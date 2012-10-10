@@ -1,0 +1,72 @@
+* =flymake-checkers=
+
+Additional checkers for [[http://www.gnu.org/software/emacs/manual/html_node/flymake/index.html][=flymake=]].
+
+This library extends the =flymake=, the on-the-fly syntax checker of GNU Emacs,
+with checkers for various programming and markup languages.  It also replaces
+outdated or broken checkers built-in to flymake.
+
+
+** Features
+
+Provided syntax checkers:
+
+- TeX/LaTeX
+- Shell scripts (Bash, Dash and Zsh)
+
+
+** Installation
+
+Install the ELPA packages from or [[http://marmalade-repo.org/][Marmalade]] with ~M-x package-install
+flymake-checkers~.
+
+Or [[https://github.com/lunaryorn/flymake-checkers/tags][download]] the latest release and install ~flymake-checkers.el~ with ~M-x
+package-install-file~.
+
+The library is written and tested against GNU Emacs 24 and may or may not work
+in earlier versions of GNU Emacs.
+
+
+** Usage
+
+Just enable =flymake-mode=, either automatically by adding the following code to
+your ~init.el~ file.
+
+#+BEGIN_SRC emacs-lisp
+  ;; Enable flymake for all files
+  (add-hook 'find-file-hook 'flymake-find-file-hook)
+#+END_SRC
+
+Or manually by ~M-x flymake-mode~ after visiting a file.
+
+The checkers provided by this library are automatically registered with flymake,
+and flymake will automatically choose the proper checker for the current buffer.
+
+
+** Customization
+
+- ~M-x customize-group flymake-checkers~
+- ~M-x customize-group flymake~
+
+
+** Further help
+
+- ~C-h f flymake~
+
+
+** License
+
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2 of the License, or (at your option) any later
+version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+this program; if not, write to the Free Software Foundation, Inc., 51 Franklin
+Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
+See [[file:COPYING][COPYING]] for details.
