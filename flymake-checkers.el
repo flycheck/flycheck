@@ -32,6 +32,7 @@
 ;;
 ;; - TeX/LaTeX with chktex
 ;; - Shell scripts (only with `sh-mode')
+;; - Python wither either flake8, pyflakes or pylint
 
 ;;; Code:
 
@@ -80,6 +81,51 @@ Return the path of the file."
     nil))
 
 
+;; Python
+
+(defcustom flymake-checkers-python-checker nil
+  "Checker to use for Python files.
+
+Set to `flake8', `pyflakes' or `epylint' to use the corresponding
+checker for Python files.  If nil, syntax checking of Python
+files is disabled."
+  :group 'flymake-checkers
+  :type '(choice (const :tag "Off" nil)
+                 (const flake8)
+                 (const pyflakes)
+                 (const epylint)
+                 (string :tag "Custom checker")))
+
+(defconst flymake-checkers-python-supported-checkers
+  '((flake8 . "flake8")
+    (pyflakes . "pyflakes")
+    (epylint . "epylint"))
+  "Supported Python checkers.")
+
+(defun flymake-checkers-python-get-checker ()
+  "Get the checker to use for Python.
+
+Return a string with the executable path of the checker, or nil
+if the checker was not found."
+  (let ((checker flymake-checkers-python-checker))
+    (when checker
+      (when (symbolp checker)
+        (setq checker
+              (cdr (assq checker flymake-checkers-python-supported-checkers))))
+      (if (stringp checker) checker
+        (error "Invalid value for flymake-checkers-python-checker: %S"
+               flymake-checkers-python-checker)))))
+
+;;;###autoload
+(defun flymake-checkers-python-init ()
+  "Initialize flymake checking for Python files."
+  (let ((checker (flymake-checkers-python-get-checker)))
+    (when checker
+      (flymake-log 3 "Using python checkers %s." checker)
+      `(,checker (,(flymake-init-create-temp-buffer-copy
+                    'flymake-create-temp-inplace))))))
+
+
 ;; Register checkers in flymake
 
 ;;;###autoload
@@ -88,7 +134,8 @@ Return the path of the file."
     ("\\.zsh\\'" flymake-checkers-sh-init)
     ("\\.bash\\'" flymake-checkers-sh-init)
     ("\\.[lL]a[tT]e[xX]\\'" flymake-checkers-tex-init)
-    ("\\.[tT]e[xX]\\'" flymake-checkers-tex-init))
+    ("\\.[tT]e[xX]\\'" flymake-checkers-tex-init)
+    ("\\.py\\'" flymake-checkers-python-init))
   "All checkers provided by flymake-checkers with corresponding.
 
 Automatically added to `flymake-allowed-file-name-masks' when
@@ -97,6 +144,7 @@ this package is loaded.")
 ;;;###autoload
 (defconst flymake-checkers-err-line-patterns
   '(("^\\(.+\\): line \\([0-9]+\\): \\(.+\\)$" 1 2 nil 3) ; bash
+    ("^\\(.+\\): ?\\([0-9]+\\): ?\\([0-9]+\\): \\(.+\\)$" 1 2 3 4) ; flake8
     ("^\\(.+\\): ?\\([0-9]+\\): \\(.+\\)$" 1 2 nil 3))
   "Additional error line patterns.
 

@@ -11,7 +11,8 @@ outdated or broken checkers built-in to flymake.
 
 Provided syntax checkers:
 
-- TeX/LaTeX :: Needs [[http://baruch.ev-en.org/proj/chktex/][~chktex~]] (included in most TeX distributions).
+- Python :: Needs one of [[http://pypi.python.org/pypi/flake8][flake8]], [[http://pypi.python.org/pypi/pyflakes][pyflakes]] or [[http://pypi.python.org/pypi/pylint][pylint]].  Configure
+            =flymake-checkers-python-checker= accordingly.
 - Shell scripts (Bash, Dash and Zsh) :: Needs the executable of the
      corresponding shell, and =sh-mode= as major mode of the file to check.
 
