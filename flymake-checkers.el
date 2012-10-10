@@ -38,6 +38,11 @@
   (require 'flymake)
   (require 'sh-script))
 
+;; Customization group
+(defgroup flymake-checkers nil
+  "Customization for flymake checkers."
+  :group 'flymake)
+
 ;; Utility functions
 
 (defun flymake-checkers-create-temp-system (filename prefix)
