@@ -42,6 +42,7 @@
 ;; Customization group
 (defgroup flymake-checkers nil
   "Customization for flymake checkers."
+  :prefix "flymake-checkers-"
   :group 'flymake)
 
 ;; Utility functions
