@@ -62,10 +62,14 @@ Return the path of the file."
 ;;;###autoload
 (defun flymake-checkers-sh-init ()
   "Initialize flymake checking for `sh-mode'."
-  (if (memq sh-shell flymake-checkers-sh-supported-shells)
-      `(,(symbol-name sh-shell) ("-n" ,(flymake-init-create-temp-buffer-copy
-                                         'flymake-checkers-create-temp-system)))
-    (flymake-log 1 "Shell %s is not supported by flymake." sh-shell)
+  (if (boundp 'sh-shell)
+      (if (memq sh-shell flymake-checkers-sh-supported-shells)
+          `(,(symbol-name sh-shell)
+            ("-n" ,(flymake-init-create-temp-buffer-copy
+                    'flymake-checkers-create-temp-system)))
+        (flymake-log 1 "Shell %s is not supported." sh-shell)
+        nil)
+    (flymake-log 1 "Shell script checking needs sh-mode.")
     nil))
 
 
