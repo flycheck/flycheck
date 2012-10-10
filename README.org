@@ -58,6 +58,11 @@ and flymake will automatically choose the proper checker for the current buffer.
 - ~C-h f flymake~
 
 
+** Credits
+
+The Vim library [[https://github.com/scrooloose/syntastic][syntastic]] by [[https://github.com/scrooloose][Martin Grenfell]] inspired many of the checkers.
+
+
 ** License
 
 This program is free software; you can redistribute it and/or modify it under
