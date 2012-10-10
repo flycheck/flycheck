@@ -76,7 +76,7 @@ Return the path of the file."
                     'flymake-checkers-create-temp-system)))
         (flymake-log 1 "Shell %s is not supported." sh-shell)
         nil)
-    (flymake-log 1 "Shell script checking needs sh-mode.")
+    (flymake-log 0 "Shell script checking needs sh-mode.")
     nil))
 
 
