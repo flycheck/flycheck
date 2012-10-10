@@ -46,6 +46,12 @@ Return the path of the file."
   (make-temp-file (or prefix "flymake-checkers") nil
                   (concat "." (file-name-extension filename))))
 
+;; TeX/LaTeX
+;;;###autoload
+(defun flymake-checkers-tex-init ()
+  "Initialize flymake checking for TeX."
+  `("chktex" ("-v0" "-q" "-I" ,(flymake-init-create-temp-buffer-copy
+                                'flymake-create-temp-inplace))))
 
 ;; sh-mode
 
@@ -68,7 +74,9 @@ Return the path of the file."
 (defconst flymake-checkers-file-name-masks
   '(("\\.sh\\'" flymake-checkers-sh-init)
     ("\\.zsh\\'" flymake-checkers-sh-init)
-    ("\\.bash\\'" flymake-checkers-sh-init))
+    ("\\.bash\\'" flymake-checkers-sh-init)
+    ("\\.[lL]a[tT]e[xX]\\'" flymake-checkers-tex-init)
+    ("\\.[tT]e[xX]\\'" flymake-checkers-tex-init))
   "All checkers provided by flymake-checkers with corresponding.
 
 Automatically added to `flymake-allowed-file-name-masks' when
