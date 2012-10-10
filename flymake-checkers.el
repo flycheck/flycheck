@@ -35,7 +35,8 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'flymake))
+  (require 'flymake)
+  (require 'sh-script))
 
 ;; Utility functions
 
