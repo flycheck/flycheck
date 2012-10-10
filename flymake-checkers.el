@@ -30,7 +30,8 @@
 
 ;; Provide checkers for:
 ;;
-;; - `sh-mode`
+;; - TeX/LaTeX with chktex
+;; - Shell scripts (only with `sh-mode')
 
 ;;; Code:
 

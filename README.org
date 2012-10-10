@@ -11,8 +11,9 @@ outdated or broken checkers built-in to flymake.
 
 Provided syntax checkers:
 
-- TeX/LaTeX
-- Shell scripts (Bash, Dash and Zsh)
+- TeX/LaTeX :: Needs [[http://baruch.ev-en.org/proj/chktex/][~chktex~]] (included in most TeX distributions).
+- Shell scripts (Bash, Dash and Zsh) :: Needs the executable of the
+     corresponding shell, and =sh-mode= as major mode of the file to check.
 
 
 ** Installation
@@ -25,6 +26,9 @@ package-install-file~.
 
 The library is written and tested against GNU Emacs 24 and may or may not work
 in earlier versions of GNU Emacs.
+
+Most checkers have dependencies against external tools that perform the
+checking.  See [[Features]] for details.
 
 
 ** Usage
