@@ -1,6 +1,6 @@
 * =flymake-checkers=
 
-Additional checkers for [[http://www.gnu.org/software/emacs/manual/html_node/flymake/index.html][=flymake=]].
+Additional checkers for [[http://www.gnu.org/software/emacs/manual/html_node/flymake/index.html][flymake]].
 
 This library extends the =flymake=, the on-the-fly syntax checker of GNU Emacs,
 with checkers for various programming and markup languages.  It also replaces
@@ -15,7 +15,7 @@ Provided syntax checkers:
             =flymake-checkers-python-checker= accordingly.
 - Shell scripts (Bash, Dash and Zsh) :: Needs the executable of the
      corresponding shell, and =sh-mode= as major mode of the file to check.
-
+- TeX/LaTeX :: Needs [[http://baruch.ev-en.org/proj/chktex/][chktex]] (included in most TeX distributions).
 
 ** Installation
 
