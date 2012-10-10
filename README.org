@@ -11,11 +11,13 @@ outdated or broken checkers built-in to flymake.
 
 Provided syntax checkers:
 
-- Python :: Needs one of [[http://pypi.python.org/pypi/flake8][flake8]], [[http://pypi.python.org/pypi/pyflakes][pyflakes]] or [[http://pypi.python.org/pypi/pylint][pylint]].  Configure
+- Python
+- Shell scripts (Bash, Dash and Zsh)
+- TeX/LaTeX
             =flymake-checkers-python-checker= accordingly.
 - Shell scripts (Bash, Dash and Zsh) :: Needs the executable of the
      corresponding shell, and =sh-mode= as major mode of the file to check.
-- TeX/LaTeX :: Needs [[http://baruch.ev-en.org/proj/chktex/][chktex]] (included in most TeX distributions).
+- TeX/LaTeX :: Needs
 
 ** Installation
 
@@ -29,7 +31,7 @@ The library is written and tested against GNU Emacs 24 and may or may not work
 in earlier versions of GNU Emacs.
 
 Most checkers have dependencies against external tools that perform the
-checking.  See [[Features]] for details.
+checking.  See [[Checkers]] for details.
 
 
 ** Usage
@@ -47,6 +49,16 @@ Or manually by ~M-x flymake-mode~ after visiting a file.
 The checkers provided by this library are automatically registered with flymake,
 and flymake will automatically choose the proper checker for the current buffer.
 
+** Checkers
+
+You need to install external utilities for the following checkers:
+
+- Python :: Install [[http://pypi.python.org/pypi/flake8][flake8]], [[http://pypi.python.org/pypi/pyflakes][pyflakes]] or [[http://pypi.python.org/pypi/pylint][pylint]] *and* configure
+            =flymake-checkers-python-checker= accordingly.
+- TeX/LaTeX :: Install [[http://baruch.ev-en.org/proj/chktex/][chktex]].  Most TeX distributions, including TeXLive and
+               MacTeX, already do this for you.
+- Shell scripts :: Install Bash or Zsh depending on the type of shell file you
+                   want to check.
 
 ** Customization
 
