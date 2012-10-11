@@ -34,6 +34,7 @@
 ;; - Shell scripts (only with `sh-mode')
 ;; - Python wither either flake8, pyflakes or pylint
 ;; - Ruby with ruby
+;; - CoffeeScript with coffeelint
 
 ;;; Code:
 
@@ -169,6 +170,20 @@ if the checker was not found."
                  'flymake-create-temp-inplace))))
 
 
+;; CoffeeScript
+(defcustom flymake-checkers-coffeelint-executable "coffeelint"
+  "Coffeelint executable to use for CoffeeScript checking."
+  :group 'flymake-checkers
+  :type 'string)
+
+;;;###autoload
+(defun flymake-checkers-coffee-init ()
+  "Initialize flymake checker for CoffeeScript files."
+  `(,flymake-checkers-coffeelint-executable
+    ("--csv" ,(flymake-init-create-temp-buffer-copy
+       'flymake-create-temp-inplace))))
+
+
 ;; Register checkers in flymake
 
 ;;;###autoload
@@ -180,16 +195,29 @@ if the checker was not found."
     ("\\.[tT]e[xX]\\'" flymake-checkers-tex-init)
     ("\\.py\\'" flymake-checkers-python-init)
     ("\\.rb\\'" flymake-checkers-ruby-init)
-    ("/Rakefile\\'" flymake-checkers-ruby-init))
+    ("/Rakefile\\'" flymake-checkers-ruby-init)
+    ("\\.coffee\\'" flymake-checkers-coffee-init))
   "All checkers provided by flymake-checkers with corresponding.
 
 Automatically added to `flymake-allowed-file-name-masks' when
 this package is loaded.")
 
 ;;;###autoload
+(defconst flymake-checkers-err-line-patterns
+  '(;; CoffeeLint CSV report
+    ("\\(.+\\),\\([0-9]+\\),\\(?:warn\\|error\\),\\(.+\\)" 1 2 nil 3))
+  "Additional error patterns.")
+
+;;;###autoload
 (eval-after-load 'flymake
   #'(mapc (lambda (cell) (add-to-list 'flymake-allowed-file-name-masks cell))
           flymake-checkers-file-name-masks))
+
+;;;###autoload
+(eval-after-load 'flymake
+  #'(setq flymake-err-line-patterns
+          (append flymake-err-line-patterns
+                  flymake-checkers-err-line-patterns)))
 
 (provide 'flymake-checkers)
 

@@ -13,6 +13,7 @@ Provided syntax checkers:
 
 - Python
 - Ruby
+- CoffeeScript
 - Shell scripts (Bash, Dash and Zsh)
 - TeX/LaTeX
 
@@ -53,6 +54,7 @@ You need to install external utilities for the following checkers:
 
 - Python :: Install [[http://pypi.python.org/pypi/flake8][flake8]], [[http://pypi.python.org/pypi/pyflakes][pyflakes]] or [[http://pypi.python.org/pypi/pylint][pylint]].
 - Ruby :: Install Ruby.
+- CoffeeScript :: Install [[http://www.coffeelint.org/][coffeelint]].
 - TeX/LaTeX :: Install [[http://baruch.ev-en.org/proj/chktex/][chktex]].  Most TeX distributions, including TeXLive and
                MacTeX, already do this for you.
 - Shell scripts :: Install Bash or Zsh depending on the type of shell file you
