@@ -55,6 +55,7 @@ Return the path of the file."
   (make-temp-file (or prefix "flymake-checkers") nil
                   (concat "." (file-name-extension filename))))
 
+
 ;; TeX/LaTeX
 ;;;###autoload
 (defun flymake-checkers-tex-init ()
@@ -62,8 +63,8 @@ Return the path of the file."
   `("chktex" ("-v0" "-q" "-I" ,(flymake-init-create-temp-buffer-copy
                                 'flymake-create-temp-inplace))))
 
-;; sh-mode
 
+;; sh-mode
 (defconst flymake-checkers-sh-options
   '((zsh . ("-n" "-d" "-f"))            ; -n: do not execute, -d: no global rcs,
                                         ; -f: no local rcs
@@ -91,7 +92,6 @@ Return the path of the file."
 
 
 ;; Python
-
 (defconst flymake-checkers-python-supported-checkers
   '((flake8 . "flake8")
     (pyflakes . "pyflakes")
