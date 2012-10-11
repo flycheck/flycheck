@@ -30,11 +30,12 @@
 
 ;; Provide checkers for:
 ;;
-;; - TeX/LaTeX with chktex
+;; - Emacs Lisp
 ;; - Shell scripts (only with `sh-mode')
 ;; - Python wither either flake8, pyflakes or pylint
 ;; - Ruby with ruby
 ;; - CoffeeScript with coffeelint
+;; - TeX/LaTeX with chktex
 
 ;;; Code:
 
@@ -56,6 +57,27 @@
 Return the path of the file."
   (make-temp-file (or prefix "flymake-checkers") nil
                   (concat "." (file-name-extension filename))))
+
+
+;; Emacs Lisp
+(defconst flymake-checkers-emacs-lisp-check-form
+  '(progn
+     (setq byte-compile-dest-file-function 'make-temp-file)
+     (dolist (file command-line-args-left)
+       (byte-compile-file file))))
+
+;;;###autoload
+(defun flymake-checkers-emacs-lisp-init ()
+  "Initialize flymake checking for Emacs Lisp."
+  (let ((executable (concat invocation-directory invocation-name))
+        (check-form-s
+         (with-temp-buffer
+           (print flymake-checkers-emacs-lisp-check-form (current-buffer))
+           (buffer-substring-no-properties (point-min) (point-max)))))
+    `(,executable ("--no-site-file" "--no-site-lisp"
+                   "--batch" "--eval" ,check-form-s
+                   ,(flymake-init-create-temp-buffer-copy
+                     'flymake-checkers-create-temp-system)))))
 
 
 ;; TeX/LaTeX
@@ -188,7 +210,8 @@ if the checker was not found."
 
 ;;;###autoload
 (defconst flymake-checkers-file-name-masks
-  '(("\\.sh\\'" flymake-checkers-sh-init)
+  '(("\\.el\\'" flymake-checkers-emacs-lisp-init)
+    ("\\.sh\\'" flymake-checkers-sh-init)
     ("\\.zsh\\'" flymake-checkers-sh-init)
     ("\\.bash\\'" flymake-checkers-sh-init)
     ("\\.[lL]a[tT]e[xX]\\'" flymake-checkers-tex-init)

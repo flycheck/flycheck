@@ -11,6 +11,7 @@ outdated or broken checkers built-in to flymake.
 
 Provided syntax checkers:
 
+- Emacs Lisp
 - Python
 - Ruby
 - CoffeeScript
