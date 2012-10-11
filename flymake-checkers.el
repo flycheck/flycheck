@@ -81,11 +81,17 @@ Return the path of the file."
 
 
 ;; TeX/LaTeX
+(defcustom flymake-checkers-chktex-executable "chktex"
+  "Chktex executable for TeX/LaTeX checking."
+  :group 'flymake-checkers
+  :type 'string)
+
 ;;;###autoload
 (defun flymake-checkers-tex-init ()
   "Initialize flymake checking for TeX."
-  `("chktex" ("-v0" "-q" "-I" ,(flymake-init-create-temp-buffer-copy
-                                'flymake-create-temp-inplace))))
+  `(,flymake-checkers-chktex-executable
+    ("-v0" "-q" "-I" ,(flymake-init-create-temp-buffer-copy
+                       'flymake-create-temp-inplace))))
 
 
 ;; sh-mode
