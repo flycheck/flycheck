@@ -89,9 +89,10 @@ Return the path of the file."
 ;;;###autoload
 (defun flymake-checkers-tex-init ()
   "Initialize flymake checking for TeX."
-  `(,flymake-checkers-chktex-executable
-    ("-v0" "-q" "-I" ,(flymake-init-create-temp-buffer-copy
-                       'flymake-create-temp-inplace))))
+  (when (executable-find flymake-checkers-chktex-executable)
+    `(,flymake-checkers-chktex-executable
+      ("-v0" "-q" "-I" ,(flymake-init-create-temp-buffer-copy
+                         'flymake-create-temp-inplace)))))
 
 
 ;; sh-mode
@@ -108,9 +109,10 @@ Return the path of the file."
 (defun flymake-checkers-sh-init ()
   "Initialize flymake checking for `sh-mode'."
   (if (boundp 'sh-shell)
-      (let ((options (cdr (assq sh-shell flymake-checkers-sh-options))))
-        (if options
-            (list (symbol-name sh-shell)
+      (let ((options (cdr (assq sh-shell flymake-checkers-sh-options)))
+            (executable (symbol-name sh-shell)))
+        (if (and options (executable-find executable))
+            (list executable
                   (append options
                           (list (flymake-init-create-temp-buffer-copy
                                  'flymake-checkers-create-temp-system))
@@ -178,7 +180,7 @@ if the checker was not found."
 (defun flymake-checkers-python-init ()
   "Initialize flymake checking for Python files."
   (let ((checker (flymake-checkers-python-get-checker)))
-    (when checker
+    (when (and checker (executable-find checker))
       (flymake-log 3 "Using python checkers %s." checker)
       `(,checker (,(flymake-init-create-temp-buffer-copy
                     'flymake-create-temp-inplace))))))
@@ -193,9 +195,10 @@ if the checker was not found."
 ;;;###autoload
 (defun flymake-checkers-ruby-init ()
   "Initialize flymake checker for Ruby files."
-  `(,flymake-checkers-ruby-executable
-    ("-w" "-c" ,(flymake-init-create-temp-buffer-copy
-                 'flymake-create-temp-inplace))))
+  (when (executable-find flymake-checkers-ruby-executable)
+    `(,flymake-checkers-ruby-executable
+      ("-w" "-c" ,(flymake-init-create-temp-buffer-copy
+                   'flymake-create-temp-inplace)))))
 
 
 ;; CoffeeScript
@@ -207,9 +210,10 @@ if the checker was not found."
 ;;;###autoload
 (defun flymake-checkers-coffee-init ()
   "Initialize flymake checker for CoffeeScript files."
-  `(,flymake-checkers-coffeelint-executable
-    ("--csv" ,(flymake-init-create-temp-buffer-copy
-       'flymake-create-temp-inplace))))
+  (when (executable-find flymake-checkers-coffeelint-executable)
+    `(,flymake-checkers-coffeelint-executable
+      ("--csv" ,(flymake-init-create-temp-buffer-copy
+                 'flymake-create-temp-inplace)))))
 
 
 ;; Register checkers in flymake
