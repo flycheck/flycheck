@@ -33,6 +33,7 @@
 ;; - TeX/LaTeX with chktex
 ;; - Shell scripts (only with `sh-mode')
 ;; - Python wither either flake8, pyflakes or pylint
+;; - Ruby with ruby
 
 ;;; Code:
 
