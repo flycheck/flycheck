@@ -154,6 +154,20 @@ if the checker was not found."
                     'flymake-create-temp-inplace))))))
 
 
+;; Ruby
+(defcustom flymake-checkers-ruby-executable "ruby"
+  "Executable to use for Ruby checking."
+  :group 'flymake-checkers
+  :type 'string)
+
+;;;###autoload
+(defun flymake-checkers-ruby-init ()
+  "Initialize flymake checkers for Ruby files."
+  `(,flymake-checkers-ruby-executable
+    ("-w" "-c" ,(flymake-init-create-temp-buffer-copy
+                 'flymake-create-temp-inplace))))
+
+
 ;; Register checkers in flymake
 
 ;;;###autoload
@@ -163,7 +177,9 @@ if the checker was not found."
     ("\\.bash\\'" flymake-checkers-sh-init)
     ("\\.[lL]a[tT]e[xX]\\'" flymake-checkers-tex-init)
     ("\\.[tT]e[xX]\\'" flymake-checkers-tex-init)
-    ("\\.py\\'" flymake-checkers-python-init))
+    ("\\.py\\'" flymake-checkers-python-init)
+    ("\\.rb\\'" flymake-checkers-ruby-init)
+    ("/Rakefile\\'" flymake-checkers-ruby-init))
   "All checkers provided by flymake-checkers with corresponding.
 
 Automatically added to `flymake-allowed-file-name-masks' when
