@@ -144,7 +144,6 @@ this package is loaded.")
 ;;;###autoload
 (defconst flymake-checkers-err-line-patterns
   '(("^\\(.+\\): line \\([0-9]+\\): \\(.+\\)$" 1 2 nil 3) ; bash
-    ("^\\(.+\\): ?\\([0-9]+\\): ?\\([0-9]+\\): \\(.+\\)$" 1 2 3 4) ; flake8
     ("^\\(.+\\): ?\\([0-9]+\\): \\(.+\\)$" 1 2 nil 3))
   "Additional error line patterns.
 
@@ -158,8 +157,9 @@ package is loaded.")
 
 ;;;###autoload
 (eval-after-load 'flymake
-  #'(setq flymake-err-line-patterns (append flymake-checkers-err-line-patterns
-                                            flymake-err-line-patterns)))
+  #'(setq flymake-err-line-patterns
+          (append flymake-err-line-patterns
+                  flymake-checkers-err-line-patterns)))
 
 (provide 'flymake-checkers)
 
