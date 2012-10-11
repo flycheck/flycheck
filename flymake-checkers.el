@@ -164,7 +164,7 @@ if the checker was not found."
 
 ;;;###autoload
 (defun flymake-checkers-ruby-init ()
-  "Initialize flymake checkers for Ruby files."
+  "Initialize flymake checker for Ruby files."
   `(,flymake-checkers-ruby-executable
     ("-w" "-c" ,(flymake-init-create-temp-buffer-copy
                  'flymake-create-temp-inplace))))
