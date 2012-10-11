@@ -14,10 +14,7 @@ Provided syntax checkers:
 - Python
 - Shell scripts (Bash, Dash and Zsh)
 - TeX/LaTeX
-            =flymake-checkers-python-checker= accordingly.
-- Shell scripts (Bash, Dash and Zsh) :: Needs the executable of the
-     corresponding shell, and =sh-mode= as major mode of the file to check.
-- TeX/LaTeX :: Needs
+
 
 ** Installation
 
