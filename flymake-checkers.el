@@ -81,18 +81,12 @@ Return the path of the file."
 
 
 ;; TeX/LaTeX
-(defcustom flymake-checkers-chktex-executable "chktex"
-  "Chktex executable for TeX/LaTeX checking."
-  :group 'flymake-checkers
-  :type 'string)
-
 ;;;###autoload
 (defun flymake-checkers-tex-init ()
   "Initialize flymake checking for TeX."
-  (when (executable-find flymake-checkers-chktex-executable)
-    `(,flymake-checkers-chktex-executable
-      ("-v0" "-q" "-I" ,(flymake-init-create-temp-buffer-copy
-                         'flymake-create-temp-inplace)))))
+  (when (executable-find "chktex")
+    `("chktex" ("-v0" "-q" "-I" ,(flymake-init-create-temp-buffer-copy
+                                  'flymake-create-temp-inplace)))))
 
 
 ;; sh-mode
@@ -187,31 +181,20 @@ if the checker was not found."
 
 
 ;; Ruby
-(defcustom flymake-checkers-ruby-executable "ruby"
-  "Executable to use for Ruby checking."
-  :group 'flymake-checkers
-  :type 'string)
-
 ;;;###autoload
 (defun flymake-checkers-ruby-init ()
   "Initialize flymake checker for Ruby files."
-  (when (executable-find flymake-checkers-ruby-executable)
-    `(,flymake-checkers-ruby-executable
-      ("-w" "-c" ,(flymake-init-create-temp-buffer-copy
-                   'flymake-create-temp-inplace)))))
+  (when (executable-find "ruby")
+    `("ruby" ("-w" "-c" ,(flymake-init-create-temp-buffer-copy
+                          'flymake-create-temp-inplace)))))
 
 
 ;; CoffeeScript
-(defcustom flymake-checkers-coffeelint-executable "coffeelint"
-  "Coffeelint executable to use for CoffeeScript checking."
-  :group 'flymake-checkers
-  :type 'string)
-
 ;;;###autoload
 (defun flymake-checkers-coffee-init ()
   "Initialize flymake checker for CoffeeScript files."
-  (when (executable-find flymake-checkers-coffeelint-executable)
-    `(,flymake-checkers-coffeelint-executable
+  (when (executable-find "coffeelint")
+    `("coffeelint"
       ("--csv" ,(flymake-init-create-temp-buffer-copy
                  'flymake-create-temp-inplace)))))
 
