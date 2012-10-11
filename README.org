@@ -51,8 +51,7 @@ and flymake will automatically choose the proper checker for the current buffer.
 
 You need to install external utilities for the following checkers:
 
-- Python :: Install [[http://pypi.python.org/pypi/flake8][flake8]], [[http://pypi.python.org/pypi/pyflakes][pyflakes]] or [[http://pypi.python.org/pypi/pylint][pylint]] *and* configure
-            =flymake-checkers-python-checker= accordingly.
+- Python :: Install [[http://pypi.python.org/pypi/flake8][flake8]], [[http://pypi.python.org/pypi/pyflakes][pyflakes]] or [[http://pypi.python.org/pypi/pylint][pylint]].
 - Ruby :: Install Ruby.
 - TeX/LaTeX :: Install [[http://baruch.ev-en.org/proj/chktex/][chktex]].  Most TeX distributions, including TeXLive and
                MacTeX, already do this for you.
