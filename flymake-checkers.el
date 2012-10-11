@@ -92,7 +92,32 @@ Return the path of the file."
 
 ;; Python
 
-(defcustom flymake-checkers-python-checker nil
+(defconst flymake-checkers-python-supported-checkers
+  '((flake8 . "flake8")
+    (pyflakes . "pyflakes")
+    (epylint . "epylint"))
+  "Supported Python checkers.
+
+Ordered by preference for `flymake-checkers-python-find-checker'.")
+
+(defun flymake-checkers-python-find-checker ()
+  "Find an installed checker from Python.
+
+Search for any checker from
+`flymake-checkers-python-supported-checkers', and return the
+symbol for the first checker found, or nil, if no checker was
+found."
+  (let ((found-checker nil)
+        (remaining flymake-checkers-python-supported-checkers))
+    (while (and (not found-checker) remaining)
+      (let ((current-checker (car remaining)))
+        (when (executable-find (cdr current-checker))
+          (setq found-checker (car current-checker))))
+      (setq remaining (cdr remaining)))
+    found-checker))
+
+(defcustom flymake-checkers-python-checker
+  (flymake-checkers-python-find-checker)
   "Checker to use for Python files.
 
 Set to `flake8', `pyflakes' or `epylint' to use the corresponding
@@ -104,12 +129,6 @@ files is disabled."
                  (const pyflakes)
                  (const epylint)
                  (string :tag "Custom checker")))
-
-(defconst flymake-checkers-python-supported-checkers
-  '((flake8 . "flake8")
-    (pyflakes . "pyflakes")
-    (epylint . "epylint"))
-  "Supported Python checkers.")
 
 (defun flymake-checkers-python-get-checker ()
   "Get the checker to use for Python.
