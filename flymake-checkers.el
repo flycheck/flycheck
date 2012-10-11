@@ -142,24 +142,9 @@ Automatically added to `flymake-allowed-file-name-masks' when
 this package is loaded.")
 
 ;;;###autoload
-(defconst flymake-checkers-err-line-patterns
-  '(("^\\(.+\\): line \\([0-9]+\\): \\(.+\\)$" 1 2 nil 3) ; bash
-    ("^\\(.+\\): ?\\([0-9]+\\): \\(.+\\)$" 1 2 nil 3))
-  "Additional error line patterns.
-
-Automatically added to `flymake-err-line-patterns' when this
-package is loaded.")
-
-;;;###autoload
 (eval-after-load 'flymake
   #'(mapc (lambda (cell) (add-to-list 'flymake-allowed-file-name-masks cell))
           flymake-checkers-file-name-masks))
-
-;;;###autoload
-(eval-after-load 'flymake
-  #'(setq flymake-err-line-patterns
-          (append flymake-err-line-patterns
-                  flymake-checkers-err-line-patterns)))
 
 (provide 'flymake-checkers)
 
