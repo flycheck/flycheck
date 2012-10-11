@@ -64,19 +64,28 @@ Return the path of the file."
 
 ;; sh-mode
 
-(defconst flymake-checkers-sh-supported-shells '(bash zsh sh)
-  "Shells supported by `flymake-checkers-sh-init'.")
+(defconst flymake-checkers-sh-options
+  '((zsh . ("-n" "-d" "-f"))            ; -n: do not execute, -d: no global rcs,
+                                        ; -f: no local rcs
+    (bash . ("-n" "--norc"))            ; -n: do not execute, --norc: no rc
+                                        ; files
+    (sh . ("-n"))                       ; -n: do not execute (as by POSIX)
+    )
+  "Options to pass to shells for syntax checking.")
 
 ;;;###autoload
 (defun flymake-checkers-sh-init ()
   "Initialize flymake checking for `sh-mode'."
   (if (boundp 'sh-shell)
-      (if (memq sh-shell flymake-checkers-sh-supported-shells)
-          `(,(symbol-name sh-shell)
-            ("-n" ,(flymake-init-create-temp-buffer-copy
-                    'flymake-checkers-create-temp-system)))
-        (flymake-log 1 "Shell %s is not supported." sh-shell)
-        nil)
+      (let ((options (cdr (assq sh-shell flymake-checkers-sh-options))))
+        (if options
+            (list (symbol-name sh-shell)
+                  (append options
+                          (list (flymake-init-create-temp-buffer-copy
+                                 'flymake-checkers-create-temp-system))
+                          nil))
+          (flymake-log 1 "Shell %s is not supported." sh-shell)
+          nil))
     (flymake-log 0 "Shell script checking needs sh-mode.")
     nil))
 
