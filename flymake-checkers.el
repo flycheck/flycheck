@@ -212,7 +212,10 @@ element in this variable."
       (set (make-local-variable 'flymake-err-line-patterns)
            (list error-pattern)))
     (if command
-        (list (car command) (cdr command))
+        (if (executable-find (car command))
+            (list (car command) (cdr command))
+          (flymake-log 0 "Command %s was not found, syntax checking disabled"
+                       (car command)))
       (error "Checker does not provide a command"))))
 
 
