@@ -55,6 +55,7 @@
   '((emacs-lisp-mode . flymake-checkers-emacs-lisp)
     (python-mode . flymake-checkers-python)
     (ruby-mode . flymake-checkers-ruby)
+    (php-mode . flymake-checkers-php)
     (coffee-mode . flymake-checkers-coffee)
     (sh-mode . flymake-checkers-sh)
     (latex-mode . flymake-checkers-tex)
@@ -360,6 +361,16 @@ if the checker was not found."
 (defun flymake-checkers-ruby ()
   "Provide a flymake checker for Ruby."
   (flymake-checkers-simple :command '("ruby" "-w" "-c" source)))
+
+;; PHP
+(defun flymake-checkers-php ()
+  "Provide a flymake checker for PHP."
+  (flymake-checkers-simple
+   :command '("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
+              "-d" "log_errors=0" source)
+   :error-patterns '("\\(?:Parse\\|Fatal\\|syntax\\) error[:,] \
+\\(.*\\) in \\(.*\\) on line \\([0-9]+\\)"
+                     2 3 nil 1)))
 
 ;; CoffeeScript
 (defun flymake-checkers-coffee ()

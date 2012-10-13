@@ -19,6 +19,7 @@ extending flymake with new checkers.
   - CoffeeScript
   - Shell scripts (Bash, Dash and Zsh)
   - TeX/LaTeX
+  - PHP
 - Simplify configuration of flymake
 - Simplify writing new checkers for flymake
 
@@ -70,6 +71,7 @@ You need to install external utilities for the following checkers:
                MacTeX, already do this for you.
 - Shell scripts :: Install Bash or Zsh depending on the type of shell file you
                    want to check.
+- PHP :: Install the [[http://php.net/manual/en/features.commandline.php][PHP command line]].
 
 
 ** Customization
