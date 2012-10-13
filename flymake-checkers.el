@@ -377,8 +377,9 @@ if the checker was not found."
   "Provide a flymake checker for CoffeeScript."
   (flymake-checkers-simple
    :command '("coffeelint" "--csv" source)
-   :error-patterns '("\\(.+\\),\\([0-9]+\\),\\(?:warn\\|error\\),\\(.+\\)"
-                     1 2 nil 3)))
+   :error-patterns
+   '(("SyntaxError: \\(.*\\) on line \\([0-9]+\\)" nil 2 nil 1)
+     ("\\(.+\\),\\([0-9]+\\),\\(?:warn\\|error\\),\\(.+\\)" 1 2 nil 3))))
 
 (provide 'flymake-checkers)
 
