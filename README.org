@@ -93,9 +93,10 @@ A checker is comprised of the following components:
      with a temporary copy of the source file[fn:1], created in the system
      temporary directory.  Use =source-inplace= instead to force the copy being
      created in the same directory as the original source file.
-- =:error-pattern= (/optional/) :: A error pattern to parse the output of
-     =:command=.  Has the form =(REGEXP FILE-IDX LINE-IDX COL-IDX
-     ERR-TEXT-IDX)=.  If omitted, all patterns defined in
+- =:error-patterns= (/optional/) :: A single error pattern or a list of error
+     patterns to parse the output of =:command=.  Each pattern has the form
+     =(REGEXP FILE-IDX LINE-IDX COL-IDX ERR-TEXT-IDX)=.  The patterns are tried
+     in order of declaration.  If omitted, all patterns defined in
      =flymake-err-line-patterns= are tried.
 
 Eventually, the checker function has only to be registered in
@@ -112,12 +113,11 @@ to perform the actual syntax check.
 First we implement the checker function:
 
 #+BEGIN_SRC emacs-lisp
-  (defun flymake-checkers-)
-    (defun flymake-checkers-coffee ()
+  (defun flymake-checkers-coffee ()
     (flymake-checkers-simple
      :command '("coffeelint" "--csv" source)
-     :error-pattern '("\\(.+\\),\\([0-9]+\\),\\(?:warn\\|error\\),\\(.+\\)"
-                      1 2 nil 3)))
+     :error-patterns '("\\(.+\\),\\([0-9]+\\),\\(?:warn\\|error\\),\\(.+\\)"
+                       1 2 nil 3)))
 #+END_SRC
 
 As you can see, we specify the command to use for checking via the =:command=
@@ -126,11 +126,18 @@ element and some subsequent arguments.  The symbol =source= is automatically
 replaced with the name of the file to check.
 
 Since ~coffeelint~ outputs errors in a CSV format, which is rather unusual, we
-also need a custom =:error-pattern= to extract the error location and message
-from the ~coffeelint~ output.  If =:error-pattern= is omitted, all patterns
-defined in =flymake-err-line-patterns= are tried, which contains pattern for a
-wide range of error format.  So if the output of =:command= is at least remotely
-similar to a standard compiler, there is a good chance that the predefined
+also need custom =:error-patterns= to extract the error location and message
+from the ~coffeelint~ output.  An error pattern is a list containing a regular
+expression that matches the error, and indexes of groups that match the file
+name, the line number, the column number and the error message respectively.
+=:error-patterns= allows for a single error pattern as seen in the example, or a
+list of such error patterns, in case the checker outputs messages in various
+formats.
+
+If =:error-patterns= is omitted, all patterns defined in
+=flymake-err-line-patterns= are tried.  This variable contains patterns for a
+wide range of error format, including all those from ~compile.el~.  Thus, if
+your checker works with ~M-x compile~, there is a good chance that predefined
 patterns already understand this output.
 
 Now we only need to register this error checker for use with [[https://github.com/defunkt/coffee-mode][coffee-mode]].

@@ -41,6 +41,7 @@
 (require 'flymake)
 
 (eval-when-compile
+  (require 'cl)
   (require 'sh-script))
 
 ;; Customization
@@ -186,6 +187,38 @@ Return the substituted command as list."
     (when command
         (mapcar 'flymake-checkers-substitute-argument command))))
 
+(defun flymake-checkers-error-pattern-p (pattern)
+  "Check whether PATTERN is a valid error pattern."
+  (and
+   (listp pattern)                      ; A pattern must be a list...
+   (= (length pattern) 5)               ; ...of length 5...
+   (stringp (car pattern))              ; ...whose first element is a string
+   ))
+
+(defun flymake-checkers-error-patterns-list-p (patterns)
+  "Check whether PATTERNS is a list of valid error patterns."
+  (let ((result nil))
+    (dolist (pattern patterns result)
+      (setq result (flymake-checkers-error-pattern-p pattern))
+      (unless result (return)))))
+
+(defun flymake-checkers-get-error-patterns (properties)
+  "Get the error patterns from PROPERTIES.
+
+PROPERTIES is a property list with information about the checker.
+
+Return a list of error patterns compatible with
+`flymake-err-line-patterns'."
+  (flymake-log 3 "Extracting error patterns from properties %s" properties)
+  (let ((patterns (plist-get properties :error-patterns)))
+    (when patterns
+      (cond
+       ;; A single pattern was given, wrap it up in a list
+       ((flymake-checkers-error-pattern-p patterns) (list patterns))
+       ;; A list of patterns
+       ((flymake-checkers-error-patterns-list-p patterns) patterns)
+       (t (error "Invalid type for :error-patterns: %S" patterns))))))
+
 (defun flymake-checkers-simple (&rest properties)
   "Declare a simple flymake checker with PROPERTIES.
 
@@ -207,10 +240,9 @@ element in this variable."
   ;; Enforce a standard cleanup function
   (setq flymake-checkers-cleanup-function 'flymake-simple-cleanup)
   (let ((command (flymake-checkers-get-substituted-command properties))
-        (error-pattern (plist-get properties :error-pattern)))
-    (when error-pattern
-      (set (make-local-variable 'flymake-err-line-patterns)
-           (list error-pattern)))
+        (error-patterns (flymake-checkers-get-error-patterns properties)))
+    (when error-patterns
+      (set (make-local-variable 'flymake-err-line-patterns) error-patterns))
     (if command
         (if (executable-find (car command))
             (list (car command) (cdr command))
@@ -334,8 +366,8 @@ if the checker was not found."
   "Provide a flymake checker for CoffeeScript."
   (flymake-checkers-simple
    :command '("coffeelint" "--csv" source)
-   :error-pattern '("\\(.+\\),\\([0-9]+\\),\\(?:warn\\|error\\),\\(.+\\)"
-                    1 2 nil 3)))
+   :error-patterns '("\\(.+\\),\\([0-9]+\\),\\(?:warn\\|error\\),\\(.+\\)"
+                     1 2 nil 3)))
 
 (provide 'flymake-checkers)
 
