@@ -1,22 +1,27 @@
 * =flymake-checkers=
 
-Additional checkers for [[http://www.gnu.org/software/emacs/manual/html_node/flymake/index.html][flymake]].
+Flymake reloaded with useful checkers and a much improved configuration.
 
-This library extends the =flymake=, the on-the-fly syntax checker of GNU Emacs,
-with checkers for various programming and markup languages.  It also replaces
-outdated or broken checkers built-in to flymake.
+On the surface this library extends =flymake=, the on-the-fly syntax checker of
+GNU Emacs, with syntax checkers for various programming and markup languages,
+replacing the broken and out-dated built-in checkers for flymake.
+
+Effectively, this library really provides a wholly new way of configuring and
+extending flymake with new checkers.
 
 
 ** Features
 
-Provided syntax checkers:
-
-- Emacs Lisp
-- Python
-- Ruby
-- CoffeeScript
-- Shell scripts (Bash, Dash and Zsh)
-- TeX/LaTeX
+- Provide syntax checkers for:
+  - CoffeeScript
+  - Emacs Lisp
+  - PHP
+  - Python
+  - Ruby
+  - Shell scripts (Bash, Dash and Zsh)
+  - TeX/LaTeX
+- Simplify configuration of flymake
+- Simplify writing new checkers for flymake
 
 
 ** Installation
@@ -36,45 +41,178 @@ checking.  See [[Checkers]] for details.
 
 ** Usage
 
-Just enable =flymake-mode=, either automatically by adding the following code to
-your ~init.el~ file.
+Enable =flymake-checkers-mode= in your ~init.el~ file.
 
 #+BEGIN_SRC emacs-lisp
   ;; Enable flymake for all files
-  (add-hook 'find-file-hook 'flymake-find-file-hook)
+  (add-hook 'find-file-hook 'flymake-checkers-mode)
+  ;; Enable flymake for Python only
+  (add-hook 'python-mode-hook 'flymake-checkers-mode)
 #+END_SRC
 
-Or manually by ~M-x flymake-mode~ after visiting a file.
+Or do ~M-x flymake-checkers-mode~ manually after visiting a file.
 
-The checkers provided by this library are automatically registered with flymake,
-and flymake will automatically choose the proper checker for the current buffer.
+On-the-fly syntax checking with flymake-checkers will then start immediately.
+
+*Important*: =flymake-checkers-mode= *overwrites* the standard flymake checker
+lookup via =flymake-allowed-file-name-masks=.  Hence, if =flymake-checkers-mode=
+is on =flymake-allowed-file-name-masks= is *ignored* and checkers declared in
+this variable have no effect.
+
 
 ** Checkers
 
 You need to install external utilities for the following checkers:
 
+- CoffeeScript :: Install [[http://www.coffeelint.org/][coffeelint]].
+- PHP :: Install the [[http://php.net/manual/en/features.commandline.php][PHP command line]].
 - Python :: Install [[http://pypi.python.org/pypi/flake8][flake8]], [[http://pypi.python.org/pypi/pyflakes][pyflakes]] or [[http://pypi.python.org/pypi/pylint][pylint]].
 - Ruby :: Install Ruby.
-- CoffeeScript :: Install [[http://www.coffeelint.org/][coffeelint]].
-- TeX/LaTeX :: Install [[http://baruch.ev-en.org/proj/chktex/][chktex]].  Most TeX distributions, including TeXLive and
-               MacTeX, already do this for you.
 - Shell scripts :: Install Bash or Zsh depending on the type of shell file you
                    want to check.
+- TeX/LaTeX :: Install [[http://baruch.ev-en.org/proj/chktex/][chktex]].  Most TeX distributions, including TeXLive and
+               MacTeX, already do this for you.
+
 
 ** Customization
 
-- ~M-x customize-group flymake-checkers~
-- ~M-x customize-group flymake~
+- ~M-x customize-variable flymake-checkers-checkers~ :: A list of all checkers.
+     The checkers are tried in the order of appearance in this list.  The first
+     checker that supports the current mode and whose executable exists is
+     used.  To change the preference of checkers, change their order in this
+     list, or remove entries from this list.
+
+Some modes have multiple checkers.  For instance, =python-mode= has three
+checkers using ~flake8~, ~pylint~ or ~pyflakes~.  When doing syntax checking in
+=python-mode=, the checkers are tried in this order and the first whose
+executable is found, is used.
+
+To chance the order of preference or enforce a single checker, just modify the
+order of their appearance in =flymake-checkers-checkers= or delete checkers you
+do not want to use.  For instance, to always use ~pyflakes~ in =python-mode=,
+just remove =flymake-checkers-python-flake8= and
+=flymake-checkers-python-pylint= from =flymake-checkers-checkers= via
+customization.
+
+
+** Extending
+
+In flymake-checkers a syntax checker is a [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Property-Lists.html#Property-Lists][property list]] with the following keys
+(the /checker properties/):
+
++ =:command= (/mandatory/) :: A list containing the executable of the syntax
+     checking tool (in the =car= of the list) and its arguments (in the =cdr=).
+     Before enabling a checker, *the executable is checked for existence* with
+     =executable-find=.  If this check fails, the checker is *not* used.  In
+     arguments the special symbol =source= is replaced with a *temporary copy of
+     the source file[fn:1]*, created in the system temporary directory.  Use
+     =source-inplace= instead to force the copy being created in the *same
+     directory as the original source file*.
++ =:error-patterns= (/optional/) :: A single error pattern or a list of error
+     patterns to parse the output of =:command=.  Each pattern has the form
+     =(REGEXP FILE-IDX LINE-IDX COL-IDX ERR-TEXT-IDX)=.  The patterns are tried
+     in order of declaration.  If omitted, all patterns defined in
+     =flymake-err-line-patterns= are tried.
++ =:modes= (/optional/) :: A single major mode symbol or a list thereof.  If
+     given, the checker will only be used in any of these modes.
++ =:predicate= (/optional/) :: A form that if present is evaluated to determine
+     whether the checker is to be used.  The checker is only used, if the form
+     evaluates to non-nil.
+
+*At least one* of =:modes= and =:predicate= must *be present*.  If both are
+present, /both/ must match for the checker to be used.
+
+Checkers are registered via =flymake-checkers-checkers=, which is a list of
+symbols.  Each symbol in this list must either be a *variable bound to a checker
+property list*, or be a *function returning one*.  In the former case, the
+variables value is *retrieved anew on each syntax checker*.  In the latter case,
+the function is *invoked on each syntax check with no arguments*.
+
+
+*** Example
+
+Let's see this in action by explaining the definition of the [[http://coffeescript.org/][CoffeeScript]]
+checker included in flymake-checkers.  This checker uses the [[www.coffeelint.org][CoffeeLint]] utility
+to perform the actual syntax check.
+
+First we declare the checker properties:
+
+#+BEGIN_SRC emacs-lisp
+  (defvar flymake-checkers-coffee
+    '(:command
+      '("coffeelint" "--csv" source)
+      :error-patterns
+      (("SyntaxError: \\(.*\\) on line \\([0-9]+\\)" nil 2 nil 1)
+       ("\\(.+\\),\\([0-9]+\\),\\(?:warn\\|error\\),\\(.+\\)" 1 2 nil 3))
+      :modes coffee-mode))
+#+END_SRC
+
+As you can see, we declare via =:modes= that this checker it is to be enabled in
+[[https://github.com/defunkt/coffee-mode][coffee-mode]].  More complicated predicates for enabled checkers can be
+implemented via the =:predicate= property.
+
+We specify the command to execute in this mode in =:command=.  It is a
+straight-forward list with the executable name as first element and some
+subsequent arguments.  The symbol =source= is automatically replaced with the
+name of the file to check.  Note that a checker is not enabled if its executable
+does not exist (as by =executable-find=).
+
+Since ~coffeelint~ outputs errors in a CSV format, which is rather unusual, we
+also need custom =:error-patterns= to extract the error location and message
+from the ~coffeelint~ output.  An error pattern is a list containing a regular
+expression that matches the error, and indexes of groups that match the file
+name, the line number, the column number and the error message respectively.
+=:error-patterns= allows for a single error pattern, or a list of such error
+patterns, in case the checker outputs messages in various formats.
+
+If =:error-patterns= is omitted, all patterns defined in
+=flymake-err-line-patterns= are tried.  This variable contains patterns for a
+wide range of error format, including all those from ~compile.el~.  Thus, if
+your checker works with ~M-x compile~, there is a good chance that predefined
+patterns already understand this output.
+
+Now we only need to register this error checker for use with
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'flymake-checkers-checkers 'flymake-checkers-coffee)
+#+END_SRC
+
+Assuming that =flymake-checkers-mode= is enabled [[(see Usage]]), CoffeeScript will
+now be syntax-checked on the fly in =coffee-mode=.
+
+Some checkers have more complicated conditions for whether they are to be used
+or not.  For instance, syntax checking in =sh-mode= needs to use different
+shells depending on the value of =sh-shell=.  Hence in the checkers for this mode
+we also give a =:predicate= that determines whether the right shell is active:
+
+#+BEGIN_SRC emacs-lisp
+  (defvar flymake-checkers-sh-zsh
+    '(:command
+      ("zsh" "-n" "-d" "-f" source)
+      :modes sh-mode
+      :predicate (eq sh-shell 'zsh)))
+#+END_SRC
+
+As you can see we declare that the checker is to be used in =sh-mode=, but we
+also give a =:predicate= that checks the value of =sh-shell=.  The predicate is
+simply a form that is evaluated whenever a syntax check is to be performed. Thus
+this checker will only be enabled if the current mode is =sh-mode= *and*
+=sh-shell= is bound to the symbol =zsh=.
 
 
 ** Further help
 
-- ~C-h f flymake~
+- ~C-h f flymake-checkers-mode~
+- ~C-h f flymake-checkers-checkers~
 
 
 ** Credits
 
-The Vim library [[https://github.com/scrooloose/syntastic][syntastic]] by [[https://github.com/scrooloose][Martin Grenfell]] inspired many of the checkers.
+The Vim library [[https://github.com/scrooloose/syntastic][syntastic]] by [[https://github.com/scrooloose][Martin Grenfell]] inspired this library and many of
+its checkers.
+
+[[https://github.com/purcell][Steve Purcell]] contributed ideas and provided templates for some of the syntax
+checkers.
 
 
 ** License
@@ -93,3 +231,9 @@ this program; if not, write to the Free Software Foundation, Inc., 51 Franklin
 Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 See [[file:COPYING][COPYING]] for details.
+
+
+** Footnotes
+
+[fn:1] These temporary copies are necessary to allow for syntax checks of
+   modified, but not yet saved buffers.
