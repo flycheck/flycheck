@@ -25,7 +25,12 @@
 
 ;;; Commentary:
 
-;; Additional checkers for `flymake-mode'.
+;; A replacement for `flymake-mode' with much improved configuration and checker
+;; API.
+
+;; Though this library intends to replace `flymake-mode', it currently is based
+;; on it.  Hence, enabling `flymake-checkers-mode' also enables `flymake-mode'.
+;; Moreover, `flymake-checkers-mode' is *incompatible* to classic flymake.
 
 ;; Provide checkers for:
 ;;
