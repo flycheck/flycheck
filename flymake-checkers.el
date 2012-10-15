@@ -51,22 +51,28 @@
   :prefix "flymake-checkers-"
   :group 'flymake)
 
-(defcustom flymake-checkers-major-mode-checkers-alist
-  '((emacs-lisp-mode . flymake-checkers-emacs-lisp)
-    (python-mode . flymake-checkers-python)
-    (ruby-mode . flymake-checkers-ruby)
-    (php-mode . flymake-checkers-php)
-    (coffee-mode . flymake-checkers-coffee)
-    (sh-mode . flymake-checkers-sh)
-    (latex-mode . flymake-checkers-tex)
-    (plain-tex-mode . flymake-checkers-tex))
-  "Flymake checkers for major modes.
+(defcustom flymake-checkers-checkers
+  '(flymake-checkers-coffee
+    flymake-checkers-emacs-lisp
+    flymake-checkers-php
+    flymake-checkers-python-flake8
+    flymake-checkers-python-pylint
+    flymake-checkers-python-pyflakes
+    flymake-checkers-ruby
+    flymake-checkers-php
+    flymake-checkers-sh
+    flymake-checkers-sh-bash
+    flymake-checkers-sh-zsh
+    flymake-checkers-tex)
+  "Flymake checkers.
 
-The `car' of each cell is a major mode symbol, the `cdr' a
-checker function."
-  :type '(alist :key-type (symbol :tag "Major mode")
-                :value-type (symbol :tag "Checker"))
-  :package-version '(flymake-checkers . "0.2"))
+A list of flymake checkers to try for the current buffer.  A
+checker is either a variable, which contains a checker definition
+or a function that is called upon each syntax check to obtain the
+checker definition."
+  :group 'flymake-checkers
+  :type '(repeat (symbol :tag "Checker")))
+
 
 ;; Utility functions
 
@@ -78,98 +84,80 @@ Return the path of the file."
                   (concat "." (file-name-extension filename))))
 
 
-;; Flymake integration
+;; Checker API
 
-(defvar flymake-checkers-cleanup-function nil
-  "The cleanup function to use for the current checker.")
-(make-variable-buffer-local 'flymake-checkers-cleanup-function)
+(defun flymake-checkers-get-checker-properties (checker)
+  "Get the properties of CHECKER.
 
-;;;###autoload
-(defun flymake-checkers-get-checker ()
-  "Get the checker to use for the current mode.
+CHECKER is a symbol pointing either to a bound variable or to a
+function.  In the former case, the `symbol-value' is returned, in
+the latter case the return value of the function being invoked
+with no arguments.
 
-This function looks the current `major-mode' up in
-`flymake-checkers-major-mode-checkers-alist'.  If this is
-successful, return the init function for this checker, otherwise
-return nil."
-  (flymake-log 3 "Searching checker for buffer %s with major mode %s"
-               (current-buffer) major-mode)
-  (let ((checker (assq major-mode flymake-checkers-major-mode-checkers-alist)))
-    (when checker
-      (flymake-log 2 "Found checker %s for buffer %s with major mode %s"
-                   (cdr checker) (current-buffer) major-mode)
-      (cdr checker))))
-
-;;;###autoload
-(defadvice flymake-get-init-function
-  (around flymake-checkers-get-init-function first activate compile)
-  "Get the flymake checker.
-
-If `flymake-checkers-mode' is on, return the flymake-checkers checkers,
-otherwise fallback to standard flymake."
-  (if flymake-checkers-mode
-      (setq ad-return-value (flymake-checkers-get-checker))
-    (setq ad-return-value ad-do-it)))
-
-;;;###autoload
-(defun flymake-checkers-cleanup (cleanup-function)
-  "Perform cleanup for flymake-checkers with CLEANUP-FUNCTION."
-  (kill-local-variable 'flymake-checkers-cleanup-function)
-  (kill-local-variable 'flymake-err-line-patterns)
-  (if cleanup-function
-      (funcall cleanup-function)
-    (flymake-simple-cleanup)))
-
-;;;###autoload
-(defadvice flymake-get-cleanup-function
-  (around flymake-checkers-get-cleanup-function activate compile)
-  "Get the cleanup function for the current checker."
-  (if flymake-checkers-mode
-      (setq ad-return-value
-            (apply-partially 'flymake-checkers-cleanup
-                             flymake-checkers-cleanup-function))
-    (setq ad-return-value ad-do-it)))
-
-
-;; Entry function
-;;;###autoload
-(define-minor-mode flymake-checkers-mode
-  "Toggle extended on-the-fly syntax checking.
-
-Extended on-the-fly syntax checking based on flymake, but with
-easier configuration and improved checkers.
-
-Note: Pure flymake is INCOMPATIBLE with this mode."
-  :init-value nil
-  :lighter " FlyC"
-  :require 'flymake-checkers
+If CHECKER is a unbound symbol, or not a symbol at all, an error
+is signaled."
   (cond
-   (flymake-checkers-mode
-    ;; Do not bug the user
-    (set (make-local-variable 'flymake-gui-warnings-enabled) nil)
-    (flymake-mode 1))
-   (t
-    (kill-local-variable 'flymake-gui-warnings-enabled)
-    (flymake-mode -1))))
+   ((and (symbolp checker) (boundp checker)) (symbol-value checker))
+   ((and (symbolp checker) (functionp checker)) (funcall checker))
+   (t (error "Invalid checker, expected variable or function, but was: %S"
+             checker))))
 
-;;;###autoload
-(defun flymake-checkers-mode-on ()
-  "Unconditionally enable `flymake-checkers-mode'."
-  (flymake-checkers-mode 1))
+(defun flymake-checkers-valid-checker-p (properties)
+  "Check whether the checker PROPERTIES are valid.
 
-;;;###autoload
-(defun flymake-checkers-mode-off ()
-  "Unconditionally disable `flymake-checkers-mode'."
-  (flymake-checkers-mode -1))
+A valid checker must have a :command, and at least one of :modes
+and :predicate.
 
+Signal an error if PROPERTIES are invalid.  Otherwise return t."
+  (unless (plist-get properties :command)
+    (error "Checker %S lacks :command" properties))
+  (unless (or (plist-get properties :modes)
+              (plist-get properties :predicate))
+    (error "Checker %S lacks :modes and :predicate." properties))
+  t)
 
-;; Checker helpers
+(defun flymake-checkers-check-modes (properties)
+  "Check the :modes of PROPERTIES.
+
+If PROPERTIES specifies :modes, check `major-mode' against these.
+Otherwise return t."
+  (let ((modes (plist-get properties :modes)))
+    (or (not modes)
+        (and (listp modes) (memq major-mode modes))  ; A list of modes
+        (eq major-mode modes))))        ; A single mode
+
+(defun flymake-checkers-check-predicate (properties)
+  "Check the :predicate of PROPERTIES.
+
+If PROPERTIES contains a :predicate, eval it and return the
+result, otherwise return t."
+  (let ((predicate (plist-get properties :predicate)))
+    (or (not predicate) (eval predicate))))
+
+(defun flymake-checkers-check-executable (properties)
+  "Check the executable of the checker PROPERTIES.
+
+Return t, if the executable in the :command of PROPERTIES exists,
+or nil otherwise."
+  (let ((executable (car (plist-get properties :command))))
+    (if (executable-find executable) t
+      (flymake-log 1 "Executable %s not found, not using checker %S"
+                   executable properties))))
+
+(defun flymake-checkers-may-use-checker (properties)
+  "Determine whether the checker described by PROPERTIES may be used.
+
+Return t if so, or nil otherwise."
+  (and (flymake-checkers-valid-checker-p properties)
+       (flymake-checkers-check-modes properties)
+       (flymake-checkers-check-predicate properties)
+       (flymake-checkers-check-executable properties)))
 
 (defun flymake-checkers-substitute-argument (arg)
   "Substitute ARG with file to check is possible.
 
-If ARG is `source' or `source-inplace', return the file to
-check, otherwise return ARG unchanged."
+If ARG is `source' or `source-inplace', create a temporary file
+to checker and return its path, otherwise return ARG unchanged."
   (let ((temp-file-function
          (cond ((eq arg 'source) 'flymake-checkers-create-temp-system)
                ((eq arg 'source-inplace) 'flymake-create-temp-inplace))))
@@ -178,15 +166,9 @@ check, otherwise return ARG unchanged."
       arg)))
 
 (defun flymake-checkers-get-substituted-command (properties)
-  "Get the substituted command from PROPERTIES.
-
-PROPERTIES is a property list with information about the checker.
-
-Return the substituted command as list."
-  (flymake-log 3 "Substituting command for properties %s" properties)
-  (let ((command (plist-get properties :command)))
-    (when command
-        (mapcar 'flymake-checkers-substitute-argument command))))
+  "Get the substitute :command from PROPERTIES."
+  (mapcar 'flymake-checkers-substitute-argument
+          (plist-get properties :command)))
 
 (defun flymake-checkers-error-pattern-p (pattern)
   "Check whether PATTERN is a valid error pattern."
@@ -220,36 +202,97 @@ Return a list of error patterns compatible with
        ((flymake-checkers-error-patterns-list-p patterns) patterns)
        (t (error "Invalid type for :error-patterns: %S" patterns))))))
 
-(defun flymake-checkers-simple (&rest properties)
-  "Declare a simple flymake checker with PROPERTIES.
 
-Call this function in the init function of your checker to
-quickly setup a simple syntax checker.
+;; Flymake integration
 
-PROPERTIES is a property list providing information about the check
-command in the following property:
+(defvar flymake-checkers-cleanup-function nil
+  "The cleanup function to use for the current checker.")
+(make-variable-buffer-local 'flymake-checkers-cleanup-function)
 
-:command The check command as list (mandatory).  In this list,
-the symbol `source' is substituted with a temporary copy of the
-file to check.  Use `source-inplace' instead of `source' to have
-the copy created in the same directory as the source file.
+(defun flymake-checkers-init-checker (properties)
+  "Initialize the checker described by PROPERTIES.
 
-:error-pattern The error pattern for parsing the output
-of :command (optional). If omitted, patterns from
-`flymake-err-line-patterns' are used.  Has the same for as an
-element in this variable."
-  ;; Enforce a standard cleanup function
-  (setq flymake-checkers-cleanup-function 'flymake-simple-cleanup)
+Setup buffer local flymake variables based on PROPERTIES, and
+return a command list for flymake."
   (let ((command (flymake-checkers-get-substituted-command properties))
         (error-patterns (flymake-checkers-get-error-patterns properties)))
+    (setq flymake-checkers-cleanup-function 'flymake-simple-cleanup)
     (when error-patterns
       (set (make-local-variable 'flymake-err-line-patterns) error-patterns))
-    (if command
-        (if (executable-find (car command))
-            (list (car command) (cdr command))
-          (flymake-log 0 "Command %s was not found, syntax checking disabled"
-                       (car command)))
-      (error "Checker does not provide a command"))))
+    (list (car command) (cdr command))))
+
+;;;###autoload
+(defun flymake-checkers-init ()
+  "Wrap checker PROPERTIES into an init function.
+
+PROPERTIES is the properties list describing a checker.
+
+Use this function `apply-partially' to construct a real init
+function for flymake."
+  (dolist (checker flymake-checkers-checkers)
+    (let ((properties (flymake-checkers-get-checker-properties checker)))
+      (flymake-log 3 "Trying checker %S with properties %S" checker properties)
+      (when (flymake-checkers-may-use-checker properties)
+        (return (flymake-checkers-init-checker properties))))))
+
+;;;###autoload
+(defadvice flymake-get-init-function
+  (around flymake-checkers-get-init-function first activate compile)
+  "Get the flymake checker.
+
+Return `flymake-checkers-init-function', if `flymake-checkers-mode' is enabled."
+  (setq ad-return-value (if flymake-checkers-mode
+                            'flymake-checkers-init
+                          ad-do-it)))
+
+;;;###autoload
+(defun flymake-checkers-cleanup ()
+  "Perform cleanup for flymake-checkers."
+  (when flymake-checkers-cleanup-function
+    (funcall flymake-checkers-cleanup-function))
+  (kill-local-variable 'flymake-checkers-cleanup-function)
+  (kill-local-variable 'flymake-err-line-patterns))
+
+;;;###autoload
+(defadvice flymake-get-cleanup-function
+  (around flymake-checkers-get-cleanup-function activate compile)
+  "Get the cleanup function for the current checker."
+  (setq ad-return-value (if flymake-checkers-mode
+                            'flymake-checkers-cleanup
+                          ad-do-it)))
+
+
+;; Entry function
+
+;;;###autoload
+(define-minor-mode flymake-checkers-mode
+  "Toggle extended on-the-fly syntax checking.
+
+Extended on-the-fly syntax checking based on flymake, but with
+easier configuration and improved checkers.
+
+Note: Pure flymake is INCOMPATIBLE with this mode."
+  :init-value nil
+  :lighter " FlyC"
+  :require 'flymake-checkers
+  (cond
+   (flymake-checkers-mode
+    ;; Do not bug the user
+    (set (make-local-variable 'flymake-gui-warnings-enabled) nil)
+    (flymake-mode 1))
+   (t
+    (kill-local-variable 'flymake-gui-warnings-enabled)
+    (flymake-mode -1))))
+
+;;;###autoload
+(defun flymake-checkers-mode-on ()
+  "Unconditionally enable `flymake-checkers-mode'."
+  (flymake-checkers-mode 1))
+
+;;;###autoload
+(defun flymake-checkers-mode-off ()
+  "Unconditionally disable `flymake-checkers-mode'."
+  (flymake-checkers-mode -1))
 
 
 ;; Checkers
@@ -267,119 +310,65 @@ element in this variable."
      (print flymake-checkers-emacs-lisp-check-form (current-buffer))
      (buffer-substring-no-properties (point-min) (point-max))))
 
-(defun flymake-checkers-emacs-lisp ()
-  "Initialize flymake checking for Emacs Lisp."
-  (let ((executable (concat invocation-directory invocation-name)))
-    (flymake-checkers-simple
-     :command `(,executable "--no-site-file" "--no-site-lisp"
-                            "--batch" "--eval"
-                            ,(flymake-checkers-emacs-lisp-check-form-s)
-                            source))))
+(defvar flymake-checkers-emacs-lisp
+  (let ((executable (concat invocation-directory invocation-name))
+        (check-form-s (flymake-checkers-emacs-lisp-check-form-s)))
+    `(:command
+      (,executable "--no-site-file" "--no-site-lisp" "--batch" "--eval"
+                   ,check-form-s source)
+      :modes emacs-lisp-mode)))
 
-;; TeX/LaTeX
-(defun flymake-checkers-tex ()
-  "Provide a flymake checker for TeX/LaTeX."
-  (flymake-checkers-simple :command '("chktex" "-v0" "-q" "-I" source-inplace)))
+(defvar flymake-checkers-tex
+  '(:command
+    ("chktex" "-v0" "-q" "-I" source-inplace)
+    :modes (latex-mode plain-tex-mode)))
 
-;; Shell script
-(defconst flymake-checkers-sh-options
-  '((zsh . ("-n" "-d" "-f"))            ; -n: do not execute, -d: no global rcs,
-                                        ; -f: no local rcs
-    (bash . ("-n" "--norc"))            ; -n: do not execute, --norc: no rc
-                                        ; files
-    (sh . ("-n"))                       ; -n: do not execute (as by POSIX)
-    )
-  "Options to pass to shells for syntax checking.")
+(defvar flymake-checkers-sh-zsh
+  '(:command
+    ("zsh" "-n" "-d" "-f" source)
+    :modes sh-mode
+    :predicate (eq sh-shell 'zsh)))
 
-(defun flymake-checkers-sh ()
-  "Provide a flymake checker for shell scripts."
-  (let ((options (cdr (assq sh-shell flymake-checkers-sh-options))))
-    (when  options
-      (flymake-checkers-simple
-       :command `(,(symbol-name sh-shell) ,@options source)))))
+(defvar flymake-checkers-sh-bash
+  '(:command
+    ("bash"  "-n" "--norc" source)
+    :modes sh-mode
+    :predicate (eq sh-shell 'bash)))
 
-;; Python
-(defconst flymake-checkers-python-supported-checkers
-  '((flake8 . "flake8")
-    (pyflakes . "pyflakes")
-    (epylint . "epylint"))
-  "Supported Python checkers.
+(defvar flymake-checkers-sh
+  '(:command
+    ("sh" "-n" source)
+    :modes sh-mode
+    :predicate (eq sh-shell 'sh)))
 
-Ordered by preference for `flymake-checkers-python-find-checker'.")
+(defvar flymake-checkers-python-pylint
+  '(:command ("epylint" source-inplace) :modes python-mode))
 
-(defun flymake-checkers-python-find-checker ()
-  "Find an installed checker from Python.
+(defvar flymake-checkers-python-pyflakes
+  '(:command ("pyflakes" source-inplace) :modes python-mode))
 
-Search for any checker from
-`flymake-checkers-python-supported-checkers', and return the
-symbol for the first checker found, or nil, if no checker was
-found."
-  (let ((found-checker nil)
-        (remaining flymake-checkers-python-supported-checkers))
-    (while (and (not found-checker) remaining)
-      (let ((current-checker (car remaining)))
-        (when (executable-find (cdr current-checker))
-          (setq found-checker (car current-checker))))
-      (setq remaining (cdr remaining)))
-    found-checker))
+(defvar flymake-checkers-python-flake8
+  '(:command ("flake8" source-inplace) :modes python-mode))
 
-(defcustom flymake-checkers-python-checker
-  (flymake-checkers-python-find-checker)
-  "Checker to use for Python files.
+(defvar flymake-checkers-ruby
+  '(:command '("ruby" "-w" "-c" source) :modes ruby-mode))
 
-Set to `flake8', `pyflakes' or `epylint' to use the corresponding
-checker for Python files.  If nil, syntax checking of Python
-files is disabled."
-  :group 'flymake-checkers
-  :type '(choice (const :tag "Off" nil)
-                 (const flake8)
-                 (const pyflakes)
-                 (const epylint)
-                 (string :tag "Custom checker")))
-
-(defun flymake-checkers-python-get-checker ()
-  "Get the checker to use for Python.
-
-Return a string with the executable path of the checker, or nil
-if the checker was not found."
-  (let ((checker flymake-checkers-python-checker))
-    (when checker
-      (when (symbolp checker)
-        (setq checker
-              (cdr (assq checker flymake-checkers-python-supported-checkers))))
-      (if (stringp checker) checker
-        (error "Invalid value for flymake-checkers-python-checker: %S"
-               flymake-checkers-python-checker)))))
-
-(defun flymake-checkers-python ()
-  "Provide a flymake checker for Python."
-  (let ((checker (flymake-checkers-python-get-checker)))
-    (when checker
-      (flymake-checkers-simple :command `(,checker source-inplace)))))
-
-;; Ruby
-(defun flymake-checkers-ruby ()
-  "Provide a flymake checker for Ruby."
-  (flymake-checkers-simple :command '("ruby" "-w" "-c" source)))
-
-;; PHP
-(defun flymake-checkers-php ()
-  "Provide a flymake checker for PHP."
-  (flymake-checkers-simple
-   :command '("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
-              "-d" "log_errors=0" source)
-   :error-patterns '("\\(?:Parse\\|Fatal\\|syntax\\) error[:,] \
+(defvar flymake-checkers-php
+  '(:command
+    '("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
+      "-d" "log_errors=0" source)
+    :error-patterns ("\\(?:Parse\\|Fatal\\|syntax\\) error[:,] \
 \\(.*\\) in \\(.*\\) on line \\([0-9]+\\)"
-                     2 3 nil 1)))
+                      2 3 nil 1)
+    :modes php-mode))
 
-;; CoffeeScript
-(defun flymake-checkers-coffee ()
-  "Provide a flymake checker for CoffeeScript."
-  (flymake-checkers-simple
-   :command '("coffeelint" "--csv" source)
-   :error-patterns
-   '(("SyntaxError: \\(.*\\) on line \\([0-9]+\\)" nil 2 nil 1)
-     ("\\(.+\\),\\([0-9]+\\),\\(?:warn\\|error\\),\\(.+\\)" 1 2 nil 3))))
+(defvar flymake-checkers-coffee
+  '(:command
+    '("coffeelint" "--csv" source)
+    :error-patterns
+    (("SyntaxError: \\(.*\\) on line \\([0-9]+\\)" nil 2 nil 1)
+     ("\\(.+\\),\\([0-9]+\\),\\(?:warn\\|error\\),\\(.+\\)" 1 2 nil 3))
+    :modes coffee-mode))
 
 (provide 'flymake-checkers)
 
