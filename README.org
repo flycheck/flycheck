@@ -13,13 +13,13 @@ extending flymake with new checkers.
 ** Features
 
 - Provide syntax checkers for:
+  - CoffeeScript
   - Emacs Lisp
+  - PHP
   - Python
   - Ruby
-  - CoffeeScript
   - Shell scripts (Bash, Dash and Zsh)
   - TeX/LaTeX
-  - PHP
 - Simplify configuration of flymake
 - Simplify writing new checkers for flymake
 
@@ -64,14 +64,14 @@ this variable have no effect.
 
 You need to install external utilities for the following checkers:
 
+- CoffeeScript :: Install [[http://www.coffeelint.org/][coffeelint]].
+- PHP :: Install the [[http://php.net/manual/en/features.commandline.php][PHP command line]].
 - Python :: Install [[http://pypi.python.org/pypi/flake8][flake8]], [[http://pypi.python.org/pypi/pyflakes][pyflakes]] or [[http://pypi.python.org/pypi/pylint][pylint]].
 - Ruby :: Install Ruby.
-- CoffeeScript :: Install [[http://www.coffeelint.org/][coffeelint]].
-- TeX/LaTeX :: Install [[http://baruch.ev-en.org/proj/chktex/][chktex]].  Most TeX distributions, including TeXLive and
-               MacTeX, already do this for you.
 - Shell scripts :: Install Bash or Zsh depending on the type of shell file you
                    want to check.
-- PHP :: Install the [[http://php.net/manual/en/features.commandline.php][PHP command line]].
+- TeX/LaTeX :: Install [[http://baruch.ev-en.org/proj/chktex/][chktex]].  Most TeX distributions, including TeXLive and
+               MacTeX, already do this for you.
 
 
 ** Customization
