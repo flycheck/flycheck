@@ -297,7 +297,14 @@ Note: Pure flymake is INCOMPATIBLE with this mode."
 
 ;; Checkers
 
-;; Emacs Lisp
+(defvar flymake-checkers-coffee
+  '(:command
+    '("coffeelint" "--csv" source)
+    :error-patterns
+    (("SyntaxError: \\(.*\\) on line \\([0-9]+\\)" nil 2 nil 1)
+     ("\\(.+\\),\\([0-9]+\\),\\(?:warn\\|error\\),\\(.+\\)" 1 2 nil 3))
+    :modes coffee-mode))
+
 (defconst flymake-checkers-emacs-lisp-check-form
   '(progn
      (setq byte-compile-dest-file-function 'make-temp-file)
@@ -318,10 +325,32 @@ Note: Pure flymake is INCOMPATIBLE with this mode."
                    ,check-form-s source)
       :modes emacs-lisp-mode)))
 
-(defvar flymake-checkers-tex
+(defvar flymake-checkers-php
   '(:command
-    ("chktex" "-v0" "-q" "-I" source-inplace)
-    :modes (latex-mode plain-tex-mode)))
+    '("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
+      "-d" "log_errors=0" source)
+    :error-patterns ("\\(?:Parse\\|Fatal\\|syntax\\) error[:,] \
+\\(.*\\) in \\(.*\\) on line \\([0-9]+\\)"
+                      2 3 nil 1)
+    :modes php-mode))
+
+(defvar flymake-checkers-python-flake8
+  '(:command ("flake8" source-inplace) :modes python-mode))
+
+(defvar flymake-checkers-python-pylint
+  '(:command ("epylint" source-inplace) :modes python-mode))
+
+(defvar flymake-checkers-python-pyflakes
+  '(:command ("pyflakes" source-inplace) :modes python-mode))
+
+(defvar flymake-checkers-ruby
+  '(:command '("ruby" "-w" "-c" source) :modes ruby-mode))
+
+(defvar flymake-checkers-sh
+  '(:command
+    ("sh" "-n" source)
+    :modes sh-mode
+    :predicate (eq sh-shell 'sh)))
 
 (defvar flymake-checkers-sh-zsh
   '(:command
@@ -335,40 +364,10 @@ Note: Pure flymake is INCOMPATIBLE with this mode."
     :modes sh-mode
     :predicate (eq sh-shell 'bash)))
 
-(defvar flymake-checkers-sh
+(defvar flymake-checkers-tex
   '(:command
-    ("sh" "-n" source)
-    :modes sh-mode
-    :predicate (eq sh-shell 'sh)))
-
-(defvar flymake-checkers-python-pylint
-  '(:command ("epylint" source-inplace) :modes python-mode))
-
-(defvar flymake-checkers-python-pyflakes
-  '(:command ("pyflakes" source-inplace) :modes python-mode))
-
-(defvar flymake-checkers-python-flake8
-  '(:command ("flake8" source-inplace) :modes python-mode))
-
-(defvar flymake-checkers-ruby
-  '(:command '("ruby" "-w" "-c" source) :modes ruby-mode))
-
-(defvar flymake-checkers-php
-  '(:command
-    '("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
-      "-d" "log_errors=0" source)
-    :error-patterns ("\\(?:Parse\\|Fatal\\|syntax\\) error[:,] \
-\\(.*\\) in \\(.*\\) on line \\([0-9]+\\)"
-                      2 3 nil 1)
-    :modes php-mode))
-
-(defvar flymake-checkers-coffee
-  '(:command
-    '("coffeelint" "--csv" source)
-    :error-patterns
-    (("SyntaxError: \\(.*\\) on line \\([0-9]+\\)" nil 2 nil 1)
-     ("\\(.+\\),\\([0-9]+\\),\\(?:warn\\|error\\),\\(.+\\)" 1 2 nil 3))
-    :modes coffee-mode))
+    ("chktex" "-v0" "-q" "-I" source-inplace)
+    :modes (latex-mode plain-tex-mode)))
 
 (provide 'flymake-checkers)
 
