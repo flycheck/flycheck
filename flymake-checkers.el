@@ -332,6 +332,12 @@ INCOMPATIBLE with this mode."
 Use either flymake-mode or flymake-checkers-mode"))
   (cond
    (flymake-checkers-mode
+    ;; Enable flymake-cursor if available
+    (when (fboundp 'flyc/show-fly-error-at-point-pretty-soon)
+      (add-hook 'post-command-hook
+                'flyc/show-fly-error-at-point-pretty-soon
+                nil t))
+
     (add-hook 'after-change-functions 'flymake-after-change-function nil t)
     (add-hook 'after-save-hook 'flymake-after-save-hook nil t)
     (add-hook 'kill-buffer-hook 'flymake-kill-buffer-hook nil t)
