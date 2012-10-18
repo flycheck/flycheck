@@ -308,7 +308,8 @@ Use either flymake-mode or flymake-checkers-mode"))
       (let ((status (ad-get-arg 0))
             (warning (ad-get-arg 1)))
         (flymake-log 0 "Fatal status %s, warning %s in flymake-checkers-mode \
-buffer %s" status warning (buffer-name)))
+buffer %s" status warning (buffer-name))
+        (flymake-report-status nil (format "!%s" status)))
     (setq ad-return-value ad-do-it)))
 
 ;; Entry function
