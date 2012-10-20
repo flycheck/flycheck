@@ -28,11 +28,16 @@
 ;; A replacement for `flymake-mode' with much improved configuration and checker
 ;; API.
 
-;; Though this library intends to replace `flymake-mode', it currently is based
-;; on it.  Hence, enabling `flymake-checkers-mode' also enables `flymake-mode'.
-;; Moreover, `flymake-checkers-mode' is *incompatible* to classic flymake.
+;; Like `flymake-mode', `flycheck-mode' performs on-the-fly syntax and style
+;; checkers in various modes.  However it features an improved configuration API
+;; based on major modes (instead of file name masks) and a much nicer and easier
+;; declarative syntax for checker definitions.
 
-;; Provide checkers for:
+;; `flycheck-mode' is intentionally incompatible to `flymake-mode'.  Attempting
+;; to enable one while the other is active causes an error.
+
+;; `flycheck-mode' provides syntax and style checkers for the following
+;; languages:
 ;;
 ;; - Emacs Lisp
 ;; - Shell scripts (only with `sh-mode')
@@ -208,7 +213,7 @@ Return a list of error patterns compatible with
        (t (error "Invalid type for :error-patterns: %S" patterns))))))
 
 
-;; Flymake integration
+;; Flymake hacking
 
 (defvar flymake-checkers-cleanup-function nil
   "The cleanup function to use for the current checker.")
@@ -266,6 +271,45 @@ Return `flymake-checkers-init-function', if `flymake-checkers-mode' is enabled."
                             'flymake-checkers-cleanup
                           ad-do-it)))
 
+;;;###autoload
+(defadvice flymake-mode (around flymake-checkers-flymake-mode activate compile)
+  "`flymake-mode' is incompatible with `flymake-checkers-mode'.
+Signal an error if the latter is active."
+  (if flymake-checkers-mode
+      (error ("flymake-mode is incompatible with flymake-checkers-mode. \
+Use either flymake-mode or flymake-checkers-mode"))
+    (setq ad-return-value ad-do-it)))
+
+(defvar flymake-checkers-mode-line nil
+  "The mode line lighter of flymake-checkers-mode.")
+
+(defadvice flymake-report-status
+  (around flymake-checkers-report-status activate compile)
+  "Update the status of flymake-checkers-mode."
+  (let ((e-w (ad-get-arg 0))
+        (status (ad-get-arg 1))
+        (mode-line (if flymake-checkers-mode " FlyC" " Flymake"))
+        (target (if flymake-checkers-mode
+                    'flymake-checkers-mode-line
+                  'flymake-mode-line)))
+    (when e-w
+      (setq flymake-mode-line-e-w e-w))
+    (when status
+      (setq flymake-mode-line-status status))
+    (when (> (length flymake-mode-line-e-w) 0)
+      (setq mode-line (format "%s:%s" mode-line flymake-mode-line-e-w)))
+    (set target (concat mode-line flymake-mode-line-status))
+    (force-mode-line-update)))
+
+(defadvice flymake-report-fatal-status
+  (around flymake-checkers-fatal-status activate compile)
+  "Ignore fatal status warnings in flymake-checkers mode."
+  (if flymake-checkers-mode
+      (let ((status (ad-get-arg 0))
+            (warning (ad-get-arg 1)))
+        (flymake-log 0 "Fatal status %s, warning %s in flymake-checkers-mode \
+buffer %s" status warning (buffer-name)))
+    (setq ad-return-value ad-do-it)))
 
 ;; Entry function
 
@@ -276,18 +320,39 @@ Return `flymake-checkers-init-function', if `flymake-checkers-mode' is enabled."
 Extended on-the-fly syntax checking based on flymake, but with
 easier configuration and improved checkers.
 
-Note: Pure flymake is INCOMPATIBLE with this mode."
+`flymake-checkers-mode' is incompatible with `flymake-mode'.
+Signal an error if the latter is active.  Note: Pure flymake is
+INCOMPATIBLE with this mode."
   :init-value nil
-  :lighter " FlyC"
+  :lighter flymake-checkers-mode-line
   :require 'flymake-checkers
+  (when flymake-mode
+    (error "flymake-checkers-mode is incompatible with flymake-mode. \
+Use either flymake-mode or flymake-checkers-mode"))
   (cond
    (flymake-checkers-mode
-    ;; Do not bug the user
-    (set (make-local-variable 'flymake-gui-warnings-enabled) nil)
-    (flymake-mode 1))
+    (add-hook 'after-change-functions 'flymake-after-change-function nil t)
+    (add-hook 'after-save-hook 'flymake-after-save-hook nil t)
+    (add-hook 'kill-buffer-hook 'flymake-kill-buffer-hook nil t)
+
+    (flymake-report-status "" "")
+    (setq flymake-timer
+          (run-at-time nil 1 'flymake-on-timer-event (current-buffer)))
+
+    (flymake-start-syntax-check))
    (t
-    (kill-local-variable 'flymake-gui-warnings-enabled)
-    (flymake-mode -1))))
+    (remove-hook 'after-change-functions 'flymake-after-change-function t)
+    (remove-hook 'after-save-hook 'flymake-after-save-hook t)
+    (remove-hook 'kill-buffer-hook 'flymake-kill-buffer-hook t)
+    ;;+(remove-hook 'find-file-hook (function flymake-find-file-hook) t)
+
+    (flymake-delete-own-overlays)
+
+    (when flymake-timer
+      (cancel-timer flymake-timer)
+      (setq flymake-timer nil))
+
+    (setq flymake-is-running nil))))
 
 ;;;###autoload
 (defun flymake-checkers-mode-on ()
