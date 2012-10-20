@@ -4,7 +4,7 @@
 ;;
 ;; Author: Sebastian Wiesner <lunaryorn@gmail.com>
 ;; URL: https://github.com/lunaryorn/flymake-checkers
-;; Version: 0.2
+;; Version: 0.3
 ;; Keywords: convenience languages tools
 
 ;; This file is not part of GNU Emacs.
