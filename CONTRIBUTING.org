@@ -1,7 +1,7 @@
 * Contributing
 
 If discovered bugs and issues, have ideas for improvements or new features, or
-want to contribute a new module, please report to the [[https://github.com/lunaryorn/flymake-checkers/issues][issue tracker]] the
+want to contribute a new module, please report to the [[https://github.com/lunaryorn/flycheck/issues][issue tracker]] the
 repository and send a pull request, but respect the following guidelines.
 
 

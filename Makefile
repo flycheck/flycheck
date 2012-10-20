@@ -4,7 +4,7 @@ BYTECOMPILEFORM = (progn \
 	(setq byte-compile-dest-file-function (lambda (fn) "$@")) \
 	(byte-compile-file "$<"))
 
-OBJECTS = flymake-checkers.elc
+OBJECTS = flycheck.elc
 
 .PHONY: build
 build : $(OBJECTS)
