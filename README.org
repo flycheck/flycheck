@@ -1,13 +1,25 @@
-* =flymake-checkers=
+* =flycheck=
 
-Flymake reloaded with useful checkers and a much improved configuration.
+Flycheck is flymake reloaded with
 
-On the surface this library extends =flymake=, the on-the-fly syntax checker of
-GNU Emacs, with syntax checkers for various programming and markup languages,
-replacing the broken and out-dated built-in checkers for flymake.
+- an improved customization interface based on major modes (instead of file name
+  patterns),
+- a much nicer and easier, declarative syntax for checker definitions (instead
+  of init functions)
+- and a bunch of ready-to-use syntax checkers for various languages (instead of
+  broken checkers using non-existing tools).
 
-Effectively, this library really provides a wholly new way of configuring and
-extending flymake with new checkers.
+
+** Motivation
+
+GNU Emacs has a built-in on-the-fly syntax checker named Flymake.  Flymake does
+a good job on the actual on-the-fly syntax checking, but its built-in checkers
+are out-dated and broken, and adding support for new checkers is cumbersome.
+
+Flycheck is a new mode that aims to replace Flymake where it is broken while
+re-using its good parts.  Hence, it features a new, declarative API to implement
+new syntax checkers, and an improved customization interface based on the major
+mode of buffers, but re-uses flymake to do the actual syntax checking.
 
 
 ** Features
@@ -20,16 +32,16 @@ extending flymake with new checkers.
   - Ruby
   - Shell scripts (Bash, Dash and Zsh)
   - TeX/LaTeX
-- Simplify configuration of flymake
-- Simplify writing new checkers for flymake
+- Easy customization by a single variable =flycheck-checkers=
+- Easy declarative API to define new syntax checkers
 
 
 ** Installation
 
 Install the ELPA packages from or [[http://marmalade-repo.org/][Marmalade]] with ~M-x package-install
-flymake-checkers~.
+flycheck~.
 
-Or [[https://github.com/lunaryorn/flymake-checkers/tags][download]] the latest release and install ~flymake-checkers.el~ with ~M-x
+Or [[https://github.com/lunaryorn/flycheck/tags][download]] the latest release and install ~flycheck.el~ with ~M-x
 package-install-file~.
 
 The library is written and tested against GNU Emacs 24 and may or may not work
@@ -41,23 +53,22 @@ checking.  See [[Checkers]] for details.
 
 ** Usage
 
-Enable =flymake-checkers-mode= in your ~init.el~ file.
+Enable =flycheck-mode= in your ~init.el~ file.
 
 #+BEGIN_SRC emacs-lisp
   ;; Enable flymake for all files
-  (add-hook 'find-file-hook 'flymake-checkers-mode)
+  (add-hook 'find-file-hook 'flycheck-mode)
   ;; Enable flymake for Python only
-  (add-hook 'python-mode-hook 'flymake-checkers-mode)
+  (add-hook 'python-mode-hook 'flycheck-mode)
 #+END_SRC
 
-Or do ~M-x flymake-checkers-mode~ manually after visiting a file.
+Or do ~M-x flycheck-mode~ manually after visiting a file.
 
-On-the-fly syntax checking with flymake-checkers will then start immediately.
+On-the-fly syntax checking with flycheck will then start immediately.
 
-*Important*: =flymake-checkers-mode= *overwrites* the standard flymake checker
-lookup via =flymake-allowed-file-name-masks=.  Hence, if =flymake-checkers-mode=
-is on =flymake-allowed-file-name-masks= is *ignored* and checkers declared in
-this variable have no effect.
+*Warning*: Flycheck is intentionally incompatible with classic Flymake.  Trying
+to enable one while the other is active /signals an error/.  At best, do not
+use =flymake-mode= anymore after you installed Flycheck.
 
 
 ** Checkers
@@ -76,28 +87,27 @@ You need to install external utilities for the following checkers:
 
 ** Customization
 
-- ~M-x customize-variable flymake-checkers-checkers~ :: A list of all checkers.
+- ~M-x customize-variable flycheck-checkers~ :: A list of all checkers.
      The checkers are tried in the order of appearance in this list.  The first
      checker that supports the current mode and whose executable exists is
      used.  To change the preference of checkers, change their order in this
      list, or remove entries from this list.
 
 Some modes have multiple checkers.  For instance, =python-mode= has three
-checkers using ~flake8~, ~pylint~ or ~pyflakes~.  When doing syntax checking in
+checkers using ~flake8~, ~pylint~or ~pyflakes~.  When doing syntax checking in
 =python-mode=, the checkers are tried in this order and the first whose
 executable is found, is used.
 
 To chance the order of preference or enforce a single checker, just modify the
-order of their appearance in =flymake-checkers-checkers= or delete checkers you
-do not want to use.  For instance, to always use ~pyflakes~ in =python-mode=,
-just remove =flymake-checkers-python-flake8= and
-=flymake-checkers-python-pylint= from =flymake-checkers-checkers= via
-customization.
+order of their appearance in =flycheck-checkers= or delete checkers you do not
+want to use.  For instance, to always use ~pyflakes~ in =python-mode=, just
+remove =flycheck-checker-python-flake8= and =flycheck-checker-python-pylint=
+from =flycheck-checkers= via customization.
 
 
 ** Extending
 
-In flymake-checkers a syntax checker is a [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Property-Lists.html#Property-Lists][property list]] with the following keys
+In flycheck a syntax checker is a [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Property-Lists.html#Property-Lists][property list]] with the following keys
 (the /checker properties/):
 
 + =:command= (/mandatory/) :: A list containing the executable of the syntax
@@ -122,7 +132,7 @@ In flymake-checkers a syntax checker is a [[http://www.gnu.org/software/emacs/ma
 *At least one* of =:modes= and =:predicate= must *be present*.  If both are
 present, /both/ must match for the checker to be used.
 
-Checkers are registered via =flymake-checkers-checkers=, which is a list of
+Checkers are registered via =flycheck-checkers=, which is a list of
 symbols.  Each symbol in this list must either be a *variable bound to a checker
 property list*, or be a *function returning one*.  In the former case, the
 variables value is *retrieved anew on each syntax checker*.  In the latter case,
@@ -132,13 +142,13 @@ the function is *invoked on each syntax check with no arguments*.
 *** Example
 
 Let's see this in action by explaining the definition of the [[http://coffeescript.org/][CoffeeScript]]
-checker included in flymake-checkers.  This checker uses the [[www.coffeelint.org][CoffeeLint]] utility
+checker included in flycheck.  This checker uses the [[www.coffeelint.org][CoffeeLint]] utility
 to perform the actual syntax check.
 
 First we declare the checker properties:
 
 #+BEGIN_SRC emacs-lisp
-  (defvar flymake-checkers-coffee
+  (defvar flycheck-checker-coffee
     '(:command
       '("coffeelint" "--csv" source)
       :error-patterns
@@ -174,19 +184,20 @@ patterns already understand this output.
 Now we only need to register this error checker for use with
 
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'flymake-checkers-checkers 'flymake-checkers-coffee)
+  (add-to-list 'flycheck-checkers 'flycheck-checker-coffee)
 #+END_SRC
 
-Assuming that =flymake-checkers-mode= is enabled [[(see Usage]]), CoffeeScript will
-now be syntax-checked on the fly in =coffee-mode=.
+Assuming that =flycheck-mode= is enabled [[(see Usage]]), CoffeeScript will now be
+syntax-checked on the fly in =coffee-mode=.
 
 Some checkers have more complicated conditions for whether they are to be used
 or not.  For instance, syntax checking in =sh-mode= needs to use different
-shells depending on the value of =sh-shell=.  Hence in the checkers for this mode
-we also give a =:predicate= that determines whether the right shell is active:
+shells depending on the value of =sh-shell=.  Hence in the checkers for this
+mode we also give a =:predicate= that determines whether the right shell is
+active:
 
 #+BEGIN_SRC emacs-lisp
-  (defvar flymake-checkers-sh-zsh
+  (defvar flycheck-checker-zsh
     '(:command
       ("zsh" "-n" "-d" "-f" source)
       :modes sh-mode
@@ -202,8 +213,8 @@ this checker will only be enabled if the current mode is =sh-mode= *and*
 
 ** Further help
 
-- ~C-h f flymake-checkers-mode~
-- ~C-h f flymake-checkers-checkers~
+- ~C-h f flycheck-mode~
+- ~C-h f flycheck-checkers~
 
 
 ** Credits
