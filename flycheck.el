@@ -382,7 +382,7 @@ Use either flymake-mode or flycheck-mode"))
 
 (defvar flycheck-checker-coffee
   '(:command
-    '("coffeelint" "--csv" source)
+    ("coffeelint" "--csv" source)
     :error-patterns
     (("SyntaxError: \\(.*\\) on line \\([0-9]+\\)" nil 2 nil 1)
      ("\\(.+\\),\\([0-9]+\\),\\(?:warn\\|error\\),\\(.+\\)" 1 2 nil 3))
@@ -410,7 +410,7 @@ Use either flymake-mode or flycheck-mode"))
 
 (defvar flycheck-checker-php
   '(:command
-    '("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
+    ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
       "-d" "log_errors=0" source)
     :error-patterns ("\\(?:Parse\\|Fatal\\|syntax\\) error[:,] \
 \\(.*\\) in \\(.*\\) on line \\([0-9]+\\)"
@@ -427,7 +427,7 @@ Use either flymake-mode or flycheck-mode"))
   '(:command ("pyflakes" source-inplace) :modes python-mode))
 
 (defvar flycheck-checker-ruby
-  '(:command '("ruby" "-w" "-c" source) :modes ruby-mode))
+  '(:command ("ruby" "-w" "-c" source) :modes ruby-mode))
 
 (defvar flycheck-checker-sh
   '(:command
