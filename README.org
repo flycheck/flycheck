@@ -38,8 +38,8 @@ mode of buffers, but re-uses flymake to do the actual syntax checking.
 
 ** Installation
 
-Install the ELPA packages from or [[http://marmalade-repo.org/][Marmalade]] with ~M-x package-install
-flycheck~.
+Install the ELPA package from [[http://melpa.milkbox.net][MELPA]] (bleeding edge snapshots) or [[http://marmalade-repo.org/][Marmalade]]
+(stable releases) with ~M-x package-install flycheck~.
 
 Or [[https://github.com/lunaryorn/flycheck/tags][download]] the latest release and install ~flycheck.el~ with ~M-x
 package-install-file~.
