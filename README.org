@@ -67,8 +67,8 @@ Or do ~M-x flycheck-mode~ manually after visiting a file.
 On-the-fly syntax checking with flycheck will then start immediately.
 
 *Warning*: Flycheck is intentionally incompatible with classic Flymake.  Trying
-to enable one while the other is active /signals an error/.  At best, do not
-use =flymake-mode= anymore after you installed Flycheck.
+to enable one while the other is active /signals an error/.  At best do not use
+=flymake-mode= anymore after you installed Flycheck.
 
 
 ** Checkers
@@ -91,12 +91,12 @@ You need to install external utilities for the following checkers:
      The checkers are tried in the order of appearance in this list.  The first
      checker that supports the current mode and whose executable exists is
      used.  To change the preference of checkers, change their order in this
-     list, or remove entries from this list.
+     list or remove entries from this list.
 
-Some modes have multiple checkers.  For instance, =python-mode= has three
+Some modes have multiple checkers.  For instance =python-mode= has three
 checkers using ~flake8~, ~pylint~or ~pyflakes~.  When doing syntax checking in
 =python-mode=, the checkers are tried in this order and the first whose
-executable is found, is used.
+executable is found is used.
 
 To chance the order of preference or enforce a single checker, just modify the
 order of their appearance in =flycheck-checkers= or delete checkers you do not
@@ -112,8 +112,8 @@ In flycheck a syntax checker is a [[http://www.gnu.org/software/emacs/manual/htm
 
 + =:command= (/mandatory/) :: A list containing the executable of the syntax
      checking tool (in the =car= of the list) and its arguments (in the =cdr=).
-     Before enabling a checker, *the executable is checked for existence* with
-     =executable-find=.  If this check fails, the checker is *not* used.  In
+     Before enabling a checker *the executable is checked for existence* with
+     =executable-find=.  If this check fails the checker is *not* used.  In
      arguments the special symbol =source= is replaced with a *temporary copy of
      the source file[fn:1]*, created in the system temporary directory.  Use
      =source-inplace= instead to force the copy being created in the *same
@@ -121,22 +121,22 @@ In flycheck a syntax checker is a [[http://www.gnu.org/software/emacs/manual/htm
 + =:error-patterns= (/optional/) :: A single error pattern or a list of error
      patterns to parse the output of =:command=.  Each pattern has the form
      =(REGEXP FILE-IDX LINE-IDX COL-IDX ERR-TEXT-IDX)=.  The patterns are tried
-     in order of declaration.  If omitted, all patterns defined in
+     in order of declaration.  If omitted all patterns defined in
      =flymake-err-line-patterns= are tried.
 + =:modes= (/optional/) :: A single major mode symbol or a list thereof.  If
-     given, the checker will only be used in any of these modes.
+     given the checker will only be used in any of these modes.
 + =:predicate= (/optional/) :: A form that if present is evaluated to determine
-     whether the checker is to be used.  The checker is only used, if the form
+     whether the checker is to be used.  The checker is only used if the form
      evaluates to non-nil.
 
-*At least one* of =:modes= and =:predicate= must *be present*.  If both are
-present, /both/ must match for the checker to be used.
+*At least one* of =:modes= and =:predicate= must *be present*.  If *both* are
+present, *both* must match for the checker to be used.
 
-Checkers are registered via =flycheck-checkers=, which is a list of
-symbols.  Each symbol in this list must either be a *variable bound to a checker
-property list*, or be a *function returning one*.  In the former case, the
-variables value is *retrieved anew on each syntax checker*.  In the latter case,
-the function is *invoked on each syntax check with no arguments*.
+Checkers are registered via =flycheck-checkers=, which is a list of symbols.
+Each symbol in this list must either be a *variable bound to a checker property
+list*, or be a *function returning one*.  In the former case, the variables
+value is *retrieved anew on each syntax check*.  In the latter case the
+function is *invoked on each syntax check with no arguments*.
 
 
 *** Example
