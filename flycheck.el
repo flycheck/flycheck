@@ -427,7 +427,7 @@ Use either flymake-mode or flycheck-mode"))
   '(:command ("pyflakes" source-inplace) :modes python-mode))
 
 (defvar flycheck-checker-ruby
-  (:command '("ruby" "-w" "-c" source) :modes ruby-mode))
+  '(:command ("ruby" "-w" "-c" source) :modes ruby-mode))
 
 (defvar flycheck-checker-sh
   '(:command
