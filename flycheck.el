@@ -351,7 +351,6 @@ Use either flymake-mode or flycheck-mode"))
     (remove-hook 'after-change-functions 'flymake-after-change-function t)
     (remove-hook 'after-save-hook 'flymake-after-save-hook t)
     (remove-hook 'kill-buffer-hook 'flymake-kill-buffer-hook t)
-    ;;+(remove-hook 'find-file-hook (function flymake-find-file-hook) t)
 
     (flymake-delete-own-overlays)
 
