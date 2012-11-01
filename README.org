@@ -81,8 +81,8 @@ You need to install external utilities for the following checkers:
 - Ruby :: Install Ruby.
 - Shell scripts :: Install Bash or Zsh depending on the type of shell file you
                    want to check.
-- TeX/LaTeX :: Install [[http://baruch.ev-en.org/proj/chktex/][chktex]].  Most TeX distributions, including TeXLive and
-               MacTeX, already do this for you.
+- TeX/LaTeX :: Install [[http://baruch.ev-en.org/proj/chktex/][chktex]] or [[http://www.ctan.org/pkg/lacheck][lacheck]].  Most TeX distributions, including
+               TeXLive and MacTeX, already do this for you.
 
 
 ** Customization

@@ -44,7 +44,7 @@
 ;; - Python wither either flake8, pyflakes or pylint
 ;; - Ruby with ruby
 ;; - CoffeeScript with coffeelint
-;; - TeX/LaTeX with chktex
+;; - TeX/LaTeX with chktex or lacheck
 
 ;;; Code:
 
@@ -72,7 +72,8 @@
     flycheck-checker-ruby
     flycheck-checker-php
     flycheck-checker-sh
-    flycheck-checker-tex
+    flycheck-checker-tex-chktex
+    flycheck-checker-tex-lacheck
     flycheck-checker-zsh)
   "Flymake checkers.
 
@@ -434,10 +435,15 @@ Use either flymake-mode or flycheck-mode"))
     :modes sh-mode
     :predicate (eq sh-shell 'sh)))
 
-(defvar flycheck-checker-tex
+(defvar flycheck-checker-tex-chktex
   '(:command
     ("chktex" "-v0" "-q" "-I" source-inplace)
     :modes (latex-mode plain-tex-mode)))
+
+(defvar flycheck-checker-tex-lacheck
+  '(:command
+    ("lacheck" source-inplace)
+    :modes latex-mode))
 
 (defvar flycheck-checker-zsh
   '(:command
