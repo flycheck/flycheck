@@ -259,6 +259,25 @@ Return `flycheck-init-function', if `flycheck-mode' is enabled."
                             'flycheck-init
                           ad-do-it)))
 
+(defun flycheck-find-all-matches (str)
+  "Return all matched for error line patterns in STR.
+
+This is a judicious override for `flymake-split-output', enabled
+by the advice below, which allows for matching multi-line
+patterns."
+  (let (result)
+    (dolist (pattern flymake-err-line-patterns)
+      (let ((regex (car pattern))
+            (pos 0))
+        (while (string-match regex str pos)
+          (push (match-string 0 str) result)
+          (setq pos (match-end 0)))))
+    result))
+
+(defadvice flymake-split-output (around flycheck-split-output (output) activate protect)
+  "Override `flymake-split-output' to support mult-line error messages."
+  (setq ad-return-value (list (flycheck-find-all-matches output) nil)))
+
 ;;;###autoload
 (defun flycheck-cleanup ()
   "Perform cleanup for flycheck."
