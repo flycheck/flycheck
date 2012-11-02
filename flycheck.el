@@ -64,6 +64,7 @@
 (defcustom flycheck-checkers
   '(flycheck-checker-bash
     flycheck-checker-coffee
+    flycheck-checker-css
     flycheck-checker-emacs-lisp
     flycheck-checker-haml
     flycheck-checker-php
@@ -388,6 +389,13 @@ Use either flymake-mode or flycheck-mode"))
     (("SyntaxError: \\(.*\\) on line \\([0-9]+\\)" nil 2 nil 1)
      ("\\(.+\\),\\([0-9]+\\),\\(?:warn\\|error\\),\\(.+\\)" 1 2 nil 3))
     :modes coffee-mode))
+
+(defvar flycheck-checker-css
+  '(:command
+    ("csslint" "--format=compact" source)
+    :error-patterns
+    ("^\\(.*\\): line \\([[:digit:]]+\\), col \\([[:digit:]]+\\), \\(.+\\)$" 1 2 3 4)
+    :modes css-mode))
 
 (defconst flycheck-checker-emacs-lisp-check-form
   '(progn
