@@ -67,6 +67,7 @@
     flycheck-checker-css
     flycheck-checker-emacs-lisp
     flycheck-checker-haml
+    flycheck-checker-javascript-jslint
     flycheck-checker-php
     flycheck-checker-python-flake8
     flycheck-checker-python-pylint
@@ -423,6 +424,16 @@ Use either flymake-mode or flycheck-mode"))
     :error-patterns
     ("^Syntax error on line \\([0-9]+\\): \\(.*\\)$" nil 1 nil 2)
     :modes haml-mode))
+
+(defvar flycheck-checker-javascript-jslint
+  '(:command
+    ("jsl" "-process" source)
+    :error-patterns
+    (("^\\(.+\\)\:\\([0-9]+\\)\: \\(SyntaxError\:.+\\)\:$" nil 2 nil 3)
+     ("^\\(.+\\)(\\([0-9]+\\)): \\(SyntaxError:.+\\)$" nil 2 nil 3)
+     ("^\\(.+\\)(\\([0-9]+\\)): \\(lint \\)?\\(warning:.+\\)$" nil 2 nil 4)
+     ("^\\(.+\\)\:\\([0-9]+\\)\: strict \\(warning: trailing comma.+\\)\:$" nil 2 nil 3))
+    :modes js-mode))
 
 (defvar flycheck-checker-php
   '(:command
