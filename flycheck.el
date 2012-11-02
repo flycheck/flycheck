@@ -301,8 +301,8 @@ Use either flymake-mode or flycheck-mode"))
     (force-mode-line-update)))
 
 (defadvice flymake-report-fatal-status
-  (around flycheck-fatal-status (status warning) activate compile)
-  "Ignore fatal status warnings in flycheck mode."
+  (around flycheck-report-fatal-status (status warning) activate compile)
+  "Ignore fatal status warnings in flycheck-mode."
   (if flycheck-mode
       (flymake-log 0 "Fatal status %s, warning %s in flycheck-mode \
 buffer %s" status warning (buffer-name))
