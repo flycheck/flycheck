@@ -266,19 +266,23 @@ Return `flycheck-init-function', if `flycheck-mode' is enabled."
 This is a judicious override for `flymake-split-output', enabled
 by the advice below, which allows for matching multi-line
 patterns."
-  (let (result)
+  (let (matches
+        (last-match-end-pos 0))
     (dolist (pattern flymake-err-line-patterns)
       (let ((regex (car pattern))
             (pos 0))
         (while (string-match regex str pos)
-          (push (match-string 0 str) result)
-          (setq pos (match-end 0)))))
-    result))
+          (push (match-string 0 str) matches)
+          (setq pos (match-end 0)))
+        (setf last-match-end-pos (max pos last-match-end-pos))))
+    (let ((residual (substring str last-match-end-pos)))
+      (list matches
+            (unless (string= "" residual) residual)))))
 
 (defadvice flymake-split-output (around flycheck-split-output (output) activate protect)
   "Override `flymake-split-output' to support mult-line error messages."
   (setq ad-return-value (if flycheck-mode
-                            (list (flycheck-find-all-matches output) nil)
+                            (flycheck-find-all-matches output)
                           ad-do-it)))
 
 ;;;###autoload
