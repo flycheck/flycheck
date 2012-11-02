@@ -65,6 +65,7 @@
   '(flycheck-checker-bash
     flycheck-checker-coffee
     flycheck-checker-emacs-lisp
+    flycheck-checker-haml
     flycheck-checker-php
     flycheck-checker-python-flake8
     flycheck-checker-python-pylint
@@ -407,6 +408,13 @@ Use either flymake-mode or flycheck-mode"))
       (,executable "--no-site-file" "--no-site-lisp" "--batch" "--eval"
                    ,check-form-s source)
       :modes emacs-lisp-mode)))
+
+(defvar flycheck-checker-haml
+  '(:command
+    ("haml" "-c" source)
+    :error-patterns
+    ("^Syntax error on line \\([0-9]+\\): \\(.*\\)$" nil 1 nil 2)
+    :modes haml-mode))
 
 (defvar flycheck-checker-php
   '(:command
