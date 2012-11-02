@@ -285,11 +285,9 @@ Use either flymake-mode or flycheck-mode"))
   "The mode line lighter of flycheck-mode.")
 
 (defadvice flymake-report-status
-  (around flycheck-report-status activate compile)
+  (around flycheck-report-status (e-w &optional status) activate compile)
   "Update the status of flycheck-mode."
-  (let ((e-w (ad-get-arg 0))
-        (status (ad-get-arg 1))
-        (mode-line (if flycheck-mode " FlyC" " Flymake"))
+  (let ((mode-line (if flycheck-mode " FlyC" " Flymake"))
         (target (if flycheck-mode
                     'flycheck-mode-line
                   'flymake-mode-line)))
@@ -303,14 +301,12 @@ Use either flymake-mode or flycheck-mode"))
     (force-mode-line-update)))
 
 (defadvice flymake-report-fatal-status
-  (around flycheck-fatal-status activate compile)
+  (around flycheck-fatal-status (status warning) activate compile)
   "Ignore fatal status warnings in flycheck mode."
   (if flycheck-mode
-      (let ((status (ad-get-arg 0))
-            (warning (ad-get-arg 1)))
-        (flymake-log 0 "Fatal status %s, warning %s in flycheck-mode \
+      (flymake-log 0 "Fatal status %s, warning %s in flycheck-mode \
 buffer %s" status warning (buffer-name))
-        (flymake-report-status nil (format "!%s" status)))
+    (flymake-report-status nil (format "!%s" status))
     (setq ad-return-value ad-do-it)))
 
 ;; Entry function
