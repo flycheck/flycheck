@@ -74,6 +74,7 @@
     flycheck-checker-python-pyflakes
     flycheck-checker-ruby
     flycheck-checker-php
+    flycheck-checker-sass
     flycheck-checker-sh
     flycheck-checker-tex-chktex
     flycheck-checker-tex-lacheck
@@ -474,6 +475,15 @@ Use either flymake-mode or flycheck-mode"))
 
 (defvar flycheck-checker-ruby
   '(:command ("ruby" "-w" "-c" source) :modes ruby-mode))
+
+(defvar flycheck-checker-sass
+  '(:command
+    ("sass" "-c" source)
+    :error-patterns
+    (("^Syntax error on line \\([0-9]+\\): \\(.*\\)$" nil 1 nil 2)
+     ("^WARNING on line \\([0-9]+\\) of .*?:\r?\n\\(.*\\)$" nil 1 nil 2)
+     ("^Syntax error: \\(.*\\)\r?\n        on line \\([0-9]+\\) of .*?$" nil 2 nil 1))
+    :modes sass-mode))
 
 (defvar flycheck-checker-sh
   '(:command
