@@ -286,7 +286,7 @@ Use either flymake-mode or flycheck-mode"))
 
 (defadvice flymake-report-status
   (around flycheck-report-status (e-w &optional status) activate compile)
-  "Update the status of flycheck-mode."
+  "Update the status of `flycheck-mode'."
   (let ((mode-line (if flycheck-mode " FlyC" " Flymake"))
         (target (if flycheck-mode
                     'flycheck-mode-line
@@ -302,7 +302,7 @@ Use either flymake-mode or flycheck-mode"))
 
 (defadvice flymake-report-fatal-status
   (around flycheck-report-fatal-status (status warning) activate compile)
-  "Ignore fatal status warnings in flycheck-mode."
+  "Ignore fatal status warnings in `flycheck-mode'."
   (if flycheck-mode
       (flymake-log 0 "Fatal status %s, warning %s in flycheck-mode \
 buffer %s" status warning (buffer-name))
