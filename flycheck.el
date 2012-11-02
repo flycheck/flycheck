@@ -277,7 +277,9 @@ patterns."
 
 (defadvice flymake-split-output (around flycheck-split-output (output) activate protect)
   "Override `flymake-split-output' to support mult-line error messages."
-  (setq ad-return-value (list (flycheck-find-all-matches output) nil)))
+  (if flycheck-mode
+      (setq ad-return-value (list (flycheck-find-all-matches output) nil))
+    ad-do-it))
 
 ;;;###autoload
 (defun flycheck-cleanup ()
