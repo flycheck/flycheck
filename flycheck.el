@@ -64,13 +64,17 @@
 (defcustom flycheck-checkers
   '(flycheck-checker-bash
     flycheck-checker-coffee
+    flycheck-checker-css
     flycheck-checker-emacs-lisp
+    flycheck-checker-haml
+    flycheck-checker-javascript-jslint
     flycheck-checker-php
     flycheck-checker-python-flake8
     flycheck-checker-python-pylint
     flycheck-checker-python-pyflakes
     flycheck-checker-ruby
     flycheck-checker-php
+    flycheck-checker-sass
     flycheck-checker-sh
     flycheck-checker-tex-chktex
     flycheck-checker-tex-lacheck
@@ -256,6 +260,31 @@ Return `flycheck-init-function', if `flycheck-mode' is enabled."
                             'flycheck-init
                           ad-do-it)))
 
+(defun flycheck-find-all-matches (str)
+  "Return all matched for error line patterns in STR.
+
+This is a judicious override for `flymake-split-output', enabled
+by the advice below, which allows for matching multi-line
+patterns."
+  (let (matches
+        (last-match-end-pos 0))
+    (dolist (pattern flymake-err-line-patterns)
+      (let ((regex (car pattern))
+            (pos 0))
+        (while (string-match regex str pos)
+          (push (match-string 0 str) matches)
+          (setq pos (match-end 0)))
+        (setf last-match-end-pos (max pos last-match-end-pos))))
+    (let ((residual (substring str last-match-end-pos)))
+      (list matches
+            (unless (string= "" residual) residual)))))
+
+(defadvice flymake-split-output (around flycheck-split-output (output) activate protect)
+  "Override `flymake-split-output' to support mult-line error messages."
+  (setq ad-return-value (if flycheck-mode
+                            (flycheck-find-all-matches output)
+                          ad-do-it)))
+
 ;;;###autoload
 (defun flycheck-cleanup ()
   "Perform cleanup for flycheck."
@@ -384,6 +413,13 @@ Use either flymake-mode or flycheck-mode"))
      ("\\(.+\\),\\([0-9]+\\),\\(?:warn\\|error\\),\\(.+\\)" 1 2 nil 3))
     :modes coffee-mode))
 
+(defvar flycheck-checker-css
+  '(:command
+    ("csslint" "--format=compact" source)
+    :error-patterns
+    ("^\\(.*\\): line \\([[:digit:]]+\\), col \\([[:digit:]]+\\), \\(.+\\)$" 1 2 3 4)
+    :modes css-mode))
+
 (defconst flycheck-checker-emacs-lisp-check-form
   '(progn
      (setq byte-compile-dest-file-function 'make-temp-file)
@@ -403,6 +439,23 @@ Use either flymake-mode or flycheck-mode"))
       (,executable "--no-site-file" "--no-site-lisp" "--batch" "--eval"
                    ,check-form-s source)
       :modes emacs-lisp-mode)))
+
+(defvar flycheck-checker-haml
+  '(:command
+    ("haml" "-c" source)
+    :error-patterns
+    ("^Syntax error on line \\([0-9]+\\): \\(.*\\)$" nil 1 nil 2)
+    :modes haml-mode))
+
+(defvar flycheck-checker-javascript-jslint
+  '(:command
+    ("jsl" "-process" source)
+    :error-patterns
+    (("^\\(.+\\)\:\\([0-9]+\\)\: \\(SyntaxError\:.+\\)\:$" nil 2 nil 3)
+     ("^\\(.+\\)(\\([0-9]+\\)): \\(SyntaxError:.+\\)$" nil 2 nil 3)
+     ("^\\(.+\\)(\\([0-9]+\\)): \\(lint \\)?\\(warning:.+\\)$" nil 2 nil 4)
+     ("^\\(.+\\)\:\\([0-9]+\\)\: strict \\(warning: trailing comma.+\\)\:$" nil 2 nil 3))
+    :modes js-mode))
 
 (defvar flycheck-checker-php
   '(:command
@@ -424,6 +477,15 @@ Use either flymake-mode or flycheck-mode"))
 
 (defvar flycheck-checker-ruby
   '(:command ("ruby" "-w" "-c" source) :modes ruby-mode))
+
+(defvar flycheck-checker-sass
+  '(:command
+    ("sass" "-c" source)
+    :error-patterns
+    (("^Syntax error on line \\([0-9]+\\): \\(.*\\)$" nil 1 nil 2)
+     ("^WARNING on line \\([0-9]+\\) of .*?:\r?\n\\(.*\\)$" nil 1 nil 2)
+     ("^Syntax error: \\(.*\\)\r?\n        on line \\([0-9]+\\) of .*?$" nil 2 nil 1))
+    :modes sass-mode))
 
 (defvar flycheck-checker-sh
   '(:command
