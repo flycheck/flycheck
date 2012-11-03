@@ -95,8 +95,15 @@ checker definition."
   "Create a copy of FILENAME with PREFIX in temp directory.
 
 Return the path of the file."
-  (make-temp-file (or prefix "flycheck") nil
-                  (concat "." (file-name-extension filename))))
+  ;; HACK: Prevent re-compression to work around a supposed bug in Emacs.
+  ;; `make-temp-file' calls `write-region' to set the contents of the new
+  ;; temporary file, which in turn calls `jka-compr-write-region' for compressed
+  ;; files. If `jka-compr-really-do-compress' is non-nil this function uses END
+  ;; even though START is a string, hence breaking the `write-region' API that
+  ;; flymake relies on.  Report upstream!
+  (let ((jka-compr-really-do-compress nil))
+    (make-temp-file (or prefix "flycheck") nil
+                    (concat "." (file-name-extension filename)))))
 
 
 ;; Checker API
