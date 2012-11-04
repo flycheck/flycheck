@@ -469,8 +469,7 @@ Use either flymake-mode or flycheck-mode"))
   '(:command
     ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
       "-d" "log_errors=0" source)
-    :error-patterns ("\\(?:Parse\\|Fatal\\|syntax\\) error[:,] \
-\\(.*\\) in \\(.*\\) on line \\([0-9]+\\)"
+    :error-patterns ("\\(?:Parse\\|Fatal\\|syntax\\) error[:,] \\(.*\\) in \\(.*\\) on line \\([0-9]+\\)"
                       2 3 nil 1)
     :modes php-mode))
 
