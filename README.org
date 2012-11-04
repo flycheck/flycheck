@@ -26,10 +26,14 @@ mode of buffers, but re-uses flymake to do the actual syntax checking.
 
 - Provide syntax checkers for:
   - CoffeeScript
+  - CSS
   - Emacs Lisp
+  - HAML
+  - Javascript
   - PHP
   - Python
   - Ruby
+  - SASS
   - Shell scripts (Bash, Dash and Zsh)
   - TeX/LaTeX
 - Easy customization by a single variable =flycheck-checkers=
@@ -76,9 +80,13 @@ to enable one while the other is active /signals an error/.  At best do not use
 You need to install external utilities for the following checkers:
 
 - CoffeeScript :: Install [[http://www.coffeelint.org/][coffeelint]].
+- CSS :: Install [[https://github.com/stubbornella/csslint][csslint]].
+- HAML :: Install [[http://haml.info][HAML]].
+- Javascript :: Install [[http://www.jslint.com/][jslint]].
 - PHP :: Install the [[http://php.net/manual/en/features.commandline.php][PHP command line]].
 - Python :: Install [[http://pypi.python.org/pypi/flake8][flake8]], [[http://pypi.python.org/pypi/pyflakes][pyflakes]] or [[http://pypi.python.org/pypi/pylint][pylint]].
 - Ruby :: Install Ruby.
+- SASS :: Install [[http://sass-lang.com][SASS]].
 - Shell scripts :: Install Bash or Zsh depending on the type of shell file you
                    want to check.
 - TeX/LaTeX :: Install [[http://baruch.ev-en.org/proj/chktex/][chktex]] or [[http://www.ctan.org/pkg/lacheck][lacheck]].  Most TeX distributions, including
