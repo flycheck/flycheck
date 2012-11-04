@@ -30,6 +30,7 @@ mode of buffers, but re-uses flymake to do the actual syntax checking.
   - Emacs Lisp
   - HAML
   - Javascript
+  - JSON
   - PHP
   - Python
   - Ruby
@@ -83,6 +84,7 @@ You need to install external utilities for the following checkers:
 - CSS :: Install [[https://github.com/stubbornella/csslint][csslint]].
 - HAML :: Install [[http://haml.info][HAML]].
 - Javascript :: Install [[http://www.jslint.com/][jslint]].
+- JSON :: Install [[https://github.com/zaach/jsonlint][jsonlint]].
 - PHP :: Install the [[http://php.net/manual/en/features.commandline.php][PHP command line]].
 - Python :: Install [[http://pypi.python.org/pypi/flake8][flake8]], [[http://pypi.python.org/pypi/pyflakes][pyflakes]] or [[http://pypi.python.org/pypi/pylint][pylint]].
 - Ruby :: Install Ruby.
