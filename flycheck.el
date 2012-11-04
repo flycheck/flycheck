@@ -67,6 +67,7 @@
     flycheck-checker-css
     flycheck-checker-emacs-lisp
     flycheck-checker-haml
+    flycheck-checker-json
     flycheck-checker-javascript-jslint
     flycheck-checker-php
     flycheck-checker-python-flake8
@@ -463,6 +464,15 @@ Use either flymake-mode or flycheck-mode"))
      ("^\\(.+\\)(\\([0-9]+\\)): \\(lint \\)?\\(warning:.+\\)$" nil 2 nil 4)
      ("^\\(.+\\)\:\\([0-9]+\\)\: strict \\(warning: trailing comma.+\\)\:$" nil 2 nil 3))
     :modes js-mode))
+
+(defvar flycheck-checker-json
+  '(:command
+    ("jsonlint" "-c" "-q" source)
+    :error-patterns
+    (("^\\(.+\\)\: line \\([0-9]+\\), col \\([0-9]+\\), \\(.+\\)$" nil 2 3 4))
+    :predicate (or
+                (eq major-mode 'json-mode)
+                (and buffer-file-name (string= "json" (file-name-extension buffer-file-name))))))
 
 (defvar flycheck-checker-php
   '(:command
