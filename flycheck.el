@@ -315,8 +315,8 @@ patterns."
   "`flymake-mode' is incompatible with `flycheck-mode'.
 Signal an error if the latter is active."
   (if flycheck-mode
-      (error ("flymake-mode is incompatible with flycheck-mode. \
-Use either flymake-mode or flycheck-mode"))
+      (error "flymake-mode is incompatible with flycheck-mode. \
+Use either flymake-mode or flycheck-mode")
     (setq ad-return-value ad-do-it)))
 
 (defvar flycheck-mode-line nil
