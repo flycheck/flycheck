@@ -471,9 +471,10 @@ Use either flymake-mode or flycheck-mode"))
     ("jsonlint" "-c" "-q" source)
     :error-patterns
     (("^\\(.+\\)\: line \\([0-9]+\\), col \\([0-9]+\\), \\(.+\\)$" nil 2 3 4))
-    :predicate (or
-                (eq major-mode 'json-mode)
-                (and buffer-file-name (string= "json" (file-name-extension buffer-file-name))))))
+    :predicate
+    (or (eq major-mode 'json-mode)
+        (and buffer-file-name
+             (string= "json" (file-name-extension buffer-file-name))))))
 
 (defvar flycheck-checker-php
   '(:command
