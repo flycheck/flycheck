@@ -71,7 +71,7 @@ Or do ~M-x flycheck-mode~ manually after visiting a file.
 On-the-fly syntax checking with flycheck will then start immediately.
 
 *Warning*: Flycheck is intentionally incompatible with classic Flymake.  Trying
-to enable one while the other is active /signals an error/.  At best do not use
+to enable one while the other is active /signals an error/.  Ideally you should not use
 =flymake-mode= anymore after you installed Flycheck.
 
 
@@ -102,7 +102,7 @@ You need to install external utilities for the following checkers:
      list or remove entries from this list.
 
 Some modes have multiple checkers.  For instance =python-mode= has three
-checkers using ~flake8~, ~pylint~or ~pyflakes~.  When doing syntax checking in
+checkers using ~flake8~, ~pylint~ or ~pyflakes~.  When doing syntax checking in
 =python-mode=, the checkers are tried in this order and the first whose
 executable is found is used.
 
