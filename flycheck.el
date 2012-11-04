@@ -286,7 +286,8 @@ patterns."
       (list matches
             (unless (string= "" residual) residual)))))
 
-(defadvice flymake-split-output (around flycheck-split-output (output) activate protect)
+(defadvice flymake-split-output
+  (around flycheck-split-output (output) activate protect)
   "Override `flymake-split-output' to support mult-line error messages."
   (setq ad-return-value (if flycheck-mode
                             (flycheck-find-all-matches output)
