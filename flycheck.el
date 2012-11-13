@@ -268,32 +268,6 @@ Return `flycheck-init-function', if `flycheck-mode' is enabled."
                             'flycheck-init
                           ad-do-it)))
 
-(defun flycheck-find-all-matches (str)
-  "Return all matched for error line patterns in STR.
-
-This is a judicious override for `flymake-split-output', enabled
-by the advice below, which allows for matching multi-line
-patterns."
-  (let (matches
-        (last-match-end-pos 0))
-    (dolist (pattern flymake-err-line-patterns)
-      (let ((regex (car pattern))
-            (pos 0))
-        (while (string-match regex str pos)
-          (push (match-string 0 str) matches)
-          (setq pos (match-end 0)))
-        (setf last-match-end-pos (max pos last-match-end-pos))))
-    (let ((residual (substring str last-match-end-pos)))
-      (list matches
-            (unless (string= "" residual) residual)))))
-
-(defadvice flymake-split-output
-  (around flycheck-split-output (output) activate protect)
-  "Override `flymake-split-output' to support mult-line error messages."
-  (setq ad-return-value (if flycheck-mode
-                            (flycheck-find-all-matches output)
-                          ad-do-it)))
-
 ;;;###autoload
 (defun flycheck-cleanup ()
   "Perform cleanup for flycheck."
@@ -495,15 +469,6 @@ Use either flymake-mode or flycheck-mode"))
 
 (defvar flycheck-checker-ruby
   '(:command ("ruby" "-w" "-c" source) :modes ruby-mode))
-
-(defvar flycheck-checker-sass
-  '(:command
-    ("sass" "-c" source)
-    :error-patterns
-    (("^Syntax error on line \\([0-9]+\\): \\(.*\\)$" nil 1 nil 2)
-     ("^WARNING on line \\([0-9]+\\) of .*?:\r?\n\\(.*\\)$" nil 1 nil 2)
-     ("^Syntax error: \\(.*\\)\r?\n        on line \\([0-9]+\\) of .*?$" nil 2 nil 1))
-    :modes sass-mode))
 
 (defvar flycheck-checker-sh
   '(:command
