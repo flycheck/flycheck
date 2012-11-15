@@ -75,7 +75,6 @@
     flycheck-checker-python-pyflakes
     flycheck-checker-ruby
     flycheck-checker-php
-    flycheck-checker-sass
     flycheck-checker-sh
     flycheck-checker-tex-chktex
     flycheck-checker-tex-lacheck
