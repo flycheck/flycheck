@@ -28,19 +28,14 @@
 ;; A replacement for `flymake-mode' with much improved configuration and checker
 ;; API.
 
-;; Like `flymake-mode', `flycheck-mode' performs on-the-fly syntax and style
-;; checkers in various modes.  However it features an improved configuration API
-;; based on major modes (instead of file name masks) and a much nicer and easier
-;; declarative syntax for checker definitions.
-
-;; `flycheck-mode' is intentionally incompatible to `flymake-mode'.  Attempting
-;; to enable one while the other is active causes an error.
+;; Like the built-in `flymake-mode' `flycheck-mode' performs on-the-fly syntax
+;; and style checkers in various modes.  However it features an improved
+;; configuration API based on major modes (instead of file name masks) and a
+;; much nicer and easier declarative syntax for checker definitions.
 
 ;; See `flycheck-checkers' for a list of provided checkers.
 
 ;;; Code:
-
-(require 'flymake)
 
 (eval-when-compile
   (require 'cl)
@@ -51,7 +46,7 @@
 (defgroup flycheck nil
   "Customization for flymake checkers."
   :prefix "flycheck-"
-  :group 'flymake)
+  :group 'flycheck)
 
 (defcustom flycheck-checkers
   '(flycheck-checker-bash
@@ -72,9 +67,9 @@
     flycheck-checker-tex-chktex
     flycheck-checker-tex-lacheck
     flycheck-checker-zsh)
-  "Flymake checkers.
+  "Flycheck checkers.
 
-A list of flymake checkers to try for the current buffer.  A
+A list of flycheck checkers to try for the current buffer.  A
 checker is either a variable, which contains a checker definition
 or a function that is called upon each syntax check to obtain the
 checker definition."
@@ -184,9 +179,7 @@ result, otherwise return t."
 Return t, if the executable in the :command of PROPERTIES exists,
 or nil otherwise."
   (let ((executable (car (plist-get properties :command))))
-    (if (executable-find executable) t
-      (flymake-log 1 "Executable %s not found, not using checker %S"
-                   executable properties))))
+    (if (executable-find executable) t)))
 
 (defun flycheck-may-use-checker (properties)
   "Determine whether the checker described by PROPERTIES may be used.
@@ -204,9 +197,9 @@ If ARG is `source' or `source-inplace', create a temporary file
 to checker and return its path, otherwise return ARG unchanged."
   (let ((temp-file-function
          (cond ((eq arg 'source) 'flycheck-create-temp-system)
-               ((eq arg 'source-inplace) 'flymake-create-temp-inplace))))
+               ((eq arg 'source-inplace) 'flycheck-create-temp-inplace))))
     (if temp-file-function
-        (flymake-init-create-temp-buffer-copy temp-file-function)
+        (flycheck-temp-buffer-copy temp-file-function)
       arg)))
 
 (defun flycheck-get-substituted-command (properties)
@@ -234,9 +227,7 @@ to checker and return its path, otherwise return ARG unchanged."
 
 PROPERTIES is a property list with information about the checker.
 
-Return a list of error patterns compatible with
-`flymake-err-line-patterns'."
-  (flymake-log 3 "Extracting error patterns from properties %s" properties)
+Return a list of error patterns of the given checker."
   (let ((patterns (plist-get properties :error-patterns)))
     (when patterns
       (cond
@@ -247,148 +238,34 @@ Return a list of error patterns compatible with
        (t (error "Invalid type for :error-patterns: %S" patterns))))))
 
 
-;; Flymake hacking
-
-(defvar flycheck-cleanup-function nil
-  "The cleanup function to use for the current checker.")
-(make-variable-buffer-local 'flycheck-cleanup-function)
-
-(defun flycheck-init-checker (properties)
-  "Initialize the checker described by PROPERTIES.
-
-Setup buffer local flymake variables based on PROPERTIES, and
-return a command list for flymake."
-  (let ((command (flycheck-get-substituted-command properties))
-        (error-patterns (flycheck-get-error-patterns properties)))
-    (setq flycheck-cleanup-function 'flymake-simple-cleanup)
-    (when error-patterns
-      (set (make-local-variable 'flymake-err-line-patterns) error-patterns))
-    (list (car command) (cdr command))))
-
 ;;;###autoload
 (defun flycheck-init ()
   "Wrap checker PROPERTIES into an init function.
 
-PROPERTIES is the properties list describing a checker.
-
-Use this function `apply-partially' to construct a real init
-function for flymake."
+PROPERTIES is the properties list describing a checker."
   (dolist (checker flycheck-checkers)
     (let ((properties (flycheck-get-checker-properties checker)))
-      (flymake-log 3 "Trying checker %S with properties %S" checker properties)
-      (when (flycheck-may-use-checker properties)
+       (when (flycheck-may-use-checker properties)
         (return (flycheck-init-checker properties))))))
 
-;;;###autoload
-(defadvice flymake-get-init-function
-  (around flycheck-get-init-function first activate compile)
-  "Get the flymake checker.
-
 Return `flycheck-init-function', if variable `flycheck-mode' is enabled."
-  (setq ad-return-value (if flycheck-mode
-                            'flycheck-init
-                          ad-do-it)))
-
-;;;###autoload
-(defun flycheck-cleanup ()
-  "Perform cleanup for flycheck."
-  (when flycheck-cleanup-function
-    (funcall flycheck-cleanup-function))
-  (kill-local-variable 'flycheck-cleanup-function)
-  (kill-local-variable 'flymake-err-line-patterns))
-
-;;;###autoload
-(defadvice flymake-get-cleanup-function
-  (around flycheck-get-cleanup-function activate compile)
-  "Get the cleanup function for the current checker."
-  (setq ad-return-value (if flycheck-mode
-                            'flycheck-cleanup
-                          ad-do-it)))
-
-;;;###autoload
-(defadvice flymake-mode (around flycheck-flymake-mode activate compile)
   "Variable `flymake-mode' is incompatible with variable `flycheck-mode'.
-Signal an error if the latter is active."
-  (if flycheck-mode
       (error "Flymake-mode is incompatible with flycheck-mode.  \
-Use either flymake-mode or flycheck-mode")
-    (setq ad-return-value ad-do-it)))
-
 (defvar flycheck-mode-line nil
   "The mode line lighter of variable `flycheck-mode'.")
 
-(defadvice flymake-report-status
-  (around flycheck-report-status (e-w &optional status) activate compile)
   "Update the status of variable `flycheck-mode'."
-  (let ((mode-line (if flycheck-mode " FlyC" " Flymake"))
-        (target (if flycheck-mode
-                    'flycheck-mode-line
-                  'flymake-mode-line)))
-    (when e-w
-      (setq flymake-mode-line-e-w e-w))
-    (when status
-      (setq flymake-mode-line-status status))
-    (when (> (length flymake-mode-line-e-w) 0)
-      (setq mode-line (format "%s:%s" mode-line flymake-mode-line-e-w)))
-    (set target (concat mode-line flymake-mode-line-status))
-    (force-mode-line-update)))
-
-(defadvice flymake-report-fatal-status
-  (around flycheck-report-fatal-status (status warning) activate compile)
   "Ignore fatal status warnings in variable `flycheck-mode'."
-  (if flycheck-mode
-      (flymake-log 0 "Fatal status %s, warning %s in flycheck-mode \
-buffer %s" status warning (buffer-name))
-    (flymake-report-status nil (format "!%s" status))
-    (setq ad-return-value ad-do-it)))
-
-;; Entry function
-
 ;;;###autoload
 (define-minor-mode flycheck-mode
-  "Toggle extended on-the-fly syntax checking.
-
-Extended on-the-fly syntax checking based on flymake, but with
-easier configuration and improved checkers.
-
-`flycheck-mode' is incompatible with `flymake-mode'.
-Signal an error if the latter is active.  Note: Pure flymake is
-INCOMPATIBLE with this mode."
+  "Toggle on-the-fly syntax checking."
   :init-value nil
   :lighter flycheck-mode-line
   :require 'flycheck
-  (when flymake-mode
     (error "Flycheck-mode is incompatible with flymake-mode.  \
-Use either flymake-mode or flycheck-mode"))
   (cond
-   (flycheck-mode
-    ;; Enable flymake-cursor if available
-    (when (fboundp 'flyc/show-fly-error-at-point-pretty-soon)
-      (add-hook 'post-command-hook
-                'flyc/show-fly-error-at-point-pretty-soon
-                nil t))
-
-    (add-hook 'after-change-functions 'flymake-after-change-function nil t)
-    (add-hook 'after-save-hook 'flymake-after-save-hook nil t)
-    (add-hook 'kill-buffer-hook 'flymake-kill-buffer-hook nil t)
-
-    (flymake-report-status "" "")
-    (setq flymake-timer
-          (run-at-time nil 1 'flymake-on-timer-event (current-buffer)))
-
-    (flymake-start-syntax-check))
-   (t
-    (remove-hook 'after-change-functions 'flymake-after-change-function t)
-    (remove-hook 'after-save-hook 'flymake-after-save-hook t)
-    (remove-hook 'kill-buffer-hook 'flymake-kill-buffer-hook t)
-
-    (flymake-delete-own-overlays)
-
-    (when flymake-timer
-      (cancel-timer flymake-timer)
-      (setq flymake-timer nil))
-
-    (setq flymake-is-running nil))))
+   (flycheck-mode)
+   (t)))
 
 ;;;###autoload
 (defun flycheck-mode-on ()
