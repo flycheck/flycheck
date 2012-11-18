@@ -195,12 +195,15 @@ Return t if so, or nil otherwise."
 
 If ARG is `source' or `source-inplace', create a temporary file
 to checker and return its path, otherwise return ARG unchanged."
-  (let ((temp-file-function
-         (cond ((eq arg 'source) 'flycheck-create-temp-system)
-               ((eq arg 'source-inplace) 'flycheck-create-temp-inplace))))
-    (if temp-file-function
-        (flycheck-temp-buffer-copy temp-file-function)
-      arg)))
+  ;; TODO: Implement temporary file handling.
+  ;; (let ((temp-file-function
+  ;;        (cond ((eq arg 'source) 'flycheck-create-temp-system)
+  ;;              ((eq arg 'source-inplace) 'flycheck-create-temp-inplace))))
+  ;;   (if temp-file-function
+  ;;       (flycheck-temp-buffer-copy temp-file-function)
+  ;;     arg))
+  ;; XXX: For now just check the buffer directly
+  (if (memq arg '(source source-inplace)) (buffer-file-name) arg))
 
 (defun flycheck-get-substituted-command (properties)
   "Get the substitute :command from PROPERTIES."
@@ -237,34 +240,85 @@ Return a list of error patterns of the given checker."
        ((flycheck-error-patterns-list-p patterns) patterns)
        (t (error "Invalid type for :error-patterns: %S" patterns))))))
 
+(defun flycheck-get-checker-for-buffer ()
+  "Find the checker for the current buffer.
 
-;;;###autoload
-(defun flycheck-init ()
-  "Wrap checker PROPERTIES into an init function.
-
-PROPERTIES is the properties list describing a checker."
+Return the checker properties if there is a checker for the
+current buffer, or nil otherwise."
   (dolist (checker flycheck-checkers)
     (let ((properties (flycheck-get-checker-properties checker)))
-       (when (flycheck-may-use-checker properties)
-        (return (flycheck-init-checker properties))))))
+      (when (flycheck-may-use-checker properties)
+        (return properties)))))
 
-Return `flycheck-init-function', if variable `flycheck-mode' is enabled."
-  "Variable `flymake-mode' is incompatible with variable `flycheck-mode'.
-      (error "Flymake-mode is incompatible with flycheck-mode.  \
+;; Syntax checking
+(defvar flycheck-current-process nil
+  "The current syntax checking process.")
+(make-variable-buffer-local 'flycheck-current-process)
+
+(defun flycheck-running-p ()
+  "Determine whether a syntax check is running."
+  (when flycheck-current-process t))
+
+(defun flycheck-buffer ()
+  "Check syntax in the current buffer."
+  (interactive)
+  (when (and flycheck-mode (not (flycheck-running-p)))
+    (let ((properties (flycheck-get-checker-for-buffer)))
+      (when properties
+        (flycheck-start-checker properties)))))
+
+(defun flycheck-start-checker (properties)
+  "Start the syntax checker defined by PROPERTIES."
+  (let* ((command (flycheck-get-substituted-command properties))
+         (program (car command))
+         (args (cdr command))
+         (process (apply 'start-file-process
+                         "flycheck" (current-buffer)
+                         program args)))
+    (flycheck-report-status "*")
+    (setq flycheck-current-process process)
+    (set-process-filter process 'flycheck-receive-checker-output)
+    (set-process-sentinel process 'flycheck-handle-signal)))
+
+(defun flycheck-receive-checker-output (process output)
+  "Receive a syntax checking PROCESS OUTPUT."
+  (message "Got process output %s" output))
+
+(defun flycheck-handle-signal (process event)
+  "Handle a syntax checking PROCESS EVENT."
+  (let ((status (process-status process)))
+    (when (memq status '(signal exit))
+      (let ((source-buffer (process-buffer process)))
+        (when (buffer-live-p source-buffer)
+          (with-current-buffer source-buffer
+            (flycheck-report-status "")
+            (delete-process process)
+            (setq flycheck-current-process nil)
+            (message "Checker for buffer %s finished" source-buffer)))))))
+
+;;;###autoload
+(defconst flycheck-mode-line-lighter " FlyC"
+  "The standard lighter for flycheck mode.")
+
 (defvar flycheck-mode-line nil
   "The mode line lighter of variable `flycheck-mode'.")
 
-  "Update the status of variable `flycheck-mode'."
-  "Ignore fatal status warnings in variable `flycheck-mode'."
+(defun flycheck-report-status (status)
+  "Report flycheck STATUS."
+  (let ((mode-line flycheck-mode-line-lighter))
+    (setq mode-line (concat mode-line status))
+    (setq flycheck-mode-line mode-line)
+    (force-mode-line-update)))
+
 ;;;###autoload
 (define-minor-mode flycheck-mode
   "Toggle on-the-fly syntax checking."
   :init-value nil
   :lighter flycheck-mode-line
   :require 'flycheck
-    (error "Flycheck-mode is incompatible with flymake-mode.  \
   (cond
-   (flycheck-mode)
+   (flycheck-mode
+    (flycheck-report-status ""))
    (t)))
 
 ;;;###autoload
