@@ -453,17 +453,15 @@ Use either flymake-mode or flycheck-mode"))
 Search from the current buffer's directory up to the file system
 root for .jshintrc, or in $HOME if that fails.
 
-Return the absolute path of the file if found, or an empty string
-otherwise."
+Return the absolute path of the file if found, or nil otherwise."
   (or (flycheck-find-file-in-tree
        (file-name-directory buffer-file-name) ".jshintrc")
-      (flycheck-find-file-in-tree (expand-file-name "~") ".jshintrc")
-      ""))
+      (flycheck-find-file-in-tree (expand-file-name "~") ".jshintrc")))
 
 (defun flycheck-checker-javascript-jshint ()
   (let ((jshintrc (find-jshintrc-path)))
     `(:command
-      ("jshint" "--config" ,jshintrc source)
+      ("jshint" ,@(when jshintrc `("--config" jshintrc)) source)
       :error-patterns
       (("^\\(.*\\): line \\([[:digit:]]+\\), col \\([[:digit:]]+\\), \\(.+\\)$" 1 2 3 4))
       :modes js-mode)))
