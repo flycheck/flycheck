@@ -447,7 +447,7 @@ Use either flymake-mode or flycheck-mode"))
     (("line \\([0-9]+\\) column \\([0-9]+\\) - \\(Warning\\|Error\\): \\(.*\\)" nil 1 2 4))
     :modes html-mode))
 
-(defun find-jshintrc-path ()
+(defun flycheck-find-jshintrc ()
   "Find .jshintrc from the current directory or $HOME.
 
 Search from the current buffer's directory up to the file system
@@ -459,7 +459,7 @@ Return the absolute path of the file if found, or nil otherwise."
       (flycheck-find-file-in-tree (expand-file-name "~") ".jshintrc")))
 
 (defun flycheck-checker-javascript-jshint ()
-  (let ((jshintrc (find-jshintrc-path)))
+  (let ((jshintrc (flycheck-find-jshintrc)))
     `(:command
       ("jshint" ,@(when jshintrc `("--config" jshintrc)) source)
       :error-patterns
