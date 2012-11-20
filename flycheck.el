@@ -36,15 +36,7 @@
 ;; `flycheck-mode' is intentionally incompatible to `flymake-mode'.  Attempting
 ;; to enable one while the other is active causes an error.
 
-;; `flycheck-mode' provides syntax and style checkers for the following
-;; languages:
-;;
-;; - Emacs Lisp
-;; - Shell scripts (only with `sh-mode')
-;; - Python wither either flake8, pyflakes or pylint
-;; - Ruby with ruby
-;; - CoffeeScript with coffeelint
-;; - TeX/LaTeX with chktex or lacheck
+;; See `flycheck-checkers' for a list of provided checkers.
 
 ;;; Code:
 
