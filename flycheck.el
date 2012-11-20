@@ -146,7 +146,7 @@ Signal an error if PROPERTIES are invalid.  Otherwise return t."
     (error "Checker %S lacks :command" properties))
   (unless (or (plist-get properties :modes)
               (plist-get properties :predicate))
-    (error "Checker %S lacks :modes and :predicate." properties))
+    (error "Checker %S lacks :modes and :predicate" properties))
   t)
 
 (defun flycheck-check-modes (properties)
@@ -273,7 +273,7 @@ function for flymake."
   (around flycheck-get-init-function first activate compile)
   "Get the flymake checker.
 
-Return `flycheck-init-function', if `flycheck-mode' is enabled."
+Return `flycheck-init-function', if variable `flycheck-mode' is enabled."
   (setq ad-return-value (if flycheck-mode
                             'flycheck-init
                           ad-do-it)))
@@ -296,19 +296,19 @@ Return `flycheck-init-function', if `flycheck-mode' is enabled."
 
 ;;;###autoload
 (defadvice flymake-mode (around flycheck-flymake-mode activate compile)
-  "`flymake-mode' is incompatible with `flycheck-mode'.
+  "Variable `flymake-mode' is incompatible with variable `flycheck-mode'.
 Signal an error if the latter is active."
   (if flycheck-mode
-      (error "flymake-mode is incompatible with flycheck-mode. \
+      (error "Flymake-mode is incompatible with flycheck-mode.  \
 Use either flymake-mode or flycheck-mode")
     (setq ad-return-value ad-do-it)))
 
 (defvar flycheck-mode-line nil
-  "The mode line lighter of flycheck-mode.")
+  "The mode line lighter of variable `flycheck-mode'.")
 
 (defadvice flymake-report-status
   (around flycheck-report-status (e-w &optional status) activate compile)
-  "Update the status of `flycheck-mode'."
+  "Update the status of variable `flycheck-mode'."
   (let ((mode-line (if flycheck-mode " FlyC" " Flymake"))
         (target (if flycheck-mode
                     'flycheck-mode-line
@@ -324,7 +324,7 @@ Use either flymake-mode or flycheck-mode")
 
 (defadvice flymake-report-fatal-status
   (around flycheck-report-fatal-status (status warning) activate compile)
-  "Ignore fatal status warnings in `flycheck-mode'."
+  "Ignore fatal status warnings in variable `flycheck-mode'."
   (if flycheck-mode
       (flymake-log 0 "Fatal status %s, warning %s in flycheck-mode \
 buffer %s" status warning (buffer-name))
@@ -347,7 +347,7 @@ INCOMPATIBLE with this mode."
   :lighter flycheck-mode-line
   :require 'flycheck
   (when flymake-mode
-    (error "flycheck-mode is incompatible with flymake-mode. \
+    (error "Flycheck-mode is incompatible with flymake-mode.  \
 Use either flymake-mode or flycheck-mode"))
   (cond
    (flycheck-mode
@@ -381,12 +381,12 @@ Use either flymake-mode or flycheck-mode"))
 
 ;;;###autoload
 (defun flycheck-mode-on ()
-  "Unconditionally enable `flycheck-mode'."
+  "Unconditionally enable variable `flycheck-mode'."
   (flycheck-mode 1))
 
 ;;;###autoload
 (defun flycheck-mode-off ()
-  "Unconditionally disable `flycheck-mode'."
+  "Unconditionally disable variable `flycheck-mode'."
   (flycheck-mode -1))
 
 
