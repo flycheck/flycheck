@@ -99,7 +99,7 @@ Return the path of the file."
     (make-temp-file (or prefix "flycheck") nil
                     (concat "." (file-name-extension filename)))))
 
-(defun flycheck-find-file-in-tree (directory filename)
+(defun flycheck-find-file-in-tree (filename directory)
   "Find FILENAME in DIRECTORY and all of its ancestors.
 
 Start looking for a file named FILENAME in DIRECTORY and traverse
@@ -112,9 +112,10 @@ found in DIRECTORY or any of its ancestors."
     (cond ((string= directory "/") (when (file-exists-p full-path) full-path))
           ((file-exists-p full-path) full-path)
           ((flycheck-find-file-in-tree
+            filename
             (file-name-directory
              (directory-file-name
-              (file-name-directory full-path))) filename)))))
+              (file-name-directory full-path))))))))
 
 (defun flycheck-find-file-for-buffer (filename)
   "Find FILENAME for the current buffer.
@@ -124,7 +125,7 @@ its ancestors (see `flycheck-find-file-in-tree').  If that fails
 try to find the file in the home directory.  If the file is not
 found anywhere return nil."
   (let* ((directory (file-name-directory buffer-file-name))
-         (filepath (flycheck-find-file-in-tree directory filename)))
+         (filepath (flycheck-find-file-in-tree filename directory)))
     (or filepath
         (let ((home-path (expand-file-name filename "~")))
           (when (file-exists-p home-path) home-path)))))
