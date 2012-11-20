@@ -99,6 +99,23 @@ Return the path of the file."
     (make-temp-file (or prefix "flycheck") nil
                     (concat "." (file-name-extension filename)))))
 
+(defun flycheck-find-file-in-tree (path filename)
+  "Find FILENAME in PATH and all of its ancestors.
+
+Start looking for a file named FILENAME in the directory denoted
+by PATH, and traverse upwards through all of its ancestors up to
+the file system root until the file is found or the root is
+reached.
+
+Return the absolute path of the file, or nil if the file was not
+found in PATH or any of its ancestors."
+  (let ((full-path (expand-file-name filename path)))
+    (cond ((string= path "/") (if (file-exists-p full-path) full-path nil))
+          ((file-exists-p full-path) full-path)
+          ((flycheck-find-file-in-tree
+            (file-name-directory
+             (directory-file-name
+              (file-name-directory full-path))) filename)))))
 
 ;; Checker API
 
@@ -430,23 +447,17 @@ Use either flymake-mode or flycheck-mode"))
     (("line \\([0-9]+\\) column \\([0-9]+\\) - \\(Warning\\|Error\\): \\(.*\\)" nil 1 2 4))
     :modes html-mode))
 
-(defun find-file-recursively (path filename)
-  "Recursively walks up a directory hierarchy PATH to look for a file \
-FILENAME.\
-Returns the full path if the file is found, nil otherwise."
-  (let ((full-path (expand-file-name filename path)))
-    (cond ((string= path "/") (if (file-exists-p full-path) full-path nil))
-          ((file-exists-p full-path) full-path)
-          ((find-file-recursively
-            (file-name-directory
-             (directory-file-name
-              (file-name-directory full-path))) filename)))))
-
 (defun find-jshintrc-path ()
-  "Search the directory of `buffer-file-name and the user's home directory \
-to look for .jshintrc."
-  (or (find-file-recursively (file-name-directory buffer-file-name) ".jshintrc")
-      (find-file-recursively (expand-file-name "~") ".jshintrc")
+  "Find .jshintrc from the current directory or $HOME.
+
+Search from the current buffer's directory up to the file system
+root for .jshintrc, or in $HOME if that fails.
+
+Return the absolute path of the file if found, or an empty string
+otherwise."
+  (or (flycheck-find-file-in-tree
+       (file-name-directory buffer-file-name) ".jshintrc")
+      (flycheck-find-file-in-tree (expand-file-name "~") ".jshintrc")
       ""))
 
 (defun flycheck-checker-javascript-jshint ()
