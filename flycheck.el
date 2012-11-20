@@ -469,19 +469,9 @@ Use this variable as file local variable to use a specific
 configuration file for a buffer.")
 (put 'flycheck-jshintrc 'safe-local-variable 'stringp)
 
-(defun flycheck-find-jshintrc ()
-  "Find .jshintrc from the current directory or $HOME.
-
-Search from the current buffer's directory up to the file system
-root for .jshintrc, or in $HOME if that fails.
-
-Return the absolute path of the file if found, or nil otherwise."
-  (or (flycheck-find-file-in-tree
-       ".jshintrc" (file-name-directory buffer-file-name))
-      (flycheck-find-file-in-tree ".jshintrc" (expand-file-name "~"))))
-
 (defun flycheck-checker-javascript-jshint ()
-  (let ((jshintrc (or flycheck-jshintrc (flycheck-find-jshintrc))))
+  (let ((jshintrc (or flycheck-jshintrc
+                      (flycheck-find-file-for-buffer ".jshintrc"))))
     `(:command
       ("jshint" ,@(when jshintrc `("--config" jshintrc)) source)
       :error-patterns
