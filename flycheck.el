@@ -99,7 +99,7 @@ Return the path of the file."
     (make-temp-file (or prefix "flycheck") nil
                     (concat "." (file-name-extension filename)))))
 
-(defun flycheck-find-file-in-tree (filename directory)
+(defun flycheck-find-file-in-tree (directory filename)
   "Find FILENAME in DIRECTORY and all of its ancestors.
 
 Start looking for a file named FILENAME in DIRECTORY and traverse
@@ -124,9 +124,9 @@ its ancestors (see `flycheck-find-file-in-tree').  If that fails
 try to find the file in the home directory.  If the file is not
 found anywhere return nil."
   (let* ((directory (file-name-directory buffer-file-name))
-         (filepath (flycheck-find-file-in-tree filename directory)))
+         (filepath (flycheck-find-file-in-tree directory filename)))
     (or filepath
-        (let ((home-path (expand-file-name "~/.jshintrc")))
+        (let ((home-path (expand-file-name filename "~")))
           (when (file-exists-p home-path) home-path)))))
 
 ;; Checker API
