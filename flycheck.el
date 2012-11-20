@@ -99,18 +99,17 @@ Return the path of the file."
     (make-temp-file (or prefix "flycheck") nil
                     (concat "." (file-name-extension filename)))))
 
-(defun flycheck-find-file-in-tree (path filename)
-  "Find FILENAME in PATH and all of its ancestors.
+(defun flycheck-find-file-in-tree (directory filename)
+  "Find FILENAME in DIRECTORY and all of its ancestors.
 
-Start looking for a file named FILENAME in the directory denoted
-by PATH, and traverse upwards through all of its ancestors up to
-the file system root until the file is found or the root is
-reached.
+Start looking for a file named FILENAME in DIRECTORY and traverse
+upwards through all of its ancestors up to the file system root
+until the file is found or the root is reached.
 
 Return the absolute path of the file, or nil if the file was not
-found in PATH or any of its ancestors."
-  (let ((full-path (expand-file-name filename path)))
-    (cond ((string= path "/") (if (file-exists-p full-path) full-path nil))
+found in DIRECTORY or any of its ancestors."
+  (let ((full-path (expand-file-name filename directory)))
+    (cond ((string= directory "/") (if (file-exists-p full-path) full-path nil))
           ((file-exists-p full-path) full-path)
           ((flycheck-find-file-in-tree
             (file-name-directory
