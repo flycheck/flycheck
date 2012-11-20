@@ -109,7 +109,7 @@ until the file is found or the root is reached.
 Return the absolute path of the file, or nil if the file was not
 found in DIRECTORY or any of its ancestors."
   (let ((full-path (expand-file-name filename directory)))
-    (cond ((string= directory "/") (if (file-exists-p full-path) full-path nil))
+    (cond ((string= directory "/") (when (file-exists-p full-path) full-path))
           ((file-exists-p full-path) full-path)
           ((flycheck-find-file-in-tree
             (file-name-directory
