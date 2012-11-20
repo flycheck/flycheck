@@ -67,7 +67,9 @@
     flycheck-checker-css
     flycheck-checker-emacs-lisp
     flycheck-checker-haml
+    flycheck-checker-html
     flycheck-checker-json
+    flycheck-checker-javascript-jshint
     flycheck-checker-javascript-jslint
     flycheck-checker-php
     flycheck-checker-python-flake8
@@ -428,6 +430,40 @@ Use either flymake-mode or flycheck-mode"))
     :error-patterns
     ("^Syntax error on line \\([0-9]+\\): \\(.*\\)$" nil 1 nil 2)
     :modes haml-mode))
+
+(defvar flycheck-checker-html
+  '(:command
+    ("tidy" "-e" "-q" source)
+    :error-patterns
+    (("line \\([0-9]+\\) column \\([0-9]+\\) - \\(Warning\\|Error\\): \\(.*\\)" nil 1 2 4))
+    :modes html-mode))
+
+(defun find-file-recursively (path filename)
+  "Recursively walks up a directory hierarchy PATH to look for a file \
+FILENAME.\
+Returns the full path if the file is found, nil otherwise."
+  (let ((full-path (expand-file-name filename path)))
+    (cond ((string= path "/") (if (file-exists-p full-path) full-path nil))
+          ((file-exists-p full-path) full-path)
+          ((find-file-recursively
+            (file-name-directory
+             (directory-file-name
+              (file-name-directory full-path))) filename)))))
+
+(defun find-jshintrc-path ()
+  "Search the directory of `buffer-file-name and the user's home directory \
+to look for .jshintrc."
+  (or (find-file-recursively (file-name-directory buffer-file-name) ".jshintrc")
+      (find-file-recursively (expand-file-name "~") ".jshintrc")
+      ""))
+
+(defun flycheck-checker-javascript-jshint ()
+  (let ((jshintrc (find-jshintrc-path)))
+    `(:command
+      ("jshint" "--config" ,jshintrc source)
+      :error-patterns
+      (("^\\(.*\\): line \\([[:digit:]]+\\), col \\([[:digit:]]+\\), \\(.+\\)$" 1 2 3 4))
+      :modes js-mode)))
 
 (defvar flycheck-checker-javascript-jslint
   '(:command
