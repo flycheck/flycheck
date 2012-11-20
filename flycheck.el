@@ -473,7 +473,9 @@ configuration file for a buffer.")
   (let ((jshintrc (or flycheck-jshintrc
                       (flycheck-find-file-for-buffer ".jshintrc"))))
     `(:command
-      ("jshint" ,@(when jshintrc `("--config" ,jshintrc)) source)
+      ("jshint"
+       ,@(when jshintrc `("--config" ,(expand-file-name jshintrc)))
+       source)
       :error-patterns
       (("^\\(.*\\): line \\([[:digit:]]+\\), col \\([[:digit:]]+\\), \\(.+\\)$" 1 2 3 4))
       :modes js-mode)))
