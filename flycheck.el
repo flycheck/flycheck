@@ -99,7 +99,7 @@ Return the path of the file."
     (make-temp-file (or prefix "flycheck") nil
                     (concat "." (file-name-extension filename)))))
 
-(defun flycheck-find-file-in-tree (directory filename)
+(defun flycheck-find-file-in-tree (filename directory)
   "Find FILENAME in DIRECTORY and all of its ancestors.
 
 Start looking for a file named FILENAME in DIRECTORY and traverse
@@ -464,8 +464,8 @@ root for .jshintrc, or in $HOME if that fails.
 
 Return the absolute path of the file if found, or nil otherwise."
   (or (flycheck-find-file-in-tree
-       (file-name-directory buffer-file-name) ".jshintrc")
-      (flycheck-find-file-in-tree (expand-file-name "~") ".jshintrc")))
+       ".jshintrc" (file-name-directory buffer-file-name))
+      (flycheck-find-file-in-tree ".jshintrc" (expand-file-name "~"))))
 
 (defun flycheck-checker-javascript-jshint ()
   (let ((jshintrc (or flycheck-jshintrc (flycheck-find-jshintrc))))
