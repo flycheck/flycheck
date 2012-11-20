@@ -116,6 +116,19 @@ found in DIRECTORY or any of its ancestors."
              (directory-file-name
               (file-name-directory full-path))) filename)))))
 
+(defun flycheck-find-file-for-buffer (filename)
+  "Find FILENAME for the current buffer.
+
+First try to find the file in the buffer's directory and any of
+its ancestors (see `flycheck-find-file-in-tree').  If that fails
+try to find the file in the home directory.  If the file is not
+found anywhere return nil."
+  (let* ((directory (file-name-directory buffer-file-name))
+         (filepath (flycheck-find-file-in-tree filename directory)))
+    (or filepath
+        (let ((home-path (expand-file-name "~/.jshintrc")))
+          (when (file-exists-p home-path) home-path)))))
+
 ;; Checker API
 
 (defun flycheck-get-checker-properties (checker)
