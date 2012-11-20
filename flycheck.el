@@ -214,7 +214,7 @@ to checker and return its path, otherwise return ARG unchanged."
   "Check whether PATTERN is a valid error pattern."
   (and
    (listp pattern)                      ; A pattern must be a list...
-   (= (length pattern) 5)               ; ...of length 5...
+   (= (length pattern) 6)               ; ...of length 6...
    (stringp (car pattern))              ; ...whose first element is a string
    ))
 
@@ -267,6 +267,10 @@ current buffer, or nil otherwise."
       (when properties
         (flycheck-start-checker properties)))))
 
+(defvar flycheck-current-patterns nil
+  "Patterns to parse the output of the current process.")
+(make-variable-buffer-local 'flycheck-current-patterns)
+
 (defun flycheck-start-checker (properties)
   "Start the syntax checker defined by PROPERTIES."
   (let* ((command (flycheck-get-substituted-command properties))
@@ -275,14 +279,67 @@ current buffer, or nil otherwise."
          (process (apply 'start-file-process
                          "flycheck" (current-buffer)
                          program args)))
+    ;; Report that flycheck is running
     (flycheck-report-status "*")
     (setq flycheck-current-process process)
+    (setq flycheck-pending-output nil)
+    ;; Clean previous error information
+    (setq flycheck-errors-and-warnings nil)
+    ;; Remember the patterns to use to parse the output of this process
+    (setq flycheck-current-patterns (flycheck-get-error-patterns properties))
+    ;; Register handlers for the process
     (set-process-filter process 'flycheck-receive-checker-output)
     (set-process-sentinel process 'flycheck-handle-signal)))
 
+(defvar flycheck-errors-and-warnings nil
+  "A list of all errors and warnings in the current buffer.")
+(make-variable-buffer-local 'flycheck-errors-and-warnings)
+
+(defvar flycheck-pending-output nil
+  "A list of outputs by the current syntax checking process.")
+(make-variable-buffer-local 'flycheck-pending-output)
+
+(defstruct (flycheck-error
+            (:constructor flycheck-make-error))
+  file-name line-no col-no text level)
+
+(defun flycheck-parse-output (output)
+  "Parse OUTPUT.
+
+Return a list of parsed errors and warnings."
+  (let ((errors nil)
+        (last-match 0))
+    (message "current pattern: %s" flycheck-current-patterns)
+    (dolist (pattern flycheck-current-patterns)
+      (let ((file-idx (nth 1 pattern))
+            (line-idx (nth 2 pattern))
+            (col-idx (nth 3 pattern))
+            (text-idx (nth 4 pattern))
+            (level (nth 5 pattern)))
+        (message "pattern: %s" pattern)
+        (while (string-match (nth 0 pattern) output last-match)
+          (setq errors
+                (cons
+                 (flycheck-make-error
+                  :file-name (when file-idx (match-string file-idx output))
+                  :line-no (when line-idx
+                             (string-to-number (match-string line-idx output)))
+                  :col-no (when col-idx
+                            (string-to-number (match-string col-idx output)))
+                  :text (when text-idx (match-string text-idx output))
+                  :level level)
+                 errors))
+          (setq last-match (match-end 0))))
+      (setq last-match 0))
+    errors))
+
 (defun flycheck-receive-checker-output (process output)
   "Receive a syntax checking PROCESS OUTPUT."
-  (message "Got process output %s" output))
+  (let ((source-buffer (process-buffer process)))
+    (when (buffer-live-p source-buffer)
+      (with-current-buffer source-buffer
+        (setq flycheck-pending-output
+              (cons output flycheck-pending-output))))))
 
 (defun flycheck-handle-signal (process event)
   "Handle a syntax checking PROCESS EVENT."
@@ -294,6 +351,11 @@ current buffer, or nil otherwise."
             (flycheck-report-status "")
             (delete-process process)
             (setq flycheck-current-process nil)
+            ;; Parse error messages
+            (let ((output (apply #'concat (nreverse flycheck-pending-output))))
+              (setq flycheck-errors-and-warnings
+                    (flycheck-parse-output output)))
+            (setq flycheck-pending-output nil)
             (message "Checker for buffer %s finished" source-buffer)))))))
 
 ;;;###autoload

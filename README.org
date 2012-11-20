@@ -133,11 +133,16 @@ In flycheck a syntax checker is a [[http://www.gnu.org/software/emacs/manual/htm
      the source file[fn:1]*, created in the system temporary directory.  Use
      =source-inplace= instead to force the copy being created in the *same
      directory as the original source file*.
-+ =:error-patterns= (/optional/) :: A single error pattern or a list of error
++ =:error-patterns= (/mandatory/) :: A single pattern or a list of error
      patterns to parse the output of =:command=.  Each pattern has the form
-     =(REGEXP FILE-IDX LINE-IDX COL-IDX ERR-TEXT-IDX)=.  The patterns are tried
-     in order of declaration.  If omitted all patterns defined in
-     =flymake-err-line-patterns= are tried.
+     =(REGEXP FILE-IDX LINE-IDX COL-IDX ERR-TEXT-IDX LEVEL)=.  =REGEXP= is a
+     regular expression that matches a single error or warning.  =FILE-IDX=,
+     =LINE-IDX=, =COL-IDX= and =ERR-TEXT-IDX= are indexes of match groups that
+     provide the file name, the line number, the column number and the error
+     message respectively.  Each of these may be nil to indicate that the
+     message does not provide the corresponding information.  =LEVEL= is either
+     =warning= or =error= and indicates the severity of this error.  The
+     patterns are tried in order of declaration.
 + =:modes= (/optional/) :: A single major mode symbol or a list thereof.  If
      given the checker will only be used in any of these modes.
 + =:predicate= (/optional/) :: A form that if present is evaluated to determine
