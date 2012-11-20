@@ -237,8 +237,9 @@ this checker will only be enabled if the current mode is =sh-mode= *and*
 The Vim library [[https://github.com/scrooloose/syntastic][syntastic]] by [[https://github.com/scrooloose][Martin Grenfell]] inspired this library and many of
 its checkers.
 
-[[https://github.com/purcell][Steve Purcell]] contributed ideas and provided templates for some of the syntax
-checkers.
+[[https://github.com/purcell][Steve Purcell]] implemented many checkers, contributed important ideas to the
+design of the checker API and engaged in worthwhile discussion to shape this
+project.
 
 [[https://github.com/wyuenho][Jimmy Yuen Ho Wong]] added the HTML syntax checker and the jshint Javascript
 checker, and did valuable testing and bug fixing.
