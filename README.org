@@ -85,7 +85,10 @@ You need to install external utilities for the following checkers:
 - CSS :: Install [[https://github.com/stubbornella/csslint][csslint]].
 - HAML :: Install [[http://haml.info][HAML]].
 - HTML :: Install [[https://github.com/w3c/tidy-html5][Tidy]].
-- Javascript :: Install [[http://www.jshint.com][jshint]] or [[http://www.jslint.com/][jslint]].
+- Javascript :: Install [[http://www.jshint.com][jshint]] or [[http://www.jslint.com/][jslint]].  The former will automatically use a
+                ~.jshintrc~ file in the buffer's directory, any ancestor thereof
+                or your ~$HOME~ directory.  You may override the path to this
+                file with the variable `flycheck-jshintrc`.
 - JSON :: Install [[https://github.com/zaach/jsonlint][jsonlint]].
 - PHP :: Install the [[http://php.net/manual/en/features.commandline.php][PHP command line]].
 - Python :: Install [[http://pypi.python.org/pypi/flake8][flake8]], [[http://pypi.python.org/pypi/pyflakes][pyflakes]] or [[http://pypi.python.org/pypi/pylint][pylint]].

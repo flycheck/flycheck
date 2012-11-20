@@ -465,11 +465,22 @@ Use either flymake-mode or flycheck-mode"))
 This variable denotes the configuration file for jshint to use
 when checking a buffer with jshint.
 
+The path contained in this variable is expanded via
+`expand-file-name' before being passed to jshint, thus ~ is
+replaced with your $HOME directory.
+
 Use this variable as file local variable to use a specific
 configuration file for a buffer.")
 (put 'flycheck-jshintrc 'safe-local-variable 'stringp)
 
 (defun flycheck-checker-javascript-jshint ()
+  "Check javascript with jshint.
+
+Use .jshintrc from either `flycheck-jshintrc' or – if that
+variable is nil – the buffer's directory, any ancestors thereof
+or the $HOME directory.
+
+If .jshintrc is not found run jshint with default settings."
   (let ((jshintrc (or flycheck-jshintrc
                       (flycheck-find-file-for-buffer ".jshintrc"))))
     `(:command
