@@ -240,6 +240,9 @@ its checkers.
 [[https://github.com/purcell][Steve Purcell]] contributed ideas and provided templates for some of the syntax
 checkers.
 
+[[https://github.com/wyuenho][Jimmy Yuen Ho Wong]] added the HTML syntax checker and the jshint Javascript
+checker, and did valuable testing and bug fixing.
+
 
 ** License
 
