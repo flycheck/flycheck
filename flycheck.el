@@ -126,7 +126,7 @@ found anywhere return nil."
   (let* ((directory (file-name-directory buffer-file-name))
          (filepath (flycheck-find-file-in-tree filename directory)))
     (or filepath
-        (let ((home-path (expand-file-name "~/.jshintrc")))
+        (let ((home-path (expand-file-name filename)))
           (when (file-exists-p home-path) home-path)))))
 
 ;; Checker API
