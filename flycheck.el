@@ -114,7 +114,7 @@ found in DIRECTORY or any of its ancestors."
           ((let ((parent-directory (file-name-directory
                                     (directory-file-name
                                      (file-name-directory full-path)))))
-             ((flycheck-find-file-in-tree filename parent-directory)))))))
+             (flycheck-find-file-in-tree filename parent-directory))))))
 
 (defun flycheck-find-file-for-buffer (filename)
   "Find FILENAME for the current buffer.
