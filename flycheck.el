@@ -4,7 +4,7 @@
 ;;
 ;; Author: Sebastian Wiesner <lunaryorn@gmail.com>
 ;; URL: https://github.com/lunaryorn/flycheck
-;; Version: 0.3
+;; Version: 0.4
 ;; Keywords: convenience languages tools
 
 ;; This file is not part of GNU Emacs.
