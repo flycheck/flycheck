@@ -111,10 +111,10 @@ found in DIRECTORY or any of its ancestors."
   (let ((full-path (expand-file-name filename directory)))
     (cond ((string= directory "/") (when (file-exists-p full-path) full-path))
           ((file-exists-p full-path) full-path)
-          (let ((parent-directory (file-name-directory
-                                   (directory-file-name
-                                    (file-name-directory full-path)))))
-            ((flycheck-find-file-in-tree filename parent-directory))))))
+          ((let ((parent-directory (file-name-directory
+                                    (directory-file-name
+                                     (file-name-directory full-path)))))
+             ((flycheck-find-file-in-tree filename parent-directory)))))))
 
 (defun flycheck-find-file-for-buffer (filename)
   "Find FILENAME for the current buffer.
