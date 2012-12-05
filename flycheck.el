@@ -255,14 +255,16 @@ current buffer, or nil otherwise."
             (:constructor flycheck-make-error))
   file-name line-no col-no text level)
 
-(defun flycheck-parse-output (output)
-  "Parse OUTPUT.
+(defun flycheck-parse-output (output patterns)
+  "Parse OUTPUT with PATTERNS.
+
+PATTERNS is a list of flycheck error patterns.
 
 Return a list of parsed errors and warnings (as `flycheck-error`
 objects)."
   (let ((errors nil)
         (last-match 0))
-    (dolist (pattern flycheck-current-patterns)
+    (dolist (pattern patterns)
       (let ((file-idx (nth 1 pattern))
             (line-idx (nth 2 pattern))
             (col-idx (nth 3 pattern))
@@ -328,7 +330,7 @@ objects)."
             ;; Parse error messages
             (let ((output (apply #'concat (nreverse flycheck-pending-output))))
               (setq flycheck-errors-and-warnings
-                    (flycheck-parse-output output)))
+                    (flycheck-parse-output output flycheck-current-patterns)))
             (setq flycheck-pending-output nil)))))))
 
 (defun flycheck-start-checker (properties)
