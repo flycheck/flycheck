@@ -6,6 +6,7 @@
 ;; URL: https://github.com/lunaryorn/flycheck
 ;; Version: 0.4
 ;; Keywords: convenience languages tools
+;; Package-Requires: ((s "1.3.0"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -121,6 +122,18 @@ found anywhere return nil."
     (or filepath
         (let ((home-path (expand-file-name filename)))
           (when (file-exists-p home-path) home-path)))))
+
+(defun flycheck-canonical-file-name (filename)
+  "Turn FILENAME into canonical form.
+
+Return FILENAME without double slashes and without trailing
+slash."
+  (directory-file-name (expand-file-name filename)))
+
+(defun flycheck-same-files (file1 file2)
+  "Determine whether two files FILE1 and FILE2 are the same."
+  (string= (flycheck-canonical-file-name file1)
+           (flycheck-canonical-file-name file2)))
 
 
 ;; Checker API
@@ -287,9 +300,42 @@ objects)."
       (setq last-match 0))
     errors))
 
-(defvar flycheck-errors-and-warnings nil
+(defun flycheck-relevant-error-p (err)
+  "Determine whether ERR is relevant for the current buffer.
+
+Return t if ERR may be shown for the current buffer, or nil
+otherwise."
+  (and
+   ;; The message must refer to the buffer's file
+   (flycheck-same-files (flycheck-error-file-name err)
+                        buffer-file-name)
+   ;; The message must have a text
+   (> (length (flycheck-error-text err)) 0)
+   ;; And it should have a line
+   (flycheck-error-line-no err)))
+
+(defun flycheck-sanitize-error (err)
+  "Sanitize ERR.
+
+Clean up the error message."
+  (setf (flycheck-error-text err)
+        (s-collapse-whitespace (flycheck-error-text err)))
+  err)
+
+(defun flycheck-sanitize-errors (errors)
+  "Sanitize ERRORS.
+
+Remove all errors that do not belong to the current file."
+  (let ((sanitized-errors nil))
+    (dolist (err errors)
+      (when (flycheck-relevant-error-p err)
+        (setq sanitized-errors
+              (cons (flycheck-sanitize-error err) sanitized-errors))))))
+
+(defvar flycheck-current-errors nil
   "A list of all errors and warnings in the current buffer.")
-(make-variable-buffer-local 'flycheck-errors-and-warnings)
+(make-variable-buffer-local 'flycheck-current-errors)
+
 
 
 ;; Process management
@@ -313,6 +359,7 @@ objects)."
   "Receive a syntax checking PROCESS OUTPUT."
   (let ((source-buffer (process-buffer process)))
     (when (buffer-live-p source-buffer)
+      ;; Aggregate output in the right buffer
       (with-current-buffer source-buffer
         (setq flycheck-pending-output
               (cons output flycheck-pending-output))))))
@@ -329,8 +376,9 @@ objects)."
             (setq flycheck-current-process nil)
             ;; Parse error messages
             (let ((output (apply #'concat (nreverse flycheck-pending-output))))
-              (setq flycheck-errors-and-warnings
-                    (flycheck-parse-output output flycheck-current-patterns)))
+              (setq flycheck-current-errors
+                    (flycheck-sanitize-errors
+                     (flycheck-parse-output output flycheck-current-patterns))))
             (setq flycheck-pending-output nil)))))))
 
 (defun flycheck-start-checker (properties)
