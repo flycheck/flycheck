@@ -78,7 +78,6 @@ checker definition."
 
 
 ;; Utility functions
-
 (defun flycheck-create-temp-system (filename prefix)
   "Create a copy of FILENAME with PREFIX in temp directory.
 
@@ -123,8 +122,8 @@ found anywhere return nil."
         (let ((home-path (expand-file-name filename)))
           (when (file-exists-p home-path) home-path)))))
 
-;; Checker API
 
+;; Checker API
 (defun flycheck-get-checker-properties (checker)
   "Get the properties of CHECKER.
 
@@ -250,55 +249,8 @@ current buffer, or nil otherwise."
       (when (flycheck-may-use-checker properties)
         (return properties)))))
 
-;; Syntax checking
-(defvar flycheck-current-process nil
-  "The current syntax checking process.")
-(make-variable-buffer-local 'flycheck-current-process)
 
-(defun flycheck-running-p ()
-  "Determine whether a syntax check is running."
-  (when flycheck-current-process t))
-
-(defun flycheck-buffer ()
-  "Check syntax in the current buffer."
-  (interactive)
-  (when (and flycheck-mode (not (flycheck-running-p)))
-    (let ((properties (flycheck-get-checker-for-buffer)))
-      (when properties
-        (flycheck-start-checker properties)))))
-
-(defvar flycheck-current-patterns nil
-  "Patterns to parse the output of the current process.")
-(make-variable-buffer-local 'flycheck-current-patterns)
-
-(defun flycheck-start-checker (properties)
-  "Start the syntax checker defined by PROPERTIES."
-  (let* ((command (flycheck-get-substituted-command properties))
-         (program (car command))
-         (args (cdr command))
-         (process (apply 'start-file-process
-                         "flycheck" (current-buffer)
-                         program args)))
-    ;; Report that flycheck is running
-    (flycheck-report-status "*")
-    (setq flycheck-current-process process)
-    (setq flycheck-pending-output nil)
-    ;; Clean previous error information
-    (setq flycheck-errors-and-warnings nil)
-    ;; Remember the patterns to use to parse the output of this process
-    (setq flycheck-current-patterns (flycheck-get-error-patterns properties))
-    ;; Register handlers for the process
-    (set-process-filter process 'flycheck-receive-checker-output)
-    (set-process-sentinel process 'flycheck-handle-signal)))
-
-(defvar flycheck-errors-and-warnings nil
-  "A list of all errors and warnings in the current buffer.")
-(make-variable-buffer-local 'flycheck-errors-and-warnings)
-
-(defvar flycheck-pending-output nil
-  "A list of outputs by the current syntax checking process.")
-(make-variable-buffer-local 'flycheck-pending-output)
-
+;; Error API
 (defstruct (flycheck-error
             (:constructor flycheck-make-error))
   file-name line-no col-no text level)
@@ -306,10 +258,10 @@ current buffer, or nil otherwise."
 (defun flycheck-parse-output (output)
   "Parse OUTPUT.
 
-Return a list of parsed errors and warnings."
+Return a list of parsed errors and warnings (as `flycheck-error`
+objects)."
   (let ((errors nil)
         (last-match 0))
-    (message "current pattern: %s" flycheck-current-patterns)
     (dolist (pattern flycheck-current-patterns)
       (let ((file-idx (nth 1 pattern))
             (line-idx (nth 2 pattern))
@@ -333,6 +285,28 @@ Return a list of parsed errors and warnings."
       (setq last-match 0))
     errors))
 
+(defvar flycheck-errors-and-warnings nil
+  "A list of all errors and warnings in the current buffer.")
+(make-variable-buffer-local 'flycheck-errors-and-warnings)
+
+
+;; Process management
+(defvar flycheck-current-patterns nil
+  "Patterns to parse the output of the current process.")
+(make-variable-buffer-local 'flycheck-current-patterns)
+
+(defvar flycheck-current-process nil
+  "The current syntax checking process.")
+(make-variable-buffer-local 'flycheck-current-process)
+
+(defun flycheck-running-p ()
+  "Determine whether a syntax check is running."
+  (when flycheck-current-process t))
+
+(defvar flycheck-pending-output nil
+  "A list of outputs by the current syntax checking process.")
+(make-variable-buffer-local 'flycheck-pending-output)
+
 (defun flycheck-receive-checker-output (process output)
   "Receive a syntax checking PROCESS OUTPUT."
   (let ((source-buffer (process-buffer process)))
@@ -355,8 +329,37 @@ Return a list of parsed errors and warnings."
             (let ((output (apply #'concat (nreverse flycheck-pending-output))))
               (setq flycheck-errors-and-warnings
                     (flycheck-parse-output output)))
-            (setq flycheck-pending-output nil)
-            (message "Checker for buffer %s finished" source-buffer)))))))
+            (setq flycheck-pending-output nil)))))))
+
+(defun flycheck-start-checker (properties)
+  "Start the syntax checker defined by PROPERTIES."
+  (let* ((command (flycheck-get-substituted-command properties))
+         (program (car command))
+         (args (cdr command))
+         (process (apply 'start-file-process
+                         "flycheck" (current-buffer)
+                         program args)))
+    ;; Report that flycheck is running
+    (flycheck-report-status "*")
+    (setq flycheck-current-process process)
+    (setq flycheck-pending-output nil)
+    ;; Clean previous error information
+    (setq flycheck-errors-and-warnings nil)
+    ;; Remember the patterns to use to parse the output of this process
+    (setq flycheck-current-patterns (flycheck-get-error-patterns properties))
+    ;; Register handlers for the process
+    (set-process-filter process 'flycheck-receive-checker-output)
+    (set-process-sentinel process 'flycheck-handle-signal)))
+
+
+;; Syntax checking mode
+(defun flycheck-buffer ()
+  "Check syntax in the current buffer."
+  (interactive)
+  (when (and flycheck-mode (not (flycheck-running-p)))
+    (let ((properties (flycheck-get-checker-for-buffer)))
+      (when properties
+        (flycheck-start-checker properties)))))
 
 ;;;###autoload
 (defconst flycheck-mode-line-lighter " FlyC"
@@ -395,7 +398,6 @@ Return a list of parsed errors and warnings."
 
 
 ;; Checkers
-
 (defvar flycheck-checker-bash
   '(:command
     ("bash"  "-n" "--norc" source)
