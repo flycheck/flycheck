@@ -463,20 +463,22 @@ Add overlays and report a proper flycheck status."
   (let ((status (process-status process)))
     (when (memq status '(signal exit))
       (let ((source-buffer (process-buffer process)))
-        (when (and flycheck-mode  (buffer-live-p source-buffer))
+        (when (buffer-live-p source-buffer)
           ;; Only parse and show errors if the mode is still active
           (with-current-buffer source-buffer
             (flycheck-report-status "")
             (delete-process process)
             (setq flycheck-current-process nil)
-            ;; Parse error messages
-            (let ((output (apply #'concat (nreverse flycheck-pending-output))))
-              (setq flycheck-current-errors
-                    (flycheck-sanitize-errors
-                     (flycheck-parse-output output (current-buffer)
-                                            flycheck-current-patterns))))
-            (setq flycheck-pending-output nil)
-            (flycheck-report-errors flycheck-current-errors)))))))
+            (when flycheck-mode
+              ;; Parse error messages if flycheck mode is active
+              (let ((output (apply #'concat
+                                   (nreverse flycheck-pending-output))))
+                (setq flycheck-current-errors
+                      (flycheck-sanitize-errors
+                       (flycheck-parse-output output (current-buffer)
+                                              flycheck-current-patterns))))
+              (setq flycheck-pending-output nil)
+              (flycheck-report-errors flycheck-current-errors))))))))
 
 (defun flycheck-start-checker (properties)
   "Start the syntax checker defined by PROPERTIES."
