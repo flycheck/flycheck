@@ -821,6 +821,8 @@ If .jshintrc is not found run jshint with default settings."
 (defvar flycheck-checker-zsh
   '(:command
     ("zsh" "-n" "-d" "-f" source)
+    :error-patterns
+    (("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 error))
     :modes sh-mode
     :predicate (eq sh-shell 'zsh)))
 
