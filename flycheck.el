@@ -132,7 +132,7 @@ Return FILENAME without double slashes and without trailing
 slash."
   (directory-file-name (expand-file-name filename)))
 
-(defun flycheck-same-files (file1 file2)
+(defun flycheck-same-files-p (file1 file2)
   "Determine whether two files FILE1 and FILE2 are the same."
   (string= (flycheck-canonical-file-name file1)
            (flycheck-canonical-file-name file2)))
@@ -318,8 +318,8 @@ Return t if ERR may be shown for the current buffer, or nil
 otherwise."
   (and
    ;; The message must refer to the buffer's file
-   (flycheck-same-files (flycheck-error-file-name err)
-                        buffer-file-name)
+   (flycheck-same-files-p (flycheck-error-file-name err)
+                          buffer-file-name)
    ;; The message must have a text
    (> (length (flycheck-error-text err)) 0)
    ;; And it should have a line
