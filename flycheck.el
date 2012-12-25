@@ -643,15 +643,17 @@ Add overlays and report a proper flycheck status."
   '(:command
     ("coffeelint" "--csv" source)
     :error-patterns
-    (("SyntaxError: \\(.*\\) on line \\([0-9]+\\)" nil 2 nil 1)
-     ("\\(.+\\),\\([0-9]+\\),\\(?:warn\\|error\\),\\(.+\\)" 1 2 nil 3))
+    (("SyntaxError: \\(.*\\) on line \\([0-9]+\\)" nil 2 nil 1 error)
+     ("\\(.+\\),\\([0-9]+\\),error,\\(.+\\)" 1 2 nil 3 error)
+     ("\\(.+\\),\\([0-9]+\\),warn,\\(.+\\)" 1 2 nil 3 warning))
     :modes coffee-mode))
 
 (defvar flycheck-checker-css
   '(:command
     ("csslint" "--format=compact" source)
     :error-patterns
-    ("^\\(.*\\): line \\([[:digit:]]+\\), col \\([[:digit:]]+\\), \\(.+\\)$" 1 2 3 4)
+    ("^\\(.*\\): line \\([[:digit:]]+\\), col \\([[:digit:]]+\\), \\(.+\\)$"
+     1 2 3 4 error)
     :modes css-mode))
 
 (defconst flycheck-checker-emacs-lisp-check-form
@@ -698,14 +700,17 @@ Add overlays and report a proper flycheck status."
   '(:command
     ("haml" "-c" source)
     :error-patterns
-    ("^Syntax error on line \\([0-9]+\\): \\(.*\\)$" nil 1 nil 2)
+    ("^Syntax error on line \\([0-9]+\\): \\(.*\\)$" nil 1 nil 2 error)
     :modes haml-mode))
 
 (defvar flycheck-checker-html
   '(:command
     ("tidy" "-e" "-q" source)
     :error-patterns
-    (("line \\([0-9]+\\) column \\([0-9]+\\) - \\(Warning\\|Error\\): \\(.*\\)" nil 1 2 4))
+    (("line \\([0-9]+\\) column \\([0-9]+\\) - Error: \\(.*\\)"
+      nil 1 2 4 error)
+     ("line \\([0-9]+\\) column \\([0-9]+\\) - Warning: \\(.*\\)"
+      nil 1 2 4 warning))
     :modes html-mode))
 
 (defvar flycheck-jshintrc nil
@@ -737,24 +742,30 @@ If .jshintrc is not found run jshint with default settings."
        ,@(when jshintrc `("--config" ,(expand-file-name jshintrc)))
        source)
       :error-patterns
-      (("^\\(.*\\): line \\([[:digit:]]+\\), col \\([[:digit:]]+\\), \\(.+\\)$" 1 2 3 4))
+      (("^\\(.*\\): line \\([[:digit:]]+\\), col \\([[:digit:]]+\\), \\(.+\\)$"
+        1 2 3 4 error))
       :modes js-mode)))
 
 (defvar flycheck-checker-javascript-jslint
   '(:command
     ("jsl" "-process" source)
     :error-patterns
-    (("^\\(.+\\)\:\\([0-9]+\\)\: \\(SyntaxError\:.+\\)\:$" nil 2 nil 3)
-     ("^\\(.+\\)(\\([0-9]+\\)): \\(SyntaxError:.+\\)$" nil 2 nil 3)
-     ("^\\(.+\\)(\\([0-9]+\\)): \\(lint \\)?\\(warning:.+\\)$" nil 2 nil 4)
-     ("^\\(.+\\)\:\\([0-9]+\\)\: strict \\(warning: trailing comma.+\\)\:$" nil 2 nil 3))
+    (("^\\(.+\\)\:\\([0-9]+\\)\: \\(SyntaxError\:.+\\)\:$"
+      nil 2 nil 3 error)
+     ("^\\(.+\\)(\\([0-9]+\\)): \\(SyntaxError:.+\\)$"
+      nil 2 nil 3 error)
+     ("^\\(.+\\)(\\([0-9]+\\)): \\(lint \\)?\\(warning:.+\\)$"
+      nil 2 nil 4 warning)
+     ("^\\(.+\\)\:\\([0-9]+\\)\: strict \\(warning: trailing comma.+\\)\:$"
+      nil 2 nil 3 warning))
     :modes js-mode))
 
 (defvar flycheck-checker-json
   '(:command
     ("jsonlint" "-c" "-q" source)
     :error-patterns
-    (("^\\(.+\\)\: line \\([0-9]+\\), col \\([0-9]+\\), \\(.+\\)$" nil 2 3 4))
+    (("^\\(.+\\)\: line \\([0-9]+\\), col \\([0-9]+\\), \\(.+\\)$"
+      nil 2 3 4 error))
     :predicate
     (or (eq major-mode 'json-mode)
         (and buffer-file-name
@@ -764,8 +775,9 @@ If .jshintrc is not found run jshint with default settings."
   '(:command
     ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
       "-d" "log_errors=0" source)
-    :error-patterns ("\\(?:Parse\\|Fatal\\|syntax\\) error[:,] \\(.*\\) in \\(.*\\) on line \\([0-9]+\\)"
-                      2 3 nil 1)
+    :error-patterns
+    (("\\(?:Parse\\|Fatal\\|syntax\\) error[:,] \\(.*\\) in \\(.*\\) on line \\([0-9]+\\)"
+       2 3 nil 1 error))
     :modes php-mode))
 
 (defvar flycheck-checker-python-flake8
