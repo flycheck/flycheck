@@ -68,7 +68,6 @@
     flycheck-checker-python-pylint
     flycheck-checker-python-pyflakes
     flycheck-checker-ruby
-    flycheck-checker-php
     flycheck-checker-sh
     flycheck-checker-tex-chktex
     flycheck-checker-tex-lacheck
