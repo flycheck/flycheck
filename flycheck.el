@@ -349,6 +349,65 @@ Remove all errors that do not belong to the current file."
 (make-variable-buffer-local 'flycheck-current-errors)
 
 
+;; Overlay management
+(defface flycheck-error-face
+  '((t (:inherit flymake-errline)))
+  "Face for flycheck errors."
+  :group 'flycheck)
+
+(defface flycheck-warning-face
+  '((t (:inherit flymake-warnline)))
+  "Face for flycheck warnings."
+  :group 'flycheck)
+
+(defconst flycheck-error-overlay nil
+  "Overlay category for flycheck errors.")
+(put 'flycheck-error-overlay 'face 'flycheck-error-face)
+(put 'flycheck-error-overlay 'priority 100)
+(put 'flycheck-error-overlay 'line-prefix "⚠")
+(put 'flycheck-error-overlay 'help-echo "Unknown error.")
+
+(defconst flycheck-warning-overlay nil
+  "Overlay category for flycheck warning.")
+(put 'flycheck-warning-overlay 'face 'flycheck-warning-face)
+(put 'flycheck-warning-overlay 'priority 100)
+(put 'flycheck-warning-overlay 'line-prefix "⚠")
+(put 'flycheck-warning-overlay 'help-echo "Unknown warning.")
+
+(defconst flycheck-overlay-categories-alist
+  '((warning . flycheck-warning-overlay)
+    (error . flycheck-error-overlay))
+  "Overlay categories for error levels.")
+
+(defun flycheck-add-overlay (err)
+  "Add overlay for ERR."
+  (flycheck-error-with-buffer err
+    (save-excursion
+      (goto-char (point-min))
+      (forward-line (- (flycheck-error-line-no err) 1))
+      ;; TODO: Consider column number
+      (let* ((beg (line-beginning-position))
+             (end (line-end-position))
+             (category (cdr (assq (flycheck-error-level err)
+                                  flycheck-overlay-categories-alist)))
+             (text (flycheck-error-text err))
+             (overlay (make-overlay beg end (flycheck-error-buffer err))))
+        ;; TODO: Consider hooks to re-check if overlay contents change
+        (overlay-put overlay 'category category)
+        (unless (s-blank? text)
+          (overlay-put overlay 'help-echo text))))))
+
+(defun flycheck-add-overlays (errors)
+  "Add overlays for ERRORS."
+  (mapc #'flycheck-add-overlay errors))
+
+(defun flycheck-clean-overlays ()
+  "Remove all flycheck overlays in the current buffer."
+  (remove-overlays (point-min) (point-max) 'category
+                   'flycheck-warning-overlay)
+  (remove-overlays (point-min) (point-max) 'category
+                   'flycheck-error-overlay))
+
 
 ;; Process management
 (defvar flycheck-current-patterns nil
@@ -392,7 +451,9 @@ Remove all errors that do not belong to the current file."
                     (flycheck-sanitize-errors
                      (flycheck-parse-output output (current-buffer)
                                             flycheck-current-patterns))))
-            (setq flycheck-pending-output nil)))))))
+            (setq flycheck-pending-output nil)
+            ;; Add overlays for the errors
+            (flycheck-add-overlays flycheck-current-errors)))))))
 
 (defun flycheck-start-checker (properties)
   "Start the syntax checker defined by PROPERTIES."
@@ -408,6 +469,8 @@ Remove all errors that do not belong to the current file."
     (setq flycheck-pending-output nil)
     ;; Clean previous error information
     (setq flycheck-current-errors nil)
+    ;; Clean previous overlays
+    (flycheck-clean-overlays)
     ;; Remember the patterns to use to parse the output of this process
     (setq flycheck-current-patterns (flycheck-get-error-patterns properties))
     ;; Register handlers for the process
@@ -447,7 +510,8 @@ Remove all errors that do not belong to the current file."
   (cond
    (flycheck-mode
     (flycheck-report-status ""))
-   (t)))
+   (t
+    (flycheck-clean-overlays))))
 
 ;;;###autoload
 (defun flycheck-mode-on ()
