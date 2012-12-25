@@ -580,8 +580,16 @@ Add overlays and report a proper flycheck status."
 
 (defconst flycheck-checker-emacs-lisp-check-form
   '(progn
-     (setq byte-compile-dest-file-function 'make-temp-file)
-     (mapc 'byte-compile-file command-line-args-left)))
+     (setq byte-compiled-files nil)
+     (defun byte-compile-dest-file (source)
+       (let ((temp-file (expand-file-name (make-temp-file source)
+                                          temporary-file-directory)))
+         (add-to-list 'byte-compiled-files temp-file)
+         temp-file))
+
+     (setq byte-compile-dest-file-function 'byte-compile-dest-file)
+     (mapc 'byte-compile-file command-line-args-left)
+     (mapc 'delete-file byte-compiled-files)))
 
 (defun flycheck-checker-emacs-lisp-check-form-s ()
   "Return `flycheck-checker-emacs-lisp-check-form as string."
