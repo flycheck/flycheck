@@ -394,7 +394,7 @@ Remove all errors that do not belong to the current file."
     (setq flycheck-current-process process)
     (setq flycheck-pending-output nil)
     ;; Clean previous error information
-    (setq flycheck-errors-and-warnings nil)
+    (setq flycheck-current-errors nil)
     ;; Remember the patterns to use to parse the output of this process
     (setq flycheck-current-patterns (flycheck-get-error-patterns properties))
     ;; Register handlers for the process
