@@ -671,7 +671,15 @@ Add overlays and report a proper flycheck status."
         (check-form-s (flycheck-checker-emacs-lisp-check-form-s)))
     `(:command
       (,executable "--no-site-file" "--no-site-lisp" "--batch" "--eval"
-                   ,check-form-s source)
+                   ;; byte-compile-file has an awkward way of writing file names
+                   ;; to stdout, namely it always outputs relative file names
+                   ;; even if absolute file names are passed to it, and it
+                   ;; completely *omits* the directory in case of warning
+                   ;; messages.  Hence we use an in-place copy here to have a
+                   ;; reliable base directory from which to expand file names.
+                   ;; Otherwise back-substitution will fail because file names
+                   ;; in the error messages lack directory information
+                   ,check-form-s source-inplace)
       :modes emacs-lisp-mode
       :error-patterns
       (("^\\(.*\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\):Warning:\\(.*\\(?:\n    .*\\)*\\)$"
