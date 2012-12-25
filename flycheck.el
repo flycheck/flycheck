@@ -42,6 +42,8 @@
   (require 'cl)
   (require 'sh-script))
 
+(require 's)
+
 ;; Customization
 
 (defgroup flycheck nil
