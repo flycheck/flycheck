@@ -363,9 +363,11 @@ Return a cons cell whose `car' is the number of errors and whose
 
 Add overlays and report a proper flycheck status."
   (flycheck-add-overlays errors)
-  (let ((no-err-warnings (flycheck-count-errors errors)))
-    (flycheck-report-status
-     (format ":%s/%s" (car no-err-warnings) (cdr no-err-warnings)))))
+  (if errors
+      (let ((no-err-warnings (flycheck-count-errors errors)))
+        (flycheck-report-status
+         (format ":%s/%s" (car no-err-warnings) (cdr no-err-warnings))))
+    (flycheck-report-status "")))
 
 (defvar flycheck-current-errors nil
   "A list of all errors and warnings in the current buffer.")
