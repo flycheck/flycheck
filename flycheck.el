@@ -91,9 +91,10 @@ Return the path of the file."
   ;; files. If `jka-compr-really-do-compress' is non-nil this function uses END
   ;; even though START is a string, hence breaking the `write-region' API that
   ;; flymake relies on.  Report upstream!
-  (let ((jka-compr-really-do-compress nil))
-    (make-temp-file (or prefix "flycheck") nil
-                    (concat "." (file-name-extension filename)))))
+  (let ((jka-compr-really-do-compress nil)
+        (extension (when filename (file-name-extension filename))))
+    (make-temp-file prefix nil
+                    (when extension (concat "." extension)))))
 
 (defun flycheck-find-file-in-tree (filename directory)
   "Find FILENAME in DIRECTORY and all of its ancestors.
