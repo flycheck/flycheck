@@ -499,7 +499,12 @@ Remove all errors that do not belong to the current file."
     `(:command
       (,executable "--no-site-file" "--no-site-lisp" "--batch" "--eval"
                    ,check-form-s source)
-      :modes emacs-lisp-mode)))
+      :modes emacs-lisp-mode
+      :error-patterns
+      (("^\\(.*\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\):Warning:\\(.*\\(?:\n    .*\\)*\\)$"
+        1 2 3 4 warning)
+       ("^\\(.*\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\):Error:\\(.*\\(?:\n    .*\\)*\\)$"
+        1 2 3 4 error)))))
 
 (defvar flycheck-checker-haml
   '(:command
