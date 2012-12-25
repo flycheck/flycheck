@@ -382,14 +382,20 @@ the corresponding buffer if it matches and file in
 (defun flycheck-sanitize-error (err)
   "Sanitize ERR.
 
-Clean up the error message."
+Clean up the error file name and the error message."
   ;; Expand the file name
   (flycheck-error-with-buffer err
-    (setf (flycheck-error-file-name err)
-          (expand-file-name (flycheck-error-file-name err)))
-    (setf (flycheck-error-text err)
-          (s-collapse-whitespace (flycheck-error-text err)))
-    (flycheck-back-substitute-filename err)))
+    ;; Clean up the file name
+    (let ((filename (flycheck-error-file-name err))
+          (text (flycheck-error-text err)))
+      ;; Collapse white space in messages to remove any new lines and
+      ;; indentation.
+      (setf (flycheck-error-text err) (s-collapse-whitespace text))
+      (when filename
+        ;; If the error has a file name, expand it relative to the default
+        ;; directory of its buffer and back substitute the file name
+        (setf (flycheck-error-file-name err) (expand-file-name filename))
+        (flycheck-back-substitute-filename err)))))
 
 (defun flycheck-sanitize-errors (errors)
   "Sanitize ERRORS.
