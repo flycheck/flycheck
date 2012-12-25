@@ -427,8 +427,7 @@ Use either flymake-mode or flycheck-mode"))
 (defconst flycheck-checker-emacs-lisp-check-form
   '(progn
      (setq byte-compile-dest-file-function 'make-temp-file)
-     (dolist (file command-line-args-left)
-       (byte-compile-file file))))
+     (mapc 'byte-compile-file command-line-args-left)))
 
 (defun flycheck-checker-emacs-lisp-check-form-s ()
   "Return `flycheck-checker-emacs-lisp-check-form as string."
