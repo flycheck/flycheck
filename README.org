@@ -32,6 +32,7 @@ mode of buffers, but re-uses flymake to do the actual syntax checking.
   - HTML
   - Javascript
   - JSON
+  - Perl
   - PHP
   - Python
   - Ruby
