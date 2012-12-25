@@ -600,9 +600,18 @@ Add overlays and report a proper flycheck status."
   (cond
    (flycheck-mode
     (flycheck-report-status "")
+
+    ;; Configure hooks
+    (add-hook 'after-save-hook 'flycheck-buffer nil t)
+
+    ;; Start an initial syntax check
     (flycheck-buffer))
    (t
     (flycheck-clean-overlays)
+
+    ;; Remove hooks
+    (remove-hook 'after-save-hook 'flycheck-buffer t)
+
     (flycheck-stop-checker))))
 
 ;;;###autoload
