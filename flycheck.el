@@ -268,10 +268,19 @@ current buffer, or nil otherwise."
 ;; Error API
 (defstruct (flycheck-error
             (:constructor flycheck-make-error))
-  file-name line-no col-no text level)
+  buffer file-name line-no col-no text level)
 
-(defun flycheck-parse-output (output patterns)
-  "Parse OUTPUT with PATTERNS.
+(defmacro flycheck-error-with-buffer (err &rest forms)
+  "Switch to the buffer of ERR and evaluate FORMS.
+
+If the buffer of ERR is not live, FORMS are not evaluated."
+  (declare (indent 1))
+  `(when (buffer-live-p (flycheck-error-buffer ,err))
+    (with-current-buffer (flycheck-error-buffer ,err)
+      ,@forms)))
+
+(defun flycheck-parse-output (output buffer patterns)
+  "Parse OUTPUT from BUFFER with PATTERNS.
 
 PATTERNS is a list of flycheck error patterns.
 
@@ -289,6 +298,7 @@ objects)."
           (setq errors
                 (cons
                  (flycheck-make-error
+                  :buffer buffer
                   :file-name (when file-idx (match-string file-idx output))
                   :line-no (when line-idx
                              (string-to-number (match-string line-idx output)))
@@ -379,7 +389,8 @@ Remove all errors that do not belong to the current file."
             (let ((output (apply #'concat (nreverse flycheck-pending-output))))
               (setq flycheck-current-errors
                     (flycheck-sanitize-errors
-                     (flycheck-parse-output output flycheck-current-patterns))))
+                     (flycheck-parse-output output (current-buffer)
+                                            flycheck-current-patterns))))
             (setq flycheck-pending-output nil)))))))
 
 (defun flycheck-start-checker (properties)
