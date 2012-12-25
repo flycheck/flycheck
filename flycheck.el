@@ -512,8 +512,11 @@ If .jshintrc is not found run jshint with default settings."
         (and buffer-file-name
              (string= "json" (file-name-extension buffer-file-name))))))
 
-(defvar flycheck-checker-perl
-  '(:command ("perl" "-w" "-c" source) :modes cperl-mode))
+(defvar flycheck-checker-perl                                                                                              
+  '(:command                                                                                                               
+    ("perl" "-w" "-c" source)                                                                                              
+    :error-patterns (("\\(.*\\) at \\([^ \n]+\\) line \\([0-9]+\\)[,.\n]" 2 3 nil 1))                                      
+    :modes cperl-mode))                                                                                                    
 
 (defvar flycheck-checker-php
   '(:command
