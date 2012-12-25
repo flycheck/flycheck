@@ -81,7 +81,7 @@ checker definition."
 
 
 ;; Utility functions
-(defun flycheck-create-temp-system (filename prefix)
+(defun flycheck-temp-file-system (filename prefix)
   "Create a copy of FILENAME with PREFIX in temp directory.
 
 Return the path of the file."
@@ -96,10 +96,10 @@ Return the path of the file."
     (make-temp-file prefix nil
                     (when extension (concat "." extension)))))
 
-(defun flycheck-create-temp-inplace (filename prefix)
+(defun flycheck-temp-file-inplace (filename prefix)
   "Create an in-place copy of FILENAME with PREFIX added.
 
-If FILENAME is nil, fall back to `flycheck-create-temp-system'.
+If FILENAME is nil, fall back to `flycheck-temp-file-system'.
 
 Return the path of the file."
   (if filename
@@ -107,7 +107,7 @@ Return the path of the file."
              (name (file-name-nondirectory filename)))
         (expand-file-name (format "flycheck-%s" name) directory))
     ;; With no filename, fall back to a copy in the system directory.
-    (flycheck-create-temp-system filename prefix)))
+    (flycheck-temp-file-system filename prefix)))
 
 (defun flycheck-find-file-in-tree (filename directory)
   "Find FILENAME in DIRECTORY and all of its ancestors.
@@ -248,8 +248,8 @@ Return t if so, or nil otherwise."
 If ARG is `source' or `source-inplace', create a temporary file
 to checker and return its path, otherwise return ARG unchanged."
   (let ((temp-file-function
-         (cond ((eq arg 'source) 'flycheck-create-temp-system)
-               ((eq arg 'source-inplace) 'flycheck-create-temp-inplace))))
+         (cond ((eq arg 'source) 'flycheck-temp-file-system)
+               ((eq arg 'source-inplace) 'flycheck-temp-file-inplace))))
     (if temp-file-function
         (let ((temp-file (flycheck-temp-buffer-copy temp-file-function)))
           (add-to-list 'flycheck-substituted-files temp-file)
