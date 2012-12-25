@@ -814,6 +814,8 @@ If .jshintrc is not found run jshint with default settings."
 (defvar flycheck-checker-tex-lacheck
   '(:command
     ("lacheck" source-inplace)
+    :error-patterns
+    (("^\"\\(.*\\)\", line \\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 warning))
     :modes latex-mode))
 
 (defvar flycheck-checker-zsh
