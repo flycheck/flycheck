@@ -226,6 +226,8 @@ or nil otherwise."
   "Determine whether the checker described by PROPERTIES may be used.
 
 Return t if so, or nil otherwise."
+  (unless (flycheck-valid-checker-p properties)
+    (error "Checker %s is not valid" properties))
   (and (flycheck-valid-checker-p properties)
        (flycheck-check-modes properties)
        (flycheck-check-predicate properties)
