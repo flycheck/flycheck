@@ -353,14 +353,16 @@ objects)."
 
 Return t if ERR may be shown for the current buffer, or nil
 otherwise."
-  (and
-   ;; The message must refer to the buffer's file
-   (flycheck-same-files-p (flycheck-error-file-name err)
-                          buffer-file-name)
-   ;; The message must have a text
-   (> (length (flycheck-error-text err)) 0)
-   ;; And it should have a line
-   (flycheck-error-line-no err)))
+  (flycheck-error-with-buffer err
+    (let ((file-name (flycheck-error-file-name err)))
+      (and
+       ;; If the error includes a file name it must refer to its buffer's file
+       (or (not file-name) (flycheck-same-files-p file-name (buffer-file-name)))
+       ;; The message must have a text
+
+       (> (length (flycheck-error-text err)) 0)
+       ;; And it should have a line
+       (flycheck-error-line-no err)))))
 
 (defun flycheck-back-substitute-filename (err)
   "Reverse substitute the file name in ERR.
