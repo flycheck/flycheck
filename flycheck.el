@@ -138,6 +138,19 @@ slash."
   (string= (flycheck-canonical-file-name file1)
            (flycheck-canonical-file-name file2)))
 
+(defun flycheck-save-buffer-to-file (file-name)
+  "Save the contents of the current buffer to FILE-NAME."
+  (make-directory (file-name-directory file-name) t)
+  (write-region nil nil file-name nil 0))
+
+(defun flycheck-temp-buffer-copy (temp-file-fn)
+  "Copy current buffer to temp file returned by TEMP-FILE-FN.
+
+Return the name of the temporary file."
+  (let ((temp-file (funcall temp-file-fn (buffer-file-name) "flycheck")))
+    (flycheck-save-buffer-to-file temp-file)
+    temp-file))
+
 
 ;; Checker API
 (defun flycheck-get-checker-properties (checker)
