@@ -440,7 +440,8 @@ Remove all errors that do not belong to the current file."
   (let ((status (process-status process)))
     (when (memq status '(signal exit))
       (let ((source-buffer (process-buffer process)))
-        (when (buffer-live-p source-buffer)
+        (when (and flycheck-mode  (buffer-live-p source-buffer))
+          ;; Only parse and show errors if the mode is still active
           (with-current-buffer source-buffer
             (flycheck-report-status "")
             (delete-process process)
@@ -477,6 +478,11 @@ Remove all errors that do not belong to the current file."
     (set-process-filter process 'flycheck-receive-checker-output)
     (set-process-sentinel process 'flycheck-handle-signal)))
 
+(defun flycheck-stop-checker ()
+  "Stop any syntax checker for the current buffer."
+  (when (flycheck-running-p)
+    (interrupt-process flycheck-current-process)))
+
 
 ;; Syntax checking mode
 (defun flycheck-buffer ()
@@ -512,7 +518,8 @@ Remove all errors that do not belong to the current file."
     (flycheck-report-status "")
     (flycheck-buffer))
    (t
-    (flycheck-clean-overlays))))
+    (flycheck-clean-overlays)
+    (flycheck-stop-checker))))
 
 ;;;###autoload
 (defun flycheck-mode-on ()
