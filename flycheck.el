@@ -218,20 +218,30 @@ Return t if so, or nil otherwise."
        (flycheck-check-predicate properties)
        (flycheck-check-executable properties)))
 
+(defvar flycheck-substituted-files nil
+  "A list of all files created for argument substitution.")
+(make-variable-buffer-local 'flycheck-substituted-files)
+
+(defun flycheck-clean-substituted-files ()
+  "Remove all substituted files."
+  (dolist (file-name flycheck-substituted-files)
+    (when (file-exists-p file-name)
+      (delete-file file-name))
+    (setq flycheck-substituted-files nil)))
+
 (defun flycheck-substitute-argument (arg)
   "Substitute ARG with file to check is possible.
 
 If ARG is `source' or `source-inplace', create a temporary file
 to checker and return its path, otherwise return ARG unchanged."
-  ;; TODO: Implement temporary file handling.
-  ;; (let ((temp-file-function
-  ;;        (cond ((eq arg 'source) 'flycheck-create-temp-system)
-  ;;              ((eq arg 'source-inplace) 'flycheck-create-temp-inplace))))
-  ;;   (if temp-file-function
-  ;;       (flycheck-temp-buffer-copy temp-file-function)
-  ;;     arg))
-  ;; XXX: For now just check the buffer directly
-  (if (memq arg '(source source-inplace)) (buffer-file-name) arg))
+  (let ((temp-file-function
+         (cond ((eq arg 'source) 'flycheck-create-temp-system)
+               ((eq arg 'source-inplace) 'flycheck-create-temp-inplace))))
+    (if temp-file-function
+        (let ((temp-file (flycheck-temp-buffer-copy temp-file-function)))
+          (add-to-list 'flycheck-substituted-files temp-file)
+          temp-file)
+      arg)))
 
 (defun flycheck-get-substituted-command (properties)
   "Get the substitute :command from PROPERTIES."
@@ -339,13 +349,32 @@ otherwise."
    ;; And it should have a line
    (flycheck-error-line-no err)))
 
+(defun flycheck-back-substitute-filename (err)
+  "Reverse substitute the file name in ERR.
+
+Substitute the file name of ERR with the `buffer-file-name' of
+the corresponding buffer if it matches and file in
+`flycheck-substituted-files'."
+  (flycheck-error-with-buffer err
+    (let ((file-name (flycheck-error-file-name err)))
+      (when file-name
+        (dolist (substituted-file flycheck-substituted-files)
+          (when (flycheck-same-files-p file-name substituted-file)
+            (setf (flycheck-error-file-name err) (buffer-file-name))
+            (return err))))
+      err)))
+
 (defun flycheck-sanitize-error (err)
   "Sanitize ERR.
 
 Clean up the error message."
-  (setf (flycheck-error-text err)
-        (s-collapse-whitespace (flycheck-error-text err)))
-  err)
+  ;; Expand the file name
+  (flycheck-error-with-buffer err
+    (setf (flycheck-error-file-name err)
+          (expand-file-name (flycheck-error-file-name err)))
+    (setf (flycheck-error-text err)
+          (s-collapse-whitespace (flycheck-error-text err)))
+    (flycheck-back-substitute-filename err)))
 
 (defun flycheck-sanitize-errors (errors)
   "Sanitize ERRORS.
@@ -353,9 +382,9 @@ Clean up the error message."
 Remove all errors that do not belong to the current file."
   (let ((sanitized-errors nil))
     (dolist (err errors)
+      (setq err (flycheck-sanitize-error err))
       (when (flycheck-relevant-error-p err)
-        (setq sanitized-errors
-              (cons (flycheck-sanitize-error err) sanitized-errors))))
+        (setq sanitized-errors (cons err sanitized-errors))))
     sanitized-errors))
 
 (defun flycheck-count-errors (errors)
@@ -494,7 +523,9 @@ Add overlays and report a proper flycheck status."
                        (flycheck-parse-output output (current-buffer)
                                               flycheck-current-patterns))))
               (setq flycheck-pending-output nil)
-              (flycheck-report-errors flycheck-current-errors))))))))
+              (flycheck-report-errors flycheck-current-errors))
+            ;; Remove substituted files
+            (flycheck-clean-substituted-files)))))))
 
 (defun flycheck-start-checker (properties)
   "Start the syntax checker defined by PROPERTIES."
