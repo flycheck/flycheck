@@ -635,7 +635,7 @@ Add overlays and report a proper flycheck status."
 ;; Checkers
 (defvar flycheck-checker-bash
   '(:command
-    ("bash"  "-n" "--norc" source)
+    ("bash" "--norc" "-n" source)
     :error-patterns
     (("^\\(.+\\): line \\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 error))
     :modes sh-mode
