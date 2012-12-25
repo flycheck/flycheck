@@ -509,7 +509,8 @@ Remove all errors that do not belong to the current file."
   :require 'flycheck
   (cond
    (flycheck-mode
-    (flycheck-report-status ""))
+    (flycheck-report-status "")
+    (flycheck-buffer))
    (t
     (flycheck-clean-overlays))))
 
