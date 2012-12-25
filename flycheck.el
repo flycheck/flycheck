@@ -285,7 +285,6 @@ objects)."
             (col-idx (nth 3 pattern))
             (text-idx (nth 4 pattern))
             (level (nth 5 pattern)))
-        (message "pattern: %s" pattern)
         (while (string-match (nth 0 pattern) output last-match)
           (setq errors
                 (cons
