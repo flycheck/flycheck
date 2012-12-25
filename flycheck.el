@@ -341,7 +341,8 @@ Remove all errors that do not belong to the current file."
     (dolist (err errors)
       (when (flycheck-relevant-error-p err)
         (setq sanitized-errors
-              (cons (flycheck-sanitize-error err) sanitized-errors))))))
+              (cons (flycheck-sanitize-error err) sanitized-errors))))
+    sanitized-errors))
 
 (defvar flycheck-current-errors nil
   "A list of all errors and warnings in the current buffer.")
