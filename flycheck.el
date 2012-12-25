@@ -807,6 +807,8 @@ If .jshintrc is not found run jshint with default settings."
 (defvar flycheck-checker-tex-chktex
   '(:command
     ("chktex" "-v0" "-q" "-I" source-inplace)
+    :error-patterns
+    (("^\\(.*\\):\\([0-9]+\\):\\([0-9]+\\):[0-9]+:\\(.*\\)$" 1 2 3 4 warning))
     :modes (latex-mode plain-tex-mode)))
 
 (defvar flycheck-checker-tex-lacheck
