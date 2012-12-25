@@ -359,8 +359,7 @@ otherwise."
        ;; If the error includes a file name it must refer to its buffer's file
        (or (not file-name) (flycheck-same-files-p file-name (buffer-file-name)))
        ;; The message must have a text
-
-       (> (length (flycheck-error-text err)) 0)
+       (not (s-blank? (flycheck-error-text err)))
        ;; And it should have a line
        (flycheck-error-line-no err)))))
 
