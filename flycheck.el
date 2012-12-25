@@ -96,6 +96,19 @@ Return the path of the file."
     (make-temp-file prefix nil
                     (when extension (concat "." extension)))))
 
+(defun flycheck-create-temp-inplace (filename prefix)
+  "Create an in-place copy of FILENAME with PREFIX added.
+
+If FILENAME is nil, fall back to `flycheck-create-temp-system'.
+
+Return the path of the file."
+  (if filename
+      (let* ((directory (file-name-directory filename))
+             (name (file-name-nondirectory filename)))
+        (expand-file-name (format "flycheck-%s" name) directory))
+    ;; With no filename, fall back to a copy in the system directory.
+    (flycheck-create-temp-system filename prefix)))
+
 (defun flycheck-find-file-in-tree (filename directory)
   "Find FILENAME in DIRECTORY and all of its ancestors.
 
