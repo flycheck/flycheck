@@ -344,6 +344,29 @@ Remove all errors that do not belong to the current file."
               (cons (flycheck-sanitize-error err) sanitized-errors))))
     sanitized-errors))
 
+(defun flycheck-count-errors (errors)
+  "Count the number of warnings and errors in ERRORS.
+
+Return a cons cell whose `car' is the number of errors and whose
+`car' is the number of warnings."
+  (let ((no-errors 0)
+        (no-warnings 0))
+    (dolist (err errors)
+      (let ((level (flycheck-error-level err)))
+        (cond
+         ((eq level 'error) (setq no-errors (+ no-errors 1)))
+         ((eq level 'warning) (setq no-warnings (+ no-warnings 1))))))
+    `(,no-errors . ,no-warnings)))
+
+(defun flycheck-report-errors (errors)
+  "Report ERRORS in the current buffer.
+
+Add overlays and report a proper flycheck status."
+  (flycheck-add-overlays errors)
+  (let ((no-err-warnings (flycheck-count-errors errors)))
+    (flycheck-report-status
+     (format ":%s/%s" (car no-err-warnings) (cdr no-err-warnings)))))
+
 (defvar flycheck-current-errors nil
   "A list of all errors and warnings in the current buffer.")
 (make-variable-buffer-local 'flycheck-current-errors)
@@ -453,8 +476,7 @@ Remove all errors that do not belong to the current file."
                      (flycheck-parse-output output (current-buffer)
                                             flycheck-current-patterns))))
             (setq flycheck-pending-output nil)
-            ;; Add overlays for the errors
-            (flycheck-add-overlays flycheck-current-errors)))))))
+            (flycheck-report-errors flycheck-current-errors)))))))
 
 (defun flycheck-start-checker (properties)
   "Start the syntax checker defined by PROPERTIES."
