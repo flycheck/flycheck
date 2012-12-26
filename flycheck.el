@@ -577,6 +577,17 @@ Add overlays and report a proper flycheck status."
 
 
 ;; Syntax checking mode
+(defun flycheck-handle-change (beg end len)
+  "Handle a buffer change between BEG and END with LEN.
+
+BEG and END mark the beginning and end of the change text.  LEN is ignored.
+
+Start a syntax check if a new line has been inserted into the buffer."
+  (let ((new-text (buffer-substring beg end)))
+    (when (and flycheck-mode (s-contains? "\n" new-text))
+      (with-demoted-errors
+        (flycheck-buffer)))))
+
 (defun flycheck-clear ()
   "Clear all errors in the current buffer."
   (interactive)
@@ -618,6 +629,7 @@ Add overlays and report a proper flycheck status."
 
     ;; Configure hooks
     (add-hook 'after-save-hook 'flycheck-buffer nil t)
+    (add-hook 'after-change-functions 'flycheck-handle-change nil t)
 
     ;; Start an initial syntax check
     (flycheck-buffer))
@@ -626,6 +638,7 @@ Add overlays and report a proper flycheck status."
 
     ;; Remove hooks
     (remove-hook 'after-save-hook 'flycheck-buffer t)
+    (remove-hook 'after-change-functions 'flycheck-handle-change t)
 
     (flycheck-stop-checker))))
 
