@@ -572,7 +572,8 @@ Add overlays and report a proper flycheck status."
         (setq flycheck-current-process process)
         (setq flycheck-pending-output nil)
         ;; Remember the patterns to use to parse the output of this process
-        (setq flycheck-current-patterns (flycheck-get-error-patterns properties))
+        (setq flycheck-current-patterns
+              (flycheck-get-error-patterns properties))
         ;; Register handlers for the process
         (set-process-filter process 'flycheck-receive-checker-output)
         (set-process-sentinel process 'flycheck-handle-signal))
