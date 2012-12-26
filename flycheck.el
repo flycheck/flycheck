@@ -614,10 +614,11 @@ Start a syntax check if a new line has been inserted into the buffer."
   "Check syntax in the current buffer."
   (interactive)
   (flycheck-clear)
-  (when (and flycheck-mode (not (flycheck-running-p)))
-    (let ((properties (flycheck-get-checker-for-buffer)))
-      (when properties
-        (flycheck-start-checker properties)))))
+  (if flycheck-mode
+      (when (not (flycheck-running-p))
+        (let ((properties (flycheck-get-checker-for-buffer)))
+          (when properties (flycheck-start-checker properties))))
+    (error "Flycheck mode disabled")))
 
 (defun flycheck-buffer-safe ()
   "Safely check syntax in the current buffer.
