@@ -6,25 +6,21 @@ Flycheck is flymake reloaded with
   patterns),
 - a much nicer and easier, declarative syntax for checker definitions (instead
   of init functions)
-- and a bunch of ready-to-use syntax checkers for various languages (instead of
-  broken checkers using non-existing tools).
+- a bunch of ready-to-use syntax checkers for various languages (instead of
+  broken checkers using non-existing tools)
+- and a clean, concise and understandable implementation (instead of a almost 2k
+  line mess of spaghetti code).
 
 
 ** Motivation
 
-GNU Emacs has a built-in on-the-fly syntax checker named Flymake.  Flymake does
-a good job on the actual on-the-fly syntax checking, but its built-in checkers
-are out-dated and broken, and adding support for new checkers is cumbersome.
-
-Flycheck is a new mode that aims to replace Flymake where it is broken while
-re-using its good parts.  Hence, it features a new, declarative API to implement
-new syntax checkers, and an improved customization interface based on the major
-mode of buffers, but re-uses flymake to do the actual syntax checking.
+Get rid of flymake which is utterly broken.
 
 
 ** Features
 
-- Provide syntax checkers for:
+- Automatic syntax check after saving or insertion of new lines
+- Built-in syntax checkers for:
   - CoffeeScript
   - CSS
   - Emacs Lisp
@@ -38,8 +34,13 @@ mode of buffers, but re-uses flymake to do the actual syntax checking.
   - SASS
   - Shell scripts (Bash, Dash and Zsh)
   - TeX/LaTeX
-- Easy customization by a single variable =flycheck-checkers=
+- Easy customization (see =flycheck-checkers=)
 - Easy declarative API to define new syntax checkers
+
+Compared to flymake these features are currently *missing*
+
+- Jump to next/previous error
+- Show error message under cursor (as provided by flymake-cursor)
 
 
 ** Installation
@@ -63,18 +64,31 @@ Enable =flycheck-mode= in your ~init.el~ file.
 
 #+BEGIN_SRC emacs-lisp
   ;; Enable flymake for all files
-  (add-hook 'find-file-hook 'flycheck-mode)
+  (add-hook 'find-file-hook 'flycheck-mode-on)
   ;; Enable flymake for Python only
-  (add-hook 'python-mode-hook 'flycheck-mode)
+  (add-hook 'python-mode-hook 'flycheck-mode-on)
 #+END_SRC
 
 Or do ~M-x flycheck-mode~ manually after visiting a file.
 
 On-the-fly syntax checking with flycheck will then start immediately.
 
-*Warning*: Flycheck is intentionally incompatible with classic Flymake.  Trying
-to enable one while the other is active /signals an error/.  Ideally you should not use
-=flymake-mode= anymore after you installed Flycheck.
+Use =flycheck-buffer= to check the current buffer manually, and =flycheck-clear=
+to clear all errors reported for the current buffer.
+
+
+** Mode line
+
+Flycheck indicates its state in the mode line:
+
+- ~FlyC~ :: No errors in the current buffer.
+- ~FlyC*~ :: The syntax check is currently running.
+- ~FlyC:3/4~ :: There are three errors and four warnings in the current buffer.
+- ~FlyC!~ :: The syntax check failed.  Inspect the ~*Messages*~ buffer for
+             details.
+- ~FlyC?~ :: The syntax check had a dubious result.  The definition of the
+             checker might be flawed.  Inspect the ~*Messages*~ buffer for
+             details.
 
 
 ** Checkers
@@ -133,11 +147,17 @@ In flycheck a syntax checker is a [[http://www.gnu.org/software/emacs/manual/htm
      the source file[fn:1]*, created in the system temporary directory.  Use
      =source-inplace= instead to force the copy being created in the *same
      directory as the original source file*.
-+ =:error-patterns= (/optional/) :: A single error pattern or a list of error
++ =:error-patterns= (/mandatory/) :: A single pattern or a list of error
      patterns to parse the output of =:command=.  Each pattern has the form
-     =(REGEXP FILE-IDX LINE-IDX COL-IDX ERR-TEXT-IDX)=.  The patterns are tried
-     in order of declaration.  If omitted all patterns defined in
-     =flymake-err-line-patterns= are tried.
+     =(REGEXP FILE-IDX LINE-IDX COL-IDX ERR-TEXT-IDX LEVEL)=.  =REGEXP= is a
+     regular expression that matches a single error or warning.  It may match a
+     *multi-line* string.  =FILE-IDX=, =LINE-IDX=, =COL-IDX= and =ERR-TEXT-IDX=
+     are *indexes of match groups* that provide the file name, the line number,
+     the column number and the error message respectively.  Each of these may be
+     nil to indicate that the message does not provide the corresponding
+     information.  =LEVEL= is either =warning= or =error= and indicates the
+     *severity of this error*.  *All* patterns are applied in the order of
+     declaration to the *whole* output of the checker.
 + =:modes= (/optional/) :: A single major mode symbol or a list thereof.  If
      given the checker will only be used in any of these modes.
 + =:predicate= (/optional/) :: A form that if present is evaluated to determine
@@ -156,25 +176,22 @@ function is *invoked on each syntax check with no arguments*.
 
 *** Example
 
-Let's see this in action by explaining the definition of the [[http://coffeescript.org/][CoffeeScript]]
-checker included in flycheck.  This checker uses the [[www.coffeelint.org][CoffeeLint]] utility
-to perform the actual syntax check.
+Let's see this in action by explaining the definition of a [[http://python.org][Python]] checker
+included in flycheck.  This checker uses the [[http://pypi.python.org/pypi/pylint][pylint]] utility to perform the
+actual syntax check.
 
 First we declare the checker properties:
 
 #+BEGIN_SRC emacs-lisp
-  (defvar flycheck-checker-coffee
+  (defvar flycheck-checker-python-pylint
     '(:command
-      '("coffeelint" "--csv" source)
+      ("epylint" source-inplace)
       :error-patterns
-      (("SyntaxError: \\(.*\\) on line \\([0-9]+\\)" nil 2 nil 1)
-       ("\\(.+\\),\\([0-9]+\\),\\(?:warn\\|error\\),\\(.+\\)" 1 2 nil 3))
-      :modes coffee-mode))
+      (("^\\(.*\\):\\([0-9]+\\): Warning (W.*): \\(.*\\)$" 1 2 nil 3 warning)
+       ("^\\(.*\\):\\([0-9]+\\): Error (E.*): \\(.*\\)$" 1 2 nil 3 error)
+       ("^\\(.*\\):\\([0-9]+\\): \\[F\\] \\(.*\\)$" 1 2 nil 3 error))
+      :modes python-mode))
 #+END_SRC
-
-As you can see, we declare via =:modes= that this checker it is to be enabled in
-[[https://github.com/defunkt/coffee-mode][coffee-mode]].  More complicated predicates for enabled checkers can be
-implemented via the =:predicate= property.
 
 We specify the command to execute in this mode in =:command=.  It is a
 straight-forward list with the executable name as first element and some
@@ -182,28 +199,23 @@ subsequent arguments.  The symbol =source= is automatically replaced with the
 name of the file to check.  Note that a checker is not enabled if its executable
 does not exist (as by =executable-find=).
 
-Since ~coffeelint~ outputs errors in a CSV format, which is rather unusual, we
-also need custom =:error-patterns= to extract the error location and message
-from the ~coffeelint~ output.  An error pattern is a list containing a regular
-expression that matches the error, and indexes of groups that match the file
-name, the line number, the column number and the error message respectively.
-=:error-patterns= allows for a single error pattern, or a list of such error
-patterns, in case the checker outputs messages in various formats.
+Next we give a list of error patterns to extract error location and message from
+the ~epylint~ output.  An error pattern is a list containing a regular
+expression that matches the error, indexes of groups that match the file name,
+the line number, the column number and the error message respectively, and an
+error level (either =warning= or =error=).  As you can see ~epylint~ emits both
+errors and warnings.
 
-If =:error-patterns= is omitted, all patterns defined in
-=flymake-err-line-patterns= are tried.  This variable contains patterns for a
-wide range of error format, including all those from ~compile.el~.  Thus, if
-your checker works with ~M-x compile~, there is a good chance that predefined
-patterns already understand this output.
+Eventually we declare that the checker is to be used in =python-mode=.
 
 Now we only need to register this error checker for use with
 
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'flycheck-checkers 'flycheck-checker-coffee)
+  (add-to-list 'flycheck-checkers 'flycheck-checker-python-pylint)
 #+END_SRC
 
-Assuming that =flycheck-mode= is enabled [[(see Usage]]), CoffeeScript will now be
-syntax-checked on the fly in =coffee-mode=.
+Assuming that =flycheck-mode= is enabled [[(see Usage]]), Python source code will
+now be syntax-checked on the fly in =pyton-mode=.
 
 Some checkers have more complicated conditions for whether they are to be used
 or not.  For instance, syntax checking in =sh-mode= needs to use different
@@ -215,15 +227,17 @@ active:
   (defvar flycheck-checker-zsh
     '(:command
       ("zsh" "-n" "-d" "-f" source)
+      :error-patterns
+      (("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 error))
       :modes sh-mode
       :predicate (eq sh-shell 'zsh)))
 #+END_SRC
 
-As you can see we declare that the checker is to be used in =sh-mode=, but we
-also give a =:predicate= that checks the value of =sh-shell=.  The predicate is
-simply a form that is evaluated whenever a syntax check is to be performed. Thus
-this checker will only be enabled if the current mode is =sh-mode= *and*
-=sh-shell= is bound to the symbol =zsh=.
+We declare that the checker is to be used in =sh-mode= *and* if a Zsh shell
+script is being edited.  The =predicate= is simply an Emacs Lisp form that is
+evaluated whenever flycheck tries to use the checker for the current
+buffer. If both =:modes= and =:predicate= are given, *both* must match for the
+checker to be used.
 
 
 ** Further help
