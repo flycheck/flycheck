@@ -531,10 +531,11 @@ Add overlays and report a proper flycheck status."
 (defun flycheck-handle-signal (process event)
   "Handle a syntax checking PROCESS EVENT."
   (let* ((status (process-status process))
-        (source-buffer (process-buffer process))
-        (output (flycheck-get-output process))
-        (properties (process-get process :flycheck-checker))
-        (error-patterns (flycheck-get-error-patterns properties)))
+         (exit-status (process-exit-status process))
+         (source-buffer (process-buffer process))
+         (output (flycheck-get-output process))
+         (properties (process-get process :flycheck-checker))
+         (error-patterns (flycheck-get-error-patterns properties)))
     (when (memq status '(signal exit))
       (delete-process process)
       (when (buffer-live-p source-buffer)
@@ -547,7 +548,13 @@ Add overlays and report a proper flycheck status."
                   (flycheck-sanitize-errors
                    (flycheck-parse-output output (current-buffer)
                                           error-patterns)))
-            (flycheck-report-errors flycheck-current-errors))
+            (flycheck-report-errors flycheck-current-errors)
+            (when (and (/= exit-status 0) (not flycheck-current-errors))
+              ;; Report possibly flawed checker definition
+              (message "Checker %s returned non-zero exit code %s,\
+ but no errors from output: %s\nChecker definition probably flawed."
+                       properties exit-status output)
+              (flycheck-report-status "?")))
           ;; Clean up after the party
           (flycheck-post-cleanup))))))
 

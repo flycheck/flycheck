@@ -84,6 +84,9 @@ Flycheck indicates its state in the mode line:
 - ~FlyC:3/4~ :: There are three errors and four warnings in the current buffer.
 - ~FlyC!~ :: The syntax check failed.  Inspect the ~*Messages*~ buffer for
              details.
+- ~FlyC?~ :: The syntax check had a dubious result.  The definition of the
+             checker might be flawed.  Inspect the ~*Messages*~ buffer for
+             details.
 
 
 ** Checkers
