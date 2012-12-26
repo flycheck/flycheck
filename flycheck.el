@@ -570,16 +570,17 @@ Add overlays and report a proper flycheck status."
              (process (apply 'start-file-process
                              "flycheck" (current-buffer)
                              program args)))
-        ;; Report that flycheck is running
-        (flycheck-report-status "*")
+        ;; Remember this process
         (setq flycheck-current-process process)
-        (setq flycheck-pending-output nil)
-        ;; Remember the patterns to use to parse the output of this process
-        (setq flycheck-current-patterns
-              (flycheck-get-error-patterns properties))
         ;; Register handlers for the process
         (set-process-filter process 'flycheck-receive-checker-output)
-        (set-process-sentinel process 'flycheck-handle-signal))
+        (setq flycheck-pending-output nil)
+        (set-process-sentinel process 'flycheck-handle-signal)
+        ;; Report that flycheck is running
+        (flycheck-report-status "*")
+        ;; Remember the patterns to use to parse the output of this process
+        (setq flycheck-current-patterns
+              (flycheck-get-error-patterns properties)))
       (error
        ;; Indicate error status
        (flycheck-report-status "!")
