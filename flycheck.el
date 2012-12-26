@@ -503,10 +503,6 @@ Add overlays and report a proper flycheck status."
 
 
 ;; Process management
-(defvar flycheck-current-patterns nil
-  "Patterns to parse the output of the current process.")
-(make-variable-buffer-local 'flycheck-current-patterns)
-
 (defvar flycheck-current-process nil
   "The current syntax checking process.")
 (make-variable-buffer-local 'flycheck-current-process)
@@ -542,8 +538,10 @@ Add overlays and report a proper flycheck status."
 
 (defun flycheck-handle-signal (process event)
   "Handle a syntax checking PROCESS EVENT."
-  (let ((status (process-status process))
-        (source-buffer (process-buffer process)))
+  (let* ((status (process-status process))
+        (source-buffer (process-buffer process))
+        (properties (process-get process :flycheck-checker))
+        (error-patterns (flycheck-get-error-patterns properties)))
     (when (memq status '(signal exit))
       (delete-process process)
       (when (buffer-live-p source-buffer)
@@ -556,7 +554,7 @@ Add overlays and report a proper flycheck status."
               (setq flycheck-current-errors
                     (flycheck-sanitize-errors
                      (flycheck-parse-output output (current-buffer)
-                                            flycheck-current-patterns))))
+                                            error-patterns))))
             (flycheck-report-errors flycheck-current-errors))
           ;; Clean up after the party
           (flycheck-post-cleanup))))))
@@ -578,9 +576,8 @@ Add overlays and report a proper flycheck status."
         (set-process-sentinel process 'flycheck-handle-signal)
         ;; Report that flycheck is running
         (flycheck-report-status "*")
-        ;; Remember the patterns to use to parse the output of this process
-        (setq flycheck-current-patterns
-              (flycheck-get-error-patterns properties)))
+        ;; Attach checker information to the process
+        (process-put process :flycheck-checker properties))
       (error
        ;; Indicate error status
        (flycheck-report-status "!")
