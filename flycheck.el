@@ -288,15 +288,44 @@ Return a list of error patterns of the given checker."
         patterns
       (error "Invalid type for :error-patterns: %S" patterns))))
 
+(defvar flycheck-last-checker nil
+  "The last checker used for the current buffer.")
+(make-variable-buffer-local 'flycheck-last-checker)
+
+(defun flycheck-try-last-checker-for-buffer ()
+  "Try the last checker for the current buffer.
+
+Return the properties of the last checker if it may be used, or
+nil otherwise."
+  ;; We should not use the last checker if it was removed from the list of
+  ;; allowed checkers in the meantime
+  (when (memq flycheck-last-checker flycheck-checkers)
+    (let ((last-checker (flycheck-get-checker-properties
+                         flycheck-last-checker)))
+      ;; Only use the last checker if we really can use it
+      (when (flycheck-may-use-checker last-checker)
+        last-checker))))
+
+(defun flycheck-get-new-checker-for-buffer ()
+  "Find a new checker for the current buffer.
+
+If a checker is found set `flycheck-last-checker' to re-use this
+checker for the next check.
+
+Return the properties of the checker or nil otherwise."
+  (dolist (checker flycheck-checkers)
+    (let ((properties (flycheck-get-checker-properties checker)))
+      (when (flycheck-may-use-checker properties)
+        (setq flycheck-last-checker checker)
+        (return properties)))))
+
 (defun flycheck-get-checker-for-buffer ()
   "Find the checker for the current buffer.
 
 Return the checker properties if there is a checker for the
 current buffer, or nil otherwise."
-  (dolist (checker flycheck-checkers)
-    (let ((properties (flycheck-get-checker-properties checker)))
-      (when (flycheck-may-use-checker properties)
-        (return properties)))))
+  (let ((last-checker (flycheck-try-last-checker-for-buffer)))
+    (or last-checker (flycheck-get-new-checker-for-buffer))))
 
 
 ;; Error API
