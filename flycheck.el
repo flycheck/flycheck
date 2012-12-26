@@ -638,6 +638,7 @@ Use when checking buffers automatically."
 
 (defvar flycheck-mode-line nil
   "The mode line lighter of variable `flycheck-mode'.")
+(make-variable-buffer-local 'flycheck-mode-line)
 
 (defun flycheck-report-status (status)
   "Report flycheck STATUS."
