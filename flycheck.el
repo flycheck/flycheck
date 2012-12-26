@@ -239,7 +239,7 @@ Return t if so, or nil otherwise."
 (defun flycheck-clean-substituted-files ()
   "Remove all substituted files."
   (dolist (file-name flycheck-substituted-files)
-    (when (file-exists-p file-name)
+    (ignore-errors
       (delete-file file-name))
     (setq flycheck-substituted-files nil)))
 
