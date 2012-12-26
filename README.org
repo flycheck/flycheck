@@ -17,7 +17,8 @@ Get rid of flymake which is utterly broken.
 
 ** Features
 
-- Provide syntax checkers for:
+- Automatic syntax check after saving or insertion of new lines
+- Built-in syntax checkers for:
   - CoffeeScript
   - CSS
   - Emacs Lisp
@@ -31,8 +32,13 @@ Get rid of flymake which is utterly broken.
   - SASS
   - Shell scripts (Bash, Dash and Zsh)
   - TeX/LaTeX
-- Easy customization by a single variable =flycheck-checkers=
+- Easy customization (see =flycheck-checkers=)
 - Easy declarative API to define new syntax checkers
+
+Compared to flymake these features are currently *missing*
+
+- Jump to next/previous error
+- Show error message under cursor (as provided by flymake-cursor)
 
 
 ** Installation
