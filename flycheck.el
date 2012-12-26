@@ -519,6 +519,14 @@ Add overlays and report a proper flycheck status."
   "A list of outputs by the current syntax checking process.")
 (make-variable-buffer-local 'flycheck-pending-output)
 
+(defun flycheck-post-cleanup ()
+  "Cleanup after a syntax check."
+  ;; Clean temporary copies of the buffer
+  (flycheck-clean-substituted-files)
+  ;; Clean status variables (pending output, process, etc.)
+  (setq flycheck-pending-output nil
+        flycheck-current-process nil))
+
 (defun flycheck-receive-checker-output (process output)
   "Receive a syntax checking PROCESS OUTPUT."
   (let ((source-buffer (process-buffer process)))
@@ -530,27 +538,25 @@ Add overlays and report a proper flycheck status."
 
 (defun flycheck-handle-signal (process event)
   "Handle a syntax checking PROCESS EVENT."
-  (let ((status (process-status process)))
+  (let ((status (process-status process))
+        (source-buffer (process-buffer process)))
     (when (memq status '(signal exit))
-      (let ((source-buffer (process-buffer process)))
-        (when (buffer-live-p source-buffer)
-          ;; Only parse and show errors if the mode is still active
-          (with-current-buffer source-buffer
-            (flycheck-report-status "")
-            (delete-process process)
-            (setq flycheck-current-process nil)
-            (when flycheck-mode
-              ;; Parse error messages if flycheck mode is active
-              (let ((output (apply #'concat
-                                   (nreverse flycheck-pending-output))))
-                (setq flycheck-current-errors
-                      (flycheck-sanitize-errors
-                       (flycheck-parse-output output (current-buffer)
-                                              flycheck-current-patterns))))
-              (setq flycheck-pending-output nil)
-              (flycheck-report-errors flycheck-current-errors))
-            ;; Remove substituted files
-            (flycheck-clean-substituted-files)))))))
+      (delete-process process)
+      (when (buffer-live-p source-buffer)
+        ;; Only parse and show errors if the mode is still active
+        (with-current-buffer source-buffer
+          (flycheck-report-status "")
+          (when flycheck-mode
+            ;; Parse error messages if flycheck mode is active
+            (let ((output (apply #'concat
+                                 (nreverse flycheck-pending-output))))
+              (setq flycheck-current-errors
+                    (flycheck-sanitize-errors
+                     (flycheck-parse-output output (current-buffer)
+                                            flycheck-current-patterns))))
+            (flycheck-report-errors flycheck-current-errors))
+          ;; Clean up after the party
+          (flycheck-post-cleanup))))))
 
 (defun flycheck-start-checker (properties)
   "Start the syntax checker defined by PROPERTIES."
