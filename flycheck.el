@@ -560,21 +560,28 @@ Add overlays and report a proper flycheck status."
 
 (defun flycheck-start-checker (properties)
   "Start the syntax checker defined by PROPERTIES."
-  (let* ((command (flycheck-get-substituted-command properties))
-         (program (car command))
-         (args (cdr command))
-         (process (apply 'start-file-process
-                         "flycheck" (current-buffer)
-                         program args)))
-    ;; Report that flycheck is running
-    (flycheck-report-status "*")
-    (setq flycheck-current-process process)
-    (setq flycheck-pending-output nil)
-    ;; Remember the patterns to use to parse the output of this process
-    (setq flycheck-current-patterns (flycheck-get-error-patterns properties))
-    ;; Register handlers for the process
-    (set-process-filter process 'flycheck-receive-checker-output)
-    (set-process-sentinel process 'flycheck-handle-signal)))
+  (condition-case err
+      (let* ((command (flycheck-get-substituted-command properties))
+             (program (car command))
+             (args (cdr command))
+             (process (apply 'start-file-process
+                             "flycheck" (current-buffer)
+                             program args)))
+        ;; Report that flycheck is running
+        (flycheck-report-status "*")
+        (setq flycheck-current-process process)
+        (setq flycheck-pending-output nil)
+        ;; Remember the patterns to use to parse the output of this process
+        (setq flycheck-current-patterns (flycheck-get-error-patterns properties))
+        ;; Register handlers for the process
+        (set-process-filter process 'flycheck-receive-checker-output)
+        (set-process-sentinel process 'flycheck-handle-signal))
+      (error
+       ;; Indicate error status
+       (flycheck-report-status "!")
+       (flycheck-post-cleanup)
+       ;; Re-signal the error
+       (signal (car err) (cdr err)))))
 
 (defun flycheck-stop-checker ()
   "Stop any syntax checker for the current buffer."
