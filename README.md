@@ -74,13 +74,17 @@ Enable `flycheck-mode` in your `init.el` file.
 (add-hook 'python-mode-hook 'flycheck-mode-on)
 ```
 
-Or do `M-x flycheck-mode` manually after visiting a file.  On-the-fly syntax
-checking with flycheck will then start immediately.
+Or do `M-x flycheck-mode` manually after visiting a file.
 
-The following commands are provided:
+With `flycheck-mode` enabled the buffer is automatically checked on-the-fly.
+You can also manually check the buffer with `M-x flycheck-buffer`.
 
-- `flycheck-buffer`: Syntax-check the current buffer
-- `flycheck-clear`: Clear all errors reported in the current buffer.
+Errors and warnings from the checker are reported in the mode line (see
+[Mode line](#mode-line)) and highlighted in the buffer.  To clear all error
+information use `M-x flycheck-clear`.
+
+A suitable checker will be selected automatically from `flycheck-checkers` (see
+[Customization](#customization)).
 
 
 Mode line
