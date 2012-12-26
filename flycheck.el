@@ -564,10 +564,6 @@ Add overlays and report a proper flycheck status."
     (flycheck-report-status "*")
     (setq flycheck-current-process process)
     (setq flycheck-pending-output nil)
-    ;; Clean previous error information
-    (setq flycheck-current-errors nil)
-    ;; Clean previous overlays
-    (flycheck-remove-overlays)
     ;; Remember the patterns to use to parse the output of this process
     (setq flycheck-current-patterns (flycheck-get-error-patterns properties))
     ;; Register handlers for the process
@@ -590,6 +586,7 @@ Add overlays and report a proper flycheck status."
 (defun flycheck-buffer ()
   "Check syntax in the current buffer."
   (interactive)
+  (flycheck-clear)
   (when (and flycheck-mode (not (flycheck-running-p)))
     (let ((properties (flycheck-get-checker-for-buffer)))
       (when properties
