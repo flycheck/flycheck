@@ -183,7 +183,7 @@ value is **retrieved anew on each syntax check**.  In the latter case the
 function is **invoked on each syntax check with no arguments**.
 
 
-*** Example
+### Example
 
 Let's see this in action by explaining the definition of a [Python][] checker
 included in flycheck.  This checker uses the [pylint][] utility to perform the
