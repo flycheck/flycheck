@@ -132,11 +132,12 @@ found in DIRECTORY or any of its ancestors."
 
 First try to find the file in the buffer's directory and any of
 its ancestors (see `flycheck-find-file-in-tree').  If that fails
-try to find the file in the home directory.  If the file is not
-found anywhere return nil."
-  (let* ((directory (file-name-directory buffer-file-name))
-         (filepath (flycheck-find-file-in-tree filename directory)))
-    (or filepath
+or if the buffer has no `buffer-file-name' try to find the file
+in the home directory.  If the file is not found anywhere return
+nil."
+  (let ((directory (when (buffer-file-name)
+                     (file-name-directory (buffer-file-name)))))
+    (or (when directory (flycheck-find-file-in-tree filename directory))
         (let ((home-path (expand-file-name filename)))
           (when (file-exists-p home-path) home-path)))))
 
