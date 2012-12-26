@@ -511,35 +511,28 @@ Add overlays and report a proper flycheck status."
   "Determine whether a syntax check is running."
   (when flycheck-current-process t))
 
-(defvar flycheck-pending-output nil
-  "A list of outputs by the current syntax checking process.")
-(make-variable-buffer-local 'flycheck-pending-output)
-
 (defun flycheck-post-cleanup ()
   "Cleanup after a syntax check."
   ;; Clean temporary copies of the buffer
   (flycheck-clean-substituted-files)
-  ;; Clean status variables (pending output, process, etc.)
-  (setq flycheck-pending-output nil
-        flycheck-current-process nil))
+  (setq flycheck-current-process nil))
 
 (defun flycheck-receive-checker-output (process output)
   "Receive a syntax checking PROCESS OUTPUT."
-  (let ((source-buffer (process-buffer process)))
-    (when (buffer-live-p source-buffer)
-      ;; Aggregate output in the right buffer
-      (with-current-buffer source-buffer
-        (setq flycheck-pending-output
-              (cons output flycheck-pending-output))))))
+  (let ((pending-output (process-get process :flycheck-pending-output)))
+    (process-put process :flycheck-pending-output
+                 (cons output pending-output))))
 
-(defun flycheck-collect-output ()
-  "Collect and return the output of the current checker."
-  (apply #'concat (nreverse flycheck-pending-output)))
+(defun flycheck-get-output (process)
+  "Get the complete output of PROCESS."
+  (let ((pending-output (process-get process :flycheck-pending-output)))
+    (apply #'concat (nreverse pending-output))))
 
 (defun flycheck-handle-signal (process event)
   "Handle a syntax checking PROCESS EVENT."
   (let* ((status (process-status process))
         (source-buffer (process-buffer process))
+        (output (flycheck-get-output process))
         (properties (process-get process :flycheck-checker))
         (error-patterns (flycheck-get-error-patterns properties)))
     (when (memq status '(signal exit))
@@ -550,11 +543,10 @@ Add overlays and report a proper flycheck status."
           (flycheck-report-status "")
           (when flycheck-mode
             ;; Parse error messages if flycheck mode is active
-            (let ((output (flycheck-collect-output)))
-              (setq flycheck-current-errors
-                    (flycheck-sanitize-errors
-                     (flycheck-parse-output output (current-buffer)
-                                            error-patterns))))
+            (setq flycheck-current-errors
+                  (flycheck-sanitize-errors
+                   (flycheck-parse-output output (current-buffer)
+                                          error-patterns)))
             (flycheck-report-errors flycheck-current-errors))
           ;; Clean up after the party
           (flycheck-post-cleanup))))))
@@ -572,7 +564,6 @@ Add overlays and report a proper flycheck status."
         (setq flycheck-current-process process)
         ;; Register handlers for the process
         (set-process-filter process 'flycheck-receive-checker-output)
-        (setq flycheck-pending-output nil)
         (set-process-sentinel process 'flycheck-handle-signal)
         ;; Report that flycheck is running
         (flycheck-report-status "*")
