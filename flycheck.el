@@ -183,6 +183,12 @@ is signaled."
    (t (error "Invalid checker, expected variable or function, but was: %S"
              checker))))
 
+(defun flycheck-registered-checker-p (checker)
+  "Determine whether CHECKER is registered.
+
+A checker is registered if it is contained in `flycheck-checkers'."
+  (memq checker flycheck-checkers))
+
 (defun flycheck-valid-checker-p (properties)
   "Check whether the checker PROPERTIES are valid.
 
@@ -299,7 +305,7 @@ Return the properties of the last checker if it may be used, or
 nil otherwise."
   ;; We should not use the last checker if it was removed from the list of
   ;; allowed checkers in the meantime
-  (when (memq flycheck-last-checker flycheck-checkers)
+  (when (flycheck-registered-checker-p flycheck-last-checker)
     (let ((last-checker (flycheck-get-checker-properties
                          flycheck-last-checker)))
       ;; Only use the last checker if we really can use it
