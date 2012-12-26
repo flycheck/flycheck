@@ -536,6 +536,10 @@ Add overlays and report a proper flycheck status."
         (setq flycheck-pending-output
               (cons output flycheck-pending-output))))))
 
+(defun flycheck-collect-output ()
+  "Collect and return the output of the current checker."
+  (apply #'concat (nreverse flycheck-pending-output)))
+
 (defun flycheck-handle-signal (process event)
   "Handle a syntax checking PROCESS EVENT."
   (let ((status (process-status process))
@@ -548,8 +552,7 @@ Add overlays and report a proper flycheck status."
           (flycheck-report-status "")
           (when flycheck-mode
             ;; Parse error messages if flycheck mode is active
-            (let ((output (apply #'concat
-                                 (nreverse flycheck-pending-output))))
+            (let ((output (flycheck-collect-output)))
               (setq flycheck-current-errors
                     (flycheck-sanitize-errors
                      (flycheck-parse-output output (current-buffer)
