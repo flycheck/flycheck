@@ -156,17 +156,18 @@ In flycheck a syntax checker is a [property list][] with the following keys (the
   the source file**, created in the system temporary directory.  Use
   `source-inplace` instead to force the copy being created in the **same
   directory as the original source file**.
-- `:error-patterns` (*mandatory*): A single pattern or a list of error patterns
-  to parse the output of `:command`.  Each pattern has the form `(REGEXP
-  FILE-IDX LINE-IDX COL-IDX ERR-TEXT-IDX LEVEL)`.  `REGEXP` is a regular
-  expression that matches a single error or warning.  It may match a
-  **multi-line** string.  `FILE-IDX`, `LINE-IDX`, `COL-IDX` and `ERR-TEXT-IDX`
-  are **indexes of match groups** that provide the file name, the line number,
-  the column number and the error message respectively.  Each of these may be
-  nil to indicate that the message does not provide the corresponding
-  information.  `LEVEL` is either `warning` or `error` and indicates the
-  **severity of this error**.  **All** patterns are applied in the order of
-  declaration to the **whole** output of the checker.
+- `:error-patterns` (*mandatory*): A list of error patterns to parse the output
+  of `:command`.  Each pattern has the form `(REGEXP FILE-IDX LINE-IDX COL-IDX
+  ERR-TEXT-IDX LEVEL)`:
+  - `REGEXP` is a regular expression that matches a single
+    error or warning.  It may match a **multi-line** string.
+  - `FILE-IDX`, `LINE-IDX`, `COL-IDX` and `ERR-TEXT-IDX` are **indexes of match
+    groups** that provide the file name, the line number, the column number and
+    the error message respectively.  Each of these may be nil to indicate that
+    the message does not provide the corresponding information.
+  - `LEVEL` is either `warning` or `error` and indicates the **severity of this
+    error**.  **All** patterns are applied in the order of declaration to the
+    **whole** output of the checker.
 - `:modes` (*optional*): A single major mode symbol or a list thereof.  If given
   the checker will only be used in any of these modes.
 - `:predicate` (*optional*): A form that if present is evaluated to determine
