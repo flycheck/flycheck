@@ -66,6 +66,7 @@
     flycheck-checker-python-pylint
     flycheck-checker-python-pyflakes
     flycheck-checker-ruby
+    flycheck-checker-sass
     flycheck-checker-sh
     flycheck-checker-tex-chktex
     flycheck-checker-tex-lacheck
@@ -804,6 +805,16 @@ If .jshintrc is not found run jshint with default settings."
     :error-patterns
     (("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 error))
     :modes ruby-mode))
+
+(defvar flycheck-checker-sass
+  '(:command
+    ("sass" "-c" source)
+    :error-patterns
+    (("^Syntax error on line \\([0-9]+\\): \\(.*\\)$" nil 1 nil 2 error)
+     ("^WARNING on line \\([0-9]+\\) of .*?:\r?\n\\(.*\\)$" nil 1 nil 2 warning)
+     ("^Syntax error: \\(.*\\)\r?\n        on line \\([0-9]+\\) of .*?$"
+      nil 2 nil 1 error))
+    :modes sass-mode))
 
 (defvar flycheck-checker-sh
   '(:command
