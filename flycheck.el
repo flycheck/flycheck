@@ -436,6 +436,11 @@ Add overlays and report a proper flycheck status."
   "A list of all errors and warnings in the current buffer.")
 (make-variable-buffer-local 'flycheck-current-errors)
 
+(defun flycheck-clear-errors ()
+  "Remove all error information from the current buffer."
+  (setq flycheck-current-errors nil)
+  (flycheck-report-status ""))
+
 
 ;; Overlay management
 (defface flycheck-error-face
@@ -576,6 +581,12 @@ Add overlays and report a proper flycheck status."
 
 
 ;; Syntax checking mode
+(defun flycheck-clear ()
+  "Clear all errors in the current buffer."
+  (interactive)
+  (flycheck-remove-overlays)
+  (flycheck-clear-errors))
+
 (defun flycheck-buffer ()
   "Check syntax in the current buffer."
   (interactive)
