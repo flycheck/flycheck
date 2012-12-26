@@ -12,14 +12,7 @@ Flycheck is flymake reloaded with
 
 ** Motivation
 
-GNU Emacs has a built-in on-the-fly syntax checker named Flymake.  Flymake does
-a good job on the actual on-the-fly syntax checking, but its built-in checkers
-are out-dated and broken, and adding support for new checkers is cumbersome.
-
-Flycheck is a new mode that aims to replace Flymake where it is broken while
-re-using its good parts.  Hence, it features a new, declarative API to implement
-new syntax checkers, and an improved customization interface based on the major
-mode of buffers, but re-uses flymake to do the actual syntax checking.
+Get rid of flymake which is utterly broken.
 
 
 ** Features
