@@ -228,7 +228,7 @@ Now we only need to register this error checker for use with
 ```
 
 Assuming that `flycheck-mode` is enabled (see [Usage](#usage)), Python source
-code will now be syntax-checked on the fly in `pyton-mode`.
+code will now be syntax-checked on the fly in `python-mode`.
 
 Some checkers have more complicated conditions for whether they are to be used
 or not.  For instance, syntax checking in `sh-mode` needs to use different
