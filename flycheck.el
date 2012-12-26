@@ -585,8 +585,7 @@ BEG and END mark the beginning and end of the change text.  LEN is ignored.
 Start a syntax check if a new line has been inserted into the buffer."
   (let ((new-text (buffer-substring beg end)))
     (when (and flycheck-mode (s-contains? "\n" new-text))
-      (with-demoted-errors
-        (flycheck-buffer)))))
+      (flycheck-buffer-safe))))
 
 (defun flycheck-clear ()
   "Clear all errors in the current buffer."
@@ -602,6 +601,18 @@ Start a syntax check if a new line has been inserted into the buffer."
     (let ((properties (flycheck-get-checker-for-buffer)))
       (when properties
         (flycheck-start-checker properties)))))
+
+(defun flycheck-buffer-safe ()
+  "Safely check syntax in the current buffer.
+
+Like `flycheck-buffer', but do not check buffers that need not be
+checked (i.e. read-only buffers) and demote all errors to messages.
+
+Use when checking buffers automatically."
+  (if (not buffer-read-only)
+      (with-demoted-errors
+        (flycheck-buffer))
+    (message "flycheck will not check read-only buffers.")))
 
 ;;;###autoload
 (defconst flycheck-mode-line-lighter " FlyC"
@@ -628,16 +639,16 @@ Start a syntax check if a new line has been inserted into the buffer."
     (flycheck-report-status "")
 
     ;; Configure hooks
-    (add-hook 'after-save-hook 'flycheck-buffer nil t)
+    (add-hook 'after-save-hook 'flycheck-buffer-safe nil t)
     (add-hook 'after-change-functions 'flycheck-handle-change nil t)
 
     ;; Start an initial syntax check
-    (flycheck-buffer))
+    (flycheck-buffer-safe))
    (t
     (flycheck-clear)
 
     ;; Remove hooks
-    (remove-hook 'after-save-hook 'flycheck-buffer t)
+    (remove-hook 'after-save-hook 'flycheck-buffer-safe t)
     (remove-hook 'after-change-functions 'flycheck-handle-change t)
 
     (flycheck-stop-checker))))
