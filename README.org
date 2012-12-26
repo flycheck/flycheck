@@ -62,9 +62,9 @@ Enable =flycheck-mode= in your ~init.el~ file.
 
 #+BEGIN_SRC emacs-lisp
   ;; Enable flymake for all files
-  (add-hook 'find-file-hook 'flycheck-mode)
+  (add-hook 'find-file-hook 'flycheck-mode-on)
   ;; Enable flymake for Python only
-  (add-hook 'python-mode-hook 'flycheck-mode)
+  (add-hook 'python-mode-hook 'flycheck-mode-on)
 #+END_SRC
 
 Or do ~M-x flycheck-mode~ manually after visiting a file.
