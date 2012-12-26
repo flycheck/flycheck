@@ -794,7 +794,13 @@ If .jshintrc is not found run jshint with default settings."
     :modes python-mode))
 
 (defvar flycheck-checker-python-pylint
-  '(:command ("epylint" source-inplace) :modes python-mode))
+  '(:command
+    ("epylint" source-inplace)
+    :error-patterns
+    (("^\\(.*\\):\\([0-9]+\\): Warning (W.*): \\(.*\\)$" 1 2 nil 3 warning)
+     ("^\\(.*\\):\\([0-9]+\\): Error (E.*): \\(.*\\)$" 1 2 nil 3 error)
+     ("^\\(.*\\):\\([0-9]+\\): \\[F\\] \\(.*\\)$" 1 2 nil 3 error))
+    :modes python-mode))
 
 (defvar flycheck-checker-python-pyflakes
   '(:command ("pyflakes" source-inplace) :modes python-mode))
