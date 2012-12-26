@@ -284,12 +284,9 @@ PROPERTIES is a property list with information about the checker.
 
 Return a list of error patterns of the given checker."
   (let ((patterns (plist-get properties :error-patterns)))
-    (cond
-     ;; A single pattern was given, wrap it up in a list
-     ((flycheck-error-pattern-p patterns) (list patterns))
-     ;; A list of patterns
-     ((flycheck-error-patterns-list-p patterns) patterns)
-     (t (error "Invalid type for :error-patterns: %S" patterns)))))
+    (if (flycheck-error-patterns-list-p patterns)
+        patterns
+      (error "Invalid type for :error-patterns: %S" patterns))))
 
 (defun flycheck-get-checker-for-buffer ()
   "Find the checker for the current buffer.
@@ -701,8 +698,8 @@ Use when checking buffers automatically."
   '(:command
     ("csslint" "--format=compact" source)
     :error-patterns
-    ("^\\(.*\\): line \\([[:digit:]]+\\), col \\([[:digit:]]+\\), \\(.+\\)$"
-     1 2 3 4 error)
+    (("^\\(.*\\): line \\([[:digit:]]+\\), col \\([[:digit:]]+\\), \\(.+\\)$"
+      1 2 3 4 error))
     :modes css-mode))
 
 (defconst flycheck-checker-emacs-lisp-check-form
@@ -749,7 +746,7 @@ Use when checking buffers automatically."
   '(:command
     ("haml" "-c" source)
     :error-patterns
-    ("^Syntax error on line \\([0-9]+\\): \\(.*\\)$" nil 1 nil 2 error)
+    (("^Syntax error on line \\([0-9]+\\): \\(.*\\)$" nil 1 nil 2 error))
     :modes haml-mode))
 
 (defvar flycheck-checker-html
