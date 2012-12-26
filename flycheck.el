@@ -800,7 +800,11 @@ If .jshintrc is not found run jshint with default settings."
     :modes python-mode))
 
 (defvar flycheck-checker-python-pyflakes
-  '(:command ("pyflakes" source-inplace) :modes python-mode))
+  '(:command
+    ("pyflakes" source-inplace)
+    :error-patterns
+    (("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 warning))
+    :modes python-mode))
 
 (defvar flycheck-checker-ruby
   '(:command
