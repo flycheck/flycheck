@@ -40,7 +40,7 @@ Features
 - Easy customization (see `flycheck-checkers`)
 - Easy declarative API to define new syntax checkers
 
-Compared to flymake these features are currently **missing**
+Compared to flymake these features are currently **missing**:
 
 - Jump to next/previous error
 - Show error message under cursor (as provided by flymake-cursor)
