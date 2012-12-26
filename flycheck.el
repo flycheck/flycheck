@@ -785,7 +785,12 @@ If .jshintrc is not found run jshint with default settings."
     :modes php-mode))
 
 (defvar flycheck-checker-python-flake8
-  '(:command ("flake8" source-inplace) :modes python-mode))
+  '(:command
+    ("flake8" source-inplace)
+    :error-patterns
+    (("^\\(.*?\\):\\([0-9]+\\):\\([0-9]*\\):? \\(E.*\\)$" 1 2 3 4 error)
+     ("^\\(.*?\\):\\([0-9]+\\):\\([0-9]*\\):? \\(W.*\\)$" 1 2 3 4 warning))
+    :modes python-mode))
 
 (defvar flycheck-checker-python-pylint
   '(:command ("epylint" source-inplace) :modes python-mode))
