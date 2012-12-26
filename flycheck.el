@@ -622,7 +622,7 @@ Add overlays and report a proper flycheck status."
     ;; Start an initial syntax check
     (flycheck-buffer))
    (t
-    (flycheck-remove-overlays)
+    (flycheck-clear)
 
     ;; Remove hooks
     (remove-hook 'after-save-hook 'flycheck-buffer t)
