@@ -6,8 +6,10 @@ Flycheck is flymake reloaded with
   patterns),
 - a much nicer and easier, declarative syntax for checker definitions (instead
   of init functions)
-- and a bunch of ready-to-use syntax checkers for various languages (instead of
-  broken checkers using non-existing tools).
+- a bunch of ready-to-use syntax checkers for various languages (instead of
+  broken checkers using non-existing tools)
+- and a clean, concise and understandable implementation (instead of a almost 2k
+  line mess of spaghetti code).
 
 
 ** Motivation
