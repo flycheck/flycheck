@@ -91,7 +91,7 @@ Return the path of the file."
   ;; temporary file, which in turn calls `jka-compr-write-region' for compressed
   ;; files. If `jka-compr-really-do-compress' is non-nil this function uses END
   ;; even though START is a string, hence breaking the `write-region' API that
-  ;; flymake relies on.  Report upstream!
+  ;; we rely on.  Report upstream!
   (let ((jka-compr-really-do-compress nil)
         (extension (when filename (file-name-extension filename))))
     (make-temp-file prefix nil
