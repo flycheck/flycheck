@@ -71,6 +71,9 @@ Or do ~M-x flycheck-mode~ manually after visiting a file.
 
 On-the-fly syntax checking with flycheck will then start immediately.
 
+Use =flycheck-buffer= to check the current buffer manually, and =flycheck-clear=
+to clear all errors reported for the current buffer.
+
 *Warning*: Flycheck is intentionally incompatible with classic Flymake.  Trying
 to enable one while the other is active /signals an error/.  Ideally you should not use
 =flymake-mode= anymore after you installed Flycheck.
