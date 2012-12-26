@@ -186,16 +186,13 @@ is signaled."
 (defun flycheck-valid-checker-p (properties)
   "Check whether the checker PROPERTIES are valid.
 
-A valid checker must have a :command, and at least one of :modes
-and :predicate.
-
-Signal an error if PROPERTIES are invalid.  Otherwise return t."
-  (unless (plist-get properties :command)
-    (error "Checker %S lacks :command" properties))
-  (unless (or (plist-get properties :modes)
-              (plist-get properties :predicate))
-    (error "Checker %S lacks :modes and :predicate" properties))
-  t)
+A valid checker must have a :command, :error-patterns, and at
+least one of :modes and :predicate."
+  (and
+   (plist-get properties :command)
+   (plist-get properties :error-patterns)
+   (or (plist-get properties :modes)
+       (plist-get properties :predicate))))
 
 (defun flycheck-check-modes (properties)
   "Check the :modes of PROPERTIES.
@@ -228,7 +225,8 @@ or nil otherwise."
 
 Return t if so, or nil otherwise."
   (unless (flycheck-valid-checker-p properties)
-    (error "Checker %s is not valid" properties))
+    (error "Checker %s is not valid.  Add :command, :error-patterns and :modes\
+ or :predicate" properties))
   (and (flycheck-valid-checker-p properties)
        (flycheck-check-modes properties)
        (flycheck-check-predicate properties)
@@ -286,13 +284,12 @@ PROPERTIES is a property list with information about the checker.
 
 Return a list of error patterns of the given checker."
   (let ((patterns (plist-get properties :error-patterns)))
-    (when patterns
-      (cond
-       ;; A single pattern was given, wrap it up in a list
-       ((flycheck-error-pattern-p patterns) (list patterns))
-       ;; A list of patterns
-       ((flycheck-error-patterns-list-p patterns) patterns)
-       (t (error "Invalid type for :error-patterns: %S" patterns))))))
+    (cond
+     ;; A single pattern was given, wrap it up in a list
+     ((flycheck-error-pattern-p patterns) (list patterns))
+     ;; A list of patterns
+     ((flycheck-error-patterns-list-p patterns) patterns)
+     (t (error "Invalid type for :error-patterns: %S" patterns)))))
 
 (defun flycheck-get-checker-for-buffer ()
   "Find the checker for the current buffer.
