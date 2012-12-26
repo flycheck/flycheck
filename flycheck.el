@@ -489,7 +489,7 @@ Add overlays and report a proper flycheck status."
   "Add overlays for ERRORS."
   (mapc #'flycheck-add-overlay errors))
 
-(defun flycheck-clean-overlays ()
+(defun flycheck-remove-overlays ()
   "Remove all flycheck overlays in the current buffer."
   (remove-overlays (point-min) (point-max) 'category
                    'flycheck-warning-overlay)
@@ -562,7 +562,7 @@ Add overlays and report a proper flycheck status."
     ;; Clean previous error information
     (setq flycheck-current-errors nil)
     ;; Clean previous overlays
-    (flycheck-clean-overlays)
+    (flycheck-remove-overlays)
     ;; Remember the patterns to use to parse the output of this process
     (setq flycheck-current-patterns (flycheck-get-error-patterns properties))
     ;; Register handlers for the process
@@ -614,7 +614,7 @@ Add overlays and report a proper flycheck status."
     ;; Start an initial syntax check
     (flycheck-buffer))
    (t
-    (flycheck-clean-overlays)
+    (flycheck-remove-overlays)
 
     ;; Remove hooks
     (remove-hook 'after-save-hook 'flycheck-buffer t)
