@@ -50,7 +50,7 @@ Installation
 ------------
 
 Install the ELPA package from [MELPA][] (bleeding edge snapshots) or
-[Marmalade][] (stable releases) with `M-x package-install flycheck`.
+[Marmalade][] (stable releases) with `M-x package-install RET flycheck`.
 
 Or [download][] the latest release and install `flycheck.el` with `M-x
 package-install-file`.
@@ -130,7 +130,7 @@ Customization
 
 ### Checker selection
 
-- `M-x customize-variable flycheck-checkers`: A list of all checkers. The
+- `M-x customize-variable RET flycheck-checkers`: A list of all checkers. The
   checkers are tried in the order of appearance in this list.  The first checker
   that supports the current mode and whose executable exists is used.  To change
   the preference of checkers, change their order in this list or remove entries
@@ -150,15 +150,15 @@ from `flycheck-checkers` via customization.
 
 ### Appearance
 
-- `M-x customize-variable flycheck-error-indicator`: Change the indicator at the
-  beginning of lines containing *errors*.  Defaults to `"⚠"`, set to `nil` to
-  disable indicators for error messages..
-- `M-x customize-variable flycheck-warning-indicator`: Change the indicator at
-  the beginning of lines containing *warnings*.  Defaults to `"⚠"`, set to `nil`
-  to disable indicators for warning messages.
-- `M-x customize-face flycheck-error-face`: Customize the face for error
+- `M-x customize-variable RET flycheck-error-indicator`: Change the indicator at
+  the beginning of lines containing *errors*.  Defaults to `"⚠"`, set to `nil`
+  to disable indicators for error messages..
+- `M-x customize-variable RET flycheck-warning-indicator`: Change the indicator
+  at the beginning of lines containing *warnings*.  Defaults to `"⚠"`, set to
+  `nil` to disable indicators for warning messages.
+- `M-x customize-face RET flycheck-error-face`: Customize the face for error
   highlights.  Inherits from `flymake-errline` by default.
-- `M-x customize-face flycheck-warning-face`: Customize the face for error
+- `M-x customize-face RET flycheck-warning-face`: Customize the face for error
   highlights.  Inherits from `flymake-warnline` by default.
 
 
