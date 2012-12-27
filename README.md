@@ -183,6 +183,8 @@ buffer.  For instance, to use `pyflakes` as checker in the current buffer, use
 
 - `M-x customize-variable RET flycheck-mode-hook`: Change functions to run after
   `flycheck-mode` is enabled.
+- `M-x customize-variable RET flycheck-after-syntax-check-hook`: Change
+  functions to run after each syntax check.
 
 
 Extending

@@ -145,6 +145,18 @@ was performed."
   :group 'flycheck
   :type 'hook)
 
+(defcustom flycheck-after-syntax-check-hook nil
+  "Hooks to run after each syntax check.
+
+This hook is run after the syntax check process finished, all
+error messages were parsed and properly reported (including
+overlay setup).
+
+Hooks are run with `with-demoted-errors', hence errors from hooks
+to not escape flycheck and cannot be caught outside."
+  :group 'flycheck
+  :type 'hook)
+
 
 ;; Utility functions
 (defun flycheck-temp-file-system (filename prefix)
@@ -693,7 +705,9 @@ Add overlays and report a proper flycheck status."
               (message "Checker %s returned non-zero exit code %s,\
  but no errors from output: %s\nChecker definition probably flawed."
                        properties exit-status output)
-              (flycheck-report-status "?")))
+              (flycheck-report-status "?"))
+            (with-demoted-errors
+              (run-hooks 'flycheck-after-syntax-check-hook)))
           ;; Clean up after the party
           (flycheck-post-cleanup))))))
 
