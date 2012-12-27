@@ -80,6 +80,17 @@ checker definition."
   :group 'flycheck
   :type '(repeat (symbol :tag "Checker")))
 
+(defface flycheck-error-face
+  '((t (:inherit flymake-errline)))
+  "Face for flycheck errors."
+  :group 'flycheck)
+
+(defface flycheck-warning-face
+  '((t (:inherit flymake-warnline)))
+  "Face for flycheck warnings."
+  :group 'flycheck)
+
+
 
 ;; Utility functions
 (defun flycheck-temp-file-system (filename prefix)
@@ -476,16 +487,6 @@ Add overlays and report a proper flycheck status."
 
 
 ;; Overlay management
-(defface flycheck-error-face
-  '((t (:inherit flymake-errline)))
-  "Face for flycheck errors."
-  :group 'flycheck)
-
-(defface flycheck-warning-face
-  '((t (:inherit flymake-warnline)))
-  "Face for flycheck warnings."
-  :group 'flycheck)
-
 (defconst flycheck-error-overlay nil
   "Overlay category for flycheck errors.")
 (put 'flycheck-error-overlay 'face 'flycheck-error-face)
