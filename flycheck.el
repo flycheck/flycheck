@@ -80,6 +80,30 @@ checker definition."
   :group 'flycheck
   :type '(repeat (symbol :tag "Checker")))
 
+(defcustom flycheck-error-indicator "⚠"
+  "Indicator for error messages.
+
+If set to a string it will be shown at the beginning of a line
+containing an error.  If nil no indicator is shown.
+
+Changing this variable does not take effect until a syntax check
+was performed."
+  :group 'flycheck
+  :type '(choice (const :tag "No indicator" nil)
+                 (string :tag "Indicator string")))
+
+(defcustom flycheck-warning-indicator "⚠"
+  "Indicator for warning messages.
+
+If set to a string it will be shown at the beginning of a line
+containing a warning.  If nil no indicator is shown.
+
+Changing this variable does not take effect until a syntax check
+was performed."
+  :group 'flycheck
+  :type '(choice (const :tag "No indicator" nil)
+                 (string :tag "Indicator string")))
+
 (defface flycheck-error-face
   '((t (:inherit flymake-errline)))
   "Face for flycheck errors."
@@ -89,7 +113,6 @@ checker definition."
   '((t (:inherit flymake-warnline)))
   "Face for flycheck warnings."
   :group 'flycheck)
-
 
 
 ;; Utility functions
@@ -491,20 +514,23 @@ Add overlays and report a proper flycheck status."
   "Overlay category for flycheck errors.")
 (put 'flycheck-error-overlay 'face 'flycheck-error-face)
 (put 'flycheck-error-overlay 'priority 100)
-(put 'flycheck-error-overlay 'line-prefix "⚠")
 (put 'flycheck-error-overlay 'help-echo "Unknown error.")
 
 (defconst flycheck-warning-overlay nil
   "Overlay category for flycheck warning.")
 (put 'flycheck-warning-overlay 'face 'flycheck-warning-face)
 (put 'flycheck-warning-overlay 'priority 100)
-(put 'flycheck-warning-overlay 'line-prefix "⚠")
 (put 'flycheck-warning-overlay 'help-echo "Unknown warning.")
 
 (defconst flycheck-overlay-categories-alist
   '((warning . flycheck-warning-overlay)
     (error . flycheck-error-overlay))
   "Overlay categories for error levels.")
+
+(defconst flycheck-overlay-indicators-alist
+  '((warning . flycheck-warning-indicator)
+    (error . flycheck-error-indicator))
+  "Indicators for error levels.")
 
 (defun flycheck-add-overlay (err)
   "Add overlay for ERR."
@@ -513,14 +539,16 @@ Add overlays and report a proper flycheck status."
       (goto-char (point-min))
       (forward-line (- (flycheck-error-line-no err) 1))
       ;; TODO: Consider column number
-      (let* ((beg (line-beginning-position))
+      (let* ((level (flycheck-error-level err))
+             (beg (line-beginning-position))
              (end (line-end-position))
-             (category (cdr (assq (flycheck-error-level err)
-                                  flycheck-overlay-categories-alist)))
+             (category (cdr (assq level flycheck-overlay-categories-alist)))
+             (indicator (cdr (assq level flycheck-overlay-indicators-alist)))
              (text (flycheck-error-text err))
              (overlay (make-overlay beg end (flycheck-error-buffer err))))
         ;; TODO: Consider hooks to re-check if overlay contents change
         (overlay-put overlay 'category category)
+        (overlay-put overlay 'line-prefix (symbol-value indicator))
         (unless (s-blank? text)
           (overlay-put overlay 'help-echo text))))))
 
