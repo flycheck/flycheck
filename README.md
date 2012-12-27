@@ -179,6 +179,12 @@ buffer.  For instance, to use `pyflakes` as checker in the current buffer, use
   highlights.  Inherits from `flymake-warnline` by default.
 
 
+### Hooking
+
+- `M-x customize-variable RET flycheck-mode-hook`: Change functions to run after
+  `flycheck-mode` is enabled.
+
+
 Extending
 ---------
 

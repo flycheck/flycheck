@@ -140,6 +140,11 @@ was performed."
   "Face for flycheck warnings."
   :group 'flycheck)
 
+(defcustom flycheck-mode-hook nil
+  "Hooks to run after `flycheck-mode'."
+  :group 'flycheck
+  :type 'hook)
+
 
 ;; Utility functions
 (defun flycheck-temp-file-system (filename prefix)
