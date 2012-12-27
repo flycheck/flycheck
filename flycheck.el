@@ -872,12 +872,16 @@ Use when checking buffers automatically."
                    ;; Otherwise back-substitution will fail because file names
                    ;; in the error messages lack directory information
                    ,check-form-s source-inplace)
-      :modes (emacs-lisp-mode lisp-interaction-mode)
       :error-patterns
       (("^\\(.*\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\):Warning:\\(.*\\(?:\n    .*\\)*\\)$"
         1 2 3 4 warning)
        ("^\\(.*\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\):Error:\\(.*\\(?:\n    .*\\)*\\)$"
-        1 2 3 4 error)))))
+        1 2 3 4 error))
+      :modes (emacs-lisp-mode lisp-interaction-mode)
+      ;; Prevent Emacs Lisp checking in temporary buffers because we cannot
+      ;; reliably parse file names from error messages thanks to aforementioned
+      ;; idiocy
+      :predicate (when (buffer-file-name)))))
 
 (defvar flycheck-checker-haml
   '(:command
