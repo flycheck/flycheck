@@ -872,7 +872,7 @@ Use when checking buffers automatically."
                    ;; Otherwise back-substitution will fail because file names
                    ;; in the error messages lack directory information
                    ,check-form-s source-inplace)
-      :modes emacs-lisp-mode
+      :modes (emacs-lisp-mode lisp-interaction-mode)
       :error-patterns
       (("^\\(.*\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\):Warning:\\(.*\\(?:\n    .*\\)*\\)$"
         1 2 3 4 warning)
