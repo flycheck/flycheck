@@ -83,8 +83,21 @@ Errors and warnings from the checker are reported in the mode line (see
 [Mode line](#mode-line)) and highlighted in the buffer.  To clear all error
 information use `M-x flycheck-clear`.
 
-A suitable checker will be selected automatically from `flycheck-checkers` (see
-[Customization](#customization)).
+By default a suitable checker is automatically selected from `flycheck-checkers`
+(see [Customization](#customization)).  You can select a specific checker for
+the current buffer with `M-x flycheck-select-checker` or by configuring the
+file-local variable `flycheck-checker`:
+
+```scheme
+;; Local Variables:
+;; flycheck-checker: flycheck-checker-python-pylint
+;; End:
+```
+
+Now **only** the [pylint][] checker will be used for the file.  If the checker
+from `flycheck-checker` or `flycheck-select-checker` cannot be used for the
+current buffer (e.g. the major mode does not match, the checker does not exist,
+etc.) an error is signaled.
 
 
 Mode line
@@ -146,6 +159,10 @@ order of their appearance in `flycheck-checkers` or delete checkers you do not
 want to use.  For instance, to always use `pyflakes` in `python-mode`, just
 remove `flycheck-checker-python-flake8` and `flycheck-checker-python-pylint`
 from `flycheck-checkers` via customization.
+
+Alternatively use `flycheck-select-checker` to select a specific checker for a
+buffer.  For instance, to use `pyflakes` as checker in the current buffer, use
+`M-x flycheck-select-checker RET python-checker-python-pyflakes`.
 
 
 ### Appearance

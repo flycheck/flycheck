@@ -73,12 +73,38 @@
     flycheck-checker-zsh)
   "Flycheck checkers.
 
-A list of flycheck checkers to try for the current buffer.  A
-checker is either a variable, which contains a checker definition
-or a function that is called upon each syntax check to obtain the
-checker definition."
+A list of flycheck checkers to try for the current buffer.
+
+If `flycheck-checker' is nil automatically select a suitable
+checker from this list on every syntax check.
+
+A checker is either a variable, which contains a checker
+definition or a function that is called upon each syntax check to
+obtain the checker definition."
   :group 'flycheck
   :type '(repeat (symbol :tag "Checker")))
+
+(defvar flycheck-checker nil
+  "Checker to use for the current buffer.
+
+If unset automatically select a suitable checker from
+`flycheck-checkers' on every syntax check.
+
+If set to a checker only use this checker.  Do never
+automatically select a checker from `flycheck-checkers' is
+skipped even if this checker is unusable in the current
+buffer (e.g. it does not exist, the major modes do not match,
+etc.).  In this case signal an error.
+
+A checker is either a variable bound to a checker definition or a
+function that is called upon each syntax check to obtain a
+checker definition (see `flycheck-checkers').
+
+Use the command `flycheck-select-checker' to select a checker for
+the current buffer, or set this variable as file local variable
+to always use a specific checker for a file.")
+(make-variable-buffer-local 'flycheck-checker)
+(put 'flycheck-checker 'safe-local-variable 'flycheck-registered-checker-p)
 
 (defcustom flycheck-error-indicator "⚠"
   "Indicator for error messages.
@@ -365,8 +391,54 @@ Return the properties of the checker or nil otherwise."
 
 Return the checker properties if there is a checker for the
 current buffer, or nil otherwise."
-  (let ((last-checker (flycheck-try-last-checker-for-buffer)))
-    (or last-checker (flycheck-get-new-checker-for-buffer))))
+  (if flycheck-checker
+      ;; If a checker was configured, try to use it!
+      (let ((properties (flycheck-get-checker-properties flycheck-checker)))
+        (if (and properties (flycheck-may-use-checker properties))
+            properties
+          (error "Configured checker %s cannot be used"
+                 flycheck-checker)))
+    (let ((last-checker (flycheck-try-last-checker-for-buffer)))
+      (or last-checker (flycheck-get-new-checker-for-buffer)))))
+
+(defvar read-flycheck-checker-history nil
+  "History of `read-flycheck-checker'.")
+
+(defun read-flycheck-checker (prompt)
+  "Read a flycheck checker from minibuffer with PROMPT.
+
+Complete with all registered checkers (see
+`flycheck-registered-checker-p').
+
+Return the checker as symbol, or nil if no checker was
+chosen."
+  (let* ((checkers (mapcar #'symbol-name flycheck-checkers))
+         (input (completing-read "Checker: " obarray
+                                 'flycheck-registered-checker-p t
+                                 nil 'read-flycheck-checker-history)))
+    (if (string= input "") nil (intern input))))
+
+(defun flycheck-select-checker (checker)
+  "Select CHECKER for the current buffer.
+
+CHECKER is a symbol providing a checker definition (see
+`flycheck-checkers') or nil.  If nil deselect the current
+checker (if any) and use automatic checker selection via
+`flycheck-checkers'.
+
+If called interactively prompt for CHECKER.  If no checker is
+entered deselect the current checker.  With prefix arg
+immediately deselect the current checker without any prompt.
+
+Set `flycheck-checker' to CHECKER and automatically start a new
+syntax check if the checker changed."
+  (interactive
+   (if current-prefix-arg
+       (list nil)
+     (list (read-flycheck-checker "Checker: "))))
+  (when (not (eq checker flycheck-checker))
+    (setq flycheck-checker checker)
+    (flycheck-buffer)))
 
 
 ;; Error API
