@@ -128,6 +128,8 @@ You need to install external utilities for the following checkers:
 Customization
 -------------
 
+### Checker selection
+
 - `M-x customize-variable flycheck-checkers`: A list of all checkers. The
   checkers are tried in the order of appearance in this list.  The first checker
   that supports the current mode and whose executable exists is used.  To change
@@ -144,6 +146,20 @@ order of their appearance in `flycheck-checkers` or delete checkers you do not
 want to use.  For instance, to always use `pyflakes` in `python-mode`, just
 remove `flycheck-checker-python-flake8` and `flycheck-checker-python-pylint`
 from `flycheck-checkers` via customization.
+
+
+### Appearance
+
+- `M-x customize-variable flycheck-error-indicator`: Change the indicator at the
+  beginning of lines containing *errors*.  Defaults to `"⚠"`, set to `nil` to
+  disable indicators for error messages..
+- `M-x customize-variable flycheck-warning-indicator`: Change the indicator at
+  the beginning of lines containing *warnings*.  Defaults to `"⚠"`, set to `nil`
+  to disable indicators for warning messages.
+- `M-x customize-face flycheck-error-face`: Customize the face for error
+  highlights.  Inherits from `flymake-errline` by default.
+- `M-x customize-face flycheck-warning-face`: Customize the face for error
+  highlights.  Inherits from `flymake-warnline` by default.
 
 
 Extending
