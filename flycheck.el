@@ -92,7 +92,7 @@ was performed."
   :type '(choice (const :tag "No indicator" nil)
                  (string :tag "Indicator string")))
 
-(defcustom flycheck-warning-indicator "⚠"
+(defcustom flycheck-warning-indicator nil
   "Indicator for warning messages.
 
 If set to a string it will be shown at the beginning of a line

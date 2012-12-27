@@ -154,8 +154,8 @@ from `flycheck-checkers` via customization.
   the beginning of lines containing *errors*.  Defaults to `"⚠"`, set to `nil`
   to disable indicators for error messages..
 - `M-x customize-variable RET flycheck-warning-indicator`: Change the indicator
-  at the beginning of lines containing *warnings*.  Defaults to `"⚠"`, set to
-  `nil` to disable indicators for warning messages.
+  at the beginning of lines containing *warnings*.  Defaults to `nil`, i.e. the
+  indicator is disabled.
 - `M-x customize-face RET flycheck-error-face`: Customize the face for error
   highlights.  Inherits from `flymake-errline` by default.
 - `M-x customize-face RET flycheck-warning-face`: Customize the face for error
