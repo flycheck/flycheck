@@ -1103,6 +1103,13 @@ If .jshintrc is not found run jshint with default settings."
     :modes sh-mode
     :predicate (eq sh-shell 'zsh)))
 
+(defvar flycheck-checker-lua
+  '(:command
+    ("luac" "-p" source)
+    :error-patterns
+    (("^.*luac[0-9.]*\\(.exe\\)?: *\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 2 3 nil 4))
+    :modes lua-mode))
+
 (provide 'flycheck)
 
 ;;; flycheck.el ends here
