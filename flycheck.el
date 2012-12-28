@@ -429,7 +429,7 @@ Return the checker as symbol, or nil if no checker was
 chosen."
   (let* ((checkers (mapcar #'symbol-name flycheck-checkers))
          (input (completing-read "Checker: " obarray
-                                 'flycheck-registered-checker-p t
+                                 'flycheck-registered-checker-p nil
                                  nil 'read-flycheck-checker-history)))
     (if (string= input "") nil (intern input))))
 
