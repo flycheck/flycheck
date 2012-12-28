@@ -676,8 +676,9 @@ Add overlays and report a proper flycheck status."
 
 (defun flycheck-get-output (process)
   "Get the complete output of PROCESS."
-  (let ((pending-output (process-get process :flycheck-pending-output)))
-    (apply #'concat (nreverse pending-output))))
+  (with-demoted-errors
+    (let ((pending-output (process-get process :flycheck-pending-output)))
+      (apply #'concat (nreverse pending-output)))))
 
 (defun flycheck-handle-signal (process event)
   "Handle a syntax checking PROCESS EVENT."
