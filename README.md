@@ -162,7 +162,7 @@ checkers using `flake8`, `pylint` or `pyflakes`.  When doing syntax checking in
 `python-mode`, the checkers are tried in this order and the first whose
 executable is found is used.
 
-To chance the order of preference or enforce a single checker, just modify the
+To change the order of preference or enforce a single checker, just modify the
 order of their appearance in `flycheck-checkers` or delete checkers you do not
 want to use.  For instance, to always use `pyflakes` in `python-mode`, just
 remove `flycheck-checker-python-flake8` and `flycheck-checker-python-pylint`
