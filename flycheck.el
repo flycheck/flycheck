@@ -706,24 +706,21 @@ output: %s\nChecker definition probably flawed."
 (defun flycheck-handle-signal (process event)
   "Handle a syntax checking PROCESS EVENT."
   (when (memq (process-status process) '(signal exit))
-    ;; Try hard to clean up after the party
-    (unwind-protect
-        (condition-case err
-            (let* ((exit-status (process-exit-status process))
-                   (source-buffer (process-buffer process))
-                   (output (flycheck-get-output process))
-                   (properties (process-get process :flycheck-checker)))
-              (when (buffer-live-p source-buffer)
+    (with-current-buffer (process-buffer process)
+      ;; Try hard to clean up after the party
+      (unwind-protect
+          (condition-case err
+              (when (buffer-live-p (process-buffer process))
                 ;; Only parse and show errors if the mode is still active
-                (with-current-buffer source-buffer
-                  (flycheck-finish-syntax-check properties
-                                                exit-status
-                                                output))))
-          (error
-           ;; Report and re-signal errors
-           (flycheck-report-status "!")
-           (signal (car err) (cdr err))))
-      (flycheck-post-syntax-check-cleanup process))))
+                (flycheck-finish-syntax-check
+                 (process-get process :flycheck-checker)
+                 (process-exit-status process)
+                 (flycheck-get-output process)))
+            (error
+             ;; Report and re-signal errors
+             (flycheck-report-status "!")
+             (signal (car err) (cdr err))))
+        (flycheck-post-syntax-check-cleanup process)))))
 
 (defun flycheck-start-checker (properties)
   "Start the syntax checker defined by PROPERTIES."
