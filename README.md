@@ -324,15 +324,17 @@ Further help
 Credits
 -------
 
-The Vim library [syntastic][] by [Martin Grenfell][scrooloose] inspired this
-library and many of its checkers.
+The following people contributed to flycheck:
 
-[Steve Purcell][purcell] implemented many checkers, contributed important ideas
-to the design of the checker API and engaged in worthwhile discussion to shape
-this project.
-
-[Jimmy Yuen Ho Wong][wyuenho] added the HTML syntax checker and the jshint
-Javascript checker, and did valuable testing and bug fixing.
+- [Jimmy Yuen Ho Wong][wyuenho] added the HTML syntax checker and the jshint
+  Javascript checker, and did valuable testing and bug fixing.
+- [Marian Schubert][maio] added the Perl syntax checker.
+- [Martin Grenfell][scrooloose] created the awesome Vim library [syntastic][]
+  which inspired this project and many of its checkers.
+- [Peter Vasil][ptrv] created the XML syntax checker.
+- [Steve Purcell][purcell] implemented many checkers, contributed important
+  ideas to the design of the checker API and engaged in worthwhile discussion to
+  shape this project.
 
 
 License
@@ -363,6 +365,8 @@ See [COPYING][] for details.
 [scrooloose]: https://github.com/scrooloose
 [purcell]: https://github.com/purcell
 [wyuenho]: https://github.com/wyuenho
+[maio]: https://github.com/maio
+[ptrv]: https://github.com/ptrv
 [copying]: https://github.com/lunaryorn/flycheck/blob/master/COPYING
 
 [coffeelint]: http://www.coffeelint.org/
