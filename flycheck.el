@@ -934,7 +934,7 @@ Use when checking buffers automatically."
       nil 1 2 4 error)
      ("line \\([0-9]+\\) column \\([0-9]+\\) - Warning: \\(.*\\)"
       nil 1 2 4 warning))
-    :modes html-mode))
+    :modes (html-mode nxhtml-mode)))
 
 (defvar flycheck-jshintrc nil
   "The path to .jshintrc.
