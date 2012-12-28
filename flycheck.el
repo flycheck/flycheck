@@ -668,8 +668,8 @@ Add overlays and report a proper flycheck status."
   (unwind-protect
       (let ((process (or process flycheck-current-process)))
         (when process
-          (delete-process)
-          (setq flycheck-current-process nil)))
+          (setq flycheck-current-process nil)
+          (delete-process process)))
     (flycheck-clean-substituted-files)))
 
 (defun flycheck-receive-checker-output (process output)
