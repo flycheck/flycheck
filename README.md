@@ -31,6 +31,7 @@ Features
   - HTML
   - Javascript
   - JSON
+  - Perl
   - PHP
   - Python
   - Ruby
@@ -128,6 +129,7 @@ You need to install external utilities for the following checkers:
   thereof or your `$HOME` directory.  You may override the path to this file
   globally or per buffer with the variable `flycheck-jshintrc`.
 - JSON: Install [jsonlint][].
+- Perl: Install [Perl][].
 - PHP: Install the [PHP command line][php].
 - Python: Install [flake8][], [pyflakes][] or [pylint][].
 - Ruby: Install Ruby.
@@ -368,6 +370,7 @@ See [COPYING][] for details.
 [jshint]: http://www.jshint.com
 [jslint]: http://www.jslint.com/
 [jsonlint]: https://github.com/zaach/jsonlint
+[perl]: http://www.perl.org/
 [php]: http://php.net/manual/en/features.commandline.php
 [flake8]: http://pypi.python.org/pypi/flake8
 [pyflakes]: http://pypi.python.org/pypi/pyflakes

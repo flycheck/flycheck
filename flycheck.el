@@ -61,6 +61,7 @@
     flycheck-checker-json
     flycheck-checker-javascript-jshint
     flycheck-checker-javascript-jslint
+    flycheck-checker-perl
     flycheck-checker-php
     flycheck-checker-python-flake8
     flycheck-checker-python-pylint
@@ -993,6 +994,14 @@ If .jshintrc is not found run jshint with default settings."
     (or (eq major-mode 'json-mode)
         (and buffer-file-name
              (string= "json" (file-name-extension buffer-file-name))))))
+
+(defvar flycheck-checker-perl
+  '(:command
+    ("perl" "-w" "-c" source)
+    :error-patterns
+    (("^\\(.*?\\) at \\(.*?\\) line \\([0-9]+\\)\\.$" 2 3 nil 1 error)
+     ("^\\(.*?\\) at \\(.*?\\) line \\([0-9]+\\), .*$" 2 3 nil 1 error))
+    :modes (perl-mode cperl-mode)))
 
 (defvar flycheck-checker-php
   '(:command
