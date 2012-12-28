@@ -131,6 +131,7 @@ You need to install external utilities for the following checkers:
   thereof or your `$HOME` directory.  You may override the path to this file
   globally or per buffer with the variable `flycheck-jshintrc`.
 - JSON: Install [jsonlint][].
+- Lua: Install [lua][].
 - Perl: Install [Perl][].
 - PHP: Install the [PHP command line][php].
 - Python: Install [flake8][], [pyflakes][] or [pylint][].
@@ -141,7 +142,6 @@ You need to install external utilities for the following checkers:
 - TeX/LaTeX: Install [chktex][] or [lacheck][].  Most TeX distributions,
   including TeXLive and MacTeX, already do this for you.
 - XML: Install [xmlstarlet][].
-- Lua: Install [lua][].
 
 
 Customization
