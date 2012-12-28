@@ -38,6 +38,7 @@ Features
   - SASS
   - Shell scripts (Bash, Dash and Zsh)
   - TeX/LaTeX
+  - XML
 - Easy customization (see `flycheck-checkers`)
 - Easy declarative API to define new syntax checkers
 
@@ -138,6 +139,7 @@ You need to install external utilities for the following checkers:
   want to check.
 - TeX/LaTeX: Install [chktex][] or [lacheck][].  Most TeX distributions,
   including TeXLive and MacTeX, already do this for you.
+- XML: Install [xmlstarlet][].
 
 
 Customization
@@ -378,3 +380,4 @@ See [COPYING][] for details.
 [sass]: http://sass-lang.com
 [chktex]: http://baruch.ev-en.org/proj/chktex/
 [lacheck]: http://www.ctan.org/pkg/lacheck
+[xmlstarlet]: http://xmlstar.sourceforge.net/

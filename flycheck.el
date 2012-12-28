@@ -71,6 +71,7 @@
     flycheck-checker-sh
     flycheck-checker-tex-chktex
     flycheck-checker-tex-lacheck
+    flycheck-checker-xml
     flycheck-checker-zsh)
   "Flycheck checkers.
 
@@ -1074,6 +1075,13 @@ If .jshintrc is not found run jshint with default settings."
     :error-patterns
     (("^\"\\(.*\\)\", line \\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 warning))
     :modes latex-mode))
+
+(defvar flycheck-checker-xml-xmlstarlet
+  '(:command
+    ("xmlstarlet" "val" "-e" "-q" source)
+    :error-patterns
+    (("^\\(.*\\):\\([0-9]+\\)\\.\\([0-9]+\\): \\(.*\\)$" 1 2 3 4 error))
+    :modes (xml-mode nxml-mode)))
 
 (defvar flycheck-checker-zsh
   '(:command
