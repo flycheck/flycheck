@@ -640,6 +640,18 @@ Add overlays and report a proper flycheck status."
   "Add overlays for ERRORS."
   (mapc #'flycheck-add-overlay errors))
 
+(defun flycheck-overlays-at (pos)
+  "Return a list of all flycheck overlays at POS."
+  (--filter (overlay-get it 'flycheck-overlay) (overlays-at pos)))
+
+(defun flycheck-overlay-errors-at (pos)
+  "Return a list of all flycheck errors overlayed at POS."
+  (--map (overlay-get it 'flycheck-error) (flycheck-overlays-at pos)))
+
+(defun flycheck-overlay-messages-at (pos)
+  "Return a list of all flycheck messages overlayed at POS."
+  (--map (overlay-get it 'help-echo) (flycheck-overlays-at pos)))
+
 (defun flycheck-remove-overlays ()
   "Remove all flycheck overlays in the current buffer."
   (remove-overlays (point-min) (point-max) 'flycheck-overlay t))
