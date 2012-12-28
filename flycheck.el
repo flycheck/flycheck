@@ -681,14 +681,15 @@ and the cursor is not in the minibuffer."
   "Show the first error message at point in minibuffer."
   (interactive)
   (flycheck-cancel-error-display-timer)
-  (if (flycheck-may-show-message)
-      (let ((message (car (flycheck-overlay-messages-at (point)))))
-        (if message
-            (message "%s" message)
-          ;; Clear the current message
-          (message nil)))
-    ;; The minibuffer is not available, so let's try again in some seconds.
-    (flycheck-show-error-at-point-soon)))
+  (when flycheck-mode
+    (if (flycheck-may-show-message)
+        (let ((message (car (flycheck-overlay-messages-at (point)))))
+          (if message
+              (message "%s" message)
+            ;; Clear the current message
+            (message nil)))
+      ;; The minibuffer is not available, so let's try again in some seconds.
+      (flycheck-show-error-at-point-soon))))
 
 (defun flycheck-show-error-at-point-soon ()
   "Show the first error message at point in minibuffer asap.
