@@ -1,4 +1,4 @@
-;;; flycheck.el --- Flymake reloaded with useful checkers
+;;; flycheck.el --- Flymake done right
 
 ;; Copyright (c) 2012 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
@@ -26,15 +26,15 @@
 
 ;;; Commentary:
 
-;; A replacement for `flymake-mode' with much improved configuration and checker
-;; API.
+;; On-the-fly syntax checking for GNU Emacs (aka "flymake done right")
 
-;; Like the built-in `flymake-mode' `flycheck-mode' performs on-the-fly syntax
-;; and style checkers in various modes.  However it features an improved
-;; configuration API based on major modes (instead of file name masks) and a
-;; much nicer and easier declarative syntax for checker definitions.
-
-;; See `flycheck-checkers' for a list of provided checkers.
+;; Provide `flycheck-mode' which enables on-the-fly syntax checking for a large
+;; number of different modes and languages (see `flycheck-checkers' for a
+;; complete list).
+;;
+;; Support for new modes and languages can be added by declaring a new syntax
+;; checker.  Read README.md for more information and take a look at built-in
+;; checkers like `flycheck-checkers-python-pylint'.
 
 ;;; Code:
 
