@@ -150,10 +150,7 @@ was performed."
 
 This hook is run after the syntax check process finished, all
 error messages were parsed and properly reported (including
-overlay setup).
-
-Hooks are run with `with-demoted-errors', hence errors from hooks
-to not escape flycheck and cannot be caught outside."
+overlay setup)."
   :group 'flycheck
   :type 'hook)
 
@@ -680,37 +677,56 @@ Add overlays and report a proper flycheck status."
     (let ((pending-output (process-get process :flycheck-pending-output)))
       (apply #'concat (nreverse pending-output)))))
 
+(defun flycheck-finish-syntax-check (properties exit-status output)
+  "Finish a syntax check.
+
+PROPERTIES are the checker properties.  EXIT-STATUS is the
+integral exit code of the syntax checker and OUTPUT its output a
+string.
+
+Parse the output and report an appropriate error status."
+  ;; Clear running state
+  (flycheck-report-status "")
+  (let* ((error-patterns (flycheck-get-error-patterns properties))
+         (parsed-errors (flycheck-parse-output output (current-buffer)
+                                               error-patterns))
+         (errors (flycheck-sanitize-errors parsed-errors)))
+    (when flycheck-mode
+      ;; Parse error messages if flycheck mode is active
+      (setq flycheck-current-errors errors)
+      (flycheck-report-errors errors)
+      (when (and (/= exit-status 0) (not errors))
+        ;; Report possibly flawed checker definition
+        (message "Checker %s returned non-zero exit code %s, but no errors from\
+output: %s\nChecker definition probably flawed."
+                 properties exit-status output)
+        (flycheck-report-status "?"))
+      ;; Eventually run post-check hooks
+      (run-hooks 'flycheck-after-syntax-check-hook))))
+
 (defun flycheck-handle-signal (process event)
   "Handle a syntax checking PROCESS EVENT."
-  (let* ((status (process-status process))
-         (exit-status (process-exit-status process))
-         (source-buffer (process-buffer process))
-         (output (flycheck-get-output process))
-         (properties (process-get process :flycheck-checker))
-         (error-patterns (flycheck-get-error-patterns properties)))
-    (when (memq status '(signal exit))
-      (delete-process process)
-      (when (buffer-live-p source-buffer)
-        ;; Only parse and show errors if the mode is still active
-        (with-current-buffer source-buffer
-          (flycheck-report-status "")
-          (when flycheck-mode
-            ;; Parse error messages if flycheck mode is active
-            (setq flycheck-current-errors
-                  (flycheck-sanitize-errors
-                   (flycheck-parse-output output (current-buffer)
-                                          error-patterns)))
-            (flycheck-report-errors flycheck-current-errors)
-            (when (and (/= exit-status 0) (not flycheck-current-errors))
-              ;; Report possibly flawed checker definition
-              (message "Checker %s returned non-zero exit code %s,\
- but no errors from output: %s\nChecker definition probably flawed."
-                       properties exit-status output)
-              (flycheck-report-status "?"))
-            (with-demoted-errors
-              (run-hooks 'flycheck-after-syntax-check-hook)))
-          ;; Clean up after the party
-          (flycheck-post-cleanup))))))
+  (when (memq (process-status process) '(signal exit))
+    (unwind-protect
+        (condition-case err
+            (let* ((exit-status (process-exit-status process))
+                   (source-buffer (process-buffer process))
+                   (output (flycheck-get-output process))
+                   (properties (process-get process :flycheck-checker)))
+              (when (buffer-live-p source-buffer)
+                ;; Only parse and show errors if the mode is still active
+                (with-current-buffer source-buffer
+                  (flycheck-finish-syntax-check properties
+                                                exit-status
+                                                output))))
+          (error
+           ;; Report and re-signal errors
+           (flycheck-report-status "!")
+           (signal (car err) (cdr err))))
+      ;; Try hard to clean up after the party
+      (unwind-protect
+          (delete-process process)
+        (flycheck-post-cleanup)))))
 
 (defun flycheck-start-checker (properties)
   "Start the syntax checker defined by PROPERTIES."
@@ -731,10 +747,10 @@ Add overlays and report a proper flycheck status."
         ;; Attach checker information to the process
         (process-put process :flycheck-checker properties))
       (error
-       ;; Indicate error status
+       ;; Report error status, clean-up and re-signal error in case process
+       ;; start or setup failed
        (flycheck-report-status "!")
        (flycheck-post-cleanup)
-       ;; Re-signal the error
        (signal (car err) (cdr err)))))
 
 (defun flycheck-stop-checker ()
