@@ -630,6 +630,7 @@ Add overlays and report a proper flycheck status."
         ;; TODO: Consider hooks to re-check if overlay contents change
         (overlay-put overlay 'category category)
         (overlay-put overlay 'line-prefix (symbol-value indicator))
+        (overlay-put overlay 'flycheck-error err)
         (unless (s-blank? text)
           (overlay-put overlay 'help-echo text))))))
 
