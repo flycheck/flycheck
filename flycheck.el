@@ -904,13 +904,13 @@ Otherwise behave as if called interactively."
 (defun flycheck-mode-on ()
   "Unconditionally enable variable `flycheck-mode'."
   (flycheck-mode 1))
-(make-obsolete 'flycheck-mode-on 'flycheck-mode)
+(make-obsolete 'flycheck-mode-on 'flycheck-mode "0.5")
 
 ;;;###autoload
 (defun flycheck-mode-off ()
   "Unconditionally disable variable `flycheck-mode'."
   (flycheck-mode -1))
-(make-obsolete 'flycheck-mode-off "Use (flycheck-mode -1).")
+(make-obsolete 'flycheck-mode-off "Use (flycheck-mode -1)." "0.5")
 
 
 ;; Checkers
