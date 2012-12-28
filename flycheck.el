@@ -4,7 +4,7 @@
 ;;
 ;; Author: Sebastian Wiesner <lunaryorn@gmail.com>
 ;; URL: https://github.com/lunaryorn/flycheck
-;; Version: 0.4
+;; Version: 0.5
 ;; Keywords: convenience languages tools
 ;; Package-Requires: ((s "1.3.0") (dash "1.0.3"))
 
