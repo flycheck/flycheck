@@ -141,6 +141,8 @@ You need to install external utilities for the following checkers:
 Customization
 -------------
 
+`M-x customize-group RET flycheck`
+
 ### Checker selection
 
 - `M-x customize-variable RET flycheck-checkers`: A list of all checkers. The
@@ -167,12 +169,12 @@ buffer.  For instance, to use `pyflakes` as checker in the current buffer, use
 
 ### Appearance
 
-- `M-x customize-variable RET flycheck-error-indicator`: Change the indicator at
-  the beginning of lines containing *errors*.  Defaults to `"⚠"`, set to `nil`
-  to disable indicators for error messages..
-- `M-x customize-variable RET flycheck-warning-indicator`: Change the indicator
-  at the beginning of lines containing *warnings*.  Defaults to `nil`, i.e. the
-  indicator is disabled.
+- `M-x customize-variable RET flycheck-error-indicator`: Customize the indicator
+  at the beginning of lines containing *errors*.  Defaults to `"⚠"`, set to
+  `nil` to disable indicators for error messages..
+- `M-x customize-variable RET flycheck-warning-indicator`: Customize the
+  indicator at the beginning of lines containing *warnings*.  Defaults to `nil`,
+  i.e. the indicator is disabled.
 - `M-x customize-face RET flycheck-error-face`: Customize the face for error
   highlights.  Inherits from `flymake-errline` by default.
 - `M-x customize-face RET flycheck-warning-face`: Customize the face for error
@@ -181,9 +183,9 @@ buffer.  For instance, to use `pyflakes` as checker in the current buffer, use
 
 ### Hooking
 
-- `M-x customize-variable RET flycheck-mode-hook`: Change functions to run after
-  `flycheck-mode` is enabled.
-- `M-x customize-variable RET flycheck-after-syntax-check-hook`: Change
+- `M-x customize-variable RET flycheck-mode-hook`: Customize functions to run
+  after `flycheck-mode` is enabled.
+- `M-x customize-variable RET flycheck-after-syntax-check-hook`: Customize
   functions to run after each syntax check.
 
 
@@ -200,7 +202,8 @@ In flycheck a syntax checker is a [property list][] with the following keys (the
   arguments the special symbol `source` is replaced with a **temporary copy of
   the source file**, created in the system temporary directory.  Use
   `source-inplace` instead to force the copy being created in the **same
-  directory as the original source file**.
+  directory as the original source file**.  **Prefer** `source` over
+  `source-inplace` if possible.
 - `:error-patterns` (*mandatory*): A list of error patterns to parse the output
   of `:command`.  Each pattern has the form `(REGEXP FILE-IDX LINE-IDX COL-IDX
   ERR-TEXT-IDX LEVEL)`:
@@ -253,9 +256,11 @@ First we declare the checker properties:
 
 We specify the command to execute in this mode in `:command`.  It is a
 straight-forward list with the executable name as first element and some
-subsequent arguments.  The symbol `source` is automatically replaced with the
-name of the file to check.  Note that a checker is not enabled if its executable
-does not exist (as by `executable-find`).
+subsequent arguments.  The symbol `source-inplace` is automatically replaced
+with the name of the file to check.  We use `source-inplace` to check the file
+at its original location so that `pylint` can take the Python package
+structure of the source tree into account.  Note that a checker is not enabled
+if its executable does not exist (as by `executable-find`).
 
 Next we give a list of error patterns to extract error location and message from
 the `epylint` output.  An error pattern is a list containing a regular
@@ -291,6 +296,10 @@ active:
     :predicate (eq sh-shell 'zsh)))
 ```
 
+First note that unlike with `pylint` we use `source` instead of `source-inplace`
+to check the file from a proper temporary copy because Zsh syntax checking does
+not need information from the original source tree.
+
 We declare that the checker is to be used in `sh-mode` **and** if a Zsh shell
 script is being edited.  The `predicate` is simply an Emacs Lisp form that is
 evaluated whenever flycheck tries to use the checker for the current buffer. If
@@ -302,7 +311,10 @@ Further help
 ------------
 
 - `C-h f flycheck-mode`
-- `C-h f flycheck-checkers`
+- `C-h f flycheck-buffer`
+- `C-h f flycheck-select-checker`
+- `C-h v flycheck-checkers`
+- `C-h v flycheck-checker`
 
 
 Credits
