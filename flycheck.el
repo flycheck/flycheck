@@ -866,6 +866,18 @@ Use when checking buffers automatically."
     (setq flycheck-mode-line mode-line)
     (force-mode-line-update)))
 
+(defun flycheck-teardown ()
+  "Teardown flyheck.
+
+Completely clear the whole flycheck state.  Remove overlays, kill
+running checks, and empty all variables used by flycheck."
+  (flycheck-clear)
+  (flycheck-stop-checker)
+  (flycheck-cancel-error-display-timer)
+  (flycheck-post-syntax-check-cleanup)
+  (setq flycheck-checker nil)
+  (setq flycheck-last-checker nil))
+
 ;;;###autoload
 (define-minor-mode flycheck-mode
   "Minor mode for on-the-fly syntax checking.
@@ -892,14 +904,13 @@ Otherwise behave as if called interactively."
     ;; Start an initial syntax check
     (flycheck-buffer-safe))
    (t
-    (flycheck-clear)
-
     ;; Remove hooks
     (remove-hook 'after-save-hook 'flycheck-buffer-safe t)
     (remove-hook 'after-change-functions 'flycheck-handle-change t)
     (remove-hook 'post-command-hook 'flycheck-show-error-at-point-soon t)
 
-    (flycheck-stop-checker))))
+    ;; and clear internal state
+    (flycheck-teardown))))
 
 ;;;###autoload
 (defun flycheck-mode-on ()
