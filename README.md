@@ -46,7 +46,6 @@ Features
 Compared to flymake these features are currently **missing**:
 
 - Jump to next/previous error
-- Show error message under cursor (as provided by flymake-cursor)
 
 
 Installation
@@ -83,7 +82,9 @@ With `flycheck-mode` enabled the buffer is automatically checked on-the-fly.
 You can also manually check the buffer with `M-x flycheck-buffer`.
 
 Errors and warnings from the checker are reported in the mode line (see
-[Mode line](#mode-line)) and highlighted in the buffer.  To clear all error
+[Mode line](#mode-line)) and highlighted in the buffer.  To view an error
+message, either hover the mouse over the highlighted error, or move the cursor
+to the highlighted error and wait a short moment.  To clear all error
 information use `M-x flycheck-clear`.
 
 By default a suitable checker is automatically selected from `flycheck-checkers`

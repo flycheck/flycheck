@@ -657,6 +657,49 @@ Add overlays and report a proper flycheck status."
   (remove-overlays (point-min) (point-max) 'flycheck-overlay t))
 
 
+;; Error message echoing
+(defun flycheck-may-show-message ()
+  "Determine whether the minibuffer is free to show a message.
+
+Return t if the minibuffer is free to show message or nil otherwise.
+
+The minibuffer is considered free if the minibuffer is not active
+and the cursor is not in the minibuffer."
+  (and (not (active-minibuffer-window)) (not cursor-in-echo-area)))
+
+(defvar flycheck-error-display-timer nil
+  "Timer to automatically show the error at point in minibuffer.")
+(make-variable-buffer-local 'flycheck-error-display-timer)
+
+(defun flycheck-cancel-error-display-timer ()
+  "Cancel the error display timer for the current buffer."
+  (when flycheck-error-display-timer
+    (cancel-timer flycheck-error-display-timer)
+    (setq flycheck-error-display-timer nil)))
+
+(defun flycheck-show-error-at-point ()
+  "Show the first error message at point in minibuffer."
+  (interactive)
+  (flycheck-cancel-error-display-timer)
+  (if (flycheck-may-show-message)
+      (let ((message (car (flycheck-overlay-messages-at (point)))))
+        (if message
+            (message "%s" message)
+          ;; Clear the current message
+          (message nil)))
+    ;; The minibuffer is not available, so let's try again in some seconds.
+    (flycheck-show-error-at-point-soon)))
+
+(defun flycheck-show-error-at-point-soon ()
+  "Show the first error message at point in minibuffer asap.
+
+Show the error message at point in minibuffer after a short delay."
+  (flycheck-cancel-error-display-timer)
+  (when (flycheck-overlays-at (point))
+    (setq flycheck-error-display-timer
+          (run-at-time 0.9 nil 'flycheck-show-error-at-point))))
+
+
 ;; Process management
 (defvar flycheck-current-process nil
   "The current syntax checking process.")
@@ -712,6 +755,9 @@ Parse the output and report an appropriate error status."
 output: %s\nChecker definition probably flawed."
                  properties exit-status output)
         (flycheck-report-status "?"))
+      ;; Update any errors messages in minibuffer
+      (when (eq (current-buffer) (window-buffer))
+        (flycheck-show-error-at-point))
       ;; Eventually run post-check hooks
       (run-hooks 'flycheck-after-syntax-check-hook))))
 
@@ -840,6 +886,7 @@ Otherwise behave as if called interactively."
     ;; Configure hooks
     (add-hook 'after-save-hook 'flycheck-buffer-safe nil t)
     (add-hook 'after-change-functions 'flycheck-handle-change nil t)
+    (add-hook 'post-command-hook 'flycheck-show-error-at-point-soon nil t)
 
     ;; Start an initial syntax check
     (flycheck-buffer-safe))
@@ -849,6 +896,7 @@ Otherwise behave as if called interactively."
     ;; Remove hooks
     (remove-hook 'after-save-hook 'flycheck-buffer-safe t)
     (remove-hook 'after-change-functions 'flycheck-handle-change t)
+    (remove-hook 'post-command-hook 'flycheck-show-error-at-point-soon t)
 
     (flycheck-stop-checker))))
 
