@@ -661,11 +661,15 @@ Add overlays and report a proper flycheck status."
   "Determine whether a syntax check is running."
   (when flycheck-current-process t))
 
-(defun flycheck-post-cleanup ()
-  "Cleanup after a syntax check."
+(defun flycheck-post-syntax-check-cleanup (&optional process)
+  "Cleanup after a syntax check PROCESS."
   ;; Clean temporary copies of the buffer
-  (flycheck-clean-substituted-files)
-  (setq flycheck-current-process nil))
+  (unwind-protect
+      (let ((process (or process flycheck-current-process)))
+        (when process
+          (delete-process)
+          (setq flycheck-current-process nil)))
+    (flycheck-clean-substituted-files)))
 
 (defun flycheck-receive-checker-output (process output)
   "Receive a syntax checking PROCESS OUTPUT."
@@ -709,6 +713,7 @@ output: %s\nChecker definition probably flawed."
 (defun flycheck-handle-signal (process event)
   "Handle a syntax checking PROCESS EVENT."
   (when (memq (process-status process) '(signal exit))
+    ;; Try hard to clean up after the party
     (unwind-protect
         (condition-case err
             (let* ((exit-status (process-exit-status process))
@@ -725,10 +730,7 @@ output: %s\nChecker definition probably flawed."
            ;; Report and re-signal errors
            (flycheck-report-status "!")
            (signal (car err) (cdr err))))
-      ;; Try hard to clean up after the party
-      (unwind-protect
-          (delete-process process)
-        (flycheck-post-cleanup)))))
+      (flycheck-post-syntax-check-cleanup process))))
 
 (defun flycheck-start-checker (properties)
   "Start the syntax checker defined by PROPERTIES."
@@ -752,7 +754,7 @@ output: %s\nChecker definition probably flawed."
        ;; Report error status, clean-up and re-signal error in case process
        ;; start or setup failed
        (flycheck-report-status "!")
-       (flycheck-post-cleanup)
+       (flycheck-post-syntax-check-cleanup)
        (signal (car err) (cdr err)))))
 
 (defun flycheck-stop-checker ()
