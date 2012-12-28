@@ -817,7 +817,15 @@ Use when checking buffers automatically."
 
 ;;;###autoload
 (define-minor-mode flycheck-mode
-  "Toggle on-the-fly syntax checking."
+  "Minor mode for on-the-fly syntax checking.
+
+When called interactively, toggle `flycheck-mode'.  With prefix
+ARG, enable `flycheck-mode' if ARG is positive, otherwise disable
+it.
+
+When called from Lisp, enable `flycheck-mode' if ARG is omitted,
+nil or positive.  If ARG is `toggle', toggle `flycheck-mode'.
+Otherwise behave as if called interactively."
   :init-value nil
   :lighter flycheck-mode-line
   :require 'flycheck
