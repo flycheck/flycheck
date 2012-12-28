@@ -593,12 +593,14 @@ Add overlays and report a proper flycheck status."
 ;; Overlay management
 (defconst flycheck-error-overlay nil
   "Overlay category for flycheck errors.")
+(put 'flycheck-error-overlay 'flycheck-overlay t)
 (put 'flycheck-error-overlay 'face 'flycheck-error-face)
 (put 'flycheck-error-overlay 'priority 100)
 (put 'flycheck-error-overlay 'help-echo "Unknown error.")
 
 (defconst flycheck-warning-overlay nil
   "Overlay category for flycheck warning.")
+(put 'flycheck-warning-overlay 'flycheck-overlay t)
 (put 'flycheck-warning-overlay 'face 'flycheck-warning-face)
 (put 'flycheck-warning-overlay 'priority 100)
 (put 'flycheck-warning-overlay 'help-echo "Unknown warning.")
@@ -640,10 +642,7 @@ Add overlays and report a proper flycheck status."
 
 (defun flycheck-remove-overlays ()
   "Remove all flycheck overlays in the current buffer."
-  (remove-overlays (point-min) (point-max) 'category
-                   'flycheck-warning-overlay)
-  (remove-overlays (point-min) (point-max) 'category
-                   'flycheck-error-overlay))
+  (remove-overlays (point-min) (point-max) 'flycheck-overlay t))
 
 
 ;; Process management
