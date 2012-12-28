@@ -6,7 +6,7 @@
 ;; URL: https://github.com/lunaryorn/flycheck
 ;; Version: 0.4
 ;; Keywords: convenience languages tools
-;; Package-Requires: ((s "1.3.0"))
+;; Package-Requires: ((s "1.3.0") (dash "1.0.3"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -43,6 +43,7 @@
   (require 'sh-script))
 
 (require 's)
+(require 'dash)
 
 ;; Customization
 
@@ -322,10 +323,8 @@ Return t if so, or nil otherwise."
 
 (defun flycheck-clean-substituted-files ()
   "Remove all substituted files."
-  (dolist (file-name flycheck-substituted-files)
-    (ignore-errors
-      (delete-file file-name))
-    (setq flycheck-substituted-files nil)))
+  (--each flycheck-substituted-files (ignore-errors (delete-file it)))
+  (setq flycheck-substituted-files nil))
 
 (defun flycheck-substitute-argument (arg)
   "Substitute ARG with file to check is possible.
@@ -356,10 +355,7 @@ to checker and return its path, otherwise return ARG unchanged."
 
 (defun flycheck-error-patterns-list-p (patterns)
   "Check whether PATTERNS is a list of valid error patterns."
-  (let ((result nil))
-    (dolist (pattern patterns result)
-      (setq result (flycheck-error-pattern-p pattern))
-      (unless result (return)))))
+  (-all? 'flycheck-error-pattern-p patterns))
 
 (defun flycheck-get-error-patterns (properties)
   "Get the error patterns from PROPERTIES.
@@ -472,6 +468,35 @@ If the buffer of ERR is not live, FORMS are not evaluated."
     (with-current-buffer (flycheck-error-buffer ,err)
       ,@forms)))
 
+(defun flycheck-parse-output-with-pattern (output buffer pattern)
+  "Parse OUTPUT from BUFFER with PATTERN.
+
+PATTERN is a flycheck error pattern.
+
+Return a list of parsed errors and warnings as `flycheck-error`
+objects."
+  (let ((file-idx (nth 1 pattern))
+        (line-idx (nth 2 pattern))
+        (col-idx (nth 3 pattern))
+        (text-idx (nth 4 pattern))
+        (level (nth 5 pattern))
+        (errors nil)
+        (last-match 0))
+    (while (string-match (nth 0 pattern) output last-match)
+      (!cons
+       (flycheck-make-error
+        :buffer buffer
+        :file-name (when file-idx (match-string file-idx output))
+        :line-no (when line-idx
+                   (string-to-number (match-string line-idx output)))
+        :col-no (when col-idx
+                  (string-to-number (match-string col-idx output)))
+        :text (when text-idx (match-string text-idx output))
+        :level level)
+       errors)
+      (setq last-match (match-end 0)))
+    errors))
+
 (defun flycheck-parse-output (output buffer patterns)
   "Parse OUTPUT from BUFFER with PATTERNS.
 
@@ -479,30 +504,7 @@ PATTERNS is a list of flycheck error patterns.
 
 Return a list of parsed errors and warnings (as `flycheck-error`
 objects)."
-  (let ((errors nil)
-        (last-match 0))
-    (dolist (pattern patterns)
-      (let ((file-idx (nth 1 pattern))
-            (line-idx (nth 2 pattern))
-            (col-idx (nth 3 pattern))
-            (text-idx (nth 4 pattern))
-            (level (nth 5 pattern)))
-        (while (string-match (nth 0 pattern) output last-match)
-          (setq errors
-                (cons
-                 (flycheck-make-error
-                  :buffer buffer
-                  :file-name (when file-idx (match-string file-idx output))
-                  :line-no (when line-idx
-                             (string-to-number (match-string line-idx output)))
-                  :col-no (when col-idx
-                            (string-to-number (match-string col-idx output)))
-                  :text (when text-idx (match-string text-idx output))
-                  :level level)
-                 errors))
-          (setq last-match (match-end 0))))
-      (setq last-match 0))
-    errors))
+  (--mapcat (flycheck-parse-output-with-pattern output buffer it) patterns))
 
 (defun flycheck-relevant-error-p (err)
   "Determine whether ERR is relevant for the current buffer.
@@ -528,10 +530,10 @@ the corresponding buffer if it matches and file in
   (flycheck-error-with-buffer err
     (let ((file-name (flycheck-error-file-name err)))
       (when file-name
-        (dolist (substituted-file flycheck-substituted-files)
-          (when (flycheck-same-files-p file-name substituted-file)
-            (setf (flycheck-error-file-name err) (buffer-file-name))
-            (return err))))
+        (--each
+          flycheck-substituted-files
+          (when (flycheck-same-files-p file-name it)
+            (setf (flycheck-error-file-name err) (buffer-file-name)))))
       err)))
 
 (defun flycheck-sanitize-error (err)
@@ -556,26 +558,17 @@ Clean up the error file name and the error message."
   "Sanitize ERRORS.
 
 Remove all errors that do not belong to the current file."
-  (let ((sanitized-errors nil))
-    (dolist (err errors)
-      (setq err (flycheck-sanitize-error err))
-      (when (flycheck-relevant-error-p err)
-        (setq sanitized-errors (cons err sanitized-errors))))
-    sanitized-errors))
+  (-filter 'flycheck-relevant-error-p (-map 'flycheck-sanitize-error errors)))
 
 (defun flycheck-count-errors (errors)
   "Count the number of warnings and errors in ERRORS.
 
 Return a cons cell whose `car' is the number of errors and whose
 `car' is the number of warnings."
-  (let ((no-errors 0)
-        (no-warnings 0))
-    (dolist (err errors)
-      (let ((level (flycheck-error-level err)))
-        (cond
-         ((eq level 'error) (setq no-errors (+ no-errors 1)))
-         ((eq level 'warning) (setq no-warnings (+ no-warnings 1))))))
-    `(,no-errors . ,no-warnings)))
+  (let* ((groups (-group-by 'flycheck-error-level errors))
+         (errors (cdr (assq 'error groups)))
+         (warnings (cdr (assq 'warning groups))))
+    `(,(length errors) . ,(length warnings))))
 
 (defun flycheck-report-errors (errors)
   "Report ERRORS in the current buffer.
