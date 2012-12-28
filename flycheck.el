@@ -312,8 +312,7 @@ Return t if so, or nil otherwise."
   (unless (flycheck-valid-checker-p properties)
     (error "Checker %s is not valid.  Add :command, :error-patterns and :modes\
  or :predicate" properties))
-  (and (flycheck-valid-checker-p properties)
-       (flycheck-check-modes properties)
+  (and (flycheck-check-modes properties)
        (flycheck-check-predicate properties)
        (flycheck-check-executable properties)))
 
