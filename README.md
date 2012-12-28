@@ -1,7 +1,7 @@
 Flycheck
 ========
 
-Flycheck is flymake reloaded with
+Flycheck is “flymake done right” with
 
 - an improved customization interface based on major modes (instead of file name
   patterns),
