@@ -31,6 +31,7 @@ Features
   - HTML
   - Javascript
   - JSON
+  - Lua
   - Perl
   - PHP
   - Python
@@ -140,6 +141,7 @@ You need to install external utilities for the following checkers:
 - TeX/LaTeX: Install [chktex][] or [lacheck][].  Most TeX distributions,
   including TeXLive and MacTeX, already do this for you.
 - XML: Install [xmlstarlet][].
+- Lua: Install [lua][].
 
 
 Customization
@@ -331,7 +333,7 @@ The following people contributed to flycheck:
 - [Marian Schubert][maio] added the Perl syntax checker.
 - [Martin Grenfell][scrooloose] created the awesome Vim library [syntastic][]
   which inspired this project and many of its checkers.
-- [Peter Vasil][ptrv] created the XML syntax checker.
+- [Peter Vasil][ptrv] created the XML and Lua syntax checkers.
 - [Steve Purcell][purcell] implemented many checkers, contributed important
   ideas to the design of the checker API and engaged in worthwhile discussion to
   shape this project.
@@ -376,6 +378,7 @@ See [COPYING][] for details.
 [jshint]: http://www.jshint.com
 [jslint]: http://www.jslint.com/
 [jsonlint]: https://github.com/zaach/jsonlint
+[lua]: http://www.lua.org/
 [perl]: http://www.perl.org/
 [php]: http://php.net/manual/en/features.commandline.php
 [flake8]: http://pypi.python.org/pypi/flake8
