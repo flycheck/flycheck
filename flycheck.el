@@ -591,12 +591,17 @@ Add overlays and report a proper flycheck status."
 
 
 ;; Overlay management
+(define-fringe-bitmap 'flycheck-fringe-exclamation-mark
+  [24 60 60 24 24 0 0 24 24] nil nil 'center)
+
 (defconst flycheck-error-overlay nil
   "Overlay category for flycheck errors.")
 (put 'flycheck-error-overlay 'flycheck-overlay t)
 (put 'flycheck-error-overlay 'face 'flycheck-error-face)
 (put 'flycheck-error-overlay 'priority 100)
 (put 'flycheck-error-overlay 'help-echo "Unknown error.")
+(put 'flycheck-error-overlay 'flycheck-fringe-bitmap
+     'flycheck-fringe-exclamation-mark)
 
 (defconst flycheck-warning-overlay nil
   "Overlay category for flycheck warning.")
@@ -604,6 +609,7 @@ Add overlays and report a proper flycheck status."
 (put 'flycheck-warning-overlay 'face 'flycheck-warning-face)
 (put 'flycheck-warning-overlay 'priority 100)
 (put 'flycheck-warning-overlay 'help-echo "Unknown warning.")
+(put 'flycheck-warning-overlay 'flycheck-fringe-bitmap 'question-mark)
 
 (defconst flycheck-overlay-categories-alist
   '((warning . flycheck-warning-overlay)
@@ -628,11 +634,15 @@ Add overlays and report a proper flycheck status."
              (category (cdr (assq level flycheck-overlay-categories-alist)))
              (indicator (cdr (assq level flycheck-overlay-indicators-alist)))
              (text (flycheck-error-text err))
-             (overlay (make-overlay beg end (flycheck-error-buffer err))))
+             (overlay (make-overlay beg end (flycheck-error-buffer err)))
+             (fringe-icon `(left-fringe ,(get category 'flycheck-fringe-bitmap)
+                                        ,(get category 'face))))
         ;; TODO: Consider hooks to re-check if overlay contents change
         (overlay-put overlay 'category category)
         (overlay-put overlay 'line-prefix (symbol-value indicator))
         (overlay-put overlay 'flycheck-error err)
+        (overlay-put overlay 'before-string
+                     (propertize "!" 'display fringe-icon))
         (unless (s-blank? text)
           (overlay-put overlay 'help-echo text))))))
 
