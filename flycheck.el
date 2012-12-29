@@ -1073,6 +1073,13 @@ If .jshintrc is not found run jshint with default settings."
         (and buffer-file-name
              (string= "json" (file-name-extension buffer-file-name))))))
 
+(defvar flycheck-checker-lua
+  '(:command
+    ("luac" "-p" source)
+    :error-patterns
+    (("^.*?: \\(.*?\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 error))
+    :modes lua-mode))
+
 (defvar flycheck-checker-perl
   '(:command
     ("perl" "-w" "-c" source)
@@ -1167,13 +1174,6 @@ If .jshintrc is not found run jshint with default settings."
     (("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 error))
     :modes sh-mode
     :predicate (eq sh-shell 'zsh)))
-
-(defvar flycheck-checker-lua
-  '(:command
-    ("luac" "-p" source)
-    :error-patterns
-    (("^.*?: \\(.*?\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 error))
-    :modes lua-mode))
 
 (provide 'flycheck)
 
