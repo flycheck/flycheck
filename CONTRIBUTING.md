@@ -11,6 +11,7 @@ Issue reporting
 
 - Check that the issue has not already been reported.
 - Check that the issue has not already been fixed in the latest code.
+- Be clear and precise (do not prose, but name functions and commands exactly).
 - Open an issue with a clear title and description in grammatically correct,
   complete sentences.
 
