@@ -598,10 +598,10 @@ Add overlays and report a proper flycheck status."
     (save-excursion
       (goto-char (point-min))
       (forward-line (- (flycheck-error-line-no err) 1))
-      ;; TODO: Consider column number
       (let* ((level (flycheck-error-level err))
-             (beg (line-beginning-position))
-             (end (line-end-position))
+             (column (flycheck-error-col-no err))
+             (beg (+ (line-beginning-position) (if column (- column 1) 0)))
+             (end (if column (+ beg 1) (line-end-position)))
              (category (cdr (assq level flycheck-overlay-categories-alist)))
              (text (flycheck-error-text err))
              (overlay (make-overlay beg end (flycheck-error-buffer err)))
