@@ -953,6 +953,9 @@ Otherwise behave as if called interactively."
 
 (defconst flycheck-checker-emacs-lisp-check-form
   '(progn
+     ;; Initialize packages to at least try to load dependencies
+     (package-initialize)
+
      (setq byte-compiled-files nil)
      (defun byte-compile-dest-file (source)
        (let ((temp-file (expand-file-name (make-temp-file source)
