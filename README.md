@@ -52,10 +52,15 @@ Installation
 ------------
 
 Install the ELPA package from [MELPA][] (bleeding edge snapshots) or
-[Marmalade][] (stable releases) with `M-x package-install RET flycheck`.
+[Marmalade][] (stable releases) with `M-x package-install RET flycheck`.  All
+dependencies are automatically installed.
 
 Or [download][] the latest release and install `flycheck.el` with `M-x
-package-install-file`.
+package-install-file`.  In this case you also need to install the following
+dependencies manually:
+
+- [dash.el][]
+- [s.el][]
 
 The library is written and tested against GNU Emacs 24 and may or may not work
 in earlier versions of GNU Emacs.
@@ -362,6 +367,8 @@ See [COPYING][] for details.
 [melpa]: http://melpa.milkbox.net
 [marmalade]: http://marmalade-repo.org/
 [download]: https://github.com/lunaryorn/flycheck/tags
+[dash.el]: https://github.com/magnars/dash.el
+[s.el]: https://github.com/magnars/s.el
 [property list]: http://www.gnu.org/software/emacs/manual/html_node/elisp/Property-Lists.html#Property-Lists]
 [python]: http://python.org
 [syntastic]: https://github.com/scrooloose/syntastic
