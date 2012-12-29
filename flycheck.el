@@ -858,6 +858,13 @@ running checks, and empty all variables used by flycheck."
   (setq flycheck-last-checker nil))
 
 ;;;###autoload
+(defvar flycheck-mode nil
+  "Whether `flycheck-mode' is enabled or disabled.
+
+See function `flycheck-mode' for a description of this minor
+mode.")
+
+;;;###autoload
 (define-minor-mode flycheck-mode
   "Minor mode for on-the-fly syntax checking.
 
