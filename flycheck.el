@@ -184,7 +184,7 @@ Return the path of the file."
   (if filename
       (let* ((directory (file-name-directory filename))
              (name (file-name-nondirectory filename)))
-        (expand-file-name (format "flycheck-%s" name) directory))
+        (expand-file-name (format "%s-%s" prefix name) directory))
     ;; With no filename, fall back to a copy in the system directory.
     (flycheck-temp-file-system filename prefix)))
 
