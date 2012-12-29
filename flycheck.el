@@ -49,7 +49,8 @@
 
 (defgroup flycheck nil
   "Customization for flymake checkers."
-  :prefix "flycheck-")
+  :prefix "flycheck-"
+  :group 'tools)
 
 (defcustom flycheck-checkers
   '(flycheck-checker-bash
