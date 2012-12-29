@@ -110,30 +110,6 @@ to always use a specific checker for a file.")
 (make-variable-buffer-local 'flycheck-checker)
 (put 'flycheck-checker 'safe-local-variable 'flycheck-registered-checker-p)
 
-(defcustom flycheck-error-indicator "⚠"
-  "Indicator for error messages.
-
-If set to a string it will be shown at the beginning of a line
-containing an error.  If nil no indicator is shown.
-
-Changing this variable does not take effect until a syntax check
-was performed."
-  :group 'flycheck
-  :type '(choice (const :tag "No indicator" nil)
-                 (string :tag "Indicator string")))
-
-(defcustom flycheck-warning-indicator nil
-  "Indicator for warning messages.
-
-If set to a string it will be shown at the beginning of a line
-containing a warning.  If nil no indicator is shown.
-
-Changing this variable does not take effect until a syntax check
-was performed."
-  :group 'flycheck
-  :type '(choice (const :tag "No indicator" nil)
-                 (string :tag "Indicator string")))
-
 (defface flycheck-error-face
   '((t (:inherit flymake-errline)))
   "Face for flycheck errors."
@@ -616,11 +592,6 @@ Add overlays and report a proper flycheck status."
     (error . flycheck-error-overlay))
   "Overlay categories for error levels.")
 
-(defconst flycheck-overlay-indicators-alist
-  '((warning . flycheck-warning-indicator)
-    (error . flycheck-error-indicator))
-  "Indicators for error levels.")
-
 (defun flycheck-add-overlay (err)
   "Add overlay for ERR."
   (flycheck-error-with-buffer err
@@ -632,14 +603,12 @@ Add overlays and report a proper flycheck status."
              (beg (line-beginning-position))
              (end (line-end-position))
              (category (cdr (assq level flycheck-overlay-categories-alist)))
-             (indicator (cdr (assq level flycheck-overlay-indicators-alist)))
              (text (flycheck-error-text err))
              (overlay (make-overlay beg end (flycheck-error-buffer err)))
              (fringe-icon `(left-fringe ,(get category 'flycheck-fringe-bitmap)
                                         ,(get category 'face))))
         ;; TODO: Consider hooks to re-check if overlay contents change
         (overlay-put overlay 'category category)
-        (overlay-put overlay 'line-prefix (symbol-value indicator))
         (overlay-put overlay 'flycheck-error err)
         (overlay-put overlay 'before-string
                      (propertize "!" 'display fringe-icon))
