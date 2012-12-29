@@ -72,7 +72,7 @@
     flycheck-checker-sh
     flycheck-checker-tex-chktex
     flycheck-checker-tex-lacheck
-    flycheck-checker-xml
+    flycheck-checker-xml-xmlstarlet
     flycheck-checker-zsh)
   "Flycheck checkers.
 
