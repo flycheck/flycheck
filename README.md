@@ -1,22 +1,15 @@
 Flycheck
 ========
 
-Flycheck is “flymake done right” with
+Flycheck provides on-the-fly syntax checking for GNU Emacs.  Essentially it's
+“flymake done right” with
 
-- an improved customization interface based on major modes (instead of file name
-  patterns),
-- a much nicer and easier, declarative syntax for checker definitions (instead
-  of init functions)
-- a bunch of ready-to-use syntax checkers for various languages (instead of
-  broken checkers using non-existing tools)
-- and a clean, concise and understandable implementation (instead of a almost 2k
+- major-mode based checkers (instead of file name patterns),
+- simple declarative checker definitions (instead of init functions)
+- ready-to-use syntax checkers for a bunch of languages (instead of broken
+  checkers using non-existing tools)
+- a clean, concise and understandable implementation (instead of a almost 2k
   line mess of spaghetti code).
-
-
-Motivation
-----------
-
-Get rid of flymake which is utterly broken.
 
 
 Features
