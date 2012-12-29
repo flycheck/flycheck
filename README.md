@@ -11,6 +11,10 @@ Flycheck provides on-the-fly syntax checking for GNU Emacs.  Essentially it's
 - a clean, concise and understandable implementation (instead of a almost 2k
   line mess of spaghetti code).
 
+And this is how it looks like:
+
+![Screenshot of Flycheck in action](https://github.com/lunaryorn/flycheck/raw/master/screenshot.png)
+
 
 Features
 --------
