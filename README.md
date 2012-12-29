@@ -11,7 +11,7 @@ Flycheck provides on-the-fly syntax checking for GNU Emacs.  Essentially it's
 - a clean, concise and understandable implementation (instead of a almost 2k
   line mess of spaghetti code).
 
-And this is how it looks like:
+And this is how it looks like (the color theme is [solarized-light][]):
 
 ![Screenshot of Flycheck in action](https://github.com/lunaryorn/flycheck/raw/master/screenshot.png)
 
@@ -355,6 +355,7 @@ Street, Fifth Floor, Boston, MA 02110-1301, USA.
 See [COPYING][] for details.
 
 
+[solarized-light]: https://github.com/bbatsov/solarized-emacs
 [melpa]: http://melpa.milkbox.net
 [marmalade]: http://marmalade-repo.org/
 [download]: https://github.com/lunaryorn/flycheck/tags
