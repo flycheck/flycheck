@@ -20,6 +20,7 @@ Features
 --------
 
 - Automatic syntax check after saving or insertion of new lines
+- Error navigation with `next-error` and `previous-error`
 - Built-in syntax checkers for:
   - CoffeeScript
   - CSS
@@ -39,10 +40,6 @@ Features
   - XML
 - Easy customization (see `flycheck-checkers`)
 - Easy declarative API to define new syntax checkers
-
-Compared to flymake these features are currently **missing**:
-
-- Jump to next/previous error
 
 
 Installation

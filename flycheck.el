@@ -465,6 +465,13 @@ to the end of this line."
            (end (if col beg (line-end-position))))
       `(,beg . ,end))))
 
+(defun flycheck-error-pos (err)
+  "Get the buffer position of ERR.
+
+If ERR has a column return exactly that column.  Otherwise return
+the beginning of the line of ERR."
+  (car (flycheck-error-region err)))
+
 (defun flycheck-parse-output-with-pattern (output buffer pattern)
   "Parse OUTPUT from BUFFER with PATTERN.
 
@@ -675,6 +682,30 @@ Add overlays and report a proper flycheck status."
 (defun flycheck-remove-overlays ()
   "Remove all flycheck overlays in the current buffer."
   (remove-overlays (point-min) (point-max) 'flycheck-overlay t))
+
+
+;; Error navigation
+(defun flycheck-next-error (no-errors reset)
+  "Advance NO-ERRORS, optionally RESET before.
+
+NO-ERRORS is a number specifying how many errors to move forward.
+IF RESET is t, move to beginning of buffer first."
+  (when reset
+    (point-min))
+  ;; TODO: Horribly inefficient, possibly improve by considering less errors.
+  (let* ((err-positions (-map 'flycheck-error-pos flycheck-current-errors))
+         ;; Remove the current point for the errors because we don't want to
+         ;; navigate to the current error again
+         (navigatable-errors (--remove (= (point) it) err-positions))
+         ;; Take errors before the point and errors after the point
+         (splitted (--split-with (>= (point) it) navigatable-errors))
+         (pos-before (nreverse (car splitted)))
+         (pos-after (cadr splitted))
+         (positions (if (< no-errors 0) pos-before pos-after))
+         ;; Eventually get the position and navigate to it
+         (pos (nth (- (abs no-errors) 1) positions)))
+    (when pos
+      (goto-char pos))))
 
 
 ;; Error message echoing
@@ -922,6 +953,9 @@ Otherwise behave as if called interactively."
     (add-hook 'after-change-functions 'flycheck-handle-change nil t)
     (add-hook 'post-command-hook 'flycheck-show-error-at-point-soon nil t)
 
+    ;; Enable navigation through Flycheck errors
+    (setq next-error-function 'flycheck-next-error)
+
     ;; Start an initial syntax check
     (flycheck-buffer-safe))
    (t
@@ -929,6 +963,9 @@ Otherwise behave as if called interactively."
     (remove-hook 'after-save-hook 'flycheck-buffer-safe t)
     (remove-hook 'after-change-functions 'flycheck-handle-change t)
     (remove-hook 'post-command-hook 'flycheck-show-error-at-point-soon t)
+
+    ;; Disable Flycheck error navigation again
+    (setq next-error-function nil)
 
     ;; and clear internal state
     (flycheck-teardown))))
