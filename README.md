@@ -86,10 +86,9 @@ error column is highlighted if an error refer to a specific column only.
 Customize `flycheck-ignore-columns` (see [Customization](#customization)) to
 always highlight the whole line.
 
-To view an error
-message, either hover the mouse over the highlighted error, or move the cursor
-to the highlighted error and wait a short moment.  To clear all error
-information use `M-x flycheck-clear`.
+To view an error message, either hover the mouse over the highlighted error, or
+move the cursor to the highlighted error and wait a short moment.  To clear all
+error information use `M-x flycheck-clear`.
 
 By default a suitable checker is automatically selected from `flycheck-checkers`
 (see [Customization](#customization)).  You can select a specific checker for
