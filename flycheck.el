@@ -1076,7 +1076,7 @@ Otherwise behave as if called interactively."
       ;; Prevent Emacs Lisp checking in temporary buffers because we cannot
       ;; reliably parse file names from error messages thanks to aforementioned
       ;; idiocy
-      :predicate (when (buffer-file-name) t))))
+      :predicate (and (buffer-file-name) (not no-byte-compile)))))
 
 (defvar flycheck-checker-haml
   '(:command
