@@ -87,6 +87,7 @@ obtain the checker definition."
   :group 'flycheck
   :type '(repeat (symbol :tag "Checker")))
 
+;; TODO: Find out how we can use defvar-local from Emacs 24.3
 (defvar flycheck-checker nil
   "Checker to use for the current buffer.
 
@@ -643,6 +644,7 @@ Add overlays and report a proper flycheck status."
 (put 'flycheck-error-overlay 'face 'flycheck-error-face)
 (put 'flycheck-error-overlay 'priority 100)
 (put 'flycheck-error-overlay 'help-echo "Unknown error.")
+;; TODO: Figure out how to use the new exclamation-mark bitmap from Emacs 24.3
 (put 'flycheck-error-overlay 'flycheck-fringe-bitmap
      'flycheck-fringe-exclamation-mark)
 
