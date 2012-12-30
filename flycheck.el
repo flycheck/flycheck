@@ -449,6 +449,22 @@ If the buffer of ERR is not live, FORMS are not evaluated."
     (with-current-buffer (flycheck-error-buffer ,err)
       ,@forms)))
 
+(defun flycheck-error-region (err)
+  "Get the region of ERR.
+
+Return a cons cell whose `car' is the beginning and whose `cdr'
+is the end of the region.  If ERR has a column number the
+beginning and end are equal and point to this column.  Otherwise
+the beginning points to the beginning of the ERR line and the end
+to the end of this line."
+  (save-excursion
+    (goto-char (point-min))
+    (forward-line (- (flycheck-error-line-no err) 1))
+    (let* ((col (flycheck-error-col-no err))
+           (beg (+ (line-beginning-position) (or col 0)))
+           (end (if col beg (line-end-position))))
+      `(,beg . ,end))))
+
 (defun flycheck-parse-output-with-pattern (output buffer pattern)
   "Parse OUTPUT from BUFFER with PATTERN.
 
@@ -623,9 +639,10 @@ Add overlays and report a proper flycheck status."
       (goto-char (point-min))
       (forward-line (- (flycheck-error-line-no err) 1))
       (let* ((level (flycheck-error-level err))
-             (column (flycheck-error-col-no err))
-             (beg (+ (line-beginning-position) (if column (- column 1) 0)))
-             (end (if column (+ beg 1) (line-end-position)))
+             (region (flycheck-error-region err))
+             (end (cdr region))
+             ;; Highlight the column appropriately
+             (beg (if (= (car region) end) (- end 1) (car region)))
              (category (cdr (assq level flycheck-overlay-categories-alist)))
              (text (flycheck-error-text err))
              (overlay (make-overlay beg end (flycheck-error-buffer err)))
