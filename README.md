@@ -81,7 +81,12 @@ With `flycheck-mode` enabled the buffer is automatically checked on-the-fly.
 You can also manually check the buffer with `M-x flycheck-buffer`.
 
 Errors and warnings from the checker are reported in the mode line (see
-[Mode line](#mode-line)) and highlighted in the buffer.  To view an error
+[Mode line](#mode-line)) and highlighted in the buffer.  By default only the
+error column is highlighted if an error refer to a specific column only.
+Customize `flycheck-ignore-columns` (see [Customization](#customization)) to
+always highlight the whole line.
+
+To view an error
 message, either hover the mouse over the highlighted error, or move the cursor
 to the highlighted error and wait a short moment.  To clear all error
 information use `M-x flycheck-clear`.
@@ -175,6 +180,8 @@ buffer.  For instance, to use `pyflakes` as checker in the current buffer, use
 
 ### Appearance
 
+- `M-x customize-variable RET flycheck-ignore-columns`: Customize whether
+  Flycheck takes column numbers into account when highlighting errors.
 - `M-x customize-face RET flycheck-error-face`: Customize the face for error
   highlights.  Inherits from `flymake-errline` by default.
 - `M-x customize-face RET flycheck-warning-face`: Customize the face for error

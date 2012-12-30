@@ -119,6 +119,20 @@ to always use a specific checker for a file.")
   "Face for flycheck warnings."
   :group 'flycheck)
 
+(defcustom flycheck-ignore-columns nil
+  "Ignore column numbers when highlighting errors.
+
+If nil only highlight the affected column an error refers to
+specific column.  If t columns are ignored and the whole line his
+highlighted regardless of whether an error refers to a column or
+a complete line.
+
+Note that this does not affect error navigation.  When navigating
+errors with `next-error' and `previous-error' Flycheck always
+just to the error column."
+  :group 'flycheck
+  :type 'boolean)
+
 (defcustom flycheck-mode-hook nil
   "Hooks to run after `flycheck-mode'."
   :group 'flycheck
@@ -449,18 +463,22 @@ If the buffer of ERR is not live, FORMS are not evaluated."
     (with-current-buffer (flycheck-error-buffer ,err)
       ,@forms)))
 
-(defun flycheck-error-region (err)
+(defun flycheck-error-region (err &optional ignore-column)
   "Get the region of ERR.
 
-Return a cons cell whose `car' is the beginning and whose `cdr'
-is the end of the region.  If ERR has a column number the
-beginning and end are equal and point to this column.  Otherwise
-the beginning points to the beginning of the ERR line and the end
-to the end of this line."
+ERR is a flycheck error whose region to get.  If IGNORE-COLUMN is
+given and t ignore the column number of ERR when determining the
+region.  Hence the region will always extend over the whole line.
+
+Return a cons cell (BEG . END).  BEG is the beginning of the
+error region and END its end.  If ERR has a column number and
+IGNORE-COLUMN is omitted or nil BEG and END are equal and refer
+to the error column.  Otherwise BEG is the beginning of the ERR
+line and END its end."
   (save-excursion
     (goto-char (point-min))
     (forward-line (- (flycheck-error-line-no err) 1))
-    (let* ((col (flycheck-error-col-no err))
+    (let* ((col (if ignore-column nil (flycheck-error-col-no err)))
            (beg (+ (line-beginning-position) (or col 0)))
            (end (if col beg (line-end-position))))
       `(,beg . ,end))))
@@ -646,7 +664,7 @@ Add overlays and report a proper flycheck status."
       (goto-char (point-min))
       (forward-line (- (flycheck-error-line-no err) 1))
       (let* ((level (flycheck-error-level err))
-             (region (flycheck-error-region err))
+             (region (flycheck-error-region err flycheck-ignore-columns))
              (end (cdr region))
              ;; Highlight the column appropriately
              (beg (if (= (car region) end) (- end 1) (car region)))
