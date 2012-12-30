@@ -133,6 +133,13 @@ overlay setup)."
   :group 'flycheck
   :type 'hook)
 
+;;;###autoload
+(defvar flycheck-mode nil
+  "Whether `flycheck-mode' is enabled or disabled.
+
+See function `flycheck-mode' for a description of this minor
+mode.")
+
 
 ;; Utility functions
 (defun flycheck-temp-file-system (filename prefix)
@@ -855,13 +862,6 @@ running checks, and empty all variables used by flycheck."
   (flycheck-post-syntax-check-cleanup)
   (setq flycheck-checker nil)
   (setq flycheck-last-checker nil))
-
-;;;###autoload
-(defvar flycheck-mode nil
-  "Whether `flycheck-mode' is enabled or disabled.
-
-See function `flycheck-mode' for a description of this minor
-mode.")
 
 ;;;###autoload
 (define-minor-mode flycheck-mode
