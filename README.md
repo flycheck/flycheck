@@ -80,15 +80,7 @@ Or do `M-x flycheck-mode` manually after visiting a file.
 With `flycheck-mode` enabled the buffer is automatically checked on-the-fly.
 You can also manually check the buffer with `M-x flycheck-buffer`.
 
-Errors and warnings from the checker are reported in the mode line (see
-[Mode line](#mode-line)) and highlighted in the buffer.  By default only the
-error column is highlighted if an error refer to a specific column only.
-Customize `flycheck-ignore-columns` (see [Customization](#customization)) to
-always highlight the whole line.
-
-To view an error message, either hover the mouse over the highlighted error, or
-move the cursor to the highlighted error and wait a short moment.  To clear all
-error information use `M-x flycheck-clear`.
+### Syntax checker selection
 
 By default a suitable checker is automatically selected from `flycheck-checkers`
 (see [Customization](#customization)).  You can select a specific checker for
@@ -106,9 +98,19 @@ from `flycheck-checker` or `flycheck-select-checker` cannot be used for the
 current buffer (e.g. the major mode does not match, the checker does not exist,
 etc.) an error is signaled.
 
+### Error reporting
 
-Mode line
----------
+Errors and warnings from the checker are reported in the mode line (see
+[Mode line](#mode-line)) and highlighted in the buffer.  By default only the
+error column is highlighted if an error refer to a specific column only.
+Customize `flycheck-ignore-columns` (see [Customization](#customization)) to
+always highlight the whole line.
+
+To view an error message, either hover the mouse over the highlighted error, or
+move the cursor to the highlighted error and wait a short moment.  To clear all
+error information use `M-x flycheck-clear`.
+
+### Mode line
 
 Flycheck indicates its state in the mode line:
 
