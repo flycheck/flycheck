@@ -44,6 +44,21 @@
 (require 's)
 (require 'dash)
 
+
+;; Compatibility
+(eval-when-compile
+  (unless (and (fboundp 'defvar-local)
+               (eq (car (symbol-function 'defvar-local)) 'macro))
+    (defmacro defvar-local (var val &optional docstring)
+      "Define VAR as a buffer-local variable with default value VAL.
+Like `defvar' but additionally marks the variable as being automatically
+buffer-local wherever it is set."
+      (declare (debug defvar) (doc-string 3))
+      ;; Can't use backquote here, it's too early in the bootstrap.
+      (list 'progn (list 'defvar var val docstring)
+            (list 'make-variable-buffer-local (list 'quote var))))))
+
+
 ;; Customization
 
 (defgroup flycheck nil
@@ -87,8 +102,7 @@ obtain the checker definition."
   :group 'flycheck
   :type '(repeat (symbol :tag "Checker")))
 
-;; TODO: Find out how we can use defvar-local from Emacs 24.3
-(defvar flycheck-checker nil
+(defvar-local flycheck-checker nil
   "Checker to use for the current buffer.
 
 If unset automatically select a suitable checker from
@@ -107,7 +121,6 @@ checker definition (see `flycheck-checkers').
 Use the command `flycheck-select-checker' to select a checker for
 the current buffer, or set this variable as file local variable
 to always use a specific checker for a file.")
-(make-variable-buffer-local 'flycheck-checker)
 (put 'flycheck-checker 'safe-local-variable 'flycheck-registered-checker-p)
 
 (defface flycheck-error-face
@@ -313,9 +326,8 @@ Return t if so, or nil otherwise."
        (flycheck-check-predicate properties)
        (flycheck-check-executable properties)))
 
-(defvar flycheck-substituted-files nil
+(defvar-local flycheck-substituted-files nil
   "A list of all files created for argument substitution.")
-(make-variable-buffer-local 'flycheck-substituted-files)
 
 (defun flycheck-clean-substituted-files ()
   "Remove all substituted files."
@@ -364,9 +376,8 @@ Return a list of error patterns of the given checker."
         patterns
       (error "Invalid type for :error-patterns: %S" patterns))))
 
-(defvar flycheck-last-checker nil
+(defvar-local flycheck-last-checker nil
   "The last checker used for the current buffer.")
-(make-variable-buffer-local 'flycheck-last-checker)
 
 (defun flycheck-try-last-checker-for-buffer ()
   "Try the last checker for the current buffer.
@@ -624,9 +635,8 @@ Add overlays and report a proper flycheck status."
          (format ":%s/%s" (car no-err-warnings) (cdr no-err-warnings))))
     (flycheck-report-status "")))
 
-(defvar flycheck-current-errors nil
+(defvar-local flycheck-current-errors nil
   "A list of all errors and warnings in the current buffer.")
-(make-variable-buffer-local 'flycheck-current-errors)
 
 (defun flycheck-clear-errors ()
   "Remove all error information from the current buffer."
@@ -638,15 +648,23 @@ Add overlays and report a proper flycheck status."
 (define-fringe-bitmap 'flycheck-fringe-exclamation-mark
   [24 60 60 24 24 0 0 24 24] nil nil 'center)
 
+(defconst flycheck-fringe-exclamation-mark
+  (if (get 'exclamation-mark 'fringe)
+      'exclamation-mark
+    'flycheck-fringe-exclamation-mark)
+    "The symbol to use as exclamation mark bitmap.
+
+Defaults to the built-in exclamation mark if available or to the
+flycheck exclamation mark otherwise.")
+
 (defconst flycheck-error-overlay nil
   "Overlay category for flycheck errors.")
 (put 'flycheck-error-overlay 'flycheck-overlay t)
 (put 'flycheck-error-overlay 'face 'flycheck-error-face)
 (put 'flycheck-error-overlay 'priority 100)
 (put 'flycheck-error-overlay 'help-echo "Unknown error.")
-;; TODO: Figure out how to use the new exclamation-mark bitmap from Emacs 24.3
 (put 'flycheck-error-overlay 'flycheck-fringe-bitmap
-     'flycheck-fringe-exclamation-mark)
+     flycheck-fringe-exclamation-mark)
 
 (defconst flycheck-warning-overlay nil
   "Overlay category for flycheck warning.")
@@ -740,9 +758,8 @@ The minibuffer is considered free if the minibuffer is not active
 and the cursor is not in the minibuffer."
   (and (not (active-minibuffer-window)) (not cursor-in-echo-area)))
 
-(defvar flycheck-error-display-timer nil
+(defvar-local flycheck-error-display-timer nil
   "Timer to automatically show the error at point in minibuffer.")
-(make-variable-buffer-local 'flycheck-error-display-timer)
 
 (defun flycheck-cancel-error-display-timer ()
   "Cancel the error display timer for the current buffer."
@@ -775,9 +792,8 @@ Show the error message at point in minibuffer after a short delay."
 
 
 ;; Process management
-(defvar flycheck-current-process nil
+(defvar-local flycheck-current-process nil
   "The current syntax checking process.")
-(make-variable-buffer-local 'flycheck-current-process)
 
 (defun flycheck-running-p ()
   "Determine whether a syntax check is running."
@@ -929,9 +945,8 @@ Use when checking buffers automatically."
 (defconst flycheck-mode-line-lighter " FlyC"
   "The standard lighter for flycheck mode.")
 
-(defvar flycheck-mode-line nil
+(defvar-local flycheck-mode-line nil
   "The mode line lighter of variable `flycheck-mode'.")
-(make-variable-buffer-local 'flycheck-mode-line)
 
 (defun flycheck-report-status (status)
   "Report flycheck STATUS."
