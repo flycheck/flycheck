@@ -110,12 +110,12 @@ to always use a specific checker for a file.")
 (put 'flycheck-checker 'safe-local-variable 'flycheck-registered-checker-p)
 
 (defface flycheck-error-face
-  '((t (:inherit flymake-errline)))
+  '((t (:inherit 'error)))
   "Face for flycheck errors."
   :group 'flycheck)
 
 (defface flycheck-warning-face
-  '((t (:inherit flymake-warnline)))
+  '((t (:inherit 'warning)))
   "Face for flycheck warnings."
   :group 'flycheck)
 
