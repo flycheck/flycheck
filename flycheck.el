@@ -541,6 +541,24 @@ Clean up the error file name and the error message."
 Remove all errors that do not belong to the current file."
   (-filter 'flycheck-relevant-error-p (-map 'flycheck-sanitize-error errors)))
 
+(defun flycheck-error-<= (err1 err2)
+  "Determine whether ERR1 goes before ERR2."
+  (let ((line1 (flycheck-error-line-no err1))
+        (line2 (flycheck-error-line-no err2)))
+    (if (= line1 line2)
+        ;; Sort by column number if possible
+        (let ((col1 (flycheck-error-col-no err1))
+              (col2 (flycheck-error-col-no err2)))
+          (or (not col1)                ; Sort errors for the whole line first
+              (and col2 (<= col1 col2))))
+      (< line1 line2))))
+
+(defun flycheck-sort-errors (errors)
+  "Sort ERRORS by line and column numbers.
+
+ERRORS is modified by side effects."
+  (sort errors 'flycheck-error-<=))
+
 (defun flycheck-count-errors (errors)
   "Count the number of warnings and errors in ERRORS.
 
@@ -730,7 +748,8 @@ Parse the output and report an appropriate error status."
   (let* ((error-patterns (flycheck-get-error-patterns properties))
          (parsed-errors (flycheck-parse-output output (current-buffer)
                                                error-patterns))
-         (errors (flycheck-sanitize-errors parsed-errors)))
+         (errors (flycheck-sort-errors
+                  (flycheck-sanitize-errors parsed-errors))))
     (when flycheck-mode
       ;; Parse error messages if flycheck mode is active
       (setq flycheck-current-errors errors)
