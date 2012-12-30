@@ -60,7 +60,7 @@
     flycheck-checker-html
     flycheck-checker-json
     flycheck-checker-javascript-jshint
-    flycheck-checker-javascript-jslint
+    flycheck-checker-javascript-jsl
     flycheck-checker-lua
     flycheck-checker-perl
     flycheck-checker-php
@@ -1128,7 +1128,7 @@ If .jshintrc is not found run jshint with default settings."
         1 2 3 4 error))
       :modes js-mode)))
 
-(defvar flycheck-checker-javascript-jslint
+(defvar flycheck-checker-javascript-jsl
   '(:command
     ("jsl" "-process" source)
     :error-patterns

@@ -137,10 +137,10 @@ You need to install external utilities for the following checkers:
 - CSS: Install [csslint][].
 - HAML: Install [HAML][].
 - HTML: Install [Tidy][].
-- Javascript: Install [jshint][] or [jslint][].  The former will
-  automatically use a `.jshintrc` file in the buffer's directory, any ancestor
-  thereof or your `$HOME` directory.  You may override the path to this file
-  globally or per buffer with the variable `flycheck-jshintrc`.
+- Javascript: Install [jsl][] or [jshint][].  The latter will automatically use
+  a `.jshintrc` file in the buffer's directory, any ancestor thereof or your
+  `$HOME` directory.  You may override the path to this file globally or per
+  buffer with the variable `flycheck-jshintrc`.
 - JSON: Install [jsonlint][].
 - Lua: Install [Lua][].
 - Perl: Install [Perl][].
@@ -385,8 +385,8 @@ See [COPYING][] for details.
 [csslint]: https://github.com/stubbornella/csslint
 [haml]: http://haml.info
 [tidy]: https://github.com/w3c/tidy-html5
+[jsl]: http://www.javascriptlint.com/
 [jshint]: http://www.jshint.com
-[jslint]: http://www.jslint.com/
 [jsonlint]: https://github.com/zaach/jsonlint
 [lua]: http://www.lua.org/
 [perl]: http://www.perl.org/
