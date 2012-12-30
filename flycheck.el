@@ -1085,10 +1085,10 @@ Otherwise behave as if called interactively."
   '(:command
     ("tidy" "-e" "-q" source)
     :error-patterns
-    (("line \\([0-9]+\\) column \\([0-9]+\\) - Error: \\(.*\\)"
-      nil 1 2 4 error)
-     ("line \\([0-9]+\\) column \\([0-9]+\\) - Warning: \\(.*\\)"
-      nil 1 2 4 warning))
+    (("^line \\([0-9]+\\) column \\([0-9]+\\) - Error: \\(.*\\)$"
+      nil 1 2 3 error)
+     ("^line \\([0-9]+\\) column \\([0-9]+\\) - Warning: \\(.*\\)$"
+      nil 1 2 3 warning))
     :modes (html-mode nxhtml-mode)))
 
 (defvar flycheck-jshintrc nil
