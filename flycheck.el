@@ -842,7 +842,7 @@ output: %s\nChecker definition probably flawed."
     (with-current-buffer (process-buffer process)
       ;; Try hard to clean up after the party
       (unwind-protect
-          (condition-case err
+          (condition-case-unless-debug err
               (when (buffer-live-p (process-buffer process))
                 ;; Only parse and show errors if the mode is still active
                 (flycheck-finish-syntax-check
