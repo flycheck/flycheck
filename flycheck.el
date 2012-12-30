@@ -574,7 +574,8 @@ Clean up the error file name and the error message."
         ;; If the error has a file name, expand it relative to the default
         ;; directory of its buffer and back substitute the file name
         (setf (flycheck-error-file-name err) (expand-file-name filename))
-        (flycheck-back-substitute-filename err)))))
+        (flycheck-back-substitute-filename err))))
+  err)
 
 (defun flycheck-sanitize-errors (errors)
   "Sanitize ERRORS.
