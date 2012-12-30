@@ -101,10 +101,15 @@ etc.) an error is signaled.
 ### Error reporting
 
 Errors and warnings from the checker are reported in the mode line (see
-[Mode line](#mode-line)) and highlighted in the buffer.  By default only the
-error column is highlighted if an error refer to a specific column only.
+[Mode line](#mode-line)) and highlighted in the buffer with
+`flycheck-error-face` and `flycheck-warning-face` respectively.  By default only
+the error column is highlighted if an error refer to a specific column only.
 Customize `flycheck-ignore-columns` (see [Customization](#customization)) to
 always highlight the whole line.
+
+Additionally indicators are placed in the fringe to highlight the lines in which
+errors occurred.  **The fringe must be at least 8 pixels wide** for the
+indicators to be displayed properly.
 
 To view an error message, either hover the mouse over the highlighted error, or
 move the cursor to the highlighted error and wait a short moment.  To clear all
