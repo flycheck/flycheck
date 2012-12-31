@@ -1023,7 +1023,7 @@ output: %s\nChecker definition probably flawed."
 
 
 ;; Checkers
-(defvar flycheck-checker-bash
+(defconst flycheck-checker-bash
   '(:command
     ("bash" "--norc" "-n" source)
     :error-patterns
@@ -1031,7 +1031,7 @@ output: %s\nChecker definition probably flawed."
     :modes sh-mode
     :predicate (eq sh-shell 'bash)))
 
-(defvar flycheck-checker-coffee
+(defconst flycheck-checker-coffee
   '(:command
     ("coffeelint" "--csv" source)
     :error-patterns
@@ -1040,7 +1040,7 @@ output: %s\nChecker definition probably flawed."
      ("\\(.+\\),\\([0-9]+\\),warn,\\(.+\\)" 1 2 nil 3 warning))
     :modes coffee-mode))
 
-(defvar flycheck-checker-css
+(defconst flycheck-checker-css
   '(:command
     ("csslint" "--format=compact" source)
     :error-patterns
@@ -1070,7 +1070,7 @@ output: %s\nChecker definition probably flawed."
      (print flycheck-checker-emacs-lisp-check-form (current-buffer))
      (buffer-substring-no-properties (point-min) (point-max))))
 
-(defvar flycheck-checker-emacs-lisp
+(defconst flycheck-checker-emacs-lisp
   (let ((executable (concat invocation-directory invocation-name))
         (check-form-s (flycheck-checker-emacs-lisp-check-form-s)))
     `(:command
@@ -1095,14 +1095,14 @@ output: %s\nChecker definition probably flawed."
       ;; idiocy
       :predicate (and (buffer-file-name) (not no-byte-compile)))))
 
-(defvar flycheck-checker-haml
+(defconst flycheck-checker-haml
   '(:command
     ("haml" "-c" source)
     :error-patterns
     (("^Syntax error on line \\([0-9]+\\): \\(.*\\)$" nil 1 nil 2 error))
     :modes haml-mode))
 
-(defvar flycheck-checker-html
+(defconst flycheck-checker-html
   '(:command
     ("tidy" "-e" "-q" source)
     :error-patterns
@@ -1145,7 +1145,7 @@ If .jshintrc is not found run jshint with default settings."
         1 2 3 4 error))
       :modes js-mode)))
 
-(defvar flycheck-checker-javascript-jsl
+(defconst flycheck-checker-javascript-jsl
   '(:command
     ("jsl" "-process" source)
     :error-patterns
@@ -1159,7 +1159,7 @@ If .jshintrc is not found run jshint with default settings."
       nil 2 nil 3 warning))
     :modes js-mode))
 
-(defvar flycheck-checker-json
+(defconst flycheck-checker-json
   '(:command
     ("jsonlint" "-c" "-q" source)
     :error-patterns
@@ -1170,14 +1170,14 @@ If .jshintrc is not found run jshint with default settings."
         (and buffer-file-name
              (string= "json" (file-name-extension buffer-file-name))))))
 
-(defvar flycheck-checker-lua
+(defconst flycheck-checker-lua
   '(:command
     ("luac" "-p" source)
     :error-patterns
     (("^.*?: \\(.*?\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 error))
     :modes lua-mode))
 
-(defvar flycheck-checker-perl
+(defconst flycheck-checker-perl
   '(:command
     ("perl" "-w" "-c" source)
     :error-patterns
@@ -1185,7 +1185,7 @@ If .jshintrc is not found run jshint with default settings."
      ("^\\(.*?\\) at \\(.*?\\) line \\([0-9]+\\), .*$" 2 3 nil 1 error))
     :modes (perl-mode cperl-mode)))
 
-(defvar flycheck-checker-php
+(defconst flycheck-checker-php
   '(:command
     ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
       "-d" "log_errors=0" source)
@@ -1194,7 +1194,7 @@ If .jshintrc is not found run jshint with default settings."
        2 3 nil 1 error))
     :modes php-mode))
 
-(defvar flycheck-checker-python-flake8
+(defconst flycheck-checker-python-flake8
   '(:command
     ("flake8" source-inplace)
     :error-patterns
@@ -1202,7 +1202,7 @@ If .jshintrc is not found run jshint with default settings."
      ("^\\(.*?\\):\\([0-9]+\\):\\([0-9]*\\):? \\(W.*\\)$" 1 2 3 4 warning))
     :modes python-mode))
 
-(defvar flycheck-checker-python-pylint
+(defconst flycheck-checker-python-pylint
   '(:command
     ("epylint" source-inplace)
     :error-patterns
@@ -1211,21 +1211,21 @@ If .jshintrc is not found run jshint with default settings."
      ("^\\(.*\\):\\([0-9]+\\): \\[F\\] \\(.*\\)$" 1 2 nil 3 error))
     :modes python-mode))
 
-(defvar flycheck-checker-python-pyflakes
+(defconst flycheck-checker-python-pyflakes
   '(:command
     ("pyflakes" source-inplace)
     :error-patterns
     (("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 warning))
     :modes python-mode))
 
-(defvar flycheck-checker-ruby
+(defconst flycheck-checker-ruby
   '(:command
     ("ruby" "-w" "-c" source)
     :error-patterns
     (("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 error))
     :modes ruby-mode))
 
-(defvar flycheck-checker-sass
+(defconst flycheck-checker-sass
   '(:command
     ("sass" "-c" source)
     :error-patterns
@@ -1235,7 +1235,7 @@ If .jshintrc is not found run jshint with default settings."
       nil 2 nil 1 error))
     :modes sass-mode))
 
-(defvar flycheck-checker-sh
+(defconst flycheck-checker-sh
   '(:command
     ("sh" "-n" source)
     :error-patterns
@@ -1243,28 +1243,28 @@ If .jshintrc is not found run jshint with default settings."
     :modes sh-mode
     :predicate (eq sh-shell 'sh)))
 
-(defvar flycheck-checker-tex-chktex
+(defconst flycheck-checker-tex-chktex
   '(:command
     ("chktex" "-v0" "-q" "-I" source-inplace)
     :error-patterns
     (("^\\(.*\\):\\([0-9]+\\):\\([0-9]+\\):[0-9]+:\\(.*\\)$" 1 2 3 4 warning))
     :modes (latex-mode plain-tex-mode)))
 
-(defvar flycheck-checker-tex-lacheck
+(defconst flycheck-checker-tex-lacheck
   '(:command
     ("lacheck" source-inplace)
     :error-patterns
     (("^\"\\(.*\\)\", line \\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 warning))
     :modes latex-mode))
 
-(defvar flycheck-checker-xml-xmlstarlet
+(defconst flycheck-checker-xml-xmlstarlet
   '(:command
     ("xmlstarlet" "val" "-e" "-q" source)
     :error-patterns
     (("^\\(.*\\):\\([0-9]+\\)\\.\\([0-9]+\\): \\(.*\\)$" 1 2 3 4 error))
     :modes (xml-mode nxml-mode)))
 
-(defvar flycheck-checker-zsh
+(defconst flycheck-checker-zsh
   '(:command
     ("zsh" "-n" "-d" "-f" source)
     :error-patterns
