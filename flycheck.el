@@ -912,6 +912,11 @@ Show the error message at point in minibuffer after a short delay."
 
 (defun flycheck-running-p ()
   "Determine whether a syntax check is running."
+  (when (and flycheck-current-process
+             (memq (process-status flycheck-current-process) '(exit signal)))
+    ;; Delete any dead process left over from previous checks
+    (flycheck-post-syntax-check-cleanup)
+    (setq flycheck-current-process nil))
   (when flycheck-current-process t))
 
 (defun flycheck-post-syntax-check-cleanup (&optional process)
