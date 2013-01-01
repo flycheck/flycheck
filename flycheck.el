@@ -1,6 +1,6 @@
 ;;; flycheck.el --- Flymake done right
 
-;; Copyright (c) 2012 Sebastian Wiesner <lunaryorn@gmail.com>
+;; Copyright (c) 2012, 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
 ;; Author: Sebastian Wiesner <lunaryorn@gmail.com>
 ;; URL: https://github.com/lunaryorn/flycheck
