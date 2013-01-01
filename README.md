@@ -87,16 +87,45 @@ By default a suitable checker is automatically selected from `flycheck-checkers`
 the current buffer with `M-x flycheck-select-checker` or by configuring the
 file-local variable `flycheck-checker`:
 
-```scheme
-;; Local Variables:
-;; flycheck-checker: flycheck-checker-python-pylint
-;; End:
+```python
+# Local Variables:
+# flycheck-checker: flycheck-checker-python-pylint
+# End:
 ```
 
 Now **only** the [pylint][] checker will be used for the file.  If the checker
 from `flycheck-checker` or `flycheck-select-checker` cannot be used for the
 current buffer (e.g. the major mode does not match, the checker does not exist,
 etc.) an error is signaled.
+
+### Checker configuration
+
+Some checkers can be configured from configuration files.  Such checkers have an
+associated variable providing the name of the configuration file, for instance
+`flycheck-jslintrc` for `flycheck-checker-javascript-jslint`.  These variables
+obey the following rules:
+
+If it contains a plain file name without any slash, e.g. `.jslintrc`,
+this file is searched in the buffer's directory, any ancestors thereof, and the
+home directory eventually.  If the buffer has no backing file, only the home
+directory is searched.
+
+If it contains a path, e.g. `./.jshintrc` or `$HOME/.jshintrc`, the
+path is expanded against the buffer's directory (using `expand-file-name`).
+
+If the configuration file is found and exists, it is passed to the checker
+invocation.  Otherwise it is simply ignored.
+
+These variables may be used as file-local variables, e.g.
+
+```scheme
+// Local Variables:
+// flycheck-jshintrc: "../.jshintrc"
+// End:
+```
+
+This file is now always checked using `.jshintrc` from the parent directory.
+
 
 ### Error reporting
 
@@ -208,15 +237,23 @@ Extending
 In flycheck a syntax checker is a [property list][] with the following keys (the
 *checker properties*):
 
-- `:command` (*mandatory*): A list containing the executable of the syntax
-  checking tool (in the `car` of the list) and its arguments (in the
+- `:command` (*mandatory*): A list containing the *executable* of the syntax
+  checking tool (in the `car` of the list) and its *arguments* (in the
   `cdr`). Before enabling a checker **the executable is checked for existence**
   with `executable-find`.  If this check fails the checker is **not** used.  In
-  arguments the special symbol `source` is replaced with a **temporary copy of
-  the source file**, created in the system temporary directory.  Use
-  `source-inplace` instead to force the copy being created in the **same
-  directory as the original source file**.  **Prefer** `source` over
-  `source-inplace` if possible.
+  *arguments* the following special symbols and tags are replaced:
+
+  - `source`: The source file to check.  A temporary file with the contents of
+    the buffer to check, created in the **system temporary directory**.
+  - `source-inplace`: The source file to check.  A temporary file with the
+    contents of the buffer to check, but created in the **same directory** as
+    the original file.  If the buffer to be checked has no `buffer-file-name`,
+    this is the same as `source`.
+  - `(config OPTION-NAME VARIABLE-NAME)`: Find and pass a config file to the
+    checker.  `OPTION-NAME` is a string containing the name of the option that
+    understood by the checker.  `VARIABLE-NAME` is a symbol referring to a
+    variable from which to take the configuration file.
+
 - `:error-patterns` (*mandatory*): A list of error patterns to parse the output
   of `:command`.  Each pattern has the form `(REGEXP FILE-IDX LINE-IDX COL-IDX
   ERR-TEXT-IDX LEVEL)`:
@@ -248,7 +285,9 @@ value is **retrieved anew on each syntax check**.  In the latter case the
 function is **invoked on each syntax check with no arguments**.
 
 
-### Example
+### Examples
+
+#### A simple example
 
 Let's see this in action by explaining the definition of a [Python][] checker
 included in flycheck.  This checker uses the [pylint][] utility to perform the
@@ -293,6 +332,8 @@ Now we only need to register this error checker for use with
 Assuming that `flycheck-mode` is enabled (see [Usage](#usage)), Python source
 code will now be syntax-checked on the fly in `python-mode`.
 
+#### Predicates for checkers
+
 Some checkers have more complicated conditions for whether they are to be used
 or not.  For instance, syntax checking in `sh-mode` needs to use different
 shells depending on the value of `sh-shell`.  Hence in the checkers for this
@@ -318,6 +359,7 @@ script is being edited.  The `predicate` is simply an Emacs Lisp form that is
 evaluated whenever flycheck tries to use the checker for the current buffer. If
 both `:modes` and `:predicate` are given, **both** must match for the checker to
 be used.
+
 
 
 Further help
