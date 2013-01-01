@@ -444,19 +444,27 @@ Return t if so, or nil otherwise."
   (--each flycheck-substituted-files (ignore-errors (delete-file it)))
   (setq flycheck-substituted-files nil))
 
+(defun flycheck-get-source-file (temp-fn)
+  "Get the source file to check using TEMP-FN.
+
+Make a temporary copy of the buffer, remember it in
+`flycheck-substituted-files' and return the file path."
+  (let ((temp-file (flycheck-temp-buffer-copy temp-fn)))
+    (add-to-list 'flycheck-substituted-files temp-file)
+    temp-file))
+
 (defun flycheck-substitute-argument (arg)
   "Substitute ARG with file to check is possible.
 
 If ARG is `source' or `source-inplace', create a temporary file
 to checker and return its path, otherwise return ARG unchanged."
-  (let ((temp-file-function
-         (cond ((eq arg 'source) 'flycheck-temp-file-system)
-               ((eq arg 'source-inplace) 'flycheck-temp-file-inplace))))
-    (if temp-file-function
-        (let ((temp-file (flycheck-temp-buffer-copy temp-file-function)))
-          (add-to-list 'flycheck-substituted-files temp-file)
-          temp-file)
-      arg)))
+  (cond
+   ((eq arg 'source)
+    (flycheck-get-source-file 'flycheck-temp-file-system))
+   ((eq arg 'source-inplace)
+    (flycheck-get-source-file 'flycheck-temp-file-inplace))
+   ;; Return the argument unchanged
+   (t arg)))
 
 (defun flycheck-get-substituted-command (properties)
   "Get the substitute :command from PROPERTIES."
