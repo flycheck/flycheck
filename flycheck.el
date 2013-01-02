@@ -1232,7 +1232,8 @@ If .jshintrc is not found run jshint with default settings.")
   '(:command
     ("flake8" source-inplace)
     :error-patterns
-    (("^\\(.*?\\):\\([0-9]+\\):\\([0-9]*\\):? \\(E.*\\)$" 1 2 3 4 error)
+    (("^\\(.*\\):\\([0-9]+\\): \\(invalid syntax\\)$" 1 2 nil 3 error)
+     ("^\\(.*?\\):\\([0-9]+\\):\\([0-9]*\\):? \\(E.*\\)$" 1 2 3 4 error)
      ("^\\(.*?\\):\\([0-9]+\\):\\([0-9]*\\):? \\(W.*\\)$" 1 2 3 4 warning))
     :modes python-mode))
 
