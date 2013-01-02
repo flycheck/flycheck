@@ -1151,8 +1151,11 @@ output: %s\nChecker definition probably flawed."
   :modes 'sh-mode
   :predicate '(eq sh-shell 'bash))
 
+(flycheck-def-config-file-var flycheck-coffeelintrc
+    flycheck-checker-coffee ".coffeelint.json")
+
 (flycheck-declare-checker flycheck-checker-coffee
-  :command '("coffeelint" "--csv" source)
+  :command '("coffeelint" (config "--file" flycheck-coffeelintrc) "--csv" source)
   :error-patterns
   '(("SyntaxError: \\(?4:.*\\) on line \\(?2:[0-9]+\\)" error)
     ("\\(?1:.+\\),\\(?2:[0-9]+\\),error,\\(?4:.+\\)" error)
@@ -1206,8 +1209,11 @@ output: %s\nChecker definition probably flawed."
   '(("^Syntax error on line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'haml-mode)
 
+(flycheck-def-config-file-var flycheck-tidyrc flycheck-checker-html
+                              ".tidyrc")
+
 (flycheck-declare-checker flycheck-checker-html
-  :command '("tidy" "-e" "-q" source)
+  :command '("tidy" (config "-config" flycheck-tidyrc) "-e" "-q" source)
   :error-patterns
   '(("^line \\(?2:[0-9]+\\) column \\(?3:[0-9]+\\) - Error: \\(?4:.*\\)$" error)
     ("^line \\(?2:[0-9]+\\) column \\(?3:[0-9]+\\) - Warning: \\(?4:.*\\)$"
@@ -1266,8 +1272,11 @@ output: %s\nChecker definition probably flawed."
     error))
   :modes 'php-mode)
 
+(flycheck-def-config-file-var flycheck-flake8rc
+    flycheck-checker-python-flake8 ".flake8rc")
+
 (flycheck-declare-checker flycheck-checker-python-flake8
-  :command '("flake8" source-inplace)
+  :command '("flake8" (config "--config" flycheck-flake8rc) source-inplace)
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:invalid syntax\\)$" error)
     ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\) \\(?4:E.*\\)$"
@@ -1310,8 +1319,12 @@ output: %s\nChecker definition probably flawed."
   :modes 'sh-mode
   :predicate '(eq sh-shell 'sh))
 
+(flycheck-def-config-file-var flycheck-chktexrc flycheck-checker-tex-chktex
+                              ".chktexrc")
+
 (flycheck-declare-checker flycheck-checker-tex-chktex
-  :command '("chktex" "-v0" "-q" "-I" source-inplace)
+  :command '("chktex" (config "-l" flycheck-chktexrc) "-v0" "-q" "-I"
+             source-inplace)
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\\(?:4[0-9]+:.*\\)$"
      warning))
