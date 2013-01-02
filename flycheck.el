@@ -183,6 +183,12 @@ Use when checking buffers automatically."
   :prefix "flycheck-"
   :group 'tools)
 
+(defgroup flycheck-config-files nil
+  "Customization of configuration files for on-the-fly syntax
+  checking."
+  :prefix "flycheck-"
+  :group 'flycheck)
+
 (defcustom flycheck-checkers
   '(flycheck-checker-bash
     flycheck-checker-coffee
@@ -412,6 +418,40 @@ present, both must match for the checker to be used."
      (flycheck-verify-checker (quote ,symbol))
      ;; And declare it valid if verification did not signal an error
      (put (quote ,symbol) :flycheck-checker t)))
+
+(defmacro flycheck-def-config-file-var (symbol checker &optional file-name)
+  "Define SYMBOL as config file variable for CHECKER, with default FILE-NAME.
+
+SYMBOL is declared as customizable variable (see `defcustom`)
+providing a configuration file for CHECKER.  The CHECKER argument
+is used for documentation purposes only.  If given use FILE-NAME
+as initial value.
+
+Use this together with the config tag in checker arguments."
+  (declare (indent 3))
+  `(progn
+     (defcustom ,symbol ,file-name
+       ,(format "The configuration file for the syntax checker
+%s.
+
+When set to a plain file name without any slash search for this
+file name in the directory of the buffer being check, any
+ancestors thereof or the home directory.  If buffer being checked
+has no backing file, search in the home directory only.  If the
+file is found pass it to the checker as configuration file.
+Otherwise invoke the checker without a configuration file.
+
+When set to a file path containing a slash expand the file name
+with `expand-file-name` and pass this file to checker, if it
+exists.  Otherwise invoke the checker without a configuration
+file.
+
+Use this variable as file-local variable if you need a specific
+configuration file a buffer." checker)
+       :type '(choice (const :tag "No configuration file" nil)
+                      (string :tag "File name or path"))
+       :group 'flycheck-config-files)
+     (put (quote ,symbol) 'safe-local-variable #'stringp)))
 
 (defun flycheck-error-pattern-p (pattern)
   "Check whether PATTERN is a valid error pattern."
@@ -1173,22 +1213,8 @@ output: %s\nChecker definition probably flawed."
      warning))
   :modes '(html-mode nxhtml-mode))
 
-(defvar flycheck-jshintrc ".jshintrc"
-  "The path to .jshintrc.
-
-This variable denotes the configuration file for jshint to use
-when checking a buffer with jshint.
-
-If set to a file name with no slash, search this file in the
-directory of the file to check, any ancestors thereof or the home
-directory.
-
-If set to a file name containing a slash (e.g. ./.jshintrc or $HOME/.jshintrc)
-expand the file name with `expand-file-name' and use it directly.
-
-Use this variable as file local variable to use a specific
-configuration file for a buffer.")
-(put 'flycheck-jshintrc 'safe-local-variable 'stringp)
+(flycheck-def-config-file-var flycheck-jshintrc
+    flycheck-checker-javascript-jshint ".jshintrc")
 
 (flycheck-declare-checker flycheck-checker-javascript-jshint
   :command '("jshint" (config "--config" flycheck-jshintrc) source)

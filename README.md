@@ -116,7 +116,10 @@ path is expanded against the buffer's directory (using `expand-file-name`).
 If the configuration file is found and exists, it is passed to the checker
 invocation.  Otherwise it is simply ignored.
 
-These variables may be used as file-local variables, e.g.
+You can get a list of all these variables with `M-x customize-group RET
+flycheck-config-files`.  Here you can also change their default values.
+
+These variables may also be used as file-local variables, e.g.
 
 ```scheme
 // Local Variables:
@@ -213,6 +216,12 @@ buffer.  For instance, to use `pyflakes` as checker in the current buffer, use
 `M-x flycheck-select-checker RET python-checker-python-pyflakes`.
 
 
+### Checker configuration
+
+`M-x customize-group RET flycheck-config-files` customizes the names and paths
+of configuration files for syntax checkers.
+
+
 ### Appearance
 
 - `M-x customize-variable RET flycheck-ignore-columns`: Customize whether
@@ -253,7 +262,9 @@ checker:
   - `(config OPTION-NAME VARIABLE-NAME)`: Find and pass a config file to the
     checker.  `OPTION-NAME` is a string containing the name of the option that
     understood by the checker.  `VARIABLE-NAME` is a symbol referring to a
-    variable from which to take the configuration file.
+    variable from which to take the configuration file.  Use
+    `flycheck-def-config-file-var` to define this variable (see `C-h f
+    flycheck-def-config-file-var` for more information).
 
 - `:error-patterns` (*mandatory*): A list of error patterns to parse the output
   of `:command`.  Each pattern has the form `(REGEXP LEVEL)`:
@@ -363,6 +374,35 @@ evaluated whenever flycheck tries to use the checker for the current buffer. If
 both `:modes` and `:predicate` are given, **both** must match for the checker to
 be used.
 
+#### Configuration files for checkers
+
+Some checkers accept a configuration file as argument that controls how the
+checker finds and reports errors.  Flycheck provides built-in support to pass
+configuration files to syntax checkers.  An example is the `jshint` checker for
+JavaScript:
+
+```scheme
+(flycheck-def-config-file-var flycheck-jshintrc
+    flycheck-checker-javascript-jshint ".jshintrc")
+
+(flycheck-declare-checker flycheck-checker-javascript-jshint
+  :command '("jshint" (config "--config" flycheck-jshintrc) source)
+  :error-patterns
+  '(("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
+     error))
+  :modes 'js-mode)
+```
+
+First we declare a variable that provides the name or path of the configuration
+file.  This variable gets an appropriate docstring, added to the customization
+interface and marked as safe local variable for strings.
+
+In the checker declaration we use this variable in a special `config` element in
+the arguments of the checker.  This element is a triple, and its second item is
+the option by which to pass the configuration file to the checker.  If the
+configuration file is found it is passed to the checker, e.g. `jshint --config
+/path/to/.jshintrc /the/file/to/check`.  Otherwise the whole element is simply
+omitted.
 
 
 Further help
@@ -374,6 +414,7 @@ Further help
 - `C-h v flycheck-checkers`
 - `C-h v flycheck-checker`
 - `C-h f flycheck-declare-checker`
+- `C-h f flycheck-def-config-file-var`
 
 
 Credits
