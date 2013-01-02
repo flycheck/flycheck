@@ -228,7 +228,7 @@ never selected automatically from `flycheck-checkers'.  If the
 checker is unusable in the current buffer an error is signaled.
 
 A checker is a symbol that is declared as checker with
-`fflycheck-declare-checker'.
+`flycheck-declare-checker'.
 
 Use the command `flycheck-select-checker' to select a checker for
 the current buffer, or set this variable as file local variable
@@ -375,13 +375,15 @@ documentation of this function for a list of special tags allowed
 in arguments.
 
 :error-patterns A list of error patterns to parse the output of
-the checker.  Each pattern is a list (REGEXP FILE-IDX LINE-IDX
-COL-IDX ERR-TEXT-IDX LEVEL).  REGEXP is a regular expression that
-matches an error.  FILE-IDX, LINE-IDX, COL-IDX and ERR-TEXT-IDX
-are indexes of match groups in REGEXP that match the file name,
-line number, column number and error text respectively.  LEVEL is
-either warning or error and determines the severity of the error
-message parsed with the pattern.
+the checker.  Each pattern is a list (REGEXP LEVEL).  REGEXP is a
+regular expression that matches an error.  This regular
+expression may contain match groups extracting specific
+information about the error.  The 1st group is the file name, the
+2nd group the line number, the 3rd group the column number and
+the 4th group the error message.  A group is ignored if it did
+not match or the match returned an empty string.  LEVEL is either
+warning or error and determines the severity of the error message
+parsed with the pattern.
 
 :modes A major mode symbol or a list thereof.  If present the
 checker is only used in these modes.
@@ -415,8 +417,9 @@ present, both must match for the checker to be used."
   "Check whether PATTERN is a valid error pattern."
   (and
    (listp pattern)                      ; A pattern must be a list...
-   (= (length pattern) 6)               ; ...of length 6...
-   (stringp (car pattern))              ; ...whose first element is a string
+   (= (length pattern) 2)               ; ...of length 2...
+   (stringp (car pattern))              ; ...whose 1st element is a string
+   (symbolp (cadr pattern))             ; ...and whose 2nd element is a symbol
    ))
 
 (defun flycheck-error-patterns-list-p (patterns)
@@ -678,6 +681,28 @@ If ERR has a column return exactly that column.  Otherwise return
 the beginning of the line of ERR."
   (car (flycheck-error-region err)))
 
+(defun flycheck-match-string-non-empty (group string &optional trim-first)
+  "Get the non-empty string from a match GROUP in STRING.
+
+If the string returned by GROUP is empty, return nil instead.
+
+If TRIM-FIRST is t trim leading and trailing white space in the matched
+string."
+  (let ((matched-string (match-string group string)))
+    (when matched-string
+      (when trim-first
+        (setq matched-string (s-trim matched-string)))
+      (when (not (s-blank? matched-string))
+        matched-string))))
+
+(defun flycheck-match-int (group string)
+  "Get an integer from a match GROUP in STRING.
+
+Return nil if the group did not match a number."
+  (let ((matched-string (flycheck-match-string-non-empty group string t)))
+    (when matched-string
+      (string-to-number matched-string))))
+
 (defun flycheck-parse-output-with-pattern (output buffer pattern)
   "Parse OUTPUT from BUFFER with PATTERN.
 
@@ -685,27 +710,18 @@ PATTERN is a flycheck error pattern.
 
 Return a list of parsed errors and warnings as `flycheck-error`
 objects."
-  (let ((file-idx (nth 1 pattern))
-        (line-idx (nth 2 pattern))
-        (col-idx (nth 3 pattern))
-        (text-idx (nth 4 pattern))
-        (level (nth 5 pattern))
+  (let ((regexp (car pattern))
+        (level (cadr pattern))
         (errors nil)
         (last-match 0))
-    (while (string-match (nth 0 pattern) output last-match)
+    (while (string-match regexp output last-match)
       (!cons
        (flycheck-make-error
         :buffer buffer
-        :file-name (when file-idx (match-string file-idx output))
-        :line-no (when line-idx
-                   (let ((line-text (s-collapse-whitespace
-                                     (match-string line-idx output))))
-                     (string-to-number line-text)))
-        :col-no (when col-idx
-                  (let ((col-text (s-collapse-whitespace
-                                   (match-string col-idx output))))
-                    (string-to-number col-text)))
-        :text (when text-idx (match-string text-idx output))
+        :file-name (flycheck-match-string-non-empty 1 output)
+        :line-no (flycheck-match-int 2 output)
+        :col-no (flycheck-match-int 3 output)
+        :text (flycheck-match-string-non-empty 4 output t)
         :level level)
        errors)
       (setq last-match (match-end 0)))
@@ -1090,23 +1106,23 @@ output: %s\nChecker definition probably flawed."
 ;; Checkers
 (flycheck-declare-checker flycheck-checker-bash
   :command '("bash" "--norc" "-n" source)
-  :error-patterns '(("^\\(.+\\): line \\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 error))
+  :error-patterns '(("^\\(?1:.+\\): line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'sh-mode
   :predicate '(eq sh-shell 'bash))
 
 (flycheck-declare-checker flycheck-checker-coffee
   :command '("coffeelint" "--csv" source)
   :error-patterns
-  '(("SyntaxError: \\(.*\\) on line \\([0-9]+\\)" nil 2 nil 1 error)
-    ("\\(.+\\),\\([0-9]+\\),error,\\(.+\\)" 1 2 nil 3 error)
-    ("\\(.+\\),\\([0-9]+\\),warn,\\(.+\\)" 1 2 nil 3 warning))
+  '(("SyntaxError: \\(?4:.*\\) on line \\(?2:[0-9]+\\)" error)
+    ("\\(?1:.+\\),\\(?2:[0-9]+\\),error,\\(?4:.+\\)" error)
+    ("\\(?1:.+\\),\\(?2:[0-9]+\\),warn,\\(?4:.+\\)" warning))
   :modes 'coffee-mode)
 
 (flycheck-declare-checker flycheck-checker-css
   :command '("csslint" "--format=compact" source)
   :error-patterns
-  '(("^\\(.*\\): line \\([[:digit:]]+\\), col \\([[:digit:]]+\\), \\(.+\\)$"
-     1 2 3 4 error))
+  '(("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
+     error))
   :modes 'css-mode)
 
 (defconst flycheck-checker-emacs-lisp-check-form
@@ -1136,26 +1152,25 @@ output: %s\nChecker definition probably flawed."
              "--no-site-file" "--no-site-lisp" "--batch" "--eval"
              ,(flycheck-checker-emacs-lisp-check-form-s))
   :error-patterns
-  '(("^\\(.*\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\):Warning:\\(.*\\(?:\n    .*\\)*\\)$"
-     1 2 3 4 warning)
-    ("^\\(.*\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\):Error:\\(.*\\(?:\n    .*\\)*\\)$"
-     1 2 3 4 error))
+  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):Warning:\\(?4:.*\\(?:\n    .*\\)*\\)$"
+     warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):Error:\\(?4:.*\\(?:\n    .*\\)*\\)$"
+     error))
   :modes '(emacs-lisp-mode lisp-interaction-mode)
   :predicate '(and (buffer-file-name) (not no-byte-compile)))
 
 (flycheck-declare-checker flycheck-checker-haml
   :command '("haml" "-c" source)
   :error-patterns
-  '(("^Syntax error on line \\([0-9]+\\): \\(.*\\)$" nil 1 nil 2 error))
+  '(("^Syntax error on line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'haml-mode)
 
 (flycheck-declare-checker flycheck-checker-html
   :command '("tidy" "-e" "-q" source)
   :error-patterns
-  '(("^line \\([0-9]+\\) column \\([0-9]+\\) - Error: \\(.*\\)$"
-     nil 1 2 3 error)
-    ("^line \\([0-9]+\\) column \\([0-9]+\\) - Warning: \\(.*\\)$"
-     nil 1 2 3 warning))
+  '(("^line \\(?2:[0-9]+\\) column \\(?3:[0-9]+\\) - Error: \\(?4:.*\\)$" error)
+    ("^line \\(?2:[0-9]+\\) column \\(?3:[0-9]+\\) - Warning: \\(?4:.*\\)$"
+     warning))
   :modes '(html-mode nxhtml-mode))
 
 (defvar flycheck-jshintrc ".jshintrc"
@@ -1178,28 +1193,26 @@ configuration file for a buffer.")
 (flycheck-declare-checker flycheck-checker-javascript-jshint
   :command '("jshint" (config "--config" flycheck-jshintrc) source)
   :error-patterns
-  '(("^\\(.*\\): line \\([[:digit:]]+\\), col \\([[:digit:]]+\\), \\(.+\\)$"
-     1 2 3 4 error))
+  '(("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
+     error))
   :modes 'js-mode)
 
 (flycheck-declare-checker flycheck-checker-javascript-jsl
   :command '("jsl" "-process" source)
   :error-patterns
-  '(("^\\(.+\\)\:\\([0-9]+\\)\: \\(SyntaxError\:.+\\)\:$"
-     nil 2 nil 3 error)
-    ("^\\(.+\\)(\\([0-9]+\\)): \\(SyntaxError:.+\\)$"
-     nil 2 nil 3 error)
-    ("^\\(.+\\)(\\([0-9]+\\)): \\(lint \\)?\\(warning:.+\\)$"
-     nil 2 nil 4 warning)
-    ("^\\(.+\\)\:\\([0-9]+\\)\: strict \\(warning: trailing comma.+\\)\:$"
-     nil 2 nil 3 warning))
+  '(("^\\(?1:.+\\)\:\\(?2:[0-9]+\\)\: \\(?4:SyntaxError:.+\\)\:$" error)
+    ("^\\(?1:.+\\)(\\(?2:[0-9]+\\)): \\(?4:SyntaxError:.+\\)$" error)
+    ("^\\(?1:.+\\)(\\(?2:[0-9]+\\)): \\(?:lint \\)?\\(?4:warning:.+\\)$"
+     warning)
+    ("^\\(?1:.+\\)\:\\(?2:[0-9]+\\)\: strict \\(?4:warning: trailing comma.+\\)\:$"
+     warning))
   :modes 'js-mode)
 
 (flycheck-declare-checker flycheck-checker-json
   :command '("jsonlint" "-c" "-q" source)
   :error-patterns
-  '(("^\\(.+\\)\: line \\([0-9]+\\), col \\([0-9]+\\), \\(.+\\)$"
-     nil 2 3 4 error))
+  '(("^\\(?1:.+\\)\: line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
+     error))
   :predicate '(or
                (eq major-mode 'json-mode)
                (and buffer-file-name
@@ -1208,86 +1221,90 @@ configuration file for a buffer.")
 (flycheck-declare-checker flycheck-checker-lua
   :command '("luac" "-p" source)
   :error-patterns
-  '(("^.*?: \\(.*?\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 error))
+  '(("^.*?: \\(?1:.*?\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'lua-mode)
 
 (flycheck-declare-checker flycheck-checker-perl
   :command '("perl" "-w" "-c" source)
   :error-patterns
-  '(("^\\(.*?\\) at \\(.*?\\) line \\([0-9]+\\)\\.$" 2 3 nil 1 error)
-    ("^\\(.*?\\) at \\(.*?\\) line \\([0-9]+\\), .*$" 2 3 nil 1 error))
+  '(("^\\(?4:.*?\\) at \\(?1:.*?\\) line \\(?2:[0-9]+\\)\\.$" error)
+    ("^\\(?4:.*?\\) at \\(?1:.*?\\) line \\(?2:[0-9]+\\), .*$" error))
   :modes '(perl-mode cperl-mode))
 
 (flycheck-declare-checker flycheck-checker-php
   :command '("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
              "-d" "log_errors=0" source)
   :error-patterns
-  '(("\\(?:Parse\\|Fatal\\|syntax\\) error[:,] \\(.*\\) in \\(.*\\) on line \\([0-9]+\\)"
-    2 3 nil 1 error))
+  '(("\\(?:Parse\\|Fatal\\|syntax\\) error[:,] \\(?4:.*\\) in \\(?1:.*\\) on line \\(?2:[0-9]+\\)"
+    error))
   :modes 'php-mode)
 
 (flycheck-declare-checker flycheck-checker-python-flake8
   :command '("flake8" source-inplace)
   :error-patterns
-  '(("^\\(.*\\):\\([0-9]+\\): \\(invalid syntax\\)$" 1 2 nil 3 error)
-    ("^\\(.*?\\):\\([0-9]+\\):\\([0-9]*\\):? \\(E.*\\)$" 1 2 3 4 error)
-    ("^\\(.*?\\):\\([0-9]+\\):\\([0-9]*\\):? \\(W.*\\)$" 1 2 3 4 warning))
+  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:invalid syntax\\)$" error)
+    ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\) \\(?4:E.*\\)$"
+     error)
+    ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]*\\):\\) \\(?4:W.*\\)$"
+     warning))
   :modes 'python-mode)
 
 (flycheck-declare-checker flycheck-checker-python-pylint
   :command '("epylint" source-inplace)
   :error-patterns
-  '(("^\\(.*\\):\\([0-9]+\\): Warning (W.*): \\(.*\\)$" 1 2 nil 3 warning)
-    ("^\\(.*\\):\\([0-9]+\\): Error (E.*): \\(.*\\)$" 1 2 nil 3 error)
-    ("^\\(.*\\):\\([0-9]+\\): \\[F\\] \\(.*\\)$" 1 2 nil 3 error))
+  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): Warning (W.*): \\(?4:.*\\)$" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): Error (E.*): \\(?4:.*\\)$" error)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\[F\\] \\(?4:.*\\)$" error))
   :modes 'python-mode)
 
 (flycheck-declare-checker flycheck-checker-python-pyflakes
   :command '("pyflakes" source-inplace)
-  :error-patterns '(("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 error))
+  :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'python-mode)
 
 (flycheck-declare-checker flycheck-checker-ruby
   :command '("ruby" "-w" "-c" source)
-  :error-patterns '(("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 error))
+  :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'ruby-mode)
 
 (flycheck-declare-checker flycheck-checker-sass
   :command '("sass" "-c" source)
   :error-patterns
-  '(("^Syntax error on line \\([0-9]+\\): \\(.*\\)$" nil 1 nil 2 error)
-    ("^WARNING on line \\([0-9]+\\) of .*?:\r?\n\\(.*\\)$" nil 1 nil 2 warning)
-    ("^Syntax error: \\(.*\\)\r?\n        on line \\([0-9]+\\) of .*?$"
-     nil 2 nil 1 error))
+  '(("^Syntax error on line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error)
+    ("^WARNING on line \\(?2:[0-9]+\\) of \\(?1:.*\\):\r?\n\\(?4:.*\\)$"
+     warning)
+    ("^Syntax error: \\(?4:.*\\)\r?\n        on line \\(?2:[0-9]+\\) of \\(1:.*\\)$"
+     error))
   :modes 'sass-mode)
 
 (flycheck-declare-checker flycheck-checker-sh
   :command '("sh" "-n" source)
-  :error-patterns '(("^\\(.+\\): line \\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 error))
+  :error-patterns '(("^\\(?1:.+\\): line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'sh-mode
   :predicate '(eq sh-shell 'sh))
 
 (flycheck-declare-checker flycheck-checker-tex-chktex
   :command '("chktex" "-v0" "-q" "-I" source-inplace)
   :error-patterns
-  '(("^\\(.*\\):\\([0-9]+\\):\\([0-9]+\\):[0-9]+:\\(.*\\)$" 1 2 3 4 warning))
+  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\\(?:4[0-9]+:.*\\)$"
+     warning))
   :modes '(latex-mode plain-tex-mode))
 
 (flycheck-declare-checker flycheck-checker-tex-lacheck
   :command '("lacheck" source-inplace)
   :error-patterns
-  '(("^\"\\(.*\\)\", line \\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 warning))
+  '(("^\"\\(?1:.*\\)\", line \\(?2:[0-9]+\\): \\(?4:.*\\)$" warning))
   :modes 'latex-mode)
 
 (flycheck-declare-checker flycheck-checker-xml-xmlstarlet
   :command '("xmlstarlet" "val" "-e" "-q" source)
   :error-patterns
-  '(("^\\(.*\\):\\([0-9]+\\)\\.\\([0-9]+\\): \\(.*\\)$" 1 2 3 4 error))
+  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\)\\.\\(?3:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes '(xml-mode nxml-mode))
 
 (flycheck-declare-checker flycheck-checker-zsh
   :command '("zsh" "-n" "-d" "-f" source)
-  :error-patterns '(("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 error))
+  :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'sh-mode
   :predicate '(eq sh-shell 'zsh))
 

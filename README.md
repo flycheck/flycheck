@@ -256,15 +256,21 @@ checker:
     variable from which to take the configuration file.
 
 - `:error-patterns` (*mandatory*): A list of error patterns to parse the output
-  of `:command`.  Each pattern has the form `(REGEXP FILE-IDX LINE-IDX COL-IDX
-  ERR-TEXT-IDX LEVEL)`:
+  of `:command`.  Each pattern has the form `(REGEXP LEVEL)`:
 
-  - `REGEXP` is a regular expression that matches a single
-    error or warning.  It may match a **multi-line** string.
-  - `FILE-IDX`, `LINE-IDX`, `COL-IDX` and `ERR-TEXT-IDX` are **indexes of match
-    groups** that provide the file name, the line number, the column number and
-    the error message respectively.  Each of these may be nil to indicate that
-    the message does not provide the corresponding information.
+  - `REGEXP` is a regular expression that matches a single error or warning.  It
+    may match a **multi-line** string.  The expression may provide the following
+    match groups:
+
+     - Group **1**: The file name
+     - Group **2**: The line number
+     - Group **3**: The column number
+     - Group **4**: The error text
+
+     Each of these groups is optional, however error messages without line
+     numbers will be ignored.  Use *explicitly numbered groups*
+     (i.e. `\(?1:foo\)`).
+
   - `LEVEL` is either `warning` or `error` and indicates the **severity of this
     error**.
 
@@ -300,9 +306,9 @@ First we declare the checker properties:
 (flycheck-declare-checker flycheck-checker-python-pylint
   :command '("epylint" source-inplace)
   :error-patterns
-  '(("^\\(.*\\):\\([0-9]+\\): Warning (W.*): \\(.*\\)$" 1 2 nil 3 warning)
-    ("^\\(.*\\):\\([0-9]+\\): Error (E.*): \\(.*\\)$" 1 2 nil 3 error)
-    ("^\\(.*\\):\\([0-9]+\\): \\[F\\] \\(.*\\)$" 1 2 nil 3 error))
+  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): Warning (W.*): \\(?4:.*\\)$" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): Error (E.*): \\(?4:.*\\)$" error)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\[F\\] \\(?4:.*\\)$" error))
   :modes 'python-mode)
 ```
 
@@ -316,10 +322,9 @@ if its executable does not exist (as by `executable-find`).
 
 Next we give a list of error patterns to extract error location and message from
 the `epylint` output.  An error pattern is a list containing a regular
-expression that matches the error, indexes of groups that match the file name,
-the line number, the column number and the error message respectively, and an
-error level (either `warning` or `error`).  As you can see `epylint` emits both
-errors and warnings.
+expression that matches the error and extracts error information in match
+groups, and an error level (either `warning` or `error`).  As you can see
+`epylint` emits both errors and warnings.
 
 Eventually we declare that the checker is to be used in `python-mode`.
 
@@ -343,7 +348,7 @@ active:
 ```scheme
 (flycheck-declare-checker flycheck-checker-zsh
   :command '("zsh" "-n" "-d" "-f" source)
-  :error-patterns '(("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 error))
+  :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'sh-mode
   :predicate '(eq sh-shell 'zsh))
 ```
