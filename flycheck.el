@@ -179,7 +179,7 @@ Use when checking buffers automatically."
 ;; Customization
 
 (defgroup flycheck nil
-  "Customization for flymake checkers."
+  "Customization of on-the-fly syntax checking."
   :prefix "flycheck-"
   :group 'tools)
 
