@@ -1249,7 +1249,7 @@ If .jshintrc is not found run jshint with default settings.")
   '(:command
     ("pyflakes" source-inplace)
     :error-patterns
-    (("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 warning))
+    (("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 error))
     :modes python-mode))
 
 (defconst flycheck-checker-ruby
