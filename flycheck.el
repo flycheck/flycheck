@@ -559,7 +559,8 @@ If FILE-NAME does not contain a slash, search the file with
 `flycheck-find-file-name' and return the result."
   (when file-name
     (if (s-contains? "/" file-name)
-        (expand-file-name file-name)
+        (let ((file-name (expand-file-name file-name)))
+          (when (file-exists-p file-name) file-name))
       (flycheck-find-file-for-buffer file-name))))
 
 (defun flycheck-substitute-argument (arg)
