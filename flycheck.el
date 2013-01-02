@@ -608,15 +608,20 @@ region.  Hence the region will always extend over the whole line.
 Return a cons cell (BEG . END).  BEG is the beginning of the
 error region and END its end.  If ERR has a column number and
 IGNORE-COLUMN is omitted or nil BEG and END are equal and refer
-to the error column.  Otherwise BEG is the beginning of the ERR
-line and END its end."
+to the error column.  Otherwise BEG is the position of the first
+non-whitespace character on the ERR line and END its end."
   (save-excursion
     (goto-char (point-min))
     (forward-line (- (flycheck-error-line-no err) 1))
-    (let* ((col (if ignore-column nil (flycheck-error-col-no err)))
-           (beg (+ (line-beginning-position) (or col 0)))
-           (end (if col beg (line-end-position))))
-      `(,beg . ,end))))
+    (let ((col (if ignore-column nil (flycheck-error-col-no err))))
+      (if col
+          ;; If the error has a column, return that column only
+          (let ((pos (+ (line-beginning-position) col)))
+            `(,pos . ,pos))
+        ;; Otherwise the region extends from the first non-whitespace character
+        ;; on the line to its end.
+        (back-to-indentation)
+        `(,(point) . ,(line-end-position))))))
 
 (defun flycheck-error-pos (err)
   "Get the buffer position of ERR.
