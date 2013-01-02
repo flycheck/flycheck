@@ -175,14 +175,10 @@ Within BODY the current checker is bound to checker."
      (dolist (checker flycheck-checkers)
        ,@body)))
 
-(ert-deftest-checkers all-checkers-have-properties ()
-  "Test that `flycheck-checkers' have properties."
-  (should (flycheck-get-checker-properties checker)))
-
 (ert-deftest-checkers all-checkers-registered ()
   "Test that all `flycheck-checkers' are considered registered."
   (should (flycheck-registered-checker-p checker)))
 
 (ert-deftest-checkers all-checkers-valid ()
   "Test that all `flycheck-checkers' are valid."
-  (should (flycheck-valid-checker-p (flycheck-get-checker-properties checker))))
+  (should (flycheck-valid-checker-p checker)))
