@@ -431,8 +431,7 @@ Use this together with the config tag in checker arguments."
   (declare (indent 3))
   `(progn
      (defcustom ,symbol ,file-name
-       ,(format "The configuration file for the syntax checker
-%s.
+       ,(format "Configuration file for `%s'.
 
 When set to a plain file name without any slash search for this
 file name in the directory of the buffer being check, any
