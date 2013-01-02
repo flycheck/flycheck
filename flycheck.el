@@ -672,9 +672,13 @@ objects."
         :buffer buffer
         :file-name (when file-idx (match-string file-idx output))
         :line-no (when line-idx
-                   (string-to-number (match-string line-idx output)))
+                   (let ((line-text (s-collapse-whitespace
+                                     (match-string line-idx output))))
+                     (string-to-number line-text)))
         :col-no (when col-idx
-                  (string-to-number (match-string col-idx output)))
+                  (let ((col-text (s-collapse-whitespace
+                                   (match-string col-idx output))))
+                    (string-to-number col-text)))
         :text (when text-idx (match-string text-idx output))
         :level level)
        errors)
