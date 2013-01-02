@@ -453,23 +453,45 @@ Make a temporary copy of the buffer, remember it in
     (add-to-list 'flycheck-substituted-files temp-file)
     temp-file))
 
+(defun flycheck-find-config-file (file-name)
+  "Find the configuration file FILE-NAME.
+
+If FILE-NAME contains a slash, return FILE-NAME expanded with
+`expand-file-name'.
+
+If FILE-NAME does not contain a slash, search the file with
+`flycheck-find-file-name' and return the result."
+  (when file-name
+    (if (s-contains? "/" file-name)
+        (expand-file-name file-name)
+      (flycheck-fidn-file-for-buffer file-name))))
+
 (defun flycheck-substitute-argument (arg)
   "Substitute ARG with file to check is possible.
 
-If ARG is `source' or `source-inplace', create a temporary file
-to checker and return its path, otherwise return ARG unchanged."
+If ARG is source or source-inplace, create a temporary file
+to checker and return its path, otherwise return ARG unchanged.
+
+If ARG is a list whose `car' is config, search the configuration
+file and return a list of options that specify this configuration
+file, or nil of the config file was not found."
   (cond
    ((eq arg 'source)
     (flycheck-get-source-file 'flycheck-temp-file-system))
    ((eq arg 'source-inplace)
     (flycheck-get-source-file 'flycheck-temp-file-inplace))
+   ((and (listp arg) (eq (car arg) 'config))
+    (let ((option-name (nth 1 arg))
+           (file-name  (flycheck-find-config-file (symbol-value (nth 2 arg)))))
+      (when file-name
+        (list option-name file-name))))
    ;; Return the argument unchanged
    (t arg)))
 
 (defun flycheck-get-substituted-command (properties)
   "Get the substitute :command from PROPERTIES."
-  (mapcar 'flycheck-substitute-argument
-          (plist-get properties :command)))
+  (-flatten (-keep 'flycheck-substitute-argument
+                   (plist-get properties :command))))
 
 (defun flycheck-error-pattern-p (pattern)
   "Check whether PATTERN is a valid error pattern."
@@ -1125,38 +1147,37 @@ output: %s\nChecker definition probably flawed."
       nil 1 2 3 warning))
     :modes (html-mode nxhtml-mode)))
 
-(defvar flycheck-jshintrc nil
+(defvar flycheck-jshintrc ".jshintrc"
   "The path to .jshintrc.
 
 This variable denotes the configuration file for jshint to use
 when checking a buffer with jshint.
 
-The path contained in this variable is expanded via
-`expand-file-name' before being passed to jshint, thus ~ is
-replaced with your $HOME directory.
+If set to a file name with no slash, search this file in the
+directory of the file to check, any ancestors thereof or the home
+directory.
+
+If set to a file name containing a slash (e.g. ./.jshintrc or $HOME/.jshintrc)
+expand the file name with `expand-file-name' and use it directly.
 
 Use this variable as file local variable to use a specific
 configuration file for a buffer.")
 (put 'flycheck-jshintrc 'safe-local-variable 'stringp)
 
-(defun flycheck-checker-javascript-jshint ()
+(defconst flycheck-checker-javascript-jshint
+  '(:command
+    ("jshint" (config "--config" flycheck-jshintrc) source)
+    :error-patterns
+    (("^\\(.*\\): line \\([[:digit:]]+\\), col \\([[:digit:]]+\\), \\(.+\\)$"
+      1 2 3 4 error))
+    :modes js-mode)
   "Check javascript with jshint.
 
 Use .jshintrc from either `flycheck-jshintrc' or – if that
 variable is nil – the buffer's directory, any ancestors thereof
 or the $HOME directory.
 
-If .jshintrc is not found run jshint with default settings."
-  (let ((jshintrc (or flycheck-jshintrc
-                      (flycheck-find-file-for-buffer ".jshintrc"))))
-    `(:command
-      ("jshint"
-       ,@(when jshintrc `("--config" ,(expand-file-name jshintrc)))
-       source)
-      :error-patterns
-      (("^\\(.*\\): line \\([[:digit:]]+\\), col \\([[:digit:]]+\\), \\(.+\\)$"
-        1 2 3 4 error))
-      :modes js-mode)))
+If .jshintrc is not found run jshint with default settings.")
 
 (defconst flycheck-checker-javascript-jsl
   '(:command
