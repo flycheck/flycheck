@@ -139,6 +139,13 @@ the error column is highlighted if an error refer to a specific column only.
 Customize `flycheck-ignore-columns` (see [Customization](#customization)) to
 always highlight the whole line.
 
+**Note:** The default faces provided by Emacs are ill-suited, because they are
+relatively pale and do not specify a background color or underline.  Hence they
+are easily overlooked and – even worse – **cannot highlight spaces**.  For best
+error highlighting, **customize** the Flycheck faces and add a background color
+or underline, or – even better – choose a color theme that has reasonable
+Flycheck faces, for instance the light or dark [solarized][] theme.
+
 Additionally indicators are placed in the fringe to highlight the lines in which
 errors occurred.  **The fringe must be at least 8 pixels wide** for the
 indicators to be displayed properly.
@@ -458,6 +465,7 @@ See [COPYING][] for details.
 [download]: https://github.com/lunaryorn/flycheck/tags
 [dash.el]: https://github.com/magnars/dash.el
 [s.el]: https://github.com/magnars/s.el
+[solarized]: https://github.com/bbatsov/solarized-emacs
 [python]: http://python.org
 [syntastic]: https://github.com/scrooloose/syntastic
 [scrooloose]: https://github.com/scrooloose
