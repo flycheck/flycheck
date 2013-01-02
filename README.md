@@ -234,8 +234,9 @@ buffer.  For instance, to use `pyflakes` as checker in the current buffer, use
 Extending
 ---------
 
-In flycheck a syntax checker is a [property list][] with the following keys (the
-*checker properties*):
+Syntax checkers are special symbols declared with `flycheck-declare-checker`.
+This function takes a symbol and some keyword arguments that describe the
+checker:
 
 - `:command` (*mandatory*): A list containing the *executable* of the syntax
   checking tool (in the `car` of the list) and its *arguments* (in the
@@ -278,11 +279,11 @@ In flycheck a syntax checker is a [property list][] with the following keys (the
 **At least one** of `:modes` and `:predicate` must **be present**.  If **both**
 are present, **both** must match for the checker to be used.
 
+See `C-h f flycheck-declare-checker` for details.
+
 Checkers are registered via `flycheck-checkers`, which is a list of symbols.
-Each symbol in this list must either be a **variable bound to a checker property
-list**, or be a **function returning one**.  In the former case, the variables
-value is **retrieved anew on each syntax check**.  In the latter case the
-function is **invoked on each syntax check with no arguments**.
+Each symbol in this list must be a checker declared with
+`flycheck-declare-checker`.
 
 
 ### Examples
@@ -296,14 +297,13 @@ actual syntax check.
 First we declare the checker properties:
 
 ```scheme
-(defvar flycheck-checker-python-pylint
-  '(:command
-    ("epylint" source-inplace)
-    :error-patterns
-    (("^\\(.*\\):\\([0-9]+\\): Warning (W.*): \\(.*\\)$" 1 2 nil 3 warning)
-     ("^\\(.*\\):\\([0-9]+\\): Error (E.*): \\(.*\\)$" 1 2 nil 3 error)
-     ("^\\(.*\\):\\([0-9]+\\): \\[F\\] \\(.*\\)$" 1 2 nil 3 error))
-    :modes python-mode))
+(flycheck-declare-checker flycheck-checker-python-pylint
+  :command '("epylint" source-inplace)
+  :error-patterns
+  '(("^\\(.*\\):\\([0-9]+\\): Warning (W.*): \\(.*\\)$" 1 2 nil 3 warning)
+    ("^\\(.*\\):\\([0-9]+\\): Error (E.*): \\(.*\\)$" 1 2 nil 3 error)
+    ("^\\(.*\\):\\([0-9]+\\): \\[F\\] \\(.*\\)$" 1 2 nil 3 error))
+  :modes 'python-mode)
 ```
 
 We specify the command to execute in this mode in `:command`.  It is a
@@ -341,13 +341,11 @@ mode we also give a `:predicate` that determines whether the right shell is
 active:
 
 ```scheme
-(defvar flycheck-checker-zsh
-  '(:command
-    ("zsh" "-n" "-d" "-f" source)
-    :error-patterns
-    (("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 error))
-    :modes sh-mode
-    :predicate (eq sh-shell 'zsh)))
+(flycheck-declare-checker flycheck-checker-zsh
+  :command '("zsh" "-n" "-d" "-f" source)
+  :error-patterns '(("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3 error))
+  :modes 'sh-mode
+  :predicate '(eq sh-shell 'zsh))
 ```
 
 First note that unlike with `pylint` we use `source` instead of `source-inplace`
@@ -370,6 +368,7 @@ Further help
 - `C-h f flycheck-select-checker`
 - `C-h v flycheck-checkers`
 - `C-h v flycheck-checker`
+- `C-h f flycheck-declare-checker`
 
 
 Credits
@@ -413,7 +412,6 @@ See [COPYING][] for details.
 [download]: https://github.com/lunaryorn/flycheck/tags
 [dash.el]: https://github.com/magnars/dash.el
 [s.el]: https://github.com/magnars/s.el
-[property list]: http://www.gnu.org/software/emacs/manual/html_node/elisp/Property-Lists.html#Property-Lists]
 [python]: http://python.org
 [syntastic]: https://github.com/scrooloose/syntastic
 [scrooloose]: https://github.com/scrooloose
