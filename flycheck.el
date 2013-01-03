@@ -1207,11 +1207,17 @@ output: %s\nChecker definition probably flawed."
   ;; Hence our backwards-substitution will fail, because the checker process has
   ;; a different base directory to resolve relative file names than the flycheck
   ;; code working on the buffer to check.
-  ;;
-  ;; Also only check buffers which may be byte-compiled.  Otherwise checking is
-  ;; pointless because `byte-compile-file' will refuse to compile the buffer
-  ;; anyway.
-  :predicate '(and (buffer-file-name) (not no-byte-compile)))
+  :predicate '(and (buffer-file-name)
+                   ;; Do not check buffers which should not be byte-compiled.
+                   ;; The checker process will refuse to compile these anyway
+                   (not no-byte-compile)
+                   ;; Do not check temporary buffers of `byte-compile-file' or
+                   ;; autoload buffers created during package installation.
+                   ;; Checking these interferes with package installation, see
+                   ;; https://github.com/lunaryorn/flycheck/issues/45 and
+                   ;; https://github.com/bbatsov/prelude/issues/248
+                   (not (string= (buffer-name) " *Compiler Input*"))
+                   (not (s-ends-with? (buffer-name) "-autoloads.el"))))
 
 (flycheck-declare-checker flycheck-checker-haml
   :command '("haml" "-c" source)
