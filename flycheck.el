@@ -1200,6 +1200,17 @@ output: %s\nChecker definition probably flawed."
     ("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):Error:\\(?4:.*\\(?:\n    .*\\)*\\)$"
      error))
   :modes '(emacs-lisp-mode lisp-interaction-mode)
+  ;; Ensure that we only check buffers with a backing file.  For buffers without
+  ;; a backing file we cannot guarantee that file names in error messages are
+  ;; properly resolved, because `byte-compile-file' emits file names *relative
+  ;; to the directory of the checked file* instead of the working directory.
+  ;; Hence our backwards-substitution will fail, because the checker process has
+  ;; a different base directory to resolve relative file names than the flycheck
+  ;; code working on the buffer to check.
+  ;;
+  ;; Also only check buffers which may be byte-compiled.  Otherwise checking is
+  ;; pointless because `byte-compile-file' will refuse to compile the buffer
+  ;; anyway.
   :predicate '(and (buffer-file-name) (not no-byte-compile)))
 
 (flycheck-declare-checker flycheck-checker-haml
