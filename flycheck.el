@@ -967,7 +967,7 @@ flycheck exclamation mark otherwise.")
 NO-ERRORS is a number specifying how many errors to move forward.
 IF RESET is t, move to beginning of buffer first."
   (when reset
-    (point-min))
+    (goto-char (point-min)))
   ;; TODO: Horribly inefficient, possibly improve by considering less errors.
   (let* ((err-positions (-map 'flycheck-error-pos flycheck-current-errors))
          ;; Remove the current point for the errors because we don't want to
