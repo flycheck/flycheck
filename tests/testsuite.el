@@ -66,12 +66,71 @@
 (defconst testsuite-testfiles (testsuite-find-all-test-files testsuite-dir)
   "All test files of this test suite.")
 
-(message "Test files: %s" testsuite-testfiles)
-
 (defun testsuite-load-testfile (testfile)
   "Load a TESTFILE."
   (let ((default-directory (file-name-directory testfile)))
     (load testfile nil :no-message)))
+
+
+;; Test helpers
+(defun should-flycheck-overlay (overlay error)
+  "Test that OVERLAY is in REGION and corresponds to ERROR."
+  (let* ((region (flycheck-error-region error))
+         (text (flycheck-error-text error))
+         (level (flycheck-error-level error))
+         (face (if (eq level 'warning)
+                   'flycheck-warning-face
+                 'flycheck-error-face))
+         (category (if (eq level 'warning)
+                       'flycheck-warning-overlay
+                     'flycheck-error-overlay))
+         (fringe-icon (if (eq level 'warning)
+                          '(left-fringe question-mark flycheck-warning-face)
+                        `(left-fringe ,flycheck-fringe-exclamation-mark
+                                      flycheck-error-face))))
+    (should overlay)
+    (should (overlay-get overlay 'flycheck-overlay))
+    (should (= (overlay-start overlay) (car region)))
+    (should (= (overlay-end overlay) (cdr region)))
+    (should (eq (overlay-get overlay 'face) face))
+    (should (equal (get-char-property 0 'display
+                                      (overlay-get overlay 'before-string))
+                   fringe-icon))
+    (should (eq (overlay-get overlay 'category) category))
+    (should (equal (overlay-get overlay 'flycheck-error) error))
+    (should (string= (overlay-get overlay 'help-echo) text))))
+
+(defun should-flycheck-error (filename expected-err)
+  "Test that ERR is an error in the current buffer."
+  (let* ((real-error (flycheck-make-error
+                      :buffer (current-buffer)
+                      :file-name filename
+                      :line-no (nth 0 expected-err)
+                      :col-no (nth 1 expected-err)
+                      :text (nth 2 expected-err)
+                      :level (nth 3 expected-err)))
+         (overlay (car (flycheck-overlays-at (flycheck-error-pos real-error)))))
+    (should (-contains? flycheck-current-errors real-error))
+    (should-flycheck-overlay overlay real-error)))
+
+(defun should-flycheck-checker (filename setup-fn checker &rest errors)
+  "Test that checking FILENAME with CHECKER gives ERRORS."
+  (should (file-exists-p filename))
+  (with-temp-buffer
+    (insert-file-contents filename t)
+    (funcall setup-fn)
+    (set (make-local-variable 'flycheck-checkers) (list checker))
+    (flycheck-mode)
+    (while (flycheck-running-p)
+      (sleep-for 1))
+    (if (not errors)
+        (should-not flycheck-current-errors)
+      (dolist (err errors)
+        (should-flycheck-error filename err)))))
+
+(defmacro resource (filename)
+  "Access a test resource with FILENAME."
+  `(expand-file-name ,filename ,default-directory))
 
 (-each testsuite-testfiles 'testsuite-load-testfile)
 
