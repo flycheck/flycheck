@@ -1344,13 +1344,13 @@ output: %s\nChecker definition probably flawed."
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\\(?4:[0-9]+:.*\\)$"
      warning))
-  :modes '(latex-mode plain-tex-mode))
+  :modes '(latex-mode plain-tex-mode LaTeX-mode))
 
 (flycheck-declare-checker flycheck-checker-tex-lacheck
   :command '("lacheck" source-inplace)
   :error-patterns
   '(("^\"\\(?1:.*\\)\", line \\(?2:[0-9]+\\): \\(?4:.*\\)$" warning))
-  :modes 'latex-mode)
+  :modes '(latex-mode LaTeX-mode))
 
 (flycheck-declare-checker flycheck-checker-xml-xmlstarlet
   :command '("xmlstarlet" "val" "-e" "-q" source)
