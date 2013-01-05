@@ -1296,10 +1296,10 @@ output: %s\nChecker definition probably flawed."
 (flycheck-declare-checker flycheck-checker-python-flake8
   :command '("flake8" (config "--config" flycheck-flake8rc) source-inplace)
   :error-patterns
-  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:invalid syntax\\)$" error)
-    ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\) \\(?4:E.*\\)$"
+  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:[[:alpha:]]\\{2\\}.*\\)$" error)
+    ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:E[0-9]+.*\\)$"
      error)
-    ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]*\\):\\) \\(?4:W.*\\)$"
+    ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:W[0-9]+.*\\)$"
      warning))
   :modes 'python-mode)
 
