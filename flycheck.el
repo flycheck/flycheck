@@ -1126,6 +1126,8 @@ output: %s\nChecker definition probably flawed."
         ;; Register handlers for the process
         (set-process-filter process 'flycheck-receive-checker-output)
         (set-process-sentinel process 'flycheck-handle-signal)
+        ;; Do never ask before killing this process
+        (set-process-query-on-exit-flag process nil)
         ;; Report that flycheck is running
         (flycheck-report-status "*")
         ;; Attach the checker to the process
