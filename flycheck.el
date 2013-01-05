@@ -1342,7 +1342,7 @@ output: %s\nChecker definition probably flawed."
   :command '("chktex" (config "-l" flycheck-chktexrc) "-v0" "-q" "-I"
              source-inplace)
   :error-patterns
-  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\\(?:4[0-9]+:.*\\)$"
+  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\\(?4:[0-9]+:.*\\)$"
      warning))
   :modes '(latex-mode plain-tex-mode))
 
