@@ -1,6 +1,6 @@
 # Do not use an import
 #
-# Checkers: Pylint
+# Checkers: Pylint, Flake8
 
 import re
 

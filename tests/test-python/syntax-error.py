@@ -1,6 +1,6 @@
 # A straight syntax error
 #
-# Checkers: Pylint
+# Checkers: Pylint, Flake8
 
 
 foo = import bar
