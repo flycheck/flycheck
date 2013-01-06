@@ -32,8 +32,16 @@
   (let ((python-indent-guess-indent-offset nil))
     (python-mode)))
 
+(ert-deftest python-pylint-syntax-error ()
+  "Test a real syntax error with pylint."
+  (should-flycheck-checker
+   (resource "syntax-error.py")
+   'python-mode-no-indent-guessing
+   'flycheck-checker-python-pylint
+   '(6 nil "invalid syntax" error)))
+
 (ert-deftest python-pylint-missing-quote ()
-  "Test a syntax error with pylint."
+  "Test a missing quote with pylint."
   (should-flycheck-checker
    (resource "missing-quote.py")
    'python-mode-no-indent-guessing
