@@ -9,13 +9,14 @@ build : $(OBJECTS)
 .PHONY: test
 test :
 	@$(EMACS) --no-site-file --no-site-lisp --batch $(EMACSFLAGS) \
-		-l tests/testsuite.el -f ert-run-tests-batch-and-exit
+		-l dependencies.el -l tests/testsuite.el \
+		-f ert-run-tests-batch-and-exit
 
 .PHONY: clean
 clean :
 	rm -f $(OBJECTS)
+	rm -rf elpa # Clean packages installed for development
 
 %.elc : %.el
 	$(EMACS) --no-site-file --no-site-lisp --batch $(EMACSFLAGS) \
-		-l deps/dash.el/dash.el -l deps/s.el/s.el \
-		-f batch-byte-compile $<
+		-l dependencies.el -f batch-byte-compile $<

@@ -1,6 +1,0 @@
-[submodule "tests/deps/dash.el"]
-	path = tests/deps/dash.el
-	url = https://github.com/magnars/dash.el
-[submodule "tests/deps/s.el"]
-	path = tests/deps/s.el
-	url = https://github.com/magnars/s.el

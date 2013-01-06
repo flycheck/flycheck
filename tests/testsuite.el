@@ -31,12 +31,8 @@
 (defconst testsuite-dir (file-name-directory load-file-name)
   "Directory of the test suite.")
 
-(defconst testsuite-deps-dir (expand-file-name "deps" testsuite-dir)
-  "Directory containing the dependencies of the test suite.")
-
-;; Load the dependencies
-(dolist (dep '("dash.el/dash.el" "s.el/s.el"))
-  (load (expand-file-name dep testsuite-deps-dir) nil :no-message))
+(require 'dash)
+(require 's)
 
 ;; Load flycheck
 (load (expand-file-name "../flycheck.el" testsuite-dir) nil :no-message)
@@ -132,6 +128,8 @@
   "Access a test resource with FILENAME."
   `(expand-file-name ,filename ,default-directory))
 
+
+;; Eventually load all test files
 (-each testsuite-testfiles 'testsuite-load-testfile)
 
 ;;; testsuite.el ends here
