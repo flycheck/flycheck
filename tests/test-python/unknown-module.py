@@ -1,4 +1,6 @@
-print('hello world')
+# Importing an unknown module
+#
+# Checkers: Pylint
 
 import spam
 

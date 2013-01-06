@@ -1,3 +1,5 @@
-# Use the builtin "map()" to trigger a pylint warning
+# Use the builtin "map()"
+#
+# Checkers: Pylint
 
 map(str, range(10))

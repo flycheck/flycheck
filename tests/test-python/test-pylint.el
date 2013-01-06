@@ -38,7 +38,7 @@
    (resource "missing-quote.py")
    'python-mode-no-indent-guessing
    'flycheck-checker-python-pylint
-   '(2 nil "EOL while scanning string literal" error)))
+   '(5 nil "EOL while scanning string literal" error)))
 
 (ert-deftest python-pylint-unknown-module ()
   "Test an unknown module with pylint."
@@ -46,7 +46,7 @@
    (resource "unknown-module.py")
    'python-mode-no-indent-guessing
    'flycheck-checker-python-pylint
-   '(3 nil "Unable to import 'spam'" error)))
+   '(5 nil "Unable to import 'spam'" error)))
 
 (ert-deftest python-pylint-unused-import ()
   "Test an unused import with pylint"
@@ -54,7 +54,7 @@
    (resource "unused-import.py")
    'python-mode-no-indent-guessing
    'flycheck-checker-python-pylint
-   '(3 nil "Unused import re" warning)))
+   '(5 nil "Unused import re" warning)))
 
 (ert-deftest python-pylint-used-map ()
   "Test usage of the map() builtin with the pylint checker."
@@ -62,6 +62,6 @@
    (resource "map-builtin.py")
    'python-mode-no-indent-guessing
    'flycheck-checker-python-pylint
-   '(3 nil "Used builtin function 'map'" warning)))
+   '(5 nil "Used builtin function 'map'" warning)))
 
 ;;; test-pylint.el ends here

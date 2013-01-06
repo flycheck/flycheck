@@ -1,4 +1,6 @@
-print('hello world')
+# Do not use an import
+#
+# Checkers: Pylint
 
 import re
 
