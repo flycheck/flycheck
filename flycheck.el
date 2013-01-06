@@ -698,9 +698,9 @@ region.  Hence the region will always extend over the whole line.
 
 Return a cons cell (BEG . END).  BEG is the beginning of the
 error region and END its end.  If ERR has a column number and
-IGNORE-COLUMN is omitted or nil BEG and END are equal and refer
-to the error column.  Otherwise BEG is the position of the first
-non-whitespace character on the ERR line and END its end."
+IGNORE-COLUMN is omitted or nil BEG and END mark a region that
+marks that column only.  Otherwise BEG is the position of the
+first non-whitespace character on the ERR line and END its end."
   (save-excursion
     (goto-char (point-min))
     (forward-line (- (flycheck-error-line-no err) 1))
@@ -708,7 +708,7 @@ non-whitespace character on the ERR line and END its end."
       (if col
           ;; If the error has a column, return that column only
           (let ((pos (+ (line-beginning-position) col)))
-            `(,pos . ,pos))
+            `(,(- pos 1) . ,pos))
         ;; Otherwise the region extends from the first non-whitespace character
         ;; on the line to its end.
         (back-to-indentation)
@@ -923,12 +923,10 @@ flycheck exclamation mark otherwise.")
       (forward-line (- (flycheck-error-line-no err) 1))
       (let* ((level (flycheck-error-level err))
              (region (flycheck-error-region err flycheck-ignore-columns))
-             (end (cdr region))
-             ;; Highlight the column appropriately
-             (beg (if (= (car region) end) (- end 1) (car region)))
              (category (cdr (assq level flycheck-overlay-categories-alist)))
              (text (flycheck-error-text err))
-             (overlay (make-overlay beg end (flycheck-error-buffer err)))
+             (overlay (make-overlay (car region) (cdr region)
+                                    (flycheck-error-buffer err)))
              (fringe-icon `(left-fringe ,(get category 'flycheck-fringe-bitmap)
                                         ,(get category 'face))))
         ;; TODO: Consider hooks to re-check if overlay contents change
