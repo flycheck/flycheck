@@ -56,4 +56,12 @@
    'flycheck-checker-python-pylint
    '(3 nil "Unused import re" warning)))
 
+(ert-deftest python-pylint-used-map ()
+  "Test usage of the map() builtin with the pylint checker."
+  (should-flycheck-checker
+   (resource "map-builtin.py")
+   'python-mode-no-indent-guessing
+   'flycheck-checker-python-pylint
+   '(3 nil "Used builtin function 'map'" warning)))
+
 ;;; test-pylint.el ends here
