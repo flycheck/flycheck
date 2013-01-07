@@ -1244,7 +1244,7 @@ output: %s\nChecker definition probably flawed."
   :error-patterns
   '(("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
      error))
-  :modes 'js-mode)
+  :modes '(js-mode js2-mode js3-mode))
 
 (flycheck-declare-checker flycheck-checker-javascript-jsl
   :command '("jsl" "-process" source)
@@ -1255,7 +1255,7 @@ output: %s\nChecker definition probably flawed."
      warning)
     ("^\\(?1:.+\\)\:\\(?2:[0-9]+\\)\: strict \\(?4:warning: trailing comma.+\\)\:$"
      warning))
-  :modes 'js-mode)
+  :modes '(js-mode js2-mode js3-mode))
 
 (flycheck-declare-checker flycheck-checker-json
   :command '("jsonlint" "-c" "-q" source)
