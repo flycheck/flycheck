@@ -176,10 +176,7 @@ You need to install external utilities for the following checkers:
 - CSS: Install [csslint][].
 - HAML: Install [HAML][].
 - HTML: Install [Tidy][].
-- Javascript: Install [jsl][] or [jshint][].  The latter will automatically use
-  a `.jshintrc` file in the buffer's directory, any ancestor thereof or your
-  `$HOME` directory.  You may override the path to this file globally or per
-  buffer with the variable `flycheck-jshintrc`.
+- Javascript: Install [jsl][] or [jshint][].
 - JSON: Install [jsonlint][].
 - Lua: Install [Lua][].
 - Perl: Install [Perl][].
