@@ -23,7 +23,6 @@
 ;;; Code:
 
 (require 'ert)
-(require 's)
 (require 'flycheck)
 
 (ert-deftest bash-missing-quote ()
