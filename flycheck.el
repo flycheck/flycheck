@@ -450,7 +450,8 @@ configuration file a buffer." checker)
        :type '(choice (const :tag "No configuration file" nil)
                       (string :tag "File name or path"))
        :group 'flycheck-config-files)
-     (put (quote ,symbol) 'safe-local-variable #'stringp)))
+     (put (quote ,symbol) 'safe-local-variable #'stringp)
+     (make-variable-buffer-local (quote ,symbol))))
 
 (defun flycheck-error-pattern-p (pattern)
   "Check whether PATTERN is a valid error pattern."
