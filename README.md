@@ -25,7 +25,7 @@ Features
   - CoffeeScript
   - CSS
   - Emacs Lisp
-  - HAML
+  - Haml
   - HTML
   - Javascript
   - JSON
@@ -34,7 +34,7 @@ Features
   - PHP
   - Python
   - Ruby
-  - SASS
+  - Sass
   - Shell scripts (Bash, Dash and Zsh)
   - TeX/LaTeX
   - XML
