@@ -153,6 +153,24 @@ To view an error message, either hover the mouse over the highlighted error, or
 move the cursor to the highlighted error and wait a short moment.  To clear all
 error information use `M-x flycheck-clear`.
 
+
+### Error navigation.
+
+Use `next-error` and `previous-error` (typically bound to `M-g n` and `M-g p`
+respectively) to jump to Flycheck errors.
+
+**Note**: *Visible* compilation buffers take preference over buffers with
+Flycheck errors.  This includes buffers from `M-x compile`, `M-x grep` and
+generally all buffers with Compilation Mode or Compilation Minor Mode enabled.
+If such a buffer is visible `next-error` and `previous-error` will navigate the
+errors (or grep results) reported by this buffer instead.  Hide this buffer
+(e.g. with `delete-other-windows`) to navigate Flycheck errors again.
+
+Error navigation always jumps to the error column, or to the first
+non-whitespace character of a line if the error does not have a column,
+regardless of `flycheck-highlighting-mode`.
+
+
 ### Mode line
 
 Flycheck indicates its state in the mode line:
