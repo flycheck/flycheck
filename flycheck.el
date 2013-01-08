@@ -713,7 +713,14 @@ first non-whitespace character on the ERR line and END its end."
         ;; Otherwise the region extends from the first non-whitespace character
         ;; on the line to its end.
         (back-to-indentation)
-        `(,(point) . ,(line-end-position))))))
+        (let ((beg (point))
+              (end (line-end-position)))
+          (when (= beg end)
+              ;; Beginning and end are equal, meaning the line is empty.
+              ;; Hence let's highlight *from the end* of the the previous line.
+              (forward-line -1)
+              (setq beg (line-end-position)))
+          `(,beg . ,end))))))
 
 (defun flycheck-error-pos (err)
   "Get the buffer position of ERR.
