@@ -508,15 +508,20 @@ A valid checker is a symbol declared as checker with
 `flycheck-declare-checker'."
   (get checker :flycheck-checker))
 
+(defun flycheck-checker-get-modes (checker)
+  "Get the modes of CHECKER"
+  (let ((modes (get checker :flycheck-modes)))
+    (if (symbolp modes)
+        (list modes)
+      modes)))
+
 (defun flycheck-check-modes (checker)
   "Check the allowed modes of CHECKER.
 
 Check the current `major-mode' against the modes allowed for
 CHECKER.  Return t if the modes match or nil otherwise."
-  (let ((modes (get checker :flycheck-modes)))
-    (or (not modes)
-        (and (listp modes) (memq major-mode modes))  ; A list of modes
-        (eq major-mode modes))))        ; A single mode
+  (let ((modes (flycheck-checker-get-modes checker)))
+    (or (not modes) (memq major-mode modes))))
 
 (defun flycheck-check-predicate (checker)
   "Check the predicate of CHECKER.
