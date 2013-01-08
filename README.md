@@ -134,10 +134,9 @@ This file is now always checked using `.jshintrc` from the parent directory.
 
 Errors and warnings from the checker are reported in the mode line (see
 [Mode line](#mode-line)) and highlighted in the buffer with
-`flycheck-error-face` and `flycheck-warning-face` respectively.  By default only
-the error column is highlighted if an error refer to a specific column only.
-Customize `flycheck-ignore-columns` (see [Customization](#customization)) to
-always highlight the whole line.
+`flycheck-error-face` and `flycheck-warning-face` respectively.  Customize
+`flycheck-highlighting-mode` (see [Customization](#customization)) to change the
+highlighting of errors.
 
 **Note:** The default faces provided by Emacs are ill-suited, because they are
 relatively pale and do not specify a background color or underline.  Hence they
@@ -228,8 +227,17 @@ of configuration files for syntax checkers.
 
 ### Appearance
 
-- `M-x customize-variable RET flycheck-ignore-columns`: Customize whether
-  Flycheck takes column numbers into account when highlighting errors.
+- `M-x customize-variable RET flycheck-highlighting-mode`: Customize how errors
+  are highlighted in a buffer:
+
+  - `columns`: Highlight errors columns.  If an error does not have a column
+    highlight the whole line.
+  - `lines`: Highlight whole lines regardless of whether errors have columns or
+    not.
+  - `nil`: Do not highlight errors at all.  Errors are only indicated in the
+    mode line and by fringe icons.
+
+  This option does not affect error navigation.
 - `M-x customize-face RET flycheck-error-face`: Customize the face for error
   highlights.  Inherits from `flymake-errline` by default.
 - `M-x customize-face RET flycheck-warning-face`: Customize the face for error

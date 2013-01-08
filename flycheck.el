@@ -251,19 +251,29 @@ to always use a specific checker for a file.")
   "Face for flycheck warnings."
   :group 'flycheck)
 
-(defcustom flycheck-ignore-columns nil
-  "Ignore column numbers when highlighting errors.
+(make-obsolete-variable 'flycheck-ignore-columns
+                        "Use `flycheck-highlighting-mode' instead."
+                        "0.6")
 
-If nil only highlight the affected column an error refers to
-specific column.  If t columns are ignored and the whole line his
-highlighted regardless of whether an error refers to a column or
-a complete line.
+(defcustom flycheck-highlighting-mode 'columns
+  "The highlighting mode.
+
+Controls how Flycheck highlights errors in buffers.  May either
+be columns, lines or nil.
+
+If columns highlight specific columns if errors are specific to a
+column.  If lines always highlight the whole line regardless of
+whether the error is specific to a column.  If nil do no
+highlight errors at all, but only show fringe icons.
 
 Note that this does not affect error navigation.  When navigating
 errors with `next-error' and `previous-error' Flycheck always
-just to the error column."
+jumps to the error column regardless of the highlighting mode."
   :group 'flycheck
-  :type 'boolean)
+  :type '(choice (const :tag "Highlight columns only" columns)
+                 (const :tag "Highlight whole lines" lines)
+                 (const :tag "Do not highlight errors" nil))
+  :package-version '(flycheck . "0.6"))
 
 (defcustom flycheck-mode-hook nil
   "Hooks to run after `flycheck-mode'."
@@ -929,8 +939,9 @@ flycheck exclamation mark otherwise.")
     (save-excursion
       (goto-char (point-min))
       (forward-line (- (flycheck-error-line-no err) 1))
-      (let* ((level (flycheck-error-level err))
-             (region (flycheck-error-region err flycheck-ignore-columns))
+      (let* ((mode flycheck-highlighting-mode)
+             (level (flycheck-error-level err))
+             (region (flycheck-error-region err (not (eq mode 'columns))))
              (category (cdr (assq level flycheck-overlay-categories-alist)))
              (text (flycheck-error-text err))
              (overlay (make-overlay (car region) (cdr region)
@@ -939,6 +950,9 @@ flycheck exclamation mark otherwise.")
                                         ,(get category 'face))))
         ;; TODO: Consider hooks to re-check if overlay contents change
         (overlay-put overlay 'category category)
+        (unless mode
+          ;; Erase the highlighting from the overlay if requested by the user
+          (overlay-put overlay 'face nil))
         (overlay-put overlay 'flycheck-error err)
         (overlay-put overlay 'before-string
                      (propertize "!" 'display fringe-icon))
