@@ -691,6 +691,49 @@ syntax check if the checker changed."
     (setq flycheck-checker checker)
     (flycheck-buffer)))
 
+(defun flycheck-describe-checker (checker)
+  "Display the documentation of CHECKER.
+
+CHECKER is a checker symbol.
+
+Pop up a help buffer with the documentation of CHECKER."
+  (interactive
+   (list (read-flycheck-checker "Checker: ")))
+  (if (null checker)
+      (message "You didn't specify a Flycheck syntax checker.")
+    (help-setup-xref (list #'flycheck-describe-checker checker)
+                     (called-interactively-p 'interactive))
+    (save-excursion
+      (with-help-window (help-buffer)
+        ;; TODO: Find and output declaring file
+        (princ (format "%s is a Flycheck syntax checker.\n\n" checker))
+        (let ((modes (flycheck-checker-get-modes checker))
+              (predicate (get checker :flycheck-predicate))
+              (config-file-var (get checker :flycheck-config-file-var)))
+          (princ (format "  This checker executes the command %s."
+                         (prin1-to-string (get checker :flycheck-command))))
+          (cond
+           ((and modes predicate)
+            (princ (format "  It checks syntax in the major mode(s) %s if the predicate %s is fulfilled. "
+                            (s-join ", " (--map (format "`%s'" it) modes))
+                            predicate)))
+           (modes
+            (princ (format "  It checks syntax in the major mode(s) %s. "
+                            (s-join ", " (--map (format "`%s'" it) modes)))))
+           (predicate
+            (princ (format "  It checks syntax if the predicate %s is fulfilled. "
+                            predicate))))
+          (when config-file-var
+            (princ (format "  Its configuration file is provided by `%s'."
+                            config-file-var)))
+          (with-current-buffer (help-buffer)
+            (save-excursion
+              (goto-char (point-min))
+              (forward-paragraph)
+              (fill-region-as-paragraph (point) (point-max)))))
+        (princ (format "\n\nDocumentation:\n%s"
+                        (get checker :flycheck-documentation)))))))
+
 
 ;; Error API
 (defstruct (flycheck-error

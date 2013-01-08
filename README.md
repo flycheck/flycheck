@@ -229,11 +229,14 @@ executable is found is used.
 To change the order of preference or enforce a single checker, just modify the
 order of their appearance in `flycheck-checkers` or delete checkers you do not
 want to use.  For instance, to always use `pyflakes` in `python-mode`, just
-remove `python-flake8` and `python-pylint` from `flycheck-checkers` via customization.
+remove `python-flake8` and `python-pylint` from `flycheck-checkers` via
+customization.
 
 Alternatively use `flycheck-select-checker` to select a specific checker for a
 buffer.  For instance, to use `pyflakes` as checker in the current buffer, use
 `M-x flycheck-select-checker RET python-checker-python-pyflakes`.
+
+Use `M-x flycheck-describe-checker` to get help about a syntax checker.
 
 
 ### Checker configuration
@@ -443,6 +446,7 @@ Further help
 - `C-h v flycheck-checker`
 - `C-h f flycheck-declare-checker`
 - `C-h f flycheck-def-config-file-var`
+- `M-x flycheck-describe-checker`
 
 
 Credits
