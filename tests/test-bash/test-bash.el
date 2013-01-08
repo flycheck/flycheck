@@ -25,6 +25,8 @@
 (require 'ert)
 (require 'flycheck)
 
+(require 'sh-script)
+
 (ert-deftest bash-missing-quote ()
   "Test a syntax error from a missing quote."
   (should-flycheck-checker
@@ -36,7 +38,5 @@
   (should-flycheck-checker
    (resource "missing-semicolon.bash") 'sh-mode 'flycheck-checker-bash
    '(5 nil "`fi'" error)))
-
-(require 'sh-script)
 
 ;;; test-bash.el ends here
