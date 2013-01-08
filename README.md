@@ -94,7 +94,7 @@ file-local variable `flycheck-checker`:
 # End:
 ```
 
-Now **only** the [pylint][] checker will be used for the file.  If the checker
+Now **only** the `pylint` checker will be used for the file.  If the checker
 from `flycheck-checker` or `flycheck-select-checker` cannot be used for the
 current buffer (e.g. the major mode does not match, the checker does not exist,
 etc.) an error is signaled.
@@ -317,7 +317,7 @@ Each symbol in this list must be a checker declared with
 #### A simple example
 
 Let's see this in action by explaining the definition of a [Python][] checker
-included in flycheck.  This checker uses the [pylint][] utility to perform the
+included in flycheck.  This checker uses the `pylint` utility to perform the
 actual syntax check.
 
 First we declare the checker properties:
