@@ -190,28 +190,28 @@ Use when checking buffers automatically."
   :group 'flycheck)
 
 (defcustom flycheck-checkers
-  '(flycheck-checker-bash
-    flycheck-checker-coffee
-    flycheck-checker-css
-    flycheck-checker-emacs-lisp
-    flycheck-checker-haml
-    flycheck-checker-html
-    flycheck-checker-json
-    flycheck-checker-javascript-jshint
-    flycheck-checker-javascript-jsl
-    flycheck-checker-lua
-    flycheck-checker-perl
-    flycheck-checker-php
-    flycheck-checker-python-flake8
-    flycheck-checker-python-pylint
-    flycheck-checker-python-pyflakes
-    flycheck-checker-ruby
-    flycheck-checker-sass
-    flycheck-checker-sh
-    flycheck-checker-tex-chktex
-    flycheck-checker-tex-lacheck
-    flycheck-checker-xml-xmlstarlet
-    flycheck-checker-zsh)
+  '(bash
+    coffee
+    css
+    emacs-lisp
+    haml
+    html
+    json
+    javascript-jshint
+    javascript-jsl
+    lua
+    perl
+    php
+    python-flake8
+    python-pylint
+    python-pyflakes
+    ruby
+    sass
+    sh
+    tex-chktex
+    tex-lacheck
+    xml-xmlstarlet
+    zsh)
   "Flycheck checkers.
 
 A list of flycheck checkers to try for the current buffer.
@@ -1166,16 +1166,15 @@ output: %s\nChecker definition probably flawed."
 
 
 ;; Checkers
-(flycheck-declare-checker flycheck-checker-bash
+(flycheck-declare-checker bash
   :command '("bash" "--norc" "-n" source)
   :error-patterns '(("^\\(?1:.+\\): line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'sh-mode
   :predicate '(eq sh-shell 'bash))
 
-(flycheck-def-config-file-var flycheck-coffeelintrc
-    flycheck-checker-coffee ".coffeelint.json")
+(flycheck-def-config-file-var flycheck-coffeelintrc coffee ".coffeelint.json")
 
-(flycheck-declare-checker flycheck-checker-coffee
+(flycheck-declare-checker coffee
   :command '("coffeelint" (config "--file" flycheck-coffeelintrc) "--csv" source)
   :error-patterns
   '(("SyntaxError: \\(?4:.*\\) on line \\(?2:[0-9]+\\)" error)
@@ -1183,14 +1182,14 @@ output: %s\nChecker definition probably flawed."
     ("\\(?1:.+\\),\\(?2:[0-9]+\\),warn,\\(?4:.+\\)" warning))
   :modes 'coffee-mode)
 
-(flycheck-declare-checker flycheck-checker-css
+(flycheck-declare-checker css
   :command '("csslint" "--format=compact" source)
   :error-patterns
   '(("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
      error))
   :modes 'css-mode)
 
-(defconst flycheck-checker-emacs-lisp-check-form
+(defconst flycheck-emacs-lisp-check-form
   '(progn
      ;; Initialize packages to at least try to load dependencies
      (package-initialize)
@@ -1206,16 +1205,16 @@ output: %s\nChecker definition probably flawed."
      (mapc 'byte-compile-file command-line-args-left)
      (mapc 'delete-file byte-compiled-files)))
 
-(defun flycheck-checker-emacs-lisp-check-form-s ()
-  "Return `flycheck-checker-emacs-lisp-check-form as string."
+(defun flycheck-emacs-lisp-check-form-s ()
+  "Return `flycheck-emacs-lisp-check-form' as string."
    (with-temp-buffer
-     (print flycheck-checker-emacs-lisp-check-form (current-buffer))
+     (print flycheck-emacs-lisp-check-form (current-buffer))
      (buffer-substring-no-properties (point-min) (point-max))))
 
-(flycheck-declare-checker flycheck-checker-emacs-lisp
+(flycheck-declare-checker emacs-lisp
   :command `(,(concat invocation-directory invocation-name)
              "--no-site-file" "--no-site-lisp" "--batch" "--eval"
-             ,(flycheck-checker-emacs-lisp-check-form-s))
+             ,(flycheck-emacs-lisp-check-form-s))
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):Warning:\\(?4:.*\\(?:\n    .*\\)*\\)$"
      warning)
@@ -1241,16 +1240,15 @@ output: %s\nChecker definition probably flawed."
                    (not (string= (buffer-name) " *Compiler Input*"))
                    (not (s-ends-with? (buffer-name) "-autoloads.el"))))
 
-(flycheck-declare-checker flycheck-checker-haml
+(flycheck-declare-checker haml
   :command '("haml" "-c" source)
   :error-patterns
   '(("^Syntax error on line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'haml-mode)
 
-(flycheck-def-config-file-var flycheck-tidyrc flycheck-checker-html
-                              ".tidyrc")
+(flycheck-def-config-file-var flycheck-tidyrc html ".tidyrc")
 
-(flycheck-declare-checker flycheck-checker-html
+(flycheck-declare-checker html
   :command '("tidy" (config "-config" flycheck-tidyrc) "-e" "-q" source)
   :error-patterns
   '(("^line \\(?2:[0-9]+\\) column \\(?3:[0-9]+\\) - Error: \\(?4:.*\\)$" error)
@@ -1258,17 +1256,16 @@ output: %s\nChecker definition probably flawed."
      warning))
   :modes '(html-mode nxhtml-mode))
 
-(flycheck-def-config-file-var flycheck-jshintrc
-    flycheck-checker-javascript-jshint ".jshintrc")
+(flycheck-def-config-file-var flycheck-jshintrc javascript-jshint ".jshintrc")
 
-(flycheck-declare-checker flycheck-checker-javascript-jshint
+(flycheck-declare-checker javascript-jshint
   :command '("jshint" (config "--config" flycheck-jshintrc) source)
   :error-patterns
   '(("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
      error))
   :modes '(js-mode js2-mode js3-mode))
 
-(flycheck-declare-checker flycheck-checker-javascript-jsl
+(flycheck-declare-checker javascript-jsl
   :command '("jsl" "-process" source)
   :error-patterns
   '(("^\\(?1:.+\\)\:\\(?2:[0-9]+\\)\: \\(?4:SyntaxError:.+\\)\:$" error)
@@ -1279,7 +1276,7 @@ output: %s\nChecker definition probably flawed."
      warning))
   :modes '(js-mode js2-mode js3-mode))
 
-(flycheck-declare-checker flycheck-checker-json
+(flycheck-declare-checker json
   :command '("jsonlint" "-c" "-q" source)
   :error-patterns
   '(("^\\(?1:.+\\)\: line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
@@ -1289,20 +1286,20 @@ output: %s\nChecker definition probably flawed."
                (and buffer-file-name
                     (string= "json" (file-name-extension buffer-file-name)))))
 
-(flycheck-declare-checker flycheck-checker-lua
+(flycheck-declare-checker lua
   :command '("luac" "-p" source)
   :error-patterns
   '(("^.*?: \\(?1:.*?\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'lua-mode)
 
-(flycheck-declare-checker flycheck-checker-perl
+(flycheck-declare-checker perl
   :command '("perl" "-w" "-c" source)
   :error-patterns
   '(("^\\(?4:.*?\\) at \\(?1:.*?\\) line \\(?2:[0-9]+\\)\\.$" error)
     ("^\\(?4:.*?\\) at \\(?1:.*?\\) line \\(?2:[0-9]+\\), .*$" error))
   :modes '(perl-mode cperl-mode))
 
-(flycheck-declare-checker flycheck-checker-php
+(flycheck-declare-checker php
   :command '("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
              "-d" "log_errors=0" source)
   :error-patterns
@@ -1310,10 +1307,9 @@ output: %s\nChecker definition probably flawed."
     error))
   :modes 'php-mode)
 
-(flycheck-def-config-file-var flycheck-flake8rc
-    flycheck-checker-python-flake8 ".flake8rc")
+(flycheck-def-config-file-var flycheck-flake8rc python-flake8 ".flake8rc")
 
-(flycheck-declare-checker flycheck-checker-python-flake8
+(flycheck-declare-checker python-flake8
   :command '("flake8" (config "--config" flycheck-flake8rc) source-inplace)
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:[[:alpha:]]\\{2\\}.*\\)$" error)
@@ -1323,7 +1319,7 @@ output: %s\nChecker definition probably flawed."
      warning))
   :modes 'python-mode)
 
-(flycheck-declare-checker flycheck-checker-python-pylint
+(flycheck-declare-checker python-pylint
   :command '("epylint" source-inplace)
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): Warning (W.*): \\(?4:.*\\)$" warning)
@@ -1331,17 +1327,17 @@ output: %s\nChecker definition probably flawed."
     ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\[F\\] \\(?4:.*\\)$" error))
   :modes 'python-mode)
 
-(flycheck-declare-checker flycheck-checker-python-pyflakes
+(flycheck-declare-checker python-pyflakes
   :command '("pyflakes" source-inplace)
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'python-mode)
 
-(flycheck-declare-checker flycheck-checker-ruby
+(flycheck-declare-checker ruby
   :command '("ruby" "-w" "-c" source)
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'ruby-mode)
 
-(flycheck-declare-checker flycheck-checker-sass
+(flycheck-declare-checker sass
   :command '("sass" "-c" source)
   :error-patterns
   '(("^Syntax error on line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error)
@@ -1351,16 +1347,15 @@ output: %s\nChecker definition probably flawed."
      error))
   :modes 'sass-mode)
 
-(flycheck-declare-checker flycheck-checker-sh
+(flycheck-declare-checker sh
   :command '("sh" "-n" source)
   :error-patterns '(("^\\(?1:.+\\): line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'sh-mode
   :predicate '(eq sh-shell 'sh))
 
-(flycheck-def-config-file-var flycheck-chktexrc flycheck-checker-tex-chktex
-                              ".chktexrc")
+(flycheck-def-config-file-var flycheck-chktexrc tex-chktex ".chktexrc")
 
-(flycheck-declare-checker flycheck-checker-tex-chktex
+(flycheck-declare-checker tex-chktex
   :command '("chktex" (config "-l" flycheck-chktexrc) "-v0" "-q" "-I"
              source-inplace)
   :error-patterns
@@ -1368,19 +1363,19 @@ output: %s\nChecker definition probably flawed."
      warning))
   :modes '(latex-mode plain-tex-mode))
 
-(flycheck-declare-checker flycheck-checker-tex-lacheck
+(flycheck-declare-checker tex-lacheck
   :command '("lacheck" source-inplace)
   :error-patterns
   '(("^\"\\(?1:.*\\)\", line \\(?2:[0-9]+\\): \\(?4:.*\\)$" warning))
   :modes 'latex-mode)
 
-(flycheck-declare-checker flycheck-checker-xml-xmlstarlet
+(flycheck-declare-checker xml-xmlstarlet
   :command '("xmlstarlet" "val" "-e" "-q" source)
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\)\\.\\(?3:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes '(xml-mode nxml-mode))
 
-(flycheck-declare-checker flycheck-checker-zsh
+(flycheck-declare-checker zsh
   :command '("zsh" "-n" "-d" "-f" source)
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'sh-mode
