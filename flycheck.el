@@ -377,7 +377,7 @@ Return the name of the temporary file."
 
 
 ;; Checker API
-(defmacro flycheck-declare-checker (symbol &rest properties)
+(defmacro flycheck-declare-checker (symbol docstring &rest properties)
   "Declare SYMBOL as syntax checker with PROPERTIES.
 
 The following PROPERTIES are understood:
@@ -409,7 +409,8 @@ the form evaluates to a non-nil result in the buffer to check.
 
 Either :modes or :predicate must be present.  If both are
 present, both must match for the checker to be used."
-  (declare (indent 1))
+  (declare (indent 1)
+           (doc-string 2))
   `(progn
      ;; Un-declare any previous checker for this mode
      (put (quote ,symbol) :flycheck-checker nil)
@@ -417,6 +418,7 @@ present, both must match for the checker to be used."
      (put (quote ,symbol) :flycheck-error-patterns nil)
      (put (quote ,symbol) :flycheck-modes nil)
      (put (quote ,symbol) :flycheck-predicate nil)
+     (put (quote ,symbol) :flycheck-documentation nil)
      ;; Store the checker properties
      (put (quote ,symbol) :flycheck-command ,(plist-get properties :command))
      (put (quote ,symbol) :flycheck-error-patterns
@@ -424,6 +426,7 @@ present, both must match for the checker to be used."
      (put (quote ,symbol) :flycheck-modes ,(plist-get properties :modes))
      (put (quote ,symbol) :flycheck-predicate
           ,(plist-get properties :predicate))
+     (put (quote ,symbol) :flycheck-documentation ,docstring)
      ;; Verify the checker
      (flycheck-verify-checker (quote ,symbol))
      ;; And declare it valid if verification did not signal an error
@@ -485,7 +488,10 @@ error if not."
   (let ((command (get checker :flycheck-command))
         (patterns (get checker :flycheck-error-patterns))
         (modes (get checker :flycheck-modes))
-        (predicate (get checker :flycheck-predicate)))
+        (predicate (get checker :flycheck-predicate))
+        (doc (get checker :flycheck-documentation)))
+    (unless (and doc (stringp doc))
+      (error "Checker %s lacks documentation" checker))
     (unless command
       (error "Checker %s lacks :command" checker))
     (unless (stringp (car command))
@@ -672,10 +678,9 @@ chosen."
 (defun flycheck-select-checker (checker)
   "Select CHECKER for the current buffer.
 
-CHECKER is a symbol providing a checker definition (see
-`flycheck-checkers') or nil.  If nil deselect the current
-checker (if any) and use automatic checker selection via
-`flycheck-checkers'.
+CHECKER is a checker symbol (see `flycheck-checkers') or nil.  If
+nil deselect the current checker (if any) and use automatic
+checker selection via `flycheck-checkers'.
 
 If called interactively prompt for CHECKER.  If no checker is
 entered deselect the current checker.  With prefix arg
@@ -1216,6 +1221,9 @@ output: %s\nChecker definition probably flawed."
 
 ;; Checkers
 (flycheck-declare-checker bash
+  "A Bash syntax checker using the bash executable.
+
+See http://www.gnu.org/software/bash/."
   :command '("bash" "--norc" "-n" source)
   :error-patterns '(("^\\(?1:.+\\): line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'sh-mode
@@ -1224,6 +1232,9 @@ output: %s\nChecker definition probably flawed."
 (flycheck-def-config-file-var flycheck-coffeelintrc coffee ".coffeelint.json")
 
 (flycheck-declare-checker coffee
+  "A CoffeeScript syntax and style checker using coffeelint.
+
+See http://www.coffeelint.org/."
   :command '("coffeelint" (config "--file" flycheck-coffeelintrc) "--csv" source)
   :error-patterns
   '(("SyntaxError: \\(?4:.*\\) on line \\(?2:[0-9]+\\)" error)
@@ -1232,6 +1243,9 @@ output: %s\nChecker definition probably flawed."
   :modes 'coffee-mode)
 
 (flycheck-declare-checker css
+  "A CSS syntax and style checker using csslint.
+
+See https://github.com/stubbornella/csslint."
   :command '("csslint" "--format=compact" source)
   :error-patterns
   '(("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
@@ -1261,6 +1275,10 @@ output: %s\nChecker definition probably flawed."
      (buffer-substring-no-properties (point-min) (point-max))))
 
 (flycheck-declare-checker emacs-lisp
+  "An Emacs Lisp syntax checker.
+
+This checker simply attempts to byte compile the contents of the
+buffer using the currently running Emacs executable."
   :command `(,(concat invocation-directory invocation-name)
              "--no-site-file" "--no-site-lisp" "--batch" "--eval"
              ,(flycheck-emacs-lisp-check-form-s))
@@ -1290,6 +1308,9 @@ output: %s\nChecker definition probably flawed."
                    (not (s-ends-with? (buffer-name) "-autoloads.el"))))
 
 (flycheck-declare-checker haml
+  "A Haml syntax checker using the Haml compiler.
+
+See http://haml.info."
   :command '("haml" "-c" source)
   :error-patterns
   '(("^Syntax error on line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
@@ -1298,6 +1319,9 @@ output: %s\nChecker definition probably flawed."
 (flycheck-def-config-file-var flycheck-tidyrc html ".tidyrc")
 
 (flycheck-declare-checker html
+  "A HTML syntax and style checker using Tidy.
+
+See https://github.com/w3c/tidy-html5."
   :command '("tidy" (config "-config" flycheck-tidyrc) "-e" "-q" source)
   :error-patterns
   '(("^line \\(?2:[0-9]+\\) column \\(?3:[0-9]+\\) - Error: \\(?4:.*\\)$" error)
@@ -1308,6 +1332,9 @@ output: %s\nChecker definition probably flawed."
 (flycheck-def-config-file-var flycheck-jshintrc javascript-jshint ".jshintrc")
 
 (flycheck-declare-checker javascript-jshint
+  "A JavaScript syntax and style checker using jshint.
+
+See http://www.jshint.com."
   :command '("jshint" (config "--config" flycheck-jshintrc) source)
   :error-patterns
   '(("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
@@ -1315,6 +1342,9 @@ output: %s\nChecker definition probably flawed."
   :modes '(js-mode js2-mode js3-mode))
 
 (flycheck-declare-checker javascript-jsl
+  "A JavaScript syntax and style checker using jsl.
+
+See http://www.javascriptlint.com/."
   :command '("jsl" "-process" source)
   :error-patterns
   '(("^\\(?1:.+\\)\:\\(?2:[0-9]+\\)\: \\(?4:SyntaxError:.+\\)\:$" error)
@@ -1326,6 +1356,9 @@ output: %s\nChecker definition probably flawed."
   :modes '(js-mode js2-mode js3-mode))
 
 (flycheck-declare-checker json
+  "A JSON syntax and style checker using jsonlint.
+
+See https://github.com/zaach/jsonlint."
   :command '("jsonlint" "-c" "-q" source)
   :error-patterns
   '(("^\\(?1:.+\\)\: line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
@@ -1336,12 +1369,18 @@ output: %s\nChecker definition probably flawed."
                     (string= "json" (file-name-extension buffer-file-name)))))
 
 (flycheck-declare-checker lua
+  "A Lua syntax checker using the Lua compiler.
+
+See http://www.lua.org/."
   :command '("luac" "-p" source)
   :error-patterns
   '(("^.*?: \\(?1:.*?\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'lua-mode)
 
 (flycheck-declare-checker perl
+  "A Perl syntax checker using the Perl interpreter.
+
+See http://www.perl.org."
   :command '("perl" "-w" "-c" source)
   :error-patterns
   '(("^\\(?4:.*?\\) at \\(?1:.*?\\) line \\(?2:[0-9]+\\)\\.$" error)
@@ -1349,6 +1388,9 @@ output: %s\nChecker definition probably flawed."
   :modes '(perl-mode cperl-mode))
 
 (flycheck-declare-checker php
+  "A PHP syntax checker using the PHP command line.
+
+See http://php.net/manual/en/features.commandline.php."
   :command '("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
              "-d" "log_errors=0" source)
   :error-patterns
@@ -1359,6 +1401,9 @@ output: %s\nChecker definition probably flawed."
 (flycheck-def-config-file-var flycheck-flake8rc python-flake8 ".flake8rc")
 
 (flycheck-declare-checker python-flake8
+  "A Python syntax and style checker using the flake8 utility.
+
+See http://pypi.python.org/pypi/flake8."
   :command '("flake8" (config "--config" flycheck-flake8rc) source-inplace)
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:[[:alpha:]]\\{2\\}.*\\)$" error)
@@ -1369,6 +1414,9 @@ output: %s\nChecker definition probably flawed."
   :modes 'python-mode)
 
 (flycheck-declare-checker python-pylint
+  "A Python syntax and style checker using the pylint utility.
+
+See http://pypi.python.org/pypi/pylint."
   :command '("epylint" source-inplace)
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): Warning (W.*): \\(?4:.*\\)$" warning)
@@ -1377,16 +1425,23 @@ output: %s\nChecker definition probably flawed."
   :modes 'python-mode)
 
 (flycheck-declare-checker python-pyflakes
+  "A Python syntax and style checker using the pyflakes utility.
+
+See http://pypi.python.org/pypi/pyflakes."
   :command '("pyflakes" source-inplace)
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'python-mode)
 
 (flycheck-declare-checker ruby
+  "A Ruby syntax checker using the Ruby interpreter."
   :command '("ruby" "-w" "-c" source)
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'ruby-mode)
 
 (flycheck-declare-checker sass
+  "A Sass syntax checker using the Sass compiler.
+
+See http://sass-lang.com."
   :command '("sass" "-c" source)
   :error-patterns
   '(("^Syntax error on line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error)
@@ -1397,6 +1452,7 @@ output: %s\nChecker definition probably flawed."
   :modes 'sass-mode)
 
 (flycheck-declare-checker sh
+  "A POSIX Shell syntax checker using the sh executable."
   :command '("sh" "-n" source)
   :error-patterns '(("^\\(?1:.+\\): line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'sh-mode
@@ -1405,6 +1461,9 @@ output: %s\nChecker definition probably flawed."
 (flycheck-def-config-file-var flycheck-chktexrc tex-chktex ".chktexrc")
 
 (flycheck-declare-checker tex-chktex
+  "A TeX and LaTeX syntax and style checker using chktex.
+
+See http://baruch.ev-en.org/proj/chktex/."
   :command '("chktex" (config "-l" flycheck-chktexrc) "-v0" "-q" "-I"
              source-inplace)
   :error-patterns
@@ -1413,18 +1472,27 @@ output: %s\nChecker definition probably flawed."
   :modes '(latex-mode plain-tex-mode))
 
 (flycheck-declare-checker tex-lacheck
+  "A LaTeX syntax and style checker using lacheck.
+
+See http://www.ctan.org/pkg/lacheck."
   :command '("lacheck" source-inplace)
   :error-patterns
   '(("^\"\\(?1:.*\\)\", line \\(?2:[0-9]+\\): \\(?4:.*\\)$" warning))
   :modes 'latex-mode)
 
 (flycheck-declare-checker xml-xmlstarlet
+  "A XML validator using the xmlstarlet utility.
+
+See http://xmlstar.sourceforge.net/."
   :command '("xmlstarlet" "val" "-e" "-q" source)
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\)\\.\\(?3:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes '(xml-mode nxml-mode))
 
 (flycheck-declare-checker zsh
+  "A Zsh syntax checker using the zsh executable.
+
+See http://www.zsh.org/."
   :command '("zsh" "-n" "-d" "-f" source)
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'sh-mode

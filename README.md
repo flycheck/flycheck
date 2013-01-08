@@ -60,7 +60,8 @@ The library is written and tested against GNU Emacs 24 and may or may not work
 in earlier versions of GNU Emacs.
 
 Most checkers have dependencies against external tools that perform the
-checking.  See [Checkers](#checkers) for details.
+checking.  Use `M-x flycheck-describe-checker` to see what a checker needs,
+e.g. `M-x flycheck-describe-checker python-pylint`.
 
 
 Usage
@@ -182,30 +183,6 @@ Flycheck indicates its state in the mode line:
   details.
 - `FlyC?`: The syntax check had a dubious result.  The definition of the checker
   might be flawed.  Inspect the `*Messages*` buffer for details.
-
-
-Checkers
---------
-
-You need to install external utilities for the following checkers:
-
-- CoffeeScript: Install [coffeelint][].
-- CSS: Install [csslint][].
-- HAML: Install [HAML][].
-- HTML: Install [Tidy][].
-- Javascript: Install [jsl][] or [jshint][].
-- JSON: Install [jsonlint][].
-- Lua: Install [Lua][].
-- Perl: Install [Perl][].
-- PHP: Install the [PHP command line][php].
-- Python: Install [flake8][], [pyflakes][] or [pylint][].
-- Ruby: Install Ruby.
-- SASS: Install [SASS][].
-- Shell scripts: Install Bash or Zsh depending on the type of shell file you
-  want to check.
-- TeX/LaTeX: Install [chktex][] or [lacheck][].  Most TeX distributions,
-  including TeXLive and MacTeX, already do this for you.
-- XML: Install [xmlstarlet][].
 
 
 Customization
@@ -499,21 +476,3 @@ See [COPYING][] for details.
 [maio]: https://github.com/maio
 [ptrv]: https://github.com/ptrv
 [copying]: https://github.com/lunaryorn/flycheck/blob/master/COPYING
-
-[coffeelint]: http://www.coffeelint.org/
-[csslint]: https://github.com/stubbornella/csslint
-[haml]: http://haml.info
-[tidy]: https://github.com/w3c/tidy-html5
-[jsl]: http://www.javascriptlint.com/
-[jshint]: http://www.jshint.com
-[jsonlint]: https://github.com/zaach/jsonlint
-[lua]: http://www.lua.org/
-[perl]: http://www.perl.org/
-[php]: http://php.net/manual/en/features.commandline.php
-[flake8]: http://pypi.python.org/pypi/flake8
-[pyflakes]: http://pypi.python.org/pypi/pyflakes
-[pylint]: http://pypi.python.org/pypi/pylint
-[sass]: http://sass-lang.com
-[chktex]: http://baruch.ev-en.org/proj/chktex/
-[lacheck]: http://www.ctan.org/pkg/lacheck
-[xmlstarlet]: http://xmlstar.sourceforge.net/
