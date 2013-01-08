@@ -720,24 +720,24 @@ Pop up a help buffer with the documentation of CHECKER."
           (cond
            ((and modes predicate)
             (princ (format "  It checks syntax in the major mode(s) %s if the predicate %s is fulfilled. "
-                            (s-join ", " (--map (format "`%s'" it) modes))
-                            predicate)))
+                           (s-join ", " (--map (format "`%s'" it) modes))
+                           predicate)))
            (modes
             (princ (format "  It checks syntax in the major mode(s) %s. "
-                            (s-join ", " (--map (format "`%s'" it) modes)))))
+                           (s-join ", " (--map (format "`%s'" it) modes)))))
            (predicate
             (princ (format "  It checks syntax if the predicate %s is fulfilled. "
-                            predicate))))
+                           (prin1-to-string predicate)))))
           (when config-file-var
             (princ (format "  Its configuration file is provided by `%s'."
-                            config-file-var)))
+                           config-file-var)))
           (with-current-buffer (help-buffer)
             (save-excursion
               (goto-char (point-min))
               (forward-paragraph)
               (fill-region-as-paragraph (point) (point-max)))))
         (princ (format "\n\nDocumentation:\n%s"
-                        (get checker :flycheck-documentation)))))))
+                       (get checker :flycheck-documentation)))))))
 
 
 ;; Error API
