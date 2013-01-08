@@ -25,7 +25,7 @@ Features
   - CoffeeScript
   - CSS
   - Emacs Lisp
-  - HAML
+  - Haml
   - HTML
   - Javascript
   - JSON
@@ -34,7 +34,7 @@ Features
   - PHP
   - Python
   - Ruby
-  - SASS
+  - Sass
   - Shell scripts (Bash, Dash and Zsh)
   - TeX/LaTeX
   - XML
@@ -60,7 +60,8 @@ The library is written and tested against GNU Emacs 24 and may or may not work
 in earlier versions of GNU Emacs.
 
 Most checkers have dependencies against external tools that perform the
-checking.  See [Checkers](#checkers) for details.
+checking.  Use `M-x flycheck-describe-checker` to see what a checker needs,
+e.g. `M-x flycheck-describe-checker python-pylint`.
 
 
 Usage
@@ -89,7 +90,7 @@ file-local variable `flycheck-checker`:
 
 ```python
 # Local Variables:
-# flycheck-checker: flycheck-checker-python-pylint
+# flycheck-checker: python-pylint
 # End:
 ```
 
@@ -102,7 +103,7 @@ etc.) an error is signaled.
 
 Some checkers can be configured from configuration files.  Such checkers have an
 associated variable providing the name of the configuration file, for instance
-`flycheck-jslintrc` for `flycheck-checker-javascript-jslint`.  These variables
+`flycheck-jslintrc` for `javascript-jslint` checker.  These variables
 obey the following rules:
 
 If it contains a plain file name without any slash, e.g. `.jslintrc`,
@@ -184,30 +185,6 @@ Flycheck indicates its state in the mode line:
   might be flawed.  Inspect the `*Messages*` buffer for details.
 
 
-Checkers
---------
-
-You need to install external utilities for the following checkers:
-
-- CoffeeScript: Install [coffeelint][].
-- CSS: Install [csslint][].
-- HAML: Install [HAML][].
-- HTML: Install [Tidy][].
-- Javascript: Install [jsl][] or [jshint][].
-- JSON: Install [jsonlint][].
-- Lua: Install [Lua][].
-- Perl: Install [Perl][].
-- PHP: Install the [PHP command line][php].
-- Python: Install [flake8][], [pyflakes][] or [pylint][].
-- Ruby: Install Ruby.
-- SASS: Install [SASS][].
-- Shell scripts: Install Bash or Zsh depending on the type of shell file you
-  want to check.
-- TeX/LaTeX: Install [chktex][] or [lacheck][].  Most TeX distributions,
-  including TeXLive and MacTeX, already do this for you.
-- XML: Install [xmlstarlet][].
-
-
 Customization
 -------------
 
@@ -229,12 +206,14 @@ executable is found is used.
 To change the order of preference or enforce a single checker, just modify the
 order of their appearance in `flycheck-checkers` or delete checkers you do not
 want to use.  For instance, to always use `pyflakes` in `python-mode`, just
-remove `flycheck-checker-python-flake8` and `flycheck-checker-python-pylint`
-from `flycheck-checkers` via customization.
+remove `python-flake8` and `python-pylint` from `flycheck-checkers` via
+customization.
 
 Alternatively use `flycheck-select-checker` to select a specific checker for a
 buffer.  For instance, to use `pyflakes` as checker in the current buffer, use
 `M-x flycheck-select-checker RET python-checker-python-pyflakes`.
+
+Use `M-x flycheck-describe-checker` to get help about a syntax checker.
 
 
 ### Checker configuration
@@ -344,7 +323,7 @@ actual syntax check.
 First we declare the checker properties:
 
 ```scheme
-(flycheck-declare-checker flycheck-checker-python-pylint
+(flycheck-declare-checker python-pylint
   :command '("epylint" source-inplace)
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): Warning (W.*): \\(?4:.*\\)$" warning)
@@ -372,7 +351,7 @@ Eventually we declare that the checker is to be used in `python-mode`.
 Now we only need to register this error checker for use with
 
 ```scheme
-(add-to-list 'flycheck-checkers 'flycheck-checker-python-pylint)
+(add-to-list 'flycheck-checkers python-pylint)
 ```
 
 Assuming that `flycheck-mode` is enabled (see [Usage](#usage)), Python source
@@ -387,7 +366,7 @@ mode we also give a `:predicate` that determines whether the right shell is
 active:
 
 ```scheme
-(flycheck-declare-checker flycheck-checker-zsh
+(flycheck-declare-checker zsh
   :command '("zsh" "-n" "-d" "-f" source)
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'sh-mode
@@ -412,10 +391,9 @@ configuration files to syntax checkers.  An example is the `jshint` checker for
 JavaScript:
 
 ```scheme
-(flycheck-def-config-file-var flycheck-jshintrc
-    flycheck-checker-javascript-jshint ".jshintrc")
+(flycheck-def-config-file-var flycheck-jshintrc javascript-jshint ".jshintrc")
 
-(flycheck-declare-checker flycheck-checker-javascript-jshint
+(flycheck-declare-checker javascript-jshint
   :command '("jshint" (config "--config" flycheck-jshintrc) source)
   :error-patterns
   '(("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
@@ -445,6 +423,7 @@ Further help
 - `C-h v flycheck-checker`
 - `C-h f flycheck-declare-checker`
 - `C-h f flycheck-def-config-file-var`
+- `M-x flycheck-describe-checker`
 
 
 Credits
@@ -497,21 +476,3 @@ See [COPYING][] for details.
 [maio]: https://github.com/maio
 [ptrv]: https://github.com/ptrv
 [copying]: https://github.com/lunaryorn/flycheck/blob/master/COPYING
-
-[coffeelint]: http://www.coffeelint.org/
-[csslint]: https://github.com/stubbornella/csslint
-[haml]: http://haml.info
-[tidy]: https://github.com/w3c/tidy-html5
-[jsl]: http://www.javascriptlint.com/
-[jshint]: http://www.jshint.com
-[jsonlint]: https://github.com/zaach/jsonlint
-[lua]: http://www.lua.org/
-[perl]: http://www.perl.org/
-[php]: http://php.net/manual/en/features.commandline.php
-[flake8]: http://pypi.python.org/pypi/flake8
-[pyflakes]: http://pypi.python.org/pypi/pyflakes
-[pylint]: http://pypi.python.org/pypi/pylint
-[sass]: http://sass-lang.com
-[chktex]: http://baruch.ev-en.org/proj/chktex/
-[lacheck]: http://www.ctan.org/pkg/lacheck
-[xmlstarlet]: http://xmlstar.sourceforge.net/
