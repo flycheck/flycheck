@@ -70,10 +70,12 @@ Usage
 Enable `flycheck-mode` in your `init.el` file.
 
 ```scheme
-;; Enable flymake for all files
-(add-hook 'find-file-hook 'flycheck-mode-on)
-;; Enable flymake for Python only
-(add-hook 'python-mode-hook 'flycheck-mode-on)
+;; Enable Flycheck for all files
+(add-hook 'find-file-hook 'flycheck-mode)
+;; Enable Flycheck for all programming modes
+(add-hook 'prog-mode-hook 'flycheck-mode)
+;; Enable Flycheck for Python only
+(add-hook 'python-mode-hook 'flycheck-mode)
 ```
 
 Or do `M-x flycheck-mode` manually after visiting a file.
