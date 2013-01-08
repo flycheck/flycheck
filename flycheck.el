@@ -440,6 +440,7 @@ as initial value.
 Use this together with the config tag in checker arguments."
   (declare (indent 3))
   `(progn
+     (put (quote ,checker) :flycheck-config-file-var (quote ,symbol))
      (defcustom ,symbol ,file-name
        ,(format "Configuration file for `%s'.
 
