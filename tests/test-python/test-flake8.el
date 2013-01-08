@@ -64,6 +64,15 @@
    '(6 13 "E251 no spaces around keyword / parameter equals" error)
    '(6 15 "E251 no spaces around keyword / parameter equals" error)))
 
+(ert-deftest python-flake8-superfluous-space-ignored ()
+  "Test superfluous space being ignored with flake8."
+  (should-flycheck-checker
+   (resource "superfluous-space.py")
+   (lambda ()
+     (python-mode-no-indent-guessing)
+     (setq flycheck-flake8rc "flake8rc"))
+   'flycheck-checker-python-flake8))
+
 (ert-deftest python-flake8-redefinition-of-unused-function ()
   "Test a redefinition of an unused function with flake8."
   (should-flycheck-checker
