@@ -35,32 +35,28 @@
   "Test a real syntax error with flake8."
   (should-flycheck-checker
    (resource "syntax-error.py")
-   'python-mode-no-indent-guessing
-   'flycheck-checker-python-flake8
+   'python-mode-no-indent-guessing 'python-flake8
    '(6 nil "invalid syntax" error)))
 
 (ert-deftest python-flake8-missing-quote ()
   "Test a syntax error with flake8."
   (should-flycheck-checker
    (resource "missing-quote.py")
-   'python-mode-no-indent-guessing
-   'flycheck-checker-python-flake8
+   'python-mode-no-indent-guessing 'python-flake8
    '(5 nil "EOL while scanning string literal" error)))
 
 (ert-deftest python-flake8-unused-import ()
   "Test an unused import with flake8"
   (should-flycheck-checker
    (resource "unused-import.py")
-   'python-mode-no-indent-guessing
-   'flycheck-checker-python-flake8
+   'python-mode-no-indent-guessing 'python-flake8
    '(5 nil "W402 're' imported but unused" warning)))
 
 (ert-deftest python-flake8-superfluous-space ()
   "Test superfluous spaces with flake8."
   (should-flycheck-checker
    (resource "superfluous-space.py")
-   'python-mode-no-indent-guessing
-   'flycheck-checker-python-flake8
+   'python-mode-no-indent-guessing 'python-flake8
    '(6 13 "E251 no spaces around keyword / parameter equals" error)
    '(6 15 "E251 no spaces around keyword / parameter equals" error)))
 
@@ -71,14 +67,13 @@
    (lambda ()
      (python-mode-no-indent-guessing)
      (setq flycheck-flake8rc "flake8rc"))
-   'flycheck-checker-python-flake8))
+   'python-flake8))
 
 (ert-deftest python-flake8-redefinition-of-unused-function ()
   "Test a redefinition of an unused function with flake8."
   (should-flycheck-checker
    (resource "redefinition-of-unused-function.py")
-   'python-mode-no-indent-guessing
-   'flycheck-checker-python-flake8
+   'python-mode-no-indent-guessing 'python-flake8
    '(10 nil "W806 redefinition of function 'foo' from line 7" warning)))
 
 ;;; test-flake8.el ends here

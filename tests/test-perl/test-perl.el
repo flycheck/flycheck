@@ -33,22 +33,21 @@
   "Test an unused variable with the Perl checker."
   (--each '(perl-mode cperl-mode)
     (should-flycheck-checker
-     (resource "unused-variable.pl") it 'flycheck-checker-perl
+     (resource "unused-variable.pl") it 'perl
      '(4 nil "Name \"main::x\" used only once: possible typo" error))))
 
 (ert-deftest perl-unqualified-variable ()
   "Test an unqualified variable with the Perl checker."
   (--each '(perl-mode cperl-mode)
     (should-flycheck-checker
-     (resource "unqualified-variable.pl") it 'flycheck-checker-perl
+     (resource "unqualified-variable.pl") it 'perl
      '(5 nil "Global symbol \"$x\" requires explicit package name" error))))
 
 (ert-deftest perl-syntax-error ()
   "Test a syntax error with the Perl checker."
    (--each '(perl-mode cperl-mode)
     (should-flycheck-checker
-     (resource "syntax-error.pl") it 'flycheck-checker-perl
-     '(4 nil "syntax error" error))))
+     (resource "syntax-error.pl") it 'perl '(4 nil "syntax error" error))))
 
 (require 'sh-script)
 
