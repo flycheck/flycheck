@@ -378,7 +378,12 @@ Return the name of the temporary file."
 
 ;; Checker API
 (defmacro flycheck-declare-checker (symbol docstring &rest properties)
-  "Declare SYMBOL as syntax checker with PROPERTIES.
+  "Declare SYMBOL as syntax checker with DOCSTRING and PROPERTIES.
+
+DOCSTRING provides documentation for the new checker.  Use
+`flycheck-checker-documentation' to access the documentation
+string of a checker, and `flycheck-describe-checker' to get help
+about a checker.
 
 The following PROPERTIES are understood:
 
@@ -404,8 +409,9 @@ parsed with the pattern.
 :modes A major mode symbol or a list thereof.  If present the
 checker is only used in these modes.
 
-:predicate A lisp form.  If present the checker is only used if
-the form evaluates to a non-nil result in the buffer to check.
+:predicate An Emacs Lisp form.  If present the checker is only
+used if the form evaluates to a non-nil result in the buffer to
+check.
 
 Either :modes or :predicate must be present.  If both are
 present, both must match for the checker to be used."
@@ -515,7 +521,7 @@ A valid checker is a symbol declared as checker with
   (get checker :flycheck-checker))
 
 (defun flycheck-checker-modes (checker)
-  "Get the modes of CHECKER"
+  "Get the modes of CHECKER."
   (let ((modes (get checker :flycheck-modes)))
     (if (symbolp modes)
         (list modes)
@@ -899,7 +905,7 @@ otherwise."
 (defun flycheck-back-substitute-filename (err)
   "Reverse substitute the file name in ERR.
 
-Substitute the file name of ERR with the `buffer-file-name' of
+Substitute the file name of ERR with the function `buffer-file-name' of
 the corresponding buffer if it matches and file in
 `flycheck-substituted-files'."
   (flycheck-error-with-buffer err
@@ -1092,7 +1098,7 @@ IF RESET is t, move to beginning of buffer first."
          (pos (nth (- (abs no-errors) 1) positions)))
     (if pos
         (goto-char pos)
-      (user-error "No more Flycheck errors."))))
+      (user-error "No more Flycheck errors"))))
 
 
 ;; Error message echoing
