@@ -331,6 +331,16 @@ Start a syntax check if a new line has been inserted into the buffer."
           (when checker (flycheck-start-checker checker))))
     (user-error "Flycheck mode disabled")))
 
+(defun flycheck-may-check-buffer ()
+  "Determine whether the buffer may be checked.
+
+A buffer may not be checked under the following conditions:
+
+- The buffer is read only (see `buffer-read-only').
+
+Return t if the buffer may be checked and nil otherwise."
+  (not buffer-read-only))
+
 (defun flycheck-buffer-safe ()
   "Safely check syntax in the current buffer.
 
@@ -338,10 +348,11 @@ Like `flycheck-buffer', but do not check buffers that need not be
 checked (i.e. read-only buffers) and demote all errors to messages.
 
 Use when checking buffers automatically."
-  (if (not buffer-read-only)
+  (if (flycheck-may-check-buffer)
       (with-demoted-errors
         (flycheck-buffer))
-    (message "flycheck will not check read-only buffers.")))
+    (message "Cannot perform a syntax check in buffer %s."
+             (buffer-name))))
 
 ;;;###autoload
 (defun flycheck-mode-on ()
