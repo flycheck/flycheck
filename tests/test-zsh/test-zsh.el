@@ -27,16 +27,20 @@
 
 (require 'sh-script)
 
+(defun zsh-mode ()
+  (sh-mode)
+  (sh-set-shell "zsh" :no-query))
+
 (ert-deftest zsh-missing-quote ()
   "Test a syntax error from a missing quote."
   (should-flycheck-checker
-   (resource "missing-quote.zsh") 'sh-mode 'zsh
+   (resource "missing-quote.zsh") 'zsh-mode 'zsh
    '(6 nil "unmatched '" error)))
 
 (ert-deftest zsh-missing-semicolon ()
   "Test a syntax error from a missing semicolon."
   (should-flycheck-checker
-   (resource "missing-semicolon.zsh") 'sh-mode 'zsh
+   (resource "missing-semicolon.zsh") 'zsh-mode 'zsh
    '(5 nil "parse error near `fi'" error)))
 
 ;;; test-zsh.el ends here

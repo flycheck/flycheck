@@ -27,16 +27,20 @@
 
 (require 'sh-script)
 
+(defun bash-mode ()
+  (sh-mode)
+  (sh-set-shell "bash" :no-query))
+
 (ert-deftest bash-missing-quote ()
   "Test a syntax error from a missing quote."
   (should-flycheck-checker
-   (resource "missing-quote.bash") 'sh-mode 'bash
+   (resource "missing-quote.bash") 'bash-mode 'bash
    '(3 nil "unexpected EOF while looking for matching `''" error)))
 
 (ert-deftest bash-missing-semicolon ()
   "Test a syntax error from a missing semicolon."
   (should-flycheck-checker
-   (resource "missing-semicolon.bash") 'sh-mode 'bash
+   (resource "missing-semicolon.bash") 'bash-mode 'bash
    '(5 nil "`fi'" error)))
 
 ;;; test-bash.el ends here
