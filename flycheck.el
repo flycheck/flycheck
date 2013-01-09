@@ -407,6 +407,7 @@ Return the name of the temporary file."
 
 
 ;; Checker API
+;;;###autoload
 (defmacro flycheck-declare-checker (symbol docstring &rest properties)
   "Declare SYMBOL as syntax checker with DOCSTRING and PROPERTIES.
 
@@ -468,6 +469,7 @@ present, both must match for the checker to be used."
      ;; And declare it valid if verification did not signal an error
      (put (quote ,symbol) :flycheck-checker t)))
 
+;;;###autoload
 (defmacro flycheck-def-config-file-var (symbol checker &optional file-name)
   "Define SYMBOL as config file variable for CHECKER, with default FILE-NAME.
 
