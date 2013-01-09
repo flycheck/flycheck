@@ -59,126 +59,7 @@ buffer-local wherever it is set."
             (list 'make-variable-buffer-local (list 'quote var))))))
 
 
-;; Syntax checking mode
-;;;###autoload
-(defconst flycheck-mode-line-lighter " FlyC"
-  "The standard lighter for flycheck mode.")
-
-(defvar-local flycheck-mode-line nil
-  "The mode line lighter of variable `flycheck-mode'.")
-
-(defun flycheck-report-status (status)
-  "Report flycheck STATUS."
-  (let ((mode-line flycheck-mode-line-lighter))
-    (setq mode-line (concat mode-line status))
-    (setq flycheck-mode-line mode-line)
-    (force-mode-line-update)))
-
-(defun flycheck-teardown ()
-  "Teardown flyheck.
-
-Completely clear the whole flycheck state.  Remove overlays, kill
-running checks, and empty all variables used by flycheck."
-  (flycheck-clear)
-  (flycheck-stop-checker)
-  (flycheck-cancel-error-display-timer)
-  (flycheck-post-syntax-check-cleanup)
-  (flycheck-clear-checker))
-
-;;;###autoload
-(define-minor-mode flycheck-mode
-  "Minor mode for on-the-fly syntax checking.
-
-When called interactively, toggle `flycheck-mode'.  With prefix
-ARG, enable `flycheck-mode' if ARG is positive, otherwise disable
-it.
-
-When called from Lisp, enable `flycheck-mode' if ARG is omitted,
-nil or positive.  If ARG is `toggle', toggle `flycheck-mode'.
-Otherwise behave as if called interactively."
-  :init-value nil
-  :lighter flycheck-mode-line
-  :require 'flycheck
-  (cond
-   (flycheck-mode
-    (flycheck-report-status "")
-
-    ;; Configure hooks
-    (add-hook 'after-save-hook 'flycheck-buffer-safe nil t)
-    (add-hook 'after-change-functions 'flycheck-handle-change nil t)
-    (add-hook 'post-command-hook 'flycheck-show-error-at-point-soon nil t)
-
-    ;; Enable navigation through Flycheck errors
-    (setq flycheck-previous-next-error-function next-error-function)
-    (setq next-error-function 'flycheck-next-error)
-
-    ;; Start an initial syntax check
-    (flycheck-buffer-safe))
-   (t
-    ;; Remove hooks
-    (remove-hook 'after-save-hook 'flycheck-buffer-safe t)
-    (remove-hook 'after-change-functions 'flycheck-handle-change t)
-    (remove-hook 'post-command-hook 'flycheck-show-error-at-point-soon t)
-
-    ;; Disable Flycheck error navigation again
-    (setq next-error-function flycheck-previous-next-error-function)
-
-    ;; and clear internal state
-    (flycheck-teardown))))
-
-(defun flycheck-handle-change (beg end len)
-  "Handle a buffer change between BEG and END with LEN.
-
-BEG and END mark the beginning and end of the change text.  LEN is ignored.
-
-Start a syntax check if a new line has been inserted into the buffer."
-  (let ((new-text (buffer-substring beg end)))
-    (when (and flycheck-mode (s-contains? "\n" new-text))
-      (flycheck-buffer-safe))))
-
-(defun flycheck-clear ()
-  "Clear all errors in the current buffer."
-  (interactive)
-  (flycheck-remove-overlays)
-  (flycheck-clear-errors))
-
-(defun flycheck-buffer ()
-  "Check syntax in the current buffer."
-  (interactive)
-  (flycheck-clear)
-  (if flycheck-mode
-      (when (not (flycheck-running-p))
-        (let ((checker (flycheck-get-checker-for-buffer)))
-          (when checker (flycheck-start-checker checker))))
-    (user-error "Flycheck mode disabled")))
-
-(defun flycheck-buffer-safe ()
-  "Safely check syntax in the current buffer.
-
-Like `flycheck-buffer', but do not check buffers that need not be
-checked (i.e. read-only buffers) and demote all errors to messages.
-
-Use when checking buffers automatically."
-  (if (not buffer-read-only)
-      (with-demoted-errors
-        (flycheck-buffer))
-    (message "flycheck will not check read-only buffers.")))
-
-;;;###autoload
-(defun flycheck-mode-on ()
-  "Unconditionally enable variable `flycheck-mode'."
-  (flycheck-mode 1))
-(make-obsolete 'flycheck-mode-on 'flycheck-mode "0.5")
-
-;;;###autoload
-(defun flycheck-mode-off ()
-  "Unconditionally disable variable `flycheck-mode'."
-  (flycheck-mode -1))
-(make-obsolete 'flycheck-mode-off "Use (flycheck-mode -1)." "0.5")
-
-
 ;; Customization
-
 (defgroup flycheck nil
   "Customization of on-the-fly syntax checking."
   :prefix "flycheck-"
@@ -289,6 +170,125 @@ error messages were parsed and properly reported (including
 overlay setup)."
   :group 'flycheck
   :type 'hook)
+
+
+;; Syntax checking mode
+;;;###autoload
+(defconst flycheck-mode-line-lighter " FlyC"
+  "The standard lighter for flycheck mode.")
+
+(defvar-local flycheck-mode-line nil
+  "The mode line lighter of variable `flycheck-mode'.")
+
+(defun flycheck-report-status (status)
+  "Report flycheck STATUS."
+  (let ((mode-line flycheck-mode-line-lighter))
+    (setq mode-line (concat mode-line status))
+    (setq flycheck-mode-line mode-line)
+    (force-mode-line-update)))
+
+(defun flycheck-teardown ()
+  "Teardown flyheck.
+
+Completely clear the whole flycheck state.  Remove overlays, kill
+running checks, and empty all variables used by flycheck."
+  (flycheck-clear)
+  (flycheck-stop-checker)
+  (flycheck-cancel-error-display-timer)
+  (flycheck-post-syntax-check-cleanup)
+  (flycheck-clear-checker))
+
+;;;###autoload
+(define-minor-mode flycheck-mode
+  "Minor mode for on-the-fly syntax checking.
+
+When called interactively, toggle `flycheck-mode'.  With prefix
+ARG, enable `flycheck-mode' if ARG is positive, otherwise disable
+it.
+
+When called from Lisp, enable `flycheck-mode' if ARG is omitted,
+nil or positive.  If ARG is `toggle', toggle `flycheck-mode'.
+Otherwise behave as if called interactively."
+  :init-value nil
+  :lighter flycheck-mode-line
+  :group 'flycheck
+  :require 'flycheck
+  (cond
+   (flycheck-mode
+    (flycheck-report-status "")
+
+    ;; Configure hooks
+    (add-hook 'after-save-hook 'flycheck-buffer-safe nil t)
+    (add-hook 'after-change-functions 'flycheck-handle-change nil t)
+    (add-hook 'post-command-hook 'flycheck-show-error-at-point-soon nil t)
+
+    ;; Enable navigation through Flycheck errors
+    (setq flycheck-previous-next-error-function next-error-function)
+    (setq next-error-function 'flycheck-next-error)
+
+    ;; Start an initial syntax check
+    (flycheck-buffer-safe))
+   (t
+    ;; Remove hooks
+    (remove-hook 'after-save-hook 'flycheck-buffer-safe t)
+    (remove-hook 'after-change-functions 'flycheck-handle-change t)
+    (remove-hook 'post-command-hook 'flycheck-show-error-at-point-soon t)
+
+    ;; Disable Flycheck error navigation again
+    (setq next-error-function flycheck-previous-next-error-function)
+
+    ;; and clear internal state
+    (flycheck-teardown))))
+
+(defun flycheck-handle-change (beg end len)
+  "Handle a buffer change between BEG and END with LEN.
+
+BEG and END mark the beginning and end of the change text.  LEN is ignored.
+
+Start a syntax check if a new line has been inserted into the buffer."
+  (let ((new-text (buffer-substring beg end)))
+    (when (and flycheck-mode (s-contains? "\n" new-text))
+      (flycheck-buffer-safe))))
+
+(defun flycheck-clear ()
+  "Clear all errors in the current buffer."
+  (interactive)
+  (flycheck-remove-overlays)
+  (flycheck-clear-errors))
+
+(defun flycheck-buffer ()
+  "Check syntax in the current buffer."
+  (interactive)
+  (flycheck-clear)
+  (if flycheck-mode
+      (when (not (flycheck-running-p))
+        (let ((checker (flycheck-get-checker-for-buffer)))
+          (when checker (flycheck-start-checker checker))))
+    (user-error "Flycheck mode disabled")))
+
+(defun flycheck-buffer-safe ()
+  "Safely check syntax in the current buffer.
+
+Like `flycheck-buffer', but do not check buffers that need not be
+checked (i.e. read-only buffers) and demote all errors to messages.
+
+Use when checking buffers automatically."
+  (if (not buffer-read-only)
+      (with-demoted-errors
+        (flycheck-buffer))
+    (message "flycheck will not check read-only buffers.")))
+
+;;;###autoload
+(defun flycheck-mode-on ()
+  "Unconditionally enable variable `flycheck-mode'."
+  (flycheck-mode 1))
+(make-obsolete 'flycheck-mode-on 'flycheck-mode "0.5")
+
+;;;###autoload
+(defun flycheck-mode-off ()
+  "Unconditionally disable variable `flycheck-mode'."
+  (flycheck-mode -1))
+(make-obsolete 'flycheck-mode-off "Use (flycheck-mode -1)." "0.5")
 
 
 ;; Utility functions
