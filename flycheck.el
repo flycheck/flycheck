@@ -61,13 +61,12 @@ buffer-local wherever it is set."
 
 ;; Customization
 (defgroup flycheck nil
-  "Customization of on-the-fly syntax checking."
+  "Check syntax on-the-fly."
   :prefix "flycheck-"
   :group 'tools)
 
 (defgroup flycheck-config-files nil
-  "Customization of configuration files for on-the-fly syntax
-  checking."
+  "Configuration files for on-the-fly syntax checking."
   :prefix "flycheck-"
   :group 'flycheck)
 
