@@ -1090,8 +1090,9 @@ IF RESET is t, move to beginning of buffer first."
          (positions (if (< no-errors 0) pos-before pos-after))
          ;; Eventually get the position and navigate to it
          (pos (nth (- (abs no-errors) 1) positions)))
-    (when pos
-      (goto-char pos))))
+    (if pos
+        (goto-char pos)
+      (user-error "No more Flycheck errors."))))
 
 
 ;; Error message echoing
