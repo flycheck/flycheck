@@ -220,6 +220,9 @@ running checks, and empty all variables used by flycheck."
   (flycheck-post-syntax-check-cleanup)
   (flycheck-clear-checker))
 
+(defvar-local flycheck-previous-next-error-function nil
+  "Remember the previous `next-error-function'.")
+
 ;;;###autoload
 (define-minor-mode flycheck-mode
   "Minor mode for on-the-fly syntax checking.
@@ -1119,9 +1122,6 @@ flycheck exclamation mark otherwise.")
 
 
 ;;;; Error navigation
-(defvar-local flycheck-previous-next-error-function nil
-  "Remember the previous `next-error-function'.")
-
 (defun flycheck-next-error (no-errors reset)
   "Advance NO-ERRORS, optionally RESET before.
 
