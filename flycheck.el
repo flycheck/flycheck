@@ -698,14 +698,11 @@ nil otherwise."
 (defun read-flycheck-checker (prompt)
   "Read a flycheck checker from minibuffer with PROMPT.
 
-Complete with all registered checkers (see
-`flycheck-registered-checker-p').
-
 Return the checker as symbol, or nil if no checker was
 chosen."
   (let* ((checkers (-map #'symbol-name flycheck-checkers))
          (input (completing-read "Checker: " obarray
-                                 #'flycheck-registered-checker-p nil
+                                 #'flycheck-valid-checker-p t
                                  nil 'read-flycheck-checker-history)))
     (if (string= input "") nil (intern input))))
 
