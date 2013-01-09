@@ -81,13 +81,13 @@ Enable `flycheck-mode` in your `init.el` file.
 Or do `M-x flycheck-mode` manually after visiting a file.
 
 In `flycheck-mode` the buffer is automatically checked on-the-fly.  You can also
-check the buffer manually with `C-! c` (`flycheck-buffer`).
+check the buffer manually with `C-c ! c` (`flycheck-buffer`).
 
 ### Syntax checker selection
 
 By default a suitable checker is automatically selected from `flycheck-checkers`
 (see [Customization](#customization)).  You can select a specific checker for
-the current buffer with `C-! s` (`flycheck-select-checker`) or by configuring
+the current buffer with `C-c ! s` (`flycheck-select-checker`) or by configuring
 the file-local variable `flycheck-checker`:
 
 ```python
@@ -425,7 +425,7 @@ Further help
 - `C-h v flycheck-checker`
 - `C-h f flycheck-declare-checker`
 - `C-h f flycheck-def-config-file-var`
-- `C-! ?` or `M-x flycheck-describe-checker`
+- `C-c ! ?` or `M-x flycheck-describe-checker`
 
 
 Credits
