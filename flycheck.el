@@ -109,6 +109,7 @@ Otherwise behave as if called interactively."
     (add-hook 'post-command-hook 'flycheck-show-error-at-point-soon nil t)
 
     ;; Enable navigation through Flycheck errors
+    (setq flycheck-previous-next-error-function next-error-function)
     (setq next-error-function 'flycheck-next-error)
 
     ;; Start an initial syntax check
@@ -120,7 +121,7 @@ Otherwise behave as if called interactively."
     (remove-hook 'post-command-hook 'flycheck-show-error-at-point-soon t)
 
     ;; Disable Flycheck error navigation again
-    (setq next-error-function nil)
+    (setq next-error-function flycheck-previous-next-error-function)
 
     ;; and clear internal state
     (flycheck-teardown))))
@@ -1067,6 +1068,9 @@ flycheck exclamation mark otherwise.")
 
 
 ;; Error navigation
+(defvar-local flycheck-previous-next-error-function nil
+  "Remember the previous `next-error-function'.")
+
 (defun flycheck-next-error (no-errors reset)
   "Advance NO-ERRORS, optionally RESET before.
 
