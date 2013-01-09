@@ -80,15 +80,15 @@ Enable `flycheck-mode` in your `init.el` file.
 
 Or do `M-x flycheck-mode` manually after visiting a file.
 
-With `flycheck-mode` enabled the buffer is automatically checked on-the-fly.
-You can also manually check the buffer with `M-x flycheck-buffer`.
+In `flycheck-mode` the buffer is automatically checked on-the-fly.  You can also
+check the buffer manually with `C-! c` (`flycheck-buffer`).
 
 ### Syntax checker selection
 
 By default a suitable checker is automatically selected from `flycheck-checkers`
 (see [Customization](#customization)).  You can select a specific checker for
-the current buffer with `M-x flycheck-select-checker` or by configuring the
-file-local variable `flycheck-checker`:
+the current buffer with `C-! s` (`flycheck-select-checker`) or by configuring
+the file-local variable `flycheck-checker`:
 
 ```python
 # Local Variables:
@@ -425,7 +425,7 @@ Further help
 - `C-h v flycheck-checker`
 - `C-h f flycheck-declare-checker`
 - `C-h f flycheck-def-config-file-var`
-- `M-x flycheck-describe-checker`
+- `C-! ?` or `M-x flycheck-describe-checker`
 
 
 Credits

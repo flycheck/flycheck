@@ -186,6 +186,20 @@ overlay setup)."
     (setq flycheck-mode-line mode-line)
     (force-mode-line-update)))
 
+(defvar flycheck-mode-map
+  (let ((map (make-sparse-keymap))
+        (pmap (make-sparse-keymap)))
+    ;; Provide a keymap for our buffer
+    (define-key pmap "c" 'flycheck-buffer)
+    (define-key pmap "C" 'flycheck-clear)
+    (define-key pmap "s" 'flycheck-select-checker)
+    (define-key pmap "?" 'flycheck-describe-checker)
+
+    ;; Bind the submap into the map
+    (define-key map (kbd "C-c !") pmap)
+    map)
+  "Keymap of `flycheck-mode'.")
+
 (defun flycheck-teardown ()
   "Teardown flyheck.
 
@@ -207,8 +221,16 @@ it.
 
 When called from Lisp, enable `flycheck-mode' if ARG is omitted,
 nil or positive.  If ARG is `toggle', toggle `flycheck-mode'.
-Otherwise behave as if called interactively."
+Otherwise behave as if called interactively.
+
+In `flycheck-mode' the buffer is automatically syntax-checked
+using the first suitable checker from `flycheck-checkers'.  Use
+`flycheck-select-checker` to select a checker for the current
+buffer manually.
+
+\\{flycheck-mode-map}"
   :init-value nil
+  :keymap flycheck-mode-map
   :lighter flycheck-mode-line
   :group 'flycheck
   :require 'flycheck
