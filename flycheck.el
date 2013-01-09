@@ -971,7 +971,7 @@ Clean up the error file name and the error message."
       ;; Collapse white space in messages to remove any new lines and
       ;; indentation.
       (when text
-        (setf (flycheck-error-text err) (s-collapse-whitespace text)))
+        (setf (flycheck-error-text err) (s-collapse-whitespace (s-trim text))))
       (when filename
         ;; If the error has a file name, expand it relative to the default
         ;; directory of its buffer and back substitute the file name
