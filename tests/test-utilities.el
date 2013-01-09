@@ -88,9 +88,8 @@
 
 (ert-deftest same-files-p ()
   "Test `flycheck-same-files-p'."
-  (should (flycheck-same-files-p "../flycheck/flycheck.el"
-                                 "../flycheck/flycheck.el"))
-  (should (flycheck-same-files-p "../flycheck/flycheck.el" "flycheck.el"))
+  (should (flycheck-same-files-p "./flycheck.el" "./flycheck.el"))
+  (should (flycheck-same-files-p "./flycheck.el" "flycheck.el"))
   (should-not (flycheck-same-files-p "../flycheck/flycheck.el" "tests.el")))
 
 (ert-deftest save-buffer-to-file ()
