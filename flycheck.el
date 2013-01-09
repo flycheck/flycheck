@@ -199,6 +199,15 @@ overlay setup)."
     map)
   "Keymap of `flycheck-mode'.")
 
+(easy-menu-define nil flycheck-mode-map "Flycheck Menu"
+  '("Flycheck"
+    ["Check current buffer" flycheck-buffer t]
+    ["Clear errors in buffer" flycheck-clear t]
+    "---"
+    ["Select checker" flycheck-select-checker t]
+    "---"
+    ["Describe checker" flycheck-describe-checker t]))
+
 (defun flycheck-teardown ()
   "Teardown flyheck.
 
