@@ -1288,7 +1288,7 @@ output: %s\nChecker definition probably flawed."
 (flycheck-declare-checker bash
   "A Bash syntax checker using the bash executable.
 
-See http://www.gnu.org/software/bash/."
+See URL `http://www.gnu.org/software/bash/'."
   :command '("bash" "--norc" "-n" source)
   :error-patterns '(("^\\(?1:.+\\): line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'sh-mode
@@ -1299,7 +1299,7 @@ See http://www.gnu.org/software/bash/."
 (flycheck-declare-checker coffee
   "A CoffeeScript syntax and style checker using coffeelint.
 
-See http://www.coffeelint.org/."
+See URL `http://www.coffeelint.org/'."
   :command '("coffeelint" (config "--file" flycheck-coffeelintrc) "--csv" source)
   :error-patterns
   '(("SyntaxError: \\(?4:.*\\) on line \\(?2:[0-9]+\\)" error)
@@ -1310,7 +1310,7 @@ See http://www.coffeelint.org/."
 (flycheck-declare-checker css
   "A CSS syntax and style checker using csslint.
 
-See https://github.com/stubbornella/csslint."
+See URL `https://github.com/stubbornella/csslint'."
   :command '("csslint" "--format=compact" source)
   :error-patterns
   '(("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
@@ -1375,7 +1375,7 @@ buffer using the currently running Emacs executable."
 (flycheck-declare-checker haml
   "A Haml syntax checker using the Haml compiler.
 
-See http://haml.info."
+See URL `http://haml.info'."
   :command '("haml" "-c" source)
   :error-patterns
   '(("^Syntax error on line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
@@ -1386,7 +1386,7 @@ See http://haml.info."
 (flycheck-declare-checker html
   "A HTML syntax and style checker using Tidy.
 
-See https://github.com/w3c/tidy-html5."
+See URL `https://github.com/w3c/tidy-html5'."
   :command '("tidy" (config "-config" flycheck-tidyrc) "-e" "-q" source)
   :error-patterns
   '(("^line \\(?2:[0-9]+\\) column \\(?3:[0-9]+\\) - Error: \\(?4:.*\\)$" error)
@@ -1399,7 +1399,7 @@ See https://github.com/w3c/tidy-html5."
 (flycheck-declare-checker javascript-jshint
   "A JavaScript syntax and style checker using jshint.
 
-See http://www.jshint.com."
+See URL `http://www.jshint.com'."
   :command '("jshint" (config "--config" flycheck-jshintrc) source)
   :error-patterns
   '(("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
@@ -1409,7 +1409,7 @@ See http://www.jshint.com."
 (flycheck-declare-checker javascript-jsl
   "A JavaScript syntax and style checker using jsl.
 
-See http://www.javascriptlint.com/."
+See URL `http://www.javascriptlint.com/'."
   :command '("jsl" "-process" source)
   :error-patterns
   '(("^\\(?1:.+\\)\:\\(?2:[0-9]+\\)\: \\(?4:SyntaxError:.+\\)\:$" error)
@@ -1423,7 +1423,7 @@ See http://www.javascriptlint.com/."
 (flycheck-declare-checker json
   "A JSON syntax and style checker using jsonlint.
 
-See https://github.com/zaach/jsonlint."
+See URL `https://github.com/zaach/jsonlint'."
   :command '("jsonlint" "-c" "-q" source)
   :error-patterns
   '(("^\\(?1:.+\\)\: line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
@@ -1436,7 +1436,7 @@ See https://github.com/zaach/jsonlint."
 (flycheck-declare-checker lua
   "A Lua syntax checker using the Lua compiler.
 
-See http://www.lua.org/."
+See URL `http://www.lua.org/'."
   :command '("luac" "-p" source)
   :error-patterns
   '(("^.*?: \\(?1:.*?\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
@@ -1445,7 +1445,7 @@ See http://www.lua.org/."
 (flycheck-declare-checker perl
   "A Perl syntax checker using the Perl interpreter.
 
-See http://www.perl.org."
+See URL `http://www.perl.org'."
   :command '("perl" "-w" "-c" source)
   :error-patterns
   '(("^\\(?4:.*?\\) at \\(?1:.*?\\) line \\(?2:[0-9]+\\)\\.$" error)
@@ -1455,7 +1455,7 @@ See http://www.perl.org."
 (flycheck-declare-checker php
   "A PHP syntax checker using the PHP command line.
 
-See http://php.net/manual/en/features.commandline.php."
+See URL `http://php.net/manual/en/features.commandline.php'."
   :command '("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
              "-d" "log_errors=0" source)
   :error-patterns
@@ -1468,7 +1468,7 @@ See http://php.net/manual/en/features.commandline.php."
 (flycheck-declare-checker python-flake8
   "A Python syntax and style checker using the flake8 utility.
 
-See http://pypi.python.org/pypi/flake8."
+See URL `http://pypi.python.org/pypi/flake8'."
   :command '("flake8" (config "--config" flycheck-flake8rc) source-inplace)
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:[[:alpha:]]\\{2\\}.*\\)$" error)
@@ -1481,7 +1481,7 @@ See http://pypi.python.org/pypi/flake8."
 (flycheck-declare-checker python-pylint
   "A Python syntax and style checker using the pylint utility.
 
-See http://pypi.python.org/pypi/pylint."
+See URL `http://pypi.python.org/pypi/pylint'."
   :command '("epylint" source-inplace)
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): Warning (W.*): \\(?4:.*\\)$" warning)
@@ -1492,7 +1492,7 @@ See http://pypi.python.org/pypi/pylint."
 (flycheck-declare-checker python-pyflakes
   "A Python syntax and style checker using the pyflakes utility.
 
-See http://pypi.python.org/pypi/pyflakes."
+See URL `http://pypi.python.org/pypi/pyflakes'."
   :command '("pyflakes" source-inplace)
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'python-mode)
@@ -1506,7 +1506,7 @@ See http://pypi.python.org/pypi/pyflakes."
 (flycheck-declare-checker sass
   "A Sass syntax checker using the Sass compiler.
 
-See http://sass-lang.com."
+See URL `http://sass-lang.com'."
   :command '("sass" "-c" source)
   :error-patterns
   '(("^Syntax error on line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error)
@@ -1528,7 +1528,7 @@ See http://sass-lang.com."
 (flycheck-declare-checker tex-chktex
   "A TeX and LaTeX syntax and style checker using chktex.
 
-See http://baruch.ev-en.org/proj/chktex/."
+See URL `http://baruch.ev-en.org/proj/chktex/'."
   :command '("chktex" (config "-l" flycheck-chktexrc) "-v0" "-q" "-I"
              source-inplace)
   :error-patterns
@@ -1539,7 +1539,7 @@ See http://baruch.ev-en.org/proj/chktex/."
 (flycheck-declare-checker tex-lacheck
   "A LaTeX syntax and style checker using lacheck.
 
-See http://www.ctan.org/pkg/lacheck."
+See URL `http://www.ctan.org/pkg/lacheck'."
   :command '("lacheck" source-inplace)
   :error-patterns
   '(("^\"\\(?1:.*\\)\", line \\(?2:[0-9]+\\): \\(?4:.*\\)$" warning))
@@ -1548,7 +1548,7 @@ See http://www.ctan.org/pkg/lacheck."
 (flycheck-declare-checker xml-xmlstarlet
   "A XML validator using the xmlstarlet utility.
 
-See http://xmlstar.sourceforge.net/."
+See URL `http://xmlstar.sourceforge.net/'."
   :command '("xmlstarlet" "val" "-e" "-q" source)
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\)\\.\\(?3:[0-9]+\\): \\(?4:.*\\)$" error))
@@ -1557,7 +1557,7 @@ See http://xmlstar.sourceforge.net/."
 (flycheck-declare-checker zsh
   "A Zsh syntax checker using the zsh executable.
 
-See http://www.zsh.org/."
+See URL `http://www.zsh.org/'."
   :command '("zsh" "-n" "-d" "-f" source)
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'sh-mode
