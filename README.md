@@ -25,7 +25,7 @@ Features
   - CoffeeScript
   - CSS
   - Emacs Lisp
-  - HAML
+  - Haml
   - HTML
   - Javascript
   - JSON
@@ -34,7 +34,7 @@ Features
   - PHP
   - Python
   - Ruby
-  - SASS
+  - Sass
   - Shell scripts (Bash, Dash and Zsh)
   - TeX/LaTeX
   - XML
@@ -60,7 +60,8 @@ The library is written and tested against GNU Emacs 24 and may or may not work
 in earlier versions of GNU Emacs.
 
 Most checkers have dependencies against external tools that perform the
-checking.  See [Checkers](#checkers) for details.
+checking.  Use `M-x flycheck-describe-checker` to see what a checker needs,
+e.g. `M-x flycheck-describe-checker python-pylint`.
 
 
 Usage
@@ -69,31 +70,33 @@ Usage
 Enable `flycheck-mode` in your `init.el` file.
 
 ```scheme
-;; Enable flymake for all files
-(add-hook 'find-file-hook 'flycheck-mode-on)
-;; Enable flymake for Python only
-(add-hook 'python-mode-hook 'flycheck-mode-on)
+;; Enable Flycheck for all files
+(add-hook 'find-file-hook 'flycheck-mode)
+;; Enable Flycheck for all programming modes
+(add-hook 'prog-mode-hook 'flycheck-mode)
+;; Enable Flycheck for Python only
+(add-hook 'python-mode-hook 'flycheck-mode)
 ```
 
 Or do `M-x flycheck-mode` manually after visiting a file.
 
-With `flycheck-mode` enabled the buffer is automatically checked on-the-fly.
-You can also manually check the buffer with `M-x flycheck-buffer`.
+In `flycheck-mode` the buffer is automatically checked on-the-fly.  You can also
+check the buffer manually with `C-c ! c` (`flycheck-buffer`).
 
 ### Syntax checker selection
 
 By default a suitable checker is automatically selected from `flycheck-checkers`
 (see [Customization](#customization)).  You can select a specific checker for
-the current buffer with `M-x flycheck-select-checker` or by configuring the
-file-local variable `flycheck-checker`:
+the current buffer with `C-c ! s` (`flycheck-select-checker`) or by configuring
+the file-local variable `flycheck-checker`:
 
 ```python
 # Local Variables:
-# flycheck-checker: flycheck-checker-python-pylint
+# flycheck-checker: python-pylint
 # End:
 ```
 
-Now **only** the [pylint][] checker will be used for the file.  If the checker
+Now **only** the `pylint` checker will be used for the file.  If the checker
 from `flycheck-checker` or `flycheck-select-checker` cannot be used for the
 current buffer (e.g. the major mode does not match, the checker does not exist,
 etc.) an error is signaled.
@@ -102,7 +105,7 @@ etc.) an error is signaled.
 
 Some checkers can be configured from configuration files.  Such checkers have an
 associated variable providing the name of the configuration file, for instance
-`flycheck-jslintrc` for `flycheck-checker-javascript-jslint`.  These variables
+`flycheck-jslintrc` for `javascript-jslint` checker.  These variables
 obey the following rules:
 
 If it contains a plain file name without any slash, e.g. `.jslintrc`,
@@ -134,10 +137,9 @@ This file is now always checked using `.jshintrc` from the parent directory.
 
 Errors and warnings from the checker are reported in the mode line (see
 [Mode line](#mode-line)) and highlighted in the buffer with
-`flycheck-error-face` and `flycheck-warning-face` respectively.  By default only
-the error column is highlighted if an error refer to a specific column only.
-Customize `flycheck-ignore-columns` (see [Customization](#customization)) to
-always highlight the whole line.
+`flycheck-error-face` and `flycheck-warning-face` respectively.  Customize
+`flycheck-highlighting-mode` (see [Customization](#customization)) to change the
+highlighting of errors.
 
 **Note:** The default faces provided by Emacs are ill-suited, because they are
 relatively pale and do not specify a background color or underline.  Hence they
@@ -154,6 +156,24 @@ To view an error message, either hover the mouse over the highlighted error, or
 move the cursor to the highlighted error and wait a short moment.  To clear all
 error information use `M-x flycheck-clear`.
 
+
+### Error navigation.
+
+Use `next-error` and `previous-error` (typically bound to `M-g n` and `M-g p`
+respectively) to jump to Flycheck errors.
+
+**Note**: *Visible* compilation buffers take preference over buffers with
+Flycheck errors.  This includes buffers from `M-x compile`, `M-x grep` and
+generally all buffers with Compilation Mode or Compilation Minor Mode enabled.
+If such a buffer is visible `next-error` and `previous-error` will navigate the
+errors (or grep results) reported by this buffer instead.  Hide this buffer
+(e.g. with `delete-other-windows`) to navigate Flycheck errors again.
+
+Error navigation always jumps to the error column, or to the first
+non-whitespace character of a line if the error does not have a column,
+regardless of `flycheck-highlighting-mode`.
+
+
 ### Mode line
 
 Flycheck indicates its state in the mode line:
@@ -165,30 +185,6 @@ Flycheck indicates its state in the mode line:
   details.
 - `FlyC?`: The syntax check had a dubious result.  The definition of the checker
   might be flawed.  Inspect the `*Messages*` buffer for details.
-
-
-Checkers
---------
-
-You need to install external utilities for the following checkers:
-
-- CoffeeScript: Install [coffeelint][].
-- CSS: Install [csslint][].
-- HAML: Install [HAML][].
-- HTML: Install [Tidy][].
-- Javascript: Install [jsl][] or [jshint][].
-- JSON: Install [jsonlint][].
-- Lua: Install [Lua][].
-- Perl: Install [Perl][].
-- PHP: Install the [PHP command line][php].
-- Python: Install [flake8][], [pyflakes][] or [pylint][].
-- Ruby: Install Ruby.
-- SASS: Install [SASS][].
-- Shell scripts: Install Bash or Zsh depending on the type of shell file you
-  want to check.
-- TeX/LaTeX: Install [chktex][] or [lacheck][].  Most TeX distributions,
-  including TeXLive and MacTeX, already do this for you.
-- XML: Install [xmlstarlet][].
 
 
 Customization
@@ -212,12 +208,14 @@ executable is found is used.
 To change the order of preference or enforce a single checker, just modify the
 order of their appearance in `flycheck-checkers` or delete checkers you do not
 want to use.  For instance, to always use `pyflakes` in `python-mode`, just
-remove `flycheck-checker-python-flake8` and `flycheck-checker-python-pylint`
-from `flycheck-checkers` via customization.
+remove `python-flake8` and `python-pylint` from `flycheck-checkers` via
+customization.
 
 Alternatively use `flycheck-select-checker` to select a specific checker for a
 buffer.  For instance, to use `pyflakes` as checker in the current buffer, use
 `M-x flycheck-select-checker RET python-checker-python-pyflakes`.
+
+Use `M-x flycheck-describe-checker` to get help about a syntax checker.
 
 
 ### Checker configuration
@@ -228,8 +226,17 @@ of configuration files for syntax checkers.
 
 ### Appearance
 
-- `M-x customize-variable RET flycheck-ignore-columns`: Customize whether
-  Flycheck takes column numbers into account when highlighting errors.
+- `M-x customize-variable RET flycheck-highlighting-mode`: Customize how errors
+  are highlighted in a buffer:
+
+  - `columns`: Highlight errors columns.  If an error does not have a column
+    highlight the whole line.
+  - `lines`: Highlight whole lines regardless of whether errors have columns or
+    not.
+  - `nil`: Do not highlight errors at all.  Errors are only indicated in the
+    mode line and by fringe icons.
+
+  This option does not affect error navigation.
 - `M-x customize-face RET flycheck-error-face`: Customize the face for error
   highlights.  Inherits from `flymake-errline` by default.
 - `M-x customize-face RET flycheck-warning-face`: Customize the face for error
@@ -312,13 +319,13 @@ Each symbol in this list must be a checker declared with
 #### A simple example
 
 Let's see this in action by explaining the definition of a [Python][] checker
-included in flycheck.  This checker uses the [pylint][] utility to perform the
+included in flycheck.  This checker uses the `pylint` utility to perform the
 actual syntax check.
 
 First we declare the checker properties:
 
 ```scheme
-(flycheck-declare-checker flycheck-checker-python-pylint
+(flycheck-declare-checker python-pylint
   :command '("epylint" source-inplace)
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): Warning (W.*): \\(?4:.*\\)$" warning)
@@ -346,7 +353,7 @@ Eventually we declare that the checker is to be used in `python-mode`.
 Now we only need to register this error checker for use with
 
 ```scheme
-(add-to-list 'flycheck-checkers 'flycheck-checker-python-pylint)
+(add-to-list 'flycheck-checkers python-pylint)
 ```
 
 Assuming that `flycheck-mode` is enabled (see [Usage](#usage)), Python source
@@ -361,7 +368,7 @@ mode we also give a `:predicate` that determines whether the right shell is
 active:
 
 ```scheme
-(flycheck-declare-checker flycheck-checker-zsh
+(flycheck-declare-checker zsh
   :command '("zsh" "-n" "-d" "-f" source)
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'sh-mode
@@ -386,10 +393,9 @@ configuration files to syntax checkers.  An example is the `jshint` checker for
 JavaScript:
 
 ```scheme
-(flycheck-def-config-file-var flycheck-jshintrc
-    flycheck-checker-javascript-jshint ".jshintrc")
+(flycheck-def-config-file-var flycheck-jshintrc javascript-jshint ".jshintrc")
 
-(flycheck-declare-checker flycheck-checker-javascript-jshint
+(flycheck-declare-checker javascript-jshint
   :command '("jshint" (config "--config" flycheck-jshintrc) source)
   :error-patterns
   '(("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
@@ -419,6 +425,7 @@ Further help
 - `C-h v flycheck-checker`
 - `C-h f flycheck-declare-checker`
 - `C-h f flycheck-def-config-file-var`
+- `C-c ! ?` or `M-x flycheck-describe-checker`
 
 
 Credits
@@ -471,21 +478,3 @@ See [COPYING][] for details.
 [maio]: https://github.com/maio
 [ptrv]: https://github.com/ptrv
 [copying]: https://github.com/lunaryorn/flycheck/blob/master/COPYING
-
-[coffeelint]: http://www.coffeelint.org/
-[csslint]: https://github.com/stubbornella/csslint
-[haml]: http://haml.info
-[tidy]: https://github.com/w3c/tidy-html5
-[jsl]: http://www.javascriptlint.com/
-[jshint]: http://www.jshint.com
-[jsonlint]: https://github.com/zaach/jsonlint
-[lua]: http://www.lua.org/
-[perl]: http://www.perl.org/
-[php]: http://php.net/manual/en/features.commandline.php
-[flake8]: http://pypi.python.org/pypi/flake8
-[pyflakes]: http://pypi.python.org/pypi/pyflakes
-[pylint]: http://pypi.python.org/pypi/pylint
-[sass]: http://sass-lang.com
-[chktex]: http://baruch.ev-en.org/proj/chktex/
-[lacheck]: http://www.ctan.org/pkg/lacheck
-[xmlstarlet]: http://xmlstar.sourceforge.net/
