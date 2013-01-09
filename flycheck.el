@@ -232,6 +232,22 @@ running checks, and empty all variables used by flycheck."
 (defvar-local flycheck-previous-next-error-function nil
   "Remember the previous `next-error-function'.")
 
+(defun flycheck-tramp-file-p (filename)
+  "Determine if FILENAME is opened with Tramp."
+  (and (fboundp 'tramp-tramp-file-p)
+       (tramp-tramp-file-p filename)))
+
+(defun flycheck-may-enable-mode ()
+  "Determine whether Flycheck mode may be enabled.
+
+Flycheck mode is not enabled under any of the following
+conditions:
+
+- The buffer file is loaded with Tramp.
+
+Return t if Flycheck mode may be enabled, and nil otherwise."
+  (not (flycheck-tramp-file-p (buffer-file-name))))
+
 ;;;###autoload
 (define-minor-mode flycheck-mode
   "Minor mode for on-the-fly syntax checking.
@@ -257,19 +273,26 @@ buffer manually.
   :require 'flycheck
   (cond
    (flycheck-mode
-    (flycheck-report-status "")
+    (cond
+     ((flycheck-may-enable-mode)
+      ;; Start flycheck mode
+      (flycheck-report-status "")
 
-    ;; Configure hooks
-    (add-hook 'after-save-hook 'flycheck-buffer-safe nil t)
-    (add-hook 'after-change-functions 'flycheck-handle-change nil t)
-    (add-hook 'post-command-hook 'flycheck-show-error-at-point-soon nil t)
+      ;; Configure hooks
+      (add-hook 'after-save-hook 'flycheck-buffer-safe nil t)
+      (add-hook 'after-change-functions 'flycheck-handle-change nil t)
+      (add-hook 'post-command-hook 'flycheck-show-error-at-point-soon nil t)
 
-    ;; Enable navigation through Flycheck errors
-    (setq flycheck-previous-next-error-function next-error-function)
-    (setq next-error-function 'flycheck-next-error)
+      ;; Enable navigation through Flycheck errors
+      (setq flycheck-previous-next-error-function next-error-function)
+      (setq next-error-function 'flycheck-next-error)
 
-    ;; Start an initial syntax check
-    (flycheck-buffer-safe))
+      ;; Start an initial syntax check
+      (flycheck-buffer-safe))
+     (t
+      ;; We may not use Flycheck mode, so disable it again and tell the user
+      (flycheck-mode -1)
+      (user-error "Cannot use Flycheck mode in buffer %s" (buffer-name)))))
    (t
     ;; Remove hooks
     (remove-hook 'after-save-hook 'flycheck-buffer-safe t)
