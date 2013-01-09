@@ -746,11 +746,15 @@ Pop up a help buffer with the documentation of CHECKER."
       (with-help-window (help-buffer)
         ;; TODO: Find and output declaring file
         (princ (format "%s is a Flycheck syntax checker.\n\n" checker))
-        (let ((modes (flycheck-checker-modes checker))
+        (let ((executable (flycheck-checker-executable checker))
+              (modes (flycheck-checker-modes checker))
               (predicate (flycheck-checker-predicate checker))
               (config-file-var (flycheck-checker-config-file-var checker)))
-          (princ (format "  This checker executes the command %s."
-                         (prin1-to-string (flycheck-checker-command checker))))
+          (princ (format "  This checker executes \"%s\"" executable))
+          (if config-file-var
+            (princ (format ", using a configuration file from `%s'.\n"
+                           config-file-var))
+            (princ ".\n"))
           (cond
            ((and modes predicate)
             (princ (format "  It checks syntax in the major mode(s) %s if the predicate %s is fulfilled. "
@@ -762,9 +766,6 @@ Pop up a help buffer with the documentation of CHECKER."
            (predicate
             (princ (format "  It checks syntax if the predicate %s is fulfilled. "
                            (prin1-to-string predicate)))))
-          (when config-file-var
-            (princ (format "  Its configuration file is provided by `%s'."
-                           config-file-var)))
           (with-current-buffer (help-buffer)
             (save-excursion
               (goto-char (point-min))
