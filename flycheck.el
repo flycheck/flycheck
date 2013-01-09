@@ -150,7 +150,7 @@ Start a syntax check if a new line has been inserted into the buffer."
       (when (not (flycheck-running-p))
         (let ((checker (flycheck-get-checker-for-buffer)))
           (when checker (flycheck-start-checker checker))))
-    (error "Flycheck mode disabled")))
+    (user-error "Flycheck mode disabled")))
 
 (defun flycheck-buffer-safe ()
   "Safely check syntax in the current buffer.
@@ -689,7 +689,8 @@ nil otherwise."
       ;; If a checker was configured, try to use it!
       (if (flycheck-may-use-checker flycheck-checker)
           flycheck-checker
-        (error "Configured syntax checker %s cannot be used" flycheck-checker))
+        (user-error "Configured syntax checker %s cannot be used"
+                    flycheck-checker))
     (or (flycheck-try-last-checker-for-buffer)
         (flycheck-get-new-checker-for-buffer))))
 
