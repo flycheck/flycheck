@@ -514,19 +514,54 @@ A valid checker is a symbol declared as checker with
 `flycheck-declare-checker'."
   (get checker :flycheck-checker))
 
-(defun flycheck-checker-get-modes (checker)
+(defun flycheck-checker-modes (checker)
   "Get the modes of CHECKER"
   (let ((modes (get checker :flycheck-modes)))
     (if (symbolp modes)
         (list modes)
       modes)))
 
+(defun flycheck-checker-predicate (checker)
+  "Get the predicate of CHECKER."
+  (get checker :flycheck-predicate))
+
+(defun flycheck-checker-command (checker)
+  "Get the raw command of CHECKER.
+
+The command list returned by this function is not substituted,
+and hence still contains special tags and symbols.  Use
+`flycheck-checker-substituted-command' to get an executable
+command list with no special tags and symbols."
+  (get checker :flycheck-command))
+
+(defun flycheck-checker-executable (checker)
+  "Get the executable of CHECKER.
+
+The executable is the `car' of the checker command as returned by
+`flycheck-checker-command'."
+  (car (flycheck-checker-command checker)))
+
+(defun flycheck-checker-error-patterns (checker)
+  "Get the error patterns of CHECKER."
+  (get checker :flycheck-error-patterns))
+
+(defun flycheck-checker-documentation (checker)
+  "Get the documentation of CHECKER."
+  (documentation-property checker :flycheck-documentation))
+
+(defun flycheck-checker-config-file-var (checker)
+  "Get the associated configuration file variable of CHECKER.
+
+Return nil if CHECKER has no associated configuration file
+variable."
+  (get checker :flycheck-config-file-var))
+
 (defun flycheck-check-modes (checker)
   "Check the allowed modes of CHECKER.
 
 Check the current `major-mode' against the modes allowed for
 CHECKER.  Return t if the modes match or nil otherwise."
-  (let ((modes (flycheck-checker-get-modes checker)))
+  (let ((modes (flycheck-checker-modes checker)))
     (or (not modes) (memq major-mode modes))))
 
 (defun flycheck-check-predicate (checker)
@@ -534,13 +569,12 @@ CHECKER.  Return t if the modes match or nil otherwise."
 
 Check the predicate of CHECKER, and return t if the checker has
 no predicate or the result of the predicate evaluation."
-  (let ((predicate (get checker :flycheck-predicate)))
+  (let ((predicate (flycheck-checker-predicate checker)))
     (or (not predicate) (eval predicate))))
 
 (defun flycheck-check-executable (checker)
   "Check the executable of the CHECKER."
-  (let ((executable (car (get checker :flycheck-command))))
-    (if (executable-find executable) t)))
+  (when (executable-find (flycheck-checker-executable checker)) t))
 
 (defun flycheck-may-use-checker (checker)
   "Determine whether a CHECKER may be used.
@@ -607,14 +641,14 @@ file, or nil of the config file was not found."
    ;; Return the argument unchanged
    (t arg)))
 
-(defun flycheck-get-substituted-command (checker)
+(defun flycheck-checker-substituted-command (checker)
   "Get the substituted command of a CHECKER.
 
 Substitute each argument in the command of CHECKER using
-`flycheck-substitute-argument.  This replaces any special symbols
-in the command."
+`flycheck-substitute-argument'.  This replaces any special
+symbols in the command."
   (-flatten (-keep #'flycheck-substitute-argument
-                   (get checker :flycheck-command))))
+                   (flycheck-checker-command checker))))
 
 (defvar-local flycheck-last-checker nil
   "The last checker used for the current buffer.")
@@ -712,11 +746,11 @@ Pop up a help buffer with the documentation of CHECKER."
       (with-help-window (help-buffer)
         ;; TODO: Find and output declaring file
         (princ (format "%s is a Flycheck syntax checker.\n\n" checker))
-        (let ((modes (flycheck-checker-get-modes checker))
-              (predicate (get checker :flycheck-predicate))
-              (config-file-var (get checker :flycheck-config-file-var)))
+        (let ((modes (flycheck-checker-modes checker))
+              (predicate (flycheck-checker-predicate checker))
+              (config-file-var (flycheck-checker-config-file-var checker)))
           (princ (format "  This checker executes the command %s."
-                         (prin1-to-string (get checker :flycheck-command))))
+                         (prin1-to-string (flycheck-checker-command checker))))
           (cond
            ((and modes predicate)
             (princ (format "  It checks syntax in the major mode(s) %s if the predicate %s is fulfilled. "
@@ -737,7 +771,7 @@ Pop up a help buffer with the documentation of CHECKER."
               (forward-paragraph)
               (fill-region-as-paragraph (point) (point-max)))))
         (princ (format "\n\nDocumentation:\n%s"
-                       (get checker :flycheck-documentation)))))))
+                       (flycheck-checker-documentation checker)))))))
 
 
 ;; Error API
@@ -1146,7 +1180,7 @@ output a string.
 Parse the output and report an appropriate error status."
   ;; Clear running state
   (flycheck-report-status "")
-  (let* ((error-patterns (get checker :flycheck-error-patterns))
+  (let* ((error-patterns (flycheck-checker-error-patterns checker))
          (parsed-errors (flycheck-parse-output output (current-buffer)
                                                error-patterns))
          (errors (flycheck-sort-errors
@@ -1189,7 +1223,7 @@ output: %s\nChecker definition probably flawed."
 (defun flycheck-start-checker (checker)
   "Start a syntax CHECKER."
   (condition-case err
-      (let* ((command (flycheck-get-substituted-command checker))
+      (let* ((command (flycheck-checker-substituted-command checker))
              (program (car command))
              (args (cdr command))
              (process (apply 'start-file-process
