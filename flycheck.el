@@ -38,6 +38,7 @@
 ;;; Code:
 
 (eval-when-compile
+  (require 'cl)                         ; For defstruct
   (require 'sh-script))
 
 (require 's)
