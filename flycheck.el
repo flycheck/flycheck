@@ -430,9 +430,10 @@ nil."
 (defun flycheck-canonical-file-name (filename)
   "Turn FILENAME into canonical form.
 
-Return FILENAME without double slashes and without trailing
-slash."
-  (directory-file-name (expand-file-name filename)))
+Return FILENAME expanded and fully resolved, in a canonical form
+without double slashes and without trailing slash, i.e. in a form
+suitable for comparison of file names."
+  (directory-file-name (file-truename filename)))
 
 (defun flycheck-same-files-p (file1 file2)
   "Determine whether two files FILE1 and FILE2 are the same."
