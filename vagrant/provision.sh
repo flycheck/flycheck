@@ -32,8 +32,20 @@ apt-get install -yy emacs24 emacs24-el emacs24-common-non-dfsg
 apt-get install -yy emacs-snapshot-el emacs-snapshot
 
 # Install dependencies for various checkers straight from the repos
-apt-get install -yy zsh bash xmlstarlet python-pip
 
+# Bash checker
+apt-get install -yy bash
+
+# Python checkers
 # Install Python checker tools
 pip install flake8
 pip install pylint
+
+# LaTeX checkers
+apt-get install -yy chktex
+
+# XML Checker
+apt-get install -yy xmlstarlet
+
+# Zsh checker
+apt-get install -yy zsh
