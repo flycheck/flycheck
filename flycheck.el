@@ -58,6 +58,15 @@ buffer-local wherever it is set."
       (list 'progn (list 'defvar var val docstring)
             (list 'make-variable-buffer-local (list 'quote var))))))
 
+(unless (fboundp 'user-error)
+  ;; Provide `user-error' for Emacs 24.2
+  (defalias 'user-error 'error)
+  ;; And make the debugger ignore our Flycheck user errors in Emacs 24.2
+  (add-to-list 'debug-ignored-errors "\\`No more Flycheck errors\\'")
+  (add-to-list 'debug-ignored-errors "\\`Flycheck mode disabled\\'")
+  (add-to-list 'debug-ignored-errors
+               "\\`Configured syntax checker .* cannot be used\\'"))
+
 
 ;;;; Customization
 (defgroup flycheck nil
@@ -220,6 +229,25 @@ running checks, and empty all variables used by flycheck."
   (flycheck-post-syntax-check-cleanup)
   (flycheck-clear-checker))
 
+(defvar-local flycheck-previous-next-error-function nil
+  "Remember the previous `next-error-function'.")
+
+(defun flycheck-tramp-file-p (filename)
+  "Determine if FILENAME is opened with Tramp."
+  (and (fboundp 'tramp-tramp-file-p)
+       (tramp-tramp-file-p filename)))
+
+(defun flycheck-may-enable-mode ()
+  "Determine whether Flycheck mode may be enabled.
+
+Flycheck mode is not enabled under any of the following
+conditions:
+
+- The buffer file is loaded with Tramp.
+
+Return t if Flycheck mode may be enabled, and nil otherwise."
+  (not (flycheck-tramp-file-p (buffer-file-name))))
+
 ;;;###autoload
 (define-minor-mode flycheck-mode
   "Minor mode for on-the-fly syntax checking.
@@ -245,19 +273,26 @@ buffer manually.
   :require 'flycheck
   (cond
    (flycheck-mode
-    (flycheck-report-status "")
+    (cond
+     ((flycheck-may-enable-mode)
+      ;; Start flycheck mode
+      (flycheck-report-status "")
 
-    ;; Configure hooks
-    (add-hook 'after-save-hook 'flycheck-buffer-safe nil t)
-    (add-hook 'after-change-functions 'flycheck-handle-change nil t)
-    (add-hook 'post-command-hook 'flycheck-show-error-at-point-soon nil t)
+      ;; Configure hooks
+      (add-hook 'after-save-hook 'flycheck-buffer-safe nil t)
+      (add-hook 'after-change-functions 'flycheck-handle-change nil t)
+      (add-hook 'post-command-hook 'flycheck-show-error-at-point-soon nil t)
 
-    ;; Enable navigation through Flycheck errors
-    (setq flycheck-previous-next-error-function next-error-function)
-    (setq next-error-function 'flycheck-next-error)
+      ;; Enable navigation through Flycheck errors
+      (setq flycheck-previous-next-error-function next-error-function)
+      (setq next-error-function 'flycheck-next-error)
 
-    ;; Start an initial syntax check
-    (flycheck-buffer-safe))
+      ;; Start an initial syntax check
+      (flycheck-buffer-safe))
+     (t
+      ;; We may not use Flycheck mode, so disable it again and tell the user
+      (flycheck-mode -1)
+      (user-error "Cannot use Flycheck mode in buffer %s" (buffer-name)))))
    (t
     ;; Remove hooks
     (remove-hook 'after-save-hook 'flycheck-buffer-safe t)
@@ -296,6 +331,16 @@ Start a syntax check if a new line has been inserted into the buffer."
           (when checker (flycheck-start-checker checker))))
     (user-error "Flycheck mode disabled")))
 
+(defun flycheck-may-check-buffer ()
+  "Determine whether the buffer may be checked.
+
+A buffer may not be checked under the following conditions:
+
+- The buffer is read only (see `buffer-read-only').
+
+Return t if the buffer may be checked and nil otherwise."
+  (not buffer-read-only))
+
 (defun flycheck-buffer-safe ()
   "Safely check syntax in the current buffer.
 
@@ -303,10 +348,11 @@ Like `flycheck-buffer', but do not check buffers that need not be
 checked (i.e. read-only buffers) and demote all errors to messages.
 
 Use when checking buffers automatically."
-  (if (not buffer-read-only)
+  (if (flycheck-may-check-buffer)
       (with-demoted-errors
         (flycheck-buffer))
-    (message "flycheck will not check read-only buffers.")))
+    (message "Cannot perform a syntax check in buffer %s."
+             (buffer-name))))
 
 ;;;###autoload
 (defun flycheck-mode-on ()
@@ -384,9 +430,10 @@ nil."
 (defun flycheck-canonical-file-name (filename)
   "Turn FILENAME into canonical form.
 
-Return FILENAME without double slashes and without trailing
-slash."
-  (directory-file-name (expand-file-name filename)))
+Return FILENAME expanded and fully resolved, in a canonical form
+without double slashes and without trailing slash, i.e. in a form
+suitable for comparison of file names."
+  (directory-file-name (file-truename filename)))
 
 (defun flycheck-same-files-p (file1 file2)
   "Determine whether two files FILE1 and FILE2 are the same."
@@ -1119,9 +1166,6 @@ flycheck exclamation mark otherwise.")
 
 
 ;;;; Error navigation
-(defvar-local flycheck-previous-next-error-function nil
-  "Remember the previous `next-error-function'.")
-
 (defun flycheck-next-error (no-errors reset)
   "Advance NO-ERRORS, optionally RESET before.
 
