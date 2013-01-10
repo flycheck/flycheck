@@ -124,9 +124,13 @@
       (dolist (err errors)
         (should-flycheck-error filename err)))))
 
-(defmacro resource (filename)
-  "Access a test resource with FILENAME."
-  `(expand-file-name ,filename ,default-directory))
+(defmacro testsuite-module (name)
+  "Create a test module with NAME."
+  (let ((directory (file-name-directory load-file-name))
+        (resource-fun (intern (format "testsuite-%s-resource" name))))
+    `(defun ,resource-fun (resource)
+       ,(format "Get a resource for the %s testsuite module." name)
+       (expand-file-name resource ,directory))))
 
 
 ;; Eventually load all test files

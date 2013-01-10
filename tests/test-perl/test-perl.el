@@ -29,25 +29,28 @@
 (package-need 'cperl-mode)
 (require 'cperl-mode)
 
+(testsuite-module "perl")
+
 (ert-deftest perl-unused-variable ()
   "Test an unused variable with the Perl checker."
   (--each '(perl-mode cperl-mode)
     (should-flycheck-checker
-     (resource "unused-variable.pl") it 'perl
+     (testsuite-perl-resource "unused-variable.pl") it 'perl
      '(4 nil "Name \"main::x\" used only once: possible typo" error))))
 
 (ert-deftest perl-unqualified-variable ()
   "Test an unqualified variable with the Perl checker."
   (--each '(perl-mode cperl-mode)
     (should-flycheck-checker
-     (resource "unqualified-variable.pl") it 'perl
+     (testsuite-perl-resource "unqualified-variable.pl") it 'perl
      '(5 nil "Global symbol \"$x\" requires explicit package name" error))))
 
 (ert-deftest perl-syntax-error ()
   "Test a syntax error with the Perl checker."
    (--each '(perl-mode cperl-mode)
     (should-flycheck-checker
-     (resource "syntax-error.pl") it 'perl '(4 nil "syntax error" error))))
+     (testsuite-perl-resource "syntax-error.pl") it 'perl
+     '(4 nil "syntax error" error))))
 
 (require 'sh-script)
 
