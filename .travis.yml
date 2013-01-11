@@ -1,0 +1,9 @@
+language: emacs-lisp
+env:
+  - EMACS=emacs24
+  - EMACS=emacs-snapshot
+before_script:
+  - sudo sh vagrant/provision.sh
+  - make
+script:
+  - make test
