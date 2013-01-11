@@ -27,22 +27,20 @@
 
 (require 'sh-script)
 
-(testsuite-module "sh")
-
-(defun shsh-mode ()
-  (sh-mode)
-  (sh-set-shell "sh" :no-query))
-
 (ert-deftest sh-missing-quote ()
   "Test a syntax error from a missing quote."
-  (should-flycheck-checker
-   (testsuite-sh-resource "missing-quote.sh") 'shsh-mode 'sh
-   '(6 nil "Syntax error: Unterminated quoted string" error)))
+  (flycheck-with-resource-buffer "missing-quote.sh"
+    (sh-mode)
+    (sh-set-shell "sh" :no-query)
+    (flycheck-should-checker
+     'sh '(6 nil "Syntax error: Unterminated quoted string" error))))
 
 (ert-deftest sh-missing-semicolon ()
   "Test a syntax error from a missing semicolon."
-  (should-flycheck-checker
-   (testsuite-sh-resource "missing-semicolon.sh") 'shsh-mode 'sh
-   '(5 nil "Syntax error: \"fi\" unexpected (expecting \"then\")" error)))
+  (flycheck-with-resource-buffer "missing-semicolon.sh"
+    (sh-mode)
+    (sh-set-shell "sh" :no-query)
+    (flycheck-should-checker
+     'sh '(5 nil "Syntax error: \"fi\" unexpected (expecting \"then\")" error))))
 
 ;;; test-sh.el ends here

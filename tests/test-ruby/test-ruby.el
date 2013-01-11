@@ -25,20 +25,20 @@
 (require 'ert)
 (require 'flycheck)
 
-(testsuite-module "ruby")
-
 (ert-deftest ruby-unexpected-string ()
   "Test a Ruby syntax error."
-  (should-flycheck-checker
-   (testsuite-ruby-resource "unexpected-string.rb")
-   'ruby-mode 'ruby
-   '(4 nil "syntax error, unexpected tSTRING_BEG, expecting $end" error)))
+  (flycheck-with-resource-buffer "unexpected-string.rb"
+    (ruby-mode)
+    (flycheck-should-checker
+     'ruby
+     '(4 nil "syntax error, unexpected tSTRING_BEG, expecting $end" error))))
 
 (ert-deftest ruby-missing-quote ()
   "Test a Ruby syntax error."
-  (should-flycheck-checker
-   (testsuite-ruby-resource "missing-quote.rb")
-   'ruby-mode 'ruby
-   '(5 nil "syntax error, unexpected tCONSTANT, expecting $end" error)))
+  (flycheck-with-resource-buffer "missing-quote.rb"
+    (ruby-mode)
+    (flycheck-should-checker
+     'ruby
+     '(5 nil "syntax error, unexpected tCONSTANT, expecting $end" error))))
 
 ;;; test-ruby.el ends here

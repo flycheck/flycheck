@@ -29,28 +29,29 @@
 (package-need 'cperl-mode)
 (require 'cperl-mode)
 
-(testsuite-module "perl")
-
 (ert-deftest perl-unused-variable ()
   "Test an unused variable with the Perl checker."
-  (--each '(perl-mode cperl-mode)
-    (should-flycheck-checker
-     (testsuite-perl-resource "unused-variable.pl") it 'perl
-     '(4 nil "Name \"main::x\" used only once: possible typo" error))))
+  (flycheck-with-resource-buffer "unused-variable.pl"
+    (dolist (mode '(perl-mode cperl-mode))
+      (funcall mode)
+      (flycheck-should-checker
+       'perl '(4 nil "Name \"main::x\" used only once: possible typo" error)))))
 
 (ert-deftest perl-unqualified-variable ()
   "Test an unqualified variable with the Perl checker."
-  (--each '(perl-mode cperl-mode)
-    (should-flycheck-checker
-     (testsuite-perl-resource "unqualified-variable.pl") it 'perl
-     '(5 nil "Global symbol \"$x\" requires explicit package name" error))))
+  (flycheck-with-resource-buffer "unqualified-variable.pl"
+    (dolist (mode '(perl-mode cperl-mode))
+      (funcall mode)
+      (flycheck-should-checker
+       'perl '(5 nil "Global symbol \"$x\" requires explicit package name"
+                 error)))))
 
 (ert-deftest perl-syntax-error ()
   "Test a syntax error with the Perl checker."
-   (--each '(perl-mode cperl-mode)
-    (should-flycheck-checker
-     (testsuite-perl-resource "syntax-error.pl") it 'perl
-     '(4 nil "syntax error" error))))
+  (flycheck-with-resource-buffer "syntax-error.pl"
+    (dolist (mode '(perl-mode cperl-mode))
+      (funcall mode)
+      (flycheck-should-checker 'perl '(4 nil "syntax error" error)))))
 
 (require 'sh-script)
 

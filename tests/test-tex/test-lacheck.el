@@ -27,13 +27,11 @@
 
 (require 'sh-script)
 
-(testsuite-module "tex-lacheck")
-
 (ert-deftest tex-lacheck-unwanted-space ()
   "Test unwanted space."
-  (should-flycheck-checker
-   (testsuite-tex-lacheck-resource "unwanted-space.tex")
-   'latex-mode 'tex-lacheck
-   '(9 nil "possible unwanted space at \"{\"" warning)))
+  (flycheck-with-resource-buffer "unwanted-space.tex"
+    (latex-mode)
+    (flycheck-should-checker
+     'tex-lacheck '(9 nil "possible unwanted space at \"{\"" warning))))
 
 ;;; test-lacheck.el ends here
