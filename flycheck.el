@@ -1584,9 +1584,11 @@ See URL `http://sass-lang.com'."
   :modes 'sass-mode)
 
 (flycheck-declare-checker sh
-  "A POSIX Shell syntax checker using the sh executable."
-  :command '("sh" "-n" source)
-  :error-patterns '(("^\\(?1:.+\\): line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
+  "A POSIX Shell syntax checker using the dash executable.
+
+See URL `http://gondor.apana.org.au/~herbert/dash/'."
+  :command '("dash" "-n" source)
+  :error-patterns '(("^\\(?1:.+\\): \\(?2:[0-9]+\\): \\1: \\(?4:.*\\)$" error))
   :modes 'sh-mode
   :predicate '(eq sh-shell 'sh))
 
