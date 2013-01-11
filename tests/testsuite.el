@@ -31,6 +31,8 @@
 (defconst testsuite-dir (file-name-directory load-file-name)
   "Directory of the test suite.")
 
+(message "Running tests on Emacs %s" emacs-version)
+
 (require 'dash)
 (require 's)
 
