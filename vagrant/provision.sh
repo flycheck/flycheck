@@ -22,8 +22,8 @@ apt-get install -yy make
 apt-get install -yy python-software-properties
 
 # Add repositories to fresh up versions
-apt-add-repository ppa:cassou/emacs  # Emacs 24
-apt-add-repository ppa:ondrej/php5   # PHP 5.4
+apt-add-repository -y ppa:cassou/emacs  # Emacs 24
+apt-add-repository -y ppa:ondrej/php5   # PHP 5.4
 
 # System upgrade
 apt-get update -qq
