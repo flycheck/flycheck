@@ -6,4 +6,4 @@ before_script:
   - sudo sh vagrant/provision.sh
   - make
 script:
-  - make test
+  - make EMACS=${EMACS} test
