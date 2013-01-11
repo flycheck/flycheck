@@ -15,6 +15,7 @@ test :
 
 .PHONY: virtual-test
 virtual-test :
+	$(VAGRANT) up
 	$(VAGRANT) ssh -c "make -C /vagrant EMACS=$(EMACS) clean test"
 
 .PHONY: clean
