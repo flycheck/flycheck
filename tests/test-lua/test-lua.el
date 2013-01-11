@@ -27,9 +27,9 @@
 (require 'ert)
 (require 'flycheck)
 
-(if (string= user-login-name "vagrant")
-    ;; HACK: Use system-wide installation in Vagrant.  The MELPA packages
-    ;; causes tests to hang
+(if (or (string= (getenv "TRAVIS") "true") (string= user-login-name "vagrant"))
+    ;; HACK: Use system-wide installation in Vagrant and on Travis.  The MELPA
+    ;; package of lua-mode causes tests to hang in these environments
     (load "/usr/share/emacs/site-lisp/lua-mode/lua-mode.el")
   (package-need 'lua-mode))
 (require 'lua-mode)
