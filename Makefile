@@ -1,5 +1,6 @@
 EMACS = emacs
 EMACSFLAGS =
+VAGRANT = vagrant
 
 OBJECTS = flycheck.elc
 
@@ -11,6 +12,10 @@ test :
 	@$(EMACS) --no-site-file --no-site-lisp --batch $(EMACSFLAGS) \
 		-l dependencies.el -l tests/testsuite.el \
 		-f ert-run-tests-batch-and-exit
+
+.PHONY: virtual-test
+virtual-test :
+	$(VAGRANT) ssh -c "make -C /vagrant EMACS=$(EMACS) clean test"
 
 .PHONY: clean
 clean :
