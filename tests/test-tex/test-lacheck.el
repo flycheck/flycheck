@@ -29,6 +29,7 @@
 
 (ert-deftest tex-lacheck-unwanted-space ()
   "Test unwanted space."
+  :expected-result (flycheck-fail-unless-checker 'tex-lacheck)
   (flycheck-with-resource-buffer "unwanted-space.tex"
     (latex-mode)
     (flycheck-should-checker

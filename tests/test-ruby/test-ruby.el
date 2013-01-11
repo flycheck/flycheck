@@ -27,6 +27,7 @@
 
 (ert-deftest ruby-unexpected-string ()
   "Test a Ruby syntax error."
+  :expected-result (flycheck-fail-unless-checker 'ruby)
   (flycheck-with-resource-buffer "unexpected-string.rb"
     (ruby-mode)
     (flycheck-should-checker
@@ -35,6 +36,7 @@
 
 (ert-deftest ruby-missing-quote ()
   "Test a Ruby syntax error."
+  :expected-result (flycheck-fail-unless-checker 'ruby)
   (flycheck-with-resource-buffer "missing-quote.rb"
     (ruby-mode)
     (flycheck-should-checker

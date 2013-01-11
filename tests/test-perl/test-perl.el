@@ -31,6 +31,7 @@
 
 (ert-deftest perl-unused-variable ()
   "Test an unused variable with the Perl checker."
+  :expected-result (flycheck-fail-unless-checker 'perl)
   (flycheck-with-resource-buffer "unused-variable.pl"
     (dolist (mode '(perl-mode cperl-mode))
       (funcall mode)
@@ -39,6 +40,7 @@
 
 (ert-deftest perl-unqualified-variable ()
   "Test an unqualified variable with the Perl checker."
+  :expected-result (flycheck-fail-unless-checker 'perl)
   (flycheck-with-resource-buffer "unqualified-variable.pl"
     (dolist (mode '(perl-mode cperl-mode))
       (funcall mode)
@@ -47,6 +49,7 @@
                  error)))))
 
 (ert-deftest perl-syntax-error ()
+  :expected-result (flycheck-fail-unless-checker 'perl)
   "Test a syntax error with the Perl checker."
   (flycheck-with-resource-buffer "syntax-error.pl"
     (dolist (mode '(perl-mode cperl-mode))

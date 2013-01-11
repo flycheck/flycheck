@@ -29,6 +29,7 @@
 
 (ert-deftest sh-missing-quote ()
   "Test a syntax error from a missing quote."
+  :expected-result (flycheck-fail-unless-checker 'sh)
   (flycheck-with-resource-buffer "missing-quote.sh"
     (sh-mode)
     (sh-set-shell "sh" :no-query)
@@ -37,6 +38,7 @@
 
 (ert-deftest sh-missing-semicolon ()
   "Test a syntax error from a missing semicolon."
+  :expected-result (flycheck-fail-unless-checker 'sh)
   (flycheck-with-resource-buffer "missing-semicolon.sh"
     (sh-mode)
     (sh-set-shell "sh" :no-query)

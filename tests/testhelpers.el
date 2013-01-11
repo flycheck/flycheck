@@ -91,4 +91,10 @@ ERRORS."
        (insert-file-contents ,filename t)
        ,@body)))
 
+(defun flycheck-fail-unless-checker (checker)
+  "Skip the test unless CHECKER is present on the system."
+  (if (executable-find (flycheck-checker-executable checker))
+      :passed
+    :failed))
+
 ;;; testhelpers.el ends here

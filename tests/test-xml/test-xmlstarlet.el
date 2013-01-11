@@ -29,6 +29,7 @@
 
 (ert-deftest xmlstarlet-missing-quote ()
   "Test a missing quote in an attribute value."
+  :expected-result (flycheck-fail-unless-checker 'xml-xmlstarlet)
   (flycheck-with-resource-buffer "missing-quote.xml"
     (nxml-mode)
     (flycheck-should-checker
@@ -36,6 +37,7 @@
 
 (ert-deftest xmlstarlet-missing-closing-tag ()
   "Test a missing closing tag."
+  :expected-result (flycheck-fail-unless-checker 'xml-xmlstarlet)
   (flycheck-with-resource-buffer "missing-closing-tag.xml"
     (nxml-mode)
     (flycheck-should-checker
@@ -44,6 +46,7 @@
 
 (ert-deftest xmlstarlet-lone-closing-tag ()
   "Test a lone closing tag."
+  :expected-result (flycheck-fail-unless-checker 'xml-xmlstarlet)
   (flycheck-with-resource-buffer "lone-closing-tag.xml"
     (nxml-mode)
     (flycheck-should-checker
@@ -52,6 +55,7 @@
 
 (ert-deftest xmlstarlet-undefined-entity ()
   "Test an undefined entity."
+  :expected-result (flycheck-fail-unless-checker 'xml-xmlstarlet)
   (flycheck-with-resource-buffer "undefined-entity.xml"
     (nxml-mode)
     (flycheck-should-checker
