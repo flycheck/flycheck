@@ -34,23 +34,26 @@ apt-get install -yy emacs-snapshot-el emacs-snapshot
 
 # Install dependencies for various checkers straight from the repos
 
-# Bash checker
+# Bash
 apt-get install -yy bash
+
+# Lua
+# HACK: Install Lua mode from repositories, because the MELPA packages causes
+# tests to hang with Emacs Snapshot
+apt-get install -yy lua5.2 lua-mode
 
 # PHP
 apt-get install -yy php5-cli
 
-# Python checkers
-# Install Python checker tools
-pip install flake8
-pip install pylint
+# Python
+pip install flake8 pylint
 
-# LaTeX checkers
+# LaTeX
 apt-get install -yy chktex
 apt-get install -yy lacheck
 
-# XML Checker
+# XML
 apt-get install -yy xmlstarlet
 
-# Zsh checker
+# Zsh
 apt-get install -yy zsh
