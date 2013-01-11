@@ -30,7 +30,7 @@
 (ert-deftest python-pylint-syntax-error ()
   "Test a real syntax error with pylint."
   :expected-result (flycheck-fail-unless-checker 'python-pylint)
-  (flycheck-with-resource-buffer "syntax-error.py"
+  (flycheck-with-resource-buffer "test-python/syntax-error.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
     (flycheck-should-checker 'python-pylint '(6 nil "invalid syntax" error))))
@@ -38,7 +38,7 @@
 (ert-deftest python-pylint-missing-quote ()
   "Test a missing quote with pylint."
   :expected-result (flycheck-fail-unless-checker 'python-pylint)
-  (flycheck-with-resource-buffer "missing-quote.py"
+  (flycheck-with-resource-buffer "test-python/missing-quote.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
     (flycheck-should-checker
@@ -47,7 +47,7 @@
 (ert-deftest python-pylint-unknown-module ()
   "Test an unknown module with pylint."
   :expected-result (flycheck-fail-unless-checker 'python-pylint)
-  (flycheck-with-resource-buffer "unknown-module.py"
+  (flycheck-with-resource-buffer "test-python/unknown-module.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
     (flycheck-should-checker
@@ -56,7 +56,7 @@
 (ert-deftest python-pylint-unused-import ()
   "Test an unused import with pylint"
   :expected-result (flycheck-fail-unless-checker 'python-pylint)
-  (flycheck-with-resource-buffer "unused-import.py"
+  (flycheck-with-resource-buffer "test-python/unused-import.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
     (flycheck-should-checker 'python-pylint
@@ -65,7 +65,7 @@
 (ert-deftest python-pylint-used-map ()
   "Test usage of the map() builtin with the pylint checker."
   :expected-result (flycheck-fail-unless-checker 'python-pylint)
-  (flycheck-with-resource-buffer "map-builtin.py"
+  (flycheck-with-resource-buffer "test-python/map-builtin.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
     (flycheck-should-checker

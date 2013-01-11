@@ -30,7 +30,7 @@
 (ert-deftest tex-chktex-intersentence-spacing ()
   "Test missing intersentence spacing."
   :expected-result (flycheck-fail-unless-checker 'tex-chktex)
-  (flycheck-with-resource-buffer "intersentence-spacing.tex"
+  (flycheck-with-resource-buffer "test-tex/intersentence-spacing.tex"
     (latex-mode)
     (flycheck-should-checker
      'tex-chktex
@@ -39,7 +39,7 @@
 (ert-deftest tex-chktex-missing-space ()
   "Test missing space."
   :expected-result (flycheck-fail-unless-checker 'tex-chktex)
-  (flycheck-with-resource-buffer "missing-space.tex"
+  (flycheck-with-resource-buffer "test-tex/missing-space.tex"
     (latex-mode)
     (flycheck-should-checker
      'tex-chktex

@@ -37,7 +37,7 @@
 (ert-deftest lua-missing-quote ()
   "Test a syntax error with Lua."
   :expected-result (flycheck-fail-unless-checker 'lua)
-  (flycheck-with-resource-buffer "missing-quote.lua"
+  (flycheck-with-resource-buffer "test-lua/missing-quote.lua"
     (lua-mode)
     (flycheck-should-checker
      'lua '(5 nil "unfinished string near '\"oh no'" error))))

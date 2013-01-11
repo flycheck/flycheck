@@ -32,7 +32,7 @@
 (ert-deftest perl-unused-variable ()
   "Test an unused variable with the Perl checker."
   :expected-result (flycheck-fail-unless-checker 'perl)
-  (flycheck-with-resource-buffer "unused-variable.pl"
+  (flycheck-with-resource-buffer "test-perl/unused-variable.pl"
     (dolist (mode '(perl-mode cperl-mode))
       (funcall mode)
       (flycheck-should-checker
@@ -41,7 +41,7 @@
 (ert-deftest perl-unqualified-variable ()
   "Test an unqualified variable with the Perl checker."
   :expected-result (flycheck-fail-unless-checker 'perl)
-  (flycheck-with-resource-buffer "unqualified-variable.pl"
+  (flycheck-with-resource-buffer "test-perl/unqualified-variable.pl"
     (dolist (mode '(perl-mode cperl-mode))
       (funcall mode)
       (flycheck-should-checker
@@ -51,7 +51,7 @@
 (ert-deftest perl-syntax-error ()
   :expected-result (flycheck-fail-unless-checker 'perl)
   "Test a syntax error with the Perl checker."
-  (flycheck-with-resource-buffer "syntax-error.pl"
+  (flycheck-with-resource-buffer "test-perl/syntax-error.pl"
     (dolist (mode '(perl-mode cperl-mode))
       (funcall mode)
       (flycheck-should-checker 'perl '(4 nil "syntax error" error)))))

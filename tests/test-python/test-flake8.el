@@ -30,7 +30,7 @@
 (ert-deftest python-flake8-syntax-error ()
   "Test a real syntax error with flake8."
   :expected-result (flycheck-fail-unless-checker 'python-flake8)
-  (flycheck-with-resource-buffer "syntax-error.py"
+  (flycheck-with-resource-buffer "test-python/syntax-error.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
     (flycheck-should-checker 'python-flake8 '(6 nil "invalid syntax" error))))
@@ -38,7 +38,7 @@
 (ert-deftest python-flake8-missing-quote ()
   "Test a syntax error with flake8."
   :expected-result (flycheck-fail-unless-checker 'python-flake8)
-  (flycheck-with-resource-buffer "missing-quote.py"
+  (flycheck-with-resource-buffer "test-python/missing-quote.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
     (flycheck-should-checker
@@ -47,7 +47,7 @@
 (ert-deftest python-flake8-unused-import ()
   "Test an unused import with flake8"
   :expected-result (flycheck-fail-unless-checker 'python-flake8)
-  (flycheck-with-resource-buffer "unused-import.py"
+  (flycheck-with-resource-buffer "test-python/unused-import.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
     (flycheck-should-checker
@@ -56,7 +56,7 @@
 (ert-deftest python-flake8-superfluous-space ()
   "Test superfluous spaces with flake8."
   :expected-result (flycheck-fail-unless-checker 'python-flake8)
-  (flycheck-with-resource-buffer "superfluous-space.py"
+  (flycheck-with-resource-buffer "test-python/superfluous-space.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
     (flycheck-should-checker
@@ -67,7 +67,7 @@
 (ert-deftest python-flake8-superfluous-space-ignored ()
   "Test superfluous space being ignored with flake8."
   :expected-result (flycheck-fail-unless-checker 'python-flake8)
-  (flycheck-with-resource-buffer "superfluous-space.py"
+  (flycheck-with-resource-buffer "test-python/superfluous-space.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
     (setq flycheck-flake8rc "flake8rc")
@@ -76,7 +76,7 @@
 (ert-deftest python-flake8-redefinition-of-unused-function ()
   "Test a redefinition of an unused function with flake8."
   :expected-result (flycheck-fail-unless-checker 'python-flake8)
-  (flycheck-with-resource-buffer "redefinition-of-unused-function.py"
+  (flycheck-with-resource-buffer "test-python/redefinition-of-unused-function.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
     (flycheck-should-checker

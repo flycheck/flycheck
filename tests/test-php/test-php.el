@@ -33,7 +33,7 @@
 (ert-deftest php-missing-quote ()
   "Test a missing quote in a PHP program."
   :expected-result (flycheck-fail-unless-checker 'php)
-  (flycheck-with-resource-buffer "missing-quote.php"
+  (flycheck-with-resource-buffer "test-php/missing-quote.php"
     (dolist (mode '(php-mode php+-mode))
       (funcall mode)
       (flycheck-should-checker
@@ -41,7 +41,7 @@
 
 (ert-deftest php-paamayim-nekudotayim ()
   "Test the T_PAAMAYIM_NEKUDOTAYIM error."
-  (flycheck-with-resource-buffer "paamayim-nekudotayim.php"
+  (flycheck-with-resource-buffer "test-php/paamayim-nekudotayim.php"
     (dolist (mode '(php-mode php+-mode))
       (funcall mode)
       (flycheck-should-checker

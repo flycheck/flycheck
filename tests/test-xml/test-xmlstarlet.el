@@ -30,7 +30,7 @@
 (ert-deftest xmlstarlet-missing-quote ()
   "Test a missing quote in an attribute value."
   :expected-result (flycheck-fail-unless-checker 'xml-xmlstarlet)
-  (flycheck-with-resource-buffer "missing-quote.xml"
+  (flycheck-with-resource-buffer "test-xml/missing-quote.xml"
     (nxml-mode)
     (flycheck-should-checker
      'xml-xmlstarlet '(5 1 "Couldn't find end of Start Tag with" error))))
@@ -38,7 +38,7 @@
 (ert-deftest xmlstarlet-missing-closing-tag ()
   "Test a missing closing tag."
   :expected-result (flycheck-fail-unless-checker 'xml-xmlstarlet)
-  (flycheck-with-resource-buffer "missing-closing-tag.xml"
+  (flycheck-with-resource-buffer "test-xml/missing-closing-tag.xml"
     (nxml-mode)
     (flycheck-should-checker
      'xml-xmlstarlet
@@ -47,7 +47,7 @@
 (ert-deftest xmlstarlet-lone-closing-tag ()
   "Test a lone closing tag."
   :expected-result (flycheck-fail-unless-checker 'xml-xmlstarlet)
-  (flycheck-with-resource-buffer "lone-closing-tag.xml"
+  (flycheck-with-resource-buffer "test-xml/lone-closing-tag.xml"
     (nxml-mode)
     (flycheck-should-checker
      'xml-xmlstarlet
@@ -56,7 +56,7 @@
 (ert-deftest xmlstarlet-undefined-entity ()
   "Test an undefined entity."
   :expected-result (flycheck-fail-unless-checker 'xml-xmlstarlet)
-  (flycheck-with-resource-buffer "undefined-entity.xml"
+  (flycheck-with-resource-buffer "test-xml/undefined-entity.xml"
     (nxml-mode)
     (flycheck-should-checker
      'xml-xmlstarlet '(4 25 "Entity 'foo' not defined" error))))

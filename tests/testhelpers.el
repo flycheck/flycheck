@@ -84,11 +84,10 @@ ERRORS."
 (defmacro flycheck-with-resource-buffer (resource-file &rest body)
   "Create a temp buffer from a RESOURCE-FILE and execute BODY."
   (declare (indent 1))
-  (let* ((directory (file-name-directory load-file-name))
-         (filename (expand-file-name resource-file directory)))
-    `(should (file-exists-p ,filename))
-    `(with-temp-buffer
-       (insert-file-contents ,filename t)
+  `(let ((filename (expand-file-name ,resource-file testsuite-dir)))
+     (should (file-exists-p filename))
+     (with-temp-buffer
+       (insert-file-contents filename t)
        ,@body)))
 
 (defun flycheck-fail-unless-checker (checker)
