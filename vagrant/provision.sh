@@ -21,8 +21,9 @@ apt-get install -yy make
 # For apt-add-repository
 apt-get install -yy python-software-properties
 
-# Add repositories for Emacs 24 and Emacs
-apt-add-repository ppa:cassou/emacs
+# Add repositories to fresh up versions
+apt-add-repository ppa:cassou/emacs  # Emacs 24
+apt-add-repository ppa:ondrej/php5   # PHP 5.4
 
 # System upgrade
 apt-get update -qq
@@ -35,6 +36,9 @@ apt-get install -yy emacs-snapshot-el emacs-snapshot
 
 # Bash checker
 apt-get install -yy bash
+
+# PHP
+apt-get install -yy php5-cli
 
 # Python checkers
 # Install Python checker tools
