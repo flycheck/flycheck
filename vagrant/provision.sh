@@ -43,6 +43,7 @@ pip install pylint
 
 # LaTeX checkers
 apt-get install -yy chktex
+apt-get install -yy lacheck
 
 # XML Checker
 apt-get install -yy xmlstarlet
