@@ -1528,7 +1528,7 @@ See URL `http://php.net/manual/en/features.commandline.php'."
   :error-patterns
   '(("\\(?:Parse\\|Fatal\\|syntax\\) error[:,] \\(?4:.*\\) in \\(?1:.*\\) on line \\(?2:[0-9]+\\)"
     error))
-  :modes 'php-mode)
+  :modes '(php-mode php+-mode))
 
 (flycheck-def-config-file-var flycheck-flake8rc python-flake8 ".flake8rc")
 
