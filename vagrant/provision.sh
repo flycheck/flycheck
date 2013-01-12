@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Refresh package lists
+apt-get update -qq
+
 # Basic utilities
 apt-get install -yy make
 
@@ -22,11 +25,11 @@ apt-get install -yy make
 apt-get install -yy python-software-properties
 
 # Add repositories to fresh up versions
-apt-add-repository -y ppa:cassou/emacs  # Emacs 24
-apt-add-repository -y ppa:ondrej/php5   # PHP 5.4
-apt-add-reposiotry -y ppa:richarvey/nodejs # Node.js and NPM
+apt-add-repository -y ppa:cassou/emacs      # Emacs 24
+apt-add-repository -y ppa:ondrej/php5       # PHP 5.4
+apt-add-reposiotry -y ppa:richarvey/nodejs  # Node.js and NPM
 
-# System upgrade
+# Refresh package lists again to fetch the PPAs
 apt-get update -qq
 
 # Install Emacs
@@ -34,7 +37,8 @@ apt-get install -yy emacs24 emacs24-el emacs24-common-non-dfsg
 apt-get install -yy emacs-snapshot-el emacs-snapshot
 
 # Bring in interpreters
-apt-get install -yy nodejs npm
+apt-get install -yy nodejs npm         # Node JS
+apt-get install -yy python python-pip  # Python
 
 # Install dependencies for various checkers straight from the repos
 
