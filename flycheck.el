@@ -1085,8 +1085,9 @@ Add overlays and report a proper flycheck status."
 
 
 ;;;; Error overlay management
-(define-fringe-bitmap 'flycheck-fringe-exclamation-mark
-  [24 60 60 24 24 0 0 24 24] nil nil 'center)
+(when (fboundp 'define-fringe-bitmap)
+  (define-fringe-bitmap 'flycheck-fringe-exclamation-mark
+    [24 60 60 24 24 0 0 24 24] nil nil 'center))
 
 (defconst flycheck-fringe-exclamation-mark
   (if (get 'exclamation-mark 'fringe)
