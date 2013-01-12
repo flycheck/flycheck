@@ -1148,7 +1148,9 @@ flycheck exclamation mark otherwise.")
 
 (defun flycheck-add-overlays (errors)
   "Add overlays for ERRORS."
-  (mapc #'flycheck-add-overlay errors))
+  ;; Add overlays, from last to first to make sure that for each region the first
+  ;; error emitted by the checker is on top
+  (mapc #'flycheck-add-overlay (reverse errors)))
 
 (defun flycheck-overlays-at (pos)
   "Return a list of all flycheck overlays at POS."
