@@ -86,9 +86,9 @@ buffer-local wherever it is set."
     emacs-lisp
     haml
     html
-    json
     javascript-jshint
     javascript-jsl
+    json
     lua
     perl
     php
