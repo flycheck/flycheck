@@ -86,9 +86,9 @@ buffer-local wherever it is set."
     emacs-lisp
     haml
     html
-    json
     javascript-jshint
     javascript-jsl
+    json
     lua
     perl
     php
@@ -621,7 +621,7 @@ A valid checker is a symbol declared as checker with
 (defun flycheck-checker-modes (checker)
   "Get the modes of CHECKER."
   (let ((modes (get checker :flycheck-modes)))
-    (if (symbolp modes)
+    (if (and modes (symbolp modes))
         (list modes)
       modes)))
 
