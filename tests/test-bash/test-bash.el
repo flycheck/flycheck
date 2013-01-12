@@ -34,7 +34,9 @@
     (sh-mode)
     (sh-set-shell "bash" "no-query")
     (flycheck-should-checker
-     'bash '(3 nil "unexpected EOF while looking for matching `''" error))))
+     'bash
+     '(3 nil "unexpected EOF while looking for matching `''" error)
+     '(6 nil "syntax error: unexpected end of file" error))))
 
 (ert-deftest bash-missing-semicolon ()
   "Test a syntax error from a missing semicolon."
@@ -42,6 +44,9 @@
   (flycheck-with-resource-buffer "test-bash/missing-semicolon.bash"
     (sh-mode)
     (sh-set-shell "bash" "no-query")
-    (flycheck-should-checker 'bash '(5 nil "`fi'" error))))
+    (flycheck-should-checker
+     'bash
+     '(5 nil "syntax error near unexpected token `fi'" error)
+     '(5 nil "`fi'" error))))
 
 ;;; test-bash.el ends here
