@@ -46,7 +46,7 @@
 
 
 ;;;; Compatibility
-(eval-when-compile
+(eval-and-compile
   (unless (and (fboundp 'defvar-local)
                (eq (car (symbol-function 'defvar-local)) 'macro))
     (defmacro defvar-local (var val &optional docstring)
@@ -58,14 +58,15 @@ buffer-local wherever it is set."
       (list 'progn (list 'defvar var val docstring)
             (list 'make-variable-buffer-local (list 'quote var))))))
 
-(unless (fboundp 'user-error)
-  ;; Provide `user-error' for Emacs 24.2
-  (defalias 'user-error 'error)
-  ;; And make the debugger ignore our Flycheck user errors in Emacs 24.2
-  (add-to-list 'debug-ignored-errors "\\`No more Flycheck errors\\'")
-  (add-to-list 'debug-ignored-errors "\\`Flycheck mode disabled\\'")
-  (add-to-list 'debug-ignored-errors
-               "\\`Configured syntax checker .* cannot be used\\'"))
+(eval-and-compile
+  (unless (fboundp 'user-error)
+    ;; Provide `user-error' for Emacs 24.2
+    (defalias 'user-error 'error)
+    ;; And make the debugger ignore our Flycheck user errors in Emacs 24.2
+    (add-to-list 'debug-ignored-errors "\\`No more Flycheck errors\\'")
+    (add-to-list 'debug-ignored-errors "\\`Flycheck mode disabled\\'")
+    (add-to-list 'debug-ignored-errors
+                 "\\`Configured syntax checker .* cannot be used\\'")))
 
 
 ;;;; Customization
