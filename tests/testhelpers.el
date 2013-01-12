@@ -56,16 +56,18 @@
     (should (equal (overlay-get overlay 'flycheck-error) error))
     (should (string= (overlay-get overlay 'help-echo) text))))
 
-(defun flycheck-should-error (filename expected-err)
+(defun flycheck-should-error (expected-err)
   "Test that ERR is an error in the current buffer."
-  (let* ((real-error (flycheck-make-error
+  (let* ((no-filename (nth 4 expected-err))
+         (real-error (flycheck-make-error
                       :buffer (current-buffer)
-                      :file-name filename
+                      :file-name (if no-filename nil (buffer-file-name))
                       :line-no (nth 0 expected-err)
                       :col-no (nth 1 expected-err)
                       :text (nth 2 expected-err)
                       :level (nth 3 expected-err)))
-         (overlay (car (flycheck-overlays-at (flycheck-error-pos real-error)))))
+         (overlay (--first (equal (overlay-get it 'flycheck-error) real-error)
+                           (flycheck-overlays-at (flycheck-error-pos real-error)))))
     (should (-contains? flycheck-current-errors real-error))
     (flycheck-should-overlay overlay real-error)))
 
@@ -79,7 +81,7 @@ ERRORS."
   (if (not errors)
       (should-not flycheck-current-errors)
     (dolist (err errors)
-      (flycheck-should-error (buffer-file-name) err))))
+      (flycheck-should-error err))))
 
 (defmacro flycheck-with-resource-buffer (resource-file &rest body)
   "Create a temp buffer from a RESOURCE-FILE and execute BODY."

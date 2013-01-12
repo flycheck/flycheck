@@ -45,6 +45,9 @@ apt-get install -yy python python-pip  # Python
 # Bash
 apt-get install -yy bash
 
+# HTML
+apt-get install -yy tidy
+
 # JSON
 npm install -g jsonlint
 
