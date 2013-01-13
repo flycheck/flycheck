@@ -100,6 +100,7 @@ ERRORS."
      (should (file-exists-p filename))
      (with-temp-buffer
        (insert-file-contents filename t)
+       (cd (file-name-directory filename))
        ,@body)))
 
 (defun flycheck-fail-unless-checker (checker)
