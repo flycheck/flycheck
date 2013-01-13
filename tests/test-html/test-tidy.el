@@ -1,10 +1,8 @@
 ;;; test-tidy.el --- Test the Tidy checker
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>,
-;;                    Peter Vasil <mail@petervasil.net>
 ;;
 ;; Author: Sebastian Wiesner <lunaryorn@gmail.com>,
-;;         Peter Vasil <mail@petervasil.net>
 ;; URL: https://github.com/lunaryorn/flycheck
 
 ;; This file is not part of GNU Emacs.
