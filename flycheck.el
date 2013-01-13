@@ -1435,7 +1435,7 @@ buffer using the currently running Emacs executable."
   :predicate '(and (buffer-file-name)
                    ;; Do not check buffers which should not be byte-compiled.
                    ;; The checker process will refuse to compile these anyway
-                   (not no-byte-compile)
+                   (not (and (boundp 'no-byte-compile) no-byte-compile))
                    ;; Do not check temporary buffers of `byte-compile-file' or
                    ;; autoload buffers created during package installation.
                    ;; Checking these interferes with package installation, see
