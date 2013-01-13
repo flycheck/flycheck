@@ -28,6 +28,7 @@
 
 (require 'dash)
 (require 's)
+(require 'flycheck)
 
 (defun flycheck-should-overlay (overlay error)
   "Test that OVERLAY is in REGION and corresponds to ERROR."
