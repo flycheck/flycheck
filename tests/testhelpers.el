@@ -84,7 +84,7 @@ ERRORS."
   (flycheck-mode)
   (should (flycheck-running-p))
   (while (and (not flycheck-syntax-checker-finished)
-              (not (member flycheck-mode-line-lighter '("FlyC?" "FlyC!"))))
+              (not (member flycheck-mode-line '("FlyC?" "FlyC!"))))
     (sleep-for 1))
   (setq flycheck-syntax-checker-finished nil)
   (if (not errors)
