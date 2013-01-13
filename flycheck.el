@@ -46,7 +46,7 @@
 
 
 ;;;; Compatibility
-(eval-when-compile
+(eval-and-compile
   (unless (and (fboundp 'defvar-local)
                (eq (car (symbol-function 'defvar-local)) 'macro))
     (defmacro defvar-local (var val &optional docstring)
@@ -58,14 +58,15 @@ buffer-local wherever it is set."
       (list 'progn (list 'defvar var val docstring)
             (list 'make-variable-buffer-local (list 'quote var))))))
 
-(unless (fboundp 'user-error)
-  ;; Provide `user-error' for Emacs 24.2
-  (defalias 'user-error 'error)
-  ;; And make the debugger ignore our Flycheck user errors in Emacs 24.2
-  (add-to-list 'debug-ignored-errors "\\`No more Flycheck errors\\'")
-  (add-to-list 'debug-ignored-errors "\\`Flycheck mode disabled\\'")
-  (add-to-list 'debug-ignored-errors
-               "\\`Configured syntax checker .* cannot be used\\'"))
+(eval-and-compile
+  (unless (fboundp 'user-error)
+    ;; Provide `user-error' for Emacs 24.2
+    (defalias 'user-error 'error)
+    ;; And make the debugger ignore our Flycheck user errors in Emacs 24.2
+    (add-to-list 'debug-ignored-errors "\\`No more Flycheck errors\\'")
+    (add-to-list 'debug-ignored-errors "\\`Flycheck mode disabled\\'")
+    (add-to-list 'debug-ignored-errors
+                 "\\`Configured syntax checker .* cannot be used\\'")))
 
 
 ;;;; Customization
@@ -930,11 +931,12 @@ If the string returned by GROUP is empty, return nil instead.
 If TRIM-FIRST is t trim leading and trailing white space in the matched
 string."
   (let ((matched-string (match-string group string)))
-    (when matched-string
-      (when trim-first
-        (setq matched-string (s-trim matched-string)))
-      (when (not (s-blank? matched-string))
-        matched-string))))
+    (save-match-data
+      (when matched-string
+        (when trim-first
+          (setq matched-string (s-trim matched-string)))
+        (when (not (s-blank? matched-string))
+          matched-string)))))
 
 (defun flycheck-match-int (group string)
   "Get an integer from a match GROUP in STRING.
@@ -1084,8 +1086,9 @@ Add overlays and report a proper flycheck status."
 
 
 ;;;; Error overlay management
-(define-fringe-bitmap 'flycheck-fringe-exclamation-mark
-  [24 60 60 24 24 0 0 24 24] nil nil 'center)
+(when (fboundp 'define-fringe-bitmap)
+  (define-fringe-bitmap 'flycheck-fringe-exclamation-mark
+    [24 60 60 24 24 0 0 24 24] nil nil 'center))
 
 (defconst flycheck-fringe-exclamation-mark
   (if (get 'exclamation-mark 'fringe)
@@ -1146,7 +1149,9 @@ flycheck exclamation mark otherwise.")
 
 (defun flycheck-add-overlays (errors)
   "Add overlays for ERRORS."
-  (mapc #'flycheck-add-overlay errors))
+  ;; Add overlays, from last to first to make sure that for each region the first
+  ;; error emitted by the checker is on top
+  (mapc #'flycheck-add-overlay (reverse errors)))
 
 (defun flycheck-overlays-at (pos)
   "Return a list of all flycheck overlays at POS."
@@ -1413,7 +1418,7 @@ This checker simply attempts to byte compile the contents of the
 buffer using the currently running Emacs executable."
   :command `(,(concat invocation-directory invocation-name)
              "--no-site-file" "--no-site-lisp" "--batch" "--eval"
-             ,(flycheck-emacs-lisp-check-form-s))
+             ,(flycheck-emacs-lisp-check-form-s) source-inplace)
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):Warning:\\(?4:.*\\(?:\n    .*\\)*\\)$"
      warning)
