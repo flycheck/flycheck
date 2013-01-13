@@ -931,11 +931,12 @@ If the string returned by GROUP is empty, return nil instead.
 If TRIM-FIRST is t trim leading and trailing white space in the matched
 string."
   (let ((matched-string (match-string group string)))
-    (when matched-string
-      (when trim-first
-        (setq matched-string (s-trim matched-string)))
-      (when (not (s-blank? matched-string))
-        matched-string))))
+    (save-match-data
+      (when matched-string
+        (when trim-first
+          (setq matched-string (s-trim matched-string)))
+        (when (not (s-blank? matched-string))
+          matched-string)))))
 
 (defun flycheck-match-int (group string)
   "Get an integer from a match GROUP in STRING.
