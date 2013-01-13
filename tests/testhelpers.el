@@ -71,13 +71,21 @@
     (should (-contains? flycheck-current-errors real-error))
     (flycheck-should-overlay overlay real-error)))
 
+(defvar-local flycheck-syntax-checker-finished nil
+  "Non-nil if the current checker has finished.")
+
 (defun flycheck-should-checker (checker &rest errors)
   "Test that checking the current buffer with CHECKER gives
 ERRORS."
   (set (make-local-variable 'flycheck-checkers) (list checker))
+  (setq flycheck-syntax-checker-finished nil)
   (flycheck-mode)
-  (while (flycheck-running-p)
+  (add-hook 'flycheck-after-syntax-check-hook
+            (lambda () (setq flycheck-syntax-checker-finished t)) nil t)
+  (while (and (not flycheck-syntax-checker-finished)
+              (not (member flycheck-mode-line-lighter '("FlyC?" "FlyC!"))))
     (sleep-for 1))
+  (setq flycheck-syntax-checker-finished nil)
   (if (not errors)
       (should-not flycheck-current-errors)
     (dolist (err errors)
