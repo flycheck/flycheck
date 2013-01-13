@@ -1418,7 +1418,7 @@ This checker simply attempts to byte compile the contents of the
 buffer using the currently running Emacs executable."
   :command `(,(concat invocation-directory invocation-name)
              "--no-site-file" "--no-site-lisp" "--batch" "--eval"
-             ,(flycheck-emacs-lisp-check-form-s))
+             ,(flycheck-emacs-lisp-check-form-s) source-inplace)
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):Warning:\\(?4:.*\\(?:\n    .*\\)*\\)$"
      warning)
