@@ -82,6 +82,7 @@ ERRORS."
   (add-hook 'flycheck-after-syntax-check-hook
             (lambda () (setq flycheck-syntax-checker-finished t)) nil t)
   (flycheck-mode)
+  (should (flycheck-running-p))
   (while (and (not flycheck-syntax-checker-finished)
               (not (member flycheck-mode-line-lighter '("FlyC?" "FlyC!"))))
     (sleep-for 1))
