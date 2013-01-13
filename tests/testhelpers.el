@@ -79,9 +79,9 @@
 ERRORS."
   (set (make-local-variable 'flycheck-checkers) (list checker))
   (setq flycheck-syntax-checker-finished nil)
-  (flycheck-mode)
   (add-hook 'flycheck-after-syntax-check-hook
             (lambda () (setq flycheck-syntax-checker-finished t)) nil t)
+  (flycheck-mode)
   (while (and (not flycheck-syntax-checker-finished)
               (not (member flycheck-mode-line-lighter '("FlyC?" "FlyC!"))))
     (sleep-for 1))
