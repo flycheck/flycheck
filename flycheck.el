@@ -210,17 +210,17 @@ overlay setup)."
     map)
   "Keymap of `flycheck-mode'.")
 
-(easy-menu-add-item nil '("Tools")
-  '("Syntax Checking"
-    ["Check current buffer" flycheck-buffer t]
-    ["Clear errors in buffer" flycheck-clear t]
-    "---"
-    ["Select checker" flycheck-select-checker t]
-    "---"
-    ["Describe checker" flycheck-describe-checker t])
+(easy-menu-change
+ '("Tools") "Syntax Checking"
+ '(["Check current buffer" flycheck-buffer t]
+   ["Clear errors in buffer" flycheck-clear t]
+   "---"
+   ["Select checker" flycheck-select-checker t]
+   "---"
+   ["Describe checker" flycheck-describe-checker t])
   "Spell Checking")
 
-(easy-menu-add-item nil '("Tools") '("--") "Spell Checking")
+(easy-menu-change '("Tools") "--" nil "Spell Checking")
 
 (defun flycheck-teardown ()
   "Teardown flyheck.
