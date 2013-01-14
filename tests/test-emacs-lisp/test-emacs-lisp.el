@@ -55,6 +55,7 @@
   (with-temp-buffer
     (insert "(message \"Hello World\")")
     (emacs-lisp-mode)
-    (should (not (buffer-file-name)))))
+    (should (not (buffer-file-name)))
+    (should (not (flycheck-may-use-checker 'emacs-lisp)))))
 
 ;;; test-emacs-lisp.el ends here
