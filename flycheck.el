@@ -82,14 +82,14 @@ buffer-local wherever it is set."
 
 (defcustom flycheck-checkers
   '(bash
-    coffee
-    css
+    coffee-coffeelint
+    css-csslint
     emacs-lisp
     haml
-    html
+    html-tidy
     javascript-jshint
     javascript-jsl
-    json
+    json-jsonlint
     lua
     perl
     php
@@ -1366,9 +1366,10 @@ See URL `http://www.gnu.org/software/bash/'."
   :modes 'sh-mode
   :predicate '(eq sh-shell 'bash))
 
-(flycheck-def-config-file-var flycheck-coffeelintrc coffee ".coffeelint.json")
+(flycheck-def-config-file-var flycheck-coffeelintrc coffee-coffeelint
+                              ".coffeelint.json")
 
-(flycheck-declare-checker coffee
+(flycheck-declare-checker coffee-coffeelint
   "A CoffeeScript syntax and style checker using coffeelint.
 
 See URL `http://www.coffeelint.org/'."
@@ -1379,7 +1380,7 @@ See URL `http://www.coffeelint.org/'."
     ("\\(?1:.+\\),\\(?2:[0-9]+\\),warn,\\(?4:.+\\)" warning))
   :modes 'coffee-mode)
 
-(flycheck-declare-checker css
+(flycheck-declare-checker css-csslint
   "A CSS syntax and style checker using csslint.
 
 See URL `https://github.com/stubbornella/csslint'."
@@ -1455,9 +1456,9 @@ See URL `http://haml.info'."
   '(("^Syntax error on line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'haml-mode)
 
-(flycheck-def-config-file-var flycheck-tidyrc html ".tidyrc")
+(flycheck-def-config-file-var flycheck-tidyrc html-tidy ".tidyrc")
 
-(flycheck-declare-checker html
+(flycheck-declare-checker html-tidy
   "A HTML syntax and style checker using Tidy.
 
 See URL `https://github.com/w3c/tidy-html5'."
@@ -1494,7 +1495,7 @@ See URL `http://www.javascriptlint.com/'."
      warning))
   :modes '(js-mode js2-mode js3-mode))
 
-(flycheck-declare-checker json
+(flycheck-declare-checker json-jsonlint
   "A JSON syntax and style checker using jsonlint.
 
 See URL `https://github.com/zaach/jsonlint'."
