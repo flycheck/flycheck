@@ -1442,7 +1442,7 @@ buffer using the currently running Emacs executable."
                    ;; https://github.com/lunaryorn/flycheck/issues/45 and
                    ;; https://github.com/bbatsov/prelude/issues/248
                    (not (string= (buffer-name) " *Compiler Input*"))
-                   (not (s-ends-with? (buffer-name) "-autoloads.el"))))
+                   (not (s-ends-with? "-autoloads.el" (buffer-name)))))
 
 (flycheck-declare-checker haml
   "A Haml syntax checker using the Haml compiler.
