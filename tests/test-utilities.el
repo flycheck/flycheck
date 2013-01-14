@@ -26,7 +26,7 @@
 (require 's)
 (require 'flycheck)
 
-(ert-deftest temp-file-system-no-filename ()
+(ert-deftest flycheck-temp-file-system-no-filename ()
   "Test `flycheck-temp-file-system' without a filename."
   (let ((filename (flycheck-temp-file-system nil "flycheck-test")))
     (unwind-protect
@@ -37,7 +37,7 @@
           (should (file-exists-p filename)))
       (ignore-errors (delete-file filename)))))
 
-(ert-deftest temp-file-system-filename-no-extension ()
+(ert-deftest flycheck-temp-file-system-filename-no-extension ()
   "Test `flycheck-temp-file-system' with an extension."
   (let ((filename (flycheck-temp-file-system "spam/with/eggs" "flycheck-test")))
     (unwind-protect
@@ -48,7 +48,7 @@
           (should (file-exists-p filename)))
       (ignore-errors (delete-file filename)))))
 
-(ert-deftest temp-file-system-filename-extension ()
+(ert-deftest flycheck-temp-file-system-filename-extension ()
   "Test `flycheck-temp-file-system' works with a complete
   filename."
   (let ((filename (flycheck-temp-file-system "spam/with/eggs.el"
@@ -61,13 +61,13 @@
           (should (file-exists-p filename)))
       (ignore-errors (delete-file filename)))))
 
-(ert-deftest temp-file-inplace-basename ()
+(ert-deftest flycheck-temp-file-inplace-basename ()
   "Test `flycheck-temp-file-inplace' with a base name."
   (let ((filename (flycheck-temp-file-inplace "eggs.el" "flycheck-test")))
     (should (string= filename (expand-file-name "flycheck-test-eggs.el" nil)))
     (should-not (file-exists-p filename))))
 
-(ert-deftest temp-file-inplace-path ()
+(ert-deftest flycheck-temp-file-inplace-path ()
   "Test `flycheck-temp-file-inplace' with complete path."
   (let ((filename (flycheck-temp-file-inplace "spam/with/eggs.el"
                                               "flycheck-test")))
@@ -75,7 +75,7 @@
                                                 "spam/with")))
     (should-not (file-exists-p filename))))
 
-(ert-deftest temp-file-inplace-no-filename ()
+(ert-deftest flycheck-temp-file-inplace-no-filename ()
   "Test `flycheck-temp-file-inplace' without a path."
   (let ((filename (flycheck-temp-file-inplace nil "flycheck-test")))
     (unwind-protect
@@ -86,13 +86,13 @@
           (should (file-exists-p filename)))
       (ignore-errors (delete-file filename)))))
 
-(ert-deftest same-files-p ()
+(ert-deftest flycheck-same-files-p ()
   "Test `flycheck-same-files-p'."
   (should (flycheck-same-files-p "./flycheck.el" "./flycheck.el"))
   (should (flycheck-same-files-p "./flycheck.el" "flycheck.el"))
   (should-not (flycheck-same-files-p "../flycheck/flycheck.el" "tests.el")))
 
-(ert-deftest save-buffer-to-file ()
+(ert-deftest flycheck-save-buffer-to-file ()
   "Test `flycheck-save-buffer-to-file'."
   (let ((filename (expand-file-name "tests-temp")))
     (unwind-protect
@@ -107,7 +107,7 @@
       (ignore-errors
         (delete-file filename)))))
 
-(ert-deftest temp-buffer-copy-system-no-filename ()
+(ert-deftest flycheck-temp-buffer-copy-system-no-filename ()
   "Test `flycheck-temp-buffer-copy' with system tempfile and no
 buffer filename."
   (with-temp-buffer
@@ -125,7 +125,7 @@ buffer filename."
             (should (string= (buffer-string) "Hello world")))
         (ignore-errors (delete-file tempfile))))))
 
-(ert-deftest temp-buffer-copy-system-filename ()
+(ert-deftest flycheck-temp-buffer-copy-system-filename ()
   "Test `flycheck-temp-buffer-copy' with system tempfile and
 buffer file name."
   (with-temp-buffer
@@ -144,7 +144,7 @@ buffer file name."
             (should (string= (buffer-string) "Hello world")))
         (ignore-errors (delete-file tempfile))))))
 
-(ert-deftest temp-buffer-copy-inplace-no-filename ()
+(ert-deftest flycheck-temp-buffer-copy-inplace-no-filename ()
   "Test `flycheck-temp-buffer-copy' with inplace copy and no file
   name."
   (with-temp-buffer
@@ -161,7 +161,7 @@ buffer file name."
             (should (string= (buffer-string) "Hello world")))
         (ignore-errors (delete-file tempfile))))))
 
-(ert-deftest temp-buffer-copy-inplace-filename ()
+(ert-deftest flycheck-temp-buffer-copy-inplace-filename ()
   "Test `flycheck-temp-buffer-copy' with inplace copy and file
   name."
   (with-temp-buffer
