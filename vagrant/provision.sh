@@ -27,7 +27,7 @@ apt-get install -yy python-software-properties
 # Add repositories to fresh up versions
 apt-add-repository -y ppa:cassou/emacs      # Emacs 24
 apt-add-repository -y ppa:ondrej/php5       # PHP 5.4
-apt-add-reposiotry -y ppa:richarvey/nodejs  # Node.js and NPM
+apt-add-repository -y ppa:richarvey/nodejs  # Node.js and NPM
 
 # Refresh package lists again to fetch the PPAs
 apt-get update -qq
