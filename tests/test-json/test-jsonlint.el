@@ -1,4 +1,4 @@
-;;; test-json.el --- Test the JSON checker
+;;; test-jsonlint.el --- Test the JSON checker
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>,
 ;;
@@ -33,4 +33,4 @@
     (flycheck-should-checker
      'json-jsonlint '(1 42 "found: ',' - expected: 'EOF'." error))))
 
-;;; test-json.el ends here
+;;; test-jsonlint.el ends here
