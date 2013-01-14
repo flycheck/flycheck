@@ -906,7 +906,8 @@ first non-whitespace character on the ERR line and END its end."
         (forward-line -1)
         (setq beg (line-end-position)))
        (col
-        (setq end (+ (line-beginning-position) col))
+        (setq end (min (+ (line-beginning-position) col)
+                       (+ (line-end-position) 1)))
         (setq beg (- end 1))))
       `(,beg . ,end))))
 
