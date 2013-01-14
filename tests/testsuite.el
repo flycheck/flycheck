@@ -28,6 +28,8 @@
 
 ;;; Code:
 
+(setq debug-on-error t)
+
 (defconst testsuite-dir (file-name-directory load-file-name)
   "Directory of the test suite.")
 
