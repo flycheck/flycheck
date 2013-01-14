@@ -58,4 +58,33 @@
     (should (not (buffer-file-name)))
     (should (not (flycheck-may-use-checker 'emacs-lisp)))))
 
+(ert-deftest emacs-lisp-inhibited-autoloads ()
+  "Test that Emacs Lisp does not check autoloads buffers.
+
+These buffers are temporary buffers generated during package
+installation, which may not be byte compiled, and hence the
+checker will refuse to check these.
+
+See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
+`https://github.com/bbatsov/prelude/issues/253'."
+  (flycheck-with-resource-buffer "test-emacs-lisp/missing-argument.el"
+    (emacs-lisp-mode)
+    (should (flycheck-may-use-checker 'emacs-lisp))
+    (rename-buffer "foo-autoloads.el")
+    (should (not (flycheck-may-use-checker 'emacs-lisp)))))
+
+(ert-deftest emacs-lis-inhibited-compiler-input ()
+  "Test that Emacs Lisp does not check byte compiler input buffers.
+
+These temporary buffers are created during byte compilation, and
+checking them interfers with package installation.
+
+See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
+`https://github.com/bbatsov/prelude/issues/253'."
+(flycheck-with-resource-buffer "test-emacs-lisp/missing-argument.el"
+    (emacs-lisp-mode)
+    (should (flycheck-may-use-checker 'emacs-lisp))
+    (rename-buffer " *Compiler Input*")
+    (should (not (flycheck-may-use-checker 'emacs-lisp)))))
+
 ;;; test-emacs-lisp.el ends here
