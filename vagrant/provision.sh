@@ -45,6 +45,9 @@ apt-get install -yy python python-pip  # Python
 # Bash
 apt-get install -yy bash
 
+# CoffeeScript
+npm install -g coffeelint
+
 # CSS
 npm install -g csslint
 
