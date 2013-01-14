@@ -45,6 +45,9 @@ apt-get install -yy python python-pip  # Python
 # Bash
 apt-get install -yy bash
 
+# CSS
+npm install -g csslint
+
 # HTML
 apt-get install -yy tidy
 
