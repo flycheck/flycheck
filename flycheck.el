@@ -1385,8 +1385,10 @@ See URL `http://www.coffeelint.org/'."
 See URL `https://github.com/stubbornella/csslint'."
   :command '("csslint" "--format=compact" source)
   :error-patterns
-  '(("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
-     error))
+  '(("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), Error - \\(?4:.+\\)$"
+     error)
+    ("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), Warning - \\(?4:.+\\)$"
+     warning))
   :modes 'css-mode)
 
 (defconst flycheck-emacs-lisp-check-form
