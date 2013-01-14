@@ -66,7 +66,7 @@ apt-get install -yy lua5.2 lua-mode
 apt-get install -yy php5-cli
 
 # Python
-pip install flake8 pylint
+pip install flake8 pylint pyflakes
 
 # LaTeX
 apt-get install -yy chktex

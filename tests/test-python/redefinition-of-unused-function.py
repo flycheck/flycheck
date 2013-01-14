@@ -1,6 +1,6 @@
 # Redefine an unused function
 #
-# Checkers: Flake8
+# Checkers: Flake8, Pyflakes
 
 
 if 5 < 10:
