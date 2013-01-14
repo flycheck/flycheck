@@ -27,7 +27,7 @@
 
 (require 'python)
 
-(ert-deftest python-pylint-syntax-error ()
+(ert-deftest checker-python-pylint-syntax-error ()
   "Test a real syntax error with pylint."
   :expected-result (flycheck-fail-unless-checker 'python-pylint)
   (flycheck-with-resource-buffer "test-python/syntax-error.py"
@@ -35,7 +35,7 @@
       (python-mode))
     (flycheck-should-checker 'python-pylint '(6 nil "invalid syntax" error))))
 
-(ert-deftest python-pylint-missing-quote ()
+(ert-deftest checker-python-pylint-missing-quote ()
   "Test a missing quote with pylint."
   :expected-result (flycheck-fail-unless-checker 'python-pylint)
   (flycheck-with-resource-buffer "test-python/missing-quote.py"
@@ -44,7 +44,7 @@
     (flycheck-should-checker
      'python-pylint '(5 nil "EOL while scanning string literal" error))))
 
-(ert-deftest python-pylint-unknown-module ()
+(ert-deftest checker-python-pylint-unknown-module ()
   "Test an unknown module with pylint."
   :expected-result (flycheck-fail-unless-checker 'python-pylint)
   (flycheck-with-resource-buffer "test-python/unknown-module.py"
@@ -53,7 +53,7 @@
     (flycheck-should-checker
      'python-pylint '(5 nil "Unable to import 'spam'" error))))
 
-(ert-deftest python-pylint-unused-import ()
+(ert-deftest checker-python-pylint-unused-import ()
   "Test an unused import with pylint"
   :expected-result (flycheck-fail-unless-checker 'python-pylint)
   (flycheck-with-resource-buffer "test-python/unused-import.py"
@@ -62,7 +62,7 @@
     (flycheck-should-checker 'python-pylint
                              '(5 nil "Unused import re" warning))))
 
-(ert-deftest python-pylint-used-map ()
+(ert-deftest checker-python-pylint-used-map ()
   "Test usage of the map() builtin with the pylint checker."
   :expected-result (flycheck-fail-unless-checker 'python-pylint)
   (flycheck-with-resource-buffer "test-python/map-builtin.py"

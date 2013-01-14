@@ -30,7 +30,7 @@
 (package-need 'php+-mode)
 (require 'php+-mode)
 
-(ert-deftest php-missing-quote ()
+(ert-deftest checker-php-missing-quote ()
   "Test a missing quote in a PHP program."
   :expected-result (flycheck-fail-unless-checker 'php)
   (flycheck-with-resource-buffer "test-php/missing-quote.php"
@@ -39,7 +39,7 @@
       (flycheck-should-checker
        'php '(7 nil "syntax error, unexpected end of file, expecting variable (T_VARIABLE) or ${ (T_DOLLAR_OPEN_CURLY_BRACES) or {$ (T_CURLY_OPEN)" error)))))
 
-(ert-deftest php-paamayim-nekudotayim ()
+(ert-deftest checker-php-paamayim-nekudotayim ()
   "Test the T_PAAMAYIM_NEKUDOTAYIM error."
   (flycheck-with-resource-buffer "test-php/paamayim-nekudotayim.php"
     (dolist (mode '(php-mode php+-mode))

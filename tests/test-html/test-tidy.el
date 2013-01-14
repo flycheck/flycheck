@@ -25,7 +25,7 @@
 (require 'ert)
 (require 'flycheck)
 
-(ert-deftest tidy-missing-tag ()
+(ert-deftest checker-tidy-missing-tag ()
   "Test a warning caused by a missing tag."
   :expected-result (flycheck-fail-unless-checker 'html)
   (flycheck-with-resource-buffer "test-html/missing-tag.html"
@@ -35,7 +35,7 @@
      '(3 1 "missing <!DOCTYPE> declaration" warning :no-filename)
      '(5 5 "missing </title> before </head>" warning :no-filename))))
 
-(ert-deftest tidy-unknown-tag ()
+(ert-deftest checker-tidy-unknown-tag ()
   "Test an error caused by an unknown tag."
   :expected-result (flycheck-fail-unless-checker 'html)
   (flycheck-with-resource-buffer "test-html/unknown-tag.html"

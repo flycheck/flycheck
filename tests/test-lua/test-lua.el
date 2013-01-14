@@ -34,7 +34,7 @@
   (package-need 'lua-mode))
 (require 'lua-mode)
 
-(ert-deftest lua-missing-quote ()
+(ert-deftest checker-lua-missing-quote ()
   "Test a syntax error with Lua."
   :expected-result (flycheck-fail-unless-checker 'lua)
   (flycheck-with-resource-buffer "test-lua/missing-quote.lua"

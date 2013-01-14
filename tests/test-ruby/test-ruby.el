@@ -25,7 +25,7 @@
 (require 'ert)
 (require 'flycheck)
 
-(ert-deftest ruby-unexpected-string ()
+(ert-deftest checker-ruby-unexpected-string ()
   "Test a Ruby syntax error."
   :expected-result (flycheck-fail-unless-checker 'ruby)
   (flycheck-with-resource-buffer "test-ruby/unexpected-string.rb"
@@ -34,7 +34,7 @@
      'ruby
      '(4 nil "syntax error, unexpected tSTRING_BEG, expecting $end" error))))
 
-(ert-deftest ruby-missing-quote ()
+(ert-deftest checker-ruby-missing-quote ()
   "Test a Ruby syntax error."
   :expected-result (flycheck-fail-unless-checker 'ruby)
   (flycheck-with-resource-buffer "test-ruby/missing-quote.rb"

@@ -25,7 +25,7 @@
 (require 'ert)
 (require 'flycheck)
 
-(ert-deftest json-multiple-toplevel-objects ()
+(ert-deftest checker-json-multiple-toplevel-objects ()
   "Test a syntax error from multiple top-level objects."
   :expected-result (flycheck-fail-unless-checker 'json)
   (flycheck-with-resource-buffer "test-json/multiple-toplevel-objects.json"

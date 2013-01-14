@@ -27,7 +27,7 @@
 
 (require 'sh-script)
 
-(ert-deftest tex-lacheck-unwanted-space ()
+(ert-deftest checker-tex-lacheck-unwanted-space ()
   "Test unwanted space."
   :expected-result (flycheck-fail-unless-checker 'tex-lacheck)
   (flycheck-with-resource-buffer "test-tex/unwanted-space.tex"

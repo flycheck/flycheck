@@ -27,7 +27,7 @@
 
 (require 'sh-script)
 
-(ert-deftest zsh-missing-quote ()
+(ert-deftest checker-zsh-missing-quote ()
   "Test a syntax error from a missing quote."
   :expected-result (flycheck-fail-unless-checker 'zsh)
   (flycheck-with-resource-buffer "test-zsh/missing-quote.zsh"
@@ -35,7 +35,7 @@
     (sh-set-shell "zsh" :no-query)
     (flycheck-should-checker 'zsh '(6 nil "unmatched '" error))))
 
-(ert-deftest zsh-missing-semicolon ()
+(ert-deftest checker-zsh-missing-semicolon ()
   "Test a syntax error from a missing semicolon."
   :expected-result (flycheck-fail-unless-checker 'zsh)
   (flycheck-with-resource-buffer "test-zsh/missing-semicolon.zsh"

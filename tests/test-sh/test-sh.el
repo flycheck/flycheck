@@ -27,7 +27,7 @@
 
 (require 'sh-script)
 
-(ert-deftest sh-missing-quote ()
+(ert-deftest checker-sh-missing-quote ()
   "Test a syntax error from a missing quote."
   :expected-result (flycheck-fail-unless-checker 'sh)
   (flycheck-with-resource-buffer "test-sh/missing-quote.sh"
@@ -36,7 +36,7 @@
     (flycheck-should-checker
      'sh '(6 nil "Syntax error: Unterminated quoted string" error))))
 
-(ert-deftest sh-missing-semicolon ()
+(ert-deftest checker-sh-missing-semicolon ()
   "Test a syntax error from a missing semicolon."
   :expected-result (flycheck-fail-unless-checker 'sh)
   (flycheck-with-resource-buffer "test-sh/missing-semicolon.sh"

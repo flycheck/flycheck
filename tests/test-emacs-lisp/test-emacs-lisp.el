@@ -26,14 +26,14 @@
 (require 'flycheck)
 (require 'bytecomp)
 
-(ert-deftest emacs-lisp-missing-parenthesis ()
+(ert-deftest checker-emacs-lisp-missing-parenthesis ()
   "Test a syntax error caused by a missing parenthesis."
   (flycheck-with-resource-buffer "test-emacs-lisp/missing-parenthesis.el"
     (emacs-lisp-mode)
     (flycheck-should-checker
      'emacs-lisp '(3 1 "End of file during parsing" error))))
 
-(ert-deftest emacs-lisp-missing-argument ()
+(ert-deftest checker-emacs-lisp-missing-argument ()
   "Test a warning caused by a missing argument."
   (flycheck-with-resource-buffer "test-emacs-lisp/missing-argument.el"
     (emacs-lisp-mode)
@@ -41,7 +41,7 @@
      'emacs-lisp
      '(4 6 "message called with 0 arguments, but requires 1+" warning))))
 
-(ert-deftest emacs-lisp-inhibited-no-byte-compile ()
+(ert-deftest checker-emacs-lisp-inhibited-no-byte-compile ()
   "Test that Emacs Lisp does not check when byte compilation is
   disabled."
   (flycheck-with-resource-buffer "test-emacs-lisp/missing-argument.el"
@@ -50,7 +50,7 @@
     (should (buffer-file-name))
     (should (not (flycheck-may-use-checker 'emacs-lisp)))))
 
-(ert-deftest emacs-lisp-inhibited-no-file-name ()
+(ert-deftest checker-emacs-lisp-inhibited-no-file-name ()
   "Test that Emacs Lisp does not check buffers without file names."
   (with-temp-buffer
     (insert "(message \"Hello World\")")
@@ -58,7 +58,7 @@
     (should (not (buffer-file-name)))
     (should (not (flycheck-may-use-checker 'emacs-lisp)))))
 
-(ert-deftest emacs-lisp-inhibited-autoloads ()
+(ert-deftest checker-emacs-lisp-inhibited-autoloads ()
   "Test that Emacs Lisp does not check autoloads buffers.
 
 These buffers are temporary buffers generated during package
@@ -73,7 +73,7 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
     (rename-buffer "foo-autoloads.el")
     (should (not (flycheck-may-use-checker 'emacs-lisp)))))
 
-(ert-deftest emacs-lis-inhibited-compiler-input ()
+(ert-deftest checker-emacs-lisp-inhibited-compiler-input ()
   "Test that Emacs Lisp does not check byte compiler input buffers.
 
 These temporary buffers are created during byte compilation, and

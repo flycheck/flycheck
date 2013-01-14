@@ -27,7 +27,7 @@
 
 (require 'sh-script)
 
-(ert-deftest tex-chktex-intersentence-spacing ()
+(ert-deftest checker-tex-chktex-intersentence-spacing ()
   "Test missing intersentence spacing."
   :expected-result (flycheck-fail-unless-checker 'tex-chktex)
   (flycheck-with-resource-buffer "test-tex/intersentence-spacing.tex"
@@ -36,7 +36,7 @@
      'tex-chktex
      '(9 28 "13:Intersentence spacing (`\\@') should perhaps be used." warning))))
 
-(ert-deftest tex-chktex-missing-space ()
+(ert-deftest checker-tex-chktex-missing-space ()
   "Test missing space."
   :expected-result (flycheck-fail-unless-checker 'tex-chktex)
   (flycheck-with-resource-buffer "test-tex/missing-space.tex"

@@ -29,7 +29,7 @@
 (package-need 'cperl-mode)
 (require 'cperl-mode)
 
-(ert-deftest perl-unused-variable ()
+(ert-deftest checker-perl-unused-variable ()
   "Test an unused variable with the Perl checker."
   :expected-result (flycheck-fail-unless-checker 'perl)
   (flycheck-with-resource-buffer "test-perl/unused-variable.pl"
@@ -38,7 +38,7 @@
       (flycheck-should-checker
        'perl '(4 nil "Name \"main::x\" used only once: possible typo" error)))))
 
-(ert-deftest perl-unqualified-variable ()
+(ert-deftest checker-perl-unqualified-variable ()
   "Test an unqualified variable with the Perl checker."
   :expected-result (flycheck-fail-unless-checker 'perl)
   (flycheck-with-resource-buffer "test-perl/unqualified-variable.pl"
@@ -48,7 +48,7 @@
        'perl '(5 nil "Global symbol \"$x\" requires explicit package name"
                  error)))))
 
-(ert-deftest perl-syntax-error ()
+(ert-deftest checker-perl-syntax-error ()
   :expected-result (flycheck-fail-unless-checker 'perl)
   "Test a syntax error with the Perl checker."
   (flycheck-with-resource-buffer "test-perl/syntax-error.pl"

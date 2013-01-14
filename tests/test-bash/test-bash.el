@@ -27,7 +27,7 @@
 
 (require 'sh-script)
 
-(ert-deftest bash-missing-quote ()
+(ert-deftest checker-bash-missing-quote ()
   "Test a syntax error from a missing quote."
   :expected-result (flycheck-fail-unless-checker 'bash)
   (flycheck-with-resource-buffer "test-bash/missing-quote.bash"
@@ -38,7 +38,7 @@
      '(3 nil "unexpected EOF while looking for matching `''" error)
      '(6 nil "syntax error: unexpected end of file" error))))
 
-(ert-deftest bash-missing-semicolon ()
+(ert-deftest checker-bash-missing-semicolon ()
   "Test a syntax error from a missing semicolon."
   :expected-result (flycheck-fail-unless-checker 'bash)
   (flycheck-with-resource-buffer "test-bash/missing-semicolon.bash"
