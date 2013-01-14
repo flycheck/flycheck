@@ -24,6 +24,7 @@
 
 (require 'ert)
 (require 'flycheck)
+(require 'bytecomp)
 
 (ert-deftest emacs-lisp-missing-parenthesis ()
   "Test a syntax error caused by a missing parenthesis."
@@ -39,5 +40,21 @@
     (flycheck-should-checker
      'emacs-lisp
      '(4 6 "message called with 0 arguments, but requires 1+" warning))))
+
+(ert-deftest emacs-lisp-inhibited-no-byte-compile ()
+  "Test that Emacs Lisp does not check when byte compilation is
+  disabled."
+  (flycheck-with-resource-buffer "test-emacs-lisp/missing-argument.el"
+    (emacs-lisp-mode)
+    (set (make-local-variable 'no-byte-compile) t)
+    (should (buffer-file-name))
+    (should (not (flycheck-may-use-checker 'emacs-lisp)))))
+
+(ert-deftest emacs-lisp-inhibited-no-file-name ()
+  "Test that Emacs Lisp does not check buffers without file names."
+  (with-temp-buffer
+    (insert "(message \"Hello World\")")
+    (emacs-lisp-mode)
+    (should (not (buffer-file-name)))))
 
 ;;; test-emacs-lisp.el ends here
