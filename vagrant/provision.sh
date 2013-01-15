@@ -54,6 +54,9 @@ npm install -g csslint
 # HTML
 apt-get install -yy tidy
 
+# JavaScript
+npm install -g jshint
+
 # JSON
 npm install -g jsonlint
 
