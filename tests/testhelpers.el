@@ -91,7 +91,8 @@ ERRORS."
   (if (not errors)
       (should-not flycheck-current-errors)
     (dolist (err errors)
-      (flycheck-should-error err))))
+      (flycheck-should-error err)))
+  (flycheck-clear))
 
 (defmacro flycheck-with-resource-buffer (resource-file &rest body)
   "Create a temp buffer from a RESOURCE-FILE and execute BODY."
