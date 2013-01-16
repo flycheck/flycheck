@@ -199,13 +199,11 @@ overlay setup)."
 (defvar flycheck-mode-map
   (let ((map (make-sparse-keymap))
         (pmap (make-sparse-keymap)))
-    ;; Provide a keymap for our buffer
     (define-key pmap "c" 'flycheck-buffer)
     (define-key pmap "C" 'flycheck-clear)
     (define-key pmap "s" 'flycheck-select-checker)
     (define-key pmap "?" 'flycheck-describe-checker)
 
-    ;; Bind the submap into the map
     (define-key map (kbd "C-c !") pmap)
     map)
   "Keymap of `flycheck-mode'.")
@@ -282,31 +280,24 @@ buffer manually.
       ;; Start flycheck mode
       (flycheck-report-status "")
 
-      ;; Configure hooks
       (add-hook 'after-save-hook 'flycheck-buffer-safe nil t)
       (add-hook 'after-change-functions 'flycheck-handle-change nil t)
       (add-hook 'post-command-hook 'flycheck-show-error-at-point-soon nil t)
 
-      ;; Enable navigation through Flycheck errors
       (setq flycheck-previous-next-error-function next-error-function)
       (setq next-error-function 'flycheck-next-error)
 
-      ;; Start an initial syntax check
       (flycheck-buffer-safe))
      (t
-      ;; We may not use Flycheck mode, so disable it again and tell the user
       (flycheck-mode -1)
       (user-error "Cannot use Flycheck mode in buffer %s" (buffer-name)))))
    (t
-    ;; Remove hooks
     (remove-hook 'after-save-hook 'flycheck-buffer-safe t)
     (remove-hook 'after-change-functions 'flycheck-handle-change t)
     (remove-hook 'post-command-hook 'flycheck-show-error-at-point-soon t)
 
-    ;; Disable Flycheck error navigation again
     (setq next-error-function flycheck-previous-next-error-function)
 
-    ;; and clear internal state
     (flycheck-teardown))))
 
 (defun flycheck-handle-change (beg end len)
@@ -532,9 +523,8 @@ present, both must match for the checker to be used."
      (put (quote ,symbol) :flycheck-predicate
           ,(plist-get properties :predicate))
      (put (quote ,symbol) :flycheck-documentation ,docstring)
-     ;; Verify the checker
+     ;; Verify the checker and declare it valid if succeeded
      (flycheck-verify-checker (quote ,symbol))
-     ;; And declare it valid if verification did not signal an error
      (put (quote ,symbol) :flycheck-checker t)))
 
 ;;;###autoload
@@ -746,7 +736,6 @@ file, or nil of the config file was not found."
            (file-name  (flycheck-find-config-file (symbol-value (nth 2 arg)))))
       (when file-name
         (list option-name file-name))))
-   ;; Return the argument unchanged
    (t arg)))
 
 (defun flycheck-checker-substituted-command (checker)
@@ -987,11 +976,8 @@ otherwise."
   (flycheck-error-with-buffer err
     (let ((file-name (flycheck-error-file-name err)))
       (and
-       ;; If the error includes a file name it must refer to its buffer's file
        (or (not file-name) (flycheck-same-files-p file-name (buffer-file-name)))
-       ;; The message must have a text
        (not (s-blank? (flycheck-error-text err)))
-       ;; And it should have a line
        (flycheck-error-line-no err)))))
 
 (defun flycheck-back-substitute-filename (err)
@@ -1013,13 +999,9 @@ the corresponding buffer if it matches and file in
   "Sanitize ERR.
 
 Clean up the error file name and the error message."
-  ;; Expand the file name
   (flycheck-error-with-buffer err
-    ;; Clean up the file name
     (let ((filename (flycheck-error-file-name err))
           (text (flycheck-error-text err)))
-      ;; Collapse white space in messages to remove any new lines and
-      ;; indentation.
       (when text
         (setf (flycheck-error-text err) (s-collapse-whitespace (s-trim text))))
       (when filename
@@ -1036,11 +1018,12 @@ Remove all errors that do not belong to the current file."
   (-filter 'flycheck-relevant-error-p (-map 'flycheck-sanitize-error errors)))
 
 (defun flycheck-error-<= (err1 err2)
-  "Determine whether ERR1 goes before ERR2."
+  "Determine whether ERR1 goes before ERR2.
+
+Compare by line numbers and then by column numbers."
   (let ((line1 (flycheck-error-line-no err1))
         (line2 (flycheck-error-line-no err2)))
     (if (= line1 line2)
-        ;; Sort by column number if possible
         (let ((col1 (flycheck-error-col-no err1))
               (col2 (flycheck-error-col-no err2)))
           (or (not col1)                ; Sort errors for the whole line first
@@ -1149,7 +1132,7 @@ flycheck exclamation mark otherwise.")
 
 (defun flycheck-add-overlays (errors)
   "Add overlays for ERRORS."
-  ;; Add overlays, from last to first to make sure that for each region the first
+  ;; Add overlays from last to first to make sure that for each region the first
   ;; error emitted by the checker is on top
   (mapc #'flycheck-add-overlay (reverse errors)))
 
@@ -1183,12 +1166,10 @@ IF RESET is t, move to beginning of buffer first."
          ;; Remove the current point for the errors because we don't want to
          ;; navigate to the current error again
          (navigatable-errors (--remove (= (point) it) err-positions))
-         ;; Take errors before the point and errors after the point
          (splitted (--split-with (>= (point) it) navigatable-errors))
          (pos-before (nreverse (car splitted)))
          (pos-after (cadr splitted))
          (positions (if (< no-errors 0) pos-before pos-after))
-         ;; Eventually get the position and navigate to it
          (pos (nth (- (abs no-errors) 1) positions)))
     (if pos
         (goto-char pos)
@@ -1223,9 +1204,8 @@ and the cursor is not in the minibuffer."
         (let ((message (car (flycheck-overlay-messages-at (point)))))
           (if message
               (message "%s" message)
-            ;; Clear the current message
             (message nil)))
-      ;; The minibuffer is not available, so let's try again in some seconds.
+      ;; Try again if the minibuffer is busy at the moment
       (flycheck-show-error-at-point-soon))))
 
 (defun flycheck-show-error-at-point-soon ()
@@ -1246,14 +1226,12 @@ Show the error message at point in minibuffer after a short delay."
   "Determine whether a syntax check is running."
   (when (and flycheck-current-process
              (memq (process-status flycheck-current-process) '(exit signal)))
-    ;; Delete any dead process left over from previous checks
     (flycheck-post-syntax-check-cleanup)
     (setq flycheck-current-process nil))
   (when flycheck-current-process t))
 
 (defun flycheck-post-syntax-check-cleanup (&optional process)
   "Cleanup after a syntax check PROCESS."
-  ;; Clean temporary copies of the buffer
   (unwind-protect
       (let ((process (or process flycheck-current-process)))
         (when process
@@ -1281,7 +1259,6 @@ the integral exit code of the syntax checker and OUTPUT its
 output a string.
 
 Parse the output and report an appropriate error status."
-  ;; Clear running state
   (flycheck-report-status "")
   (let* ((error-patterns (flycheck-checker-error-patterns checker))
          (parsed-errors (flycheck-parse-output output (current-buffer)
@@ -1289,7 +1266,6 @@ Parse the output and report an appropriate error status."
          (errors (flycheck-sort-errors
                   (flycheck-sanitize-errors parsed-errors))))
     (when flycheck-mode
-      ;; Parse error messages if flycheck mode is active
       (setq flycheck-current-errors errors)
       (flycheck-report-errors errors)
       (when (and (/= exit-status 0) (not errors))
@@ -1298,27 +1274,22 @@ Parse the output and report an appropriate error status."
 output: %s\nChecker definition probably flawed."
                  checker exit-status output)
         (flycheck-report-status "?"))
-      ;; Update any errors messages in minibuffer
       (when (eq (current-buffer) (window-buffer))
         (flycheck-show-error-at-point))
-      ;; Eventually run post-check hooks
       (run-hooks 'flycheck-after-syntax-check-hook))))
 
 (defun flycheck-handle-signal (process event)
   "Handle a syntax checking PROCESS EVENT."
   (when (memq (process-status process) '(signal exit))
     (with-current-buffer (process-buffer process)
-      ;; Try hard to clean up after the party
       (unwind-protect
           (condition-case-unless-debug err
               (when (buffer-live-p (process-buffer process))
-                ;; Only parse and show errors if the mode is still active
                 (flycheck-finish-syntax-check
                  (process-get process :flycheck-checker)
                  (process-exit-status process)
                  (flycheck-get-output process)))
             (error
-             ;; Report and re-signal errors
              (flycheck-report-status "!")
              (signal (car err) (cdr err))))
         (flycheck-post-syntax-check-cleanup process)))))
@@ -1332,20 +1303,13 @@ output: %s\nChecker definition probably flawed."
              (process (apply 'start-file-process
                              "flycheck" (current-buffer)
                              program args)))
-        ;; Remember this process
         (setq flycheck-current-process process)
-        ;; Register handlers for the process
         (set-process-filter process 'flycheck-receive-checker-output)
         (set-process-sentinel process 'flycheck-handle-signal)
-        ;; Do never ask before killing this process
         (set-process-query-on-exit-flag process nil)
-        ;; Report that flycheck is running
         (flycheck-report-status "*")
-        ;; Attach the checker to the process
         (process-put process :flycheck-checker checker))
       (error
-       ;; Report error status, clean-up and re-signal error in case process
-       ;; start or setup failed
        (flycheck-report-status "!")
        (flycheck-post-syntax-check-cleanup)
        (signal (car err) (cdr err)))))
