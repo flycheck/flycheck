@@ -39,6 +39,7 @@ apt-get install -yy emacs-snapshot-el emacs-snapshot
 # Bring in interpreters
 apt-get install -yy nodejs npm         # Node JS
 apt-get install -yy python python-pip  # Python
+apt-get install -yy ruby1.9.1
 
 # Install dependencies for various checkers straight from the repos
 
@@ -50,6 +51,9 @@ npm install -g coffeelint
 
 # CSS
 npm install -g csslint
+
+# Haml
+gem install --no-user-install haml
 
 # HTML
 apt-get install -yy tidy
