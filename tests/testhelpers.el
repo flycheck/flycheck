@@ -110,4 +110,26 @@ ERRORS."
       :passed
     :failed))
 
+(defun flycheck-travis-ci-p ()
+  "Determine whether the tests run on Travis CI.
+
+Return t if so, or nil otherwise.
+
+See URL `http://travis-ci.org'."
+  (string= (getenv "TRAVIS") "true"))
+
+(defun flycheck-vagrant-p ()
+  "Determine whether the tests run inside a Vagrant VM.
+
+Return t if so, or nil otherwise."
+  (string= user-login-name "vagrant"))
+
+(defun flycheck-ci-p ()
+  "Determine whether the tests run in a CI environment.
+
+A CI environment is either Travis CI or Vagrant.
+
+Return t if so, or nil otherwise."
+  (or (flycheck-vagrant-p) (flycheck-travis-ci-p)))
+
 ;;; testhelpers.el ends here
