@@ -104,11 +104,13 @@ ERRORS."
        (cd (file-name-directory filename))
        ,@body)))
 
-(defun flycheck-fail-unless-checker (checker)
-  "Skip the test unless CHECKER is present on the system."
-  (if (executable-find (flycheck-checker-executable checker))
+(defun flycheck-fail-unless-checkers (&rest checkers)
+  "Skip the test unless all CHECKERS are present on the system."
+  (if (-all? 'flycheck-check-executable checkers)
       :passed
     :failed))
+
+(defalias 'flycheck-fail-unless-checker 'flycheck-fail-unless-checkers)
 
 (defun flycheck-travis-ci-p ()
   "Determine whether the tests run on Travis CI.
