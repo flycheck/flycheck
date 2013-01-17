@@ -3,7 +3,7 @@ env:
   - EMACS=emacs24
   - EMACS=emacs-snapshot
 before_script:
-  - sudo sh vagrant/provision.sh
+  - python vagrant/provision.py
   - make
 script:
   - make EMACS=${EMACS} test
