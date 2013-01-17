@@ -139,4 +139,11 @@ A CI environment is either Travis CI or Vagrant.
 Return t if so, or nil otherwise."
   (or (flycheck-vagrant-p) (flycheck-travis-ci-p)))
 
+(defun flycheck-min-emacs-version-p (major &optional minor)
+  "Determine whether Emacs has the required version.
+
+Return t if Emacs is at least MAJOR.MINOR, or nil otherwise."
+  (when (>= emacs-major-version major)
+    (or (null minor) (>= emacs-minor-version minor))))
+
 ;;; testhelpers.el ends here
