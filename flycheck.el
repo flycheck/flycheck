@@ -322,8 +322,12 @@ Start a syntax check if a new line has been inserted into the buffer."
   (flycheck-clear)
   (if flycheck-mode
       (when (not (flycheck-running-p))
-        (let ((checker (flycheck-get-checker-for-buffer)))
-          (when checker (flycheck-start-checker checker))))
+        (condition-case err
+            (let ((checker (flycheck-get-checker-for-buffer)))
+              (when checker (flycheck-start-checker checker)))
+          (error
+           (flycheck-report-status "!")
+           (signal (car err) (cdr err)))))
     (user-error "Flycheck mode disabled")))
 
 (defun flycheck-may-check-buffer ()
