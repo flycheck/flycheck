@@ -67,11 +67,11 @@ error is signaled on all subsequent checks."
                                      :type error-type)))
       (should (string= (car (cdr error-data))
                        "Configured syntax checker bash cannot be used"))
-      (should (string= flycheck-mode-line "FlyC!"))
+      (should (string= flycheck-mode-line " FlyC!"))
       ;; A subsequent syntax checker should still fail, and not fall back to
       ;; automatic selection
       (should-error (flycheck-buffer) :type error-type)
-      (should (string= flycheck-mode-line "FlyC!")))))
+      (should (string= flycheck-mode-line " FlyC!")))))
 
 (ert-deftest flycheck-select-checker-automatically ()
   "Test automatic checker selection.
