@@ -75,19 +75,24 @@
 (defvar-local flycheck-syntax-checker-finished nil
   "Non-nil if the current checker has finished.")
 
+(add-hook 'flycheck-after-syntax-check-hook
+          (lambda () (setq flycheck-syntax-checker-finished t)))
+
+(defun flycheck-wait-for-syntax-checker ()
+  "Wait until the syntax check in the current buffer is finished."
+  (while (not flycheck-syntax-checker-finished)
+    (sleep-for 1))
+  (setq flycheck-syntax-checker-finished nil))
+
 (defun flycheck-should-checker (checker &rest errors)
   "Test that checking the current buffer with CHECKER gives
 ERRORS."
   (set (make-local-variable 'flycheck-checkers) (list checker))
   (setq flycheck-syntax-checker-finished nil)
-  (add-hook 'flycheck-after-syntax-check-hook
-            (lambda () (setq flycheck-syntax-checker-finished t)) nil t)
   (should (not (flycheck-running-p)))
   (should (flycheck-may-use-checker checker))
   (flycheck-mode)
-  (while (not flycheck-syntax-checker-finished)
-    (sleep-for 1))
-  (setq flycheck-syntax-checker-finished nil)
+  (flycheck-wait-for-syntax-checker)
   (if (not errors)
       (should-not flycheck-current-errors)
     (dolist (err errors)
