@@ -30,24 +30,29 @@
 (require 's)
 (require 'flycheck)
 
-(defmacro* ert-deftest-checkers (test () docstring &body body)
-  "Define BODY as test over all `flycheck-checkers'.
+(ert-deftest flycheck-checkers-not-empty ()
+  "Test that there are any registered checkers."
+  (should flycheck-checkers))
 
-Within BODY the current checker is bound to checker."
-  (declare (doc-string 3)
-           (indent 2))
+(ert-deftest flycheck-checkers-sound ()
+  "Test that `flycheck-checkers' is sound.
 
-  `(ert-deftest ,test ()
-     ,docstring
-     (dolist (checker flycheck-checkers)
-       ,@body)))
+Any checker in this list should be valid and registered."
+  (dolist (checker flycheck-checkers)
+    (should (flycheck-valid-checker-p checker))
+    (should (flycheck-registered-checker-p checker))))
 
-(ert-deftest-checkers all-checkers-registered ()
-  "Test that all `flycheck-checkers' are considered registered."
-  (should (flycheck-registered-checker-p checker)))
+(ert-deftest flycheck-checkers-complete ()
+  "Test that `flycheck-checkers' is complete.
 
-(ert-deftest-checkers all-checkers-valid ()
-  "Test that all `flycheck-checkers' are valid."
-  (should (flycheck-valid-checker-p checker)))
+All declared checkers should be registered."
+  (let (declared-checkers)
+    (mapatoms (lambda (symbol)
+                (when (flycheck-valid-checker-p symbol)
+                  (push symbol declared-checkers))))
+    (should declared-checkers)
+    (dolist (checker declared-checkers)
+      (should (memq checker flycheck-checkers))
+      (should (flycheck-registered-checker-p checker)))))
 
 ;;; test-flycheck-checkers.el ends here
