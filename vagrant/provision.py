@@ -96,6 +96,8 @@ PACKAGES = [
     Npm('csslint'),
     # Haml
     Gem('haml'),
+    # HTML
+    Apt('tidy'),
     # JavaScript,
     Npm('jshint'),
     # JSON
