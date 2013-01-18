@@ -30,7 +30,6 @@
 
 (ert-deftest checker-haml-inconsistent-indentation ()
   "Test a syntax error caused by inconsistent indentation."
-  ;; FIXME: Get Haml installed on Travis without Gem failures
   :expected-result (flycheck-fail-unless-checker 'haml)
   (flycheck-with-resource-buffer "test-haml/inconsistent-indentation.haml"
     (haml-mode)
