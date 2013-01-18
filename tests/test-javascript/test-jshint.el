@@ -1,4 +1,4 @@
-;;; test-jshint.el --- Test the JSON checker
+;;; test-jshint.el --- Test the JSHint checker
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>,
 ;;

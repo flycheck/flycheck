@@ -1,4 +1,4 @@
-;;; test-hamllint.el --- Test the Haml checker
+;;; test-haml.el --- Test the Haml checker
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>,
 ;;
@@ -38,4 +38,4 @@
      'haml
      '(5 nil "Inconsistent indentation: 3 spaces were used for indentation, but the rest of the document was indented using 2 spaces." error :no-filename))))
 
-;;; test-hamllint.el ends here
+;;; test-haml.el ends here
