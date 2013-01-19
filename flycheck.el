@@ -569,7 +569,7 @@ configuration file a buffer." checker)
    (listp pattern)                      ; A pattern must be a list...
    (= (length pattern) 2)               ; ...of length 2...
    (stringp (car pattern))              ; ...whose 1st element is a string
-   (symbolp (cadr pattern))             ; ...and whose 2nd element is a symbol
+   ;; (symbolp (cadr pattern))          ; ...and whose 2nd element is a symbol
    ))
 
 (defun flycheck-error-patterns-list-p (patterns)
@@ -954,7 +954,9 @@ objects."
         :line-no (flycheck-match-int 2 output)
         :col-no (flycheck-match-int 3 output)
         :text (flycheck-match-string-non-empty 4 output t)
-        :level level)
+        :level (if (symbolp level)
+                   level
+                 (eval level)))
        errors)
       (setq last-match (match-end 0)))
     errors))
