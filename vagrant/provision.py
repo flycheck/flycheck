@@ -110,6 +110,8 @@ PACKAGES = [
     Apt('php5-cli'),
     # Python
     Pip('flake8'), Pip('pylint'), Pip('pyflakes'),
+    # Sass
+    Gem('sass'),
     # LaTeX
     Apt('chktex'), Apt('lacheck'),
     # XML
