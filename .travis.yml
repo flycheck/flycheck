@@ -1,0 +1,9 @@
+language: emacs-lisp
+env:
+  - EMACS=emacs24
+  - EMACS=emacs-snapshot
+before_script:
+  - python vagrant/provision.py
+  - make
+script:
+  - make EMACS=${EMACS} test
