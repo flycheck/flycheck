@@ -1,1 +1,7 @@
 *.elc
+
+# Packages installed for development
+elpa/
+
+# Vagrant cache
+.vagrant

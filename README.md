@@ -1,6 +1,8 @@
 Flycheck
 ========
 
+[![Build Status](https://travis-ci.org/lunaryorn/flycheck.png)](https://travis-ci.org/lunaryorn/flycheck)
+
 Flycheck provides on-the-fly syntax checking for GNU Emacs.  Essentially it's
 “flymake done right” with
 
@@ -438,7 +440,8 @@ The following people contributed to flycheck:
 - [Marian Schubert][maio] added the Perl syntax checker.
 - [Martin Grenfell][scrooloose] created the awesome Vim library [syntastic][]
   which inspired this project and many of its checkers.
-- [Peter Vasil][ptrv] created the XML and Lua syntax checkers.
+- [Peter Vasil][ptrv] created the XML and Lua syntax checkers, added unit tests
+  and did valuable testing.
 - [Steve Purcell][purcell] implemented many checkers, contributed important
   ideas to the design of the checker API and engaged in worthwhile discussion to
   shape this project.

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- An XML syntax error from a lone closing tag -->
+<spam>
+  </with>
+</spam>

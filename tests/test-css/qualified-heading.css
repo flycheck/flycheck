@@ -1,0 +1,5 @@
+/** A warning triggered by a qualified heading. */
+
+.foo h1 {
+    font-size: 100%;
+}
