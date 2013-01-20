@@ -914,14 +914,14 @@ the beginning of the line of ERR."
 
 
 ;;;; Error parsing
-(defun flycheck-match-string-non-empty (group string &optional trim-first)
-  "Get the non-empty string from a match GROUP in STRING.
+(defun flycheck-match-string-non-empty (group match &optional trim-first)
+  "Get a non-empty string from a GROUP in MATCH.
 
 If the string returned by GROUP is empty, return nil instead.
 
 If TRIM-FIRST is t trim leading and trailing white space in the matched
 string."
-  (let ((matched-string (match-string group string)))
+  (let ((matched-string (nth group match)))
     (save-match-data
       (when matched-string
         (when trim-first
@@ -929,46 +929,81 @@ string."
         (when (not (s-blank? matched-string))
           matched-string)))))
 
-(defun flycheck-match-int (group string)
-  "Get an integer from a match GROUP in STRING.
+(defun flycheck-match-int (group match)
+  "Get an integer from a GROUP in MATCH.
 
 Return nil if the group did not match a number."
-  (let ((matched-string (flycheck-match-string-non-empty group string t)))
+  (let ((matched-string (flycheck-match-string-non-empty group match t)))
     (when matched-string
       (string-to-number matched-string))))
 
-(defun flycheck-parse-output-with-pattern (output buffer pattern)
-  "Parse OUTPUT from BUFFER with PATTERN.
+(defun flycheck-get-regexp (patterns)
+  "Create a single regular expression from PATTERNS."
+  (s-join "\\|" (--map (format "\\(?:%s\\)" (car it)) patterns)))
 
-PATTERN is a flycheck error pattern.
+(defun flycheck-split-output (output patterns)
+  "Split OUTPUT from BUFFER with PATTERNS.
 
-Return a list of parsed errors and warnings as `flycheck-error`
-objects."
-  (let ((regexp (car pattern))
-        (level (cadr pattern))
+Return a list of strings where each string is an unparsed error."
+  (let ((regexp (flycheck-get-regexp patterns))
         (errors nil)
         (last-match 0))
     (while (string-match regexp output last-match)
-      (!cons
-       (flycheck-make-error
-        :buffer buffer
-        :file-name (flycheck-match-string-non-empty 1 output)
-        :line-no (flycheck-match-int 2 output)
-        :col-no (flycheck-match-int 3 output)
-        :text (flycheck-match-string-non-empty 4 output t)
-        :level level)
-       errors)
+      (!cons (match-string 0 output) errors)
       (setq last-match (match-end 0)))
     errors))
+
+(defun flycheck-try-parse-error-with-pattern (err pattern)
+  "Try to parse a single ERR with a PATTERN.
+
+Return the parsed error if PATTERN matched ERR, or nil
+otherwise."
+  (let* ((regexp (car pattern))
+         (level (cadr pattern))
+         (match (s-match regexp err)))
+    (when match
+      (flycheck-make-error
+       :file-name (flycheck-match-string-non-empty 1 match)
+       :line-no (flycheck-match-int 2 match)
+       :col-no (flycheck-match-int 3 match)
+       :text (flycheck-match-string-non-empty 4 match t)
+       :level level))))
+
+(defun flycheck-parse-error (err patterns)
+  "Parse a single ERR with error PATTERNS.
+
+Apply each pattern in PATTERNS to ERR, in the given order, and
+return the first parsed error."
+  ;; Try to parse patterns in the order of declaration to make sure that the
+  ;; first match wins.
+  (car (--keep (flycheck-try-parse-error-with-pattern err it) patterns)))
+
+(defun flycheck-parse-errors (errors patterns)
+  "Parse ERRORS with PATTERNS.
+
+ERRORS is a list of strings where each string is an unparsed
+error message, typically from `flycheck-split-output'.  PATTERNS
+is a list of error patterns to parse ERRORS with.
+
+Return a list of parsed errors."
+  (--map (flycheck-parse-error it patterns) errors))
 
 (defun flycheck-parse-output (output buffer patterns)
   "Parse OUTPUT from BUFFER with PATTERNS.
 
 PATTERNS is a list of flycheck error patterns.
 
-Return a list of parsed errors and warnings (as `flycheck-error`
+First split OUTPUT with PATTERNS to obtain a list of unparsed
+errors.  Then parse each error with PATTERNS to create a
+structured representation of the error.  This ensures that the
+first pattern wins.
+
+Return a list of parsed errors and warnings (as `flycheck-error'
 objects)."
-  (--mapcat (flycheck-parse-output-with-pattern output buffer it) patterns))
+  (let* ((chunks (flycheck-split-output output patterns))
+         (errors (flycheck-parse-errors chunks patterns)))
+    (--each errors (setf (flycheck-error-buffer it) buffer))
+    errors))
 
 (defun flycheck-relevant-error-p (err)
   "Determine whether ERR is relevant for the current buffer.
@@ -1498,11 +1533,11 @@ See URL `http://php.net/manual/en/features.commandline.php'."
 See URL `http://pypi.python.org/pypi/flake8'."
   :command '("flake8" (config "--config" flycheck-flake8rc) source-inplace)
   :error-patterns
-  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:[[:alpha:]]\\{2\\}.*\\)$" error)
-    ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:E[0-9]+.*\\)$"
+  '(("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:E[0-9]+.*\\)$"
      error)
     ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:W[0-9]+.*\\)$"
-     warning))
+     warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'python-mode)
 
 (flycheck-declare-checker python-pylint

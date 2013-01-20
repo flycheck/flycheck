@@ -298,8 +298,9 @@ checker:
   - `LEVEL` is either `warning` or `error` and indicates the **severity of this
     error**.
 
-  **All** patterns are applied in the order of declaration to the whole** output
-  **of the checker.
+  Patterns are applied in the order of declaration to the **whole** output of
+  the checker.  Parts of the output already matched by a pattern will not be
+  matched by any subsequent patterns.
 - `:modes` (*optional*): A single major mode symbol or a list thereof.  If given
   the checker will only be used in any of these modes.
 - `:predicate` (*optional*): A form that if present is evaluated to determine
