@@ -88,7 +88,6 @@ buffer-local wherever it is set."
     haml
     html-tidy
     javascript-jshint
-    javascript-jsl
     json-jsonlint
     lua
     perl
@@ -463,7 +462,7 @@ Return the name of the temporary file."
 Return the checker as symbol, or nil if no checker was
 chosen."
   (let* ((checkers (-map #'symbol-name flycheck-checkers))
-         (input (completing-read "Checker: " obarray
+         (input (completing-read prompt obarray
                                  #'flycheck-valid-checker-p t
                                  nil 'read-flycheck-checker-history)))
     (if (string= input "") nil (intern input))))
@@ -826,7 +825,7 @@ CHECKER is a checker symbol.
 
 Pop up a help buffer with the documentation of CHECKER."
   (interactive
-   (list (read-flycheck-checker "Checker: ")))
+   (list (read-flycheck-checker "Describe checker: ")))
   (if (null checker)
       (message "You didn't specify a Flycheck syntax checker.")
     (help-setup-xref (list #'flycheck-describe-checker checker)
@@ -1449,20 +1448,6 @@ See URL `http://www.jshint.com'."
      error))
   :modes '(js-mode js2-mode js3-mode))
 
-(flycheck-declare-checker javascript-jsl
-  "A JavaScript syntax and style checker using jsl.
-
-See URL `http://www.javascriptlint.com/'."
-  :command '("jsl" "-process" source)
-  :error-patterns
-  '(("^\\(?1:.+\\)\:\\(?2:[0-9]+\\)\: \\(?4:SyntaxError:.+\\)\:$" error)
-    ("^\\(?1:.+\\)(\\(?2:[0-9]+\\)): \\(?4:SyntaxError:.+\\)$" error)
-    ("^\\(?1:.+\\)(\\(?2:[0-9]+\\)): \\(?:lint \\)?\\(?4:warning:.+\\)$"
-     warning)
-    ("^\\(?1:.+\\)\:\\(?2:[0-9]+\\)\: strict \\(?4:warning: trailing comma.+\\)\:$"
-     warning))
-  :modes '(js-mode js2-mode js3-mode))
-
 (flycheck-declare-checker json-jsonlint
   "A JSON syntax and style checker using jsonlint.
 
@@ -1555,7 +1540,7 @@ See URL `http://sass-lang.com'."
   '(("^Syntax error on line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error)
     ("^WARNING on line \\(?2:[0-9]+\\) of \\(?1:.*\\):\r?\n\\(?4:.*\\)$"
      warning)
-    ("^Syntax error: \\(?4:.*\\)\r?\n        on line \\(?2:[0-9]+\\) of \\(1:.*\\)$"
+    ("^Syntax error: \\(?4:.*\\)\r?\n        on line \\(?2:[0-9]+\\) of \\(?1:.*\\)$"
      error))
   :modes 'sass-mode)
 
