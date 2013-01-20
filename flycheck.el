@@ -88,7 +88,6 @@ buffer-local wherever it is set."
     haml
     html-tidy
     javascript-jshint
-    javascript-jsl
     json-jsonlint
     lua
     perl
@@ -1447,20 +1446,6 @@ See URL `http://www.jshint.com'."
   :error-patterns
   '(("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
      error))
-  :modes '(js-mode js2-mode js3-mode))
-
-(flycheck-declare-checker javascript-jsl
-  "A JavaScript syntax and style checker using jsl.
-
-See URL `http://www.javascriptlint.com/'."
-  :command '("jsl" "-process" source)
-  :error-patterns
-  '(("^\\(?1:.+\\)\:\\(?2:[0-9]+\\)\: \\(?4:SyntaxError:.+\\)\:$" error)
-    ("^\\(?1:.+\\)(\\(?2:[0-9]+\\)): \\(?4:SyntaxError:.+\\)$" error)
-    ("^\\(?1:.+\\)(\\(?2:[0-9]+\\)): \\(?:lint \\)?\\(?4:warning:.+\\)$"
-     warning)
-    ("^\\(?1:.+\\)\:\\(?2:[0-9]+\\)\: strict \\(?4:warning: trailing comma.+\\)\:$"
-     warning))
   :modes '(js-mode js2-mode js3-mode))
 
 (flycheck-declare-checker json-jsonlint
