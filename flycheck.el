@@ -463,7 +463,7 @@ Return the name of the temporary file."
 Return the checker as symbol, or nil if no checker was
 chosen."
   (let* ((checkers (-map #'symbol-name flycheck-checkers))
-         (input (completing-read "Checker: " obarray
+         (input (completing-read prompt obarray
                                  #'flycheck-valid-checker-p t
                                  nil 'read-flycheck-checker-history)))
     (if (string= input "") nil (intern input))))
