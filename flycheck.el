@@ -1555,7 +1555,7 @@ See URL `http://sass-lang.com'."
   '(("^Syntax error on line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error)
     ("^WARNING on line \\(?2:[0-9]+\\) of \\(?1:.*\\):\r?\n\\(?4:.*\\)$"
      warning)
-    ("^Syntax error: \\(?4:.*\\)\r?\n        on line \\(?2:[0-9]+\\) of \\(1:.*\\)$"
+    ("^Syntax error: \\(?4:.*\\)\r?\n        on line \\(?2:[0-9]+\\) of \\(?1:.*\\)$"
      error))
   :modes 'sass-mode)
 
