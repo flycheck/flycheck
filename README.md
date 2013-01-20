@@ -105,10 +105,10 @@ etc.) an error is signaled.
 
 Some checkers can be configured from configuration files.  Such checkers have an
 associated variable providing the name of the configuration file, for instance
-`flycheck-jslintrc` for `javascript-jslint` checker.  These variables
+`flycheck-jshintrc` for `javascript-jshint` checker.  These variables
 obey the following rules:
 
-If it contains a plain file name without any slash, e.g. `.jslintrc`,
+If it contains a plain file name without any slash, e.g. `.jshintrc`,
 this file is searched in the buffer's directory, any ancestors thereof, and the
 home directory eventually.  If the buffer has no backing file, only the home
 directory is searched.
