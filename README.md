@@ -1,6 +1,8 @@
 Flycheck
 ========
 
+[![Build Status](https://travis-ci.org/lunaryorn/flycheck.png)](https://travis-ci.org/lunaryorn/flycheck)
+
 Flycheck provides on-the-fly syntax checking for GNU Emacs.  Essentially it's
 “flymake done right” with
 
