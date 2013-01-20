@@ -32,8 +32,7 @@
 ;; complete list).
 ;;
 ;; Support for new modes and languages can be added by declaring a new syntax
-;; checker.  Read README.md for more information and take a look at built-in
-;; checkers like `flycheck-checkers-python-pylint'.
+;; checker.
 
 ;;; Code:
 
