@@ -95,6 +95,7 @@ ERRORS."
   (flycheck-wait-for-syntax-checker)
   (if (not errors)
       (should-not flycheck-current-errors)
+    (should (= (length errors) (length flycheck-current-errors)))
     (dolist (err errors)
       (flycheck-should-error err)))
   (flycheck-clear))

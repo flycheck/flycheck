@@ -46,7 +46,9 @@
     (dolist (mode '(js-mode js2-mode js3-mode))
       (funcall mode)
       (flycheck-should-checker
-       'javascript-jshint '(3 7 "Unclosed string." error)))))
+       'javascript-jshint
+       '(3 7 "Unclosed string." error)
+       '(4 7 "Unclosed string." error)))))
 
 (ert-deftest checker-javascript-jshint-use-eval ()
   "Use eval()"

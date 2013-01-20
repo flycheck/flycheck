@@ -33,7 +33,10 @@
   (flycheck-with-resource-buffer "test-xml/missing-quote.xml"
     (nxml-mode)
     (flycheck-should-checker
-     'xml-xmlstarlet '(5 1 "Couldn't find end of Start Tag with" error))))
+     'xml-xmlstarlet
+     '(5 1 "Unescaped '<' not allowed in attributes values" error)
+     '(5 1 "attributes construct error" error)
+     '(5 1 "Couldn't find end of Start Tag with" error))))
 
 (ert-deftest checker-xmlstarlet-missing-closing-tag ()
   "Test a missing closing tag."
