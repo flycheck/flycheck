@@ -83,7 +83,8 @@ Enable `flycheck-mode` in your `init.el` file.
 Or do `M-x flycheck-mode` manually after visiting a file.
 
 In `flycheck-mode` the buffer is automatically checked on-the-fly.  You can also
-check the buffer manually with `C-c ! c` (`flycheck-buffer`).
+check the buffer manually with `C-c ! c` (`flycheck-buffer`), or invoke the
+checker in a separate compilation buffer with `C-c ! C-c` (`flycheck-compile`).
 
 ### Syntax checker selection
 
@@ -310,7 +311,8 @@ checker:
 **At least one** of `:modes` and `:predicate` must **be present**.  If **both**
 are present, **both** must match for the checker to be used.
 
-See `C-h f flycheck-declare-checker` for details.
+See `C-h f flycheck-declare-checker` for details.  Use `flycheck-select-checker`
+(`C-c ! s`) and `flycheck-compile` (`C-c ! C-c`) to test your new checker.
 
 Checkers are registered via `flycheck-checkers`, which is a list of symbols.
 Each symbol in this list must be a checker declared with
@@ -427,6 +429,7 @@ Further help
 - `C-h v flycheck-checkers`
 - `C-h v flycheck-checker`
 - `C-h f flycheck-declare-checker`
+- `C-h f flycheck-compile`
 - `C-h f flycheck-def-config-file-var`
 - `C-c ! ?` or `M-x flycheck-describe-checker`
 

@@ -38,6 +38,7 @@
 
 (eval-when-compile
   (require 'cl)                         ; For defstruct
+  (require 'compile)                    ; Compilation Mode
   (require 'sh-script))
 
 (require 's)
@@ -199,9 +200,9 @@ overlay setup)."
         (pmap (make-sparse-keymap)))
     (define-key pmap "c" 'flycheck-buffer)
     (define-key pmap "C" 'flycheck-clear)
+    (define-key pmap (kbd "C-c") 'flycheck-compile)
     (define-key pmap "s" 'flycheck-select-checker)
     (define-key pmap "?" 'flycheck-describe-checker)
-
     (define-key map (kbd "C-c !") pmap)
     map)
   "Keymap of `flycheck-mode'.")
@@ -210,6 +211,7 @@ overlay setup)."
  '("Tools") "Syntax Checking"
  '(["Check current buffer" flycheck-buffer t]
    ["Clear errors in buffer" flycheck-clear t]
+   ["Compile current buffer" flycheck-compile t]
    "---"
    ["Select checker" flycheck-select-checker t]
    "---"
@@ -327,6 +329,25 @@ Start a syntax check if a new line has been inserted into the buffer."
            (flycheck-report-status "!")
            (signal (car err) (cdr err)))))
     (user-error "Flycheck mode disabled")))
+
+(defun flycheck-compile-name (mode-name)
+  "Get a name for a compilation buffer."
+  (format "*Flycheck %s*" (buffer-file-name)))
+
+(defun flycheck-compile ()
+  "Run syntax checker as compiler."
+  (interactive)
+  (unless (buffer-file-name)
+    (user-error "Cannot compile buffers without backing file."))
+  (let ((checker (flycheck-get-checker-for-buffer)))
+    (if checker
+        (let* ((command (flycheck-checker-shell-command checker))
+               (buffer (compilation-start command nil
+                                          #'flycheck-compile-name)))
+          (with-current-buffer buffer
+            (set (make-local-variable 'compilation-error-regexp-alist)
+                 (flycheck-checker-compilation-error-regexp-alist checker))))
+      (user-error "No suitable checker available."))))
 
 (defun flycheck-may-check-buffer ()
   "Determine whether the buffer may be checked.
@@ -645,6 +666,26 @@ The executable is the `car' of the checker command as returned by
   "Get the error patterns of CHECKER."
   (get checker :flycheck-error-patterns))
 
+(defun flycheck-checker-pattern-to-error-regexp (pattern)
+  "Convert PATTERN into an error regexp for compile.el.
+
+Return a list representing PATTERN, suitable as element in
+`compilation-error-regexp-alist'."
+  (let* ((regexp (car pattern))
+         (level (cadr pattern))
+         (level-no (cond
+                    ((eq level 'error) 2)
+                    ((eq level 'warning) 1))))
+    (list regexp 1 2 3 level-no)))
+
+(defun flycheck-checker-compilation-error-regexp-alist (checker)
+  "Convert error patterns of CHECKER for use with compile.el.
+
+Return an alist of all error patterns of CHECKER, suitable for
+use with `compilation-error-regexp-alist'."
+  (-map #'flycheck-checker-pattern-to-error-regexp
+        (flycheck-checker-error-patterns checker)))
+
 (defun flycheck-checker-documentation (checker)
   "Get the documentation of CHECKER."
   (documentation-property checker :flycheck-documentation))
@@ -748,6 +789,36 @@ Substitute each argument in the command of CHECKER using
 symbols in the command."
   (-flatten (-keep #'flycheck-substitute-argument
                    (flycheck-checker-command checker))))
+
+(defun flycheck-substitute-shell-argument (arg)
+  "Substitute ARG for use in a shell command..
+
+If ARG is source or source-inplace, return the buffer file name.
+
+If ARG is a list whose `car' is config, search the configuration
+file and return a list of options that specify this configuration
+file, or nil of the config file was not found.
+
+ARG is always quoted for use in a shell command (see
+`shell-quote-argument')."
+  (cond
+   ((memq arg '(source source-inplace))
+    (shell-quote-argument (buffer-file-name)))
+   ((and (listp arg) (eq (car arg) 'config))
+    (let ((option-name (nth 1 arg))
+          (file-name (flycheck-find-config-file (symbol-value (nth 2 arg)))))
+      (if file-name
+          (concat option-name " " (shell-quote-argument file-name))
+        "")))
+   (t (shell-quote-argument arg))))
+
+(defun flycheck-checker-shell-command (checker)
+  "Get a shell command for CHECKER.
+
+Return the command of CHECKER as single string, suitable for
+shell execution."
+  (s-join " " (-map #'flycheck-substitute-shell-argument
+                    (flycheck-checker-command checker))))
 
 
 ;;;; Checker selection
