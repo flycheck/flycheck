@@ -1480,12 +1480,6 @@ See URL `https://github.com/stubbornella/csslint'."
      (mapc 'byte-compile-file command-line-args-left)
      (mapc 'delete-file byte-compiled-files)))
 
-(defun flycheck-emacs-lisp-check-form-s ()
-  "Return `flycheck-emacs-lisp-check-form' as string."
-   (with-temp-buffer
-     (print flycheck-emacs-lisp-check-form (current-buffer))
-     (buffer-substring-no-properties (point-min) (point-max))))
-
 (flycheck-declare-checker emacs-lisp
   "An Emacs Lisp syntax checker.
 
@@ -1493,7 +1487,7 @@ This checker simply attempts to byte compile the contents of the
 buffer using the currently running Emacs executable."
   :command `(,(concat invocation-directory invocation-name)
              "--no-site-file" "--no-site-lisp" "--batch" "--eval"
-             ,(flycheck-emacs-lisp-check-form-s) source-inplace)
+             ,(prin1-to-string flycheck-emacs-lisp-check-form) source-inplace)
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):Warning:\\(?4:.*\\(?:\n    .*\\)*\\)$"
      warning)
