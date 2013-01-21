@@ -218,7 +218,7 @@ Alternatively use `flycheck-select-checker` to select a specific checker for a
 buffer.  For instance, to use `pyflakes` as checker in the current buffer, use
 `M-x flycheck-select-checker RET python-checker-python-pyflakes`.
 
-Use `M-x flycheck-describe-checker` to get help about a syntax checker.
+Use `C-c ! ?` (`flycheck-describe-checker`) to get help about a syntax checker.
 
 
 ### Checker configuration
@@ -241,9 +241,9 @@ of configuration files for syntax checkers.
 
   This option does not affect error navigation.
 - `M-x customize-face RET flycheck-error-face`: Customize the face for error
-  highlights.  Inherits from `flymake-errline` by default.
+  highlights.  Inherits from `error` by default.
 - `M-x customize-face RET flycheck-warning-face`: Customize the face for error
-  highlights.  Inherits from `flymake-warnline` by default.
+  highlights.  Inherits from `warning` by default.
 
 
 ### Hooking
