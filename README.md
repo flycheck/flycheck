@@ -273,6 +273,12 @@ checker:
     contents of the buffer to check, but created in the **same directory** as
     the original file.  If the buffer to be checked has no `buffer-file-name`,
     this is the same as `source`.
+  - `source-original`: The original name of the file to check.  The contents of
+    this file may not be up to date with the contents of the buffer to check.
+    **Do not use this as primary input to a checker**.  Instead, use `source` or
+    `source-inplace`.  Use this symbol only to **additionally** pass the
+    original name to the checker.  The `checkdoc` checker provides an example
+    for using this symbol.
   - `(config OPTION-NAME VARIABLE-NAME)`: Find and pass a config file to the
     checker.  `OPTION-NAME` is a string containing the name of the option that
     understood by the checker.  `VARIABLE-NAME` is a symbol referring to a

@@ -764,16 +764,26 @@ If FILE-NAME does not contain a slash, search the file with
   "Substitute ARG with file to check is possible.
 
 If ARG is source or source-inplace, create a temporary file
-to checker and return its path, otherwise return ARG unchanged.
+to check and return its path.
+
+If ARG is source-original, return the path of the actual file to
+check, or an empty string if the buffer has no file name.  Note
+that the contents of the file may not be up to date with the
+contents of the buffer to check.  Do not use this as primary
+input to a checker!
 
 If ARG is a list whose `car' is config, search the configuration
 file and return a list of options that specify this configuration
-file, or nil of the config file was not found."
+file, or nil of the config file was not found.
+
+In all other cases, return ARG unchanged."
   (cond
    ((eq arg 'source)
     (flycheck-get-source-file #'flycheck-temp-file-system))
    ((eq arg 'source-inplace)
     (flycheck-get-source-file #'flycheck-temp-file-inplace))
+   ((eq arg 'source-original)
+    (or (buffer-file-name) ""))
    ((and (listp arg) (eq (car arg) 'config))
     (let ((option-name (nth 1 arg))
            (file-name  (flycheck-find-config-file (symbol-value (nth 2 arg)))))
@@ -802,7 +812,7 @@ file, or nil of the config file was not found.
 ARG is always quoted for use in a shell command (see
 `shell-quote-argument')."
   (cond
-   ((memq arg '(source source-inplace))
+   ((memq arg '(source source-inplace source-original))
     (shell-quote-argument (buffer-file-name)))
    ((and (listp arg) (eq (car arg) 'config))
     (let ((option-name (nth 1 arg))
