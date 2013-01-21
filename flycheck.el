@@ -85,6 +85,7 @@ buffer-local wherever it is set."
     coffee-coffeelint
     css-csslint
     emacs-lisp
+    emacs-lisp-checkdoc
     haml
     html-tidy
     javascript-jshint
@@ -1474,6 +1475,23 @@ See URL `https://github.com/stubbornella/csslint'."
      warning))
   :modes 'css-mode)
 
+(defconst flycheck-emacs-command
+  `(,(concat invocation-directory invocation-name)
+    "--no-site-file" "--no-site-lisp" "--batch" "--eval")
+  "A command to execute an Emacs Lisp form in a background process.")
+
+(defun flycheck-temp-compilation-buffer-p ()
+  "Determine whether the current buffer is a temporary buffer.
+
+Return t if the current buffer is a temporary buffer created
+during byte-compilation or autoloads generation, or nil otherwise."
+  ;; Detect temporary buffers of `byte-compile-file' or autoload buffers created
+  ;; during package installation.  Checking these interferes with package
+  ;; installation, see https://github.com/lunaryorn/flycheck/issues/45 and
+  ;; https://github.com/bbatsov/prelude/issues/248
+  (or (string= (buffer-name) " *Compiler Input*")
+      (s-ends-with? "-autoloads.el" (buffer-name))))
+
 (defconst flycheck-emacs-lisp-check-form
   '(progn
      ;; Initialize packages to at least try to load dependencies
@@ -1495,9 +1513,9 @@ See URL `https://github.com/stubbornella/csslint'."
 
 This checker simply attempts to byte compile the contents of the
 buffer using the currently running Emacs executable."
-  :command `(,(concat invocation-directory invocation-name)
-             "--no-site-file" "--no-site-lisp" "--batch" "--eval"
-             ,(prin1-to-string flycheck-emacs-lisp-check-form) source-inplace)
+  :command (append flycheck-emacs-command
+                   `(,(prin1-to-string flycheck-emacs-lisp-check-form)
+                     source-inplace))
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):Warning:\\(?4:.*\\(?:\n    .*\\)*\\)$"
      warning)
@@ -1515,13 +1533,42 @@ buffer using the currently running Emacs executable."
                    ;; Do not check buffers which should not be byte-compiled.
                    ;; The checker process will refuse to compile these anyway
                    (not (and (boundp 'no-byte-compile) no-byte-compile))
-                   ;; Do not check temporary buffers of `byte-compile-file' or
-                   ;; autoload buffers created during package installation.
-                   ;; Checking these interferes with package installation, see
-                   ;; https://github.com/lunaryorn/flycheck/issues/45 and
-                   ;; https://github.com/bbatsov/prelude/issues/248
-                   (not (string= (buffer-name) " *Compiler Input*"))
-                   (not (s-ends-with? "-autoloads.el" (buffer-name)))))
+                   (not (flycheck-temp-compilation-buffer-p))))
+
+(defconst flycheck-emacs-lisp-checkdoc-form
+  '(progn
+     (require 'checkdoc)
+
+     (defvar flycheck-process-default-directory default-directory)
+
+     (let ((filename (car command-line-args-left))
+           (original-filename (cadr command-line-args-left)))
+       (with-temp-buffer
+         (insert-file-contents filename t)
+         (setq buffer-file-name (when (> (length original-filename) 0)
+                                  original-filename))
+         (setq default-directory flycheck-process-default-directory)
+         (checkdoc-current-buffer t)
+         (with-current-buffer checkdoc-diagnostic-buffer
+           (princ (buffer-substring-no-properties (point-min) (point-max)))
+           (kill-buffer))))))
+
+(flycheck-declare-checker emacs-lisp-checkdoc
+  "An Emacs Lisp style checker using CheckDoc.
+
+The checker runs `checkdoc-current-buffer'."
+  :command (append flycheck-emacs-command
+                   `(,(prin1-to-string flycheck-emacs-lisp-checkdoc-form)
+                     ;; CheckDoc checks that features which are provided match
+                     ;; the name of the file which causes bogus warnings with
+                     ;; Flycheck's temporary buffer copies.  Hence we also give
+                     ;; the original file name to checkdoc for use as buffer
+                     ;; file name, so that checkdoc sees the real file name,
+                     ;; which avoids these bogus warnings.
+                     source source-original))
+  :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)" warning))
+  :modes '(emacs-lisp-mode lisp-interaction-mode)
+  :predicate '(not (flycheck-temp-compilation-buffer-p)))
 
 (flycheck-declare-checker haml
   "A Haml syntax checker using the Haml compiler.
