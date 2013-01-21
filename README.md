@@ -358,7 +358,7 @@ Eventually we declare that the checker is to be used in `python-mode`.
 Now we only need to register this error checker for use with
 
 ```scheme
-(add-to-list 'flycheck-checkers python-pylint)
+(add-to-list 'flycheck-checkers 'python-pylint)
 ```
 
 Assuming that `flycheck-mode` is enabled (see [Usage](#usage)), Python source
