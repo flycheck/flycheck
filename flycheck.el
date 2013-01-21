@@ -339,7 +339,7 @@ Start a syntax check if a new line has been inserted into the buffer."
   "Run syntax checker as compiler."
   (interactive)
   (unless (buffer-file-name)
-    (user-error "Cannot compile buffers without backing file."))
+    (user-error "Cannot compile buffers without backing file"))
   (let ((checker (flycheck-get-checker-for-buffer)))
     (if checker
         (let* ((command (flycheck-checker-shell-command checker))
@@ -348,7 +348,7 @@ Start a syntax check if a new line has been inserted into the buffer."
           (with-current-buffer buffer
             (set (make-local-variable 'compilation-error-regexp-alist)
                  (flycheck-checker-compilation-error-regexp-alist checker))))
-      (user-error "No suitable checker available."))))
+      (user-error "No suitable checker available"))))
 
 (defun flycheck-may-check-buffer ()
   "Determine whether the buffer may be checked.
