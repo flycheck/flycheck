@@ -62,8 +62,8 @@ The library is written and tested against GNU Emacs 24 and may or may not work
 in earlier versions of GNU Emacs.
 
 Most checkers have dependencies against external tools that perform the
-checking.  Use `M-x flycheck-describe-checker` to see what a checker needs,
-e.g. `M-x flycheck-describe-checker python-pylint`.
+checking.  Use `C-c ! ?` (`flycheck-describe-checker`) to see what a checker
+needs, e.g. `C-c ! ? python-pylint`.
 
 
 Usage
@@ -157,7 +157,7 @@ indicators to be displayed properly.
 
 To view an error message, either hover the mouse over the highlighted error, or
 move the cursor to the highlighted error and wait a short moment.  To clear all
-error information use `M-x flycheck-clear`.
+error information use `C-c ! C` (`flycheck-clear`).
 
 
 ### Error navigation.
