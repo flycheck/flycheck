@@ -313,6 +313,14 @@ checker:
 - `:predicate` (*optional*): A form that if present is evaluated to determine
   whether the checker is to be used.  The checker is only used if the form
   evaluates to non-nil.
+- `:next-checker` (*optional*): A list of checkers to run after this checker.
+  Each element is either a checker symbol, or a cons cell `(predicate
+  . checker)`.  In the latter case, `checker` is a checker symbol, and
+  `predicate` specifies when to run the checker: If `no-errors`, `checker` is
+  only run if this checker returned no errors, if `warnings-only`, `checker` is
+  only run if this checker returned only warnings.  Only the **first** suitable
+  **and** registered (see `flycheck-checkers`) checker with matching `predicate`
+  is run.
 
 **At least one** of `:modes` and `:predicate` must **be present**.  If **both**
 are present, **both** must match for the checker to be used.

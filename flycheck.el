@@ -527,6 +527,19 @@ checker is only used in these modes.
 used if the form evaluates to a non-nil result in the buffer to
 check.
 
+:next-checkers A list where each element is either a checker
+symbol to run after this checker or a cons cell (PREDICATE
+. CHECKER).  In the latter case, CHECKER is the checker to run,
+and PREDICATE specifies when to run the checker: If PREDICATE is
+no-errors run the next checker only if this checker returned no
+errors at all.  If PREDICATE is warnings-only, run the next
+checker only if this checker returned only warnings.  Only the
+first usable and registered (see `flycheck-registered-checker-p')
+is run.
+
+A checker must be declared before its :next-checkers are
+declared.
+
 Either :modes or :predicate must be present.  If both are
 present, both must match for the checker to be used."
   (declare (indent 1)
@@ -538,6 +551,7 @@ present, both must match for the checker to be used."
      (put (quote ,symbol) :flycheck-error-patterns nil)
      (put (quote ,symbol) :flycheck-modes nil)
      (put (quote ,symbol) :flycheck-predicate nil)
+     (put (quote ,symbol) :flycheck-next-checkers nil)
      (put (quote ,symbol) :flycheck-documentation nil)
      ;; Store the checker properties
      (put (quote ,symbol) :flycheck-command ,(plist-get properties :command))
@@ -546,6 +560,8 @@ present, both must match for the checker to be used."
      (put (quote ,symbol) :flycheck-modes ,(plist-get properties :modes))
      (put (quote ,symbol) :flycheck-predicate
           ,(plist-get properties :predicate))
+     (put (quote ,symbol) :flycheck-next-checkers
+          ,(plist-get properties :next-checkers))
      (put (quote ,symbol) :flycheck-documentation ,docstring)
      ;; Verify the checker and declare it valid if succeeded
      (flycheck-verify-checker (quote ,symbol))
@@ -609,6 +625,7 @@ error if not."
         (patterns (get checker :flycheck-error-patterns))
         (modes (get checker :flycheck-modes))
         (predicate (get checker :flycheck-predicate))
+        (next-checkers (get checker :flycheck-next-checkers))
         (doc (get checker :flycheck-documentation)))
     (unless (and doc (stringp doc))
       (error "Checker %s lacks documentation" checker))
@@ -619,7 +636,17 @@ error if not."
     (unless (and patterns (flycheck-error-patterns-list-p patterns))
       (error "Checker %s lacks valid :error-patterns" checker))
     (unless (or modes predicate)
-      (error "Checker %s lacks :modes and :predicate" checker))))
+      (error "Checker %s lacks :modes and :predicate" checker))
+    (unless (or
+             (null next-checkers)
+             (and (listp next-checkers)
+                  (--all? (or (symbolp it)
+                              (and (listp it)
+                                   (memq (car it) '(no-errors warnings-only))
+                                   (symbolp (cdr it))))
+                          next-checkers)))
+      (error "Checker %s has invalid next checkers.  Make sure to declare this\
+checker before its next checkers." checker))))
 
 
 ;;;; Checker API
@@ -646,6 +673,10 @@ A valid checker is a symbol declared as checker with
 (defun flycheck-checker-predicate (checker)
   "Get the predicate of CHECKER."
   (get checker :flycheck-predicate))
+
+(defun flycheck-checker-next-checkers (checker)
+  "Get the next checkers for CHECKER."
+  (get checker :flycheck-next-checkers))
 
 (defun flycheck-checker-command (checker)
   "Get the raw command of CHECKER.
@@ -729,6 +760,20 @@ otherwise."
   (and (flycheck-check-modes checker)
        (flycheck-check-predicate checker)
        (flycheck-check-executable checker)))
+
+(defun flycheck-may-use-next-checker (next-checker)
+  "Determine whether NEXT-CHECKER may be used."
+  (when (symbolp next-checker)
+    (setq next-checker `(t . ,next-checker)))
+  (let ((predicate (car next-checker))
+        (next-checker (cdr next-checker)))
+    (and (or (eq predicate t)
+             (and (eq predicate 'no-errors)
+                  (not (flycheck-has-current-errors-p)))
+             (and (eq predicate 'warnings-only)
+                  (not (flycheck-has-current-errors-p 'error))))
+         (flycheck-registered-checker-p next-checker)
+         (flycheck-may-use-checker next-checker))))
 
 (defvar-local flycheck-substituted-files nil
   "A list of all files created for argument substitution.")
@@ -875,6 +920,15 @@ nil otherwise."
                     flycheck-checker))
     (or (flycheck-try-last-checker-for-buffer)
         (flycheck-get-new-checker-for-buffer))))
+
+(defun flycheck-get-next-checker-for-buffer (checker)
+  "Get the checker to run after CHECKER for the current buffer."
+  (let ((next-checkers (flycheck-checker-next-checkers checker)))
+    (when next-checkers
+      (let ((next-checker (-first #'flycheck-may-use-next-checker next-checkers)))
+        (if (symbolp next-checker)
+            next-checker
+          (cdr next-checker))))))
 
 (defun flycheck-select-checker (checker)
   "Select CHECKER for the current buffer.
@@ -1157,6 +1211,9 @@ ERRORS is modified by side effects."
 
 
 ;;;; Error analysis and reporting
+(defvar-local flycheck-current-errors nil
+  "A list of all errors and warnings in the current buffer.")
+
 (defun flycheck-count-errors (errors)
   "Count the number of warnings and errors in ERRORS.
 
@@ -1166,6 +1223,20 @@ Return a cons cell whose `car' is the number of errors and whose
          (errors (cdr (assq 'error groups)))
          (warnings (cdr (assq 'warning groups))))
     `(,(length errors) . ,(length warnings))))
+
+(defun flycheck-has-errors-p (errors &optional level)
+  "Determine if there are any ERRORS with LEVEL.
+
+If LEVEL is omitted check if ERRORS is not nil."
+  (if level
+      (--any? (eq (flycheck-error-level it) level) errors)
+    (when errors t)))
+
+(defun flycheck-has-current-errors-p (&optional level)
+  "Determine if the current buffer has errors with LEVEL.
+
+If LEVEL is omitted if the current buffer has any errors at all."
+  (flycheck-has-errors-p flycheck-current-errors level))
 
 (defun flycheck-report-errors (errors)
   "Report ERRORS in the current buffer.
@@ -1177,9 +1248,6 @@ Add overlays and report a proper flycheck status."
         (flycheck-report-status
          (format ":%s/%s" (car no-err-warnings) (cdr no-err-warnings))))
     (flycheck-report-status "")))
-
-(defvar-local flycheck-current-errors nil
-  "A list of all errors and warnings in the current buffer.")
 
 (defun flycheck-clear-errors ()
   "Remove all error information from the current buffer."
@@ -1370,23 +1438,25 @@ Show the error message at point in minibuffer after a short delay."
     (let ((pending-output (process-get process :flycheck-pending-output)))
       (apply #'concat (nreverse pending-output)))))
 
-(defun flycheck-finish-syntax-check (checker exit-status output)
-  "Finish a syntax check with CHECKER.
-
-CHECKER is the checker used during this check.  EXIT-STATUS is
-the integral exit code of the syntax checker and OUTPUT its
-output a string.
+(defun flycheck-finish-syntax-check (process)
+  "Finish a syntax check from PROCESS.
 
 Parse the output and report an appropriate error status."
   (flycheck-report-status "")
-  (let* ((error-patterns (flycheck-checker-error-patterns checker))
+  (let* ((checker (process-get process :flycheck-checker))
+         (exit-status (process-exit-status process))
+         (output (flycheck-get-output process))
+         (error-patterns (flycheck-checker-error-patterns checker))
          (parsed-errors (flycheck-parse-output output (current-buffer)
                                                error-patterns))
-         (errors (flycheck-sort-errors
-                  (flycheck-sanitize-errors parsed-errors))))
+         (errors (flycheck-sanitize-errors parsed-errors))
+         (next-checker (flycheck-get-next-checker-for-buffer checker)))
+    ;; Clean up th e
+    (flycheck-post-syntax-check-cleanup process)
     (when flycheck-mode
-      (setq flycheck-current-errors errors)
-      (flycheck-report-errors errors)
+      (setq flycheck-current-errors
+            (flycheck-sort-errors (append errors flycheck-current-errors nil)))
+      (flycheck-report-errors flycheck-current-errors)
       (when (and (/= exit-status 0) (not errors))
         ;; Report possibly flawed checker definition
         (message "Checker %s returned non-zero exit code %s, but no errors from\
@@ -1395,23 +1465,22 @@ output: %s\nChecker definition probably flawed."
         (flycheck-report-status "?"))
       (when (eq (current-buffer) (window-buffer))
         (flycheck-show-error-at-point))
-      (run-hooks 'flycheck-after-syntax-check-hook))))
+      (if next-checker
+          (flycheck-start-checker next-checker)
+        (run-hooks 'flycheck-after-syntax-check-hook)))))
 
 (defun flycheck-handle-signal (process event)
   "Handle a syntax checking PROCESS EVENT."
   (when (memq (process-status process) '(signal exit))
     (with-current-buffer (process-buffer process)
-      (unwind-protect
-          (condition-case-unless-debug err
-              (when (buffer-live-p (process-buffer process))
-                (flycheck-finish-syntax-check
-                 (process-get process :flycheck-checker)
-                 (process-exit-status process)
-                 (flycheck-get-output process)))
-            (error
-             (flycheck-report-status "!")
-             (signal (car err) (cdr err))))
-        (flycheck-post-syntax-check-cleanup process)))))
+      (condition-case-unless-debug err
+          (if (buffer-live-p (process-buffer process))
+              (flycheck-finish-syntax-check process)
+            (flycheck-post-syntax-check-cleanup process))
+        (error
+         (flycheck-post-syntax-check-cleanup process)
+         (flycheck-report-status "!")
+         (signal (car err) (cdr err)))))))
 
 (defun flycheck-start-checker (checker)
   "Start a syntax CHECKER."
