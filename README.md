@@ -433,6 +433,36 @@ configuration file is found it is passed to the checker, e.g. `jshint --config
 /path/to/.jshintrc /the/file/to/check`.  Otherwise the whole element is simply
 omitted.
 
+#### Chaining checkers
+
+Sometimes it is useful to apply more than one checker to a buffer.  For
+instance, the built-in Emacs Lisp checker runs checkdoc afterwards to ensure
+that the buffer is not only free of syntax errors, but also meets the stylistic
+requirements of good Emacs Lisp code:
+
+```scheme
+(flycheck-declare-checker emacs-lisp
+  "An Emacs Lisp syntax checker.
+
+This checker simply attempts to byte compile the contents of the
+buffer using the currently running Emacs executable."
+  :command (append flycheck-emacs-command
+                   `(,(prin1-to-string flycheck-emacs-lisp-check-form)
+                     source-inplace))
+  :error-patterns
+  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):Warning:\\(?4:.*\\(?:\n    .*\\)*\\)$"
+     warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):Error:\\(?4:.*\\(?:\n    .*\\)*\\)$"
+     error))
+  :modes '(emacs-lisp-mode lisp-interaction-mode)
+  ;; […]
+  :next-checkers '(emacs-lisp-checkdoc))
+```
+
+The `:next-checkers` property specifies checkers to run after this checker.  In
+this example, the checkdoc checker is always run after the standard Emacs Lisp
+checker.
+
 
 Further help
 ------------
