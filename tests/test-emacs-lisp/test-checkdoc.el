@@ -30,7 +30,7 @@
   (flycheck-with-resource-buffer "test-emacs-lisp/missing-period-in-docstring.el"
     (emacs-lisp-mode)
     (flycheck-should-checker
-     'emacs-lisp-checkdoc
+     '(emacs-lisp emacs-lisp-checkdoc)  ; Checkdoc is chained after Emacs Lisp
      '(12 nil "First sentence should end with punctuation" warning))))
 
 (ert-deftest checker-emacs-lisp-checkdoc-inhibited-autoloads ()

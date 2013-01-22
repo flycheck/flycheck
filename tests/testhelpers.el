@@ -84,13 +84,15 @@
     (sleep-for 1))
   (setq flycheck-syntax-checker-finished nil))
 
-(defun flycheck-should-checker (checker &rest errors)
-  "Test that checking the current buffer with CHECKER gives
+(defun flycheck-should-checker (checkers &rest errors)
+  "Test that checking the current buffer with CHECKERS gives
 ERRORS."
-  (set (make-local-variable 'flycheck-checkers) (list checker))
+  (unless (listp checkers)
+    (setq checkers (list checkers)))
+  (set (make-local-variable 'flycheck-checkers) checkers)
   (setq flycheck-syntax-checker-finished nil)
   (should (not (flycheck-running-p)))
-  (should (flycheck-may-use-checker checker))
+  (should (-all? #'flycheck-may-use-checker checkers))
   (flycheck-mode)
   (flycheck-wait-for-syntax-checker)
   (if (not errors)

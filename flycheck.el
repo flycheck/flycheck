@@ -1602,7 +1602,8 @@ buffer using the currently running Emacs executable."
                    ;; Do not check buffers which should not be byte-compiled.
                    ;; The checker process will refuse to compile these anyway
                    (not (and (boundp 'no-byte-compile) no-byte-compile))
-                   (not (flycheck-temp-compilation-buffer-p))))
+                   (not (flycheck-temp-compilation-buffer-p)))
+  :next-checkers '(emacs-lisp-checkdoc))
 
 (defconst flycheck-emacs-lisp-checkdoc-form
   '(progn
