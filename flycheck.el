@@ -1609,15 +1609,14 @@ buffer using the currently running Emacs executable."
   '(progn
      (require 'checkdoc)
 
-     (defvar flycheck-process-default-directory default-directory)
-
      (let ((filename (car command-line-args-left))
-           (original-filename (cadr command-line-args-left)))
+           (original-filename (cadr command-line-args-left))
+           (process-default-directory default-directory))
        (with-temp-buffer
          (insert-file-contents filename t)
          (setq buffer-file-name (when (> (length original-filename) 0)
                                   original-filename))
-         (setq default-directory flycheck-process-default-directory)
+         (setq default-directory process-default-directory)
          (checkdoc-current-buffer t)
          (with-current-buffer checkdoc-diagnostic-buffer
            (princ (buffer-substring-no-properties (point-min) (point-max)))
