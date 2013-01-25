@@ -34,7 +34,10 @@
      '(12 nil "First sentence should end with punctuation" warning))))
 
 (ert-deftest checker-emacs-lisp-checkdoc-no-buffer-file-name ()
-  "Test checkdoc checker in buffers without file names."
+  "Test checkdoc checker in buffers without file names.
+
+Regression test for https://github.com/lunaryorn/flycheck/issues/73 and
+https://github.com/bbatsov/prelude/issues/259."
   (with-temp-buffer
     (insert ";;; Hello world\n(message \"foo\")")
     (emacs-lisp-mode)
