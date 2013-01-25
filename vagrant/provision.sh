@@ -33,6 +33,10 @@ npm () {
     sudo npm install -g "$@"
 }
 
+pear () {
+    sudo pear -q install "$@"
+}
+
 pip () {
     sudo pip install "$@"
 }
@@ -64,6 +68,7 @@ apt emacs24 emacs24-el emacs24-common-non-dfsg \
 # Install the necessary interpreters and tools
 apt nodejs npm \
     python python-pip \
+    php5-cli php-pear \
     ruby1.9.1
 
 # Install all checker tools
@@ -72,12 +77,13 @@ apt nodejs npm \
 apt bash \
     tidy \
     lua5.2 lua-mode \
-    php5-cli \
     chktex lacheck \
     xmlstarlet \
     zsh
 
 pip flake8 pylint pyflakes
+
+pear PHP_CodeSniffer
 
 npm coffee-script coffeelint \
     csslint \

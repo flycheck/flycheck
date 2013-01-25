@@ -93,6 +93,7 @@ buffer-local wherever it is set."
     lua
     perl
     php
+    php-phpcs
     python-flake8
     python-pylint
     python-pyflakes
@@ -1717,6 +1718,17 @@ See URL `http://php.net/manual/en/features.commandline.php'."
   :error-patterns
   '(("\\(?:Parse\\|Fatal\\|syntax\\) error[:,] \\(?4:.*\\) in \\(?1:.*\\) on line \\(?2:[0-9]+\\)"
     error))
+  :modes '(php-mode php+-mode)
+  :next-checkers '((warnings-only . php-phpcs)))
+
+(flycheck-declare-checker php-phpcs
+  "A PHP syntax checker using PHP_CodeSniffer.
+
+See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
+  :command '("phpcs" "--report=emacs" source)
+  :error-patterns
+  '(("\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): error - \\(?4:.*\\)" error)
+    ("\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): warning - \\(?4:.*\\)" warning))
   :modes '(php-mode php+-mode))
 
 (flycheck-def-config-file-var flycheck-flake8rc python-flake8 ".flake8rc")
