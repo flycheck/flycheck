@@ -45,6 +45,6 @@
     (dolist (mode '(php-mode php+-mode))
       (funcall mode)
       (flycheck-should-checker
-       'php '(6 nil "syntax error, unexpected ')', expecting :: (T_PAAMAYIM_NEKUDOTAYIM)" error)))))
+       'php '(8 nil "syntax error, unexpected ')', expecting :: (T_PAAMAYIM_NEKUDOTAYIM)" error)))))
 
 ;;; test-php.el ends here

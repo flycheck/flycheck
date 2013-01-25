@@ -1,6 +1,6 @@
-# Test a parse error caused by a missing quote
-
 <?php
+
+/** Test a parse error caused by a missing quote */
 
 echo("foo)
 
