@@ -95,11 +95,16 @@ ERRORS."
   (should (-all? #'flycheck-may-use-checker checkers))
   (flycheck-mode)
   (flycheck-wait-for-syntax-checker)
-  (if (not errors)
-      (should-not flycheck-current-errors)
+  (cond
+   ((not errors) (should-not flycheck-current-errors))
+   ;; If a single true argument is given, just check that the buffer has any
+   ;; errors.
+   ((and (= (length errors) 1) (car errors))
+    (should flycheck-current-errors))
+   (t
     (should (= (length errors) (length flycheck-current-errors)))
     (dolist (err errors)
-      (flycheck-should-error err)))
+      (flycheck-should-error err))))
   (flycheck-clear))
 
 (defmacro flycheck-with-resource-buffer (resource-file &rest body)

@@ -1614,8 +1614,9 @@ buffer using the currently running Emacs executable."
            (process-default-directory default-directory))
        (with-temp-buffer
          (insert-file-contents filename t)
-         (setq buffer-file-name (when (> (length original-filename) 0)
-                                  original-filename))
+
+         (when (> (length original-filename) 0)
+           (setq buffer-file-name original-filename))
          (setq default-directory process-default-directory)
          (checkdoc-current-buffer t)
          (with-current-buffer checkdoc-diagnostic-buffer

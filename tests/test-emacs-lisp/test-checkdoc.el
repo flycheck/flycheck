@@ -33,6 +33,16 @@
      '(emacs-lisp emacs-lisp-checkdoc)  ; Checkdoc is chained after Emacs Lisp
      '(12 nil "First sentence should end with punctuation" warning))))
 
+(ert-deftest checker-emacs-lisp-checkdoc-no-buffer-file-name ()
+  "Test checkdoc checker in buffers without file names."
+  (with-temp-buffer
+    (insert ";;; Hello world\n(message \"foo\")")
+    (emacs-lisp-mode)
+    (should (not (buffer-file-name)))
+    ;; Just check that there are any errors, i.e. that the checker was used and
+    ;; worked.
+    (flycheck-should-checker 'emacs-lisp-checkdoc t)))
+
 (ert-deftest checker-emacs-lisp-checkdoc-inhibited-autoloads ()
   "Test that CheckDoc does not check autoloads buffers. "
   (flycheck-with-resource-buffer "test-emacs-lisp/missing-period-in-docstring.el"
