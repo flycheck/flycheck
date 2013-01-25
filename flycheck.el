@@ -1257,6 +1257,8 @@ Add overlays and report a proper flycheck status."
 
 ;;;; Error overlay management
 (when (fboundp 'define-fringe-bitmap)
+  ;; define-fringe-bitmap is not available if Emacs is built without GUI
+  ;; support, see https://github.com/lunaryorn/flycheck/issues/57
   (define-fringe-bitmap 'flycheck-fringe-exclamation-mark
     [24 60 60 24 24 0 0 24 24] nil nil 'center))
 
