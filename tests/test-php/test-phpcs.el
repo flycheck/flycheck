@@ -36,8 +36,10 @@
   (flycheck-with-resource-buffer "test-php/uppercase-keyword.php"
     (dolist (mode '(php-mode php+-mode))
       (funcall mode)
-      (flycheck-should-checker
-       '(php php-phpcs) '(19 8 "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\"" error)))))
+      (flycheck-buffer-sync)
+      (flycheck-should-errors
+       '(19 8 "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\"" error))
+      (flycheck-ensure-clear))))
 
 (ert-deftest checker-php-phpcs-overlong-line ()
   "Test a phpcs warning about an overlong line."
@@ -45,7 +47,9 @@
   (flycheck-with-resource-buffer "test-php/overlong-line.php"
     (dolist (mode '(php-mode php+-mode))
       (funcall mode)
-      (flycheck-should-checker
-       '(php php-phpcs) '(19 8 "Line exceeds 85 characters; contains 88 characters" warning)))))
+      (flycheck-buffer-sync)
+      (flycheck-should-errors
+       '(19 8 "Line exceeds 85 characters; contains 88 characters" warning))
+      (flycheck-ensure-clear))))
 
 ;;; test-phpcs.el ends here

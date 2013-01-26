@@ -84,28 +84,37 @@
     (sleep-for 1))
   (setq flycheck-syntax-checker-finished nil))
 
-(defun flycheck-should-checker (checkers &rest errors)
-  "Test that checking the current buffer with CHECKERS gives
-ERRORS."
-  (unless (listp checkers)
-    (setq checkers (list checkers)))
-  (set (make-local-variable 'flycheck-checkers) checkers)
+(defun flycheck-disable-checkers (&rest checkers)
+  "Disable all CHECKERS for the current buffer."
+  (set (make-local-variable 'flycheck-checkers)
+       (--remove (memq it checkers) flycheck-checkers)))
+
+(defun flycheck-buffer-sync ()
+  "Check the current buffer synchronously."
   (setq flycheck-syntax-checker-finished nil)
   (should (not (flycheck-running-p)))
-  (should (-all? #'flycheck-may-use-checker checkers))
   (flycheck-mode)
-  (flycheck-wait-for-syntax-checker)
-  (cond
-   ((not errors) (should-not flycheck-current-errors))
-   ;; If a single true argument is given, just check that the buffer has any
-   ;; errors.
-   ((and (= (length errors) 1) (car errors))
-    (should flycheck-current-errors))
-   (t
-    (should (= (length errors) (length flycheck-current-errors)))
+  (flycheck-wait-for-syntax-checker))
+
+(defun flycheck-ensure-clear ()
+  "Clear the current buffer.
+
+Raise an assertion error if the buffer is not clear afterwards."
+  (flycheck-clear)
+  (should (not flycheck-current-errors))
+  (should (not (--any? (overlay-get it 'flycheck-overlay)
+                       (overlays-in (point-min) (point-max))))))
+
+(defun flycheck-should-errors (&rest errors)
+  "Test that the current buffers has ERRORS.
+
+If no ERRORS are given, ensure that there are any errors in the
+buffer at all."
+  (if (not errors)
+      (should flycheck-current-errors)
     (dolist (err errors)
-      (flycheck-should-error err))))
-  (flycheck-clear))
+      (flycheck-should-error err))
+    (should (= (length errors) (length flycheck-current-errors)))))
 
 (defmacro flycheck-with-resource-buffer (resource-file &rest body)
   "Create a temp buffer from a RESOURCE-FILE and execute BODY."

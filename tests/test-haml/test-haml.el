@@ -33,8 +33,8 @@
   :expected-result (flycheck-fail-unless-checker 'haml)
   (flycheck-with-resource-buffer "test-haml/inconsistent-indentation.haml"
     (haml-mode)
-    (flycheck-should-checker
-     'haml
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
      '(5 nil "Inconsistent indentation: 3 spaces were used for indentation, but the rest of the document was indented using 2 spaces." error :no-filename))))
 
 ;;; test-haml.el ends here

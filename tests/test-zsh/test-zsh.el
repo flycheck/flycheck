@@ -33,7 +33,8 @@
   (flycheck-with-resource-buffer "test-zsh/missing-quote.zsh"
     (sh-mode)
     (sh-set-shell "zsh" :no-query)
-    (flycheck-should-checker 'zsh '(6 nil "unmatched '" error))))
+    (flycheck-buffer-sync)
+    (flycheck-should-errors '(6 nil "unmatched '" error))))
 
 (ert-deftest checker-zsh-missing-semicolon ()
   "Test a syntax error from a missing semicolon."
@@ -41,6 +42,7 @@
   (flycheck-with-resource-buffer "test-zsh/missing-semicolon.zsh"
     (sh-mode)
     (sh-set-shell "zsh" :no-query)
-    (flycheck-should-checker 'zsh '(5 nil "parse error near `fi'" error))))
+    (flycheck-buffer-sync)
+    (flycheck-should-errors '(5 nil "parse error near `fi'" error))))
 
 ;;; test-zsh.el ends here

@@ -30,8 +30,8 @@
   :expected-result (flycheck-fail-unless-checker 'ruby)
   (flycheck-with-resource-buffer "test-ruby/unexpected-string.rb"
     (ruby-mode)
-    (flycheck-should-checker
-     'ruby
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
      '(4 nil "syntax error, unexpected tSTRING_BEG, expecting $end" error))))
 
 (ert-deftest checker-ruby-missing-quote ()
@@ -39,8 +39,8 @@
   :expected-result (flycheck-fail-unless-checker 'ruby)
   (flycheck-with-resource-buffer "test-ruby/missing-quote.rb"
     (ruby-mode)
-    (flycheck-should-checker
-     'ruby
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
      '(5 nil "syntax error, unexpected tCONSTANT, expecting $end" error))))
 
 ;;; test-ruby.el ends here

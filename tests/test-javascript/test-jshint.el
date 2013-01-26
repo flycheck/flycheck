@@ -36,8 +36,9 @@
   (flycheck-with-resource-buffer "test-javascript/missing-semicolon.js"
     (dolist (mode '(js-mode js2-mode js3-mode))
       (funcall mode)
-      (flycheck-should-checker
-       'javascript-jshint '(3 21 "Missing semicolon." error)))))
+      (flycheck-buffer-sync)
+      (flycheck-should-errors '(3 21 "Missing semicolon." error))
+      (flycheck-ensure-clear))))
 
 (ert-deftest checker-javascript-jshint-missing-quote ()
   "A missing quote."
@@ -45,10 +46,10 @@
   (flycheck-with-resource-buffer "test-javascript/missing-quote.js"
     (dolist (mode '(js-mode js2-mode js3-mode))
       (funcall mode)
-      (flycheck-should-checker
-       'javascript-jshint
-       '(3 7 "Unclosed string." error)
-       '(4 7 "Unclosed string." error)))))
+      (flycheck-buffer-sync)
+      (flycheck-should-errors '(3 7 "Unclosed string." error)
+                              '(4 7 "Unclosed string." error))
+      (flycheck-ensure-clear))))
 
 (ert-deftest checker-javascript-jshint-use-eval ()
   "Use eval()"
@@ -56,7 +57,8 @@
   (flycheck-with-resource-buffer "test-javascript/use-eval.js"
     (dolist (mode '(js-mode js2-mode js3-mode))
       (funcall mode)
-      (flycheck-should-checker
-       'javascript-jshint '(3 1 "eval is evil." error)))))
+      (flycheck-buffer-sync)
+      (flycheck-should-errors '(3 1 "eval is evil." error))
+      (flycheck-ensure-clear))))
 
 ;;; test-jshint.el ends here

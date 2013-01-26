@@ -33,7 +33,8 @@
   (flycheck-with-resource-buffer "test-python/syntax-error.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-should-checker 'python-flake8 '(6 nil "invalid syntax" error))))
+    (flycheck-buffer-sync)
+    (flycheck-should-errors '(6 nil "invalid syntax" error))))
 
 (ert-deftest checker-python-flake8-missing-quote ()
   "Test a syntax error with flake8."
@@ -41,8 +42,9 @@
   (flycheck-with-resource-buffer "test-python/missing-quote.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-should-checker
-     'python-flake8 '(5 nil "EOL while scanning string literal" error))))
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
+     '(5 nil "EOL while scanning string literal" error))))
 
 (ert-deftest checker-python-flake8-unused-import ()
   "Test an unused import with flake8"
@@ -50,8 +52,9 @@
   (flycheck-with-resource-buffer "test-python/unused-import.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-should-checker
-     'python-flake8 '(5 nil "W402 're' imported but unused" warning))))
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
+     '(5 nil "W402 're' imported but unused" warning))))
 
 (ert-deftest checker-python-flake8-superfluous-space ()
   "Test superfluous spaces with flake8."
@@ -59,8 +62,8 @@
   (flycheck-with-resource-buffer "test-python/superfluous-space.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-should-checker
-     'python-flake8
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
      '(6 13 "E251 no spaces around keyword / parameter equals" error)
      '(6 15 "E251 no spaces around keyword / parameter equals" error))))
 
@@ -71,7 +74,8 @@
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
     (setq flycheck-flake8rc "flake8rc")
-    (flycheck-should-checker 'python-flake8)))
+    (flycheck-buffer-sync)
+    (should-not flycheck-current-errors)))
 
 (ert-deftest checker-python-flake8-redefinition-of-unused-function ()
   "Test a redefinition of an unused function with flake8."
@@ -79,8 +83,8 @@
   (flycheck-with-resource-buffer "test-python/redefinition-of-unused-function.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-should-checker
-     'python-flake8
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
      '(10 nil "W806 redefinition of function 'foo' from line 7" warning))))
 
 ;;; test-flake8.el ends here

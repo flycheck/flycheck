@@ -35,8 +35,10 @@
   (flycheck-with-resource-buffer "test-perl/unused-variable.pl"
     (dolist (mode '(perl-mode cperl-mode))
       (funcall mode)
-      (flycheck-should-checker
-       'perl '(4 nil "Name \"main::x\" used only once: possible typo" error)))))
+      (flycheck-buffer-sync)
+      (flycheck-should-errors
+       '(4 nil "Name \"main::x\" used only once: possible typo" error))
+      (flycheck-ensure-clear))))
 
 (ert-deftest checker-perl-unqualified-variable ()
   "Test an unqualified variable with the Perl checker."
@@ -44,9 +46,10 @@
   (flycheck-with-resource-buffer "test-perl/unqualified-variable.pl"
     (dolist (mode '(perl-mode cperl-mode))
       (funcall mode)
-      (flycheck-should-checker
-       'perl '(5 nil "Global symbol \"$x\" requires explicit package name"
-                 error)))))
+      (flycheck-buffer-sync)
+      (flycheck-should-errors
+       '(5 nil "Global symbol \"$x\" requires explicit package name" error))
+      (flycheck-ensure-clear))))
 
 (ert-deftest checker-perl-syntax-error ()
   :expected-result (flycheck-fail-unless-checker 'perl)
@@ -54,7 +57,9 @@
   (flycheck-with-resource-buffer "test-perl/syntax-error.pl"
     (dolist (mode '(perl-mode cperl-mode))
       (funcall mode)
-      (flycheck-should-checker 'perl '(4 nil "syntax error" error)))))
+      (flycheck-buffer-sync)
+      (flycheck-should-errors '(4 nil "syntax error" error))
+      (flycheck-ensure-clear))))
 
 (require 'sh-script)
 

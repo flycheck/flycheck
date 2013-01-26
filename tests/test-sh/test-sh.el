@@ -33,8 +33,9 @@
   (flycheck-with-resource-buffer "test-sh/missing-quote.sh"
     (sh-mode)
     (sh-set-shell "sh" :no-query)
-    (flycheck-should-checker
-     'sh '(6 nil "Syntax error: Unterminated quoted string" error))))
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
+     '(6 nil "Syntax error: Unterminated quoted string" error))))
 
 (ert-deftest checker-sh-missing-semicolon ()
   "Test a syntax error from a missing semicolon."
@@ -42,7 +43,8 @@
   (flycheck-with-resource-buffer "test-sh/missing-semicolon.sh"
     (sh-mode)
     (sh-set-shell "sh" :no-query)
-    (flycheck-should-checker
-     'sh '(5 nil "Syntax error: \"fi\" unexpected (expecting \"then\")" error))))
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
+     '(5 nil "Syntax error: \"fi\" unexpected (expecting \"then\")" error))))
 
 ;;; test-sh.el ends here

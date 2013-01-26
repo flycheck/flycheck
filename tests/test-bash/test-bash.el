@@ -33,8 +33,8 @@
   (flycheck-with-resource-buffer "test-bash/missing-quote.bash"
     (sh-mode)
     (sh-set-shell "bash" "no-query")
-    (flycheck-should-checker
-     'bash
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
      '(3 nil "unexpected EOF while looking for matching `''" error)
      '(6 nil "syntax error: unexpected end of file" error))))
 
@@ -44,8 +44,8 @@
   (flycheck-with-resource-buffer "test-bash/missing-semicolon.bash"
     (sh-mode)
     (sh-set-shell "bash" "no-query")
-    (flycheck-should-checker
-     'bash
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
      '(5 nil "syntax error near unexpected token `fi'" error)
      '(5 nil "`fi'" error))))
 

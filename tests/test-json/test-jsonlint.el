@@ -30,7 +30,7 @@
   :expected-result (flycheck-fail-unless-checker 'json-jsonlint)
   (flycheck-with-resource-buffer "test-json/multiple-toplevel-objects.json"
     (should (buffer-file-name))
-    (flycheck-should-checker
-     'json-jsonlint '(1 42 "found: ',' - expected: 'EOF'." error))))
+    (flycheck-buffer-sync)
+    (flycheck-should-errors '(1 42 "found: ',' - expected: 'EOF'." error))))
 
 ;;; test-jsonlint.el ends here

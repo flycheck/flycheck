@@ -30,8 +30,8 @@
   :expected-result (flycheck-fail-unless-checker 'html-tidy)
   (flycheck-with-resource-buffer "test-html/missing-tag.html"
     (html-mode)
-    (flycheck-should-checker
-     'html-tidy
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
      '(3 1 "missing <!DOCTYPE> declaration" warning :no-filename)
      '(5 5 "missing </title> before </head>" warning :no-filename))))
 
@@ -40,8 +40,8 @@
   :expected-result (flycheck-fail-unless-checker 'html-tidy)
   (flycheck-with-resource-buffer "test-html/unknown-tag.html"
     (html-mode)
-    (flycheck-should-checker
-     'html-tidy
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
      '(3 1 "missing <!DOCTYPE> declaration" warning :no-filename)
      '(8 5 "<spam> is not recognized!" error :no-filename)
      '(8 5 "discarding unexpected <spam>" warning :no-filename))))

@@ -32,8 +32,8 @@
   :expected-result (flycheck-fail-unless-checker 'tex-chktex)
   (flycheck-with-resource-buffer "test-tex/intersentence-spacing.tex"
     (latex-mode)
-    (flycheck-should-checker
-     'tex-chktex
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
      '(9 28 "13:Intersentence spacing (`\\@') should perhaps be used." warning))))
 
 (ert-deftest checker-tex-chktex-missing-space ()
@@ -41,8 +41,8 @@
   :expected-result (flycheck-fail-unless-checker 'tex-chktex)
   (flycheck-with-resource-buffer "test-tex/missing-space.tex"
     (latex-mode)
-    (flycheck-should-checker
-     'tex-chktex
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
      '(9 12 "36:You should put a space in front of parenthesis." warning))))
 
 ;;; test-chktex.el ends here

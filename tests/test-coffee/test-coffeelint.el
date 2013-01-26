@@ -33,8 +33,8 @@
   :expected-result (flycheck-fail-unless-checker 'coffee-coffeelint)
   (flycheck-with-resource-buffer "test-coffee/throwing-string.coffee"
     (coffee-mode)
-    (flycheck-should-checker
-     'coffee-coffeelint '(4 nil "Throwing strings is forbidden" error))))
+    (flycheck-buffer-sync)
+    (flycheck-should-errors '(4 nil "Throwing strings is forbidden" error))))
 
 (ert-deftest checker-coffeelint-throwing-strings-warning ()
   "Test a warning caused by throwing a string."
@@ -42,15 +42,15 @@
   (flycheck-with-resource-buffer "test-coffee/throwing-string.coffee"
     (coffee-mode)
     (setq flycheck-coffeelintrc "coffeelint.json")
-    (flycheck-should-checker
-     'coffee-coffeelint '(4 nil "Throwing strings is forbidden" warning))))
+    (flycheck-buffer-sync)
+    (flycheck-should-errors '(4 nil "Throwing strings is forbidden" warning))))
 
 (ert-deftest checker-coffeelint-missing-quote ()
   "Test a syntax error caused by a missing quote."
   :expected-result (flycheck-fail-unless-checker 'coffee-coffeelint)
   (flycheck-with-resource-buffer "test-coffee/missing-quote.coffee"
     (coffee-mode)
-    (flycheck-should-checker
-     'coffee-coffeelint '(4 nil "missing \", starting" error :no-filename))))
+    (flycheck-buffer-sync)
+    (flycheck-should-errors '(4 nil "missing \", starting" error :no-filename))))
 
 ;;; test-coffeelint.el ends here

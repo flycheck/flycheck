@@ -32,7 +32,9 @@
   :expected-result (flycheck-fail-unless-checker 'tex-lacheck)
   (flycheck-with-resource-buffer "test-tex/unwanted-space.tex"
     (latex-mode)
-    (flycheck-should-checker
-     'tex-lacheck '(9 nil "possible unwanted space at \"{\"" warning))))
+    (flycheck-disable-checkers 'tex-chktex)
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
+     '(9 nil "possible unwanted space at \"{\"" warning))))
 
 ;;; test-lacheck.el ends here

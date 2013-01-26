@@ -36,15 +36,19 @@
   (flycheck-with-resource-buffer "test-php/missing-quote.php"
     (dolist (mode '(php-mode php+-mode))
       (funcall mode)
-      (flycheck-should-checker
-       'php '(7 nil "syntax error, unexpected end of file, expecting variable (T_VARIABLE) or ${ (T_DOLLAR_OPEN_CURLY_BRACES) or {$ (T_CURLY_OPEN)" error)))))
+      (flycheck-buffer-sync)
+      (flycheck-should-errors
+       '(7 nil "syntax error, unexpected end of file, expecting variable (T_VARIABLE) or ${ (T_DOLLAR_OPEN_CURLY_BRACES) or {$ (T_CURLY_OPEN)" error))
+      (flycheck-ensure-clear))))
 
 (ert-deftest checker-php-paamayim-nekudotayim ()
   "Test the T_PAAMAYIM_NEKUDOTAYIM error."
   (flycheck-with-resource-buffer "test-php/paamayim-nekudotayim.php"
     (dolist (mode '(php-mode php+-mode))
       (funcall mode)
-      (flycheck-should-checker
-       'php '(8 nil "syntax error, unexpected ')', expecting :: (T_PAAMAYIM_NEKUDOTAYIM)" error)))))
+      (flycheck-buffer-sync)
+      (flycheck-should-errors
+       '(8 nil "syntax error, unexpected ')', expecting :: (T_PAAMAYIM_NEKUDOTAYIM)" error))
+      (flycheck-ensure-clear))))
 
 ;;; test-php.el ends here

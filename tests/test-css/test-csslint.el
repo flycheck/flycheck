@@ -30,16 +30,17 @@
   :expected-result (flycheck-fail-unless-checker 'css-csslint)
   (flycheck-with-resource-buffer "test-css/qualified-heading.css"
     (css-mode)
-    (flycheck-should-checker
-     'css-csslint '(3 6 "Heading (h1) should not be qualified." warning))))
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
+     '(3 6 "Heading (h1) should not be qualified." warning))))
 
 (ert-deftest checker-css-csslint-missing-brace ()
   "Test a syntax error caused by a missing brace."
   :expected-result (flycheck-fail-unless-checker 'css-csslint)
   (flycheck-with-resource-buffer "test-css/missing-brace.css"
     (css-mode)
-    (flycheck-should-checker
-     'css-csslint
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
      '(4 16 "Expected LBRACE at line 4, col 16." error)
      '(4 16 "Unexpected token '100%' at line 4, col 16." error)
      '(4 20 "Unexpected token ';' at line 4, col 20." error)

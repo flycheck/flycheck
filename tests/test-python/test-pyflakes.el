@@ -33,7 +33,9 @@
   (flycheck-with-resource-buffer "test-python/syntax-error.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-should-checker 'python-pyflakes '(6 nil "invalid syntax" error))))
+    (flycheck-disable-checkers 'python-flake8 'python-pylint)
+    (flycheck-buffer-sync)
+    (flycheck-should-errors '(6 nil "invalid syntax" error))))
 
 (ert-deftest checker-python-pyflakes-missing-quote ()
   "Test a syntax error with pyflakes."
@@ -41,8 +43,10 @@
   (flycheck-with-resource-buffer "test-python/missing-quote.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-should-checker
-     'python-pyflakes '(5 nil "EOL while scanning string literal" error))))
+    (flycheck-disable-checkers 'python-flake8 'python-pylint)
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
+     '(5 nil "EOL while scanning string literal" error))))
 
 (ert-deftest checker-python-pyflakes-unused-import ()
   "Test an unused import with pyflakes"
@@ -50,8 +54,10 @@
   (flycheck-with-resource-buffer "test-python/unused-import.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-should-checker
-     'python-pyflakes '(5 nil "'re' imported but unused" error))))
+    (flycheck-disable-checkers 'python-flake8 'python-pylint)
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
+     '(5 nil "'re' imported but unused" error))))
 
 (ert-deftest checker-python-pyflakes-redefinition-of-unused-function ()
   "Test a redefinition of an unused function with pyflakes."
@@ -59,8 +65,9 @@
   (flycheck-with-resource-buffer "test-python/redefinition-of-unused-function.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-should-checker
-     'python-pyflakes
+    (flycheck-disable-checkers 'python-flake8 'python-pylint)
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
      '(10 nil "redefinition of function 'foo' from line 7" error))))
 
 ;;; test-pyflakes.el ends here

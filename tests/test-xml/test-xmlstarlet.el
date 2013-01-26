@@ -32,8 +32,8 @@
   :expected-result (flycheck-fail-unless-checker 'xml-xmlstarlet)
   (flycheck-with-resource-buffer "test-xml/missing-quote.xml"
     (nxml-mode)
-    (flycheck-should-checker
-     'xml-xmlstarlet
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
      '(5 1 "Unescaped '<' not allowed in attributes values" error)
      '(5 1 "attributes construct error" error)
      '(5 1 "Couldn't find end of Start Tag with" error))))
@@ -43,8 +43,8 @@
   :expected-result (flycheck-fail-unless-checker 'xml-xmlstarlet)
   (flycheck-with-resource-buffer "test-xml/missing-closing-tag.xml"
     (nxml-mode)
-    (flycheck-should-checker
-     'xml-xmlstarlet
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
      '(5 8 "Opening and ending tag mismatch: with line 4 and spam" error))))
 
 (ert-deftest checker-xmlstarlet-lone-closing-tag ()
@@ -52,8 +52,8 @@
   :expected-result (flycheck-fail-unless-checker 'xml-xmlstarlet)
   (flycheck-with-resource-buffer "test-xml/lone-closing-tag.xml"
     (nxml-mode)
-    (flycheck-should-checker
-     'xml-xmlstarlet
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
      '(4 10 "Opening and ending tag mismatch: spam line 3 and with" error))))
 
 (ert-deftest checker-xmlstarlet-undefined-entity ()
@@ -61,7 +61,7 @@
   :expected-result (flycheck-fail-unless-checker 'xml-xmlstarlet)
   (flycheck-with-resource-buffer "test-xml/undefined-entity.xml"
     (nxml-mode)
-    (flycheck-should-checker
-     'xml-xmlstarlet '(4 25 "Entity 'foo' not defined" error))))
+    (flycheck-buffer-sync)
+    (flycheck-should-errors '(4 25 "Entity 'foo' not defined" error))))
 
 ;;; test-xmlstarlet.el ends here

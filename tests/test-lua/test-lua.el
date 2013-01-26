@@ -39,7 +39,8 @@
   :expected-result (flycheck-fail-unless-checker 'lua)
   (flycheck-with-resource-buffer "test-lua/missing-quote.lua"
     (lua-mode)
-    (flycheck-should-checker
-     'lua '(5 nil "unfinished string near '\"oh no'" error))))
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
+     '(5 nil "unfinished string near '\"oh no'" error))))
 
 ;;; test-lua.el ends here

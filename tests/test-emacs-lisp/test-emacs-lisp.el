@@ -30,15 +30,17 @@
   "Test a syntax error caused by a missing parenthesis."
   (flycheck-with-resource-buffer "test-emacs-lisp/missing-parenthesis.el"
     (emacs-lisp-mode)
-    (flycheck-should-checker
-     'emacs-lisp '(3 1 "End of file during parsing" error))))
+    (flycheck-disable-checkers 'emacs-lisp-checkdoc)
+    (flycheck-buffer-sync)
+    (flycheck-should-errors '(3 1 "End of file during parsing" error))))
 
 (ert-deftest checker-emacs-lisp-missing-argument ()
   "Test a warning caused by a missing argument."
   (flycheck-with-resource-buffer "test-emacs-lisp/missing-argument.el"
     (emacs-lisp-mode)
-    (flycheck-should-checker
-     'emacs-lisp
+    (flycheck-disable-checkers 'emacs-lisp-checkdoc)
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
      '(4 6 "message called with 0 arguments, but requires 1+" warning))))
 
 (ert-deftest checker-emacs-lisp-inhibited-no-byte-compile ()
