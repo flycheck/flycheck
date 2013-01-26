@@ -1061,19 +1061,7 @@ Return the errors parsed with the error patterns of CHECKER."
   (let* ((errors (flycheck-parse-output-with-patterns output checker buffer)))
     ;; Attach originating buffer to each error
     (--each errors (setf (flycheck-error-buffer it) buffer))
-    errors))
-
-(defun flycheck-relevant-error-p (err)
-  "Determine whether ERR is relevant for the current buffer.
-
-Return t if ERR may be shown for the current buffer, or nil
-otherwise."
-  (flycheck-error-with-buffer err
-    (let ((file-name (flycheck-error-file-name err)))
-      (and
-       (or (not file-name) (flycheck-same-files-p file-name (buffer-file-name)))
-       (not (s-blank? (flycheck-error-text err)))
-       (flycheck-error-line-no err)))))
+    (flycheck-sanitize-errors errors)))
 
 (defun flycheck-back-substitute-filename (err)
   "Reverse substitute the file name in ERR.
@@ -1093,7 +1081,8 @@ the corresponding buffer if it matches and file in
 (defun flycheck-sanitize-error (err)
   "Sanitize ERR.
 
-Clean up the error file name and the error message."
+Back substitute the file name to use the real buffer file name
+and clean superfluous whitespace in the error message."
   (flycheck-error-with-buffer err
     (let ((filename (flycheck-error-file-name err))
           (text (flycheck-error-text err)))
@@ -1109,27 +1098,8 @@ Clean up the error file name and the error message."
 (defun flycheck-sanitize-errors (errors)
   "Sanitize ERRORS.
 
-Remove all errors that do not belong to the current file."
-  (-filter 'flycheck-relevant-error-p (-map 'flycheck-sanitize-error errors)))
-
-(defun flycheck-error-<= (err1 err2)
-  "Determine whether ERR1 goes before ERR2.
-
-Compare by line numbers and then by column numbers."
-  (let ((line1 (flycheck-error-line-no err1))
-        (line2 (flycheck-error-line-no err2)))
-    (if (= line1 line2)
-        (let ((col1 (flycheck-error-col-no err1))
-              (col2 (flycheck-error-col-no err2)))
-          (or (not col1)                ; Sort errors for the whole line first
-              (and col2 (<= col1 col2))))
-      (< line1 line2))))
-
-(defun flycheck-sort-errors (errors)
-  "Sort ERRORS by line and column numbers.
-
-ERRORS is modified by side effects."
-  (sort errors 'flycheck-error-<=))
+See `flycheck-sanitize-error' for more information."
+  (-map 'flycheck-sanitize-error errors))
 
 
 ;;;; Error parsing with regular expressions
@@ -1228,9 +1198,47 @@ objects)."
     (flycheck-parse-errors-with-patterns chunks patterns)))
 
 
-;;;; Error analysis and reporting
+;;;; Error analysis
 (defvar-local flycheck-current-errors nil
   "A list of all errors and warnings in the current buffer.")
+
+(defun flycheck-relevant-error-p (err)
+  "Determine whether ERR is relevant for the current buffer.
+
+Return t if ERR may be shown for the current buffer, or nil
+otherwise."
+  (flycheck-error-with-buffer err
+    (let ((file-name (flycheck-error-file-name err)))
+      (and
+       (or (not file-name) (flycheck-same-files-p file-name (buffer-file-name)))
+       (not (s-blank? (flycheck-error-text err)))
+       (flycheck-error-line-no err)))))
+
+(defun flycheck-relevant-errors (errors)
+  "Filter the relevant errors from ERRORS.
+
+Return a list of all errors that are relevant for their
+corresponding buffer."
+  (-filter #'flycheck-relevant-error-p errors))
+
+(defun flycheck-error-<= (err1 err2)
+  "Determine whether ERR1 goes before ERR2.
+
+Compare by line numbers and then by column numbers."
+  (let ((line1 (flycheck-error-line-no err1))
+        (line2 (flycheck-error-line-no err2)))
+    (if (= line1 line2)
+        (let ((col1 (flycheck-error-col-no err1))
+              (col2 (flycheck-error-col-no err2)))
+          (or (not col1)                ; Sort errors for the whole line first
+              (and col2 (<= col1 col2))))
+      (< line1 line2))))
+
+(defun flycheck-sort-errors (errors)
+  "Sort ERRORS by line and column numbers.
+
+ERRORS is modified by side effects."
+  (sort errors 'flycheck-error-<=))
 
 (defun flycheck-count-errors (errors)
   "Count the number of warnings and errors in ERRORS.
@@ -1256,6 +1264,8 @@ If LEVEL is omitted check if ERRORS is not nil."
 If LEVEL is omitted if the current buffer has any errors at all."
   (flycheck-has-errors-p flycheck-current-errors level))
 
+
+;;;; Error reporting
 (defun flycheck-report-errors (errors)
   "Report ERRORS in the current buffer.
 
@@ -1467,7 +1477,7 @@ Parse the output and report an appropriate error status."
          (exit-status (process-exit-status process))
          (output (flycheck-get-output process))
          (parsed-errors (flycheck-parse-output output checker (current-buffer)))
-         (errors (flycheck-sanitize-errors parsed-errors)))
+         (errors (flycheck-relevant-errors parsed-errors)))
     (flycheck-post-syntax-check-cleanup process)
     (when flycheck-mode
       (setq flycheck-current-errors
