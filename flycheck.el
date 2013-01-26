@@ -1010,8 +1010,8 @@ Pop up a help buffer with the documentation of CHECKER."
 
 ;;;; Checker error API
 (defstruct (flycheck-error
-            (:constructor flycheck-make-error))
-  buffer file-name line-no col-no text level)
+            (:constructor flycheck-error-new))
+  buffer filename line column message level)
 
 (defmacro flycheck-error-with-buffer (err &rest forms)
   "Switch to the buffer of ERR and evaluate FORMS.
@@ -1036,9 +1036,9 @@ marks that column only.  Otherwise BEG is the position of the
 first non-whitespace character on the ERR line and END its end."
   (save-excursion
     (goto-char (point-min))
-    (forward-line (- (flycheck-error-line-no err) 1))
+    (forward-line (- (flycheck-error-line err) 1))
     (back-to-indentation)
-    (let* ((col (if ignore-column nil (flycheck-error-col-no err)))
+    (let* ((col (if ignore-column nil (flycheck-error-column err)))
            (beg (point))
            (end (line-end-position)))
       (cond
@@ -1079,12 +1079,12 @@ Substitute the file name of ERR with the function `buffer-file-name' of
 the corresponding buffer if it matches and file in
 `flycheck-substituted-files'."
   (flycheck-error-with-buffer err
-    (let ((file-name (flycheck-error-file-name err)))
-      (when file-name
+    (let ((filename (flycheck-error-filename err)))
+      (when filename
         (--each
           flycheck-substituted-files
-          (when (flycheck-same-files-p file-name it)
-            (setf (flycheck-error-file-name err) (buffer-file-name)))))
+          (when (flycheck-same-files-p filename it)
+            (setf (flycheck-error-filename err) (buffer-file-name)))))
       err)))
 
 (defun flycheck-sanitize-error (err)
@@ -1093,14 +1093,14 @@ the corresponding buffer if it matches and file in
 Back substitute the file name to use the real buffer file name
 and clean superfluous whitespace in the error message."
   (flycheck-error-with-buffer err
-    (let ((filename (flycheck-error-file-name err))
-          (text (flycheck-error-text err)))
-      (when text
-        (setf (flycheck-error-text err) (s-trim text)))
+    (let ((filename (flycheck-error-filename err))
+          (message (flycheck-error-message err)))
+      (when message
+        (setf (flycheck-error-message err) (s-trim message)))
       (when filename
         ;; If the error has a file name, expand it relative to the default
         ;; directory of its buffer and back substitute the file name
-        (setf (flycheck-error-file-name err) (expand-file-name filename))
+        (setf (flycheck-error-filename err) (expand-file-name filename))
         (flycheck-back-substitute-filename err))))
   err)
 
@@ -1165,11 +1165,11 @@ otherwise."
          (level (cadr pattern))
          (match (s-match regexp err)))
     (when match
-      (flycheck-make-error
-       :file-name (flycheck-match-string-non-empty 1 match)
-       :line-no (flycheck-match-int 2 match)
-       :col-no (flycheck-match-int 3 match)
-       :text (flycheck-match-string-non-empty 4 match t)
+      (flycheck-error-new
+       :filename (flycheck-match-string-non-empty 1 match)
+       :line (flycheck-match-int 2 match)
+       :column (flycheck-match-int 3 match)
+       :message (flycheck-match-string-non-empty 4 match t)
        :level level))))
 
 (defun flycheck-parse-error-with-patterns (err patterns)
@@ -1216,11 +1216,11 @@ objects)."
 Return t if ERR may be shown for the current buffer, or nil
 otherwise."
   (flycheck-error-with-buffer err
-    (let ((file-name (flycheck-error-file-name err)))
+    (let ((file-name (flycheck-error-filename err)))
       (and
        (or (not file-name) (flycheck-same-files-p file-name (buffer-file-name)))
-       (not (s-blank? (flycheck-error-text err)))
-       (flycheck-error-line-no err)))))
+       (not (s-blank? (flycheck-error-message err)))
+       (flycheck-error-line err)))))
 
 (defun flycheck-relevant-errors (errors)
   "Filter the relevant errors from ERRORS.
@@ -1233,11 +1233,11 @@ corresponding buffer."
   "Determine whether ERR1 goes before ERR2.
 
 Compare by line numbers and then by column numbers."
-  (let ((line1 (flycheck-error-line-no err1))
-        (line2 (flycheck-error-line-no err2)))
+  (let ((line1 (flycheck-error-line err1))
+        (line2 (flycheck-error-line err2)))
     (if (= line1 line2)
-        (let ((col1 (flycheck-error-col-no err1))
-              (col2 (flycheck-error-col-no err2)))
+        (let ((col1 (flycheck-error-column err1))
+              (col2 (flycheck-error-column err2)))
           (or (not col1)                ; Sort errors for the whole line first
               (and col2 (<= col1 col2))))
       (< line1 line2))))
@@ -1334,12 +1334,12 @@ flycheck exclamation mark otherwise.")
   (flycheck-error-with-buffer err
     (save-excursion
       (goto-char (point-min))
-      (forward-line (- (flycheck-error-line-no err) 1))
+      (forward-line (- (flycheck-error-line err) 1))
       (let* ((mode flycheck-highlighting-mode)
              (level (flycheck-error-level err))
              (region (flycheck-error-region err (not (eq mode 'columns))))
              (category (cdr (assq level flycheck-overlay-categories-alist)))
-             (text (flycheck-error-text err))
+             (message (flycheck-error-message err))
              (overlay (make-overlay (car region) (cdr region)
                                     (flycheck-error-buffer err)))
              (fringe-icon `(left-fringe ,(get category 'flycheck-fringe-bitmap)
@@ -1352,8 +1352,8 @@ flycheck exclamation mark otherwise.")
         (overlay-put overlay 'flycheck-error err)
         (overlay-put overlay 'before-string
                      (propertize "!" 'display fringe-icon))
-        (unless (s-blank? text)
-          (overlay-put overlay 'help-echo text))))))
+        (unless (s-blank? message)
+          (overlay-put overlay 'help-echo message))))))
 
 (defun flycheck-add-overlays (errors)
   "Add overlays for ERRORS."
