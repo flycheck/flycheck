@@ -1050,95 +1050,16 @@ the beginning of the line of ERR."
   (car (flycheck-error-region err)))
 
 
-;;;; Error parsing
-(defun flycheck-match-string-non-empty (group match &optional trim-first)
-  "Get a non-empty string from a GROUP in MATCH.
+;;;; General error parsing
+(defun flycheck-parse-output (output checker buffer)
+  "Parse OUTPUT from CHECKER in BUFFER.
 
-If the string returned by GROUP is empty, return nil instead.
+OUTPUT is a string with the output from the checker symbol
+CHECKER.  BUFFER is the buffer which was checked.
 
-If TRIM-FIRST is t trim leading and trailing white space in the matched
-string."
-  (let ((matched-string (nth group match)))
-    (save-match-data
-      (when matched-string
-        (when trim-first
-          (setq matched-string (s-trim matched-string)))
-        (when (not (s-blank? matched-string))
-          matched-string)))))
-
-(defun flycheck-match-int (group match)
-  "Get an integer from a GROUP in MATCH.
-
-Return nil if the group did not match a number."
-  (let ((matched-string (flycheck-match-string-non-empty group match t)))
-    (when matched-string
-      (string-to-number matched-string))))
-
-(defun flycheck-get-regexp (patterns)
-  "Create a single regular expression from PATTERNS."
-  (s-join "\\|" (--map (format "\\(?:%s\\)" (car it)) patterns)))
-
-(defun flycheck-split-output (output patterns)
-  "Split OUTPUT from BUFFER with PATTERNS.
-
-Return a list of strings where each string is an unparsed error."
-  (let ((regexp (flycheck-get-regexp patterns))
-        (errors nil)
-        (last-match 0))
-    (while (string-match regexp output last-match)
-      (!cons (match-string 0 output) errors)
-      (setq last-match (match-end 0)))
-    errors))
-
-(defun flycheck-try-parse-error-with-pattern (err pattern)
-  "Try to parse a single ERR with a PATTERN.
-
-Return the parsed error if PATTERN matched ERR, or nil
-otherwise."
-  (let* ((regexp (car pattern))
-         (level (cadr pattern))
-         (match (s-match regexp err)))
-    (when match
-      (flycheck-make-error
-       :file-name (flycheck-match-string-non-empty 1 match)
-       :line-no (flycheck-match-int 2 match)
-       :col-no (flycheck-match-int 3 match)
-       :text (flycheck-match-string-non-empty 4 match t)
-       :level level))))
-
-(defun flycheck-parse-error (err patterns)
-  "Parse a single ERR with error PATTERNS.
-
-Apply each pattern in PATTERNS to ERR, in the given order, and
-return the first parsed error."
-  ;; Try to parse patterns in the order of declaration to make sure that the
-  ;; first match wins.
-  (car (--keep (flycheck-try-parse-error-with-pattern err it) patterns)))
-
-(defun flycheck-parse-errors (errors patterns)
-  "Parse ERRORS with PATTERNS.
-
-ERRORS is a list of strings where each string is an unparsed
-error message, typically from `flycheck-split-output'.  PATTERNS
-is a list of error patterns to parse ERRORS with.
-
-Return a list of parsed errors."
-  (--map (flycheck-parse-error it patterns) errors))
-
-(defun flycheck-parse-output (output buffer patterns)
-  "Parse OUTPUT from BUFFER with PATTERNS.
-
-PATTERNS is a list of flycheck error patterns.
-
-First split OUTPUT with PATTERNS to obtain a list of unparsed
-errors.  Then parse each error with PATTERNS to create a
-structured representation of the error.  This ensures that the
-first pattern wins.
-
-Return a list of parsed errors and warnings (as `flycheck-error'
-objects)."
-  (let* ((chunks (flycheck-split-output output patterns))
-         (errors (flycheck-parse-errors chunks patterns)))
+Return the errors parsed with the error patterns of CHECKER."
+  (let* ((errors (flycheck-parse-output-with-patterns output checker buffer)))
+    ;; Attach originating buffer to each error
     (--each errors (setf (flycheck-error-buffer it) buffer))
     errors))
 
@@ -1209,6 +1130,102 @@ Compare by line numbers and then by column numbers."
 
 ERRORS is modified by side effects."
   (sort errors 'flycheck-error-<=))
+
+
+;;;; Error parsing with regular expressions
+(defun flycheck-match-string-non-empty (group match &optional trim-first)
+  "Get a non-empty string from a GROUP in MATCH.
+
+If the string returned by GROUP is empty, return nil instead.
+
+If TRIM-FIRST is t trim leading and trailing white space in the matched
+string."
+  (let ((matched-string (nth group match)))
+    (save-match-data
+      (when matched-string
+        (when trim-first
+          (setq matched-string (s-trim matched-string)))
+        (when (not (s-blank? matched-string))
+          matched-string)))))
+
+(defun flycheck-match-int (group match)
+  "Get an integer from a GROUP in MATCH.
+
+Return nil if the group did not match a number."
+  (let ((matched-string (flycheck-match-string-non-empty group match t)))
+    (when matched-string
+      (string-to-number matched-string))))
+
+(defun flycheck-get-regexp (patterns)
+  "Create a single regular expression from PATTERNS."
+  (s-join "\\|" (--map (format "\\(?:%s\\)" (car it)) patterns)))
+
+(defun flycheck-tokenize-output-with-patterns (output patterns)
+  "Tokenize OUTPUT with PATTERNS.
+
+Split the output into error tokens, using all regular expressions
+from the error PATTERNS.  An error token is simply a string
+containing a single error from OUTPUT.  Such a token can then be
+parsed into a structured error by applying the PATTERNS again,
+see `flycheck-parse-errors-with-patterns'.
+
+Return a list of error tokens."
+  (let ((regexp (flycheck-get-regexp patterns))
+        (errors nil)
+        (last-match 0))
+    (while (string-match regexp output last-match)
+      (!cons (match-string 0 output) errors)
+      (setq last-match (match-end 0)))
+    errors))
+
+(defun flycheck-try-parse-error-with-pattern (err pattern)
+  "Try to parse a single ERR with a PATTERN.
+
+Return the parsed error if PATTERN matched ERR, or nil
+otherwise."
+  (let* ((regexp (car pattern))
+         (level (cadr pattern))
+         (match (s-match regexp err)))
+    (when match
+      (flycheck-make-error
+       :file-name (flycheck-match-string-non-empty 1 match)
+       :line-no (flycheck-match-int 2 match)
+       :col-no (flycheck-match-int 3 match)
+       :text (flycheck-match-string-non-empty 4 match t)
+       :level level))))
+
+(defun flycheck-parse-error-with-patterns (err patterns)
+  "Parse a single ERR with error PATTERNS.
+
+Apply each pattern in PATTERNS to ERR, in the given order, and
+return the first parsed error."
+  ;; Try to parse patterns in the order of declaration to make sure that the
+  ;; first match wins.
+  (car (--keep (flycheck-try-parse-error-with-pattern err it) patterns)))
+
+(defun flycheck-parse-errors-with-patterns (errors patterns)
+  "Parse ERRORS with PATTERNS.
+
+ERRORS is a list of strings where each string is an unparsed
+error message, typically from `flycheck-split-output'.  PATTERNS
+is a list of error patterns to parse ERRORS with.
+
+Return a list of parsed errors."
+  (--map (flycheck-parse-error-with-patterns it patterns) errors))
+
+(defun flycheck-parse-output-with-patterns (output checker buffer)
+  "Parse OUTPUT from CHECKER in BUFFER with error patterns.
+
+Uses the error patterns of CHECKER to tokenize the output and
+tries to parse each error token with all patterns, in the order
+of declaration.  Hence an error is never matched twice by two
+different patterns.  The pattern declared first always wins.
+
+Return a list of parsed errors and warnings (as `flycheck-error'
+objects)."
+  (let* ((patterns (flycheck-checker-error-patterns checker))
+         (chunks (flycheck-tokenize-output-with-patterns output patterns)))
+    (flycheck-parse-errors-with-patterns chunks patterns)))
 
 
 ;;;; Error analysis and reporting
@@ -1449,9 +1466,7 @@ Parse the output and report an appropriate error status."
   (let* ((checker (process-get process :flycheck-checker))
          (exit-status (process-exit-status process))
          (output (flycheck-get-output process))
-         (error-patterns (flycheck-checker-error-patterns checker))
-         (parsed-errors (flycheck-parse-output output (current-buffer)
-                                               error-patterns))
+         (parsed-errors (flycheck-parse-output output checker (current-buffer)))
          (errors (flycheck-sanitize-errors parsed-errors)))
     (flycheck-post-syntax-check-cleanup process)
     (when flycheck-mode
