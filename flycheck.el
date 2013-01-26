@@ -1177,7 +1177,7 @@ Clean up the error file name and the error message."
     (let ((filename (flycheck-error-file-name err))
           (text (flycheck-error-text err)))
       (when text
-        (setf (flycheck-error-text err) (s-collapse-whitespace (s-trim text))))
+        (setf (flycheck-error-text err) (s-trim text)))
       (when filename
         ;; If the error has a file name, expand it relative to the default
         ;; directory of its buffer and back substitute the file name

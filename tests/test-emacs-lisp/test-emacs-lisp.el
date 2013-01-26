@@ -41,7 +41,7 @@
     (flycheck-disable-checkers 'emacs-lisp-checkdoc)
     (flycheck-buffer-sync)
     (flycheck-should-errors
-     '(4 6 "message called with 0 arguments, but requires 1+" warning))))
+     '(4 6 "message called with 0 arguments, but\n    requires 1+" warning))))
 
 (ert-deftest checker-emacs-lisp-inhibited-no-byte-compile ()
   "Test that Emacs Lisp does not check when byte compilation is
