@@ -16,6 +16,6 @@
  * @link     https://github.com/lunaryorn/flycheck
  */
 
-$spam = "This line is really, really long to trigger a warning about an overlong line"";
+$spam = "This line is really, really long to trigger a warning about an overlong line";
 
 ?>

@@ -49,7 +49,7 @@
       (funcall mode)
       (flycheck-buffer-sync)
       (flycheck-should-errors
-       '(19 8 "Line exceeds 85 characters; contains 88 characters" warning))
+       '(19 88 "Line exceeds 85 characters; contains 87 characters" warning))
       (flycheck-ensure-clear))))
 
 ;;; test-phpcs.el ends here
