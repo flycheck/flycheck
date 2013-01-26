@@ -1454,7 +1454,6 @@ Parse the output and report an appropriate error status."
                                                error-patterns))
          (errors (flycheck-sanitize-errors parsed-errors))
          (next-checker (flycheck-get-next-checker-for-buffer checker)))
-    ;; Clean up th e
     (flycheck-post-syntax-check-cleanup process)
     (when flycheck-mode
       (setq flycheck-current-errors
