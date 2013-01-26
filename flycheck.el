@@ -999,7 +999,7 @@ Pop up a help buffer with the documentation of CHECKER."
                        (flycheck-checker-documentation checker)))))))
 
 
-;; Checker error API
+;;;; Checker error API
 (defstruct (flycheck-error
             (:constructor flycheck-make-error))
   buffer file-name line-no col-no text level)
