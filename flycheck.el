@@ -388,6 +388,15 @@ Use when checking buffers automatically."
 
 
 ;;;; Utility functions
+(defun flycheck-string-to-number-safe (string)
+  "Safely convert STRING to a number.
+
+If STRING is of string type, and a numeric string (see
+`s-numeric?'), convert STRING to a number and return it.
+Otherwise return nil."
+  (when (and (stringp string) (s-numeric? string))
+    (string-to-number string)))
+
 (defun flycheck-temp-file-system (filename prefix)
   "Create a copy of FILENAME with PREFIX in temp directory.
 
@@ -1122,9 +1131,8 @@ string."
   "Get an integer from a GROUP in MATCH.
 
 Return nil if the group did not match a number."
-  (let ((matched-string (flycheck-match-string-non-empty group match t)))
-    (when matched-string
-      (string-to-number matched-string))))
+  (flycheck-string-to-number-safe
+   (flycheck-match-string-non-empty group match t)))
 
 (defun flycheck-get-regexp (patterns)
   "Create a single regular expression from PATTERNS."
