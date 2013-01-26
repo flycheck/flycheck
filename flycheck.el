@@ -1452,8 +1452,7 @@ Parse the output and report an appropriate error status."
          (error-patterns (flycheck-checker-error-patterns checker))
          (parsed-errors (flycheck-parse-output output (current-buffer)
                                                error-patterns))
-         (errors (flycheck-sanitize-errors parsed-errors))
-         (next-checker (flycheck-get-next-checker-for-buffer checker)))
+         (errors (flycheck-sanitize-errors parsed-errors)))
     (flycheck-post-syntax-check-cleanup process)
     (when flycheck-mode
       (setq flycheck-current-errors
@@ -1467,9 +1466,10 @@ output: %s\nChecker definition probably flawed."
         (flycheck-report-status "?"))
       (when (eq (current-buffer) (window-buffer))
         (flycheck-show-error-at-point))
-      (if next-checker
-          (flycheck-start-checker next-checker)
-        (run-hooks 'flycheck-after-syntax-check-hook)))))
+      (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
+        (if next-checker
+            (flycheck-start-checker next-checker)
+          (run-hooks 'flycheck-after-syntax-check-hook))))))
 
 (defun flycheck-handle-signal (process event)
   "Handle a syntax checking PROCESS EVENT."
