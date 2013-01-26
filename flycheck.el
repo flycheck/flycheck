@@ -1206,6 +1206,80 @@ objects)."
     (flycheck-parse-errors-with-patterns chunks patterns)))
 
 
+;;;; Error parsers
+(defun flycheck-parse-xml-region (beg end)
+  "Parse the xml region between BEG and END.
+
+Wrapper around `xml-parse-region' which transforms the return
+value of this function into one compatible to
+`libxml-parse-xml-region' by simply returning the first element
+from the node list."
+  (car (xml-parse-region beg end)))
+
+(defvar flycheck-xml-parser
+  (if (fboundp 'libxml-parse-xml-region)
+      'libxml-parse-xml-region 'flycheck-parse-xml-region)
+  "Parse an xml string from a region.
+
+Use libxml if Emacs is built with libxml support.  Otherwise fall
+back to `xml-parse-region'.")
+
+(defun flycheck-parse-xml-string (xml)
+  "Parse an XML string.
+
+Return the document tree parsed from XML."
+  (with-temp-buffer
+    (insert xml)
+    (funcall flycheck-xml-parser (point-min) (point-max))))
+
+(defun flycheck-parse-checkstyle-error-node (node filename)
+  "Parse a single error NODE for FILENAME in a Checkstyle doc.
+
+Return the corresponding Flycheck error, or nil of NODE is not an
+error node."
+  (when (listp node)                    ; Ignore text nodes
+    (let* ((name (car node))
+           (attrs (cadr node))
+           (line (cdr (assq 'line attrs)))
+           (column (cdr (assq 'column attrs)))
+           (severity (cdr (assq 'severity attrs)))
+           (message (cdr (assq 'message attrs))))
+      (when (eq name 'error)
+        (flycheck-error-new
+         :filename filename
+         :line (flycheck-string-to-number-safe line)
+         :column (flycheck-string-to-number-safe column)
+         :message message
+         :level (if (string= severity "error") 'error 'warning))))))
+
+(defun flycheck-parse-checkstyle-file-node (node)
+  "Parse a single file NODE in a Checkstyle document.
+
+Return a list of all errors contained in the NODE, or nil if NODE
+is not a file node."
+  (when (listp node)                    ; Ignore text nodes
+    (let* ((name (car node))
+           (attrs (cadr node))
+           (body (cddr node))
+           (filename (cdr (assq 'name attrs))))
+      (when (eq name 'file)
+        (--keep (flycheck-parse-checkstyle-error-node it filename) body)))))
+
+(defun flycheck-parse-checkstyle (output checker buffer)
+  "Parse Checkstyle errors from OUTPUT of CHECKER in BUFFER.
+
+Parse Checkstyle-like XML output.  Use this error parser for
+checkers that have an option to output errors in this format.
+
+See URL `http://checkstyle.sourceforge.net/' for information
+about Checkstyle."
+  (let* ((root (flycheck-parse-xml-string output)))
+    (unless (eq (car root) 'checkstyle)
+      (error "Unexpected root element %s" (car root)))
+    ;;; cddr gets us the body of the node without its name and its attributes
+    (-flatten (-keep #'flycheck-parse-checkstyle-file-node (cddr root)))))
+
+
 ;;;; Error analysis
 (defvar-local flycheck-current-errors nil
   "A list of all errors and warnings in the current buffer.")
