@@ -1611,19 +1611,32 @@ buffer using the currently running Emacs executable."
   '(progn
      (require 'checkdoc)
 
+     ;; Turn command line normalization into a NOOP to fix arg out of range
+     ;; error in the checker process.  Emacs seems to call this function for
+     ;; each command line argument, for no apparent reason.  Unfortunately this
+     ;; function signals an error if applied to an empty string which breaks the
+     ;; checkdoc checker for buffers without backing files.  Since Flycheck
+     ;; passes sane file names anyway, we can safely turn this function into a
+     ;; noop.
+     (defalias 'command-line-normalize-file-name 'identity)
+
      (let ((filename (car command-line-args-left))
            (original-filename (cadr command-line-args-left))
            (process-default-directory default-directory))
        (with-temp-buffer
          (insert-file-contents filename t)
-
          (when (> (length original-filename) 0)
            (setq buffer-file-name original-filename))
          (setq default-directory process-default-directory)
-         (checkdoc-current-buffer t)
-         (with-current-buffer checkdoc-diagnostic-buffer
-           (princ (buffer-substring-no-properties (point-min) (point-max)))
-           (kill-buffer))))))
+         (condition-case err
+             (progn
+               (checkdoc-current-buffer t)
+               (with-current-buffer checkdoc-diagnostic-buffer
+                 (princ (buffer-substring-no-properties (point-min)
+                                                        (point-max)))
+                 (kill-buffer)))
+           (error
+            (message "Ignoring error: %S" err)))))))
 
 (flycheck-declare-checker emacs-lisp-checkdoc
   "An Emacs Lisp style checker using CheckDoc.
