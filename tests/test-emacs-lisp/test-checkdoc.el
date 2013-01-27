@@ -56,6 +56,14 @@ https://github.com/bbatsov/prelude/issues/259."
     (rename-buffer "foo-autoloads.el")
     (should (not (flycheck-may-use-checker 'emacs-lisp-checkdoc)))))
 
+(ert-deftest checker-emacs-lisp-checkdoc-inhibited-autoloads-source ()
+  "Test that CheckDoc does no check temporary autoload buffers."
+  (flycheck-with-resource-buffer "test-emacs-lisp/missing-period-in-docstring.el"
+    (emacs-lisp-mode)
+    (should (flycheck-may-use-checker 'emacs-lisp-checkdoc))
+    (rename-buffer " *autoload-file*")
+    (should (not (flycheck-may-use-checker 'emacs-lisp-checkdoc)))))
+
 (ert-deftest checker-emacs-lisp-checkdoc-inhibited-compiler-input ()
   "Test that CheckDoc does not check byte compiler input buffers."
 (flycheck-with-resource-buffer "test-emacs-lisp/missing-period-in-docstring.el"

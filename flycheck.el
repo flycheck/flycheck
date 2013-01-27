@@ -1560,7 +1560,7 @@ during byte-compilation or autoloads generation, or nil otherwise."
   ;; during package installation.  Checking these interferes with package
   ;; installation, see https://github.com/lunaryorn/flycheck/issues/45 and
   ;; https://github.com/bbatsov/prelude/issues/248
-  (or (string= (buffer-name) " *Compiler Input*")
+  (or (member (buffer-name) '(" *Compiler Input*" " *autoload-file*"))
       (s-ends-with? "-autoloads.el" (buffer-name))))
 
 (defconst flycheck-emacs-lisp-check-form
