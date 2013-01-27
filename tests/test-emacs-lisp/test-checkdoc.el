@@ -49,7 +49,7 @@ https://github.com/bbatsov/prelude/issues/259."
     (flycheck-should-errors)))
 
 (ert-deftest checker-emacs-lisp-checkdoc-inhibited-autoloads ()
-  "Test that CheckDoc does not check autoloads buffers. "
+  "Test that CheckDoc does not check autoloads buffers."
   (flycheck-with-resource-buffer "test-emacs-lisp/missing-period-in-docstring.el"
     (emacs-lisp-mode)
     (should (flycheck-may-use-checker 'emacs-lisp-checkdoc))
