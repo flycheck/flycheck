@@ -947,7 +947,7 @@ syntax check if the checker changed."
   (interactive
    (if current-prefix-arg
        (list nil)
-     (list (read-flycheck-checker "Checker: "))))
+     (list (read-flycheck-checker "Select checker: "))))
   (when (not (eq checker flycheck-checker))
     (setq flycheck-checker checker)
     (flycheck-buffer)))
