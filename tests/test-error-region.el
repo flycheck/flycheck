@@ -1,4 +1,4 @@
-;;; test-error-regionh.el --- Tests for error region
+;;; test-error-region.el --- Tests for error region
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
@@ -19,6 +19,10 @@
 
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; Test calculations of error regions.
 
 ;;; Code:
 
