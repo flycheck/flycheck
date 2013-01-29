@@ -94,6 +94,7 @@
   (setq flycheck-syntax-checker-finished nil)
   (should (not (flycheck-running-p)))
   (flycheck-mode)
+  (should (flycheck-running-p))
   (flycheck-wait-for-syntax-checker))
 
 (defun flycheck-ensure-clear ()
