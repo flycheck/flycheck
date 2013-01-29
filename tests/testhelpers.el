@@ -94,7 +94,9 @@
   (setq flycheck-syntax-checker-finished nil)
   (should (not (flycheck-running-p)))
   (flycheck-mode)
-  (should (flycheck-running-p))
+  ;; After enabling flycheck-mode the checker should either be running now, or
+  ;; already be finished (if it was fast).
+  (should (or (flycheck-running-p) flycheck-syntax-checker-finished))
   (flycheck-wait-for-syntax-checker))
 
 (defun flycheck-ensure-clear ()
