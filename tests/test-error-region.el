@@ -34,9 +34,9 @@
   "Test the region of an error."
   (with-temp-buffer
     (insert text)
-    (let* ((err (flycheck-make-error :buffer (current-buffer)
-                                     :line-no line-no
-                                     :col-no col-no))
+    (let* ((err (flycheck-error-new :buffer (current-buffer)
+                                    :line line-no
+                                    :column col-no))
            (region (flycheck-error-region err))
            (pos (flycheck-error-pos err)))
       (should (= pos (car region)))

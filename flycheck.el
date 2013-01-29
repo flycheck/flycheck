@@ -388,6 +388,15 @@ Use when checking buffers automatically."
 
 
 ;;;; Utility functions
+(defun flycheck-string-to-number-safe (string)
+  "Safely convert STRING to a number.
+
+If STRING is of string type, and a numeric string (see
+`s-numeric?'), convert STRING to a number and return it.
+Otherwise return nil."
+  (when (and (stringp string) (s-numeric? string))
+    (string-to-number string)))
+
 (defun flycheck-temp-file-system (filename prefix)
   "Create a copy of FILENAME with PREFIX in temp directory.
 
@@ -521,6 +530,12 @@ not match or the match returned an empty string.  LEVEL is either
 warning or error and determines the severity of the error message
 parsed with the pattern.
 
+:error-parser A function symbol to parse errors with.  The
+function must accept three arguments OUTPUT CHECKER BUFFER, where
+OUTPUT is the output as string and CHECKER the checker symbol
+that was used to check BUFFER.  The function must return a list
+of `flycheck-error' objects parsed from OUTPUT.
+
 :modes A major mode symbol or a list thereof.  If present the
 checker is only used in these modes.
 
@@ -538,11 +553,10 @@ checker only if this checker returned only warnings.  Only the
 first usable and registered (see `flycheck-registered-checker-p')
 is run.
 
-A checker must be declared before its :next-checkers are
-declared.
-
-Either :modes or :predicate must be present.  If both are
-present, both must match for the checker to be used."
+A checker must have a :command property, either :error-patterns
+or :error-parser (but not both), and at least one of :predicate
+and :modes.  If :predicate and :modes are present, both must
+match for the checker to be used."
   (declare (indent 1)
            (doc-string 2))
   `(progn
@@ -550,6 +564,7 @@ present, both must match for the checker to be used."
      (put (quote ,symbol) :flycheck-checker nil)
      (put (quote ,symbol) :flycheck-command nil)
      (put (quote ,symbol) :flycheck-error-patterns nil)
+     (put (quote ,symbol) :flycheck-error-parser nil)
      (put (quote ,symbol) :flycheck-modes nil)
      (put (quote ,symbol) :flycheck-predicate nil)
      (put (quote ,symbol) :flycheck-next-checkers nil)
@@ -558,6 +573,8 @@ present, both must match for the checker to be used."
      (put (quote ,symbol) :flycheck-command ,(plist-get properties :command))
      (put (quote ,symbol) :flycheck-error-patterns
           ,(plist-get properties :error-patterns))
+     (put (quote ,symbol) :flycheck-error-parser
+          ,(plist-get properties :error-parser))
      (put (quote ,symbol) :flycheck-modes ,(plist-get properties :modes))
      (put (quote ,symbol) :flycheck-predicate
           ,(plist-get properties :predicate))
@@ -624,20 +641,29 @@ Ensure that all required properties are present, and signal an
 error if not."
   (let ((command (get checker :flycheck-command))
         (patterns (get checker :flycheck-error-patterns))
+        (parser (get checker :flycheck-error-parser))
         (modes (get checker :flycheck-modes))
         (predicate (get checker :flycheck-predicate))
         (next-checkers (get checker :flycheck-next-checkers))
         (doc (get checker :flycheck-documentation)))
     (unless (and doc (stringp doc))
-      (error "Checker %s lacks documentation" checker))
+      (error "Checker %s must have documentation" checker))
     (unless command
-      (error "Checker %s lacks :command" checker))
+      (error "Checker %s must have a :command" checker))
     (unless (stringp (car command))
-      (error "Checker %s lacks executable in :command" checker))
-    (unless (and patterns (flycheck-error-patterns-list-p patterns))
-      (error "Checker %s lacks valid :error-patterns" checker))
+      (error "Checker %s must have an executable in :command" checker))
+    (unless (or patterns parser)
+      (error "Checker %s must have an :error-parser or :error-patterns" checker))
+    (when (and patterns parser)
+      (error "Checker %s must not have :error-parser and :error-patterns"
+             checker))
+    (unless (or (null patterns) (flycheck-error-patterns-list-p patterns))
+      (error "Checker %s has invalid :error-patterns" checker))
+    (unless (or (null parser) (fboundp parser))
+      (error "Function definition of error parser %s of checker %s is void"
+             parser checker))
     (unless (or modes predicate)
-      (error "Checker %s lacks :modes and :predicate" checker))
+      (error "Checker %s must have :modes or :predicate" checker))
     (unless (or
              (null next-checkers)
              (and (listp next-checkers)
@@ -646,8 +672,7 @@ error if not."
                                    (memq (car it) '(no-errors warnings-only))
                                    (symbolp (cdr it))))
                           next-checkers)))
-      (error "Checker %s has invalid next checkers.  Make sure to declare this\
-checker before its next checkers." checker))))
+      (error "Checker %s has invalid next checkers" checker))))
 
 
 ;;;; Checker API
@@ -698,6 +723,10 @@ The executable is the `car' of the checker command as returned by
 (defun flycheck-checker-error-patterns (checker)
   "Get the error patterns of CHECKER."
   (get checker :flycheck-error-patterns))
+
+(defun flycheck-checker-error-parser (checker)
+  "Get the error parser of CHECKER."
+  (get checker :flycheck-error-parser))
 
 (defun flycheck-checker-pattern-to-error-regexp (pattern)
   "Convert PATTERN into an error regexp for compile.el.
@@ -1001,8 +1030,8 @@ Pop up a help buffer with the documentation of CHECKER."
 
 ;;;; Checker error API
 (defstruct (flycheck-error
-            (:constructor flycheck-make-error))
-  buffer file-name line-no col-no text level)
+            (:constructor flycheck-error-new))
+  buffer filename line column message level)
 
 (defmacro flycheck-error-with-buffer (err &rest forms)
   "Switch to the buffer of ERR and evaluate FORMS.
@@ -1027,9 +1056,9 @@ marks that column only.  Otherwise BEG is the position of the
 first non-whitespace character on the ERR line and END its end."
   (save-excursion
     (goto-char (point-min))
-    (forward-line (- (flycheck-error-line-no err) 1))
+    (forward-line (- (flycheck-error-line err) 1))
     (back-to-indentation)
-    (let* ((col (if ignore-column nil (flycheck-error-col-no err)))
+    (let* ((col (if ignore-column nil (flycheck-error-column err)))
            (beg (point))
            (end (line-end-position)))
       (cond
@@ -1050,7 +1079,61 @@ the beginning of the line of ERR."
   (car (flycheck-error-region err)))
 
 
-;;;; Error parsing
+;;;; General error parsing
+(defun flycheck-parse-output (output checker buffer)
+  "Parse OUTPUT from CHECKER in BUFFER.
+
+OUTPUT is a string with the output from the checker symbol
+CHECKER.  BUFFER is the buffer which was checked.
+
+Return the errors parsed with the error patterns of CHECKER."
+  (let* ((parser (or (flycheck-checker-error-parser checker)
+                     'flycheck-parse-output-with-patterns))
+         (errors (funcall parser output checker buffer)))
+    ;; Attach originating buffer to each error
+    (--each errors (setf (flycheck-error-buffer it) buffer))
+    (flycheck-sanitize-errors errors)))
+
+(defun flycheck-back-substitute-filename (err)
+  "Reverse substitute the file name in ERR.
+
+Substitute the file name of ERR with the function `buffer-file-name' of
+the corresponding buffer if it matches and file in
+`flycheck-substituted-files'."
+  (flycheck-error-with-buffer err
+    (let ((filename (flycheck-error-filename err)))
+      (when filename
+        (--each
+          flycheck-substituted-files
+          (when (flycheck-same-files-p filename it)
+            (setf (flycheck-error-filename err) (buffer-file-name)))))
+      err)))
+
+(defun flycheck-sanitize-error (err)
+  "Sanitize ERR.
+
+Back substitute the file name to use the real buffer file name
+and clean superfluous whitespace in the error message."
+  (flycheck-error-with-buffer err
+    (let ((filename (flycheck-error-filename err))
+          (message (flycheck-error-message err)))
+      (when message
+        (setf (flycheck-error-message err) (s-trim message)))
+      (when filename
+        ;; If the error has a file name, expand it relative to the default
+        ;; directory of its buffer and back substitute the file name
+        (setf (flycheck-error-filename err) (expand-file-name filename))
+        (flycheck-back-substitute-filename err))))
+  err)
+
+(defun flycheck-sanitize-errors (errors)
+  "Sanitize ERRORS.
+
+See `flycheck-sanitize-error' for more information."
+  (-map 'flycheck-sanitize-error errors))
+
+
+;;;; Error parsing with regular expressions
 (defun flycheck-match-string-non-empty (group match &optional trim-first)
   "Get a non-empty string from a GROUP in MATCH.
 
@@ -1070,18 +1153,23 @@ string."
   "Get an integer from a GROUP in MATCH.
 
 Return nil if the group did not match a number."
-  (let ((matched-string (flycheck-match-string-non-empty group match t)))
-    (when matched-string
-      (string-to-number matched-string))))
+  (flycheck-string-to-number-safe
+   (flycheck-match-string-non-empty group match t)))
 
 (defun flycheck-get-regexp (patterns)
   "Create a single regular expression from PATTERNS."
   (s-join "\\|" (--map (format "\\(?:%s\\)" (car it)) patterns)))
 
-(defun flycheck-split-output (output patterns)
-  "Split OUTPUT from BUFFER with PATTERNS.
+(defun flycheck-tokenize-output-with-patterns (output patterns)
+  "Tokenize OUTPUT with PATTERNS.
 
-Return a list of strings where each string is an unparsed error."
+Split the output into error tokens, using all regular expressions
+from the error PATTERNS.  An error token is simply a string
+containing a single error from OUTPUT.  Such a token can then be
+parsed into a structured error by applying the PATTERNS again,
+see `flycheck-parse-errors-with-patterns'.
+
+Return a list of error tokens."
   (let ((regexp (flycheck-get-regexp patterns))
         (errors nil)
         (last-match 0))
@@ -1099,14 +1187,14 @@ otherwise."
          (level (cadr pattern))
          (match (s-match regexp err)))
     (when match
-      (flycheck-make-error
-       :file-name (flycheck-match-string-non-empty 1 match)
-       :line-no (flycheck-match-int 2 match)
-       :col-no (flycheck-match-int 3 match)
-       :text (flycheck-match-string-non-empty 4 match t)
+      (flycheck-error-new
+       :filename (flycheck-match-string-non-empty 1 match)
+       :line (flycheck-match-int 2 match)
+       :column (flycheck-match-int 3 match)
+       :message (flycheck-match-string-non-empty 4 match t)
        :level level))))
 
-(defun flycheck-parse-error (err patterns)
+(defun flycheck-parse-error-with-patterns (err patterns)
   "Parse a single ERR with error PATTERNS.
 
 Apply each pattern in PATTERNS to ERR, in the given order, and
@@ -1115,7 +1203,7 @@ return the first parsed error."
   ;; first match wins.
   (car (--keep (flycheck-try-parse-error-with-pattern err it) patterns)))
 
-(defun flycheck-parse-errors (errors patterns)
+(defun flycheck-parse-errors-with-patterns (errors patterns)
   "Parse ERRORS with PATTERNS.
 
 ERRORS is a list of strings where each string is an unparsed
@@ -1123,24 +1211,100 @@ error message, typically from `flycheck-split-output'.  PATTERNS
 is a list of error patterns to parse ERRORS with.
 
 Return a list of parsed errors."
-  (--map (flycheck-parse-error it patterns) errors))
+  (--map (flycheck-parse-error-with-patterns it patterns) errors))
 
-(defun flycheck-parse-output (output buffer patterns)
-  "Parse OUTPUT from BUFFER with PATTERNS.
+(defun flycheck-parse-output-with-patterns (output checker buffer)
+  "Parse OUTPUT from CHECKER in BUFFER with error patterns.
 
-PATTERNS is a list of flycheck error patterns.
-
-First split OUTPUT with PATTERNS to obtain a list of unparsed
-errors.  Then parse each error with PATTERNS to create a
-structured representation of the error.  This ensures that the
-first pattern wins.
+Uses the error patterns of CHECKER to tokenize the output and
+tries to parse each error token with all patterns, in the order
+of declaration.  Hence an error is never matched twice by two
+different patterns.  The pattern declared first always wins.
 
 Return a list of parsed errors and warnings (as `flycheck-error'
 objects)."
-  (let* ((chunks (flycheck-split-output output patterns))
-         (errors (flycheck-parse-errors chunks patterns)))
-    (--each errors (setf (flycheck-error-buffer it) buffer))
-    errors))
+  (let* ((patterns (flycheck-checker-error-patterns checker))
+         (chunks (flycheck-tokenize-output-with-patterns output patterns)))
+    (flycheck-parse-errors-with-patterns chunks patterns)))
+
+
+;;;; Error parsers
+(defun flycheck-parse-xml-region (beg end)
+  "Parse the xml region between BEG and END.
+
+Wrapper around `xml-parse-region' which transforms the return
+value of this function into one compatible to
+`libxml-parse-xml-region' by simply returning the first element
+from the node list."
+  (car (xml-parse-region beg end)))
+
+(defvar flycheck-xml-parser
+  (if (fboundp 'libxml-parse-xml-region)
+      'libxml-parse-xml-region 'flycheck-parse-xml-region)
+  "Parse an xml string from a region.
+
+Use libxml if Emacs is built with libxml support.  Otherwise fall
+back to `xml-parse-region'.")
+
+(defun flycheck-parse-xml-string (xml)
+  "Parse an XML string.
+
+Return the document tree parsed from XML."
+  (with-temp-buffer
+    (insert xml)
+    (funcall flycheck-xml-parser (point-min) (point-max))))
+
+(defun flycheck-parse-checkstyle-error-node (node filename)
+  "Parse a single error NODE for FILENAME in a Checkstyle doc.
+
+Return the corresponding Flycheck error, or nil of NODE is not an
+error node."
+  (when (listp node)                    ; Ignore text nodes
+    (let* ((name (car node))
+           (attrs (cadr node))
+           (line (flycheck-string-to-number-safe (cdr (assq 'line attrs))))
+           (column (flycheck-string-to-number-safe (cdr (assq 'column attrs))))
+           (severity (cdr (assq 'severity attrs)))
+           (message (cdr (assq 'message attrs))))
+      (when (eq name 'error)
+        (flycheck-error-new
+         :filename filename
+         :line line
+         :column (when (and column (> column 0)) column)
+         :message message
+         :level (if (string= severity "error") 'error 'warning))))))
+
+(defun flycheck-parse-checkstyle-file-node (node)
+  "Parse a single file NODE in a Checkstyle document.
+
+Return a list of all errors contained in the NODE, or nil if NODE
+is not a file node."
+  (when (listp node)                    ; Ignore text nodes
+    (let* ((name (car node))
+           (attrs (cadr node))
+           (body (cddr node))
+           (filename (cdr (assq 'name attrs))))
+      (when (eq name 'file)
+        (--keep (flycheck-parse-checkstyle-error-node it filename) body)))))
+
+(defun flycheck-parse-checkstyle (output checker buffer)
+  "Parse Checkstyle errors from OUTPUT of CHECKER in BUFFER.
+
+Parse Checkstyle-like XML output.  Use this error parser for
+checkers that have an option to output errors in this format.
+
+See URL `http://checkstyle.sourceforge.net/' for information
+about Checkstyle."
+  (let* ((root (flycheck-parse-xml-string output)))
+    (unless (eq (car root) 'checkstyle)
+      (error "Unexpected root element %s" (car root)))
+    ;;; cddr gets us the body of the node without its name and its attributes
+    (-flatten (-keep #'flycheck-parse-checkstyle-file-node (cddr root)))))
+
+
+;;;; Error analysis
+(defvar-local flycheck-current-errors nil
+  "A list of all errors and warnings in the current buffer.")
 
 (defun flycheck-relevant-error-p (err)
   "Determine whether ERR is relevant for the current buffer.
@@ -1148,58 +1312,28 @@ objects)."
 Return t if ERR may be shown for the current buffer, or nil
 otherwise."
   (flycheck-error-with-buffer err
-    (let ((file-name (flycheck-error-file-name err)))
+    (let ((file-name (flycheck-error-filename err)))
       (and
        (or (not file-name) (flycheck-same-files-p file-name (buffer-file-name)))
-       (not (s-blank? (flycheck-error-text err)))
-       (flycheck-error-line-no err)))))
+       (not (s-blank? (flycheck-error-message err)))
+       (flycheck-error-line err)))))
 
-(defun flycheck-back-substitute-filename (err)
-  "Reverse substitute the file name in ERR.
+(defun flycheck-relevant-errors (errors)
+  "Filter the relevant errors from ERRORS.
 
-Substitute the file name of ERR with the function `buffer-file-name' of
-the corresponding buffer if it matches and file in
-`flycheck-substituted-files'."
-  (flycheck-error-with-buffer err
-    (let ((file-name (flycheck-error-file-name err)))
-      (when file-name
-        (--each
-          flycheck-substituted-files
-          (when (flycheck-same-files-p file-name it)
-            (setf (flycheck-error-file-name err) (buffer-file-name)))))
-      err)))
-
-(defun flycheck-sanitize-error (err)
-  "Sanitize ERR.
-
-Clean up the error file name and the error message."
-  (flycheck-error-with-buffer err
-    (let ((filename (flycheck-error-file-name err))
-          (text (flycheck-error-text err)))
-      (when text
-        (setf (flycheck-error-text err) (s-trim text)))
-      (when filename
-        ;; If the error has a file name, expand it relative to the default
-        ;; directory of its buffer and back substitute the file name
-        (setf (flycheck-error-file-name err) (expand-file-name filename))
-        (flycheck-back-substitute-filename err))))
-  err)
-
-(defun flycheck-sanitize-errors (errors)
-  "Sanitize ERRORS.
-
-Remove all errors that do not belong to the current file."
-  (-filter 'flycheck-relevant-error-p (-map 'flycheck-sanitize-error errors)))
+Return a list of all errors that are relevant for their
+corresponding buffer."
+  (-filter #'flycheck-relevant-error-p errors))
 
 (defun flycheck-error-<= (err1 err2)
   "Determine whether ERR1 goes before ERR2.
 
 Compare by line numbers and then by column numbers."
-  (let ((line1 (flycheck-error-line-no err1))
-        (line2 (flycheck-error-line-no err2)))
+  (let ((line1 (flycheck-error-line err1))
+        (line2 (flycheck-error-line err2)))
     (if (= line1 line2)
-        (let ((col1 (flycheck-error-col-no err1))
-              (col2 (flycheck-error-col-no err2)))
+        (let ((col1 (flycheck-error-column err1))
+              (col2 (flycheck-error-column err2)))
           (or (not col1)                ; Sort errors for the whole line first
               (and col2 (<= col1 col2))))
       (< line1 line2))))
@@ -1209,11 +1343,6 @@ Compare by line numbers and then by column numbers."
 
 ERRORS is modified by side effects."
   (sort errors 'flycheck-error-<=))
-
-
-;;;; Error analysis and reporting
-(defvar-local flycheck-current-errors nil
-  "A list of all errors and warnings in the current buffer.")
 
 (defun flycheck-count-errors (errors)
   "Count the number of warnings and errors in ERRORS.
@@ -1239,6 +1368,8 @@ If LEVEL is omitted check if ERRORS is not nil."
 If LEVEL is omitted if the current buffer has any errors at all."
   (flycheck-has-errors-p flycheck-current-errors level))
 
+
+;;;; Error reporting
 (defun flycheck-report-errors (errors)
   "Report ERRORS in the current buffer.
 
@@ -1299,12 +1430,12 @@ flycheck exclamation mark otherwise.")
   (flycheck-error-with-buffer err
     (save-excursion
       (goto-char (point-min))
-      (forward-line (- (flycheck-error-line-no err) 1))
+      (forward-line (- (flycheck-error-line err) 1))
       (let* ((mode flycheck-highlighting-mode)
              (level (flycheck-error-level err))
              (region (flycheck-error-region err (not (eq mode 'columns))))
              (category (cdr (assq level flycheck-overlay-categories-alist)))
-             (text (flycheck-error-text err))
+             (message (flycheck-error-message err))
              (overlay (make-overlay (car region) (cdr region)
                                     (flycheck-error-buffer err)))
              (fringe-icon `(left-fringe ,(get category 'flycheck-fringe-bitmap)
@@ -1317,8 +1448,8 @@ flycheck exclamation mark otherwise.")
         (overlay-put overlay 'flycheck-error err)
         (overlay-put overlay 'before-string
                      (propertize "!" 'display fringe-icon))
-        (unless (s-blank? text)
-          (overlay-put overlay 'help-echo text))))))
+        (unless (s-blank? message)
+          (overlay-put overlay 'help-echo message))))))
 
 (defun flycheck-add-overlays (errors)
   "Add overlays for ERRORS."
@@ -1449,10 +1580,8 @@ Parse the output and report an appropriate error status."
   (let* ((checker (process-get process :flycheck-checker))
          (exit-status (process-exit-status process))
          (output (flycheck-get-output process))
-         (error-patterns (flycheck-checker-error-patterns checker))
-         (parsed-errors (flycheck-parse-output output (current-buffer)
-                                               error-patterns))
-         (errors (flycheck-sanitize-errors parsed-errors)))
+         (parsed-errors (flycheck-parse-output output checker (current-buffer)))
+         (errors (flycheck-relevant-errors parsed-errors)))
     (flycheck-post-syntax-check-cleanup process)
     (when flycheck-mode
       (setq flycheck-current-errors
@@ -1683,10 +1812,10 @@ See URL `https://github.com/w3c/tidy-html5'."
   "A JavaScript syntax and style checker using jshint.
 
 See URL `http://www.jshint.com'."
-  :command '("jshint" (config "--config" flycheck-jshintrc) source)
-  :error-patterns
-  '(("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
-     error))
+  :command '("jshint" "--checkstyle-reporter"
+             (config "--config" flycheck-jshintrc)
+             source)
+  :error-parser 'flycheck-parse-checkstyle
   :modes '(js-mode js2-mode js3-mode))
 
 (flycheck-declare-checker json-jsonlint
@@ -1737,10 +1866,8 @@ See URL `http://php.net/manual/en/features.commandline.php'."
   "A PHP syntax checker using PHP_CodeSniffer.
 
 See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
-  :command '("phpcs" "--report=emacs" source)
-  :error-patterns
-  '(("\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): error - \\(?4:.*\\)" error)
-    ("\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): warning - \\(?4:.*\\)" warning))
+  :command '("phpcs" "--report=checkstyle" source)
+  :error-parser 'flycheck-parse-checkstyle
   :modes '(php-mode php+-mode))
 
 (flycheck-def-config-file-var flycheck-flake8rc python-flake8 ".flake8rc")

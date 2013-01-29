@@ -1,7 +1,6 @@
-/** A missing semicolon */
+/** An unused variable */
 
 
 (function() {
     var foo = ["Hello world"];
-    foo.indexOf("Foo")
 }());

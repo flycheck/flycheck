@@ -262,11 +262,11 @@ Syntax checkers are special symbols declared with `flycheck-declare-checker`.
 This function takes a symbol and some keyword arguments that describe the
 checker:
 
-- `:command` (*mandatory*): A list containing the *executable* of the syntax
-  checking tool (in the `car` of the list) and its *arguments* (in the
-  `cdr`). Before enabling a checker **the executable is checked for existence**
-  with `executable-find`.  If this check fails the checker is **not** used.  In
-  *arguments* the following special symbols and tags are replaced:
+- `:command`: A list containing the *executable* of the syntax checking tool (in
+  the `car` of the list) and its *arguments* (in the `cdr`). Before enabling a
+  checker **the executable is checked for existence** with `executable-find`.
+  If this check fails the checker is **not** used.  In *arguments* the following
+  special symbols and tags are replaced:
 
   - `source`: The source file to check.  A temporary file with the contents of
     the buffer to check, created in the **system temporary directory**.
@@ -287,8 +287,8 @@ checker:
     `flycheck-def-config-file-var` to define this variable (see `C-h f
     flycheck-def-config-file-var` for more information).
 
-- `:error-patterns` (*mandatory*): A list of error patterns to parse the output
-  of `:command`.  Each pattern has the form `(REGEXP LEVEL)`:
+- `:error-patterns`: A list of error patterns to parse the output of `:command`.
+  Each pattern has the form `(REGEXP LEVEL)`:
 
   - `REGEXP` is a regular expression that matches a single error or warning.  It
     may match a **multi-line** string.  The expression may provide the following
@@ -309,19 +309,27 @@ checker:
   Patterns are applied in the order of declaration to the **whole** output of
   the checker.  Parts of the output already matched by a pattern will not be
   matched by any subsequent patterns.
-- `:modes` (*optional*): A single major mode symbol or a list thereof.  If given
-  the checker will only be used in any of these modes.
-- `:predicate` (*optional*): A form that if present is evaluated to determine
-  whether the checker is to be used.  The checker is only used if the form
-  evaluates to non-nil.
-- `:next-checker` (*optional*): A list of checkers to run after this checker.
-  Each element is either a checker symbol, or a cons cell `(predicate
-  . checker)`.  In the latter case, `checker` is a checker symbol, and
-  `predicate` specifies when to run the checker: If `no-errors`, `checker` is
-  only run if this checker returned no errors, if `warnings-only`, `checker` is
-  only run if this checker returned only warnings.  Only the **first** suitable
-  **and** registered (see `flycheck-checkers`) checker with matching `predicate`
-  is run.
+- `:error-parser`: A function symbol to parse errors with.  The function must
+  take three arguments `output checker buffer`.  `output` is the output of the
+  `checker` as string.  `checker` is the checker symbol that was used to check
+  the `buffer`.  `buffer` is the buffer that was checked.  The function must
+  return a list of `flycheck-error` objects.
+
+  Flycheck provides the following built-in parsers:
+
+  - `flycheck-parse-checkstyle`: Parse XML output similar to [Checkstyle][].
+- `:modes`: A single major mode symbol or a list thereof.  If given the checker
+  will only be used in any of these modes.
+- `:predicate`: A form that if present is evaluated to determine whether the
+  checker is to be used.  The checker is only used if the form evaluates to
+  non-nil.
+- `:next-checker`: A list of checkers to run after this checker.  Each element
+  is either a checker symbol, or a cons cell `(predicate . checker)`.  In the
+  latter case, `checker` is a checker symbol, and `predicate` specifies when to
+  run the checker: If `no-errors`, `checker` is only run if this checker
+  returned no errors, if `warnings-only`, `checker` is only run if this checker
+  returned only warnings.  Only the **first** suitable **and** registered (see
+  `flycheck-checkers`) checker with matching `predicate` is run.
 
 **At least one** of `:modes` and `:predicate` must **be present**.  If **both**
 are present, **both** must match for the checker to be used.
@@ -416,10 +424,8 @@ JavaScript:
 (flycheck-def-config-file-var flycheck-jshintrc javascript-jshint ".jshintrc")
 
 (flycheck-declare-checker javascript-jshint
-  :command '("jshint" (config "--config" flycheck-jshintrc) source)
-  :error-patterns
-  '(("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
-     error))
+  :command '("jshint" "--checkstyle-reporter" (config "--config" flycheck-jshintrc) source)
+  :error-parser 'flycheck-parse-checkstyle
   :modes 'js-mode)
 ```
 
@@ -523,6 +529,7 @@ See [COPYING][] for details.
 [s.el]: https://github.com/magnars/s.el
 [solarized]: https://github.com/bbatsov/solarized-emacs
 [python]: http://python.org
+[checkstyle]: http://checkstyle.sourceforge.net/
 [syntastic]: https://github.com/scrooloose/syntastic
 [scrooloose]: https://github.com/scrooloose
 [purcell]: https://github.com/purcell

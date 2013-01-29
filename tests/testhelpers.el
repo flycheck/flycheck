@@ -33,7 +33,7 @@
 (defun flycheck-should-overlay (overlay error)
   "Test that OVERLAY is in REGION and corresponds to ERROR."
   (let* ((region (flycheck-error-region error))
-         (text (flycheck-error-text error))
+         (message (flycheck-error-message error))
          (level (flycheck-error-level error))
          (face (if (eq level 'warning)
                    'flycheck-warning-face
@@ -55,17 +55,17 @@
                    fringe-icon))
     (should (eq (overlay-get overlay 'category) category))
     (should (equal (overlay-get overlay 'flycheck-error) error))
-    (should (string= (overlay-get overlay 'help-echo) text))))
+    (should (string= (overlay-get overlay 'help-echo) message))))
 
 (defun flycheck-should-error (expected-err)
   "Test that ERR is an error in the current buffer."
   (let* ((no-filename (nth 4 expected-err))
-         (real-error (flycheck-make-error
+         (real-error (flycheck-error-new
                       :buffer (current-buffer)
-                      :file-name (if no-filename nil (buffer-file-name))
-                      :line-no (nth 0 expected-err)
-                      :col-no (nth 1 expected-err)
-                      :text (nth 2 expected-err)
+                      :filename (if no-filename nil (buffer-file-name))
+                      :line (nth 0 expected-err)
+                      :column (nth 1 expected-err)
+                      :message (nth 2 expected-err)
                       :level (nth 3 expected-err)))
          (overlay (--first (equal (overlay-get it 'flycheck-error) real-error)
                            (flycheck-overlays-at (flycheck-error-pos real-error)))))
