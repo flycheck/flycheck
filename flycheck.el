@@ -1262,15 +1262,15 @@ error node."
   (when (listp node)                    ; Ignore text nodes
     (let* ((name (car node))
            (attrs (cadr node))
-           (line (cdr (assq 'line attrs)))
-           (column (cdr (assq 'column attrs)))
+           (line (flycheck-string-to-number-safe (cdr (assq 'line attrs))))
+           (column (flycheck-string-to-number-safe (cdr (assq 'column attrs))))
            (severity (cdr (assq 'severity attrs)))
            (message (cdr (assq 'message attrs))))
       (when (eq name 'error)
         (flycheck-error-new
          :filename filename
-         :line (flycheck-string-to-number-safe line)
-         :column (flycheck-string-to-number-safe column)
+         :line line
+         :column (when (and column (> column 0)) column)
          :message message
          :level (if (string= severity "error") 'error 'warning))))))
 
