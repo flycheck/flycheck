@@ -547,9 +547,6 @@ checker only if this checker returned only warnings.  Only the
 first usable and registered (see `flycheck-registered-checker-p')
 is run.
 
-A checker must be declared before its :next-checkers are
-declared.
-
 Either :modes or :predicate must be present.  If both are
 present, both must match for the checker to be used."
   (declare (indent 1)
