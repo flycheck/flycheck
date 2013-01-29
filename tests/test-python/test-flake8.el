@@ -77,14 +77,4 @@
     (flycheck-buffer-sync)
     (should-not flycheck-current-errors)))
 
-(ert-deftest checker-python-flake8-redefinition-of-unused-function ()
-  "Test a redefinition of an unused function with flake8."
-  :expected-result (flycheck-fail-unless-checker 'python-flake8)
-  (flycheck-with-resource-buffer "test-python/redefinition-of-unused-function.py"
-    (let ((python-indent-guess-indent-offset nil))
-      (python-mode))
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
-     '(10 nil "W806 redefinition of function 'foo' from line 7" warning))))
-
 ;;; test-flake8.el ends here

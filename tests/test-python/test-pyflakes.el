@@ -59,15 +59,4 @@
     (flycheck-should-errors
      '(5 nil "'re' imported but unused" error))))
 
-(ert-deftest checker-python-pyflakes-redefinition-of-unused-function ()
-  "Test a redefinition of an unused function with pyflakes."
-  :expected-result (flycheck-fail-unless-checker 'python-pyflakes)
-  (flycheck-with-resource-buffer "test-python/redefinition-of-unused-function.py"
-    (let ((python-indent-guess-indent-offset nil))
-      (python-mode))
-    (flycheck-disable-checkers 'python-flake8 'python-pylint)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
-     '(10 nil "redefinition of function 'foo' from line 7" error))))
-
 ;;; test-pyflakes.el ends here
