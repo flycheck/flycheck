@@ -530,6 +530,12 @@ not match or the match returned an empty string.  LEVEL is either
 warning or error and determines the severity of the error message
 parsed with the pattern.
 
+:error-parser A function symbol to parse errors with.  The
+function must accept three arguments OUTPUT CHECKER BUFFER, where
+OUTPUT is the output as string and CHECKER the checker symbol
+that was used to check BUFFER.  The function must return a list
+of `flycheck-error' objects parsed from OUTPUT.
+
 :modes A major mode symbol or a list thereof.  If present the
 checker is only used in these modes.
 
@@ -547,8 +553,10 @@ checker only if this checker returned only warnings.  Only the
 first usable and registered (see `flycheck-registered-checker-p')
 is run.
 
-Either :modes or :predicate must be present.  If both are
-present, both must match for the checker to be used."
+A checker must have a :command property, either :error-patterns
+or :error-parser (but not both), and at least one of :predicate
+and :modes.  If :predicate and :modes are present, both must
+match for the checker to be used."
   (declare (indent 1)
            (doc-string 2))
   `(progn
@@ -556,6 +564,7 @@ present, both must match for the checker to be used."
      (put (quote ,symbol) :flycheck-checker nil)
      (put (quote ,symbol) :flycheck-command nil)
      (put (quote ,symbol) :flycheck-error-patterns nil)
+     (put (quote ,symbol) :flycheck-error-parser nil)
      (put (quote ,symbol) :flycheck-modes nil)
      (put (quote ,symbol) :flycheck-predicate nil)
      (put (quote ,symbol) :flycheck-next-checkers nil)
@@ -564,6 +573,8 @@ present, both must match for the checker to be used."
      (put (quote ,symbol) :flycheck-command ,(plist-get properties :command))
      (put (quote ,symbol) :flycheck-error-patterns
           ,(plist-get properties :error-patterns))
+     (put (quote ,symbol) :flycheck-error-parser
+          ,(plist-get properties :error-parser))
      (put (quote ,symbol) :flycheck-modes ,(plist-get properties :modes))
      (put (quote ,symbol) :flycheck-predicate
           ,(plist-get properties :predicate))
@@ -630,6 +641,7 @@ Ensure that all required properties are present, and signal an
 error if not."
   (let ((command (get checker :flycheck-command))
         (patterns (get checker :flycheck-error-patterns))
+        (parser (get checker :flycheck-error-parser))
         (modes (get checker :flycheck-modes))
         (predicate (get checker :flycheck-predicate))
         (next-checkers (get checker :flycheck-next-checkers))
@@ -640,8 +652,16 @@ error if not."
       (error "Checker %s must have a :command" checker))
     (unless (stringp (car command))
       (error "Checker %s must have an executable in :command" checker))
-    (unless (and patterns (flycheck-error-patterns-list-p patterns))
+    (unless (or patterns parser)
+      (error "Checker %s must have an :error-parser or :error-patterns" checker))
+    (when (and patterns parser)
+      (error "Checker %s must not have :error-parser and :error-patterns"
+             checker))
+    (unless (or (null patterns) (flycheck-error-patterns-list-p patterns))
       (error "Checker %s has invalid :error-patterns" checker))
+    (unless (or (null parser) (fboundp parser))
+      (error "Function definition of error parser %s of checker %s is void"
+             parser checker))
     (unless (or modes predicate)
       (error "Checker %s must have :modes or :predicate" checker))
     (unless (or
@@ -703,6 +723,10 @@ The executable is the `car' of the checker command as returned by
 (defun flycheck-checker-error-patterns (checker)
   "Get the error patterns of CHECKER."
   (get checker :flycheck-error-patterns))
+
+(defun flycheck-checker-error-parser (checker)
+  "Get the error parser of CHECKER."
+  (get checker :flycheck-error-parser))
 
 (defun flycheck-checker-pattern-to-error-regexp (pattern)
   "Convert PATTERN into an error regexp for compile.el.
@@ -1063,7 +1087,9 @@ OUTPUT is a string with the output from the checker symbol
 CHECKER.  BUFFER is the buffer which was checked.
 
 Return the errors parsed with the error patterns of CHECKER."
-  (let* ((errors (flycheck-parse-output-with-patterns output checker buffer)))
+  (let* ((parser (or (flycheck-checker-error-parser checker)
+                     'flycheck-parse-output-with-patterns))
+         (errors (funcall parser output checker buffer)))
     ;; Attach originating buffer to each error
     (--each errors (setf (flycheck-error-buffer it) buffer))
     (flycheck-sanitize-errors errors)))
