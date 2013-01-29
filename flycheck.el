@@ -151,12 +151,13 @@ to always use a specific checker for a file.")
   "The highlighting mode.
 
 Controls how Flycheck highlights errors in buffers.  May either
-be columns, lines or nil.
+be `columns', `lines' or nil.
 
-If columns highlight specific columns if errors are specific to a
-column.  If lines always highlight the whole line regardless of
-whether the error is specific to a column.  If nil do no
-highlight errors at all, but only show fringe icons.
+If set to `columns' highlight specific columns if errors are
+specific to a column.  If set to `lines' always highlight the
+whole line regardless of whether the error is specific to a
+column.  If nil do no highlight errors at all, but only show
+fringe icons.
 
 Note that this does not affect error navigation.  When navigating
 errors with `next-error' and `previous-error' Flycheck always
@@ -305,9 +306,11 @@ buffer manually.
 (defun flycheck-handle-change (beg end len)
   "Handle a buffer change between BEG and END with LEN.
 
-BEG and END mark the beginning and end of the change text.  LEN is ignored.
+BEG and END mark the beginning and end of the change text.  LEN
+is ignored.
 
-Start a syntax check if a new line has been inserted into the buffer."
+Start a syntax check if a new line has been inserted into the
+buffer."
   (let ((new-text (buffer-substring beg end)))
     (when (and flycheck-mode (s-contains? "\n" new-text))
       (flycheck-buffer-safe))))
@@ -333,7 +336,7 @@ Start a syntax check if a new line has been inserted into the buffer."
     (user-error "Flycheck mode disabled")))
 
 (defun flycheck-compile-name (mode-name)
-  "Get a name for a compilation buffer."
+  "Get a name for a compilation buffer based on MODE-NAME."
   (format "*Flycheck %s*" (buffer-file-name)))
 
 (defun flycheck-compile ()
@@ -511,7 +514,7 @@ about a checker.
 
 The following PROPERTIES are understood:
 
-:command A list with the executable (in `car') and the
+`:command' A list with the executable (in `car') and the
 arguments (in `cdr') of the syntax checker.  The executable is
 checked for existence with `executable-find' before executing the
 checker.  The arguments are substituted with
@@ -519,7 +522,7 @@ checker.  The arguments are substituted with
 documentation of this function for a list of special tags allowed
 in arguments.
 
-:error-patterns A list of error patterns to parse the output of
+`:error-patterns' A list of error patterns to parse the output of
 the checker.  Each pattern is a list (REGEXP LEVEL).  REGEXP is a
 regular expression that matches an error.  This regular
 expression may contain match groups extracting specific
@@ -530,38 +533,38 @@ not match or the match returned an empty string.  LEVEL is either
 warning or error and determines the severity of the error message
 parsed with the pattern.
 
-:error-parser A function symbol to parse errors with.  The
+`:error-parser' A function symbol to parse errors with.  The
 function must accept three arguments OUTPUT CHECKER BUFFER, where
 OUTPUT is the output as string and CHECKER the checker symbol
 that was used to check BUFFER.  The function must return a list
 of `flycheck-error' objects parsed from OUTPUT.
 
-:modes A major mode symbol or a list thereof.  If present the
+`:modes' A major mode symbol or a list thereof.  If present the
 checker is only used in these modes.
 
-:predicate An Emacs Lisp form.  If present the checker is only
+`:predicate' An Emacs Lisp form.  If present the checker is only
 used if the form evaluates to a non-nil result in the buffer to
 check.
 
-:next-checkers A list where each element is either a checker
+`:next-checkers' A list where each element is either a checker
 symbol to run after this checker or a cons cell (PREDICATE
-. CHECKER).  In the latter case, CHECKER is the checker to run,
-and PREDICATE specifies when to run the checker: If PREDICATE is
-no-errors run the next checker only if this checker returned no
-errors at all.  If PREDICATE is warnings-only, run the next
-checker only if this checker returned only warnings.  Only the
-first usable and registered (see `flycheck-registered-checker-p')
-is run.
+. CHECKER).  In the latter case, CHECKER is the checker symbol to
+run, and the PREDICATE symbol specifies when to run the checker:
+If PREDICATE is `no-errors' run the next checker only if this
+checker returned no errors at all.  If PREDICATE is
+`warnings-only', run the next checker only if this checker
+returned only warnings.  Only the first usable and
+registered (see `flycheck-registered-checker-p') is run.
 
-A checker must have a :command property, either :error-patterns
-or :error-parser (but not both), and at least one of :predicate
-and :modes.  If :predicate and :modes are present, both must
-match for the checker to be used."
+A checker must have a `:command' property, either
+`:error-patterns' or `:error-parser' (but not both), and at least
+one of `:predicate' and `:modes'.  If `:predicate' and `:modes'
+are present, both must match for the checker to be used."
   (declare (indent 1)
            (doc-string 2))
   `(progn
      ;; Un-declare any previous checker for this mode
-     (put (quote ,symbol) :flycheck-checker nil)
+     (put (quote ,symbol) :flychieck-checker nil)
      (put (quote ,symbol) :flycheck-command nil)
      (put (quote ,symbol) :flycheck-error-patterns nil)
      (put (quote ,symbol) :flycheck-error-parser nil)
@@ -609,7 +612,7 @@ file is found pass it to the checker as configuration file.
 Otherwise invoke the checker without a configuration file.
 
 When set to a file path containing a slash expand the file name
-with `expand-file-name` and pass this file to checker, if it
+with `expand-file-named' and pass this file to checker, if it
 exists.  Otherwise invoke the checker without a configuration
 file.
 
@@ -839,18 +842,18 @@ If FILE-NAME does not contain a slash, search the file with
 (defun flycheck-substitute-argument (arg)
   "Substitute ARG with file to check is possible.
 
-If ARG is source or source-inplace, create a temporary file
+If ARG is `source' or `source-inplace', create a temporary file
 to check and return its path.
 
-If ARG is source-original, return the path of the actual file to
-check, or an empty string if the buffer has no file name.  Note
-that the contents of the file may not be up to date with the
+If ARG is `source-original', return the path of the actual file
+to check, or an empty string if the buffer has no file name.
+Note that the contents of the file may not be up to date with the
 contents of the buffer to check.  Do not use this as primary
 input to a checker!
 
-If ARG is a list whose `car' is config, search the configuration
-file and return a list of options that specify this configuration
-file, or nil of the config file was not found.
+If ARG is a list whose `car' is `config', search the
+configuration file and return a list of options that specify this
+configuration file, or nil of the config file was not found.
 
 In all other cases, return ARG unchanged."
   (cond
@@ -879,11 +882,12 @@ symbols in the command."
 (defun flycheck-substitute-shell-argument (arg)
   "Substitute ARG for use in a shell command..
 
-If ARG is source or source-inplace, return the buffer file name.
+If ARG is `source', `source-inplace' or `source-original', return
+the buffer file name.
 
-If ARG is a list whose `car' is config, search the configuration
-file and return a list of options that specify this configuration
-file, or nil of the config file was not found.
+If ARG is a list whose `car' is `config', search the
+configuration file and return a list of options that specify this
+configuration file, or nil of the config file was not found.
 
 ARG is always quoted for use in a shell command (see
 `shell-quote-argument')."
