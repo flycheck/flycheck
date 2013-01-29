@@ -3,7 +3,7 @@ Flycheck
 
 [![Build Status](https://travis-ci.org/lunaryorn/flycheck.png)](https://travis-ci.org/lunaryorn/flycheck)
 
-Flycheck provides on-the-fly syntax checking for GNU Emacs.  Essentially it's
+Flycheck provides on-the-fly syntax checking for GNU Emacs 24.  Essentially it's
 “flymake done right” with
 
 - major-mode based checkers (instead of file name patterns),
@@ -58,8 +58,9 @@ dependencies manually:
 - [dash.el][]
 - [s.el][]
 
-The library is written and tested against GNU Emacs 24 and may or may not work
-in earlier versions of GNU Emacs.
+Flycheck is written and tested against GNU Emacs 24.2 and newer.  It should work
+on Emacs 24.1, too.  GNU Emacs 23 and before, and other flavors of Emacs
+(e.g. XEmacs) are not supported.
 
 Most checkers have dependencies against external tools that perform the
 checking.  Use `C-c ! ?` (`flycheck-describe-checker`) to see what a checker
