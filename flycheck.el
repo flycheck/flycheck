@@ -635,15 +635,15 @@ error if not."
         (next-checkers (get checker :flycheck-next-checkers))
         (doc (get checker :flycheck-documentation)))
     (unless (and doc (stringp doc))
-      (error "Checker %s lacks documentation" checker))
+      (error "Checker %s must have documentation" checker))
     (unless command
-      (error "Checker %s lacks :command" checker))
+      (error "Checker %s must have a :command" checker))
     (unless (stringp (car command))
-      (error "Checker %s lacks executable in :command" checker))
+      (error "Checker %s must have an executable in :command" checker))
     (unless (and patterns (flycheck-error-patterns-list-p patterns))
-      (error "Checker %s lacks valid :error-patterns" checker))
+      (error "Checker %s has invalid :error-patterns" checker))
     (unless (or modes predicate)
-      (error "Checker %s lacks :modes and :predicate" checker))
+      (error "Checker %s must have :modes or :predicate" checker))
     (unless (or
              (null next-checkers)
              (and (listp next-checkers)
@@ -652,8 +652,7 @@ error if not."
                                    (memq (car it) '(no-errors warnings-only))
                                    (symbolp (cdr it))))
                           next-checkers)))
-      (error "Checker %s has invalid next checkers.  Make sure to declare this\
-checker before its next checkers." checker))))
+      (error "Checker %s has invalid next checkers" checker))))
 
 
 ;;;; Checker API
