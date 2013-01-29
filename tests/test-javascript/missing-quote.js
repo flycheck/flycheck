@@ -1,3 +1,6 @@
 /** A syntax error caused by a missing quote */
 
-alert("Hello world)
+(function() {
+    var foo = ["Hello world"];
+    foo.indexOf("Foo);
+}());

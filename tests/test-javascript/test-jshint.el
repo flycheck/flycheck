@@ -37,7 +37,7 @@
     (dolist (mode '(js-mode js2-mode js3-mode))
       (funcall mode)
       (flycheck-buffer-sync)
-      (flycheck-should-errors '(3 21 "Missing semicolon." error))
+      (flycheck-should-errors '(6 23 "Missing semicolon." error))
       (flycheck-ensure-clear))))
 
 (ert-deftest checker-javascript-jshint-missing-quote ()
@@ -47,8 +47,10 @@
     (dolist (mode '(js-mode js2-mode js3-mode))
       (funcall mode)
       (flycheck-buffer-sync)
-      (flycheck-should-errors '(3 7 "Unclosed string." error)
-                              '(4 7 "Unclosed string." error))
+      (flycheck-should-errors
+       '(5 17 "Unclosed string." error)
+       '(6 17 "Unclosed string." error)
+       '(7 17 "Unclosed string." error))
       (flycheck-ensure-clear))))
 
 (ert-deftest checker-javascript-jshint-use-eval ()
@@ -59,6 +61,16 @@
       (funcall mode)
       (flycheck-buffer-sync)
       (flycheck-should-errors '(3 1 "eval is evil." error))
+      (flycheck-ensure-clear))))
+
+(ert-deftest checker-javascript-jshint-unused-variable ()
+  "An unused variable."
+  :expected-result (flycheck-fail-unless-checker 'javascript-jshint)
+  (flycheck-with-resource-buffer "test-javascript/unused-variable.js"
+    (dolist (mode '(js-mode js2-mode js3-mode))
+      (funcall mode)
+      (flycheck-buffer-sync)
+      (flycheck-should-errors '(5 nil "Unused variable: 'foo'" warning))
       (flycheck-ensure-clear))))
 
 ;;; test-jshint.el ends here

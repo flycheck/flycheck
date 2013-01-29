@@ -423,10 +423,8 @@ JavaScript:
 (flycheck-def-config-file-var flycheck-jshintrc javascript-jshint ".jshintrc")
 
 (flycheck-declare-checker javascript-jshint
-  :command '("jshint" (config "--config" flycheck-jshintrc) source)
-  :error-patterns
-  '(("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
-     error))
+  :command '("jshint" "--checkstyle-reporter" (config "--config" flycheck-jshintrc) source)
+  :error-parser 'flycheck-parse-checkstyle
   :modes 'js-mode)
 ```
 
