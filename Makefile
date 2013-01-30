@@ -8,7 +8,7 @@ OBJECTS = flycheck.elc
 build : $(OBJECTS)
 
 .PHONY: test
-test :
+test : build
 	@$(EMACS) --no-site-file --no-site-lisp --batch $(EMACSFLAGS) \
 		-l dependencies.el -l tests/testsuite.el \
 		-f ert-run-tests-batch-and-exit

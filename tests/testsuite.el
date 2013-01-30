@@ -39,7 +39,7 @@
 (require 's)
 
 ;; Load flycheck
-(load (expand-file-name "../flycheck.el" testsuite-dir) nil :no-message)
+(load (expand-file-name "../flycheck" testsuite-dir) nil :no-message)
 
 ;; Load test helpers
 (load (expand-file-name "testhelpers.el" testsuite-dir) nil :no-message)

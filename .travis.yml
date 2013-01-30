@@ -4,6 +4,5 @@ env:
   - EMACS=emacs-snapshot
 before_script:
   - sh vagrant/provision.sh
-  - make
 script:
   - make EMACS=${EMACS} test
