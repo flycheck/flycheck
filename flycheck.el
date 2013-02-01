@@ -1623,6 +1623,7 @@ output: %s\nChecker definition probably flawed."
       (let* ((command (flycheck-checker-substituted-command checker))
              (program (car command))
              (args (cdr command))
+             (process-connection-type nil) ; Use pipes to receive checker output
              (process (apply 'start-file-process
                              "flycheck" (current-buffer)
                              program args)))
