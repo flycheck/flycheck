@@ -286,6 +286,7 @@ buffer manually.
       (add-hook 'after-save-hook 'flycheck-buffer-safe nil t)
       (add-hook 'after-change-functions 'flycheck-handle-change nil t)
       (add-hook 'post-command-hook 'flycheck-show-error-at-point-soon nil t)
+      (add-hook 'kill-buffer-hook 'flycheck-teardown nil t)
 
       (setq flycheck-previous-next-error-function next-error-function)
       (setq next-error-function 'flycheck-next-error)
@@ -298,6 +299,7 @@ buffer manually.
     (remove-hook 'after-save-hook 'flycheck-buffer-safe t)
     (remove-hook 'after-change-functions 'flycheck-handle-change t)
     (remove-hook 'post-command-hook 'flycheck-show-error-at-point-soon t)
+    (remove-hook 'kill-buffer-hook 'flycheck-teardown t)
 
     (setq next-error-function flycheck-previous-next-error-function)
 
