@@ -26,8 +26,11 @@
 
 ;;; Code:
 
+(require 'ert)
+
 (require 'dash)
 (require 's)
+
 (require 'flycheck)
 
 (defun flycheck-should-overlay (overlay error)
