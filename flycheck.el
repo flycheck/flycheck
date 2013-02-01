@@ -1606,12 +1606,11 @@ output: %s\nChecker definition probably flawed."
 
 (defun flycheck-handle-signal (process event)
   "Handle a syntax checking PROCESS EVENT."
-  (when (memq (process-status process) '(signal exit))
+  (when (and (memq (process-status process) '(signal exit))
+             (buffer-live-p (process-buffer process)))
     (with-current-buffer (process-buffer process)
       (condition-case-unless-debug err
-          (if (buffer-live-p (process-buffer process))
-              (flycheck-finish-syntax-check process)
-            (flycheck-post-syntax-check-cleanup process))
+          (flycheck-finish-syntax-check process)
         (error
          (flycheck-post-syntax-check-cleanup process)
          (flycheck-report-status "!")
