@@ -1586,25 +1586,33 @@ Parse the output and report an appropriate error status."
   (let* ((checker (process-get process :flycheck-checker))
          (exit-status (process-exit-status process))
          (output (flycheck-get-output process))
-         (parsed-errors (flycheck-parse-output output checker (current-buffer)))
-         (errors (flycheck-relevant-errors parsed-errors)))
+         (errors
+          (condition-case err
+              (flycheck-relevant-errors
+               (flycheck-parse-output output checker (current-buffer)))
+            (error
+             (message "Failed to parse errors from checker %S in output: %s\n\
+Error: %s" checker output (error-message-string err))
+             (flycheck-report-status "!")
+             :errored))))
     (flycheck-post-syntax-check-cleanup process)
     (when flycheck-mode
-      (setq flycheck-current-errors
-            (flycheck-sort-errors (append errors flycheck-current-errors nil)))
-      (flycheck-report-errors flycheck-current-errors)
-      (when (and (/= exit-status 0) (not errors))
-        ;; Report possibly flawed checker definition
-        (message "Checker %s returned non-zero exit code %s, but no errors from\
+      (unless (eq errors :errored)
+        (setq flycheck-current-errors
+              (flycheck-sort-errors (append errors flycheck-current-errors nil)))
+        (flycheck-report-errors flycheck-current-errors)
+        (when (and (/= exit-status 0) (not errors))
+          ;; Report possibly flawed checker definition
+          (message "Checker %S returned non-zero exit code %s, but no errors from\
 output: %s\nChecker definition probably flawed."
-                 checker exit-status output)
-        (flycheck-report-status "?"))
-      (when (eq (current-buffer) (window-buffer))
-        (flycheck-show-error-at-point))
-      (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
-        (if next-checker
-            (flycheck-start-checker next-checker)
-          (run-hooks 'flycheck-after-syntax-check-hook))))))
+                   checker exit-status output)
+          (flycheck-report-status "?"))
+        (when (eq (current-buffer) (window-buffer))
+          (flycheck-show-error-at-point))
+        (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
+          (if next-checker
+              (flycheck-start-checker next-checker)
+            (run-hooks 'flycheck-after-syntax-check-hook)))))))
 
 (defun flycheck-handle-signal (process event)
   "Handle a syntax checking PROCESS EVENT."
