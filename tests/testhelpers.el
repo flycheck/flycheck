@@ -99,7 +99,7 @@
   (flycheck-mode)
   ;; After enabling flycheck-mode the checker should either be running now, or
   ;; already be finished (if it was fast).
-  (should (or (flycheck-running-p) flycheck-syntax-checker-finished))
+  (should (or flycheck-current-process flycheck-syntax-checker-finished))
   (flycheck-wait-for-syntax-checker))
 
 (defun flycheck-ensure-clear ()
