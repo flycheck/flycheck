@@ -329,7 +329,7 @@ buffer."
   (flycheck-clear)
   (if flycheck-mode
       (when (not (flycheck-running-p))
-        (condition-case-unless-debug err
+        (condition-case err
             (let ((checker (flycheck-get-checker-for-buffer)))
               (when checker (flycheck-start-checker checker)))
           (error
@@ -1611,7 +1611,7 @@ output: %s\nChecker definition probably flawed."
   (when (and (memq (process-status process) '(signal exit))
              (buffer-live-p (process-buffer process)))
     (with-current-buffer (process-buffer process)
-      (condition-case-unless-debug err
+      (condition-case err
           (flycheck-finish-syntax-check process)
         (error
          (flycheck-post-syntax-check-cleanup process)
@@ -1620,7 +1620,7 @@ output: %s\nChecker definition probably flawed."
 
 (defun flycheck-start-checker (checker)
   "Start a syntax CHECKER."
-  (condition-case-unless-debug err
+  (condition-case err
       (let* ((command (flycheck-checker-substituted-command checker))
              (program (car command))
              (args (cdr command))
