@@ -81,10 +81,21 @@
 (add-hook 'flycheck-after-syntax-check-hook
           (lambda () (setq flycheck-syntax-checker-finished t)))
 
+(defconst flycheck-checker-wait-time 5
+  "Time to wait until a checker is finished in seconds.
+
+After this time has elapsed, the checker is considered to have
+failed, and the test aborted with failure.")
+
 (defun flycheck-wait-for-syntax-checker ()
   "Wait until the syntax check in the current buffer is finished."
-  (while (not flycheck-syntax-checker-finished)
-    (sleep-for 1))
+  (let ((starttime (float-time)))
+    (while (and (not flycheck-syntax-checker-finished)
+                (< (- (float-time) starttime) flycheck-checker-wait-time))
+      (sleep-for 1))
+    (unless (< (- (float-time) starttime) flycheck-checker-wait-time)
+      (flycheck-stop-checker)
+      (error "Syntax check did not finish after 15 seconds")))
   (setq flycheck-syntax-checker-finished nil))
 
 (defun flycheck-disable-checkers (&rest checkers)
