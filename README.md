@@ -493,6 +493,7 @@ The following people contributed to flycheck:
 - [Bozhidar Batsov][bbatsov] provided valuable feedback and refinements, and
   brought Flycheck to a larger user base by adding it to his awesome [Prelude][]
   project.
+- [Damon Haley][dhaley] helped to shape and test the PHP CodeSniffer checker.
 - [Jimmy Yuen Ho Wong][wyuenho] added the HTML syntax checker and the jshint
   Javascript checker, and did valuable testing and bug fixing.
 - [Marian Schubert][maio] added the Perl syntax checker.
@@ -536,6 +537,7 @@ See [COPYING][] for details.
 [checkstyle]: http://checkstyle.sourceforge.net/
 [bbatsov]: https://github.com/bbatsov
 [prelude]: https://github.com/bbatsov/prelude
+[dhaley]: https://github.com/dhaley
 [syntastic]: https://github.com/scrooloose/syntastic
 [scrooloose]: https://github.com/scrooloose
 [purcell]: https://github.com/purcell
