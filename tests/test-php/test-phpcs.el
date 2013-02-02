@@ -1,4 +1,4 @@
-;;; test-phpcs.el --- Test the Ruby checker
+;;; test-phpcs.el --- Test the PHP CodeSniffer checker
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;

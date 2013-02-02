@@ -1,4 +1,4 @@
-;;; test-php.el --- Test the Ruby checker
+;;; test-php.el --- Test the PHP checker
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
