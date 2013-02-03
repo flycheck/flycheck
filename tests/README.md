@@ -4,6 +4,9 @@ Flycheck testsuite
 This directory contains the test suite of Flycheck, using the [ERT][] test
 library.
 
+To install and manage the test suite dependencies, [Carton][] is required.
+
+
 Running tests
 -------------
 
@@ -45,5 +48,6 @@ guidelines:
 
 
 [ert]: http://www.gnu.org/software/emacs/manual/html_node/ert/index.html
+[carton]: https://github.com/rejeep/carton
 [virtualbox]: https://www.virtualbox.org/
 [vagrant]: http://www.vagrantup.com/
