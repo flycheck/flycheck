@@ -1302,10 +1302,11 @@ checkers that have an option to output errors in this format.
 See URL `http://checkstyle.sourceforge.net/' for information
 about Checkstyle."
   (let* ((root (flycheck-parse-xml-string output)))
-    (unless (eq (car root) 'checkstyle)
-      (error "Unexpected root element %s" (car root)))
-    ;;; cddr gets us the body of the node without its name and its attributes
-    (-flatten (-keep #'flycheck-parse-checkstyle-file-node (cddr root)))))
+    (when root
+      (unless (eq (car root) 'checkstyle)
+        (error "Unexpected root element %s" (car root)))
+      ;; cddr gets us the body of the node without its name and its attributes
+      (-flatten (-keep #'flycheck-parse-checkstyle-file-node (cddr root))))))
 
 
 ;;;; Error analysis
