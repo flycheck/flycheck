@@ -1,0 +1,27 @@
+(source "melpa" "http://melpa.milkbox.net/packages/")
+
+(package "flycheck" "0.6.1" "Flymake done right
+
+Flycheck provides on-the-fly syntax checker with
+
+- major-mode based checkers,
+- simple declarative checker definitions,
+- built-in checkers for many languages,
+- standard error navigation,
+- easy customization,
+- and a clean, concise and understandable implementation.")
+
+(depends-on "s" "1.3.1")
+(depends-on "dash" "1.0.3")
+
+;; Various modes for use in the unit tests
+(development
+ (depends-on "coffee-mode")
+ (depends-on "haml-mode")
+ (depends-on "js2-mode")
+ (depends-on "js3-mode")
+ (depends-on "lua-mode")
+ (depends-on "cperl-mode")
+ (depends-on "php-mode")
+ (depends-on "php+-mode")
+ (depends-on "sass-mode"))
