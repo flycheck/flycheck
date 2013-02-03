@@ -53,7 +53,7 @@ export DEBIAN_FRONTEND='noninteractive'
 apt_update
 
 # Install basic packages
-apt make python-software-properties
+apt git make python-software-properties
 
 # Bring in the necessary PPAs
 ppa ppa:cassou/emacs
@@ -92,3 +92,10 @@ npm coffee-script coffeelint \
 
 gem haml \
     sass
+
+# Install carton for Emacs dependency management
+rm -rf /tmp/carton
+git clone https://github.com/rejeep/carton /tmp/carton
+mkdir -p /opt/
+rm -rf /opt/carton
+sudo mv /tmp/carton /opt/carton

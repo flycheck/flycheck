@@ -25,9 +25,7 @@
 (require 'ert)
 (require 'flycheck)
 
-(package-need 'js2-mode)
 (require 'js2-mode)
-(package-need 'js3-mode)
 (require 'js3-mode)
 
 (ert-deftest checker-javascript-jshint-missing-semicolon ()

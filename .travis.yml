@@ -4,5 +4,6 @@ env:
   - EMACS=emacs-snapshot
 before_script:
   - sh vagrant/provision.sh
+  - make deps
 script:
-  - make EMACS=${EMACS} test
+  - make EMACS=${EMACS} CARTON=/opt/carton/bin/carton test

@@ -25,7 +25,6 @@
 (require 'ert)
 (require 'flycheck)
 
-(package-need 'haml-mode)
 (require 'haml-mode)
 
 (ert-deftest checker-haml-inconsistent-indentation ()

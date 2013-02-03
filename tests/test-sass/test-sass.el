@@ -25,7 +25,6 @@
 (require 'ert)
 (require 'flycheck)
 
-(package-need 'sass-mode)
 (require 'sass-mode)
 
 (ert-deftest checker-sass-inconsistent-indentation ()

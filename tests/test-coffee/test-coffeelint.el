@@ -25,7 +25,6 @@
 (require 'ert)
 (require 'flycheck)
 
-(package-need 'coffee-mode)
 (require 'coffee-mode)
 
 (ert-deftest checker-coffeelint-throwing-strings ()

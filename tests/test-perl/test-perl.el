@@ -26,7 +26,6 @@
 (require 'dash)
 (require 'flycheck)
 
-(package-need 'cperl-mode)
 (require 'cperl-mode)
 
 (ert-deftest checker-perl-unused-variable ()
