@@ -25,9 +25,7 @@
 (require 'ert)
 (require 'flycheck)
 
-(package-need 'php-mode)
 (require 'php-mode)
-(package-need 'php+-mode)
 (require 'php+-mode)
 
 (ert-deftest checker-php-phpcs-uppercase-keyqord ()

@@ -31,8 +31,7 @@
     ;; HACK: Use system-wide installation in Vagrant and on Travis.  The MELPA
     ;; package of lua-mode causes tests to hang in these environments
     (load "/usr/share/emacs/site-lisp/lua-mode/lua-mode.el")
-  (package-need 'lua-mode))
-(require 'lua-mode)
+  (require 'lua-mode))
 
 (ert-deftest checker-lua-missing-quote ()
   "Test a syntax error with Lua."
