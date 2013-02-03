@@ -50,4 +50,14 @@
        '(19 88 "Line exceeds 85 characters; contains 87 characters" warning))
       (flycheck-ensure-clear))))
 
+(ert-deftest checker-php-phpcs-no-errors ()
+  "Test a file without phpcs warnings and errors."
+  :expected-result (flycheck-fail-unless-checkers 'php 'php-phpcs)
+   (flycheck-with-resource-buffer "test-php/no-errors.php"
+    (dolist (mode '(php-mode php+-mode))
+      (funcall mode)
+      (flycheck-buffer-sync)
+      (should-not flycheck-current-errors)
+      (flycheck-ensure-clear))))
+
 ;;; test-phpcs.el ends here
