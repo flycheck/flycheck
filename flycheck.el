@@ -44,8 +44,6 @@
 (require 's)
 (require 'dash)
 
-(require 'button)                       ; For `define-button-type'
-
 
 ;;;; Compatibility
 (eval-and-compile
@@ -1029,12 +1027,17 @@ syntax check if the checker changed."
 
 
 ;;;; Checker help
-(define-button-type 'help-flycheck-checker-def
-  :supertype 'help-xref
-  'help-function 'flycheck-goto-checker-definition
-  'help-echo (purecopy "mouse-2, RET: find Flycheck checker definition"))
+;; Define our custom help button to navigation to checker definitions.  Be
+;; auto-load friendly, and delay the definition until after 'help-mode was
+;; loaded.
+(eval-after-load 'help-mode
+  '(define-button-type 'help-flycheck-checker-def
+     :supertype 'help-xref
+     'help-function 'flycheck-goto-checker-definition
+     'help-echo (purecopy "mouse-2, RET: find Flycheck checker definition")))
 
-;; Plug Flycheck into find-func, to provide navigation to checker definitions
+;; Plug Flycheck into find-func, to provide navigation to checker definitions.
+;; Again we are friendly to autoload.
 (eval-after-load 'find-func
   '(progn
      (defconst flycheck-find-checker-regexp
