@@ -228,6 +228,7 @@ overlay setup)."
 
 Completely clear the whole flycheck state.  Remove overlays, kill
 running checks, and empty all variables used by flycheck."
+  (flycheck-clean-deferred-check)
   (flycheck-clear)
   (flycheck-stop-checker)
   (flycheck-cancel-error-display-timer)
@@ -287,6 +288,9 @@ buffer manually.
       (add-hook 'after-change-functions 'flycheck-handle-change nil t)
       (add-hook 'post-command-hook 'flycheck-show-error-at-point-soon nil t)
       (add-hook 'kill-buffer-hook 'flycheck-teardown nil t)
+      ;; Execute deferred checks if the buffer visibility changes
+      (add-hook 'window-configuration-change-hook
+                'flycheck-perform-deferred-syntax-check nil t)
 
       (setq flycheck-previous-next-error-function next-error-function)
       (setq next-error-function 'flycheck-next-error)
@@ -300,6 +304,8 @@ buffer manually.
     (remove-hook 'after-change-functions 'flycheck-handle-change t)
     (remove-hook 'post-command-hook 'flycheck-show-error-at-point-soon t)
     (remove-hook 'kill-buffer-hook 'flycheck-teardown t)
+    (remove-hook 'window-configuration-change-hook
+                 'flycheck-perform-deferred-syntax-check t)
 
     (setq next-error-function flycheck-previous-next-error-function)
 
@@ -326,6 +332,7 @@ buffer."
 (defun flycheck-buffer ()
   "Check syntax in the current buffer."
   (interactive)
+  (flycheck-clean-deferred-check)
   (flycheck-clear)
   (if flycheck-mode
       (when (not (flycheck-running-p))
@@ -366,6 +373,14 @@ A buffer may not be checked under the following conditions:
 Return t if the buffer may be checked and nil otherwise."
   (not buffer-read-only))
 
+(defun flycheck-must-defer-check ()
+  "Determine whether the syntax check has to be deferred.
+
+A check has to be deferred if the buffer is not visible.
+
+Return t if the check is to be deferred, or nil otherwise."
+  (not (get-buffer-window)))
+
 (defun flycheck-buffer-safe ()
   "Safely check syntax in the current buffer.
 
@@ -374,8 +389,10 @@ checked (i.e. read-only buffers) and demote all errors to messages.
 
 Use when checking buffers automatically."
   (if (flycheck-may-check-buffer)
-      (with-demoted-errors
-        (flycheck-buffer))
+      (if (flycheck-must-defer-check)
+          (flycheck-buffer-deferred)
+        (with-demoted-errors
+          (flycheck-buffer)))
     (message "Cannot perform a syntax check in buffer %s."
              (buffer-name))))
 
@@ -390,6 +407,31 @@ Use when checking buffers automatically."
   "Unconditionally disable variable `flycheck-mode'."
   (flycheck-mode -1))
 (make-obsolete 'flycheck-mode-off "Use (flycheck-mode -1)." "0.5")
+
+
+;;;; Deferred syntax checking
+(defvar-local flycheck-deferred-syntax-check nil
+  "If non-nil, a syntax check as been deferred in `flycheck-buffer-safe'.")
+
+(defun flycheck-deferred-check-p ()
+  "Determine whether the current buffer has a deferred check.
+
+Return t if so, or nil otherwise."
+  flycheck-deferred-syntax-check)
+
+(defun flycheck-buffer-deferred ()
+  "Defer syntax check for the current buffer."
+  (setq flycheck-deferred-syntax-check t))
+
+(defun flycheck-clean-deferred-check ()
+  "Clean an deferred syntax checking state."
+  (setq flycheck-deferred-syntax-check nil))
+
+(defun flycheck-perform-deferred-syntax-check ()
+  "Perform any deferred syntax checks."
+  (when (flycheck-deferred-check-p)
+    (flycheck-clean-deferred-check)
+    (flycheck-buffer-safe)))
 
 
 ;;;; Utility functions

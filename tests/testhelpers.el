@@ -108,10 +108,13 @@ failed, and the test aborted with failure.")
   "Check the current buffer synchronously."
   (setq flycheck-syntax-checker-finished nil)
   (should (not (flycheck-running-p)))
-  (flycheck-mode)
-  ;; After enabling flycheck-mode the checker should either be running now, or
+  (flycheck-mode)                       ; This will only start a deferred check,
+  (flycheck-buffer)                     ; so we need an explicit manual check
+  ;; After starting the check, the checker should either be running now, or
   ;; already be finished (if it was fast).
   (should (or flycheck-current-process flycheck-syntax-checker-finished))
+  ;; Also there should be no deferred check pending anymore
+  (should-not (flycheck-deferred-check-p))
   (flycheck-wait-for-syntax-checker))
 
 (defun flycheck-ensure-clear ()
