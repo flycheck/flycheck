@@ -396,18 +396,6 @@ Use when checking buffers automatically."
     (message "Cannot perform a syntax check in buffer %s."
              (buffer-name))))
 
-;;;###autoload
-(defun flycheck-mode-on ()
-  "Unconditionally enable variable `flycheck-mode'."
-  (flycheck-mode 1))
-(make-obsolete 'flycheck-mode-on 'flycheck-mode "0.5")
-
-;;;###autoload
-(defun flycheck-mode-off ()
-  "Unconditionally disable variable `flycheck-mode'."
-  (flycheck-mode -1))
-(make-obsolete 'flycheck-mode-off "Use (flycheck-mode -1)." "0.5")
-
 
 ;;;; Deferred syntax checking
 (defvar-local flycheck-deferred-syntax-check nil
