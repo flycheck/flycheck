@@ -95,7 +95,8 @@ failed, and the test aborted with failure.")
       (sleep-for 1))
     (unless (< (- (float-time) starttime) flycheck-checker-wait-time)
       (flycheck-stop-checker)
-      (error "Syntax check did not finish after 15 seconds")))
+      (error "Syntax check did not finish after %s seconds"
+             flycheck-checker-wait-time)))
   (setq flycheck-syntax-checker-finished nil))
 
 (defun flycheck-disable-checkers (&rest checkers)
