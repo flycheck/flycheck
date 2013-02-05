@@ -25,7 +25,7 @@
 (require 'ert)
 (require 'flycheck)
 
-(require 'haml-mode)
+(require 'haml-mode nil t)
 
 (ert-deftest checker-haml-inconsistent-indentation ()
   "Test a syntax error caused by inconsistent indentation."

@@ -25,8 +25,8 @@
 (require 'ert)
 (require 'flycheck)
 
-(require 'js2-mode)
-(require 'js3-mode)
+(require 'js2-mode nil t)
+(require 'js3-mode nil t)
 
 (ert-deftest checker-javascript-jshint-missing-semicolon ()
   "A missing semicolon."

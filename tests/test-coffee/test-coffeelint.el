@@ -25,7 +25,7 @@
 (require 'ert)
 (require 'flycheck)
 
-(require 'coffee-mode)
+(require 'coffee-mode nil t)
 
 (ert-deftest checker-coffeelint-throwing-strings ()
   "Test an error caused by throwing a string."

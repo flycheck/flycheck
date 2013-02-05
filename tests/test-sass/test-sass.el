@@ -25,7 +25,7 @@
 (require 'ert)
 (require 'flycheck)
 
-(require 'sass-mode)
+(require 'sass-mode nil t)
 
 (ert-deftest checker-sass-inconsistent-indentation ()
   "Test a syntax error caused by inconsistent indentation."

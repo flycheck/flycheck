@@ -25,8 +25,8 @@
 (require 'ert)
 (require 'flycheck)
 
-(require 'php-mode)
-(require 'php+-mode)
+(require 'php-mode nil t)
+(require 'php+-mode nil t)
 
 (ert-deftest checker-php-phpcs-uppercase-keyqord ()
   "Test an uppercase keyword error by phpcs."

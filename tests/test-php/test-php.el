@@ -25,8 +25,8 @@
 (require 'ert)
 (require 'flycheck)
 
-(require 'php-mode)
-(require 'php+-mode)
+(require 'php-mode nil t)
+(require 'php+-mode nil t)
 
 (ert-deftest checker-php-missing-quote ()
   "Test a missing quote in a PHP program."

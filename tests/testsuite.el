@@ -30,7 +30,11 @@
 
 (setq debug-on-error t)
 
-(defconst testsuite-dir (file-name-directory load-file-name)
+(defconst testsuite-dir
+  (if load-file-name
+      (file-name-directory load-file-name)
+    ;; Fall back to default directory (in case of M-x eval-buffer)
+    default-directory)
   "Directory of the test suite.")
 
 (message "Running tests on Emacs %s" emacs-version)

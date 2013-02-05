@@ -26,7 +26,7 @@
 (require 'dash)
 (require 'flycheck)
 
-(require 'cperl-mode)
+(require 'cperl-mode nil t)
 
 (ert-deftest checker-perl-unused-variable ()
   "Test an unused variable with the Perl checker."
