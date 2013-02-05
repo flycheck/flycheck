@@ -39,7 +39,6 @@
 (eval-when-compile
   (require 'cl)                         ; For `defstruct'
   (require 'compile)                    ; For Compilation Mode integration
-  (require 'find-func)                  ; For `find-func-space-re'
   (require 'sh-script))
 
 (require 's)
@@ -1035,20 +1034,20 @@ syntax check if the checker changed."
   'help-function 'flycheck-goto-checker-definition
   'help-echo (purecopy "mouse-2, RET: find Flycheck checker definition"))
 
-(defun flycheck-find-checker-definition (checker file)
-  "Find the definition of CHECKER in FILE."
-  (require 'find-func)
-  (let* ((flycheck-find-checker-regexp
-          (concat "^\\s-*(flycheck-declare-checker "
-                  find-function-space-re
-                  "%s\\(\\s-\\|$\\)"))
-         (find-function-regexp-alist
-          '((checker . flycheck-find-checker-regexp))))
-    (find-function-search-for-symbol checker 'checker file)))
+;; Plug Flycheck into find-func, to provide navigation to checker definitions
+(eval-after-load 'find-func
+  '(progn
+     (defconst flycheck-find-checker-regexp
+       (concat "^\\s-*(flycheck-declare-checker "
+               find-function-space-re "%s\\(\\s-\\|$\\)")
+       "Regular expression to find a checker definition.")
+     (add-to-list 'find-function-regexp-alist
+                  '(flycheck-checker . flycheck-find-checker-regexp))))
 
 (defun flycheck-goto-checker-definition (checker file)
   "Go to to the definition of CHECKER in FILE."
-  (let ((location (flycheck-find-checker-definition checker file)))
+  (let ((location (find-function-search-for-symbol
+                   checker 'flycheck-checker file)))
     (pop-to-buffer (car location))
     (if (cdr location)
         (goto-char (cdr location))
