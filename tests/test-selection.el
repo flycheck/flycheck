@@ -1,4 +1,4 @@
-;;; test-selection.el --- Tests for utility functions
+;;; test-selection.el --- Tests for checker selection
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
