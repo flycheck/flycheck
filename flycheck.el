@@ -1027,7 +1027,7 @@ CHECKER is a checker symbol.
 Pop up a help buffer with the documentation of CHECKER."
   (interactive
    (list (read-flycheck-checker "Describe checker: ")))
-  (if (null checker)
+  (if (or (null checker) (not (flycheck-valid-checker-p checker)))
       (message "You didn't specify a Flycheck syntax checker.")
     (help-setup-xref (list #'flycheck-describe-checker checker)
                      (called-interactively-p 'interactive))
