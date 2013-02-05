@@ -37,12 +37,15 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'cl)                         ; For defstruct
-  (require 'compile)                    ; Compilation Mode
+  (require 'cl)                         ; For `defstruct'
+  (require 'compile)                    ; For Compilation Mode integration
+  (require 'find-func)                  ; For `find-func-space-re'
   (require 'sh-script))
 
 (require 's)
 (require 'dash)
+
+(require 'button)                       ; For `define-button-type'
 
 
 ;;;; Compatibility
@@ -604,6 +607,7 @@ are present, both must match for the checker to be used."
      (put (quote ,symbol) :flycheck-predicate nil)
      (put (quote ,symbol) :flycheck-next-checkers nil)
      (put (quote ,symbol) :flycheck-documentation nil)
+     (put (quote ,symbol) :flycheck-file nil)
      ;; Store the checker properties
      (put (quote ,symbol) :flycheck-command ,(plist-get properties :command))
      (put (quote ,symbol) :flycheck-error-patterns
@@ -616,6 +620,7 @@ are present, both must match for the checker to be used."
      (put (quote ,symbol) :flycheck-next-checkers
           ,(plist-get properties :next-checkers))
      (put (quote ,symbol) :flycheck-documentation ,docstring)
+     (put (quote ,symbol) :flycheck-file ,load-file-name)
      ;; Verify the checker and declare it valid if succeeded
      (flycheck-verify-checker (quote ,symbol))
      (put (quote ,symbol) :flycheck-checker t)))
@@ -786,6 +791,12 @@ use with `compilation-error-regexp-alist'."
 (defun flycheck-checker-documentation (checker)
   "Get the documentation of CHECKER."
   (documentation-property checker :flycheck-documentation))
+
+(defun flycheck-checker-file (checker)
+  "Get the file CHECKER was defined in.
+
+Return nil if the file cannot be determined."
+  (get checker :flycheck-file))
 
 (defun flycheck-checker-config-file-var (checker)
   "Get the associated configuration file variable of CHECKER.
@@ -1019,6 +1030,30 @@ syntax check if the checker changed."
 
 
 ;;;; Checker help
+(define-button-type 'help-flycheck-checker-def
+  :supertype 'help-xref
+  'help-function 'flycheck-goto-checker-definition
+  'help-echo (purecopy "mouse-2, RET: find Flycheck checker definition"))
+
+(defun flycheck-find-checker-definition (checker file)
+  "Find the definition of CHECKER in FILE."
+  (require 'find-func)
+  (let* ((flycheck-find-checker-regexp
+          (concat "^\\s-*(flycheck-declare-checker "
+                  find-function-space-re
+                  "%s\\(\\s-\\|$\\)"))
+         (find-function-regexp-alist
+          '((checker . flycheck-find-checker-regexp))))
+    (find-function-search-for-symbol checker 'checker file)))
+
+(defun flycheck-goto-checker-definition (checker file)
+  "Go to to the definition of CHECKER in FILE."
+  (let ((location (flycheck-find-checker-definition checker file)))
+    (pop-to-buffer (car location))
+    (if (cdr location)
+        (goto-char (cdr location))
+      (message "Unable to find checker location in file"))))
+
 (defun flycheck-describe-checker (checker)
   "Display the documentation of CHECKER.
 
@@ -1033,12 +1068,20 @@ Pop up a help buffer with the documentation of CHECKER."
                      (called-interactively-p 'interactive))
     (save-excursion
       (with-help-window (help-buffer)
-        ;; TODO: Find and output declaring file
-        (princ (format "%s is a Flycheck syntax checker.\n\n" checker))
         (let ((executable (flycheck-checker-executable checker))
+              (filename (flycheck-checker-file checker))
               (modes (flycheck-checker-modes checker))
               (predicate (flycheck-checker-predicate checker))
               (config-file-var (flycheck-checker-config-file-var checker)))
+          ;; TODO: Find and output declaring file
+          (princ (format "%s is a Flycheck syntax checker" checker))
+          (when filename
+            (princ (format " in `%s'" (file-name-nondirectory filename)))
+            (with-current-buffer standard-output
+              (save-excursion
+                (re-search-backward "`\\([^`']+\\)'" nil t)
+                (help-xref-button 1 'help-flycheck-checker-def checker filename))))
+          (princ ".\n\n")
           (princ (format "  This checker executes \"%s\"" executable))
           (if config-file-var
             (princ (format ", using a configuration file from `%s'.\n"
