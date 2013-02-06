@@ -596,7 +596,7 @@ are present, both must match for the checker to be used."
            (doc-string 2))
   `(progn
      ;; Un-declare any previous checker for this mode
-     (put (quote ,symbol) :flychieck-checker nil)
+     (put (quote ,symbol) :flycheck-checker nil)
      (put (quote ,symbol) :flycheck-command nil)
      (put (quote ,symbol) :flycheck-error-patterns nil)
      (put (quote ,symbol) :flycheck-error-parser nil)
