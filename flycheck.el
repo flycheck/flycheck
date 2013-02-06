@@ -460,6 +460,15 @@ Return the path of the file."
     ;; With no filename, fall back to a copy in the system directory.
     (flycheck-temp-file-system filename prefix)))
 
+(defun flycheck-root-directory-p (directory)
+  "Determine if DIRECTORY is the root directory.
+
+In order to work in work in a platform-neutral way,
+check to see if DIRECTORY is its own parent.
+
+Return t if root directory, otherwise nil."
+  (string= directory (file-name-directory directory)))
+
 (defun flycheck-find-file-in-tree (filename directory)
   "Find FILENAME in DIRECTORY and all of its ancestors.
 
@@ -470,7 +479,7 @@ until the file is found or the root is reached.
 Return the absolute path of the file, or nil if the file was not
 found in DIRECTORY or any of its ancestors."
   (let ((full-path (expand-file-name filename directory)))
-    (cond ((string= directory "/") (when (file-exists-p full-path) full-path))
+    (cond ((flycheck-root-directory-p directory) (when (file-exists-p full-path) full-path))
           ((file-exists-p full-path) full-path)
           ((let ((parent-directory (file-name-directory
                                     (directory-file-name
