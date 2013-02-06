@@ -53,7 +53,7 @@ export DEBIAN_FRONTEND='noninteractive'
 apt_update
 
 # Install basic packages
-apt git make python-software-properties
+apt make python-software-properties
 
 # Bring in the necessary PPAs
 ppa ppa:cassou/emacs
@@ -94,8 +94,11 @@ gem haml \
     sass
 
 # Install carton for Emacs dependency management
-rm -rf /tmp/carton
-git clone https://github.com/rejeep/carton /tmp/carton
-mkdir -p /opt/
-rm -rf /opt/carton
-sudo mv /tmp/carton /opt/carton
+CARTON_DIR=/opt/carton-0.1.0
+if ! [ -d "$CARTON_DIR" -a -x "/$CARTON_DIR/bin/carton" ]; then
+  sudo rm -rf "$CARTON_DIR"
+  wget -O - https://github.com/rejeep/carton/archive/v0.1.0.tar.gz | \
+    sudo tar xz -C /opt
+  # Bring carton into $PATH
+  sudo ln -fs "$CARTON_DIR/bin/carton" /usr/local/bin
+fi

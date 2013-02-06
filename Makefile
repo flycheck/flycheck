@@ -22,7 +22,7 @@ test : build
 .PHONY: virtual-test
 virtual-test :
 	$(VAGRANT) up
-	$(VAGRANT) ssh -c "make -C /vagrant CARTON=/opt/carton/bin/carton EMACS=$(EMACS) clean test"
+	$(VAGRANT) ssh -c "make -C /vagrant EMACS=$(EMACS) clean test"
 
 .PHONY: clean
 clean :
