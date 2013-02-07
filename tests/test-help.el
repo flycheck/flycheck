@@ -36,8 +36,7 @@
             (goto-char (point-min))
             (re-search-forward "`.*?'")
             (should (string= (match-string 0) "`flycheck.el'"))
-            (goto-char (+ 2 (match-beginning 0)))
-            (should (push-button))
+            (push-button (+ 2 (match-beginning 0)))
             (unwind-protect
                 (progn
                   (should (string= (buffer-name) "flycheck.el"))
