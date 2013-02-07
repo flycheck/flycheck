@@ -177,6 +177,10 @@ A CI environment is either Travis CI or Vagrant.
 Return t if so, or nil otherwise."
   (or (flycheck-vagrant-p) (flycheck-travis-ci-p)))
 
+(defun flycheck-windows-p ()
+  "Determine whether the tests are running on Windows."
+  (memq system-type '(ms-dos windows-nt cygwin)))
+
 (defun flycheck-min-emacs-version-p (major &optional minor)
   "Determine whether Emacs has the required version.
 
