@@ -626,7 +626,13 @@ are present, both must match for the checker to be used."
      (put (quote ,symbol) :flycheck-next-checkers
           ,(plist-get properties :next-checkers))
      (put (quote ,symbol) :flycheck-documentation ,docstring)
-     (put (quote ,symbol) :flycheck-file ,load-file-name)
+     ;; Record the location of the definition of the checker.  If we're loading
+     ;; from a file, record the file loaded from.  Otherwise use the current
+     ;; buffer name, in case of `eval-buffer' and the like.
+     (let ((filename (if load-in-progress load-file-name (buffer-file-name))))
+       (when (and filename (s-ends-with? ".elc" filename))
+         (setq filename (s-chop-suffix "c" filename)))
+       (put (quote ,symbol) :flycheck-file filename))
      ;; Verify the checker and declare it valid if succeeded
      (flycheck-verify-checker (quote ,symbol))
      (put (quote ,symbol) :flycheck-checker t)))
