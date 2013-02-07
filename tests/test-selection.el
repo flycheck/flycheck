@@ -25,6 +25,16 @@
 (require 'ert)
 (require 'flycheck)
 
+(ert-deftest flycheck-automatic-selection-no-checker ()
+  "Test mode line status report if automatic selection failed."
+  (with-temp-buffer
+    (insert "Hello world\n")
+    (fundamental-mode)                  ; This mode certainly has no checker
+    (flycheck-mode)
+    (flycheck-buffer)
+    (should-not (or flycheck-current-process flycheck-syntax-checker-finished))
+    (should (string= flycheck-mode-line " FlyC-"))))
+
 (ert-deftest flycheck-select-checker ()
   "Test that checkers are properly selected.
 

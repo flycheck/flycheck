@@ -338,7 +338,9 @@ buffer."
       (when (not (flycheck-running-p))
         (condition-case err
             (let ((checker (flycheck-get-checker-for-buffer)))
-              (when checker (flycheck-start-checker checker)))
+              (if checker
+                  (flycheck-start-checker checker)
+                (flycheck-report-status "-")))
           (error
            (flycheck-report-status "!")
            (signal (car err) (cdr err)))))

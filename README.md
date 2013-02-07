@@ -185,6 +185,7 @@ Flycheck indicates its state in the mode line:
 - `FlyC`: No errors in the current buffer.
 - `FlyC*`: The syntax check is currently running.
 - `FlyC:3/4`: There are three errors and four warnings in the current buffer.
+- `FlyC-`: Automatic checker selection did not find a suitable checker.
 - `FlyC!`: The syntax check failed.  Inspect the `*Messages*` buffer for
   details.
 - `FlyC?`: The syntax check had a dubious result.  The definition of the checker
