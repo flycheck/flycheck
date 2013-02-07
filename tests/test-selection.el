@@ -102,4 +102,4 @@ selected."
     (should (not flycheck-checker))
     (should (eq flycheck-last-checker 'python-flake8))))
 
-;;; checkers-selection.el ends here
+;;; test-selection.el ends here
