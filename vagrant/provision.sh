@@ -38,7 +38,7 @@ pear () {
 }
 
 pip () {
-    sudo pip install "$@"
+    sudo pip install --use-mirrors "$@"
 }
 
 gem () {
