@@ -1073,6 +1073,16 @@ syntax check if the checker changed."
         (goto-char (cdr location))
       (message "Unable to find checker location in file"))))
 
+(defun flycheck-checker-at-point ()
+  "Return the Flycheck checker found at or before point.
+
+Return 0 if there is no checker."
+  ;; A checker is like a variable, but doesn't have to be bound...
+  (let ((symbol (variable-at-point :any-symbol)))
+    (if (and (symbolp symbol) (flycheck-valid-checker-p symbol))
+        symbol
+      0)))
+
 (defun flycheck-describe-checker (checker)
   "Display the documentation of CHECKER.
 
@@ -1080,7 +1090,13 @@ CHECKER is a checker symbol.
 
 Pop up a help buffer with the documentation of CHECKER."
   (interactive
-   (list (read-flycheck-checker "Describe checker: ")))
+   (let* ((checker (flycheck-checker-at-point))
+          (enable-recursive-minibuffers t)
+          (prompt (if (symbolp checker)
+                      (format "Describe checker (default %s): " checker)
+                    "Describe checker: "))
+          (reply (read-flycheck-checker prompt)))
+     (list (or reply checker))))
   (if (or (null checker) (not (flycheck-valid-checker-p checker)))
       (message "You didn't specify a Flycheck syntax checker.")
     (help-setup-xref (list #'flycheck-describe-checker checker)
