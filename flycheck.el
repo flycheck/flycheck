@@ -1991,7 +1991,7 @@ See URL `http://php.net/manual/en/features.commandline.php'."
 See URL `http://pear.php.net/package/PHP_CodeSniffer/'.
 
 PHP CodeSniffer 1.4.3 is required.  Earlier versions are known to
-have issues that prevents Flycheck from parsing the output
+have issues that prevent Flycheck from parsing the output
 correctly.
 
 See URL `https://github.com/lunaryorn/flycheck/issues/78'."
