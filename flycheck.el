@@ -216,9 +216,9 @@ overlay setup)."
    ["Clear errors in buffer" flycheck-clear t]
    ["Compile current buffer" flycheck-compile t]
    "---"
-   ["Select checker" flycheck-select-checker t]
+   ["Select syntax checker" flycheck-select-checker t]
    "---"
-   ["Describe checker" flycheck-describe-checker t])
+   ["Describe syntax qchecker" flycheck-describe-checker t])
   "Spell Checking")
 
 (easy-menu-change '("Tools") "--" nil "Spell Checking")
