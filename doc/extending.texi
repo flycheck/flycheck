@@ -1,0 +1,448 @@
+Flycheck is extensible with new syntax checkers.  This chapter explains
+how to do so, and provides examples for common use cases.
+
+If you implement new syntax checkers, please consider @b{contributing}
+these.  @xref{Contributing syntax checkers}, for more information.
+
+@menu
+* Declaration::
+* Error parsers::
+* Examples::
+@end menu
+
+@node Declaration, Error parsers, Extending, Extending
+@comment  node-name,  next,  previous,  up
+@section Declaration of syntax checkers
+
+Checkers are declared with @code{flycheck-declare-checker}:
+
+@defmac flycheck-declare-checker symbol docstring &rest properties
+Declare SYMBOL as new syntax checker with PROPERTIES.
+
+DOCSTRING provides documentation for the syntax checker.
+
+The PROPERTIES specify the new syntax checker:
+
+@table @code
+@item :command '(@var{executable} @var{arguments}...)
+A list providing the command to execute.  The command consists of an
+@var{executable} specified as string in the @code{car}, and the
+@var{arguments} for this executable in the @code{cdr}.  @xref{List
+elements, , ,elisp}, for more information about the elements of a list.
+
+The @var{executable} is checked for existence with
+@code{executable-find} before executing the syntax checker.
+
+In @var{arguments}, various special symbols are substituted before
+executing the syntax checker:
+
+@table @code
+@item source
+@itemx source-inplace
+These symbols are substituted with the file to check.  This file is a
+temporary file with the contents of the buffer.  With @code{source} the
+copy is created in the temporary directory of the system.  This is
+@emph{recommended}.
+
+With @code{source-inplace} the temporary files is created in the same
+directory as the buffer's file.  Use this, if the syntax check needs
+other files from the source directory.  If the buffer has no
+@code{buffer-file-name}, @code{source-inplace} is the same as
+@code{source}.
+
+@item source-original
+This symbol is substituted with @code{buffer-file-name}, or an empty
+string, if the buffer has no file name.  Note that if the buffer is
+modified, the content of the file is @b{not up to date} with the actual
+content of the buffer.  Hence do @b{not} use this as primary input to a
+syntax checker!
+
+See the declaration of the @code{emacs-lisp-checkdoc} syntax checker for
+an application of this symbol.
+
+@item (config @var{option} @var{variable})
+This cell is substituted with a configuration file for the syntax
+checker.  @var{option} is a string containing the option that specifies
+a configuration file to the syntax checker tool.
+
+@var{variable} is a symbol referring to a variable from which to obtain
+the name or path of the configuration file.  @xref{Configuration}, for
+more information about syntax checker configuration.  Define this
+variable with @code{flycheck-def-config-file-var}.
+
+If the configuration file is found according to the rules documented in
+@ref{Configuration}, the symbol is substituted with the @var{option} and
+the absolute path to the configuration file as string.  Otherwise the
+symbol is simply dropped from the arguments of the syntax checker.
+@end table
+
+This property is @b{mandatory}.
+
+@item :error-parser '@var{parser}
+An error parser to use for parsing the output of the syntax checker.
+
+The @var{parser} is a function symbol.  @xref{Error parsers}, for more
+information about error parsers, including a list of built-in error
+parsers.
+
+Using a error parser is preferred if a syntax checker provides a
+structured output format like XML or JSON.  If possible, re-use one of
+the built-in error parsers listed in @ref{Error parsers}
+
+May not be specified together with @code{:error-patterns}.
+
+@item :error-patterns '((@var{regexp} @var{level})...)
+A list of one or more error patterns to parse the output of
+@code{:command}.
+
+The @var{regexp} is a regular expression matching a single error or
+warning.  The @var{level} is either @code{error} or @code{warning} and
+classifies the severity of the matched error message.
+
+Do @b{not} use error patterns if you can use an error parser.
+
+The @var{regexp} may provide the following match groups:
+
+@table @emph
+@item Group 1
+The file name.
+@item Group 2
+The line number.
+@item Group 3
+The column number.
+@item Group 4
+The error text.
+@end table
+
+Each of these groups is optional, however error messages without line
+numbers will be ignored.  Use @b{explicitly numbered groups} to make
+sure that the group numbering is correct.  @xref{Regexp Backslash, ,
+,elisp}, for more information about regular expression groups.
+
+The patterns are applied in the order of declaration to the whole output
+of the syntax checker.  Output already matched by a pattern will not be
+matched by subsequent patterns.  In other words, the first pattern wins.
+
+May not be specified together with @code{:error-parser}.
+
+@item :modes '@var{major-mode}
+@itemx :modes '(@var{major-mode}...)
+A single @var{major-mode}, or a list thereof.
+
+@var{major-mode} is a symbol referring to a major mode.  If given the
+syntax checker will only be used in buffers with any of the given major
+modes.
+
+@item :predicate @var{form}
+A predicate that determines whether the syntax checker may be used.
+
+@var{form} is a quoted Emacs Lisp form.  It is evaluated before each
+syntax check to determine whether the syntax checker may be used for the
+current buffer.  If @var{form} evaluates to nil, the syntax checker is
+not used.
+
+If @var{:modes} is given, @var{FORM} is only evaluated if the major mode
+matches.  Otherwise the syntax checker is not used.
+
+@item :next-checker '(@var{item}...)
+A list of syntax checker to run after this syntax checker.
+
+Each @var{item} is either a single syntax checker symbol, or a cons cell
+@code{(@var{predicate} . @var{checker})}.  Each @var{item} is tried on
+the order of declaration.
+
+If the @var{item} is a syntax checker symbol, determine whether it is
+usable @b{and} registered (i.e. contained in @code{flycheck-checkers}).
+If so start a new syntax check with that syntax checker, and merged its
+results with the results of this syntax checker.  If not, try the next
+@var{item}.
+
+If @var{item} is a cons cell, @var{predicate} specifies whether to run
+the @var{checker} depending on the results of this syntax checker:
+
+@table @code
+@item no-errors
+The @var{CHECKER} is only used if this syntax checker resulted in no
+errors at all.
+@item warnings-only
+The @var{CHECKER} is only used if this syntax checker did not result in
+error messages of severity @code{error}.
+@end table
+
+If the predicate matches, and @var{checker} is usable and registered,
+start a new syntax checker with @var{checker} and merged its results
+with the results of this syntax checker.  If not, try the next
+@var{item}.
+
+If there is no further @var{item}, finish the syntax check.
+@end table
+
+At least on of @code{:modes} and @code{:predicate} must be present.  If
+both are present, both must match for the syntax checker to be used.
+
+Either @code{:error-patterns} or @code{:error-parser} must be present.
+If both are present, an error is signaled.
+@end defmac
+
+A syntax checker declared with @code{flycheck-declare-checker} is
+already suitable for manual checker selection with
+@code{flycheck-select-checker}.  For automatic selection the syntax
+checker must be registered by adding it to @code{flycheck-checkers}.
+@xref{Selection}.
+
+@defmac flycheck-def-config-file-var @var{symbol} @var{checker} @
+  &optional @var{filename}
+Define @var{symbol} as configuration file variable for a syntax
+@var{checker}, with a default value of @var{filename}.
+
+@var{symbol} is declared as customizable variable using
+@code{defcustom}, to provide a configuration file for the given syntax
+@var{checker}.  The variable has the customization type @code{string},
+and gets a comprehensive docstring, including a reference to
+@var{checker}.
+
+@var{filename} is used as initial value for the variable.  If omitted,
+the initial value is nil.
+
+Use this macro together with the @code{config} cell in the command of a
+syntax checker.
+@end defmac
+
+@node Error parsers, Examples, Declaration, Extending
+@comment  node-name,  next,  previous,  up
+@section Error parsers
+
+Syntax checkers may use more sophisticated error parsing by using the
+@code{:error-parser} property.  @xref{Declaration}.
+
+Flycheck provides the following error parsers for use by syntax
+checkers:
+
+@table @code
+@item flycheck-parse-checkstyle
+Parse XML output similar to @uref{http://checkstyle.sourceforge.net/,
+Checkstyle}.
+@end table
+
+You may also define your own error parsers.  An error parser is a
+function that takes three arguments:
+
+@table @var
+@item output
+The complete output of the syntax checker as string.
+@item checker
+A symbol denoting the executed syntax checker.
+@item buffer
+A buffer object referring to the buffer that was syntax-checked.
+@end table
+
+The function shall return a list of Flycheck errors.  @xref{Error API},
+for more information about Flycheck errors.
+
+Flycheck provides some utility functions to implement error parsers.
+@xref{Error parser API}.
+
+@node Examples,  , Error parsers, Extending
+@comment  node-name,  next,  previous,  up
+@section Examples of syntax checkers
+
+@menu
+* Simple example::              How to declare basic syntax checkers
+* Predicate example::           How to control syntax checker usage
+* Configuration example::       How to configure syntax checkers
+* Chaining example::            How to execute more than one syntax checker
+@end menu
+
+@node Simple example, Predicate example, Examples, Examples
+@comment  node-name,  next,  previous,  up
+@subsection Basic syntax checkers
+
+As explained in the previous chapter @ref{Extending} a syntax checker is
+declared with @code{flycheck-declare-checker}.
+
+We will use this function to declare a syntax checker using the
+CodeSniffer utility for the PHP programming language:
+
+@lisp
+(flycheck-declare-checker php-phpcs
+  "A PHP syntax checker using PHP_CodeSniffer.
+
+See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
+  :command '("phpcs" "--report=checkstyle" source)
+  :error-parser 'flycheck-parse-checkstyle
+  :modes '(php-mode php+-mode))
+@end lisp
+
+First we specify the @code{:command} to execute.  The first element of
+the command list is the name of the executable, @command{phpcs} in our
+case.  This command is checked for existence with @code{executable-find}
+before using this syntax checker.  If the command does not exist, the
+syntax checker is @emph{not} used.
+
+The executable is following by the arguments, in this case some options
+and the symbol @code{source}.  This symbol is replaced with the file to
+check.  This file is a temporary file created in the system temporary
+directory and containing the contents of the buffer to check.
+
+Next we specify how to parse the output of the syntax checker.  PHP
+CodeSniffer provides an option to output errors in an XML format similar
+to the Java tool Checkstyle, so we use the built-in @emph{error parser}
+@code{flycheck-parse-checkstyle} to parse the output.
+
+Eventually we enable the syntax checker in PHP editing modes.
+
+If the syntax checker does not provide any sort of structured output
+format, we have to parse the error messages from the textual output.  To
+do so, we can use @emph{error patterns}, like in the Pylint syntax
+checker for the Python programming language:
+
+@lisp
+(flycheck-declare-checker python-pylint
+  "A Python syntax and style checker using the pylint utility.
+
+See URL `http://pypi.python.org/pypi/pylint'."
+  :command '("epylint" source-inplace)
+  :error-patterns
+  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): Warning (W.*): \\(?4:.*\\)$" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): Error (E.*): \\(?4:.*\\)$" error)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\[F\\] \\(?4:.*\\)$" error))
+  :modes 'python-mode)
+@end lisp
+
+Again, there is a @code{:command}, however we use the
+@code{source-inplace} symbol this time.  This symbol causes the
+temporary file to be created in the same directory as the original file,
+making information from the source code tree available to the syntax
+checker.  In case of Pylint, these are the Python packages from the
+source code tree.
+
+Next we give the list of @emph{error patterns} to parse errors.  These
+patterns extract the error location and the error message from the
+output of @command{epylint}.  An error pattern is a list containing a
+regular expression with match groups to extract the error information,
+and an error level (either @code{warning} or @code{error}).
+
+Eventually we enable the syntax checker in @code{python-mode}.
+
+@node Predicate example, Configuration example, Simple example, Examples
+@comment  node-name,  next,  previous,  up
+@subsection Syntax checkers with predicates
+
+In the previous examples the syntax checkers were specific to certain
+major modes.  However, this is not always the case.  For instance, GNU
+Emacs provides a single mode only for shell scripting in various Shell
+languages.  A syntax checker for a specific shell must check whether the
+edited shell script is written for the right shell:
+
+@lisp
+(flycheck-declare-checker zsh
+  "A Zsh syntax checker using the zsh executable.
+
+See URL `http://www.zsh.org/'."
+  :command '("zsh" "-n" "-d" "-f" source)
+  :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
+  :modes 'sh-mode
+  :predicate '(eq sh-shell 'zsh))
+@end lisp
+
+This syntax checker for the Zsh shell is enabled in @code{sh-mode} as
+specified by @code{:modes}, however it specifies an additional
+@code{:predicate} to determine whether the right shell is in use.  Hence
+this syntax checker is only used if a Zsh shell scripting is being
+edited in @code{sh-mode}, but not if a Bash or POSIX Shell script is
+being edited.
+
+A syntax checker may even go as far as not having @code{:modes} at all.
+For instance, there is no special JSON mode, but syntax checking JSON is
+still desirable.  Hence a JSON syntax checker may use the
+@code{:predicate} to check the file extension:
+
+@lisp
+
+(flycheck-declare-checker json-jsonlint
+  "A JSON syntax and style checker using jsonlint.
+
+See URL `https://github.com/zaach/jsonlint'."
+  :command '("jsonlint" "-c" "-q" source)
+  :error-patterns
+  '(("^\\(?1:.+\\)\: line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
+     error))
+  :predicate '(and buffer-file-name
+                   (string= "json" (file-name-extension buffer-file-name)))))
+@end lisp
+
+This syntax checker is now used whenever a file ends with .json,
+regardless of the major mode.
+
+@node Configuration example, Chaining example, Predicate example, Examples
+@comment  node-name,  next,  previous,  up
+@subsection Configuration files for syntax checkers
+
+Some syntax checkers can be configured using configuration files given
+by an option.  Flycheck provides built-in support to handle such
+configuration files:
+
+@lisp
+(flycheck-def-config-file-var flycheck-jshintrc javascript-jshint ".jshintrc")
+
+(flycheck-declare-checker javascript-jshint
+  "A JavaScript syntax and style checker using jshint.
+
+See URL `http://www.jshint.com'."
+  :command '("jshint" "--checkstyle-reporter"
+             (config "--config" flycheck-jshintrc) source)
+  :error-parser 'flycheck-parse-checkstyle
+  :modes '(js-mode js2-mode js3-mode))
+@end lisp
+
+As you can see, we declare a syntax checker for Javascript, using the
+@command{jshint} utility.  This utility accepts a configuration file via
+the @option{--config} option.
+
+To use a configuration file with jshint, we first declare the variable
+@code{flycheck-jshintrc} that provides the name of the file, as
+explained in @ref{Configuration}.
+
+In the @code{:command} we use a @code{config} element to pass the
+configuration file to the syntax checker.  If the configuration file is
+found, its path will be passed to the syntax checker, using the option
+specified after the @code{config} symbol.  Otherwise the whole element
+is simply omitted from the command line.
+
+@node Chaining example,  , Configuration example, Examples
+@comment  node-name,  next,  previous,  up
+@subsection Chaining syntax checkers
+
+For many languages, more than a single syntax checker is applicable.
+For instance, Emacs Lisp can be checked for syntactic corrections with
+the byte code compiler, and for adherence to the Emacs Lisp
+documentation style using Checkdoc.  PHP, too, can be syntax checked
+with the PHP parser, and verified against coding styles using PHP
+CodeSniffer.
+
+To support such cases, syntax checkers can be @dfn{chained} using the
+@code{:next-checkers}.  The standard PHP syntax checker uses this to
+run PHP CodeSniffer if there are no syntax errors:
+
+@lisp
+(flycheck-declare-checker php
+  "A PHP syntax checker using the PHP command line.
+
+See URL `http://php.net/manual/en/features.commandline.php'."
+  :command '("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
+             "-d" "log_errors=0" source)
+  :error-patterns
+  '(("\\(?:Parse\\|Fatal\\|syntax\\) error[:,] \\(?4:.*\\) in \\(?1:.*\\) on line \\(?2:[0-9]+\\)"
+    error))
+  :modes '(php-mode php+-mode)
+  :next-checkers '((warnings-only . php-phpcs)))
+@end lisp
+
+Now PHP CodeSniffer will check the coding style, whenever a PHP syntax
+check did not result in any errors, if PHP CodeSniffer syntax checker is
+usable @emph{and} registered.
+
+@c Local Variables:
+@c mode: texinfo
+@c TeX-master: "flycheck"
+@c End:

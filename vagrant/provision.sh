@@ -61,6 +61,9 @@ ppa ppa:ondrej/php5
 ppa ppa:richarvey/nodejs
 apt_update
 
+# Install texinfo to build documentation
+apt texinfo
+
 # Install Emacs 24.2 and Emacs snapshot
 apt emacs24 emacs24-el emacs24-common-non-dfsg \
     emacs-snapshot emacs-snapshot-el

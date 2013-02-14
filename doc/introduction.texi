@@ -1,0 +1,126 @@
+Flycheck provides on-the-fly syntax checking for GNU Emacs 24.
+Essentially it is ``Flymake done right'' with
+
+@itemize @bullet
+@item
+ready-to-use syntax checkers for a bunch of languages
+@item
+simple declarative checker definitions,
+@item
+checkers based on major modes,
+@item
+and a clean, concise and understandable implementation with decent test
+coverage.
+@end itemize
+
+@noindent
+@xref{Top, ,GNU Flymake, flymake}, for more information about
+Flymake.
+
+@menu
+* Features::                    What Flycheck can do for you
+* Installation::                How to install Flycheck in your GNU Emacs 24
+* Activation::                  How to activate Flycheck for on-the-fly syntax
+                                 checking
+@end menu
+
+@node Features, Installation, Introduction, Introduction
+@comment  node-name,  next,  previous,  up
+@section Features
+
+@itemize @bullet
+@item
+Automatic syntax checking after saving or insertion of new lines
+@item
+Error navigation with @code{next-error} and @code{previous-error}
+@item
+Built-in syntax checkers for:
+@itemize @bullet
+@item
+CoffeeScript
+@item
+CSS
+@item
+Emacs Lisp (using the byte compiler and CheckDoc)
+@item
+Haml
+@item
+HTML
+@item
+Javascript
+@item
+JSON
+@item
+Lua
+@item
+Perl
+@item
+PHP (using the PHP Command Line and PHP CodeSniffer)
+@item
+Python (using @command{flake8}, @command{pylint}, or @command{pyflakes})
+@item
+Ruby
+@item
+Sass
+@item
+Shell scripts (using Bash, Dash, or Zsh depending on the type of shell
+script)
+@item
+TeX/LaTeX (using @command{chktex} or @command{lacheck})
+@item
+XML
+@end itemize
+@item
+Easy customization
+@item
+Easy declarative API to define new syntax checkers
+@end itemize
+
+@node Installation, Activation, Features, Introduction
+@comment  node-name,  next,  previous,  up
+@section Installation
+
+Install the ELPA package from @uref{http://melpa.milkbox.net, MELPA} or
+@uref{http://marmalade-repo.org/, Marmalade} using @kbd{M-x
+package-install RET flycheck}.  The former is the @emph{recommended}
+repository.
+
+Neither of these repositories is included in GNU Emacs by default.  You
+need to enable these repositories explicitly.  For instance, to add the
+MELPA repository, add the following code to @file{init.el}:
+
+@lisp
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.milkbox.net/packages/") t)
+(package-initialize)
+@end lisp
+
+Flycheck is written and tested against GNU Emacs 24.2 and newer.  It
+should work on GNU Emacs 24.1, too.  Earlier releases of GNU Emacs,
+especially GNU Emacs 23 and before, and other flavors of Emacs
+(e.g. XEmacs, Aquamacs, etc.) are @b{not} supported.  Flycheck may or
+may not work, the latter being more likely.
+
+Most checkers depend on external tools to perform the actual syntax
+checking.  Use @code{flycheck-describe-checker} to get help about a
+syntax checker and its dependencies.
+
+@node Activation,  , Installation, Introduction
+@comment  node-name,  next,  previous,  up
+@section Activation
+
+Enable @code{flycheck-mode} in your @file{init.el} file:
+
+@lisp
+(add-hook 'prog-mode-hook 'flycheck-mode)
+(add-hook 'text-mode-hook 'flycheck-mode)
+@end lisp
+
+@noindent
+Alternatively, use @kbd{M-x flycheck-mode} to manually enable Flycheck.
+
+@c Local Variables:
+@c mode: texinfo
+@c TeX-master: "flycheck"
+@c End:

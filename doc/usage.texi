@@ -1,0 +1,313 @@
+This chapter explains the usage of Flycheck.
+
+@menu
+* Syntax checking::             How syntax is checked
+* Selection::                   How syntax checkers are selected
+* Configuration::               How to configure individual syntax checkers
+* Reporting::                   How syntax warnings and errors are reported
+* Navigation::                  How to navigate syntax warnings and errors
+* Mode line::                   How status information is displayed in the mode
+                                 line
+@end menu
+
+@node Syntax checking, Selection, Usage, Usage
+@comment  node-name,  next,  previous,  up
+@section Syntax checking
+
+In @code{flycheck-mode} the buffer is automatically checked on the fly
+when
+
+@itemize
+@item
+the file is saved,
+@item
+or if new lines are inserted.
+@end itemize
+
+@noindent
+You can also check the buffer manually:
+
+@table @kbd
+@item C-c ! c
+@itemx M-x flycheck-buffer
+@findex flycheck-buffer
+Start a syntax check in the current buffer.
+@end table
+
+Each syntax check is comprised of the following steps:
+
+@enumerate
+@item
+Select a suitable syntax checker.  @xref{Selection}, for more
+information on how syntax checkers are selected.
+@item
+Copy the contents of the buffer to be checked to a temporary file.
+@item
+Execute the syntax checker tool(s).
+@item
+Parse the output of the tool, and report all errors and warnings.
+@xref{Reporting}, for more information.
+@item
+Run hooks in @code{flycheck-after-syntax-check-hook}.
+@end enumerate
+
+@defopt flycheck-after-syntax-check-hook
+This variable is a list of function to execute after a syntax check is
+completed, including all chained syntax checkers.
+
+By the time these functions are called, all errors and warnings are
+already reported.  @xref{Reporting}, for more information about error
+reporting.
+
+This variable is a normal hook. @xref{Hooks, , ,elisp}.
+@end defopt
+
+@node Selection, Configuration, Syntax checking, Usage
+@comment  node-name,  next,  previous,  up
+@section Syntax checker selection
+
+By default Flycheck automatically selects a suitable syntax checker from
+@code{flycheck-checkers}:
+
+@defopt flycheck-checkers
+A list of all syntax checkers to use as candidates for automatic checker
+selection.
+
+The first suitable syntax checker from this list is used to check a
+buffer.  A syntax checker is suitable, if
+@itemize
+@item
+it may be used for the current major mode,
+@item
+it's predicate matches,
+@item
+and if the syntax checking tool exists.
+@end itemize
+
+A syntax checker contained in this list is said to be @dfn{registered}.
+
+@xref{Syntax checkers}, for a list of available checkers.
+@end defopt
+
+If no suitable syntax checker is found the syntax check is
+@emph{silently} omitted.  @emph{No} error is signaled, and only a
+specific indicator informs about the omitted syntax check.  @xref{Mode
+line}.
+
+You can manually select a specific syntax checker for the current
+buffer, too:
+
+@table @kbd
+@item C-c ! s
+@itemx M-x flycheck-select-checker
+@findex flycheck-select-checker
+Prompt for a checker.  If no syntax checker is entered deselect the
+current syntax checker, and re-enable automatic selection again.  With
+prefix arg, re-enable automatic selection without prompting.
+
+Syntax checker do @emph{not} need to be registered to be manually
+selected with this command.
+@end table
+
+@noindent
+@code{flycheck-select-checker} sets @code{flycheck-checker}:
+
+@defvar flycheck-checker
+Syntax checker to use for the current buffer.
+
+The variable is buffer local, and safe as file local variable for
+registered checkers.
+
+If unset, automatically select a suitable syntax checker.
+
+If set, only use this syntax checker.  Automatic selection is
+@emph{disabled}.  If the syntax checker is unusable, signal an error.
+@end defvar
+
+@noindent
+You may directly set this variable, e.g. via file local variables.  For
+instance, you can use the following file local variable within a Python
+source file to always check this file with @command{pylint}:
+
+@example
+# Local Variables:
+# flycheck-checker: python-pylint
+# End:
+@end example
+
+@noindent
+@xref{Specifying File Variables, , ,emacs}, for more information about
+file variables.
+
+Each syntax checker provides documentation with information about the
+executable the syntax checker uses, in which buffers it will be used for
+syntax checks, and whether it can be configured.  @xref{Configuration},
+for more information about syntax checker configuration.
+
+@table @kbd
+@item C-c ! ?
+@itemx M-x flycheck-describe-checker
+@findex flycheck-describe-checker
+Show the documentation of a syntax checker.
+@end table
+
+@node Configuration, Reporting, Selection, Usage
+@comment  node-name,  next,  previous,  up
+@section Syntax checker configuration
+
+Some syntax checkers read configuration files.  These checkers have an
+associated variable providing the name of the configuration file, for
+instance @code{flycheck-jshintrc} for the @flyc{javascript-jshint}
+syntax checker.  These variables obey the following rules:
+
+If the variable contains a plain file name @emph{without} any slash,
+e.g. @file{.jshintrc}, this file is searched
+
+@enumerate
+@item
+in the buffer's directory,
+@item
+any ancestors thereof,
+@item
+and in the @env{HOME} directory eventually.
+@end enumerate
+
+@noindent
+If the buffer has no @code{buffer-file-name}, only the @env{HOME}
+directory is searched.
+
+If the variable contains a @emph{path with} a slash,
+e.g. @file{./.jshintrc} or @file{~/.jshintrc}, the path is expanded
+against the buffer's directory using @code{expand-file-name}.
+
+Customize these variables using @kbd{M-x customize-group RET
+flycheck-config-files}.  Use @code{flycheck-describe-checker} to find
+out whether a syntax checker has a configuration file.
+
+You may also use these variables as file-local variables.  For instance,
+the following checks the Javascript file always with @file{.jshintrc}
+from the parent directory:
+
+@example
+// Local variables:
+// flycheck-jshintrc: "../.jshintrc"
+// End:
+@end example
+
+@node Reporting, Navigation, Configuration, Usage
+@comment  node-name,  next,  previous,  up
+@section Error reporting
+
+Errors and warnings from a syntax checker are
+@itemize
+@item
+reported in the mode line,
+@item
+indicated by fringe icons,
+@item
+and highlighted in the buffer with @code{flycheck-error-face} and
+@code{flycheck-warning-face} respectively, according to
+@code{flycheck-highlighting-mode}
+@end itemize
+
+@defopt flycheck-error-face
+@defoptx flycheck-warning-face
+The faces to use to highlight errors and warnings respectively.
+
+Note that the default faces provided by GNU Emacs are ill-suited to
+highlight errors because these are relatively pale and do not specify a
+background color or underline.  Hence highlights are easily overlook and
+even @b{invisible} for white space.
+
+For best error highlighting customize these faces, or choose a color
+theme that has reasonable Flycheck faces, for instance the excellent
+@url{https://github.com/bbatsov/solarized-emacs,Solarized theme}.
+@end defopt
+
+@defopt flycheck-highlighting-mode
+This variable determines how to highlight errors:
+
+If set to @code{columns} try to highlight errors as exactly as possible.
+If an error provides information about a specific column, only this
+column is highlighted.  This retains as much information as possible
+from the syntax checker, but a single column highlight may be easily
+overlooked.  This mode is the default.
+
+If set to @code{lines} the whole line on which the error occurred is
+highlighted, regardless of whether the error is actually specific to a
+column.  Column information is hence ignored.
+
+If set to @code{nil} highlighting is completely disabled.  Errors will
+only be reported via fringe icons and in the mode line.
+
+Note that this variable does @emph{not} affect error @emph{navigation}.
+@code{next-error} and @code{previous-error} always jump to the error
+column, regardless of the highlighting mode.
+@end defopt
+
+To view an error message, either hover the mouse of the highlighted
+error, or move the point to the highlighted error and wait for a short
+moment to see the error message in the echo area.
+
+@table @kbd
+@item C-c ! C
+@itemx M-x flycheck-clear
+@findex flycheck-clear
+Clear all Flycheck errors and warnings in the current buffer.
+@end table
+
+@node Navigation, Mode line, Reporting, Usage
+@comment  node-name,  next,  previous,  up
+@section Error navigation
+
+Use @kbd{M-g n} (@code{next-error}) and @kbd{M-g p}
+(@code{previous-error}) to navigate between Flycheck warnings and errors
+in the current buffer.  @xref{Compilation Mode, , ,emacs}, for more
+information about these commands.
+
+Note that as Flycheck integrates itself into the standard error
+navigation provided by Compilation Mode, @emph{visible} compilation
+buffers take preference over buffers with Flycheck errors.  This
+includes buffers from @kbd{M-x compile}, @kbd{M-x grep} and generally
+all buffers with Compilation Mode or Compilation Minor Mode.
+
+If such a buffer is visible, @kbd{M-g n} and @kbd{M-g p} will ignore
+Flycheck errors and warnings, and navigate errors (or generally results)
+reported by that buffer instead.   To navigation Flycheck errors again,
+hide the buffer, e.g. with @kbd{C-x 1}.
+
+Error navigation jumps to the error column, or to the first
+non-whitespace character of a line if the error is not specific to a
+column.
+
+@node Mode line,  , Navigation, Usage
+@comment  node-name,  next,  previous,  up
+@section Mode line
+
+Flycheck indicates its state in the mode line:
+
+@table @samp
+@item FlyC
+There are no errors in the current buffer.
+@item FlyC*
+A syntax check is being performed currently.
+@item FlyC:3/4
+There are three errors and four warnings in the current buffer.
+@item FlyC-
+Automatic syntax checker selection did not find a suitable syntax
+checker.  @xref{Selection}, for more information.
+@item FlyC!
+The syntax check failed.  Inspect the @code{*Messages*} buffer for
+details.
+@item FlyC?
+The syntax check had a dubious result.  The definition of the syntax
+checker may be flawed.  Inspect the @code{*Messages*} buffer for
+details.  This indicator should never be displayed for built-in syntax
+checkers.  If it is, please report this issue to the Flycheck
+developers.  @xref{Reporting issues}.
+@end table
+
+@c Local Variables:
+@c mode: texinfo
+@c TeX-master: "flycheck"
+@c End:

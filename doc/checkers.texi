@@ -1,0 +1,34 @@
+The following syntax checkers are included in Flycheck.  Use @kbd{M-x
+flycheck-describe-checker} to get help for the syntax checker under
+point.
+
+@itemize
+@iflyc bash
+@iflyc coffee-coffeelint
+@iflyc css-csslint
+@iflyc emacs-lisp
+@iflyc emacs-lisp-checkdoc
+@iflyc haml
+@iflyc html-tidy
+@iflyc javascript-jshint
+@iflyc json-jsonlint
+@iflyc lua
+@iflyc perl
+@iflyc php
+@iflyc php-phpcs
+@iflyc python-flake8
+@iflyc python-pylint
+@iflyc python-pyflakes
+@iflyc ruby
+@iflyc sass
+@iflyc sh
+@iflyc tex-chktex
+@iflyc tex-lacheck
+@iflyc xml-xmlstarlet
+@iflyc zsh
+@end itemize
+
+@c Local Variables:
+@c mode: texinfo
+@c TeX-master: "flycheck"
+@c End:

@@ -1,0 +1,118 @@
+This chapter provides a brief overview over the Flycheck API.
+
+You may use this API to extend Flycheck, e.g. by implementing new error
+parsers or more in-depth error analysis.  You will also find this API
+helpful if you want to develop Flycheck itself.
+
+As said this chapter merely provides an overview over the Flycheck API.
+The documentation is therefore rather brief.  For a definite reference
+on a function or variable, consult its docstring via
+@code{describe-function} and @code{describe-variable} respectively.
+
+@menu
+* Error API::                   How to create and inspect Flycheck errors
+* Error parser API::            Utilities for implementing error parsers
+@end menu
+
+@node Error API, Error parser API, API, API
+@comment  node-name,  next,  previous,  up
+@section Error API
+
+Flycheck errors are represented by the structure @code{flycheck-error}.
+@xref{Structures, , , cl}, for information about CL structures.
+
+This structure has the following attributes, each of which may be nil:
+
+@table @code
+@item buffer
+The buffer object referring to the buffer this error belongs to.
+
+Note that you do not need to set this attribute when creating errors in
+an error parser.  Flycheck automatically keeps track of the buffer
+itself.
+
+@item filename
+A string containing the filename the error refers to.
+
+@item line
+An integer providing the line the error refers to.
+
+@item column
+An integer providing the column the error refers to.
+
+If this attribute is nil, Flycheck will assume the error to refer to the
+whole line.
+
+@item message
+The human-readable error message as string.
+
+@item level
+The severity of the error message, as either @code{error} or
+@code{warning}.
+@end table
+
+The structure has only a single constructor:
+
+@defun flycheck-error-new attributes
+Create a new Flycheck error with the given @var{attributes}.
+
+@var{attributes} are given as keyword arguments.
+@end defun
+
+The following functions are provided to work with errors:
+
+@defun flycheck-error-with-buffer err &optional forms
+Evaluate @var{forms} with the current buffer set to the buffer of
+@var{err}.  If this buffer is not live, @var{forms} are not evaluated.
+@end defun
+
+@defun flycheck-error-region err &optional ignore-column
+Get the buffer region referred to by @var{err}.
+
+If @var{ignore-column} is non-nil, ignore the column attribute of
+@var{err} when determining the region.
+
+Return the region as cons cell @code{(@var{beg} . @var{end})}.
+@end defun
+
+@defun flycheck-error-pos err
+Get the buffer position referred to by @var{err}.
+
+This is the position that error navigation would jump to when navigating
+to this error.
+@end defun
+
+The following functions and variables may be used to analyze the errors
+of a syntax check.
+
+@defvar flycheck-current-errors
+This buffer-local variable stores the errors of the last syntax check,
+sorted by line and column number.
+@end defvar
+
+@defun flycheck-count-errors errors
+Count the number of errors and warnings in @var{errors}.
+
+Return a cons cell @code{(@var{no-errors} . @var{no-warnings})}.
+@end defun
+
+@defun flycheck-has-errors-p errors &optional level
+Determine if there are any @var{errors} with the given @var{level}.
+
+If @var{level} is omitted, determine whether @var{errors} is not nil.
+Otherwise determine whether there are any errors whose level is equal to
+the given @var{level}.
+@end defun
+
+@node Error parser API,  , Error API, API
+@comment  node-name,  next,  previous,  up
+@section Error parser API
+
+@defun flycheck-parse-xml-string xml
+Parse an @var{xml} string and return the parsed document tree.
+@end defun
+
+@c Local Variables:
+@c mode: texinfo
+@c TeX-master: "flycheck"
+@c End:

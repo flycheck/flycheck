@@ -206,6 +206,7 @@ overlay setup)."
     (define-key pmap (kbd "C-c") 'flycheck-compile)
     (define-key pmap "s" 'flycheck-select-checker)
     (define-key pmap "?" 'flycheck-describe-checker)
+    (define-key pmap "i" 'flycheck-info)
     (define-key map (kbd "C-c !") pmap)
     map)
   "Keymap of `flycheck-mode'.")
@@ -218,7 +219,8 @@ overlay setup)."
    "---"
    ["Select syntax checker" flycheck-select-checker t]
    "---"
-   ["Describe syntax qchecker" flycheck-describe-checker t])
+   ["Describe syntax checker" flycheck-describe-checker t]
+   ["Read the Flycheck manual" flycheck-info t])
   "Spell Checking")
 
 (easy-menu-change '("Tools") "--" nil "Spell Checking")
@@ -1024,16 +1026,18 @@ nil otherwise."
 (defun flycheck-select-checker (checker)
   "Select CHECKER for the current buffer.
 
-CHECKER is a checker symbol (see `flycheck-checkers') or nil.  If
-nil deselect the current checker (if any) and use automatic
-checker selection via `flycheck-checkers'.
+CHECKER is a syntax checker symbol (see `flycheck-checkers') or
+nil.  It does not need to be registered in `flycheck-checkers'.
+If nil deselect the current syntax checker (if any) and use
+automatic checker selection via `flycheck-checkers'.
 
-If called interactively prompt for CHECKER.  If no checker is
-entered deselect the current checker.  With prefix arg
-immediately deselect the current checker without any prompt.
+If called interactively prompt for CHECKER.  If no syntax checker
+is entered deselect the current syntax checker.  With prefix arg
+immediately deselect the current syntax checker without any
+prompt.
 
 Set `flycheck-checker' to CHECKER and automatically start a new
-syntax check if the checker changed."
+syntax check if the syntax checker changed."
   (interactive
    (if current-prefix-arg
        (list nil)
@@ -1043,7 +1047,12 @@ syntax check if the checker changed."
     (flycheck-buffer)))
 
 
-;;;; Checker help
+;;;; Documentation
+(defun flycheck-info ()
+  "Open the Flycheck manual."
+  (interactive)
+  (info "flycheck"))
+
 ;; Define our custom help button to navigation to checker definitions.  Be
 ;; auto-load friendly, and delay the definition until after 'help-mode was
 ;; loaded.
@@ -1363,7 +1372,11 @@ back to `xml-parse-region'.")
 (defun flycheck-parse-xml-string (xml)
   "Parse an XML string.
 
-Return the document tree parsed from XML."
+Return the document tree parsed from XML in the form (ROOT ATTRS
+BODY...).  ROOT is a symbol identifying the name of the root
+element.  ATTRS is an alist of the attributes of the root node.
+BODY is zero or more body elements, either as strings (in case of
+text nodes) or as XML nodes, in the same for as the root node."
   (with-temp-buffer
     (insert xml)
     (funcall flycheck-xml-parser (point-min) (point-max))))

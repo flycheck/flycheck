@@ -2,6 +2,7 @@ EMACS = emacs
 EMACSFLAGS =
 CARTON = carton
 VAGRANT = vagrant
+INSTALL-INFO = install-info
 
 OBJECTS = flycheck.elc
 
@@ -12,6 +13,16 @@ deps :
 
 .PHONY: build
 build : deps $(OBJECTS)
+
+doc/dir : doc/flycheck.info
+	$(INSTALL-INFO) doc/flycheck.info doc/dir
+
+.PHONY: doc
+doc : doc/dir
+
+.PHONY: clean-doc
+clean-doc :
+	rm -f doc/flycheck.info doc/dir
 
 .PHONY: test
 test : build

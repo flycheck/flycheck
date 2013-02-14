@@ -1,0 +1,46 @@
+The following people contributed to Flycheck.  Their help and ideas,
+their support and patches are greatly appreciated.
+
+@itemize
+@item
+@uref{https://github.com/bbatsov, Bozhidar Batsov} provided valuable
+feedback and refinements, and brought Flycheck to a larger user base by
+adding it to his awesome @uref{https://github.com/bbatsov/prelude,
+Prelude project}.
+
+@item
+@uref{https://github.com/dhaley, Damon Haley} helped to shape and test
+the PHP CodeSniffer checker.
+
+@item
+@uref{https://github.com/wyuenho, Jimmy Yuen Ho Wong} added the HTML
+syntax checker and the jshint Javascript checker, and did valuable
+testing and bug fixing.
+
+@item
+@uref{https://github.com/maio, Marian Schubert} added the Perl syntax
+checker.
+
+@item
+@uref{https://github.com/scrooloose, Martin Grenfell} created the
+awesome Vim library @uref{https://github.com/scrooloose/syntastic,
+syntastic} which inspired this project and many of its checkers.
+
+@item
+@uref{https://github.com/ptrv, Peter Vasil} created the XML and Lua
+syntax checkers, added unit tests and did valuable testing.
+
+@item
+@uref{https://github.com/steckerhalter, steckerhalter} provided the PHP
+CodeSniffer checker.
+
+@item
+@uref{https://github.com/purcell, Steve Purcell} implemented many
+checkers, contributed important ideas to the design of the checker API
+and engaged in worthwhile discussion to shape this project.
+@end itemize
+
+@c Local Variables:
+@c mode: texinfo
+@c TeX-master: "flycheck"
+@c End:
