@@ -3,5 +3,9 @@
 # Packages installed for development
 elpa/
 
+# Package files
+flycheck-pkg.el
+flycheck-*.tar.gz
+
 # Vagrant cache
 .vagrant

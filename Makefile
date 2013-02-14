@@ -6,6 +6,13 @@ INSTALL-INFO = install-info
 
 OBJECTS = flycheck.elc
 
+VERSION = $(shell $(CARTON) version)
+
+PACKAGE_SRCS = flycheck.el \
+	flycheck-pkg.el \
+	doc/flycheck.info doc/dir flycheck.el
+PACKAGE = flycheck-$(VERSION).tar.gz
+
 .PHONY: deps
 deps :
 	$(CARTON) install
@@ -39,8 +46,22 @@ virtual-test :
 clean :
 	rm -f $(OBJECTS)
 	rm -rf elpa # Clean packages installed for development
+	rm -rf $(PACKAGE) flycheck-pkg.el
 
 %.elc : %.el
 	$(CARTON) exec $(EMACS) --no-site-file --no-site-lisp --batch \
 		$(EMACSFLAGS) \
 		-f batch-byte-compile $<
+
+flycheck-pkg.el : Carton
+	$(CARTON) package
+
+$(PACKAGE) : $(PACKAGE_SRCS)
+	rm -rf flycheck-$(VERSION)
+	mkdir -p flycheck-$(VERSION)
+	cp -f $(PACKAGE_SRCS) flycheck-$(VERSION)
+	tar czf flycheck-$(VERSION).tar.gz flycheck-$(VERSION)
+	rm -rf flycheck-$(VERSION)
+
+.PHONY: package
+package : $(PACKAGE)
