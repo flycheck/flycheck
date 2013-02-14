@@ -288,11 +288,14 @@ buffer manually.
 
       (add-hook 'after-save-hook 'flycheck-buffer-safe nil t)
       (add-hook 'after-change-functions 'flycheck-handle-change nil t)
-      (add-hook 'post-command-hook 'flycheck-show-error-at-point-soon nil t)
       (add-hook 'kill-buffer-hook 'flycheck-teardown nil t)
       ;; Execute deferred checks if the buffer visibility changes
       (add-hook 'window-configuration-change-hook
                 'flycheck-perform-deferred-syntax-check nil t)
+
+      ;; Update error display in minibuffer after commands and error navigation
+      (add-hook 'post-command-hook 'flycheck-show-error-at-point-soon nil t)
+      (add-hook 'next-error-hook 'flycheck-show-error-at-point nil t)
 
       (setq flycheck-previous-next-error-function next-error-function)
       (setq next-error-function 'flycheck-next-error)
@@ -304,10 +307,11 @@ buffer manually.
    (t
     (remove-hook 'after-save-hook 'flycheck-buffer-safe t)
     (remove-hook 'after-change-functions 'flycheck-handle-change t)
-    (remove-hook 'post-command-hook 'flycheck-show-error-at-point-soon t)
     (remove-hook 'kill-buffer-hook 'flycheck-teardown t)
     (remove-hook 'window-configuration-change-hook
                  'flycheck-perform-deferred-syntax-check t)
+    (remove-hook 'post-command-hook 'flycheck-show-error-at-point-soon t)
+    (remove-hook 'next-error-hook 'flycheck-show-error-at-point t)
 
     (setq next-error-function flycheck-previous-next-error-function)
 
