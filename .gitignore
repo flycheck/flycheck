@@ -5,7 +5,7 @@ elpa/
 
 # Package files
 flycheck-pkg.el
-flycheck-*.tar.gz
+flycheck-*.tar
 
 # Vagrant cache
 .vagrant
