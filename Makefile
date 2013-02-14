@@ -11,7 +11,7 @@ VERSION = $(shell $(CARTON) version)
 PACKAGE_SRCS = flycheck.el \
 	flycheck-pkg.el \
 	doc/flycheck.info doc/dir flycheck.el
-PACKAGE = flycheck-$(VERSION).tar.gz
+PACKAGE = flycheck-$(VERSION).tar
 
 .PHONY: build
 build : deps $(OBJECTS)
@@ -46,7 +46,7 @@ $(PACKAGE) : $(PACKAGE_SRCS)
 	rm -rf flycheck-$(VERSION)
 	mkdir -p flycheck-$(VERSION)
 	cp -f $(PACKAGE_SRCS) flycheck-$(VERSION)
-	tar czf flycheck-$(VERSION).tar.gz flycheck-$(VERSION)
+	tar cf $(PACKAGE) flycheck-$(VERSION)
 	rm -rf flycheck-$(VERSION)
 
 .PHONY: clean
