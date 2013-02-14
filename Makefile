@@ -13,16 +13,13 @@ PACKAGE_SRCS = flycheck.el \
 	doc/flycheck.info doc/dir flycheck.el
 PACKAGE = flycheck-$(VERSION).tar.gz
 
+.PHONY: build
+build : deps $(OBJECTS)
+
 .PHONY: deps
 deps :
 	$(CARTON) install
 	$(CARTON) update
-
-.PHONY: build
-build : deps $(OBJECTS)
-
-doc/dir : doc/flycheck.info
-	$(INSTALL-INFO) doc/flycheck.info doc/dir
 
 .PHONY: doc
 doc : doc/dir
@@ -42,6 +39,16 @@ virtual-test :
 	$(VAGRANT) up
 	$(VAGRANT) ssh -c "make -C /vagrant EMACS=$(EMACS) clean test"
 
+.PHONY: package
+package : $(PACKAGE)
+
+$(PACKAGE) : $(PACKAGE_SRCS)
+	rm -rf flycheck-$(VERSION)
+	mkdir -p flycheck-$(VERSION)
+	cp -f $(PACKAGE_SRCS) flycheck-$(VERSION)
+	tar czf flycheck-$(VERSION).tar.gz flycheck-$(VERSION)
+	rm -rf flycheck-$(VERSION)
+
 .PHONY: clean
 clean :
 	rm -f $(OBJECTS)
@@ -56,12 +63,5 @@ clean :
 flycheck-pkg.el : Carton
 	$(CARTON) package
 
-$(PACKAGE) : $(PACKAGE_SRCS)
-	rm -rf flycheck-$(VERSION)
-	mkdir -p flycheck-$(VERSION)
-	cp -f $(PACKAGE_SRCS) flycheck-$(VERSION)
-	tar czf flycheck-$(VERSION).tar.gz flycheck-$(VERSION)
-	rm -rf flycheck-$(VERSION)
-
-.PHONY: package
-package : $(PACKAGE)
+doc/dir : doc/flycheck.info
+	$(INSTALL-INFO) doc/flycheck.info doc/dir
