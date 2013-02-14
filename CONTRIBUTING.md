@@ -2,8 +2,9 @@ Contributing
 ============
 
 If you discovered bugs and issues, have ideas for improvements or new features,
-or want to contribute a new module, please report to the [issue tracker][1] the
-repository and send a pull request, but respect the following guidelines.
+or want to contribute a new syntax checker, please report to the
+[issue tracker][1] the repository and send a pull request, but respect the
+following guidelines.
 
 
 Issue reporting
