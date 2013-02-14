@@ -24,7 +24,32 @@
 
 ;; Entry point of the Flycheck test suite.
 
-;; Load Flycheck, all required dependencies and all tests files.
+;; Loading
+;; -------
+;;
+;; This library loads Flycheck and all its dependencies, and the
+;; testhelpers.el library.
+
+;; Debugging
+;; ---------
+;;
+;; Enable the debugger by setting `debug-on-error' to t, in order to get decent
+;; backtraces in case of test errors.
+
+;; Test discovery
+;; --------------
+;;
+;; Find and load all tests.
+;;
+;; Test files and directories must match the `testsuite-test-file-pattern'.
+;; Essentially this pattern matches all directories and files starting with the
+;; prefix "test-".
+;;
+;; All test files in all test directories are added to `testsuite-testfiles',
+;; and loaded.
+;;
+;; Note that the tests are *not* executed.  This is left to the ERT test
+;; runners.
 
 ;;; Code:
 

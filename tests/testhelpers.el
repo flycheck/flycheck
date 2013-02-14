@@ -24,6 +24,60 @@
 
 ;; Provide macros and functions to aid test writing.
 
+;; Resource handling
+;; -----------------
+;;
+;; These functions can be used to load resources within a test.
+;;
+;; `flycheck-with-resource-buffer' executes forms with a temporary buffer using
+;; a resource file from the test suite.
+
+;; Checking buffers
+;; ----------------
+;;
+;; The following functions can be used to perform syntax checks in a test.
+;;
+;; `flycheck-buffer-sync' starts a syntax check in the current buffer and waits
+;; for the syntax check to complete.
+;;
+;; `flycheck-wait-for-syntax-checker'  waits until the syntax check in the
+;; current buffer is finished.
+;;
+;; `flycheck-disable-checkers' disables syntax checkers in the current buffers.
+
+;; Expecting failures
+;; ------------------
+;;
+;; These functions are intended for use with as value for the `:expected-result'
+;; keyword to `ert-deftest'.
+;;
+;; `flycheck-fail-unless-checkers' marks a test as expected to fail if the given
+;; syntax checkers are not installed.
+
+;; Test predicates
+;; ---------------
+;;
+;; `flycheck-should-errors' tests that the current buffer has ERRORS.
+;;
+;; `flycheck-ensure-clear' clear the error state of the current buffer, and
+;; signals a test failure if clearing failed.
+
+;; Test helpers
+;; ------------
+;;
+;; `flycheck-travis-ci-p' determines whether the tests are running on Travis CI.
+;;
+;; `flycheck-vagrant-p' determines whether the tests are running in the Vagrant
+;; test VM.
+;;
+;; `flycheck-ci-p' determines whether the tests are running in any CI
+;; environment.
+;;
+;; `flycheck-windows-p' determines whether the tests are running on Windows.
+;;
+;; `flycheck-min-emacs-version-p' determines whether Emacs has at least the
+;; given version.
+
 ;;; Code:
 
 (require 'ert)
@@ -61,7 +115,22 @@
     (should (string= (overlay-get overlay 'help-echo) message))))
 
 (defun flycheck-should-error (expected-err)
-  "Test that ERR is an error in the current buffer."
+  "Test that EXPECTED-ERR is an error in the current buffer.
+
+Test that the error is contained in `flycheck-current-errors',
+and that there is an overlay for this error at the correct
+position.
+
+EXPECTED-ERR is a list (LINE COLUMN MESSAGE LEVEL [NO-FILENAME]).
+LINE and COLUMN are integers specifying the expected line and
+column number respectively.  COLUMN may be nil to indicate that
+the error has no column.  MESSAGE is a string with the expected
+error message.  LEVEL is either `error' or `warning' and
+indicates the expected error level.  If given and non-nil,
+`NO-FILENAME' indicates that the error is expected to not have a
+file name.
+
+Signal a test failure if this error is not present."
   (let* ((no-filename (nth 4 expected-err))
          (real-error (flycheck-error-new
                       :buffer (current-buffer)
@@ -74,6 +143,24 @@
                            (flycheck-overlays-at (flycheck-error-pos real-error)))))
     (should (-contains? flycheck-current-errors real-error))
     (flycheck-should-overlay overlay real-error)))
+
+(defun flycheck-should-errors (&rest errors)
+  "Test that the current buffers has ERRORS.
+
+Without ERRORS test that there are any errors in the current
+buffer.
+
+With ERRORS, test that each error in ERRORS is present in the
+current buffer, and that the number of errors in the current
+buffer is equal to the number of given ERRORS.
+
+Each error in ERRORS is a list as expected by
+`flycheck-should-error'."
+  (if (not errors)
+      (should flycheck-current-errors)
+    (dolist (err errors)
+      (flycheck-should-error err))
+    (should (= (length errors) (length flycheck-current-errors)))))
 
 (defvar-local flycheck-syntax-checker-finished nil
   "Non-nil if the current checker has finished.")
@@ -100,7 +187,13 @@ failed, and the test aborted with failure.")
   (setq flycheck-syntax-checker-finished nil))
 
 (defun flycheck-disable-checkers (&rest checkers)
-  "Disable all CHECKERS for the current buffer."
+  "Disable all CHECKERS for the current buffer.
+
+Each argument is a syntax checker symbol to be disabled for the
+current buffer.
+
+Turn `flycheck-checkers' into a buffer-local variable and remove
+all CHECKERS from its definition."
   (set (make-local-variable 'flycheck-checkers)
        (--remove (memq it checkers) flycheck-checkers)))
 
@@ -126,19 +219,11 @@ Raise an assertion error if the buffer is not clear afterwards."
   (should (not (--any? (overlay-get it 'flycheck-overlay)
                        (overlays-in (point-min) (point-max))))))
 
-(defun flycheck-should-errors (&rest errors)
-  "Test that the current buffers has ERRORS.
-
-If no ERRORS are given, ensure that there are any errors in the
-buffer at all."
-  (if (not errors)
-      (should flycheck-current-errors)
-    (dolist (err errors)
-      (flycheck-should-error err))
-    (should (= (length errors) (length flycheck-current-errors)))))
-
 (defmacro flycheck-with-resource-buffer (resource-file &rest body)
-  "Create a temp buffer from a RESOURCE-FILE and execute BODY."
+  "Create a temp buffer from a RESOURCE-FILE and execute BODY.
+
+If RESOURCE-FILE is a relative file name, it is expanded against
+`testsuite-dir'."
   (declare (indent 1))
   `(let ((filename (expand-file-name ,resource-file testsuite-dir)))
      (should (file-exists-p filename))
@@ -148,7 +233,9 @@ buffer at all."
        ,@body)))
 
 (defun flycheck-fail-unless-checkers (&rest checkers)
-  "Skip the test unless all CHECKERS are present on the system."
+  "Skip the test unless all CHECKERS are present on the system.
+
+Return `:passed' if all CHECKERS are installed, or `:failed' otherwise."
   (if (-all? 'flycheck-check-executable checkers)
       :passed
     :failed))
@@ -156,7 +243,7 @@ buffer at all."
 (defalias 'flycheck-fail-unless-checker 'flycheck-fail-unless-checkers)
 
 (defun flycheck-travis-ci-p ()
-  "Determine whether the tests run on Travis CI.
+  "Determine whether the testsuite is running on Travis CI.
 
 Return t if so, or nil otherwise.
 
@@ -164,13 +251,13 @@ See URL `http://travis-ci.org'."
   (string= (getenv "TRAVIS") "true"))
 
 (defun flycheck-vagrant-p ()
-  "Determine whether the tests run inside a Vagrant VM.
+  "Determine whether the testsuite is running inside a Vagrant VM.
 
 Return t if so, or nil otherwise."
   (string= user-login-name "vagrant"))
 
 (defun flycheck-ci-p ()
-  "Determine whether the tests run in a CI environment.
+  "Determine whether the testsuite is running in a CI environment.
 
 A CI environment is either Travis CI or Vagrant.
 
@@ -178,7 +265,7 @@ Return t if so, or nil otherwise."
   (or (flycheck-vagrant-p) (flycheck-travis-ci-p)))
 
 (defun flycheck-windows-p ()
-  "Determine whether the tests are running on Windows."
+  "Determine whether the testsuite is running on Windows."
   (memq system-type '(ms-dos windows-nt cygwin)))
 
 (defun flycheck-min-emacs-version-p (major &optional minor)
