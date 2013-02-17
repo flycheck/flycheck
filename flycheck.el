@@ -914,9 +914,10 @@ Note that the contents of the file may not be up to date with the
 contents of the buffer to check.  Do not use this as primary
 input to a checker!
 
-If ARG is a list whose `car' is `config', search the
-configuration file and return a list of options that specify this
-configuration file, or nil of the config file was not found.
+If ARG is a form `(config-file OPTION VARIABLE), search the
+configuration file bound to VARIABLE and return a list of options
+that pass this configuration file to the syntax checker, or nil
+if the configuration file was not found.
 
 In all other cases, return ARG unchanged."
   (cond
@@ -926,7 +927,7 @@ In all other cases, return ARG unchanged."
     (flycheck-get-source-file #'flycheck-temp-file-inplace))
    ((eq arg 'source-original)
     (or (buffer-file-name) ""))
-   ((and (listp arg) (eq (car arg) 'config))
+   ((and (listp arg) (eq (car arg) 'config-file))
     (let ((option-name (nth 1 arg))
            (file-name  (flycheck-find-config-file (symbol-value (nth 2 arg)))))
       (when file-name
@@ -1797,7 +1798,8 @@ See URL `http://www.gnu.org/software/bash/'."
   "A CoffeeScript syntax and style checker using coffeelint.
 
 See URL `http://www.coffeelint.org/'."
-  :command '("coffeelint" (config "--file" flycheck-coffeelintrc) "--csv" source)
+  :command '("coffeelint" (config-file "--file" flycheck-coffeelintrc)
+             "--csv" source)
   :error-patterns
   '(("SyntaxError: \\(?4:.*\\) on line \\(?2:[0-9]+\\)" error)
     ("\\(?1:.+\\),\\(?2:[0-9]+\\),error,\\(?4:.+\\)" error)
@@ -1940,7 +1942,7 @@ See URL `http://haml.info'."
   "A HTML syntax and style checker using Tidy.
 
 See URL `https://github.com/w3c/tidy-html5'."
-  :command '("tidy" (config "-config" flycheck-tidyrc) "-e" "-q" source)
+  :command '("tidy" (config-file "-config" flycheck-tidyrc) "-e" "-q" source)
   :error-patterns
   '(("^line \\(?2:[0-9]+\\) column \\(?3:[0-9]+\\) - Error: \\(?4:.*\\)$" error)
     ("^line \\(?2:[0-9]+\\) column \\(?3:[0-9]+\\) - Warning: \\(?4:.*\\)$"
@@ -1954,7 +1956,7 @@ See URL `https://github.com/w3c/tidy-html5'."
 
 See URL `http://www.jshint.com'."
   :command '("jshint" "--checkstyle-reporter"
-             (config "--config" flycheck-jshintrc)
+             (config-file "--config" flycheck-jshintrc)
              source)
   :error-parser 'flycheck-parse-checkstyle
   :modes '(js-mode js2-mode js3-mode))
@@ -2023,7 +2025,7 @@ See URL `https://github.com/lunaryorn/flycheck/issues/78'."
   "A Python syntax and style checker using the flake8 utility.
 
 See URL `http://pypi.python.org/pypi/flake8'."
-  :command '("flake8" (config "--config" flycheck-flake8rc) source-inplace)
+  :command '("flake8" (config-file "--config" flycheck-flake8rc) source-inplace)
   :error-patterns
   '(("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:E[0-9]+.*\\)$"
      error)
@@ -2085,7 +2087,7 @@ See URL `http://gondor.apana.org.au/~herbert/dash/'."
   "A TeX and LaTeX syntax and style checker using chktex.
 
 See URL `http://baruch.ev-en.org/proj/chktex/'."
-  :command '("chktex" (config "-l" flycheck-chktexrc) "-v0" "-q" "-I"
+  :command '("chktex" (config-file "-l" flycheck-chktexrc) "-v0" "-q" "-I"
              source-inplace)
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\\(?4:[0-9]+:.*\\)$"

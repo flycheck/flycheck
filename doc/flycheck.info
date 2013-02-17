@@ -522,7 +522,7 @@ Checkers are declared with `flycheck-declare-checker':
                See the declaration of the `emacs-lisp-checkdoc' syntax
                checker for an application of this symbol.
 
-         `(config OPTION VARIABLE)'
+         `(config-file OPTION VARIABLE)'
                This cell is substituted with a configuration file for
                the syntax checker.  OPTION is a string containing the
                option that specifies a configuration file to the syntax
@@ -669,8 +669,8 @@ it to `flycheck-checkers'.  *Note Selection::.
      FILENAME is used as initial value for the variable.  If omitted,
      the initial value is nil.
 
-     Use this macro together with the `config' cell in the command of a
-     syntax checker.
+     Use this macro together with the `config-file' cell in the command
+     of a syntax checker.
 
 
 File: flycheck.info,  Node: Error parsers,  Next: Examples,  Prev: Declaration,  Up: Extending
@@ -819,7 +819,6 @@ For instance, there is no special JSON mode, but syntax checking JSON is
 still desirable.  Hence a JSON syntax checker may use the `:predicate'
 to check the file extension:
 
-
      (flycheck-declare-checker json-jsonlint
        "A JSON syntax and style checker using jsonlint.
 
@@ -851,7 +850,7 @@ configuration files:
 
      See URL `http://www.jshint.com'."
        :command '("jshint" "--checkstyle-reporter"
-                  (config "--config" flycheck-jshintrc) source)
+                  (config-file "--config" flycheck-jshintrc) source)
        :error-parser 'flycheck-parse-checkstyle
        :modes '(js-mode js2-mode js3-mode))
 
@@ -863,11 +862,11 @@ configuration files:
 variable `flycheck-jshintrc' that provides the name of the file, as
 explained in *note Configuration::.
 
-   In the `:command' we use a `config' element to pass the
+   In the `:command' we use a `config-file' element to pass the
 configuration file to the syntax checker.  If the configuration file is
 found, its path will be passed to the syntax checker, using the option
-specified after the `config' symbol.  Otherwise the whole element is
-simply omitted from the command line.
+specified after the `config-file' symbol.  Otherwise the whole element
+is simply omitted from the command line.
 
 
 File: flycheck.info,  Node: Chaining example,  Prev: Configuration example,  Up: Examples
@@ -1796,23 +1795,23 @@ Node: Navigation13264
 Node: Mode line14327
 Node: Extending15233
 Node: Declaration15662
-Node: Error parsers24129
-Node: Examples25109
-Node: Simple example25540
-Node: Predicate example28603
-Node: Configuration example30585
-Node: Chaining example32039
-Node: API33425
-Node: Error API34213
-Node: Error parser API36824
-Node: Contribution37050
-Node: Reporting issues37728
-Node: Contributing syntax checkers38467
-Node: Contributing code39264
-Node: Unit tests40611
-Node: Credits42052
-Node: GNU Free Documentation License43560
-Node: Syntax checkers68733
-Node: Function and Variable Index69501
+Node: Error parsers24139
+Node: Examples25119
+Node: Simple example25550
+Node: Predicate example28613
+Node: Configuration example30594
+Node: Chaining example32063
+Node: API33449
+Node: Error API34237
+Node: Error parser API36848
+Node: Contribution37074
+Node: Reporting issues37752
+Node: Contributing syntax checkers38491
+Node: Contributing code39288
+Node: Unit tests40635
+Node: Credits42076
+Node: GNU Free Documentation License43584
+Node: Syntax checkers68757
+Node: Function and Variable Index69525
 
 End Tag Table

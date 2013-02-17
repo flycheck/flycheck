@@ -60,7 +60,7 @@ syntax checker!
 See the declaration of the @code{emacs-lisp-checkdoc} syntax checker for
 an application of this symbol.
 
-@item (config @var{option} @var{variable})
+@item (config-file @var{option} @var{variable})
 This cell is substituted with a configuration file for the syntax
 checker.  @var{option} is a string containing the option that specifies
 a configuration file to the syntax checker tool.
@@ -204,8 +204,8 @@ and gets a comprehensive docstring, including a reference to
 @var{filename} is used as initial value for the variable.  If omitted,
 the initial value is nil.
 
-Use this macro together with the @code{config} cell in the command of a
-syntax checker.
+Use this macro together with the @code{config-file} cell in the command
+of a syntax checker.
 @end defmac
 
 @node Error parsers, Examples, Declaration, Extending
@@ -358,7 +358,6 @@ still desirable.  Hence a JSON syntax checker may use the
 @code{:predicate} to check the file extension:
 
 @lisp
-
 (flycheck-declare-checker json-jsonlint
   "A JSON syntax and style checker using jsonlint.
 
@@ -390,7 +389,7 @@ configuration files:
 
 See URL `http://www.jshint.com'."
   :command '("jshint" "--checkstyle-reporter"
-             (config "--config" flycheck-jshintrc) source)
+             (config-file "--config" flycheck-jshintrc) source)
   :error-parser 'flycheck-parse-checkstyle
   :modes '(js-mode js2-mode js3-mode))
 @end lisp
@@ -403,11 +402,11 @@ To use a configuration file with jshint, we first declare the variable
 @code{flycheck-jshintrc} that provides the name of the file, as
 explained in @ref{Configuration}.
 
-In the @code{:command} we use a @code{config} element to pass the
+In the @code{:command} we use a @code{config-file} element to pass the
 configuration file to the syntax checker.  If the configuration file is
 found, its path will be passed to the syntax checker, using the option
-specified after the @code{config} symbol.  Otherwise the whole element
-is simply omitted from the command line.
+specified after the @code{config-file} symbol.  Otherwise the whole
+element is simply omitted from the command line.
 
 @node Chaining example,  , Configuration example, Examples
 @comment  node-name,  next,  previous,  up
