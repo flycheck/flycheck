@@ -1052,6 +1052,7 @@ syntax check if the syntax checker changed."
 
 
 ;;;; Documentation
+;;;###autoload
 (defun flycheck-info ()
   "Open the Flycheck manual."
   (interactive)
