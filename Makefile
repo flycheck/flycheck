@@ -3,12 +3,22 @@ EMACSFLAGS =
 CARTON = carton
 VAGRANT = vagrant
 INSTALL-INFO = install-info
-
-OBJECTS = flycheck.elc
-
 VERSION = $(shell $(CARTON) version)
 
-PACKAGE_SRCS = flycheck.el \
+SRCS = flycheck.el
+OBJECTS = $(SRCS:.el=.elc)
+
+DOC_SRCS = doc/api.texi \
+	doc/checkers.texi \
+	doc/contribution.texi \
+	doc/credits.texi \
+	doc/extending.texi \
+	doc/fdl-1.3.texi \
+	doc/flycheck.texi \
+	doc/introduction.texi \
+	doc/usage.texi
+
+PACKAGE_SRCS = $(SRCS) \
 	flycheck-pkg.el \
 	doc/flycheck.info doc/dir flycheck.el
 PACKAGE = flycheck-$(VERSION).tar
@@ -65,3 +75,5 @@ flycheck-pkg.el : Carton
 
 doc/dir : doc/flycheck.info
 	$(INSTALL-INFO) doc/flycheck.info doc/dir
+
+doc/flycheck.info : $(DOC_SRCS)
