@@ -540,6 +540,11 @@ Checkers are declared with `flycheck-declare-checker':
                configuration file as string.  Otherwise the symbol is
                simply dropped from the arguments of the syntax checker.
 
+         `(eval FORM)'
+               This cell is substituted with a result of FORM
+               evaluation. No substitutions are performed in FORM
+               before it is evaluated.
+
           This property is mandatory.
 
     `:error-parser 'PARSER'
@@ -1765,7 +1770,7 @@ Function and Variable Index
 * flycheck-count-errors:                 Error API.           (line  72)
 * flycheck-current-errors:               Error API.           (line  68)
 * flycheck-declare-checker:              Declaration.         (line   9)
-* flycheck-def-config-file-var:          Declaration.         (line 189)
+* flycheck-def-config-file-var:          Declaration.         (line 194)
 * flycheck-describe-checker:             Selection.           (line  72)
 * flycheck-error-face:                   Reporting.           (line  16)
 * flycheck-error-new:                    Error API.           (line  40)
@@ -1795,23 +1800,23 @@ Node: Navigation13264
 Node: Mode line14327
 Node: Extending15233
 Node: Declaration15662
-Node: Error parsers24139
-Node: Examples25119
-Node: Simple example25550
-Node: Predicate example28613
-Node: Configuration example30594
-Node: Chaining example32063
-Node: API33449
-Node: Error API34237
-Node: Error parser API36848
-Node: Contribution37074
-Node: Reporting issues37752
-Node: Contributing syntax checkers38491
-Node: Contributing code39288
-Node: Unit tests40635
-Node: Credits42076
-Node: GNU Free Documentation License43584
-Node: Syntax checkers68757
-Node: Function and Variable Index69525
+Node: Error parsers24330
+Node: Examples25310
+Node: Simple example25741
+Node: Predicate example28804
+Node: Configuration example30785
+Node: Chaining example32254
+Node: API33640
+Node: Error API34428
+Node: Error parser API37039
+Node: Contribution37265
+Node: Reporting issues37943
+Node: Contributing syntax checkers38682
+Node: Contributing code39479
+Node: Unit tests40826
+Node: Credits42267
+Node: GNU Free Documentation License43775
+Node: Syntax checkers68948
+Node: Function and Variable Index69716
 
 End Tag Table
