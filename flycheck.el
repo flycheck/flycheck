@@ -694,6 +694,20 @@ configuration file a buffer." checker)
   "Check whether PATTERNS is a list of valid error patterns."
   (-all? 'flycheck-error-pattern-p patterns))
 
+(defun flycheck-command-argument-p (arg)
+  "Check whether ARG is a valid command argument."
+  (or
+   (memq arg '(source source-inplace source-original))
+   (stringp arg)
+   (and (listp arg)
+        (case (car arg)
+          (config-file (= 3 (length arg)))
+          (eval (= 2 (length arg)))))))
+
+(defun flycheck-command-arguments-list-p (arguments)
+  "Check whether ARGUMENTS is a list of valid arguments."
+  (-all? 'flycheck-command-argument-p arguments))
+
 (defun flycheck-verify-checker (checker)
   "Verify CHECKER.
 
@@ -712,6 +726,8 @@ error if not."
       (error "Checker %s must have a :command" checker))
     (unless (stringp (car command))
       (error "Checker %s must have an executable in :command" checker))
+    (unless (flycheck-command-arguments-list-p command)
+      (error "Checker %s has invalid :command arguments" checker))
     (unless (or patterns parser)
       (error "Checker %s must have an :error-parser or :error-patterns" checker))
     (when (and patterns parser)
@@ -919,6 +935,9 @@ configuration file bound to VARIABLE and return a list of options
 that pass this configuration file to the syntax checker, or nil
 if the configuration file was not found.
 
+If ARG is a list whose `car' is `eval', return the result of
+evaluation of ARG `cdr`.
+
 In all other cases, return ARG unchanged."
   (cond
    ((eq arg 'source)
@@ -927,11 +946,14 @@ In all other cases, return ARG unchanged."
     (flycheck-get-source-file #'flycheck-temp-file-inplace))
    ((eq arg 'source-original)
     (or (buffer-file-name) ""))
-   ((and (listp arg) (eq (car arg) 'config-file))
-    (let ((option-name (nth 1 arg))
-           (file-name  (flycheck-find-config-file (symbol-value (nth 2 arg)))))
-      (when file-name
-        (list option-name file-name))))
+   ((listp arg)
+    (case (car arg)
+      (config-file
+       (let ((option-name (nth 1 arg))
+             (file-name  (flycheck-find-config-file (symbol-value (nth 2 arg)))))
+         (when file-name
+           (list option-name file-name))))
+      (eval (eval (cadr arg)))))
    (t arg)))
 
 (defun flycheck-checker-substituted-command (checker)
