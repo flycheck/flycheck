@@ -1031,7 +1031,6 @@ shell execution."
 
 (defun flycheck-clear-checker ()
   "Clear configured and remembered checkers in the current buffer."
-  (setq flycheck-checker nil)
   (setq flycheck-last-checker nil))
 
 (defun flycheck-try-last-checker-for-buffer ()
