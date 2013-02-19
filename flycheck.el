@@ -254,7 +254,8 @@ conditions:
 - The buffer file is loaded with Tramp.
 
 Return t if Flycheck mode may be enabled, and nil otherwise."
-  (not (flycheck-tramp-file-p (buffer-file-name))))
+  (and (not (flycheck-tramp-file-p (buffer-file-name)))
+       (flycheck-get-checker-for-buffer)))
 
 ;;;###autoload
 (define-minor-mode flycheck-mode
