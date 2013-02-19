@@ -3,7 +3,7 @@ EMACSFLAGS =
 CARTON = carton
 VAGRANT = vagrant
 INSTALL-INFO = install-info
-VERSION = $(shell $(CARTON) version)
+VERSION = $(shell EMACS=$(EMACS) $(CARTON) version)
 
 SRCS = flycheck.el
 OBJECTS = $(SRCS:.el=.elc)
