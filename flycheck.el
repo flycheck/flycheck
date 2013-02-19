@@ -303,7 +303,7 @@ buffer manually.
       (flycheck-buffer-safe))
      (t
       (flycheck-mode -1)
-      (user-error "Cannot use Flycheck mode in buffer %s" (buffer-name)))))
+      (message "Cannot use Flycheck mode in buffer %s" (buffer-name)))))
    (t
     (remove-hook 'after-save-hook 'flycheck-buffer-safe t)
     (remove-hook 'after-change-functions 'flycheck-handle-change t)
