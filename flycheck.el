@@ -921,6 +921,8 @@ If FILE-NAME does not contain a slash, search the file with
 (defun flycheck-substitute-argument (arg)
   "Substitute ARG with file to check is possible.
 
+If ARG is a string, return ARG unchanged.
+
 If ARG is `source' or `source-inplace', create a temporary file
 to check and return its path.
 
@@ -938,8 +940,10 @@ if the configuration file was not found.
 If ARG is a form `(eval FORM)', return the result of evaluating
 FORM.
 
-In all other cases, return ARG unchanged."
+In all other cases, signal an error."
   (cond
+   ((stringp arg)
+    arg)
    ((eq arg 'source)
     (flycheck-get-source-file #'flycheck-temp-file-system))
    ((eq arg 'source-inplace)
@@ -954,7 +958,7 @@ In all other cases, return ARG unchanged."
          (when file-name
            (list option-name file-name))))
       (eval (eval (cadr arg)))))
-   (t arg)))
+   (:else (error "Unsupported argument %S" arg))))
 
 (defun flycheck-checker-substituted-command (checker)
   "Get the substituted command of a CHECKER.
