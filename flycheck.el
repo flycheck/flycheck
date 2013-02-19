@@ -1098,7 +1098,8 @@ syntax check if the syntax checker changed."
      (list (read-flycheck-checker "Select checker: "))))
   (when (not (eq checker flycheck-checker))
     (setq flycheck-checker checker)
-    (flycheck-buffer)))
+    (when flycheck-mode
+      (flycheck-buffer))))
 
 
 ;;;; Documentation
