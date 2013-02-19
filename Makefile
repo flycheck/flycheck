@@ -24,7 +24,7 @@ PACKAGE_SRCS = $(SRCS) \
 PACKAGE = flycheck-$(VERSION).tar
 
 .PHONY: build
-build : deps $(OBJECTS)
+build : $(OBJECTS)
 
 .PHONY: deps
 deps :
