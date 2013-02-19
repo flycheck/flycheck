@@ -935,8 +935,8 @@ configuration file bound to VARIABLE and return a list of options
 that pass this configuration file to the syntax checker, or nil
 if the configuration file was not found.
 
-If ARG is a list whose `car' is `eval', return the result of
-evaluation of ARG `cdr`.
+If ARG is a form `(eval FORM)', return the result of evaluating
+FORM.
 
 In all other cases, return ARG unchanged."
   (cond
