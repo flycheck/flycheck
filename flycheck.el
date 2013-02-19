@@ -918,46 +918,70 @@ If FILE-NAME does not contain a slash, search the file with
           (when (file-exists-p file-name) file-name))
       (flycheck-find-file-for-buffer file-name))))
 
-(defun flycheck-substitute-argument (arg)
-  "Substitute ARG with file to check is possible.
+(defun flycheck-substitute-argument-cell (cell)
+  "Substitute an argument CELL.
 
-If ARG is a string, return ARG unchanged.
+Generally, a CELL is a form `(SYMBOL ARGS...) where SYMBOL is a special tag,
+and ARGS the arguments for this tag.
 
-If ARG is `source' or `source-inplace', create a temporary file
+If CELL is a form `(config-file OPTION VARIABLE)' search the
+configuration file bound to VARIABLE and return a list of options
+that pass this configuration file to the syntax checker, or nil
+if the configuration file was not found.
+
+If CELL is a form `(eval FORM), return the result of evaluating
+FORM in the buffer to be checked.
+
+In all other cases, signal an error."
+  (let ((tag (car cell))
+        (args (cdr cell)))
+    (case tag
+      (config-file
+       (let ((option-name (car args))
+             (file-name (flycheck-find-config-file (symbol-value (cadr args)))))
+         (when file-name
+           (list option-name file-name))))
+      (eval
+       (eval (car args)))
+      (t
+       (error "Unsupported argument cell %S" cell)))))
+
+(defun flycheck-substitute-argument-symbol (symbol)
+  "Substitute an argument SYMBOL.
+
+If SYMBOL is `source' or `source-inplace', create a temporary file
 to check and return its path.
 
-If ARG is `source-original', return the path of the actual file
+If SYMBOL is `source-original', return the path of the actual file
 to check, or an empty string if the buffer has no file name.
 Note that the contents of the file may not be up to date with the
 contents of the buffer to check.  Do not use this as primary
 input to a checker!
 
-If ARG is a form `(config-file OPTION VARIABLE), search the
-configuration file bound to VARIABLE and return a list of options
-that pass this configuration file to the syntax checker, or nil
-if the configuration file was not found.
+In all other cases, signal an error."
+  (case symbol
+    (source
+     (flycheck-get-source-file #'flycheck-temp-file-system))
+    (source-inplace
+     (flycheck-get-source-file #'flycheck-temp-file-inplace))
+    (source-original
+     (or (buffer-file-name) ""))
+    (t
+     (error "Unsupported argument symbol %S" symbol))))
 
-If ARG is a form `(eval FORM)', return the result of evaluating
-FORM.
+(defun flycheck-substitute-argument (arg)
+  "Substitute ARG with file to check is possible.
+
+If ARG is a string, return ARG unchanged.
+
+If ARG is a list, substitute it with
+`flycheck-substitute-argument-cell'.
 
 In all other cases, signal an error."
   (cond
-   ((stringp arg)
-    arg)
-   ((eq arg 'source)
-    (flycheck-get-source-file #'flycheck-temp-file-system))
-   ((eq arg 'source-inplace)
-    (flycheck-get-source-file #'flycheck-temp-file-inplace))
-   ((eq arg 'source-original)
-    (or (buffer-file-name) ""))
-   ((listp arg)
-    (case (car arg)
-      (config-file
-       (let ((option-name (nth 1 arg))
-             (file-name  (flycheck-find-config-file (symbol-value (nth 2 arg)))))
-         (when file-name
-           (list option-name file-name))))
-      (eval (eval (cadr arg)))))
+   ((stringp arg) arg)
+   ((symbolp arg) (flycheck-substitute-argument-symbol arg))
+   ((listp arg) (flycheck-substitute-argument-cell arg))
    (:else (error "Unsupported argument %S" arg))))
 
 (defun flycheck-checker-substituted-command (checker)
