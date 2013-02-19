@@ -18,6 +18,10 @@ syntax checker and the jshint Javascript checker, and did valuable
 testing and bug fixing.
 
 @item
+@uref{https://github.com/kwitek,Krzysztof Witkowski} implemented
+@code{eval} support in Flycheck commands.
+
+@item
 @uref{https://github.com/maio, Marian Schubert} added the Perl syntax
 checker.
 

@@ -1193,6 +1193,9 @@ their support and patches are greatly appreciated.
      syntax checker and the jshint Javascript checker, and did valuable
      testing and bug fixing.
 
+   * Krzysztof Witkowski (https://github.com/kwitek) implemented `eval'
+     support in Flycheck commands.
+
    * Marian Schubert (https://github.com/maio) added the Perl syntax
      checker.
 
@@ -1815,8 +1818,8 @@ Node: Contributing syntax checkers38682
 Node: Contributing code39479
 Node: Unit tests40826
 Node: Credits42267
-Node: GNU Free Documentation License43775
-Node: Syntax checkers68948
-Node: Function and Variable Index69716
+Node: GNU Free Documentation License43883
+Node: Syntax checkers69056
+Node: Function and Variable Index69824
 
 End Tag Table
