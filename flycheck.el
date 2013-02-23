@@ -1001,31 +1001,53 @@ symbols in the command."
   (-flatten (-keep #'flycheck-substitute-argument
                    (flycheck-checker-command checker))))
 
+(defun flycheck-substitute-shell-argument-symbol (symbol)
+  "Substitute a shell argument SYMBOL.
+
+If SYMBOL is `source', `source-inplace' or `source-original',
+return the buffer file name quoted with `shell-quote-argument'.
+
+Otherwise signal an error."
+  (if (memq symbol '(source source-inplace source-original))
+      (shell-quote-argument (buffer-file-name))
+    (error "Unsupported argument symbol %S" symbol)))
+
+(defun flycheck-substitute-shell-argument-cell (cell)
+  "Substitute a shell argument CELL.
+
+Like `flycheck-substitute-argument-cell', but return a single
+string suitable for a shell command, i.e. quoted as necessary
+with `shell-quote-argument'."
+  (let ((args (flycheck-substitute-argument-cell cell)))
+    (if (stringp args)
+        (shell-quote-argument args)
+      (s-join " " (-map #'shell-quote-argument args)))))
+
 (defun flycheck-substitute-shell-argument (arg)
-  "Substitute ARG for use in a shell command..
+  "Substitute ARG with file to check is possible.
 
-If ARG is `source', `source-inplace' or `source-original', return
-the buffer file name.
+If ARG is a string, return ARG quoted with
+`shell-quote-argument'.
 
-If ARG is a list whose `car' is `config', search the
-configuration file and return a list of options that specify this
-configuration file, or nil of the config file was not found.
+If ARG is a symbol, substitute it with
+`flycheck-substitute-shell-argument-symbol'.
 
-ARG is always quoted for use in a shell command (see
-`shell-quote-argument')."
+If ARG is a list, substitute it with
+`flycheck-substitute-shell-argument-cell'.
+
+In all other cases, signal an error."
   (cond
-   ((memq arg '(source source-inplace source-original))
-    (shell-quote-argument (buffer-file-name)))
-   ((and (listp arg) (eq (car arg) 'config))
-    (let ((option-name (nth 1 arg))
-          (file-name (flycheck-find-config-file (symbol-value (nth 2 arg)))))
-      (if file-name
-          (concat option-name " " (shell-quote-argument file-name))
-        "")))
-   (t (shell-quote-argument arg))))
+   ((stringp arg) (shell-quote-argument arg))
+   ((symbolp arg) (flycheck-substitute-shell-argument-symbol arg))
+   ((listp arg) (flycheck-substitute-shell-argument-cell arg))
+   (:else (error "Unsupported argument %S" arg))))
 
 (defun flycheck-checker-shell-command (checker)
   "Get a shell command for CHECKER.
+
+Substitutions are performed like in
+`flycheck-checker-substituted-command', but with
+`flycheck-substitute-shell-argument'.
 
 Return the command of CHECKER as single string, suitable for
 shell execution."
