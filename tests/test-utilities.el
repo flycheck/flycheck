@@ -194,4 +194,12 @@ buffer file name."
   (should-not (flycheck-root-directory-p "C:\\Windows"))
   (should-not (flycheck-root-directory-p "C:\\Windows\\")))
 
+(ert-deftest flycheck-find-file-in-tree ()
+  "Test `flycheck-find-file-in-tree'."
+  (let ((filename (expand-file-name "../Makefile" testsuite-dir)))
+    (should (equal (flycheck-find-file-in-tree "Makefile" testsuite-dir)
+                   filename)))
+  (should-not (flycheck-find-file-in-tree "this-file-should-really-not-exist"
+                                          testsuite-dir)))
+
 ;;; test-utilities.el ends here
