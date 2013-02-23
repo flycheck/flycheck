@@ -183,6 +183,7 @@ buffer file name."
   :expected-result (if (not (flycheck-windows-p)) :passed :failed)
   (should (flycheck-root-directory-p "/"))
   (should (flycheck-root-directory-p "//"))
+  (should-not (flycheck-root-directory-p "/home/foo/"))
   (should-not (flycheck-root-directory-p "/home/foo")))
 
 (ert-deftest flycheck-root-directory-p-windows ()
@@ -190,6 +191,7 @@ buffer file name."
   :expected-result (if (flycheck-windows-p) :passed :failed)
   (should (flycheck-root-directory-p "C:\\"))
   (should (flycheck-root-directory-p "D:\\"))
+  (should-not (flycheck-root-directory-p "C:\\Windows"))
   (should-not (flycheck-root-directory-p "C:\\Windows\\")))
 
 ;;; test-utilities.el ends here

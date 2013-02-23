@@ -476,7 +476,8 @@ In order to work in work in a platform-neutral way,
 check to see if DIRECTORY is its own parent.
 
 Return t if root directory, otherwise nil."
-  (string= directory (file-name-directory directory)))
+  (string= (directory-file-name directory)
+           (file-name-directory (directory-file-name directory))))
 
 (defun flycheck-find-file-in-tree (filename directory)
   "Find FILENAME in DIRECTORY and all of its ancestors.
