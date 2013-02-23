@@ -55,4 +55,13 @@ All declared checkers should be registered."
       (should (memq checker flycheck-checkers))
       (should (flycheck-registered-checker-p checker)))))
 
+(ert-deftest flycheck-checkers-patterns-or-parser ()
+  "Test that all `flycheck-checkers' have either patterns or
+  parsers."
+  (dolist (checker flycheck-checkers)
+    (should (or (and (flycheck-checker-error-patterns checker)
+                     (not (flycheck-checker-error-parser checker)))
+                (and (not (flycheck-checker-error-patterns checker))
+                     (flycheck-checker-error-parser checker))))))
+
 ;;; test-flycheck-checkers.el ends here
