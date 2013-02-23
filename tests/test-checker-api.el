@@ -87,7 +87,11 @@
                    '("Hello " "World"))))
   (should (equal (flycheck-substitute-argument-cell
                   '(eval (concat "Hello" "World")))
-                 "HelloWorld")))
+                 "HelloWorld"))
+  (should-not (flycheck-substitute-argument-cell
+               '(eval (when (string= "foo" "bar") "yes"))))
+  (should-error (flycheck-substitute-argument-cell '(eval 100)))
+  (should-error (flycheck-substitute-argument-cell '(eval '("foo" 100)))))
 
 (ert-deftest flycheck-substitute-argument-cell-unknown ()
   "Test substitution of an unknown argument cell."
@@ -155,7 +159,12 @@
                    "Hello \\ World")))
   (should (equal (flycheck-substitute-shell-argument-cell
                   '(eval (concat "Hello " "\"World\"")))
-                 "Hello\\ \\\"World\\\"")))
+                 "Hello\\ \\\"World\\\""))
+  (should (equal (flycheck-substitute-shell-argument-cell
+                  '(eval (when (string= "foo" "bar") "yes")))
+                 ""))
+  (should-error (flycheck-substitute-shell-argument-cell '(eval 100)))
+  (should-error (flycheck-substitute-shell-argument-cell '(eval '("foo" 100)))))
 
 (ert-deftest flycheck-substitute-argument-cell-unknown ()
   "Test substitution of an unknown argument cell."

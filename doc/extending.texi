@@ -76,8 +76,12 @@ the absolute path to the configuration file as string.  Otherwise the
 symbol is simply dropped from the arguments of the syntax checker.
 
 @item (eval @var{form})
-This cell is substituted with a result of @var{form} evaluation. No
-substitutions are performed in @var{form} before it is evaluated.
+This cell is substituted with a result of evaluating @var{form}.
+@var{form} must either return a string or a list of strings, or
+@code{nil} to indicate that nothing should be substituted for
+@var{cell}.  In case of other return values an error is signaled.
+@emph{No} further substitutions are performed, neither in @var{form}
+before it is evaluated, nor in the result of evaluating FORM.
 @end table
 
 This property is @b{mandatory}.

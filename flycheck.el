@@ -935,7 +935,12 @@ that pass this configuration file to the syntax checker, or nil
 if the configuration file was not found.
 
 If CELL is a form `(eval FORM), return the result of evaluating
-FORM in the buffer to be checked.
+FORM in the buffer to be checked.  FORM must either return a
+string or a list of strings, or nil to indicate that nothing
+should be substituted for CELL.  In case of other return values
+an error is signaled.  _No_ further substitutions are performed,
+neither in FORM before it is evaluated, nor in the result of
+evaluating FORM.
 
 In all other cases, signal an error."
   (let ((tag (car cell))
@@ -947,7 +952,13 @@ In all other cases, signal an error."
          (when file-name
            (list option-name file-name))))
       (eval
-       (eval (car args)))
+       (let* ((form (car args))
+              (result (eval form)))
+         (if (or (null result)
+                 (stringp result)
+                 (and (listp result) (-all? #'stringp result)))
+             result
+           (error "Invalid result from evaluation of %S: %S" form result))))
       (t
        (error "Unsupported argument cell %S" cell)))))
 
