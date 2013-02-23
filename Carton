@@ -1,6 +1,6 @@
 (source "melpa" "http://melpa.milkbox.net/packages/")
 
-(package "flycheck" "0.7" "Flymake done right
+(package "flycheck" "0.7.1" "Flymake done right
 
 Flycheck provides on-the-fly syntax checker with
 
