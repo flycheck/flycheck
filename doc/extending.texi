@@ -75,6 +75,11 @@ If the configuration file is found according to the rules documented in
 the absolute path to the configuration file as string.  Otherwise the
 symbol is simply dropped from the arguments of the syntax checker.
 
+If @var{option} ends with a @code{=} character, @var{option} and the
+absolute path to the configuration file are concatenated and given as a
+single argument to the syntax checker.  Otherwise, @var{option} and the
+configuration file path are given as two separate arguments.
+
 @item (eval @var{form})
 This cell is substituted with a result of evaluating @var{form}.
 @var{form} must either return a string or a list of strings, or

@@ -69,6 +69,19 @@
       (should (equal (flycheck-substitute-argument-cell
                       '(config-file "--foo" my-fancy-config-var))
                      (list "--foo" makefile-path)))
+      ;; The same with an option ending with a =
+      (setq my-fancy-config-var "Makefile")
+      (should (equal (flycheck-substitute-argument-cell
+                      '(config-file "--foo=" my-fancy-config-var))
+                     (list (concat "--foo=" makefile-path))))
+      (setq my-fancy-config-var "../Makefile")
+      (should (equal (flycheck-substitute-argument-cell
+                      '(config-file "--foo=" my-fancy-config-var))
+                     (list (concat "--foo=" makefile-path))))
+      (setq my-fancy-config-var makefile-path)
+      (should (equal (flycheck-substitute-argument-cell
+                      '(config-file "--foo=" my-fancy-config-var))
+                     (list (concat "--foo=" makefile-path))))
       ;; Find a file from the home directory
       (let* ((filename (-first #'file-regular-p
                                (directory-files (getenv "HOME") :full-names))))
@@ -141,6 +154,19 @@
       (should (equal (flycheck-substitute-shell-argument-cell
                       '(config-file "--foo" my-fancy-config-var))
                      (concat "--foo " (shell-quote-argument makefile-path))))
+      ;; The same with an option ending with a =
+      (setq my-fancy-config-var "Makefile")
+      (should (equal (flycheck-substitute-shell-argument-cell
+                      '(config-file "--foo=" my-fancy-config-var))
+                     (shell-quote-argument (concat "--foo=" makefile-path))))
+      (setq my-fancy-config-var "../Makefile")
+      (should (equal (flycheck-substitute-shell-argument-cell
+                      '(config-file "--foo=" my-fancy-config-var))
+                     (shell-quote-argument (concat "--foo=" makefile-path))))
+      (setq my-fancy-config-var makefile-path)
+      (should (equal (flycheck-substitute-shell-argument-cell
+                      '(config-file "--foo=" my-fancy-config-var))
+                     (shell-quote-argument (concat "--foo=" makefile-path))))
       ;; Find a file from the home directory
       (let* ((filename (-first #'file-regular-p
                                (directory-files (getenv "HOME") :full-names))))

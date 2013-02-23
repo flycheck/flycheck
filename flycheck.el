@@ -539,6 +539,21 @@ Return the name of the temporary file."
     (flycheck-save-buffer-to-file temp-file)
     temp-file))
 
+(defun flycheck-option-with-value-argument (option value)
+  "Create arguments specifying OPTION with VALUE.
+
+OPTION is a string denoting the option to pass, VALUE a string
+containing the value for this option.
+
+If OPTION ends with a equal sign =, OPTION and VALUE are
+concatenated to a single string, which is then wrapped in a list
+and returned.
+
+Otherwise `(list OPTION VALUE)' is returned."
+  (if (s-ends-with? "=" option)
+      (list (concat option value))
+    (list option value)))
+
 
 ;;;; Minibuffer tools
 (defvar read-flycheck-checker-history nil
@@ -930,9 +945,14 @@ Generally, a CELL is a form `(SYMBOL ARGS...) where SYMBOL is a special tag,
 and ARGS the arguments for this tag.
 
 If CELL is a form `(config-file OPTION VARIABLE)' search the
-configuration file bound to VARIABLE and return a list of options
-that pass this configuration file to the syntax checker, or nil
-if the configuration file was not found.
+configuration file bound to VARIABLE with
+`flycheck-find-config-file' and return a list of options that
+pass this configuration file to the syntax checker, or nil if the
+configuration file was not found.  If OPTION ends with a =
+character, the returned list contains a single element only,
+being the concatenation of OPTION and the path of the
+configuration file.  Otherwise the list has two items, the first
+being OPTION, the second the path of the configuration file.
 
 If CELL is a form `(eval FORM), return the result of evaluating
 FORM in the buffer to be checked.  FORM must either return a
@@ -950,7 +970,7 @@ In all other cases, signal an error."
        (let ((option-name (car args))
              (file-name (flycheck-find-config-file (symbol-value (cadr args)))))
          (when file-name
-           (list option-name file-name))))
+           (flycheck-option-with-value-argument option-name file-name))))
       (eval
        (let* ((form (car args))
               (result (eval form)))

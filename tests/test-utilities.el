@@ -202,4 +202,11 @@ buffer file name."
   (should-not (flycheck-find-file-in-tree "this-file-should-really-not-exist"
                                           testsuite-dir)))
 
+(ert-deftest flycheck-option-with-value-argument ()
+  "Test concatenation of options and arguments."
+  (should (equal (flycheck-option-with-value-argument "--foo" "bar")
+                 '("--foo" "bar")))
+    (should (equal (flycheck-option-with-value-argument "--foo=" "bar")
+                 '("--foo=bar"))))
+
 ;;; test-utilities.el ends here
