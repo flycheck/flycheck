@@ -489,12 +489,15 @@ until the file is found or the root is reached.
 Return the absolute path of the file, or nil if the file was not
 found in DIRECTORY or any of its ancestors."
   (let ((full-path (expand-file-name filename directory)))
-    (cond ((flycheck-root-directory-p directory) (when (file-exists-p full-path) full-path))
-          ((file-exists-p full-path) full-path)
-          ((let ((parent-directory (file-name-directory
-                                    (directory-file-name
-                                     (file-name-directory full-path)))))
-             (flycheck-find-file-in-tree filename parent-directory))))))
+    (cond
+     ((flycheck-root-directory-p directory)
+      (when (file-exists-p full-path) full-path))
+     ((file-exists-p full-path) full-path)
+     (:else
+      (let ((parent-directory (file-name-directory
+                               (directory-file-name
+                                (file-name-directory full-path)))))
+        (flycheck-find-file-in-tree filename parent-directory))))))
 
 (defun flycheck-find-file-for-buffer (filename)
   "Find FILENAME for the current buffer.
