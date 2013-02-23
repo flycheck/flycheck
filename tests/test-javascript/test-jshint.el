@@ -38,19 +38,6 @@
       (flycheck-should-errors '(6 23 "Missing semicolon." error))
       (flycheck-ensure-clear))))
 
-(ert-deftest checker-javascript-jshint-missing-quote ()
-  "A missing quote."
-  :expected-result (flycheck-fail-unless-checker 'javascript-jshint)
-  (flycheck-with-resource-buffer "test-javascript/missing-quote.js"
-    (dolist (mode '(js-mode js2-mode js3-mode))
-      (funcall mode)
-      (flycheck-buffer-sync)
-      (flycheck-should-errors
-       '(5 17 "Unclosed string." error)
-       '(6 17 "Unclosed string." error)
-       '(7 17 "Unclosed string." error))
-      (flycheck-ensure-clear))))
-
 (ert-deftest checker-javascript-jshint-use-eval ()
   "Use eval()"
   :expected-result (flycheck-fail-unless-checker 'javascript-jshint)
@@ -58,7 +45,7 @@
     (dolist (mode '(js-mode js2-mode js3-mode))
       (funcall mode)
       (flycheck-buffer-sync)
-      (flycheck-should-errors '(3 1 "eval is evil." error))
+      (flycheck-should-errors '(3 1 "eval can be harmful." error))
       (flycheck-ensure-clear))))
 
 (ert-deftest checker-javascript-jshint-unused-variable ()
