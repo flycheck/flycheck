@@ -510,7 +510,7 @@ nil."
   (let ((directory (when (buffer-file-name)
                      (file-name-directory (buffer-file-name)))))
     (or (when directory (flycheck-find-file-in-tree filename directory))
-        (let ((home-path (expand-file-name filename)))
+        (let ((home-path (expand-file-name filename "~")))
           (when (file-exists-p home-path) home-path)))))
 
 (defun flycheck-canonical-file-name (filename)
