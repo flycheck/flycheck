@@ -979,6 +979,9 @@ In all other cases, signal an error."
 
 If ARG is a string, return ARG unchanged.
 
+If ARG is a symbol, substitute it with
+`flycheck-substitute-argument-symbol'.
+
 If ARG is a list, substitute it with
 `flycheck-substitute-argument-cell'.
 
