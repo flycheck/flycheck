@@ -32,7 +32,7 @@
   :expected-result (flycheck-fail-unless-checker 'bash)
   (flycheck-with-resource-buffer "test-bash/missing-quote.bash"
     (sh-mode)
-    (sh-set-shell "bash" "no-query")
+    (sh-set-shell "bash" :no-query)
     (flycheck-buffer-sync)
     (flycheck-should-errors
      '(3 nil "unexpected EOF while looking for matching `''" error)
@@ -43,7 +43,7 @@
   :expected-result (flycheck-fail-unless-checker 'bash)
   (flycheck-with-resource-buffer "test-bash/missing-semicolon.bash"
     (sh-mode)
-    (sh-set-shell "bash" "no-query")
+    (sh-set-shell "bash" :no-query)
     (flycheck-buffer-sync)
     (flycheck-should-errors
      '(5 nil "syntax error near unexpected token `fi'" error)
