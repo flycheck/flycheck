@@ -87,4 +87,15 @@
     (flycheck-buffer-sync)
     (should-not flycheck-current-errors)))
 
+(ert-deftest checker-python-flake8-complex-code ()
+  "Test superfluous spaces with flake8."
+  :expected-result (flycheck-fail-unless-checker 'python-flake8)
+  (flycheck-with-resource-buffer "test-python/complex-code.py"
+    (let ((python-indent-guess-indent-offset nil))
+      (python-mode))
+    (setq flycheck-flake8rc "flake8rc")
+    (flycheck-buffer-sync)
+    (flycheck-should-errors '(6 1 "C901 'foo' is too complex (4)" warning))))
+
+
 ;;; test-flake8.el ends here

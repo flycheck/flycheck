@@ -1,2 +1,3 @@
 [flake8]
 ignore=E251,F401
+max-complexity=4
