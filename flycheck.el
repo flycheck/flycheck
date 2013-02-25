@@ -1673,28 +1673,25 @@ flycheck exclamation mark otherwise.")
 (defun flycheck-add-overlay (err)
   "Add overlay for ERR."
   (flycheck-error-with-buffer err
-    (save-excursion
-      (goto-char (point-min))
-      (forward-line (- (flycheck-error-line err) 1))
-      (let* ((mode flycheck-highlighting-mode)
-             (level (flycheck-error-level err))
-             (region (flycheck-error-region err (not (eq mode 'columns))))
-             (category (cdr (assq level flycheck-overlay-categories-alist)))
-             (message (flycheck-error-message err))
-             (overlay (make-overlay (car region) (cdr region)
-                                    (flycheck-error-buffer err)))
-             (fringe-icon `(left-fringe ,(get category 'flycheck-fringe-bitmap)
-                                        ,(get category 'face))))
-        ;; TODO: Consider hooks to re-check if overlay contents change
-        (overlay-put overlay 'category category)
-        (unless mode
-          ;; Erase the highlighting from the overlay if requested by the user
-          (overlay-put overlay 'face nil))
-        (overlay-put overlay 'flycheck-error err)
-        (overlay-put overlay 'before-string
-                     (propertize "!" 'display fringe-icon))
-        (unless (s-blank? message)
-          (overlay-put overlay 'help-echo message))))))
+    (let* ((mode flycheck-highlighting-mode)
+           (level (flycheck-error-level err))
+           (region (flycheck-error-region err (not (eq mode 'columns))))
+           (category (cdr (assq level flycheck-overlay-categories-alist)))
+           (message (flycheck-error-message err))
+           (overlay (make-overlay (car region) (cdr region)
+                                  (flycheck-error-buffer err)))
+           (fringe-icon `(left-fringe ,(get category 'flycheck-fringe-bitmap)
+                                      ,(get category 'face))))
+      ;; TODO: Consider hooks to re-check if overlay contents change
+      (overlay-put overlay 'category category)
+      (unless mode
+        ;; Erase the highlighting from the overlay if requested by the user
+        (overlay-put overlay 'face nil))
+      (overlay-put overlay 'flycheck-error err)
+      (overlay-put overlay 'before-string
+                   (propertize "!" 'display fringe-icon))
+      (unless (s-blank? message)
+        (overlay-put overlay 'help-echo message)))))
 
 (defun flycheck-add-overlays (errors)
   "Add overlays for ERRORS."
