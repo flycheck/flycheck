@@ -107,4 +107,8 @@
 ;; Eventually load all test files
 (-each testsuite-testfiles 'testsuite-load-testfile)
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; testsuite.el ends here

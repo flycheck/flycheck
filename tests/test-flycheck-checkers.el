@@ -64,4 +64,8 @@ All declared checkers should be registered."
                 (and (not (flycheck-checker-error-patterns checker))
                      (flycheck-checker-error-parser checker))))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-flycheck-checkers.el ends here

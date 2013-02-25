@@ -64,4 +64,8 @@
     (flycheck-buffer-sync)
     (flycheck-should-errors '(4 25 "Entity 'foo' not defined" error))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-xmlstarlet.el ends here

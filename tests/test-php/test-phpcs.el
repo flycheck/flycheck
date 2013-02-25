@@ -60,4 +60,8 @@
       (should-not flycheck-current-errors)
       (flycheck-ensure-clear))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-phpcs.el ends here

@@ -36,4 +36,8 @@
     (flycheck-should-errors
      '(5 nil "Inconsistent indentation: 3 spaces used for indentation, but the rest of the document was indented using 2 spaces." error :no-filename))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-haml.el ends here

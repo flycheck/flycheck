@@ -62,4 +62,8 @@
 
 (require 'sh-script)
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-perl.el ends here

@@ -52,4 +52,8 @@
     (flycheck-buffer-sync)
     (flycheck-should-errors '(4 nil "missing \", starting" error :no-filename))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-coffeelint.el ends here

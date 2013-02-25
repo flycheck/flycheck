@@ -43,4 +43,8 @@
     (flycheck-should-errors
      '(5 nil "syntax error, unexpected tCONSTANT, expecting $end" error))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-ruby.el ends here

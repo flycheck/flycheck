@@ -45,4 +45,8 @@
     (flycheck-should-errors
      '(9 12 "36:You should put a space in front of parenthesis." warning))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-chktex.el ends here

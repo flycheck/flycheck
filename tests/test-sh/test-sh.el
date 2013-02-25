@@ -47,4 +47,8 @@
     (flycheck-should-errors
      '(5 nil "Syntax error: \"fi\" unexpected (expecting \"then\")" error))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-sh.el ends here

@@ -98,4 +98,8 @@
     (flycheck-should-errors '(6 1 "C901 'foo' is too complex (4)" warning))))
 
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-flake8.el ends here

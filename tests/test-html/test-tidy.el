@@ -46,4 +46,8 @@
      '(8 5 "<spam> is not recognized!" error :no-filename)
      '(8 5 "discarding unexpected <spam>" warning :no-filename))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-tidy.el ends here

@@ -33,4 +33,8 @@
     (flycheck-buffer-sync)
     (flycheck-should-errors '(1 42 "found: ',' - expected: 'EOF'." error))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-jsonlint.el ends here

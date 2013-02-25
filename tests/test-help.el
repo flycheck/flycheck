@@ -49,4 +49,8 @@
       (when (buffer-live-p help-buffer)
         (kill-buffer help-buffer)))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-help.el ends here

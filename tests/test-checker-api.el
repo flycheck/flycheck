@@ -196,4 +196,8 @@
   "Test substitution of an unknown argument cell."
   (should-error (flycheck-substitute-shell-argument-cell '(foo "bar"))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-checker-api.el ends here

@@ -60,4 +60,8 @@
     (flycheck-buffer-safe)
     (should (flycheck-deferred-check-p))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; checkers-selection.el ends here

@@ -2239,4 +2239,8 @@ See URL `http://www.zsh.org/'."
 
 (provide 'flycheck)
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; flycheck.el ends here

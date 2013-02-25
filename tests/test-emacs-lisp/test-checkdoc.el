@@ -81,4 +81,8 @@ https://github.com/bbatsov/prelude/issues/259."
     (rename-buffer " *Compiler Input*")
     (should (not (flycheck-may-use-checker 'emacs-lisp-checkdoc)))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-checkdoc.el ends here

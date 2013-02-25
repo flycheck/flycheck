@@ -49,4 +49,8 @@
      '(5 nil "syntax error near unexpected token `fi'" error)
      '(5 nil "`fi'" error))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-bash.el ends here

@@ -209,4 +209,8 @@ buffer file name."
     (should (equal (flycheck-option-with-value-argument "--foo=" "bar")
                  '("--foo=bar"))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-utilities.el ends here

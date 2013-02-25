@@ -49,4 +49,8 @@
        '(8 nil "syntax error, unexpected ')', expecting :: (T_PAAMAYIM_NEKUDOTAYIM)" error))
       (flycheck-ensure-clear))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-php.el ends here

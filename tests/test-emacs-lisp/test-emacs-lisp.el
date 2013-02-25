@@ -97,4 +97,8 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
     (rename-buffer " *Compiler Input*")
     (should (not (flycheck-may-use-checker 'emacs-lisp)))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-emacs-lisp.el ends here

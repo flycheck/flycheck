@@ -37,4 +37,8 @@
     (flycheck-should-errors
      '(9 nil "possible unwanted space at \"{\"" warning))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-lacheck.el ends here

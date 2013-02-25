@@ -110,4 +110,8 @@ selected."
     (should (not flycheck-checker))
     (should (eq flycheck-last-checker 'python-flake8))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-selection.el ends here

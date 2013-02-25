@@ -59,4 +59,8 @@
     (flycheck-should-errors
      '(5 nil "'re' imported but unused" error))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-pyflakes.el ends here

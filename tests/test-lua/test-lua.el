@@ -42,4 +42,8 @@
     (flycheck-should-errors
      '(5 nil "unfinished string near '\"oh no'" error))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-lua.el ends here

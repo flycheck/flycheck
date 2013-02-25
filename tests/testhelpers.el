@@ -275,4 +275,8 @@ Return t if Emacs is at least MAJOR.MINOR, or nil otherwise."
   (when (>= emacs-major-version major)
     (or (null minor) (>= emacs-minor-version minor))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; testhelpers.el ends here

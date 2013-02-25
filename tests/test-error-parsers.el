@@ -84,4 +84,8 @@
   (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml nil nil)
                  flycheck-expected-errors)))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-error-parsers.el ends here

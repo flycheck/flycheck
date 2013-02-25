@@ -70,4 +70,8 @@
   "Test an error column beyond the end of a line."
   (flycheck-should-region "Hello\n    World\n" 1 10 6 7))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-error-region.el ends here

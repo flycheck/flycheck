@@ -46,4 +46,8 @@
      '(4 20 "Unexpected token ';' at line 4, col 20." error)
      '(5 1 "Unexpected token '}' at line 5, col 1." error))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-csslint.el ends here

@@ -78,4 +78,8 @@
     (flycheck-buffer-sync)
     (flycheck-should-errors '(5 nil "Used builtin function 'map'" warning))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-pylint.el ends here

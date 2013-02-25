@@ -45,4 +45,8 @@
     (flycheck-buffer-sync)
     (flycheck-should-errors '(5 nil "parse error near `fi'" error))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-zsh.el ends here

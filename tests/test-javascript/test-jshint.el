@@ -58,4 +58,8 @@
       (flycheck-should-errors '(5 nil "Unused variable: 'foo'" warning))
       (flycheck-ensure-clear))))
 
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
 ;;; test-jshint.el ends here
