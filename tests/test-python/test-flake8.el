@@ -34,7 +34,7 @@
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
     (flycheck-buffer-sync)
-    (flycheck-should-errors '(6 nil "invalid syntax" error))))
+    (flycheck-should-errors '(6 13 "E901 SyntaxError: invalid syntax" error))))
 
 (ert-deftest checker-python-flake8-missing-quote ()
   "Test a syntax error with flake8."
@@ -44,7 +44,7 @@
       (python-mode))
     (flycheck-buffer-sync)
     (flycheck-should-errors
-     '(5 nil "EOL while scanning string literal" error))))
+     '(5 14 "E901 SyntaxError: EOL while scanning string literal" error))))
 
 (ert-deftest checker-python-flake8-unused-import ()
   "Test an unused import with flake8"
@@ -54,7 +54,17 @@
       (python-mode))
     (flycheck-buffer-sync)
     (flycheck-should-errors
-     '(5 nil "W402 're' imported but unused" warning))))
+     '(5 1 "F401 're' imported but unused" warning))))
+
+(ert-deftest checker-python-flake8-unused-import-ignored ()
+  "Test an unused import being ignored with flake8."
+  :expected-result (flycheck-fail-unless-checker 'python-flake8)
+  (flycheck-with-resource-buffer "test-python/unused-import.py"
+    (let ((python-indent-guess-indent-offset nil))
+      (python-mode))
+    (setq flycheck-flake8rc "flake8rc")
+    (flycheck-buffer-sync)
+    (should-not flycheck-current-errors)))
 
 (ert-deftest checker-python-flake8-superfluous-space ()
   "Test superfluous spaces with flake8."

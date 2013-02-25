@@ -1,2 +1,2 @@
-[pep8]
-ignore=E251
+[flake8]
+ignore=E251,F401

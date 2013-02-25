@@ -2132,13 +2132,19 @@ See URL `https://github.com/lunaryorn/flycheck/issues/78'."
 (flycheck-declare-checker python-flake8
   "A Python syntax and style checker using the flake8 utility.
 
+For best error reporting, use Flake8 2.0 or newer.
+
 See URL `http://pypi.python.org/pypi/flake8'."
   :command '("flake8" (config-file "--config" flycheck-flake8rc) source-inplace)
   :error-patterns
   '(("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:E[0-9]+.*\\)$"
      error)
+    ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:F[0-9]+.*\\)$"
+     warning)                           ; Flake8 >= 2.0
     ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:W[0-9]+.*\\)$"
-     warning)
+     warning)                           ; Flake8 < 2.0
+    ;; Syntax errors in Flake8 < 2.0, in Flake8 >= 2.0 syntax errors are caught
+    ;; by the E.* pattern above
     ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'python-mode)
 

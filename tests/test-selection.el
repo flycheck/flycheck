@@ -52,7 +52,7 @@ executed, and has its errors reported."
     (flycheck-select-checker 'python-flake8)
     (flycheck-wait-for-syntax-checker)
     (should (= (length flycheck-current-errors) 1))
-    (flycheck-should-error '(5 nil "W402 're' imported but unused" warning))
+    (flycheck-should-error '(5 1 "F401 're' imported but unused" warning))
     (should (eq flycheck-checker 'python-flake8))))
 
 (ert-deftest flycheck-select-checker-unusable ()
@@ -106,7 +106,7 @@ selected."
     (flycheck-buffer)
     (flycheck-wait-for-syntax-checker)
     (should (= (length flycheck-current-errors) 1))
-    (flycheck-should-error '(5 nil "W402 're' imported but unused" warning))
+    (flycheck-should-error '(5 1 "F401 're' imported but unused" warning))
     (should (not flycheck-checker))
     (should (eq flycheck-last-checker 'python-flake8))))
 
