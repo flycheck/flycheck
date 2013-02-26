@@ -31,6 +31,10 @@ deps :
 	$(CARTON) install
 	$(CARTON) update
 
+.PHONY: clean-deps
+clean-deps :
+	rm -rf elpa # Clean packages installed for development
+
 .PHONY: doc
 doc : doc/dir
 
@@ -62,7 +66,6 @@ $(PACKAGE) : $(PACKAGE_SRCS)
 .PHONY: clean
 clean :
 	rm -f $(OBJECTS)
-	rm -rf elpa # Clean packages installed for development
 	rm -rf $(PACKAGE) flycheck-pkg.el
 
 %.elc : %.el
