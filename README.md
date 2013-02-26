@@ -45,7 +45,7 @@ Features
 Installation
 ------------
 
-Install the ELPA package from [MELPA][]) or [Marmalade][] with `M-x
+Install the ELPA package from [MELPA][] or [Marmalade][] with `M-x
 package-install RET flycheck`.  All dependencies are automatically installed.
 
 Flycheck is written and tested against GNU Emacs 24.2 and newer.  It should work
