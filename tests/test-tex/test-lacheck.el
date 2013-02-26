@@ -1,4 +1,4 @@
-;;; test-lacheck.el --- Test the lacheck checker
+;;; test-lacheck.el --- Test the lacheck checker -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;

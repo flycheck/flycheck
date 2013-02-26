@@ -1,4 +1,4 @@
-;; A warning error caused by a missing argument
+;; A warning error caused by a missing argument -*- lexical-binding: t; -*-
 
 (if t
     (message)

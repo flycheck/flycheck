@@ -1,4 +1,4 @@
-;;; flycheck.el --- Flymake done right
+;;; flycheck.el --- Flymake done right -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2012, 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
@@ -37,6 +37,7 @@
 ;;; Code:
 
 (eval-when-compile
+  (require 'jka-compr)
   (require 'cl)                         ; For `defstruct'
   (require 'compile)                    ; For Compilation Mode integration
   (require 'sh-script))
@@ -318,10 +319,10 @@ buffer manually.
 
     (flycheck-teardown))))
 
-(defun flycheck-handle-change (beg end len)
-  "Handle a buffer change between BEG and END with LEN.
+(defun flycheck-handle-change (beg end _len)
+  "Handle a buffer change between BEG and END.
 
-BEG and END mark the beginning and end of the change text.  LEN
+BEG and END mark the beginning and end of the change text.  _LEN
 is ignored.
 
 Start a syntax check if a new line has been inserted into the
@@ -353,8 +354,10 @@ buffer."
            (signal (car err) (cdr err)))))
     (user-error "Flycheck mode disabled")))
 
-(defun flycheck-compile-name (mode-name)
-  "Get a name for a compilation buffer based on MODE-NAME."
+(defun flycheck-compile-name (_name)
+  "Get a name for a Flycheck compilation buffer.
+
+_NAME is ignored."
   (format "*Flycheck %s*" (buffer-file-name)))
 
 (defun flycheck-compile ()
@@ -564,8 +567,7 @@ Otherwise `(list OPTION VALUE)' is returned."
 
 Return the checker as symbol, or nil if no checker was
 chosen."
-  (let* ((checkers (-map #'symbol-name flycheck-checkers))
-         (input (completing-read prompt obarray
+  (let* ((input (completing-read prompt obarray
                                  #'flycheck-valid-checker-p t
                                  nil 'read-flycheck-checker-history)))
     (if (string= input "") nil (intern input))))
@@ -1453,13 +1455,15 @@ is a list of error patterns to parse ERRORS with.
 Return a list of parsed errors."
   (--map (flycheck-parse-error-with-patterns it patterns) errors))
 
-(defun flycheck-parse-output-with-patterns (output checker buffer)
-  "Parse OUTPUT from CHECKER in BUFFER with error patterns.
+(defun flycheck-parse-output-with-patterns (output checker _buffer)
+  "Parse OUTPUT from CHECKER with error patterns.
 
 Uses the error patterns of CHECKER to tokenize the output and
 tries to parse each error token with all patterns, in the order
 of declaration.  Hence an error is never matched twice by two
 different patterns.  The pattern declared first always wins.
+
+_BUFFER is ignored.
 
 Return a list of parsed errors and warnings (as `flycheck-error'
 objects)."
@@ -1531,11 +1535,13 @@ is not a file node."
       (when (eq name 'file)
         (--keep (flycheck-parse-checkstyle-error-node it filename) body)))))
 
-(defun flycheck-parse-checkstyle (output checker buffer)
-  "Parse Checkstyle errors from OUTPUT of CHECKER in BUFFER.
+(defun flycheck-parse-checkstyle (output _checker _buffer)
+  "Parse Checkstyle errors from OUTPUT.
 
 Parse Checkstyle-like XML output.  Use this error parser for
 checkers that have an option to output errors in this format.
+
+_CHECKER and _BUFFER are ignored.
 
 See URL `http://checkstyle.sourceforge.net/' for information
 about Checkstyle."
@@ -1850,8 +1856,10 @@ output: %s\nChecker definition probably flawed."
               (flycheck-start-checker next-checker)
             (run-hooks 'flycheck-after-syntax-check-hook)))))))
 
-(defun flycheck-handle-signal (process event)
-  "Handle a syntax checking PROCESS EVENT."
+(defun flycheck-handle-signal (process _event)
+  "Handle a signal from the syntax checking PROCESS.
+
+_EVENT is ignored."
   (when (and (memq (process-status process) '(signal exit))
              (buffer-live-p (process-buffer process)))
     (with-current-buffer (process-buffer process)

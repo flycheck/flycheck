@@ -1,4 +1,4 @@
-;;; test-flycheck-checkers.el --- Tests for flycheck-checkers
+;;; test-flycheck-checkers.el --- Tests for flycheck-checkers -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;

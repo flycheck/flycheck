@@ -1,4 +1,4 @@
-;;; test-checker-api.el --- Tests for checker API
+;;; test-checker-api.el --- Tests for checker API -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
@@ -45,42 +45,45 @@
         (should (flycheck-check-executable checker))
       (should-not (flycheck-check-executable checker)))))
 
+(defvar flycheck-test-config-var)
+(defvar flycheck-test-option-var)
+
 (ert-deftest flycheck-substitute-argument-cell-config-file ()
   "Test substitution of `config-file' argument cell."
   ;; We need a real buffer for config-file search
   (flycheck-with-resource-buffer "test-checker-api.el"
     (let ((makefile-path (expand-file-name "../Makefile" testsuite-dir))
-          my-fancy-config-var)
+          flycheck-test-config-var)
       ;; A non-existing file
-      (setq my-fancy-config-var
+      (setq flycheck-test-config-var
             "no-such-file-should-ever-exist-really")
       (should-not (flycheck-substitute-argument-cell
-                   '(config-file "--foo" my-fancy-config-var)))
+                   '(config-file "--foo" flycheck-test-config-var)))
       ;; An existing file, first by name and then by relative and absolute path
-      (setq my-fancy-config-var "Makefile")
+      (setq flycheck-test-config-var "Makefile")
       (should (equal (flycheck-substitute-argument-cell
-                      '(config-file "--foo" my-fancy-config-var))
+                      '(config-file "--foo" flycheck-test-config-var))
                      (list "--foo" makefile-path)))
-      (setq my-fancy-config-var "../Makefile")
+      (setq flycheck-test-config-var "../Makefile")
       (should (equal (flycheck-substitute-argument-cell
-                      '(config-file "--foo" my-fancy-config-var))
+                      '(config-file "--foo" flycheck-test-config-var))
                      (list "--foo" makefile-path)))
-      (setq my-fancy-config-var makefile-path)
+      (setq flycheck-test-config-var makefile-path)
       (should (equal (flycheck-substitute-argument-cell
-                      '(config-file "--foo" my-fancy-config-var))
+                      '(config-file "--foo" flycheck-test-config-var))
                      (list "--foo" makefile-path)))
       ;; The same with an option ending with a =
-      (setq my-fancy-config-var "Makefile")
+      (setq flycheck-test-config-var "Makefile")
       (should (equal (flycheck-substitute-argument-cell
-                      '(config-file "--foo=" my-fancy-config-var))
+                      '(config-file "--foo=" flycheck-test-config-var))
                      (list (concat "--foo=" makefile-path))))
-      (setq my-fancy-config-var "../Makefile")
+      (setq flycheck-test-config-var "../Makefile")
       (should (equal (flycheck-substitute-argument-cell
-                      '(config-file "--foo=" my-fancy-config-var))
+                      '(config-file "--foo=" flycheck-test-config-var))
                      (list (concat "--foo=" makefile-path))))
-      (setq my-fancy-config-var makefile-path)
+      (setq flycheck-test-config-var makefile-path)
       (should (equal (flycheck-substitute-argument-cell
-                      '(config-file "--foo=" my-fancy-config-var))
+                      '(config-file "--foo=" flycheck-test-config-var))
                      (list (concat "--foo=" makefile-path))))
       ;; Find a file from the home directory
       (let* ((filename (-first #'file-regular-p
@@ -88,15 +91,15 @@
         (unless filename
           ;; Let the test fail if there is no file in $HOME
           (error "No file in $HOME found."))
-        (setq my-fancy-config-var (file-name-nondirectory filename))
+        (setq flycheck-test-config-var (file-name-nondirectory filename))
         (should (equal (flycheck-substitute-argument-cell
-                        '(config-file "--bar" my-fancy-config-var))
+                        '(config-file "--bar" flycheck-test-config-var))
                        (list "--bar" filename)))))))
 
 (ert-deftest flycheck-substitute-argument-cell-eval ()
   "Test substitution of `eval' argument cell."
-  (let ((my-fancy-var '("Hello " "World")))
-    (should (equal (flycheck-substitute-argument-cell '(eval my-fancy-var))
+  (let ((flycheck-test-option-var '("Hello " "World")))
+    (should (equal (flycheck-substitute-argument-cell '(eval flycheck-test-option-var))
                    '("Hello " "World"))))
   (should (equal (flycheck-substitute-argument-cell
                   '(eval (concat "Hello" "World")))
@@ -134,38 +137,38 @@
   ;; We need a real buffer for config-file search
   (flycheck-with-resource-buffer "test-checker-api.el"
     (let ((makefile-path (expand-file-name "../Makefile" testsuite-dir))
-          my-fancy-config-var)
+          flycheck-test-config-var)
       ;; A non-existing file
-      (setq my-fancy-config-var
+      (setq flycheck-test-config-var
             "no-such-file-should-ever-exist-really")
       (should (equal (flycheck-substitute-shell-argument-cell
-                      '(config-file "--foo" my-fancy-config-var))
+                      '(config-file "--foo" flycheck-test-config-var))
                      ""))
       ;; An existing file, first by name and then by relative and absolute path
-      (setq my-fancy-config-var "Makefile")
+      (setq flycheck-test-config-var "Makefile")
       (should (equal (flycheck-substitute-shell-argument-cell
-                      '(config-file "--foo" my-fancy-config-var))
+                      '(config-file "--foo" flycheck-test-config-var))
                      (concat "--foo " (shell-quote-argument makefile-path))))
-      (setq my-fancy-config-var "../Makefile")
+      (setq flycheck-test-config-var "../Makefile")
       (should (equal (flycheck-substitute-shell-argument-cell
-                      '(config-file "--foo" my-fancy-config-var))
+                      '(config-file "--foo" flycheck-test-config-var))
                      (concat "--foo " (shell-quote-argument makefile-path))))
-      (setq my-fancy-config-var makefile-path)
+      (setq flycheck-test-config-var makefile-path)
       (should (equal (flycheck-substitute-shell-argument-cell
-                      '(config-file "--foo" my-fancy-config-var))
+                      '(config-file "--foo" flycheck-test-config-var))
                      (concat "--foo " (shell-quote-argument makefile-path))))
       ;; The same with an option ending with a =
-      (setq my-fancy-config-var "Makefile")
+      (setq flycheck-test-config-var "Makefile")
       (should (equal (flycheck-substitute-shell-argument-cell
-                      '(config-file "--foo=" my-fancy-config-var))
+                      '(config-file "--foo=" flycheck-test-config-var))
                      (shell-quote-argument (concat "--foo=" makefile-path))))
-      (setq my-fancy-config-var "../Makefile")
+      (setq flycheck-test-config-var "../Makefile")
       (should (equal (flycheck-substitute-shell-argument-cell
-                      '(config-file "--foo=" my-fancy-config-var))
+                      '(config-file "--foo=" flycheck-test-config-var))
                      (shell-quote-argument (concat "--foo=" makefile-path))))
-      (setq my-fancy-config-var makefile-path)
+      (setq flycheck-test-config-var makefile-path)
       (should (equal (flycheck-substitute-shell-argument-cell
-                      '(config-file "--foo=" my-fancy-config-var))
+                      '(config-file "--foo=" flycheck-test-config-var))
                      (shell-quote-argument (concat "--foo=" makefile-path))))
       ;; Find a file from the home directory
       (let* ((filename (-first #'file-regular-p
@@ -173,15 +176,15 @@
         (unless filename
           ;; Let the test fail if there is no file in $HOME
           (error "No file in $HOME found."))
-        (setq my-fancy-config-var (file-name-nondirectory filename))
+        (setq flycheck-test-config-var (file-name-nondirectory filename))
         (should (equal (flycheck-substitute-shell-argument-cell
-                        '(config-file "--bar" my-fancy-config-var))
+                        '(config-file "--bar" flycheck-test-config-var))
                        (concat "--bar " (shell-quote-argument filename))))))))
 
 (ert-deftest flycheck-substitute-shell-argument-cell-eval ()
   "Test substitution of `eval' argument cell."
-  (let ((my-fancy-var '("Hello" " World")))
-    (should (equal (flycheck-substitute-shell-argument-cell '(eval my-fancy-var))
+  (let ((flycheck-test-option-var '("Hello" " World")))
+    (should (equal (flycheck-substitute-shell-argument-cell '(eval flycheck-test-option-var))
                    "Hello \\ World")))
   (should (equal (flycheck-substitute-shell-argument-cell
                   '(eval (concat "Hello " "\"World\"")))

@@ -1,4 +1,4 @@
-;;; test-pyflakes.el --- Test the pyflakes checker
+;;; test-pyflakes.el --- Test the pyflakes checker -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;

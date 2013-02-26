@@ -1,4 +1,4 @@
-;;; test-coffeelint.el --- Test the COFFEELINT checker
+;;; test-coffeelint.el --- Test the Coffeelint checker -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>,
 ;;

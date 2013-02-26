@@ -1,4 +1,4 @@
-;;; test-ruby.el --- Test the Ruby checker
+;;; test-ruby.el --- Test the Ruby checker -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;

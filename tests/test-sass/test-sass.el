@@ -1,4 +1,4 @@
-;;; test-sass.el --- Test the Sass checker
+;;; test-sass.el --- Test the Sass checker -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>,
 ;;

@@ -1,4 +1,4 @@
-;;; test-emacs-lisp.el --- Test the Emacs Lisp checker
+;;; test-emacs-lisp.el --- Test the Emacs Lisp checker -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>,
 ;;

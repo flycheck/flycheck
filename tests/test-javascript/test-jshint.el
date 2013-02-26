@@ -1,4 +1,4 @@
-;;; test-jshint.el --- Test the JSHint checker
+;;; test-jshint.el --- Test the JSHint checker -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>,
 ;;

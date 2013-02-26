@@ -1,4 +1,4 @@
-;;; test-zsh.el --- Test the Zsh checker
+;;; test-zsh.el --- Test the Zsh checker -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;

@@ -1,4 +1,4 @@
-;;; test-utilities.el --- Tests for utility functions
+;;; test-utilities.el --- Tests for utility functions -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;

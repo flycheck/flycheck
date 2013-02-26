@@ -1,4 +1,4 @@
-;;; test-help.el --- Tests for checker help
+;;; test-help.el --- Tests for checker help -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;

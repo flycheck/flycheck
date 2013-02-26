@@ -1,4 +1,4 @@
-;;; testsuite.el --- Testsuite for Flycheck
+;;; testsuite.el --- Testsuite for Flycheck -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;

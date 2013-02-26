@@ -1,4 +1,4 @@
-;;; test-pylint.el --- Test the pylint checker
+;;; test-pylint.el --- Test the pylint checker -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;

@@ -1,4 +1,4 @@
-;;; test-php.el --- Test the PHP checker
+;;; test-php.el --- Test the PHP checker -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;

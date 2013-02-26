@@ -1,4 +1,4 @@
-;;; test-xmlstarlet.el --- Test the xmlstarlet checker
+;;; test-xmlstarlet.el --- Test the xmlstarlet checker -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;

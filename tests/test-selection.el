@@ -1,4 +1,4 @@
-;;; test-selection.el --- Tests for checker selection
+;;; test-selection.el --- Tests for checker selection -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;

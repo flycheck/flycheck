@@ -1,4 +1,4 @@
-;;; test-bash.el --- Test the bash checker
+;;; test-bash.el --- Test the bash checker -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;

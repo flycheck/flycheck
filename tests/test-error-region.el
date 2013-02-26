@@ -1,4 +1,4 @@
-;;; test-error-region.el --- Tests for error region
+;;; test-error-region.el --- Tests for error region -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;

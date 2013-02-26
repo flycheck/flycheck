@@ -1,4 +1,4 @@
-;;; missing-period-in-docstring -- Trigger checkdoc warning
+;;; missing-period-in-docstring -- Trigger checkdoc warning -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 
