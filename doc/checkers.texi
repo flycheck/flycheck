@@ -8,6 +8,7 @@ point.
 @iflyc css-csslint
 @iflyc emacs-lisp
 @iflyc emacs-lisp-checkdoc
+@iflyc go-gofmt
 @iflyc haml
 @iflyc html-tidy
 @iflyc javascript-jshint

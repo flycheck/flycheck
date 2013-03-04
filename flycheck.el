@@ -87,6 +87,7 @@ buffer-local wherever it is set."
     css-csslint
     emacs-lisp
     emacs-lisp-checkdoc
+    go-gofmt
     haml
     html-tidy
     javascript-jshint
@@ -2043,6 +2044,14 @@ The checker runs `checkdoc-current-buffer'."
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)" warning))
   :modes '(emacs-lisp-mode lisp-interaction-mode)
   :predicate '(not (flycheck-temp-compilation-buffer-p)))
+
+(flycheck-declare-checker go-gofmt
+  "A Go syntax and style checker using the gofmt utility.
+
+See URL `http://golang.org/cmd/gofmt/'."
+  :command '("gofmt" source)
+  :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): \\(?4:.*\\)$" error))
+  :modes 'go-mode)
 
 (flycheck-declare-checker haml
   "A Haml syntax checker using the Haml compiler.

@@ -43,6 +43,8 @@ CSS
 @item
 Emacs Lisp (using the byte compiler and CheckDoc)
 @item
+Go (using @command{gofmt})
+@item
 Haml
 @item
 HTML

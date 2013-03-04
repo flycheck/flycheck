@@ -81,6 +81,7 @@ File: flycheck.info,  Node: Features,  Next: Installation,  Prev: Introduction, 
         * CoffeeScript
         * CSS
         * Emacs Lisp (using the byte compiler and CheckDoc)
+        * Go (using 'gofmt')
         * Haml
         * HTML
         * Javascript
@@ -1650,6 +1651,7 @@ point.
    * 'css-csslint'
    * 'emacs-lisp'
    * 'emacs-lisp-checkdoc'
+   * 'go-gofmt'
    * 'haml'
    * 'html-tidy'
    * 'javascript-jshint'
@@ -1705,34 +1707,34 @@ Tag Table:
 Node: Top689
 Node: Introduction1941
 Node: Features2732
-Node: Installation3614
-Node: Activation4788
-Node: Usage5113
-Node: Syntax checking5736
-Node: Selection6998
-Node: Configuration9579
-Node: Reporting10890
-Node: Navigation13168
-Node: Mode line14215
-Node: Extending15116
-Node: Declaration15545
-Node: Error parsers24794
-Node: Examples25772
-Node: Simple example26203
-Node: Predicate example29267
-Node: Configuration example31248
-Node: Chaining example32717
-Node: API34103
-Node: Error API34891
-Node: Error parser API37492
-Node: Contribution37718
-Node: Reporting issues38394
-Node: Contributing syntax checkers39130
-Node: Contributing code39925
-Node: Unit tests41265
-Node: Credits42698
-Node: GNU Free Documentation License44309
-Node: Syntax checkers69461
-Node: Function and Variable Index70207
+Node: Installation3643
+Node: Activation4817
+Node: Usage5142
+Node: Syntax checking5765
+Node: Selection7027
+Node: Configuration9608
+Node: Reporting10919
+Node: Navigation13197
+Node: Mode line14244
+Node: Extending15145
+Node: Declaration15574
+Node: Error parsers24823
+Node: Examples25801
+Node: Simple example26232
+Node: Predicate example29296
+Node: Configuration example31277
+Node: Chaining example32746
+Node: API34132
+Node: Error API34920
+Node: Error parser API37521
+Node: Contribution37747
+Node: Reporting issues38423
+Node: Contributing syntax checkers39159
+Node: Contributing code39954
+Node: Unit tests41294
+Node: Credits42727
+Node: GNU Free Documentation License44338
+Node: Syntax checkers69490
+Node: Function and Variable Index70252
 
 End Tag Table
