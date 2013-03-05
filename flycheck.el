@@ -1299,7 +1299,8 @@ Pop up a help buffer with the documentation of CHECKER."
               (filename (flycheck-checker-file checker))
               (modes (flycheck-checker-modes checker))
               (predicate (flycheck-checker-predicate checker))
-              (config-file-var (flycheck-checker-config-file-var checker)))
+              (config-file-var (flycheck-checker-config-file-var checker))
+              (option-vars (flycheck-checker-option-vars checker)))
           ;; TODO: Find and output declaring file
           (princ (format "%s is a Flycheck syntax checker" checker))
           (when filename
@@ -1329,8 +1330,13 @@ Pop up a help buffer with the documentation of CHECKER."
             (save-excursion
               (goto-char (point-min))
               (forward-paragraph)
-              (fill-region-as-paragraph (point) (point-max)))))
-        (princ (format "\n\nDocumentation:\n%s"
+              (fill-region-as-paragraph (point) (point-max))))
+          (princ "\n")
+          (when option-vars
+            (princ "\n  This syntax checker can be configured with these options:\n\n")
+            (--each option-vars
+              (princ (format "     * `%s'\n" it)))))
+        (princ (format "\nDocumentation:\n%s"
                        (flycheck-checker-documentation checker)))))))
 
 
