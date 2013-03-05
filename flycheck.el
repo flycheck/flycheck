@@ -676,7 +676,8 @@ providing a configuration file for CHECKER.  The CHECKER argument
 is used for documentation purposes only.  If given use FILE-NAME
 as initial value.
 
-Use this together with the config tag in checker arguments."
+Use this together with the `config-file' cell in syntax checker
+commands."
   (declare (indent 3))
   `(progn
      (put (quote ,checker) :flycheck-config-file-var (quote ,symbol))
