@@ -1246,7 +1246,7 @@ Pop up a help buffer with the documentation of CHECKER."
                 (re-search-backward "`\\([^`']+\\)'" nil t)
                 (help-xref-button 1 'help-flycheck-checker-def checker filename))))
           (princ ".\n\n")
-          (princ (format "  This checker executes \"%s\"" executable))
+          (princ (format "  This syntax checker executes \"%s\"" executable))
           (if config-file-var
             (princ (format ", using a configuration file from `%s'.\n"
                            config-file-var))
