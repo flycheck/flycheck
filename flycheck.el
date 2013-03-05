@@ -2045,7 +2045,9 @@ The checker runs `checkdoc-current-buffer'."
   :predicate '(not (flycheck-temp-compilation-buffer-p)))
 
 (flycheck-declare-checker go-fmt
-  "A Go syntax and style checker using the gofmt utility."
+  "A Go syntax and style checker using the gofmt utility.
+
+See URL `http://golang.org/cmd/gofmt/'."
   :command '("gofmt" source-inplace)
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'go-mode)
