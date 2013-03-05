@@ -305,6 +305,10 @@ instance, the following checks the Javascript file always with
      // flycheck-jshintrc: "../.jshintrc"
      // End:
 
+   Some syntax checkers have options that cannot be changed in
+configuration files.  These options can be changed by various variables.
+Customize these with 'M-x customize-group RET flycheck-options'.
+
 
 File: flycheck.info,  Node: Reporting,  Next: Navigation,  Prev: Configuration,  Up: Usage
 
@@ -494,9 +498,9 @@ Checkers are declared with 'flycheck-declare-checker':
                'flycheck-def-config-file-var'.
 
                If the configuration file is found according to the rules
-               documented in *note Configuration::, the symbol is
+               documented in *note Configuration::, the cell is
                substituted with the OPTION and the absolute path to the
-               configuration file as string.  Otherwise the symbol is
+               configuration file as string.  Otherwise the cell is
                simply dropped from the arguments of the syntax checker.
 
                If OPTION ends with a '=' character, OPTION and the
@@ -504,6 +508,27 @@ Checkers are declared with 'flycheck-declare-checker':
                and given as a single argument to the syntax checker.
                Otherwise, OPTION and the configuration file path are
                given as two separate arguments.
+
+          '(option OPTION VARIABLE [FILTER])'
+               This cell is substituted with the value of VARIABLE.
+               OPTION is a string containing the option for with to
+               specify the value.  FILTER is an optional function to be
+               applied to the value of VARIABLE before substitution.
+
+               VARIABLE is a symbol referring to a variable whose value
+               to use.  *Note Configuration::, for more information
+               about syntax checker configuration.  Define this variable
+               with 'flycheck-def-option-var'.
+
+               If VARIABLE is not NIL after applying FILTER, the cell is
+               substituted with the OPTION and the value of VARIABLE
+               after applying FILTER.  Otherwise the cell is simply
+               dropped from the arguments of the syntax checker.  If
+               VARIABLE is 'nil' directly, FILTER is not applied, and
+               the cell is immediately dropped.
+
+               An OPTION ending with a '=' character is treated like in
+               a 'config-file' cell.
 
           '(eval FORM)'
                This cell is substituted with a result of evaluating
@@ -641,6 +666,22 @@ it to 'flycheck-checkers'.  *Note Selection::.
 
      Use this macro together with the 'config-file' cell in the command
      of a syntax checker.
+
+ -- Macro: flycheck-def-option-var SYMBOL INITIAL-VALUE CHECKER
+          &optional CUSTOM-ARGS
+     Define SYMBOL as option variable for a syntax CHECKER, with the
+     given INITIAL-VALUE.
+
+     SYMBOL is declared as customizable variable, buffer-local variable
+     using 'defcustom', to provide an option for the given syntax
+     CHECKER.  SYMBOL gets a comprehensive docstring, including a
+     reference to CHECKER.
+
+     CUSTOM-ARGS are forwarded to 'defcustom'.  Declare the
+     customization type here.
+
+     Use this macro together with the 'option' cell in the command of a
+     syntax checker.
 
 
 File: flycheck.info,  Node: Error parsers,  Next: Examples,  Prev: Declaration,  Up: Extending
@@ -835,6 +876,31 @@ configuration file to the syntax checker.  If the configuration file is
 found, its path will be passed to the syntax checker, using the option
 specified after the 'config-file' symbol.  Otherwise the whole element
 is simply omitted from the command line.
+
+   Some Syntax checkers can also be configured using options passed on
+the command line.  Flycheck supports this case, too.  We will use this
+facility to extend the PHP CodeSniffer syntax checker from the *note
+Simple example:: with support for coding standards:
+
+     (flycheck-def-option-var flycheck-phpcs-standard nil phpcs
+       "The coding standard for PHP CodeSniffer."
+       :type '(choice (const :tag "Default standard" nil)
+                      (string :tag "Standard name" nil)))
+     (put 'flycheck-phpcs-standard 'safe-local-variable #'stringp)
+
+     (flycheck-declare-checker php-phpcs
+       "A PHP syntax checker using PHP_CodeSniffer."
+       :command '("phpcs" "--report=checkstyle"
+                  (option "--standard=" flycheck-phpcs-standard)
+                  source)
+       :error-parser 'flycheck-parse-checkstyle
+       :modes '(php-mode php+-mode))
+
+   The syntax checker is pretty much the same as before, except that a
+new element was added to ':command'.  This element passes the value of
+the new option variable 'flycheck-phpcs-standard' to the syntax checker.
+This variable is declared with the special macro
+'flycheck-def-option-var' at the beginning.
 
 
 File: flycheck.info,  Node: Chaining example,  Prev: Configuration example,  Up: Examples
@@ -1691,7 +1757,8 @@ Function and Variable Index
 * flycheck-count-errors:                 Error API.           (line  71)
 * flycheck-current-errors:               Error API.           (line  67)
 * flycheck-declare-checker:              Declaration.         (line   8)
-* flycheck-def-config-file-var:          Declaration.         (line 196)
+* flycheck-def-config-file-var:          Declaration.         (line 217)
+* flycheck-def-option-var:               Declaration.         (line 233)
 * flycheck-describe-checker:             Selection.           (line  70)
 * flycheck-error-face:                   Reporting.           (line  13)
 * flycheck-error-new:                    Error API.           (line  39)
@@ -1716,28 +1783,28 @@ Node: Usage5142
 Node: Syntax checking5765
 Node: Selection7027
 Node: Configuration9608
-Node: Reporting10919
-Node: Navigation13197
-Node: Mode line14244
-Node: Extending15145
-Node: Declaration15574
-Node: Error parsers24823
-Node: Examples25801
-Node: Simple example26232
-Node: Predicate example29296
-Node: Configuration example31277
-Node: Chaining example32746
-Node: API34132
-Node: Error API34920
-Node: Error parser API37521
-Node: Contribution37747
-Node: Reporting issues38423
-Node: Contributing syntax checkers39159
-Node: Contributing code39954
-Node: Unit tests41294
-Node: Credits42727
-Node: GNU Free Documentation License44429
-Node: Syntax checkers69581
-Node: Function and Variable Index70343
+Node: Reporting11121
+Node: Navigation13399
+Node: Mode line14446
+Node: Extending15347
+Node: Declaration15776
+Node: Error parsers26723
+Node: Examples27701
+Node: Simple example28132
+Node: Predicate example31196
+Node: Configuration example33177
+Node: Chaining example35836
+Node: API37222
+Node: Error API38010
+Node: Error parser API40611
+Node: Contribution40837
+Node: Reporting issues41513
+Node: Contributing syntax checkers42249
+Node: Contributing code43044
+Node: Unit tests44384
+Node: Credits45817
+Node: GNU Free Documentation License47519
+Node: Syntax checkers72671
+Node: Function and Variable Index73433
 
 End Tag Table

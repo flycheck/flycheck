@@ -71,14 +71,35 @@ more information about syntax checker configuration.  Define this
 variable with @code{flycheck-def-config-file-var}.
 
 If the configuration file is found according to the rules documented in
-@ref{Configuration}, the symbol is substituted with the @var{option} and
+@ref{Configuration}, the cell is substituted with the @var{option} and
 the absolute path to the configuration file as string.  Otherwise the
-symbol is simply dropped from the arguments of the syntax checker.
+cell is simply dropped from the arguments of the syntax checker.
 
 If @var{option} ends with a @code{=} character, @var{option} and the
 absolute path to the configuration file are concatenated and given as a
 single argument to the syntax checker.  Otherwise, @var{option} and the
 configuration file path are given as two separate arguments.
+
+@item (option @var{option} @var{variable} [@var{filter}])
+This cell is substituted with the value of @var{variable}.  @var{option}
+is a string containing the option for with to specify the value.
+@var{filter} is an optional function to be applied to the value of
+@var{variable} before substitution.
+
+@var{variable} is a symbol referring to a variable whose value to use.
+@xref{Configuration}, for more information about syntax checker
+configuration.  Define this variable with
+@code{flycheck-def-option-var}.
+
+If @var{variable} is not @var{nil} after applying @var{filter}, the cell
+is substituted with the @var{option} and the value of @var{variable}
+after applying @var{filter}.  Otherwise the cell is simply dropped from
+the arguments of the syntax checker.  If @var{variable} is @code{nil}
+directly, @var{filter} is @b{not} applied, and the cell is immediately
+dropped.
+
+An @var{option} ending with a @code{=} character is treated like in a
+@code{config-file} cell.
 
 @item (eval @var{form})
 This cell is substituted with a result of evaluating @var{form}.
@@ -219,6 +240,23 @@ the initial value is nil.
 
 Use this macro together with the @code{config-file} cell in the command
 of a syntax checker.
+@end defmac
+
+@defmac flycheck-def-option-var @var{symbol} @var{initial-value} @
+  @var{checker} &optional @var{custom-args}
+Define @var{symbol} as option variable for a syntax @var{checker}, with
+the given @var{initial-value}.
+
+@var{symbol} is declared as customizable variable, buffer-local variable
+using @code{defcustom}, to provide an option for the given syntax
+@var{checker}.  @var{symbol} gets a comprehensive docstring, including a
+reference to @var{checker}.
+
+@var{custom-args} are forwarded to @code{defcustom}.  Declare the
+customization type here.
+
+Use this macro together with the @code{option} cell in the command of a
+syntax checker.
 @end defmac
 
 @node Error parsers, Examples, Declaration, Extending
@@ -420,6 +458,34 @@ configuration file to the syntax checker.  If the configuration file is
 found, its path will be passed to the syntax checker, using the option
 specified after the @code{config-file} symbol.  Otherwise the whole
 element is simply omitted from the command line.
+
+Some Syntax checkers can also be configured using options passed on the
+command line.  Flycheck supports this case, too.  We will use this
+facility to extend the PHP CodeSniffer syntax checker from the
+@ref{Simple example} with support for coding standards:
+
+@lisp
+(flycheck-def-option-var flycheck-phpcs-standard nil phpcs
+  "The coding standard for PHP CodeSniffer."
+  :type '(choice (const :tag "Default standard" nil)
+                 (string :tag "Standard name" nil)))
+(put 'flycheck-phpcs-standard 'safe-local-variable #'stringp)
+
+(flycheck-declare-checker php-phpcs
+  "A PHP syntax checker using PHP_CodeSniffer."
+  :command '("phpcs" "--report=checkstyle"
+             (option "--standard=" flycheck-phpcs-standard)
+             source)
+  :error-parser 'flycheck-parse-checkstyle
+  :modes '(php-mode php+-mode))
+@end lisp
+
+The syntax checker is pretty much the same as before, except that a new
+element was added to @code{:command}.  This element passes the value of
+the new option variable @code{flycheck-phpcs-standard} to the syntax
+checker.  This variable is declared with the special macro
+@code{flycheck-def-option-var} at the beginning.
+
 
 @node Chaining example,  , Configuration example, Examples
 @comment  node-name,  next,  previous,  up

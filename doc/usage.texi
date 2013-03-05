@@ -194,6 +194,10 @@ from the parent directory:
 // End:
 @end example
 
+Some syntax checkers have options that cannot be changed in
+configuration files.  These options can be changed by various variables.
+Customize these with @kbd{M-x customize-group RET flycheck-options}.
+
 @node Reporting, Navigation, Configuration, Usage
 @comment  node-name,  next,  previous,  up
 @section Error reporting

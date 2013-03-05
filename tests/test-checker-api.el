@@ -96,6 +96,32 @@
                         '(config-file "--bar" flycheck-test-config-var))
                        (list "--bar" filename)))))))
 
+(ert-deftest flycheck-substitute-argument-cell-option ()
+  "Test substitution of `option' argument cell."
+  (let ((flycheck-test-option-var "bar"))
+    (should (equal (flycheck-substitute-argument-cell
+                    '(option "--foo" flycheck-test-option-var))
+                   '("--foo" "bar")))
+     (should (equal (flycheck-substitute-argument-cell
+                    '(option "--foo=" flycheck-test-option-var))
+                   '("--foo=bar"))))
+  (let ((flycheck-test-option-var 100))
+    (should-error (flycheck-substitute-argument-cell
+                   '(option "--foo" flycheck-test-option-var)))
+    (should (equal (flycheck-substitute-argument-cell
+                    '(option "--foo" flycheck-test-option-var number-to-string))
+                   '("--foo" "100")))
+    (should (equal (flycheck-substitute-argument-cell
+                    '(option "--foo=" flycheck-test-option-var number-to-string))
+                   '("--foo=100"))))
+  (let (flycheck-test-option-var)
+    (should-not (flycheck-substitute-argument-cell
+                 '(option "--foo" flycheck-test-option-var)))
+    (should-not (flycheck-substitute-argument-cell
+                 '(option "--foo" flycheck-test-option-var #'number-to-string)))
+    (should-not (flycheck-substitute-argument-cell
+                 '(option "--foo=" flycheck-test-option-var #'number-to-string)))))
+
 (ert-deftest flycheck-substitute-argument-cell-eval ()
   "Test substitution of `eval' argument cell."
   (let ((flycheck-test-option-var '("Hello " "World")))
@@ -180,6 +206,37 @@
         (should (equal (flycheck-substitute-shell-argument-cell
                         '(config-file "--bar" flycheck-test-config-var))
                        (concat "--bar " (shell-quote-argument filename))))))))
+
+(ert-deftest flycheck-substitute-shell-argument-cell-option ()
+  "Test substitution of `option' shell argument cell."
+  (let ((flycheck-test-option-var "Hello World"))
+    (should (equal (flycheck-substitute-shell-argument-cell
+                    '(option "--foo" flycheck-test-option-var))
+                   "--foo Hello\\ World"))
+     (should (equal (flycheck-substitute-shell-argument-cell
+                    '(option "--foo=" flycheck-test-option-var))
+                    "--foo\\=Hello\\ World")))
+  (let ((flycheck-test-option-var 100))
+    (should-error (flycheck-substitute-shell-argument-cell
+                   '(option "--foo" flycheck-test-option-var)))
+    (should (equal (flycheck-substitute-shell-argument-cell
+                    '(option "--foo" flycheck-test-option-var number-to-string))
+                   "--foo 100"))
+    (should (equal (flycheck-substitute-shell-argument-cell
+                    '(option "--foo=" flycheck-test-option-var number-to-string))
+                   "--foo\\=100")))
+  (let (flycheck-test-option-var)
+    (should (equal (flycheck-substitute-shell-argument-cell
+                    '(option "--foo" flycheck-test-option-var))
+                   ""))
+    (should (equal (flycheck-substitute-shell-argument-cell
+                    '(option "--foo" flycheck-test-option-var
+                             #'number-to-string))
+                   ""))
+    (should (equal (flycheck-substitute-shell-argument-cell
+                    '(option "--foo=" flycheck-test-option-var
+                             #'number-to-string))
+                   ""))))
 
 (ert-deftest flycheck-substitute-shell-argument-cell-eval ()
   "Test substitution of `eval' argument cell."
