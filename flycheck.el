@@ -2199,6 +2199,17 @@ See URL `http://php.net/manual/en/features.commandline.php'."
   :modes '(php-mode php+-mode)
   :next-checkers '((warnings-only . php-phpcs)))
 
+(flycheck-def-option-var flycheck-phpcs-standard nil php-phpcs
+  "The coding standard for PHP CodeSniffer.
+
+When nil, use the default standard from the global PHP
+CodeSniffer configuration.  When set to a string, pass the string
+to PHP CodeSniffer which will interpret it as name as a standard,
+or as path to a standard specification."
+  :type '(choice (const :tag "Default standard" nil)
+                 (string :tag "Standard name or file")))
+(put 'flycheck-phpcs-standard 'safe-local-variable #'stringp)
+
 (flycheck-declare-checker php-phpcs
   "A PHP syntax checker using PHP_CodeSniffer.
 
@@ -2209,7 +2220,9 @@ have issues that prevent Flycheck from parsing the output
 correctly.
 
 See URL `https://github.com/lunaryorn/flycheck/issues/78'."
-  :command '("phpcs" "--report=checkstyle" source)
+  :command '("phpcs" "--report=checkstyle"
+             (option "--standard=" flycheck-phpcs-standard)
+             source)
   :error-parser 'flycheck-parse-checkstyle
   :modes '(php-mode php+-mode))
 

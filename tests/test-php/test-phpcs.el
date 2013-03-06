@@ -39,6 +39,30 @@
        '(19 8 "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\"" error))
       (flycheck-ensure-clear))))
 
+(ert-deftest checker-php-phpcs-uppercase-keyqord-explicit-standard ()
+  "Test an uppercase keyword error by phpcs."
+  :expected-result (flycheck-fail-unless-checkers 'php 'php-phpcs)
+  (flycheck-with-resource-buffer "test-php/uppercase-keyword.php"
+    (dolist (mode '(php-mode php+-mode))
+      (funcall mode)
+      (setq flycheck-phpcs-standard "PEAR")
+      (flycheck-buffer-sync)
+      (flycheck-should-errors
+       '(19 8 "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\"" error))
+      (flycheck-ensure-clear))))
+
+(ert-deftest checker-php-phpcs-uppercase-keyqord-different-standard ()
+  "Test an uppercase keyword error by phpcs."
+  :expected-result (flycheck-fail-unless-checkers 'php 'php-phpcs)
+  (flycheck-with-resource-buffer "test-php/uppercase-keyword.php"
+    (dolist (mode '(php-mode php+-mode))
+      (funcall mode)
+      (setq flycheck-phpcs-standard "Zend")
+      (flycheck-buffer-sync)
+      (flycheck-should-errors
+       '(21 1 "A closing tag is not permitted at the end of a PHP file" error))
+      (flycheck-ensure-clear))))
+
 (ert-deftest checker-php-phpcs-overlong-line ()
   "Test a phpcs warning about an overlong line."
   :expected-result (flycheck-fail-unless-checkers 'php 'php-phpcs)
