@@ -18,7 +18,9 @@
 # Provision a VM with necessary packages to test all Flycheck checkers
 
 ppa () {
-    sudo apt-add-repository -y "$1"
+    for ppa in "$@"; do
+      sudo apt-add-repository -y "$ppa"
+    done
 }
 
 apt_update () {
@@ -56,9 +58,7 @@ apt_update
 apt make python-software-properties
 
 # Bring in the necessary PPAs
-ppa ppa:cassou/emacs
-ppa ppa:ondrej/php5
-ppa ppa:richarvey/nodejs
+ppa ppa:cassou/emacs ppa:ondrej/php5 ppa:richarvey/nodejs ppa:gophers/go
 apt_update
 
 # Install texinfo to build documentation
@@ -82,7 +82,8 @@ apt bash \
     lua5.2 lua-mode \
     chktex lacheck \
     xmlstarlet \
-    zsh
+    zsh \
+    golang-stable
 
 pip flake8 pylint pyflakes
 

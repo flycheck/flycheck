@@ -24,4 +24,5 @@ Flycheck provides on-the-fly syntax checker with
  (depends-on "cperl-mode")
  (depends-on "php-mode")
  (depends-on "php+-mode")
- (depends-on "sass-mode"))
+ (depends-on "sass-mode")
+ (depends-on "go-mode"))
