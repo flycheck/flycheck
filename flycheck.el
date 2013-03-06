@@ -2048,7 +2048,7 @@ The checker runs `checkdoc-current-buffer'."
   "A Go syntax and style checker using the gofmt utility.
 
 See URL `http://golang.org/cmd/gofmt/'."
-  :command '("gofmt" source-inplace)
+  :command '("gofmt" source-original)
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'go-mode)
 
