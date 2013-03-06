@@ -1147,6 +1147,9 @@ their support and patches are greatly appreciated.
    * Peter Vasil (https://github.com/ptrv) created the XML and Lua
      syntax checkers, added unit tests and did valuable testing.
 
+   * Robert Zaremba (https://github.com/robert-zaremba) added the Go
+     syntax checker.
+
    * steckerhalter (https://github.com/steckerhalter) provided the PHP
      CodeSniffer checker.
 
@@ -1733,8 +1736,8 @@ Node: Contributing syntax checkers39159
 Node: Contributing code39954
 Node: Unit tests41294
 Node: Credits42727
-Node: GNU Free Documentation License44338
-Node: Syntax checkers69490
-Node: Function and Variable Index70252
+Node: GNU Free Documentation License44429
+Node: Syntax checkers69581
+Node: Function and Variable Index70343
 
 End Tag Table

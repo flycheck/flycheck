@@ -35,6 +35,10 @@ syntastic} which inspired this project and many of its checkers.
 syntax checkers, added unit tests and did valuable testing.
 
 @item
+@uref{https://github.com/robert-zaremba, Robert Zaremba} added the Go
+syntax checker.
+
+@item
 @uref{https://github.com/steckerhalter, steckerhalter} provided the PHP
 CodeSniffer checker.
 

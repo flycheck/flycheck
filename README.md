@@ -133,6 +133,7 @@ The following people contributed to flycheck:
   which inspired this project and many of its checkers.
 - [Peter Vasil][ptrv] created the XML and Lua syntax checkers, added unit tests
   and did valuable testing.
+- [Robert Zaremba][robert-zaremba] added the Go syntax checker.
 - [steckerhalter][] provided the PHP CodeSniffer checker.
 - [Steve Purcell][purcell] implemented many checkers, contributed important
   ideas to the design of the checker API and engaged in worthwhile discussion to
@@ -176,5 +177,6 @@ See [COPYING][] for details.
 [wyuenho]: https://github.com/wyuenho
 [maio]: https://github.com/maio
 [ptrv]: https://github.com/ptrv
+[robert-zaremba]: https://github.com/robert-zaremba
 [steckerhalter]: https://github.com/steckerhalter
 [copying]: https://github.com/lunaryorn/flycheck/blob/master/COPYING
