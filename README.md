@@ -25,6 +25,7 @@ Features
   - CoffeeScript
   - CSS
   - Emacs Lisp
+  - Go
   - Haml
   - HTML
   - Javascript
