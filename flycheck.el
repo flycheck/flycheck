@@ -718,7 +718,8 @@ buffer-local.  CUSTOM-ARGS are forwarded to `defcustom'.
 
 Use this together with the `option' cell in syntax checker
 commands."
-  (declare (indent 3))
+  (declare (indent 3)
+           (doc-string 4))
   `(progn
      (let ((options (flycheck-checker-option-vars (quote ,checker))))
        (put (quote ,checker) :flycheck-option-vars
