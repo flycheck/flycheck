@@ -1311,7 +1311,8 @@ Pop up a help buffer with the documentation of CHECKER."
               (modes (flycheck-checker-modes checker))
               (predicate (flycheck-checker-predicate checker))
               (config-file-var (flycheck-checker-config-file-var checker))
-              (option-vars (flycheck-checker-option-vars checker)))
+              (option-vars (sort (flycheck-checker-option-vars checker)
+                                 #'string<)))
           ;; TODO: Find and output declaring file
           (princ (format "%s is a Flycheck syntax checker" checker))
           (when filename
