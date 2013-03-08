@@ -2239,13 +2239,31 @@ See URL `https://github.com/lunaryorn/flycheck/issues/78'."
 
 (flycheck-def-config-file-var flycheck-flake8rc python-flake8 ".flake8rc")
 
+(flycheck-def-option-var flycheck-flake8-maximum-complexity nil python-flake8
+  "The maximum McCabe complexity of methods.
+
+If nil, do not check the complexity of methods.  If set to an
+integer, report any complexity greater than the value of this
+variable as warning.
+
+If set to an integer, this variable overrules any similar setting
+in the configuration file denoted by `flycheck-flake8rc'."
+  :type '(choice (const :tag "Do not check McCabe complexity" nil)
+                 (integer :tag "Maximum complexity")))
+(put 'flycheck-flake8-maximum-complexity 'safe-local-variable #'integerp)
+
 (flycheck-declare-checker python-flake8
   "A Python syntax and style checker using the flake8 utility.
 
 For best error reporting, use Flake8 2.0 or newer.
 
 See URL `http://pypi.python.org/pypi/flake8'."
-  :command '("flake8" (config-file "--config" flycheck-flake8rc) source-inplace)
+  :command '("flake8"
+             (config-file "--config" flycheck-flake8rc)
+             (option "--max-complexity"
+                     flycheck-flake8-maximum-complexity
+                     flycheck-option-int)
+             source-inplace)
   :error-patterns
   '(("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:E[0-9]+.*\\)$"
      error)
@@ -2254,7 +2272,7 @@ See URL `http://pypi.python.org/pypi/flake8'."
     ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:W[0-9]+.*\\)$"
      warning)                           ; Flake8 < 2.0
     ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:C[0-9]+.*\\)$"
-     warning)                           ; McCabe complexity in Flake8 < 2.0
+     warning)                           ; McCabe complexity in Flake8 > 2.0
     ;; Syntax errors in Flake8 < 2.0, in Flake8 >= 2.0 syntax errors are caught
     ;; by the E.* pattern above
     ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))

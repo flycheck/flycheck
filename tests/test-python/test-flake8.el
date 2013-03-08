@@ -93,7 +93,7 @@
   (flycheck-with-resource-buffer "test-python/complex-code.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (setq flycheck-flake8rc "flake8rc")
+    (setq flycheck-flake8-maximum-complexity 4)
     (flycheck-buffer-sync)
     (flycheck-should-errors '(6 1 "C901 'foo' is too complex (4)" warning))))
 
