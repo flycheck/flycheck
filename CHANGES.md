@@ -9,6 +9,7 @@ master
 
   - Add support for syntax checker options (#72)
   - Add option for the coding standard used by PHP CodeSniffer
+  - Add option for maximum complexity and maximum line length to Flake8
 
 - Improvements:
 
