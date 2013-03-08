@@ -5,6 +5,11 @@ master
 
   - Go using `gofmt`
 
+- New features:
+
+  - Add support for syntax checker options (#72)
+  - Add option for the coding standard used by PHP CodeSniffer
+
 - Improvements:
 
   - Support McCabe warnings from `flake8`
