@@ -812,6 +812,14 @@ error if not."
 
 
 ;;;; Checker API
+(defun flycheck-declared-checkers ()
+  "Find all declared syntax checkers."
+  (let (declared-checkers)
+    (mapatoms (lambda (symbol)
+                (when (flycheck-valid-checker-p symbol)
+                  (push symbol declared-checkers))))
+    (sort declared-checkers #'string<)))
+
 (defun flycheck-registered-checker-p (checker)
   "Determine whether CHECKER is registered.
 

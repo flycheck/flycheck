@@ -46,10 +46,7 @@ Any checker in this list should be valid and registered."
   "Test that `flycheck-checkers' is complete.
 
 All declared checkers should be registered."
-  (let (declared-checkers)
-    (mapatoms (lambda (symbol)
-                (when (flycheck-valid-checker-p symbol)
-                  (push symbol declared-checkers))))
+  (let ((declared-checkers (flycheck-declared-checkers)))
     (should declared-checkers)
     (dolist (checker declared-checkers)
       (should (memq checker flycheck-checkers))
