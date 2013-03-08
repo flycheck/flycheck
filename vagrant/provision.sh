@@ -36,6 +36,7 @@ npm () {
 }
 
 pear () {
+    sudo pear update-channels
     sudo pear -q install "$@"
 }
 
