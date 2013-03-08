@@ -430,9 +430,10 @@ these.  *Note Contributing syntax checkers::, for more information.
 
 * Menu:
 
-* Declaration::
-* Error parsers::
-* Examples::
+* Declaration::         How to declare syntax checkers
+* Error parsers::       Built-in error parsers
+* Option filters::      Built-in option filters
+* Examples::            Examples on how to declare syntax checkers
 
 
 File: flycheck.info,  Node: Declaration,  Next: Error parsers,  Prev: Extending,  Up: Extending
@@ -514,6 +515,8 @@ Checkers are declared with 'flycheck-declare-checker':
                OPTION is a string containing the option for with to
                specify the value.  FILTER is an optional function to be
                applied to the value of VARIABLE before substitution.
+               *Note Option filters::, for a list of built-in option
+               filters.
 
                VARIABLE is a symbol referring to a variable whose value
                to use.  *Note Configuration::, for more information
@@ -684,7 +687,7 @@ it to 'flycheck-checkers'.  *Note Selection::.
      syntax checker.
 
 
-File: flycheck.info,  Node: Error parsers,  Next: Examples,  Prev: Declaration,  Up: Extending
+File: flycheck.info,  Node: Error parsers,  Next: Option filters,  Prev: Declaration,  Up: Extending
 
 3.2 Error parsers
 =================
@@ -716,9 +719,22 @@ API::, for more information about Flycheck errors.
 *Note Error parser API::.
 
 
-File: flycheck.info,  Node: Examples,  Prev: Error parsers,  Up: Extending
+File: flycheck.info,  Node: Option filters,  Next: Examples,  Prev: Error parsers,  Up: Extending
 
-3.3 Examples of syntax checkers
+3.3 Option filters
+==================
+
+Flycheck provides the following built-in option filters for use with the
+'option' cell:
+
+'flycheck-option-int'
+     An integral option that handles 'nil' correctly (unlike
+     'number-to-string').
+
+
+File: flycheck.info,  Node: Examples,  Prev: Option filters,  Up: Extending
+
+3.4 Examples of syntax checkers
 ===============================
 
 * Menu:
@@ -731,7 +747,7 @@ File: flycheck.info,  Node: Examples,  Prev: Error parsers,  Up: Extending
 
 File: flycheck.info,  Node: Simple example,  Next: Predicate example,  Prev: Examples,  Up: Examples
 
-3.3.1 Basic syntax checkers
+3.4.1 Basic syntax checkers
 ---------------------------
 
 As explained in the previous chapter *note Extending:: a syntax checker
@@ -799,7 +815,7 @@ error level (either 'warning' or 'error').
 
 File: flycheck.info,  Node: Predicate example,  Next: Configuration example,  Prev: Simple example,  Up: Examples
 
-3.3.2 Syntax checkers with predicates
+3.4.2 Syntax checkers with predicates
 -------------------------------------
 
 In the previous examples the syntax checkers were specific to certain
@@ -845,7 +861,7 @@ regardless of the major mode.
 
 File: flycheck.info,  Node: Configuration example,  Next: Chaining example,  Prev: Predicate example,  Up: Examples
 
-3.3.3 Configuration files for syntax checkers
+3.4.3 Configuration files for syntax checkers
 ---------------------------------------------
 
 Some syntax checkers can be configured using configuration files given
@@ -905,7 +921,7 @@ This variable is declared with the special macro
 
 File: flycheck.info,  Node: Chaining example,  Prev: Configuration example,  Up: Examples
 
-3.3.4 Chaining syntax checkers
+3.4.4 Chaining syntax checkers
 ------------------------------
 
 For many languages, more than a single syntax checker is applicable.
@@ -1757,8 +1773,8 @@ Function and Variable Index
 * flycheck-count-errors:                 Error API.           (line  71)
 * flycheck-current-errors:               Error API.           (line  67)
 * flycheck-declare-checker:              Declaration.         (line   8)
-* flycheck-def-config-file-var:          Declaration.         (line 217)
-* flycheck-def-option-var:               Declaration.         (line 233)
+* flycheck-def-config-file-var:          Declaration.         (line 219)
+* flycheck-def-option-var:               Declaration.         (line 235)
 * flycheck-describe-checker:             Selection.           (line  70)
 * flycheck-error-face:                   Reporting.           (line  13)
 * flycheck-error-new:                    Error API.           (line  39)
@@ -1787,24 +1803,25 @@ Node: Reporting11121
 Node: Navigation13399
 Node: Mode line14446
 Node: Extending15347
-Node: Declaration15776
-Node: Error parsers26737
-Node: Examples27715
-Node: Simple example28146
-Node: Predicate example31210
-Node: Configuration example33191
-Node: Chaining example35850
-Node: API37236
-Node: Error API38024
-Node: Error parser API40625
-Node: Contribution40851
-Node: Reporting issues41527
-Node: Contributing syntax checkers42263
-Node: Contributing code43058
-Node: Unit tests44398
-Node: Credits45831
-Node: GNU Free Documentation License47533
-Node: Syntax checkers72685
-Node: Function and Variable Index73447
+Node: Declaration15946
+Node: Error parsers27000
+Node: Option filters27984
+Node: Examples28323
+Node: Simple example28755
+Node: Predicate example31819
+Node: Configuration example33800
+Node: Chaining example36459
+Node: API37845
+Node: Error API38633
+Node: Error parser API41234
+Node: Contribution41460
+Node: Reporting issues42136
+Node: Contributing syntax checkers42872
+Node: Contributing code43667
+Node: Unit tests45007
+Node: Credits46440
+Node: GNU Free Documentation License48142
+Node: Syntax checkers73294
+Node: Function and Variable Index74056
 
 End Tag Table

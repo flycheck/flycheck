@@ -1153,6 +1153,16 @@ shell execution."
                     (flycheck-checker-command checker))))
 
 
+;;;; Option filters
+(defun flycheck-option-int (value)
+  "Convert an integral option VALUE to a string.
+
+If VALUE is nil, return nil.  Otherwise return VALUE converted to
+a string."
+  (when value
+    (number-to-string value)))
+
+
 ;;;; Checker selection
 (defvar-local flycheck-last-checker nil
   "The last checker used for the current buffer.")

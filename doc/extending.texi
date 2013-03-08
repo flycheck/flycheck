@@ -5,9 +5,10 @@ If you implement new syntax checkers, please consider @b{contributing}
 these.  @xref{Contributing syntax checkers}, for more information.
 
 @menu
-* Declaration::
-* Error parsers::
-* Examples::
+* Declaration::         How to declare syntax checkers
+* Error parsers::       Built-in error parsers
+* Option filters::      Built-in option filters
+* Examples::            Examples on how to declare syntax checkers
 @end menu
 
 @node Declaration, Error parsers, Extending, Extending
@@ -84,7 +85,8 @@ configuration file path are given as two separate arguments.
 This cell is substituted with the value of @var{variable}.  @var{option}
 is a string containing the option for with to specify the value.
 @var{filter} is an optional function to be applied to the value of
-@var{variable} before substitution.
+@var{variable} before substitution.  @xref{Option filters}, for a list
+of built-in option filters.
 
 @var{variable} is a symbol referring to a variable whose value to use.
 @xref{Configuration}, for more information about syntax checker
@@ -259,7 +261,7 @@ Use this macro together with the @code{option} cell in the command of a
 syntax checker.
 @end defmac
 
-@node Error parsers, Examples, Declaration, Extending
+@node Error parsers, Option filters, Declaration, Extending
 @comment  node-name,  next,  previous,  up
 @section Error parsers
 
@@ -293,7 +295,20 @@ for more information about Flycheck errors.
 Flycheck provides some utility functions to implement error parsers.
 @xref{Error parser API}.
 
-@node Examples,  , Error parsers, Extending
+@node Option filters, Examples, Error parsers, Extending
+@comment  node-name,  next,  previous,  up
+@section Option filters
+
+Flycheck provides the following built-in option filters for use with the
+@code{option} cell:
+
+@table @code
+@item flycheck-option-int
+An integral option that handles @code{nil} correctly (unlike
+@code{number-to-string}).
+@end table
+
+@node Examples,  , Option filters, Extending
 @comment  node-name,  next,  previous,  up
 @section Examples of syntax checkers
 
