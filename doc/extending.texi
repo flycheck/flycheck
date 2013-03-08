@@ -229,7 +229,7 @@ checker must be registered by adding it to @code{flycheck-checkers}.
 Define @var{symbol} as configuration file variable for a syntax
 @var{checker}, with a default value of @var{filename}.
 
-@var{symbol} is declared as customizable variable using
+@var{symbol} is declared as customizable, buffer-local variable using
 @code{defcustom}, to provide a configuration file for the given syntax
 @var{checker}.  The variable has the customization type @code{string},
 and gets a comprehensive docstring, including a reference to
