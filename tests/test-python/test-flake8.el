@@ -74,8 +74,8 @@
       (python-mode))
     (flycheck-buffer-sync)
     (flycheck-should-errors
-     '(6 13 "E251 no spaces around keyword / parameter equals" error)
-     '(6 15 "E251 no spaces around keyword / parameter equals" error))))
+     '(6 13 "E251 unexpected spaces around keyword / parameter equals" error)
+     '(6 15 "E251 unexpected spaces around keyword / parameter equals" error))))
 
 (ert-deftest checker-python-flake8-superfluous-space-ignored ()
   "Test superfluous space being ignored with flake8."
