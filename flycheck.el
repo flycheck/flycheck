@@ -2252,6 +2252,21 @@ in the configuration file denoted by `flycheck-flake8rc'."
                  (integer :tag "Maximum complexity")))
 (put 'flycheck-flake8-maximum-complexity 'safe-local-variable #'integerp)
 
+(flycheck-def-option-var flycheck-flake8-maximum-line-length nil python-flake8
+  "The maximum length of lines.
+
+If set to an integer, the value of this variable denotes the
+maximum length of lines, overruling any similar setting in the
+configuration file denoted by `flycheck-flake8rc'.  An error will
+be reported for any line longer than the value of this variable.
+
+If set to nil, use the maximum line length from the configuration
+file denoted by `flycheck-flake8rc', or the PEP 8 recommendation
+of 79 characters if there is no configuration with this setting."
+  :type '(choice (const :tag "Default value")
+                 (integer :tag "Maximum line length in characters")))
+(put 'flycheck-flake8-maximum-line-length 'safe-local-variable #'integerp)
+
 (flycheck-declare-checker python-flake8
   "A Python syntax and style checker using the flake8 utility.
 
@@ -2262,6 +2277,9 @@ See URL `http://pypi.python.org/pypi/flake8'."
              (config-file "--config" flycheck-flake8rc)
              (option "--max-complexity"
                      flycheck-flake8-maximum-complexity
+                     flycheck-option-int)
+             (option "--max-line-length"
+                     flycheck-flake8-maximum-line-length
                      flycheck-option-int)
              source-inplace)
   :error-patterns

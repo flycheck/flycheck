@@ -97,6 +97,15 @@
     (flycheck-buffer-sync)
     (flycheck-should-errors '(6 1 "C901 'foo' is too complex (4)" warning))))
 
+(ert-deftest checker-python-flake8-very-long-line ()
+  "Test an overly long line, using the maximum line length option."
+  :expected-result (flycheck-fail-unless-checker 'python-flake8)
+  (flycheck-with-resource-buffer "test-python/very-long-line.py"
+    (python-mode)
+    (setq flycheck-flake8-maximum-line-length 50)
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
+     '(5 51 "E501 line too long (61 > 50 characters)" error))))
 
 ;; Local Variables:
 ;; coding: utf-8
