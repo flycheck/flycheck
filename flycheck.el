@@ -813,7 +813,10 @@ error if not."
 
 ;;;; Checker API
 (defun flycheck-declared-checkers ()
-  "Find all declared syntax checkers."
+  "Find all declared syntax checkers.
+
+The returned list is sorted alphapetically by the symbol name of
+the syntax checkers."
   (let (declared-checkers)
     (mapatoms (lambda (symbol)
                 (when (flycheck-valid-checker-p symbol)
