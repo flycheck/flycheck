@@ -155,10 +155,50 @@ Show the documentation of a syntax checker.
 @comment  node-name,  next,  previous,  up
 @section Syntax checker configuration
 
-Some syntax checkers read configuration files.  These checkers have an
-associated variable providing the name of the configuration file, for
-instance @code{flycheck-jshintrc} for the @flyc{javascript-jshint}
-syntax checker.  These variables obey the following rules:
+Some syntax checkers can be configured via options.  The following
+options are provided by Flycheck (use @kbd{C-h v} or @kbd{M-x
+describe-variable} on the variable name for detailed help):
+
+@defopt flycheck-flake8-maximum-complexity
+The maximum McCabe complexity the @code{python-flake8} syntax checker
+allows without reporting a warning.
+@end defopt
+
+@defopt flycheck-flake8-maximum-line-length
+The maximum length of a line in characters the @code{python-flake8}
+syntax checker allows without reporting an error.
+@end defopt
+
+@defopt flycheck-phpcs-standard
+The coding standard the syntax checker @code{php-phpcs} shall use.
+@end defopt
+
+Some syntax checkers also read configuration files denoted by associated
+@emph{configuration file variables}.  The following configuration files
+are provided by Flycheck:
+
+@defopt flycheck-chktexrc
+The configuration file for the @code{tex-chktex} syntax checker.
+@end defopt
+
+@defopt flycheck-coffeelintrc
+The configuration file for the @code{coffee-coffeelint} syntax checker.
+@end defopt
+
+@defopt flycheck-flake8rc
+The configuration file for the @code{python-flake8} syntax checker.
+@end defopt
+
+@defopt flycheck-jshintrc
+The configuration file for the @code{javascript-jshint} syntax checker.
+@end defopt
+
+@defopt flycheck-tidyrc
+The configuration file for the @code{html-tidy} syntax checker.
+@end defopt
+
+All configuration file variables are interpreted according to the
+following rules:
 
 If the variable contains a plain file name @emph{without} any slash,
 e.g. @file{.jshintrc}, this file is searched

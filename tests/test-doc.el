@@ -42,6 +42,36 @@
     (forward-line 1)
     (should (looking-at "@end itemize"))))
 
+(ert-deftest doc-all-options-documented ()
+  "Tests that all option variables are documented in the manual."
+  (let ((config-vars (sort (-flatten (-keep #'flycheck-checker-option-vars
+                                            (flycheck-declared-checkers)))
+                           #'string<)))
+    (flycheck-with-resource-buffer "../doc/usage.texi"
+      ;; Go to the beginning of the configuration section
+      (re-search-forward "@node Configuration")
+      ;; Go to the beginning of the option variable listing
+      (re-search-forward "configured via options\\.")
+      ;; Verify that all variables are documented
+      (dolist (var config-vars)
+        (re-search-forward "^@defopt \\(.*?\\)$")
+        (should (equal (match-string 1) (symbol-name var)))))))
+
+(ert-deftest doc-all-config-vars-documented ()
+  "Tests that all configuration file variables are documented in the manual."
+  (let ((option-file-vars (sort (-keep #'flycheck-checker-config-file-var
+                                       (flycheck-declared-checkers))
+                                #'string<)))
+    (flycheck-with-resource-buffer "../doc/usage.texi"
+      ;; Go to the beginning of the configuration section
+      (re-search-forward "@node Configuration")
+      ;; Go to the beginning of the option variable listing
+      (re-search-forward "configuration file variables")
+      ;; Verify that all variables are documented
+      (dolist (var option-file-vars)
+        (re-search-forward "^@defopt \\(.*?\\)$")
+        (should (equal (match-string 1) (symbol-name var)))))))
+
 
 ;; Local Variables:
 ;; coding: utf-8

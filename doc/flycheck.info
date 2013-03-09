@@ -274,10 +274,42 @@ File: flycheck.info,  Node: Configuration,  Next: Reporting,  Prev: Selection,  
 2.3 Syntax checker configuration
 ================================
 
-Some syntax checkers read configuration files.  These checkers have an
-associated variable providing the name of the configuration file, for
-instance 'flycheck-jshintrc' for the 'javascript-jshint' syntax checker.
-These variables obey the following rules:
+Some syntax checkers can be configured via options.  The following
+options are provided by Flycheck (use 'C-h v' or 'M-x describe-variable'
+on the variable name for detailed help):
+
+ -- User Option: flycheck-flake8-maximum-complexity
+     The maximum McCabe complexity the 'python-flake8' syntax checker
+     allows without reporting a warning.
+
+ -- User Option: flycheck-flake8-maximum-line-length
+     The maximum length of a line in characters the 'python-flake8'
+     syntax checker allows without reporting an error.
+
+ -- User Option: flycheck-phpcs-standard
+     The coding standard the syntax checker 'php-phpcs' shall use.
+
+   Some syntax checkers also read configuration files denoted by
+associated _configuration file variables_.  The following configuration
+files are provided by Flycheck:
+
+ -- User Option: flycheck-chktexrc
+     The configuration file for the 'tex-chktex' syntax checker.
+
+ -- User Option: flycheck-coffeelintrc
+     The configuration file for the 'coffee-coffeelint' syntax checker.
+
+ -- User Option: flycheck-flake8rc
+     The configuration file for the 'python-flake8' syntax checker.
+
+ -- User Option: flycheck-jshintrc
+     The configuration file for the 'javascript-jshint' syntax checker.
+
+ -- User Option: flycheck-tidyrc
+     The configuration file for the 'html-tidy' syntax checker.
+
+   All configuration file variables are interpreted according to the
+following rules:
 
    If the variable contains a plain file name _without_ any slash, e.g.
 '.jshintrc', this file is searched
@@ -1771,7 +1803,9 @@ Function and Variable Index
 * flycheck-buffer:                       Syntax checking.     (line  15)
 * flycheck-checker:                      Selection.           (line  41)
 * flycheck-checkers:                     Selection.           (line   9)
+* flycheck-chktexrc:                     Configuration.       (line  25)
 * flycheck-clear:                        Reporting.           (line  53)
+* flycheck-coffeelintrc:                 Configuration.       (line  28)
 * flycheck-count-errors:                 Error API.           (line  71)
 * flycheck-current-errors:               Error API.           (line  67)
 * flycheck-declare-checker:              Declaration.         (line   8)
@@ -1783,10 +1817,16 @@ Function and Variable Index
 * flycheck-error-pos:                    Error API.           (line  58)
 * flycheck-error-region:                 Error API.           (line  50)
 * flycheck-error-with-buffer:            Error API.           (line  46)
+* flycheck-flake8-maximum-complexity:    Configuration.       (line  10)
+* flycheck-flake8-maximum-line-length:   Configuration.       (line  14)
+* flycheck-flake8rc:                     Configuration.       (line  31)
 * flycheck-has-errors-p:                 Error API.           (line  76)
 * flycheck-highlighting-mode:            Reporting.           (line  27)
+* flycheck-jshintrc:                     Configuration.       (line  34)
 * flycheck-parse-xml-string:             Error parser API.    (line   6)
+* flycheck-phpcs-standard:               Configuration.       (line  18)
 * flycheck-select-checker:               Selection.           (line  32)
+* flycheck-tidyrc:                       Configuration.       (line  37)
 * flycheck-warning-face:                 Reporting.           (line  14)
 
 
@@ -1801,29 +1841,29 @@ Node: Usage5142
 Node: Syntax checking5765
 Node: Selection7027
 Node: Configuration9608
-Node: Reporting11121
-Node: Navigation13399
-Node: Mode line14446
-Node: Extending15347
-Node: Declaration15946
-Node: Error parsers27000
-Node: Option filters27984
-Node: Examples28323
-Node: Simple example28755
-Node: Predicate example31819
-Node: Configuration example33800
-Node: Chaining example36459
-Node: API37845
-Node: Error API38633
-Node: Error parser API41234
-Node: Contribution41460
-Node: Reporting issues42136
-Node: Contributing syntax checkers42872
-Node: Contributing code43667
-Node: Unit tests45007
-Node: Credits46440
-Node: GNU Free Documentation License48142
-Node: Syntax checkers73294
-Node: Function and Variable Index74159
+Node: Reporting12276
+Node: Navigation14554
+Node: Mode line15601
+Node: Extending16502
+Node: Declaration17101
+Node: Error parsers28155
+Node: Option filters29139
+Node: Examples29478
+Node: Simple example29910
+Node: Predicate example32974
+Node: Configuration example34955
+Node: Chaining example37614
+Node: API39000
+Node: Error API39788
+Node: Error parser API42389
+Node: Contribution42615
+Node: Reporting issues43291
+Node: Contributing syntax checkers44027
+Node: Contributing code44822
+Node: Unit tests46162
+Node: Credits47595
+Node: GNU Free Documentation License49297
+Node: Syntax checkers74449
+Node: Function and Variable Index75314
 
 End Tag Table
