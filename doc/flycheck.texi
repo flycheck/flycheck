@@ -52,6 +52,7 @@ Copyright @copyright{} 2013 Sebastian Wiesner
 * Extending::                   How to extend Flycheck with new syntax checkers
 * API::                         An overview about the Flycheck API
 * Contribution::                How to contribute to Flycheck development
+* Changes::                     Changes to Flycheck
 * Credits::                     Developers and contributors to Flycheck
 * GNU Free Documentation License::  The license of this documentation
 * Syntax checkers::             Available syntax checkers
@@ -82,13 +83,19 @@ Copyright @copyright{} 2013 Sebastian Wiesner
 
 @include api.texi
 
-@node Contribution, Credits, API, Top
+@node Contribution, Changes, API, Top
 @comment  node-name,  next,  previous,  up
 @chapter Contribution
 
 @include contribution.texi
 
-@node Credits, GNU Free Documentation License, Contribution, Top
+@node Changes, Credits, Contribution, Top
+@comment  node-name,  next,  previous,  up
+@appendix Changes
+
+@include changes.texi
+
+@node Credits, GNU Free Documentation License, Changes, Top
 @comment  node-name,  next,  previous,  up
 @appendix Credits
 

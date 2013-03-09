@@ -174,7 +174,7 @@ The coding standard the syntax checker @code{php-phpcs} shall use.
 @end defopt
 
 Some syntax checkers also read configuration files denoted by associated
-@emph{configuration file variables}.  The following configuration files
+@dfn{configuration file variables}.  The following configuration files
 are provided by Flycheck:
 
 @defopt flycheck-chktexrc
