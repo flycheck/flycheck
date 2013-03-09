@@ -40,6 +40,7 @@ This manual is for Flycheck.
 * Extending::                   How to extend Flycheck with new syntax checkers
 * API::                         An overview about the Flycheck API
 * Contribution::                How to contribute to Flycheck development
+* Changes::                     Changes to Flycheck
 * Credits::                     Developers and contributors to Flycheck
 * GNU Free Documentation License::  The license of this documentation
 * Syntax checkers::             Available syntax checkers
@@ -290,7 +291,7 @@ on the variable name for detailed help):
      The coding standard the syntax checker 'php-phpcs' shall use.
 
    Some syntax checkers also read configuration files denoted by
-associated _configuration file variables_.  The following configuration
+associated "configuration file variables".  The following configuration
 files are provided by Flycheck:
 
  -- User Option: flycheck-chktexrc
@@ -1098,7 +1099,7 @@ File: flycheck.info,  Node: Error parser API,  Prev: Error API,  Up: API
      Parse an XML string and return the parsed document tree.
 
 
-File: flycheck.info,  Node: Contribution,  Next: Credits,  Prev: API,  Up: Top
+File: flycheck.info,  Node: Contribution,  Next: Changes,  Prev: API,  Up: Top
 
 5 Contribution
 **************
@@ -1228,9 +1229,288 @@ using the *note ERT: (ert)Top. library.
      tests in a dedicated Emacs process with 'make test'.
 
 
-File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Contribution,  Up: Top
+File: flycheck.info,  Node: Changes,  Next: Credits,  Prev: Contribution,  Up: Top
 
-Appendix A Credits
+Appendix A Changes
+******************
+
+This appendix provides a comprehensive changelog of all releases:
+
+* Menu:
+
+* master        :: unreleased
+* 0.7.1         :: Feb 23, 2013
+* 0.7           :: Feb 14, 2013
+* 0.6.1         :: Jan 30, 2013
+* 0.6           :: Jan 29, 2013
+* 0.5           :: Dec 28, 2012
+* 0.4           :: Nov 21, 2012
+* 0.3           :: Oct 20, 2012
+* 0.2           :: Oct 15, 2012
+* 0.1           :: Oct 11, 2012
+
+
+File: flycheck.info,  Node: 0.1,  Next: 0.2,  Up: Changes
+
+0.1 (Oct 11, 2012)
+==================
+
+Initial release as flymake-checkers
+
+   * New syntax checkers
+
+        * TeX/LaTeX
+        * Shell scripts
+        * Python
+        * Ruby
+        * Coffeescript
+        * Emacs Lisp
+
+
+File: flycheck.info,  Node: 0.2,  Next: 0.3,  Prev: 0.1,  Up: Changes
+
+0.2 (Oct 15, 2012)
+==================
+
+   * New syntax checkers
+
+        * PHP
+
+   * API changes
+
+        * Simplify syntax checker declarations
+          (https://github.com/lunaryorn/flycheck/issues/2)
+
+
+File: flycheck.info,  Node: 0.3,  Next: 0.4,  Prev: 0.2,  Up: Changes
+
+0.3 (Oct 20, 2012)
+==================
+
+   * Replace 'flymake-mode' with a custom syntax checking minor mode
+     (https://github.com/lunaryorn/flycheck/issues/4)
+
+
+File: flycheck.info,  Node: 0.4,  Next: 0.5,  Prev: 0.2,  Up: Changes
+
+0.4 (Nov 21, 2012)
+==================
+
+   * Rename the project to Flycheck
+     (https://github.com/lunaryorn/flycheck/issues/5)
+   * New syntax checkers
+
+        * HAML (https://github.com/lunaryorn/flycheck/issues/9)
+        * CSS (https://github.com/lunaryorn/flycheck/issues/9)
+        * Javascript with 'jsl'
+          (https://github.com/lunaryorn/flycheck/issues/9)
+        * Javascript with 'jshint'
+          (https://github.com/lunaryorn/flycheck/issues/16)
+        * JSON (https://github.com/lunaryorn/flycheck/issues/12)
+        * LaTeX with 'lacheck'
+
+   * Bug fixes
+        * Fix type error when checking compressed Emacs Lisp
+          (https://github.com/lunaryorn/flycheck/issues/10)
+
+
+File: flycheck.info,  Node: 0.5,  Next: 0.6,  Prev: 0.4,  Up: Changes
+
+0.5 (Dec 28, 2012)
+==================
+
+   * New syntax checkers:
+
+        * SASS (https://github.com/lunaryorn/flycheck/issues/15)
+        * Perl (https://github.com/lunaryorn/flycheck/issues/21)
+        * XML
+        * Lua (https://github.com/lunaryorn/flycheck/issues/30)
+
+   * New features:
+
+        * Support manual buffer-local selection of syntax checker
+          (https://github.com/lunaryorn/flycheck/issues/25)
+        * Add customizable error indicators
+          (https://github.com/lunaryorn/flycheck/issues/28)
+        * Echo error messages at point without 3rd-party libraries like
+          flymake-cursor
+          (https://github.com/lunaryorn/flycheck/issues/27)
+
+   * Improvements:
+
+        * Remember the last automatically selected syntax checker
+          (https://github.com/lunaryorn/flycheck/issues/24)
+
+   * Bug fixes:
+
+        * Fix syntax checking of buffers without backing files
+          (https://github.com/lunaryorn/flycheck/issues/19)
+
+   * API changes:
+
+        * Replace underlying Flymake API with a custom syntax checking
+          implementation
+          (https://github.com/lunaryorn/flycheck/issues/15)
+
+
+File: flycheck.info,  Node: 0.6,  Next: 0.6.1,  Prev: 0.5,  Up: Changes
+
+0.6 (Jan 29, 2013)
+==================
+
+   * New syntax checkers:
+
+        * Emacs Lisp with 'checkdoc-current-buffer'
+          (https://github.com/lunaryorn/flycheck/issues/53)
+        * PHP with PHP CodeSniffer
+          (https://github.com/lunaryorn/flycheck/issues/72)
+
+   * Removed syntax checkers:
+
+        * Javascript with 'jsl'
+
+   * New features:
+
+        * Error navigation with 'next-error' and 'previous-error'
+          (https://github.com/lunaryorn/flycheck/issues/26)
+        * Fringe icons instead of error indicators
+          (https://github.com/lunaryorn/flycheck/issues/33)
+        * Menu entry for Flycheck
+          (https://github.com/lunaryorn/flycheck/issues/59)
+        * Customizable error highlighting, taking the column number into
+          account (https://github.com/lunaryorn/flycheck/issues/35)
+        * Configuration files for syntax checkers
+        * Add configuration file support to the syntax checkers
+          'coffee-coffeelint', 'html-tidy', 'javascript-jshint',
+          'pyton-flake8' and 'tex-chktex'
+        * Allow to compile a buffer with a syntax checker for testing
+          purposes (https://github.com/lunaryorn/flycheck/issues/58)
+        * Use multiple syntax checkers during a syntax check
+          (https://github.com/lunaryorn/flycheck/issues/31)
+        * Add dedicated help for syntax checkers
+          (https://github.com/lunaryorn/flycheck/issues/52)
+
+   * Improvements:
+
+        * Match error patterns in order of declaration
+          (https://github.com/lunaryorn/flycheck/issues/55)
+
+   * Bug fixes:
+
+        * Inherit highlighting faces from built-in faces
+          (https://github.com/lunaryorn/flycheck/issues/24)
+        * Correct error patterns of the HTML syntax checker
+          (https://github.com/lunaryorn/flycheck/issues/36)
+        * Detect syntax errors in the 'python-flake8' syntax checker
+          (https://github.com/lunaryorn/flycheck/issues/42)
+        * Fix various regressions after introducing unit tests
+        * Inhibit syntax checking during package installation
+          (https://github.com/lunaryorn/flycheck/issues/45)
+        * Disable syntax checking in Tramp buffers
+          (https://github.com/lunaryorn/flycheck/issues/54)
+        * Preserve whitespace in error messages
+          (https://github.com/lunaryorn/flycheck/issues/65)
+
+   * API changes:
+        * Replace syntax checker variables with syntax checker
+          declarations (https://github.com/lunaryorn/flycheck/issues/41)
+        * Support parsing errors with arbitrary functions instead of
+          error patterns
+          (https://github.com/lunaryorn/flycheck/issues/38)
+        * Add an error parser for Checkstyle-like XML output
+          (https://github.com/lunaryorn/flycheck/issues/38)
+
+
+File: flycheck.info,  Node: 0.6.1,  Next: 0.7,  Prev: 0.6,  Up: Changes
+
+0.6.1 (Jan 30, 2013)
+====================
+
+   * Fix package dependencies
+
+
+File: flycheck.info,  Node: 0.7,  Next: 0.7.1,  Prev: 0.6.1,  Up: Changes
+
+0.7 (Feb 14, 2013)
+==================
+
+   * New features:
+
+        * Navigate to source of syntax checker declarations from syntax
+          checker help
+        * Add online Info manual
+          (https://github.com/lunaryorn/flycheck/issues/60)
+
+   * Improvements:
+
+        * Use pipes instead of TTYs to read output from syntax checkers
+        * Defer syntax checks for invisible buffers
+          (https://github.com/lunaryorn/flycheck/issues/80)
+        * Immediately display error messages after error navigation
+          (https://github.com/lunaryorn/flycheck/issues/62)
+
+   * Bug fixes:
+
+        * Never select deleted buffers
+        * Do not let the debugger interfere with necessary cleanup
+          actions
+        * Do not attempt to parse empty XML trees
+          (https://github.com/lunaryorn/flycheck/issues/78)
+        * Fix infinite recursion on Windows
+          (https://github.com/lunaryorn/flycheck/issues/81)
+
+
+File: flycheck.info,  Node: 0.7.1,  Next: master,  Prev: 0.7,  Up: Changes
+
+0.7.1 (Feb 23, 2013)
+====================
+
+   * Bug fixes:
+
+        * Do not signal errors from 'flycheck-mode'
+          (https://github.com/lunaryorn/flycheck/issues/87)
+        * Correctly fall back to 'HOME' when searching configuration
+          files
+        * Correctly ascend to parent directory when searching
+          configuration files
+
+   * API changes:
+
+        * Rename 'config' cell to 'config-file'
+        * Allow to pass the result of 'config-file' cells as single
+          argument
+        * Add support for evaluating Lisp forms in syntax checker
+          commands (https://github.com/lunaryorn/flycheck/issues/86)
+
+
+File: flycheck.info,  Node: master,  Prev: 0.7.1,  Up: Changes
+
+master (unreleased)
+===================
+
+   * New syntax checkers:
+
+        * Go using 'gofmt'
+          (https://github.com/lunaryorn/flycheck/issues/91)
+
+   * New features:
+
+        * Add support for syntax checker options
+          (https://github.com/lunaryorn/flycheck/issues/72)
+        * Add option for the coding standard used by the 'php-phpcs'
+          syntax checker
+        * Add options for the maximum McCabe complexity and the maximum
+          line length to 'python-flake8'
+
+   * Improvements:
+
+        * Support McCabe warnings in 'python-flake8'
+        * Support warnings from 'flake8' 2
+
+
+File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
+
+Appendix B Credits
 ******************
 
 The following people contributed to Flycheck.  Their help and ideas,
@@ -1274,7 +1554,7 @@ their support and patches are greatly appreciated.
 
 File: flycheck.info,  Node: GNU Free Documentation License,  Next: Syntax checkers,  Prev: Credits,  Up: Top
 
-Appendix B GNU Free Documentation License
+Appendix C GNU Free Documentation License
 *****************************************
 
                      Version 1.3, 3 November 2008
@@ -1756,7 +2036,7 @@ their use in free software.
 
 File: flycheck.info,  Node: Syntax checkers,  Next: Function and Variable Index,  Prev: GNU Free Documentation License,  Up: Top
 
-Appendix C Available syntax checkers
+Appendix D Available syntax checkers
 ************************************
 
 The following syntax checkers are included in Flycheck, listed in the
@@ -1833,37 +2113,48 @@ Function and Variable Index
 
 Tag Table:
 Node: Top689
-Node: Introduction1941
-Node: Features2732
-Node: Installation3643
-Node: Activation4817
-Node: Usage5142
-Node: Syntax checking5765
-Node: Selection7027
-Node: Configuration9608
-Node: Reporting12276
-Node: Navigation14554
-Node: Mode line15601
-Node: Extending16502
-Node: Declaration17101
-Node: Error parsers28155
-Node: Option filters29139
-Node: Examples29478
-Node: Simple example29910
-Node: Predicate example32974
-Node: Configuration example34955
-Node: Chaining example37614
-Node: API39000
-Node: Error API39788
-Node: Error parser API42389
-Node: Contribution42615
-Node: Reporting issues43291
-Node: Contributing syntax checkers44027
-Node: Contributing code44822
-Node: Unit tests46162
-Node: Credits47595
-Node: GNU Free Documentation License49297
-Node: Syntax checkers74449
-Node: Function and Variable Index75314
+Node: Introduction1993
+Node: Features2784
+Node: Installation3695
+Node: Activation4869
+Node: Usage5194
+Node: Syntax checking5817
+Node: Selection7079
+Node: Configuration9660
+Node: Reporting12328
+Node: Navigation14606
+Node: Mode line15653
+Node: Extending16554
+Node: Declaration17153
+Node: Error parsers28207
+Node: Option filters29191
+Node: Examples29530
+Node: Simple example29962
+Node: Predicate example33026
+Node: Configuration example35007
+Node: Chaining example37666
+Node: API39052
+Node: Error API39840
+Node: Error parser API42441
+Node: Contribution42667
+Node: Reporting issues43343
+Node: Contributing syntax checkers44079
+Node: Contributing code44874
+Node: Unit tests46214
+Node: Changes47647
+Node: 0.148167
+Node: 0.248451
+Node: 0.348729
+Node: 0.448965
+Node: 0.549740
+Node: 0.650960
+Node: 0.6.153810
+Node: 0.753959
+Node: 0.7.154973
+Node: master55691
+Node: Credits56367
+Node: GNU Free Documentation License58064
+Node: Syntax checkers83216
+Node: Function and Variable Index84081
 
 End Tag Table

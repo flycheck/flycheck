@@ -1,0 +1,397 @@
+This appendix provides a comprehensive changelog of all releases:
+
+@menu
+* master        :: unreleased
+* 0.7.1         :: Feb 23, 2013
+* 0.7           :: Feb 14, 2013
+* 0.6.1         :: Jan 30, 2013
+* 0.6           :: Jan 29, 2013
+* 0.5           :: Dec 28, 2012
+* 0.4           :: Nov 21, 2012
+* 0.3           :: Oct 20, 2012
+* 0.2           :: Oct 15, 2012
+* 0.1           :: Oct 11, 2012
+@end menu
+
+@macro ghissue{number, text}
+@uref{https://github.com/lunaryorn/flycheck/issues/\number\, \text\}
+@end macro
+
+@node 0.1, 0.2, , Changes
+@comment  node-name,  next,  previous,  up
+@unnumberedsec 0.1 (Oct 11, 2012)
+
+Initial release as flymake-checkers
+
+@itemize @bullet
+@item
+New syntax checkers
+
+@itemize @bullet
+@item
+TeX/LaTeX
+@item
+Shell scripts
+@item
+Python
+@item
+Ruby
+@item
+Coffeescript
+@item
+Emacs Lisp
+@end itemize
+
+@end itemize
+
+
+@node 0.2, 0.3, 0.1, Changes
+@comment  node-name,  next,  previous,  up
+@unnumberedsec 0.2 (Oct 15, 2012)
+
+@itemize @bullet
+@item
+New syntax checkers
+
+@itemize @bullet
+@item
+PHP
+@end itemize
+
+@item
+API changes
+
+@itemize @bullet
+@item
+@ghissue{2, Simplify syntax checker declarations}
+@end itemize
+
+@end itemize
+
+@node 0.3, 0.4, 0.2, Changes
+@comment  node-name,  next,  previous,  up
+@unnumberedsec 0.3 (Oct 20, 2012)
+
+@itemize @bullet
+@item
+@ghissue{4, Replace @code{flymake-mode} with a custom syntax checking
+minor mode}
+@end itemize
+
+@node 0.4, 0.5, 0.2, Changes
+@comment  node-name,  next,  previous,  up
+@unnumberedsec 0.4 (Nov 21, 2012)
+
+@itemize @bullet
+@item
+@ghissue{5, Rename the project to Flycheck}
+@item
+New syntax checkers
+
+@itemize @bullet
+@item
+@ghissue{9, HAML}
+@item
+@ghissue{9, CSS}
+@item
+@ghissue{9, Javascript with @command{jsl}}
+@item
+@ghissue{16, Javascript with @command{jshint}}
+@item
+@ghissue{12, JSON}
+@item
+LaTeX with @command{lacheck}
+@end itemize
+
+@item
+Bug fixes
+@itemize @bullet
+@item
+@ghissue{10, Fix type error when checking compressed Emacs Lisp}
+@end itemize
+
+@end itemize
+
+@node 0.5, 0.6, 0.4, Changes
+@comment  node-name,  next,  previous,  up
+@unnumberedsec 0.5 (Dec 28, 2012)
+
+@itemize @bullet
+@item
+New syntax checkers:
+
+@itemize
+@item
+@ghissue{15, SASS}
+@item
+@ghissue{21, Perl}
+@item
+XML
+@item
+@ghissue{30, Lua}
+@end itemize
+
+@item
+New features:
+
+@itemize @bullet
+@item
+@ghissue{25, Support manual buffer-local selection of syntax checker}
+@item
+@ghissue{28, Add customizable error indicators}
+@item
+@ghissue{27, Echo error messages at point without 3rd-party libraries
+like flymake-cursor}
+@end itemize
+
+@item
+Improvements:
+
+@itemize @bullet
+@item
+@ghissue{24, Remember the last automatically selected syntax checker}
+@end itemize
+
+@item
+Bug fixes:
+
+@itemize @bullet
+@item
+@ghissue{19, Fix syntax checking of buffers without backing files}
+@end itemize
+
+@item
+API changes:
+
+@itemize @bullet
+@item
+@ghissue{15, Replace underlying Flymake API with a custom syntax
+checking implementation}
+@end itemize
+
+@end itemize
+
+@node 0.6, 0.6.1, 0.5, Changes
+@comment  node-name,  next,  previous,  up
+@unnumberedsec 0.6 (Jan 29, 2013)
+
+@itemize @bullet
+@item
+New syntax checkers:
+
+@itemize @bullet
+@item
+@ghissue{53, Emacs Lisp with @code{checkdoc-current-buffer}}
+@item
+@ghissue{72, PHP with PHP CodeSniffer}
+@end itemize
+
+@item
+Removed syntax checkers:
+
+@itemize
+@item
+Javascript with @command{jsl}
+@end itemize
+
+@item
+New features:
+
+@itemize @bullet
+@item
+@ghissue{26, Error navigation with @code{next-error} and
+@code{previous-error}}
+@item
+@ghissue{33, Fringe icons instead of error indicators}
+@item
+@ghissue{59, Menu entry for Flycheck}
+@item
+@ghissue{35, Customizable error highlighting@comma{} taking the column
+number into account}
+@item
+Configuration files for syntax checkers
+@item
+Add configuration file support to the syntax checkers
+@code{coffee-coffeelint}, @code{html-tidy}, @code{javascript-jshint},
+@code{pyton-flake8} and @code{tex-chktex}
+@item
+@ghissue{58, Allow to compile a buffer with a syntax checker for testing
+purposes}
+@item
+@ghissue{31, Use multiple syntax checkers during a syntax check}
+@item
+@ghissue{52, Add dedicated help for syntax checkers}
+@end itemize
+
+@item
+Improvements:
+
+@itemize @bullet
+@item
+@ghissue{55, Match error patterns in order of declaration}
+@end itemize
+
+@item
+Bug fixes:
+
+@itemize @bullet
+@item
+@ghissue{24, Inherit highlighting faces from built-in faces}
+@item
+@ghissue{36, Correct error patterns of the HTML syntax checker}
+@item
+@ghissue{42, Detect syntax errors in the @code{python-flake8} syntax
+checker}
+@item
+Fix various regressions after introducing unit tests
+@item
+@ghissue{45, Inhibit syntax checking during package installation}
+@item
+@ghissue{54, Disable syntax checking in Tramp buffers}
+@item
+@ghissue{65, Preserve whitespace in error messages}
+@end itemize
+
+@item
+API changes:
+@itemize
+@item
+@ghissue{41, Replace syntax checker variables with syntax checker
+declarations}
+@item
+@ghissue{38, Support parsing errors with arbitrary functions instead of
+error patterns}
+@item
+@ghissue{38, Add an error parser for Checkstyle-like XML output}
+@end itemize
+
+@end itemize
+
+@node 0.6.1, 0.7, 0.6, Changes
+@comment  node-name,  next,  previous,  up
+@unnumberedsec 0.6.1 (Jan 30, 2013)
+
+@itemize @bullet
+@item
+Fix package dependencies
+@end itemize
+
+@node 0.7, 0.7.1, 0.6.1, Changes
+@comment  node-name,  next,  previous,  up
+@unnumberedsec 0.7 (Feb 14, 2013)
+
+@itemize @bullet
+@item
+New features:
+
+@itemize @bullet
+@item
+Navigate to source of syntax checker declarations from syntax checker
+help
+@item
+@ghissue{60, Add online Info manual}
+@end itemize
+
+@item
+Improvements:
+
+@itemize @bullet
+@item
+Use pipes instead of TTYs to read output from syntax checkers
+@item
+@ghissue{80, Defer syntax checks for invisible buffers}
+@item
+@ghissue{62, Immediately display error messages after error navigation}
+@end itemize
+
+@item
+Bug fixes:
+
+@itemize @bullet
+@item
+Never select deleted buffers
+@item
+Do not let the debugger interfere with necessary cleanup actions
+@item
+@ghissue{78, Do not attempt to parse empty XML trees}
+@item
+@ghissue{81, Fix infinite recursion on Windows}
+@end itemize
+
+@end itemize
+
+@node 0.7.1, master, 0.7, Changes
+@comment  node-name,  next,  previous,  up
+@unnumberedsec 0.7.1 (Feb 23, 2013)
+
+@itemize @bullet
+@item
+Bug fixes:
+
+@itemize @bullet
+@item
+@ghissue{87, Do not signal errors from @code{flycheck-mode}}
+@item
+Correctly fall back to @env{HOME} when searching configuration files
+@item
+Correctly ascend to parent directory when searching configuration files
+@end itemize
+
+@item
+API changes:
+
+@itemize @bullet
+@item
+Rename @code{config} cell to @code{config-file}
+@item
+Allow to pass the result of @code{config-file} cells as single argument
+@item
+@ghissue{86, Add support for evaluating Lisp forms in syntax checker
+commands}
+@end itemize
+
+@end itemize
+
+@node master, , 0.7.1, Changes
+@comment  node-name,  next,  previous,  up
+@unnumberedsec master (unreleased)
+
+@itemize @bullet
+@item
+New syntax checkers:
+
+@itemize @bullet
+@item
+@ghissue{91, Go using @command{gofmt}}
+@end itemize
+
+@item
+New features:
+
+@itemize @bullet
+@item
+@ghissue{72, Add support for syntax checker options}
+@item
+Add option for the coding standard used by the @code{php-phpcs} syntax
+checker
+@item
+Add options for the maximum McCabe complexity and the maximum line
+length to @code{python-flake8}
+@end itemize
+
+@item
+Improvements:
+
+@itemize @bullet
+@item
+Support McCabe warnings in @code{python-flake8}
+@item
+Support warnings from @command{flake8} 2
+@end itemize
+
+@end itemize
+
+@c Local Variables:
+@c mode: texinfo
+@c TeX-master: "flycheck"
+@c End:
