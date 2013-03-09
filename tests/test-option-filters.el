@@ -22,7 +22,7 @@
 
 ;;; Commentary
 
-;; Test error parsers
+;; Test option filters
 
 ;;; Code:
 
