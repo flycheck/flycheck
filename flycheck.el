@@ -320,6 +320,12 @@ buffer manually.
 
     (flycheck-teardown))))
 
+;; Add Flycheck Mode as customization option to basic modes
+;;;###autoload
+(custom-add-option 'text-mode-hook #'flycheck-mode)
+;;;###autoload
+(custom-add-option 'prog-mode-hook #'flycheck-mode)
+
 (defun flycheck-handle-change (beg end _len)
   "Handle a buffer change between BEG and END.
 
