@@ -1,6 +1,6 @@
-The following syntax checkers are included in Flycheck.  Use @kbd{M-x
-flycheck-describe-checker} to get help for the syntax checker under
-point.
+The following syntax checkers are included in Flycheck, listed in the
+order of their appearance in the default value of
+@code{flycheck-checkers}:
 
 @itemize
 @iflyc bash
@@ -28,6 +28,9 @@ point.
 @iflyc xml-xmlstarlet
 @iflyc zsh
 @end itemize
+
+Use @kbd{M-x flycheck-describe-checker} in this buffer to get help for
+the syntax checker under point.
 
 @c Local Variables:
 @c mode: texinfo

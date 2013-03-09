@@ -1727,9 +1727,8 @@ File: flycheck.info,  Node: Syntax checkers,  Next: Function and Variable Index,
 Appendix C Available syntax checkers
 ************************************
 
-The following syntax checkers are included in Flycheck.  Use 'M-x
-flycheck-describe-checker' to get help for the syntax checker under
-point.
+The following syntax checkers are included in Flycheck, listed in the
+order of their appearance in the default value of 'flycheck-checkers':
 
    * 'bash'
    * 'coffee-coffeelint'
@@ -1755,6 +1754,9 @@ point.
    * 'tex-lacheck'
    * 'xml-xmlstarlet'
    * 'zsh'
+
+   Use 'M-x flycheck-describe-checker' in this buffer to get help for
+the syntax checker under point.
 
 
 File: flycheck.info,  Node: Function and Variable Index,  Prev: Syntax checkers,  Up: Top
@@ -1822,6 +1824,6 @@ Node: Unit tests45007
 Node: Credits46440
 Node: GNU Free Documentation License48142
 Node: Syntax checkers73294
-Node: Function and Variable Index74056
+Node: Function and Variable Index74159
 
 End Tag Table
