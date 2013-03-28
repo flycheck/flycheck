@@ -235,7 +235,7 @@ running checks, and empty all variables used by flycheck."
   (flycheck-clean-deferred-check)
   (flycheck-clear)
   (flycheck-stop-checker)
-  (flycheck-cancel-error-display-timer)
+  (flycheck-cancel-error-show-error-timer)
   (flycheck-post-syntax-check-cleanup)
   (flycheck-clear-checker))
 
@@ -1854,19 +1854,19 @@ The minibuffer is considered free if the minibuffer is not active
 and the cursor is not in the minibuffer."
   (and (not (active-minibuffer-window)) (not cursor-in-echo-area)))
 
-(defvar-local flycheck-error-display-timer nil
+(defvar-local flycheck-error-show-error-timer nil
   "Timer to automatically show the error at point in minibuffer.")
 
-(defun flycheck-cancel-error-display-timer ()
+(defun flycheck-cancel-error-show-error-timer ()
   "Cancel the error display timer for the current buffer."
-  (when flycheck-error-display-timer
-    (cancel-timer flycheck-error-display-timer)
-    (setq flycheck-error-display-timer nil)))
+  (when flycheck-error-show-error-timer
+    (cancel-timer flycheck-error-show-error-timer)
+    (setq flycheck-error-show-error-timer nil)))
 
 (defun flycheck-show-error-at-point ()
   "Show the first error message at point in minibuffer."
   (interactive)
-  (flycheck-cancel-error-display-timer)
+  (flycheck-cancel-error-show-error-timer)
   (when flycheck-mode
     (if (flycheck-may-show-message)
         (let ((message (car (flycheck-overlay-messages-at (point)))))
@@ -1880,9 +1880,9 @@ and the cursor is not in the minibuffer."
   "Show the first error message at point in minibuffer asap.
 
 Show the error message at point in minibuffer after a short delay."
-  (flycheck-cancel-error-display-timer)
+  (flycheck-cancel-error-show-error-timer)
   (when (flycheck-overlays-at (point))
-    (setq flycheck-error-display-timer
+    (setq flycheck-error-show-error-timer
           (run-at-time 0.9 nil 'flycheck-show-error-at-point))))
 
 
