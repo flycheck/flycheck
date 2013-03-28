@@ -387,6 +387,8 @@ Improvements:
 Support McCabe warnings in @code{python-flake8}
 @item
 Support warnings from @command{flake8} 2
+@item
+@ghissue{94, Show long error messages in a popup buffer}
 @end itemize
 
 @end itemize

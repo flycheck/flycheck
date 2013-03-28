@@ -1845,15 +1845,6 @@ IF RESET is t, move to beginning of buffer first."
 
 
 ;;;; Error message echoing
-(defun flycheck-may-show-message ()
-  "Determine whether the minibuffer is free to show a message.
-
-Return t if the minibuffer is free to show message or nil otherwise.
-
-The minibuffer is considered free if the minibuffer is not active
-and the cursor is not in the minibuffer."
-  (and (not (active-minibuffer-window)) (not cursor-in-echo-area)))
-
 (defvar-local flycheck-error-show-error-timer nil
   "Timer to automatically show the error at point in minibuffer.")
 
@@ -1868,13 +1859,9 @@ and the cursor is not in the minibuffer."
   (interactive)
   (flycheck-cancel-error-show-error-timer)
   (when flycheck-mode
-    (if (flycheck-may-show-message)
-        (let ((message (car (flycheck-overlay-messages-at (point)))))
-          (if message
-              (message "%s" message)
-            (message nil)))
-      ;; Try again if the minibuffer is busy at the moment
-      (flycheck-show-error-at-point-soon))))
+    (let ((message (car (flycheck-overlay-messages-at (point)))))
+      (when message
+        (display-message-or-buffer message "*Flycheck errors*")))))
 
 (defun flycheck-show-error-at-point-soon ()
   "Show the first error message at point in minibuffer asap.

@@ -1,4 +1,4 @@
-This is flycheck.info, produced by makeinfo version 5.0 from
+This is flycheck.info, produced by makeinfo version 5.1 from
 flycheck.texi.
 
 This manual is for Flycheck.
@@ -1506,6 +1506,8 @@ master (unreleased)
 
         * Support McCabe warnings in 'python-flake8'
         * Support warnings from 'flake8' 2
+        * Show long error messages in a popup buffer
+          (https://github.com/lunaryorn/flycheck/issues/94)
 
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
@@ -2152,9 +2154,9 @@ Node: 0.6.153810
 Node: 0.753959
 Node: 0.7.154973
 Node: master55691
-Node: Credits56367
-Node: GNU Free Documentation License58064
-Node: Syntax checkers83216
-Node: Function and Variable Index84081
+Node: Credits56480
+Node: GNU Free Documentation License58177
+Node: Syntax checkers83329
+Node: Function and Variable Index84194
 
 End Tag Table
