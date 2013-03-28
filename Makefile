@@ -9,6 +9,7 @@ SRCS = flycheck.el
 OBJECTS = $(SRCS:.el=.elc)
 
 DOC_SRCS = doc/api.texi \
+	doc/changes.texi \
 	doc/checkers.texi \
 	doc/contribution.texi \
 	doc/credits.texi \
