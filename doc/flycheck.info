@@ -1508,6 +1508,8 @@ master (unreleased)
         * Support warnings from 'flake8' 2
         * Show long error messages in a popup buffer
           (https://github.com/lunaryorn/flycheck/issues/94)
+        * Show all error messages at point
+          (https://github.com/lunaryorn/flycheck/issues/96)
 
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
@@ -2154,9 +2156,9 @@ Node: 0.6.153810
 Node: 0.753959
 Node: 0.7.154973
 Node: master55691
-Node: Credits56480
-Node: GNU Free Documentation License58177
-Node: Syntax checkers83329
-Node: Function and Variable Index84194
+Node: Credits56583
+Node: GNU Free Documentation License58280
+Node: Syntax checkers83432
+Node: Function and Variable Index84297
 
 End Tag Table

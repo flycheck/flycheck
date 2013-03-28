@@ -1816,6 +1816,10 @@ flycheck exclamation mark otherwise.")
   "Return a list of all flycheck messages overlayed at POS."
   (--map (overlay-get it 'help-echo) (flycheck-overlays-at pos)))
 
+(defun flycheck-overlay-messages-string-at (pos)
+  "Return a single string containing all error messages at POS."
+  (s-join "\n\n" (flycheck-overlay-messages-at pos)))
+
 (defun flycheck-remove-overlays ()
   "Remove all flycheck overlays in the current buffer."
   (remove-overlays (point-min) (point-max) 'flycheck-overlay t))
@@ -1859,9 +1863,9 @@ IF RESET is t, move to beginning of buffer first."
   (interactive)
   (flycheck-cancel-error-show-error-timer)
   (when flycheck-mode
-    (let ((message (car (flycheck-overlay-messages-at (point)))))
-      (when message
-        (display-message-or-buffer message "*Flycheck errors*")))))
+    (let ((error-messages (flycheck-overlay-messages-string-at (point))))
+      (when error-messages
+        (display-message-or-buffer error-messages "*Flycheck errors*")))))
 
 (defun flycheck-show-error-at-point-soon ()
   "Show the first error message at point in minibuffer asap.
