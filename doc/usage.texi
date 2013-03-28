@@ -245,7 +245,8 @@ Customize these with @kbd{M-x customize-group RET flycheck-options}.
 Errors and warnings from a syntax checker are
 @itemize
 @item
-reported in the mode line,
+reported in the mode line or in a popup buffer, depending on the length
+of the error messages,
 @item
 indicated by fringe icons,
 @item
@@ -282,7 +283,7 @@ highlighted, regardless of whether the error is actually specific to a
 column.  Column information is hence ignored.
 
 If set to @code{nil} highlighting is completely disabled.  Errors will
-only be reported via fringe icons and in the mode line.
+only be reported via fringe icons and error message popups.
 
 Note that this variable does @emph{not} affect error @emph{navigation}.
 @code{next-error} and @code{previous-error} always jump to the error
