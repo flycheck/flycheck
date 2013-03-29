@@ -2300,6 +2300,8 @@ See URL `http://pypi.python.org/pypi/flake8'."
      warning)                           ; Flake8 < 2.0
     ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:C[0-9]+.*\\)$"
      warning)                           ; McCabe complexity in Flake8 > 2.0
+    ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:N[0-9]+.*\\)$"
+     warning)                           ; pep8-naming Flake8 plugin.
     ;; Syntax errors in Flake8 < 2.0, in Flake8 >= 2.0 syntax errors are caught
     ;; by the E.* pattern above
     ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))

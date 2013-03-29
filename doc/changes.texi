@@ -391,6 +391,8 @@ Support warnings from @command{flake8} 2
 @ghissue{94, Show long error messages in a popup buffer}
 @item
 @ghissue{96, Show all error messages at point}
+@item
+@ghissue{98, Add support for naming warings from @command{flake8} 2}
 @end itemize
 
 @end itemize

@@ -1511,6 +1511,8 @@ master (unreleased)
           (https://github.com/lunaryorn/flycheck/issues/94)
         * Show all error messages at point
           (https://github.com/lunaryorn/flycheck/issues/96)
+        * Add support for naming warings from 'flake8' 2
+          (https://github.com/lunaryorn/flycheck/issues/98)
 
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
@@ -2157,9 +2159,9 @@ Node: 0.6.153887
 Node: 0.754036
 Node: 0.7.155050
 Node: master55768
-Node: Credits56660
-Node: GNU Free Documentation License58357
-Node: Syntax checkers83509
-Node: Function and Variable Index84374
+Node: Credits56777
+Node: GNU Free Documentation License58474
+Node: Syntax checkers83626
+Node: Function and Variable Index84491
 
 End Tag Table
