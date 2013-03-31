@@ -115,9 +115,9 @@
       (python-mode))
     (flycheck-buffer-sync)
     (flycheck-should-errors
-     '(6 7 "N801 class names should use CapWords convention" error)
-     '(7 9 "N802 function name should be lowercase" error)
-     '(8 9 "N806 variable in function should be lowercase" error))))
+     '(6 7 "N801 class names should use CapWords convention" warning)
+     '(7 9 "N802 function name should be lowercase" warning)
+     '(8 9 "N806 variable in function should be lowercase" warning))))
 
 ;; Local Variables:
 ;; coding: utf-8
