@@ -107,6 +107,18 @@
     (flycheck-should-errors
      '(5 51 "E501 line too long (61 > 50 characters)" error))))
 
+(ert-deftest checker-python-flake8-pep8-naming ()
+  "PEP8 compliant names with Flake8 and pep8-naming."
+  :expected-result (flycheck-fail-unless-checker 'python-flake8)
+  (flycheck-with-resource-buffer "test-python/pep8-naming.py"
+    (let ((python-indent-guess-indent-offset nil))
+      (python-mode))
+    (flycheck-buffer-sync)
+    (flycheck-should-errors
+     '(6 7 "N801 class names should use CapWords convention" error)
+     '(7 9 "N802 function name should be lowercase" error)
+     '(8 9 "N806 variable in function should be lowercase" error))))
+
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:
