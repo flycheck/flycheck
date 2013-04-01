@@ -1,4 +1,4 @@
-;;; test-selection.el --- Tests for deferred checking API -*- lexical-binding: t; -*-
+;;; test-deferred-check.el --- Tests for deferred checking API -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
@@ -64,4 +64,4 @@
 ;; coding: utf-8
 ;; End:
 
-;;; checkers-selection.el ends here
+;;; checkers-deferred-check.el ends here
