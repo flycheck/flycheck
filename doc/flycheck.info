@@ -1537,6 +1537,8 @@ master (unreleased)
           (https://github.com/lunaryorn/flycheck/issues/96)
         * Add support for naming warings from 'flake8' 2
           (https://github.com/lunaryorn/flycheck/issues/98)
+        * Flycheck mode is not longer enabled for buffers whose names
+          start with a space
 
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
@@ -2188,9 +2190,9 @@ Node: 0.6.154636
 Node: 0.754785
 Node: 0.7.155799
 Node: master56517
-Node: Credits57526
-Node: GNU Free Documentation License59350
-Node: Syntax checkers84502
-Node: Function and Variable Index85367
+Node: Credits57625
+Node: GNU Free Documentation License59449
+Node: Syntax checkers84601
+Node: Function and Variable Index85466
 
 End Tag Table

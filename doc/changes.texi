@@ -393,6 +393,8 @@ Support warnings from @command{flake8} 2
 @ghissue{96, Show all error messages at point}
 @item
 @ghissue{98, Add support for naming warings from @command{flake8} 2}
+@item
+Flycheck mode is not longer enabled for buffers whose names start with a space
 @end itemize
 
 @end itemize

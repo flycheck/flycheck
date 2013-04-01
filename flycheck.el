@@ -261,7 +261,8 @@ conditions:
 - The buffer file is loaded with Tramp.
 
 Return t if Flycheck mode may be enabled, and nil otherwise."
-  (and (not (flycheck-tramp-file-p (buffer-file-name)))
+  (and (not (s-starts-with? (buffer-name) " "))
+       (not (flycheck-tramp-file-p (buffer-file-name)))
        (flycheck-get-checker-for-buffer)))
 
 ;;;###autoload
