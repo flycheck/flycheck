@@ -206,6 +206,8 @@ overlay setup)."
     (define-key pmap "c" 'flycheck-buffer)
     (define-key pmap "C" 'flycheck-clear)
     (define-key pmap (kbd "C-c") 'flycheck-compile)
+    (define-key pmap "n" 'flycheck-next-error)
+    (define-key pmap "p" 'flycheck-previous-error)
     (define-key pmap "s" 'flycheck-select-checker)
     (define-key pmap "?" 'flycheck-describe-checker)
     (define-key pmap "i" 'flycheck-info)
@@ -218,6 +220,9 @@ overlay setup)."
  '(["Check current buffer" flycheck-buffer t]
    ["Clear errors in buffer" flycheck-clear t]
    ["Compile current buffer" flycheck-compile t]
+   "---"
+   ["Go to next error" flycheck-next-error t]
+   ["Go to next error" flycheck-previous-error t]
    "---"
    ["Select syntax checker" flycheck-select-checker t]
    "---"
@@ -1826,26 +1831,42 @@ flycheck exclamation mark otherwise.")
 
 
 ;;;; Error navigation
-(defun flycheck-next-error (no-errors reset)
-  "Advance NO-ERRORS, optionally RESET before.
+(defun flycheck-next-error (&optional n reset)
+  "Visit the N-th error from the current point.
 
-NO-ERRORS is a number specifying how many errors to move forward.
-IF RESET is t, move to beginning of buffer first."
-  (when reset
-    (goto-char (point-min)))
+If RESET is given and non-nil, re-start from the beginning of the buffer.
+
+N specifies how many errors to move forwards.  If negative, move backwards."
+  (interactive "P")
   ;; TODO: Horribly inefficient, possibly improve by considering less errors.
-  (let* ((err-positions (-map 'flycheck-error-pos flycheck-current-errors))
-         ;; Remove the current point for the errors because we don't want to
-         ;; navigate to the current error again
-         (navigatable-errors (--remove (= (point) it) err-positions))
-         (splitted (--split-with (>= (point) it) navigatable-errors))
-         (pos-before (nreverse (car splitted)))
-         (pos-after (cadr splitted))
-         (positions (if (< no-errors 0) pos-before pos-after))
-         (pos (nth (- (abs no-errors) 1) positions)))
-    (if pos
-        (goto-char pos)
+  (let* ((n (or n 1))
+         (current-pos (if reset (point-min) (point)))
+         (before-and-after (->> flycheck-current-errors
+                             (-map 'flycheck-error-pos)
+                             (--remove (= current-pos it))
+                             (--split-with (>= current-pos it))))
+         (before (nreverse (car before-and-after)))
+         (after (cadr before-and-after))
+         (error-pos (nth-value (- (abs n) 1) (if (< n 0) before after))))
+    (if error-pos
+        (goto-char error-pos)
       (user-error "No more Flycheck errors"))))
+
+(defun flycheck-previous-error (&optional n)
+  "Visit the N-th previous error.
+
+If given, N specifies the number of errors to move backwards.  If
+N is negative, move forwards instead."
+  (interactive "P")
+  (flycheck-next-error (- (or n 1))))
+
+(defun flycheck-first-error (&optional n)
+  "Visit the N-th error from beginning of the buffer.
+
+If given, N specifies the number of errors to move forward from
+the beginning of the buffer."
+  (interactive "P")
+  (flycheck-next-error n :reset))
 
 
 ;;;; Error message echoing

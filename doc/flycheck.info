@@ -404,22 +404,46 @@ File: flycheck.info,  Node: Navigation,  Next: Mode line,  Prev: Reporting,  Up:
 2.5 Error navigation
 ====================
 
-Use 'M-g n' ('next-error') and 'M-g p' ('previous-error') to navigate
-between Flycheck warnings and errors in the current buffer.  *Note
-(emacs)Compilation Mode::, for more information about these commands.
+Flycheck supports the standard error navigation commands of Emacs.  If
+no compilation buffer (including those from 'M-x compile', 'M-x grep',
+'M-x occur', etc.)  is visible, 'M-g n' ('next-error') and 'M-g p'
+('previous-error') will navigate between Flycheck warnings and errors in
+the current buffer.  *Note (emacs)Compilation Mode::, for more
+information about these commands.
 
-   Note that as Flycheck integrates itself into the standard error
-navigation provided by Compilation Mode, _visible_ compilation buffers
-take preference over buffers with Flycheck errors.  This includes
-buffers from 'M-x compile', 'M-x grep' and generally all buffers with
-Compilation Mode or Compilation Minor Mode.
-
-   If such a buffer is visible, 'M-g n' and 'M-g p' will ignore Flycheck
+   Visible compilation buffers take precedence over Flycheck navigation.
+If such a buffer is visible, 'M-g n' and 'M-g p' will ignore Flycheck
 errors and warnings, and navigate errors (or generally results) reported
-by that buffer instead.  To navigation Flycheck errors again, hide the
-buffer, e.g.  with 'C-x 1'.
+by the compilation buffer instead.
 
-   Error navigation jumps to the error column, or to the first
+   To address this issue, Flycheck provides independent error navigation
+commands:
+
+'C-c ! n'
+'M-x flycheck-next-error'
+     Jump to the next Flycheck error.
+
+     With prefix argument, jump forwards by as many errors as specified
+     by the prefix argument, e.g.  'M-3 C-c ! n' will move to the 3rd
+     error from the current point.
+
+'C-c ! p'
+'M-x flycheck-previous-error'
+     Jump to the previous Flycheck error.
+
+     With prefix argument, jump backwards by as many errors as specified
+     by the prefix argument, e.g.  'M-3 C-c ! p' will move to the 3rd
+     previous error from the current point.
+
+'M-x flycheck-first-error'
+     Jump to the first Flycheck error.
+
+     With prefix argument, jump forwards to by as many errors as
+     specified by the prefix argument, e.g.  'M-3 M-x
+     flycheck-first-error' moves to the 3rd error from the beginning of
+     the buffer.
+
+   Error navigation jumps to the exact error column, or to the first
 non-whitespace character of a line if the error is not specific to a
 column.
 
@@ -2113,8 +2137,10 @@ Function and Variable Index
 * flycheck-has-errors-p:                 Error API.           (line  76)
 * flycheck-highlighting-mode:            Reporting.           (line  28)
 * flycheck-jshintrc:                     Configuration.       (line  34)
+* flycheck-next-error:                   Navigation.          (line  23)
 * flycheck-parse-xml-string:             Error parser API.    (line   6)
 * flycheck-phpcs-standard:               Configuration.       (line  18)
+* flycheck-previous-error:               Navigation.          (line  31)
 * flycheck-select-checker:               Selection.           (line  32)
 * flycheck-tidyrc:                       Configuration.       (line  37)
 * flycheck-warning-face:                 Reporting.           (line  15)
@@ -2133,38 +2159,38 @@ Node: Selection7079
 Node: Configuration9660
 Node: Reporting12328
 Node: Navigation14683
-Node: Mode line15730
-Node: Extending16631
-Node: Declaration17230
-Node: Error parsers28284
-Node: Option filters29268
-Node: Examples29607
-Node: Simple example30039
-Node: Predicate example33103
-Node: Configuration example35084
-Node: Chaining example37743
-Node: API39129
-Node: Error API39917
-Node: Error parser API42518
-Node: Contribution42744
-Node: Reporting issues43420
-Node: Contributing syntax checkers44156
-Node: Contributing code44951
-Node: Unit tests46291
-Node: Changes47724
-Node: 0.148244
-Node: 0.248528
-Node: 0.348806
-Node: 0.449042
-Node: 0.549817
-Node: 0.651037
-Node: 0.6.153887
-Node: 0.754036
-Node: 0.7.155050
-Node: master55768
-Node: Credits56777
-Node: GNU Free Documentation License58601
-Node: Syntax checkers83753
-Node: Function and Variable Index84618
+Node: Mode line16479
+Node: Extending17380
+Node: Declaration17979
+Node: Error parsers29033
+Node: Option filters30017
+Node: Examples30356
+Node: Simple example30788
+Node: Predicate example33852
+Node: Configuration example35833
+Node: Chaining example38492
+Node: API39878
+Node: Error API40666
+Node: Error parser API43267
+Node: Contribution43493
+Node: Reporting issues44169
+Node: Contributing syntax checkers44905
+Node: Contributing code45700
+Node: Unit tests47040
+Node: Changes48473
+Node: 0.148993
+Node: 0.249277
+Node: 0.349555
+Node: 0.449791
+Node: 0.550566
+Node: 0.651786
+Node: 0.6.154636
+Node: 0.754785
+Node: 0.7.155799
+Node: master56517
+Node: Credits57526
+Node: GNU Free Documentation License59350
+Node: Syntax checkers84502
+Node: Function and Variable Index85367
 
 End Tag Table
