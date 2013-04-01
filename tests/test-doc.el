@@ -29,10 +29,19 @@
 (require 'ert)
 (require 'flycheck)
 
+(defmacro flycheck-with-doc-buffer (doc-file &rest body)
+  "Create a temp buffer from DOC-FILE and execute BODY."
+  (declare (indent 1))
+  `(let* ((filename (expand-file-name (concat "../doc/" ,doc-file)
+                                      testsuite-dir)))
+     (should (file-exists-p filename))
+     (with-temp-buffer
+       (insert-file-contents filename)
+       ,@body)))
 
 (ert-deftest doc-all-checkers-documented ()
   "Test that all registered checkers are documented in the Flycheck manual."
-  (flycheck-with-resource-buffer "../doc/checkers.texi"
+  (flycheck-with-doc-buffer "checkers.texi"
     ;; Search for the beginning of the list of checkers
     (re-search-forward "@itemize")
     (dolist (checker flycheck-checkers)
@@ -47,7 +56,7 @@
   (let ((config-vars (sort (-flatten (-keep #'flycheck-checker-option-vars
                                             (flycheck-declared-checkers)))
                            #'string<)))
-    (flycheck-with-resource-buffer "../doc/usage.texi"
+    (flycheck-with-doc-buffer "usage.texi"
       ;; Go to the beginning of the configuration section
       (re-search-forward "@node Configuration")
       ;; Go to the beginning of the option variable listing
@@ -62,7 +71,7 @@
   (let ((option-file-vars (sort (-keep #'flycheck-checker-config-file-var
                                        (flycheck-declared-checkers))
                                 #'string<)))
-    (flycheck-with-resource-buffer "../doc/usage.texi"
+    (flycheck-with-doc-buffer "usage.texi"
       ;; Go to the beginning of the configuration section
       (re-search-forward "@node Configuration")
       ;; Go to the beginning of the option variable listing

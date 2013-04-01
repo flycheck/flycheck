@@ -39,7 +39,7 @@
 Select two different checkers and test that each one is properly
 executed, and has its errors reported."
   :expected-result (flycheck-fail-unless-checkers 'python-pylint 'python-flake8)
-  (flycheck-with-resource-buffer "test-python/unused-import.py"
+  (flycheck-with-resource-buffer "unused-import.py"
     (python-mode)
     (set (make-local-variable 'flycheck-checkers) '(python-pylint))
     (should (-all? 'flycheck-may-use-checker flycheck-checkers))
@@ -61,7 +61,7 @@ executed, and has its errors reported."
 Select a checker that is not usable in a buffer, and test that an
 error is signaled on all subsequent checks."
   :expected-result (flycheck-fail-unless-checkers 'python-pylint 'bash)
-  (flycheck-with-resource-buffer "test-python/unused-import.py"
+  (flycheck-with-resource-buffer "unused-import.py"
     (python-mode)
     (set (make-local-variable 'flycheck-checkers) '(python-pylint))
     (should (not flycheck-checker))
@@ -90,7 +90,7 @@ Have Flycheck select a checker automatically, then change the
 list of registered checkers, and test that a new checker is
 selected."
   :expected-result (flycheck-fail-unless-checkers 'python-pylint 'python-flake8)
-  (flycheck-with-resource-buffer "test-python/unused-import.py"
+  (flycheck-with-resource-buffer "unused-import.py"
     (python-mode)
     (set (make-local-variable 'flycheck-checkers) '(python-pylint python-flake8))
     (flycheck-mode)

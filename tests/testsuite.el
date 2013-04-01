@@ -62,6 +62,9 @@
     default-directory)
   "Directory of the test suite.")
 
+(defconst resources-dir (expand-file-name "resources" testsuite-dir)
+  "Directory of test resources.")
+
 (message "Running tests on Emacs %s" emacs-version)
 
 (require 'dash)

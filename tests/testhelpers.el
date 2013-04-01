@@ -217,7 +217,7 @@ Raise an assertion error if the buffer is not clear afterwards."
 If RESOURCE-FILE is a relative file name, it is expanded against
 `testsuite-dir'."
   (declare (indent 1))
-  `(let ((filename (expand-file-name ,resource-file testsuite-dir)))
+  `(let ((filename (expand-file-name ,resource-file resources-dir)))
      (should (file-exists-p filename))
      (with-temp-buffer
        (insert-file-contents filename t)
