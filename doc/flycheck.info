@@ -1558,6 +1558,9 @@ their support and patches are greatly appreciated.
      checkers, contributed important ideas to the design of the checker
      API and engaged in worthwhile discussion to shape this project.
 
+   * Yannick Roehlly (https://github.com/yannick1974) added support for
+     PEP8 naming errors to the Flake8 syntax checker.
+
 
 File: flycheck.info,  Node: GNU Free Documentation License,  Next: Syntax checkers,  Prev: Credits,  Up: Top
 
@@ -2160,8 +2163,8 @@ Node: 0.754036
 Node: 0.7.155050
 Node: master55768
 Node: Credits56777
-Node: GNU Free Documentation License58474
-Node: Syntax checkers83626
-Node: Function and Variable Index84491
+Node: GNU Free Documentation License58601
+Node: Syntax checkers83753
+Node: Function and Variable Index84618
 
 End Tag Table
