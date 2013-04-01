@@ -76,11 +76,9 @@ apt nodejs npm \
     ruby1.9.1
 
 # Install all checker tools
-# HACK: Install Lua mode from repositories, because the MELPA package causes
-# tests to hang on Emacs snapshot
 apt bash \
     tidy \
-    lua5.2 lua-mode \
+    lua5.2 \
     chktex lacheck \
     xmlstarlet \
     zsh \

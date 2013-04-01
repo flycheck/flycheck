@@ -27,11 +27,7 @@
 (require 'ert)
 (require 'flycheck)
 
-(if (flycheck-ci-p)
-    ;; HACK: Use system-wide installation in Vagrant and on Travis.  The MELPA
-    ;; package of lua-mode causes tests to hang in these environments
-    (load "/usr/share/emacs/site-lisp/lua-mode/lua-mode.el")
-  (require 'lua-mode nil t))
+(require 'lua-mode nil t)
 
 (ert-deftest checker-lua-missing-quote ()
   "Test a syntax error with Lua."

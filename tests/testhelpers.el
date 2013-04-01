@@ -65,14 +65,6 @@
 ;; Test helpers
 ;; ------------
 ;;
-;; `flycheck-travis-ci-p' determines whether the tests are running on Travis CI.
-;;
-;; `flycheck-vagrant-p' determines whether the tests are running in the Vagrant
-;; test VM.
-;;
-;; `flycheck-ci-p' determines whether the tests are running in any CI
-;; environment.
-;;
 ;; `flycheck-windows-p' determines whether the tests are running on Windows.
 ;;
 ;; `flycheck-min-emacs-version-p' determines whether Emacs has at least the
@@ -241,28 +233,6 @@ Return `:passed' if all CHECKERS are installed, or `:failed' otherwise."
     :failed))
 
 (defalias 'flycheck-fail-unless-checker 'flycheck-fail-unless-checkers)
-
-(defun flycheck-travis-ci-p ()
-  "Determine whether the testsuite is running on Travis CI.
-
-Return t if so, or nil otherwise.
-
-See URL `http://travis-ci.org'."
-  (string= (getenv "TRAVIS") "true"))
-
-(defun flycheck-vagrant-p ()
-  "Determine whether the testsuite is running inside a Vagrant VM.
-
-Return t if so, or nil otherwise."
-  (string= user-login-name "vagrant"))
-
-(defun flycheck-ci-p ()
-  "Determine whether the testsuite is running in a CI environment.
-
-A CI environment is either Travis CI or Vagrant.
-
-Return t if so, or nil otherwise."
-  (or (flycheck-vagrant-p) (flycheck-travis-ci-p)))
 
 (defun flycheck-windows-p ()
   "Determine whether the testsuite is running on Windows."
