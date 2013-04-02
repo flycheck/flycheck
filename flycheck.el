@@ -72,7 +72,7 @@ buffer-local wherever it is set."
 
 ;;;; Customization
 (defgroup flycheck nil
-  "Check syntax on-the-fly."
+  "On-the-fly syntax checking (aka \"flymake done right\")."
   :prefix "flycheck-"
   :group 'tools)
 
@@ -106,33 +106,35 @@ buffer-local wherever it is set."
     tex-lacheck
     xml-xmlstarlet
     zsh)
-  "Flycheck checkers.
+  "Syntax checkers available for automatic selection.
 
-A list of flycheck checkers to try for the current buffer.
+A list of Flycheck syntax checkers to choose from when syntax
+checking a buffer.  Flycheck will automatically select a suitable
+syntax checker from this list, unless `flycheck-checker' is set,
+either directly or with `flycheck-select-checker'.
 
-If `flycheck-checker' is nil a checker is automatically selected
-from these checkers on every syntax checker.
-
-Syntax checkers are declared with `flycheck-declare-checker'."
+Syntax checkers in this list must be declared with
+`flycheck-declare-checker'."
   :group 'flycheck
   :type '(repeat (symbol :tag "Checker")))
 
 (defvar-local flycheck-checker nil
-  "Checker to use for the current buffer.
+  "Syntax checker to use for the current buffer.
 
-If unset automatically select a suitable checker from
-`flycheck-checkers' on every syntax check.
+If unset or nil, automatically select a suitable syntax checker
+from `flycheck-checkers' on every syntax check.
 
-If set to a checker only use this checker.  If set, checkers are
-never selected automatically from `flycheck-checkers'.  If the
+If set to a syntax checker only use this syntax checker and never
+select one from `flycheck-checkers' automatically.  If the syntax
 checker is unusable in the current buffer an error is signaled.
 
-A checker is a symbol that is declared as checker with
+A syntax checker assigned to this variable must be declared with
 `flycheck-declare-checker'.
 
-Use the command `flycheck-select-checker' to select a checker for
-the current buffer, or set this variable as file local variable
-to always use a specific checker for a file.")
+Use the command `flycheck-select-checker' to select a syntax
+checker for the current buffer, or set this variable as file
+local variable to always use a specific syntax checker for a
+file.")
 (put 'flycheck-checker 'safe-local-variable 'flycheck-registered-checker-p)
 
 (defface flycheck-error-face
@@ -150,7 +152,7 @@ to always use a specific checker for a file.")
                         "0.6")
 
 (defcustom flycheck-highlighting-mode 'columns
-  "The highlighting mode.
+  "The highlighting mode for Flycheck errors and warnings.
 
 Controls how Flycheck highlights errors in buffers.  May either
 be `columns', `lines' or nil.
@@ -258,7 +260,10 @@ running checks, and empty all variables used by flycheck."
 Flycheck mode is not enabled under any of the following
 conditions:
 
-- The buffer file is loaded with Tramp.
+- No suitable syntax checker exists for the current buffer.
+- The current buffer is loaded through Tramp.
+- The current buffer is a temporary buffer (i.e. its name starts
+  with a space).
 
 Return t if Flycheck mode may be enabled, and nil otherwise."
   (and (not (s-starts-with? (buffer-name) " "))
@@ -277,9 +282,11 @@ When called from Lisp, enable `flycheck-mode' if ARG is omitted,
 nil or positive.  If ARG is `toggle', toggle `flycheck-mode'.
 Otherwise behave as if called interactively.
 
+Flycheck mode will not be enabled if `flycheck-may-enable-mode' returns false.
+
 In `flycheck-mode' the buffer is automatically syntax-checked
-using the first suitable checker from `flycheck-checkers'.  Use
-`flycheck-select-checker` to select a checker for the current
+using the first suitable syntax checker from `flycheck-checkers'.
+Use `flycheck-select-checker' to select a checker for the current
 buffer manually.
 
 \\{flycheck-mode-map}"
