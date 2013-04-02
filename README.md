@@ -61,20 +61,15 @@ python-pylint`.
 Usage
 -----
 
-This section provides a short introduction to Flycheck.  For complete
-documentation, including the declaration of new syntax checkers, refer to the
-Info manual of Flycheck.  Open the manual with `C-c ! i`.
+Once installed, enable Flycheck mode with `M-x flycheck-mode`.
 
-Enable `flycheck-mode` in your `init.el` file for all text editing and
-programming modes:
+To enable it for all text editing and programming modes, add the following to
+your `init.el` file:
 
 ```scheme
 (add-hook 'prog-mode-hook 'flycheck-mode)
 (add-hook 'text-mode-hook 'flycheck-mode)
 ```
-
-You may also enable Flycheck manually after visiting a file with `M-x
-flycheck-mode`.
 
 In `flycheck-mode` the buffer is automatically checked on-the-fly.  You can also
 check the buffer manually with `C-c ! c`.
@@ -96,8 +91,7 @@ in the Flycheck info manual.
 
 Errors and warnings from the syntax checker are reported in the mode line,
 highlighted in the buffer and indicated with icons in the fringe.  Customize
-`flycheck-highlighting-mode` to change the highlighting of errors.  Refer to the
-sections *Reporting* and *Mode line* for more information.
+`flycheck-highlighting-mode` to change the highlighting of errors.
 
 **Note:** The default highlighting faces provided GNU Emacs are ill-suited to
 highlight errors.  They are too easily overlooked.  Make sure to customize these
@@ -105,17 +99,12 @@ faces to add a striking background color or an underlying, or choose a color
 theme with reasonable Flycheck faces, for instance the excellent light or dark
 [solarized][] themes.
 
-Use `M-g n` and `M-g p` to navigate between errors.  If the point is on an
-error, the error message is shown in the echo area after a short delay.  You may
-also hover the mouse over a highlighted error to get a tooltip with the error
-message.  See *Reporting* for more information.
+Use `C-c ! n` and `C-c ! p` to navigate between errors.  If the point is on an
+error, the error message is shown in the echo area or in a popup buffer after a
+short delay.  You may also hover the mouse over a highlighted error to get a
+tooltip with the error message.
 
-**Note**: *Visible* compilation buffers take preference over buffers with
-Flycheck errors.  This includes buffers from `M-x compile`, `M-x grep` and
-generally all buffers with Compilation Mode or Compilation Minor Mode enabled.
-If such a buffer is visible `next-error` and `previous-error` will navigate the
-errors (or grep results) reported by this buffer instead.  Hide this buffer
-(e.g. with `delete-other-windows`) to navigate Flycheck errors again.
+Read the complete manual with `C-c ! i` or `M-x flycheck-info`.
 
 
 Credits
