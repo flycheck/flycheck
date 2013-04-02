@@ -118,6 +118,7 @@ The following people contributed to flycheck:
 - [Damon Haley][dhaley] helped to shape and test the PHP CodeSniffer checker.
 - [Jimmy Yuen Ho Wong][wyuenho] added the HTML syntax checker and the jshint
   Javascript checker, and did valuable testing and bug fixing.
+- [Krzysztof Witkowski][kwitek] implemented `eval` support in Flycheck commands.
 - [Marian Schubert][maio] added the Perl syntax checker.
 - [Martin Grenfell][scrooloose] created the awesome Vim library [syntastic][]
   which inspired this project and many of its checkers.
@@ -128,6 +129,8 @@ The following people contributed to flycheck:
 - [Steve Purcell][purcell] implemented many checkers, contributed important
   ideas to the design of the checker API and engaged in worthwhile discussion to
   shape this project.
+- [Yannick Roehlly][yannick1974] added support for PEP8 naming errors to the
+  Flake8 syntax checker.
 
 
 License
@@ -165,8 +168,10 @@ See [COPYING][] for details.
 [scrooloose]: https://github.com/scrooloose
 [purcell]: https://github.com/purcell
 [wyuenho]: https://github.com/wyuenho
+[kwitek]: https://github.com/kwitek
 [maio]: https://github.com/maio
 [ptrv]: https://github.com/ptrv
 [robert-zaremba]: https://github.com/robert-zaremba
 [steckerhalter]: https://github.com/steckerhalter
+[yannick1974]: https://github.com/yannick1974
 [copying]: https://github.com/lunaryorn/flycheck/blob/master/COPYING
