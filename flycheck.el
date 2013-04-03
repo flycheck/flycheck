@@ -1815,7 +1815,7 @@ flycheck exclamation mark otherwise.")
       (overlay-put overlay 'face nil))
     (overlay-put overlay 'flycheck-error err)
     (overlay-put overlay 'before-string (propertize "!" 'display fringe-icon))
-    (overlay-put overlay 'help-echo (flycheck-error-messages err))))
+    (overlay-put overlay 'help-echo (flycheck-error-message err))))
 
 (defun flycheck-add-overlays (errors)
   "Add overlays for ERRORS."
