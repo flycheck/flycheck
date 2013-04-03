@@ -1857,6 +1857,7 @@ N specifies how many errors to move forwards.  If negative, move backwards."
          (current-pos (if reset (point-min) (point)))
          (before-and-after (->> flycheck-current-errors
                              (-map 'flycheck-error-pos)
+                             (-uniq)
                              (--remove (= current-pos it))
                              (--split-with (>= current-pos it))))
          (before (nreverse (car before-and-after)))
