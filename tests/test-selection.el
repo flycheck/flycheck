@@ -70,17 +70,14 @@ error is signaled on all subsequent checks."
     (flycheck-wait-for-syntax-checker)
     (should (= (length flycheck-current-errors) 1))
     (flycheck-should-error '(5 nil "Unused import re" warning))
-    (let* ((error-type (if (flycheck-min-emacs-version-p 24 3)
-                          'user-error
-                         'error))
-           (error-data (should-error (flycheck-select-checker 'bash)
-                                     :type error-type)))
-      (should (string= (car (cdr error-data))
+    (let* ((error-data (should-error (flycheck-select-checker 'bash)
+                                     :type flycheck-user-error-type)))
+      (should (string= (cadr error-data)
                        "Configured syntax checker bash cannot be used"))
       (should (string= flycheck-mode-line " FlyC!"))
       ;; A subsequent syntax checker should still fail, and not fall back to
       ;; automatic selection
-      (should-error (flycheck-buffer) :type error-type)
+      (should-error (flycheck-buffer) :type flycheck-user-error-type)
       (should (string= flycheck-mode-line " FlyC!")))))
 
 (ert-deftest flycheck-select-checker-automatically ()

@@ -245,6 +245,10 @@ Return t if Emacs is at least MAJOR.MINOR, or nil otherwise."
   (when (>= emacs-major-version major)
     (or (null minor) (>= emacs-minor-version minor))))
 
+(defconst flycheck-user-error-type
+  (if (flycheck-min-emacs-version-p 24 3) 'user-error 'error)
+  "The `user-error' type used by Flycheck.")
+
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:
