@@ -22,7 +22,7 @@
 
 ;;; Commentary
 
-;; Test error parsers
+;; Test the contents of documentation.
 
 ;;; Code:
 
