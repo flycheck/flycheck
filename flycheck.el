@@ -314,7 +314,7 @@ buffer manually.
       (add-hook 'next-error-hook 'flycheck-show-error-at-point nil t)
 
       (setq flycheck-previous-next-error-function next-error-function)
-      (setq next-error-function 'flycheck-next-error)
+      (setq next-error-function 'flycheck-next-error-function)
 
       (flycheck-buffer-safe))
      (t
@@ -1845,15 +1845,11 @@ flycheck exclamation mark otherwise.")
 
 
 ;;;; Error navigation
-(defun flycheck-next-error (&optional n reset)
+(defun flycheck-next-error-function (n reset)
   "Visit the N-th error from the current point.
 
-If RESET is given and non-nil, re-start from the beginning of the buffer.
-
-N specifies how many errors to move forwards.  If negative, move backwards."
-  (interactive "P")
-  ;; TODO: Horribly inefficient, possibly improve by considering less errors.
-  (let* ((n (or n 1))
+Intended for use with `next-error-function'."
+   (let* ((n (or n 1))
          (current-pos (if reset (point-min) (point)))
          (before-and-after (->> flycheck-current-errors
                              (-map 'flycheck-error-pos)
@@ -1866,6 +1862,16 @@ N specifies how many errors to move forwards.  If negative, move backwards."
     (if error-pos
         (goto-char error-pos)
       (user-error "No more Flycheck errors"))))
+
+(defun flycheck-next-error (&optional n reset)
+  "Visit the N-th error from the current point.
+
+If RESET is given and non-nil, re-start from the beginning of the buffer.
+
+N specifies how many errors to move forwards.  If negative, move backwards."
+  (interactive "P")
+  ;; TODO: Horribly inefficient, possibly improve by considering less errors.
+  (flycheck-next-error-function n reset))
 
 (defun flycheck-previous-error (&optional n)
   "Visit the N-th previous error.
