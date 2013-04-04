@@ -222,6 +222,7 @@ If RESOURCE-FILE is a relative file name, it is expanded against
      (with-temp-buffer
        (insert-file-contents filename t)
        (cd (file-name-directory filename))
+       (rename-buffer (file-name-nondirectory filename))
        ,@body)))
 
 (defun flycheck-fail-unless-checkers (&rest checkers)
