@@ -323,7 +323,7 @@ conditions:
   with a space).
 
 Return t if Flycheck mode may be enabled, and nil otherwise."
-  (and (not (s-starts-with? (buffer-name) " "))
+  (and (not (s-starts-with? " " (buffer-name)))
        (not (flycheck-tramp-file-p (buffer-file-name)))
        (flycheck-get-checker-for-buffer)))
 
