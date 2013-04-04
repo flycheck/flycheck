@@ -30,35 +30,35 @@
 
 (ert-deftest checker-perl-unused-variable ()
   "Test an unused variable with the Perl checker."
-  :expected-result (flycheck-fail-unless-checker 'perl)
-  (flycheck-with-resource-buffer "unused-variable.pl"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'perl)
+  (flycheck-testsuite-with-resource-buffer "unused-variable.pl"
     (dolist (mode '(perl-mode cperl-mode))
       (funcall mode)
-      (flycheck-buffer-sync)
-      (flycheck-should-errors
+      (flycheck-testsuite-buffer-sync)
+      (flycheck-testsuite-should-errors
        '(4 nil "Name \"main::x\" used only once: possible typo" error))
-      (flycheck-ensure-clear))))
+      (flycheck-testsuite-ensure-clear))))
 
 (ert-deftest checker-perl-unqualified-variable ()
   "Test an unqualified variable with the Perl checker."
-  :expected-result (flycheck-fail-unless-checker 'perl)
-  (flycheck-with-resource-buffer "unqualified-variable.pl"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'perl)
+  (flycheck-testsuite-with-resource-buffer "unqualified-variable.pl"
     (dolist (mode '(perl-mode cperl-mode))
       (funcall mode)
-      (flycheck-buffer-sync)
-      (flycheck-should-errors
+      (flycheck-testsuite-buffer-sync)
+      (flycheck-testsuite-should-errors
        '(5 nil "Global symbol \"$x\" requires explicit package name" error))
-      (flycheck-ensure-clear))))
+      (flycheck-testsuite-ensure-clear))))
 
 (ert-deftest checker-perl-syntax-error ()
-  :expected-result (flycheck-fail-unless-checker 'perl)
+  :expected-result (flycheck-testsuite-fail-unless-checker 'perl)
   "Test a syntax error with the Perl checker."
-  (flycheck-with-resource-buffer "syntax-error.pl"
+  (flycheck-testsuite-with-resource-buffer "syntax-error.pl"
     (dolist (mode '(perl-mode cperl-mode))
       (funcall mode)
-      (flycheck-buffer-sync)
-      (flycheck-should-errors '(4 nil "syntax error" error))
-      (flycheck-ensure-clear))))
+      (flycheck-testsuite-buffer-sync)
+      (flycheck-testsuite-should-errors '(4 nil "syntax error" error))
+      (flycheck-testsuite-ensure-clear))))
 
 (require 'sh-script)
 

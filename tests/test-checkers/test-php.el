@@ -30,24 +30,24 @@
 
 (ert-deftest checker-php-missing-quote ()
   "Test a missing quote in a PHP program."
-  :expected-result (flycheck-fail-unless-checker 'php)
-  (flycheck-with-resource-buffer "missing-quote.php"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'php)
+  (flycheck-testsuite-with-resource-buffer "missing-quote.php"
     (dolist (mode '(php-mode php+-mode))
       (funcall mode)
-      (flycheck-buffer-sync)
-      (flycheck-should-errors
+      (flycheck-testsuite-buffer-sync)
+      (flycheck-testsuite-should-errors
        '(7 nil "syntax error, unexpected end of file, expecting variable (T_VARIABLE) or ${ (T_DOLLAR_OPEN_CURLY_BRACES) or {$ (T_CURLY_OPEN)" error))
-      (flycheck-ensure-clear))))
+      (flycheck-testsuite-ensure-clear))))
 
 (ert-deftest checker-php-paamayim-nekudotayim ()
   "Test the T_PAAMAYIM_NEKUDOTAYIM error."
-  (flycheck-with-resource-buffer "paamayim-nekudotayim.php"
+  (flycheck-testsuite-with-resource-buffer "paamayim-nekudotayim.php"
     (dolist (mode '(php-mode php+-mode))
       (funcall mode)
-      (flycheck-buffer-sync)
-      (flycheck-should-errors
+      (flycheck-testsuite-buffer-sync)
+      (flycheck-testsuite-should-errors
        '(8 nil "syntax error, unexpected ')', expecting :: (T_PAAMAYIM_NEKUDOTAYIM)" error))
-      (flycheck-ensure-clear))))
+      (flycheck-testsuite-ensure-clear))))
 
 ;; Local Variables:
 ;; coding: utf-8

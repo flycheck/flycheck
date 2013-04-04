@@ -30,59 +30,59 @@
 
 (ert-deftest checker-php-phpcs-uppercase-keyqord ()
   "Test an uppercase keyword error by phpcs."
-  :expected-result (flycheck-fail-unless-checkers 'php 'php-phpcs)
-  (flycheck-with-resource-buffer "uppercase-keyword.php"
+  :expected-result (flycheck-testsuite-fail-unless-checkers 'php 'php-phpcs)
+  (flycheck-testsuite-with-resource-buffer "uppercase-keyword.php"
     (dolist (mode '(php-mode php+-mode))
       (funcall mode)
-      (flycheck-buffer-sync)
-      (flycheck-should-errors
+      (flycheck-testsuite-buffer-sync)
+      (flycheck-testsuite-should-errors
        '(19 8 "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\"" error))
-      (flycheck-ensure-clear))))
+      (flycheck-testsuite-ensure-clear))))
 
 (ert-deftest checker-php-phpcs-uppercase-keyqord-explicit-standard ()
   "Test an uppercase keyword error by phpcs."
-  :expected-result (flycheck-fail-unless-checkers 'php 'php-phpcs)
-  (flycheck-with-resource-buffer "uppercase-keyword.php"
+  :expected-result (flycheck-testsuite-fail-unless-checkers 'php 'php-phpcs)
+  (flycheck-testsuite-with-resource-buffer "uppercase-keyword.php"
     (dolist (mode '(php-mode php+-mode))
       (funcall mode)
       (setq flycheck-phpcs-standard "PEAR")
-      (flycheck-buffer-sync)
-      (flycheck-should-errors
+      (flycheck-testsuite-buffer-sync)
+      (flycheck-testsuite-should-errors
        '(19 8 "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\"" error))
-      (flycheck-ensure-clear))))
+      (flycheck-testsuite-ensure-clear))))
 
 (ert-deftest checker-php-phpcs-uppercase-keyqord-different-standard ()
   "Test an uppercase keyword error by phpcs."
-  :expected-result (flycheck-fail-unless-checkers 'php 'php-phpcs)
-  (flycheck-with-resource-buffer "uppercase-keyword.php"
+  :expected-result (flycheck-testsuite-fail-unless-checkers 'php 'php-phpcs)
+  (flycheck-testsuite-with-resource-buffer "uppercase-keyword.php"
     (dolist (mode '(php-mode php+-mode))
       (funcall mode)
       (setq flycheck-phpcs-standard "Zend")
-      (flycheck-buffer-sync)
-      (flycheck-should-errors
+      (flycheck-testsuite-buffer-sync)
+      (flycheck-testsuite-should-errors
        '(21 1 "A closing tag is not permitted at the end of a PHP file" error))
-      (flycheck-ensure-clear))))
+      (flycheck-testsuite-ensure-clear))))
 
 (ert-deftest checker-php-phpcs-overlong-line ()
   "Test a phpcs warning about an overlong line."
-  :expected-result (flycheck-fail-unless-checkers 'php 'php-phpcs)
-  (flycheck-with-resource-buffer "overlong-line.php"
+  :expected-result (flycheck-testsuite-fail-unless-checkers 'php 'php-phpcs)
+  (flycheck-testsuite-with-resource-buffer "overlong-line.php"
     (dolist (mode '(php-mode php+-mode))
       (funcall mode)
-      (flycheck-buffer-sync)
-      (flycheck-should-errors
+      (flycheck-testsuite-buffer-sync)
+      (flycheck-testsuite-should-errors
        '(19 88 "Line exceeds 85 characters; contains 87 characters" warning))
-      (flycheck-ensure-clear))))
+      (flycheck-testsuite-ensure-clear))))
 
 (ert-deftest checker-php-phpcs-no-errors ()
   "Test a file without phpcs warnings and errors."
-  :expected-result (flycheck-fail-unless-checkers 'php 'php-phpcs)
-   (flycheck-with-resource-buffer "no-errors.php"
+  :expected-result (flycheck-testsuite-fail-unless-checkers 'php 'php-phpcs)
+   (flycheck-testsuite-with-resource-buffer "no-errors.php"
     (dolist (mode '(php-mode php+-mode))
       (funcall mode)
-      (flycheck-buffer-sync)
+      (flycheck-testsuite-buffer-sync)
       (should-not flycheck-current-errors)
-      (flycheck-ensure-clear))))
+      (flycheck-testsuite-ensure-clear))))
 
 ;; Local Variables:
 ;; coding: utf-8

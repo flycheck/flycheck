@@ -32,7 +32,7 @@
 (ert-deftest flycheck-may-enable-mode-no-undo-buffers ()
   (with-temp-buffer
     (should-not (flycheck-may-enable-mode)))
-  (flycheck-with-resource-buffer "many-errors.el"
+  (flycheck-testsuite-with-resource-buffer "many-errors.el"
     (emacs-lisp-mode)
     (should (flycheck-get-checker-for-buffer))
     (rename-buffer " foo")
@@ -44,14 +44,14 @@
   (error "Implement me: Find a dummy tramp backend to use for this test!"))
 
 (ert-deftest flycheck-may-enable-mode-no-checker-found ()
-  (flycheck-with-resource-buffer "many-errors.el"
+  (flycheck-testsuite-with-resource-buffer "many-errors.el"
     (text-mode)
     (should-not (s-starts-with? " " (buffer-name)))
     (should-not (flycheck-get-checker-for-buffer))
     (should-not (flycheck-may-enable-mode))))
 
 (ert-deftest flycheck-may-enable-mode-checker-found ()
-  (flycheck-with-resource-buffer "many-errors.el"
+  (flycheck-testsuite-with-resource-buffer "many-errors.el"
     (emacs-lisp-mode)
     (should (flycheck-get-checker-for-buffer))
     (should (flycheck-may-enable-mode))))
@@ -66,7 +66,7 @@
 
 (ert-deftest flycheck-global-mode-no-undo-buffers ()
   (flycheck-with-global-mode
-    (flycheck-with-resource-buffer "many-errors.el"
+    (flycheck-testsuite-with-resource-buffer "many-errors.el"
       (should-not flycheck-mode)
       (rename-buffer " foo")
       (emacs-lisp-mode)
@@ -74,14 +74,14 @@
 
 (ert-deftest flycheck-global-mode-no-checker-found ()
   (flycheck-with-global-mode
-    (flycheck-with-resource-buffer "many-errors.el"
+    (flycheck-testsuite-with-resource-buffer "many-errors.el"
       (should-not flycheck-mode)
       (text-mode)
       (should-not flycheck-mode))))
 
 (ert-deftest flycheck-global-mode-checker-found ()
   (flycheck-with-global-mode
-    (flycheck-with-resource-buffer "many-errors.el"
+    (flycheck-testsuite-with-resource-buffer "many-errors.el"
       (should-not flycheck-mode)
       (emacs-lisp-mode)
       (should flycheck-mode))))

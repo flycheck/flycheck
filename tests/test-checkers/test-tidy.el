@@ -27,21 +27,21 @@
 
 (ert-deftest checker-tidy-missing-tag ()
   "Test a warning caused by a missing tag."
-  :expected-result (flycheck-fail-unless-checker 'html-tidy)
-  (flycheck-with-resource-buffer "missing-tag.html"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'html-tidy)
+  (flycheck-testsuite-with-resource-buffer "missing-tag.html"
     (html-mode)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(3 1 "missing <!DOCTYPE> declaration" warning :no-filename)
      '(5 5 "missing </title> before </head>" warning :no-filename))))
 
 (ert-deftest checker-tidy-unknown-tag ()
   "Test an error caused by an unknown tag."
-  :expected-result (flycheck-fail-unless-checker 'html-tidy)
-  (flycheck-with-resource-buffer "unknown-tag.html"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'html-tidy)
+  (flycheck-testsuite-with-resource-buffer "unknown-tag.html"
     (html-mode)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(3 1 "missing <!DOCTYPE> declaration" warning :no-filename)
      '(8 5 "<spam> is not recognized!" error :no-filename)
      '(8 5 "discarding unexpected <spam>" warning :no-filename))))

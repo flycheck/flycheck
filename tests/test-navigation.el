@@ -31,10 +31,10 @@
 
 (defun flycheck-test-next-error-function (next-error-function)
    (let (error-data)
-      (flycheck-with-resource-buffer "many-errors.el"
+      (flycheck-testsuite-with-resource-buffer "many-errors.el"
         (emacs-lisp-mode)
         (flycheck-mode)
-        (flycheck-buffer-sync)
+        (flycheck-testsuite-buffer-sync)
         (goto-char (point-min))
         (funcall next-error-function)
         (should (= (point) 116))
@@ -43,7 +43,7 @@
         (funcall next-error-function)
         (should (= (point) 193))
         (setq error-data (should-error (funcall next-error-function)
-                                       :type flycheck-user-error-type))
+                                       :type flycheck-testsuite-user-error-type))
         (should (string= (cadr error-data) "No more Flycheck errors"))
         ;; Now try prefix argument and reset
         (funcall next-error-function 2 t)
@@ -52,7 +52,7 @@
         (funcall next-error-function -1)
         (should (= (point) 116))
         (setq error-data (should-error (funcall next-error-function 10)
-                                       :type flycheck-user-error-type))
+                                       :type flycheck-testsuite-user-error-type))
         (should (string= (cadr error-data) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-navigate-next-error-compile-mode ()
@@ -65,10 +65,10 @@
 
 (defun flycheck-test-previous-error-function (previous-error-function)
   (let (error-data)
-    (flycheck-with-resource-buffer "many-errors.el"
+    (flycheck-testsuite-with-resource-buffer "many-errors.el"
       (emacs-lisp-mode)
       (flycheck-mode)
-      (flycheck-buffer-sync)
+      (flycheck-testsuite-buffer-sync)
       (goto-char (point-max))
       (funcall previous-error-function)
       (should (= (point) 193))
@@ -77,7 +77,7 @@
       (funcall previous-error-function)
       (should (= (point) 116))
       (setq error-data (should-error (funcall previous-error-function)
-                                     :type flycheck-user-error-type))
+                                     :type flycheck-testsuite-user-error-type))
       (should (string= (cadr error-data) "No more Flycheck errors"))
       ;; Now go to buffer end again, and try a prefix arg
       (goto-char (point-max))
@@ -86,7 +86,7 @@
       (funcall previous-error-function -1)
       (should (= (point) 193))
       (setq error-data (should-error (funcall previous-error-function 10)
-                                     :type flycheck-user-error-type))
+                                     :type flycheck-testsuite-user-error-type))
       (should (string= (cadr error-data) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-navigate-previous-error-compile-mode ()
@@ -99,10 +99,10 @@
 
 (defun flycheck-test-first-error-function (first-error-function)
   (let (error-data)
-    (flycheck-with-resource-buffer "many-errors.el"
+    (flycheck-testsuite-with-resource-buffer "many-errors.el"
       (emacs-lisp-mode)
       (flycheck-mode)
-      (flycheck-buffer-sync)
+      (flycheck-testsuite-buffer-sync)
       (goto-char (point-max))
       (funcall first-error-function)
       (should (= (point) 116))
@@ -111,7 +111,7 @@
       (funcall first-error-function 2)
       (should (= (point) 139))
       (setq error-data (should-error (funcall first-error-function 10)
-                                     :type flycheck-user-error-type))
+                                     :type flycheck-testsuite-user-error-type))
       (should (string= (cadr error-data) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-navigate-first-error-compile-mode ()

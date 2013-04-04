@@ -1,10 +1,8 @@
-;;; test-lua.el --- Test the lua checker -*- lexical-binding: t; -*-
+;;; flycheck-testrunner.el --- Test runner  -*- lexical-binding: t -*-
 
-;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>,
-;;                    Peter Vasil <mail@petervasil.net>
+;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
-;; Author: Sebastian Wiesner <lunaryorn@gmail.com>,
-;;         Peter Vasil <mail@petervasil.net>
+;; Author: Sebastian Wiesner <lunaryorn@gmail.com>
 ;; URL: https://github.com/lunaryorn/flycheck
 
 ;; This file is not part of GNU Emacs.
@@ -22,24 +20,30 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+;;; Commentary:
+
+;; The unit test runner
+
 ;;; Code:
 
-(require 'ert)
-(require 'flycheck)
+(setq debug-on-error t)
 
-(require 'lua-mode nil t)
+;;;; Load the testsuite
+(let* ((testdir (file-name-directory load-file-name))
+       (sourcedir (expand-file-name ".." testdir))
+       (testsuite (expand-file-name "flycheck-testsuite" testdir)))
+  (dolist (dir (list testdir sourcedir))
+    (add-to-list 'load-path dir))
+  (load testsuite nil :no-message))
 
-(ert-deftest checker-lua-missing-quote ()
-  "Test a syntax error with Lua."
-  :expected-result (flycheck-testsuite-fail-unless-checker 'lua)
-  (flycheck-testsuite-with-resource-buffer "missing-quote.lua"
-    (lua-mode)
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors
-     '(5 nil "unfinished string near '\"oh no'" error))))
+(princ (format "Running Flycheck tests under Emacs %s\n" emacs-version))
+
+(flycheck-testsuite-load-tests)
+
+(ert-run-tests-batch-and-exit (car command-line-args-left))
 
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:
 
-;;; test-lua.el ends here
+;;; flycheck-testrunner.el ends here

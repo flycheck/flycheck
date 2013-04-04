@@ -129,10 +129,7 @@ To add unit tests do the following:
 @item
 Familiarize yourself with the @ref{Top, , ERT, ert} library.
 @item
-Familiarize yourself with the test suite in @file{testsuite.el}.
-@item
-Familiarize yourself with the @file{testhelpers.el} library in the
-@file{tests/} directory.
+Familiarize yourself with the test suite in @file{flycheck-testsuite.el}.
 @item
 Add your tests to the appropriate file.  Create a new test file if
 necessary.
@@ -154,9 +151,8 @@ Install @uref{https://github.com/rejeep/carton, Carton}.
 @item
 Setup your development environment with @command{carton install}.
 @item
-Load the tests into the current Emacs process with @kbd{M-x load-file
-RET tests/testsuite.el}, and run them with @kbd{M-x ert}, or run the
-tests in a dedicated Emacs process with @command{make test}.
+Run the tests with @command{tests/run.sh}.  Use @command{tests/run.sh
+flake8} to run only tests whose names contain the string @code{flake8}.
 @end itemize
 
 @c Local Variables:

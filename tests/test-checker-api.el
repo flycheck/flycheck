@@ -51,8 +51,8 @@
 (ert-deftest flycheck-substitute-argument-cell-config-file ()
   "Test substitution of `config-file' argument cell."
   ;; We need a real buffer for config-file search
-  (flycheck-with-resource-buffer "missing-argument.el"
-    (let ((makefile-path (expand-file-name "../Makefile" testsuite-dir))
+  (flycheck-testsuite-with-resource-buffer "missing-argument.el"
+    (let ((makefile-path (expand-file-name "../Makefile" flycheck-testsuite-dir))
           flycheck-test-config-var)
       ;; A non-existing file
       (setq flycheck-test-config-var
@@ -140,19 +140,18 @@
 
 (ert-deftest flycheck-substitute-argument-symbol ()
   "Test substitution of argument symbols."
-  (flycheck-with-resource-buffer "missing-argument.el"
+  (flycheck-testsuite-with-resource-buffer "missing-argument.el"
     (unwind-protect
         (progn
           (should (equal (flycheck-substitute-argument-symbol 'source-original)
                          (buffer-file-name)))
           (let ((filename (flycheck-substitute-argument-symbol 'source-inplace)))
-            (should (equal filename
-                           (expand-file-name "flycheck-missing-argument.el"
-                                             resources-dir)))
+            (should (equal filename (flycheck-testsuite-resource-filename
+                                     "flycheck-missing-argument.el")))
             (should (file-exists-p filename)))
           (let ((filename (flycheck-substitute-argument-symbol 'source)))
             (should-not (equal (file-name-directory filename)
-                               (file-name-as-directory resources-dir)))
+                               (file-name-as-directory flycheck-testsuite-resources-dir)))
             (should (file-exists-p filename)))
           (should-error (flycheck-substitute-argument-symbol 'foobar))))
     (flycheck-clean-substituted-files)))
@@ -160,8 +159,8 @@
 (ert-deftest flycheck-substitute-shell-argument-cell-config-file ()
   "Test substitution of `config-file' shell argument cell."
   ;; We need a real buffer for config-file search
-  (flycheck-with-resource-buffer "missing-argument.el"
-    (let ((makefile-path (expand-file-name "../Makefile" testsuite-dir))
+  (flycheck-testsuite-with-resource-buffer "missing-argument.el"
+    (let ((makefile-path (expand-file-name "../Makefile" flycheck-testsuite-dir))
           flycheck-test-config-var)
       ;; A non-existing file
       (setq flycheck-test-config-var

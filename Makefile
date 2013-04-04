@@ -46,8 +46,9 @@ clean-doc :
 .PHONY: test
 test : build
 	EMACS=$(EMACS) $(CARTON) exec $(EMACS) \
-		--no-site-file --no-site-lisp --batch $(EMACSFLAGS) \
-		-l tests/testsuite.el -f ert-run-tests-batch-and-exit
+		-Q --no-site-lisp $(EMACSFLAGS) --script \
+		tests/flycheck-testrunner.el
+
 
 .PHONY: virtual-test
 virtual-test :

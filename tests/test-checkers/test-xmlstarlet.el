@@ -29,40 +29,40 @@
 
 (ert-deftest checker-xmlstarlet-missing-quote ()
   "Test a missing quote in an attribute value."
-  :expected-result (flycheck-fail-unless-checker 'xml-xmlstarlet)
-  (flycheck-with-resource-buffer "missing-quote.xml"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'xml-xmlstarlet)
+  (flycheck-testsuite-with-resource-buffer "missing-quote.xml"
     (nxml-mode)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(5 1 "Unescaped '<' not allowed in attributes values" error)
      '(5 1 "attributes construct error" error)
      '(5 1 "Couldn't find end of Start Tag with" error))))
 
 (ert-deftest checker-xmlstarlet-missing-closing-tag ()
   "Test a missing closing tag."
-  :expected-result (flycheck-fail-unless-checker 'xml-xmlstarlet)
-  (flycheck-with-resource-buffer "missing-closing-tag.xml"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'xml-xmlstarlet)
+  (flycheck-testsuite-with-resource-buffer "missing-closing-tag.xml"
     (nxml-mode)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(5 8 "Opening and ending tag mismatch: with line 4 and spam" error))))
 
 (ert-deftest checker-xmlstarlet-lone-closing-tag ()
   "Test a lone closing tag."
-  :expected-result (flycheck-fail-unless-checker 'xml-xmlstarlet)
-  (flycheck-with-resource-buffer "lone-closing-tag.xml"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'xml-xmlstarlet)
+  (flycheck-testsuite-with-resource-buffer "lone-closing-tag.xml"
     (nxml-mode)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(4 10 "Opening and ending tag mismatch: spam line 3 and with" error))))
 
 (ert-deftest checker-xmlstarlet-undefined-entity ()
   "Test an undefined entity."
-  :expected-result (flycheck-fail-unless-checker 'xml-xmlstarlet)
-  (flycheck-with-resource-buffer "undefined-entity.xml"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'xml-xmlstarlet)
+  (flycheck-testsuite-with-resource-buffer "undefined-entity.xml"
     (nxml-mode)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors '(4 25 "Entity 'foo' not defined" error))))
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors '(4 25 "Entity 'foo' not defined" error))))
 
 ;; Local Variables:
 ;; coding: utf-8

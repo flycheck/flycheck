@@ -33,7 +33,7 @@
   "Create a temp buffer from DOC-FILE and execute BODY."
   (declare (indent 1))
   `(let* ((filename (expand-file-name (concat "../doc/" ,doc-file)
-                                      testsuite-dir)))
+                                      flycheck-testsuite-dir)))
      (should (file-exists-p filename))
      (with-temp-buffer
        (insert-file-contents filename)

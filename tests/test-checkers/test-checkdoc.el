@@ -27,20 +27,20 @@
 
 (ert-deftest checker-emacs-lisp-checkdoc-missing-period ()
   "Test a checkdoc warning caused by a missing period in a docstring."
-  (flycheck-with-resource-buffer "missing-period-in-docstring.el"
+  (flycheck-testsuite-with-resource-buffer "missing-period-in-docstring.el"
     (emacs-lisp-mode)
     ;; Checkdoc is chained after Emacs Lisp
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(12 nil "First sentence should end with punctuation" warning))))
 
 (ert-deftest checker-emacs-lisp-checkdoc-missing-period-compressed ()
   "Test a checkdoc warning caused by a missing period in a docstring."
-  (flycheck-with-resource-buffer "missing-period-in-docstring.el.gz"
+  (flycheck-testsuite-with-resource-buffer "missing-period-in-docstring.el.gz"
     (emacs-lisp-mode)
     ;; Checkdoc is chained after Emacs Lisp
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(12 nil "First sentence should end with punctuation" warning))))
 
 (ert-deftest checker-emacs-lisp-checkdoc-no-buffer-file-name ()
@@ -52,14 +52,14 @@ https://github.com/bbatsov/prelude/issues/259."
     (insert ";;; Hello world\n(message \"foo\")")
     (emacs-lisp-mode)
     (should (not (buffer-file-name)))
-    (flycheck-buffer-sync)
+    (flycheck-testsuite-buffer-sync)
     ;; Just check that there are any errors, i.e. that the checker was used and
     ;; worked.
-    (flycheck-should-errors)))
+    (flycheck-testsuite-should-errors)))
 
 (ert-deftest checker-emacs-lisp-checkdoc-inhibited-autoloads ()
   "Test that CheckDoc does not check autoloads buffers."
-  (flycheck-with-resource-buffer "missing-period-in-docstring.el"
+  (flycheck-testsuite-with-resource-buffer "missing-period-in-docstring.el"
     (emacs-lisp-mode)
     (should (flycheck-may-use-checker 'emacs-lisp-checkdoc))
     (rename-buffer "foo-autoloads.el")
@@ -67,7 +67,7 @@ https://github.com/bbatsov/prelude/issues/259."
 
 (ert-deftest checker-emacs-lisp-checkdoc-inhibited-autoloads-source ()
   "Test that CheckDoc does no check temporary autoload buffers."
-  (flycheck-with-resource-buffer "missing-period-in-docstring.el"
+  (flycheck-testsuite-with-resource-buffer "missing-period-in-docstring.el"
     (emacs-lisp-mode)
     (should (flycheck-may-use-checker 'emacs-lisp-checkdoc))
     (rename-buffer " *autoload-file*")
@@ -75,7 +75,7 @@ https://github.com/bbatsov/prelude/issues/259."
 
 (ert-deftest checker-emacs-lisp-checkdoc-inhibited-compiler-input ()
   "Test that CheckDoc does not check byte compiler input buffers."
-  (flycheck-with-resource-buffer "missing-period-in-docstring.el"
+  (flycheck-testsuite-with-resource-buffer "missing-period-in-docstring.el"
     (emacs-lisp-mode)
     (should (flycheck-may-use-checker 'emacs-lisp-checkdoc))
     (rename-buffer " *Compiler Input*")

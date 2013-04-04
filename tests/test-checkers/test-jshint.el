@@ -30,33 +30,33 @@
 
 (ert-deftest checker-javascript-jshint-missing-semicolon ()
   "A missing semicolon."
-  :expected-result (flycheck-fail-unless-checker 'javascript-jshint)
-  (flycheck-with-resource-buffer "missing-semicolon.js"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
+  (flycheck-testsuite-with-resource-buffer "missing-semicolon.js"
     (dolist (mode '(js-mode js2-mode js3-mode))
       (funcall mode)
-      (flycheck-buffer-sync)
-      (flycheck-should-errors '(6 23 "Missing semicolon." error))
-      (flycheck-ensure-clear))))
+      (flycheck-testsuite-buffer-sync)
+      (flycheck-testsuite-should-errors '(6 23 "Missing semicolon." error))
+      (flycheck-testsuite-ensure-clear))))
 
 (ert-deftest checker-javascript-jshint-use-eval ()
   "Use eval()"
-  :expected-result (flycheck-fail-unless-checker 'javascript-jshint)
-  (flycheck-with-resource-buffer "use-eval.js"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
+  (flycheck-testsuite-with-resource-buffer "use-eval.js"
     (dolist (mode '(js-mode js2-mode js3-mode))
       (funcall mode)
-      (flycheck-buffer-sync)
-      (flycheck-should-errors '(3 1 "eval can be harmful." error))
-      (flycheck-ensure-clear))))
+      (flycheck-testsuite-buffer-sync)
+      (flycheck-testsuite-should-errors '(3 1 "eval can be harmful." error))
+      (flycheck-testsuite-ensure-clear))))
 
 (ert-deftest checker-javascript-jshint-unused-variable ()
   "An unused variable."
-  :expected-result (flycheck-fail-unless-checker 'javascript-jshint)
-  (flycheck-with-resource-buffer "unused-variable.js"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
+  (flycheck-testsuite-with-resource-buffer "unused-variable.js"
     (dolist (mode '(js-mode js2-mode js3-mode))
       (funcall mode)
-      (flycheck-buffer-sync)
-      (flycheck-should-errors '(5 nil "Unused variable: 'foo'" warning))
-      (flycheck-ensure-clear))))
+      (flycheck-testsuite-buffer-sync)
+      (flycheck-testsuite-should-errors '(5 nil "Unused variable: 'foo'" warning))
+      (flycheck-testsuite-ensure-clear))))
 
 ;; Local Variables:
 ;; coding: utf-8

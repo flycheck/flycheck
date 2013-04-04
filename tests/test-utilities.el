@@ -180,7 +180,7 @@ buffer file name."
 
 (ert-deftest flycheck-root-directory-p-unix ()
   "Test whether `flycheck-root-directory-p' behaves correctly."
-  :expected-result (if (not (flycheck-windows-p)) :passed :failed)
+  :expected-result (if (not (flycheck-testsuite-windows-p)) :passed :failed)
   (should (flycheck-root-directory-p "/"))
   (should (flycheck-root-directory-p "//"))
   (should-not (flycheck-root-directory-p "/home/foo/"))
@@ -188,7 +188,7 @@ buffer file name."
 
 (ert-deftest flycheck-root-directory-p-windows ()
   "Test whether `flycheck-root-directory-p' behaves correctly on Windows."
-  :expected-result (if (flycheck-windows-p) :passed :failed)
+  :expected-result (if (flycheck-testsuite-windows-p) :passed :failed)
   (should (flycheck-root-directory-p "C:\\"))
   (should (flycheck-root-directory-p "D:\\"))
   (should-not (flycheck-root-directory-p "C:\\Windows"))
@@ -196,11 +196,11 @@ buffer file name."
 
 (ert-deftest flycheck-find-file-in-tree ()
   "Test `flycheck-find-file-in-tree'."
-  (let ((filename (expand-file-name "../Makefile" testsuite-dir)))
-    (should (equal (flycheck-find-file-in-tree "Makefile" testsuite-dir)
+  (let ((filename (expand-file-name "../Makefile" flycheck-testsuite-dir)))
+    (should (equal (flycheck-find-file-in-tree "Makefile" flycheck-testsuite-dir)
                    filename)))
   (should-not (flycheck-find-file-in-tree "this-file-should-really-not-exist"
-                                          testsuite-dir)))
+                                          flycheck-testsuite-dir)))
 
 (ert-deftest flycheck-option-with-value-argument ()
   "Test concatenation of options and arguments."

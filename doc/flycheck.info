@@ -1233,9 +1233,8 @@ using the *note ERT: (ert)Top. library.
    To add unit tests do the following:
 
    * Familiarize yourself with the *note ERT: (ert)Top. library.
-   * Familiarize yourself with the test suite in 'testsuite.el'.
-   * Familiarize yourself with the 'testhelpers.el' library in the
-     'tests/' directory.
+   * Familiarize yourself with the test suite in
+     'flycheck-testsuite.el'.
    * Add your tests to the appropriate file.  Create a new test file if
      necessary.
    * Extend the provisioning script 'vagrant/provision.sh' with the
@@ -1248,9 +1247,8 @@ using the *note ERT: (ert)Top. library.
    You may also run the tests locally during development.  To do so:
    * Install Carton (https://github.com/rejeep/carton).
    * Setup your development environment with 'carton install'.
-   * Load the tests into the current Emacs process with 'M-x load-file
-     RET tests/testsuite.el', and run them with 'M-x ert', or run the
-     tests in a dedicated Emacs process with 'make test'.
+   * Run the tests with 'tests/run.sh'.  Use 'tests/run.sh flake8' to
+     run only tests whose names contain the string 'flake8'.
 
 
 File: flycheck.info,  Node: Changes,  Next: Credits,  Prev: Contribution,  Up: Top
@@ -2182,20 +2180,20 @@ Node: Reporting issues44195
 Node: Contributing syntax checkers44931
 Node: Contributing code45726
 Node: Unit tests47066
-Node: Changes48499
-Node: 0.149019
-Node: 0.249303
-Node: 0.349581
-Node: 0.449817
-Node: 0.550592
-Node: 0.651812
-Node: 0.6.154662
-Node: 0.754811
-Node: 0.7.155825
-Node: master56543
-Node: Credits57840
-Node: GNU Free Documentation License59664
-Node: Syntax checkers84816
-Node: Function and Variable Index85681
+Node: Changes48353
+Node: 0.148873
+Node: 0.249157
+Node: 0.349435
+Node: 0.449671
+Node: 0.550446
+Node: 0.651666
+Node: 0.6.154516
+Node: 0.754665
+Node: 0.7.155679
+Node: master56397
+Node: Credits57694
+Node: GNU Free Documentation License59518
+Node: Syntax checkers84670
+Node: Function and Variable Index85535
 
 End Tag Table

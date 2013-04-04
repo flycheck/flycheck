@@ -29,22 +29,22 @@
 
 (ert-deftest checker-sh-missing-quote ()
   "Test a syntax error from a missing quote."
-  :expected-result (flycheck-fail-unless-checker 'sh)
-  (flycheck-with-resource-buffer "missing-quote.sh"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'sh)
+  (flycheck-testsuite-with-resource-buffer "missing-quote.sh"
     (sh-mode)
     (sh-set-shell "sh" :no-query)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(6 nil "Syntax error: Unterminated quoted string" error))))
 
 (ert-deftest checker-sh-missing-semicolon ()
   "Test a syntax error from a missing semicolon."
-  :expected-result (flycheck-fail-unless-checker 'sh)
-  (flycheck-with-resource-buffer "missing-semicolon.sh"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'sh)
+  (flycheck-testsuite-with-resource-buffer "missing-semicolon.sh"
     (sh-mode)
     (sh-set-shell "sh" :no-query)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(5 nil "Syntax error: \"fi\" unexpected (expecting \"then\")" error))))
 
 ;; Local Variables:

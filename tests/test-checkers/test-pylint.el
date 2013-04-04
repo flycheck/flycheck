@@ -29,54 +29,54 @@
 
 (ert-deftest checker-python-pylint-syntax-error ()
   "Test a real syntax error with pylint."
-  :expected-result (flycheck-fail-unless-checker 'python-pylint)
-  (flycheck-with-resource-buffer "syntax-error.py"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'python-pylint)
+  (flycheck-testsuite-with-resource-buffer "syntax-error.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-disable-checkers 'python-flake8)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors '(6 nil "invalid syntax" error))))
+    (flycheck-testsuite-disable-checkers 'python-flake8)
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors '(6 nil "invalid syntax" error))))
 
 (ert-deftest checker-python-pylint-missing-quote ()
   "Test a missing quote with pylint."
-  :expected-result (flycheck-fail-unless-checker 'python-pylint)
-  (flycheck-with-resource-buffer "missing-quote.py"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'python-pylint)
+  (flycheck-testsuite-with-resource-buffer "missing-quote.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-disable-checkers 'python-flake8)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-disable-checkers 'python-flake8)
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(5 nil "EOL while scanning string literal" error))))
 
 (ert-deftest checker-python-pylint-unknown-module ()
   "Test an unknown module with pylint."
-  :expected-result (flycheck-fail-unless-checker 'python-pylint)
-  (flycheck-with-resource-buffer "unknown-module.py"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'python-pylint)
+  (flycheck-testsuite-with-resource-buffer "unknown-module.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-disable-checkers 'python-flake8)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors '(5 nil "Unable to import 'spam'" error))))
+    (flycheck-testsuite-disable-checkers 'python-flake8)
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors '(5 nil "Unable to import 'spam'" error))))
 
 (ert-deftest checker-python-pylint-unused-import ()
   "Test an unused import with pylint"
-  :expected-result (flycheck-fail-unless-checker 'python-pylint)
-  (flycheck-with-resource-buffer "unused-import.py"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'python-pylint)
+  (flycheck-testsuite-with-resource-buffer "unused-import.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-disable-checkers 'python-flake8)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors '(5 nil "Unused import re" warning))))
+    (flycheck-testsuite-disable-checkers 'python-flake8)
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors '(5 nil "Unused import re" warning))))
 
 (ert-deftest checker-python-pylint-used-map ()
   "Test usage of the map() builtin with the pylint checker."
-  :expected-result (flycheck-fail-unless-checker 'python-pylint)
-  (flycheck-with-resource-buffer "map-builtin.py"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'python-pylint)
+  (flycheck-testsuite-with-resource-buffer "map-builtin.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-disable-checkers 'python-flake8)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors '(5 nil "Used builtin function 'map'" warning))))
+    (flycheck-testsuite-disable-checkers 'python-flake8)
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors '(5 nil "Used builtin function 'map'" warning))))
 
 ;; Local Variables:
 ;; coding: utf-8

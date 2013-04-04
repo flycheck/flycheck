@@ -29,92 +29,92 @@
 
 (ert-deftest checker-python-flake8-syntax-error ()
   "Test a real syntax error with flake8."
-  :expected-result (flycheck-fail-unless-checker 'python-flake8)
-  (flycheck-with-resource-buffer "syntax-error.py"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
+  (flycheck-testsuite-with-resource-buffer "syntax-error.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-buffer-sync)
-    (flycheck-should-errors '(6 13 "E901 SyntaxError: invalid syntax" error))))
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors '(6 13 "E901 SyntaxError: invalid syntax" error))))
 
 (ert-deftest checker-python-flake8-missing-quote ()
   "Test a syntax error with flake8."
-  :expected-result (flycheck-fail-unless-checker 'python-flake8)
-  (flycheck-with-resource-buffer "missing-quote.py"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
+  (flycheck-testsuite-with-resource-buffer "missing-quote.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(5 14 "E901 SyntaxError: EOL while scanning string literal" error))))
 
 (ert-deftest checker-python-flake8-unused-import ()
   "Test an unused import with flake8"
-  :expected-result (flycheck-fail-unless-checker 'python-flake8)
-  (flycheck-with-resource-buffer "unused-import.py"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
+  (flycheck-testsuite-with-resource-buffer "unused-import.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(5 1 "F401 're' imported but unused" warning))))
 
 (ert-deftest checker-python-flake8-unused-import-ignored ()
   "Test an unused import being ignored with flake8."
-  :expected-result (flycheck-fail-unless-checker 'python-flake8)
-  (flycheck-with-resource-buffer "unused-import.py"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
+  (flycheck-testsuite-with-resource-buffer "unused-import.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
     (setq flycheck-flake8rc "flake8rc")
-    (flycheck-buffer-sync)
+    (flycheck-testsuite-buffer-sync)
     (should-not flycheck-current-errors)))
 
 (ert-deftest checker-python-flake8-superfluous-space ()
   "Test superfluous spaces with flake8."
-  :expected-result (flycheck-fail-unless-checker 'python-flake8)
-  (flycheck-with-resource-buffer "superfluous-space.py"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
+  (flycheck-testsuite-with-resource-buffer "superfluous-space.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(6 13 "E251 unexpected spaces around keyword / parameter equals" error)
      '(6 15 "E251 unexpected spaces around keyword / parameter equals" error))))
 
 (ert-deftest checker-python-flake8-superfluous-space-ignored ()
   "Test superfluous space being ignored with flake8."
-  :expected-result (flycheck-fail-unless-checker 'python-flake8)
-  (flycheck-with-resource-buffer "superfluous-space.py"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
+  (flycheck-testsuite-with-resource-buffer "superfluous-space.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
     (setq flycheck-flake8rc "flake8rc")
-    (flycheck-buffer-sync)
+    (flycheck-testsuite-buffer-sync)
     (should-not flycheck-current-errors)))
 
 (ert-deftest checker-python-flake8-complex-code ()
   "Test superfluous spaces with flake8."
-  :expected-result (flycheck-fail-unless-checker 'python-flake8)
-  (flycheck-with-resource-buffer "complex-code.py"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
+  (flycheck-testsuite-with-resource-buffer "complex-code.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
     (setq flycheck-flake8-maximum-complexity 4)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors '(6 1 "C901 'foo' is too complex (4)" warning))))
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors '(6 1 "C901 'foo' is too complex (4)" warning))))
 
 (ert-deftest checker-python-flake8-very-long-line ()
   "Test an overly long line, using the maximum line length option."
-  :expected-result (flycheck-fail-unless-checker 'python-flake8)
-  (flycheck-with-resource-buffer "very-long-line.py"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
+  (flycheck-testsuite-with-resource-buffer "very-long-line.py"
     (python-mode)
     (setq flycheck-flake8-maximum-line-length 50)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(5 51 "E501 line too long (61 > 50 characters)" error))))
 
 (ert-deftest checker-python-flake8-pep8-naming ()
   "PEP8 compliant names with Flake8 and pep8-naming."
-  :expected-result (flycheck-fail-unless-checker 'python-flake8)
-  (flycheck-with-resource-buffer "pep8-naming.py"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
+  (flycheck-testsuite-with-resource-buffer "pep8-naming.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(6 7 "N801 class names should use CapWords convention" warning)
      '(7 9 "N802 function name should be lowercase" warning)
      '(8 9 "N806 variable in function should be lowercase" warning))))

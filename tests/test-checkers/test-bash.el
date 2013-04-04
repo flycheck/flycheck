@@ -29,23 +29,23 @@
 
 (ert-deftest checker-bash-missing-quote ()
   "Test a syntax error from a missing quote."
-  :expected-result (flycheck-fail-unless-checker 'bash)
-  (flycheck-with-resource-buffer "missing-quote.bash"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'bash)
+  (flycheck-testsuite-with-resource-buffer "missing-quote.bash"
     (sh-mode)
     (sh-set-shell "bash" :no-query)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(3 nil "unexpected EOF while looking for matching `''" error)
      '(6 nil "syntax error: unexpected end of file" error))))
 
 (ert-deftest checker-bash-missing-semicolon ()
   "Test a syntax error from a missing semicolon."
-  :expected-result (flycheck-fail-unless-checker 'bash)
-  (flycheck-with-resource-buffer "missing-semicolon.bash"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'bash)
+  (flycheck-testsuite-with-resource-buffer "missing-semicolon.bash"
     (sh-mode)
     (sh-set-shell "bash" :no-query)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(5 nil "syntax error near unexpected token `fi'" error)
      '(5 nil "`fi'" error))))
 

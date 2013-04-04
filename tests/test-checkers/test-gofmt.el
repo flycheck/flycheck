@@ -29,11 +29,11 @@
 
 (ert-deftest checker-go-gofmt-syntax-error ()
   "Test a syntax error."
-  :expected-result (flycheck-fail-unless-checker 'go-gofmt)
-  (flycheck-with-resource-buffer "syntax-error.go"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'go-gofmt)
+  (flycheck-testsuite-with-resource-buffer "syntax-error.go"
     (go-mode)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(5 9 "expected '(', found 'IDENT' ta" error)
      '(6 1 "expected ')', found '}'" error))))
 

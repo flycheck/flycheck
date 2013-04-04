@@ -27,20 +27,20 @@
 
 (ert-deftest checker-ruby-unexpected-string ()
   "Test a Ruby syntax error."
-  :expected-result (flycheck-fail-unless-checker 'ruby)
-  (flycheck-with-resource-buffer "unexpected-string.rb"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby)
+  (flycheck-testsuite-with-resource-buffer "unexpected-string.rb"
     (ruby-mode)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(4 nil "syntax error, unexpected tSTRING_BEG, expecting $end" error))))
 
 (ert-deftest checker-ruby-missing-quote ()
   "Test a Ruby syntax error."
-  :expected-result (flycheck-fail-unless-checker 'ruby)
-  (flycheck-with-resource-buffer "missing-quote.rb"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby)
+  (flycheck-testsuite-with-resource-buffer "missing-quote.rb"
     (ruby-mode)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(5 nil "syntax error, unexpected tCONSTANT, expecting $end" error))))
 
 ;; Local Variables:

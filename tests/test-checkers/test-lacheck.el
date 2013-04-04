@@ -29,12 +29,12 @@
 
 (ert-deftest checker-tex-lacheck-unwanted-space ()
   "Test unwanted space."
-  :expected-result (flycheck-fail-unless-checker 'tex-lacheck)
-  (flycheck-with-resource-buffer "unwanted-space.tex"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'tex-lacheck)
+  (flycheck-testsuite-with-resource-buffer "unwanted-space.tex"
     (latex-mode)
-    (flycheck-disable-checkers 'tex-chktex)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-disable-checkers 'tex-chktex)
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(9 nil "possible unwanted space at \"{\"" warning))))
 
 ;; Local Variables:

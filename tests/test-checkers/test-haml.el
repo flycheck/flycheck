@@ -29,11 +29,11 @@
 
 (ert-deftest checker-haml-inconsistent-indentation ()
   "Test a syntax error caused by inconsistent indentation."
-  :expected-result (flycheck-fail-unless-checker 'haml)
-  (flycheck-with-resource-buffer "inconsistent-indentation.haml"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'haml)
+  (flycheck-testsuite-with-resource-buffer "inconsistent-indentation.haml"
     (haml-mode)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(5 nil "Inconsistent indentation: 3 spaces used for indentation, but the rest of the document was indented using 2 spaces." error :no-filename))))
 
 ;; Local Variables:

@@ -28,33 +28,33 @@
 
 (ert-deftest checker-emacs-lisp-missing-parenthesis ()
   "Test a syntax error caused by a missing parenthesis."
-  (flycheck-with-resource-buffer "missing-parenthesis.el"
+  (flycheck-testsuite-with-resource-buffer "missing-parenthesis.el"
     (emacs-lisp-mode)
-    (flycheck-disable-checkers 'emacs-lisp-checkdoc)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors '(3 1 "End of file during parsing" error))))
+    (flycheck-testsuite-disable-checkers 'emacs-lisp-checkdoc)
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors '(3 1 "End of file during parsing" error))))
 
 (ert-deftest checker-emacs-lisp-missing-parenthesis-compressed ()
   "Test a syntax error caused by a missing parenthesis."
-  (flycheck-with-resource-buffer "missing-parenthesis.el.gz"
+  (flycheck-testsuite-with-resource-buffer "missing-parenthesis.el.gz"
     (emacs-lisp-mode)
-    (flycheck-disable-checkers 'emacs-lisp-checkdoc)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors '(3 1 "End of file during parsing" error))))
+    (flycheck-testsuite-disable-checkers 'emacs-lisp-checkdoc)
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors '(3 1 "End of file during parsing" error))))
 
 (ert-deftest checker-emacs-lisp-missing-argument ()
   "Test a warning caused by a missing argument."
-  (flycheck-with-resource-buffer "missing-argument.el"
+  (flycheck-testsuite-with-resource-buffer "missing-argument.el"
     (emacs-lisp-mode)
-    (flycheck-disable-checkers 'emacs-lisp-checkdoc)
-    (flycheck-buffer-sync)
-    (flycheck-should-errors
+    (flycheck-testsuite-disable-checkers 'emacs-lisp-checkdoc)
+    (flycheck-testsuite-buffer-sync)
+    (flycheck-testsuite-should-errors
      '(4 6 "message called with 0 arguments, but\n    requires 1+" warning))))
 
 (ert-deftest checker-emacs-lisp-inhibited-no-byte-compile ()
   "Test that Emacs Lisp does not check when byte compilation is
   disabled."
-  (flycheck-with-resource-buffer "missing-argument.el"
+  (flycheck-testsuite-with-resource-buffer "missing-argument.el"
     (emacs-lisp-mode)
     (set (make-local-variable 'no-byte-compile) t)
     (should (buffer-file-name))
@@ -77,7 +77,7 @@ checker will refuse to check these.
 
 See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
 `https://github.com/bbatsov/prelude/issues/253'."
-  (flycheck-with-resource-buffer "missing-argument.el"
+  (flycheck-testsuite-with-resource-buffer "missing-argument.el"
     (emacs-lisp-mode)
     (should (flycheck-may-use-checker 'emacs-lisp))
     (rename-buffer "foo-autoloads.el")
@@ -91,7 +91,7 @@ checking them interfers with package installation.
 
 See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
 `https://github.com/bbatsov/prelude/issues/253'."
-(flycheck-with-resource-buffer "missing-argument.el"
+(flycheck-testsuite-with-resource-buffer "missing-argument.el"
     (emacs-lisp-mode)
     (should (flycheck-may-use-checker 'emacs-lisp))
     (rename-buffer " *Compiler Input*")
