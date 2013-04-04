@@ -33,7 +33,7 @@
   (flycheck-testsuite-with-resource-buffer "syntax-error.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-testsuite-disable-checkers 'python-flake8)
+    (flycheck-testsuite-disable-checkers 'python-flake8 'python-pyflakes)
     (flycheck-testsuite-buffer-sync)
     (flycheck-testsuite-should-errors '(6 nil "invalid syntax" error))))
 
@@ -43,7 +43,7 @@
   (flycheck-testsuite-with-resource-buffer "missing-quote.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-testsuite-disable-checkers 'python-flake8)
+    (flycheck-testsuite-disable-checkers 'python-flake8 'python-pyflakes)
     (flycheck-testsuite-buffer-sync)
     (flycheck-testsuite-should-errors
      '(5 nil "EOL while scanning string literal" error))))
@@ -54,7 +54,7 @@
   (flycheck-testsuite-with-resource-buffer "unknown-module.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-testsuite-disable-checkers 'python-flake8)
+    (flycheck-testsuite-disable-checkers 'python-flake8 'python-pyflakes)
     (flycheck-testsuite-buffer-sync)
     (flycheck-testsuite-should-errors '(5 nil "Unable to import 'spam'" error))))
 
@@ -64,7 +64,7 @@
   (flycheck-testsuite-with-resource-buffer "unused-import.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-testsuite-disable-checkers 'python-flake8)
+    (flycheck-testsuite-disable-checkers 'python-flake8 'python-pyflakes)
     (flycheck-testsuite-buffer-sync)
     (flycheck-testsuite-should-errors '(5 nil "Unused import re" warning))))
 
@@ -74,7 +74,7 @@
   (flycheck-testsuite-with-resource-buffer "map-builtin.py"
     (let ((python-indent-guess-indent-offset nil))
       (python-mode))
-    (flycheck-testsuite-disable-checkers 'python-flake8)
+    (flycheck-testsuite-disable-checkers 'python-flake8 'python-pyflakes)
     (flycheck-testsuite-buffer-sync)
     (flycheck-testsuite-should-errors '(5 nil "Used builtin function 'map'" warning))))
 
