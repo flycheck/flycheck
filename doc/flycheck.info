@@ -135,12 +135,11 @@ File: flycheck.info,  Node: Activation,  Prev: Installation,  Up: Introduction
 1.3 Activation
 ==============
 
-Enable 'flycheck-mode' in your 'init.el' file:
+Once installed, enable Flycheck mode with 'M-x flycheck-mode'.  To
+automatically enable Flycheck in all buffers, in which it can be used,
+add the following to your 'init.el' file:
 
-     (add-hook 'prog-mode-hook 'flycheck-mode)
-     (add-hook 'text-mode-hook 'flycheck-mode)
-
-Alternatively, use 'M-x flycheck-mode' to manually enable Flycheck.
+     (add-hook 'after-init-hook #'global-flycheck-mode)
 
 
 File: flycheck.info,  Node: Usage,  Next: Extending,  Prev: Introduction,  Up: Top
@@ -1520,6 +1519,10 @@ master (unreleased)
 
    * New features:
 
+        * Add a global Flycheck mode
+          (https://github.com/lunaryorn/flycheck/issues/29).
+          '(global-flycheck-mode)' is now the recommended way to enable
+          Flycheck
         * Add support for syntax checker options
           (https://github.com/lunaryorn/flycheck/issues/72)
         * Add option for the coding standard used by the 'php-phpcs'
@@ -2155,44 +2158,44 @@ Node: Introduction1993
 Node: Features2784
 Node: Installation3695
 Node: Activation4869
-Node: Usage5194
-Node: Syntax checking5817
-Node: Selection7079
-Node: Configuration9660
-Node: Reporting12328
-Node: Navigation14683
-Node: Mode line16479
-Node: Extending17380
-Node: Declaration17979
-Node: Error parsers29033
-Node: Option filters30017
-Node: Examples30356
-Node: Simple example30788
-Node: Predicate example33852
-Node: Configuration example35833
-Node: Chaining example38492
-Node: API39878
-Node: Error API40666
-Node: Error parser API43267
-Node: Contribution43493
-Node: Reporting issues44169
-Node: Contributing syntax checkers44905
-Node: Contributing code45700
-Node: Unit tests47040
-Node: Changes48473
-Node: 0.148993
-Node: 0.249277
-Node: 0.349555
-Node: 0.449791
-Node: 0.550566
-Node: 0.651786
-Node: 0.6.154636
-Node: 0.754785
-Node: 0.7.155799
-Node: master56517
-Node: Credits57625
-Node: GNU Free Documentation License59449
-Node: Syntax checkers84601
-Node: Function and Variable Index85466
+Node: Usage5220
+Node: Syntax checking5843
+Node: Selection7105
+Node: Configuration9686
+Node: Reporting12354
+Node: Navigation14709
+Node: Mode line16505
+Node: Extending17406
+Node: Declaration18005
+Node: Error parsers29059
+Node: Option filters30043
+Node: Examples30382
+Node: Simple example30814
+Node: Predicate example33878
+Node: Configuration example35859
+Node: Chaining example38518
+Node: API39904
+Node: Error API40692
+Node: Error parser API43293
+Node: Contribution43519
+Node: Reporting issues44195
+Node: Contributing syntax checkers44931
+Node: Contributing code45726
+Node: Unit tests47066
+Node: Changes48499
+Node: 0.149019
+Node: 0.249303
+Node: 0.349581
+Node: 0.449817
+Node: 0.550592
+Node: 0.651812
+Node: 0.6.154662
+Node: 0.754811
+Node: 0.7.155825
+Node: master56543
+Node: Credits57840
+Node: GNU Free Documentation License59664
+Node: Syntax checkers84816
+Node: Function and Variable Index85681
 
 End Tag Table

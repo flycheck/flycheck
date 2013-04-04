@@ -370,6 +370,9 @@ New features:
 
 @itemize @bullet
 @item
+@ghissue{29, Add a global Flycheck mode}.  @code{(global-flycheck-mode)}
+is now the recommended way to enable Flycheck
+@item
 @ghissue{72, Add support for syntax checker options}
 @item
 Add option for the coding standard used by the @code{php-phpcs} syntax

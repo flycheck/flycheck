@@ -254,22 +254,6 @@ running checks, and empty all variables used by flycheck."
   (and (fboundp 'tramp-tramp-file-p)
        (tramp-tramp-file-p filename)))
 
-(defun flycheck-may-enable-mode ()
-  "Determine whether Flycheck mode may be enabled.
-
-Flycheck mode is not enabled under any of the following
-conditions:
-
-- No suitable syntax checker exists for the current buffer.
-- The current buffer is loaded through Tramp.
-- The current buffer is a temporary buffer (i.e. its name starts
-  with a space).
-
-Return t if Flycheck mode may be enabled, and nil otherwise."
-  (and (not (s-starts-with? (buffer-name) " "))
-       (not (flycheck-tramp-file-p (buffer-file-name)))
-       (flycheck-get-checker-for-buffer)))
-
 ;;;###autoload
 (define-minor-mode flycheck-mode
   "Minor mode for on-the-fly syntax checking.
@@ -297,29 +281,23 @@ buffer manually.
   :require 'flycheck
   (cond
    (flycheck-mode
-    (cond
-     ((flycheck-may-enable-mode)
-      ;; Start flycheck mode
-      (flycheck-report-status "")
+    (flycheck-report-status "")
 
-      (add-hook 'after-save-hook 'flycheck-buffer-safe nil t)
-      (add-hook 'after-change-functions 'flycheck-handle-change nil t)
-      (add-hook 'kill-buffer-hook 'flycheck-teardown nil t)
-      ;; Execute deferred checks if the buffer visibility changes
-      (add-hook 'window-configuration-change-hook
-                'flycheck-perform-deferred-syntax-check nil t)
+    (add-hook 'after-save-hook 'flycheck-buffer-safe nil t)
+    (add-hook 'after-change-functions 'flycheck-handle-change nil t)
+    (add-hook 'kill-buffer-hook 'flycheck-teardown nil t)
+    ;; Execute deferred checks if the buffer visibility changes
+    (add-hook 'window-configuration-change-hook
+              'flycheck-perform-deferred-syntax-check nil t)
 
-      ;; Update error display in minibuffer after commands and error navigation
-      (add-hook 'post-command-hook 'flycheck-show-error-at-point-soon nil t)
-      (add-hook 'next-error-hook 'flycheck-show-error-at-point nil t)
+    ;; Update error display in minibuffer after commands and error navigation
+    (add-hook 'post-command-hook 'flycheck-show-error-at-point-soon nil t)
+    (add-hook 'next-error-hook 'flycheck-show-error-at-point nil t)
 
-      (setq flycheck-previous-next-error-function next-error-function)
-      (setq next-error-function 'flycheck-next-error-function)
+    (setq flycheck-previous-next-error-function next-error-function)
+    (setq next-error-function 'flycheck-next-error-function)
 
-      (flycheck-buffer-safe))
-     (t
-      (flycheck-mode -1)
-      (message "Cannot use Flycheck mode in buffer %s" (buffer-name)))))
+    (flycheck-buffer-safe))
    (t
     (remove-hook 'after-save-hook 'flycheck-buffer-safe t)
     (remove-hook 'after-change-functions 'flycheck-handle-change t)
@@ -333,11 +311,35 @@ buffer manually.
 
     (flycheck-teardown))))
 
-;; Add Flycheck Mode as customization option to basic modes
+(defun flycheck-may-enable-mode ()
+  "Determine whether Flycheck mode may be enabled.
+
+Flycheck mode is not enabled under any of the following
+conditions:
+
+- No suitable syntax checker exists for the current buffer.
+- The current buffer is loaded through Tramp.
+- The current buffer is a temporary buffer (i.e. its name starts
+  with a space).
+
+Return t if Flycheck mode may be enabled, and nil otherwise."
+  (and (not (s-starts-with? (buffer-name) " "))
+       (not (flycheck-tramp-file-p (buffer-file-name)))
+       (flycheck-get-checker-for-buffer)))
+
+(defun flycheck-mode-on-safe ()
+  "Enable `flycheck-mode' if it is safe to do so.
+
+`flycheck-mode' is only enabled if `flycheck-may-enable-mode'
+returns t."
+  (when (flycheck-may-enable-mode)
+    (flycheck-mode)))
+
 ;;;###autoload
-(custom-add-option 'text-mode-hook #'flycheck-mode)
-;;;###autoload
-(custom-add-option 'prog-mode-hook #'flycheck-mode)
+(define-globalized-minor-mode global-flycheck-mode flycheck-mode
+  flycheck-mode-on-safe
+  :init-value nil
+  :group 'flycheck)
 
 (defun flycheck-handle-change (beg end _len)
   "Handle a buffer change between BEG and END.

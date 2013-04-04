@@ -25,14 +25,6 @@
 (require 'ert)
 (require 'flycheck)
 
-(ert-deftest flycheck-mode-no-checker-available ()
-  "Test that Flycheck mode is not enabled if no syntax checker is available."
-  (with-temp-buffer
-    (insert "Hello world\n")
-    (fundamental-mode)                  ; This mode certainly has no checker
-    (flycheck-mode)
-    (should-not flycheck-mode)))
-
 (ert-deftest flycheck-select-checker ()
   "Test that checkers are properly selected.
 

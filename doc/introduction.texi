@@ -112,15 +112,13 @@ syntax checker and its dependencies.
 @comment  node-name,  next,  previous,  up
 @section Activation
 
-Enable @code{flycheck-mode} in your @file{init.el} file:
+Once installed, enable Flycheck mode with @kbd{M-x flycheck-mode}.  To
+automatically enable Flycheck in all buffers, in which it can be used,
+add the following to your @file{init.el} file:
 
 @lisp
-(add-hook 'prog-mode-hook 'flycheck-mode)
-(add-hook 'text-mode-hook 'flycheck-mode)
+(add-hook 'after-init-hook #'global-flycheck-mode)
 @end lisp
-
-@noindent
-Alternatively, use @kbd{M-x flycheck-mode} to manually enable Flycheck.
 
 @c Local Variables:
 @c mode: texinfo

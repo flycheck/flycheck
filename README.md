@@ -63,16 +63,15 @@ Usage
 
 Once installed, enable Flycheck mode with `M-x flycheck-mode`.
 
-To enable it for all text editing and programming modes, add the following to
-your `init.el` file:
+To enable Flycheck mode in all buffers, in which it can be used, add the
+following to your `init.el` file:
 
 ```scheme
-(add-hook 'prog-mode-hook 'flycheck-mode)
-(add-hook 'text-mode-hook 'flycheck-mode)
+(add-hook 'after-init-hook #'global-flycheck-modes)
 ```
 
-In `flycheck-mode` the buffer is automatically checked on-the-fly.  You can also
-check the buffer manually with `C-c ! c`.
+In Flycheck mode the buffer will automatically be checked on the fly, if a
+suitable syntax checker exists.  Use `C-c ! c` to start a syntax check manually.
 
 A suitable syntax checker is automatically selected from the list of registered
 checkers in `flycheck-checkers`.  Use  `C-c ! s` to manually select a specific
