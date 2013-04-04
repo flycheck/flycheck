@@ -31,34 +31,23 @@
 (ert-deftest checker-perl-unused-variable ()
   "Test an unused variable with the Perl checker."
   :expected-result (flycheck-testsuite-fail-unless-checker 'perl)
-  (flycheck-testsuite-with-resource-buffer "unused-variable.pl"
-    (dolist (mode '(perl-mode cperl-mode))
-      (funcall mode)
-      (flycheck-testsuite-buffer-sync)
-      (flycheck-testsuite-should-errors
-       '(4 nil "Name \"main::x\" used only once: possible typo" error))
-      (flycheck-testsuite-ensure-clear))))
+  (flycheck-testsuite-should-syntax-check
+   "unused-variable.pl" '(perl-mode cperl-mode) nil
+   '(4 nil "Name \"main::x\" used only once: possible typo" error)))
 
 (ert-deftest checker-perl-unqualified-variable ()
   "Test an unqualified variable with the Perl checker."
   :expected-result (flycheck-testsuite-fail-unless-checker 'perl)
-  (flycheck-testsuite-with-resource-buffer "unqualified-variable.pl"
-    (dolist (mode '(perl-mode cperl-mode))
-      (funcall mode)
-      (flycheck-testsuite-buffer-sync)
-      (flycheck-testsuite-should-errors
-       '(5 nil "Global symbol \"$x\" requires explicit package name" error))
-      (flycheck-testsuite-ensure-clear))))
+  (flycheck-testsuite-should-syntax-check
+   "unqualified-variable.pl" '(perl-mode cperl-mode) nil
+   '(5 nil "Global symbol \"$x\" requires explicit package name" error)))
 
 (ert-deftest checker-perl-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'perl)
   "Test a syntax error with the Perl checker."
-  (flycheck-testsuite-with-resource-buffer "syntax-error.pl"
-    (dolist (mode '(perl-mode cperl-mode))
-      (funcall mode)
-      (flycheck-testsuite-buffer-sync)
-      (flycheck-testsuite-should-errors '(4 nil "syntax error" error))
-      (flycheck-testsuite-ensure-clear))))
+  (flycheck-testsuite-should-syntax-check
+   "syntax-error.pl" '(perl-mode cperl-mode) nil
+   '(4 nil "syntax error" error)))
 
 (require 'sh-script)
 

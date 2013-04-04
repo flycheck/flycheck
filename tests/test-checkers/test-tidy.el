@@ -28,23 +28,19 @@
 (ert-deftest checker-tidy-missing-tag ()
   "Test a warning caused by a missing tag."
   :expected-result (flycheck-testsuite-fail-unless-checker 'html-tidy)
-  (flycheck-testsuite-with-resource-buffer "missing-tag.html"
-    (html-mode)
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors
-     '(3 1 "missing <!DOCTYPE> declaration" warning :no-filename)
-     '(5 5 "missing </title> before </head>" warning :no-filename))))
+  (flycheck-testsuite-should-syntax-check
+   "missing-tag.html" 'html-mode nil
+   '(3 1 "missing <!DOCTYPE> declaration" warning :no-filename)
+   '(5 5 "missing </title> before </head>" warning :no-filename)))
 
 (ert-deftest checker-tidy-unknown-tag ()
   "Test an error caused by an unknown tag."
   :expected-result (flycheck-testsuite-fail-unless-checker 'html-tidy)
-  (flycheck-testsuite-with-resource-buffer "unknown-tag.html"
-    (html-mode)
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors
-     '(3 1 "missing <!DOCTYPE> declaration" warning :no-filename)
-     '(8 5 "<spam> is not recognized!" error :no-filename)
-     '(8 5 "discarding unexpected <spam>" warning :no-filename))))
+  (flycheck-testsuite-should-syntax-check
+   "unknown-tag.html" 'html-mode nil
+   '(3 1 "missing <!DOCTYPE> declaration" warning :no-filename)
+   '(8 5 "<spam> is not recognized!" error :no-filename)
+   '(8 5 "discarding unexpected <spam>" warning :no-filename)))
 
 ;; Local Variables:
 ;; coding: utf-8

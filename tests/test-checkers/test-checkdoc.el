@@ -27,21 +27,17 @@
 
 (ert-deftest checker-emacs-lisp-checkdoc-missing-period ()
   "Test a checkdoc warning caused by a missing period in a docstring."
-  (flycheck-testsuite-with-resource-buffer "missing-period-in-docstring.el"
-    (emacs-lisp-mode)
-    ;; Checkdoc is chained after Emacs Lisp
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors
-     '(12 nil "First sentence should end with punctuation" warning))))
+  (flycheck-testsuite-should-syntax-check
+   "missing-period-in-docstring.el"
+   'emacs-lisp-mode nil                 ; Checkdoc is chained after Emacs Lisp
+   '(12 nil "First sentence should end with punctuation" warning)))
 
 (ert-deftest checker-emacs-lisp-checkdoc-missing-period-compressed ()
   "Test a checkdoc warning caused by a missing period in a docstring."
-  (flycheck-testsuite-with-resource-buffer "missing-period-in-docstring.el.gz"
-    (emacs-lisp-mode)
-    ;; Checkdoc is chained after Emacs Lisp
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors
-     '(12 nil "First sentence should end with punctuation" warning))))
+  (flycheck-testsuite-should-syntax-check
+   "missing-period-in-docstring.el.gz"
+   'emacs-lisp-mode nil
+   '(12 nil "First sentence should end with punctuation" warning)))
 
 (ert-deftest checker-emacs-lisp-checkdoc-no-buffer-file-name ()
   "Test checkdoc checker in buffers without file names.

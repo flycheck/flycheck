@@ -45,6 +45,11 @@
 ;; `flycheck-testsuite-with-resource-buffer' executes forms with a temporary
 ;; buffer using a resource file from the test suite.
 
+;; Test helpers
+;; ------------
+;;
+;; `flycheck-testsuite-with-hook' executes the body with a specified hook form.
+
 ;; Test environment utilities
 ;; --------------------------
 ;;
@@ -84,6 +89,9 @@
 ;; ---------------
 ;;
 ;; `flycheck-testsuite-should-errors' tests that the current buffer has ERRORS.
+;;
+;; `flycheck-testsuite-should-syntax-check' tests that a syntax check results in
+;; the specified errors.
 ;;
 ;; `flycheck-testsuite-ensure-clear' clear the error state of the current
 ;; buffer, and signals a test failure if clearing failed.
@@ -169,6 +177,23 @@ The absolute file name of RESOURCE-FILE is determined with
        (cd (file-name-directory filename))
        (rename-buffer (file-name-nondirectory filename))
        ,@body)))
+
+
+;;;; Test helpers
+(defmacro flycheck-testsuite-with-hook (hook-var form &rest body)
+  "Set HOOK-VAR to FORM and evaluate BODY.
+
+HOOK-VAR is a hook variable or a list thereof, which is set to
+FORM before evaluating BODY.
+
+After evaluation of BODY, set HOOK-VAR to nil."
+  (declare (indent 2))
+  `(let ((hooks (quote ,(if (listp hook-var) hook-var (list hook-var)))))
+     (unwind-protect
+          (progn
+            (--each hooks (add-hook it #'(lambda () ,form)))
+            ,@body)
+        (--each hooks (set it nil)))))
 
 
 ;;;; Test environment helpers
@@ -337,6 +362,30 @@ Each error in ERRORS is a list as expected by
     (dolist (err errors)
       (flycheck-testsuite-should-error err))
     (should (= (length errors) (length flycheck-current-errors)))))
+
+(defun flycheck-testsuite-should-syntax-check
+  (resource-file modes disabled-checkers &rest errors)
+  "Test a syntax check in RESOURCE-FILE with MODES.
+
+RESOURCE-FILE is the file to check.  MODES is a single major mode
+symbol or a list thereof, specifying the major modes to syntax
+check with.  DISABLED-CHECKERS is a syntax checker or a list
+thereof to disable before checking the file.  ERRORS is the list
+of expected errors."
+  (when (symbolp modes)
+    (setq modes (list modes)))
+  (when (symbolp disabled-checkers)
+    (setq disabled-checkers (list disabled-checkers)))
+  (--each modes
+    (flycheck-testsuite-with-resource-buffer resource-file
+      (funcall it)
+      (when disabled-checkers
+        (apply #'flycheck-testsuite-disable-checkers disabled-checkers))
+      (flycheck-testsuite-buffer-sync)
+      (if (eq (car errors) :no-errors)
+          (should-not flycheck-current-errors)
+        (apply #'flycheck-testsuite-should-errors errors))
+      (flycheck-testsuite-ensure-clear))))
 
 
 (provide 'flycheck-testsuite)

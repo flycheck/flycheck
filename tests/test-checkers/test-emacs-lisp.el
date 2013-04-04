@@ -28,28 +28,21 @@
 
 (ert-deftest checker-emacs-lisp-missing-parenthesis ()
   "Test a syntax error caused by a missing parenthesis."
-  (flycheck-testsuite-with-resource-buffer "missing-parenthesis.el"
-    (emacs-lisp-mode)
-    (flycheck-testsuite-disable-checkers 'emacs-lisp-checkdoc)
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors '(3 1 "End of file during parsing" error))))
+  (flycheck-testsuite-should-syntax-check
+   "missing-parenthesis.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
+   '(3 1 "End of file during parsing" error)))
 
 (ert-deftest checker-emacs-lisp-missing-parenthesis-compressed ()
   "Test a syntax error caused by a missing parenthesis."
-  (flycheck-testsuite-with-resource-buffer "missing-parenthesis.el.gz"
-    (emacs-lisp-mode)
-    (flycheck-testsuite-disable-checkers 'emacs-lisp-checkdoc)
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors '(3 1 "End of file during parsing" error))))
+  (flycheck-testsuite-should-syntax-check
+   "missing-parenthesis.el.gz" 'emacs-lisp-mode 'emacs-lisp-checkdoc
+   '(3 1 "End of file during parsing" error)))
 
 (ert-deftest checker-emacs-lisp-missing-argument ()
   "Test a warning caused by a missing argument."
-  (flycheck-testsuite-with-resource-buffer "missing-argument.el"
-    (emacs-lisp-mode)
-    (flycheck-testsuite-disable-checkers 'emacs-lisp-checkdoc)
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors
-     '(4 6 "message called with 0 arguments, but\n    requires 1+" warning))))
+  (flycheck-testsuite-should-syntax-check
+   "missing-argument.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
+   '(4 6 "message called with 0 arguments, but\n    requires 1+" warning)))
 
 (ert-deftest checker-emacs-lisp-inhibited-no-byte-compile ()
   "Test that Emacs Lisp does not check when byte compilation is

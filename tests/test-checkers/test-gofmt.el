@@ -30,12 +30,10 @@
 (ert-deftest checker-go-gofmt-syntax-error ()
   "Test a syntax error."
   :expected-result (flycheck-testsuite-fail-unless-checker 'go-gofmt)
-  (flycheck-testsuite-with-resource-buffer "syntax-error.go"
-    (go-mode)
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors
-     '(5 9 "expected '(', found 'IDENT' ta" error)
-     '(6 1 "expected ')', found '}'" error))))
+  (flycheck-testsuite-should-syntax-check
+   "syntax-error.go" 'go-mode nil
+   '(5 9 "expected '(', found 'IDENT' ta" error)
+   '(6 1 "expected ')', found '}'" error)))
 
 ;; Local Variables:
 ;; coding: utf-8

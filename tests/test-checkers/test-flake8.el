@@ -30,94 +30,76 @@
 (ert-deftest checker-python-flake8-syntax-error ()
   "Test a real syntax error with flake8."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
-  (flycheck-testsuite-with-resource-buffer "syntax-error.py"
-    (let ((python-indent-guess-indent-offset nil))
-      (python-mode))
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors '(6 13 "E901 SyntaxError: invalid syntax" error))))
+  (flycheck-testsuite-should-syntax-check
+   "syntax-error.py" 'python-mode '(python-pylint python-pyflakes)
+    '(6 13 "E901 SyntaxError: invalid syntax" error)))
 
 (ert-deftest checker-python-flake8-missing-quote ()
   "Test a syntax error with flake8."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
-  (flycheck-testsuite-with-resource-buffer "missing-quote.py"
-    (let ((python-indent-guess-indent-offset nil))
-      (python-mode))
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors
-     '(5 14 "E901 SyntaxError: EOL while scanning string literal" error))))
+  (flycheck-testsuite-should-syntax-check
+   "missing-quote.py" 'python-mode '(python-pylint python-pyflakes)
+   '(5 14 "E901 SyntaxError: EOL while scanning string literal" error)))
 
 (ert-deftest checker-python-flake8-unused-import ()
   "Test an unused import with flake8"
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
-  (flycheck-testsuite-with-resource-buffer "unused-import.py"
-    (let ((python-indent-guess-indent-offset nil))
-      (python-mode))
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors
-     '(5 1 "F401 're' imported but unused" warning))))
+  (flycheck-testsuite-should-syntax-check
+   "unused-import.py" 'python-mode '(python-pylint python-pyflakes)
+    '(5 1 "F401 're' imported but unused" warning)))
 
 (ert-deftest checker-python-flake8-unused-import-ignored ()
   "Test an unused import being ignored with flake8."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
-  (flycheck-testsuite-with-resource-buffer "unused-import.py"
-    (let ((python-indent-guess-indent-offset nil))
-      (python-mode))
-    (setq flycheck-flake8rc "flake8rc")
-    (flycheck-testsuite-buffer-sync)
-    (should-not flycheck-current-errors)))
+  (flycheck-testsuite-with-hook python-mode-hook
+      (setq flycheck-flake8rc "flake8rc")
+    (flycheck-testsuite-should-syntax-check
+     "unused-import.py" 'python-mode '(python-pylint python-pyflakes)
+     :no-errors)))
 
 (ert-deftest checker-python-flake8-superfluous-space ()
   "Test superfluous spaces with flake8."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
-  (flycheck-testsuite-with-resource-buffer "superfluous-space.py"
-    (let ((python-indent-guess-indent-offset nil))
-      (python-mode))
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors
-     '(6 13 "E251 unexpected spaces around keyword / parameter equals" error)
-     '(6 15 "E251 unexpected spaces around keyword / parameter equals" error))))
+  (flycheck-testsuite-should-syntax-check
+   "superfluous-space.py" 'python-mode '(python-pylint python-pyflakes)
+   '(6 13 "E251 unexpected spaces around keyword / parameter equals" error)
+   '(6 15 "E251 unexpected spaces around keyword / parameter equals" error)))
 
 (ert-deftest checker-python-flake8-superfluous-space-ignored ()
   "Test superfluous space being ignored with flake8."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
-  (flycheck-testsuite-with-resource-buffer "superfluous-space.py"
-    (let ((python-indent-guess-indent-offset nil))
-      (python-mode))
-    (setq flycheck-flake8rc "flake8rc")
-    (flycheck-testsuite-buffer-sync)
-    (should-not flycheck-current-errors)))
+  (flycheck-testsuite-with-hook python-mode-hook
+      (setq flycheck-flake8rc "flake8rc")
+    (flycheck-testsuite-should-syntax-check
+     "superfluous-space.py" 'python-mode '(python-pylint python-pyflakes)
+     :no-errors)))
 
 (ert-deftest checker-python-flake8-complex-code ()
   "Test superfluous spaces with flake8."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
-  (flycheck-testsuite-with-resource-buffer "complex-code.py"
-    (let ((python-indent-guess-indent-offset nil))
-      (python-mode))
-    (setq flycheck-flake8-maximum-complexity 4)
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors '(6 1 "C901 'foo' is too complex (4)" warning))))
+  (flycheck-testsuite-with-hook python-mode-hook
+      (setq flycheck-flake8-maximum-complexity 4)
+    (flycheck-testsuite-should-syntax-check
+     "complex-code.py" 'python-mode '(python-pylint python-pyflakes)
+     '(6 1 "C901 'foo' is too complex (4)" warning))))
 
 (ert-deftest checker-python-flake8-very-long-line ()
   "Test an overly long line, using the maximum line length option."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
-  (flycheck-testsuite-with-resource-buffer "very-long-line.py"
-    (python-mode)
-    (setq flycheck-flake8-maximum-line-length 50)
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors
+  (flycheck-testsuite-with-hook python-mode-hook
+      (setq flycheck-flake8-maximum-line-length 50)
+    (flycheck-testsuite-should-syntax-check
+     "very-long-line.py" 'python-mode '(python-pylint python-pyflakes)
      '(5 51 "E501 line too long (61 > 50 characters)" error))))
 
 (ert-deftest checker-python-flake8-pep8-naming ()
   "PEP8 compliant names with Flake8 and pep8-naming."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
-  (flycheck-testsuite-with-resource-buffer "pep8-naming.py"
-    (let ((python-indent-guess-indent-offset nil))
-      (python-mode))
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors
-     '(6 7 "N801 class names should use CapWords convention" warning)
-     '(7 9 "N802 function name should be lowercase" warning)
-     '(8 9 "N806 variable in function should be lowercase" warning))))
+  (flycheck-testsuite-should-syntax-check
+   "pep8-naming.py" 'python-mode '(python-pylint python-pyflakes)
+   '(6 7 "N801 class names should use CapWords convention" warning)
+   '(7 9 "N802 function name should be lowercase" warning)
+   '(8 9 "N806 variable in function should be lowercase" warning)))
 
 ;; Local Variables:
 ;; coding: utf-8

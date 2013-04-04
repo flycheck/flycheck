@@ -31,32 +31,23 @@
 (ert-deftest checker-javascript-jshint-missing-semicolon ()
   "A missing semicolon."
   :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
-  (flycheck-testsuite-with-resource-buffer "missing-semicolon.js"
-    (dolist (mode '(js-mode js2-mode js3-mode))
-      (funcall mode)
-      (flycheck-testsuite-buffer-sync)
-      (flycheck-testsuite-should-errors '(6 23 "Missing semicolon." error))
-      (flycheck-testsuite-ensure-clear))))
+  (flycheck-testsuite-should-syntax-check
+   "missing-semicolon.js" '(js-mode js2-mode js3-mode) nil
+   '(6 23 "Missing semicolon." error)))
 
 (ert-deftest checker-javascript-jshint-use-eval ()
   "Use eval()"
   :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
-  (flycheck-testsuite-with-resource-buffer "use-eval.js"
-    (dolist (mode '(js-mode js2-mode js3-mode))
-      (funcall mode)
-      (flycheck-testsuite-buffer-sync)
-      (flycheck-testsuite-should-errors '(3 1 "eval can be harmful." error))
-      (flycheck-testsuite-ensure-clear))))
+  (flycheck-testsuite-should-syntax-check
+   "use-eval.js" '(js-mode js2-mode js3-mode) nil
+   '(3 1 "eval can be harmful." error)))
 
 (ert-deftest checker-javascript-jshint-unused-variable ()
   "An unused variable."
   :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
-  (flycheck-testsuite-with-resource-buffer "unused-variable.js"
-    (dolist (mode '(js-mode js2-mode js3-mode))
-      (funcall mode)
-      (flycheck-testsuite-buffer-sync)
-      (flycheck-testsuite-should-errors '(5 nil "Unused variable: 'foo'" warning))
-      (flycheck-testsuite-ensure-clear))))
+  (flycheck-testsuite-should-syntax-check
+   "unused-variable.js" '(js-mode js2-mode js3-mode) nil
+   '(5 nil "Unused variable: 'foo'" warning)))
 
 ;; Local Variables:
 ;; coding: utf-8

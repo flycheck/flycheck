@@ -30,27 +30,25 @@
 (ert-deftest checker-coffeelint-throwing-strings ()
   "Test an error caused by throwing a string."
   :expected-result (flycheck-testsuite-fail-unless-checker 'coffee-coffeelint)
-  (flycheck-testsuite-with-resource-buffer "throwing-string.coffee"
-    (coffee-mode)
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors '(4 nil "Throwing strings is forbidden" error))))
+  (flycheck-testsuite-should-syntax-check
+   "throwing-string.coffee" 'coffee-mode nil
+   '(4 nil "Throwing strings is forbidden" error)))
 
 (ert-deftest checker-coffeelint-throwing-strings-warning ()
   "Test a warning caused by throwing a string."
   :expected-result (flycheck-testsuite-fail-unless-checker 'coffee-coffeelint)
-  (flycheck-testsuite-with-resource-buffer "throwing-string.coffee"
-    (coffee-mode)
-    (setq flycheck-coffeelintrc "coffeelint.json")
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors '(4 nil "Throwing strings is forbidden" warning))))
+  (flycheck-testsuite-with-hook coffee-mode-hook
+      (setq flycheck-coffeelintrc "coffeelint.json")
+    (flycheck-testsuite-should-syntax-check
+     "throwing-string.coffee" 'coffee-mode nil
+     '(4 nil "Throwing strings is forbidden" warning))))
 
 (ert-deftest checker-coffeelint-missing-quote ()
   "Test a syntax error caused by a missing quote."
   :expected-result (flycheck-testsuite-fail-unless-checker 'coffee-coffeelint)
-  (flycheck-testsuite-with-resource-buffer "missing-quote.coffee"
-    (coffee-mode)
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors '(4 nil "missing \", starting" error :no-filename))))
+  (flycheck-testsuite-should-syntax-check
+   "missing-quote.coffee" 'coffee-mode nil
+   '(4 nil "missing \", starting" error :no-filename)))
 
 ;; Local Variables:
 ;; coding: utf-8

@@ -28,23 +28,19 @@
 (ert-deftest checker-css-csslint-qualified-heading ()
   "Test a warning caused by a qualified heading."
   :expected-result (flycheck-testsuite-fail-unless-checker 'css-csslint)
-  (flycheck-testsuite-with-resource-buffer "qualified-heading.css"
-    (css-mode)
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors
-     '(3 6 "Heading (h1) should not be qualified." warning))))
+  (flycheck-testsuite-should-syntax-check
+   "qualified-heading.css" 'css-mode nil
+   '(3 6 "Heading (h1) should not be qualified." warning)))
 
 (ert-deftest checker-css-csslint-missing-brace ()
   "Test a syntax error caused by a missing brace."
   :expected-result (flycheck-testsuite-fail-unless-checker 'css-csslint)
-  (flycheck-testsuite-with-resource-buffer "missing-brace.css"
-    (css-mode)
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors
-     '(4 16 "Expected LBRACE at line 4, col 16." error)
-     '(4 16 "Unexpected token '100%' at line 4, col 16." error)
-     '(4 20 "Unexpected token ';' at line 4, col 20." error)
-     '(5 1 "Unexpected token '}' at line 5, col 1." error))))
+  (flycheck-testsuite-should-syntax-check
+   "missing-brace.css" 'css-mode nil
+   '(4 16 "Expected LBRACE at line 4, col 16." error)
+   '(4 16 "Unexpected token '100%' at line 4, col 16." error)
+   '(4 20 "Unexpected token ';' at line 4, col 20." error)
+   '(5 1 "Unexpected token '}' at line 5, col 1." error)))
 
 ;; Local Variables:
 ;; coding: utf-8

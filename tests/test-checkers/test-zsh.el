@@ -30,20 +30,19 @@
 (ert-deftest checker-zsh-missing-quote ()
   "Test a syntax error from a missing quote."
   :expected-result (flycheck-testsuite-fail-unless-checker 'zsh)
-  (flycheck-testsuite-with-resource-buffer "missing-quote.zsh"
-    (sh-mode)
-    (sh-set-shell "zsh" :no-query)
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors '(6 nil "unmatched '" error))))
+  (flycheck-testsuite-with-hook sh-mode-hook
+      (sh-set-shell "zsh" :no-query)
+    (flycheck-testsuite-should-syntax-check
+     "missing-quote.zsh" 'sh-mode nil '(6 nil "unmatched '" error))))
 
 (ert-deftest checker-zsh-missing-semicolon ()
   "Test a syntax error from a missing semicolon."
   :expected-result (flycheck-testsuite-fail-unless-checker 'zsh)
-  (flycheck-testsuite-with-resource-buffer "missing-semicolon.zsh"
-    (sh-mode)
-    (sh-set-shell "zsh" :no-query)
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors '(5 nil "parse error near `fi'" error))))
+  (flycheck-testsuite-with-hook sh-mode-hook
+      (sh-set-shell "zsh" :no-query)
+    (flycheck-testsuite-should-syntax-check
+     "missing-semicolon.zsh" 'sh-mode nil
+     '(5 nil "parse error near `fi'" error))))
 
 ;; Local Variables:
 ;; coding: utf-8

@@ -30,34 +30,23 @@
 (ert-deftest checker-python-pyflakes-syntax-error ()
   "Test a real syntax error with pyflakes."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-pyflakes)
-  (flycheck-testsuite-with-resource-buffer "syntax-error.py"
-    (let ((python-indent-guess-indent-offset nil))
-      (python-mode))
-    (flycheck-testsuite-disable-checkers 'python-flake8 'python-pylint)
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors '(6 nil "invalid syntax" error))))
+  (flycheck-testsuite-should-syntax-check
+   "syntax-error.py" 'python-mode '(python-flake8 python-pylint)
+    '(6 nil "invalid syntax" error)))
 
 (ert-deftest checker-python-pyflakes-missing-quote ()
   "Test a syntax error with pyflakes."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-pyflakes)
-  (flycheck-testsuite-with-resource-buffer "missing-quote.py"
-    (let ((python-indent-guess-indent-offset nil))
-      (python-mode))
-    (flycheck-testsuite-disable-checkers 'python-flake8 'python-pylint)
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors
-     '(5 nil "EOL while scanning string literal" error))))
+  (flycheck-testsuite-should-syntax-check
+   "missing-quote.py" 'python-mode '(python-flake8 python-pylint)
+    '(5 nil "EOL while scanning string literal" error)))
 
 (ert-deftest checker-python-pyflakes-unused-import ()
   "Test an unused import with pyflakes"
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-pyflakes)
-  (flycheck-testsuite-with-resource-buffer "unused-import.py"
-    (let ((python-indent-guess-indent-offset nil))
-      (python-mode))
-    (flycheck-testsuite-disable-checkers 'python-flake8 'python-pylint)
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors
-     '(5 nil "'re' imported but unused" error))))
+  (flycheck-testsuite-should-syntax-check
+   "unused-import.py" 'python-mode '(python-flake8 python-pylint)
+   '(5 nil "'re' imported but unused" error)))
 
 ;; Local Variables:
 ;; coding: utf-8

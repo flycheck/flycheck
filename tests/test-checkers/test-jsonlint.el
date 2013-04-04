@@ -28,10 +28,9 @@
 (ert-deftest checker-json-multiple-toplevel-objects ()
   "Test a syntax error from multiple top-level objects."
   :expected-result (flycheck-testsuite-fail-unless-checker 'json-jsonlint)
-  (flycheck-testsuite-with-resource-buffer "multiple-toplevel-objects.json"
-    (should (buffer-file-name))
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-testsuite-should-errors '(1 42 "found: ',' - expected: 'EOF'." error))))
+  (flycheck-testsuite-should-syntax-check
+   "multiple-toplevel-objects.json" 'text-mode nil
+    '(1 42 "found: ',' - expected: 'EOF'." error)))
 
 ;; Local Variables:
 ;; coding: utf-8
