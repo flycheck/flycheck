@@ -29,8 +29,8 @@ build : $(OBJECTS)
 
 .PHONY: deps
 deps :
-	$(CARTON) install
-	$(CARTON) update
+	EMACS=$(EMACS) $(CARTON) install
+	EMACS=$(EMACS) $(CARTON) update
 
 .PHONY: clean-deps
 clean-deps :
@@ -45,8 +45,8 @@ clean-doc :
 
 .PHONY: test
 test : build
-	$(CARTON) exec $(EMACS) --no-site-file --no-site-lisp --batch \
-		$(EMACSFLAGS) \
+	EMACS=$(EMACS) $(CARTON) exec $(EMACS) \
+		--no-site-file --no-site-lisp --batch $(EMACSFLAGS) \
 		-l tests/testsuite.el -f ert-run-tests-batch-and-exit
 
 .PHONY: virtual-test
@@ -70,12 +70,12 @@ clean :
 	rm -rf $(PACKAGE) flycheck-pkg.el
 
 %.elc : %.el
-	$(CARTON) exec $(EMACS) --no-site-file --no-site-lisp --batch \
-		$(EMACSFLAGS) \
+	EMACS=$(EMACS) $(CARTON) exec $(EMACS) \
+		--no-site-file --no-site-lisp --batch $(EMACSFLAGS) \
 		-f batch-byte-compile $<
 
 flycheck-pkg.el : Carton
-	$(CARTON) package
+	EMACS=$(EMACS) $(CARTON) package
 
 doc/dir : doc/flycheck.info
 	$(INSTALL-INFO) doc/flycheck.info doc/dir
