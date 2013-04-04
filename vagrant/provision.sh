@@ -65,9 +65,13 @@ apt_update
 # Install texinfo to build documentation
 apt texinfo
 
-# Install Emacs 24.2 and Emacs snapshot
-apt emacs24 emacs24-el emacs24-common-non-dfsg \
-    emacs-snapshot emacs-snapshot-el
+if [ -z "$EMACS" ]; then
+  # Install Emacs 24.2 and Emacs snapshot, if n
+  apt emacs24-nox
+  apt emacs-snapshot-nox
+else
+  apt "$EMACS"-nox || exit 1
+fi
 
 # Install the necessary interpreters and tools
 apt nodejs npm \
