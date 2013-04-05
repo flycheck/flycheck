@@ -191,6 +191,9 @@ overlay setup)."
 (defconst flycheck-mode-line-lighter " FlyC"
   "The standard lighter for flycheck mode.")
 
+(defvar-local flycheck-temp-buffer-copies nil
+  "A list of all temporary copies of a buffer.")
+
 (defvar-local flycheck-mode-line nil
   "The mode line lighter of variable `flycheck-mode'.")
 
@@ -242,7 +245,7 @@ running checks, and empty all variables used by flycheck."
   (flycheck-clear)
   (flycheck-stop-checker)
   (flycheck-cancel-error-show-error-timer)
-  (flycheck-post-syntax-check-cleanup)
+  (flycheck-clean-files flycheck-temp-buffer-copies)
   (flycheck-clear-checker))
 
 (defvar-local flycheck-previous-next-error-function nil
@@ -984,21 +987,17 @@ otherwise."
          (flycheck-registered-checker-p next-checker)
          (flycheck-may-use-checker next-checker))))
 
-(defvar-local flycheck-substituted-files nil
-  "A list of all files created for argument substitution.")
-
-(defun flycheck-clean-substituted-files ()
-  "Remove all substituted files."
-  (--each flycheck-substituted-files (ignore-errors (delete-file it)))
-  (setq flycheck-substituted-files nil))
+(defun flycheck-clean-files (files)
+  "Safely remove FILES."
+  (--each files (ignore-errors (delete-file it))))
 
 (defun flycheck-get-source-file (temp-fn)
   "Get the source file to check using TEMP-FN.
 
 Make a temporary copy of the buffer, remember it in
-`flycheck-substituted-files' and return the file path."
+`flycheck-temp-buffer-copies' and return the file path."
   (let ((temp-file (flycheck-temp-buffer-copy temp-fn)))
-    (add-to-list #'flycheck-substituted-files temp-file)
+    (add-to-list 'flycheck-temp-buffer-copies temp-file)
     temp-file))
 
 (defun flycheck-find-config-file (file-name)
@@ -1449,26 +1448,30 @@ Return the errors parsed with the error patterns of CHECKER."
     (--each errors (setf (flycheck-error-buffer it) buffer))
     (flycheck-sanitize-errors errors)))
 
-(defun flycheck-back-substitute-filename (err)
-  "Reverse substitute the file name in ERR.
+(defun flycheck-fix-error-filename (err buffer-files)
+  "Fix the file name of ERR from BUFFER-FILES.
 
-Substitute the file name of ERR with the function `buffer-file-name' of
-the corresponding buffer if it matches and file in
-`flycheck-substituted-files'."
+If the file name of ERR is in BUFFER-FILES, replace it with the
+return value of the function `buffer-file-name'."
   (flycheck-error-with-buffer err
     (let ((filename (flycheck-error-filename err)))
       (when filename
-        (--each
-          flycheck-substituted-files
+        (--each buffer-files
           (when (flycheck-same-files-p filename it)
             (setf (flycheck-error-filename err) (buffer-file-name)))))
       err)))
 
+(defun flycheck-fix-error-filenames (errors buffer-files)
+  "Fix the file names of all ERRORS from BUFFER-FILES.
+
+See `flycheck-fix-error-filename' for details."
+  (--map (flycheck-fix-error-filename it buffer-files) errors))
+
 (defun flycheck-sanitize-error (err)
   "Sanitize ERR.
 
-Back substitute the file name to use the real buffer file name
-and clean superfluous whitespace in the error message."
+Make the error filename absolute, and clean up whitespace in the
+error message."
   (flycheck-error-with-buffer err
     (let ((filename (flycheck-error-filename err))
           (message (flycheck-error-message err)))
@@ -1477,8 +1480,7 @@ and clean superfluous whitespace in the error message."
       (when filename
         ;; If the error has a file name, expand it relative to the default
         ;; directory of its buffer and back substitute the file name
-        (setf (flycheck-error-filename err) (expand-file-name filename))
-        (flycheck-back-substitute-filename err))))
+        (setf (flycheck-error-filename err) (expand-file-name filename)))))
   err)
 
 (defun flycheck-sanitize-errors (errors)
@@ -1928,18 +1930,14 @@ Show the error message at point in minibuffer after a short delay."
   "Determine whether a syntax check is running."
   (when (and flycheck-current-process
              (memq (process-status flycheck-current-process) '(exit signal)))
-    (flycheck-post-syntax-check-cleanup)
+    (flycheck-delete-process flycheck-current-process)
     (setq flycheck-current-process nil))
   (when flycheck-current-process t))
 
-(defun flycheck-post-syntax-check-cleanup (&optional process)
-  "Cleanup after a syntax check PROCESS."
-  (unwind-protect
-      (let ((process (or process flycheck-current-process)))
-        (when process
-          (setq flycheck-current-process nil)
-          (delete-process process)))
-    (flycheck-clean-substituted-files)))
+(defun flycheck-delete-process (process)
+  "Delete PROCESS and clear it's resources."
+  (flycheck-clean-files (process-get process :flycheck-temp-buffer-copies))
+  (delete-process process))
 
 (defun flycheck-receive-checker-output (process output)
   "Receive a syntax checking PROCESS OUTPUT."
@@ -1953,55 +1951,62 @@ Show the error message at point in minibuffer after a short delay."
     (let ((pending-output (process-get process :flycheck-pending-output)))
       (apply #'concat (nreverse pending-output)))))
 
-(defun flycheck-finish-syntax-check (process)
-  "Finish a syntax check from PROCESS.
+(defun flycheck-finish-syntax-check (checker exit-status files output)
+  "Finish a syntax check from CHECKER with EXIT-STATUS.
 
-Parse the output and report an appropriate error status."
+FILES is a list of files given as input to the checker.  OUTPUT
+is the output of the syntax checker.
+
+Parse the OUTPUT and report an appropriate error status."
   (flycheck-report-status "")
-  (let* ((checker (process-get process :flycheck-checker))
-         (exit-status (process-exit-status process))
-         (output (flycheck-get-output process))
-         (errors
-          (condition-case err
-              (flycheck-relevant-errors
-               (flycheck-parse-output output checker (current-buffer)))
-            (error
-             (message "Failed to parse errors from checker %S in output: %s\n\
+  (let (errors)
+    (condition-case err
+          (setq errors (flycheck-parse-output output checker (current-buffer)))
+        (error
+         (message "Failed to parse errors from checker %S in output: %s\n\
 Error: %s" checker output (error-message-string err))
-             (flycheck-report-status "!")
-             :errored))))
-    (flycheck-post-syntax-check-cleanup process)
-    (when flycheck-mode
-      (unless (eq errors :errored)
-        (setq flycheck-current-errors
-              (flycheck-sort-errors (append errors flycheck-current-errors nil)))
-        (flycheck-report-errors flycheck-current-errors)
-        (when (and (/= exit-status 0) (not errors))
-          ;; Report possibly flawed checker definition
-          (message "Checker %S returned non-zero exit code %s, but no errors from\
+         (flycheck-report-status "!")
+         (setq errors :errored)))
+    (unless (eq errors :errored)
+      (setq errors (flycheck-relevant-errors
+                    (flycheck-fix-error-filenames errors files)))
+      (setq flycheck-current-errors
+            (flycheck-sort-errors (append errors flycheck-current-errors nil)))
+      (flycheck-report-errors flycheck-current-errors)
+      (when (and (/= exit-status 0) (not errors))
+        ;; Report possibly flawed checker definition
+        (message "Checker %S returned non-zero exit code %s, but no errors from\
 output: %s\nChecker definition probably flawed."
-                   checker exit-status output)
-          (flycheck-report-status "?"))
-        (when (eq (current-buffer) (window-buffer))
-          (flycheck-show-error-at-point))
-        (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
-          (if next-checker
-              (flycheck-start-checker next-checker)
-            (run-hooks 'flycheck-after-syntax-check-hook)))))))
+                 checker exit-status output)
+        (flycheck-report-status "?"))
+      (when (eq (current-buffer) (window-buffer))
+        (flycheck-show-error-at-point))
+      (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
+        (if next-checker
+            (flycheck-start-checker next-checker)
+          (run-hooks 'flycheck-after-syntax-check-hook))))))
 
 (defun flycheck-handle-signal (process _event)
   "Handle a signal from the syntax checking PROCESS.
 
 _EVENT is ignored."
-  (when (and (memq (process-status process) '(signal exit))
-             (buffer-live-p (process-buffer process)))
-    (with-current-buffer (process-buffer process)
-      (condition-case err
-          (flycheck-finish-syntax-check process)
-        (error
-         (flycheck-post-syntax-check-cleanup process)
-         (flycheck-report-status "!")
-         (signal (car err) (cdr err)))))))
+  (when (memq (process-status process) '(signal exit))
+    (let ((checker (process-get process :flycheck-checker))
+          (files (process-get process :flycheck-temp-buffer-copies))
+          (exit-status (process-exit-status process))
+          (output (flycheck-get-output process))
+          (buffer (process-buffer process)))
+      ;; First, let's clean up all the garbage
+      (flycheck-delete-process process)
+      (setq flycheck-current-process nil)
+      ;; Now, if the checked buffer is still live, parse and report the errors.
+      (when (and (buffer-live-p buffer) flycheck-mode)
+        (with-current-buffer buffer
+          (condition-case err
+              (flycheck-finish-syntax-check checker exit-status files output)
+            (error
+             (flycheck-report-status "!")
+             (signal (car err) (cdr err)))))))))
 
 (defun flycheck-start-checker (checker)
   "Start a syntax CHECKER."
@@ -2018,10 +2023,21 @@ _EVENT is ignored."
         (set-process-sentinel process 'flycheck-handle-signal)
         (set-process-query-on-exit-flag process nil)
         (flycheck-report-status "*")
+        (process-put process :flycheck-temp-buffer-copies
+                     flycheck-temp-buffer-copies)
+        ;; Temporary files are not attached to the process, so let's reset the
+        ;; variable
+        (setq flycheck-temp-buffer-copies nil)
         (process-put process :flycheck-checker checker))
       (error
        (flycheck-report-status "!")
-       (flycheck-post-syntax-check-cleanup)
+       ;; Clear all substituted files
+       (flycheck-clean-files flycheck-temp-buffer-copies)
+       (setq flycheck-temp-buffer-copies nil)
+       (when flycheck-current-process
+         ;; Clear the process if it's already there
+         (flycheck-delete-process flycheck-current-process)
+         (setq flycheck-current-process nil))
        (signal (car err) (cdr err)))))
 
 (defun flycheck-stop-checker ()

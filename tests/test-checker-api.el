@@ -154,7 +154,7 @@
                                (file-name-as-directory flycheck-testsuite-resources-dir)))
             (should (file-exists-p filename)))
           (should-error (flycheck-substitute-argument-symbol 'foobar))))
-    (flycheck-clean-substituted-files)))
+    (flycheck-clean-files flycheck-temp-buffer-copies)))
 
 (ert-deftest flycheck-substitute-shell-argument-cell-config-file ()
   "Test substitution of `config-file' shell argument cell."
