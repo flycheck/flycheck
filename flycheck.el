@@ -976,7 +976,7 @@ otherwise."
 (defun flycheck-may-use-next-checker (next-checker)
   "Determine whether NEXT-CHECKER may be used."
   (when (symbolp next-checker)
-    (setq next-checker `(t . ,next-checker)))
+    (setq next-checker (cons t next-checker)))
   (let ((predicate (car next-checker))
         (next-checker (cdr next-checker)))
     (and (or (eq predicate t)
@@ -1423,7 +1423,7 @@ first non-whitespace character on the ERR line and END its end."
         (setq end (min (+ (line-beginning-position) col)
                        (+ (line-end-position) 1)))
         (setq beg (- end 1))))
-      `(,beg . ,end))))
+      (cons beg end))))
 
 (defun flycheck-error-pos (err)
   "Get the buffer position of ERR.
@@ -1455,10 +1455,9 @@ If the file name of ERR is in BUFFER-FILES, replace it with the
 return value of the function `buffer-file-name'."
   (flycheck-error-with-buffer err
     (let ((filename (flycheck-error-filename err)))
-      (when filename
-        (--each buffer-files
-          (when (flycheck-same-files-p filename it)
-            (setf (flycheck-error-filename err) (buffer-file-name)))))
+      (when (and filename (--any? (flycheck-same-files-p filename it)
+                                  buffer-files))
+        (setf (flycheck-error-filename err) (buffer-file-name)))
       err)))
 
 (defun flycheck-fix-error-filenames (errors buffer-files)
@@ -1576,9 +1575,10 @@ _BUFFER is ignored.
 
 Return a list of parsed errors and warnings (as `flycheck-error'
 objects)."
-  (let* ((patterns (flycheck-checker-error-patterns checker))
-         (chunks (flycheck-tokenize-output-with-patterns output patterns)))
-    (flycheck-parse-errors-with-patterns chunks patterns)))
+  (let ((patterns (flycheck-checker-error-patterns checker)))
+    (-> output
+      (flycheck-tokenize-output-with-patterns patterns)
+      (flycheck-parse-errors-with-patterns patterns))))
 
 
 ;;;; Error parsers
@@ -1712,7 +1712,7 @@ Return a cons cell whose `car' is the number of errors and whose
   (let* ((groups (-group-by 'flycheck-error-level errors))
          (errors (cdr (assq 'error groups)))
          (warnings (cdr (assq 'warning groups))))
-    `(,(length errors) . ,(length warnings))))
+    (cons (length errors) (length warnings))))
 
 (defun flycheck-has-errors-p (errors &optional level)
   "Determine if there are any ERRORS with LEVEL.
@@ -1962,10 +1962,11 @@ Error: %s" checker output (error-message-string err))
          (flycheck-report-status "!")
          (setq errors :errored)))
     (unless (eq errors :errored)
-      (setq errors (flycheck-relevant-errors
-                    (flycheck-fix-error-filenames errors files)))
-      (setq flycheck-current-errors
-            (flycheck-sort-errors (append errors flycheck-current-errors nil)))
+      (setq flycheck-current-errors (-> errors
+                                      (flycheck-fix-error-filenames files)
+                                      flycheck-relevant-errors
+                                      (append flycheck-current-errors nil)
+                                      flycheck-sort-errors))
       (flycheck-report-errors flycheck-current-errors)
       (when (and (/= exit-status 0) (not errors))
         ;; Report possibly flawed checker definition
