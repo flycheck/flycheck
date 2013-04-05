@@ -2107,8 +2107,7 @@ during byte-compilation or autoloads generation, or nil otherwise."
 
      (setq byte-compiled-files nil)
      (defun byte-compile-dest-file (source)
-       (let ((temp-file (expand-file-name (make-temp-file source)
-                                          temporary-file-directory)))
+       (let ((temp-file (make-temp-file (file-name-nondirectory source))))
          (add-to-list 'byte-compiled-files temp-file)
          temp-file))
 
