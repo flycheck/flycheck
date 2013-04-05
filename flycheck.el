@@ -1446,7 +1446,7 @@ Return the errors parsed with the error patterns of CHECKER."
          (errors (funcall parser output checker buffer)))
     ;; Attach originating buffer to each error
     (--each errors (setf (flycheck-error-buffer it) buffer))
-    (flycheck-sanitize-errors errors)))
+    (-map #'flycheck-sanitize-error errors)))
 
 (defun flycheck-fix-error-filename (err buffer-files)
   "Fix the file name of ERR from BUFFER-FILES.
@@ -1482,12 +1482,6 @@ error message."
         ;; directory of its buffer and back substitute the file name
         (setf (flycheck-error-filename err) (expand-file-name filename)))))
   err)
-
-(defun flycheck-sanitize-errors (errors)
-  "Sanitize ERRORS.
-
-See `flycheck-sanitize-error' for more information."
-  (-map 'flycheck-sanitize-error errors))
 
 
 ;;;; Error parsing with regular expressions
