@@ -421,9 +421,11 @@ Return t if the check is to be deferred, or nil otherwise."
   "Safely check syntax in the current buffer.
 
 Like `flycheck-buffer', but do not check buffers that need not be
-checked (i.e. read-only buffers) and demote all errors to messages.
+checked (i.e. read-only buffers) and demote all errors to
+messages.  Also, defer syntax checks if the buffer is not visible
+in any window.
 
-Use when checking buffers automatically."
+Use when checking buffers automatically, i.e. in hooks."
   (if (flycheck-may-check-buffer)
       (if (flycheck-must-defer-check)
           (flycheck-buffer-deferred)
