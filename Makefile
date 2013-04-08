@@ -58,6 +58,9 @@ virtual-test :
 .PHONY: package
 package : $(PACKAGE)
 
+.PHONY: pkg-file
+pkg-file : flycheck-pkg.el
+
 $(PACKAGE) : $(PACKAGE_SRCS)
 	rm -rf flycheck-$(VERSION)
 	mkdir -p flycheck-$(VERSION)
@@ -68,7 +71,7 @@ $(PACKAGE) : $(PACKAGE_SRCS)
 .PHONY: clean
 clean :
 	rm -f $(OBJECTS)
-	rm -rf $(PACKAGE) flycheck-pkg.el
+	rm -rf $(PACKAGE)
 
 %.elc : %.el
 	EMACS=$(EMACS) $(CARTON) exec $(EMACS) \
