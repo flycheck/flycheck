@@ -21,6 +21,7 @@ order of their appearance in the default value of
 @iflyc python-pylint
 @iflyc python-pyflakes
 @iflyc ruby
+@iflyc rust-rustc
 @iflyc sass
 @iflyc sh
 @iflyc tex-chktex
