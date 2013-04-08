@@ -1515,6 +1515,8 @@ master (unreleased)
 
         * Go using 'gofmt'
           (https://github.com/lunaryorn/flycheck/issues/91)
+        * Rust using 'rustc'
+          (https://github.com/lunaryorn/flycheck/issues/101)
 
    * New features:
 
@@ -2196,9 +2198,9 @@ Node: 0.6.154547
 Node: 0.754696
 Node: 0.7.155710
 Node: master56428
-Node: Credits57725
-Node: GNU Free Documentation License59638
-Node: Syntax checkers84790
-Node: Function and Variable Index85673
+Node: Credits57815
+Node: GNU Free Documentation License59728
+Node: Syntax checkers84880
+Node: Function and Variable Index85763
 
 End Tag Table

@@ -363,6 +363,8 @@ New syntax checkers:
 @itemize @bullet
 @item
 @ghissue{91, Go using @command{gofmt}}
+@item
+@ghissue{101, Rust using @command{rustc}}
 @end itemize
 
 @item
