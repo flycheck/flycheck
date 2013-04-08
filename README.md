@@ -35,6 +35,7 @@ Features
   - PHP
   - Python
   - Ruby
+  - Rust
   - Sass
   - Shell scripts (Bash, Dash and Zsh)
   - TeX/LaTeX
@@ -130,6 +131,7 @@ The following people contributed to flycheck:
   shape this project.
 - [Yannick Roehlly][yannick1974] added support for PEP8 naming errors to the
   Flake8 syntax checker.
+- [Victor Deryagin][vderyagin] added the Rust syntax checker.
 
 
 License
@@ -173,3 +175,4 @@ See [COPYING][] for details.
 [steckerhalter]: https://github.com/steckerhalter
 [yannick1974]: https://github.com/yannick1974
 [copying]: https://github.com/lunaryorn/flycheck/blob/master/COPYING
+[vderyagin]: https://github.com/vderyagin

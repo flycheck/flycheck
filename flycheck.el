@@ -99,6 +99,7 @@ buffer-local wherever it is set."
     python-pylint
     python-pyflakes
     ruby
+    rust-rustc
     sass
     sh
     tex-chktex
@@ -2456,6 +2457,14 @@ See URL `http://www.zsh.org/'."
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'sh-mode
   :predicate '(eq sh-shell 'zsh))
+
+(flycheck-declare-checker rust-rustc
+  "A Rust syntax checker using rustc parsing option.
+
+See URL `http://rust-lang.org'."
+  :command '("rustc" "--parse-only" source)
+  :error-patterns '(("^\\(?1:.+\\.r[cs]\\):\\(?2:[[:digit:]]+\\):\\(?3:[[:digit:]]+\\): [[:digit:]]+:[[:digit:]]+ error: \\(?4:.+\\)$" error))
+  :modes 'rust-mode)
 
 (provide 'flycheck)
 

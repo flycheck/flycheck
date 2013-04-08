@@ -63,6 +63,8 @@ Python (using @command{flake8}, @command{pylint}, or @command{pyflakes})
 @item
 Ruby
 @item
+Rust (using @command{rustc})
+@item
 Sass
 @item
 Shell scripts (using Bash, Dash, or Zsh depending on the type of shell
