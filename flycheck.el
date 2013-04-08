@@ -197,13 +197,6 @@ overlay setup)."
 (defvar-local flycheck-mode-line nil
   "The mode line lighter of variable `flycheck-mode'.")
 
-(defun flycheck-report-status (status)
-  "Report flycheck STATUS."
-  (let ((mode-line flycheck-mode-line-lighter))
-    (setq mode-line (concat mode-line status))
-    (setq flycheck-mode-line mode-line)
-    (force-mode-line-update)))
-
 (defvar flycheck-mode-map
   (let ((map (make-sparse-keymap))
         (pmap (make-sparse-keymap)))
@@ -358,23 +351,29 @@ buffer."
 (defun flycheck-clear ()
   "Clear all errors in the current buffer."
   (interactive)
-  (flycheck-remove-overlays)
+  (flycheck-delete-all-overlays)
   (flycheck-clear-errors))
 
 (defun flycheck-buffer ()
   "Check syntax in the current buffer."
   (interactive)
   (flycheck-clean-deferred-check)
-  (flycheck-clear)
   (if flycheck-mode
       (when (not (flycheck-running-p))
+        ;; Clear error list and mark all overlays for deletion.  We do not
+        ;; delete all overlays immediately to avoid excessive re-displays and
+        ;; flickering, if the same errors gets highlighted again after the check
+        ;; completed.
+        (flycheck-clear-errors)
+        (flycheck-mark-all-overlays-for-deletion)
         (condition-case err
             (let ((checker (flycheck-get-checker-for-buffer)))
               (if checker
                   (flycheck-start-checker checker)
+                (flycheck-clear)
                 (flycheck-report-status "-")))
           (error
-           (flycheck-report-status "!")
+           (flycheck-report-error)
            (signal (car err) (cdr err)))))
     (user-error "Flycheck mode disabled")))
 
@@ -435,6 +434,32 @@ Use when checking buffers automatically, i.e. in hooks."
              (buffer-name))))
 
 
+;;;; Mode line reporting
+(defun flycheck-report-status (status)
+  "Report Flycheck STATUS."
+  (let ((mode-line flycheck-mode-line-lighter))
+    (setq mode-line (concat mode-line status))
+    (setq flycheck-mode-line mode-line)
+    (force-mode-line-update)))
+
+(defun flycheck-report-error ()
+  "Report a Flycheck error status.
+
+Clears all Flycheck errors first."
+  (flycheck-clear)
+  (flycheck-report-status "!"))
+
+(defun flycheck-report-error-count (errors)
+  "Report ERRORS in the current buffer.
+
+Report a proper flycheck status."
+  (if errors
+      (let ((no-err-warnings (flycheck-count-errors errors)))
+        (flycheck-report-status
+         (format ":%s/%s" (car no-err-warnings) (cdr no-err-warnings))))
+    (flycheck-report-status "")))
+
+
 ;;;; Deferred syntax checking
 (defvar-local flycheck-deferred-syntax-check nil
   "If non-nil, a syntax check as been deferred in `flycheck-buffer-safe'.")
@@ -1668,6 +1693,11 @@ about Checkstyle."
 (defvar-local flycheck-current-errors nil
   "A list of all errors and warnings in the current buffer.")
 
+(defun flycheck-clear-errors ()
+  "Remove all error information from the current buffer."
+  (setq flycheck-current-errors nil)
+  (flycheck-report-status ""))
+
 (defun flycheck-relevant-error-p (err)
   "Determine whether ERR is relevant for the current buffer.
 
@@ -1731,24 +1761,6 @@ If LEVEL is omitted if the current buffer has any errors at all."
   (flycheck-has-errors-p flycheck-current-errors level))
 
 
-;;;; Error reporting
-(defun flycheck-report-errors (errors)
-  "Report ERRORS in the current buffer.
-
-Add overlays and report a proper flycheck status."
-  (flycheck-add-overlays errors)
-  (if errors
-      (let ((no-err-warnings (flycheck-count-errors errors)))
-        (flycheck-report-status
-         (format ":%s/%s" (car no-err-warnings) (cdr no-err-warnings))))
-    (flycheck-report-status "")))
-
-(defun flycheck-clear-errors ()
-  "Remove all error information from the current buffer."
-  (setq flycheck-current-errors nil)
-  (flycheck-report-status ""))
-
-
 ;;;; Error overlay management
 (when (fboundp 'define-fringe-bitmap)
   ;; define-fringe-bitmap is not available if Emacs is built without GUI
@@ -1787,14 +1799,12 @@ flycheck exclamation mark otherwise.")
     (error . flycheck-error-overlay))
   "Overlay categories for error levels.")
 
-(defun flycheck-get-or-create-overlay (err)
+(defun flycheck-create-overlay (err)
   "Get or create the overlay for ERR."
   (flycheck-error-with-buffer err
     (let* ((mode flycheck-highlighting-mode)
            (region (flycheck-error-region err (not (eq mode 'columns))))
-           (old-overlay (--first (eq (overlay-get it 'flycheck-error) err)
-                                 (flycheck-overlays-at (car region))))
-           (overlay (or old-overlay (make-overlay (car region) (cdr region)))))
+           (overlay (make-overlay (car region) (cdr region))))
       (overlay-put overlay 'flycheck-error err)
       overlay)))
 
@@ -1802,7 +1812,7 @@ flycheck exclamation mark otherwise.")
   "Add overlay for ERR."
   ;; We attempt to reuse an existing overlay for ERR, to avoid duplicate
   ;; overlays.
-  (let* ((overlay (flycheck-get-or-create-overlay err))
+  (let* ((overlay (flycheck-create-overlay err))
          (level (flycheck-error-level err))
          (category (cdr (assq level flycheck-overlay-categories-alist)))
          (fringe-icon `(left-fringe ,(get category 'flycheck-fringe-bitmap)
@@ -1846,9 +1856,23 @@ flycheck exclamation mark otherwise.")
   "Return a single string containing all error messages at POS."
   (s-join "\n\n" (flycheck-overlay-messages-at pos)))
 
-(defun flycheck-remove-overlays ()
+(defvar-local flycheck-overlays-to-delete nil
+  "Overlays mark for deletion after all syntax checks completed.")
+
+(defun flycheck-delete-all-overlays ()
   "Remove all flycheck overlays in the current buffer."
-  (remove-overlays (point-min) (point-max) 'flycheck-overlay t))
+  (flycheck-delete-marked-overlays)
+  (-each (flycheck-overlays-in (point-min) (point-max)) #'delete-overlay))
+
+(defun flycheck-mark-all-overlays-for-deletion ()
+  "Mark all current overlays for deletion."
+  (setq flycheck-overlays-to-delete
+        (flycheck-overlays-in (point-min) (point-max))))
+
+(defun flycheck-delete-marked-overlays ()
+  "Delete all overlays marked for deletion."
+  (-each flycheck-overlays-to-delete #'delete-overlay)
+  (setq flycheck-overlays-to-delete nil))
 
 
 ;;;; Error navigation
@@ -1969,27 +1993,32 @@ Parse the OUTPUT and report an appropriate error status."
         (error
          (message "Failed to parse errors from checker %S in output: %s\n\
 Error: %s" checker output (error-message-string err))
-         (flycheck-report-status "!")
+         (flycheck-report-error)
          (setq errors :errored)))
     (unless (eq errors :errored)
+      (setq errors (-> errors
+                     (flycheck-fix-error-filenames files)
+                     flycheck-relevant-errors))
+      (flycheck-add-overlays errors)
       (setq flycheck-current-errors (-> errors
-                                      (flycheck-fix-error-filenames files)
-                                      flycheck-relevant-errors
                                       (append flycheck-current-errors nil)
                                       flycheck-sort-errors))
-      (flycheck-report-errors flycheck-current-errors)
+      (flycheck-report-error-count flycheck-current-errors)
       (when (and (/= exit-status 0) (not errors))
         ;; Report possibly flawed checker definition
         (message "Checker %S returned non-zero exit code %s, but no errors from\
 output: %s\nChecker definition probably flawed."
                  checker exit-status output)
         (flycheck-report-status "?"))
-      (when (eq (current-buffer) (window-buffer))
-        (flycheck-show-error-at-point))
       (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
         (if next-checker
             (flycheck-start-checker next-checker)
-          (run-hooks 'flycheck-after-syntax-check-hook))))))
+          ;; Delete overlays from the last syntax check
+          (flycheck-delete-marked-overlays)
+          (run-hooks 'flycheck-after-syntax-check-hook)
+          ;; Update the error display
+          (when (eq (current-buffer) (window-buffer))
+            (flycheck-show-error-at-point)))))))
 
 (defun flycheck-handle-signal (process _event)
   "Handle a signal from the syntax checking PROCESS.
@@ -2010,7 +2039,7 @@ _EVENT is ignored."
           (condition-case err
               (flycheck-finish-syntax-check checker exit-status files output)
             (error
-             (flycheck-report-status "!")
+             (flycheck-report-error)
              (signal (car err) (cdr err)))))))))
 
 (defun flycheck-start-checker (checker)
@@ -2035,7 +2064,7 @@ _EVENT is ignored."
         (setq flycheck-temp-buffer-copies nil)
         (process-put process :flycheck-checker checker))
       (error
-       (flycheck-report-status "!")
+       (flycheck-report-error)
        ;; Clear all substituted files
        (flycheck-clean-files flycheck-temp-buffer-copies)
        (setq flycheck-temp-buffer-copies nil)
