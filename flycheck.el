@@ -1822,9 +1822,17 @@ flycheck exclamation mark otherwise.")
   ;; error emitted by the checker is on top
   (mapc #'flycheck-add-overlay errors))
 
+(defun flycheck-filter-overlays (overlays)
+  "Get all Flycheck overlays from OVERLAYS."
+  (--filter (overlay-get it 'flycheck-overlay) overlays))
+
 (defun flycheck-overlays-at (pos)
-  "Return a list of all flycheck overlays at POS."
-  (--filter (overlay-get it 'flycheck-overlay) (overlays-at pos)))
+  "Get all Flycheck overlays at POS."
+  (flycheck-filter-overlays (overlays-at pos)))
+
+(defun flycheck-overlays-in (beg end)
+  "Get all Flycheck overlays between BEG and END."
+  (flycheck-filter-overlays (overlays-in beg end)))
 
 (defun flycheck-overlay-errors-at (pos)
   "Return a list of all flycheck errors overlayed at POS."

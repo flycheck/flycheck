@@ -361,7 +361,9 @@ Each error in ERRORS is a list as expected by
       (should flycheck-current-errors)
     (dolist (err errors)
       (flycheck-testsuite-should-error err))
-    (should (= (length errors) (length flycheck-current-errors)))))
+    (should (= (length errors) (length flycheck-current-errors)))
+    (should (= (length errors)
+               (length (flycheck-overlays-in (point-min) (point-max)))))))
 
 (defun flycheck-testsuite-should-syntax-check
   (resource-file modes disabled-checkers &rest errors)
