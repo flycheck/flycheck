@@ -50,6 +50,10 @@ and engaged in worthwhile discussion to shape this project.
 @item
 @uref{https://github.com/yannick1974, Yannick Roehlly} added support for
 PEP8 naming errors to the Flake8 syntax checker.
+
+@item
+@uref{https://github.com/vderyagin, Victor Deryagin} added the Rust
+syntax checker.
 @end itemize
 
 @c Local Variables:

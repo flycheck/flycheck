@@ -59,7 +59,7 @@ apt_update
 apt make python-software-properties
 
 # Bring in the necessary PPAs
-ppa ppa:cassou/emacs ppa:ondrej/php5 ppa:richarvey/nodejs ppa:gophers/go
+ppa ppa:cassou/emacs ppa:ondrej/php5 ppa:richarvey/nodejs ppa:gophers/go ppa:kevincantu/rust
 apt_update
 
 # Install texinfo to build documentation
@@ -86,7 +86,8 @@ apt bash \
     chktex lacheck \
     xmlstarlet \
     zsh \
-    golang-stable
+    golang-stable \
+    rust
 
 pip flake8 pep8-naming pylint pyflakes
 

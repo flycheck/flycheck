@@ -92,6 +92,7 @@ File: flycheck.info,  Node: Features,  Next: Installation,  Prev: Introduction, 
         * PHP (using the PHP Command Line and PHP CodeSniffer)
         * Python (using 'flake8', 'pylint', or 'pyflakes')
         * Ruby
+        * Rust (using 'rustc')
         * Sass
         * Shell scripts (using Bash, Dash, or Zsh depending on the type
           of shell script)
@@ -1588,6 +1589,9 @@ their support and patches are greatly appreciated.
    * Yannick Roehlly (https://github.com/yannick1974) added support for
      PEP8 naming errors to the Flake8 syntax checker.
 
+   * Victor Deryagin (https://github.com/vderyagin) added the Rust
+     syntax checker.
+
 
 File: flycheck.info,  Node: GNU Free Documentation License,  Next: Syntax checkers,  Prev: Credits,  Up: Top
 
@@ -2097,6 +2101,7 @@ order of their appearance in the default value of 'flycheck-checkers':
    * 'python-pylint'
    * 'python-pyflakes'
    * 'ruby'
+   * 'rust-rustc'
    * 'sass'
    * 'sh'
    * 'tex-chktex'
@@ -2154,46 +2159,46 @@ Tag Table:
 Node: Top689
 Node: Introduction1993
 Node: Features2784
-Node: Installation3695
-Node: Activation4869
-Node: Usage5220
-Node: Syntax checking5843
-Node: Selection7105
-Node: Configuration9686
-Node: Reporting12354
-Node: Navigation14709
-Node: Mode line16505
-Node: Extending17406
-Node: Declaration18005
-Node: Error parsers29059
-Node: Option filters30043
-Node: Examples30382
-Node: Simple example30814
-Node: Predicate example33878
-Node: Configuration example35859
-Node: Chaining example38518
-Node: API39904
-Node: Error API40692
-Node: Error parser API43293
-Node: Contribution43519
-Node: Reporting issues44195
-Node: Contributing syntax checkers44931
-Node: Contributing code45726
-Node: Unit tests47066
-Node: Changes48353
-Node: 0.148873
-Node: 0.249157
-Node: 0.349435
-Node: 0.449671
-Node: 0.550446
-Node: 0.651666
-Node: 0.6.154516
-Node: 0.754665
-Node: 0.7.155679
-Node: master56397
-Node: Credits57694
-Node: GNU Free Documentation License59518
-Node: Syntax checkers84670
-Node: Function and Variable Index85535
+Node: Installation3726
+Node: Activation4900
+Node: Usage5251
+Node: Syntax checking5874
+Node: Selection7136
+Node: Configuration9717
+Node: Reporting12385
+Node: Navigation14740
+Node: Mode line16536
+Node: Extending17437
+Node: Declaration18036
+Node: Error parsers29090
+Node: Option filters30074
+Node: Examples30413
+Node: Simple example30845
+Node: Predicate example33909
+Node: Configuration example35890
+Node: Chaining example38549
+Node: API39935
+Node: Error API40723
+Node: Error parser API43324
+Node: Contribution43550
+Node: Reporting issues44226
+Node: Contributing syntax checkers44962
+Node: Contributing code45757
+Node: Unit tests47097
+Node: Changes48384
+Node: 0.148904
+Node: 0.249188
+Node: 0.349466
+Node: 0.449702
+Node: 0.550477
+Node: 0.651697
+Node: 0.6.154547
+Node: 0.754696
+Node: 0.7.155710
+Node: master56428
+Node: Credits57725
+Node: GNU Free Documentation License59638
+Node: Syntax checkers84790
+Node: Function and Variable Index85673
 
 End Tag Table
