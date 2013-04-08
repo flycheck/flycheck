@@ -39,6 +39,14 @@
    'emacs-lisp-mode nil
    '(12 nil "First sentence should end with punctuation" warning)))
 
+(ert-deftest checker-emacs-lisp-checkdoc-many-errors ()
+  (flycheck-testsuite-should-syntax-check
+   "many-errors.el" 'emacs-lisp-mode nil
+   '(7 nil "You should have a section marked \";;; Code:\"" warning)
+   '(7 1 "`message' called with 0 args to fill 1\n    format field(s)" warning)
+   '(9 2 "princ called with 0 arguments, but\n    requires 1-2" warning)
+   '(14 1 "the function `i-do-not-exist' is not\n    known to be defined." warning)))
+
 (ert-deftest checker-emacs-lisp-checkdoc-no-buffer-file-name ()
   "Test checkdoc checker in buffers without file names.
 
