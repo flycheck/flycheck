@@ -1543,6 +1543,8 @@ master (unreleased)
           (https://github.com/lunaryorn/flycheck/issues/98)
         * Flycheck mode is not longer enabled for buffers whose names
           start with a space
+        * Improve highlighting to reduce screen flickering
+          (https://github.com/lunaryorn/flycheck/issues/100)
 
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
@@ -2198,9 +2200,9 @@ Node: 0.6.154547
 Node: 0.754696
 Node: 0.7.155710
 Node: master56428
-Node: Credits57815
-Node: GNU Free Documentation License59728
-Node: Syntax checkers84880
-Node: Function and Variable Index85763
+Node: Credits57935
+Node: GNU Free Documentation License59848
+Node: Syntax checkers85000
+Node: Function and Variable Index85883
 
 End Tag Table
