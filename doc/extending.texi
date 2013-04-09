@@ -177,7 +177,7 @@ syntax check to determine whether the syntax checker may be used for the
 current buffer.  If @var{form} evaluates to nil, the syntax checker is
 not used.
 
-If @var{:modes} is given, @var{FORM} is only evaluated if the major mode
+If @var{:modes} is given, @var{form} is only evaluated if the major mode
 matches.  Otherwise the syntax checker is not used.
 
 @item :next-checker '(@var{item}...)
@@ -198,10 +198,10 @@ the @var{checker} depending on the results of this syntax checker:
 
 @table @code
 @item no-errors
-The @var{CHECKER} is only used if this syntax checker resulted in no
+The @var{checker} is only used if this syntax checker resulted in no
 errors at all.
 @item warnings-only
-The @var{CHECKER} is only used if this syntax checker did not result in
+The @var{checker} is only used if this syntax checker did not result in
 error messages of severity @code{error}.
 @end table
 
