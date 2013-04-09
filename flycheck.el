@@ -24,7 +24,18 @@
 ;;; Commentary:
 
 ;; On-the-fly syntax checking for GNU Emacs (aka "flymake done right")
-
+;;
+;;
+;; Flycheck provides on-the-fly syntax checker with
+;;
+;; - major-mode based checkers,
+;; - simple declarative checker definitions,
+;; - built-in checkers for many languages,
+;; - standard error navigation,
+;; - easy customization,
+;; - and a clean, concise and understandable implementation.
+;;
+;;
 ;; Provide `flycheck-mode' which enables on-the-fly syntax checking for a large
 ;; number of different modes and languages (see `flycheck-checkers' for a
 ;; complete list).
@@ -225,7 +236,7 @@ overlay setup)."
    "---"
    ["Describe syntax checker" flycheck-describe-checker t]
    ["Read the Flycheck manual" flycheck-info t])
-  "Spell Checking")
+ "Spell Checking")
 
 (easy-menu-change '("Tools") "--" nil "Spell Checking")
 
@@ -1381,8 +1392,8 @@ Pop up a help buffer with the documentation of CHECKER."
           (princ ".\n\n")
           (princ (format "  This syntax checker executes \"%s\"" executable))
           (if config-file-var
-            (princ (format ", using a configuration file from `%s'.\n"
-                           config-file-var))
+              (princ (format ", using a configuration file from `%s'.\n"
+                             config-file-var))
             (princ ".\n"))
           (cond
            ((and modes predicate)
@@ -1404,7 +1415,7 @@ Pop up a help buffer with the documentation of CHECKER."
           (when option-vars
             (princ "\n  This syntax checker can be configured with these options:\n\n")
             (--each option-vars
-              (princ (format "     * `%s'\n" it)))))
+                    (princ (format "     * `%s'\n" it)))))
         (princ (format "\nDocumentation:\n%s"
                        (flycheck-checker-documentation checker)))))))
 
@@ -1420,8 +1431,8 @@ Pop up a help buffer with the documentation of CHECKER."
 If the buffer of ERR is not live, FORMS are not evaluated."
   (declare (indent 1))
   `(when (buffer-live-p (flycheck-error-buffer ,err))
-    (with-current-buffer (flycheck-error-buffer ,err)
-      ,@forms)))
+     (with-current-buffer (flycheck-error-buffer ,err)
+       ,@forms)))
 
 (defun flycheck-error-region (err &optional ignore-column)
   "Get the region of ERR.
@@ -1481,11 +1492,11 @@ Return the errors parsed with the error patterns of CHECKER."
 If the file name of ERR is in BUFFER-FILES, replace it with the
 return value of the function `buffer-file-name'."
   (flycheck-error-with-buffer err
-    (let ((filename (flycheck-error-filename err)))
-      (when (and filename (--any? (flycheck-same-files-p filename it)
-                                  buffer-files))
-        (setf (flycheck-error-filename err) (buffer-file-name)))
-      err)))
+                              (let ((filename (flycheck-error-filename err)))
+                                (when (and filename (--any? (flycheck-same-files-p filename it)
+                                                            buffer-files))
+                                  (setf (flycheck-error-filename err) (buffer-file-name)))
+                                err)))
 
 (defun flycheck-fix-error-filenames (errors buffer-files)
   "Fix the file names of all ERRORS from BUFFER-FILES.
@@ -1499,14 +1510,14 @@ See `flycheck-fix-error-filename' for details."
 Make the error filename absolute, and clean up whitespace in the
 error message."
   (flycheck-error-with-buffer err
-    (let ((filename (flycheck-error-filename err))
-          (message (flycheck-error-message err)))
-      (when message
-        (setf (flycheck-error-message err) (s-trim message)))
-      (when filename
-        ;; If the error has a file name, expand it relative to the default
-        ;; directory of its buffer and back substitute the file name
-        (setf (flycheck-error-filename err) (expand-file-name filename)))))
+                              (let ((filename (flycheck-error-filename err))
+                                    (message (flycheck-error-message err)))
+                                (when message
+                                  (setf (flycheck-error-message err) (s-trim message)))
+                                (when filename
+                                  ;; If the error has a file name, expand it relative to the default
+                                  ;; directory of its buffer and back substitute the file name
+                                  (setf (flycheck-error-filename err) (expand-file-name filename)))))
   err)
 
 
@@ -1604,8 +1615,8 @@ Return a list of parsed errors and warnings (as `flycheck-error'
 objects)."
   (let ((patterns (flycheck-checker-error-patterns checker)))
     (-> output
-      (flycheck-tokenize-output-with-patterns patterns)
-      (flycheck-parse-errors-with-patterns patterns))))
+        (flycheck-tokenize-output-with-patterns patterns)
+        (flycheck-parse-errors-with-patterns patterns))))
 
 
 ;;;; Error parsers
@@ -1704,11 +1715,11 @@ about Checkstyle."
 Return t if ERR may be shown for the current buffer, or nil
 otherwise."
   (flycheck-error-with-buffer err
-    (let ((file-name (flycheck-error-filename err)))
-      (and
-       (or (not file-name) (flycheck-same-files-p file-name (buffer-file-name)))
-       (not (s-blank? (flycheck-error-message err)))
-       (flycheck-error-line err)))))
+                              (let ((file-name (flycheck-error-filename err)))
+                                (and
+                                 (or (not file-name) (flycheck-same-files-p file-name (buffer-file-name)))
+                                 (not (s-blank? (flycheck-error-message err)))
+                                 (flycheck-error-line err)))))
 
 (defun flycheck-relevant-errors (errors)
   "Filter the relevant errors from ERRORS.
@@ -1772,7 +1783,7 @@ If LEVEL is omitted if the current buffer has any errors at all."
   (if (get 'exclamation-mark 'fringe)
       'exclamation-mark
     'flycheck-fringe-exclamation-mark)
-    "The symbol to use as exclamation mark bitmap.
+  "The symbol to use as exclamation mark bitmap.
 
 Defaults to the built-in exclamation mark if available or to the
 flycheck exclamation mark otherwise.")
@@ -1802,11 +1813,11 @@ flycheck exclamation mark otherwise.")
 (defun flycheck-create-overlay (err)
   "Get or create the overlay for ERR."
   (flycheck-error-with-buffer err
-    (let* ((mode flycheck-highlighting-mode)
-           (region (flycheck-error-region err (not (eq mode 'columns))))
-           (overlay (make-overlay (car region) (cdr region))))
-      (overlay-put overlay 'flycheck-error err)
-      overlay)))
+                              (let* ((mode flycheck-highlighting-mode)
+                                     (region (flycheck-error-region err (not (eq mode 'columns))))
+                                     (overlay (make-overlay (car region) (cdr region))))
+                                (overlay-put overlay 'flycheck-error err)
+                                overlay)))
 
 (defun flycheck-add-overlay (err)
   "Add overlay for ERR."
@@ -1880,13 +1891,13 @@ flycheck exclamation mark otherwise.")
   "Visit the N-th error from the current point.
 
 Intended for use with `next-error-function'."
-   (let* ((n (or n 1))
+  (let* ((n (or n 1))
          (current-pos (if reset (point-min) (point)))
          (before-and-after (->> flycheck-current-errors
-                             (-map 'flycheck-error-pos)
-                             (-uniq)
-                             (--remove (= current-pos it))
-                             (--split-with (>= current-pos it))))
+                                (-map 'flycheck-error-pos)
+                                (-uniq)
+                                (--remove (= current-pos it))
+                                (--split-with (>= current-pos it))))
          (before (nreverse (car before-and-after)))
          (after (cadr before-and-after))
          (error-pos (nth-value (- (abs n) 1) (if (< n 0) before after))))
@@ -1989,20 +2000,20 @@ Parse the OUTPUT and report an appropriate error status."
   (flycheck-report-status "")
   (let (errors)
     (condition-case err
-          (setq errors (flycheck-parse-output output checker (current-buffer)))
-        (error
-         (message "Failed to parse errors from checker %S in output: %s\n\
+        (setq errors (flycheck-parse-output output checker (current-buffer)))
+      (error
+       (message "Failed to parse errors from checker %S in output: %s\n\
 Error: %s" checker output (error-message-string err))
-         (flycheck-report-error)
-         (setq errors :errored)))
+       (flycheck-report-error)
+       (setq errors :errored)))
     (unless (eq errors :errored)
       (setq errors (-> errors
-                     (flycheck-fix-error-filenames files)
-                     flycheck-relevant-errors))
+                       (flycheck-fix-error-filenames files)
+                       flycheck-relevant-errors))
       (flycheck-add-overlays errors)
       (setq flycheck-current-errors (-> errors
-                                      (append flycheck-current-errors nil)
-                                      flycheck-sort-errors))
+                                        (append flycheck-current-errors nil)
+                                        flycheck-sort-errors))
       (flycheck-report-error-count flycheck-current-errors)
       (when (and (/= exit-status 0) (not errors))
         ;; Report possibly flawed checker definition
@@ -2063,16 +2074,16 @@ _EVENT is ignored."
         ;; variable
         (setq flycheck-temp-buffer-copies nil)
         (process-put process :flycheck-checker checker))
-      (error
-       (flycheck-report-error)
-       ;; Clear all substituted files
-       (flycheck-clean-files flycheck-temp-buffer-copies)
-       (setq flycheck-temp-buffer-copies nil)
-       (when flycheck-current-process
-         ;; Clear the process if it's already there
-         (flycheck-delete-process flycheck-current-process)
-         (setq flycheck-current-process nil))
-       (signal (car err) (cdr err)))))
+    (error
+     (flycheck-report-error)
+     ;; Clear all substituted files
+     (flycheck-clean-files flycheck-temp-buffer-copies)
+     (setq flycheck-temp-buffer-copies nil)
+     (when flycheck-current-process
+       ;; Clear the process if it's already there
+       (flycheck-delete-process flycheck-current-process)
+       (setq flycheck-current-process nil))
+     (signal (car err) (cdr err)))))
 
 (defun flycheck-stop-checker ()
   "Stop any syntax checker for the current buffer."
@@ -2082,40 +2093,40 @@ _EVENT is ignored."
 
 ;;;; Built-in checkers
 (flycheck-declare-checker bash
-  "A Bash syntax checker using the bash executable.
+                          "A Bash syntax checker using the bash executable.
 
 See URL `http://www.gnu.org/software/bash/'."
-  :command '("bash" "--norc" "-n" source)
-  :error-patterns '(("^\\(?1:.+\\): line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
-  :modes 'sh-mode
-  :predicate '(eq sh-shell 'bash))
+                          :command '("bash" "--norc" "-n" source)
+                          :error-patterns '(("^\\(?1:.+\\): line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
+                          :modes 'sh-mode
+                          :predicate '(eq sh-shell 'bash))
 
 (flycheck-def-config-file-var flycheck-coffeelintrc coffee-coffeelint
                               ".coffeelint.json")
 
 (flycheck-declare-checker coffee-coffeelint
-  "A CoffeeScript syntax and style checker using coffeelint.
+                          "A CoffeeScript syntax and style checker using coffeelint.
 
 See URL `http://www.coffeelint.org/'."
-  :command '("coffeelint" (config-file "--file" flycheck-coffeelintrc)
-             "--csv" source)
-  :error-patterns
-  '(("SyntaxError: \\(?4:.*\\) on line \\(?2:[0-9]+\\)" error)
-    ("\\(?1:.+\\),\\(?2:[0-9]+\\),error,\\(?4:.+\\)" error)
-    ("\\(?1:.+\\),\\(?2:[0-9]+\\),warn,\\(?4:.+\\)" warning))
-  :modes 'coffee-mode)
+                          :command '("coffeelint" (config-file "--file" flycheck-coffeelintrc)
+                                     "--csv" source)
+                          :error-patterns
+                          '(("SyntaxError: \\(?4:.*\\) on line \\(?2:[0-9]+\\)" error)
+                            ("\\(?1:.+\\),\\(?2:[0-9]+\\),error,\\(?4:.+\\)" error)
+                            ("\\(?1:.+\\),\\(?2:[0-9]+\\),warn,\\(?4:.+\\)" warning))
+                          :modes 'coffee-mode)
 
 (flycheck-declare-checker css-csslint
-  "A CSS syntax and style checker using csslint.
+                          "A CSS syntax and style checker using csslint.
 
 See URL `https://github.com/stubbornella/csslint'."
-  :command '("csslint" "--format=compact" source)
-  :error-patterns
-  '(("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), Error - \\(?4:.+\\)$"
-     error)
-    ("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), Warning - \\(?4:.+\\)$"
-     warning))
-  :modes 'css-mode)
+                          :command '("csslint" "--format=compact" source)
+                          :error-patterns
+                          '(("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), Error - \\(?4:.+\\)$"
+                             error)
+                            ("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), Warning - \\(?4:.+\\)$"
+                             warning))
+                          :modes 'css-mode)
 
 (defconst flycheck-emacs-command
   `(,(concat invocation-directory invocation-name)
@@ -2150,32 +2161,32 @@ during byte-compilation or autoloads generation, or nil otherwise."
      (mapc 'delete-file byte-compiled-files)))
 
 (flycheck-declare-checker emacs-lisp
-  "An Emacs Lisp syntax checker.
+                          "An Emacs Lisp syntax checker.
 
 This checker simply attempts to byte compile the contents of the
 buffer using the currently running Emacs executable."
-  :command (append flycheck-emacs-command
-                   `(,(prin1-to-string flycheck-emacs-lisp-check-form)
-                     source-inplace))
-  :error-patterns
-  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):Warning:\\(?4:.*\\(?:\n    .*\\)*\\)$"
-     warning)
-    ("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):Error:\\(?4:.*\\(?:\n    .*\\)*\\)$"
-     error))
-  :modes '(emacs-lisp-mode lisp-interaction-mode)
-  ;; Ensure that we only check buffers with a backing file.  For buffers without
-  ;; a backing file we cannot guarantee that file names in error messages are
-  ;; properly resolved, because `byte-compile-file' emits file names *relative
-  ;; to the directory of the checked file* instead of the working directory.
-  ;; Hence our backwards-substitution will fail, because the checker process has
-  ;; a different base directory to resolve relative file names than the flycheck
-  ;; code working on the buffer to check.
-  :predicate '(and (buffer-file-name)
-                   ;; Do not check buffers which should not be byte-compiled.
-                   ;; The checker process will refuse to compile these anyway
-                   (not (and (boundp 'no-byte-compile) no-byte-compile))
-                   (not (flycheck-temp-compilation-buffer-p)))
-  :next-checkers '(emacs-lisp-checkdoc))
+                          :command (append flycheck-emacs-command
+                                           `(,(prin1-to-string flycheck-emacs-lisp-check-form)
+                                             source-inplace))
+                          :error-patterns
+                          '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):Warning:\\(?4:.*\\(?:\n    .*\\)*\\)$"
+                             warning)
+                            ("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):Error:\\(?4:.*\\(?:\n    .*\\)*\\)$"
+                             error))
+                          :modes '(emacs-lisp-mode lisp-interaction-mode)
+                          ;; Ensure that we only check buffers with a backing file.  For buffers without
+                          ;; a backing file we cannot guarantee that file names in error messages are
+                          ;; properly resolved, because `byte-compile-file' emits file names *relative
+                          ;; to the directory of the checked file* instead of the working directory.
+                          ;; Hence our backwards-substitution will fail, because the checker process has
+                          ;; a different base directory to resolve relative file names than the flycheck
+                          ;; code working on the buffer to check.
+                          :predicate '(and (buffer-file-name)
+                                           ;; Do not check buffers which should not be byte-compiled.
+                                           ;; The checker process will refuse to compile these anyway
+                                           (not (and (boundp 'no-byte-compile) no-byte-compile))
+                                           (not (flycheck-temp-compilation-buffer-p)))
+                          :next-checkers '(emacs-lisp-checkdoc))
 
 (defconst flycheck-emacs-lisp-checkdoc-form
   '(progn
@@ -2209,121 +2220,121 @@ buffer using the currently running Emacs executable."
             (message "Ignoring error: %S" err)))))))
 
 (flycheck-declare-checker emacs-lisp-checkdoc
-  "An Emacs Lisp style checker using CheckDoc.
+                          "An Emacs Lisp style checker using CheckDoc.
 
 The checker runs `checkdoc-current-buffer'."
-  :command (append flycheck-emacs-command
-                   `(,(prin1-to-string flycheck-emacs-lisp-checkdoc-form)
-                     ;; CheckDoc checks that features which are provided match
-                     ;; the name of the file which causes bogus warnings with
-                     ;; Flycheck's temporary buffer copies.  Hence we also give
-                     ;; the original file name to checkdoc for use as buffer
-                     ;; file name, so that checkdoc sees the real file name,
-                     ;; which avoids these bogus warnings.
-                     source source-original))
-  :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)" warning))
-  :modes '(emacs-lisp-mode lisp-interaction-mode)
-  :predicate '(not (flycheck-temp-compilation-buffer-p)))
+                          :command (append flycheck-emacs-command
+                                           `(,(prin1-to-string flycheck-emacs-lisp-checkdoc-form)
+                                             ;; CheckDoc checks that features which are provided match
+                                             ;; the name of the file which causes bogus warnings with
+                                             ;; Flycheck's temporary buffer copies.  Hence we also give
+                                             ;; the original file name to checkdoc for use as buffer
+                                             ;; file name, so that checkdoc sees the real file name,
+                                             ;; which avoids these bogus warnings.
+                                             source source-original))
+                          :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)" warning))
+                          :modes '(emacs-lisp-mode lisp-interaction-mode)
+                          :predicate '(not (flycheck-temp-compilation-buffer-p)))
 
 (flycheck-declare-checker go-gofmt
-  "A Go syntax and style checker using the gofmt utility.
+                          "A Go syntax and style checker using the gofmt utility.
 
 See URL `http://golang.org/cmd/gofmt/'."
-  :command '("gofmt" source)
-  :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): \\(?4:.*\\)$" error))
-  :modes 'go-mode)
+                          :command '("gofmt" source)
+                          :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): \\(?4:.*\\)$" error))
+                          :modes 'go-mode)
 
 (flycheck-declare-checker haml
-  "A Haml syntax checker using the Haml compiler.
+                          "A Haml syntax checker using the Haml compiler.
 
 See URL `http://haml.info'."
-  :command '("haml" "-c" source)
-  :error-patterns
-  '(("^Syntax error on line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
-  :modes 'haml-mode)
+                          :command '("haml" "-c" source)
+                          :error-patterns
+                          '(("^Syntax error on line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
+                          :modes 'haml-mode)
 
 (flycheck-def-config-file-var flycheck-tidyrc html-tidy ".tidyrc")
 
 (flycheck-declare-checker html-tidy
-  "A HTML syntax and style checker using Tidy.
+                          "A HTML syntax and style checker using Tidy.
 
 See URL `https://github.com/w3c/tidy-html5'."
-  :command '("tidy" (config-file "-config" flycheck-tidyrc) "-e" "-q" source)
-  :error-patterns
-  '(("^line \\(?2:[0-9]+\\) column \\(?3:[0-9]+\\) - Error: \\(?4:.*\\)$" error)
-    ("^line \\(?2:[0-9]+\\) column \\(?3:[0-9]+\\) - Warning: \\(?4:.*\\)$"
-     warning))
-  :modes '(html-mode nxhtml-mode))
+                          :command '("tidy" (config-file "-config" flycheck-tidyrc) "-e" "-q" source)
+                          :error-patterns
+                          '(("^line \\(?2:[0-9]+\\) column \\(?3:[0-9]+\\) - Error: \\(?4:.*\\)$" error)
+                            ("^line \\(?2:[0-9]+\\) column \\(?3:[0-9]+\\) - Warning: \\(?4:.*\\)$"
+                             warning))
+                          :modes '(html-mode nxhtml-mode))
 
 (flycheck-def-config-file-var flycheck-jshintrc javascript-jshint ".jshintrc")
 
 (flycheck-declare-checker javascript-jshint
-  "A JavaScript syntax and style checker using jshint.
+                          "A JavaScript syntax and style checker using jshint.
 
 See URL `http://www.jshint.com'."
-  :command '("jshint" "--checkstyle-reporter"
-             (config-file "--config" flycheck-jshintrc)
-             source)
-  :error-parser 'flycheck-parse-checkstyle
-  :modes '(js-mode js2-mode js3-mode))
+                          :command '("jshint" "--checkstyle-reporter"
+                                     (config-file "--config" flycheck-jshintrc)
+                                     source)
+                          :error-parser 'flycheck-parse-checkstyle
+                          :modes '(js-mode js2-mode js3-mode))
 
 (flycheck-declare-checker json-jsonlint
-  "A JSON syntax and style checker using jsonlint.
+                          "A JSON syntax and style checker using jsonlint.
 
 See URL `https://github.com/zaach/jsonlint'."
-  :command '("jsonlint" "-c" "-q" source)
-  :error-patterns
-  '(("^\\(?1:.+\\)\: line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
-     error))
-  :predicate '(or
-               (eq major-mode 'json-mode)
-               (and buffer-file-name
-                    (string= "json" (file-name-extension buffer-file-name)))))
+                          :command '("jsonlint" "-c" "-q" source)
+                          :error-patterns
+                          '(("^\\(?1:.+\\)\: line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
+                             error))
+                          :predicate '(or
+                                       (eq major-mode 'json-mode)
+                                       (and buffer-file-name
+                                            (string= "json" (file-name-extension buffer-file-name)))))
 
 (flycheck-declare-checker lua
-  "A Lua syntax checker using the Lua compiler.
+                          "A Lua syntax checker using the Lua compiler.
 
 See URL `http://www.lua.org/'."
-  :command '("luac" "-p" source)
-  :error-patterns
-  '(("^.*?: \\(?1:.*?\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
-  :modes 'lua-mode)
+                          :command '("luac" "-p" source)
+                          :error-patterns
+                          '(("^.*?: \\(?1:.*?\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
+                          :modes 'lua-mode)
 
 (flycheck-declare-checker perl
-  "A Perl syntax checker using the Perl interpreter.
+                          "A Perl syntax checker using the Perl interpreter.
 
 See URL `http://www.perl.org'."
-  :command '("perl" "-w" "-c" source)
-  :error-patterns
-  '(("^\\(?4:.*?\\) at \\(?1:.*?\\) line \\(?2:[0-9]+\\)\\.$" error)
-    ("^\\(?4:.*?\\) at \\(?1:.*?\\) line \\(?2:[0-9]+\\), .*$" error))
-  :modes '(perl-mode cperl-mode))
+                          :command '("perl" "-w" "-c" source)
+                          :error-patterns
+                          '(("^\\(?4:.*?\\) at \\(?1:.*?\\) line \\(?2:[0-9]+\\)\\.$" error)
+                            ("^\\(?4:.*?\\) at \\(?1:.*?\\) line \\(?2:[0-9]+\\), .*$" error))
+                          :modes '(perl-mode cperl-mode))
 
 (flycheck-declare-checker php
-  "A PHP syntax checker using the PHP command line.
+                          "A PHP syntax checker using the PHP command line.
 
 See URL `http://php.net/manual/en/features.commandline.php'."
-  :command '("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
-             "-d" "log_errors=0" source)
-  :error-patterns
-  '(("\\(?:Parse\\|Fatal\\|syntax\\) error[:,] \\(?4:.*\\) in \\(?1:.*\\) on line \\(?2:[0-9]+\\)"
-    error))
-  :modes '(php-mode php+-mode)
-  :next-checkers '((warnings-only . php-phpcs)))
+                          :command '("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
+                                     "-d" "log_errors=0" source)
+                          :error-patterns
+                          '(("\\(?:Parse\\|Fatal\\|syntax\\) error[:,] \\(?4:.*\\) in \\(?1:.*\\) on line \\(?2:[0-9]+\\)"
+                             error))
+                          :modes '(php-mode php+-mode)
+                          :next-checkers '((warnings-only . php-phpcs)))
 
 (flycheck-def-option-var flycheck-phpcs-standard nil php-phpcs
-  "The coding standard for PHP CodeSniffer.
+                         "The coding standard for PHP CodeSniffer.
 
 When nil, use the default standard from the global PHP
 CodeSniffer configuration.  When set to a string, pass the string
 to PHP CodeSniffer which will interpret it as name as a standard,
 or as path to a standard specification."
-  :type '(choice (const :tag "Default standard" nil)
-                 (string :tag "Standard name or file")))
+                         :type '(choice (const :tag "Default standard" nil)
+                                        (string :tag "Standard name or file")))
 (put 'flycheck-phpcs-standard 'safe-local-variable #'stringp)
 
 (flycheck-declare-checker php-phpcs
-  "A PHP syntax checker using PHP_CodeSniffer.
+                          "A PHP syntax checker using PHP_CodeSniffer.
 
 See URL `http://pear.php.net/package/PHP_CodeSniffer/'.
 
@@ -2332,16 +2343,16 @@ have issues that prevent Flycheck from parsing the output
 correctly.
 
 See URL `https://github.com/lunaryorn/flycheck/issues/78'."
-  :command '("phpcs" "--report=checkstyle"
-             (option "--standard=" flycheck-phpcs-standard)
-             source)
-  :error-parser 'flycheck-parse-checkstyle
-  :modes '(php-mode php+-mode))
+                          :command '("phpcs" "--report=checkstyle"
+                                     (option "--standard=" flycheck-phpcs-standard)
+                                     source)
+                          :error-parser 'flycheck-parse-checkstyle
+                          :modes '(php-mode php+-mode))
 
 (flycheck-def-config-file-var flycheck-flake8rc python-flake8 ".flake8rc")
 
 (flycheck-def-option-var flycheck-flake8-maximum-complexity nil python-flake8
-  "The maximum McCabe complexity of methods.
+                         "The maximum McCabe complexity of methods.
 
 If nil, do not check the complexity of methods.  If set to an
 integer, report any complexity greater than the value of this
@@ -2349,12 +2360,12 @@ variable as warning.
 
 If set to an integer, this variable overrules any similar setting
 in the configuration file denoted by `flycheck-flake8rc'."
-  :type '(choice (const :tag "Do not check McCabe complexity" nil)
-                 (integer :tag "Maximum complexity")))
+                         :type '(choice (const :tag "Do not check McCabe complexity" nil)
+                                        (integer :tag "Maximum complexity")))
 (put 'flycheck-flake8-maximum-complexity 'safe-local-variable #'integerp)
 
 (flycheck-def-option-var flycheck-flake8-maximum-line-length nil python-flake8
-  "The maximum length of lines.
+                         "The maximum length of lines.
 
 If set to an integer, the value of this variable denotes the
 maximum length of lines, overruling any similar setting in the
@@ -2364,135 +2375,135 @@ be reported for any line longer than the value of this variable.
 If set to nil, use the maximum line length from the configuration
 file denoted by `flycheck-flake8rc', or the PEP 8 recommendation
 of 79 characters if there is no configuration with this setting."
-  :type '(choice (const :tag "Default value")
-                 (integer :tag "Maximum line length in characters")))
+                         :type '(choice (const :tag "Default value")
+                                        (integer :tag "Maximum line length in characters")))
 (put 'flycheck-flake8-maximum-line-length 'safe-local-variable #'integerp)
 
 (flycheck-declare-checker python-flake8
-  "A Python syntax and style checker using the flake8 utility.
+                          "A Python syntax and style checker using the flake8 utility.
 
 For best error reporting, use Flake8 2.0 or newer.
 
 See URL `http://pypi.python.org/pypi/flake8'."
-  :command '("flake8"
-             (config-file "--config" flycheck-flake8rc)
-             (option "--max-complexity"
-                     flycheck-flake8-maximum-complexity
-                     flycheck-option-int)
-             (option "--max-line-length"
-                     flycheck-flake8-maximum-line-length
-                     flycheck-option-int)
-             source-inplace)
-  :error-patterns
-  '(("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:E[0-9]+.*\\)$"
-     error)
-    ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:F[0-9]+.*\\)$"
-     warning)                           ; Flake8 >= 2.0
-    ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:W[0-9]+.*\\)$"
-     warning)                           ; Flake8 < 2.0
-    ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:C[0-9]+.*\\)$"
-     warning)                           ; McCabe complexity in Flake8 > 2.0
-    ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:N[0-9]+.*\\)$"
-     warning)                           ; pep8-naming Flake8 plugin.
-    ;; Syntax errors in Flake8 < 2.0, in Flake8 >= 2.0 syntax errors are caught
-    ;; by the E.* pattern above
-    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
-  :modes 'python-mode)
+                          :command '("flake8"
+                                     (config-file "--config" flycheck-flake8rc)
+                                     (option "--max-complexity"
+                                             flycheck-flake8-maximum-complexity
+                                             flycheck-option-int)
+                                     (option "--max-line-length"
+                                             flycheck-flake8-maximum-line-length
+                                             flycheck-option-int)
+                                     source-inplace)
+                          :error-patterns
+                          '(("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:E[0-9]+.*\\)$"
+                             error)
+                            ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:F[0-9]+.*\\)$"
+                             warning)                           ; Flake8 >= 2.0
+                            ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:W[0-9]+.*\\)$"
+                             warning)                           ; Flake8 < 2.0
+                            ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:C[0-9]+.*\\)$"
+                             warning)                           ; McCabe complexity in Flake8 > 2.0
+                            ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)? \\(?4:N[0-9]+.*\\)$"
+                             warning)                           ; pep8-naming Flake8 plugin.
+                            ;; Syntax errors in Flake8 < 2.0, in Flake8 >= 2.0 syntax errors are caught
+                            ;; by the E.* pattern above
+                            ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
+                          :modes 'python-mode)
 
 (flycheck-declare-checker python-pylint
-  "A Python syntax and style checker using the pylint utility.
+                          "A Python syntax and style checker using the pylint utility.
 
 See URL `http://pypi.python.org/pypi/pylint'."
-  :command '("epylint" source-inplace)
-  :error-patterns
-  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): Warning (W.*): \\(?4:.*\\)$" warning)
-    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): Error (E.*): \\(?4:.*\\)$" error)
-    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\[F\\] \\(?4:.*\\)$" error))
-  :modes 'python-mode)
+                          :command '("epylint" source-inplace)
+                          :error-patterns
+                          '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): Warning (W.*): \\(?4:.*\\)$" warning)
+                            ("^\\(?1:.*\\):\\(?2:[0-9]+\\): Error (E.*): \\(?4:.*\\)$" error)
+                            ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\[F\\] \\(?4:.*\\)$" error))
+                          :modes 'python-mode)
 
 (flycheck-declare-checker python-pyflakes
-  "A Python syntax and style checker using the pyflakes utility.
+                          "A Python syntax and style checker using the pyflakes utility.
 
 See URL `http://pypi.python.org/pypi/pyflakes'."
-  :command '("pyflakes" source-inplace)
-  :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
-  :modes 'python-mode)
+                          :command '("pyflakes" source-inplace)
+                          :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
+                          :modes 'python-mode)
 
 (flycheck-declare-checker ruby
-  "A Ruby syntax checker using the Ruby interpreter."
-  :command '("ruby" "-w" "-c" source)
-  :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
-  :modes 'ruby-mode)
+                          "A Ruby syntax checker using the Ruby interpreter."
+                          :command '("ruby" "-w" "-c" source)
+                          :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
+                          :modes 'ruby-mode)
 
 (flycheck-declare-checker sass
-  "A Sass syntax checker using the Sass compiler.
+                          "A Sass syntax checker using the Sass compiler.
 
 See URL `http://sass-lang.com'."
-  :command '("sass" "-c" source)
-  :error-patterns
-  '(("^Syntax error on line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error)
-    ("^WARNING on line \\(?2:[0-9]+\\) of \\(?1:.*\\):\r?\n\\(?4:.*\\)$"
-     warning)
-    ("^Syntax error: \\(?4:.*\\)\r?\n        on line \\(?2:[0-9]+\\) of \\(?1:.*\\)$"
-     error))
-  :modes 'sass-mode)
+                          :command '("sass" "-c" source)
+                          :error-patterns
+                          '(("^Syntax error on line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error)
+                            ("^WARNING on line \\(?2:[0-9]+\\) of \\(?1:.*\\):\r?\n\\(?4:.*\\)$"
+                             warning)
+                            ("^Syntax error: \\(?4:.*\\)\r?\n        on line \\(?2:[0-9]+\\) of \\(?1:.*\\)$"
+                             error))
+                          :modes 'sass-mode)
 
 (flycheck-declare-checker sh
-  "A POSIX Shell syntax checker using the dash executable.
+                          "A POSIX Shell syntax checker using the dash executable.
 
 See URL `http://gondor.apana.org.au/~herbert/dash/'."
-  :command '("dash" "-n" source)
-  :error-patterns '(("^\\(?1:.+\\): \\(?2:[0-9]+\\): \\1: \\(?4:.*\\)$" error))
-  :modes 'sh-mode
-  :predicate '(eq sh-shell 'sh))
+                          :command '("dash" "-n" source)
+                          :error-patterns '(("^\\(?1:.+\\): \\(?2:[0-9]+\\): \\1: \\(?4:.*\\)$" error))
+                          :modes 'sh-mode
+                          :predicate '(eq sh-shell 'sh))
 
 (flycheck-def-config-file-var flycheck-chktexrc tex-chktex ".chktexrc")
 
 (flycheck-declare-checker tex-chktex
-  "A TeX and LaTeX syntax and style checker using chktex.
+                          "A TeX and LaTeX syntax and style checker using chktex.
 
 See URL `http://baruch.ev-en.org/proj/chktex/'."
-  :command '("chktex" (config-file "-l" flycheck-chktexrc) "-v0" "-q" "-I"
-             source-inplace)
-  :error-patterns
-  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\\(?4:[0-9]+:.*\\)$"
-     warning))
-  :modes '(latex-mode plain-tex-mode))
+                          :command '("chktex" (config-file "-l" flycheck-chktexrc) "-v0" "-q" "-I"
+                                     source-inplace)
+                          :error-patterns
+                          '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\\(?4:[0-9]+:.*\\)$"
+                             warning))
+                          :modes '(latex-mode plain-tex-mode))
 
 (flycheck-declare-checker tex-lacheck
-  "A LaTeX syntax and style checker using lacheck.
+                          "A LaTeX syntax and style checker using lacheck.
 
 See URL `http://www.ctan.org/pkg/lacheck'."
-  :command '("lacheck" source-inplace)
-  :error-patterns
-  '(("^\"\\(?1:.*\\)\", line \\(?2:[0-9]+\\): \\(?4:.*\\)$" warning))
-  :modes 'latex-mode)
+                          :command '("lacheck" source-inplace)
+                          :error-patterns
+                          '(("^\"\\(?1:.*\\)\", line \\(?2:[0-9]+\\): \\(?4:.*\\)$" warning))
+                          :modes 'latex-mode)
 
 (flycheck-declare-checker xml-xmlstarlet
-  "A XML validator using the xmlstarlet utility.
+                          "A XML validator using the xmlstarlet utility.
 
 See URL `http://xmlstar.sourceforge.net/'."
-  :command '("xmlstarlet" "val" "-e" "-q" source)
-  :error-patterns
-  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\)\\.\\(?3:[0-9]+\\): \\(?4:.*\\)$" error))
-  :modes '(xml-mode nxml-mode))
+                          :command '("xmlstarlet" "val" "-e" "-q" source)
+                          :error-patterns
+                          '(("^\\(?1:.*\\):\\(?2:[0-9]+\\)\\.\\(?3:[0-9]+\\): \\(?4:.*\\)$" error))
+                          :modes '(xml-mode nxml-mode))
 
 (flycheck-declare-checker zsh
-  "A Zsh syntax checker using the zsh executable.
+                          "A Zsh syntax checker using the zsh executable.
 
 See URL `http://www.zsh.org/'."
-  :command '("zsh" "-n" "-d" "-f" source)
-  :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
-  :modes 'sh-mode
-  :predicate '(eq sh-shell 'zsh))
+                          :command '("zsh" "-n" "-d" "-f" source)
+                          :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
+                          :modes 'sh-mode
+                          :predicate '(eq sh-shell 'zsh))
 
 (flycheck-declare-checker rust-rustc
-  "A Rust syntax checker using rustc parsing option.
+                          "A Rust syntax checker using rustc parsing option.
 
 See URL `http://rust-lang.org'."
-  :command '("rustc" "--parse-only" source)
-  :error-patterns '(("^\\(?1:.+\\.r[cs]\\):\\(?2:[[:digit:]]+\\):\\(?3:[[:digit:]]+\\): [[:digit:]]+:[[:digit:]]+ error: \\(?4:.+\\)$" error))
-  :modes 'rust-mode)
+                          :command '("rustc" "--parse-only" source)
+                          :error-patterns '(("^\\(?1:.+\\.r[cs]\\):\\(?2:[[:digit:]]+\\):\\(?3:[[:digit:]]+\\): [[:digit:]]+:[[:digit:]]+ error: \\(?4:.+\\)$" error))
+                          :modes 'rust-mode)
 
 (provide 'flycheck)
 
