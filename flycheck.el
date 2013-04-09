@@ -24,7 +24,18 @@
 ;;; Commentary:
 
 ;; On-the-fly syntax checking for GNU Emacs (aka "flymake done right")
-
+;;
+;;
+;; Flycheck provides on-the-fly syntax checker with
+;;
+;; - major-mode based checkers,
+;; - simple declarative checker definitions,
+;; - built-in checkers for many languages,
+;; - standard error navigation,
+;; - easy customization,
+;; - and a clean, concise and understandable implementation.
+;;
+;;
 ;; Provide `flycheck-mode' which enables on-the-fly syntax checking for a large
 ;; number of different modes and languages (see `flycheck-checkers' for a
 ;; complete list).
