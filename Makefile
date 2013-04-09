@@ -18,6 +18,7 @@ DOC_SRCS = doc/api.texi \
 	doc/flycheck.texi \
 	doc/introduction.texi \
 	doc/usage.texi
+HTML_SRCS = $(DOC_SRCS) doc/flycheck.css
 
 PACKAGE_SRCS = $(SRCS) \
 	flycheck-pkg.el \
@@ -42,6 +43,17 @@ doc : doc/dir
 .PHONY: clean-doc
 clean-doc :
 	rm -f doc/flycheck.info doc/dir
+
+.PHONY: html
+html : $(HTML_SRCS)
+	$(MAKEINFO) --html --split=chapter --css-ref=flycheck.css \
+		-o doc/html doc/flycheck.texi
+	cp doc/flycheck.css doc/html/flycheck.css
+	touch doc/html/.nojekyll
+
+.PHONY: clean-html
+clean-html:
+	rm -rf doc/html
 
 .PHONY: test
 test : build

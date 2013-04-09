@@ -1,0 +1,56 @@
+body {
+    font-family: "HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-weight: 300;
+    font-size: 14px;
+    background: #eee;
+    color: #666;
+    max-width: 90%;
+    line-height: 2;
+}
+
+a {
+    text-decoration: none;
+    color: #258fb8;
+}
+
+p {
+    margin-top: 10px;
+    display: block;
+}
+
+h1 {
+    margin-top: 10px;
+    font-size: 1.8em;
+}
+
+h2 {
+    font-size: 1.5em;
+}
+
+h3 {
+    font-size: 1.3em;
+}
+
+samp, code, kbd {
+    background: #ddd;
+    border: 1px solid #ccc;
+    font-family: Menlo,Monaco,"Andale Mono","lucida console","Courier New",monospace;
+    font-size: 0.9em;
+    padding: 1px 3px;
+    margin: 0 3px;
+    border-radius: 5px;
+    font-style: normal;
+}
+
+pre {
+     background: #ddd;
+    border: 1px solid #ccc;
+    font-family: Menlo,Monaco,"Andale Mono","lucida console","Courier New",monospace;
+    font-size: 0.9em;
+    padding: 1px 3px;
+    margin: 0 3px;
+    border-radius: 5px;
+    font-style: normal;
+    overflow-x: auto;
+    line-height: 1.5;
+}

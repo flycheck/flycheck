@@ -8,3 +8,6 @@ flycheck-*.tar
 
 # Vagrant cache
 .vagrant
+
+# HTML documentation
+doc/html/
