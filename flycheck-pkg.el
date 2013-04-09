@@ -1,4 +1,4 @@
-(define-package "flycheck" "0.7.1"
+(define-package "flycheck" "0.8"
   "Flymake done right
 
 Flycheck provides on-the-fly syntax checker with

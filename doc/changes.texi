@@ -2,6 +2,7 @@ This appendix provides a comprehensive changelog of all releases:
 
 @menu
 * master        :: unreleased
+* 0.8           :: Apr 9, 2013
 * 0.7.1         :: Feb 23, 2013
 * 0.7           :: Feb 14, 2013
 * 0.6.1         :: Jan 30, 2013
@@ -320,7 +321,7 @@ Do not let the debugger interfere with necessary cleanup actions
 
 @end itemize
 
-@node 0.7.1, master, 0.7, Changes
+@node 0.7.1, 0.8, 0.7, Changes
 @comment  node-name,  next,  previous,  up
 @unnumberedsec 0.7.1 (Feb 23, 2013)
 
@@ -352,9 +353,9 @@ commands}
 
 @end itemize
 
-@node master, , 0.7.1, Changes
+@node 0.8, master, 0.7.1, Changes
 @comment  node-name,  next,  previous,  up
-@unnumberedsec master (unreleased)
+@unnumberedsec master (Apr 9, 2013)
 
 @itemize @bullet
 @item
@@ -406,6 +407,10 @@ space
 @end itemize
 
 @end itemize
+
+@node master, , 0.8, Changes
+@comment  node-name,  next,  previous,  up
+@unnumberedsec master (unreleased)
 
 @c Local Variables:
 @c mode: texinfo

@@ -1262,6 +1262,7 @@ This appendix provides a comprehensive changelog of all releases:
 * Menu:
 
 * master        :: unreleased
+* 0.8           :: Apr 9, 2013
 * 0.7.1         :: Feb 23, 2013
 * 0.7           :: Feb 14, 2013
 * 0.6.1         :: Jan 30, 2013
@@ -1483,7 +1484,7 @@ File: flycheck.info,  Node: 0.7,  Next: 0.7.1,  Prev: 0.6.1,  Up: Changes
           (https://github.com/lunaryorn/flycheck/issues/81)
 
 
-File: flycheck.info,  Node: 0.7.1,  Next: master,  Prev: 0.7,  Up: Changes
+File: flycheck.info,  Node: 0.7.1,  Next: 0.8,  Prev: 0.7,  Up: Changes
 
 0.7.1 (Feb 23, 2013)
 ====================
@@ -1506,10 +1507,10 @@ File: flycheck.info,  Node: 0.7.1,  Next: master,  Prev: 0.7,  Up: Changes
           commands (https://github.com/lunaryorn/flycheck/issues/86)
 
 
-File: flycheck.info,  Node: master,  Prev: 0.7.1,  Up: Changes
+File: flycheck.info,  Node: 0.8,  Next: master,  Prev: 0.7.1,  Up: Changes
 
-master (unreleased)
-===================
+master (Apr 9, 2013)
+====================
 
    * New syntax checkers:
 
@@ -1545,6 +1546,12 @@ master (unreleased)
           start with a space
         * Improve highlighting to reduce screen flickering
           (https://github.com/lunaryorn/flycheck/issues/100)
+
+
+File: flycheck.info,  Node: master,  Prev: 0.8,  Up: Changes
+
+master (unreleased)
+===================
 
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
@@ -2190,19 +2197,20 @@ Node: Contributing syntax checkers44962
 Node: Contributing code45757
 Node: Unit tests47097
 Node: Changes48384
-Node: 0.148904
-Node: 0.249188
-Node: 0.349466
-Node: 0.449702
-Node: 0.550477
-Node: 0.651697
-Node: 0.6.154547
-Node: 0.754696
-Node: 0.7.155710
-Node: master56428
-Node: Credits57935
-Node: GNU Free Documentation License59848
-Node: Syntax checkers85000
-Node: Function and Variable Index85883
+Node: 0.148935
+Node: 0.249219
+Node: 0.349497
+Node: 0.449733
+Node: 0.550508
+Node: 0.651728
+Node: 0.6.154578
+Node: 0.754727
+Node: 0.7.155741
+Node: 0.856456
+Node: master57977
+Node: Credits58082
+Node: GNU Free Documentation License59995
+Node: Syntax checkers85147
+Node: Function and Variable Index86030
 
 End Tag Table
