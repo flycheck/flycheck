@@ -225,7 +225,7 @@ overlay setup)."
    "---"
    ["Describe syntax checker" flycheck-describe-checker t]
    ["Read the Flycheck manual" flycheck-info t])
-  "Spell Checking")
+ "Spell Checking")
 
 (easy-menu-change '("Tools") "--" nil "Spell Checking")
 
@@ -1383,8 +1383,8 @@ Pop up a help buffer with the documentation of CHECKER."
           (princ ".\n\n")
           (princ (format "  This syntax checker executes \"%s\"" executable))
           (if config-file-var
-            (princ (format ", using a configuration file from `%s'.\n"
-                           config-file-var))
+              (princ (format ", using a configuration file from `%s'.\n"
+                             config-file-var))
             (princ ".\n"))
           (cond
            ((and modes predicate)
@@ -1422,8 +1422,8 @@ Pop up a help buffer with the documentation of CHECKER."
 If the buffer of ERR is not live, FORMS are not evaluated."
   (declare (indent 1))
   `(when (buffer-live-p (flycheck-error-buffer ,err))
-    (with-current-buffer (flycheck-error-buffer ,err)
-      ,@forms)))
+     (with-current-buffer (flycheck-error-buffer ,err)
+       ,@forms)))
 
 (defun flycheck-error-region (err &optional ignore-column)
   "Get the region of ERR.
@@ -1774,7 +1774,7 @@ If LEVEL is omitted if the current buffer has any errors at all."
   (if (get 'exclamation-mark 'fringe)
       'exclamation-mark
     'flycheck-fringe-exclamation-mark)
-    "The symbol to use as exclamation mark bitmap.
+  "The symbol to use as exclamation mark bitmap.
 
 Defaults to the built-in exclamation mark if available or to the
 flycheck exclamation mark otherwise.")
@@ -1882,7 +1882,7 @@ flycheck exclamation mark otherwise.")
   "Visit the N-th error from the current point.
 
 Intended for use with `next-error-function'."
-   (let* ((n (or n 1))
+  (let* ((n (or n 1))
          (current-pos (if reset (point-min) (point)))
          (before-and-after (->> flycheck-current-errors
                              (-map 'flycheck-error-pos)
@@ -1991,12 +1991,12 @@ Parse the OUTPUT and report an appropriate error status."
   (flycheck-report-status "")
   (let (errors)
     (condition-case err
-          (setq errors (flycheck-parse-output output checker (current-buffer)))
-        (error
-         (message "Failed to parse errors from checker %S in output: %s\n\
+        (setq errors (flycheck-parse-output output checker (current-buffer)))
+      (error
+       (message "Failed to parse errors from checker %S in output: %s\n\
 Error: %s" checker output (error-message-string err))
-         (flycheck-report-error)
-         (setq errors :errored)))
+       (flycheck-report-error)
+       (setq errors :errored)))
     (unless (eq errors :errored)
       (setq errors (-> errors
                      (flycheck-fix-error-filenames files)
@@ -2065,16 +2065,16 @@ _EVENT is ignored."
         ;; variable
         (setq flycheck-temp-buffer-copies nil)
         (process-put process :flycheck-checker checker))
-      (error
-       (flycheck-report-error)
-       ;; Clear all substituted files
-       (flycheck-clean-files flycheck-temp-buffer-copies)
-       (setq flycheck-temp-buffer-copies nil)
-       (when flycheck-current-process
-         ;; Clear the process if it's already there
-         (flycheck-delete-process flycheck-current-process)
-         (setq flycheck-current-process nil))
-       (signal (car err) (cdr err)))))
+    (error
+     (flycheck-report-error)
+     ;; Clear all substituted files
+     (flycheck-clean-files flycheck-temp-buffer-copies)
+     (setq flycheck-temp-buffer-copies nil)
+     (when flycheck-current-process
+       ;; Clear the process if it's already there
+       (flycheck-delete-process flycheck-current-process)
+       (setq flycheck-current-process nil))
+     (signal (car err) (cdr err)))))
 
 (defun flycheck-stop-checker ()
   "Stop any syntax checker for the current buffer."
@@ -2309,7 +2309,7 @@ See URL `http://php.net/manual/en/features.commandline.php'."
              "-d" "log_errors=0" source)
   :error-patterns
   '(("\\(?:Parse\\|Fatal\\|syntax\\) error[:,] \\(?4:.*\\) in \\(?1:.*\\) on line \\(?2:[0-9]+\\)"
-    error))
+     error))
   :modes '(php-mode php+-mode)
   :next-checkers '((warnings-only . php-phpcs)))
 
