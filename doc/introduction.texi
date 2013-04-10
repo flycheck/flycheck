@@ -20,10 +20,6 @@ And this is how it looks in action, using the awesome
 @center @image{screenshot,,,Flycheck in action}
 @end ifhtml
 
-@noindent
-@xref{Top, ,GNU Flymake, flymake}, for more information about
-Flymake.
-
 @menu
 * Features::                    What Flycheck can do for you
 * Installation::                How to install Flycheck in your GNU Emacs 24

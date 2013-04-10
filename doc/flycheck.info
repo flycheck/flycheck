@@ -63,8 +63,6 @@ Essentially it is "Flymake done right" with
    * and a clean, concise and understandable implementation with decent
      test coverage.
 
-*Note GNU Flymake: (flymake)Top, for more information about Flymake.
-
 * Menu:
 
 * Features::                    What Flycheck can do for you
@@ -1616,6 +1614,10 @@ their support and patches are greatly appreciated.
    * Victor Deryagin (https://github.com/vderyagin) added the Rust
      syntax checker.
 
+   Of course we also need to thank *note GNU Flymake: (flymake)Top, the
+first, respectable, though somewhat failed attempt at on-the-fly syntax
+checking.
+
 
 File: flycheck.info,  Node: GNU Free Documentation License,  Next: Syntax checkers,  Prev: Credits,  Up: Top
 
@@ -2183,48 +2185,48 @@ Function and Variable Index
 Tag Table:
 Node: Top734
 Node: Introduction2083
-Node: Features2874
-Node: Installation3943
-Node: Activation5117
-Node: Usage5468
-Node: Syntax checking6091
-Node: Selection7353
-Node: Configuration9934
-Node: Reporting12602
-Node: Navigation14957
-Node: Mode line16753
-Node: Extending17654
-Node: Declaration18253
-Node: Error parsers29307
-Node: Option filters30291
-Node: Examples30630
-Node: Simple example31062
-Node: Predicate example34126
-Node: Configuration example36107
-Node: Chaining example38766
-Node: API40152
-Node: Error API40940
-Node: Error parser API43541
-Node: Contribution43767
-Node: Reporting issues44443
-Node: Contributing syntax checkers45179
-Node: Contributing code45974
-Node: Unit tests47314
-Node: Changes48601
-Node: 0.149152
-Node: 0.249436
-Node: 0.349714
-Node: 0.449950
-Node: 0.550725
-Node: 0.651945
-Node: 0.6.154795
-Node: 0.754944
-Node: 0.7.155958
-Node: 0.856673
-Node: master58188
-Node: Credits58523
-Node: GNU Free Documentation License60436
-Node: Syntax checkers85588
-Node: Function and Variable Index86483
+Node: Features2804
+Node: Installation3873
+Node: Activation5047
+Node: Usage5398
+Node: Syntax checking6021
+Node: Selection7283
+Node: Configuration9864
+Node: Reporting12532
+Node: Navigation14887
+Node: Mode line16683
+Node: Extending17584
+Node: Declaration18183
+Node: Error parsers29237
+Node: Option filters30221
+Node: Examples30560
+Node: Simple example30992
+Node: Predicate example34056
+Node: Configuration example36037
+Node: Chaining example38696
+Node: API40082
+Node: Error API40870
+Node: Error parser API43471
+Node: Contribution43697
+Node: Reporting issues44373
+Node: Contributing syntax checkers45109
+Node: Contributing code45904
+Node: Unit tests47244
+Node: Changes48531
+Node: 0.149082
+Node: 0.249366
+Node: 0.349644
+Node: 0.449880
+Node: 0.550655
+Node: 0.651875
+Node: 0.6.154725
+Node: 0.754874
+Node: 0.7.155888
+Node: 0.856603
+Node: master58118
+Node: Credits58453
+Node: GNU Free Documentation License60521
+Node: Syntax checkers85673
+Node: Function and Variable Index86568
 
 End Tag Table
