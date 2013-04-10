@@ -17,7 +17,7 @@
 @syncodeindex fn cp
 
 @copying
-This manual is for Flycheck.
+This manual is for Flycheck, the on-the-fly syntax checker for GNU Emacs.
 
 Copyright @copyright{} 2013 Sebastian Wiesner
 
