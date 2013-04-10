@@ -1,9 +1,6 @@
 (source "melpa" "http://melpa.milkbox.net/packages/")
 
-(package "flycheck" "0.8" "On-the-fly syntax checking (Flymake done right)")
-
-(depends-on "s" "1.3.1")
-(depends-on "dash" "1.0.3")
+(package-file "flycheck.el")
 
 ;; Various modes for use in the unit tests
 (development

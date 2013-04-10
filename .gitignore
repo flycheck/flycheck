@@ -4,6 +4,7 @@
 elpa/
 
 # Generated package archive
+flycheck-pkg.el
 flycheck-*.tar
 
 # Vagrant cache

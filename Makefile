@@ -70,9 +70,6 @@ virtual-test :
 .PHONY: package
 package : $(PACKAGE)
 
-.PHONY: pkg-file
-pkg-file : flycheck-pkg.el
-
 $(PACKAGE) : $(PACKAGE_SRCS)
 	rm -rf flycheck-$(VERSION)
 	mkdir -p flycheck-$(VERSION)

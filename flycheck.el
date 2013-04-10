@@ -1,10 +1,12 @@
-;;; flycheck.el --- Flymake done right -*- lexical-binding: t; -*-
+;;; flycheck.el --- On-the-fly syntax checking (Flymake done right) -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2012, 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
 ;; Author: Sebastian Wiesner <lunaryorn@gmail.com>
 ;; URL: https://github.com/lunaryorn/flycheck
 ;; Keywords: convenience languages tools
+;; Version: 0.8
+;; Package-Requires: ((s "1.3.1") (dash "1.0.3"))
 
 ;; This file is not part of GNU Emacs.
 

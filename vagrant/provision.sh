@@ -102,7 +102,7 @@ gem haml \
     sass
 
 # Install carton for Emacs dependency management
-CARTON_VERSION=0.1.2
+CARTON_VERSION=0.2.0
 CARTON_DIR="/opt/carton-${CARTON_VERSION}"
 if ! [ -d "$CARTON_DIR" -a -x "/$CARTON_DIR/bin/carton" ]; then
   sudo rm -rf "$CARTON_DIR"
