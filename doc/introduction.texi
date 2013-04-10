@@ -13,6 +13,13 @@ and a clean, concise and understandable implementation with decent test
 coverage.
 @end itemize
 
+@ifhtml
+@noindent
+And this is how it looks in action, using the awesome
+@uref{https://github.com/bbatsov/solarized-Emacs, solarized-light} color theme:
+@center @image{screenshot,,,Flycheck in action}
+@end ifhtml
+
 @noindent
 @xref{Top, ,GNU Flymake, flymake}, for more information about
 Flymake.
