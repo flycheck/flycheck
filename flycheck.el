@@ -288,6 +288,7 @@ buffer manually.
 
     ;; Update error display in minibuffer after commands and error navigation
     (add-hook 'post-command-hook 'flycheck-show-error-at-point-soon nil t)
+    (add-hook 'post-command-hook 'flycheck-hide-error-buffer nil t)
     (add-hook 'next-error-hook 'flycheck-show-error-at-point nil t)
 
     (setq flycheck-previous-next-error-function next-error-function)
@@ -301,6 +302,7 @@ buffer manually.
     (remove-hook 'window-configuration-change-hook
                  'flycheck-perform-deferred-syntax-check t)
     (remove-hook 'post-command-hook 'flycheck-show-error-at-point-soon t)
+    (remove-hook 'post-command-hook 'flycheck-hide-error-buffer t)
     (remove-hook 'next-error-hook 'flycheck-show-error-at-point t)
 
     (setq next-error-function flycheck-previous-next-error-function)
@@ -1925,6 +1927,16 @@ the beginning of the buffer."
 
 
 ;;;; Error message echoing
+(defconst flycheck-error-message-buffer "*Flycheck errors*"
+  "The name of the buffer to show long error messages in.")
+
+(defun flycheck-error-message-buffer ()
+  "Get the buffer object to show long error messages in.
+
+Get the buffer named by variable `flycheck-error-message-buffer',
+or nil if the buffer does not exist."
+  (get-buffer flycheck-error-message-buffer))
+
 (defvar-local flycheck-error-show-error-timer nil
   "Timer to automatically show the error at point in minibuffer.")
 
@@ -1941,7 +1953,8 @@ the beginning of the buffer."
   (when flycheck-mode
     (let ((error-messages (flycheck-overlay-messages-string-at (point))))
       (when error-messages
-        (display-message-or-buffer error-messages "*Flycheck errors*")))))
+        (display-message-or-buffer error-messages
+                                   flycheck-error-message-buffer)))))
 
 (defun flycheck-show-error-at-point-soon ()
   "Show the first error message at point in minibuffer asap.
@@ -1951,6 +1964,16 @@ Show the error message at point in minibuffer after a short delay."
   (when (flycheck-overlays-at (point))
     (setq flycheck-error-show-error-timer
           (run-at-time 0.9 nil 'flycheck-show-error-at-point))))
+
+(defun flycheck-hide-error-buffer ()
+  "Hide the Flycheck error buffer if necessary.
+
+Hide the error buffer if there is no error under point."
+  (interactive)
+  (let* ((buffer (flycheck-error-message-buffer))
+         (window (when buffer (get-buffer-window buffer))))
+    (when (and window (not (flycheck-overlays-at (point))))
+      (quit-window nil window))))
 
 
 ;;;; Checker process management

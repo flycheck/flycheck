@@ -420,6 +420,15 @@ New syntax checkers:
 @item
 @ghissue{103, SCSS using @command{scss}}
 @end itemize
+
+@item
+Improvements:
+
+@itemize @bullet
+@item
+Quit the error message window when navigating away from error locations
+@end itemize
+
 @end itemize
 
 
