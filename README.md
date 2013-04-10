@@ -13,7 +13,7 @@ Flycheck provides on-the-fly syntax checking for GNU Emacs 24.  Essentially it's
 
 And this is how it looks like (the color theme is [solarized-light][]):
 
-![Screenshot of Flycheck in action](https://github.com/lunaryorn/flycheck/raw/master/screenshot.png)
+![Screenshot of Flycheck in action](https://github.com/lunaryorn/flycheck/raw/master/doc/screenshot.png)
 
 
 Features
