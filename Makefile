@@ -17,11 +17,13 @@ DOC_SRCS = doc/api.texi \
 	doc/fdl-1.3.texi \
 	doc/flycheck.texi \
 	doc/github-ribbon.texi \
+	doc/html-frontmatter.texi \
 	doc/introduction.texi \
 	doc/usage.texi
 HTML_SRCS = $(DOC_SRCS) doc/htmlxref.cnf
 HTML_TARGETS = doc/html/index.html \
 	doc/html/.nojekyll \
+	doc/html/screenshot.png \
 	doc/html/flycheck.css
 
 
@@ -94,6 +96,9 @@ doc/dir : doc/flycheck.info
 	$(INSTALL-INFO) doc/flycheck.info doc/dir
 
 doc/flycheck.info : $(DOC_SRCS)
+
+doc/html/screenshot.png : doc/screenshot.png
+	cp -f $< $@
 
 doc/html/flycheck.css : doc/flycheck.css
 	cp -f $< $@
