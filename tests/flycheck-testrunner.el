@@ -26,8 +26,6 @@
 
 ;;; Code:
 
-(setq debug-on-error t)
-
 ;;;; Load the testsuite
 (let* ((testdir (file-name-directory load-file-name))
        (sourcedir (expand-file-name ".." testdir))
