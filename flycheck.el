@@ -2437,7 +2437,7 @@ See URL `http://sass-lang.com'."
      warning)
     ("^Syntax error: \\(?4:.*\\)\r?\n        on line \\(?2:[0-9]+\\) of \\(?1:.*\\)$"
      error))
-  :modes 'sass-mode)
+  :modes '(sass-mode scss-mode))
 
 (flycheck-declare-checker sh
   "A POSIX Shell syntax checker using the dash executable.
