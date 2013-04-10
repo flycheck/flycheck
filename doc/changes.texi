@@ -355,7 +355,7 @@ commands}
 
 @node 0.8, master, 0.7.1, Changes
 @comment  node-name,  next,  previous,  up
-@unnumberedsec master (Apr 9, 2013)
+@unnumberedsec 0.8 (Apr 9, 2013)
 
 @itemize @bullet
 @item

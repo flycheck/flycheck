@@ -1509,8 +1509,8 @@ File: flycheck.info,  Node: 0.7.1,  Next: 0.8,  Prev: 0.7,  Up: Changes
 
 File: flycheck.info,  Node: 0.8,  Next: master,  Prev: 0.7.1,  Up: Changes
 
-master (Apr 9, 2013)
-====================
+0.8 (Apr 9, 2013)
+=================
 
    * New syntax checkers:
 
@@ -2213,10 +2213,10 @@ Node: 0.6.154578
 Node: 0.754727
 Node: 0.7.155741
 Node: 0.856456
-Node: master57977
-Node: Credits58199
-Node: GNU Free Documentation License60112
-Node: Syntax checkers85264
-Node: Function and Variable Index86159
+Node: master57971
+Node: Credits58193
+Node: GNU Free Documentation License60106
+Node: Syntax checkers85258
+Node: Function and Variable Index86153
 
 End Tag Table
