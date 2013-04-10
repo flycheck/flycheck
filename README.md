@@ -11,7 +11,7 @@ Flycheck provides on-the-fly syntax checking for GNU Emacs 24.  Essentially it's
 - and a clean, concise and understandable implementation (instead of a almost 2k
   line mess of spaghetti code).
 
-And this is how it looks like (the color theme is [solarized-light][]):
+And this is how it looks like, using the awesome [solarized-light][] color theme:
 
 ![Screenshot of Flycheck in action](https://github.com/lunaryorn/flycheck/raw/master/doc/screenshot.png)
 
