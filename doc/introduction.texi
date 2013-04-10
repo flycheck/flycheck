@@ -37,9 +37,9 @@ Error navigation with @code{next-error} and @code{previous-error}
 Built-in syntax checkers for:
 @itemize @bullet
 @item
-CoffeeScript
+CoffeeScript (using @command{coffeelint})
 @item
-CSS
+CSS (using @command{csslint}))
 @item
 Emacs Lisp (using the byte compiler and CheckDoc)
 @item
@@ -47,11 +47,11 @@ Go (using @command{gofmt})
 @item
 Haml
 @item
-HTML
+HTML (using @command{tidy})
 @item
-Javascript
+Javascript (using @command{jshint})
 @item
-JSON
+JSON (using @command{jsonlint})
 @item
 Lua
 @item
@@ -67,12 +67,14 @@ Rust (using @command{rustc})
 @item
 Sass
 @item
+SCSS
+@item
 Shell scripts (using Bash, Dash, or Zsh depending on the type of shell
 script)
 @item
 TeX/LaTeX (using @command{chktex} or @command{lacheck})
 @item
-XML
+XML (using @command{xmlstarlet})
 @end itemize
 @item
 Easy customization

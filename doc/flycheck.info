@@ -79,14 +79,14 @@ File: flycheck.info,  Node: Features,  Next: Installation,  Prev: Introduction, 
    * Automatic syntax checking after saving or insertion of new lines
    * Error navigation with 'next-error' and 'previous-error'
    * Built-in syntax checkers for:
-        * CoffeeScript
-        * CSS
+        * CoffeeScript (using 'coffeelint')
+        * CSS (using 'csslint'))
         * Emacs Lisp (using the byte compiler and CheckDoc)
         * Go (using 'gofmt')
         * Haml
-        * HTML
-        * Javascript
-        * JSON
+        * HTML (using 'tidy')
+        * Javascript (using 'jshint')
+        * JSON (using 'jsonlint')
         * Lua
         * Perl
         * PHP (using the PHP Command Line and PHP CodeSniffer)
@@ -94,10 +94,11 @@ File: flycheck.info,  Node: Features,  Next: Installation,  Prev: Introduction, 
         * Ruby
         * Rust (using 'rustc')
         * Sass
+        * SCSS
         * Shell scripts (using Bash, Dash, or Zsh depending on the type
           of shell script)
         * TeX/LaTeX (using 'chktex' or 'lacheck')
-        * XML
+        * XML (using 'xmlstarlet')
    * Easy customization
    * Easy declarative API to define new syntax checkers
 
@@ -2181,47 +2182,47 @@ Tag Table:
 Node: Top689
 Node: Introduction1993
 Node: Features2784
-Node: Installation3726
-Node: Activation4900
-Node: Usage5251
-Node: Syntax checking5874
-Node: Selection7136
-Node: Configuration9717
-Node: Reporting12385
-Node: Navigation14740
-Node: Mode line16536
-Node: Extending17437
-Node: Declaration18036
-Node: Error parsers29090
-Node: Option filters30074
-Node: Examples30413
-Node: Simple example30845
-Node: Predicate example33909
-Node: Configuration example35890
-Node: Chaining example38549
-Node: API39935
-Node: Error API40723
-Node: Error parser API43324
-Node: Contribution43550
-Node: Reporting issues44226
-Node: Contributing syntax checkers44962
-Node: Contributing code45757
-Node: Unit tests47097
-Node: Changes48384
-Node: 0.148935
-Node: 0.249219
-Node: 0.349497
-Node: 0.449733
-Node: 0.550508
-Node: 0.651728
-Node: 0.6.154578
-Node: 0.754727
-Node: 0.7.155741
-Node: 0.856456
-Node: master57971
-Node: Credits58306
-Node: GNU Free Documentation License60219
-Node: Syntax checkers85371
-Node: Function and Variable Index86266
+Node: Installation3853
+Node: Activation5027
+Node: Usage5378
+Node: Syntax checking6001
+Node: Selection7263
+Node: Configuration9844
+Node: Reporting12512
+Node: Navigation14867
+Node: Mode line16663
+Node: Extending17564
+Node: Declaration18163
+Node: Error parsers29217
+Node: Option filters30201
+Node: Examples30540
+Node: Simple example30972
+Node: Predicate example34036
+Node: Configuration example36017
+Node: Chaining example38676
+Node: API40062
+Node: Error API40850
+Node: Error parser API43451
+Node: Contribution43677
+Node: Reporting issues44353
+Node: Contributing syntax checkers45089
+Node: Contributing code45884
+Node: Unit tests47224
+Node: Changes48511
+Node: 0.149062
+Node: 0.249346
+Node: 0.349624
+Node: 0.449860
+Node: 0.550635
+Node: 0.651855
+Node: 0.6.154705
+Node: 0.754854
+Node: 0.7.155868
+Node: 0.856583
+Node: master58098
+Node: Credits58433
+Node: GNU Free Documentation License60346
+Node: Syntax checkers85498
+Node: Function and Variable Index86393
 
 End Tag Table
