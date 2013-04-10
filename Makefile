@@ -80,7 +80,7 @@ $(PACKAGE) : $(PACKAGE_SRCS)
 .PHONY: clean
 clean :
 	rm -f $(OBJECTS)
-	rm -rf $(PACKAGE)
+	rm -rf $(PACKAGE) flycheck-pkg.el
 
 %.elc : %.el
 	EMACS=$(EMACS) $(CARTON) exec $(EMACS) \
