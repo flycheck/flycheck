@@ -9,6 +9,12 @@ body {
     max-width: 1000px;
 }
 
+@media screen and (max-width: 800px) {
+    body {
+        margin: 0 15px;
+    }
+}
+
 a {
     text-decoration: none;
     color: #258fb8;
