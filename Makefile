@@ -16,9 +16,14 @@ DOC_SRCS = doc/api.texi \
 	doc/extending.texi \
 	doc/fdl-1.3.texi \
 	doc/flycheck.texi \
+	doc/github-ribbon.texi \
 	doc/introduction.texi \
 	doc/usage.texi
-HTML_SRCS = $(DOC_SRCS) doc/flycheck.css
+HTML_SRCS = $(DOC_SRCS) doc/htmlxref.cnf
+HTML_TARGETS = doc/html/index.html \
+	doc/html/.nojekyll \
+	doc/html/flycheck.css
+
 
 PACKAGE_SRCS = $(SRCS) \
 	flycheck-pkg.el \
@@ -45,11 +50,7 @@ clean-doc :
 	rm -f doc/flycheck.info doc/dir
 
 .PHONY: html
-html : $(HTML_SRCS)
-	$(MAKEINFO) --html --split=chapter --css-ref=flycheck.css \
-		-o doc/html doc/flycheck.texi
-	cp doc/flycheck.css doc/html/flycheck.css
-	touch doc/html/.nojekyll
+html : $(HTML_TARGETS)
 
 .PHONY: clean-html
 clean-html:
@@ -60,7 +61,6 @@ test : build
 	EMACS=$(EMACS) $(CARTON) exec $(EMACS) \
 		-Q --no-site-lisp $(EMACSFLAGS) --script \
 		tests/flycheck-testrunner.el
-
 
 .PHONY: virtual-test
 virtual-test :
@@ -94,3 +94,13 @@ doc/dir : doc/flycheck.info
 	$(INSTALL-INFO) doc/flycheck.info doc/dir
 
 doc/flycheck.info : $(DOC_SRCS)
+
+doc/html/flycheck.css : doc/flycheck.css
+	cp -f $< $@
+
+doc/html/.nojekyll:
+	touch $@
+
+doc/html/index.html: $(DOC_SRCS)
+	$(MAKEINFO) --html --split=chapter --css-ref=flycheck.css \
+		-o doc/html doc/flycheck.texi

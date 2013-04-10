@@ -21,7 +21,7 @@ a {
 }
 
 p {
-    margin-top: 10px;
+    margin: 1em 0;
     display: block;
 }
 
@@ -60,4 +60,14 @@ pre {
     font-style: normal;
     overflow-x: auto;
     line-height: 1.5;
+}
+
+#frontmatter {
+    width: 700px;
+    margin: 0 auto;
+}
+
+#frontmatter div {
+    display: block;
+    margin: 1em 0;
 }
