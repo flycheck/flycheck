@@ -85,6 +85,7 @@ buffer-local wherever it is set."
     css-csslint
     emacs-lisp
     emacs-lisp-checkdoc
+    go
     go-gofmt
     haml
     html-tidy
@@ -2227,6 +2228,51 @@ The checker runs `checkdoc-current-buffer'."
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)" warning))
   :modes '(emacs-lisp-mode lisp-interaction-mode)
   :predicate '(not (flycheck-temp-compilation-buffer-p)))
+
+(defun go-check-command ()
+  "Build go checker command depending on the type of source file to check."
+  (let ((src-tmp-file (flycheck-substitute-argument-symbol 'source-inplace))
+        (src-orig (file-name-nondirectory
+                   (flycheck-substitute-argument-symbol 'source-original)))
+        (args nil)
+        (args-list nil)
+        (is-test nil)
+        (go-list-cmd "go list -f '{{.GoFiles}} {{.CgoFiles}}'")
+        (go-list-regexp "^\\[\\(.*\\)\\] \\[\\(.*\\)\\]"))
+    (if (s-ends-with? "_test.go" src-tmp-file)
+        (progn
+          (setq args (append args (list "test" "-c")))
+          (setq is-test t)
+          (setq go-list-cmd "go list -f '{{.GoFiles}} {{.CgoFiles}} {{.TestGoFiles}}'"))
+      (setq args (list "build" "-o" "/dev/null")))
+    (setq args-list
+          (replace-regexp-in-string
+           "[[:space:]\n]*$" ""
+           (shell-command-to-string go-list-cmd)))
+    (if is-test
+        (setq go-list-regexp "^\\[\\(.*\\)\\] \\[\\(.*\\)\\] \\[\\(.*\\)\\]"))
+    (string-match go-list-regexp args-list)
+    (let ((go-files  (match-string 1 args-list))
+          (cgo-files (match-string 2 args-list))
+          (go-test-files (if is-test (match-string 3 args-list))))
+      (if (or (not go-files) (not (string= go-files "")))
+          (setq args (append args (s-split " " go-files))))
+      (if (not (string= cgo-files ""))
+          (setq args (append args (s-split " " cgo-files))))
+      (if is-test
+          (if (not (string= go-test-files ""))
+              (setq args (append args (s-split " " go-test-files)))))
+      )
+    (setq args (delete src-orig args))
+    ))
+
+(flycheck-declare-checker go
+  "A Go syntax and style checker using the go compiler.
+
+See URL `https://golang.org/cmd/go'."
+  :command (append (list "go") `((eval (go-check-command))))
+  :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
+  :modes 'go-mode)
 
 (flycheck-declare-checker go-gofmt
   "A Go syntax and style checker using the gofmt utility.

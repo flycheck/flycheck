@@ -82,7 +82,7 @@ File: flycheck.info,  Node: Features,  Next: Installation,  Prev: Introduction, 
         * CoffeeScript
         * CSS
         * Emacs Lisp (using the byte compiler and CheckDoc)
-        * Go (using 'gofmt')
+        * Go (using go compiler and 'gofmt')
         * Haml
         * HTML
         * Javascript
@@ -2104,6 +2104,7 @@ order of their appearance in the default value of 'flycheck-checkers':
    * 'css-csslint'
    * 'emacs-lisp'
    * 'emacs-lisp-checkdoc'
+   * 'go'
    * 'go-gofmt'
    * 'haml'
    * 'html-tidy'

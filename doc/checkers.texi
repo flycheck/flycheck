@@ -8,6 +8,7 @@ order of their appearance in the default value of
 @iflyc css-csslint
 @iflyc emacs-lisp
 @iflyc emacs-lisp-checkdoc
+@iflyc go
 @iflyc go-gofmt
 @iflyc haml
 @iflyc html-tidy

@@ -31,12 +31,12 @@ awesome Vim library @uref{https://github.com/scrooloose/syntastic,
 syntastic} which inspired this project and many of its checkers.
 
 @item
-@uref{https://github.com/ptrv, Peter Vasil} created the XML and Lua
+@uref{https://github.com/ptrv, Peter Vasil} created the Go, XML and Lua
 syntax checkers, added unit tests and did valuable testing.
 
 @item
-@uref{https://github.com/robert-zaremba, Robert Zaremba} added the Go
-syntax checker.
+@uref{https://github.com/robert-zaremba, Robert Zaremba} added the
+Go-Gofmt syntax checker.
 
 @item
 @uref{https://github.com/steckerhalter, steckerhalter} provided the PHP
