@@ -100,6 +100,7 @@ buffer-local wherever it is set."
     ruby
     rust-rustc
     sass
+    scss
     sh
     tex-chktex
     tex-lacheck
@@ -2438,6 +2439,19 @@ See URL `http://sass-lang.com'."
     ("^Syntax error: \\(?4:.*\\)\r?\n        on line \\(?2:[0-9]+\\) of \\(?1:.*\\)$"
      error))
   :modes 'sass-mode)
+
+(flycheck-declare-checker scss
+  "A SCSS syntax checker using the SCSS compiler.
+
+See URL `http://sass-lang.com'."
+  :command '("scss" "-c" source)
+  :error-patterns
+  '(("^Syntax error on line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error)
+    ("^WARNING on line \\(?2:[0-9]+\\) of \\(?1:.*\\):\r?\n\\(?4:.*\\)$"
+     warning)
+    ("^Syntax error: \\(?4:.*\\)\r?\n        on line \\(?2:[0-9]+\\) of \\(?1:.*\\)$"
+     error))
+  :modes 'scss-mode)
 
 (flycheck-declare-checker sh
   "A POSIX Shell syntax checker using the dash executable.

@@ -37,6 +37,7 @@ Features
   - Ruby
   - Rust
   - Sass
+  - SCSS
   - Shell scripts (Bash, Dash and Zsh)
   - TeX/LaTeX
   - XML

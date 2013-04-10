@@ -23,6 +23,7 @@ order of their appearance in the default value of
 @iflyc ruby
 @iflyc rust-rustc
 @iflyc sass
+@iflyc scss
 @iflyc sh
 @iflyc tex-chktex
 @iflyc tex-lacheck

@@ -1553,6 +1553,11 @@ File: flycheck.info,  Node: master,  Prev: 0.8,  Up: Changes
 master (unreleased)
 ===================
 
+   * New syntax checkers:
+
+        * SCSS using 'scss'
+          (https://github.com/lunaryorn/flycheck/issues/103)
+
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
 
@@ -2114,6 +2119,7 @@ order of their appearance in the default value of 'flycheck-checkers':
    * 'ruby'
    * 'rust-rustc'
    * 'sass'
+   * 'scss'
    * 'sh'
    * 'tex-chktex'
    * 'tex-lacheck'
@@ -2208,9 +2214,9 @@ Node: 0.754727
 Node: 0.7.155741
 Node: 0.856456
 Node: master57977
-Node: Credits58082
-Node: GNU Free Documentation License59995
-Node: Syntax checkers85147
-Node: Function and Variable Index86030
+Node: Credits58199
+Node: GNU Free Documentation License60112
+Node: Syntax checkers85264
+Node: Function and Variable Index86159
 
 End Tag Table
