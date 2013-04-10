@@ -12,3 +12,6 @@ flycheck-*.tar
 
 # HTML documentation
 doc/html/
+
+# Go compiler noise
+command-line-arguments.test
