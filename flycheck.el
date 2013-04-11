@@ -279,7 +279,7 @@ buffer manually.
   :require 'flycheck
   (cond
    (flycheck-mode
-    (flycheck-report-status "")
+    (flycheck-clear)
 
     (add-hook 'after-save-hook 'flycheck-buffer-safe nil t)
     (add-hook 'after-change-functions 'flycheck-handle-change nil t)
