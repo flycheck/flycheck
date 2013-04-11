@@ -22,7 +22,6 @@ DOC_SRCS = doc/api.texi \
 	doc/usage.texi
 HTML_SRCS = $(DOC_SRCS) doc/htmlxref.cnf
 HTML_TARGETS = doc/html/index.html \
-	doc/html/.nojekyll \
 	doc/html/screenshot.png \
 	doc/html/flycheck.css
 
@@ -102,9 +101,6 @@ doc/html/screenshot.png : doc/screenshot.png
 
 doc/html/flycheck.css : doc/flycheck.css
 	cp -f $< $@
-
-doc/html/.nojekyll:
-	touch $@
 
 doc/html/index.html: $(DOC_SRCS)
 	$(MAKEINFO) --html --split=chapter --css-ref=flycheck.css \
