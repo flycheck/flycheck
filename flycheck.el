@@ -1426,7 +1426,7 @@ Pop up a help buffer with the documentation of CHECKER."
   "Switch to the buffer of ERR and evaluate FORMS.
 
 If the buffer of ERR is not live, FORMS are not evaluated."
-  (declare (indent 1))
+  (declare (indent 1) (debug t))
   `(when (buffer-live-p (flycheck-error-buffer ,err))
      (with-current-buffer (flycheck-error-buffer ,err)
        ,@forms)))
