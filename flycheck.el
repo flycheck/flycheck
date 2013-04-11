@@ -357,7 +357,8 @@ buffer."
   "Clear all errors in the current buffer."
   (interactive)
   (flycheck-delete-all-overlays)
-  (flycheck-clear-errors))
+  (flycheck-clear-errors)
+  (flycheck-hide-error-buffer))
 
 (defun flycheck-buffer ()
   "Check syntax in the current buffer."
