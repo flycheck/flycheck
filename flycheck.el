@@ -2458,7 +2458,7 @@ See URL `http://pypi.python.org/pypi/pyflakes'."
 
 See URL `http://rust-lang.org'."
   :command '("rustc" "--parse-only" source)
-  :error-patterns '(("^\\(?1:.+\\.r[cs]\\):\\(?2:[[:digit:]]+\\):\\(?3:[[:digit:]]+\\): [[:digit:]]+:[[:digit:]]+ error: \\(?4:.+\\)$" error))
+  :error-patterns '(("^\\(?1:.+\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): [0-9]+:[0-9]+ error: \\(?4:.+\\)$" error))
   :modes 'rust-mode)
 
 (flycheck-declare-checker sass
