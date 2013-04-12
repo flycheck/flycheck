@@ -20,9 +20,9 @@ order of their appearance in the default value of
 @iflyc python-flake8
 @iflyc python-pylint
 @iflyc python-pyflakes
+@iflyc rst
 @iflyc ruby
 @iflyc rust-rustc
-@iflyc rst
 @iflyc sass
 @iflyc scss
 @iflyc sh
