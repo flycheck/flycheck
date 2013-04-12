@@ -2,8 +2,10 @@
 
 (package-file "flycheck.el")
 
-;; Various modes for use in the unit tests
 (development
+ (depends-on "ert")                     ; Unit test library
+
+ ;; Various modes for use in the unit tests
  (depends-on "coffee-mode")
  (depends-on "haml-mode")
  (depends-on "js2-mode")
