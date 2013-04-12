@@ -36,6 +36,7 @@ Features
   - Python
   - Ruby
   - Rust
+  - RST (ReStructuredText)
   - Sass
   - SCSS
   - Shell scripts (Bash, Dash and Zsh)

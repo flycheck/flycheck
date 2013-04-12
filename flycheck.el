@@ -99,6 +99,7 @@ buffer-local wherever it is set."
     python-flake8
     python-pylint
     python-pyflakes
+    rst
     ruby
     rust-rustc
     sass
@@ -2446,6 +2447,17 @@ See URL `http://pypi.python.org/pypi/pyflakes'."
   :command '("pyflakes" source-inplace)
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'python-mode)
+
+(flycheck-declare-checker rst
+  "A ReStructuredText (RST) syntax checker using Docutils.
+
+See URL `http://docutils.sourceforge.net/'."
+  :command '("rst2pseudoxml.py" "--report=2" "--exit-status=1" "--halt=5" source)
+  :error-patterns
+  '(("^\\(?1:.+\\):\\(?2:[0-9]+\\): (WARNING/2) \\(?4:.+\\)$" warning)
+    ("^\\(?1:.+\\):\\(?2:[0-9]+\\): (ERROR/3) \\(?4:.+\\)$" error)
+    ("^\\(?1:.+\\):\\(?2:[0-9]+\\): (SEVERE/4) \\(?4:.+\\)$" error))
+  :modes 'rst-mode)
 
 (flycheck-declare-checker ruby
   "A Ruby syntax checker using the Ruby interpreter."

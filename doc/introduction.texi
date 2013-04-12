@@ -68,6 +68,8 @@ Ruby
 @item
 Rust (using @command{rustc})
 @item
+RST (ReStructuredText, using Docutils)
+@item
 Sass
 @item
 SCSS

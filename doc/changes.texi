@@ -419,6 +419,8 @@ New syntax checkers:
 @itemize @bullet
 @item
 @ghissue{103, SCSS using @command{scss}}
+@item
+RST (ReStructuredText) using Docutils
 @end itemize
 
 @item

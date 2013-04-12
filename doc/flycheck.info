@@ -93,6 +93,7 @@ File: flycheck.info,  Node: Features,  Next: Installation,  Prev: Introduction, 
         * Python (using 'flake8', 'pylint', or 'pyflakes')
         * Ruby
         * Rust (using 'rustc')
+        * RST (ReStructuredText, using Docutils)
         * Sass
         * SCSS
         * Shell scripts (using Bash, Dash, or Zsh depending on the type
@@ -1558,6 +1559,7 @@ master (unreleased)
 
         * SCSS using 'scss'
           (https://github.com/lunaryorn/flycheck/issues/103)
+        * RST (ReStructuredText) using Docutils
 
    * Improvements:
 
@@ -2128,6 +2130,7 @@ order of their appearance in the default value of 'flycheck-checkers':
    * 'python-pyflakes'
    * 'ruby'
    * 'rust-rustc'
+   * 'rst'
    * 'sass'
    * 'scss'
    * 'sh'
@@ -2186,47 +2189,47 @@ Tag Table:
 Node: Top734
 Node: Introduction2083
 Node: Features2804
-Node: Installation3873
-Node: Activation5047
-Node: Usage5398
-Node: Syntax checking6021
-Node: Selection7283
-Node: Configuration9864
-Node: Reporting12532
-Node: Navigation14887
-Node: Mode line16683
-Node: Extending17584
-Node: Declaration18183
-Node: Error parsers29237
-Node: Option filters30221
-Node: Examples30560
-Node: Simple example30992
-Node: Predicate example34056
-Node: Configuration example36037
-Node: Chaining example38696
-Node: API40082
-Node: Error API40870
-Node: Error parser API43471
-Node: Contribution43697
-Node: Reporting issues44373
-Node: Contributing syntax checkers45109
-Node: Contributing code45904
-Node: Unit tests47244
-Node: Changes48531
-Node: 0.149082
-Node: 0.249366
-Node: 0.349644
-Node: 0.449880
-Node: 0.550655
-Node: 0.651875
-Node: 0.6.154725
-Node: 0.754874
-Node: 0.7.155888
-Node: 0.856603
-Node: master58118
-Node: Credits58453
-Node: GNU Free Documentation License60521
-Node: Syntax checkers85673
-Node: Function and Variable Index86568
+Node: Installation3922
+Node: Activation5096
+Node: Usage5447
+Node: Syntax checking6070
+Node: Selection7332
+Node: Configuration9913
+Node: Reporting12581
+Node: Navigation14936
+Node: Mode line16732
+Node: Extending17633
+Node: Declaration18232
+Node: Error parsers29286
+Node: Option filters30270
+Node: Examples30609
+Node: Simple example31041
+Node: Predicate example34105
+Node: Configuration example36086
+Node: Chaining example38745
+Node: API40131
+Node: Error API40919
+Node: Error parser API43520
+Node: Contribution43746
+Node: Reporting issues44422
+Node: Contributing syntax checkers45158
+Node: Contributing code45953
+Node: Unit tests47293
+Node: Changes48580
+Node: 0.149131
+Node: 0.249415
+Node: 0.349693
+Node: 0.449929
+Node: 0.550704
+Node: 0.651924
+Node: 0.6.154774
+Node: 0.754923
+Node: 0.7.155937
+Node: 0.856652
+Node: master58167
+Node: Credits58550
+Node: GNU Free Documentation License60618
+Node: Syntax checkers85770
+Node: Function and Variable Index86676
 
 End Tag Table

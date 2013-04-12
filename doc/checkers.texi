@@ -22,6 +22,7 @@ order of their appearance in the default value of
 @iflyc python-pyflakes
 @iflyc ruby
 @iflyc rust-rustc
+@iflyc rst
 @iflyc sass
 @iflyc scss
 @iflyc sh
