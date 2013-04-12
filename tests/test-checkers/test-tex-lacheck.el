@@ -1,4 +1,4 @@
-;;; test-sh.el --- Test the sh checker -*- lexical-binding: t; -*-
+;;; test-tex-lacheck.el --- Test the lacheck checker -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
@@ -27,17 +27,15 @@
 
 (require 'sh-script)
 
-(ert-deftest checker-sh-syntax-error ()
-  "Test a syntax error from a missing semicolon."
-  :expected-result (flycheck-testsuite-fail-unless-checker 'sh)
-  (flycheck-testsuite-with-hook sh-mode-hook
-      (sh-set-shell "sh" :no-query)
-    (flycheck-testsuite-should-syntax-check
-     "checkers/sh-syntax-error.sh" 'sh-mode nil
-     '(5 nil "Syntax error: \"fi\" unexpected (expecting \"then\")" error))))
+(ert-deftest checker-tex-lacheck-warning ()
+  "Test unwanted space."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'tex-lacheck)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/tex-lacheck-warning.tex" 'latex-mode 'tex-chktex
+    '(9 nil "possible unwanted space at \"{\"" warning)))
 
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:
 
-;;; test-sh.el ends here
+;;; test-tex-lacheck.el ends here

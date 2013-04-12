@@ -27,10 +27,10 @@
 
 (require 'scss-mode nil t)
 
-(ert-deftest checker-scss-invalid-css ()
+(ert-deftest checker-scss-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'scss)
   (flycheck-testsuite-should-syntax-check
-   "invalid-css.scss" 'scss-mode nil
+   "checkers/scss-error.scss" 'scss-mode nil
    '(3 nil "Invalid CSS after \"        c olor:\": expected pseudoclass or pseudoelement, was \" red;\"" error)))
 
 ;; Local Variables:

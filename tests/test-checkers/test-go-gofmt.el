@@ -1,8 +1,8 @@
-;;; test-sh.el --- Test the sh checker -*- lexical-binding: t; -*-
+;;; test-go-gofmt.el --- Test the gofmt checker -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
+;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>,
 ;;
-;; Author: Sebastian Wiesner <lunaryorn@gmail.com>
+;; Author: Sebastian Wiesner <lunaryorn@gmail.com>,
 ;; URL: https://github.com/lunaryorn/flycheck
 
 ;; This file is not part of GNU Emacs.
@@ -25,19 +25,18 @@
 (require 'ert)
 (require 'flycheck)
 
-(require 'sh-script)
+(require 'go-mode nil :no-error)
 
-(ert-deftest checker-sh-syntax-error ()
-  "Test a syntax error from a missing semicolon."
-  :expected-result (flycheck-testsuite-fail-unless-checker 'sh)
-  (flycheck-testsuite-with-hook sh-mode-hook
-      (sh-set-shell "sh" :no-query)
-    (flycheck-testsuite-should-syntax-check
-     "checkers/sh-syntax-error.sh" 'sh-mode nil
-     '(5 nil "Syntax error: \"fi\" unexpected (expecting \"then\")" error))))
+(ert-deftest checker-go-gofmt-syntax-error ()
+  "Test a syntax error."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'go-gofmt)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/go-syntax-error.go" 'go-mode nil
+   '(5 9 "expected '(', found 'IDENT' ta" error)
+   '(6 1 "expected ')', found '}'" error)))
 
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:
 
-;;; test-sh.el ends here
+;;; test-go-gofmt.el ends here

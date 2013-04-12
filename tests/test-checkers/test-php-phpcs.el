@@ -1,4 +1,4 @@
-;;; test-php.el --- Test the PHP checker -*- lexical-binding: t; -*-
+;;; test-php-phpcs.el --- Test the PHP CodeSniffer checker -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
@@ -28,14 +28,24 @@
 (require 'php-mode nil t)
 (require 'php+-mode nil t)
 
-(ert-deftest checker-php-syntax-error ()
-  "Test the T_PAAMAYIM_NEKUDOTAYIM error."
+(ert-deftest checker-php-phpcs-error ()
+  "Test an uppercase keyword error by phpcs."
+  :expected-result (flycheck-testsuite-fail-unless-checkers 'php 'php-phpcs)
   (flycheck-testsuite-should-syntax-check
-   "checkers/php-syntax-error.php" '(php-mode php+-mode) nil
-   '(8 nil "syntax error, unexpected ')', expecting :: (T_PAAMAYIM_NEKUDOTAYIM)" error)))
+   "checkers/php-phpcs-error.php" '(php-mode php+-mode) nil
+   '(19 8 "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\"" error)))
+
+(ert-deftest checker-php-phpcs-error-phpcs-standard ()
+  "Test an uppercase keyword error by phpcs."
+  :expected-result (flycheck-testsuite-fail-unless-checkers 'php 'php-phpcs)
+  (flycheck-testsuite-with-hook (php-mode-hook php+-mode-hook)
+      (setq flycheck-phpcs-standard "Zend")
+    (flycheck-testsuite-should-syntax-check
+     "checkers/php-phpcs-error.php" '(php-mode php+-mode) nil
+     '(21 1 "A closing tag is not permitted at the end of a PHP file" error))))
 
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:
 
-;;; test-php.el ends here
+;;; test-php-phpcs.el ends here

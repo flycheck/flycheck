@@ -27,21 +27,13 @@
 
 (require 'sh-script)
 
-(ert-deftest checker-zsh-missing-quote ()
-  "Test a syntax error from a missing quote."
-  :expected-result (flycheck-testsuite-fail-unless-checker 'zsh)
-  (flycheck-testsuite-with-hook sh-mode-hook
-      (sh-set-shell "zsh" :no-query)
-    (flycheck-testsuite-should-syntax-check
-     "missing-quote.zsh" 'sh-mode nil '(6 nil "unmatched '" error))))
-
-(ert-deftest checker-zsh-missing-semicolon ()
+(ert-deftest checker-zsh-syntax-error ()
   "Test a syntax error from a missing semicolon."
   :expected-result (flycheck-testsuite-fail-unless-checker 'zsh)
   (flycheck-testsuite-with-hook sh-mode-hook
       (sh-set-shell "zsh" :no-query)
     (flycheck-testsuite-should-syntax-check
-     "missing-semicolon.zsh" 'sh-mode nil
+     "checkers/zsh-syntax-error.zsh" 'sh-mode nil
      '(5 nil "parse error near `fi'" error))))
 
 ;; Local Variables:

@@ -1,8 +1,8 @@
-;;; test-sh.el --- Test the sh checker -*- lexical-binding: t; -*-
+;;; test-json-jsonlint.el --- Test the JSON checker -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
+;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>,
 ;;
-;; Author: Sebastian Wiesner <lunaryorn@gmail.com>
+;; Author: Sebastian Wiesner <lunaryorn@gmail.com>,
 ;; URL: https://github.com/lunaryorn/flycheck
 
 ;; This file is not part of GNU Emacs.
@@ -25,19 +25,15 @@
 (require 'ert)
 (require 'flycheck)
 
-(require 'sh-script)
-
-(ert-deftest checker-sh-syntax-error ()
-  "Test a syntax error from a missing semicolon."
-  :expected-result (flycheck-testsuite-fail-unless-checker 'sh)
-  (flycheck-testsuite-with-hook sh-mode-hook
-      (sh-set-shell "sh" :no-query)
-    (flycheck-testsuite-should-syntax-check
-     "checkers/sh-syntax-error.sh" 'sh-mode nil
-     '(5 nil "Syntax error: \"fi\" unexpected (expecting \"then\")" error))))
+(ert-deftest checker-json-jsonlint-error ()
+  "Test a syntax error from multiple top-level objects."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'json-jsonlint)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/json-jsonlint-error.json" 'text-mode nil
+    '(1 42 "found: ',' - expected: 'EOF'." error)))
 
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:
 
-;;; test-sh.el ends here
+;;; test-json-jsonlint.el ends here

@@ -27,11 +27,11 @@
 
 (require 'sass-mode nil t)
 
-(ert-deftest checker-sass-inconsistent-indentation ()
+(ert-deftest checker-sass-error ()
   "Test a syntax error caused by inconsistent indentation."
   :expected-result (flycheck-testsuite-fail-unless-checker 'sass)
   (flycheck-testsuite-should-syntax-check
-   "inconsistent-indentation.sass" 'sass-mode nil
+   "checkers/sass-error.sass" 'sass-mode nil
     '(5 nil "Inconsistent indentation: 3 spaces were used for indentation, but the rest of the document was indented using 2 spaces." error)))
 
 ;; Local Variables:

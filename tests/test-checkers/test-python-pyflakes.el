@@ -1,4 +1,4 @@
-;;; test-sh.el --- Test the sh checker -*- lexical-binding: t; -*-
+;;; test-python-pyflakes.el --- Test the pyflakes checker -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
@@ -25,19 +25,24 @@
 (require 'ert)
 (require 'flycheck)
 
-(require 'sh-script)
+(require 'python)
 
-(ert-deftest checker-sh-syntax-error ()
-  "Test a syntax error from a missing semicolon."
-  :expected-result (flycheck-testsuite-fail-unless-checker 'sh)
-  (flycheck-testsuite-with-hook sh-mode-hook
-      (sh-set-shell "sh" :no-query)
-    (flycheck-testsuite-should-syntax-check
-     "checkers/sh-syntax-error.sh" 'sh-mode nil
-     '(5 nil "Syntax error: \"fi\" unexpected (expecting \"then\")" error))))
+(ert-deftest checker-python-pyflakes-syntax-error ()
+  "Test a real syntax error with pyflakes."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'python-pyflakes)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/python-syntax-error.py" 'python-mode '(python-flake8 python-pylint)
+    '(3 nil "invalid syntax" error)))
+
+(ert-deftest checker-python-pyflakes-error ()
+  "Test an unused import with pyflakes"
+  :expected-result (flycheck-testsuite-fail-unless-checker 'python-pyflakes)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/python-pyflakes-error.py" 'python-mode '(python-flake8 python-pylint)
+   '(3 nil "'re' imported but unused" error)))
 
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:
 
-;;; test-sh.el ends here
+;;; test-python-pyflakes.el ends here

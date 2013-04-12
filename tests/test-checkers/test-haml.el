@@ -27,11 +27,10 @@
 
 (require 'haml-mode nil t)
 
-(ert-deftest checker-haml-inconsistent-indentation ()
-  "Test a syntax error caused by inconsistent indentation."
+(ert-deftest checker-haml-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'haml)
   (flycheck-testsuite-should-syntax-check
-   "inconsistent-indentation.haml" 'haml-mode nil
+   "checkers/haml-error.haml" 'haml-mode nil
    '(5 nil "Inconsistent indentation: 3 spaces used for indentation, but the rest of the document was indented using 2 spaces." error :no-filename)))
 
 ;; Local Variables:

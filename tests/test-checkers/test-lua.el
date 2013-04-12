@@ -29,11 +29,10 @@
 
 (require 'lua-mode nil t)
 
-(ert-deftest checker-lua-missing-quote ()
-  "Test a syntax error with Lua."
+(ert-deftest checker-lua-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'lua)
   (flycheck-testsuite-should-syntax-check
-   "missing-quote.lua" 'lua-mode nil
+   "checkers/lua-syntax-error.lua" 'lua-mode nil
    '(5 nil "unfinished string near '\"oh no'" error)))
 
 ;; Local Variables:

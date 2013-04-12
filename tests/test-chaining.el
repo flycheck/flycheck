@@ -1,4 +1,4 @@
-;;; test-sh.el --- Test the sh checker -*- lexical-binding: t; -*-
+;;; test-chaining.el --- Tests for checker chaining -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
@@ -20,24 +20,26 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+;;; Commentary
+
+;; Test option filters
+
 ;;; Code:
 
 (require 'ert)
 (require 'flycheck)
 
-(require 'sh-script)
-
-(ert-deftest checker-sh-syntax-error ()
-  "Test a syntax error from a missing semicolon."
-  :expected-result (flycheck-testsuite-fail-unless-checker 'sh)
-  (flycheck-testsuite-with-hook sh-mode-hook
-      (sh-set-shell "sh" :no-query)
-    (flycheck-testsuite-should-syntax-check
-     "checkers/sh-syntax-error.sh" 'sh-mode nil
-     '(5 nil "Syntax error: \"fi\" unexpected (expecting \"then\")" error))))
+(ert-deftest flycheck-chaining-preserves-early-errors ()
+  "Test that chaining preserves all errors from all checkers."
+  (flycheck-testsuite-should-syntax-check
+   "chained-errors.el" 'emacs-lisp-mode nil
+   '(8 nil "You should have a section marked \";;; Code:\"" warning)
+   '(8 1 "`message' called with 0 args to fill 1\n    format field(s)" warning)
+   '(10 2 "princ called with 0 arguments, but\n    requires 1-2" warning)
+   '(15 1 "the function `i-do-not-exist' is not\n    known to be defined." warning)))
 
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:
 
-;;; test-sh.el ends here
+;;; test-chaining.el ends here

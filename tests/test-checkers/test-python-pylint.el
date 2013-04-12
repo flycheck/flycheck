@@ -1,4 +1,4 @@
-;;; test-rst.el --- Test the RST checker -*- lexical-binding: t; -*-
+;;; test-python-pylint.el --- Test the pylint checker -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
@@ -25,31 +25,31 @@
 (require 'ert)
 (require 'flycheck)
 
-(require 'rst)
+(require 'python)
 
-(ert-deftest checker-rst-warning ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'rst)
+(ert-deftest checker-python-pylint-syntax-error ()
+  "Test a real syntax error with pylint."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'python-pylint)
   (flycheck-testsuite-should-syntax-check
-   "checkers/rst-warning.rst" 'rst-mode nil
-   '(8 nil "Title underline too short." warning)
-   '(11 nil "Title underline too short." warning)))
+   "checkers/python-syntax-error.py" 'python-mode '(python-flake8 python-pyflakes)
+   '(3 nil "invalid syntax" error)))
 
-(ert-deftest checker-rst-error ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'rst)
+(ert-deftest checker-python-pylint-error ()
+  "Test an unknown module with pylint."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'python-pylint)
   (flycheck-testsuite-should-syntax-check
-   "checkers/rst-error.rst" 'rst-mode nil
-   '(5 nil "Unknown target name: \"restructuredtext\"." error)
-   '(7 nil "Unknown target name: \"cool\"." error)))
+   "checkers/python-pylint-error.py" 'python-mode '(python-flake8 python-pyflakes)
+   '(3 nil "Unable to import 'spam'" error)))
 
-(ert-deftest checker-rst-severe ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'rst)
+(ert-deftest checker-python-pylint-used-map ()
+  "Test usage of the map() builtin with the pylint checker."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'python-pylint)
   (flycheck-testsuite-should-syntax-check
-   "checkers/rst-severe.rst" 'rst-mode nil
-   '(6 nil "Unexpected section title." error)
-   '(11 nil "Unexpected section title." error)))
+   "checkers/python-pylint-warning.py" 'python-mode '(python-flake8 python-pyflakes)
+   '(3 nil "Used builtin function 'map'" warning)))
 
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:
 
-;;; test-rst.el ends here
+;;; test-python-pylint.el ends here

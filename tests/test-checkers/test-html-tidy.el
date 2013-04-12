@@ -1,8 +1,8 @@
-;;; test-sh.el --- Test the sh checker -*- lexical-binding: t; -*-
+;;; test-html-tidy.el --- Test the Tidy checker -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
+;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>,
 ;;
-;; Author: Sebastian Wiesner <lunaryorn@gmail.com>
+;; Author: Sebastian Wiesner <lunaryorn@gmail.com>,
 ;; URL: https://github.com/lunaryorn/flycheck
 
 ;; This file is not part of GNU Emacs.
@@ -25,19 +25,17 @@
 (require 'ert)
 (require 'flycheck)
 
-(require 'sh-script)
-
-(ert-deftest checker-sh-syntax-error ()
-  "Test a syntax error from a missing semicolon."
-  :expected-result (flycheck-testsuite-fail-unless-checker 'sh)
-  (flycheck-testsuite-with-hook sh-mode-hook
-      (sh-set-shell "sh" :no-query)
-    (flycheck-testsuite-should-syntax-check
-     "checkers/sh-syntax-error.sh" 'sh-mode nil
-     '(5 nil "Syntax error: \"fi\" unexpected (expecting \"then\")" error))))
+(ert-deftest checker-html-tidy-warning-and-error ()
+  "Test an error caused by an unknown tag."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'html-tidy)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/html-tidy-warning-and-error.html" 'html-mode nil
+   '(3 1 "missing <!DOCTYPE> declaration" warning :no-filename)
+   '(8 5 "<spam> is not recognized!" error :no-filename)
+   '(8 5 "discarding unexpected <spam>" warning :no-filename)))
 
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:
 
-;;; test-sh.el ends here
+;;; test-html-tidy.el ends here

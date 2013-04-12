@@ -1,4 +1,4 @@
-;;; test-sh.el --- Test the sh checker -*- lexical-binding: t; -*-
+;;; test-xml-xmlstarlet.el --- Test the xmlstarlet checker -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
@@ -25,19 +25,17 @@
 (require 'ert)
 (require 'flycheck)
 
-(require 'sh-script)
+(require 'nxml-mode)
 
-(ert-deftest checker-sh-syntax-error ()
-  "Test a syntax error from a missing semicolon."
-  :expected-result (flycheck-testsuite-fail-unless-checker 'sh)
-  (flycheck-testsuite-with-hook sh-mode-hook
-      (sh-set-shell "sh" :no-query)
-    (flycheck-testsuite-should-syntax-check
-     "checkers/sh-syntax-error.sh" 'sh-mode nil
-     '(5 nil "Syntax error: \"fi\" unexpected (expecting \"then\")" error))))
+(ert-deftest checker-xml-xmlstarlet-syntax-error ()
+  "Test a lone closing tag."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'xml-xmlstarlet)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/xml-syntax-error.xml" 'nxml-mode nil
+   '(4 10 "Opening and ending tag mismatch: spam line 3 and with" error)))
 
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:
 
-;;; test-sh.el ends here
+;;; test-xml-xmlstarlet.el ends here

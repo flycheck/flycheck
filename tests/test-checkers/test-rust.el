@@ -28,18 +28,10 @@
 (require 'rust-mode nil :no-error)
 
 (ert-deftest checker-rust-syntax-error ()
-  "Test a syntax error."
   :expected-result (flycheck-testsuite-fail-unless-checker 'rust-rustc)
   (flycheck-testsuite-should-syntax-check
-   "missing-semicolon.rs" 'rust-mode nil
-   '(3 14 "expected `;` but found `<eof>`" error)))
-
-(ert-deftest checker-rust-missing-semicolon ()
-  "Test missing semicolon detection."
-  :expected-result (flycheck-testsuite-fail-unless-checker 'rust-rustc)
-  (flycheck-testsuite-should-syntax-check
-   "missing-semicolon.rs" 'rust-mode nil
-   '(3 14 "expected `;` but found `<eof>`" error)))
+   "checkers/rust-syntax-error.rs" 'rust-mode nil
+   '(3 10 "expected `{` but found `bla`" error)))
 
 ;; Local Variables:
 ;; coding: utf-8
