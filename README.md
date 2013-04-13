@@ -124,9 +124,9 @@ The following people contributed to flycheck:
 - [Marian Schubert][maio] added the Perl syntax checker.
 - [Martin Grenfell][scrooloose] created the awesome Vim library [syntastic][]
   which inspired this project and many of its checkers.
-- [Peter Vasil][ptrv] created the XML and Lua syntax checkers, added unit tests
-  and did valuable testing.
-- [Robert Zaremba][robert-zaremba] added the Go syntax checker.
+- [Peter Vasil][ptrv] contributed syntax checkers for XML, Lua and Go (using `go
+  build` and `go test`), added unit tests and did valuable testing.
+- [Robert Zaremba][robert-zaremba] added a Go syntax checker using `gofmt`.
 - [steckerhalter][] provided the PHP CodeSniffer checker.
 - [Steve Purcell][purcell] implemented many checkers, contributed important
   ideas to the design of the checker API and engaged in worthwhile discussion to

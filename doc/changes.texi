@@ -421,6 +421,8 @@ New syntax checkers:
 @ghissue{103, SCSS using @command{scss}}
 @item
 RST (ReStructuredText) using Docutils
+@item
+@ghissue{107, Go using @command{go build} and @command{go test}}
 @end itemize
 
 @item

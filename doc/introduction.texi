@@ -46,7 +46,7 @@ CSS (using @command{csslint}))
 @item
 Emacs Lisp (using the byte compiler and CheckDoc)
 @item
-Go (using @command{gofmt})
+Go (using @command{gofmt}, @command{go build} and @command{go test})
 @item
 Haml
 @item

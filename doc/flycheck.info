@@ -82,7 +82,7 @@ File: flycheck.info,  Node: Features,  Next: Installation,  Prev: Introduction, 
         * CoffeeScript (using 'coffeelint')
         * CSS (using 'csslint'))
         * Emacs Lisp (using the byte compiler and CheckDoc)
-        * Go (using 'gofmt')
+        * Go (using 'gofmt', 'go build' and 'go test')
         * Haml
         * HTML (using 'tidy')
         * Javascript (using 'jshint')
@@ -1560,6 +1560,8 @@ master (unreleased)
         * SCSS using 'scss'
           (https://github.com/lunaryorn/flycheck/issues/103)
         * RST (ReStructuredText) using Docutils
+        * Go using 'go build' and 'go test'
+          (https://github.com/lunaryorn/flycheck/issues/107)
 
    * Improvements:
 
@@ -1597,11 +1599,12 @@ their support and patches are greatly appreciated.
      Vim library syntastic (https://github.com/scrooloose/syntastic)
      which inspired this project and many of its checkers.
 
-   * Peter Vasil (https://github.com/ptrv) created the XML and Lua
-     syntax checkers, added unit tests and did valuable testing.
+   * Peter Vasil (https://github.com/ptrv) contributed syntax checkers
+     for XML, Lua and Go (using 'go build' and 'go test'), added unit
+     tests and did valuable testing.
 
-   * Robert Zaremba (https://github.com/robert-zaremba) added the Go
-     syntax checker.
+   * Robert Zaremba (https://github.com/robert-zaremba) added Go syntax
+     checker using 'gofmt'.
 
    * steckerhalter (https://github.com/steckerhalter) provided the PHP
      CodeSniffer checker.
@@ -2117,6 +2120,8 @@ order of their appearance in the default value of 'flycheck-checkers':
    * 'emacs-lisp'
    * 'emacs-lisp-checkdoc'
    * 'go-gofmt'
+   * 'go-build'
+   * 'go-test'
    * 'haml'
    * 'html-tidy'
    * 'javascript-jshint'
@@ -2189,47 +2194,47 @@ Tag Table:
 Node: Top734
 Node: Introduction2083
 Node: Features2804
-Node: Installation3922
-Node: Activation5096
-Node: Usage5447
-Node: Syntax checking6070
-Node: Selection7332
-Node: Configuration9913
-Node: Reporting12581
-Node: Navigation14936
-Node: Mode line16732
-Node: Extending17633
-Node: Declaration18232
-Node: Error parsers29286
-Node: Option filters30270
-Node: Examples30609
-Node: Simple example31041
-Node: Predicate example34105
-Node: Configuration example36086
-Node: Chaining example38745
-Node: API40131
-Node: Error API40919
-Node: Error parser API43520
-Node: Contribution43746
-Node: Reporting issues44422
-Node: Contributing syntax checkers45158
-Node: Contributing code45953
-Node: Unit tests47293
-Node: Changes48580
-Node: 0.149131
-Node: 0.249415
-Node: 0.349693
-Node: 0.449929
-Node: 0.550704
-Node: 0.651924
-Node: 0.6.154774
-Node: 0.754923
-Node: 0.7.155937
-Node: 0.856652
-Node: master58167
-Node: Credits58550
-Node: GNU Free Documentation License60618
-Node: Syntax checkers85770
-Node: Function and Variable Index86676
+Node: Installation3948
+Node: Activation5122
+Node: Usage5473
+Node: Syntax checking6096
+Node: Selection7358
+Node: Configuration9939
+Node: Reporting12607
+Node: Navigation14962
+Node: Mode line16758
+Node: Extending17659
+Node: Declaration18258
+Node: Error parsers29312
+Node: Option filters30296
+Node: Examples30635
+Node: Simple example31067
+Node: Predicate example34131
+Node: Configuration example36112
+Node: Chaining example38771
+Node: API40157
+Node: Error API40945
+Node: Error parser API43546
+Node: Contribution43772
+Node: Reporting issues44448
+Node: Contributing syntax checkers45184
+Node: Contributing code45979
+Node: Unit tests47319
+Node: Changes48606
+Node: 0.149157
+Node: 0.249441
+Node: 0.349719
+Node: 0.449955
+Node: 0.550730
+Node: 0.651950
+Node: 0.6.154800
+Node: 0.754949
+Node: 0.7.155963
+Node: 0.856678
+Node: master58193
+Node: Credits58681
+Node: GNU Free Documentation License60805
+Node: Syntax checkers85957
+Node: Function and Variable Index86894
 
 End Tag Table

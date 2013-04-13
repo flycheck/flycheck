@@ -9,6 +9,8 @@ order of their appearance in the default value of
 @iflyc emacs-lisp
 @iflyc emacs-lisp-checkdoc
 @iflyc go-gofmt
+@iflyc go-build
+@iflyc go-test
 @iflyc haml
 @iflyc html-tidy
 @iflyc javascript-jshint
