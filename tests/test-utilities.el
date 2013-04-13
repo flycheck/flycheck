@@ -207,6 +207,16 @@ buffer file name."
   (should (equal (flycheck-option-with-value-argument "--foo=" "bar")
                  '("--foo=bar"))))
 
+(ert-deftest flycheck-temporary-buffer-p ()
+  (with-temp-buffer
+    (should (flycheck-temporary-buffer-p)))
+  (with-temp-buffer
+    (rename-buffer " foo")
+    (should (flycheck-temporary-buffer-p)))
+  (with-temp-buffer
+    (rename-buffer "foo")
+    (should-not (flycheck-temporary-buffer-p))))
+
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:

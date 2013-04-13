@@ -316,15 +316,17 @@ buffer manually.
   "Determine whether Flycheck mode may be enabled.
 
 Flycheck mode is not enabled under any of the following
-conditions:
+conditions
 
-- No suitable syntax checker exists for the current buffer.
-- The current buffer is loaded through Tramp.
-- The current buffer is a temporary buffer (i.e. its name starts
-  with a space).
+The current buffer is a temporary buffer as determined by
+`flycheck-temporary-buffer-p'.
+
+The current buffer is loaded through Tramp.
+
+No suitable syntax checker exists for the current buffer.
 
 Return t if Flycheck mode may be enabled, and nil otherwise."
-  (and (not (s-starts-with? " " (buffer-name)))
+  (and (not (flycheck-temporary-buffer-p))
        (not (flycheck-tramp-file-p (buffer-file-name)))
        (flycheck-get-checker-for-buffer)))
 
@@ -614,6 +616,13 @@ Otherwise `(list OPTION VALUE)' is returned."
   (if (s-ends-with? "=" option)
       (list (concat option value))
     (list option value)))
+
+(defun flycheck-temporary-buffer-p ()
+  "Determine whether the current buffer is a temporary buffer.
+
+Buffers whose names start with a space are considered temporary
+buffers."
+  (s-starts-with? " " (buffer-name)))
 
 
 ;;;; Minibuffer tools
