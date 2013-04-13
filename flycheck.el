@@ -248,11 +248,6 @@ running checks, and empty all variables used by flycheck."
 (defvar-local flycheck-previous-next-error-function nil
   "Remember the previous `next-error-function'.")
 
-(defun flycheck-tramp-file-p (filename)
-  "Determine if FILENAME is opened with Tramp."
-  (and (fboundp 'tramp-tramp-file-p)
-       (tramp-tramp-file-p filename)))
-
 ;;;###autoload
 (define-minor-mode flycheck-mode
   "Minor mode for on-the-fly syntax checking.
@@ -321,13 +316,14 @@ conditions
 The current buffer is a temporary buffer as determined by
 `flycheck-temporary-buffer-p'.
 
-The current buffer is loaded through Tramp.
+The current buffer refers to a remote file, as determined by
+`file-remote-p'.
 
 No suitable syntax checker exists for the current buffer.
 
 Return t if Flycheck mode may be enabled, and nil otherwise."
   (and (not (flycheck-temporary-buffer-p))
-       (not (flycheck-tramp-file-p (buffer-file-name)))
+       (not (and (buffer-file-name) (file-remote-p (buffer-file-name) 'method)))
        (flycheck-get-checker-for-buffer)))
 
 (defun flycheck-mode-on-safe ()
