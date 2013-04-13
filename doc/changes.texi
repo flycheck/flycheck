@@ -2,7 +2,8 @@ This appendix provides a comprehensive changelog of all releases:
 
 @menu
 * master        :: unreleased
-* 0.8           :: Apr 9, 2013
+* 0.9           :: Apr 13, 2013
+* 0.8           :: Apr 09, 2013
 * 0.7.1         :: Feb 23, 2013
 * 0.7           :: Feb 14, 2013
 * 0.6.1         :: Jan 30, 2013
@@ -353,7 +354,7 @@ commands}
 
 @end itemize
 
-@node 0.8, master, 0.7.1, Changes
+@node 0.8, 0.9, 0.7.1, Changes
 @comment  node-name,  next,  previous,  up
 @unnumberedsec 0.8 (Apr 9, 2013)
 
@@ -408,9 +409,9 @@ space
 
 @end itemize
 
-@node master, , 0.8, Changes
+@node 0.9, master, 0.8, Changes
 @comment  node-name,  next,  previous,  up
-@unnumberedsec master (unreleased)
+@unnumberedsec 0.9 (Apr 13, 2013)
 
 @itemize @bullet
 @item
@@ -435,6 +436,9 @@ Quit the error message window when navigating away from error locations
 
 @end itemize
 
+@node master, , 0.9, Changes
+@comment  node-name,  next,  previous,  up
+@unnumberedsec master (unreleased)
 
 @c Local Variables:
 @c mode: texinfo
