@@ -31,7 +31,7 @@ awesome Vim library @uref{https://github.com/scrooloose/syntastic,
 syntastic} which inspired this project and many of its checkers.
 
 @item
-@uref{https://github.com/ptrv, Peter Vasil} created the XML and Lua
+@uref{https://github.com/ptrv, Peter Vasil} created the XML, Lua and Go
 syntax checkers, added unit tests and did valuable testing.
 
 @item
