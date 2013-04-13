@@ -51,8 +51,7 @@
 (ert-deftest flycheck-temp-file-system-filename-extension ()
   "Test `flycheck-temp-file-system' works with a complete
   filename."
-  (let ((filename (flycheck-temp-file-system "spam/with/eggs.el"
-                                             "flycheck-test")))
+  (let ((filename (flycheck-temp-file-system "spam/with/eggs.el" "flycheck-test")))
     (unwind-protect
         (progn
           (should (string= (file-name-extension filename) "el"))
@@ -104,8 +103,7 @@
           (with-temp-buffer
             (insert-file-contents-literally filename)
             (should (string= (buffer-string) "Hello world"))))
-      (ignore-errors
-        (delete-file filename)))))
+      (ignore-errors (delete-file filename)))))
 
 (ert-deftest flycheck-temp-buffer-copy-system-no-filename ()
   "Test `flycheck-temp-buffer-copy' with system tempfile and no
@@ -206,7 +204,7 @@ buffer file name."
   "Test concatenation of options and arguments."
   (should (equal (flycheck-option-with-value-argument "--foo" "bar")
                  '("--foo" "bar")))
-    (should (equal (flycheck-option-with-value-argument "--foo=" "bar")
+  (should (equal (flycheck-option-with-value-argument "--foo=" "bar")
                  '("--foo=bar"))))
 
 ;; Local Variables:
