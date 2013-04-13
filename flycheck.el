@@ -88,6 +88,8 @@ buffer-local wherever it is set."
     emacs-lisp
     emacs-lisp-checkdoc
     go-gofmt
+    go-build
+    go-test
     haml
     html-tidy
     javascript-jshint
@@ -2261,7 +2263,37 @@ The checker runs `checkdoc-current-buffer'."
 See URL `http://golang.org/cmd/gofmt/'."
   :command '("gofmt" source)
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): \\(?4:.*\\)$" error))
-  :modes 'go-mode)
+  :modes 'go-mode
+  :next-checkers '((no-errors . go-build) (no-errors . go-test)))
+
+(flycheck-declare-checker go-build
+  "A Go syntax and style checker using the go build command.
+
+See URL `https://golang.org/cmd/go'.
+
+This syntax checker may cause bogus warnings due to an upstream
+bug in Go.
+
+See URL `https://code.google.com/p/go/issues/detail?id=4851' for
+more information."
+  :command '("go" "build" "-o" "/dev/null")
+  :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
+  :modes 'go-mode
+  :predicate '(and (not (s-ends-with? "_test.go" (buffer-file-name)))
+                   (not (buffer-modified-p))))
+
+(flycheck-declare-checker go-test
+  "A Go syntax and style checker using the go test command.
+
+See URL `https://golang.org/cmd/go'."
+  ;; This command builds the test executable without running it
+  ;; and leaves the executable in the current directory.
+  ;; Unfortunately 'go test -c' does not have the '-o' option.
+  :command '("go" "test" "-c")
+  :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
+  :modes 'go-mode
+  :predicate '(and (s-ends-with? "_test.go" (buffer-file-name))
+                   (not (buffer-modified-p))))
 
 (flycheck-declare-checker haml
   "A Haml syntax checker using the Haml compiler.
