@@ -446,6 +446,14 @@ compatibility library will be installed from GNU ELPA.
 
 @itemize @bullet
 @item
+New syntax checkers:
+
+@itemize @bullet
+@item
+Ruby using RuboCop
+
+@itemize @bullet
+@item
 Improvements:
 
 @itemize @bullet
