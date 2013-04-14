@@ -1,13 +1,21 @@
-Flycheck provides on-the-fly syntax checking for GNU Emacs 24.
-Essentially it is ``Flymake done right'' with
+Flycheck (aka ``Flymake done right'') is a modern on-the-fly syntax
+checking extension for GNU Emacs 24 withL
 
 @itemize @bullet
 @item
-ready-to-use syntax checkers for a bunch of languages
+ready-to-use syntax checkers for a bunch of languages,
 @item
-simple declarative checker definitions,
+easy customization,
 @item
-checkers based on major modes,
+a comprehensive manual,
+@item
+a dead simple, declarative API to create new syntax checkers,
+@item
+major-mode based selection of syntax checkers,
+@item
+multiple syntax checkers per buffer,
+@item
+a ``doesn't get in your way'' guarantee,
 @item
 and a clean, concise and understandable implementation with decent test
 coverage.
@@ -32,10 +40,7 @@ And this is how it looks in action, using the awesome
 @section Features
 
 @itemize @bullet
-@item
 Automatic syntax checking after saving or insertion of new lines
-@item
-Error navigation with @code{next-error} and @code{previous-error}
 @item
 Built-in syntax checkers for:
 @itemize @bullet
@@ -82,9 +87,18 @@ TeX/LaTeX (using @command{chktex} or @command{lacheck})
 XML (using @command{xmlstarlet})
 @end itemize
 @item
+Nice error indication and highlighting
+@item
 Easy customization
 @item
+Syntax checker configuration with project-specific configuration files
+and options
+@item
+Error navigation with @code{next-error} and @code{previous-error}
+@item
 Easy declarative API to define new syntax checkers
+@item
+Error parsers for structured markup formats (e.g. Checkdoc XML)
 @end itemize
 
 @node Installation, Activation, Features, Introduction

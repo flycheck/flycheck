@@ -6,7 +6,7 @@
 ;; URL: https://github.com/lunaryorn/flycheck
 ;; Keywords: convenience languages tools
 ;; Version: 0.9
-;; Package-Requires: ((s "1.3.1") (dash "1.1") (emacs "24.1"))
+;; Package-Requires: ((s "1.3.1") (dash "1.1") (cl-lib "0.1") (emacs "24.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -25,23 +25,24 @@
 
 ;;; Commentary:
 
-;; On-the-fly syntax checking for GNU Emacs (aka "flymake done right")
+;; Modern on-the-fly syntax checking for GNU Emacs (aka "flymake done right")
 
 ;; Provide `flycheck-mode' which enables on-the-fly syntax checking for a large
 ;; number of different modes and languages (see `flycheck-checkers' for a
 ;; complete list).
 ;;
 ;; Support for new modes and languages can be added by declaring a new syntax
-;; checker.
+;; checker (see `flycheck-declare-checker').
 
 ;;; Code:
 
 (eval-when-compile
   (require 'jka-compr)
-  (require 'cl)                         ; For `defstruct'
+  (require 'cl-lib)
   (require 'compile)                    ; For Compilation Mode integration
   (require 'sh-script))
 
+(require 'cl-lib)
 (require 's)
 (require 'dash)
 
@@ -814,15 +815,19 @@ This variable is an option for the syntax checker `%s'." docstring checker)
 
 (defun flycheck-command-argument-cell-p (cell)
   "Determine whether CELL is a valid argument cell."
-  (let ((tag (car cell))
-        (args (cdr cell)))
-    (case tag
-      (config-file (and (stringp (car args))
-                        (symbolp (cadr args))))
-      (option (and (stringp (car args))
-                   (symbolp (cadr args))
-                   (or (null (caddr args)) (symbolp (caddr args)))))
-      (eval (= (length args) 1)))))
+  (pcase cell
+    (`(config-file ,option-name ,config-file-var)
+     (and (stringp option-name)
+          (symbolp config-file-var)))
+    (`(option ,option-name ,option-var)
+     (and (stringp option-name)
+          (symbolp option-var)))
+    (`(option ,option-name ,option-var ,filter)
+     (and (stringp option-name)
+          (symbolp option-var)
+          (symbolp filter)))
+    (`(eval _) t)
+    (_ nil)))
 
 (defun flycheck-command-argument-p (arg)
   "Check whether ARG is a valid command argument."
@@ -949,9 +954,9 @@ Return a list representing PATTERN, suitable as element in
 `compilation-error-regexp-alist'."
   (let* ((regexp (car pattern))
          (level (cadr pattern))
-         (level-no (cond
-                    ((eq level 'error) 2)
-                    ((eq level 'warning) 1))))
+         (level-no (pcase level
+                     (`error 2)
+                     (`warning 1))))
     (list regexp 1 2 3 level-no)))
 
 (defun flycheck-checker-compilation-error-regexp-alist (checker)
@@ -1074,13 +1079,13 @@ being the concatenation of OPTION and the path of the
 configuration file.  Otherwise the list has two items, the first
 being OPTION, the second the path of the configuration file.
 
-If CELL is a form `(eval OPTION VARIABLE [FILTER])' retrieve the
-value of VARIABLE and return a list of arguments that pass this
-value as value for OPTION to the syntax checker.  FILTER is an
-optional function to be applied to the value of VARIABLE.  This
-function must return nil or a string.  In the former case, return
-nil.  In the latter case, return a list of arguments as described
-above.  If OPTION ends with a =, process it like in a
+If CELL is a form `(option OPTION VARIABLE [FILTER])' retrieve
+the value of VARIABLE and return a list of arguments that pass
+this value as value for OPTION to the syntax checker.  FILTER is
+an optional function to be applied to the value of VARIABLE.
+This function must return nil or a string.  In the former case,
+return nil.  In the latter case, return a list of arguments as
+described above.  If OPTION ends with a =, process it like in a
 `config-file' cell (see above).
 
 If CELL is a form `(eval FORM), return the result of evaluating
@@ -1092,36 +1097,33 @@ neither in FORM before it is evaluated, nor in the result of
 evaluating FORM.
 
 In all other cases, signal an error."
-  (let ((tag (car cell))
-        (args (cdr cell)))
-    (case tag
-      (config-file
-       (let ((option-name (car args))
-             (file-name (flycheck-find-config-file (symbol-value (cadr args)))))
-         (when file-name
-           (flycheck-option-with-value-argument option-name file-name))))
-      (option
-       (let* ((option-name (car args))
-              (variable (cadr args))
-              (value (symbol-value variable))
-              (filter (or (nth 2 args) #'identity)))
-         (unless (null value)
-           (setq value (funcall filter value)))
-         (when value
-           (unless (stringp value)
-             (error "Value %S of %S for %s is not a string"
-                    value variable option-name))
-           (flycheck-option-with-value-argument option-name value))))
-      (eval
-       (let* ((form (car args))
-              (result (eval form)))
-         (if (or (null result)
-                 (stringp result)
-                 (and (listp result) (-all? #'stringp result)))
-             result
-           (error "Invalid result from evaluation of %S: %S" form result))))
-      (t
-       (error "Unsupported argument cell %S" cell)))))
+  (pcase cell
+    (`(config-file ,option-name ,file-name-var)
+     (let ((file-name (flycheck-find-config-file (symbol-value file-name-var))))
+       (when file-name
+         (flycheck-option-with-value-argument option-name file-name))))
+    (`(option ,option-name ,variable)
+     (let ((value (symbol-value variable)))
+       (when value
+         (unless (stringp value)
+           (error "Value %S of %S for option %s is not a string"
+                  value variable option-name))
+         (flycheck-option-with-value-argument option-name value))))
+    (`(option ,option-name ,variable ,filter)
+     (let ((value (funcall filter (symbol-value variable))))
+       (when value
+         (unless (stringp value)
+           (error "Value %S of %S (filter: %S) for option %s is not a string"
+                  value variable filter option-name))
+         (flycheck-option-with-value-argument option-name value))))
+    (`(eval ,form)
+     (let* ((result (eval form)))
+       (if (or (null result)
+               (stringp result)
+               (and (listp result) (-all? #'stringp result)))
+           result
+         (error "Invalid result from evaluation of %S: %S" form result))))
+    (_ (error "Unsupported argument cell %S" cell))))
 
 (defun flycheck-substitute-argument-symbol (symbol)
   "Substitute an argument SYMBOL.
@@ -1136,7 +1138,7 @@ contents of the buffer to check.  Do not use this as primary
 input to a checker!
 
 In all other cases, signal an error."
-  (case symbol
+  (cl-case symbol
     (source
      (flycheck-get-source-file #'flycheck-temp-file-system))
     (source-inplace
@@ -1427,8 +1429,8 @@ Pop up a help buffer with the documentation of CHECKER."
 
 
 ;;;; Checker error API
-(defstruct (flycheck-error
-            (:constructor flycheck-error-new))
+(cl-defstruct (flycheck-error
+               (:constructor flycheck-error-new))
   buffer filename line column message level)
 
 (defmacro flycheck-error-with-buffer (err &rest forms)
@@ -1906,7 +1908,7 @@ Intended for use with `next-error-function'."
                              (--split-with (>= current-pos it))))
          (before (nreverse (car before-and-after)))
          (after (cadr before-and-after))
-         (error-pos (nth-value (- (abs n) 1) (if (< n 0) before after))))
+         (error-pos (nth (- (abs n) 1) (if (< n 0) before after))))
     (if error-pos
         (goto-char error-pos)
       (user-error "No more Flycheck errors"))))

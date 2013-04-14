@@ -116,10 +116,13 @@
   (let (flycheck-test-option-var)
     (should-not (flycheck-substitute-argument-cell
                  '(option "--foo" flycheck-test-option-var)))
-    (should-not (flycheck-substitute-argument-cell
-                 '(option "--foo" flycheck-test-option-var #'number-to-string)))
-    (should-not (flycheck-substitute-argument-cell
-                 '(option "--foo=" flycheck-test-option-var #'number-to-string)))))
+    ;; Catch an error, because `number-to-string' is called with nil
+    (should-error (flycheck-substitute-argument-cell
+                   '(option "--foo" flycheck-test-option-var number-to-string))
+                  :type 'wrong-type-argument)
+    (should-error (flycheck-substitute-argument-cell
+                   '(option "--foo=" flycheck-test-option-var number-to-string))
+                  :type 'wrong-type-argument)))
 
 (ert-deftest flycheck-substitute-argument-cell-eval ()
   "Test substitution of `eval' argument cell."
@@ -227,14 +230,12 @@
     (should (equal (flycheck-substitute-shell-argument-cell
                     '(option "--foo" flycheck-test-option-var))
                    ""))
-    (should (equal (flycheck-substitute-shell-argument-cell
-                    '(option "--foo" flycheck-test-option-var
-                             #'number-to-string))
-                   ""))
-    (should (equal (flycheck-substitute-shell-argument-cell
-                    '(option "--foo=" flycheck-test-option-var
-                             #'number-to-string))
-                   ""))))
+    (should-error (flycheck-substitute-shell-argument-cell
+                   '(option "--foo" flycheck-test-option-var number-to-string))
+                  :type 'wrong-type-argument)
+    (should-error (flycheck-substitute-shell-argument-cell
+                   '(option "--foo=" flycheck-test-option-var number-to-string))
+                  :type 'wrong-type-argument)))
 
 (ert-deftest flycheck-substitute-shell-argument-cell-eval ()
   "Test substitution of `eval' argument cell."

@@ -54,12 +54,16 @@ File: flycheck.info,  Node: Introduction,  Next: Usage,  Prev: Top,  Up: Top
 1 Introduction
 **************
 
-Flycheck provides on-the-fly syntax checking for GNU Emacs 24.
-Essentially it is "Flymake done right" with
+Flycheck (aka "Flymake done right") is a modern on-the-fly syntax
+checking extension for GNU Emacs 24 withL
 
-   * ready-to-use syntax checkers for a bunch of languages
-   * simple declarative checker definitions,
-   * checkers based on major modes,
+   * ready-to-use syntax checkers for a bunch of languages,
+   * easy customization,
+   * a comprehensive manual,
+   * a dead simple, declarative API to create new syntax checkers,
+   * major-mode based selection of syntax checkers,
+   * multiple syntax checkers per buffer,
+   * a "doesn't get in your way" guarantee,
    * and a clean, concise and understandable implementation with decent
      test coverage.
 
@@ -76,8 +80,7 @@ File: flycheck.info,  Node: Features,  Next: Installation,  Prev: Introduction, 
 1.1 Features
 ============
 
-   * Automatic syntax checking after saving or insertion of new lines
-   * Error navigation with 'next-error' and 'previous-error'
+     Automatic syntax checking after saving or insertion of new lines
    * Built-in syntax checkers for:
         * CoffeeScript (using 'coffeelint')
         * CSS (using 'csslint'))
@@ -100,8 +103,13 @@ File: flycheck.info,  Node: Features,  Next: Installation,  Prev: Introduction, 
           of shell script)
         * TeX/LaTeX (using 'chktex' or 'lacheck')
         * XML (using 'xmlstarlet')
+   * Nice error indication and highlighting
    * Easy customization
+   * Syntax checker configuration with project-specific configuration
+     files and options
+   * Error navigation with 'next-error' and 'previous-error'
    * Easy declarative API to define new syntax checkers
+   * Error parsers for structured markup formats (e.g.  Checkdoc XML)
 
 
 File: flycheck.info,  Node: Installation,  Next: Activation,  Prev: Features,  Up: Introduction
@@ -570,7 +578,7 @@ Checkers are declared with 'flycheck-declare-checker':
                Otherwise, OPTION and the configuration file path are
                given as two separate arguments.
 
-          '(option OPTION VARIABLE [FILTER])'
+          '(option OPTION VARIABLE [FILTERS])'
                This cell is substituted with the value of VARIABLE.
                OPTION is a string containing the option for with to
                specify the value.  FILTER is an optional function to be
@@ -586,9 +594,7 @@ Checkers are declared with 'flycheck-declare-checker':
                If VARIABLE is not NIL after applying FILTER, the cell is
                substituted with the OPTION and the value of VARIABLE
                after applying FILTER.  Otherwise the cell is simply
-               dropped from the arguments of the syntax checker.  If
-               VARIABLE is 'nil' directly, FILTER is not applied, and
-               the cell is immediately dropped.
+               dropped from the arguments of the syntax checker.
 
                An OPTION ending with a '=' character is treated like in
                a 'config-file' cell.
@@ -1575,6 +1581,14 @@ File: flycheck.info,  Node: master,  Prev: 0.9,  Up: Changes
 master (unreleased)
 ===================
 
+Flycheck uses *note cl-lib: (cl)Top. now.  This library is built-in as
+of GNU Emacs 24.3.  For earlier releases of GNU Emacs 24 an additional
+compatibility library will be installed from GNU ELPA.
+
+   * Improvements:
+
+        * Call option filters for 'nil' values, too
+
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
 
@@ -1598,6 +1612,11 @@ their support and patches are greatly appreciated.
 
    * Krzysztof Witkowski (https://github.com/kwitek) implemented 'eval'
      support in Flycheck commands.
+
+   * Magnar Sveen (https://github.com/magnars/) developed the awesome
+     dash.el (https://github.com/magnars/dash.el) and s.el
+     (https://github.com/magnars/s.el) libraries, that drive
+     considerable parts of Flycheck's internals.
 
    * Marian Schubert (https://github.com/maio) added the Perl syntax
      checker.
@@ -2173,8 +2192,8 @@ Function and Variable Index
 * flycheck-count-errors:                 Error API.           (line  71)
 * flycheck-current-errors:               Error API.           (line  67)
 * flycheck-declare-checker:              Declaration.         (line   8)
-* flycheck-def-config-file-var:          Declaration.         (line 219)
-* flycheck-def-option-var:               Declaration.         (line 235)
+* flycheck-def-config-file-var:          Declaration.         (line 217)
+* flycheck-def-option-var:               Declaration.         (line 233)
 * flycheck-describe-checker:             Selection.           (line  70)
 * flycheck-error-face:                   Reporting.           (line  14)
 * flycheck-error-new:                    Error API.           (line  39)
@@ -2200,49 +2219,49 @@ Function and Variable Index
 Tag Table:
 Node: Top734
 Node: Introduction2083
-Node: Features2804
-Node: Installation3948
-Node: Activation5122
-Node: Usage5473
-Node: Syntax checking6096
-Node: Selection7358
-Node: Configuration9939
-Node: Reporting12607
-Node: Navigation14962
-Node: Mode line16758
-Node: Extending17659
-Node: Declaration18258
-Node: Error parsers29312
-Node: Option filters30296
-Node: Examples30635
-Node: Simple example31067
-Node: Predicate example34131
-Node: Configuration example36112
-Node: Chaining example38771
-Node: API40157
-Node: Error API40945
-Node: Error parser API43546
-Node: Contribution43772
-Node: Reporting issues44448
-Node: Contributing syntax checkers45184
-Node: Contributing code45979
-Node: Unit tests47319
-Node: Changes48606
-Node: 0.149190
-Node: 0.249474
-Node: 0.349752
-Node: 0.449988
-Node: 0.550763
-Node: 0.651983
-Node: 0.6.154833
-Node: 0.754982
-Node: 0.7.155996
-Node: 0.856711
-Node: 0.958223
-Node: master58721
-Node: Credits58826
-Node: GNU Free Documentation License60950
-Node: Syntax checkers86102
-Node: Function and Variable Index87039
+Node: Features2984
+Node: Installation4335
+Node: Activation5509
+Node: Usage5860
+Node: Syntax checking6483
+Node: Selection7745
+Node: Configuration10326
+Node: Reporting12994
+Node: Navigation15349
+Node: Mode line17145
+Node: Extending18046
+Node: Declaration18645
+Node: Error parsers29578
+Node: Option filters30562
+Node: Examples30901
+Node: Simple example31333
+Node: Predicate example34397
+Node: Configuration example36378
+Node: Chaining example39037
+Node: API40423
+Node: Error API41211
+Node: Error parser API43812
+Node: Contribution44038
+Node: Reporting issues44714
+Node: Contributing syntax checkers45450
+Node: Contributing code46245
+Node: Unit tests47585
+Node: Changes48872
+Node: 0.149456
+Node: 0.249740
+Node: 0.350018
+Node: 0.450254
+Node: 0.551029
+Node: 0.652249
+Node: 0.6.155099
+Node: 0.755248
+Node: 0.7.156262
+Node: 0.856977
+Node: 0.958489
+Node: master58987
+Node: Credits59363
+Node: GNU Free Documentation License61727
+Node: Syntax checkers86879
+Node: Function and Variable Index87816
 
 End Tag Table

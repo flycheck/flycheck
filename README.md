@@ -1,17 +1,21 @@
 Flycheck [![Build Status](https://travis-ci.org/lunaryorn/flycheck.png?branch=master)](https://travis-ci.org/lunaryorn/flycheck)
 ========
 
-Flycheck provides on-the-fly syntax checking for GNU Emacs 24.  Essentially it's
-“flymake done right” with
+Flycheck (aka “Flymake done right”) is a modern on-the-fly syntax checking
+extension for GNU Emacs 24 with:
 
-- major-mode based checkers (instead of file name patterns),
-- simple declarative checker definitions (instead of init functions),
-- ready-to-use syntax checkers for a bunch of languages (instead of broken
-  checkers using non-existing tools),
-- and a clean, concise and understandable implementation (instead of a almost 2k
-  line mess of spaghetti code).
+- ready-to-use syntax checkers for a bunch of languages,
+- easy customization,
+- a comprehensive manual,
+- a dead simple, declarative API to create new syntax checkers,
+- major-mode based selection of syntax checkers,
+- multiple syntax checkers per buffer,
+- a “doesn’t get in your way” guarantee,
+- and a clean, concise and understandable implementation with decent test
+  coverage.
 
-And this is how it looks like, using the awesome [solarized-light][] color theme:
+And this is how it looks like, using the awesome [solarized-light][] color
+theme:
 
 ![Screenshot of Flycheck in action](https://github.com/lunaryorn/flycheck/raw/master/doc/screenshot.png)
 
@@ -20,7 +24,6 @@ Features
 --------
 
 - Automatic syntax check after saving or insertion of new lines
-- Error navigation with `next-error` and `previous-error`
 - Built-in syntax checkers for:
   - CoffeeScript
   - CSS
@@ -42,8 +45,13 @@ Features
   - Shell scripts (Bash, Dash and Zsh)
   - TeX/LaTeX
   - XML
-- Easy customization (see `flycheck-checkers`)
-- Easy declarative API to define new syntax checkers
+- Nice error indication and highlighting
+- Easy customization
+- Syntax checker configuration with project-specific configuration files and
+  options
+- Error navigation with `next-error` and `previous-error`
+- Declarative API to define new syntax checkers
+- Error parsers for structured markup formats (e.g. Checkdoc XML)
 
 
 Installation
@@ -70,7 +78,7 @@ To enable Flycheck mode in all buffers, in which it can be used, add the
 following to your `init.el` file:
 
 ```scheme
-(add-hook 'after-init-hook #'global-flycheck-modes)
+(add-hook 'after-init-hook #'global-flycheck-mode)
 ```
 
 In Flycheck mode the buffer will automatically be checked on the fly, if a
@@ -121,6 +129,8 @@ The following people contributed to flycheck:
 - [Jimmy Yuen Ho Wong][wyuenho] added the HTML syntax checker and the jshint
   Javascript checker, and did valuable testing and bug fixing.
 - [Krzysztof Witkowski][kwitek] implemented `eval` support in Flycheck commands.
+- [Magnar Sveen][magnars] developed the awesome [dash.el][] and [s.el][]
+  libraries, that drive considerable parts of Flycheck's internals.
 - [Marian Schubert][maio] added the Perl syntax checker.
 - [Martin Grenfell][scrooloose] created the awesome Vim library [syntastic][]
   which inspired this project and many of its checkers.
@@ -178,3 +188,6 @@ See [COPYING][] for details.
 [yannick1974]: https://github.com/yannick1974
 [copying]: https://github.com/lunaryorn/flycheck/blob/master/COPYING
 [vderyagin]: https://github.com/vderyagin
+[magnars]: https://github.com/magnars
+[dash.el]: https://github.com/magnars/dash.el
+[s.el]: https://github.com/magnars/s.el
