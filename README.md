@@ -42,7 +42,7 @@ Features
   - RST (ReStructuredText)
   - Sass
   - SCSS
-  - Shell scripts (Bash, Dash and Zsh)
+  - Shell scripts (POSIX Shell, Bash and Zsh)
   - TeX/LaTeX
   - XML
 - Nice error indication and highlighting
@@ -141,6 +141,9 @@ The following people contributed to flycheck:
 - [Steve Purcell][purcell] implemented many checkers, contributed important
   ideas to the design of the checker API and engaged in worthwhile discussion to
   shape this project.
+- [Sylvain Rousseau][thisirs] added a syntax checker for POSIX shell script
+  using @command{bash}, and improved error parsing in the Bash script syntax
+  checker.
 - [Yannick Roehlly][yannick1974] added support for PEP8 naming errors to the
   Flake8 syntax checker.
 - [Victor Deryagin][vderyagin] added the Rust syntax checker.
@@ -191,3 +194,4 @@ See [COPYING][] for details.
 [magnars]: https://github.com/magnars
 [dash.el]: https://github.com/magnars/dash.el
 [s.el]: https://github.com/magnars/s.el
+[thisirs]: https://github.com/thisirs

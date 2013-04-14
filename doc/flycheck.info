@@ -1639,6 +1639,10 @@ their support and patches are greatly appreciated.
      checkers, contributed important ideas to the design of the checker
      API and engaged in worthwhile discussion to shape this project.
 
+   * Sylvain Rousseau (https://github.com/thisirs) added a syntax
+     checker for POSIX shell script using 'bash', and improved error
+     parsing in the Bash script syntax checker.
+
    * Yannick Roehlly (https://github.com/yannick1974) added support for
      PEP8 naming errors to the Flake8 syntax checker.
 
@@ -2164,7 +2168,8 @@ order of their appearance in the default value of 'flycheck-checkers':
    * 'rust-rustc'
    * 'sass'
    * 'scss'
-   * 'sh'
+   * 'sh-dash'
+   * 'sh-bash'
    * 'tex-chktex'
    * 'tex-lacheck'
    * 'xml-xmlstarlet'
@@ -2260,8 +2265,8 @@ Node: 0.856977
 Node: 0.958489
 Node: master58987
 Node: Credits59363
-Node: GNU Free Documentation License61727
-Node: Syntax checkers86879
-Node: Function and Variable Index87816
+Node: GNU Free Documentation License61911
+Node: Syntax checkers87063
+Node: Function and Variable Index88020
 
 End Tag Table
