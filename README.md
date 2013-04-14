@@ -27,6 +27,7 @@ Features
 - Built-in syntax checkers for:
   - CoffeeScript
   - CSS
+  - Elixir
   - Emacs Lisp
   - Go
   - Haml
@@ -141,6 +142,7 @@ The following people contributed to flycheck:
 - [Steve Purcell][purcell] implemented many checkers, contributed important
   ideas to the design of the checker API and engaged in worthwhile discussion to
   shape this project.
+- [Sylvain Benner][syl20bnr] added the Elixir syntax checker.
 - [Sylvain Rousseau][thisirs] added a syntax checker for POSIX shell script
   using `bash`, and improved error parsing in the Bash script syntax checker.
 - [Yannick Roehlly][yannick1974] added support for PEP8 naming errors to the
@@ -194,3 +196,4 @@ See [COPYING][] for details.
 [dash.el]: https://github.com/magnars/dash.el
 [s.el]: https://github.com/magnars/s.el
 [thisirs]: https://github.com/thisirs
+[syl20bnr]: https://github.com/syl20bnr

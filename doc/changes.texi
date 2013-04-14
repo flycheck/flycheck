@@ -454,6 +454,8 @@ New syntax checkers:
 @ghissue{112, POSIX Shell script using @command{bash}}
 @item
 @ghissue{113, Ruby using @command{rubocop}}
+@item
+@ghissue{108, Elixir}
 @end itemize
 
 @item

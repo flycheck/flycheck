@@ -56,6 +56,10 @@ checkers, contributed important ideas to the design of the checker API
 and engaged in worthwhile discussion to shape this project.
 
 @item
+@uref{https://github.com/syl20bnr, Sylvain Benner} added the Elixir
+syntax checker.
+
+@item
 @uref{https://github.com/thisirs, Sylvain Rousseau} added a syntax
 checker for POSIX shell script using @command{bash}, and improved error
 parsing in the Bash script syntax checker.

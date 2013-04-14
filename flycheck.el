@@ -86,6 +86,7 @@ buffer-local wherever it is set."
   '(bash
     coffee-coffeelint
     css-csslint
+    elixir
     emacs-lisp
     emacs-lisp-checkdoc
     go-gofmt
@@ -2212,6 +2213,31 @@ See URL `https://github.com/stubbornella/csslint'."
     ("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), Warning - \\(?4:.+\\)$"
      warning))
   :modes 'css-mode)
+
+(flycheck-declare-checker elixir
+  "An Elixir syntax checker using the Elixir interpreter."
+  :command '("elixirc"
+             "-o" temporary-directory   ; Move compiler output out of the way
+             "--ignore-module-conflict" ; Prevent tedious module redefinition
+                                        ; warning.
+             "+warn_obsolete_guard"
+             "+warn_unused_import"
+             "+warn_shadow_vars"
+             "+warn_export_vars"
+             "+strong_validation"
+             "+report"
+             source)
+  :error-patterns
+  '(("^\\*\\* (.*) \\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:redefining.*\\)$" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*obsolete\\)$" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*unused\\)$" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*shadowed.*\\)$" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*always matches.*\\)$" warning)
+    ;; the following regexp cannot be consistently tested
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*deprecated.*\\)$" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*future reserved.*\\)$" warning))
+  :modes 'elixir-mode)
 
 (defconst flycheck-emacs-command
   `(,(concat invocation-directory invocation-name)
