@@ -813,15 +813,19 @@ This variable is an option for the syntax checker `%s'." docstring checker)
 
 (defun flycheck-command-argument-cell-p (cell)
   "Determine whether CELL is a valid argument cell."
-  (let ((tag (car cell))
-        (args (cdr cell)))
-    (case tag
-      (config-file (and (stringp (car args))
-                        (symbolp (cadr args))))
-      (option (and (stringp (car args))
-                   (symbolp (cadr args))
-                   (or (null (caddr args)) (symbolp (caddr args)))))
-      (eval (= (length args) 1)))))
+  (pcase cell
+    (`(config-file ,option-name ,config-file-var)
+     (and (stringp option-name)
+          (symbolp config-file-var)))
+    (`(option ,option-name ,option-var)
+     (and (stringp option-name)
+          (symbolp option-var)))
+    (`(option ,option-name ,option-var ,filter)
+     (and (stringp option-name)
+          (symbolp option-var)
+          (symbolp filter)))
+    (`(eval _) t)
+    (_ nil)))
 
 (defun flycheck-command-argument-p (arg)
   "Check whether ARG is a valid command argument."
@@ -1073,13 +1077,13 @@ being the concatenation of OPTION and the path of the
 configuration file.  Otherwise the list has two items, the first
 being OPTION, the second the path of the configuration file.
 
-If CELL is a form `(eval OPTION VARIABLE [FILTER])' retrieve the
-value of VARIABLE and return a list of arguments that pass this
-value as value for OPTION to the syntax checker.  FILTER is an
-optional function to be applied to the value of VARIABLE.  This
-function must return nil or a string.  In the former case, return
-nil.  In the latter case, return a list of arguments as described
-above.  If OPTION ends with a =, process it like in a
+If CELL is a form `(option OPTION VARIABLE [FILTER])' retrieve
+the value of VARIABLE and return a list of arguments that pass
+this value as value for OPTION to the syntax checker.  FILTER is
+an optional function to be applied to the value of VARIABLE.
+This function must return nil or a string.  In the former case,
+return nil.  In the latter case, return a list of arguments as
+described above.  If OPTION ends with a =, process it like in a
 `config-file' cell (see above).
 
 If CELL is a form `(eval FORM), return the result of evaluating
@@ -1091,36 +1095,33 @@ neither in FORM before it is evaluated, nor in the result of
 evaluating FORM.
 
 In all other cases, signal an error."
-  (let ((tag (car cell))
-        (args (cdr cell)))
-    (case tag
-      (config-file
-       (let ((option-name (car args))
-             (file-name (flycheck-find-config-file (symbol-value (cadr args)))))
-         (when file-name
-           (flycheck-option-with-value-argument option-name file-name))))
-      (option
-       (let* ((option-name (car args))
-              (variable (cadr args))
-              (value (symbol-value variable))
-              (filter (or (nth 2 args) #'identity)))
-         (unless (null value)
-           (setq value (funcall filter value)))
-         (when value
-           (unless (stringp value)
-             (error "Value %S of %S for %s is not a string"
-                    value variable option-name))
-           (flycheck-option-with-value-argument option-name value))))
-      (eval
-       (let* ((form (car args))
-              (result (eval form)))
-         (if (or (null result)
-                 (stringp result)
-                 (and (listp result) (-all? #'stringp result)))
-             result
-           (error "Invalid result from evaluation of %S: %S" form result))))
-      (t
-       (error "Unsupported argument cell %S" cell)))))
+  (pcase cell
+    (`(config-file ,option-name ,file-name-var)
+     (let ((file-name (flycheck-find-config-file (symbol-value file-name-var))))
+       (when file-name
+         (flycheck-option-with-value-argument option-name file-name))))
+    (`(option ,option-name ,variable)
+     (let ((value (symbol-value variable)))
+       (when value
+         (unless (stringp value)
+           (error "Value %S of %S for option %s is not a string"
+                  value variable option-name))
+         (flycheck-option-with-value-argument option-name value))))
+    (`(option ,option-name ,variable ,filter)
+     (let ((value (funcall filter (symbol-value variable))))
+       (when value
+         (unless (stringp value)
+           (error "Value %S of %S (filter: %S) for option %s is not a string"
+                  value variable filter option-name))
+         (flycheck-option-with-value-argument option-name value))))
+    (`(eval ,form)
+     (let* ((result (eval form)))
+       (if (or (null result)
+               (stringp result)
+               (and (listp result) (-all? #'stringp result)))
+           result
+         (error "Invalid result from evaluation of %S: %S" form result))))
+    (_ (error "Unsupported argument cell %S" cell))))
 
 (defun flycheck-substitute-argument-symbol (symbol)
   "Substitute an argument SYMBOL.

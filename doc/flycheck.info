@@ -570,7 +570,7 @@ Checkers are declared with 'flycheck-declare-checker':
                Otherwise, OPTION and the configuration file path are
                given as two separate arguments.
 
-          '(option OPTION VARIABLE [FILTER])'
+          '(option OPTION VARIABLE [FILTERS])'
                This cell is substituted with the value of VARIABLE.
                OPTION is a string containing the option for with to
                specify the value.  FILTER is an optional function to be
@@ -586,9 +586,7 @@ Checkers are declared with 'flycheck-declare-checker':
                If VARIABLE is not NIL after applying FILTER, the cell is
                substituted with the OPTION and the value of VARIABLE
                after applying FILTER.  Otherwise the cell is simply
-               dropped from the arguments of the syntax checker.  If
-               VARIABLE is 'nil' directly, FILTER is not applied, and
-               the cell is immediately dropped.
+               dropped from the arguments of the syntax checker.
 
                An OPTION ending with a '=' character is treated like in
                a 'config-file' cell.
@@ -1575,6 +1573,10 @@ File: flycheck.info,  Node: master,  Prev: 0.9,  Up: Changes
 master (unreleased)
 ===================
 
+   * Improvements:
+
+        * Call option filters for 'nil' values, too
+
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
 
@@ -2173,8 +2175,8 @@ Function and Variable Index
 * flycheck-count-errors:                 Error API.           (line  71)
 * flycheck-current-errors:               Error API.           (line  67)
 * flycheck-declare-checker:              Declaration.         (line   8)
-* flycheck-def-config-file-var:          Declaration.         (line 219)
-* flycheck-def-option-var:               Declaration.         (line 235)
+* flycheck-def-config-file-var:          Declaration.         (line 217)
+* flycheck-def-option-var:               Declaration.         (line 233)
 * flycheck-describe-checker:             Selection.           (line  70)
 * flycheck-error-face:                   Reporting.           (line  14)
 * flycheck-error-new:                    Error API.           (line  39)
@@ -2212,37 +2214,37 @@ Node: Navigation14962
 Node: Mode line16758
 Node: Extending17659
 Node: Declaration18258
-Node: Error parsers29312
-Node: Option filters30296
-Node: Examples30635
-Node: Simple example31067
-Node: Predicate example34131
-Node: Configuration example36112
-Node: Chaining example38771
-Node: API40157
-Node: Error API40945
-Node: Error parser API43546
-Node: Contribution43772
-Node: Reporting issues44448
-Node: Contributing syntax checkers45184
-Node: Contributing code45979
-Node: Unit tests47319
-Node: Changes48606
-Node: 0.149190
-Node: 0.249474
-Node: 0.349752
-Node: 0.449988
-Node: 0.550763
-Node: 0.651983
-Node: 0.6.154833
-Node: 0.754982
-Node: 0.7.155996
-Node: 0.856711
-Node: 0.958223
-Node: master58721
-Node: Credits58826
-Node: GNU Free Documentation License60950
-Node: Syntax checkers86102
-Node: Function and Variable Index87039
+Node: Error parsers29191
+Node: Option filters30175
+Node: Examples30514
+Node: Simple example30946
+Node: Predicate example34010
+Node: Configuration example35991
+Node: Chaining example38650
+Node: API40036
+Node: Error API40824
+Node: Error parser API43425
+Node: Contribution43651
+Node: Reporting issues44327
+Node: Contributing syntax checkers45063
+Node: Contributing code45858
+Node: Unit tests47198
+Node: Changes48485
+Node: 0.149069
+Node: 0.249353
+Node: 0.349631
+Node: 0.449867
+Node: 0.550642
+Node: 0.651862
+Node: 0.6.154712
+Node: 0.754861
+Node: 0.7.155875
+Node: 0.856590
+Node: 0.958102
+Node: master58600
+Node: Credits58778
+Node: GNU Free Documentation License60902
+Node: Syntax checkers86054
+Node: Function and Variable Index86991
 
 End Tag Table
