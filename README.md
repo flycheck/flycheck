@@ -1,17 +1,21 @@
 Flycheck [![Build Status](https://travis-ci.org/lunaryorn/flycheck.png?branch=master)](https://travis-ci.org/lunaryorn/flycheck)
 ========
 
-Flycheck provides on-the-fly syntax checking for GNU Emacs 24.  Essentially it's
-“flymake done right” with
+Flycheck (aka “Flymake done right”) is a modern on-the-fly syntax checking
+extension for GNU Emacs 24 with:
 
-- major-mode based checkers (instead of file name patterns),
-- simple declarative checker definitions (instead of init functions),
-- ready-to-use syntax checkers for a bunch of languages (instead of broken
-  checkers using non-existing tools),
-- and a clean, concise and understandable implementation (instead of a almost 2k
-  line mess of spaghetti code).
+- ready-to-use syntax checkers for a bunch of languages,
+- easy customization,
+- a comprehensive manual,
+- a dead simple, declarative API to create new syntax checkers,
+- major-mode based selection of syntax checkers,
+- multiple syntax checkers per buffer,
+- a “doesn’t get in your way” guarantee,
+- and a clean, concise and understandable implementation with decent test
+  coverage.
 
-And this is how it looks like, using the awesome [solarized-light][] color theme:
+And this is how it looks like, using the awesome [solarized-light][] color
+theme:
 
 ![Screenshot of Flycheck in action](https://github.com/lunaryorn/flycheck/raw/master/doc/screenshot.png)
 
@@ -20,7 +24,6 @@ Features
 --------
 
 - Automatic syntax check after saving or insertion of new lines
-- Error navigation with `next-error` and `previous-error`
 - Built-in syntax checkers for:
   - CoffeeScript
   - CSS
@@ -42,8 +45,13 @@ Features
   - Shell scripts (Bash, Dash and Zsh)
   - TeX/LaTeX
   - XML
-- Easy customization (see `flycheck-checkers`)
-- Easy declarative API to define new syntax checkers
+- Nice error indication and highlighting
+- Easy customization
+- Syntax checker configuration with project-specific configuration files and
+  options
+- Error navigation with `next-error` and `previous-error`
+- Declarative API to define new syntax checkers
+- Error parsers for structured markup formats (e.g. Checkdoc XML)
 
 
 Installation

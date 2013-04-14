@@ -54,12 +54,16 @@ File: flycheck.info,  Node: Introduction,  Next: Usage,  Prev: Top,  Up: Top
 1 Introduction
 **************
 
-Flycheck provides on-the-fly syntax checking for GNU Emacs 24.
-Essentially it is "Flymake done right" with
+Flycheck (aka "Flymake done right") is a modern on-the-fly syntax
+checking extension for GNU Emacs 24 withL
 
-   * ready-to-use syntax checkers for a bunch of languages
-   * simple declarative checker definitions,
-   * checkers based on major modes,
+   * ready-to-use syntax checkers for a bunch of languages,
+   * easy customization,
+   * a comprehensive manual,
+   * a dead simple, declarative API to create new syntax checkers,
+   * major-mode based selection of syntax checkers,
+   * multiple syntax checkers per buffer,
+   * a "doesn't get in your way" guarantee,
    * and a clean, concise and understandable implementation with decent
      test coverage.
 
@@ -76,8 +80,7 @@ File: flycheck.info,  Node: Features,  Next: Installation,  Prev: Introduction, 
 1.1 Features
 ============
 
-   * Automatic syntax checking after saving or insertion of new lines
-   * Error navigation with 'next-error' and 'previous-error'
+     Automatic syntax checking after saving or insertion of new lines
    * Built-in syntax checkers for:
         * CoffeeScript (using 'coffeelint')
         * CSS (using 'csslint'))
@@ -100,8 +103,13 @@ File: flycheck.info,  Node: Features,  Next: Installation,  Prev: Introduction, 
           of shell script)
         * TeX/LaTeX (using 'chktex' or 'lacheck')
         * XML (using 'xmlstarlet')
+   * Nice error indication and highlighting
    * Easy customization
+   * Syntax checker configuration with project-specific configuration
+     files and options
+   * Error navigation with 'next-error' and 'previous-error'
    * Easy declarative API to define new syntax checkers
+   * Error parsers for structured markup formats (e.g.  Checkdoc XML)
 
 
 File: flycheck.info,  Node: Installation,  Next: Activation,  Prev: Features,  Up: Introduction
@@ -2206,49 +2214,49 @@ Function and Variable Index
 Tag Table:
 Node: Top734
 Node: Introduction2083
-Node: Features2804
-Node: Installation3948
-Node: Activation5122
-Node: Usage5473
-Node: Syntax checking6096
-Node: Selection7358
-Node: Configuration9939
-Node: Reporting12607
-Node: Navigation14962
-Node: Mode line16758
-Node: Extending17659
-Node: Declaration18258
-Node: Error parsers29191
-Node: Option filters30175
-Node: Examples30514
-Node: Simple example30946
-Node: Predicate example34010
-Node: Configuration example35991
-Node: Chaining example38650
-Node: API40036
-Node: Error API40824
-Node: Error parser API43425
-Node: Contribution43651
-Node: Reporting issues44327
-Node: Contributing syntax checkers45063
-Node: Contributing code45858
-Node: Unit tests47198
-Node: Changes48485
-Node: 0.149069
-Node: 0.249353
-Node: 0.349631
-Node: 0.449867
-Node: 0.550642
-Node: 0.651862
-Node: 0.6.154712
-Node: 0.754861
-Node: 0.7.155875
-Node: 0.856590
-Node: 0.958102
-Node: master58600
-Node: Credits58976
-Node: GNU Free Documentation License61100
-Node: Syntax checkers86252
-Node: Function and Variable Index87189
+Node: Features2984
+Node: Installation4335
+Node: Activation5509
+Node: Usage5860
+Node: Syntax checking6483
+Node: Selection7745
+Node: Configuration10326
+Node: Reporting12994
+Node: Navigation15349
+Node: Mode line17145
+Node: Extending18046
+Node: Declaration18645
+Node: Error parsers29578
+Node: Option filters30562
+Node: Examples30901
+Node: Simple example31333
+Node: Predicate example34397
+Node: Configuration example36378
+Node: Chaining example39037
+Node: API40423
+Node: Error API41211
+Node: Error parser API43812
+Node: Contribution44038
+Node: Reporting issues44714
+Node: Contributing syntax checkers45450
+Node: Contributing code46245
+Node: Unit tests47585
+Node: Changes48872
+Node: 0.149456
+Node: 0.249740
+Node: 0.350018
+Node: 0.450254
+Node: 0.551029
+Node: 0.652249
+Node: 0.6.155099
+Node: 0.755248
+Node: 0.7.156262
+Node: 0.856977
+Node: 0.958489
+Node: master58987
+Node: Credits59363
+Node: GNU Free Documentation License61487
+Node: Syntax checkers86639
+Node: Function and Variable Index87576
 
 End Tag Table
