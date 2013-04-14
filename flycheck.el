@@ -86,6 +86,7 @@ buffer-local wherever it is set."
   '(bash
     coffee-coffeelint
     css-csslint
+    dash
     emacs-lisp
     emacs-lisp-checkdoc
     go-gofmt
@@ -2124,8 +2125,8 @@ _EVENT is ignored."
   "A Bash syntax checker using the bash executable.
 
 See URL `http://www.gnu.org/software/bash/'."
-  :command '("bash" "--norc" "-n" source)
-  :error-patterns '(("^\\(?1:.+\\): line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
+  :command '("bash" "--norc" "-n" "--" source)
+  :error-patterns '(("^\\(?1:.+\\):[^0-9]+\\(?2:[0-9]+\\) *: *\\(?4:.*\\)$" error))
   :modes 'sh-mode
   :predicate '(eq sh-shell 'bash))
 
@@ -2155,6 +2156,15 @@ See URL `https://github.com/stubbornella/csslint'."
     ("^\\(?1:.*\\): line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), Warning - \\(?4:.+\\)$"
      warning))
   :modes 'css-mode)
+
+(flycheck-declare-checker dash
+  "A POSIX Shell syntax checker using the dash executable.
+
+See URL `http://gondor.apana.org.au/~herbert/dash/'."
+  :command '("dash" "-n" source)
+  :error-patterns '(("^\\(?1:.+\\): \\(?2:[0-9]+\\): \\1: \\(?4:.*\\)$" error))
+  :modes 'sh-mode
+  :predicate '(eq sh-shell 'sh))
 
 (defconst flycheck-emacs-command
   `(,(concat invocation-directory invocation-name)
@@ -2539,11 +2549,9 @@ See URL `http://sass-lang.com'."
   :modes 'scss-mode)
 
 (flycheck-declare-checker sh
-  "A POSIX Shell syntax checker using the dash executable.
-
-See URL `http://gondor.apana.org.au/~herbert/dash/'."
-  :command '("dash" "-n" source)
-  :error-patterns '(("^\\(?1:.+\\): \\(?2:[0-9]+\\): \\1: \\(?4:.*\\)$" error))
+  "A POSIX Shell syntax checker using the bash executable."
+  :command '("bash" "--posix" "--norc" "-n" "--" source)
+  :error-patterns '(("^\\(?1:.+\\):[^0-9]+\\(?2:[0-9]+\\) *: *\\(?4:.*\\)$" error))
   :modes 'sh-mode
   :predicate '(eq sh-shell 'sh))
 
