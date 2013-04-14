@@ -952,9 +952,9 @@ Return a list representing PATTERN, suitable as element in
 `compilation-error-regexp-alist'."
   (let* ((regexp (car pattern))
          (level (cadr pattern))
-         (level-no (cond
-                    ((eq level 'error) 2)
-                    ((eq level 'warning) 1))))
+         (level-no (case level
+                     (error 2)
+                     (warning 1))))
     (list regexp 1 2 3 level-no)))
 
 (defun flycheck-checker-compilation-error-regexp-alist (checker)
