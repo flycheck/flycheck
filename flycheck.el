@@ -2160,8 +2160,8 @@ See URL `https://github.com/stubbornella/csslint'."
 (flycheck-declare-checker elixir
   "An Elixir syntax checker using the Elixir interpreter."
   :command '("elixirc"
-             "--ignore-module-conflict" ;; needed to prevent from module
-                                        ;; redefinition warning.
+             "--ignore-module-conflict" ; needed to prevent from module
+                                        ; redefinition warning.
              "+warn_obsolete_guard"
              "+warn_unused_import"
              "+warn_shadow_vars"
