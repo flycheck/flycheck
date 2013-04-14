@@ -1613,6 +1613,11 @@ their support and patches are greatly appreciated.
    * Krzysztof Witkowski (https://github.com/kwitek) implemented 'eval'
      support in Flycheck commands.
 
+   * Magnar Sveen (https://github.com/magnars/) developed the awesome
+     dash.el (https://github.com/magnars/dash.el) and s.el
+     (https://github.com/magnars/s.el) libraries, that drive
+     considerable parts of Flycheck's internals.
+
    * Marian Schubert (https://github.com/maio) added the Perl syntax
      checker.
 
@@ -2255,8 +2260,8 @@ Node: 0.856977
 Node: 0.958489
 Node: master58987
 Node: Credits59363
-Node: GNU Free Documentation License61487
-Node: Syntax checkers86639
-Node: Function and Variable Index87576
+Node: GNU Free Documentation License61727
+Node: Syntax checkers86879
+Node: Function and Variable Index87816
 
 End Tag Table

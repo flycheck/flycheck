@@ -129,6 +129,8 @@ The following people contributed to flycheck:
 - [Jimmy Yuen Ho Wong][wyuenho] added the HTML syntax checker and the jshint
   Javascript checker, and did valuable testing and bug fixing.
 - [Krzysztof Witkowski][kwitek] implemented `eval` support in Flycheck commands.
+- [Magnar Sveen][magnars] developed the awesome [dash.el][] and [s.el][]
+  libraries, that drive considerable parts of Flycheck's internals.
 - [Marian Schubert][maio] added the Perl syntax checker.
 - [Martin Grenfell][scrooloose] created the awesome Vim library [syntastic][]
   which inspired this project and many of its checkers.
@@ -186,3 +188,6 @@ See [COPYING][] for details.
 [yannick1974]: https://github.com/yannick1974
 [copying]: https://github.com/lunaryorn/flycheck/blob/master/COPYING
 [vderyagin]: https://github.com/vderyagin
+[magnars]: https://github.com/magnars
+[dash.el]: https://github.com/magnars/dash.el
+[s.el]: https://github.com/magnars/s.el

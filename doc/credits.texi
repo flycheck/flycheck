@@ -22,6 +22,12 @@ testing and bug fixing.
 @code{eval} support in Flycheck commands.
 
 @item
+@uref{https://github.com/magnars/,Magnar Sveen} developed the awesome
+@uref{https://github.com/magnars/dash.el, dash.el} and
+@uref{https://github.com/magnars/s.el, s.el} libraries, that drive
+considerable parts of Flycheck's internals.
+
+@item
 @uref{https://github.com/maio, Marian Schubert} added the Perl syntax
 checker.
 
