@@ -2045,7 +2045,7 @@ Error: %s" checker output (error-message-string err))
       (flycheck-report-error-count flycheck-current-errors)
       (when (and (/= exit-status 0) (not errors))
         ;; Report possibly flawed checker definition
-        (message "Checker %S returned non-zero exit code %s, but no errors from\
+        (message "Checker %S returned non-zero exit code %s, but no errors from \
 output: %s\nChecker definition probably flawed."
                  checker exit-status output)
         (flycheck-report-status "?"))
