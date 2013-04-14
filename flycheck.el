@@ -6,7 +6,7 @@
 ;; URL: https://github.com/lunaryorn/flycheck
 ;; Keywords: convenience languages tools
 ;; Version: 0.9
-;; Package-Requires: ((s "1.3.1") (dash "1.1") (emacs "24.1"))
+;; Package-Requires: ((s "1.3.1") (dash "1.1") (cl-lib "0.1") (emacs "24.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -38,10 +38,11 @@
 
 (eval-when-compile
   (require 'jka-compr)
-  (require 'cl)                         ; For `defstruct'
+  (require 'cl-lib)
   (require 'compile)                    ; For Compilation Mode integration
   (require 'sh-script))
 
+(require 'cl-lib)
 (require 's)
 (require 'dash)
 
@@ -952,9 +953,9 @@ Return a list representing PATTERN, suitable as element in
 `compilation-error-regexp-alist'."
   (let* ((regexp (car pattern))
          (level (cadr pattern))
-         (level-no (case level
-                     (error 2)
-                     (warning 1))))
+         (level-no (pcase level
+                     (`error 2)
+                     (`warning 1))))
     (list regexp 1 2 3 level-no)))
 
 (defun flycheck-checker-compilation-error-regexp-alist (checker)
@@ -1136,7 +1137,7 @@ contents of the buffer to check.  Do not use this as primary
 input to a checker!
 
 In all other cases, signal an error."
-  (case symbol
+  (cl-case symbol
     (source
      (flycheck-get-source-file #'flycheck-temp-file-system))
     (source-inplace
@@ -1427,8 +1428,8 @@ Pop up a help buffer with the documentation of CHECKER."
 
 
 ;;;; Checker error API
-(defstruct (flycheck-error
-            (:constructor flycheck-error-new))
+(cl-defstruct (flycheck-error
+               (:constructor flycheck-error-new))
   buffer filename line column message level)
 
 (defmacro flycheck-error-with-buffer (err &rest forms)
@@ -1906,7 +1907,7 @@ Intended for use with `next-error-function'."
                              (--split-with (>= current-pos it))))
          (before (nreverse (car before-and-after)))
          (after (cadr before-and-after))
-         (error-pos (nth-value (- (abs n) 1) (if (< n 0) before after))))
+         (error-pos (nth (- (abs n) 1) (if (< n 0) before after))))
     (if error-pos
         (goto-char error-pos)
       (user-error "No more Flycheck errors"))))

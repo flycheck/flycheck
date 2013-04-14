@@ -1573,6 +1573,10 @@ File: flycheck.info,  Node: master,  Prev: 0.9,  Up: Changes
 master (unreleased)
 ===================
 
+Flycheck uses *note cl-lib: (cl)Top. now.  This library is built-in as
+of GNU Emacs 24.3.  For earlier releases of GNU Emacs 24 an additional
+compatibility library will be installed from GNU ELPA.
+
    * Improvements:
 
         * Call option filters for 'nil' values, too
@@ -2242,9 +2246,9 @@ Node: 0.7.155875
 Node: 0.856590
 Node: 0.958102
 Node: master58600
-Node: Credits58778
-Node: GNU Free Documentation License60902
-Node: Syntax checkers86054
-Node: Function and Variable Index86991
+Node: Credits58976
+Node: GNU Free Documentation License61100
+Node: Syntax checkers86252
+Node: Function and Variable Index87189
 
 End Tag Table
