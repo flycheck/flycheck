@@ -454,6 +454,8 @@ New syntax checkers:
 @ghissue{112, POSIX Shell script using @command{bash}}
 @item
 @ghissue{113, Ruby using @command{rubocop}}
+@item
+@ghissue{108, Elixir}
 @end itemize
 
 @item
@@ -461,7 +463,7 @@ Removed syntax checkers:
 
 @itemize @bullet
 @item
-@ghissue{115, Remove the pyflakes syntax checker}.  Use Flake8
+@ghissue{115, Remove the pyflakes syntax checker}.  Use Flake8rc
 @end itemize
 
 @item
