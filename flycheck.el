@@ -2482,7 +2482,11 @@ See URL `http://pypi.python.org/pypi/pylint'."
 
 See URL `http://pypi.python.org/pypi/pyflakes'."
   :command '("pyflakes" source-inplace)
-  :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
+  :error-patterns
+  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:redefinition.*\\)$" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*unused.*\\)$" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*used\\)$" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'python-mode)
 
 (flycheck-declare-checker rst

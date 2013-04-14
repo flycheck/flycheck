@@ -39,7 +39,7 @@
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-pyflakes)
   (flycheck-testsuite-should-syntax-check
    "checkers/python-pyflakes-error.py" 'python-mode '(python-flake8 python-pylint)
-   '(3 nil "'re' imported but unused" error)))
+   '(3 nil "'re' imported but unused" warning)))
 
 ;; Local Variables:
 ;; coding: utf-8
