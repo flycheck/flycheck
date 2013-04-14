@@ -78,7 +78,7 @@ To enable Flycheck mode in all buffers, in which it can be used, add the
 following to your `init.el` file:
 
 ```scheme
-(add-hook 'after-init-hook #'global-flycheck-modes)
+(add-hook 'after-init-hook #'global-flycheck-mode)
 ```
 
 In Flycheck mode the buffer will automatically be checked on the fly, if a
