@@ -27,6 +27,7 @@ Features
 - Built-in syntax checkers for:
   - CoffeeScript
   - CSS
+  - Elixir
   - Emacs Lisp
   - Go
   - Haml
@@ -144,6 +145,7 @@ The following people contributed to flycheck:
 - [Yannick Roehlly][yannick1974] added support for PEP8 naming errors to the
   Flake8 syntax checker.
 - [Victor Deryagin][vderyagin] added the Rust syntax checker.
+- [Sylvain Benner][syl20bnr] added the Elixir syntax checker.
 
 
 License
@@ -191,3 +193,4 @@ See [COPYING][] for details.
 [magnars]: https://github.com/magnars
 [dash.el]: https://github.com/magnars/dash.el
 [s.el]: https://github.com/magnars/s.el
+[syl20bnr]: https://github.com/syl20bnr
