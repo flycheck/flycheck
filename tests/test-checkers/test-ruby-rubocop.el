@@ -41,6 +41,16 @@
    '(3 nil "Use snake_case for symbols." warning)
    '(4 nil "Prefer single-quoted strings when you don't need string interpolation or special symbols." warning)))
 
+(ert-deftest checker-ruby-rubocop-warnings-disabled ()
+  "Test Ruby RuboCop configuration file."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
+  (flycheck-testsuite-with-hook ruby-mode-hook
+      (setq flycheck-rubocoprc "rubocop.yml")
+    (flycheck-testsuite-should-syntax-check
+     "checkers/ruby-rubocop-warnings.rb" 'ruby-mode nil
+      '(1 nil "Missing encoding comment." warning)
+      '(4 nil "Prefer single-quoted strings when you don't need string interpolation or special symbols." warning))))
+
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:

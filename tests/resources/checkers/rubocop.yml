@@ -1,0 +1,3 @@
+# Disable snake case for symbol
+SymbolSnakeCase:
+  Enabled: false

@@ -316,6 +316,9 @@ files are provided by Flycheck:
  -- User Option: flycheck-jshintrc
      The configuration file for the 'javascript-jshint' syntax checker.
 
+ -- User Option: flycheck-rubocoprc
+     The configuration file for the 'ruby-rubocup' syntax checker.
+
  -- User Option: flycheck-tidyrc
      The configuration file for the 'html-tidy' syntax checker.
 
@@ -2226,8 +2229,9 @@ Function and Variable Index
 * flycheck-parse-xml-string:             Error parser API.    (line   6)
 * flycheck-phpcs-standard:               Configuration.       (line  18)
 * flycheck-previous-error:               Navigation.          (line  31)
+* flycheck-rubocoprc:                    Configuration.       (line  37)
 * flycheck-select-checker:               Selection.           (line  32)
-* flycheck-tidyrc:                       Configuration.       (line  37)
+* flycheck-tidyrc:                       Configuration.       (line  40)
 * flycheck-warning-face:                 Reporting.           (line  15)
 
 
@@ -2242,42 +2246,42 @@ Node: Usage5888
 Node: Syntax checking6511
 Node: Selection7773
 Node: Configuration10354
-Node: Reporting13022
-Node: Navigation15377
-Node: Mode line17173
-Node: Extending18074
-Node: Declaration18673
-Node: Error parsers29606
-Node: Option filters30590
-Node: Examples30929
-Node: Simple example31361
-Node: Predicate example34425
-Node: Configuration example36406
-Node: Chaining example39065
-Node: API40451
-Node: Error API41239
-Node: Error parser API43840
-Node: Contribution44066
-Node: Reporting issues44742
-Node: Contributing syntax checkers45478
-Node: Contributing code46273
-Node: Unit tests47613
-Node: Changes48900
-Node: 0.149484
-Node: 0.249768
-Node: 0.350046
-Node: 0.450282
-Node: 0.551057
-Node: 0.652277
-Node: 0.6.155127
-Node: 0.755276
-Node: 0.7.156290
-Node: 0.857005
-Node: 0.958517
-Node: master59015
-Node: Credits59745
-Node: GNU Free Documentation License62343
-Node: Syntax checkers87495
-Node: Function and Variable Index88472
+Node: Reporting13126
+Node: Navigation15481
+Node: Mode line17277
+Node: Extending18178
+Node: Declaration18777
+Node: Error parsers29710
+Node: Option filters30694
+Node: Examples31033
+Node: Simple example31465
+Node: Predicate example34529
+Node: Configuration example36510
+Node: Chaining example39169
+Node: API40555
+Node: Error API41343
+Node: Error parser API43944
+Node: Contribution44170
+Node: Reporting issues44846
+Node: Contributing syntax checkers45582
+Node: Contributing code46377
+Node: Unit tests47717
+Node: Changes49004
+Node: 0.149588
+Node: 0.249872
+Node: 0.350150
+Node: 0.450386
+Node: 0.551161
+Node: 0.652381
+Node: 0.6.155231
+Node: 0.755380
+Node: 0.7.156394
+Node: 0.857109
+Node: 0.958621
+Node: master59119
+Node: Credits59849
+Node: GNU Free Documentation License62447
+Node: Syntax checkers87599
+Node: Function and Variable Index88576
 
 End Tag Table

@@ -2500,11 +2500,15 @@ See URL `http://docutils.sourceforge.net/'."
     ("^\\(?1:.+\\):\\(?2:[0-9]+\\): (SEVERE/4) \\(?4:.+\\)$" error))
   :modes 'rst-mode)
 
+(flycheck-def-config-file-var flycheck-rubocoprc ruby-rubocop ".rubocop.yml")
+
 (flycheck-declare-checker ruby-rubocop
   "A Ruby syntax checker using the RuboCop tool.
 
 See URL `https://github.com/bbatsov/rubocop'."
-  :command '("rubocop" "--emacs" "--silent" source)
+  :command '("rubocop" "--emacs" "--silent"
+             (config-file "--config" flycheck-rubocoprc)
+             source)
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): C: \\(?4:.*\\)$" warning)
     ("^\\(?1:.*\\):\\(?2:[0-9]+\\): W: \\(?4:.*\\)$" warning)

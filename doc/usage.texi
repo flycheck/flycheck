@@ -193,6 +193,10 @@ The configuration file for the @code{python-flake8} syntax checker.
 The configuration file for the @code{javascript-jshint} syntax checker.
 @end defopt
 
+@defopt flycheck-rubocoprc
+The configuration file for the @code{ruby-rubocup} syntax checker.
+@end defopt
+
 @defopt flycheck-tidyrc
 The configuration file for the @code{html-tidy} syntax checker.
 @end defopt
