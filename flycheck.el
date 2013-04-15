@@ -103,6 +103,7 @@ buffer-local wherever it is set."
     python-pylint
     python-pyflakes
     rst
+    ruby-rubocop
     ruby
     rust-rustc
     sass
@@ -2502,6 +2503,17 @@ See URL `http://docutils.sourceforge.net/'."
   "A Ruby syntax checker using the Ruby interpreter."
   :command '("ruby" "-w" "-c" source)
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
+  :modes 'ruby-mode)
+
+(flycheck-declare-checker ruby-rubocop
+  "A Ruby syntax checker using the RuboCop tool.
+
+See URL `https://github.com/bbatsov/rubocop'."
+  :command '("rubocop" "-e" "-s" source)
+  :error-patterns
+  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): C: \\(?4:.*\\)$" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): W: \\(?4:.*\\)$" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): E: \\(?4:.*\\)$" error))
   :modes 'ruby-mode)
 
 (flycheck-declare-checker rust-rustc

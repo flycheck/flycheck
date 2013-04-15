@@ -99,7 +99,8 @@ npm coffee-script coffeelint \
     jsonlint
 
 gem haml \
-    sass
+    sass \
+    rubocop
 
 # Install carton for Emacs dependency management
 CARTON_VERSION=0.2.0
