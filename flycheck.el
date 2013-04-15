@@ -107,7 +107,8 @@ buffer-local wherever it is set."
     rust-rustc
     sass
     scss
-    sh
+    sh-dash
+    sh-bash
     tex-chktex
     tex-lacheck
     xml-xmlstarlet
@@ -2045,7 +2046,7 @@ Error: %s" checker output (error-message-string err))
       (flycheck-report-error-count flycheck-current-errors)
       (when (and (/= exit-status 0) (not errors))
         ;; Report possibly flawed checker definition
-        (message "Checker %S returned non-zero exit code %s, but no errors from\
+        (message "Checker %S returned non-zero exit code %s, but no errors from \
 output: %s\nChecker definition probably flawed."
                  checker exit-status output)
         (flycheck-report-status "?"))
@@ -2124,8 +2125,8 @@ _EVENT is ignored."
   "A Bash syntax checker using the bash executable.
 
 See URL `http://www.gnu.org/software/bash/'."
-  :command '("bash" "--norc" "-n" source)
-  :error-patterns '(("^\\(?1:.+\\): line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
+  :command '("bash" "--norc" "-n" "--" source)
+  :error-patterns '(("^\\(?1:.+\\):[^0-9]+\\(?2:[0-9]+\\) *: *\\(?4:.*\\)$" error))
   :modes 'sh-mode
   :predicate '(eq sh-shell 'bash))
 
@@ -2538,12 +2539,21 @@ See URL `http://sass-lang.com'."
      error))
   :modes 'scss-mode)
 
-(flycheck-declare-checker sh
+(flycheck-declare-checker sh-dash
   "A POSIX Shell syntax checker using the dash executable.
 
 See URL `http://gondor.apana.org.au/~herbert/dash/'."
   :command '("dash" "-n" source)
   :error-patterns '(("^\\(?1:.+\\): \\(?2:[0-9]+\\): \\1: \\(?4:.*\\)$" error))
+  :modes 'sh-mode
+  :predicate '(eq sh-shell 'sh))
+
+(flycheck-declare-checker sh-bash
+  "A POSIX Shell syntax checker using the bash executable.
+
+See URL `http://www.gnu.org/software/bash/'."
+  :command '("bash" "--posix" "--norc" "-n" "--" source)
+  :error-patterns '(("^\\(?1:.+\\):[^0-9]+\\(?2:[0-9]+\\) *: *\\(?4:.*\\)$" error))
   :modes 'sh-mode
   :predicate '(eq sh-shell 'sh))
 

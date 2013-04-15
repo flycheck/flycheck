@@ -26,7 +26,7 @@ Pull requests
 - Use the same coding style and spacing.
 - Verify your Emacs Lisp code with `checkdoc` (`C-c ? d`).
 - Add unit tests for your new checkers.  Take a look at existing tests, and do
-  not forget to update `vagrant/provision.py` to install your checker tool into
+  not forget to update `vagrant/provision.sh` to install your checker tool into
   the virtual testing environment.
 - Open a [pull request][4] that relates to but one subject with a clear title
   and description in grammatically correct, complete sentences.
