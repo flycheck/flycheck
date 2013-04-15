@@ -1581,13 +1581,20 @@ File: flycheck.info,  Node: master,  Prev: 0.9,  Up: Changes
 master (unreleased)
 ===================
 
-Flycheck uses *note cl-lib: (cl)Top. now.  This library is built-in as
-of GNU Emacs 24.3.  For earlier releases of GNU Emacs 24 an additional
-compatibility library will be installed from GNU ELPA.
+   * Flycheck uses *note cl-lib: (cl)Top. now.  This library is built-in
+     as of GNU Emacs 24.3.  For earlier releases of GNU Emacs 24 an
+     additional compatibility library will be installed from GNU ELPA.
+
+   * New syntax checkers:
+
+        * POSIX Shell script using 'bash'
+          (https://github.com/lunaryorn/flycheck/issues/112)
 
    * Improvements:
 
         * Call option filters for 'nil' values, too
+        * Improve error parsing in Bash syntax checker
+          (https://github.com/lunaryorn/flycheck/issues/112)
 
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
@@ -2264,9 +2271,9 @@ Node: 0.7.156262
 Node: 0.856977
 Node: 0.958489
 Node: master58987
-Node: Credits59363
-Node: GNU Free Documentation License61911
-Node: Syntax checkers87063
-Node: Function and Variable Index88020
+Node: Credits59625
+Node: GNU Free Documentation License62173
+Node: Syntax checkers87325
+Node: Function and Variable Index88282
 
 End Tag Table

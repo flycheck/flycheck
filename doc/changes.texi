@@ -440,17 +440,28 @@ Quit the error message window when navigating away from error locations
 @comment  node-name,  next,  previous,  up
 @unnumberedsec master (unreleased)
 
+@itemize @bullet
+@item
 Flycheck uses @ref{Top, , cl-lib, cl} now.  This library is built-in as
 of GNU Emacs 24.3.  For earlier releases of GNU Emacs 24 an additional
 compatibility library will be installed from GNU ELPA.
 
+@item
+New syntax checkers:
+
 @itemize @bullet
+@item
+@ghissue{112, POSIX Shell script using @command{bash}}
+@end itemize
+
 @item
 Improvements:
 
 @itemize @bullet
 @item
 Call option filters for @code{nil} values, too
+@item
+@ghissue{112, Improve error parsing in Bash syntax checker}
 @end itemize
 @end itemize
 
