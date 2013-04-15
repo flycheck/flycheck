@@ -86,7 +86,6 @@ buffer-local wherever it is set."
   '(bash
     coffee-coffeelint
     css-csslint
-    dash
     emacs-lisp
     emacs-lisp-checkdoc
     go-gofmt
@@ -108,7 +107,8 @@ buffer-local wherever it is set."
     rust-rustc
     sass
     scss
-    sh
+    sh-dash
+    sh-bash
     tex-chktex
     tex-lacheck
     xml-xmlstarlet
@@ -2157,15 +2157,6 @@ See URL `https://github.com/stubbornella/csslint'."
      warning))
   :modes 'css-mode)
 
-(flycheck-declare-checker dash
-  "A POSIX Shell syntax checker using the dash executable.
-
-See URL `http://gondor.apana.org.au/~herbert/dash/'."
-  :command '("dash" "-n" source)
-  :error-patterns '(("^\\(?1:.+\\): \\(?2:[0-9]+\\): \\1: \\(?4:.*\\)$" error))
-  :modes 'sh-mode
-  :predicate '(eq sh-shell 'sh))
-
 (defconst flycheck-emacs-command
   `(,(concat invocation-directory invocation-name)
     "--no-site-file" "--no-site-lisp" "--batch" "--eval")
@@ -2548,8 +2539,19 @@ See URL `http://sass-lang.com'."
      error))
   :modes 'scss-mode)
 
-(flycheck-declare-checker sh
-  "A POSIX Shell syntax checker using the bash executable."
+(flycheck-declare-checker sh-dash
+  "A POSIX Shell syntax checker using the dash executable.
+
+See URL `http://gondor.apana.org.au/~herbert/dash/'."
+  :command '("dash" "-n" source)
+  :error-patterns '(("^\\(?1:.+\\): \\(?2:[0-9]+\\): \\1: \\(?4:.*\\)$" error))
+  :modes 'sh-mode
+  :predicate '(eq sh-shell 'sh))
+
+(flycheck-declare-checker sh-bash
+  "A POSIX Shell syntax checker using the bash executable.
+
+See URL `http://www.gnu.org/software/bash/'."
   :command '("bash" "--posix" "--norc" "-n" "--" source)
   :error-patterns '(("^\\(?1:.+\\):[^0-9]+\\(?2:[0-9]+\\) *: *\\(?4:.*\\)$" error))
   :modes 'sh-mode

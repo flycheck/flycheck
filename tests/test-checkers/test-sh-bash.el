@@ -1,4 +1,4 @@
-;;; test-sh.el --- Test the sh checker -*- lexical-binding: t; -*-
+;;; test-sh-bash.el --- Test the sh-bash checker -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
@@ -27,17 +27,18 @@
 
 (require 'sh-script)
 
-(ert-deftest checker-sh-syntax-error ()
+(ert-deftest checker-sh-bash-syntax-error ()
   "Test a syntax error from a missing semicolon."
-  :expected-result (flycheck-testsuite-fail-unless-checker 'sh)
+  :expected-result (flycheck-testsuite-fail-unless-checker 'sh-bash)
   (flycheck-testsuite-with-hook sh-mode-hook
       (sh-set-shell "sh" :no-query)
     (flycheck-testsuite-should-syntax-check
-     "checkers/sh-syntax-error.sh" 'sh-mode nil
-     '(5 nil "Syntax error: \"fi\" unexpected (expecting \"then\")" error))))
+     "checkers/sh-bash-syntax-error.sh" 'sh-mode 'sh-dash
+     '(5 nil "syntax error near unexpected token `fi'" error)
+     '(5 nil "`fi'" error))))
 
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:
 
-;;; test-sh.el ends here
+;;; test-sh-bash.el ends here
