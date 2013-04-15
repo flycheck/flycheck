@@ -452,6 +452,8 @@ New syntax checkers:
 @itemize @bullet
 @item
 @ghissue{112, POSIX Shell script using @command{bash}}
+@item
+@ghissue{113, Ruby using @command{rubocop}}
 @end itemize
 
 @item

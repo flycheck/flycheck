@@ -1,4 +1,4 @@
-;;; test-ruby.el --- Test the Ruby checker -*- lexical-binding: t; -*-
+;;; test-ruby-rubocop.el --- Test the RuboCop checker -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
@@ -25,15 +25,24 @@
 (require 'ert)
 (require 'flycheck)
 
-(ert-deftest checker-ruby-syntax-error ()
+(ert-deftest checker-ruby-rubocop-syntax-error ()
   "Test a Ruby syntax error."
-  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby)
+  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
   (flycheck-testsuite-should-syntax-check
-   "checkers/ruby-syntax-error.rb" 'ruby-mode '(ruby-rubocop)
-   '(5 nil "syntax error, unexpected tCONSTANT, expecting $end" error)))
+   "checkers/ruby-syntax-error.rb" 'ruby-mode nil
+   '(5 nil "Syntax error, unexpected tconstant, expecting $end" error)))
+
+(ert-deftest checker-ruby-rubocop-warnings ()
+  "Test some Ruby warnings emitted by RuboCop."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/ruby-rubocop-warnings.rb" 'ruby-mode nil
+   '(1 nil "Missing encoding comment." warning)
+   '(3 nil "Use snake_case for symbols." warning)
+   '(4 nil "Prefer single-quoted strings when you don't need string interpolation or special symbols." warning)))
 
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:
 
-;;; test-ruby.el ends here
+;;; test-ruby-rubocop.el ends here

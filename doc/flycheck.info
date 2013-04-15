@@ -94,7 +94,7 @@ File: flycheck.info,  Node: Features,  Next: Installation,  Prev: Introduction, 
         * Perl
         * PHP (using the PHP Command Line and PHP CodeSniffer)
         * Python (using 'flake8', 'pylint', or 'pyflakes')
-        * Ruby
+        * Ruby (using 'rubocop' or 'ruby')
         * Rust (using 'rustc')
         * RST (ReStructuredText, using Docutils)
         * Sass
@@ -1589,6 +1589,8 @@ master (unreleased)
 
         * POSIX Shell script using 'bash'
           (https://github.com/lunaryorn/flycheck/issues/112)
+        * Ruby using 'rubocop'
+          (https://github.com/lunaryorn/flycheck/issues/113)
 
    * Improvements:
 
@@ -1606,9 +1608,10 @@ The following people contributed to Flycheck.  Their help and ideas,
 their support and patches are greatly appreciated.
 
    * Bozhidar Batsov (https://github.com/bbatsov) provided valuable
-     feedback and refinements, and brought Flycheck to a larger user
-     base by adding it to his awesome Prelude project
-     (https://github.com/bbatsov/prelude).
+     feedback and refinements, brought Flycheck to a larger user base by
+     adding it to his awesome Prelude project
+     (https://github.com/bbatsov/prelude), and added a Ruby syntax
+     checker using 'rubocop'.
 
    * Damon Haley (https://github.com/dhaley) helped to shape and test
      the PHP CodeSniffer checker.
@@ -2171,6 +2174,7 @@ order of their appearance in the default value of 'flycheck-checkers':
    * 'python-pylint'
    * 'python-pyflakes'
    * 'rst'
+   * 'ruby-rubocop'
    * 'ruby'
    * 'rust-rustc'
    * 'sass'
@@ -2232,48 +2236,48 @@ Tag Table:
 Node: Top734
 Node: Introduction2083
 Node: Features2984
-Node: Installation4335
-Node: Activation5509
-Node: Usage5860
-Node: Syntax checking6483
-Node: Selection7745
-Node: Configuration10326
-Node: Reporting12994
-Node: Navigation15349
-Node: Mode line17145
-Node: Extending18046
-Node: Declaration18645
-Node: Error parsers29578
-Node: Option filters30562
-Node: Examples30901
-Node: Simple example31333
-Node: Predicate example34397
-Node: Configuration example36378
-Node: Chaining example39037
-Node: API40423
-Node: Error API41211
-Node: Error parser API43812
-Node: Contribution44038
-Node: Reporting issues44714
-Node: Contributing syntax checkers45450
-Node: Contributing code46245
-Node: Unit tests47585
-Node: Changes48872
-Node: 0.149456
-Node: 0.249740
-Node: 0.350018
-Node: 0.450254
-Node: 0.551029
-Node: 0.652249
-Node: 0.6.155099
-Node: 0.755248
-Node: 0.7.156262
-Node: 0.856977
-Node: 0.958489
-Node: master58987
-Node: Credits59625
-Node: GNU Free Documentation License62173
-Node: Syntax checkers87325
-Node: Function and Variable Index88282
+Node: Installation4363
+Node: Activation5537
+Node: Usage5888
+Node: Syntax checking6511
+Node: Selection7773
+Node: Configuration10354
+Node: Reporting13022
+Node: Navigation15377
+Node: Mode line17173
+Node: Extending18074
+Node: Declaration18673
+Node: Error parsers29606
+Node: Option filters30590
+Node: Examples30929
+Node: Simple example31361
+Node: Predicate example34425
+Node: Configuration example36406
+Node: Chaining example39065
+Node: API40451
+Node: Error API41239
+Node: Error parser API43840
+Node: Contribution44066
+Node: Reporting issues44742
+Node: Contributing syntax checkers45478
+Node: Contributing code46273
+Node: Unit tests47613
+Node: Changes48900
+Node: 0.149484
+Node: 0.249768
+Node: 0.350046
+Node: 0.450282
+Node: 0.551057
+Node: 0.652277
+Node: 0.6.155127
+Node: 0.755276
+Node: 0.7.156290
+Node: 0.857005
+Node: 0.958517
+Node: master59015
+Node: Credits59745
+Node: GNU Free Documentation License62343
+Node: Syntax checkers87495
+Node: Function and Variable Index88472
 
 End Tag Table

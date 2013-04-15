@@ -4,9 +4,10 @@ their support and patches are greatly appreciated.
 @itemize
 @item
 @uref{https://github.com/bbatsov, Bozhidar Batsov} provided valuable
-feedback and refinements, and brought Flycheck to a larger user base by
+feedback and refinements, brought Flycheck to a larger user base by
 adding it to his awesome @uref{https://github.com/bbatsov/prelude,
-Prelude project}.
+Prelude project}, and added a Ruby syntax checker using
+@command{rubocop}.
 
 @item
 @uref{https://github.com/dhaley, Damon Haley} helped to shape and test

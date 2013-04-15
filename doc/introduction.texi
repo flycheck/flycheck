@@ -69,7 +69,7 @@ PHP (using the PHP Command Line and PHP CodeSniffer)
 @item
 Python (using @command{flake8}, @command{pylint}, or @command{pyflakes})
 @item
-Ruby
+Ruby (using @command{rubocop} or @command{ruby})
 @item
 Rust (using @command{rustc})
 @item

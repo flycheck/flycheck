@@ -122,9 +122,9 @@ Credits
 
 The following people contributed to flycheck:
 
-- [Bozhidar Batsov][bbatsov] provided valuable feedback and refinements, and
-  brought Flycheck to a larger user base by adding it to his awesome [Prelude][]
-  project.
+- [Bozhidar Batsov][bbatsov] provided valuable feedback and refinements, brought
+  Flycheck to a larger user base by adding it to his awesome [Prelude][]
+  project, and added a Ruby syntax checker using `rubocop`.
 - [Damon Haley][dhaley] helped to shape and test the PHP CodeSniffer checker.
 - [Jimmy Yuen Ho Wong][wyuenho] added the HTML syntax checker and the jshint
   Javascript checker, and did valuable testing and bug fixing.
