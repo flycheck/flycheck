@@ -49,6 +49,17 @@ gem () {
     command gem install "$@"
 }
 
+install_from_github () {
+    # $1: github account
+    # $2: repository name
+    # $3: branch
+    cd /tmp
+    git clone -b $3 "git://github.com/$1/$2.git"
+    cd $2
+    make
+    sudo make install
+}
+
 # Silence debconf
 export DEBIAN_FRONTEND='noninteractive'
 
@@ -100,6 +111,14 @@ npm coffee-script coffeelint \
 
 gem haml \
     sass
+
+# Install a stable version of Elixir from source
+ppa "deb http://binaries.erlang-solutions.com/debian precise contrib"
+wget -O - "http://binaries.erlang-solutions.com/debian/erlang_solutions.asc" | \
+  sudo apt-key add -
+apt_update
+apt esl-erlang
+install_from_github elixir-lang elixir stable
 
 # Install carton for Emacs dependency management
 CARTON_VERSION=0.2.0
