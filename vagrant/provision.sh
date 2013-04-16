@@ -56,7 +56,7 @@ install_from_github () {
     cd /tmp
     git clone -b $3 "git://github.com/$1/$2.git"
     cd $2
-    make
+    make -j $(nproc)
     sudo make install
 }
 
