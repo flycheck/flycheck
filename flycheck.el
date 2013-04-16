@@ -1980,7 +1980,6 @@ Show the error message at point in minibuffer after a short delay."
   "Hide the Flycheck error buffer if necessary.
 
 Hide the error buffer if there is no error under point."
-  (interactive)
   (let* ((buffer (flycheck-error-message-buffer))
          (window (when buffer (get-buffer-window buffer))))
     (when (and window (not (flycheck-overlays-at (point))))
