@@ -2172,14 +2172,13 @@ See URL `https://github.com/stubbornella/csslint'."
   :error-patterns
   '(("^\\*\\* (.*) \\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error)
     ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:redefining.*\\)$" warning)
-    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:export_all.*\\)$" warning)
-    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*future reserved.*\\)$" warning)
-    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*deprecated.*\\)$" warning)
-    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*shadowed.*\\)$" warning)
-    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*always matches.*\\)$" warning)
     ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*obsolete\\)$" warning)
     ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*unused\\)$" warning)
-    )
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*shadowed.*\\)$" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*always matches.*\\)$" warning)
+    ;; the following regexp cannot be consistently tested
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*deprecated.*\\)$" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*future reserved.*\\)$" warning))
   :modes 'elixir-mode)
 
 (defconst flycheck-emacs-command
