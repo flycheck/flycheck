@@ -296,9 +296,15 @@ column, regardless of the highlighting mode.
 
 To view an error message, either hover the mouse of the highlighted
 error, or move the point to the highlighted error and wait for a short
-moment to see the error message in the echo area.
+moment to see the error message in the echo area.  You can also copy the
+error message into kill ring:
 
 @table @kbd
+@item C-c ! C-w
+@itemx M-x flycheck-copy-messages-as-kill
+@findex flycheck-copy-messages-as-kill
+Copy all Flycheck error messages at the current point into kill ring.
+
 @item C-c ! C
 @itemx M-x flycheck-clear
 @findex flycheck-clear

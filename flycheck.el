@@ -214,6 +214,7 @@ overlay setup)."
     (define-key pmap (kbd "C-c") 'flycheck-compile)
     (define-key pmap "n" 'flycheck-next-error)
     (define-key pmap "p" 'flycheck-previous-error)
+    (define-key pmap (kbd "C-w") 'flycheck-copy-messages-as-kill)
     (define-key pmap "s" 'flycheck-select-checker)
     (define-key pmap "?" 'flycheck-describe-checker)
     (define-key pmap "i" 'flycheck-info)
@@ -1948,6 +1949,12 @@ Get the buffer named by variable `flycheck-error-message-buffer',
 or nil if the buffer does not exist."
   (get-buffer flycheck-error-message-buffer))
 
+(defun flycheck-display-error-messages (error-messages)
+  "Display Flycheck ERROR-MESSAGES."
+  (when error-messages
+    (display-message-or-buffer error-messages
+                               flycheck-error-message-buffer)))
+
 (defvar-local flycheck-error-show-error-timer nil
   "Timer to automatically show the error at point in minibuffer.")
 
@@ -1958,14 +1965,11 @@ or nil if the buffer does not exist."
     (setq flycheck-error-show-error-timer nil)))
 
 (defun flycheck-show-error-at-point ()
-  "Show the first error message at point in minibuffer."
-  (interactive)
+  "Show the all error messages at point in minibuffer."
   (flycheck-cancel-error-show-error-timer)
   (when flycheck-mode
-    (let ((error-messages (flycheck-overlay-messages-string-at (point))))
-      (when error-messages
-        (display-message-or-buffer error-messages
-                                   flycheck-error-message-buffer)))))
+    (flycheck-display-error-messages
+     (flycheck-overlay-messages-string-at (point)))))
 
 (defun flycheck-show-error-at-point-soon ()
   "Show the first error message at point in minibuffer asap.
@@ -1984,6 +1988,14 @@ Hide the error buffer if there is no error under point."
          (window (when buffer (get-buffer-window buffer))))
     (when (and window (not (flycheck-overlays-at (point))))
       (quit-window nil window))))
+
+(defun flycheck-copy-messages-as-kill (pos)
+  "Copy message under POS into kill ring."
+  (interactive "d")
+  (let ((error-messages (flycheck-overlay-messages-string-at pos)))
+    (when error-messages
+      (kill-new error-messages)
+      (flycheck-display-error-messages error-messages))))
 
 
 ;;;; Checker process management

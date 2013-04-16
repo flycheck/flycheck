@@ -405,7 +405,13 @@ Errors and warnings from a syntax checker are
 
    To view an error message, either hover the mouse of the highlighted
 error, or move the point to the highlighted error and wait for a short
-moment to see the error message in the echo area.
+moment to see the error message in the echo area.  You can also copy the
+error message into kill ring:
+
+'C-c ! C-w'
+'M-x flycheck-copy-messages-as-kill'
+     Copy all Flycheck error messages at the current point into kill
+     ring.
 
 'C-c ! C'
 'M-x flycheck-clear'
@@ -1595,6 +1601,11 @@ master (unreleased)
         * Ruby using 'rubocop'
           (https://github.com/lunaryorn/flycheck/issues/113)
 
+   * New features:
+
+        * Add 'flycheck-copy-messages-as-kill', mapped to 'C-c ! C-w',
+          to copy all error messages under point into kill ring.
+
    * Improvements:
 
         * Call option filters for 'nil' values, too
@@ -2206,8 +2217,9 @@ Function and Variable Index
 * flycheck-checker:                      Selection.           (line  41)
 * flycheck-checkers:                     Selection.           (line   9)
 * flycheck-chktexrc:                     Configuration.       (line  25)
-* flycheck-clear:                        Reporting.           (line  54)
+* flycheck-clear:                        Reporting.           (line  60)
 * flycheck-coffeelintrc:                 Configuration.       (line  28)
+* flycheck-copy-messages-as-kill:        Reporting.           (line  55)
 * flycheck-count-errors:                 Error API.           (line  71)
 * flycheck-current-errors:               Error API.           (line  67)
 * flycheck-declare-checker:              Declaration.         (line   8)
@@ -2247,41 +2259,41 @@ Node: Syntax checking6511
 Node: Selection7773
 Node: Configuration10354
 Node: Reporting13126
-Node: Navigation15481
-Node: Mode line17277
-Node: Extending18178
-Node: Declaration18777
-Node: Error parsers29710
-Node: Option filters30694
-Node: Examples31033
-Node: Simple example31465
-Node: Predicate example34529
-Node: Configuration example36510
-Node: Chaining example39169
-Node: API40555
-Node: Error API41343
-Node: Error parser API43944
-Node: Contribution44170
-Node: Reporting issues44846
-Node: Contributing syntax checkers45582
-Node: Contributing code46377
-Node: Unit tests47717
-Node: Changes49004
-Node: 0.149588
-Node: 0.249872
-Node: 0.350150
-Node: 0.450386
-Node: 0.551161
-Node: 0.652381
-Node: 0.6.155231
-Node: 0.755380
-Node: 0.7.156394
-Node: 0.857109
-Node: 0.958621
-Node: master59119
-Node: Credits59849
-Node: GNU Free Documentation License62447
-Node: Syntax checkers87599
-Node: Function and Variable Index88576
+Node: Navigation15664
+Node: Mode line17460
+Node: Extending18361
+Node: Declaration18960
+Node: Error parsers29893
+Node: Option filters30877
+Node: Examples31216
+Node: Simple example31648
+Node: Predicate example34712
+Node: Configuration example36693
+Node: Chaining example39352
+Node: API40738
+Node: Error API41526
+Node: Error parser API44127
+Node: Contribution44353
+Node: Reporting issues45029
+Node: Contributing syntax checkers45765
+Node: Contributing code46560
+Node: Unit tests47900
+Node: Changes49187
+Node: 0.149771
+Node: 0.250055
+Node: 0.350333
+Node: 0.450569
+Node: 0.551344
+Node: 0.652564
+Node: 0.6.155414
+Node: 0.755563
+Node: 0.7.156577
+Node: 0.857292
+Node: 0.958804
+Node: master59302
+Node: Credits60189
+Node: GNU Free Documentation License62787
+Node: Syntax checkers87939
+Node: Function and Variable Index88916
 
 End Tag Table

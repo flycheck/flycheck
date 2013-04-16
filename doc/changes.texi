@@ -457,6 +457,16 @@ New syntax checkers:
 @end itemize
 
 @item
+New features:
+
+@itemize @bullet
+@item
+Add @code{flycheck-copy-messages-as-kill}, mapped to @kbd{C-c ! C-w}, to
+copy all error messages under point into kill ring.
+@end itemize
+
+
+@item
 Improvements:
 
 @itemize @bullet
