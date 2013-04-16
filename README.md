@@ -142,8 +142,7 @@ The following people contributed to flycheck:
   ideas to the design of the checker API and engaged in worthwhile discussion to
   shape this project.
 - [Sylvain Rousseau][thisirs] added a syntax checker for POSIX shell script
-  using @command{bash}, and improved error parsing in the Bash script syntax
-  checker.
+  using `bash`, and improved error parsing in the Bash script syntax checker.
 - [Yannick Roehlly][yannick1974] added support for PEP8 naming errors to the
   Flake8 syntax checker.
 - [Victor Deryagin][vderyagin] added the Rust syntax checker.
