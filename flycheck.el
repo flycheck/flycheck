@@ -84,6 +84,7 @@ buffer-local wherever it is set."
 
 (defcustom flycheck-checkers
   '(bash
+    c++-cpplint
     coffee-coffeelint
     css-csslint
     emacs-lisp
@@ -2130,6 +2131,44 @@ See URL `http://www.gnu.org/software/bash/'."
   :error-patterns '(("^\\(?1:.+\\):[^0-9]+\\(?2:[0-9]+\\) *: *\\(?4:.*\\)$" error))
   :modes 'sh-mode
   :predicate '(eq sh-shell 'bash))
+
+(flycheck-def-option-var flycheck-cpplint-verbosity 3 c++-cpplint
+  "The verbosity level.
+
+Specify a number 0-5 to restrict errors to certain verbosity levels."
+  :type '(choice (integer :tag "Default value" :value  3)
+                 (integer :tag "Verbosity level")))
+(put 'flycheck-cpplint-verbosity 'safe-local-variable #'integerp)
+
+(flycheck-def-option-var flycheck-cpplint-category-filter nil c++-cpplint
+  "A Comma-separated list of category-filters to apply.
+
+Only error messages whose category names pass the filters will be
+printed. \(Category names are printed with the message and look
+like \"[whitespace/indent]\".\) Filters are evaluated left to
+right. \"-FOO\" means \"do not print categories that start with
+FOO\". \"+FOO\" means \"do print categories that start with FOO.
+
+Examples: --filter=-whitespace,+whitespace/braces
+          --filter=-whitespace,-runtime/printf,+runtime/printf_format
+          --filter=-,+build/include_what_you_use"
+  :type '(choice (const :tag "Default empty" nil)
+                 (string :tag "Comma-separated list of category filters")))
+(put 'flycheck-cpplint-category-filter 'safe-local-variable #'stringp)
+
+(flycheck-declare-checker c++-cpplint
+  "A cpp syntax checker using the cpplin.py tool.
+
+See URL `http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py'."
+  :command '("cpplint.py"
+             (option "--verbose="
+                     flycheck-cpplint-verbosity
+                     flycheck-option-int)
+             (option "--filter=" flycheck-cpplint-category-filter)
+             source)
+  :error-patterns '(("^\\(?1:.*\\):\\(?2:.*\\):  \\(?4:.*\[[0-4]\]\\)$" warning)
+                    ("^\\(?1:.*\\):\\(?2:.*\\):  \\(?4:.*\[[5]\]\\)$" error))
+  :modes 'c++-mode)
 
 (flycheck-def-config-file-var flycheck-coffeelintrc coffee-coffeelint
                               ".coffeelint.json")

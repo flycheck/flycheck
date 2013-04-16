@@ -102,6 +102,10 @@ gem haml \
     sass \
     rubocop
 
+sudo wget -O /usr/local/bin/cpplint.py \
+    http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py \
+    && chmod +x /usr/local/bin/cpplint.py
+
 # Install carton for Emacs dependency management
 CARTON_VERSION=0.2.0
 CARTON_DIR="/opt/carton-${CARTON_VERSION}"

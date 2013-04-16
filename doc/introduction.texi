@@ -45,6 +45,8 @@ Automatic syntax checking after saving or insertion of new lines
 Built-in syntax checkers for:
 @itemize @bullet
 @item
+C++ (using @command{cpplint.py})
+@item
 CoffeeScript (using @command{coffeelint})
 @item
 CSS (using @command{csslint}))
