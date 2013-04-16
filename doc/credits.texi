@@ -39,8 +39,9 @@ syntastic} which inspired this project and many of its checkers.
 
 @item
 @uref{https://github.com/ptrv, Peter Vasil} contributed syntax checkers
-for XML, Lua and Go (using @command{go build} and @command{go test}),
-added unit tests and did valuable testing.
+for XML, Lua, Go (using @command{go build} and @command{go test}) and
+C++ using @command{cpplint.py}, added unit tests and did valuable
+testing.
 
 @item
 @uref{https://github.com/robert-zaremba, Robert Zaremba} added Go syntax

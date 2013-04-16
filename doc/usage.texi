@@ -159,6 +159,15 @@ Some syntax checkers can be configured via options.  The following
 options are provided by Flycheck (use @kbd{C-h v} or @kbd{M-x
 describe-variable} on the variable name for detailed help):
 
+@defopt flycheck-cpplint-verbosity
+The verbosity level the @code{c++-cpplint} syntax checker shall use.
+@end defopt
+
+@defopt flycheck-cpplint-category-filter
+A comma-separated list of category-filters to pass to the
+@code{c++-cpplint} syntax checker.
+@end defopt
+
 @defopt flycheck-flake8-maximum-complexity
 The maximum McCabe complexity the @code{python-flake8} syntax checker
 allows without reporting a warning.

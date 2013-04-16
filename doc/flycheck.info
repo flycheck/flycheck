@@ -82,6 +82,7 @@ File: flycheck.info,  Node: Features,  Next: Installation,  Prev: Introduction, 
 
      Automatic syntax checking after saving or insertion of new lines
    * Built-in syntax checkers for:
+        * C++ (using 'cpplint.py')
         * CoffeeScript (using 'coffeelint')
         * CSS (using 'csslint'))
         * Emacs Lisp (using the byte compiler and CheckDoc)
@@ -288,6 +289,13 @@ File: flycheck.info,  Node: Configuration,  Next: Reporting,  Prev: Selection,  
 Some syntax checkers can be configured via options.  The following
 options are provided by Flycheck (use 'C-h v' or 'M-x describe-variable'
 on the variable name for detailed help):
+
+ -- User Option: flycheck-cpplint-verbosity
+     The verbosity level the 'c++-cpplint' syntax checker shall use.
+
+ -- User Option: flycheck-cpplint-category-filter
+     A comma-separated list of category-filters to pass to the
+     'c++-cpplint' syntax checker.
 
  -- User Option: flycheck-flake8-maximum-complexity
      The maximum McCabe complexity the 'python-flake8' syntax checker
@@ -1639,8 +1647,8 @@ their support and patches are greatly appreciated.
      which inspired this project and many of its checkers.
 
    * Peter Vasil (https://github.com/ptrv) contributed syntax checkers
-     for XML, Lua and Go (using 'go build' and 'go test'), added unit
-     tests and did valuable testing.
+     for XML, Lua, Go (using 'go build' and 'go test') and C++ using
+     'cpplint.py', added unit tests and did valuable testing.
 
    * Robert Zaremba (https://github.com/robert-zaremba) added Go syntax
      checker using 'gofmt'.
@@ -2158,6 +2166,7 @@ The following syntax checkers are included in Flycheck, listed in the
 order of their appearance in the default value of 'flycheck-checkers':
 
    * 'bash'
+   * 'c++-cpplint'
    * 'coffee-coffeelint'
    * 'css-csslint'
    * 'emacs-lisp'
@@ -2205,10 +2214,12 @@ Function and Variable Index
 * flycheck-buffer:                       Syntax checking.     (line  15)
 * flycheck-checker:                      Selection.           (line  41)
 * flycheck-checkers:                     Selection.           (line   9)
-* flycheck-chktexrc:                     Configuration.       (line  25)
+* flycheck-chktexrc:                     Configuration.       (line  32)
 * flycheck-clear:                        Reporting.           (line  54)
-* flycheck-coffeelintrc:                 Configuration.       (line  28)
+* flycheck-coffeelintrc:                 Configuration.       (line  35)
 * flycheck-count-errors:                 Error API.           (line  71)
+* flycheck-cpplint-category-filter:      Configuration.       (line  13)
+* flycheck-cpplint-verbosity:            Configuration.       (line  10)
 * flycheck-current-errors:               Error API.           (line  67)
 * flycheck-declare-checker:              Declaration.         (line   8)
 * flycheck-def-config-file-var:          Declaration.         (line 217)
@@ -2219,19 +2230,19 @@ Function and Variable Index
 * flycheck-error-pos:                    Error API.           (line  58)
 * flycheck-error-region:                 Error API.           (line  50)
 * flycheck-error-with-buffer:            Error API.           (line  46)
-* flycheck-flake8-maximum-complexity:    Configuration.       (line  10)
-* flycheck-flake8-maximum-line-length:   Configuration.       (line  14)
-* flycheck-flake8rc:                     Configuration.       (line  31)
+* flycheck-flake8-maximum-complexity:    Configuration.       (line  17)
+* flycheck-flake8-maximum-line-length:   Configuration.       (line  21)
+* flycheck-flake8rc:                     Configuration.       (line  38)
 * flycheck-has-errors-p:                 Error API.           (line  76)
 * flycheck-highlighting-mode:            Reporting.           (line  28)
-* flycheck-jshintrc:                     Configuration.       (line  34)
+* flycheck-jshintrc:                     Configuration.       (line  41)
 * flycheck-next-error:                   Navigation.          (line  23)
 * flycheck-parse-xml-string:             Error parser API.    (line   6)
-* flycheck-phpcs-standard:               Configuration.       (line  18)
+* flycheck-phpcs-standard:               Configuration.       (line  25)
 * flycheck-previous-error:               Navigation.          (line  31)
-* flycheck-rubocoprc:                    Configuration.       (line  37)
+* flycheck-rubocoprc:                    Configuration.       (line  44)
 * flycheck-select-checker:               Selection.           (line  32)
-* flycheck-tidyrc:                       Configuration.       (line  40)
+* flycheck-tidyrc:                       Configuration.       (line  47)
 * flycheck-warning-face:                 Reporting.           (line  15)
 
 
@@ -2240,48 +2251,48 @@ Tag Table:
 Node: Top734
 Node: Introduction2083
 Node: Features2984
-Node: Installation4363
-Node: Activation5537
-Node: Usage5888
-Node: Syntax checking6511
-Node: Selection7773
-Node: Configuration10354
-Node: Reporting13126
-Node: Navigation15481
-Node: Mode line17277
-Node: Extending18178
-Node: Declaration18777
-Node: Error parsers29710
-Node: Option filters30694
-Node: Examples31033
-Node: Simple example31465
-Node: Predicate example34529
-Node: Configuration example36510
-Node: Chaining example39169
-Node: API40555
-Node: Error API41343
-Node: Error parser API43944
-Node: Contribution44170
-Node: Reporting issues44846
-Node: Contributing syntax checkers45582
-Node: Contributing code46377
-Node: Unit tests47717
-Node: Changes49004
-Node: 0.149588
-Node: 0.249872
-Node: 0.350150
-Node: 0.450386
-Node: 0.551161
-Node: 0.652381
-Node: 0.6.155231
-Node: 0.755380
-Node: 0.7.156394
-Node: 0.857109
-Node: 0.958621
-Node: master59119
-Node: Credits59849
-Node: GNU Free Documentation License62447
-Node: Syntax checkers87599
-Node: Function and Variable Index88576
+Node: Installation4398
+Node: Activation5572
+Node: Usage5923
+Node: Syntax checking6546
+Node: Selection7808
+Node: Configuration10389
+Node: Reporting13424
+Node: Navigation15779
+Node: Mode line17575
+Node: Extending18476
+Node: Declaration19075
+Node: Error parsers30008
+Node: Option filters30992
+Node: Examples31331
+Node: Simple example31763
+Node: Predicate example34827
+Node: Configuration example36808
+Node: Chaining example39467
+Node: API40853
+Node: Error API41641
+Node: Error parser API44242
+Node: Contribution44468
+Node: Reporting issues45144
+Node: Contributing syntax checkers45880
+Node: Contributing code46675
+Node: Unit tests48015
+Node: Changes49302
+Node: 0.149886
+Node: 0.250170
+Node: 0.350448
+Node: 0.450684
+Node: 0.551459
+Node: 0.652679
+Node: 0.6.155529
+Node: 0.755678
+Node: 0.7.156692
+Node: 0.857407
+Node: 0.958919
+Node: master59417
+Node: Credits60147
+Node: GNU Free Documentation License62769
+Node: Syntax checkers87921
+Node: Function and Variable Index88917
 
 End Tag Table
