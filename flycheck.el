@@ -1457,21 +1457,25 @@ IGNORE-COLUMN is omitted or nil BEG and END mark a region that
 marks that column only.  Otherwise BEG is the position of the
 first non-whitespace character on the ERR line and END its end."
   (save-excursion
-    (goto-char (point-min))
-    (forward-line (- (flycheck-error-line err) 1))
-    (back-to-indentation)
-    (let* ((col (if ignore-column nil (flycheck-error-column err)))
-           (beg (point))
-           (end (line-end-position)))
-      (cond
-       ((= beg end)
-        (forward-line -1)
-        (setq beg (line-end-position)))
-       (col
-        (setq end (min (+ (line-beginning-position) col)
-                       (+ (line-end-position) 1)))
-        (setq beg (- end 1))))
-      (cons beg end))))
+    (save-restriction
+      ;; Error regions are absolute in relation to the buffer, so remove point
+      ;; restrictions temporarily while determining the error region
+      (widen)
+      (goto-char (point-min))
+      (forward-line (- (flycheck-error-line err) 1))
+      (back-to-indentation)
+      (let* ((col (if ignore-column nil (flycheck-error-column err)))
+             (beg (point))
+             (end (line-end-position)))
+        (cond
+         ((= beg end)
+          (forward-line -1)
+          (setq beg (line-end-position)))
+         (col
+          (setq end (min (+ (line-beginning-position) col)
+                         (+ (line-end-position) 1)))
+          (setq beg (- end 1))))
+        (cons beg end)))))
 
 (defun flycheck-error-pos (err)
   "Get the buffer position of ERR.
@@ -1879,7 +1883,9 @@ flycheck exclamation mark otherwise.")
 (defun flycheck-delete-all-overlays ()
   "Remove all flycheck overlays in the current buffer."
   (flycheck-delete-marked-overlays)
-  (-each (flycheck-overlays-in (point-min) (point-max)) #'delete-overlay))
+  (save-restriction
+    (widen)
+    (-each (flycheck-overlays-in (point-min) (point-max)) #'delete-overlay)))
 
 (defun flycheck-mark-all-overlays-for-deletion ()
   "Mark all current overlays for deletion."
@@ -1893,6 +1899,12 @@ flycheck exclamation mark otherwise.")
 
 
 ;;;; Error navigation
+(defun flycheck-navigatable-position-p (pos)
+  "Determine whether POS can be navigated to."
+  (and (/= pos (point))
+       (>= pos (point-min))
+       (<= pos (point-max))))
+
 (defun flycheck-next-error-function (n reset)
   "Visit the N-th error from the current point.
 
@@ -1903,7 +1915,7 @@ Intended for use with `next-error-function'."
          (before-and-after (->> flycheck-current-errors
                              (-map 'flycheck-error-pos)
                              (-uniq)
-                             (--remove (= current-pos it))
+                             (-filter #'flycheck-navigatable-position-p)
                              (--split-with (>= current-pos it))))
          (before (nreverse (car before-and-after)))
          (after (cadr before-and-after))

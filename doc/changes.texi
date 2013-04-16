@@ -465,7 +465,6 @@ Add @code{flycheck-copy-messages-as-kill}, mapped to @kbd{C-c ! C-w}, to
 copy all error messages under point into kill ring.
 @end itemize
 
-
 @item
 Improvements:
 
@@ -474,7 +473,18 @@ Improvements:
 Call option filters for @code{nil} values, too
 @item
 @ghissue{112, Improve error parsing in Bash syntax checker}
+@item
+Error navigation does not cross restrictions in narrowed buffers anymore
 @end itemize
+
+@item
+Bug fixes:
+
+@itemize @bullet
+@item
+Fix error highlighting and navigation in narrowed buffers
+@end itemize
+
 @end itemize
 
 

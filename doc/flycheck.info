@@ -1611,6 +1611,12 @@ master (unreleased)
         * Call option filters for 'nil' values, too
         * Improve error parsing in Bash syntax checker
           (https://github.com/lunaryorn/flycheck/issues/112)
+        * Error navigation does not cross restrictions in narrowed
+          buffers anymore
+
+   * Bug fixes:
+
+        * Fix error highlighting and navigation in narrowed buffers
 
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
@@ -2291,9 +2297,9 @@ Node: 0.7.156577
 Node: 0.857292
 Node: 0.958804
 Node: master59302
-Node: Credits60189
-Node: GNU Free Documentation License62787
-Node: Syntax checkers87939
-Node: Function and Variable Index88916
+Node: Credits60368
+Node: GNU Free Documentation License62966
+Node: Syntax checkers88118
+Node: Function and Variable Index89095
 
 End Tag Table
