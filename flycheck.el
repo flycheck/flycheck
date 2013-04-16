@@ -1830,8 +1830,6 @@ flycheck exclamation mark otherwise.")
 
 (defun flycheck-add-overlay (err)
   "Add overlay for ERR."
-  ;; We attempt to reuse an existing overlay for ERR, to avoid duplicate
-  ;; overlays.
   (let* ((overlay (flycheck-create-overlay err))
          (level (flycheck-error-level err))
          (category (cdr (assq level flycheck-overlay-categories-alist)))
@@ -1848,8 +1846,6 @@ flycheck exclamation mark otherwise.")
 
 (defun flycheck-add-overlays (errors)
   "Add overlays for ERRORS."
-  ;; Add overlays from last to first to make sure that for each region the first
-  ;; error emitted by the checker is on top
   (mapc #'flycheck-add-overlay errors))
 
 (defun flycheck-filter-overlays (overlays)
@@ -1900,6 +1896,7 @@ flycheck exclamation mark otherwise.")
   "Visit the N-th error from the current point.
 
 Intended for use with `next-error-function'."
+  ;; TODO: Horribly inefficient, possibly improve by considering less errors.
   (let* ((n (or n 1))
          (current-pos (if reset (point-min) (point)))
          (before-and-after (->> flycheck-current-errors
@@ -1921,7 +1918,6 @@ If RESET is given and non-nil, re-start from the beginning of the buffer.
 
 N specifies how many errors to move forwards.  If negative, move backwards."
   (interactive "P")
-  ;; TODO: Horribly inefficient, possibly improve by considering less errors.
   (flycheck-next-error-function n reset))
 
 (defun flycheck-previous-error (&optional n)
