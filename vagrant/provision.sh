@@ -118,7 +118,7 @@ wget -O - "http://binaries.erlang-solutions.com/debian/erlang_solutions.asc" | \
   sudo apt-key add -
 apt_update
 sudo apt-get install -y --fix-missing  esl-erlang
-install_from_github elixir-lang elixir stable
+install_from_github elixir-lang elixir master
 
 # Install carton for Emacs dependency management
 CARTON_VERSION=0.2.0
