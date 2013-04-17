@@ -1391,7 +1391,6 @@ Pop up a help buffer with the documentation of CHECKER."
               (config-file-var (flycheck-checker-config-file-var checker))
               (option-vars (sort (flycheck-checker-option-vars checker)
                                  #'string<)))
-          ;; TODO: Find and output declaring file
           (princ (format "%s is a Flycheck syntax checker" checker))
           (when filename
             (princ (format " in `%s'" (file-name-nondirectory filename)))
