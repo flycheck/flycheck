@@ -105,7 +105,7 @@ buffer-local wherever it is set."
     rst
     ruby-rubocop
     ruby
-    rust-rustc
+    rust
     sass
     scss
     sh-dash
@@ -2540,7 +2540,7 @@ See URL `https://github.com/bbatsov/rubocop'."
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'ruby-mode)
 
-(flycheck-declare-checker rust-rustc
+(flycheck-declare-checker rust
   "A Rust syntax checker using rustc parsing option.
 
 See URL `http://rust-lang.org'."
