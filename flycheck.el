@@ -1901,8 +1901,7 @@ flycheck exclamation mark otherwise.")
 ;;;; Error navigation
 (defun flycheck-navigatable-position-p (pos)
   "Determine whether POS can be navigated to."
-  (and (/= pos (point))
-       (>= pos (point-min))
+  (and (>= pos (point-min))
        (<= pos (point-max))))
 
 (defun flycheck-next-error-function (n reset)
@@ -1916,6 +1915,7 @@ Intended for use with `next-error-function'."
                              (-map 'flycheck-error-pos)
                              (-uniq)
                              (-filter #'flycheck-navigatable-position-p)
+                             (--remove (= current-pos it))
                              (--split-with (>= current-pos it))))
          (before (nreverse (car before-and-after)))
          (after (cadr before-and-after))
