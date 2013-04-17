@@ -119,7 +119,7 @@ ppa "deb http://binaries.erlang-solutions.com/debian precise contrib"
 wget -O - "http://binaries.erlang-solutions.com/debian/erlang_solutions.asc" | \
   sudo apt-key add -
 apt_update
-apt esl-erlang
+sudo apt-get install -y --fix-missing  esl-erlang
 install_from_github elixir-lang elixir stable
 
 # Install carton for Emacs dependency management
