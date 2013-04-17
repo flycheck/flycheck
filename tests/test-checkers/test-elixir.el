@@ -38,7 +38,7 @@
   "Test an Elixir warning about unused variable."
   :expected-result (flycheck-testsuite-fail-unless-checker 'elixir)
   (flycheck-testsuite-should-syntax-check
-   "checkers/elixir-warning-unused.ex" 'elixir-mode nil
+   "checkers/elixir-warning-unused-var.ex" 'elixir-mode nil
    '(2 nil "variable unused_var is unused" warning)))
 
 (ert-deftest checker-elixir-warning-shadowed ()
@@ -52,7 +52,7 @@
   "Test an Elixir warning about always match clause."
   :expected-result (flycheck-testsuite-fail-unless-checker 'elixir)
   (flycheck-testsuite-should-syntax-check
-   "checkers/elixir-warning-shadowed-var.ex" 'elixir-mode nil
+   "checkers/elixir-warning-always-match.ex" 'elixir-mode nil
    '(6 nil "this clause cannot match because a previous clause at line 3 always matches"
        warning)))
 
