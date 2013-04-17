@@ -57,7 +57,7 @@
        warning)))
 
 (ert-deftest checker-elixir-warning-obsolete ()
-  "Test an Elixir warning about always match clause."
+  "Test an Elixir warning about obsolete guard."
   :expected-result (flycheck-testsuite-fail-unless-checker 'elixir)
   (flycheck-testsuite-should-syntax-check
    "checkers/elixir-warning-obsolete.ex" 'elixir-mode nil
