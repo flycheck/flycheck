@@ -113,11 +113,13 @@ gem haml \
     sass
 
 # Install a stable version of Elixir from source
-ppa "deb http://binaries.erlang-solutions.com/debian precise contrib"
-wget -O - "http://binaries.erlang-solutions.com/debian/erlang_solutions.asc" | \
-  sudo apt-key add -
-apt_update
-apt esl-erlang
+wget -O - "https://elearning.erlang-solutions.com/couchdb//rbingen_adapter//package_R16B_precise64_1361901944/esl-erlang_16.b-1~ubuntu~precise_amd64.deb" | \
+  sudo dpkg -i 
+#ppa "deb http://binaries.erlang-solutions.com/debian precise contrib"
+#wget -O - "http://binaries.erlang-solutions.com/debian/erlang_solutions.asc" | \
+  #sudo apt-key add -
+#apt_update
+#apt esl-erlang
 install_from_github elixir-lang elixir stable
 
 # Install carton for Emacs dependency management
