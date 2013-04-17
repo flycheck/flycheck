@@ -1455,27 +1455,27 @@ error region and END its end.  If ERR has a column number and
 IGNORE-COLUMN is omitted or nil BEG and END mark a region that
 marks that column only.  Otherwise BEG is the position of the
 first non-whitespace character on the ERR line and END its end."
-  (flycheck-error-with-buffer
-      (save-excursion
-        (save-restriction
-          ;; Error regions are absolute in relation to the buffer, so remove
-          ;; point restrictions temporarily while determining the error region
-          (widen)
-          (goto-char (point-min))
-          (forward-line (- (flycheck-error-line err) 1))
-          (back-to-indentation)
-          (let* ((col (if ignore-column nil (flycheck-error-column err)))
-                 (beg (point))
-                 (end (line-end-position)))
-            (cond
-             ((= beg end)
-              (forward-line -1)
-              (setq beg (line-end-position)))
-             (col
-              (setq end (min (+ (line-beginning-position) col)
-                             (+ (line-end-position) 1)))
-              (setq beg (- end 1))))
-            (cons beg end))))))
+  (flycheck-error-with-buffer err
+    (save-excursion
+      (save-restriction
+        ;; Error regions are absolute in relation to the buffer, so remove
+        ;; point restrictions temporarily while determining the error region
+        (widen)
+        (goto-char (point-min))
+        (forward-line (- (flycheck-error-line err) 1))
+        (back-to-indentation)
+        (let* ((col (if ignore-column nil (flycheck-error-column err)))
+               (beg (point))
+               (end (line-end-position)))
+          (cond
+           ((= beg end)
+            (forward-line -1)
+            (setq beg (line-end-position)))
+           (col
+            (setq end (min (+ (line-beginning-position) col)
+                           (+ (line-end-position) 1)))
+            (setq beg (- end 1))))
+          (cons beg end))))))
 
 (defun flycheck-error-pos (err)
   "Get the buffer position of ERR.
