@@ -27,41 +27,17 @@
 
 (require 'elixir-mode)
 
-(ert-deftest checker-elixir-syntax-error ()
-  "Test a real Elixir syntax error."
+(ert-deftest checker-elixir ()
+  "Test an Elixir for error and warning messages."
   :expected-result (flycheck-testsuite-fail-unless-checker 'elixir)
   (flycheck-testsuite-should-syntax-check
-   "checkers/elixir-syntax-error.ex" 'elixir-mode nil
-   '(4 nil "function puts/1 undefined" error)))
-
-(ert-deftest checker-elixir-warning-unused ()
-  "Test an Elixir warning about unused variable."
-  :expected-result (flycheck-testsuite-fail-unless-checker 'elixir)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/elixir-warning-unused-var.ex" 'elixir-mode nil
-   '(2 nil "variable unused_var is unused" warning)))
-
-(ert-deftest checker-elixir-warning-shadowed ()
-  "Test an Elixir warning about shadowed variable."
-  :expected-result (flycheck-testsuite-fail-unless-checker 'elixir)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/elixir-warning-shadowed.ex" 'elixir-mode nil
-   '(5 nil "variable a shadowed in 'fun'" warning)))
-
-(ert-deftest checker-elixir-warning-always-match ()
-  "Test an Elixir warning about always match clause."
-  :expected-result (flycheck-testsuite-fail-unless-checker 'elixir)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/elixir-warning-always-match.ex" 'elixir-mode nil
-   '(6 nil "this clause cannot match because a previous clause at line 3 always matches"
-       warning)))
-
-(ert-deftest checker-elixir-warning-obsolete ()
-  "Test an Elixir warning about obsolete guard."
-  :expected-result (flycheck-testsuite-fail-unless-checker 'elixir)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/elixir-warning-obsolete.ex" 'elixir-mode nil
-   '(3 nil "list/1 obsolete" warning)))
+   "checkers/elixir.ex" 'elixir-mode nil
+   '(8  nil "list/1 obsolete" warning)
+   '(15 nil "variable a is unused" warning)
+   '(16 nil "variable a shadowed in 'fun'" warning)
+   '(24 nil "this clause cannot match because a previous clause at line 21 always matches"
+       warning)
+   '(35 nil "function puts/1 undefined" error)))
 
 ;; Local Variables:
 ;; coding: utf-8
