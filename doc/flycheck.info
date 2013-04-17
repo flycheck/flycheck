@@ -2196,7 +2196,7 @@ order of their appearance in the default value of 'flycheck-checkers':
    * 'rst'
    * 'ruby-rubocop'
    * 'ruby'
-   * 'rust-rustc'
+   * 'rust'
    * 'sass'
    * 'scss'
    * 'sh-dash'
@@ -2300,6 +2300,6 @@ Node: master59302
 Node: Credits60368
 Node: GNU Free Documentation License62966
 Node: Syntax checkers88118
-Node: Function and Variable Index89095
+Node: Function and Variable Index89089
 
 End Tag Table

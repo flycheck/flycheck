@@ -28,7 +28,7 @@
 (require 'rust-mode nil :no-error)
 
 (ert-deftest checker-rust-syntax-error ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'rust-rustc)
+  :expected-result (flycheck-testsuite-fail-unless-checker 'rust)
   (flycheck-testsuite-should-syntax-check
    "checkers/rust-syntax-error.rs" 'rust-mode nil
    '(3 10 "expected `{` but found `bla`" error)))
