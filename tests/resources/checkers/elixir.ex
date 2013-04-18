@@ -4,11 +4,11 @@
 #                                Warnings
 # -----------------------------------------------------------------------------
 
-defmodule Obsolete do
-  def some_fun(alist) when list(alist) do        # <--- Warning here
-    IO.inspect alist
-  end
-end
+# defmodule Obsolete do
+#   def some_fun(alist) when list(alist) do        # <--- Warning here
+#     IO.inspect alist
+#   end
+# end
 
 defmodule Shadowed do
   def func() do
