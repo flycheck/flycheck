@@ -101,7 +101,6 @@ buffer-local wherever it is set."
     php-phpcs
     python-flake8
     python-pylint
-    python-pyflakes
     rst
     ruby-rubocop
     ruby
@@ -2499,14 +2498,6 @@ See URL `http://pypi.python.org/pypi/pylint'."
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): Warning (W.*): \\(?4:.*\\)$" warning)
     ("^\\(?1:.*\\):\\(?2:[0-9]+\\): Error (E.*): \\(?4:.*\\)$" error)
     ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\[F\\] \\(?4:.*\\)$" error))
-  :modes 'python-mode)
-
-(flycheck-declare-checker python-pyflakes
-  "A Python syntax and style checker using the pyflakes utility.
-
-See URL `http://pypi.python.org/pypi/pyflakes'."
-  :command '("pyflakes" source-inplace)
-  :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'python-mode)
 
 (flycheck-declare-checker rst

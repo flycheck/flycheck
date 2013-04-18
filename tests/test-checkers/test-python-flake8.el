@@ -31,13 +31,13 @@
   "Test a real syntax error with flake8."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
   (flycheck-testsuite-should-syntax-check
-   "checkers/python-syntax-error.py" 'python-mode '(python-pylint python-pyflakes)
+   "checkers/python-syntax-error.py" 'python-mode 'python-pylint
     '(3 13 "E901 SyntaxError: invalid syntax" error)))
 
 (ert-deftest checker-python-flake8-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
   (flycheck-testsuite-should-syntax-check
-   "checkers/python-flake8-warning.py" 'python-mode '(python-pylint python-pyflakes)
+   "checkers/python-flake8-warning.py" 'python-mode 'python-pylint
     '(3 1 "F401 're' imported but unused" warning)))
 
 (ert-deftest checker-python-flake8-warning-ignored ()
@@ -46,13 +46,13 @@
   (flycheck-testsuite-with-hook python-mode-hook
       (setq flycheck-flake8rc "flake8rc")
     (flycheck-testsuite-should-syntax-check
-     "checkers/python-flake8-warning.py" 'python-mode '(python-pylint python-pyflakes)
+     "checkers/python-flake8-warning.py" 'python-mode 'python-pylint
      :no-errors)))
 
 (ert-deftest checker-python-flake8-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
   (flycheck-testsuite-should-syntax-check
-   "checkers/python-flake8-error.py" 'python-mode '(python-pylint python-pyflakes)
+   "checkers/python-flake8-error.py" 'python-mode 'python-pylint
    '(6 13 "E251 unexpected spaces around keyword / parameter equals" error)
    '(6 15 "E251 unexpected spaces around keyword / parameter equals" error)))
 
@@ -62,7 +62,7 @@
   (flycheck-testsuite-with-hook python-mode-hook
       (setq flycheck-flake8rc "flake8rc")
     (flycheck-testsuite-should-syntax-check
-     "checkers/python-flake8-error.py" 'python-mode '(python-pylint python-pyflakes)
+     "checkers/python-flake8-error.py" 'python-mode 'python-pylint
      :no-errors)))
 
 (ert-deftest checker-python-flake8-warning-maximum-complexity ()
@@ -72,7 +72,7 @@
       (setq flycheck-flake8-maximum-complexity 4)
     (flycheck-testsuite-should-syntax-check
      "checkers/python-flake8-warning-maximum-complexity.py"
-     'python-mode '(python-pylint python-pyflakes)
+     'python-mode 'python-pylint
      '(6 1 "C901 'foo' is too complex (4)" warning))))
 
 (ert-deftest checker-python-flake8-error-maximum-line-length ()
@@ -81,15 +81,14 @@
       (setq flycheck-flake8-maximum-line-length 50)
     (flycheck-testsuite-should-syntax-check
      "checkers/python-flake8-error-maximum-line-length.py"
-     'python-mode '(python-pylint python-pyflakes)
+     'python-mode 'python-pylint
      '(5 51 "E501 line too long (61 > 50 characters)" error))))
 
 (ert-deftest checker-python-flake8-warning-naming ()
   "PEP8 compliant names with Flake8 and pep8-naming."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
   (flycheck-testsuite-should-syntax-check
-   "checkers/python-flake8-warning-naming.py" 'python-mode
-   '(python-pylint python-pyflakes)
+   "checkers/python-flake8-warning-naming.py" 'python-mode 'python-pylint
    '(6 7 "N801 class names should use CapWords convention" warning)
    '(7 9 "N802 function name should be lowercase" warning)
    '(8 9 "N806 variable in function should be lowercase" warning)))

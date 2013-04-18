@@ -89,7 +89,7 @@ apt bash \
     golang-stable \
     rust
 
-pip flake8 pep8-naming pylint pyflakes docutils
+pip flake8 pep8-naming pylint docutils
 
 pear PHP_CodeSniffer
 

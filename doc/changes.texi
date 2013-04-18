@@ -457,6 +457,14 @@ New syntax checkers:
 @end itemize
 
 @item
+Removed syntax checkers:
+
+@itemize @bullet
+@item
+@ghissue{115, Remove the pyflakes syntax checker}.  Use Flake8
+@end itemize
+
+@item
 New features:
 
 @itemize @bullet

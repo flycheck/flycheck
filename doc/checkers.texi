@@ -21,7 +21,6 @@ order of their appearance in the default value of
 @iflyc php-phpcs
 @iflyc python-flake8
 @iflyc python-pylint
-@iflyc python-pyflakes
 @iflyc rst
 @iflyc ruby-rubocop
 @iflyc ruby

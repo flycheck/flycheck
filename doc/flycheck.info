@@ -2194,7 +2194,6 @@ order of their appearance in the default value of 'flycheck-checkers':
    * 'php-phpcs'
    * 'python-flake8'
    * 'python-pylint'
-   * 'python-pyflakes'
    * 'rst'
    * 'ruby-rubocop'
    * 'ruby'
@@ -2302,6 +2301,6 @@ Node: master59302
 Node: Credits60508
 Node: GNU Free Documentation License63106
 Node: Syntax checkers88258
-Node: Function and Variable Index89229
+Node: Function and Variable Index89206
 
 End Tag Table
