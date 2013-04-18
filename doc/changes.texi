@@ -483,6 +483,9 @@ Bug fixes:
 @itemize @bullet
 @item
 Fix error highlighting and navigation in narrowed buffers
+@item
+@ghissue{118, Use a hopefully more reliable way to parse output of PHP
+CodeSniffer}
 @end itemize
 
 @end itemize

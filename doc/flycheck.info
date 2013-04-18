@@ -1617,6 +1617,8 @@ master (unreleased)
    * Bug fixes:
 
         * Fix error highlighting and navigation in narrowed buffers
+        * Use a hopefully more reliable way to parse output of PHP
+          CodeSniffer (https://github.com/lunaryorn/flycheck/issues/118)
 
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
@@ -2297,9 +2299,9 @@ Node: 0.7.156577
 Node: 0.857292
 Node: 0.958804
 Node: master59302
-Node: Credits60368
-Node: GNU Free Documentation License62966
-Node: Syntax checkers88118
-Node: Function and Variable Index89089
+Node: Credits60508
+Node: GNU Free Documentation License63106
+Node: Syntax checkers88258
+Node: Function and Variable Index89229
 
 End Tag Table

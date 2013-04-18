@@ -2415,17 +2415,18 @@ or as path to a standard specification."
 (flycheck-declare-checker php-phpcs
   "A PHP syntax checker using PHP_CodeSniffer.
 
-See URL `http://pear.php.net/package/PHP_CodeSniffer/'.
-
-PHP CodeSniffer 1.4.3 is required.  Earlier versions are known to
-have issues that prevent Flycheck from parsing the output
-correctly.
-
-See URL `https://github.com/lunaryorn/flycheck/issues/78'."
-  :command '("phpcs" "--report=checkstyle"
+See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
+  :command '("phpcs" "--report=emacs"
              (option "--standard=" flycheck-phpcs-standard)
              source)
-  :error-parser 'flycheck-parse-checkstyle
+  ;; Though phpcs supports Checkstyle output which we could feed to
+  ;; `flycheck-parse-checkstyle', we are still using error patterns here,
+  ;; because PHP has notoriously unstable output habits.  See URL
+  ;; `https://github.com/lunaryorn/flycheck/issues/78' and URL
+  ;; `https://github.com/lunaryorn/flycheck/issues/118'
+  :error-patterns
+  '(("\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): error - \\(?4:.*\\)" error)
+    ("\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): warning - \\(?4:.*\\)" warning))
   :modes '(php-mode php+-mode))
 
 (flycheck-def-config-file-var flycheck-flake8rc python-flake8 ".flake8rc")
