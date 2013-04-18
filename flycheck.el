@@ -808,7 +808,7 @@ This variable is an option for the syntax checker `%s'." docstring checker)
    (listp pattern)                      ; A pattern must be a list...
    (= (length pattern) 2)               ; ...of length 2...
    (stringp (car pattern))              ; ...whose 1st element is a string
-   (symbolp (cadr pattern))             ; ...and whose 2nd element is a symbol
+   (memq (cadr pattern) '(warning error)) ; ...and whose 2nd element a category
    ))
 
 (defun flycheck-error-patterns-list-p (patterns)
@@ -828,7 +828,7 @@ This variable is an option for the syntax checker `%s'." docstring checker)
      (and (stringp option-name)
           (symbolp option-var)
           (symbolp filter)))
-    (`(eval _) t)
+    (`(eval ,_) t)
     (_ nil)))
 
 (defun flycheck-command-argument-p (arg)
