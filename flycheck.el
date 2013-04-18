@@ -1669,7 +1669,7 @@ back to `xml-parse-region'.")
   (let ((next (flycheck-haskell-parse-until-next lines (list))))
     (if (null (cadr next))
         '()
-      (gather-errors (cadr next)))))
+      (flycheck-haskell-gather-errors (cadr next)))))
 
 (defun flycheck-haskell-gather-errors (lines)
   (if (null lines) (list)
