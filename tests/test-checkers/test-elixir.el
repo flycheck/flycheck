@@ -32,7 +32,8 @@
   :expected-result (flycheck-testsuite-fail-unless-checker 'elixir)
   (flycheck-testsuite-should-syntax-check
    "checkers/elixir.ex" 'elixir-mode nil
-   '(8  nil "list/1 obsolete" warning)
+   ;; need v0.8.2
+   ;; '(8  nil "list/1 obsolete" warning)
    '(15 nil "variable a is unused" warning)
    '(16 nil "variable a shadowed in 'fun'" warning)
    '(24 nil "this clause cannot match because a previous clause at line 21 always matches"

@@ -49,17 +49,6 @@ gem () {
     command gem install "$@"
 }
 
-install_from_github () {
-    # $1: github account
-    # $2: repository name
-    # $3: branch
-    cd /tmp
-    git clone -b $3 "git://github.com/$1/$2.git"
-    cd $2
-    make -j $(nproc)
-    sudo make install
-}
-
 # Silence debconf
 export DEBIAN_FRONTEND='noninteractive'
 
@@ -112,13 +101,21 @@ npm coffee-script coffeelint \
 gem haml \
     sass
 
-# Install a stable version of Elixir from source
+# Install up-to-date erlang dependency for elixir
 ppa "deb http://binaries.erlang-solutions.com/debian precise contrib"
 wget -O - "http://binaries.erlang-solutions.com/debian/erlang_solutions.asc" | \
   sudo apt-key add -
 apt_update
 sudo apt-get install -y --fix-missing  esl-erlang
-install_from_github elixir-lang elixir master
+# Install a stable version of Elixir
+ELIXIR_VERSION=0.8.1
+ELIXIR_DIR="/opt/elixir-${ELIXIR_VERSION}"
+if ! [ -d "$ELIXIR_DIR" -a -x "/$ELIXIR_DIR/bin/elixirc" ]; then
+  sudo rm -rf "$ELIXIR_DIR"
+  wget -qO- -O tmp.zip "http://dl.dropbox.com/u/4934685/elixir/v0.8.1.zip" && \
+    sudo unzip -d /opt/elixir-${ELIXIR_VERSION} tmp.zip && rm tmp.zip
+  sudo ln -fs "$ELIXIR_DIR/bin/elixirc" /usr/local/bin
+fi
 
 # Install carton for Emacs dependency management
 CARTON_VERSION=0.2.0
