@@ -41,7 +41,9 @@ pear () {
 }
 
 pip () {
-    sudo pip install -U --use-mirrors "$@"
+    # Install from Crate index because link crawling on PyPI is damn slow.
+    # See https://github.com/pypa/pip/issues/864 for more information.
+    sudo pip install -i https://restricted.crate.io/ -U "$@"
 }
 
 gem () {
