@@ -1601,6 +1601,12 @@ master (unreleased)
         * Ruby using 'rubocop'
           (https://github.com/lunaryorn/flycheck/issues/113)
 
+   * Removed syntax checkers:
+
+        * Python using Pyflakes
+          (https://github.com/lunaryorn/flycheck/issues/115).  Use the
+          superior Flake8 syntax checker
+
    * New features:
 
         * Add 'flycheck-copy-messages-as-kill', mapped to 'C-c ! C-w',
@@ -2298,9 +2304,9 @@ Node: 0.7.156577
 Node: 0.857292
 Node: 0.958804
 Node: master59302
-Node: Credits60508
-Node: GNU Free Documentation License63106
-Node: Syntax checkers88258
-Node: Function and Variable Index89206
+Node: Credits60684
+Node: GNU Free Documentation License63282
+Node: Syntax checkers88434
+Node: Function and Variable Index89382
 
 End Tag Table

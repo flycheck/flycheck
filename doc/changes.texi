@@ -461,7 +461,8 @@ Removed syntax checkers:
 
 @itemize @bullet
 @item
-@ghissue{115, Remove the pyflakes syntax checker}.  Use Flake8
+@ghissue{115, Python using Pyflakes}.  Use the superior Flake8 syntax
+checker
 @end itemize
 
 @item
