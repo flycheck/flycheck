@@ -105,7 +105,7 @@ gem haml \
     rubocop
 
 # Install carton for Emacs dependency management
-CARTON_VERSION=0.2.0
+CARTON_VERSION=0.3.0
 CARTON_DIR="/opt/carton-${CARTON_VERSION}"
 if ! [ -d "$CARTON_DIR" -a -x "/$CARTON_DIR/bin/carton" ]; then
   sudo rm -rf "$CARTON_DIR"
