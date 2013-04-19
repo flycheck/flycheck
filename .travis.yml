@@ -6,4 +6,4 @@ before_script:
   - sh vagrant/provision.sh
   - make EMACS=${EMACS} deps
 script:
-  - make EMACS=${EMACS} test
+  - make EMACS=${EMACS} test doc
