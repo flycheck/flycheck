@@ -1607,7 +1607,7 @@ master (unreleased)
 
         * Remove the pyflakes syntax checker
           (https://github.com/lunaryorn/flycheck/issues/115).  Use
-          Flake8rc
+          Flake8
 
    * New features:
 
@@ -2310,9 +2310,9 @@ Node: 0.7.156612
 Node: 0.857327
 Node: 0.958839
 Node: master59337
-Node: Credits60774
-Node: GNU Free Documentation License63461
-Node: Syntax checkers88613
-Node: Function and Variable Index89575
+Node: Credits60772
+Node: GNU Free Documentation License63459
+Node: Syntax checkers88611
+Node: Function and Variable Index89573
 
 End Tag Table
