@@ -101,20 +101,27 @@ npm coffee-script coffeelint \
 gem haml \
     sass
 
-# Install up-to-date erlang dependency for elixir
-ppa "deb http://binaries.erlang-solutions.com/debian precise contrib"
-wget -O - "http://binaries.erlang-solutions.com/debian/erlang_solutions.asc" | \
-  sudo apt-key add -
-apt_update
-sudo apt-get install -y --fix-missing  esl-erlang
-# Install a stable version of Elixir
+# Install Elixir compiler.
 ELIXIR_VERSION=0.8.1
 ELIXIR_DIR="/opt/elixir-${ELIXIR_VERSION}"
-if ! [ -d "$ELIXIR_DIR" -a -x "/$ELIXIR_DIR/bin/elixirc" ]; then
-  sudo rm -rf "$ELIXIR_DIR"
+ELIXIR_SYMDIR="/usr/local/bin"
+if [ -f "$ELIXIR_SYMDIR/elixirc" ]; then
+  echo "Elixir compiler already installed."
+else
+  echo "Installing Elixir compiler in /usr/local/bin..."
+  # Erlang dependency.
+  ppa "deb http://binaries.erlang-solutions.com/debian precise contrib"
+  wget -O - "http://binaries.erlang-solutions.com/debian/erlang_solutions.asc" | \
+    sudo apt-key add -
+  apt_update
+  sudo apt-get install -y --fix-missing  esl-erlang
+  # Actual installation of the Elixir compiler.
+  if [ -d "$ELIXIR_DIR" ]; then
+    sudo rm -rf "$ELIXIR_DIR"
+  fi
   wget -qO- -O tmp.zip "http://dl.dropbox.com/u/4934685/elixir/v0.8.1.zip" && \
-    sudo unzip -d /opt/elixir-${ELIXIR_VERSION} tmp.zip && rm tmp.zip
-  sudo ln -fs "$ELIXIR_DIR/bin/elixirc" /usr/local/bin
+    sudo unzip -qq -d /opt/elixir-${ELIXIR_VERSION} tmp.zip && rm tmp.zip
+  sudo ln -fs "$ELIXIR_DIR/bin/elixirc" $ELIXIR_SYMDIR
 fi
 
 # Install carton for Emacs dependency management
