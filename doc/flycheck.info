@@ -572,6 +572,9 @@ Checkers are declared with 'flycheck-declare-checker':
                Use this symbol if you need to move files created by a
                syntax checker out of the way.
 
+               See the declaration of the 'elixir' syntax checker for an
+               application of this symbol.
+
           '(config-file OPTION VARIABLE)'
                This cell is substituted with a configuration file for
                the syntax checker.  OPTION is a string containing the
@@ -1613,12 +1616,6 @@ master (unreleased)
 
    * Removed syntax checkers:
 
-        * Remove the pyflakes syntax checker
-          (https://github.com/lunaryorn/flycheck/issues/115).  Use
-          Flake8rc
-
-   * Removed syntax checkers:
-
         * Python using Pyflakes
           (https://github.com/lunaryorn/flycheck/issues/115).  Use the
           superior Flake8 syntax checker
@@ -2258,8 +2255,8 @@ Function and Variable Index
 * flycheck-count-errors:                 Error API.           (line  71)
 * flycheck-current-errors:               Error API.           (line  67)
 * flycheck-declare-checker:              Declaration.         (line   8)
-* flycheck-def-config-file-var:          Declaration.         (line 225)
-* flycheck-def-option-var:               Declaration.         (line 241)
+* flycheck-def-config-file-var:          Declaration.         (line 228)
+* flycheck-def-option-var:               Declaration.         (line 244)
 * flycheck-describe-checker:             Selection.           (line  70)
 * flycheck-error-face:                   Reporting.           (line  14)
 * flycheck-error-new:                    Error API.           (line  39)
@@ -2298,37 +2295,37 @@ Node: Navigation15699
 Node: Mode line17495
 Node: Extending18396
 Node: Declaration18995
-Node: Error parsers29928
-Node: Option filters30912
-Node: Examples31251
-Node: Simple example31683
-Node: Predicate example34747
-Node: Configuration example36728
-Node: Chaining example39387
-Node: API40773
-Node: Error API41561
-Node: Error parser API44162
-Node: Contribution44388
-Node: Reporting issues45064
-Node: Contributing syntax checkers45800
-Node: Contributing code46595
-Node: Unit tests47935
-Node: Changes49222
-Node: 0.149806
-Node: 0.250090
-Node: 0.350368
-Node: 0.450604
-Node: 0.551379
-Node: 0.652599
-Node: 0.6.155449
-Node: 0.755598
-Node: 0.7.156612
-Node: 0.857327
-Node: 0.958839
-Node: master59337
-Node: Credits60774
-Node: GNU Free Documentation License63461
-Node: Syntax checkers88613
-Node: Function and Variable Index89575
+Node: Error parsers30374
+Node: Option filters31358
+Node: Examples31697
+Node: Simple example32129
+Node: Predicate example35193
+Node: Configuration example37174
+Node: Chaining example39833
+Node: API41219
+Node: Error API42007
+Node: Error parser API44608
+Node: Contribution44834
+Node: Reporting issues45510
+Node: Contributing syntax checkers46246
+Node: Contributing code47041
+Node: Unit tests48381
+Node: Changes49668
+Node: 0.150252
+Node: 0.250536
+Node: 0.350814
+Node: 0.451050
+Node: 0.551825
+Node: 0.653045
+Node: 0.6.155895
+Node: 0.756044
+Node: 0.7.157058
+Node: 0.857773
+Node: 0.959285
+Node: master59783
+Node: Credits61367
+Node: GNU Free Documentation License64054
+Node: Syntax checkers89206
+Node: Function and Variable Index90168
 
 End Tag Table

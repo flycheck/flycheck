@@ -68,6 +68,9 @@ directory, which is unique on each execution of the syntax checker.
 Use this symbol if you need to move files created by a syntax checker
 out of the way.
 
+See the declaration of the @code{elixir} syntax checker for an
+application of this symbol.
+
 @item (config-file @var{option} @var{variable})
 This cell is substituted with a configuration file for the syntax
 checker.  @var{option} is a string containing the option that specifies
