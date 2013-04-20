@@ -2177,11 +2177,19 @@ See URL `https://github.com/stubbornella/csslint'."
      warning))
   :modes 'css-mode)
 
+;; The temporary directory where to store the generated beam files. 
+;; This is required because Elixir compiler can produce several .beam files per
+;; .ex files (one per declared module).
+(flycheck-def-config-file-var flycheck-elixir-temp-dir
+    elixir (format "%s/flycheck-elixir" temporary-file-directory))
+
 (flycheck-declare-checker elixir
   "An Elixir syntax checker using the Elixir interpreter."
   :command '("elixirc"
-             "--ignore-module-conflict" ; needed to prevent from module
-                                        ; redefinition warning.
+             (option "-o" flycheck-elixir-temp-dir)
+             ;; needed to avoid tedious module redefinition warning.
+             "--ignore-module-conflict"
+             ;; activate all possible warnings
              "+warn_obsolete_guard"
              "+warn_unused_import"
              "+warn_shadow_vars"
