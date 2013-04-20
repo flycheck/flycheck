@@ -126,6 +126,11 @@ Syntax checkers in this list must be declared with
   :group 'flycheck
   :type '(repeat (symbol :tag "Checker")))
 
+(defcustom flycheck-face-inhibit-mode-line-updates nil
+  "If non-nil, don't make any changes to the mode-line appearance."
+  :group 'flycheck
+  :type 'boolean)
+
 (defvar-local flycheck-checker nil
   "Syntax checker to use for the current buffer.
 
@@ -154,6 +159,46 @@ file.")
   '((t :inherit warning))
   "Face for flycheck warnings."
   :group 'flycheck)
+
+(defface flycheck-error-face-mode-line
+  '((default (:foreground "white" :underline nil
+                          :weight normal
+                          :inherit flycheck-error-face)))
+  "The face to use for the modeline when there are errors in the buffer"
+  :group 'flycheck)
+
+(defface flycheck-warning-face-mode-line
+  '((default (:foreground "white" :underline nil
+                          :weight normal
+                          :inherit flycheck-warning-face)))
+  "The face to use for the modeline when there are warnings in the buffer"
+  :group 'flycheck)
+
+(defvar flycheck-face-modeline-remap-cookie nil
+  "A list of The 'cookies' returned from face-remap-add-relative, so
+that we can reset our face remappings.")
+(make-variable-buffer-local 'flycheck-face-modeline-remap-cookie)
+
+(defun flycheck-face-update-buffer-mode-line (status)
+  "Sets the mode-line face unless `flycheck-face-inhibit-mode-line-updates'
+is non-nil."
+  (flycheck-face-reset-mode-line)
+  (unless flycheck-face-inhibit-mode-line-updates
+    (setq flycheck-face-modeline-remap-cookie
+          (flycheck-face-remap-modeline-face status))))
+
+(defun flycheck-face-remap-modeline-face (status)
+  "Set a relative mapping to mode-line face for STATUS."
+  (case status
+    (warning (face-remap-add-relative 'mode-line 'flycheck-warning-face-mode-line))
+    (error   (face-remap-add-relative 'mode-line 'flycheck-error-face-mode-line))
+    (ok      nil)))
+
+(defun flycheck-face-reset-mode-line ()
+  "Reset mode-line face remapping."
+  (when flycheck-face-modeline-remap-cookie
+    (face-remap-remove-relative flycheck-face-modeline-remap-cookie)
+    (setq flycheck-face-modeline-remap-cookie nil)))
 
 (make-obsolete-variable 'flycheck-ignore-columns
                         "Use `flycheck-highlighting-mode' instead."
@@ -455,7 +500,9 @@ Use when checking buffers automatically, i.e. in hooks."
   (let ((mode-line flycheck-mode-line-lighter))
     (setq mode-line (concat mode-line status))
     (setq flycheck-mode-line mode-line)
-    (force-mode-line-update)))
+    (flycheck-face-update-buffer-mode-line 'ok)
+    (force-mode-line-update))
+  )
 
 (defun flycheck-report-error ()
   "Report a Flycheck error status.
@@ -471,7 +518,10 @@ Report a proper flycheck status."
   (if errors
       (let ((no-err-warnings (flycheck-count-errors errors)))
         (flycheck-report-status
-         (format ":%s/%s" (car no-err-warnings) (cdr no-err-warnings))))
+         (format ":%s/%s" (car no-err-warnings) (cdr no-err-warnings)))
+        (if (> (car no-err-warnings) 0)
+            (flycheck-face-update-buffer-mode-line 'error)
+          (flycheck-face-update-buffer-mode-line 'warning)))
     (flycheck-report-status "")))
 
 
