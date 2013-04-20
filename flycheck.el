@@ -199,8 +199,11 @@ overlay setup)."
 (defconst flycheck-mode-line-lighter " FlyC"
   "The standard lighter for flycheck mode.")
 
-(defvar-local flycheck-temp-buffer-copies nil
-  "A list of all temporary copies of a buffer.")
+(defvar-local flycheck-temp-files nil
+  "A list of all temporary files for a syntax check.")
+
+(defvar-local flycheck-temp-directories nil
+  "A list of all temporary directories for a syntax check.")
 
 (defvar-local flycheck-mode-line nil
   "The mode line lighter of variable `flycheck-mode'.")
@@ -247,7 +250,8 @@ running checks, and empty all variables used by flycheck."
   (flycheck-clear)
   (flycheck-stop-checker)
   (flycheck-cancel-error-show-error-timer)
-  (flycheck-clean-files flycheck-temp-buffer-copies)
+  (flycheck-safe-delete-files flycheck-temp-files)
+  (flycheck-safe-delete-directories flycheck-temp-directories)
   (flycheck-clear-checker))
 
 (defvar-local flycheck-previous-next-error-function nil
@@ -533,6 +537,13 @@ Return the path of the file."
     ;; With no filename, fall back to a copy in the system directory.
     (flycheck-temp-file-system filename prefix)))
 
+(defun flycheck-unique-temporary-directory (prefix)
+  "Create a unique temporary directory from PREFIX."
+  (let* ((path (expand-file-name prefix temporary-file-directory))
+         (name (make-temp-name path)))
+    (make-directory name)
+    name))
+
 (defun flycheck-root-directory-p (directory)
   "Determine if DIRECTORY is the root directory.
 
@@ -624,6 +635,14 @@ Otherwise `(list OPTION VALUE)' is returned."
 Buffers whose names start with a space are considered temporary
 buffers."
   (s-starts-with? " " (buffer-name)))
+
+(defun flycheck-safe-delete-files (files)
+  "Safely remove FILES."
+  (--each files (ignore-errors (delete-file it))))
+
+(defun flycheck-safe-delete-directories (directories)
+  "Safely remove DIRECTORIES."
+  (--each directories (ignore-errors (delete-directory it :recursive))))
 
 
 ;;;; Minibuffer tools
@@ -833,7 +852,7 @@ This variable is an option for the syntax checker `%s'." docstring checker)
 (defun flycheck-command-argument-p (arg)
   "Check whether ARG is a valid command argument."
   (or
-   (memq arg '(source source-inplace source-original))
+   (memq arg '(source source-inplace source-original temporary-directory))
    (stringp arg)
    (and (listp arg) (flycheck-command-argument-cell-p arg))))
 
@@ -1037,18 +1056,23 @@ otherwise."
          (flycheck-registered-checker-p next-checker)
          (flycheck-may-use-checker next-checker))))
 
-(defun flycheck-clean-files (files)
-  "Safely remove FILES."
-  (--each files (ignore-errors (delete-file it))))
-
 (defun flycheck-get-source-file (temp-fn)
   "Get the source file to check using TEMP-FN.
 
 Make a temporary copy of the buffer, remember it in
-`flycheck-temp-buffer-copies' and return the file path."
+`flycheck-temp-files' and return the file path."
   (let ((temp-file (flycheck-temp-buffer-copy temp-fn)))
-    (add-to-list 'flycheck-temp-buffer-copies temp-file)
+    (add-to-list 'flycheck-temp-files temp-file)
     temp-file))
+
+(defun flycheck-get-temporary-directory ()
+  "Get a temporary directory for a syntax checker.
+
+Remember the directory path in `flycheck-temp-directories'
+and return the path."
+  (let ((path (flycheck-unique-temporary-directory "flycheck")))
+    (add-to-list 'flycheck-temp-directories path)
+    path))
 
 (defun flycheck-find-config-file (file-name)
   "Find the configuration file FILE-NAME.
@@ -1138,6 +1162,9 @@ Note that the contents of the file may not be up to date with the
 contents of the buffer to check.  Do not use this as primary
 input to a checker!
 
+If SYMBOL is `temporary-directory', create a unique temporary
+directory and return its path.
+
 In all other cases, signal an error."
   (cl-case symbol
     (source
@@ -1146,6 +1173,8 @@ In all other cases, signal an error."
      (flycheck-get-source-file #'flycheck-temp-file-inplace))
     (source-original
      (or (buffer-file-name) ""))
+    (temporary-directory
+     (flycheck-get-temporary-directory))
     (t
      (error "Unsupported argument symbol %S" symbol))))
 
@@ -2023,7 +2052,10 @@ Hide the error buffer if there is no error under point."
 
 (defun flycheck-delete-process (process)
   "Delete PROCESS and clear it's resources."
-  (flycheck-clean-files (process-get process :flycheck-temp-buffer-copies))
+  ;; Remove temporary files and directories created for this process
+  (flycheck-safe-delete-files (process-get process :flycheck-temp-files))
+  (flycheck-safe-delete-directories
+   (process-get process :flycheck-temp-directories))
   (delete-process process))
 
 (defun flycheck-receive-checker-output (process output)
@@ -2085,7 +2117,7 @@ output: %s\nChecker definition probably flawed."
 _EVENT is ignored."
   (when (memq (process-status process) '(signal exit))
     (let ((checker (process-get process :flycheck-checker))
-          (files (process-get process :flycheck-temp-buffer-copies))
+          (files (process-get process :flycheck-temp-files))
           (exit-status (process-exit-status process))
           (output (flycheck-get-output process))
           (buffer (process-buffer process)))
@@ -2116,17 +2148,22 @@ _EVENT is ignored."
         (set-process-sentinel process 'flycheck-handle-signal)
         (set-process-query-on-exit-flag process nil)
         (flycheck-report-status "*")
-        (process-put process :flycheck-temp-buffer-copies
-                     flycheck-temp-buffer-copies)
-        ;; Temporary files are not attached to the process, so let's reset the
-        ;; variable
-        (setq flycheck-temp-buffer-copies nil)
+        (process-put process :flycheck-temp-files
+                     flycheck-temp-files)
+        (process-put process :flycheck-temp-directories
+                     flycheck-temp-directories)
+        ;; Temporary files and directories are not attached to the process, so
+        ;; let's reset the variables
+        (setq flycheck-temp-files nil
+              flycheck-temp-directories nil)
         (process-put process :flycheck-checker checker))
     (error
      (flycheck-report-error)
-     ;; Clear all substituted files
-     (flycheck-clean-files flycheck-temp-buffer-copies)
-     (setq flycheck-temp-buffer-copies nil)
+     ;; Remove all temporary files created for the process
+     (flycheck-safe-delete-files flycheck-temp-files)
+     (flycheck-safe-delete-directories flycheck-temp-directories)
+     (setq flycheck-temp-files nil
+           flycheck-temp-directories nil)
      (when flycheck-current-process
        ;; Clear the process if it's already there
        (flycheck-delete-process flycheck-current-process)

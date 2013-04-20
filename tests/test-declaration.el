@@ -56,7 +56,7 @@
   (should-not (flycheck-command-argument-cell-p '(foo bar))))
 
 (ert-deftest flycheck-command-argument-p ()
-  (--each '(source source-inplace source-original)
+  (--each '(source source-inplace source-original temporary-directory)
     (should (flycheck-command-argument-p it)))
   (should (flycheck-command-argument-p "foo"))
   (should (flycheck-command-argument-p '(eval bar)))

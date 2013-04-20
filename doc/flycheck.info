@@ -563,6 +563,14 @@ Checkers are declared with 'flycheck-declare-checker':
                See the declaration of the 'emacs-lisp-checkdoc' syntax
                checker for an application of this symbol.
 
+          'temporary-directory'
+               This symbol is substituted with the path of an existing
+               temporary directory, which is unique on each execution of
+               the syntax checker.
+
+               Use this symbol if you need to move files created by a
+               syntax checker out of the way.
+
           '(config-file OPTION VARIABLE)'
                This cell is substituted with a configuration file for
                the syntax checker.  OPTION is a string containing the
@@ -1611,6 +1619,8 @@ master (unreleased)
 
         * Add 'flycheck-copy-messages-as-kill', mapped to 'C-c ! C-w',
           to copy all error messages under point into kill ring.
+        * Syntax checkers can redirect output to a temporary directory
+          now using the 'temporary-directory' argument symbol.
 
    * Improvements:
 
@@ -2236,8 +2246,8 @@ Function and Variable Index
 * flycheck-count-errors:                 Error API.           (line  71)
 * flycheck-current-errors:               Error API.           (line  67)
 * flycheck-declare-checker:              Declaration.         (line   8)
-* flycheck-def-config-file-var:          Declaration.         (line 217)
-* flycheck-def-option-var:               Declaration.         (line 233)
+* flycheck-def-config-file-var:          Declaration.         (line 225)
+* flycheck-def-option-var:               Declaration.         (line 241)
 * flycheck-describe-checker:             Selection.           (line  70)
 * flycheck-error-face:                   Reporting.           (line  14)
 * flycheck-error-new:                    Error API.           (line  39)
@@ -2276,37 +2286,37 @@ Node: Navigation15664
 Node: Mode line17460
 Node: Extending18361
 Node: Declaration18960
-Node: Error parsers29893
-Node: Option filters30877
-Node: Examples31216
-Node: Simple example31648
-Node: Predicate example34712
-Node: Configuration example36693
-Node: Chaining example39352
-Node: API40738
-Node: Error API41526
-Node: Error parser API44127
-Node: Contribution44353
-Node: Reporting issues45029
-Node: Contributing syntax checkers45765
-Node: Contributing code46560
-Node: Unit tests47900
-Node: Changes49187
-Node: 0.149771
-Node: 0.250055
-Node: 0.350333
-Node: 0.450569
-Node: 0.551344
-Node: 0.652564
-Node: 0.6.155414
-Node: 0.755563
-Node: 0.7.156577
-Node: 0.857292
-Node: 0.958804
-Node: master59302
-Node: Credits60684
-Node: GNU Free Documentation License63282
-Node: Syntax checkers88434
-Node: Function and Variable Index89382
+Node: Error parsers30222
+Node: Option filters31206
+Node: Examples31545
+Node: Simple example31977
+Node: Predicate example35041
+Node: Configuration example37022
+Node: Chaining example39681
+Node: API41067
+Node: Error API41855
+Node: Error parser API44456
+Node: Contribution44682
+Node: Reporting issues45358
+Node: Contributing syntax checkers46094
+Node: Contributing code46889
+Node: Unit tests48229
+Node: Changes49516
+Node: 0.150100
+Node: 0.250384
+Node: 0.350662
+Node: 0.450898
+Node: 0.551673
+Node: 0.652893
+Node: 0.6.155743
+Node: 0.755892
+Node: 0.7.156906
+Node: 0.857621
+Node: 0.959133
+Node: master59631
+Node: Credits61147
+Node: GNU Free Documentation License63745
+Node: Syntax checkers88897
+Node: Function and Variable Index89845
 
 End Tag Table

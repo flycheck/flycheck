@@ -85,6 +85,17 @@
           (should (file-exists-p filename)))
       (ignore-errors (delete-file filename)))))
 
+(ert-deftest flycheck-unique-temporary-directory ()
+  "Test `flycheck-unique-temporary-directory'."
+  (let ((dirname (flycheck-unique-temporary-directory "flycheck-test")))
+    (unwind-protect
+        (progn
+          (should (s-starts-with? temporary-file-directory dirname))
+          (should (s-starts-with? "flycheck-test"
+                                  (file-name-nondirectory dirname)))
+          (should (file-directory-p dirname)))
+      (ignore-errors (delete-directory dirname :recurse)))))
+
 (ert-deftest flycheck-same-files-p ()
   "Test `flycheck-same-files-p'."
   (should (flycheck-same-files-p "./flycheck.el" "./flycheck.el"))
@@ -216,6 +227,19 @@ buffer file name."
   (with-temp-buffer
     (rename-buffer "foo")
     (should-not (flycheck-temporary-buffer-p))))
+
+(ert-deftest flycheck-safe-delete-directories-recursive ()
+  (let ((dirname (flycheck-unique-temporary-directory "flycheck-test")))
+    (unwind-protect
+        (let ((filename (expand-file-name "foo" dirname)))
+          (process-lines "touch" filename)
+          (should (s-starts-with? dirname filename))
+          (should (file-exists-p filename))
+          (flycheck-safe-delete-directories (list dirname))
+          (should-not (file-exists-p filename))
+          (should-not (file-directory-p dirname))
+          (should-not (file-exists-p dirname)))
+      (ignore-errors (delete-directory dirname :recursive)))))
 
 ;; Local Variables:
 ;; coding: utf-8
