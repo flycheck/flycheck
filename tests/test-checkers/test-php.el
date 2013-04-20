@@ -30,6 +30,7 @@
 
 (ert-deftest checker-php-syntax-error ()
   "Test the T_PAAMAYIM_NEKUDOTAYIM error."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'php)
   (flycheck-testsuite-should-syntax-check
    "checkers/php-syntax-error.php" '(php-mode php+-mode) nil
    '(8 nil "syntax error, unexpected ')', expecting :: (T_PAAMAYIM_NEKUDOTAYIM)" error)))
