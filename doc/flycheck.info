@@ -1623,9 +1623,9 @@ master (unreleased)
    * New features:
 
         * Add 'flycheck-copy-messages-as-kill', mapped to 'C-c ! C-w',
-          to copy all error messages under point into kill ring.
+          to copy all error messages under point into kill ring
         * Syntax checkers can redirect output to a temporary directory
-          now using the 'temporary-directory' argument symbol.
+          now using the 'temporary-directory' argument symbol
 
    * Improvements:
 
@@ -2323,9 +2323,9 @@ Node: 0.7.157058
 Node: 0.857773
 Node: 0.959285
 Node: master59783
-Node: Credits61367
-Node: GNU Free Documentation License64054
-Node: Syntax checkers89206
-Node: Function and Variable Index90168
+Node: Credits61365
+Node: GNU Free Documentation License64052
+Node: Syntax checkers89204
+Node: Function and Variable Index90166
 
 End Tag Table

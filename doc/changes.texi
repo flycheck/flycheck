@@ -473,10 +473,10 @@ New features:
 @itemize @bullet
 @item
 Add @code{flycheck-copy-messages-as-kill}, mapped to @kbd{C-c ! C-w}, to
-copy all error messages under point into kill ring.
+copy all error messages under point into kill ring
 @item
 Syntax checkers can redirect output to a temporary directory now using
-the @code{temporary-directory} argument symbol.
+the @code{temporary-directory} argument symbol
 @end itemize
 
 @item
