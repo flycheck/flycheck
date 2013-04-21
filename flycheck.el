@@ -200,12 +200,6 @@ overlay setup)."
 (defconst flycheck-mode-line-lighter " FlyC"
   "The standard lighter for flycheck mode.")
 
-(defvar-local flycheck-temp-files nil
-  "A list of all temporary files for a syntax check.")
-
-(defvar-local flycheck-temp-directories nil
-  "A list of all temporary directories for a syntax check.")
-
 (defvar-local flycheck-mode-line nil
   "The mode line lighter of variable `flycheck-mode'.")
 
@@ -251,8 +245,7 @@ running checks, and empty all variables used by flycheck."
   (flycheck-clear)
   (flycheck-stop-checker)
   (flycheck-cancel-error-show-error-timer)
-  (flycheck-safe-delete-files flycheck-temp-files)
-  (flycheck-safe-delete-directories flycheck-temp-directories)
+  (flycheck-safe-delete-temporaries)
   (flycheck-clear-checker))
 
 (defvar-local flycheck-previous-next-error-function nil
@@ -510,8 +503,16 @@ Otherwise return nil."
   (when (and (stringp string) (s-numeric? string))
     (string-to-number string)))
 
+(defvar-local flycheck-temp-files nil
+  "A list of temporary files created by Flycheck.")
+
+(defvar-local flycheck-temp-directories nil
+  "A list of all temporary directories created by Flycheckg.")
+
 (defun flycheck-temp-file-system (filename prefix)
   "Create a copy of FILENAME with PREFIX in temp directory.
+
+Add the path of the file to `flycheck-temp-files'.
 
 Return the path of the file."
   ;; HACK: Prevent re-compression to work around a supposed bug in Emacs.
@@ -520,29 +521,41 @@ Return the path of the file."
   ;; files. If `jka-compr-really-do-compress' is non-nil this function uses END
   ;; even though START is a string, hence breaking the `write-region' API that
   ;; we rely on.  Report upstream!
-  (let ((jka-compr-really-do-compress nil)
-        (extension (when filename (file-name-extension filename))))
-    (make-temp-file prefix nil
-                    (when extension (concat "." extension)))))
+  (let* ((jka-compr-really-do-compress nil)
+         (extension (when filename (file-name-extension filename)))
+         (tempfile (make-temp-file prefix nil
+                                   (when extension (concat "." extension)))))
+    (add-to-list 'flycheck-temp-files tempfile)
+    tempfile))
 
 (defun flycheck-temp-file-inplace (filename prefix)
   "Create an in-place copy of FILENAME with PREFIX added.
+
+Add the path of the file to `flycheck-temp-files'.
 
 If FILENAME is nil, fall back to `flycheck-temp-file-system'.
 
 Return the path of the file."
   (if filename
       (let* ((directory (file-name-directory filename))
-             (name (file-name-nondirectory filename)))
-        (expand-file-name (format "%s-%s" prefix name) directory))
+             (name (file-name-nondirectory filename))
+             (tempname (format "%s-%s" prefix name))
+             (tempfile (expand-file-name tempname directory)))
+        (add-to-list 'flycheck-temp-files tempfile)
+        tempfile)
     ;; With no filename, fall back to a copy in the system directory.
     (flycheck-temp-file-system filename prefix)))
 
 (defun flycheck-unique-temporary-directory (prefix)
-  "Create a unique temporary directory from PREFIX."
+  "Create a unique temporary directory from PREFIX.
+
+Add the directory to `flycheck-temp-directories'.
+
+Return the path of the directory"
   (let* ((path (expand-file-name prefix temporary-file-directory))
          (name (make-temp-name path)))
     (make-directory name)
+    (add-to-list 'flycheck-temp-directories name)
     name))
 
 (defun flycheck-root-directory-p (directory)
@@ -607,14 +620,6 @@ suitable for comparison of file names."
   (make-directory (file-name-directory file-name) t)
   (write-region nil nil file-name nil 0))
 
-(defun flycheck-temp-buffer-copy (temp-file-fn)
-  "Copy current buffer to temp file returned by TEMP-FILE-FN.
-
-Return the name of the temporary file."
-  (let ((temp-file (funcall temp-file-fn (buffer-file-name) "flycheck")))
-    (flycheck-save-buffer-to-file temp-file)
-    temp-file))
-
 (defun flycheck-option-with-value-argument (option value)
   "Create arguments specifying OPTION with VALUE.
 
@@ -638,12 +643,23 @@ buffers."
   (s-starts-with? " " (buffer-name)))
 
 (defun flycheck-safe-delete-files (files)
-  "Safely remove FILES."
+  "Safely delete FILES."
   (--each files (ignore-errors (delete-file it))))
 
 (defun flycheck-safe-delete-directories (directories)
-  "Safely remove DIRECTORIES."
+  "Safely delete DIRECTORIES."
   (--each directories (ignore-errors (delete-directory it :recursive))))
+
+(defun flycheck-safe-delete-temporaries ()
+  "Safely delete all temp files and directories of Flycheck.
+
+Safely delete all files listed in `flycheck-temp-files' and all
+directories in `flycheck-temp-directories', and set both
+variables to nil."
+  (flycheck-safe-delete-directories flycheck-temp-directories)
+  (flycheck-safe-delete-files flycheck-temp-files)
+  (setq flycheck-temp-directories nil
+        flycheck-temp-files nil))
 
 
 ;;;; Minibuffer tools
@@ -1057,24 +1073,6 @@ otherwise."
          (flycheck-registered-checker-p next-checker)
          (flycheck-may-use-checker next-checker))))
 
-(defun flycheck-get-source-file (temp-fn)
-  "Get the source file to check using TEMP-FN.
-
-Make a temporary copy of the buffer, remember it in
-`flycheck-temp-files' and return the file path."
-  (let ((temp-file (flycheck-temp-buffer-copy temp-fn)))
-    (add-to-list 'flycheck-temp-files temp-file)
-    temp-file))
-
-(defun flycheck-get-temporary-directory ()
-  "Get a temporary directory for a syntax checker.
-
-Remember the directory path in `flycheck-temp-directories'
-and return the path."
-  (let ((path (flycheck-unique-temporary-directory "flycheck")))
-    (add-to-list 'flycheck-temp-directories path)
-    path))
-
 (defun flycheck-find-config-file (file-name)
   "Find the configuration file FILE-NAME.
 
@@ -1169,13 +1167,17 @@ directory and return its path.
 In all other cases, signal an error."
   (cl-case symbol
     (source
-     (flycheck-get-source-file #'flycheck-temp-file-system))
+     (let ((filename (flycheck-temp-file-system (buffer-file-name) "flycheck")))
+       (flycheck-save-buffer-to-file filename)
+       filename))
     (source-inplace
-     (flycheck-get-source-file #'flycheck-temp-file-inplace))
+     (let ((filename (flycheck-temp-file-inplace (buffer-file-name) "flycheck")))
+       (flycheck-save-buffer-to-file filename)
+       filename))
     (source-original
      (or (buffer-file-name) ""))
     (temporary-directory
-     (flycheck-get-temporary-directory))
+     (flycheck-unique-temporary-directory "flycheck"))
     (t
      (error "Unsupported argument symbol %S" symbol))))
 
@@ -2161,10 +2163,7 @@ _EVENT is ignored."
     (error
      (flycheck-report-error)
      ;; Remove all temporary files created for the process
-     (flycheck-safe-delete-files flycheck-temp-files)
-     (flycheck-safe-delete-directories flycheck-temp-directories)
-     (setq flycheck-temp-files nil
-           flycheck-temp-directories nil)
+     (flycheck-safe-delete-temporaries)
      (when flycheck-current-process
        ;; Clear the process if it's already there
        (flycheck-delete-process flycheck-current-process)
