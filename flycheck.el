@@ -2253,7 +2253,7 @@ See URL `https://github.com/stubbornella/csslint'."
 
 (flycheck-declare-checker erlang
   "An Erlang syntax checker using the Erlang interpreter."
-  :command '("erlc" "-o" temporary-directory "-Wall" source-original)
+  :command '("erlc" "-o" temporary-directory "-Wall" source)
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): Warning:\\(?4:.*\\)$" warning)
     ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))

@@ -6,5 +6,3 @@ great_func() ->
     io:format("Flycheck is great!");
 error_func() ->
     'head-mismatch'.
-
-
