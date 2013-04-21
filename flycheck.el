@@ -515,11 +515,9 @@ Otherwise return nil."
 Add the directory to `flycheck-temp-directories'.
 
 Return the path of the directory"
-  (let* ((path (expand-file-name prefix temporary-file-directory))
-         (name (make-temp-name path)))
-    (make-directory name)
-    (add-to-list 'flycheck-temp-directories name)
-    name))
+  (let* ((tempdir (make-temp-file prefix :directory)))
+    (add-to-list 'flycheck-temp-directories tempdir)
+    tempdir))
 
 (defun flycheck-temp-file-system (filename prefix)
   "Create a temporary file named after FILENAME with PREFIX.
