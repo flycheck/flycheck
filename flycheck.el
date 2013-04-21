@@ -89,6 +89,7 @@ buffer-local wherever it is set."
     elixir
     emacs-lisp
     emacs-lisp-checkdoc
+    erlang
     go-gofmt
     go-build
     go-test
@@ -2340,6 +2341,14 @@ The checker runs `checkdoc-current-buffer'."
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)" warning))
   :modes '(emacs-lisp-mode lisp-interaction-mode)
   :predicate '(not (flycheck-temp-compilation-buffer-p)))
+
+(flycheck-declare-checker erlang
+  "An Erlang syntax checker using the Erlang interpreter."
+  :command '("erlc" "-o" temporary-directory "-Wall" source)
+  :error-patterns
+  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): Warning:\\(?4:.*\\)$" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
+  :modes 'erlang-mode)
 
 (flycheck-declare-checker go-gofmt
   "A Go syntax and style checker using the gofmt utility.

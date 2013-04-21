@@ -9,6 +9,7 @@ order of their appearance in the default value of
 @iflyc elixir
 @iflyc emacs-lisp
 @iflyc emacs-lisp-checkdoc
+@iflyc erlang
 @iflyc go-gofmt
 @iflyc go-build
 @iflyc go-test

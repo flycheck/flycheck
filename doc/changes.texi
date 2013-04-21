@@ -456,6 +456,8 @@ New syntax checkers:
 @ghissue{113, Ruby using @command{rubocop}}
 @item
 @ghissue{108, Elixir}
+@item
+@ghissue{122, Erlang}
 @end itemize
 
 @item

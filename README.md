@@ -29,6 +29,7 @@ Features
   - CSS
   - Elixir
   - Emacs Lisp
+  - Erlang
   - Go
   - Haml
   - HTML
@@ -142,7 +143,7 @@ The following people contributed to flycheck:
 - [Steve Purcell][purcell] implemented many checkers, contributed important
   ideas to the design of the checker API and engaged in worthwhile discussion to
   shape this project.
-- [Sylvain Benner][syl20bnr] added the Elixir syntax checker.
+- [Sylvain Benner][syl20bnr] added syntax checkers for Elixir and Erlang.
 - [Sylvain Rousseau][thisirs] added a syntax checker for POSIX shell script
   using `bash`, and improved error parsing in the Bash script syntax checker.
 - [Yannick Roehlly][yannick1974] added support for PEP8 naming errors to the

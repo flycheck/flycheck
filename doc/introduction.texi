@@ -53,6 +53,8 @@ Elixir (using @command{elixirc})
 @item
 Emacs Lisp (using the byte compiler and CheckDoc)
 @item
+Erlang (using @command{erlc})
+@item
 Go (using @command{gofmt}, @command{go build} and @command{go test})
 @item
 Haml

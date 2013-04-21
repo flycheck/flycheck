@@ -56,8 +56,8 @@ checkers, contributed important ideas to the design of the checker API
 and engaged in worthwhile discussion to shape this project.
 
 @item
-@uref{https://github.com/syl20bnr, Sylvain Benner} added the Elixir
-syntax checker.
+@uref{https://github.com/syl20bnr, Sylvain Benner} added syntax checkers
+for Elixir and Erlang.
 
 @item
 @uref{https://github.com/thisirs, Sylvain Rousseau} added a syntax
