@@ -91,7 +91,7 @@ deb_src_key "http://binaries.erlang-solutions.com/debian/erlang_solutions.asc"
 apt_update
 
 # Install texinfo to build documentation
-apt texinfo
+apt texinfo install-info
 
 if [ -z "$EMACS" ]; then
   # Install Emacs 24.2 and Emacs snapshot, if no Emacs is chosen
