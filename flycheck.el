@@ -87,6 +87,7 @@ buffer-local wherever it is set."
     coffee-coffeelint
     css-csslint
     elixir
+    erlang
     emacs-lisp
     emacs-lisp-checkdoc
     go-gofmt
@@ -2249,6 +2250,14 @@ See URL `https://github.com/stubbornella/csslint'."
     ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*deprecated.*\\)$" warning)
     ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*future reserved.*\\)$" warning))
   :modes 'elixir-mode)
+
+(flycheck-declare-checker erlang
+  "An Erlang syntax checker using the Erlang interpreter."
+  :command '("erlc" "-o" temporary-directory "-Wall" source)
+  :error-patterns
+  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): Warning:\\(?4:.*\\)$" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
+  :modes 'erlang-mode)
 
 (defconst flycheck-emacs-command
   `(,(concat invocation-directory invocation-name)
