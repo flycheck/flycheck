@@ -1327,6 +1327,7 @@ This appendix provides a comprehensive changelog of all releases:
 * Menu:
 
 * master        :: unreleased
+* 0.10          :: Apr 21, 2013
 * 0.9           :: Apr 13, 2013
 * 0.8           :: Apr 09, 2013
 * 0.7.1         :: Feb 23, 2013
@@ -1614,7 +1615,7 @@ File: flycheck.info,  Node: 0.8,  Next: 0.9,  Prev: 0.7.1,  Up: Changes
           (https://github.com/lunaryorn/flycheck/issues/100)
 
 
-File: flycheck.info,  Node: 0.9,  Next: master,  Prev: 0.8,  Up: Changes
+File: flycheck.info,  Node: 0.9,  Next: 0.10,  Prev: 0.8,  Up: Changes
 
 0.9 (Apr 13, 2013)
 ==================
@@ -1633,9 +1634,9 @@ File: flycheck.info,  Node: 0.9,  Next: master,  Prev: 0.8,  Up: Changes
           locations
 
 
-File: flycheck.info,  Node: master,  Prev: 0.9,  Up: Changes
+File: flycheck.info,  Node: 0.10,  Next: master,  Prev: 0.9,  Up: Changes
 
-master (unreleased)
+0.10 (Apr 21, 2013)
 ===================
 
    * Flycheck uses *note cl-lib: (cl)Top. now.  This library is built-in
@@ -1683,6 +1684,12 @@ master (unreleased)
         * Fix error highlighting and navigation in narrowed buffers
         * Use a hopefully more reliable way to parse output of PHP
           CodeSniffer (https://github.com/lunaryorn/flycheck/issues/118)
+
+
+File: flycheck.info,  Node: master,  Prev: 0.10,  Up: Changes
+
+master (unreleased)
+===================
 
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
@@ -2356,21 +2363,22 @@ Node: Contributing syntax checkers47783
 Node: Contributing code48578
 Node: Unit tests49918
 Node: Changes51205
-Node: 0.151789
-Node: 0.252073
-Node: 0.352351
-Node: 0.452587
-Node: 0.553362
-Node: 0.654582
-Node: 0.6.157432
-Node: 0.757581
-Node: 0.7.158595
-Node: 0.859310
-Node: 0.960822
-Node: master61320
-Node: Credits63361
-Node: GNU Free Documentation License66060
-Node: Syntax checkers91212
-Node: Function and Variable Index92188
+Node: 0.151821
+Node: 0.252105
+Node: 0.352383
+Node: 0.452619
+Node: 0.553394
+Node: 0.654614
+Node: 0.6.157464
+Node: 0.757613
+Node: 0.7.158627
+Node: 0.859342
+Node: 0.960854
+Node: 0.1061350
+Node: master63404
+Node: Credits63510
+Node: GNU Free Documentation License66209
+Node: Syntax checkers91361
+Node: Function and Variable Index92337
 
 End Tag Table
