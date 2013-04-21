@@ -519,6 +519,17 @@ CodeSniffer}
 @comment  node-name,  next,  previous,  up
 @unnumberedsec master (unreleased)
 
+@itemize bullet
+@item
+Improvements:
+
+@itemize @bullet
+@item
+@ghissue{123, The @code{ruby} syntax checker now differentiates warnings
+from errors}
+@end itemize
+
+@end itemize
 
 @c Local Variables:
 @c mode: texinfo
