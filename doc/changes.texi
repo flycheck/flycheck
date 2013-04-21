@@ -519,6 +519,12 @@ CodeSniffer}
 @comment  node-name,  next,  previous,  up
 @unnumberedsec master (unreleased)
 
+@item
+Improvements:
+
+@itemize @bullet
+@item
+The @code{ruby} checker now differentiates warnings from errors
 
 @c Local Variables:
 @c mode: texinfo

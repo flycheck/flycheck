@@ -32,6 +32,13 @@
    "checkers/ruby-syntax-error.rb" 'ruby-mode '(ruby-rubocop)
    '(5 nil "syntax error, unexpected tCONSTANT, expecting $end" error)))
 
+(ert-deftest checker-ruby-warning ()
+  "Test a Ruby syntax error."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/ruby-warning.rb" 'ruby-mode '(ruby-rubocop)
+   '(3 nil "possibly useless use of == in void context" warning)))
+
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:

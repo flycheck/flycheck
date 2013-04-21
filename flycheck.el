@@ -2636,7 +2636,9 @@ See URL `https://github.com/bbatsov/rubocop'."
 (flycheck-declare-checker ruby
   "A Ruby syntax checker using the Ruby interpreter."
   :command '("ruby" "-w" "-c" source)
-  :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
+  :error-patterns
+  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): warning: \\(?4:.*\\)$" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'ruby-mode)
 
 (flycheck-declare-checker rust
