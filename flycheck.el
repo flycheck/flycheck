@@ -213,6 +213,7 @@ overlay setup)."
     (define-key pmap "n" 'flycheck-next-error)
     (define-key pmap "p" 'flycheck-previous-error)
     (define-key pmap (kbd "C-w") 'flycheck-copy-messages-as-kill)
+    (define-key pmap "/" 'flycheck-google-messages)
     (define-key pmap "s" 'flycheck-select-checker)
     (define-key pmap "?" 'flycheck-describe-checker)
     (define-key pmap "i" 'flycheck-info)
@@ -228,6 +229,7 @@ overlay setup)."
    "---"
    ["Go to next error" flycheck-next-error t]
    ["Go to next error" flycheck-previous-error t]
+   ["Google messages at point" flycheck-google-messages t]
    "---"
    ["Select syntax checker" flycheck-select-checker t]
    "---"
@@ -2052,6 +2054,45 @@ Hide the error buffer if there is no error under point."
     (when error-messages
       (kill-new error-messages)
       (flycheck-display-error-messages error-messages))))
+
+(defcustom flycheck-google-max-messages 5
+  "How many messages to google at once.
+
+If set to an integer, `flycheck-google-messages' will signal an
+error if there are more Flycheck messages at point than the value
+of this variable.
+
+If set to nil, `flycheck-google-messages' will always google all
+messages at point."
+  :group 'flycheck
+  :type '(choice (const :tag "Always google all messages" nil)
+                 (integer :tag "Maximum messages to google"))
+  :package-version '(flycheck . "0.1"))
+
+(defun flycheck-google-messages (pos &optional quote-flag)
+  "Google each error message at POS.
+
+Issue a separate Google query for each error message at POS.
+Signal an error if there are more messages at POS than
+`flycheck-google-max-messages'.
+
+Enclose the Google query in quotation marks, if
+`google-wrap-in-quotes' is t.  With QUOTE-FLAG, invert the effect
+of `google-wrap-in-quotes'.
+
+This function requires the Google This library from URL
+`https://github.com/Bruce-Connor/emacs-google-this'."
+  (interactive "d\nP")
+  (unless (require 'google-this nil :no-error)
+    (user-error "Please install Google This from \
+https://github.com/Bruce-Connor/emacs-google-this"))
+  (let ((messages (flycheck-overlay-messages-at pos)))
+    (when (and flycheck-google-max-messages
+               (> (length messages) flycheck-google-max-messages))
+      (user-error "More than %s messages at point"
+                  flycheck-google-max-messages))
+    (--each messages
+      (google-string quote-flag it :no-confirm))))
 
 
 ;;;; Checker process management

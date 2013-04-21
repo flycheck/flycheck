@@ -297,13 +297,24 @@ column, regardless of the highlighting mode.
 To view an error message, either hover the mouse of the highlighted
 error, or move the point to the highlighted error and wait for a short
 moment to see the error message in the echo area.  You can also copy the
-error message into kill ring:
+error message into kill ring, or google it straight from Emacs:
 
 @table @kbd
 @item C-c ! C-w
 @itemx M-x flycheck-copy-messages-as-kill
 @findex flycheck-copy-messages-as-kill
 Copy all Flycheck error messages at the current point into kill ring.
+
+@item C-c ! /
+@itemx M-x flycheck-google-messages
+@findex flycheck-google-messages
+Google for all Flycheck error messages at the current point.
+
+If there are more than @code{flycheck-google-max-messages} errors at
+point, signal an error, to avoid spamming your browser with Google tabs.
+
+Requires the @uref{https://github.com/Bruce-Connor/emacs-google-this,
+Google This} library.
 
 @item C-c ! C
 @itemx M-x flycheck-clear

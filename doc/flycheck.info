@@ -1,18 +1,17 @@
-This is doc/flycheck.info, produced by makeinfo version 4.13 from
-doc/flycheck.texi.
+This is flycheck.info, produced by makeinfo version 5.1 from
+flycheck.texi.
 
 This manual is for Flycheck, the on-the-fly syntax checker for GNU
 Emacs.
 
    Copyright (C) 2013 Sebastian Wiesner
 
-       Permission is granted to copy, distribute and/or modify this
-     document   under the terms of the GNU Free Documentation License,
-     Version 1.3 or   any later version published by the Free Software
-     Foundation; with no   Invariant Sections, no Front-Cover Texts,
-     and no Back-Cover Texts.  A   copy of the license is included in
-     the section entitled "GNU Free   Documentation License".
-
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, no Front-Cover Texts, and
+     no Back-Cover Texts.  A copy of the license is included in the
+     section entitled "GNU Free Documentation License".
 INFO-DIR-SECTION Emacs
 START-INFO-DIR-ENTRY
 * Flycheck: (flycheck). On the fly syntax checking (aka "flymake done right")
@@ -29,16 +28,16 @@ Emacs.
 
    Copyright (C) 2013 Sebastian Wiesner
 
-       Permission is granted to copy, distribute and/or modify this
-     document   under the terms of the GNU Free Documentation License,
-     Version 1.3 or   any later version published by the Free Software
-     Foundation; with no   Invariant Sections, no Front-Cover Texts,
-     and no Back-Cover Texts.  A   copy of the license is included in
-     the section entitled "GNU Free   Documentation License".
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, no Front-Cover Texts, and
+     no Back-Cover Texts.  A copy of the license is included in the
+     section entitled "GNU Free Documentation License".
 
 * Menu:
 
-* Introduction::                Introduce Flycheck, aka ``flymake done right''
+* Introduction::                Introduce Flycheck, aka "flymake done right"
 * Usage::                       How to use Flycheck for on-the-fly syntax checking
 * Extending::                   How to extend Flycheck with new syntax checkers
 * API::                         An overview about the Flycheck API
@@ -59,19 +58,12 @@ Flycheck (aka "Flymake done right") is a modern on-the-fly syntax
 checking extension for GNU Emacs 24 withL
 
    * ready-to-use syntax checkers for a bunch of languages,
-
    * easy customization,
-
    * a comprehensive manual,
-
    * a dead simple, declarative API to create new syntax checkers,
-
    * major-mode based selection of syntax checkers,
-
    * multiple syntax checkers per buffer,
-
    * a "doesn't get in your way" guarantee,
-
    * and a clean, concise and understandable implementation with decent
      test coverage.
 
@@ -89,65 +81,37 @@ File: flycheck.info,  Node: Features,  Next: Installation,  Prev: Introduction, 
 ============
 
      Automatic syntax checking after saving or insertion of new lines
-
    * Built-in syntax checkers for:
-        * CoffeeScript (using `coffeelint')
-
-        * CSS (using `csslint'))
-
-        * Elixir (using `elixirc')
-
+        * CoffeeScript (using 'coffeelint')
+        * CSS (using 'csslint'))
+        * Elixir (using 'elixirc')
         * Emacs Lisp (using the byte compiler and CheckDoc)
-
-        * Erlang (using `erlc')
-
-        * Go (using `gofmt', `go build' and `go test')
-
+        * Erlang (using 'erlc')
+        * Go (using 'gofmt', 'go build' and 'go test')
         * Haml
-
-        * HTML (using `tidy')
-
-        * Javascript (using `jshint')
-
-        * JSON (using `jsonlint')
-
+        * HTML (using 'tidy')
+        * Javascript (using 'jshint')
+        * JSON (using 'jsonlint')
         * Lua
-
         * Perl
-
         * PHP (using the PHP Command Line and PHP CodeSniffer)
-
-        * Python (using `flake8', `pylint', or `pyflakes')
-
-        * Ruby (using `rubocop' or `ruby')
-
-        * Rust (using `rustc')
-
+        * Python (using 'flake8', 'pylint', or 'pyflakes')
+        * Ruby (using 'rubocop' or 'ruby')
+        * Rust (using 'rustc')
         * RST (ReStructuredText, using Docutils)
-
         * Sass
-
         * SCSS
-
         * Shell scripts (using Bash, Dash, or Zsh depending on the type
           of shell script)
-
-        * TeX/LaTeX (using `chktex' or `lacheck')
-
-        * XML (using `xmlstarlet')
-
+        * TeX/LaTeX (using 'chktex' or 'lacheck')
+        * XML (using 'xmlstarlet')
    * Nice error indication and highlighting
-
    * Easy customization
-
    * Syntax checker configuration with project-specific configuration
      files and options
-
-   * Error navigation with `next-error' and `previous-error'
-
+   * Error navigation with 'next-error' and 'previous-error'
    * Easy declarative API to define new syntax checkers
-
-   * Error parsers for structured markup formats (e.g. Checkdoc XML)
+   * Error parsers for structured markup formats (e.g.  Checkdoc XML)
 
 
 File: flycheck.info,  Node: Installation,  Next: Activation,  Prev: Features,  Up: Introduction
@@ -156,12 +120,12 @@ File: flycheck.info,  Node: Installation,  Next: Activation,  Prev: Features,  U
 ================
 
 Install the ELPA package from MELPA (http://melpa.milkbox.net) or
-Marmalade (http://marmalade-repo.org/) using `M-x package-install RET
+Marmalade (http://marmalade-repo.org/) using 'M-x package-install RET
 flycheck'.  The former is the _recommended_ repository.
 
    Neither of these repositories is included in GNU Emacs by default.
 You need to enable these repositories explicitly.  For instance, to add
-the MELPA repository, add the following code to `init.el':
+the MELPA repository, add the following code to 'init.el':
 
      (require 'package)
      (add-to-list 'package-archives
@@ -171,11 +135,11 @@ the MELPA repository, add the following code to `init.el':
    Flycheck is written and tested against GNU Emacs 24.2 and newer.  It
 should work on GNU Emacs 24.1, too.  Earlier releases of GNU Emacs,
 especially GNU Emacs 23 and before, and other flavors of Emacs (e.g.
-XEmacs, Aquamacs, etc.) are not supported.  Flycheck may or may not
+XEmacs, Aquamacs, etc.)  are not supported.  Flycheck may or may not
 work, the latter being more likely.
 
    Most checkers depend on external tools to perform the actual syntax
-checking.  Use `flycheck-describe-checker' to get help about a syntax
+checking.  Use 'flycheck-describe-checker' to get help about a syntax
 checker and its dependencies.
 
 
@@ -184,9 +148,9 @@ File: flycheck.info,  Node: Activation,  Prev: Installation,  Up: Introduction
 1.3 Activation
 ==============
 
-Once installed, enable Flycheck mode with `M-x flycheck-mode'.  To
+Once installed, enable Flycheck mode with 'M-x flycheck-mode'.  To
 automatically enable Flycheck in all buffers, in which it can be used,
-add the following to your `init.el' file:
+add the following to your 'init.el' file:
 
      (add-hook 'after-init-hook #'global-flycheck-mode)
 
@@ -214,41 +178,36 @@ File: flycheck.info,  Node: Syntax checking,  Next: Selection,  Prev: Usage,  Up
 2.1 Syntax checking
 ===================
 
-In `flycheck-mode' the buffer is automatically checked on the fly when
+In 'flycheck-mode' the buffer is automatically checked on the fly when
 
    * the file is saved,
-
    * or if new lines are inserted.
 
 You can also check the buffer manually:
 
-`C-c ! c'
-`M-x flycheck-buffer'
+'C-c ! c'
+'M-x flycheck-buffer'
      Start a syntax check in the current buffer.
 
    Each syntax check is comprised of the following steps:
 
   1. Select a suitable syntax checker.  *Note Selection::, for more
      information on how syntax checkers are selected.
-
   2. Copy the contents of the buffer to be checked to a temporary file.
-
   3. Execute the syntax checker tool(s).
-
   4. Parse the output of the tool, and report all errors and warnings.
      *Note Reporting::, for more information.
-
-  5. Run hooks in `flycheck-after-syntax-check-hook'.
+  5. Run hooks in 'flycheck-after-syntax-check-hook'.
 
  -- User Option: flycheck-after-syntax-check-hook
-     This variable is a list of function to execute after a syntax
-     check is completed, including all chained syntax checkers.
+     This variable is a list of function to execute after a syntax check
+     is completed, including all chained syntax checkers.
 
      By the time these functions are called, all errors and warnings are
      already reported.  *Note Reporting::, for more information about
      error reporting.
 
-     This variable is a normal hook. *Note Hooks: (elisp)Hooks.
+     This variable is a normal hook.  *Note (elisp)Hooks::.
 
 
 File: flycheck.info,  Node: Selection,  Next: Configuration,  Prev: Syntax checking,  Up: Usage
@@ -257,7 +216,7 @@ File: flycheck.info,  Node: Selection,  Next: Configuration,  Prev: Syntax check
 ============================
 
 By default Flycheck automatically selects a suitable syntax checker from
-`flycheck-checkers':
+'flycheck-checkers':
 
  -- User Option: flycheck-checkers
      A list of all syntax checkers to use as candidates for automatic
@@ -266,24 +225,22 @@ By default Flycheck automatically selects a suitable syntax checker from
      The first suitable syntax checker from this list is used to check a
      buffer.  A syntax checker is suitable, if
         * it may be used for the current major mode,
-
         * it's predicate matches,
-
         * and if the syntax checking tool exists.
 
      A syntax checker contained in this list is said to be "registered".
 
      *Note Syntax checkers::, for a list of available checkers.
 
-   If no suitable syntax checker is found the syntax check is
-_silently_ omitted.  _No_ error is signaled, and only a specific
-indicator informs about the omitted syntax check.  *Note Mode line::.
+   If no suitable syntax checker is found the syntax check is _silently_
+omitted.  _No_ error is signaled, and only a specific indicator informs
+about the omitted syntax check.  *Note Mode line::.
 
    You can manually select a specific syntax checker for the current
 buffer, too:
 
-`C-c ! s'
-`M-x flycheck-select-checker'
+'C-c ! s'
+'M-x flycheck-select-checker'
      Prompt for a checker.  If no syntax checker is entered deselect the
      current syntax checker, and re-enable automatic selection again.
      With prefix arg, re-enable automatic selection without prompting.
@@ -291,7 +248,7 @@ buffer, too:
      Syntax checker do _not_ need to be registered to be manually
      selected with this command.
 
-`flycheck-select-checker' sets `flycheck-checker':
+'flycheck-select-checker' sets 'flycheck-checker':
 
  -- Variable: flycheck-checker
      Syntax checker to use for the current buffer.
@@ -304,24 +261,24 @@ buffer, too:
      If set, only use this syntax checker.  Automatic selection is
      _disabled_.  If the syntax checker is unusable, signal an error.
 
-You may directly set this variable, e.g. via file local variables.  For
+You may directly set this variable, e.g.  via file local variables.  For
 instance, you can use the following file local variable within a Python
-source file to always check this file with `pylint':
+source file to always check this file with 'pylint':
 
      # Local Variables:
      # flycheck-checker: python-pylint
      # End:
 
-*Note Specifying File Variables: (emacs)Specifying File Variables, for
-more information about file variables.
+*Note (emacs)Specifying File Variables::, for more information about
+file variables.
 
    Each syntax checker provides documentation with information about the
 executable the syntax checker uses, in which buffers it will be used for
 syntax checks, and whether it can be configured.  *Note Configuration::,
 for more information about syntax checker configuration.
 
-`C-c ! ?'
-`M-x flycheck-describe-checker'
+'C-c ! ?'
+'M-x flycheck-describe-checker'
      Show the documentation of a syntax checker.
 
 
@@ -331,68 +288,66 @@ File: flycheck.info,  Node: Configuration,  Next: Reporting,  Prev: Selection,  
 ================================
 
 Some syntax checkers can be configured via options.  The following
-options are provided by Flycheck (use `C-h v' or `M-x
-describe-variable' on the variable name for detailed help):
+options are provided by Flycheck (use 'C-h v' or 'M-x describe-variable'
+on the variable name for detailed help):
 
  -- User Option: flycheck-flake8-maximum-complexity
-     The maximum McCabe complexity the `python-flake8' syntax checker
+     The maximum McCabe complexity the 'python-flake8' syntax checker
      allows without reporting a warning.
 
  -- User Option: flycheck-flake8-maximum-line-length
-     The maximum length of a line in characters the `python-flake8'
+     The maximum length of a line in characters the 'python-flake8'
      syntax checker allows without reporting an error.
 
  -- User Option: flycheck-phpcs-standard
-     The coding standard the syntax checker `php-phpcs' shall use.
+     The coding standard the syntax checker 'php-phpcs' shall use.
 
    Some syntax checkers also read configuration files denoted by
 associated "configuration file variables".  The following configuration
 files are provided by Flycheck:
 
  -- User Option: flycheck-chktexrc
-     The configuration file for the `tex-chktex' syntax checker.
+     The configuration file for the 'tex-chktex' syntax checker.
 
  -- User Option: flycheck-coffeelintrc
-     The configuration file for the `coffee-coffeelint' syntax checker.
+     The configuration file for the 'coffee-coffeelint' syntax checker.
 
  -- User Option: flycheck-flake8rc
-     The configuration file for the `python-flake8' syntax checker.
+     The configuration file for the 'python-flake8' syntax checker.
 
  -- User Option: flycheck-jshintrc
-     The configuration file for the `javascript-jshint' syntax checker.
+     The configuration file for the 'javascript-jshint' syntax checker.
 
  -- User Option: flycheck-rubocoprc
-     The configuration file for the `ruby-rubocup' syntax checker.
+     The configuration file for the 'ruby-rubocup' syntax checker.
 
  -- User Option: flycheck-tidyrc
-     The configuration file for the `html-tidy' syntax checker.
+     The configuration file for the 'html-tidy' syntax checker.
 
    All configuration file variables are interpreted according to the
 following rules:
 
    If the variable contains a plain file name _without_ any slash, e.g.
-`.jshintrc', this file is searched
+'.jshintrc', this file is searched
 
   1. in the buffer's directory,
-
   2. any ancestors thereof,
+  3. and in the 'HOME' directory eventually.
 
-  3. and in the `HOME' directory eventually.
-
-If the buffer has no `buffer-file-name', only the `HOME' directory is
+If the buffer has no 'buffer-file-name', only the 'HOME' directory is
 searched.
 
-   If the variable contains a _path with_ a slash, e.g. `./.jshintrc'
-or `~/.jshintrc', the path is expanded against the buffer's directory
-using `expand-file-name'.
+   If the variable contains a _path with_ a slash, e.g.  './.jshintrc'
+or '~/.jshintrc', the path is expanded against the buffer's directory
+using 'expand-file-name'.
 
-   Customize these variables using `M-x customize-group RET
-flycheck-config-files'.  Use `flycheck-describe-checker' to find out
+   Customize these variables using 'M-x customize-group RET
+flycheck-config-files'.  Use 'flycheck-describe-checker' to find out
 whether a syntax checker has a configuration file.
 
    You may also use these variables as file-local variables.  For
 instance, the following checks the Javascript file always with
-`.jshintrc' from the parent directory:
+'.jshintrc' from the parent directory:
 
      // Local variables:
      // flycheck-jshintrc: "../.jshintrc"
@@ -400,7 +355,7 @@ instance, the following checks the Javascript file always with
 
    Some syntax checkers have options that cannot be changed in
 configuration files.  These options can be changed by various variables.
-Customize these with `M-x customize-group RET flycheck-options'.
+Customize these with 'M-x customize-group RET flycheck-options'.
 
 
 File: flycheck.info,  Node: Reporting,  Next: Navigation,  Prev: Configuration,  Up: Usage
@@ -411,12 +366,10 @@ File: flycheck.info,  Node: Reporting,  Next: Navigation,  Prev: Configuration, 
 Errors and warnings from a syntax checker are
    * reported in the mode line or in a popup buffer, depending on the
      length of the error messages,
-
    * indicated by fringe icons,
-
-   * and highlighted in the buffer with `flycheck-error-face' and
-     `flycheck-warning-face' respectively, according to
-     `flycheck-highlighting-mode'
+   * and highlighted in the buffer with 'flycheck-error-face' and
+     'flycheck-warning-face' respectively, according to
+     'flycheck-highlighting-mode'
 
  -- User Option: flycheck-error-face
  -- User Option: flycheck-warning-face
@@ -435,35 +388,46 @@ Errors and warnings from a syntax checker are
  -- User Option: flycheck-highlighting-mode
      This variable determines how to highlight errors:
 
-     If set to `columns' try to highlight errors as exactly as possible.
+     If set to 'columns' try to highlight errors as exactly as possible.
      If an error provides information about a specific column, only this
      column is highlighted.  This retains as much information as
-     possible from the syntax checker, but a single column highlight
-     may be easily overlooked.  This mode is the default.
+     possible from the syntax checker, but a single column highlight may
+     be easily overlooked.  This mode is the default.
 
-     If set to `lines' the whole line on which the error occurred is
+     If set to 'lines' the whole line on which the error occurred is
      highlighted, regardless of whether the error is actually specific
      to a column.  Column information is hence ignored.
 
-     If set to `nil' highlighting is completely disabled.  Errors will
+     If set to 'nil' highlighting is completely disabled.  Errors will
      only be reported via fringe icons and error message popups.
 
      Note that this variable does _not_ affect error _navigation_.
-     `next-error' and `previous-error' always jump to the error column,
+     'next-error' and 'previous-error' always jump to the error column,
      regardless of the highlighting mode.
 
    To view an error message, either hover the mouse of the highlighted
 error, or move the point to the highlighted error and wait for a short
 moment to see the error message in the echo area.  You can also copy the
-error message into kill ring:
+error message into kill ring, or google it straight from Emacs:
 
-`C-c ! C-w'
-`M-x flycheck-copy-messages-as-kill'
+'C-c ! C-w'
+'M-x flycheck-copy-messages-as-kill'
      Copy all Flycheck error messages at the current point into kill
      ring.
 
-`C-c ! C'
-`M-x flycheck-clear'
+'C-c ! /'
+'M-x flycheck-google-messages'
+     Google for all Flycheck error messages at the current point.
+
+     If there are more than 'flycheck-google-max-messages' errors at
+     point, signal an error, to avoid spamming your browser with Google
+     tabs.
+
+     Requires the Google This
+     (https://github.com/Bruce-Connor/emacs-google-this) library.
+
+'C-c ! C'
+'M-x flycheck-clear'
      Clear all Flycheck errors and warnings in the current buffer.
 
 
@@ -473,44 +437,43 @@ File: flycheck.info,  Node: Navigation,  Next: Mode line,  Prev: Reporting,  Up:
 ====================
 
 Flycheck supports the standard error navigation commands of Emacs.  If
-no compilation buffer (including those from `M-x compile', `M-x grep',
-`M-x occur', etc.) is visible, `M-g n' (`next-error') and `M-g p'
-(`previous-error') will navigate between Flycheck warnings and errors
-in the current buffer.  *Note Compilation Mode: (emacs)Compilation
-Mode, for more information about these commands.
+no compilation buffer (including those from 'M-x compile', 'M-x grep',
+'M-x occur', etc.)  is visible, 'M-g n' ('next-error') and 'M-g p'
+('previous-error') will navigate between Flycheck warnings and errors in
+the current buffer.  *Note (emacs)Compilation Mode::, for more
+information about these commands.
 
    Visible compilation buffers take precedence over Flycheck navigation.
-If such a buffer is visible, `M-g n' and `M-g p' will ignore Flycheck
-errors and warnings, and navigate errors (or generally results)
-reported by the compilation buffer instead.
+If such a buffer is visible, 'M-g n' and 'M-g p' will ignore Flycheck
+errors and warnings, and navigate errors (or generally results) reported
+by the compilation buffer instead.
 
    To address this issue, Flycheck provides independent error navigation
 commands:
 
-`C-c ! n'
-`M-x flycheck-next-error'
+'C-c ! n'
+'M-x flycheck-next-error'
      Jump to the next Flycheck error.
 
      With prefix argument, jump forwards by as many errors as specified
-     by the prefix argument, e.g. `M-3 C-c ! n' will move to the 3rd
+     by the prefix argument, e.g.  'M-3 C-c ! n' will move to the 3rd
      error from the current point.
 
-`C-c ! p'
-`M-x flycheck-previous-error'
+'C-c ! p'
+'M-x flycheck-previous-error'
      Jump to the previous Flycheck error.
 
-     With prefix argument, jump backwards by as many errors as
-     specified by the prefix argument, e.g. `M-3 C-c ! p' will move to
-     the 3rd previous error from the current point.
+     With prefix argument, jump backwards by as many errors as specified
+     by the prefix argument, e.g.  'M-3 C-c ! p' will move to the 3rd
+     previous error from the current point.
 
-`M-x flycheck-first-error'
+'M-x flycheck-first-error'
      Jump to the first Flycheck error.
 
      With prefix argument, jump forwards to by as many errors as
-     specified by the prefix argument, e.g. `M-3 M-x
+     specified by the prefix argument, e.g.  'M-3 M-x
      flycheck-first-error' moves to the 3rd error from the beginning of
      the buffer.
-
 
    Error navigation jumps to the exact error column, or to the first
 non-whitespace character of a line if the error is not specific to a
@@ -524,26 +487,21 @@ File: flycheck.info,  Node: Mode line,  Prev: Navigation,  Up: Usage
 
 Flycheck indicates its state in the mode line:
 
-`FlyC'
+'FlyC'
      There are no errors in the current buffer.
-
-`FlyC*'
+'FlyC*'
      A syntax check is being performed currently.
-
-`FlyC:3/4'
+'FlyC:3/4'
      There are three errors and four warnings in the current buffer.
-
-`FlyC-'
+'FlyC-'
      Automatic syntax checker selection did not find a suitable syntax
      checker.  *Note Selection::, for more information.
-
-`FlyC!'
-     The syntax check failed.  Inspect the `*Messages*' buffer for
+'FlyC!'
+     The syntax check failed.  Inspect the '*Messages*' buffer for
      details.
-
-`FlyC?'
+'FlyC?'
      The syntax check had a dubious result.  The definition of the
-     syntax checker may be flawed.  Inspect the `*Messages*' buffer for
+     syntax checker may be flawed.  Inspect the '*Messages*' buffer for
      details.  This indicator should never be displayed for built-in
      syntax checkers.  If it is, please report this issue to the
      Flycheck developers.  *Note Reporting issues::.
@@ -573,7 +531,7 @@ File: flycheck.info,  Node: Declaration,  Next: Error parsers,  Prev: Extending,
 3.1 Declaration of syntax checkers
 ==================================
 
-Checkers are declared with `flycheck-declare-checker':
+Checkers are declared with 'flycheck-declare-checker':
 
  -- Macro: flycheck-declare-checker symbol docstring &rest properties
      Declare SYMBOL as new syntax checker with PROPERTIES.
@@ -582,30 +540,28 @@ Checkers are declared with `flycheck-declare-checker':
 
      The PROPERTIES specify the new syntax checker:
 
-    `:command '(EXECUTABLE ARGUMENTS...)'
-          A list providing the command to execute.  The command
-          consists of an EXECUTABLE specified as string in the `car',
-          and the ARGUMENTS for this executable in the `cdr'.  *Note
-          List elements: (elisp)List elements, for more information
-          about the elements of a list.
+     ':command '(EXECUTABLE ARGUMENTS...)'
+          A list providing the command to execute.  The command consists
+          of an EXECUTABLE specified as string in the 'car', and the
+          ARGUMENTS for this executable in the 'cdr'.  *Note (elisp)List
+          elements::, for more information about the elements of a list.
 
-          The EXECUTABLE is checked for existence with
-          `executable-find' before executing the syntax checker.
+          The EXECUTABLE is checked for existence with 'executable-find'
+          before executing the syntax checker.
 
           In ARGUMENTS, various special symbols are substituted before
           executing the syntax checker:
 
-         `source'
+          'source'
                This symbol is substituted with the file to check.  This
                file is a temporary file with the contents of the buffer
                to check, created in the system's temporary directory.
 
-               If the buffer to check has a file name, the
-               non-directory component of the name of the temporary
-               file will be the same as in the buffer's file name, to
-               support languages which enforce specific rules on the
-               file name (e.g. the file must be named after the
-               containing class).
+               If the buffer to check has a file name, the non-directory
+               component of the name of the temporary file will be the
+               same as in the buffer's file name, to support languages
+               which enforce specific rules on the file name (e.g.  the
+               file must be named after the containing class).
 
                If the buffer to check has no file name, the name of the
                temporary file will be random.
@@ -613,48 +569,48 @@ Checkers are declared with `flycheck-declare-checker':
                This symbol is the preferred way to pass the input file
                to your syntax checker.
 
-         `source-inplace'
+          'source-inplace'
                This symbol is substituted with the file to check.  This
                file is a temporary file with the contents of the buffer
                to check, created in the same directory as the buffer's
                file.  The name of the file is random.
 
-               If the buffer has no file name, this symbol is
-               equivalent to `source'.
+               If the buffer has no file name, this symbol is equivalent
+               to 'source'.
 
                This symbol should be used if and only if the syntax
                check needs other files from the source directory (e.g.
                include files in C, or Python modules).
 
-         `source-original'
-               This symbol is substituted with `buffer-file-name', or
-               an empty string, if the buffer has no file name.
+          'source-original'
+               This symbol is substituted with 'buffer-file-name', or an
+               empty string, if the buffer has no file name.
 
                This symbol is provided to additionally pass the real
                name of the file to check to a syntax checker.
 
                It should never be used as primary input to the syntax
-               checker, unless both `source' and `source-original' are
+               checker, unless both 'source' and 'source-original' are
                totally not applicable.  In this case, be sure to add a
-               predicate to your syntax checker that inhibits the
-               syntax check, if the buffer has no file name, or was
-               modified, for otherwise the syntax check will fail or
-               return out-dated errors:
+               predicate to your syntax checker that inhibits the syntax
+               check, if the buffer has no file name, or was modified,
+               for otherwise the syntax check will fail or return
+               out-dated errors:
 
                     :predicate (and (buffer-file-name) (not (buffer-modified-p)))
 
-         `temporary-directory'
+          'temporary-directory'
                This symbol is substituted with the path of an existing
-               temporary directory, which is unique on each execution
-               of the syntax checker.
+               temporary directory, which is unique on each execution of
+               the syntax checker.
 
                Use this symbol if you need to move files created by a
                syntax checker out of the way.
 
-               See the declaration of the `elixir' syntax checker for an
+               See the declaration of the 'elixir' syntax checker for an
                application of this symbol.
 
-         `(config-file OPTION VARIABLE)'
+          '(config-file OPTION VARIABLE)'
                This cell is substituted with a configuration file for
                the syntax checker.  OPTION is a string containing the
                option that specifies a configuration file to the syntax
@@ -664,21 +620,21 @@ Checkers are declared with `flycheck-declare-checker':
                to obtain the name or path of the configuration file.
                *Note Configuration::, for more information about syntax
                checker configuration.  Define this variable with
-               `flycheck-def-config-file-var'.
+               'flycheck-def-config-file-var'.
 
-               If the configuration file is found according to the
-               rules documented in *note Configuration::, the cell is
+               If the configuration file is found according to the rules
+               documented in *note Configuration::, the cell is
                substituted with the OPTION and the absolute path to the
                configuration file as string.  Otherwise the cell is
                simply dropped from the arguments of the syntax checker.
 
-               If OPTION ends with a `=' character, OPTION and the
+               If OPTION ends with a '=' character, OPTION and the
                absolute path to the configuration file are concatenated
                and given as a single argument to the syntax checker.
                Otherwise, OPTION and the configuration file path are
                given as two separate arguments.
 
-         `(option OPTION VARIABLE [FILTERS])'
+          '(option OPTION VARIABLE [FILTERS])'
                This cell is substituted with the value of VARIABLE.
                OPTION is a string containing the option for with to
                specify the value.  FILTER is an optional function to be
@@ -688,29 +644,29 @@ Checkers are declared with `flycheck-declare-checker':
 
                VARIABLE is a symbol referring to a variable whose value
                to use.  *Note Configuration::, for more information
-               about syntax checker configuration.  Define this
-               variable with `flycheck-def-option-var'.
+               about syntax checker configuration.  Define this variable
+               with 'flycheck-def-option-var'.
 
-               If VARIABLE is not NIL after applying FILTER, the cell
-               is substituted with the OPTION and the value of VARIABLE
+               If VARIABLE is not NIL after applying FILTER, the cell is
+               substituted with the OPTION and the value of VARIABLE
                after applying FILTER.  Otherwise the cell is simply
                dropped from the arguments of the syntax checker.
 
-               An OPTION ending with a `=' character is treated like in
-               a `config-file' cell.
+               An OPTION ending with a '=' character is treated like in
+               a 'config-file' cell.
 
-         `(eval FORM)'
+          '(eval FORM)'
                This cell is substituted with a result of evaluating
                FORM.  FORM must either return a string or a list of
-               strings, or `nil' to indicate that nothing should be
+               strings, or 'nil' to indicate that nothing should be
                substituted for CELL.  In case of other return values an
                error is signaled.  _No_ further substitutions are
-               performed, neither in FORM before it is evaluated, nor
-               in the result of evaluating FORM.
+               performed, neither in FORM before it is evaluated, nor in
+               the result of evaluating FORM.
 
           This property is mandatory.
 
-    `:error-parser 'PARSER'
+     ':error-parser 'PARSER'
           An error parser to use for parsing the output of the syntax
           checker.
 
@@ -718,59 +674,56 @@ Checkers are declared with `flycheck-declare-checker':
           more information about error parsers, including a list of
           built-in error parsers.
 
-          Using a error parser is preferred if a syntax checker
-          provides a structured output format like XML or JSON.  If
-          possible, re-use one of the built-in error parsers listed in
-          *note Error parsers::
+          Using a error parser is preferred if a syntax checker provides
+          a structured output format like XML or JSON. If possible,
+          re-use one of the built-in error parsers listed in *note Error
+          parsers::
 
-          May not be specified together with `:error-patterns'.
+          May not be specified together with ':error-patterns'.
 
-    `:error-patterns '((REGEXP LEVEL)...)'
+     ':error-patterns '((REGEXP LEVEL)...)'
           A list of one or more error patterns to parse the output of
-          `:command'.
+          ':command'.
 
           The REGEXP is a regular expression matching a single error or
-          warning.  The LEVEL is either `error' or `warning' and
+          warning.  The LEVEL is either 'error' or 'warning' and
           classifies the severity of the matched error message.
 
           Do not use error patterns if you can use an error parser.
 
           The REGEXP may provide the following match groups:
 
-         _Group 1_
+          _Group 1_
                The file name.
-
-         _Group 2_
+          _Group 2_
                The line number.
-
-         _Group 3_
+          _Group 3_
                The column number.
-
-         _Group 4_
+          _Group 4_
                The error text.
 
           Each of these groups is optional, however error messages
-          without line numbers will be ignored.  Use explicitly
-          numbered groups to make sure that the group numbering is
-          correct.  *Note Regexp Backslash: (elisp)Regexp Backslash,
-          for more information about regular expression groups.
+          without line numbers will be ignored.  Use explicitly numbered
+          groups to make sure that the group numbering is correct.
+          *Note (elisp)Regexp Backslash::, for more information about
+          regular expression groups.
 
           The patterns are applied in the order of declaration to the
-          whole output of the syntax checker.  Output already matched
-          by a pattern will not be matched by subsequent patterns.  In
+          whole output of the syntax checker.  Output already matched by
+          a pattern will not be matched by subsequent patterns.  In
           other words, the first pattern wins.
 
-          May not be specified together with `:error-parser'.
+          May not be specified together with ':error-parser'.
 
-    `:modes 'MAJOR-MODE'
-    `:modes '(MAJOR-MODE...)'
+     ':modes 'MAJOR-MODE'
+     ':modes '(MAJOR-MODE...)'
           A single MAJOR-MODE, or a list thereof.
 
           MAJOR-MODE is a symbol referring to a major mode.  If given
           the syntax checker will only be used in buffers with any of
           the given major modes.
 
-    `:predicate FORM'
+     ':predicate FORM'
           A predicate that determines whether the syntax checker may be
           used.
 
@@ -782,47 +735,46 @@ Checkers are declared with `flycheck-declare-checker':
           If :MODES is given, FORM is only evaluated if the major mode
           matches.  Otherwise the syntax checker is not used.
 
-    `:next-checker '(ITEM...)'
+     ':next-checker '(ITEM...)'
           A list of syntax checker to run after this syntax checker.
 
           Each ITEM is either a single syntax checker symbol, or a cons
-          cell `(PREDICATE . CHECKER)'.  Each ITEM is tried on the
-          order of declaration.
+          cell '(PREDICATE . CHECKER)'.  Each ITEM is tried on the order
+          of declaration.
 
           If the ITEM is a syntax checker symbol, determine whether it
-          is usable and registered (i.e. contained in
-          `flycheck-checkers').  If so start a new syntax check with
+          is usable and registered (i.e.  contained in
+          'flycheck-checkers').  If so start a new syntax check with
           that syntax checker, and merged its results with the results
           of this syntax checker.  If not, try the next ITEM.
 
-          If ITEM is a cons cell, PREDICATE specifies whether to run
-          the CHECKER depending on the results of this syntax checker:
+          If ITEM is a cons cell, PREDICATE specifies whether to run the
+          CHECKER depending on the results of this syntax checker:
 
-         `no-errors'
+          'no-errors'
                The CHECKER is only used if this syntax checker resulted
                in no errors at all.
-
-         `warnings-only'
+          'warnings-only'
                The CHECKER is only used if this syntax checker did not
-               result in error messages of severity `error'.
+               result in error messages of severity 'error'.
 
           If the predicate matches, and CHECKER is usable and
-          registered, start a new syntax checker with CHECKER and
-          merged its results with the results of this syntax checker.
-          If not, try the next ITEM.
+          registered, start a new syntax checker with CHECKER and merged
+          its results with the results of this syntax checker.  If not,
+          try the next ITEM.
 
           If there is no further ITEM, finish the syntax check.
 
-     At least on of `:modes' and `:predicate' must be present.  If both
+     At least on of ':modes' and ':predicate' must be present.  If both
      are present, both must match for the syntax checker to be used.
 
-     Either `:error-patterns' or `:error-parser' must be present.  If
+     Either ':error-patterns' or ':error-parser' must be present.  If
      both are present, an error is signaled.
 
-   A syntax checker declared with `flycheck-declare-checker' is already
-suitable for manual checker selection with `flycheck-select-checker'.
+   A syntax checker declared with 'flycheck-declare-checker' is already
+suitable for manual checker selection with 'flycheck-select-checker'.
 For automatic selection the syntax checker must be registered by adding
-it to `flycheck-checkers'.  *Note Selection::.
+it to 'flycheck-checkers'.  *Note Selection::.
 
  -- Macro: flycheck-def-config-file-var SYMBOL CHECKER &optional
           FILENAME
@@ -830,14 +782,14 @@ it to `flycheck-checkers'.  *Note Selection::.
      with a default value of FILENAME.
 
      SYMBOL is declared as customizable, buffer-local variable using
-     `defcustom', to provide a configuration file for the given syntax
-     CHECKER.  The variable has the customization type `string', and
+     'defcustom', to provide a configuration file for the given syntax
+     CHECKER.  The variable has the customization type 'string', and
      gets a comprehensive docstring, including a reference to CHECKER.
 
      FILENAME is used as initial value for the variable.  If omitted,
      the initial value is nil.
 
-     Use this macro together with the `config-file' cell in the command
+     Use this macro together with the 'config-file' cell in the command
      of a syntax checker.
 
  -- Macro: flycheck-def-option-var SYMBOL INITIAL-VALUE CHECKER
@@ -846,14 +798,14 @@ it to `flycheck-checkers'.  *Note Selection::.
      given INITIAL-VALUE.
 
      SYMBOL is declared as customizable variable, buffer-local variable
-     using `defcustom', to provide an option for the given syntax
+     using 'defcustom', to provide an option for the given syntax
      CHECKER.  SYMBOL gets a comprehensive docstring, including a
      reference to CHECKER.
 
-     CUSTOM-ARGS are forwarded to `defcustom'.  Declare the
+     CUSTOM-ARGS are forwarded to 'defcustom'.  Declare the
      customization type here.
 
-     Use this macro together with the `option' cell in the command of a
+     Use this macro together with the 'option' cell in the command of a
      syntax checker.
 
 
@@ -863,12 +815,12 @@ File: flycheck.info,  Node: Error parsers,  Next: Option filters,  Prev: Declara
 =================
 
 Syntax checkers may use more sophisticated error parsing by using the
-`:error-parser' property.  *Note Declaration::.
+':error-parser' property.  *Note Declaration::.
 
    Flycheck provides the following error parsers for use by syntax
 checkers:
 
-`flycheck-parse-checkstyle'
+'flycheck-parse-checkstyle'
      Parse XML output similar to Checkstyle
      (http://checkstyle.sourceforge.net/).
 
@@ -877,10 +829,8 @@ function that takes three arguments:
 
 OUTPUT
      The complete output of the syntax checker as string.
-
 CHECKER
      A symbol denoting the executed syntax checker.
-
 BUFFER
      A buffer object referring to the buffer that was syntax-checked.
 
@@ -897,11 +847,11 @@ File: flycheck.info,  Node: Option filters,  Next: Examples,  Prev: Error parser
 ==================
 
 Flycheck provides the following built-in option filters for use with the
-`option' cell:
+'option' cell:
 
-`flycheck-option-int'
-     An integral option that handles `nil' correctly (unlike
-     `number-to-string').
+'flycheck-option-int'
+     An integral option that handles 'nil' correctly (unlike
+     'number-to-string').
 
 
 File: flycheck.info,  Node: Examples,  Prev: Option filters,  Up: Extending
@@ -923,7 +873,7 @@ File: flycheck.info,  Node: Simple example,  Next: Predicate example,  Prev: Exa
 ---------------------------
 
 As explained in the previous chapter *note Extending:: a syntax checker
-is declared with `flycheck-declare-checker'.
+is declared with 'flycheck-declare-checker'.
 
    We will use this function to declare a syntax checker using the
 CodeSniffer utility for the PHP programming language:
@@ -936,21 +886,21 @@ CodeSniffer utility for the PHP programming language:
        :error-parser 'flycheck-parse-checkstyle
        :modes '(php-mode php+-mode))
 
-   First we specify the `:command' to execute.  The first element of
-the command list is the name of the executable, `phpcs' in our case.
-This command is checked for existence with `executable-find' before
-using this syntax checker.  If the command does not exist, the syntax
-checker is _not_ used.
+   First we specify the ':command' to execute.  The first element of the
+command list is the name of the executable, 'phpcs' in our case.  This
+command is checked for existence with 'executable-find' before using
+this syntax checker.  If the command does not exist, the syntax checker
+is _not_ used.
 
    The executable is following by the arguments, in this case some
-options and the symbol `source'.  This symbol is replaced with the file
+options and the symbol 'source'.  This symbol is replaced with the file
 to check.  This file is a temporary file created in the system temporary
 directory and containing the contents of the buffer to check.
 
    Next we specify how to parse the output of the syntax checker.  PHP
 CodeSniffer provides an option to output errors in an XML format similar
 to the Java tool Checkstyle, so we use the built-in _error parser_
-`flycheck-parse-checkstyle' to parse the output.
+'flycheck-parse-checkstyle' to parse the output.
 
    Eventually we enable the syntax checker in PHP editing modes.
 
@@ -970,7 +920,7 @@ for the Python programming language:
          ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\[F\\] \\(?4:.*\\)$" error))
        :modes 'python-mode)
 
-   Again, there is a `:command', however we use the `source-inplace'
+   Again, there is a ':command', however we use the 'source-inplace'
 symbol this time.  This symbol causes the temporary file to be created
 in the same directory as the original file, making information from the
 source code tree available to the syntax checker.  In case of Pylint,
@@ -978,11 +928,11 @@ these are the Python packages from the source code tree.
 
    Next we give the list of _error patterns_ to parse errors.  These
 patterns extract the error location and the error message from the
-output of `epylint'.  An error pattern is a list containing a regular
+output of 'epylint'.  An error pattern is a list containing a regular
 expression with match groups to extract the error information, and an
-error level (either `warning' or `error').
+error level (either 'warning' or 'error').
 
-   Eventually we enable the syntax checker in `python-mode'.
+   Eventually we enable the syntax checker in 'python-mode'.
 
 
 File: flycheck.info,  Node: Predicate example,  Next: Configuration example,  Prev: Simple example,  Up: Examples
@@ -1005,15 +955,15 @@ edited shell script is written for the right shell:
        :modes 'sh-mode
        :predicate '(eq sh-shell 'zsh))
 
-   This syntax checker for the Zsh shell is enabled in `sh-mode' as
-specified by `:modes', however it specifies an additional `:predicate'
+   This syntax checker for the Zsh shell is enabled in 'sh-mode' as
+specified by ':modes', however it specifies an additional ':predicate'
 to determine whether the right shell is in use.  Hence this syntax
 checker is only used if a Zsh shell scripting is being edited in
-`sh-mode', but not if a Bash or POSIX Shell script is being edited.
+'sh-mode', but not if a Bash or POSIX Shell script is being edited.
 
-   A syntax checker may even go as far as not having `:modes' at all.
+   A syntax checker may even go as far as not having ':modes' at all.
 For instance, there is no special JSON mode, but syntax checking JSON is
-still desirable.  Hence a JSON syntax checker may use the `:predicate'
+still desirable.  Hence a JSON syntax checker may use the ':predicate'
 to check the file extension:
 
      (flycheck-declare-checker json-jsonlint
@@ -1052,17 +1002,17 @@ configuration files:
        :modes '(js-mode js2-mode js3-mode))
 
    As you can see, we declare a syntax checker for Javascript, using the
-`jshint' utility.  This utility accepts a configuration file via the
-`--config' option.
+'jshint' utility.  This utility accepts a configuration file via the
+'--config' option.
 
    To use a configuration file with jshint, we first declare the
-variable `flycheck-jshintrc' that provides the name of the file, as
+variable 'flycheck-jshintrc' that provides the name of the file, as
 explained in *note Configuration::.
 
-   In the `:command' we use a `config-file' element to pass the
+   In the ':command' we use a 'config-file' element to pass the
 configuration file to the syntax checker.  If the configuration file is
 found, its path will be passed to the syntax checker, using the option
-specified after the `config-file' symbol.  Otherwise the whole element
+specified after the 'config-file' symbol.  Otherwise the whole element
 is simply omitted from the command line.
 
    Some Syntax checkers can also be configured using options passed on
@@ -1085,10 +1035,10 @@ Simple example:: with support for coding standards:
        :modes '(php-mode php+-mode))
 
    The syntax checker is pretty much the same as before, except that a
-new element was added to `:command'.  This element passes the value of
-the new option variable `flycheck-phpcs-standard' to the syntax
-checker.  This variable is declared with the special macro
-`flycheck-def-option-var' at the beginning.
+new element was added to ':command'.  This element passes the value of
+the new option variable 'flycheck-phpcs-standard' to the syntax checker.
+This variable is declared with the special macro
+'flycheck-def-option-var' at the beginning.
 
 
 File: flycheck.info,  Node: Chaining example,  Prev: Configuration example,  Up: Examples
@@ -1104,7 +1054,7 @@ with the PHP parser, and verified against coding styles using PHP
 CodeSniffer.
 
    To support such cases, syntax checkers can be "chained" using the
-`:next-checkers'.  The standard PHP syntax checker uses this to run PHP
+':next-checkers'.  The standard PHP syntax checker uses this to run PHP
 CodeSniffer if there are no syntax errors:
 
      (flycheck-declare-checker php
@@ -1131,14 +1081,14 @@ File: flycheck.info,  Node: API,  Next: Contribution,  Prev: Extending,  Up: Top
 
 This chapter provides a brief overview over the Flycheck API.
 
-   You may use this API to extend Flycheck, e.g. by implementing new
+   You may use this API to extend Flycheck, e.g.  by implementing new
 error parsers or more in-depth error analysis.  You will also find this
 API helpful if you want to develop Flycheck itself.
 
    As said this chapter merely provides an overview over the Flycheck
-API.  The documentation is therefore rather brief.  For a definite
+API. The documentation is therefore rather brief.  For a definite
 reference on a function or variable, consult its docstring via
-`describe-function' and `describe-variable' respectively.
+'describe-function' and 'describe-variable' respectively.
 
 * Menu:
 
@@ -1151,36 +1101,36 @@ File: flycheck.info,  Node: Error API,  Next: Error parser API,  Prev: API,  Up:
 4.1 Error API
 =============
 
-Flycheck errors are represented by the structure `flycheck-error'.
-*Note Structures: (cl)Structures, for information about CL structures.
+Flycheck errors are represented by the structure 'flycheck-error'.
+*Note (cl)Structures::, for information about CL structures.
 
    This structure has the following attributes, each of which may be
 nil:
 
-`buffer'
+'buffer'
      The buffer object referring to the buffer this error belongs to.
 
      Note that you do not need to set this attribute when creating
      errors in an error parser.  Flycheck automatically keeps track of
      the buffer itself.
 
-`filename'
+'filename'
      A string containing the filename the error refers to.
 
-`line'
+'line'
      An integer providing the line the error refers to.
 
-`column'
+'column'
      An integer providing the column the error refers to.
 
      If this attribute is nil, Flycheck will assume the error to refer
      to the whole line.
 
-`message'
+'message'
      The human-readable error message as string.
 
-`level'
-     The severity of the error message, as either `error' or `warning'.
+'level'
+     The severity of the error message, as either 'error' or 'warning'.
 
    The structure has only a single constructor:
 
@@ -1201,7 +1151,7 @@ nil:
      If IGNORE-COLUMN is non-nil, ignore the column attribute of ERR
      when determining the region.
 
-     Return the region as cons cell `(BEG . END)'.
+     Return the region as cons cell '(BEG . END)'.
 
  -- Function: flycheck-error-pos err
      Get the buffer position referred to by ERR.
@@ -1219,7 +1169,7 @@ errors of a syntax check.
  -- Function: flycheck-count-errors errors
      Count the number of errors and warnings in ERRORS.
 
-     Return a cons cell `(NO-ERRORS . NO-WARNINGS)'.
+     Return a cons cell '(NO-ERRORS . NO-WARNINGS)'.
 
  -- Function: flycheck-has-errors-p errors &optional level
      Determine if there are any ERRORS with the given LEVEL.
@@ -1246,9 +1196,7 @@ File: flycheck.info,  Node: Contribution,  Next: Changes,  Prev: API,  Up: Top
 Flycheck needs your help, in all aspects.  Please
 
    * report all bugs and issues you can find,
-
    * tell us your ideas for improvements or new features,
-
    * and send us your patches and pull requests!
 
    This chapter helps you in doing so, by giving you guidelines for
@@ -1273,12 +1221,9 @@ Please report any issues to the Flycheck issue tracker
    When doing so, please respect the following guidelines:
 
    * Check that the issue has not already been reported.
-
    * Check that the issue has not already been fixed in the latest code.
-
    * Be clear and precise.  If possible, name functions and command
      exactly.
-
    * Open an issue with a clear title and description in grammatically
      correct, complete sentences.
 
@@ -1293,16 +1238,14 @@ File: flycheck.info,  Node: Contributing syntax checkers,  Next: Contributing co
 
 When creating a new syntax checker, either create an issue (see *note
 Reporting issues::) and paste your syntax checker declaration, or fork
-the repository, implement the syntax checker in Flycheck itself and
-send us a pull request (see *note Contributing code::).
+the repository, implement the syntax checker in Flycheck itself and send
+us a pull request (see *note Contributing code::).
 
    Whatever way you choose, please respect the following guidelines:
 
    * Provide a link to the website of the syntax checker tool.
-
    * Show some example source code that triggered warnings or errors
      with the syntax checker tool.
-
    * If possible, please add unit tests for your new syntax checker.
      *Note Unit tests::.
 
@@ -1318,22 +1261,16 @@ Please contribute patches to Flycheck as pull requests on Github.
 
    * Read how to properly contribute to open source projects on Github
      (http://gun.io/blog/how-to-github-fork-branch-and-pull-request).
-
    * Use a topic branch to easily amend a pull request later, if
      necessary.
-
    * Write good commit messages
      (http://gun.io/blog/how-to-github-fork-branch-and-pull-request).
-
    * Use the same coding style and spacing.
-
-   * Verify your Emacs Lisp code with `checkdoc' (`C-c ? d').
-
+   * Verify your Emacs Lisp code with 'checkdoc' ('C-c ? d').
    * Add unit tests for your code, if possible.  *Note Unit tests::.
-
    * Open a pull request
-     (https://help.github.com/articles/using-pull-requests) that
-     relates to but one subject with a clear title and description in
+     (https://help.github.com/articles/using-pull-requests) that relates
+     to but one subject with a clear title and description in
      grammatically correct, complete sentences.  Be sure to give use
      cases and rationale for your new feature.
 
@@ -1341,7 +1278,6 @@ Please contribute patches to Flycheck as pull requests on Github.
 not do the following:
 
    * Include a feature without good use cases and rationale.
-
    * Merge poorly written or incomplete code.
 
 You will be asked to improve your pull request in these cases.
@@ -1356,35 +1292,28 @@ Flycheck has a comprehensive to maintain and ensure the functionality
 and quality of the code.  Please add unit tests for your code if
 possible.
 
-   The test suite is contained in the `tests/' directory and written
+   The test suite is contained in the 'tests/' directory and written
 using the *note ERT: (ert)Top. library.
 
    To add unit tests do the following:
 
    * Familiarize yourself with the *note ERT: (ert)Top. library.
-
    * Familiarize yourself with the test suite in
-     `flycheck-testsuite.el'.
-
+     'flycheck-testsuite.el'.
    * Add your tests to the appropriate file.  Create a new test file if
      necessary.
-
-   * Extend the provisioning script `vagrant/provision.sh' with the
+   * Extend the provisioning script 'vagrant/provision.sh' with the
      dependencies of your tests, if necessary.  This includes syntax
      checker tools.
-
    * Install Virtual Box (https://www.virtualbox.org/) and Vagrant
      (http://www.vagrantup.com/).
-
-   * Run your tests with `make virtual-test'.
+   * Run your tests with 'make virtual-test'.
 
    You may also run the tests locally during development.  To do so:
    * Install Carton (https://github.com/rejeep/carton).
-
-   * Setup your development environment with `carton install'.
-
-   * Run the tests with `tests/run.sh'.  Use `tests/run.sh flake8' to
-     run only tests whose names contain the string `flake8'.
+   * Setup your development environment with 'carton install'.
+   * Run the tests with 'tests/run.sh'.  Use 'tests/run.sh flake8' to
+     run only tests whose names contain the string 'flake8'.
 
 
 File: flycheck.info,  Node: Changes,  Next: Credits,  Prev: Contribution,  Up: Top
@@ -1420,17 +1349,11 @@ Initial release as flymake-checkers
    * New syntax checkers
 
         * TeX/LaTeX
-
         * Shell scripts
-
         * Python
-
         * Ruby
-
         * Coffeescript
-
         * Emacs Lisp
-
 
 
 File: flycheck.info,  Node: 0.2,  Next: 0.3,  Prev: 0.1,  Up: Changes
@@ -1447,14 +1370,13 @@ File: flycheck.info,  Node: 0.2,  Next: 0.3,  Prev: 0.1,  Up: Changes
         * Simplify syntax checker declarations
           (https://github.com/lunaryorn/flycheck/issues/2)
 
-
 
 File: flycheck.info,  Node: 0.3,  Next: 0.4,  Prev: 0.2,  Up: Changes
 
 0.3 (Oct 20, 2012)
 ==================
 
-   * Replace `flymake-mode' with a custom syntax checking minor mode
+   * Replace 'flymake-mode' with a custom syntax checking minor mode
      (https://github.com/lunaryorn/flycheck/issues/4)
 
 
@@ -1465,27 +1387,20 @@ File: flycheck.info,  Node: 0.4,  Next: 0.5,  Prev: 0.3,  Up: Changes
 
    * Rename the project to Flycheck
      (https://github.com/lunaryorn/flycheck/issues/5)
-
    * New syntax checkers
 
         * HAML (https://github.com/lunaryorn/flycheck/issues/9)
-
         * CSS (https://github.com/lunaryorn/flycheck/issues/9)
-
-        * Javascript with `jsl'
+        * Javascript with 'jsl'
           (https://github.com/lunaryorn/flycheck/issues/9)
-
-        * Javascript with `jshint'
+        * Javascript with 'jshint'
           (https://github.com/lunaryorn/flycheck/issues/16)
-
         * JSON (https://github.com/lunaryorn/flycheck/issues/12)
-
-        * LaTeX with `lacheck'
+        * LaTeX with 'lacheck'
 
    * Bug fixes
         * Fix type error when checking compressed Emacs Lisp
           (https://github.com/lunaryorn/flycheck/issues/10)
-
 
 
 File: flycheck.info,  Node: 0.5,  Next: 0.6,  Prev: 0.4,  Up: Changes
@@ -1496,21 +1411,16 @@ File: flycheck.info,  Node: 0.5,  Next: 0.6,  Prev: 0.4,  Up: Changes
    * New syntax checkers:
 
         * SASS (https://github.com/lunaryorn/flycheck/issues/15)
-
         * Perl (https://github.com/lunaryorn/flycheck/issues/21)
-
         * XML
-
         * Lua (https://github.com/lunaryorn/flycheck/issues/30)
 
    * New features:
 
         * Support manual buffer-local selection of syntax checker
           (https://github.com/lunaryorn/flycheck/issues/25)
-
         * Add customizable error indicators
           (https://github.com/lunaryorn/flycheck/issues/28)
-
         * Echo error messages at point without 3rd-party libraries like
           flymake-cursor
           (https://github.com/lunaryorn/flycheck/issues/27)
@@ -1531,7 +1441,6 @@ File: flycheck.info,  Node: 0.5,  Next: 0.6,  Prev: 0.4,  Up: Changes
           implementation
           (https://github.com/lunaryorn/flycheck/issues/15)
 
-
 
 File: flycheck.info,  Node: 0.6,  Next: 0.6.1,  Prev: 0.5,  Up: Changes
 
@@ -1540,42 +1449,33 @@ File: flycheck.info,  Node: 0.6,  Next: 0.6.1,  Prev: 0.5,  Up: Changes
 
    * New syntax checkers:
 
-        * Emacs Lisp with `checkdoc-current-buffer'
+        * Emacs Lisp with 'checkdoc-current-buffer'
           (https://github.com/lunaryorn/flycheck/issues/53)
-
         * PHP with PHP CodeSniffer
           (https://github.com/lunaryorn/flycheck/issues/72)
 
    * Removed syntax checkers:
 
-        * Javascript with `jsl'
+        * Javascript with 'jsl'
 
    * New features:
 
-        * Error navigation with `next-error' and `previous-error'
+        * Error navigation with 'next-error' and 'previous-error'
           (https://github.com/lunaryorn/flycheck/issues/26)
-
         * Fringe icons instead of error indicators
           (https://github.com/lunaryorn/flycheck/issues/33)
-
         * Menu entry for Flycheck
           (https://github.com/lunaryorn/flycheck/issues/59)
-
-        * Customizable error highlighting, taking the column number
-          into account (https://github.com/lunaryorn/flycheck/issues/35)
-
+        * Customizable error highlighting, taking the column number into
+          account (https://github.com/lunaryorn/flycheck/issues/35)
         * Configuration files for syntax checkers
-
         * Add configuration file support to the syntax checkers
-          `coffee-coffeelint', `html-tidy', `javascript-jshint',
-          `pyton-flake8' and `tex-chktex'
-
+          'coffee-coffeelint', 'html-tidy', 'javascript-jshint',
+          'pyton-flake8' and 'tex-chktex'
         * Allow to compile a buffer with a syntax checker for testing
           purposes (https://github.com/lunaryorn/flycheck/issues/58)
-
         * Use multiple syntax checkers during a syntax check
           (https://github.com/lunaryorn/flycheck/issues/31)
-
         * Add dedicated help for syntax checkers
           (https://github.com/lunaryorn/flycheck/issues/52)
 
@@ -1588,35 +1488,26 @@ File: flycheck.info,  Node: 0.6,  Next: 0.6.1,  Prev: 0.5,  Up: Changes
 
         * Inherit highlighting faces from built-in faces
           (https://github.com/lunaryorn/flycheck/issues/24)
-
         * Correct error patterns of the HTML syntax checker
           (https://github.com/lunaryorn/flycheck/issues/36)
-
-        * Detect syntax errors in the `python-flake8' syntax checker
+        * Detect syntax errors in the 'python-flake8' syntax checker
           (https://github.com/lunaryorn/flycheck/issues/42)
-
         * Fix various regressions after introducing unit tests
-
         * Inhibit syntax checking during package installation
           (https://github.com/lunaryorn/flycheck/issues/45)
-
         * Disable syntax checking in Tramp buffers
           (https://github.com/lunaryorn/flycheck/issues/54)
-
         * Preserve whitespace in error messages
           (https://github.com/lunaryorn/flycheck/issues/65)
 
    * API changes:
         * Replace syntax checker variables with syntax checker
           declarations (https://github.com/lunaryorn/flycheck/issues/41)
-
         * Support parsing errors with arbitrary functions instead of
           error patterns
           (https://github.com/lunaryorn/flycheck/issues/38)
-
         * Add an error parser for Checkstyle-like XML output
           (https://github.com/lunaryorn/flycheck/issues/38)
-
 
 
 File: flycheck.info,  Node: 0.6.1,  Next: 0.7,  Prev: 0.6,  Up: Changes
@@ -1636,33 +1527,26 @@ File: flycheck.info,  Node: 0.7,  Next: 0.7.1,  Prev: 0.6.1,  Up: Changes
 
         * Navigate to source of syntax checker declarations from syntax
           checker help
-
         * Add online Info manual
           (https://github.com/lunaryorn/flycheck/issues/60)
 
    * Improvements:
 
         * Use pipes instead of TTYs to read output from syntax checkers
-
         * Defer syntax checks for invisible buffers
           (https://github.com/lunaryorn/flycheck/issues/80)
-
         * Immediately display error messages after error navigation
           (https://github.com/lunaryorn/flycheck/issues/62)
 
    * Bug fixes:
 
         * Never select deleted buffers
-
         * Do not let the debugger interfere with necessary cleanup
           actions
-
         * Do not attempt to parse empty XML trees
           (https://github.com/lunaryorn/flycheck/issues/78)
-
         * Fix infinite recursion on Windows
           (https://github.com/lunaryorn/flycheck/issues/81)
-
 
 
 File: flycheck.info,  Node: 0.7.1,  Next: 0.8,  Prev: 0.7,  Up: Changes
@@ -1672,25 +1556,20 @@ File: flycheck.info,  Node: 0.7.1,  Next: 0.8,  Prev: 0.7,  Up: Changes
 
    * Bug fixes:
 
-        * Do not signal errors from `flycheck-mode'
+        * Do not signal errors from 'flycheck-mode'
           (https://github.com/lunaryorn/flycheck/issues/87)
-
-        * Correctly fall back to `HOME' when searching configuration
+        * Correctly fall back to 'HOME' when searching configuration
           files
-
         * Correctly ascend to parent directory when searching
           configuration files
 
    * API changes:
 
-        * Rename `config' cell to `config-file'
-
-        * Allow to pass the result of `config-file' cells as single
+        * Rename 'config' cell to 'config-file'
+        * Allow to pass the result of 'config-file' cells as single
           argument
-
         * Add support for evaluating Lisp forms in syntax checker
           commands (https://github.com/lunaryorn/flycheck/issues/86)
-
 
 
 File: flycheck.info,  Node: 0.8,  Next: 0.9,  Prev: 0.7.1,  Up: Changes
@@ -1700,49 +1579,38 @@ File: flycheck.info,  Node: 0.8,  Next: 0.9,  Prev: 0.7.1,  Up: Changes
 
    * New syntax checkers:
 
-        * Go using `gofmt'
+        * Go using 'gofmt'
           (https://github.com/lunaryorn/flycheck/issues/91)
-
-        * Rust using `rustc'
+        * Rust using 'rustc'
           (https://github.com/lunaryorn/flycheck/issues/101)
 
    * New features:
 
         * Add a global Flycheck mode
           (https://github.com/lunaryorn/flycheck/issues/29).
-          `(global-flycheck-mode)' is now the recommended way to enable
+          '(global-flycheck-mode)' is now the recommended way to enable
           Flycheck
-
         * Add support for syntax checker options
           (https://github.com/lunaryorn/flycheck/issues/72)
-
-        * Add option for the coding standard used by the `php-phpcs'
+        * Add option for the coding standard used by the 'php-phpcs'
           syntax checker
-
         * Add options for the maximum McCabe complexity and the maximum
-          line length to `python-flake8'
+          line length to 'python-flake8'
 
    * Improvements:
 
-        * Support McCabe warnings in `python-flake8'
-
-        * Support warnings from `flake8' 2
-
+        * Support McCabe warnings in 'python-flake8'
+        * Support warnings from 'flake8' 2
         * Show long error messages in a popup buffer
           (https://github.com/lunaryorn/flycheck/issues/94)
-
         * Show all error messages at point
           (https://github.com/lunaryorn/flycheck/issues/96)
-
-        * Add support for naming warings from `flake8' 2
+        * Add support for naming warings from 'flake8' 2
           (https://github.com/lunaryorn/flycheck/issues/98)
-
         * Flycheck mode is not longer enabled for buffers whose names
           start with a space
-
         * Improve highlighting to reduce screen flickering
           (https://github.com/lunaryorn/flycheck/issues/100)
-
 
 
 File: flycheck.info,  Node: 0.9,  Next: master,  Prev: 0.8,  Up: Changes
@@ -1752,12 +1620,10 @@ File: flycheck.info,  Node: 0.9,  Next: master,  Prev: 0.8,  Up: Changes
 
    * New syntax checkers:
 
-        * SCSS using `scss'
+        * SCSS using 'scss'
           (https://github.com/lunaryorn/flycheck/issues/103)
-
         * RST (ReStructuredText) using Docutils
-
-        * Go using `go build' and `go test'
+        * Go using 'go build' and 'go test'
           (https://github.com/lunaryorn/flycheck/issues/107)
 
    * Improvements:
@@ -1765,28 +1631,23 @@ File: flycheck.info,  Node: 0.9,  Next: master,  Prev: 0.8,  Up: Changes
         * Quit the error message window when navigating away from error
           locations
 
-
 
 File: flycheck.info,  Node: master,  Prev: 0.9,  Up: Changes
 
 master (unreleased)
 ===================
 
-   * Flycheck uses *note cl-lib: (cl)Top. now.  This library is
-     built-in as of GNU Emacs 24.3.  For earlier releases of GNU Emacs
-     24 an additional compatibility library will be installed from GNU
-     ELPA.
+   * Flycheck uses *note cl-lib: (cl)Top. now.  This library is built-in
+     as of GNU Emacs 24.3.  For earlier releases of GNU Emacs 24 an
+     additional compatibility library will be installed from GNU ELPA.
 
    * New syntax checkers:
 
-        * POSIX Shell script using `bash'
+        * POSIX Shell script using 'bash'
           (https://github.com/lunaryorn/flycheck/issues/112)
-
-        * Ruby using `rubocop'
+        * Ruby using 'rubocop'
           (https://github.com/lunaryorn/flycheck/issues/113)
-
         * Elixir (https://github.com/lunaryorn/flycheck/issues/108)
-
         * Erlang (https://github.com/lunaryorn/flycheck/issues/122)
 
    * Removed syntax checkers:
@@ -1797,33 +1658,30 @@ master (unreleased)
 
    * New features:
 
-        * Add `flycheck-copy-messages-as-kill', mapped to `C-c ! C-w',
+        * Add 'flycheck-copy-messages-as-kill', mapped to 'C-c ! C-w',
           to copy all error messages under point into kill ring
-
+        * Add 'flycheck-google-messages', mapped to 'C-c ! /', to google
+          for error messages under point.  Needs the Google This
+          (https://github.com/Bruce-Connor/emacs-google-this) library
         * Syntax checkers can redirect output to a temporary directory
-          now using the `temporary-directory' argument symbol
+          now using the 'temporary-directory' argument symbol
 
    * Improvements:
 
-        * Call option filters for `nil' values, too
-
+        * Call option filters for 'nil' values, too
         * Improve error parsing in Bash syntax checker
           (https://github.com/lunaryorn/flycheck/issues/112)
-
         * Error navigation does not cross restrictions in narrowed
           buffers anymore
-
         * Try to preserve the non-directory part of the buffer's file
-          name when substituting the `source' symbol
+          name when substituting the 'source' symbol
           (https://github.com/lunaryorn/flycheck/issues/99)
 
    * Bug fixes:
 
         * Fix error highlighting and navigation in narrowed buffers
-
         * Use a hopefully more reliable way to parse output of PHP
           CodeSniffer (https://github.com/lunaryorn/flycheck/issues/118)
-
 
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
@@ -1838,7 +1696,7 @@ their support and patches are greatly appreciated.
      feedback and refinements, brought Flycheck to a larger user base by
      adding it to his awesome Prelude project
      (https://github.com/bbatsov/prelude), and added a Ruby syntax
-     checker using `rubocop'.
+     checker using 'rubocop'.
 
    * Damon Haley (https://github.com/dhaley) helped to shape and test
      the PHP CodeSniffer checker.
@@ -1847,7 +1705,7 @@ their support and patches are greatly appreciated.
      syntax checker and the jshint Javascript checker, and did valuable
      testing and bug fixing.
 
-   * Krzysztof Witkowski (https://github.com/kwitek) implemented `eval'
+   * Krzysztof Witkowski (https://github.com/kwitek) implemented 'eval'
      support in Flycheck commands.
 
    * Magnar Sveen (https://github.com/magnars/) developed the awesome
@@ -1858,17 +1716,16 @@ their support and patches are greatly appreciated.
    * Marian Schubert (https://github.com/maio) added the Perl syntax
      checker.
 
-   * Martin Grenfell (https://github.com/scrooloose) created the
-     awesome Vim library syntastic
-     (https://github.com/scrooloose/syntastic) which inspired this
-     project and many of its checkers.
+   * Martin Grenfell (https://github.com/scrooloose) created the awesome
+     Vim library syntastic (https://github.com/scrooloose/syntastic)
+     which inspired this project and many of its checkers.
 
    * Peter Vasil (https://github.com/ptrv) contributed syntax checkers
-     for XML, Lua and Go (using `go build' and `go test'), added unit
+     for XML, Lua and Go (using 'go build' and 'go test'), added unit
      tests and did valuable testing.
 
    * Robert Zaremba (https://github.com/robert-zaremba) added Go syntax
-     checker using `gofmt'.
+     checker using 'gofmt'.
 
    * steckerhalter (https://github.com/steckerhalter) provided the PHP
      CodeSniffer checker.
@@ -1881,7 +1738,7 @@ their support and patches are greatly appreciated.
      for Elixir and Erlang.
 
    * Sylvain Rousseau (https://github.com/thisirs) added a syntax
-     checker for POSIX shell script using `bash', and improved error
+     checker for POSIX shell script using 'bash', and improved error
      parsing in the Bash script syntax checker.
 
    * Yannick Roehlly (https://github.com/yannick1974) added support for
@@ -1903,7 +1760,7 @@ Appendix C GNU Free Documentation License
                      Version 1.3, 3 November 2008
 
      Copyright (C) 2000, 2001, 2002, 2007, 2008 Free Software Foundation, Inc.
-     `http://fsf.org/'
+     <http://fsf.org/>
 
      Everyone is permitted to copy and distribute verbatim copies
      of this license document, but changing it is not allowed.
@@ -1928,21 +1785,21 @@ Appendix C GNU Free Documentation License
      free program should come with manuals providing the same freedoms
      that the software does.  But this License is not limited to
      software manuals; it can be used for any textual work, regardless
-     of subject matter or whether it is published as a printed book.
-     We recommend this License principally for works whose purpose is
+     of subject matter or whether it is published as a printed book.  We
+     recommend this License principally for works whose purpose is
      instruction or reference.
 
   1. APPLICABILITY AND DEFINITIONS
 
      This License applies to any manual or other work, in any medium,
-     that contains a notice placed by the copyright holder saying it
-     can be distributed under the terms of this License.  Such a notice
+     that contains a notice placed by the copyright holder saying it can
+     be distributed under the terms of this License.  Such a notice
      grants a world-wide, royalty-free license, unlimited in duration,
      to use that work under the conditions stated herein.  The
      "Document", below, refers to any such manual or work.  Any member
-     of the public is a licensee, and is addressed as "you".  You
-     accept the license if you copy, modify or distribute the work in a
-     way requiring permission under copyright law.
+     of the public is a licensee, and is addressed as "you".  You accept
+     the license if you copy, modify or distribute the work in a way
+     requiring permission under copyright law.
 
      A "Modified Version" of the Document means any work containing the
      Document or a portion of it, either copied verbatim, or with
@@ -1960,12 +1817,12 @@ Appendix C GNU Free Documentation License
      regarding them.
 
      The "Invariant Sections" are certain Secondary Sections whose
-     titles are designated, as being those of Invariant Sections, in
-     the notice that says that the Document is released under this
-     License.  If a section does not fit the above definition of
-     Secondary then it is not allowed to be designated as Invariant.
-     The Document may contain zero Invariant Sections.  If the Document
-     does not identify any Invariant Sections then there are none.
+     titles are designated, as being those of Invariant Sections, in the
+     notice that says that the Document is released under this License.
+     If a section does not fit the above definition of Secondary then it
+     is not allowed to be designated as Invariant.  The Document may
+     contain zero Invariant Sections.  If the Document does not identify
+     any Invariant Sections then there are none.
 
      The "Cover Texts" are certain short passages of text that are
      listed, as Front-Cover Texts or Back-Cover Texts, in the notice
@@ -1976,27 +1833,27 @@ Appendix C GNU Free Documentation License
      A "Transparent" copy of the Document means a machine-readable copy,
      represented in a format whose specification is available to the
      general public, that is suitable for revising the document
-     straightforwardly with generic text editors or (for images
-     composed of pixels) generic paint programs or (for drawings) some
-     widely available drawing editor, and that is suitable for input to
-     text formatters or for automatic translation to a variety of
-     formats suitable for input to text formatters.  A copy made in an
-     otherwise Transparent file format whose markup, or absence of
-     markup, has been arranged to thwart or discourage subsequent
-     modification by readers is not Transparent.  An image format is
-     not Transparent if used for any substantial amount of text.  A
-     copy that is not "Transparent" is called "Opaque".
+     straightforwardly with generic text editors or (for images composed
+     of pixels) generic paint programs or (for drawings) some widely
+     available drawing editor, and that is suitable for input to text
+     formatters or for automatic translation to a variety of formats
+     suitable for input to text formatters.  A copy made in an otherwise
+     Transparent file format whose markup, or absence of markup, has
+     been arranged to thwart or discourage subsequent modification by
+     readers is not Transparent.  An image format is not Transparent if
+     used for any substantial amount of text.  A copy that is not
+     "Transparent" is called "Opaque".
 
      Examples of suitable formats for Transparent copies include plain
      ASCII without markup, Texinfo input format, LaTeX input format,
-     SGML or XML using a publicly available DTD, and
-     standard-conforming simple HTML, PostScript or PDF designed for
-     human modification.  Examples of transparent image formats include
-     PNG, XCF and JPG.  Opaque formats include proprietary formats that
-     can be read and edited only by proprietary word processors, SGML or
-     XML for which the DTD and/or processing tools are not generally
-     available, and the machine-generated HTML, PostScript or PDF
-     produced by some word processors for output purposes only.
+     SGML or XML using a publicly available DTD, and standard-conforming
+     simple HTML, PostScript or PDF designed for human modification.
+     Examples of transparent image formats include PNG, XCF and JPG.
+     Opaque formats include proprietary formats that can be read and
+     edited only by proprietary word processors, SGML or XML for which
+     the DTD and/or processing tools are not generally available, and
+     the machine-generated HTML, PostScript or PDF produced by some word
+     processors for output purposes only.
 
      The "Title Page" means, for a printed book, the title page itself,
      plus such following pages as are needed to hold, legibly, the
@@ -2034,8 +1891,8 @@ Appendix C GNU Free Documentation License
      may not use technical measures to obstruct or control the reading
      or further copying of the copies you make or distribute.  However,
      you may accept compensation in exchange for copies.  If you
-     distribute a large enough number of copies you must also follow
-     the conditions in section 3.
+     distribute a large enough number of copies you must also follow the
+     conditions in section 3.
 
      You may also lend copies, under the same conditions stated above,
      and you may publicly display copies.
@@ -2049,12 +1906,11 @@ Appendix C GNU Free Documentation License
      these Cover Texts: Front-Cover Texts on the front cover, and
      Back-Cover Texts on the back cover.  Both covers must also clearly
      and legibly identify you as the publisher of these copies.  The
-     front cover must present the full title with all words of the
-     title equally prominent and visible.  You may add other material
-     on the covers in addition.  Copying with changes limited to the
-     covers, as long as they preserve the title of the Document and
-     satisfy these conditions, can be treated as verbatim copying in
-     other respects.
+     front cover must present the full title with all words of the title
+     equally prominent and visible.  You may add other material on the
+     covers in addition.  Copying with changes limited to the covers, as
+     long as they preserve the title of the Document and satisfy these
+     conditions, can be treated as verbatim copying in other respects.
 
      If the required texts for either cover are too voluminous to fit
      legibly, you should put the first ones listed (as many as fit
@@ -2062,40 +1918,39 @@ Appendix C GNU Free Documentation License
      adjacent pages.
 
      If you publish or distribute Opaque copies of the Document
-     numbering more than 100, you must either include a
-     machine-readable Transparent copy along with each Opaque copy, or
-     state in or with each Opaque copy a computer-network location from
-     which the general network-using public has access to download
-     using public-standard network protocols a complete Transparent
-     copy of the Document, free of added material.  If you use the
-     latter option, you must take reasonably prudent steps, when you
-     begin distribution of Opaque copies in quantity, to ensure that
-     this Transparent copy will remain thus accessible at the stated
-     location until at least one year after the last time you
-     distribute an Opaque copy (directly or through your agents or
-     retailers) of that edition to the public.
+     numbering more than 100, you must either include a machine-readable
+     Transparent copy along with each Opaque copy, or state in or with
+     each Opaque copy a computer-network location from which the general
+     network-using public has access to download using public-standard
+     network protocols a complete Transparent copy of the Document, free
+     of added material.  If you use the latter option, you must take
+     reasonably prudent steps, when you begin distribution of Opaque
+     copies in quantity, to ensure that this Transparent copy will
+     remain thus accessible at the stated location until at least one
+     year after the last time you distribute an Opaque copy (directly or
+     through your agents or retailers) of that edition to the public.
 
      It is requested, but not required, that you contact the authors of
-     the Document well before redistributing any large number of
-     copies, to give them a chance to provide you with an updated
-     version of the Document.
+     the Document well before redistributing any large number of copies,
+     to give them a chance to provide you with an updated version of the
+     Document.
 
   4. MODIFICATIONS
 
      You may copy and distribute a Modified Version of the Document
      under the conditions of sections 2 and 3 above, provided that you
-     release the Modified Version under precisely this License, with
-     the Modified Version filling the role of the Document, thus
-     licensing distribution and modification of the Modified Version to
-     whoever possesses a copy of it.  In addition, you must do these
-     things in the Modified Version:
+     release the Modified Version under precisely this License, with the
+     Modified Version filling the role of the Document, thus licensing
+     distribution and modification of the Modified Version to whoever
+     possesses a copy of it.  In addition, you must do these things in
+     the Modified Version:
 
        A. Use in the Title Page (and on the covers, if any) a title
-          distinct from that of the Document, and from those of
-          previous versions (which should, if there were any, be listed
-          in the History section of the Document).  You may use the
-          same title as a previous version if the original publisher of
-          that version gives permission.
+          distinct from that of the Document, and from those of previous
+          versions (which should, if there were any, be listed in the
+          History section of the Document).  You may use the same title
+          as a previous version if the original publisher of that
+          version gives permission.
 
        B. List on the Title Page, as authors, one or more persons or
           entities responsible for authorship of the modifications in
@@ -2125,31 +1980,30 @@ Appendix C GNU Free Documentation License
 
        I. Preserve the section Entitled "History", Preserve its Title,
           and add to it an item stating at least the title, year, new
-          authors, and publisher of the Modified Version as given on
-          the Title Page.  If there is no section Entitled "History" in
-          the Document, create one stating the title, year, authors,
-          and publisher of the Document as given on its Title Page,
-          then add an item describing the Modified Version as stated in
-          the previous sentence.
+          authors, and publisher of the Modified Version as given on the
+          Title Page.  If there is no section Entitled "History" in the
+          Document, create one stating the title, year, authors, and
+          publisher of the Document as given on its Title Page, then add
+          an item describing the Modified Version as stated in the
+          previous sentence.
 
        J. Preserve the network location, if any, given in the Document
           for public access to a Transparent copy of the Document, and
           likewise the network locations given in the Document for
-          previous versions it was based on.  These may be placed in
-          the "History" section.  You may omit a network location for a
-          work that was published at least four years before the
-          Document itself, or if the original publisher of the version
-          it refers to gives permission.
+          previous versions it was based on.  These may be placed in the
+          "History" section.  You may omit a network location for a work
+          that was published at least four years before the Document
+          itself, or if the original publisher of the version it refers
+          to gives permission.
 
        K. For any section Entitled "Acknowledgements" or "Dedications",
-          Preserve the Title of the section, and preserve in the
-          section all the substance and tone of each of the contributor
+          Preserve the Title of the section, and preserve in the section
+          all the substance and tone of each of the contributor
           acknowledgements and/or dedications given therein.
 
-       L. Preserve all the Invariant Sections of the Document,
-          unaltered in their text and in their titles.  Section numbers
-          or the equivalent are not considered part of the section
-          titles.
+       L. Preserve all the Invariant Sections of the Document, unaltered
+          in their text and in their titles.  Section numbers or the
+          equivalent are not considered part of the section titles.
 
        M. Delete any section Entitled "Endorsements".  Such a section
           may not be included in the Modified Version.
@@ -2162,11 +2016,11 @@ Appendix C GNU Free Documentation License
 
      If the Modified Version includes new front-matter sections or
      appendices that qualify as Secondary Sections and contain no
-     material copied from the Document, you may at your option
-     designate some or all of these sections as invariant.  To do this,
-     add their titles to the list of Invariant Sections in the Modified
-     Version's license notice.  These titles must be distinct from any
-     other section titles.
+     material copied from the Document, you may at your option designate
+     some or all of these sections as invariant.  To do this, add their
+     titles to the list of Invariant Sections in the Modified Version's
+     license notice.  These titles must be distinct from any other
+     section titles.
 
      You may add a section Entitled "Endorsements", provided it contains
      nothing but endorsements of your Modified Version by various
@@ -2175,15 +2029,15 @@ Appendix C GNU Free Documentation License
      definition of a standard.
 
      You may add a passage of up to five words as a Front-Cover Text,
-     and a passage of up to 25 words as a Back-Cover Text, to the end
-     of the list of Cover Texts in the Modified Version.  Only one
-     passage of Front-Cover Text and one of Back-Cover Text may be
-     added by (or through arrangements made by) any one entity.  If the
-     Document already includes a cover text for the same cover,
-     previously added by you or by arrangement made by the same entity
-     you are acting on behalf of, you may not add another; but you may
-     replace the old one, on explicit permission from the previous
-     publisher that added the old one.
+     and a passage of up to 25 words as a Back-Cover Text, to the end of
+     the list of Cover Texts in the Modified Version.  Only one passage
+     of Front-Cover Text and one of Back-Cover Text may be added by (or
+     through arrangements made by) any one entity.  If the Document
+     already includes a cover text for the same cover, previously added
+     by you or by arrangement made by the same entity you are acting on
+     behalf of, you may not add another; but you may replace the old
+     one, on explicit permission from the previous publisher that added
+     the old one.
 
      The author(s) and publisher(s) of the Document do not by this
      License give permission to use their names for publicity for or to
@@ -2193,8 +2047,8 @@ Appendix C GNU Free Documentation License
 
      You may combine the Document with other documents released under
      this License, under the terms defined in section 4 above for
-     modified versions, provided that you include in the combination
-     all of the Invariant Sections of all of the original documents,
+     modified versions, provided that you include in the combination all
+     of the Invariant Sections of all of the original documents,
      unmodified, and list them all as Invariant Sections of your
      combined work in its license notice, and that you preserve all
      their Warranty Disclaimers.
@@ -2221,20 +2075,20 @@ Appendix C GNU Free Documentation License
      documents released under this License, and replace the individual
      copies of this License in the various documents with a single copy
      that is included in the collection, provided that you follow the
-     rules of this License for verbatim copying of each of the
-     documents in all other respects.
+     rules of this License for verbatim copying of each of the documents
+     in all other respects.
 
      You may extract a single document from such a collection, and
      distribute it individually under this License, provided you insert
-     a copy of this License into the extracted document, and follow
-     this License in all other respects regarding verbatim copying of
-     that document.
+     a copy of this License into the extracted document, and follow this
+     License in all other respects regarding verbatim copying of that
+     document.
 
   7. AGGREGATION WITH INDEPENDENT WORKS
 
      A compilation of the Document or its derivatives with other
-     separate and independent documents or works, in or on a volume of
-     a storage or distribution medium, is called an "aggregate" if the
+     separate and independent documents or works, in or on a volume of a
+     storage or distribution medium, is called an "aggregate" if the
      copyright resulting from the compilation is not used to limit the
      legal rights of the compilation's users beyond what the individual
      works permit.  When the Document is included in an aggregate, this
@@ -2279,8 +2133,8 @@ Appendix C GNU Free Documentation License
 
      However, if you cease all violation of this License, then your
      license from a particular copyright holder is reinstated (a)
-     provisionally, unless and until the copyright holder explicitly
-     and finally terminates your license, and (b) permanently, if the
+     provisionally, unless and until the copyright holder explicitly and
+     finally terminates your license, and (b) permanently, if the
      copyright holder fails to notify you of the violation by some
      reasonable means prior to 60 days after the cessation.
 
@@ -2292,33 +2146,33 @@ Appendix C GNU Free Documentation License
      after your receipt of the notice.
 
      Termination of your rights under this section does not terminate
-     the licenses of parties who have received copies or rights from
-     you under this License.  If your rights have been terminated and
-     not permanently reinstated, receipt of a copy of some or all of
-     the same material does not give you any rights to use it.
+     the licenses of parties who have received copies or rights from you
+     under this License.  If your rights have been terminated and not
+     permanently reinstated, receipt of a copy of some or all of the
+     same material does not give you any rights to use it.
 
- 10. FUTURE REVISIONS OF THIS LICENSE
+  10. FUTURE REVISIONS OF THIS LICENSE
 
      The Free Software Foundation may publish new, revised versions of
      the GNU Free Documentation License from time to time.  Such new
      versions will be similar in spirit to the present version, but may
      differ in detail to address new problems or concerns.  See
-     `http://www.gnu.org/copyleft/'.
+     <http://www.gnu.org/copyleft/>.
 
      Each version of the License is given a distinguishing version
      number.  If the Document specifies that a particular numbered
      version of this License "or any later version" applies to it, you
      have the option of following the terms and conditions either of
      that specified version or of any later version that has been
-     published (not as a draft) by the Free Software Foundation.  If
-     the Document does not specify a version number of this License,
-     you may choose any version ever published (not as a draft) by the
-     Free Software Foundation.  If the Document specifies that a proxy
-     can decide which future versions of this License can be used, that
+     published (not as a draft) by the Free Software Foundation.  If the
+     Document does not specify a version number of this License, you may
+     choose any version ever published (not as a draft) by the Free
+     Software Foundation.  If the Document specifies that a proxy can
+     decide which future versions of this License can be used, that
      proxy's public statement of acceptance of a version permanently
      authorizes you to choose that version for the Document.
 
- 11. RELICENSING
+  11. RELICENSING
 
      "Massive Multiauthor Collaboration Site" (or "MMC Site") means any
      World Wide Web server that publishes copyrightable works and also
@@ -2348,7 +2202,6 @@ Appendix C GNU Free Documentation License
      site under CC-BY-SA on the same site at any time before August 1,
      2009, provided the MMC is eligible for relicensing.
 
-
 ADDENDUM: How to use this License for your documents
 ====================================================
 
@@ -2376,9 +2229,9 @@ combination of the three, merge those two alternatives to suit the
 situation.
 
    If your document contains nontrivial examples of program code, we
-recommend releasing these examples in parallel under your choice of
-free software license, such as the GNU General Public License, to
-permit their use in free software.
+recommend releasing these examples in parallel under your choice of free
+software license, such as the GNU General Public License, to permit
+their use in free software.
 
 
 File: flycheck.info,  Node: Syntax checkers,  Next: Function and Variable Index,  Prev: GNU Free Documentation License,  Up: Top
@@ -2387,73 +2240,42 @@ Appendix D Available syntax checkers
 ************************************
 
 The following syntax checkers are included in Flycheck, listed in the
-order of their appearance in the default value of `flycheck-checkers':
+order of their appearance in the default value of 'flycheck-checkers':
 
-   * `bash'
+   * 'bash'
+   * 'coffee-coffeelint'
+   * 'css-csslint'
+   * 'elixir'
+   * 'emacs-lisp'
+   * 'emacs-lisp-checkdoc'
+   * 'erlang'
+   * 'go-gofmt'
+   * 'go-build'
+   * 'go-test'
+   * 'haml'
+   * 'html-tidy'
+   * 'javascript-jshint'
+   * 'json-jsonlint'
+   * 'lua'
+   * 'perl'
+   * 'php'
+   * 'php-phpcs'
+   * 'python-flake8'
+   * 'python-pylint'
+   * 'rst'
+   * 'ruby-rubocop'
+   * 'ruby'
+   * 'rust'
+   * 'sass'
+   * 'scss'
+   * 'sh-dash'
+   * 'sh-bash'
+   * 'tex-chktex'
+   * 'tex-lacheck'
+   * 'xml-xmlstarlet'
+   * 'zsh'
 
-   * `coffee-coffeelint'
-
-   * `css-csslint'
-
-   * `elixir'
-
-   * `emacs-lisp'
-
-   * `emacs-lisp-checkdoc'
-
-   * `erlang'
-
-   * `go-gofmt'
-
-   * `go-build'
-
-   * `go-test'
-
-   * `haml'
-
-   * `html-tidy'
-
-   * `javascript-jshint'
-
-   * `json-jsonlint'
-
-   * `lua'
-
-   * `perl'
-
-   * `php'
-
-   * `php-phpcs'
-
-   * `python-flake8'
-
-   * `python-pylint'
-
-   * `rst'
-
-   * `ruby-rubocop'
-
-   * `ruby'
-
-   * `rust'
-
-   * `sass'
-
-   * `scss'
-
-   * `sh-dash'
-
-   * `sh-bash'
-
-   * `tex-chktex'
-
-   * `tex-lacheck'
-
-   * `xml-xmlstarlet'
-
-   * `zsh'
-
-   Use `M-x flycheck-describe-checker' in this buffer to get help for
+   Use 'M-x flycheck-describe-checker' in this buffer to get help for
 the syntax checker under point.
 
 
@@ -2465,88 +2287,89 @@ Function and Variable Index
  [index ]
 * Menu:
 
-* flycheck-after-syntax-check-hook:      Syntax checking.     (line  33)
-* flycheck-buffer:                       Syntax checking.     (line  16)
-* flycheck-checker:                      Selection.           (line  44)
-* flycheck-checkers:                     Selection.           (line  10)
-* flycheck-chktexrc:                     Configuration.       (line  26)
-* flycheck-clear:                        Reporting.           (line  62)
-* flycheck-coffeelintrc:                 Configuration.       (line  29)
-* flycheck-copy-messages-as-kill:        Reporting.           (line  57)
-* flycheck-count-errors:                 Error API.           (line  72)
-* flycheck-current-errors:               Error API.           (line  68)
-* flycheck-declare-checker:              Declaration.         (line   9)
-* flycheck-def-config-file-var:          Declaration.         (line 259)
-* flycheck-def-option-var:               Declaration.         (line 275)
-* flycheck-describe-checker:             Selection.           (line  72)
-* flycheck-error-face:                   Reporting.           (line  17)
-* flycheck-error-new:                    Error API.           (line  40)
-* flycheck-error-pos:                    Error API.           (line  59)
-* flycheck-error-region:                 Error API.           (line  51)
-* flycheck-error-with-buffer:            Error API.           (line  47)
-* flycheck-flake8-maximum-complexity:    Configuration.       (line  11)
-* flycheck-flake8-maximum-line-length:   Configuration.       (line  15)
-* flycheck-flake8rc:                     Configuration.       (line  32)
-* flycheck-has-errors-p:                 Error API.           (line  77)
-* flycheck-highlighting-mode:            Reporting.           (line  31)
-* flycheck-jshintrc:                     Configuration.       (line  35)
+* flycheck-after-syntax-check-hook:      Syntax checking.     (line  27)
+* flycheck-buffer:                       Syntax checking.     (line  15)
+* flycheck-checker:                      Selection.           (line  41)
+* flycheck-checkers:                     Selection.           (line   9)
+* flycheck-chktexrc:                     Configuration.       (line  25)
+* flycheck-clear:                        Reporting.           (line  71)
+* flycheck-coffeelintrc:                 Configuration.       (line  28)
+* flycheck-copy-messages-as-kill:        Reporting.           (line  55)
+* flycheck-count-errors:                 Error API.           (line  71)
+* flycheck-current-errors:               Error API.           (line  67)
+* flycheck-declare-checker:              Declaration.         (line   8)
+* flycheck-def-config-file-var:          Declaration.         (line 251)
+* flycheck-def-option-var:               Declaration.         (line 267)
+* flycheck-describe-checker:             Selection.           (line  70)
+* flycheck-error-face:                   Reporting.           (line  14)
+* flycheck-error-new:                    Error API.           (line  39)
+* flycheck-error-pos:                    Error API.           (line  58)
+* flycheck-error-region:                 Error API.           (line  50)
+* flycheck-error-with-buffer:            Error API.           (line  46)
+* flycheck-flake8-maximum-complexity:    Configuration.       (line  10)
+* flycheck-flake8-maximum-line-length:   Configuration.       (line  14)
+* flycheck-flake8rc:                     Configuration.       (line  31)
+* flycheck-google-messages:              Reporting.           (line  60)
+* flycheck-has-errors-p:                 Error API.           (line  76)
+* flycheck-highlighting-mode:            Reporting.           (line  28)
+* flycheck-jshintrc:                     Configuration.       (line  34)
 * flycheck-next-error:                   Navigation.          (line  23)
-* flycheck-parse-xml-string:             Error parser API.    (line   7)
-* flycheck-phpcs-standard:               Configuration.       (line  19)
+* flycheck-parse-xml-string:             Error parser API.    (line   6)
+* flycheck-phpcs-standard:               Configuration.       (line  18)
 * flycheck-previous-error:               Navigation.          (line  31)
-* flycheck-rubocoprc:                    Configuration.       (line  38)
-* flycheck-select-checker:               Selection.           (line  34)
-* flycheck-tidyrc:                       Configuration.       (line  41)
-* flycheck-warning-face:                 Reporting.           (line  18)
+* flycheck-rubocoprc:                    Configuration.       (line  37)
+* flycheck-select-checker:               Selection.           (line  32)
+* flycheck-tidyrc:                       Configuration.       (line  40)
+* flycheck-warning-face:                 Reporting.           (line  15)
 
 
 
 Tag Table:
-Node: Top756
-Node: Introduction2119
-Node: Features3027
-Node: Installation4500
-Node: Activation5673
-Node: Usage6024
-Node: Syntax checking6647
-Node: Selection7918
-Node: Configuration10525
-Node: Reporting13298
-Node: Navigation15838
-Node: Mode line17647
-Node: Extending18553
-Node: Declaration19152
-Node: Error parsers31620
-Node: Option filters32606
-Node: Examples32945
-Node: Simple example33377
-Node: Predicate example36440
-Node: Configuration example38421
-Node: Chaining example41081
-Node: API42467
-Node: Error API43255
-Node: Error parser API45866
-Node: Contribution46092
-Node: Reporting issues46770
-Node: Contributing syntax checkers47509
-Node: Contributing code48306
-Node: Unit tests49653
-Node: Changes50947
-Node: 0.151531
-Node: 0.251821
-Node: 0.352100
-Node: 0.452336
-Node: 0.553118
-Node: 0.654344
-Node: 0.6.157212
-Node: 0.757361
-Node: 0.7.158382
-Node: 0.859102
-Node: 0.960625
-Node: master61126
-Node: Credits62973
-Node: GNU Free Documentation License65677
-Node: Syntax checkers90850
-Node: Function and Variable Index91857
+Node: Top734
+Node: Introduction2083
+Node: Features2984
+Node: Installation4430
+Node: Activation5604
+Node: Usage5955
+Node: Syntax checking6578
+Node: Selection7840
+Node: Configuration10421
+Node: Reporting13193
+Node: Navigation16123
+Node: Mode line17919
+Node: Extending18820
+Node: Declaration19419
+Node: Error parsers31850
+Node: Option filters32834
+Node: Examples33173
+Node: Simple example33605
+Node: Predicate example36669
+Node: Configuration example38650
+Node: Chaining example41309
+Node: API42695
+Node: Error API43483
+Node: Error parser API46084
+Node: Contribution46310
+Node: Reporting issues46986
+Node: Contributing syntax checkers47722
+Node: Contributing code48517
+Node: Unit tests49857
+Node: Changes51144
+Node: 0.151728
+Node: 0.252012
+Node: 0.352290
+Node: 0.452526
+Node: 0.553301
+Node: 0.654521
+Node: 0.6.157371
+Node: 0.757520
+Node: 0.7.158534
+Node: 0.859249
+Node: 0.960761
+Node: master61259
+Node: Credits63300
+Node: GNU Free Documentation License65999
+Node: Syntax checkers91151
+Node: Function and Variable Index92127
 
 End Tag Table

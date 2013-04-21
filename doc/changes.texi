@@ -477,6 +477,11 @@ New features:
 Add @code{flycheck-copy-messages-as-kill}, mapped to @kbd{C-c ! C-w}, to
 copy all error messages under point into kill ring
 @item
+Add @code{flycheck-google-messages}, mapped to @kbd{C-c ! /}, to google
+for error messages under point.  Needs the
+@uref{https://github.com/Bruce-Connor/emacs-google-this, Google This}
+library
+@item
 Syntax checkers can redirect output to a temporary directory now using
 the @code{temporary-directory} argument symbol
 @end itemize
