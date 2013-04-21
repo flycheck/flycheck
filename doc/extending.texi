@@ -39,27 +39,52 @@ executing the syntax checker:
 
 @table @code
 @item source
-@itemx source-inplace
-These symbols are substituted with the file to check.  This file is a
-temporary file with the contents of the buffer.  With @code{source} the
-copy is created in the temporary directory of the system.  This is
-@emph{recommended}.
+This symbol is substituted with the file to check.  This file is a
+temporary file with the contents of the buffer to check, created in the
+system's temporary directory.
 
-With @code{source-inplace} the temporary files is created in the same
-directory as the buffer's file.  Use this, if the syntax check needs
-other files from the source directory.  If the buffer has no
-@code{buffer-file-name}, @code{source-inplace} is the same as
+If the buffer to check has a file name, the non-directory component of
+the name of the temporary file will be the same as in the buffer's file
+name, to support languages which enforce specific rules on the file name
+(e.g. the file must be named after the containing class).
+
+If the buffer to check has no file name, the name of the temporary file
+will be random.
+
+This symbol is the @b{preferred} way to pass the input file to your
+syntax checker.
+
+@item source-inplace
+This symbol is substituted with the file to check.  This file is a
+temporary file with the contents of the buffer to check, created @b{in
+the same directory} as the buffer's file.  The name of the file is
+random.
+
+If the buffer has no file name, this symbol is equivalent to
 @code{source}.
+
+This symbol should be used if and only if the syntax check @b{needs
+other files} from the source directory (e.g. include files in C, or
+Python modules).
 
 @item source-original
 This symbol is substituted with @code{buffer-file-name}, or an empty
-string, if the buffer has no file name.  Note that if the buffer is
-modified, the content of the file is @b{not up to date} with the actual
-content of the buffer.  Hence do @b{not} use this as primary input to a
-syntax checker!
+string, if the buffer has no file name.
 
-See the declaration of the @code{emacs-lisp-checkdoc} syntax checker for
-an application of this symbol.
+This symbol is provided to @b{additionally} pass the real name of the
+file to check to a syntax checker.
+
+It should @b{never} be used as primary input to the syntax checker,
+unless both @code{source} and @code{source-original} are totally not
+applicable.  In this case, be sure to add a predicate to your syntax
+checker that inhibits the syntax check, if the buffer has no file name,
+or was modified, for otherwise the syntax check will fail or return
+out-dated errors:
+
+@lisp
+:predicate (and (buffer-file-name) (not (buffer-modified-p)))
+@end lisp
+
 
 @item temporary-directory
 This symbol is substituted with the path of an existing temporary

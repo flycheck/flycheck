@@ -541,28 +541,51 @@ Checkers are declared with 'flycheck-declare-checker':
           executing the syntax checker:
 
           'source'
-          'source-inplace'
-               These symbols are substituted with the file to check.
-               This file is a temporary file with the contents of the
-               buffer.  With 'source' the copy is created in the
-               temporary directory of the system.  This is
-               _recommended_.
+               This symbol is substituted with the file to check.  This
+               file is a temporary file with the contents of the buffer
+               to check, created in the system's temporary directory.
 
-               With 'source-inplace' the temporary files is created in
-               the same directory as the buffer's file.  Use this, if
-               the syntax check needs other files from the source
-               directory.  If the buffer has no 'buffer-file-name',
-               'source-inplace' is the same as 'source'.
+               If the buffer to check has a file name, the non-directory
+               component of the name of the temporary file will be the
+               same as in the buffer's file name, to support languages
+               which enforce specific rules on the file name (e.g.  the
+               file must be named after the containing class).
+
+               If the buffer to check has no file name, the name of the
+               temporary file will be random.
+
+               This symbol is the preferred way to pass the input file
+               to your syntax checker.
+
+          'source-inplace'
+               This symbol is substituted with the file to check.  This
+               file is a temporary file with the contents of the buffer
+               to check, created in the same directory as the buffer's
+               file.  The name of the file is random.
+
+               If the buffer has no file name, this symbol is equivalent
+               to 'source'.
+
+               This symbol should be used if and only if the syntax
+               check needs other files from the source directory (e.g.
+               include files in C, or Python modules).
 
           'source-original'
                This symbol is substituted with 'buffer-file-name', or an
-               empty string, if the buffer has no file name.  Note that
-               if the buffer is modified, the content of the file is not
-               up to date with the actual content of the buffer.  Hence
-               do not use this as primary input to a syntax checker!
+               empty string, if the buffer has no file name.
 
-               See the declaration of the 'emacs-lisp-checkdoc' syntax
-               checker for an application of this symbol.
+               This symbol is provided to additionally pass the real
+               name of the file to check to a syntax checker.
+
+               It should never be used as primary input to the syntax
+               checker, unless both 'source' and 'source-original' are
+               totally not applicable.  In this case, be sure to add a
+               predicate to your syntax checker that inhibits the syntax
+               check, if the buffer has no file name, or was modified,
+               for otherwise the syntax check will fail or return
+               out-dated errors:
+
+                    :predicate (and (buffer-file-name) (not (buffer-modified-p)))
 
           'temporary-directory'
                This symbol is substituted with the path of an existing
@@ -1634,6 +1657,9 @@ master (unreleased)
           (https://github.com/lunaryorn/flycheck/issues/112)
         * Error navigation does not cross restrictions in narrowed
           buffers anymore
+        * Try to preserve the non-directory part of the buffer's file
+          name when substituting the 'source' symbol
+          (https://github.com/lunaryorn/flycheck/issues/99)
 
    * Bug fixes:
 
@@ -2255,8 +2281,8 @@ Function and Variable Index
 * flycheck-count-errors:                 Error API.           (line  71)
 * flycheck-current-errors:               Error API.           (line  67)
 * flycheck-declare-checker:              Declaration.         (line   8)
-* flycheck-def-config-file-var:          Declaration.         (line 228)
-* flycheck-def-option-var:               Declaration.         (line 244)
+* flycheck-def-config-file-var:          Declaration.         (line 251)
+* flycheck-def-option-var:               Declaration.         (line 267)
 * flycheck-describe-checker:             Selection.           (line  70)
 * flycheck-error-face:                   Reporting.           (line  14)
 * flycheck-error-new:                    Error API.           (line  39)
@@ -2295,37 +2321,37 @@ Node: Navigation15699
 Node: Mode line17495
 Node: Extending18396
 Node: Declaration18995
-Node: Error parsers30374
-Node: Option filters31358
-Node: Examples31697
-Node: Simple example32129
-Node: Predicate example35193
-Node: Configuration example37174
-Node: Chaining example39833
-Node: API41219
-Node: Error API42007
-Node: Error parser API44608
-Node: Contribution44834
-Node: Reporting issues45510
-Node: Contributing syntax checkers46246
-Node: Contributing code47041
-Node: Unit tests48381
-Node: Changes49668
-Node: 0.150252
-Node: 0.250536
-Node: 0.350814
-Node: 0.451050
-Node: 0.551825
-Node: 0.653045
-Node: 0.6.155895
-Node: 0.756044
-Node: 0.7.157058
-Node: 0.857773
-Node: 0.959285
-Node: master59783
-Node: Credits61365
-Node: GNU Free Documentation License64052
-Node: Syntax checkers89204
-Node: Function and Variable Index90166
+Node: Error parsers31426
+Node: Option filters32410
+Node: Examples32749
+Node: Simple example33181
+Node: Predicate example36245
+Node: Configuration example38226
+Node: Chaining example40885
+Node: API42271
+Node: Error API43059
+Node: Error parser API45660
+Node: Contribution45886
+Node: Reporting issues46562
+Node: Contributing syntax checkers47298
+Node: Contributing code48093
+Node: Unit tests49433
+Node: Changes50720
+Node: 0.151304
+Node: 0.251588
+Node: 0.351866
+Node: 0.452102
+Node: 0.552877
+Node: 0.654097
+Node: 0.6.156947
+Node: 0.757096
+Node: 0.7.158110
+Node: 0.858825
+Node: 0.960337
+Node: master60835
+Node: Credits62600
+Node: GNU Free Documentation License65287
+Node: Syntax checkers90439
+Node: Function and Variable Index91401
 
 End Tag Table

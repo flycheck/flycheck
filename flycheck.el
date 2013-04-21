@@ -509,10 +509,31 @@ Otherwise return nil."
 (defvar-local flycheck-temp-directories nil
   "A list of all temporary directories created by Flycheckg.")
 
-(defun flycheck-temp-file-system (filename prefix)
-  "Create a copy of FILENAME with PREFIX in temp directory.
+(defun flycheck-temp-dir-system (prefix)
+  "Create a unique temporary directory from PREFIX.
 
-Add the path of the file to `flycheck-temp-files'.
+Add the directory to `flycheck-temp-directories'.
+
+Return the path of the directory"
+  (let* ((path (expand-file-name prefix temporary-file-directory))
+         (name (make-temp-name path)))
+    (make-directory name)
+    (add-to-list 'flycheck-temp-directories name)
+    name))
+
+(defun flycheck-temp-file-system (filename prefix)
+  "Create a temporary file named after FILENAME with PREFIX.
+
+If FILENAME is nil, this function creates a temporary file with
+PREFIX and a random suffix.  The path of the file is added to
+`flycheck-temp-files'.
+
+If FILENAME is non-nil, this function creates a temporary
+directory with PREFIX and a random suffix using
+`flycheck-temp-dir-system', and creates a file with the same name
+as FILENAME in this directory.  The path of the file is *not*
+added to `flycheck-temp-files', because the directory is already
+tracked as temp file.
 
 Return the path of the file."
   ;; HACK: Prevent re-compression to work around a supposed bug in Emacs.
@@ -521,10 +542,13 @@ Return the path of the file."
   ;; files. If `jka-compr-really-do-compress' is non-nil this function uses END
   ;; even though START is a string, hence breaking the `write-region' API that
   ;; we rely on.  Report upstream!
-  (let* ((jka-compr-really-do-compress nil)
-         (extension (when filename (file-name-extension filename)))
-         (tempfile (make-temp-file prefix nil
-                                   (when extension (concat "." extension)))))
+  (let ((jka-compr-really-do-compress nil)
+        tempfile)
+    (if filename
+        (let ((directory (flycheck-temp-dir-system prefix)))
+          (setq tempfile (expand-file-name (file-name-nondirectory filename)
+                                           directory)))
+      (setq tempfile (make-temp-file prefix)))
     (add-to-list 'flycheck-temp-files tempfile)
     tempfile))
 
@@ -545,18 +569,6 @@ Return the path of the file."
         tempfile)
     ;; With no filename, fall back to a copy in the system directory.
     (flycheck-temp-file-system filename prefix)))
-
-(defun flycheck-unique-temporary-directory (prefix)
-  "Create a unique temporary directory from PREFIX.
-
-Add the directory to `flycheck-temp-directories'.
-
-Return the path of the directory"
-  (let* ((path (expand-file-name prefix temporary-file-directory))
-         (name (make-temp-name path)))
-    (make-directory name)
-    (add-to-list 'flycheck-temp-directories name)
-    name))
 
 (defun flycheck-root-directory-p (directory)
   "Determine if DIRECTORY is the root directory.
@@ -1152,8 +1164,10 @@ In all other cases, signal an error."
 (defun flycheck-substitute-argument-symbol (symbol)
   "Substitute an argument SYMBOL.
 
-If SYMBOL is `source' or `source-inplace', create a temporary file
-to check and return its path.
+If SYMBOL is `source' or `source-inplace', create a temporary
+file to check and return its path.  With `source', try to retain
+the non-directory component of the buffer's file name in the
+temporary file.
 
 If SYMBOL is `source-original', return the path of the actual file
 to check, or an empty string if the buffer has no file name.
@@ -1177,7 +1191,7 @@ In all other cases, signal an error."
     (source-original
      (or (buffer-file-name) ""))
     (temporary-directory
-     (flycheck-unique-temporary-directory "flycheck"))
+     (flycheck-temp-dir-system "flycheck"))
     (t
      (error "Unsupported argument symbol %S" symbol))))
 
@@ -2275,9 +2289,9 @@ during byte-compilation or autoloads generation, or nil otherwise."
 
 This checker simply attempts to byte compile the contents of the
 buffer using the currently running Emacs executable."
-  :command (append flycheck-emacs-command
-                   `(,(prin1-to-string flycheck-emacs-lisp-check-form)
-                     source-inplace))
+  :command `(,@flycheck-emacs-command
+             ,(prin1-to-string flycheck-emacs-lisp-check-form)
+             source-inplace)
   :error-patterns
   '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):Warning:\\(?4:.*\\(?:\n    .*\\)*\\)$"
      warning)
@@ -2302,22 +2316,11 @@ buffer using the currently running Emacs executable."
   '(progn
      (require 'checkdoc)
 
-     ;; Turn command line normalization into a NOOP to fix arg out of range
-     ;; error in the checker process.  Emacs seems to call this function for
-     ;; each command line argument, for no apparent reason.  Unfortunately this
-     ;; function signals an error if applied to an empty string which breaks the
-     ;; checkdoc checker for buffers without backing files.  Since Flycheck
-     ;; passes sane file names anyway, we can safely turn this function into a
-     ;; noop.
-     (defalias 'command-line-normalize-file-name 'identity)
-
      (let ((filename (car command-line-args-left))
-           (original-filename (cadr command-line-args-left))
            (process-default-directory default-directory))
        (with-temp-buffer
          (insert-file-contents filename t)
-         (when (> (length original-filename) 0)
-           (setq buffer-file-name original-filename))
+         (setq buffer-file-name filename)
          (setq default-directory process-default-directory)
          (condition-case err
              (progn
@@ -2333,15 +2336,9 @@ buffer using the currently running Emacs executable."
   "An Emacs Lisp style checker using CheckDoc.
 
 The checker runs `checkdoc-current-buffer'."
-  :command (append flycheck-emacs-command
-                   `(,(prin1-to-string flycheck-emacs-lisp-checkdoc-form)
-                     ;; CheckDoc checks that features which are provided match
-                     ;; the name of the file which causes bogus warnings with
-                     ;; Flycheck's temporary buffer copies.  Hence we also give
-                     ;; the original file name to checkdoc for use as buffer
-                     ;; file name, so that checkdoc sees the real file name,
-                     ;; which avoids these bogus warnings.
-                     source source-original))
+  :command `(,@flycheck-emacs-command
+             ,(prin1-to-string flycheck-emacs-lisp-checkdoc-form)
+             source)
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)" warning))
   :modes '(emacs-lisp-mode lisp-interaction-mode)
   :predicate '(not (flycheck-temp-compilation-buffer-p)))

@@ -489,6 +489,9 @@ Call option filters for @code{nil} values, too
 @ghissue{112, Improve error parsing in Bash syntax checker}
 @item
 Error navigation does not cross restrictions in narrowed buffers anymore
+@item
+@ghissue{99, Try to preserve the non-directory part of the buffer's file
+name when substituting the @code{source} symbol}
 @end itemize
 
 @item

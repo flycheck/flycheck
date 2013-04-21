@@ -55,28 +55,20 @@
   "Test `flycheck-temp-file-system' without a filename."
   (let ((filename (flycheck-temp-file-system nil "flycheck-test")))
     (flycheck-testsuite-trap-temp-file filename
-      (should-not (file-name-extension filename))
-      (should (s-starts-with? "flycheck-test"
-                              (file-name-nondirectory filename)))
+      (should (s-starts-with? temporary-file-directory filename))
+      (should (s-starts-with? "flycheck-test" (file-name-nondirectory filename)))
       (should (file-exists-p filename)))))
 
-(ert-deftest flycheck-temp-file-system-filename-no-extension ()
+(ert-deftest flycheck-temp-file-system-filename ()
   "Test `flycheck-temp-file-system' with an extension."
-  (let ((filename (flycheck-temp-file-system "spam/with/eggs" "flycheck-test")))
-    (flycheck-testsuite-trap-temp-file filename
-      (should-not (file-name-extension filename))
-      (should (s-starts-with? "flycheck-test"
-                              (file-name-nondirectory filename)))
-      (should (file-exists-p filename)))))
-
-(ert-deftest flycheck-temp-file-system-filename-extension ()
-  "Test `flycheck-temp-file-system' works with a complete filename."
-  (let ((filename (flycheck-temp-file-system "spam/with/eggs.el" "flycheck-test")))
-    (flycheck-testsuite-trap-temp-file filename
-      (should (string= (file-name-extension filename) "el"))
-      (should (s-starts-with? "flycheck-test"
-                              (file-name-nondirectory filename)))
-      (should (file-exists-p filename)))))
+  (let* ((filename (flycheck-temp-file-system "spam/with/eggs.el"
+                                              "flycheck-test"))
+         (dirname (directory-file-name (file-name-directory filename))))
+    (flycheck-testsuite-trap-temp-dir dirname
+      (should (string= "eggs.el" (file-name-nondirectory filename)))
+      (should (s-starts-with? temporary-file-directory filename))
+      (should (s-starts-with? "flycheck-test" (file-name-nondirectory dirname)))
+      (should (file-directory-p dirname)))))
 
 (ert-deftest flycheck-temp-file-inplace-basename ()
   "Test `flycheck-temp-file-inplace' with a base name."
@@ -103,9 +95,8 @@
                               (file-name-nondirectory filename)))
       (should (file-exists-p filename)))))
 
-(ert-deftest flycheck-unique-temporary-directory ()
-  "Test `flycheck-unique-temporary-directory'."
-  (let ((dirname (flycheck-unique-temporary-directory "flycheck-test")))
+(ert-deftest flycheck-temp-dir-system ()
+  (let ((dirname (flycheck-temp-dir-system "flycheck-test")))
     (flycheck-testsuite-trap-temp-dir dirname
       (should (s-starts-with? temporary-file-directory dirname))
       (should (s-starts-with? "flycheck-test"
@@ -174,7 +165,7 @@
     (should-not (flycheck-temporary-buffer-p))))
 
 (ert-deftest flycheck-safe-delete-directories-recursive ()
-  (let ((dirname (flycheck-unique-temporary-directory "flycheck-test")))
+  (let ((dirname (flycheck-temp-dir-system "flycheck-test")))
     (unwind-protect
         (let ((filename (expand-file-name "foo" dirname)))
           (process-lines "touch" filename)
