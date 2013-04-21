@@ -85,6 +85,7 @@ File: flycheck.info,  Node: Features,  Next: Installation,  Prev: Introduction, 
         * CoffeeScript (using 'coffeelint')
         * CSS (using 'csslint'))
         * Elixir (using 'elixirc')
+        * Erlang (using 'erlc')
         * Emacs Lisp (using the byte compiler and CheckDoc)
         * Go (using 'gofmt', 'go build' and 'go test')
         * Haml
@@ -1719,7 +1720,7 @@ their support and patches are greatly appreciated.
      API and engaged in worthwhile discussion to shape this project.
 
    * Sylvain Benner (https://github.com/syl20bnr) added the Elixir
-     syntax checker.
+     and Erlang syntax checkers.
 
    * Sylvain Rousseau (https://github.com/thisirs) added a syntax
      checker for POSIX shell script using 'bash', and improved error
@@ -2230,6 +2231,7 @@ order of their appearance in the default value of 'flycheck-checkers':
    * 'coffee-coffeelint'
    * 'css-csslint'
    * 'elixir'
+   * 'erlang'
    * 'emacs-lisp'
    * 'emacs-lisp-checkdoc'
    * 'go-gofmt'
