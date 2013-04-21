@@ -314,7 +314,8 @@ If there are more than @code{flycheck-google-max-messages} errors at
 point, signal an error, to avoid spamming your browser with Google tabs.
 
 Requires the @uref{https://github.com/Bruce-Connor/emacs-google-this,
-Google This} library.
+Google This} library which is available on
+@uref{http://melpa.milkbox.net/, MELPA}.
 
 @item C-c ! C
 @itemx M-x flycheck-clear
