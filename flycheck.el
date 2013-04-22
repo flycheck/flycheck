@@ -342,7 +342,8 @@ returns t."
 (define-globalized-minor-mode global-flycheck-mode flycheck-mode
   flycheck-mode-on-safe
   :init-value nil
-  :group 'flycheck)
+  :group 'flycheck
+  :require 'flycheck)
 
 (defun flycheck-handle-change (beg end _len)
   "Handle a buffer change between BEG and END.
