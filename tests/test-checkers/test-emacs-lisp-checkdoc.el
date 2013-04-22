@@ -47,7 +47,7 @@ https://github.com/bbatsov/prelude/issues/259."
   (with-temp-buffer
     (insert ";;; Hello world\n(message \"foo\")")
     (emacs-lisp-mode)
-    (should (not (buffer-file-name)))
+    (should-not (buffer-file-name))
     (flycheck-testsuite-buffer-sync)
     ;; Just check that there are any errors, i.e. that the checker was used and
     ;; worked.
@@ -59,7 +59,7 @@ https://github.com/bbatsov/prelude/issues/259."
     (emacs-lisp-mode)
     (should (flycheck-may-use-checker 'emacs-lisp-checkdoc))
     (rename-buffer "foo-autoloads.el")
-    (should (not (flycheck-may-use-checker 'emacs-lisp-checkdoc)))))
+    (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
 
 (ert-deftest checker-emacs-lisp-checkdoc-inhibited-autoloads-source ()
   "Test that CheckDoc does no check temporary autoload buffers."
@@ -67,7 +67,7 @@ https://github.com/bbatsov/prelude/issues/259."
     (emacs-lisp-mode)
     (should (flycheck-may-use-checker 'emacs-lisp-checkdoc))
     (rename-buffer " *autoload-file*")
-    (should (not (flycheck-may-use-checker 'emacs-lisp-checkdoc)))))
+    (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
 
 (ert-deftest checker-emacs-lisp-checkdoc-inhibited-compiler-input ()
   "Test that CheckDoc does not check byte compiler input buffers."
@@ -75,7 +75,7 @@ https://github.com/bbatsov/prelude/issues/259."
     (emacs-lisp-mode)
     (should (flycheck-may-use-checker 'emacs-lisp-checkdoc))
     (rename-buffer " *Compiler Input*")
-    (should (not (flycheck-may-use-checker 'emacs-lisp-checkdoc)))))
+    (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
 
 ;; Local Variables:
 ;; coding: utf-8
