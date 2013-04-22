@@ -519,7 +519,7 @@ CodeSniffer}
 @comment  node-name,  next,  previous,  up
 @unnumberedsec master (unreleased)
 
-@itemize bullet
+@itemize @bullet
 @item
 Improvements:
 

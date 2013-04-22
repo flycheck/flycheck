@@ -1691,7 +1691,7 @@ File: flycheck.info,  Node: master,  Prev: 0.10,  Up: Changes
 master (unreleased)
 ===================
 
-   bullet Improvements:
+   * Improvements:
 
         * The 'ruby' syntax checker now differentiates warnings from
           errors (https://github.com/lunaryorn/flycheck/issues/123)
@@ -2381,9 +2381,9 @@ Node: 0.859342
 Node: 0.960854
 Node: 0.1061350
 Node: master63404
-Node: Credits63673
-Node: GNU Free Documentation License66372
-Node: Syntax checkers91524
-Node: Function and Variable Index92500
+Node: Credits63668
+Node: GNU Free Documentation License66367
+Node: Syntax checkers91519
+Node: Function and Variable Index92495
 
 End Tag Table
