@@ -2380,7 +2380,11 @@ The checker runs `checkdoc-current-buffer'."
              source)
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)" warning))
   :modes '(emacs-lisp-mode lisp-interaction-mode)
-  :predicate '(not (flycheck-temp-compilation-buffer-p)))
+  :predicate
+  '(and (not (flycheck-temp-compilation-buffer-p))
+        (not (and (buffer-file-name)
+                  (string= (file-name-nondirectory (buffer-file-name))
+                           "Carton")))))
 
 (flycheck-declare-checker erlang
   "An Erlang syntax checker using the Erlang interpreter."

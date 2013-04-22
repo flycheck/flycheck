@@ -77,6 +77,15 @@ https://github.com/bbatsov/prelude/issues/259."
     (rename-buffer " *Compiler Input*")
     (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
 
+(ert-deftest checker-emacs-lisp-checkdoc-inhibited-carton ()
+  (flycheck-testsuite-with-resource-buffer "checkers/emacs-lisp-checkdoc-warning.el"
+    (emacs-lisp-mode)
+    (should (flycheck-may-use-checker 'emacs-lisp-checkdoc))
+    (setq buffer-file-name "/foo/bar/Cartony")  ; No real carton file
+    (should (flycheck-may-use-checker 'emacs-lisp-checkdoc))
+    (setq buffer-file-name "/foo/bar/Carton")
+    (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
+
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:
