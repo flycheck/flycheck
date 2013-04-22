@@ -266,8 +266,6 @@ When called from Lisp, enable `flycheck-mode' if ARG is omitted,
 nil or positive.  If ARG is `toggle', toggle `flycheck-mode'.
 Otherwise behave as if called interactively.
 
-Flycheck mode will not be enabled if `flycheck-may-enable-mode' returns false.
-
 In `flycheck-mode' the buffer is automatically syntax-checked
 using the first suitable syntax checker from `flycheck-checkers'.
 Use `flycheck-select-checker' to select a checker for the current
