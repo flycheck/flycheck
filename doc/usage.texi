@@ -25,6 +25,10 @@ or if new lines are inserted.
 @end itemize
 
 @noindent
+It is possible to check the buffer only upon saving if the custom variable
+@code{flycheck-check-on-save-only} it set to non-nil.
+
+@noindent
 You can also check the buffer manually:
 
 @table @kbd

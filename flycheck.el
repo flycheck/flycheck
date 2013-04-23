@@ -180,6 +180,11 @@ jumps to the error column regardless of the highlighting mode."
                  (const :tag "Highlight whole lines" lines)
                  (const :tag "Do not highlight errors" nil))
   :package-version '(flycheck . "0.6"))
+  
+(defcustom flycheck-check-on-save-only nil
+  "If non-nil, flycheck will perform a syntax check only when the file is saved."
+  :group 'flycheck
+  :type 'boolean)
 
 (defcustom flycheck-mode-hook nil
   "Hooks to run after `flycheck-mode'."
@@ -254,6 +259,10 @@ running checks, and empty all variables used by flycheck."
 (defvar-local flycheck-previous-next-error-function nil
   "Remember the previous `next-error-function'.")
 
+(defun flycheck-check-on-save-only-p ()
+  "Determine if flycheck performs a syntax check on file save only ."
+  flycheck-check-on-save-only)
+
 ;;;###autoload
 (define-minor-mode flycheck-mode
   "Minor mode for on-the-fly syntax checking.
@@ -282,7 +291,8 @@ buffer manually.
     (flycheck-clear)
 
     (add-hook 'after-save-hook 'flycheck-buffer-safe nil t)
-    (add-hook 'after-change-functions 'flycheck-handle-change nil t)
+    (if (not (flycheck-check-on-save-only-p))
+         (add-hook 'after-change-functions 'flycheck-handle-change nil t))
     (add-hook 'kill-buffer-hook 'flycheck-teardown nil t)
     ;; Execute deferred checks if the buffer visibility changes
     (add-hook 'window-configuration-change-hook
@@ -299,7 +309,8 @@ buffer manually.
     (flycheck-buffer-safe))
    (t
     (remove-hook 'after-save-hook 'flycheck-buffer-safe t)
-    (remove-hook 'after-change-functions 'flycheck-handle-change t)
+    (if (not (flycheck-check-on-save-only-p))
+         (remove-hook 'after-change-functions 'flycheck-handle-change t))
     (remove-hook 'kill-buffer-hook 'flycheck-teardown t)
     (remove-hook 'window-configuration-change-hook
                  'flycheck-perform-deferred-syntax-check t)
