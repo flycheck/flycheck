@@ -15,3 +15,9 @@ defmodule AlwaysMatch do
     IO.puts "Cannot get here."
   end
 end
+
+defmodule Obsolete do
+  def some_fun(alist) when list(alist) do
+    IO.inspect alist
+  end
+end
