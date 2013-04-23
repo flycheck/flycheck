@@ -132,14 +132,14 @@ gem haml \
     rubocop
 
 # Install Elixir compiler.
-ELIXIR_VERSION=0.8.1
+ELIXIR_VERSION=0.8.2
 ELIXIR_DIR="/opt/elixir-${ELIXIR_VERSION}"
 ELIXIR_SYMDIR="/usr/local/bin"
 if ! [ -d "$ELIXIR_DIR" -a -x "$ELIXIR_DIR/elixirc" ]; then
     sudo rm -rf "$ELIXIR_DIR"
     # Download to a temporary file, because silly unzip can't cope with stdin
     ELIXIR_DOWNLOAD="$(tempfile)"
-    wget "http://dl.dropbox.com/u/4934685/elixir/v0.8.1.zip" > "$ELIXIR_DOWNLOAD"
+    wget "http://dl.dropbox.com/u/4934685/elixir/v${ELIXIR_VERSION}.zip" > "$ELIXIR_DOWNLOAD"
     sudo unzip -qq -d "$ELIXIR_DIR" "$ELIXIR_DOWNLOAD"
     rm "$ELIXIR_DOWNLOAD"
     sudo ln -fs "$ELIXIR_DIR/bin/elixirc" "$ELIXIR_SYMDIR"

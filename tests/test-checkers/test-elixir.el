@@ -39,15 +39,8 @@
    "checkers/elixir-warnings.ex" 'elixir-mode nil
    '(5 nil "variable a is unused" warning)
    '(6 nil "variable a shadowed in 'fun'" warning)
-   '(14 nil "this clause cannot match because a previous clause at line 11 always matches" warning)))
-
-(ert-deftest checker-elixir-warning-future ()
-  "A warning that will only be emitted in the to-be-released Elixir version."
-  :expected-result :failed
-  ;; TODO Merge this test into elixir-warnings if 0.8.2 is released
-  (flycheck-testsuite-should-syntax-check
-   "checkers/elixir-warning-future.ex" 'elixir-mode nil
-   '(8 nil "list/1 obsolete" warning)))
+   '(14 nil "this clause cannot match because a previous clause at line 11 always matches" warning)
+   '(20 nil "list/1 obsolete" warning)))
 
 ;; Local Variables:
 ;; coding: utf-8
