@@ -2273,12 +2273,6 @@ See URL `https://github.com/stubbornella/csslint'."
              "-o" temporary-directory   ; Move compiler output out of the way
              "--ignore-module-conflict" ; Prevent tedious module redefinition
                                         ; warning.
-             "+warn_obsolete_guard"
-             "+warn_unused_import"
-             "+warn_shadow_vars"
-             "+warn_export_vars"
-             "+strong_validation"
-             "+report"
              source)
   :error-patterns
   '(("^\\*\\* (.*) \\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error)
