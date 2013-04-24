@@ -457,10 +457,8 @@ messages.
 
 Use when checking buffers automatically, i.e. in hooks."
   (with-demoted-errors
-    (if (flycheck-may-check-buffer)
-        (flycheck-buffer)
-      (message "Cannot perform a syntax check in buffer %s."
-               (buffer-name)))))
+    (when (flycheck-may-check-buffer)
+      (flycheck-buffer))))
 
 
 ;;;; Mode line reporting
