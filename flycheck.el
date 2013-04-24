@@ -1887,11 +1887,6 @@ flycheck exclamation mark otherwise.")
 (put 'flycheck-warning-overlay 'help-echo "Unknown warning.")
 (put 'flycheck-warning-overlay 'flycheck-fringe-bitmap 'question-mark)
 
-(defconst flycheck-overlay-categories-alist
-  '((warning . flycheck-warning-overlay)
-    (error . flycheck-error-overlay))
-  "Overlay categories for error levels.")
-
 (defun flycheck-create-overlay (err)
   "Get or create the overlay for ERR."
   (flycheck-error-with-buffer err
@@ -1920,7 +1915,10 @@ If `flycheck-indication-mode' is neither `left-fringe' nor
   "Add overlay for ERR."
   (let* ((overlay (flycheck-create-overlay err))
          (level (flycheck-error-level err))
-         (category (cdr (assq level flycheck-overlay-categories-alist))))
+         (category (cl-case level
+                     (warning 'flycheck-warning-overlay)
+                     (error 'flycheck-error-overlay)
+                     (t (error "Invalid error level %S" level)))))
     ;; TODO: Consider hooks to re-check if overlay contents change
     (overlay-put overlay 'category category)
     (unless flycheck-highlighting-mode
