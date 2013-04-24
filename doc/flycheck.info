@@ -178,12 +178,38 @@ File: flycheck.info,  Node: Syntax checking,  Next: Selection,  Prev: Usage,  Up
 2.1 Syntax checking
 ===================
 
-In 'flycheck-mode' the buffer is automatically checked on the fly when
+By default, 'flycheck-mode' checks syntax automatically when
 
+   * the mode is enabled,
    * the file is saved,
    * or if new lines are inserted.
 
-You can also check the buffer manually:
+However, you can customize automatic syntax checking with
+'flycheck-check-syntax-automatically':
+
+ -- User Option: flycheck-check-syntax-automatically
+     When Flycheck should check syntax automatically.
+
+     This variable is list of events that may trigger syntax checks.
+     The following events are known:
+
+     'mode-enabled' checks syntax if 'flycheck-mode' is enabled.
+
+     'save' checks syntax after the buffer was saved.
+
+     'new-line' checks syntax after a new line was inserted.
+
+     An syntax check is only conducted for events that are contained in
+     this list.  For instance, the following setting will cause Flycheck
+     to never check syntax if a new line was inserted:
+
+          (setq flycheck-check-syntax-automatically '(mode-enabled save))
+
+     If the list is empty syntax is never checked automatically.  In
+     this case, use 'flycheck-buffer' to check syntax manually.
+
+Regardless of automatic syntax checking you can also check the buffer
+manually:
 
 'C-c ! c'
 'M-x flycheck-buffer'
@@ -1706,6 +1732,9 @@ master (unreleased)
 
         * Customizable error indication with control of the fringe side,
           via 'flycheck-indication-mode'
+        * Customizable automatic syntax checking, via
+          'flycheck-check-syntax-automatically'
+          (https://github.com/lunaryorn/flycheck/issues/128)
 
    * Improvements:
 
@@ -2321,8 +2350,9 @@ Function and Variable Index
  [index ]
 * Menu:
 
-* flycheck-after-syntax-check-hook:      Syntax checking.     (line  27)
-* flycheck-buffer:                       Syntax checking.     (line  15)
+* flycheck-after-syntax-check-hook:      Syntax checking.     (line  53)
+* flycheck-buffer:                       Syntax checking.     (line  41)
+* flycheck-check-syntax-automatically:   Syntax checking.     (line  15)
 * flycheck-checker:                      Selection.           (line  41)
 * flycheck-checkers:                     Selection.           (line   9)
 * flycheck-chktexrc:                     Configuration.       (line  25)
@@ -2367,45 +2397,45 @@ Node: Installation4430
 Node: Activation5604
 Node: Usage5955
 Node: Syntax checking6578
-Node: Selection7840
-Node: Configuration10421
-Node: Reporting13193
-Node: Navigation16688
-Node: Mode line18484
-Node: Extending19385
-Node: Declaration19984
-Node: Error parsers32415
-Node: Option filters33399
-Node: Examples33738
-Node: Simple example34170
-Node: Predicate example37234
-Node: Configuration example39215
-Node: Chaining example41874
-Node: API43260
-Node: Error API44048
-Node: Error parser API46649
-Node: Contribution46875
-Node: Reporting issues47551
-Node: Contributing syntax checkers48287
-Node: Contributing code49082
-Node: Unit tests50422
-Node: Changes51709
-Node: 0.152325
-Node: 0.252609
-Node: 0.352887
-Node: 0.453123
-Node: 0.553898
-Node: 0.655118
-Node: 0.6.157968
-Node: 0.758117
-Node: 0.7.159131
-Node: 0.859846
-Node: 0.961358
-Node: 0.1061854
-Node: master63908
-Node: Credits64452
-Node: GNU Free Documentation License67151
-Node: Syntax checkers92303
-Node: Function and Variable Index93279
+Node: Selection8802
+Node: Configuration11383
+Node: Reporting14155
+Node: Navigation17650
+Node: Mode line19446
+Node: Extending20347
+Node: Declaration20946
+Node: Error parsers33377
+Node: Option filters34361
+Node: Examples34700
+Node: Simple example35132
+Node: Predicate example38196
+Node: Configuration example40177
+Node: Chaining example42836
+Node: API44222
+Node: Error API45010
+Node: Error parser API47611
+Node: Contribution47837
+Node: Reporting issues48513
+Node: Contributing syntax checkers49249
+Node: Contributing code50044
+Node: Unit tests51384
+Node: Changes52671
+Node: 0.153287
+Node: 0.253571
+Node: 0.353849
+Node: 0.454085
+Node: 0.554860
+Node: 0.656080
+Node: 0.6.158930
+Node: 0.759079
+Node: 0.7.160093
+Node: 0.860808
+Node: 0.962320
+Node: 0.1062816
+Node: master64870
+Node: Credits65577
+Node: GNU Free Documentation License68276
+Node: Syntax checkers93428
+Node: Function and Variable Index94404
 
 End Tag Table

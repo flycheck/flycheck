@@ -204,6 +204,32 @@ jumps to the error column regardless of the highlighting mode."
                  (const :tag "Do not highlight errors" nil))
   :package-version '(flycheck . "0.6"))
 
+(defcustom flycheck-check-syntax-automatically '(save new-line mode-enabled)
+  "When Flycheck should check syntax automatically.
+
+This variable is a list of events that may trigger syntax checks.
+The following events are known:
+
+`mode-enabled' checks syntax automatically when `flycheck-mode'
+is enabled.
+
+`save' checks syntax automatically each time the buffer is saved.
+
+`new-line' checks syntax automatically each time a new line is
+inserted into the buffer.
+
+For instance, set this variable to '(mode-enabled save) to only
+check syntax automatically when saving a buffer, but never when
+modifying its contents.
+
+If nil, never check syntax automatically.  Use `flycheck-buffer'
+to start a syntax check manually."
+  :group 'flycheck
+  :type '(set (const :tag "After the buffer was saved" save)
+              (const :tag "After a new line was inserted" new-line)
+              (const :tag "After `flycheck-mode' was enabled" mode-enabled))
+  :package-version '(flycheck . "0.11"))
+
 (defcustom flycheck-mode-hook nil
   "Hooks to run after `flycheck-mode'."
   :group 'flycheck
@@ -279,14 +305,12 @@ running checks, and empty all variables used by flycheck."
 
 (defconst flycheck-hooks-alist
   '(
-    ;; Check syntax immediately after save, or after the buffer visibility
-    ;; changed
-    (after-save-hook                  . flycheck-buffer-safe)
-    (window-configuration-change-hook . flycheck-perform-deferred-syntax-check)
-    ;; Check syntax after the buffer contents changed in certain ways
+    ;; Handle events that may start automatic syntax checks
+    (after-save-hook                  . flycheck-handle-save)
     (after-change-functions           . flycheck-handle-change)
-    ;; If the buffer or Emacs gets killed, teardown Flycheck (e.g. kill running
-    ;; processes, delete temp files, etc.)
+    ;; Handle events that may triggered pending deferred checks
+    (window-configuration-change-hook . flycheck-perform-deferred-syntax-check)
+    ;; Tear down Flycheck if the buffer or Emacs is kill
     (kill-buffer-hook                 . flycheck-teardown)
     (kill-emacs-hook                  . flycheck-teardown)
     ;; Show or hide error popups after commands
@@ -333,7 +357,7 @@ buffer manually.
     (setq flycheck-previous-next-error-function next-error-function)
     (setq next-error-function 'flycheck-next-error-function)
 
-    (flycheck-buffer-safe))
+    (flycheck-buffer-automatically 'mode-enabled))
    (t
     (setq next-error-function flycheck-previous-next-error-function)
 
@@ -342,6 +366,8 @@ buffer manually.
 
     (flycheck-teardown))))
 
+
+;;; Global syntax checking
 (defun flycheck-may-enable-mode ()
   "Determine whether Flycheck mode may be enabled.
 
@@ -376,17 +402,8 @@ returns t."
   :group 'flycheck
   :require 'flycheck)
 
-(defun flycheck-handle-change (beg end _len)
-  "Handle a buffer change between BEG and END.
-
-BEG and END mark the beginning and end of the change text.  _LEN
-is ignored.
-
-Start a syntax check if a new line has been inserted into the
-buffer."
-  (when (and flycheck-mode (s-contains? "\n" (buffer-substring beg end)))
-    (flycheck-buffer-safe)))
-
+
+;;; Manual syntax checking
 (defun flycheck-clear ()
   "Clear all errors in the current buffer."
   (interactive)
@@ -438,15 +455,10 @@ _NAME is ignored."
                  (flycheck-checker-compilation-error-regexp-alist checker))))
       (user-error "No suitable checker available"))))
 
-(defun flycheck-may-check-buffer ()
-  "Determine whether the buffer may be checked.
-
-A buffer may not be checked under the following conditions:
-
-- The buffer is read only (see `buffer-read-only').
-
-Return t if the buffer may be checked and nil otherwise."
-  (not buffer-read-only))
+
+;;;; Deferred syntax checking
+(defvar-local flycheck-deferred-syntax-check nil
+  "If non-nil, a deferred syntax check is pending.")
 
 (defun flycheck-must-defer-check ()
   "Determine whether the syntax check has to be deferred.
@@ -456,24 +468,71 @@ A check has to be deferred if the buffer is not visible.
 Return t if the check is to be deferred, or nil otherwise."
   (not (get-buffer-window)))
 
-(defun flycheck-buffer-safe ()
-  "Safely check syntax in the current buffer.
+(defun flycheck-deferred-check-p ()
+  "Determine whether the current buffer has a deferred check.
 
-Like `flycheck-buffer', but check less aggressively and demote
-all errors to messages.
+Return t if so, or nil otherwise."
+  flycheck-deferred-syntax-check)
 
-This function does not check buffers that may not be checked
-according to `flycheck-may-check-buffer', and defers the syntax
-check if `flycheck-must-defer-check' returns a non-nil value.
+(defun flycheck-buffer-deferred ()
+  "Defer syntax check for the current buffer."
+  (setq flycheck-deferred-syntax-check t))
 
-Use when checking buffers automatically, i.e. in hooks."
-  (if (flycheck-may-check-buffer)
+(defun flycheck-clean-deferred-check ()
+  "Clean an deferred syntax checking state."
+  (setq flycheck-deferred-syntax-check nil))
+
+(defun flycheck-perform-deferred-syntax-check ()
+  "Perform any deferred syntax checks."
+  (when (flycheck-deferred-check-p)
+    (flycheck-clean-deferred-check)
+    (flycheck-buffer-automatically)))
+
+
+;;;; Automatic syntax checking
+(defun flycheck-may-check-automatically (&optional condition)
+  "Determine whether the buffer may be checked under CONDITION.
+
+Read-only buffers may never be checked automatically.
+
+If CONDITION is non-nil, determine whether syntax may checked
+automatically according to
+`flycheck-check-syntax-automatically'."
+  (and (not buffer-read-only)
+       (or (not condition)
+           (memq condition flycheck-check-syntax-automatically))))
+
+(defun flycheck-buffer-automatically (&optional condition)
+  "Automatically check syntax at CONDITION.
+
+Syntax is not checked if `flycheck-may-check-automatically'
+returns nil for CONDITION.
+
+The syntax check is deferred if `flycheck-must-defer-check'
+returns t."
+  (if (flycheck-may-check-automatically condition)
       (if (flycheck-must-defer-check)
           (flycheck-buffer-deferred)
         (with-demoted-errors
           (flycheck-buffer)))
     (message "Cannot perform a syntax check in buffer %s."
              (buffer-name))))
+
+(defun flycheck-handle-change (beg end _len)
+  "Handle a buffer change between BEG and END.
+
+BEG and END mark the beginning and end of the change text.  _LEN
+is ignored.
+
+Start a syntax check if a new line has been inserted into the
+buffer."
+  (when (and flycheck-mode
+             (s-contains? "\n" (buffer-substring beg end)))
+    (flycheck-buffer-automatically 'new-line)))
+
+(defun flycheck-handle-save ()
+  "Handle a save of the buffer."
+  (flycheck-buffer-automatically 'save))
 
 
 ;;;; Mode line reporting
@@ -500,31 +559,6 @@ Report a proper flycheck status."
         (flycheck-report-status
          (format ":%s/%s" (car no-err-warnings) (cdr no-err-warnings))))
     (flycheck-report-status "")))
-
-
-;;;; Deferred syntax checking
-(defvar-local flycheck-deferred-syntax-check nil
-  "If non-nil, a syntax check as been deferred in `flycheck-buffer-safe'.")
-
-(defun flycheck-deferred-check-p ()
-  "Determine whether the current buffer has a deferred check.
-
-Return t if so, or nil otherwise."
-  flycheck-deferred-syntax-check)
-
-(defun flycheck-buffer-deferred ()
-  "Defer syntax check for the current buffer."
-  (setq flycheck-deferred-syntax-check t))
-
-(defun flycheck-clean-deferred-check ()
-  "Clean an deferred syntax checking state."
-  (setq flycheck-deferred-syntax-check nil))
-
-(defun flycheck-perform-deferred-syntax-check ()
-  "Perform any deferred syntax checks."
-  (when (flycheck-deferred-check-p)
-    (flycheck-clean-deferred-check)
-    (flycheck-buffer-safe)))
 
 
 ;;;; Utility functions

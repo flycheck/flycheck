@@ -14,10 +14,11 @@ This chapter explains the usage of Flycheck.
 @comment  node-name,  next,  previous,  up
 @section Syntax checking
 
-In @code{flycheck-mode} the buffer is automatically checked on the fly
-when
+By default, @code{flycheck-mode} checks syntax automatically when
 
 @itemize
+@item
+the mode is enabled,
 @item
 the file is saved,
 @item
@@ -25,7 +26,36 @@ or if new lines are inserted.
 @end itemize
 
 @noindent
-You can also check the buffer manually:
+However, you can customize automatic syntax checking with
+@code{flycheck-check-syntax-automatically}:
+
+@defopt flycheck-check-syntax-automatically
+When Flycheck should check syntax automatically.
+
+This variable is list of events that may trigger syntax checks.  The
+following events are known:
+
+@code{mode-enabled} checks syntax if @code{flycheck-mode} is enabled.
+
+@code{save} checks syntax after the buffer was saved.
+
+@code{new-line} checks syntax after a new line was inserted.
+
+An syntax check is only conducted for events that are contained in this
+list.  For instance, the following setting will cause Flycheck to never
+check syntax if a new line was inserted:
+
+@lisp
+(setq flycheck-check-syntax-automatically '(mode-enabled save))
+@end lisp
+
+If the list is empty syntax is never checked automatically.  In this
+case, use @code{flycheck-buffer} to check syntax manually.
+@end defopt
+
+@noindent
+Regardless of automatic syntax checking you can also check the buffer
+manually:
 
 @table @kbd
 @item C-c ! c

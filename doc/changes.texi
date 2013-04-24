@@ -527,6 +527,9 @@ New features:
 @item
 Customizable error indication with control of the fringe side, via
 @code{flycheck-indication-mode}
+@item
+@ghissue{128, Customizable automatic syntax checking@comma{} via
+@code{flycheck-check-syntax-automatically}}
 @end itemize
 
 @item
