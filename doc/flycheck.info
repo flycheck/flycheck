@@ -1696,6 +1696,10 @@ master (unreleased)
         * The 'ruby' syntax checker now differentiates warnings from
           errors (https://github.com/lunaryorn/flycheck/issues/123)
 
+   * Bug fixes:
+
+        * Add missing customization group for syntax checker options
+
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
 
@@ -2381,9 +2385,9 @@ Node: 0.859342
 Node: 0.960854
 Node: 0.1061350
 Node: master63404
-Node: Credits63668
-Node: GNU Free Documentation License66367
-Node: Syntax checkers91519
-Node: Function and Variable Index92495
+Node: Credits63755
+Node: GNU Free Documentation License66454
+Node: Syntax checkers91606
+Node: Function and Variable Index92582
 
 End Tag Table

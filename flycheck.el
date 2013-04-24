@@ -32,7 +32,7 @@
 ;; complete list).
 ;;
 ;; Support for new modes and languages can be added by declaring a new syntax
-;; checker (see `flycheck-declare-checker').
+1;; checker (see `flycheck-declare-checker').
 
 ;;; Code:
 
@@ -78,7 +78,12 @@ buffer-local wherever it is set."
   :group 'tools)
 
 (defgroup flycheck-config-files nil
-  "Configuration files for on-the-fly syntax checking."
+  "Configuration files for on-the-fly syntax checkers."
+  :prefix "flycheck-"
+  :group 'flycheck)
+
+(defgroup flycheck-options nil
+  "Options for on-the-fly syntax checkers."
   :prefix "flycheck-"
   :group 'flycheck)
 

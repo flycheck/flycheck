@@ -529,6 +529,14 @@ Improvements:
 from errors}
 @end itemize
 
+@item
+Bug fixes:
+
+@itemize
+@item
+Add missing customization group for syntax checker options
+@end itemize
+
 @end itemize
 
 @c Local Variables:
