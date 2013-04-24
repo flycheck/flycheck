@@ -527,6 +527,8 @@ Improvements:
 @item
 @ghissue{123, The @code{ruby} syntax checker now differentiates warnings
 from errors}
+@item
+Faces are now in a separate customization group
 @end itemize
 
 @item

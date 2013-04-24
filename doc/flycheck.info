@@ -1695,6 +1695,7 @@ master (unreleased)
 
         * The 'ruby' syntax checker now differentiates warnings from
           errors (https://github.com/lunaryorn/flycheck/issues/123)
+        * Faces are now in a separate customization group
 
    * Bug fixes:
 
@@ -2385,9 +2386,9 @@ Node: 0.859342
 Node: 0.960854
 Node: 0.1061350
 Node: master63404
-Node: Credits63755
-Node: GNU Free Documentation License66454
-Node: Syntax checkers91606
-Node: Function and Variable Index92582
+Node: Credits63813
+Node: GNU Free Documentation License66512
+Node: Syntax checkers91664
+Node: Function and Variable Index92640
 
 End Tag Table

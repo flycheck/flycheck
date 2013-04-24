@@ -87,6 +87,11 @@ buffer-local wherever it is set."
   :prefix "flycheck-"
   :group 'flycheck)
 
+(defgroup flycheck-faces nil
+  "Faces used by on-the-fly syntax checking."
+  :prefix "flycheck-"
+  :group 'flycheck)
+
 (defcustom flycheck-checkers
   '(bash
     coffee-coffeelint
@@ -153,13 +158,13 @@ file.")
 
 (defface flycheck-error-face
   '((t :inherit error))
-  "Face for flycheck errors."
-  :group 'flycheck)
+  "Face for on-the-fly syntax checking errors."
+  :group 'flycheck-faces)
 
 (defface flycheck-warning-face
   '((t :inherit warning))
-  "Face for flycheck warnings."
-  :group 'flycheck)
+  "Face for on-the-fly syntax checking warnings."
+  :group 'flycheck-faces)
 
 (make-obsolete-variable 'flycheck-ignore-columns
                         "Use `flycheck-highlighting-mode' instead."
