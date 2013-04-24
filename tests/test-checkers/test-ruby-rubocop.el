@@ -25,6 +25,8 @@
 (require 'ert)
 (require 'flycheck)
 
+(defvar ruby-mode-hook)
+
 (ert-deftest checker-ruby-rubocop-syntax-error ()
   "Test a Ruby syntax error."
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
