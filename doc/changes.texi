@@ -521,6 +521,15 @@ CodeSniffer}
 
 @itemize @bullet
 @item
+New features:
+
+@itemize @bullet
+@item
+Customizable error indication with control of the fringe side, via
+@code{flycheck-indication-mode}.
+@end itemize
+
+@item
 Improvements:
 
 @itemize @bullet

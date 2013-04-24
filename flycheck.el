@@ -166,6 +166,23 @@ file.")
   "Face for on-the-fly syntax checking warnings."
   :group 'flycheck-faces)
 
+(defcustom flycheck-indication-mode 'left-fringe
+  "The indication mode for Flycheck errors and warnings.
+
+Controls how Flycheck indicates errors in buffers.  May either be
+`left-fringe', `right-fringe', or nil.
+
+If set to `left-fringe' or `right-fringe', indicate errors and
+warnings via icons in the left and right fringe respectively.
+
+If set to nil, errors and warnings are not indicated.  However,
+they may still be highlighted according to
+`flycheck-highlighting-mode'."
+  :group 'flycheck
+  :type '(choice (const :tag "Indicate in the left fringe" left-fringe)
+                 (const :tag "Indicate in the right fringe" right-fringe)
+                 (const :tag "Do not indicate" nil)))
+
 (defcustom flycheck-highlighting-mode 'columns
   "The highlighting mode for Flycheck errors and warnings.
 
@@ -1885,10 +1902,19 @@ flycheck exclamation mark otherwise.")
       overlay)))
 
 (defun flycheck-make-fringe-icon (category)
-  "Create the fringe icon for CATEGORY."
-  (let ((bitmap (get category 'flycheck-fringe-bitmap))
-        (face (get category 'face)))
-    (propertize "!" 'display `(left-fringe ,bitmap ,face))))
+  "Create the fringe icon for CATEGORY.
+
+Return a propertized string that shows a fringe bitmap according
+to CATEGORY and the side specified `flycheck-indication-mode'.
+Use this string as `before-string' of an overlay to actually show
+the icon.
+
+If `flycheck-indication-mode' is neither `left-fringe' nor
+`right-fringe', returned nil."
+  (when (memq flycheck-indication-mode '(left-fringe right-fringe))
+    (let ((bitmap (get category 'flycheck-fringe-bitmap))
+          (face (get category 'face)))
+      (propertize "!" 'display (list flycheck-indication-mode bitmap face)))))
 
 (defun flycheck-add-overlay (err)
   "Add overlay for ERR."
@@ -1901,7 +1927,9 @@ flycheck exclamation mark otherwise.")
       ;; Erase the highlighting from the overlay if requested by the user
       (overlay-put overlay 'face nil))
     (overlay-put overlay 'flycheck-error err)
-    (overlay-put overlay 'before-string (flycheck-make-fringe-icon category))
+    (let ((icon (flycheck-make-fringe-icon category)))
+      (when icon
+        (overlay-put overlay 'before-string icon)))
     (overlay-put overlay 'help-echo (flycheck-error-message err))))
 
 (defun flycheck-add-overlays (errors)

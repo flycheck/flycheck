@@ -252,7 +252,7 @@ Errors and warnings from a syntax checker are
 reported in the mode line or in a popup buffer, depending on the length
 of the error messages,
 @item
-indicated by fringe icons,
+indicated according to @code{flycheck-indication-mode},
 @item
 and highlighted in the buffer with @code{flycheck-error-face} and
 @code{flycheck-warning-face} respectively, according to
@@ -287,11 +287,23 @@ highlighted, regardless of whether the error is actually specific to a
 column.  Column information is hence ignored.
 
 If set to @code{nil} highlighting is completely disabled.  Errors will
-only be reported via fringe icons and error message popups.
+still be reported in the mode line and in error message popups, and
+indicated according to @code{flycheck-indication-mode}.
 
 Note that this variable does @emph{not} affect error @emph{navigation}.
 @code{next-error} and @code{previous-error} always jump to the error
 column, regardless of the highlighting mode.
+@end defopt
+
+@defopt flycheck-indication-mode
+This variable determines how to indicate errors:
+
+If set to @code{left-fringe} or @code{right-fringe}, indicate errors and
+warnings in the left and right fringe respectively.
+
+If set to @code{nil}, do not indicate errors.  Errors will still be
+reported in the mode line and in error message popups, and highlighted
+according to @code{flycheck-highlighting-mode}.
 @end defopt
 
 To view an error message, either hover the mouse of the highlighted
