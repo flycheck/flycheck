@@ -382,9 +382,8 @@ is ignored.
 
 Start a syntax check if a new line has been inserted into the
 buffer."
-  (let ((new-text (buffer-substring beg end)))
-    (when (and flycheck-mode (s-contains? "\n" new-text))
-      (flycheck-buffer-safe))))
+  (when (and flycheck-mode (s-contains? "\n" (buffer-substring beg end)))
+    (flycheck-buffer-safe)))
 
 (defun flycheck-clear ()
   "Clear all errors in the current buffer."
@@ -397,7 +396,7 @@ buffer."
   "Check syntax in the current buffer."
   (interactive)
   (if flycheck-mode
-      (when (not (flycheck-running-p))
+      (unless (flycheck-running-p)
         ;; Clear error list and mark all overlays for deletion.  We do not
         ;; delete all overlays immediately to avoid excessive re-displays and
         ;; flickering, if the same errors gets highlighted again after the check
