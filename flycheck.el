@@ -166,10 +166,6 @@ file.")
   "Face for on-the-fly syntax checking warnings."
   :group 'flycheck-faces)
 
-(make-obsolete-variable 'flycheck-ignore-columns
-                        "Use `flycheck-highlighting-mode' instead."
-                        "0.6")
-
 (defcustom flycheck-highlighting-mode 'columns
   "The highlighting mode for Flycheck errors and warnings.
 
