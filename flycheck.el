@@ -1884,20 +1884,24 @@ flycheck exclamation mark otherwise.")
       (overlay-put overlay 'flycheck-error err)
       overlay)))
 
+(defun flycheck-make-fringe-icon (category)
+  "Create the fringe icon for CATEGORY."
+  (let ((bitmap (get category 'flycheck-fringe-bitmap))
+        (face (get category 'face)))
+    (propertize "!" 'display `(left-fringe ,bitmap ,face))))
+
 (defun flycheck-add-overlay (err)
   "Add overlay for ERR."
   (let* ((overlay (flycheck-create-overlay err))
          (level (flycheck-error-level err))
-         (category (cdr (assq level flycheck-overlay-categories-alist)))
-         (fringe-icon `(left-fringe ,(get category 'flycheck-fringe-bitmap)
-                                    ,(get category 'face))))
+         (category (cdr (assq level flycheck-overlay-categories-alist))))
     ;; TODO: Consider hooks to re-check if overlay contents change
     (overlay-put overlay 'category category)
     (unless flycheck-highlighting-mode
       ;; Erase the highlighting from the overlay if requested by the user
       (overlay-put overlay 'face nil))
     (overlay-put overlay 'flycheck-error err)
-    (overlay-put overlay 'before-string (propertize "!" 'display fringe-icon))
+    (overlay-put overlay 'before-string (flycheck-make-fringe-icon category))
     (overlay-put overlay 'help-echo (flycheck-error-message err))))
 
 (defun flycheck-add-overlays (errors)
