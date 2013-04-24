@@ -37,10 +37,10 @@
 ;;; Code:
 
 (eval-when-compile
+  ;; For JKA workarounds in `flycheck-temp-file-system'
   (require 'jka-compr)
-  (require 'cl-lib)
-  (require 'compile)                    ; For Compilation Mode integration
-  (require 'sh-script))
+  ;; For integration into Compile Mode
+  (require 'compile))
 
 (require 'cl-lib)
 (require 's)
