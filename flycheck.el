@@ -6,7 +6,7 @@
 ;; URL: https://github.com/lunaryorn/flycheck
 ;; Keywords: convenience languages tools
 ;; Version: 0.10
-;; Package-Requires: ((s "1.3.1") (dash "1.1") (cl-lib "0.1") (emacs "24.1"))
+;; Package-Requires: ((s "1.3.1") (dash "1.2") (cl-lib "0.1") (emacs "24.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -767,8 +767,8 @@ are present, both must match for the checker to be used."
   ;; Record the location of the definition of the checker.  If we're loading
   ;; from a file, record the file loaded from.  Otherwise use the current
   ;; buffer name, in case of `eval-buffer' and the like.
-  (let ((filename (if load-in-progress load-file-name (buffer-file-name))))
-    (when (and filename (s-ends-with? ".elc" filename))
+  (-when-let (filename (if load-in-progress load-file-name (buffer-file-name)))
+    (when (s-ends-with? ".elc" filename)
       (setq filename (s-chop-suffix "c" filename)))
     (put symbol :flycheck-file filename))
   ;; Verify the checker and declare it valid if succeeded
@@ -1126,25 +1126,23 @@ evaluating FORM.
 In all other cases, signal an error."
   (pcase cell
     (`(config-file ,option-name ,file-name-var)
-     (let ((file-name (flycheck-find-config-file (symbol-value file-name-var))))
-       (when file-name
-         (flycheck-option-with-value-argument option-name file-name))))
+     (-when-let* ((value (symbol-value file-name-var))
+                  (file-name (flycheck-find-config-file value)))
+       (flycheck-option-with-value-argument option-name file-name)))
     (`(option ,option-name ,variable)
-     (let ((value (symbol-value variable)))
-       (when value
-         (unless (stringp value)
-           (error "Value %S of %S for option %s is not a string"
-                  value variable option-name))
-         (flycheck-option-with-value-argument option-name value))))
+     (-when-let (value (symbol-value variable))
+       (unless (stringp value)
+         (error "Value %S of %S for option %s is not a string"
+                value variable option-name))
+       (flycheck-option-with-value-argument option-name value)))
     (`(option ,option-name ,variable ,filter)
-     (let ((value (funcall filter (symbol-value variable))))
-       (when value
-         (unless (stringp value)
-           (error "Value %S of %S (filter: %S) for option %s is not a string"
-                  value variable filter option-name))
-         (flycheck-option-with-value-argument option-name value))))
+     (-when-let (value (funcall filter (symbol-value variable)))
+       (unless (stringp value)
+         (error "Value %S of %S (filter: %S) for option %s is not a string"
+                value variable filter option-name))
+       (flycheck-option-with-value-argument option-name value)))
     (`(eval ,form)
-     (let* ((result (eval form)))
+     (let ((result (eval form)))
        (if (or (null result)
                (stringp result)
                (and (listp result) (-all? #'stringp result)))
@@ -1302,9 +1300,8 @@ If a checker is found set `flycheck-last-checker' to re-use this
 checker for the next check.
 
 Return the checker if there is any, or nil otherwise."
-  (let ((checker (-first #'flycheck-may-use-checker flycheck-checkers)))
-    (when checker
-      (setq flycheck-last-checker checker))))
+  (-when-let (checker (-first #'flycheck-may-use-checker flycheck-checkers))
+    (setq flycheck-last-checker checker)))
 
 (defun flycheck-get-checker-for-buffer ()
   "Find the checker for the current buffer.
@@ -1322,12 +1319,11 @@ nil otherwise."
 
 (defun flycheck-get-next-checker-for-buffer (checker)
   "Get the checker to run after CHECKER for the current buffer."
-  (let ((next-checkers (flycheck-checker-next-checkers checker)))
-    (when next-checkers
-      (let ((next-checker (-first #'flycheck-may-use-next-checker next-checkers)))
-        (if (symbolp next-checker)
-            next-checker
-          (cdr next-checker))))))
+  (-when-let (next-checkers (flycheck-checker-next-checkers checker))
+    (let ((next-checker (-first #'flycheck-may-use-next-checker next-checkers)))
+      (if (symbolp next-checker)
+          next-checker
+        (cdr next-checker)))))
 
 (defun flycheck-select-checker (checker)
   "Select CHECKER for the current buffer.
@@ -1542,9 +1538,8 @@ Return the errors parsed with the error patterns of CHECKER."
 If the file name of ERR is in BUFFER-FILES, replace it with the
 return value of the function `buffer-file-name'."
   (flycheck-error-with-buffer err
-    (let ((filename (flycheck-error-filename err)))
-      (when (and filename (--any? (flycheck-same-files-p filename it)
-                                  buffer-files))
+    (-when-let (filename (flycheck-error-filename err))
+      (when (--any? (flycheck-same-files-p filename it) buffer-files)
         (setf (flycheck-error-filename err) (buffer-file-name)))
       err)))
 
@@ -1742,12 +1737,11 @@ _CHECKER and _BUFFER are ignored.
 
 See URL `http://checkstyle.sourceforge.net/' for information
 about Checkstyle."
-  (let* ((root (flycheck-parse-xml-string output)))
-    (when root
-      (unless (eq (car root) 'checkstyle)
-        (error "Unexpected root element %s" (car root)))
-      ;; cddr gets us the body of the node without its name and its attributes
-      (-flatten (-keep #'flycheck-parse-checkstyle-file-node (cddr root))))))
+  (-when-let (root (flycheck-parse-xml-string output))
+    (unless (eq (car root) 'checkstyle)
+      (error "Unexpected root element %s" (car root)))
+    ;; cddr gets us the body of the node without its name and its attributes
+    (-flatten (-keep #'flycheck-parse-checkstyle-file-node (cddr root)))))
 
 
 ;;;; Error analysis
@@ -1893,9 +1887,8 @@ If `flycheck-indication-mode' is neither `left-fringe' nor
       ;; Erase the highlighting from the overlay if requested by the user
       (overlay-put overlay 'face nil))
     (overlay-put overlay 'flycheck-error err)
-    (let ((icon (flycheck-make-fringe-icon category)))
-      (when icon
-        (overlay-put overlay 'before-string icon)))
+    (-when-let (icon (flycheck-make-fringe-icon category))
+      (overlay-put overlay 'before-string icon))
     (overlay-put overlay 'help-echo (flycheck-error-message err))))
 
 (defun flycheck-add-overlays (errors)
@@ -2045,18 +2038,17 @@ Show the error message at point in minibuffer after a short delay."
   "Hide the Flycheck error buffer if necessary.
 
 Hide the error buffer if there is no error under point."
-  (let* ((buffer (flycheck-error-message-buffer))
-         (window (when buffer (get-buffer-window buffer))))
-    (when (and window (not (flycheck-overlays-at (point))))
+  (-when-let* ((buffer (flycheck-error-message-buffer))
+               (window (get-buffer-window buffer)))
+    (unless (flycheck-overlays-at (point))
       (quit-window nil window))))
 
 (defun flycheck-copy-messages-as-kill (pos)
   "Copy message under POS into kill ring."
   (interactive "d")
-  (let ((error-messages (flycheck-overlay-messages-string-at pos)))
-    (when error-messages
-      (kill-new error-messages)
-      (flycheck-display-error-messages error-messages))))
+  (-when-let (error-messages (flycheck-overlay-messages-string-at pos))
+    (kill-new error-messages)
+    (flycheck-display-error-messages error-messages)))
 
 (defcustom flycheck-google-max-messages 5
   "How many messages to google at once.
