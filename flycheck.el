@@ -267,7 +267,6 @@ overlay setup)."
 
 Completely clear the whole flycheck state.  Remove overlays, kill
 running checks, and empty all variables used by flycheck."
-  (flycheck-clean-deferred-check)
   (flycheck-clear)
   (flycheck-stop-checker)
   (flycheck-cancel-error-show-error-timer)
@@ -278,12 +277,20 @@ running checks, and empty all variables used by flycheck."
   "Remember the previous `next-error-function'.")
 
 (defconst flycheck-hooks-alist
-  '((after-save-hook                  . flycheck-buffer-safe)
+  '(
+    ;; Check syntax immediately after save, or after the buffer visibility
+    ;; changed
+    (after-save-hook                  . flycheck-buffer-safe)
+    (window-configuration-change-hook . flycheck-buffer-safe)
+    ;; Check syntax after the buffer contents changed in certain ways
     (after-change-functions           . flycheck-handle-change)
+    ;; If the buffer gets killed, teardown Flycheck (e.g. kill running
+    ;; processes, delete temp files, etc.)
     (kill-buffer-hook                 . flycheck-teardown)
-    (window-configuration-change-hook . flycheck-perform-deferred-syntax-check)
+    ;; Show or hide error popups after commands
     (post-command-hook                . flycheck-show-error-at-point-soon)
     (post-command-hook                . flycheck-hide-error-buffer)
+    ;; Immediately show error popups when navigating to an error
     (next-error-hook                  . flycheck-show-error-at-point))
   "Hooks which Flycheck needs to hook in.
 
@@ -389,7 +396,6 @@ buffer."
 (defun flycheck-buffer ()
   "Check syntax in the current buffer."
   (interactive)
-  (flycheck-clean-deferred-check)
   (if flycheck-mode
       (when (not (flycheck-running-p))
         ;; Clear error list and mark all overlays for deletion.  We do not
@@ -436,34 +442,25 @@ _NAME is ignored."
 A buffer may not be checked under the following conditions:
 
 - The buffer is read only (see `buffer-read-only').
+- The buffer is not visible (i.e. `get-buffer-window' returns nil).
 
 Return t if the buffer may be checked and nil otherwise."
-  (not buffer-read-only))
-
-(defun flycheck-must-defer-check ()
-  "Determine whether the syntax check has to be deferred.
-
-A check has to be deferred if the buffer is not visible.
-
-Return t if the check is to be deferred, or nil otherwise."
-  (not (get-buffer-window)))
+  (and (not buffer-read-only)
+       (get-buffer-window)))
 
 (defun flycheck-buffer-safe ()
   "Safely check syntax in the current buffer.
 
 Like `flycheck-buffer', but do not check buffers that need not be
 checked (i.e. read-only buffers) and demote all errors to
-messages.  Also, defer syntax checks if the buffer is not visible
-in any window.
+messages.
 
 Use when checking buffers automatically, i.e. in hooks."
-  (if (flycheck-may-check-buffer)
-      (if (flycheck-must-defer-check)
-          (flycheck-buffer-deferred)
-        (with-demoted-errors
-          (flycheck-buffer)))
-    (message "Cannot perform a syntax check in buffer %s."
-             (buffer-name))))
+  (with-demoted-errors
+    (if (flycheck-may-check-buffer)
+        (flycheck-buffer)
+      (message "Cannot perform a syntax check in buffer %s."
+               (buffer-name)))))
 
 
 ;;;; Mode line reporting
@@ -490,31 +487,6 @@ Report a proper flycheck status."
         (flycheck-report-status
          (format ":%s/%s" (car no-err-warnings) (cdr no-err-warnings))))
     (flycheck-report-status "")))
-
-
-;;;; Deferred syntax checking
-(defvar-local flycheck-deferred-syntax-check nil
-  "If non-nil, a syntax check as been deferred in `flycheck-buffer-safe'.")
-
-(defun flycheck-deferred-check-p ()
-  "Determine whether the current buffer has a deferred check.
-
-Return t if so, or nil otherwise."
-  flycheck-deferred-syntax-check)
-
-(defun flycheck-buffer-deferred ()
-  "Defer syntax check for the current buffer."
-  (setq flycheck-deferred-syntax-check t))
-
-(defun flycheck-clean-deferred-check ()
-  "Clean an deferred syntax checking state."
-  (setq flycheck-deferred-syntax-check nil))
-
-(defun flycheck-perform-deferred-syntax-check ()
-  "Perform any deferred syntax checks."
-  (when (flycheck-deferred-check-p)
-    (flycheck-clean-deferred-check)
-    (flycheck-buffer-safe)))
 
 
 ;;;; Utility functions

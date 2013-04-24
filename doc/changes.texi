@@ -538,6 +538,10 @@ Improvements:
 from errors}
 @item
 Faces are now in a separate customization group
+@item
+Invisible buffers are never checked automatically anymore
+@item
+Buffers are rechecked if the become visible
 @end itemize
 
 @item
