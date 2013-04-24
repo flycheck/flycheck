@@ -1540,8 +1540,8 @@ return value of the function `buffer-file-name'."
   (flycheck-error-with-buffer err
     (-when-let (filename (flycheck-error-filename err))
       (when (--any? (flycheck-same-files-p filename it) buffer-files)
-        (setf (flycheck-error-filename err) (buffer-file-name)))
-      err)))
+        (setf (flycheck-error-filename err) (buffer-file-name)))))
+  err)
 
 (defun flycheck-fix-error-filenames (errors buffer-files)
   "Fix the file names of all ERRORS from BUFFER-FILES.
