@@ -277,6 +277,20 @@ running checks, and empty all variables used by flycheck."
 (defvar-local flycheck-previous-next-error-function nil
   "Remember the previous `next-error-function'.")
 
+(defconst flycheck-hooks-alist
+  '((after-save-hook                  . flycheck-buffer-safe)
+    (after-change-functions           . flycheck-handle-change)
+    (kill-buffer-hook                 . flycheck-teardown)
+    (window-configuration-change-hook . flycheck-perform-deferred-syntax-check)
+    (post-command-hook                . flycheck-show-error-at-point-soon)
+    (post-command-hook                . flycheck-hide-error-buffer)
+    (next-error-hook                  . flycheck-show-error-at-point))
+  "Hooks which Flycheck needs to hook in.
+
+The `car' of each pair is a hook variable, the `cdr' a function
+to be added or removed from the hook variable if Flycheck mode is
+enabled and disabled respectively.")
+
 ;;;###autoload
 (define-minor-mode flycheck-mode
   "Minor mode for on-the-fly syntax checking.
@@ -304,33 +318,18 @@ buffer manually.
    (flycheck-mode
     (flycheck-clear)
 
-    (add-hook 'after-save-hook 'flycheck-buffer-safe nil t)
-    (add-hook 'after-change-functions 'flycheck-handle-change nil t)
-    (add-hook 'kill-buffer-hook 'flycheck-teardown nil t)
-    ;; Execute deferred checks if the buffer visibility changes
-    (add-hook 'window-configuration-change-hook
-              'flycheck-perform-deferred-syntax-check nil t)
-
-    ;; Update error display in minibuffer after commands and error navigation
-    (add-hook 'post-command-hook 'flycheck-show-error-at-point-soon nil t)
-    (add-hook 'post-command-hook 'flycheck-hide-error-buffer nil t)
-    (add-hook 'next-error-hook 'flycheck-show-error-at-point nil t)
+    (--each flycheck-hooks-alist
+      (add-hook (car it) (cdr it) nil t))
 
     (setq flycheck-previous-next-error-function next-error-function)
     (setq next-error-function 'flycheck-next-error-function)
 
     (flycheck-buffer-safe))
    (t
-    (remove-hook 'after-save-hook 'flycheck-buffer-safe t)
-    (remove-hook 'after-change-functions 'flycheck-handle-change t)
-    (remove-hook 'kill-buffer-hook 'flycheck-teardown t)
-    (remove-hook 'window-configuration-change-hook
-                 'flycheck-perform-deferred-syntax-check t)
-    (remove-hook 'post-command-hook 'flycheck-show-error-at-point-soon t)
-    (remove-hook 'post-command-hook 'flycheck-hide-error-buffer t)
-    (remove-hook 'next-error-hook 'flycheck-show-error-at-point t)
-
     (setq next-error-function flycheck-previous-next-error-function)
+
+    (--each flycheck-hooks-alist
+      (remove-hook (car it) (cdr it) t))
 
     (flycheck-teardown))))
 
