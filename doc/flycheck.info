@@ -1705,7 +1705,7 @@ master (unreleased)
    * New features:
 
         * Customizable error indication with control of the fringe side,
-          via 'flycheck-indication-mode'.
+          via 'flycheck-indication-mode'
 
    * Improvements:
 
@@ -2405,9 +2405,9 @@ Node: 0.859846
 Node: 0.961358
 Node: 0.1061854
 Node: master63908
-Node: Credits64575
-Node: GNU Free Documentation License67274
-Node: Syntax checkers92426
-Node: Function and Variable Index93402
+Node: Credits64574
+Node: GNU Free Documentation License67273
+Node: Syntax checkers92425
+Node: Function and Variable Index93401
 
 End Tag Table
