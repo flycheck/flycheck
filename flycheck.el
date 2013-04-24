@@ -32,7 +32,7 @@
 ;; complete list).
 ;;
 ;; Support for new modes and languages can be added by declaring a new syntax
-1;; checker (see `flycheck-declare-checker').
+;; checker (see `flycheck-declare-checker').
 
 ;;; Code:
 
