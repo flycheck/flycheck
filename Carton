@@ -3,6 +3,9 @@
 (package-file "flycheck.el")
 
 (development
+ ;; Make optional dependencies available for development
+ (depends-on "google-this")
+
  (depends-on "ert")                     ; Unit test library
 
  ;; Various modes for use in the unit tests
