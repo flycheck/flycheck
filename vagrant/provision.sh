@@ -101,35 +101,42 @@ else
   apt "$EMACS"-nox || exit 1
 fi
 
-# Install the necessary interpreters and tools
-apt nodejs npm \
-    python python-pip \
-    php5-cli php-pear \
-    ruby1.9.1 \
-    esl-erlang
+# Install the necessary additional package managers
+apt npm \
+    php-pear \
+    python-pip
 
-# Install all checker tools
+# Install syntax checker tools
 apt bash \
-    tidy \
-    lua5.2 \
-    chktex lacheck \
-    xmlstarlet \
-    zsh \
+    chktex \
+    esl-erlang \
     golang-stable \
-    rust
+    lacheck \
+    lua5.2 \
+    php5-cli \
+    ruby1.9.1 \
+    rust \
+    scala \
+    tidy \
+    xmlstarlet \
+    zsh
 
-pip flake8 pep8-naming pylint docutils
+pip docutils \
+    flake8 \
+    pep8-naming \
+    pylint
 
 pear PHP_CodeSniffer
 
-npm coffee-script coffeelint \
+npm coffeelint \
+    coffee-script  \
     csslint \
     jshint \
     jsonlint
 
 gem haml \
-    sass \
-    rubocop
+    rubocop \
+    sass
 
 # Install Elixir compiler.
 ELIXIR_VERSION=0.8.2

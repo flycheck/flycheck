@@ -81,6 +81,8 @@ RST (ReStructuredText, using Docutils)
 @item
 Sass
 @item
+Scala
+@item
 SCSS
 @item
 Shell scripts (using Bash, Dash, or Zsh depending on the type of shell

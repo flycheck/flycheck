@@ -43,6 +43,7 @@ Features
   - Rust
   - RST (ReStructuredText)
   - Sass
+  - Scala
   - SCSS
   - Shell scripts (POSIX Shell, Bash and Zsh)
   - TeX/LaTeX

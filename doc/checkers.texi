@@ -28,6 +28,7 @@ order of their appearance in the default value of
 @iflyc ruby
 @iflyc rust
 @iflyc sass
+@iflyc scala
 @iflyc scss
 @iflyc sh-dash
 @iflyc sh-bash

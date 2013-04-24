@@ -118,6 +118,7 @@ buffer-local wherever it is set."
     ruby
     rust
     sass
+    scala
     scss
     sh-dash
     sh-bash
@@ -2729,6 +2730,15 @@ See URL `http://sass-lang.com'."
     ("^Syntax error: \\(?4:.*\\)\r?\n        on line \\(?2:[0-9]+\\) of \\(?1:.*\\)$"
      error))
   :modes 'sass-mode)
+
+(flycheck-declare-checker scala
+  "A Scala syntax checker using the Scala compiler.
+
+See URL `http://www.scala-lang.org/'."
+  :command '("scalac" "-Ystop-after:parser" source)
+  :error-patterns
+  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): error: \\(?4:.*\\)$" error))
+  :modes 'scala-mode)
 
 (flycheck-declare-checker scss
   "A SCSS syntax checker using the SCSS compiler.

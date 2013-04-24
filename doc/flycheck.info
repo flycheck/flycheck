@@ -100,6 +100,7 @@ File: flycheck.info,  Node: Features,  Next: Installation,  Prev: Introduction, 
         * Rust (using 'rustc')
         * RST (ReStructuredText, using Docutils)
         * Sass
+        * Scala
         * SCSS
         * Shell scripts (using Bash, Dash, or Zsh depending on the type
           of shell script)
@@ -1728,6 +1729,10 @@ File: flycheck.info,  Node: master,  Prev: 0.10,  Up: Changes
 master (unreleased)
 ===================
 
+   * New syntax checkers:
+
+        * Scala (https://github.com/lunaryorn/flycheck/issues/124)
+
    * New features:
 
         * Customizable error indication with control of the fringe side,
@@ -2330,6 +2335,7 @@ order of their appearance in the default value of 'flycheck-checkers':
    * 'ruby'
    * 'rust'
    * 'sass'
+   * 'scala'
    * 'scss'
    * 'sh-dash'
    * 'sh-bash'
@@ -2393,49 +2399,49 @@ Tag Table:
 Node: Top734
 Node: Introduction2083
 Node: Features2984
-Node: Installation4430
-Node: Activation5604
-Node: Usage5955
-Node: Syntax checking6578
-Node: Selection8802
-Node: Configuration11383
-Node: Reporting14155
-Node: Navigation17650
-Node: Mode line19446
-Node: Extending20347
-Node: Declaration20946
-Node: Error parsers33377
-Node: Option filters34361
-Node: Examples34700
-Node: Simple example35132
-Node: Predicate example38196
-Node: Configuration example40177
-Node: Chaining example42836
-Node: API44222
-Node: Error API45010
-Node: Error parser API47611
-Node: Contribution47837
-Node: Reporting issues48513
-Node: Contributing syntax checkers49249
-Node: Contributing code50044
-Node: Unit tests51384
-Node: Changes52671
-Node: 0.153287
-Node: 0.253571
-Node: 0.353849
-Node: 0.454085
-Node: 0.554860
-Node: 0.656080
-Node: 0.6.158930
-Node: 0.759079
-Node: 0.7.160093
-Node: 0.860808
-Node: 0.962320
-Node: 0.1062816
-Node: master64870
-Node: Credits65577
-Node: GNU Free Documentation License68276
-Node: Syntax checkers93428
-Node: Function and Variable Index94404
+Node: Installation4446
+Node: Activation5620
+Node: Usage5971
+Node: Syntax checking6594
+Node: Selection8818
+Node: Configuration11399
+Node: Reporting14171
+Node: Navigation17666
+Node: Mode line19462
+Node: Extending20363
+Node: Declaration20962
+Node: Error parsers33393
+Node: Option filters34377
+Node: Examples34716
+Node: Simple example35148
+Node: Predicate example38212
+Node: Configuration example40193
+Node: Chaining example42852
+Node: API44238
+Node: Error API45026
+Node: Error parser API47627
+Node: Contribution47853
+Node: Reporting issues48529
+Node: Contributing syntax checkers49265
+Node: Contributing code50060
+Node: Unit tests51400
+Node: Changes52687
+Node: 0.153303
+Node: 0.253587
+Node: 0.353865
+Node: 0.454101
+Node: 0.554876
+Node: 0.656096
+Node: 0.6.158946
+Node: 0.759095
+Node: 0.7.160109
+Node: 0.860824
+Node: 0.962336
+Node: 0.1062832
+Node: master64886
+Node: Credits65688
+Node: GNU Free Documentation License68387
+Node: Syntax checkers93539
+Node: Function and Variable Index94528
 
 End Tag Table

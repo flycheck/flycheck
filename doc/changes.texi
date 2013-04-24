@@ -521,6 +521,14 @@ CodeSniffer}
 
 @itemize @bullet
 @item
+New syntax checkers:
+
+@itemize @bullet
+@item
+@ghissue{124, Scala}
+@end itemize
+
+@item
 New features:
 
 @itemize @bullet
