@@ -345,7 +345,7 @@ files are provided by Flycheck:
      The configuration file for the 'javascript-jshint' syntax checker.
 
  -- User Option: flycheck-rubocoprc
-     The configuration file for the 'ruby-rubocup' syntax checker.
+     The configuration file for the 'ruby-rubocop' syntax checker.
 
  -- User Option: flycheck-tidyrc
      The configuration file for the 'html-tidy' syntax checker.
