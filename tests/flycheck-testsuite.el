@@ -273,6 +273,8 @@ all CHECKERS from its definition."
   ;; already be finished (if it was fast).
   (should (or flycheck-current-process
               flycheck-testsuite-syntax-checker-finished))
+  ;; Also there should be no deferred check pending anymore
+  (should-not (flycheck-deferred-check-p))
   (flycheck-testsuite-wait-for-syntax-checker))
 
 (defun flycheck-testsuite-ensure-clear ()
