@@ -284,9 +284,10 @@ running checks, and empty all variables used by flycheck."
     (window-configuration-change-hook . flycheck-buffer-safe)
     ;; Check syntax after the buffer contents changed in certain ways
     (after-change-functions           . flycheck-handle-change)
-    ;; If the buffer gets killed, teardown Flycheck (e.g. kill running
+    ;; If the buffer or Emacs gets killed, teardown Flycheck (e.g. kill running
     ;; processes, delete temp files, etc.)
     (kill-buffer-hook                 . flycheck-teardown)
+    (kill-emacs-hook                  . flycheck-teardown)
     ;; Show or hide error popups after commands
     (post-command-hook                . flycheck-show-error-at-point-soon)
     (post-command-hook                . flycheck-hide-error-buffer)
