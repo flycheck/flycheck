@@ -714,6 +714,14 @@ suitable for comparison of file names."
   (make-directory (file-name-directory file-name) t)
   (write-region nil nil file-name nil 0))
 
+(defun flycheck-save-buffer-to-temp (temp-file-fn prefix)
+  "Save buffer to temp file returned by TEMP-FILE-FN with PREFIX.
+
+Return the name of the temporary file."
+  (let ((filename (funcall temp-file-fn (buffer-file-name) prefix)))
+    (flycheck-save-buffer-to-file filename)
+    filename))
+
 (defun flycheck-option-with-value-argument (option value)
   "Create arguments specifying OPTION with VALUE.
 
@@ -944,9 +952,11 @@ This variable is an option for the syntax checker `%s'." docstring checker)
   "Check whether PATTERNS is a list of valid error patterns."
   (-all? 'flycheck-error-pattern-p patterns))
 
-(defun flycheck-command-argument-cell-p (cell)
-  "Determine whether CELL is a valid argument cell."
-  (pcase cell
+(defun flycheck-command-argument-p (arg)
+  "Check whether ARG is a valid command argument."
+  (pcase arg
+    ((pred stringp) t)
+    ((or `source `source-inplace `source-original `temporary-directory) t)
     (`(config-file ,option-name ,config-file-var)
      (and (stringp option-name)
           (symbolp config-file-var)))
@@ -959,13 +969,6 @@ This variable is an option for the syntax checker `%s'." docstring checker)
           (symbolp filter)))
     (`(eval ,_) t)
     (_ nil)))
-
-(defun flycheck-command-argument-p (arg)
-  "Check whether ARG is a valid command argument."
-  (or
-   (memq arg '(source source-inplace source-original temporary-directory))
-   (stringp arg)
-   (and (listp arg) (flycheck-command-argument-cell-p arg))))
 
 (defun flycheck-command-arguments-list-p (arguments)
   "Check whether ARGUMENTS is a list of valid arguments."
@@ -1181,13 +1184,26 @@ If FILE-NAME does not contain a slash, search the file with
           (when (file-exists-p file-name) file-name))
       (flycheck-find-file-for-buffer file-name))))
 
-(defun flycheck-substitute-argument-cell (cell)
-  "Substitute an argument CELL.
+(defun flycheck-substitute-argument (arg)
+  "Substitute ARG with file to check is possible.
 
-Generally, a CELL is a form `(SYMBOL ARGS...) where SYMBOL is a special tag,
-and ARGS the arguments for this tag.
+If ARG is a string, return ARG unchanged.
 
-If CELL is a form `(config-file OPTION VARIABLE)' search the
+If ARG is `source' or `source-inplace', create a temporary file
+to check and return its path.  With `source', try to retain the
+non-directory component of the buffer's file name in the
+temporary file.
+
+If ARG is `source-original', return the path of the actual file
+to check, or an empty string if the buffer has no file name.
+Note that the contents of the file may not be up to date with the
+contents of the buffer to check.  Do not use this as primary
+input to a checker!
+
+If ARG is `temporary-directory', create a unique temporary
+directory and return its path.
+
+If ARG is a form `(config-file OPTION VARIABLE)' search the
 configuration file bound to VARIABLE with
 `flycheck-find-config-file' and return a list of arguments that
 pass this configuration file to the syntax checker, or nil if the
@@ -1197,16 +1213,16 @@ being the concatenation of OPTION and the path of the
 configuration file.  Otherwise the list has two items, the first
 being OPTION, the second the path of the configuration file.
 
-If CELL is a form `(option OPTION VARIABLE [FILTER])' retrieve
-the value of VARIABLE and return a list of arguments that pass
-this value as value for OPTION to the syntax checker.  FILTER is
-an optional function to be applied to the value of VARIABLE.
-This function must return nil or a string.  In the former case,
-return nil.  In the latter case, return a list of arguments as
-described above.  If OPTION ends with a =, process it like in a
+If ARG is a form `(option OPTION VARIABLE [FILTER])' retrieve the
+value of VARIABLE and return a list of arguments that pass this
+value as value for OPTION to the syntax checker.  FILTER is an
+optional function to be applied to the value of VARIABLE.  This
+function must return nil or a string.  In the former case, return
+nil.  In the latter case, return a list of arguments as described
+above.  If OPTION ends with a =, process it like in a
 `config-file' cell (see above).
 
-If CELL is a form `(eval FORM), return the result of evaluating
+If ARG is a form `(eval FORM), return the result of evaluating
 FORM in the buffer to be checked.  FORM must either return a
 string or a list of strings, or nil to indicate that nothing
 should be substituted for CELL.  In case of other return values
@@ -1215,7 +1231,14 @@ neither in FORM before it is evaluated, nor in the result of
 evaluating FORM.
 
 In all other cases, signal an error."
-  (pcase cell
+  (pcase arg
+    ((pred stringp) arg)
+    (`source
+     (flycheck-save-buffer-to-temp #'flycheck-temp-file-system "flycheck"))
+    (`source-inplace
+     (flycheck-save-buffer-to-temp #'flycheck-temp-file-inplace "flycheck"))
+    (`source-original (or (buffer-file-name) ""))
+    (`temporary-directory (flycheck-temp-dir-system "flycheck"))
     (`(config-file ,option-name ,file-name-var)
      (-when-let* ((value (symbol-value file-name-var))
                   (file-name (flycheck-find-config-file value)))
@@ -1239,59 +1262,7 @@ In all other cases, signal an error."
                (and (listp result) (-all? #'stringp result)))
            result
          (error "Invalid result from evaluation of %S: %S" form result))))
-    (_ (error "Unsupported argument cell %S" cell))))
-
-(defun flycheck-substitute-argument-symbol (symbol)
-  "Substitute an argument SYMBOL.
-
-If SYMBOL is `source' or `source-inplace', create a temporary
-file to check and return its path.  With `source', try to retain
-the non-directory component of the buffer's file name in the
-temporary file.
-
-If SYMBOL is `source-original', return the path of the actual file
-to check, or an empty string if the buffer has no file name.
-Note that the contents of the file may not be up to date with the
-contents of the buffer to check.  Do not use this as primary
-input to a checker!
-
-If SYMBOL is `temporary-directory', create a unique temporary
-directory and return its path.
-
-In all other cases, signal an error."
-  (cl-case symbol
-    (source
-     (let ((filename (flycheck-temp-file-system (buffer-file-name) "flycheck")))
-       (flycheck-save-buffer-to-file filename)
-       filename))
-    (source-inplace
-     (let ((filename (flycheck-temp-file-inplace (buffer-file-name) "flycheck")))
-       (flycheck-save-buffer-to-file filename)
-       filename))
-    (source-original
-     (or (buffer-file-name) ""))
-    (temporary-directory
-     (flycheck-temp-dir-system "flycheck"))
-    (t
-     (error "Unsupported argument symbol %S" symbol))))
-
-(defun flycheck-substitute-argument (arg)
-  "Substitute ARG with file to check is possible.
-
-If ARG is a string, return ARG unchanged.
-
-If ARG is a symbol, substitute it with
-`flycheck-substitute-argument-symbol'.
-
-If ARG is a list, substitute it with
-`flycheck-substitute-argument-cell'.
-
-In all other cases, signal an error."
-  (cond
-   ((stringp arg) arg)
-   ((symbolp arg) (flycheck-substitute-argument-symbol arg))
-   ((listp arg) (flycheck-substitute-argument-cell arg))
-   (:else (error "Unsupported argument %S" arg))))
+    (_ (error "Unsupported argument %S" arg))))
 
 (defun flycheck-checker-substituted-command (checker)
   "Get the substituted command of a CHECKER.
@@ -1302,46 +1273,19 @@ symbols in the command."
   (-flatten (-keep #'flycheck-substitute-argument
                    (flycheck-checker-command checker))))
 
-(defun flycheck-substitute-shell-argument-symbol (symbol)
-  "Substitute a shell argument SYMBOL.
-
-If SYMBOL is `source', `source-inplace' or `source-original',
-return the buffer file name quoted with `shell-quote-argument'.
-
-Otherwise signal an error."
-  (if (memq symbol '(source source-inplace source-original))
-      (shell-quote-argument (buffer-file-name))
-    (error "Unsupported argument symbol %S" symbol)))
-
-(defun flycheck-substitute-shell-argument-cell (cell)
-  "Substitute a shell argument CELL.
-
-Like `flycheck-substitute-argument-cell', but return a single
-string suitable for a shell command, i.e. quoted as necessary
-with `shell-quote-argument'."
-  (let ((args (flycheck-substitute-argument-cell cell)))
-    (if (stringp args)
-        (shell-quote-argument args)
-      (s-join " " (-map #'shell-quote-argument args)))))
-
 (defun flycheck-substitute-shell-argument (arg)
   "Substitute ARG with file to check is possible.
 
-If ARG is a string, return ARG quoted with
-`shell-quote-argument'.
-
-If ARG is a symbol, substitute it with
-`flycheck-substitute-shell-argument-symbol'.
-
-If ARG is a list, substitute it with
-`flycheck-substitute-shell-argument-cell'.
-
-In all other cases, signal an error."
-  (cond
-   ((stringp arg) (shell-quote-argument arg))
-   ((symbolp arg) (flycheck-substitute-shell-argument-symbol arg))
-   ((listp arg) (flycheck-substitute-shell-argument-cell arg))
-   (:else (error "Unsupported argument %S" arg))))
+Like `flycheck-substitute-argument', but return a single string
+suitable for use as argument to a shell command, and do not
+substitute with temporary files.  `source' and `source-inplace'
+are substituted with the buffer file name."
+  (if (memq arg '(source source-inplace source-original))
+      (shell-quote-argument (buffer-file-name))
+    (let ((args (flycheck-substitute-argument arg)))
+      (if (stringp args)
+          (shell-quote-argument args)
+        (s-join " " (-map #'shell-quote-argument args))))))
 
 (defun flycheck-checker-shell-command (checker)
   "Get a shell command for CHECKER.
@@ -1352,7 +1296,7 @@ Substitutions are performed like in
 
 Return the command of CHECKER as single string, suitable for
 shell execution."
-  (s-join " " (-map #'flycheck-substitute-shell-argument
+  (s-join " " (-keep #'flycheck-substitute-shell-argument
                     (flycheck-checker-command checker))))
 
 
