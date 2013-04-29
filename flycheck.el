@@ -527,9 +527,10 @@ is ignored.
 
 Start a syntax check if a new line has been inserted into the
 buffer."
-  (when (and flycheck-mode
-             (s-contains? "\n" (buffer-substring beg end)))
-    (flycheck-buffer-automatically 'new-line)))
+  (save-match-data
+    ;; Save and restore the match data, as recommended in (elisp)Change Hooks
+    (when (and flycheck-mode (s-contains? "\n" (buffer-substring beg end)))
+      (flycheck-buffer-automatically 'new-line))))
 
 (defun flycheck-handle-save ()
   "Handle a save of the buffer."
