@@ -2155,16 +2155,16 @@ of `google-wrap-in-quotes'.
 This function requires the Google This library from URL
 `https://github.com/Bruce-Connor/emacs-google-this'."
   (interactive "d\nP")
-  (unless (require 'google-this nil :no-error)
+  (if (fboundp 'google-string)
+      (let ((messages (flycheck-overlay-messages-at pos)))
+        (when (and flycheck-google-max-messages
+                   (> (length messages) flycheck-google-max-messages))
+          (user-error "More than %s messages at point"
+                      flycheck-google-max-messages))
+        (--each messages
+          (google-string quote-flag it :no-confirm)))
     (user-error "Please install Google This from \
-https://github.com/Bruce-Connor/emacs-google-this"))
-  (let ((messages (flycheck-overlay-messages-at pos)))
-    (when (and flycheck-google-max-messages
-               (> (length messages) flycheck-google-max-messages))
-      (user-error "More than %s messages at point"
-                  flycheck-google-max-messages))
-    (--each messages
-      (google-string quote-flag it :no-confirm))))
+https://github.com/Bruce-Connor/emacs-google-this")))
 
 
 ;;;; Checker process management
