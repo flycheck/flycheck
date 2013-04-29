@@ -231,6 +231,20 @@ to start a syntax check manually."
               (const :tag "After `flycheck-mode' was enabled" mode-enabled))
   :package-version '(flycheck . "0.11"))
 
+(defcustom flycheck-google-max-messages 5
+  "How many messages to google at once.
+
+If set to an integer, `flycheck-google-messages' will signal an
+error if there are more Flycheck messages at point than the value
+of this variable.
+
+If set to nil, `flycheck-google-messages' will always google all
+messages at point."
+  :group 'flycheck
+  :type '(choice (const :tag "Always google all messages" nil)
+                 (integer :tag "Maximum messages to google"))
+  :package-version '(flycheck . "0.10"))
+
 (defcustom flycheck-mode-hook nil
   "Hooks to run after `flycheck-mode'."
   :group 'flycheck
@@ -2126,20 +2140,6 @@ Hide the error buffer if there is no error under point."
   (-when-let (error-messages (flycheck-overlay-messages-string-at pos))
     (kill-new error-messages)
     (flycheck-display-error-messages error-messages)))
-
-(defcustom flycheck-google-max-messages 5
-  "How many messages to google at once.
-
-If set to an integer, `flycheck-google-messages' will signal an
-error if there are more Flycheck messages at point than the value
-of this variable.
-
-If set to nil, `flycheck-google-messages' will always google all
-messages at point."
-  :group 'flycheck
-  :type '(choice (const :tag "Always google all messages" nil)
-                 (integer :tag "Maximum messages to google"))
-  :package-version '(flycheck . "0.1"))
 
 (defun flycheck-google-messages (pos &optional quote-flag)
   "Google each error message at POS.
