@@ -56,11 +56,19 @@
                                      "flycheck-substitute-dummy")))
             (should (file-exists-p filename)))
           (let ((filename (flycheck-substitute-argument 'source)))
-            (should-not (equal (file-name-directory filename)
-                               (file-name-as-directory flycheck-testsuite-resources-dir)))
+            (should (s-starts-with? temporary-file-directory filename))
             (should (file-exists-p filename)))
           (should-error (flycheck-substitute-argument 'foobar))))
     (flycheck-safe-delete-files flycheck-temp-files)))
+
+(ert-deftest flycheck-substitute-argument-temporary-directory ()
+  (with-temp-buffer
+    (unwind-protect
+        (progn
+          (let ((dirname (flycheck-substitute-argument 'temporary-directory)))
+            (should (file-directory-p dirname))
+            (should (s-starts-with? temporary-file-directory dirname))))
+      (flycheck-safe-delete-directories flycheck-temp-directories))))
 
 (ert-deftest flycheck-substitute-argument-config-file ()
   "Test substitution of `config-file' argument cell."
@@ -148,6 +156,21 @@
                '(eval (when (string= "foo" "bar") "yes"))))
   (should-error (flycheck-substitute-argument '(eval 100)))
   (should-error (flycheck-substitute-argument '(eval '("foo" 100)))))
+
+(ert-deftest flycheck-substitute-shell-argument-source ()
+  (flycheck-testsuite-with-resource-buffer "substitute-dummy"
+    (--each '(source source-inplace source-original)
+      (should (equal (flycheck-substitute-shell-argument it)
+                     (flycheck-testsuite-resource-filename "substitute-dummy"))))))
+
+(ert-deftest flycheck-substitute-shell-argument-temporary-directory ()
+  (with-temp-buffer
+    (unwind-protect
+        (progn
+          (let ((dirname (flycheck-substitute-shell-argument 'temporary-directory)))
+            (should (file-directory-p dirname))
+            (should (s-starts-with? temporary-file-directory dirname))))
+      (flycheck-safe-delete-directories flycheck-temp-directories))))
 
 (ert-deftest flycheck-substitute-shell-argument-config-file ()
   ;; We need a real buffer for config-file search
