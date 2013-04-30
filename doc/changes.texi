@@ -538,6 +538,9 @@ Customizable error indication with control of the fringe side, via
 @item
 @ghissue{128, Customizable automatic syntax checking@comma{} via
 @code{flycheck-check-syntax-automatically}}
+@item
+@ghissue{133, Customizable configuration file search@comma{} via
+@code{flycheck-locate-config-file-functions}}
 @end itemize
 
 @item

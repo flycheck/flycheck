@@ -231,29 +231,6 @@ The configuration file for the @code{ruby-rubocop} syntax checker.
 The configuration file for the @code{html-tidy} syntax checker.
 @end defopt
 
-All configuration file variables are interpreted according to the
-following rules:
-
-If the variable contains a plain file name @emph{without} any slash,
-e.g. @file{.jshintrc}, this file is searched
-
-@enumerate
-@item
-in the buffer's directory,
-@item
-any ancestors thereof,
-@item
-and in the @env{HOME} directory eventually.
-@end enumerate
-
-@noindent
-If the buffer has no @code{buffer-file-name}, only the @env{HOME}
-directory is searched.
-
-If the variable contains a @emph{path with} a slash,
-e.g. @file{./.jshintrc} or @file{~/.jshintrc}, the path is expanded
-against the buffer's directory using @code{expand-file-name}.
-
 Customize these variables using @kbd{M-x customize-group RET
 flycheck-config-files}.  Use @code{flycheck-describe-checker} to find
 out whether a syntax checker has a configuration file.
@@ -268,9 +245,39 @@ from the parent directory:
 // End:
 @end example
 
-Some syntax checkers have options that cannot be changed in
-configuration files.  These options can be changed by various variables.
-Customize these with @kbd{M-x customize-group RET flycheck-options}.
+These configuration files are located using the functions in
+@code{flycheck-locate-config-file-functions}:
+
+@defopt flycheck-locate-config-file-functions
+Functions to locate syntax checker configuration files.
+
+Each function in this hook must accept two arguments: The value of the
+configuration file variable, and the syntax checker symbol.  It must
+return either a string with an absolute path to the configuration file,
+or nil, if it cannot locate the configuration file.
+
+The functions in this hook are called in order of appearance, until a
+function returns non-nil.  The configuration file returned by that
+function is then given to the syntax checker if it exists.
+@end defopt
+
+With the default value of this variable, configuration files are located
+by the following algorithm:
+
+@enumerate
+@item
+If the configuration file variable contains a path a directory
+separator, expand the path against the buffer's default directory and
+use the resulting path as configuration file.
+@item
+If the buffer has a file name, search the buffer's directory and any
+ancestors thereof for the configuration file.
+@item
+Eventually attempt to locate the configuration file in the user's home
+directory.
+@end enumerate
+
+If any of these steps succeeds, the subsequent steps are not executed.
 
 @node Reporting, Navigation, Configuration, Usage
 @comment  node-name,  next,  previous,  up

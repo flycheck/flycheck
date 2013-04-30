@@ -164,6 +164,15 @@ Relative file names are expanded against
 `flycheck-testsuite-resource-dir'."
   (expand-file-name resource-file flycheck-testsuite-resources-dir))
 
+(defun flycheck-testsuite-locate-config-file (filename _checker)
+  "Find a configuration FILENAME in the testsuite.
+
+_CHECKER is ignored."
+  (let* ((directory (flycheck-testsuite-resource-filename "checkers/config-files"))
+         (filepath (expand-file-name filename directory)))
+    (when (file-exists-p filepath)
+      filepath)))
+
 (defmacro flycheck-testsuite-with-resource-buffer (resource-file &rest body)
   "Create a temp buffer from a RESOURCE-FILE and execute BODY.
 
@@ -251,17 +260,6 @@ failed, and the test aborted with failure.")
       (error "Syntax check did not finish after %s seconds"
              flycheck-testsuite-checker-wait-time)))
   (setq flycheck-testsuite-syntax-checker-finished nil))
-
-(defun flycheck-testsuite-disable-checkers (&rest checkers)
-  "Disable all CHECKERS for the current buffer.
-
-Each argument is a syntax checker symbol to be disabled for the
-current buffer.
-
-Turn `flycheck-checkers' into a buffer-local variable and remove
-all CHECKERS from its definition."
-  (set (make-local-variable 'flycheck-checkers)
-       (--remove (memq it checkers) flycheck-checkers)))
 
 (defun flycheck-testsuite-buffer-sync ()
   "Check the current buffer synchronously."
@@ -379,15 +377,19 @@ of expected errors."
   (when (symbolp disabled-checkers)
     (setq disabled-checkers (list disabled-checkers)))
   (--each modes
-    (flycheck-testsuite-with-resource-buffer resource-file
-      (funcall it)
-      (when disabled-checkers
-        (apply #'flycheck-testsuite-disable-checkers disabled-checkers))
-      (flycheck-testsuite-buffer-sync)
-      (if (eq (car errors) :no-errors)
-          (should-not flycheck-current-errors)
-        (apply #'flycheck-testsuite-should-errors errors))
-      (flycheck-testsuite-ensure-clear))))
+    (let ((flycheck-checkers (--remove (memq it disabled-checkers)
+                                       flycheck-checkers)))
+     (flycheck-testsuite-with-resource-buffer resource-file
+       (funcall it)
+       ;; Configure config file locating for unit tests
+       (--each '(flycheck-locate-config-file-absolute-path
+                 flycheck-testsuite-locate-config-file)
+         (add-hook 'flycheck-locate-config-file-functions it :append :local))
+       (flycheck-testsuite-buffer-sync)
+       (if (eq (car errors) :no-errors)
+           (should-not flycheck-current-errors)
+         (apply #'flycheck-testsuite-should-errors errors))
+       (flycheck-testsuite-ensure-clear)))))
 
 
 (provide 'flycheck-testsuite)

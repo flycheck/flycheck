@@ -1,6 +1,6 @@
 ;;; test-checker-api.el --- Tests for checker API -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
+;; Copyright (c) 2023 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
 ;; Author: Sebastian Wiesner <lunaryorn@gmail.com>
 ;; URL: https://github.com/lunaryorn/flycheck
@@ -23,6 +23,7 @@
 ;;; Code:
 
 (require 'ert)
+(require 'mocker)
 (require 'flycheck)
 
 (ert-deftest flycheck-checker-modes ()
@@ -42,229 +43,175 @@
         (should (flycheck-check-executable checker))
       (should-not (flycheck-check-executable checker)))))
 
-(defvar flycheck-test-config-var)
-(defvar flycheck-test-option-var)
-
 (ert-deftest flycheck-substitute-argument-source ()
   (flycheck-testsuite-with-resource-buffer "substitute-dummy"
     (unwind-protect
         (progn
-          (should (equal (flycheck-substitute-argument 'source-original)
+          (should (equal (flycheck-substitute-argument 'source-original 'emacs-lisp)
                          (buffer-file-name)))
-          (let ((filename (flycheck-substitute-argument 'source-inplace)))
+
+          (let ((filename (flycheck-substitute-argument 'source-inplace 'emacs-lisp)))
             (should (equal filename (flycheck-testsuite-resource-filename
                                      "flycheck-substitute-dummy")))
             (should (file-exists-p filename)))
-          (let ((filename (flycheck-substitute-argument 'source)))
+
+          (let ((filename (flycheck-substitute-argument 'source 'emacs-lisp)))
             (should (s-starts-with? temporary-file-directory filename))
-            (should (file-exists-p filename)))
-          (should-error (flycheck-substitute-argument 'foobar))))
+            (should (file-exists-p filename)))))
     (flycheck-safe-delete-files flycheck-temp-files)))
+
+(ert-deftest flycheck-substitute-shell-argument-source ()
+  (flycheck-testsuite-with-resource-buffer "substitute-dummy"
+    (--each '(source source-inplace source-original)
+      (should (equal (flycheck-substitute-shell-argument it 'emacs-lisp)
+                     (buffer-file-name))))))
 
 (ert-deftest flycheck-substitute-argument-temporary-directory ()
   (with-temp-buffer
     (unwind-protect
         (progn
-          (let ((dirname (flycheck-substitute-argument 'temporary-directory)))
+          (let ((dirname (flycheck-substitute-argument 'temporary-directory
+                                                       'emacs-lisp)))
             (should (file-directory-p dirname))
             (should (s-starts-with? temporary-file-directory dirname))))
       (flycheck-safe-delete-directories flycheck-temp-directories))))
 
+(ert-deftest flycheck-substitute-shell-argument-temporary-directory ()
+  (mocker-let
+      ((flycheck-substitute-argument
+        (arg checker)
+        ((:input '(temporary-directory emacs-lisp) :output "spam with eggs"))))
+    (should (equal (flycheck-substitute-shell-argument 'temporary-directory
+                                                       'emacs-lisp)
+                   "spam\\ with\\ eggs"))))
+
+(defvar flycheck-test-config-var)
+
 (ert-deftest flycheck-substitute-argument-config-file ()
-  "Test substitution of `config-file' argument cell."
-  ;; We need a real buffer for config-file search
-  (flycheck-testsuite-with-resource-buffer "substitute-dummy"
-    (let ((makefile-path (expand-file-name "../Makefile" flycheck-testsuite-dir))
-          flycheck-test-config-var)
-      ;; A non-existing file
-      (setq flycheck-test-config-var
-            "no-such-file-should-ever-exist-really")
-      (should-not (flycheck-substitute-argument
-                   '(config-file "--foo" flycheck-test-config-var)))
-      ;; An existing file, first by name and then by relative and absolute path
-      (setq flycheck-test-config-var "Makefile")
-      (should (equal (flycheck-substitute-argument
-                      '(config-file "--foo" flycheck-test-config-var))
-                     (list "--foo" makefile-path)))
-      (setq flycheck-test-config-var "../../Makefile")
-      (should (equal (flycheck-substitute-argument
-                      '(config-file "--foo" flycheck-test-config-var))
-                     (list "--foo" makefile-path)))
-      (setq flycheck-test-config-var makefile-path)
-      (should (equal (flycheck-substitute-argument
-                      '(config-file "--foo" flycheck-test-config-var))
-                     (list "--foo" makefile-path)))
-      (setq flycheck-test-config-var "Makefile")
-      (should (equal (flycheck-substitute-argument
-                      '(config-file "--foo=" flycheck-test-config-var))
-                     (list (concat "--foo=" makefile-path))))
-      (setq flycheck-test-config-var "../../Makefile")
-      (should (equal (flycheck-substitute-argument
-                      '(config-file "--foo=" flycheck-test-config-var))
-                     (list (concat "--foo=" makefile-path))))
-      (setq flycheck-test-config-var makefile-path)
-      (should (equal (flycheck-substitute-argument
-                      '(config-file "--foo=" flycheck-test-config-var))
-                     (list (concat "--foo=" makefile-path))))
-      ;; Find a file from the home directory
-      (let* ((filename (-first #'file-regular-p
-                               (directory-files (getenv "HOME") :full-names))))
-        (unless filename
-          ;; Let the test fail if there is no file in $HOME
-          (error "No file in $HOME found."))
-        (setq flycheck-test-config-var (file-name-nondirectory filename))
+  (let ((flycheck-test-config-var "substitute-dummy")
+        (config-file (flycheck-testsuite-resource-filename "substitute-dummy")))
+    (mocker-let
+        ((locate-config-file-nil
+          (filename checker)
+          ((:input '("substitute-dummy" emacs-lisp) :output nil
+                   :min-occur 2 :max-occur 2)))
+         (locate-config-file-real
+          (filename checker)
+          ((:input '("substitute-dummy" emacs-lisp) :output config-file
+                   :min-occur 2 :max-occur 2))))
+      (let ((flycheck-locate-config-file-functions
+             '(locate-config-file-nil locate-config-file-real)))
         (should (equal (flycheck-substitute-argument
-                        '(config-file "--bar" flycheck-test-config-var))
-                       (list "--bar" filename)))))))
+                        '(config-file "--foo" flycheck-test-config-var)
+                        'emacs-lisp)
+                       (list "--foo" config-file)))
+        (should (equal (flycheck-substitute-argument
+                        '(config-file "--foo=" flycheck-test-config-var)
+                        'emacs-lisp)
+                       (list (concat "--foo=" config-file))))))))
+
+(ert-deftest flycheck-substitute-shell-argument-config-file ()
+  (let ((filename "spam with eggs"))
+    (mocker-let
+        ((flycheck-substitute-argument
+          (arg checker)
+          ((:input '((config-file "--foo" flycheck-test-config-var) emacs-lisp)
+                   :output (list "--foo" filename))
+           (:input '((config-file "--foo=" flycheck-test-config-var) emacs-lisp)
+                   :output (list (concat "--foo=" filename))))))
+      (should (equal (flycheck-substitute-shell-argument
+                      '(config-file "--foo" flycheck-test-config-var)
+                      'emacs-lisp)
+                     (concat "--foo " (shell-quote-argument filename))))
+      (should (equal (flycheck-substitute-shell-argument
+                      '(config-file "--foo=" flycheck-test-config-var)
+                      'emacs-lisp)
+                     (shell-quote-argument (concat "--foo=" filename)))))))
+
+(defvar flycheck-test-option-var)
 
 (ert-deftest flycheck-substitute-argument-option ()
-  "Test substitution of `option' argument cell."
   (let ((flycheck-test-option-var "bar"))
     (should (equal (flycheck-substitute-argument
-                    '(option "--foo" flycheck-test-option-var))
+                    '(option "--foo" flycheck-test-option-var) 'emacs-lisp)
                    '("--foo" "bar")))
-     (should (equal (flycheck-substitute-argument
-                    '(option "--foo=" flycheck-test-option-var))
+    (should (equal (flycheck-substitute-argument
+                    '(option "--foo=" flycheck-test-option-var) 'emacs-lisp)
                    '("--foo=bar"))))
-  (let ((flycheck-test-option-var 100))
+  (let ((flycheck-test-option-var 200))
     (should-error (flycheck-substitute-argument
-                   '(option "--foo" flycheck-test-option-var)))
+                   '(option "--foo" flycheck-test-option-var) 'emacs-lisp))
     (should (equal (flycheck-substitute-argument
-                    '(option "--foo" flycheck-test-option-var number-to-string))
-                   '("--foo" "100")))
+                    '(option "--foo" flycheck-test-option-var number-to-string) 'emacs-lisp)
+                   '("--foo" "200")))
     (should (equal (flycheck-substitute-argument
-                    '(option "--foo=" flycheck-test-option-var number-to-string))
-                   '("--foo=100"))))
+                    '(option "--foo=" flycheck-test-option-var number-to-string) 'emacs-lisp)
+                   '("--foo=200"))))
   (let (flycheck-test-option-var)
     (should-not (flycheck-substitute-argument
-                 '(option "--foo" flycheck-test-option-var)))
+                 '(option "--foo" flycheck-test-option-var) 'emacs-lisp))
     ;; Catch an error, because `number-to-string' is called with nil
     (should-error (flycheck-substitute-argument
-                   '(option "--foo" flycheck-test-option-var number-to-string))
+                   '(option "--foo" flycheck-test-option-var number-to-string) 'emacs-lisp)
                   :type 'wrong-type-argument)
     (should-error (flycheck-substitute-argument
-                   '(option "--foo=" flycheck-test-option-var number-to-string))
+                   '(option "--foo=" flycheck-test-option-var number-to-string) 'emacs-lisp)
                   :type 'wrong-type-argument)))
+
+(ert-deftest flycheck-substitute-shell-argument-option ()
+  (mocker-let
+      ((flycheck-substitute-argument
+        (arg checker)
+        ((:input '((option "--foo" flycheck-test-option-var) emacs-lisp)
+                 :output '("--foo" "spam with eggs"))
+         (:input '((option "--foo=" flycheck-test-option-var) emacs-lisp)
+                 :output '("--foo=spam with eggs"))
+         (:input '((option "--foo" flycheck-test-option-var number-to-string)
+                   emacs-lisp)
+                 :output '("--foo" "spam with eggs"))
+         (:input '((option "--foo=" flycheck-test-option-var number-to-string)
+                   emacs-lisp)
+                 :output '("--foo=spam with eggs")))))
+    (should (equal (flycheck-substitute-shell-argument
+                    '(option "--foo" flycheck-test-option-var)
+                    'emacs-lisp)
+                   "--foo spam\\ with\\ eggs"))
+    (should (equal (flycheck-substitute-shell-argument
+                    '(option "--foo=" flycheck-test-option-var)
+                    'emacs-lisp)
+                   "--foo\\=spam\\ with\\ eggs"))
+    (should (equal (flycheck-substitute-shell-argument
+                    '(option "--foo" flycheck-test-option-var number-to-string)
+                    'emacs-lisp)
+                   "--foo spam\\ with\\ eggs"))
+    (should (equal (flycheck-substitute-shell-argument
+                    '(option "--foo=" flycheck-test-option-var number-to-string)
+                    'emacs-lisp)
+                   "--foo\\=spam\\ with\\ eggs"))))
 
 (ert-deftest flycheck-substitute-argument-eval ()
   (let ((flycheck-test-option-var '("Hello " "World")))
-    (should (equal (flycheck-substitute-argument '(eval flycheck-test-option-var))
+    (should (equal (flycheck-substitute-argument '(eval flycheck-test-option-var) 'emacs-lisp)
                    '("Hello " "World"))))
-  (should (equal (flycheck-substitute-argument '(eval (concat "Hello" "World")))
+  (should (equal (flycheck-substitute-argument '(eval (concat "Hello" "World")) 'emacs-lisp)
                  "HelloWorld"))
   (should-not (flycheck-substitute-argument
-               '(eval (when (string= "foo" "bar") "yes"))))
-  (should-error (flycheck-substitute-argument '(eval 100)))
-  (should-error (flycheck-substitute-argument '(eval '("foo" 100)))))
-
-(ert-deftest flycheck-substitute-shell-argument-source ()
-  (flycheck-testsuite-with-resource-buffer "substitute-dummy"
-    (--each '(source source-inplace source-original)
-      (should (equal (flycheck-substitute-shell-argument it)
-                     (flycheck-testsuite-resource-filename "substitute-dummy"))))))
-
-(ert-deftest flycheck-substitute-shell-argument-temporary-directory ()
-  (with-temp-buffer
-    (unwind-protect
-        (progn
-          (let ((dirname (flycheck-substitute-shell-argument 'temporary-directory)))
-            (should (file-directory-p dirname))
-            (should (s-starts-with? temporary-file-directory dirname))))
-      (flycheck-safe-delete-directories flycheck-temp-directories))))
-
-(ert-deftest flycheck-substitute-shell-argument-config-file ()
-  ;; We need a real buffer for config-file search
-  (flycheck-testsuite-with-resource-buffer "substitute-dummy"
-    (let ((makefile-path (expand-file-name "../Makefile" flycheck-testsuite-dir))
-          flycheck-test-config-var)
-      ;; A non-existing file
-      (setq flycheck-test-config-var
-            "no-such-file-should-ever-exist-really")
-      (should (equal (flycheck-substitute-shell-argument
-                      '(config-file "--foo" flycheck-test-config-var))
-                     ""))
-      ;; An existing file, first by name and then by relative and absolute path
-      (setq flycheck-test-config-var "Makefile")
-      (should (equal (flycheck-substitute-shell-argument
-                      '(config-file "--foo" flycheck-test-config-var))
-                     (concat "--foo " (shell-quote-argument makefile-path))))
-      (setq flycheck-test-config-var "../../Makefile")
-      (should (equal (flycheck-substitute-shell-argument
-                      '(config-file "--foo" flycheck-test-config-var))
-                     (concat "--foo " (shell-quote-argument makefile-path))))
-      (setq flycheck-test-config-var makefile-path)
-      (should (equal (flycheck-substitute-shell-argument
-                      '(config-file "--foo" flycheck-test-config-var))
-                     (concat "--foo " (shell-quote-argument makefile-path))))
-      ;; The same with an option ending with a =
-      (setq flycheck-test-config-var "Makefile")
-      (should (equal (flycheck-substitute-shell-argument
-                      '(config-file "--foo=" flycheck-test-config-var))
-                     (shell-quote-argument (concat "--foo=" makefile-path))))
-      (setq flycheck-test-config-var "../../Makefile")
-      (should (equal (flycheck-substitute-shell-argument
-                      '(config-file "--foo=" flycheck-test-config-var))
-                     (shell-quote-argument (concat "--foo=" makefile-path))))
-      (setq flycheck-test-config-var makefile-path)
-      (should (equal (flycheck-substitute-shell-argument
-                      '(config-file "--foo=" flycheck-test-config-var))
-                     (shell-quote-argument (concat "--foo=" makefile-path))))
-      ;; Find a file from the home directory
-      (let* ((filename (-first #'file-regular-p
-                               (directory-files (getenv "HOME") :full-names))))
-        (unless filename
-          ;; Let the test fail if there is no file in $HOME
-          (error "No file in $HOME found."))
-        (setq flycheck-test-config-var (file-name-nondirectory filename))
-        (should (equal (flycheck-substitute-shell-argument
-                        '(config-file "--bar" flycheck-test-config-var))
-                       (concat "--bar " (shell-quote-argument filename))))))))
-
-(ert-deftest flycheck-substitute-shell-argument-option ()
-  (let ((flycheck-test-option-var "Hello World"))
-    (should (equal (flycheck-substitute-shell-argument
-                    '(option "--foo" flycheck-test-option-var))
-                   "--foo Hello\\ World"))
-     (should (equal (flycheck-substitute-shell-argument
-                    '(option "--foo=" flycheck-test-option-var))
-                    "--foo\\=Hello\\ World")))
-  (let ((flycheck-test-option-var 100))
-    (should-error (flycheck-substitute-shell-argument
-                   '(option "--foo" flycheck-test-option-var)))
-    (should (equal (flycheck-substitute-shell-argument
-                    '(option "--foo" flycheck-test-option-var number-to-string))
-                   "--foo 100"))
-    (should (equal (flycheck-substitute-shell-argument
-                    '(option "--foo=" flycheck-test-option-var number-to-string))
-                   "--foo\\=100")))
-  (let (flycheck-test-option-var)
-    (should (equal (flycheck-substitute-shell-argument
-                    '(option "--foo" flycheck-test-option-var))
-                   ""))
-    (should-error (flycheck-substitute-shell-argument
-                   '(option "--foo" flycheck-test-option-var number-to-string))
-                  :type 'wrong-type-argument)
-    (should-error (flycheck-substitute-shell-argument
-                   '(option "--foo=" flycheck-test-option-var number-to-string))
-                  :type 'wrong-type-argument)))
+               '(eval (when (string= "foo" "bar") "yes")) 'emacs-lisp))
+  (should-error (flycheck-substitute-argument '(eval 200) 'emacs-lisp))
+  (should-error (flycheck-substitute-argument '(eval '("foo" 200)) 'emacs-lisp)))
 
 (ert-deftest flycheck-substitute-shell-argument-eval ()
-  "Test substitution of `eval' argument cell."
-  (let ((flycheck-test-option-var '("Hello" " World")))
-    (should (equal (flycheck-substitute-shell-argument '(eval flycheck-test-option-var))
-                   "Hello \\ World")))
-  (should (equal (flycheck-substitute-shell-argument
-                  '(eval (concat "Hello " "\"World\"")))
-                 "Hello\\ \\\"World\\\""))
-  (should (equal (flycheck-substitute-shell-argument
-                  '(eval (when (string= "foo" "bar") "yes")))
-                 ""))
-  (should-error (flycheck-substitute-shell-argument '(eval 100)))
-  (should-error (flycheck-substitute-shell-argument '(eval '("foo" 100)))))
+  (mocker-let
+      ((flycheck-substitute-argument
+        (arg checker)
+        ((:input '((eval foo) emacs-lisp) :output '("foo bar" "spam eggs")))))
+    (should (equal (flycheck-substitute-shell-argument '(eval foo) 'emacs-lisp)
+                   "foo\\ bar spam\\ eggs"))))
 
 (ert-deftest flycheck-substitute-argument-unknown ()
-  (should-error (flycheck-substitute-argument '(foo "bar")))
-  (should-error (flycheck-substitute-argument 100)))
+  (--each '(flycheck-substitute-argument flycheck-substitute-shell-argument)
+    (should-error (funcall it '(foo "bar") 'emacs-lisp))
+    (should-error (funcall it 200 'emacs-lisp))))
 
 ;; Local Variables:
 ;; coding: utf-8

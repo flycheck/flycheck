@@ -35,7 +35,7 @@
       (let ((flycheck-check-syntax-automatically nil))
         (should-not (flycheck-may-check-automatically it))
         (should (flycheck-may-check-automatically)))
-      ;; Disable just a specific even
+      ;; Disable just a specific event
       (let ((flycheck-check-syntax-automatically
              (remq it flycheck-check-syntax-automatically)))
         (should flycheck-check-syntax-automatically)

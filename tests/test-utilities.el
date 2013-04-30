@@ -123,18 +123,6 @@
             (should (string= (buffer-string) "Hello world"))))
       (ignore-errors (delete-file filename)))))
 
-(ert-deftest flycheck-find-file-for-buffer ()
-  (with-temp-buffer
-    (setq buffer-file-name (expand-file-name "test-utilities.el"
-                                             flycheck-testsuite-dir))
-    (should (string= (flycheck-find-file-for-buffer "flycheck-testsuite.el")
-                     (expand-file-name "flycheck-testsuite.el"
-                                       flycheck-testsuite-dir)))
-    (should (string= (flycheck-find-file-for-buffer "Makefile")
-                     (expand-file-name "../Makefile" flycheck-testsuite-dir)))
-    (should-not (flycheck-find-file-for-buffer
-                 "this-file-should-really-not-exist"))))
-
 (ert-deftest flycheck-option-with-value-argument ()
   "Test concatenation of options and arguments."
   (should (equal (flycheck-option-with-value-argument "--foo" "bar")

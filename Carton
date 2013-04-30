@@ -7,6 +7,7 @@
  (depends-on "google-this")
 
  (depends-on "ert")                     ; Unit test library
+ (depends-on "mocker")                  ; Mocking library
 
  ;; Various modes for use in the unit tests
  (depends-on "coffee-mode")

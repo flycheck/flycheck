@@ -351,23 +351,6 @@ files are provided by Flycheck:
  -- User Option: flycheck-tidyrc
      The configuration file for the 'html-tidy' syntax checker.
 
-   All configuration file variables are interpreted according to the
-following rules:
-
-   If the variable contains a plain file name _without_ any slash, e.g.
-'.jshintrc', this file is searched
-
-  1. in the buffer's directory,
-  2. any ancestors thereof,
-  3. and in the 'HOME' directory eventually.
-
-If the buffer has no 'buffer-file-name', only the 'HOME' directory is
-searched.
-
-   If the variable contains a _path with_ a slash, e.g.  './.jshintrc'
-or '~/.jshintrc', the path is expanded against the buffer's directory
-using 'expand-file-name'.
-
    Customize these variables using 'M-x customize-group RET
 flycheck-config-files'.  Use 'flycheck-describe-checker' to find out
 whether a syntax checker has a configuration file.
@@ -380,9 +363,35 @@ instance, the following checks the Javascript file always with
      // flycheck-jshintrc: "../.jshintrc"
      // End:
 
-   Some syntax checkers have options that cannot be changed in
-configuration files.  These options can be changed by various variables.
-Customize these with 'M-x customize-group RET flycheck-options'.
+   These configuration files are located using the functions in
+'flycheck-locate-config-file-functions':
+
+ -- User Option: flycheck-locate-config-file-functions
+     Functions to locate syntax checker configuration files.
+
+     Each function in this hook must accept two arguments: The value of
+     the configuration file variable, and the syntax checker symbol.  It
+     must return either a string with an absolute path to the
+     configuration file, or nil, if it cannot locate the configuration
+     file.
+
+     The functions in this hook are called in order of appearance, until
+     a function returns non-nil.  The configuration file returned by
+     that function is then given to the syntax checker if it exists.
+
+   With the default value of this variable, configuration files are
+located by the following algorithm:
+
+  1. If the configuration file variable contains a path a directory
+     separator, expand the path against the buffer's default directory
+     and use the resulting path as configuration file.
+  2. If the buffer has a file name, search the buffer's directory and
+     any ancestors thereof for the configuration file.
+  3. Eventually attempt to locate the configuration file in the user's
+     home directory.
+
+   If any of these steps succeeds, the subsequent steps are not
+executed.
 
 
 File: flycheck.info,  Node: Reporting,  Next: Navigation,  Prev: Configuration,  Up: Usage
@@ -1740,6 +1749,9 @@ master (unreleased)
         * Customizable automatic syntax checking, via
           'flycheck-check-syntax-automatically'
           (https://github.com/lunaryorn/flycheck/issues/128)
+        * Customizable configuration file search, via
+          'flycheck-locate-config-file-functions'
+          (https://github.com/lunaryorn/flycheck/issues/133)
 
    * Improvements:
 
@@ -2384,6 +2396,7 @@ Function and Variable Index
 * flycheck-highlighting-mode:            Reporting.           (line  28)
 * flycheck-indication-mode:              Reporting.           (line  49)
 * flycheck-jshintrc:                     Configuration.       (line  34)
+* flycheck-locate-config-file-functions: Configuration.       (line  58)
 * flycheck-next-error:                   Navigation.          (line  23)
 * flycheck-parse-xml-string:             Error parser API.    (line   6)
 * flycheck-phpcs-standard:               Configuration.       (line  18)
@@ -2405,43 +2418,43 @@ Node: Usage5971
 Node: Syntax checking6594
 Node: Selection8818
 Node: Configuration11399
-Node: Reporting14171
-Node: Navigation17666
-Node: Mode line19462
-Node: Extending20363
-Node: Declaration20962
-Node: Error parsers33393
-Node: Option filters34377
-Node: Examples34716
-Node: Simple example35148
-Node: Predicate example38212
-Node: Configuration example40193
-Node: Chaining example42852
-Node: API44238
-Node: Error API45026
-Node: Error parser API47627
-Node: Contribution47853
-Node: Reporting issues48529
-Node: Contributing syntax checkers49265
-Node: Contributing code50060
-Node: Unit tests51400
-Node: Changes52687
-Node: 0.153303
-Node: 0.253587
-Node: 0.353865
-Node: 0.454101
-Node: 0.554876
-Node: 0.656096
-Node: 0.6.158946
-Node: 0.759095
-Node: 0.7.160109
-Node: 0.860824
-Node: 0.962336
-Node: 0.1062832
-Node: master64886
-Node: Credits65688
-Node: GNU Free Documentation License68387
-Node: Syntax checkers93539
-Node: Function and Variable Index94528
+Node: Reporting14736
+Node: Navigation18231
+Node: Mode line20027
+Node: Extending20928
+Node: Declaration21527
+Node: Error parsers33958
+Node: Option filters34942
+Node: Examples35281
+Node: Simple example35713
+Node: Predicate example38777
+Node: Configuration example40758
+Node: Chaining example43417
+Node: API44803
+Node: Error API45591
+Node: Error parser API48192
+Node: Contribution48418
+Node: Reporting issues49094
+Node: Contributing syntax checkers49830
+Node: Contributing code50625
+Node: Unit tests51965
+Node: Changes53252
+Node: 0.153868
+Node: 0.254152
+Node: 0.354430
+Node: 0.454666
+Node: 0.555441
+Node: 0.656661
+Node: 0.6.159511
+Node: 0.759660
+Node: 0.7.160674
+Node: 0.861389
+Node: 0.962901
+Node: 0.1063397
+Node: master65451
+Node: Credits66418
+Node: GNU Free Documentation License69117
+Node: Syntax checkers94269
+Node: Function and Variable Index95258
 
 End Tag Table

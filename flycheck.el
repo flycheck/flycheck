@@ -157,6 +157,25 @@ local variable to always use a specific syntax checker for a
 file.")
 (put 'flycheck-checker 'safe-local-variable 'flycheck-registered-checker-p)
 
+(defcustom flycheck-locate-config-file-functions
+  '(flycheck-locate-config-file-absolute-path
+    flycheck-locate-config-file-ancestor-directories
+    flycheck-locate-config-file-home)
+  "Functions to locate syntax checker configuration files.
+
+Each function in this hook must accept two arguments: The value
+of the configuration file variable, and the syntax checker
+symbol.  It must return either a string with an absolute path to
+the configuration file, or nil, if it cannot locate the
+configuration file.
+
+The functions in this hook are called in order of appearance, until a
+function returns non-nil.  The configuration file returned by that
+function is then given to the syntax checker if it exists.
+"
+  :group 'flycheck
+  :type 'hook)
+
 (defface flycheck-error-face
   '((t :inherit error))
   "Face for on-the-fly syntax checking errors."
@@ -652,20 +671,6 @@ Return the path of the file."
     ;; With no filename, fall back to a copy in the system directory.
     (flycheck-temp-file-system filename prefix)))
 
-(defun flycheck-find-file-for-buffer (filename)
-  "Find FILENAME for the current buffer.
-
-First try to find the file in the buffer's directory and any of
-its ancestors (see `locate-dominating-file').  If that fails or
-if the buffer has no `buffer-file-name' try to find the file in
-the home directory.  If the file is not found anywhere return
-nil."
-  (-if-let* ((basename (buffer-file-name))
-             (directory (locate-dominating-file basename filename)))
-    (expand-file-name filename directory)
-    (let ((home-path (expand-file-name filename "~")))
-          (when (file-exists-p home-path) home-path))))
-
 (defun flycheck-canonical-file-name (filename)
   "Turn FILENAME into canonical form.
 
@@ -1140,22 +1145,22 @@ otherwise."
          (flycheck-registered-checker-p next-checker)
          (flycheck-may-use-checker next-checker))))
 
-(defun flycheck-find-config-file (file-name)
-  "Find the configuration file FILE-NAME.
+(defun flycheck-locate-config-file (filename checker)
+  "Locate the configuration file FILENAME for CHECKER.
 
-If FILE-NAME contains a slash, return FILE-NAME expanded with
-`expand-file-name'.
+Locate the configuration file using
+`flycheck-locate-config-file-functions'.
 
-If FILE-NAME does not contain a slash, search the file with
-`flycheck-find-file-name' and return the result."
-  (when file-name
-    (if (s-contains? "/" file-name)
-        (let ((file-name (expand-file-name file-name)))
-          (when (file-exists-p file-name) file-name))
-      (flycheck-find-file-for-buffer file-name))))
+Return the absolute path of the configuration file, or nil if no
+configuration file was found."
+  (-when-let (filepath (run-hook-with-args-until-success
+                        'flycheck-locate-config-file-functions
+                        filename checker))
+    (when (file-exists-p filepath)
+      filepath)))
 
-(defun flycheck-substitute-argument (arg)
-  "Substitute ARG with file to check is possible.
+(defun flycheck-substitute-argument (arg checker)
+  "Substitute ARG for CHECKER.
 
 If ARG is a string, return ARG unchanged.
 
@@ -1211,7 +1216,7 @@ In all other cases, signal an error."
     (`temporary-directory (flycheck-temp-dir-system "flycheck"))
     (`(config-file ,option-name ,file-name-var)
      (-when-let* ((value (symbol-value file-name-var))
-                  (file-name (flycheck-find-config-file value)))
+                  (file-name (flycheck-locate-config-file value checker)))
        (flycheck-option-with-value-argument option-name file-name)))
     (`(option ,option-name ,variable)
      (-when-let (value (symbol-value variable))
@@ -1240,11 +1245,11 @@ In all other cases, signal an error."
 Substitute each argument in the command of CHECKER using
 `flycheck-substitute-argument'.  This replaces any special
 symbols in the command."
-  (-flatten (-keep #'flycheck-substitute-argument
+  (-flatten (--keep (flycheck-substitute-argument it checker)
                    (flycheck-checker-command checker))))
 
-(defun flycheck-substitute-shell-argument (arg)
-  "Substitute ARG with file to check is possible.
+(defun flycheck-substitute-shell-argument (arg checker)
+  "Substitute ARG for CHECKER.
 
 Like `flycheck-substitute-argument', but return a single string
 suitable for use as argument to a shell command, and do not
@@ -1252,7 +1257,7 @@ substitute with temporary files.  `source' and `source-inplace'
 are substituted with the buffer file name."
   (if (memq arg '(source source-inplace source-original))
       (shell-quote-argument (buffer-file-name))
-    (let ((args (flycheck-substitute-argument arg)))
+    (let ((args (flycheck-substitute-argument arg checker)))
       (if (stringp args)
           (shell-quote-argument args)
         (s-join " " (-map #'shell-quote-argument args))))))
@@ -1266,8 +1271,50 @@ Substitutions are performed like in
 
 Return the command of CHECKER as single string, suitable for
 shell execution."
-  (s-join " " (-keep #'flycheck-substitute-shell-argument
-                    (flycheck-checker-command checker))))
+  (s-join " " (--keep (flycheck-substitute-shell-argument it checker)
+                      (flycheck-checker-command checker))))
+
+
+;;;; Configuration file functions
+(defun flycheck-locate-config-file-absolute-path (filepath _checker)
+  "Find a configuration file by a FILEPATH.
+
+If FILEPATH is a real path, i.e. contains a path separator,
+expand it against the default directory and return it.
+
+Otherwise return nil.
+
+_CHECKER is ignored."
+  (when (file-name-directory filepath)
+    (expand-file-name filepath)))
+
+(defun flycheck-locate-config-file-ancestor-directories (filename _checker)
+  "Find a configuration FILENAME in ancestor directories.
+
+Search FILENAME in all ancestor directories of the current buffer.
+
+Return nil, if the buffer has no file name, or if FILENAME was
+not found in any ancestor directory.
+
+_CHECKER is ignored."
+  (-when-let* ((basefile (buffer-file-name))
+               (directory (locate-dominating-file basefile filename)))
+    (expand-file-name filename directory)))
+
+(defun flycheck-locate-config-file-home (filename _checker)
+  "Find a configuration FILENAME in the home directory.
+
+Search FILENAME in the user's home directory.
+
+Return nil, if FILENAME does not exist in the user's home directory."
+  (let ((path (expand-file-name filename "~")))
+    (when (file-exists-p path)
+      path)))
+
+(--each '(flycheck-locate-config-file-absolute-path
+          flycheck-locate-config-file-ancestor-directories
+          flycheck-locate-config-file-home)
+  (custom-add-frequent-value 'flycheck-locate-config-file-functions it))
 
 
 ;;;; Option filters
