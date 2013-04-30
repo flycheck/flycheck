@@ -670,8 +670,7 @@ Checkers are declared with 'flycheck-declare-checker':
                checker configuration.  Define this variable with
                'flycheck-def-config-file-var'.
 
-               If the configuration file is found according to the rules
-               documented in *note Configuration::, the cell is
+               If the configuration file is found, the cell is
                substituted with the OPTION and the absolute path to the
                configuration file as string.  Otherwise the cell is
                simply dropped from the arguments of the syntax checker.
@@ -2380,8 +2379,8 @@ Function and Variable Index
 * flycheck-count-errors:                 Error API.           (line  71)
 * flycheck-current-errors:               Error API.           (line  67)
 * flycheck-declare-checker:              Declaration.         (line   8)
-* flycheck-def-config-file-var:          Declaration.         (line 251)
-* flycheck-def-option-var:               Declaration.         (line 267)
+* flycheck-def-config-file-var:          Declaration.         (line 250)
+* flycheck-def-option-var:               Declaration.         (line 266)
 * flycheck-describe-checker:             Selection.           (line  70)
 * flycheck-error-face:                   Reporting.           (line  14)
 * flycheck-error-new:                    Error API.           (line  39)
@@ -2423,38 +2422,38 @@ Node: Navigation18231
 Node: Mode line20027
 Node: Extending20928
 Node: Declaration21527
-Node: Error parsers33958
-Node: Option filters34942
-Node: Examples35281
-Node: Simple example35713
-Node: Predicate example38777
-Node: Configuration example40758
-Node: Chaining example43417
-Node: API44803
-Node: Error API45591
-Node: Error parser API48192
-Node: Contribution48418
-Node: Reporting issues49094
-Node: Contributing syntax checkers49830
-Node: Contributing code50625
-Node: Unit tests51965
-Node: Changes53252
-Node: 0.153868
-Node: 0.254152
-Node: 0.354430
-Node: 0.454666
-Node: 0.555441
-Node: 0.656661
-Node: 0.6.159511
-Node: 0.759660
-Node: 0.7.160674
-Node: 0.861389
-Node: 0.962901
-Node: 0.1063397
-Node: master65451
-Node: Credits66418
-Node: GNU Free Documentation License69117
-Node: Syntax checkers94269
-Node: Function and Variable Index95258
+Node: Error parsers33884
+Node: Option filters34868
+Node: Examples35207
+Node: Simple example35639
+Node: Predicate example38703
+Node: Configuration example40684
+Node: Chaining example43343
+Node: API44729
+Node: Error API45517
+Node: Error parser API48118
+Node: Contribution48344
+Node: Reporting issues49020
+Node: Contributing syntax checkers49756
+Node: Contributing code50551
+Node: Unit tests51891
+Node: Changes53178
+Node: 0.153794
+Node: 0.254078
+Node: 0.354356
+Node: 0.454592
+Node: 0.555367
+Node: 0.656587
+Node: 0.6.159437
+Node: 0.759586
+Node: 0.7.160600
+Node: 0.861315
+Node: 0.962827
+Node: 0.1063323
+Node: master65377
+Node: Credits66344
+Node: GNU Free Documentation License69043
+Node: Syntax checkers94195
+Node: Function and Variable Index95184
 
 End Tag Table

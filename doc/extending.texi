@@ -106,10 +106,10 @@ the name or path of the configuration file.  @xref{Configuration}, for
 more information about syntax checker configuration.  Define this
 variable with @code{flycheck-def-config-file-var}.
 
-If the configuration file is found according to the rules documented in
-@ref{Configuration}, the cell is substituted with the @var{option} and
-the absolute path to the configuration file as string.  Otherwise the
-cell is simply dropped from the arguments of the syntax checker.
+If the configuration file is found, the cell is substituted with the
+@var{option} and the absolute path to the configuration file as string.
+Otherwise the cell is simply dropped from the arguments of the syntax
+checker.
 
 If @var{option} ends with a @code{=} character, @var{option} and the
 absolute path to the configuration file are concatenated and given as a
