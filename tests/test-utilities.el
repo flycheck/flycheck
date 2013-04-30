@@ -123,29 +123,17 @@
             (should (string= (buffer-string) "Hello world"))))
       (ignore-errors (delete-file filename)))))
 
-(ert-deftest flycheck-root-directory-p-unix ()
-  "Test whether `flycheck-root-directory-p' behaves correctly."
-  :expected-result (if (not (flycheck-testsuite-windows-p)) :passed :failed)
-  (should (flycheck-root-directory-p "/"))
-  (should (flycheck-root-directory-p "//"))
-  (should-not (flycheck-root-directory-p "/home/foo/"))
-  (should-not (flycheck-root-directory-p "/home/foo")))
-
-(ert-deftest flycheck-root-directory-p-windows ()
-  "Test whether `flycheck-root-directory-p' behaves correctly on Windows."
-  :expected-result (if (flycheck-testsuite-windows-p) :passed :failed)
-  (should (flycheck-root-directory-p "C:\\"))
-  (should (flycheck-root-directory-p "D:\\"))
-  (should-not (flycheck-root-directory-p "C:\\Windows"))
-  (should-not (flycheck-root-directory-p "C:\\Windows\\")))
-
-(ert-deftest flycheck-find-file-in-tree ()
-  "Test `flycheck-find-file-in-tree'."
-  (let ((filename (expand-file-name "../Makefile" flycheck-testsuite-dir)))
-    (should (equal (flycheck-find-file-in-tree "Makefile" flycheck-testsuite-dir)
-                   filename)))
-  (should-not (flycheck-find-file-in-tree "this-file-should-really-not-exist"
-                                          flycheck-testsuite-dir)))
+(ert-deftest flycheck-find-file-for-buffer ()
+  (with-temp-buffer
+    (setq buffer-file-name (expand-file-name "test-utilities.el"
+                                             flycheck-testsuite-dir))
+    (should (string= (flycheck-find-file-for-buffer "flycheck-testsuite.el")
+                     (expand-file-name "flycheck-testsuite.el"
+                                       flycheck-testsuite-dir)))
+    (should (string= (flycheck-find-file-for-buffer "Makefile")
+                     (expand-file-name "../Makefile" flycheck-testsuite-dir)))
+    (should-not (flycheck-find-file-for-buffer
+                 "this-file-should-really-not-exist"))))
 
 (ert-deftest flycheck-option-with-value-argument ()
   "Test concatenation of options and arguments."

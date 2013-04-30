@@ -652,49 +652,19 @@ Return the path of the file."
     ;; With no filename, fall back to a copy in the system directory.
     (flycheck-temp-file-system filename prefix)))
 
-(defun flycheck-root-directory-p (directory)
-  "Determine if DIRECTORY is the root directory.
-
-In order to work in work in a platform-neutral way,
-check to see if DIRECTORY is its own parent.
-
-Return t if root directory, otherwise nil."
-  (string= (directory-file-name directory)
-           (file-name-directory (directory-file-name directory))))
-
-(defun flycheck-find-file-in-tree (filename directory)
-  "Find FILENAME in DIRECTORY and all of its ancestors.
-
-Start looking for a file named FILENAME in DIRECTORY and traverse
-upwards through all of its ancestors up to the file system root
-until the file is found or the root is reached.
-
-Return the absolute path of the file, or nil if the file was not
-found in DIRECTORY or any of its ancestors."
-  (let ((full-path (expand-file-name filename directory)))
-    (cond
-     ((flycheck-root-directory-p directory)
-      (when (file-exists-p full-path) full-path))
-     ((file-exists-p full-path) full-path)
-     (:else
-      (let ((parent-directory (file-name-directory
-                               (directory-file-name
-                                (file-name-directory full-path)))))
-        (flycheck-find-file-in-tree filename parent-directory))))))
-
 (defun flycheck-find-file-for-buffer (filename)
   "Find FILENAME for the current buffer.
 
 First try to find the file in the buffer's directory and any of
-its ancestors (see `flycheck-find-file-in-tree').  If that fails
-or if the buffer has no `buffer-file-name' try to find the file
-in the home directory.  If the file is not found anywhere return
+its ancestors (see `locate-dominating-file').  If that fails or
+if the buffer has no `buffer-file-name' try to find the file in
+the home directory.  If the file is not found anywhere return
 nil."
-  (let ((directory (when (buffer-file-name)
-                     (file-name-directory (buffer-file-name)))))
-    (or (when directory (flycheck-find-file-in-tree filename directory))
-        (let ((home-path (expand-file-name filename "~")))
-          (when (file-exists-p home-path) home-path)))))
+  (-if-let* ((basename (buffer-file-name))
+             (directory (locate-dominating-file basename filename)))
+    (expand-file-name filename directory)
+    (let ((home-path (expand-file-name filename "~")))
+          (when (file-exists-p home-path) home-path))))
 
 (defun flycheck-canonical-file-name (filename)
   "Turn FILENAME into canonical form.
