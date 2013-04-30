@@ -1277,12 +1277,10 @@ shell execution."
 
 ;;;; Configuration file functions
 (defun flycheck-locate-config-file-absolute-path (filepath _checker)
-  "Find a configuration file by a FILEPATH.
+  "Locate a configuration file by a FILEPATH.
 
-If FILEPATH is a real path, i.e. contains a path separator,
-expand it against the default directory and return it.
-
-Otherwise return nil.
+If FILEPATH is a contains a path separator, expand it against the
+default directory and return it.  Otherwise return nil.
 
 _CHECKER is ignored."
   (when (file-name-directory filepath)
@@ -1291,10 +1289,13 @@ _CHECKER is ignored."
 (defun flycheck-locate-config-file-ancestor-directories (filename _checker)
   "Find a configuration FILENAME in ancestor directories.
 
-Search FILENAME in all ancestor directories of the current buffer.
+(defun flycheck-locate-config-file-ancestor-directories (filename _checker)
+  "Locate a configuration FILENAME in ancestor directories.
 
-Return nil, if the buffer has no file name, or if FILENAME was
-not found in any ancestor directory.
+If the current buffer has a file name, search FILENAME in the
+directory of the current buffer and all ancestors thereof (see
+`locate-dominating-file').  If the file is found, return its
+absolute path.  Otherwise return nil.
 
 _CHECKER is ignored."
   (-when-let* ((basefile (buffer-file-name))
@@ -1302,11 +1303,10 @@ _CHECKER is ignored."
     (expand-file-name filename directory)))
 
 (defun flycheck-locate-config-file-home (filename _checker)
-  "Find a configuration FILENAME in the home directory.
+  "Locate a configuration FILENAME in the home directory.
 
-Search FILENAME in the user's home directory.
-
-Return nil, if FILENAME does not exist in the user's home directory."
+Return the absolute path, if FILENAME exists in the user's home
+directory, or nil otherwise."
   (let ((path (expand-file-name filename "~")))
     (when (file-exists-p path)
       path)))
