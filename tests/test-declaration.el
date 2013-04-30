@@ -32,36 +32,32 @@
   (should-not (flycheck-error-pattern-p "foo"))
   (should-not (flycheck-error-pattern-p 'warning)))
 
-(ert-deftest flycheck-command-argument-cell-p-config-file ()
-  (should (flycheck-command-argument-cell-p '(config-file "foo" bar)))
-  (should-not (flycheck-command-argument-cell-p '(config-file "foo" 'bar)))
-  (should-not (flycheck-command-argument-cell-p '(config-file "foo"))))
-
-(ert-deftest flycheck-command-argument-cell-p-option ()
-  (should (flycheck-command-argument-cell-p '(option "foo" bar)))
-  (should (flycheck-command-argument-cell-p '(option "foo" bar filter)))
-  (should-not (flycheck-command-argument-cell-p '(option "foo" 'bar)))
-  (should-not (flycheck-command-argument-cell-p '(option "foo" bar 'filter)))
-  (should-not (flycheck-command-argument-cell-p '(option "foo"))))
-
-(ert-deftest flycheck-command-argument-cell-p-eval ()
-  (should (flycheck-command-argument-cell-p '(eval bar)))
-  (should (flycheck-command-argument-cell-p '(eval (bar))))
-  (should-not (flycheck-command-argument-cell-p '(eval)))
-  (should-not (flycheck-command-argument-cell-p '(eval foo bar))))
-
-(ert-deftest flycheck-command-argument-cell-p-no-cell ()
-  (should-not (flycheck-command-argument-cell-p "foo"))
-  (should-not (flycheck-command-argument-cell-p 'foo))
-  (should-not (flycheck-command-argument-cell-p '(foo bar))))
-
-(ert-deftest flycheck-command-argument-p ()
+(ert-deftest flycheck-command-argument-p-symbols ()
   (--each '(source source-inplace source-original temporary-directory)
-    (should (flycheck-command-argument-p it)))
-  (should (flycheck-command-argument-p "foo"))
+    (should (flycheck-command-argument-p it))))
+
+(ert-deftest flycheck-command-argument-p-config-file ()
+  (should (flycheck-command-argument-p '(config-file "foo" bar)))
+  (should-not (flycheck-command-argument-p '(config-file "foo" 'bar)))
+  (should-not (flycheck-command-argument-p '(config-file "foo"))))
+
+(ert-deftest flycheck-command-argument-p-option ()
+  (should (flycheck-command-argument-p '(option "foo" bar)))
+  (should (flycheck-command-argument-p '(option "foo" bar filter)))
+  (should-not (flycheck-command-argument-p '(option "foo" 'bar)))
+  (should-not (flycheck-command-argument-p '(option "foo" bar 'filter)))
+  (should-not (flycheck-command-argument-p '(option "foo"))))
+
+(ert-deftest flycheck-command-argument-p-eval ()
   (should (flycheck-command-argument-p '(eval bar)))
-  (should-not (flycheck-command-argument-p '(foo bar)))
-  (should-not (flycheck-command-argument-p 1)))
+  (should (flycheck-command-argument-p '(eval (bar))))
+  (should-not (flycheck-command-argument-p '(eval)))
+  (should-not (flycheck-command-argument-p '(eval foo bar))))
+
+(ert-deftest flycheck-command-argument-p-invalid-argument ()
+  (should-not (flycheck-command-argument-p 100))
+  (should-not (flycheck-command-argument-p 'foo))
+  (should-not (flycheck-command-argument-p '(foo bar))))
 
 ;; Local Variables:
 ;; coding: utf-8
