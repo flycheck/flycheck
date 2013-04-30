@@ -270,6 +270,10 @@ If the configuration file variable contains a path a directory
 separator, expand the path against the buffer's default directory and
 use the resulting path as configuration file.
 @item
+If @uref{https://github.com/bbatsov/projectile, Projectile} is available
+and the current buffer is part of a project project, search the
+configuration file in the root directory of the project.
+@item
 If the buffer has a file name, search the buffer's directory and any
 ancestors thereof for the configuration file.
 @item

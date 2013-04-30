@@ -28,10 +28,12 @@
 
 (require 'ert)
 (require 'flycheck)
+(require 'mocker)
 
 (ert-deftest flycheck-locate-config-file-functions ()
   (should (equal flycheck-locate-config-file-functions
                  '(flycheck-locate-config-file-absolute-path
+                   flycheck-locate-config-file-projectile
                    flycheck-locate-config-file-ancestor-directories
                    flycheck-locate-config-file-home))))
 
@@ -43,6 +45,20 @@
     (should (equal (flycheck-locate-config-file-absolute-path "../Makefile"
                                                               'emacs-lisp)
                    (expand-file-name "../Makefile" flycheck-testsuite-dir)))))
+
+(ert-deftest flycheck-locate-config-file-projectile ()
+  (should-not (fboundp #'projectile-project-root))
+  (should-not (flycheck-locate-config-file-projectile "flycheck-testsuite.el"
+                                                      'emacs-lisp))
+  (mocker-let
+      ((projectile-project-root
+        ()
+        ((:input () :output flycheck-testsuite-dir
+                 :min-occur 2 :max-occur 2))))
+    (should (equal (flycheck-locate-config-file-projectile
+                    "flycheck-testsuite.el" 'emacs-lisp)
+                   (expand-file-name "flycheck-testsuite.el" flycheck-testsuite-dir)))
+    (should-not (flycheck-locate-config-file-projectile "Makefile" 'emacs-lisp))))
 
 (ert-deftest flycheck-locate-config-file-ancestor-directories ()
   (with-temp-buffer

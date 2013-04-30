@@ -159,6 +159,7 @@ file.")
 
 (defcustom flycheck-locate-config-file-functions
   '(flycheck-locate-config-file-absolute-path
+    flycheck-locate-config-file-projectile
     flycheck-locate-config-file-ancestor-directories
     flycheck-locate-config-file-home)
   "Functions to locate syntax checker configuration files.
@@ -1286,8 +1287,23 @@ _CHECKER is ignored."
   (when (file-name-directory filepath)
     (expand-file-name filepath)))
 
-(defun flycheck-locate-config-file-ancestor-directories (filename _checker)
-  "Find a configuration FILENAME in ancestor directories.
+(defun flycheck-locate-config-file-projectile (filename _checker)
+  "Locate a configuration FILENAME in a projectile project.
+
+If the Projectile library (see URL
+`https://github.com/bbatsov/projectile') is available and the
+current buffer is within a Projectile project, search FILENAME in
+the root directory of the project.  If the file is found, return
+its absolute path.
+
+Otherwise return nil.
+
+_CHECKER is ignored."
+  (when (fboundp #'projectile-project-root)
+    (-when-let (root-directory (projectile-project-root))
+      (let ((filepath (expand-file-name filename root-directory)))
+        (when (file-exists-p filepath)
+          filepath)))))
 
 (defun flycheck-locate-config-file-ancestor-directories (filename _checker)
   "Locate a configuration FILENAME in ancestor directories.
@@ -1312,6 +1328,7 @@ directory, or nil otherwise."
       path)))
 
 (--each '(flycheck-locate-config-file-absolute-path
+          flycheck-locate-config-file-projectile
           flycheck-locate-config-file-ancestor-directories
           flycheck-locate-config-file-home)
   (custom-add-frequent-value 'flycheck-locate-config-file-functions it))

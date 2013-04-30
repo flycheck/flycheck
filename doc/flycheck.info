@@ -385,9 +385,12 @@ located by the following algorithm:
   1. If the configuration file variable contains a path a directory
      separator, expand the path against the buffer's default directory
      and use the resulting path as configuration file.
-  2. If the buffer has a file name, search the buffer's directory and
+  2. If Projectile (https://github.com/bbatsov/projectile) is available
+     and the current buffer is part of a project project, search the
+     configuration file in the root directory of the project.
+  3. If the buffer has a file name, search the buffer's directory and
      any ancestors thereof for the configuration file.
-  3. Eventually attempt to locate the configuration file in the user's
+  4. Eventually attempt to locate the configuration file in the user's
      home directory.
 
    If any of these steps succeeds, the subsequent steps are not
@@ -1751,6 +1754,8 @@ master (unreleased)
         * Customizable configuration file search, via
           'flycheck-locate-config-file-functions'
           (https://github.com/lunaryorn/flycheck/issues/133)
+        * Find configuration files in Projectile
+          (https://github.com/bbatsov/projectile) projects
 
    * Improvements:
 
@@ -2417,43 +2422,43 @@ Node: Usage5971
 Node: Syntax checking6594
 Node: Selection8818
 Node: Configuration11399
-Node: Reporting14736
-Node: Navigation18231
-Node: Mode line20027
-Node: Extending20928
-Node: Declaration21527
-Node: Error parsers33884
-Node: Option filters34868
-Node: Examples35207
-Node: Simple example35639
-Node: Predicate example38703
-Node: Configuration example40684
-Node: Chaining example43343
-Node: API44729
-Node: Error API45517
-Node: Error parser API48118
-Node: Contribution48344
-Node: Reporting issues49020
-Node: Contributing syntax checkers49756
-Node: Contributing code50551
-Node: Unit tests51891
-Node: Changes53178
-Node: 0.153794
-Node: 0.254078
-Node: 0.354356
-Node: 0.454592
-Node: 0.555367
-Node: 0.656587
-Node: 0.6.159437
-Node: 0.759586
-Node: 0.7.160600
-Node: 0.861315
-Node: 0.962827
-Node: 0.1063323
-Node: master65377
-Node: Credits66344
-Node: GNU Free Documentation License69043
-Node: Syntax checkers94195
-Node: Function and Variable Index95184
+Node: Reporting14939
+Node: Navigation18434
+Node: Mode line20230
+Node: Extending21131
+Node: Declaration21730
+Node: Error parsers34087
+Node: Option filters35071
+Node: Examples35410
+Node: Simple example35842
+Node: Predicate example38906
+Node: Configuration example40887
+Node: Chaining example43546
+Node: API44932
+Node: Error API45720
+Node: Error parser API48321
+Node: Contribution48547
+Node: Reporting issues49223
+Node: Contributing syntax checkers49959
+Node: Contributing code50754
+Node: Unit tests52094
+Node: Changes53381
+Node: 0.153997
+Node: 0.254281
+Node: 0.354559
+Node: 0.454795
+Node: 0.555570
+Node: 0.656790
+Node: 0.6.159640
+Node: 0.759789
+Node: 0.7.160803
+Node: 0.861518
+Node: 0.963030
+Node: 0.1063526
+Node: master65580
+Node: Credits66655
+Node: GNU Free Documentation License69354
+Node: Syntax checkers94506
+Node: Function and Variable Index95495
 
 End Tag Table

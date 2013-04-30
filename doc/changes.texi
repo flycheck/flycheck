@@ -541,6 +541,9 @@ Customizable error indication with control of the fringe side, via
 @item
 @ghissue{133, Customizable configuration file search@comma{} via
 @code{flycheck-locate-config-file-functions}}
+@item
+Find configuration files in @uref{https://github.com/bbatsov/projectile,
+Projectile} projects
 @end itemize
 
 @item
