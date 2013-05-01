@@ -218,31 +218,48 @@ manually:
 
    Each syntax check is comprised of the following steps:
 
-  1. Clear error information from previous syntax checks.
-  2. Select a suitable syntax checker.  *Note Selection::, for more
+  1. Run hooks in 'flycheck-before-syntax-check-hook'.
+  2. Clear error information from previous syntax checks.
+  3. Select a suitable syntax checker.  *Note Selection::, for more
      information on how syntax checkers are selected.
-  3. Copy the contents of the buffer to be checked to a temporary file.
-  4. Execute the syntax checker.
-  5. Parse the output of the tool, and report all errors and warnings.
+  4. Copy the contents of the buffer to be checked to a temporary file.
+  5. Execute the syntax checker.
+  6. Parse the output of the tool, and report all errors and warnings.
      *Note Reporting::, for more information.
-  6. If the buffer can be checked with another syntax checker, continue
-     from step 3, but with the next syntax checker.  This is called
+  7. If the buffer can be checked with another syntax checker, continue
+     from step 4, but with the next syntax checker.  This is called
      "chaining" of syntax checkers.
-  7. Run hooks in 'flycheck-after-syntax-check-hook'.
+  8. Run hooks in 'flycheck-after-syntax-check-hook'.
 
  -- User Option: flycheck-after-syntax-check-hook
-     Hooks to run after each syntax check.
+     Functions to run after each syntax check.
 
-     This hook is run after a syntax check was finished.  At this point,
-     all chained checkers were run, and all errors were parsed,
-     highlighted and reported.  *Note Reporting::, for more information
-     about error reporting.  The variable 'flycheck-current-errors'
-     contains all errors from all syntax checkers run during the syntax
-     check, so you can use the various error analysis functions.
+     This hook is run after a syntax check was finished.
 
-     Note that this hook does not run after individual syntax checkers
-     were finished.  It only runs after the last checker in the syntax
-     checker chain.
+     At this point, all chained checkers were run, and all errors were
+     parsed, highlighted and reported.  *Note Reporting::, for more
+     information about error reporting.  The variable
+     'flycheck-current-errors' contains all errors from all syntax
+     checkers run during the syntax check, so you can use the various
+     error analysis functions.
+
+     Note that this hook does not run after each individual syntax
+     checker in the syntax checker chain, but only after the last
+     checker.
+
+     This variable is a normal hook.  *Note (elisp)Hooks::.
+
+ -- User Option: flycheck-before-syntax-check-hook
+     Functions to run before each syntax check.
+
+     This hook is run right before a syntax check starts.
+
+     Error information from the previous syntax check is not cleared
+     before this hook runs.
+
+     Note that this hook does not run before each individual syntax
+     checker in the syntax checker chain, but only before the first
+     checker.
 
      This variable is a normal hook.  *Note (elisp)Hooks::.
 
@@ -1766,6 +1783,7 @@ master (unreleased)
           (https://github.com/lunaryorn/flycheck/issues/133)
         * Find configuration files in Projectile
           (https://github.com/bbatsov/projectile) projects
+        * Add 'flycheck-before-syntax-check-hook'
 
    * Improvements:
 
@@ -2382,7 +2400,8 @@ Function and Variable Index
  [index ]
 * Menu:
 
-* flycheck-after-syntax-check-hook:      Syntax checking.     (line  57)
+* flycheck-after-syntax-check-hook:      Syntax checking.     (line  58)
+* flycheck-before-syntax-check-hook:     Syntax checking.     (line  76)
 * flycheck-buffer:                       Syntax checking.     (line  41)
 * flycheck-check-syntax-automatically:   Syntax checking.     (line  15)
 * flycheck-checker:                      Selection.           (line  41)
@@ -2430,45 +2449,45 @@ Node: Installation4446
 Node: Activation5620
 Node: Usage5971
 Node: Syntax checking6594
-Node: Selection9368
-Node: Configuration11949
-Node: Reporting15489
-Node: Navigation18984
-Node: Mode line20780
-Node: Extending21681
-Node: Declaration22280
-Node: Error parsers34637
-Node: Option filters35621
-Node: Examples35960
-Node: Simple example36392
-Node: Predicate example39456
-Node: Configuration example41437
-Node: Chaining example44096
-Node: API45482
-Node: Error API46270
-Node: Error parser API48871
-Node: Contribution49097
-Node: Reporting issues49773
-Node: Contributing syntax checkers50509
-Node: Contributing code51304
-Node: Unit tests52644
-Node: Changes53931
-Node: 0.154547
-Node: 0.254831
-Node: 0.355109
-Node: 0.455345
-Node: 0.556120
-Node: 0.657340
-Node: 0.6.160190
-Node: 0.760339
-Node: 0.7.161353
-Node: 0.862068
-Node: 0.963580
-Node: 0.1064076
-Node: master66130
-Node: Credits67205
-Node: GNU Free Documentation License69904
-Node: Syntax checkers95056
-Node: Function and Variable Index96045
+Node: Selection9886
+Node: Configuration12467
+Node: Reporting16007
+Node: Navigation19502
+Node: Mode line21298
+Node: Extending22199
+Node: Declaration22798
+Node: Error parsers35155
+Node: Option filters36139
+Node: Examples36478
+Node: Simple example36910
+Node: Predicate example39974
+Node: Configuration example41955
+Node: Chaining example44614
+Node: API46000
+Node: Error API46788
+Node: Error parser API49389
+Node: Contribution49615
+Node: Reporting issues50291
+Node: Contributing syntax checkers51027
+Node: Contributing code51822
+Node: Unit tests53162
+Node: Changes54449
+Node: 0.155065
+Node: 0.255349
+Node: 0.355627
+Node: 0.455863
+Node: 0.556638
+Node: 0.657858
+Node: 0.6.160708
+Node: 0.760857
+Node: 0.7.161871
+Node: 0.862586
+Node: 0.964098
+Node: 0.1064594
+Node: master66648
+Node: Credits67773
+Node: GNU Free Documentation License70472
+Node: Syntax checkers95624
+Node: Function and Variable Index96613
 
 End Tag Table

@@ -68,6 +68,8 @@ Each syntax check is comprised of the following steps:
 
 @enumerate
 @item
+Run hooks in @code{flycheck-before-syntax-check-hook}.
+@item
 Clear error information from previous syntax checks.
 @item
 Select a suitable syntax checker.  @xref{Selection}, for more
@@ -81,28 +83,46 @@ Parse the output of the tool, and report all errors and warnings.
 @xref{Reporting}, for more information.
 @item
 If the buffer can be checked with another syntax checker, continue from
-step 3, but with the next syntax checker.  This is called ``chaining''
+step 4, but with the next syntax checker.  This is called ``chaining''
 of syntax checkers.
 @item
 Run hooks in @code{flycheck-after-syntax-check-hook}.
 @end enumerate
 
 @defopt flycheck-after-syntax-check-hook
-Hooks to run after each syntax check.
+Functions to run after each syntax check.
 
-This hook is run after a syntax check was finished.  At this point,
-@b{all} chained checkers were run, and all errors were parsed,
-highlighted and reported.  @xref{Reporting}, for more information about
-error reporting.  The variable @code{flycheck-current-errors} contains
-all errors from all syntax checkers run during the syntax check, so you
-can use the various error analysis functions.
+This hook is run after a syntax check was finished.
 
-Note that this hook does @b{not} run after individual syntax checkers
-were finished.  It only runs after the @b{last checker} in the syntax
-checker chain.
+At this point, @b{all} chained checkers were run, and all errors were
+parsed, highlighted and reported.  @xref{Reporting}, for more
+information about error reporting.  The variable
+@code{flycheck-current-errors} contains all errors from all syntax
+checkers run during the syntax check, so you can use the various error
+analysis functions.
+
+Note that this hook does @b{not} run after each individual syntax
+checker in the syntax checker chain, but only after the @b{last
+checker}.
 
 This variable is a normal hook. @xref{Hooks, , ,elisp}.
 @end defopt
+
+@defopt flycheck-before-syntax-check-hook
+Functions to run before each syntax check.
+
+This hook is run right before a syntax check starts.
+
+Error information from the previous syntax check is @b{not} cleared
+before this hook runs.
+
+Note that this hook does not @b{run} before each individual syntax
+checker in the syntax checker chain, but only before the @b{first
+checker}.
+
+This variable is a normal hook. @xref{Hooks, , ,elisp}.
+@end defopt
+
 
 @node Selection, Configuration, Syntax checking, Usage
 @comment  node-name,  next,  previous,  up

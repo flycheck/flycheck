@@ -261,18 +261,35 @@ messages at point."
   :type 'hook)
 
 (defcustom flycheck-after-syntax-check-hook nil
-  "Hooks to run after each syntax check.
+  "Functions to run after each syntax check.
 
-This hook is run after a syntax check was finished.  At this
-point, *all* chained checkers were run, and all errors were
-parsed, highlighted and reported.  The variable
+This hook is run after a syntax check was finished.
+
+At this point, *all* chained checkers were run, and all errors
+were parsed, highlighted and reported.  The variable
 `flycheck-current-errors' contains all errors from all syntax
 checkers run during the syntax check, so you can use the various
 error analysis functions.
 
-Note that this hook does *not* run after individual syntax
-checkers were finished.  It only runs after the *last checker* in
-the complete syntax checker chain.
+Note that this hook does *not* run after each individual syntax
+checker in the syntax checker chain, but only after the *last
+checker*.
+
+This variable is a normal hook."
+  :group 'flycheck
+  :type 'hook)
+
+(defcustom flycheck-before-syntax-check-hook nil
+  "Functions to run before each syntax check.
+
+This hook is run right before a syntax check starts.
+
+Error information from the previous syntax check is *not*
+cleared before this hook runs.
+
+Note that this hook does *not* run before each individual syntax
+checker in the syntax checker chain, but only before the *first
+checker*.
 
 This variable is a normal hook."
   :group 'flycheck
@@ -465,6 +482,7 @@ returns t."
         ;; delete all overlays immediately to avoid excessive re-displays and
         ;; flickering, if the same errors gets highlighted again after the check
         ;; completed.
+        (run-hooks 'flycheck-before-syntax-check-hook)
         (flycheck-clear-errors)
         (flycheck-mark-all-overlays-for-deletion)
         (condition-case err

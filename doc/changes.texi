@@ -544,6 +544,8 @@ Customizable error indication with control of the fringe side, via
 @item
 Find configuration files in @uref{https://github.com/bbatsov/projectile,
 Projectile} projects
+@item
+Add @code{flycheck-before-syntax-check-hook}
 @end itemize
 
 @item
