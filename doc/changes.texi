@@ -2,6 +2,7 @@ This appendix provides a comprehensive changelog of all releases:
 
 @menu
 * master        :: unreleased
+* 0.11          :: May 01, 2013
 * 0.10          :: Apr 21, 2013
 * 0.9           :: Apr 13, 2013
 * 0.8           :: Apr 09, 2013
@@ -437,7 +438,7 @@ Quit the error message window when navigating away from error locations
 
 @end itemize
 
-@node 0.10, master, 0.9, Changes
+@node 0.10, 0.11, 0.9, Changes
 @comment  node-name,  next,  previous,  up
 @unnumberedsec 0.10 (Apr 21, 2013)
 
@@ -515,9 +516,9 @@ CodeSniffer}
 
 @end itemize
 
-@node master, , 0.10, Changes
+@node 0.11, master, 0.10, Changes
 @comment  node-name,  next,  previous,  up
-@unnumberedsec master (unreleased)
+@unnumberedsec 0.11 (May 01, 2013)
 
 @itemize @bullet
 @item
@@ -569,6 +570,10 @@ Add missing customization group for syntax checker options
 @end itemize
 
 @end itemize
+
+@node master, , 0.11, Changes
+@comment  node-name,  next,  previous,  up
+@unnumberedsec master (unreleased)
 
 @c Local Variables:
 @c mode: texinfo
