@@ -227,12 +227,18 @@ manually:
   5. Run hooks in 'flycheck-after-syntax-check-hook'.
 
  -- User Option: flycheck-after-syntax-check-hook
-     This variable is a list of function to execute after a syntax check
-     is completed, including all chained syntax checkers.
+     Hooks to run after each syntax check.
 
-     By the time these functions are called, all errors and warnings are
-     already reported.  *Note Reporting::, for more information about
-     error reporting.
+     This hook is run after a syntax check was finished.  At this point,
+     all chained checkers were run, and all errors were parsed,
+     highlighted and reported.  *Note Reporting::, for more information
+     about error reporting.  The variable 'flycheck-current-errors'
+     contains all errors from all syntax checkers run during the syntax
+     check, so you can use the various error analysis functions.
+
+     Note that this hook does not run after individual syntax checkers
+     were finished.  It only runs after the last checker in the complete
+     syntax checker chain.
 
      This variable is a normal hook.  *Note (elisp)Hooks::.
 
@@ -2420,45 +2426,45 @@ Node: Installation4446
 Node: Activation5620
 Node: Usage5971
 Node: Syntax checking6594
-Node: Selection8818
-Node: Configuration11399
-Node: Reporting14939
-Node: Navigation18434
-Node: Mode line20230
-Node: Extending21131
-Node: Declaration21730
-Node: Error parsers34087
-Node: Option filters35071
-Node: Examples35410
-Node: Simple example35842
-Node: Predicate example38906
-Node: Configuration example40887
-Node: Chaining example43546
-Node: API44932
-Node: Error API45720
-Node: Error parser API48321
-Node: Contribution48547
-Node: Reporting issues49223
-Node: Contributing syntax checkers49959
-Node: Contributing code50754
-Node: Unit tests52094
-Node: Changes53381
-Node: 0.153997
-Node: 0.254281
-Node: 0.354559
-Node: 0.454795
-Node: 0.555570
-Node: 0.656790
-Node: 0.6.159640
-Node: 0.759789
-Node: 0.7.160803
-Node: 0.861518
-Node: 0.963030
-Node: 0.1063526
-Node: master65580
-Node: Credits66655
-Node: GNU Free Documentation License69354
-Node: Syntax checkers94506
-Node: Function and Variable Index95495
+Node: Selection9151
+Node: Configuration11732
+Node: Reporting15272
+Node: Navigation18767
+Node: Mode line20563
+Node: Extending21464
+Node: Declaration22063
+Node: Error parsers34420
+Node: Option filters35404
+Node: Examples35743
+Node: Simple example36175
+Node: Predicate example39239
+Node: Configuration example41220
+Node: Chaining example43879
+Node: API45265
+Node: Error API46053
+Node: Error parser API48654
+Node: Contribution48880
+Node: Reporting issues49556
+Node: Contributing syntax checkers50292
+Node: Contributing code51087
+Node: Unit tests52427
+Node: Changes53714
+Node: 0.154330
+Node: 0.254614
+Node: 0.354892
+Node: 0.455128
+Node: 0.555903
+Node: 0.657123
+Node: 0.6.159973
+Node: 0.760122
+Node: 0.7.161136
+Node: 0.861851
+Node: 0.963363
+Node: 0.1063859
+Node: master65913
+Node: Credits66988
+Node: GNU Free Documentation License69687
+Node: Syntax checkers94839
+Node: Function and Variable Index95828
 
 End Tag Table

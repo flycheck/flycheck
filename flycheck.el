@@ -172,7 +172,8 @@ configuration file.
 The functions in this hook are called in order of appearance, until a
 function returns non-nil.  The configuration file returned by that
 function is then given to the syntax checker if it exists.
-"
+
+This function is an abnormal hook."
   :group 'flycheck
   :type 'hook)
 
@@ -272,9 +273,17 @@ messages at point."
 (defcustom flycheck-after-syntax-check-hook nil
   "Hooks to run after each syntax check.
 
-This hook is run after the syntax check process finished, all
-error messages were parsed and properly reported (including
-overlay setup)."
+This hook is run after a syntax check was finished.  At this
+point, all chained checkers were run, and all errors were parsed,
+highlighted and reported.  The variable `flycheck-current-errors'
+contains all errors from all syntax checkers run during the
+syntax check, so you can use the various error analysis functions.
+
+Note that this hook does *not* run after individual syntax
+checkers were finished.  It only runs after the *last checker* in
+the complete syntax checker chain.
+
+This variable is a normal hook."
   :group 'flycheck
   :type 'hook)
 
