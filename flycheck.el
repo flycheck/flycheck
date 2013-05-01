@@ -56,7 +56,6 @@
 Like `defvar' but additionally marks the variable as being automatically
 buffer-local wherever it is set."
       (declare (debug defvar) (doc-string 3))
-      ;; Can't use backquote here, it's too early in the bootstrap.
       (list 'progn (list 'defvar var val docstring)
             (list 'make-variable-buffer-local (list 'quote var))))))
 
@@ -561,8 +560,8 @@ is ignored.
 
 Start a syntax check if a new line has been inserted into the
 buffer."
+  ;; Save and restore the match data, as recommended in (elisp)Change Hooks
   (save-match-data
-    ;; Save and restore the match data, as recommended in (elisp)Change Hooks
     (when (and flycheck-mode (s-contains? "\n" (buffer-substring beg end)))
       (flycheck-buffer-automatically 'new-line))))
 
@@ -669,7 +668,6 @@ Return the path of the file."
              (tempfile (expand-file-name tempname directory)))
         (add-to-list 'flycheck-temp-files tempfile)
         tempfile)
-    ;; With no filename, fall back to a copy in the system directory.
     (flycheck-temp-file-system filename prefix)))
 
 (defun flycheck-canonical-file-name (filename)
@@ -829,9 +827,7 @@ are present, both must match for the checker to be used."
 
 (defun flycheck--declare-checker-1 (symbol docstring &rest properties)
   "Declare SYMBOL as checker with DOCSTRING and PROPERTIES."
-  ;; Un-declare any previous checker for this mode
   (flycheck-undeclare-checker symbol)
-  ;; Store the checker properties
   (put symbol :flycheck-command (plist-get properties :command))
   (put symbol :flycheck-error-patterns (plist-get properties :error-patterns))
   (put symbol :flycheck-error-parser (plist-get properties :error-parser))
@@ -840,13 +836,12 @@ are present, both must match for the checker to be used."
   (put symbol :flycheck-next-checkers (plist-get properties :next-checkers))
   (put symbol :flycheck-documentation docstring)
   ;; Record the location of the definition of the checker.  If we're loading
-  ;; from a file, record the file loaded from.  Otherwise use the current
-  ;; buffer name, in case of `eval-buffer' and the like.
+  ;; from a file, record the file loaded from.  Otherwise use the current buffer
+  ;; file name, in case of `eval-buffer' and the like.
   (-when-let (filename (if load-in-progress load-file-name (buffer-file-name)))
     (when (s-ends-with? ".elc" filename)
       (setq filename (s-chop-suffix "c" filename)))
     (put symbol :flycheck-file filename))
-  ;; Verify the checker and declare it valid if succeeded
   (flycheck-verify-checker symbol)
   (put symbol :flycheck-checker t))
 
@@ -1378,7 +1373,6 @@ Return the checker if there is any, or nil otherwise."
 Return checker if there is a checker for the current buffer, or
 nil otherwise."
   (if flycheck-checker
-      ;; If a checker was configured, try to use it!
       (if (flycheck-may-use-checker flycheck-checker)
           flycheck-checker
         (user-error "Configured syntax checker %s cannot be used"
@@ -1426,17 +1420,16 @@ syntax check if the syntax checker changed."
   (interactive)
   (info "flycheck"))
 
-;; Define our custom help button to navigation to checker definitions.  Be
-;; auto-load friendly, and delay the definition until after 'help-mode was
-;; loaded.
+;; Define a custom help button and plug into find-func to navigate to checker
+;; definitions, but delay this until after the corresponding libraries have been
+;; loaded to not forcibly load these libraries even if the user never even
+;; uses this feature
 (eval-after-load 'help-mode
   '(define-button-type 'help-flycheck-checker-def
      :supertype 'help-xref
      'help-function 'flycheck-goto-checker-definition
      'help-echo (purecopy "mouse-2, RET: find Flycheck checker definition")))
 
-;; Plug Flycheck into find-func, to provide navigation to checker definitions.
-;; Again we are friendly to autoload.
 (eval-after-load 'find-func
   '(progn
      (defconst flycheck-find-checker-regexp
@@ -1459,7 +1452,6 @@ syntax check if the syntax checker changed."
   "Return the Flycheck checker found at or before point.
 
 Return 0 if there is no checker."
-  ;; A checker is like a variable, but doesn't have to be bound...
   (let ((symbol (variable-at-point :any-symbol)))
     (if (and (symbolp symbol) (flycheck-valid-checker-p symbol))
         symbol
@@ -1597,7 +1589,6 @@ Return the errors parsed with the error patterns of CHECKER."
   (let* ((parser (or (flycheck-checker-error-parser checker)
                      'flycheck-parse-output-with-patterns))
          (errors (funcall parser output checker buffer)))
-    ;; Attach originating buffer to each error
     (--each errors (setf (flycheck-error-buffer it) buffer))
     (-map #'flycheck-sanitize-error errors)))
 
@@ -1629,8 +1620,6 @@ error message."
       (when message
         (setf (flycheck-error-message err) (s-trim message)))
       (when filename
-        ;; If the error has a file name, expand it relative to the default
-        ;; directory of its buffer and back substitute the file name
         (setf (flycheck-error-filename err) (expand-file-name filename)))))
   err)
 
@@ -1768,7 +1757,7 @@ text nodes) or as XML nodes, in the same for as the root node."
 
 Return the corresponding Flycheck error, or nil of NODE is not an
 error node."
-  (when (listp node)                    ; Ignore text nodes
+  (when (listp node)
     (let* ((name (car node))
            (attrs (cadr node))
            (line (flycheck-string-to-number-safe (cdr (assq 'line attrs))))
@@ -2159,7 +2148,6 @@ https://github.com/Bruce-Connor/emacs-google-this")))
 
 (defun flycheck-delete-process (process)
   "Delete PROCESS and clear it's resources."
-  ;; Remove temporary files and directories created for this process
   (flycheck-safe-delete-files (process-get process :flycheck-temp-files))
   (flycheck-safe-delete-directories
    (process-get process :flycheck-temp-directories))
@@ -2203,7 +2191,6 @@ Error: %s" checker output (error-message-string err))
                                       flycheck-sort-errors))
       (flycheck-report-error-count flycheck-current-errors)
       (when (and (/= exit-status 0) (not errors))
-        ;; Report possibly flawed checker definition
         (message "Checker %S returned non-zero exit code %s, but no errors from \
 output: %s\nChecker definition probably flawed."
                  checker exit-status output)
@@ -2211,10 +2198,8 @@ output: %s\nChecker definition probably flawed."
       (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
         (if next-checker
             (flycheck-start-checker next-checker)
-          ;; Delete overlays from the last syntax check
           (flycheck-delete-marked-overlays)
           (run-hooks 'flycheck-after-syntax-check-hook)
-          ;; Update the error display
           (when (eq (current-buffer) (window-buffer))
             (flycheck-show-error-at-point)))))))
 
@@ -2228,10 +2213,8 @@ _EVENT is ignored."
           (exit-status (process-exit-status process))
           (output (flycheck-get-output process))
           (buffer (process-buffer process)))
-      ;; First, let's clean up all the garbage
       (flycheck-delete-process process)
       (setq flycheck-current-process nil)
-      ;; Now, if the checked buffer is still live, parse and report the errors.
       (when (and (buffer-live-p buffer) flycheck-mode)
         (with-current-buffer buffer
           (condition-case err
@@ -2259,14 +2242,13 @@ _EVENT is ignored."
                      flycheck-temp-files)
         (process-put process :flycheck-temp-directories
                      flycheck-temp-directories)
-        ;; Temporary files and directories are not attached to the process, so
-        ;; let's reset the variables
+        ;; Now that temporary files and directories are attached to the process,
+        ;; we can reset the variables used to collect them
         (setq flycheck-temp-files nil
               flycheck-temp-directories nil)
         (process-put process :flycheck-checker checker))
     (error
      (flycheck-report-error)
-     ;; Remove all temporary files created for the process
      (flycheck-safe-delete-temporaries)
      (when flycheck-current-process
        ;; Clear the process if it's already there
@@ -2346,16 +2328,13 @@ See URL `https://github.com/stubbornella/csslint'."
 
 Return t if the current buffer is a temporary buffer created
 during byte-compilation or autoloads generation, or nil otherwise."
-  ;; Detect temporary buffers of `byte-compile-file' or autoload buffers created
-  ;; during package installation.  Checking these interferes with package
-  ;; installation, see https://github.com/lunaryorn/flycheck/issues/45 and
-  ;; https://github.com/bbatsov/prelude/issues/248
   (or (member (buffer-name) '(" *Compiler Input*" " *autoload-file*"))
       (s-ends-with? "-autoloads.el" (buffer-name))))
 
 (defconst flycheck-emacs-lisp-check-form
   '(progn
-     ;; Initialize packages to at least try to load dependencies
+     ;; Initialize packages to at least try to load dependencies of the checked
+     ;; file
      (package-initialize)
 
      (setq byte-compiled-files nil)
@@ -2393,6 +2372,10 @@ buffer using the currently running Emacs executable."
                    ;; Do not check buffers which should not be byte-compiled.
                    ;; The checker process will refuse to compile these anyway
                    (not (and (boundp 'no-byte-compile) no-byte-compile))
+                   ;; Checking temporary buffers from `byte-compile-file' or
+                   ;; autoload buffers interferes with package installation. See
+                   ;; https://github.com/lunaryorn/flycheck/issues/45 and
+                   ;; https://github.com/bbatsov/prelude/issues/248
                    (not (flycheck-temp-compilation-buffer-p)))
   :next-checkers '(emacs-lisp-checkdoc))
 
@@ -2427,6 +2410,8 @@ The checker runs `checkdoc-current-buffer'."
   :modes '(emacs-lisp-mode lisp-interaction-mode)
   :predicate
   '(and (not (flycheck-temp-compilation-buffer-p))
+        ;; Do not check Carton files.  These really don't need to follow
+        ;; Checkdoc conventions
         (not (and (buffer-file-name)
                   (string= (file-name-nondirectory (buffer-file-name))
                            "Carton")))))
@@ -2468,9 +2453,8 @@ more information."
   "A Go syntax and style checker using the go test command.
 
 See URL `https://golang.org/cmd/go'."
-  ;; This command builds the test executable without running it
-  ;; and leaves the executable in the current directory.
-  ;; Unfortunately 'go test -c' does not have the '-o' option.
+  ;; This command builds the test executable and leaves it in the current
+  ;; directory.  Unfortunately 'go test -c' does not have the '-o' option.
   :command '("go" "test" "-c")
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'go-mode
