@@ -68,15 +68,21 @@ Each syntax check is comprised of the following steps:
 
 @enumerate
 @item
+Clear error information from previous syntax checks.
+@item
 Select a suitable syntax checker.  @xref{Selection}, for more
 information on how syntax checkers are selected.
 @item
 Copy the contents of the buffer to be checked to a temporary file.
 @item
-Execute the syntax checker tool(s).
+Execute the syntax checker.
 @item
 Parse the output of the tool, and report all errors and warnings.
 @xref{Reporting}, for more information.
+@item
+If the buffer can be checked with another syntax checker, continue from
+step 3, but with the next syntax checker.  This is called ``chaining''
+of syntax checkers.
 @item
 Run hooks in @code{flycheck-after-syntax-check-hook}.
 @end enumerate
@@ -84,16 +90,16 @@ Run hooks in @code{flycheck-after-syntax-check-hook}.
 @defopt flycheck-after-syntax-check-hook
 Hooks to run after each syntax check.
 
-This hook is run after a syntax check was finished.  At this point, all
-chained checkers were run, and all errors were parsed, highlighted and
-reported.  @xref{Reporting}, for more information about error reporting.
-The variable `flycheck-current-errors' contains all errors from all
-syntax checkers run during the syntax check, so you can use the various
-error analysis functions.
+This hook is run after a syntax check was finished.  At this point,
+@b{all} chained checkers were run, and all errors were parsed,
+highlighted and reported.  @xref{Reporting}, for more information about
+error reporting.  The variable @code{flycheck-current-errors} contains
+all errors from all syntax checkers run during the syntax check, so you
+can use the various error analysis functions.
 
 Note that this hook does @b{not} run after individual syntax checkers
-were finished.  It only runs after the @b{last checker} in the complete
-syntax checker chain.
+were finished.  It only runs after the @b{last checker} in the syntax
+checker chain.
 
 This variable is a normal hook. @xref{Hooks, , ,elisp}.
 @end defopt

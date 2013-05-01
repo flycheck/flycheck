@@ -218,13 +218,17 @@ manually:
 
    Each syntax check is comprised of the following steps:
 
-  1. Select a suitable syntax checker.  *Note Selection::, for more
+  1. Clear error information from previous syntax checks.
+  2. Select a suitable syntax checker.  *Note Selection::, for more
      information on how syntax checkers are selected.
-  2. Copy the contents of the buffer to be checked to a temporary file.
-  3. Execute the syntax checker tool(s).
-  4. Parse the output of the tool, and report all errors and warnings.
+  3. Copy the contents of the buffer to be checked to a temporary file.
+  4. Execute the syntax checker.
+  5. Parse the output of the tool, and report all errors and warnings.
      *Note Reporting::, for more information.
-  5. Run hooks in 'flycheck-after-syntax-check-hook'.
+  6. If the buffer can be checked with another syntax checker, continue
+     from step 3, but with the next syntax checker.  This is called
+     "chaining" of syntax checkers.
+  7. Run hooks in 'flycheck-after-syntax-check-hook'.
 
  -- User Option: flycheck-after-syntax-check-hook
      Hooks to run after each syntax check.
@@ -237,8 +241,8 @@ manually:
      check, so you can use the various error analysis functions.
 
      Note that this hook does not run after individual syntax checkers
-     were finished.  It only runs after the last checker in the complete
-     syntax checker chain.
+     were finished.  It only runs after the last checker in the syntax
+     checker chain.
 
      This variable is a normal hook.  *Note (elisp)Hooks::.
 
@@ -2378,7 +2382,7 @@ Function and Variable Index
  [index ]
 * Menu:
 
-* flycheck-after-syntax-check-hook:      Syntax checking.     (line  53)
+* flycheck-after-syntax-check-hook:      Syntax checking.     (line  57)
 * flycheck-buffer:                       Syntax checking.     (line  41)
 * flycheck-check-syntax-automatically:   Syntax checking.     (line  15)
 * flycheck-checker:                      Selection.           (line  41)
@@ -2426,45 +2430,45 @@ Node: Installation4446
 Node: Activation5620
 Node: Usage5971
 Node: Syntax checking6594
-Node: Selection9151
-Node: Configuration11732
-Node: Reporting15272
-Node: Navigation18767
-Node: Mode line20563
-Node: Extending21464
-Node: Declaration22063
-Node: Error parsers34420
-Node: Option filters35404
-Node: Examples35743
-Node: Simple example36175
-Node: Predicate example39239
-Node: Configuration example41220
-Node: Chaining example43879
-Node: API45265
-Node: Error API46053
-Node: Error parser API48654
-Node: Contribution48880
-Node: Reporting issues49556
-Node: Contributing syntax checkers50292
-Node: Contributing code51087
-Node: Unit tests52427
-Node: Changes53714
-Node: 0.154330
-Node: 0.254614
-Node: 0.354892
-Node: 0.455128
-Node: 0.555903
-Node: 0.657123
-Node: 0.6.159973
-Node: 0.760122
-Node: 0.7.161136
-Node: 0.861851
-Node: 0.963363
-Node: 0.1063859
-Node: master65913
-Node: Credits66988
-Node: GNU Free Documentation License69687
-Node: Syntax checkers94839
-Node: Function and Variable Index95828
+Node: Selection9368
+Node: Configuration11949
+Node: Reporting15489
+Node: Navigation18984
+Node: Mode line20780
+Node: Extending21681
+Node: Declaration22280
+Node: Error parsers34637
+Node: Option filters35621
+Node: Examples35960
+Node: Simple example36392
+Node: Predicate example39456
+Node: Configuration example41437
+Node: Chaining example44096
+Node: API45482
+Node: Error API46270
+Node: Error parser API48871
+Node: Contribution49097
+Node: Reporting issues49773
+Node: Contributing syntax checkers50509
+Node: Contributing code51304
+Node: Unit tests52644
+Node: Changes53931
+Node: 0.154547
+Node: 0.254831
+Node: 0.355109
+Node: 0.455345
+Node: 0.556120
+Node: 0.657340
+Node: 0.6.160190
+Node: 0.760339
+Node: 0.7.161353
+Node: 0.862068
+Node: 0.963580
+Node: 0.1064076
+Node: master66130
+Node: Credits67205
+Node: GNU Free Documentation License69904
+Node: Syntax checkers95056
+Node: Function and Variable Index96045
 
 End Tag Table

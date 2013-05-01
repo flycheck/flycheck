@@ -264,10 +264,11 @@ messages at point."
   "Hooks to run after each syntax check.
 
 This hook is run after a syntax check was finished.  At this
-point, all chained checkers were run, and all errors were parsed,
-highlighted and reported.  The variable `flycheck-current-errors'
-contains all errors from all syntax checkers run during the
-syntax check, so you can use the various error analysis functions.
+point, *all* chained checkers were run, and all errors were
+parsed, highlighted and reported.  The variable
+`flycheck-current-errors' contains all errors from all syntax
+checkers run during the syntax check, so you can use the various
+error analysis functions.
 
 Note that this hook does *not* run after individual syntax
 checkers were finished.  It only runs after the *last checker* in
