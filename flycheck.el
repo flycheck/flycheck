@@ -295,6 +295,18 @@ This variable is a normal hook."
   :group 'flycheck
   :type 'hook)
 
+(defcustom flycheck-syntax-check-failed-hook nil
+  "Functions to run if a syntax check failed.
+
+This hook is run whenever an error occurs during Flycheck's
+internal processing.  No information about the error is given to
+this hook.
+
+You should use this hook to conduct additional cleanup actions
+when Flycheck failed.
+
+This variable is a normal hook.")
+
 (defface flycheck-error-face
   '((t :inherit error))
   "Face for on-the-fly syntax checking errors."
@@ -611,6 +623,7 @@ buffer."
 
 Clears all Flycheck errors first."
   (flycheck-clear)
+  (run-hooks 'flycheck-syntax-check-failed-hook)
   (flycheck-report-status "!"))
 
 (defun flycheck-report-error-count (errors)

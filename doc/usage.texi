@@ -123,6 +123,21 @@ checker}.
 This variable is a normal hook. @xref{Hooks, , ,elisp}.
 @end defopt
 
+There is also a hook run whenever a syntax check fails:
+
+@defopt flycheck-syntax-check-failed-hook
+Functions to run if a syntax check failed.
+
+This hook is run whenever an error occurs during Flycheck's
+internal processing.  No information about the error is given to
+this hook.
+
+You should use this hook to conduct additional cleanup actions
+when Flycheck failed.
+
+This variable is a normal hook. @xref{Hooks, , ,elisp}.
+@end defopt
+
 
 @node Selection, Configuration, Syntax checking, Usage
 @comment  node-name,  next,  previous,  up
