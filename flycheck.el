@@ -1294,7 +1294,7 @@ its absolute path.
 Otherwise return nil.
 
 _CHECKER is ignored."
-  (when (fboundp #'projectile-project-root)
+  (when (fboundp 'projectile-project-root)
     (-when-let (root-directory (projectile-project-root))
       (let ((filepath (expand-file-name filename root-directory)))
         (when (file-exists-p filepath)
