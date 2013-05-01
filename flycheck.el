@@ -177,16 +177,6 @@ This function is an abnormal hook."
   :group 'flycheck
   :type 'hook)
 
-(defface flycheck-error-face
-  '((t :inherit error))
-  "Face for on-the-fly syntax checking errors."
-  :group 'flycheck-faces)
-
-(defface flycheck-warning-face
-  '((t :inherit warning))
-  "Face for on-the-fly syntax checking warnings."
-  :group 'flycheck-faces)
-
 (defcustom flycheck-indication-mode 'left-fringe
   "The indication mode for Flycheck errors and warnings.
 
@@ -286,6 +276,16 @@ the complete syntax checker chain.
 This variable is a normal hook."
   :group 'flycheck
   :type 'hook)
+
+(defface flycheck-error-face
+  '((t :inherit error))
+  "Face for on-the-fly syntax checking errors."
+  :group 'flycheck-faces)
+
+(defface flycheck-warning-face
+  '((t :inherit warning))
+  "Face for on-the-fly syntax checking warnings."
+  :group 'flycheck-faces)
 
 
 ;;;; Minor mode definition
