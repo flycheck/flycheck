@@ -1826,6 +1826,11 @@ File: flycheck.info,  Node: master,  Prev: 0.11,  Up: Changes
 master (unreleased)
 ===================
 
+   * Improvements:
+
+        * Defer syntax checks while a buffer is reverted, to avoid race
+          conditions
+
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
 
@@ -2520,9 +2525,9 @@ Node: 0.964881
 Node: 0.1065377
 Node: 0.1167429
 Node: master68617
-Node: Credits68723
-Node: GNU Free Documentation License71545
-Node: Syntax checkers96697
-Node: Function and Variable Index97686
+Node: Credits68837
+Node: GNU Free Documentation License71659
+Node: Syntax checkers96811
+Node: Function and Variable Index97800
 
 End Tag Table

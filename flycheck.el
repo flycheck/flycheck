@@ -383,7 +383,8 @@ running checks, and empty all variables used by flycheck."
     (after-change-functions           . flycheck-handle-change)
     ;; Handle events that may triggered pending deferred checks
     (window-configuration-change-hook . flycheck-perform-deferred-syntax-check)
-    ;; Tear down Flycheck if the buffer or Emacs is kill
+    ;; Tear down Flycheck if the buffer or Emacs are killed, to clean up
+    ;; temporary files and directories.
     (kill-buffer-hook                 . flycheck-teardown)
     (kill-emacs-hook                  . flycheck-teardown)
     ;; Show or hide error popups after commands
@@ -537,10 +538,14 @@ _NAME is ignored."
 (defun flycheck-must-defer-check ()
   "Determine whether the syntax check has to be deferred.
 
-A check has to be deferred if the buffer is not visible.
+A check has to be deferred if the buffer is not visible, or if the buffer is
+currently being reverted.
 
 Return t if the check is to be deferred, or nil otherwise."
-  (not (get-buffer-window)))
+  (or (not (get-buffer-window))
+      ;; We must defer checks while a buffer is being reverted, to avoid race
+      ;; conditions while the buffer contents are being restored.
+      revert-buffer-in-progress-p))
 
 (defun flycheck-deferred-check-p ()
   "Determine whether the current buffer has a deferred check.
