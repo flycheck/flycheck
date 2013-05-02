@@ -26,6 +26,7 @@ order of their appearance in the default value of
 @iflyc rst
 @iflyc ruby-rubocop
 @iflyc ruby
+@iflyc ruby-jruby
 @iflyc rust
 @iflyc sass
 @iflyc scala

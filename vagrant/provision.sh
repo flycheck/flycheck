@@ -114,12 +114,16 @@ apt bash \
     lacheck \
     lua5.2 \
     php5-cli \
+    jruby \
     ruby1.9.1 \
     rust \
     scala \
     tidy \
     xmlstarlet \
     zsh
+
+# Enforce the proper default version of the default Ruby interpreter
+sudo update-alternatives --set ruby /usr/bin/ruby1.9.1
 
 pip docutils \
     flake8 \
