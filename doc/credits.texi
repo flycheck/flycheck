@@ -57,7 +57,9 @@ and engaged in worthwhile discussion to shape this project.
 
 @item
 @uref{https://github.com/syl20bnr, Sylvain Benner} added syntax checkers
-for Elixir and Erlang.
+for Elixir and Erlang, and wrote the cool
+@uref{https://github.com/syl20bnr/flycheck-color-mode-line,
+flycheck-color-mode-line.el} extension.
 
 @item
 @uref{https://github.com/thisirs, Sylvain Rousseau} added a syntax

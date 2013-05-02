@@ -56,6 +56,13 @@ Features
 - Declarative API to define new syntax checkers
 - Error parsers for structured markup formats (e.g. Checkdoc XML)
 
+### 3rd party extensions
+
+The following extensions provide additional cool features for Flycheck:
+
+- [flycheck-color-mode-line.el][] colors the mode line according to the Flycheck
+  status.
+
 
 Installation
 ------------
@@ -144,7 +151,8 @@ The following people contributed to flycheck:
 - [Steve Purcell][purcell] implemented many checkers, contributed important
   ideas to the design of the checker API and engaged in worthwhile discussion to
   shape this project.
-- [Sylvain Benner][syl20bnr] added syntax checkers for Elixir and Erlang.
+- [Sylvain Benner][syl20bnr] added syntax checkers for Elixir and Erlang, and
+  wrote the cool [flycheck-color-mode-line.el][] extension.
 - [Sylvain Rousseau][thisirs] added a syntax checker for POSIX shell script
   using `bash`, and improved error parsing in the Bash script syntax checker.
 - [Yannick Roehlly][yannick1974] added support for PEP8 naming errors to the
@@ -199,3 +207,4 @@ See [COPYING][] for details.
 [s.el]: https://github.com/magnars/s.el
 [thisirs]: https://github.com/thisirs
 [syl20bnr]: https://github.com/syl20bnr
+[flycheck-color-mode-line.el]: https://github.com/syl20bnr/flycheck-color-mode-line

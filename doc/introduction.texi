@@ -107,6 +107,18 @@ Easy declarative API to define new syntax checkers
 Error parsers for structured markup formats (e.g. Checkdoc XML)
 @end itemize
 
+@subsection 3rd party extensions
+
+The following extensions provide additional cool features for Flycheck:
+
+@itemize @bullet
+@item
+@uref{https://github.com/syl20bnr/flycheck-color-mode-line,
+flycheck-color-mode-line.el} colors the mode line according to the
+Flycheck status.
+
+@end itemize
+
 @node Installation, Activation, Features, Introduction
 @comment  node-name,  next,  previous,  up
 @section Installation

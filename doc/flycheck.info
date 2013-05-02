@@ -114,6 +114,15 @@ File: flycheck.info,  Node: Features,  Next: Installation,  Prev: Introduction, 
    * Easy declarative API to define new syntax checkers
    * Error parsers for structured markup formats (e.g.  Checkdoc XML)
 
+1.1.1 3rd party extensions
+--------------------------
+
+The following extensions provide additional cool features for Flycheck:
+
+   * flycheck-color-mode-line.el
+     (https://github.com/syl20bnr/flycheck-color-mode-line) colors the
+     mode line according to the Flycheck status.
+
 
 File: flycheck.info,  Node: Installation,  Next: Activation,  Prev: Features,  Up: Introduction
 
@@ -1869,7 +1878,9 @@ their support and patches are greatly appreciated.
      API and engaged in worthwhile discussion to shape this project.
 
    * Sylvain Benner (https://github.com/syl20bnr) added syntax checkers
-     for Elixir and Erlang.
+     for Elixir and Erlang, and wrote the cool
+     flycheck-color-mode-line.el
+     (https://github.com/syl20bnr/flycheck-color-mode-line) extension.
 
    * Sylvain Rousseau (https://github.com/thisirs) added a syntax
      checker for POSIX shell script using 'bash', and improved error
@@ -2468,50 +2479,50 @@ Tag Table:
 Node: Top734
 Node: Introduction2083
 Node: Features2984
-Node: Installation4446
-Node: Activation5620
-Node: Usage5971
-Node: Syntax checking6594
-Node: Selection10355
-Node: Configuration12936
-Node: Reporting16476
-Node: Navigation19971
-Node: Mode line21767
-Node: Extending22668
-Node: Declaration23267
-Node: Error parsers35624
-Node: Option filters36608
-Node: Examples36947
-Node: Simple example37379
-Node: Predicate example40443
-Node: Configuration example42424
-Node: Chaining example45083
-Node: API46469
-Node: Error API47257
-Node: Error parser API49858
-Node: Contribution50084
-Node: Reporting issues50760
-Node: Contributing syntax checkers51496
-Node: Contributing code52291
-Node: Unit tests53631
-Node: Changes54918
-Node: 0.155566
-Node: 0.255850
-Node: 0.356128
-Node: 0.456364
-Node: 0.557139
-Node: 0.658359
-Node: 0.6.161209
-Node: 0.761358
-Node: 0.7.162372
-Node: 0.863087
-Node: 0.964599
-Node: 0.1065095
-Node: 0.1167147
-Node: master68335
-Node: Credits68441
-Node: GNU Free Documentation License71140
-Node: Syntax checkers96292
-Node: Function and Variable Index97281
+Node: Installation4728
+Node: Activation5902
+Node: Usage6253
+Node: Syntax checking6876
+Node: Selection10637
+Node: Configuration13218
+Node: Reporting16758
+Node: Navigation20253
+Node: Mode line22049
+Node: Extending22950
+Node: Declaration23549
+Node: Error parsers35906
+Node: Option filters36890
+Node: Examples37229
+Node: Simple example37661
+Node: Predicate example40725
+Node: Configuration example42706
+Node: Chaining example45365
+Node: API46751
+Node: Error API47539
+Node: Error parser API50140
+Node: Contribution50366
+Node: Reporting issues51042
+Node: Contributing syntax checkers51778
+Node: Contributing code52573
+Node: Unit tests53913
+Node: Changes55200
+Node: 0.155848
+Node: 0.256132
+Node: 0.356410
+Node: 0.456646
+Node: 0.557421
+Node: 0.658641
+Node: 0.6.161491
+Node: 0.761640
+Node: 0.7.162654
+Node: 0.863369
+Node: 0.964881
+Node: 0.1065377
+Node: 0.1167429
+Node: master68617
+Node: Credits68723
+Node: GNU Free Documentation License71545
+Node: Syntax checkers96697
+Node: Function and Variable Index97686
 
 End Tag Table
