@@ -2305,7 +2305,7 @@ _EVENT is ignored."
 
 ;;;; Built-in checkers
 (flycheck-declare-checker bash
-  "A Bash syntax checker using the bash executable.
+  "A Bash syntax checker using the Bash shell.
 
 See URL `http://www.gnu.org/software/bash/'."
   :command '("bash" "--norc" "-n" "--" source)
@@ -2389,10 +2389,7 @@ during byte-compilation or autoloads generation, or nil otherwise."
      (mapc 'delete-file byte-compiled-files)))
 
 (flycheck-declare-checker emacs-lisp
-  "An Emacs Lisp syntax checker.
-
-This checker simply attempts to byte compile the contents of the
-buffer using the currently running Emacs executable."
+  "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler."
   :command `(,@flycheck-emacs-command
              ,(prin1-to-string flycheck-emacs-lisp-check-form)
              source-inplace)
@@ -2475,7 +2472,7 @@ See URL `http://golang.org/cmd/gofmt/'."
   :next-checkers '((no-errors . go-build) (no-errors . go-test)))
 
 (flycheck-declare-checker go-build
-  "A Go syntax and style checker using the go build command.
+  "A Go syntax and type checker using the `go build' command.
 
 See URL `https://golang.org/cmd/go'.
 
@@ -2491,7 +2488,7 @@ more information."
                    (not (buffer-modified-p))))
 
 (flycheck-declare-checker go-test
-  "A Go syntax and style checker using the go test command.
+  "A Go syntax and type checker using the `go test' command.
 
 See URL `https://golang.org/cmd/go'."
   ;; This command builds the test executable and leaves it in the current
@@ -2569,7 +2566,7 @@ See URL `http://www.perl.org'."
   :modes '(perl-mode cperl-mode))
 
 (flycheck-declare-checker php
-  "A PHP syntax checker using the PHP command line.
+  "A PHP syntax checker using the PHP command line interpreter.
 
 See URL `http://php.net/manual/en/features.commandline.php'."
   :command '("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
@@ -2592,7 +2589,7 @@ or as path to a standard specification."
 (put 'flycheck-phpcs-standard 'safe-local-variable #'stringp)
 
 (flycheck-declare-checker php-phpcs
-  "A PHP syntax checker using PHP_CodeSniffer.
+  "A PHP style checker using PHP_CodeSniffer.
 
 See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
   :command '("phpcs" "--report=emacs"
@@ -2639,7 +2636,7 @@ of 79 characters if there is no configuration with this setting."
 (put 'flycheck-flake8-maximum-line-length 'safe-local-variable #'integerp)
 
 (flycheck-declare-checker python-flake8
-  "A Python syntax and style checker using the flake8 utility.
+  "A Python syntax and style checker using Flake8.
 
 For best error reporting, use Flake8 2.0 or newer.
 
@@ -2670,7 +2667,7 @@ See URL `http://pypi.python.org/pypi/flake8'."
   :modes 'python-mode)
 
 (flycheck-declare-checker python-pylint
-  "A Python syntax and style checker using the pylint utility.
+  "A Python syntax and style checker using Pylint.
 
 See URL `http://pypi.python.org/pypi/pylint'."
   :command '("epylint" source-inplace)
@@ -2694,7 +2691,7 @@ See URL `http://docutils.sourceforge.net/'."
 (flycheck-def-config-file-var flycheck-rubocoprc ruby-rubocop ".rubocop.yml")
 
 (flycheck-declare-checker ruby-rubocop
-  "A Ruby syntax checker using the RuboCop tool.
+  "A Ruby syntax and style checker using the RuboCop tool.
 
 See URL `https://github.com/bbatsov/rubocop'."
   :command '("rubocop" "--emacs" "--silent"
@@ -2715,7 +2712,7 @@ See URL `https://github.com/bbatsov/rubocop'."
   :modes 'ruby-mode)
 
 (flycheck-declare-checker rust
-  "A Rust syntax checker using rustc parsing option.
+  "A Rust syntax checker using Rust compiler.
 
 See URL `http://rust-lang.org'."
   :command '("rustc" "--parse-only" source)
@@ -2798,7 +2795,7 @@ See URL `http://www.ctan.org/pkg/lacheck'."
   :modes 'latex-mode)
 
 (flycheck-declare-checker xml-xmlstarlet
-  "A XML validator using the xmlstarlet utility.
+  "A XML syntax checker and validator using the xmlstarlet utility.
 
 See URL `http://xmlstar.sourceforge.net/'."
   :command '("xmlstarlet" "val" "-e" "-q" source)
@@ -2807,7 +2804,7 @@ See URL `http://xmlstar.sourceforge.net/'."
   :modes '(xml-mode nxml-mode))
 
 (flycheck-declare-checker zsh
-  "A Zsh syntax checker using the zsh executable.
+  "A Zsh syntax checker using the Zsh shell.
 
 See URL `http://www.zsh.org/'."
   :command '("zsh" "-n" "-d" "-f" source)
