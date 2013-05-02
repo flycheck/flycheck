@@ -3,7 +3,8 @@
 <div id="frontmatter">
 @end html
 
-@center Flycheck is a modern on-the-fly syntax checker for GNU Emacs 24 (aka ``Flymake done right'')
+@center Flycheck is a modern on-the-fly syntax checker for GNU Emacs 24
+@center (aka ``Flymake done right'')
 
 @center Proceed to the @ref{Introduction} for more information
 
