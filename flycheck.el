@@ -110,6 +110,8 @@ buffer-local wherever it is set."
     perl
     php
     php-phpcs
+    puppet-parser
+    puppet-lint
     python-flake8
     python-pylint
     rst
@@ -2682,6 +2684,25 @@ See URL `http://pypi.python.org/pypi/pylint'."
     ("^\\(?1:.*\\):\\(?2:[0-9]+\\): Error (E.*): \\(?4:.*\\)$" error)
     ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\[F\\] \\(?4:.*\\)$" error))
   :modes 'python-mode)
+
+(flycheck-declare-checker puppet-parser
+  "Syntax checker for puppet using puppet's own parser"
+  :command '("puppet" "parser" "validate" "--color=false" source)
+  :error-patterns
+  '(("^.*?: Could not parse for environment \\w+: \\(?4:.*\\) at \\(?1:\/.*\\):\\(?2:[0-9]+\\)$" error)
+    ("^.*?: Could not parse for environment \\w+: \\(?4:\\(.*\n\\)*.*\\) at \\(?1:\/.*\\):\\(?2:[0-9]+\\)$" error))
+  :modes 'puppet-mode
+  :next-checkers '((no-errors . puppet-lint)))
+
+(flycheck-declare-checker puppet-lint
+  "Puppet style guideline checker using puppet-lint"
+  :command '("puppet-lint" "--with-filename" source-original)
+  ;; only check buffer if buffer is saved to disk
+  :predicate (and (buffer-file-name) (not (buffer-modified-p)))
+  :error-patterns
+  '(("^\\(?1:.*\\) - WARNING: \\(?4:.*\\) on line \\(?2:[0-9]+\\)" warning)
+    ("^\\(?1:.*\\) - ERROR: \\(?4:.*\\) on line \\(?2:[0-9]+\\)" error))
+  :modes 'puppet-mode)
 
 (flycheck-declare-checker rst
   "A ReStructuredText (RST) syntax checker using Docutils.
