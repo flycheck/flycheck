@@ -21,6 +21,8 @@ order of their appearance in the default value of
 @iflyc perl
 @iflyc php
 @iflyc php-phpcs
+@iflyc puppet-parser
+@iflyc puppet-lint
 @iflyc python-flake8
 @iflyc python-pylint
 @iflyc rst

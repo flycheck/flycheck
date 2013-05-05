@@ -18,6 +18,7 @@
  (depends-on "cperl-mode")
  (depends-on "php-mode")
  (depends-on "php+-mode")
+ (depends-on "puppet-mode")
  (depends-on "sass-mode")
  (depends-on "scala-mode2")
  (depends-on "scss-mode")

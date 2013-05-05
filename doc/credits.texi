@@ -33,6 +33,10 @@ considerable parts of Flycheck's internals.
 checker.
 
 @item
+@uref{https://github.com/markhellewell, Mark Hellewell} added the Puppet
+syntax and style checkers.
+
+@item
 @uref{https://github.com/scrooloose, Martin Grenfell} created the
 awesome Vim library @uref{https://github.com/scrooloose/syntastic,
 syntastic} which inspired this project and many of its checkers.

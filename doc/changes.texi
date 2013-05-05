@@ -577,6 +577,14 @@ Add missing customization group for syntax checker options
 
 @itemize @bullet
 @item
+New syntax checkers:
+
+@itemize @bullet
+@item
+@ghissue{138, Puppet}
+@end itemize
+
+@item
 Improvements:
 
 @itemize @bullet

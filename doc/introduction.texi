@@ -71,6 +71,8 @@ Perl
 @item
 PHP (using the PHP Command Line and PHP CodeSniffer)
 @item
+Puppet (using @command{puppet parser} and @command{puppet-lint})
+@item
 Python (using @command{flake8}, @command{pylint}, or @command{pyflakes})
 @item
 Ruby (using @command{rubocop} or @command{ruby})

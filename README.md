@@ -38,6 +38,7 @@ Features
   - Lua
   - Perl
   - PHP
+  - Puppet
   - Python
   - Ruby
   - Rust
@@ -142,6 +143,7 @@ The following people contributed to flycheck:
 - [Magnar Sveen][magnars] developed the awesome [dash.el][] and [s.el][]
   libraries, that drive considerable parts of Flycheck's internals.
 - [Marian Schubert][maio] added the Perl syntax checker.
+- [Mark Hellewell][markhellewell] added the Puppet syntax and style checkers.
 - [Martin Grenfell][scrooloose] created the awesome Vim library [syntastic][]
   which inspired this project and many of its checkers.
 - [Peter Vasil][ptrv] contributed syntax checkers for XML, Lua and Go (using `go
@@ -208,3 +210,4 @@ See [COPYING][] for details.
 [thisirs]: https://github.com/thisirs
 [syl20bnr]: https://github.com/syl20bnr
 [flycheck-color-mode-line.el]: https://github.com/syl20bnr/flycheck-color-mode-line
+[markhellewell]: https://github.com/markhellewell

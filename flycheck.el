@@ -110,6 +110,8 @@ buffer-local wherever it is set."
     perl
     php
     php-phpcs
+    puppet-parser
+    puppet-lint
     python-flake8
     python-pylint
     rst
@@ -2610,6 +2612,27 @@ See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
   '(("\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): error - \\(?4:.*\\)" error)
     ("\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): warning - \\(?4:.*\\)" warning))
   :modes '(php-mode php+-mode))
+
+(flycheck-declare-checker puppet-parser
+  "A Puppet DSL syntax checker using puppet's own parser.
+
+See URL `http://www.puppetlabs.com/'."
+  :command '("puppet" "parser" "validate" "--color=false" source)
+  :error-patterns
+  '(("^.*?: Could not parse for environment \\w+: \\(?4:\\(.*\n\\)*?.*?\\) at \\(?1:\/.*\\):\\(?2:[0-9]+\\)$" error))
+  :modes 'puppet-mode
+  :next-checkers '((no-errors . puppet-lint)))
+
+(flycheck-declare-checker puppet-lint
+  "A Puppet DSL style checker using puppet-lint.
+
+See URL `http://www.puppet-lint.com/'."
+  :command '("puppet-lint" "--with-filename" source-original)
+  :predicate (and (buffer-file-name) (not (buffer-modified-p)))
+  :error-patterns
+  '(("^\\(?1:.*\\) - WARNING: \\(?4:.*\\) on line \\(?2:[0-9]+\\)" warning)
+    ("^\\(?1:.*\\) - ERROR: \\(?4:.*\\) on line \\(?2:[0-9]+\\)" error))
+  :modes 'puppet-mode)
 
 (flycheck-def-config-file-var flycheck-flake8rc python-flake8 ".flake8rc")
 

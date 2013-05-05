@@ -95,6 +95,7 @@ File: flycheck.info,  Node: Features,  Next: Installation,  Prev: Introduction, 
         * Lua
         * Perl
         * PHP (using the PHP Command Line and PHP CodeSniffer)
+        * Puppet (using 'puppet parser' and 'puppet-lint')
         * Python (using 'flake8', 'pylint', or 'pyflakes')
         * Ruby (using 'rubocop' or 'ruby')
         * Rust (using 'rustc')
@@ -1826,6 +1827,10 @@ File: flycheck.info,  Node: master,  Prev: 0.11,  Up: Changes
 master (unreleased)
 ===================
 
+   * New syntax checkers:
+
+        * Puppet (https://github.com/lunaryorn/flycheck/issues/138)
+
    * Improvements:
 
         * Defer syntax checks while a buffer is reverted, to avoid race
@@ -1863,6 +1868,9 @@ their support and patches are greatly appreciated.
 
    * Marian Schubert (https://github.com/maio) added the Perl syntax
      checker.
+
+   * Mark Hellewell (https://github.com/markhellewell) added the Puppet
+     syntax and style checkers.
 
    * Martin Grenfell (https://github.com/scrooloose) created the awesome
      Vim library syntastic (https://github.com/scrooloose/syntastic)
@@ -2410,6 +2418,8 @@ order of their appearance in the default value of 'flycheck-checkers':
    * 'perl'
    * 'php'
    * 'php-phpcs'
+   * 'puppet-parser'
+   * 'puppet-lint'
    * 'python-flake8'
    * 'python-pylint'
    * 'rst'
@@ -2484,50 +2494,50 @@ Tag Table:
 Node: Top734
 Node: Introduction2083
 Node: Features2984
-Node: Installation4728
-Node: Activation5902
-Node: Usage6253
-Node: Syntax checking6876
-Node: Selection10637
-Node: Configuration13218
-Node: Reporting16758
-Node: Navigation20253
-Node: Mode line22049
-Node: Extending22950
-Node: Declaration23549
-Node: Error parsers35906
-Node: Option filters36890
-Node: Examples37229
-Node: Simple example37661
-Node: Predicate example40725
-Node: Configuration example42706
-Node: Chaining example45365
-Node: API46751
-Node: Error API47539
-Node: Error parser API50140
-Node: Contribution50366
-Node: Reporting issues51042
-Node: Contributing syntax checkers51778
-Node: Contributing code52573
-Node: Unit tests53913
-Node: Changes55200
-Node: 0.155848
-Node: 0.256132
-Node: 0.356410
-Node: 0.456646
-Node: 0.557421
-Node: 0.658641
-Node: 0.6.161491
-Node: 0.761640
-Node: 0.7.162654
-Node: 0.863369
-Node: 0.964881
-Node: 0.1065377
-Node: 0.1167429
-Node: master68617
-Node: Credits68837
-Node: GNU Free Documentation License71659
-Node: Syntax checkers96811
-Node: Function and Variable Index97800
+Node: Installation4787
+Node: Activation5961
+Node: Usage6312
+Node: Syntax checking6935
+Node: Selection10696
+Node: Configuration13277
+Node: Reporting16817
+Node: Navigation20312
+Node: Mode line22108
+Node: Extending23009
+Node: Declaration23608
+Node: Error parsers35965
+Node: Option filters36949
+Node: Examples37288
+Node: Simple example37720
+Node: Predicate example40784
+Node: Configuration example42765
+Node: Chaining example45424
+Node: API46810
+Node: Error API47598
+Node: Error parser API50199
+Node: Contribution50425
+Node: Reporting issues51101
+Node: Contributing syntax checkers51837
+Node: Contributing code52632
+Node: Unit tests53972
+Node: Changes55259
+Node: 0.155907
+Node: 0.256191
+Node: 0.356469
+Node: 0.456705
+Node: 0.557480
+Node: 0.658700
+Node: 0.6.161550
+Node: 0.761699
+Node: 0.7.162713
+Node: 0.863428
+Node: 0.964940
+Node: 0.1065436
+Node: 0.1167488
+Node: master68676
+Node: Credits68992
+Node: GNU Free Documentation License71919
+Node: Syntax checkers97071
+Node: Function and Variable Index98100
 
 End Tag Table
