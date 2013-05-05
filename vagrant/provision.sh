@@ -90,6 +90,11 @@ deb_src "esl-erlang" "deb http://binaries.erlang-solutions.com/debian precise co
 deb_src_key "http://binaries.erlang-solutions.com/debian/erlang_solutions.asc"
 apt_update
 
+# Install puppet using Puppet Labs own repo.
+deb_src "puppetlabs" "deb http://apt.puppetlabs.com precise main"
+deb_src_key "http://apt.puppetlabs.com/keyring.gpg"
+apt_update
+
 # Install texinfo to build documentation
 apt texinfo install-info
 
@@ -114,6 +119,7 @@ apt bash \
     lacheck \
     lua5.2 \
     php5-cli \
+    puppet \
     ruby1.9.1 \
     rust \
     scala \
@@ -136,7 +142,8 @@ npm coffeelint \
 
 gem haml \
     rubocop \
-    sass
+    sass \
+    puppet-lint
 
 # Install Elixir compiler.
 ELIXIR_VERSION=0.8.2
