@@ -26,18 +26,16 @@
 
 (require 'puppet-mode)
 
-(ert-deftest checker-puppet-puppet-lint-case-without-default-warn ()
-  "Test case statement missing default warning."
+(ert-deftest checker-puppet-puppet-lint-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'puppet-puppet-lint)
   (flycheck-testsuite-should-syntax-check
-   "checkers/puppet-puppet-lint-case_without_default_warn.pp" 'puppet-mode nil
+   "checkers/puppet-puppet-lint-warning.pp" 'puppet-mode nil
    '(2 nil "case statement without a default case" warning)))
 
-(ert-deftest checker-puppet-puppet-lint-mlayout ()
-  "mlayout not in autoload module layout"
+(ert-deftest checker-puppet-puppet-lint-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'puppet-puppet-lint)
   (flycheck-testsuite-should-syntax-check
-   "checkers/puppet-puppet-lint/mlayout/manifests/wrong.pp" 'puppet-mode nil
+   "checkers/puppet-puppet-lint/error/manifests/puppet-puppet-lint-error.pp" 'puppet-mode nil
    '(2 nil "mlayout not in autoload module layout" error)))
 
 ;; Local Variables:

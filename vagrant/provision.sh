@@ -88,8 +88,6 @@ ppa ppa:cassou/emacs \
 # entry
 deb_src "esl-erlang" "deb http://binaries.erlang-solutions.com/debian precise contrib"
 deb_src_key "http://binaries.erlang-solutions.com/debian/erlang_solutions.asc"
-apt_update
-
 # Install puppet using Puppet Labs own repo.
 deb_src "puppetlabs" "deb http://apt.puppetlabs.com precise main"
 deb_src_key "http://apt.puppetlabs.com/keyring.gpg"
