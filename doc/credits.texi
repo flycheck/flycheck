@@ -3,80 +3,73 @@ their support and patches are greatly appreciated.
 
 @itemize
 @item
-@uref{https://github.com/bbatsov, Bozhidar Batsov} provided valuable
-feedback and refinements, brought Flycheck to a larger user base by
-adding it to his awesome @uref{https://github.com/bbatsov/prelude,
-Prelude project}, and added a Ruby syntax checker using
-@command{rubocop}.
+@gh{bbatsov, Bozhidar Batsov} provided valuable feedback and
+refinements, brought Flycheck to a larger user base by adding it to his
+awesome @gh{bbatsov/prelude, Prelude project}, and added a Ruby syntax
+checker using @command{rubocop}.
 
 @item
-@uref{https://github.com/dhaley, Damon Haley} helped to shape and test
-the PHP CodeSniffer checker.
-
-@item
-@uref{https://github.com/wyuenho, Jimmy Yuen Ho Wong} added the HTML
-syntax checker and the jshint Javascript checker, and did valuable
-testing and bug fixing.
-
-@item
-@uref{https://github.com/kwitek,Krzysztof Witkowski} implemented
-@code{eval} support in Flycheck commands.
-
-@item
-@uref{https://github.com/magnars/,Magnar Sveen} developed the awesome
-@uref{https://github.com/magnars/dash.el, dash.el} and
-@uref{https://github.com/magnars/s.el, s.el} libraries, that drive
-considerable parts of Flycheck's internals.
-
-@item
-@uref{https://github.com/maio, Marian Schubert} added the Perl syntax
+@gh{dhaley, Damon Haley} helped to shape and test the PHP CodeSniffer
 checker.
 
 @item
-@uref{https://github.com/markhellewell, Mark Hellewell} added the Puppet
-syntax and style checkers.
+@gh{wyuenho, Jimmy Yuen Ho Wong} added the HTML syntax checker and the
+jshint Javascript checker, and did valuable testing and bug fixing.
 
 @item
-@uref{https://github.com/scrooloose, Martin Grenfell} created the
-awesome Vim library @uref{https://github.com/scrooloose/syntastic,
-syntastic} which inspired this project and many of its checkers.
+@gh{kwitek,Krzysztof Witkowski} implemented @code{eval} support in
+Flycheck commands.
 
 @item
-@uref{https://github.com/ptrv, Peter Vasil} contributed syntax checkers
-for XML, Lua and Go (using @command{go build} and @command{go test}),
-added unit tests and did valuable testing.
+@gh{magnars/,Magnar Sveen} developed the awesome @gh{magnars/dash.el,
+dash.el} and @gh{magnars/s.el, s.el} libraries, that drive considerable
+parts of Flycheck's internals.
 
 @item
-@uref{https://github.com/robert-zaremba, Robert Zaremba} added Go syntax
-checker using @command{gofmt}.
+@gh{maio, Marian Schubert} added the Perl syntax checker.
 
 @item
-@uref{https://github.com/steckerhalter, steckerhalter} provided the PHP
-CodeSniffer checker.
+@gh{markhellewell, Mark Hellewell} added the Puppet syntax and style
+checkers.
 
 @item
-@uref{https://github.com/purcell, Steve Purcell} implemented many
-checkers, contributed important ideas to the design of the checker API
-and engaged in worthwhile discussion to shape this project.
+@gh{scrooloose, Martin Grenfell} created the awesome Vim library
+@gh{scrooloose/syntastic, syntastic} which inspired this project and
+many of its checkers.
 
 @item
-@uref{https://github.com/syl20bnr, Sylvain Benner} added syntax checkers
-for Elixir and Erlang, and wrote the cool
-@uref{https://github.com/syl20bnr/flycheck-color-mode-line,
+@gh{ptrv, Peter Vasil} contributed syntax checkers for XML, Lua and Go
+(using @command{go build} and @command{go test}), added unit tests and
+did valuable testing.
+
+@item
+@gh{robert-zaremba, Robert Zaremba} added Go syntax checker using
+@command{gofmt}.
+
+@item
+@gh{steckerhalter, steckerhalter} provided the PHP CodeSniffer checker.
+
+@item
+@gh{purcell, Steve Purcell} implemented many checkers, contributed
+important ideas to the design of the checker API and engaged in
+worthwhile discussion to shape this project.
+
+@item
+@gh{syl20bnr, Sylvain Benner} added syntax checkers for Elixir and
+Erlang, and wrote the cool @gh{syl20bnr/flycheck-color-mode-line,
 flycheck-color-mode-line.el} extension.
 
 @item
-@uref{https://github.com/thisirs, Sylvain Rousseau} added a syntax
-checker for POSIX shell script using @command{bash}, and improved error
-parsing in the Bash script syntax checker.
+@gh{thisirs, Sylvain Rousseau} added a syntax checker for POSIX shell
+script using @command{bash}, and improved error parsing in the Bash
+script syntax checker.
 
 @item
-@uref{https://github.com/yannick1974, Yannick Roehlly} added support for
-PEP8 naming errors to the Flake8 syntax checker.
+@gh{yannick1974, Yannick Roehlly} added support for PEP8 naming errors
+to the Flake8 syntax checker.
 
 @item
-@uref{https://github.com/vderyagin, Victor Deryagin} added the Rust
-syntax checker.
+@gh{vderyagin, Victor Deryagin} added the Rust syntax checker.
 @end itemize
 
 Of course we also need to thank @ref{Top, ,GNU Flymake, flymake}, the

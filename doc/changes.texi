@@ -18,7 +18,7 @@ This appendix provides a comprehensive changelog of all releases:
 @end menu
 
 @macro ghissue{number, text}
-@uref{https://github.com/lunaryorn/flycheck/issues/\number\, \text\}
+@gh{lunaryorn/flycheck/issues/\number\, \text\}
 @end macro
 
 @node 0.1, 0.2, , Changes

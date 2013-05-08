@@ -5,6 +5,11 @@
 
 @c Macros
 
+@c A Github link shortcut
+@macro gh{url, text}
+@uref{https://github.com/\url\, \text\}
+@end macro
+
 @macro flyc{checker}
 @code{\checker\}
 @end macro
