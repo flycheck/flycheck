@@ -44,10 +44,13 @@ clean-deps :
 	rm -rf elpa # Clean packages installed for development
 
 .PHONY: doc
-doc : doc/dir
+doc : info html
 
-.PHONY: clean-doc
-clean-doc :
+.PHONY: info
+info: doc/dir
+
+.PHONY: clean-info
+clean-info :
 	rm -f doc/flycheck.info doc/dir
 
 .PHONY: html
