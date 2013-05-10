@@ -25,16 +25,20 @@
 (require 'ert)
 (require 'flycheck)
 
+(defun flycheck-testsuite-jruby-expected-result ()
+  (if (flycheck-testsuite-travis-ci-p) :failed
+    (flycheck-testsuite-fail-unless-checker 'ruby-jruby)))
+
 (ert-deftest checker-ruby-jruby-syntax-error ()
   "Test a Ruby syntax error."
-  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-jruby)
+  :expected-result (flycheck-testsuite-jruby-expected-result)
   (flycheck-testsuite-should-syntax-check
    "checkers/ruby-syntax-error.rb" 'ruby-mode '(ruby-rubocop ruby)
    '(5 nil "syntax error, unexpected tCONSTANT" error)))
 
 (ert-deftest checker-ruby-jruby-warning ()
   "Test a Ruby syntax error."
-  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-jruby)
+  :expected-result (flycheck-testsuite-jruby-expected-result)
   (flycheck-testsuite-should-syntax-check
    "checkers/ruby-warning.rb" 'ruby-mode '(ruby-rubocop ruby)
    '(3 nil "Useless use of == in void context." warning)))
