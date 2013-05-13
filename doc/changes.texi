@@ -581,6 +581,8 @@ New syntax checkers:
 
 @itemize @bullet
 @item
+@ghissue{136, Ruby using @command{jruby}}
+@item
 @ghissue{138, Puppet}
 @end itemize
 
@@ -590,6 +592,14 @@ Improvements:
 @itemize @bullet
 @item
 Defer syntax checks while a buffer is reverted, to avoid race conditions
+@end itemize
+
+@item
+Bug fixes:
+
+@itemize @bullet
+@item
+@ghissue{136, Correctly parse syntax errors from JRuby}
 @end itemize
 
 @end itemize

@@ -210,6 +210,10 @@ After evaluation of BODY, set HOOK-VAR to nil."
   "Determine whether the testsuite is running on Windows."
   (memq system-type '(ms-dos windows-nt cygwin)))
 
+(defun flycheck-testsuite-travis-ci-p ()
+  "Determine whether the testsuite is running on Travis CI."
+  (string= (getenv "TRAVIS") "true"))
+
 (defun flycheck-testsuite-min-emacs-version-p (major &optional minor)
   "Determine whether Emacs has the required version.
 

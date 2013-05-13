@@ -97,7 +97,7 @@ File: flycheck.info,  Node: Features,  Next: Installation,  Prev: Introduction, 
         * PHP (using the PHP Command Line and PHP CodeSniffer)
         * Puppet (using 'puppet parser' and 'puppet-lint')
         * Python (using 'flake8', 'pylint', or 'pyflakes')
-        * Ruby (using 'rubocop' or 'ruby')
+        * Ruby (using 'rubocop', 'ruby' or 'jruby')
         * Rust (using 'rustc')
         * RST (ReStructuredText, using Docutils)
         * Sass
@@ -1829,12 +1829,19 @@ master (unreleased)
 
    * New syntax checkers:
 
+        * Ruby using 'jruby'
+          (https://github.com/lunaryorn/flycheck/issues/136)
         * Puppet (https://github.com/lunaryorn/flycheck/issues/138)
 
    * Improvements:
 
         * Defer syntax checks while a buffer is reverted, to avoid race
           conditions
+
+   * Bug fixes:
+
+        * Correctly parse syntax errors from JRuby
+          (https://github.com/lunaryorn/flycheck/issues/136)
 
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
@@ -2425,6 +2432,7 @@ order of their appearance in the default value of 'flycheck-checkers':
    * 'rst'
    * 'ruby-rubocop'
    * 'ruby'
+   * 'ruby-jruby'
    * 'rust'
    * 'sass'
    * 'scala'
@@ -2494,50 +2502,50 @@ Tag Table:
 Node: Top734
 Node: Introduction2083
 Node: Features2984
-Node: Installation4787
-Node: Activation5961
-Node: Usage6312
-Node: Syntax checking6935
-Node: Selection10696
-Node: Configuration13277
-Node: Reporting16817
-Node: Navigation20312
-Node: Mode line22108
-Node: Extending23009
-Node: Declaration23608
-Node: Error parsers35965
-Node: Option filters36949
-Node: Examples37288
-Node: Simple example37720
-Node: Predicate example40784
-Node: Configuration example42765
-Node: Chaining example45424
-Node: API46810
-Node: Error API47598
-Node: Error parser API50199
-Node: Contribution50425
-Node: Reporting issues51101
-Node: Contributing syntax checkers51837
-Node: Contributing code52632
-Node: Unit tests53972
-Node: Changes55259
-Node: 0.155907
-Node: 0.256191
-Node: 0.356469
-Node: 0.456705
-Node: 0.557480
-Node: 0.658700
-Node: 0.6.161550
-Node: 0.761699
-Node: 0.7.162713
-Node: 0.863428
-Node: 0.964940
-Node: 0.1065436
-Node: 0.1167488
-Node: master68676
-Node: Credits68992
-Node: GNU Free Documentation License71919
-Node: Syntax checkers97071
-Node: Function and Variable Index98100
+Node: Installation4796
+Node: Activation5970
+Node: Usage6321
+Node: Syntax checking6944
+Node: Selection10705
+Node: Configuration13286
+Node: Reporting16826
+Node: Navigation20321
+Node: Mode line22117
+Node: Extending23018
+Node: Declaration23617
+Node: Error parsers35974
+Node: Option filters36958
+Node: Examples37297
+Node: Simple example37729
+Node: Predicate example40793
+Node: Configuration example42774
+Node: Chaining example45433
+Node: API46819
+Node: Error API47607
+Node: Error parser API50208
+Node: Contribution50434
+Node: Reporting issues51110
+Node: Contributing syntax checkers51846
+Node: Contributing code52641
+Node: Unit tests53981
+Node: Changes55268
+Node: 0.155916
+Node: 0.256200
+Node: 0.356478
+Node: 0.456714
+Node: 0.557489
+Node: 0.658709
+Node: 0.6.161559
+Node: 0.761708
+Node: 0.7.162722
+Node: 0.863437
+Node: 0.964949
+Node: 0.1065445
+Node: 0.1167497
+Node: master68685
+Node: Credits69221
+Node: GNU Free Documentation License72148
+Node: Syntax checkers97300
+Node: Function and Variable Index98347
 
 End Tag Table

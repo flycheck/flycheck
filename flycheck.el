@@ -117,6 +117,7 @@ buffer-local wherever it is set."
     rst
     ruby-rubocop
     ruby
+    ruby-jruby
     rust
     sass
     scala
@@ -2733,10 +2734,25 @@ See URL `https://github.com/bbatsov/rubocop'."
   :modes 'ruby-mode)
 
 (flycheck-declare-checker ruby
-  "A Ruby syntax checker using the Ruby interpreter."
+  "A Ruby syntax checker using the standard (MRI) Ruby interpreter.
+
+See URL `http://www.ruby-lang.org/'."
   :command '("ruby" "-w" "-c" source)
   :error-patterns
-  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): warning: \\(?4:.*\\)$" warning)
+  ;; These patterns support output from JRuby, too, to deal with RVM or Rbenv
+  '(("^SyntaxError in \\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\):? warning: \\(?4:.*\\)$" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
+  :modes 'ruby-mode)
+
+(flycheck-declare-checker ruby-jruby
+  "A Ruby syntax checker using the JRuby interpreter.
+
+See URL `http://jruby.org/'."
+  :command '("jruby" "-w" "-c" source)
+  :error-patterns
+  '(("^SyntaxError in \\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\) warning: \\(?4:.*\\)$" warning)
     ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'ruby-mode)
 
