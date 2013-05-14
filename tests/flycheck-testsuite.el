@@ -292,7 +292,7 @@ Raise an assertion error if the buffer is not clear afterwards."
 ;;;; Test predicates
 (defun flycheck-testsuite-should-overlay (overlay error)
   "Test that OVERLAY is in REGION and corresponds to ERROR."
-  (let* ((region (flycheck-error-region error))
+  (let* ((region (flycheck-error-region-for-mode error 'sexps))
          (message (flycheck-error-message error))
          (level (flycheck-error-level error))
          (face (if (eq level 'warning)
@@ -343,7 +343,7 @@ Signal a test failure if this error is not present."
                       :message (nth 2 expected-err)
                       :level (nth 3 expected-err)))
          (overlay (--first (equal (overlay-get it 'flycheck-error) real-error)
-                           (flycheck-overlays-at (flycheck-error-pos real-error)))))
+                           (flycheck-overlays-in 0 (+ 1 (buffer-size))))))
     (should (-contains? flycheck-current-errors real-error))
     (flycheck-testsuite-should-overlay overlay real-error)))
 

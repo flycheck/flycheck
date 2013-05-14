@@ -365,8 +365,12 @@ theme that has reasonable Flycheck faces, for instance the excellent
 This variable determines how to highlight errors:
 
 If set to @code{columns}, only highlight the error column.  If the error
-is not specific to a column, highlight the whole line.  This mode is the
-default.
+is not specific to a column, highlight the whole line.
+
+If set to @code{sexps}, highlight the expression at the error column.
+If there is no expression at the error column, highlight the column
+only.  If the error is not specific to a column, highlight the whole
+line.  This mode is the default.
 
 If set to @code{lines}, highlight the whole line the error refers to,
 regardless of whether the error is specific to a column.
