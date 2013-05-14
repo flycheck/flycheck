@@ -189,9 +189,8 @@ Controls how Flycheck indicates errors in buffers.  May either be
 If set to `left-fringe' or `right-fringe', indicate errors and
 warnings via icons in the left and right fringe respectively.
 
-If set to nil, errors and warnings are not indicated.  However,
-they may still be highlighted according to
-`flycheck-highlighting-mode'."
+If set to nil, do not indicate errors and warnings, but just
+highlight them according to `flycheck-highlighting-mode'."
   :group 'flycheck
   :type '(choice (const :tag "Indicate in the left fringe" left-fringe)
                  (const :tag "Indicate in the right fringe" right-fringe)
@@ -203,11 +202,13 @@ they may still be highlighted according to
 Controls how Flycheck highlights errors in buffers.  May either
 be `columns', `lines' or nil.
 
-If set to `columns' highlight specific columns if errors are
-specific to a column.  If set to `lines' always highlight the
-whole line regardless of whether the error is specific to a
-column.  If nil do no highlight errors at all, but only show
-fringe icons.
+If `columns', highlight the error column.  If the error does not
+have a column, highlight the whole line.
+
+If `lines', always highlight the whole line.
+
+If nil do no highlight errors at all, but only indicate according
+to `flycheck-indication-mode'.
 
 Note that this does not affect error navigation.  When navigating
 errors with `next-error' and `previous-error' Flycheck always

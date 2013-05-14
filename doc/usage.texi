@@ -364,18 +364,15 @@ theme that has reasonable Flycheck faces, for instance the excellent
 @defopt flycheck-highlighting-mode
 This variable determines how to highlight errors:
 
-If set to @code{columns} try to highlight errors as exactly as possible.
-If an error provides information about a specific column, only this
-column is highlighted.  This retains as much information as possible
-from the syntax checker, but a single column highlight may be easily
-overlooked.  This mode is the default.
+If set to @code{columns}, only highlight the error column.  If the error
+is not specific to a column, highlight the whole line.  This mode is the
+default.
 
-If set to @code{lines} the whole line on which the error occurred is
-highlighted, regardless of whether the error is actually specific to a
-column.  Column information is hence ignored.
+If set to @code{lines}, highlight the whole line the error refers to,
+regardless of whether the error is specific to a column.
 
-If set to @code{nil} highlighting is completely disabled.  Errors will
-still be reported in the mode line and in error message popups, and
+If set to @code{nil}, do not highlight errors at all.  However, errors
+will still be reported in the mode line and in error message popups, and
 indicated according to @code{flycheck-indication-mode}.
 
 Note that this variable does @emph{not} affect error @emph{navigation}.
