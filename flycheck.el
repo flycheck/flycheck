@@ -189,31 +189,36 @@ Controls how Flycheck indicates errors in buffers.  May either be
 If set to `left-fringe' or `right-fringe', indicate errors and
 warnings via icons in the left and right fringe respectively.
 
-If set to nil, errors and warnings are not indicated.  However,
-they may still be highlighted according to
-`flycheck-highlighting-mode'."
+If set to nil, do not indicate errors and warnings, but just
+highlight them according to `flycheck-highlighting-mode'."
   :group 'flycheck
   :type '(choice (const :tag "Indicate in the left fringe" left-fringe)
                  (const :tag "Indicate in the right fringe" right-fringe)
                  (const :tag "Do not indicate" nil)))
 
-(defcustom flycheck-highlighting-mode 'columns
+(defcustom flycheck-highlighting-mode 'sexps
   "The highlighting mode for Flycheck errors and warnings.
 
 Controls how Flycheck highlights errors in buffers.  May either
-be `columns', `lines' or nil.
+be `columns', `sexps', `lines' or nil.
 
-If set to `columns' highlight specific columns if errors are
-specific to a column.  If set to `lines' always highlight the
-whole line regardless of whether the error is specific to a
-column.  If nil do no highlight errors at all, but only show
-fringe icons.
+If `columns', highlight the error column.  If the error does not
+have a column, highlight the whole line.
+
+If `sexps', highlight the expression at the error column, if
+there is any, otherwise behave like `columns'.
+
+If `lines', always highlight the whole line.
+
+If nil do no highlight errors at all, but only indicate according
+to `flycheck-indication-mode'.
 
 Note that this does not affect error navigation.  When navigating
 errors with `next-error' and `previous-error' Flycheck always
 jumps to the error column regardless of the highlighting mode."
   :group 'flycheck
   :type '(choice (const :tag "Highlight columns only" columns)
+                 (const :tag "Highlight expressions" sexps)
                  (const :tag "Highlight whole lines" lines)
                  (const :tag "Do not highlight errors" nil))
   :package-version '(flycheck . "0.6"))
@@ -1634,16 +1639,41 @@ if ERR has no column."
         (setq beg (- end 1))
         (cons beg end)))))
 
+(defun flycheck-error-sexp-region (err)
+  "Get the sexp region of ERR.
+
+ERR is a Flycheck error whose region to get.
+
+Return a cons cell `(BEG . END)' where BEG is the beginning of
+the symbol at the error column, and END the end of the symbol.
+If ERR has no error column, or if there is no symbol at this
+column, return nil."
+  (-when-let (column (car (flycheck-error-column-region err)))
+    (save-excursion
+      (save-restriction
+        (widen)
+        (goto-char column)
+        (bounds-of-thing-at-point 'sexp)))))
+
 (defun flycheck-error-region-for-mode (err mode)
   "Get the region of ERR for the highlighting MODE.
 
-ERR is a Flycheck error.  MODE may either be `columns' or `lines'.
+ERR is a Flycheck error.  MODE may either be `columns', `sexps' or `lines'.
 
-If MODE is `columns', return the column region of ERR, or the
-line region if ERR has no column. If `lines', return the line region."
+If `columns', return the column region of ERR, or the
+line region if ERR has no column.
+
+If `sexps', return the sexp region of ERR, or the result of
+`columns', if there is no symbol at the error column.
+
+If `lines', return the line region.
+
+Otherwise signal an error."
   (pcase mode
     (`columns (or (flycheck-error-column-region err)
                   (flycheck-error-line-region err)))
+    (`sexps (or (flycheck-error-sexp-region err)
+                (flycheck-error-region-for-mode err 'columns)))
     (`lines (flycheck-error-line-region err))
     (_ (error "Invalid mode %S" mode))))
 

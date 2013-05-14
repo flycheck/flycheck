@@ -478,19 +478,20 @@ Errors and warnings from a syntax checker are
  -- User Option: flycheck-highlighting-mode
      This variable determines how to highlight errors:
 
-     If set to 'columns' try to highlight errors as exactly as possible.
-     If an error provides information about a specific column, only this
-     column is highlighted.  This retains as much information as
-     possible from the syntax checker, but a single column highlight may
-     be easily overlooked.  This mode is the default.
+     If set to 'columns', only highlight the error column.  If the error
+     is not specific to a column, highlight the whole line.
 
-     If set to 'lines' the whole line on which the error occurred is
-     highlighted, regardless of whether the error is actually specific
-     to a column.  Column information is hence ignored.
+     If set to 'sexps', highlight the expression at the error column.
+     If there is no expression at the error column, highlight the column
+     only.  If the error is not specific to a column, highlight the
+     whole line.  This mode is the default.
 
-     If set to 'nil' highlighting is completely disabled.  Errors will
-     still be reported in the mode line and in error message popups, and
-     indicated according to 'flycheck-indication-mode'.
+     If set to 'lines', highlight the whole line the error refers to,
+     regardless of whether the error is specific to a column.
+
+     If set to 'nil', do not highlight errors at all.  However, errors
+     will still be reported in the mode line and in error message
+     popups, and indicated according to 'flycheck-indication-mode'.
 
      Note that this variable does _not_ affect error _navigation_.
      'next-error' and 'previous-error' always jump to the error column,
@@ -1842,6 +1843,11 @@ master (unreleased)
           (https://github.com/lunaryorn/flycheck/issues/136)
         * Puppet (https://github.com/lunaryorn/flycheck/issues/138)
 
+   * New features:
+
+        * Highlight error expressions by default, with the new 'sexps'
+          highlighting mode
+
    * Improvements:
 
         * Defer syntax checks while a buffer is reverted, to avoid race
@@ -2472,9 +2478,9 @@ Function and Variable Index
 * flycheck-checker:                      Selection.           (line  41)
 * flycheck-checkers:                     Selection.           (line   9)
 * flycheck-chktexrc:                     Configuration.       (line  25)
-* flycheck-clear:                        Reporting.           (line  83)
+* flycheck-clear:                        Reporting.           (line  84)
 * flycheck-coffeelintrc:                 Configuration.       (line  28)
-* flycheck-copy-messages-as-kill:        Reporting.           (line  66)
+* flycheck-copy-messages-as-kill:        Reporting.           (line  67)
 * flycheck-count-errors:                 Error API.           (line  80)
 * flycheck-current-errors:               Error API.           (line  76)
 * flycheck-declare-checker:              Declaration.         (line   8)
@@ -2491,10 +2497,10 @@ Function and Variable Index
 * flycheck-flake8-maximum-complexity:    Configuration.       (line  10)
 * flycheck-flake8-maximum-line-length:   Configuration.       (line  14)
 * flycheck-flake8rc:                     Configuration.       (line  31)
-* flycheck-google-messages:              Reporting.           (line  71)
+* flycheck-google-messages:              Reporting.           (line  72)
 * flycheck-has-errors-p:                 Error API.           (line  85)
 * flycheck-highlighting-mode:            Reporting.           (line  28)
-* flycheck-indication-mode:              Reporting.           (line  49)
+* flycheck-indication-mode:              Reporting.           (line  50)
 * flycheck-jshintrc:                     Configuration.       (line  34)
 * flycheck-locate-config-file-functions: Configuration.       (line  58)
 * flycheck-next-error:                   Navigation.          (line  23)
@@ -2520,43 +2526,43 @@ Node: Syntax checking6944
 Node: Selection10705
 Node: Configuration13286
 Node: Reporting16826
-Node: Navigation20321
-Node: Mode line22117
-Node: Extending23018
-Node: Declaration23617
-Node: Error parsers35974
-Node: Option filters36958
-Node: Examples37297
-Node: Simple example37729
-Node: Predicate example40793
-Node: Configuration example42774
-Node: Chaining example45433
-Node: API46819
-Node: Error API47607
-Node: Error parser API50477
-Node: Contribution50703
-Node: Reporting issues51379
-Node: Contributing syntax checkers52115
-Node: Contributing code52910
-Node: Unit tests54250
-Node: Changes55537
-Node: 0.156185
-Node: 0.256469
-Node: 0.356747
-Node: 0.456983
-Node: 0.557758
-Node: 0.658978
-Node: 0.6.161828
-Node: 0.761977
-Node: 0.7.162991
-Node: 0.863706
-Node: 0.965218
-Node: 0.1065714
-Node: 0.1167766
-Node: master68954
-Node: Credits69490
-Node: GNU Free Documentation License72417
-Node: Syntax checkers97569
-Node: Function and Variable Index98616
+Node: Navigation20313
+Node: Mode line22109
+Node: Extending23010
+Node: Declaration23609
+Node: Error parsers35966
+Node: Option filters36950
+Node: Examples37289
+Node: Simple example37721
+Node: Predicate example40785
+Node: Configuration example42766
+Node: Chaining example45425
+Node: API46811
+Node: Error API47599
+Node: Error parser API50469
+Node: Contribution50695
+Node: Reporting issues51371
+Node: Contributing syntax checkers52107
+Node: Contributing code52902
+Node: Unit tests54242
+Node: Changes55529
+Node: 0.156177
+Node: 0.256461
+Node: 0.356739
+Node: 0.456975
+Node: 0.557750
+Node: 0.658970
+Node: 0.6.161820
+Node: 0.761969
+Node: 0.7.162983
+Node: 0.863698
+Node: 0.965210
+Node: 0.1065706
+Node: 0.1167758
+Node: master68946
+Node: Credits69602
+Node: GNU Free Documentation License72529
+Node: Syntax checkers97681
+Node: Function and Variable Index98728
 
 End Tag Table

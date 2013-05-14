@@ -587,6 +587,15 @@ New syntax checkers:
 @end itemize
 
 @item
+New features:
+
+@itemize @bullet
+@item
+Highlight error expressions by default, with the new @code{sexps}
+highlighting mode
+@end itemize
+
+@item
 Improvements:
 
 @itemize @bullet
