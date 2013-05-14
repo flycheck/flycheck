@@ -66,11 +66,23 @@ Evaluate @var{forms} with the current buffer set to the buffer of
 @var{err}.  If this buffer is not live, @var{forms} are not evaluated.
 @end defun
 
-@defun flycheck-error-region err &optional ignore-column
+@defun flycheck-error-line-region err
+Get the error line region as @code{(@var{beg} . @var{end})}.
+@end defun
+
+@defun flycheck-error-column-region err
+Get the error column region.
+
+If @var{err} has no column, return @code{nil}.  Otherwise return the
+region around the error column as cons cell @code{(@var{beg}
+. @var{end})}.
+@end defun
+
+@defun flycheck-error-region err
 Get the buffer region referred to by @var{err}.
 
-If @var{ignore-column} is non-nil, ignore the column attribute of
-@var{err} when determining the region.
+If @var{err} has a column, return the column region, otherwise return
+the line region.
 
 Return the region as cons cell @code{(@var{beg} . @var{end})}.
 @end defun

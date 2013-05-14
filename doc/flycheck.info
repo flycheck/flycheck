@@ -1246,11 +1246,20 @@ nil:
      Evaluate FORMS with the current buffer set to the buffer of ERR.
      If this buffer is not live, FORMS are not evaluated.
 
- -- Function: flycheck-error-region err &optional ignore-column
+ -- Function: flycheck-error-line-region err
+     Get the error line region as '(BEG . END)'.
+
+ -- Function: flycheck-error-column-region err
+     Get the error column region.
+
+     If ERR has no column, return 'nil'.  Otherwise return the region
+     around the error column as cons cell '(BEG . END)'.
+
+ -- Function: flycheck-error-region err
      Get the buffer region referred to by ERR.
 
-     If IGNORE-COLUMN is non-nil, ignore the column attribute of ERR
-     when determining the region.
+     If ERR has a column, return the column region, otherwise return the
+     line region.
 
      Return the region as cons cell '(BEG . END)'.
 
@@ -2466,22 +2475,24 @@ Function and Variable Index
 * flycheck-clear:                        Reporting.           (line  83)
 * flycheck-coffeelintrc:                 Configuration.       (line  28)
 * flycheck-copy-messages-as-kill:        Reporting.           (line  66)
-* flycheck-count-errors:                 Error API.           (line  71)
-* flycheck-current-errors:               Error API.           (line  67)
+* flycheck-count-errors:                 Error API.           (line  80)
+* flycheck-current-errors:               Error API.           (line  76)
 * flycheck-declare-checker:              Declaration.         (line   8)
 * flycheck-def-config-file-var:          Declaration.         (line 250)
 * flycheck-def-option-var:               Declaration.         (line 266)
 * flycheck-describe-checker:             Selection.           (line  70)
+* flycheck-error-column-region:          Error API.           (line  53)
 * flycheck-error-face:                   Reporting.           (line  14)
+* flycheck-error-line-region:            Error API.           (line  50)
 * flycheck-error-new:                    Error API.           (line  39)
-* flycheck-error-pos:                    Error API.           (line  58)
-* flycheck-error-region:                 Error API.           (line  50)
+* flycheck-error-pos:                    Error API.           (line  67)
+* flycheck-error-region:                 Error API.           (line  59)
 * flycheck-error-with-buffer:            Error API.           (line  46)
 * flycheck-flake8-maximum-complexity:    Configuration.       (line  10)
 * flycheck-flake8-maximum-line-length:   Configuration.       (line  14)
 * flycheck-flake8rc:                     Configuration.       (line  31)
 * flycheck-google-messages:              Reporting.           (line  71)
-* flycheck-has-errors-p:                 Error API.           (line  76)
+* flycheck-has-errors-p:                 Error API.           (line  85)
 * flycheck-highlighting-mode:            Reporting.           (line  28)
 * flycheck-indication-mode:              Reporting.           (line  49)
 * flycheck-jshintrc:                     Configuration.       (line  34)
@@ -2522,30 +2533,30 @@ Node: Configuration example42774
 Node: Chaining example45433
 Node: API46819
 Node: Error API47607
-Node: Error parser API50208
-Node: Contribution50434
-Node: Reporting issues51110
-Node: Contributing syntax checkers51846
-Node: Contributing code52641
-Node: Unit tests53981
-Node: Changes55268
-Node: 0.155916
-Node: 0.256200
-Node: 0.356478
-Node: 0.456714
-Node: 0.557489
-Node: 0.658709
-Node: 0.6.161559
-Node: 0.761708
-Node: 0.7.162722
-Node: 0.863437
-Node: 0.964949
-Node: 0.1065445
-Node: 0.1167497
-Node: master68685
-Node: Credits69221
-Node: GNU Free Documentation License72148
-Node: Syntax checkers97300
-Node: Function and Variable Index98347
+Node: Error parser API50477
+Node: Contribution50703
+Node: Reporting issues51379
+Node: Contributing syntax checkers52115
+Node: Contributing code52910
+Node: Unit tests54250
+Node: Changes55537
+Node: 0.156185
+Node: 0.256469
+Node: 0.356747
+Node: 0.456983
+Node: 0.557758
+Node: 0.658978
+Node: 0.6.161828
+Node: 0.761977
+Node: 0.7.162991
+Node: 0.863706
+Node: 0.965218
+Node: 0.1065714
+Node: 0.1167766
+Node: master68954
+Node: Credits69490
+Node: GNU Free Documentation License72417
+Node: Syntax checkers97569
+Node: Function and Variable Index98616
 
 End Tag Table

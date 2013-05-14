@@ -30,45 +30,60 @@
 (require 's)
 (require 'flycheck)
 
-(defun flycheck-should-region (text line-no col-no beg end &optional region-text)
-  "Test the region of an error."
-  (with-temp-buffer
-    (insert text)
-    (let* ((err (flycheck-error-new :buffer (current-buffer)
-                                    :line line-no
-                                    :column col-no))
-           (region (flycheck-error-region err))
-           (pos (flycheck-error-pos err)))
-      (should (= pos (car region)))
-      (should (= (car region) beg))
-      (should (= (cdr region) end))
-      (if region-text
-          (should (string= (buffer-substring beg end) region-text))
-        (should (s-blank? (s-trim (buffer-substring beg end))))))))
+(defmacro flycheck-testsuite-buffer-with-error-at (text line column &rest body)
+  "Execute BODY a temporary buffer with TEXT and an error at LINE:COLUMN.
+
+In BODY the error is bound to ERR."
+  (declare (indent 3))
+  `(with-temp-buffer
+     (insert ,text)
+     (let ((err (flycheck-error-new :buffer (current-buffer)
+                                    :line ,line :column ,column)))
+       ,@body)))
 
 (ert-deftest flycheck-error-region-no-column ()
-  "Test an error region without columns"
-  (flycheck-should-region "Hello\n    World" 2 nil 11 16 "World"))
+  (flycheck-testsuite-buffer-with-error-at "Hello\n    World" 2 nil
+    (let ((region '(11 . 16)))
+      (should-not (flycheck-error-column-region err))
+      (should (equal (flycheck-error-line-region err) region))
+      (should (equal (flycheck-error-region err) region)))))
 
 (ert-deftest flycheck-error-region-no-column-eof ()
-  "Test an error region without column at the end of the file."
-  (flycheck-should-region "Hello\n    World\n" 3 nil 16 17))
+  (flycheck-testsuite-buffer-with-error-at "Hello\n    World\n" 3 nil
+    (let ((region '(16 . 17)))
+      (should-not (flycheck-error-column-region err))
+      (--each '(flycheck-error-line-region flycheck-error-region)
+        (should (equal (funcall it err) region))))))
 
 (ert-deftest flycheck-error-region-column ()
-  "Test an error region with a column."
-  (flycheck-should-region "Hello\n    World" 2 7 13 14 "r"))
+  (flycheck-testsuite-buffer-with-error-at "Hello\n    World" 2 7
+    (let ((region '(13 . 14)))
+      (should (equal (flycheck-error-line-region err) '(11 . 16)))
+      (--each '(flycheck-error-column-region flycheck-error-region)
+        (should (equal (funcall it err) region))))))
 
 (ert-deftest flycheck-error-region-column-eof ()
-  "Test an error column at EOF."
-  (flycheck-should-region "Hello\n    World\n" 3 1 16 17))
+  (flycheck-testsuite-buffer-with-error-at "Hello\n    World\n" 3 1
+    (let ((region '(16 . 17)))
+      (--each '(flycheck-error-column-region
+                flycheck-error-line-region
+                flycheck-error-region)
+        (should (equal (funcall it err) region))))))
 
 (ert-deftest flycheck-error-region-line-beyond-eof ()
-  "Test an error line beyond the end of a file."
-  (flycheck-should-region "Hello\n    World\n" 4 1 16 17))
+  (flycheck-testsuite-buffer-with-error-at "Hello\n    World\n" 4 1
+    (let ((region '(16 . 17)))
+      (--each '(flycheck-error-column-region
+                flycheck-error-line-region
+                flycheck-error-region)
+        (should (equal (funcall it err) region))))))
 
 (ert-deftest flycheck-error-region-column-beyond-eol ()
-  "Test an error column beyond the end of a line."
-  (flycheck-should-region "Hello\n    World\n" 1 10 6 7))
+  (flycheck-testsuite-buffer-with-error-at "Hello\n    World\n" 1 10
+    (let ((region '(6 . 7)))
+      (should (equal (flycheck-error-line-region err) '(1 . 6)))
+      (--each '(flycheck-error-column-region flycheck-error-region)
+        (should (equal (funcall it err) region))))))
 
 ;; Local Variables:
 ;; coding: utf-8
