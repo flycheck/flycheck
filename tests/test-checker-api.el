@@ -1,6 +1,6 @@
 ;;; test-checker-api.el --- Tests for checker API -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2023 Sebastian Wiesner <lunaryorn@gmail.com>
+;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
 ;; Author: Sebastian Wiesner <lunaryorn@gmail.com>
 ;; URL: https://github.com/lunaryorn/flycheck
