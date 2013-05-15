@@ -107,6 +107,17 @@ In BODY the error is bound to ERR."
       (--each '(lines columns sexps)
         (should (equal (flycheck-error-region-for-mode err it) '(5 . 29)))))))
 
+(ert-deftest flycheck-error-pos ()
+  (with-temp-buffer
+    (insert "    Hello\n   World\n")
+    (should (= (flycheck-error-pos (flycheck-error-new-at 1 1)) 1))
+    (should (= (flycheck-error-pos (flycheck-error-new-at 1 4)) 4))
+    (should (= (flycheck-error-pos (flycheck-error-new-at 1 nil)) 5))
+    (should (= (flycheck-error-pos (flycheck-error-new-at 2 nil)) 14))
+    (should (= (flycheck-error-pos (flycheck-error-new-at 3 1)) 19))
+    (should (= (flycheck-error-pos (flycheck-error-new-at 4 1)) 19))
+    (should (= (flycheck-error-pos (flycheck-error-new-at 4 nil)) 19))))
+
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:
