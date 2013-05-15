@@ -30,17 +30,6 @@
 (require 's)
 (require 'flycheck)
 
-(defmacro flycheck-testsuite-buffer-with-error-at (text line column &rest body)
-  "Execute BODY a temporary buffer with TEXT and an error at LINE:COLUMN.
-
-In BODY the error is bound to ERR."
-  (declare (indent 3))
-  `(with-temp-buffer
-     (insert ,text)
-     (let ((err (flycheck-error-new :buffer (current-buffer)
-                                    :line ,line :column ,column)))
-       ,@body)))
-
 (ert-deftest flycheck-error-line-region ()
   (with-temp-buffer
     (insert "Hello\n    World\n")
