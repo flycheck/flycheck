@@ -1263,16 +1263,8 @@ nil:
      this column as cons cell '(BEG . END)'.  If ERR has no error
      column, or if there is no expression at this column, return 'nil'
 
- -- Function: flycheck-error-region err
-     Get the buffer region referred to by ERR.
-
-     If ERR has a column, return the column region, otherwise return the
-     line region.
-
-     Return the region as cons cell '(BEG . END)'.
-
  -- Function: flycheck-error-pos err
-     Get the buffer position referred to by ERR.
+     Get the exact buffer position referred to by ERR.
 
      This is the position that error navigation would jump to when
      navigating to this error.
@@ -2488,8 +2480,8 @@ Function and Variable Index
 * flycheck-clear:                        Reporting.           (line  84)
 * flycheck-coffeelintrc:                 Configuration.       (line  28)
 * flycheck-copy-messages-as-kill:        Reporting.           (line  67)
-* flycheck-count-errors:                 Error API.           (line  87)
-* flycheck-current-errors:               Error API.           (line  83)
+* flycheck-count-errors:                 Error API.           (line  79)
+* flycheck-current-errors:               Error API.           (line  75)
 * flycheck-declare-checker:              Declaration.         (line   8)
 * flycheck-def-config-file-var:          Declaration.         (line 250)
 * flycheck-def-option-var:               Declaration.         (line 266)
@@ -2498,15 +2490,14 @@ Function and Variable Index
 * flycheck-error-face:                   Reporting.           (line  14)
 * flycheck-error-line-region:            Error API.           (line  50)
 * flycheck-error-new:                    Error API.           (line  39)
-* flycheck-error-pos:                    Error API.           (line  74)
-* flycheck-error-region:                 Error API.           (line  66)
+* flycheck-error-pos:                    Error API.           (line  66)
 * flycheck-error-sexp-region:            Error API.           (line  59)
 * flycheck-error-with-buffer:            Error API.           (line  46)
 * flycheck-flake8-maximum-complexity:    Configuration.       (line  10)
 * flycheck-flake8-maximum-line-length:   Configuration.       (line  14)
 * flycheck-flake8rc:                     Configuration.       (line  31)
 * flycheck-google-messages:              Reporting.           (line  72)
-* flycheck-has-errors-p:                 Error API.           (line  92)
+* flycheck-has-errors-p:                 Error API.           (line  84)
 * flycheck-highlighting-mode:            Reporting.           (line  28)
 * flycheck-indication-mode:              Reporting.           (line  50)
 * flycheck-jshintrc:                     Configuration.       (line  34)
@@ -2547,30 +2538,30 @@ Node: Configuration example42766
 Node: Chaining example45425
 Node: API46811
 Node: Error API47599
-Node: Error parser API50763
-Node: Contribution50989
-Node: Reporting issues51665
-Node: Contributing syntax checkers52401
-Node: Contributing code53196
-Node: Unit tests54536
-Node: Changes55823
-Node: 0.156471
-Node: 0.256755
-Node: 0.357033
-Node: 0.457269
-Node: 0.558044
-Node: 0.659264
-Node: 0.6.162114
-Node: 0.762263
-Node: 0.7.163277
-Node: 0.863992
-Node: 0.965504
-Node: 0.1066000
-Node: 0.1168052
-Node: master69240
-Node: Credits69896
-Node: GNU Free Documentation License72823
-Node: Syntax checkers97975
-Node: Function and Variable Index99022
+Node: Error parser API50537
+Node: Contribution50763
+Node: Reporting issues51439
+Node: Contributing syntax checkers52175
+Node: Contributing code52970
+Node: Unit tests54310
+Node: Changes55597
+Node: 0.156245
+Node: 0.256529
+Node: 0.356807
+Node: 0.457043
+Node: 0.557818
+Node: 0.659038
+Node: 0.6.161888
+Node: 0.762037
+Node: 0.7.163051
+Node: 0.863766
+Node: 0.965278
+Node: 0.1065774
+Node: 0.1167826
+Node: master69014
+Node: Credits69670
+Node: GNU Free Documentation License72597
+Node: Syntax checkers97749
+Node: Function and Variable Index98796
 
 End Tag Table

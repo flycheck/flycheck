@@ -87,17 +87,8 @@ has no error column, or if there is no expression at this column, return
 @code{nil}
 @end defun
 
-@defun flycheck-error-region err
-Get the buffer region referred to by @var{err}.
-
-If @var{err} has a column, return the column region, otherwise return
-the line region.
-
-Return the region as cons cell @code{(@var{beg} . @var{end})}.
-@end defun
-
 @defun flycheck-error-pos err
-Get the buffer position referred to by @var{err}.
+Get the exact buffer position referred to by @var{err}.
 
 This is the position that error navigation would jump to when navigating
 to this error.

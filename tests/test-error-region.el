@@ -41,62 +41,71 @@ In BODY the error is bound to ERR."
                                     :line ,line :column ,column)))
        ,@body)))
 
-(ert-deftest flycheck-error-region-no-column ()
-  (flycheck-testsuite-buffer-with-error-at "Hello\n    World" 2 nil
-    (let ((region '(11 . 16)))
-      (should-not (flycheck-error-column-region err))
-      (should (equal (flycheck-error-line-region err) region))
-      (should (equal (flycheck-error-region err) region)))))
+(ert-deftest flycheck-error-line-region ()
+  (with-temp-buffer
+    (insert "Hello\n    World\n")
+    (should (equal (flycheck-error-line-region (flycheck-error-new-at 1 1))
+                   '(1 . 6)))
+    (should (equal (flycheck-error-line-region (flycheck-error-new-at 2 4))
+                   '(11 . 16)))
+    ;; An error column beyond the end of the line is simply ignored just like
+    ;; all other error columns
+    (should (equal (flycheck-error-line-region (flycheck-error-new-at 2 10))
+                   '(11 . 16)))
+    ;; An error line beyond the end of file should highlight the last line
+    (should (equal (flycheck-error-line-region (flycheck-error-new-at 4 3))
+                   '(16 . 17)))))
 
-(ert-deftest flycheck-error-region-no-column-eof ()
-  (flycheck-testsuite-buffer-with-error-at "Hello\n    World\n" 3 nil
-    (let ((region '(16 . 17)))
-      (should-not (flycheck-error-column-region err))
-      (--each '(flycheck-error-line-region flycheck-error-region)
-        (should (equal (funcall it err) region))))))
-
-(ert-deftest flycheck-error-region-column ()
-  (flycheck-testsuite-buffer-with-error-at "Hello\n    World" 2 7
-    (let ((region '(13 . 14)))
-      (should (equal (flycheck-error-line-region err) '(11 . 16)))
-      (--each '(flycheck-error-column-region flycheck-error-region)
-        (should (equal (funcall it err) region))))))
-
-(ert-deftest flycheck-error-region-column-eof ()
-  (flycheck-testsuite-buffer-with-error-at "Hello\n    World\n" 3 1
-    (let ((region '(16 . 17)))
-      (--each '(flycheck-error-column-region
-                flycheck-error-line-region
-                flycheck-error-region)
-        (should (equal (funcall it err) region))))))
-
-(ert-deftest flycheck-error-region-line-beyond-eof ()
-  (flycheck-testsuite-buffer-with-error-at "Hello\n    World\n" 4 1
-    (let ((region '(16 . 17)))
-      (--each '(flycheck-error-column-region
-                flycheck-error-line-region
-                flycheck-error-region)
-        (should (equal (funcall it err) region))))))
-
-(ert-deftest flycheck-error-region-column-beyond-eol ()
-  (flycheck-testsuite-buffer-with-error-at "Hello\n    World\n" 1 10
-    (let ((region '(6 . 7)))
-      (should (equal (flycheck-error-line-region err) '(1 . 6)))
-      (--each '(flycheck-error-column-region flycheck-error-region)
-        (should (equal (funcall it err) region))))))
-
-(ert-deftest flycheck-error-line-region-indentation ()
-  (flycheck-testsuite-buffer-with-error-at "    Hello" 1 nil
-    (should (equal (flycheck-error-line-region err) '(5 . 10)))
-    (should (equal (flycheck-error-line-region err :no-indent) '(1 . 10)))))
+(ert-deftest flycheck-error-column-region ()
+  (with-temp-buffer
+    (insert "Hello\n    World\n")
+    (should-not (flycheck-error-column-region (flycheck-error-new-at 1 nil)))
+    (should (equal (flycheck-error-column-region (flycheck-error-new-at 1 4))
+                   '(4 . 5)))
+    (should (equal (flycheck-error-column-region (flycheck-error-new-at 2 6))
+                   '(12 . 13)))
+    ;; A column beyond the end of a line
+    (should (equal (flycheck-error-column-region (flycheck-error-new-at 1 7))
+                   '(6 . 7)))
+    ;; A column right at the end of the last empty line of a file (an important
+    ;; special case, because the Emacs Lisp checker reports undefined functions
+    ;; at this place!)
+    (should (equal (flycheck-error-column-region (flycheck-error-new-at 3 1))
+                   '(16 . 17)))
+    ;; A column beyond the end of file
+    (should (equal (flycheck-error-column-region (flycheck-error-new-at 4 2))
+                   '(16 . 17)))))
 
 (ert-deftest flycheck-error-sexp-region ()
-  (flycheck-testsuite-buffer-with-error-at "    (message)" 1 6
+  (with-temp-buffer
+    (insert "    (message)\n    (message")
     (emacs-lisp-mode)
-    (should (equal (flycheck-error-sexp-region err) '(6 . 13))))
-  (flycheck-testsuite-buffer-with-error-at "    (message" 1 5
+    (should-not (flycheck-error-sexp-region (flycheck-error-new-at 1 2)))
+    (should (equal (flycheck-error-sexp-region (flycheck-error-new-at 1 5))
+                   '(5 . 14)))
+    (should (equal (flycheck-error-sexp-region (flycheck-error-new-at 1 8))
+                   '(6 . 13)))
+    ;; An incomplete expression
+    (should-not (flycheck-error-sexp-region (flycheck-error-new-at 2 5)))))
+
+(ert-deftest flycheck-error-region-for-mode ()
+  (with-temp-buffer
+    (insert "    (message) ;; Hello world\n    (message")
     (emacs-lisp-mode)
-    (should-not (flycheck-error-sexp-region err))))
+    ;; Test an expression at the error column for all modes
+    (let ((err (flycheck-error-new-at 1 7)))
+      (should (equal (flycheck-error-region-for-mode err 'lines) '(5 . 29)))
+      (should (equal (flycheck-error-region-for-mode err 'columns) '(7 . 8)))
+      (should (equal (flycheck-error-region-for-mode err 'sexps) '(6 . 13))))
+    ;; Test an error column which does not point to an expression
+    (let ((err (flycheck-error-new-at 2 5)))
+      (should (equal (flycheck-error-region-for-mode err 'lines) '(34 . 42)))
+      (--each '(columns sexps)
+        (should (equal (flycheck-error-region-for-mode err it) '(34 . 35)))))
+    ;; Test an error without column for all modes
+    (let ((err (flycheck-error-new-at 1 nil)))
+      (--each '(lines columns sexps)
+        (should (equal (flycheck-error-region-for-mode err it) '(5 . 29)))))))
 
 ;; Local Variables:
 ;; coding: utf-8

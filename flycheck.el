@@ -1685,23 +1685,15 @@ Otherwise signal an error."
     (`lines (flycheck-error-line-region err))
     (_ (error "Invalid mode %S" mode))))
 
-(defun flycheck-error-region (err)
-  "Get the region of ERR.
-
-ERR is a Flycheck error whose region to get.
-
-Return the column region (`flycheck-error-column-region'), if ERR
-has a column, and the line region (`flycheck-error-line-region')
-otherwise."
-  (or (flycheck-error-column-region err) (flycheck-error-line-region err)))
-
 (defun flycheck-error-pos (err)
   "Get the buffer position of ERR.
 
 ERR is a Flycheck error whose position to get.
 
-The buffer position is simple the `car' of `flycheck-error-region'"
-  (car (flycheck-error-region err)))
+The error position is the error column, or the first
+non-whitespace character of the error line, if ERR has no error column."
+  (car (or (flycheck-error-column-region err)
+           (flycheck-error-line-region err))))
 
 
 ;;;; General error parsing
