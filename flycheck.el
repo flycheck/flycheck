@@ -1599,32 +1599,26 @@ If the buffer of ERR is not live, FORMS are not evaluated."
      (with-current-buffer (flycheck-error-buffer ,err)
        ,@forms)))
 
-(defun flycheck-error-line-region (err &optional ignore-indentation)
+(defun flycheck-error-line-region (err)
   "Get the line region of ERR.
 
-ERR is a Flycheck error whose region to get.  If
-IGNORE-INDENTATION is non-nil, ignore indentation.
+ERR is a Flycheck error whose region to get.
 
-Return a cons cell `(BEG . END)' where BEG is the beginning of
-the line ERR refers to, and END the end of the line.  If
-IGNORE=INDENTATION is non-nil BEG points to the real beginning of
-the line , otherwise to the first non-whitespace character on the
-line."
+Return a cons cell `(BEG . END)' where BEG is the first
+non-whitespace character on the line ERR refers to, and END the
+end of the line."
   (flycheck-error-with-buffer err
     (save-excursion
       (save-restriction
         (widen)
         (goto-char (point-min))
-        ;; Move to
         (forward-line (- (flycheck-error-line err) 1))
-        (if ignore-indentation
-            (goto-char (line-beginning-position))
-          (back-to-indentation))
+        (back-to-indentation)
         (let ((beg (point))
               (end (line-end-position)))
           (when (= beg end)
-            ;; The current line is empty, so start with the end of the previous
-            ;; line to have any region at all
+            ;; The current line is empty, so include the previous line break
+            ;; character(s) to have any region at all
             (forward-line -1)
             (setq beg (line-end-position)))
           (cons beg end))))))
@@ -1638,14 +1632,30 @@ Return a cons cell `(BEG . END)' where BEG is the character
 before the error column, and END the actual error column, or nil
 if ERR has no column."
   (-when-let (column (flycheck-error-column err))
-    (pcase-let ((`(,beg . ,end) (flycheck-error-line-region err :ignore-indent)))
-      (save-excursion
-        ;; The end is either the column offset of the line, or the end of the
-        ;; line, if the column offset points beyond the end of the line.  The
-        ;; beginning is then just the character before the end, obviously.
-        (setq end (min (+ beg column) (+ end 1)))
-        (setq beg (- end 1))
-        (cons beg end)))))
+    (save-excursion
+      (save-restriction
+        (widen)
+        (let ((line (flycheck-error-line err)))
+          (goto-char (point-min))
+          (forward-line (- line 1))
+          (cond
+           ((> line (line-number-at-pos))
+            ;; If the line is beyond the end of the file, return the very last
+            ;; column in the file
+            (cons (- (point-max) 1) (point-max)))
+           ((= (line-beginning-position) (line-end-position))
+              ;; The line is empty, so there is no column to highlight on this
+              ;; line.  Thus, return the last column of the previous line
+            (let ((end (line-beginning-position)))
+              (forward-line -1)
+              (cons (line-end-position) end)))
+           (:else
+            ;; The end is either the column offset of the line, or
+            ;; the end of the line, if the column offset points beyond the end
+            ;; of the line.
+            (let ((end (min (+ (line-beginning-position) column)
+                           (+ (line-end-position) 1))))
+              (cons (- end 1) end)))))))))
 
 (defun flycheck-error-sexp-region (err)
   "Get the sexp region of ERR.
