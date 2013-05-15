@@ -85,6 +85,19 @@ In BODY the error is bound to ERR."
       (--each '(flycheck-error-column-region flycheck-error-region)
         (should (equal (funcall it err) region))))))
 
+(ert-deftest flycheck-error-line-region-indentation ()
+  (flycheck-testsuite-buffer-with-error-at "    Hello" 1 nil
+    (should (equal (flycheck-error-line-region err) '(5 . 10)))
+    (should (equal (flycheck-error-line-region err :no-indent) '(1 . 10)))))
+
+(ert-deftest flycheck-error-sexp-region ()
+  (flycheck-testsuite-buffer-with-error-at "    (message)" 1 6
+    (emacs-lisp-mode)
+    (should (equal (flycheck-error-sexp-region err) '(6 . 13))))
+  (flycheck-testsuite-buffer-with-error-at "    (message" 1 5
+    (emacs-lisp-mode)
+    (should-not (flycheck-error-sexp-region err))))
+
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:
