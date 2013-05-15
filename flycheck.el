@@ -2071,7 +2071,6 @@ If `flycheck-indication-mode' is neither `left-fringe' nor
       (unless mode
         ;; Erase the highlighting from the overlay if requested by the user
         (overlay-put overlay 'face nil))
-      (overlay-put overlay 'flycheck-error err)
       (-when-let (icon (flycheck-make-fringe-icon category))
         (overlay-put overlay 'before-string icon))
       (overlay-put overlay 'help-echo (flycheck-error-message err)))))
