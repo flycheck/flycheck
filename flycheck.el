@@ -74,22 +74,29 @@ buffer-local wherever it is set."
 (defgroup flycheck nil
   "On-the-fly syntax checking (aka \"flymake done right\")."
   :prefix "flycheck-"
-  :group 'tools)
+  :group 'tools
+  :link '(url-link :tag "Online manual" "http://flycheck.lunaryorn.com")
+  :link '(url-link :tag "Github" "https://github.com/lunaryorn/flycheck")
+  :link '(custom-manual "(flycheck)Top")
+  :link '(info-link "(flycheck)Usage"))
 
 (defgroup flycheck-config-files nil
   "Configuration files for on-the-fly syntax checkers."
   :prefix "flycheck-"
-  :group 'flycheck)
+  :group 'flycheck
+  :link '(info-link "(flycheck)Configuration"))
 
 (defgroup flycheck-options nil
   "Options for on-the-fly syntax checkers."
   :prefix "flycheck-"
-  :group 'flycheck)
+  :group 'flycheck
+  :link '(info-link "(flycheck)Configuration"))
 
 (defgroup flycheck-faces nil
   "Faces used by on-the-fly syntax checking."
   :prefix "flycheck-"
-  :group 'flycheck)
+  :group 'flycheck
+  :link '(info-link "(flycheck)Configuration"))
 
 (defcustom flycheck-checkers
   '(bash
