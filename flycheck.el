@@ -1586,7 +1586,8 @@ Pop up a help buffer with the documentation of CHECKER."
 
 ;;;; Checker error API
 (cl-defstruct (flycheck-error
-               (:constructor flycheck-error-new))
+               (:constructor flycheck-error-new)
+               (:constructor flycheck-error-new-at (line column &optional level message (buffer (current-buffer)))))
   buffer filename line column message level)
 
 (defmacro flycheck-error-with-buffer (err &rest forms)
