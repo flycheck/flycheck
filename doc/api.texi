@@ -78,6 +78,15 @@ region around the error column as cons cell @code{(@var{beg}
 . @var{end})}.
 @end defun
 
+@defun flycheck-error-sexp-region err
+Get the error expression region.
+
+If @var{err} has an error column, return the region of the expression at
+this column as cons cell @code{(@var{beg} . @var{end})}.  If @var{err}
+has no error column, or if there is no expression at this column, return
+@code{nil}
+@end defun
+
 @defun flycheck-error-region err
 Get the buffer region referred to by @var{err}.
 
