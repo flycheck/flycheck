@@ -221,7 +221,7 @@ jumps to the error column regardless of the highlighting mode."
                  (const :tag "Highlight expressions" sexps)
                  (const :tag "Highlight whole lines" lines)
                  (const :tag "Do not highlight errors" nil))
-  :package-version '(flycheck . "0.6"))
+  :package-version '(flycheck . "0.12"))
 
 (defcustom flycheck-check-syntax-automatically '(save new-line mode-enabled)
   "When Flycheck should check syntax automatically.
