@@ -204,15 +204,20 @@ However, you can customize automatic syntax checking with
      This variable is list of events that may trigger syntax checks.
      The following events are known:
 
-     'mode-enabled' checks syntax if 'flycheck-mode' is enabled.
-
-     'save' checks syntax after the buffer was saved.
-
-     'new-line' checks syntax after a new line was inserted.
+     'mode-enabled'
+          Check syntax immediately if 'flycheck-mode' is enabled.
+     'save'
+          Check syntax immediately after the buffer was saved.
+     'new-line'
+          Check syntax immediately after a new line was inserted into
+          the buffer.
+     'idle-change'
+          Check syntax a short time after the last change to the buffer.
 
      An syntax check is only conducted for events that are contained in
      this list.  For instance, the following setting will cause Flycheck
-     to never check syntax if a new line was inserted:
+     to _only_ check if the mode is enabled or the buffer was saved, but
+     _never_ after changes to the buffer contents:
 
           (setq flycheck-check-syntax-automatically '(mode-enabled save))
 
@@ -1847,6 +1852,8 @@ master (unreleased)
 
         * Highlight error expressions by default, with the new 'sexps'
           highlighting mode
+        * Automatically check syntax some time after the last change in
+          the buffer (https://github.com/lunaryorn/flycheck/issues/140)
 
    * Improvements:
 
@@ -2471,9 +2478,9 @@ Function and Variable Index
  [index ]
 * Menu:
 
-* flycheck-after-syntax-check-hook:      Syntax checking.     (line  58)
-* flycheck-before-syntax-check-hook:     Syntax checking.     (line  76)
-* flycheck-buffer:                       Syntax checking.     (line  41)
+* flycheck-after-syntax-check-hook:      Syntax checking.     (line  63)
+* flycheck-before-syntax-check-hook:     Syntax checking.     (line  81)
+* flycheck-buffer:                       Syntax checking.     (line  46)
 * flycheck-check-syntax-automatically:   Syntax checking.     (line  15)
 * flycheck-checker:                      Selection.           (line  41)
 * flycheck-checkers:                     Selection.           (line   9)
@@ -2509,7 +2516,7 @@ Function and Variable Index
 * flycheck-previous-error:               Navigation.          (line  31)
 * flycheck-rubocoprc:                    Configuration.       (line  37)
 * flycheck-select-checker:               Selection.           (line  32)
-* flycheck-syntax-check-failed-hook:     Syntax checking.     (line  92)
+* flycheck-syntax-check-failed-hook:     Syntax checking.     (line  97)
 * flycheck-tidyrc:                       Configuration.       (line  40)
 * flycheck-warning-face:                 Reporting.           (line  15)
 
@@ -2523,46 +2530,46 @@ Node: Installation4796
 Node: Activation5970
 Node: Usage6321
 Node: Syntax checking6944
-Node: Selection10705
-Node: Configuration13286
-Node: Reporting16826
-Node: Navigation20313
-Node: Mode line22109
-Node: Extending23010
-Node: Declaration23609
-Node: Error parsers35966
-Node: Option filters36950
-Node: Examples37289
-Node: Simple example37721
-Node: Predicate example40785
-Node: Configuration example42766
-Node: Chaining example45425
-Node: API46811
-Node: Error API47599
-Node: Error parser API50469
-Node: Contribution50695
-Node: Reporting issues51371
-Node: Contributing syntax checkers52107
-Node: Contributing code52902
-Node: Unit tests54242
-Node: Changes55529
-Node: 0.156177
-Node: 0.256461
-Node: 0.356739
-Node: 0.456975
-Node: 0.557750
-Node: 0.658970
-Node: 0.6.161820
-Node: 0.761969
-Node: 0.7.162983
-Node: 0.863698
-Node: 0.965210
-Node: 0.1065706
-Node: 0.1167758
-Node: master68946
-Node: Credits69602
-Node: GNU Free Documentation License72529
-Node: Syntax checkers97681
-Node: Function and Variable Index98728
+Node: Selection10953
+Node: Configuration13534
+Node: Reporting17074
+Node: Navigation20561
+Node: Mode line22357
+Node: Extending23258
+Node: Declaration23857
+Node: Error parsers36214
+Node: Option filters37198
+Node: Examples37537
+Node: Simple example37969
+Node: Predicate example41033
+Node: Configuration example43014
+Node: Chaining example45673
+Node: API47059
+Node: Error API47847
+Node: Error parser API50717
+Node: Contribution50943
+Node: Reporting issues51619
+Node: Contributing syntax checkers52355
+Node: Contributing code53150
+Node: Unit tests54490
+Node: Changes55777
+Node: 0.156425
+Node: 0.256709
+Node: 0.356987
+Node: 0.457223
+Node: 0.557998
+Node: 0.659218
+Node: 0.6.162068
+Node: 0.762217
+Node: 0.7.163231
+Node: 0.863946
+Node: 0.965458
+Node: 0.1065954
+Node: 0.1168006
+Node: master69194
+Node: Credits69994
+Node: GNU Free Documentation License72921
+Node: Syntax checkers98073
+Node: Function and Variable Index99120
 
 End Tag Table

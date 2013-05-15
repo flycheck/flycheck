@@ -27,7 +27,7 @@
 (require 'dash)
 
 (ert-deftest flycheck-may-check-automatically ()
-  (--each '(save new-line mode-enabled)
+  (--each '(save idle-change new-line mode-enabled)
     (with-temp-buffer
       (should (flycheck-may-check-automatically it))
       (should (flycheck-may-check-automatically))
@@ -53,7 +53,7 @@
   ;; afterwards, because the temporary resource buffer has no associated window
   ;; and is thus not checked immediately.  This allows us to neatly test whether
   ;; an automatic test happened
-  (--each '(save new-line mode-enabled)
+  (--each '(save idle-change new-line mode-enabled)
     (flycheck-testsuite-with-resource-buffer "automatic-check-dummy.el"
       (flycheck-mode-no-check)
       (flycheck-buffer-automatically it)
@@ -86,6 +86,23 @@
     (should-not (flycheck-deferred-check-p))
     (let ((flycheck-check-syntax-automatically '(mode-enabled)))
       (flycheck-mode))
+    (should (flycheck-deferred-check-p))))
+
+(ert-deftest flycheck-check-syntax-automatically-idle-change ()
+  (flycheck-testsuite-with-resource-buffer "automatic-check-dummy.el"
+    (emacs-lisp-mode)
+    (flycheck-mode-no-check)
+    (let ((flycheck-check-syntax-automatically
+           (remq 'idle-change flycheck-check-syntax-automatically)))
+      (insert "Hello world")
+      (sleep-for 0.55))
+    (should-not (flycheck-deferred-check-p)))
+  (flycheck-testsuite-with-resource-buffer "automatic-check-dummy.el"
+    (emacs-lisp-mode)
+    (flycheck-mode-no-check)
+    (let ((flycheck-check-syntax-automatically '(idle-change)))
+      (insert "Hello world")
+      (sleep-for 0.55))
     (should (flycheck-deferred-check-p))))
 
 (ert-deftest flycheck-check-syntax-automatically-new-line ()
