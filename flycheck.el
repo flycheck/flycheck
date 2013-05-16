@@ -2051,7 +2051,9 @@ If `flycheck-indication-mode' is neither `left-fringe' nor
       (propertize "!" 'display (list flycheck-indication-mode bitmap face)))))
 
 (defun flycheck-add-overlay (err)
-  "Add overlay for ERR."
+  "Add overlay for ERR.
+
+Return the created overlay."
   (flycheck-error-with-buffer err
     (pcase-let* ((mode flycheck-highlighting-mode)
                  ;; Default to lines highlighting.  If MODE is nil, we want the
@@ -2073,7 +2075,8 @@ If `flycheck-indication-mode' is neither `left-fringe' nor
         (overlay-put overlay 'face nil))
       (-when-let (icon (flycheck-make-fringe-icon category))
         (overlay-put overlay 'before-string icon))
-      (overlay-put overlay 'help-echo (flycheck-error-message err)))))
+      (overlay-put overlay 'help-echo (flycheck-error-message err))
+      overlay)))
 
 (defun flycheck-add-overlays (errors)
   "Add overlays for ERRORS."
