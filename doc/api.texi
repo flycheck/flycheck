@@ -97,6 +97,10 @@ This is the position that error navigation would jump to when navigating
 to this error.
 @end defun
 
+@defun flycheck-error-format error
+Format the @var{error} as a human-readable string.
+@end defun
+
 The following functions and variables may be used to analyze the errors
 of a syntax check.
 

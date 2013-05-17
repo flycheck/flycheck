@@ -1277,6 +1277,9 @@ nil:
      This is the position that error navigation would jump to when
      navigating to this error.
 
+ -- Function: flycheck-error-format error
+     Format the ERROR as a human-readable string.
+
    The following functions and variables may be used to analyze the
 errors of a syntax check.
 
@@ -2493,14 +2496,15 @@ Function and Variable Index
 * flycheck-clear:                        Reporting.           (line  84)
 * flycheck-coffeelintrc:                 Configuration.       (line  28)
 * flycheck-copy-messages-as-kill:        Reporting.           (line  67)
-* flycheck-count-errors:                 Error API.           (line  82)
-* flycheck-current-errors:               Error API.           (line  78)
+* flycheck-count-errors:                 Error API.           (line  85)
+* flycheck-current-errors:               Error API.           (line  81)
 * flycheck-declare-checker:              Declaration.         (line   8)
 * flycheck-def-config-file-var:          Declaration.         (line 250)
 * flycheck-def-option-var:               Declaration.         (line 266)
 * flycheck-describe-checker:             Selection.           (line  70)
 * flycheck-error-column-region:          Error API.           (line  56)
 * flycheck-error-face:                   Reporting.           (line  14)
+* flycheck-error-format:                 Error API.           (line  75)
 * flycheck-error-line-region:            Error API.           (line  53)
 * flycheck-error-new:                    Error API.           (line  42)
 * flycheck-error-pos:                    Error API.           (line  69)
@@ -2510,7 +2514,7 @@ Function and Variable Index
 * flycheck-flake8-maximum-line-length:   Configuration.       (line  14)
 * flycheck-flake8rc:                     Configuration.       (line  31)
 * flycheck-google-messages:              Reporting.           (line  72)
-* flycheck-has-errors-p:                 Error API.           (line  87)
+* flycheck-has-errors-p:                 Error API.           (line  90)
 * flycheck-highlighting-mode:            Reporting.           (line  28)
 * flycheck-indication-mode:              Reporting.           (line  50)
 * flycheck-jshintrc:                     Configuration.       (line  34)
@@ -2551,30 +2555,30 @@ Node: Configuration example43014
 Node: Chaining example45673
 Node: API47059
 Node: Error API47847
-Node: Error parser API50846
-Node: Contribution51072
-Node: Reporting issues51748
-Node: Contributing syntax checkers52558
-Node: Contributing code53353
-Node: Unit tests54693
-Node: Changes55980
-Node: 0.156628
-Node: 0.256912
-Node: 0.357190
-Node: 0.457426
-Node: 0.558201
-Node: 0.659421
-Node: 0.6.162271
-Node: 0.762420
-Node: 0.7.163434
-Node: 0.864149
-Node: 0.965661
-Node: 0.1066157
-Node: 0.1168209
-Node: master69397
-Node: Credits70284
-Node: GNU Free Documentation License73211
-Node: Syntax checkers98363
-Node: Function and Variable Index99410
+Node: Error parser API50939
+Node: Contribution51165
+Node: Reporting issues51841
+Node: Contributing syntax checkers52651
+Node: Contributing code53446
+Node: Unit tests54786
+Node: Changes56073
+Node: 0.156721
+Node: 0.257005
+Node: 0.357283
+Node: 0.457519
+Node: 0.558294
+Node: 0.659514
+Node: 0.6.162364
+Node: 0.762513
+Node: 0.7.163527
+Node: 0.864242
+Node: 0.965754
+Node: 0.1066250
+Node: 0.1168302
+Node: master69490
+Node: Credits70377
+Node: GNU Free Documentation License73304
+Node: Syntax checkers98456
+Node: Function and Variable Index99503
 
 End Tag Table
