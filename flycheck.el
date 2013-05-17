@@ -1738,9 +1738,14 @@ _not_ include the file name."
         (column (flycheck-error-column err))
         (level (symbol-name (flycheck-error-level err)))
         (message (flycheck-error-message err)))
+    ;; FIXME: s-lex-format breaks with double backslash, see
+    ;; https://github.com/magnars/s.el/issues/34
+    ;; (if column
+    ;;     (s-lex-format "${line}:${column}:${level}: ${message}")
+    ;;   (s-lex-format "${line}:${level}: ${message}"))
     (if column
-        (s-lex-format "${line}:${column}:${level}: ${message}")
-      (s-lex-format "${line}:${level}: ${message}"))))
+        (format "%s:%s:%s: %s" line column level message)
+      (format "%s:%s: %s" line level message))))
 
 
 ;;;; General error parsing

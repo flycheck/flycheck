@@ -116,7 +116,11 @@
                    "20:7:error: Spam with eggs"))
   (should (string= (flycheck-error-format
                     (flycheck-error-new-at 14 nil 'warning "Oh no"))
-                   "14:warning: Oh no")))
+                   "14:warning: Oh no"))
+  ;; Specific test for https://github.com/magnars/s.el/issues/34
+  (should (string= (flycheck-error-format
+                    (flycheck-error-new-at 14 15 'error "dash\\nbroken"))
+                   "14:15:error: dash\\nbroken")))
 
 ;; Local Variables:
 ;; coding: utf-8
