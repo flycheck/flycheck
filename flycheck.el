@@ -2204,7 +2204,7 @@ the beginning of the buffer."
 
 
 ;;;; Error message echoing
-(defconst flycheck-error-message-buffer "*Flycheck errors*"
+(defconst flycheck-error-message-buffer "*Flycheck error messages*"
   "The name of the buffer to show long error messages in.")
 
 (defun flycheck-error-message-buffer ()
