@@ -464,6 +464,53 @@ buffer manually.
     (flycheck-teardown))))
 
 
+;;; Version information
+(defun flycheck-library-version ()
+  "Get the version in the Flycheck library header."
+  (require 'package)                    ; For `package-buffer-info'
+  (-when-let* ((definition (symbol-function 'flycheck-mode))
+               (source-file (find-lisp-object-file-name 'flycheck-mode
+                                                        definition)))
+    (with-temp-buffer
+      (insert-file-contents source-file)
+      (aref (package-buffer-info) 3))))
+
+(defun flycheck-package-version ()
+  "Get the package version of Flycheck.
+
+This is the version number of the installed Flycheck package."
+  (when (boundp 'package-alist)
+    (-when-let (info (cdr (assq 'flycheck package-alist)))
+      (package-version-join (aref info 0)))))
+
+(defun flycheck-version (&optional show-version)
+  "Get the Flycheck version as string.
+
+If called interactively or if SHOW-VERSION is non-nil, show the
+version in the echo area and the messages buffer.
+
+The returned string includes both, the version from package.el
+and the library version, if both a present and different.
+
+If the version number could not be determined, signal an error,
+if called interactively, or if SHOW-VERSION is non-nil, otherwise
+just return nil."
+  (interactive (list (not (or executing-kbd-macro noninteractive))))
+  (let* ((lib-version (flycheck-library-version))
+         (pkg-version (flycheck-package-version))
+         (version (cond
+                   ((and lib-version pkg-version
+                         (not (string= lib-version pkg-version)))
+                    (format "%s (package: %s)" lib-version pkg-version))
+                   ((or pkg-version lib-version)
+                    (format "%s" (or pkg-version lib-version))))))
+    (when show-version
+      (unless version
+        (error "Could not find out Flycheck version"))
+      (message "Flycheck version: %s" version))
+    version))
+
+
 ;;; Global syntax checking
 (defun flycheck-may-enable-mode ()
   "Determine whether Flycheck mode may be enabled.

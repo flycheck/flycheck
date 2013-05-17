@@ -596,6 +596,8 @@ highlighting mode
 @item
 @ghissue{140, Automatically check syntax some time after the last change
 in the buffer}
+@item
+Add @code{flycheck-version} to determine the installed Flycheck version
 @end itemize
 
 @item

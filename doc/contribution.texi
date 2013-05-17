@@ -38,7 +38,8 @@ Check that the issue has not already been fixed in the latest code.
 Be clear and precise.  If possible, name functions and command exactly.
 @item
 Open an issue with a clear title and description in grammatically
-correct, complete sentences.
+correct, complete sentences.  Include the version of Flycheck as shown
+by @kbd{M-x flycheck-version}.
 @end itemize
 
 We will try to handle each issue appropriately, and adhering to these
