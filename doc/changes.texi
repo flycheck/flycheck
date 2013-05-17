@@ -598,6 +598,9 @@ highlighting mode
 in the buffer}
 @item
 Add @code{flycheck-version} to determine the installed Flycheck version
+@item
+Add @code{flycheck-list-errors}, mapped to @kbd{C-c ! l}, to list all
+errors in a separate buffer
 @end itemize
 
 @item
