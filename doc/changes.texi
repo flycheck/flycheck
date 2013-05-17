@@ -593,6 +593,9 @@ New features:
 @item
 Highlight error expressions by default, with the new @code{sexps}
 highlighting mode
+@item
+@ghissue{140, Automatically check syntax some time after the last change
+in the buffer}
 @end itemize
 
 @item

@@ -230,19 +230,25 @@ jumps to the error column regardless of the highlighting mode."
                  (const :tag "Do not highlight errors" nil))
   :package-version '(flycheck . "0.12"))
 
-(defcustom flycheck-check-syntax-automatically '(save new-line mode-enabled)
+(defcustom flycheck-check-syntax-automatically '(save
+                                                 idle-change
+                                                 new-line
+                                                 mode-enabled)
   "When Flycheck should check syntax automatically.
 
 This variable is a list of events that may trigger syntax checks.
 The following events are known:
 
-`mode-enabled' checks syntax automatically when `flycheck-mode'
-is enabled.
-
 `save' checks syntax automatically each time the buffer is saved.
+
+`idle-change' checks syntax automatically some time after the
+last change to the buffer occurred.
 
 `new-line' checks syntax automatically each time a new line is
 inserted into the buffer.
+
+`mode-enabled' checks syntax automatically when `flycheck-mode'
+is enabled.
 
 For instance, set this variable to '(mode-enabled save) to only
 check syntax automatically when saving a buffer, but never when
@@ -252,9 +258,10 @@ If nil, never check syntax automatically.  Use `flycheck-buffer'
 to start a syntax check manually."
   :group 'flycheck
   :type '(set (const :tag "After the buffer was saved" save)
+              (const :tag "After the buffer was changed and idle" idle-change)
               (const :tag "After a new line was inserted" new-line)
               (const :tag "After `flycheck-mode' was enabled" mode-enabled))
-  :package-version '(flycheck . "0.11"))
+  :package-version '(flycheck . "0.12"))
 
 (defcustom flycheck-google-max-messages 5
   "How many messages to google at once.
@@ -613,6 +620,15 @@ returns t."
     (message "Cannot perform a syntax check in buffer %s."
              (buffer-name))))
 
+(defvar-local flycheck-idle-change-timer nil
+  "Timer to mark the idle time since the last change.")
+
+(defun flycheck-clear-idle-change-timer ()
+  "Clear the idle change timer."
+  (when flycheck-idle-change-timer
+    (cancel-timer flycheck-idle-change-timer)
+    (setq flycheck-idle-change-timer nil)))
+
 (defun flycheck-handle-change (beg end _len)
   "Handle a buffer change between BEG and END.
 
@@ -623,8 +639,18 @@ Start a syntax check if a new line has been inserted into the
 buffer."
   ;; Save and restore the match data, as recommended in (elisp)Change Hooks
   (save-match-data
-    (when (and flycheck-mode (s-contains? "\n" (buffer-substring beg end)))
-      (flycheck-buffer-automatically 'new-line))))
+    (when flycheck-mode
+      ;; The buffer was changed, thus clear the idle timer
+      (flycheck-clear-idle-change-timer)
+      (if (s-contains? "\n" (buffer-substring beg end))
+          (flycheck-buffer-automatically 'new-line)
+        (setq flycheck-idle-change-timer
+              (run-at-time 0.5 nil #'flycheck-handle-idle-change))))))
+
+(defun flycheck-handle-idle-change ()
+  "Handle an expired idle time since the last change."
+  (flycheck-clear-idle-change-timer)
+  (flycheck-buffer-automatically 'idle-change))
 
 (defun flycheck-handle-save ()
   "Handle a save of the buffer."
