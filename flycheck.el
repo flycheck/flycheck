@@ -612,13 +612,11 @@ returns nil for CONDITION.
 
 The syntax check is deferred if `flycheck-must-defer-check'
 returns t."
-  (if (flycheck-may-check-automatically condition)
+  (when (flycheck-may-check-automatically condition)
       (if (flycheck-must-defer-check)
           (flycheck-buffer-deferred)
         (with-demoted-errors
-          (flycheck-buffer)))
-    (message "Cannot perform a syntax check in buffer %s."
-             (buffer-name))))
+          (flycheck-buffer)))))
 
 (defvar-local flycheck-idle-change-timer nil
   "Timer to mark the idle time since the last change.")
