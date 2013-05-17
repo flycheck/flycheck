@@ -62,9 +62,7 @@ clean-html:
 
 .PHONY: test
 test : build
-	EMACS=$(EMACS) $(CARTON) exec $(EMACS) \
-		-Q --no-site-lisp $(EMACSFLAGS) --script \
-		tests/flycheck-testrunner.el
+	EMACS=$(EMACS) $(CARTON) exec $(EMACS) -Q $(EMACSFLAGS) --script tests/flycheck-testrunner.el
 
 .PHONY: virtual-test
 virtual-test :
@@ -87,9 +85,7 @@ clean :
 	rm -rf $(PACKAGE) flycheck-pkg.el
 
 %.elc : %.el
-	EMACS=$(EMACS) $(CARTON) exec $(EMACS) \
-		--no-site-file --no-site-lisp --batch $(EMACSFLAGS) \
-		-f batch-byte-compile $<
+	EMACS=$(EMACS) $(CARTON) exec $(EMACS) -Q --batch $(EMACSFLAGS) -f batch-byte-compile $<
 
 flycheck-pkg.el : Carton
 	EMACS=$(EMACS) $(CARTON) package
@@ -106,5 +102,4 @@ doc/html/flycheck.css : doc/flycheck.css
 	cp -f $< $@
 
 doc/html/index.html: $(DOC_SRCS)
-	$(MAKEINFO) --html --split=chapter --css-ref=flycheck.css \
-		-o doc/html doc/flycheck.texi
+	$(MAKEINFO) --html --split=chapter --css-ref=flycheck.css -o doc/html doc/flycheck.texi
