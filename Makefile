@@ -62,8 +62,8 @@ clean-deps :
 test : compile
 	EMACS=$(EMACS) $(CARTON) exec $(EMACS) -Q $(EMACSFLAGS) --script tests/flycheck-testrunner.el
 
-.PHONY: virtual-test
-virtual-test :
+.PHONY: vagrant-test
+vagrant-test :
 	$(VAGRANT) up
 	$(VAGRANT) ssh -c "make -C /vagrant EMACS=$(EMACS) clean test"
 
