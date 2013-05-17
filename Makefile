@@ -34,6 +34,21 @@ PACKAGE = flycheck-$(VERSION).tar
 .PHONY: compile
 compile : $(OBJECTS)
 
+.PHONY: package
+package : $(PACKAGE)
+
+$(PACKAGE) : $(PACKAGE_SRCS)
+	rm -rf flycheck-$(VERSION)
+	mkdir -p flycheck-$(VERSION)
+	cp -f $(PACKAGE_SRCS) flycheck-$(VERSION)
+	tar cf $(PACKAGE) flycheck-$(VERSION)
+	rm -rf flycheck-$(VERSION)
+
+.PHONY: clean
+clean :
+	rm -f $(OBJECTS)
+	rm -rf $(PACKAGE) flycheck-pkg.el
+
 .PHONY: deps
 deps :
 	EMACS=$(EMACS) $(CARTON) install
@@ -41,7 +56,16 @@ deps :
 
 .PHONY: clean-deps
 clean-deps :
-	rm -rf elpa # Clean packages installed for development
+	rm -rf elpa
+
+.PHONY: test
+test : compile
+	EMACS=$(EMACS) $(CARTON) exec $(EMACS) -Q $(EMACSFLAGS) --script tests/flycheck-testrunner.el
+
+.PHONY: virtual-test
+virtual-test :
+	$(VAGRANT) up
+	$(VAGRANT) ssh -c "make -C /vagrant EMACS=$(EMACS) clean test"
 
 .PHONY: doc
 doc : info html
@@ -59,30 +83,6 @@ html : $(HTML_TARGETS)
 .PHONY: clean-html
 clean-html:
 	rm -rf doc/html
-
-.PHONY: test
-test : compile
-	EMACS=$(EMACS) $(CARTON) exec $(EMACS) -Q $(EMACSFLAGS) --script tests/flycheck-testrunner.el
-
-.PHONY: virtual-test
-virtual-test :
-	$(VAGRANT) up
-	$(VAGRANT) ssh -c "make -C /vagrant EMACS=$(EMACS) clean test"
-
-.PHONY: package
-package : $(PACKAGE)
-
-$(PACKAGE) : $(PACKAGE_SRCS)
-	rm -rf flycheck-$(VERSION)
-	mkdir -p flycheck-$(VERSION)
-	cp -f $(PACKAGE_SRCS) flycheck-$(VERSION)
-	tar cf $(PACKAGE) flycheck-$(VERSION)
-	rm -rf flycheck-$(VERSION)
-
-.PHONY: clean
-clean :
-	rm -f $(OBJECTS)
-	rm -rf $(PACKAGE) flycheck-pkg.el
 
 %.elc : %.el
 	EMACS=$(EMACS) $(CARTON) exec $(EMACS) -Q --batch $(EMACSFLAGS) -f batch-byte-compile $<
