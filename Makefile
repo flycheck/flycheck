@@ -31,8 +31,8 @@ PACKAGE_SRCS = $(SRCS) \
 	doc/flycheck.info doc/dir flycheck.el
 PACKAGE = flycheck-$(VERSION).tar
 
-.PHONY: build
-build : $(OBJECTS)
+.PHONY: compile
+compile : $(OBJECTS)
 
 .PHONY: deps
 deps :
@@ -61,7 +61,7 @@ clean-html:
 	rm -rf doc/html
 
 .PHONY: test
-test : build
+test : compile
 	EMACS=$(EMACS) $(CARTON) exec $(EMACS) -Q $(EMACSFLAGS) --script tests/flycheck-testrunner.el
 
 .PHONY: virtual-test
