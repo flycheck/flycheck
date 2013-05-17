@@ -1,4 +1,4 @@
-;;; test-error-region.el --- Tests for error region -*- lexical-binding: t; -*-
+;;; test-error-api.el --- Tests for the error API -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
@@ -107,8 +107,19 @@
     (should (= (flycheck-error-pos (flycheck-error-new-at 4 1)) 19))
     (should (= (flycheck-error-pos (flycheck-error-new-at 4 nil)) 19))))
 
+(ert-deftest flycheck-error-format ()
+  (should (string= (flycheck-error-format
+                    (flycheck-error-new-at 3 5 'warning "Hello world"))
+                   "3:5:warning: Hello world"))
+  (should (string= (flycheck-error-format
+                    (flycheck-error-new-at 20 7 'error "Spam with eggs"))
+                   "20:7:error: Spam with eggs"))
+  (should (string= (flycheck-error-format
+                    (flycheck-error-new-at 14 nil 'warning "Oh no"))
+                   "14:warning: Oh no")))
+
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:
 
-;;; test-error-region.el ends here
+;;; test-error-api.el ends here

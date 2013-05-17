@@ -1729,6 +1729,19 @@ non-whitespace character of the error line, if ERR has no error column."
   (car (or (flycheck-error-column-region err)
            (flycheck-error-line-region err))))
 
+(defun flycheck-error-format (err)
+  "Format ERR as human-readable string.
+
+Return a string that represents the given ERR.  This string does
+_not_ include the file name."
+  (let ((line (flycheck-error-line err))
+        (column (flycheck-error-column err))
+        (level (symbol-name (flycheck-error-level err)))
+        (message (flycheck-error-message err)))
+    (if column
+        (s-lex-format "${line}:${column}:${level}: ${message}")
+      (s-lex-format "${line}:${level}: ${message}"))))
+
 
 ;;;; General error parsing
 (defun flycheck-parse-output (output checker buffer)
