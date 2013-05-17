@@ -34,7 +34,7 @@
   :expected-result (flycheck-testsuite-fail-unless-checker 'go-build)
   (flycheck-testsuite-should-syntax-check
    "checkers/go-testpackage/go-build-error.go" 'go-mode nil
-   '(6 nil "undefined: fmt" error)))
+   '(6 nil "undefined: fmt" error :checker go-build)))
 
 ;; Local Variables:
 ;; coding: utf-8

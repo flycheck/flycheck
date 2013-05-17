@@ -33,7 +33,8 @@
   :expected-result (flycheck-testsuite-fail-unless-checkers 'php 'php-phpcs)
   (flycheck-testsuite-should-syntax-check
    "checkers/php-phpcs-error.php" '(php-mode php+-mode) nil
-   '(19 8 "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\"" error)))
+   '(19 8 "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\"" error
+        :checker php-phpcs)))
 
 (ert-deftest checker-php-phpcs-error-phpcs-standard ()
   "Test an uppercase keyword error by phpcs."
@@ -42,7 +43,8 @@
       (setq flycheck-phpcs-standard "Zend")
     (flycheck-testsuite-should-syntax-check
      "checkers/php-phpcs-error.php" '(php-mode php+-mode) nil
-     '(21 1 "A closing tag is not permitted at the end of a PHP file" error))))
+     '(21 1 "A closing tag is not permitted at the end of a PHP file" error
+          :checker php-phpcs))))
 
 ;; Local Variables:
 ;; coding: utf-8

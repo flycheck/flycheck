@@ -109,18 +109,22 @@
 
 (ert-deftest flycheck-error-format ()
   (should (string= (flycheck-error-format
-                    (flycheck-error-new-at 3 5 'warning "Hello world"))
-                   "3:5:warning: Hello world"))
+                    (flycheck-error-new-at 3 5 'warning "Hello world"
+                                           :checker 'emacs-lisp))
+                   "3:5:warning: Hello world (emacs-lisp)"))
   (should (string= (flycheck-error-format
-                    (flycheck-error-new-at 20 7 'error "Spam with eggs"))
-                   "20:7:error: Spam with eggs"))
+                    (flycheck-error-new-at 20 7 'error "Spam with eggs"
+                                           :checker 'ruby))
+                   "20:7:error: Spam with eggs (ruby)"))
   (should (string= (flycheck-error-format
-                    (flycheck-error-new-at 14 nil 'warning "Oh no"))
-                   "14:warning: Oh no"))
+                    (flycheck-error-new-at 14 nil 'warning "Oh no"
+                                           :checker 'python-flake8))
+                   "14:warning: Oh no (python-flake8)"))
   ;; Specific test for https://github.com/magnars/s.el/issues/34
   (should (string= (flycheck-error-format
-                    (flycheck-error-new-at 14 15 'error "dash\\nbroken"))
-                   "14:15:error: dash\\nbroken")))
+                    (flycheck-error-new-at 14 15 'error "dash\\nbroken"
+                                           :checker 'foo))
+                   "14:15:error: dash\\nbroken (foo)")))
 
 ;; Local Variables:
 ;; coding: utf-8

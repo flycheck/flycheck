@@ -1658,8 +1658,11 @@ Pop up a help buffer with the documentation of CHECKER."
 ;;;; Checker error API
 (cl-defstruct (flycheck-error
                (:constructor flycheck-error-new)
-               (:constructor flycheck-error-new-at (line column &optional level message (buffer (current-buffer)))))
-  buffer filename line column message level)
+               (:constructor flycheck-error-new-at (line column
+                                                         &optional level message
+                                                         &key (buffer (current-buffer))
+                                                         checker)))
+  buffer checker filename line column message level)
 
 (defmacro flycheck-error-with-buffer (err &rest forms)
   "Switch to the buffer of ERR and evaluate FORMS.
@@ -1784,15 +1787,16 @@ _not_ include the file name."
   (let ((line (flycheck-error-line err))
         (column (flycheck-error-column err))
         (level (symbol-name (flycheck-error-level err)))
+        (checker (symbol-name (flycheck-error-checker err)))
         (message (flycheck-error-message err)))
     ;; FIXME: s-lex-format breaks with double backslash, see
     ;; https://github.com/magnars/s.el/issues/34
     ;; (if column
-    ;;     (s-lex-format "${line}:${column}:${level}: ${message}")
-    ;;   (s-lex-format "${line}:${level}: ${message}"))
+    ;;     (s-lex-format "${line}:${column}:${level}: ${message} (${checker})")
+    ;;   (s-lex-format "${line}:${level}: ${message} (${checker})"))
     (if column
-        (format "%s:%s:%s: %s" line column level message)
-      (format "%s:%s: %s" line level message))))
+        (format "%s:%s:%s: %s (%s)" line column level message checker)
+      (format "%s:%s: %s (%s)" line level message checker))))
 
 
 ;;;; General error parsing
@@ -1806,7 +1810,9 @@ Return the errors parsed with the error patterns of CHECKER."
   (let* ((parser (or (flycheck-checker-error-parser checker)
                      'flycheck-parse-output-with-patterns))
          (errors (funcall parser output checker buffer)))
-    (--each errors (setf (flycheck-error-buffer it) buffer))
+    (--each errors
+      (setf (flycheck-error-buffer it) buffer)
+      (setf (flycheck-error-checker it) checker))
     (-map #'flycheck-sanitize-error errors)))
 
 (defun flycheck-fix-error-filename (err buffer-files)

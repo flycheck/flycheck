@@ -317,31 +317,25 @@ Raise an assertion error if the buffer is not clear afterwards."
     (should (equal (overlay-get overlay 'flycheck-error) error))
     (should (string= (overlay-get overlay 'help-echo) message))))
 
-(defun flycheck-testsuite-should-error (expected-err)
+(defun flycheck-testsuite-should-error (line column message level &rest properties)
   "Test that EXPECTED-ERR is an error in the current buffer.
 
 Test that the error is contained in `flycheck-current-errors',
 and that there is an overlay for this error at the correct
 position.
 
-EXPECTED-ERR is a list (LINE COLUMN MESSAGE LEVEL [NO-FILENAME]).
-LINE and COLUMN are integers specifying the expected line and
-column number respectively.  COLUMN may be nil to indicate that
-the error has no column.  MESSAGE is a string with the expected
-error message.  LEVEL is either `error' or `warning' and
-indicates the expected error level.  If given and non-nil,
-`NO-FILENAME' indicates that the error is expected to not have a
-file name.
+LINE, COLUMN, MESSAGE and LEVEL are the expected properties of
+the error.  PROPERTIES specify additional properties of the expected ERROR.
 
 Signal a test failure if this error is not present."
-  (let* ((no-filename (nth 4 expected-err))
+  (let* ((filename (-if-let (member (plist-member properties :filename))
+                     (cadr member) (buffer-file-name)))
+         (checker (-if-let (member (plist-member properties :checker))
+                    (cadr member) (or flycheck-checker flycheck-last-checker)))
+         (buffer (or (plist-get properties :buffer) (current-buffer)))
          (real-error (flycheck-error-new
-                      :buffer (current-buffer)
-                      :filename (if no-filename nil (buffer-file-name))
-                      :line (nth 0 expected-err)
-                      :column (nth 1 expected-err)
-                      :message (nth 2 expected-err)
-                      :level (nth 3 expected-err)))
+                      :buffer buffer :filename filename :checker checker
+                      :line line :column column :message message :level level))
          (overlay (--first (equal (overlay-get it 'flycheck-error) real-error)
                            (flycheck-overlays-in 0 (+ 1 (buffer-size))))))
     (should (-contains? flycheck-current-errors real-error))
@@ -362,7 +356,7 @@ Each error in ERRORS is a list as expected by
   (if (not errors)
       (should flycheck-current-errors)
     (dolist (err errors)
-      (flycheck-testsuite-should-error err))
+      (apply #'flycheck-testsuite-should-error err))
     (should (= (length errors) (length flycheck-current-errors)))
     (should (= (length errors)
                (length (flycheck-overlays-in (point-min) (point-max)))))))

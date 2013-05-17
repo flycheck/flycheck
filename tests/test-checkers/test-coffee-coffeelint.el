@@ -46,7 +46,7 @@
   :expected-result (flycheck-testsuite-fail-unless-checker 'coffee-coffeelint)
   (flycheck-testsuite-should-syntax-check
    "checkers/coffee-syntax-error.coffee" 'coffee-mode nil
-   '(4 nil "missing \", starting" error :no-filename)))
+   '(4 nil "missing \", starting" error :filename nil)))
 
 ;; Local Variables:
 ;; coding: utf-8

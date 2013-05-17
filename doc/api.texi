@@ -31,6 +31,9 @@ Note that you do not need to set this attribute when creating errors in
 an error parser.  Flycheck automatically keeps track of the buffer
 itself.
 
+@item checker
+The syntax checker that reported this error.
+
 @item filename
 A string containing the filename the error refers to.
 
