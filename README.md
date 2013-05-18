@@ -14,10 +14,10 @@ extension for GNU Emacs 24 with:
 - and a clean, concise and understandable implementation with decent test
   coverage.
 
-And this is how it looks like, using the awesome [solarized-light][] color
-theme:
-
 ![Screenshot of Flycheck in action](https://github.com/lunaryorn/flycheck/raw/master/doc/screenshot.png)
+
+The screenshot was taken using the awesome [solarized-light][] color theme and
+the great [Anonymous Pro][anon-pro] font.
 
 
 Features
@@ -181,6 +181,7 @@ See [COPYING][] for details.
 
 
 [solarized-light]: https://github.com/bbatsov/solarized-emacs
+[anon-pro]: http://www.marksimonson.com/fonts/view/anonymous-pro
 [melpa]: http://melpa.milkbox.net
 [marmalade]: http://marmalade-repo.org/
 [download]: https://github.com/lunaryorn/flycheck/tags
