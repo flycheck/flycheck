@@ -1454,6 +1454,7 @@ This appendix provides a comprehensive changelog of all releases:
 * Menu:
 
 * master        :: unreleased
+* 0.12          :: May 18, 2013
 * 0.11          :: May 01, 2013
 * 0.10          :: Apr 21, 2013
 * 0.9           :: Apr 13, 2013
@@ -1849,9 +1850,9 @@ File: flycheck.info,  Node: 0.11,  Next: master,  Prev: 0.10,  Up: Changes
         * Add missing customization group for syntax checker options
 
 
-File: flycheck.info,  Node: master,  Prev: 0.11,  Up: Changes
+File: flycheck.info,  Node: 0.12,  Next: master,  Prev: 0.11,  Up: Changes
 
-master (unreleased)
+0.12 (May 18, 2013)
 ===================
 
    * New syntax checkers:
@@ -1880,6 +1881,12 @@ master (unreleased)
 
         * Correctly parse syntax errors from JRuby
           (https://github.com/lunaryorn/flycheck/issues/136)
+
+
+File: flycheck.info,  Node: master,  Prev: 0.12,  Up: Changes
+
+master (unreleased)
+===================
 
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
@@ -2571,23 +2578,24 @@ Node: Contributing syntax checkers52810
 Node: Contributing code53605
 Node: Unit tests54945
 Node: Changes56232
-Node: 0.156880
-Node: 0.257164
-Node: 0.357442
-Node: 0.457678
-Node: 0.558453
-Node: 0.659673
-Node: 0.6.162523
-Node: 0.762672
-Node: 0.7.163686
-Node: 0.864401
-Node: 0.965913
-Node: 0.1066409
-Node: 0.1168461
-Node: master69649
-Node: Credits70645
-Node: GNU Free Documentation License73572
-Node: Syntax checkers98724
-Node: Function and Variable Index99771
+Node: 0.156912
+Node: 0.257196
+Node: 0.357474
+Node: 0.457710
+Node: 0.558485
+Node: 0.659705
+Node: 0.6.162555
+Node: 0.762704
+Node: 0.7.163718
+Node: 0.864433
+Node: 0.965945
+Node: 0.1066441
+Node: 0.1168493
+Node: 0.1269681
+Node: master70690
+Node: Credits70796
+Node: GNU Free Documentation License73723
+Node: Syntax checkers98875
+Node: Function and Variable Index99922
 
 End Tag Table
