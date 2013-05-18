@@ -517,7 +517,7 @@ CodeSniffer}
 
 @end itemize
 
-@node 0.11, master, 0.10, Changes
+@node 0.11, 0.12, 0.10, Changes
 @comment  node-name,  next,  previous,  up
 @unnumberedsec 0.11 (May 01, 2013)
 

@@ -1815,7 +1815,7 @@ File: flycheck.info,  Node: 0.10,  Next: 0.11,  Prev: 0.9,  Up: Changes
           CodeSniffer (https://github.com/lunaryorn/flycheck/issues/118)
 
 
-File: flycheck.info,  Node: 0.11,  Next: master,  Prev: 0.10,  Up: Changes
+File: flycheck.info,  Node: 0.11,  Next: 0.12,  Prev: 0.10,  Up: Changes
 
 0.11 (May 01, 2013)
 ===================
@@ -2591,11 +2591,11 @@ Node: 0.864433
 Node: 0.965945
 Node: 0.1066441
 Node: 0.1168493
-Node: 0.1269681
-Node: master70690
-Node: Credits70796
-Node: GNU Free Documentation License73723
-Node: Syntax checkers98875
-Node: Function and Variable Index99922
+Node: 0.1269679
+Node: master70688
+Node: Credits70794
+Node: GNU Free Documentation License73721
+Node: Syntax checkers98873
+Node: Function and Variable Index99920
 
 End Tag Table
