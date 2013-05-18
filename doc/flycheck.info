@@ -63,6 +63,7 @@ checking extension for GNU Emacs 24 withL
    * a dead simple, declarative API to create new syntax checkers,
    * major-mode based selection of syntax checkers,
    * multiple syntax checkers per buffer,
+   * optional error list popup,
    * a "doesn't get in your way" guarantee,
    * and a clean, concise and understandable implementation with decent
      test coverage.
@@ -80,7 +81,10 @@ File: flycheck.info,  Node: Features,  Next: Installation,  Prev: Introduction, 
 1.1 Features
 ============
 
-     Automatic syntax checking after saving or insertion of new lines
+     Automatic on-the-fly syntax checking while editing
+   * Fully automatic selection of the syntax checker
+   * Optional manual selection of a syntax checker with
+     'flycheck-select-checker' at 'C-c ! s'
    * Built-in syntax checkers for:
         * CoffeeScript (using 'coffeelint')
         * CSS (using 'csslint'))
@@ -112,6 +116,7 @@ File: flycheck.info,  Node: Features,  Next: Installation,  Prev: Introduction, 
    * Syntax checker configuration with project-specific configuration
      files and options
    * Error navigation with 'next-error' and 'previous-error'
+   * Error list with 'flycheck-list-errors' at 'C-c ! l'
    * Easy declarative API to define new syntax checkers
    * Error parsers for structured markup formats (e.g.  Checkdoc XML)
 
@@ -2550,52 +2555,52 @@ Function and Variable Index
 Tag Table:
 Node: Top734
 Node: Introduction2083
-Node: Features2984
-Node: Installation4796
-Node: Activation5970
-Node: Usage6321
-Node: Syntax checking6944
-Node: Selection10953
-Node: Configuration13534
-Node: Reporting17074
-Node: Navigation20720
-Node: Mode line22516
-Node: Extending23417
-Node: Declaration24016
-Node: Error parsers36373
-Node: Option filters37357
-Node: Examples37696
-Node: Simple example38128
-Node: Predicate example41192
-Node: Configuration example43173
-Node: Chaining example45832
-Node: API47218
-Node: Error API48006
-Node: Error parser API51098
-Node: Contribution51324
-Node: Reporting issues52000
-Node: Contributing syntax checkers52810
-Node: Contributing code53605
-Node: Unit tests54945
-Node: Changes56232
-Node: 0.156912
-Node: 0.257196
-Node: 0.357474
-Node: 0.457710
-Node: 0.558485
-Node: 0.659705
-Node: 0.6.162555
-Node: 0.762704
-Node: 0.7.163718
-Node: 0.864433
-Node: 0.965945
-Node: 0.1066441
-Node: 0.1168493
-Node: 0.1269679
-Node: master70688
-Node: Credits70794
-Node: GNU Free Documentation License73721
-Node: Syntax checkers98873
-Node: Function and Variable Index99920
+Node: Features3016
+Node: Installation5024
+Node: Activation6198
+Node: Usage6549
+Node: Syntax checking7172
+Node: Selection11181
+Node: Configuration13762
+Node: Reporting17302
+Node: Navigation20948
+Node: Mode line22744
+Node: Extending23645
+Node: Declaration24244
+Node: Error parsers36601
+Node: Option filters37585
+Node: Examples37924
+Node: Simple example38356
+Node: Predicate example41420
+Node: Configuration example43401
+Node: Chaining example46060
+Node: API47446
+Node: Error API48234
+Node: Error parser API51326
+Node: Contribution51552
+Node: Reporting issues52228
+Node: Contributing syntax checkers53038
+Node: Contributing code53833
+Node: Unit tests55173
+Node: Changes56460
+Node: 0.157140
+Node: 0.257424
+Node: 0.357702
+Node: 0.457938
+Node: 0.558713
+Node: 0.659933
+Node: 0.6.162783
+Node: 0.762932
+Node: 0.7.163946
+Node: 0.864661
+Node: 0.966173
+Node: 0.1066669
+Node: 0.1168721
+Node: 0.1269907
+Node: master70916
+Node: Credits71022
+Node: GNU Free Documentation License73949
+Node: Syntax checkers99101
+Node: Function and Variable Index100148
 
 End Tag Table

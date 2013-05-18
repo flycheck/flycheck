@@ -10,6 +10,7 @@ extension for GNU Emacs 24 with:
 - a dead simple, declarative API to create new syntax checkers,
 - major-mode based selection of syntax checkers,
 - multiple syntax checkers per buffer,
+- optional error list popup,
 - a “doesn’t get in your way” guarantee,
 - and a clean, concise and understandable implementation with decent test
   coverage.
@@ -23,7 +24,10 @@ the great [Anonymous Pro][anon-pro] font.
 Features
 --------
 
-- Automatic syntax check after saving or insertion of new lines
+- Automatic on-the-fly syntax checking while editing
+- Fully automatic selection of the best syntax checker
+- Optional manual selection of a syntax checker with `flycheck-select-checker`
+  at `C-c ! s`
 - Built-in syntax checkers for:
   - CoffeeScript
   - CSS
@@ -54,6 +58,7 @@ Features
 - Syntax checker configuration with project-specific configuration files and
   options
 - Error navigation with `next-error` and `previous-error`
+- Error list with `flycheck-list-errors` at `C-c ! l`
 - Declarative API to define new syntax checkers
 - Error parsers for structured markup formats (e.g. Checkdoc XML)
 

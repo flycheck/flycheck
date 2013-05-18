@@ -15,6 +15,8 @@ major-mode based selection of syntax checkers,
 @item
 multiple syntax checkers per buffer,
 @item
+optional error list popup,
+@item
 a ``doesn't get in your way'' guarantee,
 @item
 and a clean, concise and understandable implementation with decent test
@@ -40,7 +42,12 @@ And this is how it looks in action, using the awesome
 @section Features
 
 @itemize @bullet
-Automatic syntax checking after saving or insertion of new lines
+Automatic on-the-fly syntax checking while editing
+@item
+Fully automatic selection of the syntax checker
+@item
+Optional manual selection of a syntax checker with
+@code{flycheck-select-checker} at @kbd{C-c ! s}
 @item
 Built-in syntax checkers for:
 @itemize @bullet
@@ -103,6 +110,8 @@ Syntax checker configuration with project-specific configuration files
 and options
 @item
 Error navigation with @code{next-error} and @code{previous-error}
+@item
+Error list with @code{flycheck-list-errors} at @kbd{C-c ! l}
 @item
 Easy declarative API to define new syntax checkers
 @item
