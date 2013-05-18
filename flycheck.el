@@ -45,6 +45,7 @@
 (require 'cl-lib)
 (require 's)
 (require 'dash)
+(require 'package)  ; For `package-buffer-info' and `package-version-join''
 
 
 ;;;; Compatibility
@@ -469,7 +470,6 @@ buffer manually.
 ;;; Version information
 (defun flycheck-library-version ()
   "Get the version in the Flycheck library header."
-  (require 'package)                    ; For `package-buffer-info'
   (-when-let* ((definition (symbol-function 'flycheck-mode))
                (source-file (find-lisp-object-file-name 'flycheck-mode
                                                         definition)))
