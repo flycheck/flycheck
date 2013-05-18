@@ -48,7 +48,8 @@
     (flycheck-testsuite-should-errors
      '(9 1 "`message' called with 0 args to fill 1\n    format field(s)" warning)
      '(11 8 "`message' called with 0 args to fill 1\n    format field(s)" warning)
-     '(12 nil "First sentence should end with punctuation" warning)
+     '(12 nil "First sentence should end with punctuation" warning
+          :checker emacs-lisp-checkdoc)
      '(15 1 "`message' called with 0 args to fill 1\n    format field(s)" warning))))
 
 (ert-deftest flycheck-navigate-does-not-cross-narrowing ()

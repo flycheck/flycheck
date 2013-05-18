@@ -31,7 +31,7 @@
   :expected-result (flycheck-testsuite-fail-unless-checker 'haml)
   (flycheck-testsuite-should-syntax-check
    "checkers/haml-error.haml" 'haml-mode nil
-   '(5 nil "Inconsistent indentation: 3 spaces used for indentation, but the rest of the document was indented using 2 spaces." error :no-filename)))
+   '(5 nil "Inconsistent indentation: 3 spaces used for indentation, but the rest of the document was indented using 2 spaces." error :filename nil)))
 
 ;; Local Variables:
 ;; coding: utf-8

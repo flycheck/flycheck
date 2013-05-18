@@ -45,6 +45,7 @@
 (require 'cl-lib)
 (require 's)
 (require 'dash)
+(require 'package)  ; For `package-buffer-info' and `package-version-join''
 
 
 ;;;; Compatibility
@@ -356,6 +357,7 @@ This variable is a normal hook.")
     (define-key pmap (kbd "C-c") 'flycheck-compile)
     (define-key pmap "n" 'flycheck-next-error)
     (define-key pmap "p" 'flycheck-previous-error)
+    (define-key pmap "l" 'flycheck-list-errors)
     (define-key pmap (kbd "C-w") 'flycheck-copy-messages-as-kill)
     (define-key pmap "/" 'flycheck-google-messages)
     (define-key pmap "s" 'flycheck-select-checker)
@@ -373,6 +375,7 @@ This variable is a normal hook.")
    "---"
    ["Go to next error" flycheck-next-error t]
    ["Go to next error" flycheck-previous-error t]
+   ["Show all errors" flycheck-list-errors t]
    ["Google messages at point" flycheck-google-messages t]
    "---"
    ["Select syntax checker" flycheck-select-checker t]
@@ -462,6 +465,52 @@ buffer manually.
       (remove-hook (car it) (cdr it) t))
 
     (flycheck-teardown))))
+
+
+;;; Version information
+(defun flycheck-library-version ()
+  "Get the version in the Flycheck library header."
+  (-when-let* ((definition (symbol-function 'flycheck-mode))
+               (source-file (find-lisp-object-file-name 'flycheck-mode
+                                                        definition)))
+    (with-temp-buffer
+      (insert-file-contents source-file)
+      (aref (package-buffer-info) 3))))
+
+(defun flycheck-package-version ()
+  "Get the package version of Flycheck.
+
+This is the version number of the installed Flycheck package."
+  (when (boundp 'package-alist)
+    (-when-let (info (cdr (assq 'flycheck package-alist)))
+      (package-version-join (aref info 0)))))
+
+(defun flycheck-version (&optional show-version)
+  "Get the Flycheck version as string.
+
+If called interactively or if SHOW-VERSION is non-nil, show the
+version in the echo area and the messages buffer.
+
+The returned string includes both, the version from package.el
+and the library version, if both a present and different.
+
+If the version number could not be determined, signal an error,
+if called interactively, or if SHOW-VERSION is non-nil, otherwise
+just return nil."
+  (interactive (list (not (or executing-kbd-macro noninteractive))))
+  (let* ((lib-version (flycheck-library-version))
+         (pkg-version (flycheck-package-version))
+         (version (cond
+                   ((and lib-version pkg-version
+                         (not (string= lib-version pkg-version)))
+                    (format "%s (package: %s)" lib-version pkg-version))
+                   ((or pkg-version lib-version)
+                    (format "%s" (or pkg-version lib-version))))))
+    (when show-version
+      (unless version
+        (error "Could not find out Flycheck version"))
+      (message "Flycheck version: %s" version))
+    version))
 
 
 ;;; Global syntax checking
@@ -1611,8 +1660,11 @@ Pop up a help buffer with the documentation of CHECKER."
 ;;;; Checker error API
 (cl-defstruct (flycheck-error
                (:constructor flycheck-error-new)
-               (:constructor flycheck-error-new-at (line column &optional level message (buffer (current-buffer)))))
-  buffer filename line column message level)
+               (:constructor flycheck-error-new-at (line column
+                                                         &optional level message
+                                                         &key checker filename
+                                                         (buffer (current-buffer)))))
+  buffer checker filename line column message level)
 
 (defmacro flycheck-error-with-buffer (err &rest forms)
   "Switch to the buffer of ERR and evaluate FORMS.
@@ -1729,6 +1781,25 @@ non-whitespace character of the error line, if ERR has no error column."
   (car (or (flycheck-error-column-region err)
            (flycheck-error-line-region err))))
 
+(defun flycheck-error-format (err)
+  "Format ERR as human-readable string.
+
+Return a string that represents the given ERR.  This string does
+_not_ include the file name."
+  (let ((line (flycheck-error-line err))
+        (column (flycheck-error-column err))
+        (level (symbol-name (flycheck-error-level err)))
+        (checker (symbol-name (flycheck-error-checker err)))
+        (message (flycheck-error-message err)))
+    ;; FIXME: s-lex-format breaks with double backslash, see
+    ;; https://github.com/magnars/s.el/issues/34
+    ;; (if column
+    ;;     (s-lex-format "${line}:${column}:${level}: ${message} (${checker})")
+    ;;   (s-lex-format "${line}:${level}: ${message} (${checker})"))
+    (if column
+        (format "%s:%s:%s: %s (%s)" line column level message checker)
+      (format "%s:%s: %s (%s)" line level message checker))))
+
 
 ;;;; General error parsing
 (defun flycheck-parse-output (output checker buffer)
@@ -1741,7 +1812,9 @@ Return the errors parsed with the error patterns of CHECKER."
   (let* ((parser (or (flycheck-checker-error-parser checker)
                      'flycheck-parse-output-with-patterns))
          (errors (funcall parser output checker buffer)))
-    (--each errors (setf (flycheck-error-buffer it) buffer))
+    (--each errors
+      (setf (flycheck-error-buffer it) buffer)
+      (setf (flycheck-error-checker it) checker))
     (-map #'flycheck-sanitize-error errors)))
 
 (defun flycheck-fix-error-filename (err buffer-files)
@@ -2203,8 +2276,105 @@ the beginning of the buffer."
   (flycheck-next-error n :reset))
 
 
+;;;; Error list
+(defconst flycheck-error-list-buffer "*Flycheck errors*"
+  "The name of the buffer to show error lists.")
+
+(defconst flycheck-list-error-regex-alist
+  '(("^\\(?1:.+?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)?error:" 1 2 3 2)
+    ("^\\(?1:.+?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)?warning:" 1 2 3 1))
+  "Compilation mode expressions for Flycheck error listings.")
+
+(define-derived-mode flycheck-error-list-mode compilation-mode "Flycheck errors"
+  "A major mode for a Flycheck error listing."
+  (setq-local compilation-error-regexp-alist
+              flycheck-list-error-regex-alist))
+
+(defun flycheck-list-buffer-label (buffer)
+  "Create a list label for BUFFER relative to DIRECTORY.
+
+BUFFER is a buffer object.
+
+The label is either the file name of BUFFER, or the buffer name.
+The file name is made relative to the current
+`default-directory'.
+
+Return the label as string."
+  (-if-let (filename (buffer-file-name buffer))
+    (file-relative-name filename)
+    (format "#<buffer %s>" (buffer-name buffer))))
+
+(defun flycheck-list-error-label (err)
+  "Create a list label for ERR.
+
+ERR is a Flycheck error.
+
+The label is either the file name of ERR, the file name of the
+buffer of ERR, or the buffer name.  The file name is made
+relative to the current `default-directory'.
+
+Return the label as string."
+  (-if-let (filename (flycheck-error-filename err))
+    (file-relative-name filename)
+    (flycheck-list-buffer-label (flycheck-error-buffer err))))
+
+(defun flycheck-list-add-header (buffer)
+  "Add a error header for BUFFER .
+
+Insert an error list header for BUFFER into the current buffer.
+The header contains the filename of BUFFER relative to the
+current `default-directory', or the buffer name, if BUFFER has no
+file name."
+  (insert (format "\n\n\C-l\n*** %s: Syntax and style errors (Flycheck v%s)\n"
+                  (flycheck-list-buffer-label buffer)
+                  (or (flycheck-version) "Unknown"))))
+
+(defun flycheck-list-add-errors (errors)
+  "Add a list of all ERRORS to the current buffer.
+
+Insert a human-readable listing of ERRORS into the current
+buffer.  The file names of ERRORS are printed relative to the
+current `default-directory'."
+  (--each errors
+    (insert (flycheck-list-error-label it))
+    (insert ":")
+    (insert (flycheck-error-format it))
+    (insert "\n")))
+
+(defun flycheck-list-errors ()
+  "List all errors in current buffer.
+
+Show all Flycheck errors in the current buffer in a separate window.
+
+Return the buffer containing the error listing."
+  (interactive)
+  (if flycheck-mode
+      (let ((source-buffer (current-buffer))
+            (source-directory default-directory)
+            (errors flycheck-current-errors)
+            (list-buffer (get-buffer-create flycheck-error-list-buffer)))
+        (with-current-buffer list-buffer
+          (flycheck-error-list-mode)
+          (setq default-directory source-directory)
+          (let ((inhibit-read-only t))
+            (goto-char (point-max))
+            (flycheck-list-add-header source-buffer)
+            (flycheck-list-add-errors errors)))
+        (pop-to-buffer list-buffer)
+        ;; Before before the first current error, and recenter the window
+        (goto-char (point-max))
+        (re-search-backward "\C-l" nil :no-error)
+        (beginning-of-line)
+        (forward-line 1)
+        (recenter 0)
+        ;; Switch back to the old window
+        (other-window -1)
+        list-buffer)
+    (user-error "Flycheck mode not enabled")))
+
+
 ;;;; Error message echoing
-(defconst flycheck-error-message-buffer "*Flycheck errors*"
+(defconst flycheck-error-message-buffer "*Flycheck error messages*"
   "The name of the buffer to show long error messages in.")
 
 (defun flycheck-error-message-buffer ()

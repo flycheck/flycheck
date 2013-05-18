@@ -30,13 +30,15 @@
   :expected-result (flycheck-testsuite-fail-unless-checker 'puppet-lint)
   (flycheck-testsuite-should-syntax-check
    "checkers/puppet-lint-warning.pp" 'puppet-mode nil
-   '(2 nil "case statement without a default case" warning)))
+   '(2 nil "case statement without a default case" warning
+       :checker puppet-lint)))
 
 (ert-deftest checker-puppet-lint-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'puppet-lint)
   (flycheck-testsuite-should-syntax-check
    "checkers/puppet-lint/error/manifests/puppet-lint-error.pp" 'puppet-mode nil
-   '(2 nil "mlayout not in autoload module layout" error)))
+   '(2 nil "mlayout not in autoload module layout" error
+       :checker puppet-lint)))
 
 ;; Local Variables:
 ;; coding: utf-8

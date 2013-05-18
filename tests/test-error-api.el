@@ -1,4 +1,4 @@
-;;; test-error-region.el --- Tests for error region -*- lexical-binding: t; -*-
+;;; test-error-api.el --- Tests for the error API -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
@@ -107,8 +107,27 @@
     (should (= (flycheck-error-pos (flycheck-error-new-at 4 1)) 19))
     (should (= (flycheck-error-pos (flycheck-error-new-at 4 nil)) 19))))
 
+(ert-deftest flycheck-error-format ()
+  (should (string= (flycheck-error-format
+                    (flycheck-error-new-at 3 5 'warning "Hello world"
+                                           :checker 'emacs-lisp))
+                   "3:5:warning: Hello world (emacs-lisp)"))
+  (should (string= (flycheck-error-format
+                    (flycheck-error-new-at 20 7 'error "Spam with eggs"
+                                           :checker 'ruby))
+                   "20:7:error: Spam with eggs (ruby)"))
+  (should (string= (flycheck-error-format
+                    (flycheck-error-new-at 14 nil 'warning "Oh no"
+                                           :checker 'python-flake8))
+                   "14:warning: Oh no (python-flake8)"))
+  ;; Specific test for https://github.com/magnars/s.el/issues/34
+  (should (string= (flycheck-error-format
+                    (flycheck-error-new-at 14 15 'error "dash\\nbroken"
+                                           :checker 'foo))
+                   "14:15:error: dash\\nbroken (foo)")))
+
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:
 
-;;; test-error-region.el ends here
+;;; test-error-api.el ends here

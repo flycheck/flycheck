@@ -401,6 +401,15 @@ reported in the mode line and in error message popups, and highlighted
 according to @code{flycheck-highlighting-mode}.
 @end defopt
 
+You can also list all errors in the current buffer:
+
+@table @kbd
+@item C-c ! l
+@itemx M-x flycheck-list-errors
+@findex flycheck-list-errors
+List all errors in the current buffer in a separate buffer.
+@end table
+
 To view an error message, either hover the mouse of the highlighted
 error, or move the point to the highlighted error and wait for a short
 moment to see the error message in the echo area.  You can also copy the

@@ -30,14 +30,16 @@
   (flycheck-testsuite-should-syntax-check
    "checkers/emacs-lisp-checkdoc-warning.el"
    'emacs-lisp-mode nil                 ; Checkdoc is chained after Emacs Lisp
-   '(12 nil "First sentence should end with punctuation" warning)))
+   '(12 nil "First sentence should end with punctuation" warning
+        :checker emacs-lisp-checkdoc)))
 
 (ert-deftest checker-emacs-lisp-checkdoc-warning-compressed ()
   "Test a checkdoc warning caused by a missing period in a docstring."
   (flycheck-testsuite-should-syntax-check
    "checkers/emacs-lisp-checkdoc-warning.el.gz"
    'emacs-lisp-mode nil
-   '(12 nil "First sentence should end with punctuation" warning)))
+   '(12 nil "First sentence should end with punctuation" warning
+        :checker emacs-lisp-checkdoc)))
 
 (ert-deftest checker-emacs-lisp-checkdoc-works-without-buffer-file-name ()
   "Test checkdoc checker in buffers without file names.

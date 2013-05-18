@@ -30,9 +30,9 @@
   :expected-result (flycheck-testsuite-fail-unless-checker 'html-tidy)
   (flycheck-testsuite-should-syntax-check
    "checkers/html-tidy-warning-and-error.html" 'html-mode nil
-   '(3 1 "missing <!DOCTYPE> declaration" warning :no-filename)
-   '(8 5 "<spam> is not recognized!" error :no-filename)
-   '(8 5 "discarding unexpected <spam>" warning :no-filename)))
+   '(3 1 "missing <!DOCTYPE> declaration" warning :filename nil)
+   '(8 5 "<spam> is not recognized!" error :filename nil)
+   '(8 5 "discarding unexpected <spam>" warning :filename nil)))
 
 ;; Local Variables:
 ;; coding: utf-8

@@ -512,6 +512,12 @@ Errors and warnings from a syntax checker are
      reported in the mode line and in error message popups, and
      highlighted according to 'flycheck-highlighting-mode'.
 
+   You can also list all errors in the current buffer:
+
+'C-c ! l'
+'M-x flycheck-list-errors'
+     List all errors in the current buffer in a separate buffer.
+
    To view an error message, either hover the mouse of the highlighted
 error, or move the point to the highlighted error and wait for a short
 moment to see the error message in the echo area.  You can also copy the
@@ -1221,6 +1227,9 @@ nil:
      errors in an error parser.  Flycheck automatically keeps track of
      the buffer itself.
 
+'checker'
+     The syntax checker that reported this error.
+
 'filename'
      A string containing the filename the error refers to.
 
@@ -1273,6 +1282,9 @@ nil:
 
      This is the position that error navigation would jump to when
      navigating to this error.
+
+ -- Function: flycheck-error-format error
+     Format the ERROR as a human-readable string.
 
    The following functions and variables may be used to analyze the
 errors of a syntax check.
@@ -1340,7 +1352,8 @@ Please report any issues to the Flycheck issue tracker
    * Be clear and precise.  If possible, name functions and command
      exactly.
    * Open an issue with a clear title and description in grammatically
-     correct, complete sentences.
+     correct, complete sentences.  Include the version of Flycheck as
+     shown by 'M-x flycheck-version'.
 
    We will try to handle each issue appropriately, and adhering to these
 guidelines helps us in doing so.
@@ -1853,6 +1866,10 @@ master (unreleased)
           highlighting mode
         * Automatically check syntax some time after the last change in
           the buffer (https://github.com/lunaryorn/flycheck/issues/140)
+        * Add 'flycheck-version' to determine the installed Flycheck
+          version
+        * Add 'flycheck-list-errors', mapped to 'C-c ! l', to list all
+          errors in a separate buffer
 
    * Improvements:
 
@@ -2484,30 +2501,32 @@ Function and Variable Index
 * flycheck-checker:                      Selection.           (line  41)
 * flycheck-checkers:                     Selection.           (line   9)
 * flycheck-chktexrc:                     Configuration.       (line  25)
-* flycheck-clear:                        Reporting.           (line  84)
+* flycheck-clear:                        Reporting.           (line  90)
 * flycheck-coffeelintrc:                 Configuration.       (line  28)
-* flycheck-copy-messages-as-kill:        Reporting.           (line  67)
-* flycheck-count-errors:                 Error API.           (line  79)
-* flycheck-current-errors:               Error API.           (line  75)
+* flycheck-copy-messages-as-kill:        Reporting.           (line  73)
+* flycheck-count-errors:                 Error API.           (line  85)
+* flycheck-current-errors:               Error API.           (line  81)
 * flycheck-declare-checker:              Declaration.         (line   8)
 * flycheck-def-config-file-var:          Declaration.         (line 250)
 * flycheck-def-option-var:               Declaration.         (line 266)
 * flycheck-describe-checker:             Selection.           (line  70)
-* flycheck-error-column-region:          Error API.           (line  53)
+* flycheck-error-column-region:          Error API.           (line  56)
 * flycheck-error-face:                   Reporting.           (line  14)
-* flycheck-error-line-region:            Error API.           (line  50)
-* flycheck-error-new:                    Error API.           (line  39)
-* flycheck-error-pos:                    Error API.           (line  66)
-* flycheck-error-sexp-region:            Error API.           (line  59)
-* flycheck-error-with-buffer:            Error API.           (line  46)
+* flycheck-error-format:                 Error API.           (line  75)
+* flycheck-error-line-region:            Error API.           (line  53)
+* flycheck-error-new:                    Error API.           (line  42)
+* flycheck-error-pos:                    Error API.           (line  69)
+* flycheck-error-sexp-region:            Error API.           (line  62)
+* flycheck-error-with-buffer:            Error API.           (line  49)
 * flycheck-flake8-maximum-complexity:    Configuration.       (line  10)
 * flycheck-flake8-maximum-line-length:   Configuration.       (line  14)
 * flycheck-flake8rc:                     Configuration.       (line  31)
-* flycheck-google-messages:              Reporting.           (line  72)
-* flycheck-has-errors-p:                 Error API.           (line  84)
+* flycheck-google-messages:              Reporting.           (line  78)
+* flycheck-has-errors-p:                 Error API.           (line  90)
 * flycheck-highlighting-mode:            Reporting.           (line  28)
 * flycheck-indication-mode:              Reporting.           (line  50)
 * flycheck-jshintrc:                     Configuration.       (line  34)
+* flycheck-list-errors:                  Reporting.           (line  64)
 * flycheck-locate-config-file-functions: Configuration.       (line  58)
 * flycheck-next-error:                   Navigation.          (line  23)
 * flycheck-parse-xml-string:             Error parser API.    (line   6)
@@ -2532,43 +2551,43 @@ Node: Syntax checking6944
 Node: Selection10953
 Node: Configuration13534
 Node: Reporting17074
-Node: Navigation20561
-Node: Mode line22357
-Node: Extending23258
-Node: Declaration23857
-Node: Error parsers36214
-Node: Option filters37198
-Node: Examples37537
-Node: Simple example37969
-Node: Predicate example41033
-Node: Configuration example43014
-Node: Chaining example45673
-Node: API47059
-Node: Error API47847
-Node: Error parser API50785
-Node: Contribution51011
-Node: Reporting issues51687
-Node: Contributing syntax checkers52423
-Node: Contributing code53218
-Node: Unit tests54558
-Node: Changes55845
-Node: 0.156493
-Node: 0.256777
-Node: 0.357055
-Node: 0.457291
-Node: 0.558066
-Node: 0.659286
-Node: 0.6.162136
-Node: 0.762285
-Node: 0.7.163299
-Node: 0.864014
-Node: 0.965526
-Node: 0.1066022
-Node: 0.1168074
-Node: master69262
-Node: Credits70062
-Node: GNU Free Documentation License72989
-Node: Syntax checkers98141
-Node: Function and Variable Index99188
+Node: Navigation20720
+Node: Mode line22516
+Node: Extending23417
+Node: Declaration24016
+Node: Error parsers36373
+Node: Option filters37357
+Node: Examples37696
+Node: Simple example38128
+Node: Predicate example41192
+Node: Configuration example43173
+Node: Chaining example45832
+Node: API47218
+Node: Error API48006
+Node: Error parser API51098
+Node: Contribution51324
+Node: Reporting issues52000
+Node: Contributing syntax checkers52810
+Node: Contributing code53605
+Node: Unit tests54945
+Node: Changes56232
+Node: 0.156880
+Node: 0.257164
+Node: 0.357442
+Node: 0.457678
+Node: 0.558453
+Node: 0.659673
+Node: 0.6.162523
+Node: 0.762672
+Node: 0.7.163686
+Node: 0.864401
+Node: 0.965913
+Node: 0.1066409
+Node: 0.1168461
+Node: master69649
+Node: Credits70645
+Node: GNU Free Documentation License73572
+Node: Syntax checkers98724
+Node: Function and Variable Index99771
 
 End Tag Table
