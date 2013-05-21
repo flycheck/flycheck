@@ -628,6 +628,14 @@ Bug fixes:
 
 @itemize @bullet
 @item
+Improvements
+
+@itemize @bullet
+@item
+Always highlight errors on top of warnings now
+@end itemize
+
+@item
 Bug fixes:
 
 @itemize @bullet

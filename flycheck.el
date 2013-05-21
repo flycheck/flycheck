@@ -2120,7 +2120,7 @@ flycheck exclamation mark otherwise.")
 
 (put 'flycheck-error-overlay 'flycheck-overlay t)
 (put 'flycheck-error-overlay 'face 'flycheck-error-face)
-(put 'flycheck-error-overlay 'priority 100)
+(put 'flycheck-error-overlay 'priority 110)
 (put 'flycheck-error-overlay 'help-echo "Unknown error.")
 (put 'flycheck-error-overlay 'flycheck-fringe-bitmap
      flycheck-fringe-exclamation-mark)

@@ -1893,6 +1893,10 @@ File: flycheck.info,  Node: master,  Prev: 0.12,  Up: Changes
 master (unreleased)
 ===================
 
+   * Improvements
+
+        * Always highlight errors on top of warnings now
+
    * Bug fixes:
 
         * Fix error when searching for a configuration file outside a
@@ -2603,9 +2607,9 @@ Node: 0.1066669
 Node: 0.1168721
 Node: 0.1269907
 Node: master70916
-Node: Credits71139
-Node: GNU Free Documentation License74066
-Node: Syntax checkers99218
-Node: Function and Variable Index100265
+Node: Credits71216
+Node: GNU Free Documentation License74143
+Node: Syntax checkers99295
+Node: Function and Variable Index100342
 
 End Tag Table
