@@ -626,6 +626,19 @@ Bug fixes:
 @comment  node-name,  next,  previous,  up
 @unnumberedsec master (unreleased)
 
+@itemize @bullet
+@item
+Bug fixes:
+
+@itemize @bullet
+@item
+Fix error when searching for a configuration file outside a Projectile
+project
+@end itemize
+
+@end itemize
+
+
 @c Local Variables:
 @c mode: texinfo
 @c TeX-master: "flycheck"

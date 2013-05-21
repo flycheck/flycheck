@@ -28,7 +28,7 @@
 
 (require 'ert)
 (require 'flycheck)
-(require 'mocker)
+(require 'projectile)
 
 (ert-deftest flycheck-locate-config-file-functions ()
   (should (equal flycheck-locate-config-file-functions
@@ -47,18 +47,19 @@
                    (expand-file-name "../Makefile" flycheck-testsuite-dir)))))
 
 (ert-deftest flycheck-locate-config-file-projectile ()
-  (should-not (fboundp #'projectile-project-root))
-  (should-not (flycheck-locate-config-file-projectile "flycheck-testsuite.el"
-                                                      'emacs-lisp))
-  (mocker-let
-      ((projectile-project-root
-        ()
-        ((:input () :output flycheck-testsuite-dir
-                 :min-occur 2 :max-occur 2))))
-    (should (equal (flycheck-locate-config-file-projectile
-                    "flycheck-testsuite.el" 'emacs-lisp)
-                   (expand-file-name "flycheck-testsuite.el" flycheck-testsuite-dir)))
-    (should-not (flycheck-locate-config-file-projectile "Makefile" 'emacs-lisp))))
+  (with-temp-buffer
+    (set-visited-file-name (expand-file-name "foo" flycheck-testsuite-dir)
+                           :no-query)
+    (should (projectile-project-p))
+    (should (equal
+             (flycheck-locate-config-file-projectile "Makefile" 'emacs-lisp)
+             (expand-file-name "../Makefile" flycheck-testsuite-dir)))
+    (should-not (flycheck-locate-config-file-projectile "Foo" 'emacs-lisp)))
+  (with-temp-buffer
+    (set-visited-file-name (expand-file-name "foo" temporary-file-directory)
+                           :no-query)
+    (should-not (projectile-project-p))
+    (should-not (flycheck-locate-config-file-projectile "Foo" 'emacs-dir))))
 
 (ert-deftest flycheck-locate-config-file-ancestor-directories ()
   (with-temp-buffer

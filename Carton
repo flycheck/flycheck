@@ -9,6 +9,8 @@
  (depends-on "ert")                     ; Unit test library
  (depends-on "mocker")                  ; Mocking library
 
+ (depends-on "projectile")              ; Projectile integration
+
  ;; Various modes for use in the unit tests
  (depends-on "coffee-mode")
  (depends-on "haml-mode")

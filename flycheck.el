@@ -1431,10 +1431,12 @@ Otherwise return nil.
 
 _CHECKER is ignored."
   (when (fboundp 'projectile-project-root)
-    (-when-let (root-directory (projectile-project-root))
-      (let ((filepath (expand-file-name filename root-directory)))
-        (when (file-exists-p filepath)
-          filepath)))))
+    (condition-case nil
+        (let* ((root-directory (projectile-project-root))
+               (filepath (expand-file-name filename root-directory)))
+          (when (file-exists-p filepath)
+            filepath))
+      (error nil))))
 
 (defun flycheck-locate-config-file-ancestor-directories (filename _checker)
   "Locate a configuration FILENAME in ancestor directories.

@@ -1893,6 +1893,11 @@ File: flycheck.info,  Node: master,  Prev: 0.12,  Up: Changes
 master (unreleased)
 ===================
 
+   * Bug fixes:
+
+        * Fix error when searching for a configuration file outside a
+          Projectile project
+
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
 
@@ -2598,9 +2603,9 @@ Node: 0.1066669
 Node: 0.1168721
 Node: 0.1269907
 Node: master70916
-Node: Credits71022
-Node: GNU Free Documentation License73949
-Node: Syntax checkers99101
-Node: Function and Variable Index100148
+Node: Credits71139
+Node: GNU Free Documentation License74066
+Node: Syntax checkers99218
+Node: Function and Variable Index100265
 
 End Tag Table
