@@ -302,9 +302,9 @@ Raise an assertion error if the buffer is not clear afterwards."
                        'flycheck-warning-overlay
                      'flycheck-error-overlay))
          (fringe-icon (if (eq level 'warning)
-                          '(left-fringe question-mark flycheck-warning)
+                          '(left-fringe question-mark flycheck-fringe-warning)
                         `(left-fringe ,flycheck-fringe-exclamation-mark
-                                      flycheck-error))))
+                                      flycheck-fringe-error))))
     (should overlay)
     (should (overlay-get overlay 'flycheck-overlay))
     (should (= (overlay-start overlay) (car region)))

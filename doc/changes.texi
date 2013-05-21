@@ -637,6 +637,15 @@ favor @code{flycheck-warning} and @code{flycheck-error} respectively
 @end itemize
 
 @item
+New features:
+
+@itemize @bullet
+@item
+Make fringe indicator faces customizable independently with
+@code{flycheck-fringe-error} and @code{flycheck-fringe-warning}
+@end itemize
+
+@item
 Bug fixes:
 
 @itemize @bullet
