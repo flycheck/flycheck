@@ -1902,6 +1902,8 @@ master (unreleased)
 
         * Make fringe indicator faces customizable independently with
           'flycheck-fringe-error' and 'flycheck-fringe-warning'
+        * Improve the default faces by using underlines instead of
+          foreground colors, if possible
 
    * Bug fixes:
 
@@ -2613,9 +2615,9 @@ Node: 0.1066669
 Node: 0.1168721
 Node: 0.1269907
 Node: master70916
-Node: Credits71460
-Node: GNU Free Documentation License74387
-Node: Syntax checkers99539
-Node: Function and Variable Index100586
+Node: Credits71568
+Node: GNU Free Documentation License74495
+Node: Syntax checkers99647
+Node: Function and Variable Index100694
 
 End Tag Table

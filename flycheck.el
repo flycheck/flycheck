@@ -332,23 +332,31 @@ This variable is a normal hook.")
 
 ;; TODO: Remove the obsolete faces in 0.14
 (defface flycheck-error
-  '((t :inherit error))
+  '((((supports :underline (:style wave)))
+     :underline (:style wave :color "Red1"))
+    (t
+     :underline t :inherit error))
   "Flycheck face for errors."
+  :package-version '(flycheck . "0.13")
   :group 'flycheck-faces)
 (define-obsolete-face-alias 'flycheck-error-face 'flycheck-error "0.13")
 
 (defface flycheck-warning
-  '((t :inherit warning))
+  '((((supports :underline (:style wave)))
+     :underline (:style wave :color "DarkOrange"))
+    (t
+     :underline t :inherit warning))
   "Flycheck face for warnings."
+  :package-version '(flycheck . "0.13")
   :group 'flycheck-faces)
 (define-obsolete-face-alias 'flycheck-warning-face 'flycheck-warning "0.13")
 
 (defface flycheck-fringe-error
-  '((t :inherit flycheck-error))
+  '((t :inherit error))
   "Flycheck face for fringe error indicators.")
 
 (defface flycheck-fringe-warning
-  '((t :inherit flycheck-warning))
+  '((t :inherit warning))
   "Flycheck face for fringe warning indicators.")
 
 

@@ -643,6 +643,9 @@ New features:
 @item
 Make fringe indicator faces customizable independently with
 @code{flycheck-fringe-error} and @code{flycheck-fringe-warning}
+@item
+Improve the default faces by using underlines instead of foreground
+colors, if possible
 @end itemize
 
 @item
