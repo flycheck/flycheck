@@ -2118,8 +2118,6 @@ If LEVEL is omitted if the current buffer has any errors at all."
 Defaults to the built-in exclamation mark if available or to the
 flycheck exclamation mark otherwise.")
 
-(defconst flycheck-error-overlay nil
-  "Overlay category for flycheck errors.")
 (put 'flycheck-error-overlay 'flycheck-overlay t)
 (put 'flycheck-error-overlay 'face 'flycheck-error-face)
 (put 'flycheck-error-overlay 'priority 100)
@@ -2127,8 +2125,6 @@ flycheck exclamation mark otherwise.")
 (put 'flycheck-error-overlay 'flycheck-fringe-bitmap
      flycheck-fringe-exclamation-mark)
 
-(defconst flycheck-warning-overlay nil
-  "Overlay category for flycheck warning.")
 (put 'flycheck-warning-overlay 'flycheck-overlay t)
 (put 'flycheck-warning-overlay 'face 'flycheck-warning-face)
 (put 'flycheck-warning-overlay 'priority 100)
