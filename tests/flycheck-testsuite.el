@@ -296,15 +296,15 @@ Raise an assertion error if the buffer is not clear afterwards."
          (message (flycheck-error-message error))
          (level (flycheck-error-level error))
          (face (if (eq level 'warning)
-                   'flycheck-warning-face
-                 'flycheck-error-face))
+                   'flycheck-warning
+                 'flycheck-error))
          (category (if (eq level 'warning)
                        'flycheck-warning-overlay
                      'flycheck-error-overlay))
          (fringe-icon (if (eq level 'warning)
-                          '(left-fringe question-mark flycheck-warning-face)
+                          '(left-fringe question-mark flycheck-warning)
                         `(left-fringe ,flycheck-fringe-exclamation-mark
-                                      flycheck-error-face))))
+                                      flycheck-error))))
     (should overlay)
     (should (overlay-get overlay 'flycheck-overlay))
     (should (= (overlay-start overlay) (car region)))

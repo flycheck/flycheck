@@ -628,6 +628,15 @@ Bug fixes:
 
 @itemize @bullet
 @item
+@b{Breaking changes}:
+
+@itemize @bullet
+@item
+Obsolete @code{flycheck-warning-face} and @code{flycheck-error-face} in
+favor @code{flycheck-warning} and @code{flycheck-error} respectively
+@end itemize
+
+@item
 Bug fixes:
 
 @itemize @bullet

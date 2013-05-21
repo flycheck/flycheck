@@ -330,15 +330,18 @@ when Flycheck failed.
 
 This variable is a normal hook.")
 
-(defface flycheck-error-face
+;; TODO: Remove the obsolete faces in 0.14
+(defface flycheck-error
   '((t :inherit error))
-  "Face for on-the-fly syntax checking errors."
+  "Flycheck face for errors."
   :group 'flycheck-faces)
+(define-obsolete-face-alias 'flycheck-error-face 'flycheck-error "0.13")
 
-(defface flycheck-warning-face
+(defface flycheck-warning
   '((t :inherit warning))
-  "Face for on-the-fly syntax checking warnings."
+  "Flycheck face for warnings."
   :group 'flycheck-faces)
+(define-obsolete-face-alias 'flycheck-warning-face 'flycheck-warning "0.13")
 
 
 ;;;; Minor mode definition
@@ -2121,7 +2124,7 @@ flycheck exclamation mark otherwise.")
 (defconst flycheck-error-overlay nil
   "Overlay category for flycheck errors.")
 (put 'flycheck-error-overlay 'flycheck-overlay t)
-(put 'flycheck-error-overlay 'face 'flycheck-error-face)
+(put 'flycheck-error-overlay 'face 'flycheck-error)
 (put 'flycheck-error-overlay 'priority 100)
 (put 'flycheck-error-overlay 'help-echo "Unknown error.")
 (put 'flycheck-error-overlay 'flycheck-fringe-bitmap
@@ -2130,7 +2133,7 @@ flycheck exclamation mark otherwise.")
 (defconst flycheck-warning-overlay nil
   "Overlay category for flycheck warning.")
 (put 'flycheck-warning-overlay 'flycheck-overlay t)
-(put 'flycheck-warning-overlay 'face 'flycheck-warning-face)
+(put 'flycheck-warning-overlay 'face 'flycheck-warning)
 (put 'flycheck-warning-overlay 'priority 100)
 (put 'flycheck-warning-overlay 'help-echo "Unknown warning.")
 (put 'flycheck-warning-overlay 'flycheck-fringe-bitmap 'question-mark)

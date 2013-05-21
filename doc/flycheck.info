@@ -1893,6 +1893,11 @@ File: flycheck.info,  Node: master,  Prev: 0.12,  Up: Changes
 master (unreleased)
 ===================
 
+   * Breaking changes:
+
+        * Obsolete 'flycheck-warning-face' and 'flycheck-error-face' in
+          favor 'flycheck-warning' and 'flycheck-error' respectively
+
    * Bug fixes:
 
         * Fix error when searching for a configuration file outside a
@@ -2603,9 +2608,9 @@ Node: 0.1066669
 Node: 0.1168721
 Node: 0.1269907
 Node: master70916
-Node: Credits71139
-Node: GNU Free Documentation License74066
-Node: Syntax checkers99218
-Node: Function and Variable Index100265
+Node: Credits71305
+Node: GNU Free Documentation License74232
+Node: Syntax checkers99384
+Node: Function and Variable Index100431
 
 End Tag Table
