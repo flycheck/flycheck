@@ -330,15 +330,34 @@ when Flycheck failed.
 
 This variable is a normal hook.")
 
-(defface flycheck-error-face
-  '((t :inherit error))
-  "Face for on-the-fly syntax checking errors."
+;; TODO: Remove the obsolete faces in 0.14
+(defface flycheck-error
+  '((((supports :underline (:style wave)))
+     :underline (:style wave :color "Red1"))
+    (t
+     :underline t :inherit error))
+  "Flycheck face for errors."
+  :package-version '(flycheck . "0.13")
   :group 'flycheck-faces)
+(define-obsolete-face-alias 'flycheck-error-face 'flycheck-error "0.13")
 
-(defface flycheck-warning-face
-  '((t :inherit warning))
-  "Face for on-the-fly syntax checking warnings."
+(defface flycheck-warning
+  '((((supports :underline (:style wave)))
+     :underline (:style wave :color "DarkOrange"))
+    (t
+     :underline t :inherit warning))
+  "Flycheck face for warnings."
+  :package-version '(flycheck . "0.13")
   :group 'flycheck-faces)
+(define-obsolete-face-alias 'flycheck-warning-face 'flycheck-warning "0.13")
+
+(defface flycheck-fringe-error
+  '((t :inherit error))
+  "Flycheck face for fringe error indicators.")
+
+(defface flycheck-fringe-warning
+  '((t :inherit warning))
+  "Flycheck face for fringe warning indicators.")
 
 
 ;;;; Minor mode definition
@@ -2119,16 +2138,18 @@ Defaults to the built-in exclamation mark if available or to the
 flycheck exclamation mark otherwise.")
 
 (put 'flycheck-error-overlay 'flycheck-overlay t)
-(put 'flycheck-error-overlay 'face 'flycheck-error-face)
+(put 'flycheck-error-overlay 'face 'flycheck-error)
 (put 'flycheck-error-overlay 'priority 110)
 (put 'flycheck-error-overlay 'help-echo "Unknown error.")
+(put 'flycheck-error-overlay 'flycheck-fringe-face 'flycheck-fringe-error)
 (put 'flycheck-error-overlay 'flycheck-fringe-bitmap
      flycheck-fringe-exclamation-mark)
 
 (put 'flycheck-warning-overlay 'flycheck-overlay t)
-(put 'flycheck-warning-overlay 'face 'flycheck-warning-face)
+(put 'flycheck-warning-overlay 'face 'flycheck-warning)
 (put 'flycheck-warning-overlay 'priority 100)
 (put 'flycheck-warning-overlay 'help-echo "Unknown warning.")
+(put 'flycheck-warning-overlay 'flycheck-fringe-face 'flycheck-fringe-warning)
 (put 'flycheck-warning-overlay 'flycheck-fringe-bitmap 'question-mark)
 
 (defun flycheck-make-fringe-icon (category)
@@ -2143,7 +2164,7 @@ If `flycheck-indication-mode' is neither `left-fringe' nor
 `right-fringe', returned nil."
   (when (memq flycheck-indication-mode '(left-fringe right-fringe))
     (let ((bitmap (get category 'flycheck-fringe-bitmap))
-          (face (get category 'face)))
+          (face (get category 'flycheck-fringe-face)))
       (propertize "!" 'display (list flycheck-indication-mode bitmap face)))))
 
 (defun flycheck-add-overlay (err)

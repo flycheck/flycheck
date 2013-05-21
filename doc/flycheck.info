@@ -1893,6 +1893,18 @@ File: flycheck.info,  Node: master,  Prev: 0.12,  Up: Changes
 master (unreleased)
 ===================
 
+   * Breaking changes:
+
+        * Obsolete 'flycheck-warning-face' and 'flycheck-error-face' in
+          favor 'flycheck-warning' and 'flycheck-error' respectively
+
+   * New features:
+
+        * Make fringe indicator faces customizable independently with
+          'flycheck-fringe-error' and 'flycheck-fringe-warning'
+        * Improve the default faces by using underlines instead of
+          foreground colors, if possible
+
    * Improvements
 
         * Always highlight errors on top of warnings now
@@ -2607,9 +2619,9 @@ Node: 0.1066669
 Node: 0.1168721
 Node: 0.1269907
 Node: master70916
-Node: Credits71216
-Node: GNU Free Documentation License74143
-Node: Syntax checkers99295
-Node: Function and Variable Index100342
+Node: Credits71645
+Node: GNU Free Documentation License74572
+Node: Syntax checkers99724
+Node: Function and Variable Index100771
 
 End Tag Table

@@ -628,6 +628,27 @@ Bug fixes:
 
 @itemize @bullet
 @item
+@b{Breaking changes}:
+
+@itemize @bullet
+@item
+Obsolete @code{flycheck-warning-face} and @code{flycheck-error-face} in
+favor @code{flycheck-warning} and @code{flycheck-error} respectively
+@end itemize
+
+@item
+New features:
+
+@itemize @bullet
+@item
+Make fringe indicator faces customizable independently with
+@code{flycheck-fringe-error} and @code{flycheck-fringe-warning}
+@item
+Improve the default faces by using underlines instead of foreground
+colors, if possible
+@end itemize
+
+@item
 Improvements
 
 @itemize @bullet
