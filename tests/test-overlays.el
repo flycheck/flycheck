@@ -32,8 +32,9 @@
 
 (ert-deftest flycheck-overlay-categories ()
   (--each '(flycheck-error-overlay flycheck-warning-overlay)
-    (should (get it 'flycheck-overlay))
-    (should (= (get it 'priority) 100)))
+    (should (get it 'flycheck-overlay)))
+  (should (= (get 'flycheck-error-overlay 'priority) 110))
+  (should (= (get 'flycheck-warning-overlay 'priority) 100))
   (should (eq (get 'flycheck-error-overlay 'face) 'flycheck-error))
   (should (eq (get 'flycheck-warning-overlay 'face) 'flycheck-warning))
   (should (eq (get 'flycheck-error-overlay 'flycheck-fringe-face)
