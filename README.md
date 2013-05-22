@@ -17,8 +17,8 @@ extension for GNU Emacs 24 with:
 
 ![Screenshot of Flycheck in action](https://github.com/lunaryorn/flycheck/raw/master/doc/screenshot.png)
 
-The screenshot was taken using the awesome [solarized-light][] color theme and
-the great [Anonymous Pro][anon-pro] font.
+The screenshot was taken on Emacs 24.3 using the awesome [solarized-light][]
+color theme and the great [Anonymous Pro][anon-pro] font.
 
 
 Features
