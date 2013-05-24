@@ -188,6 +188,25 @@ This function is an abnormal hook."
   :group 'flycheck
   :type 'hook)
 
+(defcustom flycheck-process-error-functions '(flycheck-add-overlay)
+  "Functions to process errors.
+
+Each function in this hook must accept a single argument: A
+Flycheck error to process.
+
+All functions in this hook are called in order of appearance,
+until a function returns non-nil.  Thus, a function in this hook
+may return nil, to allow for further processing of the error, or
+t, to indicate that the error was fully processed and inhibit any
+further processing.
+
+The functions are called for each newly parsed error immediately
+after the corresponding syntax checker finished.  At this stage,
+the overlays from the previous syntax checks are still present,
+and there may be further syntax checkers in the chain.
+
+This variable is an abnormal hook.")
+
 (defcustom flycheck-indication-mode 'left-fringe
   "The indication mode for Flycheck errors and warnings.
 
@@ -2195,10 +2214,6 @@ Return the created overlay."
       (overlay-put overlay 'help-echo (flycheck-error-message err))
       overlay)))
 
-(defun flycheck-add-overlays (errors)
-  "Add overlays for ERRORS."
-  (mapc #'flycheck-add-overlay errors))
-
 (defun flycheck-filter-overlays (overlays)
   "Get all Flycheck overlays from OVERLAYS."
   (--filter (overlay-get it 'flycheck-overlay) overlays))
@@ -2529,10 +2544,12 @@ Error: %s" checker output (error-message-string err))
       (setq errors (-> errors
                      (flycheck-fix-error-filenames files)
                      flycheck-relevant-errors))
-      (flycheck-add-overlays errors)
       (setq flycheck-current-errors (-> errors
                                       (append flycheck-current-errors nil)
                                       flycheck-sort-errors))
+      ;; Process all new errors
+      (--each errors
+        (run-hook-with-args-until-success 'flycheck-process-error-functions it))
       (flycheck-report-error-count flycheck-current-errors)
       (when (and (/= exit-status 0) (not errors))
         (message "Checker %S returned non-zero exit code %s, but no errors from \
