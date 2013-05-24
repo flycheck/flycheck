@@ -673,19 +673,19 @@ automatically according to
        (or (not condition)
            (memq condition flycheck-check-syntax-automatically))))
 
-(defun flycheck-buffer-automatically (&optional condition)
+(defun flycheck-buffer-automatically (&optional condition force-deferred)
   "Automatically check syntax at CONDITION.
 
 Syntax is not checked if `flycheck-may-check-automatically'
 returns nil for CONDITION.
 
-The syntax check is deferred if `flycheck-must-defer-check'
-returns t."
+The syntax check is deferred if FORCE-DEFERRED is non-nil, or if
+`flycheck-must-defer-check' returns t."
   (when (flycheck-may-check-automatically condition)
-      (if (flycheck-must-defer-check)
-          (flycheck-buffer-deferred)
-        (with-demoted-errors
-          (flycheck-buffer)))))
+    (if (or force-deferred (flycheck-must-defer-check))
+        (flycheck-buffer-deferred)
+      (with-demoted-errors
+        (flycheck-buffer)))))
 
 (defvar-local flycheck-idle-change-timer nil
   "Timer to mark the idle time since the last change.")
@@ -710,14 +710,14 @@ buffer."
       ;; The buffer was changed, thus clear the idle timer
       (flycheck-clear-idle-change-timer)
       (if (s-contains? "\n" (buffer-substring beg end))
-          (flycheck-buffer-automatically 'new-line)
+          (flycheck-buffer-automatically 'new-line :force-deferred)
         (setq flycheck-idle-change-timer
               (run-at-time 0.5 nil #'flycheck-handle-idle-change))))))
 
 (defun flycheck-handle-idle-change ()
   "Handle an expired idle time since the last change."
   (flycheck-clear-idle-change-timer)
-  (flycheck-buffer-automatically 'idle-change))
+  (flycheck-buffer-automatically 'idle-change :force-deferred))
 
 (defun flycheck-handle-save ()
   "Handle a save of the buffer."

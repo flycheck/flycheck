@@ -1908,6 +1908,8 @@ master (unreleased)
    * Improvements
 
         * Always highlight errors on top of warnings now
+        * Do not trigger syntax checks in the middle of commands
+          (https://github.com/lunaryorn/flycheck/issues/141)
 
    * Bug fixes:
 
@@ -2619,9 +2621,9 @@ Node: 0.1066669
 Node: 0.1168721
 Node: 0.1269907
 Node: master70916
-Node: Credits71645
-Node: GNU Free Documentation License74572
-Node: Syntax checkers99724
-Node: Function and Variable Index100771
+Node: Credits71771
+Node: GNU Free Documentation License74698
+Node: Syntax checkers99850
+Node: Function and Variable Index100897
 
 End Tag Table

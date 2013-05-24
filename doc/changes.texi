@@ -654,6 +654,8 @@ Improvements
 @itemize @bullet
 @item
 Always highlight errors on top of warnings now
+@item
+@ghissue{141, Do not trigger syntax checks in the middle of commands}
 @end itemize
 
 @item
