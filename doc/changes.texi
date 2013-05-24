@@ -669,6 +669,9 @@ project
 Do not start a syntax check before the @code{flycheck-mode-hook} was run
 @item
 Do not start automatic syntax checks if Flycheck Mode is disabled
+@item
+@ghissue{143, Defer the initial syntax check until after the current
+interactive command}
 @end itemize
 
 @end itemize

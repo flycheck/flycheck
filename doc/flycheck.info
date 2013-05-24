@@ -1947,6 +1947,9 @@ master (unreleased)
           was run
         * Do not start automatic syntax checks if Flycheck Mode is
           disabled
+        * Defer the initial syntax check until after the current
+          interactive command
+          (https://github.com/lunaryorn/flycheck/issues/143)
 
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
@@ -2657,9 +2660,9 @@ Node: 0.1067893
 Node: 0.1169945
 Node: 0.1271131
 Node: master72140
-Node: Credits73169
-Node: GNU Free Documentation License76096
-Node: Syntax checkers101248
-Node: Index102273
+Node: Credits73325
+Node: GNU Free Documentation License76252
+Node: Syntax checkers101404
+Node: Index102429
 
 End Tag Table
