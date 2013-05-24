@@ -2248,7 +2248,8 @@ Return the created overlay."
 (defun flycheck-navigatable-position-p (pos)
   "Determine whether POS can be navigated to."
   (and (>= pos (point-min))
-       (<= pos (point-max))))
+       (<= pos (point-max))
+       (and (flycheck-overlays-at pos))))
 
 (defun flycheck-next-error-function (n reset)
   "Visit the N-th error from the current point.
