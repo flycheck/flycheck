@@ -390,6 +390,11 @@ Note that this variable does @emph{not} affect error @emph{navigation}.
 column, regardless of the highlighting mode.
 @end defopt
 
+@defvr {Face} flycheck-fringe-error
+@defvrx {Face} flycheck-fringe-warning
+The faces of fringe indicators for errors and warnings respectively.
+@end defvr
+
 @defopt flycheck-indication-mode
 This variable determines how to indicate errors:
 

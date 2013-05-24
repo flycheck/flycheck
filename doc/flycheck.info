@@ -507,6 +507,11 @@ Errors and warnings from a syntax checker are
      'next-error' and 'previous-error' always jump to the error column,
      regardless of the highlighting mode.
 
+ -- Face: flycheck-fringe-error
+ -- Face: flycheck-fringe-warning
+     The faces of fringe indicators for errors and warnings
+     respectively.
+
  -- User Option: flycheck-indication-mode
      This variable determines how to indicate errors:
 
@@ -2534,9 +2539,9 @@ Function and Variable Index
 * flycheck-checker:                      Selection.           (line  41)
 * flycheck-checkers:                     Selection.           (line   9)
 * flycheck-chktexrc:                     Configuration.       (line  25)
-* flycheck-clear:                        Reporting.           (line  90)
+* flycheck-clear:                        Reporting.           (line  95)
 * flycheck-coffeelintrc:                 Configuration.       (line  28)
-* flycheck-copy-messages-as-kill:        Reporting.           (line  73)
+* flycheck-copy-messages-as-kill:        Reporting.           (line  78)
 * flycheck-count-errors:                 Error API.           (line  85)
 * flycheck-current-errors:               Error API.           (line  81)
 * flycheck-declare-checker:              Declaration.         (line   8)
@@ -2554,12 +2559,14 @@ Function and Variable Index
 * flycheck-flake8-maximum-complexity:    Configuration.       (line  10)
 * flycheck-flake8-maximum-line-length:   Configuration.       (line  14)
 * flycheck-flake8rc:                     Configuration.       (line  31)
-* flycheck-google-messages:              Reporting.           (line  78)
+* flycheck-fringe-error:                 Reporting.           (line  50)
+* flycheck-fringe-warning:               Reporting.           (line  51)
+* flycheck-google-messages:              Reporting.           (line  83)
 * flycheck-has-errors-p:                 Error API.           (line  90)
 * flycheck-highlighting-mode:            Reporting.           (line  28)
-* flycheck-indication-mode:              Reporting.           (line  50)
+* flycheck-indication-mode:              Reporting.           (line  55)
 * flycheck-jshintrc:                     Configuration.       (line  34)
-* flycheck-list-errors:                  Reporting.           (line  64)
+* flycheck-list-errors:                  Reporting.           (line  69)
 * flycheck-locate-config-file-functions: Configuration.       (line  58)
 * flycheck-next-error:                   Navigation.          (line  23)
 * flycheck-parse-xml-string:             Error parser API.    (line   6)
@@ -2584,44 +2591,44 @@ Node: Syntax checking7172
 Node: Selection11181
 Node: Configuration13762
 Node: Reporting17302
-Node: Navigation20920
-Node: Mode line22716
-Node: Extending23617
-Node: Declaration24216
-Node: Error parsers36573
-Node: Option filters37557
-Node: Examples37896
-Node: Simple example38328
-Node: Predicate example41392
-Node: Configuration example43373
-Node: Chaining example46032
-Node: API47418
-Node: Error API48206
-Node: Error parser API51298
-Node: Contribution51524
-Node: Reporting issues52200
-Node: Contributing syntax checkers53010
-Node: Contributing code53805
-Node: Unit tests55145
-Node: Changes56432
-Node: 0.157112
-Node: 0.257396
-Node: 0.357674
-Node: 0.457910
-Node: 0.558685
-Node: 0.659905
-Node: 0.6.162755
-Node: 0.762904
-Node: 0.7.163918
-Node: 0.864633
-Node: 0.966145
-Node: 0.1066641
-Node: 0.1168693
-Node: 0.1269879
-Node: master70888
-Node: Credits71617
-Node: GNU Free Documentation License74544
-Node: Syntax checkers99696
-Node: Function and Variable Index100743
+Node: Navigation21066
+Node: Mode line22862
+Node: Extending23763
+Node: Declaration24362
+Node: Error parsers36719
+Node: Option filters37703
+Node: Examples38042
+Node: Simple example38474
+Node: Predicate example41538
+Node: Configuration example43519
+Node: Chaining example46178
+Node: API47564
+Node: Error API48352
+Node: Error parser API51444
+Node: Contribution51670
+Node: Reporting issues52346
+Node: Contributing syntax checkers53156
+Node: Contributing code53951
+Node: Unit tests55291
+Node: Changes56578
+Node: 0.157258
+Node: 0.257542
+Node: 0.357820
+Node: 0.458056
+Node: 0.558831
+Node: 0.660051
+Node: 0.6.162901
+Node: 0.763050
+Node: 0.7.164064
+Node: 0.864779
+Node: 0.966291
+Node: 0.1066787
+Node: 0.1168839
+Node: 0.1270025
+Node: master71034
+Node: Credits71763
+Node: GNU Free Documentation License74690
+Node: Syntax checkers99842
+Node: Function and Variable Index100889
 
 End Tag Table
