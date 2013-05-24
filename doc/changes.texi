@@ -663,6 +663,8 @@ Bug fixes:
 @item
 Fix error when searching for a configuration file outside a Projectile
 project
+@item
+Do not start a syntax check before the @code{flycheck-mode-hook} was run
 @end itemize
 
 @end itemize

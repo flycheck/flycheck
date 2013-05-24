@@ -467,6 +467,7 @@ buffer manually.
   :lighter flycheck-mode-line
   :group 'flycheck
   :require 'flycheck
+  :after-hook (flycheck-buffer-automatically 'mode-enabled)
   (cond
    (flycheck-mode
     (flycheck-clear)
@@ -475,9 +476,7 @@ buffer manually.
       (add-hook (car it) (cdr it) nil t))
 
     (setq flycheck-previous-next-error-function next-error-function)
-    (setq next-error-function 'flycheck-next-error-function)
-
-    (flycheck-buffer-automatically 'mode-enabled))
+    (setq next-error-function 'flycheck-next-error-function))
    (t
     (setq next-error-function flycheck-previous-next-error-function)
 

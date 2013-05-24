@@ -1941,6 +1941,8 @@ master (unreleased)
 
         * Fix error when searching for a configuration file outside a
           Projectile project
+        * Do not start a syntax check before the 'flycheck-mode-hook'
+          was run
 
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
@@ -2651,9 +2653,9 @@ Node: 0.1067893
 Node: 0.1169945
 Node: 0.1271131
 Node: master72140
-Node: Credits72869
-Node: GNU Free Documentation License75796
-Node: Syntax checkers100948
-Node: Index101973
+Node: Credits72957
+Node: GNU Free Documentation License75884
+Node: Syntax checkers101036
+Node: Index102061
 
 End Tag Table
