@@ -57,6 +57,8 @@
 (ert-deftest flycheck-buffer-automatically-deferred ()
   "Test that `flycheck-buffer-safe' properly defers the check."
   (with-temp-buffer
+    (let ((flycheck-check-syntax-automatically nil))
+      (flycheck-mode))
     (should-not (flycheck-deferred-check-p))
     (flycheck-buffer-automatically)
     (should (flycheck-deferred-check-p))))
