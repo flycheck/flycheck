@@ -18,10 +18,14 @@ on a function or variable, consult its docstring via
 @comment  node-name,  next,  previous,  up
 @section Error API
 
-Flycheck errors are represented by the structure @code{flycheck-error}.
+Flycheck errors are represented by the CL structure @code{flycheck-error}.
 @xref{Structures, , , cl}, for information about CL structures.
 
-This structure has the following attributes, each of which may be nil:
+@deftp {Structure} flycheck-error @
+  buffer checker filename line column message level
+
+A Flycheck error with the following attributes, each of which may be
+@code{nil}:
 
 @table @code
 @item buffer
@@ -54,13 +58,37 @@ The severity of the error message, as either @code{error} or
 @code{warning}.
 @end table
 
-The structure has only a single constructor:
+There are two constructors you may use to create errors:
 
 @defun flycheck-error-new attributes
 Create a new Flycheck error with the given @var{attributes}.
 
-@var{attributes} are given as keyword arguments.
+@var{attributes} are given as keyword arguments, for instance:
+
+@lisp
+(flycheck-error-new :line 10 :column 5 :message "Foo" :level 'warning)
+@end lisp
+
 @end defun
+
+@defun flycheck-error-new-at line column &optional level message @
+  &key checker filename buffer
+Create a new Flycheck error at the given position.
+
+@var{line} and @var{column} are the line and column of the new error
+respectively.  The optional arguments @var{level} and @var{message} are
+the level and the message respectively.
+
+The @var{checker}, @var{filename} and @var{buffer} attributes may be
+initialized as keyword arguments only.  Note that these keywords
+arguments may only be used @b{together} with the optional arguments,
+that is @var{level} and @var{message} must be specified explicitly to
+use the keyword arguments.
+
+If omitted, @var{buffer} defaults to the current buffer.
+@end defun
+
+@end deftp
 
 The following functions are provided to work with errors:
 

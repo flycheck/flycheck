@@ -20,6 +20,7 @@
 
 @syncodeindex vr cp
 @syncodeindex fn cp
+@syncodeindex tp cp
 
 @include html-frontmatter.texi
 
@@ -65,7 +66,7 @@ Copyright @copyright{} 2013 Sebastian Wiesner
 * Credits::                     Developers and contributors to Flycheck
 * GNU Free Documentation License::  The license of this documentation
 * Syntax checkers::             Available syntax checkers
-* Function and Variable Index::  A menu containing functions and variables
+* Index::                        An index of all types, functions and variables
 @end menu
 
 @node Introduction, Usage, Top, Top
@@ -124,16 +125,16 @@ Copyright @copyright{} 2013 Sebastian Wiesner
 @include github-ribbon.texi
 @include fdl-1.3.texi
 
-@node Syntax checkers, Function and Variable Index, GNU Free Documentation License, Top
+@node Syntax checkers, Index, GNU Free Documentation License, Top
 @comment  node-name,  next,  previous,  up
 @appendix Available syntax checkers
 
 @include github-ribbon.texi
 @include checkers.texi
 
-@node Function and Variable Index,  , Syntax checkers, Top
+@node Index,  , Syntax checkers, Top
 @comment  node-name,  next,  previous,  up
-@unnumbered Function and Variable Index
+@unnumbered Type, Function and Variable Index
 
 @include github-ribbon.texi
 @printindex cp
