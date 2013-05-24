@@ -39,8 +39,7 @@
    "checkers/elixir-warnings.ex" 'elixir-mode nil
    '(5 nil "variable a is unused" warning)
    '(6 nil "variable a shadowed in 'fun'" warning)
-   '(14 nil "this clause cannot match because a previous clause at line 11 always matches" warning)
-   '(20 nil "list/1 obsolete" warning)))
+   '(14 nil "this clause cannot match because a previous clause at line 11 always matches" warning)))
 
 ;; Local Variables:
 ;; coding: utf-8
