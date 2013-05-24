@@ -145,7 +145,7 @@ gem haml \
     puppet-lint
 
 # Install Elixir compiler.
-ELIXIR_VERSION=0.8.2
+ELIXIR_VERSION=0.9.0
 ELIXIR_DIR="/opt/elixir-${ELIXIR_VERSION}"
 ELIXIR_SYMDIR="/usr/local/bin"
 if ! [ -d "$ELIXIR_DIR" -a -x "$ELIXIR_DIR/elixirc" ]; then
