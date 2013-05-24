@@ -467,12 +467,12 @@ Errors and warnings from a syntax checker are
    * reported in the mode line or in a popup buffer, depending on the
      length of the error messages,
    * indicated according to 'flycheck-indication-mode',
-   * and highlighted in the buffer with 'flycheck-error-face' and
-     'flycheck-warning-face' respectively, according to
+   * and highlighted in the buffer with 'flycheck-error' and
+     'flycheck-warning' faces respectively, according to
      'flycheck-highlighting-mode'
 
- -- User Option: flycheck-error-face
- -- User Option: flycheck-warning-face
+ -- Face: flycheck-error
+ -- Face: flycheck-warning
      The faces to use to highlight errors and warnings respectively.
 
      Note that the default faces provided by GNU Emacs are ill-suited to
@@ -2543,8 +2543,8 @@ Function and Variable Index
 * flycheck-def-config-file-var:          Declaration.         (line 250)
 * flycheck-def-option-var:               Declaration.         (line 266)
 * flycheck-describe-checker:             Selection.           (line  70)
+* flycheck-error:                        Reporting.           (line  14)
 * flycheck-error-column-region:          Error API.           (line  56)
-* flycheck-error-face:                   Reporting.           (line  14)
 * flycheck-error-format:                 Error API.           (line  75)
 * flycheck-error-line-region:            Error API.           (line  53)
 * flycheck-error-new:                    Error API.           (line  42)
@@ -2569,7 +2569,7 @@ Function and Variable Index
 * flycheck-select-checker:               Selection.           (line  32)
 * flycheck-syntax-check-failed-hook:     Syntax checking.     (line  97)
 * flycheck-tidyrc:                       Configuration.       (line  40)
-* flycheck-warning-face:                 Reporting.           (line  15)
+* flycheck-warning:                      Reporting.           (line  15)
 
 
 
@@ -2584,44 +2584,44 @@ Node: Syntax checking7172
 Node: Selection11181
 Node: Configuration13762
 Node: Reporting17302
-Node: Navigation20948
-Node: Mode line22744
-Node: Extending23645
-Node: Declaration24244
-Node: Error parsers36601
-Node: Option filters37585
-Node: Examples37924
-Node: Simple example38356
-Node: Predicate example41420
-Node: Configuration example43401
-Node: Chaining example46060
-Node: API47446
-Node: Error API48234
-Node: Error parser API51326
-Node: Contribution51552
-Node: Reporting issues52228
-Node: Contributing syntax checkers53038
-Node: Contributing code53833
-Node: Unit tests55173
-Node: Changes56460
-Node: 0.157140
-Node: 0.257424
-Node: 0.357702
-Node: 0.457938
-Node: 0.558713
-Node: 0.659933
-Node: 0.6.162783
-Node: 0.762932
-Node: 0.7.163946
-Node: 0.864661
-Node: 0.966173
-Node: 0.1066669
-Node: 0.1168721
-Node: 0.1269907
-Node: master70916
-Node: Credits71645
-Node: GNU Free Documentation License74572
-Node: Syntax checkers99724
-Node: Function and Variable Index100771
+Node: Navigation20920
+Node: Mode line22716
+Node: Extending23617
+Node: Declaration24216
+Node: Error parsers36573
+Node: Option filters37557
+Node: Examples37896
+Node: Simple example38328
+Node: Predicate example41392
+Node: Configuration example43373
+Node: Chaining example46032
+Node: API47418
+Node: Error API48206
+Node: Error parser API51298
+Node: Contribution51524
+Node: Reporting issues52200
+Node: Contributing syntax checkers53010
+Node: Contributing code53805
+Node: Unit tests55145
+Node: Changes56432
+Node: 0.157112
+Node: 0.257396
+Node: 0.357674
+Node: 0.457910
+Node: 0.558685
+Node: 0.659905
+Node: 0.6.162755
+Node: 0.762904
+Node: 0.7.163918
+Node: 0.864633
+Node: 0.966145
+Node: 0.1066641
+Node: 0.1168693
+Node: 0.1269879
+Node: master70888
+Node: Credits71617
+Node: GNU Free Documentation License74544
+Node: Syntax checkers99696
+Node: Function and Variable Index100743
 
 End Tag Table

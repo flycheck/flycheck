@@ -348,13 +348,13 @@ of the error messages,
 @item
 indicated according to @code{flycheck-indication-mode},
 @item
-and highlighted in the buffer with @code{flycheck-error-face} and
-@code{flycheck-warning-face} respectively, according to
+and highlighted in the buffer with @code{flycheck-error} and
+@code{flycheck-warning} faces respectively, according to
 @code{flycheck-highlighting-mode}
 @end itemize
 
-@defopt flycheck-error-face
-@defoptx flycheck-warning-face
+@defvr {Face} flycheck-error
+@defvrx {Face} flycheck-warning
 The faces to use to highlight errors and warnings respectively.
 
 Note that the default faces provided by GNU Emacs are ill-suited to
@@ -365,7 +365,7 @@ even @b{invisible} for white space.
 For best error highlighting customize these faces, or choose a color
 theme that has reasonable Flycheck faces, for instance the excellent
 @url{https://github.com/bbatsov/solarized-emacs,Solarized theme}.
-@end defopt
+@end defvr
 
 @defopt flycheck-highlighting-mode
 This variable determines how to highlight errors:
