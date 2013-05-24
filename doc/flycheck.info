@@ -1945,6 +1945,8 @@ master (unreleased)
           Projectile project
         * Do not start a syntax check before the 'flycheck-mode-hook'
           was run
+        * Do not start automatic syntax checks if Flycheck Mode is
+          disabled
 
 
 File: flycheck.info,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Changes,  Up: Top
@@ -2655,9 +2657,9 @@ Node: 0.1067893
 Node: 0.1169945
 Node: 0.1271131
 Node: master72140
-Node: Credits73083
-Node: GNU Free Documentation License76010
-Node: Syntax checkers101162
-Node: Index102187
+Node: Credits73169
+Node: GNU Free Documentation License76096
+Node: Syntax checkers101248
+Node: Index102273
 
 End Tag Table
