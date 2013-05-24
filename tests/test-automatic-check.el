@@ -133,6 +133,13 @@
       (save-buffer 0))
     (should (flycheck-deferred-check-p))))
 
+(ert-deftest flycheck-buffer-automatically-mode-disabled ()
+  (with-temp-buffer
+    (should-not flycheck-mode)
+    (should-not (flycheck-deferred-check-p))
+    (flycheck-buffer-automatically)
+    (should-not (flycheck-deferred-check-p))))
+
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:
