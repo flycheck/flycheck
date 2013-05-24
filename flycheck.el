@@ -680,7 +680,7 @@ returns nil for CONDITION.
 
 The syntax check is deferred if `flycheck-must-defer-check'
 returns t."
-  (when (flycheck-may-check-automatically condition)
+  (when (and flycheck-mode (flycheck-may-check-automatically condition))
       (if (flycheck-must-defer-check)
           (flycheck-buffer-deferred)
         (with-demoted-errors
