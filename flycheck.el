@@ -467,7 +467,7 @@ buffer manually.
   :lighter flycheck-mode-line
   :group 'flycheck
   :require 'flycheck
-  :after-hook (flycheck-buffer-automatically 'mode-enabled)
+  :after-hook (flycheck-buffer-automatically 'mode-enabled :force-deferred)
   (cond
    (flycheck-mode
     (flycheck-clear)
