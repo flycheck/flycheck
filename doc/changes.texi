@@ -646,6 +646,9 @@ Make fringe indicator faces customizable independently with
 @item
 Improve the default faces by using underlines instead of foreground
 colors, if possible
+@item
+@ghissue{141, Customizable error processing with
+@code{flycheck-process-error-functions}}
 @end itemize
 
 @item

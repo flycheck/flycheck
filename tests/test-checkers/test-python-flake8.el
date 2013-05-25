@@ -46,8 +46,7 @@
   (flycheck-testsuite-with-hook python-mode-hook
       (setq flycheck-flake8rc "flake8rc")
     (flycheck-testsuite-should-syntax-check
-     "checkers/python-flake8-warning.py" 'python-mode 'python-pylint
-     :no-errors)))
+     "checkers/python-flake8-warning.py" 'python-mode 'python-pylint)))
 
 (ert-deftest checker-python-flake8-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
@@ -57,13 +56,11 @@
    '(6 15 "E251 unexpected spaces around keyword / parameter equals" error)))
 
 (ert-deftest checker-python-flake8-error ()
-  "Test superfluous space being ignored with flake8."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
   (flycheck-testsuite-with-hook python-mode-hook
       (setq flycheck-flake8rc "flake8rc")
     (flycheck-testsuite-should-syntax-check
-     "checkers/python-flake8-error.py" 'python-mode 'python-pylint
-     :no-errors)))
+     "checkers/python-flake8-error.py" 'python-mode 'python-pylint)))
 
 (ert-deftest checker-python-flake8-warning-maximum-complexity ()
   "Test superfluous spaces with flake8."

@@ -383,10 +383,17 @@ of expected errors."
        (--each '(flycheck-locate-config-file-absolute-path
                  flycheck-testsuite-locate-config-file)
          (add-hook 'flycheck-locate-config-file-functions it :append :local))
-       (flycheck-testsuite-buffer-sync)
-       (if (eq (car errors) :no-errors)
-           (should-not flycheck-current-errors)
-         (apply #'flycheck-testsuite-should-errors errors))
+       (let ((process-hook-called 0))
+         (add-hook 'flycheck-process-error-functions
+                   (lambda (_err)
+                     (setq process-hook-called (1+ process-hook-called))
+                     nil)
+                   nil :local)
+         (flycheck-testsuite-buffer-sync)
+         (should (= process-hook-called (length errors))))
+       (if errors
+           (apply #'flycheck-testsuite-should-errors errors)
+         (should-not flycheck-current-errors))
        (flycheck-testsuite-ensure-clear)))))
 
 

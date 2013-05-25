@@ -406,6 +406,22 @@ reported in the mode line and in error message popups, and highlighted
 according to @code{flycheck-highlighting-mode}.
 @end defopt
 
+You can also completely customize error processing by hooking into
+Flycheck:
+
+@defopt flycheck-process-error-functions
+Functions to process errors.
+
+Each function in this hook must accept a single argument:  The Flycheck
+error to process.  @xref{Error API}, for more information about Flycheck
+error objects.
+
+The functions in this hook are called in order of appearance, until a
+function returns non-nil.  Thus, a function in this hook may return nil,
+to allow for further processing of the error, or t, to indicate that the
+error was fully processed and inhibit any further processing.
+@end defopt
+
 You can also list all errors in the current buffer:
 
 @table @kbd

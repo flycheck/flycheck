@@ -522,6 +522,22 @@ Errors and warnings from a syntax checker are
      reported in the mode line and in error message popups, and
      highlighted according to 'flycheck-highlighting-mode'.
 
+   You can also completely customize error processing by hooking into
+Flycheck:
+
+ -- User Option: flycheck-process-error-functions
+     Functions to process errors.
+
+     Each function in this hook must accept a single argument: The
+     Flycheck error to process.  *Note Error API::, for more information
+     about Flycheck error objects.
+
+     The functions in this hook are called in order of appearance, until
+     a function returns non-nil.  Thus, a function in this hook may
+     return nil, to allow for further processing of the error, or t, to
+     indicate that the error was fully processed and inhibit any further
+     processing.
+
    You can also list all errors in the current buffer:
 
 'C-c ! l'
@@ -1932,6 +1948,9 @@ master (unreleased)
           'flycheck-fringe-error' and 'flycheck-fringe-warning'
         * Improve the default faces by using underlines instead of
           foreground colors, if possible
+        * Customizable error processing with
+          'flycheck-process-error-functions'
+          (https://github.com/lunaryorn/flycheck/issues/141)
 
    * Improvements
 
@@ -2571,9 +2590,9 @@ Type, Function and Variable Index
 * flycheck-checker:                      Selection.           (line  41)
 * flycheck-checkers:                     Selection.           (line   9)
 * flycheck-chktexrc:                     Configuration.       (line  25)
-* flycheck-clear:                        Reporting.           (line  95)
+* flycheck-clear:                        Reporting.           (line 111)
 * flycheck-coffeelintrc:                 Configuration.       (line  28)
-* flycheck-copy-messages-as-kill:        Reporting.           (line  78)
+* flycheck-copy-messages-as-kill:        Reporting.           (line  94)
 * flycheck-count-errors:                 Error API.           (line 108)
 * flycheck-current-errors:               Error API.           (line 104)
 * flycheck-declare-checker:              Declaration.         (line   8)
@@ -2595,17 +2614,18 @@ Type, Function and Variable Index
 * flycheck-flake8rc:                     Configuration.       (line  31)
 * flycheck-fringe-error:                 Reporting.           (line  50)
 * flycheck-fringe-warning:               Reporting.           (line  51)
-* flycheck-google-messages:              Reporting.           (line  83)
+* flycheck-google-messages:              Reporting.           (line  99)
 * flycheck-has-errors-p:                 Error API.           (line 113)
 * flycheck-highlighting-mode:            Reporting.           (line  28)
 * flycheck-indication-mode:              Reporting.           (line  55)
 * flycheck-jshintrc:                     Configuration.       (line  34)
-* flycheck-list-errors:                  Reporting.           (line  69)
+* flycheck-list-errors:                  Reporting.           (line  85)
 * flycheck-locate-config-file-functions: Configuration.       (line  58)
 * flycheck-next-error:                   Navigation.          (line  23)
 * flycheck-parse-xml-string:             Error parser API.    (line   6)
 * flycheck-phpcs-standard:               Configuration.       (line  18)
 * flycheck-previous-error:               Navigation.          (line  31)
+* flycheck-process-error-functions:      Reporting.           (line  68)
 * flycheck-rubocoprc:                    Configuration.       (line  37)
 * flycheck-select-checker:               Selection.           (line  32)
 * flycheck-syntax-check-failed-hook:     Syntax checking.     (line  97)
@@ -2625,44 +2645,44 @@ Node: Syntax checking7177
 Node: Selection11186
 Node: Configuration13767
 Node: Reporting17307
-Node: Navigation21071
-Node: Mode line22867
-Node: Extending23768
-Node: Declaration24367
-Node: Error parsers36724
-Node: Option filters37708
-Node: Examples38047
-Node: Simple example38479
-Node: Predicate example41543
-Node: Configuration example43524
-Node: Chaining example46183
-Node: API47569
-Node: Error API48357
-Node: Error parser API52550
-Node: Contribution52776
-Node: Reporting issues53452
-Node: Contributing syntax checkers54262
-Node: Contributing code55057
-Node: Unit tests56397
-Node: Changes57684
-Node: 0.158364
-Node: 0.258648
-Node: 0.358926
-Node: 0.459162
-Node: 0.559937
-Node: 0.661157
-Node: 0.6.164007
-Node: 0.764156
-Node: 0.7.165170
-Node: 0.865885
-Node: 0.967397
-Node: 0.1067893
-Node: 0.1169945
-Node: 0.1271131
-Node: master72140
-Node: Credits73325
-Node: GNU Free Documentation License76252
-Node: Syntax checkers101404
-Node: Index102429
+Node: Navigation21717
+Node: Mode line23513
+Node: Extending24414
+Node: Declaration25013
+Node: Error parsers37370
+Node: Option filters38354
+Node: Examples38693
+Node: Simple example39125
+Node: Predicate example42189
+Node: Configuration example44170
+Node: Chaining example46829
+Node: API48215
+Node: Error API49003
+Node: Error parser API53196
+Node: Contribution53422
+Node: Reporting issues54098
+Node: Contributing syntax checkers54908
+Node: Contributing code55703
+Node: Unit tests57043
+Node: Changes58330
+Node: 0.159010
+Node: 0.259294
+Node: 0.359572
+Node: 0.459808
+Node: 0.560583
+Node: 0.661803
+Node: 0.6.164653
+Node: 0.764802
+Node: 0.7.165816
+Node: 0.866531
+Node: 0.968043
+Node: 0.1068539
+Node: 0.1170591
+Node: 0.1271777
+Node: master72786
+Node: Credits74122
+Node: GNU Free Documentation License77049
+Node: Syntax checkers102201
+Node: Index103226
 
 End Tag Table
