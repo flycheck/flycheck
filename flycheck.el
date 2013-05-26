@@ -6,7 +6,7 @@
 ;; URL: https://github.com/lunaryorn/flycheck
 ;; Keywords: convenience languages tools
 ;; Version: 0.13-cvs
-;; Package-Requires: ((s "1.3.1") (dash "1.2") (cl-lib "0.1") (emacs "24.1"))
+;; Package-Requires: ((s "1.6.0") (dash "1.2") (cl-lib "0.1") (emacs "24.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -1832,14 +1832,9 @@ _not_ include the file name."
         (level (symbol-name (flycheck-error-level err)))
         (checker (symbol-name (flycheck-error-checker err)))
         (message (flycheck-error-message err)))
-    ;; FIXME: s-lex-format breaks with double backslash, see
-    ;; https://github.com/magnars/s.el/issues/34
-    ;; (if column
-    ;;     (s-lex-format "${line}:${column}:${level}: ${message} (${checker})")
-    ;;   (s-lex-format "${line}:${level}: ${message} (${checker})"))
     (if column
-        (format "%s:%s:%s: %s (%s)" line column level message checker)
-      (format "%s:%s: %s (%s)" line level message checker))))
+        (s-lex-format "${line}:${column}:${level}: ${message} (${checker})")
+      (s-lex-format "${line}:${level}: ${message} (${checker})"))))
 
 
 ;;;; General error parsing
