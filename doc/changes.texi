@@ -646,6 +646,9 @@ Make fringe indicator faces customizable independently with
 @item
 Improve the default faces by using underlines instead of foreground
 colors, if possible
+@item
+@ghissue{144, Make the delay before starting a syntax check customizable
+via @code{flycheck-idle-change-delay}}
 @end itemize
 
 @item

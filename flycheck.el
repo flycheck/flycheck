@@ -267,11 +267,12 @@ to start a syntax check manually."
 (defcustom flycheck-idle-change-delay 0.5
   "How many seconds to wait before checking syntax automatically.
 
-After the buffer is changed, Flycheck will wait as many seconds
+After the buffer was changed, Flycheck will wait as many seconds
 as the value of this variable before starting a syntax check.  If
-the buffer is modified during this time, Flycheck will wait again.
+the buffer is modified during this time, Flycheck will wait
+again.
 
-This variable has effect, if `idle-change' is not contained in
+This variable has no effect, if `idle-change' is not contained in
 `flycheck-check-syntax-automatically'."
   :group 'flycheck
   :type 'number

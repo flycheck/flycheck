@@ -229,6 +229,16 @@ However, you can customize automatic syntax checking with
      If the list is empty syntax is never checked automatically.  In
      this case, use 'flycheck-buffer' to check syntax manually.
 
+ -- User Option: flycheck-idle-change-delay
+     How many seconds to wait before starting a syntax check.
+
+     After the buffer was changed, Flycheck waits as many seconds as the
+     value of this variable before starting a syntax check.  If the
+     buffer is changed during this time, Flycheck starts to wait again.
+
+     This variable has no effekt, if 'idle-change' is not contained in
+     'flycheck-check-syntax-automatically'.
+
 Regardless of automatic syntax checking you can also check the buffer
 manually:
 
@@ -1932,6 +1942,9 @@ master (unreleased)
           'flycheck-fringe-error' and 'flycheck-fringe-warning'
         * Improve the default faces by using underlines instead of
           foreground colors, if possible
+        * Make the delay before starting a syntax check customizable via
+          'flycheck-idle-change-delay'
+          (https://github.com/lunaryorn/flycheck/issues/144)
 
    * Improvements
 
@@ -2564,9 +2577,9 @@ Type, Function and Variable Index
  [index ]
 * Menu:
 
-* flycheck-after-syntax-check-hook:      Syntax checking.     (line  63)
-* flycheck-before-syntax-check-hook:     Syntax checking.     (line  81)
-* flycheck-buffer:                       Syntax checking.     (line  46)
+* flycheck-after-syntax-check-hook:      Syntax checking.     (line  73)
+* flycheck-before-syntax-check-hook:     Syntax checking.     (line  91)
+* flycheck-buffer:                       Syntax checking.     (line  56)
 * flycheck-check-syntax-automatically:   Syntax checking.     (line  15)
 * flycheck-checker:                      Selection.           (line  41)
 * flycheck-checkers:                     Selection.           (line   9)
@@ -2598,6 +2611,7 @@ Type, Function and Variable Index
 * flycheck-google-messages:              Reporting.           (line  83)
 * flycheck-has-errors-p:                 Error API.           (line 113)
 * flycheck-highlighting-mode:            Reporting.           (line  28)
+* flycheck-idle-change-delay:            Syntax checking.     (line  41)
 * flycheck-indication-mode:              Reporting.           (line  55)
 * flycheck-jshintrc:                     Configuration.       (line  34)
 * flycheck-list-errors:                  Reporting.           (line  69)
@@ -2608,7 +2622,7 @@ Type, Function and Variable Index
 * flycheck-previous-error:               Navigation.          (line  31)
 * flycheck-rubocoprc:                    Configuration.       (line  37)
 * flycheck-select-checker:               Selection.           (line  32)
-* flycheck-syntax-check-failed-hook:     Syntax checking.     (line  97)
+* flycheck-syntax-check-failed-hook:     Syntax checking.     (line 107)
 * flycheck-tidyrc:                       Configuration.       (line  40)
 * flycheck-warning:                      Reporting.           (line  15)
 
@@ -2622,47 +2636,47 @@ Node: Installation5029
 Node: Activation6203
 Node: Usage6554
 Node: Syntax checking7177
-Node: Selection11186
-Node: Configuration13767
-Node: Reporting17307
-Node: Navigation21071
-Node: Mode line22867
-Node: Extending23768
-Node: Declaration24367
-Node: Error parsers36724
-Node: Option filters37708
-Node: Examples38047
-Node: Simple example38479
-Node: Predicate example41543
-Node: Configuration example43524
-Node: Chaining example46183
-Node: API47569
-Node: Error API48357
-Node: Error parser API52550
-Node: Contribution52776
-Node: Reporting issues53452
-Node: Contributing syntax checkers54262
-Node: Contributing code55057
-Node: Unit tests56397
-Node: Changes57684
-Node: 0.158364
-Node: 0.258648
-Node: 0.358926
-Node: 0.459162
-Node: 0.559937
-Node: 0.661157
-Node: 0.6.164007
-Node: 0.764156
-Node: 0.7.165170
-Node: 0.865885
-Node: 0.967397
-Node: 0.1067893
-Node: 0.1169945
-Node: 0.1271131
-Node: master72140
-Node: Credits73325
-Node: GNU Free Documentation License76252
-Node: Syntax checkers101404
-Node: Index102429
+Node: Selection11623
+Node: Configuration14204
+Node: Reporting17744
+Node: Navigation21508
+Node: Mode line23304
+Node: Extending24205
+Node: Declaration24804
+Node: Error parsers37161
+Node: Option filters38145
+Node: Examples38484
+Node: Simple example38916
+Node: Predicate example41980
+Node: Configuration example43961
+Node: Chaining example46620
+Node: API48006
+Node: Error API48794
+Node: Error parser API52987
+Node: Contribution53213
+Node: Reporting issues53889
+Node: Contributing syntax checkers54699
+Node: Contributing code55494
+Node: Unit tests56834
+Node: Changes58121
+Node: 0.158801
+Node: 0.259085
+Node: 0.359363
+Node: 0.459599
+Node: 0.560374
+Node: 0.661594
+Node: 0.6.164444
+Node: 0.764593
+Node: 0.7.165607
+Node: 0.866322
+Node: 0.967834
+Node: 0.1068330
+Node: 0.1170382
+Node: 0.1271568
+Node: master72577
+Node: Credits73935
+Node: GNU Free Documentation License76862
+Node: Syntax checkers102014
+Node: Index103039
 
 End Tag Table
