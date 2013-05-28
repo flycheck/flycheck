@@ -103,6 +103,16 @@
     (let ((flycheck-check-syntax-automatically '(idle-change)))
       (insert "Hello world")
       (sleep-for 0.55))
+    (should (flycheck-deferred-check-p)))
+  (flycheck-testsuite-with-resource-buffer "automatic-check-dummy.el"
+    (emacs-lisp-mode)
+    (flycheck-mode-no-check)
+    (let ((flycheck-check-syntax-automatically '(idle-change))
+          (flycheck-idle-change-delay 1.5))
+      (insert "Hello world")
+      (sleep-for 0.55)
+      (should-not (flycheck-deferred-check-p))
+      (sleep-for 1))
     (should (flycheck-deferred-check-p))))
 
 (ert-deftest flycheck-check-syntax-automatically-new-line ()
