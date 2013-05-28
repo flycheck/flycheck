@@ -283,6 +283,20 @@ to start a syntax check manually."
               (const :tag "After `flycheck-mode' was enabled" mode-enabled))
   :package-version '(flycheck . "0.12"))
 
+(defcustom flycheck-idle-change-delay 0.5
+  "How many seconds to wait before checking syntax automatically.
+
+After the buffer was changed, Flycheck will wait as many seconds
+as the value of this variable before starting a syntax check.  If
+the buffer is modified during this time, Flycheck will wait
+again.
+
+This variable has no effect, if `idle-change' is not contained in
+`flycheck-check-syntax-automatically'."
+  :group 'flycheck
+  :type 'number
+  :package-version '(flycheck . "0.13"))
+
 (defcustom flycheck-google-max-messages 5
   "How many messages to google at once.
 
@@ -731,7 +745,7 @@ buffer."
       (if (s-contains? "\n" (buffer-substring beg end))
           (flycheck-buffer-automatically 'new-line :force-deferred)
         (setq flycheck-idle-change-timer
-              (run-at-time 0.5 nil #'flycheck-handle-idle-change))))))
+              (run-at-time flycheck-idle-change-delay nil #'flycheck-handle-idle-change))))))
 
 (defun flycheck-handle-idle-change ()
   "Handle an expired idle time since the last change."

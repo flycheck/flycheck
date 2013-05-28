@@ -649,6 +649,9 @@ colors, if possible
 @item
 @ghissue{141, Customizable error processing with
 @code{flycheck-process-error-functions}}
+@item
+@ghissue{144, Make the delay before starting a syntax check customizable
+via @code{flycheck-idle-change-delay}}
 @end itemize
 
 @item

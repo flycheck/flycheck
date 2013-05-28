@@ -59,6 +59,17 @@ If the list is empty syntax is never checked automatically.  In this
 case, use @code{flycheck-buffer} to check syntax manually.
 @end defopt
 
+@defopt flycheck-idle-change-delay
+How many seconds to wait before starting a syntax check.
+
+After the buffer was changed, Flycheck waits as many seconds as the
+value of this variable before starting a syntax check.  If the buffer is
+changed during this time, Flycheck starts to wait again.
+
+This variable has no effekt, if @code{idle-change} is not contained in
+@code{flycheck-check-syntax-automatically}.
+@end defopt
+
 @noindent
 Regardless of automatic syntax checking you can also check the buffer
 manually:
