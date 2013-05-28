@@ -369,7 +369,7 @@ CodeSniffer utility for the PHP programming language:
 See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
   :command '("phpcs" "--report=checkstyle" source)
   :error-parser 'flycheck-parse-checkstyle
-  :modes '(php-mode php+-mode))
+  :modes 'php-mode)
 @end lisp
 
 First we specify the @code{:command} to execute.  The first element of
@@ -525,7 +525,7 @@ facility to extend the PHP CodeSniffer syntax checker from the
              (option "--standard=" flycheck-phpcs-standard)
              source)
   :error-parser 'flycheck-parse-checkstyle
-  :modes '(php-mode php+-mode))
+  :modes 'php-mode)
 @end lisp
 
 The syntax checker is pretty much the same as before, except that a new
@@ -560,7 +560,7 @@ See URL `http://php.net/manual/en/features.commandline.php'."
   :error-patterns
   '(("\\(?:Parse\\|Fatal\\|syntax\\) error[:,] \\(?4:.*\\) in \\(?1:.*\\) on line \\(?2:[0-9]+\\)"
     error))
-  :modes '(php-mode php+-mode)
+  :modes 'php-mode
   :next-checkers '((warnings-only . php-phpcs)))
 @end lisp
 

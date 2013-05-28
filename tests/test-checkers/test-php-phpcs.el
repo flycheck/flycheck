@@ -26,23 +26,22 @@
 (require 'flycheck)
 
 (require 'php-mode nil t)
-(require 'php+-mode nil t)
 
 (ert-deftest checker-php-phpcs-error ()
   "Test an uppercase keyword error by phpcs."
   :expected-result (flycheck-testsuite-fail-unless-checkers 'php 'php-phpcs)
   (flycheck-testsuite-should-syntax-check
-   "checkers/php-phpcs-error.php" '(php-mode php+-mode) nil
+   "checkers/php-phpcs-error.php" 'php-mode nil
    '(19 8 "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\"" error
         :checker php-phpcs)))
 
 (ert-deftest checker-php-phpcs-error-phpcs-standard ()
   "Test an uppercase keyword error by phpcs."
   :expected-result (flycheck-testsuite-fail-unless-checkers 'php 'php-phpcs)
-  (flycheck-testsuite-with-hook (php-mode-hook php+-mode-hook)
+  (flycheck-testsuite-with-hook php-mode-hook
       (setq flycheck-phpcs-standard "Zend")
     (flycheck-testsuite-should-syntax-check
-     "checkers/php-phpcs-error.php" '(php-mode php+-mode) nil
+     "checkers/php-phpcs-error.php" 'php-mode nil
      '(21 1 "A closing tag is not permitted at the end of a PHP file" error
           :checker php-phpcs))))
 
