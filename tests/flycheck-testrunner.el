@@ -26,13 +26,15 @@
 
 ;;; Code:
 
-;;;; Load the testsuite
+(require 'dash)
+
+;;; Load the testsuite
 (let* ((testdir (file-name-directory load-file-name))
-       (sourcedir (expand-file-name ".." testdir))
-       (testsuite (expand-file-name "flycheck-testsuite" testdir)))
-  (dolist (dir (list testdir sourcedir))
-    (add-to-list 'load-path dir))
-  (load testsuite nil :no-message))
+       (sourcedir (expand-file-name ".." testdir)))
+  (--each (list testdir sourcedir)
+    (add-to-list 'load-path it)))
+
+(require 'flycheck-testsuite)
 
 (princ (format "Running Flycheck tests under Emacs %s\n" emacs-version))
 
