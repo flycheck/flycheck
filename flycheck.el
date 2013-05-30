@@ -42,10 +42,12 @@
   ;; For integration into Compile Mode
   (require 'compile))
 
-(require 'cl-lib)
 (require 's)
 (require 'dash)
-(require 'package)  ; For `package-buffer-info' and `package-version-join''
+(require 'cl-lib)                       ; For `cl-defstruct'
+(require 'help-mode)                    ; For `define-button-type'
+(require 'find-func)                    ; For `find-function-space-re', etc.
+(require 'package)       ; For `package-buffer-info' and `package-version-join''
 
 
 ;;;; Compatibility
@@ -1610,24 +1612,18 @@ syntax check if the syntax checker changed."
   (interactive)
   (info "flycheck"))
 
-;; Define a custom help button and plug into find-func to navigate to checker
-;; definitions, but delay this until after the corresponding libraries have been
-;; loaded to not forcibly load these libraries even if the user never even
-;; uses this feature
-(eval-after-load 'help-mode
-  '(define-button-type 'help-flycheck-checker-def
-     :supertype 'help-xref
-     'help-function 'flycheck-goto-checker-definition
-     'help-echo (purecopy "mouse-2, RET: find Flycheck checker definition")))
+(define-button-type 'help-flycheck-checker-def
+  :supertype 'help-xref
+  'help-function 'flycheck-goto-checker-definition
+  'help-echo (purecopy "mouse-2, RET: find Flycheck checker definition"))
 
-(eval-after-load 'find-func
-  '(progn
-     (defconst flycheck-find-checker-regexp
-       (concat "^\\s-*(flycheck-declare-checker "
-               find-function-space-re "%s\\(\\s-\\|$\\)")
-       "Regular expression to find a checker definition.")
-     (add-to-list 'find-function-regexp-alist
-                  '(flycheck-checker . flycheck-find-checker-regexp))))
+(defconst flycheck-find-checker-regexp
+  (concat "^\\s-*(flycheck-declare-checker "
+          find-function-space-re "%s\\(\\s-\\|$\\)")
+  "Regular expression to find a checker definition.")
+
+(add-to-list 'find-function-regexp-alist
+             '(flycheck-checker . flycheck-find-checker-regexp))
 
 (defun flycheck-goto-checker-definition (checker file)
   "Go to to the definition of CHECKER in FILE."
