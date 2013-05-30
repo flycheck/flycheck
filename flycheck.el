@@ -2703,15 +2703,21 @@ during byte-compilation or autoloads generation, or nil otherwise."
      ;; file
      (package-initialize)
 
-     (setq byte-compiled-files nil)
-     (defun byte-compile-dest-file (source)
+     ;; Try best to make local dependencies available
+     (defun flycheck-extend-load-path (filename)
+       (add-to-list 'load-path (file-name-directory filename)))
+
+     (defvar flycheck-byte-compiled-files nil)
+
+     (defun flycheck-byte-compile-dest-file (source)
        (let ((temp-file (make-temp-file (file-name-nondirectory source))))
-         (add-to-list 'byte-compiled-files temp-file)
+         (add-to-list 'flycheck-byte-compiled-files temp-file)
          temp-file))
 
-     (setq byte-compile-dest-file-function 'byte-compile-dest-file)
+     (setq byte-compile-dest-file-function 'flycheck-byte-compile-dest-file)
+     (mapc 'flycheck-extend-load-path command-line-args-left)
      (mapc 'byte-compile-file command-line-args-left)
-     (mapc 'delete-file byte-compiled-files)))
+     (mapc 'delete-file flycheck-byte-compiled-files)))
 
 (flycheck-declare-checker emacs-lisp
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler."

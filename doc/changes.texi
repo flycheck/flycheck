@@ -662,6 +662,9 @@ Improvements
 Always highlight errors on top of warnings now
 @item
 @ghissue{141, Do not trigger syntax checks in the middle of commands}
+@item
+Add the current directory to load path in the @code{emacs-lisp} syntax
+checker
 @end itemize
 
 @item
