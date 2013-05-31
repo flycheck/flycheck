@@ -2776,7 +2776,7 @@ The checker runs `checkdoc-current-buffer'."
              ,(prin1-to-string flycheck-emacs-lisp-checkdoc-form)
              source)
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)" warning))
-  :modes '(emacs-lisp-mode lisp-interaction-mode)
+  :modes '(emacs-lisp-mode)
   :predicate
   '(and (not (flycheck-temp-compilation-buffer-p))
         ;; Do not check Carton files.  These really don't need to follow
