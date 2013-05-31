@@ -2758,15 +2758,12 @@ during byte-compilation or autoloads generation, or nil otherwise."
          (insert-file-contents filename t)
          (setq buffer-file-name filename)
          (setq default-directory process-default-directory)
-         (condition-case err
-             (progn
-               (checkdoc-current-buffer t)
-               (with-current-buffer checkdoc-diagnostic-buffer
-                 (princ (buffer-substring-no-properties (point-min)
-                                                        (point-max)))
-                 (kill-buffer)))
-           (error
-            (message "Ignoring error: %S" err)))))))
+         (with-demoted-errors
+           (checkdoc-current-buffer t)
+           (with-current-buffer checkdoc-diagnostic-buffer
+             (princ (buffer-substring-no-properties (point-min)
+                                                    (point-max)))
+             (kill-buffer)))))))
 
 (flycheck-declare-checker emacs-lisp-checkdoc
   "An Emacs Lisp style checker using CheckDoc.
