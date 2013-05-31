@@ -150,11 +150,17 @@ MELPA repository, add the following code to @file{init.el}:
 (package-initialize)
 @end lisp
 
-Flycheck is written and tested against GNU Emacs 24.2 and newer.  It
-should work on GNU Emacs 24.1, too.  Earlier releases of GNU Emacs,
-especially GNU Emacs 23 and before, and other flavors of Emacs
-(e.g. XEmacs, Aquamacs, etc.) are @b{not} supported.  Flycheck may or
-may not work, the latter being more likely.
+Flycheck supports GNU Emacs 24.2 and newer on Linux, OS X and any other
+decent flavor of Unix.  It should work with GNU Emacs 24.1, too, but it
+is not tested against this version of Emacs.
+
+Flycheck does not support Windows, but tries to be compatible with it.
+You may try to use Flycheck on Windows.  It should mostly work, but
+expect problems and issues.  Pull requests which improve Windows
+compatibility are welcome.
+
+Flycheck also does not support GNU Emacs 23 and other flavors of Emacs
+(e.g. XEmacs, Aquamacs, etc.).  Don't try, it will @emph{not} work.
 
 Most checkers depend on external tools to perform the actual syntax
 checking.  Use @code{flycheck-describe-checker} to get help about a

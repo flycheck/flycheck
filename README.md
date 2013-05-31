@@ -76,9 +76,16 @@ Installation
 Install the ELPA package from [MELPA][] or [Marmalade][] with `M-x
 package-install RET flycheck`.  All dependencies are automatically installed.
 
-Flycheck is written and tested against GNU Emacs 24.2 and newer.  It should work
-on Emacs 24.1, too.  GNU Emacs 23 and before, and other flavors of Emacs
-(e.g. XEmacs) are *not* supported.
+Flycheck supports GNU Emacs 24.2 and newer on Linux, OS X and any other decent
+flavor of Unix.  It should work with GNU Emacs 24.1, too, but it is not tested
+against this version of Emacs.
+
+Flycheck does not support Windows, but tries to be compatible with it.  You may
+try to use Flycheck on Windows.  It should mostly work, but expect problems and
+issues.  Pull requests which improve Windows compatibility are welcome.
+
+Flycheck also does not support GNU Emacs 23 and other flavors of Emacs
+(e.g. XEmacs, Aquamacs, etc.).  Don't try, it will *not* work.
 
 Most checkers have dependencies against external tools that perform the
 checking.  Use `C-c ! ?` to see what a checker needs, e.g. `C-c ! ?
