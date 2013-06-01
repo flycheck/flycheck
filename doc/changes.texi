@@ -668,6 +668,8 @@ checker
 @item
 Do not longer use the @code{emacs-lisp-checkdoc} syntax checker in
 Scratch buffers
+@item
+@ghissue{149, Do not flush temporary files onto disk}
 @end itemize
 
 @item
