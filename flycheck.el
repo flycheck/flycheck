@@ -876,7 +876,10 @@ suitable for comparison of file names."
 (defun flycheck-save-buffer-to-file (file-name)
   "Save the contents of the current buffer to FILE-NAME."
   (make-directory (file-name-directory file-name) t)
-  (write-region nil nil file-name nil 0))
+  ;; avoid unnecessary fsync for temporary file
+  (let ((write-region-inhibit-fsync t))
+    (write-region nil nil file-name nil 0)
+  ))
 
 (defun flycheck-save-buffer-to-temp (temp-file-fn prefix)
   "Save buffer to temp file returned by TEMP-FILE-FN with PREFIX.
