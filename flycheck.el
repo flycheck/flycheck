@@ -1003,7 +1003,7 @@ one of `:predicate' and `:modes'.  If `:predicate' and `:modes'
 are present, both must match for the checker to be used."
   (declare (indent 1)
            (doc-string 2))
-  `(flycheck--declare-checker-1 (quote ,symbol) ,docstring ,@properties)
+  `(flycheck--declare-checker-1 ',symbol ,docstring ,@properties)
   )
 
 (defun flycheck-undeclare-checker (symbol)
@@ -1049,7 +1049,7 @@ Use this together with the `config-file' cell in syntax checker
 commands."
   (declare (indent 3))
   `(progn
-     (put (quote ,checker) :flycheck-config-file-var (quote ,symbol))
+     (put ',checker :flycheck-config-file-var ',symbol)
      (defcustom ,symbol ,file-name
        ,(format "Configuration file for `%s'.
 
@@ -1089,16 +1089,15 @@ commands."
   (declare (indent 3)
            (doc-string 4))
   `(progn
-     (let ((options (flycheck-checker-option-vars (quote ,checker))))
-       (put (quote ,checker) :flycheck-option-vars
-            (-uniq (cons (quote ,symbol) options))))
+     (let ((options (flycheck-checker-option-vars ',checker)))
+       (put ',checker :flycheck-option-vars (-uniq (cons ',symbol options))))
      (defcustom ,symbol ,init-value
        ,(format "%s
 
 This variable is an option for the syntax checker `%s'." docstring checker)
        :group 'flycheck-options
        ,@custom-args)
-     (make-variable-buffer-local (quote ,symbol))))
+     (make-variable-buffer-local ',symbol)))
 
 (defun flycheck-error-pattern-p (pattern)
   "Check whether PATTERN is a valid error pattern."
