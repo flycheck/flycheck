@@ -665,6 +665,9 @@ Always highlight errors on top of warnings now
 @item
 Add the current directory to load path in the @code{emacs-lisp} syntax
 checker
+@item
+Do not longer use the @code{emacs-lisp-checkdoc} syntax checker in
+Scratch buffers
 @end itemize
 
 @item
