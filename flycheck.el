@@ -1069,9 +1069,9 @@ Use this variable as file-local variable if you need a specific
 configuration file a buffer." checker)
        :type '(choice (const :tag "No configuration file" nil)
                       (string :tag "File name or path"))
-       :group 'flycheck-config-files)
-     (put (quote ,symbol) 'safe-local-variable #'stringp)
-     (make-variable-buffer-local (quote ,symbol))))
+       :group 'flycheck-config-files
+       :safe #'stringp)
+     (make-variable-buffer-local ',symbol)))
 
 ;;;###autoload
 (defmacro flycheck-def-option-var (symbol init-value checker docstring
