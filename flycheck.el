@@ -2246,6 +2246,7 @@ Return the created overlay."
 
 (defvar-local flycheck-overlays-to-delete nil
   "Overlays mark for deletion after all syntax checks completed.")
+(put 'flycheck-overlays-to-delete 'permanent-local t)
 
 (defun flycheck-delete-all-overlays ()
   "Remove all flycheck overlays in the current buffer."
@@ -2503,6 +2504,7 @@ https://github.com/Bruce-Connor/emacs-google-this")))
 ;;;; Checker process management
 (defvar-local flycheck-current-process nil
   "The current syntax checking process.")
+(put 'flycheck-current-process 'permanent-local t)
 
 (defun flycheck-running-p ()
   "Determine whether a syntax check is running."
