@@ -2584,14 +2584,16 @@ _EVENT is ignored."
           (output (flycheck-get-output process))
           (buffer (process-buffer process)))
       (flycheck-delete-process process)
-      (setq flycheck-current-process nil)
-      (when (and (buffer-live-p buffer) flycheck-mode)
+      (when (buffer-live-p buffer)
         (with-current-buffer buffer
-          (condition-case err
-              (flycheck-finish-syntax-check checker exit-status files output)
-            (error
-             (flycheck-report-error)
-             (signal (car err) (cdr err)))))))))
+          (setq flycheck-current-process nil)
+          (flycheck-report-status "")
+          (when flycheck-mode
+            (condition-case err
+                (flycheck-finish-syntax-check checker exit-status files output)
+              (error
+               (flycheck-report-error)
+               (signal (car err) (cdr err))))))))))
 
 (defun flycheck-start-checker (checker)
   "Start a syntax CHECKER."

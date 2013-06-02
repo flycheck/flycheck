@@ -686,6 +686,8 @@ Do not start automatic syntax checks if Flycheck Mode is disabled
 @item
 @ghissue{143, Defer the initial syntax check until after the current
 interactive command}
+@item
+Correctly clean up information about running processes
 @end itemize
 
 @end itemize
