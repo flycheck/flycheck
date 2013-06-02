@@ -883,7 +883,9 @@ suitable for comparison of file names."
 
 Return the name of the temporary file."
   (let ((filename (funcall temp-file-fn (buffer-file-name) prefix)))
-    (flycheck-save-buffer-to-file filename)
+    ;; Do not flush short-lived temporary files onto disk
+    (let ((write-region-inhibit-fsync t))
+      (flycheck-save-buffer-to-file filename))
     filename))
 
 (defun flycheck-option-with-value-argument (option value)

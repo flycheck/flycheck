@@ -158,6 +158,8 @@ The following people contributed to flycheck:
 - [Mark Hellewell][markhellewell] added the Puppet syntax and style checkers.
 - [Martin Grenfell][scrooloose] created the awesome Vim library [syntastic][]
   which inspired this project and many of its checkers.
+- [Matthias Dahl][BinaryKhaos] improved the performance of Flycheck's temp file
+  handling.
 - [Peter Vasil][ptrv] contributed syntax checkers for XML, Lua and Go (using `go
   build` and `go test`), added unit tests and did valuable testing.
 - [Robert Zaremba][robert-zaremba] added a Go syntax checker using `gofmt`.
@@ -224,3 +226,4 @@ See [COPYING][] for details.
 [syl20bnr]: https://github.com/syl20bnr
 [flycheck-color-mode-line.el]: https://github.com/syl20bnr/flycheck-color-mode-line
 [markhellewell]: https://github.com/markhellewell
+[BinaryKhaos]: https://github.com/Binarykhaos

@@ -38,6 +38,10 @@ checkers.
 many of its checkers.
 
 @item
+@gh{BinaryKhaos,Matthias Dahl} improved the performance of Flycheck's
+temp file handling.
+
+@item
 @gh{ptrv, Peter Vasil} contributed syntax checkers for XML, Lua and Go
 (using @command{go build} and @command{go test}), added unit tests and
 did valuable testing.
