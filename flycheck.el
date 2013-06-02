@@ -2257,7 +2257,8 @@ Return the created overlay."
 (defun flycheck-mark-all-overlays-for-deletion ()
   "Mark all current overlays for deletion."
   (setq flycheck-overlays-to-delete
-        (flycheck-overlays-in (point-min) (point-max))))
+        (append (flycheck-overlays-in (point-min) (point-max))
+                flycheck-overlays-to-delete)))
 
 (defun flycheck-delete-marked-overlays ()
   "Delete all overlays marked for deletion."
