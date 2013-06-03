@@ -113,6 +113,8 @@ buffer-local wherever it is set."
     go-build
     go-test
     haml
+    haskell-ghc
+    haskell-hlint
     html-tidy
     javascript-jshint
     json-jsonlint
@@ -2012,6 +2014,45 @@ from the node list."
 Use libxml if Emacs is built with libxml support.  Otherwise fall
 back to `xml-parse-region'.")
 
+(defun flycheck-haskell-line-is-header (line)
+  (string-match "^.*\\.hs:" line))
+
+(defun flycheck-haskell-info-from-header (line)
+  (let ((separated (split-string line ":")))
+    (list (car separated) (cadr separated) (caddr separated))))
+
+(defun flycheck-haskell-parse-until-next (lines acumulator)
+  (if (or (null lines) (flycheck-haskell-line-is-header (car lines)))
+      (list (reverse acumulator) lines)
+    (flycheck-haskell-parse-until-next (cdr lines) (cons (car lines) acumulator))))
+
+(defun flycheck-haskell-parse-errors (lines)
+  (let ((next (flycheck-haskell-parse-until-next lines (list))))
+    (if (null (cadr next))
+        '()
+      (flycheck-haskell-gather-errors (cadr next)))))
+
+(defun flycheck-haskell-gather-errors (lines)
+  (if (null lines) (list)
+    (let ((first (flycheck-haskell-info-from-header (car lines)))
+          (next (flycheck-haskell-parse-until-next (cdr lines) (list))))
+      (cons (flycheck-error-new
+             :filename (car first)
+             :line (string-to-number (cadr first))
+             :column (string-to-number (caddr first))
+             :message (mapconcat 'identity (car next) "\n")
+             :level (if (string-match ".*Warning.*" (car (car next)))
+                        'warning 'error))
+            (flycheck-haskell-gather-errors (cadr next))))))
+
+(defun flycheck-haskell-parse-ghc (ghc-output checker buffer)
+  (flycheck-haskell-parse-errors (split-string ghc-output "\n")))
+
+(defun flycheck-haskell-parse-hlint (hlint-output checker buffer)
+  (if (string-match ".*No suggestions.*" hlint-output)
+      (list)
+    (flycheck-haskell-gather-errors (split-string hlint-output "\n"))))
+
 (defun flycheck-parse-xml-string (xml)
   "Parse an XML string.
 
@@ -2832,6 +2873,19 @@ See URL `https://golang.org/cmd/go'."
   :modes 'go-mode
   :predicate '(and (s-ends-with? "_test.go" (buffer-file-name))
                    (not (buffer-modified-p))))
+
+(flycheck-declare-checker haskell-ghc
+ "A simple syntax checker using ghc"
+ :command '("ghc" "-Wall" "-fno-warn-name-shadowing" source-inplace)
+ :error-parser 'flycheck-haskell-parse-ghc
+ :modes 'haskell-mode
+ :next-checkers '(haskell-hlint))
+
+(flycheck-declare-checker haskell-hlint
+  "A simple syntax checker using hlint"
+  :command '("hlint" source-inplace)
+  :error-parser 'flycheck-haskell-parse-hlint
+  :modes 'haskell-mode)
 
 (flycheck-declare-checker haml
   "A Haml syntax checker using the Haml compiler.
