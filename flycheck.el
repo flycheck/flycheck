@@ -60,9 +60,8 @@ buffer-local wherever it is set."
       (declare (debug defvar) (doc-string 3))
       `(progn
          (defvar ,var ,val ,docstring)
-         (make-variable-buffer-local ',var)))))
+         (make-variable-buffer-local ',var))))
 
-(eval-and-compile
   (unless (fboundp 'user-error)
     ;; Provide `user-error' for Emacs 24.2
     (defalias 'user-error 'error)
