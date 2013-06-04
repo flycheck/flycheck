@@ -85,7 +85,6 @@ out-dated errors:
 :predicate (and (buffer-file-name) (not (buffer-modified-p)))
 @end lisp
 
-
 @item temporary-directory
 This symbol is substituted with the path of an existing temporary
 directory, which is unique on each execution of the syntax checker.
@@ -307,7 +306,7 @@ Flycheck provides the following error parsers for use by syntax
 checkers:
 
 @table @code
-@item flycheck-parse-output-with-patterns
+@item flycheck-parse-with-patterns
 Parse output with the @code{:error-patterns} of the syntax checker.
 @item flycheck-parse-checkstyle
 Parse XML output similar to @uref{http://checkstyle.sourceforge.net/,

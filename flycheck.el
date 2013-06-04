@@ -1026,7 +1026,8 @@ are present, both must match for the checker to be used."
   (flycheck-undeclare-checker symbol)
   (put symbol :flycheck-command (plist-get properties :command))
   (put symbol :flycheck-error-patterns (plist-get properties :error-patterns))
-  (put symbol :flycheck-error-parser (plist-get properties :error-parser))
+  (put symbol :flycheck-error-parser
+       (or (plist-get properties :error-parser) 'flycheck-parse-with-patterns))
   (put symbol :flycheck-modes (plist-get properties :modes))
   (put symbol :flycheck-predicate (plist-get properties :predicate))
   (put symbol :flycheck-next-checkers (plist-get properties :next-checkers))
@@ -1160,8 +1161,8 @@ error if not."
       (error "Checker %s must have an executable in :command" checker))
     (unless (flycheck-command-arguments-list-p command)
       (error "Checker %s has invalid :command arguments" checker))
-    (unless (or patterns parser)
-      (error "Checker %s must have an :error-parser or :error-patterns" checker))
+    (when (and (eq parser 'flycheck-parse-with-patterns) (null patterns))
+      (error "Checker %s must have :error-patterns" checker))
     (unless (or (null patterns) (flycheck-error-patterns-list-p patterns))
       (error "Checker %s has invalid :error-patterns" checker))
     (unless (or (null parser) (fboundp parser))
@@ -1857,8 +1858,7 @@ OUTPUT is a string with the output from the checker symbol
 CHECKER.  BUFFER is the buffer which was checked.
 
 Return the errors parsed with the error patterns of CHECKER."
-  (let* ((parser (or (flycheck-checker-error-parser checker)
-                     'flycheck-parse-output-with-patterns))
+  (let* ((parser (flycheck-checker-error-parser checker))
          (errors (funcall parser output checker buffer)))
     (--each errors
       (setf (flycheck-error-buffer it) buffer)
@@ -1977,7 +1977,7 @@ is a list of error patterns to parse ERRORS with.
 Return a list of parsed errors."
   (--map (flycheck-parse-error-with-patterns it patterns) errors))
 
-(defun flycheck-parse-output-with-patterns (output checker _buffer)
+(defun flycheck-parse-with-patterns (output checker _buffer)
   "Parse OUTPUT from CHECKER with error patterns.
 
 Uses the error patterns of CHECKER to tokenize the output and

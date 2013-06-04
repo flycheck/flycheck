@@ -53,13 +53,13 @@ All declared checkers should be registered."
       (should (flycheck-registered-checker-p checker)))))
 
 (ert-deftest flycheck-checkers-patterns-or-parser ()
-  "Test that all `flycheck-checkers' have either patterns or
-  parsers."
+  "Test that all `flycheck-checkers' have parser and patterns."
   (dolist (checker flycheck-checkers)
-    (should (or (and (flycheck-checker-error-patterns checker)
-                     (not (flycheck-checker-error-parser checker)))
-                (and (not (flycheck-checker-error-patterns checker))
-                     (flycheck-checker-error-parser checker))))))
+    (let ((patterns (flycheck-checker-error-patterns checker))
+          (parser (flycheck-checker-error-parser checker)))
+      (should checker)
+      (should (or (and (eq parser 'flycheck-parse-with-patterns) patterns)
+                  (null patterns))))))
 
 ;; Local Variables:
 ;; coding: utf-8
