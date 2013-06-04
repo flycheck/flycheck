@@ -52,15 +52,15 @@
 
 ;;;; Compatibility
 (eval-and-compile
-  (unless (and (fboundp 'defvar-local)
-               (eq (car (symbol-function 'defvar-local)) 'macro))
+  (unless (fboundp 'defvar-local)
     (defmacro defvar-local (var val &optional docstring)
       "Define VAR as a buffer-local variable with default value VAL.
 Like `defvar' but additionally marks the variable as being automatically
 buffer-local wherever it is set."
       (declare (debug defvar) (doc-string 3))
-      (list 'progn (list 'defvar var val docstring)
-            (list 'make-variable-buffer-local (list 'quote var))))))
+      `(progn
+         (defvar ,var ,val ,docstring)
+         (make-variable-buffer-local ',var)))))
 
 (eval-and-compile
   (unless (fboundp 'user-error)
