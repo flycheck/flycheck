@@ -156,9 +156,13 @@ parsers.
 
 Using a error parser is preferred if a syntax checker provides a
 structured output format like XML or JSON.  If possible, re-use one of
-the built-in error parsers listed in @ref{Error parsers}
+the built-in error parsers listed in @ref{Error parsers}.
 
-May not be specified together with @code{:error-patterns}.
+An error parser takes precedence over @code{:error-patterns}.  To use an
+error parser together with patterns, you must manually call
+@code{flycheck-parse-output-with-patterns} in your error parser to parse
+with error patterns first.  You can the post-process the errors returned
+by this function.
 
 @item :error-patterns '((@var{regexp} @var{level})...)
 A list of one or more error patterns to parse the output of
@@ -191,8 +195,6 @@ sure that the group numbering is correct.  @xref{Regexp Backslash, ,
 The patterns are applied in the order of declaration to the whole output
 of the syntax checker.  Output already matched by a pattern will not be
 matched by subsequent patterns.  In other words, the first pattern wins.
-
-May not be specified together with @code{:error-parser}.
 
 @item :modes '@var{major-mode}
 @itemx :modes '(@var{major-mode}...)
@@ -305,6 +307,8 @@ Flycheck provides the following error parsers for use by syntax
 checkers:
 
 @table @code
+@item flycheck-parse-output-with-patterns
+Parse output with the @code{:error-patterns} of the syntax checker.
 @item flycheck-parse-checkstyle
 Parse XML output similar to @uref{http://checkstyle.sourceforge.net/,
 Checkstyle}.

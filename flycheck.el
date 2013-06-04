@@ -1162,9 +1162,6 @@ error if not."
       (error "Checker %s has invalid :command arguments" checker))
     (unless (or patterns parser)
       (error "Checker %s must have an :error-parser or :error-patterns" checker))
-    (when (and patterns parser)
-      (error "Checker %s must not have :error-parser and :error-patterns"
-             checker))
     (unless (or (null patterns) (flycheck-error-patterns-list-p patterns))
       (error "Checker %s has invalid :error-patterns" checker))
     (unless (or (null parser) (fboundp parser))
