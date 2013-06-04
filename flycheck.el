@@ -2335,8 +2335,7 @@ the beginning of the buffer."
 
 (define-derived-mode flycheck-error-list-mode compilation-mode "Flycheck errors"
   "A major mode for a Flycheck error listing."
-  (setq-local compilation-error-regexp-alist
-              flycheck-list-error-regex-alist))
+  (setq-local compilation-error-regexp-alist flycheck-list-error-regex-alist))
 
 (defun flycheck-list-buffer-label (buffer)
   "Create a list label for BUFFER relative to DIRECTORY.
