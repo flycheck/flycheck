@@ -62,6 +62,11 @@ buffer-local wherever it is set."
          (defvar ,var ,val ,docstring)
          (make-variable-buffer-local ',var))))
 
+  (unless (fboundp 'setq-local)
+    (defmacro setq-local (var val)
+      "Set variable VAR to value VAL in current buffer."
+      `(set (make-local-variable ',var) ,val)))
+
   (unless (fboundp 'user-error)
     ;; Provide `user-error' for Emacs 24.2
     (defalias 'user-error 'error)

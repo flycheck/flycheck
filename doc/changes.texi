@@ -688,6 +688,8 @@ Do not start automatic syntax checks if Flycheck Mode is disabled
 interactive command}
 @item
 Correctly clean up information about running processes
+@item
+@ghissue{150, Fix compatibility with Emacs 24.2 and earlier}
 @end itemize
 
 @end itemize
