@@ -672,6 +672,9 @@ Scratch buffers
 @ghissue{149, Do not flush temporary files onto disk}
 @item
 Syntax checkers may have error patterns and error parser now
+@item
+Predicate forms are now wrapped into functions and compiled into
+functions during byte compilation
 @end itemize
 
 @item

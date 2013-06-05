@@ -206,12 +206,13 @@ modes.
 @item :predicate @var{form}
 A predicate that determines whether the syntax checker may be used.
 
-@var{form} is a quoted Emacs Lisp form.  It is evaluated before each
-syntax check to determine whether the syntax checker may be used for the
-current buffer.  If @var{form} evaluates to nil, the syntax checker is
-not used.
+@var{form} is a quoted Emacs Lisp form.  The @var{form} is wrapped into
+a function and compiled during byte compiled.  This function is called
+before each syntax check to determine whether the syntax checker may be
+used for the current buffer.  If @var{form} returns nil, the syntax
+checker is not used.
 
-If @var{:modes} is given, @var{form} is only evaluated if the major mode
+If @var{:modes} is given, @var{form} is only called if the major mode
 matches.  Otherwise the syntax checker is not used.
 
 @item :next-checker '(@var{item}...)
