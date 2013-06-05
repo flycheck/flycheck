@@ -1016,7 +1016,7 @@ are present, both must match for the checker to be used."
      :error-parser (or ,(plist-get properties :error-parser)
                        'flycheck-parse-with-patterns)
      :modes ,(plist-get properties :modes)
-     :predicate ,(-when-let (predicate (cadr (plist-get properties :predicate)))
+     :predicate ,(-when-let (predicate (eval (plist-get properties :predicate)))
                    `(function (lambda () ,predicate)))
      :next-checkers ,(plist-get properties :next-checkers)
      :documentation ,docstring))
