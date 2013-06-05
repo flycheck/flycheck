@@ -37,10 +37,10 @@
 ;;; Code:
 
 (eval-when-compile
-  ;; For JKA workarounds in `flycheck-temp-file-system'
-  (require 'jka-compr)
-  ;; For integration into Compile Mode
-  (require 'compile))
+  (require 'jka-compr)                  ; For JKA workarounds in
+                                        ; `flycheck-temp-file-system'
+  (require 'compile)                    ; Compile Mode integration
+  (require 'sh-script))                 ; `sh-shell' for sh checker predicates
 
 (require 's)
 (require 'dash)
@@ -989,9 +989,10 @@ of `flycheck-error' objects parsed from OUTPUT.
 `:modes' A major mode symbol or a list thereof.  If present the
 checker is only used in these modes.
 
-`:predicate' An Emacs Lisp form.  If present the checker is only
-used if the form evaluates to a non-nil result in the buffer to
-check.
+`:predicate' An Emacs Lisp form.  If present the syntax checker
+is only used if this form returns a non-nil result when evaluated
+in the buffer to check.  The form is wrapped into a `lambda'
+function to support byte compilation.
 
 `:next-checkers' A list where each element is either a checker
 symbol to run after this checker or a cons cell (PREDICATE
@@ -1009,8 +1010,29 @@ one of `:predicate' and `:modes'.  If `:predicate' and `:modes'
 are present, both must match for the checker to be used."
   (declare (indent 1)
            (doc-string 2))
-  `(flycheck--declare-checker-1 ',symbol ,docstring ,@properties)
-  )
+  `(progn
+     (flycheck-undeclare-checker ',symbol)
+     (put ',symbol :flycheck-command ,(plist-get properties :command))
+     (put ',symbol :flycheck-error-patterns
+          ,(plist-get properties :error-patterns))
+     (put ',symbol :flycheck-error-parser
+          (or ,(plist-get properties :error-parser)
+              'flycheck-parse-with-patterns))
+     (put ',symbol :flycheck-modes ,(plist-get properties :modes))
+     (put ',symbol :flycheck-predicate
+          ,(-when-let (predicate (cadr (plist-get properties :predicate)))
+             `(function (lambda () ,predicate))))
+     (put ',symbol :flycheck-next-checkers ,(plist-get properties :next-checkers))
+     (put ',symbol :flycheck-documentation ,docstring)
+     ;; Record the location of the definition of the checker.  If we're loading
+     ;; from a file, record the file loaded from.  Otherwise use the current buffer
+     ;; file name, in case of `eval-buffer' and the like.
+     (-when-let (filename (if load-in-progress load-file-name (buffer-file-name)))
+       (when (s-ends-with? ".elc" filename)
+         (setq filename (s-chop-suffix "c" filename)))
+       (put ',symbol :flycheck-file filename))
+     (flycheck-verify-checker ',symbol)
+     (put ',symbol :flycheck-checker t)))
 
 (defun flycheck-undeclare-checker (symbol)
   "Un-declare the syntax checker denoted by SYMBOL."
@@ -1020,27 +1042,6 @@ are present, both must match for the checker to be used."
                           :flycheck-predicate :flycheck-next-checkers
                           :flycheck-documentation :flycheck-file)
     (put symbol it nil)))
-
-(defun flycheck--declare-checker-1 (symbol docstring &rest properties)
-  "Declare SYMBOL as checker with DOCSTRING and PROPERTIES."
-  (flycheck-undeclare-checker symbol)
-  (put symbol :flycheck-command (plist-get properties :command))
-  (put symbol :flycheck-error-patterns (plist-get properties :error-patterns))
-  (put symbol :flycheck-error-parser
-       (or (plist-get properties :error-parser) 'flycheck-parse-with-patterns))
-  (put symbol :flycheck-modes (plist-get properties :modes))
-  (put symbol :flycheck-predicate (plist-get properties :predicate))
-  (put symbol :flycheck-next-checkers (plist-get properties :next-checkers))
-  (put symbol :flycheck-documentation docstring)
-  ;; Record the location of the definition of the checker.  If we're loading
-  ;; from a file, record the file loaded from.  Otherwise use the current buffer
-  ;; file name, in case of `eval-buffer' and the like.
-  (-when-let (filename (if load-in-progress load-file-name (buffer-file-name)))
-    (when (s-ends-with? ".elc" filename)
-      (setq filename (s-chop-suffix "c" filename)))
-    (put symbol :flycheck-file filename))
-  (flycheck-verify-checker symbol)
-  (put symbol :flycheck-checker t))
 
 
 ;;;###autoload
@@ -1214,7 +1215,7 @@ A valid checker is a symbol declared as checker with
       modes)))
 
 (defun flycheck-checker-predicate (checker)
-  "Get the predicate of CHECKER."
+  "Get the predicate function of CHECKER."
   (get checker :flycheck-predicate))
 
 (defun flycheck-checker-next-checkers (checker)
@@ -1299,10 +1300,11 @@ CHECKER.  Return t if the modes match or nil otherwise."
 (defun flycheck-check-predicate (checker)
   "Check the predicate of CHECKER.
 
-Check the predicate of CHECKER, and return t if the checker has
-no predicate or the result of the predicate evaluation."
+Check the predicate of CHECKER.  Return t if CHECKER has no
+predicate function, otherwise return the result of calling the
+predicate function."
   (let ((predicate (flycheck-checker-predicate checker)))
-    (or (not predicate) (eval predicate))))
+    (or (not predicate) (funcall predicate))))
 
 (defun flycheck-check-executable (checker)
   "Check the executable of the CHECKER."
@@ -1669,7 +1671,6 @@ Pop up a help buffer with the documentation of CHECKER."
         (let ((executable (flycheck-checker-executable checker))
               (filename (flycheck-checker-file checker))
               (modes (flycheck-checker-modes checker))
-              (predicate (flycheck-checker-predicate checker))
               (config-file-var (flycheck-checker-config-file-var checker))
               (option-vars (sort (flycheck-checker-option-vars checker)
                                  #'string<)))
@@ -1686,17 +1687,9 @@ Pop up a help buffer with the documentation of CHECKER."
               (princ (format ", using a configuration file from `%s'.\n"
                              config-file-var))
             (princ ".\n"))
-          (cond
-           ((and modes predicate)
-            (princ (format "  It checks syntax in the major mode(s) %s if the predicate %s is fulfilled. "
-                           (s-join ", " (--map (format "`%s'" it) modes))
-                           predicate)))
-           (modes
-            (princ (format "  It checks syntax in the major mode(s) %s. "
-                           (s-join ", " (--map (format "`%s'" it) modes)))))
-           (predicate
-            (princ (format "  It checks syntax if the predicate %s is fulfilled. "
-                           (prin1-to-string predicate)))))
+          (if modes
+           (princ (format "  It checks syntax in the major mode(s) %s. "
+                          (s-join ", " (--map (format "`%s'" it) modes)))))
           (with-current-buffer (help-buffer)
             (save-excursion
               (goto-char (point-min))
