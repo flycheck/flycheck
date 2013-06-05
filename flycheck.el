@@ -1010,39 +1010,41 @@ one of `:predicate' and `:modes'.  If `:predicate' and `:modes'
 are present, both must match for the checker to be used."
   (declare (indent 1)
            (doc-string 2))
-  `(progn
-     (flycheck-undeclare-checker ',symbol)
-     (put ',symbol :flycheck-command ,(plist-get properties :command))
-     (put ',symbol :flycheck-error-patterns
-          ,(plist-get properties :error-patterns))
-     (put ',symbol :flycheck-error-parser
-          (or ,(plist-get properties :error-parser)
-              'flycheck-parse-with-patterns))
-     (put ',symbol :flycheck-modes ,(plist-get properties :modes))
-     (put ',symbol :flycheck-predicate
-          ,(-when-let (predicate (cadr (plist-get properties :predicate)))
-             `(function (lambda () ,predicate))))
-     (put ',symbol :flycheck-next-checkers ,(plist-get properties :next-checkers))
-     (put ',symbol :flycheck-documentation ,docstring)
-     ;; Record the location of the definition of the checker.  If we're loading
-     ;; from a file, record the file loaded from.  Otherwise use the current buffer
-     ;; file name, in case of `eval-buffer' and the like.
-     (-when-let (filename (if load-in-progress load-file-name (buffer-file-name)))
-       (when (s-ends-with? ".elc" filename)
-         (setq filename (s-chop-suffix "c" filename)))
-       (put ',symbol :flycheck-file filename))
-     (flycheck-verify-checker ',symbol)
-     (put ',symbol :flycheck-checker t)))
+  `(flycheck-set-checker-properties ',symbol
+     :command ,(plist-get properties :command)
+     :error-patterns ,(plist-get properties :error-patterns)
+     :error-parser (or ,(plist-get properties :error-parser)
+                       'flycheck-parse-with-patterns)
+     :modes ,(plist-get properties :modes)
+     :predicate ,(-when-let (predicate (cadr (plist-get properties :predicate)))
+                   `(function (lambda () ,predicate)))
+     :next-checkers ,(plist-get properties :next-checkers)
+     :documentation ,docstring))
 
-(defun flycheck-undeclare-checker (symbol)
-  "Un-declare the syntax checker denoted by SYMBOL."
-  (--each
-      '(:flycheck-checker :flycheck-command :flycheck-error-parser
-                          :flycheck-error-patterns :flycheck-modes
-                          :flycheck-predicate :flycheck-next-checkers
-                          :flycheck-documentation :flycheck-file)
-    (put symbol it nil)))
+(defun flycheck-clear-checker-properties (symbol)
+  "Remove all Flycheck checker properties from SYMBOL."
+  (--each '(checker command error-parser error-patterns modes predicate
+                    next-checkers documentation file)
+    (put symbol (intern (concat ":flycheck-" (symbol-name it))) nil)))
 
+(defun flycheck-set-checker-properties (symbol &rest properties)
+  "Set Flycheck checker PROPERTIES on SYMBOL."
+  (declare (indent 1))
+  (flycheck-clear-checker-properties symbol) ; Clear old properties first
+  (--each '(command error-parser error-patterns modes predicate next-checkers
+                    documentation)
+    (let ((name (symbol-name it)))
+      (put symbol (intern (concat ":flycheck-" name))
+           (plist-get properties (intern (concat ":" name))))))
+  ;; Record the location of the definition of the checker.  If we're loading
+  ;; from a file, record the file loaded from.  Otherwise use the current
+  ;; buffer file name, in case of `eval-buffer' and the like.
+  (-when-let (filename (if load-in-progress load-file-name (buffer-file-name)))
+    (when (s-ends-with? ".elc" filename)
+      (setq filename (s-chop-suffix "c" filename)))
+    (put symbol :flycheck-file filename))
+  (flycheck-verify-checker symbol)
+  (put symbol :flycheck-checker t))
 
 ;;;###autoload
 (defmacro flycheck-def-config-file-var (symbol checker &optional file-name)
