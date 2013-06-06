@@ -1,4 +1,4 @@
-EMACS = emacs
+EMACS ?= emacs
 EMACSFLAGS =
 CARTON = carton
 VAGRANT = vagrant
