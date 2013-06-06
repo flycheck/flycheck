@@ -57,8 +57,8 @@ deps :
 	$(CARTON) install
 	$(CARTON) update
 
-.PHONY: clean-deps
-clean-deps :
+.PHONY: clean-elpa
+clean-elpa :
 	rm -rf elpa
 
 .PHONY: test
@@ -87,8 +87,11 @@ html : $(HTML_TARGETS)
 clean-html:
 	rm -rf doc/html
 
-%.elc : %.el
+%.elc : %.el elpa
 	$(CARTON) exec $(EMACS) -Q --batch $(EMACSFLAGS) -f batch-byte-compile $<
+
+elpa : Carton
+	$(CARTON) install
 
 flycheck-pkg.el : Carton
 	$(CARTON) package
