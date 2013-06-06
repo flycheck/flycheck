@@ -47,6 +47,9 @@ $(PACKAGE) : $(PACKAGE_SRCS)
 	tar cf $(PACKAGE) flycheck-$(VERSION)
 	rm -rf flycheck-$(VERSION)
 
+.PHONY: clean-all
+clean-all : clean clean-elpa clean-doc
+
 .PHONY: clean
 clean :
 	rm -f $(OBJECTS)
@@ -72,6 +75,9 @@ vagrant-test :
 
 .PHONY: doc
 doc : info html
+
+.PHONY: clean-doc
+clean-doc : clean-info clean-html
 
 .PHONY: info
 info: doc/dir
