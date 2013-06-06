@@ -1,9 +1,12 @@
-EMACS = emacs
+EMACS ?= emacs
 EMACSFLAGS =
 CARTON = carton
 VAGRANT = vagrant
 INSTALL-INFO = install-info
-VERSION = $(shell EMACS=$(EMACS) $(CARTON) version)
+VERSION := $(shell EMACS=$(EMACS) $(CARTON) version)
+
+# Export the used EMACS to recipe environments
+export EMACS
 
 SRCS = flycheck.el
 OBJECTS = $(SRCS:.el=.elc)
@@ -44,6 +47,9 @@ $(PACKAGE) : $(PACKAGE_SRCS)
 	tar cf $(PACKAGE) flycheck-$(VERSION)
 	rm -rf flycheck-$(VERSION)
 
+.PHONY: clean-all
+clean-all : clean clean-elpa clean-doc
+
 .PHONY: clean
 clean :
 	rm -f $(OBJECTS)
@@ -51,16 +57,16 @@ clean :
 
 .PHONY: deps
 deps :
-	EMACS=$(EMACS) $(CARTON) install
-	EMACS=$(EMACS) $(CARTON) update
+	$(CARTON) install
+	$(CARTON) update
 
-.PHONY: clean-deps
-clean-deps :
+.PHONY: clean-elpa
+clean-elpa :
 	rm -rf elpa
 
 .PHONY: test
 test : compile
-	EMACS=$(EMACS) $(CARTON) exec $(EMACS) -Q $(EMACSFLAGS) --script tests/flycheck-testrunner.el
+	$(CARTON) exec $(EMACS) -Q $(EMACSFLAGS) --script tests/flycheck-testrunner.el
 
 .PHONY: vagrant-test
 vagrant-test :
@@ -69,6 +75,9 @@ vagrant-test :
 
 .PHONY: doc
 doc : info html
+
+.PHONY: clean-doc
+clean-doc : clean-info clean-html
 
 .PHONY: info
 info: doc/dir
@@ -84,11 +93,14 @@ html : $(HTML_TARGETS)
 clean-html:
 	rm -rf doc/html
 
-%.elc : %.el
-	EMACS=$(EMACS) $(CARTON) exec $(EMACS) -Q --batch $(EMACSFLAGS) -f batch-byte-compile $<
+%.elc : %.el elpa
+	$(CARTON) exec $(EMACS) -Q --batch $(EMACSFLAGS) -f batch-byte-compile $<
+
+elpa : Carton
+	$(CARTON) install
 
 flycheck-pkg.el : Carton
-	EMACS=$(EMACS) $(CARTON) package
+	$(CARTON) package
 
 doc/dir : doc/flycheck.info
 	$(INSTALL-INFO) doc/flycheck.info doc/dir
