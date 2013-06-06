@@ -634,6 +634,8 @@ Bug fixes:
 @item
 Obsolete @code{flycheck-warning-face} and @code{flycheck-error-face} in
 favor @code{flycheck-warning} and @code{flycheck-error} respectively
+@item
+Obsolete @code{:predicate} forms in favor of @code{:predicate} functions
 @end itemize
 
 @item

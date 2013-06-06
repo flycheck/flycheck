@@ -989,10 +989,11 @@ of `flycheck-error' objects parsed from OUTPUT.
 `:modes' A major mode symbol or a list thereof.  If present the
 checker is only used in these modes.
 
-`:predicate' An Emacs Lisp form.  If present the syntax checker
-is only used if this form returns a non-nil result when evaluated
-in the buffer to check.  The form is wrapped into a `lambda'
-function to support byte compilation.
+`:predicate' A function symbol or lambda expression.  If present
+the syntax checker is only used if this function returns non-nil
+when called in the buffer to check.
+
+May also be a form, but this usage is obsolete.
 
 `:next-checkers' A list where each element is either a checker
 symbol to run after this checker or a cons cell (PREDICATE
@@ -1016,8 +1017,7 @@ are present, both must match for the checker to be used."
      :error-parser (or ,(plist-get properties :error-parser)
                        'flycheck-parse-with-patterns)
      :modes ,(plist-get properties :modes)
-     :predicate ,(-when-let (predicate (eval (plist-get properties :predicate)))
-                   `(function (lambda () ,predicate)))
+     :predicate ,(plist-get properties :predicate)
      :next-checkers ,(plist-get properties :next-checkers)
      :documentation ,docstring))
 
@@ -1031,11 +1031,18 @@ are present, both must match for the checker to be used."
   "Set Flycheck checker PROPERTIES on SYMBOL."
   (declare (indent 1))
   (flycheck-clear-checker-properties symbol) ; Clear old properties first
-  (--each '(command error-parser error-patterns modes predicate next-checkers
+  (--each '(command error-parser error-patterns modes next-checkers
                     documentation)
     (let ((name (symbol-name it)))
       (put symbol (intern (concat ":flycheck-" name))
            (plist-get properties (intern (concat ":" name))))))
+  (-when-let (predicate (plist-get properties :predicate))
+    (unless (functionp predicate)
+      (message "Warning: Using an obsolete, non-function predicate for checker %s. \
+Use a function or lambda expression"
+               symbol)
+      (setq predicate #'(lambda () (eval predicate))))
+    (put symbol :flycheck-predicate predicate))
   ;; Record the location of the definition of the checker.  If we're loading
   ;; from a file, record the file loaded from.  Otherwise use the current
   ;; buffer file name, in case of `eval-buffer' and the like.
@@ -1173,6 +1180,11 @@ error if not."
              parser checker))
     (unless (or modes predicate)
       (error "Checker %s must have :modes or :predicate" checker))
+    (unless (or (symbolp modes) (-all? #'symbolp modes))
+      (error "Modes of checker %s must be a major mode or a list thereof"
+             checker))
+    (unless (or (null predicate) (functionp predicate))
+      (error "Predicate of checker %s must be a function" checker))
     (unless (or
              (null next-checkers)
              (and (listp next-checkers)
@@ -2637,7 +2649,7 @@ See URL `http://www.gnu.org/software/bash/'."
   :command '("bash" "--norc" "-n" "--" source)
   :error-patterns '(("^\\(?1:.+\\):[^0-9]+\\(?2:[0-9]+\\) *: *\\(?4:.*\\)$" error))
   :modes 'sh-mode
-  :predicate '(eq sh-shell 'bash))
+  :predicate #'(lambda () (eq sh-shell 'bash)))
 
 (flycheck-def-config-file-var flycheck-coffeelintrc coffee-coffeelint
                               ".coffeelint.json")
@@ -2738,15 +2750,17 @@ during byte-compilation or autoloads generation, or nil otherwise."
   ;; Hence our backwards-substitution will fail, because the checker process has
   ;; a different base directory to resolve relative file names than the flycheck
   ;; code working on the buffer to check.
-  :predicate '(and (buffer-file-name)
-                   ;; Do not check buffers which should not be byte-compiled.
-                   ;; The checker process will refuse to compile these anyway
-                   (not (and (boundp 'no-byte-compile) no-byte-compile))
-                   ;; Checking temporary buffers from `byte-compile-file' or
-                   ;; autoload buffers interferes with package installation. See
-                   ;; https://github.com/lunaryorn/flycheck/issues/45 and
-                   ;; https://github.com/bbatsov/prelude/issues/248
-                   (not (flycheck-temp-compilation-buffer-p)))
+  :predicate
+  #'(lambda ()
+      (and (buffer-file-name)
+           ;; Do not check buffers which should not be byte-compiled.  The
+           ;; checker process will refuse to compile these anyway
+           (not (and (boundp 'no-byte-compile) no-byte-compile))
+           ;; Checking temporary buffers from `byte-compile-file' or autoload
+           ;; buffers interferes with package installation. See
+           ;; https://github.com/lunaryorn/flycheck/issues/45 and
+           ;; https://github.com/bbatsov/prelude/issues/248
+           (not (flycheck-temp-compilation-buffer-p))))
   :next-checkers '(emacs-lisp-checkdoc))
 
 (defconst flycheck-emacs-lisp-checkdoc-form
@@ -2776,12 +2790,13 @@ The checker runs `checkdoc-current-buffer'."
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)" warning))
   :modes '(emacs-lisp-mode)
   :predicate
-  '(and (not (flycheck-temp-compilation-buffer-p))
-        ;; Do not check Carton files.  These really don't need to follow
-        ;; Checkdoc conventions
-        (not (and (buffer-file-name)
-                  (string= (file-name-nondirectory (buffer-file-name))
-                           "Carton")))))
+  #'(lambda ()
+      (and (not (flycheck-temp-compilation-buffer-p))
+           ;; Do not check Carton files.  These really don't need to follow
+           ;; Checkdoc conventions
+           (not (and (buffer-file-name)
+                     (string= (file-name-nondirectory (buffer-file-name))
+                              "Carton"))))))
 
 (flycheck-declare-checker erlang
   "An Erlang syntax checker using the Erlang interpreter."
@@ -2813,8 +2828,9 @@ more information."
   :command '("go" "build" "-o" "/dev/null")
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'go-mode
-  :predicate '(and (not (s-ends-with? "_test.go" (buffer-file-name)))
-                   (not (buffer-modified-p))))
+  :predicate #'(lambda ()
+                 (and (not (s-ends-with? "_test.go" (buffer-file-name)))
+                      (not (buffer-modified-p)))))
 
 (flycheck-declare-checker go-test
   "A Go syntax and type checker using the `go test' command.
@@ -2825,8 +2841,9 @@ See URL `https://golang.org/cmd/go'."
   :command '("go" "test" "-c")
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'go-mode
-  :predicate '(and (s-ends-with? "_test.go" (buffer-file-name))
-                   (not (buffer-modified-p))))
+  :predicate #'(lambda ()
+                 (and (s-ends-with? "_test.go" (buffer-file-name))
+                      (not (buffer-modified-p)))))
 
 (flycheck-declare-checker haml
   "A Haml syntax checker using the Haml compiler.
@@ -2870,10 +2887,12 @@ See URL `https://github.com/zaach/jsonlint'."
   :error-patterns
   '(("^\\(?1:.+\\)\: line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
      error))
-  :predicate '(or
-               (eq major-mode 'json-mode)
-               (and buffer-file-name
-                    (string= "json" (file-name-extension buffer-file-name)))))
+  :predicate
+  #'(lambda ()
+      (or
+       (eq major-mode 'json-mode)
+       (and buffer-file-name
+            (string= "json" (file-name-extension buffer-file-name))))))
 
 (flycheck-declare-checker lua
   "A Lua syntax checker using the Lua compiler.
@@ -2949,7 +2968,7 @@ See URL `http://www.puppetlabs.com/'."
 
 See URL `http://www.puppet-lint.com/'."
   :command '("puppet-lint" "--with-filename" source-original)
-  :predicate (and (buffer-file-name) (not (buffer-modified-p)))
+  :predicate #'(lambda () (and (buffer-file-name) (not (buffer-modified-p))))
   :error-patterns
   '(("^\\(?1:.*\\) - WARNING: \\(?4:.*\\) on line \\(?2:[0-9]+\\)" warning)
     ("^\\(?1:.*\\) - ERROR: \\(?4:.*\\) on line \\(?2:[0-9]+\\)" error))
@@ -3126,7 +3145,7 @@ See URL `http://gondor.apana.org.au/~herbert/dash/'."
   :command '("dash" "-n" source)
   :error-patterns '(("^\\(?1:.+\\): \\(?2:[0-9]+\\): \\1: \\(?4:.*\\)$" error))
   :modes 'sh-mode
-  :predicate '(eq sh-shell 'sh))
+  :predicate #'(lambda () (eq sh-shell 'sh)))
 
 (flycheck-declare-checker sh-bash
   "A POSIX Shell syntax checker using the Bash shell.
@@ -3135,7 +3154,7 @@ See URL `http://www.gnu.org/software/bash/'."
   :command '("bash" "--posix" "--norc" "-n" "--" source)
   :error-patterns '(("^\\(?1:.+\\):[^0-9]+\\(?2:[0-9]+\\) *: *\\(?4:.*\\)$" error))
   :modes 'sh-mode
-  :predicate '(eq sh-shell 'sh))
+  :predicate #'(lambda () (eq sh-shell 'sh)))
 
 (flycheck-def-config-file-var flycheck-chktexrc tex-chktex ".chktexrc")
 
@@ -3175,7 +3194,7 @@ See URL `http://www.zsh.org/'."
   :command '("zsh" "-n" "-d" "-f" source)
   :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'sh-mode
-  :predicate '(eq sh-shell 'zsh))
+  :predicate #'(lambda () (eq sh-shell 'zsh)))
 
 (provide 'flycheck)
 

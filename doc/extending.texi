@@ -82,7 +82,8 @@ or was modified, for otherwise the syntax check will fail or return
 out-dated errors:
 
 @lisp
-:predicate (and (buffer-file-name) (not (buffer-modified-p)))
+:predicate #'(lambda () (and (buffer-file-name)
+                             (not (buffer-modified-p)))
 @end lisp
 
 @item temporary-directory
@@ -203,14 +204,21 @@ A single @var{major-mode}, or a list thereof.
 syntax checker will only be used in buffers with any of the given major
 modes.
 
-@item :predicate @var{form}
-A predicate that determines whether the syntax checker may be used.
+@item :predicate #'@var{function}
+@itemx :predicate #'(lambda () @var{body})))
+@itemx :predicate '@var{form}
+A predicate function that determines whether the syntax checker may be
+used.
 
-@var{form} is a quoted Emacs Lisp form.  The @var{form} is wrapped into
-a function and compiled during byte compiled.  This function is called
-before each syntax check to determine whether the syntax checker may be
-used for the current buffer.  If @var{form} returns nil, the syntax
-checker is not used.
+@var{FUNCTION} is called before each syntax check to determine whether
+the syntax checker may be used for the current buffer.  If
+@var{function} returns nil, the syntax checker is not used.  Of course,
+you may also use a lambda expression with @var{BODY}.  @xref{Lambda
+Expression, , , elisp}, for more information on lambda expression.
+
+Alternatively, you may also specify a @var{form} which is then evaluated
+to determine whether the syntax checker may used.  However, this usage
+is obsolete.
 
 If @var{:modes} is given, @var{form} is only called if the major mode
 matches.  Otherwise the syntax checker is not used.
