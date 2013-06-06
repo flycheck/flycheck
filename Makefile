@@ -3,7 +3,7 @@ EMACSFLAGS =
 CARTON = carton
 VAGRANT = vagrant
 INSTALL-INFO = install-info
-VERSION = $(shell EMACS=$(EMACS) $(CARTON) version)
+VERSION := $(shell EMACS=$(EMACS) $(CARTON) version)
 
 # Export the used EMACS to recipe environments
 export EMACS
