@@ -1070,17 +1070,10 @@ commands."
      (defcustom ,symbol ,file-name
        ,(format "Configuration file for `%s'.
 
-When set to a plain file name without any slash search for this
-file name in the directory of the buffer being check, any
-ancestors thereof or the home directory.  If buffer being checked
-has no backing file, search in the home directory only.  If the
-file is found pass it to the checker as configuration file.
-Otherwise invoke the checker without a configuration file.
-
-When set to a file path containing a slash expand the file name
-with `expand-file-named' and pass this file to checker, if it
-exists.  Otherwise invoke the checker without a configuration
-file.
+Locate the configuration file using the functions from
+`flycheck-locate-config-file-functions'.  If the file is found
+pass it to the syntax checker as configuration file.  Otherwise
+invoke the syntax checker without a configuration file.
 
 Use this variable as file-local variable if you need a specific
 configuration file a buffer." checker)
