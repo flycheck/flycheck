@@ -369,6 +369,17 @@ when Flycheck failed.
 
 This variable is a normal hook.")
 
+(defcustom flycheck-display-error-messages-function 'flycheck-display-message-or-buffer
+  "Function to display error messages.
+
+This function takes a single argument: A string with all error messages.
+
+The default function uses `display-message-or-buffer'.
+
+A value of nil will disable the display of error messages."
+  :group 'flycheck
+  :type 'function)
+
 ;; TODO: Remove the obsolete faces in 0.14
 (defface flycheck-error
   '((((supports :underline (:style wave)))
@@ -2430,9 +2441,15 @@ or nil if the buffer does not exist."
 
 (defun flycheck-display-error-messages (error-messages)
   "Display Flycheck ERROR-MESSAGES."
-  (when error-messages
-    (display-message-or-buffer error-messages
-                               flycheck-error-message-buffer)))
+  (when (and error-messages flycheck-display-error-messages-function)
+    (funcall flycheck-display-error-messages-function error-messages)))
+
+(defun flycheck-display-message-or-buffer (error-messages)
+  "Display ERROR-MESSAGES in the echo area or a pop-up buffer.
+
+Uses `display-message-or-buffer'."
+  (display-message-or-buffer error-messages
+                             flycheck-error-message-buffer))
 
 (defvar-local flycheck-error-show-error-timer nil
   "Timer to automatically show the error at point in minibuffer.")
