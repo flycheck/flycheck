@@ -378,7 +378,8 @@ The default function uses `display-message-or-buffer'.
 
 A value of nil will disable the display of error messages."
   :group 'flycheck
-  :type 'function)
+  :type 'function
+  :package-version '(flycheck . "0.13"))
 
 ;; TODO: Remove the obsolete faces in 0.14
 (defface flycheck-error
