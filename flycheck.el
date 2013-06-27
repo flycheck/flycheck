@@ -369,7 +369,7 @@ when Flycheck failed.
 
 This variable is a normal hook.")
 
-(defcustom flycheck-display-error-messages-function 'flycheck-display-message-or-buffer
+(defcustom flycheck-display-errors-function 'flycheck-display-error-messages
   "Function to display error messages.
 
 This function takes a single argument: A string with all error messages.
@@ -2248,14 +2248,6 @@ Return the created overlay."
   "Return a list of all flycheck errors overlayed at POS."
   (--map (overlay-get it 'flycheck-error) (flycheck-overlays-at pos)))
 
-(defun flycheck-overlay-messages-at (pos)
-  "Return a list of all flycheck messages overlayed at POS."
-  (--map (overlay-get it 'help-echo) (flycheck-overlays-at pos)))
-
-(defun flycheck-overlay-messages-string-at (pos)
-  "Return a single string containing all error messages at POS."
-  (s-join "\n\n" (flycheck-overlay-messages-at pos)))
-
 (defvar-local flycheck-overlays-to-delete nil
   "Overlays mark for deletion after all syntax checks completed.")
 (put 'flycheck-overlays-to-delete 'permanent-local t)
@@ -2439,10 +2431,19 @@ Get the buffer named by variable `flycheck-error-message-buffer',
 or nil if the buffer does not exist."
   (get-buffer flycheck-error-message-buffer))
 
-(defun flycheck-display-error-messages (error-messages)
-  "Display Flycheck ERROR-MESSAGES."
-  (when (and error-messages flycheck-display-error-messages-function)
-    (funcall flycheck-display-error-messages-function error-messages)))
+(defun flycheck-display-error-messages (errors)
+  "Display the messages of ERRORS.
+
+Concatenate all non-nil messages of ERRORS separated by empty
+lines, and display them with `display-message-or-buffer', which
+shows the messages either in the echo area or in a separate
+buffer, depending on the number of lines.
+
+In the latter case, show messages in
+`flycheck-error-message-buffer'."
+  (-when-let (messages (-keep #'flycheck-error-message errors))
+    (display-message-or-buffer (s-join "\n\n" messages)
+                               flycheck-error-message-buffer)))
 
 (defun flycheck-display-message-or-buffer (error-messages)
   "Display ERROR-MESSAGES in the echo area or a pop-up buffer.
@@ -2450,6 +2451,11 @@ or nil if the buffer does not exist."
 Uses `display-message-or-buffer'."
   (display-message-or-buffer error-messages
                              flycheck-error-message-buffer))
+
+(defun flycheck-display-errors (errors)
+  "Display ERRORS using `flycheck-display-errors-function'."
+  (when flycheck-display-errors-function
+    (funcall flycheck-display-errors-function errors)))
 
 (defvar-local flycheck-error-show-error-timer nil
   "Timer to automatically show the error at point in minibuffer.")
@@ -2464,8 +2470,8 @@ Uses `display-message-or-buffer'."
   "Show the all error messages at point in minibuffer."
   (flycheck-cancel-error-show-error-timer)
   (when flycheck-mode
-    (flycheck-display-error-messages
-     (flycheck-overlay-messages-string-at (point)))))
+    (-when-let (errors (flycheck-overlay-errors-at (point)))
+      (flycheck-display-errors errors))))
 
 (defun flycheck-show-error-at-point-soon ()
   "Show the first error message at point in minibuffer asap.
