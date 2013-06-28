@@ -7,3 +7,7 @@ before_script:
   - make elpa
 script:
   - make test info
+# Disable Emacs snapshot, because Carton is broken
+matrix:
+  exclude:
+    - env: EMACS=emacs-snapshot
