@@ -2496,7 +2496,7 @@ Each error message under point is copied into the kill ring."
   (interactive "d")
   (-when-let* ((errors (flycheck-overlay-errors-at pos))
                (messages (-keep #'flycheck-error-message errors)))
-    (-each messages #'kill-new)
+    (-each (nreverse messages) #'kill-new)
     (flycheck-display-errors errors)))
 
 (defun flycheck-google-messages (pos &optional quote-flag)
