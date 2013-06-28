@@ -31,7 +31,7 @@ HTML_TARGETS = doc/html/index.html \
 
 PACKAGE_SRCS = $(SRCS) \
 	flycheck-pkg.el \
-	doc/flycheck.info doc/dir flycheck.el
+	doc/flycheck.info doc/dir
 PACKAGE = flycheck-$(VERSION).tar
 
 .PHONY: compile
