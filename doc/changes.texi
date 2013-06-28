@@ -702,6 +702,8 @@ interactive command}
 Correctly clean up information about running processes
 @item
 @ghissue{150, Fix compatibility with Emacs 24.2 and earlier}
+@item
+Fix version information on Emacs trunk builds
 @end itemize
 
 @end itemize
