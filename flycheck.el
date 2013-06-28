@@ -2421,31 +2421,7 @@ Return the buffer containing the error listing."
     (user-error "Flycheck mode not enabled")))
 
 
-;;;; Error message echoing
-(defconst flycheck-error-message-buffer "*Flycheck error messages*"
-  "The name of the buffer to show long error messages in.")
-
-(defun flycheck-error-message-buffer ()
-  "Get the buffer object to show long error messages in.
-
-Get the buffer named by variable `flycheck-error-message-buffer',
-or nil if the buffer does not exist."
-  (get-buffer flycheck-error-message-buffer))
-
-(defun flycheck-display-error-messages (errors)
-  "Display the messages of ERRORS.
-
-Concatenate all non-nil messages of ERRORS separated by empty
-lines, and display them with `display-message-or-buffer', which
-shows the messages either in the echo area or in a separate
-buffer, depending on the number of lines.
-
-In the latter case, show messages in
-`flycheck-error-message-buffer'."
-  (-when-let (messages (-keep #'flycheck-error-message errors))
-    (display-message-or-buffer (s-join "\n\n" messages)
-                               flycheck-error-message-buffer)))
-
+;;;; General error display
 (defun flycheck-display-errors (errors)
   "Display ERRORS using `flycheck-display-errors-function'."
   (when flycheck-display-errors-function
@@ -2476,6 +2452,32 @@ Show the error message at point in minibuffer after a short delay."
     (setq flycheck-error-show-error-timer
           (run-at-time 0.9 nil 'flycheck-show-error-at-point))))
 
+
+;;;; Error display functions
+(defconst flycheck-error-message-buffer "*Flycheck error messages*"
+  "The name of the buffer to show long error messages in.")
+
+(defun flycheck-error-message-buffer ()
+  "Get the buffer object to show long error messages in.
+
+Get the buffer named by variable `flycheck-error-message-buffer',
+or nil if the buffer does not exist."
+  (get-buffer flycheck-error-message-buffer))
+
+(defun flycheck-display-error-messages (errors)
+  "Display the messages of ERRORS.
+
+Concatenate all non-nil messages of ERRORS separated by empty
+lines, and display them with `display-message-or-buffer', which
+shows the messages either in the echo area or in a separate
+buffer, depending on the number of lines.
+
+In the latter case, show messages in
+`flycheck-error-message-buffer'."
+  (-when-let (messages (-keep #'flycheck-error-message errors))
+    (display-message-or-buffer (s-join "\n\n" messages)
+                               flycheck-error-message-buffer)))
+
 (defun flycheck-hide-error-buffer ()
   "Hide the Flycheck error buffer if necessary.
 
@@ -2485,6 +2487,8 @@ Hide the error buffer if there is no error under point."
     (unless (flycheck-overlays-at (point))
       (quit-window nil window))))
 
+
+;;;; Working with error messages
 (defun flycheck-copy-messages-as-kill (pos)
   "Copy each error message under POS into kill ring.
 
