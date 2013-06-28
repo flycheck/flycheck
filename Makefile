@@ -71,7 +71,7 @@ test : compile
 .PHONY: vagrant-test
 vagrant-test :
 	$(VAGRANT) up
-	$(VAGRANT) ssh -c "make -C /vagrant EMACS=$(EMACS) clean test"
+	$(VAGRANT) ssh -c "make -C /flycheck EMACS=$(EMACS) clean test"
 
 .PHONY: doc
 doc : info html
