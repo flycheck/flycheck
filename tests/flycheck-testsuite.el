@@ -2432,7 +2432,8 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
     '(5 nil "Inconsistent indentation: 3 spaces were used for indentation, but the rest of the document was indented using 2 spaces." error)))
 
 (ert-deftest checker-scala-syntax-error ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'scala)
+  :expected-result (if (flycheck-testsuite-travis-ci-p) :failed
+                     (flycheck-testsuite-fail-unless-checker 'scala))
   (flycheck-testsuite-should-syntax-check
    "checkers/scala-syntax-error.scala" 'scala-mode nil
    '(3 nil "identifier expected but '{' found." error)))
