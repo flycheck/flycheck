@@ -2446,13 +2446,6 @@ In the latter case, show messages in
     (display-message-or-buffer (s-join "\n\n" messages)
                                flycheck-error-message-buffer)))
 
-(defun flycheck-display-message-or-buffer (error-messages)
-  "Display ERROR-MESSAGES in the echo area or a pop-up buffer.
-
-Uses `display-message-or-buffer'."
-  (display-message-or-buffer error-messages
-                             flycheck-error-message-buffer))
-
 (defun flycheck-display-errors (errors)
   "Display ERRORS using `flycheck-display-errors-function'."
   (when flycheck-display-errors-function
