@@ -591,7 +591,7 @@ All declared checkers should be registered."
       (flycheck-perform-deferred-syntax-check)))
   (mocker-let
       ((flycheck-buffer-automatically (&optional error condition)
-                                      ((:input '(nil nil) :min-occur 1 :max-occur 1))))
+                                      ((:input '(nil nil)))))
     (with-temp-buffer
       (flycheck-buffer-deferred)
       (flycheck-perform-deferred-syntax-check))))
@@ -1849,8 +1849,7 @@ many-errors-for-error-list.el:14:1:warning: the function
 (ert-deftest flycheck-display-errors-custom-function ()
   (let ((err (flycheck-error-new-at 10 20 'warning "Foo")))
     (mocker-let
-        ((display-function (errors)
-                           ((:input `((,err)) :min-occur 1 :max-occur 1))))
+        ((display-function (errors) ((:input `((,err))))))
       (let ((flycheck-display-errors-function 'display-function))
         (flycheck-display-errors (list err))))))
 
@@ -1875,8 +1874,7 @@ many-errors-for-error-list.el:14:1:warning: the function
                         (flycheck-error-new-at 1 10 'warning "2nd message"))))
       (-each errors #'flycheck-add-overlay)
       (mocker-let
-          ((display-function (errors)
-                             ((:input `(,errors) :min-occur 1 :max-occur 1))))
+          ((display-function (errors) ((:input `(,errors)))))
         (let ((flycheck-display-errors-function 'display-function))
           (flycheck-copy-messages-as-kill 10))))
     (should (equal (-take 2 kill-ring) '("1st message" "2nd message")))))
