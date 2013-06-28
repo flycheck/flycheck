@@ -27,8 +27,6 @@
 (require 'mocker)
 (require 's)
 
-(defvar flycheck-display-errors-function)
-
 (ert-deftest flycheck-display-errors-no-function ()
   (let ((err (flycheck-error-new-at 10 20 'warning "This is a Flycheck error."))
         (flycheck-display-errors-function nil))
