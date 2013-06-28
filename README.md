@@ -162,6 +162,8 @@ The following people contributed to flycheck:
   handling.
 - [Peter Vasil][ptrv] contributed syntax checkers for XML, Lua and Go (using `go
   build` and `go test`), added unit tests and did valuable testing.
+- [Robert Dallas Gray][rdallasgray] made error display customizable with
+  `flycheck-display-errors-function`.
 - [Robert Zaremba][robert-zaremba] added a Go syntax checker using `gofmt`.
 - [steckerhalter][] provided the PHP CodeSniffer checker.
 - [Steve Purcell][purcell] implemented many checkers, contributed important
@@ -227,3 +229,4 @@ See [COPYING][] for details.
 [flycheck-color-mode-line.el]: https://github.com/syl20bnr/flycheck-color-mode-line
 [markhellewell]: https://github.com/markhellewell
 [BinaryKhaos]: https://github.com/Binarykhaos
+[rdallasgray]: https://github.com/rdallasgray

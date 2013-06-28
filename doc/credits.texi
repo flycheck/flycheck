@@ -47,6 +47,10 @@ temp file handling.
 did valuable testing.
 
 @item
+@gh{rdallasgray, Robert Dallas Gray} made error display customizable
+with @code{flycheck-display-errors-function}.
+
+@item
 @gh{robert-zaremba, Robert Zaremba} added Go syntax checker using
 @command{gofmt}.
 

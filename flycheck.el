@@ -369,6 +369,18 @@ when Flycheck failed.
 
 This variable is a normal hook.")
 
+(defcustom flycheck-display-errors-function 'flycheck-display-error-messages
+  "Function to display error messages.
+
+This function takes a single argument: A string with all error messages.
+
+The default function uses `display-message-or-buffer'.
+
+A value of nil will disable the display of error messages."
+  :group 'flycheck
+  :type 'function
+  :package-version '(flycheck . "0.13"))
+
 ;; TODO: Remove the obsolete faces in 0.14
 (defface flycheck-error
   '((((supports :underline (:style wave)))
@@ -2237,14 +2249,6 @@ Return the created overlay."
   "Return a list of all flycheck errors overlayed at POS."
   (--map (overlay-get it 'flycheck-error) (flycheck-overlays-at pos)))
 
-(defun flycheck-overlay-messages-at (pos)
-  "Return a list of all flycheck messages overlayed at POS."
-  (--map (overlay-get it 'help-echo) (flycheck-overlays-at pos)))
-
-(defun flycheck-overlay-messages-string-at (pos)
-  "Return a single string containing all error messages at POS."
-  (s-join "\n\n" (flycheck-overlay-messages-at pos)))
-
 (defvar-local flycheck-overlays-to-delete nil
   "Overlays mark for deletion after all syntax checks completed.")
 (put 'flycheck-overlays-to-delete 'permanent-local t)
@@ -2428,11 +2432,31 @@ Get the buffer named by variable `flycheck-error-message-buffer',
 or nil if the buffer does not exist."
   (get-buffer flycheck-error-message-buffer))
 
-(defun flycheck-display-error-messages (error-messages)
-  "Display Flycheck ERROR-MESSAGES."
-  (when error-messages
-    (display-message-or-buffer error-messages
+(defun flycheck-display-error-messages (errors)
+  "Display the messages of ERRORS.
+
+Concatenate all non-nil messages of ERRORS separated by empty
+lines, and display them with `display-message-or-buffer', which
+shows the messages either in the echo area or in a separate
+buffer, depending on the number of lines.
+
+In the latter case, show messages in
+`flycheck-error-message-buffer'."
+  (-when-let (messages (-keep #'flycheck-error-message errors))
+    (display-message-or-buffer (s-join "\n\n" messages)
                                flycheck-error-message-buffer)))
+
+(defun flycheck-display-message-or-buffer (error-messages)
+  "Display ERROR-MESSAGES in the echo area or a pop-up buffer.
+
+Uses `display-message-or-buffer'."
+  (display-message-or-buffer error-messages
+                             flycheck-error-message-buffer))
+
+(defun flycheck-display-errors (errors)
+  "Display ERRORS using `flycheck-display-errors-function'."
+  (when flycheck-display-errors-function
+    (funcall flycheck-display-errors-function errors)))
 
 (defvar-local flycheck-error-show-error-timer nil
   "Timer to automatically show the error at point in minibuffer.")
@@ -2447,8 +2471,8 @@ or nil if the buffer does not exist."
   "Show the all error messages at point in minibuffer."
   (flycheck-cancel-error-show-error-timer)
   (when flycheck-mode
-    (flycheck-display-error-messages
-     (flycheck-overlay-messages-string-at (point)))))
+    (-when-let (errors (flycheck-overlay-errors-at (point)))
+      (flycheck-display-errors errors))))
 
 (defun flycheck-show-error-at-point-soon ()
   "Show the first error message at point in minibuffer asap.
@@ -2469,11 +2493,14 @@ Hide the error buffer if there is no error under point."
       (quit-window nil window))))
 
 (defun flycheck-copy-messages-as-kill (pos)
-  "Copy message under POS into kill ring."
+  "Copy each error message under POS into kill ring.
+
+Each error message under point is copied into the kill ring."
   (interactive "d")
-  (-when-let (error-messages (flycheck-overlay-messages-string-at pos))
-    (kill-new error-messages)
-    (flycheck-display-error-messages error-messages)))
+  (-when-let* ((errors (flycheck-overlay-errors-at pos))
+               (messages (-keep #'flycheck-error-message errors)))
+    (-each messages #'kill-new)
+    (flycheck-display-errors errors)))
 
 (defun flycheck-google-messages (pos &optional quote-flag)
   "Google each error message at POS.
@@ -2490,7 +2517,9 @@ This function requires the Google This library from URL
 `https://github.com/Bruce-Connor/emacs-google-this'."
   (interactive "d\nP")
   (if (fboundp 'google-string)
-      (let ((messages (flycheck-overlay-messages-at pos)))
+      (-when-let (messages (->> pos
+                             flycheck-overlay-errors-at
+                             (-keep #'flycheck-error-message)))
         (when (and flycheck-google-max-messages
                    (> (length messages) flycheck-google-max-messages))
           (user-error "More than %s messages at point"

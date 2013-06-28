@@ -442,10 +442,25 @@ You can also list all errors in the current buffer:
 List all errors in the current buffer in a separate buffer.
 @end table
 
-To view an error message, either hover the mouse of the highlighted
-error, or move the point to the highlighted error and wait for a short
-moment to see the error message in the echo area.  You can also copy the
-error message into kill ring, or google it straight from Emacs:
+If you hover a highlighted error with the mouse, a tooltip with the
+top-most error message will be shown.
+
+Flycheck also displays errors under point, via
+@code{flycheck-display-errors-function}:
+
+@defopt
+A function to display errors under point.
+
+If set to a function, call the function with a list of all errors to
+show.  If set to nil, to not display errors at all.
+
+The default function @code{flycheck-display-error-messages} shows all
+error messages separated by empty lines in the echo area or in a
+separate buffer depending on the number of messages.
+@end defopt
+
+You can also work with the error messages at point, and copy them into
+the kill ring or search them on Google:
 
 @table @kbd
 @item C-c ! C-w
