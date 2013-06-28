@@ -448,7 +448,7 @@ top-most error message will be shown.
 Flycheck also displays errors under point, via
 @code{flycheck-display-errors-function}:
 
-@defopt
+@defopt flycheck-display-errors-function
 A function to display errors under point.
 
 If set to a function, call the function with a list of all errors to
