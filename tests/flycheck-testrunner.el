@@ -38,8 +38,6 @@
 
 (princ (format "Running Flycheck tests under Emacs %s\n" emacs-version))
 
-(flycheck-testsuite-load-tests)
-
 (ert-run-tests-batch-and-exit (car command-line-args-left))
 
 ;; Local Variables:
