@@ -1866,6 +1866,22 @@ many-errors-for-error-list.el:14:1:warning: the function
       (should (s-contains? (flycheck-error-message err) (buffer-string))))))
 
 
+;;;; Working with error messages
+(ert-deftest flycheck-copy-messages-as-kill ()
+  (with-temp-buffer
+    (insert "A test buffer to copy errors from")
+    (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
+          (errors (list (flycheck-error-new-at 1 nil 'error "1st message")
+                        (flycheck-error-new-at 1 10 'warning "2nd message"))))
+      (-each errors #'flycheck-add-overlay)
+      (mocker-let
+          ((display-function (errors)
+                             ((:input `(,errors) :min-occur 1 :max-occur 1))))
+        (let ((flycheck-display-errors-function 'display-function))
+          (flycheck-copy-messages-as-kill 10))))
+    (should (equal (-take 2 kill-ring) '("1st message" "2nd message")))))
+
+
 ;;;; Checker process management
 (ert-deftest flycheck-chaining-preserves-early-errors ()
   "Test that chaining preserves all errors from all checkers."
