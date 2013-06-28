@@ -1879,6 +1879,30 @@ many-errors-for-error-list.el:14:1:warning: the function
           (flycheck-copy-messages-as-kill 10))))
     (should (equal (-take 2 kill-ring) '("1st message" "2nd message")))))
 
+(ert-deftest flycheck-google-messages ()
+  (with-temp-buffer
+    (insert "A test buffer to copy errors from")
+    (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
+          (errors (list (flycheck-error-new-at 1 nil 'error "1st message")
+                        (flycheck-error-new-at 1 10 'warning "2nd message"))))
+      (-each errors #'flycheck-add-overlay)
+      (let ((err (should-error (flycheck-google-messages 10)
+                               :type flycheck-testsuite-user-error-type)))
+        (should (string= (cadr err) "Please install Google This from https://github.com/Bruce-Connor/emacs-google-this")))
+
+      (mocker-let
+          ((google-string (quote-flag s confirm)
+                          ((:input '(nil "1st message" :no-confirm))
+                           (:input '(nil "2nd message" :no-confirm))
+                           (:input '(:quote "1st message" :no-confirm))
+                           (:input '(:quote "2nd message" :no-confirm)))))
+        (let* ((flycheck-google-max-messages 1)
+               (err (should-error (flycheck-google-messages 10)
+                                  :type flycheck-testsuite-user-error-type)))
+          (should (string= (cadr err) "More than 1 messages at point")))
+        (flycheck-google-messages 10)
+        (flycheck-google-messages 10 :quote)))))
+
 
 ;;;; Checker process management
 (ert-deftest flycheck-chaining-preserves-early-errors ()
