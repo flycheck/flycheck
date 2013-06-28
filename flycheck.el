@@ -213,6 +213,18 @@ and there may be further syntax checkers in the chain.
 
 This variable is an abnormal hook.")
 
+(defcustom flycheck-display-errors-function 'flycheck-display-error-messages
+  "Function to display error messages.
+
+This function takes a single argument: A string with all error messages.
+
+The default function uses `display-message-or-buffer'.
+
+A value of nil will disable the display of error messages."
+  :group 'flycheck
+  :type 'function
+  :package-version '(flycheck . "0.13"))
+
 (defcustom flycheck-indication-mode 'left-fringe
   "The indication mode for Flycheck errors and warnings.
 
@@ -368,18 +380,6 @@ You should use this hook to conduct additional cleanup actions
 when Flycheck failed.
 
 This variable is a normal hook.")
-
-(defcustom flycheck-display-errors-function 'flycheck-display-error-messages
-  "Function to display error messages.
-
-This function takes a single argument: A string with all error messages.
-
-The default function uses `display-message-or-buffer'.
-
-A value of nil will disable the display of error messages."
-  :group 'flycheck
-  :type 'function
-  :package-version '(flycheck . "0.13"))
 
 ;; TODO: Remove the obsolete faces in 0.14
 (defface flycheck-error
