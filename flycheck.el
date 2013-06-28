@@ -2493,11 +2493,14 @@ Hide the error buffer if there is no error under point."
       (quit-window nil window))))
 
 (defun flycheck-copy-messages-as-kill (pos)
-  "Copy message under POS into kill ring."
+  "Copy each error message under POS into kill ring.
+
+Each error message under point is copied into the kill ring."
   (interactive "d")
-  (-when-let (error-messages (flycheck-overlay-messages-string-at pos))
-    (kill-new error-messages)
-    (flycheck-display-error-messages error-messages)))
+  (-when-let* ((errors (flycheck-overlay-errors-at pos))
+               (messages (-keep #'flycheck-error-message errors)))
+    (-each messages #'kill-new)
+    (flycheck-display-errors errors)))
 
 (defun flycheck-google-messages (pos &optional quote-flag)
   "Google each error message at POS.
@@ -2514,7 +2517,9 @@ This function requires the Google This library from URL
 `https://github.com/Bruce-Connor/emacs-google-this'."
   (interactive "d\nP")
   (if (fboundp 'google-string)
-      (let ((messages (flycheck-overlay-messages-at pos)))
+      (-when-let (messages (->> pos
+                             flycheck-overlay-errors-at
+                             (-keep #'flycheck-error-message)))
         (when (and flycheck-google-max-messages
                    (> (length messages) flycheck-google-max-messages))
           (user-error "More than %s messages at point"

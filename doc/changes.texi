@@ -680,6 +680,8 @@ Syntax checkers may have error patterns and error parser now
 @item
 Predicate forms are now wrapped into functions and compiled into
 functions during byte compilation
+@item
+Copy each message separately in @code{flycheck-copy-messages-as-kill}
 @end itemize
 
 @item
