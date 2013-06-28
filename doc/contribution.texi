@@ -132,8 +132,8 @@ Familiarize yourself with the @ref{Top, , ERT, ert} library.
 @item
 Familiarize yourself with the test suite in @file{flycheck-testsuite.el}.
 @item
-Add your tests to the appropriate file.  Create a new test file if
-necessary.
+Add your tests at the appropriate.  Keep the order of tests
+corresponding to the order of declarations in @file{flycheck.el}.
 @item
 Extend the provisioning script @file{vagrant/provision.sh} with the
 dependencies of your tests, if necessary.  This includes syntax checker
