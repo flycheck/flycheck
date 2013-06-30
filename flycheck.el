@@ -216,11 +216,11 @@ This variable is an abnormal hook.")
 (defcustom flycheck-display-errors-function 'flycheck-display-error-messages
   "Function to display error messages.
 
-This function takes a single argument: A string with all error messages.
+If set to a function, call the function with the list of errors
+to display as single argument.  Each error is an instance of the
+`flycheck-error' struct.
 
-The default function uses `display-message-or-buffer'.
-
-A value of nil will disable the display of error messages."
+If set to nil, do not display errors at all."
   :group 'flycheck
   :type 'function
   :package-version '(flycheck . "0.13"))
