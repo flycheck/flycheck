@@ -14,6 +14,7 @@
  ;; Various modes for use in the unit tests
  (depends-on "coffee-mode")
  (depends-on "haml-mode")
+ (depends-on "web-mode")
  (depends-on "js2-mode")
  (depends-on "js3-mode")
  (depends-on "lua-mode")

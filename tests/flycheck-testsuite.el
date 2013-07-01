@@ -121,6 +121,7 @@
           elixir-mode
           go-mode
           haml-mode
+          web-mode
           js2-mode
           js3-mode
           lua-mode
@@ -2147,7 +2148,7 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
   "Test an error caused by an unknown tag."
   :expected-result (flycheck-testsuite-fail-unless-checker 'html-tidy)
   (flycheck-testsuite-should-syntax-check
-   "checkers/html-tidy-warning-and-error.html" 'html-mode nil
+   "checkers/html-tidy-warning-and-error.html" '(html-mode web-mode) nil
    '(3 1 "missing <!DOCTYPE> declaration" warning :filename nil)
    '(8 5 "<spam> is not recognized!" error :filename nil)
    '(8 5 "discarding unexpected <spam>" warning :filename nil)))
