@@ -50,6 +50,18 @@
 ;;
 ;; `flycheck-testsuite-with-hook' executes the body with a specified hook form.
 ;;
+;; `flycheck-mode-no-check' enables Flycheck Mode in the current buffer without
+;; starting a syntax check immediately.
+;;
+;; `flycheck-with-global-mode' enables Global Flycheck Mode while the body is
+;; evaluated.
+;;
+;; `flycheck-testsuite-delete-temps' deletes Flycheck temporary files after the
+;; body was evaluated.
+;;
+;; `flycheck-testsuite-with-help-buffer' kills the Help buffer after the body
+;; was evaluated.
+;;
 ;; `flycheck-testsuite-not-on-travis' signals an error if the test is run on
 ;; Travis CI.  Use in combination with `:expected-result' to skip tests on
 ;; Travis CI.
@@ -240,7 +252,7 @@ After evaluation of BODY, set HOOK-VAR to nil."
        ,@body)
      (should-not (file-exists-p filename))))
 
-(defmacro flycheck-with-help-buffer (&rest body)
+(defmacro flycheck-testsuite-with-help-buffer (&rest body)
   "Execute BODY and kill the help buffer afterwards."
   (declare (indent 0))
   `(unwind-protect
@@ -1254,7 +1266,7 @@ error is signaled on all subsequent checks."
 (ert-deftest flycheck-describe-checker-pops-up-help ()
   "Test that describing a syntax checker pops up a help buffer."
   (dolist (checker (flycheck-declared-checkers))
-    (flycheck-with-help-buffer
+    (flycheck-testsuite-with-help-buffer
       (flycheck-describe-checker checker)
       (should (buffer-live-p (get-buffer (help-buffer))))
       (should (get-buffer-window (help-buffer)))
@@ -1267,7 +1279,7 @@ error is signaled on all subsequent checks."
 (ert-deftest flycheck-describe-checker-navigate-to-source ()
   "Test that checkers are properly described."
   (dolist (checker (flycheck-declared-checkers))
-    (flycheck-with-help-buffer
+    (flycheck-testsuite-with-help-buffer
       (flycheck-describe-checker checker)
       (with-current-buffer (help-buffer)
         (goto-char (point-min))
@@ -1286,7 +1298,7 @@ error is signaled on all subsequent checks."
 (ert-deftest flycheck-describe-checker-executable-name ()
   "Test that the command name appears in syntax checker help."
   (dolist (checker (flycheck-declared-checkers))
-    (flycheck-with-help-buffer
+    (flycheck-testsuite-with-help-buffer
       (flycheck-describe-checker checker)
       (with-current-buffer (help-buffer)
         (goto-char (point-min))
@@ -1298,7 +1310,7 @@ error is signaled on all subsequent checks."
 (ert-deftest flycheck-describe-checker-config-file-var ()
   "Test that the config file var appears in syntax checker help."
   (dolist (checker (flycheck-declared-checkers))
-    (flycheck-with-help-buffer
+    (flycheck-testsuite-with-help-buffer
       (flycheck-describe-checker checker)
       (with-current-buffer (help-buffer)
         (let ((config-file-var (flycheck-checker-config-file-var checker)))
@@ -1313,7 +1325,7 @@ error is signaled on all subsequent checks."
 (ert-deftest flycheck-describe-checker-option-vars ()
   "Test that option variables appear in syntax checker help."
   (dolist (checker (flycheck-declared-checkers))
-    (flycheck-with-help-buffer
+    (flycheck-testsuite-with-help-buffer
       (flycheck-describe-checker checker)
       (with-current-buffer (help-buffer)
         (let ((option-vars (sort (flycheck-checker-option-vars checker)
@@ -1341,7 +1353,7 @@ error is signaled on all subsequent checks."
 (ert-deftest flycheck-describe-checker-docstring ()
   "Test that the docstring appears in syntax checker help."
   (dolist (checker (flycheck-declared-checkers))
-    (flycheck-with-help-buffer
+    (flycheck-testsuite-with-help-buffer
       (flycheck-describe-checker checker)
       (with-current-buffer (help-buffer)
         (should (s-contains? (flycheck-checker-documentation checker)
