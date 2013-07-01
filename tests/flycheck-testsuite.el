@@ -49,6 +49,10 @@
 ;; ------------
 ;;
 ;; `flycheck-testsuite-with-hook' executes the body with a specified hook form.
+;;
+;; `flycheck-testsuite-not-on-travis' signals an error if the test is run on
+;; Travis CI.  Use in combination with `:expected-result' to skip tests on
+;; Travis CI.
 
 ;; Test environment utilities
 ;; --------------------------
@@ -243,6 +247,13 @@ After evaluation of BODY, set HOOK-VAR to nil."
        (progn ,@body)
      (when (buffer-live-p (get-buffer (help-buffer)))
        (kill-buffer (help-buffer)))))
+
+(defun flycheck-testsuite-not-on-travis ()
+  "Signal an error if run on Travis CI.
+
+Use together with `:expected-result' to skip tests on travis CI."
+  (when (flycheck-testsuite-travis-ci-p)
+    (error "Test skipped on Travis CI.")))
 
 
 ;;;; Test environment helpers
@@ -2367,6 +2378,7 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
 (ert-deftest checker-ruby-jruby-syntax-error ()
   "Test a Ruby syntax error."
   :expected-result (flycheck-testsuite-jruby-expected-result)
+  (flycheck-testsuite-not-on-travis)
   (flycheck-testsuite-should-syntax-check
    "checkers/ruby-syntax-error.rb" 'ruby-mode '(ruby-rubocop ruby)
    '(5 nil "syntax error, unexpected tCONSTANT" error)))
@@ -2374,6 +2386,7 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
 (ert-deftest checker-ruby-jruby-warning ()
   "Test a Ruby syntax error."
   :expected-result (flycheck-testsuite-jruby-expected-result)
+  (flycheck-testsuite-not-on-travis)
   (flycheck-testsuite-should-syntax-check
    "checkers/ruby-warning.rb" 'ruby-mode '(ruby-rubocop ruby)
    '(3 nil "Useless use of == in void context." warning)))
@@ -2434,8 +2447,7 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
 (ert-deftest checker-scala-syntax-error ()
   :expected-result (if (flycheck-testsuite-travis-ci-p) :failed
                      (flycheck-testsuite-fail-unless-checker 'scala))
-  (when (flycheck-testsuite-travis-ci-p)
-    (error "Scala times out on Travis"))
+  (flycheck-testsuite-not-on-travis)
   (flycheck-testsuite-should-syntax-check
    "checkers/scala-syntax-error.scala" 'scala-mode nil
    '(3 nil "identifier expected but '{' found." error)))
