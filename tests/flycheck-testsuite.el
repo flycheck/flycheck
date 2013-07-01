@@ -2434,6 +2434,8 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
 (ert-deftest checker-scala-syntax-error ()
   :expected-result (if (flycheck-testsuite-travis-ci-p) :failed
                      (flycheck-testsuite-fail-unless-checker 'scala))
+  (when (flycheck-testsuite-travis-ci-p)
+    (error "Scala times out on Travis"))
   (flycheck-testsuite-should-syntax-check
    "checkers/scala-syntax-error.scala" 'scala-mode nil
    '(3 nil "identifier expected but '{' found." error)))
