@@ -2892,7 +2892,7 @@ See URL `https://github.com/w3c/tidy-html5'."
   '(("^line \\(?2:[0-9]+\\) column \\(?3:[0-9]+\\) - Error: \\(?4:.*\\)$" error)
     ("^line \\(?2:[0-9]+\\) column \\(?3:[0-9]+\\) - Warning: \\(?4:.*\\)$"
      warning))
-  :modes '(html-mode nxhtml-mode))
+  :modes '(html-mode nxhtml-mode web-mode))
 
 (flycheck-def-config-file-var flycheck-jshintrc javascript-jshint ".jshintrc")
 
