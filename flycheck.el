@@ -379,7 +379,9 @@ this hook.
 You should use this hook to conduct additional cleanup actions
 when Flycheck failed.
 
-This variable is a normal hook.")
+This variable is a normal hook."
+  :group 'flycheck
+  :type 'hook)
 
 ;; TODO: Remove the obsolete faces in 0.14
 (defface flycheck-error
