@@ -3089,14 +3089,13 @@ See URL `http://docutils.sourceforge.net/'."
 (flycheck-declare-checker ruby-rubocop
   "A Ruby syntax and style checker using the RuboCop tool.
 
-See URL `https://github.com/bbatsov/rubocop'."
-  :command '("rubocop" "--emacs" "--silent"
+See URL `http://batsov.com/rubocop/'."
+  :command '("rubocop" "--format" "emacs" "--silent"
              (config-file "--config" flycheck-rubocoprc)
              source)
   :error-patterns
-  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): C: \\(?4:.*\\)$" warning)
-    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): W: \\(?4:.*\\)$" warning)
-    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): E: \\(?4:.*\\)$" error))
+  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): \\(?:C\\|W\\): \\(?4:.*\\)$" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): \\(?:E\\|F\\): \\(?4:.*\\)$" error))
   :modes 'ruby-mode)
 
 (flycheck-declare-checker ruby
