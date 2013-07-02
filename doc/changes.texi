@@ -712,6 +712,18 @@ Fix version information on Emacs trunk builds
 @comment  node-name,  next,  previous,  up
 @unnumberedsec master (unreleased)
 
+@itemize @bullet
+@item
+Improvements:
+
+@itemize
+@item
+@ghissue{159, Support Rubocop 0.9 and drop support for older Rubocop
+releases}
+@end itemize
+
+@end itemize
+
 @c Local Variables:
 @c mode: texinfo
 @c TeX-master: "flycheck"
