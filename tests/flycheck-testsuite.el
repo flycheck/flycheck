@@ -2388,7 +2388,6 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
     (flycheck-testsuite-fail-unless-checker 'ruby-jruby)))
 
 (ert-deftest checker-ruby-jruby-syntax-error ()
-  "Test a Ruby syntax error."
   :expected-result (flycheck-testsuite-jruby-expected-result)
   (flycheck-testsuite-not-on-travis)
   (flycheck-testsuite-should-syntax-check
@@ -2396,7 +2395,6 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
    '(5 nil "syntax error, unexpected tCONSTANT" error)))
 
 (ert-deftest checker-ruby-jruby-warning ()
-  "Test a Ruby syntax error."
   :expected-result (flycheck-testsuite-jruby-expected-result)
   (flycheck-testsuite-not-on-travis)
   (flycheck-testsuite-should-syntax-check
@@ -2404,40 +2402,38 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
    '(3 nil "Useless use of == in void context." warning)))
 
 (ert-deftest checker-ruby-rubocop-syntax-error ()
-  "Test a Ruby syntax error."
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
   (flycheck-testsuite-should-syntax-check
    "checkers/ruby-syntax-error.rb" 'ruby-mode nil
-   '(5 nil "Syntax error, unexpected tconstant, expecting $end" error)))
+   '(5 7 "unexpected token tCONSTANT" error)
+   '(5 24 "unterminated string meets end of file" error)))
 
 (ert-deftest checker-ruby-rubocop-warnings ()
-  "Test some Ruby warnings emitted by RuboCop."
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
   (flycheck-testsuite-should-syntax-check
    "checkers/ruby-rubocop-warnings.rb" 'ruby-mode nil
-   '(1 nil "Missing utf-8 encoding comment." warning)
-   '(3 nil "Use snake_case for symbols." warning)
-   '(4 nil "Prefer single-quoted strings when you don't need string interpolation or special symbols." warning)))
+   '(1 1 "Missing utf-8 encoding comment." warning)
+   '(3 1 "Assigned but unused variable - arr" warning)
+   '(3 14 "Use snake_case for symbols." warning)
+   '(4 6 "Prefer single-quoted strings when you don't need string interpolation or special symbols." warning)))
 
 (ert-deftest checker-ruby-rubocop-warnings-disabled ()
-  "Test Ruby RuboCop configuration file."
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
   (flycheck-testsuite-with-hook ruby-mode-hook
       (setq flycheck-rubocoprc "rubocop.yml")
     (flycheck-testsuite-should-syntax-check
      "checkers/ruby-rubocop-warnings.rb" 'ruby-mode nil
-      '(1 nil "Missing utf-8 encoding comment." warning)
-      '(4 nil "Prefer single-quoted strings when you don't need string interpolation or special symbols." warning))))
+     '(1 1 "Missing utf-8 encoding comment." warning)
+     '(3 1 "Assigned but unused variable - arr" warning)
+     '(4 6 "Prefer single-quoted strings when you don't need string interpolation or special symbols." warning))))
 
 (ert-deftest checker-ruby-syntax-error ()
-  "Test a Ruby syntax error."
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby)
   (flycheck-testsuite-should-syntax-check
    "checkers/ruby-syntax-error.rb" 'ruby-mode '(ruby-rubocop)
    '(5 nil "syntax error, unexpected tCONSTANT, expecting $end" error)))
 
 (ert-deftest checker-ruby-warning ()
-  "Test a Ruby syntax error."
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby)
   (flycheck-testsuite-should-syntax-check
    "checkers/ruby-warning.rb" 'ruby-mode '(ruby-rubocop)
