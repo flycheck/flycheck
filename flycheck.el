@@ -3089,7 +3089,7 @@ See URL `http://docutils.sourceforge.net/'."
 (flycheck-declare-checker ruby-rubocop
   "A Ruby syntax and style checker using the RuboCop tool.
 
-See URL `https://github.com/bbatsov/rubocop'."
+See URL `http://batsov.com/rubocop/'."
   :command '("rubocop" "--format" "emacs" "--silent"
              (config-file "--config" flycheck-rubocoprc)
              source)
