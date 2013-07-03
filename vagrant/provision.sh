@@ -137,7 +137,8 @@ npm coffeelint \
     coffee-script  \
     csslint \
     jshint \
-    jsonlint
+    jsonlint \
+    less
 
 gem haml \
     rubocop \
