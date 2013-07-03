@@ -120,6 +120,7 @@ buffer-local wherever it is set."
     html-tidy
     javascript-jshint
     json-jsonlint
+    less
     lua
     perl
     php
@@ -2920,6 +2921,17 @@ See URL `https://github.com/zaach/jsonlint'."
        (eq major-mode 'json-mode)
        (and buffer-file-name
             (string= "json" (file-name-extension buffer-file-name))))))
+
+(flycheck-declare-checker less
+  "A LESS syntax checker using lessc.
+
+At least version 1.4 of lessc is required.
+
+See URL `http://lesscss.org'."
+  :command '("lessc" "--lint" "--no-color" source)
+  :error-patterns
+  '(("^\\(?4:[^\e\n]*\\|FileError:.*\n\\) in \\(?1:[^ \r\n\t\e]+\\)\\(?::\\| on line \\)\\(?2:[0-9]+\\)\\(?::\\|, column \\)\\(?3:[0-9]+\\):?" error))
+  :modes 'less-css-mode)
 
 (flycheck-declare-checker lua
   "A Lua syntax checker using the Lua compiler.
