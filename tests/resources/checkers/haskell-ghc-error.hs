@@ -1,0 +1,3 @@
+bogus
+
+module Foo where
