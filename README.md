@@ -36,6 +36,7 @@ Features
   - Erlang
   - Go
   - Haml
+  - Haskell
   - HTML
   - Javascript
   - JSON
