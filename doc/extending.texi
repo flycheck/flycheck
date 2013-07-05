@@ -1,41 +1,42 @@
-Flycheck is extensible with new syntax checkers.  This chapter explains
-how to do so, and provides examples for common use cases.
+This chapter explains how to add new syntax checkers to Flycheck, and
+provides examples for common use cases.
 
-If you implement new syntax checkers, please consider @b{contributing}
-these.  @xref{Contributing syntax checkers}, for more information.
+If you define a new syntax checker, @emph{please} contribute it to
+Flycheck to make it available to other users, too.  @xref{Contributing
+syntax checkers}, for more information.
 
 @menu
-* Declaration::         How to declare syntax checkers
+* Definition::          How to define syntax checkers
 * Error parsers::       Built-in error parsers
 * Option filters::      Built-in option filters
 * Examples::            Examples on how to declare syntax checkers
 @end menu
 
-@node Declaration, Error parsers, Extending, Extending
+@node Definition, Error parsers, Extending, Extending
 @comment  node-name,  next,  previous,  up
-@section Declaration of syntax checkers
+@section Definition of syntax checkers
 
-Checkers are declared with @code{flycheck-declare-checker}:
+You define new syntax checkers with @code{flycheck-define-checker}:
 
-@defmac flycheck-declare-checker symbol docstring &rest properties
-Declare SYMBOL as new syntax checker with PROPERTIES.
+@defmac flycheck-define-checker symbol docstring &rest properties
+Define @var{symbol} as new syntax checker with @var{docstring} and
+@var{properties}.
 
-DOCSTRING provides documentation for the syntax checker.
+@var{docstring} provides documentation for the syntax checker.  Use
+@kbd{C-c ! ?} or @kbd{M-x flycheck-describe-checker} to view the
+documentation of a syntax checker.
 
-The PROPERTIES specify the new syntax checker:
+The following @var{properties} constitute a syntax checker:
 
 @table @code
-@item :command '(@var{executable} @var{arguments}...)
-A list providing the command to execute.  The command consists of an
-@var{executable} specified as string in the @code{car}, and the
-@var{arguments} for this executable in the @code{cdr}.  @xref{List
-elements, , ,elisp}, for more information about the elements of a list.
+@item :command (@var{command} @var{arg} ...)
+An unquoted list describing the syntax checker command to execute.
 
-The @var{executable} is checked for existence with
-@code{executable-find} before executing the syntax checker.
+@var{command} is checked for existence with @code{executable-find}
+before executing a syntax checker.
 
-In @var{arguments}, various special symbols are substituted before
-executing the syntax checker:
+In @var{command} and @var{arg}, the following special symbols and sexps
+are substituted before executing the syntax checker:
 
 @table @code
 @item source
@@ -46,10 +47,10 @@ system's temporary directory.
 If the buffer to check has a file name, the non-directory component of
 the name of the temporary file will be the same as in the buffer's file
 name, to support languages which enforce specific rules on the file name
-(e.g. the file must be named after the containing class).
+(e.g. the file must be named after the containing feature, class, etc.).
 
 If the buffer to check has no file name, the name of the temporary file
-will be random.
+is random.
 
 This symbol is the @b{preferred} way to pass the input file to your
 syntax checker.
@@ -75,15 +76,15 @@ This symbol is provided to @b{additionally} pass the real name of the
 file to check to a syntax checker.
 
 It should @b{never} be used as primary input to the syntax checker,
-unless both @code{source} and @code{source-original} are totally not
+unless both @code{source} and @code{source-original} are absolutely not
 applicable.  In this case, be sure to add a predicate to your syntax
 checker that inhibits the syntax check, if the buffer has no file name,
 or was modified, for otherwise the syntax check will fail or return
 out-dated errors:
 
 @lisp
-:predicate #'(lambda () (and (buffer-file-name)
-                             (not (buffer-modified-p)))
+:predicate (lambda () (and (buffer-file-name)
+                           (not (buffer-modified-p)))
 @end lisp
 
 @item temporary-directory
@@ -147,126 +148,118 @@ before it is evaluated, nor in the result of evaluating FORM.
 
 This property is @b{mandatory}.
 
-@item :error-parser '@var{parser}
-An error parser to use for parsing the output of the syntax checker.
+@item :error-patterns ((@var{level} @var{sexp}) ...)
+An unquoted list of one or more error patterns to parse the output of
+the syntax checker @code{:command}.
 
-The @var{parser} is a function symbol.  @xref{Error parsers}, for more
-information about error parsers, including a list of built-in error
-parsers.
+@var{level} is either @code{warning} or @code{error} and denotes the
+severity of errors matched by the pattern.
 
-Using a error parser is preferred if a syntax checker provides a
-structured output format like XML or JSON.  If possible, re-use one of
-the built-in error parsers listed in @ref{Error parsers}.
+The @var{level} is followed by one or more @code{rx} @var{sexp}
+elements.  See the docstring of the function @code{rx} for more
+information.  In addition to the standard forms of @code{rx}, Flycheck
+supports the following additional forms to make specific parts of the
+error output available to Flycheck:
 
-An error parser takes precedence over @code{:error-patterns}.  To use an
-error parser together with patterns, you must manually call
-@code{flycheck-parse-output-with-patterns} in your error parser to parse
-with error patterns first.  You can the post-process the errors returned
-by this function.
+@table @code
+@item line
+Matches the line number the error refers to, as a sequence of one or
+more digits.
 
-@item :error-patterns '((@var{regexp} @var{level})...)
-A list of one or more error patterns to parse the output of
-@code{:command}.
+@item column
+Matches a column number the error refers to, as a sequence of one or
+more digits.
 
-The @var{regexp} is a regular expression matching a single error or
-warning.  The @var{level} is either @code{error} or @code{warning} and
-classifies the severity of the matched error message.
+@item (file-name @var{sexp} ...)
+Matches the file name the error refers to.  @var{sexp} matches the name
+of the file.  If no @var{sexp} is given, use a default body of
+@code{(minimal-match (one-or-more not-newline))}, which is equivalent to
+@code{".+?"}.
 
-Do @b{not} use error patterns if you can use an error parser.
-
-The @var{regexp} may provide the following match groups:
-
-@table @emph
-@item Group 1
-The file name.
-@item Group 2
-The line number.
-@item Group 3
-The column number.
-@item Group 4
-The error text.
+@item (message @var{sexp} ...)
+Matches the error message to be shown to the user.  @var{sexp} matches
+the text of the message.  If no @var{sexp} is given, use a default body
+of @code((one-or-more not-newline)), which is equivalent to @code{".+"}.
 @end table
 
-Each of these groups is optional, however error messages without line
-numbers will be ignored.  Use @b{explicitly numbered groups} to make
-sure that the group numbering is correct.  @xref{Regexp Backslash, ,
-,elisp}, for more information about regular expression groups.
+Each of these items is optional, however error messages without a
+@code{line} will be ignored and are not shown in the buffer.
 
 The patterns are applied in the order of declaration to the whole output
 of the syntax checker.  Output already matched by a pattern will not be
 matched by subsequent patterns.  In other words, the first pattern wins.
 
-@item :modes '@var{major-mode}
-@itemx :modes '(@var{major-mode}...)
-A single @var{major-mode}, or a list thereof.
+@item :error-parser @var{function}
+@itemx :error-parser (lambda (ouptut checker buffer) @var{body} ...)
+A function to parse the output of the syntax checker, either as unquoted
+function symbol or @code{lambda} form.
 
-@var{major-mode} is a symbol referring to a major mode.  If given the
-syntax checker will only be used in buffers with any of the given major
-modes.
+The function must accept three arguments @var{output}, @var{checker} and
+@var{buffer}, where @var{output} is the output of the syntax checker as
+string, @var{checker} the syntax checker that was used, and
+@code{buffer} a buffer object representing the checker buffer.
 
-@item :predicate #'@var{function}
-@itemx :predicate #'(lambda () @var{body})))
-@itemx :predicate '@var{form}
-A predicate function that determines whether the syntax checker may be
-used.
+The function must return a list of @code{flycheck-error} objects parsed
+from @var{output}.  @xref{Error API} for information about
+@code{flycheck-error}, and @ref{Error parsers} for a list of built-in
+error parsers.
 
-@var{FUNCTION} is called before each syntax check to determine whether
-the syntax checker may be used for the current buffer.  If
-@var{function} returns nil, the syntax checker is not used.  Of course,
-you may also use a lambda expression with @var{BODY}.  @xref{Lambda
-Expression, , , elisp}, for more information on lambda expression.
+If this property is given, it takes precedence over
+@code{:error-patterns}.  To use an error parser together with patterns,
+you must manually call @code{flycheck-parse-output-with-patterns} in
+your error parser to apply the error patterns.  You can then manipulate
+the @code{flycheck-error} objects returned by this function.
 
-Alternatively, you may also specify a @var{form} which is then evaluated
-to determine whether the syntax checker may used.  However, this usage
-is obsolete.
+@item :modes @var{mode}
+@itemx :modes (@var{mode}...)
+An unquoted major mode symbol or an unquoted list thereof.
 
-If @var{:modes} is given, @var{form} is only called if the major mode
-matches.  Otherwise the syntax checker is not used.
+If given, this syntax checker is only used, if the major mode of the
+buffer to check is equal (as in @code{eq}) to any given @var{mode}.
 
-@item :next-checker '(@var{item}...)
-A list of syntax checker to run after this syntax checker.
+@item :predicate @var{function}
+@itemx :error-parser (lambda () @var{body} ...)
+A function to determines whether to use this syntax checker in the
+current buffer, either as unquoted function symbol or as @code{lambda}
+form.  The syntax checker is only used if this function returns non-nil
+when called in the buffer to check.
 
-Each @var{item} is either a single syntax checker symbol, or a cons cell
-@code{(@var{predicate} . @var{checker})}.  Each @var{item} is tried on
-the order of declaration.
+If @var{:modes} is given, the function is only called in matching major
+modes.  That means, if both @code{:modes} and @code{:predicate} are
+given, @b{both} must match for this syntax checker to be used.
 
-If the @var{item} is a syntax checker symbol, determine whether it is
-usable @b{and} registered (i.e. contained in @code{flycheck-checkers}).
-If so start a new syntax check with that syntax checker, and merged its
-results with the results of this syntax checker.  If not, try the next
-@var{item}.
+@item :next-checker (@var{item} ...)
+An unquoted list defining the syntax checker to run after this checker.
 
-If @var{item} is a cons cell, @var{predicate} specifies whether to run
-the @var{checker} depending on the results of this syntax checker:
+Each @var{item} is either a syntax checker symbol or a cons cell
+@code{(@var{predicate} . @var{checker})}.  In the former case, the
+syntax checker is always considered.  In the later case, @var{checker}
+is only considered if the @var{predicate} matches.
+
+@var{predicate} is either @code{no-errors} or @code{warnings-only}:
 
 @table @code
 @item no-errors
-The @var{checker} is only used if this syntax checker resulted in no
-errors at all.
+The syntax @var{checker} is only considered if this syntax checker
+reported no errors at all.
 @item warnings-only
-The @var{checker} is only used if this syntax checker did not result in
-error messages of severity @code{error}.
+The syntax @var{checker} is only considered if this syntax checker only
+reported warnings, but no errors.
+@end table
 @end table
 
-If the predicate matches, and @var{checker} is usable and registered,
-start a new syntax checker with @var{checker} and merged its results
-with the results of this syntax checker.  If not, try the next
-@var{item}.
-
-If there is no further @var{item}, finish the syntax check.
-@end table
-
-At least on of @code{:modes} and @code{:predicate} must be present.  If
-both are present, both must match for the syntax checker to be used.
-
-Either @code{:error-patterns} or @code{:error-parser} must be present.
-If both are present, an error is signaled.
+@code{:command} is @b{mandatory}.  A syntax checker must also have at
+least one of @code{:modes} and @code{:predicate}, and at least one of
+@code{:error-patterns} or @code{:error-parser} are present, an error is
+signaled.  If @code{:predicate} and @code{:modes} are given, both must
+match for the syntax checker to be used.  @code{:next-checkers} is
+entirely optional.
 @end defmac
 
-A syntax checker declared with @code{flycheck-declare-checker} is
-already suitable for manual checker selection with
-@code{flycheck-select-checker}.  For automatic selection the syntax
-checker must be registered by adding it to @code{flycheck-checkers}.
+A syntax checker define with @code{flycheck-define-checker} is already
+suitable for manual checker selection with
+@code{flycheck-select-checker}.  To make the syntax checker available
+for automatic selection, add it to @code{flycheck-checkers}.
 @xref{Selection}.
 
 @defmac flycheck-def-config-file-var @var{symbol} @var{checker} @
@@ -304,12 +297,13 @@ Use this macro together with the @code{option} cell in the command of a
 syntax checker.
 @end defmac
 
-@node Error parsers, Option filters, Declaration, Extending
+@node Error parsers, Option filters, Definition, Extending
 @comment  node-name,  next,  previous,  up
 @section Error parsers
 
 Syntax checkers may use more sophisticated error parsing by using the
-@code{:error-parser} property.  @xref{Declaration}.
+@code{:error-parser} property.  @xref{Definition}, for information about
+syntax checker definition.
 
 Flycheck provides the following error parsers for use by syntax
 checkers:
