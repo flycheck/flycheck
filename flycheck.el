@@ -1411,7 +1411,7 @@ A checker is registered if it is contained in `flycheck-checkers'."
 (defun flycheck-valid-checker-p (checker)
   "Check whether a CHECKER is valid.
 
-A valid checker is a symbol declared as checker with
+A valid checker is a symbol define as syntax checker with
 `flycheck-define-checker'."
   (get checker :flycheck-checker))
 
