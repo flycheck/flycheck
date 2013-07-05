@@ -72,6 +72,8 @@ Javascript (using @command{jshint})
 @item
 JSON (using @command{jsonlint})
 @item
+LESS (using @command{lessc})
+@item
 Lua
 @item
 Perl
