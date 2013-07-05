@@ -3094,38 +3094,75 @@ See URL `http://haml.info'."
   ((error line-start "Syntax error on line " line ": " (message) line-end))
   :modes haml-mode)
 
-(flycheck-declare-checker haskell-hdevtools
+(flycheck-define-checker haskell-hdevtools
   "A Haskell syntax and type checker using hdevtools.
 
 See URL `https://github.com/bitc/hdevtools'."
-  :command '("hdevtools" "check" "-g" "-Wall" source-inplace)
+  :command ("hdevtools" "check" "-g" "-Wall" source-inplace)
   :error-patterns
-  '(("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\\(?: \\|\n    \\)Warning:\n? +\\(?4:\\(?:.+\\)\\(?:\n +.+\\)*\\)" warning)
-    ("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\n\\(?4:\\( +.+\n\\)*\\)" error)
-    ("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\\(?4:.*\\)" error))
-  :modes 'haskell-mode
-  :next-checkers '((warnings-only . haskell-hlint)))
+  ((warning line-start (file-name) ":" line ":" column ":"
+            (or " " "\n    ") "Warning:" (optional "/n")
+            (one-or-more " ")
+            (message (one-or-more not-newline)
+                     (zero-or-more "\n"
+                                   (one-or-more " ")
+                                   (one-or-more not-newline)))
+            line-end)
+   (error line-start (file-name) ":" line ":" column ":"
+          (or (message (one-or-more not-newline))
+              (and "\n" (one-or-more " ")
+                   (message (one-or-more not-newline)
+                            (zero-or-more "\n"
+                                          (one-or-more " ")
+                                          (one-or-more not-newline)))))
+          line-end))
+  :modes haskell-mode
+  :next-checkers ((warnings-only . haskell-hlint)))
 
-(flycheck-declare-checker haskell-ghc
+(flycheck-define-checker haskell-ghc
   "A Haskell syntax and type checker using ghc.
 
 See URL `http://www.haskell.org/ghc/'."
-  :command '("ghc" "-Wall" "-fno-code" source-inplace)
+  :command ("ghc" "-Wall" "-fno-code" source-inplace)
   :error-patterns
-  '(("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\\(?: \\|\n    \\)Warning:\n? +\\(?4:\\(?:.+\\)\\(?:\n +.+\\)*\\)" warning)
-    ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\n +\\(?4:\\(?:.+\\)\\(?:\n +.+\\)*\\)" error))
-  :modes 'haskell-mode
-  :next-checkers '((warnings-only . haskell-hlint)))
+  ((warning line-start (file-name) ":" line ":" column ":"
+            (or " " "\n    ") "Warning:" (optional "/n")
+            (one-or-more " ")
+            (message (one-or-more not-newline)
+                     (zero-or-more "\n"
+                                   (one-or-more " ")
+                                   (one-or-more not-newline)))
+            line-end)
+   (error line-start (file-name) ":" line ":" column ":"
+          (or (message (one-or-more not-newline))
+              (and "\n" (one-or-more " ")
+                   (message (one-or-more not-newline)
+                            (zero-or-more "\n"
+                                          (one-or-more " ")
+                                          (one-or-more not-newline)))))
+          line-end))
+  :modes haskell-mode
+  :next-checkers ((warnings-only . haskell-hlint)))
 
-(flycheck-declare-checker haskell-hlint
+(flycheck-define-checker haskell-hlint
   "A Haskell style checker using hlint.
 
 See URL `http://community.haskell.org/~ndm/hlint/'."
-  :command '("hlint" source-inplace)
+  :command ("hlint" source-inplace)
   :error-patterns
-  '(("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): Warning: \\(?4:.+\\(?:\n.+\\)+\\)" warning)
-    ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): Error: \\(?4:.+\\(?:\n.+\\)+\\)" error))
-  :modes 'haskell-mode)
+  ((warning line-start
+            (file-name) ":" line ":" column
+            ": Warning: "
+            (message (one-or-more not-newline)
+                     (one-or-more "\n" (one-or-more not-newline)))
+            line-end)
+   (error line-start
+          (file-name) ":" line ":" column
+          ": Error: "
+          (message (one-or-more not-newline)
+                   (one-or-more "\n" (one-or-more not-newline)))
+          line-end))
+  :modes haskell-mode)
 
 (flycheck-def-config-file-var flycheck-tidyrc html-tidy ".tidyrc")
 
