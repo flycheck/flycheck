@@ -3061,15 +3061,24 @@ See URL `https://github.com/zaach/jsonlint'."
      (and buffer-file-name
           (string= "json" (file-name-extension buffer-file-name))))))
 
-(flycheck-declare-checker less
+(flycheck-define-checker less
   "A LESS syntax checker using lessc.
 At least version 1.4 of lessc is required.
 
 See URL `http://lesscss.org'."
-  :command '("lessc" "--lint" "--no-color" source)
+  :command ("lessc" "--lint" "--no-color" source)
   :error-patterns
-  '(("^\\(?4:[^\e\n]*\\|FileError:.*\n\\) in \\(?1:[^ \r\n\t\e]+\\)\\(?::\\| on line \\)\\(?2:[0-9]+\\)\\(?::\\|, column \\)\\(?3:[0-9]+\\):?" error))
-  :modes 'less-css-mode)
+  ((error line-start
+          (message (or (zero-or-more (not (any "\e" "\n")))
+                       (and "FileError:" (zero-or-more not-newline) "\n")))
+          " in "
+          (group-n 1 (one-or-more (not (any " " "\r" "\n" "\t" "\e"))))
+          (or ":" " on line ")
+          line
+          (or ":" ", column ")
+          column
+          (optional ":")))
+  :modes less-css-mode)
 
 (flycheck-define-checker lua
   "A Lua syntax checker using the Lua compiler.
