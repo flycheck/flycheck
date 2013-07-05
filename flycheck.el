@@ -388,7 +388,6 @@ This variable is a normal hook."
   :group 'flycheck
   :type 'hook)
 
-;; TODO: Remove the obsolete faces in 0.14
 (defface flycheck-error
   '((((supports :underline (:style wave)))
      :underline (:style wave :color "Red1"))
