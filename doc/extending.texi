@@ -9,7 +9,7 @@ syntax checkers}, for more information.
 * Definition::          How to define syntax checkers
 * Error parsers::       Built-in error parsers
 * Option filters::      Built-in option filters
-* Examples::            Examples on how to declare syntax checkers
+* Examples::            Examples on how to define syntax checkers
 @end menu
 
 @node Definition, Error parsers, Extending, Extending
@@ -352,7 +352,7 @@ An integral option that handles @code{nil} correctly (unlike
 @section Examples of syntax checkers
 
 @menu
-* Simple example::              How to declare basic syntax checkers
+* Simple example::              How to define a basic syntax checker
 * Predicate example::           How to control syntax checker usage
 * Configuration example::       How to configure syntax checkers
 * Chaining example::            How to execute more than one syntax checker
@@ -363,19 +363,19 @@ An integral option that handles @code{nil} correctly (unlike
 @subsection Basic syntax checkers
 
 As explained in the previous chapter @ref{Extending} a syntax checker is
-declared with @code{flycheck-declare-checker}.
+declared with @code{flycheck-define-checker}.
 
-We will use this function to declare a syntax checker using the
+We will use this function to define a syntax checker using the PHP
 CodeSniffer utility for the PHP programming language:
 
 @lisp
-(flycheck-declare-checker php-phpcs
+(flycheck-define-checker php-phpcs
   "A PHP syntax checker using PHP_CodeSniffer.
 
 See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
-  :command '("phpcs" "--report=checkstyle" source)
-  :error-parser 'flycheck-parse-checkstyle
-  :modes 'php-mode)
+  :command ("phpcs" "--report=checkstyle" source)
+  :error-parser flycheck-parse-checkstyle
+  :modes php-mode)
 @end lisp
 
 First we specify the @code{:command} to execute.  The first element of
@@ -402,16 +402,20 @@ do so, we can use @emph{error patterns}, like in the Pylint syntax
 checker for the Python programming language:
 
 @lisp
-(flycheck-declare-checker python-pylint
-  "A Python syntax and style checker using the pylint utility.
+(flycheck-define-checker python-pylint
+  "A Python syntax and style checker using Pylint.
 
 See URL `http://pypi.python.org/pypi/pylint'."
-  :command '("epylint" source-inplace)
+  :command ("epylint" source-inplace)
   :error-patterns
-  '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): Warning (W.*): \\(?4:.*\\)$" warning)
-    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): Error (E.*): \\(?4:.*\\)$" error)
-    ("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\[F\\] \\(?4:.*\\)$" error))
-  :modes 'python-mode)
+  ((warning line-start (file-name) ":" line
+            ": Warning (W" (zero-or-more not-newline) "): "
+            (message) line-end)
+   (error line-start (file-name) ":" line
+          ": Error (E" (zero-or-more not-newline) "): "
+          (message) line-end)
+   (error line-start (file-name) ":" line ": [F] " (message) line-end))
+  :modes python-mode)
 @end lisp
 
 Again, there is a @code{:command}, however we use the
@@ -421,7 +425,7 @@ making information from the source code tree available to the syntax
 checker.  In case of Pylint, these are the Python packages from the
 source code tree.
 
-Next we give the list of @emph{error patterns} to parse errors.  These
+Next we give the list of @code{:error-patterns} to parse errors.  These
 patterns extract the error location and the error message from the
 output of @command{epylint}.  An error pattern is a list containing a
 regular expression with match groups to extract the error information,
@@ -440,14 +444,15 @@ languages.  A syntax checker for a specific shell must check whether the
 edited shell script is written for the right shell:
 
 @lisp
-(flycheck-declare-checker zsh
-  "A Zsh syntax checker using the zsh executable.
+(flycheck-define-checker zsh
+  "A Zsh syntax checker using the Zsh shell.
 
 See URL `http://www.zsh.org/'."
-  :command '("zsh" "-n" "-d" "-f" source)
-  :error-patterns '(("^\\(?1:.*\\):\\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
-  :modes 'sh-mode
-  :predicate '(eq sh-shell 'zsh))
+  :command ("zsh" "-n" "-d" "-f" source)
+  :error-patterns
+  ((error line-start (file-name) ":" line ": " (message) line-end))
+  :modes sh-mode
+  :predicate (lambda () (eq sh-shell 'zsh)))
 @end lisp
 
 This syntax checker for the Zsh shell is enabled in @code{sh-mode} as
@@ -463,19 +468,26 @@ still desirable.  Hence a JSON syntax checker may use the
 @code{:predicate} to check the file extension:
 
 @lisp
-(flycheck-declare-checker json-jsonlint
+(flycheck-define-checker json-jsonlint
   "A JSON syntax and style checker using jsonlint.
 
 See URL `https://github.com/zaach/jsonlint'."
-  :command '("jsonlint" "-c" "-q" source)
+  :command ("jsonlint" "-c" "-q" source)
   :error-patterns
-  '(("^\\(?1:.+\\)\: line \\(?2:[0-9]+\\), col \\(?3:[0-9]+\\), \\(?4:.+\\)$"
-     error))
-  :predicate '(and buffer-file-name
-                   (string= "json" (file-name-extension buffer-file-name)))))
+  ((error line-start
+          (file-name)
+          ": line " line
+          ", col " column ", "
+          (message) line-end))
+  :predicate
+  (lambda ()
+    (or
+     (eq major-mode 'json-mode)
+     (and buffer-file-name
+          (string= "json" (file-name-extension buffer-file-name))))))
 @end lisp
 
-This syntax checker is now used whenever a file ends with .json,
+This syntax checker is now used whenever a file ends with @code{.json},
 regardless of the major mode.
 
 @node Configuration example, Chaining example, Predicate example, Examples
@@ -489,17 +501,17 @@ configuration files:
 @lisp
 (flycheck-def-config-file-var flycheck-jshintrc javascript-jshint ".jshintrc")
 
-(flycheck-declare-checker javascript-jshint
+(flycheck-define-checker javascript-jshint
   "A JavaScript syntax and style checker using jshint.
 
 See URL `http://www.jshint.com'."
-  :command '("jshint" "--checkstyle-reporter"
-             (config-file "--config" flycheck-jshintrc) source)
-  :error-parser 'flycheck-parse-checkstyle
-  :modes '(js-mode js2-mode js3-mode))
+  :command ("jshint" "--checkstyle-reporter"
+            (config-file "--config" flycheck-jshintrc) source)
+  :error-parser flycheck-parse-checkstyle
+  :modes (js-mode js2-mode js3-mode))
 @end lisp
 
-As you can see, we declare a syntax checker for Javascript, using the
+As you can see, we define a syntax checker for Javascript, using the
 @command{jshint} utility.  This utility accepts a configuration file via
 the @option{--config} option.
 
@@ -557,17 +569,17 @@ To support such cases, syntax checkers can be @dfn{chained} using the
 run PHP CodeSniffer if there are no syntax errors:
 
 @lisp
-(flycheck-declare-checker php
-  "A PHP syntax checker using the PHP command line.
+(flycheck-define-checker php
+  "A PHP syntax checker using the PHP command line interpreter.
 
 See URL `http://php.net/manual/en/features.commandline.php'."
-  :command '("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
-             "-d" "log_errors=0" source)
+  :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
+            "-d" "log_errors=0" source)
   :error-patterns
-  '(("\\(?:Parse\\|Fatal\\|syntax\\) error[:,] \\(?4:.*\\) in \\(?1:.*\\) on line \\(?2:[0-9]+\\)"
-    error))
-  :modes 'php-mode
-  :next-checkers '((warnings-only . php-phpcs)))
+  ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
+          (message) " in " (file-name) " on line " line line-end))
+  :modes (php-mode php+-mode)
+  :next-checkers ((warnings-only . php-phpcs)))
 @end lisp
 
 Now PHP CodeSniffer will check the coding style, whenever a PHP syntax
