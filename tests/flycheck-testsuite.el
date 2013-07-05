@@ -2200,7 +2200,7 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
   :expected-result (flycheck-testsuite-fail-unless-checker 'haskell-hlint)
   (flycheck-testsuite-should-syntax-check
    "checkers/haskell-hlint-error.hs" 'haskell-mode nil
-   '(2 20 "Avoid lambda\nFound:\n  \\ x -> unwords x\nWhy not:\n  unwords" error
+   '(4 1 "Eta reduce\nFound:\n  warnMe xs = map lines xs\nWhy not:\n  warnMe = map lines" error
        :checker haskell-hlint)))
 
 (ert-deftest checker-haskell-hlint-warning ()

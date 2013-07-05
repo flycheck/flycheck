@@ -1,2 +1,4 @@
-main :: IO ()
-main = putStrLn . (\x -> unwords x) $ ["Hello"]
+module Foo
+where
+warnMe :: [String] -> [[String]]
+warnMe xs = map lines xs
