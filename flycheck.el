@@ -2834,14 +2834,14 @@ See URL `http://elixir-lang.org/'."
    (warning line-start
             file-name ":"
             line ": "
-            (group-n 4 (or
-                        (and "redefining" (zero-or-more not-newline))
-                        (and (zero-or-more not-newline)
-                             (or "obsolete" "unused"))
-                        (and (zero-or-more not-newline)
-                             (or "shadowed" "always matches"
-                                 "deprecated" "future reserved")
-                             (zero-or-more not-newline))))
+            (message (or
+                      (and "redefining" (zero-or-more not-newline))
+                      (and (zero-or-more not-newline)
+                           (or "obsolete" "unused"))
+                      (and (zero-or-more not-newline)
+                           (or "shadowed" "always matches"
+                               "deprecated" "future reserved")
+                           (zero-or-more not-newline))))
             line-end))
   :modes elixir-mode)
 
@@ -2886,13 +2886,11 @@ during byte-compilation or autoloads generation, or nil otherwise."
             source-inplace)
   :error-patterns
   ((error line-start file-name ":" line ":" column ":Error:"
-          (group-n 4
-                   (zero-or-more not-newline)
+          (message (zero-or-more not-newline)
                    (zero-or-more "\n    " (zero-or-more not-newline)))
           line-end)
    (warning line-start file-name ":" line ":" column ":Warning:"
-            (group-n 4
-                     (zero-or-more not-newline)
+            (message (zero-or-more not-newline)
                      (zero-or-more "\n    " (zero-or-more not-newline)))
             line-end))
   :modes (emacs-lisp-mode lisp-interaction-mode)
@@ -3155,7 +3153,7 @@ See URL `http://www.puppetlabs.com/'."
           (minimal-match (zero-or-more not-newline)) ; Skip puppetc executable
                                                      ; name
           ": Could not parse for environment " (one-or-more word)
-          ": " (group-n 4 (minimal-match (zero-or-more anything)))
+          ": " (message (minimal-match (zero-or-more anything)))
           " at "  (group-n 1 "/" (zero-or-more not-newline)) ":" line line-end))
   :modes puppet-mode
   :next-checkers ((no-errors . puppet-lint)))
@@ -3223,14 +3221,14 @@ See URL `http://pypi.python.org/pypi/flake8'."
   :error-patterns
   ((error line-start
           file-name ":" line ":" (optional column ":") " "
-          (group-n 4 "E" (one-or-more digit) (zero-or-more not-newline))
+          (message "E" (one-or-more digit) (zero-or-more not-newline))
           line-end)
    (warning line-start
             file-name ":" line ":" (optional column ":") " "
-            (group-n 4 (or "F"          ; Pyflakes in Flake8 >= 2.0
-                           "W"          ; Pyflakes in Flake8 < 2.0
-                           "C"          ; McCabe in Flake >= 2.0
-                           "N")         ; pep8-naming in Flake8 >= 2.0
+            (message (or "F"            ; Pyflakes in Flake8 >= 2.0
+                         "W"            ; Pyflakes in Flake8 < 2.0
+                         "C"            ; McCabe in Flake >= 2.0
+                         "N")           ; pep8-naming in Flake8 >= 2.0
                      (one-or-more digit) (zero-or-more not-newline))
             line-end)
    ;; Syntax errors in Flake8 < 2.0, in Flake8 >= 2.0 syntax errors are caught
