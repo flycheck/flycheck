@@ -409,11 +409,15 @@ This variable is a normal hook."
 
 (defface flycheck-fringe-error
   '((t :inherit error))
-  "Flycheck face for fringe error indicators.")
+  "Flycheck face for fringe error indicators."
+  :package-version '(flycheck . "0.13")
+  :group 'flycheck-face)
 
 (defface flycheck-fringe-warning
   '((t :inherit warning))
-  "Flycheck face for fringe warning indicators.")
+  "Flycheck face for fringe warning indicators."
+  :package-version '(flycheck . "0.13")
+  :group 'flycheck-face)
 
 
 ;;;; Minor mode definition
