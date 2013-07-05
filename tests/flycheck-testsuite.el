@@ -856,8 +856,9 @@ All declared checkers should be registered."
 
 ;;;; Checker declarations
 (ert-deftest flycheck-error-pattern-p ()
-  (should (flycheck-error-pattern-p '("foo" warning)))
-  (should-not (flycheck-error-pattern-p '("foo" bar)))
+  (should (flycheck-error-pattern-p '("foo" . warning)))
+  (should-not (flycheck-error-pattern-p '("bar" . foo)))
+  (should-not (flycheck-error-pattern-p '("bar" warning)))
   (should-not (flycheck-error-pattern-p "foo"))
   (should-not (flycheck-error-pattern-p 'warning)))
 
