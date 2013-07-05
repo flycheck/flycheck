@@ -179,7 +179,7 @@ of the file.  If no @var{sexp} is given, use a default body of
 @item (message @var{sexp} ...)
 Matches the error message to be shown to the user.  @var{sexp} matches
 the text of the message.  If no @var{sexp} is given, use a default body
-of @code((one-or-more not-newline)), which is equivalent to @code{".+"}.
+of @code{(one-or-more not-newline)}, which is equivalent to @code{".+"}.
 @end table
 
 Each of these items is optional, however error messages without a
@@ -200,8 +200,8 @@ string, @var{checker} the syntax checker that was used, and
 @code{buffer} a buffer object representing the checker buffer.
 
 The function must return a list of @code{flycheck-error} objects parsed
-from @var{output}.  @xref{Error API} for information about
-@code{flycheck-error}, and @ref{Error parsers} for a list of built-in
+from @var{output}.  @xref{Error API}, for information about
+@code{flycheck-error}.  @xref{Error parsers}, for a list of built-in
 error parsers.
 
 If this property is given, it takes precedence over
