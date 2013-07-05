@@ -137,6 +137,7 @@
           elixir-mode
           go-mode
           haml-mode
+          haskell-mode
           web-mode
           js2-mode
           js3-mode
@@ -2167,6 +2168,48 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
   (flycheck-testsuite-should-syntax-check
    "checkers/haml-error.haml" 'haml-mode nil
    '(5 nil "Inconsistent indentation: 3 spaces used for indentation, but the rest of the document was indented using 2 spaces." error :filename nil)))
+
+(ert-deftest checker-haskell-hdevtools-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'haskell-hdevtools)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/haskell-hdevtools-error.hs" 'haskell-mode nil
+   '(1 8 "Not in scope: `unknown'" error
+       :checker haskell-hdevtools)))
+
+(ert-deftest checker-haskell-hdevtools-warning ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'haskell-hdevtools)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/haskell-hdevtools-warning.hs" 'haskell-mode nil
+   '(3 1 "Top-level binding with no type signature: foo :: Integer" warning
+       :checker haskell-hdevtools)))
+
+(ert-deftest checker-haskell-ghc-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'haskell-ghc)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/haskell-ghc-error.hs" 'haskell-mode 'haskell-hdevtools
+   '(3 1 "parse error on input `module'" error
+       :checker haskell-ghc)))
+
+(ert-deftest checker-haskell-ghc-warning ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'haskell-ghc)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/haskell-ghc-warning.hs" 'haskell-mode 'haskell-hdevtools
+   '(3 1 "Top-level binding with no type signature: foo :: Integer" warning
+       :checker haskell-ghc)))
+
+(ert-deftest checker-haskell-hlint-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'haskell-hlint)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/haskell-hlint-error.hs" 'haskell-mode nil
+   '(4 1 "Eta reduce\nFound:\n  warnMe xs = map lines xs\nWhy not:\n  warnMe = map lines" error
+       :checker haskell-hlint)))
+
+(ert-deftest checker-haskell-hlint-warning ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'haskell-hlint)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/haskell-hlint-warning.hs" 'haskell-mode nil
+   '(2 8 "Redundant bracket\nFound:\n  (putStrLn \"Foobar\")\nWhy not:\n  putStrLn \"Foobar\"" warning
+       :checker haskell-hlint)))
 
 (ert-deftest checker-html-tidy-warning-and-error ()
   "Test an error caused by an unknown tag."

@@ -117,6 +117,9 @@ buffer-local wherever it is set."
     go-build
     go-test
     haml
+    haskell-hdevtools
+    haskell-ghc
+    haskell-hlint
     html-tidy
     javascript-jshint
     json-jsonlint
@@ -2881,6 +2884,39 @@ See URL `http://haml.info'."
   :error-patterns
   '(("^Syntax error on line \\(?2:[0-9]+\\): \\(?4:.*\\)$" error))
   :modes 'haml-mode)
+
+(flycheck-declare-checker haskell-hdevtools
+  "A Haskell syntax and type checker using hdevtools.
+
+See URL `https://github.com/bitc/hdevtools'."
+  :command '("hdevtools" "check" "-g" "-Wall" source-inplace)
+  :error-patterns
+  '(("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): Warning:\n? +\\(?4:\\(?:.+\\)\\(?:\n +.+\\)*\\)" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\n\\(?4:\\( +.+\n\\)*\\)" error)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\\(?4:.*\\)" error))
+  :modes 'haskell-mode
+  :next-checkers '((warnings-only . haskell-hlint)))
+
+(flycheck-declare-checker haskell-ghc
+  "A Haskell syntax and type checker using ghc.
+
+See URL `http://www.haskell.org/ghc/'."
+  :command '("ghc" "-Wall" "-fno-code" source-inplace)
+  :error-patterns
+  '(("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\\(?: \\|\n    \\)Warning:\n? +\\(?4:\\(?:.+\\)\\(?:\n +.+\\)*\\)" warning)
+    ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\n +\\(?4:\\(?:.+\\)\\(?:\n +.+\\)*\\)" error))
+  :modes 'haskell-mode
+  :next-checkers '((warnings-only . haskell-hlint)))
+
+(flycheck-declare-checker haskell-hlint
+  "A Haskell style checker using hlint.
+
+See URL `http://community.haskell.org/~ndm/hlint/'."
+  :command '("hlint" source-inplace)
+  :error-patterns
+  '(("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): Warning: \\(?4:.+\\(?:\n.+\\)+\\)" warning)
+    ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): Error: \\(?4:.+\\(?:\n.+\\)+\\)" error))
+  :modes 'haskell-mode)
 
 (flycheck-def-config-file-var flycheck-tidyrc html-tidy ".tidyrc")
 

@@ -66,6 +66,8 @@ Go (using @command{gofmt}, @command{go build} and @command{go test})
 @item
 Haml
 @item
+Haskell (using @command{ghc}, @command{hdevtools} and @command{hlint})
+@item
 HTML (using @command{tidy})
 @item
 Javascript (using @command{jshint})

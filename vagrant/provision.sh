@@ -110,7 +110,10 @@ apt npm \
 apt bash \
     chktex \
     esl-erlang \
+    ghc \
     golang-stable \
+    hdevtools \
+    hlint \
     lacheck \
     lua5.2 \
     php5-cli \
