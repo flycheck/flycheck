@@ -957,10 +957,12 @@ variables to nil."
 
 (eval-and-compile
   (defun flycheck-rx-message (form)
+    "Translate the `(message)' FORM into a regular expression."
     (let ((body (or (cdr form) '((one-or-more not-newline)))))
       (rx-submatch-n `(group-n 4 ,@body))))
 
   (defun flycheck-rx-file-name (form)
+    "Translate the `(file-name)' FORM into a regular expression."
     (let ((body (or (cdr form) '((minimal-match
                                   (one-or-more not-newline))))))
       (rx-submatch-n `(group-n 1 ,@body))))
