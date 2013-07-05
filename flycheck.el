@@ -72,10 +72,14 @@ buffer-local wherever it is set."
     ;; Provide `user-error' for Emacs 24.2
     (defalias 'user-error 'error)
     ;; And make the debugger ignore our Flycheck user errors in Emacs 24.2
-    (add-to-list 'debug-ignored-errors "\\`No more Flycheck errors\\'")
-    (add-to-list 'debug-ignored-errors "\\`Flycheck mode disabled\\'")
     (add-to-list 'debug-ignored-errors
-                 "\\`Configured syntax checker .* cannot be used\\'")))
+                 (rx string-start "No more Flycheck errors" string-end))
+    (add-to-list 'debug-ignored-errors
+                 (rx string-start "Flycheck mode disabled" string-end))
+    (add-to-list 'debug-ignored-errors
+                 (rx string-start "Configured syntax checker "
+                     symbol-start (one-or-more not-newline) symbol-end
+                     " cannot be used" string-end))))
 
 
 ;;;; Customization
@@ -1837,8 +1841,20 @@ syntax check if the syntax checker changed."
   'help-echo (purecopy "mouse-2, RET: find Flycheck checker definition"))
 
 (defconst flycheck-find-checker-regexp
-  (concat "^\\s-*(\\(flycheck-declare-flycheck\\|checker-define-checker\\) "
-          find-function-space-re "%s\\(\\s-\\|$\\)")
+  ;; We use `eval-and-compile' and `rx-to-string' here instead of simply `rx',
+  ;; because we need to dynamically add the regexp from `find-function-space-re'
+  (eval-when-compile
+    (rx-to-string
+     `(and line-start (zero-or-more (syntax whitespace))
+           "("
+           symbol-start
+           (or "flycheck-declare-checker" "flycheck-define-checker")
+           symbol-end
+           (regexp ,find-function-space-re)
+           symbol-start
+           "%s"
+           symbol-end
+           (or (syntax whitespace) line-end))))
   "Regular expression to find a checker definition.")
 
 (add-to-list 'find-function-regexp-alist

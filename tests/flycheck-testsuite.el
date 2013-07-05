@@ -125,6 +125,7 @@
 (require 'dash)
 (require 's)
 
+(require 'rx)
 (require 'compile)                      ; For `compilation-next-error'
 (require 'sh-script)                    ; For `sh-set-shell'
 
@@ -1227,13 +1228,15 @@ error is signaled on all subsequent checks."
   "Test that all registered checkers are documented in the Flycheck manual."
   (flycheck-with-doc-buffer "checkers.texi"
     ;; Search for the beginning of the list of checkers
-    (re-search-forward "@itemize")
+    (re-search-forward (rx "@itemize"))
     (dolist (checker flycheck-checkers)
       (forward-line 1)
-      (should (looking-at "^@iflyc \\(.*?\\)$"))
+      (should (looking-at (rx line-start "@iflyc " symbol-start
+                              (group (one-or-more not-newline))
+                              symbol-end line-end)))
       (should (equal (match-string 1) (symbol-name checker))))
     (forward-line 1)
-    (should (looking-at "@end itemize"))))
+    (should (looking-at (rx "@end itemize")))))
 
 (ert-deftest doc-all-options-documented ()
   "Tests that all option variables are documented in the manual."
@@ -1242,12 +1245,14 @@ error is signaled on all subsequent checks."
                            #'string<)))
     (flycheck-with-doc-buffer "usage.texi"
       ;; Go to the beginning of the configuration section
-      (re-search-forward "@node Configuration")
+      (re-search-forward (rx "@node Configuration"))
       ;; Go to the beginning of the option variable listing
-      (re-search-forward "configured via options\\.")
+      (re-search-forward (rx "configured via options."))
       ;; Verify that all variables are documented
       (dolist (var config-vars)
-        (re-search-forward "^@defopt \\(.*?\\)$")
+        (re-search-forward (rx line-start "@defopt " symbol-start
+                               (group (one-or-more not-newline))
+                               symbol-end line-end))
         (should (equal (match-string 1) (symbol-name var)))))))
 
 (ert-deftest doc-all-config-vars-documented ()
@@ -1257,12 +1262,14 @@ error is signaled on all subsequent checks."
                                 #'string<)))
     (flycheck-with-doc-buffer "usage.texi"
       ;; Go to the beginning of the configuration section
-      (re-search-forward "@node Configuration")
+      (re-search-forward (rx "@node Configuration"))
       ;; Go to the beginning of the option variable listing
-      (re-search-forward "configuration file variables")
+      (re-search-forward (rx "configuration file variables"))
       ;; Verify that all variables are documented
       (dolist (var option-file-vars)
-        (re-search-forward "^@defopt \\(.*?\\)$")
+        (re-search-forward (rx line-start "@defopt " symbol-start
+                               (group (one-or-more not-newline))
+                               symbol-end line-end))
         (should (equal (match-string 1) (symbol-name var)))))))
 
 (ert-deftest flycheck-describe-checker-pops-up-help ()
@@ -1274,7 +1281,8 @@ error is signaled on all subsequent checks."
       (should (get-buffer-window (help-buffer)))
       (with-current-buffer (help-buffer)
         (goto-char (point-min))
-        (re-search-forward "\\(.*?\\) is a Flycheck syntax checker")
+        (re-search-forward (rx symbol-start (group (one-or-more not-newline))
+                               symbol-end " is a Flycheck syntax checker"))
         (should (= (match-beginning 0) 1))
         (should (string= (match-string 1) (symbol-name checker)))))))
 
@@ -1285,16 +1293,19 @@ error is signaled on all subsequent checks."
       (flycheck-describe-checker checker)
       (with-current-buffer (help-buffer)
         (goto-char (point-min))
-        (re-search-forward "`.*?'")
+        (re-search-forward
+         (rx "`" (minimal-match (zero-or-more not-newline)) "'"))
         (should (string= (match-string 0) "`flycheck.el'"))
         (push-button (+ 2 (match-beginning 0)))
         (unwind-protect
             (progn
               (should (string= (buffer-name) "flycheck.el"))
-              (should (string=
-                       (buffer-substring-no-properties
-                        (point) (line-end-position))
-                       (format "(flycheck-define-checker %S" checker))))
+              (should (looking-at
+                       (rx line-start "("
+                           symbol-start "flycheck-define-checker" symbol-end " "
+                           symbol-start (group (one-or-more not-newline)) symbol-end
+                           line-end)))
+              (should (string= (match-string 1) (symbol-name checker))))
           (kill-buffer))))))
 
 (ert-deftest flycheck-describe-checker-executable-name ()
