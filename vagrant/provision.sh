@@ -67,6 +67,11 @@ gem () {
     command gem install "$@"
 }
 
+cabal () {
+    sudo cabal update
+    sudo cabal install --global "$@"
+}
+
 # Silence debconf
 export DEBIAN_FRONTEND='noninteractive'
 
@@ -104,12 +109,15 @@ fi
 # Install the necessary additional package managers
 apt npm \
     php-pear \
-    python-pip
+    python-pip \
+    cabal-install
 
 # Install syntax checker tools
 apt bash \
     chktex \
     esl-erlang \
+    ghc \
+    hlint \
     golang-stable \
     lacheck \
     lua5.2 \
@@ -144,6 +152,8 @@ gem haml \
     rubocop \
     sass \
     puppet-lint
+
+cabal hdevtools
 
 # Install Elixir compiler.
 ELIXIR_VERSION=0.9.0
