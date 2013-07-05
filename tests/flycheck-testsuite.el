@@ -2207,13 +2207,13 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
   :expected-result (flycheck-testsuite-fail-unless-checker 'less)
   (flycheck-testsuite-should-syntax-check
    "checkers/less-file-error.less" 'less-css-mode nil
-   '(3 1 "FileError: 'no-such-file.less' wasn't found" error)))
+   '(3 1 "'no-such-file.less' wasn't found" error)))
 
 (ert-deftest checker-less-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'less)
   (flycheck-testsuite-should-syntax-check
    "checkers/less-syntax-error.less" 'less-css-mode nil
-   '(2 1 "ParseError: missing closing `}`" error)))
+   '(2 1 "missing closing `}`" error)))
 
 (ert-deftest checker-lua-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'lua)

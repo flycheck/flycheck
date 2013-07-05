@@ -3068,16 +3068,14 @@ At least version 1.4 of lessc is required.
 See URL `http://lesscss.org'."
   :command ("lessc" "--lint" "--no-color" source)
   :error-patterns
-  ((error line-start
-          (message (or (zero-or-more (not (any "\e" "\n")))
-                       (and "FileError:" (zero-or-more not-newline) "\n")))
+  ((error line-start (one-or-more word) ":"
+          (message)
           " in "
-          (group-n 1 (one-or-more (not (any " " "\r" "\n" "\t" "\e"))))
-          (or ":" " on line ")
-          line
-          (or ":" ", column ")
-          column
-          (optional ":")))
+          file-name
+
+          " on line " line
+          ", column " column ":"
+          line-end))
   :modes less-css-mode)
 
 (flycheck-define-checker lua
