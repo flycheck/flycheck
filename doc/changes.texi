@@ -720,6 +720,9 @@ Fix version information on Emacs trunk builds
 @item
 @ghissue{163, Obsolete @code{flycheck-declare-checker} in favor of
 @code{flycheck-define-checker}}
+@item
+Remove the obsolete @code{flycheck-error-face} and
+@code{flycheck-warning-face}
 @end itemize
 
 @item

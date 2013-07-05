@@ -397,7 +397,6 @@ This variable is a normal hook."
   "Flycheck face for errors."
   :package-version '(flycheck . "0.13")
   :group 'flycheck-faces)
-(define-obsolete-face-alias 'flycheck-error-face 'flycheck-error "0.13")
 
 (defface flycheck-warning
   '((((supports :underline (:style wave)))
@@ -407,7 +406,6 @@ This variable is a normal hook."
   "Flycheck face for warnings."
   :package-version '(flycheck . "0.13")
   :group 'flycheck-faces)
-(define-obsolete-face-alias 'flycheck-warning-face 'flycheck-warning "0.13")
 
 (defface flycheck-fringe-error
   '((t :inherit error))
