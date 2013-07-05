@@ -1026,10 +1026,10 @@ checker returned no errors at all.  If PREDICATE is
 returned only warnings.  Only the first usable and
 registered (see `flycheck-registered-checker-p') is run.
 
-A checker must have a `:command' property, either
-`:error-patterns' or `:error-parser' (but not both), and at least
-one of `:predicate' and `:modes'.  If `:predicate' and `:modes'
-are present, both must match for the checker to be used."
+A checker must have a `:command' property, at least one of
+`:error-patterns' or `:error-parser', and at least one of
+`:predicate' and `:modes'.  If `:predicate' and `:modes' are
+present, both must match for the checker to be used."
   (declare (indent 1)
            (doc-string 2))
   `(flycheck-set-checker-properties ',symbol
