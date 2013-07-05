@@ -39,6 +39,7 @@ Features
   - HTML
   - Javascript
   - JSON
+  - LESS
   - Lua
   - Perl
   - PHP
