@@ -1232,7 +1232,7 @@ The following PROPERTIES constitute a syntax checker:
      An unquoted list of error patterns to parse the output of
      the syntax checker `:command'.  LEVEL is either `error' or
      `warning' and denotes the severity of errors matched by the
-     pattern. The LEVEL is followed by one or more RX `SEXP's
+     pattern.  The LEVEL is followed by one or more RX `SEXP's
      which parse the error and extract line, column, file name
      and error message.  See `rx' for general information about
      RX, and `flycheck-rx-to-string' for special RX forms
