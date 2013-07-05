@@ -479,7 +479,7 @@ Any checker in this list should be valid and registered."
   "Test that `flycheck-checkers' is complete.
 
 All declared checkers should be registered."
-  (let ((declared-checkers (flycheck-declared-checkers)))
+  (let ((declared-checkers (flycheck-defined-checkers)))
     (should declared-checkers)
     (dolist (checker declared-checkers)
       (should (memq checker flycheck-checkers))
@@ -857,8 +857,9 @@ All declared checkers should be registered."
 
 ;;;; Checker declarations
 (ert-deftest flycheck-error-pattern-p ()
-  (should (flycheck-error-pattern-p '("foo" warning)))
-  (should-not (flycheck-error-pattern-p '("foo" bar)))
+  (should (flycheck-error-pattern-p '("foo" . warning)))
+  (should-not (flycheck-error-pattern-p '("bar" . foo)))
+  (should-not (flycheck-error-pattern-p '("bar" warning)))
   (should-not (flycheck-error-pattern-p "foo"))
   (should-not (flycheck-error-pattern-p 'warning)))
 
@@ -891,23 +892,6 @@ All declared checkers should be registered."
 
 
 ;;;; Checker API
-(ert-deftest flycheck-checker-modes ()
-  (dolist (checker flycheck-checkers)
-    (should (listp (flycheck-checker-modes checker)))
-    (should (-all? #'symbolp (flycheck-checker-modes checker)))))
-
-(ert-deftest flycheck-checker-executable ()
-  (dolist (checker flycheck-checkers)
-    (should (equal (flycheck-checker-executable checker)
-                   (car (flycheck-checker-command checker))))
-    (should (stringp (flycheck-checker-executable checker)))))
-
-(ert-deftest flycheck-check-executable ()
-  (dolist (checker flycheck-checkers)
-    (if (executable-find (flycheck-checker-executable checker))
-        (should (flycheck-check-executable checker))
-      (should-not (flycheck-check-executable checker)))))
-
 (defvar flycheck-test-config-var)
 (defvar flycheck-test-option-var)
 
@@ -1077,6 +1061,21 @@ All declared checkers should be registered."
     (should (equal (flycheck-substitute-shell-argument '(eval foo) 'emacs-lisp)
                    "foo\\ bar spam\\ eggs"))))
 
+(ert-deftest flycheck-checker-modes ()
+  (dolist (checker flycheck-checkers)
+    (should (listp (flycheck-checker-modes checker)))
+    (should (-all? #'symbolp (flycheck-checker-modes checker)))))
+
+(ert-deftest flycheck-checker-executable ()
+  (dolist (checker flycheck-checkers)
+    (should (stringp (flycheck-checker-executable checker)))))
+
+(ert-deftest flycheck-check-executable ()
+  (dolist (checker flycheck-checkers)
+    (if (executable-find (flycheck-checker-executable checker))
+        (should (flycheck-check-executable checker))
+      (should-not (flycheck-check-executable checker)))))
+
 
 ;;;; Configuration file functions
 (ert-deftest flycheck-locate-config-file-absolute-path ()
@@ -1239,7 +1238,7 @@ error is signaled on all subsequent checks."
 (ert-deftest doc-all-options-documented ()
   "Tests that all option variables are documented in the manual."
   (let ((config-vars (sort (-flatten (-keep #'flycheck-checker-option-vars
-                                            (flycheck-declared-checkers)))
+                                            (flycheck-defined-checkers)))
                            #'string<)))
     (flycheck-with-doc-buffer "usage.texi"
       ;; Go to the beginning of the configuration section
@@ -1254,7 +1253,7 @@ error is signaled on all subsequent checks."
 (ert-deftest doc-all-config-vars-documented ()
   "Tests that all configuration file variables are documented in the manual."
   (let ((option-file-vars (sort (-keep #'flycheck-checker-config-file-var
-                                       (flycheck-declared-checkers))
+                                       (flycheck-defined-checkers))
                                 #'string<)))
     (flycheck-with-doc-buffer "usage.texi"
       ;; Go to the beginning of the configuration section
@@ -1268,7 +1267,7 @@ error is signaled on all subsequent checks."
 
 (ert-deftest flycheck-describe-checker-pops-up-help ()
   "Test that describing a syntax checker pops up a help buffer."
-  (dolist (checker (flycheck-declared-checkers))
+  (dolist (checker (flycheck-defined-checkers))
     (flycheck-testsuite-with-help-buffer
       (flycheck-describe-checker checker)
       (should (buffer-live-p (get-buffer (help-buffer))))
@@ -1281,7 +1280,7 @@ error is signaled on all subsequent checks."
 
 (ert-deftest flycheck-describe-checker-navigate-to-source ()
   "Test that checkers are properly described."
-  (dolist (checker (flycheck-declared-checkers))
+  (dolist (checker (flycheck-defined-checkers))
     (flycheck-testsuite-with-help-buffer
       (flycheck-describe-checker checker)
       (with-current-buffer (help-buffer)
@@ -1295,12 +1294,12 @@ error is signaled on all subsequent checks."
               (should (string=
                        (buffer-substring-no-properties
                         (point) (line-end-position))
-                       (format "(flycheck-declare-checker %S" checker))))
+                       (format "(flycheck-define-checker %S" checker))))
           (kill-buffer))))))
 
 (ert-deftest flycheck-describe-checker-executable-name ()
   "Test that the command name appears in syntax checker help."
-  (dolist (checker (flycheck-declared-checkers))
+  (dolist (checker (flycheck-defined-checkers))
     (flycheck-testsuite-with-help-buffer
       (flycheck-describe-checker checker)
       (with-current-buffer (help-buffer)
@@ -1312,7 +1311,7 @@ error is signaled on all subsequent checks."
 
 (ert-deftest flycheck-describe-checker-config-file-var ()
   "Test that the config file var appears in syntax checker help."
-  (dolist (checker (flycheck-declared-checkers))
+  (dolist (checker (flycheck-defined-checkers))
     (flycheck-testsuite-with-help-buffer
       (flycheck-describe-checker checker)
       (with-current-buffer (help-buffer)
@@ -1327,7 +1326,7 @@ error is signaled on all subsequent checks."
 
 (ert-deftest flycheck-describe-checker-option-vars ()
   "Test that option variables appear in syntax checker help."
-  (dolist (checker (flycheck-declared-checkers))
+  (dolist (checker (flycheck-defined-checkers))
     (flycheck-testsuite-with-help-buffer
       (flycheck-describe-checker checker)
       (with-current-buffer (help-buffer)
@@ -1355,7 +1354,7 @@ error is signaled on all subsequent checks."
 
 (ert-deftest flycheck-describe-checker-docstring ()
   "Test that the docstring appears in syntax checker help."
-  (dolist (checker (flycheck-declared-checkers))
+  (dolist (checker (flycheck-defined-checkers))
     (flycheck-testsuite-with-help-buffer
       (flycheck-describe-checker checker)
       (with-current-buffer (help-buffer)
@@ -2252,13 +2251,13 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
   :expected-result (flycheck-testsuite-fail-unless-checker 'less)
   (flycheck-testsuite-should-syntax-check
    "checkers/less-file-error.less" 'less-css-mode nil
-   '(3 1 "FileError: 'no-such-file.less' wasn't found" error)))
+   '(3 1 "'no-such-file.less' wasn't found" error)))
 
 (ert-deftest checker-less-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'less)
   (flycheck-testsuite-should-syntax-check
    "checkers/less-syntax-error.less" 'less-css-mode nil
-   '(2 1 "ParseError: missing closing `}`" error)))
+   '(2 1 "missing closing `}`" error)))
 
 (ert-deftest checker-lua-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'lua)
