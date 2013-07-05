@@ -254,6 +254,9 @@ least one of @code{:modes} and @code{:predicate}, and at least one of
 signaled.  If @code{:predicate} and @code{:modes} are given, both must
 match for the syntax checker to be used.  @code{:next-checkers} is
 entirely optional.
+
+If any property has an invalid value, a (compile-time) error is
+signaled.
 @end defmac
 
 A syntax checker define with @code{flycheck-define-checker} is already
