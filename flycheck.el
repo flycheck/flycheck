@@ -960,6 +960,11 @@ variables to nil."
     (let ((body (or (cdr form) '((one-or-more not-newline)))))
       (rx-submatch-n `(group-n 4 ,@body))))
 
+  (defun flycheck-rx-file-name (form)
+    (let ((body (or (cdr form) '((minimal-match
+                                  (one-or-more not-newline))))))
+      (rx-submatch-n `(group-n 1 ,@body))))
+
   (defun flycheck-rx-to-string (form &optional no-group)
     "Like `rx-to-string' for FORM, but with special keywords:
 
@@ -969,20 +974,21 @@ variables to nil."
 `column'
      matches the column number.
 
-`file-name'
-     matches the file name.
+`(file-name SEXP ...)'
+     matches the file name.  SEXP constitutes the body of the message.  If no
+     SEXP is given, use a default body  of `(minimal-match
+     (one-or-more not-newline))'.
 
 `(message SEXP ...)'
      matches the message. SEXP constitutes the body of the message.  If no SEXP
-     is given use a default body of `(one-or-more not-newline)'
+     is given, use a default body of `(one-or-more not-newline)'.
 
 NO-GROUP is passed to `rx-to-string'."
     (let ((rx-constituents
            (append
             `((line . ,(rx (group-n 2 (one-or-more digit))))
               (column . ,(rx (group-n 3 (one-or-more digit))))
-              (file-name . ,(rx (group-n 1 (minimal-match
-                                            (one-or-more not-newline)))))
+              (file-name flycheck-rx-file-name 0 nil)
               (message flycheck-rx-message 0 nil))
             rx-constituents nil)))
       (rx-to-string form no-group))))
@@ -2781,7 +2787,7 @@ _EVENT is ignored."
 See URL `http://www.gnu.org/software/bash/'."
   :command ("bash" "--norc" "-n" "--" source)
   :error-patterns ((error line-start
-                          file-name ":" (one-or-more (not (any digit)))
+                          (file-name) ":" (one-or-more (not (any digit)))
                           line (zero-or-more " ") ":" (zero-or-more " ")
                           (message) line-end))
   :modes sh-mode
@@ -2798,8 +2804,8 @@ See URL `http://www.coffeelint.org/'."
   ("coffeelint" (config-file "--file" flycheck-coffeelintrc) "--csv" source)
   :error-patterns
   ((error "SyntaxError: " (message) " on line " line)
-   (error line-start file-name "," line ",error," (message) line-end)
-   (warning line-start file-name "," line ",warn," (message) line-end))
+   (error line-start (file-name) "," line ",error," (message) line-end)
+   (warning line-start (file-name) "," line ",warn," (message) line-end))
   :modes coffee-mode)
 
 (flycheck-define-checker css-csslint
@@ -2809,12 +2815,12 @@ See URL `https://github.com/stubbornella/csslint'."
   :command ("csslint" "--format=compact" source)
   :error-patterns
   ((error line-start
-          file-name
+          (file-name)
           ": line " line
           ", col " column
           ", Error - " (message) line-end)
    (warning line-start
-            file-name ": line "
+            (file-name) ": line "
             line ", col "
             column ", Warning - " (message) line-end))
   :modes css-mode)
@@ -2830,9 +2836,9 @@ See URL `http://elixir-lang.org/'."
             source)
   :error-patterns
   ((error line-start "** (" (zero-or-more not-newline) ") "
-          file-name ":" line ": " (message) line-end)
+          (file-name) ":" line ": " (message) line-end)
    (warning line-start
-            file-name ":"
+            (file-name) ":"
             line ": "
             (message (or
                       (and "redefining" (zero-or-more not-newline))
@@ -2885,11 +2891,11 @@ during byte-compilation or autoloads generation, or nil otherwise."
             (eval (prin1-to-string flycheck-emacs-lisp-check-form))
             source-inplace)
   :error-patterns
-  ((error line-start file-name ":" line ":" column ":Error:"
+  ((error line-start (file-name) ":" line ":" column ":Error:"
           (message (zero-or-more not-newline)
                    (zero-or-more "\n    " (zero-or-more not-newline)))
           line-end)
-   (warning line-start file-name ":" line ":" column ":Warning:"
+   (warning line-start (file-name) ":" line ":" column ":Warning:"
             (message (zero-or-more not-newline)
                      (zero-or-more "\n    " (zero-or-more not-newline)))
             line-end))
@@ -2939,7 +2945,7 @@ The checker runs `checkdoc-current-buffer'."
             (eval (prin1-to-string flycheck-emacs-lisp-checkdoc-form))
             source)
   :error-patterns
-  ((warning line-start file-name ":" line ": " (message) line-end))
+  ((warning line-start (file-name) ":" line ": " (message) line-end))
   :modes (emacs-lisp-mode)
   :predicate
   (lambda ()
@@ -2954,8 +2960,8 @@ The checker runs `checkdoc-current-buffer'."
   "An Erlang syntax checker using the Erlang interpreter."
   :command ("erlc" "-o" temporary-directory "-Wall" source)
   :error-patterns
-  ((warning line-start file-name ":" line ": Warning:" (message) line-end)
-   (error line-start file-name ":" line ": " (message) line-end))
+  ((warning line-start (file-name) ":" line ": Warning:" (message) line-end)
+   (error line-start (file-name) ":" line ": " (message) line-end))
   :modes erlang-mode)
 
 (flycheck-define-checker go-gofmt
@@ -2964,7 +2970,7 @@ The checker runs `checkdoc-current-buffer'."
 See URL `http://golang.org/cmd/gofmt/'."
   :command ("gofmt" source)
   :error-patterns
-  ((error line-start file-name ":" line ":" column ": " (message) line-end))
+  ((error line-start (file-name) ":" line ":" column ": " (message) line-end))
 :modes go-mode
   :next-checkers ((no-errors . go-build) (no-errors . go-test)))
 
@@ -2980,7 +2986,7 @@ See URL `https://code.google.com/p/go/issues/detail?id=4851' for
 more information."
   :command ("go" "build" "-o" "/dev/null")
   :error-patterns
-  ((error line-start file-name ":" line ": " (message) line-end))
+  ((error line-start (file-name) ":" line ": " (message) line-end))
   :modes go-mode
   :predicate
   (lambda ()
@@ -2995,7 +3001,7 @@ See URL `https://golang.org/cmd/go'."
   ;; directory.  Unfortunately 'go test -c' does not have the '-o' option.
   :command ("go" "test" "-c")
   :error-patterns
-  ((error line-start file-name ":" line ": " (message) line-end))
+  ((error line-start (file-name) ":" line ": " (message) line-end))
   :modes go-mode
   :predicate
   (lambda ()
@@ -3048,7 +3054,7 @@ See URL `https://github.com/zaach/jsonlint'."
   :command ("jsonlint" "-c" "-q" source)
   :error-patterns
   ((error line-start
-          file-name
+          (file-name)
           ": line " line
           ", col " column ", "
           (message) line-end))
@@ -3069,7 +3075,7 @@ See URL `http://lesscss.org'."
   ((error line-start (one-or-more word) ":"
           (message)
           " in "
-          file-name
+          (file-name)
 
           " on line " line
           ", column " column ":"
@@ -3085,7 +3091,7 @@ See URL `http://www.lua.org/'."
   ((error line-start
           (minimal-match (zero-or-more not-newline)) ; Skip name of the luac
                                                      ; executable
-          ": " file-name ":" line ": " (message) line-end))
+          ": " (file-name) ":" line ": " (message) line-end))
   :modes lua-mode)
 
 (flycheck-define-checker perl
@@ -3095,7 +3101,7 @@ See URL `http://www.perl.org'."
   :command ("perl" "-w" "-c" source)
   :error-patterns
   ((error line-start (minimal-match (message))
-          " at " file-name " line " line
+          " at " (file-name) " line " line
           (or "." (and ", " (zero-or-more not-newline))) line-end))
   :modes (perl-mode cperl-mode))
 
@@ -3107,7 +3113,7 @@ See URL `http://php.net/manual/en/features.commandline.php'."
             "-d" "log_errors=0" source)
   :error-patterns
   ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
-          (message) " in " file-name " on line " line line-end))
+          (message) " in " (file-name) " on line " line line-end))
   :modes (php-mode php+-mode)
   :next-checkers ((warnings-only . php-phpcs)))
 
@@ -3136,10 +3142,10 @@ See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
   ;; `https://github.com/lunaryorn/flycheck/issues/118'
   :error-patterns
   ((error line-start
-          file-name ":" line ":" column ": error - " (message)
+          (file-name) ":" line ":" column ": error - " (message)
           line-end)
    (warning line-start
-            file-name ":" line ":" column ": warning - " (message)
+            (file-name) ":" line ":" column ": warning - " (message)
             line-end))
   :modes (php-mode php+-mode))
 
@@ -3154,7 +3160,7 @@ See URL `http://www.puppetlabs.com/'."
                                                      ; name
           ": Could not parse for environment " (one-or-more word)
           ": " (message (minimal-match (zero-or-more anything)))
-          " at "  (group-n 1 "/" (zero-or-more not-newline)) ":" line line-end))
+          " at "  (file-name "/" (zero-or-more not-newline)) ":" line line-end))
   :modes puppet-mode
   :next-checkers ((no-errors . puppet-lint)))
 
@@ -3165,10 +3171,10 @@ See URL `http://www.puppet-lint.com/'."
   :command ("puppet-lint" "--with-filename" source-original)
   :error-patterns
   ((warning line-start
-            file-name " - WARNING: " (message) " on line " line
+            (file-name) " - WARNING: " (message) " on line " line
             line-end)
    (error line-start
-          file-name " - ERROR: " (message) " on line " line
+          (file-name) " - ERROR: " (message) " on line " line
           line-end))
   :modes puppet-mode
   :predicate (lambda () (and (buffer-file-name) (not (buffer-modified-p)))))
@@ -3220,11 +3226,11 @@ See URL `http://pypi.python.org/pypi/flake8'."
             source-inplace)
   :error-patterns
   ((error line-start
-          file-name ":" line ":" (optional column ":") " "
+          (file-name) ":" line ":" (optional column ":") " "
           (message "E" (one-or-more digit) (zero-or-more not-newline))
           line-end)
    (warning line-start
-            file-name ":" line ":" (optional column ":") " "
+            (file-name) ":" line ":" (optional column ":") " "
             (message (or "F"            ; Pyflakes in Flake8 >= 2.0
                          "W"            ; Pyflakes in Flake8 < 2.0
                          "C"            ; McCabe in Flake >= 2.0
@@ -3233,7 +3239,7 @@ See URL `http://pypi.python.org/pypi/flake8'."
             line-end)
    ;; Syntax errors in Flake8 < 2.0, in Flake8 >= 2.0 syntax errors are caught
    ;; by the E.* pattern above
-   (error line-start file-name ":" line ":" (message) line-end))
+   (error line-start (file-name) ":" line ":" (message) line-end))
   :modes python-mode)
 
 (flycheck-define-checker python-pylint
@@ -3242,13 +3248,13 @@ See URL `http://pypi.python.org/pypi/flake8'."
 See URL `http://pypi.python.org/pypi/pylint'."
   :command ("epylint" source-inplace)
   :error-patterns
-  ((warning line-start file-name ":" line
+  ((warning line-start (file-name) ":" line
             ": Warning (W" (zero-or-more not-newline) "): "
             (message) line-end)
-   (error line-start file-name ":" line
+   (error line-start (file-name) ":" line
           ": Error (E" (zero-or-more not-newline) "): "
           (message) line-end)
-   (error line-start file-name ":" line ": [F] " (message) line-end))
+   (error line-start (file-name) ":" line ": [F] " (message) line-end))
   :modes python-mode)
 
 (flycheck-define-checker rst
@@ -3257,9 +3263,9 @@ See URL `http://pypi.python.org/pypi/pylint'."
 See URL `http://docutils.sourceforge.net/'."
   :command ("rst2pseudoxml.py" "--report=2" "--exit-status=1" "--halt=5" source)
   :error-patterns
-  ((warning line-start file-name ":" line ": (WARNING/2) " (message) line-end)
+  ((warning line-start (file-name) ":" line ": (WARNING/2) " (message) line-end)
    (error line-start
-          file-name ":" line
+          (file-name) ":" line
           ": (" (or "ERROR/3" "SEVERE/4") ") "
           (message) line-end))
   :modes rst-mode)
@@ -3275,10 +3281,10 @@ See URL `http://batsov.com/rubocop/'."
             source)
   :error-patterns
   ((warning line-start
-            file-name ":" line ":" column ": " (or "C" "W") ": " (message)
+            (file-name) ":" line ":" column ": " (or "C" "W") ": " (message)
             line-end)
    (error line-start
-          file-name ":" line ":" column ": " (or "E" "F") ": " (message)
+          (file-name) ":" line ":" column ": " (or "E" "F") ": " (message)
           line-end))
   :modes ruby-mode)
 
@@ -3289,11 +3295,13 @@ See URL `http://www.ruby-lang.org/'."
   :command ("ruby" "-w" "-c" source)
   :error-patterns
   ;; These patterns support output from JRuby, too, to deal with RVM or Rbenv
-  ((error line-start "SyntaxError in " file-name ":" line ": " (message) line-end)
+  ((error line-start
+          "SyntaxError in " (file-name) ":" line ": " (message)
+          line-end)
    (warning line-start
-            file-name ":" line ":" (optional column ":")
+            (file-name) ":" line ":" (optional column ":")
             " warning: " (message) line-end)
-   (error line-start file-name ":" line ": " (message) line-end))
+   (error line-start (file-name) ":" line ": " (message) line-end))
   :modes 'ruby-mode)
 
 (flycheck-define-checker ruby-jruby
@@ -3302,9 +3310,11 @@ See URL `http://www.ruby-lang.org/'."
 See URL `http://jruby.org/'."
   :command ("jruby" "-w" "-c" source)
   :error-patterns
-  ((error line-start "SyntaxError in " file-name ":" line ": " (message) line-end)
-   (warning line-start file-name ":" line " warning: " (message) line-end)
-   (error line-start file-name ":" line ": " (message) line-end))
+  ((error line-start
+          "SyntaxError in " (file-name) ":" line ": " (message)
+          line-end)
+   (warning line-start (file-name) ":" line " warning: " (message) line-end)
+   (error line-start (file-name) ":" line ": " (message) line-end))
   :modes ruby-mode)
 
 (flycheck-define-checker rust
@@ -3313,7 +3323,7 @@ See URL `http://jruby.org/'."
 See URL `http://rust-lang.org'."
   :command ("rustc" "--parse-only" source)
   :error-patterns
-  ((error line-start file-name ":" line ":" column ": "
+  ((error line-start (file-name) ":" line ":" column ": "
           (one-or-more digit) ":" (one-or-more digit) " error: "
           (message) line-end))
   :modes rust-mode)
@@ -3325,10 +3335,12 @@ See URL `http://sass-lang.com'."
   :command ("sass" "-c" source)
   :error-patterns
   ((error line-start "Syntax error on line " line ": " (message))
-   (warning line-start "WARNING on line " line " of " file-name
+   (warning line-start "WARNING on line " line " of " (file-name)
             ":" (optional "\r") "\n" (message) line-end)
-   (error line-start "Syntax error: " (message)
-          (optional "\r") "\n        on line " line " of " file-name line-end))
+   (error line-start
+          "Syntax error: " (message)
+          (optional "\r") "\n        on line " line " of " (file-name)
+          line-end))
   :modes sass-mode)
 
 (flycheck-define-checker scala
@@ -3337,7 +3349,7 @@ See URL `http://sass-lang.com'."
 See URL `http://www.scala-lang.org/'."
   :command ("scalac" "-Ystop-after:parser" source)
   :error-patterns
-  ((error line-start file-name ":" line ": error: " (message) line-end))
+  ((error line-start (file-name) ":" line ": error: " (message) line-end))
   :modes scala-mode)
 
 (flycheck-define-checker scss
@@ -3347,10 +3359,12 @@ See URL `http://sass-lang.com'."
   :command ("scss" "-c" source)
   :error-patterns
   ((error line-start "Syntax error on line " line ": " (message))
-   (warning line-start "WARNING on line " line " of " file-name
+   (warning line-start "WARNING on line " line " of " (file-name)
             ":" (optional "\r") "\n" (message) line-end)
-   (error line-start "Syntax error: " (message)
-          (optional "\r") "\n        on line " line " of " file-name line-end))
+   (error line-start
+          "Syntax error: " (message)
+          (optional "\r") "\n        on line " line " of " (file-name)
+          line-end))
   :modes scss-mode)
 
 (flycheck-define-checker sh-dash
@@ -3359,7 +3373,7 @@ See URL `http://sass-lang.com'."
 See URL `http://gondor.apana.org.au/~herbert/dash/'."
   :command ("dash" "-n" source)
   :error-patterns
-  ((error line-start file-name ": " line ": " (backref 1) ": " (message)))
+  ((error line-start (file-name) ": " line ": " (backref 1) ": " (message)))
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'sh)))
 
@@ -3370,7 +3384,7 @@ See URL `http://www.gnu.org/software/bash/'."
   :command ("bash" "--posix" "--norc" "-n" "--" source)
   :error-patterns
   ((error line-start
-          file-name ":" (one-or-more (not (any digit)))
+          (file-name) ":" (one-or-more (not (any digit)))
           line (zero-or-more " ") ":" (zero-or-more " ")
           (message) line-end))
   :modes sh-mode
@@ -3385,7 +3399,7 @@ See URL `http://baruch.ev-en.org/proj/chktex/'."
   :command ("chktex" (config-file "-l" flycheck-chktexrc) "-v0" "-q" "-I"
             source-inplace)
   :error-patterns
-  ((warning line-start file-name ":" line ":" column ":" (message) line-end))
+  ((warning line-start (file-name) ":" line ":" column ":" (message) line-end))
   :modes (latex-mode plain-tex-mode))
 
 (flycheck-define-checker tex-lacheck
@@ -3394,7 +3408,9 @@ See URL `http://baruch.ev-en.org/proj/chktex/'."
 See URL `http://www.ctan.org/pkg/lacheck'."
   :command ("lacheck" source-inplace)
   :error-patterns
-  ((warning line-start "\"" file-name "\", line " line ": " (message) line-end))
+  ((warning line-start
+            "\"" (file-name) "\", line " line ": " (message)
+            line-end))
   :modes latex-mode)
 
 (flycheck-define-checker xml-xmlstarlet
@@ -3403,7 +3419,7 @@ See URL `http://www.ctan.org/pkg/lacheck'."
 See URL `http://xmlstar.sourceforge.net/'."
   :command ("xmlstarlet" "val" "-e" "-q" source)
   :error-patterns
-  ((error line-start file-name ":" line "." column ": " (message) line-end))
+  ((error line-start (file-name) ":" line "." column ": " (message) line-end))
   :modes (xml-mode nxml-mode))
 
 (flycheck-define-checker zsh
@@ -3411,7 +3427,8 @@ See URL `http://xmlstar.sourceforge.net/'."
 
 See URL `http://www.zsh.org/'."
   :command ("zsh" "-n" "-d" "-f" source)
-  :error-patterns ((error line-start file-name ":" line ": " (message) line-end))
+  :error-patterns
+  ((error line-start (file-name) ":" line ": " (message) line-end))
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'zsh)))
 
