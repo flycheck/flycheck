@@ -17,6 +17,7 @@ order of their appearance in the default value of
 @iflyc html-tidy
 @iflyc javascript-jshint
 @iflyc json-jsonlint
+@iflyc less
 @iflyc lua
 @iflyc perl
 @iflyc php
