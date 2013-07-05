@@ -1118,9 +1118,6 @@ are present, both must match for the checker to be used."
        (--map (cons (car it) (cadr it)) (plist-get properties :error-patterns)))
   (-when-let (predicate (plist-get properties :predicate))
     (unless (functionp predicate)
-      (message "Warning: Using an obsolete, non-function predicate for checker %s. \
-Use a function or lambda expression"
-               symbol)
       (setq predicate #'(lambda () (eval predicate))))
     (put symbol :flycheck-predicate predicate))
   (put symbol :flycheck-file (flycheck-current-load-file))
