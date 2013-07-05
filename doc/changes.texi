@@ -714,6 +714,15 @@ Fix version information on Emacs trunk builds
 
 @itemize @bullet
 @item
+@b{Breaking changes}:
+
+@itemize @bullet
+@item
+@ghissue{163, Obsolete @code{flycheck-declare-checker} in favor of
+@code{flycheck-define-checker}}
+@end itemize
+
+@item
 New syntax checkers:
 
 @itemize @bullet
