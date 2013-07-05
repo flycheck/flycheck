@@ -2902,7 +2902,7 @@ See URL `https://github.com/bitc/hdevtools'."
 See URL `http://www.haskell.org/ghc/'."
   :command '("ghc" "-Wall" "-fno-code" source-inplace)
   :error-patterns
-  '(("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): Warning:\n? +\\(?4:\\(?:.+\\)\\(?:\n +.+\\)*\\)" warning)
+  '(("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\\(?: \\|\n    \\)Warning:\n? +\\(?4:\\(?:.+\\)\\(?:\n +.+\\)*\\)" warning)
     ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\n +\\(?4:\\(?:.+\\)\\(?:\n +.+\\)*\\)" error))
   :modes 'haskell-mode
   :next-checkers '((warnings-only . haskell-hlint)))
