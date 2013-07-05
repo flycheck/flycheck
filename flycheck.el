@@ -1208,7 +1208,82 @@ error if not."
     (-all? 'flycheck-command-argument-p arguments)))
 
 (defmacro flycheck-define-checker (symbol doc-string &rest properties)
-  "Define SYMBOL as syntax checker with DOC-STRING and PROPERTIES."
+  "Define SYMBOL as syntax checker with DOC-STRING and PROPERTIES.
+
+DOCSTRING provides documentation for the new syntax checker, as
+shown with `flycheck-describe-checker'.
+
+The following PROPERTIES constitute a syntax checker:
+
+`:command (COMMAND ARG ...)'
+      An unquoted list describing the syntax checker command to
+     execute.  `COMMAND' and `ARG' are subject to substitution of
+     special symbols and forms by `flycheck-substitute-argument',
+     which provide the file to check, options and configuration
+     file paths.  The `COMMAND' is checked with `executable-find'
+     before execution.
+
+`:error-patterns ((LEVEL SEXP ...) ...)'
+     An unquoted list of error patterns to parse the output of
+     the syntax checker `:command'.  LEVEL is either `error' or
+     `warning' and denotes the severity of errors matched by the
+     pattern. The LEVEL is followed by one or more RX `SEXP's
+     which parse the error and extract line, column, file name
+     and error message.  See `rx' for general information about
+     RX, and `flycheck-rx-to-string' for special RX forms
+     provided by Flycheck.
+
+`:error-parser FUNCTION'
+`:error-parser (lambda (output checker buffer) BODY ...)'
+     A function to parse errors with, either as unquoted symbol,
+     or `lambda' form.  The function must accept three arguments
+     OUTPUT CHECKER BUFFER, where OUTPUT is the syntax checker
+     output as string, CHECKER the syntax checker that was used,
+     and BUFFER a buffer object representing the checked buffer.
+     The function must return a list of `flycheck-error' objects
+     parsed from OUTPUT.  See Info node `(flycheck)Error API' for
+     more information about `flycheck-error', and Info
+     node `(flycheck)Error parsers' for a list of existing
+     parsers.
+
+`:modes MODE'
+`:modes (MODE ...)'
+     An unquoted major mode symbol or a list thereof.  If
+     present, the syntax checker is only used if the major mode
+     of the buffer to check is equal (as in `eq') to any given
+     MODE.
+
+`:predicate FUNCTION'
+`:predicate (lambda () BODY ...)'
+     A function to determine whether to use the syntax checker in
+     the current buffer, either as unquoted function symbol or
+     `lambda' form.  The syntax checker is only used if this
+     function returns non-nil when called in the buffer to check.
+     If `:modes' is given, the function is only called in
+     matching modes.
+
+`:next-checkers (ITEM ...)'
+     An unquoted list defining the syntax checker to run after
+     this syntax checker.  Each ITEM is either a syntax checker
+     symbol, or a cons cell `(PREDICATE . CHECKER)'.  In the
+     former case, the syntax checker is always considered.  In
+     the later case, CHECKER is only considered if the PREDICATE
+     matches.  PREDICATE is either `no-errors' or
+     `warnings-only'.  In the former case, CHECKER is only
+     considered if this checker reported no errors or warnings at
+     all, in the latter case, CHECKER is only considered if this
+     checker reported only warnings, but no errors.  The first
+     registered and available syntax checker with matching
+     predicate is executed after this checker.
+
+A syntax checker must have a `:command', and at least one of
+`:error-patterns' or `:error-parser', and at least one of
+`:modes' and `:predicate'.  If `:predicate' and `:modes' are
+given, both must match for the syntax checker to be used.
+`:next-checkers' is entirely optional.
+
+Signal a (compile-time) error if any property has an invalid
+value."
   (declare (indent 1)
            (doc-string 2))
   (let ((command (plist-get properties :command))
