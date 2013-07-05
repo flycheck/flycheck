@@ -714,6 +714,14 @@ Fix version information on Emacs trunk builds
 
 @itemize @bullet
 @item
+New syntax checkers:
+
+@itemize @bullet
+@item
+@ghissue{162, Haskell}
+@end itemize
+
+@item
 Improvements:
 
 @itemize @bullet
