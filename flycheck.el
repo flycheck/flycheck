@@ -118,6 +118,9 @@ buffer-local wherever it is set."
     go-build
     go-test
     haml
+    haskell-hdevtools
+    haskell-ghc
+    haskell-hlint
     html-tidy
     javascript-jshint
     json-jsonlint
@@ -1081,10 +1084,10 @@ checker returned no errors at all.  If PREDICATE is
 returned only warnings.  Only the first usable and
 registered (see `flycheck-registered-checker-p') is run.
 
-A checker must have a `:command' property, either
-`:error-patterns' or `:error-parser' (but not both), and at least
-one of `:predicate' and `:modes'.  If `:predicate' and `:modes'
-are present, both must match for the checker to be used."
+A checker must have a `:command' property, at least one of
+`:error-patterns' or `:error-parser', and at least one of
+`:predicate' and `:modes'.  If `:predicate' and `:modes' are
+present, both must match for the checker to be used."
   (declare (indent 1)
            (doc-string 2))
   `(flycheck-set-checker-properties ',symbol
@@ -3090,6 +3093,39 @@ See URL `http://haml.info'."
   :error-patterns
   ((error line-start "Syntax error on line " line ": " (message) line-end))
   :modes haml-mode)
+
+(flycheck-declare-checker haskell-hdevtools
+  "A Haskell syntax and type checker using hdevtools.
+
+See URL `https://github.com/bitc/hdevtools'."
+  :command '("hdevtools" "check" "-g" "-Wall" source-inplace)
+  :error-patterns
+  '(("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\\(?: \\|\n    \\)Warning:\n? +\\(?4:\\(?:.+\\)\\(?:\n +.+\\)*\\)" warning)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\n\\(?4:\\( +.+\n\\)*\\)" error)
+    ("^\\(?1:.*\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\\(?4:.*\\)" error))
+  :modes 'haskell-mode
+  :next-checkers '((warnings-only . haskell-hlint)))
+
+(flycheck-declare-checker haskell-ghc
+  "A Haskell syntax and type checker using ghc.
+
+See URL `http://www.haskell.org/ghc/'."
+  :command '("ghc" "-Wall" "-fno-code" source-inplace)
+  :error-patterns
+  '(("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\\(?: \\|\n    \\)Warning:\n? +\\(?4:\\(?:.+\\)\\(?:\n +.+\\)*\\)" warning)
+    ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):\n +\\(?4:\\(?:.+\\)\\(?:\n +.+\\)*\\)" error))
+  :modes 'haskell-mode
+  :next-checkers '((warnings-only . haskell-hlint)))
+
+(flycheck-declare-checker haskell-hlint
+  "A Haskell style checker using hlint.
+
+See URL `http://community.haskell.org/~ndm/hlint/'."
+  :command '("hlint" source-inplace)
+  :error-patterns
+  '(("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): Warning: \\(?4:.+\\(?:\n.+\\)+\\)" warning)
+    ("^\\(?1:.*?\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): Error: \\(?4:.+\\(?:\n.+\\)+\\)" error))
+  :modes 'haskell-mode)
 
 (flycheck-def-config-file-var flycheck-tidyrc html-tidy ".tidyrc")
 
