@@ -718,8 +718,8 @@ Fix version information on Emacs trunk builds
 
 @itemize @bullet
 @item
-@ghissue{163, Obsolete @code{flycheck-declare-checker} in favor of
-@code{flycheck-define-checker}}
+@ghissue{163, Introduce @code{flycheck-define-checker} and obsolete
+@code{flycheck-declare-checker}}
 @item
 Remove the obsolete @code{flycheck-error-face} and
 @code{flycheck-warning-face}
