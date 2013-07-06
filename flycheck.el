@@ -821,6 +821,16 @@ Report a proper flycheck status."
 
 
 ;;;; Utility functions
+(defun flycheck-sexp-to-string (sexp)
+  "Convert SEXP to a string.
+
+Like `prin1-to-string' but ensure that the returned string
+is loadable."
+  (let ((print-quoted t)
+        (print-length nil)
+        (print-level nil))
+    (prin1-to-string sexp)))
+
 (defun flycheck-string-to-number-safe (string)
   "Safely convert STRING to a number.
 
@@ -2982,7 +2992,7 @@ during byte-compilation or autoloads generation, or nil otherwise."
 (flycheck-define-checker emacs-lisp
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler."
   :command ((eval flycheck-emacs-command)
-            (eval (prin1-to-string flycheck-emacs-lisp-check-form))
+            (eval (flycheck-sexp-to-string flycheck-emacs-lisp-check-form))
             source-inplace)
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ":Error:"
@@ -3036,7 +3046,7 @@ during byte-compilation or autoloads generation, or nil otherwise."
 
 The checker runs `checkdoc-current-buffer'."
   :command ((eval flycheck-emacs-command)
-            (eval (prin1-to-string flycheck-emacs-lisp-checkdoc-form))
+            (eval (flycheck-sexp-to-string flycheck-emacs-lisp-checkdoc-form))
             source)
   :error-patterns
   ((warning line-start (file-name) ":" line ": " (message) line-end))

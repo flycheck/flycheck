@@ -748,6 +748,15 @@ Improvements:
 releases}
 @end itemize
 
+@item
+Bug fixes:
+
+@itemize @bullet
+@item
+Fix warnings about flawed definitions in @code{emacs-lisp} and
+@code{emacs-lisp-checkdoc}, caused by faulty formatting of sexps
+@end itemize
+
 @end itemize
 
 @c Local Variables:
