@@ -741,8 +741,7 @@ Improvements:
 
 @itemize @bullet
 @item
-@ghissue{157, Support} @uref{http://web-mode.org/, Web Mode} in
-@code{html-tidy} syntax checker
+@ghissue{157, Support Web Mode in @code{html-tidy} syntax checker}
 @item
 @ghissue{159, Support Rubocop 0.9 and drop support for older Rubocop
 releases}
