@@ -173,7 +173,7 @@ buffer.  A syntax checker is suitable, if
 @item
 it may be used for the current major mode,
 @item
-it's predicate matches,
+its predicate matches,
 @item
 and if the syntax checking tool exists.
 @end itemize
