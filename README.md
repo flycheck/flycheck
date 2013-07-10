@@ -31,6 +31,7 @@ Features
 - Built-in syntax checkers for:
   - CoffeeScript
   - CSS
+  - D
   - Elixir
   - Emacs Lisp
   - Erlang

@@ -133,6 +133,7 @@
 (--each '(sh-script
           coffee-mode
           css-mode
+          d-mode
           elixir-mode
           erlang
           elixir-mode
@@ -1997,6 +1998,30 @@ many-errors-for-error-list.el:14:1:warning: the function
    '(4 16 "Unexpected token '100%' at line 4, col 16." error)
    '(4 20 "Unexpected token ';' at line 4, col 20." error)
    '(5 1 "Unexpected token '}' at line 5, col 1." error)))
+
+(ert-deftest checker-d-syntax-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'd)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/d-syntax-error.d" 'd-mode nil
+   '(2 nil "module studio is in file 'std/studio.d' which cannot be read" error)))
+
+(ert-deftest checker-d-syntax-warning ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'd)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/d-syntax-warning.d" 'd-mode nil
+   '(6 nil "statement is not reachable" warning)))
+
+(ert-deftest checker-d-syntax-deprecated ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'd)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/d-syntax-deprecated.d" 'd-mode nil
+   '(11 nil "function d_syntax_deprecated.foo is deprecated" warning)))
+
+(ert-deftest checker-d-syntax-error-without-module ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'd)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/d_syntax_error_without_module.d" 'd-mode nil
+   '(5 nil "undefined identifier writel, did you mean template write(T...)(T args) if (!is(T[0] : File))?" error)))
 
 (ert-deftest checker-elixir-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'elixir)
