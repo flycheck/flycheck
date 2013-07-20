@@ -131,6 +131,7 @@
 
 ;; Modes used by our tests
 (--each '(sh-script
+          c++-mode
           coffee-mode
           css-mode
           elixir-mode
@@ -1961,6 +1962,24 @@ many-errors-for-error-list.el:14:1:warning: the function
      "checkers/bash-syntax-error.bash" 'sh-mode nil
      '(5 nil "syntax error near unexpected token `fi'" error)
      '(5 nil "`fi'" error))))
+
+(ert-deftest checker-c/c++-clang-warning ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/c-clang-warning.c" 'c-mode nil
+   '(4 nil "unused variable 'unused'" warning)))
+
+(ert-deftest checker-c/c++-clang-fatal-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/c-clang-fatal-error.c" 'c-mode nil
+   '(1 nil "'non_existant_file.h' file not found" error)))
+
+(ert-deftest checker-c/c++-clang-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/c++-clang-error.cpp" 'c++-mode nil
+   '(5 nil "implicit instantiation of undefined template 'test<false>'" error)))
 
 (ert-deftest checker-coffeelint-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'coffee-coffeelint)
