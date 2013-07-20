@@ -13,7 +13,8 @@ checker using @command{rubocop}.
 checker.
 
 @item
-@gh{dholm, David Holm} added support for the cppcheck C/C++ checker.
+@gh{dholm, David Holm} added support for using cppcheck and Clang to check
+C/C++.
 
 @item
 @gh{wyuenho, Jimmy Yuen Ho Wong} added the HTML syntax checker and the
