@@ -115,6 +115,7 @@ apt npm \
 # Install syntax checker tools
 apt bash \
     chktex \
+    clang \
     esl-erlang \
     ghc \
     hlint \
