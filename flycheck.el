@@ -2553,6 +2553,14 @@ the beginning of the buffer."
 (defconst flycheck-error-list-buffer "*Flycheck errors*"
   "The name of the buffer to show error lists.")
 
+(defun flycheck-error-list-buffer ()
+  "Get the buffer to show error lists.
+
+If the buffer does not exist yet, create it.
+
+Return the buffer object."
+  (get-buffer-create flycheck-error-list-buffer))
+
 (defconst flycheck-list-error-regex-alist
   '(("^\\(?1:.+?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)?error:" 1 2 3 2)
     ("^\\(?1:.+?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)?warning:" 1 2 3 1))
@@ -2613,18 +2621,24 @@ current `default-directory'."
     (insert (flycheck-error-format it))
     (insert "\n")))
 
-(defun flycheck-list-errors ()
-  "List all errors in current buffer.
+(defun flycheck-list-errors (&optional pos)
+  "List all errors at POS in current buffer.
 
-Show all Flycheck errors in the current buffer in a separate window.
+Show all Flycheck errors at POS in the current buffer in a
+separate window.  If POS is omitted or nil, show all errors.
+
+Interactively, show all Flycheck errors.  With prefix arg, only
+show errors at point.
 
 Return the buffer containing the error listing."
-  (interactive)
+  (interactive (when current-prefix-arg (list (point))))
   (if flycheck-mode
       (let ((source-buffer (current-buffer))
             (source-directory default-directory)
-            (errors flycheck-current-errors)
-            (list-buffer (get-buffer-create flycheck-error-list-buffer)))
+            (errors (if pos
+                        (flycheck-overlay-errors-at pos)
+                      flycheck-current-errors))
+            (list-buffer (flycheck-error-list-buffer)))
         (with-current-buffer list-buffer
           (flycheck-error-list-mode)
           (setq default-directory source-directory)

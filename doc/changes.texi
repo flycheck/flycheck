@@ -726,6 +726,15 @@ Remove the obsolete @code{flycheck-error-face} and
 @end itemize
 
 @item
+New features:
+
+@itemize
+@item
+@ghissue{166, List errors at point only with prefix arg to
+@code{flycheck-list-errors}}
+@end itemize
+
+@item
 New syntax checkers:
 
 @itemize @bullet

@@ -440,6 +440,8 @@ You can also list all errors in the current buffer:
 @itemx M-x flycheck-list-errors
 @findex flycheck-list-errors
 List all errors in the current buffer in a separate buffer.
+
+With prefix arg, list only errors at point.
 @end table
 
 If you hover a highlighted error with the mouse, a tooltip with the

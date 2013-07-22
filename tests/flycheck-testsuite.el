@@ -1854,8 +1854,7 @@ many-errors-for-error-list.el:9:2:warning: princ called with 0
     arguments, but requires 1-2 (emacs-lisp)
 many-errors-for-error-list.el:14:1:warning: the function
     `i-do-not-exist' is not known to be defined. (emacs-lisp)
-"
-                                                   (flycheck-version))))
+" (flycheck-version))))
           ;; Test navigation
           (compilation-next-error 1)
           (should (looking-at "^many-errors-for-error-list.el:7:warning:"))
@@ -1865,9 +1864,25 @@ many-errors-for-error-list.el:14:1:warning: the function
           (should (looking-at "^many-errors-for-error-list.el:9:2:warning:"))
           (compilation-next-error 1)
           (should (looking-at "^many-errors-for-error-list.el:14:1:warning:"))
-          (should-error (compilation-next-error 1))))
-    (-when-let (buffer (get-buffer flycheck-error-list-buffer))
-      (kill-buffer buffer))))
+          (should-error (compilation-next-error 1)))
+        (kill-buffer (flycheck-error-list-buffer))
+
+        ;; Test listing at current position only
+        (with-current-buffer "many-errors-for-error-list.el"
+          (goto-char (point-min))
+          (goto-char (+ (line-beginning-position 8) 2))
+          (flycheck-list-errors (point))
+          (with-current-buffer flycheck-error-list-buffer
+            (should (looking-at "^*** many-errors-for-error-list\\.el:"))
+            ;; Test the contents of the error buffer
+            (should (string= (buffer-string) (format "
+
+\C-l
+*** many-errors-for-error-list.el: Syntax and style errors (Flycheck v%s)
+many-errors-for-error-list.el:9:2:warning: princ called with 0
+    arguments, but requires 1-2 (emacs-lisp)
+" (flycheck-version)))))))
+    (kill-buffer (flycheck-error-list-buffer))))
 
 
 ;;;; General error display
