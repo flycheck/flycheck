@@ -2065,7 +2065,7 @@ many-errors-for-error-list.el:7:1:warning: `message' called with 0
                         (flycheck-error-new-at 1 10 'warning "2nd message"))))
       (-each errors #'flycheck-add-overlay)
       (mocker-let
-          ((display-function (errors) ((:input `(,errors)))))
+          ((message (errors) ((:input '("1st message\n2nd message")))))
         (let ((flycheck-display-errors-function 'display-function))
           (flycheck-copy-messages-as-kill 10))))
     (should (equal (-take 2 kill-ring) '("1st message" "2nd message")))))
