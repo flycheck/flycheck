@@ -3167,10 +3167,30 @@ initialize packages."
   ;; return nil to have Flycheck drop the whole option
   (when value "package-initialize"))
 
+(flycheck-def-option-var flycheck-emacs-lisp-package-user-dir nil emacs-lisp
+  "Package directory for the Emacs Lisp syntax checker.
+
+When set to a string, set `package-user-dir' to the value of this
+variable before initializing packages.
+
+This variable has no effect, if
+`flycheck-emacs-lisp-initialize-packages' is nil."
+  :type '(choice (const :tag "Default package directory" nil)
+                 (directory :tag "Custom package directory"))
+  :risky t
+  :package-version '(flycheck . "0.14"))
+
+(defun flycheck-option-emacs-lisp-package-user-dir (value)
+  "Option filter for `flycheck-emacs-lisp-package-user-dir'."
+  (when value
+    (flycheck-sexp-to-string `(setq package-user-dir ,value))))
+
 (flycheck-define-checker emacs-lisp
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler."
   :command ((eval flycheck-emacs-command)
             (option-list "--directory" flycheck-emacs-lisp-load-path)
+            (option "--eval" flycheck-emacs-lisp-package-user-dir
+                    flycheck-option-emacs-lisp-package-user-dir)
             (option "--funcall" flycheck-emacs-lisp-initialize-packages
                     flycheck-option-emacs-lisp-package-initialize)
             "--eval"

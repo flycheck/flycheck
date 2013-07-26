@@ -269,6 +269,10 @@ syntax check, e.g. if an unexpected version of a required library
 is used.
 @end defopt
 
+@defopt flycheck-emacs-lisp-package-user-dir
+The package directory for the @code{emacs-lisp} syntax checker.
+@end defopt
+
 @defopt flycheck-flake8-maximum-complexity
 The maximum McCabe complexity the @code{python-flake8} syntax checker
 allows without reporting a warning.
