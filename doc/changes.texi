@@ -732,6 +732,10 @@ New features:
 @item
 @ghissue{166, List errors at point only with prefix arg to
 @code{flycheck-list-errors}}
+@item
+@ghissue{166, Add new display function
+@code{flycheck-display-errors-in-list} to display errors at point in the
+error list}
 @end itemize
 
 @item

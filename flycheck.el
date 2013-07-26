@@ -222,7 +222,7 @@ and there may be further syntax checkers in the chain.
 
 This variable is an abnormal hook.")
 
-(defcustom flycheck-display-errors-function 'flycheck-display-error-messages
+(defcustom flycheck-display-errors-function #'flycheck-display-error-messages
   "Function to display error messages.
 
 If set to a function, call the function with the list of errors
@@ -231,7 +231,11 @@ to display as single argument.  Each error is an instance of the
 
 If set to nil, do not display errors at all."
   :group 'flycheck
-  :type 'function
+  :type '(choice (const :tag "Display error messages"
+                        flycheck-display-error-messages)
+                 (const :tag "Display errors in error list"
+                        flycheck-display-errors-in-list)
+                 (function :tag "Error display function"))
   :package-version '(flycheck . "0.13"))
 
 (defcustom flycheck-indication-mode 'left-fringe
@@ -2653,16 +2657,26 @@ and thus used by `flycheck-error-list-refresh'."
         (flycheck-error-list-insert-header source-buffer)
         (flycheck-error-list-insert-errors errors)))))
 
+(defun flycheck-error-list-goto-current-errors ()
+  "Move the point to the beginning of the current errors."
+  (goto-char (point-max))
+  (re-search-backward "\C-l" nil :no-error)
+  (beginning-of-line)
+  (forward-line 1))
+
 (defun flycheck-error-list-recenter ()
   "Recenter the current error list buffer.
 
 Move the point to the beginning of the current errors, and
-recenter the display."
-  (goto-char (point-max))
-  (re-search-backward "\C-l" nil :no-error)
-  (beginning-of-line)
-  (forward-line 1)
-  (recenter 0))
+recenter the display, if the error list is currently shown."
+  (-if-let (window (get-buffer-window))
+    (with-selected-window window
+      ;; We must move the point with the right window selected, for otherwise
+      ;; the point location is mysteriously wrong when recentering :|
+      (flycheck-error-list-goto-current-errors)
+      (recenter 0))
+    ;; If there is no window, just update the location of the point
+    (flycheck-error-list-goto-current-errors)))
 
 (defun flycheck-error-list-refresh ()
   "Refresh the current error list.
@@ -2770,6 +2784,18 @@ Hide the error buffer if there is no error under point."
                (window (get-buffer-window buffer)))
     (unless (flycheck-overlays-at (point))
       (quit-window nil window))))
+
+(defun flycheck-display-errors-in-list (errors)
+  "Display ERRORS in the error list.
+
+Add all ERRORS to the error list, but do *not* show the error
+list.
+
+Note that this function does *not* actually show the error list,
+it just adds ERRORS to it."
+  (flycheck-error-list-add-errors errors)
+  (with-current-buffer (flycheck-error-list-buffer)
+    (flycheck-error-list-recenter)))
 
 
 ;;;; Working with error messages
