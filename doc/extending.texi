@@ -146,6 +146,9 @@ This cell is substituted with a result of evaluating @var{form}.
 before it is evaluated, nor in the result of evaluating FORM.
 @end table
 
+Note that substitution is @b{not} recursive.  No symbols or cells are
+substituted within the body of cells!
+
 This property is @b{mandatory}.
 
 @item :error-patterns ((@var{level} @var{sexp}) ...)

@@ -1572,7 +1572,10 @@ an error is signaled.  _No_ further substitutions are performed,
 neither in FORM before it is evaluated, nor in the result of
 evaluating FORM.
 
-In all other cases, signal an error."
+In all other cases, signal an error.
+
+Note that substitution is *not* recursive.  No symbols or cells
+are substituted within the body of cells!"
   (pcase arg
     ((pred stringp) arg)
     (`source
