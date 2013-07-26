@@ -3134,8 +3134,10 @@ during byte-compilation or autoloads generation, or nil otherwise."
   "Load path to use in the Emacs Lisp syntax checker.
 
 When set to a list of strings, add each directory in this list to
-the `load-path' before invoking the byte compiler.  When nil,
-only use the built-in `load-path' of Emacs.
+the `load-path' before invoking the byte compiler.  Relative
+paths in this list are expanded against the `default-directory'
+of the buffer to check.  When nil, only use the built-in
+`load-path' of Emacs.
 
 The directory of the file being checked is always part of the
 `load-path' while checking, regardless of the value of this
@@ -3197,7 +3199,10 @@ This variable has no effect, if
 (flycheck-define-checker emacs-lisp
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler."
   :command ((eval flycheck-emacs-command)
-            (option-list "--directory" flycheck-emacs-lisp-load-path)
+            (option-list "--directory" flycheck-emacs-lisp-load-path
+                         ;; Expand relative paths against the directory of the
+                         ;; buffer to check
+                         expand-file-name)
             (option "--eval" flycheck-emacs-lisp-package-user-dir
                     flycheck-option-emacs-lisp-package-user-dir)
             (option "--funcall" flycheck-emacs-lisp-initialize-packages
