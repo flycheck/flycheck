@@ -2779,6 +2779,13 @@ Get the buffer named by variable `flycheck-error-message-buffer',
 or nil if the buffer does not exist."
   (get-buffer flycheck-error-message-buffer))
 
+(defun flycheck-may-use-echo-area-p ()
+  "Determine whether the echo area may be used.
+
+The echo area may be used if the cursor is not in the echo area,
+and if the echo area is not occupied by minibuffer input."
+  (not (or cursor-in-echo-area (active-minibuffer-window))))
+
 (defun flycheck-display-error-messages (errors)
   "Display the messages of ERRORS.
 
@@ -2790,8 +2797,9 @@ buffer, depending on the number of lines.
 In the latter case, show messages in
 `flycheck-error-message-buffer'."
   (-when-let (messages (-keep #'flycheck-error-message errors))
-    (display-message-or-buffer (s-join "\n\n" messages)
-                               flycheck-error-message-buffer)))
+    (when (flycheck-may-use-echo-area-p)
+      (display-message-or-buffer (s-join "\n\n" messages)
+                                 flycheck-error-message-buffer))))
 
 (defun flycheck-hide-error-buffer ()
   "Hide the Flycheck error buffer if necessary.
