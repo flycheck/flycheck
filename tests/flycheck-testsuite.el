@@ -1825,6 +1825,52 @@ spam/with/eggs:6:10:error: Error 1 (ruby)
 foo/bar:15:8:error: Error 2 (python-flake8)
 ")))))))
 
+(ert-deftest flycheck-error-list-refresh ()
+  (unwind-protect
+      (flycheck-testsuite-with-resource-buffer "many-errors-for-error-list.el"
+        (emacs-lisp-mode)
+        (flycheck-testsuite-buffer-sync)
+        (flycheck-list-errors)
+        (with-current-buffer (flycheck-error-list-buffer)
+          (should (string= (buffer-string) (format "
+
+\C-l
+*** many-errors-for-error-list.el: Syntax and style errors (Flycheck v%s)
+many-errors-for-error-list.el:7:warning: You should have a section marked \";;; Code:\" (emacs-lisp-checkdoc)
+many-errors-for-error-list.el:7:1:warning: `message' called with 0
+    args to fill 1 format field(s) (emacs-lisp)
+many-errors-for-error-list.el:9:2:warning: princ called with 0
+    arguments, but requires 1-2 (emacs-lisp)
+many-errors-for-error-list.el:14:1:warning: the function
+    `i-do-not-exist' is not known to be defined. (emacs-lisp)
+" (flycheck-version)))))
+        (with-current-buffer "many-errors-for-error-list.el"
+          ;; Remove a bunch of errors
+          (setq flycheck-current-errors (-drop 2 flycheck-current-errors)))
+        (with-current-buffer (flycheck-error-list-buffer)
+          (flycheck-error-list-refresh)
+          (should (string= (buffer-string) (format "
+
+\C-l
+*** many-errors-for-error-list.el: Syntax and style errors (Flycheck v%s)
+many-errors-for-error-list.el:7:warning: You should have a section marked \";;; Code:\" (emacs-lisp-checkdoc)
+many-errors-for-error-list.el:7:1:warning: `message' called with 0
+    args to fill 1 format field(s) (emacs-lisp)
+many-errors-for-error-list.el:9:2:warning: princ called with 0
+    arguments, but requires 1-2 (emacs-lisp)
+many-errors-for-error-list.el:14:1:warning: the function
+    `i-do-not-exist' is not known to be defined. (emacs-lisp)
+
+
+\C-l
+*** many-errors-for-error-list.el: Syntax and style errors (Flycheck v%s)
+many-errors-for-error-list.el:9:2:warning: princ called with 0
+    arguments, but requires 1-2 (emacs-lisp)
+many-errors-for-error-list.el:14:1:warning: the function
+    `i-do-not-exist' is not known to be defined. (emacs-lisp)
+" (flycheck-version) (flycheck-version))))))
+    (kill-buffer (flycheck-error-list-buffer))))
+
 (ert-deftest flycheck-list-errors ()
   (with-temp-buffer
     (should-not flycheck-mode)
@@ -1842,6 +1888,9 @@ foo/bar:15:8:error: Error 2 (python-flake8)
           ;; The list buffer should not be selected!
           (should-not (eq (current-buffer) list-buffer)))
         (with-current-buffer flycheck-error-list-buffer
+          ;; Source buffer should be tracked
+          (should (eq flycheck-error-list-source-buffer
+                      (get-buffer "many-errors-for-error-list.el")))
           ;; Point must be on the beginning of the header line
           (should (looking-at "^*** many-errors-for-error-list\\.el:"))
           ;; Test the contents of the error buffer
@@ -1867,23 +1916,24 @@ many-errors-for-error-list.el:14:1:warning: the function
           (compilation-next-error 1)
           (should (looking-at "^many-errors-for-error-list.el:14:1:warning:"))
           (should-error (compilation-next-error 1)))
+
         (kill-buffer (flycheck-error-list-buffer))
+        (set-buffer "many-errors-for-error-list.el")
 
         ;; Test listing at current position only
-        (with-current-buffer "many-errors-for-error-list.el"
-          (goto-char (point-min))
-          (goto-char (+ (line-beginning-position 8) 2))
-          (flycheck-list-errors (point))
-          (with-current-buffer flycheck-error-list-buffer
-            (should (looking-at "^*** many-errors-for-error-list\\.el:"))
-            ;; Test the contents of the error buffer
-            (should (string= (buffer-string) (format "
+        (goto-char (point-min))
+        (goto-char (+ (line-beginning-position 8) 2))
+        (flycheck-list-errors (point))
+        (with-current-buffer flycheck-error-list-buffer
+          (should (looking-at "^*** many-errors-for-error-list\\.el:"))
+          ;; Test the contents of the error buffer
+          (should (string= (buffer-string) (format "
 
 \C-l
 *** many-errors-for-error-list.el: Syntax and style errors (Flycheck v%s)
 many-errors-for-error-list.el:9:2:warning: princ called with 0
     arguments, but requires 1-2 (emacs-lisp)
-" (flycheck-version)))))))
+" (flycheck-version))))))
     (kill-buffer (flycheck-error-list-buffer))))
 
 

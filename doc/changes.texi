@@ -763,6 +763,8 @@ Bug fixes:
 @item
 Fix warnings about flawed definitions in @code{emacs-lisp} and
 @code{emacs-lisp-checkdoc}, caused by faulty formatting of sexps
+@item
+@ghissue{166, Refresh error lists when pressing @kbd{g}}
 @end itemize
 
 @end itemize
