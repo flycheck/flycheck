@@ -951,6 +951,20 @@ Otherwise `(list OPTION VALUE)' is returned."
       (list (concat option value))
     (list option value)))
 
+(defun flycheck-prepend-with-option (option items)
+  "Prepend each item in ITEMS with OPTION.
+
+Prepend OPTION to each item in ITEMS.
+
+ITEMS is a list of value to pass to the syntax checker.  OPTION
+is the option, as string.  ITEM-FILTER is a function to apply to
+each item."
+  (unless (stringp option)
+    (error "Option %S is not a string" option))
+  (->> items
+    (--map (list option it))
+    -flatten))
+
 (defun flycheck-temporary-buffer-p ()
   "Determine whether the current buffer is a temporary buffer.
 
@@ -1212,10 +1226,10 @@ error if not."
       (`(config-file ,option-name ,config-file-var)
        (and (stringp option-name)
             (symbolp config-file-var)))
-      (`(option ,option-name ,option-var)
+      (`(,(or `option `option-list) ,option-name ,option-var)
        (and (stringp option-name)
             (symbolp option-var)))
-      (`(option ,option-name ,option-var ,filter)
+      (`(,(or `option `option-list) ,option-name ,option-var ,filter)
        (and (stringp option-name)
             (symbolp option-var)
             (symbolp filter)))
@@ -1564,6 +1578,14 @@ nil.  In the latter case, return a list of arguments as described
 above.  If OPTION ends with a =, process it like in a
 `config-file' cell (see above).
 
+If ARG is a form `(option-list OPTION VARIABLE [FILTER])',
+retrieve the value of VARIABLE, which must be a list, and prepend
+OPTION before each item in this list.  FILTER is an optional
+function to be applied to each item in the list.  Items for which
+FILTER returns nil are dropped.  If the list is non-nil after the
+application of FILTER, return a list `(OPTION ITEM1 OPTION ITEM2
+...)'.  Otherwise return nil.
+
 If ARG is a form `(eval FORM), return the result of evaluating
 FORM in the buffer to be checked.  FORM must either return a
 string or a list of strings, or nil to indicate that nothing
@@ -1600,6 +1622,18 @@ are substituted within the body of cells!"
          (error "Value %S of %S (filter: %S) for option %s is not a string"
                 value variable filter option-name))
        (flycheck-option-with-value-argument option-name value)))
+    (`(option-list ,option-name ,variable)
+     (-when-let (value (symbol-value variable))
+       (unless (and (listp value) (-all? #'stringp value))
+         (error "Value %S of %S for option %S is not a list of strings"
+                value variable option-name))
+       (flycheck-prepend-with-option option-name value)))
+    (`(option-list ,option-name ,variable ,filter)
+     (-when-let (value (-keep filter (symbol-value variable)))
+       (unless (and (listp value) (-all? #'stringp value))
+         (error "Value %S of %S for option %S is not a list of strings"
+                value variable option-name))
+       (flycheck-prepend-with-option option-name value)))
     (`(eval ,form)
      (let ((result (eval form)))
        (if (or (null result)
@@ -1761,7 +1795,7 @@ directory, or nil otherwise."
   (custom-add-frequent-value 'flycheck-locate-config-file-functions it))
 
 
-;;;; Option filters
+;;;; Generic option filters
 (defun flycheck-option-int (value)
   "Convert an integral option VALUE to a string.
 

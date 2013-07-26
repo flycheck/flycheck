@@ -736,6 +736,9 @@ New features:
 @ghissue{166, Add new display function
 @code{flycheck-display-errors-in-list} to display errors at point in the
 error list}
+@item
+New @code{option-list} argument cell to pass option lists to a syntax
+checker
 @end itemize
 
 @item
