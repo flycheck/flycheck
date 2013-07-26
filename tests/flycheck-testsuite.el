@@ -1745,38 +1745,40 @@ error is signaled on all subsequent checks."
 
 
 ;;;; Error list
-(ert-deftest flycheck-list-buffer-label ()
+(ert-deftest flycheck-error-list-buffer-label ()
   (with-temp-buffer
     (rename-buffer "Foo")
-    (should (string= (flycheck-list-buffer-label (current-buffer))
+    (should (string= (flycheck-error-list-buffer-label (current-buffer))
                      "#<buffer Foo>")))
   (with-temp-buffer
     (set-visited-file-name (expand-file-name "foo/bar" flycheck-testsuite-dir)
                            :no-query)
     (cd flycheck-testsuite-dir)
-    (should (string= (flycheck-list-buffer-label (current-buffer)) "foo/bar"))))
+    (should (string= (flycheck-error-list-buffer-label (current-buffer))
+                     "foo/bar"))))
 
-(ert-deftest flycheck-list-error-label ()
+(ert-deftest flycheck-error-list-error-label ()
   (with-temp-buffer
     (rename-buffer "Foo")
-    (should (string= (flycheck-list-error-label (flycheck-error-new-at 1 1))
+    (should (string= (flycheck-error-list-error-label (flycheck-error-new-at 1 1))
                      "#<buffer Foo>")))
   (with-temp-buffer
     (set-visited-file-name (expand-file-name "foo/bar" flycheck-testsuite-dir)
                            :no-query)
     (cd flycheck-testsuite-dir)
-    (should (string= (flycheck-list-error-label (flycheck-error-new-at 1 1))
+    (should (string= (flycheck-error-list-error-label (flycheck-error-new-at 1 1))
                      "foo/bar")))
   (with-temp-buffer
     (cd flycheck-testsuite-dir)
     (let* ((filename (expand-file-name "spam/with/eggs" flycheck-testsuite-dir))
            (err (flycheck-error-new-at 1 1 'warning "Foo" :filename filename)))
-      (should (string= (flycheck-list-error-label err) "spam/with/eggs")))))
+      (should (string= (flycheck-error-list-error-label err)
+                       "spam/with/eggs")))))
 
-(ert-deftest flycheck-list-add-header ()
+(ert-deftest flycheck-error-list-insert-header ()
   (with-temp-buffer
     (rename-buffer "Foo")
-    (flycheck-list-add-header (current-buffer))
+    (flycheck-error-list-insert-header (current-buffer))
     (should (string= (buffer-string)
                      (format "
 
@@ -1788,7 +1790,7 @@ error is signaled on all subsequent checks."
     (set-visited-file-name (expand-file-name "spam/with/eggs" flycheck-testsuite-dir)
                            :no-query)
     (cd flycheck-testsuite-dir)
-    (flycheck-list-add-header (current-buffer))
+    (flycheck-error-list-insert-header (current-buffer))
     (should (string= (buffer-string)
                      (format "
 
@@ -1797,7 +1799,7 @@ error is signaled on all subsequent checks."
 "
                              (flycheck-version))))))
 
-(ert-deftest flycheck-list-add-errors ()
+(ert-deftest flycheck-error-list-insert-errors ()
   (let (buf1 buf2)
     (with-temp-buffer
       (setq buf1 (current-buffer))
@@ -1816,12 +1818,58 @@ error is signaled on all subsequent checks."
                               (flycheck-error-new-at 15 8 'error "Error 2"
                                                      :buffer buf1 :checker 'python-flake8
                                                      :filename (expand-file-name "foo/bar" flycheck-testsuite-dir)))))
-            (flycheck-list-add-errors errors))
+            (flycheck-error-list-insert-errors errors))
           (should (string= (buffer-string) "\
 #<buffer Spam>:4:warning: Warning 1 (emacs-lisp)
 spam/with/eggs:6:10:error: Error 1 (ruby)
 foo/bar:15:8:error: Error 2 (python-flake8)
 ")))))))
+
+(ert-deftest flycheck-error-list-refresh ()
+  (unwind-protect
+      (flycheck-testsuite-with-resource-buffer "many-errors-for-error-list.el"
+        (emacs-lisp-mode)
+        (flycheck-testsuite-buffer-sync)
+        (flycheck-list-errors)
+        (with-current-buffer (flycheck-error-list-buffer)
+          (should (string= (buffer-string) (format "
+
+\C-l
+*** many-errors-for-error-list.el: Syntax and style errors (Flycheck v%s)
+many-errors-for-error-list.el:7:warning: You should have a section marked \";;; Code:\" (emacs-lisp-checkdoc)
+many-errors-for-error-list.el:7:1:warning: `message' called with 0
+    args to fill 1 format field(s) (emacs-lisp)
+many-errors-for-error-list.el:9:2:warning: princ called with 0
+    arguments, but requires 1-2 (emacs-lisp)
+many-errors-for-error-list.el:14:1:warning: the function
+    `i-do-not-exist' is not known to be defined. (emacs-lisp)
+" (flycheck-version)))))
+        (with-current-buffer "many-errors-for-error-list.el"
+          ;; Remove a bunch of errors
+          (setq flycheck-current-errors (-drop 2 flycheck-current-errors)))
+        (with-current-buffer (flycheck-error-list-buffer)
+          (flycheck-error-list-refresh)
+          (should (string= (buffer-string) (format "
+
+\C-l
+*** many-errors-for-error-list.el: Syntax and style errors (Flycheck v%s)
+many-errors-for-error-list.el:7:warning: You should have a section marked \";;; Code:\" (emacs-lisp-checkdoc)
+many-errors-for-error-list.el:7:1:warning: `message' called with 0
+    args to fill 1 format field(s) (emacs-lisp)
+many-errors-for-error-list.el:9:2:warning: princ called with 0
+    arguments, but requires 1-2 (emacs-lisp)
+many-errors-for-error-list.el:14:1:warning: the function
+    `i-do-not-exist' is not known to be defined. (emacs-lisp)
+
+
+\C-l
+*** many-errors-for-error-list.el: Syntax and style errors (Flycheck v%s)
+many-errors-for-error-list.el:9:2:warning: princ called with 0
+    arguments, but requires 1-2 (emacs-lisp)
+many-errors-for-error-list.el:14:1:warning: the function
+    `i-do-not-exist' is not known to be defined. (emacs-lisp)
+" (flycheck-version) (flycheck-version))))))
+    (kill-buffer (flycheck-error-list-buffer))))
 
 (ert-deftest flycheck-list-errors ()
   (with-temp-buffer
@@ -1840,6 +1888,9 @@ foo/bar:15:8:error: Error 2 (python-flake8)
           ;; The list buffer should not be selected!
           (should-not (eq (current-buffer) list-buffer)))
         (with-current-buffer flycheck-error-list-buffer
+          ;; Source buffer should be tracked
+          (should (eq flycheck-error-list-source-buffer
+                      (get-buffer "many-errors-for-error-list.el")))
           ;; Point must be on the beginning of the header line
           (should (looking-at "^*** many-errors-for-error-list\\.el:"))
           ;; Test the contents of the error buffer
@@ -1854,8 +1905,7 @@ many-errors-for-error-list.el:9:2:warning: princ called with 0
     arguments, but requires 1-2 (emacs-lisp)
 many-errors-for-error-list.el:14:1:warning: the function
     `i-do-not-exist' is not known to be defined. (emacs-lisp)
-"
-                                                   (flycheck-version))))
+" (flycheck-version))))
           ;; Test navigation
           (compilation-next-error 1)
           (should (looking-at "^many-errors-for-error-list.el:7:warning:"))
@@ -1865,12 +1915,33 @@ many-errors-for-error-list.el:14:1:warning: the function
           (should (looking-at "^many-errors-for-error-list.el:9:2:warning:"))
           (compilation-next-error 1)
           (should (looking-at "^many-errors-for-error-list.el:14:1:warning:"))
-          (should-error (compilation-next-error 1))))
-    (-when-let (buffer (get-buffer flycheck-error-list-buffer))
-      (kill-buffer buffer))))
+          (should-error (compilation-next-error 1)))
+
+        (kill-buffer (flycheck-error-list-buffer))
+        (set-buffer "many-errors-for-error-list.el")
+
+        ;; Test listing at current position only
+        (goto-char (point-min))
+        (goto-char (+ (line-beginning-position 8) 2))
+        (flycheck-list-errors (point))
+        (with-current-buffer flycheck-error-list-buffer
+          (should (looking-at "^*** many-errors-for-error-list\\.el:"))
+          ;; Test the contents of the error buffer
+          (should (string= (buffer-string) (format "
+
+\C-l
+*** many-errors-for-error-list.el: Syntax and style errors (Flycheck v%s)
+many-errors-for-error-list.el:9:2:warning: princ called with 0
+    arguments, but requires 1-2 (emacs-lisp)
+" (flycheck-version))))))
+    (kill-buffer (flycheck-error-list-buffer))))
 
 
 ;;;; General error display
+(ert-deftest flycheck-display-errors-function ()
+  (should (eq flycheck-display-errors-function
+              #'flycheck-display-error-messages)))
+
 (ert-deftest flycheck-display-errors-no-function ()
   (let ((err (flycheck-error-new-at 10 20 'warning "This is a Flycheck error."))
         (flycheck-display-errors-function nil))
@@ -1891,7 +1962,7 @@ many-errors-for-error-list.el:14:1:warning: the function
 
 
 ;;;; Error display functions
-(ert-deftest flycheck-display-errors-default-function ()
+(ert-deftest flycheck-display-error-messages ()
   (let ((err (flycheck-error-new-at 10 20 'warning
                                     "This is a Flycheck error.")))
     (with-current-buffer "*Messages*"
@@ -1899,6 +1970,31 @@ many-errors-for-error-list.el:14:1:warning: the function
     (flycheck-display-error-messages (list err))
     (with-current-buffer "*Messages*"
       (should (s-contains? (flycheck-error-message err) (buffer-string))))))
+
+(ert-deftest flycheck-display-errors-in-list ()
+  (unwind-protect
+      (flycheck-testsuite-with-resource-buffer "many-errors-for-error-list.el"
+        (emacs-lisp-mode)
+        (flycheck-testsuite-buffer-sync)
+
+        (flycheck-display-errors-in-list (-take 2 flycheck-current-errors))
+        (let ((list-buffer (get-buffer flycheck-error-list-buffer)))
+          (should list-buffer)
+          ;; The list buffer should not be selected!
+          (should-not (eq (current-buffer) list-buffer)))
+        (with-current-buffer (flycheck-error-list-buffer)
+          (should (eq flycheck-error-list-source-buffer
+                      (get-buffer "many-errors-for-error-list.el")))
+          (should (looking-at "^*** many-errors-for-error-list\\.el:"))
+          (should (string= (buffer-string) (format "
+
+\C-l
+*** many-errors-for-error-list.el: Syntax and style errors (Flycheck v%s)
+many-errors-for-error-list.el:7:warning: You should have a section marked \";;; Code:\" (emacs-lisp-checkdoc)
+many-errors-for-error-list.el:7:1:warning: `message' called with 0
+    args to fill 1 format field(s) (emacs-lisp)
+" (flycheck-version))))))
+    (kill-buffer (flycheck-error-list-buffer))))
 
 
 ;;;; Working with error messages

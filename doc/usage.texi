@@ -440,6 +440,8 @@ You can also list all errors in the current buffer:
 @itemx M-x flycheck-list-errors
 @findex flycheck-list-errors
 List all errors in the current buffer in a separate buffer.
+
+With prefix arg, list only errors at point.
 @end table
 
 If you hover a highlighted error with the mouse, a tooltip with the
@@ -454,10 +456,29 @@ A function to display errors under point.
 If set to a function, call the function with a list of all errors to
 show.  If set to nil, to not display errors at all.
 
-The default function @code{flycheck-display-error-messages} shows all
-error messages separated by empty lines in the echo area or in a
-separate buffer depending on the number of messages.
+The default function is @code{flycheck-display-error-messages}.
 @end defopt
+
+The following display functions are available:
+@table @code
+@item flycheck-display-error-messages
+@findex flycheck-display-error-messages
+Show error messages separated by empty lines in the echo area.  If the
+error messages are too long for the echo area, show the error messages
+in a popup buffer instead.
+
+See @code{display-message-or-buffer} for details on when popup buffers
+are used.
+
+@item flycheck-display-errors-in-list
+@findex flycheck-display-errors-in-list
+Show errors in the error list from @code{flycheck-list-errors} or
+@kbd{C-c ! l}.
+
+Note that this function does @b{not} actually show the error list
+itself, but only adds the errors at point to it.  You need to open the
+error list manually with @kbd{C-c ! l} first.
+@end table
 
 You can also work with the error messages at point, and copy them into
 the kill ring or search them on Google:

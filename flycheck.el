@@ -222,7 +222,7 @@ and there may be further syntax checkers in the chain.
 
 This variable is an abnormal hook.")
 
-(defcustom flycheck-display-errors-function 'flycheck-display-error-messages
+(defcustom flycheck-display-errors-function #'flycheck-display-error-messages
   "Function to display error messages.
 
 If set to a function, call the function with the list of errors
@@ -231,7 +231,11 @@ to display as single argument.  Each error is an instance of the
 
 If set to nil, do not display errors at all."
   :group 'flycheck
-  :type 'function
+  :type '(choice (const :tag "Display error messages"
+                        flycheck-display-error-messages)
+                 (const :tag "Display errors in error list"
+                        flycheck-display-errors-in-list)
+                 (function :tag "Error display function"))
   :package-version '(flycheck . "0.13"))
 
 (defcustom flycheck-indication-mode 'left-fringe
@@ -2567,16 +2571,33 @@ the beginning of the buffer."
 (defconst flycheck-error-list-buffer "*Flycheck errors*"
   "The name of the buffer to show error lists.")
 
+(defun flycheck-error-list-buffer ()
+  "Get the buffer to show error lists.
+
+If the buffer does not exist yet, create it.
+
+Return the buffer object."
+  (get-buffer-create flycheck-error-list-buffer))
+
 (defconst flycheck-list-error-regex-alist
   '(("^\\(?1:.+?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)?error:" 1 2 3 2)
     ("^\\(?1:.+?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)?warning:" 1 2 3 1))
   "Compilation mode expressions for Flycheck error listings.")
 
+(defvar flycheck-error-list-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "g" #'flycheck-error-list-refresh)
+    map)
+  "Keymap for Flycheck error list buffers.")
+
 (define-derived-mode flycheck-error-list-mode compilation-mode "Flycheck errors"
   "A major mode for a Flycheck error listing."
   (setq-local compilation-error-regexp-alist flycheck-list-error-regex-alist))
 
-(defun flycheck-list-buffer-label (buffer)
+(defvar-local flycheck-error-list-source-buffer nil
+  "The current source buffer of the error list.")
+
+(defun flycheck-error-list-buffer-label (buffer)
   "Create a list label for BUFFER relative to DIRECTORY.
 
 BUFFER is a buffer object.
@@ -2590,7 +2611,7 @@ Return the label as string."
     (file-relative-name filename)
     (format "#<buffer %s>" (buffer-name buffer))))
 
-(defun flycheck-list-error-label (err)
+(defun flycheck-error-list-error-label (err)
   "Create a list label for ERR.
 
 ERR is a Flycheck error.
@@ -2602,61 +2623,114 @@ relative to the current `default-directory'.
 Return the label as string."
   (-if-let (filename (flycheck-error-filename err))
     (file-relative-name filename)
-    (flycheck-list-buffer-label (flycheck-error-buffer err))))
+    (flycheck-error-list-buffer-label (flycheck-error-buffer err))))
 
-(defun flycheck-list-add-header (buffer)
-  "Add a error header for BUFFER .
+(defun flycheck-error-list-insert-header (buffer)
+  "Insert an error header for BUFFER into the current buffer.
 
 Insert an error list header for BUFFER into the current buffer.
 The header contains the filename of BUFFER relative to the
 current `default-directory', or the buffer name, if BUFFER has no
 file name."
   (insert (format "\n\n\C-l\n*** %s: Syntax and style errors (Flycheck v%s)\n"
-                  (flycheck-list-buffer-label buffer)
+                  (flycheck-error-list-buffer-label buffer)
                   (or (flycheck-version) "Unknown"))))
 
-(defun flycheck-list-add-errors (errors)
-  "Add a list of all ERRORS to the current buffer.
+(defun flycheck-error-list-insert-errors (errors)
+  "Insert a list of all ERRORS into the current buffer.
 
 Insert a human-readable listing of ERRORS into the current
 buffer.  The file names of ERRORS are printed relative to the
 current `default-directory'."
   (--each errors
-    (insert (flycheck-list-error-label it))
+    (insert (flycheck-error-list-error-label it))
     (insert ":")
     (insert (flycheck-error-format it))
     (insert "\n")))
 
-(defun flycheck-list-errors ()
-  "List all errors in current buffer.
+(defun flycheck-error-list-add-errors (errors &optional source-buffer)
+  "Add ERRORS from SOURCE-BUFFER to the Flycheck error list.
 
-Show all Flycheck errors in the current buffer in a separate window.
+ERRORS is a list of Flycheck errors to show.  SOURCE-BUFFER is
+the buffer from which these errors originate, defaulting to the
+current buffer.
+
+The name of SOURCE-BUFFER is shown in the header inserted for
+ERRORS.  It is also added to `flycheck-error-list-source-buffer'
+and thus used by `flycheck-error-list-refresh'."
+  (let* ((source-buffer (or source-buffer (current-buffer)))
+         ;; Remember the default directory of the source buffer
+         (source-directory (buffer-local-value 'default-directory source-buffer)))
+    (with-current-buffer (flycheck-error-list-buffer)
+      (flycheck-error-list-mode)
+      (setq default-directory source-directory ; Change to the right directory
+                                        ; to resolve error references properly
+            flycheck-error-list-source-buffer source-buffer)
+      (let ((inhibit-read-only t))
+        (goto-char (point-max))
+        (flycheck-error-list-insert-header source-buffer)
+        (flycheck-error-list-insert-errors errors)))))
+
+(defun flycheck-error-list-goto-current-errors ()
+  "Move the point to the beginning of the current errors."
+  (goto-char (point-max))
+  (re-search-backward "\C-l" nil :no-error)
+  (beginning-of-line)
+  (forward-line 1))
+
+(defun flycheck-error-list-recenter ()
+  "Recenter the current error list buffer.
+
+Move the point to the beginning of the current errors, and
+recenter the display, if the error list is currently shown."
+  (-if-let (window (get-buffer-window))
+    (with-selected-window window
+      ;; We must move the point with the right window selected, for otherwise
+      ;; the point location is mysteriously wrong when recentering :|
+      (flycheck-error-list-goto-current-errors)
+      (recenter 0))
+    ;; If there is no window, just update the location of the point
+    (flycheck-error-list-goto-current-errors)))
+
+(defun flycheck-error-list-refresh ()
+  "Refresh the current error list.
+
+Add all errors currently reported for the current
+`flycheck-error-list-source-buffer', and recenter the error
+list."
+  (interactive)
+  (unless (derived-mode-p 'flycheck-error-list-mode)
+    (user-error "The current buffer is no error list"))
+  (let ((source flycheck-error-list-source-buffer))
+    (when (buffer-live-p source)
+      (unless (buffer-local-value 'flycheck-mode source)
+        (user-error "Flycheck mode disabled in %S" source))
+      (let ((errors (buffer-local-value 'flycheck-current-errors source)))
+        (flycheck-error-list-add-errors errors source))
+      (flycheck-error-list-recenter))))
+
+(defun flycheck-list-errors (&optional pos)
+  "List all errors at POS in current buffer.
+
+Show all Flycheck errors at POS in the current buffer in a
+separate window.  If POS is omitted or nil, show all errors.
+
+Interactively, show all Flycheck errors.  With prefix arg, only
+show errors at point.
 
 Return the buffer containing the error listing."
-  (interactive)
-  (if flycheck-mode
-      (let ((source-buffer (current-buffer))
-            (source-directory default-directory)
-            (errors flycheck-current-errors)
-            (list-buffer (get-buffer-create flycheck-error-list-buffer)))
-        (with-current-buffer list-buffer
-          (flycheck-error-list-mode)
-          (setq default-directory source-directory)
-          (let ((inhibit-read-only t))
-            (goto-char (point-max))
-            (flycheck-list-add-header source-buffer)
-            (flycheck-list-add-errors errors)))
-        (pop-to-buffer list-buffer)
-        ;; Before before the first current error, and recenter the window
-        (goto-char (point-max))
-        (re-search-backward "\C-l" nil :no-error)
-        (beginning-of-line)
-        (forward-line 1)
-        (recenter 0)
-        ;; Switch back to the old window
-        (other-window -1)
-        list-buffer)
-    (user-error "Flycheck mode not enabled")))
+  (interactive (when current-prefix-arg (list (point))))
+  (unless flycheck-mode
+    (user-error "Flycheck mode not enabled"))
+  (let ((errors (if pos
+                    (flycheck-overlay-errors-at pos)
+                  flycheck-current-errors)))
+    (flycheck-error-list-add-errors errors)
+    (pop-to-buffer (flycheck-error-list-buffer))
+    (flycheck-error-list-recenter)
+    ;; Switch back to the old window
+    (other-window -1)
+    (flycheck-error-list-buffer)))
 
 
 ;;;; General error display
@@ -2724,6 +2798,18 @@ Hide the error buffer if there is no error under point."
                (window (get-buffer-window buffer)))
     (unless (flycheck-overlays-at (point))
       (quit-window nil window))))
+
+(defun flycheck-display-errors-in-list (errors)
+  "Display ERRORS in the error list.
+
+Add all ERRORS to the error list, but do *not* show the error
+list.
+
+Note that this function does *not* actually show the error list,
+it just adds ERRORS to it."
+  (flycheck-error-list-add-errors errors)
+  (with-current-buffer (flycheck-error-list-buffer)
+    (flycheck-error-list-recenter)))
 
 
 ;;;; Working with error messages

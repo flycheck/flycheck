@@ -726,6 +726,19 @@ Remove the obsolete @code{flycheck-error-face} and
 @end itemize
 
 @item
+New features:
+
+@itemize
+@item
+@ghissue{166, List errors at point only with prefix arg to
+@code{flycheck-list-errors}}
+@item
+@ghissue{166, Add new display function
+@code{flycheck-display-errors-in-list} to display errors at point in the
+error list}
+@end itemize
+
+@item
 New syntax checkers:
 
 @itemize @bullet
@@ -754,6 +767,8 @@ Bug fixes:
 @item
 Fix warnings about flawed definitions in @code{emacs-lisp} and
 @code{emacs-lisp-checkdoc}, caused by faulty formatting of sexps
+@item
+@ghissue{166, Refresh error lists when pressing @kbd{g}}
 @end itemize
 
 @end itemize
