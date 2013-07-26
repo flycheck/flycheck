@@ -1951,6 +1951,20 @@ Pop up a help buffer with the documentation of CHECKER."
                                                          &optional level message
                                                          &key checker filename
                                                          (buffer (current-buffer)))))
+  "Structure representing an error reported by a syntax checker.
+Slots:
+
+`buffer' The buffer the reported was reported for, as buffer object.
+
+`checker' The syntax checker which reported this error, as symbol.
+
+`filename'  The file name the error refers to, as string.
+
+`line' The line number the error refers to, as number.
+
+`column' The column number the error refers to, as number.
+
+`level' The error level, as either `warning' or `error'."
   buffer checker filename line column message level)
 
 (defmacro flycheck-error-with-buffer (err &rest forms)
