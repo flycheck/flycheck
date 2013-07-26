@@ -3,3 +3,5 @@
 (if t
     (message)
   (message "Hello foo"))
+
+(dummy-package-foo)

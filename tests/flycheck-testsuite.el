@@ -2231,22 +2231,50 @@ https://github.com/bbatsov/prelude/issues/259."
     (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
 
 (ert-deftest checker-emacs-lisp-sytnax-error ()
-  "Test a syntax error caused by a missing parenthesis."
   (flycheck-testsuite-should-syntax-check
    "checkers/emacs-lisp-syntax-error.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
    '(3 1 "End of file during parsing" error)))
 
 (ert-deftest checker-emacs-lisp-syntax-error-compressed ()
-  "Test a syntax error caused by a missing parenthesis."
   (flycheck-testsuite-should-syntax-check
    "checkers/emacs-lisp-syntax-error.el.gz" 'emacs-lisp-mode 'emacs-lisp-checkdoc
    '(3 1 "End of file during parsing" error)))
 
+(ert-deftest checker-emacs-lisp-error ()
+  (flycheck-testsuite-should-syntax-check
+   "checkers/emacs-lisp-error.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
+   '(3 1 "Cannot open load file: no such file or directory, dummy-package" error)))
+
+(ert-deftest checker-emacs-lisp-error-load-path ()
+  (flycheck-testsuite-with-hook emacs-lisp-mode-hook
+      (setq flycheck-emacs-lisp-load-path
+            (list (flycheck-testsuite-resource-filename
+                   "dummy-elpa/dummy-package-0.1")))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/emacs-lisp-error.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc)))
+
+(ert-deftest checker-emacs-lisp-error-packages ()
+  (flycheck-testsuite-with-hook emacs-lisp-mode-hook
+      (setq flycheck-emacs-lisp-package-user-dir
+            (flycheck-testsuite-resource-filename "dummy-elpa")
+            flycheck-emacs-lisp-initialize-packages t)
+    (flycheck-testsuite-should-syntax-check
+     "checkers/emacs-lisp-error.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc)))
+
 (ert-deftest checker-emacs-lisp-warning ()
-  "Test a warning caused by a missing argument."
   (flycheck-testsuite-should-syntax-check
    "checkers/emacs-lisp-warning.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
-   '(4 6 "message called with 0 arguments,\n    but requires 1+" warning)))
+   '(4 6 "message called with 0 arguments,\n    but requires 1+" warning)
+   '(8 1 "the function `dummy-package-foo'\n    is not known to be defined." warning)))
+
+(ert-deftest checker-emacs-lisp-warning-packages ()
+  (flycheck-testsuite-with-hook emacs-lisp-mode-hook
+      (setq flycheck-emacs-lisp-package-user-dir
+            (flycheck-testsuite-resource-filename "dummy-elpa")
+            flycheck-emacs-lisp-initialize-packages t)
+    (flycheck-testsuite-should-syntax-check
+     "checkers/emacs-lisp-warning.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
+     '(4 6 "message called with 0 arguments,\n    but requires 1+" warning))))
 
 (ert-deftest checker-emacs-lisp-inhibited-no-byte-compile ()
   "Test that Emacs Lisp does not check when byte compilation is
