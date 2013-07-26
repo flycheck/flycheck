@@ -3151,7 +3151,7 @@ is used."
   :risky t
   :package-version '(flycheck . "0.14"))
 
-(flycheck-def-option-var flycheck-emacs-lisp-initialize-packages t emacs-lisp
+(flycheck-def-option-var flycheck-emacs-lisp-initialize-packages nil emacs-lisp
   "Whether to initialize packages in the Emacs Lisp syntax checker.
 
 When non-nil, call `package-initialize' before invoking the byte
