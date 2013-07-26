@@ -169,6 +169,15 @@ if ! [ -d "$ELIXIR_DIR" -a -x "$ELIXIR_DIR/elixirc" ]; then
     sudo ln -fs "$ELIXIR_DIR/bin/elixirc" "$ELIXIR_SYMDIR"
 fi
 
+# Install D compiler.
+DMD_VERSION=2.063.2
+DMD_DEB="dmd_${DMD_VERSION}-0_amd64.deb"
+command wget -q "http://downloads.dlang.org/releases/2013/${DMD_DEB}"
+# DMD depends on these packages but dpkg doesn't care about them.
+apt gcc-multilib xdg-utils
+sudo dpkg --install "$DMD_DEB"
+rm "$DMD_DEB"
+
 # Install carton for Emacs dependency management
 CARTON_VERSION=0.3.0
 CARTON_DIR="/opt/carton-${CARTON_VERSION}"

@@ -114,6 +114,7 @@ buffer-local wherever it is set."
   '(bash
     coffee-coffeelint
     css-csslint
+    d
     elixir
     emacs-lisp
     emacs-lisp-checkdoc
@@ -3039,6 +3040,28 @@ See URL `https://github.com/stubbornella/csslint'."
             line ", col "
             column ", Warning - " (message) line-end))
   :modes css-mode)
+
+(defun flycheck-d-base-dir ()
+  (let ((nest (save-excursion
+                (goto-char (point-min))
+                (if (re-search-forward "module\s+\\([^\s]+\\);" nil t)
+                    (->> (match-string-no-properties 1)
+                      string-to-vector
+                      (cl-count ?.))
+                    0))))
+    (when (equal (file-name-nondirectory (buffer-file-name)) "package.d")
+      (cl-incf nest))
+    (concat "-I./" (s-repeat nest "../"))))
+
+(flycheck-define-checker d
+  "A D syntax checker using D compiler."
+  :command ("dmd" "-debug" "-o-" "-property"
+                  "-wi" ; Compilation will continue even if there are warnings
+                  (eval (flycheck-d-base-dir)) source)
+  :error-patterns
+  ((error line-start (file-name) "(" line "): Error: " (message) line-end)
+   (warning line-start (file-name) "(" line "): " (or "Warning" "Deprecation") ": " (message) line-end))
+  :modes d-mode)
 
 (flycheck-define-checker elixir
   "An Elixir syntax checker using the Elixir interpreter.
