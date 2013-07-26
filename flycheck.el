@@ -2570,7 +2570,7 @@ Return the buffer object."
   "A major mode for a Flycheck error listing."
   (setq-local compilation-error-regexp-alist flycheck-list-error-regex-alist))
 
-(defun flycheck-list-buffer-label (buffer)
+(defun flycheck-error-list-buffer-label (buffer)
   "Create a list label for BUFFER relative to DIRECTORY.
 
 BUFFER is a buffer object.
@@ -2584,7 +2584,7 @@ Return the label as string."
     (file-relative-name filename)
     (format "#<buffer %s>" (buffer-name buffer))))
 
-(defun flycheck-list-error-label (err)
+(defun flycheck-error-list-error-label (err)
   "Create a list label for ERR.
 
 ERR is a Flycheck error.
@@ -2596,30 +2596,60 @@ relative to the current `default-directory'.
 Return the label as string."
   (-if-let (filename (flycheck-error-filename err))
     (file-relative-name filename)
-    (flycheck-list-buffer-label (flycheck-error-buffer err))))
+    (flycheck-error-list-buffer-label (flycheck-error-buffer err))))
 
-(defun flycheck-list-add-header (buffer)
-  "Add a error header for BUFFER .
+(defun flycheck-error-list-insert-header (buffer)
+  "Insert an error header for BUFFER into the current buffer.
 
 Insert an error list header for BUFFER into the current buffer.
 The header contains the filename of BUFFER relative to the
 current `default-directory', or the buffer name, if BUFFER has no
 file name."
   (insert (format "\n\n\C-l\n*** %s: Syntax and style errors (Flycheck v%s)\n"
-                  (flycheck-list-buffer-label buffer)
+                  (flycheck-error-list-buffer-label buffer)
                   (or (flycheck-version) "Unknown"))))
 
-(defun flycheck-list-add-errors (errors)
-  "Add a list of all ERRORS to the current buffer.
+(defun flycheck-error-list-insert-errors (errors)
+  "Insert a list of all ERRORS into the current buffer.
 
 Insert a human-readable listing of ERRORS into the current
 buffer.  The file names of ERRORS are printed relative to the
 current `default-directory'."
   (--each errors
-    (insert (flycheck-list-error-label it))
+    (insert (flycheck-error-list-error-label it))
     (insert ":")
     (insert (flycheck-error-format it))
     (insert "\n")))
+
+(defun flycheck-error-list-add-errors (errors &optional source-buffer)
+  "Add ERRORS from SOURCE-BUFFER to the Flycheck error list.
+
+ERRORS is a list of Flycheck errors to show.  SOURCE-BUFFER is
+the buffer from which these errors originate, defaulting to the
+current buffer.  The name of this buffer is shown in the header."
+  (let* ((source-buffer (or source-buffer (current-buffer)))
+         ;; Remember the default directory of the source buffer
+         (source-directory (with-current-buffer source-buffer
+                             default-directory)))
+    (with-current-buffer (flycheck-error-list-buffer)
+      (flycheck-error-list-mode)
+      (setq default-directory source-directory) ; Change to the right directory
+                                        ; to resolve error references properly
+      (let ((inhibit-read-only t))
+        (goto-char (point-max))
+        (flycheck-error-list-insert-header source-buffer)
+        (flycheck-error-list-insert-errors errors)))))
+
+(defun flycheck-error-list-recenter ()
+  "Recenter the current error list buffer.
+
+Move the point to the beginning of the current errors, and
+recenter the display."
+  (goto-char (point-max))
+  (re-search-backward "\C-l" nil :no-error)
+  (beginning-of-line)
+  (forward-line 1)
+  (recenter 0))
 
 (defun flycheck-list-errors (&optional pos)
   "List all errors at POS in current buffer.
@@ -2633,29 +2663,15 @@ show errors at point.
 Return the buffer containing the error listing."
   (interactive (when current-prefix-arg (list (point))))
   (if flycheck-mode
-      (let ((source-buffer (current-buffer))
-            (source-directory default-directory)
-            (errors (if pos
+      (let ((errors (if pos
                         (flycheck-overlay-errors-at pos)
-                      flycheck-current-errors))
-            (list-buffer (flycheck-error-list-buffer)))
-        (with-current-buffer list-buffer
-          (flycheck-error-list-mode)
-          (setq default-directory source-directory)
-          (let ((inhibit-read-only t))
-            (goto-char (point-max))
-            (flycheck-list-add-header source-buffer)
-            (flycheck-list-add-errors errors)))
-        (pop-to-buffer list-buffer)
-        ;; Before before the first current error, and recenter the window
-        (goto-char (point-max))
-        (re-search-backward "\C-l" nil :no-error)
-        (beginning-of-line)
-        (forward-line 1)
-        (recenter 0)
+                      flycheck-current-errors)))
+        (flycheck-error-list-add-errors errors)
+        (pop-to-buffer (flycheck-error-list-buffer))
+        (flycheck-error-list-recenter)
         ;; Switch back to the old window
         (other-window -1)
-        list-buffer)
+        (flycheck-error-list-buffer))
     (user-error "Flycheck mode not enabled")))
 
 

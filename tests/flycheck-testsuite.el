@@ -1745,38 +1745,40 @@ error is signaled on all subsequent checks."
 
 
 ;;;; Error list
-(ert-deftest flycheck-list-buffer-label ()
+(ert-deftest flycheck-error-list-buffer-label ()
   (with-temp-buffer
     (rename-buffer "Foo")
-    (should (string= (flycheck-list-buffer-label (current-buffer))
+    (should (string= (flycheck-error-list-buffer-label (current-buffer))
                      "#<buffer Foo>")))
   (with-temp-buffer
     (set-visited-file-name (expand-file-name "foo/bar" flycheck-testsuite-dir)
                            :no-query)
     (cd flycheck-testsuite-dir)
-    (should (string= (flycheck-list-buffer-label (current-buffer)) "foo/bar"))))
+    (should (string= (flycheck-error-list-buffer-label (current-buffer))
+                     "foo/bar"))))
 
-(ert-deftest flycheck-list-error-label ()
+(ert-deftest flycheck-error-list-error-label ()
   (with-temp-buffer
     (rename-buffer "Foo")
-    (should (string= (flycheck-list-error-label (flycheck-error-new-at 1 1))
+    (should (string= (flycheck-error-list-error-label (flycheck-error-new-at 1 1))
                      "#<buffer Foo>")))
   (with-temp-buffer
     (set-visited-file-name (expand-file-name "foo/bar" flycheck-testsuite-dir)
                            :no-query)
     (cd flycheck-testsuite-dir)
-    (should (string= (flycheck-list-error-label (flycheck-error-new-at 1 1))
+    (should (string= (flycheck-error-list-error-label (flycheck-error-new-at 1 1))
                      "foo/bar")))
   (with-temp-buffer
     (cd flycheck-testsuite-dir)
     (let* ((filename (expand-file-name "spam/with/eggs" flycheck-testsuite-dir))
            (err (flycheck-error-new-at 1 1 'warning "Foo" :filename filename)))
-      (should (string= (flycheck-list-error-label err) "spam/with/eggs")))))
+      (should (string= (flycheck-error-list-error-label err)
+                       "spam/with/eggs")))))
 
-(ert-deftest flycheck-list-add-header ()
+(ert-deftest flycheck-error-list-insert-header ()
   (with-temp-buffer
     (rename-buffer "Foo")
-    (flycheck-list-add-header (current-buffer))
+    (flycheck-error-list-insert-header (current-buffer))
     (should (string= (buffer-string)
                      (format "
 
@@ -1788,7 +1790,7 @@ error is signaled on all subsequent checks."
     (set-visited-file-name (expand-file-name "spam/with/eggs" flycheck-testsuite-dir)
                            :no-query)
     (cd flycheck-testsuite-dir)
-    (flycheck-list-add-header (current-buffer))
+    (flycheck-error-list-insert-header (current-buffer))
     (should (string= (buffer-string)
                      (format "
 
@@ -1797,7 +1799,7 @@ error is signaled on all subsequent checks."
 "
                              (flycheck-version))))))
 
-(ert-deftest flycheck-list-add-errors ()
+(ert-deftest flycheck-error-list-insert-errors ()
   (let (buf1 buf2)
     (with-temp-buffer
       (setq buf1 (current-buffer))
@@ -1816,7 +1818,7 @@ error is signaled on all subsequent checks."
                               (flycheck-error-new-at 15 8 'error "Error 2"
                                                      :buffer buf1 :checker 'python-flake8
                                                      :filename (expand-file-name "foo/bar" flycheck-testsuite-dir)))))
-            (flycheck-list-add-errors errors))
+            (flycheck-error-list-insert-errors errors))
           (should (string= (buffer-string) "\
 #<buffer Spam>:4:warning: Warning 1 (emacs-lisp)
 spam/with/eggs:6:10:error: Error 1 (ruby)
