@@ -3151,18 +3151,27 @@ is used."
   :risky t
   :package-version '(flycheck . "0.14"))
 
-(flycheck-def-option-var flycheck-emacs-lisp-initialize-packages nil emacs-lisp
+(flycheck-def-option-var flycheck-emacs-lisp-initialize-packages
+    'auto emacs-lisp
   "Whether to initialize packages in the Emacs Lisp syntax checker.
 
-When non-nil, call `package-initialize' before invoking the byte
-compiler to make all packages available.  Otherwise do not
-initialize packages."
-  :type 'boolean
+To initialize packages, call `package-initialize' before
+byte-compiling the file to check.
+
+When nil, never initialize packages.  When `auto', initialize
+packages only when checking files from `user-emacs-directory'.
+For any other non-nil value, always initialize packages."
+  :type '(choice (const :tag "Do not initialize packages" nil)
+                 (const :tag "Initialize packages for configuration only" auto)
+                 (const :tag "Always initialize packages" t))
   :risky t
   :package-version '(flycheck . "0.14"))
 
 (defun flycheck-option-emacs-lisp-package-initialize (value)
   "Option filter for `flycheck-emacs-lisp-initialize-packages'."
+  (when (eq value 'auto)
+    (let ((user-dir (expand-file-name user-emacs-directory)))
+      (setq value (s-starts-with? (buffer-file-name) user-dir))))
   ;; Return the function name, if packages shall be initialized, otherwise
   ;; return nil to have Flycheck drop the whole option
   (when value "package-initialize"))

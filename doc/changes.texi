@@ -725,7 +725,7 @@ Remove the obsolete @code{flycheck-error-face} and
 @code{flycheck-warning-face}
 @item
 @ghissue{176, Do not initialize packages by default in @code{emacs-lisp}
-syntax checker}
+syntax checker for non-configuration files}
 @end itemize
 
 @item

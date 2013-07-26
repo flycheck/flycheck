@@ -254,8 +254,13 @@ options are provided by Flycheck (use @kbd{C-h v} or @kbd{M-x
 describe-variable} on the variable name for detailed help):
 
 @defopt flycheck-emacs-lisp-initialize-packages
-When non-nil, initialize packages (see @code{package-initialize}) before
+Whether to initialize packages (see @code{package-initialize}) before
 invoking the byte compiler in the @code{emacs-lisp} syntax checker.
+
+When @code{nil}, never initialize packages.  When @code{auto},
+initialize packages only when checking files from the user's Emacs
+configuration in @code{user-emacs-directory}.  For any other non-nil
+value, always initialize packages.
 @end defopt
 
 @defopt flycheck-emacs-lisp-load-path
