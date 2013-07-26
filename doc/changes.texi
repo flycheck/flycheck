@@ -739,6 +739,10 @@ error list}
 @item
 New @code{option-list} argument cell to pass option lists to a syntax
 checker
+@item
+@ghissue{174, New @code{flycheck-emacs-lisp-load-path} option to
+customize the @code{load-path} used by the @code{emacs-lisp} syntax
+checker}
 @end itemize
 
 @item

@@ -3102,7 +3102,7 @@ See URL `http://elixir-lang.org/'."
 
 (defconst flycheck-emacs-command
   `(,(concat invocation-directory invocation-name)
-    "--no-site-file" "--no-site-lisp" "--batch" "--eval")
+    "--no-site-file" "--no-site-lisp" "--batch")
   "A command to execute an Emacs Lisp form in a background process.")
 
 (defun flycheck-temp-compilation-buffer-p ()
@@ -3134,9 +3134,32 @@ during byte-compilation or autoloads generation, or nil otherwise."
      (mapc 'byte-compile-file command-line-args-left)
      (mapc 'delete-file flycheck-byte-compiled-files)))
 
+(flycheck-def-option-var flycheck-emacs-lisp-load-path nil emacs-lisp
+  "Load path to use in the Emacs Lisp syntax checker.
+
+When set to a list of strings, add each directory in this list to
+the `load-path' before invoking the byte compiler.  When nil,
+only use the built-in `load-path' of Emacs.
+
+The directory of the file being checked is always part of the
+`load-path' while checking, regardless of the value of this
+variable.
+
+Set this variable to `load-path' to use the `load-path' of your
+Emacs session for syntax checking.
+
+Note that changing this variable can lead to wrong results of the
+syntax check, e.g. if an unexpected version of a required library
+is used."
+  :type '(repeat directory)
+  :risky t
+  :package-version '(flycheck . "0.14"))
+
 (flycheck-define-checker emacs-lisp
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler."
   :command ((eval flycheck-emacs-command)
+            (option-list "--directory" flycheck-emacs-lisp-load-path)
+            "--eval"
             (eval (flycheck-sexp-to-string flycheck-emacs-lisp-check-form))
             source-inplace)
   :error-patterns
@@ -3190,7 +3213,7 @@ during byte-compilation or autoloads generation, or nil otherwise."
   "An Emacs Lisp style checker using CheckDoc.
 
 The checker runs `checkdoc-current-buffer'."
-  :command ((eval flycheck-emacs-command)
+  :command ((eval flycheck-emacs-command) "--eval"
             (eval (flycheck-sexp-to-string flycheck-emacs-lisp-checkdoc-form))
             source)
   :error-patterns
