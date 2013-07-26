@@ -723,6 +723,9 @@ Fix version information on Emacs trunk builds
 @item
 Remove the obsolete @code{flycheck-error-face} and
 @code{flycheck-warning-face}
+@item
+@ghissue{176, Do not initialize packages by default in @code{emacs-lisp}
+syntax checker for non-configuration files}
 @end itemize
 
 @item
@@ -736,6 +739,20 @@ New features:
 @ghissue{166, Add new display function
 @code{flycheck-display-errors-in-list} to display errors at point in the
 error list}
+@item
+New @code{option-list} argument cell to pass option lists to a syntax
+checker
+@item
+@ghissue{174, New @code{flycheck-emacs-lisp-load-path} option to
+customize the @code{load-path} used by the @code{emacs-lisp} syntax
+checker}
+@item
+@ghissue{176, New @code{flycheck-emacs-lisp-initialize-packages} option
+to initialize packages in the @code{emacs-lisp} syntax checker}
+@item
+@ghissue{176, New @code{flycheck-emacs-lisp-package-user-dir} option to
+configure the package directory for the @code{emacs-lisp} syntax
+checker}
 @end itemize
 
 @item

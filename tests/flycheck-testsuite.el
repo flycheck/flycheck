@@ -832,6 +832,11 @@ All declared checkers should be registered."
   (should (equal (flycheck-option-with-value-argument "--foo=" "bar")
                  '("--foo=bar"))))
 
+(ert-deftest flycheck-prepend-with-option ()
+  (should (null (flycheck-prepend-with-option "-f" nil)))
+  (should (equal (flycheck-prepend-with-option "-L" '("foo" "bar"))
+                 '("-L" "foo" "-L" "bar"))))
+
 (ert-deftest flycheck-temporary-buffer-p ()
   (with-temp-buffer
     (should (flycheck-temporary-buffer-p)))
@@ -879,6 +884,13 @@ All declared checkers should be registered."
   (should-not (flycheck-command-argument-p '(option "foo" 'bar)))
   (should-not (flycheck-command-argument-p '(option "foo" bar 'filter)))
   (should-not (flycheck-command-argument-p '(option "foo"))))
+
+(ert-deftest flycheck-command-argument-p-option-list ()
+  (should (flycheck-command-argument-p '(option-list "foo" bar)))
+  (should (flycheck-command-argument-p '(option-list "foo" bar filter)))
+  (should-not (flycheck-command-argument-p '(option-list "foo" 'bar)))
+  (should-not (flycheck-command-argument-p '(option-list "foo" bar 'filter)))
+  (should-not (flycheck-command-argument-p '(option-list "foo"))))
 
 (ert-deftest flycheck-command-argument-p-eval ()
   (should (flycheck-command-argument-p '(eval bar)))
@@ -974,6 +986,29 @@ All declared checkers should be registered."
                    '(option "--foo=" flycheck-test-option-var number-to-string) 'emacs-lisp)
                   :type 'wrong-type-argument)))
 
+(ert-deftest flycheck-substitute-argument-option-list ()
+  (let ((flycheck-test-option-var "spam"))
+    (should-error (flycheck-substitute-argument
+                   '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)))
+  (let ((flycheck-test-option-var '("spam" "eggs")))
+    (should (equal (flycheck-substitute-argument
+                    '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)
+                   '("--foo" "spam" "--foo" "eggs"))))
+  (let ((flycheck-test-option-var '(10 20)))
+    (should-error (flycheck-substitute-argument
+                   '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp))
+    (should (equal (flycheck-substitute-argument
+                    '(option-list "--foo" flycheck-test-option-var number-to-string) 'emacs-lisp)
+                   '("--foo" "10" "--foo" "20"))))
+  (let (flycheck-test-option-var)
+    (should-not (flycheck-substitute-argument
+                 '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)))
+  (let ((flycheck-test-option-var '(nil)))
+    ;; Catch an error, because `number-to-string' is called with nil
+    (should-error (flycheck-substitute-argument
+                   '(option-list "--foo" flycheck-test-option-var number-to-string) 'emacs-lisp)
+                  :type 'wrong-type-argument)))
+
 (ert-deftest flycheck-substitute-argument-eval ()
   (let ((flycheck-test-option-var '("Hello " "World")))
     (should (equal (flycheck-substitute-argument '(eval flycheck-test-option-var) 'emacs-lisp)
@@ -1054,6 +1089,30 @@ All declared checkers should be registered."
                     'emacs-lisp)
                    "--foo\\=spam\\ with\\ eggs"))))
 
+(ert-deftest flycheck-substitute-shell-argument-option-list ()
+  (let ((flycheck-test-option-var "spam"))
+    (should-error (flycheck-substitute-shell-argument
+                   '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)))
+  (let ((flycheck-test-option-var '("spam" "with eggs")))
+    (should (equal (flycheck-substitute-shell-argument
+                    '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)
+                   "--foo spam --foo with\\ eggs")))
+  (let ((flycheck-test-option-var '(10 20)))
+    (should-error (flycheck-substitute-shell-argument
+                   '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp))
+    (should (equal (flycheck-substitute-shell-argument
+                    '(option-list "--foo" flycheck-test-option-var number-to-string) 'emacs-lisp)
+                   "--foo 10 --foo 20")))
+  (let (flycheck-test-option-var)
+    (should (equal (flycheck-substitute-shell-argument
+                    '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)
+                   "")))
+  (let ((flycheck-test-option-var '(nil)))
+    ;; Catch an error, because `number-to-string' is called with nil
+    (should-error (flycheck-substitute-shell-argument
+                   '(option-list "--foo" flycheck-test-option-var number-to-string) 'emacs-lisp)
+                  :type 'wrong-type-argument)))
+
 (ert-deftest flycheck-substitute-shell-argument-eval ()
   (mocker-let
       ((flycheck-substitute-argument
@@ -1130,7 +1189,7 @@ All declared checkers should be registered."
       (setenv "HOME" old-home))))
 
 
-;;;; Option filters
+;;;; Generic option filters
 (ert-deftest flycheck-option-int ()
   "Test conversion with `flycheck-option-int'."
   (should (null (flycheck-option-int nil)))
@@ -2172,22 +2231,50 @@ https://github.com/bbatsov/prelude/issues/259."
     (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
 
 (ert-deftest checker-emacs-lisp-sytnax-error ()
-  "Test a syntax error caused by a missing parenthesis."
   (flycheck-testsuite-should-syntax-check
    "checkers/emacs-lisp-syntax-error.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
    '(3 1 "End of file during parsing" error)))
 
 (ert-deftest checker-emacs-lisp-syntax-error-compressed ()
-  "Test a syntax error caused by a missing parenthesis."
   (flycheck-testsuite-should-syntax-check
    "checkers/emacs-lisp-syntax-error.el.gz" 'emacs-lisp-mode 'emacs-lisp-checkdoc
    '(3 1 "End of file during parsing" error)))
 
+(ert-deftest checker-emacs-lisp-error ()
+  (flycheck-testsuite-should-syntax-check
+   "checkers/emacs-lisp-error.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
+   '(3 1 "Cannot open load file: no such file or directory, dummy-package" error)))
+
+(ert-deftest checker-emacs-lisp-error-load-path ()
+  (flycheck-testsuite-with-hook emacs-lisp-mode-hook
+      (setq flycheck-emacs-lisp-load-path
+            (list (flycheck-testsuite-resource-filename
+                   "dummy-elpa/dummy-package-0.1")))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/emacs-lisp-error.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc)))
+
+(ert-deftest checker-emacs-lisp-error-packages ()
+  (flycheck-testsuite-with-hook emacs-lisp-mode-hook
+      (setq flycheck-emacs-lisp-package-user-dir
+            (flycheck-testsuite-resource-filename "dummy-elpa")
+            flycheck-emacs-lisp-initialize-packages t)
+    (flycheck-testsuite-should-syntax-check
+     "checkers/emacs-lisp-error.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc)))
+
 (ert-deftest checker-emacs-lisp-warning ()
-  "Test a warning caused by a missing argument."
   (flycheck-testsuite-should-syntax-check
    "checkers/emacs-lisp-warning.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
-   '(4 6 "message called with 0 arguments,\n    but requires 1+" warning)))
+   '(4 6 "message called with 0 arguments,\n    but requires 1+" warning)
+   '(8 1 "the function `dummy-package-foo'\n    is not known to be defined." warning)))
+
+(ert-deftest checker-emacs-lisp-warning-packages ()
+  (flycheck-testsuite-with-hook emacs-lisp-mode-hook
+      (setq flycheck-emacs-lisp-package-user-dir
+            (flycheck-testsuite-resource-filename "dummy-elpa")
+            flycheck-emacs-lisp-initialize-packages t)
+    (flycheck-testsuite-should-syntax-check
+     "checkers/emacs-lisp-warning.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
+     '(4 6 "message called with 0 arguments,\n    but requires 1+" warning))))
 
 (ert-deftest checker-emacs-lisp-inhibited-no-byte-compile ()
   "Test that Emacs Lisp does not check when byte compilation is
