@@ -253,6 +253,31 @@ Some syntax checkers can be configured via options.  The following
 options are provided by Flycheck (use @kbd{C-h v} or @kbd{M-x
 describe-variable} on the variable name for detailed help):
 
+@defopt flycheck-emacs-lisp-initialize-packages
+Whether to initialize packages (see @code{package-initialize}) before
+invoking the byte compiler in the @code{emacs-lisp} syntax checker.
+
+When @code{nil}, never initialize packages.  When @code{auto},
+initialize packages only when checking files from the user's Emacs
+configuration in @code{user-emacs-directory}.  For any other non-nil
+value, always initialize packages.
+@end defopt
+
+@defopt flycheck-emacs-lisp-load-path
+The @code{load-path} to use while checking with @code{emacs-lisp}.
+
+The directory of the file being checked is always added to
+@code{load-path}, regardless of the value of this variable.
+
+Note that changing this variable can lead to wrong results of the
+syntax check, e.g. if an unexpected version of a required library
+is used.
+@end defopt
+
+@defopt flycheck-emacs-lisp-package-user-dir
+The package directory for the @code{emacs-lisp} syntax checker.
+@end defopt
+
 @defopt flycheck-flake8-maximum-complexity
 The maximum McCabe complexity the @code{python-flake8} syntax checker
 allows without reporting a warning.

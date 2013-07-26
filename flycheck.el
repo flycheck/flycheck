@@ -951,6 +951,20 @@ Otherwise `(list OPTION VALUE)' is returned."
       (list (concat option value))
     (list option value)))
 
+(defun flycheck-prepend-with-option (option items)
+  "Prepend each item in ITEMS with OPTION.
+
+Prepend OPTION to each item in ITEMS.
+
+ITEMS is a list of value to pass to the syntax checker.  OPTION
+is the option, as string.  ITEM-FILTER is a function to apply to
+each item."
+  (unless (stringp option)
+    (error "Option %S is not a string" option))
+  (->> items
+    (--map (list option it))
+    -flatten))
+
 (defun flycheck-temporary-buffer-p ()
   "Determine whether the current buffer is a temporary buffer.
 
@@ -1212,10 +1226,10 @@ error if not."
       (`(config-file ,option-name ,config-file-var)
        (and (stringp option-name)
             (symbolp config-file-var)))
-      (`(option ,option-name ,option-var)
+      (`(,(or `option `option-list) ,option-name ,option-var)
        (and (stringp option-name)
             (symbolp option-var)))
-      (`(option ,option-name ,option-var ,filter)
+      (`(,(or `option `option-list) ,option-name ,option-var ,filter)
        (and (stringp option-name)
             (symbolp option-var)
             (symbolp filter)))
@@ -1564,6 +1578,14 @@ nil.  In the latter case, return a list of arguments as described
 above.  If OPTION ends with a =, process it like in a
 `config-file' cell (see above).
 
+If ARG is a form `(option-list OPTION VARIABLE [FILTER])',
+retrieve the value of VARIABLE, which must be a list, and prepend
+OPTION before each item in this list.  FILTER is an optional
+function to be applied to each item in the list.  Items for which
+FILTER returns nil are dropped.  If the list is non-nil after the
+application of FILTER, return a list `(OPTION ITEM1 OPTION ITEM2
+...)'.  Otherwise return nil.
+
 If ARG is a form `(eval FORM), return the result of evaluating
 FORM in the buffer to be checked.  FORM must either return a
 string or a list of strings, or nil to indicate that nothing
@@ -1600,6 +1622,18 @@ are substituted within the body of cells!"
          (error "Value %S of %S (filter: %S) for option %s is not a string"
                 value variable filter option-name))
        (flycheck-option-with-value-argument option-name value)))
+    (`(option-list ,option-name ,variable)
+     (-when-let (value (symbol-value variable))
+       (unless (and (listp value) (-all? #'stringp value))
+         (error "Value %S of %S for option %S is not a list of strings"
+                value variable option-name))
+       (flycheck-prepend-with-option option-name value)))
+    (`(option-list ,option-name ,variable ,filter)
+     (-when-let (value (-keep filter (symbol-value variable)))
+       (unless (and (listp value) (-all? #'stringp value))
+         (error "Value %S of %S for option %S is not a list of strings"
+                value variable option-name))
+       (flycheck-prepend-with-option option-name value)))
     (`(eval ,form)
      (let ((result (eval form)))
        (if (or (null result)
@@ -1761,7 +1795,7 @@ directory, or nil otherwise."
   (custom-add-frequent-value 'flycheck-locate-config-file-functions it))
 
 
-;;;; Option filters
+;;;; Generic option filters
 (defun flycheck-option-int (value)
   "Convert an integral option VALUE to a string.
 
@@ -3068,7 +3102,7 @@ See URL `http://elixir-lang.org/'."
 
 (defconst flycheck-emacs-command
   `(,(concat invocation-directory invocation-name)
-    "--no-site-file" "--no-site-lisp" "--batch" "--eval")
+    "--no-site-file" "--no-site-lisp" "--batch")
   "A command to execute an Emacs Lisp form in a background process.")
 
 (defun flycheck-temp-compilation-buffer-p ()
@@ -3081,10 +3115,6 @@ during byte-compilation or autoloads generation, or nil otherwise."
 
 (defconst flycheck-emacs-lisp-check-form
   '(progn
-     ;; Initialize packages to at least try to load dependencies of the checked
-     ;; file
-     (package-initialize)
-
      ;; Try best to make local dependencies available
      (defun flycheck-extend-load-path (filename)
        (add-to-list 'load-path (file-name-directory filename)))
@@ -3100,9 +3130,79 @@ during byte-compilation or autoloads generation, or nil otherwise."
      (mapc 'byte-compile-file command-line-args-left)
      (mapc 'delete-file flycheck-byte-compiled-files)))
 
+(flycheck-def-option-var flycheck-emacs-lisp-load-path nil emacs-lisp
+  "Load path to use in the Emacs Lisp syntax checker.
+
+When set to a list of strings, add each directory in this list to
+the `load-path' before invoking the byte compiler.  When nil,
+only use the built-in `load-path' of Emacs.
+
+The directory of the file being checked is always part of the
+`load-path' while checking, regardless of the value of this
+variable.
+
+Set this variable to `load-path' to use the `load-path' of your
+Emacs session for syntax checking.
+
+Note that changing this variable can lead to wrong results of the
+syntax check, e.g. if an unexpected version of a required library
+is used."
+  :type '(repeat directory)
+  :risky t
+  :package-version '(flycheck . "0.14"))
+
+(flycheck-def-option-var flycheck-emacs-lisp-initialize-packages
+    'auto emacs-lisp
+  "Whether to initialize packages in the Emacs Lisp syntax checker.
+
+To initialize packages, call `package-initialize' before
+byte-compiling the file to check.
+
+When nil, never initialize packages.  When `auto', initialize
+packages only when checking files from `user-emacs-directory'.
+For any other non-nil value, always initialize packages."
+  :type '(choice (const :tag "Do not initialize packages" nil)
+                 (const :tag "Initialize packages for configuration only" auto)
+                 (const :tag "Always initialize packages" t))
+  :risky t
+  :package-version '(flycheck . "0.14"))
+
+(defun flycheck-option-emacs-lisp-package-initialize (value)
+  "Option filter for `flycheck-emacs-lisp-initialize-packages'."
+  (when (eq value 'auto)
+    (let ((user-dir (expand-file-name user-emacs-directory)))
+      (setq value (s-starts-with? (buffer-file-name) user-dir))))
+  ;; Return the function name, if packages shall be initialized, otherwise
+  ;; return nil to have Flycheck drop the whole option
+  (when value "package-initialize"))
+
+(flycheck-def-option-var flycheck-emacs-lisp-package-user-dir nil emacs-lisp
+  "Package directory for the Emacs Lisp syntax checker.
+
+When set to a string, set `package-user-dir' to the value of this
+variable before initializing packages.
+
+This variable has no effect, if
+`flycheck-emacs-lisp-initialize-packages' is nil."
+  :type '(choice (const :tag "Default package directory" nil)
+                 (directory :tag "Custom package directory"))
+  :risky t
+  :package-version '(flycheck . "0.14"))
+
+(defun flycheck-option-emacs-lisp-package-user-dir (value)
+  "Option filter for `flycheck-emacs-lisp-package-user-dir'."
+  (when value
+    (flycheck-sexp-to-string `(setq package-user-dir ,value))))
+
 (flycheck-define-checker emacs-lisp
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler."
   :command ((eval flycheck-emacs-command)
+            (option-list "--directory" flycheck-emacs-lisp-load-path)
+            (option "--eval" flycheck-emacs-lisp-package-user-dir
+                    flycheck-option-emacs-lisp-package-user-dir)
+            (option "--funcall" flycheck-emacs-lisp-initialize-packages
+                    flycheck-option-emacs-lisp-package-initialize)
+            "--eval"
             (eval (flycheck-sexp-to-string flycheck-emacs-lisp-check-form))
             source-inplace)
   :error-patterns
@@ -3156,7 +3256,7 @@ during byte-compilation or autoloads generation, or nil otherwise."
   "An Emacs Lisp style checker using CheckDoc.
 
 The checker runs `checkdoc-current-buffer'."
-  :command ((eval flycheck-emacs-command)
+  :command ((eval flycheck-emacs-command) "--eval"
             (eval (flycheck-sexp-to-string flycheck-emacs-lisp-checkdoc-form))
             source)
   :error-patterns
