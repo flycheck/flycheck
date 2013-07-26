@@ -2823,8 +2823,8 @@ Each error message under point is copied into the kill ring."
   (interactive "d")
   (-when-let* ((errors (flycheck-overlay-errors-at pos))
                (messages (-keep #'flycheck-error-message errors)))
-    (-each (nreverse messages) #'kill-new)
-    (flycheck-display-errors errors)))
+    (-each (reverse messages) #'kill-new)
+    (message (s-join "\n" messages))))
 
 (defun flycheck-google-messages (pos &optional quote-flag)
   "Google each error message at POS.
