@@ -743,6 +743,9 @@ checker
 @ghissue{174, New @code{flycheck-emacs-lisp-load-path} option to
 customize the @code{load-path} used by the @code{emacs-lisp} syntax
 checker}
+@item
+@ghissue{176, New @code{flycheck-emacs-lisp-initialize-packages} option
+to initialize packages in the @code{emacs-lisp} syntax checker}
 @end itemize
 
 @item

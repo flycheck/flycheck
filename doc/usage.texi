@@ -253,6 +253,11 @@ Some syntax checkers can be configured via options.  The following
 options are provided by Flycheck (use @kbd{C-h v} or @kbd{M-x
 describe-variable} on the variable name for detailed help):
 
+@defopt flycheck-emacs-lisp-initialize-packages
+When non-nil, initialize packages (see @code{package-initialize}) before
+invoking the byte compiler in the @code{emacs-lisp} syntax checker.
+@end defopt
+
 @defopt flycheck-emacs-lisp-load-path
 The @code{load-path} to use while checking with @code{emacs-lisp}.
 

@@ -3115,10 +3115,6 @@ during byte-compilation or autoloads generation, or nil otherwise."
 
 (defconst flycheck-emacs-lisp-check-form
   '(progn
-     ;; Initialize packages to at least try to load dependencies of the checked
-     ;; file
-     (package-initialize)
-
      ;; Try best to make local dependencies available
      (defun flycheck-extend-load-path (filename)
        (add-to-list 'load-path (file-name-directory filename)))
@@ -3155,10 +3151,28 @@ is used."
   :risky t
   :package-version '(flycheck . "0.14"))
 
+(flycheck-def-option-var flycheck-emacs-lisp-initialize-packages t emacs-lisp
+  "Whether to initialize packages in the Emacs Lisp syntax checker.
+
+When non-nil, call `package-initialize' before invoking the byte
+compiler to make all packages available.  Otherwise do not
+initialize packages."
+  :type 'boolean
+  :risky t
+  :package-version '(flycheck . "0.14"))
+
+(defun flycheck-option-emacs-lisp-package-initialize (value)
+  "Option filter for `flycheck-emacs-lisp-initialize-packages'."
+  ;; Return the function name, if packages shall be initialized, otherwise
+  ;; return nil to have Flycheck drop the whole option
+  (when value "package-initialize"))
+
 (flycheck-define-checker emacs-lisp
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler."
   :command ((eval flycheck-emacs-command)
             (option-list "--directory" flycheck-emacs-lisp-load-path)
+            (option "--funcall" flycheck-emacs-lisp-initialize-packages
+                    flycheck-option-emacs-lisp-package-initialize)
             "--eval"
             (eval (flycheck-sexp-to-string flycheck-emacs-lisp-check-form))
             source-inplace)
