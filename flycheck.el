@@ -3173,7 +3173,7 @@ For any other non-nil value, always initialize packages."
   "Option filter for `flycheck-emacs-lisp-initialize-packages'."
   (when (eq value 'auto)
     (let ((user-dir (expand-file-name user-emacs-directory)))
-      (setq value (s-starts-with? (buffer-file-name) user-dir))))
+      (setq value (s-starts-with? user-dir (buffer-file-name)))))
   ;; Return the function name, if packages shall be initialized, otherwise
   ;; return nil to have Flycheck drop the whole option
   (when value "package-initialize"))
