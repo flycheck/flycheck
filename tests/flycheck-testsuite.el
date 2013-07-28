@@ -2413,13 +2413,6 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
    '(8 5 "<spam> is not recognized!" error :filename nil)
    '(8 5 "discarding unexpected <spam>" warning :filename nil)))
 
-(ert-deftest checker-javascript-jshint-syntax-error ()
-  "A missing semicolon."
-  :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/javascript-jshint-syntax-error.js" '(js-mode js2-mode js3-mode) nil
-   '(6 23 "Missing semicolon." error)))
-
 (ert-deftest checker-javascript-jshint-error ()
   "Use eval()"
   :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
@@ -2432,6 +2425,8 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
   :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
   (flycheck-testsuite-should-syntax-check
    "checkers/javascript-jshint-warning.js" '(js-mode js2-mode js3-mode) nil
+   '(5 5 "Missing \"use strict\" statement." error)
+   '(5 12 "'foo' is defined but never used." error)
    '(5 nil "Unused variable: 'foo'" warning)))
 
 (ert-deftest checker-json-jsonlint-error ()
