@@ -3193,6 +3193,9 @@ This variable has no effect, if
 
 (defun flycheck-option-emacs-lisp-package-user-dir (value)
   "Option filter for `flycheck-emacs-lisp-package-user-dir'."
+  (unless value
+    ;; Inherit the package directory from our Emacs session
+    (setq value package-user-dir))
   (when value
     (flycheck-sexp-to-string `(setq package-user-dir ,value))))
 
