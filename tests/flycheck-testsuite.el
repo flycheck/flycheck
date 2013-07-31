@@ -2416,9 +2416,17 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
 (ert-deftest checker-javascript-jshint-syntax-error ()
   "A missing semicolon."
   :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/javascript-jshint-syntax-error.js" '(js-mode js2-mode js3-mode) nil
-   '(6 23 "Missing semicolon." error)))
+  ;; Silence JS2 and JS3 parsers
+  (let ((js2-mode-show-parse-errors nil)
+        (js2-mode-show-strict-warnings nil)
+        (js3-mode-show-parse-errors nil))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/javascript-jshint-syntax-error.js" '(js-mode js2-mode js3-mode) nil
+     '(3 25 "Unclosed string." error)
+     '(4 1 "Unclosed string." error)
+     '(3 11 "Unclosed string." error)
+     '(3 nil "Unused variable: 'foo'" warning)
+     '(4 1 "Missing semicolon." error))))
 
 (ert-deftest checker-javascript-jshint-error ()
   "Use eval()"
