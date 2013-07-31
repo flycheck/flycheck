@@ -2473,7 +2473,7 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
   :expected-result (flycheck-testsuite-fail-unless-checker 'php)
   (flycheck-testsuite-should-syntax-check
    "checkers/php-syntax-error.php" 'php-mode nil
-   '(8 nil "syntax error, unexpected ')', expecting :: (T_PAAMAYIM_NEKUDOTAYIM)" error)))
+   '(8 nil "syntax error, unexpected ')', expecting '('" error)))
 
 (ert-deftest checker-php-phpcs-error ()
   "Test an uppercase keyword error by phpcs."
