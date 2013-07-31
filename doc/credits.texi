@@ -13,8 +13,8 @@ checker using @command{rubocop}.
 checker.
 
 @item
-@gh{dholm, David Holm} added a C/C++ style checker using
-@command{cppcheck}.
+@gh{dholm, David Holm} added C/C++ syntax and style checkers using
+@command{clang} and @command{cppcheck} respectively.
 
 @item
 @gh{wyuenho, Jimmy Yuen Ho Wong} added the HTML syntax checker and the
