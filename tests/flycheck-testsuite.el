@@ -2241,9 +2241,19 @@ https://github.com/bbatsov/prelude/issues/259."
    '(3 1 "End of file during parsing" error)))
 
 (ert-deftest checker-emacs-lisp-error ()
-  (flycheck-testsuite-should-syntax-check
-   "checkers/emacs-lisp-error.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
-   '(3 1 "Cannot open load file: no such file or directory, dummy-package" error)))
+  ;; Determine how the Emacs message for load file errors looks like: In Emacs
+  ;; Snapshot, the message has three parts because the underlying file error is
+  ;; contained in the message.  In stable release the file error itself is
+  ;; missing and the message has only two parts.
+  (let* ((parts (condition-case err
+                    (require 'does-not-exist)
+                  (file-error (cdr err))))
+         (msg (format "Cannot open load file: %sdummy-package"
+                      (if (= (length parts) 2) ""
+                        "no such file or directory, "))))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/emacs-lisp-error.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
+     `(3 1 ,msg error))))
 
 (ert-deftest checker-emacs-lisp-error-load-path ()
   (flycheck-testsuite-with-hook emacs-lisp-mode-hook
