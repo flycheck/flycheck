@@ -17,8 +17,9 @@ extension for GNU Emacs 24 with:
 
 ![Screenshot of Flycheck in action](https://github.com/lunaryorn/flycheck/raw/master/doc/screenshot.png)
 
-The screenshot was taken on Emacs 24.3 using the awesome [solarized-light][]
-color theme and the great [Anonymous Pro][anon-pro] font.
+The screenshot was taken on Emacs 24.3 using the awesome
+[solarized-light][soloarzied] color theme and the great
+[Anonymous Pro](http://www.marksimonson.com/fonts/view/anonymous-pro) font.
 
 
 Features
@@ -68,15 +69,16 @@ Features
 
 The following extensions provide additional cool features for Flycheck:
 
-- [flycheck-color-mode-line.el][] colors the mode line according to the Flycheck
-  status.
+- [flycheck-color-mode-line.el][color-mode-line] colors the mode line according
+  to the Flycheck status.
 
 
 Installation
 ------------
 
-Install the ELPA package from [MELPA][] or [Marmalade][] with `M-x
-package-install RET flycheck`.  All dependencies are automatically installed.
+Install the ELPA package from [MELPA](http://melpa.milkbox.net) or
+[Marmalade](http://marmalade-repo.org/) with `M-x package-install RET flycheck`.
+All dependencies are automatically installed.
 
 Flycheck supports GNU Emacs 24.2 and newer on Linux, OS X and any other decent
 flavor of Unix.  It should work with GNU Emacs 24.1, too, but it is not tested
@@ -147,39 +149,51 @@ Credits
 
 The following people contributed to flycheck:
 
-- [Bozhidar Batsov][bbatsov] provided valuable feedback and refinements, brought
-  Flycheck to a larger user base by adding it to his awesome [Prelude][]
-  project, and added a Ruby syntax checker using `rubocop`.
-- [Damon Haley][dhaley] helped to shape and test the PHP CodeSniffer checker.
-- [Jimmy Yuen Ho Wong][wyuenho] added the HTML syntax checker and the jshint
-  Javascript checker, and did valuable testing and bug fixing.
-- [Krzysztof Witkowski][kwitek] implemented `eval` support in Flycheck commands.
-- [Magnar Sveen][magnars] developed the awesome [dash.el][] and [s.el][]
-  libraries, that drive considerable parts of Flycheck's internals.
-- [Marian Schubert][maio] added the Perl syntax checker.
-- [Mark Hellewell][markhellewell] added the Puppet syntax and style checkers.
-- [Martin Grenfell][scrooloose] created the awesome Vim library [syntastic][]
-  which inspired this project and many of its checkers.
-- [Matthias Dahl][BinaryKhaos] improved the performance of Flycheck's temp file
-  handling.
-- [Peter Vasil][ptrv] contributed syntax checkers for XML, Lua and Go (using `go
-  build` and `go test`), added unit tests and did valuable testing.
-- [Robert Dallas Gray][rdallasgray] made error display customizable with
-  `flycheck-display-errors-function`.
-- [Robert Zaremba][robert-zaremba] added a Go syntax checker using `gofmt`.
-- [steckerhalter][] provided the PHP CodeSniffer checker.
-- [Steve Purcell][purcell] implemented many checkers, contributed important
-  ideas to the design of the checker API and engaged in worthwhile discussion to
-  shape this project.
-- [Sylvain Benner][syl20bnr] added syntax checkers for Elixir and Erlang, and
-  wrote the cool [flycheck-color-mode-line.el][] extension.
-- [Sylvain Rousseau][thisirs] added a syntax checker for POSIX shell script
-  using `bash`, and improved error parsing in the Bash script syntax checker.
-- [Yannick Roehlly][yannick1974] added support for PEP8 naming errors to the
-  Flake8 syntax checker.
-- [Victor Deryagin][vderyagin] added the Rust syntax checker.
+- [Bozhidar Batsov](https://github.com/bbatsov) provided valuable feedback and
+  refinements, brought Flycheck to a larger user base by adding it to his
+  awesome [Prelude](https://github.com/bbatsov/prelude) project, and added a
+  Ruby syntax checker using `rubocop`.
+- [Damon Haley](https://github.com/dhaley) helped to shape and test the PHP
+  CodeSniffer checker.
+- [Jimmy Yuen Ho Wong](https://github.com/wyuenho) added the HTML syntax checker
+  and the jshint Javascript checker, and did valuable testing and bug fixing.
+- [Krzysztof Witkowski](https://github.com/kwitek) implemented `eval` support in
+  Flycheck commands.
+- [Magnar Sveen](https://github.com/magnars) developed the awesome
+  [dash.el](https://github.com/magnars/dash.el) and
+  [s.el](https://github.com/magnars/s.el) libraries, that drive considerable
+  parts of Flycheck's internals.
+- [Marian Schubert](https://github.com/maio) added the Perl syntax checker.
+- [Mark Hellewell](https://github.com/markhellewell) added the Puppet syntax and
+  style checkers.
+- [Martin Grenfell](https://github.com/scrooloose) created the awesome Vim
+  library [syntastic](https://github.com/scrooloose/syntastic) which inspired
+  this project and many of its checkers.
+- [Matthias Dahl](https://github.com/Binarykhaos) improved the performance of
+  Flycheck's temp file handling.
+- [Peter Vasil](https://github.com/ptrv) contributed syntax checkers for XML,
+  Lua and Go (using `go build` and `go test`), added unit tests and did valuable
+  testing.
+- [Robert Dallas Gray](https://github.com/rdallasgray) made error display
+  customizable with `flycheck-display-errors-function`.
+- [Robert Zaremba](https://github.com/robert-zaremba) added a Go syntax checker
+  using `gofmt`.
+- [steckerhalter](https://github.com/steckerhalter) provided the PHP CodeSniffer
+  checker.
+- [Steve Purcell](https://github.com/purcell) implemented many checkers,
+  contributed important ideas to the design of the checker API and engaged in
+  worthwhile discussion to shape this project.
+- [Sylvain Benner](https://github.com/syl20bnr) added syntax checkers for Elixir
+  and Erlang, and wrote the cool [flycheck-color-mode-line.el][color-mode-line]
+  extension.
+- [Sylvain Rousseau](https://github.com/thisirs) added a syntax checker for
+  POSIX shell script using `bash`, and improved error parsing in the Bash script
+  syntax checker.
+- [Yannick Roehlly](https://github.com/yannick1974) added support for PEP8
+  naming errors to the Flake8 syntax checker.
+- [Victor Deryagin](https://github.com/vderyagin) added the Rust syntax checker.
 
-
+1
 License
 -------
 
@@ -195,40 +209,8 @@ PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see http://www.gnu.org/licenses/.
 
-See [COPYING][] for details.
+See [COPYING](https://github.com/lunaryorn/flycheck/blob/master/COPYING) for
+details.
 
-
-[solarized-light]: https://github.com/bbatsov/solarized-emacs
-[anon-pro]: http://www.marksimonson.com/fonts/view/anonymous-pro
-[melpa]: http://melpa.milkbox.net
-[marmalade]: http://marmalade-repo.org/
-[download]: https://github.com/lunaryorn/flycheck/tags
-[dash.el]: https://github.com/magnars/dash.el
-[s.el]: https://github.com/magnars/s.el
 [solarized]: https://github.com/bbatsov/solarized-emacs
-[python]: http://python.org
-[checkstyle]: http://checkstyle.sourceforge.net/
-[bbatsov]: https://github.com/bbatsov
-[prelude]: https://github.com/bbatsov/prelude
-[dhaley]: https://github.com/dhaley
-[syntastic]: https://github.com/scrooloose/syntastic
-[scrooloose]: https://github.com/scrooloose
-[purcell]: https://github.com/purcell
-[wyuenho]: https://github.com/wyuenho
-[kwitek]: https://github.com/kwitek
-[maio]: https://github.com/maio
-[ptrv]: https://github.com/ptrv
-[robert-zaremba]: https://github.com/robert-zaremba
-[steckerhalter]: https://github.com/steckerhalter
-[yannick1974]: https://github.com/yannick1974
-[copying]: https://github.com/lunaryorn/flycheck/blob/master/COPYING
-[vderyagin]: https://github.com/vderyagin
-[magnars]: https://github.com/magnars
-[dash.el]: https://github.com/magnars/dash.el
-[s.el]: https://github.com/magnars/s.el
-[thisirs]: https://github.com/thisirs
-[syl20bnr]: https://github.com/syl20bnr
-[flycheck-color-mode-line.el]: https://github.com/syl20bnr/flycheck-color-mode-line
-[markhellewell]: https://github.com/markhellewell
-[BinaryKhaos]: https://github.com/Binarykhaos
-[rdallasgray]: https://github.com/rdallasgray
+[color-mode-line]: https://github.com/syl20bnr/flycheck-color-mode-line
