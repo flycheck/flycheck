@@ -3089,14 +3089,7 @@ See URL `http://elixir-lang.org/'."
    (warning line-start
             (file-name) ":"
             line ": "
-            (message (or
-                      (and "redefining" (zero-or-more not-newline))
-                      (and (zero-or-more not-newline)
-                           (or "obsolete" "unused"))
-                      (and (zero-or-more not-newline)
-                           (or "shadowed" "always matches"
-                               "deprecated" "future reserved")
-                           (zero-or-more not-newline))))
+            (message)
             line-end))
   :modes elixir-mode)
 
