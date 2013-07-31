@@ -40,13 +40,15 @@ emacs-snapshot-nox:
   pkg.installed
 
 # Carton for Emacs dependency management
-{% set carton_archive = '/usr/src/carton-{0}.tar.gz'.format(pillar['carton']['version']) %}
-{% set carton_directory = '/opt/carton-{0}'.format(pillar['carton']['version']) %}
+{% set carton_version = salt['pillar.get']('carton:version') %}
+{% set carton_hash = salt['pillar.get']('carton:hash') %}
+{% set carton_archive = '/usr/src/carton-{0}.tar.gz'.format(carton_version) %}
+{% set carton_directory = '/opt/carton-{0}'.format(carton_version) %}
 
 {{carton_archive}}:
   file.managed:
-    - source: https://github.com/rejeep/carton/archive/v{{pillar['carton']['version']}}.tar.gz
-    - source_hash: md5={{pillar['carton']['hash']}}
+    - source: https://github.com/rejeep/carton/archive/v{{carton_version}}.tar.gz
+    - source_hash: md5={{carton_hash}}
 
 {{carton_directory}}:
   cmd.run:

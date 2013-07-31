@@ -1,17 +1,19 @@
 # -*- mode: yaml; -*-
 
 # Erlang and Elixir
-{% set elixir_archive = '/usr/src/elixir-{0}.zip'.format(pillar['elixir']['version']) %}
-{% set elixir_directory = '/opt/elixir-{0}'.format(pillar['elixir']['version']) %}
+{% set elixir_version = salt['pillar.get']('elixir:version') %}
+{% set elixir_hash = salt['pillar.get']('elixir:hash') %}
+{% set elixir_archive = '/usr/src/elixir-{0}.zip'.format(elixir_version) %}
+{% set elixir_directory = '/opt/elixir-{0}'.format(elixir_version) %}
 
 {{elixir_archive}}:
   file.managed:
-    - source: http://dl.dropbox.com/u/4934685/elixir/v{{pillar['elixir']['version']}}.zip
-    - source_hash: md5={{pillar['elixir']['hash']}}
+    - source: http://dl.dropbox.com/u/4934685/elixir/v{{elixir_version}}.zip
+    - source_hash: md5={{elixir_hash}}
 
 {{elixir_directory}}:
   cmd.run:
-    - name: unzip -o {{elixir_archive}} -d /opt/elixir-{{pillar['elixir']['version']}}
+    - name: unzip -o {{elixir_archive}} -d /opt/elixir-{{elixir_version}}
     - unless: test -d {{elixir_directory}}
     - require:
         - file: {{elixir_archive}}
