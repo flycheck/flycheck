@@ -4,6 +4,10 @@
 include:
   - base.tools
 
+c/c++-cppcheck:
+  pkg.installed:
+    - name: cppcheck
+
 html-tidy:
   pkg.installed:
     - name: tidy
