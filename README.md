@@ -152,7 +152,7 @@ The following people contributed to flycheck:
   Flycheck to a larger user base by adding it to his awesome [Prelude][]
   project, and added a Ruby syntax checker using `rubocop`.
 - [Damon Haley][dhaley] helped to shape and test the PHP CodeSniffer checker.
-- [David Holm][dholm] added support for the cppcheck C/C++ checker.
+- [David Holm][dholm] added a C/C++ style checker using `cppcheck`.
 - [Jimmy Yuen Ho Wong][wyuenho] added the HTML syntax checker and the jshint
   Javascript checker, and did valuable testing and bug fixing.
 - [Krzysztof Witkowski][kwitek] implemented `eval` support in Flycheck commands.
