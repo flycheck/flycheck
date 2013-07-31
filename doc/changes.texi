@@ -734,6 +734,8 @@ New syntax checkers:
 @item
 @ghissue{162, Haskell with @command{ghc}@comma{} @command{hdevtools}
 and @command{hlint}}
+@item
+@ghissue{170, C/C++ with @command{cppcheck}}
 @end itemize
 
 @item
