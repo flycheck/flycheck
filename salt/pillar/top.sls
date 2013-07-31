@@ -1,6 +1,6 @@
 # -*- mode: yaml; -*-
 
-testing:
+base:
   '*':
     - base
   travis:

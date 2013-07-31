@@ -11,9 +11,9 @@ file_client: local
 # On Travis, the current directory is our Git checkout, so we can directly load
 # our states and pillars from it.
 file_roots:
-  testing:
-    - ./salt/salt/testing/
+  base:
+    - ./salt/salt/
 
 pillar_roots:
-  testing:
-    - ./salt/pillar/testing/
+  base:
+    - ./salt/pillar/
