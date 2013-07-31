@@ -1,0 +1,18 @@
+# -*- mode: yaml; -*-
+
+# Minion configuration file for Vagrant
+
+# ID of the node
+id: vagrant
+
+# Local files, this is masterless
+file_client: local
+
+# On Vagrant, we load our salts and pillars from the standard shared folder
+file_roots:
+  base:
+    - /vagrant/salt/salt/
+
+pillar_roots:
+  base:
+    - /vagrant/salt/pillar/

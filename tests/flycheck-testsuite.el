@@ -131,6 +131,7 @@
 
 ;; Modes used by our tests
 (--each '(sh-script
+          c-mode
           c++-mode
           coffee-mode
           css-mode
@@ -1192,9 +1193,19 @@ All declared checkers should be registered."
 
 ;;;; Generic option filters
 (ert-deftest flycheck-option-int ()
-  "Test conversion with `flycheck-option-int'."
   (should (null (flycheck-option-int nil)))
   (should (equal (flycheck-option-int 10) "10")))
+
+(ert-deftest flycheck-option-comma-separated-list ()
+  (should (null (flycheck-option-comma-separated-list nil)))
+  (should (null (flycheck-option-comma-separated-list '(nil))))
+  (should (null (flycheck-option-comma-separated-list '(10 20) nil (lambda (x) nil))))
+  (should (equal (flycheck-option-comma-separated-list '("foo" "bar"))
+                 "foo,bar"))
+  (should (equal (flycheck-option-comma-separated-list '("foo" "bar") ":")
+                 "foo:bar"))
+  (should (equal (flycheck-option-comma-separated-list '(10 20) nil #'number-to-string)
+                 "10,20")))
 
 
 ;;;; Checker selection
@@ -2136,6 +2147,40 @@ many-errors-for-error-list.el:7:1:warning: `message' called with 0
    "checkers/c++-clang-error.cpp" 'c++-mode nil
    '(5 18 "implicit instantiation of undefined template 'test<false>'" error)))
 
+(ert-deftest checker-c/c++-cppcheck-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/c_c++-cppcheck-error.c" 'c-mode nil
+   '(4 nil "Null pointer dereference" error)))
+
+(ert-deftest checker-c/c++-cppcheck-warning ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/c_c++-cppcheck-warning.c" 'c-mode nil
+   '(2 nil "The expression \"x\" is of type 'bool' and it is compared against a integer value that is neither 1 nor 0." warning)))
+
+(ert-deftest checker-c/c++-cppcheck-style ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/c_c++-cppcheck-style.c" 'c-mode nil
+   '(3 nil "Unused variable: unused" warning)))
+
+(ert-deftest checker-c/c++-cppcheck-style-suppressed ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
+  (flycheck-testsuite-with-hook c-mode-hook
+      (setq flycheck-cppcheck-checks nil)
+    (flycheck-testsuite-should-syntax-check
+     "checkers/c_c++-cppcheck-style.c" 'c-mode nil)))
+
+(ert-deftest checker-c/c++-cppcheck-multiple-checks ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
+  (flycheck-testsuite-with-hook c++-mode-hook
+      (setq flycheck-cppcheck-checks '("performance" "portability"))
+      (flycheck-testsuite-should-syntax-check
+       "checkers/c_c++-cppcheck-multiple-checks.cpp" 'c++-mode nil
+       '(2 nil "Extra qualification 'A::' unnecessary and considered an error by many compilers." warning)
+       '(9 nil "Prefix ++/-- operators should be preferred for non-primitive types. Pre-increment/decrement can be more efficient than post-increment/decrement. Post-increment/decrement usually involves keeping a copy of the previous value around and adds a little extra code." warning))))
+
 (ert-deftest checker-coffeelint-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'coffee-coffeelint)
   (flycheck-testsuite-should-syntax-check
@@ -2240,13 +2285,15 @@ https://github.com/bbatsov/prelude/issues/259."
     (rename-buffer " *Compiler Input*")
     (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
 
-(ert-deftest checker-emacs-lisp-checkdoc-inhibited-carton ()
+(ert-deftest checker-emacs-lisp-checkdoc-inhibited-cask ()
   (flycheck-testsuite-with-resource-buffer "checkers/emacs-lisp-checkdoc-warning.el"
     (emacs-lisp-mode)
     (should (flycheck-may-use-checker 'emacs-lisp-checkdoc))
     (setq buffer-file-name "/foo/bar/Cartony")  ; No real carton file
     (should (flycheck-may-use-checker 'emacs-lisp-checkdoc))
     (setq buffer-file-name "/foo/bar/Carton")
+    (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))
+    (setq buffer-file-name "/foo/bar/Cask")
     (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
 
 (ert-deftest checker-emacs-lisp-sytnax-error ()
@@ -2260,9 +2307,19 @@ https://github.com/bbatsov/prelude/issues/259."
    '(3 1 "End of file during parsing" error)))
 
 (ert-deftest checker-emacs-lisp-error ()
-  (flycheck-testsuite-should-syntax-check
-   "checkers/emacs-lisp-error.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
-   '(3 1 "Cannot open load file: no such file or directory, dummy-package" error)))
+  ;; Determine how the Emacs message for load file errors looks like: In Emacs
+  ;; Snapshot, the message has three parts because the underlying file error is
+  ;; contained in the message.  In stable release the file error itself is
+  ;; missing and the message has only two parts.
+  (let* ((parts (condition-case err
+                    (require 'does-not-exist)
+                  (file-error (cdr err))))
+         (msg (format "Cannot open load file: %sdummy-package"
+                      (if (= (length parts) 2) ""
+                        "no such file or directory, "))))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/emacs-lisp-error.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
+     `(3 1 ,msg error))))
 
 (ert-deftest checker-emacs-lisp-error-load-path ()
   (flycheck-testsuite-with-hook emacs-lisp-mode-hook
@@ -2432,6 +2489,21 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
    '(8 5 "<spam> is not recognized!" error :filename nil)
    '(8 5 "discarding unexpected <spam>" warning :filename nil)))
 
+(ert-deftest checker-javascript-jshint-syntax-error ()
+  "A missing semicolon."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
+  ;; Silence JS2 and JS3 parsers
+  (let ((js2-mode-show-parse-errors nil)
+        (js2-mode-show-strict-warnings nil)
+        (js3-mode-show-parse-errors nil))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/javascript-jshint-syntax-error.js" '(js-mode js2-mode js3-mode) nil
+     '(3 25 "Unclosed string." error)
+     '(4 1 "Unclosed string." error)
+     '(3 11 "Unclosed string." error)
+     '(3 nil "Unused variable: 'foo'" warning)
+     '(4 1 "Missing semicolon." error))))
+
 (ert-deftest checker-javascript-jshint-error ()
   "Use eval()"
   :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
@@ -2444,8 +2516,6 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
   :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
   (flycheck-testsuite-should-syntax-check
    "checkers/javascript-jshint-warning.js" '(js-mode js2-mode js3-mode) nil
-   '(5 5 "Missing \"use strict\" statement." error)
-   '(5 12 "'foo' is defined but never used." error)
    '(5 nil "Unused variable: 'foo'" warning)))
 
 (ert-deftest checker-json-jsonlint-error ()
@@ -2492,7 +2562,7 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
   :expected-result (flycheck-testsuite-fail-unless-checker 'php)
   (flycheck-testsuite-should-syntax-check
    "checkers/php-syntax-error.php" 'php-mode nil
-   '(8 nil "syntax error, unexpected ')', expecting :: (T_PAAMAYIM_NEKUDOTAYIM)" error)))
+   '(8 nil "syntax error, unexpected ')', expecting '('" error)))
 
 (ert-deftest checker-php-phpcs-error ()
   "Test an uppercase keyword error by phpcs."

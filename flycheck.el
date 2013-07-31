@@ -113,6 +113,7 @@ buffer-local wherever it is set."
 (defcustom flycheck-checkers
   '(bash
     c/c++-clang
+    c/c++-cppcheck
     coffee-coffeelint
     css-csslint
     elixir
@@ -844,6 +845,10 @@ If STRING is of string type, and a numeric string (see
 Otherwise return nil."
   (when (and (stringp string) (s-numeric? string))
     (string-to-number string)))
+
+(defun flycheck-string-list-p (obj)
+  "Determine if OBJ is a list of strings."
+  (and (listp obj) (-all? #'stringp obj)))
 
 (defvar-local flycheck-temp-files nil
   "A list of temporary files created by Flycheck.")
@@ -1805,6 +1810,25 @@ a string."
   (when value
     (number-to-string value)))
 
+(defun flycheck-option-comma-separated-list (value &optional separator filter)
+  "Convert VALUE into a list separated by SEPARATOR.
+
+SEPARATOR is a string to separate items in VALUE, defaulting to
+\",\".  FILTER is an optional function, which takes a single
+argument and returns either a string or nil.
+
+If VALUE is a list, apply FILTER to each item in VALUE, remove
+all nil items, and return a single string of all remaining items
+separated by SEPARATOR.
+
+Otherwise, apply FILTER to VALUE and return the result.  FILTER is ignored."
+  (let ((filter (or filter #'identity))
+        (separator (or separator ",")))
+    (if (listp value)
+        (-when-let (value (-keep filter value))
+          (s-join separator value))
+      (funcall filter value))))
+
 
 ;;;; Checker selection
 (defvar-local flycheck-last-checker nil
@@ -1954,8 +1978,8 @@ Pop up a help buffer with the documentation of CHECKER."
               (filename (flycheck-checker-file checker))
               (modes (flycheck-checker-modes checker))
               (config-file-var (flycheck-checker-config-file-var checker))
-              (option-vars (sort (flycheck-checker-option-vars checker)
-                                 #'string<)))
+              (option-vars (-sort #'string<
+                                  (flycheck-checker-option-vars checker))))
           (princ (format "%s is a Flycheck syntax checker" checker))
           (when filename
             (princ (format " in `%s'" (file-name-nondirectory filename)))
@@ -2365,6 +2389,34 @@ about Checkstyle."
         (error "Unexpected root element %s" (car root)))
       ;; cddr gets us the body of the node without its name and its attributes
       (-flatten (-keep #'flycheck-parse-checkstyle-file-node (cddr root))))))
+
+(eval-and-compile
+  (defun flycheck-parse-cppcheck (output _checker _buffer)
+    "Parse Cppcheck errors from OUTPUT.
+
+Parse Cppcheck XML v2 output.
+
+_BUFFER and _ERROR are ignored.
+
+See URL `http://cppcheck.sourceforge.net/' for more information
+about Cppcheck."
+    (-when-let* ((root (flycheck-parse-xml-string output))
+                 (errors (--first (eq (car it) 'errors) (cddr root))))
+      (unless (eq (car root) 'results)
+        (error "Unexpected root element %s" (car root)))
+      (-flatten
+       (--keep (when (and (listp it) (eq (car it) 'error))
+                 (let* ((attrs (cadr it))
+                        (loc (--first (eq (car it) 'location) (cddr it)))
+                        (locattrs (cadr loc)))
+                   (flycheck-error-new
+                    :filename (cdr (assq 'file locattrs))
+                    :line (flycheck-string-to-number-safe
+                           (cdr (assq 'line locattrs)))
+                    :message (cdr (assq 'verbose attrs))
+                    :level (if (string= (cdr (assq 'severity attrs)) "error")
+                               'error 'warning))))
+               errors)))))
 
 
 ;;;; Error analysis
@@ -3060,6 +3112,35 @@ See URL `http://clang.llvm.org/'."
           ": " (or "fatal error" "error") ": " (message) line-end))
   :modes (c-mode c++-mode))
 
+(flycheck-def-option-var flycheck-cppcheck-checks '("style") c/c++-cppcheck
+  "Enabled checks for Cppcheck.
+
+The value of this variable is a list of strings, where each
+string is the name of an additional check to enable.  By default,
+all coding style checks are enabled.
+
+See section \"Enable message\" in the Cppcheck manual at URL
+`http://cppcheck.sourceforge.net/manual.pdf', and the
+documentation of the `--enable' option for more information,
+including a list of supported checks."
+  :type '(repeat :tag "Additional checks"
+                 (string :tag "Check name"))
+  ;; Quote this lambda, to allow `describe-variable' to display the lambda
+  ;; properly
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.14"))
+
+(flycheck-define-checker c/c++-cppcheck
+  "A C/C++ checker using cppcheck.
+
+See URL `http://cppcheck.sourceforge.net/'."
+  :command ("cppcheck" "--quiet" "--xml-version=2" "--inline-suppr"
+            (option "--enable=" flycheck-cppcheck-checks
+                    flycheck-option-comma-separated-list)
+            source)
+  :error-parser flycheck-parse-cppcheck
+  :modes (c-mode c++-mode))
+
 (flycheck-def-config-file-var flycheck-coffeelintrc coffee-coffeelint
                               ".coffeelint.json")
 
@@ -3107,14 +3188,7 @@ See URL `http://elixir-lang.org/'."
    (warning line-start
             (file-name) ":"
             line ": "
-            (message (or
-                      (and "redefining" (zero-or-more not-newline))
-                      (and (zero-or-more not-newline)
-                           (or "obsolete" "unused"))
-                      (and (zero-or-more not-newline)
-                           (or "shadowed" "always matches"
-                               "deprecated" "future reserved")
-                           (zero-or-more not-newline))))
+            (message)
             line-end))
   :modes elixir-mode)
 
@@ -3291,11 +3365,11 @@ The checker runs `checkdoc-current-buffer'."
   :predicate
   (lambda ()
     (and (not (flycheck-temp-compilation-buffer-p))
-         ;; Do not check Carton files.  These really don't need to follow
+         ;; Do not check Cask/Carton files.  These really don't need to follow
          ;; Checkdoc conventions
          (not (and (buffer-file-name)
-                   (string= (file-name-nondirectory (buffer-file-name))
-                            "Carton"))))))
+                   (member (file-name-nondirectory (buffer-file-name))
+                           '("Cask" "Carton")))))))
 
 (flycheck-define-checker erlang
   "An Erlang syntax checker using the Erlang interpreter."
@@ -3536,8 +3610,8 @@ CodeSniffer configuration.  When set to a string, pass the string
 to PHP CodeSniffer which will interpret it as name as a standard,
 or as path to a standard specification."
   :type '(choice (const :tag "Default standard" nil)
-                 (string :tag "Standard name or file")))
-(put 'flycheck-phpcs-standard 'safe-local-variable #'stringp)
+                 (string :tag "Standard name or file"))
+  :safe #'stringp)
 
 (flycheck-define-checker php-phpcs
   "A PHP style checker using PHP_CodeSniffer.
@@ -3602,8 +3676,8 @@ variable as warning.
 If set to an integer, this variable overrules any similar setting
 in the configuration file denoted by `flycheck-flake8rc'."
   :type '(choice (const :tag "Do not check McCabe complexity" nil)
-                 (integer :tag "Maximum complexity")))
-(put 'flycheck-flake8-maximum-complexity 'safe-local-variable #'integerp)
+                 (integer :tag "Maximum complexity"))
+  :safe #'integerp)
 
 (flycheck-def-option-var flycheck-flake8-maximum-line-length nil python-flake8
   "The maximum length of lines.
@@ -3617,8 +3691,8 @@ If set to nil, use the maximum line length from the configuration
 file denoted by `flycheck-flake8rc', or the PEP 8 recommendation
 of 79 characters if there is no configuration with this setting."
   :type '(choice (const :tag "Default value")
-                 (integer :tag "Maximum line length in characters")))
-(put 'flycheck-flake8-maximum-line-length 'safe-local-variable #'integerp)
+                 (integer :tag "Maximum line length in characters"))
+  :safe #'integerp)
 
 (flycheck-define-checker python-flake8
   "A Python syntax and style checker using Flake8.
