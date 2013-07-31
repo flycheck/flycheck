@@ -11,7 +11,7 @@ include:
 
 {{elixir_archive}}:
   file.managed:
-    - source: http://dl.dropbox.com/u/4934685/elixir/v{{elixir_version}}.zip
+    - source: https://github.com/elixir-lang/elixir/releases/download/v{{elixir_version}}/v{{elixir_version}}.zip
     - source_hash: md5={{elixir_hash}}
 
 {{elixir_directory}}:
