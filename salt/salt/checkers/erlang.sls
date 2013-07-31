@@ -1,5 +1,8 @@
 # -*- mode: yaml; -*-
 
+include:
+  - base.tools
+
 # Erlang and Elixir
 {% set elixir_version = salt['pillar.get']('elixir:version') %}
 {% set elixir_hash = salt['pillar.get']('elixir:hash') %}

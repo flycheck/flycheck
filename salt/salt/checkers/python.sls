@@ -2,31 +2,34 @@
 
 # Syntax checking tools in Python, available through Pip
 
-# Install pip itself
-python-pip:
-  pkg.installed
+# Install Python and PIP
+python:
+  pkg.installed:
+    - names:
+        - python
+        - python-pip
 
 python-flake8:
   pip.installed:
     - name: flake8
     - require:
-        - pkg: python-pip
+        - pkg: python
 
 # Flake8 plugins
 python-flake8-pep-naming:
   pip.installed:
     - name: pep8-naming
     - require:
-        - pkg: python-pip
+        - pkg: python
 
 python-pylint:
   pip.installed:
     - name: pylint
     - require:
-        - pkg: python-pip
+        - pkg: python
 
 rst:
   pip.installed:
     - name: docutils
     - require:
-        - pkg: python-pip
+        - pkg: python

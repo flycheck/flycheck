@@ -1,13 +1,15 @@
 # -*- mode: yaml; -*-
 
 # Syntax checkers implemented in Javascript and available through Node.js
+include:
+  - base.tools
 
 # Node.js itself, along with NPM
 nodejs:
   pkgrepo.managed:
     - ppa: chris-lea/node.js
     - require:
-        - pkg: python-software-properties
+        - pkg: ppa
     - require_in:
         - pkg: nodejs
   pkg.installed: []

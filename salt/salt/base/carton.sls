@@ -1,43 +1,9 @@
 # -*- mode: yaml; -*-
 
-# Base packages
+# Carton
 
-# Basic utilities
-tar:
-  pkg.installed
-
-unzip:
-  pkg.installed
-
-python-software-properties: # To add PPAs
-  pkg.installed
-
-# Basic build tools
-make:
-  pkg.installed
-
-# Texinfo documentation system
-texinfo:
-  pkg.installed
-
-install-info:
-  pkg.installed
-
-# Emacs packages
-emacs:
-  pkgrepo.managed:
-    - ppa: cassou/emacs
-    - require:
-        - pkg: python-software-properties
-    - require_in:
-        - pkg: emacs24-nox
-        - pkg: emacs-snapshot-nox
-
-emacs24-nox:
-  pkg.installed
-
-emacs-snapshot-nox:
-  pkg.installed
+include:
+  - base.tools
 
 # Carton for Emacs dependency management
 {% set carton_version = salt['pillar.get']('carton:version') %}

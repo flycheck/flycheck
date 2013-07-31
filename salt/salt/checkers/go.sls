@@ -1,11 +1,11 @@
 # -*- mode: yaml; -*-
 
 # Go
-go-repo:
+golang:
   pkgrepo.managed:
     - ppa: gophers/go
     - require:
-        - pkg: python-software-properties
+        - pkg: ppa
     - require_in:
         - pkg: go-gofmt
         - pkg: go-build

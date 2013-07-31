@@ -1,6 +1,8 @@
 # -*- mode: yaml; -*-
 
 # Checker tools which don't fit into any other category
+include:
+  - base.tools
 
 html-tidy:
   pkg.installed:
@@ -20,6 +22,8 @@ puppet-parser:
 rust:
   pkgrepo.managed:
     - ppa: kevincantu/rust
+    - require:
+        - pkg: ppa
     - require_in:
         - pkg: rust
   pkg.installed: []
