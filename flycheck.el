@@ -3116,7 +3116,7 @@ including a list of supported checks."
   "A C/C++ checker using cppcheck.
 
 See URL `http://cppcheck.sourceforge.net/'."
-  :command ("cppcheck" "--quiet" "--xml-version=2"
+  :command ("cppcheck" "--quiet" "--xml-version=2" "--inline-suppr"
             (option "--enable=" flycheck-cppcheck-checks
                     flycheck-option-comma-separated-list)
             source)
