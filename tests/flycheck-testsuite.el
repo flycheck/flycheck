@@ -2128,35 +2128,39 @@ many-errors-for-error-list.el:7:1:warning: `message' called with 0
      '(5 nil "syntax error near unexpected token `fi'" error)
      '(5 nil "`fi'" error))))
 
+(ert-deftest checker-c/c++-cppcheck-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/c_c++-cppcheck-error.c" 'c-mode nil
+   '(4 nil "Null pointer dereference" error)))
+
 (ert-deftest checker-c/c++-cppcheck-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
   (flycheck-testsuite-should-syntax-check
-   "checkers/c-cppcheck-warning.c" 'c-mode nil
+   "checkers/c_c++-cppcheck-warning.c" 'c-mode nil
    '(2 nil "The expression \"x\" is of type 'bool' and it is compared against a integer value that is neither 1 nor 0." warning)))
 
 (ert-deftest checker-c/c++-cppcheck-style ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
   (flycheck-testsuite-should-syntax-check
-   "checkers/c-cppcheck-style.c" 'c-mode nil
+   "checkers/c_c++-cppcheck-style.c" 'c-mode nil
    '(3 nil "Unused variable: unused" warning)))
 
-(ert-deftest checker-c/c++-cppcheck-performance ()
+(ert-deftest checker-c/c++-cppcheck-style-suppressed ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/c++-cppcheck-performance.cpp" 'c++-mode nil
-   '(4 nil "Prefix ++/-- operators should be preferred for non-primitive types. Pre-increment/decrement can be more efficient than post-increment/decrement. Post-increment/decrement usually involves keeping a copy of the previous value around and adds a little extra code." warning)))
+  (flycheck-testsuite-with-hook c-mode-hook
+      (setq flycheck-cppcheck-checks nil)
+    (flycheck-testsuite-should-syntax-check
+     "checkers/c_c++-cppcheck-style.c" 'c-mode nil)))
 
-(ert-deftest checker-c/c++-cppcheck-portability ()
+(ert-deftest checker-c/c++-cppcheck-multiple-checks ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/c++-cppcheck-portability.h" 'c++-mode nil
-   '(2 nil "Extra qualification 'A::' unnecessary and considered an error by many compilers." warning)))
-
-(ert-deftest checker-c/c++-cppcheck-error ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/c-cppcheck-error.c" 'c-mode nil
-   '(4 nil "Null pointer dereference" error)))
+  (flycheck-testsuite-with-hook c++-mode-hook
+      (setq flycheck-cppcheck-checks '("performance" "portability"))
+      (flycheck-testsuite-should-syntax-check
+       "checkers/c_c++-cppcheck-multiple-checks.cpp" 'c++-mode nil
+       '(2 nil "Extra qualification 'A::' unnecessary and considered an error by many compilers." warning)
+       '(9 nil "Prefix ++/-- operators should be preferred for non-primitive types. Pre-increment/decrement can be more efficient than post-increment/decrement. Post-increment/decrement usually involves keeping a copy of the previous value around and adds a little extra code." warning))))
 
 (ert-deftest checker-coffeelint-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'coffee-coffeelint)

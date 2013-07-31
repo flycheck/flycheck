@@ -845,6 +845,10 @@ Otherwise return nil."
   (when (and (stringp string) (s-numeric? string))
     (string-to-number string)))
 
+(defun flycheck-string-list-p (obj)
+  "Determine if OBJ is a list of strings."
+  (and (listp obj) (-all? #'stringp obj)))
+
 (defvar-local flycheck-temp-files nil
   "A list of temporary files created by Flycheck.")
 
@@ -3090,11 +3094,32 @@ See URL `http://www.gnu.org/software/bash/'."
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'bash)))
 
+(flycheck-def-option-var flycheck-cppcheck-checks '("style") c/c++-cppcheck
+  "Enabled checks for Cppcheck.
+
+The value of this variable is a list of strings, where each
+string is the name of an additional check to enable.  By default,
+all coding style checks are enabled.
+
+See section \"Enable message\" in the Cppcheck manual at URL
+`http://cppcheck.sourceforge.net/manual.pdf', and the
+documentation of the `--enable' option for more information,
+including a list of supported checks."
+  :type '(repeat :tag "Additional checks"
+                 (string :tag "Check name"))
+  ;; Quote this lambda, to allow `describe-variable' to display the lambda
+  ;; properly
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.14"))
+
 (flycheck-define-checker c/c++-cppcheck
   "A C/C++ checker using cppcheck.
 
 See URL `http://cppcheck.sourceforge.net/'."
-  :command ("cppcheck" "--quiet" "--xml-version=2" "--enable=style" source)
+  :command ("cppcheck" "--quiet" "--xml-version=2"
+            (option "--enable=" flycheck-cppcheck-checks
+                    flycheck-option-comma-separated-list)
+            source)
   :error-parser flycheck-parse-cppcheck
   :modes (c-mode c++-mode))
 
