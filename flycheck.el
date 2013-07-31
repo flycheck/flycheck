@@ -2366,6 +2366,34 @@ about Checkstyle."
       ;; cddr gets us the body of the node without its name and its attributes
       (-flatten (-keep #'flycheck-parse-checkstyle-file-node (cddr root))))))
 
+(eval-and-compile
+  (defun flycheck-parse-cppcheck (output _checker _buffer)
+    "Parse Cppcheck errors from OUTPUT.
+
+Parse Cppcheck XML v2 output.
+
+_BUFFER and _ERROR are ignored.
+
+See URL `http://cppcheck.sourceforge.net/' for more information
+about Cppcheck."
+    (-when-let* ((root (flycheck-parse-xml-string output))
+                 (errors (--first (eq (car it) 'errors) (cddr root))))
+      (unless (eq (car root) 'results)
+        (error "Unexpected root element %s" (car root)))
+      (-flatten
+       (--keep (when (and (listp it) (eq (car it) 'error))
+                 (let* ((attrs (cadr it))
+                        (loc (--first (eq (car it) 'location) (cddr it)))
+                        (locattrs (cadr loc)))
+                   (flycheck-error-new
+                    :filename (cdr (assq 'file locattrs))
+                    :line (flycheck-string-to-number-safe
+                           (cdr (assq 'line locattrs)))
+                    :message (cdr (assq 'msg attrs))
+                    :level (if (string= (cdr (assq 'severity attrs)) "error")
+                               'error 'warning))))
+               errors)))))
+
 
 ;;;; Error analysis
 (defvar-local flycheck-current-errors nil
@@ -3047,13 +3075,8 @@ See URL `http://www.gnu.org/software/bash/'."
   "A C/C++ checker using cppcheck.
 
 See URL `http://cppcheck.sourceforge.net/'."
-  :command ("cppcheck" "--quiet" "--enable=style" source)
-  :error-patterns
-
-  ((warning line-start "[" (file-name) ":" line "]: "
-            "(" (or "style" "performance" "portability" "warning") ") "
-            (message) line-end)
-   (error line-start "[" (file-name) ":" line "]: (error) " (message) line-end))
+  :command ("cppcheck" "--quiet" "--xml-version=2" "--enable=style" source)
+  :error-parser flycheck-parse-cppcheck
   :modes (c-mode c++-mode))
 
 (flycheck-def-config-file-var flycheck-coffeelintrc coffee-coffeelint
