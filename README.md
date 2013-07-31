@@ -193,7 +193,7 @@ The following people contributed to flycheck:
   naming errors to the Flake8 syntax checker.
 - [Victor Deryagin](https://github.com/vderyagin) added the Rust syntax checker.
 
-1
+
 License
 -------
 
