@@ -753,6 +753,9 @@ to initialize packages in the @code{emacs-lisp} syntax checker}
 @ghissue{176, New @code{flycheck-emacs-lisp-package-user-dir} option to
 configure the package directory for the @code{emacs-lisp} syntax
 checker}
+@item
+New option filter @code{flycheck-option-comma-separated-list} for
+options with comma separated lists as values
 @end itemize
 
 @item

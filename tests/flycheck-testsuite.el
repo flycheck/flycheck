@@ -1192,9 +1192,19 @@ All declared checkers should be registered."
 
 ;;;; Generic option filters
 (ert-deftest flycheck-option-int ()
-  "Test conversion with `flycheck-option-int'."
   (should (null (flycheck-option-int nil)))
   (should (equal (flycheck-option-int 10) "10")))
+
+(ert-deftest flycheck-option-comma-separated-list ()
+  (should (null (flycheck-option-comma-separated-list nil)))
+  (should (null (flycheck-option-comma-separated-list '(nil))))
+  (should (null (flycheck-option-comma-separated-list '(10 20) nil (lambda (x) nil))))
+  (should (equal (flycheck-option-comma-separated-list '("foo" "bar"))
+                 "foo,bar"))
+  (should (equal (flycheck-option-comma-separated-list '("foo" "bar") ":")
+                 "foo:bar"))
+  (should (equal (flycheck-option-comma-separated-list '(10 20) nil #'number-to-string)
+                 "10,20")))
 
 
 ;;;; Checker selection

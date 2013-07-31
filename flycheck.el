@@ -1805,6 +1805,25 @@ a string."
   (when value
     (number-to-string value)))
 
+(defun flycheck-option-comma-separated-list (value &optional separator filter)
+  "Convert VALUE into a list separated by SEPARATOR.
+
+SEPARATOR is a string to separate items in VALUE, defaulting to
+\",\".  FILTER is an optional function, which takes a single
+argument and returns either a string or nil.
+
+If VALUE is a list, apply FILTER to each item in VALUE, remove
+all nil items, and return a single string of all remaining items
+separated by SEPARATOR.
+
+Otherwise, apply FILTER to VALUE and return the result.  FILTER is ignored."
+  (let ((filter (or filter #'identity))
+        (separator (or separator ",")))
+    (if (listp value)
+        (-when-let (value (-keep filter value))
+          (s-join separator value))
+      (funcall filter value))))
+
 
 ;;;; Checker selection
 (defvar-local flycheck-last-checker nil
