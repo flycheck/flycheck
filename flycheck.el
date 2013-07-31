@@ -3347,11 +3347,11 @@ The checker runs `checkdoc-current-buffer'."
   :predicate
   (lambda ()
     (and (not (flycheck-temp-compilation-buffer-p))
-         ;; Do not check Carton files.  These really don't need to follow
+         ;; Do not check Cask/Carton files.  These really don't need to follow
          ;; Checkdoc conventions
          (not (and (buffer-file-name)
-                   (string= (file-name-nondirectory (buffer-file-name))
-                            "Carton"))))))
+                   (member (file-name-nondirectory (buffer-file-name))
+                           '("Cask" "Carton")))))))
 
 (flycheck-define-checker erlang
   "An Erlang syntax checker using the Erlang interpreter."
