@@ -1,7 +1,3 @@
 /** A missing semicolon */
 
-
-(function() {
-    var foo = ["Hello world"];
-    foo.indexOf("Foo")
-}());
+var foo = "Hello world);

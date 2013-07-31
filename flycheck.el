@@ -223,7 +223,7 @@ and there may be further syntax checkers in the chain.
 
 This variable is an abnormal hook.")
 
-(defcustom flycheck-display-errors-function 'flycheck-display-error-messages
+(defcustom flycheck-display-errors-function #'flycheck-display-error-messages
   "Function to display error messages.
 
 If set to a function, call the function with the list of errors
@@ -232,7 +232,11 @@ to display as single argument.  Each error is an instance of the
 
 If set to nil, do not display errors at all."
   :group 'flycheck
-  :type 'function
+  :type '(choice (const :tag "Display error messages"
+                        flycheck-display-error-messages)
+                 (const :tag "Display errors in error list"
+                        flycheck-display-errors-in-list)
+                 (function :tag "Error display function"))
   :package-version '(flycheck . "0.13"))
 
 (defcustom flycheck-indication-mode 'left-fringe
@@ -948,6 +952,20 @@ Otherwise `(list OPTION VALUE)' is returned."
       (list (concat option value))
     (list option value)))
 
+(defun flycheck-prepend-with-option (option items)
+  "Prepend each item in ITEMS with OPTION.
+
+Prepend OPTION to each item in ITEMS.
+
+ITEMS is a list of value to pass to the syntax checker.  OPTION
+is the option, as string.  ITEM-FILTER is a function to apply to
+each item."
+  (unless (stringp option)
+    (error "Option %S is not a string" option))
+  (->> items
+    (--map (list option it))
+    -flatten))
+
 (defun flycheck-temporary-buffer-p ()
   "Determine whether the current buffer is a temporary buffer.
 
@@ -1209,10 +1227,10 @@ error if not."
       (`(config-file ,option-name ,config-file-var)
        (and (stringp option-name)
             (symbolp config-file-var)))
-      (`(option ,option-name ,option-var)
+      (`(,(or `option `option-list) ,option-name ,option-var)
        (and (stringp option-name)
             (symbolp option-var)))
-      (`(option ,option-name ,option-var ,filter)
+      (`(,(or `option `option-list) ,option-name ,option-var ,filter)
        (and (stringp option-name)
             (symbolp option-var)
             (symbolp filter)))
@@ -1561,6 +1579,14 @@ nil.  In the latter case, return a list of arguments as described
 above.  If OPTION ends with a =, process it like in a
 `config-file' cell (see above).
 
+If ARG is a form `(option-list OPTION VARIABLE [FILTER])',
+retrieve the value of VARIABLE, which must be a list, and prepend
+OPTION before each item in this list.  FILTER is an optional
+function to be applied to each item in the list.  Items for which
+FILTER returns nil are dropped.  If the list is non-nil after the
+application of FILTER, return a list `(OPTION ITEM1 OPTION ITEM2
+...)'.  Otherwise return nil.
+
 If ARG is a form `(eval FORM), return the result of evaluating
 FORM in the buffer to be checked.  FORM must either return a
 string or a list of strings, or nil to indicate that nothing
@@ -1569,7 +1595,10 @@ an error is signaled.  _No_ further substitutions are performed,
 neither in FORM before it is evaluated, nor in the result of
 evaluating FORM.
 
-In all other cases, signal an error."
+In all other cases, signal an error.
+
+Note that substitution is *not* recursive.  No symbols or cells
+are substituted within the body of cells!"
   (pcase arg
     ((pred stringp) arg)
     (`source
@@ -1594,6 +1623,18 @@ In all other cases, signal an error."
          (error "Value %S of %S (filter: %S) for option %s is not a string"
                 value variable filter option-name))
        (flycheck-option-with-value-argument option-name value)))
+    (`(option-list ,option-name ,variable)
+     (-when-let (value (symbol-value variable))
+       (unless (and (listp value) (-all? #'stringp value))
+         (error "Value %S of %S for option %S is not a list of strings"
+                value variable option-name))
+       (flycheck-prepend-with-option option-name value)))
+    (`(option-list ,option-name ,variable ,filter)
+     (-when-let (value (-keep filter (symbol-value variable)))
+       (unless (and (listp value) (-all? #'stringp value))
+         (error "Value %S of %S for option %S is not a list of strings"
+                value variable option-name))
+       (flycheck-prepend-with-option option-name value)))
     (`(eval ,form)
      (let ((result (eval form)))
        (if (or (null result)
@@ -1755,7 +1796,7 @@ directory, or nil otherwise."
   (custom-add-frequent-value 'flycheck-locate-config-file-functions it))
 
 
-;;;; Option filters
+;;;; Generic option filters
 (defun flycheck-option-int (value)
   "Convert an integral option VALUE to a string.
 
@@ -1952,6 +1993,20 @@ Pop up a help buffer with the documentation of CHECKER."
                                                          &optional level message
                                                          &key checker filename
                                                          (buffer (current-buffer)))))
+  "Structure representing an error reported by a syntax checker.
+Slots:
+
+`buffer' The buffer the reported was reported for, as buffer object.
+
+`checker' The syntax checker which reported this error, as symbol.
+
+`filename'  The file name the error refers to, as string.
+
+`line' The line number the error refers to, as number.
+
+`column' The column number the error refers to, as number.
+
+`level' The error level, as either `warning' or `error'."
   buffer checker filename line column message level)
 
 (defmacro flycheck-error-with-buffer (err &rest forms)
@@ -2554,16 +2609,33 @@ the beginning of the buffer."
 (defconst flycheck-error-list-buffer "*Flycheck errors*"
   "The name of the buffer to show error lists.")
 
+(defun flycheck-error-list-buffer ()
+  "Get the buffer to show error lists.
+
+If the buffer does not exist yet, create it.
+
+Return the buffer object."
+  (get-buffer-create flycheck-error-list-buffer))
+
 (defconst flycheck-list-error-regex-alist
   '(("^\\(?1:.+?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)?error:" 1 2 3 2)
     ("^\\(?1:.+?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)?warning:" 1 2 3 1))
   "Compilation mode expressions for Flycheck error listings.")
 
+(defvar flycheck-error-list-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "g" #'flycheck-error-list-refresh)
+    map)
+  "Keymap for Flycheck error list buffers.")
+
 (define-derived-mode flycheck-error-list-mode compilation-mode "Flycheck errors"
   "A major mode for a Flycheck error listing."
   (setq-local compilation-error-regexp-alist flycheck-list-error-regex-alist))
 
-(defun flycheck-list-buffer-label (buffer)
+(defvar-local flycheck-error-list-source-buffer nil
+  "The current source buffer of the error list.")
+
+(defun flycheck-error-list-buffer-label (buffer)
   "Create a list label for BUFFER relative to DIRECTORY.
 
 BUFFER is a buffer object.
@@ -2577,7 +2649,7 @@ Return the label as string."
     (file-relative-name filename)
     (format "#<buffer %s>" (buffer-name buffer))))
 
-(defun flycheck-list-error-label (err)
+(defun flycheck-error-list-error-label (err)
   "Create a list label for ERR.
 
 ERR is a Flycheck error.
@@ -2589,61 +2661,114 @@ relative to the current `default-directory'.
 Return the label as string."
   (-if-let (filename (flycheck-error-filename err))
     (file-relative-name filename)
-    (flycheck-list-buffer-label (flycheck-error-buffer err))))
+    (flycheck-error-list-buffer-label (flycheck-error-buffer err))))
 
-(defun flycheck-list-add-header (buffer)
-  "Add a error header for BUFFER .
+(defun flycheck-error-list-insert-header (buffer)
+  "Insert an error header for BUFFER into the current buffer.
 
 Insert an error list header for BUFFER into the current buffer.
 The header contains the filename of BUFFER relative to the
 current `default-directory', or the buffer name, if BUFFER has no
 file name."
   (insert (format "\n\n\C-l\n*** %s: Syntax and style errors (Flycheck v%s)\n"
-                  (flycheck-list-buffer-label buffer)
+                  (flycheck-error-list-buffer-label buffer)
                   (or (flycheck-version) "Unknown"))))
 
-(defun flycheck-list-add-errors (errors)
-  "Add a list of all ERRORS to the current buffer.
+(defun flycheck-error-list-insert-errors (errors)
+  "Insert a list of all ERRORS into the current buffer.
 
 Insert a human-readable listing of ERRORS into the current
 buffer.  The file names of ERRORS are printed relative to the
 current `default-directory'."
   (--each errors
-    (insert (flycheck-list-error-label it))
+    (insert (flycheck-error-list-error-label it))
     (insert ":")
     (insert (flycheck-error-format it))
     (insert "\n")))
 
-(defun flycheck-list-errors ()
-  "List all errors in current buffer.
+(defun flycheck-error-list-add-errors (errors &optional source-buffer)
+  "Add ERRORS from SOURCE-BUFFER to the Flycheck error list.
 
-Show all Flycheck errors in the current buffer in a separate window.
+ERRORS is a list of Flycheck errors to show.  SOURCE-BUFFER is
+the buffer from which these errors originate, defaulting to the
+current buffer.
+
+The name of SOURCE-BUFFER is shown in the header inserted for
+ERRORS.  It is also added to `flycheck-error-list-source-buffer'
+and thus used by `flycheck-error-list-refresh'."
+  (let* ((source-buffer (or source-buffer (current-buffer)))
+         ;; Remember the default directory of the source buffer
+         (source-directory (buffer-local-value 'default-directory source-buffer)))
+    (with-current-buffer (flycheck-error-list-buffer)
+      (flycheck-error-list-mode)
+      (setq default-directory source-directory ; Change to the right directory
+                                        ; to resolve error references properly
+            flycheck-error-list-source-buffer source-buffer)
+      (let ((inhibit-read-only t))
+        (goto-char (point-max))
+        (flycheck-error-list-insert-header source-buffer)
+        (flycheck-error-list-insert-errors errors)))))
+
+(defun flycheck-error-list-goto-current-errors ()
+  "Move the point to the beginning of the current errors."
+  (goto-char (point-max))
+  (re-search-backward "\C-l" nil :no-error)
+  (beginning-of-line)
+  (forward-line 1))
+
+(defun flycheck-error-list-recenter ()
+  "Recenter the current error list buffer.
+
+Move the point to the beginning of the current errors, and
+recenter the display, if the error list is currently shown."
+  (-if-let (window (get-buffer-window))
+    (with-selected-window window
+      ;; We must move the point with the right window selected, for otherwise
+      ;; the point location is mysteriously wrong when recentering :|
+      (flycheck-error-list-goto-current-errors)
+      (recenter 0))
+    ;; If there is no window, just update the location of the point
+    (flycheck-error-list-goto-current-errors)))
+
+(defun flycheck-error-list-refresh ()
+  "Refresh the current error list.
+
+Add all errors currently reported for the current
+`flycheck-error-list-source-buffer', and recenter the error
+list."
+  (interactive)
+  (unless (derived-mode-p 'flycheck-error-list-mode)
+    (user-error "The current buffer is no error list"))
+  (let ((source flycheck-error-list-source-buffer))
+    (when (buffer-live-p source)
+      (unless (buffer-local-value 'flycheck-mode source)
+        (user-error "Flycheck mode disabled in %S" source))
+      (let ((errors (buffer-local-value 'flycheck-current-errors source)))
+        (flycheck-error-list-add-errors errors source))
+      (flycheck-error-list-recenter))))
+
+(defun flycheck-list-errors (&optional pos)
+  "List all errors at POS in current buffer.
+
+Show all Flycheck errors at POS in the current buffer in a
+separate window.  If POS is omitted or nil, show all errors.
+
+Interactively, show all Flycheck errors.  With prefix arg, only
+show errors at point.
 
 Return the buffer containing the error listing."
-  (interactive)
-  (if flycheck-mode
-      (let ((source-buffer (current-buffer))
-            (source-directory default-directory)
-            (errors flycheck-current-errors)
-            (list-buffer (get-buffer-create flycheck-error-list-buffer)))
-        (with-current-buffer list-buffer
-          (flycheck-error-list-mode)
-          (setq default-directory source-directory)
-          (let ((inhibit-read-only t))
-            (goto-char (point-max))
-            (flycheck-list-add-header source-buffer)
-            (flycheck-list-add-errors errors)))
-        (pop-to-buffer list-buffer)
-        ;; Before before the first current error, and recenter the window
-        (goto-char (point-max))
-        (re-search-backward "\C-l" nil :no-error)
-        (beginning-of-line)
-        (forward-line 1)
-        (recenter 0)
-        ;; Switch back to the old window
-        (other-window -1)
-        list-buffer)
-    (user-error "Flycheck mode not enabled")))
+  (interactive (when current-prefix-arg (list (point))))
+  (unless flycheck-mode
+    (user-error "Flycheck mode not enabled"))
+  (let ((errors (if pos
+                    (flycheck-overlay-errors-at pos)
+                  flycheck-current-errors)))
+    (flycheck-error-list-add-errors errors)
+    (pop-to-buffer (flycheck-error-list-buffer))
+    (flycheck-error-list-recenter)
+    ;; Switch back to the old window
+    (other-window -1)
+    (flycheck-error-list-buffer)))
 
 
 ;;;; General error display
@@ -2689,6 +2814,13 @@ Get the buffer named by variable `flycheck-error-message-buffer',
 or nil if the buffer does not exist."
   (get-buffer flycheck-error-message-buffer))
 
+(defun flycheck-may-use-echo-area-p ()
+  "Determine whether the echo area may be used.
+
+The echo area may be used if the cursor is not in the echo area,
+and if the echo area is not occupied by minibuffer input."
+  (not (or cursor-in-echo-area (active-minibuffer-window))))
+
 (defun flycheck-display-error-messages (errors)
   "Display the messages of ERRORS.
 
@@ -2700,8 +2832,9 @@ buffer, depending on the number of lines.
 In the latter case, show messages in
 `flycheck-error-message-buffer'."
   (-when-let (messages (-keep #'flycheck-error-message errors))
-    (display-message-or-buffer (s-join "\n\n" messages)
-                               flycheck-error-message-buffer)))
+    (when (flycheck-may-use-echo-area-p)
+      (display-message-or-buffer (s-join "\n\n" messages)
+                                 flycheck-error-message-buffer))))
 
 (defun flycheck-hide-error-buffer ()
   "Hide the Flycheck error buffer if necessary.
@@ -2712,6 +2845,18 @@ Hide the error buffer if there is no error under point."
     (unless (flycheck-overlays-at (point))
       (quit-window nil window))))
 
+(defun flycheck-display-errors-in-list (errors)
+  "Display ERRORS in the error list.
+
+Add all ERRORS to the error list, but do *not* show the error
+list.
+
+Note that this function does *not* actually show the error list,
+it just adds ERRORS to it."
+  (flycheck-error-list-add-errors errors)
+  (with-current-buffer (flycheck-error-list-buffer)
+    (flycheck-error-list-recenter)))
+
 
 ;;;; Working with error messages
 (defun flycheck-copy-messages-as-kill (pos)
@@ -2721,8 +2866,8 @@ Each error message under point is copied into the kill ring."
   (interactive "d")
   (-when-let* ((errors (flycheck-overlay-errors-at pos))
                (messages (-keep #'flycheck-error-message errors)))
-    (-each (nreverse messages) #'kill-new)
-    (flycheck-display-errors errors)))
+    (-each (reverse messages) #'kill-new)
+    (message (s-join "\n" messages))))
 
 (defun flycheck-google-messages (pos &optional quote-flag)
   "Google each error message at POS.
@@ -2957,20 +3102,13 @@ See URL `http://elixir-lang.org/'."
    (warning line-start
             (file-name) ":"
             line ": "
-            (message (or
-                      (and "redefining" (zero-or-more not-newline))
-                      (and (zero-or-more not-newline)
-                           (or "obsolete" "unused"))
-                      (and (zero-or-more not-newline)
-                           (or "shadowed" "always matches"
-                               "deprecated" "future reserved")
-                           (zero-or-more not-newline))))
+            (message)
             line-end))
   :modes elixir-mode)
 
 (defconst flycheck-emacs-command
   `(,(concat invocation-directory invocation-name)
-    "--no-site-file" "--no-site-lisp" "--batch" "--eval")
+    "--no-site-file" "--no-site-lisp" "--batch")
   "A command to execute an Emacs Lisp form in a background process.")
 
 (defun flycheck-temp-compilation-buffer-p ()
@@ -2983,10 +3121,6 @@ during byte-compilation or autoloads generation, or nil otherwise."
 
 (defconst flycheck-emacs-lisp-check-form
   '(progn
-     ;; Initialize packages to at least try to load dependencies of the checked
-     ;; file
-     (package-initialize)
-
      ;; Try best to make local dependencies available
      (defun flycheck-extend-load-path (filename)
        (add-to-list 'load-path (file-name-directory filename)))
@@ -3002,9 +3136,87 @@ during byte-compilation or autoloads generation, or nil otherwise."
      (mapc 'byte-compile-file command-line-args-left)
      (mapc 'delete-file flycheck-byte-compiled-files)))
 
+(flycheck-def-option-var flycheck-emacs-lisp-load-path nil emacs-lisp
+  "Load path to use in the Emacs Lisp syntax checker.
+
+When set to a list of strings, add each directory in this list to
+the `load-path' before invoking the byte compiler.  Relative
+paths in this list are expanded against the `default-directory'
+of the buffer to check.  When nil, only use the built-in
+`load-path' of Emacs.
+
+The directory of the file being checked is always part of the
+`load-path' while checking, regardless of the value of this
+variable.
+
+Set this variable to `load-path' to use the `load-path' of your
+Emacs session for syntax checking.
+
+Note that changing this variable can lead to wrong results of the
+syntax check, e.g. if an unexpected version of a required library
+is used."
+  :type '(repeat directory)
+  :risky t
+  :package-version '(flycheck . "0.14"))
+
+(flycheck-def-option-var flycheck-emacs-lisp-initialize-packages
+    'auto emacs-lisp
+  "Whether to initialize packages in the Emacs Lisp syntax checker.
+
+To initialize packages, call `package-initialize' before
+byte-compiling the file to check.
+
+When nil, never initialize packages.  When `auto', initialize
+packages only when checking files from `user-emacs-directory'.
+For any other non-nil value, always initialize packages."
+  :type '(choice (const :tag "Do not initialize packages" nil)
+                 (const :tag "Initialize packages for configuration only" auto)
+                 (const :tag "Always initialize packages" t))
+  :risky t
+  :package-version '(flycheck . "0.14"))
+
+(defun flycheck-option-emacs-lisp-package-initialize (value)
+  "Option filter for `flycheck-emacs-lisp-initialize-packages'."
+  (when (eq value 'auto)
+    (let ((user-dir (expand-file-name user-emacs-directory)))
+      (setq value (s-starts-with? user-dir (buffer-file-name)))))
+  ;; Return the function name, if packages shall be initialized, otherwise
+  ;; return nil to have Flycheck drop the whole option
+  (when value "package-initialize"))
+
+(flycheck-def-option-var flycheck-emacs-lisp-package-user-dir nil emacs-lisp
+  "Package directory for the Emacs Lisp syntax checker.
+
+When set to a string, set `package-user-dir' to the value of this
+variable before initializing packages.
+
+This variable has no effect, if
+`flycheck-emacs-lisp-initialize-packages' is nil."
+  :type '(choice (const :tag "Default package directory" nil)
+                 (directory :tag "Custom package directory"))
+  :risky t
+  :package-version '(flycheck . "0.14"))
+
+(defun flycheck-option-emacs-lisp-package-user-dir (value)
+  "Option filter for `flycheck-emacs-lisp-package-user-dir'."
+  (unless value
+    ;; Inherit the package directory from our Emacs session
+    (setq value package-user-dir))
+  (when value
+    (flycheck-sexp-to-string `(setq package-user-dir ,value))))
+
 (flycheck-define-checker emacs-lisp
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler."
   :command ((eval flycheck-emacs-command)
+            (option-list "--directory" flycheck-emacs-lisp-load-path
+                         ;; Expand relative paths against the directory of the
+                         ;; buffer to check
+                         expand-file-name)
+            (option "--eval" flycheck-emacs-lisp-package-user-dir
+                    flycheck-option-emacs-lisp-package-user-dir)
+            (option "--funcall" flycheck-emacs-lisp-initialize-packages
+                    flycheck-option-emacs-lisp-package-initialize)
+            "--eval"
             (eval (flycheck-sexp-to-string flycheck-emacs-lisp-check-form))
             source-inplace)
   :error-patterns
@@ -3058,7 +3270,7 @@ during byte-compilation or autoloads generation, or nil otherwise."
   "An Emacs Lisp style checker using CheckDoc.
 
 The checker runs `checkdoc-current-buffer'."
-  :command ((eval flycheck-emacs-command)
+  :command ((eval flycheck-emacs-command) "--eval"
             (eval (flycheck-sexp-to-string flycheck-emacs-lisp-checkdoc-form))
             source)
   :error-patterns

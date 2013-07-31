@@ -723,6 +723,36 @@ Fix version information on Emacs trunk builds
 @item
 Remove the obsolete @code{flycheck-error-face} and
 @code{flycheck-warning-face}
+@item
+@ghissue{176, Do not initialize packages by default in @code{emacs-lisp}
+syntax checker for non-configuration files}
+@end itemize
+
+@item
+New features:
+
+@itemize
+@item
+@ghissue{166, List errors at point only with prefix arg to
+@code{flycheck-list-errors}}
+@item
+@ghissue{166, Add new display function
+@code{flycheck-display-errors-in-list} to display errors at point in the
+error list}
+@item
+New @code{option-list} argument cell to pass option lists to a syntax
+checker
+@item
+@ghissue{174, New @code{flycheck-emacs-lisp-load-path} option to
+customize the @code{load-path} used by the @code{emacs-lisp} syntax
+checker}
+@item
+@ghissue{176, New @code{flycheck-emacs-lisp-initialize-packages} option
+to initialize packages in the @code{emacs-lisp} syntax checker}
+@item
+@ghissue{176, New @code{flycheck-emacs-lisp-package-user-dir} option to
+configure the package directory for the @code{emacs-lisp} syntax
+checker}
 @end itemize
 
 @item
@@ -756,6 +786,11 @@ Bug fixes:
 @item
 Fix warnings about flawed definitions in @code{emacs-lisp} and
 @code{emacs-lisp-checkdoc}, caused by faulty formatting of sexps
+@item
+@ghissue{166, Refresh error lists when pressing @kbd{g}}
+@item
+@ghissue{175, Do not obscure active minibuffer input when displaying
+errors in the echo area}
 @end itemize
 
 @end itemize

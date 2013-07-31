@@ -137,6 +137,15 @@ the arguments of the syntax checker.
 An @var{option} ending with a @code{=} character is treated like in a
 @code{config-file} cell.
 
+@item (option-list @var{option} @var{variable} [@var{filter}])
+This cell is similar to @code{option}, but for option lists.
+
+The value of @var{variable} must be a list, and @var{option} is prepend
+to each non-nil item in the list.  @var{filter} is an optional function
+to be applied to each item in the list before substitution.  Items for
+which the filter returns nil are dropped.  @xref{Option filters}, for a
+list of built-in option filters.
+
 @item (eval @var{form})
 This cell is substituted with a result of evaluating @var{form}.
 @var{form} must either return a string or a list of strings, or
@@ -145,6 +154,9 @@ This cell is substituted with a result of evaluating @var{form}.
 @emph{No} further substitutions are performed, neither in @var{form}
 before it is evaluated, nor in the result of evaluating FORM.
 @end table
+
+Note that substitution is @b{not} recursive.  No symbols or cells are
+substituted within the body of cells!
 
 This property is @b{mandatory}.
 

@@ -833,6 +833,11 @@ All declared checkers should be registered."
   (should (equal (flycheck-option-with-value-argument "--foo=" "bar")
                  '("--foo=bar"))))
 
+(ert-deftest flycheck-prepend-with-option ()
+  (should (null (flycheck-prepend-with-option "-f" nil)))
+  (should (equal (flycheck-prepend-with-option "-L" '("foo" "bar"))
+                 '("-L" "foo" "-L" "bar"))))
+
 (ert-deftest flycheck-temporary-buffer-p ()
   (with-temp-buffer
     (should (flycheck-temporary-buffer-p)))
@@ -880,6 +885,13 @@ All declared checkers should be registered."
   (should-not (flycheck-command-argument-p '(option "foo" 'bar)))
   (should-not (flycheck-command-argument-p '(option "foo" bar 'filter)))
   (should-not (flycheck-command-argument-p '(option "foo"))))
+
+(ert-deftest flycheck-command-argument-p-option-list ()
+  (should (flycheck-command-argument-p '(option-list "foo" bar)))
+  (should (flycheck-command-argument-p '(option-list "foo" bar filter)))
+  (should-not (flycheck-command-argument-p '(option-list "foo" 'bar)))
+  (should-not (flycheck-command-argument-p '(option-list "foo" bar 'filter)))
+  (should-not (flycheck-command-argument-p '(option-list "foo"))))
 
 (ert-deftest flycheck-command-argument-p-eval ()
   (should (flycheck-command-argument-p '(eval bar)))
@@ -975,6 +987,29 @@ All declared checkers should be registered."
                    '(option "--foo=" flycheck-test-option-var number-to-string) 'emacs-lisp)
                   :type 'wrong-type-argument)))
 
+(ert-deftest flycheck-substitute-argument-option-list ()
+  (let ((flycheck-test-option-var "spam"))
+    (should-error (flycheck-substitute-argument
+                   '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)))
+  (let ((flycheck-test-option-var '("spam" "eggs")))
+    (should (equal (flycheck-substitute-argument
+                    '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)
+                   '("--foo" "spam" "--foo" "eggs"))))
+  (let ((flycheck-test-option-var '(10 20)))
+    (should-error (flycheck-substitute-argument
+                   '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp))
+    (should (equal (flycheck-substitute-argument
+                    '(option-list "--foo" flycheck-test-option-var number-to-string) 'emacs-lisp)
+                   '("--foo" "10" "--foo" "20"))))
+  (let (flycheck-test-option-var)
+    (should-not (flycheck-substitute-argument
+                 '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)))
+  (let ((flycheck-test-option-var '(nil)))
+    ;; Catch an error, because `number-to-string' is called with nil
+    (should-error (flycheck-substitute-argument
+                   '(option-list "--foo" flycheck-test-option-var number-to-string) 'emacs-lisp)
+                  :type 'wrong-type-argument)))
+
 (ert-deftest flycheck-substitute-argument-eval ()
   (let ((flycheck-test-option-var '("Hello " "World")))
     (should (equal (flycheck-substitute-argument '(eval flycheck-test-option-var) 'emacs-lisp)
@@ -1055,6 +1090,30 @@ All declared checkers should be registered."
                     'emacs-lisp)
                    "--foo\\=spam\\ with\\ eggs"))))
 
+(ert-deftest flycheck-substitute-shell-argument-option-list ()
+  (let ((flycheck-test-option-var "spam"))
+    (should-error (flycheck-substitute-shell-argument
+                   '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)))
+  (let ((flycheck-test-option-var '("spam" "with eggs")))
+    (should (equal (flycheck-substitute-shell-argument
+                    '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)
+                   "--foo spam --foo with\\ eggs")))
+  (let ((flycheck-test-option-var '(10 20)))
+    (should-error (flycheck-substitute-shell-argument
+                   '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp))
+    (should (equal (flycheck-substitute-shell-argument
+                    '(option-list "--foo" flycheck-test-option-var number-to-string) 'emacs-lisp)
+                   "--foo 10 --foo 20")))
+  (let (flycheck-test-option-var)
+    (should (equal (flycheck-substitute-shell-argument
+                    '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)
+                   "")))
+  (let ((flycheck-test-option-var '(nil)))
+    ;; Catch an error, because `number-to-string' is called with nil
+    (should-error (flycheck-substitute-shell-argument
+                   '(option-list "--foo" flycheck-test-option-var number-to-string) 'emacs-lisp)
+                  :type 'wrong-type-argument)))
+
 (ert-deftest flycheck-substitute-shell-argument-eval ()
   (mocker-let
       ((flycheck-substitute-argument
@@ -1131,7 +1190,7 @@ All declared checkers should be registered."
       (setenv "HOME" old-home))))
 
 
-;;;; Option filters
+;;;; Generic option filters
 (ert-deftest flycheck-option-int ()
   "Test conversion with `flycheck-option-int'."
   (should (null (flycheck-option-int nil)))
@@ -1746,38 +1805,40 @@ error is signaled on all subsequent checks."
 
 
 ;;;; Error list
-(ert-deftest flycheck-list-buffer-label ()
+(ert-deftest flycheck-error-list-buffer-label ()
   (with-temp-buffer
     (rename-buffer "Foo")
-    (should (string= (flycheck-list-buffer-label (current-buffer))
+    (should (string= (flycheck-error-list-buffer-label (current-buffer))
                      "#<buffer Foo>")))
   (with-temp-buffer
     (set-visited-file-name (expand-file-name "foo/bar" flycheck-testsuite-dir)
                            :no-query)
     (cd flycheck-testsuite-dir)
-    (should (string= (flycheck-list-buffer-label (current-buffer)) "foo/bar"))))
+    (should (string= (flycheck-error-list-buffer-label (current-buffer))
+                     "foo/bar"))))
 
-(ert-deftest flycheck-list-error-label ()
+(ert-deftest flycheck-error-list-error-label ()
   (with-temp-buffer
     (rename-buffer "Foo")
-    (should (string= (flycheck-list-error-label (flycheck-error-new-at 1 1))
+    (should (string= (flycheck-error-list-error-label (flycheck-error-new-at 1 1))
                      "#<buffer Foo>")))
   (with-temp-buffer
     (set-visited-file-name (expand-file-name "foo/bar" flycheck-testsuite-dir)
                            :no-query)
     (cd flycheck-testsuite-dir)
-    (should (string= (flycheck-list-error-label (flycheck-error-new-at 1 1))
+    (should (string= (flycheck-error-list-error-label (flycheck-error-new-at 1 1))
                      "foo/bar")))
   (with-temp-buffer
     (cd flycheck-testsuite-dir)
     (let* ((filename (expand-file-name "spam/with/eggs" flycheck-testsuite-dir))
            (err (flycheck-error-new-at 1 1 'warning "Foo" :filename filename)))
-      (should (string= (flycheck-list-error-label err) "spam/with/eggs")))))
+      (should (string= (flycheck-error-list-error-label err)
+                       "spam/with/eggs")))))
 
-(ert-deftest flycheck-list-add-header ()
+(ert-deftest flycheck-error-list-insert-header ()
   (with-temp-buffer
     (rename-buffer "Foo")
-    (flycheck-list-add-header (current-buffer))
+    (flycheck-error-list-insert-header (current-buffer))
     (should (string= (buffer-string)
                      (format "
 
@@ -1789,7 +1850,7 @@ error is signaled on all subsequent checks."
     (set-visited-file-name (expand-file-name "spam/with/eggs" flycheck-testsuite-dir)
                            :no-query)
     (cd flycheck-testsuite-dir)
-    (flycheck-list-add-header (current-buffer))
+    (flycheck-error-list-insert-header (current-buffer))
     (should (string= (buffer-string)
                      (format "
 
@@ -1798,7 +1859,7 @@ error is signaled on all subsequent checks."
 "
                              (flycheck-version))))))
 
-(ert-deftest flycheck-list-add-errors ()
+(ert-deftest flycheck-error-list-insert-errors ()
   (let (buf1 buf2)
     (with-temp-buffer
       (setq buf1 (current-buffer))
@@ -1817,12 +1878,58 @@ error is signaled on all subsequent checks."
                               (flycheck-error-new-at 15 8 'error "Error 2"
                                                      :buffer buf1 :checker 'python-flake8
                                                      :filename (expand-file-name "foo/bar" flycheck-testsuite-dir)))))
-            (flycheck-list-add-errors errors))
+            (flycheck-error-list-insert-errors errors))
           (should (string= (buffer-string) "\
 #<buffer Spam>:4:warning: Warning 1 (emacs-lisp)
 spam/with/eggs:6:10:error: Error 1 (ruby)
 foo/bar:15:8:error: Error 2 (python-flake8)
 ")))))))
+
+(ert-deftest flycheck-error-list-refresh ()
+  (unwind-protect
+      (flycheck-testsuite-with-resource-buffer "many-errors-for-error-list.el"
+        (emacs-lisp-mode)
+        (flycheck-testsuite-buffer-sync)
+        (flycheck-list-errors)
+        (with-current-buffer (flycheck-error-list-buffer)
+          (should (string= (buffer-string) (format "
+
+\C-l
+*** many-errors-for-error-list.el: Syntax and style errors (Flycheck v%s)
+many-errors-for-error-list.el:7:warning: You should have a section marked \";;; Code:\" (emacs-lisp-checkdoc)
+many-errors-for-error-list.el:7:1:warning: `message' called with 0
+    args to fill 1 format field(s) (emacs-lisp)
+many-errors-for-error-list.el:9:2:warning: princ called with 0
+    arguments, but requires 1-2 (emacs-lisp)
+many-errors-for-error-list.el:14:1:warning: the function
+    `i-do-not-exist' is not known to be defined. (emacs-lisp)
+" (flycheck-version)))))
+        (with-current-buffer "many-errors-for-error-list.el"
+          ;; Remove a bunch of errors
+          (setq flycheck-current-errors (-drop 2 flycheck-current-errors)))
+        (with-current-buffer (flycheck-error-list-buffer)
+          (flycheck-error-list-refresh)
+          (should (string= (buffer-string) (format "
+
+\C-l
+*** many-errors-for-error-list.el: Syntax and style errors (Flycheck v%s)
+many-errors-for-error-list.el:7:warning: You should have a section marked \";;; Code:\" (emacs-lisp-checkdoc)
+many-errors-for-error-list.el:7:1:warning: `message' called with 0
+    args to fill 1 format field(s) (emacs-lisp)
+many-errors-for-error-list.el:9:2:warning: princ called with 0
+    arguments, but requires 1-2 (emacs-lisp)
+many-errors-for-error-list.el:14:1:warning: the function
+    `i-do-not-exist' is not known to be defined. (emacs-lisp)
+
+
+\C-l
+*** many-errors-for-error-list.el: Syntax and style errors (Flycheck v%s)
+many-errors-for-error-list.el:9:2:warning: princ called with 0
+    arguments, but requires 1-2 (emacs-lisp)
+many-errors-for-error-list.el:14:1:warning: the function
+    `i-do-not-exist' is not known to be defined. (emacs-lisp)
+" (flycheck-version) (flycheck-version))))))
+    (kill-buffer (flycheck-error-list-buffer))))
 
 (ert-deftest flycheck-list-errors ()
   (with-temp-buffer
@@ -1841,6 +1948,9 @@ foo/bar:15:8:error: Error 2 (python-flake8)
           ;; The list buffer should not be selected!
           (should-not (eq (current-buffer) list-buffer)))
         (with-current-buffer flycheck-error-list-buffer
+          ;; Source buffer should be tracked
+          (should (eq flycheck-error-list-source-buffer
+                      (get-buffer "many-errors-for-error-list.el")))
           ;; Point must be on the beginning of the header line
           (should (looking-at "^*** many-errors-for-error-list\\.el:"))
           ;; Test the contents of the error buffer
@@ -1855,8 +1965,7 @@ many-errors-for-error-list.el:9:2:warning: princ called with 0
     arguments, but requires 1-2 (emacs-lisp)
 many-errors-for-error-list.el:14:1:warning: the function
     `i-do-not-exist' is not known to be defined. (emacs-lisp)
-"
-                                                   (flycheck-version))))
+" (flycheck-version))))
           ;; Test navigation
           (compilation-next-error 1)
           (should (looking-at "^many-errors-for-error-list.el:7:warning:"))
@@ -1866,12 +1975,33 @@ many-errors-for-error-list.el:14:1:warning: the function
           (should (looking-at "^many-errors-for-error-list.el:9:2:warning:"))
           (compilation-next-error 1)
           (should (looking-at "^many-errors-for-error-list.el:14:1:warning:"))
-          (should-error (compilation-next-error 1))))
-    (-when-let (buffer (get-buffer flycheck-error-list-buffer))
-      (kill-buffer buffer))))
+          (should-error (compilation-next-error 1)))
+
+        (kill-buffer (flycheck-error-list-buffer))
+        (set-buffer "many-errors-for-error-list.el")
+
+        ;; Test listing at current position only
+        (goto-char (point-min))
+        (goto-char (+ (line-beginning-position 8) 2))
+        (flycheck-list-errors (point))
+        (with-current-buffer flycheck-error-list-buffer
+          (should (looking-at "^*** many-errors-for-error-list\\.el:"))
+          ;; Test the contents of the error buffer
+          (should (string= (buffer-string) (format "
+
+\C-l
+*** many-errors-for-error-list.el: Syntax and style errors (Flycheck v%s)
+many-errors-for-error-list.el:9:2:warning: princ called with 0
+    arguments, but requires 1-2 (emacs-lisp)
+" (flycheck-version))))))
+    (kill-buffer (flycheck-error-list-buffer))))
 
 
 ;;;; General error display
+(ert-deftest flycheck-display-errors-function ()
+  (should (eq flycheck-display-errors-function
+              #'flycheck-display-error-messages)))
+
 (ert-deftest flycheck-display-errors-no-function ()
   (let ((err (flycheck-error-new-at 10 20 'warning "This is a Flycheck error."))
         (flycheck-display-errors-function nil))
@@ -1892,7 +2022,7 @@ many-errors-for-error-list.el:14:1:warning: the function
 
 
 ;;;; Error display functions
-(ert-deftest flycheck-display-errors-default-function ()
+(ert-deftest flycheck-display-error-messages ()
   (let ((err (flycheck-error-new-at 10 20 'warning
                                     "This is a Flycheck error.")))
     (with-current-buffer "*Messages*"
@@ -1900,6 +2030,31 @@ many-errors-for-error-list.el:14:1:warning: the function
     (flycheck-display-error-messages (list err))
     (with-current-buffer "*Messages*"
       (should (s-contains? (flycheck-error-message err) (buffer-string))))))
+
+(ert-deftest flycheck-display-errors-in-list ()
+  (unwind-protect
+      (flycheck-testsuite-with-resource-buffer "many-errors-for-error-list.el"
+        (emacs-lisp-mode)
+        (flycheck-testsuite-buffer-sync)
+
+        (flycheck-display-errors-in-list (-take 2 flycheck-current-errors))
+        (let ((list-buffer (get-buffer flycheck-error-list-buffer)))
+          (should list-buffer)
+          ;; The list buffer should not be selected!
+          (should-not (eq (current-buffer) list-buffer)))
+        (with-current-buffer (flycheck-error-list-buffer)
+          (should (eq flycheck-error-list-source-buffer
+                      (get-buffer "many-errors-for-error-list.el")))
+          (should (looking-at "^*** many-errors-for-error-list\\.el:"))
+          (should (string= (buffer-string) (format "
+
+\C-l
+*** many-errors-for-error-list.el: Syntax and style errors (Flycheck v%s)
+many-errors-for-error-list.el:7:warning: You should have a section marked \";;; Code:\" (emacs-lisp-checkdoc)
+many-errors-for-error-list.el:7:1:warning: `message' called with 0
+    args to fill 1 format field(s) (emacs-lisp)
+" (flycheck-version))))))
+    (kill-buffer (flycheck-error-list-buffer))))
 
 
 ;;;; Working with error messages
@@ -1911,7 +2066,7 @@ many-errors-for-error-list.el:14:1:warning: the function
                         (flycheck-error-new-at 1 10 'warning "2nd message"))))
       (-each errors #'flycheck-add-overlay)
       (mocker-let
-          ((display-function (errors) ((:input `(,errors)))))
+          ((message (errors) ((:input '("1st message\n2nd message")))))
         (let ((flycheck-display-errors-function 'display-function))
           (flycheck-copy-messages-as-kill 10))))
     (should (equal (-take 2 kill-ring) '("1st message" "2nd message")))))
@@ -2107,22 +2262,60 @@ https://github.com/bbatsov/prelude/issues/259."
     (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
 
 (ert-deftest checker-emacs-lisp-sytnax-error ()
-  "Test a syntax error caused by a missing parenthesis."
   (flycheck-testsuite-should-syntax-check
    "checkers/emacs-lisp-syntax-error.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
    '(3 1 "End of file during parsing" error)))
 
 (ert-deftest checker-emacs-lisp-syntax-error-compressed ()
-  "Test a syntax error caused by a missing parenthesis."
   (flycheck-testsuite-should-syntax-check
    "checkers/emacs-lisp-syntax-error.el.gz" 'emacs-lisp-mode 'emacs-lisp-checkdoc
    '(3 1 "End of file during parsing" error)))
 
+(ert-deftest checker-emacs-lisp-error ()
+  ;; Determine how the Emacs message for load file errors looks like: In Emacs
+  ;; Snapshot, the message has three parts because the underlying file error is
+  ;; contained in the message.  In stable release the file error itself is
+  ;; missing and the message has only two parts.
+  (let* ((parts (condition-case err
+                    (require 'does-not-exist)
+                  (file-error (cdr err))))
+         (msg (format "Cannot open load file: %sdummy-package"
+                      (if (= (length parts) 2) ""
+                        "no such file or directory, "))))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/emacs-lisp-error.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
+     `(3 1 ,msg error))))
+
+(ert-deftest checker-emacs-lisp-error-load-path ()
+  (flycheck-testsuite-with-hook emacs-lisp-mode-hook
+      (setq flycheck-emacs-lisp-load-path
+            (list (flycheck-testsuite-resource-filename
+                   "dummy-elpa/dummy-package-0.1")))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/emacs-lisp-error.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc)))
+
+(ert-deftest checker-emacs-lisp-error-packages ()
+  (flycheck-testsuite-with-hook emacs-lisp-mode-hook
+      (setq flycheck-emacs-lisp-package-user-dir
+            (flycheck-testsuite-resource-filename "dummy-elpa")
+            flycheck-emacs-lisp-initialize-packages t)
+    (flycheck-testsuite-should-syntax-check
+     "checkers/emacs-lisp-error.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc)))
+
 (ert-deftest checker-emacs-lisp-warning ()
-  "Test a warning caused by a missing argument."
   (flycheck-testsuite-should-syntax-check
    "checkers/emacs-lisp-warning.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
-   '(4 6 "message called with 0 arguments,\n    but requires 1+" warning)))
+   '(4 6 "message called with 0 arguments,\n    but requires 1+" warning)
+   '(8 1 "the function `dummy-package-foo'\n    is not known to be defined." warning)))
+
+(ert-deftest checker-emacs-lisp-warning-packages ()
+  (flycheck-testsuite-with-hook emacs-lisp-mode-hook
+      (setq flycheck-emacs-lisp-package-user-dir
+            (flycheck-testsuite-resource-filename "dummy-elpa")
+            flycheck-emacs-lisp-initialize-packages t)
+    (flycheck-testsuite-should-syntax-check
+     "checkers/emacs-lisp-warning.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
+     '(4 6 "message called with 0 arguments,\n    but requires 1+" warning))))
 
 (ert-deftest checker-emacs-lisp-inhibited-no-byte-compile ()
   "Test that Emacs Lisp does not check when byte compilation is
@@ -2264,9 +2457,17 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
 (ert-deftest checker-javascript-jshint-syntax-error ()
   "A missing semicolon."
   :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/javascript-jshint-syntax-error.js" '(js-mode js2-mode js3-mode) nil
-   '(6 23 "Missing semicolon." error)))
+  ;; Silence JS2 and JS3 parsers
+  (let ((js2-mode-show-parse-errors nil)
+        (js2-mode-show-strict-warnings nil)
+        (js3-mode-show-parse-errors nil))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/javascript-jshint-syntax-error.js" '(js-mode js2-mode js3-mode) nil
+     '(3 25 "Unclosed string." error)
+     '(4 1 "Unclosed string." error)
+     '(3 11 "Unclosed string." error)
+     '(3 nil "Unused variable: 'foo'" warning)
+     '(4 1 "Missing semicolon." error))))
 
 (ert-deftest checker-javascript-jshint-error ()
   "Use eval()"
@@ -2326,7 +2527,7 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
   :expected-result (flycheck-testsuite-fail-unless-checker 'php)
   (flycheck-testsuite-should-syntax-check
    "checkers/php-syntax-error.php" 'php-mode nil
-   '(8 nil "syntax error, unexpected ')', expecting :: (T_PAAMAYIM_NEKUDOTAYIM)" error)))
+   '(8 nil "syntax error, unexpected ')', expecting '('" error)))
 
 (ert-deftest checker-php-phpcs-error ()
   "Test an uppercase keyword error by phpcs."
