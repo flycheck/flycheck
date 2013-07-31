@@ -360,6 +360,9 @@ Flycheck provides the following built-in option filters for use with the
 @item flycheck-option-int
 An integral option that handles @code{nil} correctly (unlike
 @code{number-to-string}).
+
+@item flycheck-option-comma-separated-list
+An option for a comma separated list.
 @end table
 
 @node Examples,  , Option filters, Extending

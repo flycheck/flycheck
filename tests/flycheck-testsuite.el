@@ -131,6 +131,7 @@
 
 ;; Modes used by our tests
 (--each '(sh-script
+          c-mode
           coffee-mode
           css-mode
           elixir-mode
@@ -1191,9 +1192,19 @@ All declared checkers should be registered."
 
 ;;;; Generic option filters
 (ert-deftest flycheck-option-int ()
-  "Test conversion with `flycheck-option-int'."
   (should (null (flycheck-option-int nil)))
   (should (equal (flycheck-option-int 10) "10")))
+
+(ert-deftest flycheck-option-comma-separated-list ()
+  (should (null (flycheck-option-comma-separated-list nil)))
+  (should (null (flycheck-option-comma-separated-list '(nil))))
+  (should (null (flycheck-option-comma-separated-list '(10 20) nil (lambda (x) nil))))
+  (should (equal (flycheck-option-comma-separated-list '("foo" "bar"))
+                 "foo,bar"))
+  (should (equal (flycheck-option-comma-separated-list '("foo" "bar") ":")
+                 "foo:bar"))
+  (should (equal (flycheck-option-comma-separated-list '(10 20) nil #'number-to-string)
+                 "10,20")))
 
 
 ;;;; Checker selection
@@ -2116,6 +2127,40 @@ many-errors-for-error-list.el:7:1:warning: `message' called with 0
      "checkers/bash-syntax-error.bash" 'sh-mode nil
      '(5 nil "syntax error near unexpected token `fi'" error)
      '(5 nil "`fi'" error))))
+
+(ert-deftest checker-c/c++-cppcheck-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/c_c++-cppcheck-error.c" 'c-mode nil
+   '(4 nil "Null pointer dereference" error)))
+
+(ert-deftest checker-c/c++-cppcheck-warning ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/c_c++-cppcheck-warning.c" 'c-mode nil
+   '(2 nil "The expression \"x\" is of type 'bool' and it is compared against a integer value that is neither 1 nor 0." warning)))
+
+(ert-deftest checker-c/c++-cppcheck-style ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/c_c++-cppcheck-style.c" 'c-mode nil
+   '(3 nil "Unused variable: unused" warning)))
+
+(ert-deftest checker-c/c++-cppcheck-style-suppressed ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
+  (flycheck-testsuite-with-hook c-mode-hook
+      (setq flycheck-cppcheck-checks nil)
+    (flycheck-testsuite-should-syntax-check
+     "checkers/c_c++-cppcheck-style.c" 'c-mode nil)))
+
+(ert-deftest checker-c/c++-cppcheck-multiple-checks ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
+  (flycheck-testsuite-with-hook c++-mode-hook
+      (setq flycheck-cppcheck-checks '("performance" "portability"))
+      (flycheck-testsuite-should-syntax-check
+       "checkers/c_c++-cppcheck-multiple-checks.cpp" 'c++-mode nil
+       '(2 nil "Extra qualification 'A::' unnecessary and considered an error by many compilers." warning)
+       '(9 nil "Prefix ++/-- operators should be preferred for non-primitive types. Pre-increment/decrement can be more efficient than post-increment/decrement. Post-increment/decrement usually involves keeping a copy of the previous value around and adds a little extra code." warning))))
 
 (ert-deftest checker-coffeelint-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'coffee-coffeelint)

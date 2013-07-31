@@ -52,6 +52,8 @@ Optional manual selection of a syntax checker with
 Built-in syntax checkers for:
 @itemize @bullet
 @item
+C/C++ (using @command{cppcheck})
+@item
 CoffeeScript (using @command{coffeelint})
 @item
 CSS (using @command{csslint}))

@@ -30,6 +30,7 @@ Features
 - Optional manual selection of a syntax checker with `flycheck-select-checker`
   at `C-c ! s`
 - Built-in syntax checkers for:
+  - C/C++
   - CoffeeScript
   - CSS
   - Elixir
@@ -155,6 +156,8 @@ The following people contributed to flycheck:
   Ruby syntax checker using `rubocop`.
 - [Damon Haley](https://github.com/dhaley) helped to shape and test the PHP
   CodeSniffer checker.
+- [David Holm](https://github.com/dholm) added a C/C++ style checker using
+  `cppcheck`.
 - [Jimmy Yuen Ho Wong](https://github.com/wyuenho) added the HTML syntax checker
   and the jshint Javascript checker, and did valuable testing and bug fixing.
 - [Krzysztof Witkowski](https://github.com/kwitek) implemented `eval` support in

@@ -112,6 +112,7 @@ buffer-local wherever it is set."
 
 (defcustom flycheck-checkers
   '(bash
+    c/c++-cppcheck
     coffee-coffeelint
     css-csslint
     elixir
@@ -843,6 +844,10 @@ If STRING is of string type, and a numeric string (see
 Otherwise return nil."
   (when (and (stringp string) (s-numeric? string))
     (string-to-number string)))
+
+(defun flycheck-string-list-p (obj)
+  "Determine if OBJ is a list of strings."
+  (and (listp obj) (-all? #'stringp obj)))
 
 (defvar-local flycheck-temp-files nil
   "A list of temporary files created by Flycheck.")
@@ -1804,6 +1809,25 @@ a string."
   (when value
     (number-to-string value)))
 
+(defun flycheck-option-comma-separated-list (value &optional separator filter)
+  "Convert VALUE into a list separated by SEPARATOR.
+
+SEPARATOR is a string to separate items in VALUE, defaulting to
+\",\".  FILTER is an optional function, which takes a single
+argument and returns either a string or nil.
+
+If VALUE is a list, apply FILTER to each item in VALUE, remove
+all nil items, and return a single string of all remaining items
+separated by SEPARATOR.
+
+Otherwise, apply FILTER to VALUE and return the result.  FILTER is ignored."
+  (let ((filter (or filter #'identity))
+        (separator (or separator ",")))
+    (if (listp value)
+        (-when-let (value (-keep filter value))
+          (s-join separator value))
+      (funcall filter value))))
+
 
 ;;;; Checker selection
 (defvar-local flycheck-last-checker nil
@@ -2364,6 +2388,34 @@ about Checkstyle."
         (error "Unexpected root element %s" (car root)))
       ;; cddr gets us the body of the node without its name and its attributes
       (-flatten (-keep #'flycheck-parse-checkstyle-file-node (cddr root))))))
+
+(eval-and-compile
+  (defun flycheck-parse-cppcheck (output _checker _buffer)
+    "Parse Cppcheck errors from OUTPUT.
+
+Parse Cppcheck XML v2 output.
+
+_BUFFER and _ERROR are ignored.
+
+See URL `http://cppcheck.sourceforge.net/' for more information
+about Cppcheck."
+    (-when-let* ((root (flycheck-parse-xml-string output))
+                 (errors (--first (eq (car it) 'errors) (cddr root))))
+      (unless (eq (car root) 'results)
+        (error "Unexpected root element %s" (car root)))
+      (-flatten
+       (--keep (when (and (listp it) (eq (car it) 'error))
+                 (let* ((attrs (cadr it))
+                        (loc (--first (eq (car it) 'location) (cddr it)))
+                        (locattrs (cadr loc)))
+                   (flycheck-error-new
+                    :filename (cdr (assq 'file locattrs))
+                    :line (flycheck-string-to-number-safe
+                           (cdr (assq 'line locattrs)))
+                    :message (cdr (assq 'verbose attrs))
+                    :level (if (string= (cdr (assq 'severity attrs)) "error")
+                               'error 'warning))))
+               errors)))))
 
 
 ;;;; Error analysis
@@ -3041,6 +3093,35 @@ See URL `http://www.gnu.org/software/bash/'."
                           (message) line-end))
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'bash)))
+
+(flycheck-def-option-var flycheck-cppcheck-checks '("style") c/c++-cppcheck
+  "Enabled checks for Cppcheck.
+
+The value of this variable is a list of strings, where each
+string is the name of an additional check to enable.  By default,
+all coding style checks are enabled.
+
+See section \"Enable message\" in the Cppcheck manual at URL
+`http://cppcheck.sourceforge.net/manual.pdf', and the
+documentation of the `--enable' option for more information,
+including a list of supported checks."
+  :type '(repeat :tag "Additional checks"
+                 (string :tag "Check name"))
+  ;; Quote this lambda, to allow `describe-variable' to display the lambda
+  ;; properly
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.14"))
+
+(flycheck-define-checker c/c++-cppcheck
+  "A C/C++ checker using cppcheck.
+
+See URL `http://cppcheck.sourceforge.net/'."
+  :command ("cppcheck" "--quiet" "--xml-version=2" "--inline-suppr"
+            (option "--enable=" flycheck-cppcheck-checks
+                    flycheck-option-comma-separated-list)
+            source)
+  :error-parser flycheck-parse-cppcheck
+  :modes (c-mode c++-mode))
 
 (flycheck-def-config-file-var flycheck-coffeelintrc coffee-coffeelint
                               ".coffeelint.json")
