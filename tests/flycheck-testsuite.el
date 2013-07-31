@@ -131,6 +131,7 @@
 
 ;; Modes used by our tests
 (--each '(sh-script
+          c-mode
           coffee-mode
           css-mode
           elixir-mode
@@ -2116,6 +2117,36 @@ many-errors-for-error-list.el:7:1:warning: `message' called with 0
      "checkers/bash-syntax-error.bash" 'sh-mode nil
      '(5 nil "syntax error near unexpected token `fi'" error)
      '(5 nil "`fi'" error))))
+
+(ert-deftest checker-c/c++-cppcheck-warning ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/c-cppcheck-warning.c" 'c-mode nil
+   '(2 nil "Comparison of a boolean with integer that is neither 1 nor 0" warning)))
+
+(ert-deftest checker-c/c++-cppcheck-style ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/c-cppcheck-style.c" 'c-mode nil
+   '(3 nil "Unused variable: unused" warning)))
+
+(ert-deftest checker-c/c++-cppcheck-performance ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/c++-cppcheck-performance.cpp" 'c++-mode nil
+   '(4 nil "Prefer prefix ++/-- operators for non-primitive types." warning)))
+
+(ert-deftest checker-c/c++-cppcheck-portability ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/c++-cppcheck-portability.h" 'c++-mode nil
+   '(2 nil "Extra qualification 'A::' unnecessary and considered an error by many compilers." warning)))
+
+(ert-deftest checker-c/c++-cppcheck-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/c-cppcheck-error.c" 'c-mode nil
+   '(4 nil "Null pointer dereference" error)))
 
 (ert-deftest checker-coffeelint-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'coffee-coffeelint)

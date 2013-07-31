@@ -112,6 +112,7 @@ buffer-local wherever it is set."
 
 (defcustom flycheck-checkers
   '(bash
+    c/c++-cppcheck
     coffee-coffeelint
     css-csslint
     elixir
@@ -3041,6 +3042,18 @@ See URL `http://www.gnu.org/software/bash/'."
                           (message) line-end))
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'bash)))
+
+(flycheck-define-checker c/c++-cppcheck
+  "A C/C++ checker using cppcheck.
+
+See URL `http://cppcheck.sourceforge.net/'."
+  :command ("cppcheck" "--enable=style" source)
+  :error-patterns
+  ((warning line-start "[" (file-name) ":" line "]: "
+            "(" (or "style" "performance" "portability" "warning") ") "
+            (message) line-end)
+   (error line-start "[" (file-name) ":" line "]: (error) " (message) line-end))
+  :modes (c-mode c++-mode))
 
 (flycheck-def-config-file-var flycheck-coffeelintrc coffee-coffeelint
                               ".coffeelint.json")
