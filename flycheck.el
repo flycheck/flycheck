@@ -3047,8 +3047,9 @@ See URL `http://www.gnu.org/software/bash/'."
   "A C/C++ checker using cppcheck.
 
 See URL `http://cppcheck.sourceforge.net/'."
-  :command ("cppcheck" "--enable=style" source)
+  :command ("cppcheck" "--quiet" "--enable=style" source)
   :error-patterns
+
   ((warning line-start "[" (file-name) ":" line "]: "
             "(" (or "style" "performance" "portability" "warning") ") "
             (message) line-end)
