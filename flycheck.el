@@ -2389,7 +2389,7 @@ about Cppcheck."
                     :filename (cdr (assq 'file locattrs))
                     :line (flycheck-string-to-number-safe
                            (cdr (assq 'line locattrs)))
-                    :message (cdr (assq 'msg attrs))
+                    :message (cdr (assq 'verbose attrs))
                     :level (if (string= (cdr (assq 'severity attrs)) "error")
                                'error 'warning))))
                errors)))))

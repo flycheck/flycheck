@@ -2122,7 +2122,7 @@ many-errors-for-error-list.el:7:1:warning: `message' called with 0
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
   (flycheck-testsuite-should-syntax-check
    "checkers/c-cppcheck-warning.c" 'c-mode nil
-   '(2 nil "Comparison of a boolean with integer that is neither 1 nor 0" warning)))
+   '(2 nil "The expression \"x\" is of type 'bool' and it is compared against a integer value that is neither 1 nor 0." warning)))
 
 (ert-deftest checker-c/c++-cppcheck-style ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
@@ -2134,7 +2134,7 @@ many-errors-for-error-list.el:7:1:warning: `message' called with 0
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
   (flycheck-testsuite-should-syntax-check
    "checkers/c++-cppcheck-performance.cpp" 'c++-mode nil
-   '(4 nil "Prefer prefix ++/-- operators for non-primitive types." warning)))
+   '(4 nil "Prefix ++/-- operators should be preferred for non-primitive types. Pre-increment/decrement can be more efficient than post-increment/decrement. Post-increment/decrement usually involves keeping a copy of the previous value around and adds a little extra code." warning)))
 
 (ert-deftest checker-c/c++-cppcheck-portability ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
