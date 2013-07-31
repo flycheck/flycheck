@@ -3511,8 +3511,8 @@ CodeSniffer configuration.  When set to a string, pass the string
 to PHP CodeSniffer which will interpret it as name as a standard,
 or as path to a standard specification."
   :type '(choice (const :tag "Default standard" nil)
-                 (string :tag "Standard name or file")))
-(put 'flycheck-phpcs-standard 'safe-local-variable #'stringp)
+                 (string :tag "Standard name or file"))
+  :safe #'stringp)
 
 (flycheck-define-checker php-phpcs
   "A PHP style checker using PHP_CodeSniffer.
@@ -3577,8 +3577,8 @@ variable as warning.
 If set to an integer, this variable overrules any similar setting
 in the configuration file denoted by `flycheck-flake8rc'."
   :type '(choice (const :tag "Do not check McCabe complexity" nil)
-                 (integer :tag "Maximum complexity")))
-(put 'flycheck-flake8-maximum-complexity 'safe-local-variable #'integerp)
+                 (integer :tag "Maximum complexity"))
+  :safe #'integerp)
 
 (flycheck-def-option-var flycheck-flake8-maximum-line-length nil python-flake8
   "The maximum length of lines.
@@ -3592,8 +3592,8 @@ If set to nil, use the maximum line length from the configuration
 file denoted by `flycheck-flake8rc', or the PEP 8 recommendation
 of 79 characters if there is no configuration with this setting."
   :type '(choice (const :tag "Default value")
-                 (integer :tag "Maximum line length in characters")))
-(put 'flycheck-flake8-maximum-line-length 'safe-local-variable #'integerp)
+                 (integer :tag "Maximum line length in characters"))
+  :safe #'integerp)
 
 (flycheck-define-checker python-flake8
   "A Python syntax and style checker using Flake8.
