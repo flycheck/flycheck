@@ -13,6 +13,9 @@ checker using @command{rubocop}.
 checker.
 
 @item
+@gh{dholm, David Holm} added support for Clang syntax checking of C/C++.
+
+@item
 @gh{wyuenho, Jimmy Yuen Ho Wong} added the HTML syntax checker and the
 jshint Javascript checker, and did valuable testing and bug fixing.
 

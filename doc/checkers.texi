@@ -4,6 +4,7 @@ order of their appearance in the default value of
 
 @itemize
 @iflyc bash
+@iflyc c/c++-clang
 @iflyc coffee-coffeelint
 @iflyc css-csslint
 @iflyc elixir
