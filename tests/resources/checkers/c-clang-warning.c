@@ -1,6 +1,8 @@
-int f(int x);
+#include <stdio.h>
+
 int f(int x)
 {
      int unused;
-     return ++x;
+     unsigned int y = 10;
+     return x < y ? ++x : x;
 }

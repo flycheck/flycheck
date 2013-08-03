@@ -3149,12 +3149,35 @@ See URL `http://www.gnu.org/software/bash/'."
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'bash)))
 
+(flycheck-def-option-var flycheck-clang-warnings '("all" "extra") c/c++-clang
+  "A list of additional warnings to enable in Clang.
+
+The value of this variable is a list of strings, where each string
+is the name of a warning category to enable.  By default, all
+recommended warnings and some extra warnings are enabled (as by
+`-Wall' and `-Wextra' respectively).
+
+Refer to the Clang manual at URL
+`http://clang.llvm.org/docs/UsersManual.html' for more
+information about warnings."
+  :type '(choice (const :tag "No additional warnings" nil)
+                 (repeat :tag "Additional warnings"
+                         (string :tag "Warning name")))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.14"))
+
 (flycheck-define-checker c/c++-clang
   "A C/C++ syntax checker using Clang.
 
 See URL `http://clang.llvm.org/'."
-  :command ("clang" "-fsyntax-only" "-Wextra" "-fno-caret-diagnostics"
-            "-fno-color-diagnostics" "-fno-diagnostics-show-option"
+  :command ("clang"
+            "-fsyntax-only"
+            "-fno-color-diagnostics"    ; Do not include color codes in output
+            "-fno-caret-diagnostics"    ; Do not visually indicate the source
+                                        ; location
+            "-fno-diagnostics-show-option" ; Do not show the corresponding
+                                        ; warning group
+            (option-list "-W" flycheck-clang-warnings s-prepend)
             "-x" (eval
                   (cl-case major-mode
                     (c++-mode "c++")

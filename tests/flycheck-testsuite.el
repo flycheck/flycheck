@@ -2149,7 +2149,19 @@ many-errors-for-error-list.el:7:1:warning: `message' called with 0
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
   (flycheck-testsuite-should-syntax-check
    "checkers/c-clang-warning.c" 'c-mode nil
-   '(4 10 "unused variable 'unused'" warning)))
+   '(5 10 "unused variable 'unused'" warning)
+   '(7 15 "comparison of integers of different signs: 'int' and 'unsigned int'" warning)))
+
+(ert-deftest checker-c/c++-clang-warning-customized ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
+  (flycheck-testsuite-with-hook c-mode-hook
+      ;; Disable conversion checks by removing -Wextra, but additionally warn
+      ;; about missing prototypes, which isn't included in -Wextra
+      (setq flycheck-clang-warnings '("all" "missing-prototypes"))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/c-clang-warning.c" 'c-mode nil
+     '(3 5 "no previous prototype for function 'f'" warning)
+     '(5 10 "unused variable 'unused'" warning))))
 
 (ert-deftest checker-c/c++-clang-fatal-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
