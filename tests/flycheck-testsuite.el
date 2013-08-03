@@ -132,6 +132,7 @@
 ;; Modes used by our tests
 (--each '(sh-script
           c-mode
+          c++-mode
           coffee-mode
           css-mode
           elixir-mode
@@ -836,7 +837,9 @@ All declared checkers should be registered."
 (ert-deftest flycheck-prepend-with-option ()
   (should (null (flycheck-prepend-with-option "-f" nil)))
   (should (equal (flycheck-prepend-with-option "-L" '("foo" "bar"))
-                 '("-L" "foo" "-L" "bar"))))
+                 '("-L" "foo" "-L" "bar")))
+  (should (equal (flycheck-prepend-with-option "-L" '("foo" "bar") #'s-prepend)
+                 '("-Lfoo" "-Lbar"))))
 
 (ert-deftest flycheck-temporary-buffer-p ()
   (with-temp-buffer
@@ -888,9 +891,10 @@ All declared checkers should be registered."
 
 (ert-deftest flycheck-command-argument-p-option-list ()
   (should (flycheck-command-argument-p '(option-list "foo" bar)))
-  (should (flycheck-command-argument-p '(option-list "foo" bar filter)))
+  (should (flycheck-command-argument-p '(option-list "foo" bar prepend-fn)))
+  (should (flycheck-command-argument-p '(option-list "foo" bar prepend-fn filter)))
   (should-not (flycheck-command-argument-p '(option-list "foo" 'bar)))
-  (should-not (flycheck-command-argument-p '(option-list "foo" bar 'filter)))
+  (should-not (flycheck-command-argument-p '(option-list "foo" bar 'prepend-fn)))
   (should-not (flycheck-command-argument-p '(option-list "foo"))))
 
 (ert-deftest flycheck-command-argument-p-eval ()
@@ -990,24 +994,31 @@ All declared checkers should be registered."
 (ert-deftest flycheck-substitute-argument-option-list ()
   (let ((flycheck-test-option-var "spam"))
     (should-error (flycheck-substitute-argument
-                   '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)))
+                   '(option-list "-I" flycheck-test-option-var) 'emacs-lisp)))
   (let ((flycheck-test-option-var '("spam" "eggs")))
     (should (equal (flycheck-substitute-argument
-                    '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)
-                   '("--foo" "spam" "--foo" "eggs"))))
+                    '(option-list "-I" flycheck-test-option-var) 'emacs-lisp)
+                   '("-I" "spam" "-I" "eggs")))
+    (should (equal (flycheck-substitute-argument
+                    '(option-list "-I" flycheck-test-option-var s-prepend) 'emacs-lisp)
+                   '("-Ispam" "-Ieggs"))))
   (let ((flycheck-test-option-var '(10 20)))
     (should-error (flycheck-substitute-argument
-                   '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp))
+                   '(option-list "-I" flycheck-test-option-var) 'emacs-lisp))
     (should (equal (flycheck-substitute-argument
-                    '(option-list "--foo" flycheck-test-option-var number-to-string) 'emacs-lisp)
-                   '("--foo" "10" "--foo" "20"))))
+                    '(option-list "-I" flycheck-test-option-var nil number-to-string) 'emacs-lisp)
+                   '("-I" "10" "-I" "20")))
+    (should (equal (flycheck-substitute-argument
+                    '(option-list "-I" flycheck-test-option-var
+                                  s-prepend number-to-string) 'emacs-lisp)
+                   '("-I10" "-I20"))))
   (let (flycheck-test-option-var)
     (should-not (flycheck-substitute-argument
-                 '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)))
+                 '(option-list "-I" flycheck-test-option-var) 'emacs-lisp)))
   (let ((flycheck-test-option-var '(nil)))
     ;; Catch an error, because `number-to-string' is called with nil
     (should-error (flycheck-substitute-argument
-                   '(option-list "--foo" flycheck-test-option-var number-to-string) 'emacs-lisp)
+                   '(option-list "-I" flycheck-test-option-var nil number-to-string) 'emacs-lisp)
                   :type 'wrong-type-argument)))
 
 (ert-deftest flycheck-substitute-argument-eval ()
@@ -1093,25 +1104,31 @@ All declared checkers should be registered."
 (ert-deftest flycheck-substitute-shell-argument-option-list ()
   (let ((flycheck-test-option-var "spam"))
     (should-error (flycheck-substitute-shell-argument
-                   '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)))
+                   '(option-list "-I" flycheck-test-option-var) 'emacs-lisp)))
   (let ((flycheck-test-option-var '("spam" "with eggs")))
     (should (equal (flycheck-substitute-shell-argument
-                    '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)
-                   "--foo spam --foo with\\ eggs")))
+                    '(option-list "-I" flycheck-test-option-var) 'emacs-lisp)
+                   "-I spam -I with\\ eggs"))
+    (should (equal (flycheck-substitute-shell-argument
+                    '(option-list "-I" flycheck-test-option-var s-prepend) 'emacs-lisp)
+                   "-Ispam -Iwith\\ eggs")))
   (let ((flycheck-test-option-var '(10 20)))
     (should-error (flycheck-substitute-shell-argument
-                   '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp))
+                   '(option-list "-I" flycheck-test-option-var) 'emacs-lisp))
     (should (equal (flycheck-substitute-shell-argument
-                    '(option-list "--foo" flycheck-test-option-var number-to-string) 'emacs-lisp)
-                   "--foo 10 --foo 20")))
+                    '(option-list "-I" flycheck-test-option-var nil number-to-string) 'emacs-lisp)
+                   "-I 10 -I 20"))
+    (should (equal (flycheck-substitute-shell-argument
+                    '(option-list "-I" flycheck-test-option-var s-prepend number-to-string) 'emacs-lisp)
+                   "-I10 -I20")))
   (let (flycheck-test-option-var)
     (should (equal (flycheck-substitute-shell-argument
-                    '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)
+                    '(option-list "-I" flycheck-test-option-var) 'emacs-lisp)
                    "")))
   (let ((flycheck-test-option-var '(nil)))
     ;; Catch an error, because `number-to-string' is called with nil
     (should-error (flycheck-substitute-shell-argument
-                   '(option-list "--foo" flycheck-test-option-var number-to-string) 'emacs-lisp)
+                   '(option-list "-I" flycheck-test-option-var nil number-to-string) 'emacs-lisp)
                   :type 'wrong-type-argument)))
 
 (ert-deftest flycheck-substitute-shell-argument-eval ()
@@ -2128,22 +2145,61 @@ many-errors-for-error-list.el:7:1:warning: `message' called with 0
      '(5 nil "syntax error near unexpected token `fi'" error)
      '(5 nil "`fi'" error))))
 
+(ert-deftest checker-c/c++-clang-warning ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/c_c++-clang-warning.c" 'c-mode nil
+   '(5 10 "unused variable 'unused'" warning)
+   '(5 nil "Unused variable: unused" warning) ; From Cppcheck, by chaining
+   '(7 15 "comparison of integers of different signs: 'int' and 'unsigned int'" warning)))
+
+(ert-deftest checker-c/c++-clang-warning-customized ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
+  (flycheck-testsuite-with-hook c-mode-hook
+      ;; Disable conversion checks by removing -Wextra, but additionally warn
+      ;; about missing prototypes, which isn't included in -Wextra
+      (setq flycheck-clang-warnings '("all" "missing-prototypes"))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/c_c++-clang-warning.c" 'c-mode nil
+     '(3 5 "no previous prototype for function 'f'" warning)
+     '(5 10 "unused variable 'unused'" warning)
+     '(5 nil "Unused variable: unused" warning)))) ; From Cppcheck, by chaining
+
+(ert-deftest checker-c/c++-clang-fatal-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/c_c++-clang-fatal-error.c" 'c-mode nil
+   '(1 10 "'c_c++-clang-header.h' file not found" error)))
+
+(ert-deftest checker-c/c++-clang-include-path ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
+  (flycheck-testsuite-with-hook c-mode-hook
+      (setq flycheck-clang-include-path '("."))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/c_c++-clang-fatal-error.c" 'c-mode nil)))
+
+(ert-deftest checker-c/c++-clang-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/c_c++-clang-error.cpp" 'c++-mode nil
+   '(5 18 "implicit instantiation of undefined template 'test<false>'" error)))
+
 (ert-deftest checker-c/c++-cppcheck-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
   (flycheck-testsuite-should-syntax-check
-   "checkers/c_c++-cppcheck-error.c" 'c-mode nil
+   "checkers/c_c++-cppcheck-error.c" 'c-mode 'c/c++-clang
    '(4 nil "Null pointer dereference" error)))
 
 (ert-deftest checker-c/c++-cppcheck-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
   (flycheck-testsuite-should-syntax-check
-   "checkers/c_c++-cppcheck-warning.c" 'c-mode nil
+   "checkers/c_c++-cppcheck-warning.c" 'c-mode 'c/c++-clang
    '(2 nil "The expression \"x\" is of type 'bool' and it is compared against a integer value that is neither 1 nor 0." warning)))
 
 (ert-deftest checker-c/c++-cppcheck-style ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
   (flycheck-testsuite-should-syntax-check
-   "checkers/c_c++-cppcheck-style.c" 'c-mode nil
+   "checkers/c_c++-cppcheck-style.c" 'c-mode 'c/c++-clang
    '(3 nil "Unused variable: unused" warning)))
 
 (ert-deftest checker-c/c++-cppcheck-style-suppressed ()
@@ -2151,14 +2207,14 @@ many-errors-for-error-list.el:7:1:warning: `message' called with 0
   (flycheck-testsuite-with-hook c-mode-hook
       (setq flycheck-cppcheck-checks nil)
     (flycheck-testsuite-should-syntax-check
-     "checkers/c_c++-cppcheck-style.c" 'c-mode nil)))
+     "checkers/c_c++-cppcheck-style.c" 'c-mode 'c/c++-clang)))
 
 (ert-deftest checker-c/c++-cppcheck-multiple-checks ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
   (flycheck-testsuite-with-hook c++-mode-hook
       (setq flycheck-cppcheck-checks '("performance" "portability"))
       (flycheck-testsuite-should-syntax-check
-       "checkers/c_c++-cppcheck-multiple-checks.cpp" 'c++-mode nil
+       "checkers/c_c++-cppcheck-multiple-checks.cpp" 'c++-mode 'c/c++-clang
        '(2 nil "Extra qualification 'A::' unnecessary and considered an error by many compilers." warning)
        '(9 nil "Prefix ++/-- operators should be preferred for non-primitive types. Pre-increment/decrement can be more efficient than post-increment/decrement. Post-increment/decrement usually involves keeping a copy of the previous value around and adds a little extra code." warning))))
 

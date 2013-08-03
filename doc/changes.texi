@@ -769,6 +769,8 @@ New syntax checkers:
 and @command{hlint}}
 @item
 @ghissue{170, C/C++ with @command{cppcheck}}
+@item
+@ghissue{172, C/C++ with @command{clang}}
 @end itemize
 
 @item

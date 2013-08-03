@@ -154,10 +154,10 @@ The following people contributed to flycheck:
   refinements, brought Flycheck to a larger user base by adding it to his
   awesome [Prelude](https://github.com/bbatsov/prelude) project, and added a
   Ruby syntax checker using `rubocop`.
-- [Damon Haley](https://github.com/dhaley) helped to shape and test the PHP
+s- [Damon Haley](https://github.com/dhaley) helped to shape and test the PHP
   CodeSniffer checker.
-- [David Holm](https://github.com/dholm) added a C/C++ style checker using
-  `cppcheck`.
+- [David Holm](https://github.com/dholm) added C/C++ syntax and style checkers
+  using `clang` and `cppcheck` respectively.
 - [Jimmy Yuen Ho Wong](https://github.com/wyuenho) added the HTML syntax checker
   and the jshint Javascript checker, and did valuable testing and bug fixing.
 - [Krzysztof Witkowski](https://github.com/kwitek) implemented `eval` support in
@@ -217,3 +217,4 @@ details.
 
 [solarized]: https://github.com/bbatsov/solarized-emacs
 [color-mode-line]: https://github.com/syl20bnr/flycheck-color-mode-line
+[dholm]: https://github.com/dholm

@@ -4,6 +4,10 @@
 include:
   - base.tools
 
+c/c++-clang:
+  pkg.installed:
+    - name: clang
+
 c/c++-cppcheck:
   pkg.installed:
     - name: cppcheck
