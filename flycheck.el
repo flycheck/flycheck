@@ -1395,13 +1395,17 @@ value."
        (put ',symbol :flycheck-checker t))))
 
 ;;;###autoload
-(defmacro flycheck-def-config-file-var (symbol checker &optional file-name)
+(defmacro flycheck-def-config-file-var (symbol checker &optional file-name
+                                               &rest custom-args)
   "Define SYMBOL as config file variable for CHECKER, with default FILE-NAME.
 
 SYMBOL is declared as customizable variable (see `defcustom`)
 providing a configuration file for CHECKER.  The CHECKER argument
 is used for documentation purposes only.  If given use FILE-NAME
 as initial value.
+
+The variable is declared with `defcustom', and declared
+buffer-local.  CUSTOM-ARGS are forwarded to `defcustom'
 
 Use this together with the `config-file' cell in syntax checker
 commands."
@@ -1421,7 +1425,8 @@ configuration file a buffer." checker)
        :type '(choice (const :tag "No configuration file" nil)
                       (string :tag "File name or path"))
        :group 'flycheck-config-files
-       :safe #'stringp)
+       :safe #'stringp
+       ,@custom-args)
      (make-variable-buffer-local ',symbol)))
 
 ;;;###autoload
