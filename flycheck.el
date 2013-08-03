@@ -222,7 +222,10 @@ after the corresponding syntax checker finished.  At this stage,
 the overlays from the previous syntax checks are still present,
 and there may be further syntax checkers in the chain.
 
-This variable is an abnormal hook.")
+This variable is an abnormal hook."
+  :group 'flycheck
+  :type 'hook
+  :package-version '(flycheck . "0.13"))
 
 (defcustom flycheck-display-errors-function #'flycheck-display-error-messages
   "Function to display error messages.
