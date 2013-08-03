@@ -2148,7 +2148,7 @@ many-errors-for-error-list.el:7:1:warning: `message' called with 0
 (ert-deftest checker-c/c++-clang-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
   (flycheck-testsuite-should-syntax-check
-   "checkers/c-clang-warning.c" 'c-mode nil
+   "checkers/c_c++-clang-warning.c" 'c-mode nil
    '(5 10 "unused variable 'unused'" warning)
    '(7 15 "comparison of integers of different signs: 'int' and 'unsigned int'" warning)))
 
@@ -2159,20 +2159,20 @@ many-errors-for-error-list.el:7:1:warning: `message' called with 0
       ;; about missing prototypes, which isn't included in -Wextra
       (setq flycheck-clang-warnings '("all" "missing-prototypes"))
     (flycheck-testsuite-should-syntax-check
-     "checkers/c-clang-warning.c" 'c-mode nil
+     "checkers/c_c++-clang-warning.c" 'c-mode nil
      '(3 5 "no previous prototype for function 'f'" warning)
      '(5 10 "unused variable 'unused'" warning))))
 
 (ert-deftest checker-c/c++-clang-fatal-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
   (flycheck-testsuite-should-syntax-check
-   "checkers/c-clang-fatal-error.c" 'c-mode nil
+   "checkers/c_c++-clang-fatal-error.c" 'c-mode nil
    '(1 10 "'non_existant_file.h' file not found" error)))
 
 (ert-deftest checker-c/c++-clang-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
   (flycheck-testsuite-should-syntax-check
-   "checkers/c++-clang-error.cpp" 'c++-mode nil
+   "checkers/c_c++-clang-error.cpp" 'c++-mode nil
    '(5 18 "implicit instantiation of undefined template 'test<false>'" error)))
 
 (ert-deftest checker-c/c++-cppcheck-error ()
