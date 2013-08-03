@@ -837,7 +837,9 @@ All declared checkers should be registered."
 (ert-deftest flycheck-prepend-with-option ()
   (should (null (flycheck-prepend-with-option "-f" nil)))
   (should (equal (flycheck-prepend-with-option "-L" '("foo" "bar"))
-                 '("-L" "foo" "-L" "bar"))))
+                 '("-L" "foo" "-L" "bar")))
+  (should (equal (flycheck-prepend-with-option "-L" '("foo" "bar") #'s-prepend)
+                 '("-Lfoo" "-Lbar"))))
 
 (ert-deftest flycheck-temporary-buffer-p ()
   (with-temp-buffer
@@ -889,9 +891,10 @@ All declared checkers should be registered."
 
 (ert-deftest flycheck-command-argument-p-option-list ()
   (should (flycheck-command-argument-p '(option-list "foo" bar)))
-  (should (flycheck-command-argument-p '(option-list "foo" bar filter)))
+  (should (flycheck-command-argument-p '(option-list "foo" bar prepend-fn)))
+  (should (flycheck-command-argument-p '(option-list "foo" bar prepend-fn filter)))
   (should-not (flycheck-command-argument-p '(option-list "foo" 'bar)))
-  (should-not (flycheck-command-argument-p '(option-list "foo" bar 'filter)))
+  (should-not (flycheck-command-argument-p '(option-list "foo" bar 'prepend-fn)))
   (should-not (flycheck-command-argument-p '(option-list "foo"))))
 
 (ert-deftest flycheck-command-argument-p-eval ()
@@ -991,24 +994,31 @@ All declared checkers should be registered."
 (ert-deftest flycheck-substitute-argument-option-list ()
   (let ((flycheck-test-option-var "spam"))
     (should-error (flycheck-substitute-argument
-                   '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)))
+                   '(option-list "-I" flycheck-test-option-var) 'emacs-lisp)))
   (let ((flycheck-test-option-var '("spam" "eggs")))
     (should (equal (flycheck-substitute-argument
-                    '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)
-                   '("--foo" "spam" "--foo" "eggs"))))
+                    '(option-list "-I" flycheck-test-option-var) 'emacs-lisp)
+                   '("-I" "spam" "-I" "eggs")))
+    (should (equal (flycheck-substitute-argument
+                    '(option-list "-I" flycheck-test-option-var s-prepend) 'emacs-lisp)
+                   '("-Ispam" "-Ieggs"))))
   (let ((flycheck-test-option-var '(10 20)))
     (should-error (flycheck-substitute-argument
-                   '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp))
+                   '(option-list "-I" flycheck-test-option-var) 'emacs-lisp))
     (should (equal (flycheck-substitute-argument
-                    '(option-list "--foo" flycheck-test-option-var number-to-string) 'emacs-lisp)
-                   '("--foo" "10" "--foo" "20"))))
+                    '(option-list "-I" flycheck-test-option-var nil number-to-string) 'emacs-lisp)
+                   '("-I" "10" "-I" "20")))
+    (should (equal (flycheck-substitute-argument
+                    '(option-list "-I" flycheck-test-option-var
+                                  s-prepend number-to-string) 'emacs-lisp)
+                   '("-I10" "-I20"))))
   (let (flycheck-test-option-var)
     (should-not (flycheck-substitute-argument
-                 '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)))
+                 '(option-list "-I" flycheck-test-option-var) 'emacs-lisp)))
   (let ((flycheck-test-option-var '(nil)))
     ;; Catch an error, because `number-to-string' is called with nil
     (should-error (flycheck-substitute-argument
-                   '(option-list "--foo" flycheck-test-option-var number-to-string) 'emacs-lisp)
+                   '(option-list "-I" flycheck-test-option-var nil number-to-string) 'emacs-lisp)
                   :type 'wrong-type-argument)))
 
 (ert-deftest flycheck-substitute-argument-eval ()
@@ -1094,25 +1104,31 @@ All declared checkers should be registered."
 (ert-deftest flycheck-substitute-shell-argument-option-list ()
   (let ((flycheck-test-option-var "spam"))
     (should-error (flycheck-substitute-shell-argument
-                   '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)))
+                   '(option-list "-I" flycheck-test-option-var) 'emacs-lisp)))
   (let ((flycheck-test-option-var '("spam" "with eggs")))
     (should (equal (flycheck-substitute-shell-argument
-                    '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)
-                   "--foo spam --foo with\\ eggs")))
+                    '(option-list "-I" flycheck-test-option-var) 'emacs-lisp)
+                   "-I spam -I with\\ eggs"))
+    (should (equal (flycheck-substitute-shell-argument
+                    '(option-list "-I" flycheck-test-option-var s-prepend) 'emacs-lisp)
+                   "-Ispam -Iwith\\ eggs")))
   (let ((flycheck-test-option-var '(10 20)))
     (should-error (flycheck-substitute-shell-argument
-                   '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp))
+                   '(option-list "-I" flycheck-test-option-var) 'emacs-lisp))
     (should (equal (flycheck-substitute-shell-argument
-                    '(option-list "--foo" flycheck-test-option-var number-to-string) 'emacs-lisp)
-                   "--foo 10 --foo 20")))
+                    '(option-list "-I" flycheck-test-option-var nil number-to-string) 'emacs-lisp)
+                   "-I 10 -I 20"))
+    (should (equal (flycheck-substitute-shell-argument
+                    '(option-list "-I" flycheck-test-option-var s-prepend number-to-string) 'emacs-lisp)
+                   "-I10 -I20")))
   (let (flycheck-test-option-var)
     (should (equal (flycheck-substitute-shell-argument
-                    '(option-list "--foo" flycheck-test-option-var) 'emacs-lisp)
+                    '(option-list "-I" flycheck-test-option-var) 'emacs-lisp)
                    "")))
   (let ((flycheck-test-option-var '(nil)))
     ;; Catch an error, because `number-to-string' is called with nil
     (should-error (flycheck-substitute-shell-argument
-                   '(option-list "--foo" flycheck-test-option-var number-to-string) 'emacs-lisp)
+                   '(option-list "-I" flycheck-test-option-var nil number-to-string) 'emacs-lisp)
                   :type 'wrong-type-argument)))
 
 (ert-deftest flycheck-substitute-shell-argument-eval ()

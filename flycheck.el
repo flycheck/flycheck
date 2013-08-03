@@ -957,19 +957,23 @@ Otherwise `(list OPTION VALUE)' is returned."
       (list (concat option value))
     (list option value)))
 
-(defun flycheck-prepend-with-option (option items)
-  "Prepend each item in ITEMS with OPTION.
+(defun flycheck-prepend-with-option (option items &optional prepend-fn)
+  "Prepend OPTION to each item in ITEMS, using PREPEND-FN.
 
 Prepend OPTION to each item in ITEMS.
 
-ITEMS is a list of value to pass to the syntax checker.  OPTION
-is the option, as string.  ITEM-FILTER is a function to apply to
-each item."
+ITEMS is a list of strings to pass to the syntax checker.  OPTION
+is the option, as string.  PREPEND-FN is a function called to
+prepend OPTION to each item in ITEMS.  If nil or omitted, use
+`list'.
+
+Return a flattened list where OPTION is prepended to each item in
+ITEMS."
   (unless (stringp option)
     (error "Option %S is not a string" option))
-  (->> items
-    (--map (list option it))
-    -flatten))
+  (unless prepend-fn
+    (setq prepend-fn #'list))
+  (-flatten (--map (funcall prepend-fn option it) items)))
 
 (defun flycheck-temporary-buffer-p ()
   "Determine whether the current buffer is a temporary buffer.
@@ -1235,10 +1239,12 @@ error if not."
       (`(,(or `option `option-list) ,option-name ,option-var)
        (and (stringp option-name)
             (symbolp option-var)))
-      (`(,(or `option `option-list) ,option-name ,option-var ,filter)
+      (`(,(or `option `option-list) ,option-name ,option-var ,prepender-or-filter)
        (and (stringp option-name)
-            (symbolp option-var)
-            (symbolp filter)))
+            (-all? #'symbolp (list option-var prepender-or-filter))))
+      (`(option-list ,option-name ,option-var ,prepender ,filter)
+       (and (stringp option-name)
+            (-all? #'symbolp (list option-var prepender filter))))
       (`(eval ,_) t)
       (_ nil)))
 
@@ -1584,13 +1590,16 @@ nil.  In the latter case, return a list of arguments as described
 above.  If OPTION ends with a =, process it like in a
 `config-file' cell (see above).
 
-If ARG is a form `(option-list OPTION VARIABLE [FILTER])',
-retrieve the value of VARIABLE, which must be a list, and prepend
-OPTION before each item in this list.  FILTER is an optional
-function to be applied to each item in the list.  Items for which
-FILTER returns nil are dropped.  If the list is non-nil after the
-application of FILTER, return a list `(OPTION ITEM1 OPTION ITEM2
-...)'.  Otherwise return nil.
+If ARG is a form `(option-list OPTION VARIABLE [PREPEND-FN
+FILTER])', retrieve the value of VARIABLE, which must be a list,
+and prepend OPTION before each item in this list, using
+PREPEND-FN.  PREPEND-FN is called with the OPTION and each item
+of the list as second argument, and should return OPTION
+prepended before the item, either as string or as list.  FILTER
+is an optional function to be applied to each item in the list.
+Items for which FILTER returns nil are dropped.  If the list is
+non-nil after the application of FILTER, return a list `(OPTION
+ITEM1 OPTION ITEM2 ...)'.  Otherwise return nil.
 
 If ARG is a form `(eval FORM), return the result of evaluating
 FORM in the buffer to be checked.  FORM must either return a
@@ -1634,12 +1643,18 @@ are substituted within the body of cells!"
          (error "Value %S of %S for option %S is not a list of strings"
                 value variable option-name))
        (flycheck-prepend-with-option option-name value)))
-    (`(option-list ,option-name ,variable ,filter)
+    (`(option-list ,option-name ,variable ,prepend-fn)
+     (-when-let (value (symbol-value variable))
+       (unless (and (listp value) (-all? #'stringp value))
+         (error "Value %S of %S for option %S is not a list of strings"
+                value variable option-name))
+       (flycheck-prepend-with-option option-name value prepend-fn)))
+    (`(option-list ,option-name ,variable ,prepend-fn ,filter)
      (-when-let (value (-keep filter (symbol-value variable)))
        (unless (and (listp value) (-all? #'stringp value))
          (error "Value %S of %S for option %S is not a list of strings"
                 value variable option-name))
-       (flycheck-prepend-with-option option-name value)))
+       (flycheck-prepend-with-option option-name value prepend-fn)))
     (`(eval ,form)
      (let ((result (eval form)))
        (if (or (null result)
@@ -1656,7 +1671,7 @@ Substitute each argument in the command of CHECKER using
 `flycheck-substitute-argument'.  This replaces any special
 symbols in the command."
   (-flatten (--keep (flycheck-substitute-argument it checker)
-                   (flycheck-checker-command checker))))
+                    (flycheck-checker-command checker))))
 
 (defun flycheck-substitute-shell-argument (arg checker)
   "Substitute ARG for CHECKER.
@@ -3294,7 +3309,7 @@ This variable has no effect, if
 (flycheck-define-checker emacs-lisp
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler."
   :command ((eval flycheck-emacs-command)
-            (option-list "--directory" flycheck-emacs-lisp-load-path
+            (option-list "--directory" flycheck-emacs-lisp-load-path nil
                          ;; Expand relative paths against the directory of the
                          ;; buffer to check
                          expand-file-name)
