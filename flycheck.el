@@ -3198,7 +3198,8 @@ See URL `http://clang.llvm.org/'."
             ": warning: " (message) line-end)
    (error line-start (file-name) ":" line ":" column
           ": " (or "fatal error" "error") ": " (message) line-end))
-  :modes (c-mode c++-mode))
+  :modes (c-mode c++-mode)
+  :next-checkers ((warnings-only . c/c++-cppcheck)))
 
 (flycheck-def-option-var flycheck-cppcheck-checks '("style") c/c++-cppcheck
   "Enabled checks for Cppcheck.
