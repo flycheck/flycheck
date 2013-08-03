@@ -1425,7 +1425,6 @@ configuration file a buffer." checker)
        :type '(choice (const :tag "No configuration file" nil)
                       (string :tag "File name or path"))
        :group 'flycheck-config-files
-       :safe #'stringp
        ,@custom-args)
      (make-variable-buffer-local ',symbol)))
 
@@ -3239,7 +3238,8 @@ See URL `http://cppcheck.sourceforge.net/'."
   :modes (c-mode c++-mode))
 
 (flycheck-def-config-file-var flycheck-coffeelintrc coffee-coffeelint
-                              ".coffeelint.json")
+                              ".coffeelint.json"
+  :safe #'stringp)
 
 (flycheck-define-checker coffee-coffeelint
   "A CoffeeScript syntax and style checker using coffeelint.
@@ -3599,7 +3599,8 @@ See URL `http://community.haskell.org/~ndm/hlint/'."
           line-end))
   :modes haskell-mode)
 
-(flycheck-def-config-file-var flycheck-tidyrc html-tidy ".tidyrc")
+(flycheck-def-config-file-var flycheck-tidyrc html-tidy ".tidyrc"
+  :safe #'stringp)
 
 (flycheck-define-checker html-tidy
   "A HTML syntax and style checker using Tidy.
@@ -3617,7 +3618,8 @@ See URL `https://github.com/w3c/tidy-html5'."
             " - Warning: " (message) line-end))
   :modes (html-mode nxhtml-mode web-mode))
 
-(flycheck-def-config-file-var flycheck-jshintrc javascript-jshint ".jshintrc")
+(flycheck-def-config-file-var flycheck-jshintrc javascript-jshint ".jshintrc"
+  :safe #'stringp)
 
 (flycheck-define-checker javascript-jshint
   "A JavaScript syntax and style checker using jshint.
@@ -3761,7 +3763,8 @@ See URL `http://www.puppet-lint.com/'."
   :modes puppet-mode
   :predicate (lambda () (and (buffer-file-name) (not (buffer-modified-p)))))
 
-(flycheck-def-config-file-var flycheck-flake8rc python-flake8 ".flake8rc")
+(flycheck-def-config-file-var flycheck-flake8rc python-flake8 ".flake8rc"
+  :safe #'stringp)
 
 (flycheck-def-option-var flycheck-flake8-maximum-complexity nil python-flake8
   "The maximum McCabe complexity of methods.
@@ -3852,7 +3855,8 @@ See URL `http://docutils.sourceforge.net/'."
           (message) line-end))
   :modes rst-mode)
 
-(flycheck-def-config-file-var flycheck-rubocoprc ruby-rubocop ".rubocop.yml")
+(flycheck-def-config-file-var flycheck-rubocoprc ruby-rubocop ".rubocop.yml"
+  :safe #'stringp)
 
 (flycheck-define-checker ruby-rubocop
   "A Ruby syntax and style checker using the RuboCop tool.
@@ -3972,7 +3976,8 @@ See URL `http://www.gnu.org/software/bash/'."
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'sh)))
 
-(flycheck-def-config-file-var flycheck-chktexrc tex-chktex ".chktexrc")
+(flycheck-def-config-file-var flycheck-chktexrc tex-chktex ".chktexrc"
+  :safe #'stringp)
 
 (flycheck-define-checker tex-chktex
   "A TeX and LaTeX syntax and style checker using chktex.
