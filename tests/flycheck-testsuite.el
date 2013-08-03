@@ -2148,9 +2148,8 @@ many-errors-for-error-list.el:7:1:warning: `message' called with 0
 (ert-deftest checker-c/c++-clang-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
   (flycheck-testsuite-should-syntax-check
-   "checkers/c_c++-clang-warning.c" 'c-mode nil
+   "checkers/c_c++-clang-warning.c" 'c-mode 'c/c++-cppcheck
    '(5 10 "unused variable 'unused'" warning)
-   '(5 nil "Unused variable: unused" warning) ; From Cppcheck, by chaining
    '(7 15 "comparison of integers of different signs: 'int' and 'unsigned int'" warning)))
 
 (ert-deftest checker-c/c++-clang-warning-customized ()
@@ -2160,10 +2159,9 @@ many-errors-for-error-list.el:7:1:warning: `message' called with 0
       ;; about missing prototypes, which isn't included in -Wextra
       (setq flycheck-clang-warnings '("all" "missing-prototypes"))
     (flycheck-testsuite-should-syntax-check
-     "checkers/c_c++-clang-warning.c" 'c-mode nil
+     "checkers/c_c++-clang-warning.c" 'c-mode 'c/c++-cppcheck
      '(3 5 "no previous prototype for function 'f'" warning)
-     '(5 10 "unused variable 'unused'" warning)
-     '(5 nil "Unused variable: unused" warning)))) ; From Cppcheck, by chaining
+     '(5 10 "unused variable 'unused'" warning))))
 
 (ert-deftest checker-c/c++-clang-fatal-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
