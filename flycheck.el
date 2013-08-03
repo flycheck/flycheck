@@ -3166,6 +3166,16 @@ information about warnings."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.14"))
 
+(flycheck-def-option-var flycheck-clang-include-path nil c/c++-clang
+  "A list of include directories for Clang.
+
+The value of this variable is a list of strings, where each
+string is a directory to add to the include path of Clang.
+Relative paths are relative to the file being checked."
+  :type '(repeat (directory :tag "Include directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.14"))
+
 (flycheck-define-checker c/c++-clang
   "A C/C++ syntax checker using Clang.
 
@@ -3178,6 +3188,7 @@ See URL `http://clang.llvm.org/'."
             "-fno-diagnostics-show-option" ; Do not show the corresponding
                                         ; warning group
             (option-list "-W" flycheck-clang-warnings s-prepend)
+            (option-list "-I" flycheck-clang-include-path)
             "-x" (eval
                   (cl-case major-mode
                     (c++-mode "c++")

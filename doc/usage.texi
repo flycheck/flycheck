@@ -253,12 +253,16 @@ Some syntax checkers can be configured via options.  The following
 options are provided by Flycheck (use @kbd{C-h v} or @kbd{M-x
 describe-variable} on the variable name for detailed help):
 
+@defopt flycheck-clang-include-path
+Include search path for @code{c/c++-clang}.
+@end defopt
+
 @defopt flycheck-clang-warnings
-Additional warnings to enable in @code{c/c++-clang}
+Additional warnings to enable in @code{c/c++-clang}.
 @end defopt
 
 @defopt flycheck-cppcheck-checks
-Additional checks to use in @code{c/c++-cppcheck}
+Additional checks to use in @code{c/c++-cppcheck}.
 @end defopt
 
 @defopt flycheck-emacs-lisp-initialize-packages

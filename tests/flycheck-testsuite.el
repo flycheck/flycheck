@@ -2167,7 +2167,14 @@ many-errors-for-error-list.el:7:1:warning: `message' called with 0
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
   (flycheck-testsuite-should-syntax-check
    "checkers/c_c++-clang-fatal-error.c" 'c-mode nil
-   '(1 10 "'non_existant_file.h' file not found" error)))
+   '(1 10 "'c_c++-clang-header.h' file not found" error)))
+
+(ert-deftest checker-c/c++-clang-include-path ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
+  (flycheck-testsuite-with-hook c-mode-hook
+      (setq flycheck-clang-include-path '("."))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/c_c++-clang-fatal-error.c" 'c-mode nil)))
 
 (ert-deftest checker-c/c++-clang-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)

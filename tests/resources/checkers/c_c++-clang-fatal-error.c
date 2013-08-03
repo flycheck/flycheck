@@ -1,1 +1,1 @@
-#include "non_existant_file.h"
+#include <c_c++-clang-header.h>
