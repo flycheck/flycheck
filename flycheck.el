@@ -259,19 +259,23 @@ highlight them according to `flycheck-highlighting-mode'."
 (defcustom flycheck-highlighting-mode 'sexps
   "The highlighting mode for Flycheck errors and warnings.
 
-Controls how Flycheck highlights errors in buffers.  May either
-be `columns', `sexps', `lines' or nil.
+The highlighting mode controls how Flycheck highlights errors in
+buffers.  The following modes are known:
 
-If `columns', highlight the error column.  If the error does not
-have a column, highlight the whole line.
+`columns'
+     highlights the error column.  If the error does not have a
+     column, highlight the whole line.
 
-If `sexps', highlight the expression at the error column, if
-there is any, otherwise behave like `columns'.
+`sexps'
+     highlights the expression at the error column, if there is
+     any, otherwise behave like `columns'.
 
-If `lines', always highlight the whole line.
+`lines'
+     highlights the whole line.
 
-If nil do no highlight errors at all, but only indicate according
-to `flycheck-indication-mode'.
+nil
+     does not highlight errors at all.  Errors will still be
+     indicated according to `flycheck-indication-mode'.
 
 Note that this does not affect error navigation.  When navigating
 errors with `next-error' and `previous-error' Flycheck always
@@ -292,16 +296,19 @@ jumps to the error column regardless of the highlighting mode."
 This variable is a list of events that may trigger syntax checks.
 The following events are known:
 
-`save' checks syntax automatically each time the buffer is saved.
+`save'
+     checks syntax automatically each time the buffer is saved.
 
-`idle-change' checks syntax automatically some time after the
-last change to the buffer occurred.
+`idle-change'
+     checks syntax automatically some time after the last change
+     to the buffer occurred.
 
-`new-line' checks syntax automatically each time a new line is
-inserted into the buffer.
+`new-line'
+     checks syntax automatically each time a new line is inserted
+     into the buffer.
 
-`mode-enabled' checks syntax automatically when `flycheck-mode'
-is enabled.
+`mode-enabled'
+     checks syntax automatically when `flycheck-mode' is enabled.
 
 For instance, set this variable to '(mode-enabled save) to only
 check syntax automatically when saving a buffer, but never when
@@ -1083,49 +1090,55 @@ about a checker.
 
 The following PROPERTIES are understood:
 
-`:command' A list with the executable (in `car') and the
-arguments (in `cdr') of the syntax checker.  The executable is
-checked for existence with `executable-find' before executing the
-checker.  The arguments are substituted with
-`flycheck-substitute-argument' before execution, see the
-documentation of this function for a list of special tags allowed
-in arguments.
+`:command'
+     A list with the executable (in `car') and the arguments (in
+     `cdr') of the syntax checker.  The executable is checked for
+     existence with `executable-find' before executing the
+     checker.  The arguments are substituted with
+     `flycheck-substitute-argument' before execution, see the
+     documentation of this function for a list of special tags
+     allowed in arguments.
 
-`:error-patterns' A list of error patterns to parse the output of
-the checker.  Each pattern is a list (REGEXP LEVEL).  REGEXP is a
-regular expression that matches an error.  This regular
-expression may contain match groups extracting specific
-information about the error.  The 1st group is the file name, the
-2nd group the line number, the 3rd group the column number and
-the 4th group the error message.  A group is ignored if it did
-not match or the match returned an empty string.  LEVEL is either
-warning or error and determines the severity of the error message
-parsed with the pattern.
+`:error-patterns'
+     A list of error patterns to parse the output of the checker.
+     Each pattern is a list (REGEXP LEVEL).  REGEXP is a regular
+     expression that matches an error.  This regular expression
+     may contain match groups extracting specific information
+     about the error.  The 1st group is the file name, the 2nd
+     group the line number, the 3rd group the column number and
+     the 4th group the error message.  A group is ignored if it
+     did not match or the match returned an empty string.  LEVEL
+     is either warning or error and determines the severity of
+     the error message parsed with the pattern.
 
-`:error-parser' A function symbol to parse errors with.  The
-function must accept three arguments OUTPUT CHECKER BUFFER, where
-OUTPUT is the output as string and CHECKER the checker symbol
-that was used to check BUFFER.  The function must return a list
-of `flycheck-error' objects parsed from OUTPUT.
+`:error-parser'
+     A function symbol to parse errors with.  The function must
+     accept three arguments OUTPUT CHECKER BUFFER, where OUTPUT
+     is the output as string and CHECKER the checker symbol that
+     was used to check BUFFER.  The function must return a list
+     of `flycheck-error' objects parsed from OUTPUT.
 
-`:modes' A major mode symbol or a list thereof.  If present the
-checker is only used in these modes.
+`:modes'
+     A major mode symbol or a list thereof.  If present the
+     checker is only used in these modes.
 
-`:predicate' A function symbol or lambda expression.  If present
-the syntax checker is only used if this function returns non-nil
-when called in the buffer to check.
+`:predicate'
+     A function symbol or lambda expression.  If present the
+     syntax checker is only used if this function returns non-nil
+     when called in the buffer to check.
 
-May also be a form, but this usage is obsolete.
+     May also be a form, but this usage is obsolete.
 
-`:next-checkers' A list where each element is either a checker
-symbol to run after this checker or a cons cell (PREDICATE
-. CHECKER).  In the latter case, CHECKER is the checker symbol to
-run, and the PREDICATE symbol specifies when to run the checker:
-If PREDICATE is `no-errors' run the next checker only if this
-checker returned no errors at all.  If PREDICATE is
-`warnings-only', run the next checker only if this checker
-returned only warnings.  Only the first usable and
-registered (see `flycheck-registered-checker-p') is run.
+`:next-checkers'
+     A list where each element is either a checker
+     symbol to run after this checker or a cons cell (PREDICATE
+     . CHECKER).  In the latter case, CHECKER is the checker symbol to
+     run, and the PREDICATE symbol specifies when to run the checker:
+     If PREDICATE is `no-errors' run the next checker only if this
+     checker returned no errors at all.  If PREDICATE is
+     `warnings-only', run the next checker only if this checker
+     returned only warnings.  Only the first usable and
+     registered (see `flycheck-registered-checker-p') is run.
 
 A checker must have a `:command' property, at least one of
 `:error-patterns' or `:error-parser', and at least one of
@@ -1261,7 +1274,7 @@ shown with `flycheck-describe-checker'.
 The following PROPERTIES constitute a syntax checker:
 
 `:command (COMMAND ARG ...)'
-      An unquoted list describing the syntax checker command to
+     An unquoted list describing the syntax checker command to
      execute.  `COMMAND' and `ARG' are subject to substitution of
      special symbols and forms by `flycheck-substitute-argument',
      which provide the file to check, options and configuration
@@ -1555,59 +1568,76 @@ configuration file was found."
 (defun flycheck-substitute-argument (arg checker)
   "Substitute ARG for CHECKER.
 
-If ARG is a string, return ARG unchanged.
+ARG may be one of the following forms:
 
-If ARG is `source' or `source-inplace', create a temporary file
-to check and return its path.  With `source', try to retain the
-non-directory component of the buffer's file name in the
-temporary file.
+STRING
+     Return ARG unchanged.
 
-If ARG is `source-original', return the path of the actual file
-to check, or an empty string if the buffer has no file name.
-Note that the contents of the file may not be up to date with the
-contents of the buffer to check.  Do not use this as primary
-input to a checker!
+`source', `source-inplace'
+     Create a temporary file to check and return its path.  With
+     `source-inplace' create the temporary file in the same
+     directory as the original file.  With `source', try to
+     retain the non-directory component of the buffer's file name
+     in the temporary file.
 
-If ARG is `temporary-directory', create a unique temporary
-directory and return its path.
+`source-original'
+     Return the path of the actual file to check, or an empty
+     string if the buffer has no file name.  Note that the
+     contents of the file may not be up to date with the contents
+     of the buffer to check.  Do not use this as primary input to
+     a checker!
 
-If ARG is a form `(config-file OPTION VARIABLE)' search the
-configuration file bound to VARIABLE with
-`flycheck-find-config-file' and return a list of arguments that
-pass this configuration file to the syntax checker, or nil if the
-configuration file was not found.  If OPTION ends with a =
-character, the returned list contains a single element only,
-being the concatenation of OPTION and the path of the
-configuration file.  Otherwise the list has two items, the first
-being OPTION, the second the path of the configuration file.
+`temporary-directory'
+     Create a unique temporary directory and return its path.
 
-If ARG is a form `(option OPTION VARIABLE [FILTER])' retrieve the
-value of VARIABLE and return a list of arguments that pass this
-value as value for OPTION to the syntax checker.  FILTER is an
-optional function to be applied to the value of VARIABLE.  This
-function must return nil or a string.  In the former case, return
-nil.  In the latter case, return a list of arguments as described
-above.  If OPTION ends with a =, process it like in a
-`config-file' cell (see above).
+`(config-file OPTION VARIABLE)'
+     Search the configuration file bound to VARIABLE with
+     `flycheck-find-config-file' and return a list of arguments
+     that pass this configuration file to the syntax checker, or
+     nil if the configuration file was not found.
 
-If ARG is a form `(option-list OPTION VARIABLE [PREPEND-FN
-FILTER])', retrieve the value of VARIABLE, which must be a list,
-and prepend OPTION before each item in this list, using
-PREPEND-FN.  PREPEND-FN is called with the OPTION and each item
-of the list as second argument, and should return OPTION
-prepended before the item, either as string or as list.  FILTER
-is an optional function to be applied to each item in the list.
-Items for which FILTER returns nil are dropped.  If the list is
-non-nil after the application of FILTER, return a list `(OPTION
-ITEM1 OPTION ITEM2 ...)'.  Otherwise return nil.
+     If OPTION ends with a = character, the returned list
+     contains a single element only, being the concatenation of
+     OPTION and the path of the configuration file.  Otherwise
+     the list has two items, the first being OPTION, the second
+     the path of the configuration file.
 
-If ARG is a form `(eval FORM), return the result of evaluating
-FORM in the buffer to be checked.  FORM must either return a
-string or a list of strings, or nil to indicate that nothing
-should be substituted for CELL.  In case of other return values
-an error is signaled.  _No_ further substitutions are performed,
-neither in FORM before it is evaluated, nor in the result of
-evaluating FORM.
+`(option OPTION VARIABLE [FILTER])'
+     Retrieve the value of VARIABLE and return a list of
+     arguments that pass this value as value for OPTION to the
+     syntax checker.
+
+     FILTER is an optional function to be applied to the value of
+     VARIABLE.  This function must return nil or a string.  In
+     the former case, return nil.  In the latter case, return a
+     list of arguments as described above.  If OPTION ends with a
+     =, process it like in a `config-file' cell (see above).
+
+`(option-list OPTION VARIABLE [PREPEND-FN [FILTER]])'
+     Retrieve the value of VARIABLE, which must be a list,
+     and prepend OPTION before each item in this list, using
+     PREPEND-FN.
+
+     PREPEND-FN is called with the OPTION and each item of the
+     list as second argument, and should return OPTION prepended
+     before the item, either as string or as list.
+
+     FILTER is an optional function to be applied to each item in
+     the list.  Items for which FILTER returns nil are dropped.
+     If the list is non-nil after the application of FILTER,
+     return a list `(OPTION ITEM1 OPTION ITEM2 ...)'.  Otherwise
+     return nil.
+
+`(eval FORM)
+     Return the result of evaluating FORM in the buffer to be
+     checked.  FORM must either return a string or a list of
+     strings, or nil to indicate that nothing should be
+     substituted for CELL.  For all other return types, signal an
+     error
+
+     _No_ further substitutions are performed, neither in FORM
+     before it is evaluated, nor in the result of evaluating
+     FORM.
 
 In all other cases, signal an error.
 
@@ -2035,17 +2065,23 @@ Pop up a help buffer with the documentation of CHECKER."
   "Structure representing an error reported by a syntax checker.
 Slots:
 
-`buffer' The buffer the reported was reported for, as buffer object.
+`buffer'
+     The buffer the reported was reported for, as buffer object.
 
-`checker' The syntax checker which reported this error, as symbol.
+`checker'
+     The syntax checker which reported this error, as symbol.
 
-`filename'  The file name the error refers to, as string.
+`filename'
+     The file name the error refers to, as string.
 
-`line' The line number the error refers to, as number.
+`line'
+     The line number the error refers to, as number.
 
-`column' The column number the error refers to, as number.
+`column'
+     The column number the error refers to, as number.
 
-`level' The error level, as either `warning' or `error'."
+`level'
+     The error level, as either `warning' or `error'."
   buffer checker filename line column message level)
 
 (defmacro flycheck-error-with-buffer (err &rest forms)
@@ -2134,15 +2170,18 @@ column, return nil."
 (defun flycheck-error-region-for-mode (err mode)
   "Get the region of ERR for the highlighting MODE.
 
-ERR is a Flycheck error.  MODE may either be `columns', `sexps' or `lines'.
+ERR is a Flycheck error.  MODE may be one of the following symbols:
 
-If `columns', return the column region of ERR, or the
-line region if ERR has no column.
+`columns'
+     Return the column region of ERR, or the line region if ERR
+     has no column.
 
-If `sexps', return the sexp region of ERR, or the result of
-`columns', if there is no symbol at the error column.
+`sexps'
+     Return the sexp region of ERR, or the result of `columns',
+     if there is no symbol at the error column.
 
-If `lines', return the line region.
+`lines'
+     Return the line region.
 
 Otherwise signal an error."
   (pcase mode
