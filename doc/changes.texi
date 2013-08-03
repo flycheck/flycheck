@@ -686,6 +686,10 @@ Predicate forms are now wrapped into functions and compiled into
 functions during byte compilation
 @item
 Copy each message separately in @code{flycheck-copy-messages-as-kill}
+@item
+Mark some customizable variables as safe for file variable usage, most
+notably @code{flycheck-indication-mode},
+@code{flycheck-highlighting-mode} and @code{flycheck-idle-change-delay}.
 @end itemize
 
 @item

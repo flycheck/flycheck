@@ -163,7 +163,8 @@ either directly or with `flycheck-select-checker'.
 Syntax checkers in this list must be defined with
 `flycheck-define-checker'."
   :group 'flycheck
-  :type '(repeat (symbol :tag "Checker")))
+  :type '(repeat (symbol :tag "Checker"))
+  :risky t)
 
 (defvar-local flycheck-checker nil
   "Syntax checker to use for the current buffer.
@@ -203,7 +204,8 @@ function is then given to the syntax checker if it exists.
 
 This variable is an abnormal hook."
   :group 'flycheck
-  :type 'hook)
+  :type 'hook
+  :risky t)
 
 (defcustom flycheck-process-error-functions '(flycheck-add-overlay)
   "Functions to process errors.
@@ -225,7 +227,8 @@ and there may be further syntax checkers in the chain.
 This variable is an abnormal hook."
   :group 'flycheck
   :type 'hook
-  :package-version '(flycheck . "0.13"))
+  :package-version '(flycheck . "0.13")
+  :risky t)
 
 (defcustom flycheck-display-errors-function #'flycheck-display-error-messages
   "Function to display error messages.
@@ -241,7 +244,8 @@ If set to nil, do not display errors at all."
                  (const :tag "Display errors in error list"
                         flycheck-display-errors-in-list)
                  (function :tag "Error display function"))
-  :package-version '(flycheck . "0.13"))
+  :package-version '(flycheck . "0.13")
+  :risky t)
 
 (defcustom flycheck-indication-mode 'left-fringe
   "The indication mode for Flycheck errors and warnings.
@@ -257,7 +261,8 @@ highlight them according to `flycheck-highlighting-mode'."
   :group 'flycheck
   :type '(choice (const :tag "Indicate in the left fringe" left-fringe)
                  (const :tag "Indicate in the right fringe" right-fringe)
-                 (const :tag "Do not indicate" nil)))
+                 (const :tag "Do not indicate" nil))
+  :safe #'symbolp)
 
 (defcustom flycheck-highlighting-mode 'sexps
   "The highlighting mode for Flycheck errors and warnings.
@@ -288,7 +293,8 @@ jumps to the error column regardless of the highlighting mode."
                  (const :tag "Highlight expressions" sexps)
                  (const :tag "Highlight whole lines" lines)
                  (const :tag "Do not highlight errors" nil))
-  :package-version '(flycheck . "0.12"))
+  :package-version '(flycheck . "0.12")
+  :safe #'symbolp)
 
 (defcustom flycheck-check-syntax-automatically '(save
                                                  idle-change
@@ -324,7 +330,8 @@ to start a syntax check manually."
               (const :tag "After the buffer was changed and idle" idle-change)
               (const :tag "After a new line was inserted" new-line)
               (const :tag "After `flycheck-mode' was enabled" mode-enabled))
-  :package-version '(flycheck . "0.12"))
+  :package-version '(flycheck . "0.12")
+  :safe #'symbolp)
 
 (defcustom flycheck-idle-change-delay 0.5
   "How many seconds to wait before checking syntax automatically.
@@ -338,7 +345,8 @@ This variable has no effect, if `idle-change' is not contained in
 `flycheck-check-syntax-automatically'."
   :group 'flycheck
   :type 'number
-  :package-version '(flycheck . "0.13"))
+  :package-version '(flycheck . "0.13")
+  :safe #'numberp)
 
 (defcustom flycheck-google-max-messages 5
   "How many messages to google at once.
@@ -352,12 +360,14 @@ messages at point."
   :group 'flycheck
   :type '(choice (const :tag "Always google all messages" nil)
                  (integer :tag "Maximum messages to google"))
-  :package-version '(flycheck . "0.10"))
+  :package-version '(flycheck . "0.10")
+  :safe #'numberp)
 
 (defcustom flycheck-mode-hook nil
   "Hooks to run after `flycheck-mode'."
   :group 'flycheck
-  :type 'hook)
+  :type 'hook
+  :risky t)
 
 (defcustom flycheck-after-syntax-check-hook nil
   "Functions to run after each syntax check.
@@ -392,7 +402,8 @@ checker*.
 
 This variable is a normal hook."
   :group 'flycheck
-  :type 'hook)
+  :type 'hook
+  :risky t)
 
 (defcustom flycheck-syntax-check-failed-hook nil
   "Functions to run if a syntax check failed.
@@ -406,7 +417,8 @@ when Flycheck failed.
 
 This variable is a normal hook."
   :group 'flycheck
-  :type 'hook)
+  :type 'hook
+  :risky t)
 
 (defface flycheck-error
   '((((supports :underline (:style wave)))
