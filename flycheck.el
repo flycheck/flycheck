@@ -3123,7 +3123,7 @@ _EVENT is ignored."
              (program (car command))
              (args (cdr command))
              (process-connection-type nil) ; Use pipes to receive checker output
-             (process (apply 'start-file-process
+             (process (apply 'start-process
                              "flycheck" (current-buffer)
                              program args)))
         (setq flycheck-current-process process)
