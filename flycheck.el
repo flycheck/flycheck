@@ -3099,7 +3099,7 @@ See URL `http://www.gnu.org/software/bash/'."
   "A C/C++ syntax checker using Clang.
 
 See URL `http://clang.llvm.org/'."
-  :command ("clang" "-fsyntax-only" "-Weverything" "-fno-caret-diagnostics"
+  :command ("clang" "-fsyntax-only" "-Wextra" "-fno-caret-diagnostics"
             "-fno-color-diagnostics" "-fno-diagnostics-show-option"
             "-x" (eval
                   (cl-case major-mode
