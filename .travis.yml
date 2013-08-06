@@ -14,7 +14,7 @@ before_install:
 install:
   - sudo FACTER_travis=true puppet apply --debug --modulepath=./puppet/lib:./puppet/modules ./puppet/manifests/site.pp
   - puppet apply --debug --modulepath=./puppet/lib:./puppet/modules ./puppet/manifests/travis.pp
-  - make elpa
+  - make packages
 # Build documentation and run unit tests
 script:
   - make -k info test

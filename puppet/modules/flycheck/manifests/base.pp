@@ -22,18 +22,19 @@ class flycheck::base {
     require => Apt::Ppa['ppa:cassou/emacs']
   }
 
-  $carton_version = '0.3.0'
+  $cask_version = '0.4.3'
+  $cask_archive = "cask.el-${cask_version}"
 
-  archive { "carton-${carton_version}":
+  archive { $cask_archive:
     ensure        => present,
-    url           => "https://github.com/rejeep/carton/archive/v${carton_version}.tar.gz",
-    digest_string => '60390687d4f4c3815d27b557b65a036c',
+    url           => "https://github.com/rejeep/cask.el/archive/v${cask_version}.tar.gz",
+    digest_string => 'ca65f41002b05dd75d9e37c5bd3f2717',
     target        => '/opt/'
   }
 
-  file { '/usr/local/bin/carton':
+  file { '/usr/local/bin/cask':
     ensure  => link,
-    target  => "/opt/carton-${carton_version}/bin/carton",
-    require => Archive["carton-${carton_version}"],
+    target  => "/opt/${cask_archive}/bin/cask",
+    require => Archive["cask.el-${cask_version}"],
   }
 }

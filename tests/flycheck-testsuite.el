@@ -535,7 +535,7 @@ All declared checkers should be registered."
 (ert-deftest flycheck-version ()
   (let* ((source-dir (expand-file-name ".." flycheck-testsuite-dir))
          (default-directory (file-name-as-directory source-dir))
-         (version (car (process-lines "carton" "version"))))
+         (version (car (process-lines "cask" "version"))))
     ;; Just the library version
     (should (string= version (flycheck-version)))
     ;; Library and package version
