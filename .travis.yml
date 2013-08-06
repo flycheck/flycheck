@@ -2,16 +2,18 @@ language: emacs-lisp
 env:
   - EMACS=emacs24
   - EMACS=emacs-snapshot
-# Bootstrap Salt, install the Minion configuration and teach Salt about the
-# Travis CI user name
+# Bootstrap Puppet, and install our Puppet modules
 before_install:
-  - wget -O - http://bootstrap.saltstack.org | sudo sh
-  - sudo install -m 644 -T ./salt/travis.minion /etc/salt/minion
-  - sudo salt-call grains.setval travis_user "${USER}"
-# Bootstrap the testing environment and install test requirements.  We install
-# Ruby tools separately, because
+  - sh ./puppet/bootstrap.sh
+  - gem install puppet librarian-puppet
+  - librarian-puppet install
+# Call Puppet to bootstrap the testing environment and install test
+# requirements.  We install Ruby tools separately as non-root user to avoid
+# screwing up with RVM.  We pass --debug to prevent Travis from getting stuck
+# due to no output, and to get as good error messages as possible
 install:
-  - sudo salt-call state.highstate
+  - sudo FACTER_travis=true puppet apply --debug --modulepath=./puppet/lib:./puppet/modules ./puppet/manifests/site.pp
+  - puppet apply --debug --modulepath=./puppet/lib:./puppet/modules ./puppet/manifests/travis.pp
   - make elpa
 # Build documentation and run unit tests
 script:

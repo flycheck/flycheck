@@ -7,9 +7,12 @@ Vagrant.configure('2') do |config|
 
   config.vm.synced_folder '.', '/flycheck'
 
-  config.vm.provision :salt do |salt|
-    salt.minion_config = './salt/vagrant.minion'
-    salt.run_highstate = true
+  config.vm.provision :shell, :path => 'puppet/bootstrap.sh'
+
+  config.vm.provision :puppet do |puppet|
+    puppet.manifests_path = 'puppet/manifests'
+    puppet.manifest_file = 'site.pp'
+    puppet.module_path = ['puppet/lib', 'puppet/modules']
   end
 
 end
