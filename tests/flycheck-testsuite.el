@@ -155,6 +155,11 @@
           scss-mode)
     (require it nil :no-error))
 
+(eval-when-compile
+  ;; Prevent warnings about unused lexical variables
+  (require 'js2-mode)
+  (require 'js3-mode))
+
 
 ;;;; Directories
 (defconst flycheck-testsuite-dir
@@ -1215,7 +1220,7 @@ All declared checkers should be registered."
 (ert-deftest flycheck-option-comma-separated-list ()
   (should (null (flycheck-option-comma-separated-list nil)))
   (should (null (flycheck-option-comma-separated-list '(nil))))
-  (should (null (flycheck-option-comma-separated-list '(10 20) nil (lambda (x) nil))))
+  (should (null (flycheck-option-comma-separated-list '(10 20) nil (lambda (_x) nil))))
   (should (equal (flycheck-option-comma-separated-list '("foo" "bar"))
                  "foo,bar"))
   (should (equal (flycheck-option-comma-separated-list '("foo" "bar") ":")
