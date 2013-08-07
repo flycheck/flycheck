@@ -154,7 +154,7 @@ The following people contributed to flycheck:
   refinements, brought Flycheck to a larger user base by adding it to his
   awesome [Prelude](https://github.com/bbatsov/prelude) project, and added a
   Ruby syntax checker using `rubocop`.
-s- [Damon Haley](https://github.com/dhaley) helped to shape and test the PHP
+- [Damon Haley](https://github.com/dhaley) helped to shape and test the PHP
   CodeSniffer checker.
 - [David Holm](https://github.com/dholm) added C/C++ syntax and style checkers
   using `clang` and `cppcheck` respectively.
