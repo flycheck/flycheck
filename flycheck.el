@@ -2411,38 +2411,28 @@ text nodes) or as XML nodes, in the same for as the root node."
     (insert xml)
     (funcall flycheck-xml-parser (point-min) (point-max))))
 
-(defun flycheck-parse-checkstyle-error-node (node filename)
-  "Parse a single error NODE for FILENAME in a Checkstyle doc.
-
-Return the corresponding Flycheck error, or nil of NODE is not an
-error node."
-  (when (listp node)
-    (let* ((name (car node))
-           (attrs (cadr node))
-           (line (flycheck-string-to-number-safe (cdr (assq 'line attrs))))
-           (column (flycheck-string-to-number-safe (cdr (assq 'column attrs))))
-           (severity (cdr (assq 'severity attrs)))
-           (message (cdr (assq 'message attrs))))
-      (when (eq name 'error)
-        (flycheck-error-new
-         :filename filename
-         :line line
-         :column (when (and column (> column 0)) column)
-         :message message
-         :level (if (string= severity "error") 'error 'warning))))))
-
 (defun flycheck-parse-checkstyle-file-node (node)
   "Parse a single file NODE in a Checkstyle document.
 
 Return a list of all errors contained in the NODE, or nil if NODE
 is not a file node."
-  (when (listp node)                    ; Ignore text nodes
-    (let* ((name (car node))
-           (attrs (cadr node))
-           (body (cddr node))
-           (filename (cdr (assq 'name attrs))))
-      (when (eq name 'file)
-        (--keep (flycheck-parse-checkstyle-error-node it filename) body)))))
+  (let ((filename (cdr (assq 'name (cadr node)))))
+    (->> (cddr node)
+      (--filter (and (listp it) (eq (car it) 'error)))
+      (--map
+       (let* ((attrs (cadr it))
+              (line (flycheck-string-to-number-safe
+                     (cdr (assq 'line attrs))))
+              (column (flycheck-string-to-number-safe
+                       (cdr (assq 'column attrs))))
+              (severity (cdr (assq 'severity attrs)))
+              (message (cdr (assq 'message attrs))))
+         (flycheck-error-new
+          :filename filename
+          :line line
+          :column (when (and column (> column 0)) column)
+          :message message
+          :level (if (string= severity "error") 'error 'warning)))))))
 
 (eval-and-compile
   ;; Parser must be defined during compilation, to allow syntax checkers parse
@@ -2461,7 +2451,23 @@ about Checkstyle."
       (unless (eq (car root) 'checkstyle)
         (error "Unexpected root element %s" (car root)))
       ;; cddr gets us the body of the node without its name and its attributes
-      (-flatten (-keep #'flycheck-parse-checkstyle-file-node (cddr root))))))
+      (->> (cddr root)
+        (--filter (and (listp it) (eq (car it) 'file)))
+        (-map #'flycheck-parse-checkstyle-file-node)
+        -flatten))))
+
+(defun flycheck-parse-cppcheck-error-node (node)
+  (let ((attrs (cadr node)))
+    (->> (cddr node)
+      (--filter (and (listp it) (eq (car it) 'location)))
+      (--map (let ((locattrs (cadr it)))
+               (flycheck-error-new
+                :filename (cdr (assq 'file locattrs))
+                :line (flycheck-string-to-number-safe
+                       (cdr (assq 'line locattrs)))
+                :message (cdr (assq 'verbose attrs))
+                :level (if (string= (cdr (assq 'severnodey attrs)) "error")
+                           'error 'warning)))))))
 
 (eval-and-compile
   (defun flycheck-parse-cppcheck (output _checker _buffer)
