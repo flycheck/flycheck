@@ -2457,6 +2457,9 @@ about Checkstyle."
         -flatten))))
 
 (defun flycheck-parse-cppcheck-error-node (node)
+  "Parse a single error NODE from Cppcheck XML.
+
+Return a list of all Flycheck errors this node represents."
   (let ((attrs (cadr node)))
     (->> (cddr node)
       (--filter (and (listp it) (eq (car it) 'location)))
@@ -2466,7 +2469,7 @@ about Checkstyle."
                 :line (flycheck-string-to-number-safe
                        (cdr (assq 'line locattrs)))
                 :message (cdr (assq 'verbose attrs))
-                :level (if (string= (cdr (assq 'severnodey attrs)) "error")
+                :level (if (string= (cdr (assq 'severity attrs)) "error")
                            'error 'warning)))))))
 
 (eval-and-compile
@@ -2483,19 +2486,11 @@ about Cppcheck."
                  (errors (--first (eq (car it) 'errors) (cddr root))))
       (unless (eq (car root) 'results)
         (error "Unexpected root element %s" (car root)))
-      (-flatten
-       (--keep (when (and (listp it) (eq (car it) 'error))
-                 (let* ((attrs (cadr it))
-                        (loc (--first (eq (car it) 'location) (cddr it)))
-                        (locattrs (cadr loc)))
-                   (flycheck-error-new
-                    :filename (cdr (assq 'file locattrs))
-                    :line (flycheck-string-to-number-safe
-                           (cdr (assq 'line locattrs)))
-                    :message (cdr (assq 'verbose attrs))
-                    :level (if (string= (cdr (assq 'severity attrs)) "error")
-                               'error 'warning))))
-               errors)))))
+      (->> errors
+        ;; Filter error nodes
+        (--filter (and (listp it) (eq (car it) 'error)))
+        (-map #'flycheck-parse-cppcheck-error-node)
+        -flatten))))
 
 
 ;;;; Error analysis
