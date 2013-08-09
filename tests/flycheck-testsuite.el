@@ -1577,7 +1577,7 @@ error is signaled on all subsequent checks."
 </checkstyle>"
   "Example Checkstyle output from jshint.")
 
-(defconst flycheck-expected-errors
+(defconst flycheck-checkstyle-expected-errors
   (list
    (flycheck-error-new
     :filename "test-javascript/missing-semicolon.js"
@@ -1604,19 +1604,64 @@ error is signaled on all subsequent checks."
   "Test Checkstyle parsing with xml.el"
   (let ((flycheck-xml-parser 'flycheck-parse-xml-region))
     (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml nil nil)
-                   flycheck-expected-errors))))
+                   flycheck-checkstyle-expected-errors))))
 
 (ert-deftest flycheck-parse-checkstyle-libxml2 ()
   "Test Checkstyle parsing with libxml2."
   :expected-result (if (fboundp 'libxml-parse-xml-region) :passed :failed)
   (let ((flycheck-xml-parser 'libxml-parse-xml-region))
     (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml nil nil)
-                   flycheck-expected-errors))))
+                   flycheck-checkstyle-expected-errors))))
 
 (ert-deftest flycheck-parse-checkstyle-auto ()
   "Test Checkstyle parsing with the automatically chosen parsed."
   (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml nil nil)
-                 flycheck-expected-errors)))
+                 flycheck-checkstyle-expected-errors)))
+
+ (defconst flycheck-cppcheck-xml
+  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<results version=\"2\">
+  <cppcheck version=\"1.52\"/>
+  <errors>
+  <error id=\"toomanyconfigs\" severity=\"information\" msg=\"Too many #ifdef configurations - cppcheck only checks 12 configurations. Use --force to check all configurations. For more details, use --enable=information.\" verbose=\"The checking \
+of the file will be interrupted because there are too many #ifdef configurations. Checking of all #ifdef configurations can be forced by --force command line option or from GUI preferences. However that may increase the checking time. For\
+ more details, use --enable=information.\">
+  </error>
+  <error id=\"nullPointer\" severity=\"error\" msg=\"Null pointer dereference\" verbose=\"Null pointer dereference\">
+  <location file=\"foo\" line=\"4\"/>
+  <location file=\"bar\" line=\"6\"/>
+  </error>
+  <error id=\"comparisonOfBoolWithInt\" severity=\"warning\" msg=\"Comparison of a boolean with integer that is neither 1 nor 0\" verbose=\"The expression &quot;x&quot; is of type 'bool' and it is compared against a integer value that is neither 1 nor 0.\">
+    <location file=\"eggs\" line=\"2\"/>
+  </error>
+  </errors>
+</results>"
+  "Example cppcheck output.")
+
+(defconst flycheck-cppcheck-expected-errors
+  (list
+   (flycheck-error-new
+    :filename "foo"
+    :line 4
+    :column nil
+    :level 'error
+    :message "Null pointer dereference")
+   (flycheck-error-new
+    :filename "bar"
+    :line 6
+    :column nil
+    :level 'error
+    :message "Null pointer dereference")
+   (flycheck-error-new
+    :filename "eggs"
+    :line 2
+    :column nil
+    :level 'warning
+    :message "The expression \"x\" is of type 'bool' and it is compared against a integer value that is neither 1 nor 0.")))
+
+(ert-deftest flycheck-parse-cppcheck ()
+  (should (equal (flycheck-parse-cppcheck flycheck-cppcheck-xml nil nil)
+                 flycheck-cppcheck-expected-errors)))
 
 
 ;;;; Error overlay management
