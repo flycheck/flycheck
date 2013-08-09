@@ -134,7 +134,13 @@ All declared checkers should be registered."
 
 (ert-deftest flycheck-package-version ()
   (require 'package)
-  (let ((package-alist '((flycheck . [(2 12) nil "Foo"]))))
+  (let* ((entry
+          (if (fboundp 'package-desc-create)
+              (list 'flycheck (package-desc-create :name 'flycheck
+                                                   :version '(2 12)
+                                                   :summary "Foo"))
+            (cons 'flycheck (vector '(2 12) nil "Foo"))))
+         (package-alist (list entry)))
     (should (string= "2.12" (flycheck-package-version)))))
 
 (ert-deftest flycheck-version ()
@@ -144,7 +150,13 @@ All declared checkers should be registered."
     ;; Just the library version
     (should (string= version (flycheck-version)))
     ;; Library and package version
-    (let ((package-alist '((flycheck . [(0 5) nil "Foo"]))))
+    (let* ((entry
+            (if (fboundp 'package-desc-create)
+                (list 'flycheck (package-desc-create :name 'flycheck
+                                                     :version '(0 5)
+                                                     :summary "Foo"))
+              (cons 'flycheck (vector '(0 5) nil "Foo"))))
+           (package-alist (list entry)))
       (should (string= (format "%s (package: 0.5)" version)
                        (flycheck-version))))))
 
