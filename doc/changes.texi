@@ -733,6 +733,9 @@ Remove the obsolete @code{flycheck-error-face} and
 @item
 @ghissue{176, Do not initialize packages by default in @code{emacs-lisp}
 syntax checker for non-configuration files}
+@item
+@ghissue{179, Change the default @code{flycheck-highlighting-mode} to
+@code{symbols}}
 @end itemize
 
 @item
@@ -763,6 +766,9 @@ checker}
 @item
 New option filter @code{flycheck-option-comma-separated-list} for
 options with comma separated lists as values
+@item
+@ghissue{179, New highlighting mode @code{symbols} to highlight the
+symbol pointed to by an error}
 @end itemize
 
 @item

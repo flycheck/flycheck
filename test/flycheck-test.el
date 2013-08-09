@@ -113,7 +113,7 @@ All declared checkers should be registered."
   (should (equal flycheck-process-error-functions '(flycheck-add-overlay))))
 
 (ert-deftest flycheck-highlighting-mode ()
-  (should (eq flycheck-highlighting-mode 'sexps)))
+  (should (eq flycheck-highlighting-mode 'symbols)))
 
 (ert-deftest flycheck-check-syntax-automatically ()
   (should (equal flycheck-check-syntax-automatically
@@ -1101,17 +1101,20 @@ error is signaled on all subsequent checks."
     (should (equal (flycheck-error-column-region (flycheck-error-new-at 4 2))
                    '(16 . 17)))))
 
-(ert-deftest flycheck-error-sexp-region ()
+(ert-deftest flycheck-error-thing-region ()
   (with-temp-buffer
     (insert "    (message)\n    (message")
     (emacs-lisp-mode)
-    (should-not (flycheck-error-sexp-region (flycheck-error-new-at 1 2)))
-    (should (equal (flycheck-error-sexp-region (flycheck-error-new-at 1 5))
+    (should-not (flycheck-error-thing-region 'sexp (flycheck-error-new-at 1 2)))
+    (should (equal (flycheck-error-thing-region 'sexp (flycheck-error-new-at 1 5))
                    '(5 . 14)))
-    (should (equal (flycheck-error-sexp-region (flycheck-error-new-at 1 8))
+    (should-not (flycheck-error-thing-region 'symbol (flycheck-error-new-at 1 5)))
+    (should (equal (flycheck-error-thing-region 'sexp (flycheck-error-new-at 1 8))
+                   '(6 . 13)))
+    (should (equal (flycheck-error-thing-region 'symbol (flycheck-error-new-at 1 8))
                    '(6 . 13)))
     ;; An incomplete expression
-    (should-not (flycheck-error-sexp-region (flycheck-error-new-at 2 5)))))
+    (should-not (flycheck-error-thing-region 'sexp (flycheck-error-new-at 2 5)))))
 
 (ert-deftest flycheck-error-region-for-mode ()
   (with-temp-buffer
@@ -1121,15 +1124,16 @@ error is signaled on all subsequent checks."
     (let ((err (flycheck-error-new-at 1 7)))
       (should (equal (flycheck-error-region-for-mode err 'lines) '(5 . 29)))
       (should (equal (flycheck-error-region-for-mode err 'columns) '(7 . 8)))
+      (should (equal (flycheck-error-region-for-mode err 'symbols) '(6 . 13)))
       (should (equal (flycheck-error-region-for-mode err 'sexps) '(6 . 13))))
     ;; Test an error column which does not point to an expression
     (let ((err (flycheck-error-new-at 2 5)))
       (should (equal (flycheck-error-region-for-mode err 'lines) '(34 . 42)))
-      (--each '(columns sexps)
+      (--each '(columns symbols sexps)
         (should (equal (flycheck-error-region-for-mode err it) '(34 . 35)))))
     ;; Test an error without column for all modes
     (let ((err (flycheck-error-new-at 1 nil)))
-      (--each '(lines columns sexps)
+      (--each '(lines columns symbols sexps)
         (should (equal (flycheck-error-region-for-mode err it) '(5 . 29)))))))
 
 (ert-deftest flycheck-error-pos ()
@@ -1378,7 +1382,7 @@ of the file will be interrupted because there are too many #ifdef configurations
         (funcall next-error-fn)
         (should (= (point) 175))
         (funcall next-error-fn)
-        (should (= (point) 244))
+        (should (= (point) 240))
         (setq error-data (should-error (funcall next-error-fn)
                                        :type flycheck-testsuite-user-error-type))
         (should (string= (cadr error-data) "No more Flycheck errors"))
@@ -1408,7 +1412,7 @@ of the file will be interrupted because there are too many #ifdef configurations
       (flycheck-testsuite-buffer-sync)
       (goto-char (point-max))
       (funcall previous-error-fn)
-      (should (= (point) 244))
+      (should (= (point) 240))
       (funcall previous-error-fn)
       (should (= (point) 175))
       (funcall previous-error-fn)
@@ -1421,7 +1425,7 @@ of the file will be interrupted because there are too many #ifdef configurations
       (funcall previous-error-fn 2)
       (should (= (point) 175))
       (funcall previous-error-fn -1)
-      (should (= (point) 244))
+      (should (= (point) 240))
       (setq error-data (should-error (funcall previous-error-fn 10)
                                      :type flycheck-testsuite-user-error-type))
       (should (string= (cadr error-data) "No more Flycheck errors")))))

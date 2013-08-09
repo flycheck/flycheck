@@ -423,9 +423,14 @@ This variable determines how to highlight errors:
 Highlights the error column.  If the error does not have a column,
 highlight the whole line.
 
+@item symbols
+Highlights the symbol at the error column, if there is any, otherwise
+behave like @code{columns}.  This is the default.
+
 @item sexps
 Highlights the expression at the error column, if there is any,
-otherwise behave like @code{columns}.  This mode is the default.
+otherwise behave like @code{columns}.  Note that this mode can be
+@b{very} slow in some major modes.
 
 @item lines
 Highlights the whole line of the error.
