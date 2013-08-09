@@ -18,7 +18,3 @@ install:
 # Build documentation and run unit tests
 script:
   - make -k info test
-# Disable Emacs snapshot, because Carton is broken
-matrix:
-  exclude:
-    - env: EMACS=emacs-snapshot
