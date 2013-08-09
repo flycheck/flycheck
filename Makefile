@@ -65,7 +65,7 @@ clean-pkgdir :
 
 .PHONY: test
 test : compile
-	$(CASK) exec $(EMACS) -Q $(EMACSFLAGS) --script tests/flycheck-testrunner.el
+	$(CASK) exec ert-runner run
 
 .PHONY: vagrant-test
 vagrant-test :
@@ -97,6 +97,7 @@ clean-html:
 
 $(PKGDIR) : Cask
 	$(CASK) install
+	touch $(PKGDIR)
 
 flycheck-pkg.el : Cask
 	$(CASK) package

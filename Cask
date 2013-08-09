@@ -8,6 +8,7 @@
  (depends-on "google-this")
 
  (depends-on "ert")                     ; Unit test library
+ (depends-on "ert-runner")              ; Unit test runner
  (depends-on "mocker")                  ; Mocking library
 
  (depends-on "projectile")              ; Projectile integration
