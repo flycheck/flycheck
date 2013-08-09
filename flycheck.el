@@ -587,9 +587,10 @@ buffer manually.
     (with-temp-buffer
       (insert-file-contents source-file)
       (let ((info (package-buffer-info)))
-        (if (fboundp 'package-desc-version)
-            (package-version-join (package-desc-version info))
-          (aref (package-buffer-info) 3))))))
+        (package-version-join
+         (if (fboundp 'package-desc-version)
+             (package-desc-version info)
+           (version-to-list (aref (package-buffer-info) 3))))))))
 
 (defun flycheck-package-version ()
   "Get the package version of Flycheck.
