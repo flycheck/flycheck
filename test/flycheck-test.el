@@ -792,8 +792,8 @@ All declared checkers should be registered."
                                              flycheck-testsuite-dir))
     (should-not (flycheck-locate-config-file-ancestor-directories "foo" 'emacs-lisp))
     (should (equal (flycheck-locate-config-file-ancestor-directories
-                    "flycheck-testrunner.el" 'emacs-lisp)
-                   (expand-file-name "flycheck-testrunner.el" flycheck-testsuite-dir)))
+                    "test-helper.el" 'emacs-lisp)
+                   (expand-file-name "test-helper.el" flycheck-testsuite-dir)))
     (should (equal (flycheck-locate-config-file-ancestor-directories
                     "Makefile" 'emacs-lisp)
                    (expand-file-name "../Makefile" flycheck-testsuite-dir)))))
@@ -806,8 +806,8 @@ All declared checkers should be registered."
           (should-not (flycheck-locate-config-file-home "foo" 'emacs-lisp))
           (should-not (flycheck-locate-config-file-home "Makefile" 'emacs-lisp))
           (should (equal (flycheck-locate-config-file-home
-                          "flycheck-testsuite.el" 'emacs-lisp)
-                         (expand-file-name "flycheck-testsuite.el"
+                          "flycheck-test.el" 'emacs-lisp)
+                         (expand-file-name "flycheck-test.el"
                                            flycheck-testsuite-dir))))
       (setenv "HOME" old-home))))
 
