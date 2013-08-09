@@ -126,10 +126,10 @@ All declared checkers should be registered."
 
 ;;;; Version information
 (ert-deftest flycheck-library-version ()
-  :expected-result (if (executable-find "carton") :passed :failed)
+  :expected-result (if (executable-find "cask") :passed :failed)
   (let* ((source-dir (expand-file-name ".." flycheck-testsuite-dir))
          (default-directory (file-name-as-directory source-dir))
-         (version (car (process-lines "carton" "version"))))
+         (version (car (process-lines "cask" "version"))))
     (should (string= version (flycheck-library-version)))))
 
 (ert-deftest flycheck-package-version ()
