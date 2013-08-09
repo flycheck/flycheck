@@ -22,13 +22,13 @@ class flycheck::base {
     require => Apt::Ppa['ppa:cassou/emacs']
   }
 
-  $cask_version = '0.4.3'
+  $cask_version = '0.4.4'
   $cask_archive = "cask.el-${cask_version}"
 
   archive { $cask_archive:
     ensure        => present,
     url           => "https://github.com/rejeep/cask.el/archive/v${cask_version}.tar.gz",
-    digest_string => 'ca65f41002b05dd75d9e37c5bd3f2717',
+    digest_string => 'df9ea7b05a260980ae42e8b8626e73ac',
     target        => '/opt/'
   }
 
