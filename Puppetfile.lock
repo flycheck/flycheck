@@ -1,0 +1,26 @@
+FORGE
+  remote: http://forge.puppetlabs.com
+  specs:
+    adrien/alternatives (0.1.1)
+    puppetlabs/apt (1.2.0)
+      puppetlabs/stdlib (>= 2.2.1)
+    puppetlabs/nodejs (0.3.0)
+      puppetlabs/apt (>= 0.0.3)
+      puppetlabs/stdlib (>= 2.0.0)
+    puppetlabs/stdlib (4.1.0)
+    smarchive/archive (0.1.1)
+
+GIT
+  remote: https://github.com/rafaelfelix/puppet-pear
+  ref: master
+  sha: b6e28203484bb594e357e4414b5169d38d727202
+  specs:
+    rafaelfc/pear (1.0.2)
+
+DEPENDENCIES
+  adrien/alternatives (>= 0)
+  puppetlabs/apt (>= 0)
+  puppetlabs/nodejs (>= 0)
+  rafaelfc/pear (>= 0)
+  smarchive/archive (>= 0)
+

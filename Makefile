@@ -1,9 +1,10 @@
 EMACS ?= emacs
 EMACSFLAGS =
-CARTON = carton
+CASK = cask
 VAGRANT = vagrant
 INSTALL-INFO = install-info
-VERSION := $(shell EMACS=$(EMACS) $(CARTON) version)
+VERSION := $(shell EMACS=$(EMACS) $(CASK) version)
+PKGDIR := $(shell EMACS=$(EMACS) $(CASK) package-directory)
 
 # Export the used EMACS to recipe environments
 export EMACS
@@ -48,25 +49,23 @@ $(PACKAGE) : $(PACKAGE_SRCS)
 	rm -rf flycheck-$(VERSION)
 
 .PHONY: clean-all
-clean-all : clean clean-elpa clean-doc
+clean-all : clean clean-pkgdir clean-doc
 
 .PHONY: clean
 clean :
 	rm -f $(OBJECTS)
 	rm -rf $(PACKAGE) flycheck-pkg.el
 
-.PHONY: deps
-deps :
-	$(CARTON) install
-	$(CARTON) update
+.PHONY: packages
+packages : $(PKGDIR)
 
-.PHONY: clean-elpa
-clean-elpa :
-	rm -rf elpa
+.PHONY: clean-pkgdir
+clean-pkgdir :
+	rm -rf $(PKGDIR)
 
 .PHONY: test
 test : compile
-	$(CARTON) exec $(EMACS) -Q $(EMACSFLAGS) --script tests/flycheck-testrunner.el
+	$(CASK) exec $(EMACS) -Q $(EMACSFLAGS) --script tests/flycheck-testrunner.el
 
 .PHONY: vagrant-test
 vagrant-test :
@@ -93,14 +92,14 @@ html : $(HTML_TARGETS)
 clean-html:
 	rm -rf doc/html
 
-%.elc : %.el elpa
-	$(CARTON) exec $(EMACS) -Q --batch $(EMACSFLAGS) -f batch-byte-compile $<
+%.elc : %.el $(PKGDIR)
+	$(CASK) exec $(EMACS) -Q --batch $(EMACSFLAGS) -f batch-byte-compile $<
 
-elpa : Carton
-	$(CARTON) install
+$(PKGDIR) : Cask
+	$(CASK) install
 
-flycheck-pkg.el : Carton
-	$(CARTON) package
+flycheck-pkg.el : Cask
+	$(CASK) package
 
 doc/dir : doc/flycheck.info
 	$(INSTALL-INFO) doc/flycheck.info doc/dir
