@@ -418,24 +418,23 @@ theme that has reasonable Flycheck faces, for instance the excellent
 @defopt flycheck-highlighting-mode
 This variable determines how to highlight errors:
 
-If set to @code{columns}, only highlight the error column.  If the error
-is not specific to a column, highlight the whole line.
+@table @code
+@item columns
+Highlights the error column.  If the error does not have a column,
+highlight the whole line.
 
-If set to @code{sexps}, highlight the expression at the error column.
-If there is no expression at the error column, highlight the column
-only.  If the error is not specific to a column, highlight the whole
-line.  This mode is the default.
+@item sexps
+Highlights the expression at the error column, if there is any,
+otherwise behave like @code{columns}.  This mode is the default.
 
-If set to @code{lines}, highlight the whole line the error refers to,
-regardless of whether the error is specific to a column.
+@item lines
+Highlights the whole line of the error.
 
-If set to @code{nil}, do not highlight errors at all.  However, errors
-will still be reported in the mode line and in error message popups, and
-indicated according to @code{flycheck-indication-mode}.
-
-Note that this variable does @emph{not} affect error @emph{navigation}.
-@code{next-error} and @code{previous-error} always jump to the error
-column, regardless of the highlighting mode.
+@item nil
+Do not highlight errors at all.  However, errors will still be reported
+in the mode line and in error message popups, and indicated according to
+@code{flycheck-indication-mode}.
+@end table
 @end defopt
 
 @defvr {Face} flycheck-fringe-error
