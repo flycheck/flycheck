@@ -809,6 +809,9 @@ Fix warnings about flawed definitions in @code{emacs-lisp} and
 @item
 @ghissue{175, Do not obscure active minibuffer input when displaying
 errors in the echo area}
+@item
+Fix universal prefix argument for @code{flycheck-next-error} at
+@code{C-c ! n}
 @end itemize
 
 @end itemize

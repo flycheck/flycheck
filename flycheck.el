@@ -2731,6 +2731,9 @@ If RESET is given and non-nil, re-start from the beginning of the buffer.
 
 N specifies how many errors to move forwards.  If negative, move backwards."
   (interactive "P")
+  (when (consp n)
+    ;; Universal prefix argument means reset
+    (setq reset t n nil))
   (flycheck-next-error-function n reset))
 
 (defun flycheck-previous-error (&optional n)
