@@ -6,7 +6,7 @@
 ;; URL: https://github.com/lunaryorn/flycheck
 ;; Keywords: convenience languages tools
 ;; Version: 0.14-cvs
-;; Package-Requires: ((s "1.6.0") (dash "1.2") (cl-lib "0.1") (emacs "24.1"))
+;; Package-Requires: ((s "1.6.0") (dash "1.6.0") (cl-lib "0.1") (emacs "24.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -264,7 +264,7 @@ highlight them according to `flycheck-highlighting-mode'."
                  (const :tag "Do not indicate" nil))
   :safe #'symbolp)
 
-(defcustom flycheck-highlighting-mode 'sexps
+(defcustom flycheck-highlighting-mode 'symbols
   "The highlighting mode for Flycheck errors and warnings.
 
 The highlighting mode controls how Flycheck highlights errors in
@@ -274,9 +274,14 @@ buffers.  The following modes are known:
      highlights the error column.  If the error does not have a
      column, highlight the whole line.
 
+`symbols'
+     highlights the symbol at the error column, if there is any, otherwise
+     behave like `columns'.
+
 `sexps'
      highlights the expression at the error column, if there is
-     any, otherwise behave like `columns'.
+     any, otherwise behave like `columns'.  Note that this mode
+     can be *very* slow in some modes.
 
 `lines'
      highlights the whole line.
@@ -290,10 +295,11 @@ errors with `next-error' and `previous-error' Flycheck always
 jumps to the error column regardless of the highlighting mode."
   :group 'flycheck
   :type '(choice (const :tag "Highlight columns only" columns)
+                 (const :tag "Highlight symbols" symbols)
                  (const :tag "Highlight expressions" sexps)
                  (const :tag "Highlight whole lines" lines)
                  (const :tag "Do not highlight errors" nil))
-  :package-version '(flycheck . "0.12")
+  :package-version '(flycheck . "0.14")
   :safe #'symbolp)
 
 (defcustom flycheck-check-syntax-automatically '(save
@@ -2171,21 +2177,22 @@ if ERR has no column."
                            (+ (line-end-position) 1))))
               (cons (- end 1) end)))))))))
 
-(defun flycheck-error-sexp-region (err)
-  "Get the sexp region of ERR.
+(defun flycheck-error-thing-region (thing err)
+  "Get the region of THING at the column of ERR.
 
-ERR is a Flycheck error whose region to get.
+ERR is a Flycheck error whose region to get.  THING is a
+understood by `thing-at-point'.
 
 Return a cons cell `(BEG . END)' where BEG is the beginning of
-the symbol at the error column, and END the end of the symbol.
-If ERR has no error column, or if there is no symbol at this
-column, return nil."
+the THING at the error column, and END the end of the symbol.  If
+ERR has no error column, or if there is no THING at this column,
+return nil."
   (-when-let (column (car (flycheck-error-column-region err)))
     (save-excursion
       (save-restriction
         (widen)
         (goto-char column)
-        (bounds-of-thing-at-point 'sexp)))))
+        (bounds-of-thing-at-point thing)))))
 
 (defun flycheck-error-region-for-mode (err mode)
   "Get the region of ERR for the highlighting MODE.
@@ -2193,12 +2200,16 @@ column, return nil."
 ERR is a Flycheck error.  MODE may be one of the following symbols:
 
 `columns'
-     Return the column region of ERR, or the line region if ERR
+     Get the column region of ERR, or the line region if ERR
      has no column.
 
+`symbols'
+     Get the symbol region of ERR, or the result of `columns', if
+     there is no sexp at the error column.
+
 `sexps'
-     Return the sexp region of ERR, or the result of `columns',
-     if there is no symbol at the error column.
+     Get the sexp region of ERR, or the result of `columns', if
+     there is no sexp at the error column.
 
 `lines'
      Return the line region.
@@ -2207,7 +2218,9 @@ Otherwise signal an error."
   (pcase mode
     (`columns (or (flycheck-error-column-region err)
                   (flycheck-error-line-region err)))
-    (`sexps (or (flycheck-error-sexp-region err)
+    (`symbols (or (flycheck-error-thing-region 'symbol err)
+                  (flycheck-error-region-for-mode err 'columns)))
+    (`sexps (or (flycheck-error-thing-region 'sexp err)
                 (flycheck-error-region-for-mode err 'columns)))
     (`lines (flycheck-error-line-region err))
     (_ (error "Invalid mode %S" mode))))
@@ -2692,16 +2705,21 @@ Return the created overlay."
 Intended for use with `next-error-function'."
   ;; TODO: Horribly inefficient, possibly improve by considering less errors.
   (let* ((n (or n 1))
-         (current-pos (if reset (point-min) (point)))
-         (before-and-after (->> flycheck-current-errors
-                             (-map 'flycheck-error-pos)
-                             (-uniq)
-                             (-filter #'flycheck-navigatable-position-p)
-                             (--remove (= current-pos it))
-                             (--split-with (>= current-pos it))))
-         (before (nreverse (car before-and-after)))
-         (after (cadr before-and-after))
-         (error-pos (nth (- (abs n) 1) (if (< n 0) before after))))
+         (forward? (> n 0))
+         (point (if reset (point-min) (point)))
+         (overlays-at-point (flycheck-overlays-at point))
+         (pos (or
+               (if forward?
+                   (-max-by #'identity (-map #'overlay-end overlays-at-point))
+                 (-min-by #'identity (-map #'overlay-start overlays-at-point)))
+               point))
+         (min (if forward? pos (point-min)))
+         (max (if forward? (point-max) pos))
+         (candidates (->> (flycheck-overlays-in min max)
+                       (-map #'overlay-start)
+                       -uniq
+                       (-sort (if forward? #'<= #'>=))))
+         (error-pos (nth (- (abs n) 1) candidates)))
     (if error-pos
         (goto-char error-pos)
       (user-error "No more Flycheck errors"))))
