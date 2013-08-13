@@ -3157,6 +3157,49 @@ _EVENT is ignored."
     (interrupt-process flycheck-current-process)))
 
 
+;;;; Emacs project helpers
+(defun flycheck-get-ede-cpp-project (file)
+  "Get EDE C/C++ project for FILE.
+If FILE does not belong to an EDE C/C++ project, or if EDE is not present, this
+function returns nil."
+  (when (featurep 'ede)
+      (let ((project (ede-current-project (expand-file-name file))))
+        (when (ede-cpp-root-project-p project)
+            project))))
+
+(defun flycheck-get-ede-cpp-project-includes (project)
+  "Get include paths from EDE C/C++ PROJECT."
+  (when (ede-cpp-root-project-p project)
+      (let* ((root-path (ede-project-root-directory project))
+             (include-paths (oref project include-path)))
+        (mapcar (lambda (path) (expand-file-name path root-path)) include-paths))))
+
+(defun flycheck-get-cpp-project-includes (option-name file)
+  "Construct a list of includes using OPTION-NAME for the specified FILE.
+If FILE is associated with a supported project type and if it has a list of
+include paths a list consisting of OPTION-NAME concatenated with each path
+will be constructed."
+  (mapcar (lambda (path) (concat option-name path))
+          (let ((ede-proj (flycheck-get-ede-cpp-project file)))
+            (cond
+             (ede-proj (flycheck-get-ede-cpp-project-includes ede-proj))))))
+
+(defun flycheck-get-cpp-project-definitions (option-name file)
+  "Construct a list of definitions using OPTION-NAME for the specified FILE.
+If FILE is associated with a supported project type and if it has a list of
+definitions a list consisting of OPTION-NAME concatenated with the name of the
+definition followed by an optional =<value> will be constructed."
+  (mapcar (lambda (define)
+            (let ((macro (car define))
+                  (value (cdr define)))
+              (concat option-name macro
+                      (unless (string= "" value)
+                        (concat "=" value)))))
+          (let ((ede-proj (flycheck-get-ede-cpp-project file)))
+            (cond
+             (ede-proj (ede-preprocessor-map ede-proj))))))
+
+
 ;;;; Built-in checkers
 (flycheck-define-checker bash
   "A Bash syntax checker using the Bash shell.
@@ -3210,6 +3253,11 @@ See URL `http://clang.llvm.org/'."
                                         ; warning group
             (option-list "-W" flycheck-clang-warnings s-prepend)
             (option-list "-I" flycheck-clang-include-path)
+            (eval
+             (let ((source-file (buffer-file-name (current-buffer))))
+               (append
+                (flycheck-get-cpp-project-includes "-I" source-file)
+                (flycheck-get-cpp-project-definitions "-D" source-file))))
             "-x" (eval
                   (cl-case major-mode
                     (c++-mode "c++")
@@ -3247,6 +3295,11 @@ See URL `http://cppcheck.sourceforge.net/'."
   :command ("cppcheck" "--quiet" "--xml-version=2" "--inline-suppr"
             (option "--enable=" flycheck-cppcheck-checks
                     flycheck-option-comma-separated-list)
+            (eval
+             (let ((source-file (buffer-file-name (current-buffer))))
+               (append
+                (flycheck-get-cpp-project-includes "-I" source-file)
+                (flycheck-get-cpp-project-definitions "-D" source-file))))
             source)
   :error-parser flycheck-parse-cppcheck
   :modes (c-mode c++-mode))
