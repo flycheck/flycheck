@@ -596,10 +596,6 @@ the 3rd error from the beginning of the buffer.
 
 @end table
 
-Error navigation jumps to the exact error column, or to the first
-non-whitespace character of a line if the error is not specific to a
-column.
-
 @node Mode line,  , Navigation, Usage
 @comment  node-name,  next,  previous,  up
 @section Mode line

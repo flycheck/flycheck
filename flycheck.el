@@ -288,11 +288,7 @@ buffers.  The following modes are known:
 
 nil
      does not highlight errors at all.  Errors will still be
-     indicated according to `flycheck-indication-mode'.
-
-Note that this does not affect error navigation.  When navigating
-errors with `next-error' and `previous-error' Flycheck always
-jumps to the error column regardless of the highlighting mode."
+     indicated according to `flycheck-indication-mode'."
   :group 'flycheck
   :type '(choice (const :tag "Highlight columns only" columns)
                  (const :tag "Highlight symbols" symbols)
