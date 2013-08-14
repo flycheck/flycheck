@@ -54,7 +54,7 @@ Built-in syntax checkers for:
 @item
 C/C++ (using @command{clang} and @command{cppcheck})
 @item
-CoffeeScript (using @command{coffeelint})
+CoffeeScript (using @command{coffee} and @command{coffeelint})
 @item
 CSS (using @command{csslint}))
 @item

@@ -114,6 +114,7 @@ buffer-local wherever it is set."
   '(bash
     c/c++-clang
     c/c++-cppcheck
+    coffee
     coffee-coffeelint
     css-csslint
     elixir
@@ -3272,8 +3273,20 @@ See URL `http://cppcheck.sourceforge.net/'."
                               ".coffeelint.json"
   :safe #'stringp)
 
+(flycheck-define-checker coffee
+  "A CoffeeScript syntax checker using coffee.
+
+See URL `http://coffeescript.org/'."
+  ;; --print suppresses generation of compiled .js files
+  :command ("coffee" "--compile" "--print" source)
+  :error-patterns
+  ((error line-start (file-name) ":" line ":" column
+          ": error: " (message) line-end))
+  :modes coffee-mode
+  :next-checkers ((warnings-only . coffee-coffeelint)))
+
 (flycheck-define-checker coffee-coffeelint
-  "A CoffeeScript syntax and style checker using coffeelint.
+  "A CoffeeScript style checker using coffeelint.
 
 See URL `http://www.coffeelint.org/'."
   :command

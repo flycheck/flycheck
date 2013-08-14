@@ -1882,26 +1882,28 @@ many-errors-for-error-list.el:7:1:warning: `message' called with 0
        '(2 nil "Extra qualification 'A::' unnecessary and considered an error by many compilers." warning)
        '(9 nil "Prefix ++/-- operators should be preferred for non-primitive types. Pre-increment/decrement can be more efficient than post-increment/decrement. Post-increment/decrement usually involves keeping a copy of the previous value around and adds a little extra code." warning))))
 
-(ert-deftest checker-coffeelint-error ()
+(ert-deftest checker-coffee-syntax-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'coffee)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/coffee-syntax-error.coffee" 'coffee-mode nil
+   '(4 7 "missing \", starting" error)))
+
+(ert-deftest checker-coffee-coffeelint-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'coffee-coffeelint)
   (flycheck-testsuite-should-syntax-check
    "checkers/coffee-coffeelint-error.coffee" 'coffee-mode nil
-   '(4 nil "Throwing strings is forbidden" error)))
+   '(4 nil "Throwing strings is forbidden" error
+       :checker coffee-coffeelint)))
 
-(ert-deftest checker-coffeelint-warning ()
+(ert-deftest checker-coffee-coffeelint-warning ()
   "Test a coffeelint error demoted to a warning via config file."
   :expected-result (flycheck-testsuite-fail-unless-checker 'coffee-coffeelint)
   (flycheck-testsuite-with-hook coffee-mode-hook
       (setq flycheck-coffeelintrc "coffeelint.json")
     (flycheck-testsuite-should-syntax-check
      "checkers/coffee-coffeelint-error.coffee" 'coffee-mode nil
-     '(4 nil "Throwing strings is forbidden" warning))))
-
-(ert-deftest checker-coffeelint-syntax-error ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'coffee-coffeelint)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/coffee-syntax-error.coffee" 'coffee-mode nil
-   '(4 nil "missing \", starting" error :filename nil)))
+     '(4 nil "Throwing strings is forbidden" warning
+         :checker coffee-coffeelint))))
 
 (ert-deftest checker-css-csslint-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'css-csslint)
