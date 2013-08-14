@@ -45,6 +45,7 @@ order of their appearance in the default value of
 @iflyc tex-chktex
 @iflyc tex-lacheck
 @iflyc xml-xmlstarlet
+@iflyc xml-xmllint
 @iflyc zsh
 @end itemize
 

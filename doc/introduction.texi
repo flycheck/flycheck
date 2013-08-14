@@ -105,7 +105,7 @@ script)
 @item
 TeX/LaTeX (using @command{chktex} or @command{lacheck})
 @item
-XML (using @command{xmlstarlet})
+XML (using @command{xmlstarlet} or @command{xmllint})
 @end itemize
 @item
 Nice error indication and highlighting

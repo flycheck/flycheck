@@ -2533,11 +2533,17 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
     '(9 nil "possible unwanted space at \"{\"" warning)))
 
 (ert-deftest checker-xml-xmlstarlet-syntax-error ()
-  "Test a lone closing tag."
   :expected-result (flycheck-testsuite-fail-unless-checker 'xml-xmlstarlet)
   (flycheck-testsuite-should-syntax-check
-   "checkers/xml-syntax-error.xml" 'nxml-mode nil
+   "checkers/xml-syntax-error.xml" 'nxml-mode 'xml-xmllint
    '(4 10 "Opening and ending tag mismatch: spam line 3 and with" error)))
+
+(ert-deftest checker-xml-xmllint-syntax-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'xml-xmllint)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/xml-syntax-error.xml" 'nxml-mode 'xml-xmlstarlet
+   '(4 nil "parser error : Opening and ending tag mismatch: spam line 3 and with" error)
+   '(5 nil "parser error : Extra content at the end of the document" error)))
 
 (ert-deftest checker-zsh-syntax-error ()
   "Test a syntax error from a missing semicolon."

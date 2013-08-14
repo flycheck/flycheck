@@ -788,6 +788,8 @@ and @command{hlint}}
 @ghissue{172, C/C++ with @command{clang}}
 @item
 CoffeeScript with @command{coffee}
+@item
+@ghissue{180, XML with @command{xmllint}}
 @end itemize
 
 @item

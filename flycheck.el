@@ -153,6 +153,7 @@ buffer-local wherever it is set."
     tex-chktex
     tex-lacheck
     xml-xmlstarlet
+    xml-xmllint
     zsh)
   "Syntax checkers available for automatic selection.
 
@@ -4058,6 +4059,16 @@ See URL `http://xmlstar.sourceforge.net/'."
   :command ("xmlstarlet" "val" "-e" "-q" source)
   :error-patterns
   ((error line-start (file-name) ":" line "." column ": " (message) line-end))
+  :modes (xml-mode nxml-mode))
+
+(flycheck-define-checker xml-xmllint
+  "A XML syntax checker and validator using the xmllint utility.
+
+The xmllint is part of libxml2, see URL
+`http://www.xmlsoft.org/'."
+  :command ("xmllint" "--noout" source)
+  :error-patterns
+  ((error line-start (file-name) ":" line ": " (message) line-end))
   :modes (xml-mode nxml-mode))
 
 (flycheck-define-checker zsh

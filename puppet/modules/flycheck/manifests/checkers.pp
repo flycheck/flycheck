@@ -31,6 +31,7 @@ class flycheck::checkers {
                 'chktex',          # tex-chktex
                 'lacheck',         # tex-lacheck
                 'xmlstarlet',      # xml-xmlstarlet
+                'libxml2-utils',   # xml-xmllint
                 'zsh',             # zsh
                 ]
   package { $packages: ensure => latest }
