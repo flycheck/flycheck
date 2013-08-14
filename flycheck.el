@@ -2691,17 +2691,10 @@ Return the created overlay."
 
 
 ;;;; Error navigation
-(defun flycheck-navigatable-position-p (pos)
-  "Determine whether POS can be navigated to."
-  (and (>= pos (point-min))
-       (<= pos (point-max))
-       (and (flycheck-overlays-at pos))))
-
 (defun flycheck-next-error-function (n reset)
   "Visit the N-th error from the current point.
 
 Intended for use with `next-error-function'."
-  ;; TODO: Horribly inefficient, possibly improve by considering less errors.
   (let* ((n (or n 1))
          (forward? (> n 0))
          (point (if reset (point-min) (point)))
