@@ -736,6 +736,8 @@ syntax checker for non-configuration files}
 @item
 @ghissue{179, Change the default @code{flycheck-highlighting-mode} to
 @code{symbols}}
+@item
+@ghissue{184, Drop support for Pylint 0.x in @command{python-pylint}}
 @end itemize
 
 @item
@@ -815,7 +817,9 @@ errors in the echo area}
 Fix universal prefix argument for @code{flycheck-next-error} at
 @code{C-c ! n}
 @item
-@ghissue{192, Correctly parse output for @command{coffeelint} 0.5.7}
+@ghissue{192, Correctly parse output of @command{coffeelint} 0.5.7}
+@item
+@ghissue{184, Correctly parse output of @command{pylint} 1.0}
 @end itemize
 
 @end itemize

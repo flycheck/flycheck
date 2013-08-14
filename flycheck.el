@@ -3878,16 +3878,19 @@ See URL `http://pypi.python.org/pypi/flake8'."
 (flycheck-define-checker python-pylint
   "A Python syntax and style checker using Pylint.
 
+This syntax checker requires Pylint 1.0 or newer.
+
 See URL `http://pypi.python.org/pypi/pylint'."
-  :command ("epylint" source-inplace)
+  ;; -r n disables the scoring report
+  :command ("pylint" "-r" "n"
+            "--msg-template" "{path}:{line}:{C}:{msg}"
+            source-inplace)
   :error-patterns
-  ((warning line-start (file-name) ":" line
-            ": Warning (W" (zero-or-more not-newline) "): "
-            (message) line-end)
-   (error line-start (file-name) ":" line
-          ": Error (E" (zero-or-more not-newline) "): "
-          (message) line-end)
-   (error line-start (file-name) ":" line ": [F] " (message) line-end))
+  ((error line-start (file-name) ":" line ":"
+          (or "E" "F") ":" (message) line-end)
+   ;; We ignore Convention level messages
+   (warning line-start (file-name) ":" line ":"
+            (or "W" "R") ":" (message) line-end))
   :modes python-mode)
 
 (flycheck-define-checker rst
