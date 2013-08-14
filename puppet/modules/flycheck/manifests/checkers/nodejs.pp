@@ -20,7 +20,7 @@ class flycheck::checkers::nodejs {
                     ]
 
   package { $node_packages:
-    ensure   => ensure,
+    ensure   => present,
     provider => npm,
     require  => Package['nodejs'],
   }
