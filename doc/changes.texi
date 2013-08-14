@@ -812,6 +812,8 @@ errors in the echo area}
 @item
 Fix universal prefix argument for @code{flycheck-next-error} at
 @code{C-c ! n}
+@item
+@ghissue{192, Correctly parse output for @command{coffeelint} 0.5.7}
 @end itemize
 
 @end itemize

@@ -3280,8 +3280,12 @@ See URL `http://www.coffeelint.org/'."
   ("coffeelint" (config-file "--file" flycheck-coffeelintrc) "--csv" source)
   :error-patterns
   ((error "SyntaxError: " (message) " on line " line)
-   (error line-start (file-name) "," line ",error," (message) line-end)
-   (warning line-start (file-name) "," line ",warn," (message) line-end))
+   (error line-start (file-name) "," line ","
+          (optional (optional (one-or-more digit)) ",") ; optional end line
+          "error," (message) line-end)
+   (warning line-start (file-name) "," line ","
+            (optional (optional (one-or-more digit)) ",")
+            "warn," (message) line-end))
   :modes coffee-mode)
 
 (flycheck-define-checker css-csslint
