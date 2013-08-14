@@ -4,12 +4,12 @@ class flycheck::checkers::php {
   apt::ppa { 'ppa:ondrej/php5': }
 
   package { 'php5-cli':
-    ensure  => present,
+    ensure  => latest,
     require => Apt::Ppa['ppa:ondrej/php5']
   }
 
   package { 'php-pear':
-    ensure  => present,
+    ensure  => latest,
     require => Package['php5-cli'],
     notify  => Exec['pear update']
   }
@@ -21,7 +21,7 @@ class flycheck::checkers::php {
   }
 
   package { 'PHP_CodeSniffer': # php-phpcs
-    ensure   => present,
+    ensure   => latest,
     provider => pear,
     require  => Exec['pear update'],
   }

@@ -15,7 +15,7 @@ class flycheck::checkers {
   apt::ppa { 'ppa:kevincantu/rust': }
 
   package { 'rust':
-    ensure  => present,
+    ensure  => latest,
     require => Apt::Ppa['ppa:kevincantu/rust']
   }
 

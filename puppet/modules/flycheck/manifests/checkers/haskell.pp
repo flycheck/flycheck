@@ -5,7 +5,7 @@ class flycheck::checkers::haskell {
   package { ['ghc', 'hlint']: ensure => latest }
 
   package { ['cabal-install']:
-    ensure  => present,
+    ensure  => latest,
     require => Package['ghc'],
     notify  => Exec['cabal update'],
   }

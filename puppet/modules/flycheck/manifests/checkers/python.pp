@@ -10,7 +10,7 @@ class flycheck::checkers::python {
                       ]
 
   package { $python_packages:
-    ensure   => present,
+    ensure   => latest,
     provider => pip,
     require  => Package['python-pip'],
   }
