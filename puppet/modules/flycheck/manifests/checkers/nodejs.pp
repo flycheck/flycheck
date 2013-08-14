@@ -11,7 +11,8 @@ class flycheck::checkers::nodejs {
     require => Apt::Ppa['ppa:chris-lea/node.js'],
   }
 
-  $node_packages = ['coffeelint', # coffee-coffeelint
+  $node_packages = ['coffee',     # coffee
+                    'coffeelint', # coffee-coffeelint
                     'csslint',    # css-csslint
                     'jshint',     # javascript-jshint
                     'jsonlint',   # json-jsonlint
