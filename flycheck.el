@@ -2465,8 +2465,7 @@ about Checkstyle."
       ;; cddr gets us the body of the node without its name and its attributes
       (->> (cddr root)
         (--filter (and (listp it) (eq (car it) 'file)))
-        (-map #'flycheck-parse-checkstyle-file-node)
-        -flatten))))
+        (-mapcat #'flycheck-parse-checkstyle-file-node)))))
 
 (defun flycheck-parse-cppcheck-error-node (node)
   "Parse a single error NODE from Cppcheck XML.
@@ -2501,8 +2500,7 @@ about Cppcheck."
       (->> errors
         ;; Filter error nodes
         (--filter (and (listp it) (eq (car it) 'error)))
-        (-map #'flycheck-parse-cppcheck-error-node)
-        -flatten))))
+        (-mapcat #'flycheck-parse-cppcheck-error-node)))))
 
 
 ;;;; Error analysis
