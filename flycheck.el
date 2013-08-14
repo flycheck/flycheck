@@ -2781,6 +2781,22 @@ Return the buffer object."
 (defvar-local flycheck-error-list-source-buffer nil
   "The current source buffer of the error list.")
 
+(defvar-local flycheck-error-list-last-errors nil
+  "The last errors in the error list.
+
+The value of this variable is a list of Flycheck error objects
+that were last added to the error list with
+`flycheck-error-list-add-errors'.")
+
+(defun flycheck-error-list-last-errors ()
+  "Get the last errors in the error list.
+
+Return a list of the last errors in the error list (as by
+`flycheck-error-list-last-errors'), or nil if there is no error
+list buffer currently."
+  (-when-let (list-buffer (get-buffer flycheck-error-list-buffer))
+    (buffer-local-value 'flycheck-error-list-last-errors list-buffer)))
+
 (defun flycheck-error-list-buffer-label (buffer)
   "Create a list label for BUFFER relative to DIRECTORY.
 
@@ -2849,7 +2865,8 @@ and thus used by `flycheck-error-list-refresh'."
       (flycheck-error-list-mode)
       (setq default-directory source-directory ; Change to the right directory
                                         ; to resolve error references properly
-            flycheck-error-list-source-buffer source-buffer)
+            flycheck-error-list-source-buffer source-buffer
+            flycheck-error-list-last-errors errors)
       (let ((inhibit-read-only t))
         (goto-char (point-max))
         (flycheck-error-list-insert-header source-buffer)
@@ -2999,9 +3016,10 @@ list.
 
 Note that this function does *not* actually show the error list,
 it just adds ERRORS to it."
-  (flycheck-error-list-add-errors errors)
-  (with-current-buffer (flycheck-error-list-buffer)
-    (flycheck-error-list-recenter)))
+  (unless (equal errors (flycheck-error-list-last-errors))
+    (flycheck-error-list-add-errors errors)
+    (with-current-buffer (flycheck-error-list-buffer)
+      (flycheck-error-list-recenter))))
 
 
 ;;;; Working with error messages
