@@ -856,7 +856,7 @@ selected."
     (flycheck-buffer)
     (flycheck-testsuite-wait-for-syntax-checker)
     (should (= (length flycheck-current-errors) 1))
-    (flycheck-testsuite-should-error 3 nil "Unused import re" 'warning)
+    (flycheck-testsuite-should-error 3 nil "Unused import re (W0611)" 'warning)
     (should (not flycheck-checker))
     (should (eq flycheck-last-checker 'python-pylint))
     (flycheck-clear-errors)
@@ -884,7 +884,7 @@ executed, and has its errors reported."
     (flycheck-buffer)
     (flycheck-testsuite-wait-for-syntax-checker)
     (should (= (length flycheck-current-errors) 1))
-    (flycheck-testsuite-should-error 3 nil "Unused import re" 'warning)
+    (flycheck-testsuite-should-error 3 nil "Unused import re (W0611)" 'warning)
     (flycheck-select-checker 'python-flake8)
     (flycheck-testsuite-wait-for-syntax-checker)
     (should (= (length flycheck-current-errors) 1))
@@ -905,7 +905,7 @@ error is signaled on all subsequent checks."
     (flycheck-buffer)
     (flycheck-testsuite-wait-for-syntax-checker)
     (should (= (length flycheck-current-errors) 1))
-    (flycheck-testsuite-should-error 3 nil "Unused import re" 'warning)
+    (flycheck-testsuite-should-error 3 nil "Unused import re (W0611)" 'warning)
     (let* ((error-data (should-error (flycheck-select-checker 'bash)
                                      :type flycheck-testsuite-user-error-type)))
       (should (string= (cadr error-data)
@@ -2383,21 +2383,21 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-pylint)
   (flycheck-testsuite-should-syntax-check
    "checkers/python-syntax-error.py" 'python-mode 'python-flake8
-   '(3 nil "invalid syntax" error)))
+   '(3 nil "invalid syntax (E0001)" error)))
 
 (ert-deftest checker-python-pylint-error ()
   "Test an unknown module with pylint."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-pylint)
   (flycheck-testsuite-should-syntax-check
    "checkers/python-pylint-error.py" 'python-mode 'python-flake8
-   '(3 nil "Unable to import 'spam'" error)))
+   '(3 nil "Unable to import 'spam' (F0401)" error)))
 
 (ert-deftest checker-python-pylint-used-map ()
   "Test usage of the map() builtin with the pylint checker."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-pylint)
   (flycheck-testsuite-should-syntax-check
    "checkers/python-pylint-warning.py" 'python-mode 'python-flake8
-   '(3 nil "Used builtin function 'map'" warning)))
+   '(3 nil "Used builtin function 'map' (W0141)" warning)))
 
 (ert-deftest checker-rst-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'rst)

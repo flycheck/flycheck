@@ -799,6 +799,8 @@ Improvements:
 @item
 @ghissue{159, Support Rubocop 0.9 and drop support for older Rubocop
 releases}
+@item
+Include the message ID in error messages from @command{python-pylint}
 @end itemize
 
 @item
