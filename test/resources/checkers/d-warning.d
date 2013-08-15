@@ -1,4 +1,4 @@
-module d_syntax_warning;
+module d_warning;
 
 auto foo(int a)
 {

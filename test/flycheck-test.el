@@ -1927,23 +1927,23 @@ many-errors-for-error-list.el:7:1:warning: `message' called with 0
    "checkers/d-syntax-error.d" 'd-mode nil
    '(2 nil "module studio is in file 'std/studio.d' which cannot be read" error)))
 
-(ert-deftest checker-d-syntax-warning ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'd)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/d-syntax-warning.d" 'd-mode nil
-   '(6 nil "statement is not reachable" warning)))
-
-(ert-deftest checker-d-syntax-deprecated ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'd)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/d-syntax-deprecated.d" 'd-mode nil
-   '(11 nil "function d_syntax_deprecated.foo is deprecated" warning)))
-
 (ert-deftest checker-d-syntax-error-without-module ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'd)
   (flycheck-testsuite-should-syntax-check
    "checkers/d_syntax_error_without_module.d" 'd-mode nil
    '(5 nil "undefined identifier writel, did you mean template write(T...)(T args) if (!is(T[0] : File))?" error)))
+
+(ert-deftest checker-d-warning ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'd)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/d-warning.d" 'd-mode nil
+   '(6 nil "statement is not reachable" warning)))
+
+(ert-deftest checker-d-deprecated ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'd)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/d-deprecated.d" 'd-mode nil
+   '(11 nil "function d_deprecated.foo is deprecated" warning)))
 
 (ert-deftest checker-elixir-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'elixir)
