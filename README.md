@@ -33,6 +33,7 @@ Features
   - C/C++
   - CoffeeScript
   - CSS
+  - D
   - Elixir
   - Emacs Lisp
   - Erlang
