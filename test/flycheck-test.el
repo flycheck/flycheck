@@ -128,8 +128,10 @@ All declared checkers should be registered."
 ;;;; Version information
 (ert-deftest flycheck-library-version ()
   :expected-result (if (executable-find "cask") :passed :failed)
-  (let* ((source-dir (expand-file-name ".." flycheck-testsuite-dir))
-         (default-directory (file-name-as-directory source-dir))
+  ;;  The default directory must end with a slash
+  (let* ((default-directory (-> flycheck-testsuite-dir
+                              f-parent
+                              file-name-as-directory))
          (version (car (process-lines "cask" "version"))))
     (should (string= version (flycheck-library-version)))))
 
@@ -145,8 +147,9 @@ All declared checkers should be registered."
     (should (string= "2.12" (flycheck-package-version)))))
 
 (ert-deftest flycheck-version ()
-  (let* ((source-dir (expand-file-name ".." flycheck-testsuite-dir))
-         (default-directory (file-name-as-directory source-dir))
+  (let* ((default-directory (-> flycheck-testsuite-dir
+                              f-parent
+                              file-name-as-directory))
          (version (car (process-lines "cask" "version"))))
     ;; Just the library version
     (should (string= version (flycheck-version)))
@@ -377,17 +380,16 @@ All declared checkers should be registered."
   (let ((dirname (flycheck-temp-dir-system "flycheck-test")))
     (flycheck-testsuite-trap-temp-dir dirname
       (should (s-starts-with? temporary-file-directory dirname))
-      (should (s-starts-with? "flycheck-test"
-                              (file-name-nondirectory dirname)))
-      (should (file-directory-p dirname)))))
+      (should (s-starts-with? "flycheck-test" (f-filename dirname)))
+      (should (f-directory? dirname)))))
 
 (ert-deftest flycheck-temp-file-system-no-filename ()
   "Test `flycheck-temp-file-system' without a filename."
   (let ((filename (flycheck-temp-file-system nil "flycheck-test")))
     (flycheck-testsuite-trap-temp-file filename
       (should (s-starts-with? temporary-file-directory filename))
-      (should (s-starts-with? "flycheck-test" (file-name-nondirectory filename)))
-      (should (file-exists-p filename)))))
+      (should (s-starts-with? "flycheck-test" (f-filename filename)))
+      (should (f-exists? filename)))))
 
 (ert-deftest flycheck-temp-file-system-filename ()
   "Test `flycheck-temp-file-system' with an extension."
@@ -398,23 +400,23 @@ All declared checkers should be registered."
       (should (string= "eggs.el" (file-name-nondirectory filename)))
       (should (s-starts-with? temporary-file-directory filename))
       (should (s-starts-with? "flycheck-test" (file-name-nondirectory dirname)))
-      (should (file-directory-p dirname)))))
+      (should (f-directory? dirname)))))
 
 (ert-deftest flycheck-temp-file-inplace-basename ()
   "Test `flycheck-temp-file-inplace' with a base name."
   (let ((filename (flycheck-temp-file-inplace "eggs.el" "flycheck-test")))
     (flycheck-testsuite-trap-temp-file filename
-      (should (string= filename (expand-file-name "flycheck-test-eggs.el" nil)))
-      (should-not (file-exists-p filename)))))
+      (should (string= filename (f-expand "flycheck-test-eggs.el")))
+      (should-not (f-exists? filename)))))
 
 (ert-deftest flycheck-temp-file-inplace-path ()
   "Test `flycheck-temp-file-inplace' with complete path."
   (let ((filename (flycheck-temp-file-inplace "spam/with/eggs.el"
                                               "flycheck-test")))
     (flycheck-testsuite-trap-temp-file filename
-      (should (string= filename (expand-file-name "flycheck-test-eggs.el"
-                                                  "spam/with")))
-      (should-not (file-exists-p filename)))))
+      (should (string= filename
+                       (f-expand (f-join "spam/with" "flycheck-test-eggs.el"))))
+      (should-not (f-exists? filename)))))
 
 (ert-deftest flycheck-temp-file-inplace-no-filename ()
   "Test `flycheck-temp-file-inplace' without a path."
@@ -423,27 +425,21 @@ All declared checkers should be registered."
       (should-not (file-name-extension filename))
       (should (s-starts-with? "flycheck-test"
                               (file-name-nondirectory filename)))
-      (should (file-exists-p filename)))))
-
-(ert-deftest flycheck-same-files-p ()
-  "Test `flycheck-same-files-p'."
-  (should (flycheck-same-files-p "./flycheck.el" "./flycheck.el"))
-  (should (flycheck-same-files-p "./flycheck.el" "flycheck.el"))
-  (should-not (flycheck-same-files-p "../flycheck/flycheck.el" "tests.el")))
+      (should (f-exists? filename)))))
 
 (ert-deftest flycheck-save-buffer-to-file ()
   "Test `flycheck-save-buffer-to-file'."
-  (let ((filename (expand-file-name "tests-temp")))
+  (let ((filename (f-expand "tests-temp")))
     (unwind-protect
         (with-temp-buffer
-          (should-not (file-exists-p filename))
+          (should-not (f-exists? filename))
           (insert "Hello world")
           (flycheck-save-buffer-to-file filename)
-          (should (file-exists-p filename))
+          (should (f-exists? filename))
           (with-temp-buffer
             (insert-file-contents-literally filename)
             (should (string= (buffer-string) "Hello world"))))
-      (ignore-errors (delete-file filename)))))
+      (ignore-errors (f-delete filename)))))
 
 (ert-deftest flycheck-option-with-value-argument ()
   "Test concatenation of options and arguments."
@@ -472,15 +468,15 @@ All declared checkers should be registered."
 (ert-deftest flycheck-safe-delete-directories-recursive ()
   (let ((dirname (flycheck-temp-dir-system "flycheck-test")))
     (unwind-protect
-        (let ((filename (expand-file-name "foo" dirname)))
+        (let ((filename (f-join dirname "foo")))
           (process-lines "touch" filename)
           (should (s-starts-with? dirname filename))
-          (should (file-exists-p filename))
+          (should (f-exists? filename))
           (flycheck-safe-delete-directories (list dirname))
-          (should-not (file-exists-p filename))
-          (should-not (file-directory-p dirname))
-          (should-not (file-exists-p dirname)))
-      (ignore-errors (delete-directory dirname :recursive)))))
+          (should-not (f-exists? filename))
+          (should-not (f-directory? dirname))
+          (should-not (f-exists? dirname)))
+      (ignore-errors (f-delete dirname :force)))))
 
 
 ;;;; Checker declarations
@@ -541,11 +537,11 @@ All declared checkers should be registered."
           (let ((filename (flycheck-substitute-argument 'source-inplace 'emacs-lisp)))
             (should (equal filename (flycheck-testsuite-resource-filename
                                      "flycheck-substitute-dummy")))
-            (should (file-exists-p filename)))
+            (should (f-exists? filename)))
 
           (let ((filename (flycheck-substitute-argument 'source 'emacs-lisp)))
             (should (s-starts-with? temporary-file-directory filename))
-            (should (file-exists-p filename)))))
+            (should (f-exists? filename)))))
     (flycheck-safe-delete-files flycheck-temp-files)))
 
 (ert-deftest flycheck-substitute-argument-temporary-directory ()
@@ -554,7 +550,7 @@ All declared checkers should be registered."
         (progn
           (let ((dirname (flycheck-substitute-argument 'temporary-directory
                                                        'emacs-lisp)))
-            (should (file-directory-p dirname))
+            (should (f-directory? dirname))
             (should (s-starts-with? temporary-file-directory dirname))))
       (flycheck-safe-delete-directories flycheck-temp-directories))))
 
@@ -781,35 +777,34 @@ All declared checkers should be registered."
                                                            'emacs-lisp))
     (should (equal (flycheck-locate-config-file-absolute-path "../Makefile"
                                                               'emacs-lisp)
-                   (expand-file-name "../Makefile" flycheck-testsuite-dir)))))
+                   (f-join flycheck-testsuite-dir "../Makefile")))))
 
 (ert-deftest flycheck-locate-config-file-projectile ()
   (require 'projectile)
   (with-temp-buffer
-    (set-visited-file-name (expand-file-name "foo" flycheck-testsuite-dir)
+    (set-visited-file-name (f-join flycheck-testsuite-dir "foo")
                            :no-query)
     (should (projectile-project-p))
     (should (equal
              (flycheck-locate-config-file-projectile "Makefile" 'emacs-lisp)
-             (expand-file-name "../Makefile" flycheck-testsuite-dir)))
+             (f-join flycheck-testsuite-dir "../Makefile")))
     (should-not (flycheck-locate-config-file-projectile "Foo" 'emacs-lisp)))
   (with-temp-buffer
-    (set-visited-file-name (expand-file-name "foo" temporary-file-directory)
+    (set-visited-file-name (f-join temporary-file-directory "foo")
                            :no-query)
     (should-not (projectile-project-p))
     (should-not (flycheck-locate-config-file-projectile "Foo" 'emacs-dir))))
 
 (ert-deftest flycheck-locate-config-file-ancestor-directories ()
   (with-temp-buffer
-    (setq buffer-file-name (expand-file-name "flycheck-testsuite.el"
-                                             flycheck-testsuite-dir))
+    (setq buffer-file-name (f-join flycheck-testsuite-dir "flycheck-testsuite.el"))
     (should-not (flycheck-locate-config-file-ancestor-directories "foo" 'emacs-lisp))
     (should (equal (flycheck-locate-config-file-ancestor-directories
                     "test-helper.el" 'emacs-lisp)
-                   (expand-file-name "test-helper.el" flycheck-testsuite-dir)))
+                   (f-join flycheck-testsuite-dir "test-helper.el")))
     (should (equal (flycheck-locate-config-file-ancestor-directories
                     "Makefile" 'emacs-lisp)
-                   (expand-file-name "../Makefile" flycheck-testsuite-dir)))))
+                   (f-join flycheck-testsuite-dir "../Makefile")))))
 
 (ert-deftest flycheck-locate-config-file-home ()
   (let ((old-home (getenv "HOME")))
@@ -820,8 +815,7 @@ All declared checkers should be registered."
           (should-not (flycheck-locate-config-file-home "Makefile" 'emacs-lisp))
           (should (equal (flycheck-locate-config-file-home
                           "flycheck-test.el" 'emacs-lisp)
-                         (expand-file-name "flycheck-test.el"
-                                           flycheck-testsuite-dir))))
+                         (f-join flycheck-testsuite-dir "flycheck-test.el"))))
       (setenv "HOME" old-home))))
 
 
@@ -922,9 +916,8 @@ error is signaled on all subsequent checks."
 (defmacro flycheck-with-doc-buffer (doc-file &rest body)
   "Create a temp buffer from DOC-FILE and execute BODY."
   (declare (indent 1))
-  `(let* ((filename (expand-file-name (concat "../doc/" ,doc-file)
-                                      flycheck-testsuite-dir)))
-     (should (file-exists-p filename))
+  `(let* ((filename (f-join flycheck-testsuite-dir "../doc" ,doc-file)))
+     (should (f-exists? filename))
      (with-temp-buffer
        (insert-file-contents filename)
        ,@body)))
@@ -1505,7 +1498,7 @@ of the file will be interrupted because there are too many #ifdef configurations
     (should (string= (flycheck-error-list-buffer-label (current-buffer))
                      "#<buffer Foo>")))
   (with-temp-buffer
-    (set-visited-file-name (expand-file-name "foo/bar" flycheck-testsuite-dir)
+    (set-visited-file-name (f-join flycheck-testsuite-dir "foo/bar")
                            :no-query)
     (cd flycheck-testsuite-dir)
     (should (string= (flycheck-error-list-buffer-label (current-buffer))
@@ -1517,14 +1510,14 @@ of the file will be interrupted because there are too many #ifdef configurations
     (should (string= (flycheck-error-list-error-label (flycheck-error-new-at 1 1))
                      "#<buffer Foo>")))
   (with-temp-buffer
-    (set-visited-file-name (expand-file-name "foo/bar" flycheck-testsuite-dir)
+    (set-visited-file-name (f-join flycheck-testsuite-dir "foo/bar")
                            :no-query)
     (cd flycheck-testsuite-dir)
     (should (string= (flycheck-error-list-error-label (flycheck-error-new-at 1 1))
                      "foo/bar")))
   (with-temp-buffer
     (cd flycheck-testsuite-dir)
-    (let* ((filename (expand-file-name "spam/with/eggs" flycheck-testsuite-dir))
+    (let* ((filename (f-join flycheck-testsuite-dir "spam/with/eggs"))
            (err (flycheck-error-new-at 1 1 'warning "Foo" :filename filename)))
       (should (string= (flycheck-error-list-error-label err)
                        "spam/with/eggs")))))
@@ -1541,7 +1534,7 @@ of the file will be interrupted because there are too many #ifdef configurations
 "
                              (flycheck-version)))))
   (with-temp-buffer
-    (set-visited-file-name (expand-file-name "spam/with/eggs" flycheck-testsuite-dir)
+    (set-visited-file-name (f-join flycheck-testsuite-dir "spam/with/eggs")
                            :no-query)
     (cd flycheck-testsuite-dir)
     (flycheck-error-list-insert-header (current-buffer))
@@ -1557,11 +1550,11 @@ of the file will be interrupted because there are too many #ifdef configurations
   (let (buf1 buf2)
     (with-temp-buffer
       (setq buf1 (current-buffer))
-      (cd (expand-file-name ".." flycheck-testsuite-dir))
+      (cd (f-parent flycheck-testsuite-dir))
       (rename-buffer "Spam")
       (with-temp-buffer
         (setq buf2 (current-buffer))
-        (set-visited-file-name (expand-file-name "spam/with/eggs" flycheck-testsuite-dir)
+        (set-visited-file-name (f-join flycheck-testsuite-dir "spam/with/eggs")
                                :no-query)
         (cd flycheck-testsuite-dir)
         (with-temp-buffer
@@ -1571,7 +1564,7 @@ of the file will be interrupted because there are too many #ifdef configurations
                                                      :buffer buf2 :checker 'ruby)
                               (flycheck-error-new-at 15 8 'error "Error 2"
                                                      :buffer buf1 :checker 'python-flake8
-                                                     :filename (expand-file-name "foo/bar" flycheck-testsuite-dir)))))
+                                                     :filename (f-join flycheck-testsuite-dir "foo/bar")))))
             (flycheck-error-list-insert-errors errors))
           (should (string= (buffer-string) "\
 #<buffer Spam>:4:warning: Warning 1 (emacs-lisp)

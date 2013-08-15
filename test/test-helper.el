@@ -117,9 +117,13 @@
 
 ;;;; Directories
 (eval-and-compile
+  ;; We need f.el at compilation time to find some load files
+  (require 'f))
+
+(eval-and-compile
   (defconst flycheck-testsuite-dir
-    (file-name-directory (if load-in-progress load-file-name
-                           (or byte-compile-current-file (buffer-file-name))))
+    (f-parent (if load-in-progress load-file-name
+                (or byte-compile-current-file (buffer-file-name))))
     "The testsuite directory.")
 
   (defconst flycheck-testsuite-resources-dir
@@ -129,7 +133,7 @@
 
 ;;;; Requires
 
-(require 'flycheck (expand-file-name "../flycheck" flycheck-testsuite-dir))
+(require 'flycheck (f-join flycheck-testsuite-dir "../flycheck"))
 (require 'ert)
 
 
@@ -139,7 +143,7 @@
 
 Relative file names are expanded against
 `flycheck-testsuite-resource-dir'."
-  (expand-file-name resource-file flycheck-testsuite-resources-dir))
+  (f-join flycheck-testsuite-resources-dir resource-file))
 
 (defun flycheck-testsuite-locate-config-file (filename _checker)
   "Find a configuration FILENAME in the testsuite.
@@ -147,7 +151,7 @@ Relative file names are expanded against
 _CHECKER is ignored."
   (let* ((directory (flycheck-testsuite-resource-filename "checkers/config-files"))
          (filepath (expand-file-name filename directory)))
-    (when (file-exists-p filepath)
+    (when (f-exists? filepath)
       filepath)))
 
 (defmacro flycheck-testsuite-with-resource-buffer (resource-file &rest body)
@@ -157,11 +161,11 @@ The absolute file name of RESOURCE-FILE is determined with
 `flycheck-testsuite-resource-filename'."
   (declare (indent 1))
   `(let ((filename (flycheck-testsuite-resource-filename ,resource-file)))
-     (should (file-exists-p filename))
+     (should (f-exists? filename))
      (with-temp-buffer
        (insert-file-contents filename t)
-       (cd (file-name-directory filename))
-       (rename-buffer (file-name-nondirectory filename))
+       (cd (f-parent filename))
+       (rename-buffer (f-filename filename))
        ,@body)))
 
 
@@ -214,7 +218,7 @@ After evaluation of BODY, set HOOK-VAR to nil."
      (flycheck-testsuite-delete-temps
       (should (equal flycheck-temp-directories (list ,dirname)))
       ,@body)
-     (should-not (file-exists-p dirname))))
+     (should-not (f-exists? dirname))))
 
 (defmacro flycheck-testsuite-trap-temp-file (filename &rest body)
   "Trap a temporary FILENAME inside BODY."
@@ -223,7 +227,7 @@ After evaluation of BODY, set HOOK-VAR to nil."
      (flycheck-testsuite-delete-temps
        (should (equal flycheck-temp-files (list ,filename)))
        ,@body)
-     (should-not (file-exists-p filename))))
+     (should-not (f-exists? filename))))
 
 (defmacro flycheck-testsuite-with-help-buffer (&rest body)
   "Execute BODY and kill the help buffer afterwards."

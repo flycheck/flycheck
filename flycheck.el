@@ -6,7 +6,7 @@
 ;; URL: https://github.com/lunaryorn/flycheck
 ;; Keywords: convenience languages tools
 ;; Version: 0.14-cvs
-;; Package-Requires: ((s "1.6.0") (dash "1.6.0") (f "0.5.0") (cl-lib "0.1") (emacs "24.1"))
+;; Package-Requires: ((s "1.6.0") (dash "1.6.0") (cl-lib "0.1") (emacs "24.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -919,8 +919,7 @@ Return the path of the file."
         tempfile)
     (if filename
         (let ((directory (flycheck-temp-dir-system prefix)))
-          (setq tempfile (expand-file-name (file-name-nondirectory filename)
-                                           directory)))
+          (setq tempfile (f-join directory (f-filename filename))))
       (setq tempfile (make-temp-file prefix)))
     (add-to-list 'flycheck-temp-files tempfile)
     tempfile))
@@ -934,30 +933,15 @@ If FILENAME is nil, fall back to `flycheck-temp-file-system'.
 
 Return the path of the file."
   (if filename
-      (let* ((directory (file-name-directory filename))
-             (name (file-name-nondirectory filename))
-             (tempname (format "%s-%s" prefix name))
-             (tempfile (expand-file-name tempname directory)))
+      (let* ((tempname (format "%s-%s" prefix (f-filename filename)))
+             (tempfile (f-expand (f-join (f-dirname filename) tempname))))
         (add-to-list 'flycheck-temp-files tempfile)
         tempfile)
     (flycheck-temp-file-system filename prefix)))
 
-(defun flycheck-canonical-file-name (filename)
-  "Turn FILENAME into canonical form.
-
-Return FILENAME expanded and fully resolved, in a canonical form
-without double slashes and without trailing slash, i.e. in a form
-suitable for comparison of file names."
-  (directory-file-name (file-truename filename)))
-
-(defun flycheck-same-files-p (file1 file2)
-  "Determine whether two files FILE1 and FILE2 are the same."
-  (string= (flycheck-canonical-file-name file1)
-           (flycheck-canonical-file-name file2)))
-
 (defun flycheck-save-buffer-to-file (file-name)
   "Save the contents of the current buffer to FILE-NAME."
-  (make-directory (file-name-directory file-name) t)
+  (make-directory (f-dirname file-name) t)
   (write-region nil nil file-name nil 0))
 
 (defun flycheck-save-buffer-to-temp (temp-file-fn prefix)
@@ -1012,11 +996,11 @@ buffers."
 
 (defun flycheck-safe-delete-files (files)
   "Safely delete FILES."
-  (--each files (ignore-errors (delete-file it))))
+  (--each files (ignore-errors (f-delete it))))
 
 (defun flycheck-safe-delete-directories (directories)
   "Safely delete DIRECTORIES."
-  (--each directories (ignore-errors (delete-directory it :recursive))))
+  (--each directories (ignore-errors (f-delete it :force))))
 
 (defun flycheck-safe-delete-temporaries ()
   "Safely delete all temp files and directories of Flycheck.
@@ -1819,8 +1803,9 @@ If FILEPATH is a contains a path separator, expand it against the
 default directory and return it.  Otherwise return nil.
 
 _CHECKER is ignored."
-  (when (file-name-directory filepath)
-    (expand-file-name filepath)))
+  ;; If the path is just a plain file name, skip it.
+  (unless (string= (f-filename filepath) filepath)
+    (f-expand filepath)))
 
 (defun flycheck-locate-config-file-projectile (filename _checker)
   "Locate a configuration FILENAME in a projectile project.
@@ -1836,9 +1821,8 @@ Otherwise return nil.
 _CHECKER is ignored."
   (when (fboundp 'projectile-project-root)
     (condition-case nil
-        (let* ((root-directory (projectile-project-root))
-               (filepath (expand-file-name filename root-directory)))
-          (when (file-exists-p filepath)
+        (let ((filepath (f-join (projectile-project-root) filename)))
+          (when (f-exists? filepath)
             filepath))
       (error nil))))
 
@@ -1853,15 +1837,15 @@ absolute path.  Otherwise return nil.
 _CHECKER is ignored."
   (-when-let* ((basefile (buffer-file-name))
                (directory (locate-dominating-file basefile filename)))
-    (expand-file-name filename directory)))
+    (f-join directory filename)))
 
 (defun flycheck-locate-config-file-home (filename _checker)
   "Locate a configuration FILENAME in the home directory.
 
 Return the absolute path, if FILENAME exists in the user's home
 directory, or nil otherwise."
-  (let ((path (expand-file-name filename "~")))
-    (when (file-exists-p path)
+  (let ((path (f-join (f-expand "~") filename)))
+    (when (f-exists? path)
       path)))
 
 (--each '(flycheck-locate-config-file-absolute-path
@@ -2271,7 +2255,7 @@ If the file name of ERR is in BUFFER-FILES, replace it with the
 return value of the function `buffer-file-name'."
   (flycheck-error-with-buffer err
     (-when-let (filename (flycheck-error-filename err))
-      (when (--any? (flycheck-same-files-p filename it) buffer-files)
+      (when (--any? (f-same? filename it) buffer-files)
         (setf (flycheck-error-filename err) (buffer-file-name)))))
   err)
 
@@ -2292,7 +2276,7 @@ error message."
       (when message
         (setf (flycheck-error-message err) (s-trim message)))
       (when filename
-        (setf (flycheck-error-filename err) (expand-file-name filename)))))
+        (setf (flycheck-error-filename err) (f-expand filename)))))
   err)
 
 
@@ -2521,7 +2505,7 @@ otherwise."
   (flycheck-error-with-buffer err
     (let ((file-name (flycheck-error-filename err)))
       (and
-       (or (not file-name) (flycheck-same-files-p file-name (buffer-file-name)))
+       (or (not file-name) (f-same? file-name (buffer-file-name)))
        (not (s-blank? (flycheck-error-message err)))
        (flycheck-error-line err)))))
 
@@ -3465,8 +3449,9 @@ For any other non-nil value, always initialize packages."
 (defun flycheck-option-emacs-lisp-package-initialize (value)
   "Option filter for `flycheck-emacs-lisp-initialize-packages'."
   (when (eq value 'auto)
-    (let ((user-dir (expand-file-name user-emacs-directory)))
-      (setq value (s-starts-with? user-dir (buffer-file-name)))))
+    (let ((user-dir (f-expand user-emacs-directory)))
+      (setq value (s-starts-with? (file-name-as-directory user-dir)
+                                  (buffer-file-name)))))
   ;; Return the function name, if packages shall be initialized, otherwise
   ;; return nil to have Flycheck drop the whole option
   (when value "package-initialize"))
@@ -3498,7 +3483,7 @@ This variable has no effect, if
             (option-list "--directory" flycheck-emacs-lisp-load-path nil
                          ;; Expand relative paths against the directory of the
                          ;; buffer to check
-                         expand-file-name)
+                         f-expand)
             (option "--eval" flycheck-emacs-lisp-package-user-dir
                     flycheck-option-emacs-lisp-package-user-dir)
             (option "--funcall" flycheck-emacs-lisp-initialize-packages
@@ -3569,7 +3554,7 @@ The checker runs `checkdoc-current-buffer'."
          ;; Do not check Cask/Carton files.  These really don't need to follow
          ;; Checkdoc conventions
          (not (and (buffer-file-name)
-                   (member (file-name-nondirectory (buffer-file-name))
+                   (member (f-filename (buffer-file-name))
                            '("Cask" "Carton")))))))
 
 (flycheck-define-checker erlang
