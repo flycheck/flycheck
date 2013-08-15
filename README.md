@@ -193,6 +193,8 @@ The following people contributed to flycheck:
 - [Sylvain Rousseau](https://github.com/thisirs) added a syntax checker for
   POSIX shell script using `bash`, and improved error parsing in the Bash script
   syntax checker.
+- [tom tan](https://github.com/tom-tan) added a syntax checker for the D
+  programming language using `dmd`.
 - [Yannick Roehlly](https://github.com/yannick1974) added support for PEP8
   naming errors to the Flake8 syntax checker.
 - [Victor Deryagin](https://github.com/vderyagin) added the Rust syntax checker.
