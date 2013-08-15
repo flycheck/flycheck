@@ -9,6 +9,7 @@ order of their appearance in the default value of
 @iflyc coffee
 @iflyc coffee-coffeelint
 @iflyc css-csslint
+@iflyc d
 @iflyc elixir
 @iflyc emacs-lisp
 @iflyc emacs-lisp-checkdoc
