@@ -6,7 +6,7 @@
 ;; URL: https://github.com/lunaryorn/flycheck
 ;; Keywords: convenience languages tools
 ;; Version: 0.15-cvs
-;; Package-Requires: ((s "1.6.0") (dash "1.6.0") (cl-lib "0.3") (emacs "24.1"))
+;; Package-Requires: ((s "1.6.0") (dash "1.6.0") (f "0.5.0") (cl-lib "0.3") (emacs "24.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -44,6 +44,7 @@
 
 (require 's)
 (require 'dash)
+(require 'f)
 (require 'rx)             ; For Regexp fanciness in `flycheck-define-checker'
 (require 'cl-lib)         ; For `cl-defstruct'
 (require 'help-mode)      ; For `define-button-type'
