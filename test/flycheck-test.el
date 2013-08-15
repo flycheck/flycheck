@@ -1921,6 +1921,27 @@ many-errors-for-error-list.el:7:1:warning: `message' called with 0
    '(4 20 "Unexpected token ';' at line 4, col 20." error)
    '(5 1 "Unexpected token '}' at line 5, col 1." error)))
 
+(ert-deftest flycheck-d-module-name ()
+  (with-temp-buffer
+    (insert "Hello world")
+    (should-not (flycheck-d-module-name)))
+  (with-temp-buffer
+    (insert "module spam.with.eggs;")
+    (should (string= (flycheck-d-module-name) "spam.with.eggs"))))
+
+(ert-deftest flycheck-d-base-directory ()
+  (flycheck-testsuite-with-resource-buffer "checkers/d-dmd-warning.d"
+    (should (f-same? (flycheck-d-base-directory)
+                     (f-join flycheck-testsuite-resources-dir "checkers"))))
+  (flycheck-testsuite-with-resource-buffer "checkers/d-dmd-warning.d"
+    (goto-char (point-min))
+    (insert "module checkers.d_dmd_warning;")
+    (should (f-same? (flycheck-d-base-directory)
+                     flycheck-testsuite-resources-dir)))
+  (flycheck-testsuite-with-resource-buffer "checkers/package.d"
+    (should (f-same? (flycheck-d-base-directory)
+                     flycheck-testsuite-resources-dir))))
+
 (ert-deftest checker-d-dmd-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'd-dmd)
   (flycheck-testsuite-should-syntax-check

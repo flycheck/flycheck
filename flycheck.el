@@ -6,7 +6,7 @@
 ;; URL: https://github.com/lunaryorn/flycheck
 ;; Keywords: convenience languages tools
 ;; Version: 0.14-cvs
-;; Package-Requires: ((s "1.6.0") (dash "1.6.0") (cl-lib "0.1") (emacs "24.1"))
+;; Package-Requires: ((s "1.6.0") (dash "1.6.0") (f "0.5.0") (cl-lib "0.1") (emacs "24.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -3329,17 +3329,37 @@ See URL `https://github.com/stubbornella/csslint'."
             column ", Warning - " (message) line-end))
   :modes css-mode)
 
-(defun flycheck-d-base-dir ()
-  (let ((nest (save-excursion
-                (goto-char (point-min))
-                (if (re-search-forward "module\s+\\([^\s]+\\);" nil t)
-                    (->> (match-string-no-properties 1)
-                      string-to-vector
-                      (cl-count ?.))
-                    0))))
-    (when (equal (file-name-nondirectory (buffer-file-name)) "package.d")
-      (cl-incf nest))
-    (concat "-I./" (s-repeat nest "../"))))
+(defconst flycheck-d-module-re (rx "module" (one-or-more (syntax whitespace))
+                                   (group (one-or-more (not (syntax whitespace))))
+                                   ";")
+  "Regular expression to match a D module declaration.")
+
+(defun flycheck-d-module-name ()
+  "Determine the D module name of the current buffer.
+
+Return the name as string, or nil if there is no module
+declaration in the current buffer."
+  (save-restriction
+    (widen)
+    (save-excursion
+      (goto-char (point-min))
+      (save-match-data
+        (when (re-search-forward flycheck-d-module-re nil :no-error)
+          (match-string-no-properties 1))))))
+
+(defun flycheck-d-base-directory ()
+  "Get the relative base directory path for this module."
+  (let* ((name (flycheck-d-module-name))
+         (nesting (if name (cl-count ?. name) 0))
+         (basedir (f-dirname (buffer-file-name))))
+    (when (equal (f-filename (buffer-file-name)) "package.d")
+      ;; a/b/package.d corresponds to module a.b, hence increment the nesting
+      ;; level to account for the file name, too.
+      (cl-incf nesting))
+    (while (> nesting 0)
+      (setq basedir (f-parent basedir))
+      (cl-decf nesting))
+    basedir))
 
 (flycheck-define-checker d-dmd
   "A D syntax checker using the DMD compiler.
@@ -3347,7 +3367,8 @@ See URL `https://github.com/stubbornella/csslint'."
 See URL `http://dlang.org/'."
   :command ("dmd" "-debug" "-o-" "-property"
                   "-wi" ; Compilation will continue even if there are warnings
-                  (eval (flycheck-d-base-dir)) source)
+                  (eval (s-concat "-I" (flycheck-d-base-directory)))
+                  source)
   :error-patterns
   ((error line-start (file-name) "(" line "): Error: " (message) line-end)
    (warning line-start (file-name) "(" line "): " (or "Warning" "Deprecation") ": " (message) line-end))
