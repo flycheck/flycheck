@@ -44,6 +44,7 @@
           c++-mode
           coffee-mode
           css-mode
+          d-mode
           elixir-mode
           erlang
           elixir-mode
@@ -1919,6 +1920,51 @@ many-errors-for-error-list.el:7:1:warning: `message' called with 0
    '(4 16 "Unexpected token '100%' at line 4, col 16." error)
    '(4 20 "Unexpected token ';' at line 4, col 20." error)
    '(5 1 "Unexpected token '}' at line 5, col 1." error)))
+
+(ert-deftest flycheck-d-module-name ()
+  (with-temp-buffer
+    (insert "Hello world")
+    (should-not (flycheck-d-module-name)))
+  (with-temp-buffer
+    (insert "module spam.with.eggs;")
+    (should (string= (flycheck-d-module-name) "spam.with.eggs"))))
+
+(ert-deftest flycheck-d-base-directory ()
+  (flycheck-testsuite-with-resource-buffer "checkers/d-dmd-warning.d"
+    (should (f-same? (flycheck-d-base-directory)
+                     (f-join flycheck-testsuite-resources-dir "checkers"))))
+  (flycheck-testsuite-with-resource-buffer "checkers/d-dmd-warning.d"
+    (goto-char (point-min))
+    (insert "module checkers.d_dmd_warning;")
+    (should (f-same? (flycheck-d-base-directory)
+                     flycheck-testsuite-resources-dir)))
+  (flycheck-testsuite-with-resource-buffer "checkers/package.d"
+    (should (f-same? (flycheck-d-base-directory)
+                     flycheck-testsuite-resources-dir))))
+
+(ert-deftest checker-d-dmd-syntax-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'd-dmd)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/d-dmd-syntax-error.d" 'd-mode nil
+   '(2 nil "module studio is in file 'std/studio.d' which cannot be read" error)))
+
+(ert-deftest checker-d-dmd-syntax-error-without-module ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'd-dmd)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/d_dmd_syntax_error_without_module.d" 'd-mode nil
+   '(5 nil "undefined identifier writel, did you mean template write(T...)(T args) if (!is(T[0] : File))?" error)))
+
+(ert-deftest checker-d-dmd-warning ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'd-dmd)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/d-dmd-warning.d" 'd-mode nil
+   '(6 nil "statement is not reachable" warning)))
+
+(ert-deftest checker-d-dmd-deprecated ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'd-dmd)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/d-dmd-deprecated.d" 'd-mode nil
+   '(11 nil "function d_dmd_deprecated.foo is deprecated" warning)))
 
 (ert-deftest checker-elixir-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'elixir)

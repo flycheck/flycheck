@@ -58,6 +58,8 @@ CoffeeScript (using @command{coffee} and @command{coffeelint})
 @item
 CSS (using @command{csslint}))
 @item
+D (using @command{dmd})
+@item
 Elixir (using @command{elixirc})
 @item
 Emacs Lisp (using the byte compiler and CheckDoc)

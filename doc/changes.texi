@@ -790,6 +790,8 @@ and @command{hlint}}
 CoffeeScript with @command{coffee}
 @item
 @ghissue{180, XML with @command{xmllint}}
+@item
+@ghissue{166, D with @command{dmd}}
 @end itemize
 
 @item

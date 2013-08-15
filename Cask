@@ -31,4 +31,5 @@
  (depends-on "go-mode")
  (depends-on "rust-mode")
  (depends-on "elixir-mode")
- (depends-on "erlang"))
+ (depends-on "erlang")
+ (depends-on "d-mode"))

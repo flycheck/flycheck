@@ -77,6 +77,10 @@ script using @command{bash}, and improved error parsing in the Bash
 script syntax checker.
 
 @item
+@gh{tom-tan, tom tan} added a syntax checker for the D programming
+language using @command{dmd}.
+
+@item
 @gh{yannick1974, Yannick Roehlly} added support for PEP8 naming errors
 to the Flake8 syntax checker.
 
