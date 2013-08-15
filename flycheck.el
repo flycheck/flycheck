@@ -117,7 +117,7 @@ buffer-local wherever it is set."
     coffee
     coffee-coffeelint
     css-csslint
-    d
+    d-dmd
     elixir
     emacs-lisp
     emacs-lisp-checkdoc
@@ -3341,8 +3341,10 @@ See URL `https://github.com/stubbornella/csslint'."
       (cl-incf nest))
     (concat "-I./" (s-repeat nest "../"))))
 
-(flycheck-define-checker d
-  "A D syntax checker using D compiler."
+(flycheck-define-checker d-dmd
+  "A D syntax checker using the DMD compiler.
+
+See URL `http://dlang.org/'."
   :command ("dmd" "-debug" "-o-" "-property"
                   "-wi" ; Compilation will continue even if there are warnings
                   (eval (flycheck-d-base-dir)) source)

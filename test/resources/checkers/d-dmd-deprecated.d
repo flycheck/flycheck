@@ -1,4 +1,4 @@
-module d_deprecated;
+module d_dmd_deprecated;
 
 deprecated
 auto foo(int a)

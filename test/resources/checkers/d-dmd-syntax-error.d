@@ -1,4 +1,4 @@
-module d_syntax_error;
+module d_dmd_syntax_error;
 import std.studio;
 
 void main()
