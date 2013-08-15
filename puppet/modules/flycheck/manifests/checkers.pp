@@ -35,4 +35,26 @@ class flycheck::checkers {
                 'zsh',             # zsh
                 ]
   package { $packages: ensure => latest }
+
+  $dmd_version = '2.063.2'
+  $dmd_deb     = "dmd_${dmd_version}-0_amd64.deb"
+
+  archive::download { $dmd_deb:
+    url           => "http://downloads.dlang.org/releases/2013/${dmd_deb}",
+    digest_string => 'fa2c04994df432156903fc66a4c73727',
+  }
+
+  # DMD dependencies need to be installed explicitly, as DPKG does not resolve
+  # them
+  package { ['gcc-multilib', 'xdg-utils']:
+    ensure => latest,
+  }
+
+  package { 'dmd':
+    ensure   => present,
+    provider => dpkg,
+    source   => "/usr/src/${dmd_deb}",
+    require  => [ Archive::Download[$dmd_deb],
+                  Package['gcc-multilib'], Package['xdg-utils'] ]
+  }
 }
