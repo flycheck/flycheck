@@ -6,7 +6,7 @@
 ;; URL: https://github.com/lunaryorn/flycheck
 ;; Keywords: convenience languages tools
 ;; Version: 0.15-cvs
-;; Package-Requires: ((s "1.6.0") (dash "1.6.0") (cl-lib "0.1") (emacs "24.1"))
+;; Package-Requires: ((s "1.6.0") (dash "1.6.0") (cl-lib "0.3") (emacs "24.1"))
 
 ;; This file is not part of GNU Emacs.
 
