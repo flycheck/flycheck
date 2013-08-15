@@ -716,7 +716,7 @@ Fix version information on Emacs trunk builds
 @end itemize
 
 @end itemize
-@node 0.14, , 0.13, Changes
+@node 0.14, master, 0.13, Changes
 @comment  node-name,  next,  previous,  up
 @unnumberedsec 0.14 (Aug 15, 2013)
 
