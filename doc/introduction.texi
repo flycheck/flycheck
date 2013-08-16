@@ -42,6 +42,7 @@ And this is how it looks in action, using the awesome
 @section Features
 
 @itemize @bullet
+@item
 Automatic on-the-fly syntax checking while editing
 @item
 Fully automatic selection of the syntax checker
