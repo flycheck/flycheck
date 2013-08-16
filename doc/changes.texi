@@ -2,6 +2,7 @@ This appendix provides a comprehensive changelog of all releases:
 
 @menu
 * master        :: unreleased
+* 0.14.1        :: Aug 15, 2013
 * 0.14          :: Aug 15, 2013
 * 0.13          :: Jun 28, 2013
 * 0.12          :: May 18, 2013
@@ -716,7 +717,7 @@ Fix version information on Emacs trunk builds
 @end itemize
 
 @end itemize
-@node 0.14, master, 0.13, Changes
+@node 0.14, 0.14.1, 0.13, Changes
 @comment  node-name,  next,  previous,  up
 @unnumberedsec 0.14 (Aug 15, 2013)
 
@@ -831,7 +832,22 @@ Fix universal prefix argument for @code{flycheck-next-error} at
 
 @end itemize
 
-@node master, , 0.14, Changes
+@node 0.14.1, master, 0.14, Changes
+@comment  node-name,  next,  previous,  up
+@unnumberedsec 0.14.1 (Aug 16, 2013)
+
+@itemize
+@item
+Bug fixes:
+
+@itemize
+@item
+@ghissue{194, Add a missing dependency}
+@end itemize
+
+@end itemize
+
+@node master, , 0.14.1, Changes
 @comment  node-name,  next,  previous,  up
 @unnumberedsec master (unreleased)
 
