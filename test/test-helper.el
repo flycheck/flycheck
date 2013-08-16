@@ -116,18 +116,14 @@
 
 
 ;;;; Directories
-(eval-and-compile
-  ;; We need f.el at compilation time to find some load files
-  (require 'f))
+(require 'f)
 
 (eval-and-compile
-  (defconst flycheck-testsuite-dir
-    (f-parent (if load-in-progress load-file-name
-                (or byte-compile-current-file (buffer-file-name))))
+  (defconst flycheck-testsuite-dir (f-parent (f-this-file))
     "The testsuite directory.")
 
   (defconst flycheck-testsuite-resources-dir
-    (expand-file-name "resources" flycheck-testsuite-dir)
+    (f-join flycheck-testsuite-dir "resources")
     "Directory of test resources."))
 
 
