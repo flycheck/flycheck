@@ -11,18 +11,11 @@ class flycheck::checkers::php {
   package { 'php-pear':
     ensure  => latest,
     require => Package['php5-cli'],
-    notify  => Exec['pear update']
-  }
-
-  exec { 'pear update':
-    command     => '/usr/bin/pear update-channels',
-    refreshonly => true,
-    require     => Package['php-pear'],
   }
 
   package { 'PHP_CodeSniffer': # php-phpcs
     ensure   => latest,
     provider => pear,
-    require  => Exec['pear update'],
+    require  => Package['php-pear'],
   }
 }
