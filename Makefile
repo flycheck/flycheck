@@ -54,7 +54,7 @@ clean-all : clean clean-pkgdir clean-doc
 .PHONY: clean
 clean :
 	rm -f $(OBJECTS)
-	rm -rf $(PACKAGE) flycheck-pkg.el
+	rm -rf flycheck-*.tar flycheck-pkg.el
 
 .PHONY: packages
 packages : $(PKGDIR)
