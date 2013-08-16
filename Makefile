@@ -65,7 +65,7 @@ clean-pkgdir :
 
 .PHONY: test
 test : compile
-	$(CASK) exec ert-runner run
+	$(CASK) exec ert-runner
 
 .PHONY: vagrant-test
 vagrant-test :
