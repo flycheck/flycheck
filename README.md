@@ -73,7 +73,7 @@ The following extensions provide additional cool features for Flycheck:
 
 - [flycheck-color-mode-line.el][color-mode-line] colors the mode line according
   to the Flycheck status.
-- [flycheck-d-unittest][https://github.com/tom-tan/flycheck-d-unittest] adds a
+- [flycheck-d-unittest](https://github.com/tom-tan/flycheck-d-unittest) adds a
   Flycheck checker to run unit tests for D programs on the fly.
 
 
