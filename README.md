@@ -1,4 +1,4 @@
-Flycheck [![Build Status](https://travis-ci.org/lunaryorn/flycheck.png?branch=master)](https://travis-ci.org/lunaryorn/flycheck)
+Flycheck [![Build Status](https://travis-ci.org/flycheck/flycheck.png?branch=master)](https://travis-ci.org/lunaryorn/flycheck)
 ========
 
 Flycheck (aka “Flymake done right”) is a modern on-the-fly syntax checking
