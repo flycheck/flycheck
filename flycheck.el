@@ -6,7 +6,7 @@
 ;; URL: https://github.com/flycheck/flycheck
 ;; Keywords: convenience languages tools
 ;; Version: 0.15-cvs
-;; Package-Requires: ((s "1.6.0") (dash "2.0.0") (f "0.6.0") (cl-lib "0.3") (emacs "24.1"))
+;; Package-Requires: ((s "1.6.0") (dash "2.0.0") (f "0.6.0") (cl-lib "0.3") (emacs "24.1") (pkg-info "0.1))
 
 ;; This file is not part of GNU Emacs.
 
@@ -587,27 +587,15 @@ buffer manually.
 ;;; Version information
 (defun flycheck-library-version ()
   "Get the version in the Flycheck library header."
-  (-when-let* ((definition (symbol-function 'flycheck-mode))
-               (source-file (find-lisp-object-file-name 'flycheck-mode
-                                                        definition)))
-    (with-temp-buffer
-      (insert-file-contents source-file)
-      (let ((info (package-buffer-info)))
-        (package-version-join
-         (if (fboundp 'package-desc-version)
-             (package-desc-version info)
-           (version-to-list (aref (package-buffer-info) 3))))))))
+  (-when-let (version (pkg-info-defining-library-version 'flycheck-mode))
+    (pkg-info-format-version version)))
 
 (defun flycheck-package-version ()
   "Get the package version of Flycheck.
 
 This is the version number of the installed Flycheck package."
-  (when (boundp 'package-alist)
-    (-when-let (info (assq 'flycheck package-alist))
-      (package-version-join
-       (if (fboundp 'package-desc-version)
-           (package-desc-version (cadr info))
-         (aref (cdr info) 0))))))
+  (-when-let (version (pkg-info-package-version 'flycheck))
+    (pkg-info-format-version version)))
 
 (defun flycheck-version (&optional show-version)
   "Get the Flycheck version as string.
