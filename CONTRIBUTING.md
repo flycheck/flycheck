@@ -32,7 +32,7 @@ Pull requests
   and description in grammatically correct, complete sentences.
 
 
-[1]: https://github.com/lunaryorn/flycheck/issues
+[1]: https://github.com/flycheck/flycheck/issues
 [2]: http://gun.io/blog/how-to-github-fork-branch-and-pull-request
 [3]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
 [4]: https://help.github.com/articles/using-pull-requests

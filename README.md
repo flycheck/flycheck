@@ -15,7 +15,7 @@ extension for GNU Emacs 24 with:
 - and a clean, concise and understandable implementation with decent test
   coverage.
 
-![Screenshot of Flycheck in action](https://github.com/lunaryorn/flycheck/raw/master/doc/screenshot.png)
+![Screenshot of Flycheck in action](https://github.com/flycheck/flycheck/raw/master/doc/screenshot.png)
 
 The screenshot was taken on Emacs 24.3 using the awesome
 [solarized-light][solarized] color theme and the great
@@ -217,7 +217,7 @@ PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see http://www.gnu.org/licenses/.
 
-See [COPYING](https://github.com/lunaryorn/flycheck/blob/master/COPYING) for
+See [COPYING](https://github.com/flycheck/flycheck/blob/master/COPYING) for
 details.
 
 [solarized]: https://github.com/bbatsov/solarized-emacs

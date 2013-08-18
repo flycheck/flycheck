@@ -3,7 +3,7 @@
 ;; Copyright (C) 2013  Sebastian Wiesner
 
 ;; Author: Sebastian Wiesner <lunaryorn@gmail.com>
-;; URL: https://github.com/lunaryorn/flycheck
+;; URL: https://github.com/flycheck/flycheck
 
 ;; This file is not part of GNU Emacs.
 

@@ -3,7 +3,7 @@
 ;; Copyright (c) 2012, 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
 ;; Author: Sebastian Wiesner <lunaryorn@gmail.com>
-;; URL: https://github.com/lunaryorn/flycheck
+;; URL: https://github.com/flycheck/flycheck
 ;; Keywords: convenience languages tools
 ;; Version: 0.15-cvs
 ;; Package-Requires: ((s "1.6.0") (dash "2.0.0") (f "0.6.0") (cl-lib "0.3") (emacs "24.1"))
@@ -89,7 +89,7 @@ buffer-local wherever it is set."
   :prefix "flycheck-"
   :group 'tools
   :link '(url-link :tag "Online manual" "http://flycheck.lunaryorn.com")
-  :link '(url-link :tag "Github" "https://github.com/lunaryorn/flycheck")
+  :link '(url-link :tag "Github" "https://github.com/flycheck/flycheck")
   :link '(custom-manual "(flycheck)Top")
   :link '(info-link "(flycheck)Usage"))
 
@@ -2564,7 +2564,7 @@ If LEVEL is omitted if the current buffer has any errors at all."
 ;;;; Error overlay management
 (when (fboundp 'define-fringe-bitmap)
   ;; define-fringe-bitmap is not available if Emacs is built without GUI
-  ;; support, see https://github.com/lunaryorn/flycheck/issues/57
+  ;; support, see https://github.com/flycheck/flycheck/issues/57
   (define-fringe-bitmap 'flycheck-fringe-exclamation-mark
     [24 60 60 24 24 0 0 24 24] nil nil 'center))
 
@@ -3517,7 +3517,7 @@ This variable has no effect, if
          (not (and (boundp 'no-byte-compile) no-byte-compile))
          ;; Checking temporary buffers from `byte-compile-file' or autoload
          ;; buffers interferes with package installation. See
-         ;; https://github.com/lunaryorn/flycheck/issues/45 and
+         ;; https://github.com/flycheck/flycheck/issues/45 and
          ;; https://github.com/bbatsov/prelude/issues/248
          (not (flycheck-temp-compilation-buffer-p))))
   :next-checkers (emacs-lisp-checkdoc))
@@ -3812,8 +3812,8 @@ See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
   ;; Though phpcs supports Checkstyle output which we could feed to
   ;; `flycheck-parse-checkstyle', we are still using error patterns here,
   ;; because PHP has notoriously unstable output habits.  See URL
-  ;; `https://github.com/lunaryorn/flycheck/issues/78' and URL
-  ;; `https://github.com/lunaryorn/flycheck/issues/118'
+  ;; `https://github.com/flycheck/flycheck/issues/78' and URL
+  ;; `https://github.com/flycheck/flycheck/issues/118'
   :error-patterns
   ((error line-start
           (file-name) ":" line ":" column ": error - " (message)

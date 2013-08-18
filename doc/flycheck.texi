@@ -1729,7 +1729,7 @@ contribution.
 @section Reporting issues
 
 Please report any issues to the
-@uref{https://github.com/lunaryorn/flycheck/issues,Flycheck issue
+@uref{https://github.com/flycheck/flycheck/issues,Flycheck issue
 tracker}.
 
 When doing so, please respect the following guidelines:
@@ -1889,7 +1889,7 @@ This appendix provides a comprehensive changelog of all releases:
 @end menu
 
 @macro ghissue{number, text}
-@gh{lunaryorn/flycheck/issues/\number\, \text\}
+@gh{flycheck/flycheck/issues/\number\, \text\}
 @end macro
 
 @node 0.1, 0.2, , Changes
@@ -2717,6 +2717,11 @@ Bug fixes:
 @node master, , 0.14.1, Changes
 @comment  node-name,  next,  previous,  up
 @unnumberedsec master (unreleased)
+
+@itemize
+@item
+Flycheck has a new home at https://github.com/flycheck/flycheck
+@end itemize
 
 @node Credits, GNU Free Documentation License, Changes, Top
 @comment  node-name,  next,  previous,  up

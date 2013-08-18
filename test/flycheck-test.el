@@ -3,7 +3,7 @@
 ;; Copyright (c) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
 ;; Author: Sebastian Wiesner <lunaryorn@gmail.com>
-;; URL: https://github.com/lunaryorn/flycheck
+;; URL: https://github.com/flycheck/flycheck
 
 ;; This file is not part of GNU Emacs.
 
@@ -1992,7 +1992,7 @@ many-errors-for-error-list.el:7:1:warning: `message' called with 0
 (ert-deftest checker-emacs-lisp-checkdoc-works-without-buffer-file-name ()
   "Test checkdoc checker in buffers without file names.
 
-Regression test for https://github.com/lunaryorn/flycheck/issues/73 and
+Regression test for https://github.com/flycheck/flycheck/issues/73 and
 https://github.com/bbatsov/prelude/issues/259."
   (with-temp-buffer
     (insert ";;; Hello world\n(message \"foo\")")
@@ -2118,7 +2118,7 @@ These buffers are temporary buffers generated during package
 installation, which may not be byte compiled, and hence the
 checker will refuse to check these.
 
-See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
+See URL `https://github.com/flycheck/flycheck/issues/45' and URL
 `https://github.com/bbatsov/prelude/issues/253'."
   (flycheck-testsuite-with-resource-buffer "checkers/emacs-lisp-warning.el"
     (emacs-lisp-mode)
@@ -2132,7 +2132,7 @@ See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
 These temporary buffers are created during byte compilation, and
 checking them interfers with package installation.
 
-See URL `https://github.com/lunaryorn/flycheck/issues/45' and URL
+See URL `https://github.com/flycheck/flycheck/issues/45' and URL
 `https://github.com/bbatsov/prelude/issues/253'."
 (flycheck-testsuite-with-resource-buffer "checkers/emacs-lisp-warning.el"
     (emacs-lisp-mode)

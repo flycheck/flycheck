@@ -13,7 +13,7 @@
  * @package  Flycheck
  * @author   Sebastian Wiesner <lunaryorn@gmail.com>
  * @license  http://www.gnu.org/licenses/gpl.html GPL-3
- * @link     https://github.com/lunaryorn/flycheck
+ * @link     https://github.com/flycheck/flycheck
  */
 
 $foo = FALSE;
