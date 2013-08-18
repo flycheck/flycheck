@@ -6,7 +6,7 @@
 ;; URL: https://github.com/lunaryorn/flycheck
 ;; Keywords: convenience languages tools
 ;; Version: 0.15-cvs
-;; Package-Requires: ((s "1.6.0") (dash "1.6.0") (f "0.6.0") (cl-lib "0.3") (emacs "24.1"))
+;; Package-Requires: ((s "1.6.0") (dash "2.0.0") (f "0.6.0") (cl-lib "0.3") (emacs "24.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -2685,8 +2685,8 @@ Intended for use with `next-error-function'."
          (overlays-at-point (flycheck-overlays-at point))
          (pos (or
                (if forward?
-                   (-max-by #'identity (-map #'overlay-end overlays-at-point))
-                 (-min-by #'identity (-map #'overlay-start overlays-at-point)))
+                   (-max (-map #'overlay-end overlays-at-point))
+                 (-min (-map #'overlay-start overlays-at-point)))
                point))
          (min (if forward? pos (point-min)))
          (max (if forward? (point-max) pos))
