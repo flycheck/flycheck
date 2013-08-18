@@ -71,6 +71,8 @@ Features
 
 The following extensions provide additional cool features for Flycheck:
 
+- [flycheck-cask](https://github.com/flycheck/flycheck-cask) makes Flycheck use
+  Cask packages in Cask projects.
 - [flycheck-color-mode-line.el][color-mode-line] colors the mode line according
   to the Flycheck status.
 - [flycheck-d-unittest](https://github.com/tom-tan/flycheck-d-unittest) adds a
