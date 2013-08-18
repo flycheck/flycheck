@@ -11,25 +11,11 @@ export EMACS
 
 SRCS = flycheck.el
 OBJECTS = $(SRCS:.el=.elc)
-
-DOC_SRCS = doc/api.texi \
-	doc/changes.texi \
-	doc/checkers.texi \
-	doc/contribution.texi \
-	doc/credits.texi \
-	doc/extending.texi \
-	doc/fdl-1.3.texi \
-	doc/flycheck.texi \
-	doc/github-ribbon.texi \
-	doc/html-frontmatter.texi \
-	doc/introduction.texi \
-	doc/usage.texi
+DOC_SRCS = doc/flycheck.texi
 HTML_SRCS = $(DOC_SRCS) doc/htmlxref.cnf
 HTML_TARGETS = doc/html/index.html \
 	doc/html/screenshot.png \
 	doc/html/flycheck.css
-
-
 PACKAGE_SRCS = $(SRCS) \
 	flycheck-pkg.el \
 	doc/flycheck.info doc/dir
