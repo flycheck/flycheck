@@ -222,4 +222,3 @@ details.
 
 [solarized]: https://github.com/bbatsov/solarized-emacs
 [color-mode-line]: https://github.com/syl20bnr/flycheck-color-mode-line
-[dholm]: https://github.com/dholm
