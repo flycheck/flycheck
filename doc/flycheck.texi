@@ -261,6 +261,16 @@ MELPA repository, add the following code to @file{init.el}:
 (package-initialize)
 @end lisp
 
+If you use @uref{https://github.com/rejeep/cask.el, Cask}, add the
+following to your @file{Cask} file:
+
+@lisp
+(source gnu)
+(source melpa)
+
+(depends-on "flycheck")
+@end lisp
+
 Flycheck supports GNU Emacs 24.2 and newer on Linux, OS X and any other
 decent flavor of Unix.  It should work with GNU Emacs 24.1, too, but it
 is not tested against this version of Emacs.
