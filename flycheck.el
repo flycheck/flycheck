@@ -45,6 +45,7 @@
 (require 's)
 (require 'dash)
 (require 'f)
+(require 'pkg-info)
 (require 'rx)             ; For Regexp fanciness in `flycheck-define-checker'
 (require 'cl-lib)         ; For `cl-defstruct'
 (require 'help-mode)      ; For `define-button-type'
