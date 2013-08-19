@@ -247,6 +247,10 @@ Use together with `:expected-result' to skip tests on travis CI."
   "Determine whether the testsuite is running on Travis CI."
   (string= (getenv "TRAVIS") "true"))
 
+(defun flycheck-testsuite-vagrant-p ()
+  "Whether the testsuite is running on our testing VM."
+  (string= (user-login-name) "vagrant"))
+
 (defun flycheck-testsuite-min-emacs-version-p (major &optional minor)
   "Determine whether Emacs has the required version.
 
@@ -264,7 +268,9 @@ Return t if Emacs is at least MAJOR.MINOR, or nil otherwise."
   "Skip the test unless all CHECKERS are present on the system.
 
 Return `:passed' if all CHECKERS are installed, or `:failed' otherwise."
-  (if (-all? 'flycheck-check-executable checkers)
+  (if (or (flycheck-testsuite-travis-ci-p)
+          (flycheck-testsuite-vagrant-p)
+          (-all? 'flycheck-check-executable checkers))
       :passed
     :failed))
 
