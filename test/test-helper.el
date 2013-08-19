@@ -209,8 +209,8 @@ After evaluation of BODY, set HOOK-VAR to nil."
   (declare (indent 1))
   `(progn
      (flycheck-testsuite-delete-temps
-      (should (equal flycheck-temp-directories (list ,dirname)))
-      ,@body)
+       (should (member ,dirname flycheck-temporaries))
+       ,@body)
      (should-not (f-exists? dirname))))
 
 (defmacro flycheck-testsuite-trap-temp-file (filename &rest body)
@@ -218,7 +218,7 @@ After evaluation of BODY, set HOOK-VAR to nil."
   (declare (indent 1))
   `(progn
      (flycheck-testsuite-delete-temps
-       (should (equal flycheck-temp-files (list ,filename)))
+       (should (member ,filename flycheck-temporaries))
        ,@body)
      (should-not (f-exists? filename))))
 

@@ -868,20 +868,17 @@ Otherwise return nil."
   "Determine if OBJ is a list of strings."
   (and (listp obj) (-all? #'stringp obj)))
 
-(defvar-local flycheck-temp-files nil
-  "A list of temporary files created by Flycheck.")
-
-(defvar-local flycheck-temp-directories nil
-  "A list of all temporary directories created by Flycheckg.")
+(defvar-local flycheck-temporaries nil
+  "Temporary files and directories created by Flycheck.")
 
 (defun flycheck-temp-dir-system (prefix)
   "Create a unique temporary directory from PREFIX.
 
-Add the directory to `flycheck-temp-directories'.
+Add the directory to `flycheck-temporaries'.
 
 Return the path of the directory"
   (let* ((tempdir (make-temp-file prefix :directory)))
-    (add-to-list 'flycheck-temp-directories tempdir)
+    (push tempdir flycheck-temporaries)
     tempdir))
 
 (defun flycheck-temp-file-system (filename prefix)
@@ -889,14 +886,12 @@ Return the path of the directory"
 
 If FILENAME is nil, this function creates a temporary file with
 PREFIX and a random suffix.  The path of the file is added to
-`flycheck-temp-files'.
+`flycheck-temporaries'.
 
 If FILENAME is non-nil, this function creates a temporary
 directory with PREFIX and a random suffix using
 `flycheck-temp-dir-system', and creates a file with the same name
-as FILENAME in this directory.  The path of the file is *not*
-added to `flycheck-temp-files', because the directory is already
-tracked as temp file.
+as FILENAME in this directory
 
 Return the path of the file."
   ;; HACK: Prevent re-compression to work around a supposed bug in Emacs.
@@ -911,13 +906,13 @@ Return the path of the file."
         (let ((directory (flycheck-temp-dir-system prefix)))
           (setq tempfile (f-join directory (f-filename filename))))
       (setq tempfile (make-temp-file prefix)))
-    (add-to-list 'flycheck-temp-files tempfile)
+    (push tempfile flycheck-temporaries)
     tempfile))
 
 (defun flycheck-temp-file-inplace (filename prefix)
   "Create an in-place copy of FILENAME with PREFIX added.
 
-Add the path of the file to `flycheck-temp-files'.
+Add the path of the file to `flycheck-temporaries'.
 
 If FILENAME is nil, fall back to `flycheck-temp-file-system'.
 
@@ -925,7 +920,7 @@ Return the path of the file."
   (if filename
       (let* ((tempname (format "%s-%s" prefix (f-filename filename)))
              (tempfile (f-expand (f-join (f-dirname filename) tempname))))
-        (add-to-list 'flycheck-temp-files tempfile)
+        (push tempfile flycheck-temporaries)
         tempfile)
     (flycheck-temp-file-system filename prefix)))
 
@@ -996,13 +991,10 @@ buffers."
 (defun flycheck-safe-delete-temporaries ()
   "Safely delete all temp files and directories of Flycheck.
 
-Safely delete all files listed in `flycheck-temp-files' and all
-directories in `flycheck-temp-directories', and set both
-variables to nil."
-  (flycheck-safe-delete flycheck-temp-directories)
-  (flycheck-safe-delete flycheck-temp-files)
-  (setq flycheck-temp-directories nil
-        flycheck-temp-files nil))
+Safely delete all files and directories listed in
+`flycheck-temporaries' and set the variable's value to nil."
+  (flycheck-safe-delete flycheck-temporaries)
+  (setq flycheck-temporaries nil))
 
 (eval-and-compile
   (defun flycheck-rx-message (form)
@@ -3043,9 +3035,7 @@ https://github.com/Bruce-Connor/emacs-google-this")))
 
 (defun flycheck-delete-process (process)
   "Delete PROCESS and clear it's resources."
-  (flycheck-safe-delete (process-get process :flycheck-temp-files))
-  (flycheck-safe-delete
-   (process-get process :flycheck-temp-directories))
+  (flycheck-safe-delete (process-get process :flycheck-temporaries))
   (delete-process process))
 
 (defun flycheck-receive-checker-output (process output)
@@ -3106,7 +3096,7 @@ output: %s\nChecker definition probably flawed."
 _EVENT is ignored."
   (when (memq (process-status process) '(signal exit))
     (let ((checker (process-get process :flycheck-checker))
-          (files (process-get process :flycheck-temp-files))
+          (files (process-get process :flycheck-temporaries))
           (exit-status (process-exit-status process))
           (output (flycheck-get-output process))
           (buffer (process-buffer process)))
@@ -3137,14 +3127,10 @@ _EVENT is ignored."
         (set-process-sentinel process 'flycheck-handle-signal)
         (set-process-query-on-exit-flag process nil)
         (flycheck-report-status "*")
-        (process-put process :flycheck-temp-files
-                     flycheck-temp-files)
-        (process-put process :flycheck-temp-directories
-                     flycheck-temp-directories)
+        (process-put process :flycheck-temporaries flycheck-temporaries)
         ;; Now that temporary files and directories are attached to the process,
         ;; we can reset the variables used to collect them
-        (setq flycheck-temp-files nil
-              flycheck-temp-directories nil)
+        (setq flycheck-temporaries nil)
         (process-put process :flycheck-checker checker))
     (error
      (flycheck-report-error)

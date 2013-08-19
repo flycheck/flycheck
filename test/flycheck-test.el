@@ -542,7 +542,7 @@ All declared checkers should be registered."
           (let ((filename (flycheck-substitute-argument 'source 'emacs-lisp)))
             (should (s-starts-with? temporary-file-directory filename))
             (should (f-exists? filename)))))
-    (flycheck-safe-delete flycheck-temp-files)))
+    (flycheck-safe-delete flycheck-temporaries)))
 
 (ert-deftest flycheck-substitute-argument-temporary-directory ()
   (with-temp-buffer
@@ -552,7 +552,7 @@ All declared checkers should be registered."
                                                        'emacs-lisp)))
             (should (f-directory? dirname))
             (should (s-starts-with? temporary-file-directory dirname))))
-      (flycheck-safe-delete flycheck-temp-directories))))
+      (flycheck-safe-delete flycheck-temporaries))))
 
 (ert-deftest flycheck-substitute-argument-config-file ()
   (let ((flycheck-test-config-var "substitute-dummy")
