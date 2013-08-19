@@ -3367,8 +3367,7 @@ See URL `http://elixir-lang.org/'."
   :modes elixir-mode)
 
 (defconst flycheck-emacs-command
-  `(,(concat invocation-directory invocation-name)
-    "--no-site-file" "--no-site-lisp" "--batch")
+  `(,(concat invocation-directory invocation-name) "-Q" "--batch")
   "A command to execute an Emacs Lisp form in a background process.")
 
 (defun flycheck-temp-compilation-buffer-p ()
