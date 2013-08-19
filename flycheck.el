@@ -984,6 +984,11 @@ Buffers whose names start with a space are considered temporary
 buffers."
   (s-starts-with? " " (buffer-name)))
 
+(defun flycheck-in-user-emacs-directory-p (filename)
+  "Whether FILENAME is in `user-emacs-directory'."
+  (s-starts-with? (file-name-as-directory (f-canonical user-emacs-directory))
+                  (f-canonical filename)))
+
 (defun flycheck-safe-delete-files (files)
   "Safely delete FILES."
   (--each files (ignore-errors (f-delete it))))
@@ -3433,9 +3438,7 @@ For any other non-nil value, always initialize packages."
 (defun flycheck-option-emacs-lisp-package-initialize (value)
   "Option filter for `flycheck-emacs-lisp-initialize-packages'."
   (when (eq value 'auto)
-    (let ((user-dir (f-expand user-emacs-directory)))
-      (setq value (s-starts-with? (file-name-as-directory user-dir)
-                                  (buffer-file-name)))))
+    (setq value (flycheck-in-user-emacs-directory-p (buffer-file-name))))
   ;; Return the function name, if packages shall be initialized, otherwise
   ;; return nil to have Flycheck drop the whole option
   (when value "package-initialize"))
