@@ -465,14 +465,14 @@ All declared checkers should be registered."
     (rename-buffer "foo")
     (should-not (flycheck-temporary-buffer-p))))
 
-(ert-deftest flycheck-safe-delete-directories-recursive ()
+(ert-deftest flycheck-safe-delete-recursive ()
   (let ((dirname (flycheck-temp-dir-system "flycheck-test")))
     (unwind-protect
         (let ((filename (f-join dirname "foo")))
           (process-lines "touch" filename)
           (should (s-starts-with? dirname filename))
           (should (f-exists? filename))
-          (flycheck-safe-delete-directories (list dirname))
+          (flycheck-safe-delete (list dirname))
           (should-not (f-exists? filename))
           (should-not (f-directory? dirname))
           (should-not (f-exists? dirname)))
@@ -542,7 +542,7 @@ All declared checkers should be registered."
           (let ((filename (flycheck-substitute-argument 'source 'emacs-lisp)))
             (should (s-starts-with? temporary-file-directory filename))
             (should (f-exists? filename)))))
-    (flycheck-safe-delete-files flycheck-temp-files)))
+    (flycheck-safe-delete flycheck-temp-files)))
 
 (ert-deftest flycheck-substitute-argument-temporary-directory ()
   (with-temp-buffer
@@ -552,7 +552,7 @@ All declared checkers should be registered."
                                                        'emacs-lisp)))
             (should (f-directory? dirname))
             (should (s-starts-with? temporary-file-directory dirname))))
-      (flycheck-safe-delete-directories flycheck-temp-directories))))
+      (flycheck-safe-delete flycheck-temp-directories))))
 
 (ert-deftest flycheck-substitute-argument-config-file ()
   (let ((flycheck-test-config-var "substitute-dummy")

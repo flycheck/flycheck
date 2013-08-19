@@ -202,10 +202,7 @@ After evaluation of BODY, set HOOK-VAR to nil."
   (declare (indent 0))
   `(unwind-protect
        (progn ,@body)
-     (flycheck-safe-delete-files flycheck-temp-files)
-     (flycheck-safe-delete-directories flycheck-temp-directories)
-     (setq flycheck-temp-files nil)
-     (setq flycheck-temp-directories nil)))
+     (flycheck-safe-delete-temporaries)))
 
 (defmacro flycheck-testsuite-trap-temp-dir (dirname &rest body)
   "Trap a temporary DIRNAME inside BODY."

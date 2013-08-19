@@ -989,13 +989,9 @@ buffers."
   (s-starts-with? (file-name-as-directory (f-canonical user-emacs-directory))
                   (f-canonical filename)))
 
-(defun flycheck-safe-delete-files (files)
-  "Safely delete FILES."
-  (--each files (ignore-errors (f-delete it))))
-
-(defun flycheck-safe-delete-directories (directories)
-  "Safely delete DIRECTORIES."
-  (--each directories (ignore-errors (f-delete it :force))))
+(defun flycheck-safe-delete (files-and-directories)
+  "Safely delete FILES-AND-DIRECTORIES."
+  (--each files-and-directories (ignore-errors (f-delete it :force))))
 
 (defun flycheck-safe-delete-temporaries ()
   "Safely delete all temp files and directories of Flycheck.
@@ -1003,8 +999,8 @@ buffers."
 Safely delete all files listed in `flycheck-temp-files' and all
 directories in `flycheck-temp-directories', and set both
 variables to nil."
-  (flycheck-safe-delete-directories flycheck-temp-directories)
-  (flycheck-safe-delete-files flycheck-temp-files)
+  (flycheck-safe-delete flycheck-temp-directories)
+  (flycheck-safe-delete flycheck-temp-files)
   (setq flycheck-temp-directories nil
         flycheck-temp-files nil))
 
@@ -3047,8 +3043,8 @@ https://github.com/Bruce-Connor/emacs-google-this")))
 
 (defun flycheck-delete-process (process)
   "Delete PROCESS and clear it's resources."
-  (flycheck-safe-delete-files (process-get process :flycheck-temp-files))
-  (flycheck-safe-delete-directories
+  (flycheck-safe-delete (process-get process :flycheck-temp-files))
+  (flycheck-safe-delete
    (process-get process :flycheck-temp-directories))
   (delete-process process))
 
