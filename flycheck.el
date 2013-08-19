@@ -89,7 +89,7 @@ buffer-local wherever it is set."
   "On-the-fly syntax checking (aka \"flymake done right\")."
   :prefix "flycheck-"
   :group 'tools
-  :link '(url-link :tag "Online manual" "http://flycheck.lunaryorn.com")
+  :link '(url-link :tag "Online manual" "http://flycheck.github.io")
   :link '(url-link :tag "Github" "https://github.com/flycheck/flycheck")
   :link '(custom-manual "(flycheck)Top")
   :link '(info-link "(flycheck)Usage"))

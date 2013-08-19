@@ -2737,7 +2737,8 @@ Bug fixes:
 
 @itemize @bullet
 @item
-Flycheck has a new home at https://github.com/flycheck/flycheck
+Flycheck has a new home at @uref{https://github.com/flycheck/flycheck},
+the online manual moved to @uref{http://flycheck.github.io}.
 @end itemize
 
 @node Credits, GNU Free Documentation License, Changes, Top
