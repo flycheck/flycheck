@@ -2672,11 +2672,11 @@ Intended for use with `next-error-function'."
          (forward? (> n 0))
          (point (if reset (point-min) (point)))
          (overlays-at-point (flycheck-overlays-at point))
-         (pos (or
-               (if forward?
-                   (-max (-map #'overlay-end overlays-at-point))
-                 (-min (-map #'overlay-start overlays-at-point)))
-               point))
+         (pos (if overlays-at-point
+                  (if forward?
+                      (-max (-map #'overlay-end overlays-at-point))
+                    (-min (-map #'overlay-start overlays-at-point)))
+                point))
          (min (if forward? pos (point-min)))
          (max (if forward? (point-max) pos))
          (candidates (->> (flycheck-overlays-in min max)
