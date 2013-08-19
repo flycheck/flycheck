@@ -2739,6 +2739,16 @@ Bug fixes:
 @item
 Flycheck has a new home at @uref{https://github.com/flycheck/flycheck},
 the online manual moved to @uref{http://flycheck.github.io}.
+
+@item
+@b{Breaking changes}:
+
+@itemize @bullet
+@item
+Do not add the current directory to the @code{emacs-lisp} syntax checker
+load path
+@end itemize
+
 @end itemize
 
 @node Credits, GNU Free Documentation License, Changes, Top

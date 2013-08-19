@@ -3381,10 +3381,6 @@ during byte-compilation or autoloads generation, or nil otherwise."
 
 (defconst flycheck-emacs-lisp-check-form
   '(progn
-     ;; Try best to make local dependencies available
-     (defun flycheck-extend-load-path (filename)
-       (add-to-list 'load-path (file-name-directory filename)))
-
      (defvar flycheck-byte-compiled-files nil)
      (defun flycheck-byte-compile-dest-file (source)
        (let ((temp-file (make-temp-file (file-name-nondirectory source))))
@@ -3392,7 +3388,6 @@ during byte-compilation or autoloads generation, or nil otherwise."
          temp-file))
 
      (setq byte-compile-dest-file-function 'flycheck-byte-compile-dest-file)
-     (mapc 'flycheck-extend-load-path command-line-args-left)
      (mapc 'byte-compile-file command-line-args-left)
      (mapc 'delete-file flycheck-byte-compiled-files)))
 
