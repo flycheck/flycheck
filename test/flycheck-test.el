@@ -913,20 +913,19 @@ error is signaled on all subsequent checks."
 
 
 ;;;; Documentation
-(defmacro flycheck-with-doc-buffer (doc-file &rest body)
-  "Create a temp buffer from DOC-FILE and execute BODY."
-  (declare (indent 1))
-  `(let* ((filename (f-join flycheck-testsuite-dir "../doc" ,doc-file)))
-     (should (f-exists? filename))
+(defmacro flycheck-with-doc-buffer (&rest body)
+  "Create a temp buffer with flycheck.texi and execute BODY."
+  (declare (indent 0))
+  `(let* ((filename (f-join flycheck-testsuite-dir "../doc/flycheck.texi")))
      (with-temp-buffer
        (insert-file-contents filename)
        ,@body)))
 
 (ert-deftest doc-all-checkers-documented ()
   "Test that all registered checkers are documented in the Flycheck manual."
-  (flycheck-with-doc-buffer "checkers.texi"
-    ;; Search for the beginning of the list of checkers
-    (re-search-forward (rx "@itemize"))
+  (flycheck-with-doc-buffer
+    (search-forward "@node Syntax checkers")
+    (search-forward "@itemize")
     (dolist (checker flycheck-checkers)
       (forward-line 1)
       (should (looking-at (rx line-start "@iflyc " symbol-start
@@ -941,11 +940,11 @@ error is signaled on all subsequent checks."
   (let ((config-vars (sort (-flatten (-keep #'flycheck-checker-option-vars
                                             (flycheck-defined-checkers)))
                            #'string<)))
-    (flycheck-with-doc-buffer "usage.texi"
+    (flycheck-with-doc-buffer
       ;; Go to the beginning of the configuration section
-      (re-search-forward (rx "@node Configuration"))
+      (search-forward "@node Configuration")
       ;; Go to the beginning of the option variable listing
-      (re-search-forward (rx "configured via options."))
+      (search-forward "configured via options.")
       ;; Verify that all variables are documented
       (dolist (var config-vars)
         (re-search-forward (rx line-start "@defopt " symbol-start
@@ -958,11 +957,11 @@ error is signaled on all subsequent checks."
   (let ((option-file-vars (sort (-keep #'flycheck-checker-config-file-var
                                        (flycheck-defined-checkers))
                                 #'string<)))
-    (flycheck-with-doc-buffer "usage.texi"
+    (flycheck-with-doc-buffer
       ;; Go to the beginning of the configuration section
-      (re-search-forward (rx "@node Configuration"))
+      (search-forward "@node Configuration")
       ;; Go to the beginning of the option variable listing
-      (re-search-forward (rx "configuration file variables"))
+      (search-forward "configuration file variables")
       ;; Verify that all variables are documented
       (dolist (var option-file-vars)
         (re-search-forward (rx line-start "@defopt " symbol-start
