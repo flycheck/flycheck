@@ -93,7 +93,7 @@ Copyright @copyright{} 2013 Sebastian Wiesner
 @chapter Introduction
 
 Flycheck (aka ``Flymake done right'') is a modern on-the-fly syntax
-checking extension for GNU Emacs 24 withL
+checking extension for GNU Emacs 24 with
 
 @itemize @bullet
 @item
@@ -148,6 +148,7 @@ Optional manual selection of a syntax checker with
 @code{flycheck-select-checker} at @kbd{C-c ! s}
 @item
 Built-in syntax checkers for:
+
 @itemize @bullet
 @item
 C/C++ (using @command{clang} and @command{cppcheck})
@@ -207,6 +208,7 @@ TeX/LaTeX (using @command{chktex} or @command{lacheck})
 @item
 XML (using @command{xmlstarlet} or @command{xmllint})
 @end itemize
+
 @item
 Nice error indication and highlighting
 @item
@@ -474,7 +476,8 @@ selection.
 
 The first suitable syntax checker from this list is used to check a
 buffer.  A syntax checker is suitable, if
-@itemize
+
+@itemize @bullet
 @item
 it may be used for the current major mode,
 @item
@@ -694,7 +697,8 @@ If any of these steps succeeds, the subsequent steps are not executed.
 @section Error reporting
 
 Errors and warnings from a syntax checker are
-@itemize
+
+@itemize @bullet
 @item
 reported in the mode line or in a popup buffer, depending on the length
 of the error messages,
@@ -1715,7 +1719,7 @@ Parse an @var{xml} string and return the parsed document tree.
 
 Flycheck needs your help, in all aspects.  Please
 
-@itemize
+@itemize @bullet
 @item
 report all bugs and issues you can find,
 @item
@@ -1744,7 +1748,7 @@ tracker}.
 
 When doing so, please respect the following guidelines:
 
-@itemize
+@itemize @bullet
 @item
 Check that the issue has not already been reported.
 @item
@@ -1772,7 +1776,7 @@ send us a pull request (see @ref{Contributing code}).
 
 Whatever way you choose, please respect the following guidelines:
 
-@itemize
+@itemize @bullet
 @item
 Provide a link to the website of the syntax checker tool.
 @item
@@ -1791,7 +1795,7 @@ Please contribute patches to Flycheck as pull requests on Github.
 
 When doing so, please respect the following guidelines:
 
-@itemize
+@itemize @bullet
 @item
 Read how to
 @uref{http://gun.io/blog/how-to-github-fork-branch-and-pull-request,
@@ -1818,7 +1822,7 @@ give use cases and rationale for your new feature.
 We will try to respect and include each contribution, however we will
 not do the following:
 
-@itemize
+@itemize @bullet
 @item
 Include a feature without good use cases and rationale.
 @item
@@ -1841,7 +1845,7 @@ using the @ref{Top, , ERT, ert} library.
 
 To add unit tests do the following:
 
-@itemize
+@itemize @bullet
 @item
 Familiarize yourself with the @ref{Top, , ERT, ert} library.
 @item
@@ -1861,7 +1865,8 @@ Run your tests with @command{make virtual-test}.
 @end itemize
 
 You may also run the tests locally during development.  To do so:
-@itemize
+
+@itemize @bullet
 @item
 Install @uref{https://github.com/rejeep/carton, Carton}.
 @item
@@ -1989,7 +1994,8 @@ LaTeX with @command{lacheck}
 @end itemize
 
 @item
-Bug fixes
+Bug fixes:
+
 @itemize @bullet
 @item
 @ghissue{10, Fix type error when checking compressed Emacs Lisp}
@@ -2005,7 +2011,7 @@ Bug fixes
 @item
 New syntax checkers:
 
-@itemize
+@itemize @bullet
 @item
 @ghissue{15, SASS}
 @item
@@ -2074,7 +2080,7 @@ New syntax checkers:
 @item
 Removed syntax checkers:
 
-@itemize
+@itemize @bullet
 @item
 Javascript with @command{jsl}
 @end itemize
@@ -2139,7 +2145,8 @@ Fix various regressions after introducing unit tests
 
 @item
 API changes:
-@itemize
+
+@itemize @bullet
 @item
 @ghissue{41, Replace syntax checker variables with syntax checker
 declarations}
@@ -2445,7 +2452,7 @@ Faces are now in a separate customization group
 @item
 Bug fixes:
 
-@itemize
+@itemize @bullet
 @item
 Add missing customization group for syntax checker options
 @end itemize
@@ -2622,7 +2629,7 @@ syntax checker for non-configuration files}
 @item
 New features:
 
-@itemize
+@itemize @bullet
 @item
 @ghissue{166, List errors at point only with prefix arg to
 @code{flycheck-list-errors}}
@@ -2713,11 +2720,11 @@ Fix universal prefix argument for @code{flycheck-next-error} at
 @comment  node-name,  next,  previous,  up
 @unnumberedsec 0.14.1 (Aug 16, 2013)
 
-@itemize
+@itemize @bullet
 @item
 Bug fixes:
 
-@itemize
+@itemize @bullet
 @item
 @ghissue{194, Add a missing dependency}
 @end itemize
@@ -2728,7 +2735,7 @@ Bug fixes:
 @comment  node-name,  next,  previous,  up
 @unnumberedsec master (unreleased)
 
-@itemize
+@itemize @bullet
 @item
 Flycheck has a new home at https://github.com/flycheck/flycheck
 @end itemize
@@ -2740,7 +2747,7 @@ Flycheck has a new home at https://github.com/flycheck/flycheck
 The following people contributed to Flycheck.  Their help and ideas,
 their support and patches are greatly appreciated.
 
-@itemize
+@itemize @bullet
 @item
 @gh{bbatsov, Bozhidar Batsov} provided valuable feedback and
 refinements, brought Flycheck to a larger user base by adding it to his
@@ -2845,7 +2852,7 @@ The following syntax checkers are included in Flycheck, listed in the
 order of their appearance in the default value of
 @code{flycheck-checkers}:
 
-@itemize
+@itemize @bullet
 @iflyc bash
 @iflyc c/c++-clang
 @iflyc c/c++-cppcheck
