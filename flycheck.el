@@ -370,6 +370,25 @@ messages at point."
   :package-version '(flycheck . "0.10")
   :safe #'numberp)
 
+(defcustom flycheck-completion-system 'ido
+  "How to complete in minibuffer prompts.
+
+`ido'
+     Use IDO.  This is default, however `grizzl' is the recommended system.
+
+`grizzl'
+
+     Use Grizzl, see URL `https://github.com/d11wtq/grizzl'.
+     This is the recommended setting, but you need to install
+     Grizzl separately.
+
+nil
+     Use the standard unfancy `completing-read'.  Not recommended."
+  :group 'flycheck
+  :type '(choice (const :tag "IDO" ido)
+                 (const :tag "Grizzl" grizzl)
+                 (const :tag "Completing read" nil)))
+
 (defcustom flycheck-mode-hook nil
   "Hooks to run after `flycheck-mode'."
   :group 'flycheck
@@ -1053,17 +1072,29 @@ Return nil, if the currently loaded file cannot be determined."
 
 ;;;; Minibuffer tools
 (defvar read-flycheck-checker-history nil
-  "History of `read-flycheck-checker'.")
+  "`completing-read' history of `read-flycheck-checker'.")
 
 (defun read-flycheck-checker (prompt)
   "Read a flycheck checker from minibuffer with PROMPT.
 
 Return the checker as symbol, or nil if no checker was
 chosen."
-  (let* ((input (completing-read prompt obarray
-                                 #'flycheck-valid-checker-p t
-                                 nil 'read-flycheck-checker-history)))
-    (if (string= input "") nil (intern input))))
+  (let ((input (cl-case flycheck-completion-system
+                 (ido
+                  (ido-completing-read prompt obarray
+                                       #'flycheck-valid-checker-p t
+                                       nil 'read-flycheck-checker-history))
+                 (grizzl
+                  (->> (flycheck-defined-checkers)
+                    (-map #'symbol-name)
+                    grizzl-make-index
+                    (grizzl-completing-read prompt)))
+                 (otherwise
+                  (completing-read prompt obarray
+                                   #'flycheck-valid-checker-p t
+                                   nil 'read-flycheck-checker-history)))))
+    (unless (string= input "")
+      (intern input))))
 
 
 ;;;; Obsolete checker declarations
@@ -1920,14 +1951,13 @@ nil otherwise."
   "Select CHECKER for the current buffer.
 
 CHECKER is a syntax checker symbol (see `flycheck-checkers') or
-nil.  It does not need to be registered in `flycheck-checkers'.
+nil.  It does _not_ need to be registered in `flycheck-checkers'.
 If nil deselect the current syntax checker (if any) and use
 automatic checker selection via `flycheck-checkers'.
 
-If called interactively prompt for CHECKER.  If no syntax checker
-is entered deselect the current syntax checker.  With prefix arg
-immediately deselect the current syntax checker without any
-prompt.
+If called interactively prompt for CHECKER.  With prefix arg
+deselect the current syntax checker and enable automatic
+selection again.
 
 Set `flycheck-checker' to CHECKER and automatically start a new
 syntax check if the syntax checker changed."

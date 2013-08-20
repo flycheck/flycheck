@@ -503,13 +503,34 @@ buffer, too:
 @item C-c ! s
 @itemx M-x flycheck-select-checker
 @findex flycheck-select-checker
-Prompt for a checker.  If no syntax checker is entered deselect the
-current syntax checker, and re-enable automatic selection again.  With
-prefix arg, re-enable automatic selection without prompting.
+Select a syntax checker for the current buffer.
 
-Syntax checker do @emph{not} need to be registered to be manually
-selected with this command.
+With prefix arg, deselect the current syntax checker if any, and
+re-enable automatic selection.
+
+Any defined syntax checker can be selected with this command, regardless
+of the contents of @code{flycheck-checkers}.
 @end table
+
+By default, the prompt uses IDO for completion and matching, but you can
+change the completion system in use:
+
+@defopt flycheck-completion-system
+The completion system to use.
+
+@table @code
+@item ido
+Use IDO. This is default, but @code{grizzl} is the recommended system.
+
+@item grizzl
+Use @uref{https://github.com/d11wtq/grizzl, Grizzl}.  This is the
+recommended system, but you need to install Grizzl separately.
+
+@item nil
+Use the standard unfancy @code{completing-read}.  This is @b{not}
+recommended.
+@end table
+@end defopt
 
 @noindent
 @code{flycheck-select-checker} sets @code{flycheck-checker}:
@@ -2747,6 +2768,15 @@ the online manual moved to @uref{http://flycheck.github.io}.
 @item
 Do not add the current directory to the @code{emacs-lisp} syntax checker
 load path
+@end itemize
+
+@item
+New features
+
+@itemize
+@item
+Support IDO or @uref{https://github.com/d11wtq/grizzl, Grizzl} as
+completion systems for @code{flycheck-select-checker} at @kbd{C-c ! s}
 @end itemize
 
 @end itemize
