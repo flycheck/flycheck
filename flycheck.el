@@ -1079,20 +1079,18 @@ Return nil, if the currently loaded file cannot be determined."
 
 Return the checker as symbol, or nil if no checker was
 chosen."
-  (let ((input (cl-case flycheck-completion-system
-                 (ido
-                  (ido-completing-read prompt obarray
-                                       #'flycheck-valid-checker-p t
-                                       nil 'read-flycheck-checker-history))
-                 (grizzl
-                  (->> (flycheck-defined-checkers)
-                    (-map #'symbol-name)
-                    grizzl-make-index
-                    (grizzl-completing-read prompt)))
-                 (otherwise
-                  (completing-read prompt obarray
-                                   #'flycheck-valid-checker-p t
-                                   nil 'read-flycheck-checker-history)))))
+  (let* ((candidates (-map #'symbol-name (flycheck-defined-checkers)))
+         (input (cl-case flycheck-completion-system
+                  (ido
+                   (ido-completing-read prompt candidates nil :require-match
+                                        nil 'read-flycheck-checker-history))
+                  (grizzl
+                   (->> candidates
+                     grizzl-make-index
+                     (grizzl-completing-read prompt)))
+                  (otherwise
+                   (completing-read prompt candidates nil :require-match
+                                    nil 'read-flycheck-checker-history)))))
     (unless (string= input "")
       (intern input))))
 
