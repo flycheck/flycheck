@@ -89,6 +89,9 @@ All declared checkers should be registered."
 (ert-deftest flycheck-google-max-messages ()
   (should (equal flycheck-google-max-messages 5)))
 
+(ert-deftest flycheck-standard-error-navigation ()
+  (should (eq flycheck-standard-error-navigation t)))
+
 (ert-deftest flycheck-completion-system ()
   (should (equal flycheck-completion-system 'ido)))
 

@@ -369,6 +369,25 @@ messages at point."
   :package-version '(flycheck . "0.10")
   :safe #'numberp)
 
+(defcustom flycheck-standard-error-navigation t
+  "Whether to support error navigation with `next-error'.
+
+If non-nil, enable navigation of Flycheck errors with
+`next-error', `previous-error' and `first-error'.  Otherwise,
+these functions just navigate errors from compilation modes.
+
+Flycheck error navigation with `flycheck-next-error',
+`flycheck-previous-error' and `flycheck-first-error' is always
+enabled, regardless of the value of this variable.
+
+Note that this setting only takes effect when `flycheck-mode' is
+enabled.  Changing it will not affect buffers which already have
+`flycheck-mode' enabled."
+  :group 'flycheck
+  :type 'boolean
+  :package-version '(flycheck . "0.15")
+  :safe #'booleanp)
+
 (defcustom flycheck-completion-system 'ido
   "How to complete in minibuffer prompts.
 
@@ -534,8 +553,8 @@ running checks, and empty all variables used by flycheck."
   (flycheck-safe-delete-temporaries)
   (flycheck-clear-checker))
 
-(defvar-local flycheck-previous-next-error-function nil
-  "Remember the previous `next-error-function'.")
+(defvar-local flycheck-old-next-error-function nil
+  "Remember the old `next-error-function'.")
 
 (defconst flycheck-hooks-alist
   '(
@@ -592,10 +611,14 @@ buffer manually.
     (--each flycheck-hooks-alist
       (add-hook (car it) (cdr it) nil t))
 
-    (setq flycheck-previous-next-error-function next-error-function)
-    (setq next-error-function 'flycheck-next-error-function))
+    (setq flycheck-old-next-error-function (if flycheck-standard-error-navigation
+                                               next-error-function
+                                             :unset))
+    (when flycheck-standard-error-navigation
+      (setq next-error-function 'flycheck-next-error-function)))
    (t
-    (setq next-error-function flycheck-previous-next-error-function)
+    (unless (eq flycheck-old-next-error-function :unset)
+      (setq next-error-function flycheck-old-next-error-function))
 
     (--each flycheck-hooks-alist
       (remove-hook (car it) (cdr it) t))
