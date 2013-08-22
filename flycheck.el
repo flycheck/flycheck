@@ -1094,7 +1094,8 @@ https://github.com/d11wtq/grizzl.")))
                   (otherwise
                    (completing-read prompt candidates nil :require-match
                                     nil 'read-flycheck-checker-history)))))
-    (unless (string= input "")
+    (if (string= input "")
+        (user-error "No syntax checker entered")
       (intern input))))
 
 
