@@ -69,6 +69,13 @@ All declared checkers should be registered."
 (ert-deftest flycheck-process-error-functions ()
   (should (equal flycheck-process-error-functions '(flycheck-add-overlay))))
 
+(ert-deftest flycheck-display-errors-function ()
+  (should (eq flycheck-display-errors-function
+              #'flycheck-display-error-messages)))
+
+(ert-deftest flycheck-indication-mode ()
+  (should (eq flycheck-indication-mode 'left-fringe)))
+
 (ert-deftest flycheck-highlighting-mode ()
   (should (eq flycheck-highlighting-mode 'symbols)))
 
@@ -76,8 +83,13 @@ All declared checkers should be registered."
   (should (equal flycheck-check-syntax-automatically
                  '(save idle-change new-line mode-enabled))))
 
-(ert-deftest flycheck-display-errors-function ()
-  (should (eq flycheck-display-errors-function
-              #'flycheck-display-error-messages)))
+(ert-deftest flycheck-idle-change-delay ()
+  (should (equal flycheck-idle-change-delay 0.5)))
+
+(ert-deftest flycheck-google-max-messages ()
+  (should (equal flycheck-google-max-messages 5)))
+
+(ert-deftest flycheck-completion-system ()
+  (should (equal flycheck-completion-system 'ido)))
 
 ;;; customization-test.el ends here
