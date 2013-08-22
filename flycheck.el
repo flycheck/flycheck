@@ -1084,9 +1084,13 @@ chosen."
                    (ido-completing-read prompt candidates nil :require-match
                                         nil 'read-flycheck-checker-history))
                   (grizzl
-                   (->> candidates
-                     grizzl-make-index
-                     (grizzl-completing-read prompt)))
+                   (if (and (fboundp 'grizzl-make-index)
+                            (fboundp 'grizzl-completing-read))
+                       (->> candidates
+                         grizzl-make-index
+                         (grizzl-completing-read prompt))
+                     (user-error "Please install Grizzl from \
+https://github.com/d11wtq/grizzl.")))
                   (otherwise
                    (completing-read prompt candidates nil :require-match
                                     nil 'read-flycheck-checker-history)))))
