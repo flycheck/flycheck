@@ -45,12 +45,11 @@
 (require 's)
 (require 'dash)
 (require 'f)
-(require 'pkg-info)
-(require 'rx)             ; For Regexp fanciness in `flycheck-define-checker'
-(require 'cl-lib)         ; For `cl-defstruct'
-(require 'help-mode)      ; For `define-button-type'
-(require 'find-func)      ; For `find-function-space-re', etc.
-(require 'package)        ; For `package-buffer-info' and `package-version-join'
+(require 'pkg-info)          ; Package and library version information
+(require 'rx)                ; Regexp fanciness in `flycheck-define-checker'
+(require 'cl-lib)            ; `cl-defstruct'
+(require 'help-mode)         ; `define-button-type'
+(require 'find-func)         ; `find-function-space-re', etc.
 
 
 ;;;; Compatibility
