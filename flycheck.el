@@ -1309,6 +1309,9 @@ error if not."
     "Check whether ARGUMENTS is a list of valid arguments."
     (-all? 'flycheck-command-argument-p arguments)))
 
+(defun flycheck-mode-add-argsource (mode source)
+  (put mode :argsources (cons source (get mode :argsources))))
+
 (defmacro flycheck-define-checker (symbol doc-string &rest properties)
   "Define SYMBOL as syntax checker with DOC-STRING and PROPERTIES.
 
@@ -1433,7 +1436,11 @@ value."
        (put ',symbol :flycheck-predicate #',predicate)
        (put ',symbol :flycheck-next-checkers ',next-checkers)
        (put ',symbol :flycheck-file (flycheck-current-load-file))
-       (put ',symbol :flycheck-checker t))))
+       (put ',symbol :flycheck-checker t)
+       (put ',symbol :flycheck-get-extra-args
+            (lambda (buffer-file-path)
+              (loop for x in (get ',symbol :argsources) append
+                    (funcall x buffer-file-path)))))))
 
 ;;;###autoload
 (defmacro flycheck-def-config-file-var (symbol checker &optional file-name
@@ -3176,7 +3183,12 @@ _EVENT is ignored."
              (process-connection-type nil) ; Use pipes to receive checker output
              (process (apply 'start-process
                              "flycheck" (current-buffer)
-                             program args)))
+                             program
+                             (append
+                              (funcall
+                               (get checker :flycheck-get-extra-args)
+                               (buffer-file-name))
+                              args))))
         (setq flycheck-current-process process)
         (set-process-filter process 'flycheck-receive-checker-output)
         (set-process-sentinel process 'flycheck-handle-signal)
