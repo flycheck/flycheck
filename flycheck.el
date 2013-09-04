@@ -3412,14 +3412,6 @@ See URL `http://elixir-lang.org/'."
   `(,(concat invocation-directory invocation-name) "-Q" "--batch")
   "A command to execute an Emacs Lisp form in a background process.")
 
-(defun flycheck-temp-compilation-buffer-p ()
-  "Determine whether the current buffer is a temporary buffer.
-
-Return t if the current buffer is a temporary buffer created
-during byte-compilation or autoloads generation, or nil otherwise."
-  (or (member (buffer-name) '(" *Compiler Input*" " *autoload-file*"))
-      (flycheck-autoloads-file-p)))
-
 (defconst flycheck-emacs-lisp-check-form
   '(progn
      (defvar flycheck-byte-compiled-files nil)
@@ -3529,19 +3521,22 @@ This variable has no effect, if
   ;; properly resolved, because `byte-compile-file' emits file names *relative
   ;; to the directory of the checked file* instead of the working directory.
   ;; Hence our backwards-substitution will fail, because the checker process has
-  ;; a different base directory to resolve relative file names than the flycheck
+  ;; a different base directory to resolve relative file names than the Flycheck
   ;; code working on the buffer to check.
   :predicate
   (lambda ()
     (and (buffer-file-name)
-         ;; Do not check buffers which should not be byte-compiled.  The
-         ;; checker process will refuse to compile these anyway
-         (not (and (boundp 'no-byte-compile) no-byte-compile))
-         ;; Checking temporary buffers from `byte-compile-file' or autoload
-         ;; buffers interferes with package installation. See
-         ;; https://github.com/flycheck/flycheck/issues/45 and
-         ;; https://github.com/bbatsov/prelude/issues/248
-         (not (flycheck-temp-compilation-buffer-p))))
+         ;; Do not check buffers which should not be byte-compiled.  The checker
+         ;; process will refuse to compile these, which would confuse Flycheck
+         (not (or (bound-and-true-p no-byte-compile)
+                  ;; Do not check buffers used for autoloads generation during
+                  ;; package installation.  These buffers are too short-lived
+                  ;; for being checked, and doing so causes spurious errors.
+                  ;; See https://github.com/flycheck/flycheck/issues/45 and
+                  ;; https://github.com/bbatsov/prelude/issues/248.  We must
+                  ;; also not check compilation buffers, but as these are
+                  ;; ephemeral, Flycheck won't check them anyway.
+                  (flycheck-autoloads-file-p)))))
   :next-checkers (emacs-lisp-checkdoc))
 
 (defconst flycheck-emacs-lisp-checkdoc-form
@@ -3573,12 +3568,12 @@ The checker runs `checkdoc-current-buffer'."
   :modes (emacs-lisp-mode)
   :predicate
   (lambda ()
-    (and (not (flycheck-temp-compilation-buffer-p))
-         ;; Do not check Cask/Carton files.  These really don't need to follow
-         ;; Checkdoc conventions
-         (not (and (buffer-file-name)
-                   (member (f-filename (buffer-file-name))
-                           '("Cask" "Carton")))))))
+    (not (or (flycheck-ephemeral-buffer-p)
+             ;; Do not check Cask/Carton files.  These really don't need to
+             ;; follow Checkdoc conventions
+             (and (buffer-file-name)
+                  (member (f-filename (buffer-file-name))
+                          '("Cask" "Carton")))))))
 
 (flycheck-define-checker erlang
   "An Erlang syntax checker using the Erlang interpreter."
