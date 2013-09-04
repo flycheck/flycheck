@@ -31,6 +31,11 @@
 (ert-deftest flycheck-may-check-automatically ()
   (--each '(save idle-change new-line mode-enabled)
     (with-temp-buffer
+      ;; We should not check ephemeral buffers
+      (should-not (flycheck-may-check-automatically it))
+      (should-not (flycheck-may-check-automatically))
+      ;; Now rename the buffer
+      (rename-buffer "foo")
       (should (flycheck-may-check-automatically it))
       (should (flycheck-may-check-automatically))
       ;; No automatic check allowed
@@ -149,8 +154,9 @@
 (ert-deftest flycheck-buffer-automatically-deferred ()
   "Test that `flycheck-buffer-safe' properly defers the check."
   (with-temp-buffer
-    (let ((flycheck-check-syntax-automatically nil))
-      (flycheck-mode))
+    (flycheck-mode)
+    ;; Flycheck won't check ephemeral buffers
+    (rename-buffer "foo")
     (should-not (flycheck-deferred-check-p))
     (flycheck-buffer-automatically)
     (should (flycheck-deferred-check-p))))
