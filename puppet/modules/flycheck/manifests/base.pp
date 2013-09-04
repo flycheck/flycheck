@@ -23,18 +23,18 @@ class flycheck::base {
   }
 
   $cask_version = '0.4.6'
-  $cask_archive = "cask.el-${cask_version}"
+  $cask_archive = "cask-${cask_version}"
 
   archive { $cask_archive:
     ensure        => present,
-    url           => "https://github.com/rejeep/cask.el/archive/v${cask_version}.tar.gz",
-    digest_string => '6a2409b8d5f97d05b952c0d181788af8',
+    url           => "https://github.com/cask/cask/archive/v${cask_version}.tar.gz",
+    digest_string => 'fecf7ca5db66d3084970a03de5d2f789',
     target        => '/opt/'
   }
 
   file { '/usr/local/bin/cask':
     ensure  => link,
     target  => "/opt/${cask_archive}/bin/cask",
-    require => Archive["cask.el-${cask_version}"],
+    require => Archive[$cask_archive],
   }
 }
