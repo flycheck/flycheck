@@ -107,15 +107,15 @@
   (should (equal (flycheck-prepend-with-option "-L" '("foo" "bar") #'s-prepend)
                  '("-Lfoo" "-Lbar"))))
 
-(ert-deftest flycheck-temporary-buffer-p ()
+(ert-deftest flycheck-ephemeral-buffer-p ()
   (with-temp-buffer
-    (should (flycheck-temporary-buffer-p)))
+    (should (flycheck-ephemeral-buffer-p)))
   (with-temp-buffer
     (rename-buffer " foo")
-    (should (flycheck-temporary-buffer-p)))
+    (should (flycheck-ephemeral-buffer-p)))
   (with-temp-buffer
     (rename-buffer "foo")
-    (should-not (flycheck-temporary-buffer-p))))
+    (should-not (flycheck-ephemeral-buffer-p))))
 
 (ert-deftest flycheck-safe-delete-recursive ()
   (let ((dirname (flycheck-temp-dir-system "flycheck-test")))
