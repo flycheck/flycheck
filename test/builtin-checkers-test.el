@@ -276,22 +276,6 @@ https://github.com/bbatsov/prelude/issues/259."
     (rename-buffer "foo-autoloads.el")
     (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
 
-(ert-deftest checker-emacs-lisp-checkdoc-inhibited-autoloads-source ()
-  "Test that CheckDoc does no check temporary autoload buffers."
-  (flycheck-testsuite-with-resource-buffer "checkers/emacs-lisp-checkdoc-warning.el"
-    (emacs-lisp-mode)
-    (should (flycheck-may-use-checker 'emacs-lisp-checkdoc))
-    (rename-buffer " *autoload-file*")
-    (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
-
-(ert-deftest checker-emacs-lisp-checkdoc-inhibited-compiler-input ()
-  "Test that CheckDoc does not check byte compiler input buffers."
-  (flycheck-testsuite-with-resource-buffer "checkers/emacs-lisp-checkdoc-warning.el"
-    (emacs-lisp-mode)
-    (should (flycheck-may-use-checker 'emacs-lisp-checkdoc))
-    (rename-buffer " *Compiler Input*")
-    (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
-
 (ert-deftest checker-emacs-lisp-checkdoc-inhibited-cask ()
   (flycheck-testsuite-with-resource-buffer "checkers/emacs-lisp-checkdoc-warning.el"
     (emacs-lisp-mode)
@@ -389,20 +373,6 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
     (emacs-lisp-mode)
     (should (flycheck-may-use-checker 'emacs-lisp))
     (rename-buffer "foo-autoloads.el")
-    (should (not (flycheck-may-use-checker 'emacs-lisp)))))
-
-(ert-deftest checker-emacs-lisp-inhibited-compiler-input ()
-  "Test that Emacs Lisp does not check byte compiler input buffers.
-
-These temporary buffers are created during byte compilation, and
-checking them interfers with package installation.
-
-See URL `https://github.com/flycheck/flycheck/issues/45' and URL
-`https://github.com/bbatsov/prelude/issues/253'."
-(flycheck-testsuite-with-resource-buffer "checkers/emacs-lisp-warning.el"
-    (emacs-lisp-mode)
-    (should (flycheck-may-use-checker 'emacs-lisp))
-    (rename-buffer " *Compiler Input*")
     (should (not (flycheck-may-use-checker 'emacs-lisp)))))
 
 (ert-deftest checker-erlang-error ()
