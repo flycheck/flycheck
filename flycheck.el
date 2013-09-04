@@ -3568,7 +3568,7 @@ The checker runs `checkdoc-current-buffer'."
   :modes (emacs-lisp-mode)
   :predicate
   (lambda ()
-    (not (or (flycheck-ephemeral-buffer-p)
+    (not (or (flycheck-autoloads-file-p)
              ;; Do not check Cask/Carton files.  These really don't need to
              ;; follow Checkdoc conventions
              (and (buffer-file-name)
