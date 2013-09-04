@@ -5,7 +5,6 @@ class flycheck::checkers {
   include flycheck::checkers::erlang
   include flycheck::checkers::go
   include flycheck::checkers::haskell
-  include flycheck::checkers::nodejs
   include flycheck::checkers::php
   include flycheck::checkers::python
   include flycheck::checkers::ruby
@@ -17,6 +16,20 @@ class flycheck::checkers {
   package { 'rust':
     ensure  => latest,
     require => Apt::Ppa['ppa:kevincantu/rust']
+  }
+
+  include nodejs
+  $node_packages = ['coffee-script', # coffee
+                    'coffeelint',    # coffee-coffeelint
+                    'csslint',       # css-csslint
+                    'jshint',        # javascript-jshint
+                    'jsonlint',      # json-jsonlint
+                    'less',          # less
+                    ]
+  package { $node_packages:
+    ensure   => present,
+    provider => npm,
+    require  => Class['nodejs'],
   }
 
   $packages = [ 'bash',            # bash/sh-bash
