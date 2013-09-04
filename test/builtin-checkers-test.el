@@ -42,7 +42,6 @@
           haskell-mode
           web-mode
           js2-mode
-          js3-mode
           less-css-mode
           lua-mode
           cperl-mode
@@ -56,8 +55,7 @@
 
 (eval-when-compile
   ;; Prevent warnings about unused lexical variables
-  (require 'js2-mode)
-  (require 'js3-mode))
+  (require 'js2-mode))
 
 (require 'sh-script)                    ; For `sh-set-shell'
 
@@ -471,10 +469,9 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
   :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
   ;; Silence JS2 and JS3 parsers
   (let ((js2-mode-show-parse-errors nil)
-        (js2-mode-show-strict-warnings nil)
-        (js3-mode-show-parse-errors nil))
+        (js2-mode-show-strict-warnings nil))
     (flycheck-testsuite-should-syntax-check
-     "checkers/javascript-jshint-syntax-error.js" '(js-mode js2-mode js3-mode) nil
+     "checkers/javascript-jshint-syntax-error.js" '(js-mode js2-mode) nil
      '(3 25 "Unclosed string." error)
      '(4 1 "Unclosed string." error)
      '(3 11 "Unclosed string." error)
@@ -485,14 +482,14 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
   "Use eval()"
   :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
   (flycheck-testsuite-should-syntax-check
-   "checkers/javascript-jshint-error.js" '(js-mode js2-mode js3-mode) nil
+   "checkers/javascript-jshint-error.js" '(js-mode js2-mode) nil
    '(3 1 "eval can be harmful." error)))
 
 (ert-deftest checker-javascript-jshint-warning ()
   "An unused variable."
   :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
   (flycheck-testsuite-should-syntax-check
-   "checkers/javascript-jshint-warning.js" '(js-mode js2-mode js3-mode) nil
+   "checkers/javascript-jshint-warning.js" '(js-mode js2-mode) nil
    '(5 nil "Unused variable: 'foo'" warning)))
 
 (ert-deftest checker-json-jsonlint-error ()
