@@ -671,19 +671,12 @@ just return nil."
 (defun flycheck-may-enable-mode ()
   "Determine whether Flycheck mode may be enabled.
 
-Flycheck mode is not enabled under any of the following
-conditions
-
-The current buffer is a temporary buffer as determined by
-`flycheck-temporary-buffer-p'.
-
-The current buffer refers to a remote file, as determined by
-`file-remote-p'.
-
-No suitable syntax checker exists for the current buffer.
+Flycheck mode is not enabled for ephemeral buffers (see
+`flycheck-ephemeral-buffer-p'), remote files (see
+`file-remote-p'), or if no suitable syntax checker exists.
 
 Return t if Flycheck mode may be enabled, and nil otherwise."
-  (and (not (flycheck-temporary-buffer-p))
+  (and (not (flycheck-ephemeral-buffer-p))
        (not (and (buffer-file-name) (file-remote-p (buffer-file-name) 'method)))
        (flycheck-get-checker-for-buffer)))
 
@@ -1013,11 +1006,11 @@ ITEMS."
     (setq prepend-fn #'list))
   (-flatten (--map (funcall prepend-fn option it) items)))
 
-(defun flycheck-temporary-buffer-p ()
-  "Determine whether the current buffer is a temporary buffer.
+(defun flycheck-ephemeral-buffer-p ()
+  "Determine whether the current buffer is an ephemeral buffer.
 
-Buffers whose names start with a space are considered temporary
-buffers."
+See Info node `(elisp)Buffer Names' for information about
+ephemeral buffers."
   (s-starts-with? " " (buffer-name)))
 
 (defun flycheck-in-user-emacs-directory-p (filename)
