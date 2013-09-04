@@ -796,7 +796,7 @@ Read-only buffers may never be checked automatically.
 If CONDITION is non-nil, determine whether syntax may checked
 automatically according to
 `flycheck-check-syntax-automatically'."
-  (and (not buffer-read-only)
+  (and (not (or buffer-read-only (flycheck-ephemeral-buffer-p)))
        (or (not condition)
            (memq condition flycheck-check-syntax-automatically))))
 
