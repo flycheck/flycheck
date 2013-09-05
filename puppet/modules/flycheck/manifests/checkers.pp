@@ -18,7 +18,11 @@ class flycheck::checkers {
     require => Apt::Ppa['ppa:kevincantu/rust']
   }
 
-  include nodejs
+  class { 'nodejs':
+    manage_repo => true,
+    version     => latest
+  }
+
   $node_packages = ['coffee-script', # coffee
                     'coffeelint',    # coffee-coffeelint
                     'csslint',       # css-csslint
