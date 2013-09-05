@@ -19,6 +19,7 @@
  (depends-on "haskell-mode")
  (depends-on "web-mode")
  (depends-on "js2-mode")
+ (depends-on "js3-mode")
  (depends-on "less-css-mode")
  (depends-on "lua-mode")
  (depends-on "cperl-mode")
