@@ -724,7 +724,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
   (flycheck-testsuite-should-syntax-check
    "checkers/ruby-rubocop-warnings.rb" 'ruby-mode nil
    '(1 1 "Missing utf-8 encoding comment." warning)
-   '(3 1 "Assigned but unused variable - arr" warning)
+   '(3 1 "Useless assignment to variable - arr" warning)
    '(3 14 "Use snake_case for symbols." warning)
    '(4 6 "Prefer single-quoted strings when you don't need string interpolation or special symbols." warning)))
 
@@ -735,7 +735,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
     (flycheck-testsuite-should-syntax-check
      "checkers/ruby-rubocop-warnings.rb" 'ruby-mode nil
      '(1 1 "Missing utf-8 encoding comment." warning)
-     '(3 1 "Assigned but unused variable - arr" warning)
+     '(3 1 "Useless assignment to variable - arr" warning)
      '(4 6 "Prefer single-quoted strings when you don't need string interpolation or special symbols." warning))))
 
 (ert-deftest checker-ruby-syntax-error ()
