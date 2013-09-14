@@ -13,7 +13,7 @@ class flycheck::checkers::gems {
                     ]
 
   package { $gem_packages:
-    ensure   => installed,
+    ensure   => latest,
     provider => gem,
   }
 }
