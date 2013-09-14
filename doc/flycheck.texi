@@ -578,6 +578,8 @@ Show the documentation of a syntax checker.
 @comment  node-name,  next,  previous,  up
 @section Syntax checker configuration
 
+@subsection Syntax checker options
+
 Some syntax checkers can be configured via options.  The following
 options are provided by Flycheck (use @kbd{C-h v} or @kbd{M-x
 describe-variable} on the variable name for detailed help):
@@ -632,6 +634,8 @@ syntax checker allows without reporting an error.
 @defopt flycheck-phpcs-standard
 The coding standard the syntax checker @code{php-phpcs} shall use.
 @end defopt
+
+@subsection Syntax checker configuration files
 
 Some syntax checkers also read configuration files denoted by associated
 @dfn{configuration file variables}.  The following configuration files
