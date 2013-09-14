@@ -3214,6 +3214,16 @@ See URL `http://www.gnu.org/software/bash/'."
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'bash)))
 
+(flycheck-def-option-var flycheck-clang-definitions nil c/c++-clang
+  "Additional preprocessor definitions for Clang.
+
+The value of this variable is a list of strings, where each
+string is an additional definition to pass to Clang, via the `-D'
+option."
+  :type '(repeat (string :tag "Definition"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.15"))
+
 (flycheck-def-option-var flycheck-clang-include-path nil c/c++-clang
   "A list of include directories for Clang.
 
@@ -3265,6 +3275,7 @@ See URL `http://clang.llvm.org/'."
                                         ; warning group
             (option "-std=" flycheck-clang-language-standard)
             (option-list "-W" flycheck-clang-warnings s-prepend)
+            (option-list "-D" flycheck-clang-definitions s-prepend)
             (option-list "-I" flycheck-clang-include-path)
             "-x" (eval
                   (cl-case major-mode

@@ -584,6 +584,10 @@ Some syntax checkers can be configured via options.  The following
 options are provided by Flycheck (use @kbd{C-h v} or @kbd{M-x
 describe-variable} on the variable name for detailed help):
 
+@defopt flycheck-clang-definitions
+Additional preprocessor definitions for @code{c/c++-clang}.
+@end defopt
+
 @defopt flycheck-clang-include-path
 Include search path for @code{c/c++-clang}.
 @end defopt
@@ -2808,6 +2812,9 @@ completion systems for @code{flycheck-select-checker} at @kbd{C-c ! s}
 @item
 @ghissue{207, Add @code{flycheck-clang-language-standard} to choose the
 language standard for C/C++ syntax checking}
+@item
+@ghissue{207, Add @code{flycheck-clang-definitions} to set additional
+definitions for C/C++ syntax checking}
 @end itemize
 
 @end itemize
