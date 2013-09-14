@@ -105,7 +105,17 @@
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
   (flycheck-testsuite-should-syntax-check
    "checkers/c_c++-clang-error.cpp" 'c++-mode nil
-   '(5 18 "implicit instantiation of undefined template 'test<false>'" error)))
+   '(5 18 "implicit instantiation of undefined template 'test<false>'" error)
+   '(6 17 "'nullptr' is a keyword in C++11" warning)
+   '(6 17 "use of undeclared identifier 'nullptr'" error)))
+
+(ert-deftest checker-c/c++-clang-error-language-standard ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
+  (flycheck-testsuite-with-hook c++-mode-hook
+      (setq flycheck-clang-language-standard "c++11")
+    (flycheck-testsuite-should-syntax-check
+     "checkers/c_c++-clang-error.cpp" 'c++-mode nil
+     '(5 18 "implicit instantiation of undefined template 'test<false>'" error))))
 
 (ert-deftest checker-c/c++-cppcheck-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)

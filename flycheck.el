@@ -3214,6 +3214,27 @@ See URL `http://www.gnu.org/software/bash/'."
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'bash)))
 
+(flycheck-def-option-var flycheck-clang-include-path nil c/c++-clang
+  "A list of include directories for Clang.
+
+The value of this variable is a list of strings, where each
+string is a directory to add to the include path of Clang.
+Relative paths are relative to the file being checked."
+  :type '(repeat (directory :tag "Include directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.14"))
+
+(flycheck-def-option-var flycheck-clang-language-standard nil c/c++-clang
+  "The language standard to use in Clang.
+
+The value of this variable is either a string denoting a language
+standard, or nil, to use the default standard.  When non-nil,
+pass the language standard via the `-std' option."
+  :type '(choice (const :tag "Default standard" nil)
+                 (string :tag "Language standard"))
+  :safe #'stringp
+  :package-version '(flycheck . "0.15"))
+
 (flycheck-def-option-var flycheck-clang-warnings '("all" "extra") c/c++-clang
   "A list of additional warnings to enable in Clang.
 
@@ -3231,16 +3252,6 @@ information about warnings."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.14"))
 
-(flycheck-def-option-var flycheck-clang-include-path nil c/c++-clang
-  "A list of include directories for Clang.
-
-The value of this variable is a list of strings, where each
-string is a directory to add to the include path of Clang.
-Relative paths are relative to the file being checked."
-  :type '(repeat (directory :tag "Include directory"))
-  :safe #'flycheck-string-list-p
-  :package-version '(flycheck . "0.14"))
-
 (flycheck-define-checker c/c++-clang
   "A C/C++ syntax checker using Clang.
 
@@ -3252,6 +3263,7 @@ See URL `http://clang.llvm.org/'."
                                         ; location
             "-fno-diagnostics-show-option" ; Do not show the corresponding
                                         ; warning group
+            (option "-std=" flycheck-clang-language-standard)
             (option-list "-W" flycheck-clang-warnings s-prepend)
             (option-list "-I" flycheck-clang-include-path)
             "-x" (eval
