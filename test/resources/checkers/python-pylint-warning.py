@@ -1,3 +1,6 @@
 # Use the builtin "map()"
 
-map(str, range(10))
+class Spam(object):
+
+    def with_eggs(self, n):
+        return map(str, range(n))

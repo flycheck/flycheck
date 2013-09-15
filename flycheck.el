@@ -4000,9 +4000,8 @@ See URL `http://pypi.python.org/pypi/pylint'."
   :error-patterns
   ((error line-start (file-name) ":" line ":"
           (or "E" "F") ":" (message) line-end)
-   ;; We ignore Convention level messages
    (warning line-start (file-name) ":" line ":"
-            (or "W" "R") ":" (message) line-end))
+            (or "W" "R" "C") ":" (message) line-end))
   :modes python-mode)
 
 (flycheck-define-checker rst
