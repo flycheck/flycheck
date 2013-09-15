@@ -101,11 +101,49 @@
     (flycheck-testsuite-should-syntax-check
      "checkers/c_c++-clang-fatal-error.c" 'c-mode nil)))
 
+(ert-deftest checker-c/c++-clang-includes ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
+  (flycheck-testsuite-with-hook c++-mode-hook
+      (setq flycheck-clang-includes
+            (list (flycheck-testsuite-resource-filename "checkers/c_c++-clang-header.h")))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/c_c++-clang-error.cpp" 'c++-mode nil
+     '(8 16 "'nullptr' is a keyword in C++11" warning)
+     '(8 16 "use of undeclared identifier 'nullptr'" error))))
+
 (ert-deftest checker-c/c++-clang-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
   (flycheck-testsuite-should-syntax-check
    "checkers/c_c++-clang-error.cpp" 'c++-mode nil
-   '(5 18 "implicit instantiation of undefined template 'test<false>'" error)))
+   '(6 17 "implicit instantiation of undefined template 'test<false>'" error)
+   '(8 16 "'nullptr' is a keyword in C++11" warning)
+   '(8 16 "use of undeclared identifier 'nullptr'" error)))
+
+(ert-deftest checker-c/c++-clang-error-language-standard ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
+  (flycheck-testsuite-with-hook c++-mode-hook
+      (setq flycheck-clang-language-standard "c++11")
+    (flycheck-testsuite-should-syntax-check
+     "checkers/c_c++-clang-error.cpp" 'c++-mode nil
+     '(6 17 "implicit instantiation of undefined template 'test<false>'" error))))
+
+(ert-deftest checker-c/c++-clang-error-definitions ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
+  (flycheck-testsuite-with-hook c++-mode-hook
+      (setq flycheck-clang-definitions '("FOO" "BAR"))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/c_c++-clang-error.cpp" 'c++-mode nil
+     '(8 16 "'nullptr' is a keyword in C++11" warning)
+     '(8 16 "use of undeclared identifier 'nullptr'" error))))
+
+(ert-deftest checker-c/c++-clang-error-no-rtti ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
+  (flycheck-testsuite-with-hook c++-mode-hook
+      (setq flycheck-clang-no-rtti t)
+    ;; Clang doesn't throw errors for RTTI operators :|, so we basically just
+    ;; test that the option flag doesn't cause any issues
+    (flycheck-testsuite-should-syntax-check
+     "checkers/c_c++-clang-error-rtti.cpp" 'c++-mode nil)))
 
 (ert-deftest checker-c/c++-cppcheck-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)

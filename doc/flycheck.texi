@@ -584,8 +584,24 @@ Some syntax checkers can be configured via options.  The following
 options are provided by Flycheck (use @kbd{C-h v} or @kbd{M-x
 describe-variable} on the variable name for detailed help):
 
+@defopt flycheck-clang-definitions
+Additional preprocessor definitions for @code{c/c++-clang}.
+@end defopt
+
 @defopt flycheck-clang-include-path
 Include search path for @code{c/c++-clang}.
+@end defopt
+
+@defopt flycheck-clang-includes
+Additional include files for @code{c/c++-clang}.
+@end defopt
+
+@defopt flycheck-clang-language-standard
+The language standard for @code{c/c++-clang}.
+@end defopt
+
+@defopt flycheck-clang-no-rtti
+Whether to disable RTTI in @code{c/c++-clang}.
 @end defopt
 
 @defopt flycheck-clang-warnings
@@ -1131,6 +1147,11 @@ string.  If omitted, it defaults to @code{list}, so by default,
 @var{filter} is an optional function to be applied to each item in the
 list before substitution.  Items for which the filter returns nil are
 dropped.  @xref{Option filters}, for a list of built-in option filters.
+
+@item (option-flag @var{option} @var{variable})
+This cell is substituted with @var{option}, if the value of
+@var{variable} is non-nil.  Otherwise it is simply dropped from the
+argument list.
 
 @item (eval @var{form})
 This cell is substituted with a result of evaluating @var{form}.
@@ -2801,6 +2822,21 @@ completion systems for @code{flycheck-select-checker} at @kbd{C-c ! s}
 @item
 @ghissue{202, Disable standard error navigation with
 @code{flycheck-standard-error-navigation}}
+@item
+@ghissue{207, Add @code{flycheck-clang-language-standard} to choose the
+language standard for C/C++ syntax checking}
+@item
+@ghissue{207, Add @code{flycheck-clang-definitions} to set additional
+definitions for C/C++ syntax checking}
+@item
+@ghissue{207, Add @code{flycheck-clang-no-rtti} to disable RTTI for
+C/C++ syntax checking}
+@item
+Add new option cell @code{option-flag} for boolean flags in syntax
+checker commands
+@item
+@ghissue{207, Add @code{flycheck-clang-includes} to include additional
+files for C/C++ syntax checking}
 @end itemize
 
 @end itemize

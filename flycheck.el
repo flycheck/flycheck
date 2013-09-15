@@ -1295,6 +1295,9 @@ error if not."
       (`(,(or `option `option-list) ,option-name ,option-var)
        (and (stringp option-name)
             (symbolp option-var)))
+      (`(option-flag ,option-name ,option-var)
+       (and (stringp option-name)
+            (symbolp option-var)))
       (`(,(or `option `option-list) ,option-name ,option-var ,prepender-or-filter)
        (and (stringp option-name)
             (-all? #'symbolp (list option-var prepender-or-filter))))
@@ -1675,6 +1678,10 @@ STRING
      return a list `(OPTION ITEM1 OPTION ITEM2 ...)'.  Otherwise
      return nil.
 
+`(option-flag OPTION VARIABLE)'
+     Retrieve the value of VARIABLE and return OPTION, if the
+     value is non-nil.  Otherwise return nil.
+
 `(eval FORM)
      Return the result of evaluating FORM in the buffer to be
      checked.  FORM must either return a string or a list of
@@ -1732,6 +1739,9 @@ are substituted within the body of cells!"
          (error "Value %S of %S for option %S is not a list of strings"
                 value variable option-name))
        (flycheck-prepend-with-option option-name value prepend-fn)))
+    (`(option-flag ,option-name ,variable)
+     (when (symbol-value variable)
+       option-name))
     (`(eval ,form)
      (let ((result (eval form)))
        (if (or (null result)
@@ -3214,6 +3224,55 @@ See URL `http://www.gnu.org/software/bash/'."
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'bash)))
 
+(flycheck-def-option-var flycheck-clang-definitions nil c/c++-clang
+  "Additional preprocessor definitions for Clang.
+
+The value of this variable is a list of strings, where each
+string is an additional definition to pass to Clang, via the `-D'
+option."
+  :type '(repeat (string :tag "Definition"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.15"))
+
+(flycheck-def-option-var flycheck-clang-include-path nil c/c++-clang
+  "A list of include directories for Clang.
+
+The value of this variable is a list of strings, where each
+string is a directory to add to the include path of Clang.
+Relative paths are relative to the file being checked."
+  :type '(repeat (directory :tag "Include directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.14"))
+
+(flycheck-def-option-var flycheck-clang-includes nil c/c++-clang
+  "A list of additional include files for Clang.
+
+The value of this variable is a list of strings, where each
+string is a file to include before syntax checking.  Relative
+paths are relative to the file being checked."
+  :type '(repeat (file :tag "Include file"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.15"))
+
+(flycheck-def-option-var flycheck-clang-language-standard nil c/c++-clang
+  "The language standard to use in Clang.
+
+The value of this variable is either a string denoting a language
+standard, or nil, to use the default standard.  When non-nil,
+pass the language standard via the `-std' option."
+  :type '(choice (const :tag "Default standard" nil)
+                 (string :tag "Language standard"))
+  :safe #'stringp
+  :package-version '(flycheck . "0.15"))
+
+(flycheck-def-option-var flycheck-clang-no-rtti nil c/c++-clang
+  "Whether to disable RTTI in Clang.
+
+When non-nil, disable RTTI for syntax checks, via `-fno-rtti'."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.15"))
+
 (flycheck-def-option-var flycheck-clang-warnings '("all" "extra") c/c++-clang
   "A list of additional warnings to enable in Clang.
 
@@ -3231,16 +3290,6 @@ information about warnings."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.14"))
 
-(flycheck-def-option-var flycheck-clang-include-path nil c/c++-clang
-  "A list of include directories for Clang.
-
-The value of this variable is a list of strings, where each
-string is a directory to add to the include path of Clang.
-Relative paths are relative to the file being checked."
-  :type '(repeat (directory :tag "Include directory"))
-  :safe #'flycheck-string-list-p
-  :package-version '(flycheck . "0.14"))
-
 (flycheck-define-checker c/c++-clang
   "A C/C++ syntax checker using Clang.
 
@@ -3252,7 +3301,11 @@ See URL `http://clang.llvm.org/'."
                                         ; location
             "-fno-diagnostics-show-option" ; Do not show the corresponding
                                         ; warning group
+            (option "-std=" flycheck-clang-language-standard)
+            (option-flag "-fno-rtti" flycheck-clang-no-rtti)
+            (option-list "-include" flycheck-clang-includes)
             (option-list "-W" flycheck-clang-warnings s-prepend)
+            (option-list "-D" flycheck-clang-definitions s-prepend)
             (option-list "-I" flycheck-clang-include-path)
             "-x" (eval
                   (cl-case major-mode
