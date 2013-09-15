@@ -2839,6 +2839,14 @@ checker commands
 files for C/C++ syntax checking}
 @end itemize
 
+@item
+Improvements:
+
+@itemize @bullet
+@item
+@ghissue{204, Do not ignore convention warnings by @command{pylint}}
+@end itemize
+
 @end itemize
 
 @node Credits, GNU Free Documentation License, Changes, Top

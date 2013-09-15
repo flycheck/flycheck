@@ -698,18 +698,25 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
    '(3 nil "invalid syntax (E0001)" error)))
 
 (ert-deftest checker-python-pylint-error ()
-  "Test an unknown module with pylint."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-pylint)
   (flycheck-testsuite-should-syntax-check
    "checkers/python-pylint-error.py" 'python-mode 'python-flake8
+   '(1 nil "Invalid module name \"python-pylint-error\" (C0103)" warning)
+   '(1 nil "Missing module docstring (C0111)" warning)
    '(3 nil "Unable to import 'spam' (F0401)" error)))
 
-(ert-deftest checker-python-pylint-used-map ()
-  "Test usage of the map() builtin with the pylint checker."
+(ert-deftest checker-python-pylint-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-pylint)
   (flycheck-testsuite-should-syntax-check
    "checkers/python-pylint-warning.py" 'python-mode 'python-flake8
-   '(3 nil "Used builtin function 'map' (W0141)" warning)))
+   '(1 nil "Invalid module name \"python-pylint-warning\" (C0103)" warning)
+   '(1 nil "Missing module docstring (C0111)" warning)
+   '(3 nil "Missing class docstring (C0111)" warning)
+   '(5 nil "Invalid argument name \"n\" (C0103)" warning)
+   '(5 nil "Missing method docstring (C0111)" warning)
+   '(6 nil "Used builtin function 'map' (W0141)" warning)
+   '(5 nil "Method could be a function (R0201)" warning)
+   '(3 nil "Too few public methods (1/2) (R0903)" warning)))
 
 (ert-deftest checker-rst-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'rst)
