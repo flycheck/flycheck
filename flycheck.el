@@ -3348,10 +3348,6 @@ See URL `http://cppcheck.sourceforge.net/'."
   :error-parser flycheck-parse-cppcheck
   :modes (c-mode c++-mode))
 
-(flycheck-def-config-file-var flycheck-coffeelintrc coffee-coffeelint
-                              ".coffeelint.json"
-  :safe #'stringp)
-
 (flycheck-define-checker coffee
   "A CoffeeScript syntax checker using coffee.
 
@@ -3363,6 +3359,10 @@ See URL `http://coffeescript.org/'."
           ": error: " (message) line-end))
   :modes coffee-mode
   :next-checkers ((warnings-only . coffee-coffeelint)))
+
+(flycheck-def-config-file-var flycheck-coffeelintrc coffee-coffeelint
+                              ".coffeelint.json"
+  :safe #'stringp)
 
 (flycheck-define-checker coffee-coffeelint
   "A CoffeeScript style checker using coffeelint.
