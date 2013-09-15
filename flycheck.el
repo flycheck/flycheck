@@ -3244,6 +3244,16 @@ Relative paths are relative to the file being checked."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.14"))
 
+(flycheck-def-option-var flycheck-clang-includes nil c/c++-clang
+  "A list of additional include files for Clang.
+
+The value of this variable is a list of strings, where each
+string is a file to include before syntax checking.  Relative
+paths are relative to the file being checked."
+  :type '(repeat (file :tag "Include file"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.15"))
+
 (flycheck-def-option-var flycheck-clang-language-standard nil c/c++-clang
   "The language standard to use in Clang.
 
@@ -3293,6 +3303,7 @@ See URL `http://clang.llvm.org/'."
                                         ; warning group
             (option "-std=" flycheck-clang-language-standard)
             (option-flag "-fno-rtti" flycheck-clang-no-rtti)
+            (option-list "-include" flycheck-clang-includes)
             (option-list "-W" flycheck-clang-warnings s-prepend)
             (option-list "-D" flycheck-clang-definitions s-prepend)
             (option-list "-I" flycheck-clang-include-path)

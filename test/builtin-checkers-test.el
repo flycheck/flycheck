@@ -101,6 +101,16 @@
     (flycheck-testsuite-should-syntax-check
      "checkers/c_c++-clang-fatal-error.c" 'c-mode nil)))
 
+(ert-deftest checker-c/c++-clang-includes ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
+  (flycheck-testsuite-with-hook c++-mode-hook
+      (setq flycheck-clang-includes
+            (list (flycheck-testsuite-resource-filename "checkers/c_c++-clang-header.h")))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/c_c++-clang-error.cpp" 'c++-mode nil
+     '(8 16 "'nullptr' is a keyword in C++11" warning)
+     '(8 16 "use of undeclared identifier 'nullptr'" error))))
+
 (ert-deftest checker-c/c++-clang-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
   (flycheck-testsuite-should-syntax-check

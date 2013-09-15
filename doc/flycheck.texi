@@ -592,6 +592,10 @@ Additional preprocessor definitions for @code{c/c++-clang}.
 Include search path for @code{c/c++-clang}.
 @end defopt
 
+@defopt flycheck-clang-includes
+Additional include files for @code{c/c++-clang}.
+@end defopt
+
 @defopt flycheck-clang-language-standard
 The language standard for @code{c/c++-clang}.
 @end defopt
@@ -2830,6 +2834,9 @@ C/C++ syntax checking}
 @item
 Add new option cell @code{option-flag} for boolean flags in syntax
 checker commands
+@item
+@ghissue{207, Add @code{flycheck-clang-includes} to include additional
+files for C/C++ syntax checking}
 @end itemize
 
 @end itemize
