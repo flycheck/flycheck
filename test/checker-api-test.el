@@ -139,6 +139,19 @@
                    '(option-list "-I" flycheck-test-option-var nil number-to-string) 'emacs-lisp)
                   :type 'wrong-type-argument)))
 
+(ert-deftest flycheck-substitute-argument-option-flag ()
+  (let ((flycheck-test-option-var nil))
+    (should-not (flycheck-substitute-argument
+                 '(option-flag "--foo" flycheck-test-option-var) 'emacs-lisp)))
+  (let ((flycheck-test-option-var t))
+    (should (equal (flycheck-substitute-argument
+                    '(option-flag "--foo" flycheck-test-option-var) 'emacs-lisp)
+                   "--foo")))
+  (let ((flycheck-test-option-var (list "bar")))
+    (should (equal (flycheck-substitute-argument
+                    '(option-flag "--foo" flycheck-test-option-var) 'emacs-lisp)
+                   "--foo"))))
+
 (ert-deftest flycheck-substitute-argument-eval ()
   (let ((flycheck-test-option-var '("Hello " "World")))
     (should (equal (flycheck-substitute-argument '(eval flycheck-test-option-var) 'emacs-lisp)
@@ -248,6 +261,19 @@
     (should-error (flycheck-substitute-shell-argument
                    '(option-list "-I" flycheck-test-option-var nil number-to-string) 'emacs-lisp)
                   :type 'wrong-type-argument)))
+
+(ert-deftest flycheck-substitute-shell-argument-option-flag ()
+  (let ((flycheck-test-option-var nil))
+    (should  (s-blank? (flycheck-substitute-shell-argument
+                        '(option-flag "--foo" flycheck-test-option-var) 'emacs-lisp))))
+  (let ((flycheck-test-option-var t))
+    (should (equal (flycheck-substitute-shell-argument
+                    '(option-flag "--foo" flycheck-test-option-var) 'emacs-lisp)
+                   "--foo")))
+  (let ((flycheck-test-option-var (list "bar")))
+    (should (equal (flycheck-substitute-shell-argument
+                    '(option-flag "--foo" flycheck-test-option-var) 'emacs-lisp)
+                   "--foo"))))
 
 (ert-deftest flycheck-substitute-shell-argument-eval ()
   (mocker-let

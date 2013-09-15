@@ -596,6 +596,10 @@ Include search path for @code{c/c++-clang}.
 The language standard for @code{c/c++-clang}.
 @end defopt
 
+@defopt flycheck-clang-no-rtti
+Whether to disable RTTI in @code{c/c++-clang}.
+@end defopt
+
 @defopt flycheck-clang-warnings
 Additional warnings to enable in @code{c/c++-clang}.
 @end defopt
@@ -1139,6 +1143,11 @@ string.  If omitted, it defaults to @code{list}, so by default,
 @var{filter} is an optional function to be applied to each item in the
 list before substitution.  Items for which the filter returns nil are
 dropped.  @xref{Option filters}, for a list of built-in option filters.
+
+@item (option-flag @var{option} @var{variable})
+This cell is substituted with @var{option}, if the value of
+@var{variable} is non-nil.  Otherwise it is simply dropped from the
+argument list.
 
 @item (eval @var{form})
 This cell is substituted with a result of evaluating @var{form}.
@@ -2815,6 +2824,12 @@ language standard for C/C++ syntax checking}
 @item
 @ghissue{207, Add @code{flycheck-clang-definitions} to set additional
 definitions for C/C++ syntax checking}
+@item
+@ghissue{207, Add @code{flycheck-clang-no-rtti} to disable RTTI for
+C/C++ syntax checking}
+@item
+Add new option cell @code{option-flag} for boolean flags in syntax
+checker commands
 @end itemize
 
 @end itemize

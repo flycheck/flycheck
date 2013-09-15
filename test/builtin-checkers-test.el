@@ -126,6 +126,15 @@
      '(8 16 "'nullptr' is a keyword in C++11" warning)
      '(8 16 "use of undeclared identifier 'nullptr'" error))))
 
+(ert-deftest checker-c/c++-clang-error-no-rtti ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
+  (flycheck-testsuite-with-hook c++-mode-hook
+      (setq flycheck-clang-no-rtti t)
+    ;; Clang doesn't throw errors for RTTI operators :|, so we basically just
+    ;; test that the option flag doesn't cause any issues
+    (flycheck-testsuite-should-syntax-check
+     "checkers/c_c++-clang-error-rtti.cpp" 'c++-mode nil)))
+
 (ert-deftest checker-c/c++-cppcheck-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
   (flycheck-testsuite-should-syntax-check
