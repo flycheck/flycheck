@@ -2813,9 +2813,9 @@ load path
 @end itemize
 
 @item
-New features
+New features:
 
-@itemize
+@itemize @bullet
 @item
 Support IDO or @uref{https://github.com/d11wtq/grizzl, Grizzl} as
 completion systems for @code{flycheck-select-checker} at @kbd{C-c ! s}
