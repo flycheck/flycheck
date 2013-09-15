@@ -673,6 +673,10 @@ The configuration file for the @code{python-flake8} syntax checker.
 The configuration file for the @code{javascript-jshint} syntax checker.
 @end defopt
 
+@defopt flycheck-pylintrc
+The configuration file for the @code{python-pylint} syntax checker.
+@end defopt
+
 @defopt flycheck-rubocoprc
 The configuration file for the @code{ruby-rubocop} syntax checker.
 @end defopt
@@ -2837,6 +2841,8 @@ checker commands
 @item
 @ghissue{207, Add @code{flycheck-clang-includes} to include additional
 files for C/C++ syntax checking}
+@item
+Add configuration file variable @code{flycheck-pylintrc} for Pylint
 @end itemize
 
 @item

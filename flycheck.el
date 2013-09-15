@@ -3987,6 +3987,10 @@ See URL `http://pypi.python.org/pypi/flake8'."
    (error line-start (file-name) ":" line ":" (message) line-end))
   :modes python-mode)
 
+(flycheck-def-config-file-var flycheck-pylintrc python-pylint
+                              ".pylintrc"
+  :safe #'stringp)
+
 (flycheck-define-checker python-pylint
   "A Python syntax and style checker using Pylint.
 
@@ -3996,6 +4000,7 @@ See URL `http://pypi.python.org/pypi/pylint'."
   ;; -r n disables the scoring report
   :command ("pylint" "-r" "n"
             "--msg-template" "{path}:{line}:{C}:{msg} ({msg_id})"
+            (config-file "--rcfile=" flycheck-pylintrc)
             source)
   :error-patterns
   ((error line-start (file-name) ":" line ":"
