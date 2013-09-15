@@ -3996,7 +3996,7 @@ See URL `http://pypi.python.org/pypi/pylint'."
   ;; -r n disables the scoring report
   :command ("pylint" "-r" "n"
             "--msg-template" "{path}:{line}:{C}:{msg} ({msg_id})"
-            source-inplace)
+            source)
   :error-patterns
   ((error line-start (file-name) ":" line ":"
           (or "E" "F") ":" (message) line-end)
