@@ -549,7 +549,7 @@ running checks, and empty all variables used by flycheck."
   (flycheck-clean-deferred-check)
   (flycheck-clear)
   (flycheck-stop-checker)
-  (flycheck-cancel-error-show-error-timer)
+  (flycheck-cancel-error-display-error-at-point-timer)
   (flycheck-safe-delete-temporaries)
   (flycheck-clear-checker))
 
@@ -570,10 +570,10 @@ running checks, and empty all variables used by flycheck."
     (kill-emacs-hook                  . flycheck-teardown)
     (change-major-mode-hook           . flycheck-teardown)
     ;; Show or hide error popups after commands
-    (post-command-hook                . flycheck-show-error-at-point-soon)
+    (post-command-hook                . flycheck-display-error-at-point-soon)
     (post-command-hook                . flycheck-hide-error-buffer)
     ;; Immediately show error popups when navigating to an error
-    (next-error-hook                  . flycheck-show-error-at-point))
+    (next-error-hook                  . flycheck-display-error-at-point))
   "Hooks which Flycheck needs to hook in.
 
 The `car' of each pair is a hook variable, the `cdr' a function
@@ -2921,30 +2921,28 @@ list."
   (when flycheck-display-errors-function
     (funcall flycheck-display-errors-function errors)))
 
-(defvar-local flycheck-error-show-error-timer nil
+(defvar-local flycheck-display-error-at-point-timer nil
   "Timer to automatically show the error at point in minibuffer.")
 
-(defun flycheck-cancel-error-show-error-timer ()
+(defun flycheck-cancel-error-display-error-at-point-timer ()
   "Cancel the error display timer for the current buffer."
-  (when flycheck-error-show-error-timer
-    (cancel-timer flycheck-error-show-error-timer)
-    (setq flycheck-error-show-error-timer nil)))
+  (when flycheck-display-error-at-point-timer
+    (cancel-timer flycheck-display-error-at-point-timer)
+    (setq flycheck-display-error-at-point-timer nil)))
 
-(defun flycheck-show-error-at-point ()
-  "Show the all error messages at point in minibuffer."
-  (flycheck-cancel-error-show-error-timer)
+(defun flycheck-display-error-at-point ()
+  "Display the all error messages at point in minibuffer."
+  (flycheck-cancel-error-display-error-at-point-timer)
   (when flycheck-mode
     (-when-let (errors (flycheck-overlay-errors-at (point)))
       (flycheck-display-errors errors))))
 
-(defun flycheck-show-error-at-point-soon ()
-  "Show the first error message at point in minibuffer asap.
-
-Show the error message at point in minibuffer after a short delay."
-  (flycheck-cancel-error-show-error-timer)
+(defun flycheck-display-error-at-point-soon ()
+  "Display the first error message at point in minibuffer delayed."
+  (flycheck-cancel-error-display-error-at-point-timer)
   (when (flycheck-overlays-at (point))
-    (setq flycheck-error-show-error-timer
-          (run-at-time 0.9 nil 'flycheck-show-error-at-point))))
+    (setq flycheck-display-error-at-point-timer
+          (run-at-time 0.9 nil 'flycheck-display-error-at-point))))
 
 
 ;;;; Error display functions
@@ -3111,7 +3109,7 @@ output: %s\nChecker definition probably flawed."
           (flycheck-error-list-refresh)
           (run-hooks 'flycheck-after-syntax-check-hook)
           (when (eq (current-buffer) (window-buffer))
-            (flycheck-show-error-at-point)))))))
+            (flycheck-display-error-at-point)))))))
 
 (defun flycheck-handle-signal (process _event)
   "Handle a signal from the syntax checking PROCESS.
