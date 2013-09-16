@@ -245,8 +245,6 @@ If set to nil, do not display errors at all."
   :group 'flycheck
   :type '(choice (const :tag "Display error messages"
                         flycheck-display-error-messages)
-                 (const :tag "Display errors in error list"
-                        flycheck-display-errors-in-list)
                  (function :tag "Error display function"))
   :package-version '(flycheck . "0.13")
   :risky t)
@@ -2986,19 +2984,6 @@ Hide the error buffer if there is no error under point."
                (window (get-buffer-window buffer)))
     (unless (flycheck-overlays-at (point))
       (quit-window nil window))))
-
-(defun flycheck-display-errors-in-list (errors)
-  "Display ERRORS in the error list.
-
-Add all ERRORS to the error list, but do *not* show the error
-list.
-
-Note that this function does *not* actually show the error list,
-it just adds ERRORS to it."
-  (unless (equal errors (flycheck-error-list-last-errors))
-    (flycheck-error-list-add-errors errors)
-    (with-current-buffer (flycheck-error-list-buffer)
-      (flycheck-error-list-recenter))))
 
 
 ;;;; Working with error messages
