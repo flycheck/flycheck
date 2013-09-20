@@ -1404,8 +1404,6 @@ value."
       (error "Missing :error-pattern or :error-parser"))
     (unless (or (null parser) (functionp parser))
       (error "%S is not a function" parser))
-    (unless (--all? (memq (car it) '(warning error)) patterns)
-      (error "Patterns %S have invalid levels" patterns))
     (unless (or modes predicate)
       (error "Missing :modes or :predicate"))
     (unless (or (symbolp modes) (-all? #'symbolp modes))
@@ -2280,6 +2278,109 @@ _not_ include the file name."
       (s-lex-format "${line}:${level}: ${message} (${checker})"))))
 
 
+;;;; Error levels
+
+;;;###autoload
+(defun flycheck-define-error-level (level &rest properties)
+  "Define a new error LEVEL with PROPERTIES.
+
+The following PROPERTIES constitute an error level:
+
+`:overlay-category CATEGORY'
+     A symbol denoting the overlay category to use for error
+     highlight overlays for this level.  See Info
+     node `(elisp)Overlay properties' for more information about
+     overlay categories.
+
+`:fringe-bitmap BITMAP'
+     A fringe bitmap symbol denoting the bitmap to use for fringe
+     indicators for this level.  See Info node `(elisp)Fringe
+     Bitmaps' for more information about fringe bitmaps.
+
+`:fringe-face FACE'
+     A face symbol denoting the face to use for fringe indicators
+     for this level."
+  (declare (indent 1))
+  (put level :flycheck-error-level t)
+  (put level :flycheck-overlay-category
+       (plist-get properties :overlay-category))
+  (put level :flycheck-fringe-bitmap
+       (plist-get properties :fringe-bitmap))
+  (put level :flycheck-fringe-face
+       (plist-get properties :fringe-face)))
+
+(defun flycheck-error-level-p (level)
+  "Determine whether LEVEL is a Flycheck error level."
+  (get level :flycheck-error-level))
+
+(defun flycheck-error-level-overlay-category (level)
+  "Get the overlay category for LEVEL."
+  (get level :flycheck-overlay-category))
+
+(defun flycheck-error-level-fringe-bitmap (level)
+  "Get the fringe bitmap for LEVEL."
+  (get level :flycheck-fringe-bitmap))
+
+(defun flycheck-error-level-fringe-face (level)
+  "Get the fringe face for LEVEL."
+  (get level :flycheck-fringe-face))
+
+(defun flycheck-error-level-make-fringe-icon (level side)
+  "Create the fringe icon for LEVEL at SIDE.
+
+Return a propertized string that shows a fringe bitmap according
+to LEVEL and the given fringe SIDE.
+
+LEVEL is a Flycheck error level defined with
+`flycheck-define-error-level', and SIDE is either `left-fringe'
+or `right-fringe'.
+
+Return a propertized string representing the fringe icon,
+intended for use as `before-string' of an overlay to actually
+show the icon."
+  (unless (memq side '(left-fringe right-fringe))
+    (error "Invalid fringe side: %S" side))
+  (propertize "!" 'display
+              (list side
+                    (flycheck-error-level-fringe-bitmap level)
+                    (flycheck-error-level-fringe-face level))))
+
+
+;;;; Built-in error levels
+(when (fboundp 'define-fringe-bitmap)
+  ;; define-fringe-bitmap is not available if Emacs is built without GUI
+  ;; support, see https://github.com/flycheck/flycheck/issues/57
+  (define-fringe-bitmap 'flycheck-fringe-exclamation-mark
+    [24 60 60 24 24 0 0 24 24] nil nil 'center))
+
+(defconst flycheck-fringe-exclamation-mark
+  (if (get 'exclamation-mark 'fringe)
+      'exclamation-mark
+    'flycheck-fringe-exclamation-mark)
+  "The symbol to use as exclamation mark bitmap.
+
+Defaults to the built-in exclamation mark if available or to the
+flycheck exclamation mark otherwise.")
+
+(put 'flycheck-error-overlay 'face 'flycheck-error)
+(put 'flycheck-error-overlay 'priority 110)
+(put 'flycheck-error-overlay 'help-echo "Unknown error.")
+
+(flycheck-define-error-level 'error
+  :overlay-category 'flycheck-error-overlay
+  :fringe-bitmap flycheck-fringe-exclamation-mark
+  :fringe-face 'flycheck-fringe-error)
+
+(put 'flycheck-warning-overlay 'face 'flycheck-warning)
+(put 'flycheck-warning-overlay 'priority 100)
+(put 'flycheck-warning-overlay 'help-echo "Unknown warning.")
+
+(flycheck-define-error-level 'warning
+  :overlay-category 'flycheck-warning-overlay
+  :fringe-bitmap 'question-mark
+  :fringe-face 'flycheck-fringe-warning)
+
+
 ;;;; General error parsing
 (defun flycheck-parse-output (output checker buffer)
   "Parse OUTPUT from CHECKER in BUFFER.
@@ -2608,74 +2709,32 @@ If LEVEL is omitted if the current buffer has any errors at all."
 
 
 ;;;; Error overlay management
-(when (fboundp 'define-fringe-bitmap)
-  ;; define-fringe-bitmap is not available if Emacs is built without GUI
-  ;; support, see https://github.com/flycheck/flycheck/issues/57
-  (define-fringe-bitmap 'flycheck-fringe-exclamation-mark
-    [24 60 60 24 24 0 0 24 24] nil nil 'center))
-
-(defconst flycheck-fringe-exclamation-mark
-  (if (get 'exclamation-mark 'fringe)
-      'exclamation-mark
-    'flycheck-fringe-exclamation-mark)
-  "The symbol to use as exclamation mark bitmap.
-
-Defaults to the built-in exclamation mark if available or to the
-flycheck exclamation mark otherwise.")
-
-(put 'flycheck-error-overlay 'flycheck-overlay t)
-(put 'flycheck-error-overlay 'face 'flycheck-error)
-(put 'flycheck-error-overlay 'priority 110)
-(put 'flycheck-error-overlay 'help-echo "Unknown error.")
-(put 'flycheck-error-overlay 'flycheck-fringe-face 'flycheck-fringe-error)
-(put 'flycheck-error-overlay 'flycheck-fringe-bitmap
-     flycheck-fringe-exclamation-mark)
-
-(put 'flycheck-warning-overlay 'flycheck-overlay t)
-(put 'flycheck-warning-overlay 'face 'flycheck-warning)
-(put 'flycheck-warning-overlay 'priority 100)
-(put 'flycheck-warning-overlay 'help-echo "Unknown warning.")
-(put 'flycheck-warning-overlay 'flycheck-fringe-face 'flycheck-fringe-warning)
-(put 'flycheck-warning-overlay 'flycheck-fringe-bitmap 'question-mark)
-
-(defun flycheck-make-fringe-icon (category)
-  "Create the fringe icon for CATEGORY.
-
-Return a propertized string that shows a fringe bitmap according
-to CATEGORY and the side specified `flycheck-indication-mode'.
-Use this string as `before-string' of an overlay to actually show
-the icon.
-
-If `flycheck-indication-mode' is neither `left-fringe' nor
-`right-fringe', returned nil."
-  (when (memq flycheck-indication-mode '(left-fringe right-fringe))
-    (let ((bitmap (get category 'flycheck-fringe-bitmap))
-          (face (get category 'flycheck-fringe-face)))
-      (propertize "!" 'display (list flycheck-indication-mode bitmap face)))))
-
 (defun flycheck-add-overlay (err)
   "Add overlay for ERR.
 
 Return the created overlay."
   (flycheck-error-with-buffer err
-    (pcase-let* ((mode flycheck-highlighting-mode)
-                 ;; Default to lines highlighting.  If MODE is nil, we want the
-                 ;; line for the sake of indication and error messages.  We erase
-                 ;; the highlighting later on
-                 (`(,beg . ,end) (flycheck-error-region-for-mode
-                                  err (or mode 'lines)))
+    ;; We must have a proper error region for the sake of fringe indication,
+    ;; error display and error navigation, even if the highlighting is disabled.
+    ;; We erase the highlighting later on in this case
+    (pcase-let* ((`(,beg . ,end) (flycheck-error-region-for-mode
+                                  err (or flycheck-highlighting-mode'lines)))
                  (overlay (make-overlay beg end))
                  (level (flycheck-error-level err))
-                 (category (pcase level
-                             (`warning 'flycheck-warning-overlay)
-                             (`error 'flycheck-error-overlay)
-                             (_ (error "Invalid error level %S" level)))))
+                 (category (flycheck-error-level-overlay-category level)))
+      (unless (flycheck-error-level-p level)
+        (error "Undefined error level: %S" level))
+      (overlay-put overlay 'flycheck-overlay t)
       (overlay-put overlay 'flycheck-error err)
       ;; TODO: Consider hooks to re-check if overlay contents change
       (overlay-put overlay 'category category)
-      (unless mode
+      (unless flycheck-highlighting-mode
         ;; Erase the highlighting from the overlay if requested by the user
         (overlay-put overlay 'face nil))
+      (when flycheck-indication-mode
+        (overlay-put overlay 'before-string
+                     (flycheck-error-level-make-fringe-icon
+                      level flycheck-indication-mode)))
       (-when-let (icon (flycheck-make-fringe-icon category))
         (overlay-put overlay 'before-string icon))
       (overlay-put overlay 'help-echo (flycheck-error-message err))
