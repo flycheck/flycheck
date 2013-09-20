@@ -2798,7 +2798,7 @@ Bug fixes:
 
 @end itemize
 
-@node master, , 0.14.1, Changes
+@node master, ,0.14.1, Changes
 @comment  node-name,  next,  previous,  up
 @unnumberedsec master (unreleased)
 
@@ -2814,6 +2814,13 @@ the online manual moved to @uref{http://flycheck.github.io}.
 @item
 Do not add the current directory to the @code{emacs-lisp} syntax checker
 load path
+@item
+@ghissue{214, @code{flycheck-list-errors} cannot list errors at point
+anymore}.  It does not accept a prefix argument anymore, and takes zero
+arguments now
+@item
+@ghissue{214, @code{flycheck-display-errors-in-list} is gone}.  The
+error list automatically highlights the error at point now
 @end itemize
 
 @item
@@ -2843,6 +2850,9 @@ checker commands
 files for C/C++ syntax checking}
 @item
 Add configuration file variable @code{flycheck-pylintrc} for Pylint
+@item
+@ghissue{214, New face @code{flycheck-error-list-highlight} to highlight
+the errors at point in the error list}
 @end itemize
 
 @item
@@ -2851,6 +2861,14 @@ Improvements:
 @itemize @bullet
 @item
 @ghissue{204, Do not ignore convention warnings by @command{pylint}}
+@item
+@ghissue{214, The error list now refreshes automatically after each
+syntax check}
+@item
+@ghissue{214, The errors at point are now automatically highlighted in
+the error list}
+@item
+
 @end itemize
 
 @end itemize
