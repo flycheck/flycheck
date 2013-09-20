@@ -706,6 +706,7 @@ returns t."
   (interactive)
   (flycheck-delete-all-overlays)
   (flycheck-clear-errors)
+  (flycheck-error-list-refresh)
   (flycheck-hide-error-buffer))
 
 (defun flycheck-buffer ()
