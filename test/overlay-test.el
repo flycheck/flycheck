@@ -29,21 +29,10 @@
 (require 'test-helper)
 
 (ert-deftest flycheck-overlay-categories ()
-  (--each '(flycheck-error-overlay flycheck-warning-overlay)
-    (should (get it 'flycheck-overlay)))
   (should (= (get 'flycheck-error-overlay 'priority) 110))
   (should (= (get 'flycheck-warning-overlay 'priority) 100))
   (should (eq (get 'flycheck-error-overlay 'face) 'flycheck-error))
   (should (eq (get 'flycheck-warning-overlay 'face) 'flycheck-warning))
-  (should (eq (get 'flycheck-error-overlay 'flycheck-fringe-face)
-              'flycheck-fringe-error))
-  (should (eq (get 'flycheck-warning-overlay 'flycheck-fringe-face)
-              'flycheck-fringe-warning))
-  (should (eq (get 'flycheck-error-overlay 'flycheck-fringe-bitmap)
-              flycheck-fringe-exclamation-mark))
-  (should (symbolp flycheck-fringe-exclamation-mark))
-  (should (eq (get 'flycheck-warning-overlay 'flycheck-fringe-bitmap)
-              'question-mark))
   (should (string= (get 'flycheck-error-overlay 'help-echo)
                    "Unknown error."))
   (should (string= (get 'flycheck-warning-overlay 'help-echo)
@@ -57,9 +46,9 @@
     (let ((overlay (flycheck-add-overlay (flycheck-error-new-at 1 1 'error))))
       (should (eq (overlay-get overlay 'category) 'flycheck-error-overlay)))
     (let ((err (should-error (flycheck-add-overlay (flycheck-error-new-at 1 1 'foo)))))
-      (should (string= (cadr err) "Invalid error level foo")))
+      (should (string= (cadr err) "Undefined error level: foo")))
     (let ((err (should-error (flycheck-add-overlay (flycheck-error-new-at 1 1)))))
-      (should (string= (cadr err) "Invalid error level nil")))))
+      (should (string= (cadr err) "Undefined error level: nil")))))
 
 (ert-deftest flycheck-add-overlay-help-echo ()
   (with-temp-buffer
@@ -67,6 +56,14 @@
       (let ((overlay (flycheck-add-overlay
                       (flycheck-error-new-at 1 1 it "A bar message"))))
         (should (string= (overlay-get overlay 'help-echo) "A bar message"))))))
+
+(ert-deftest flycheck-add-overlay-flycheck-overlay ()
+  (with-temp-buffer
+    (insert "Foo bar")
+    (--each '(warning error)
+      (let* ((err (flycheck-error-new-at 1 1 it))
+             (overlay (flycheck-add-overlay err)))
+        (should (overlay-get overlay 'flycheck-overlay))))))
 
 (ert-deftest flycheck-add-overlay-flycheck-error ()
   (with-temp-buffer
@@ -82,19 +79,14 @@
       (--each '(error warning)
         (let ((overlay (flycheck-add-overlay (flycheck-error-new-at 1 1 it))))
           (should-not (overlay-get overlay 'before-string)))))
-    ;; An unknown indication mode should cause no error indication
-    (let ((flycheck-indication-mode 'foo))
-      (--each '(error warning)
-        (let ((overlay (flycheck-add-overlay (flycheck-error-new-at 1 1 it))))
-          (should-not (overlay-get overlay 'before-string)))))
-    ;; Test the bitmap and face of fringe icons
+    ;; Test fringe face and bitmap
     (--each '(warning error)
       (pcase-let* ((overlay (flycheck-add-overlay (flycheck-error-new-at 1 1 it)))
                    (category (overlay-get overlay 'category))
                    (before-string (overlay-get overlay 'before-string))
                    (`(_ ,bitmap ,face) (get-text-property 0 'display before-string)))
-        (should (eq face (get category 'flycheck-fringe-face)))
-        (should (eq bitmap (get category 'flycheck-fringe-bitmap)))))
+        (should (eq face (flycheck-error-level-fringe-face it)))
+        (should (eq bitmap (flycheck-error-level-fringe-bitmap it)))))
     ;; Test the various indication modes
     (--each '(left-fringe right-fringe)
       (let ((flycheck-indication-mode it))

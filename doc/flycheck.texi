@@ -1006,13 +1006,14 @@ Flycheck to make it available to other users, too.  @xref{Contributing
 syntax checkers}, for more information.
 
 @menu
-* Definition::          How to define syntax checkers
-* Error parsers::       Built-in error parsers
-* Option filters::      Built-in option filters
-* Examples::            Examples on how to define syntax checkers
+* Definition::                  How to define syntax checkers
+* Error levels::                Built-in error levels and how to define new
+* Error parsers::               Built-in error parsers
+* Option filters::              Built-in option filters
+* Examples::                    Examples on how to define syntax checkers
 @end menu
 
-@node Definition, Error parsers, Extending, Extending
+@node Definition, Error levels, Extending, Extending
 @comment  node-name,  next,  previous,  up
 @section Definition of syntax checkers
 
@@ -1175,8 +1176,13 @@ This property is @b{mandatory}.
 An unquoted list of one or more error patterns to parse the output of
 the syntax checker @code{:command}.
 
-@var{level} is either @code{warning} or @code{error} and denotes the
-severity of errors matched by the pattern.
+@var{level} is a Flycheck error level, and denotes the severity of
+errors matched by the pattern.  This mainly affects the visual
+representation of matched errors in buffers.
+
+Flycheck provides the built-in error levels @code{error} and
+@code{warning}.  You can define your own error levels with
+@code{flycheck-define-error-level}.
 
 The @var{level} is followed by one or more @code{rx} @var{sexp}
 elements.  See the docstring of the function @code{rx} for more
@@ -1323,7 +1329,52 @@ Use this macro together with the @code{option} cell in the command of a
 syntax checker.
 @end defmac
 
-@node Error parsers, Option filters, Definition, Extending
+@node Error levels, Error parsers, Definition, Extending
+@comment  node-name,  next,  previous,  up
+@section Error levels
+
+Flycheck provides two built-in error levels:
+
+@table @code
+@item error
+Severe errors which cannot be ignored
+@item warning
+Potential errors which can be ignored
+@end table
+
+You can define your own error levels with
+@code{flycheck-define-error-level}:
+
+@deffn flycheck-define-error-level @var{level} &rest @var{properties}
+Define a new error @var{level} with @var{properties}.
+
+The following @var{properties} constitute an error level:
+
+@table @code
+@item :overlay-category @var{category}
+The overlay @var{category} for @var{level}, as symbol.
+
+An overlay category is a symbol whose properties provide the default
+values for overlays of this category.  @xref{Overlay properties, ,
+,elisp}, for more information about overlay properties and categories.
+
+A category for an error level overlay should at least define the
+@code{face} property, for error highlighting.  Other useful properties
+for error level categories are @code{priority} to influence the stacking
+of multiple error level overlays, and @code{help-echo} to define a
+default error messages for errors without messages.
+@item :fringe-face @var{face}
+A face to use for fringe indicators for @var{level}, as symbol.
+@item :fringe-bitmap @var{bitmap}
+A fringe bitmap to use for fringe indicators for @var{level}, as symbol.
+
+@xref{Fringe Bitmaps, , ,elisp}, for a list of built-in fringe bitmaps,
+and instructions on how to define new bitmaps.
+@end table
+
+@end deffn
+
+@node Error parsers, Option filters, Error levels, Extending
 @comment  node-name,  next,  previous,  up
 @section Error parsers
 
@@ -1458,7 +1509,7 @@ Next we give the list of @code{:error-patterns} to parse errors.  These
 patterns extract the error location and the error message from the
 output of @command{epylint}.  An error pattern is a list containing a
 regular expression with match groups to extract the error information,
-and an error level (either @code{warning} or @code{error}).
+and an error level.
 
 Eventually we enable the syntax checker in @code{python-mode}.
 
@@ -1546,7 +1597,7 @@ the @option{--config} option.
 
 To use a configuration file with jshint, we first declare the variable
 @code{flycheck-jshintrc} that provides the name of the file, as
-explained in @ref{Configuration}.
+oexplained in @ref{Configuration}.
 
 In the @code{:command} we use a @code{config-file} element to pass the
 configuration file to the syntax checker.  If the configuration file is
@@ -1675,8 +1726,8 @@ whole line.
 The human-readable error message as string.
 
 @item level
-The severity of the error message, as either @code{error} or
-@code{warning}.
+The error level of the message, as symbol denoting an error level
+defined with @code{flycheck-define-error-level}.
 @end table
 
 There are two constructors you may use to create errors:
@@ -2843,6 +2894,9 @@ checker commands
 files for C/C++ syntax checking}
 @item
 Add configuration file variable @code{flycheck-pylintrc} for Pylint
+@item
+@ghissue{212, Define new error levels with
+@code{flycheck-define-error-level}}
 @end itemize
 
 @item
