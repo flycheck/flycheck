@@ -45,7 +45,6 @@
 (require 's)
 (require 'dash)
 (require 'f)
-(require 'pkg-info)          ; Package and library version information
 (require 'rx)                ; Regexp fanciness in `flycheck-define-checker'
 (require 'cl-lib)            ; `cl-defstruct'
 (require 'help-mode)         ; `define-button-type'
@@ -629,15 +628,17 @@ buffer manually.
 ;;; Version information
 (defun flycheck-library-version ()
   "Get the version in the Flycheck library header."
-  (-when-let (version (pkg-info-defining-library-version 'flycheck-mode))
-    (pkg-info-format-version version)))
+  (when (fboundp 'pkg-info-defining-library-version)
+    (-when-let (version (pkg-info-defining-library-version 'flycheck-mode))
+      (package-version-join version))))
 
 (defun flycheck-package-version ()
   "Get the package version of Flycheck.
 
 This is the version number of the installed Flycheck package."
-  (-when-let (version (pkg-info-package-version 'flycheck))
-    (pkg-info-format-version version)))
+  (when (fboundp 'pkg-info-package-version)
+    (-when-let (version (pkg-info-package-version 'flycheck))
+      (package-version-join version))))
 
 (defun flycheck-version (&optional show-version)
   "Get the Flycheck version as string.
@@ -662,7 +663,7 @@ just return nil."
                     (format "%s" (or pkg-version lib-version))))))
     (when show-version
       (unless version
-        (error "Could not find out Flycheck version"))
+        (error "Could not find out Flycheck version. Please install pkg-info."))
       (message "Flycheck version: %s" version))
     version))
 
@@ -2848,17 +2849,6 @@ Return the label as string."
     (file-relative-name filename)
     (flycheck-error-list-buffer-label (flycheck-error-buffer err))))
 
-(defun flycheck-error-list-insert-header (buffer)
-  "Insert an error header for BUFFER into the current buffer.
-
-Insert an error list header for BUFFER into the current buffer.
-The header contains the filename of BUFFER relative to the
-current `default-directory', or the buffer name, if BUFFER has no
-file name."
-  (insert (format "\n\n\C-l\n*** %s: Syntax and style errors (Flycheck v%s)\n"
-                  (flycheck-error-list-buffer-label buffer)
-                  (or (flycheck-version) "Unknown"))))
-
 (defun flycheck-error-list-insert-errors (errors)
   "Insert a list of all ERRORS into the current buffer.
 
@@ -2892,7 +2882,6 @@ and thus used by `flycheck-error-list-refresh'."
             flycheck-error-list-last-errors errors)
       (let ((inhibit-read-only t))
         (goto-char (point-max))
-        (flycheck-error-list-insert-header source-buffer)
         (flycheck-error-list-insert-errors errors)))))
 
 (defun flycheck-error-list-goto-current-errors ()
