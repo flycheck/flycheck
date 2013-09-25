@@ -3462,7 +3462,7 @@ See URL `http://elixir-lang.org/'."
   :modes elixir-mode)
 
 (defconst flycheck-emacs-command
-  `(,(concat invocation-directory invocation-name) "-Q" "--batch")
+  `(,(concat invocation-directory invocation-name) "-q" "--batch" "--no-splash" )
   "A command to execute an Emacs Lisp form in a background process.")
 
 (defconst flycheck-emacs-lisp-check-form
@@ -3499,6 +3499,16 @@ is used."
   :type '(repeat directory)
   :risky t
   :package-version '(flycheck . "0.14"))
+
+(flycheck-def-option-var flycheck-emacs-lisp-no-site t emacs-lisp
+  "Whether to disable the site-wide startup file and site-lisp directories.
+
+When non-nil, disable the site-wide startup file for syntax checks, via
+`--no-site-file' also do not add site-lisp directories to load-path with
+`--no-site-lisp' option."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.15"))
 
 (flycheck-def-option-var flycheck-emacs-lisp-initialize-packages
     'auto emacs-lisp
@@ -3548,6 +3558,8 @@ This variable has no effect, if
 (flycheck-define-checker emacs-lisp
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler."
   :command ((eval flycheck-emacs-command)
+            (option-flag "--no-site-file" flycheck-emacs-lisp-no-site)
+            (option-flag "--no-site-lisp" flycheck-emacs-lisp-no-site)
             (option-list "--directory" flycheck-emacs-lisp-load-path nil
                          ;; Expand relative paths against the directory of the
                          ;; buffer to check
