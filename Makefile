@@ -79,7 +79,9 @@ clean-html:
 	rm -rf doc/html
 
 %.elc : %.el $(PKGDIR)
-	$(CASK) exec $(EMACS) -Q --batch $(EMACSFLAGS) -f batch-byte-compile $<
+	$(CASK) exec $(EMACS) -Q --batch $(EMACSFLAGS) \
+		--eval '(setq package-user-dir "$(PKGDIR)")' -f package-initialize \
+		-f batch-byte-compile $<
 
 $(PKGDIR) : Cask
 	$(CASK) install
