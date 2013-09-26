@@ -40,12 +40,20 @@
   (require 'jka-compr)                  ; For JKA workarounds in
                                         ; `flycheck-temp-file-system'
   (require 'compile)                    ; Compile Mode integration
-  (require 'sh-script))                 ; `sh-shell' for sh checker predicates
+  (require 'sh-script)                  ; `sh-shell' for sh checker predicates
+
+  ;; Package and library version information. We do not need to require it at
+  ;; runtime, since the main entry points are autoloaded, however we must
+  ;; required it during compilation time, because we later on call
+  ;; `pkg-info-format-version' which is not autoloaded.  Since we call an entry
+  ;; point before calling this function, we do know that pkg-info is loaded by
+  ;; then, but the byte compiler doesn't, so let's silence it.
+  (require 'pkg-info)                  ; Package and library version information
+  )
 
 (require 's)
 (require 'dash)
 (require 'f)
-(require 'pkg-info)          ; Package and library version information
 (require 'rx)                ; Regexp fanciness in `flycheck-define-checker'
 (require 'cl-lib)            ; `cl-defstruct'
 (require 'help-mode)         ; `define-button-type'
