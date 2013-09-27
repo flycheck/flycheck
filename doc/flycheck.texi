@@ -2851,6 +2851,9 @@ Improvements:
 @itemize @bullet
 @item
 @ghissue{204, Do not ignore convention warnings by @command{pylint}}
+@item
+@code{emacs-lisp-checkdoc} does not longer check @file{.dir-locals.el}
+files
 @end itemize
 
 @end itemize

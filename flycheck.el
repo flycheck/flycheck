@@ -3627,11 +3627,11 @@ The checker runs `checkdoc-current-buffer'."
   :predicate
   (lambda ()
     (not (or (flycheck-autoloads-file-p)
-             ;; Do not check Cask/Carton files.  These really don't need to
-             ;; follow Checkdoc conventions
+             ;; Do not check Cask/Carton and dir-locals files.  These really
+             ;; don't need to follow Checkdoc conventions
              (and (buffer-file-name)
                   (member (f-filename (buffer-file-name))
-                          '("Cask" "Carton")))))))
+                          '("Cask" "Carton" ".dir-locals.el")))))))
 
 (flycheck-define-checker erlang
   "An Erlang syntax checker using the Erlang interpreter."
