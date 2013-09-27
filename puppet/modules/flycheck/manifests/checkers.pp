@@ -11,6 +11,14 @@ class flycheck::checkers {
 
   # Various other syntax checkers
 
+  # This PPA provides Clang 3.2 for Ubuntu 12.04
+  apt::ppa { 'ppa:kxstudio-team/builds': }
+
+  package { 'clang':
+    ensure  => latest,
+    require => Apt::Ppa['ppa:kxstudio-team/builds'],
+  }
+
   apt::ppa { 'ppa:kevincantu/rust': }
 
   package { 'rust':
@@ -37,7 +45,6 @@ class flycheck::checkers {
   }
 
   $packages = [ 'bash',            # bash/sh-bash
-                'clang',           # c/c++-clang
                 'cppcheck',        # c/c++-cpppcheck
                 'tidy',            # html-tidy
                 'lua5.2',          # lua

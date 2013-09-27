@@ -108,7 +108,6 @@
             (list (flycheck-testsuite-resource-filename "checkers/c_c++-clang-header.h")))
     (flycheck-testsuite-should-syntax-check
      "checkers/c_c++-clang-error.cpp" 'c++-mode nil
-     '(8 16 "'nullptr' is a keyword in C++11" warning)
      '(8 16 "use of undeclared identifier 'nullptr'" error))))
 
 (ert-deftest checker-c/c++-clang-error ()
@@ -116,7 +115,6 @@
   (flycheck-testsuite-should-syntax-check
    "checkers/c_c++-clang-error.cpp" 'c++-mode nil
    '(6 17 "implicit instantiation of undefined template 'test<false>'" error)
-   '(8 16 "'nullptr' is a keyword in C++11" warning)
    '(8 16 "use of undeclared identifier 'nullptr'" error)))
 
 (ert-deftest checker-c/c++-clang-error-language-standard ()
@@ -133,7 +131,6 @@
       (setq flycheck-clang-definitions '("FOO" "BAR"))
     (flycheck-testsuite-should-syntax-check
      "checkers/c_c++-clang-error.cpp" 'c++-mode nil
-     '(8 16 "'nullptr' is a keyword in C++11" warning)
      '(8 16 "use of undeclared identifier 'nullptr'" error))))
 
 (ert-deftest checker-c/c++-clang-error-no-rtti ()
