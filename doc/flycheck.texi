@@ -3093,4 +3093,5 @@ the syntax checker under point.
 @c mode: texinfo
 @c TeX-master: t
 @c TeX-command-default: "Makeinfo"
+@c coding: utf-8
 @c End:
