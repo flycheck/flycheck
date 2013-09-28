@@ -301,6 +301,10 @@ add the following to your @file{init.el} file:
 (add-hook 'after-init-hook #'global-flycheck-mode)
 @end lisp
 
+Flycheck will not check syntax in buffers for remote or encrypted
+files.  The former is potentially slow, and the latter might leak
+confidential data to temporary directories.
+
 @node Usage, Extending, Introduction, Top
 @comment  node-name,  next,  previous,  up
 @chapter Usage
