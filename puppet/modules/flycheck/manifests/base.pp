@@ -14,6 +14,9 @@ class flycheck::base {
   # Texinfo building
   package { ['texinfo', 'install-info']: ensure => latest }
 
+  # Decrypt encrypted files in unit tests
+  package { 'gnupg': ensure => latest }
+
   # Emacs packages
   apt::ppa { 'ppa:cassou/emacs': }
 
