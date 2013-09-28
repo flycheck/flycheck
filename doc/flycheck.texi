@@ -25,12 +25,29 @@
 @ifhtml
 @html
 <div id="frontmatter">
+
+<div align="center">
 @end html
 
-@center Flycheck is a modern on-the-fly syntax checker for GNU Emacs 24
-@center (aka ``Flymake done right'')
+Flycheck is a modern on-the-fly syntax checker for GNU Emacs 24 (aka
+``Flymake done right'')
 
-@center Proceed to the @ref{Introduction} for more information
+@html
+</div>
+@end html
+
+@center Proceed to the @ref{Introduction} for more information.
+
+@html
+<div align="center">
+@end html
+
+Or head over to @uref{https://github.com/flycheck/flycheck, Github} for
+the source code and issue tracker.
+
+@html
+</div>
+@end html
 
 @center @image{screenshot,,,Flycheck in action}
 
