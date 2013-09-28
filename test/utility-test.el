@@ -117,6 +117,18 @@
     (rename-buffer "foo")
     (should-not (flycheck-ephemeral-buffer-p))))
 
+(ert-deftest flycheck-encrypted-buffer-p ()
+  (with-temp-buffer
+    (should-not (flycheck-encrypted-buffer-p)))
+  (flycheck-testsuite-with-resource-buffer "global-mode-dummy.el"
+    (should-not (flycheck-encrypted-buffer-p)))
+  (let* ((filename (flycheck-testsuite-resource-filename "encrypted-file.el.gpg"))
+         ;; Tell EPA about our passphrase
+         (epa-file-cache-passphrase-for-symmetric-encryption t)
+         (epa-file-passphrase-alist (list (cons filename "foo"))))
+    (flycheck-testsuite-with-resource-buffer filename
+      (should (flycheck-encrypted-buffer-p)))))
+
 (ert-deftest flycheck-safe-delete-recursive ()
   (let ((dirname (flycheck-temp-dir-system "flycheck-test")))
     (unwind-protect

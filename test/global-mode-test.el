@@ -27,6 +27,7 @@
 ;;; Code:
 
 (require 'test-helper)
+(require 'epa-file)
 
 (ert-deftest flycheck-may-enable-mode-no-undo-buffers ()
   (with-temp-buffer
@@ -38,6 +39,16 @@
     (rename-buffer " foo")
     (should (string= (buffer-name) " foo"))
     (should-not (flycheck-may-enable-mode))))
+
+(ert-deftest flycheck-may-enable-mode-encrypted-file ()
+  (let* ((filename (flycheck-testsuite-resource-filename "encrypted-file.el.gpg"))
+         ;; Tell EPA about our passphrase
+         (epa-file-cache-passphrase-for-symmetric-encryption t)
+         (epa-file-passphrase-alist (list (cons filename "foo"))))
+    (flycheck-testsuite-with-resource-buffer filename
+      (emacs-lisp-mode)
+      (should (flycheck-get-checker-for-buffer))
+      (should-not (flycheck-may-enable-mode)))))
 
 (ert-deftest flycheck-may-enable-mode-tramp ()
   :expected-result :failed
@@ -67,6 +78,16 @@
       (rename-buffer " foo")
       (emacs-lisp-mode)
       (should-not flycheck-mode))))
+
+(ert-deftest flycheck-global-mode-no-encrypted-file ()
+  (let* ((filename (flycheck-testsuite-resource-filename "encrypted-file.el.gpg"))
+         ;; Tell EPA about our passphrase
+         (epa-file-cache-passphrase-for-symmetric-encryption t)
+         (epa-file-passphrase-alist (list (cons filename "foo"))))
+    (flycheck-with-global-mode
+      (flycheck-testsuite-with-resource-buffer filename
+        (emacs-lisp-mode)
+        (should-not flycheck-mode)))))
 
 (ert-deftest flycheck-global-mode-no-checker-found ()
   (flycheck-with-global-mode

@@ -676,12 +676,16 @@ just return nil."
 (defun flycheck-may-enable-mode ()
   "Determine whether Flycheck mode may be enabled.
 
-Flycheck mode is not enabled for ephemeral buffers (see
-`flycheck-ephemeral-buffer-p'), remote files (see
-`file-remote-p'), or if no suitable syntax checker exists.
+Flycheck mode is not enabled for
+
+- ephemeral buffers (see `flycheck-ephemeral-buffer-p'),
+- encrypted buffers (see `flycheck-encrypted-buffer-p'),
+- remote files (see `file-remote-p'),
+- or if no suitable syntax checker exists.
 
 Return t if Flycheck mode may be enabled, and nil otherwise."
   (and (not (flycheck-ephemeral-buffer-p))
+       (not (flycheck-encrypted-buffer-p))
        (not (and (buffer-file-name) (file-remote-p (buffer-file-name) 'method)))
        (flycheck-get-checker-for-buffer)))
 
@@ -1017,6 +1021,17 @@ ITEMS."
 See Info node `(elisp)Buffer Names' for information about
 ephemeral buffers."
   (s-starts-with? " " (buffer-name)))
+
+(defun flycheck-encrypted-buffer-p ()
+  "Determine whether the current buffer is an encrypted file.
+
+See Info node `(epa)Top' for Emacs' interface to encrypted
+files."
+  ;; The EPA file handler sets this variable locally to remember the recipients
+  ;; of the encrypted file for re-encryption.  Hence, a local binding of this
+  ;; variable is a good indication that the buffer is encrypted.  I haven't
+  ;; found any better indicator anyway.
+  (local-variable-p 'epa-file-encrypt-to))
 
 (defun flycheck-autoloads-file-p ()
   "Determine whether the current buffer is a autoloads file.
