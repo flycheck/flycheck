@@ -2873,9 +2873,8 @@ list."
   (interactive)
   (when (flycheck-error-list-buffer-exists-p)
     (let* ((error-list-buffer (flycheck-error-list-buffer))
-           (source-buffer (if (eq (current-buffer) error-list-buffer)
-                              flycheck-error-list-source-buffer
-                            (current-buffer)))
+           (source-buffer (buffer-local-value 'flycheck-error-list-source-buffer
+                                              error-list-buffer))
            (errors (buffer-local-value 'flycheck-current-errors source-buffer )))
       (when (buffer-live-p source-buffer)
         (unless (buffer-local-value 'flycheck-mode source-buffer)
