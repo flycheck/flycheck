@@ -2942,10 +2942,9 @@ as source buffer."
     (user-error "Flycheck mode not enabled"))
   (flycheck-error-list-set-source (current-buffer))
   ;; Show the error list in a window, and re-select the old window
-  (let ((current-frame (selected-frame))
-        (old-window (selected-window)))
+  (let ((old-window (selected-window)))
     (pop-to-buffer (flycheck-error-list-buffer))
-    (set-frame-selected-window current-frame old-window))
+    (select-window old-window))
   ;; Finally, refresh the error list to show the most recent errors
   (flycheck-error-list-refresh))
 
