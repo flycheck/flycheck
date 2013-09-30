@@ -2928,6 +2928,14 @@ files
 @ghissue{222, Do not automatically check syntax in encrypted files}
 @end itemize
 
+@item
+Bug fixes:
+
+@itemize @bullet
+@item
+@ghissue{225, Find local includes in the Clang syntax checker}
+@end itemize
+
 @end itemize
 
 @node Credits, GNU Free Documentation License, Changes, Top

@@ -1,2 +1,0 @@
-#define FOO
-#define BAR

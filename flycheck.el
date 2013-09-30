@@ -3387,7 +3387,10 @@ See URL `http://clang.llvm.org/'."
             "-x" (eval
                   (cl-case major-mode
                     (c++-mode "c++")
-                    (c-mode "c"))) source)
+                    (c-mode "c")))
+            ;; We must stay in the same directory, to properly resolve #include
+            ;; with quotes
+            source-inplace)
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column
             ": warning: " (message) line-end)

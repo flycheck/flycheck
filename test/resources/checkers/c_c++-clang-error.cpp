@@ -1,8 +1,10 @@
+#include "c_c++-clang-local-header.h"
+
 template<bool> struct test;
 template<> struct test<true> {};
 
 int main(void) {
-#if !(defined(FOO) && defined(BAR))
+#if !(defined(FLYCHECK_LOCAL) && defined(FLYCHECK_LIBRARY))
     test<false> t;
 #endif
     int *foo = nullptr;

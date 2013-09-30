@@ -1,0 +1,1 @@
+#define FLYCHECK_LIBRARY
