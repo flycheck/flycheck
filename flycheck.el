@@ -225,8 +225,8 @@ Flycheck error to process.
 All functions in this hook are called in order of appearance,
 until a function returns non-nil.  Thus, a function in this hook
 may return nil, to allow for further processing of the error, or
-t, to indicate that the error was fully processed and inhibit any
-further processing.
+any non-nil value, to indicate that the error was fully processed
+and inhibit any further processing.
 
 The functions are called for each newly parsed error immediately
 after the corresponding syntax checker finished.  At this stage,
