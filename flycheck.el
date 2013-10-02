@@ -573,6 +573,8 @@ running checks, and empty all variables used by flycheck."
     (kill-buffer-hook                 . flycheck-teardown)
     (kill-emacs-hook                  . flycheck-teardown)
     (change-major-mode-hook           . flycheck-teardown)
+    ;; Update the error list if necessary
+    (post-command-hook                . flycheck-error-list-update-source)
     ;; Show or hide error popups after commands
     (post-command-hook                . flycheck-display-error-at-point-soon)
     (post-command-hook                . flycheck-hide-error-buffer)
@@ -2939,6 +2941,16 @@ list."
       (goto-char (point-min))
       (forward-line (1- (+ min-line (max 0 (/ (- max-line min-line) 2)))))
       (flycheck-error-list-recenter-at (point)))))
+
+(defun flycheck-error-list-update-source ()
+  "Update the source buffer of the error list."
+  (when (not (or (eq (current-buffer) (flycheck-error-list-buffer))
+                 (eq (current-buffer) (flycheck-error-list-source))))
+    ;; We must not update the source buffer, if the current buffer is the error
+    ;; list itself.  If the current buffer is already the source of the error
+    ;; list, we don't need to do anything, too.
+    (flycheck-error-list-set-source (current-buffer))
+    (flycheck-error-list-refresh)))
 
 (defun flycheck-list-errors ()
   "Show the error list for the current buffer."

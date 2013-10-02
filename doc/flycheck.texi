@@ -2853,6 +2853,9 @@ Add configuration file variable @code{flycheck-pylintrc} for Pylint
 @item
 @ghissue{214, New face @code{flycheck-error-list-highlight} to highlight
 the errors at point in the error list}
+@item
+@ghissue{214, The error list now automatically updates to show the
+errors of the current buffer}
 @end itemize
 
 @item
