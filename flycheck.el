@@ -2923,7 +2923,6 @@ list."
       (when errors
         (save-excursion
           (goto-char (point-min))
-          (forward-line 1)
           (while (< (point) (point-max))
             (let ((error-at-line (get-text-property (point) 'flycheck-error)))
               (when (and error-at-line (member error-at-line errors))
