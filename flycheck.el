@@ -2784,16 +2784,21 @@ the beginning of the buffer."
   "The name of the buffer to show error lists.")
 
 (defun flycheck-error-list-buffer ()
-  "Get the buffer to show error lists.
+  "Get the error list buffer.
 
-If the buffer does not exist yet, create it.
-
-Return the buffer object."
-  (get-buffer-create flycheck-error-list-buffer))
-
-(defun flycheck-error-list-buffer-exists-p ()
-  "Determine whether an error list buffer exists."
+Return the buffer object, or nil, if the error list does not
+exist."
   (get-buffer flycheck-error-list-buffer))
+
+(defmacro flycheck-with-error-list (&rest body)
+  "Evaluate BODY in the error list buffer.
+
+If the error list exists, evaluate BODY with the error list as
+current buffer.  If no error list exists, do not evaluate BODY."
+  (declare (indent 0))
+  `(-when-let (error-list (flycheck-error-list-buffer))
+     (with-current-buffer error-list
+       ,@body)))
 
 (defconst flycheck-list-error-regex-alist
   '(("^\\(?1:.+?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)?error:" 1 2 3 2)
@@ -2812,6 +2817,29 @@ Return the buffer object."
 
 (defvar-local flycheck-error-list-source-buffer nil
   "The current source buffer of the error list.")
+
+(defun flycheck-error-list-source ()
+  "Get the current source buffer of the error list.
+
+Return nil, if the error list does not have a source buffer, or
+if the source buffer is not alive anymore."
+  (-when-let* ((error-list (flycheck-error-list-buffer))
+               (source (buffer-local-value 'flycheck-error-list-source-buffer
+                                           error-list)))
+    (when (buffer-live-p source)
+      source)))
+
+(defun flycheck-error-list-set-source (buffer)
+  "Set BUFFER as the source buffer of the error list."
+  (flycheck-with-error-list
+    (flycheck-error-list-mode)
+    (setq flycheck-error-list-source-buffer buffer
+          ;; Change to the right working directory to let compile-mode resolve
+          ;; error references properly.
+          default-directory (buffer-local-value 'default-directory buffer))
+    ;; Remove any old errors
+    (let ((inhibit-read-only t))
+      (erase-buffer))))
 
 (defun flycheck-error-list-buffer-label (buffer)
   "Create a list label for BUFFER relative to DIRECTORY.
@@ -2871,74 +2899,54 @@ Add all errors currently reported for the current
 `flycheck-error-list-source-buffer', and recenter the error
 list."
   (interactive)
-  (when (flycheck-error-list-buffer-exists-p)
-    (let* ((error-list-buffer (flycheck-error-list-buffer))
-           (source-buffer (buffer-local-value 'flycheck-error-list-source-buffer
-                                              error-list-buffer))
-           (errors (buffer-local-value 'flycheck-current-errors source-buffer )))
-      (when (buffer-live-p source-buffer)
-        (unless (buffer-local-value 'flycheck-mode source-buffer)
-          (user-error "Flycheck mode disabled in %S" source-buffer))
-        (with-current-buffer (flycheck-error-list-buffer)
-          (let ((inhibit-read-only t))
-            (erase-buffer)
-            (flycheck-error-list-insert-errors errors))
-          (flycheck-error-list-recenter-at (point-min)))))))
+  (-when-let (source-buffer (flycheck-error-list-source))
+    (let ((errors (buffer-local-value 'flycheck-current-errors source-buffer)))
+      (flycheck-with-error-list
+        (let ((inhibit-read-only t))
+          (erase-buffer)
+          (flycheck-error-list-insert-errors errors))
+        (flycheck-error-list-recenter-at (point-min))))))
 
 (defvar-local flycheck-error-list-highlight-overlays nil
   "Error highlight overlays in the error list buffer.")
 
 (defun flycheck-error-list-highlight-errors (errors)
   "Highlight ERRORS in the error list."
-  (when (flycheck-error-list-buffer-exists-p)
-    (with-current-buffer (flycheck-error-list-buffer)
-      (let ((old-overlays flycheck-error-list-highlight-overlays)
-            (min-line (line-number-at-pos (point-max)))
-            (max-line (line-number-at-pos (point-min))))
-        ;; Display the new overlays first, to avoid re-display flickering
-        (setq flycheck-error-list-highlight-overlays nil)
-        (when errors
-          (save-excursion
-            (goto-char (point-min))
-            (forward-line 1)
-            (while (< (point) (point-max))
-              (let ((error-at-line (get-text-property (point) 'flycheck-error)))
-                (when (and error-at-line (member error-at-line errors))
-                  ;; Adjust minimum and maximum lines
-                  (setq min-line (min min-line (line-number-at-pos (point)))
-                        max-line (max max-line (line-number-at-pos (point))))
-                  (let ((ov (make-overlay (line-beginning-position)
-                                          (line-end-position))))
-                    (push ov flycheck-error-list-highlight-overlays)
-                    (overlay-put ov 'flycheck-error-highlight-overlay t)
-                    (overlay-put ov 'face 'flycheck-error-list-highlight))))
-              (forward-line 1))))
-        ;; Delete the old overlays
-        (-each old-overlays #'delete-overlay)
-        (goto-char (point-min))
-        (forward-line (1- (+ min-line (max 0 (/ (- max-line min-line) 2)))))
-        (flycheck-error-list-recenter-at (point))))))
-
-(defun flycheck-error-list-set-source (buffer)
-  "Set BUFFER as the source buffer of the error list.
-
-If the error list does not exist yet, it is created with BUFFER
-as source buffer."
-  (with-current-buffer (flycheck-error-list-buffer)
-    (flycheck-error-list-mode)
-    (setq flycheck-error-list-source-buffer buffer
-          ;; Change to the right working directory to let compile-mode resolve
-          ;; error references properly.
-          default-directory (buffer-local-value 'default-directory buffer))
-    ;; Remove any old errors
-    (let ((inhibit-read-only t))
-      (erase-buffer))))
+  (flycheck-with-error-list
+    (let ((old-overlays flycheck-error-list-highlight-overlays)
+          (min-line (line-number-at-pos (point-max)))
+          (max-line (line-number-at-pos (point-min))))
+      ;; Display the new overlays first, to avoid re-display flickering
+      (setq flycheck-error-list-highlight-overlays nil)
+      (when errors
+        (save-excursion
+          (goto-char (point-min))
+          (forward-line 1)
+          (while (< (point) (point-max))
+            (let ((error-at-line (get-text-property (point) 'flycheck-error)))
+              (when (and error-at-line (member error-at-line errors))
+                ;; Adjust minimum and maximum lines
+                (setq min-line (min min-line (line-number-at-pos (point)))
+                      max-line (max max-line (line-number-at-pos (point))))
+                (let ((ov (make-overlay (line-beginning-position)
+                                        (line-end-position))))
+                  (push ov flycheck-error-list-highlight-overlays)
+                  (overlay-put ov 'flycheck-error-highlight-overlay t)
+                  (overlay-put ov 'face 'flycheck-error-list-highlight))))
+            (forward-line 1))))
+      ;; Delete the old overlays
+      (-each old-overlays #'delete-overlay)
+      (goto-char (point-min))
+      (forward-line (1- (+ min-line (max 0 (/ (- max-line min-line) 2)))))
+      (flycheck-error-list-recenter-at (point)))))
 
 (defun flycheck-list-errors ()
   "Show the error list for the current buffer."
   (interactive)
   (unless flycheck-mode
     (user-error "Flycheck mode not enabled"))
+  ;; Make sure that the error list exists
+  (get-buffer-create flycheck-error-list-buffer)
   (flycheck-error-list-set-source (current-buffer))
   ;; Show the error list in a window, and re-select the old window
   (let ((old-window (selected-window)))
