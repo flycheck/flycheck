@@ -2916,8 +2916,8 @@ list."
   "Highlight ERRORS in the error list."
   (flycheck-with-error-list
     (let ((old-overlays flycheck-error-list-highlight-overlays)
-          (min-line (line-number-at-pos (point-max)))
-          (max-line (line-number-at-pos (point-min))))
+          (min-point (point-max))
+          (max-point (point-min)))
       ;; Display the new overlays first, to avoid re-display flickering
       (setq flycheck-error-list-highlight-overlays nil)
       (when errors
@@ -2928,8 +2928,8 @@ list."
             (let ((error-at-line (get-text-property (point) 'flycheck-error)))
               (when (and error-at-line (member error-at-line errors))
                 ;; Adjust minimum and maximum lines
-                (setq min-line (min min-line (line-number-at-pos (point)))
-                      max-line (max max-line (line-number-at-pos (point))))
+                (setq min-point (min min-point (point))
+                      max-point (max max-point (point)))
                 (let ((ov (make-overlay (line-beginning-position)
                                         (line-end-position))))
                   (push ov flycheck-error-list-highlight-overlays)
@@ -2938,8 +2938,10 @@ list."
             (forward-line 1))))
       ;; Delete the old overlays
       (-each old-overlays #'delete-overlay)
-      (goto-char (point-min))
-      (forward-line (1- (+ min-line (max 0 (/ (- max-line min-line) 2)))))
+      ;; Move point to the middle error
+      (goto-char (+ min-point (/ (- max-point min-point) 2)))
+      (beginning-of-line)
+      ;; And recenter the error list at this position
       (flycheck-error-list-recenter-at (point)))))
 
 (defun flycheck-error-list-update-source ()
