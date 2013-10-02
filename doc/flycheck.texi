@@ -828,7 +828,7 @@ to allow for further processing of the error, or t, to indicate that the
 error was fully processed and inhibit any further processing.
 @end defopt
 
-You can also list all errors in the current buffer:
+You can also show a list with all errors in the current buffer:
 
 @table @kbd
 @item C-c ! l
@@ -836,7 +836,9 @@ You can also list all errors in the current buffer:
 @findex flycheck-list-errors
 List all errors in the current buffer in a separate buffer.
 
-With prefix arg, list only errors at point.
+The error list automatically refreshes after a syntax check, and follows
+the current buffer, that is, if you switch to another buffer, the error
+list is updated to show the errors of the new buffer.
 @end table
 
 If you hover a highlighted error with the mouse, a tooltip with the
