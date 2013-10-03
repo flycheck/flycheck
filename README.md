@@ -73,10 +73,10 @@ The following extensions provide additional cool features for Flycheck:
 
 - [flycheck-cask](https://github.com/flycheck/flycheck-cask) makes Flycheck use
   Cask packages in Cask projects.
-- [flycheck-color-mode-line.el][color-mode-line] colors the mode line according
-  to the Flycheck status.
-- [flycheck-d-unittest](https://github.com/flycheck/flycheck-d-unittest) adds a
-  Flycheck checker to run unit tests for D programs on the fly.
+- [flycheck-color-mode-line][] colors the mode line according to the Flycheck
+  status.
+- [flycheck-d-unittest][] adds a Flycheck checker to run unit tests for D
+  programs on the fly.
 
 
 Installation
@@ -200,13 +200,13 @@ The following people contributed to flycheck:
   contributed important ideas to the design of the checker API and engaged in
   worthwhile discussion to shape this project.
 - [Sylvain Benner](https://github.com/syl20bnr) added syntax checkers for Elixir
-  and Erlang, and wrote the cool [flycheck-color-mode-line.el][color-mode-line]
-  extension.
+  and Erlang, and wrote the cool [flycheck-color-mode-line][] extension.
 - [Sylvain Rousseau](https://github.com/thisirs) added a syntax checker for
   POSIX shell script using `bash`, and improved error parsing in the Bash script
   syntax checker.
 - [tom tan](https://github.com/tom-tan) added a syntax checker for the D
-  programming language using `dmd`.
+  programming language using `dmd`, and wrote the cool [flycheck-d-unittest][]
+  extension.
 - [Yannick Roehlly](https://github.com/yannick1974) added support for PEP8
   naming errors to the Flake8 syntax checker.
 - [Victor Deryagin](https://github.com/vderyagin) added the Rust syntax checker.
@@ -231,4 +231,5 @@ See [COPYING](https://github.com/flycheck/flycheck/blob/master/COPYING) for
 details.
 
 [solarized]: https://github.com/bbatsov/solarized-emacs
-[color-mode-line]: https://github.com/flycheck/flycheck-color-mode-line
+[flycheck-color-mode-line]: https://github.com/flycheck/flycheck-color-mode-line
+[flycheck-d-unittest]: https://github.com/flycheck/flycheck-d-unittest

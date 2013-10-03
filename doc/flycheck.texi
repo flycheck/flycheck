@@ -3026,7 +3026,8 @@ script syntax checker.
 
 @item
 @gh{tom-tan, tom tan} added a syntax checker for the D programming
-language using @command{dmd}.
+language using @command{dmd}, and wrote the cool
+@gh{flycheck/flycheck-d-unittest, flycheck-d-unittest} extension.
 
 @item
 @gh{yannick1974, Yannick Roehlly} added support for PEP8 naming errors
