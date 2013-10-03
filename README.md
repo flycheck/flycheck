@@ -75,7 +75,7 @@ The following extensions provide additional cool features for Flycheck:
   Cask packages in Cask projects.
 - [flycheck-color-mode-line.el][color-mode-line] colors the mode line according
   to the Flycheck status.
-- [flycheck-d-unittest](https://github.com/tom-tan/flycheck-d-unittest) adds a
+- [flycheck-d-unittest](https://github.com/flycheck/flycheck-d-unittest) adds a
   Flycheck checker to run unit tests for D programs on the fly.
 
 
@@ -231,4 +231,4 @@ See [COPYING](https://github.com/flycheck/flycheck/blob/master/COPYING) for
 details.
 
 [solarized]: https://github.com/bbatsov/solarized-emacs
-[color-mode-line]: https://github.com/syl20bnr/flycheck-color-mode-line
+[color-mode-line]: https://github.com/flycheck/flycheck-color-mode-line

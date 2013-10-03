@@ -248,12 +248,12 @@ The following extensions provide additional cool features for Flycheck:
 packages in @uref{https://github.com/cask/cask, Cask} projects.
 
 @item
-@uref{https://github.com/syl20bnr/flycheck-color-mode-line,
+@uref{https://github.com/flycheck/flycheck-color-mode-line,
 flycheck-color-mode-line.el} colors the mode line according to the
 Flycheck status.
 
 @item
-@uref{https://github.com/tom-tan/flycheck-d-unittest,
+@uref{https://github.com/flycheck/flycheck-d-unittest,
 flycheck-d-unittests} adds a Flycheck checker to run unit tests for D
 programs on the fly.
 
@@ -3016,8 +3016,8 @@ worthwhile discussion to shape this project.
 
 @item
 @gh{syl20bnr, Sylvain Benner} added syntax checkers for Elixir and
-Erlang, and wrote the cool @gh{syl20bnr/flycheck-color-mode-line,
-flycheck-color-mode-line.el} extension.
+Erlang, and wrote the cool @gh{flycheck/flycheck-color-mode-line,
+flycheck-color-mode-line} extension.
 
 @item
 @gh{thisirs, Sylvain Rousseau} added a syntax checker for POSIX shell
