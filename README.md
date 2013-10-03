@@ -85,7 +85,7 @@ Installation
 Install the ELPA package from [MELPA](http://melpa.milkbox.net) or
 [Marmalade](http://marmalade-repo.org/).
 
-In your [`Cask` file](https://github.com/rejeep/cask.el):
+In your [`Cask` file](https://github.com/cask/cask):
 
 ```lisp
 (source gnu)

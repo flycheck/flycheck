@@ -279,7 +279,7 @@ MELPA repository, add the following code to @file{init.el}:
 (package-initialize)
 @end lisp
 
-If you use @uref{https://github.com/rejeep/cask.el, Cask}, add the
+If you use @uref{https://github.com/cask/cask, Cask}, add the
 following to your @file{Cask} file:
 
 @lisp
@@ -2006,9 +2006,9 @@ You may also run the tests locally during development.  To do so:
 
 @itemize @bullet
 @item
-Install @uref{https://github.com/rejeep/carton, Carton}.
+Install @uref{https://github.com/cask/cask, Cask}.
 @item
-Setup your development environment with @command{carton install}.
+Setup your development environment with @command{cask install}.
 @item
 Run the tests with @command{tests/run.sh}.  Use @command{tests/run.sh
 flake8} to run only tests whose names contain the string @code{flake8}.
