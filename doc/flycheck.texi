@@ -1,6 +1,7 @@
 \input texinfo
 @setfilename flycheck.info
 @settitle The Flycheck manual
+@documentencoding UTF-8
 @documentlanguage en
 
 @c Macros
@@ -26,27 +27,21 @@
 @html
 <div id="frontmatter">
 
-<div align="center">
-@end html
+<p class="text-center lead">
+Modern on-the-fly syntax checking for GNU Emacs 24
+<small>(aka “Flymake done right”)</small>
+</p>
 
-Flycheck is a modern on-the-fly syntax checker for GNU Emacs 24 (aka
-``Flymake done right'')
-
-@html
-</div>
-@end html
-
-@center Proceed to the @ref{Introduction} for more information.
-
-@html
-<div align="center">
-@end html
-
-Or head over to @uref{https://github.com/flycheck/flycheck, Github} for
-the source code and issue tracker.
-
-@html
-</div>
+<p class="text-center">
+<a class="btn btn-info btn-large" href="Introduction.html#Introduction">
+Introduction
+</a>
+<a class="btn btn-primary btn-large"
+   href="https://github.com/flycheck/flycheck"
+   target="_blank">
+Github
+</a>
+</p>
 @end html
 
 @center @image{screenshot,,,Flycheck in action}
