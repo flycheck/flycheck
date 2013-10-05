@@ -2842,6 +2842,20 @@ if the source buffer is not alive anymore."
     (when (buffer-live-p source)
       source)))
 
+(defun flycheck-error-list-set-mode-line ()
+  "Update the mode line of the error list.
+
+The mode line shows the file name of the source buffer."
+  (let* ((source (flycheck-error-list-source)))
+    (setq mode-line-buffer-identification
+          (nconc (propertized-buffer-identification "%b")
+                 (list
+                  (s-concat
+                   " for buffer "
+                   ;; Escape "%" in names to avoid accidental substitution
+                   (propertize (s-replace "%" "%%" (buffer-name source))
+                               'face 'mode-line-buffer-id)))))))
+
 (defun flycheck-error-list-set-source (buffer)
   "Set BUFFER as the source buffer of the error list."
   (flycheck-with-error-list
@@ -2853,7 +2867,8 @@ if the source buffer is not alive anymore."
     ;; Remove any old errors
     (let ((inhibit-read-only t))
       (erase-buffer)
-      (set-buffer-modified-p nil))))
+      (set-buffer-modified-p nil))
+    (flycheck-error-list-set-mode-line)))
 
 (defun flycheck-error-list-buffer-label (buffer)
   "Create a list label for BUFFER relative to DIRECTORY.
