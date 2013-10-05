@@ -2852,7 +2852,8 @@ if the source buffer is not alive anymore."
           default-directory (buffer-local-value 'default-directory buffer))
     ;; Remove any old errors
     (let ((inhibit-read-only t))
-      (erase-buffer))))
+      (erase-buffer)
+      (set-buffer-modified-p nil))))
 
 (defun flycheck-error-list-buffer-label (buffer)
   "Create a list label for BUFFER relative to DIRECTORY.
@@ -2917,7 +2918,8 @@ list."
       (flycheck-with-error-list
         (let ((inhibit-read-only t))
           (erase-buffer)
-          (flycheck-error-list-insert-errors errors))
+          (flycheck-error-list-insert-errors errors)
+          (set-buffer-modified-p nil))
         (flycheck-error-list-recenter-at (point-min))))))
 
 (defvar-local flycheck-error-list-highlight-overlays nil
