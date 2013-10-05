@@ -2842,6 +2842,13 @@ if the source buffer is not alive anymore."
     (when (buffer-live-p source)
       source)))
 
+(defvar flycheck-error-list-mode-line-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map [mode-line mouse-1]
+      #'flycheck-error-list-mouse-switch-to-source)
+    map)
+  "Keymap for error list mode line.")
+
 (defun flycheck-error-list-set-mode-line ()
   "Update the mode line of the error list.
 
@@ -2854,7 +2861,10 @@ The mode line shows the file name of the source buffer."
                    " for buffer "
                    ;; Escape "%" in names to avoid accidental substitution
                    (propertize (s-replace "%" "%%" (buffer-name source))
-                               'face 'mode-line-buffer-id)))))))
+                               'face 'mode-line-buffer-id
+                               'mouse-face 'mode-line-highlight
+                               'help-echo "mouse-1: switch to source"
+                               'local-map flycheck-error-list-mode-line-map)))))))
 
 (defun flycheck-error-list-set-source (buffer)
   "Set BUFFER as the source buffer of the error list."
@@ -2869,6 +2879,15 @@ The mode line shows the file name of the source buffer."
       (erase-buffer)
       (set-buffer-modified-p nil))
     (flycheck-error-list-set-mode-line)))
+
+(defun flycheck-error-list-mouse-switch-to-source (event)
+  "Switch to the error list source buffer of the EVENT window."
+  (interactive "e")
+  (save-selected-window
+    (when (eventp event)
+      (select-window (posn-window (event-start event))))
+    (when (buffer-live-p flycheck-error-list-source-buffer)
+      (switch-to-buffer flycheck-error-list-source-buffer))))
 
 (defun flycheck-error-list-buffer-label (buffer)
   "Create a list label for BUFFER relative to DIRECTORY.
