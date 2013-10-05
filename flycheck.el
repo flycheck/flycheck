@@ -863,10 +863,8 @@ buffer."
 ;;;; Mode line reporting
 (defun flycheck-report-status (status)
   "Report Flycheck STATUS."
-  (let ((mode-line flycheck-mode-line-lighter))
-    (setq mode-line (concat mode-line status))
-    (setq flycheck-mode-line mode-line)
-    (force-mode-line-update)))
+  (setq flycheck-mode-line (concat flycheck-mode-line-lighter status))
+  (force-mode-line-update))
 
 (defun flycheck-report-error ()
   "Report a Flycheck error status.
