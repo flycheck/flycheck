@@ -1474,10 +1474,13 @@ commands."
      (defcustom ,symbol ,file-name
        ,(format "Configuration file for `%s'.
 
-Locate the configuration file using the functions from
-`flycheck-locate-config-file-functions'.  If the file is found
-pass it to the syntax checker as configuration file.  Otherwise
-invoke the syntax checker without a configuration file.
+If set to a string, locate the configuration file using the
+functions from `flycheck-locate-config-file-functions'.  If the
+file is found pass it to the syntax checker as configuration
+file.
+
+If no configuration file is found, or if this variable is set to
+nil, invoke the syntax checker without a configuration file.
 
 Use this variable as file-local variable if you need a specific
 configuration file a buffer." checker)

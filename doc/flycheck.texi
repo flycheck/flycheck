@@ -717,21 +717,8 @@ The configuration file for the @code{ruby-rubocop} syntax checker.
 The configuration file for the @code{html-tidy} syntax checker.
 @end defopt
 
-Customize these variables using @kbd{M-x customize-group RET
-flycheck-config-files}.  Use @code{flycheck-describe-checker} to find
-out whether a syntax checker has a configuration file.
-
-You may also use these variables as file-local variables.  For instance,
-the following checks the Javascript file always with @file{.jshintrc}
-from the parent directory:
-
-@example
-// Local variables:
-// flycheck-jshintrc: "../.jshintrc"
-// End:
-@end example
-
-These configuration files are located using the functions in
+The value of these variables is either a string or nil.  In the former
+case, locate the configuration file using the functions in
 @code{flycheck-locate-config-file-functions}:
 
 @defopt flycheck-locate-config-file-functions
@@ -768,6 +755,26 @@ directory.
 @end enumerate
 
 If any of these steps succeeds, the subsequent steps are not executed.
+
+If the configuration file is found, pass it to the syntax checker upon
+invocation.
+
+If the configuration file is not found, or if the value of the variable
+is nil, invoke the syntax checker without a configuration file.
+
+Customize these variables using @kbd{M-x customize-group RET
+flycheck-config-files}.  Use @code{flycheck-describe-checker} to find
+out whether a syntax checker has a configuration file.
+
+You may also use these variables as file-local variables.  For instance,
+the following checks the Javascript file always with @file{.jshintrc}
+from the parent directory:
+
+@example
+// Local variables:
+// flycheck-jshintrc: "../.jshintrc"
+// End:
+@end example
 
 @node Reporting, Navigation, Configuration, Usage
 @comment  node-name,  next,  previous,  up
