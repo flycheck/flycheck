@@ -32,4 +32,5 @@
  (depends-on "rust-mode")
  (depends-on "elixir-mode")
  (depends-on "erlang")
- (depends-on "d-mode"))
+ (depends-on "d-mode")
+ (depends-on "yaml-mode"))

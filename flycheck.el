@@ -161,6 +161,7 @@ buffer-local wherever it is set."
     tex-lacheck
     xml-xmlstarlet
     xml-xmllint
+    yaml-ruby
     zsh)
   "Syntax checkers available for automatic selection.
 
@@ -4266,6 +4267,30 @@ The xmllint is part of libxml2, see URL
   :error-patterns
   ((error line-start (file-name) ":" line ": " (message) line-end))
   :modes (xml-mode nxml-mode))
+
+(flycheck-define-checker yaml-ruby
+  "A YAML syntax checker using Ruby's YAML parser.
+
+The YAML parser is available in the standard (MRI) Ruby
+interpreter.  If installed Ruby version is 1.9.2 or lower, Syck
+YAML parser is used, or Psych YAML parser is used.
+
+See URL `http://www.ruby-lang.org/'."
+  :command ("ruby" "-ryaml" "-e"
+"begin;
+   file_name = ARGV[0]; \
+   YAML.load(ARGF); \
+ rescue Exception => e; \
+   STDERR.puts \"#{file_name}:#{e}\"; \
+ end" source)
+  :error-patterns
+  (;; Syck (Ruby <= 1.9.2, unmaintained)
+   (error line-start (file-name)
+          ":syntax error on line " line ", col " column ": `" (message) "'" line-end)
+   ;; Psych (Ruby >= 1.9.3)
+   (error line-start (file-name) ":" (zero-or-more not-newline) ":" (message)
+          "at line " line " column " column  line-end))
+  :modes yaml-mode)
 
 (flycheck-define-checker zsh
   "A Zsh syntax checker using the Zsh shell.
