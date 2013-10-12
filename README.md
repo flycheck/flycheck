@@ -58,6 +58,7 @@ Features
   - Shell scripts (POSIX Shell, Bash and Zsh)
   - TeX/LaTeX
   - XML
+  - YAML
 - Nice error indication and highlighting
 - Easy customization
 - Syntax checker configuration with project-specific configuration files and

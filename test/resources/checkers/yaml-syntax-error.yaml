@@ -1,0 +1,5 @@
+# A simple syntax error in YAML
+
+A: foo
+  a1: bar
+  a2: baz
