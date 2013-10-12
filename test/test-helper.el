@@ -251,6 +251,25 @@ Use together with `:expected-result' to skip tests on travis CI."
   "Whether the testsuite is running on our testing VM."
   (string= (user-login-name) "vagrant"))
 
+(defun flycheck-testsuite-ruby-version ()
+  "Return Ruby version.
+
+Return version string if Ruby is installed on your system, or nil otherwise."
+  (with-temp-buffer
+    (let ((ret (call-process-shell-command "ruby -e 'puts RUBY_VERSION'" nil t)))
+      (if (not (zerop ret))
+          nil
+        (goto-char (point-min))
+        (buffer-substring-no-properties
+         (line-beginning-position) (line-end-position))))))
+
+(defun flycheck-testsuite-min-ruby-version-p (version)
+  "Determine whether Ruby has the required version.
+
+Return t if Ruby is at least VERSION, or nil otherwise."
+  (let ((ruby-version (flycheck-testsuite-ruby-version)))
+    (and (stringp ruby-version) (version<= version ruby-version))))
+
 (defun flycheck-testsuite-min-emacs-version-p (major &optional minor)
   "Determine whether Emacs has the required version.
 
