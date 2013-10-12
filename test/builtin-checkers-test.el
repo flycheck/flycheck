@@ -51,7 +51,8 @@
           rust-mode
           sass-mode
           scala-mode2
-          scss-mode)
+          scss-mode
+          yaml-mode)
   (require it))
 
 (eval-when-compile
@@ -860,6 +861,12 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
    "checkers/xml-syntax-error.xml" 'nxml-mode 'xml-xmlstarlet
    '(4 nil "parser error : Opening and ending tag mismatch: spam line 3 and with" error)
    '(5 nil "parser error : Extra content at the end of the document" error)))
+
+(ert-deftest checker-yaml-syntax-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'yaml)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/yaml-syntax-error.yaml" 'yaml-mode nil
+   '(4 5 "mapping values are not allowed in this context" error)))
 
 (ert-deftest checker-zsh-syntax-error ()
   "Test a syntax error from a missing semicolon."
