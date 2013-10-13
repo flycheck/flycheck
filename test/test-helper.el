@@ -251,43 +251,6 @@ Use together with `:expected-result' to skip tests on travis CI."
   "Whether the testsuite is running on our testing VM."
   (string= (user-login-name) "vagrant"))
 
-(defun flycheck-testsuite-ruby-version ()
-  "Return Ruby version.
-
-Return version string if Ruby is installed on your system, or nil otherwise."
-  (condition-case nil
-      (car (process-lines "ruby" "-e" "puts RUBY_VERSION"))
-    (error nil)))
-
-(defun flycheck-testsuite-min-ruby-version-p (version)
-  "Determine whether Ruby has the required version.
-
-Return t if Ruby is at least VERSION, or nil otherwise."
-  (let ((ruby-version (flycheck-testsuite-ruby-version)))
-    (and (stringp ruby-version) (version<= version ruby-version))))
-
-(defun flycheck-testsuite-ruby-psych-version ()
-  "Return Ruby Psych Library version.
-
-Return version string if Ruby is installed on your system, or nil otherwise."
-  (condition-case nil
-      (car (process-lines "ruby" "-rpsych" "-e" "puts Psych::VERSION"))
-    (error nil)))
-
-(defun flycheck-testsuite-min-ruby-psych-version-p (version)
-  "Determine whether Ruby Psych has the required version.
-
-Return t if Ruby Psych is at least VERSION, or nil otherwise."
-  (let ((psych-version (flycheck-testsuite-ruby-psych-version)))
-    (and (stringp psych-version) (version<= version psych-version))))
-
-(defun flycheck-testsuite-max-ruby-psych-version-p (version)
-  "Determine whether Ruby Psych has the required version.
-
-Return t if Ruby Psych is at most VERSION, or nil otherwise."
-  (let ((psych-version (flycheck-testsuite-ruby-psych-version)))
-    (and (stringp psych-version) (version<= psych-version version))))
-
 (defun flycheck-testsuite-min-emacs-version-p (major &optional minor)
   "Determine whether Emacs has the required version.
 
