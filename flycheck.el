@@ -4271,11 +4271,10 @@ The xmllint is part of libxml2, see URL
 (flycheck-define-checker yaml-ruby
   "A YAML syntax checker using Ruby's YAML parser.
 
-The YAML parser is available in the standard (MRI) Ruby
-interpreter.  If installed Ruby version is 1.9.2 or lower, Syck
-YAML parser is used, or Psych YAML parser is used.
+This syntax checker uses the YAML parser from Ruby's standard
+library.
 
-See URL `http://www.ruby-lang.org/'."
+See URL `http://www.ruby-doc.org/stdlib-2.0.0/libdoc/yaml/rdoc/YAML.html'."
   :command ("ruby" "-ryaml" "-e"
 "begin;
    file_name = ARGV[0]; \
