@@ -444,6 +444,13 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
    "checkers/go/src/main/go-missing-sub-package-error.go" 'go-mode nil
    '(3 8 "import \"testpackage\": cannot find package" error :checker go-build)))
 
+(ert-deftest checker-go-build-subpackage-error ()
+  "Test an error in a subpackage."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'go-build)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/go/src/main/go-sub-package-error.go" 'go-mode nil
+   '(3 8 "import \"testpackage\": cannot find package" error :checker go-build)))
+
 (ert-deftest checker-go-test-error ()
   "Test an import error."
   :expected-result (flycheck-testsuite-fail-unless-checker 'go-test)
