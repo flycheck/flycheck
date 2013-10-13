@@ -3351,6 +3351,21 @@ When non-nil, disable RTTI for syntax checks, via `-fno-rtti'."
   :safe #'booleanp
   :package-version '(flycheck . "0.15"))
 
+(flycheck-def-option-var flycheck-clang-standard-library nil c/c++-clang
+  "The standard library to use for Clang.
+
+The value of this variable is the name of a standard library as
+string, or nil to use the default standard library.
+
+Refer to the Clang manual at URL
+`http://clang.llvm.org/docs/UsersManual.html' for more
+information about the standard library."
+  :type '(choice (const "libc++")
+                 (const :tag "GNU libstdc++" "libstdc++")
+                 (string :tag "Library name"))
+  :safe #'stringp
+  :package-version '(flycheck . "0.15"))
+
 (flycheck-def-option-var flycheck-clang-warnings '("all" "extra") c/c++-clang
   "A list of additional warnings to enable in Clang.
 
@@ -3380,6 +3395,7 @@ See URL `http://clang.llvm.org/'."
             "-fno-diagnostics-show-option" ; Do not show the corresponding
                                         ; warning group
             (option "-std=" flycheck-clang-language-standard)
+            (option "-stdlib=" flycheck-clang-standard-library)
             (option-flag "-fno-rtti" flycheck-clang-no-rtti)
             (option-list "-include" flycheck-clang-includes)
             (option-list "-W" flycheck-clang-warnings s-prepend)

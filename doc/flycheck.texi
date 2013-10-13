@@ -636,6 +636,10 @@ The language standard for @code{c/c++-clang}.
 Whether to disable RTTI in @code{c/c++-clang}.
 @end defopt
 
+@defopt flycheck-clang-standard-library
+The standard library to use for @code{c/c++-clang}.
+@end defopt
+
 @defopt flycheck-clang-warnings
 Additional warnings to enable in @code{c/c++-clang}.
 @end defopt
@@ -2936,6 +2940,8 @@ Add configuration file variable @code{flycheck-pylintrc} for Pylint
 @item
 @ghissue{212, Define new error levels with
 @code{flycheck-define-error-level}}
+@ghissue{234, Add @code{flycheck-clang-standard-library} to choose the
+standard library for C/C++ syntax checking}
 @end itemize
 
 @item

@@ -125,6 +125,11 @@
      "checkers/c_c++-clang-error.cpp" 'c++-mode nil
      '(8 17 "implicit instantiation of undefined template 'test<false>'" error))))
 
+(ert-deftest checker-c/c++-clang-standard-library ()
+  :expected-result :failed
+  ;; I simply have no idea how to test for a standard library. Suggestions welcome
+  (error "Not implemented"))
+
 (ert-deftest checker-c/c++-clang-error-definitions ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
   (flycheck-testsuite-with-hook c++-mode-hook
