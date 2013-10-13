@@ -51,7 +51,8 @@
           rust-mode
           sass-mode
           scala-mode2
-          scss-mode)
+          scss-mode
+          yaml-mode)
   (require it))
 
 (eval-when-compile
@@ -865,6 +866,42 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
    "checkers/xml-syntax-error.xml" 'nxml-mode 'xml-xmlstarlet
    '(4 nil "parser error : Opening and ending tag mismatch: spam line 3 and with" error)
    '(5 nil "parser error : Extra content at the end of the document" error)))
+
+(ert-deftest checker-yaml-ruby-psych-122-or-lower-syntax-error ()
+  "Test a syntax error by Psych YAML parser version 1.2.2 or lower.
+
+The syntax error by Psych YAML parser require Ruby version 1.9.3
+or higher.  Because Psych YAML parser is available in 1.9.2, but
+Default Ruby YAML engine is syck on Ruby 1.9.2."
+  :expected-result (if (or (not (flycheck-testsuite-min-ruby-version-p "1.9.3"))
+                           (not (flycheck-testsuite-max-ruby-psych-version-p "1.2.2"))) :failed
+                     (flycheck-testsuite-fail-unless-checker 'yaml-ruby))
+  (flycheck-testsuite-should-syntax-check
+   "checkers/yaml-syntax-error.yaml" 'yaml-mode nil
+   '(3 4 "couldn't parse YAML" error)))
+
+(ert-deftest checker-yaml-ruby-psych-130-or-higher-syntax-error ()
+  "Test a syntax error by Psych YAML parser version 1.3.0 or higher.
+
+See the description of the
+`checker-yaml-ruby-psych-122-or-higher-syntax-error'."
+  :expected-result (if (or (not (flycheck-testsuite-min-ruby-version-p "1.9.3"))
+                            (not (flycheck-testsuite-min-ruby-psych-version-p "1.3.0"))) :failed
+                     (flycheck-testsuite-fail-unless-checker 'yaml-ruby))
+  (flycheck-testsuite-should-syntax-check
+   "checkers/yaml-syntax-error.yaml" 'yaml-mode nil
+   '(4 5 "mapping values are not allowed in this context" error)))
+
+(ert-deftest checker-yaml-ruby-syck-syntax-error ()
+  "Test a syntax error by Syck YAML parser.
+
+See the description of the
+`checker-yaml-ruby-psych-122-or-higher-syntax-error'."
+  :expected-result (if (flycheck-testsuite-min-ruby-version-p "1.9.3") :failed
+                     (flycheck-testsuite-fail-unless-checker 'yaml-ruby))
+  (flycheck-testsuite-should-syntax-check
+   "checkers/yaml-syntax-error.yaml" 'yaml-mode nil
+   '(3 5 "a1: bar" error)))
 
 (ert-deftest checker-zsh-syntax-error ()
   "Test a syntax error from a missing semicolon."
