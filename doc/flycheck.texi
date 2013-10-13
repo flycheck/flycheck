@@ -2910,6 +2910,14 @@ load path
 @end itemize
 
 @item
+Improvements:
+
+@itemize @bullet
+@item
+@ghissue{236, YAML}
+@end itemize
+
+@item
 New features:
 
 @itemize @bullet
@@ -3054,6 +3062,10 @@ language using @command{dmd}, and wrote the cool
 @item
 @gh{yannick1974, Yannick Roehlly} added support for PEP8 naming errors
 to the Flake8 syntax checker.
+
+@item
+@gh{yasuyk, Yasuyuki Oka} added a syntax checker for YAML using Ruby's
+standard YAML parser.
 
 @item
 @gh{vderyagin, Victor Deryagin} added the Rust syntax checker.
