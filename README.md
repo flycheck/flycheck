@@ -58,6 +58,7 @@ Features
   - Shell scripts (POSIX Shell, Bash and Zsh)
   - TeX/LaTeX
   - XML
+  - YAML
 - Nice error indication and highlighting
 - Easy customization
 - Syntax checker configuration with project-specific configuration files and
@@ -209,6 +210,8 @@ The following people contributed to flycheck:
   extension.
 - [Yannick Roehlly](https://github.com/yannick1974) added support for PEP8
   naming errors to the Flake8 syntax checker.
+- [Yasuyuki Oka](https://github.com/yasuyk) added a syntax checker for YAML
+  using Ruby's standard YAML parser.
 - [Victor Deryagin](https://github.com/vderyagin) added the Rust syntax checker.
 
 

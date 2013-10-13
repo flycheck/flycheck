@@ -231,7 +231,10 @@ script)
 TeX/LaTeX (using @command{chktex} or @command{lacheck})
 @item
 XML (using @command{xmlstarlet} or @command{xmllint})
+@item
+YAML (using @command{ruby})
 @end itemize
+
 
 @item
 Nice error indication and highlighting
@@ -2911,6 +2914,14 @@ load path
 @end itemize
 
 @item
+Improvements:
+
+@itemize @bullet
+@item
+@ghissue{236, YAML}
+@end itemize
+
+@item
 New features:
 
 @itemize @bullet
@@ -3059,6 +3070,10 @@ language using @command{dmd}, and wrote the cool
 to the Flake8 syntax checker.
 
 @item
+@gh{yasuyk, Yasuyuki Oka} added a syntax checker for YAML using Ruby's
+standard YAML parser.
+
+@item
 @gh{vderyagin, Victor Deryagin} added the Rust syntax checker.
 @end itemize
 
@@ -3125,6 +3140,7 @@ order of their appearance in the default value of
 @iflyc tex-lacheck
 @iflyc xml-xmlstarlet
 @iflyc xml-xmllint
+@iflyc yaml-ruby
 @iflyc zsh
 @end itemize
 

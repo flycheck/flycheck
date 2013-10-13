@@ -51,7 +51,8 @@
           rust-mode
           sass-mode
           scala-mode2
-          scss-mode)
+          scss-mode
+          yaml-mode)
   (require it))
 
 (eval-when-compile
@@ -865,6 +866,27 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
    "checkers/xml-syntax-error.xml" 'nxml-mode 'xml-xmlstarlet
    '(4 nil "parser error : Opening and ending tag mismatch: spam line 3 and with" error)
    '(5 nil "parser error : Extra content at the end of the document" error)))
+
+(ert-deftest checker-yaml-ruby ()
+  (flycheck-testsuite-fail-unless-checker 'yaml-ruby)
+  (let* ((ruby-version (car (process-lines "ruby" "-e" "puts RUBY_VERSION")))
+         (psych-version (when (version<= "1.9.3" ruby-version)
+                          (car (process-lines "ruby" "-rpsych"
+                                              "-e" "puts Psych::VERSION"))))
+         (expected-error
+          (cond
+           ;; Syck parser in Ruby 1.9.2 and lower
+           ((version< ruby-version "1.9.3")
+            '(3 5 "a1: bar" error))
+           ;; Psych parser in Ruby 1.9.3 and up.  The Psych errors apparently
+           ;; vary between different versions, so we have to adapt.  Ruby, you
+           ;; suck.
+           ((version< psych-version "1.2.2")
+            '(3 4 "couldn't parse YAML" error))
+           (:else
+            '(4 5 "mapping values are not allowed in this context" error)))))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/yaml-syntax-error.yaml" 'yaml-mode nil expected-error)))
 
 (ert-deftest checker-zsh-syntax-error ()
   "Test a syntax error from a missing semicolon."
