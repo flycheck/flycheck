@@ -865,8 +865,9 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
 (ert-deftest checker-yaml-ruby-psych-syntax-error ()
   "Test a syntax error by Psych YAML parser.
 
-Test a syntax error by Psych YAML parser require Ruby version 1.9.3 or later.
-Because Psych YAML parser is available in 1.9.2, but Default Ruby YAML engine is syck on Ruby 1.9.2.
+Test a syntax error by Psych YAML parser require Ruby version 1.9.3 or
+later.  Because Psych YAML parser is available in 1.9.2, but Default
+Ruby YAML engine is syck on Ruby 1.9.2.
 "
   :expected-result (if (not (flycheck-testsuite-min-ruby-version-p "1.9.3")) :failed
                      (flycheck-testsuite-fail-unless-checker 'yaml-ruby))
