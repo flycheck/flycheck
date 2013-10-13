@@ -255,13 +255,9 @@ Use together with `:expected-result' to skip tests on travis CI."
   "Return Ruby version.
 
 Return version string if Ruby is installed on your system, or nil otherwise."
-  (with-temp-buffer
-    (let ((ret (call-process-shell-command "ruby -e 'puts RUBY_VERSION'" nil t)))
-      (if (not (zerop ret))
-          nil
-        (goto-char (point-min))
-        (buffer-substring-no-properties
-         (line-beginning-position) (line-end-position))))))
+  (condition-case nil
+      (car (process-lines "ruby" "-e" "puts RUBY_VERSION"))
+    (error nil)))
 
 (defun flycheck-testsuite-min-ruby-version-p (version)
   "Determine whether Ruby has the required version.
