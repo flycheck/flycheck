@@ -3737,7 +3737,8 @@ See URL `http://golang.org/cmd/gofmt/'."
 See URL `https://golang.org/cmd/go'."
   :command ("go" "build" "-o" temporary-file source-original)
   :error-patterns
-  ((error line-start (file-name) ":" line ": " (message) line-end))
+  ((error line-start (file-name) ":" line ": " (message) line-end)
+   (error line-start (file-name) ":" line ":" column ": " (message) line-end))
   :modes go-mode
   :predicate
   (lambda ()
