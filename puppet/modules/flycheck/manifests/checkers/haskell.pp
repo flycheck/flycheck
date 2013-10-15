@@ -4,23 +4,24 @@ class flycheck::checkers::haskell {
 
   package { ['ghc', 'hlint']: ensure => latest }
 
-  package { ['cabal-install']:
+  package { 'cabal-install':
     ensure  => latest,
     require => Package['ghc'],
-    notify  => Exec['cabal update'],
   }
 
-  exec { 'cabal update':
-    command     => '/usr/bin/cabal update',
-    refreshonly => true,
+  exec { 'flycheck::checkers::haskell::cabal-update':
+    command     => 'cabal update',
     environment => 'HOME=/root',
+    unless      => 'cabal info hdevtools',
+    path        => ['/usr/bin'],
     require     => Package['cabal-install']
   }
 
   exec { 'hdevtools':
-    command     => '/usr/bin/cabal install --global hdevtools',
+    command     => 'cabal install --global hdevtools',
     creates     => '/usr/local/bin/hdevtools',
     environment => 'HOME=/root',
-    require     => Exec['cabal update'],
+    require     => Exec['flycheck::checkers::haskell::cabal-update'],
+    path        => ['/usr/bin']
   }
 }
