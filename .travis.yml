@@ -2,18 +2,17 @@ language: emacs-lisp
 env:
   - EMACS=emacs24
   - EMACS=emacs-snapshot
-# Bootstrap Puppet, and install our Puppet modules
+# We pass --debug to all our Puppet commands to prevent Travis from getting
+# stuck, and to aid debugging
 before_install:
-  - sh ./puppet/bootstrap.sh
-  - gem install puppet librarian-puppet
-  - librarian-puppet install
-# Call Puppet to bootstrap the testing environment and install test
-# requirements.  We install Ruby tools separately as non-root user to avoid
-# screwing up with RVM.  We pass --debug to prevent Travis from getting stuck
-# due to no output, and to get as good error messages as possible
+  # Bootstrap Puppet, and install our Puppet modules
+  - sudo FACTER_travis=true puppet apply --debug ./puppet/manifests/bootstrap.pp
+  # Bootstrap test environment, except Ruby gemsn
+  - sudo FACTER_travis=true puppet apply --debug --modulepath=/etc/puppet/modules:./puppet/modules ./puppet/manifests/site.pp
+  # Install Gems as non-root to not screw up with RVM
+  - puppet apply --debug --modulepath=/etc/puppet/modules:./puppet/modules ./puppet/manifests/travis.pp
+# Install our packages
 install:
-  - sudo FACTER_travis=true puppet apply --debug --modulepath=./puppet/lib:./puppet/modules ./puppet/manifests/site.pp
-  - puppet apply --debug --modulepath=./puppet/lib:./puppet/modules ./puppet/manifests/travis.pp
   - make packages
 # Build documentation and run unit tests
 script:
