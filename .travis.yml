@@ -5,6 +5,8 @@ env:
 # We pass --debug to all our Puppet commands to prevent Travis from getting
 # stuck, and to aid debugging
 before_install:
+  # Install Puppet to bootstrap Puppet 3 :)
+  - sudo apt-get install puppet
   # Bootstrap Puppet, and install our Puppet modules
   - sudo FACTER_travis=true puppet apply --debug ./puppet/manifests/bootstrap.pp
   # Bootstrap test environment, except Ruby gemsn
