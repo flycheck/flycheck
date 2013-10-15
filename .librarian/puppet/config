@@ -1,3 +1,0 @@
---- 
-  LIBRARIAN_PUPPET_DESTRUCTIVE: "false"
-  LIBRARIAN_PUPPET_PATH: puppet/lib

@@ -7,12 +7,12 @@ Vagrant.configure('2') do |config|
 
   config.vm.synced_folder '.', '/flycheck'
 
-  config.vm.provision :shell, :path => 'puppet/bootstrap.sh'
+  config.vm.provision :shell, :inline => 'puppet apply /flycheck/puppet/manifests/bootstrap.pp'
 
   config.vm.provision :puppet do |puppet|
     puppet.manifests_path = 'puppet/manifests'
     puppet.manifest_file = 'site.pp'
-    puppet.module_path = ['puppet/lib', 'puppet/modules']
+    puppet.module_path = ['puppet/modules']
   end
 
 end

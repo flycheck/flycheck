@@ -2025,7 +2025,7 @@ tools.
 Install @uref{https://www.virtualbox.org/,Virtual Box} and
 @uref{http://www.vagrantup.com/,Vagrant}.
 @item
-Run your tests with @command{make virtual-test}.
+Run your tests with @command{make vagrant-test}.
 @end itemize
 
 You may also run the tests locally during development.  To do so:
