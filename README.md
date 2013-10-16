@@ -83,8 +83,8 @@ The following extensions provide additional cool features for Flycheck:
 Installation
 ------------
 
-Install the ELPA package from [MELPA](http://melpa.milkbox.net) or
-[Marmalade](http://marmalade-repo.org/).
+Install the ELPA package from [MELPA](http://melpa.milkbox.net/#/flycheck) or
+[Marmalade](http://marmalade-repo.org/packages/flycheck).
 
 In your [`Cask` file](https://github.com/cask/cask):
 
