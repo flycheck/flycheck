@@ -360,6 +360,13 @@ This variable has no effect, if `idle-change' is not contained in
   :package-version '(flycheck . "0.13")
   :safe #'numberp)
 
+(defcustom flycheck-idle-display-delay 0.9
+  "Delay in seconds before displaying errors at point."
+  :group 'flycheck
+  :type 'number
+  :package-version '(flycheck . "0.15")
+  :safe #'numberp)
+
 (defcustom flycheck-google-max-messages 5
   "How many messages to google at once.
 
@@ -3065,7 +3072,7 @@ Show the error message at point in minibuffer after a short delay."
   (flycheck-cancel-error-show-error-timer)
   (when (flycheck-overlays-at (point))
     (setq flycheck-error-show-error-timer
-          (run-at-time 0.9 nil 'flycheck-show-error-at-point))))
+          (run-at-time flycheck-idle-display-delay nil 'flycheck-show-error-at-point))))
 
 
 ;;;; Error display functions

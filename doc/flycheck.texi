@@ -888,6 +888,10 @@ With prefix arg, list only errors at point.
 If you hover a highlighted error with the mouse, a tooltip with the
 top-most error message will be shown.
 
+@defopt flycheck-idle-display-delay
+Delay in seconds before displaying errors at point.
+@end defopt
+
 Flycheck also displays errors under point, via
 @code{flycheck-display-errors-function}:
 
