@@ -888,8 +888,15 @@ With prefix arg, list only errors at point.
 If you hover a highlighted error with the mouse, a tooltip with the
 top-most error message will be shown.
 
-Flycheck also displays errors under point, via
-@code{flycheck-display-errors-function}:
+Flycheck also displays errors under point after a short delay:
+
+@defopt flycheck-display-errors-delay
+Delay in seconds before displaying errors at point.
+
+Use floating point numbers to express fractions of seconds.
+@end defopt
+
+The error is displayed via @code{flycheck-display-errors-function}:
 
 @defopt flycheck-display-errors-function
 A function to display errors under point.
@@ -2953,6 +2960,9 @@ Add configuration file variable @code{flycheck-pylintrc} for Pylint
 @code{flycheck-define-error-level}}
 @ghissue{234, Add @code{flycheck-clang-standard-library} to choose the
 standard library for C/C++ syntax checking}
+@item
+@ghissue{243, Customize the delay for displaying errors via
+@code{flycheck-display-errors-delay}}
 @end itemize
 
 @item

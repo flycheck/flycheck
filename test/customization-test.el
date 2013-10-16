@@ -69,6 +69,9 @@ All declared checkers should be registered."
 (ert-deftest flycheck-process-error-functions ()
   (should (equal flycheck-process-error-functions '(flycheck-add-overlay))))
 
+(ert-deftest flycheck-display-errors-delay ()
+  (should (equal flycheck-display-errors-delay 0.9)))
+
 (ert-deftest flycheck-display-errors-function ()
   (should (eq flycheck-display-errors-function
               #'flycheck-display-error-messages)))
