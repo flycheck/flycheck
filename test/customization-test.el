@@ -86,6 +86,9 @@ All declared checkers should be registered."
 (ert-deftest flycheck-idle-change-delay ()
   (should (equal flycheck-idle-change-delay 0.5)))
 
+(ert-deftest flycheck-idle-display-delay ()
+  (should (equal flycheck-idle-display-delay 0.9)))
+
 (ert-deftest flycheck-google-max-messages ()
   (should (equal flycheck-google-max-messages 5)))
 
