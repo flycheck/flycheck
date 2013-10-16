@@ -115,22 +115,33 @@
 ;;; Code:
 
 
-;;;; Directories
+;;;; Requires
+(require 'cl-lib)
+(require 'find-func)
+(require 'ert)
+(require 'flycheck)
 (require 'f)
 
-(eval-and-compile
-  (defconst flycheck-testsuite-dir (f-parent (f-this-file))
-    "The testsuite directory.")
-
-  (defconst flycheck-testsuite-resources-dir
-    (f-join flycheck-testsuite-dir "resources")
-    "Directory of test resources."))
-
 
-;;;; Requires
+;;;; Directories
 
-(require 'flycheck (f-join flycheck-testsuite-dir "../flycheck"))
-(require 'ert)
+(defconst flycheck-testsuite-dir (f-parent (f-this-file))
+  "The testsuite directory.")
+
+(defconst flycheck-testsuite-resources-dir
+  (f-join flycheck-testsuite-dir "resources")
+  "Directory of test resources.")
+
+(defconst flycheck-testsuite-source-dir
+  (f-parent flycheck-testsuite-dir)
+  "The Flycheck source directory.")
+
+;; Ensure that we test against the source tree, and not against an accidentally
+;; installed Flycheck package.
+(let ((source (symbol-file 'flycheck-mode 'defun)))
+  (cl-assert (f-same? source (f-join flycheck-testsuite-source-dir "flycheck.elc"))
+             nil "ERROR: Flycheck not loaded from the byte compiled source, but from %s! \
+Run make compile" source))
 
 
 ;;;; Testsuite resource handling
