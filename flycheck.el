@@ -240,6 +240,15 @@ This variable is an abnormal hook."
   :package-version '(flycheck . "0.13")
   :risky t)
 
+(defcustom flycheck-display-errors-delay 0.9
+  "Delay in seconds before displaying errors at point.
+
+Use floating point numbers to express fractions of seconds."
+  :group 'flycheck
+  :type 'number
+  :package-version '(flycheck . "0.15")
+  :safe #'numberp)
+
 (defcustom flycheck-display-errors-function #'flycheck-display-error-messages
   "Function to display error messages.
 
@@ -3065,7 +3074,7 @@ Show the error message at point in minibuffer after a short delay."
   (flycheck-cancel-error-show-error-timer)
   (when (flycheck-overlays-at (point))
     (setq flycheck-error-show-error-timer
-          (run-at-time 0.9 nil 'flycheck-show-error-at-point))))
+          (run-at-time flycheck-display-errors-delay nil 'flycheck-show-error-at-point))))
 
 
 ;;;; Error display functions
