@@ -437,6 +437,13 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
    "checkers/go/src/testpackage/go-build-error.go" 'go-mode nil
    '(6 nil "undefined: fmt" error :checker go-build)))
 
+(ert-deftest checker-go-build-syntax-error ()
+  "Test a syntax error with go build."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'go-build)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/go/src/main/go-build-error.go" 'go-mode nil
+   '(9 nil "undefined: missing" error :checker go-build)))
+
 (ert-deftest checker-go-build-missing-subpackage-error ()
   "Test a missing subpackage."
   :expected-result (flycheck-testsuite-fail-unless-checker 'go-build)
