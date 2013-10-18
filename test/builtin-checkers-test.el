@@ -449,7 +449,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
   :expected-result (flycheck-testsuite-fail-unless-checker 'go-build)
   (flycheck-testsuite-should-syntax-check
    "checkers/go/src/main/go-missing-sub-package-error.go" 'go-mode nil
-   '(3 8 "import \"testpackage\": cannot find package" error :checker go-build)))
+   '(6 nil "undefined: fmt" error :checker go-build)))
 
 (ert-deftest checker-go-build-subpackage-error ()
   "Test an error in a subpackage."
