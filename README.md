@@ -55,6 +55,7 @@ Features
   - Sass
   - Scala
   - SCSS
+  - Slim
   - Shell scripts (POSIX Shell, Bash and Zsh)
   - TeX/LaTeX
   - XML

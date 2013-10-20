@@ -52,6 +52,7 @@
           sass-mode
           scala-mode2
           scss-mode
+          slim-mode
           yaml-mode)
   (require it))
 
@@ -854,6 +855,15 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
     (flycheck-testsuite-should-syntax-check
      "checkers/sh-dash-syntax-error.sh" 'sh-mode '(sh-bash)
      '(5 nil "Syntax error: \"fi\" unexpected (expecting \"then\")" error))))
+
+(ert-deftest checker-slim-error ()
+  (flycheck-testsuite-fail-unless-checker 'slim)
+  (let* ((slim-version (cadr (split-string (car (process-lines "slimrb" "-v")))))
+         (expected-error (if (version<= "1.3.1" slim-version)
+                            '(2 1 "Unexpected indentation" error)
+                           '(2 nil "Unexpected indentation" error))))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/slim-error.slim" 'slim-mode nil expected-error)))
 
 (ert-deftest checker-tex-chktex-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'tex-chktex)
