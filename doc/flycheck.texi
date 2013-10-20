@@ -2930,6 +2930,8 @@ Improvements:
 @itemize @bullet
 @item
 @ghissue{236, YAML}
+@item
+@ghissue{245, Javascript with @command{gjslint}}
 @end itemize
 
 @item
@@ -3084,8 +3086,8 @@ language using @command{dmd}, and wrote the cool
 to the Flake8 syntax checker.
 
 @item
-@gh{yasuyk, Yasuyuki Oka} added a syntax checker for YAML using Ruby's
-standard YAML parser.
+@gh{yasuyk, Yasuyuki Oka} added syntax checkers for YAML (using Ruby's
+standard YAML parser) and Javascript (using Google's Closure linter).
 
 @item
 @gh{vderyagin, Victor Deryagin} added the Rust syntax checker.
