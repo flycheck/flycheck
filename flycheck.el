@@ -43,14 +43,10 @@
   (require 'sh-script)                  ; `sh-shell' for sh checker predicates
 )
 
-;; Declare `pkg-info-format-version' to be defined, to avoid a byte compiler
-;; warning.  We know that this function is only called after `pkg-info' is
-;; auto-loaded, so we can safely silence the compiler warning.
-(declare-function pkg-info-format-version "pkg-info.el" (version))
-
 (require 's)
 (require 'dash)
 (require 'f)
+(require 'pkg-info)
 (require 'rx)                ; Regexp fanciness in `flycheck-define-checker'
 (require 'cl-lib)            ; `cl-defstruct'
 (require 'help-mode)         ; `define-button-type'
