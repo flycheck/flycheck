@@ -457,14 +457,20 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
    '(5 nil "Inconsistent indentation: 3 spaces used for indentation, but the rest of the document was indented using 2 spaces." error :filename nil)))
 
 (ert-deftest checker-haskell-hdevtools-error ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'haskell-hdevtools)
+  ;; HDevtools tests fail on Vagrant, because hdevtools can't create unix
+  ;; sockets on shared folders…
+  :expected-result (if (flycheck-testsuite-vagrant-p)
+                       :failed
+                     (flycheck-testsuite-fail-unless-checker 'haskell-hdevtools))
   (flycheck-testsuite-should-syntax-check
    "checkers/haskell-hdevtools-error.hs" 'haskell-mode nil
    '(1 8 "Not in scope: `unknown'" error
        :checker haskell-hdevtools)))
 
 (ert-deftest checker-haskell-hdevtools-warning ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'haskell-hdevtools)
+  :expected-result (if (flycheck-testsuite-vagrant-p)
+                       :failed
+                     (flycheck-testsuite-fail-unless-checker 'haskell-hdevtools))
   (flycheck-testsuite-should-syntax-check
    "checkers/haskell-hdevtools-warning.hs" 'haskell-mode nil
    '(3 1 "Top-level binding with no type signature: foo :: Integer" warning
