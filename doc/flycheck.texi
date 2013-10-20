@@ -197,7 +197,7 @@ Haskell (using @command{ghc}, @command{hdevtools} and @command{hlint})
 @item
 HTML (using @command{tidy})
 @item
-Javascript (using @command{jshint})
+Javascript (using @command{jshint} and @command{gjslint})
 @item
 JSON (using @command{jsonlint})
 @item
@@ -706,6 +706,10 @@ The configuration file for the @code{coffee-coffeelint} syntax checker.
 
 @defopt flycheck-flake8rc
 The configuration file for the @code{python-flake8} syntax checker.
+@end defopt
+
+@defopt flycheck-gjslintrc
+The configuration file for the @code{javascript-gjslint} syntax checker.
 @end defopt
 
 @defopt flycheck-jshintrc
@@ -3126,6 +3130,7 @@ order of their appearance in the default value of
 @iflyc haskell-hlint
 @iflyc html-tidy
 @iflyc javascript-jshint
+@iflyc javascript-gjslint
 @iflyc json-jsonlint
 @iflyc less
 @iflyc lua

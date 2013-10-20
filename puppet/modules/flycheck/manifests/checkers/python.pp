@@ -28,4 +28,9 @@ class flycheck::checkers::python {
     provider => pip,
     require  => Exec['flycheck::checkers::python::bootstrap-pip'],
   }
+
+  exec { 'closure-linter': # gjslint
+    command => '/usr/bin/easy_install -U http://closure-linter.googlecode.com/files/closure_linter-latest.tar.gz',
+    require => Exec['flycheck::checkers::python::bootstrap-pip'],
+  }
 }

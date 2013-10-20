@@ -133,6 +133,7 @@ buffer-local wherever it is set."
     haskell-hlint
     html-tidy
     javascript-jshint
+    javascript-gjslint
     json-jsonlint
     less
     lua
@@ -3892,6 +3893,17 @@ See URL `http://www.jshint.com'."
             (config-file "--config" flycheck-jshintrc)
             source)
   :error-parser flycheck-parse-checkstyle
+  :modes (js-mode js2-mode js3-mode))
+
+(flycheck-def-config-file-var flycheck-gjslintrc javascript-gjslint ".gjslintrc"
+  :safe #'stringp)
+
+(flycheck-define-checker javascript-gjslint
+  "A JavaScript syntax and style checker using Closure Linter.
+
+See URL `https://developers.google.com/closure/utilities'."
+  :command ("gjslint" (config-file "--flagfile" flycheck-gjslintrc) source)
+  :error-patterns ((error line-start "Line " line ", " (message) line-end))
   :modes (js-mode js2-mode js3-mode))
 
 (flycheck-define-checker json-jsonlint
