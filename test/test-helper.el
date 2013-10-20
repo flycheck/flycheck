@@ -137,11 +137,12 @@
   "The Flycheck source directory.")
 
 ;; Ensure that we test against the source tree, and not against an accidentally
-;; installed Flycheck package.
+;; installed Flycheck package, if we are batch-running the tests with ERT runner
 (let ((source (symbol-file 'flycheck-mode 'defun)))
-  (cl-assert (f-same? source (f-join flycheck-testsuite-source-dir "flycheck.elc"))
-             nil "ERROR: Flycheck not loaded from the byte compiled source, but from %s! \
-Run make compile" source))
+  (when (boundp 'ert-runner-selector)
+    (cl-assert (f-same? source (f-join flycheck-testsuite-source-dir "flycheck.elc"))
+               nil "ERROR: Flycheck not loaded from the byte compiled source, but from %s! \
+Run make compile" source)))
 
 
 ;;;; Testsuite resource handling
