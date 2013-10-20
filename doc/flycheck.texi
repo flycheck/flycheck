@@ -197,7 +197,7 @@ Haskell (using @command{ghc}, @command{hdevtools} and @command{hlint})
 @item
 HTML (using @command{tidy})
 @item
-Javascript (using @command{jshint})
+Javascript (using @command{jshint} and @command{gjslint})
 @item
 JSON (using @command{jsonlint})
 @item
@@ -706,6 +706,10 @@ The configuration file for the @code{coffee-coffeelint} syntax checker.
 
 @defopt flycheck-flake8rc
 The configuration file for the @code{python-flake8} syntax checker.
+@end defopt
+
+@defopt flycheck-gjslintrc
+The configuration file for the @code{javascript-gjslint} syntax checker.
 @end defopt
 
 @defopt flycheck-jshintrc
@@ -2926,6 +2930,8 @@ Improvements:
 @itemize @bullet
 @item
 @ghissue{236, YAML}
+@item
+@ghissue{245, Javascript with @command{gjslint}}
 @end itemize
 
 @item
@@ -3080,8 +3086,8 @@ language using @command{dmd}, and wrote the cool
 to the Flake8 syntax checker.
 
 @item
-@gh{yasuyk, Yasuyuki Oka} added a syntax checker for YAML using Ruby's
-standard YAML parser.
+@gh{yasuyk, Yasuyuki Oka} added syntax checkers for YAML (using Ruby's
+standard YAML parser) and Javascript (using Google's Closure linter).
 
 @item
 @gh{vderyagin, Victor Deryagin} added the Rust syntax checker.
@@ -3126,6 +3132,7 @@ order of their appearance in the default value of
 @iflyc haskell-hlint
 @iflyc html-tidy
 @iflyc javascript-jshint
+@iflyc javascript-gjslint
 @iflyc json-jsonlint
 @iflyc less
 @iflyc lua
