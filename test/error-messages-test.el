@@ -38,10 +38,8 @@
           (errors (list (flycheck-error-new-at 1 nil 'error "1st message")
                         (flycheck-error-new-at 1 10 'warning "2nd message"))))
       (-each errors #'flycheck-add-overlay)
-      (mocker-let
-          ((message (errors) ((:input '("1st message\n2nd message")))))
-        (let ((flycheck-display-errors-function 'display-function))
-          (flycheck-copy-messages-as-kill 10))))
+      (let ((flycheck-display-errors-function 'display-function))
+        (flycheck-copy-messages-as-kill 10)))
     (should (equal (-take 2 kill-ring) '("1st message" "2nd message")))))
 
 (ert-deftest flycheck-google-messages ()
