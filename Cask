@@ -28,6 +28,7 @@
  (depends-on "sass-mode")
  (depends-on "scala-mode2")
  (depends-on "scss-mode")
+ (depends-on "slim-mode")
  (depends-on "go-mode")
  (depends-on "rust-mode")
  (depends-on "elixir-mode")
