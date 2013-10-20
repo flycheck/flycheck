@@ -6,7 +6,6 @@ class flycheck::checkers {
   include flycheck::checkers::go
   include flycheck::checkers::haskell
   include flycheck::checkers::php
-  include flycheck::checkers::python
   include flycheck::checkers::ruby
 
   # Various other syntax checkers
@@ -42,6 +41,23 @@ class flycheck::checkers {
     ensure   => present,
     provider => npm,
     require  => Class['nodejs'],
+  }
+
+  $python_packages = ['flake8',      # python-flake8
+                      'pep8-naming', # Plugin for flake8
+                      'pylint',      # python-pylint
+                      'docutils',    # rst
+                      ]
+
+  package { $python_packages:
+    ensure   => latest,
+    provider => pip,
+  }
+
+  package { 'closure-linter':
+    ensure   => installed,
+    provider => pip,
+    source   => 'http://closure-linter.googlecode.com/files/closure_linter-latest.tar.gz',
   }
 
   $packages = [ 'bash',            # bash/sh-bash

@@ -40,4 +40,21 @@ class flycheck::base {
     target  => "/opt/${cask_archive}/bin/cask",
     require => Archive[$cask_archive],
   }
+
+  # PIP, to install various checker utilities
+  package { 'python': ensure => latest}
+
+  package { 'python-setuptools' :
+    ensure  => latest,
+    notify  => Exec['base::bootstrap-pip'],
+    require => Package['python'],
+  }
+
+  exec { 'base::bootstrap-pip':
+    command     => '/usr/bin/easy_install -U setuptools pip',
+    refreshonly => true,
+    require     => Package['python-setuptools'],
+  }
+
+  Exec['base::bootstrap-pip'] -> Package <| provider == pip |>
 }
