@@ -536,6 +536,13 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
    "checkers/javascript-jshint-warning.js" '(js-mode js2-mode js3-mode) nil
    '(5 nil "Unused variable: 'foo'" warning)))
 
+(ert-deftest checker-javascript-gjslint-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-gjslint)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/javascript-gjslint-error.js" '(js-mode js2-mode js3-mode) 'javascript-jshint
+   '(2 nil "E:0131: Single-quoted string preferred over double-quoted string." error :filename nil)
+   '(5 nil "E:0001: Extra space before \")\"" error :filename nil)))
+
 (ert-deftest checker-json-jsonlint-error ()
   "Test a syntax error from multiple top-level objects."
   :expected-result (flycheck-testsuite-fail-unless-checker 'json-jsonlint)
