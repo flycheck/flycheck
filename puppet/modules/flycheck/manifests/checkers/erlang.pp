@@ -22,7 +22,7 @@ class flycheck::checkers::erlang {
     extension     => 'zip',
     digest_string => '8a7611ffb39292d8a43f479e55afdbf3',
     target        => "/opt/elixir-${elixir_version}",
-    root_dir      => ".",
+    root_dir      => '.',
     require       => Package['esl-erlang'],
   }
 
