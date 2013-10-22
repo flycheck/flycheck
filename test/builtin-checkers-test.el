@@ -858,7 +858,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
 
 (ert-deftest checker-slim-error ()
   (flycheck-testsuite-fail-unless-checker 'slim)
-  (let* ((slim-version (second (split-string (car (process-lines "slimrb" "-v")))))
+  (let* ((slim-version (cadr (split-string (car (process-lines "slimrb" "-v")))))
          (expected-error (if (version<= "1.3.1" slim-version)
                             '(2 1 "Unexpected indentation" error)
                            '(2 nil "Unexpected indentation" error))))
