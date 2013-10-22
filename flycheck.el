@@ -4265,12 +4265,10 @@ See URL `http://www.gnu.org/software/bash/'."
 See URL `http://slim-lang.com'."
   :command ("slimrb" "-c" source)
   :error-patterns
-  (;; Slim <= 1.3.0
-   (error line-start "Slim::Parser::SyntaxError:" (message) (optional "\r")
-          "\n  " (file-name) ", Line " line line-end)
-   ;; Slim >= 1.3.1
-   (error line-start "Slim::Parser::SyntaxError:" (message) (optional "\r")
-          "\n  " (file-name) ", Line " line ", Column " column line-end))
+  ((error line-start
+          "Slim::Parser::SyntaxError:" (message) (optional "\r") "\n  "
+          (file-name) ", Line " line (optional ", Column " column)
+          line-end))
   :modes slim-mode)
 
 (flycheck-def-config-file-var flycheck-chktexrc tex-chktex ".chktexrc"
