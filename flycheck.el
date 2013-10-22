@@ -153,6 +153,7 @@ buffer-local wherever it is set."
     rst
     ruby-rubocop
     ruby-rubylint
+    chef-foodcritic
     rust
     sass
     scala
@@ -3444,6 +3445,16 @@ See URL `http://cppcheck.sourceforge.net/'."
             source)
   :error-parser flycheck-parse-cppcheck
   :modes (c-mode c++-mode))
+
+(flycheck-define-checker chef-foodcritic
+  "A Chef cookbooks syntax checker using Foodcritic.
+
+See URL `http://acrmp.github.io/foodcritic/'."
+  :command ("foodcritic" source)
+  :error-patterns
+  ((error line-start (message) ": " (file-name) ":" line line-end))
+  :modes ruby-mode
+  :next-checkers ((warnings-only . ruby)))
 
 (flycheck-define-checker coffee
   "A CoffeeScript syntax checker using coffee.

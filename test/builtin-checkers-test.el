@@ -204,6 +204,14 @@
        '(9 nil warning "Prefix ++/-- operators should be preferred for non-primitive types. Pre-increment/decrement can be more efficient than post-increment/decrement. Post-increment/decrement usually involves keeping a copy of the previous value around and adds a little extra code."
            :checker c/c++-cppcheck)))))
 
+(ert-deftest checker-chef-foodcritic-warnings ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'chef)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/chef-foodcritic-warnings.rb" 'ruby-mode '(ruby-rubocop ruby ruby-jruby)
+   '(3 nil "FC002: Avoid string interpolation where not required" error)
+   '(8 nil "FC003: Check whether you are running with chef server before using server-specific features" error)
+   '(11 nil "FC004: Use a service resource to start and stop services" error)))
+
 (ert-deftest builtin-checker/coffee-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'coffee)
   (flycheck-testsuite-should-syntax-check

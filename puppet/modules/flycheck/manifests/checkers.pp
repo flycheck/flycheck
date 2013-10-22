@@ -91,6 +91,8 @@ class flycheck::checkers {
                 'chktex',          # tex-chktex
                 'lacheck',         # tex-lacheck
                 'xmlstarlet',      # xml-xmlstarlet
+                'libxslt-dev',     # chef-foodcritic
+                'libxml2-dev',     # chef-foodcritic
                 'libxml2-utils',   # xml-xmllint
                 'zsh',             # zsh
                 ]
