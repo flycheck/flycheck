@@ -2990,6 +2990,9 @@ Bug fixes:
 @itemize @bullet
 @item
 @ghissue{225, Find local includes in the Clang syntax checker}
+@item
+Do not emit spurious flawed definition warning in the @code{rst} syntax
+checker
 @end itemize
 
 @end itemize

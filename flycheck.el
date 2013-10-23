@@ -4128,7 +4128,7 @@ See URL `http://pypi.python.org/pypi/pylint'."
   "A ReStructuredText (RST) syntax checker using Docutils.
 
 See URL `http://docutils.sourceforge.net/'."
-  :command ("rst2pseudoxml.py" "--report=2" "--exit-status=1" "--halt=5" source)
+  :command ("rst2pseudoxml.py" "--report=2" "--halt=5" source)
   :error-patterns
   ((warning line-start (file-name) ":" line ": (WARNING/2) " (message) line-end)
    (error line-start
