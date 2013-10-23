@@ -25,14 +25,14 @@ class flycheck::base {
     require => Apt::Ppa['ppa:cassou/emacs']
   }
 
-  $cask_version = '0.4.6'
-  $cask_archive = "cask-${cask_version}"
+  $cask_archive = 'cask-master'
 
   archive { $cask_archive:
-    ensure        => present,
-    url           => "https://github.com/cask/cask/archive/v${cask_version}.tar.gz",
-    digest_string => 'fecf7ca5db66d3084970a03de5d2f789',
-    target        => '/opt/'
+    ensure    => present,
+    # Don't verify the checksum, since master changes frequently
+    checksum  => false,
+    url       => 'https://github.com/cask/cask/archive/master.tar.gz',
+    target    => '/opt/',
   }
 
   file { '/usr/local/bin/cask':
