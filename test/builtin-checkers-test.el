@@ -888,6 +888,20 @@ found)."
      '(6 nil warning "possibly useless use of == in void context"
          :checker ruby))))
 
+(ert-deftest checker-ruby-lint-warning ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-lint)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/ruby-lint-warning.rb" 'ruby-mode '(ruby-rubocop ruby ruby-jruby)
+   '(2 17 "unused argument name" warning)
+   '(8 0 "unused local variable user2" warning)))
+
+(ert-deftest checker-ruby-lint-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-lint)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/ruby-lint-error.rb" 'ruby-mode '(ruby-rubocop ruby ruby-jruby)
+   '(7 21 "undefined instance variable @name" error)
+   '(12 0 "wrong number of arguments (expected 0 but got 1)" error)))
+
 (ert-deftest checker-rust-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'rust)
   (flycheck-testsuite-should-syntax-check
