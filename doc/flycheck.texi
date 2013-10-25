@@ -207,7 +207,7 @@ Lua
 @item
 Perl
 @item
-PHP (using @command{php}, @command{phpcs} and @command{phpmd})
+PHP (using @command{php}, @command{phpmd} and @command{phpcs})
 @item
 Puppet (using @command{puppet parser} and @command{puppet-lint})
 @item
@@ -3145,8 +3145,8 @@ order of their appearance in the default value of
 @iflyc lua
 @iflyc perl
 @iflyc php
-@iflyc php-phpcs
 @iflyc php-phpmd
+@iflyc php-phpcs
 @iflyc puppet-parser
 @iflyc puppet-lint
 @iflyc python-flake8

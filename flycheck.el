@@ -139,8 +139,8 @@ buffer-local wherever it is set."
     lua
     perl
     php
-    php-phpcs
     php-phpmd
+    php-phpcs
     puppet-parser
     puppet-lint
     python-flake8
@@ -3975,7 +3975,27 @@ See URL `http://php.net/manual/en/features.commandline.php'."
   ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
           (message) " in " (file-name) " on line " line line-end))
   :modes (php-mode php+-mode)
-  :next-checkers ((warnings-only . php-phpcs)))
+  :next-checkers ((warnings-only . php-phpmd)))
+
+(flycheck-def-option-var flycheck-phpmd-rulesets
+    "cleancode,codesize,controversial,design,naming,unusedcode" php-phpmd
+  "The rule sets for PHP Mess Detector.
+
+Set A rule set filename or a comma-separated string of
+rule set filenames."
+  :type '(choice (const :tag "Default all rule sets" nil)
+                 (string :tag "A filename or a comma-separated string"))
+  :safe #'stringp)
+
+(flycheck-define-checker php-phpmd
+  "A PHP style checker using PHP Mess Detector.
+
+See URL `http://phpmd.org/'."
+  :command ("phpmd" source (option "text" flycheck-phpmd-rulesets))
+  :error-patterns
+  ((warning line-start(file-name) ":" line (message) line-end))
+  :modes (php-mode php+-mode)
+  :next-checkers (php-phpcs))
 
 (flycheck-def-option-var flycheck-phpcs-standard nil php-phpcs
   "The coding standard for PHP CodeSniffer.
@@ -4007,26 +4027,6 @@ See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
    (warning line-start
             (file-name) ":" line ":" column ": warning - " (message)
             line-end))
-  :modes (php-mode php+-mode)
-  :next-checkers (php-phpmd))
-
-(flycheck-def-option-var flycheck-phpmd-rulesets
-    "cleancode,codesize,controversial,design,naming,unusedcode" php-phpmd
-  "The rule sets for PHP Mess Detector.
-
-Set A rule set filename or a comma-separated string of
-rule set filenames."
-  :type '(choice (const :tag "Default all rule sets" nil)
-                 (string :tag "A filename or a comma-separated string"))
-  :safe #'stringp)
-
-(flycheck-define-checker php-phpmd
-  "A PHP style checker using PHP Mess Detector.
-
-See URL `http://phpmd.org/'."
-  :command ("phpmd" source (option "text" flycheck-phpmd-rulesets))
-  :error-patterns
-  ((warning line-start(file-name) ":" line (message) line-end))
   :modes (php-mode php+-mode))
 
 (flycheck-define-checker puppet-parser
