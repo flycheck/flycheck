@@ -1,6 +1,6 @@
 // A simple import error in Go test file
 
-package testpackage
+package main
 
 import "testing"
 

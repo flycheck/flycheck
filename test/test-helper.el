@@ -446,6 +446,12 @@ of expected errors."
          (should-not flycheck-current-errors))
        (flycheck-testsuite-ensure-clear)))))
 
+(defun flycheck-testsuite-set-environment ()
+  "Set required environment variables."
+  (setenv "GOPATH" (flycheck-testsuite-resource-filename "checkers/go")))
+
+(flycheck-testsuite-set-environment)
+
 (provide 'test-helper)
 
 ;; Local Variables:
