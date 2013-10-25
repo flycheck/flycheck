@@ -433,7 +433,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
   "Test a syntax error."
   :expected-result (flycheck-testsuite-fail-unless-checker 'go-gofmt)
   (flycheck-testsuite-should-syntax-check
-   "checkers/go-syntax-error.go" 'go-mode nil
+   "checkers/go/src/syntax/syntax-error.go" 'go-mode nil
    '(5 9 "expected '(', found 'IDENT' ta" error)
    '(6 1 "expected ')', found '}'" error)))
 
@@ -441,14 +441,14 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
   "Test an import error."
   :expected-result (flycheck-testsuite-fail-unless-checker 'go-build)
   (flycheck-testsuite-should-syntax-check
-   "checkers/go-testpackage/go-build-error.go" 'go-mode nil
+   "checkers/go/src/error/build-error.go" 'go-mode nil
    '(6 nil "undefined: fmt" error :checker go-build)))
 
 (ert-deftest checker-go-test-error ()
   "Test an import error."
   :expected-result (flycheck-testsuite-fail-unless-checker 'go-test)
   (flycheck-testsuite-should-syntax-check
-   "checkers/go-testpackage/go-test-error_test.go" 'go-mode nil
+   "checkers/go/src/test/test-error_test.go" 'go-mode nil
    '(8 nil "undefined: fmt" error :checker go-test)))
 
 (ert-deftest checker-haml-error ()
