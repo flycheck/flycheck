@@ -3978,20 +3978,24 @@ See URL `http://php.net/manual/en/features.commandline.php'."
   :next-checkers ((warnings-only . php-phpmd)))
 
 (flycheck-def-option-var flycheck-phpmd-rulesets
-    "cleancode,codesize,controversial,design,naming,unusedcode" php-phpmd
+    '("cleancode" "codesize" "controversial" "design" "naming" "unusedcode")
+    php-phpmd
   "The rule sets for PHP Mess Detector.
 
-Set A rule set filename or a comma-separated string of
-rule set filenames."
-  :type '(choice (const :tag "Default all rule sets" nil)
-                 (string :tag "A filename or a comma-separated string"))
-  :safe #'stringp)
+Set default rule sets and custom rule set files.
+
+See section \"Using multiple rule sets\" in the PHP Mess Detector
+manual at URL `http://phpmd.org/documentation/index.html'."
+  :type '(repeat :tag "rule sets"
+                 (string :tag "A filename or rule set"))
+  :safe #'flycheck-string-list-p)
 
 (flycheck-define-checker php-phpmd
   "A PHP style checker using PHP Mess Detector.
 
 See URL `http://phpmd.org/'."
-  :command ("phpmd" source (option "text" flycheck-phpmd-rulesets))
+  :command ("phpmd" source (option "text" flycheck-phpmd-rulesets
+                                   flycheck-option-comma-separated-list))
   :error-patterns
   ((warning line-start(file-name) ":" line (message) line-end))
   :modes (php-mode php+-mode)
