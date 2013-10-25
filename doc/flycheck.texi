@@ -2934,6 +2934,8 @@ Improvements:
 @ghissue{236, YAML}
 @item
 @ghissue{245, Javascript with @command{gjslint}}
+@item
+@ghissue{246, Slim}
 @end itemize
 
 @item
@@ -3089,7 +3091,8 @@ to the Flake8 syntax checker.
 
 @item
 @gh{yasuyk, Yasuyuki Oka} added syntax checkers for YAML (using Ruby's
-standard YAML parser) and Javascript (using Google's Closure linter).
+standard YAML parser), Javascript (using Google's Closure linter) and
+Slim.
 
 @item
 @gh{vderyagin, Victor Deryagin} added the Rust syntax checker.
