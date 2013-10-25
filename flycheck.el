@@ -3489,17 +3489,8 @@ See URL `http://www.coffeelint.org/'."
   "A CSS syntax and style checker using csslint.
 
 See URL `https://github.com/stubbornella/csslint'."
-  :command ("csslint" "--format=compact" source)
-  :error-patterns
-  ((error line-start
-          (file-name)
-          ": line " line
-          ", col " column
-          ", Error - " (message) line-end)
-   (warning line-start
-            (file-name) ": line "
-            line ", col "
-            column ", Warning - " (message) line-end))
+  :command ("csslint" "--format=checkstyle-xml" source)
+  :error-parser flycheck-parse-checkstyle
   :modes css-mode)
 
 (defconst flycheck-d-module-re (rx "module" (one-or-more (syntax whitespace))
