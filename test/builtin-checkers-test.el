@@ -525,22 +525,22 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
      '(3 25 "Unclosed string." error)
      '(4 1 "Unclosed string." error)
      '(3 11 "Unclosed string." error)
-     '(3 nil "Unused variable: 'foo'" warning)
      '(4 1 "Missing semicolon." error))))
 
-(ert-deftest checker-javascript-jshint-error ()
-  "Use eval()"
-  :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/javascript-jshint-error.js" '(js-mode js2-mode js3-mode) nil
-   '(3 1 "eval can be harmful." error)))
-
-(ert-deftest checker-javascript-jshint-warning ()
+(ert-deftest checker-javascript-jshint-error-disabled ()
   "An unused variable."
   :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
   (flycheck-testsuite-should-syntax-check
-   "checkers/javascript-jshint-warning.js" '(js-mode js2-mode js3-mode) nil
-   '(5 nil "Unused variable: 'foo'" warning)))
+   "checkers/javascript-jshint-error.js" '(js-mode js2-mode js3-mode) nil))
+
+(ert-deftest checker-javascript-jshint-error-enabled ()
+  "An unused variable."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
+  (flycheck-testsuite-with-hook (js-mode-hook js2-mode-hook js3-mode-hook)
+      (setq flycheck-jshintrc "jshintrc")
+    (flycheck-testsuite-should-syntax-check
+     "checkers/javascript-jshint-error.js" '(js-mode js2-mode js3-mode) nil
+     '(5 12 "'foo' is defined but never used." error))))
 
 (ert-deftest checker-javascript-gjslint-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-gjslint)
