@@ -66,4 +66,11 @@
   (should (eq (flycheck-error-level-overlay-category 'warning)
               'flycheck-warning-overlay)))
 
+(ert-deftest flycheck-error-level-warning ()
+  (should (eq (flycheck-error-level-fringe-bitmap 'info) nil))
+  (should (eq (flycheck-error-level-fringe-face 'info)
+              'flycheck-fringe-info))
+  (should (eq (flycheck-error-level-overlay-category 'info)
+              'flycheck-info-overlay)))
+
 ;;; error-level-test.el ends here
