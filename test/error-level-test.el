@@ -51,8 +51,19 @@
 
 
 ;; Test the builtin levels
-(ert-deftest flycheck-error-level-error ())
+(ert-deftest flycheck-error-level-error ()
+  (should (eq (flycheck-error-level-fringe-bitmap 'error)
+              flycheck-fringe-exclamation-mark))
+  (should (eq (flycheck-error-level-fringe-face 'error)
+              'flycheck-fringe-error))
+  (should (eq (flycheck-error-level-overlay-category 'error)
+              'flycheck-error-overlay)))
 
-(ert-deftest flycheck-error-level-warning ())
+(ert-deftest flycheck-error-level-warning ()
+  (should (eq (flycheck-error-level-fringe-bitmap 'warning) 'question-mark))
+  (should (eq (flycheck-error-level-fringe-face 'warning)
+              'flycheck-fringe-warning))
+  (should (eq (flycheck-error-level-overlay-category 'warning)
+              'flycheck-warning-overlay)))
 
 ;;; error-level-test.el ends here
