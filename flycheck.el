@@ -4128,14 +4128,12 @@ See URL `http://jruby.org/'."
   "A Ruby syntax and code analysis checker using ruby-lint.
 
 See URL `https://github.com/YorickPeterse/ruby-lint'."
-  :command ("ruby-lint" source)
+  :command ("ruby-lint" "analyze" "--presenter=syntastic" source)
   :error-patterns
   ((warning line-start
-            (file-name) ": warning: line " line ", column " column ": " (message)
-            line-end)
+            (file-name) ":W:" line ":" column ": " (message) line-end)
    (error line-start
-          (file-name)  ": error: line " line ", column " column ": " (message)
-          line-end))
+            (file-name) ":E:" line ":" column ": " (message) line-end))
   :modes ruby-mode)
 
 (flycheck-define-checker rust
