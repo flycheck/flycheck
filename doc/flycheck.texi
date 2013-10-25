@@ -228,6 +228,8 @@ SCSS
 Shell scripts (using Bash, Dash, or Zsh depending on the type of shell
 script)
 @item
+Slim
+@item
 TeX/LaTeX (using @command{chktex} or @command{lacheck})
 @item
 XML (using @command{xmlstarlet} or @command{xmllint})
@@ -3156,6 +3158,7 @@ order of their appearance in the default value of
 @iflyc scss
 @iflyc sh-dash
 @iflyc sh-bash
+@iflyc slim
 @iflyc tex-chktex
 @iflyc tex-lacheck
 @iflyc xml-xmlstarlet
