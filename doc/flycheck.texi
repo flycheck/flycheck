@@ -207,7 +207,7 @@ Lua
 @item
 Perl
 @item
-PHP (using the PHP Command Line and PHP CodeSniffer)
+PHP (using @command{php}, @command{phpmd} and @command{phpcs})
 @item
 Puppet (using @command{puppet parser} and @command{puppet-lint})
 @item
@@ -690,6 +690,10 @@ syntax checker allows without reporting an error.
 
 @defopt flycheck-phpcs-standard
 The coding standard the syntax checker @code{php-phpcs} shall use.
+@end defopt
+
+@defopt flycheck-phpmd-rulesets
+The rule sets for PHP Mess Detector @code{php-phpmd} shall use
 @end defopt
 
 @subsection Syntax checker configuration files
@@ -3146,6 +3150,7 @@ order of their appearance in the default value of
 @iflyc lua
 @iflyc perl
 @iflyc php
+@iflyc php-phpmd
 @iflyc php-phpcs
 @iflyc puppet-parser
 @iflyc puppet-lint

@@ -139,6 +139,7 @@ buffer-local wherever it is set."
     lua
     perl
     php
+    php-phpmd
     php-phpcs
     puppet-parser
     puppet-lint
@@ -3966,7 +3967,32 @@ See URL `http://php.net/manual/en/features.commandline.php'."
   ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
           (message) " in " (file-name) " on line " line line-end))
   :modes (php-mode php+-mode)
-  :next-checkers ((warnings-only . php-phpcs)))
+  :next-checkers ((warnings-only . php-phpmd)))
+
+(flycheck-def-option-var flycheck-phpmd-rulesets
+    '("cleancode" "codesize" "controversial" "design" "naming" "unusedcode")
+    php-phpmd
+  "The rule sets for PHP Mess Detector.
+
+Set default rule sets and custom rule set files.
+
+See section \"Using multiple rule sets\" in the PHP Mess Detector
+manual at URL `http://phpmd.org/documentation/index.html'."
+  :type '(repeat :tag "rule sets"
+                 (string :tag "A filename or rule set"))
+  :safe #'flycheck-string-list-p)
+
+(flycheck-define-checker php-phpmd
+  "A PHP style checker using PHP Mess Detector.
+
+See URL `http://phpmd.org/'."
+  :command ("phpmd" source "text"
+            (eval (flycheck-option-comma-separated-list
+                   flycheck-phpmd-rulesets)))
+  :error-patterns
+  ((warning line-start(file-name) ":" line (message) line-end))
+  :modes (php-mode php+-mode)
+  :next-checkers (php-phpcs))
 
 (flycheck-def-option-var flycheck-phpcs-standard nil php-phpcs
   "The coding standard for PHP CodeSniffer.

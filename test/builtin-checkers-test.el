@@ -596,6 +596,16 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
    "checkers/php-syntax-error.php" 'php-mode nil
    '(8 nil "syntax error, unexpected ')', expecting '('" error)))
 
+(ert-deftest checker-php-phpmd-warning ()
+  :expected-result (flycheck-testsuite-fail-unless-checkers 'php 'php-phpmd)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/php-phpmd-warning.php" 'php-mode '(php-phpcs)
+   '(4 nil "Avoid unused private fields such as '$FOO'." warning :checker php-phpmd)
+   '(5 nil "Avoid unused private methods such as 'bar'." warning :checker php-phpmd)
+   '(5 nil "Avoid unused parameters such as '$baz'." warning :checker php-phpmd)
+   '(7 nil "Avoid variables with short names like $i. Configured minimum length is 3." warning :checker php-phpmd)
+   '(7 nil "Avoid unused local variables such as '$i'." warning :checker php-phpmd)))
+
 (ert-deftest checker-php-phpcs-error ()
   "Test an uppercase keyword error by phpcs."
   :expected-result (flycheck-testsuite-fail-unless-checkers 'php 'php-phpcs)
