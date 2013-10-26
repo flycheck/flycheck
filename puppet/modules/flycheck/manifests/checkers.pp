@@ -33,6 +33,7 @@ class flycheck::checkers {
   $node_packages = ['coffee-script', # coffee
                     'coffeelint',    # coffee-coffeelint
                     'csslint',       # css-csslint
+                    'js-yaml',       # yaml-jsyaml
                     'jshint',        # javascript-jshint
                     'jsonlint',      # json-jsonlint
                     'less',          # less
