@@ -155,6 +155,7 @@ buffer-local wherever it is set."
     scss
     sh-dash
     sh-bash
+    slim
     tex-chktex
     tex-lacheck
     xml-xmlstarlet
@@ -3489,17 +3490,8 @@ See URL `http://www.coffeelint.org/'."
   "A CSS syntax and style checker using csslint.
 
 See URL `https://github.com/stubbornella/csslint'."
-  :command ("csslint" "--format=compact" source)
-  :error-patterns
-  ((error line-start
-          (file-name)
-          ": line " line
-          ", col " column
-          ", Error - " (message) line-end)
-   (warning line-start
-            (file-name) ": line "
-            line ", col "
-            column ", Warning - " (message) line-end))
+  :command ("csslint" "--format=checkstyle-xml" source)
+  :error-parser flycheck-parse-checkstyle
   :modes css-mode)
 
 (defconst flycheck-d-module-re (rx "module" (one-or-more (syntax whitespace))
@@ -4283,6 +4275,18 @@ See URL `http://www.gnu.org/software/bash/'."
           (message) line-end))
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'sh)))
+
+(flycheck-define-checker slim
+  "A Slim syntax checker using the Slim compiler.
+
+See URL `http://slim-lang.com'."
+  :command ("slimrb" "-c" source)
+  :error-patterns
+  ((error line-start
+          "Slim::Parser::SyntaxError:" (message) (optional "\r") "\n  "
+          (file-name) ", Line " line (optional ", Column " column)
+          line-end))
+  :modes slim-mode)
 
 (flycheck-def-config-file-var flycheck-chktexrc tex-chktex ".chktexrc"
   :safe #'stringp)

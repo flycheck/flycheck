@@ -1,3 +1,6 @@
-/** Use eval to trigger a warning */
+/** An unused variable */
 
-eval("alert();");
+
+(function() {
+    var foo = ["Hello world"];
+}());

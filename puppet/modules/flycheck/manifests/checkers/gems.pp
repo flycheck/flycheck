@@ -10,6 +10,7 @@ class flycheck::checkers::gems {
                     'puppet-lint',
                     'rubocop',     # ruby-rubocop
                     'sass',        # sass/scss
+                    'slim',        # slim
                     ]
 
   package { $gem_packages:
