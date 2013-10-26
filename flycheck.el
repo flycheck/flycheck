@@ -3941,9 +3941,12 @@ See URL `http://www.lua.org/'."
   :command ("luac" "-p" source)
   :error-patterns
   ((error line-start
-          (minimal-match (zero-or-more not-newline)) ; Skip name of the luac
-                                                     ; executable
-          ": " (file-name) ":" line ": " (message) line-end))
+          ;; Skip the name of the luac executable.  We also skip the file name,
+          ;; because luac is stupid enough as to abbreviate file names in its
+          ;; output, which for obvious reasons breaks our file name
+          ;; detection. See https://github.com/flycheck/flycheck/issues/251
+          (minimal-match (zero-or-more not-newline))
+          ":" line ": " (message) line-end))
   :modes lua-mode)
 
 (flycheck-define-checker perl

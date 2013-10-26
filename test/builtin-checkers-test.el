@@ -573,7 +573,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
   :expected-result (flycheck-testsuite-fail-unless-checker 'lua)
   (flycheck-testsuite-should-syntax-check
    "checkers/lua-syntax-error.lua" 'lua-mode nil
-   '(5 nil "unfinished string near '\"oh no'" error)))
+   '(5 nil "unfinished string near '\"oh no'" error :filename nil)))
 
 (ert-deftest checker-perl-error ()
   "Test an unused variable with the Perl checker."

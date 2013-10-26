@@ -3004,6 +3004,9 @@ Bug fixes:
 @item
 Do not emit spurious flawed definition warning in the @code{rst} syntax
 checker
+@item
+@ghissue{251, Handle abbreviated file names in @command{luac}
+output@comma{} by simply ignoring them}
 @end itemize
 
 @end itemize
