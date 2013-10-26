@@ -3446,7 +3446,9 @@ See URL `http://clang.llvm.org/'."
             ;; with quotes
             source-inplace)
   :error-patterns
-  ((warning line-start (file-name) ":" line ":" column
+  ((info line-start (file-name) ":" line ":" column
+            ": note: " (message) line-end)
+   (warning line-start (file-name) ":" line ":" column
             ": warning: " (message) line-end)
    (error line-start (file-name) ":" line ":" column
           ": " (or "fatal error" "error") ": " (message) line-end))
@@ -4142,7 +4144,9 @@ See URL `http://pypi.python.org/pypi/pylint'."
   ((error line-start (file-name) ":" line ":"
           (or "E" "F") ":" (message) line-end)
    (warning line-start (file-name) ":" line ":"
-            (or "W" "R" "C") ":" (message) line-end))
+            (or "W" "R") ":" (message) line-end)
+   (warning line-start (file-name) ":" line ":"
+            "C:" (message) line-end))
   :modes python-mode)
 
 (flycheck-define-checker rst

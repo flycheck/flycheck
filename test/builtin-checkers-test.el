@@ -116,6 +116,7 @@
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
   (flycheck-testsuite-should-syntax-check
    "checkers/c_c++-clang-error.cpp" 'c++-mode nil
+   '(3 23 "template is declared here" info)
    '(8 17 "implicit instantiation of undefined template 'test<false>'" error)
    '(10 16 "use of undeclared identifier 'nullptr'" error)))
 
@@ -125,6 +126,7 @@
       (setq flycheck-clang-language-standard "c++11")
     (flycheck-testsuite-should-syntax-check
      "checkers/c_c++-clang-error.cpp" 'c++-mode nil
+     '(3 23 "template is declared here" info)
      '(8 17 "implicit instantiation of undefined template 'test<false>'" error))))
 
 (ert-deftest checker-c/c++-clang-standard-library ()
