@@ -2974,6 +2974,7 @@ Add configuration file variable @code{flycheck-pylintrc} for Pylint
 @item
 @ghissue{212, Define new error levels with
 @code{flycheck-define-error-level}}
+@item
 @ghissue{234, Add @code{flycheck-clang-standard-library} to choose the
 standard library for C/C++ syntax checking}
 @item
