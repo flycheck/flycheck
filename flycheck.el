@@ -4109,7 +4109,8 @@ See URL `http://www.ruby-lang.org/'."
             (file-name) ":" line ":" (optional column ":")
             " warning: " (message) line-end)
    (error line-start (file-name) ":" line ": " (message) line-end))
-  :modes (enh-ruby-mode ruby-mode))
+  :modes (enh-ruby-mode ruby-mode)
+  :next-checkers ((warnings-only . ruby-rubylint)))
 
 (flycheck-define-checker ruby-jruby
   "A Ruby syntax checker using the JRuby interpreter.
@@ -4122,7 +4123,8 @@ See URL `http://jruby.org/'."
           line-end)
    (warning line-start (file-name) ":" line " warning: " (message) line-end)
    (error line-start (file-name) ":" line ": " (message) line-end))
-  :modes (enh-ruby-mode ruby-mode))
+  :modes (enh-ruby-mode ruby-mode)
+  :next-checkers ((warnings-only . ruby-rubylint)))
 
 (flycheck-define-checker ruby-rubylint
   "A Ruby syntax and code analysis checker using ruby-lint.
