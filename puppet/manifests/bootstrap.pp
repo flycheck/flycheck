@@ -41,7 +41,8 @@ define puppet::module($module = $title, $version = undef) {
     default => "--version ${version}",
   }
 
-  $directory_name = regsubst($module, '/', '-')
+  $parts = split($module, '/')
+  $directory_name = $parts[1]
 
   exec { "puppet::module::install::${module}":
     command => "puppet module install ${module} ${version_argument}",
@@ -54,7 +55,7 @@ define puppet::module($module = $title, $version = undef) {
 puppet::module { ['puppetlabs/stdlib',
                   'puppetlabs/apt',
                   'puppetlabs/nodejs',
-                  'rafaelfc/pear',
+                  'nodes/php',
                   'gini/archive',
                   'adrien/alternatives']:
 }
