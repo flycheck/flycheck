@@ -3994,8 +3994,9 @@ manual at URL `http://phpmd.org/documentation/index.html'."
   "A PHP style checker using PHP Mess Detector.
 
 See URL `http://phpmd.org/'."
-  :command ("phpmd" source (option "text" flycheck-phpmd-rulesets
-                                   flycheck-option-comma-separated-list))
+  :command ("phpmd" source "text"
+            (eval (flycheck-option-comma-separated-list
+                   flycheck-phpmd-rulesets)))
   :error-patterns
   ((warning line-start(file-name) ":" line (message) line-end))
   :modes (php-mode php+-mode)
