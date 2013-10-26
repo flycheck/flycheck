@@ -213,7 +213,7 @@ The following people contributed to flycheck:
   naming errors to the Flake8 syntax checker.
 - [Yasuyuki Oka](https://github.com/yasuyk) added syntax checkers for YAML
   (using Ruby's standard YAML parser), Javascript (using Google's Closure
-  linter) and Slim.
+  linter), Slim and PHP (using PHP Mess Detector)
 - [Victor Deryagin](https://github.com/vderyagin) added the Rust syntax checker.
 
 

@@ -2940,6 +2940,8 @@ Improvements:
 @ghissue{245, Javascript with @command{gjslint}}
 @item
 @ghissue{246, Slim}
+@item
+@ghissue{249, PHP using @command{phpmd}}
 @end itemize
 
 @item
@@ -3098,8 +3100,8 @@ to the Flake8 syntax checker.
 
 @item
 @gh{yasuyk, Yasuyuki Oka} added syntax checkers for YAML (using Ruby's
-standard YAML parser), Javascript (using Google's Closure linter) and
-Slim.
+standard YAML parser), Javascript (using Google's Closure linter),
+Slim and PHP (using PHP Mess Detector)
 
 @item
 @gh{vderyagin, Victor Deryagin} added the Rust syntax checker.
