@@ -16,6 +16,7 @@
  ;; Various modes for use in the unit tests
  (depends-on "adoc-mode")
  (depends-on "coffee-mode")
+ (depends-on "feature-mode")
  (depends-on "haml-mode")
  (depends-on "handlebars-mode")
  (depends-on "haskell-mode")

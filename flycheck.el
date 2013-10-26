@@ -126,6 +126,7 @@ buffer-local wherever it is set."
     coffee
     coffee-coffeelint
     css-csslint
+    cucumber
     d-dmd
     elixir
     emacs-lisp
@@ -3518,6 +3519,28 @@ See URL `https://github.com/stubbornella/csslint'."
   :command ("csslint" "--format=checkstyle-xml" source)
   :error-parser flycheck-parse-checkstyle
   :modes css-mode)
+
+(flycheck-define-checker cucumber
+  "A Cucumber syntax checker using the cucumber command.
+
+See URL `http://cukes.info/'."
+  :command ( "cucumber" "--dry-run" "--quiet" "--strict" "--format" "pretty"
+             (eval (expand-file-name
+                    (locate-dominating-file default-directory "features"))))
+  :error-patterns
+  ((error line-start (file-name) ": Lexing error on line " line ": "
+          (message) line-end)
+   (error line-start (zero-or-more not-newline) "Parse error at "
+          (file-name) ":" line "." (message) line-end)
+   (warning line-start
+            (message) (optional "\r") "\n"
+            (zero-or-more (not (syntax whitespace)))
+            (zero-or-more (syntax whitespace))
+            (file-name) ":" line ":" (zero-or-more not-newline) line-end))
+  :modes feature-mode
+  :predicate
+  (lambda ()
+    (locate-dominating-file default-directory "features")))
 
 (defconst flycheck-d-module-re (rx "module" (one-or-more (syntax whitespace))
                                    (group (one-or-more (not (syntax whitespace))))

@@ -11,7 +11,8 @@ class flycheck::checkers::gems {
     $gem_requires = [Class['flycheck::ruby']]
   }
 
-  $gem_packages = [ 'foodcritic',  # chef-foodcritic
+  $gem_packages = [ 'cucumber',    # cucumber
+                    'foodcritic',  # chef-foodcritic
                     'haml',
                     'puppet-lint',
                     'rubocop',     # ruby-rubocop

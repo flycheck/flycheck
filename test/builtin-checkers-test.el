@@ -232,6 +232,24 @@
    '(4 20 error "Unexpected token ';' at line 4, col 20." :checker css-csslint)
    '(5 1 error "Unexpected token '}' at line 5, col 1." :checker css-csslint)))
 
+(ert-deftest flycheck/cucumber-lexer-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'cucumber)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/cucumber/lexer-error/features/lexer-error.feature" 'feature-mode
+   '(1 nil error "'Feature Test::Unit'. See http://wiki.github.com/cucumber/gherkin/lexingerror for more information. (Gherkin::Lexer::LexingError)" :checker cucumber)))
+
+(ert-deftest flycheck/cucumber-parser-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'cucumber)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/cucumber/parser-error/features/parser-error.feature" 'feature-mode
+   '(1 nil error "Found scenario when expecting one of: comment, feature, tag. (Current state: root). (Gherkin::Parser::ParseError)" :checker cucumber)))
+
+(ert-deftest flycheck/cucumber-warning ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'cucumber)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/cucumber/warning/features/warning.feature" 'feature-mode
+   '(9 nil warning "Undefined step: \"I can assert that x == y\" (Cucumber::Undefined)" :checker cucumber)))
+
 (ert-deftest flycheck-d-module-name ()
   (with-temp-buffer
     (insert "Hello world")
