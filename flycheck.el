@@ -3967,7 +3967,8 @@ See URL `http://php.net/manual/en/features.commandline.php'."
   ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
           (message) " in " (file-name) " on line " line line-end))
   :modes (php-mode php+-mode)
-  :next-checkers ((warnings-only . php-phpmd)))
+  :next-checkers ((warnings-only . php-phpmd)
+                  (warnings-only . php-phpcs)))
 
 (flycheck-def-option-var flycheck-phpmd-rulesets
     '("cleancode" "codesize" "controversial" "design" "naming" "unusedcode")
