@@ -43,6 +43,7 @@ Features
   - Elixir
   - Emacs Lisp
   - Erlang
+  - ERuby
   - Go
   - Haml
   - Handlebars
