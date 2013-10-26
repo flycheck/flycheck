@@ -890,6 +890,12 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
    '(4 nil "parser error : Opening and ending tag mismatch: spam line 3 and with" error)
    '(5 nil "parser error : Extra content at the end of the document" error)))
 
+(ert-deftest checker-yaml-jsyaml-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'yaml-jsyaml)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/yaml-syntax-error.yaml" 'yaml-mode 'yaml-ruby
+   '(4 5 "bad indentation of a mapping entry" error :filename nil)))
+
 (ert-deftest checker-yaml-ruby ()
   (flycheck-testsuite-fail-unless-checker 'yaml-ruby)
   (let* ((ruby-version (car (process-lines "ruby" "-e" "puts RUBY_VERSION")))
@@ -909,7 +915,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
            (:else
             '(4 5 "mapping values are not allowed in this context" error)))))
     (flycheck-testsuite-should-syntax-check
-     "checkers/yaml-syntax-error.yaml" 'yaml-mode nil expected-error)))
+     "checkers/yaml-syntax-error.yaml" 'yaml-mode 'yaml-jsyaml expected-error)))
 
 (ert-deftest checker-zsh-syntax-error ()
   "Test a syntax error from a missing semicolon."
