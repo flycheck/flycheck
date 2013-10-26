@@ -37,7 +37,7 @@ Modern on-the-fly syntax checking for GNU Emacs 24
 </p>
 
 <p class="text-center">
-<small>Distributed under the
+<small>Flycheck is distributed under the
 terms of the <a href="http://www.gnu.org/licenses/gpl-3.0.en.html"
 target="_blank">GNU GPL 3 or any later version</a>.</small>
 </p>
