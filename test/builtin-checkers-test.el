@@ -882,23 +882,21 @@ found)."
 
 (ert-deftest checker-ruby-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby)
-  (flycheck-testsuite-without-checkers ruby-rubocop
-    (flycheck-testsuite-should-syntax-check
-     "checkers/ruby-warnings.rb" 'ruby-mode
-     '(6 nil warning "possibly useless use of == in void context"
-         :checker ruby))))
+   (flycheck-testsuite-should-syntax-check
+    "checkers/ruby-warning.rb" 'ruby-mode '(ruby-rubocop)
+    '(3 nil "possibly useless use of == in void context" warning)))
 
-(ert-deftest checker-ruby-lint-warning ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-lint)
+(ert-deftest checker-ruby-rubylint-warning ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubylint)
   (flycheck-testsuite-should-syntax-check
-   "checkers/ruby-lint-warning.rb" 'ruby-mode '(ruby-rubocop ruby ruby-jruby)
+   "checkers/ruby-rubylint-warning.rb" 'ruby-mode '(ruby-rubocop ruby ruby-jruby)
    '(2 17 "unused argument name" warning)
    '(8 0 "unused local variable user2" warning)))
 
-(ert-deftest checker-ruby-lint-error ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-lint)
+(ert-deftest checker-ruby-rubylint-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubylint)
   (flycheck-testsuite-should-syntax-check
-   "checkers/ruby-lint-error.rb" 'ruby-mode '(ruby-rubocop ruby ruby-jruby)
+   "checkers/ruby-rubylint-error.rb" 'ruby-mode '(ruby-rubocop ruby ruby-jruby)
    '(7 21 "undefined instance variable @name" error)
    '(12 0 "wrong number of arguments (expected 0 but got 1)" error)))
 

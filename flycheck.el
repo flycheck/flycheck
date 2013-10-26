@@ -148,7 +148,7 @@ buffer-local wherever it is set."
     ruby-rubocop
     ruby
     ruby-jruby
-    ruby-lint
+    ruby-rubylint
     rust
     sass
     scala
@@ -4093,7 +4093,7 @@ See URL `http://batsov.com/rubocop/'."
           (file-name) ":" line ":" column ": " (or "E" "F") ": " (message)
           line-end))
   :modes (enh-ruby-mode ruby-mode)
-  :next-checkers ((warnings-only . ruby-lint)))
+  :next-checkers ((warnings-only . ruby-rubylint)))
 
 (flycheck-define-checker ruby
   "A Ruby syntax checker using the standard (MRI) Ruby interpreter.
@@ -4124,7 +4124,7 @@ See URL `http://jruby.org/'."
    (error line-start (file-name) ":" line ": " (message) line-end))
   :modes (enh-ruby-mode ruby-mode))
 
-(flycheck-define-checker ruby-lint
+(flycheck-define-checker ruby-rubylint
   "A Ruby syntax and code analysis checker using ruby-lint.
 
 See URL `https://github.com/YorickPeterse/ruby-lint'."

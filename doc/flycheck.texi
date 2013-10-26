@@ -3225,7 +3225,7 @@ order of their appearance in the default value of
 @iflyc ruby-rubocop
 @iflyc ruby
 @iflyc ruby-jruby
-@iflyc ruby-lint
+@iflyc ruby-rubylint
 @iflyc rust
 @iflyc sass
 @iflyc scala
