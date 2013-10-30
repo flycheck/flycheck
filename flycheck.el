@@ -4176,7 +4176,7 @@ See URL `http://batsov.com/rubocop/'."
    (error line-start
           (file-name) ":" line ":" column ": " (or "E" "F") ": " (message)
           line-end))
-  :modes ruby-mode)
+  :modes (Enhanced-Ruby-Mode enh-ruby-mode ruby-mode))
 
 (flycheck-define-checker ruby
   "A Ruby syntax checker using the standard (MRI) Ruby interpreter.
@@ -4192,7 +4192,7 @@ See URL `http://www.ruby-lang.org/'."
             (file-name) ":" line ":" (optional column ":")
             " warning: " (message) line-end)
    (error line-start (file-name) ":" line ": " (message) line-end))
-  :modes 'ruby-mode)
+  :modes (Enhanced-Ruby-Mode enh-ruby-mode ruby-mode))
 
 (flycheck-define-checker ruby-jruby
   "A Ruby syntax checker using the JRuby interpreter.
@@ -4205,7 +4205,7 @@ See URL `http://jruby.org/'."
           line-end)
    (warning line-start (file-name) ":" line " warning: " (message) line-end)
    (error line-start (file-name) ":" line ": " (message) line-end))
-  :modes ruby-mode)
+  :modes (Enhanced-Ruby-Mode enh-ruby-mode ruby-mode))
 
 (flycheck-define-checker rust
   "A Rust syntax checker using Rust compiler.
