@@ -884,7 +884,7 @@ to allow for further processing of the error, or t, to indicate that the
 error was fully processed and inhibit any further processing.
 @end defopt
 
-You can also list all errors in the current buffer:
+You can also show a list with all errors in the current buffer:
 
 @table @kbd
 @item C-c ! l
@@ -892,7 +892,9 @@ You can also list all errors in the current buffer:
 @findex flycheck-list-errors
 List all errors in the current buffer in a separate buffer.
 
-With prefix arg, list only errors at point.
+The error list automatically refreshes after a syntax check, and follows
+the current buffer, that is, if you switch to another buffer, the error
+list is updated to show the errors of the new buffer.
 @end table
 
 If you hover a highlighted error with the mouse, a tooltip with the
@@ -2912,7 +2914,7 @@ Bug fixes:
 
 @end itemize
 
-@node master,  , 0.14.1, Changes
+@node master, , 0.14.1, Changes
 @comment  node-name,  next,  previous,  up
 @unnumberedsec master (unreleased)
 
@@ -2928,6 +2930,13 @@ the online manual moved to @uref{http://flycheck.github.io}.
 @item
 Do not add the current directory to the @code{emacs-lisp} syntax checker
 load path
+@item
+@ghissue{214, @code{flycheck-list-errors} cannot list errors at point
+anymore}.  It does not accept a prefix argument anymore, and takes zero
+arguments now
+@item
+@ghissue{214, @code{flycheck-display-errors-in-list} is gone}.  The
+error list automatically highlights the error at point now
 @end itemize
 
 @item
@@ -2972,6 +2981,12 @@ files for C/C++ syntax checking}
 @item
 Add configuration file variable @code{flycheck-pylintrc} for Pylint
 @item
+@ghissue{214, New face @code{flycheck-error-list-highlight} to highlight
+the errors at point in the error list}
+@item
+@ghissue{214, The error list now automatically updates to show the
+errors of the current buffer}
+@item
 @ghissue{212, Define new error levels with
 @code{flycheck-define-error-level}}
 @item
@@ -2988,6 +3003,12 @@ Improvements:
 @itemize @bullet
 @item
 @ghissue{204, Do not ignore convention warnings by @command{pylint}}
+@item
+@ghissue{214, The error list now refreshes automatically after each
+syntax check}
+@item
+@ghissue{214, The errors at point are now automatically highlighted in
+the error list}
 @item
 @code{emacs-lisp-checkdoc} does not longer check @file{.dir-locals.el}
 files
