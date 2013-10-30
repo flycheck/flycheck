@@ -3530,7 +3530,7 @@ declaration in the current buffer."
   "A D syntax checker using the DMD compiler.
 
 See URL `http://dlang.org/'."
-  :command ("dmd" "-debug" "-o-" "-property"
+  :command ("dmd" "-debug" "-o-"
                   "-wi" ; Compilation will continue even if there are warnings
                   (eval (s-concat "-I" (flycheck-d-base-directory)))
                   source)
