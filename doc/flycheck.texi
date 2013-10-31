@@ -2937,6 +2937,8 @@ arguments now
 @item
 @ghissue{214, @code{flycheck-display-errors-in-list} is gone}.  The
 error list automatically highlights the error at point now
+@item
+Remove obsolete @code{flycheck-declare-checker}
 @end itemize
 
 @item
