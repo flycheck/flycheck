@@ -504,6 +504,7 @@ This variable is a normal hook."
   '((t :inherit warning))
   "Flycheck face for fringe warning indicators."
   :package-version '(flycheck . "0.13")
+  :group 'flycheck-faces)
 
 (defface flycheck-error-list-highlight
   '((t :inherit highlight))
