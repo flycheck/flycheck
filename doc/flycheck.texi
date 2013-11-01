@@ -2942,7 +2942,7 @@ Remove obsolete @code{flycheck-declare-checker}
 @end itemize
 
 @item
-Improvements:
+New syntax checkers:
 
 @itemize @bullet
 @item
