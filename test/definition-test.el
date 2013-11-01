@@ -28,13 +28,6 @@
 
 (require 'test-helper)
 
-(ert-deftest flycheck-error-pattern-p ()
-  (should (flycheck-error-pattern-p '("foo" . warning)))
-  (should-not (flycheck-error-pattern-p '("bar" . foo)))
-  (should-not (flycheck-error-pattern-p '("bar" warning)))
-  (should-not (flycheck-error-pattern-p "foo"))
-  (should-not (flycheck-error-pattern-p 'warning)))
-
 (ert-deftest flycheck-command-argument-p-symbols ()
   (--each '(source source-inplace source-original temporary-directory)
     (should (flycheck-command-argument-p it))))
