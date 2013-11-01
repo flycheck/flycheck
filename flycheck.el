@@ -4136,7 +4136,7 @@ See URL `https://github.com/YorickPeterse/ruby-lint'."
             (file-name) ":W:" line ":" column ": " (message) line-end)
    (error line-start
             (file-name) ":E:" line ":" column ": " (message) line-end))
-  :modes ruby-mode)
+  :modes (enh-ruby-mode ruby-mode))
 
 (flycheck-define-checker rust
   "A Rust syntax checker using Rust compiler.
