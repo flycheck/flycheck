@@ -3016,6 +3016,8 @@ the error list}
 files
 @item
 @ghissue{222, Do not automatically check syntax in encrypted files}
+@item
+@ghissue{256, Support @code{enh-ruby-mode} in Ruby syntax checkers}
 @end itemize
 
 @item
