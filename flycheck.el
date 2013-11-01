@@ -6,7 +6,7 @@
 ;; URL: https://github.com/flycheck/flycheck
 ;; Keywords: convenience languages tools
 ;; Version: 0.15-cvs
-;; Package-Requires: ((s "1.6.0") (dash "2.0.0") (f "0.6.0") (pkg-info "0.1") (cl-lib "0.3") (emacs "24.1"))
+;; Package-Requires: ((s "1.6.0") (dash "2.0.0") (f "0.6.0") (pkg-info "0.4") (cl-lib "0.3") (emacs "24.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -46,7 +46,6 @@
 (require 's)
 (require 'dash)
 (require 'f)
-(require 'pkg-info)
 (require 'rx)                ; Regexp fanciness in `flycheck-define-checker'
 (require 'cl-lib)            ; `cl-defstruct'
 (require 'help-mode)         ; `define-button-type'
@@ -654,18 +653,6 @@ buffer manually.
 
 
 ;;; Version information
-(defun flycheck-library-version ()
-  "Get the version in the Flycheck library header."
-  (-when-let (version (pkg-info-defining-library-version 'flycheck-mode))
-    (pkg-info-format-version version)))
-
-(defun flycheck-package-version ()
-  "Get the package version of Flycheck.
-
-This is the version number of the installed Flycheck package."
-  (-when-let (version (pkg-info-package-version 'flycheck))
-    (pkg-info-format-version version)))
-
 (defun flycheck-version (&optional show-version)
   "Get the Flycheck version as string.
 
@@ -678,18 +665,9 @@ and the library version, if both a present and different.
 If the version number could not be determined, signal an error,
 if called interactively, or if SHOW-VERSION is non-nil, otherwise
 just return nil."
-  (interactive (list (not (or executing-kbd-macro noninteractive))))
-  (let* ((lib-version (flycheck-library-version))
-         (pkg-version (flycheck-package-version))
-         (version (cond
-                   ((and lib-version pkg-version
-                         (not (string= lib-version pkg-version)))
-                    (format "%s (package: %s)" lib-version pkg-version))
-                   ((or pkg-version lib-version)
-                    (format "%s" (or pkg-version lib-version))))))
+  (interactive (list t))
+  (let ((version (pkg-info-version-info 'flycheck)))
     (when show-version
-      (unless version
-        (error "Could not find out Flycheck version"))
       (message "Flycheck version: %s" version))
     version))
 
