@@ -444,6 +444,14 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
    "checkers/go/src/error/build-error.go" 'go-mode nil
    '(6 nil "undefined: fmt" error :checker go-build)))
 
+(ert-deftest checker-go-package-test ()
+  "Test successful go build with subpackages (used to verify the
+GOPATH environment variable is set properly and subpackages can be
+found)."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'go-build)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/go/src/b1/main.go" 'go-mode nil))
+
 (ert-deftest checker-go-test-error ()
   "Test an import error."
   :expected-result (flycheck-testsuite-fail-unless-checker 'go-test)
