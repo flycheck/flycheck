@@ -427,6 +427,7 @@ of expected errors."
   (--each modes
     (let ((flycheck-checkers (--remove (memq it disabled-checkers)
                                        flycheck-checkers)))
+     (flycheck-testsuite-set-environment)
      (flycheck-testsuite-with-resource-buffer resource-file
        (funcall it)
        ;; Configure config file locating for unit tests
@@ -445,6 +446,14 @@ of expected errors."
            (apply #'flycheck-testsuite-should-errors errors)
          (should-not flycheck-current-errors))
        (flycheck-testsuite-ensure-clear)))))
+
+(defun flycheck-testsuite-set-environment ()
+  "Set required environment variables."
+  (when (not (getenv "GOPATH"))
+    (let ((gopath "test/resources/checkers/go"))
+      (let ((path (cond ((flycheck-testsuite-travis-ci-p) (concat (file-name-as-directory (getenv "TRAVIS_BUILD_DIR")) gopath))
+                        ((flycheck-testsuite-vagrant-p) (concat (file-name-as-directory "/flycheck") gopath)))))
+        (setenv "GOPATH" path)))))
 
 (provide 'test-helper)
 
