@@ -448,11 +448,7 @@ of expected errors."
 
 (defun flycheck-testsuite-set-environment ()
   "Set required environment variables."
-  (when (not (getenv "GOPATH"))
-    (let ((gopath "test/resources/checkers/go"))
-      (let ((path (cond ((flycheck-testsuite-travis-ci-p) (concat (file-name-as-directory (getenv "TRAVIS_BUILD_DIR")) gopath))
-                        ((flycheck-testsuite-vagrant-p) (concat (file-name-as-directory "/flycheck") gopath)))))
-        (setenv "GOPATH" path)))))
+  (setenv "GOPATH" (flycheck-testsuite-resource-filename "checkers/go")))
 
 (flycheck-testsuite-set-environment)
 
