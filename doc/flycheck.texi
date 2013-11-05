@@ -1163,6 +1163,16 @@ out of the way.
 See the declaration of the @code{elixir} syntax checker for an
 application of this symbol.
 
+@item temporary-file-name
+This symbol is substituted with a unique temporary file name.  The file
+itself is not created.
+
+Use this symbol if you need to move files created by a syntax checker
+out of the way.
+
+See the declaration of the @code{go-build} syntax checker for an
+application of this symbol.
+
 @item (config-file @var{option} @var{variable})
 This cell is substituted with a configuration file for the syntax
 checker.  @var{option} is a string containing the option that specifies
@@ -2997,6 +3007,9 @@ standard library for C/C++ syntax checking}
 @item
 @ghissue{243, Customize the delay for displaying errors via
 @code{flycheck-display-errors-delay}}
+@item
+@ghissue{259, Add a new symbol @code{temporary-file-name} to pass
+temporary file names to syntax checkers}
 @end itemize
 
 @item
@@ -3032,6 +3045,9 @@ checker
 @item
 @ghissue{251, Handle abbreviated file names in @command{luac}
 output@comma{} by simply ignoring them}
+@item
+@ghissue{259, Correctly redirect the output binary of the
+@code{go-build} syntax checker}
 @end itemize
 
 @end itemize
@@ -3057,6 +3073,10 @@ checker.
 @item
 @gh{dholm, David Holm} added C/C++ syntax and style checkers using
 @command{clang} and @command{cppcheck} respectively.
+
+@item
+@gh{gfrey, Gereon Frey} fixed the @command{go-build} syntax checker and
+improve its tests.
 
 @item
 @gh{wyuenho, Jimmy Yuen Ho Wong} added the HTML syntax checker and the

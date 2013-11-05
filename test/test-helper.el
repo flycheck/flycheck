@@ -50,6 +50,9 @@
 ;;
 ;; `flycheck-testsuite-with-hook' executes the body with a specified hook form.
 ;;
+;; `flycheck-testsuite-with-env' executes the body with the specified
+;; environment variables.
+;;
 ;; `flycheck-mode-no-check' enables Flycheck Mode in the current buffer without
 ;; starting a syntax check immediately.
 ;;
@@ -192,6 +195,21 @@ After evaluation of BODY, set HOOK-VAR to nil."
             (--each hooks (add-hook it #'(lambda () ,form)))
             ,@body)
         (--each hooks (set it nil)))))
+
+(defmacro flycheck-testsuite-with-env (env &rest body)
+  "Add ENV to `process-environment' in BODY.
+
+Execute BODY with a `process-environment' with contains all
+variables from ENV added.
+
+ENV is an alist, where each cons cell `(VAR . VALUE)' is a
+environment variable VAR to be added to `process-environment'
+with VALUE."
+  (declare (indent 1))
+  `(let ((process-environment (copy-sequence process-environment)))
+     (--each ,env
+       (setenv (car it) (cdr it)))
+     ,@body))
 
 (defun flycheck-mode-no-check ()
   "Enable Flycheck mode without checking automatically."
