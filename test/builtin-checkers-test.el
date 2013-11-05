@@ -466,14 +466,20 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
      '(6 nil error "undefined: fmt" :checker go-build)) ))
 
 (ert-deftest checker-go-package-test ()
-  "Test successful go build with subpackages (used to verify the
-GOPATH environment variable is set properly and subpackages can be
-found)."
   :expected-result (flycheck-testsuite-fail-unless-checker 'go-build)
   (flycheck-testsuite-with-env
       `(("GOPATH" . ,(flycheck-testsuite-resource-filename "checkers/go")))
     (flycheck-testsuite-should-syntax-check
      "checkers/go/src/b1/main.go" 'go-mode nil)))
+
+(ert-deftest checker-go-build-missing-package ()
+  "Test successful go build with subpackages (used to verify the
+GOPATH environment variable is set properly and subpackages can be
+found)."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'go-build)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/go/src/b1/main.go" 'go-mode nil
+   '(4 2 error "import \"b2\": cannot find package" :checker go-build)))
 
 (ert-deftest checker-go-test-error ()
   "Test an import error."

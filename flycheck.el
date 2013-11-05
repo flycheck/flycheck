@@ -3630,7 +3630,8 @@ See URL `http://golang.org/cmd/gofmt/'."
 See URL `https://golang.org/cmd/go'."
   :command ("go" "build" "-o" temporary-file-name)
   :error-patterns
-  ((error line-start (file-name) ":" line ": " (message) line-end))
+  ((error line-start (file-name) ":" line ":"
+          (optional column ":")" " (message) line-end))
   :modes go-mode
   :predicate
   (lambda ()
