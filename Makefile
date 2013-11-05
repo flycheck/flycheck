@@ -51,7 +51,7 @@ clean-pkgdir :
 
 .PHONY: test
 test : compile
-	$(CASK) exec ert-runner
+	GOPATH="/flycheck/test/resources/checkers/go" $(CASK) exec ert-runner -p "checker-go"
 
 .PHONY: vagrant-test
 vagrant-test :

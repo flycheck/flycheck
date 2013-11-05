@@ -1146,7 +1146,7 @@ https://github.com/d11wtq/grizzl.")))
     "Check whether ARG is a valid command argument."
     (pcase arg
       ((pred stringp) t)
-      ((or `source `source-inplace `source-original `temporary-directory) t)
+      ((or `source `source-inplace `source-original `temporary-directory `temporary-file) t)
       (`(config-file ,option-name ,config-file-var)
        (and (stringp option-name)
             (symbolp config-file-var)))
@@ -1496,6 +1496,9 @@ STRING
      of the buffer to check.  Do not use this as primary input to
      a checker!
 
+`temporary-file'
+     Create a unique file and return its path.
+
 `temporary-directory'
      Create a unique temporary directory and return its path.
 
@@ -1563,6 +1566,7 @@ are substituted within the body of cells!"
     (`source-inplace
      (flycheck-save-buffer-to-temp #'flycheck-temp-file-inplace "flycheck"))
     (`source-original (or (buffer-file-name) ""))
+    (`temporary-file (flycheck-temp-file-system nil "flycheck"))
     (`temporary-directory (flycheck-temp-dir-system "flycheck"))
     (`(config-file ,option-name ,file-name-var)
      (-when-let* ((value (symbol-value file-name-var))
@@ -3618,16 +3622,11 @@ See URL `http://golang.org/cmd/gofmt/'."
 (flycheck-define-checker go-build
   "A Go syntax and type checker using the `go build' command.
 
-See URL `https://golang.org/cmd/go'.
-
-This syntax checker may cause bogus warnings due to an upstream
-bug in Go.
-
-See URL `https://code.google.com/p/go/issues/detail?id=4851' for
-more information."
-  :command ("go" "build" "-o" "/dev/null")
+See URL `https://golang.org/cmd/go'."
+  :command ("go" "build" "-o" temporary-file source-original)
   :error-patterns
-  ((error line-start (file-name) ":" line ": " (message) line-end))
+  ((error line-start (file-name) ":" line ": " (message) line-end)
+   (error line-start (file-name) ":" line ":" column ": " (message) line-end))
   :modes go-mode
   :predicate
   (lambda ()

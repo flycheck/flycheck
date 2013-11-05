@@ -433,7 +433,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
   "Test a syntax error."
   :expected-result (flycheck-testsuite-fail-unless-checker 'go-gofmt)
   (flycheck-testsuite-should-syntax-check
-   "checkers/go-syntax-error.go" 'go-mode nil
+   "checkers/go/src/main/go-syntax-error.go" 'go-mode nil
    '(5 9 "expected '(', found 'IDENT' ta" error)
    '(6 1 "expected ')', found '}'" error)))
 
@@ -441,14 +441,35 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
   "Test an import error."
   :expected-result (flycheck-testsuite-fail-unless-checker 'go-build)
   (flycheck-testsuite-should-syntax-check
-   "checkers/go-testpackage/go-build-error.go" 'go-mode nil
+   "checkers/go/src/testpackage/go-build-error.go" 'go-mode nil
    '(6 nil "undefined: fmt" error :checker go-build)))
+
+(ert-deftest checker-go-build-syntax-error ()
+  "Test a syntax error with go build."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'go-build)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/go/src/main/go-build-error.go" 'go-mode nil
+   '(9 nil "undefined: missing" error :checker go-build)))
+
+(ert-deftest checker-go-build-missing-subpackage-error ()
+  "Test a missing subpackage."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'go-build)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/go/src/main/go-missing-sub-package-error.go" 'go-mode nil
+   '(6 nil "undefined: fmt" error :checker go-build)))
+
+(ert-deftest checker-go-build-subpackage-error ()
+  "Test an error in a subpackage."
+  :expected-result (flycheck-testsuite-fail-unless-checker 'go-build)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/go/src/main/go-sub-package-error.go" 'go-mode nil
+   '(3 8 "import \"testpackage\": cannot find package" error :checker go-build)))
 
 (ert-deftest checker-go-test-error ()
   "Test an import error."
   :expected-result (flycheck-testsuite-fail-unless-checker 'go-test)
   (flycheck-testsuite-should-syntax-check
-   "checkers/go-testpackage/go-test-error_test.go" 'go-mode nil
+   "checkers/go/src/testpackage/go-test-error_test.go" 'go-mode nil
    '(8 nil "undefined: fmt" error :checker go-test)))
 
 (ert-deftest checker-haml-error ()
