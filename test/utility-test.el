@@ -54,6 +54,16 @@
       (should (s-starts-with? "flycheck-test" (file-name-nondirectory dirname)))
       (should (f-directory? dirname)))))
 
+(ert-deftest flycheck-temp-filename-system ()
+  (let ((filename (flycheck-temp-filename-system "flycheck-test")))
+    (flycheck-testsuite-trap-temp-file filename
+      (should (s-starts-with? temporary-file-directory filename))
+      (should (s-starts-with? "flycheck-test" (f-filename filename)))
+      (should-not (f-exists? filename))
+      (process-lines "touch" filename)
+      (should (f-exists? filename)))
+    (should-not (f-exists? filename))))
+
 (ert-deftest flycheck-temp-file-inplace-basename ()
   "Test `flycheck-temp-file-inplace' with a base name."
   (let ((filename (flycheck-temp-file-inplace "eggs.el" "flycheck-test")))
