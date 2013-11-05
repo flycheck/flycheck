@@ -1983,7 +1983,8 @@ Pop up a help buffer with the documentation of CHECKER."
                (:constructor flycheck-error-new)
                (:constructor flycheck-error-new-at (line column
                                                          &optional level message
-                                                         &key checker filename
+                                                         &key checker
+                                                         (filename (buffer-file-name))
                                                          (buffer (current-buffer)))))
   "Structure representing an error reported by a syntax checker.
 Slots:

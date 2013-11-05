@@ -358,9 +358,11 @@ Raise an assertion error if the buffer is not clear afterwards."
 
 
 ;;;; Test predicates
-(defun flycheck-testsuite-should-overlay (overlay error)
-  "Test that OVERLAY is in REGION and corresponds to ERROR."
-  (let* ((region (flycheck-error-region-for-mode error 'symbols))
+(defun flycheck-testsuite-should-overlay (error)
+  "Test that ERR has an overlay."
+  (let* ((overlay (--first (equal (overlay-get it 'flycheck-error) error)
+                           (flycheck-overlays-in 0 (+ 1 (buffer-size)))))
+         (region (flycheck-error-region-for-mode error 'symbols))
          (message (flycheck-error-message error))
          (level (flycheck-error-level error))
          (face (if (eq level 'warning)
@@ -385,30 +387,6 @@ Raise an assertion error if the buffer is not clear afterwards."
     (should (equal (overlay-get overlay 'flycheck-error) error))
     (should (string= (overlay-get overlay 'help-echo) message))))
 
-(defun flycheck-testsuite-should-error (line column message level &rest properties)
-  "Test that EXPECTED-ERR is an error in the current buffer.
-
-Test that the error is contained in `flycheck-current-errors',
-and that there is an overlay for this error at the correct
-position.
-
-LINE, COLUMN, MESSAGE and LEVEL are the expected properties of
-the error.  PROPERTIES specify additional properties of the expected ERROR.
-
-Signal a test failure if this error is not present."
-  (let* ((filename (-if-let (member (plist-member properties :filename))
-                     (cadr member) (buffer-file-name)))
-         (checker (-if-let (member (plist-member properties :checker))
-                    (cadr member) (or flycheck-checker flycheck-last-checker)))
-         (buffer (or (plist-get properties :buffer) (current-buffer)))
-         (real-error (flycheck-error-new
-                      :buffer buffer :filename filename :checker checker
-                      :line line :column column :message message :level level))
-         (overlay (--first (equal (overlay-get it 'flycheck-error) real-error)
-                           (flycheck-overlays-in 0 (+ 1 (buffer-size))))))
-    (should (-contains? flycheck-current-errors real-error))
-    (flycheck-testsuite-should-overlay overlay real-error)))
-
 (defun flycheck-testsuite-should-errors (&rest errors)
   "Test that the current buffers has ERRORS.
 
@@ -423,9 +401,9 @@ Each error in ERRORS is a list as expected by
 `flycheck-testsuite-should-error'."
   (if (not errors)
       (should flycheck-current-errors)
-    (dolist (err errors)
-      (apply #'flycheck-testsuite-should-error err))
-    (should (= (length errors) (length flycheck-current-errors)))
+    (let ((expected (--map (apply #'flycheck-error-new-at it) errors)))
+      (should (equal expected flycheck-current-errors))
+      (-each expected #'flycheck-testsuite-should-overlay))
     (should (= (length errors)
                (length (flycheck-overlays-in (point-min) (point-max)))))))
 
@@ -458,10 +436,10 @@ of expected errors."
                      nil)
                    nil :local)
          (flycheck-testsuite-buffer-sync)
+         (if errors
+             (apply #'flycheck-testsuite-should-errors errors)
+           (should-not flycheck-current-errors))
          (should (= process-hook-called (length errors))))
-       (if errors
-           (apply #'flycheck-testsuite-should-errors errors)
-         (should-not flycheck-current-errors))
        (flycheck-testsuite-ensure-clear)))))
 
 (provide 'test-helper)

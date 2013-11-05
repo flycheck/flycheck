@@ -113,10 +113,13 @@
     (widen)
     (should (= (length (flycheck-overlays-in (point-min) (point-max))) 4))
     (flycheck-testsuite-should-errors
-     '(9 1 "`message' called with 0 args to fill 1\n    format field(s)" warning)
-     '(11 8 "`message' called with 0 args to fill 1\n    format field(s)" warning)
-     '(12 nil "First sentence should end with punctuation" warning
+     '(9 1 warning "`message' called with 0 args to fill 1\n    format field(s)"
+         :checker emacs-lisp)
+     '(11 8 warning "`message' called with 0 args to fill 1\n    format field(s)"
+          :checker emacs-lisp)
+     '(12 nil warning "First sentence should end with punctuation"
           :checker emacs-lisp-checkdoc)
-     '(15 1 "`message' called with 0 args to fill 1\n    format field(s)" warning))))
+     '(15 1 warning "`message' called with 0 args to fill 1\n    format field(s)"
+          :checker emacs-lisp))))
 
 ;;; overlay-test.el ends here

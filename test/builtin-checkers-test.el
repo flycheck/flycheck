@@ -69,15 +69,16 @@
   (flycheck-testsuite-with-hook sh-mode-hook (sh-set-shell "bash" :no-query)
     (flycheck-testsuite-should-syntax-check
      "checkers/bash-syntax-error.bash" 'sh-mode nil
-     '(5 nil "syntax error near unexpected token `fi'" error)
-     '(5 nil "`fi'" error))))
+     '(5 nil error "syntax error near unexpected token `fi'" :checker bash)
+     '(5 nil error "`fi'" :checker bash))))
 
 (ert-deftest checker-c/c++-clang-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
   (flycheck-testsuite-should-syntax-check
    "checkers/c_c++-clang-warning.c" 'c-mode 'c/c++-cppcheck
-   '(5 10 "unused variable 'unused'" warning)
-   '(7 15 "comparison of integers of different signs: 'int' and 'unsigned int'" warning)))
+   '(5 10 warning "unused variable 'unused'" :checker c/c++-clang)
+   '(7 15 warning "comparison of integers of different signs: 'int' and 'unsigned int'"
+       :checker c/c++-clang)))
 
 (ert-deftest checker-c/c++-clang-warning-customized ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
@@ -87,14 +88,15 @@
       (setq flycheck-clang-warnings '("all" "missing-prototypes"))
     (flycheck-testsuite-should-syntax-check
      "checkers/c_c++-clang-warning.c" 'c-mode 'c/c++-cppcheck
-     '(3 5 "no previous prototype for function 'f'" warning)
-     '(5 10 "unused variable 'unused'" warning))))
+     '(3 5 warning "no previous prototype for function 'f'" :checker c/c++-clang)
+     '(5 10 warning "unused variable 'unused'" :checker c/c++-clang))))
 
 (ert-deftest checker-c/c++-clang-fatal-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
   (flycheck-testsuite-should-syntax-check
    "checkers/c_c++-clang-fatal-error.c" 'c-mode nil
-   '(2 10 "'c_c++-clang-library-header.h' file not found" error)))
+   '(2 10 error "'c_c++-clang-library-header.h' file not found"
+       :checker c/c++-clang)))
 
 (ert-deftest checker-c/c++-clang-include-path ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
@@ -110,14 +112,17 @@
             (list (flycheck-testsuite-resource-filename "checkers/include/c_c++-clang-library-header.h")))
     (flycheck-testsuite-should-syntax-check
      "checkers/c_c++-clang-error.cpp" 'c++-mode nil
-     '(10 16 "use of undeclared identifier 'nullptr'" error))))
+     '(10 16 error "use of undeclared identifier 'nullptr'"
+          :checker c/c++-clang))))
 
 (ert-deftest checker-c/c++-clang-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
   (flycheck-testsuite-should-syntax-check
    "checkers/c_c++-clang-error.cpp" 'c++-mode nil
-   '(8 17 "implicit instantiation of undefined template 'test<false>'" error)
-   '(10 16 "use of undeclared identifier 'nullptr'" error)))
+   '(8 17 error "implicit instantiation of undefined template 'test<false>'"
+       :checker c/c++-clang)
+   '(10 16 error "use of undeclared identifier 'nullptr'"
+        :checker c/c++-clang)))
 
 (ert-deftest checker-c/c++-clang-error-language-standard ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
@@ -125,7 +130,8 @@
       (setq flycheck-clang-language-standard "c++11")
     (flycheck-testsuite-should-syntax-check
      "checkers/c_c++-clang-error.cpp" 'c++-mode nil
-     '(8 17 "implicit instantiation of undefined template 'test<false>'" error))))
+     '(8 17 error "implicit instantiation of undefined template 'test<false>'"
+         :checker c/c++-clang))))
 
 (ert-deftest checker-c/c++-clang-standard-library ()
   :expected-result :failed
@@ -138,7 +144,8 @@
       (setq flycheck-clang-definitions '("FLYCHECK_LOCAL" "FLYCHECK_LIBRARY"))
     (flycheck-testsuite-should-syntax-check
      "checkers/c_c++-clang-error.cpp" 'c++-mode nil
-     '(10 16 "use of undeclared identifier 'nullptr'" error))))
+     '(10 16 error "use of undeclared identifier 'nullptr'"
+          :checker c/c++-clang))))
 
 (ert-deftest checker-c/c++-clang-error-no-rtti ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
@@ -153,19 +160,20 @@
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
   (flycheck-testsuite-should-syntax-check
    "checkers/c_c++-cppcheck-error.c" 'c-mode 'c/c++-clang
-   '(4 nil "Null pointer dereference" error)))
+   '(4 nil error "Null pointer dereference" :checker c/c++-cppcheck)))
 
 (ert-deftest checker-c/c++-cppcheck-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
   (flycheck-testsuite-should-syntax-check
    "checkers/c_c++-cppcheck-warning.c" 'c-mode 'c/c++-clang
-   '(2 nil "The expression \"x\" is of type 'bool' and it is compared against a integer value that is neither 1 nor 0." warning)))
+   '(2 nil warning "The expression \"x\" is of type 'bool' and it is compared against a integer value that is neither 1 nor 0."
+       :checker c/c++-cppcheck)))
 
 (ert-deftest checker-c/c++-cppcheck-style ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
   (flycheck-testsuite-should-syntax-check
    "checkers/c_c++-cppcheck-style.c" 'c-mode 'c/c++-clang
-   '(3 nil "Unused variable: unused" warning)))
+   '(3 nil warning "Unused variable: unused" :checker c/c++-cppcheck)))
 
 (ert-deftest checker-c/c++-cppcheck-style-suppressed ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
@@ -178,22 +186,24 @@
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
   (flycheck-testsuite-with-hook c++-mode-hook
       (setq flycheck-cppcheck-checks '("performance" "portability"))
-      (flycheck-testsuite-should-syntax-check
-       "checkers/c_c++-cppcheck-multiple-checks.cpp" 'c++-mode 'c/c++-clang
-       '(2 nil "Extra qualification 'A::' unnecessary and considered an error by many compilers." warning)
-       '(9 nil "Prefix ++/-- operators should be preferred for non-primitive types. Pre-increment/decrement can be more efficient than post-increment/decrement. Post-increment/decrement usually involves keeping a copy of the previous value around and adds a little extra code." warning))))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/c_c++-cppcheck-multiple-checks.cpp" 'c++-mode 'c/c++-clang
+     '(2 nil warning "Extra qualification 'A::' unnecessary and considered an error by many compilers."
+         :checker c/c++-cppcheck)
+     '(9 nil warning "Prefix ++/-- operators should be preferred for non-primitive types. Pre-increment/decrement can be more efficient than post-increment/decrement. Post-increment/decrement usually involves keeping a copy of the previous value around and adds a little extra code."
+         :checker c/c++-cppcheck))))
 
 (ert-deftest checker-coffee-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'coffee)
   (flycheck-testsuite-should-syntax-check
    "checkers/coffee-syntax-error.coffee" 'coffee-mode nil
-   '(4 7 "missing \", starting" error)))
+   '(4 7 error "missing \", starting" :checker coffee)))
 
 (ert-deftest checker-coffee-coffeelint-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'coffee-coffeelint)
   (flycheck-testsuite-should-syntax-check
    "checkers/coffee-coffeelint-error.coffee" 'coffee-mode nil
-   '(4 nil "Throwing strings is forbidden" error
+   '(4 nil error "Throwing strings is forbidden"
        :checker coffee-coffeelint)))
 
 (ert-deftest checker-coffee-coffeelint-warning ()
@@ -203,23 +213,25 @@
       (setq flycheck-coffeelintrc "coffeelint.json")
     (flycheck-testsuite-should-syntax-check
      "checkers/coffee-coffeelint-error.coffee" 'coffee-mode nil
-     '(4 nil "Throwing strings is forbidden" warning
+     '(4 nil warning "Throwing strings is forbidden"
          :checker coffee-coffeelint))))
 
 (ert-deftest checker-css-csslint-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'css-csslint)
   (flycheck-testsuite-should-syntax-check
    "checkers/css-csslint-warning.css" 'css-mode nil
-   '(3 6 "Heading (h1) should not be qualified." warning)))
+   '(3 6 warning "Heading (h1) should not be qualified."
+       :checker css-csslint)))
 
 (ert-deftest checker-css-csslint-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'css-csslint)
   (flycheck-testsuite-should-syntax-check
    "checkers/css-syntax-error.css" 'css-mode nil
-   '(4 16 "Expected LBRACE at line 4, col 16." error)
-   '(4 16 "Unexpected token '100%' at line 4, col 16." error)
-   '(4 20 "Unexpected token ';' at line 4, col 20." error)
-   '(5 1 "Unexpected token '}' at line 5, col 1." error)))
+   '(4 16 error "Unexpected token '100%' at line 4, col 16."
+       :checker css-csslint)
+   '(4 16 error "Expected LBRACE at line 4, col 16." :checker css-csslint)
+   '(4 20 error "Unexpected token ';' at line 4, col 20." :checker css-csslint)
+   '(5 1 error "Unexpected token '}' at line 5, col 1." :checker css-csslint)))
 
 (ert-deftest flycheck-d-module-name ()
   (with-temp-buffer
@@ -246,46 +258,50 @@
   :expected-result (flycheck-testsuite-fail-unless-checker 'd-dmd)
   (flycheck-testsuite-should-syntax-check
    "checkers/d-dmd-syntax-error.d" 'd-mode nil
-   '(2 nil "module studio is in file 'std/studio.d' which cannot be read" error)))
+   '(2 nil error "module studio is in file 'std/studio.d' which cannot be read"
+       :checker d-dmd)))
 
 (ert-deftest checker-d-dmd-syntax-error-without-module ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'd-dmd)
   (flycheck-testsuite-should-syntax-check
    "checkers/d_dmd_syntax_error_without_module.d" 'd-mode nil
-   '(5 nil "undefined identifier writel, did you mean template write(T...)(T args) if (!is(T[0] : File))?" error)))
+   '(5 nil error "undefined identifier writel, did you mean template write(T...)(T args) if (!is(T[0] : File))?"
+       :checker d-dmd)))
 
 (ert-deftest checker-d-dmd-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'd-dmd)
   (flycheck-testsuite-should-syntax-check
    "checkers/d-dmd-warning.d" 'd-mode nil
-   '(6 nil "statement is not reachable" warning)))
+   '(6 nil warning "statement is not reachable" :checker d-dmd)))
 
 (ert-deftest checker-d-dmd-deprecated ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'd-dmd)
   (flycheck-testsuite-should-syntax-check
    "checkers/d-dmd-deprecated.d" 'd-mode nil
-   '(11 nil "function d_dmd_deprecated.foo is deprecated" warning)))
+   '(11 nil warning "function d_dmd_deprecated.foo is deprecated"
+        :checker d-dmd)))
 
 (ert-deftest checker-elixir-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'elixir)
   (flycheck-testsuite-should-syntax-check
    "checkers/elixir-error.ex" 'elixir-mode nil
-   '(5 nil "function puts/1 undefined" error)))
+   '(5 nil error "function puts/1 undefined" :checker elixir)))
 
 (ert-deftest checker-elixir-warnings ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'elixir)
   (flycheck-testsuite-should-syntax-check
    "checkers/elixir-warnings.ex" 'elixir-mode nil
-   '(5 nil "variable a is unused" warning)
-   '(6 nil "variable a shadowed in 'fun'" warning)
-   '(14 nil "this clause cannot match because a previous clause at line 11 always matches" warning)))
+   '(5 nil warning "variable a is unused" :checker elixir)
+   '(6 nil warning "variable a shadowed in 'fun'" :checker elixir)
+   '(14 nil warning "this clause cannot match because a previous clause at line 11 always matches"
+        :checker elixir)))
 
 (ert-deftest checker-emacs-lisp-checkdoc-warning ()
   "Test a checkdoc warning caused by a missing period in a docstring."
   (flycheck-testsuite-should-syntax-check
    "checkers/emacs-lisp-checkdoc-warning.el"
    'emacs-lisp-mode nil                 ; Checkdoc is chained after Emacs Lisp
-   '(12 nil "First sentence should end with punctuation" warning
+   '(12 nil warning "First sentence should end with punctuation"
         :checker emacs-lisp-checkdoc)))
 
 (ert-deftest checker-emacs-lisp-checkdoc-warning-compressed ()
@@ -293,7 +309,7 @@
   (flycheck-testsuite-should-syntax-check
    "checkers/emacs-lisp-checkdoc-warning.el.gz"
    'emacs-lisp-mode nil
-   '(12 nil "First sentence should end with punctuation" warning
+   '(12 nil warning "First sentence should end with punctuation"
         :checker emacs-lisp-checkdoc)))
 
 (ert-deftest checker-emacs-lisp-checkdoc-works-without-buffer-file-name ()
@@ -332,12 +348,12 @@ https://github.com/bbatsov/prelude/issues/259."
 (ert-deftest checker-emacs-lisp-sytnax-error ()
   (flycheck-testsuite-should-syntax-check
    "checkers/emacs-lisp-syntax-error.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
-   '(3 1 "End of file during parsing" error)))
+   '(3 1 error "End of file during parsing" :checker emacs-lisp)))
 
 (ert-deftest checker-emacs-lisp-syntax-error-compressed ()
   (flycheck-testsuite-should-syntax-check
    "checkers/emacs-lisp-syntax-error.el.gz" 'emacs-lisp-mode 'emacs-lisp-checkdoc
-   '(3 1 "End of file during parsing" error)))
+   '(3 1 error "End of file during parsing" :checker emacs-lisp)))
 
 (ert-deftest checker-emacs-lisp-error ()
   ;; Determine how the Emacs message for load file errors looks like: In Emacs
@@ -352,7 +368,7 @@ https://github.com/bbatsov/prelude/issues/259."
                         "no such file or directory, "))))
     (flycheck-testsuite-should-syntax-check
      "checkers/emacs-lisp-error.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
-     `(3 1 ,msg error))))
+     `(3 1 error ,msg :checker emacs-lisp))))
 
 (ert-deftest checker-emacs-lisp-error-load-path ()
   (flycheck-testsuite-with-hook emacs-lisp-mode-hook
@@ -373,8 +389,10 @@ https://github.com/bbatsov/prelude/issues/259."
 (ert-deftest checker-emacs-lisp-warning ()
   (flycheck-testsuite-should-syntax-check
    "checkers/emacs-lisp-warning.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
-   '(4 6 "message called with 0 arguments,\n    but requires 1+" warning)
-   '(8 1 "the function `dummy-package-foo'\n    is not known to be defined." warning)))
+   '(4 6 warning "message called with 0 arguments,\n    but requires 1+"
+       :checker emacs-lisp)
+   '(8 1 warning "the function `dummy-package-foo'\n    is not known to be defined."
+       :checker emacs-lisp)))
 
 (ert-deftest checker-emacs-lisp-warning-packages ()
   (flycheck-testsuite-with-hook emacs-lisp-mode-hook
@@ -383,7 +401,8 @@ https://github.com/bbatsov/prelude/issues/259."
             flycheck-emacs-lisp-initialize-packages t)
     (flycheck-testsuite-should-syntax-check
      "checkers/emacs-lisp-warning.el" 'emacs-lisp-mode 'emacs-lisp-checkdoc
-     '(4 6 "message called with 0 arguments,\n    but requires 1+" warning))))
+     '(4 6 warning "message called with 0 arguments,\n    but requires 1+"
+         :checker emacs-lisp))))
 
 (ert-deftest checker-emacs-lisp-inhibited-no-byte-compile ()
   "Test that Emacs Lisp does not check when byte compilation is
@@ -421,21 +440,21 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
   :expected-result (flycheck-testsuite-fail-unless-checker 'erlang)
   (flycheck-testsuite-should-syntax-check
    "checkers/erlang-error.erl" 'erlang-mode nil
-   '(7 nil "head mismatch" error)))
+   '(7 nil error "head mismatch" :checker erlang)))
 
 (ert-deftest checker-erlang-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'erlang)
   (flycheck-testsuite-should-syntax-check
    "checkers/erlang-warning.erl" 'erlang-mode nil
-   '(6 nil "wrong number of arguments in format call" warning)))
+   '(6 nil warning "wrong number of arguments in format call" :checker erlang)))
 
 (ert-deftest checker-go-gofmt-syntax-error ()
   "Test a syntax error."
   :expected-result (flycheck-testsuite-fail-unless-checker 'go-gofmt)
   (flycheck-testsuite-should-syntax-check
    "checkers/go/src/syntax/syntax-error.go" 'go-mode nil
-   '(5 9 "expected '(', found 'IDENT' ta" error)
-   '(6 1 "expected ')', found '}'" error)))
+   '(5 9 error "expected '(', found 'IDENT' ta" :checker go-gofmt)
+   '(6 1 error "expected ')', found '}'" :checker go-gofmt)))
 
 (ert-deftest checker-go-build-error ()
   "Test an import error."
@@ -444,7 +463,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
       `(("GOPATH" . ,(flycheck-testsuite-resource-filename "checkers/go")))
     (flycheck-testsuite-should-syntax-check
      "checkers/go/src/error/build-error.go" 'go-mode nil
-     '(6 nil "undefined: fmt" error :checker go-build)) ))
+     '(6 nil error "undefined: fmt" :checker go-build)) ))
 
 (ert-deftest checker-go-package-test ()
   "Test successful go build with subpackages (used to verify the
@@ -463,13 +482,14 @@ found)."
       `(("GOPATH" . ,(flycheck-testsuite-resource-filename "checkers/go")))
     (flycheck-testsuite-should-syntax-check
      "checkers/go/src/test/test-error_test.go" 'go-mode nil
-     '(8 nil "undefined: fmt" error :checker go-test))))
+     '(8 nil error "undefined: fmt" :checker go-test))))
 
 (ert-deftest checker-haml-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'haml)
   (flycheck-testsuite-should-syntax-check
    "checkers/haml-error.haml" 'haml-mode nil
-   '(5 nil "Inconsistent indentation: 3 spaces used for indentation, but the rest of the document was indented using 2 spaces." error :filename nil)))
+   '(5 nil error "Inconsistent indentation: 3 spaces used for indentation, but the rest of the document was indented using 2 spaces."
+       :checker haml :filename nil)))
 
 (ert-deftest checker-haskell-hdevtools-error ()
   ;; HDevtools tests fail on Vagrant, because hdevtools can't create unix
@@ -479,7 +499,7 @@ found)."
                      (flycheck-testsuite-fail-unless-checker 'haskell-hdevtools))
   (flycheck-testsuite-should-syntax-check
    "checkers/haskell-hdevtools-error.hs" 'haskell-mode nil
-   '(1 8 "Not in scope: `unknown'" error
+   '(1 8 error "Not in scope: `unknown'"
        :checker haskell-hdevtools)))
 
 (ert-deftest checker-haskell-hdevtools-warning ()
@@ -488,35 +508,34 @@ found)."
                      (flycheck-testsuite-fail-unless-checker 'haskell-hdevtools))
   (flycheck-testsuite-should-syntax-check
    "checkers/haskell-hdevtools-warning.hs" 'haskell-mode nil
-   '(3 1 "Top-level binding with no type signature: foo :: Integer" warning
+   '(3 1 warning "Top-level binding with no type signature: foo :: Integer"
        :checker haskell-hdevtools)))
 
 (ert-deftest checker-haskell-ghc-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'haskell-ghc)
   (flycheck-testsuite-should-syntax-check
    "checkers/haskell-ghc-error.hs" 'haskell-mode 'haskell-hdevtools
-   '(3 1 "parse error on input `module'" error
-       :checker haskell-ghc)))
+   '(3 1 error "parse error on input `module'" :checker haskell-ghc)))
 
 (ert-deftest checker-haskell-ghc-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'haskell-ghc)
   (flycheck-testsuite-should-syntax-check
    "checkers/haskell-ghc-warning.hs" 'haskell-mode 'haskell-hdevtools
-   '(3 1 "Top-level binding with no type signature: foo :: Integer" warning
+   '(3 1 warning "Top-level binding with no type signature: foo :: Integer"
        :checker haskell-ghc)))
 
 (ert-deftest checker-haskell-hlint-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'haskell-hlint)
   (flycheck-testsuite-should-syntax-check
    "checkers/haskell-hlint-error.hs" 'haskell-mode nil
-   '(4 1 "Eta reduce\nFound:\n  warnMe xs = map lines xs\nWhy not:\n  warnMe = map lines" error
+   '(4 1 error "Eta reduce\nFound:\n  warnMe xs = map lines xs\nWhy not:\n  warnMe = map lines"
        :checker haskell-hlint)))
 
 (ert-deftest checker-haskell-hlint-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'haskell-hlint)
   (flycheck-testsuite-should-syntax-check
    "checkers/haskell-hlint-warning.hs" 'haskell-mode nil
-   '(2 8 "Redundant bracket\nFound:\n  (putStrLn \"Foobar\")\nWhy not:\n  putStrLn \"Foobar\"" warning
+   '(2 8 warning "Redundant bracket\nFound:\n  (putStrLn \"Foobar\")\nWhy not:\n  putStrLn \"Foobar\""
        :checker haskell-hlint)))
 
 (ert-deftest checker-html-tidy-warning-and-error ()
@@ -524,9 +543,12 @@ found)."
   :expected-result (flycheck-testsuite-fail-unless-checker 'html-tidy)
   (flycheck-testsuite-should-syntax-check
    "checkers/html-tidy-warning-and-error.html" '(html-mode web-mode) nil
-   '(3 1 "missing <!DOCTYPE> declaration" warning :filename nil)
-   '(8 5 "<spam> is not recognized!" error :filename nil)
-   '(8 5 "discarding unexpected <spam>" warning :filename nil)))
+   '(3 1 warning "missing <!DOCTYPE> declaration"
+       :checker html-tidy :filename nil)
+   '(8 5 error "<spam> is not recognized!"
+       :checker html-tidy :filename nil)
+   '(8 5 warning "discarding unexpected <spam>"
+       :checker html-tidy :filename nil)))
 
 (ert-deftest checker-javascript-jshint-syntax-error ()
   "A missing semicolon."
@@ -537,10 +559,10 @@ found)."
         (js3-mode-show-parse-errors nil))
     (flycheck-testsuite-should-syntax-check
      "checkers/javascript-jshint-syntax-error.js" '(js-mode js2-mode js3-mode) nil
-     '(3 25 "Unclosed string." error)
-     '(4 1 "Unclosed string." error)
-     '(3 11 "Unclosed string." error)
-     '(4 1 "Missing semicolon." error))))
+     '(3 11 error "Unclosed string." :checker javascript-jshint)
+     '(3 25 error "Unclosed string." :checker javascript-jshint)
+     '(4 1 error "Missing semicolon." :checker javascript-jshint)
+     '(4 1 error "Unclosed string." :checker javascript-jshint))))
 
 (ert-deftest checker-javascript-jshint-error-disabled ()
   "An unused variable."
@@ -555,77 +577,87 @@ found)."
       (setq flycheck-jshintrc "jshintrc")
     (flycheck-testsuite-should-syntax-check
      "checkers/javascript-jshint-error.js" '(js-mode js2-mode js3-mode) nil
-     '(5 12 "'foo' is defined but never used." error))))
+     '(5 12 error "'foo' is defined but never used."
+         :checker javascript-jshint))))
 
 (ert-deftest checker-javascript-gjslint-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-gjslint)
   (flycheck-testsuite-should-syntax-check
    "checkers/javascript-gjslint-error.js" '(js-mode js2-mode js3-mode) 'javascript-jshint
-   '(2 nil "E:0131: Single-quoted string preferred over double-quoted string." error :filename nil)
-   '(5 nil "E:0001: Extra space before \")\"" error :filename nil)))
+   '(2 nil error "E:0131: Single-quoted string preferred over double-quoted string."
+       :checker javascript-gjslint :filename nil)
+   '(5 nil error "E:0001: Extra space before \")\""
+       :checker javascript-gjslint :filename nil)))
 
 (ert-deftest checker-json-jsonlint-error ()
   "Test a syntax error from multiple top-level objects."
   :expected-result (flycheck-testsuite-fail-unless-checker 'json-jsonlint)
   (flycheck-testsuite-should-syntax-check
    "checkers/json-jsonlint-error.json" 'text-mode nil
-    '(1 42 "found: ',' - expected: 'EOF'." error)))
+    '(1 42 error "found: ',' - expected: 'EOF'." :checker json-jsonlint)))
 
 (ert-deftest checker-less-file-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'less)
   (flycheck-testsuite-should-syntax-check
    "checkers/less-file-error.less" 'less-css-mode nil
-   '(3 1 "'no-such-file.less' wasn't found" error)))
+   '(3 1 error "'no-such-file.less' wasn't found" :checker less)))
 
 (ert-deftest checker-less-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'less)
   (flycheck-testsuite-should-syntax-check
    "checkers/less-syntax-error.less" 'less-css-mode nil
-   '(2 1 "missing closing `}`" error)))
+   '(2 1 error "missing closing `}`" :checker less)))
 
 (ert-deftest checker-lua-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'lua)
   (flycheck-testsuite-should-syntax-check
    "checkers/lua-syntax-error.lua" 'lua-mode nil
-   '(5 nil "unfinished string near '\"oh no'" error :filename nil)))
+   '(5 nil error "unfinished string near '\"oh no'"
+       :checker lua :filename nil)))
 
 (ert-deftest checker-perl-error ()
   "Test an unused variable with the Perl checker."
   :expected-result (flycheck-testsuite-fail-unless-checker 'perl)
   (flycheck-testsuite-should-syntax-check
    "checkers/perl-error.pl" '(perl-mode cperl-mode) nil
-   '(4 nil "Name \"main::x\" used only once: possible typo" error)))
+   '(4 nil error "Name \"main::x\" used only once: possible typo"
+       :checker perl)))
 
 (ert-deftest checker-perl-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'perl)
   "Test a syntax error with the Perl checker."
   (flycheck-testsuite-should-syntax-check
    "checkers/perl-syntax-error.pl" '(perl-mode cperl-mode) nil
-   '(4 nil "syntax error" error)))
+   '(4 nil error "syntax error" :checker perl)))
 
 (ert-deftest checker-php-syntax-error ()
   "Test the T_PAAMAYIM_NEKUDOTAYIM error."
   :expected-result (flycheck-testsuite-fail-unless-checker 'php)
   (flycheck-testsuite-should-syntax-check
    "checkers/php-syntax-error.php" 'php-mode nil
-   '(8 nil "syntax error, unexpected ')', expecting '('" error)))
+   '(8 nil error "syntax error, unexpected ')', expecting '('" :checker php)))
 
 (ert-deftest checker-php-phpmd-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checkers 'php 'php-phpmd)
   (flycheck-testsuite-should-syntax-check
    "checkers/php-phpmd-warning.php" 'php-mode '(php-phpcs)
-   '(4 nil "Avoid unused private fields such as '$FOO'." warning :checker php-phpmd)
-   '(5 nil "Avoid unused private methods such as 'bar'." warning :checker php-phpmd)
-   '(5 nil "Avoid unused parameters such as '$baz'." warning :checker php-phpmd)
-   '(7 nil "Avoid variables with short names like $i. Configured minimum length is 3." warning :checker php-phpmd)
-   '(7 nil "Avoid unused local variables such as '$i'." warning :checker php-phpmd)))
+   '(4 nil warning "Avoid unused private fields such as '$FOO'."
+       :checker php-phpmd)
+   '(5 nil warning "Avoid unused private methods such as 'bar'."
+       :checker php-phpmd)
+   '(5 nil warning "Avoid unused parameters such as '$baz'."
+       :checker php-phpmd)
+   '(7 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
+       :checker php-phpmd)
+   '(7 nil warning "Avoid unused local variables such as '$i'."
+       :checker php-phpmd)))
 
 (ert-deftest checker-php-phpcs-error ()
   "Test an uppercase keyword error by phpcs."
   :expected-result (flycheck-testsuite-fail-unless-checkers 'php 'php-phpcs)
   (flycheck-testsuite-should-syntax-check
    "checkers/php-phpcs-error.php" 'php-mode nil
-   '(19 8 "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\"" error
+   '(19 8 error "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\""
         :checker php-phpcs)))
 
 (ert-deftest checker-php-phpcs-error-phpcs-standard ()
@@ -635,7 +667,7 @@ found)."
       (setq flycheck-phpcs-standard "Zend")
     (flycheck-testsuite-should-syntax-check
      "checkers/php-phpcs-error.php" 'php-mode nil
-     '(21 1 "A closing tag is not permitted at the end of a PHP file" error
+     '(21 1 error "A closing tag is not permitted at the end of a PHP file"
           :checker php-phpcs))))
 
 (ert-deftest checker-puppet-parser-singleline-syntax-error ()
@@ -643,43 +675,42 @@ found)."
   :expected-result (flycheck-testsuite-fail-unless-checker 'puppet-parser)
   (flycheck-testsuite-should-syntax-check
    "checkers/puppet-parser-singleline.pp" 'puppet-mode nil
-   '(3 nil "Syntax error at ','; expected '}'" error)))
+   '(3 nil error "Syntax error at ','; expected '}'" :checker puppet-parser)))
 
 (ert-deftest checker-puppet-parser-multiline-syntax-error ()
   "Test a real (multi line) syntax error with puppet parser."
   :expected-result (flycheck-testsuite-fail-unless-checker 'puppet-parser)
   (flycheck-testsuite-should-syntax-check
    "checkers/puppet-parser-multiline.pp" 'puppet-mode nil
-   '(8 nil "Unclosed quote after '' in 'something
+   '(8 nil error "Unclosed quote after '' in 'something
 }
-'" error)))
+'" :checker puppet-parser)))
 
 (ert-deftest checker-puppet-lint-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'puppet-lint)
   (flycheck-testsuite-should-syntax-check
    "checkers/puppet-lint-warning.pp" 'puppet-mode nil
-   '(2 nil "case statement without a default case" warning
+   '(2 nil warning "case statement without a default case"
        :checker puppet-lint)))
 
 (ert-deftest checker-puppet-lint-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'puppet-lint)
   (flycheck-testsuite-should-syntax-check
    "checkers/puppet-lint/error/manifests/puppet-lint-error.pp" 'puppet-mode nil
-   '(2 nil "mlayout not in autoload module layout" error
-       :checker puppet-lint)))
+   '(2 nil error "mlayout not in autoload module layout" :checker puppet-lint)))
 
 (ert-deftest checker-python-flake8-syntax-error ()
   "Test a real syntax error with flake8."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
   (flycheck-testsuite-should-syntax-check
    "checkers/python-syntax-error.py" 'python-mode 'python-pylint
-    '(3 13 "E901 SyntaxError: invalid syntax" error)))
+    '(3 13 error "E901 SyntaxError: invalid syntax" :checker python-flake8)))
 
 (ert-deftest checker-python-flake8-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
   (flycheck-testsuite-should-syntax-check
    "checkers/python-flake8-warning.py" 'python-mode 'python-pylint
-    '(3 1 "F401 're' imported but unused" warning)))
+    '(3 1 warning "F401 're' imported but unused" :checker python-flake8)))
 
 (ert-deftest checker-python-flake8-warning-ignored ()
   "Test an unused import being ignored with flake8."
@@ -693,8 +724,10 @@ found)."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
   (flycheck-testsuite-should-syntax-check
    "checkers/python-flake8-error.py" 'python-mode 'python-pylint
-   '(6 13 "E251 unexpected spaces around keyword / parameter equals" error)
-   '(6 15 "E251 unexpected spaces around keyword / parameter equals" error)))
+   '(6 13 error "E251 unexpected spaces around keyword / parameter equals"
+       :checker python-flake8)
+   '(6 15 error "E251 unexpected spaces around keyword / parameter equals"
+       :checker python-flake8)))
 
 (ert-deftest checker-python-flake8-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
@@ -711,7 +744,7 @@ found)."
     (flycheck-testsuite-should-syntax-check
      "checkers/python-flake8-warning-maximum-complexity.py"
      'python-mode 'python-pylint
-     '(6 1 "C901 'foo' is too complex (4)" warning))))
+     '(6 1 warning "C901 'foo' is too complex (4)" :checker python-flake8))))
 
 (ert-deftest checker-python-flake8-error-maximum-line-length ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
@@ -720,65 +753,72 @@ found)."
     (flycheck-testsuite-should-syntax-check
      "checkers/python-flake8-error-maximum-line-length.py"
      'python-mode 'python-pylint
-     '(5 51 "E501 line too long (61 > 50 characters)" error))))
+     '(5 51 error "E501 line too long (61 > 50 characters)"
+         :checker python-flake8))))
 
 (ert-deftest checker-python-flake8-warning-naming ()
   "PEP8 compliant names with Flake8 and pep8-naming."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
   (flycheck-testsuite-should-syntax-check
    "checkers/python-flake8-warning-naming.py" 'python-mode 'python-pylint
-   '(6 7 "N801 class names should use CapWords convention" warning)
-   '(7 9 "N802 function name should be lowercase" warning)
-   '(8 9 "N806 variable in function should be lowercase" warning)))
+   '(6 7 warning "N801 class names should use CapWords convention"
+       :checker python-flake8)
+   '(7 9 warning "N802 function name should be lowercase"
+       :checker python-flake8)
+   '(8 9 warning "N806 variable in function should be lowercase"
+       :checker python-flake8)))
 
 (ert-deftest checker-python-pylint-syntax-error ()
   "Test a real syntax error with pylint."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-pylint)
   (flycheck-testsuite-should-syntax-check
    "checkers/python-syntax-error.py" 'python-mode 'python-flake8
-   '(3 nil "invalid syntax (E0001)" error)))
+   '(3 nil error "invalid syntax (E0001)" :checker python-pylint)))
 
 (ert-deftest checker-python-pylint-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-pylint)
   (flycheck-testsuite-should-syntax-check
    "checkers/python-pylint-error.py" 'python-mode 'python-flake8
-   '(1 nil "Invalid module name \"python-pylint-error\" (C0103)" warning)
-   '(1 nil "Missing module docstring (C0111)" warning)
-   '(3 nil "Unable to import 'spam' (F0401)" error)))
+   '(1 nil warning "Invalid module name \"python-pylint-error\" (C0103)"
+       :checker python-pylint)
+   '(1 nil warning "Missing module docstring (C0111)" :checker python-pylint)
+   '(3 nil error "Unable to import 'spam' (F0401)" :checker python-pylint)))
 
 (ert-deftest checker-python-pylint-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-pylint)
   (flycheck-testsuite-should-syntax-check
    "checkers/python-pylint-warning.py" 'python-mode 'python-flake8
-   '(1 nil "Invalid module name \"python-pylint-warning\" (C0103)" warning)
-   '(1 nil "Missing module docstring (C0111)" warning)
-   '(3 nil "Missing class docstring (C0111)" warning)
-   '(5 nil "Invalid argument name \"n\" (C0103)" warning)
-   '(5 nil "Missing method docstring (C0111)" warning)
-   '(6 nil "Used builtin function 'map' (W0141)" warning)
-   '(5 nil "Method could be a function (R0201)" warning)
-   '(3 nil "Too few public methods (1/2) (R0903)" warning)))
+   '(1 nil warning "Invalid module name \"python-pylint-warning\" (C0103)"
+       :checker python-pylint)
+   '(1 nil warning "Missing module docstring (C0111)" :checker python-pylint)
+   '(3 nil warning "Missing class docstring (C0111)" :checker python-pylint)
+   '(3 nil warning "Too few public methods (1/2) (R0903)"
+       :checker python-pylint)
+   '(5 nil warning "Invalid argument name \"n\" (C0103)" :checker python-pylint)
+   '(5 nil warning "Missing method docstring (C0111)" :checker python-pylint)
+   '(5 nil warning "Method could be a function (R0201)" :checker python-pylint)
+   '(6 nil warning "Used builtin function 'map' (W0141)" :checker python-pylint)))
 
 (ert-deftest checker-rst-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'rst)
   (flycheck-testsuite-should-syntax-check
    "checkers/rst-warning.rst" 'rst-mode nil
-   '(8 nil "Title underline too short." warning)
-   '(11 nil "Title underline too short." warning)))
+   '(8 nil warning "Title underline too short." :checker rst)
+   '(11 nil warning "Title underline too short." :checker rst)))
 
 (ert-deftest checker-rst-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'rst)
   (flycheck-testsuite-should-syntax-check
    "checkers/rst-error.rst" 'rst-mode nil
-   '(5 nil "Unknown target name: \"restructuredtext\"." error)
-   '(7 nil "Unknown target name: \"cool\"." error)))
+   '(5 nil error "Unknown target name: \"restructuredtext\"." :checker rst)
+   '(7 nil error "Unknown target name: \"cool\"." :checker rst)))
 
 (ert-deftest checker-rst-severe ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'rst)
   (flycheck-testsuite-should-syntax-check
    "checkers/rst-severe.rst" 'rst-mode nil
-   '(6 nil "Unexpected section title." error)
-   '(11 nil "Unexpected section title." error)))
+   '(6 nil error "Unexpected section title." :checker rst)
+   '(11 nil error "Unexpected section title." :checker rst)))
 
 (defun flycheck-testsuite-jruby-expected-result ()
   (if (flycheck-testsuite-travis-ci-p) :failed
@@ -789,30 +829,31 @@ found)."
   (flycheck-testsuite-not-on-travis)
   (flycheck-testsuite-should-syntax-check
    "checkers/ruby-syntax-error.rb" 'ruby-mode '(ruby-rubocop ruby)
-   '(5 nil "syntax error, unexpected tCONSTANT" error)))
+   '(5 nil error "syntax error, unexpected tCONSTANT" :checker ruby-jruby)))
 
 (ert-deftest checker-ruby-jruby-warning ()
   :expected-result (flycheck-testsuite-jruby-expected-result)
   (flycheck-testsuite-not-on-travis)
   (flycheck-testsuite-should-syntax-check
    "checkers/ruby-warning.rb" 'ruby-mode '(ruby-rubocop ruby)
-   '(3 nil "Useless use of == in void context." warning)))
+   '(3 nil warning "Useless use of == in void context." :checker ruby-jruby)))
 
 (ert-deftest checker-ruby-rubocop-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
   (flycheck-testsuite-should-syntax-check
    "checkers/ruby-syntax-error.rb" 'ruby-mode nil
-   '(5 7 "unexpected token tCONSTANT" error)
-   '(5 24 "unterminated string meets end of file" error)))
+   '(5 7 error "unexpected token tCONSTANT" :checker ruby-rubocop)
+   '(5 24 error "unterminated string meets end of file" :checker ruby-rubocop)))
 
 (ert-deftest checker-ruby-rubocop-warnings ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
   (flycheck-testsuite-should-syntax-check
    "checkers/ruby-rubocop-warnings.rb" 'ruby-mode nil
-   '(1 1 "Missing utf-8 encoding comment." warning)
-   '(3 1 "Useless assignment to variable - arr" warning)
-   '(3 14 "Use snake_case for symbols." warning)
-   '(4 6 "Prefer single-quoted strings when you don't need string interpolation or special symbols." warning)))
+   '(1 1 warning "Missing utf-8 encoding comment." :checker ruby-rubocop)
+   '(3 1 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
+   '(3 14 warning "Use snake_case for symbols." :checker ruby-rubocop)
+   '(4 6 warning "Prefer single-quoted strings when you don't need string interpolation or special symbols."
+       :checker ruby-rubocop)))
 
 (ert-deftest checker-ruby-rubocop-warnings-disabled ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
@@ -820,34 +861,37 @@ found)."
       (setq flycheck-rubocoprc "rubocop.yml")
     (flycheck-testsuite-should-syntax-check
      "checkers/ruby-rubocop-warnings.rb" 'ruby-mode nil
-     '(1 1 "Missing utf-8 encoding comment." warning)
-     '(3 1 "Useless assignment to variable - arr" warning)
-     '(4 6 "Prefer single-quoted strings when you don't need string interpolation or special symbols." warning))))
+     '(1 1 warning "Missing utf-8 encoding comment." :checker ruby-rubocop)
+     '(3 1 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
+     '(4 6 warning "Prefer single-quoted strings when you don't need string interpolation or special symbols."
+         :checker ruby-rubocop))))
 
 (ert-deftest checker-ruby-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby)
   (flycheck-testsuite-should-syntax-check
    "checkers/ruby-syntax-error.rb" 'ruby-mode '(ruby-rubocop)
-   '(5 nil "syntax error, unexpected tCONSTANT, expecting $end" error)))
+   '(5 nil error "syntax error, unexpected tCONSTANT, expecting $end"
+       :checker ruby)))
 
 (ert-deftest checker-ruby-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby)
   (flycheck-testsuite-should-syntax-check
    "checkers/ruby-warning.rb" 'ruby-mode '(ruby-rubocop)
-   '(3 nil "possibly useless use of == in void context" warning)))
+   '(3 nil warning "possibly useless use of == in void context" :checker ruby)))
 
 (ert-deftest checker-rust-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'rust)
   (flycheck-testsuite-should-syntax-check
    "checkers/rust-syntax-error.rs" 'rust-mode nil
-   '(3 10 "expected `{` but found `bla`" error)))
+   '(3 10 error "expected `{` but found `bla`" :checker rust)))
 
 (ert-deftest checker-sass-error ()
   "Test a syntax error caused by inconsistent indentation."
   :expected-result (flycheck-testsuite-fail-unless-checker 'sass)
   (flycheck-testsuite-should-syntax-check
    "checkers/sass-error.sass" 'sass-mode nil
-    '(5 nil "Inconsistent indentation: 3 spaces were used for indentation, but the rest of the document was indented using 2 spaces." error)))
+    '(5 nil error "Inconsistent indentation: 3 spaces were used for indentation, but the rest of the document was indented using 2 spaces."
+        :checker sass)))
 
 (ert-deftest checker-scala-syntax-error ()
   :expected-result (if (flycheck-testsuite-travis-ci-p) :failed
@@ -855,13 +899,14 @@ found)."
   (flycheck-testsuite-not-on-travis)
   (flycheck-testsuite-should-syntax-check
    "checkers/scala-syntax-error.scala" 'scala-mode nil
-   '(3 nil "identifier expected but '{' found." error)))
+   '(3 nil error "identifier expected but '{' found." :checker scala)))
 
 (ert-deftest checker-scss-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'scss)
   (flycheck-testsuite-should-syntax-check
    "checkers/scss-error.scss" 'scss-mode nil
-   '(3 nil "Invalid CSS after \"        c olor:\": expected pseudoclass or pseudoelement, was \" red;\"" error)))
+   '(3 nil error "Invalid CSS after \"        c olor:\": expected pseudoclass or pseudoelement, was \" red;\""
+       :checker scss)))
 
 (ert-deftest checker-sh-bash-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'sh-bash)
@@ -869,8 +914,8 @@ found)."
       (sh-set-shell "sh" :no-query)
     (flycheck-testsuite-should-syntax-check
      "checkers/sh-bash-syntax-error.sh" 'sh-mode '(sh-dash)
-     '(3 nil "syntax error near unexpected token `('" error)
-     '(3 nil "`cat <(echo blah)'" error))))
+     '(3 nil error "syntax error near unexpected token `('" :checker sh-bash)
+     '(3 nil error "`cat <(echo blah)'" :checker sh-bash))))
 
 (ert-deftest checker-sh-dash-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'sh-dash)
@@ -878,41 +923,47 @@ found)."
       (sh-set-shell "sh" :no-query)
     (flycheck-testsuite-should-syntax-check
      "checkers/sh-dash-syntax-error.sh" 'sh-mode '(sh-bash)
-     '(5 nil "Syntax error: \"fi\" unexpected (expecting \"then\")" error))))
+     '(5 nil error "Syntax error: \"fi\" unexpected (expecting \"then\")"
+         :checker sh-dash))))
 
 (ert-deftest checker-slim-error ()
   (flycheck-testsuite-fail-unless-checker 'slim)
   (let* ((slim-version (cadr (split-string (car (process-lines "slimrb" "-v")))))
-         (expected-error (if (version<= "1.3.1" slim-version)
-                            '(2 1 "Unexpected indentation" error)
-                           '(2 nil "Unexpected indentation" error))))
+         ;; Old Slim compilers do not report column information
+         (column (if (version<= "1.3.1" slim-version) 1 nil)))
     (flycheck-testsuite-should-syntax-check
-     "checkers/slim-error.slim" 'slim-mode nil expected-error)))
+     "checkers/slim-error.slim" 'slim-mode nil
+     `(2 ,column error "Unexpected indentation" :checker slim))))
 
 (ert-deftest checker-tex-chktex-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'tex-chktex)
   (flycheck-testsuite-should-syntax-check
    "checkers/tex-chktex-warning.tex" 'latex-mode nil
-   '(9 28 "13:Intersentence spacing (`\\@') should perhaps be used." warning)))
+   '(9 28 warning "13:Intersentence spacing (`\\@') should perhaps be used."
+       :checker tex-chktex)))
 
 (ert-deftest checker-tex-lacheck-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'tex-lacheck)
   (flycheck-testsuite-should-syntax-check
    "checkers/tex-lacheck-warning.tex" 'latex-mode 'tex-chktex
-    '(9 nil "possible unwanted space at \"{\"" warning)))
+    '(9 nil warning "possible unwanted space at \"{\""
+        :checker tex-lacheck)))
 
 (ert-deftest checker-xml-xmlstarlet-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'xml-xmlstarlet)
   (flycheck-testsuite-should-syntax-check
    "checkers/xml-syntax-error.xml" 'nxml-mode 'xml-xmllint
-   '(4 10 "Opening and ending tag mismatch: spam line 3 and with" error)))
+   '(4 10 error "Opening and ending tag mismatch: spam line 3 and with"
+       :checker xml-xmlstarlet)))
 
 (ert-deftest checker-xml-xmllint-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'xml-xmllint)
   (flycheck-testsuite-should-syntax-check
    "checkers/xml-syntax-error.xml" 'nxml-mode 'xml-xmlstarlet
-   '(4 nil "parser error : Opening and ending tag mismatch: spam line 3 and with" error)
-   '(5 nil "parser error : Extra content at the end of the document" error)))
+   '(4 nil error "parser error : Opening and ending tag mismatch: spam line 3 and with"
+       :checker xml-xmllint)
+   '(5 nil error "parser error : Extra content at the end of the document"
+       :checker xml-xmllint)))
 
 (ert-deftest checker-yaml-ruby ()
   (flycheck-testsuite-fail-unless-checker 'yaml-ruby)
@@ -924,14 +975,15 @@ found)."
           (cond
            ;; Syck parser in Ruby 1.9.2 and lower
            ((version< ruby-version "1.9.3")
-            '(3 5 "a1: bar" error))
+            '(3 5 error "a1: bar" :checker yaml-ruby))
            ;; Psych parser in Ruby 1.9.3 and up.  The Psych errors apparently
            ;; vary between different versions, so we have to adapt.  Ruby, you
            ;; suck.
            ((version< psych-version "1.2.2")
-            '(3 4 "couldn't parse YAML" error))
+            '(3 4 error "couldn't parse YAML" :checker yaml-ruby))
            (:else
-            '(4 5 "mapping values are not allowed in this context" error)))))
+            '(4 5 error "mapping values are not allowed in this context"
+                :checker yaml-ruby)))))
     (flycheck-testsuite-should-syntax-check
      "checkers/yaml-syntax-error.yaml" 'yaml-mode nil expected-error)))
 
@@ -942,6 +994,6 @@ found)."
       (sh-set-shell "zsh" :no-query)
     (flycheck-testsuite-should-syntax-check
      "checkers/zsh-syntax-error.zsh" 'sh-mode nil
-     '(5 nil "parse error near `fi'" error))))
+     '(5 nil error "parse error near `fi'" :checker zsh))))
 
 ;;; builtin-checkers-test.el ends here
