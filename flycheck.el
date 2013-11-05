@@ -913,16 +913,6 @@ Otherwise return nil."
 (defvar-local flycheck-temporaries nil
   "Temporary files and directories created by Flycheck.")
 
-(defun flycheck-temp-filename-system (prefix)
-  "Create a unique temporary filename from PREFIX.
-
-Add the filename to the `flycheck-temporaries'.
-
-Return the temporary filename"
-  (let* ((tempname (f-join temporary-file-directory (make-temp-name prefix))))
-    (push tempname flycheck-temporaries)
-    tempname))
-
 (defun flycheck-temp-dir-system (prefix)
   "Create a unique temporary directory from PREFIX.
 
@@ -1156,7 +1146,8 @@ https://github.com/d11wtq/grizzl.")))
     "Check whether ARG is a valid command argument."
     (pcase arg
       ((pred stringp) t)
-      ((or `source `source-inplace `source-original `temporary-directory `temporary-filename) t)
+      ((or `source `source-inplace `source-original) t)
+      ((or `temporary-directory `temporary-file-name) t)
       (`(config-file ,option-name ,config-file-var)
        (and (stringp option-name)
             (symbolp config-file-var)))
@@ -1506,11 +1497,12 @@ STRING
      of the buffer to check.  Do not use this as primary input to
      a checker!
 
-`temporary-filename'
-     Create a unique filename.
-
 `temporary-directory'
      Create a unique temporary directory and return its path.
+
+`temporary-file-name'
+     Return a unique temporary filename.  The file is *not*
+     created.
 
 `(config-file OPTION VARIABLE)'
      Search the configuration file bound to VARIABLE with
@@ -1576,8 +1568,10 @@ are substituted within the body of cells!"
     (`source-inplace
      (flycheck-save-buffer-to-temp #'flycheck-temp-file-inplace "flycheck"))
     (`source-original (or (buffer-file-name) ""))
-    (`temporary-filename (flycheck-temp-filename-system "flycheck"))
     (`temporary-directory (flycheck-temp-dir-system "flycheck"))
+    (`temporary-file-name
+     (let ((directory (flycheck-temp-dir-system "flycheck")))
+       (make-temp-name (f-join directory "flycheck"))))
     (`(config-file ,option-name ,file-name-var)
      (-when-let* ((value (symbol-value file-name-var))
                   (file-name (flycheck-locate-config-file value checker)))
@@ -3633,7 +3627,7 @@ See URL `http://golang.org/cmd/gofmt/'."
   "A Go syntax and type checker using the `go build' command.
 
 See URL `https://golang.org/cmd/go'."
-  :command ("go" "build" "-o" temporary-filename)
+  :command ("go" "build" "-o" temporary-file-name)
   :error-patterns
   ((error line-start (file-name) ":" line ": " (message) line-end))
   :modes go-mode
