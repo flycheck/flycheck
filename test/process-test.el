@@ -30,11 +30,14 @@
   "Test that chaining preserves all errors from all checkers."
   (flycheck-testsuite-should-syntax-check
    "chained-errors.el" 'emacs-lisp-mode nil
-   '(8 nil "You should have a section marked \";;; Code:\"" warning
+   '(8 nil warning "You should have a section marked \";;; Code:\""
        :checker emacs-lisp-checkdoc)
-   '(8 1 "`message' called with 0 args to fill 1\n    format field(s)" warning)
-   '(10 2 "princ called with 0 arguments, but\n    requires 1-2" warning)
-   '(15 1 "the function `i-do-not-exist' is not\n    known to be defined." warning)))
+   '(8 1 warning "`message' called with 0 args to fill 1\n    format field(s)"
+       :checker emacs-lisp)
+   '(10 2 warning "princ called with 0 arguments, but\n    requires 1-2"
+        :checker emacs-lisp)
+   '(15 1 warning "the function `i-do-not-exist' is not\n    known to be defined."
+        :checker emacs-lisp)))
 
 (require 'test-helper)
 

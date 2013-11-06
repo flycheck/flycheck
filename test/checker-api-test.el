@@ -51,11 +51,22 @@
 (ert-deftest flycheck-substitute-argument-temporary-directory ()
   (with-temp-buffer
     (unwind-protect
-        (progn
-          (let ((dirname (flycheck-substitute-argument 'temporary-directory
-                                                       'emacs-lisp)))
-            (should (f-directory? dirname))
-            (should (s-starts-with? temporary-file-directory dirname))))
+        (let ((dirname (flycheck-substitute-argument 'temporary-directory
+                                                     'emacs-lisp)))
+          (should (f-directory? dirname))
+          (should (s-starts-with? temporary-file-directory dirname)))
+      (flycheck-safe-delete flycheck-temporaries))))
+
+(ert-deftest flycheck-substitute-argument-temporary-filename ()
+  (with-temp-buffer
+    (unwind-protect
+        (let ((filename (flycheck-substitute-argument 'temporary-file-name
+                                                      'emacs-lisp)))
+          ;; The filename should not exist, but it's parent directory should
+          (should-not (f-exists? filename))
+          (should (f-directory? (f-parent filename)))
+          (should (s-starts-with? temporary-file-directory filename))
+          (should (member (f-parent filename) flycheck-temporaries)))
       (flycheck-safe-delete flycheck-temporaries))))
 
 (ert-deftest flycheck-substitute-argument-config-file ()

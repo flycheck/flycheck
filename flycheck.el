@@ -6,7 +6,7 @@
 ;; URL: https://github.com/flycheck/flycheck
 ;; Keywords: convenience languages tools
 ;; Version: 0.15-cvs
-;; Package-Requires: ((s "1.6.0") (dash "2.0.0") (f "0.6.0") (pkg-info "0.1") (cl-lib "0.3") (emacs "24.1"))
+;; Package-Requires: ((s "1.6.0") (dash "2.0.0") (f "0.6.0") (pkg-info "0.4") (cl-lib "0.3") (emacs "24.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -46,7 +46,6 @@
 (require 's)
 (require 'dash)
 (require 'f)
-(require 'pkg-info)
 (require 'rx)                ; Regexp fanciness in `flycheck-define-checker'
 (require 'cl-lib)            ; `cl-defstruct'
 (require 'help-mode)         ; `define-button-type'
@@ -139,6 +138,7 @@ buffer-local wherever it is set."
     lua
     perl
     php
+    php-phpmd
     php-phpcs
     puppet-parser
     puppet-lint
@@ -258,8 +258,6 @@ If set to nil, do not display errors at all."
   :group 'flycheck
   :type '(choice (const :tag "Display error messages"
                         flycheck-display-error-messages)
-                 (const :tag "Display errors in error list"
-                        flycheck-display-errors-in-list)
                  (function :tag "Error display function"))
   :package-version '(flycheck . "0.13")
   :risky t)
@@ -524,6 +522,18 @@ This variable is a normal hook."
   :package-version '(flycheck . "0.15")
   :group 'flycheck-faces)
 
+(defface flycheck-error-list-highlight
+  '((t :inherit highlight))
+  "Flycheck face to highlight errors in the error list."
+  :package-version '(flycheck . "0.15")
+  :group 'flycheck-faces)
+
+(defface flycheck-error-list-highlight-at-point
+  '((t :inherit lazy-highlight))
+  "Flycheck face to highlight error at point in the error list."
+  :package-version '(flycheck . "0.15")
+  :group 'flycheck-faces)
+
 
 ;;;; Minor mode definition
 ;;;###autoload
@@ -579,7 +589,7 @@ running checks, and empty all variables used by flycheck."
   (flycheck-clean-deferred-check)
   (flycheck-clear)
   (flycheck-stop-checker)
-  (flycheck-cancel-error-show-error-timer)
+  (flycheck-cancel-error-display-error-at-point-timer)
   (flycheck-safe-delete-temporaries)
   (flycheck-clear-checker))
 
@@ -599,11 +609,14 @@ running checks, and empty all variables used by flycheck."
     (kill-buffer-hook                 . flycheck-teardown)
     (kill-emacs-hook                  . flycheck-teardown)
     (change-major-mode-hook           . flycheck-teardown)
+    ;; Update the error list if necessary
+    (post-command-hook                . flycheck-error-list-update-source)
+    (post-command-hook                . flycheck-error-list-highlight-errors)
     ;; Show or hide error popups after commands
-    (post-command-hook                . flycheck-show-error-at-point-soon)
+    (post-command-hook                . flycheck-display-error-at-point-soon)
     (post-command-hook                . flycheck-hide-error-buffer)
     ;; Immediately show error popups when navigating to an error
-    (next-error-hook                  . flycheck-show-error-at-point))
+    (next-error-hook                  . flycheck-display-error-at-point))
   "Hooks which Flycheck needs to hook in.
 
 The `car' of each pair is a hook variable, the `cdr' a function
@@ -657,18 +670,6 @@ buffer manually.
 
 
 ;;; Version information
-(defun flycheck-library-version ()
-  "Get the version in the Flycheck library header."
-  (-when-let (version (pkg-info-defining-library-version 'flycheck-mode))
-    (pkg-info-format-version version)))
-
-(defun flycheck-package-version ()
-  "Get the package version of Flycheck.
-
-This is the version number of the installed Flycheck package."
-  (-when-let (version (pkg-info-package-version 'flycheck))
-    (pkg-info-format-version version)))
-
 (defun flycheck-version (&optional show-version)
   "Get the Flycheck version as string.
 
@@ -681,18 +682,9 @@ and the library version, if both a present and different.
 If the version number could not be determined, signal an error,
 if called interactively, or if SHOW-VERSION is non-nil, otherwise
 just return nil."
-  (interactive (list (not (or executing-kbd-macro noninteractive))))
-  (let* ((lib-version (flycheck-library-version))
-         (pkg-version (flycheck-package-version))
-         (version (cond
-                   ((and lib-version pkg-version
-                         (not (string= lib-version pkg-version)))
-                    (format "%s (package: %s)" lib-version pkg-version))
-                   ((or pkg-version lib-version)
-                    (format "%s" (or pkg-version lib-version))))))
+  (interactive (list t))
+  (let ((version (pkg-info-version-info 'flycheck)))
     (when show-version
-      (unless version
-        (error "Could not find out Flycheck version"))
       (message "Flycheck version: %s" version))
     version))
 
@@ -736,6 +728,7 @@ returns t."
   (interactive)
   (flycheck-delete-all-overlays)
   (flycheck-clear-errors)
+  (flycheck-error-list-refresh)
   (flycheck-hide-error-buffer))
 
 (defun flycheck-buffer ()
@@ -1164,174 +1157,14 @@ https://github.com/d11wtq/grizzl.")))
       (intern input))))
 
 
-;;;; Obsolete checker declarations
-;;;###autoload
-(defmacro flycheck-declare-checker (symbol docstring &rest properties)
-  "Declare SYMBOL as syntax checker with DOCSTRING and PROPERTIES.
-
-DOCSTRING provides documentation for the new checker.  Use
-`flycheck-checker-documentation' to access the documentation
-string of a checker, and `flycheck-describe-checker' to get help
-about a checker.
-
-The following PROPERTIES are understood:
-
-`:command'
-     A list with the executable (in `car') and the arguments (in
-     `cdr') of the syntax checker.  The executable is checked for
-     existence with `executable-find' before executing the
-     checker.  The arguments are substituted with
-     `flycheck-substitute-argument' before execution, see the
-     documentation of this function for a list of special tags
-     allowed in arguments.
-
-`:error-patterns'
-     A list of error patterns to parse the output of the checker.
-     Each pattern is a list (REGEXP LEVEL).  REGEXP is a regular
-     expression that matches an error.  This regular expression
-     may contain match groups extracting specific information
-     about the error.  The 1st group is the file name, the 2nd
-     group the line number, the 3rd group the column number and
-     the 4th group the error message.  A group is ignored if it
-     did not match or the match returned an empty string.  LEVEL
-     is either warning or error and determines the severity of
-     the error message parsed with the pattern.
-
-`:error-parser'
-     A function symbol to parse errors with.  The function must
-     accept three arguments OUTPUT CHECKER BUFFER, where OUTPUT
-     is the output as string and CHECKER the checker symbol that
-     was used to check BUFFER.  The function must return a list
-     of `flycheck-error' objects parsed from OUTPUT.
-
-`:modes'
-     A major mode symbol or a list thereof.  If present the
-     checker is only used in these modes.
-
-`:predicate'
-     A function symbol or lambda expression.  If present the
-     syntax checker is only used if this function returns non-nil
-     when called in the buffer to check.
-
-     May also be a form, but this usage is obsolete.
-
-`:next-checkers'
-     A list where each element is either a checker
-     symbol to run after this checker or a cons cell (PREDICATE
-     . CHECKER).  In the latter case, CHECKER is the checker symbol to
-     run, and the PREDICATE symbol specifies when to run the checker:
-     If PREDICATE is `no-errors' run the next checker only if this
-     checker returned no errors at all.  If PREDICATE is
-     `warnings-only', run the next checker only if this checker
-     returned only warnings.  Only the first usable and
-     registered (see `flycheck-registered-checker-p') is run.
-
-A checker must have a `:command' property, at least one of
-`:error-patterns' or `:error-parser', and at least one of
-`:predicate' and `:modes'.  If `:predicate' and `:modes' are
-present, both must match for the checker to be used."
-  (declare (indent 1)
-           (doc-string 2))
-  `(flycheck-set-checker-properties ',symbol
-     :command ,(plist-get properties :command)
-     :error-patterns ,(plist-get properties :error-patterns)
-     :error-parser (or ,(plist-get properties :error-parser)
-                       'flycheck-parse-with-patterns)
-     :modes ,(plist-get properties :modes)
-     :predicate ,(plist-get properties :predicate)
-     :next-checkers ,(plist-get properties :next-checkers)
-     :documentation ,docstring))
-
-(make-obsolete 'flycheck-declare-checker 'flycheck-define-checker
-               "0.14")
-
-(defun flycheck-clear-checker-properties (symbol)
-  "Remove all Flycheck checker properties from SYMBOL."
-  (--each '(checker command error-parser error-patterns modes predicate
-                    next-checkers documentation file)
-    (put symbol (intern (concat ":flycheck-" (symbol-name it))) nil)))
-
-(defun flycheck-set-checker-properties (symbol &rest properties)
-  "Set Flycheck checker PROPERTIES on SYMBOL."
-  (declare (indent 1))
-  (flycheck-clear-checker-properties symbol) ; Clear old properties first
-  (--each '(command error-parser modes next-checkers documentation)
-    (let ((name (symbol-name it)))
-      (put symbol (intern (concat ":flycheck-" name))
-           (plist-get properties (intern (concat ":" name))))))
-  (put symbol :flycheck-error-patterns
-       (--map (cons (car it) (cadr it)) (plist-get properties :error-patterns)))
-  (-when-let (predicate (plist-get properties :predicate))
-    (unless (functionp predicate)
-      (setq predicate #'(lambda () (eval predicate))))
-    (put symbol :flycheck-predicate predicate))
-  (put symbol :flycheck-file (flycheck-current-load-file))
-  (flycheck-verify-checker symbol)
-  (put symbol :flycheck-checker t))
-
-(defun flycheck-error-pattern-p (pattern)
-  "Check whether PATTERN is a valid error pattern."
-  (and
-   (consp pattern)
-   (stringp (car pattern))
-   (memq (cdr pattern) '(warning error))))
-
-(defun flycheck-error-patterns-list-p (patterns)
-  "Check whether PATTERNS is a list of valid error patterns."
-  (-all? 'flycheck-error-pattern-p patterns))
-
-(defun flycheck-verify-checker (checker)
-  "Verify CHECKER.
-
-Ensure that all required properties are present, and signal an
-error if not."
-  (let ((command (get checker :flycheck-command))
-        (patterns (get checker :flycheck-error-patterns))
-        (parser (get checker :flycheck-error-parser))
-        (modes (get checker :flycheck-modes))
-        (predicate (get checker :flycheck-predicate))
-        (next-checkers (get checker :flycheck-next-checkers))
-        (doc (get checker :flycheck-documentation)))
-    (unless (and doc (stringp doc))
-      (error "Checker %s must have documentation" checker))
-    (unless command
-      (error "Checker %s must have a :command" checker))
-    (unless (stringp (car command))
-      (error "Checker %s must have an executable in :command" checker))
-    (unless (flycheck-command-arguments-list-p command)
-      (error "Checker %s has invalid :command arguments" checker))
-    (when (and (eq parser 'flycheck-parse-with-patterns) (null patterns))
-      (error "Checker %s must have :error-patterns" checker))
-    (unless (or (null patterns) (flycheck-error-patterns-list-p patterns))
-      (error "Checker %s has invalid :error-patterns" checker))
-    (unless (or (null parser) (fboundp parser))
-      (error "Function definition of error parser %s of checker %s is void"
-             parser checker))
-    (unless (or modes predicate)
-      (error "Checker %s must have :modes or :predicate" checker))
-    (unless (or (symbolp modes) (-all? #'symbolp modes))
-      (error "Modes of checker %s must be a major mode or a list thereof"
-             checker))
-    (unless (or (null predicate) (functionp predicate))
-      (error "Predicate of checker %s must be a function" checker))
-    (unless (or
-             (null next-checkers)
-             (and (listp next-checkers)
-                  (--all? (or (symbolp it)
-                              (and (listp it)
-                                   (memq (car it) '(no-errors warnings-only))
-                                   (symbolp (cdr it))))
-                          next-checkers)))
-      (error "Checker %s has invalid next checkers" checker))))
-
-
 ;;;; Checker definitions
 (eval-and-compile
   (defun flycheck-command-argument-p (arg)
     "Check whether ARG is a valid command argument."
     (pcase arg
       ((pred stringp) t)
-      ((or `source `source-inplace `source-original `temporary-directory) t)
+      ((or `source `source-inplace `source-original) t)
+      ((or `temporary-directory `temporary-file-name) t)
       (`(config-file ,option-name ,config-file-var)
        (and (stringp option-name)
             (symbolp config-file-var)))
@@ -1684,6 +1517,10 @@ STRING
 `temporary-directory'
      Create a unique temporary directory and return its path.
 
+`temporary-file-name'
+     Return a unique temporary filename.  The file is *not*
+     created.
+
 `(config-file OPTION VARIABLE)'
      Search the configuration file bound to VARIABLE with
      `flycheck-find-config-file' and return a list of arguments
@@ -1749,6 +1586,9 @@ are substituted within the body of cells!"
      (flycheck-save-buffer-to-temp #'flycheck-temp-file-inplace "flycheck"))
     (`source-original (or (buffer-file-name) ""))
     (`temporary-directory (flycheck-temp-dir-system "flycheck"))
+    (`temporary-file-name
+     (let ((directory (flycheck-temp-dir-system "flycheck")))
+       (make-temp-name (f-join directory "flycheck"))))
     (`(config-file ,option-name ,file-name-var)
      (-when-let* ((value (symbol-value file-name-var))
                   (file-name (flycheck-locate-config-file value checker)))
@@ -2160,7 +2000,8 @@ Pop up a help buffer with the documentation of CHECKER."
                (:constructor flycheck-error-new)
                (:constructor flycheck-error-new-at (line column
                                                          &optional level message
-                                                         &key checker filename
+                                                         &key checker
+                                                         (filename (buffer-file-name))
                                                          (buffer (current-buffer)))))
   "Structure representing an error reported by a syntax checker.
 Slots:
@@ -2812,6 +2653,10 @@ Return the created overlay."
   "Return a list of all flycheck errors overlayed at POS."
   (--map (overlay-get it 'flycheck-error) (flycheck-overlays-at pos)))
 
+(defun flycheck-overlay-errors-in (beg end)
+  "Return a list of all flycheck errors overlayed between BEG and END."
+  (--map (overlay-get it 'flycheck-error) (flycheck-overlays-in beg end)))
+
 (defvar-local flycheck-overlays-to-delete nil
   "Overlays mark for deletion after all syntax checks completed.")
 (put 'flycheck-overlays-to-delete 'permanent-local t)
@@ -2894,12 +2739,21 @@ the beginning of the buffer."
   "The name of the buffer to show error lists.")
 
 (defun flycheck-error-list-buffer ()
-  "Get the buffer to show error lists.
+  "Get the error list buffer.
 
-If the buffer does not exist yet, create it.
+Return the buffer object, or nil, if the error list does not
+exist."
+  (get-buffer flycheck-error-list-buffer))
 
-Return the buffer object."
-  (get-buffer-create flycheck-error-list-buffer))
+(defmacro flycheck-with-error-list (&rest body)
+  "Evaluate BODY in the error list buffer.
+
+If the error list exists, evaluate BODY with the error list as
+current buffer.  If no error list exists, do not evaluate BODY."
+  (declare (indent 0))
+  `(-when-let (error-list (flycheck-error-list-buffer))
+     (with-current-buffer error-list
+       ,@body)))
 
 (defconst flycheck-list-error-regex-alist
   '(("^\\(?1:.+?\\):\\(?2:[0-9]+\\):\\(?:\\(?3:[0-9]+\\):\\)?error:" 1 2 3 2)
@@ -2919,21 +2773,63 @@ Return the buffer object."
 (defvar-local flycheck-error-list-source-buffer nil
   "The current source buffer of the error list.")
 
-(defvar-local flycheck-error-list-last-errors nil
-  "The last errors in the error list.
+(defun flycheck-error-list-source ()
+  "Get the current source buffer of the error list.
 
-The value of this variable is a list of Flycheck error objects
-that were last added to the error list with
-`flycheck-error-list-add-errors'.")
+Return nil, if the error list does not have a source buffer, or
+if the source buffer is not alive anymore."
+  (-when-let* ((error-list (flycheck-error-list-buffer))
+               (source (buffer-local-value 'flycheck-error-list-source-buffer
+                                           error-list)))
+    (when (buffer-live-p source)
+      source)))
 
-(defun flycheck-error-list-last-errors ()
-  "Get the last errors in the error list.
+(defvar flycheck-error-list-mode-line-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map [mode-line mouse-1]
+      #'flycheck-error-list-mouse-switch-to-source)
+    map)
+  "Keymap for error list mode line.")
 
-Return a list of the last errors in the error list (as by
-`flycheck-error-list-last-errors'), or nil if there is no error
-list buffer currently."
-  (-when-let (list-buffer (get-buffer flycheck-error-list-buffer))
-    (buffer-local-value 'flycheck-error-list-last-errors list-buffer)))
+(defun flycheck-error-list-set-mode-line ()
+  "Update the mode line of the error list.
+
+The mode line shows the file name of the source buffer."
+  (let* ((source (flycheck-error-list-source)))
+    (setq mode-line-buffer-identification
+          (nconc (propertized-buffer-identification "%b")
+                 (list
+                  (s-concat
+                   " for buffer "
+                   ;; Escape "%" in names to avoid accidental substitution
+                   (propertize (s-replace "%" "%%" (buffer-name source))
+                               'face 'mode-line-buffer-id
+                               'mouse-face 'mode-line-highlight
+                               'help-echo "mouse-1: switch to source"
+                               'local-map flycheck-error-list-mode-line-map)))))))
+
+(defun flycheck-error-list-set-source (buffer)
+  "Set BUFFER as the source buffer of the error list."
+  (flycheck-with-error-list
+    (flycheck-error-list-mode)
+    (setq flycheck-error-list-source-buffer buffer
+          ;; Change to the right working directory to let compile-mode resolve
+          ;; error references properly.
+          default-directory (buffer-local-value 'default-directory buffer))
+    ;; Remove any old errors
+    (let ((inhibit-read-only t))
+      (erase-buffer)
+      (set-buffer-modified-p nil))
+    (flycheck-error-list-set-mode-line)))
+
+(defun flycheck-error-list-mouse-switch-to-source (event)
+  "Switch to the error list source buffer of the EVENT window."
+  (interactive "e")
+  (save-selected-window
+    (when (eventp event)
+      (select-window (posn-window (event-start event))))
+    (when (buffer-live-p flycheck-error-list-source-buffer)
+      (switch-to-buffer flycheck-error-list-source-buffer))))
 
 (defun flycheck-error-list-buffer-label (buffer)
   "Create a list label for BUFFER relative to DIRECTORY.
@@ -2963,17 +2859,6 @@ Return the label as string."
     (file-relative-name filename)
     (flycheck-error-list-buffer-label (flycheck-error-buffer err))))
 
-(defun flycheck-error-list-insert-header (buffer)
-  "Insert an error header for BUFFER into the current buffer.
-
-Insert an error list header for BUFFER into the current buffer.
-The header contains the filename of BUFFER relative to the
-current `default-directory', or the buffer name, if BUFFER has no
-file name."
-  (insert (format "\n\n\C-l\n*** %s: Syntax and style errors (Flycheck v%s)\n"
-                  (flycheck-error-list-buffer-label buffer)
-                  (or (flycheck-version) "Unknown"))))
-
 (defun flycheck-error-list-insert-errors (errors)
   "Insert a list of all ERRORS into the current buffer.
 
@@ -2981,55 +2866,21 @@ Insert a human-readable listing of ERRORS into the current
 buffer.  The file names of ERRORS are printed relative to the
 current `default-directory'."
   (--each errors
-    (insert (flycheck-error-list-error-label it))
-    (insert ":")
-    (insert (flycheck-error-format it))
-    (insert "\n")))
+    (let ((beg (point)))
+      (insert (flycheck-error-list-error-label it))
+      (insert ":")
+      (insert (flycheck-error-format it))
+      ;; Track the error for this line
+      (put-text-property beg (point) 'flycheck-error it)
+      (insert "\n"))))
 
-(defun flycheck-error-list-add-errors (errors &optional source-buffer)
-  "Add ERRORS from SOURCE-BUFFER to the Flycheck error list.
-
-ERRORS is a list of Flycheck errors to show.  SOURCE-BUFFER is
-the buffer from which these errors originate, defaulting to the
-current buffer.
-
-The name of SOURCE-BUFFER is shown in the header inserted for
-ERRORS.  It is also added to `flycheck-error-list-source-buffer'
-and thus used by `flycheck-error-list-refresh'."
-  (let* ((source-buffer (or source-buffer (current-buffer)))
-         ;; Remember the default directory of the source buffer
-         (source-directory (buffer-local-value 'default-directory source-buffer)))
-    (with-current-buffer (flycheck-error-list-buffer)
-      (flycheck-error-list-mode)
-      (setq default-directory source-directory ; Change to the right directory
-                                        ; to resolve error references properly
-            flycheck-error-list-source-buffer source-buffer
-            flycheck-error-list-last-errors errors)
-      (let ((inhibit-read-only t))
-        (goto-char (point-max))
-        (flycheck-error-list-insert-header source-buffer)
-        (flycheck-error-list-insert-errors errors)))))
-
-(defun flycheck-error-list-goto-current-errors ()
-  "Move the point to the beginning of the current errors."
-  (goto-char (point-max))
-  (re-search-backward "\C-l" nil :no-error)
-  (beginning-of-line)
-  (forward-line 1))
-
-(defun flycheck-error-list-recenter ()
-  "Recenter the current error list buffer.
-
-Move the point to the beginning of the current errors, and
-recenter the display, if the error list is currently shown."
-  (-if-let (window (get-buffer-window))
-    (with-selected-window window
-      ;; We must move the point with the right window selected, for otherwise
-      ;; the point location is mysteriously wrong when recentering :|
-      (flycheck-error-list-goto-current-errors)
-      (recenter 0))
-    ;; If there is no window, just update the location of the point
-    (flycheck-error-list-goto-current-errors)))
+(defun flycheck-error-list-recenter-at (pos)
+  "Recenter the error list at POS."
+  (--each (get-buffer-window-list)
+    (with-selected-window it
+      ;; Move the point to the very beginning of the error list
+      (goto-char pos)
+      (recenter))))
 
 (defun flycheck-error-list-refresh ()
   "Refresh the current error list.
@@ -3038,38 +2889,81 @@ Add all errors currently reported for the current
 `flycheck-error-list-source-buffer', and recenter the error
 list."
   (interactive)
-  (unless (derived-mode-p 'flycheck-error-list-mode)
-    (user-error "The current buffer is no error list"))
-  (let ((source flycheck-error-list-source-buffer))
-    (when (buffer-live-p source)
-      (unless (buffer-local-value 'flycheck-mode source)
-        (user-error "Flycheck mode disabled in %S" source))
-      (let ((errors (buffer-local-value 'flycheck-current-errors source)))
-        (flycheck-error-list-add-errors errors source))
-      (flycheck-error-list-recenter))))
+  (-when-let (source-buffer (flycheck-error-list-source))
+    (let ((errors (buffer-local-value 'flycheck-current-errors source-buffer)))
+      (flycheck-with-error-list
+        (let ((inhibit-read-only t))
+          (erase-buffer)
+          (flycheck-error-list-insert-errors errors)
+          (set-buffer-modified-p nil))
+        (flycheck-error-list-recenter-at (point-min))))))
 
-(defun flycheck-list-errors (&optional pos)
-  "List all errors at POS in current buffer.
+(defvar-local flycheck-error-list-highlight-overlays nil
+  "Error highlight overlays in the error list buffer.")
 
-Show all Flycheck errors at POS in the current buffer in a
-separate window.  If POS is omitted or nil, show all errors.
+(defun flycheck-error-list-highlight-errors ()
+  "Highlight errors in the error list."
+  (let ((errors-at-line (flycheck-overlay-errors-in (line-beginning-position)
+                                                    (line-end-position)))
+        (errors-at-point (flycheck-overlay-errors-at (point))))
+    (flycheck-with-error-list
+     (let ((old-overlays flycheck-error-list-highlight-overlays)
+           (min-point (point-max))
+           (max-point (point-min)))
+       ;; Display the new overlays first, to avoid re-display flickering
+       (setq flycheck-error-list-highlight-overlays nil)
+       (when errors-at-line
+         (save-excursion
+           (goto-char (point-min))
+           (while (< (point) (point-max))
+             (let* ((err (get-text-property (point) 'flycheck-error))
+                    (face (cond
+                           ((member err errors-at-point)
+                            'flycheck-error-list-highlight-at-point)
+                           ((member err errors-at-line)
+                            'flycheck-error-list-highlight))))
+               (when face
+                 (setq min-point (min min-point (point))
+                       max-point (max max-point (point)))
+                 (let ((ov (make-overlay (line-beginning-position)
+                                         ;; Extend overlay to the beginning of
+                                         ;; the next line, to highlight the
+                                         ;; whole line
+                                         (line-beginning-position 2))))
+                   (push ov flycheck-error-list-highlight-overlays)
+                   (overlay-put ov 'flycheck-error-highlight-overlay t)
+                   (overlay-put ov 'face face))))
+             (forward-line 1))))
+       ;; Delete the old overlays
+       (-each old-overlays #'delete-overlay)
+       ;; Move point to the middle error
+       (goto-char (+ min-point (/ (- max-point min-point) 2)))
+       (beginning-of-line)
+       ;; And recenter the error list at this position
+       (flycheck-error-list-recenter-at (point))))))
 
-Interactively, show all Flycheck errors.  With prefix arg, only
-show errors at point.
+(defun flycheck-error-list-update-source ()
+  "Update the source buffer of the error list."
+  (when (not (or (eq (current-buffer) (flycheck-error-list-buffer))
+                 (eq (current-buffer) (flycheck-error-list-source))))
+    ;; We must not update the source buffer, if the current buffer is the error
+    ;; list itself.  If the current buffer is already the source of the error
+    ;; list, we don't need to do anything, too.
+    (flycheck-error-list-set-source (current-buffer))
+    (flycheck-error-list-refresh)))
 
-Return the buffer containing the error listing."
-  (interactive (when current-prefix-arg (list (point))))
+(defun flycheck-list-errors ()
+  "Show the error list for the current buffer."
+  (interactive)
   (unless flycheck-mode
     (user-error "Flycheck mode not enabled"))
-  (let ((errors (if pos
-                    (flycheck-overlay-errors-at pos)
-                  flycheck-current-errors)))
-    (flycheck-error-list-add-errors errors)
-    (pop-to-buffer (flycheck-error-list-buffer))
-    (flycheck-error-list-recenter)
-    ;; Switch back to the old window
-    (other-window -1)
-    (flycheck-error-list-buffer)))
+  ;; Make sure that the error list exists
+  (get-buffer-create flycheck-error-list-buffer)
+  (flycheck-error-list-set-source (current-buffer))
+  ;; Show the error list in a window, and re-select the old window
+  (display-buffer (flycheck-error-list-buffer))
+  ;; Finally, refresh the error list to show the most recent errors
+  (flycheck-error-list-refresh))
 
 
 ;;;; General error display
@@ -3078,30 +2972,28 @@ Return the buffer containing the error listing."
   (when flycheck-display-errors-function
     (funcall flycheck-display-errors-function errors)))
 
-(defvar-local flycheck-error-show-error-timer nil
+(defvar-local flycheck-display-error-at-point-timer nil
   "Timer to automatically show the error at point in minibuffer.")
 
-(defun flycheck-cancel-error-show-error-timer ()
+(defun flycheck-cancel-error-display-error-at-point-timer ()
   "Cancel the error display timer for the current buffer."
-  (when flycheck-error-show-error-timer
-    (cancel-timer flycheck-error-show-error-timer)
-    (setq flycheck-error-show-error-timer nil)))
+  (when flycheck-display-error-at-point-timer
+    (cancel-timer flycheck-display-error-at-point-timer)
+    (setq flycheck-display-error-at-point-timer nil)))
 
-(defun flycheck-show-error-at-point ()
-  "Show the all error messages at point in minibuffer."
-  (flycheck-cancel-error-show-error-timer)
+(defun flycheck-display-error-at-point ()
+  "Display the all error messages at point in minibuffer."
+  (flycheck-cancel-error-display-error-at-point-timer)
   (when flycheck-mode
     (-when-let (errors (flycheck-overlay-errors-at (point)))
       (flycheck-display-errors errors))))
 
-(defun flycheck-show-error-at-point-soon ()
-  "Show the first error message at point in minibuffer asap.
-
-Show the error message at point in minibuffer after a short delay."
-  (flycheck-cancel-error-show-error-timer)
+(defun flycheck-display-error-at-point-soon ()
+  "Display the first error message at point in minibuffer delayed."
+  (flycheck-cancel-error-display-error-at-point-timer)
   (when (flycheck-overlays-at (point))
-    (setq flycheck-error-show-error-timer
-          (run-at-time flycheck-display-errors-delay nil 'flycheck-show-error-at-point))))
+    (setq flycheck-display-error-at-point-timer
+          (run-at-time flycheck-display-errors-delay nil 'flycheck-display-error-at-point))))
 
 
 ;;;; Error display functions
@@ -3145,19 +3037,6 @@ Hide the error buffer if there is no error under point."
                (window (get-buffer-window buffer)))
     (unless (flycheck-overlays-at (point))
       (quit-window nil window))))
-
-(defun flycheck-display-errors-in-list (errors)
-  "Display ERRORS in the error list.
-
-Add all ERRORS to the error list, but do *not* show the error
-list.
-
-Note that this function does *not* actually show the error list,
-it just adds ERRORS to it."
-  (unless (equal errors (flycheck-error-list-last-errors))
-    (flycheck-error-list-add-errors errors)
-    (with-current-buffer (flycheck-error-list-buffer)
-      (flycheck-error-list-recenter))))
 
 
 ;;;; Working with error messages
@@ -3265,9 +3144,10 @@ output: %s\nChecker definition probably flawed."
         (if next-checker
             (flycheck-start-checker next-checker)
           (flycheck-delete-marked-overlays)
+          (flycheck-error-list-refresh)
           (run-hooks 'flycheck-after-syntax-check-hook)
           (when (eq (current-buffer) (window-buffer))
-            (flycheck-show-error-at-point)))))))
+            (flycheck-display-error-at-point)))))))
 
 (defun flycheck-handle-signal (process _event)
   "Handle a signal from the syntax checking PROCESS.
@@ -3560,7 +3440,7 @@ declaration in the current buffer."
   "A D syntax checker using the DMD compiler.
 
 See URL `http://dlang.org/'."
-  :command ("dmd" "-debug" "-o-" "-property"
+  :command ("dmd" "-debug" "-o-"
                   "-wi" ; Compilation will continue even if there are warnings
                   (eval (s-concat "-I" (flycheck-d-base-directory)))
                   source)
@@ -3776,16 +3656,11 @@ See URL `http://golang.org/cmd/gofmt/'."
 (flycheck-define-checker go-build
   "A Go syntax and type checker using the `go build' command.
 
-See URL `https://golang.org/cmd/go'.
-
-This syntax checker may cause bogus warnings due to an upstream
-bug in Go.
-
-See URL `https://code.google.com/p/go/issues/detail?id=4851' for
-more information."
-  :command ("go" "build" "-o" "/dev/null")
+See URL `https://golang.org/cmd/go'."
+  :command ("go" "build" "-o" temporary-file-name)
   :error-patterns
-  ((error line-start (file-name) ":" line ": " (message) line-end))
+  ((error line-start (file-name) ":" line ":"
+          (optional column ":")" " (message) line-end))
   :modes go-mode
   :predicate
   (lambda ()
@@ -3971,9 +3846,12 @@ See URL `http://www.lua.org/'."
   :command ("luac" "-p" source)
   :error-patterns
   ((error line-start
-          (minimal-match (zero-or-more not-newline)) ; Skip name of the luac
-                                                     ; executable
-          ": " (file-name) ":" line ": " (message) line-end))
+          ;; Skip the name of the luac executable.  We also skip the file name,
+          ;; because luac is stupid enough as to abbreviate file names in its
+          ;; output, which for obvious reasons breaks our file name
+          ;; detection. See https://github.com/flycheck/flycheck/issues/251
+          (minimal-match (zero-or-more not-newline))
+          ":" line ": " (message) line-end))
   :modes lua-mode)
 
 (flycheck-define-checker perl
@@ -3997,7 +3875,33 @@ See URL `http://php.net/manual/en/features.commandline.php'."
   ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
           (message) " in " (file-name) " on line " line line-end))
   :modes (php-mode php+-mode)
-  :next-checkers ((warnings-only . php-phpcs)))
+  :next-checkers ((warnings-only . php-phpmd)
+                  (warnings-only . php-phpcs)))
+
+(flycheck-def-option-var flycheck-phpmd-rulesets
+    '("cleancode" "codesize" "controversial" "design" "naming" "unusedcode")
+    php-phpmd
+  "The rule sets for PHP Mess Detector.
+
+Set default rule sets and custom rule set files.
+
+See section \"Using multiple rule sets\" in the PHP Mess Detector
+manual at URL `http://phpmd.org/documentation/index.html'."
+  :type '(repeat :tag "rule sets"
+                 (string :tag "A filename or rule set"))
+  :safe #'flycheck-string-list-p)
+
+(flycheck-define-checker php-phpmd
+  "A PHP style checker using PHP Mess Detector.
+
+See URL `http://phpmd.org/'."
+  :command ("phpmd" source "text"
+            (eval (flycheck-option-comma-separated-list
+                   flycheck-phpmd-rulesets)))
+  :error-patterns
+  ((warning line-start(file-name) ":" line (message) line-end))
+  :modes (php-mode php+-mode)
+  :next-checkers (php-phpcs))
 
 (flycheck-def-option-var flycheck-phpcs-standard nil php-phpcs
   "The coding standard for PHP CodeSniffer.
@@ -4179,7 +4083,7 @@ See URL `http://batsov.com/rubocop/'."
    (error line-start
           (file-name) ":" line ":" column ": " (or "E" "F") ": " (message)
           line-end))
-  :modes ruby-mode)
+  :modes (enh-ruby-mode ruby-mode))
 
 (flycheck-define-checker ruby
   "A Ruby syntax checker using the standard (MRI) Ruby interpreter.
@@ -4195,7 +4099,7 @@ See URL `http://www.ruby-lang.org/'."
             (file-name) ":" line ":" (optional column ":")
             " warning: " (message) line-end)
    (error line-start (file-name) ":" line ": " (message) line-end))
-  :modes 'ruby-mode)
+  :modes (enh-ruby-mode ruby-mode))
 
 (flycheck-define-checker ruby-jruby
   "A Ruby syntax checker using the JRuby interpreter.
@@ -4208,7 +4112,7 @@ See URL `http://jruby.org/'."
           line-end)
    (warning line-start (file-name) ":" line " warning: " (message) line-end)
    (error line-start (file-name) ":" line ": " (message) line-end))
-  :modes ruby-mode)
+  :modes (enh-ruby-mode ruby-mode))
 
 (flycheck-define-checker rust
   "A Rust syntax checker using Rust compiler.

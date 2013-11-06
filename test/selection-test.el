@@ -42,9 +42,10 @@ selected."
     (flycheck-buffer)
     (flycheck-testsuite-wait-for-syntax-checker)
     (flycheck-testsuite-should-errors
-     '(1 nil "Invalid module name \"errors-from-different-checkers\" (C0103)" warning)
-     '(1 nil "Missing module docstring (C0111)" warning)
-     '(3 nil "Unused import re (W0611)" warning))
+     '(1 nil warning "Invalid module name \"errors-from-different-checkers\" (C0103)"
+         :checker python-pylint)
+     '(1 nil warning "Missing module docstring (C0111)" :checker python-pylint)
+     '(3 nil warning "Unused import re (W0611)" :checker python-pylint))
     (should (not flycheck-checker))
     (should (eq flycheck-last-checker 'python-pylint))
     (flycheck-clear-errors)
@@ -53,7 +54,7 @@ selected."
     (flycheck-buffer)
     (flycheck-testsuite-wait-for-syntax-checker)
     (flycheck-testsuite-should-errors
-     '(3 1 "F401 're' imported but unused" warning))
+     '(3 1 warning "F401 're' imported but unused" :checker python-flake8))
     (should (not flycheck-checker))
     (should (eq flycheck-last-checker 'python-flake8))))
 
@@ -72,13 +73,14 @@ executed, and has its errors reported."
     (flycheck-buffer)
     (flycheck-testsuite-wait-for-syntax-checker)
     (flycheck-testsuite-should-errors
-     '(1 nil "Invalid module name \"errors-from-different-checkers\" (C0103)" warning)
-     '(1 nil "Missing module docstring (C0111)" warning)
-     '(3 nil "Unused import re (W0611)" warning))
+     '(1 nil warning "Invalid module name \"errors-from-different-checkers\" (C0103)"
+         :checker python-pylint)
+     '(1 nil warning "Missing module docstring (C0111)" :checker python-pylint)
+     '(3 nil warning "Unused import re (W0611)" :checker python-pylint))
     (flycheck-select-checker 'python-flake8)
     (flycheck-testsuite-wait-for-syntax-checker)
     (flycheck-testsuite-should-errors
-     '(3 1 "F401 're' imported but unused" warning))
+     '(3 1 warning "F401 're' imported but unused" :checker python-flake8))
     (should (eq flycheck-checker 'python-flake8))))
 
 (ert-deftest flycheck-select-checker-unusable ()
@@ -95,9 +97,10 @@ error is signaled on all subsequent checks."
     (flycheck-buffer)
     (flycheck-testsuite-wait-for-syntax-checker)
     (flycheck-testsuite-should-errors
-     '(1 nil "Invalid module name \"errors-from-different-checkers\" (C0103)" warning)
-     '(1 nil "Missing module docstring (C0111)" warning)
-     '(3 nil "Unused import re (W0611)" warning))
+     '(1 nil warning "Invalid module name \"errors-from-different-checkers\" (C0103)"
+         :checker python-pylint)
+     '(1 nil warning "Missing module docstring (C0111)" :checker python-pylint)
+     '(3 nil warning "Unused import re (W0611)" :checker python-pylint))
     (let* ((error-data (should-error (flycheck-select-checker 'bash)
                                      :type flycheck-testsuite-user-error-type)))
       (should (string= (cadr error-data)

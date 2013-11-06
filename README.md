@@ -173,6 +173,8 @@ The following people contributed to flycheck:
   CodeSniffer checker.
 - [David Holm](https://github.com/dholm) added C/C++ syntax and style checkers
   using `clang` and `cppcheck` respectively.
+- [Gereon Frey](https://github.com/gfrey) fixed the `go-build` syntax checker
+  and improve its tests.
 - [Jimmy Yuen Ho Wong](https://github.com/wyuenho) added the HTML syntax checker
   and the jshint Javascript checker, and did valuable testing and bug fixing.
 - [Krzysztof Witkowski](https://github.com/kwitek) implemented `eval` support in
@@ -213,7 +215,7 @@ The following people contributed to flycheck:
   naming errors to the Flake8 syntax checker.
 - [Yasuyuki Oka](https://github.com/yasuyk) added syntax checkers for YAML
   (using Ruby's standard YAML parser), Javascript (using Google's Closure
-  linter) and Slim.
+  linter), Slim and PHP (using PHP Mess Detector)
 - [Victor Deryagin](https://github.com/vderyagin) added the Rust syntax checker.
 
 

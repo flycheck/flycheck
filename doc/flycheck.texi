@@ -37,7 +37,7 @@ Modern on-the-fly syntax checking for GNU Emacs 24
 </p>
 
 <p class="text-center">
-<small>Distributed under the
+<small>Flycheck is distributed under the
 terms of the <a href="http://www.gnu.org/licenses/gpl-3.0.en.html"
 target="_blank">GNU GPL 3 or any later version</a>.</small>
 </p>
@@ -207,7 +207,7 @@ Lua
 @item
 Perl
 @item
-PHP (using the PHP Command Line and PHP CodeSniffer)
+PHP (using @command{php}, @command{phpmd} and @command{phpcs})
 @item
 Puppet (using @command{puppet parser} and @command{puppet-lint})
 @item
@@ -692,6 +692,10 @@ syntax checker allows without reporting an error.
 The coding standard the syntax checker @code{php-phpcs} shall use.
 @end defopt
 
+@defopt flycheck-phpmd-rulesets
+The rule sets for PHP Mess Detector @code{php-phpmd} shall use
+@end defopt
+
 @subsection Syntax checker configuration files
 
 Some syntax checkers also read configuration files denoted by associated
@@ -880,7 +884,7 @@ to allow for further processing of the error, or t, to indicate that the
 error was fully processed and inhibit any further processing.
 @end defopt
 
-You can also list all errors in the current buffer:
+You can also show a list with all errors in the current buffer:
 
 @table @kbd
 @item C-c ! l
@@ -888,7 +892,9 @@ You can also list all errors in the current buffer:
 @findex flycheck-list-errors
 List all errors in the current buffer in a separate buffer.
 
-With prefix arg, list only errors at point.
+The error list automatically refreshes after a syntax check, and follows
+the current buffer, that is, if you switch to another buffer, the error
+list is updated to show the errors of the new buffer.
 @end table
 
 If you hover a highlighted error with the mouse, a tooltip with the
@@ -1155,6 +1161,16 @@ Use this symbol if you need to move files created by a syntax checker
 out of the way.
 
 See the declaration of the @code{elixir} syntax checker for an
+application of this symbol.
+
+@item temporary-file-name
+This symbol is substituted with a unique temporary file name.  The file
+itself is not created.
+
+Use this symbol if you need to move files created by a syntax checker
+out of the way.
+
+See the declaration of the @code{go-build} syntax checker for an
 application of this symbol.
 
 @item (config-file @var{option} @var{variable})
@@ -2910,7 +2926,7 @@ Bug fixes:
 
 @end itemize
 
-@node master,  , 0.14.1, Changes
+@node master, , 0.14.1, Changes
 @comment  node-name,  next,  previous,  up
 @unnumberedsec master (unreleased)
 
@@ -2926,10 +2942,19 @@ the online manual moved to @uref{http://flycheck.github.io}.
 @item
 Do not add the current directory to the @code{emacs-lisp} syntax checker
 load path
+@item
+@ghissue{214, @code{flycheck-list-errors} cannot list errors at point
+anymore}.  It does not accept a prefix argument anymore, and takes zero
+arguments now
+@item
+@ghissue{214, @code{flycheck-display-errors-in-list} is gone}.  The
+error list automatically highlights the error at point now
+@item
+Remove obsolete @code{flycheck-declare-checker}
 @end itemize
 
 @item
-Improvements:
+New syntax checkers:
 
 @itemize @bullet
 @item
@@ -2938,6 +2963,8 @@ Improvements:
 @ghissue{245, Javascript with @command{gjslint}}
 @item
 @ghissue{246, Slim}
+@item
+@ghissue{249, PHP using @command{phpmd}}
 @end itemize
 
 @item
@@ -2968,8 +2995,15 @@ files for C/C++ syntax checking}
 @item
 Add configuration file variable @code{flycheck-pylintrc} for Pylint
 @item
+@ghissue{214, New face @code{flycheck-error-list-highlight} to highlight
+the errors at point in the error list}
+@item
+@ghissue{214, The error list now automatically updates to show the
+errors of the current buffer}
+@item
 @ghissue{212, Define new error levels with
 @code{flycheck-define-error-level}}
+@item
 @ghissue{234, Add @code{flycheck-clang-standard-library} to choose the
 standard library for C/C++ syntax checking}
 @item
@@ -2978,6 +3012,9 @@ standard library for C/C++ syntax checking}
 @item
 @ghissue{215, Add @code{info} level for informational annotations by
 syntax checkers}
+@item
+@ghissue{259, Add a new symbol @code{temporary-file-name} to pass
+temporary file names to syntax checkers}
 @end itemize
 
 @item
@@ -2986,6 +3023,12 @@ Improvements:
 @itemize @bullet
 @item
 @ghissue{204, Do not ignore convention warnings by @command{pylint}}
+@item
+@ghissue{214, The error list now refreshes automatically after each
+syntax check}
+@item
+@ghissue{214, The errors at point are now automatically highlighted in
+the error list}
 @item
 @code{emacs-lisp-checkdoc} does not longer check @file{.dir-locals.el}
 files
@@ -2997,6 +3040,8 @@ messages}
 @item
 @ghissue{215, Demote convention warnings from @code{python-pylint} to
 info level}
+@item
+@ghissue{256, Support @code{enh-ruby-mode} in Ruby syntax checkers}
 @end itemize
 
 @item
@@ -3008,6 +3053,12 @@ Bug fixes:
 @item
 Do not emit spurious flawed definition warning in the @code{rst} syntax
 checker
+@item
+@ghissue{251, Handle abbreviated file names in @command{luac}
+output@comma{} by simply ignoring them}
+@item
+@ghissue{259, Correctly redirect the output binary of the
+@code{go-build} syntax checker}
 @end itemize
 
 @end itemize
@@ -3033,6 +3084,10 @@ checker.
 @item
 @gh{dholm, David Holm} added C/C++ syntax and style checkers using
 @command{clang} and @command{cppcheck} respectively.
+
+@item
+@gh{gfrey, Gereon Frey} fixed the @command{go-build} syntax checker and
+improve its tests.
 
 @item
 @gh{wyuenho, Jimmy Yuen Ho Wong} added the HTML syntax checker and the
@@ -3105,8 +3160,8 @@ to the Flake8 syntax checker.
 
 @item
 @gh{yasuyk, Yasuyuki Oka} added syntax checkers for YAML (using Ruby's
-standard YAML parser), Javascript (using Google's Closure linter) and
-Slim.
+standard YAML parser), Javascript (using Google's Closure linter),
+Slim and PHP (using PHP Mess Detector)
 
 @item
 @gh{vderyagin, Victor Deryagin} added the Rust syntax checker.
@@ -3157,6 +3212,7 @@ order of their appearance in the default value of
 @iflyc lua
 @iflyc perl
 @iflyc php
+@iflyc php-phpmd
 @iflyc php-phpcs
 @iflyc puppet-parser
 @iflyc puppet-lint
