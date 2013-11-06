@@ -801,17 +801,15 @@ found)."
      '(4 nil error "Unable to import 'spam' (F0401)" :checker python-pylint)
      '(5 nil warning "Unused import re (W0611)" :checker python-pylint)
      '(7 nil info "Missing class docstring (C0111)" :checker python-pylint)
-     '(9 nil info "Invalid method name \"withEggs\" (C0103)"
+     '(9 4 info "Invalid method name \"withEggs\" (C0103)"
          :checker python-pylint)
-     '(9 nil info "Missing method docstring (C0111)" :checker python-pylint)
-     '(9 nil warning "Method could be a function (R0201)"
-         :checker python-pylint)
-     '(10 nil warning "Used builtin function 'map' (W0141)"
+     '(9 4 info "Missing method docstring (C0111)" :checker python-pylint)
+     '(9 4 warning "Method could be a function (R0201)" :checker python-pylint)
+     '(10 15 warning "Used builtin function 'map' (W0141)"
           :checker python-pylint)
-     '(12 nil info "Missing method docstring (C0111)" :checker python-pylint)
-     '(12 nil warning "Method could be a function (R0201)"
-          :checker python-pylint)
-     '(14 nil error "Module 'sys' has no 'python_version' member (E1101)"
+     '(12 4 info "Missing method docstring (C0111)" :checker python-pylint)
+     '(12 4 warning "Method could be a function (R0201)" :checker python-pylint)
+     '(14 15 error "Module 'sys' has no 'python_version' member (E1101)"
           :checker python-pylint))))
 
 (ert-deftest checker-rst ()

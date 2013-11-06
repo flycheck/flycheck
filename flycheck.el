@@ -4049,15 +4049,15 @@ This syntax checker requires Pylint 1.0 or newer.
 See URL `http://pypi.python.org/pypi/pylint'."
   ;; -r n disables the scoring report
   :command ("pylint" "-r" "n"
-            "--msg-template" "{path}:{line}:{C}:{msg} ({msg_id})"
+            "--msg-template" "{path}:{line}:{column}:{C}:{msg} ({msg_id})"
             (config-file "--rcfile=" flycheck-pylintrc)
             source)
   :error-patterns
-  ((error line-start (file-name) ":" line ":"
+  ((error line-start (file-name) ":" line ":" column ":"
           (or "E" "F") ":" (message) line-end)
-   (warning line-start (file-name) ":" line ":"
+   (warning line-start (file-name) ":" line ":" column ":"
             (or "W" "R") ":" (message) line-end)
-   (info line-start (file-name) ":" line ":"
+   (info line-start (file-name) ":" line ":" column ":"
          "C:" (message) line-end))
   :modes python-mode)
 

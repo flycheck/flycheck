@@ -3042,6 +3042,8 @@ messages}
 naming warnings from @code{python-flake8} to info level}
 @item
 @ghissue{256, Support @code{enh-ruby-mode} in Ruby syntax checkers}
+@item
+Parse columns from @code{python-pylint} errors
 @end itemize
 
 @item
