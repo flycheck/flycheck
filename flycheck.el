@@ -2934,7 +2934,8 @@ list."
   ;; Show the error list in a window, and re-select the old window
   (let ((old-window (selected-window)))
     (pop-to-buffer (flycheck-error-list-buffer))
-    (select-window old-window))
+    (or (and (boundp 'popwin-mode) popwin-mode) ;Respect popwin window manager
+        (select-window old-window)))
   ;; Finally, refresh the error list to show the most recent errors
   (flycheck-error-list-refresh))
 
