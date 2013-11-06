@@ -42,9 +42,9 @@ selected."
     (flycheck-buffer)
     (flycheck-testsuite-wait-for-syntax-checker)
     (flycheck-testsuite-should-errors
-     '(1 nil warning "Invalid module name \"errors-from-different-checkers\" (C0103)"
+     '(1 nil info "Invalid module name \"errors-from-different-checkers\" (C0103)"
          :checker python-pylint)
-     '(1 nil warning "Missing module docstring (C0111)" :checker python-pylint)
+     '(1 nil info "Missing module docstring (C0111)" :checker python-pylint)
      '(3 nil warning "Unused import re (W0611)" :checker python-pylint))
     (should (not flycheck-checker))
     (should (eq flycheck-last-checker 'python-pylint))
@@ -73,9 +73,9 @@ executed, and has its errors reported."
     (flycheck-buffer)
     (flycheck-testsuite-wait-for-syntax-checker)
     (flycheck-testsuite-should-errors
-     '(1 nil warning "Invalid module name \"errors-from-different-checkers\" (C0103)"
+     '(1 nil info "Invalid module name \"errors-from-different-checkers\" (C0103)"
          :checker python-pylint)
-     '(1 nil warning "Missing module docstring (C0111)" :checker python-pylint)
+     '(1 nil info "Missing module docstring (C0111)" :checker python-pylint)
      '(3 nil warning "Unused import re (W0611)" :checker python-pylint))
     (flycheck-select-checker 'python-flake8)
     (flycheck-testsuite-wait-for-syntax-checker)
@@ -97,9 +97,9 @@ error is signaled on all subsequent checks."
     (flycheck-buffer)
     (flycheck-testsuite-wait-for-syntax-checker)
     (flycheck-testsuite-should-errors
-     '(1 nil warning "Invalid module name \"errors-from-different-checkers\" (C0103)"
+     '(1 nil info "Invalid module name \"errors-from-different-checkers\" (C0103)"
          :checker python-pylint)
-     '(1 nil warning "Missing module docstring (C0111)" :checker python-pylint)
+     '(1 nil info "Missing module docstring (C0111)" :checker python-pylint)
      '(3 nil warning "Unused import re (W0611)" :checker python-pylint))
     (let* ((error-data (should-error (flycheck-select-checker 'bash)
                                      :type flycheck-testsuite-user-error-type)))

@@ -4049,8 +4049,8 @@ See URL `http://pypi.python.org/pypi/pylint'."
           (or "E" "F") ":" (message) line-end)
    (warning line-start (file-name) ":" line ":"
             (or "W" "R") ":" (message) line-end)
-   (warning line-start (file-name) ":" line ":"
-            "C:" (message) line-end))
+   (info line-start (file-name) ":" line ":"
+         "C:" (message) line-end))
   :modes python-mode)
 
 (flycheck-define-checker rst
