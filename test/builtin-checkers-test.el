@@ -280,13 +280,10 @@
 
 (ert-deftest checker-d-dmd-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'd-dmd)
-  (flycheck-testsuite-should-syntax-check "checkers/d-dmd-warning.d" 'd-mode
-   '(6 nil warning "statement is not reachable" :checker d-dmd)))
-
-(ert-deftest checker-d-dmd-deprecated ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'd-dmd)
-  (flycheck-testsuite-should-syntax-check "checkers/d-dmd-deprecated.d" 'd-mode
-   '(11 nil warning "function d_dmd_deprecated.foo is deprecated"
+  (flycheck-testsuite-should-syntax-check
+   "checkers/d-dmd-warning.d" 'd-mode
+   '(6 nil warning "statement is not reachable" :checker d-dmd)
+   '(17 nil warning "function d_dmd_warning.bar is deprecated"
         :checker d-dmd)))
 
 (ert-deftest checker-elixir-error ()
@@ -826,26 +823,16 @@ found)."
      '(6 nil warning "Used builtin function 'map' (W0141)"
          :checker python-pylint))))
 
-(ert-deftest checker-rst-warning ()
+(ert-deftest checker-rst ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'rst)
   (flycheck-testsuite-should-syntax-check
-   "checkers/rst-warning.rst" 'rst-mode
+   "checkers/rst.rst" 'rst-mode
    '(8 nil warning "Title underline too short." :checker rst)
-   '(11 nil warning "Title underline too short." :checker rst)))
-
-(ert-deftest checker-rst-error ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'rst)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/rst-error.rst" 'rst-mode
-   '(5 nil error "Unknown target name: \"restructuredtext\"." :checker rst)
-   '(7 nil error "Unknown target name: \"cool\"." :checker rst)))
-
-(ert-deftest checker-rst-severe ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'rst)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/rst-severe.rst" 'rst-mode
-   '(6 nil error "Unexpected section title." :checker rst)
-   '(11 nil error "Unexpected section title." :checker rst)))
+   '(14 nil error "Unexpected section title." :checker rst)
+   '(16 nil error "Unknown target name: \"restructuredtext\"." :checker rst)
+   '(19 nil warning "Title underline too short." :checker rst)
+   '(21 nil error "Unknown target name: \"cool\"." :checker rst)
+   '(26 nil error "Unexpected section title." :checker rst)))
 
 (defun flycheck-testsuite-jruby-expected-result ()
   (if (flycheck-testsuite-travis-ci-p) :failed
@@ -864,8 +851,8 @@ found)."
   (flycheck-testsuite-not-on-travis)
   (flycheck-testsuite-without-checkers (ruby-rubocop ruby)
     (flycheck-testsuite-should-syntax-check
-     "checkers/ruby-warning.rb" 'ruby-mode
-     '(3 nil warning "Useless use of == in void context."
+     "checkers/ruby-warnings.rb" 'ruby-mode
+     '(6 nil warning "Useless use of == in void context."
          :checker ruby-jruby))))
 
 (ert-deftest checker-ruby-rubocop-syntax-error ()
@@ -878,7 +865,7 @@ found)."
 (ert-deftest checker-ruby-rubocop-warnings ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
   (flycheck-testsuite-should-syntax-check
-   "checkers/ruby-rubocop-warnings.rb" 'ruby-mode
+   "checkers/ruby-warnings.rb" 'ruby-mode
    '(1 1 warning "Missing utf-8 encoding comment." :checker ruby-rubocop)
    '(3 1 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
    '(3 14 warning "Use snake_case for symbols." :checker ruby-rubocop)
@@ -890,7 +877,7 @@ found)."
   (flycheck-testsuite-with-hook ruby-mode-hook
       (setq flycheck-rubocoprc "rubocop.yml")
     (flycheck-testsuite-should-syntax-check
-     "checkers/ruby-rubocop-warnings.rb" 'ruby-mode
+     "checkers/ruby-warnings.rb" 'ruby-mode
      '(1 1 warning "Missing utf-8 encoding comment." :checker ruby-rubocop)
      '(3 1 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
      '(4 6 warning "Prefer single-quoted strings when you don't need string interpolation or special symbols."
@@ -908,8 +895,8 @@ found)."
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby)
   (flycheck-testsuite-without-checkers ruby-rubocop
     (flycheck-testsuite-should-syntax-check
-     "checkers/ruby-warning.rb" 'ruby-mode
-     '(3 nil warning "possibly useless use of == in void context"
+     "checkers/ruby-warnings.rb" 'ruby-mode
+     '(6 nil warning "possibly useless use of == in void context"
          :checker ruby))))
 
 (ert-deftest checker-rust-syntax-error ()
@@ -947,7 +934,7 @@ found)."
       (sh-set-shell "sh" :no-query)
     (flycheck-testsuite-without-checkers  sh-dash
       (flycheck-testsuite-should-syntax-check
-       "checkers/sh-bash-syntax-error.sh" 'sh-mode
+       "checkers/sh-syntax-error.sh" 'sh-mode
        '(3 nil error "syntax error near unexpected token `('" :checker sh-bash)
        '(3 nil error "`cat <(echo blah)'" :checker sh-bash)))))
 
@@ -956,9 +943,8 @@ found)."
   (flycheck-testsuite-with-hook sh-mode-hook
       (sh-set-shell "sh" :no-query)
     (flycheck-testsuite-should-syntax-check
-     "checkers/sh-dash-syntax-error.sh" 'sh-mode
-     '(5 nil error "Syntax error: \"fi\" unexpected (expecting \"then\")"
-         :checker sh-dash))))
+     "checkers/sh-syntax-error.sh" 'sh-mode
+     '(3 nil error "Syntax error: \"(\" unexpected" :checker sh-dash))))
 
 (ert-deftest checker-slim-error ()
   (flycheck-testsuite-fail-unless-checker 'slim)
@@ -972,16 +958,18 @@ found)."
 (ert-deftest checker-tex-chktex-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'tex-chktex)
   (flycheck-testsuite-should-syntax-check
-   "checkers/tex-chktex-warning.tex" 'latex-mode
-   '(9 28 warning "13:Intersentence spacing (`\\@') should perhaps be used."
+   "checkers/tex-warning.tex" 'latex-mode
+   '(5 28 warning "13:Intersentence spacing (`\\@') should perhaps be used."
        :checker tex-chktex)))
 
 (ert-deftest checker-tex-lacheck-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'tex-lacheck)
   (flycheck-testsuite-without-checkers tex-chktex
     (flycheck-testsuite-should-syntax-check
-     "checkers/tex-lacheck-warning.tex" 'latex-mode
-     '(9 nil warning "possible unwanted space at \"{\""
+     "checkers/tex-warning.tex" 'latex-mode
+     '(5 nil warning "missing `\\@' before `.' in \"GNU.\""
+         :checker tex-lacheck)
+     '(7 nil warning "possible unwanted space at \"{\""
          :checker tex-lacheck))))
 
 (ert-deftest checker-xml-xmlstarlet-syntax-error ()
