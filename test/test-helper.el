@@ -365,16 +365,11 @@ Raise an assertion error if the buffer is not clear afterwards."
          (region (flycheck-error-region-for-mode error 'symbols))
          (message (flycheck-error-message error))
          (level (flycheck-error-level error))
-         (face (if (eq level 'warning)
-                   'flycheck-warning
-                 'flycheck-error))
-         (category (if (eq level 'warning)
-                       'flycheck-warning-overlay
-                     'flycheck-error-overlay))
-         (fringe-icon (if (eq level 'warning)
-                          '(left-fringe question-mark flycheck-fringe-warning)
-                        `(left-fringe ,flycheck-fringe-exclamation-mark
-                                      flycheck-fringe-error))))
+         (category (flycheck-error-level-overlay-category level))
+         (face (get category 'face))
+         (fringe-bitmap (flycheck-error-level-fringe-bitmap level))
+         (fringe-face (flycheck-error-level-fringe-face level))
+         (fringe-icon (list 'left-fringe fringe-bitmap fringe-face)))
     (should overlay)
     (should (overlay-get overlay 'flycheck-overlay))
     (should (= (overlay-start overlay) (car region)))

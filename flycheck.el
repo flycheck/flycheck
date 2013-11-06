@@ -493,6 +493,15 @@ This variable is a normal hook."
   :package-version '(flycheck . "0.13")
   :group 'flycheck-faces)
 
+(defface flycheck-info
+  '((((supports :underline (:style wave)))
+     :underline (:style wave :color "ForestGreen"))
+    (t
+     :underline t :inherit success))
+  "Flycheck face for informational messages."
+  :package-version '(flycheck . "0.15")
+  :group 'flycheck-faces)
+
 (defface flycheck-fringe-error
   '((t :inherit error))
   "Flycheck face for fringe error indicators."
@@ -503,6 +512,14 @@ This variable is a normal hook."
   '((t :inherit warning))
   "Flycheck face for fringe warning indicators."
   :package-version '(flycheck . "0.13")
+  :group 'flycheck-faces)
+
+(defface flycheck-fringe-info
+  ;; Semantically `success' is probably not the right face, but it looks nice as
+  ;; a base face
+  '((t :inherit success))
+  "Flycheck face for fringe info indicators."
+  :package-version '(flycheck . "0.15")
   :group 'flycheck-faces)
 
 (defface flycheck-error-list-highlight
@@ -2250,6 +2267,18 @@ flycheck exclamation mark otherwise.")
   :fringe-bitmap 'question-mark
   :fringe-face 'flycheck-fringe-warning)
 
+(put 'flycheck-info-overlay 'face 'flycheck-info)
+(put 'flycheck-info-overlay 'priority 90)
+(put 'flycheck-info-overlay 'help-error "Unknown info.")
+
+(flycheck-define-error-level 'info
+  :overlay-category 'flycheck-info-overlay
+  ;; Not exactly the right indicator, but looks pretty, and I prefer to use
+  ;; built-in bitmaps over diving into the hassle of messing around with custom
+  ;; fringe bitmaps
+  :fringe-bitmap 'empty-line
+  :fringe-face 'flycheck-fringe-info)
+
 
 ;;;; General error parsing
 (defun flycheck-parse-output (output checker buffer)
@@ -3297,7 +3326,9 @@ See URL `http://clang.llvm.org/'."
             ;; with quotes
             source-inplace)
   :error-patterns
-  ((warning line-start (file-name) ":" line ":" column
+  ((info line-start (file-name) ":" line ":" column
+            ": note: " (message) line-end)
+   (warning line-start (file-name) ":" line ":" column
             ": warning: " (message) line-end)
    (error line-start (file-name) ":" line ":" column
           ": " (or "fatal error" "error") ": " (message) line-end))
@@ -4017,7 +4048,9 @@ See URL `http://pypi.python.org/pypi/pylint'."
   ((error line-start (file-name) ":" line ":"
           (or "E" "F") ":" (message) line-end)
    (warning line-start (file-name) ":" line ":"
-            (or "W" "R" "C") ":" (message) line-end))
+            (or "W" "R") ":" (message) line-end)
+   (warning line-start (file-name) ":" line ":"
+            "C:" (message) line-end))
   :modes python-mode)
 
 (flycheck-define-checker rst

@@ -1415,6 +1415,8 @@ Flycheck provides two built-in error levels:
 Severe errors which cannot be ignored
 @item warning
 Potential errors which can be ignored
+@item info
+Informational annotations
 @end table
 
 You can define your own error levels with
@@ -3008,6 +3010,9 @@ standard library for C/C++ syntax checking}
 @ghissue{243, Customize the delay for displaying errors via
 @code{flycheck-display-errors-delay}}
 @item
+@ghissue{215, Add @code{info} level for informational annotations by
+syntax checkers}
+@item
 @ghissue{259, Add a new symbol @code{temporary-file-name} to pass
 temporary file names to syntax checkers}
 @end itemize
@@ -3029,6 +3034,12 @@ the error list}
 files
 @item
 @ghissue{222, Do not automatically check syntax in encrypted files}
+@item
+@ghissue{215, Parse notes from @code{c/c++-clang} into info level
+messages}
+@item
+@ghissue{215, Demote convention warnings from @code{python-pylint} to
+info level}
 @item
 @ghissue{256, Support @code{enh-ruby-mode} in Ruby syntax checkers}
 @end itemize
