@@ -66,8 +66,8 @@
   (should (eq (flycheck-error-level-overlay-category 'warning)
               'flycheck-warning-overlay)))
 
-(ert-deftest flycheck-error-level-warning ()
-  (should (eq (flycheck-error-level-fringe-bitmap 'info) nil))
+(ert-deftest flycheck-error-level-info ()
+  (should (eq (flycheck-error-level-fringe-bitmap 'info) 'empty-line))
   (should (eq (flycheck-error-level-fringe-face 'info)
               'flycheck-fringe-info))
   (should (eq (flycheck-error-level-overlay-category 'info)
