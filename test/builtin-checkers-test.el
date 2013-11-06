@@ -726,65 +726,65 @@ found)."
    "checkers/python-syntax-error.py" 'python-mode
     '(3 13 error "E901 SyntaxError: invalid syntax" :checker python-flake8)))
 
-(ert-deftest checker-python-flake8-warning ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/python-flake8-warning.py" 'python-mode
-    '(3 1 warning "F401 're' imported but unused" :checker python-flake8)))
-
 (ert-deftest checker-python-flake8-warning-ignored ()
-  "Test an unused import being ignored with flake8."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
   (flycheck-testsuite-with-hook python-mode-hook
       (setq flycheck-flake8rc "flake8rc")
-    (flycheck-testsuite-should-syntax-check "checkers/python-flake8-warning.py"
-                                            'python-mode)))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/python.py" 'python-mode
+     '(7 1 error "E302 expected 2 blank lines, found 1" :checker python-flake8)
+     '(9 9 warning "N802 function name should be lowercase"
+         :checker python-flake8))))
 
-(ert-deftest checker-python-flake8-error ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/python-flake8-error.py" 'python-mode
-   '(6 13 error "E251 unexpected spaces around keyword / parameter equals"
-       :checker python-flake8)
-   '(6 15 error "E251 unexpected spaces around keyword / parameter equals"
-       :checker python-flake8)))
-
-(ert-deftest checker-python-flake8-error ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
-  (flycheck-testsuite-with-hook python-mode-hook
-      (setq flycheck-flake8rc "flake8rc")
-    (flycheck-testsuite-should-syntax-check "checkers/python-flake8-error.py"
-                                            'python-mode)))
-
-(ert-deftest checker-python-flake8-warning-maximum-complexity ()
+(ert-deftest checker-python-flake8-maximum-complexity ()
   "Test superfluous spaces with flake8."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
   (flycheck-testsuite-with-hook python-mode-hook
       (setq flycheck-flake8-maximum-complexity 4)
     (flycheck-testsuite-should-syntax-check
-     "checkers/python-flake8-warning-maximum-complexity.py" 'python-mode
-     '(6 1 warning "C901 'foo' is too complex (4)" :checker python-flake8))))
+     "checkers/python.py" 'python-mode
+     '(5 1 warning "F401 're' imported but unused" :checker python-flake8)
+     '(7 1 error "E302 expected 2 blank lines, found 1" :checker python-flake8)
+     '(9 9 warning "N802 function name should be lowercase"
+         :checker python-flake8)
+     '(12 1 warning "C901 'Spam.with_ham' is too complex (4)"
+          :checker python-flake8)
+     '(12 29 error "E251 unexpected spaces around keyword / parameter equals"
+          :checker python-flake8)
+     '(12 31 error "E251 unexpected spaces around keyword / parameter equals"
+          :checker python-flake8))))
 
 (ert-deftest checker-python-flake8-error-maximum-line-length ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
   (flycheck-testsuite-with-hook python-mode-hook
-      (setq flycheck-flake8-maximum-line-length 50)
+      (setq flycheck-flake8-maximum-line-length 40)
     (flycheck-testsuite-should-syntax-check
-     "checkers/python-flake8-error-maximum-line-length.py" 'python-mode
-     '(5 51 error "E501 line too long (61 > 50 characters)"
-         :checker python-flake8))))
+     "checkers/python.py" 'python-mode
+     '(5 1 warning "F401 're' imported but unused" :checker python-flake8)
+     '(7 1 error "E302 expected 2 blank lines, found 1" :checker python-flake8)
+     '(9 9 warning "N802 function name should be lowercase"
+         :checker python-flake8)
+     '(10 41 error "E501 line too long (46 > 40 characters)"
+          :checker python-flake8)
+     '(12 29 error "E251 unexpected spaces around keyword / parameter equals"
+          :checker python-flake8)
+     '(12 31 error "E251 unexpected spaces around keyword / parameter equals"
+          :checker python-flake8)
+     '(14 41 error "E501 line too long (41 > 40 characters)"
+          :checker python-flake8))))
 
-(ert-deftest checker-python-flake8-warning-naming ()
+(ert-deftest checker-python-flake8 ()
   "PEP8 compliant names with Flake8 and pep8-naming."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
   (flycheck-testsuite-should-syntax-check
-   "checkers/python-flake8-warning-naming.py" 'python-mode
-   '(6 7 warning "N801 class names should use CapWords convention"
-       :checker python-flake8)
-   '(7 9 warning "N802 function name should be lowercase"
-       :checker python-flake8)
-   '(8 9 warning "N806 variable in function should be lowercase"
-       :checker python-flake8)))
+   "checkers/python.py" 'python-mode
+   '(5 1 warning "F401 're' imported but unused" :checker python-flake8)
+   '(7 1 error "E302 expected 2 blank lines, found 1" :checker python-flake8)
+   '(9 9 warning "N802 function name should be lowercase" :checker python-flake8)
+   '(12 29 error "E251 unexpected spaces around keyword / parameter equals"
+        :checker python-flake8)
+   '(12 31 error "E251 unexpected spaces around keyword / parameter equals"
+        :checker python-flake8)))
 
 (ert-deftest checker-python-pylint-syntax-error ()
   "Test a real syntax error with pylint."
@@ -794,34 +794,27 @@ found)."
      "checkers/python-syntax-error.py" 'python-mode
      '(3 nil error "invalid syntax (E0001)" :checker python-pylint))))
 
-(ert-deftest checker-python-pylint-error ()
+(ert-deftest checker-python-pylint ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-pylint)
   (flycheck-testsuite-without-checkers python-flake8
     (flycheck-testsuite-should-syntax-check
-     "checkers/python-pylint-error.py" 'python-mode
-     '(1 nil warning "Invalid module name \"python-pylint-error\" (C0103)"
+     "checkers/python.py" 'python-mode
+     '(1 nil info "Missing module docstring (C0111)" :checker python-pylint)
+     '(4 nil error "Unable to import 'spam' (F0401)" :checker python-pylint)
+     '(5 nil warning "Unused import re (W0611)" :checker python-pylint)
+     '(7 nil info "Missing class docstring (C0111)" :checker python-pylint)
+     '(9 nil info "Invalid method name \"withEggs\" (C0103)"
          :checker python-pylint)
-     '(1 nil warning "Missing module docstring (C0111)" :checker python-pylint)
-     '(3 nil error "Unable to import 'spam' (F0401)" :checker python-pylint))))
-
-(ert-deftest checker-python-pylint-warning ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'python-pylint)
-  (flycheck-testsuite-without-checkers python-flake8
-    (flycheck-testsuite-should-syntax-check
-     "checkers/python-pylint-warning.py" 'python-mode
-     '(1 nil warning "Invalid module name \"python-pylint-warning\" (C0103)"
+     '(9 nil info "Missing method docstring (C0111)" :checker python-pylint)
+     '(9 nil warning "Method could be a function (R0201)"
          :checker python-pylint)
-     '(1 nil warning "Missing module docstring (C0111)" :checker python-pylint)
-     '(3 nil warning "Missing class docstring (C0111)" :checker python-pylint)
-     '(3 nil warning "Too few public methods (1/2) (R0903)"
-         :checker python-pylint)
-     '(5 nil warning "Invalid argument name \"n\" (C0103)"
-         :checker python-pylint)
-     '(5 nil warning "Missing method docstring (C0111)" :checker python-pylint)
-     '(5 nil warning "Method could be a function (R0201)"
-         :checker python-pylint)
-     '(6 nil warning "Used builtin function 'map' (W0141)"
-         :checker python-pylint))))
+     '(10 nil warning "Used builtin function 'map' (W0141)"
+          :checker python-pylint)
+     '(12 nil info "Missing method docstring (C0111)" :checker python-pylint)
+     '(12 nil warning "Method could be a function (R0201)"
+          :checker python-pylint)
+     '(14 nil error "Module 'sys' has no 'python_version' member (E1101)"
+          :checker python-pylint))))
 
 (ert-deftest checker-rst ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'rst)
