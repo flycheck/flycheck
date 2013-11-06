@@ -733,7 +733,7 @@ found)."
     (flycheck-testsuite-should-syntax-check
      "checkers/python.py" 'python-mode
      '(7 1 error "E302 expected 2 blank lines, found 1" :checker python-flake8)
-     '(9 9 warning "N802 function name should be lowercase"
+     '(9 9 info "N802 function name should be lowercase"
          :checker python-flake8))))
 
 (ert-deftest checker-python-flake8-maximum-complexity ()
@@ -745,8 +745,7 @@ found)."
      "checkers/python.py" 'python-mode
      '(5 1 warning "F401 're' imported but unused" :checker python-flake8)
      '(7 1 error "E302 expected 2 blank lines, found 1" :checker python-flake8)
-     '(9 9 warning "N802 function name should be lowercase"
-         :checker python-flake8)
+     '(9 9 info "N802 function name should be lowercase" :checker python-flake8)
      '(12 1 warning "C901 'Spam.with_ham' is too complex (4)"
           :checker python-flake8)
      '(12 29 error "E251 unexpected spaces around keyword / parameter equals"
@@ -762,8 +761,7 @@ found)."
      "checkers/python.py" 'python-mode
      '(5 1 warning "F401 're' imported but unused" :checker python-flake8)
      '(7 1 error "E302 expected 2 blank lines, found 1" :checker python-flake8)
-     '(9 9 warning "N802 function name should be lowercase"
-         :checker python-flake8)
+     '(9 9 info "N802 function name should be lowercase" :checker python-flake8)
      '(10 41 error "E501 line too long (46 > 40 characters)"
           :checker python-flake8)
      '(12 29 error "E251 unexpected spaces around keyword / parameter equals"
@@ -780,7 +778,7 @@ found)."
    "checkers/python.py" 'python-mode
    '(5 1 warning "F401 're' imported but unused" :checker python-flake8)
    '(7 1 error "E302 expected 2 blank lines, found 1" :checker python-flake8)
-   '(9 9 warning "N802 function name should be lowercase" :checker python-flake8)
+   '(9 9 info "N802 function name should be lowercase" :checker python-flake8)
    '(12 29 error "E251 unexpected spaces around keyword / parameter equals"
         :checker python-flake8)
    '(12 31 error "E251 unexpected spaces around keyword / parameter equals"

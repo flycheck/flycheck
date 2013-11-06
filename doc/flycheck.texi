@@ -3038,8 +3038,8 @@ files
 @ghissue{215, Parse notes from @code{c/c++-clang} into info level
 messages}
 @item
-@ghissue{215, Demote convention warnings from @code{python-pylint} to
-info level}
+@ghissue{215, Demote convention warnings from @code{python-pylint} and
+naming warnings from @code{python-flake8} to info level}
 @item
 @ghissue{256, Support @code{enh-ruby-mode} in Ruby syntax checkers}
 @end itemize

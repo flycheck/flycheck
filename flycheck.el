@@ -4020,10 +4020,14 @@ See URL `http://pypi.python.org/pypi/flake8'."
             (file-name) ":" line ":" (optional column ":") " "
             (message (or "F"            ; Pyflakes in Flake8 >= 2.0
                          "W"            ; Pyflakes in Flake8 < 2.0
-                         "C"            ; McCabe in Flake >= 2.0
-                         "N")           ; pep8-naming in Flake8 >= 2.0
+                         "C")           ; McCabe in Flake >= 2.0
                      (one-or-more digit) (zero-or-more not-newline))
             line-end)
+   (info line-start
+         (file-name) ":" line ":" (optional column ":") " "
+         (message "N"              ; pep8-naming in Flake8 >= 2.0
+                  (one-or-more digit) (zero-or-more not-newline))
+         line-end)
    ;; Syntax errors in Flake8 < 2.0, in Flake8 >= 2.0 syntax errors are caught
    ;; by the E.* pattern above
    (error line-start (file-name) ":" line ":" (message) line-end))
