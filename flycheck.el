@@ -2315,15 +2315,19 @@ See `flycheck-fix-error-filename' for details."
 (defun flycheck-sanitize-error (err)
   "Sanitize ERR.
 
-Make the error filename absolute, and clean up whitespace in the
-error message."
+- Make the error filename absolute
+- Trim leading and trailing whitespace in the error message
+- Remove 0 column"
   (flycheck-error-with-buffer err
     (let ((filename (flycheck-error-filename err))
-          (message (flycheck-error-message err)))
+          (message (flycheck-error-message err))
+          (column (flycheck-error-column err)))
       (when message
         (setf (flycheck-error-message err) (s-trim message)))
       (when filename
-        (setf (flycheck-error-filename err) (f-expand filename)))))
+        (setf (flycheck-error-filename err) (f-expand filename)))
+      (when (eq column 0)
+        (setf (flycheck-error-column err) nil))))
   err)
 
 
