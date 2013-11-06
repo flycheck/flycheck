@@ -3022,8 +3022,6 @@ Improvements:
 
 @itemize @bullet
 @item
-@ghissue{204, Do not ignore convention warnings by @command{pylint}}
-@item
 @ghissue{214, The error list now refreshes automatically after each
 syntax check}
 @item
@@ -3038,8 +3036,11 @@ files
 @ghissue{215, Parse notes from @code{c/c++-clang} into info level
 messages}
 @item
-@ghissue{215, Demote convention warnings from @code{python-pylint} and
-naming warnings from @code{python-flake8} to info level}
+@ghissue{204, Parse convention warnings from @command{pylint}} to
+@ghissue{215, info level}
+@item
+@ghissue{215, Demote naming warnings from @code{python-flake8} to info
+level}
 @item
 @ghissue{256, Support @code{enh-ruby-mode} in Ruby syntax checkers}
 @item
