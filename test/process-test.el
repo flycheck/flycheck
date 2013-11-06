@@ -29,7 +29,7 @@
 (ert-deftest flycheck-chaining-preserves-early-errors ()
   "Test that chaining preserves all errors from all checkers."
   (flycheck-testsuite-should-syntax-check
-   "chained-errors.el" 'emacs-lisp-mode nil
+   "chained-errors.el" 'emacs-lisp-mode
    '(8 nil warning "You should have a section marked \";;; Code:\""
        :checker emacs-lisp-checkdoc)
    '(8 1 warning "`message' called with 0 args to fill 1\n    format field(s)"

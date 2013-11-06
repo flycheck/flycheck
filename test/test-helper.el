@@ -211,6 +211,19 @@ with VALUE."
        (setenv (car it) (cdr it)))
      ,@body))
 
+(defmacro flycheck-testsuite-without-checkers (checkers &rest body)
+  "Execute BODY without CHECKERS.
+
+Remove CHECKERS from `flycheck-checkers' while BODY is
+evaluated.
+
+CHECKERS is a syntax checker symbol or a list thereof."
+  (declare (indent 1))
+  (let ((checkers (if (symbolp checkers) (list checkers) checkers)))
+    `(let* ((flycheck-checkers (--remove (memq it ',checkers)
+                                         flycheck-checkers)))
+       ,@body)))
+
 (defun flycheck-mode-no-check ()
   "Enable Flycheck mode without checking automatically."
   (emacs-lisp-mode)
@@ -403,39 +416,33 @@ Each error in ERRORS is a list as expected by
                (length (flycheck-overlays-in (point-min) (point-max)))))))
 
 (defun flycheck-testsuite-should-syntax-check
-  (resource-file modes disabled-checkers &rest errors)
+  (resource-file modes &rest errors)
   "Test a syntax check in RESOURCE-FILE with MODES.
 
 RESOURCE-FILE is the file to check.  MODES is a single major mode
 symbol or a list thereof, specifying the major modes to syntax
-check with.  DISABLED-CHECKERS is a syntax checker or a list
-thereof to disable before checking the file.  ERRORS is the list
-of expected errors."
+check with.  ERRORS is the list of expected errors."
   (when (symbolp modes)
     (setq modes (list modes)))
-  (when (symbolp disabled-checkers)
-    (setq disabled-checkers (list disabled-checkers)))
   (--each modes
-    (let ((flycheck-checkers (--remove (memq it disabled-checkers)
-                                       flycheck-checkers)))
-     (flycheck-testsuite-with-resource-buffer resource-file
-       (funcall it)
-       ;; Configure config file locating for unit tests
-       (--each '(flycheck-locate-config-file-absolute-path
-                 flycheck-testsuite-locate-config-file)
-         (add-hook 'flycheck-locate-config-file-functions it :append :local))
-       (let ((process-hook-called 0))
-         (add-hook 'flycheck-process-error-functions
-                   (lambda (_err)
-                     (setq process-hook-called (1+ process-hook-called))
-                     nil)
-                   nil :local)
-         (flycheck-testsuite-buffer-sync)
-         (if errors
-             (apply #'flycheck-testsuite-should-errors errors)
-           (should-not flycheck-current-errors))
-         (should (= process-hook-called (length errors))))
-       (flycheck-testsuite-ensure-clear)))))
+    (flycheck-testsuite-with-resource-buffer resource-file
+      (funcall it)
+      ;; Configure config file locating for unit tests
+      (--each '(flycheck-locate-config-file-absolute-path
+                flycheck-testsuite-locate-config-file)
+        (add-hook 'flycheck-locate-config-file-functions it :append :local))
+      (let ((process-hook-called 0))
+        (add-hook 'flycheck-process-error-functions
+                  (lambda (_err)
+                    (setq process-hook-called (1+ process-hook-called))
+                    nil)
+                  nil :local)
+        (flycheck-testsuite-buffer-sync)
+        (if errors
+            (apply #'flycheck-testsuite-should-errors errors)
+          (should-not flycheck-current-errors))
+        (should (= process-hook-called (length errors))))
+      (flycheck-testsuite-ensure-clear))))
 
 (provide 'test-helper)
 
