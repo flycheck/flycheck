@@ -656,38 +656,49 @@ found)."
    "checkers/php-syntax-error.php" 'php-mode
    '(8 nil error "syntax error, unexpected ')', expecting '('" :checker php)))
 
-(ert-deftest builtin-checker/php-phpmd-warning ()
-  :expected-result (flycheck-testsuite-fail-unless-checkers 'php 'php-phpmd)
-  (flycheck-testsuite-without-checkers php-phpcs
-    (flycheck-testsuite-should-syntax-check
-     "checkers/php-phpmd-warning.php" 'php-mode
-     '(4 nil warning "Avoid unused private fields such as '$FOO'."
-         :checker php-phpmd)
-     '(5 nil warning "Avoid unused private methods such as 'bar'."
-         :checker php-phpmd)
-     '(5 nil warning "Avoid unused parameters such as '$baz'."
-         :checker php-phpmd)
-     '(7 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
-         :checker php-phpmd)
-     '(7 nil warning "Avoid unused local variables such as '$i'."
-         :checker php-phpmd))))
-
-(ert-deftest builtin-checker/php-phpcs-error ()
-  "Test an uppercase keyword error by phpcs."
-  :expected-result (flycheck-testsuite-fail-unless-checkers 'php 'php-phpcs)
+(ert-deftest builtin-checker/php ()
+  :expected-result (flycheck-testsuite-fail-unless-checkers 'php-phpcs
+                                                            'php-phpmd)
   (flycheck-testsuite-should-syntax-check
-   "checkers/php-phpcs-error.php" 'php-mode
-   '(19 8 error "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\""
+   "checkers/php.php" 'php-mode
+   '(19 6 error "Missing class doc comment" :checker php-phpcs)
+   '(21 nil warning "Avoid unused private fields such as '$FOO'."
+        :checker php-phpmd)
+   '(21 20 error "Private member variable \"FOO\" must be prefixed with an underscore" :checker php-phpcs)
+   '(22 nil warning "Avoid unused parameters such as '$baz'."
+        :checker php-phpmd)
+   '(22 nil warning "Avoid unused private methods such as 'bar'."
+        :checker php-phpmd)
+   '(22 13 error "Missing function doc comment" :checker php-phpcs)
+   '(22 13 error "Private method name \"A::bar\" must be prefixed with an underscore"
+        :checker php-phpcs)
+   '(24 nil warning "Avoid unused local variables such as '$i'."
+        :checker php-phpmd)
+   '(24 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
+        :checker php-phpmd)
+   '(24 12 error "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\""
         :checker php-phpcs)))
 
-(ert-deftest builtin-checker/php-phpcs-error-phpcs-standard ()
-  "Test an uppercase keyword error by phpcs."
-  :expected-result (flycheck-testsuite-fail-unless-checkers 'php 'php-phpcs)
+(ert-deftest builtin-checker/php-phpcs-standard ()
+  :expected-result (flycheck-testsuite-fail-unless-checkers 'php-phpcs
+                                                            'php-phpmd)
   (flycheck-testsuite-with-hook php-mode-hook
       (setq flycheck-phpcs-standard "Zend")
     (flycheck-testsuite-should-syntax-check
-     "checkers/php-phpcs-error.php" 'php-mode
-     '(21 1 error "A closing tag is not permitted at the end of a PHP file"
+     "checkers/php.php" 'php-mode
+     '(21 nil warning "Avoid unused private fields such as '$FOO'."
+          :checker php-phpmd)
+     '(21 20 error "Private member variable \"FOO\" must contain a leading underscore"
+          :checker php-phpcs)
+     '(22 nil warning "Avoid unused parameters such as '$baz'."
+          :checker php-phpmd)
+     '(22 nil warning "Avoid unused private methods such as 'bar'."
+          :checker php-phpmd)
+     '(24 nil warning "Avoid unused local variables such as '$i'."
+          :checker php-phpmd)
+     '(24 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
+          :checker php-phpmd)
+     '(28 1 error "A closing tag is not permitted at the end of a PHP file"
           :checker php-phpcs))))
 
 (ert-deftest builtin-checker/puppet-parser-singleline-syntax-error ()
