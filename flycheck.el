@@ -2530,7 +2530,8 @@ _BUFFER and _ERROR are ignored.
 See URL `http://cppcheck.sourceforge.net/' for more information
 about Cppcheck."
     (-when-let* ((root (flycheck-parse-xml-string output))
-                 (errors (--first (eq (car it) 'errors) (cddr root))))
+                 (errors (--first (and (listp it) (eq (car it) 'errors))
+                                  (cddr root))))
       (unless (eq (car root) 'results)
         (error "Unexpected root element %s" (car root)))
       (->> errors
