@@ -28,12 +28,12 @@
 
 (require 'test-helper)
 
-(ert-deftest flycheck-sanitize-error-trailing-whitespace ()
+(ert-deftest flycheck-sanitize-error/trailing-whitespace ()
   (let ((err (flycheck-error-new-at 1 1 'error " foo " :checker 'emacs-lisp)))
     (equal (flycheck-sanitize-error err)
            (flycheck-error-new-at 1 1 'error "foo" :checker 'emacs-lisp))))
 
-(ert-deftest flycheck-sanitize-error-zero-column ()
+(ert-deftest flycheck-sanitize-error/zero-column ()
   (let ((err (flycheck-error-new-at 1 0 'error "foo" :checker 'emacs-lisp)))
     (equal (flycheck-sanitize-error err)
            (flycheck-error-new-at 1 nil 'error "foo" :checker 'emacs-lisp))))

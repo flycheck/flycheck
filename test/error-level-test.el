@@ -35,19 +35,43 @@
     :fringe-bitmap 'left-triangle
     :fringe-face 'highlight)
 
-(ert-deftest flycheck-define-error-level ()
-  (should (flycheck-error-level-p 'test-level))
-  (should (eq (flycheck-error-level-fringe-bitmap 'test-level) 'left-triangle))
-  (should (eq (flycheck-error-level-fringe-face 'test-level) 'highlight))
+(ert-deftest flycheck-define-error-level/is-error-level? ()
+  (should (flycheck-error-level-p 'test-level)))
+
+(ert-deftest flycheck-define-error-level/has-fringe-bitmap ()
+  (should (eq (flycheck-error-level-fringe-bitmap 'test-level) 'left-triangle)))
+
+(ert-deftest flycheck-define-error-level/has-fringe-face ()
+  (should (eq (flycheck-error-level-fringe-face 'test-level) 'highlight)))
+
+(ert-deftest flycheck-define-error-level/has-overlay-category ()
   (should (eq (flycheck-error-level-overlay-category 'test-level) 'category)))
 
-(ert-deftest flycheck-error-level-make-fringe-icon ()
-  (--each '(left-fringe right-fringe)
-    (pcase-let* ((icon (flycheck-error-level-make-fringe-icon 'test-level it))
-                 (`(,side ,bitmap ,face) (get-text-property 0 'display icon)))
-      (should (eq side it))
-      (should (eq bitmap 'left-triangle))
-      (should (eq face 'highlight)))))
+(ert-deftest flycheck-error-level-make-fringe-icon/has-fringe-bitmap ()
+  (pcase-let* ((icon (flycheck-error-level-make-fringe-icon
+                      'test-level 'left-fringe))
+               (`(_ ,bitmap _) (get-text-property 0 'display icon)))
+    (should (eq bitmap 'left-triangle))))
+
+(ert-deftest flycheck-error-level-make-fringe-icon/has-fringe-face ()
+  (pcase-let* ((icon (flycheck-error-level-make-fringe-icon 'test-level 'left-fringe))
+               (`(_ _ ,face) (get-text-property 0 'display icon)))
+    (should (eq face 'highlight))))
+
+(ert-deftest flycheck-error-level-make-fringe-icon/left-fringe ()
+  (pcase-let* ((icon (flycheck-error-level-make-fringe-icon 'test-level 'left-fringe))
+               (`(,side _ _) (get-text-property 0 'display icon)))
+    (should (eq side 'left-fringe))))
+
+(ert-deftest flycheck-error-level-make-fringe-icon/right-fringe ()
+  (pcase-let* ((icon (flycheck-error-level-make-fringe-icon 'test-level 'right-fringe))
+               (`(,side _ _) (get-text-property 0 'display icon)))
+    (should (eq side 'right-fringe))))
+
+(ert-deftest flycheck-error-level-make-fringe-icon/invalid-side ()
+  (let ((err (should-error (flycheck-error-level-make-fringe-icon 'test-level
+                                                                  'up-fringe))))
+    (should (string= (cadr err) "Invalid fringe side: up-fringe"))))
 
 
 ;; Test the builtin levels

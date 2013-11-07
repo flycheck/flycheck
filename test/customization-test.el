@@ -28,30 +28,22 @@
 
 (require 'test-helper)
 
-(ert-deftest flycheck-checkers-not-empty ()
-  "Test that there are any registered checkers."
+(ert-deftest flycheck-checkers/there-are-registered-checkers ()
   (should flycheck-checkers))
 
-(ert-deftest flycheck-checkers-sound ()
-  "Test that `flycheck-checkers' is sound.
-
-Any checker in this list should be valid and registered."
+(ert-deftest flycheck-checkers/all-registered-checkers-are-declared ()
   (dolist (checker flycheck-checkers)
     (should (flycheck-valid-checker-p checker))
     (should (flycheck-registered-checker-p checker))))
 
-(ert-deftest flycheck-checkers-complete ()
-  "Test that `flycheck-checkers' is complete.
-
-All declared checkers should be registered."
+(ert-deftest flycheck-checkers/all-declared-checkers-are-registered ()
   (let ((declared-checkers (flycheck-defined-checkers)))
     (should declared-checkers)
     (dolist (checker declared-checkers)
       (should (memq checker flycheck-checkers))
       (should (flycheck-registered-checker-p checker)))))
 
-(ert-deftest flycheck-checkers-patterns-or-parser ()
-  "Test that all `flycheck-checkers' have parser and patterns."
+(ert-deftest flycheck-checkers/should-have-either-patterns-or-parser ()
   (dolist (checker flycheck-checkers)
     (let ((patterns (flycheck-checker-error-patterns checker))
           (parser (flycheck-checker-error-parser checker)))
@@ -59,43 +51,43 @@ All declared checkers should be registered."
       (should (or (and (eq parser 'flycheck-parse-with-patterns) patterns)
                   (null patterns))))))
 
-(ert-deftest flycheck-locate-config-file-functions ()
+(ert-deftest flycheck-locate-config-file-functions/default ()
   (should (equal flycheck-locate-config-file-functions
                  '(flycheck-locate-config-file-absolute-path
                    flycheck-locate-config-file-projectile
                    flycheck-locate-config-file-ancestor-directories
                    flycheck-locate-config-file-home))))
 
-(ert-deftest flycheck-process-error-functions ()
+(ert-deftest flycheck-process-error-functions/default ()
   (should (equal flycheck-process-error-functions '(flycheck-add-overlay))))
 
-(ert-deftest flycheck-display-errors-delay ()
+(ert-deftest flycheck-display-errors-delay/default ()
   (should (equal flycheck-display-errors-delay 0.9)))
 
-(ert-deftest flycheck-display-errors-function ()
+(ert-deftest flycheck-display-errors-function/default ()
   (should (eq flycheck-display-errors-function
               #'flycheck-display-error-messages)))
 
-(ert-deftest flycheck-indication-mode ()
+(ert-deftest flycheck-indication-mode/default ()
   (should (eq flycheck-indication-mode 'left-fringe)))
 
-(ert-deftest flycheck-highlighting-mode ()
+(ert-deftest flycheck-highlighting-mode/default ()
   (should (eq flycheck-highlighting-mode 'symbols)))
 
-(ert-deftest flycheck-check-syntax-automatically ()
+(ert-deftest flycheck-check-syntax-automatically/default ()
   (should (equal flycheck-check-syntax-automatically
                  '(save idle-change new-line mode-enabled))))
 
-(ert-deftest flycheck-idle-change-delay ()
+(ert-deftest flycheck-idle-change-delay/default ()
   (should (equal flycheck-idle-change-delay 0.5)))
 
-(ert-deftest flycheck-google-max-messages ()
+(ert-deftest flycheck-google-max-messages/default ()
   (should (equal flycheck-google-max-messages 5)))
 
-(ert-deftest flycheck-standard-error-navigation ()
+(ert-deftest flycheck-standard-error-navigation/default ()
   (should (eq flycheck-standard-error-navigation t)))
 
-(ert-deftest flycheck-completion-system ()
+(ert-deftest flycheck-completion-system/default ()
   (should (equal flycheck-completion-system 'ido)))
 
 ;;; customization-test.el ends here
