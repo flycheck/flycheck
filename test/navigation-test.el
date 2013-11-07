@@ -56,7 +56,7 @@
                                        :type flycheck-testsuite-user-error-type))
         (should (string= (cadr error-data) "No more Flycheck errors")))))
 
-(ert-deftest flycheck-next-error-compile-mode ()
+(ert-deftest flycheck-next-error/compile-mode ()
   "Test navigation to the next error by means of compile mode."
   (flycheck-test-next-error-function #'next-error))
 
@@ -90,7 +90,7 @@
                                      :type flycheck-testsuite-user-error-type))
       (should (string= (cadr error-data) "No more Flycheck errors")))))
 
-(ert-deftest flycheck-previous-error-compile-mode ()
+(ert-deftest flycheck-previous-error/compile-mode ()
   "Test navigation to the previous error by means of compile mode."
   (flycheck-test-previous-error-function #'previous-error))
 
@@ -115,7 +115,7 @@
                                      :type flycheck-testsuite-user-error-type))
       (should (string= (cadr error-data) "No more Flycheck errors")))))
 
-(ert-deftest flycheck-first-error-compile-mode ()
+(ert-deftest flycheck-first-error/compile-mode ()
   "Test navigation to the first error by means of compile mode."
   (flycheck-test-first-error-function #'first-error))
 
@@ -123,7 +123,7 @@
   "Test navigation to the first error."
   (flycheck-test-first-error-function #'flycheck-first-error))
 
-(ert-deftest flycheck-next-error-does-not-cross-narrowing ()
+(ert-deftest flycheck-next-error/does-not-cross-narrowing ()
   "Test that error navigation does not cross restrictions"
   (flycheck-testsuite-with-resource-buffer "narrowing.el"
     (emacs-lisp-mode)

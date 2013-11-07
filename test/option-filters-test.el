@@ -28,19 +28,33 @@
 
 (require 'test-helper)
 
-(ert-deftest flycheck-option-int ()
-  (should (null (flycheck-option-int nil)))
+(ert-deftest flycheck-option-int/pass-through-nil ()
+  (should (null (flycheck-option-int nil))))
+
+(ert-deftest flycheck-option-int/integer-argument ()
   (should (equal (flycheck-option-int 10) "10")))
 
-(ert-deftest flycheck-option-comma-separated-list ()
-  (should (null (flycheck-option-comma-separated-list nil)))
-  (should (null (flycheck-option-comma-separated-list '(nil))))
-  (should (null (flycheck-option-comma-separated-list '(10 20) nil (lambda (_x) nil))))
+(ert-deftest flycheck-option-comma-separated-list/empty-list ()
+  (should (null (flycheck-option-comma-separated-list nil))))
+
+(ert-deftest flycheck-option-comma-separated-list/with-single-nil ()
+  (should (null (flycheck-option-comma-separated-list '(nil)))))
+
+(ert-deftest flycheck-option-comma-separated-list/filter-returns-nil ()
+  (should (null (flycheck-option-comma-separated-list '(10 20) nil
+                                                      (lambda (_x) nil)))))
+
+(ert-deftest flycheck-option-comma-separated-list/default-separator ()
   (should (equal (flycheck-option-comma-separated-list '("foo" "bar"))
-                 "foo,bar"))
+                 "foo,bar")))
+
+(ert-deftest flycheck-option-comma-separated-list/custom-separator ()
   (should (equal (flycheck-option-comma-separated-list '("foo" "bar") ":")
-                 "foo:bar"))
-  (should (equal (flycheck-option-comma-separated-list '(10 20) nil #'number-to-string)
+                 "foo:bar")))
+
+(ert-deftest flycheck-option-comma-separated-list/custom-filter ()
+  (should (equal (flycheck-option-comma-separated-list '(10 20) nil
+                                                       #'number-to-string)
                  "10,20")))
 
 ;;; option-filters-test.el ends here

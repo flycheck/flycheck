@@ -28,11 +28,7 @@
 
 
 ;;;; General error display
-(ert-deftest flycheck-display-errors-function ()
-  (should (eq flycheck-display-errors-function
-              #'flycheck-display-error-messages)))
-
-(ert-deftest flycheck-display-errors-no-function ()
+(ert-deftest flycheck-display-errors/no-display-function-set ()
   (let ((err (flycheck-error-new-at 10 20 'warning "This is a Flycheck error."))
         (flycheck-display-errors-function nil))
     ;; Error display must not fail with nil
@@ -43,12 +39,14 @@
       (should-not (s-contains? (flycheck-error-message err)
                                (buffer-string))))))
 
-(ert-deftest flycheck-display-errors-custom-function ()
-  (let ((err (flycheck-error-new-at 10 20 'warning "Foo")))
-    (mocker-let
-        ((display-function (errors) ((:input `((,err))))))
-      (let ((flycheck-display-errors-function 'display-function))
-        (flycheck-display-errors (list err))))))
+(ert-deftest flycheck-display-errors/custom-function ()
+  (let* ((err (flycheck-error-new-at 10 20 'warning "Foo"))
+         (displayed-errors nil)
+         (flycheck-display-errors-function (lambda (errors)
+                                             (--each errors
+                                               (push it displayed-errors)))))
+    (flycheck-display-errors (list err))
+    (should (equal displayed-errors (list err)))))
 
 
 

@@ -64,20 +64,20 @@
   "Errors to be parsed from `flycheck-checkstyle-xml'.")
 
 
-(ert-deftest flycheck-parse-checkstyle-xml ()
+(ert-deftest flycheck-parse-checkstyle/with-builtin-xml ()
   "Test Checkstyle parsing with xml.el"
   (let ((flycheck-xml-parser 'flycheck-parse-xml-region))
     (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml nil nil)
                    flycheck-checkstyle-expected-errors))))
 
-(ert-deftest flycheck-parse-checkstyle-libxml2 ()
+(ert-deftest flycheck-parse-checkstyle/with-libxml2 ()
   "Test Checkstyle parsing with libxml2."
   :expected-result (if (fboundp 'libxml-parse-xml-region) :passed :failed)
   (let ((flycheck-xml-parser 'libxml-parse-xml-region))
     (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml nil nil)
                    flycheck-checkstyle-expected-errors))))
 
-(ert-deftest flycheck-parse-checkstyle-auto ()
+(ert-deftest flycheck-parse-checkstyle/automatic-parser ()
   "Test Checkstyle parsing with the automatically chosen parsed."
   (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml nil nil)
                  flycheck-checkstyle-expected-errors)))

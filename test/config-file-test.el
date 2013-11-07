@@ -28,52 +28,76 @@
 
 (require 'projectile)
 
-(ert-deftest flycheck-locate-config-file-absolute-path ()
+(ert-deftest flycheck-locate-config-file-absolute-path/just-a-base-name ()
   (with-temp-buffer
     (cd flycheck-testsuite-dir)
     (should-not (flycheck-locate-config-file-absolute-path "flycheck-testsuite.el"
-                                                           'emacs-lisp))
+                                                           'emacs-lisp))))
+
+(ert-deftest flycheck-locate-config-file-absolute-path/with-path ()
+  (with-temp-buffer
+    (cd flycheck-testsuite-dir)
     (should (equal (flycheck-locate-config-file-absolute-path "../Makefile"
                                                               'emacs-lisp)
                    (f-join flycheck-testsuite-dir "../Makefile")))))
 
-(ert-deftest flycheck-locate-config-file-projectile ()
-  (require 'projectile)
+
+
+(ert-deftest flycheck-locate-config-file-projectile/existing-file-inside-a-project ()
   (with-temp-buffer
     (set-visited-file-name (f-join flycheck-testsuite-dir "foo")
                            :no-query)
     (should (projectile-project-p))
     (should (equal
              (flycheck-locate-config-file-projectile "Makefile" 'emacs-lisp)
-             (f-join flycheck-testsuite-dir "../Makefile")))
-    (should-not (flycheck-locate-config-file-projectile "Foo" 'emacs-lisp)))
+             (f-join flycheck-testsuite-dir "../Makefile")))))
+
+(ert-deftest flycheck-locate-config-file-projectile/not-existing-file-inside-a-project ()
+  (with-temp-buffer
+    (set-visited-file-name (f-join flycheck-testsuite-dir "foo")
+                           :no-query)
+    (should (projectile-project-p))
+    (should-not (flycheck-locate-config-file-projectile "Foo" 'emacs-lisp))))
+
+(ert-deftest flycheck-locate-config-file-projectile/outside-a-project ()
   (with-temp-buffer
     (set-visited-file-name (f-join temporary-file-directory "foo")
                            :no-query)
     (should-not (projectile-project-p))
     (should-not (flycheck-locate-config-file-projectile "Foo" 'emacs-dir))))
 
-(ert-deftest flycheck-locate-config-file-ancestor-directories ()
+(ert-deftest flycheck-locate-config-file-ancestor-directories/not-existing-file ()
   (with-temp-buffer
     (setq buffer-file-name (f-join flycheck-testsuite-dir "flycheck-testsuite.el"))
-    (should-not (flycheck-locate-config-file-ancestor-directories "foo" 'emacs-lisp))
+    (should-not (flycheck-locate-config-file-ancestor-directories
+                 "foo" 'emacs-lisp))))
+
+(ert-deftest flycheck-locate-config-file-ancestor-directories/file-on-same-level ()
+  (with-temp-buffer
+    (setq buffer-file-name (f-join flycheck-testsuite-dir "flycheck-testsuite.el"))
     (should (equal (flycheck-locate-config-file-ancestor-directories
                     "test-helper.el" 'emacs-lisp)
-                   (f-join flycheck-testsuite-dir "test-helper.el")))
+                   (f-join flycheck-testsuite-dir "test-helper.el")))))
+
+(ert-deftest flycheck-locate-config-file-ancestor-directories/file-on-parent-level ()
+  (with-temp-buffer
+    (setq buffer-file-name (f-join flycheck-testsuite-dir "flycheck-testsuite.el"))
     (should (equal (flycheck-locate-config-file-ancestor-directories
                     "Makefile" 'emacs-lisp)
                    (f-join flycheck-testsuite-dir "../Makefile")))))
 
-(ert-deftest flycheck-locate-config-file-home ()
-  (let ((old-home (getenv "HOME")))
-    (unwind-protect
-        (progn
-          (setenv "HOME" flycheck-testsuite-dir)
-          (should-not (flycheck-locate-config-file-home "foo" 'emacs-lisp))
-          (should-not (flycheck-locate-config-file-home "Makefile" 'emacs-lisp))
-          (should (equal (flycheck-locate-config-file-home
+(ert-deftest flycheck-locate-config-file/not-existing-file ()
+  (flycheck-testsuite-with-env (list (cons "HOME" flycheck-testsuite-dir))
+    (should-not (flycheck-locate-config-file-home "foo" 'emacs-lisp))))
+
+(ert-deftest flycheck-locate-config-file/existing-file-in-parent-directory ()
+  (flycheck-testsuite-with-env (list (cons "HOME" flycheck-testsuite-dir))
+    (should-not (flycheck-locate-config-file-home "Makefile" 'emacs-lisp))))
+
+(ert-deftest flycheck-locate-config-file/existing-file-in-home-directory ()
+  (flycheck-testsuite-with-env (list (cons "HOME" flycheck-testsuite-dir))
+    (should (equal (flycheck-locate-config-file-home
                           "test-helper.el" 'emacs-lisp)
-                         (f-join flycheck-testsuite-dir "test-helper.el"))))
-      (setenv "HOME" old-home))))
+                         (f-join flycheck-testsuite-dir "test-helper.el")))))
 
 ;;; config-file-test.el ends here
