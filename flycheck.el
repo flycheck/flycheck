@@ -4132,10 +4132,12 @@ See URL `http://jruby.org/'."
 See URL `https://github.com/YorickPeterse/ruby-lint'."
   :command ("ruby-lint" "analyze" "--presenter=syntastic" source)
   :error-patterns
-  ((warning line-start
+  ((info line-start
+         (file-name) ":I:" line ":" column ": " (message) line-end)
+   (warning line-start
             (file-name) ":W:" line ":" column ": " (message) line-end)
    (error line-start
-            (file-name) ":E:" line ":" column ": " (message) line-end))
+          (file-name) ":E:" line ":" column ": " (message) line-end))
   :modes (enh-ruby-mode ruby-mode))
 
 (flycheck-define-checker rust
