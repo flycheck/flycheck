@@ -213,7 +213,7 @@ Puppet (using @command{puppet parser} and @command{puppet-lint})
 @item
 Python (using @command{flake8}, @command{pylint}, or @command{pyflakes})
 @item
-Ruby (using @command{rubocop}, @command{ruby} or @command{jruby})
+Ruby (using @command{rubocop}, @command{ruby} , @command{jruby} or @command{ruby-lint})
 @item
 Rust (using @command{rustc})
 @item
@@ -3225,6 +3225,7 @@ order of their appearance in the default value of
 @iflyc ruby-rubocop
 @iflyc ruby
 @iflyc ruby-jruby
+@iflyc ruby-rubylint
 @iflyc rust
 @iflyc sass
 @iflyc scala
