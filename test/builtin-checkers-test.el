@@ -556,7 +556,7 @@ found)."
    '(2 8 warning "Redundant bracket\nFound:\n  (putStrLn \"Foobar\")\nWhy not:\n  putStrLn \"Foobar\""
        :checker haskell-hlint)))
 
-(ert-deftest builtin-checker/html-tidy-warning-and-error ()
+(ert-deftest builtin-checker/html-tidy ()
   "Test an error caused by an unknown tag."
   :expected-result (flycheck-testsuite-fail-unless-checker 'html-tidy)
   (flycheck-testsuite-should-syntax-check
@@ -576,7 +576,7 @@ found)."
         (js2-mode-show-strict-warnings nil)
         (js3-mode-show-parse-errors nil))
     (flycheck-testsuite-should-syntax-check
-     "checkers/javascript-jshint-syntax-error.js" '(js-mode js2-mode js3-mode)
+     "checkers/javascript-syntax-error.js" '(js-mode js2-mode js3-mode)
      '(3 11 error "Unclosed string." :checker javascript-jshint)
      '(3 25 error "Unclosed string." :checker javascript-jshint)
      '(4 1 error "Missing semicolon." :checker javascript-jshint)
@@ -586,7 +586,7 @@ found)."
   "An unused variable."
   :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
   (flycheck-testsuite-should-syntax-check
-   "checkers/javascript-jshint-error.js" '(js-mode js2-mode js3-mode)))
+   "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)))
 
 (ert-deftest builtin-checker/javascript-jshint-error-enabled ()
   "An unused variable."
@@ -594,18 +594,18 @@ found)."
   (flycheck-testsuite-with-hook (js-mode-hook js2-mode-hook js3-mode-hook)
       (setq flycheck-jshintrc "jshintrc")
     (flycheck-testsuite-should-syntax-check
-     "checkers/javascript-jshint-error.js" '(js-mode js2-mode js3-mode)
-     '(5 12 error "'foo' is defined but never used."
+     "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
+     '(4 12 error "'foo' is defined but never used."
          :checker javascript-jshint))))
 
 (ert-deftest builtin-checker/javascript-gjslint-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-gjslint)
   (flycheck-testsuite-without-checkers javascript-jshint
     (flycheck-testsuite-should-syntax-check
-     "checkers/javascript-gjslint-error.js" '(js-mode js2-mode js3-mode)
-     '(2 nil error "E:0131: Single-quoted string preferred over double-quoted string."
+     "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
+     '(4 nil error "E:0131: Single-quoted string preferred over double-quoted string."
          :checker javascript-gjslint :filename nil)
-     '(5 nil error "E:0001: Extra space before \")\""
+     '(4 nil error "E:0001: Extra space before \"]\""
          :checker javascript-gjslint :filename nil))))
 
 (ert-deftest builtin-checker/json-jsonlint-error ()
