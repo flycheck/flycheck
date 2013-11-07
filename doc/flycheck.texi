@@ -3062,6 +3062,8 @@ output@comma{} by simply ignoring them}
 @item
 @ghissue{259, Correctly redirect the output binary of the
 @code{go-build} syntax checker}
+@item
+@ghissue{263, Fix Cppcheck parsing with the built-in Emacs XML parser}
 @end itemize
 
 @end itemize

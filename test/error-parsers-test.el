@@ -127,4 +127,21 @@ of the file will be interrupted because there are too many #ifdef configurations
   (should (equal (flycheck-parse-cppcheck flycheck-cppcheck-xml nil nil)
                  flycheck-cppcheck-expected-errors)))
 
+(ert-deftest flycheck-parse-cppcheck/empty-errors-list-with-automatic-parser ()
+  (should-not (flycheck-parse-cppcheck "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<results version=\"2\">
+  <cppcheck version=\"1.60.1\"/>
+  <errors>
+  </errors>
+</results>" nil nil)))
+
+(ert-deftest flycheck-parse-cppcheck/empty-errors-list-with-builtin-parser ()
+  (let ((flycheck-xml-parser #'flycheck-parse-xml-region))
+    (should-not (flycheck-parse-cppcheck "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<results version=\"2\">
+  <cppcheck version=\"1.60.1\"/>
+  <errors>
+  </errors>
+</results>" nil nil))))
+
 ;;; error-parsers-test.el ends here
