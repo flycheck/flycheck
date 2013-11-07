@@ -2269,7 +2269,7 @@ flycheck exclamation mark otherwise.")
 
 (put 'flycheck-info-overlay 'face 'flycheck-info)
 (put 'flycheck-info-overlay 'priority 90)
-(put 'flycheck-info-overlay 'help-error "Unknown info.")
+(put 'flycheck-info-overlay 'help-echo "Unknown info.")
 
 (flycheck-define-error-level 'info
   :overlay-category 'flycheck-info-overlay
