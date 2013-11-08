@@ -894,7 +894,7 @@ found)."
   (flycheck-testsuite-without-checkers (ruby-rubocop ruby ruby-jruby)
     (flycheck-testsuite-should-syntax-check
      "checkers/ruby-rubylint-info.rb" 'ruby-mode
-     '(1 0 info "the use of then/do is not needed here" :checker ruby-rubylint))))
+     '(1 nil info "the use of then/do is not needed here" :checker ruby-rubylint))))
 
 (ert-deftest checker-ruby-rubylint-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubylint)
@@ -902,7 +902,7 @@ found)."
     (flycheck-testsuite-should-syntax-check
      "checkers/ruby-rubylint-warning.rb" 'ruby-mode
      '(2 17 warning "unused argument name" :checker ruby-rubylint)
-     '(8 0 warning "unused local variable user2" :checker ruby-rubylint))))
+     '(8 nil warning "unused local variable user2" :checker ruby-rubylint))))
 
 (ert-deftest checker-ruby-rubylint-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubylint)
@@ -910,7 +910,7 @@ found)."
     (flycheck-testsuite-should-syntax-check
      "checkers/ruby-rubylint-error.rb" 'ruby-mode
      '(7 21 error "undefined instance variable @name" :checker ruby-rubylint)
-     '(12 0 error "wrong number of arguments (expected 0 but got 1)" :checker ruby-rubylint))))
+     '(12 nil error "wrong number of arguments (expected 0 but got 1)" :checker ruby-rubylint))))
 
 (ert-deftest checker-rust-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'rust)
