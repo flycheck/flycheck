@@ -953,14 +953,7 @@ directory with PREFIX and a random suffix using
 as FILENAME in this directory
 
 Return the path of the file."
-  ;; HACK: Prevent re-compression to work around a supposed bug in Emacs.
-  ;; `make-temp-file' calls `write-region' to set the contents of the new
-  ;; temporary file, which in turn calls `jka-compr-write-region' for compressed
-  ;; files. If `jka-compr-really-do-compress' is non-nil this function uses END
-  ;; even though START is a string, hence breaking the `write-region' API that
-  ;; we rely on.  Report upstream!
-  (let ((jka-compr-really-do-compress nil)
-        tempfile)
+  (let (tempfile)
     (if filename
         (let ((directory (flycheck-temp-dir-system prefix)))
           (setq tempfile (f-join directory (f-filename filename))))
@@ -986,7 +979,8 @@ Return the path of the file."
 (defun flycheck-save-buffer-to-file (file-name)
   "Save the contents of the current buffer to FILE-NAME."
   (make-directory (f-dirname file-name) t)
-  (write-region nil nil file-name nil 0))
+  (let ((jka-compr-inhibit t))
+    (write-region nil nil file-name nil 0)))
 
 (defun flycheck-save-buffer-to-temp (temp-file-fn prefix)
   "Save buffer to temp file returned by TEMP-FILE-FN with PREFIX.
@@ -3479,6 +3473,8 @@ See URL `http://elixir-lang.org/'."
 
 (defconst flycheck-emacs-lisp-check-form
   '(progn
+     (require 'jka-compr)
+
      (defvar flycheck-byte-compiled-files nil)
      (defun flycheck-byte-compile-dest-file (source)
        (let ((temp-file (make-temp-file (file-name-nondirectory source))))
@@ -3486,7 +3482,10 @@ See URL `http://elixir-lang.org/'."
          temp-file))
 
      (setq byte-compile-dest-file-function 'flycheck-byte-compile-dest-file)
-     (mapc 'byte-compile-file command-line-args-left)
+     (let ((jka-compr-inhibit t))
+       ;; Flycheck inhibits compression of temporary files, thus we must not
+       ;; attempt to decompress
+       (mapc 'byte-compile-file command-line-args-left))
      (mapc 'delete-file flycheck-byte-compiled-files)))
 
 (flycheck-def-option-var flycheck-emacs-lisp-load-path nil emacs-lisp
@@ -3606,13 +3605,20 @@ This variable has no effect, if
 
 (defconst flycheck-emacs-lisp-checkdoc-form
   '(progn
+     (require 'jka-compr)
      (require 'checkdoc)
 
      (let ((filename (car command-line-args-left))
+           ;; Don't attempt to decompress, because Flycheck never compresses the
+           ;; temporary files for syntax checking
+           (jka-compr-inhibit t)
+           ;; Remember the default directory of the process
            (process-default-directory default-directory))
        (with-temp-buffer
-         (insert-file-contents filename t)
+         (insert-file-contents filename 'visit)
          (setq buffer-file-name filename)
+         ;; And change back to the process default directory to make file-name
+         ;; back-substutition work
          (setq default-directory process-default-directory)
          (with-demoted-errors
            (checkdoc-current-buffer t)

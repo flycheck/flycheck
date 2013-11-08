@@ -3045,6 +3045,9 @@ level}
 @ghissue{256, Support @code{enh-ruby-mode} in Ruby syntax checkers}
 @item
 Parse columns from @code{python-pylint} errors
+@item
+Do not compress temporary files for syntax checks if the original file
+was compressed
 @end itemize
 
 @item
