@@ -301,66 +301,7 @@
    '(14 nil warning "this clause cannot match because a previous clause at line 11 always matches"
         :checker elixir)))
 
-(ert-deftest builtin-checker/emacs-lisp-checkdoc-warning ()
-  "Test a checkdoc warning caused by a missing period in a docstring."
-  (flycheck-testsuite-should-syntax-check
-   "checkers/emacs-lisp-checkdoc-warning.el" 'emacs-lisp-mode
-   '(12 nil warning "First sentence should end with punctuation"
-        :checker emacs-lisp-checkdoc)))
-
-(ert-deftest builtin-checker/emacs-lisp-checkdoc-warning-compressed ()
-  "Test a checkdoc warning caused by a missing period in a docstring."
-  (flycheck-testsuite-should-syntax-check
-   "checkers/emacs-lisp-checkdoc-warning.el.gz" 'emacs-lisp-mode
-   '(12 nil warning "First sentence should end with punctuation"
-        :checker emacs-lisp-checkdoc)))
-
-(ert-deftest builtin-checker/emacs-lisp-checkdoc-works-without-buffer-file-name ()
-  "Test checkdoc checker in buffers without file names.
-
-Regression test for https://github.com/flycheck/flycheck/issues/73 and
-https://github.com/bbatsov/prelude/issues/259."
-  (with-temp-buffer
-    (insert ";;; Hello world\n(message \"foo\")")
-    (emacs-lisp-mode)
-    (should-not (buffer-file-name))
-    (flycheck-testsuite-buffer-sync)
-    ;; Just check that there are any errors, i.e. that the checker was used and
-    ;; worked.
-    (flycheck-testsuite-should-errors)))
-
-(ert-deftest builtin-checker/emacs-lisp-checkdoc-inhibited-autoloads ()
-  "Test that CheckDoc does not check autoloads buffers."
-  (flycheck-testsuite-with-resource-buffer "checkers/emacs-lisp-checkdoc-warning.el"
-    (emacs-lisp-mode)
-    (should (flycheck-may-use-checker 'emacs-lisp-checkdoc))
-    (rename-buffer "foo-autoloads.el")
-    (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
-
-(ert-deftest builtin-checker/emacs-lisp-checkdoc-inhibited-cask ()
-  (flycheck-testsuite-with-resource-buffer "checkers/emacs-lisp-checkdoc-warning.el"
-    (emacs-lisp-mode)
-    (should (flycheck-may-use-checker 'emacs-lisp-checkdoc))
-    (setq buffer-file-name "/foo/bar/Cartony")  ; No real carton file
-    (should (flycheck-may-use-checker 'emacs-lisp-checkdoc))
-    (setq buffer-file-name "/foo/bar/Carton")
-    (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))
-    (setq buffer-file-name "/foo/bar/Cask")
-    (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
-
-(ert-deftest builtin-checker/emacs-lisp-sytnax-error ()
-  (flycheck-testsuite-without-checkers emacs-lisp-checkdoc
-    (flycheck-testsuite-should-syntax-check
-     "checkers/emacs-lisp-syntax-error.el" 'emacs-lisp-mode
-     '(3 1 error "End of file during parsing" :checker emacs-lisp))))
-
-(ert-deftest builtin-checker/emacs-lisp-syntax-error-compressed ()
-  (flycheck-testsuite-without-checkers emacs-lisp-checkdoc
-    (flycheck-testsuite-should-syntax-check
-     "checkers/emacs-lisp-syntax-error.el.gz" 'emacs-lisp-mode
-     '(3 1 error "End of file during parsing" :checker emacs-lisp))))
-
-(ert-deftest builtin-checker/emacs-lisp-error ()
+(ert-deftest builtin-checker/emacs-lisp ()
   ;; Determine how the Emacs message for load file errors looks like: In Emacs
   ;; Snapshot, the message has three parts because the underlying file error is
   ;; contained in the message.  In stable release the file error itself is
@@ -371,67 +312,70 @@ https://github.com/bbatsov/prelude/issues/259."
          (msg (format "Cannot open load file: %sdummy-package"
                       (if (= (length parts) 2) ""
                         "no such file or directory, "))))
-    (flycheck-testsuite-without-checkers emacs-lisp-checkdoc
-      (flycheck-testsuite-should-syntax-check
-       "checkers/emacs-lisp-error.el" 'emacs-lisp-mode
-       `(3 1 error ,msg :checker emacs-lisp)))))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/emacs-lisp.el" 'emacs-lisp-mode
+     '(12 nil warning "First sentence should end with punctuation"
+          :checker emacs-lisp-checkdoc)
+     `(15 1 error ,msg :checker emacs-lisp))))
 
-(ert-deftest builtin-checker/emacs-lisp-error-load-path ()
+(ert-deftest builtin-checker/emacs-lisp-load-path ()
   (flycheck-testsuite-with-hook emacs-lisp-mode-hook
       (setq flycheck-emacs-lisp-load-path
             (list (flycheck-testsuite-resource-filename
                    "dummy-elpa/dummy-package-0.1")))
-    (flycheck-testsuite-without-checkers emacs-lisp-checkdoc
-      (flycheck-testsuite-should-syntax-check "checkers/emacs-lisp-error.el"
-                                              'emacs-lisp-mode))))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/emacs-lisp.el" 'emacs-lisp-mode
+     '(12 nil warning "First sentence should end with punctuation"
+          :checker emacs-lisp-checkdoc)
+     '(18 6 warning "message called with 0 arguments, but
+    requires 1+" :checker emacs-lisp)
+     '(23 1 warning "the function `dummy-package-foo' might
+    not be defined at runtime." :checker emacs-lisp))))
 
-(ert-deftest builtin-checker/emacs-lisp-error-packages ()
+(ert-deftest builtin-checker/emacs-lisp-initialize-packages ()
   (flycheck-testsuite-with-hook emacs-lisp-mode-hook
       (setq flycheck-emacs-lisp-package-user-dir
             (flycheck-testsuite-resource-filename "dummy-elpa")
             flycheck-emacs-lisp-initialize-packages t)
-    (flycheck-testsuite-without-checkers emacs-lisp-checkdoc
-      (flycheck-testsuite-should-syntax-check "checkers/emacs-lisp-error.el"
-                                              'emacs-lisp-mode))))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/emacs-lisp.el" 'emacs-lisp-mode
+     '(12 nil warning "First sentence should end with punctuation"
+          :checker emacs-lisp-checkdoc)
+     '(18 6 warning "message called with 0 arguments, but
+    requires 1+" :checker emacs-lisp))))
 
-(ert-deftest builtin-checker/emacs-lisp-warning ()
+(ert-deftest builtin-checker/emacs-lisp-checks-compressed-file ()
+  (flycheck-testsuite-should-syntax-check
+   "checkers/emacs-lisp.el.gz" 'emacs-lisp-mode
+   '(12 nil warning "First sentence should end with punctuation"
+        :checker emacs-lisp-checkdoc)
+   '(16 6 warning "message called with 0 arguments, but
+    requires 1+" :checker emacs-lisp)
+   '(21 1 warning "the function `dummy-package-foo' is
+    not known to be defined." :checker emacs-lisp)))
+
+(ert-deftest builtin-checker/emacs-lisp-sytnax-error ()
   (flycheck-testsuite-without-checkers emacs-lisp-checkdoc
     (flycheck-testsuite-should-syntax-check
-     "checkers/emacs-lisp-warning.el" 'emacs-lisp-mode
-     '(4 6 warning "message called with 0 arguments,\n    but requires 1+"
-         :checker emacs-lisp)
-     '(8 1 warning "the function `dummy-package-foo'\n    is not known to be defined."
-         :checker emacs-lisp))))
+     "checkers/emacs-lisp-syntax-error.el" 'emacs-lisp-mode
+     '(3 1 error "End of file during parsing" :checker emacs-lisp))))
 
-(ert-deftest builtin-checker/emacs-lisp-warning-packages ()
-  (flycheck-testsuite-with-hook emacs-lisp-mode-hook
-      (setq flycheck-emacs-lisp-package-user-dir
-            (flycheck-testsuite-resource-filename "dummy-elpa")
-            flycheck-emacs-lisp-initialize-packages t)
-    (flycheck-testsuite-without-checkers emacs-lisp-checkdoc
-      (flycheck-testsuite-should-syntax-check
-       "checkers/emacs-lisp-warning.el" 'emacs-lisp-mode
-       '(4 6 warning "message called with 0 arguments,\n    but requires 1+"
-           :checker emacs-lisp)))))
+(ert-deftest builtin-checker/emacs-lisp-without-file-name ()
+  "Test checkdoc checker in buffers without file names.
 
-(ert-deftest builtin-checker/emacs-lisp-inhibited-no-byte-compile ()
-  "Test that Emacs Lisp does not check when byte compilation is
-  disabled."
-  (flycheck-testsuite-with-resource-buffer "checkers/emacs-lisp-warning.el"
-    (emacs-lisp-mode)
-    (set (make-local-variable 'no-byte-compile) t)
-    (should (buffer-file-name))
-    (should (not (flycheck-may-use-checker 'emacs-lisp)))))
-
-(ert-deftest builtin-checker/emacs-lisp-inhibited-no-file-name ()
-  "Test that Emacs Lisp does not check buffers without file names."
+Regression test for https://github.com/flycheck/flycheck/issues/73 and
+https://github.com/bbatsov/prelude/issues/259."
   (with-temp-buffer
-    (insert "(message \"Hello World\")")
+    (insert-file-contents
+     (flycheck-testsuite-resource-filename "checkers/emacs-lisp.el"))
     (emacs-lisp-mode)
-    (should (not (buffer-file-name)))
-    (should (not (flycheck-may-use-checker 'emacs-lisp)))))
+    (should-not (buffer-file-name))
+    (flycheck-testsuite-buffer-sync)
+    ;; TODO: Consider whether checkdoc is really useful in buffers without file
+    ;; names…
+    (flycheck-testsuite-should-errors)))
 
-(ert-deftest builtin-checker/emacs-lisp-inhibited-autoloads ()
+(ert-deftest builtin-checker/emacs-lisp-does-not-check-autoloads-buffers ()
   "Test that Emacs Lisp does not check autoloads buffers.
 
 These buffers are temporary buffers generated during package
@@ -440,11 +384,26 @@ checker will refuse to check these.
 
 See URL `https://github.com/flycheck/flycheck/issues/45' and URL
 `https://github.com/bbatsov/prelude/issues/253'."
-  (flycheck-testsuite-with-resource-buffer "checkers/emacs-lisp-warning.el"
-    (emacs-lisp-mode)
-    (should (flycheck-may-use-checker 'emacs-lisp))
-    (rename-buffer "foo-autoloads.el")
-    (should (not (flycheck-may-use-checker 'emacs-lisp)))))
+  (let ((autoloads-file (locate-library "dash-autoloads")))
+    (should (f-file? autoloads-file))
+    (with-temp-buffer
+      (insert-file-contents autoloads-file 'visit)
+      (should-not (flycheck-may-use-checker 'emacs-lisp))
+      (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc)))))
+
+(ert-deftest builtin-checker/emacs-lisp-checkdoc-does-not-check-cask-files ()
+  (let ((cask-file (f-join flycheck-testsuite-source-dir "Cask")))
+    (with-temp-buffer
+      (insert-file-contents cask-file 'visit)
+      (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc)))))
+
+(ert-deftest builtin-checker/emacs-lisp-does-not-check-with-no-byte-compile ()
+  (flycheck-testsuite-with-hook emacs-lisp-mode-hook
+      (set (make-local-variable 'no-byte-compile) t)
+    (flycheck-testsuite-should-syntax-check
+     "checkers/emacs-lisp.el" 'emacs-lisp-mode
+     '(12 nil warning "First sentence should end with punctuation"
+          :checker emacs-lisp-checkdoc))))
 
 (ert-deftest builtin-checker/erlang-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'erlang)

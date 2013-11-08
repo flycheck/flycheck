@@ -1,4 +1,4 @@
-;;; emacs-lisp-checkdoc-warning.el -- Trigger checkdoc warning -*- lexical-binding: t; -*-
+;;; emacs-lisp.el -- Trigger Emacs Lisp warnings -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 
@@ -9,9 +9,14 @@
 ;;; Code:
 
 (defun foobar ()
-  "Does nothing really useful")
+  "Does nothing really useful"
+  (dummy-package-foo))
 
-;; The following is also to make checkdoc happy.
-(provide 'missing-period-in-docstring)
+(require 'dummy-package)
 
-;;; emacs-lisp-checkdoc-warning.el ends here
+(if t
+    (message)
+  (message "Hello foo"))
+
+(provide 'emacs-lisp)
+;;; emacs-lisp.el ends here
