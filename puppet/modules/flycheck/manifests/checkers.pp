@@ -1,14 +1,28 @@
+# Class: flycheck::checkers
+#
 # Install all syntax checkers
-
 class flycheck::checkers {
+
+  include flycheck::python
+  include flycheck::ruby
 
   include flycheck::checkers::erlang
   include flycheck::checkers::go
   include flycheck::checkers::haskell
   include flycheck::checkers::php
-  include flycheck::checkers::ruby
+
+  # Do not install Gems on Travis
+  if $::travis {
+    notice('Skipping Ruby Gems on Travis CI')
+  }
+  else {
+    include flycheck::checkers::gems
+  }
 
   # Various other syntax checkers
+  Package {
+    require => Class['apt::update'],
+  }
 
   # This PPA provides Clang 3.2 for Ubuntu 12.04
   apt::ppa { 'ppa:kxstudio-team/builds': }
@@ -52,12 +66,15 @@ class flycheck::checkers {
   package { $python_packages:
     ensure   => latest,
     provider => pip,
+    # We must have pip available
+    require  => Class['flycheck::python'],
   }
 
   package { 'closure-linter':
     ensure   => installed,
     provider => pip,
     source   => 'http://closure-linter.googlecode.com/files/closure_linter-latest.tar.gz',
+    require  => Class['flycheck::python'],
   }
 
   $packages = [ 'bash',            # bash/sh-bash

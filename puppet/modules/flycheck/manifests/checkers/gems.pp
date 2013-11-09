@@ -16,5 +16,6 @@ class flycheck::checkers::gems {
   package { $gem_packages:
     ensure   => latest,
     provider => gem,
+    require  => Class['flycheck::ruby']
   }
 }
