@@ -2,6 +2,8 @@
 
 class flycheck::checkers::gems {
 
+  include flycheck::ruby
+
   # We keep all gems in a separate class to install them separately on Travis
   # CI, as normal user, and not as root.  If we install Gems as root on Travis,
   # RVM screws up, and won't find our gems.
