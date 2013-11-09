@@ -58,9 +58,6 @@ puppet::module { ['puppetlabs/stdlib',
                   'puppetlabs/apt',
                   'puppetlabs/nodejs',
                   'gini/archive',
+                  'nodes/php',
                   'adrien/alternatives']:
-}
-
-puppet::module { 'nodes/php':
-  installed_name => 'puppet-php',
 }
