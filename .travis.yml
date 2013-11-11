@@ -13,7 +13,7 @@ before_install:
   # Bootstrap test environment, except Ruby gemsn
   - sudo FACTER_travis=true puppet apply --debug --modulepath=/etc/puppet/modules:./puppet/modules ./puppet/manifests/site.pp
   # Install Gems as non-root to not screw up with RVM
-  - puppet apply --debug --modulepath=/etc/puppet/modules:./puppet/modules ./puppet/manifests/travis.pp
+  - FACTER_travis=true puppet apply --debug --modulepath=/etc/puppet/modules:./puppet/modules ./puppet/manifests/travis.pp
 # Install our packages
 install:
   - make packages
