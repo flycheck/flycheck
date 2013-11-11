@@ -33,7 +33,8 @@
         (flycheck-display-errors-function nil))
     ;; Error display must not fail with nil
     (with-current-buffer "*Messages*"
-      (erase-buffer))
+      (let ((inhibit-read-only t))
+        (erase-buffer)))
     (flycheck-display-errors (list err))
     (with-current-buffer "*Messages*"
       (should-not (s-contains? (flycheck-error-message err)
@@ -55,7 +56,8 @@
   (let ((err (flycheck-error-new-at 10 20 'warning
                                     "This is a Flycheck error.")))
     (with-current-buffer "*Messages*"
-      (erase-buffer))
+      (let ((inhibit-read-only t))
+        (erase-buffer)))
     (flycheck-display-error-messages (list err))
     (with-current-buffer "*Messages*"
       (should (s-contains? (flycheck-error-message err) (buffer-string))))))
