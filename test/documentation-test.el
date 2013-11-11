@@ -52,9 +52,9 @@
 
 (ert-deftest flycheck-manual/all-options-are-documented ()
   "Tests that all option variables are documented in the manual."
-  (let ((config-vars (sort (-flatten (-keep #'flycheck-checker-option-vars
-                                            (flycheck-defined-checkers)))
-                           #'string<)))
+  (let ((config-vars (-sort #'string<
+                            (-flatten (-keep #'flycheck-checker-option-vars
+                                            (flycheck-defined-checkers))))))
     (flycheck-with-manual-buffer
       ;; Go to the beginning of the configuration section
       (search-forward "@node Configuration")
@@ -69,9 +69,9 @@
 
 (ert-deftest flycheck-manual/all-config-vars-are-documented ()
   "Tests that all configuration file variables are documented in the manual."
-  (let ((option-file-vars (sort (-keep #'flycheck-checker-config-file-var
-                                       (flycheck-defined-checkers))
-                                #'string<)))
+  (let ((option-file-vars (-sort #'string<
+                                (-keep #'flycheck-checker-config-file-var
+                                        (flycheck-defined-checkers)))))
     (flycheck-with-manual-buffer
       ;; Go to the beginning of the configuration section
       (search-forward "@node Configuration")
@@ -149,8 +149,8 @@
     (flycheck-testsuite-with-help-buffer
       (flycheck-describe-checker checker)
       (with-current-buffer (help-buffer)
-        (let ((option-vars (sort (flycheck-checker-option-vars checker)
-                                 #'string<))
+        (let ((option-vars (-sort #'string<
+                                  (flycheck-checker-option-vars checker)))
               ;; The regular expression to find the beginning of the option
               ;; variable list
               (regexp "This\\s-+syntax\\s-+checker\\s-+can\\s-+be\\s-+configured\\s-+with\\s-+these\\s-+options:\n"))
