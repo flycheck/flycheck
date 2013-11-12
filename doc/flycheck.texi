@@ -306,9 +306,10 @@ following to your @file{Cask} file:
 (depends-on "flycheck")
 @end lisp
 
-Flycheck supports GNU Emacs 24.2 and newer on Linux, OS X and any other
-decent flavor of Unix.  It should work with GNU Emacs 24.1, too, but it
-is not tested against this version of Emacs.
+Flycheck supports Emacs 24.  It is tested with Emacs 24.3, and Emacs
+snapshot builds.  It should work with GNU Emacs 24.1 and 24.2 as well,
+but it is not tested against these versions.  If it does not work with
+these versions, please report an issue.
 
 Flycheck does not support Windows, but tries to be compatible with it.
 You may try to use Flycheck on Windows.  It should mostly work, but
