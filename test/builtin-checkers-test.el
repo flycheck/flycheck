@@ -446,9 +446,13 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
 GOPATH environment variable is set properly and subpackages can be
 found)."
   :expected-result (flycheck-testsuite-fail-unless-checker 'go-build)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/go/src/b1/main.go" 'go-mode
-   '(4 2 error "import \"b2\": cannot find package" :checker go-build)))
+  (let ((message (if (flycheck-testsuite-travis-ci-p)
+                     ;; The Go version in Travis has a different error message
+                     "cannot find package \"b2\" in any of:"
+                   "import \"b2\": cannot find package")))
+    (flycheck-testsuite-should-syntax-check
+     "checkers/go/src/b1/main.go" 'go-mode
+     `(4 2 error ,message :checker go-build))))
 
 (ert-deftest builtin-checker/go-test-error ()
   "Test an import error."
