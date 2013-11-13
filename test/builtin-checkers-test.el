@@ -810,21 +810,15 @@ found)."
    '(21 nil error "Unknown target name: \"cool\"." :checker rst)
    '(26 nil error "Unexpected section title." :checker rst)))
 
-(defun flycheck-testsuite-jruby-expected-result ()
-  (if (flycheck-testsuite-travis-ci-p) :failed
-    (flycheck-testsuite-fail-unless-checker 'ruby-jruby)))
-
 (ert-deftest builtin-checker/ruby-jruby-syntax-error ()
-  :expected-result (flycheck-testsuite-jruby-expected-result)
-  (flycheck-testsuite-not-on-travis)
+  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-jruby)
   (flycheck-testsuite-without-checkers (ruby-rubocop ruby)
     (flycheck-testsuite-should-syntax-check
      "checkers/ruby-syntax-error.rb" 'ruby-mode
      '(5 nil error "syntax error, unexpected tCONSTANT" :checker ruby-jruby))))
 
 (ert-deftest builtin-checker/ruby-jruby-warning ()
-  :expected-result (flycheck-testsuite-jruby-expected-result)
-  (flycheck-testsuite-not-on-travis)
+  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-jruby)
   (flycheck-testsuite-without-checkers (ruby-rubocop ruby)
     (flycheck-testsuite-should-syntax-check
      "checkers/ruby-warnings.rb" 'ruby-mode
@@ -890,9 +884,7 @@ found)."
         :checker sass)))
 
 (ert-deftest builtin-checker/scala-syntax-error ()
-  :expected-result (if (flycheck-testsuite-travis-ci-p) :failed
-                     (flycheck-testsuite-fail-unless-checker 'scala))
-  (flycheck-testsuite-not-on-travis)
+  :expected-result (flycheck-testsuite-fail-unless-checker 'scala)
   (flycheck-testsuite-should-syntax-check
    "checkers/scala-syntax-error.scala" 'scala-mode
    '(3 nil error "identifier expected but '{' found." :checker scala)))
