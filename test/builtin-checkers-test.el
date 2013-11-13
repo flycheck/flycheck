@@ -217,7 +217,6 @@
        :checker coffee-coffeelint)))
 
 (ert-deftest builtin-checker/coffee-coffeelint-warning ()
-  "Test a coffeelint error demoted to a warning via config file."
   :expected-result (flycheck-testsuite-fail-unless-checker 'coffee-coffeelint)
   (flycheck-testsuite-with-hook coffee-mode-hook
       (setq flycheck-coffeelintrc "coffeelint.json")
