@@ -2080,6 +2080,7 @@ This appendix provides a comprehensive changelog of all releases:
 
 @menu
 * master        :: unreleased
+* 0.15          :: Nov 15, 2013
 * 0.14.1        :: Aug 15, 2013
 * 0.14          :: Aug 15, 2013
 * 0.13          :: Jun 28, 2013
@@ -2912,7 +2913,7 @@ Fix universal prefix argument for @code{flycheck-next-error} at
 
 @end itemize
 
-@node 0.14.1, master, 0.14, Changes
+@node 0.14.1, 0.15, 0.14, Changes
 @comment  node-name,  next,  previous,  up
 @unnumberedsec 0.14.1 (Aug 16, 2013)
 
@@ -2927,9 +2928,9 @@ Bug fixes:
 
 @end itemize
 
-@node master, , 0.14.1, Changes
+@node 0.15, master, 0.14.1, Changes
 @comment  node-name,  next,  previous,  up
-@unnumberedsec master (unreleased)
+@unnumberedsec 0.15 (Nov 15, 2013)
 
 @itemize @bullet
 @item
@@ -3072,6 +3073,10 @@ output@comma{} by simply ignoring them}
 @end itemize
 
 @end itemize
+
+@node master,  , 0.15, Changes
+@comment  node-name,  next,  previous,  up
+@unnumberedsec master (unreleased)
 
 @node Credits, GNU Free Documentation License, Changes, Top
 @comment  node-name,  next,  previous,  up
