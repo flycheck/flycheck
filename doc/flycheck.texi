@@ -2996,8 +2996,9 @@ files for C/C++ syntax checking}
 @item
 Add configuration file variable @code{flycheck-pylintrc} for Pylint
 @item
-@ghissue{214, New face @code{flycheck-error-list-highlight} to highlight
-the errors at point in the error list}
+@ghissue{214, New faces @code{flycheck-error-list-highlight-at-point}
+and @code{flycheck-error-list-highlight} to highlight the errors at
+point and at the current line respectively in the error list}
 @item
 @ghissue{214, The error list now automatically updates to show the
 errors of the current buffer}
