@@ -26,6 +26,8 @@
 
 ;;; Code:
 
+(require 'mocker)
+
 (require 'test-helper)
 
 (defvar flycheck-test-config-var)
