@@ -28,120 +28,148 @@
 
 (require 'test-helper)
 
-(require 'compile)                      ; For `compilation-next-error'
+(require 'cl-lib)
+(require 'mocker)
 
-(defun flycheck-test-next-error-function (next-error-fn)
-   (let (error-data)
-      (flycheck-testsuite-with-resource-buffer "many-errors-for-navigation.el"
-        (emacs-lisp-mode)
-        (flycheck-mode)
-        (flycheck-testsuite-buffer-sync)
-        (goto-char (point-min))
-        (funcall next-error-fn)
-        (should (= (point) 152))
-        (funcall next-error-fn)
-        (should (= (point) 175))
-        (funcall next-error-fn)
-        (should (= (point) 240))
-        (setq error-data (should-error (funcall next-error-fn)
-                                       :type flycheck-testsuite-user-error-type))
-        (should (string= (cadr error-data) "No more Flycheck errors"))
-        ;; Now try prefix argument and reset
-        (funcall next-error-fn 2 t)
-        (should (= (point) 175))
-        ;; And a negative prefix argument now
-        (funcall next-error-fn -1)
-        (should (= (point) 152))
-        (setq error-data (should-error (funcall next-error-fn 10)
-                                       :type flycheck-testsuite-user-error-type))
-        (should (string= (cadr error-data) "No more Flycheck errors")))))
+(defmacro flycheck-testsuite-with-nav-buffer (&rest body)
+  (declare (indent 0))
+  `(flycheck-testsuite-with-resource-buffer "checkers/emacs-lisp.el"
+     (emacs-lisp-mode)
+     (flycheck-mode)
+     (flycheck-testsuite-buffer-sync)
+     (goto-char (point-min))
+     ,@body))
 
-(ert-deftest flycheck-next-error/compile-mode ()
-  "Test navigation to the next error by means of compile mode."
-  (flycheck-test-next-error-function #'next-error))
+(defun flycheck-testsuite-at-nth-error (n)
+  (let* ((error (nth (1- n) flycheck-current-errors))
+         (mode flycheck-highlighting-mode)
+         (region (flycheck-error-region-for-mode error mode)))
+    (and (member error (flycheck-overlay-errors-at (point)))
+         (= (point) (car region)))))
 
-(ert-deftest flycheck-next-error ()
-  "Test navigation to the next error."
-  (flycheck-test-next-error-function #'flycheck-next-error))
+(defun flycheck-testsuite-explain--at-nth-error (n)
+  (let ((errors (flycheck-overlay-errors-at (point))))
+    (if (null errors)
+        (format "Expected to be at error %s, but no error at point %s"
+                n (point))
+      (let ((pos (cl-position (car errors) flycheck-current-errors)))
+        (format "Expected to be at error %s, but point %s is at error %s"
+                n (point) (1+ pos))))))
 
-(defun flycheck-test-previous-error-function (previous-error-fn)
-  (let (error-data)
-    (flycheck-testsuite-with-resource-buffer "many-errors-for-navigation.el"
-      (emacs-lisp-mode)
-      (flycheck-mode)
-      (flycheck-testsuite-buffer-sync)
-      (goto-char (point-max))
-      (funcall previous-error-fn)
-      (should (= (point) 240))
-      (funcall previous-error-fn)
-      (should (= (point) 175))
-      (funcall previous-error-fn)
-      (should (= (point) 152))
-      (setq error-data (should-error (funcall previous-error-fn)
-                                     :type flycheck-testsuite-user-error-type))
-      (should (string= (cadr error-data) "No more Flycheck errors"))
-      ;; Now go to buffer end again, and try a prefix arg
-      (goto-char (point-max))
-      (funcall previous-error-fn 2)
-      (should (= (point) 175))
-      (funcall previous-error-fn -1)
-      (should (= (point) 240))
-      (setq error-data (should-error (funcall previous-error-fn 10)
-                                     :type flycheck-testsuite-user-error-type))
-      (should (string= (cadr error-data) "No more Flycheck errors")))))
+(put 'flycheck-testsuite-at-nth-error 'ert-explainer
+     'flycheck-testsuite-explain--at-nth-error)
 
-(ert-deftest flycheck-previous-error/compile-mode ()
-  "Test navigation to the previous error by means of compile mode."
-  (flycheck-test-previous-error-function #'previous-error))
+(ert-deftest flycheck-next-error/goes-to-first-error ()
+  (flycheck-testsuite-with-nav-buffer
+    (flycheck-next-error)
+    (should (flycheck-testsuite-at-nth-error 1))))
 
-(ert-deftest flycheck-previous-error ()
-  "Test navigation to the previous error."
-  (flycheck-test-previous-error-function #'flycheck-previous-error))
+(ert-deftest flycheck-next-error/goes-to-next-error ()
+  (flycheck-testsuite-with-nav-buffer
+    (flycheck-next-error)
+    (flycheck-next-error)
+    (should (flycheck-testsuite-at-nth-error 2))))
 
-(defun flycheck-test-first-error-function (first-error-fn)
-  (let (error-data)
-    (flycheck-testsuite-with-resource-buffer "many-errors-for-navigation.el"
-      (emacs-lisp-mode)
-      (flycheck-mode)
-      (flycheck-testsuite-buffer-sync)
-      (goto-char (point-max))
-      (funcall first-error-fn)
-      (should (= (point) 152))
-      (funcall first-error-fn)
-      (should (= (point) 152))
-      (funcall first-error-fn 2)
-      (should (= (point) 175))
-      (setq error-data (should-error (funcall first-error-fn 10)
-                                     :type flycheck-testsuite-user-error-type))
-      (should (string= (cadr error-data) "No more Flycheck errors")))))
+(ert-deftest flycheck-next-error/errors-beyond-last-error ()
+  (flycheck-testsuite-with-nav-buffer
+    (goto-char (point-max))
+    (let ((err (should-error (flycheck-next-error)
+                             :type flycheck-testsuite-user-error-type)))
+      (should (string= (cadr err) "No more Flycheck errors")))))
 
-(ert-deftest flycheck-first-error/compile-mode ()
-  "Test navigation to the first error by means of compile mode."
-  (flycheck-test-first-error-function #'first-error))
+(ert-deftest flycheck-next-error/errors-when-moving-too-far ()
+  (flycheck-testsuite-with-nav-buffer
+    (let ((err (should-error (flycheck-next-error 4)
+                             :type flycheck-testsuite-user-error-type)))
+      (should (string= (cadr err) "No more Flycheck errors")))))
 
-(ert-deftest flycheck-first-error ()
-  "Test navigation to the first error."
-  (flycheck-test-first-error-function #'flycheck-first-error))
+(ert-deftest flycheck-next-error/navigate-by-two-errors ()
+  (flycheck-testsuite-with-nav-buffer
+    (flycheck-next-error 2)
+    (should (flycheck-testsuite-at-nth-error 2))))
+
+(ert-deftest flycheck-next-error/navigate-back-by-two-errors ()
+  (flycheck-testsuite-with-nav-buffer
+    (goto-char (point-max))
+    (flycheck-next-error -2)
+    (should (flycheck-testsuite-at-nth-error 1))))
+
+(ert-deftest flycheck-next-error/reset-navigates-to-first-error ()
+  (flycheck-testsuite-with-nav-buffer
+    (goto-char (point-max))
+    (flycheck-next-error 1 'reset)
+    (should (flycheck-testsuite-at-nth-error 1))))
 
 (ert-deftest flycheck-next-error/does-not-cross-narrowing ()
-  "Test that error navigation does not cross restrictions"
-  (flycheck-testsuite-with-resource-buffer "narrowing.el"
-    (emacs-lisp-mode)
-    (flycheck-mode)
+  (flycheck-testsuite-with-nav-buffer
     (re-search-forward "(defun .*")
-    (forward-line 1)
-    (narrow-to-defun 1)
-    (should (buffer-narrowed-p))
-    (flycheck-testsuite-buffer-sync)
-    (flycheck-next-error 1 :reset)
-    (should (= (point) 166))
+    (narrow-to-defun)
+    (goto-char (point-min))
     (flycheck-next-error)
-    (should (= (point) 198))
-    (should-error (flycheck-next-error)
-                  :type flycheck-testsuite-user-error-type)
+    (should (flycheck-testsuite-at-nth-error 1))
+    (let ((err (should-error (flycheck-next-error)
+                             :type flycheck-testsuite-user-error-type)))
+      (should (string= (cadr err) "No more Flycheck errors")))))
+
+(ert-deftest flycheck-previous-error/errors-before-first-error ()
+  (flycheck-testsuite-with-nav-buffer
+    (let ((err (should-error (flycheck-previous-error)
+                             :type flycheck-testsuite-user-error-type)))
+      (should (string= (cadr err) "No more Flycheck errors")))))
+
+(ert-deftest flycheck-previous-error/goes-to-last-error ()
+  (flycheck-testsuite-with-nav-buffer
+    (goto-char (point-max))
     (flycheck-previous-error)
-    (should (= (point) 166))
-    (should-error (flycheck-previous-error)
-                  :type flycheck-testsuite-user-error-type)))
+    (should (flycheck-testsuite-at-nth-error 2))))
+
+(ert-deftest flycheck-previous-error/navigate-by-two-errors ()
+  (flycheck-testsuite-with-nav-buffer
+    (goto-char (point-max))
+    (flycheck-previous-error 2)
+    (should (flycheck-testsuite-at-nth-error 1))))
+
+(ert-deftest flycheck-previous-error/navigate-back-by-two-errors ()
+  (flycheck-testsuite-with-nav-buffer
+    (flycheck-previous-error -2)
+    (should (flycheck-testsuite-at-nth-error 2))))
+
+(ert-deftest flycheck-previous-errors/errors-when-moving-too-far ()
+  (flycheck-testsuite-with-nav-buffer
+    (goto-char (point-max))
+    (let ((err (should-error (flycheck-previous-error 4)
+                             :type flycheck-testsuite-user-error-type)))
+      (should (string= (cadr err) "No more Flycheck errors")))))
+
+(ert-deftest flycheck-first-error/goes-to-first-error ()
+  (flycheck-testsuite-with-nav-buffer
+    (goto-char (point-max))
+    (flycheck-first-error)
+    (should (flycheck-testsuite-at-nth-error 1))))
+
+(ert-deftest flycheck-first-error/stays-at-first-error-if-called-again ()
+  (flycheck-testsuite-with-nav-buffer
+    (goto-char (point-max))
+    (flycheck-first-error)
+    (flycheck-first-error)
+    (should (flycheck-testsuite-at-nth-error 1))))
+
+(ert-deftest flycheck-first-error/goes-to-second-error ()
+  (flycheck-testsuite-with-nav-buffer
+    (goto-char (point-max))
+    (flycheck-first-error 2)
+    (should (flycheck-testsuite-at-nth-error 2))))
+
+(ert-deftest next-error/calls-flycheck-next-error-function ()
+  (flycheck-testsuite-with-nav-buffer
+    (mocker-let
+     ((flycheck-next-error-function (n reset)
+                                    ((:input '(1 nil))
+                                     (:input '(2 nil))
+                                     (:input '(2 reset)))))
+     (goto-char (point-min))
+     (next-error)
+     (next-error 2)
+     (next-error 2 'reset))))
 
 ;;; navigation-test.el ends here
