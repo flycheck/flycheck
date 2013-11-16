@@ -17,9 +17,9 @@ extension for GNU Emacs 24 with:
 
 ![Screenshot of Flycheck in action](https://github.com/flycheck/flycheck/raw/master/doc/screenshot.png)
 
-The screenshot was taken on Emacs 24.3 using the awesome
-[solarized-light][solarized] color theme and the great
-[Anonymous Pro](http://www.marksimonson.com/fonts/view/anonymous-pro) font.
+The screenshot shows Flycheck on Emacs 24.3.50 with the awesome [Zenburn][]
+color theme and the great
+[Source Code Pro](https://github.com/adobe/source-code-pro).
 
 
 Features
@@ -152,7 +152,7 @@ highlighted in the buffer and indicated with icons in the fringe.  Customize
 highlight errors.  They are too easily overlooked.  Make sure to customize these
 faces to add a striking background color or an underlying, or choose a color
 theme with reasonable Flycheck faces, for instance the excellent light or dark
-[solarized][] themes.
+[solarized][] themes, or the fancy [Zenburn][] theme.
 
 Use `C-c ! n` and `C-c ! p` to navigate between errors.  If the point is on an
 error, the error message is shown in the echo area or in a popup buffer after a
@@ -239,6 +239,7 @@ this program.  If not, see http://www.gnu.org/licenses/.
 See [COPYING](https://github.com/flycheck/flycheck/blob/master/COPYING) for
 details.
 
+[zenburn]: https://github.com/bbatsov/zenburn-emacs
 [solarized]: https://github.com/bbatsov/solarized-emacs
 [flycheck-color-mode-line]: https://github.com/flycheck/flycheck-color-mode-line
 [flycheck-d-unittest]: https://github.com/flycheck/flycheck-d-unittest

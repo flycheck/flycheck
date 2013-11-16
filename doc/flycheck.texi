@@ -144,9 +144,8 @@ coverage.
 @ifhtml
 @noindent
 And this is how it looks in action, using the awesome
-@uref{https://github.com/bbatsov/solarized-Emacs, solarized-light} color
-theme and the great
-@uref{http://www.marksimonson.com/fonts/view/anonymous-pro, Anonymous
+@uref{https://github.com/bbatsov/zenburn-emacs, Zenburn} color theme and
+the great @uref{https://github.com/adobe/source-code-pro, Source Code
 Pro} font:
 @center @image{screenshot,,,Flycheck in action}
 @end ifhtml
