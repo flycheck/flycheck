@@ -3575,10 +3575,30 @@ Why not:
      '(4 12 error "'foo' is defined but never used."
          :checker javascript-jshint))))
 
+(ert-deftest flycheck-define-checker/javascript-eslint-error ()
+  :tags '(builtin-checker external-tool language-javascript)
+  (skip-unless (flycheck-check-executable 'javascript-eslint))
+  (let ((flycheck-disabled-checkers '(javascript-jshint)))
+    (flycheck-test-should-syntax-check
+     "checkers/javascript-syntax-error.js" '(js-mode js2-mode js3-mode)
+     '(3 26 error "Unexpected token ILLEGAL" :checker javascript-eslint))))
+
+(ert-deftest flycheck-define-checker/javascript-eslint-warning ()
+  :tags '(builtin-checker external-tool language-javascript)
+  (skip-unless (flycheck-check-executable 'javascript-eslint))
+  (let ((flycheck-eslintrc "eslint.json")
+        (flycheck-disabled-checkers '(javascript-jshint)))
+    (flycheck-test-should-syntax-check
+     "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
+     '(3 1 warning "Missing \"use strict\" statement."
+         :checker javascript-eslint)
+     '(4 8 warning "foo is defined but never used"
+         :checker javascript-eslint))))
+
 (ert-deftest flycheck-define-checker/javascript-gjslint ()
   :tags '(builtin-checker external-tool language-javascript)
   (skip-unless (flycheck-check-executable 'javascript-gjslint))
-  (let ((flycheck-disabled-checkers '(javascript-jshint)))
+  (let ((flycheck-disabled-checkers '(javascript-jshint javascript-eslint)))
     (flycheck-test-should-syntax-check
      "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
      '(4 nil error "E:0131: Single-quoted string preferred over double-quoted string."
