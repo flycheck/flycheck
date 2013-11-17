@@ -1335,10 +1335,15 @@ given, @b{both} must match for this syntax checker to be used.
 @item :next-checker (@var{item} ...)
 An unquoted list defining the syntax checker to run after this checker.
 
+Flycheck tries all items in the order of declaration, and runs the first
+usable one.  Subsequent items are @emph{not} used.
+
 Each @var{item} is either a syntax checker symbol or a cons cell
-@code{(@var{predicate} . @var{checker})}.  In the former case, the
-syntax checker is always considered.  In the later case, @var{checker}
-is only considered if the @var{predicate} matches.
+@code{(@var{predicate} . @var{checker})}.
+
+In the former case, the syntax checker is usable, if it is eligible for
+automatic selection.  In the latter case, the @var{predicate} must also
+match.
 
 @var{predicate} is either @code{no-errors} or @code{warnings-only}:
 
