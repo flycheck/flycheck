@@ -615,6 +615,21 @@ Show the documentation of a syntax checker.
 @comment  node-name,  next,  previous,  up
 @section Syntax checker configuration
 
+@subsection Syntax checker executables
+
+For each syntax checker, there is a buffer-local, customizable variable
+@code{flycheck-@var{checker}-executable}, where @var{checker} is the
+name of the syntax checker.
+
+The value of this variable is either nil, or a string.  In the former
+case, Flycheck uses the default executable from the syntax checker
+definition when executing the syntax checker.  In the latter case, it
+uses the value of the variable as executable.
+
+You can use these variables to override the executable from the
+definition per buffer.  For instance, you could use a different Emacs
+version with the @code{emacs-lisp} or @code{emacs-lisp-checkdoc}.
+
 @subsection Syntax checker options
 
 Some syntax checkers can be configured via options.  The following
@@ -1099,8 +1114,17 @@ The following @var{properties} constitute a syntax checker:
 An unquoted list describing the syntax checker command to execute.
 
 @var{executable} must be a string with the executable of this syntax
-checker.  Each @var{arg} is an argument to the executable, either as
-string, or as one of the following special symbols and forms:
+checker.
+
+A customizable, buffer-local variable
+@code{flycheck-@var{symbol}-executable} is implicitly defined to allow
+overriding of the executable.  If this variable is non-nil, Flycheck
+uses the value of the variable as executable, otherwise it falls back to
+@var{executable}.  In either case, the executable is checked with
+@code{executable-find} before use.
+
+Each @var{arg} is an argument to the executable, either as string, or as
+one of the following special symbols and forms:
 
 @table @code
 @item source
@@ -3087,6 +3111,15 @@ output@comma{} by simply ignoring them}
 @item
 Argument substitution is no longer performed on syntax checker
 executables.  The executable must be a string.
+@end itemize
+
+@item
+New features:
+
+@itemize @bullet
+@item
+@ghissue{272, Define variables to override the executables of syntax
+checkers}
 @end itemize
 
 @end itemize

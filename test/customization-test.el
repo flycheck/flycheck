@@ -27,6 +27,7 @@
 ;;; Code:
 
 (require 'test-helper)
+(require 'flycheck)
 
 (ert-deftest flycheck-checkers/there-are-registered-checkers ()
   (should flycheck-checkers))
@@ -89,5 +90,12 @@
 
 (ert-deftest flycheck-completion-system/default ()
   (should (equal flycheck-completion-system 'ido)))
+
+(ert-deftest flycheck-executable-variables ()
+  (dolist (checker flycheck-checkers)
+    (let ((variable (flycheck-checker-executable-variable checker)))
+      (should (symbolp variable))
+      (should (custom-variable-p variable))
+      (should-not (symbol-value variable)))))
 
 ;;; customization-test.el ends here

@@ -105,6 +105,12 @@ buffer-local wherever it is set."
   :group 'flycheck
   :link '(info-link "(flycheck)Configuration"))
 
+(defgroup flycheck-executables nil
+  "Executables of syntax checkers."
+  :prefix "flycheck-"
+  :group 'flycheck
+  :link '(info-link "(flycheck)Configuration"))
+
 (defgroup flycheck-faces nil
   "Faces used by on-the-fly syntax checking."
   :prefix "flycheck-"
@@ -1193,9 +1199,16 @@ The following PROPERTIES constitute a syntax checker:
      An unquoted list describing the syntax checker command to
      execute.
 
-     EXECUTABLE must be a string naming the executable of this
-     syntax checker.  Each ARG is an argument to the executable,
-     either as string, or as special symbol or form for
+     EXECUTABLE must be a string with the executable of this
+     syntax checker.  A customizable, buffer-local variable
+     `flycheck-CHECKER-executable' is implicitly defined to allow
+     overriding of the executable.  If this variable is non-nil,
+     Flycheck uses the value of the variable as executable,
+     otherwise it falls back to EXECUTABLE.  In either case, the
+     executable is checked with `executable-find' before use.
+
+     Each ARG is an argument to the executable, either as string,
+     or as special symbol or form for
      `flycheck-substitute-argument', which see.
 
 `:error-patterns ((LEVEL SEXP ...) ...)'
@@ -1266,7 +1279,8 @@ value."
         (patterns (plist-get properties :error-patterns))
         (modes (plist-get properties :modes))
         (predicate (plist-get properties :predicate))
-        (next-checkers (plist-get properties :next-checkers)))
+        (next-checkers (plist-get properties :next-checkers))
+        (executable-var (intern (format "flycheck-%s-executable" symbol))))
     (when (null command)
       (error "Missing :command"))
     (unless (stringp (car command))
@@ -1306,6 +1320,23 @@ value."
        (put ',symbol :flycheck-predicate #',predicate)
        (put ',symbol :flycheck-next-checkers ',next-checkers)
        (put ',symbol :flycheck-file (flycheck-current-load-file))
+
+       ;; Declare the variable for the executable
+       (defcustom ,executable-var nil
+         ,(format "The executable of the %s syntax checker.
+
+Either a string containing the name or the path of the
+executable, or nil to use the default executable from the syntax
+checker declaration.
+
+The default executable is %S." symbol (car command))
+         :type '(choice (const :tag "Default executable" nil)
+                        (string :tag "Name or path"))
+         :group 'flycheck-executables
+         :risky t)
+       (make-variable-buffer-local ',executable-var)
+       (put ',symbol :flycheck-executable-var ',executable-var)
+
        (put ',symbol :flycheck-checker t))))
 
 ;;;###autoload
@@ -1397,9 +1428,22 @@ A valid checker is a symbol define as syntax checker with
 `flycheck-define-checker'."
   (get checker :flycheck-checker))
 
-(defun flycheck-checker-executable (checker)
-  "Get the command executable of CHECKER."
+(defun flycheck-checker-executable-variable (checker)
+  "Get the executable variable of CHECKER."
+  (get checker :flycheck-executable-var))
+
+(defun flycheck-checker-default-executable (checker)
+  "Get the default executable of CHECKER."
   (car (get checker :flycheck-command)))
+
+(defun flycheck-checker-executable (checker)
+  "Get the command executable of CHECKER.
+
+The executable is either the value of the variable
+`flycheck-CHECKER-executable', or the default executable given in
+the syntax checker definition, if the variable is nil."
+  (or (symbol-value (flycheck-checker-executable-variable checker))
+      (flycheck-checker-default-executable checker)))
 
 (defun flycheck-checker-arguments (checker)
   "Get the command arguments of CHECKER."
@@ -1948,7 +1992,7 @@ Pop up a help buffer with the documentation of CHECKER."
                      (called-interactively-p 'interactive))
     (save-excursion
       (with-help-window (help-buffer)
-        (let ((executable (flycheck-checker-executable checker))
+        (let ((executable (flycheck-checker-default-executable checker))
               (filename (flycheck-checker-file checker))
               (modes (flycheck-checker-modes checker))
               (config-file-var (flycheck-checker-config-file-var checker))
@@ -3642,6 +3686,12 @@ The checker runs `checkdoc-current-buffer'."
              (and (buffer-file-name)
                   (member (f-filename (buffer-file-name))
                           '("Cask" "Carton" ".dir-locals.el")))))))
+
+(progn
+  ;; Use the currently running Emacs by default.
+  (setcar (get 'emacs-lisp :flycheck-command) flycheck-this-emacs-executable)
+  (setcar (get 'emacs-lisp-checkdoc :flycheck-command)
+          flycheck-this-emacs-executable))
 
 (flycheck-define-checker erlang
   "An Erlang syntax checker using the Erlang interpreter."

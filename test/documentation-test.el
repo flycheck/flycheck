@@ -127,7 +127,7 @@
         (re-search-forward
          "This\\s-+syntax\\s-+checker\\s-+executes\\s-+\"\\(.+?\\)\"\\(?:\\.\\|,\\)")
         (should (string= (match-string 1)
-                         (flycheck-checker-executable checker)))))))
+                         (flycheck-checker-default-executable checker)))))))
 
 (ert-deftest flycheck-describe-checker/help-shows-config-file-var ()
   "Test that the config file var appears in syntax checker help."
