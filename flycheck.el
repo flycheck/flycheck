@@ -1189,13 +1189,14 @@ shown with `flycheck-describe-checker'.
 
 The following PROPERTIES constitute a syntax checker:
 
-`:command (COMMAND ARG ...)'
+`:command (EXECUTABLE ARG ...)'
      An unquoted list describing the syntax checker command to
-     execute.  `COMMAND' and `ARG' are subject to substitution of
-     special symbols and forms by `flycheck-substitute-argument',
-     which provide the file to check, options and configuration
-     file paths.  The `COMMAND' is checked with `executable-find'
-     before execution.
+     execute.
+
+     EXECUTABLE must be a string naming the executable of this
+     syntax checker.  Each ARG is an argument to the executable,
+     either as string, or as special symbol or form for
+     `flycheck-substitute-argument', which see.
 
 `:error-patterns ((LEVEL SEXP ...) ...)'
      An unquoted list of error patterns to parse the output of
@@ -1268,8 +1269,10 @@ value."
         (next-checkers (plist-get properties :next-checkers)))
     (when (null command)
       (error "Missing :command"))
-    (unless (flycheck-command-arguments-list-p command)
-      (error "Invalid command %S " command))
+    (unless (stringp (car command))
+      (error "Invalid command executable %S" (car command)))
+    (unless (flycheck-command-arguments-list-p (cdr command))
+      (error "Invalid command arguments %S" command))
     (when (and (null parser) (null patterns))
       (error "Missing :error-pattern or :error-parser"))
     (unless (or (null parser) (functionp parser))
@@ -1394,6 +1397,14 @@ A valid checker is a symbol define as syntax checker with
 `flycheck-define-checker'."
   (get checker :flycheck-checker))
 
+(defun flycheck-checker-executable (checker)
+  "Get the command executable of CHECKER."
+  (car (get checker :flycheck-command)))
+
+(defun flycheck-checker-arguments (checker)
+  "Get the command arguments of CHECKER."
+  (cdr (get checker :flycheck-command)))
+
 (defun flycheck-checker-modes (checker)
   "Get the modes of CHECKER."
   (let ((modes (get checker :flycheck-modes)))
@@ -1408,15 +1419,6 @@ A valid checker is a symbol define as syntax checker with
 (defun flycheck-checker-next-checkers (checker)
   "Get the next checkers for CHECKER."
   (get checker :flycheck-next-checkers))
-
-(defun flycheck-checker-command (checker)
-  "Get the raw command of CHECKER.
-
-The command list returned by this function is not substituted,
-and hence still contains special tags and symbols.  Use
-`flycheck-checker-substituted-command' to get an executable
-command list with no special tags and symbols."
-  (get checker :flycheck-command))
 
 (defun flycheck-checker-error-patterns (checker)
   "Get the error patterns of CHECKER.
@@ -1629,14 +1631,14 @@ are substituted within the body of cells!"
          (error "Invalid result from evaluation of %S: %S" form result))))
     (_ (error "Unsupported argument %S" arg))))
 
-(defun flycheck-checker-substituted-command (checker)
-  "Get the substituted command of a CHECKER.
+(defun flycheck-checker-substituted-arguments (checker)
+  "Get the substituted arguments of a CHECKER.
 
-Substitute each argument in the command of CHECKER using
+Substitute each argument of CHECKER using
 `flycheck-substitute-argument'.  This replaces any special
 symbols in the command."
   (-flatten (--keep (flycheck-substitute-argument it checker)
-                    (flycheck-checker-command checker))))
+                    (flycheck-checker-arguments checker))))
 
 (defun flycheck-substitute-shell-argument (arg checker)
   "Substitute ARG for CHECKER.
@@ -1655,23 +1657,16 @@ are substituted with the buffer file name."
 (defun flycheck-checker-shell-command (checker)
   "Get a shell command for CHECKER.
 
-Substitutions are performed like in
-`flycheck-checker-substituted-command', but with
+Perform substitution in the arguments of CHECKER, but with
 `flycheck-substitute-shell-argument'.
 
 Return the command of CHECKER as single string, suitable for
 shell execution."
-  (s-join " " (--keep (flycheck-substitute-shell-argument it checker)
-                      (flycheck-checker-command checker))))
-
-(defun flycheck-checker-executable (checker)
-  "Get the executable of CHECKER.
-
-The executable is the `car' of the checker command as returned by
-`flycheck-checker-command'."
-  (let* ((command (flycheck-checker-command checker))
-         (executable (flycheck-substitute-argument (car command) checker)))
-    (if (listp executable) (car executable) executable)))
+  (concat
+   (shell-quote-argument (flycheck-checker-executable checker))
+   " "
+   (s-join " " (--keep (flycheck-substitute-shell-argument it checker)
+                       (flycheck-checker-arguments checker)))))
 
 (defun flycheck-check-modes (checker)
   "Check the allowed modes of CHECKER.
@@ -3173,9 +3168,8 @@ _EVENT is ignored."
 (defun flycheck-start-checker (checker)
   "Start a syntax CHECKER."
   (condition-case err
-      (let* ((command (flycheck-checker-substituted-command checker))
-             (program (car command))
-             (args (cdr command))
+      (let* ((program (flycheck-checker-executable checker))
+             (args (flycheck-checker-substituted-arguments checker))
              (process-connection-type nil) ; Use pipes to receive checker output
              (process (apply 'start-process
                              "flycheck" (current-buffer)
@@ -3561,8 +3555,7 @@ This variable has no effect, if
 
 (flycheck-define-checker emacs-lisp
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler."
-  :command ((eval flycheck-this-emacs-executable)
-            (eval flycheck-emacs-args)
+  :command ("emacs" (eval flycheck-emacs-args)
             (option-list "--directory" flycheck-emacs-lisp-load-path nil
                          ;; Expand relative paths against the directory of the
                          ;; buffer to check
@@ -3635,8 +3628,7 @@ This variable has no effect, if
   "An Emacs Lisp style checker using CheckDoc.
 
 The checker runs `checkdoc-current-buffer'."
-  :command ((eval flycheck-this-emacs-executable)
-            (eval flycheck-emacs-args) "--eval"
+  :command ("emacs" (eval flycheck-emacs-args) "--eval"
             (eval (flycheck-sexp-to-string flycheck-emacs-lisp-checkdoc-form))
             source)
   :error-patterns
