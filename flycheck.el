@@ -3467,9 +3467,12 @@ See URL `http://elixir-lang.org/'."
             line-end))
   :modes elixir-mode)
 
-(defconst flycheck-emacs-command
-  `(,(concat invocation-directory invocation-name) "-Q" "--batch")
-  "A command to execute an Emacs Lisp form in a background process.")
+(defconst flycheck-this-emacs-executable
+  (concat invocation-directory invocation-name)
+  "The path to the currently running Emacs executable.")
+
+(defconst flycheck-emacs-args '("-Q" "--batch")
+  "Common arguments to Emacs invocations.")
 
 (defconst flycheck-emacs-lisp-check-form
   '(progn
@@ -3558,7 +3561,8 @@ This variable has no effect, if
 
 (flycheck-define-checker emacs-lisp
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler."
-  :command ((eval flycheck-emacs-command)
+  :command ((eval flycheck-this-emacs-executable)
+            (eval flycheck-emacs-args)
             (option-list "--directory" flycheck-emacs-lisp-load-path nil
                          ;; Expand relative paths against the directory of the
                          ;; buffer to check
@@ -3631,7 +3635,8 @@ This variable has no effect, if
   "An Emacs Lisp style checker using CheckDoc.
 
 The checker runs `checkdoc-current-buffer'."
-  :command ((eval flycheck-emacs-command) "--eval"
+  :command ((eval flycheck-this-emacs-executable)
+            (eval flycheck-emacs-args) "--eval"
             (eval (flycheck-sexp-to-string flycheck-emacs-lisp-checkdoc-form))
             source)
   :error-patterns
