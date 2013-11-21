@@ -1106,9 +1106,10 @@ are substituted before executing the syntax checker:
 
 @table @code
 @item source
-This symbol is substituted with the file to check.  This file is a
-temporary file with the contents of the buffer to check, created in the
-system's temporary directory.
+The file to check.
+
+This file is a temporary file with the contents of the buffer to check,
+created in the system's temporary directory.
 
 If the buffer to check has a file name, the non-directory component of
 the name of the temporary file will be the same as in the buffer's file
@@ -1122,10 +1123,11 @@ This symbol is the @b{preferred} way to pass the input file to your
 syntax checker.
 
 @item source-inplace
-This symbol is substituted with the file to check.  This file is a
-temporary file with the contents of the buffer to check, created @b{in
-the same directory} as the buffer's file.  The name of the file is
-random.
+The file to check.
+
+This file is a temporary file with the contents of the buffer to check,
+created @b{in the same directory} as the buffer's file.  The name of the
+file is random.
 
 If the buffer has no file name, this symbol is equivalent to
 @code{source}.
@@ -1135,8 +1137,8 @@ other files} from the source directory (e.g. include files in C, or
 Python modules).
 
 @item source-original
-This symbol is substituted with @code{buffer-file-name}, or an empty
-string, if the buffer has no file name.
+The file name of the current buffer, as by @code{buffer-file-name}, or
+an empty string, if the buffer has no file name.
 
 This symbol is provided to @b{additionally} pass the real name of the
 file to check to a syntax checker.
@@ -1154,8 +1156,8 @@ out-dated errors:
 @end lisp
 
 @item temporary-directory
-This symbol is substituted with the path of an existing temporary
-directory, which is unique on each execution of the syntax checker.
+The path to an existing temporary directory, which is unique on each
+execution of the syntax checker.
 
 Use this symbol if you need to move files created by a syntax checker
 out of the way.
@@ -1164,8 +1166,8 @@ See the declaration of the @code{elixir} syntax checker for an
 application of this symbol.
 
 @item temporary-file-name
-This symbol is substituted with a unique temporary file name.  The file
-itself is not created.
+The path to a temporary file, which is unique on each execution of the
+syntax checker.  The file is @emph{not} created automatically.
 
 Use this symbol if you need to move files created by a syntax checker
 out of the way.
@@ -1174,17 +1176,18 @@ See the declaration of the @code{go-build} syntax checker for an
 application of this symbol.
 
 @item (config-file @var{option} @var{variable})
-This cell is substituted with a configuration file for the syntax
-checker.  @var{option} is a string containing the option that specifies
-a configuration file to the syntax checker tool.
+A configuration file for this syntax checker.
+
+@var{option} is a string containing the option that specifies a
+configuration file to the syntax checker tool.
 
 @var{variable} is a symbol referring to a variable from which to obtain
 the name or path of the configuration file.  @xref{Configuration}, for
 more information about syntax checker configuration.  Define this
 variable with @code{flycheck-def-config-file-var}.
 
-If the configuration file is found, the cell is substituted with the
-@var{option} and the absolute path to the configuration file as string.
+If the configuration file is found, pass the @var{option} and the
+absolute path to the configuration file to the syntax checker.
 Otherwise the cell is simply dropped from the arguments of the syntax
 checker.
 
@@ -1194,56 +1197,74 @@ single argument to the syntax checker.  Otherwise, @var{option} and the
 configuration file path are given as two separate arguments.
 
 @item (option @var{option} @var{variable} [@var{filters}])
-This cell is substituted with the value of @var{variable}.  @var{option}
-is a string containing the option for with to specify the value.
-@var{filter} is an optional function to be applied to the value of
-@var{variable} before substitution.  @xref{Option filters}, for a list
-of built-in option filters.
+The value of a variable.
+
+@var{option} is a string containing the option for with to specify the
+value.  @var{filter} is an optional function to be applied to the value
+of @var{variable} before use.  @xref{Option filters}, for a list of
+built-in option filters.
 
 @var{variable} is a symbol referring to a variable whose value to use.
 @xref{Configuration}, for more information about syntax checker
 configuration.  Define this variable with
 @code{flycheck-def-option-var}.
 
-If @var{variable} is not @var{nil} after applying @var{filter}, the cell
-is substituted with the @var{option} and the value of @var{variable}
-after applying @var{filter}.  Otherwise the cell is simply dropped from
-the arguments of the syntax checker.
+If @var{variable} is not @code{nil} after applying @var{filter}, pass
+@var{option} and the value of @var{variable} after applying
+@var{filter}.  Otherwise the cell is simply dropped from the arguments
+of the syntax checker.
 
 An @var{option} ending with a @code{=} character is treated like in a
 @code{config-file} cell.
 
 @item (option-list @var{option} @var{variable} [@var{prepend-fn} [@var{filter}]])
-This cell is similar to @code{option}, but for option lists.
+Like @code{option}, but for lists of options.
 
-The value of @var{variable} must be a list, and @var{option} is
-prepended to each non-nil item in the list, using the function
-@var{prepend-fn}.  @var{prepend-fn} is called with @var{option} as first
-and each item in the list as second argument.  It should return the
-result of prepending @var{option} to the item, either as list or as
-string.  If omitted, it defaults to @code{list}, so by default,
-@var{option} will be prepended as a separate argument.
+@var{option} is a string containing the option to specify.
+@var{variable} is a variable whose value must be a list.
+@var{prepend-fn} is a function called with @var{option} as first and the
+item of the list as second argument.  It should return the result
+of prepending @var{option} to the item, either as list or as string.  If
+omitted, it defaults to @code{list}, so by default, @var{option} will be
+prepended as a separate argument.
 
 @var{filter} is an optional function to be applied to each item in the
-list before substitution.  Items for which the filter returns nil are
-dropped.  @xref{Option filters}, for a list of built-in option filters.
+list before use.  @xref{Option filters}, for a list of built-in option
+filters.
+
+For each item in the value of @var{variable}, which is not @code{nil}
+after applying @var{filter}, pass @var{option} the the item after
+applying @var{filter}, as returned by @var{prepend-fn}.
+
+Nil items are simply ignored.
 
 @item (option-flag @var{option} @var{variable})
-This cell is substituted with @var{option}, if the value of
-@var{variable} is non-nil.  Otherwise it is simply dropped from the
-argument list.
+Like @code{option}, but for boolean flags.
+
+@var{option} is a string containing the option to
+specify. @var{variable} is a symbol referring to a variable.
+
+If @var{variable} is non-nil, pass @var{option} to the syntax checker.
+Otherwise just ignore this argument.
 
 @item (eval @var{form})
-This cell is substituted with a result of evaluating @var{form}.
-@var{form} must either return a string or a list of strings, or
-@code{nil} to indicate that nothing should be substituted for
-@var{cell}.  In case of other return values an error is signaled.
-@emph{No} further substitutions are performed, neither in @var{form}
-before it is evaluated, nor in the result of evaluating FORM.
+The result of evaluating @var{form}.
+
+@var{form} is an arbitrary Emacs Lisp form.  It is evaluated literally
+@emph{each time} the syntax checker is executed.  Special forms and
+symbols in @var{form} are @emph{not} replaced!
+
+@var{form} must evaluate either to a string, a list of strings or nil.
+For any other result, signal an error.
+
+If the result of @var{form} is not nil, pass the result to the syntax
+checker @emph{literally}.  Special symbols and forms in the result of
+@var{form} are @emph{not} replaced.
 @end table
 
-Note that substitution is @b{not} recursive.  No symbols or cells are
-substituted within the body of cells!
+Note these special forms and symbols do @b{not} apply recursively.
+Within the body of a cell, special forms and symbols are @b{not}
+replaced!
 
 This property is @b{mandatory}.
 
