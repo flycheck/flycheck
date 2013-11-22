@@ -115,6 +115,7 @@ buffer-local wherever it is set."
   '(bash
     c/c++-clang
     c/c++-cppcheck
+    cfengine
     coffee
     coffee-coffeelint
     css-csslint
@@ -3362,6 +3363,22 @@ See URL `http://cppcheck.sourceforge.net/'."
             source)
   :error-parser flycheck-parse-cppcheck
   :modes (c-mode c++-mode))
+
+(flycheck-define-checker cfengine
+  "A CFEngine syntax checker using cf-promises.
+
+See URL `http://cfengine.com/'."
+  :command ("cf-promises" "-f"
+            ;; We must stay in the same directory to resolve @include
+            source-inplace)
+  :error-patterns
+  ((info line-start (file-name) ":" line ":" column
+            ": note: " (message) line-end)
+   (warning line-start (file-name) ":" line ":" column
+            ": warning: " (message) line-end)
+   (error line-start (file-name) ":" line ":" column
+          ": " (or "fatal error" "error") ": " (message) line-end))
+  :modes (cfengine-mode cfengine3-mode))
 
 (flycheck-define-checker coffee
   "A CoffeeScript syntax checker using coffee.
