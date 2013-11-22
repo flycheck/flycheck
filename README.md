@@ -39,6 +39,7 @@ Features
   - Erlang
   - Go
   - Haml
+  - Handlebars
   - Haskell
   - HTML
   - Javascript
