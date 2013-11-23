@@ -2019,6 +2019,9 @@ Pop up a help buffer with the documentation of CHECKER."
               (goto-char (point-min))
               (forward-paragraph)
               (fill-region-as-paragraph (point) (point-max))))
+          (princ "\n\n")
+          (princ (format "  The executable can be overridden with `%s'."
+                         (flycheck-checker-executable-variable checker)))
           (princ "\n")
           (when option-vars
             (princ "\n  This syntax checker can be configured with these options:\n\n")
