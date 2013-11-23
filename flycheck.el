@@ -3243,6 +3243,43 @@ _EVENT is ignored."
     (interrupt-process flycheck-current-process)))
 
 
+;;;; Syntax checker executable
+(defun flycheck-set-checker-executable (checker &optional executable)
+  "Set the EXECUTABLE of CHECKER.
+
+CHECKER is a syntax checker symbol.  EXECUTABLE is a string with
+the name of a executable or the path to an executable file, which
+is to be used as executable for CHECKER.  If omitted or nil,
+reset the executable of CHECKER.
+
+Interactively, prompt for a syntax checker and an executable
+file, and set the executable of the selected syntax checker.
+With prefix arg, prompt for a syntax checker only, and reset the
+executable of the select checker to the default.
+
+Set the executable variable of CHECKER, that is,
+`flycheck-CHECKER-executable' to EXECUTABLE.  Signal
+`user-error', if EXECUTABLE does not denote a command or an
+executable file.
+
+This command is intended for interactive use only.  In Lisp, just
+`let'-bind the corresponding variable, or set it directly.  Use
+`flycheck-checker-executable-variable' to obtain the executable
+variable symbol for a syntax checker."
+  (interactive
+   (let* ((checker (read-flycheck-checker "Syntax checker: "))
+          (default-executable (flycheck-checker-default-executable checker))
+          (executable (if current-prefix-arg
+                          nil
+                        (read-file-name "Executable: " nil default-executable
+                                        nil nil #'executable-find))))
+     (list checker executable)))
+  (when (and executable (not (executable-find executable)))
+    (user-error "%s is no executable" executable))
+  (let ((variable (flycheck-checker-executable-variable checker)))
+    (set variable executable)))
+
+
 ;;;; Built-in checkers
 (flycheck-define-checker bash
   "A Bash syntax checker using the Bash shell.

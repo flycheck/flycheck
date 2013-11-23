@@ -317,17 +317,6 @@
           :checker emacs-lisp-checkdoc)
      `(15 1 error ,msg :checker emacs-lisp))))
 
-(ert-deftest builtin-checker/emacs-lisp-overridden-executable ()
-  (flycheck-testsuite-with-hook 'emacs-lisp-mode-hook
-      (setq flycheck-emacs-lisp-executable
-            (flycheck-testsuite-resource-filename "bin/dummy-emacs"))
-    (flycheck-testsuite-should-syntax-check
-     "checkers/emacs-lisp.el" 'emacs-lisp-mode
-     '(12 nil warning "First sentence should end with punctuation"
-          :checker emacs-lisp-checkdoc)
-     '(17 4 error "t is not true!" :checker emacs-lisp)
-     '(19 11 warning "This is a stupid message" :checker emacs-lisp))))
-
 (ert-deftest builtin-checker/emacs-lisp-load-path ()
   (flycheck-testsuite-with-hook emacs-lisp-mode-hook
       (setq flycheck-emacs-lisp-load-path

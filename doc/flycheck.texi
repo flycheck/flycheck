@@ -626,9 +626,25 @@ case, Flycheck uses the default executable from the syntax checker
 definition when executing the syntax checker.  In the latter case, it
 uses the value of the variable as executable.
 
-You can use these variables to override the executable from the
-definition per buffer.  For instance, you could use a different Emacs
-version with the @code{emacs-lisp} or @code{emacs-lisp-checkdoc}.
+Use these variables to override the executable from the definition per
+buffer.  For instance, you could use a different Emacs version with the
+@code{emacs-lisp} or @code{emacs-lisp-checkdoc}.
+
+You can either set this variable directly in your @file{init.el}, or
+change it interactively:
+
+@table @kbd
+@item C-c ! e
+@itemx M-x flycheck-set-checker-executable
+@findex flycheck-set-checker-executable
+Set the executable of a syntax checker in the current buffer.
+
+Prompt for a syntax checker, and an executable file, and set the
+corresponding executable variable.
+
+With prefix arg, prompt for a syntax checker and reset its executable to
+the default.
+@end table
 
 @subsection Syntax checker options
 
@@ -3120,6 +3136,9 @@ New features:
 @item
 @ghissue{272, Define variables to override the executables of syntax
 checkers}
+@item
+@ghissue{272, Interactively set the executable of a syntax checker with
+@code{flycheck-set-checker-executable}}
 @end itemize
 
 @end itemize
