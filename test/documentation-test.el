@@ -127,7 +127,18 @@
         (re-search-forward
          "This\\s-+syntax\\s-+checker\\s-+executes\\s-+\"\\(.+?\\)\"\\(?:\\.\\|,\\)")
         (should (string= (match-string 1)
-                         (flycheck-checker-executable checker)))))))
+                         (flycheck-checker-default-executable checker)))))))
+
+(ert-deftest flycheck-describe-checker/help-shows-executable-variable ()
+  (dolist (checker (flycheck-defined-checkers))
+    (flycheck-testsuite-with-help-buffer
+      (flycheck-describe-checker checker)
+      (with-current-buffer (help-buffer)
+        (goto-char (point-min))
+        (re-search-forward
+         "The executable can be overridden with `\\(.+?\\)'.")
+        (let ((var (flycheck-checker-executable-variable checker)))
+          (should (string= (match-string 1) (symbol-name var))))))))
 
 (ert-deftest flycheck-describe-checker/help-shows-config-file-var ()
   "Test that the config file var appears in syntax checker help."
