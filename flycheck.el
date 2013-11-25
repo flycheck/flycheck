@@ -561,6 +561,7 @@ This variable is a normal hook."
     (define-key pmap (kbd "C-w") 'flycheck-copy-messages-as-kill)
     (define-key pmap "/" 'flycheck-google-messages)
     (define-key pmap "s" 'flycheck-select-checker)
+    (define-key pmap "e" 'flycheck-set-checker-executable)
     (define-key pmap "?" 'flycheck-describe-checker)
     (define-key pmap "i" 'flycheck-info)
     (define-key pmap "V" 'flycheck-version)
