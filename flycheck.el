@@ -3368,16 +3368,14 @@ See URL `http://cppcheck.sourceforge.net/'."
   "A CFEngine syntax checker using cf-promises.
 
 See URL `http://cfengine.com/'."
-  :command ("cf-promises" "-f"
+  :command ("cf-promises" "-Wall" "-f"
             ;; We must stay in the same directory to resolve @include
             source-inplace)
   :error-patterns
-  ((info line-start (file-name) ":" line ":" column
-            ": note: " (message) line-end)
-   (warning line-start (file-name) ":" line ":" column
+  ((warning line-start (file-name) ":" line ":" column
             ": warning: " (message) line-end)
    (error line-start (file-name) ":" line ":" column
-          ": " (or "fatal error" "error") ": " (message) line-end))
+          ": error: " (message) line-end))
   :modes (cfengine-mode cfengine3-mode))
 
 (flycheck-define-checker coffee

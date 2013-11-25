@@ -1,0 +1,9 @@
+body common control
+{
+      host_licenses_paid => "2000";
+      bundlesequence => { run };
+}
+
+bundle agent run
+{
+}
