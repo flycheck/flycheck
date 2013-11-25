@@ -176,6 +176,8 @@ Built-in syntax checkers for:
 @item
 C/C++ (using @command{clang} and @command{cppcheck})
 @item
+CFEngine (using @command{cf-promises})
+@item
 CoffeeScript (using @command{coffee} and @command{coffeelint})
 @item
 CSS (using @command{csslint}))
@@ -3290,6 +3292,7 @@ order of their appearance in the default value of
 @iflyc bash
 @iflyc c/c++-clang
 @iflyc c/c++-cppcheck
+@iflyc cfengine
 @iflyc coffee
 @iflyc coffee-coffeelint
 @iflyc css-csslint
