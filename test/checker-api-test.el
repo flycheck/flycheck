@@ -305,6 +305,13 @@
   (dolist (checker flycheck-checkers)
     (should (stringp (flycheck-checker-executable checker)))))
 
+(ert-deftest flycheck-checker-executable/override-the-executable ()
+  (dolist (checker flycheck-checkers)
+    (let ((variable (flycheck-checker-executable-variable checker)))
+      (should (equal (eval `(let ((,variable "some-nice-executable"))
+                              (flycheck-checker-executable ',checker)))
+                     "some-nice-executable")))))
+
 (ert-deftest flycheck-check-executable ()
   (dolist (checker flycheck-checkers)
     (if (executable-find (flycheck-checker-executable checker))
