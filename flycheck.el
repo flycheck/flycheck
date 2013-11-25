@@ -3281,6 +3281,8 @@ variable symbol for a syntax checker."
     (user-error "%s is no executable" executable))
   (let ((variable (flycheck-checker-executable-variable checker)))
     (set variable executable)))
+(put 'flycheck-set-checker-executable 'interactive-only
+     "Set the executable variable directly instead")
 
 
 ;;;; Built-in checkers
