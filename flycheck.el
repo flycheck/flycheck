@@ -133,6 +133,7 @@ buffer-local wherever it is set."
     go-build
     go-test
     haml
+    handlebars
     haskell-hdevtools
     haskell-ghc
     haskell-hlint
@@ -3791,6 +3792,18 @@ See URL `http://haml.info'."
   :error-patterns
   ((error line-start "Syntax error on line " line ": " (message) line-end))
   :modes haml-mode)
+
+(flycheck-define-checker handlebars
+  "A Handlebars syntax checker using the Handlebars compiler.
+
+See URL `https://github.com/wycats/handlebars.js'."
+  :command ("handlebars" source)
+  :error-patterns
+  ((error line-start
+          "Error: Parse error on line " line ":" (optional "\r") "\n"
+          (zero-or-more not-newline) "\n" (zero-or-more not-newline) "\n"
+          (message) line-end))
+  :modes (handlebars-mode handlebars-sgml-mode))
 
 (flycheck-define-checker haskell-hdevtools
   "A Haskell syntax and type checker using hdevtools.

@@ -39,6 +39,7 @@
           elixir-mode
           go-mode
           haml-mode
+          handlebars-mode
           haskell-mode
           web-mode
           js2-mode
@@ -468,6 +469,13 @@ found)."
    "checkers/haml-error.haml" 'haml-mode
    '(5 nil error "Inconsistent indentation: 3 spaces used for indentation, but the rest of the document was indented using 2 spaces."
        :checker haml :filename nil)))
+
+(ert-deftest builtin-checker/handlebars-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'handlebars)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/handlebars-error.hbs" 'handlebars-mode
+   '(2 nil error "Expecting 'ID', 'DATA', got 'INVALID'"
+       :checker handlebars :filename nil)))
 
 ;; HDevtools tests fail on Vagrant, because hdevtools can't create unix sockets
 ;; on shared folders, and on Travis CI, because hdevtools doesn't install with

@@ -192,6 +192,8 @@ Go (using @command{gofmt}, @command{go build} and @command{go test})
 @item
 Haml
 @item
+Handlebars
+@item
 Haskell (using @command{ghc}, @command{hdevtools} and @command{hlint})
 @item
 HTML (using @command{tidy})
@@ -3302,6 +3304,7 @@ order of their appearance in the default value of
 @iflyc go-build
 @iflyc go-test
 @iflyc haml
+@iflyc handlebars
 @iflyc haskell-hdevtools
 @iflyc haskell-ghc
 @iflyc haskell-hlint
