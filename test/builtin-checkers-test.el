@@ -237,9 +237,9 @@
   :expected-result (flycheck-testsuite-fail-unless-checker 'css-csslint)
   (flycheck-testsuite-should-syntax-check
    "checkers/css-syntax-error.css" 'css-mode
+   '(4 16 error "Expected LBRACE at line 4, col 16." :checker css-csslint)
    '(4 16 error "Unexpected token '100%' at line 4, col 16."
        :checker css-csslint)
-   '(4 16 error "Expected LBRACE at line 4, col 16." :checker css-csslint)
    '(4 20 error "Unexpected token ';' at line 4, col 20." :checker css-csslint)
    '(5 1 error "Unexpected token '}' at line 5, col 1." :checker css-csslint)))
 
@@ -546,8 +546,8 @@ found)."
      "checkers/javascript-syntax-error.js" '(js-mode js2-mode js3-mode)
      '(3 11 error "Unclosed string." :checker javascript-jshint)
      '(3 25 error "Unclosed string." :checker javascript-jshint)
-     '(4 1 error "Missing semicolon." :checker javascript-jshint)
-     '(4 1 error "Unclosed string." :checker javascript-jshint))))
+     '(4 1 error "Unclosed string." :checker javascript-jshint)
+     '(4 1 error "Missing semicolon." :checker javascript-jshint))))
 
 (ert-deftest builtin-checker/javascript-jshint-error-disabled ()
   "An unused variable."
@@ -632,16 +632,16 @@ found)."
    '(21 nil warning "Avoid unused private fields such as '$FOO'."
         :checker php-phpmd)
    '(21 20 error "Private member variable \"FOO\" must be prefixed with an underscore" :checker php-phpcs)
-   '(22 nil warning "Avoid unused parameters such as '$baz'."
-        :checker php-phpmd)
    '(22 nil warning "Avoid unused private methods such as 'bar'."
+        :checker php-phpmd)
+   '(22 nil warning "Avoid unused parameters such as '$baz'."
         :checker php-phpmd)
    '(22 13 error "Missing function doc comment" :checker php-phpcs)
    '(22 13 error "Private method name \"A::bar\" must be prefixed with an underscore"
         :checker php-phpcs)
-   '(24 nil warning "Avoid unused local variables such as '$i'."
-        :checker php-phpmd)
    '(24 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
+        :checker php-phpmd)
+   '(24 nil warning "Avoid unused local variables such as '$i'."
         :checker php-phpmd)
    '(24 12 error "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\""
         :checker php-phpcs)))
@@ -674,13 +674,13 @@ found)."
           :checker php-phpmd)
      '(21 20 error "Private member variable \"FOO\" must contain a leading underscore"
           :checker php-phpcs)
-     '(22 nil warning "Avoid unused parameters such as '$baz'."
-          :checker php-phpmd)
      '(22 nil warning "Avoid unused private methods such as 'bar'."
           :checker php-phpmd)
-     '(24 nil warning "Avoid unused local variables such as '$i'."
+     '(22 nil warning "Avoid unused parameters such as '$baz'."
           :checker php-phpmd)
      '(24 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
+          :checker php-phpmd)
+     '(24 nil warning "Avoid unused local variables such as '$i'."
           :checker php-phpmd)
      '(28 1 error "A closing tag is not permitted at the end of a PHP file"
           :checker php-phpcs))))
@@ -818,27 +818,6 @@ found)."
    '(21 nil error "Unknown target name: \"cool\"." :checker rst)
    '(26 nil error "Unexpected section title." :checker rst)))
 
-(defun flycheck-testsuite-jruby-expected-result ()
-  (if (flycheck-testsuite-travis-ci-p) :failed
-    (flycheck-testsuite-fail-unless-checker 'ruby-jruby)))
-
-(ert-deftest builtin-checker/ruby-jruby-syntax-error ()
-  :expected-result (flycheck-testsuite-jruby-expected-result)
-  (flycheck-testsuite-not-on-travis)
-  (flycheck-testsuite-without-checkers (ruby-rubocop ruby)
-    (flycheck-testsuite-should-syntax-check
-     "checkers/ruby-syntax-error.rb" 'ruby-mode
-     '(5 nil error "syntax error, unexpected tCONSTANT" :checker ruby-jruby))))
-
-(ert-deftest builtin-checker/ruby-jruby-warning ()
-  :expected-result (flycheck-testsuite-jruby-expected-result)
-  (flycheck-testsuite-not-on-travis)
-  (flycheck-testsuite-without-checkers (ruby-rubocop ruby)
-    (flycheck-testsuite-should-syntax-check
-     "checkers/ruby-warnings.rb" 'ruby-mode
-     '(6 nil warning "Useless use of == in void context."
-         :checker ruby-jruby))))
-
 (ert-deftest builtin-checker/ruby-rubocop-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
   (flycheck-testsuite-should-syntax-check
@@ -846,42 +825,50 @@ found)."
    '(5 7 error "unexpected token tCONSTANT" :checker ruby-rubocop)
    '(5 24 error "unterminated string meets end of file" :checker ruby-rubocop)))
 
-(ert-deftest builtin-checker/ruby-rubocop-warnings ()
+(ert-deftest builtin-checker/ruby-warnings ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
   (flycheck-testsuite-should-syntax-check
-   "checkers/ruby-warnings.rb" 'ruby-mode
-   '(1 1 warning "Missing utf-8 encoding comment." :checker ruby-rubocop)
-   '(3 1 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
-   '(3 14 warning "Use snake_case for symbols." :checker ruby-rubocop)
-   '(4 6 warning "Prefer single-quoted strings when you don't need string interpolation or special symbols."
-       :checker ruby-rubocop)))
+     "checkers/ruby-warnings.rb" 'ruby-mode
+     '(1 1 info "Missing utf-8 encoding comment." :checker ruby-rubocop)
+     '(4 17 warning "unused argument name" :checker ruby-rubylint)
+     '(5 4 warning "unused local variable arr" :checker ruby-rubylint)
+     '(5 5 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
+     '(5 18 info "Use snake_case for symbols." :checker ruby-rubocop)
+     '(6 10 info "Prefer single-quoted strings when you don't need string interpolation or special symbols."
+         :checker ruby-rubocop)
+     '(10 4 info "the use of then/do is not needed here" :checker ruby-rubylint)
+     '(10 5 info "Favor modifier if/unless usage when you have a single-line body. Another good alternative is the usage of control flow &&/||."
+          :checker ruby-rubocop)
+     '(10 5 info "Never use then for multi-line if/unless."
+          :checker ruby-rubocop)
+     '(10 8 warning "Literal true appeared in a condition."
+          :checker ruby-rubocop)
+     '(11 23 error "undefined instance variable @name" :checker ruby-rubylint)
+     '(16 nil error "wrong number of arguments (expected 2..3 but got 0)"
+          :checker ruby-rubylint)))
 
-(ert-deftest builtin-checker/ruby-rubocop-warnings-disabled ()
+(ert-deftest builtin-checker/ruby-warnings-disabled-rubocop-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
   (flycheck-testsuite-with-hook ruby-mode-hook
       (setq flycheck-rubocoprc "rubocop.yml")
     (flycheck-testsuite-should-syntax-check
      "checkers/ruby-warnings.rb" 'ruby-mode
-     '(1 1 warning "Missing utf-8 encoding comment." :checker ruby-rubocop)
-     '(3 1 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
-     '(4 6 warning "Prefer single-quoted strings when you don't need string interpolation or special symbols."
-         :checker ruby-rubocop))))
-
-(ert-deftest builtin-checker/ruby-syntax-error ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby)
-  (flycheck-testsuite-without-checkers ruby-rubocop
-    (flycheck-testsuite-should-syntax-check
-     "checkers/ruby-syntax-error.rb" 'ruby-mode
-     '(5 nil error "syntax error, unexpected tCONSTANT, expecting $end"
-         :checker ruby))))
-
-(ert-deftest builtin-checker/ruby-warning ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby)
-  (flycheck-testsuite-without-checkers ruby-rubocop
-    (flycheck-testsuite-should-syntax-check
-     "checkers/ruby-warnings.rb" 'ruby-mode
-     '(6 nil warning "possibly useless use of == in void context"
-         :checker ruby))))
+     '(1 1 info "Missing utf-8 encoding comment." :checker ruby-rubocop)
+     '(4 17 warning "unused argument name" :checker ruby-rubylint)
+     '(5 4 warning "unused local variable arr" :checker ruby-rubylint)
+     '(5 5 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
+     '(6 10 info "Prefer single-quoted strings when you don't need string interpolation or special symbols."
+         :checker ruby-rubocop)
+     '(10 4 info "the use of then/do is not needed here" :checker ruby-rubylint)
+     '(10 5 info "Favor modifier if/unless usage when you have a single-line body. Another good alternative is the usage of control flow &&/||."
+          :checker ruby-rubocop)
+     '(10 5 info "Never use then for multi-line if/unless."
+          :checker ruby-rubocop)
+     '(10 8 warning "Literal true appeared in a condition."
+          :checker ruby-rubocop)
+     '(11 23 error "undefined instance variable @name" :checker ruby-rubylint)
+     '(16 nil error "wrong number of arguments (expected 2..3 but got 0)"
+          :checker ruby-rubylint))))
 
 (ert-deftest builtin-checker/rust-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'rust)

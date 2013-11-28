@@ -214,7 +214,7 @@ Puppet (using @command{puppet parser} and @command{puppet-lint})
 @item
 Python (using @command{flake8}, @command{pylint}, or @command{pyflakes})
 @item
-Ruby (using @command{rubocop}, @command{ruby} or @command{jruby})
+Ruby (using @command{rubocop} and @command{ruby-lint})
 @item
 Rust (using @command{rustc})
 @item
@@ -616,6 +616,37 @@ Show the documentation of a syntax checker.
 @node Configuration, Reporting, Selection, Usage
 @comment  node-name,  next,  previous,  up
 @section Syntax checker configuration
+
+@subsection Syntax checker executables
+
+For each syntax checker, there is a buffer-local, customizable variable
+@code{flycheck-@var{checker}-executable}, where @var{checker} is the
+name of the syntax checker.
+
+The value of this variable is either nil, or a string.  In the former
+case, Flycheck uses the default executable from the syntax checker
+definition when executing the syntax checker.  In the latter case, it
+uses the value of the variable as executable.
+
+Use these variables to override the executable from the definition per
+buffer.  For instance, you could use a different Emacs version with the
+@code{emacs-lisp} or @code{emacs-lisp-checkdoc}.
+
+You can either set this variable directly in your @file{init.el}, or
+change it interactively:
+
+@table @kbd
+@item C-c ! e
+@itemx M-x flycheck-set-checker-executable
+@findex flycheck-set-checker-executable
+Set the executable of a syntax checker in the current buffer.
+
+Prompt for a syntax checker, and an executable file, and set the
+corresponding executable variable.
+
+With prefix arg, prompt for a syntax checker and reset its executable to
+the default.
+@end table
 
 @subsection Syntax checker options
 
@@ -1097,14 +1128,21 @@ documentation of a syntax checker.
 The following @var{properties} constitute a syntax checker:
 
 @table @code
-@item :command (@var{command} @var{arg} ...)
+@item :command (@var{executable} @var{arg} ...)
 An unquoted list describing the syntax checker command to execute.
 
-@var{command} is checked for existence with @code{executable-find}
-before executing a syntax checker.
+@var{executable} must be a string with the executable of this syntax
+checker.
 
-In @var{command} and @var{arg}, the following special symbols and sexps
-are substituted before executing the syntax checker:
+A customizable, buffer-local variable
+@code{flycheck-@var{symbol}-executable} is implicitly defined to allow
+overriding of the executable.  If this variable is non-nil, Flycheck
+uses the value of the variable as executable, otherwise it falls back to
+@var{executable}.  In either case, the executable is checked with
+@code{executable-find} before use.
+
+Each @var{arg} is an argument to the executable, either as string, or as
+one of the following special symbols and forms:
 
 @table @code
 @item source
@@ -3105,11 +3143,54 @@ output@comma{} by simply ignoring them}
 @comment  node-name,  next,  previous,  up
 @unnumberedsec master (unreleased)
 
+@itemize @bullet
+@item @b{Breaking changes}:
+
+@itemize @bullet
+@item
+Argument substitution is no longer performed on syntax checker
+executables.  The executable must be a string.
+@item
+@ghissue{250, Remove @code{ruby} and @code{ruby-jruby} syntax checkers.
+Use @code{ruby-rubocop} and @code{ruby-rubylint} instead}
+@end itemize
+
+@item
+New syntax checkers:
+
+@itemize @bullet
+@item
+@ghissue{250, Ruby with @command{ruby-lint}}
+@end itemize
+
+@item
+New features:
+
+@itemize @bullet
+@item
+@ghissue{272, Define variables to override the executables of syntax
+checkers}
+@item
+@ghissue{272, Interactively set the executable of a syntax checker with
+@code{flycheck-set-checker-executable}}
+@end itemize
+
+@item
+Improvements:
+
+@itemize @bullet
+@item
+Demote Rubocop convention messages to @code{info} level
+@end itemize
+
+@end itemize
+
 @node Credits, GNU Free Documentation License, Changes, Top
 @comment  node-name,  next,  previous,  up
 @appendix Credits
 
-The following people contributed to Flycheck.  Their help and ideas,
+Flycheck is written and maintained by @gh{lunaryorn, Sebastian Wiesner},
+with contributions from the following people.  Their help and ideas,
 their support and patches are greatly appreciated.
 
 @itemize @bullet
@@ -3201,9 +3282,9 @@ language using @command{dmd}, and wrote the cool
 to the Flake8 syntax checker.
 
 @item
-@gh{yasuyk, Yasuyuki Oka} added syntax checkers for YAML (using Ruby's
-standard YAML parser), Javascript (using Google's Closure linter),
-Slim and PHP (using PHP Mess Detector)
+@gh{yasuyk, Yasuyuki Oka} added syntax checkers for Javascript (using
+Google's Closure linter), PHP (using PHP Mess Detector), Ruby (using
+Ruby Lint) Slim and YAML (using Ruby's standard YAML parser).
 
 @item
 @gh{vderyagin, Victor Deryagin} added the Rust syntax checker.
@@ -3263,8 +3344,7 @@ order of their appearance in the default value of
 @iflyc python-pylint
 @iflyc rst
 @iflyc ruby-rubocop
-@iflyc ruby
-@iflyc ruby-jruby
+@iflyc ruby-rubylint
 @iflyc rust
 @iflyc sass
 @iflyc scala
