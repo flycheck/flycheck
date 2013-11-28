@@ -817,50 +817,50 @@ found)."
    '(5 7 error "unexpected token tCONSTANT" :checker ruby-rubocop)
    '(5 24 error "unterminated string meets end of file" :checker ruby-rubocop)))
 
-(ert-deftest builtin-checker/ruby-rubocop-warnings ()
+(ert-deftest builtin-checker/ruby-warnings ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
   (flycheck-testsuite-should-syntax-check
-   "checkers/ruby-warnings.rb" 'ruby-mode
-   '(1 1 warning "Missing utf-8 encoding comment." :checker ruby-rubocop)
-   '(3 1 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
-   '(3 14 warning "Use snake_case for symbols." :checker ruby-rubocop)
-   '(4 6 warning "Prefer single-quoted strings when you don't need string interpolation or special symbols."
-       :checker ruby-rubocop)))
+     "checkers/ruby-warnings.rb" 'ruby-mode
+     '(1 1 warning "Missing utf-8 encoding comment." :checker ruby-rubocop)
+     '(4 17 warning "unused argument name" :checker ruby-rubylint)
+     '(5 4 warning "unused local variable arr" :checker ruby-rubylint)
+     '(5 5 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
+     '(5 18 warning "Use snake_case for symbols." :checker ruby-rubocop)
+     '(6 10 warning "Prefer single-quoted strings when you don't need string interpolation or special symbols."
+         :checker ruby-rubocop)
+     '(10 4 info "the use of then/do is not needed here" :checker ruby-rubylint)
+     '(10 5 warning "Favor modifier if/unless usage when you have a single-line body. Another good alternative is the usage of control flow &&/||."
+          :checker ruby-rubocop)
+     '(10 5 warning "Never use then for multi-line if/unless."
+          :checker ruby-rubocop)
+     '(10 8 warning "Literal true appeared in a condition."
+          :checker ruby-rubocop)
+     '(11 23 error "undefined instance variable @name" :checker ruby-rubylint)
+     '(16 nil error "wrong number of arguments (expected 2..3 but got 0)"
+          :checker ruby-rubylint)))
 
-(ert-deftest builtin-checker/ruby-rubocop-warnings-disabled ()
+(ert-deftest builtin-checker/ruby-warnings-disabled-rubocop-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
   (flycheck-testsuite-with-hook ruby-mode-hook
       (setq flycheck-rubocoprc "rubocop.yml")
     (flycheck-testsuite-should-syntax-check
      "checkers/ruby-warnings.rb" 'ruby-mode
      '(1 1 warning "Missing utf-8 encoding comment." :checker ruby-rubocop)
-     '(3 1 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
-     '(3 14 warning "Use snake_case for symbols." :checker ruby-rubocop)
-     '(4 6 warning "Prefer single-quoted strings when you don't need string interpolation or special symbols."
-         :checker ruby-rubocop))))
-
-(ert-deftest builtin-checker/ruby-rubylint-info ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubylint)
-  (flycheck-testsuite-without-checkers (ruby-rubocop ruby ruby-jruby)
-    (flycheck-testsuite-should-syntax-check
-     "checkers/ruby-rubylint-info.rb" 'ruby-mode
-     '(1 nil info "the use of then/do is not needed here" :checker ruby-rubylint))))
-
-(ert-deftest builtin-checker/ruby-rubylint-warning ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubylint)
-  (flycheck-testsuite-without-checkers (ruby-rubocop ruby ruby-jruby)
-    (flycheck-testsuite-should-syntax-check
-     "checkers/ruby-rubylint-warning.rb" 'ruby-mode
-     '(2 17 warning "unused argument name" :checker ruby-rubylint)
-     '(8 nil warning "unused local variable user2" :checker ruby-rubylint))))
-
-(ert-deftest builtin-checker/ruby-rubylint-error ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubylint)
-  (flycheck-testsuite-without-checkers (ruby-rubocop ruby ruby-jruby)
-    (flycheck-testsuite-should-syntax-check
-     "checkers/ruby-rubylint-error.rb" 'ruby-mode
-     '(7 21 error "undefined instance variable @name" :checker ruby-rubylint)
-     '(12 nil error "wrong number of arguments (expected 0 but got 1)" :checker ruby-rubylint))))
+     '(4 17 warning "unused argument name" :checker ruby-rubylint)
+     '(5 4 warning "unused local variable arr" :checker ruby-rubylint)
+     '(5 5 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
+     '(6 10 warning "Prefer single-quoted strings when you don't need string interpolation or special symbols."
+         :checker ruby-rubocop)
+     '(10 4 info "the use of then/do is not needed here" :checker ruby-rubylint)
+     '(10 5 warning "Favor modifier if/unless usage when you have a single-line body. Another good alternative is the usage of control flow &&/||."
+          :checker ruby-rubocop)
+     '(10 5 warning "Never use then for multi-line if/unless."
+          :checker ruby-rubocop)
+     '(10 8 warning "Literal true appeared in a condition."
+          :checker ruby-rubocop)
+     '(11 23 error "undefined instance variable @name" :checker ruby-rubylint)
+     '(16 nil error "wrong number of arguments (expected 2..3 but got 0)"
+          :checker ruby-rubylint))))
 
 (ert-deftest builtin-checker/rust-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'rust)
