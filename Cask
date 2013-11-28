@@ -16,6 +16,7 @@
  ;; Various modes for use in the unit tests
  (depends-on "coffee-mode")
  (depends-on "haml-mode")
+ (depends-on "handlebars-mode")
  (depends-on "haskell-mode")
  (depends-on "web-mode")
  (depends-on "js2-mode")
