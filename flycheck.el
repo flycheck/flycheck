@@ -152,8 +152,7 @@ buffer-local wherever it is set."
     python-pylint
     rst
     ruby-rubocop
-    ruby
-    ruby-jruby
+    ruby-rubylint
     rust
     sass
     scala
@@ -4189,35 +4188,21 @@ See URL `http://batsov.com/rubocop/'."
    (error line-start
           (file-name) ":" line ":" column ": " (or "E" "F") ": " (message)
           line-end))
-  :modes (enh-ruby-mode ruby-mode))
+  :modes (enh-ruby-mode ruby-mode)
+  :next-checkers ((warnings-only . ruby-rubylint)))
 
-(flycheck-define-checker ruby
-  "A Ruby syntax checker using the standard (MRI) Ruby interpreter.
+(flycheck-define-checker ruby-rubylint
+  "A Ruby syntax and code analysis checker using ruby-lint.
 
-See URL `http://www.ruby-lang.org/'."
-  :command ("ruby" "-w" "-c" source)
+See URL `https://github.com/YorickPeterse/ruby-lint'."
+  :command ("ruby-lint" "analyze" "--presenter=syntastic" source)
   :error-patterns
-  ;; These patterns support output from JRuby, too, to deal with RVM or Rbenv
-  ((error line-start
-          "SyntaxError in " (file-name) ":" line ": " (message)
-          line-end)
+  ((info line-start
+         (file-name) ":I:" line ":" column ": " (message) line-end)
    (warning line-start
-            (file-name) ":" line ":" (optional column ":")
-            " warning: " (message) line-end)
-   (error line-start (file-name) ":" line ": " (message) line-end))
-  :modes (enh-ruby-mode ruby-mode))
-
-(flycheck-define-checker ruby-jruby
-  "A Ruby syntax checker using the JRuby interpreter.
-
-See URL `http://jruby.org/'."
-  :command ("jruby" "-w" "-c" source)
-  :error-patterns
-  ((error line-start
-          "SyntaxError in " (file-name) ":" line ": " (message)
-          line-end)
-   (warning line-start (file-name) ":" line " warning: " (message) line-end)
-   (error line-start (file-name) ":" line ": " (message) line-end))
+            (file-name) ":W:" line ":" column ": " (message) line-end)
+   (error line-start
+          (file-name) ":E:" line ":" column ": " (message) line-end))
   :modes (enh-ruby-mode ruby-mode))
 
 (flycheck-define-checker rust

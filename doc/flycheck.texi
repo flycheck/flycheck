@@ -212,7 +212,7 @@ Puppet (using @command{puppet parser} and @command{puppet-lint})
 @item
 Python (using @command{flake8}, @command{pylint}, or @command{pyflakes})
 @item
-Ruby (using @command{rubocop}, @command{ruby} or @command{jruby})
+Ruby (using @command{rubocop} and @command{ruby-lint})
 @item
 Rust (using @command{rustc})
 @item
@@ -3148,6 +3148,17 @@ output@comma{} by simply ignoring them}
 @item
 Argument substitution is no longer performed on syntax checker
 executables.  The executable must be a string.
+@item
+@ghissue{250, Remove @code{ruby} and @code{ruby-jruby} syntax checkers.
+Use @code{ruby-rubocop} and @code{ruby-rubylint} instead}
+@end itemize
+
+@item
+New syntax checkers:
+
+@itemize @bullet
+@item
+@ghissue{250, Ruby with @command{ruby-lint}}
 @end itemize
 
 @item
@@ -3260,9 +3271,9 @@ language using @command{dmd}, and wrote the cool
 to the Flake8 syntax checker.
 
 @item
-@gh{yasuyk, Yasuyuki Oka} added syntax checkers for YAML (using Ruby's
-standard YAML parser), Javascript (using Google's Closure linter),
-Slim and PHP (using PHP Mess Detector)
+@gh{yasuyk, Yasuyuki Oka} added syntax checkers for Javascript (using
+Google's Closure linter), PHP (using PHP Mess Detector), Ruby (using
+Ruby Lint) Slim and YAML (using Ruby's standard YAML parser).
 
 @item
 @gh{vderyagin, Victor Deryagin} added the Rust syntax checker.
@@ -3321,8 +3332,7 @@ order of their appearance in the default value of
 @iflyc python-pylint
 @iflyc rst
 @iflyc ruby-rubocop
-@iflyc ruby
-@iflyc ruby-jruby
+@iflyc ruby-rubylint
 @iflyc rust
 @iflyc sass
 @iflyc scala
