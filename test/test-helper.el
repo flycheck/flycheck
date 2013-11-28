@@ -311,11 +311,7 @@ Return t if Emacs is at least MAJOR.MINOR, or nil otherwise."
   "Skip the test unless all CHECKERS are present on the system.
 
 Return `:passed' if all CHECKERS are installed, or `:failed' otherwise."
-  (if (or (flycheck-testsuite-travis-ci-p)
-          (flycheck-testsuite-vagrant-p)
-          (-all? 'flycheck-check-executable checkers))
-      :passed
-    :failed))
+  (if (-all? 'flycheck-check-executable checkers) :passed :failed))
 
 (defalias 'flycheck-testsuite-fail-unless-checker
   'flycheck-testsuite-fail-unless-checkers)

@@ -2,6 +2,10 @@
 
 class flycheck::checkers::haskell {
 
+  Package {
+    require => Class['apt::update']
+  }
+
   package { ['ghc', 'hlint']: ensure => latest }
 
   package { 'cabal-install':

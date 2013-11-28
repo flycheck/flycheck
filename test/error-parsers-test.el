@@ -64,20 +64,20 @@
   "Errors to be parsed from `flycheck-checkstyle-xml'.")
 
 
-(ert-deftest flycheck-parse-checkstyle-xml ()
+(ert-deftest flycheck-parse-checkstyle/with-builtin-xml ()
   "Test Checkstyle parsing with xml.el"
   (let ((flycheck-xml-parser 'flycheck-parse-xml-region))
     (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml nil nil)
                    flycheck-checkstyle-expected-errors))))
 
-(ert-deftest flycheck-parse-checkstyle-libxml2 ()
+(ert-deftest flycheck-parse-checkstyle/with-libxml2 ()
   "Test Checkstyle parsing with libxml2."
   :expected-result (if (fboundp 'libxml-parse-xml-region) :passed :failed)
   (let ((flycheck-xml-parser 'libxml-parse-xml-region))
     (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml nil nil)
                    flycheck-checkstyle-expected-errors))))
 
-(ert-deftest flycheck-parse-checkstyle-auto ()
+(ert-deftest flycheck-parse-checkstyle/automatic-parser ()
   "Test Checkstyle parsing with the automatically chosen parsed."
   (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml nil nil)
                  flycheck-checkstyle-expected-errors)))
@@ -126,5 +126,22 @@ of the file will be interrupted because there are too many #ifdef configurations
 (ert-deftest flycheck-parse-cppcheck ()
   (should (equal (flycheck-parse-cppcheck flycheck-cppcheck-xml nil nil)
                  flycheck-cppcheck-expected-errors)))
+
+(ert-deftest flycheck-parse-cppcheck/empty-errors-list-with-automatic-parser ()
+  (should-not (flycheck-parse-cppcheck "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<results version=\"2\">
+  <cppcheck version=\"1.60.1\"/>
+  <errors>
+  </errors>
+</results>" nil nil)))
+
+(ert-deftest flycheck-parse-cppcheck/empty-errors-list-with-builtin-parser ()
+  (let ((flycheck-xml-parser #'flycheck-parse-xml-region))
+    (should-not (flycheck-parse-cppcheck "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<results version=\"2\">
+  <cppcheck version=\"1.60.1\"/>
+  <errors>
+  </errors>
+</results>" nil nil))))
 
 ;;; error-parsers-test.el ends here
