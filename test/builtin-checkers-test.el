@@ -810,27 +810,6 @@ found)."
    '(21 nil error "Unknown target name: \"cool\"." :checker rst)
    '(26 nil error "Unexpected section title." :checker rst)))
 
-(defun flycheck-testsuite-jruby-expected-result ()
-  (if (flycheck-testsuite-travis-ci-p) :failed
-    (flycheck-testsuite-fail-unless-checker 'ruby-jruby)))
-
-(ert-deftest builtin-checker/ruby-jruby-syntax-error ()
-  :expected-result (flycheck-testsuite-jruby-expected-result)
-  (flycheck-testsuite-not-on-travis)
-  (flycheck-testsuite-without-checkers (ruby-rubocop ruby)
-    (flycheck-testsuite-should-syntax-check
-     "checkers/ruby-syntax-error.rb" 'ruby-mode
-     '(5 nil error "syntax error, unexpected tCONSTANT" :checker ruby-jruby))))
-
-(ert-deftest builtin-checker/ruby-jruby-warning ()
-  :expected-result (flycheck-testsuite-jruby-expected-result)
-  (flycheck-testsuite-not-on-travis)
-  (flycheck-testsuite-without-checkers (ruby-rubocop ruby ruby-rubylint)
-    (flycheck-testsuite-should-syntax-check
-     "checkers/ruby-warnings.rb" 'ruby-mode
-     '(6 nil warning "Useless use of == in void context."
-         :checker ruby-jruby))))
-
 (ert-deftest builtin-checker/ruby-rubocop-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
   (flycheck-testsuite-should-syntax-check
@@ -859,21 +838,6 @@ found)."
      '(3 14 warning "Use snake_case for symbols." :checker ruby-rubocop)
      '(4 6 warning "Prefer single-quoted strings when you don't need string interpolation or special symbols."
          :checker ruby-rubocop))))
-
-(ert-deftest builtin-checker/ruby-syntax-error ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby)
-  (flycheck-testsuite-without-checkers ruby-rubocop
-    (flycheck-testsuite-should-syntax-check
-     "checkers/ruby-syntax-error.rb" 'ruby-mode
-     '(5 nil error "syntax error, unexpected tCONSTANT, expecting $end"
-         :checker ruby))))
-
-(ert-deftest builtin-checker/ruby-warning ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby)
-  (flycheck-testsuite-without-checkers (ruby-rubocop ruby-rubylint)
-    (flycheck-testsuite-should-syntax-check
-     "checkers/ruby-warnings.rb" 'ruby-mode
-     '(6 nil warning "possibly useless use of == in void context" :checker ruby))))
 
 (ert-deftest builtin-checker/ruby-rubylint-info ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubylint)

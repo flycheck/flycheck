@@ -2,7 +2,7 @@
 #
 # Install Ruby, and select Ruby 1.9 as default
 class flycheck::ruby {
-  package { ['ruby1.9.1', 'ruby1.9.1-dev', 'jruby']:
+  package { ['ruby1.9.1', 'ruby1.9.1-dev']:
     ensure  => latest,
     require => Class['apt::update'],
   }
