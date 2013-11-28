@@ -3796,7 +3796,7 @@ See URL `http://haml.info'."
 (flycheck-define-checker handlebars
   "A Handlebars syntax checker using the Handlebars compiler.
 
-See URL `https://github.com/wycats/handlebars.js'."
+See URL `http://handlebarsjs.com/'."
   :command ("handlebars" source)
   :error-patterns
   ((error line-start
