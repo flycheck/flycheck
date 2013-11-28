@@ -2411,7 +2411,7 @@ Return a list of error tokens."
     (while (string-match regexp output last-match)
       (!cons (match-string 0 output) errors)
       (setq last-match (match-end 0)))
-    errors))
+    (reverse errors)))
 
 (defun flycheck-try-parse-error-with-pattern (err pattern)
   "Try to parse a single ERR with a PATTERN.
