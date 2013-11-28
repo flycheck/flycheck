@@ -3151,6 +3151,14 @@ executables.  The executable must be a string.
 @end itemize
 
 @item
+New syntax checkers:
+
+@itemize @bullet
+@item
+@ghissue{250, Ruby with @command{ruby-lint}}
+@end itemize
+
+@item
 New features:
 
 @itemize @bullet
