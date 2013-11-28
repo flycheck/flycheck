@@ -2410,7 +2410,7 @@ Return a list of error tokens."
     (while (string-match regexp output last-match)
       (!cons (match-string 0 output) errors)
       (setq last-match (match-end 0)))
-    errors))
+    (reverse errors)))
 
 (defun flycheck-try-parse-error-with-pattern (err pattern)
   "Try to parse a single ERR with a PATTERN.
@@ -2604,7 +2604,7 @@ Return a list of all errors that are relevant for their
 corresponding buffer."
   (-filter #'flycheck-relevant-error-p errors))
 
-(defun flycheck-error-<= (err1 err2)
+(defun flycheck-error-< (err1 err2)
   "Determine whether ERR1 goes before ERR2.
 
 Compare by line numbers and then by column numbers."
@@ -2613,15 +2613,16 @@ Compare by line numbers and then by column numbers."
     (if (= line1 line2)
         (let ((col1 (flycheck-error-column err1))
               (col2 (flycheck-error-column err2)))
-          (or (not col1)                ; Sort errors for the whole line first
-              (and col2 (<= col1 col2))))
+          (and col2
+               ;; Sort errors for the whole line first
+               (or (not col1) (< col1 col2))))
       (< line1 line2))))
 
 (defun flycheck-sort-errors (errors)
   "Sort ERRORS by line and column numbers.
 
 ERRORS is modified by side effects."
-  (sort errors 'flycheck-error-<=))
+  (sort errors 'flycheck-error-<))
 
 (defun flycheck-count-errors (errors)
   "Count the number of warnings and errors in ERRORS.

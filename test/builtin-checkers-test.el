@@ -236,9 +236,9 @@
   :expected-result (flycheck-testsuite-fail-unless-checker 'css-csslint)
   (flycheck-testsuite-should-syntax-check
    "checkers/css-syntax-error.css" 'css-mode
+   '(4 16 error "Expected LBRACE at line 4, col 16." :checker css-csslint)
    '(4 16 error "Unexpected token '100%' at line 4, col 16."
        :checker css-csslint)
-   '(4 16 error "Expected LBRACE at line 4, col 16." :checker css-csslint)
    '(4 20 error "Unexpected token ';' at line 4, col 20." :checker css-csslint)
    '(5 1 error "Unexpected token '}' at line 5, col 1." :checker css-csslint)))
 
@@ -538,8 +538,8 @@ found)."
      "checkers/javascript-syntax-error.js" '(js-mode js2-mode js3-mode)
      '(3 11 error "Unclosed string." :checker javascript-jshint)
      '(3 25 error "Unclosed string." :checker javascript-jshint)
-     '(4 1 error "Missing semicolon." :checker javascript-jshint)
-     '(4 1 error "Unclosed string." :checker javascript-jshint))))
+     '(4 1 error "Unclosed string." :checker javascript-jshint)
+     '(4 1 error "Missing semicolon." :checker javascript-jshint))))
 
 (ert-deftest builtin-checker/javascript-jshint-error-disabled ()
   "An unused variable."
@@ -624,16 +624,16 @@ found)."
    '(21 nil warning "Avoid unused private fields such as '$FOO'."
         :checker php-phpmd)
    '(21 20 error "Private member variable \"FOO\" must be prefixed with an underscore" :checker php-phpcs)
-   '(22 nil warning "Avoid unused parameters such as '$baz'."
-        :checker php-phpmd)
    '(22 nil warning "Avoid unused private methods such as 'bar'."
+        :checker php-phpmd)
+   '(22 nil warning "Avoid unused parameters such as '$baz'."
         :checker php-phpmd)
    '(22 13 error "Missing function doc comment" :checker php-phpcs)
    '(22 13 error "Private method name \"A::bar\" must be prefixed with an underscore"
         :checker php-phpcs)
-   '(24 nil warning "Avoid unused local variables such as '$i'."
-        :checker php-phpmd)
    '(24 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
+        :checker php-phpmd)
+   '(24 nil warning "Avoid unused local variables such as '$i'."
         :checker php-phpmd)
    '(24 12 error "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\""
         :checker php-phpcs)))
@@ -666,13 +666,13 @@ found)."
           :checker php-phpmd)
      '(21 20 error "Private member variable \"FOO\" must contain a leading underscore"
           :checker php-phpcs)
-     '(22 nil warning "Avoid unused parameters such as '$baz'."
-          :checker php-phpmd)
      '(22 nil warning "Avoid unused private methods such as 'bar'."
           :checker php-phpmd)
-     '(24 nil warning "Avoid unused local variables such as '$i'."
+     '(22 nil warning "Avoid unused parameters such as '$baz'."
           :checker php-phpmd)
      '(24 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
+          :checker php-phpmd)
+     '(24 nil warning "Avoid unused local variables such as '$i'."
           :checker php-phpmd)
      '(28 1 error "A closing tag is not permitted at the end of a PHP file"
           :checker php-phpcs))))
