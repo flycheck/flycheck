@@ -875,14 +875,14 @@ found)."
      "checkers/ruby-warnings.rb" 'ruby-mode
      '(6 nil warning "possibly useless use of == in void context" :checker ruby))))
 
-(ert-deftest checker-ruby-rubylint-info ()
+(ert-deftest builtin-checker/ruby-rubylint-info ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubylint)
   (flycheck-testsuite-without-checkers (ruby-rubocop ruby ruby-jruby)
     (flycheck-testsuite-should-syntax-check
      "checkers/ruby-rubylint-info.rb" 'ruby-mode
      '(1 nil info "the use of then/do is not needed here" :checker ruby-rubylint))))
 
-(ert-deftest checker-ruby-rubylint-warning ()
+(ert-deftest builtin-checker/ruby-rubylint-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubylint)
   (flycheck-testsuite-without-checkers (ruby-rubocop ruby ruby-jruby)
     (flycheck-testsuite-should-syntax-check
@@ -890,7 +890,7 @@ found)."
      '(2 17 warning "unused argument name" :checker ruby-rubylint)
      '(8 nil warning "unused local variable user2" :checker ruby-rubylint))))
 
-(ert-deftest checker-ruby-rubylint-error ()
+(ert-deftest builtin-checker/ruby-rubylint-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubylint)
   (flycheck-testsuite-without-checkers (ruby-rubocop ruby ruby-jruby)
     (flycheck-testsuite-should-syntax-check
