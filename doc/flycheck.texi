@@ -3187,7 +3187,8 @@ Demote Rubocop convention messages to @code{info} level
 @comment  node-name,  next,  previous,  up
 @appendix Credits
 
-The following people contributed to Flycheck.  Their help and ideas,
+Flycheck is written and maintained by @gh{lunaryorn, Sebastian Wiesner},
+with contributions from the following people.  Their help and ideas,
 their support and patches are greatly appreciated.
 
 @itemize @bullet
