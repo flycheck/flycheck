@@ -4182,8 +4182,11 @@ See URL `http://batsov.com/rubocop/'."
             (config-file "--config" flycheck-rubocoprc)
             source)
   :error-patterns
-  ((warning line-start
-            (file-name) ":" line ":" column ": " (or "C" "W") ": " (message)
+  ((info line-start
+         (file-name) ":" line ":" column ": C: " (message)
+         line-end)
+   (warning line-start
+            (file-name) ":" line ":" column ": W: " (message)
             line-end)
    (error line-start
           (file-name) ":" line ":" column ": " (or "E" "F") ": " (message)

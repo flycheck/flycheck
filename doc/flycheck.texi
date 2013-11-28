@@ -3173,6 +3173,14 @@ checkers}
 @code{flycheck-set-checker-executable}}
 @end itemize
 
+@item
+Improvements:
+
+@itemize @bullet
+@item
+Demote Rubocop convention messages to @code{info} level
+@end itemize
+
 @end itemize
 
 @node Credits, GNU Free Documentation License, Changes, Top
