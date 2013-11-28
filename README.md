@@ -215,9 +215,9 @@ The following people contributed to flycheck:
   extension.
 - [Yannick Roehlly](https://github.com/yannick1974) added support for PEP8
   naming errors to the Flake8 syntax checker.
-- [Yasuyuki Oka](https://github.com/yasuyk) added syntax checkers for YAML
-  (using Ruby's standard YAML parser), Javascript (using Google's Closure
-  linter), Slim and PHP (using PHP Mess Detector)
+- [Yasuyuki Oka](https://github.com/yasuyk) added syntax checkers for Javascript
+  (using Google's Closure linter), PHP (using PHP Mess Detector), Ruby (using
+  Ruby Lint) Slim and YAML (using Ruby's standard YAML parser).
 - [Victor Deryagin](https://github.com/vderyagin) added the Rust syntax checker.
 
 
