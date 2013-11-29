@@ -165,6 +165,7 @@ buffer-local wherever it is set."
     tex-lacheck
     xml-xmlstarlet
     xml-xmllint
+    yaml-jsyaml
     yaml-ruby
     zsh)
   "Syntax checkers available for automatic selection.
@@ -4348,6 +4349,17 @@ The xmllint is part of libxml2, see URL
   :error-patterns
   ((error line-start (file-name) ":" line ": " (message) line-end))
   :modes (xml-mode nxml-mode))
+
+(flycheck-define-checker yaml-jsyaml
+  "A YAML syntax checker using JS-YAML.
+
+See URL `https://github.com/nodeca/js-yaml'."
+  :command ("js-yaml" source)
+  :error-patterns
+  ((error line-start
+          "JS-YAML: " (message) " at line " line ", column " column ":"
+          line-end))
+  :modes yaml-mode)
 
 (flycheck-define-checker yaml-ruby
   "A YAML syntax checker using Ruby's YAML parser.

@@ -50,6 +50,7 @@ class flycheck::checkers {
                     'handlebars',    # handlebars
                     'jshint',        # javascript-jshint
                     'jsonlint',      # json-jsonlint
+                    'js-yaml',       # yaml-jsyaml
                     'less',          # less
                     ]
   package { $node_packages:

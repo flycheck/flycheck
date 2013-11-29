@@ -960,8 +960,14 @@ found)."
      '(5 nil error "parser error : Extra content at the end of the document"
          :checker xml-xmllint))))
 
+(ert-deftest builtin-checker/yaml-jsyaml-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'yaml-jsyaml)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/yaml-syntax-error.yaml" 'yaml-mode
+   '(4 5 error "bad indentation of a mapping entry"
+       :checker yaml-jsyaml :filename nil)))
+
 (ert-deftest builtin-checker/yaml-ruby ()
-  (flycheck-testsuite-fail-unless-checker 'yaml-ruby)
   (let* ((ruby-version (car (process-lines "ruby" "-e" "puts RUBY_VERSION")))
          (psych-version (when (version<= "1.9.3" ruby-version)
                           (car (process-lines "ruby" "-rpsych"
@@ -979,8 +985,9 @@ found)."
            (:else
             '(4 5 error "mapping values are not allowed in this context"
                 :checker yaml-ruby)))))
-    (flycheck-testsuite-should-syntax-check
-     "checkers/yaml-syntax-error.yaml" 'yaml-mode expected-error)))
+    (flycheck-testsuite-without-checkers yaml-jsyaml
+      (flycheck-testsuite-should-syntax-check
+       "checkers/yaml-syntax-error.yaml" 'yaml-mode expected-error))))
 
 (ert-deftest builtin-checker/zsh-syntax-error ()
   "Test a syntax error from a missing semicolon."
