@@ -50,6 +50,9 @@
 ;;
 ;; `flycheck-testsuite-with-hook' executes the body with a specified hook form.
 ;;
+;; `flycheck-testsuite-with-env' executes the body with the specified
+;; environment variables.
+;;
 ;; `flycheck-mode-no-check' enables Flycheck Mode in the current buffer without
 ;; starting a syntax check immediately.
 ;;
@@ -193,6 +196,34 @@ After evaluation of BODY, set HOOK-VAR to nil."
             ,@body)
         (--each hooks (set it nil)))))
 
+(defmacro flycheck-testsuite-with-env (env &rest body)
+  "Add ENV to `process-environment' in BODY.
+
+Execute BODY with a `process-environment' with contains all
+variables from ENV added.
+
+ENV is an alist, where each cons cell `(VAR . VALUE)' is a
+environment variable VAR to be added to `process-environment'
+with VALUE."
+  (declare (indent 1))
+  `(let ((process-environment (copy-sequence process-environment)))
+     (--each ,env
+       (setenv (car it) (cdr it)))
+     ,@body))
+
+(defmacro flycheck-testsuite-without-checkers (checkers &rest body)
+  "Execute BODY without CHECKERS.
+
+Remove CHECKERS from `flycheck-checkers' while BODY is
+evaluated.
+
+CHECKERS is a syntax checker symbol or a list thereof."
+  (declare (indent 1))
+  (let ((checkers (if (symbolp checkers) (list checkers) checkers)))
+    `(let* ((flycheck-checkers (--remove (memq it ',checkers)
+                                         flycheck-checkers)))
+       ,@body)))
+
 (defun flycheck-mode-no-check ()
   "Enable Flycheck mode without checking automatically."
   (emacs-lisp-mode)
@@ -280,11 +311,7 @@ Return t if Emacs is at least MAJOR.MINOR, or nil otherwise."
   "Skip the test unless all CHECKERS are present on the system.
 
 Return `:passed' if all CHECKERS are installed, or `:failed' otherwise."
-  (if (or (flycheck-testsuite-travis-ci-p)
-          (flycheck-testsuite-vagrant-p)
-          (-all? 'flycheck-check-executable checkers))
-      :passed
-    :failed))
+  (if (-all? 'flycheck-check-executable checkers) :passed :failed))
 
 (defalias 'flycheck-testsuite-fail-unless-checker
   'flycheck-testsuite-fail-unless-checkers)
@@ -340,21 +367,18 @@ Raise an assertion error if the buffer is not clear afterwards."
 
 
 ;;;; Test predicates
-(defun flycheck-testsuite-should-overlay (overlay error)
-  "Test that OVERLAY is in REGION and corresponds to ERROR."
-  (let* ((region (flycheck-error-region-for-mode error 'symbols))
+(defun flycheck-testsuite-should-overlay (error)
+  "Test that ERR has an overlay."
+  (let* ((overlay (--first (equal (overlay-get it 'flycheck-error) error)
+                           (flycheck-overlays-in 0 (+ 1 (buffer-size)))))
+         (region (flycheck-error-region-for-mode error 'symbols))
          (message (flycheck-error-message error))
          (level (flycheck-error-level error))
-         (face (if (eq level 'warning)
-                   'flycheck-warning
-                 'flycheck-error))
-         (category (if (eq level 'warning)
-                       'flycheck-warning-overlay
-                     'flycheck-error-overlay))
-         (fringe-icon (if (eq level 'warning)
-                          '(left-fringe question-mark flycheck-fringe-warning)
-                        `(left-fringe ,flycheck-fringe-exclamation-mark
-                                      flycheck-fringe-error))))
+         (category (flycheck-error-level-overlay-category level))
+         (face (get category 'face))
+         (fringe-bitmap (flycheck-error-level-fringe-bitmap level))
+         (fringe-face (flycheck-error-level-fringe-face level))
+         (fringe-icon (list 'left-fringe fringe-bitmap fringe-face)))
     (should overlay)
     (should (overlay-get overlay 'flycheck-overlay))
     (should (= (overlay-start overlay) (car region)))
@@ -366,30 +390,6 @@ Raise an assertion error if the buffer is not clear afterwards."
     (should (eq (overlay-get overlay 'category) category))
     (should (equal (overlay-get overlay 'flycheck-error) error))
     (should (string= (overlay-get overlay 'help-echo) message))))
-
-(defun flycheck-testsuite-should-error (line column message level &rest properties)
-  "Test that EXPECTED-ERR is an error in the current buffer.
-
-Test that the error is contained in `flycheck-current-errors',
-and that there is an overlay for this error at the correct
-position.
-
-LINE, COLUMN, MESSAGE and LEVEL are the expected properties of
-the error.  PROPERTIES specify additional properties of the expected ERROR.
-
-Signal a test failure if this error is not present."
-  (let* ((filename (-if-let (member (plist-member properties :filename))
-                     (cadr member) (buffer-file-name)))
-         (checker (-if-let (member (plist-member properties :checker))
-                    (cadr member) (or flycheck-checker flycheck-last-checker)))
-         (buffer (or (plist-get properties :buffer) (current-buffer)))
-         (real-error (flycheck-error-new
-                      :buffer buffer :filename filename :checker checker
-                      :line line :column column :message message :level level))
-         (overlay (--first (equal (overlay-get it 'flycheck-error) real-error)
-                           (flycheck-overlays-in 0 (+ 1 (buffer-size))))))
-    (should (-contains? flycheck-current-errors real-error))
-    (flycheck-testsuite-should-overlay overlay real-error)))
 
 (defun flycheck-testsuite-should-errors (&rest errors)
   "Test that the current buffers has ERRORS.
@@ -405,46 +405,40 @@ Each error in ERRORS is a list as expected by
 `flycheck-testsuite-should-error'."
   (if (not errors)
       (should flycheck-current-errors)
-    (dolist (err errors)
-      (apply #'flycheck-testsuite-should-error err))
-    (should (= (length errors) (length flycheck-current-errors)))
+    (let ((expected (--map (apply #'flycheck-error-new-at it) errors)))
+      (should (equal expected flycheck-current-errors))
+      (-each expected #'flycheck-testsuite-should-overlay))
     (should (= (length errors)
                (length (flycheck-overlays-in (point-min) (point-max)))))))
 
 (defun flycheck-testsuite-should-syntax-check
-  (resource-file modes disabled-checkers &rest errors)
+  (resource-file modes &rest errors)
   "Test a syntax check in RESOURCE-FILE with MODES.
 
 RESOURCE-FILE is the file to check.  MODES is a single major mode
 symbol or a list thereof, specifying the major modes to syntax
-check with.  DISABLED-CHECKERS is a syntax checker or a list
-thereof to disable before checking the file.  ERRORS is the list
-of expected errors."
+check with.  ERRORS is the list of expected errors."
   (when (symbolp modes)
     (setq modes (list modes)))
-  (when (symbolp disabled-checkers)
-    (setq disabled-checkers (list disabled-checkers)))
   (--each modes
-    (let ((flycheck-checkers (--remove (memq it disabled-checkers)
-                                       flycheck-checkers)))
-     (flycheck-testsuite-with-resource-buffer resource-file
-       (funcall it)
-       ;; Configure config file locating for unit tests
-       (--each '(flycheck-locate-config-file-absolute-path
-                 flycheck-testsuite-locate-config-file)
-         (add-hook 'flycheck-locate-config-file-functions it :append :local))
-       (let ((process-hook-called 0))
-         (add-hook 'flycheck-process-error-functions
-                   (lambda (_err)
-                     (setq process-hook-called (1+ process-hook-called))
-                     nil)
-                   nil :local)
-         (flycheck-testsuite-buffer-sync)
-         (should (= process-hook-called (length errors))))
-       (if errors
-           (apply #'flycheck-testsuite-should-errors errors)
-         (should-not flycheck-current-errors))
-       (flycheck-testsuite-ensure-clear)))))
+    (flycheck-testsuite-with-resource-buffer resource-file
+      (funcall it)
+      ;; Configure config file locating for unit tests
+      (--each '(flycheck-locate-config-file-absolute-path
+                flycheck-testsuite-locate-config-file)
+        (add-hook 'flycheck-locate-config-file-functions it :append :local))
+      (let ((process-hook-called 0))
+        (add-hook 'flycheck-process-error-functions
+                  (lambda (_err)
+                    (setq process-hook-called (1+ process-hook-called))
+                    nil)
+                  nil :local)
+        (flycheck-testsuite-buffer-sync)
+        (if errors
+            (apply #'flycheck-testsuite-should-errors errors)
+          (should-not flycheck-current-errors))
+        (should (= process-hook-called (length errors))))
+      (flycheck-testsuite-ensure-clear))))
 
 (provide 'test-helper)
 

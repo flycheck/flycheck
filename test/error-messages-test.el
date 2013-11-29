@@ -29,7 +29,6 @@
 (require 'test-helper)
 
 (require 'mocker)
-(require 'cl)                           ; Mocker wants `letf'
 
 (ert-deftest flycheck-copy-messages-as-kill ()
   (with-temp-buffer

@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Test an error triggered by an uppercase keyword.
+ * Test warnings for PHPCS and 
  *
  * Checkers: php-phpcs
  *
- * The following comment blurp is to make PHPCS happy.
+ * The following comment blurp makes PHPCS really happy :)
  *
  * PHP Version 5
  *
@@ -16,6 +16,13 @@
  * @link     https://github.com/flycheck/flycheck
  */
 
-$foo = FALSE;
+class A
+{
+    private static $FOO = 2;
+    private function bar($baz)
+    {
+        $i=FALSE;
+    }
+}
 
 ?>

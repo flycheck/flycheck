@@ -28,7 +28,7 @@
 
 (require 'test-helper)
 
-(defmacro flycheck-with-doc-buffer (&rest body)
+(defmacro flycheck-with-manual-buffer (&rest body)
   "Create a temp buffer with flycheck.texi and execute BODY."
   (declare (indent 0))
   `(let* ((filename (f-join flycheck-testsuite-dir "../doc/flycheck.texi")))
@@ -36,9 +36,9 @@
        (insert-file-contents filename)
        ,@body)))
 
-(ert-deftest doc-all-checkers-documented ()
+(ert-deftest flycheck-manual/all-checkers-are-documented ()
   "Test that all registered checkers are documented in the Flycheck manual."
-  (flycheck-with-doc-buffer
+  (flycheck-with-manual-buffer
     (search-forward "@node Syntax checkers")
     (search-forward "@itemize")
     (dolist (checker flycheck-checkers)
@@ -50,12 +50,12 @@
     (forward-line 1)
     (should (looking-at (rx "@end itemize")))))
 
-(ert-deftest doc-all-options-documented ()
+(ert-deftest flycheck-manual/all-options-are-documented ()
   "Tests that all option variables are documented in the manual."
-  (let ((config-vars (sort (-flatten (-keep #'flycheck-checker-option-vars
-                                            (flycheck-defined-checkers)))
-                           #'string<)))
-    (flycheck-with-doc-buffer
+  (let ((config-vars (-sort #'string<
+                            (-flatten (-keep #'flycheck-checker-option-vars
+                                            (flycheck-defined-checkers))))))
+    (flycheck-with-manual-buffer
       ;; Go to the beginning of the configuration section
       (search-forward "@node Configuration")
       ;; Go to the beginning of the option variable listing
@@ -67,12 +67,12 @@
                                symbol-end line-end))
         (should (equal (match-string 1) (symbol-name var)))))))
 
-(ert-deftest doc-all-config-vars-documented ()
+(ert-deftest flycheck-manual/all-config-vars-are-documented ()
   "Tests that all configuration file variables are documented in the manual."
-  (let ((option-file-vars (sort (-keep #'flycheck-checker-config-file-var
-                                       (flycheck-defined-checkers))
-                                #'string<)))
-    (flycheck-with-doc-buffer
+  (let ((option-file-vars (-sort #'string<
+                                (-keep #'flycheck-checker-config-file-var
+                                        (flycheck-defined-checkers)))))
+    (flycheck-with-manual-buffer
       ;; Go to the beginning of the configuration section
       (search-forward "@node Configuration")
       ;; Go to the beginning of the option variable listing
@@ -84,8 +84,7 @@
                                symbol-end line-end))
         (should (equal (match-string 1) (symbol-name var)))))))
 
-(ert-deftest flycheck-describe-checker-pops-up-help ()
-  "Test that describing a syntax checker pops up a help buffer."
+(ert-deftest flycheck-describe-checker/pops-up-help-buffer ()
   (dolist (checker (flycheck-defined-checkers))
     (flycheck-testsuite-with-help-buffer
       (flycheck-describe-checker checker)
@@ -98,8 +97,7 @@
         (should (= (match-beginning 0) 1))
         (should (string= (match-string 1) (symbol-name checker)))))))
 
-(ert-deftest flycheck-describe-checker-navigate-to-source ()
-  "Test that checkers are properly described."
+(ert-deftest flycheck-describe-checker/can-navigate-to-source ()
   (dolist (checker (flycheck-defined-checkers))
     (flycheck-testsuite-with-help-buffer
       (flycheck-describe-checker checker)
@@ -120,8 +118,7 @@
               (should (string= (match-string 1) (symbol-name checker))))
           (kill-buffer))))))
 
-(ert-deftest flycheck-describe-checker-executable-name ()
-  "Test that the command name appears in syntax checker help."
+(ert-deftest flycheck-describe-checker/help-shows-executable-name ()
   (dolist (checker (flycheck-defined-checkers))
     (flycheck-testsuite-with-help-buffer
       (flycheck-describe-checker checker)
@@ -130,9 +127,20 @@
         (re-search-forward
          "This\\s-+syntax\\s-+checker\\s-+executes\\s-+\"\\(.+?\\)\"\\(?:\\.\\|,\\)")
         (should (string= (match-string 1)
-                         (flycheck-checker-executable checker)))))))
+                         (flycheck-checker-default-executable checker)))))))
 
-(ert-deftest flycheck-describe-checker-config-file-var ()
+(ert-deftest flycheck-describe-checker/help-shows-executable-variable ()
+  (dolist (checker (flycheck-defined-checkers))
+    (flycheck-testsuite-with-help-buffer
+      (flycheck-describe-checker checker)
+      (with-current-buffer (help-buffer)
+        (goto-char (point-min))
+        (re-search-forward
+         "The executable can be overridden with `\\(.+?\\)'.")
+        (let ((var (flycheck-checker-executable-variable checker)))
+          (should (string= (match-string 1) (symbol-name var))))))))
+
+(ert-deftest flycheck-describe-checker/help-shows-config-file-var ()
   "Test that the config file var appears in syntax checker help."
   (dolist (checker (flycheck-defined-checkers))
     (flycheck-testsuite-with-help-buffer
@@ -147,14 +155,13 @@
              ", using\\s-+a\\s-+configuration\\s-+file\\s-+from\\s-+`\\(.+?\\)'\\.")
             (should (equal (match-string 1) (symbol-name config-file-var)))))))))
 
-(ert-deftest flycheck-describe-checker-option-vars ()
-  "Test that option variables appear in syntax checker help."
+(ert-deftest flycheck-describe-checker/help-shows-option-vars ()
   (dolist (checker (flycheck-defined-checkers))
     (flycheck-testsuite-with-help-buffer
       (flycheck-describe-checker checker)
       (with-current-buffer (help-buffer)
-        (let ((option-vars (sort (flycheck-checker-option-vars checker)
-                                 #'string<))
+        (let ((option-vars (-sort #'string<
+                                  (flycheck-checker-option-vars checker)))
               ;; The regular expression to find the beginning of the option
               ;; variable list
               (regexp "This\\s-+syntax\\s-+checker\\s-+can\\s-+be\\s-+configured\\s-+with\\s-+these\\s-+options:\n"))
@@ -175,7 +182,7 @@
             (forward-line 1)
             (should (looking-at "^$"))))))))
 
-(ert-deftest flycheck-describe-checker-docstring ()
+(ert-deftest flycheck-describe-checker/help-shows-checker-docstring ()
   "Test that the docstring appears in syntax checker help."
   (dolist (checker (flycheck-defined-checkers))
     (flycheck-testsuite-with-help-buffer

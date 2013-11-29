@@ -34,14 +34,17 @@ package { 'puppet':
 }
 
 # Bootstrap the required Puppet modules
-define puppet::module($module = $title, $version = undef) {
+define puppet::module($module = $title, $installed_name = undef, $version = undef) {
 
   $version_argument = $version ? {
     undef   => '',
     default => "--version ${version}",
   }
 
-  $directory_name = regsubst($module, '/', '-')
+  $directory_name = $installed_name ? {
+    undef   => regsubst($module, '/', '-'),
+    default => $installed_name
+  }
 
   exec { "puppet::module::install::${module}":
     command => "puppet module install ${module} ${version_argument}",
@@ -54,7 +57,7 @@ define puppet::module($module = $title, $version = undef) {
 puppet::module { ['puppetlabs/stdlib',
                   'puppetlabs/apt',
                   'puppetlabs/nodejs',
-                  'rafaelfc/pear',
                   'gini/archive',
+                  'nodes/php',
                   'adrien/alternatives']:
 }

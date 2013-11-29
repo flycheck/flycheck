@@ -26,6 +26,8 @@
 
 ;;; Code:
 
+(require 'mocker)
+
 (require 'test-helper)
 
 (defvar flycheck-test-config-var)
@@ -51,11 +53,22 @@
 (ert-deftest flycheck-substitute-argument-temporary-directory ()
   (with-temp-buffer
     (unwind-protect
-        (progn
-          (let ((dirname (flycheck-substitute-argument 'temporary-directory
-                                                       'emacs-lisp)))
-            (should (f-directory? dirname))
-            (should (s-starts-with? temporary-file-directory dirname))))
+        (let ((dirname (flycheck-substitute-argument 'temporary-directory
+                                                     'emacs-lisp)))
+          (should (f-directory? dirname))
+          (should (s-starts-with? temporary-file-directory dirname)))
+      (flycheck-safe-delete flycheck-temporaries))))
+
+(ert-deftest flycheck-substitute-argument-temporary-filename ()
+  (with-temp-buffer
+    (unwind-protect
+        (let ((filename (flycheck-substitute-argument 'temporary-file-name
+                                                      'emacs-lisp)))
+          ;; The filename should not exist, but it's parent directory should
+          (should-not (f-exists? filename))
+          (should (f-directory? (f-parent filename)))
+          (should (s-starts-with? temporary-file-directory filename))
+          (should (member (f-parent filename) flycheck-temporaries)))
       (flycheck-safe-delete flycheck-temporaries))))
 
 (ert-deftest flycheck-substitute-argument-config-file ()
@@ -291,6 +304,13 @@
 (ert-deftest flycheck-checker-executable ()
   (dolist (checker flycheck-checkers)
     (should (stringp (flycheck-checker-executable checker)))))
+
+(ert-deftest flycheck-checker-executable/override-the-executable ()
+  (dolist (checker flycheck-checkers)
+    (let ((variable (flycheck-checker-executable-variable checker)))
+      (should (equal (eval `(let ((,variable "some-nice-executable"))
+                              (flycheck-checker-executable ',checker)))
+                     "some-nice-executable")))))
 
 (ert-deftest flycheck-check-executable ()
   (dolist (checker flycheck-checkers)

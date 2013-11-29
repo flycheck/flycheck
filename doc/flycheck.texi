@@ -37,7 +37,7 @@ Modern on-the-fly syntax checking for GNU Emacs 24
 </p>
 
 <p class="text-center">
-<small>Distributed under the
+<small>Flycheck is distributed under the
 terms of the <a href="http://www.gnu.org/licenses/gpl-3.0.en.html"
 target="_blank">GNU GPL 3 or any later version</a>.</small>
 </p>
@@ -144,9 +144,8 @@ coverage.
 @ifhtml
 @noindent
 And this is how it looks in action, using the awesome
-@uref{https://github.com/bbatsov/solarized-Emacs, solarized-light} color
-theme and the great
-@uref{http://www.marksimonson.com/fonts/view/anonymous-pro, Anonymous
+@uref{https://github.com/bbatsov/zenburn-emacs, Zenburn} color theme and
+the great @uref{https://github.com/adobe/source-code-pro, Source Code
 Pro} font:
 @center @image{screenshot,,,Flycheck in action}
 @end ifhtml
@@ -193,6 +192,8 @@ Go (using @command{gofmt}, @command{go build} and @command{go test})
 @item
 Haml
 @item
+Handlebars
+@item
 Haskell (using @command{ghc}, @command{hdevtools} and @command{hlint})
 @item
 HTML (using @command{tidy})
@@ -207,13 +208,13 @@ Lua
 @item
 Perl
 @item
-PHP (using the PHP Command Line and PHP CodeSniffer)
+PHP (using @command{php}, @command{phpmd} and @command{phpcs})
 @item
 Puppet (using @command{puppet parser} and @command{puppet-lint})
 @item
 Python (using @command{flake8}, @command{pylint}, or @command{pyflakes})
 @item
-Ruby (using @command{rubocop}, @command{ruby} or @command{jruby})
+Ruby (using @command{rubocop} and @command{ruby-lint})
 @item
 Rust (using @command{rustc})
 @item
@@ -306,9 +307,10 @@ following to your @file{Cask} file:
 (depends-on "flycheck")
 @end lisp
 
-Flycheck supports GNU Emacs 24.2 and newer on Linux, OS X and any other
-decent flavor of Unix.  It should work with GNU Emacs 24.1, too, but it
-is not tested against this version of Emacs.
+Flycheck supports Emacs 24.  It is tested with Emacs 24.3, and Emacs
+snapshot builds.  It should work with GNU Emacs 24.1 and 24.2 as well,
+but it is not tested against these versions.  If it does not work with
+these versions, please report an issue.
 
 Flycheck does not support Windows, but tries to be compatible with it.
 You may try to use Flycheck on Windows.  It should mostly work, but
@@ -615,6 +617,37 @@ Show the documentation of a syntax checker.
 @comment  node-name,  next,  previous,  up
 @section Syntax checker configuration
 
+@subsection Syntax checker executables
+
+For each syntax checker, there is a buffer-local, customizable variable
+@code{flycheck-@var{checker}-executable}, where @var{checker} is the
+name of the syntax checker.
+
+The value of this variable is either nil, or a string.  In the former
+case, Flycheck uses the default executable from the syntax checker
+definition when executing the syntax checker.  In the latter case, it
+uses the value of the variable as executable.
+
+Use these variables to override the executable from the definition per
+buffer.  For instance, you could use a different Emacs version with the
+@code{emacs-lisp} or @code{emacs-lisp-checkdoc}.
+
+You can either set this variable directly in your @file{init.el}, or
+change it interactively:
+
+@table @kbd
+@item C-c ! e
+@itemx M-x flycheck-set-checker-executable
+@findex flycheck-set-checker-executable
+Set the executable of a syntax checker in the current buffer.
+
+Prompt for a syntax checker, and an executable file, and set the
+corresponding executable variable.
+
+With prefix arg, prompt for a syntax checker and reset its executable to
+the default.
+@end table
+
 @subsection Syntax checker options
 
 Some syntax checkers can be configured via options.  The following
@@ -690,6 +723,10 @@ syntax checker allows without reporting an error.
 
 @defopt flycheck-phpcs-standard
 The coding standard the syntax checker @code{php-phpcs} shall use.
+@end defopt
+
+@defopt flycheck-phpmd-rulesets
+The rule sets for PHP Mess Detector @code{php-phpmd} shall use
 @end defopt
 
 @subsection Syntax checker configuration files
@@ -880,7 +917,7 @@ to allow for further processing of the error, or t, to indicate that the
 error was fully processed and inhibit any further processing.
 @end defopt
 
-You can also list all errors in the current buffer:
+You can also show a list with all errors in the current buffer:
 
 @table @kbd
 @item C-c ! l
@@ -888,7 +925,9 @@ You can also list all errors in the current buffer:
 @findex flycheck-list-errors
 List all errors in the current buffer in a separate buffer.
 
-With prefix arg, list only errors at point.
+The error list automatically refreshes after a syntax check, and follows
+the current buffer, that is, if you switch to another buffer, the error
+list is updated to show the errors of the new buffer.
 @end table
 
 If you hover a highlighted error with the mouse, a tooltip with the
@@ -1089,20 +1128,28 @@ documentation of a syntax checker.
 The following @var{properties} constitute a syntax checker:
 
 @table @code
-@item :command (@var{command} @var{arg} ...)
+@item :command (@var{executable} @var{arg} ...)
 An unquoted list describing the syntax checker command to execute.
 
-@var{command} is checked for existence with @code{executable-find}
-before executing a syntax checker.
+@var{executable} must be a string with the executable of this syntax
+checker.
 
-In @var{command} and @var{arg}, the following special symbols and sexps
-are substituted before executing the syntax checker:
+A customizable, buffer-local variable
+@code{flycheck-@var{symbol}-executable} is implicitly defined to allow
+overriding of the executable.  If this variable is non-nil, Flycheck
+uses the value of the variable as executable, otherwise it falls back to
+@var{executable}.  In either case, the executable is checked with
+@code{executable-find} before use.
+
+Each @var{arg} is an argument to the executable, either as string, or as
+one of the following special symbols and forms:
 
 @table @code
 @item source
-This symbol is substituted with the file to check.  This file is a
-temporary file with the contents of the buffer to check, created in the
-system's temporary directory.
+The file to check.
+
+This file is a temporary file with the contents of the buffer to check,
+created in the system's temporary directory.
 
 If the buffer to check has a file name, the non-directory component of
 the name of the temporary file will be the same as in the buffer's file
@@ -1116,10 +1163,11 @@ This symbol is the @b{preferred} way to pass the input file to your
 syntax checker.
 
 @item source-inplace
-This symbol is substituted with the file to check.  This file is a
-temporary file with the contents of the buffer to check, created @b{in
-the same directory} as the buffer's file.  The name of the file is
-random.
+The file to check.
+
+This file is a temporary file with the contents of the buffer to check,
+created @b{in the same directory} as the buffer's file.  The name of the
+file is random.
 
 If the buffer has no file name, this symbol is equivalent to
 @code{source}.
@@ -1129,8 +1177,8 @@ other files} from the source directory (e.g. include files in C, or
 Python modules).
 
 @item source-original
-This symbol is substituted with @code{buffer-file-name}, or an empty
-string, if the buffer has no file name.
+The file name of the current buffer, as by @code{buffer-file-name}, or
+an empty string, if the buffer has no file name.
 
 This symbol is provided to @b{additionally} pass the real name of the
 file to check to a syntax checker.
@@ -1148,8 +1196,8 @@ out-dated errors:
 @end lisp
 
 @item temporary-directory
-This symbol is substituted with the path of an existing temporary
-directory, which is unique on each execution of the syntax checker.
+The path to an existing temporary directory, which is unique on each
+execution of the syntax checker.
 
 Use this symbol if you need to move files created by a syntax checker
 out of the way.
@@ -1157,18 +1205,29 @@ out of the way.
 See the declaration of the @code{elixir} syntax checker for an
 application of this symbol.
 
+@item temporary-file-name
+The path to a temporary file, which is unique on each execution of the
+syntax checker.  The file is @emph{not} created automatically.
+
+Use this symbol if you need to move files created by a syntax checker
+out of the way.
+
+See the declaration of the @code{go-build} syntax checker for an
+application of this symbol.
+
 @item (config-file @var{option} @var{variable})
-This cell is substituted with a configuration file for the syntax
-checker.  @var{option} is a string containing the option that specifies
-a configuration file to the syntax checker tool.
+A configuration file for this syntax checker.
+
+@var{option} is a string containing the option that specifies a
+configuration file to the syntax checker tool.
 
 @var{variable} is a symbol referring to a variable from which to obtain
 the name or path of the configuration file.  @xref{Configuration}, for
 more information about syntax checker configuration.  Define this
 variable with @code{flycheck-def-config-file-var}.
 
-If the configuration file is found, the cell is substituted with the
-@var{option} and the absolute path to the configuration file as string.
+If the configuration file is found, pass the @var{option} and the
+absolute path to the configuration file to the syntax checker.
 Otherwise the cell is simply dropped from the arguments of the syntax
 checker.
 
@@ -1178,56 +1237,74 @@ single argument to the syntax checker.  Otherwise, @var{option} and the
 configuration file path are given as two separate arguments.
 
 @item (option @var{option} @var{variable} [@var{filters}])
-This cell is substituted with the value of @var{variable}.  @var{option}
-is a string containing the option for with to specify the value.
-@var{filter} is an optional function to be applied to the value of
-@var{variable} before substitution.  @xref{Option filters}, for a list
-of built-in option filters.
+The value of a variable.
+
+@var{option} is a string containing the option for with to specify the
+value.  @var{filter} is an optional function to be applied to the value
+of @var{variable} before use.  @xref{Option filters}, for a list of
+built-in option filters.
 
 @var{variable} is a symbol referring to a variable whose value to use.
 @xref{Configuration}, for more information about syntax checker
 configuration.  Define this variable with
 @code{flycheck-def-option-var}.
 
-If @var{variable} is not @var{nil} after applying @var{filter}, the cell
-is substituted with the @var{option} and the value of @var{variable}
-after applying @var{filter}.  Otherwise the cell is simply dropped from
-the arguments of the syntax checker.
+If @var{variable} is not @code{nil} after applying @var{filter}, pass
+@var{option} and the value of @var{variable} after applying
+@var{filter}.  Otherwise the cell is simply dropped from the arguments
+of the syntax checker.
 
 An @var{option} ending with a @code{=} character is treated like in a
 @code{config-file} cell.
 
 @item (option-list @var{option} @var{variable} [@var{prepend-fn} [@var{filter}]])
-This cell is similar to @code{option}, but for option lists.
+Like @code{option}, but for lists of options.
 
-The value of @var{variable} must be a list, and @var{option} is
-prepended to each non-nil item in the list, using the function
-@var{prepend-fn}.  @var{prepend-fn} is called with @var{option} as first
-and each item in the list as second argument.  It should return the
-result of prepending @var{option} to the item, either as list or as
-string.  If omitted, it defaults to @code{list}, so by default,
-@var{option} will be prepended as a separate argument.
+@var{option} is a string containing the option to specify.
+@var{variable} is a variable whose value must be a list.
+@var{prepend-fn} is a function called with @var{option} as first and the
+item of the list as second argument.  It should return the result
+of prepending @var{option} to the item, either as list or as string.  If
+omitted, it defaults to @code{list}, so by default, @var{option} will be
+prepended as a separate argument.
 
 @var{filter} is an optional function to be applied to each item in the
-list before substitution.  Items for which the filter returns nil are
-dropped.  @xref{Option filters}, for a list of built-in option filters.
+list before use.  @xref{Option filters}, for a list of built-in option
+filters.
+
+For each item in the value of @var{variable}, which is not @code{nil}
+after applying @var{filter}, pass @var{option} the the item after
+applying @var{filter}, as returned by @var{prepend-fn}.
+
+Nil items are simply ignored.
 
 @item (option-flag @var{option} @var{variable})
-This cell is substituted with @var{option}, if the value of
-@var{variable} is non-nil.  Otherwise it is simply dropped from the
-argument list.
+Like @code{option}, but for boolean flags.
+
+@var{option} is a string containing the option to
+specify. @var{variable} is a symbol referring to a variable.
+
+If @var{variable} is non-nil, pass @var{option} to the syntax checker.
+Otherwise just ignore this argument.
 
 @item (eval @var{form})
-This cell is substituted with a result of evaluating @var{form}.
-@var{form} must either return a string or a list of strings, or
-@code{nil} to indicate that nothing should be substituted for
-@var{cell}.  In case of other return values an error is signaled.
-@emph{No} further substitutions are performed, neither in @var{form}
-before it is evaluated, nor in the result of evaluating FORM.
+The result of evaluating @var{form}.
+
+@var{form} is an arbitrary Emacs Lisp form.  It is evaluated literally
+@emph{each time} the syntax checker is executed.  Special forms and
+symbols in @var{form} are @emph{not} replaced!
+
+@var{form} must evaluate either to a string, a list of strings or nil.
+For any other result, signal an error.
+
+If the result of @var{form} is not nil, pass the result to the syntax
+checker @emph{literally}.  Special symbols and forms in the result of
+@var{form} are @emph{not} replaced.
 @end table
 
-Note that substitution is @b{not} recursive.  No symbols or cells are
-substituted within the body of cells!
+Note these special forms and symbols do @b{not} apply recursively.
+Within the body of a cell, special forms and symbols are @b{not}
+replaced!
 
 This property is @b{mandatory}.
 
@@ -1319,10 +1396,15 @@ given, @b{both} must match for this syntax checker to be used.
 @item :next-checker (@var{item} ...)
 An unquoted list defining the syntax checker to run after this checker.
 
+Flycheck tries all items in the order of declaration, and runs the first
+usable one.  Subsequent items are @emph{not} used.
+
 Each @var{item} is either a syntax checker symbol or a cons cell
-@code{(@var{predicate} . @var{checker})}.  In the former case, the
-syntax checker is always considered.  In the later case, @var{checker}
-is only considered if the @var{predicate} matches.
+@code{(@var{predicate} . @var{checker})}.
+
+In the former case, the syntax checker is usable, if it is eligible for
+automatic selection.  In the latter case, the @var{predicate} must also
+match.
 
 @var{predicate} is either @code{no-errors} or @code{warnings-only}:
 
@@ -1399,6 +1481,8 @@ Flycheck provides two built-in error levels:
 Severe errors which cannot be ignored
 @item warning
 Potential errors which can be ignored
+@item info
+Informational annotations
 @end table
 
 You can define your own error levels with
@@ -2061,6 +2145,7 @@ This appendix provides a comprehensive changelog of all releases:
 
 @menu
 * master        :: unreleased
+* 0.15          :: Nov 15, 2013
 * 0.14.1        :: Aug 15, 2013
 * 0.14          :: Aug 15, 2013
 * 0.13          :: Jun 28, 2013
@@ -2893,7 +2978,7 @@ Fix universal prefix argument for @code{flycheck-next-error} at
 
 @end itemize
 
-@node 0.14.1, master, 0.14, Changes
+@node 0.14.1, 0.15, 0.14, Changes
 @comment  node-name,  next,  previous,  up
 @unnumberedsec 0.14.1 (Aug 16, 2013)
 
@@ -2908,9 +2993,9 @@ Bug fixes:
 
 @end itemize
 
-@node master,  , 0.14.1, Changes
+@node 0.15, master, 0.14.1, Changes
 @comment  node-name,  next,  previous,  up
-@unnumberedsec master (unreleased)
+@unnumberedsec 0.15 (Nov 15, 2013)
 
 @itemize @bullet
 @item
@@ -2924,10 +3009,19 @@ the online manual moved to @uref{http://flycheck.github.io}.
 @item
 Do not add the current directory to the @code{emacs-lisp} syntax checker
 load path
+@item
+@ghissue{214, @code{flycheck-list-errors} cannot list errors at point
+anymore}.  It does not accept a prefix argument anymore, and takes zero
+arguments now
+@item
+@ghissue{214, @code{flycheck-display-errors-in-list} is gone}.  The
+error list automatically highlights the error at point now
+@item
+Remove obsolete @code{flycheck-declare-checker}
 @end itemize
 
 @item
-Improvements:
+New syntax checkers:
 
 @itemize @bullet
 @item
@@ -2936,6 +3030,8 @@ Improvements:
 @ghissue{245, Javascript with @command{gjslint}}
 @item
 @ghissue{246, Slim}
+@item
+@ghissue{249, PHP using @command{phpmd}}
 @end itemize
 
 @item
@@ -2966,13 +3062,27 @@ files for C/C++ syntax checking}
 @item
 Add configuration file variable @code{flycheck-pylintrc} for Pylint
 @item
+@ghissue{214, New faces @code{flycheck-error-list-highlight-at-point}
+and @code{flycheck-error-list-highlight} to highlight the errors at
+point and at the current line respectively in the error list}
+@item
+@ghissue{214, The error list now automatically updates to show the
+errors of the current buffer}
+@item
 @ghissue{212, Define new error levels with
 @code{flycheck-define-error-level}}
+@item
 @ghissue{234, Add @code{flycheck-clang-standard-library} to choose the
 standard library for C/C++ syntax checking}
 @item
 @ghissue{243, Customize the delay for displaying errors via
 @code{flycheck-display-errors-delay}}
+@item
+@ghissue{215, Add @code{info} level for informational annotations by
+syntax checkers}
+@item
+@ghissue{259, Add a new symbol @code{temporary-file-name} to pass
+temporary file names to syntax checkers}
 @end itemize
 
 @item
@@ -2980,12 +3090,32 @@ Improvements:
 
 @itemize @bullet
 @item
-@ghissue{204, Do not ignore convention warnings by @command{pylint}}
+@ghissue{214, The error list now refreshes automatically after each
+syntax check}
+@item
+@ghissue{214, The errors at point are now automatically highlighted in
+the error list}
 @item
 @code{emacs-lisp-checkdoc} does not longer check @file{.dir-locals.el}
 files
 @item
 @ghissue{222, Do not automatically check syntax in encrypted files}
+@item
+@ghissue{215, Parse notes from @code{c/c++-clang} into info level
+messages}
+@item
+@ghissue{204, Parse convention warnings from @command{pylint}} to
+@ghissue{215, info level}
+@item
+@ghissue{215, Demote naming warnings from @code{python-flake8} to info
+level}
+@item
+@ghissue{256, Support @code{enh-ruby-mode} in Ruby syntax checkers}
+@item
+Parse columns from @code{python-pylint} errors
+@item
+Do not compress temporary files for syntax checks if the original file
+was compressed
 @end itemize
 
 @item
@@ -2997,6 +3127,62 @@ Bug fixes:
 @item
 Do not emit spurious flawed definition warning in the @code{rst} syntax
 checker
+@item
+@ghissue{251, Handle abbreviated file names in @command{luac}
+output@comma{} by simply ignoring them}
+@item
+@ghissue{259, Correctly redirect the output binary of the
+@code{go-build} syntax checker}
+@item
+@ghissue{263, Fix Cppcheck parsing with the built-in Emacs XML parser}
+@end itemize
+
+@end itemize
+
+@node master,  , 0.15, Changes
+@comment  node-name,  next,  previous,  up
+@unnumberedsec master (unreleased)
+
+@itemize @bullet
+@item @b{Breaking changes}:
+
+@itemize @bullet
+@item
+Argument substitution is no longer performed on syntax checker
+executables.  The executable must be a string.
+@item
+@ghissue{250, Remove @code{ruby} and @code{ruby-jruby} syntax checkers.
+Use @code{ruby-rubocop} and @code{ruby-rubylint} instead}
+@end itemize
+
+@item
+New syntax checkers:
+
+@itemize @bullet
+@item
+@ghissue{250, Ruby with @command{ruby-lint}}
+@item
+@ghissue{270, Handlebars}
+@end itemize
+
+@item
+New features:
+
+@itemize @bullet
+@item
+@ghissue{272, Define variables to override the executables of syntax
+checkers}
+@item
+@ghissue{272, Interactively set the executable of a syntax checker with
+@code{flycheck-set-checker-executable}}
+@end itemize
+
+@item
+Improvements:
+
+@itemize @bullet
+@item
+Demote Rubocop convention messages to @code{info} level
 @end itemize
 
 @end itemize
@@ -3005,7 +3191,8 @@ checker
 @comment  node-name,  next,  previous,  up
 @appendix Credits
 
-The following people contributed to Flycheck.  Their help and ideas,
+Flycheck is written and maintained by @gh{lunaryorn, Sebastian Wiesner},
+with contributions from the following people.  Their help and ideas,
 their support and patches are greatly appreciated.
 
 @itemize @bullet
@@ -3022,6 +3209,10 @@ checker.
 @item
 @gh{dholm, David Holm} added C/C++ syntax and style checkers using
 @command{clang} and @command{cppcheck} respectively.
+
+@item
+@gh{gfrey, Gereon Frey} fixed the @command{go-build} syntax checker and
+improve its tests.
 
 @item
 @gh{wyuenho, Jimmy Yuen Ho Wong} added the HTML syntax checker and the
@@ -3093,9 +3284,10 @@ language using @command{dmd}, and wrote the cool
 to the Flake8 syntax checker.
 
 @item
-@gh{yasuyk, Yasuyuki Oka} added syntax checkers for YAML (using Ruby's
-standard YAML parser), Javascript (using Google's Closure linter) and
-Slim.
+@gh{yasuyk, Yasuyuki Oka} added syntax checkers for Handlebars,
+Javascript (using Google's Closure linter), PHP (using PHP Mess
+Detector), Ruby (using Ruby Lint) Slim and YAML (using Ruby's standard
+YAML parser).
 
 @item
 @gh{vderyagin, Victor Deryagin} added the Rust syntax checker.
@@ -3135,6 +3327,7 @@ order of their appearance in the default value of
 @iflyc go-build
 @iflyc go-test
 @iflyc haml
+@iflyc handlebars
 @iflyc haskell-hdevtools
 @iflyc haskell-ghc
 @iflyc haskell-hlint
@@ -3146,6 +3339,7 @@ order of their appearance in the default value of
 @iflyc lua
 @iflyc perl
 @iflyc php
+@iflyc php-phpmd
 @iflyc php-phpcs
 @iflyc puppet-parser
 @iflyc puppet-lint
@@ -3153,8 +3347,7 @@ order of their appearance in the default value of
 @iflyc python-pylint
 @iflyc rst
 @iflyc ruby-rubocop
-@iflyc ruby
-@iflyc ruby-jruby
+@iflyc ruby-rubylint
 @iflyc rust
 @iflyc sass
 @iflyc scala
