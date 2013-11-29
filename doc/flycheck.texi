@@ -3163,6 +3163,8 @@ New syntax checkers:
 @ghissue{250, Ruby with @command{ruby-lint}}
 @item
 @ghissue{270, Handlebars}
+@item
+@ghissue{253, YAML with @command{yaml-jsyaml}}
 @end itemize
 
 @item
@@ -3286,8 +3288,8 @@ to the Flake8 syntax checker.
 @item
 @gh{yasuyk, Yasuyuki Oka} added syntax checkers for Handlebars,
 Javascript (using Google's Closure linter), PHP (using PHP Mess
-Detector), Ruby (using Ruby Lint) Slim and YAML (using Ruby's standard
-YAML parser).
+Detector), Ruby (using Ruby Lint) Slim and YAML (using either Ruby's
+standard YAML parser or js-yaml).
 
 @item
 @gh{vderyagin, Victor Deryagin} added the Rust syntax checker.
