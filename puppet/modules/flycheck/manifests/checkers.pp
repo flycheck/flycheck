@@ -78,7 +78,8 @@ class flycheck::checkers {
     require  => Class['flycheck::python'],
   }
 
-  $packages = [ 'bash',            # bash/sh-bash
+  $packages = [ 'asciidoc',        # asciidoc
+                'bash',            # bash/sh-bash
                 'cppcheck',        # c/c++-cpppcheck
                 'ghc',             # haskell-ghc
                 'hlint',           # haskell-lint
