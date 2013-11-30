@@ -194,7 +194,7 @@ Haml
 @item
 Handlebars
 @item
-Haskell (using @command{ghc}, @command{hdevtools} and @command{hlint})
+Haskell (using @command{ghc} and @command{hlint})
 @item
 HTML (using @command{tidy})
 @item
@@ -274,6 +274,11 @@ Flycheck status.
 @uref{https://github.com/flycheck/flycheck-d-unittest,
 flycheck-d-unittests} adds a Flycheck checker to run unit tests for D
 programs on the fly.
+
+@item
+@uref{https://github.com/flycheck/flycheck-hdevtools,
+flycheck-hdevtools} adds a Flycheck syntax checker for Haskell based on
+@uref{https://github.com/bitc/hdevtools/, hdevtools}.
 
 @end itemize
 
@@ -3153,6 +3158,10 @@ executables.  The executable must be a string.
 @item
 @ghissue{250, Remove @code{ruby} and @code{ruby-jruby} syntax checkers.
 Use @code{ruby-rubocop} and @code{ruby-rubylint} instead}
+@item
+@ghissue{275, Split out @code{haskell-hdevtools} into a separate
+package}.  See @uref{https://github.com/flycheck/flycheck-hdevtools,
+flycheck-hdevtools}
 @end itemize
 
 @item
@@ -3330,7 +3339,6 @@ order of their appearance in the default value of
 @iflyc go-test
 @iflyc haml
 @iflyc handlebars
-@iflyc haskell-hdevtools
 @iflyc haskell-ghc
 @iflyc haskell-hlint
 @iflyc html-tidy

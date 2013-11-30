@@ -8,7 +8,6 @@ class flycheck::checkers {
 
   include flycheck::checkers::erlang
   include flycheck::checkers::go
-  include flycheck::checkers::haskell
   include flycheck::checkers::php
 
   # Do not install Gems on Travis
@@ -81,6 +80,8 @@ class flycheck::checkers {
 
   $packages = [ 'bash',            # bash/sh-bash
                 'cppcheck',        # c/c++-cpppcheck
+                'ghc',             # haskell-ghc
+                'hlint',           # haskell-lint
                 'tidy',            # html-tidy
                 'lua5.2',          # lua
                 'perl',            # perl
