@@ -121,6 +121,7 @@ buffer-local wherever it is set."
   '(bash
     c/c++-clang
     c/c++-cppcheck
+    chef-foodcritic
     coffee
     coffee-coffeelint
     css-csslint
@@ -153,7 +154,6 @@ buffer-local wherever it is set."
     rst
     ruby-rubocop
     ruby-rubylint
-    chef-foodcritic
     rust
     sass
     scala
