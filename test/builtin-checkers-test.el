@@ -30,6 +30,7 @@
 
 ;; Load all modes used by our tests
 (--each '(sh-script
+          adoc-mode
           cc-mode
           coffee-mode
           css-mode
@@ -63,6 +64,14 @@
   (require 'js3-mode))
 
 (require 'sh-script)                    ; For `sh-set-shell'
+
+(ert-deftest builtin-checker/asciidoc ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'asciidoc)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/asciidoc.adoc" 'adoc-mode
+   '(1 nil warning "missing style: [paradef-default]: paragraph" :checker asciidoc)
+   '(3 nil warning "old tables syntax" :checker asciidoc)
+   '(11 nil error "[tabledef-default] illegal width=%60%" :checker asciidoc)))
 
 (ert-deftest builtin-checker/bash-missing-semicolon ()
   "Test a syntax error from a missing semicolon."
