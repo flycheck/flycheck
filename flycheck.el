@@ -3454,7 +3454,21 @@ See URL `http://acrmp.github.io/foodcritic/'."
   :error-patterns
   ((error line-start (message) ": " (file-name) ":" line line-end))
   :modes ruby-mode
-  :next-checkers ((warnings-only . ruby)))
+  :predicate
+  (lambda ()
+    (not (string=
+          (f-root)
+          (f-up (lambda (path)
+                  (or
+                   ;; Chef CookBook
+                   ;; http://docs.opscode.com/chef/knife.html#id38
+                   (and (f-dir? (f-expand "recipes" path))
+                        (f-file? (f-expand "metadata.rb" path)))
+                   ;; Knife Solo
+                   ;; http://matschaffer.github.io/knife-solo/#label-Init+command
+                   (and (f-dir? (f-expand "cookbooks" path))
+                        (f-dir? (f-expand ".chef" path)))))
+                default-directory)))))
 
 (flycheck-define-checker coffee
   "A CoffeeScript syntax checker using coffee.
