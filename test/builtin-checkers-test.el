@@ -49,6 +49,7 @@
           cperl-mode
           php-mode
           puppet-mode
+          racket-mode
           rust-mode
           sass-mode
           scala-mode2
@@ -789,6 +790,12 @@ found)."
      '(12 4 warning "Method could be a function (R0201)" :checker python-pylint)
      '(14 15 error "Module 'sys' has no 'python_version' member (E1101)"
           :checker python-pylint))))
+
+(ert-deftest builtin-checker/racket-syntax-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'racket)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/racket-syntax-error.rkt" 'racket-mode
+   '(4 2 error "read: expected a `)' to close `('" :checker racket)))
 
 (ert-deftest builtin-checker/rst ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'rst)

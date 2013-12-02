@@ -214,6 +214,8 @@ Puppet (using @command{puppet parser} and @command{puppet-lint})
 @item
 Python (using @command{flake8}, @command{pylint}, or @command{pyflakes})
 @item
+Racket
+@item
 Ruby (using @command{rubocop} and @command{ruby-lint})
 @item
 Rust (using @command{rustc})
@@ -3355,6 +3357,7 @@ order of their appearance in the default value of
 @iflyc puppet-lint
 @iflyc python-flake8
 @iflyc python-pylint
+@iflyc racket
 @iflyc rst
 @iflyc ruby-rubocop
 @iflyc ruby-rubylint

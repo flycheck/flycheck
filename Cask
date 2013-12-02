@@ -31,6 +31,7 @@
  (depends-on "scss-mode")
  (depends-on "slim-mode")
  (depends-on "go-mode")
+ (depends-on "racket-mode")
  (depends-on "rust-mode")
  (depends-on "elixir-mode")
  (depends-on "erlang")
