@@ -31,6 +31,7 @@ Features
   at `C-c ! s`
 - Built-in syntax checkers for:
   - C/C++
+  - Chef cookbooks
   - CoffeeScript
   - CSS
   - D

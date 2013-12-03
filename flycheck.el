@@ -121,6 +121,7 @@ buffer-local wherever it is set."
   '(bash
     c/c++-clang
     c/c++-cppcheck
+    chef-foodcritic
     coffee
     coffee-coffeelint
     css-csslint
@@ -3444,6 +3445,26 @@ See URL `http://cppcheck.sourceforge.net/'."
             source)
   :error-parser flycheck-parse-cppcheck
   :modes (c-mode c++-mode))
+
+(flycheck-define-checker chef-foodcritic
+  "A Chef cookbooks syntax checker using Foodcritic.
+
+See URL `http://acrmp.github.io/foodcritic/'."
+  :command ("foodcritic" source)
+  :error-patterns
+  ((error line-start (message) ": " (file-name) ":" line line-end))
+  :modes ruby-mode
+  :predicate
+  (lambda ()
+    (let ((parent-dir (file-name-directory
+                       (directory-file-name default-directory))))
+      (or
+       ;; Chef CookBook
+       ;; http://docs.opscode.com/chef/knife.html#id38
+       (locate-dominating-file parent-dir "recipes")
+       ;; Knife Solo
+       ;; http://matschaffer.github.io/knife-solo/#label-Init+command
+       (locate-dominating-file parent-dir "cookbooks")))))
 
 (flycheck-define-checker coffee
   "A CoffeeScript syntax checker using coffee.
