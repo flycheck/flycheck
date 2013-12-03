@@ -817,6 +817,13 @@ found)."
    '(5 7 error "unexpected token tCONSTANT" :checker ruby-rubocop)
    '(5 24 error "unterminated string meets end of file" :checker ruby-rubocop)))
 
+(ert-deftest builtin-checker/ruby-rubylint-syntax-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
+  (flycheck-testsuite-without-checkers ruby-rubocop
+    (flycheck-testsuite-should-syntax-check
+     "checkers/ruby-syntax-error.rb" 'ruby-mode
+     '(5 7 error "unexpected token tCONSTANT" :checker ruby-rubylint))))
+
 (ert-deftest builtin-checker/ruby-warnings ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
   (flycheck-testsuite-should-syntax-check
