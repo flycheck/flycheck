@@ -28,41 +28,11 @@
 
 (require 'test-helper)
 
-;; Load all modes used by our tests
-(--each '(sh-script
-          cc-mode
-          coffee-mode
-          css-mode
-          d-mode
-          elixir-mode
-          erlang
-          elixir-mode
-          go-mode
-          haml-mode
-          handlebars-mode
-          haskell-mode
-          web-mode
-          js2-mode
-          js3-mode
-          less-css-mode
-          lua-mode
-          cperl-mode
-          php-mode
-          puppet-mode
-          rust-mode
-          sass-mode
-          scala-mode2
-          scss-mode
-          slim-mode
-          yaml-mode)
-  (require it))
-
-(eval-when-compile
-  ;; Prevent warnings about unused lexical variables
-  (require 'js2-mode)
-  (require 'js3-mode))
-
-(require 'sh-script)                    ; For `sh-set-shell'
+;; Tell the byte compiler about the variables we'll use
+(defvar js2-mode-show-strict-warnings)
+(defvar js2-mode-show-parse-errors)
+(defvar js3-mode-show-parse-errors)
+(autoload 'sh-set-shell "sh-script")
 
 (ert-deftest builtin-checker/bash-missing-semicolon ()
   "Test a syntax error from a missing semicolon."
