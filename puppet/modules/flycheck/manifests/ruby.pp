@@ -14,7 +14,7 @@ class flycheck::ruby {
   }
 
   # To compile Nokogiri, which is a dependency of foodcritic
-  $xml_headers = ['libxslt-dev', 'libxml2-dev']
+  $xml_headers = ['libxslt1-dev', 'libxml2-dev']
   package { $xml_headers:
     ensure  => latest,
     require => Class['apt::update']
