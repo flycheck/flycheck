@@ -14,7 +14,8 @@ class flycheck::checkers::gems {
     default => [],
   }
 
-  $gem_packages = [ 'haml',
+  $gem_packages = [ 'foodcritic',  # chef-foodcritic
+                    'haml',
                     'puppet-lint',
                     'rubocop',     # ruby-rubocop
                     'sass',        # sass/scss
