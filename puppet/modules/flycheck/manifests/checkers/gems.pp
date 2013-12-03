@@ -6,12 +6,9 @@ class flycheck::checkers::gems {
   # CI, as normal user, and not as root.  If we install Gems as root on Travis,
   # RVM screws up, and won't find our gems.
 
-  $gem_requires = $::travis ? {
-    # We know that Ruby is available on Travis CI, so we do not need Ruby
-    # provisioning from flycheck::ruby.  Thus, this manifest is independent on
-    # Travis CI, so we can easily call it as non-root
-    undef   => [Class['flycheck::ruby']],
-    default => [],
+  if defined(Class['flycheck::ruby']) {
+    # If Ruby is installed, do so before installing our Gems
+    $gem_requires = [Class['flycheck::ruby']]
   }
 
   $gem_packages = [ 'foodcritic',  # chef-foodcritic
