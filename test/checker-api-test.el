@@ -33,7 +33,7 @@
 (defvar flycheck-test-config-var)
 (defvar flycheck-test-option-var)
 
-(ert-deftest flycheck-substitute-argument-source ()
+(ert-deftest flycheck-substitute-argument/source ()
   (flycheck-testsuite-with-resource-buffer "substitute-dummy"
     (unwind-protect
         (progn
@@ -50,7 +50,7 @@
             (should (f-exists? filename)))))
     (flycheck-safe-delete flycheck-temporaries)))
 
-(ert-deftest flycheck-substitute-argument-temporary-directory ()
+(ert-deftest flycheck-substitute-argument/temporary-directory ()
   (with-temp-buffer
     (unwind-protect
         (let ((dirname (flycheck-substitute-argument 'temporary-directory
@@ -59,7 +59,7 @@
           (should (s-starts-with? temporary-file-directory dirname)))
       (flycheck-safe-delete flycheck-temporaries))))
 
-(ert-deftest flycheck-substitute-argument-temporary-filename ()
+(ert-deftest flycheck-substitute-argument/temporary-filename ()
   (with-temp-buffer
     (unwind-protect
         (let ((filename (flycheck-substitute-argument 'temporary-file-name
@@ -71,7 +71,7 @@
           (should (member (f-parent filename) flycheck-temporaries)))
       (flycheck-safe-delete flycheck-temporaries))))
 
-(ert-deftest flycheck-substitute-argument-config-file ()
+(ert-deftest flycheck-substitute-argument/config-file ()
   (let ((flycheck-test-config-var "substitute-dummy")
         (config-file (flycheck-testsuite-resource-filename "substitute-dummy")))
     (mocker-let
@@ -94,7 +94,7 @@
                         'emacs-lisp)
                        (list (concat "--foo=" config-file))))))))
 
-(ert-deftest flycheck-substitute-argument-option ()
+(ert-deftest flycheck-substitute-argument/option ()
   (let ((flycheck-test-option-var "bar"))
     (should (equal (flycheck-substitute-argument
                     '(option "--foo" flycheck-test-option-var) 'emacs-lisp)
@@ -122,7 +122,7 @@
                    '(option "--foo=" flycheck-test-option-var number-to-string) 'emacs-lisp)
                   :type 'wrong-type-argument)))
 
-(ert-deftest flycheck-substitute-argument-option-list ()
+(ert-deftest flycheck-substitute-argument/option-list ()
   (let ((flycheck-test-option-var "spam"))
     (should-error (flycheck-substitute-argument
                    '(option-list "-I" flycheck-test-option-var) 'emacs-lisp)))
@@ -152,7 +152,7 @@
                    '(option-list "-I" flycheck-test-option-var nil number-to-string) 'emacs-lisp)
                   :type 'wrong-type-argument)))
 
-(ert-deftest flycheck-substitute-argument-option-flag ()
+(ert-deftest flycheck-substitute-argument/option-flag ()
   (let ((flycheck-test-option-var nil))
     (should-not (flycheck-substitute-argument
                  '(option-flag "--foo" flycheck-test-option-var) 'emacs-lisp)))
@@ -165,7 +165,7 @@
                     '(option-flag "--foo" flycheck-test-option-var) 'emacs-lisp)
                    "--foo"))))
 
-(ert-deftest flycheck-substitute-argument-eval ()
+(ert-deftest flycheck-substitute-argument/eval ()
   (let ((flycheck-test-option-var '("Hello " "World")))
     (should (equal (flycheck-substitute-argument '(eval flycheck-test-option-var) 'emacs-lisp)
                    '("Hello " "World"))))
@@ -176,18 +176,18 @@
   (should-error (flycheck-substitute-argument '(eval 200) 'emacs-lisp))
   (should-error (flycheck-substitute-argument '(eval '("foo" 200)) 'emacs-lisp)))
 
-(ert-deftest flycheck-substitute-argument-unknown ()
+(ert-deftest flycheck-substitute-argument/unknown ()
   (--each '(flycheck-substitute-argument flycheck-substitute-shell-argument)
     (should-error (funcall it '(foo "bar") 'emacs-lisp))
     (should-error (funcall it 200 'emacs-lisp))))
 
-(ert-deftest flycheck-substitute-shell-argument-source ()
+(ert-deftest flycheck-substitute-shell-argument/source ()
   (flycheck-testsuite-with-resource-buffer "substitute-dummy"
     (--each '(source source-inplace source-original)
       (should (equal (flycheck-substitute-shell-argument it 'emacs-lisp)
                      (buffer-file-name))))))
 
-(ert-deftest flycheck-substitute-shell-argument-temporary-directory ()
+(ert-deftest flycheck-substitute-shell-argument/temporary-directory ()
   (mocker-let
       ((flycheck-substitute-argument
         (arg checker)
@@ -196,7 +196,7 @@
                                                        'emacs-lisp)
                    "spam\\ with\\ eggs"))))
 
-(ert-deftest flycheck-substitute-shell-argument-config-file ()
+(ert-deftest flycheck-substitute-shell-argument/config-file ()
   (let ((filename "spam with eggs"))
     (mocker-let
         ((flycheck-substitute-argument
@@ -214,7 +214,7 @@
                       'emacs-lisp)
                      (shell-quote-argument (concat "--foo=" filename)))))))
 
-(ert-deftest flycheck-substitute-shell-argument-option ()
+(ert-deftest flycheck-substitute-shell-argument/option ()
   (mocker-let
       ((flycheck-substitute-argument
         (arg checker)
@@ -245,7 +245,7 @@
                     'emacs-lisp)
                    "--foo\\=spam\\ with\\ eggs"))))
 
-(ert-deftest flycheck-substitute-shell-argument-option-list ()
+(ert-deftest flycheck-substitute-shell-argument/option-list ()
   (let ((flycheck-test-option-var "spam"))
     (should-error (flycheck-substitute-shell-argument
                    '(option-list "-I" flycheck-test-option-var) 'emacs-lisp)))
@@ -275,7 +275,7 @@
                    '(option-list "-I" flycheck-test-option-var nil number-to-string) 'emacs-lisp)
                   :type 'wrong-type-argument)))
 
-(ert-deftest flycheck-substitute-shell-argument-option-flag ()
+(ert-deftest flycheck-substitute-shell-argument/option-flag ()
   (let ((flycheck-test-option-var nil))
     (should  (s-blank? (flycheck-substitute-shell-argument
                         '(option-flag "--foo" flycheck-test-option-var) 'emacs-lisp))))
@@ -288,7 +288,7 @@
                     '(option-flag "--foo" flycheck-test-option-var) 'emacs-lisp)
                    "--foo"))))
 
-(ert-deftest flycheck-substitute-shell-argument-eval ()
+(ert-deftest flycheck-substitute-shell-argument/eval ()
   (mocker-let
       ((flycheck-substitute-argument
         (arg checker)

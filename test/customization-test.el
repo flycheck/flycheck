@@ -59,43 +59,51 @@
                    flycheck-locate-config-file-ancestor-directories
                    flycheck-locate-config-file-home))))
 
-(ert-deftest flycheck-process-error-functions/default ()
+(ert-deftest flycheck-process-error-functions/defaults-to-add-overlay ()
   (should (equal flycheck-process-error-functions '(flycheck-add-overlay))))
 
-(ert-deftest flycheck-display-errors-delay/default ()
+(ert-deftest flycheck-display-errors-delay/defaults-to-0.9 ()
   (should (equal flycheck-display-errors-delay 0.9)))
 
-(ert-deftest flycheck-display-errors-function/default ()
+(ert-deftest flycheck-display-errors-function/defaults-to-display-error-messages ()
   (should (eq flycheck-display-errors-function
               #'flycheck-display-error-messages)))
 
-(ert-deftest flycheck-indication-mode/default ()
+(ert-deftest flycheck-indication-mode/defaults-to-left-fringe ()
   (should (eq flycheck-indication-mode 'left-fringe)))
 
-(ert-deftest flycheck-highlighting-mode/default ()
+(ert-deftest flycheck-highlighting-mode/defaults-to-symbols ()
   (should (eq flycheck-highlighting-mode 'symbols)))
 
-(ert-deftest flycheck-check-syntax-automatically/default ()
+(ert-deftest flycheck-check-syntax-automatically/defaults-to-all-events ()
   (should (equal flycheck-check-syntax-automatically
                  '(save idle-change new-line mode-enabled))))
 
-(ert-deftest flycheck-idle-change-delay/default ()
+(ert-deftest flycheck-idle-change-delay/defaults-to-0.5 ()
   (should (equal flycheck-idle-change-delay 0.5)))
 
-(ert-deftest flycheck-google-max-messages/default ()
+(ert-deftest flycheck-google-max-messages/defaults-to-5 ()
   (should (equal flycheck-google-max-messages 5)))
 
-(ert-deftest flycheck-standard-error-navigation/default ()
+(ert-deftest flycheck-standard-error-navigation/default-to-t ()
   (should (eq flycheck-standard-error-navigation t)))
 
-(ert-deftest flycheck-completion-system/default ()
+(ert-deftest flycheck-completion-system/defaults-to-ido ()
   (should (equal flycheck-completion-system 'ido)))
 
-(ert-deftest flycheck-executable-variables ()
+(ert-deftest flycheck-CHECKER-executable/is-special-variable ()
   (dolist (checker flycheck-checkers)
     (let ((variable (flycheck-checker-executable-variable checker)))
-      (should (symbolp variable))
-      (should (custom-variable-p variable))
-      (should-not (symbol-value variable)))))
+      (should (custom-variable-p variable)))))
+
+(ert-deftest flycheck-CHECKER-executable/is-customizable ()
+  (dolist (checker flycheck-checkers)
+    (let ((variable (flycheck-checker-executable-variable checker)))
+      (should (custom-variable-p variable)))))
+
+(ert-deftest flycheck-CHECKER-executable/defaults-to-nil ()
+  (dolist (checker flycheck-checkers)
+    (let ((variable (flycheck-checker-executable-variable checker)))
+      (should (null (symbol-value variable))))))
 
 ;;; customization-test.el ends here

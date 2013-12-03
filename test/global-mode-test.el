@@ -29,7 +29,7 @@
 (require 'test-helper)
 (require 'epa-file)
 
-(ert-deftest flycheck-may-enable-mode-no-undo-buffers ()
+(ert-deftest flycheck-may-enable-mode/not-in-ephemeral-buffers ()
   (with-temp-buffer
     (should-not (flycheck-may-enable-mode)))
   (with-temp-buffer
@@ -40,7 +40,7 @@
     (should (string= (buffer-name) " foo"))
     (should-not (flycheck-may-enable-mode))))
 
-(ert-deftest flycheck-may-enable-mode-encrypted-file ()
+(ert-deftest flycheck-may-enable-mode/not-in-encrypted-files ()
   (let* ((filename (flycheck-testsuite-resource-filename "encrypted-file.el.gpg"))
          ;; Tell EPA about our passphrase
          (epa-file-cache-passphrase-for-symmetric-encryption t)
@@ -50,11 +50,11 @@
       (should (flycheck-get-checker-for-buffer))
       (should-not (flycheck-may-enable-mode)))))
 
-(ert-deftest flycheck-may-enable-mode-tramp ()
+(ert-deftest flycheck-may-enable-mode/does-not-enable-in-tramp-buffers ()
   :expected-result :failed
   (error "Implement me: Find a dummy tramp backend to use for this test!"))
 
-(ert-deftest flycheck-may-enable-mode-no-checker-found ()
+(ert-deftest flycheck-may-enable-mode/not-if-no-checker-is-found ()
   (with-temp-buffer
     (setq buffer-file-name "foo")
     (rename-buffer "foo")
@@ -63,7 +63,7 @@
     (should-not (flycheck-get-checker-for-buffer))
     (should-not (flycheck-may-enable-mode))))
 
-(ert-deftest flycheck-may-enable-mode-checker-found ()
+(ert-deftest flycheck-may-enable-mode/checker-found ()
   (with-temp-buffer
     (setq buffer-file-name "foo")
     (rename-buffer "foo")
@@ -71,7 +71,7 @@
     (should (flycheck-get-checker-for-buffer))
     (should (flycheck-may-enable-mode))))
 
-(ert-deftest flycheck-global-mode-no-undo-buffers ()
+(ert-deftest global-flycheck-mode/does-not-enable-in-ephemeral-buffers ()
   (flycheck-with-global-mode
     (with-temp-buffer
       (setq buffer-file-name "foo")
@@ -79,7 +79,7 @@
       (emacs-lisp-mode)
       (should-not flycheck-mode))))
 
-(ert-deftest flycheck-global-mode-no-encrypted-file ()
+(ert-deftest global-flycheck-mode/does-not-enable-in-encrypted-file ()
   (let* ((filename (flycheck-testsuite-resource-filename "encrypted-file.el.gpg"))
          ;; Tell EPA about our passphrase
          (epa-file-cache-passphrase-for-symmetric-encryption t)
@@ -89,14 +89,14 @@
         (emacs-lisp-mode)
         (should-not flycheck-mode)))))
 
-(ert-deftest flycheck-global-mode-no-checker-found ()
+(ert-deftest global-flycheck-mode/does-not-enable-if-no-checker-is-found ()
   (flycheck-with-global-mode
     (with-temp-buffer
       (rename-buffer "foo")
       (text-mode)
       (should-not flycheck-mode))))
 
-(ert-deftest flycheck-global-mode-checker-found ()
+(ert-deftest global-flycheck-mode/checker-found ()
   (flycheck-with-global-mode
     (with-temp-buffer
       (setq buffer-file-name "foo")
