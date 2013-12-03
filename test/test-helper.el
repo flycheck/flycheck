@@ -125,6 +125,10 @@
 (require 'flycheck)
 (require 'f)
 
+(with-no-warnings
+  ;; For mocker
+  (require 'cl))
+
 
 ;;;; Autoloads
 
