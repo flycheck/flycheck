@@ -42,7 +42,7 @@
    '(3 nil warning "old tables syntax" :checker asciidoc)
    '(11 nil error "[tabledef-default] illegal width=%60%" :checker asciidoc)))
 
-(ert-deftest flycheck/bash-missing-semicolon ()
+(ert-deftest flycheck/bash ()
   "Test a syntax error from a missing semicolon."
   :expected-result (flycheck-testsuite-fail-unless-checker 'bash)
   (flycheck-testsuite-with-hook sh-mode-hook (sh-set-shell "bash" :no-query)
@@ -215,7 +215,7 @@
      '(4 nil warning "Throwing strings is forbidden"
          :checker coffee-coffeelint))))
 
-(ert-deftest flycheck/css-csslint-warning ()
+(ert-deftest flycheck/css-csslint ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'css-csslint)
   (flycheck-testsuite-should-syntax-check
    "checkers/css-csslint-warning.css" 'css-mode
@@ -406,7 +406,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
    "checkers/erlang-warning.erl" 'erlang-mode
    '(6 nil warning "wrong number of arguments in format call" :checker erlang)))
 
-(ert-deftest flycheck/go-gofmt-syntax-error ()
+(ert-deftest flycheck/go-gofmt ()
   "Test a syntax error."
   :expected-result (flycheck-testsuite-fail-unless-checker 'go-gofmt)
   (flycheck-testsuite-should-syntax-check
@@ -414,7 +414,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
    '(5 9 error "expected '(', found 'IDENT' ta" :checker go-gofmt)
    '(6 1 error "expected ')', found '}'" :checker go-gofmt)))
 
-(ert-deftest flycheck/go-build-error ()
+(ert-deftest flycheck/go-build ()
   "Test an import error."
   :expected-result (flycheck-testsuite-fail-unless-checker 'go-build)
   (flycheck-testsuite-with-env
@@ -423,7 +423,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
      "checkers/go/src/error/build-error.go" 'go-mode
      '(6 nil error "undefined: fmt" :checker go-build)) ))
 
-(ert-deftest flycheck/go-package ()
+(ert-deftest flycheck/go-build-handles-packages ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'go-build)
   (flycheck-testsuite-with-env
       `(("GOPATH" . ,(flycheck-testsuite-resource-filename "checkers/go")))
@@ -443,7 +443,7 @@ found)."
      "checkers/go/src/b1/main.go" 'go-mode
      `(4 2 error ,message :checker go-build))))
 
-(ert-deftest flycheck/go-test-error ()
+(ert-deftest flycheck/go-test ()
   "Test an import error."
   :expected-result (flycheck-testsuite-fail-unless-checker 'go-test)
   (flycheck-testsuite-with-env
@@ -452,14 +452,14 @@ found)."
      "checkers/go/src/test/test-error_test.go" 'go-mode
      '(8 nil error "undefined: fmt" :checker go-test))))
 
-(ert-deftest flycheck/haml-error ()
+(ert-deftest flycheck/haml ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'haml)
   (flycheck-testsuite-should-syntax-check
    "checkers/haml-error.haml" 'haml-mode
    '(5 nil error "Inconsistent indentation: 3 spaces used for indentation, but the rest of the document was indented using 2 spaces."
        :checker haml :filename nil)))
 
-(ert-deftest flycheck/handlebars-error ()
+(ert-deftest flycheck/handlebars ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'handlebars)
   (flycheck-testsuite-should-syntax-check
    "checkers/handlebars-error.hbs" 'handlebars-mode
@@ -524,7 +524,7 @@ Why not:
   (flycheck-testsuite-should-syntax-check
    "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)))
 
-(ert-deftest flycheck/javascript-jshint-error-enabled ()
+(ert-deftest flycheck/javascript-jshint ()
   "An unused variable."
   :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-jshint)
   (flycheck-testsuite-with-hook (js-mode-hook js2-mode-hook js3-mode-hook)
@@ -534,7 +534,7 @@ Why not:
      '(4 12 error "'foo' is defined but never used."
          :checker javascript-jshint))))
 
-(ert-deftest flycheck/javascript-gjslint-error ()
+(ert-deftest flycheck/javascript-gjslint ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'javascript-gjslint)
   (flycheck-testsuite-without-checkers javascript-jshint
     (flycheck-testsuite-should-syntax-check
@@ -544,33 +544,33 @@ Why not:
      '(4 nil error "E:0001: Extra space before \"]\""
          :checker javascript-gjslint :filename nil))))
 
-(ert-deftest flycheck/json-jsonlint-error ()
+(ert-deftest flycheck/json-jsonlint ()
   "Test a syntax error from multiple top-level objects."
   :expected-result (flycheck-testsuite-fail-unless-checker 'json-jsonlint)
   (flycheck-testsuite-should-syntax-check
    "checkers/json-jsonlint-error.json" 'text-mode
     '(1 42 error "found: ',' - expected: 'EOF'." :checker json-jsonlint)))
 
-(ert-deftest flycheck/less-file-error ()
+(ert-deftest flycheck/less ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'less)
   (flycheck-testsuite-should-syntax-check
    "checkers/less-file-error.less" 'less-css-mode
    '(3 1 error "'no-such-file.less' wasn't found" :checker less)))
 
-(ert-deftest flycheck/less-syntax-error ()
+(ert-deftest flycheck/less ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'less)
   (flycheck-testsuite-should-syntax-check
    "checkers/less-syntax-error.less" 'less-css-mode
    '(2 1 error "missing closing `}`" :checker less)))
 
-(ert-deftest flycheck/lua-syntax-error ()
+(ert-deftest flycheck/lua ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'lua)
   (flycheck-testsuite-should-syntax-check
    "checkers/lua-syntax-error.lua" 'lua-mode
    '(5 nil error "unfinished string near '\"oh no'"
        :checker lua :filename nil)))
 
-(ert-deftest flycheck/perl-error ()
+(ert-deftest flycheck/perl ()
   "Test an unused variable with the Perl checker."
   :expected-result (flycheck-testsuite-fail-unless-checker 'perl)
   (flycheck-testsuite-should-syntax-check
@@ -796,7 +796,7 @@ Why not:
      "checkers/ruby-syntax-error.rb" 'ruby-mode
      '(5 7 error "unexpected token tCONSTANT" :checker ruby-rubylint))))
 
-(ert-deftest flycheck/ruby-warnings ()
+(ert-deftest flycheck/ruby ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
   (flycheck-testsuite-should-syntax-check
      "checkers/ruby-warnings.rb" 'ruby-mode
@@ -818,7 +818,7 @@ Why not:
      '(16 1 error "wrong number of arguments (expected 2..3 but got 0)"
           :checker ruby-rubylint)))
 
-(ert-deftest flycheck/ruby-warnings-disabled-rubocop-warning ()
+(ert-deftest flycheck/ruby-rubocop-disabled-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
   (flycheck-testsuite-with-hook ruby-mode-hook
       (setq flycheck-rubocoprc "rubocop.yml")
@@ -841,13 +841,13 @@ Why not:
      '(16 1 error "wrong number of arguments (expected 2..3 but got 0)"
           :checker ruby-rubylint))))
 
-(ert-deftest flycheck/rust-syntax-error ()
+(ert-deftest flycheck/rust ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'rust)
   (flycheck-testsuite-should-syntax-check
    "checkers/rust-syntax-error.rs" 'rust-mode
    '(3 10 error "expected `{` but found `bla`" :checker rust)))
 
-(ert-deftest flycheck/sass-error ()
+(ert-deftest flycheck/sass ()
   "Test a syntax error caused by inconsistent indentation."
   :expected-result (flycheck-testsuite-fail-unless-checker 'sass)
   (flycheck-testsuite-should-syntax-check
@@ -855,7 +855,7 @@ Why not:
     '(5 nil error "Inconsistent indentation: 3 spaces were used for indentation, but the rest of the document was indented using 2 spaces."
         :checker sass)))
 
-(ert-deftest flycheck/scala-syntax-error ()
+(ert-deftest flycheck/scala ()
   :expected-result (if (flycheck-testsuite-travis-ci-p) :failed
                      (flycheck-testsuite-fail-unless-checker 'scala))
   (flycheck-testsuite-not-on-travis)
@@ -863,24 +863,24 @@ Why not:
    "checkers/scala-syntax-error.scala" 'scala-mode
    '(3 nil error "identifier expected but '{' found." :checker scala)))
 
-(ert-deftest flycheck/scss-error ()
+(ert-deftest flycheck/scss ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'scss)
   (flycheck-testsuite-should-syntax-check
    "checkers/scss-error.scss" 'scss-mode
    '(3 nil error "Invalid CSS after \"        c olor:\": expected pseudoclass or pseudoelement, was \" red;\""
        :checker scss)))
 
-(ert-deftest flycheck/sh-bash-syntax-error ()
+(ert-deftest flycheck/sh-bash ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'sh-bash)
   (flycheck-testsuite-with-hook sh-mode-hook
       (sh-set-shell "sh" :no-query)
-    (flycheck-testsuite-without-checkers  sh-dash
+    (flycheck-testsuite-without-checkers sh-dash
       (flycheck-testsuite-should-syntax-check
        "checkers/sh-syntax-error.sh" 'sh-mode
        '(3 nil error "syntax error near unexpected token `('" :checker sh-bash)
        '(3 nil error "`cat <(echo blah)'" :checker sh-bash)))))
 
-(ert-deftest flycheck/sh-dash-syntax-error ()
+(ert-deftest flycheck/sh-dash ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'sh-dash)
   (flycheck-testsuite-with-hook sh-mode-hook
       (sh-set-shell "sh" :no-query)
@@ -888,7 +888,7 @@ Why not:
      "checkers/sh-syntax-error.sh" 'sh-mode
      '(3 nil error "Syntax error: \"(\" unexpected" :checker sh-dash))))
 
-(ert-deftest flycheck/slim-error ()
+(ert-deftest flycheck/slim ()
   (flycheck-testsuite-fail-unless-checker 'slim)
   (let* ((slim-version (cadr (split-string (car (process-lines "slimrb" "-v")))))
          ;; Old Slim compilers do not report column information
@@ -897,14 +897,14 @@ Why not:
      "checkers/slim-error.slim" 'slim-mode
      `(2 ,column error "Unexpected indentation" :checker slim))))
 
-(ert-deftest flycheck/tex-chktex-warning ()
+(ert-deftest flycheck/tex-chktex ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'tex-chktex)
   (flycheck-testsuite-should-syntax-check
    "checkers/tex-warning.tex" 'latex-mode
    '(5 28 warning "13:Intersentence spacing (`\\@') should perhaps be used."
        :checker tex-chktex)))
 
-(ert-deftest flycheck/tex-lacheck-warning ()
+(ert-deftest flycheck/tex-lacheck ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'tex-lacheck)
   (flycheck-testsuite-without-checkers tex-chktex
     (flycheck-testsuite-should-syntax-check
@@ -914,14 +914,14 @@ Why not:
      '(7 nil warning "possible unwanted space at \"{\""
          :checker tex-lacheck))))
 
-(ert-deftest flycheck/xml-xmlstarlet-syntax-error ()
+(ert-deftest flycheck/xml-xmlstarlet ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'xml-xmlstarlet)
   (flycheck-testsuite-should-syntax-check
    "checkers/xml-syntax-error.xml" 'nxml-mode
    '(4 10 error "Opening and ending tag mismatch: spam line 3 and with"
        :checker xml-xmlstarlet)))
 
-(ert-deftest flycheck/xml-xmllint-syntax-error ()
+(ert-deftest flycheck/xml-xmllint-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'xml-xmllint)
   (flycheck-testsuite-without-checkers xml-xmlstarlet
     (flycheck-testsuite-should-syntax-check
@@ -931,7 +931,7 @@ Why not:
      '(5 nil error "parser error : Extra content at the end of the document"
          :checker xml-xmllint))))
 
-(ert-deftest flycheck/yaml-jsyaml-error ()
+(ert-deftest flycheck/yaml-jsyaml ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'yaml-jsyaml)
   (flycheck-testsuite-should-syntax-check
    "checkers/yaml-syntax-error.yaml" 'yaml-mode
@@ -960,7 +960,7 @@ Why not:
       (flycheck-testsuite-should-syntax-check
        "checkers/yaml-syntax-error.yaml" 'yaml-mode expected-error))))
 
-(ert-deftest flycheck/zsh-syntax-error ()
+(ert-deftest flycheck/zsh ()
   "Test a syntax error from a missing semicolon."
   :expected-result (flycheck-testsuite-fail-unless-checker 'zsh)
   (flycheck-testsuite-with-hook sh-mode-hook
