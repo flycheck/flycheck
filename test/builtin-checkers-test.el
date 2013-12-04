@@ -466,34 +466,31 @@ found)."
    '(2 nil error "Expecting 'ID', 'DATA', got 'INVALID'"
        :checker handlebars :filename nil)))
 
-(ert-deftest flycheck/haskell-ghc-error ()
+(ert-deftest flycheck/haskell-ghc-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'haskell-ghc)
   (flycheck-testsuite-without-checkers haskell-hdevtools
     (flycheck-testsuite-should-syntax-check
-     "checkers/haskell-ghc-error.hs" 'haskell-mode
+     "checkers/haskell-ghc-syntax-error.hs" 'haskell-mode
      '(3 1 error "parse error on input `module'" :checker haskell-ghc))))
 
-(ert-deftest flycheck/haskell-ghc-warning ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'haskell-ghc)
+(ert-deftest flycheck/haskell ()
+  :expected-result (flycheck-testsuite-fail-unless-checker
+                    'haskell-ghc 'haskell-hlint)
   (flycheck-testsuite-without-checkers haskell-hdevtools
     (flycheck-testsuite-should-syntax-check
-     "checkers/haskell-ghc-warning.hs" 'haskell-mode
+     "checkers/haskell.hs" 'haskell-mode
      '(3 1 warning "Top-level binding with no type signature: foo :: Integer"
-         :checker haskell-ghc))))
-
-(ert-deftest flycheck/haskell-hlint-error ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'haskell-hlint)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/haskell-hlint-error.hs" 'haskell-mode
-   '(4 1 error "Eta reduce\nFound:\n  warnMe xs = map lines xs\nWhy not:\n  warnMe = map lines"
-       :checker haskell-hlint)))
-
-(ert-deftest flycheck/haskell-hlint-warning ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'haskell-hlint)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/haskell-hlint-warning.hs" 'haskell-mode
-   '(2 8 warning "Redundant bracket\nFound:\n  (putStrLn \"Foobar\")\nWhy not:\n  putStrLn \"Foobar\""
-       :checker haskell-hlint)))
+         :checker haskell-ghc)
+     '(6 1 error "Eta reduce
+Found:
+  bar xs = map lines xs
+Why not:
+  bar = map lines" :checker haskell-hlint)
+     '(9 8 warning "Redundant bracket
+Found:
+  (putStrLn \"Foobar\")
+Why not:
+  putStrLn \"Foobar\"" :checker haskell-hlint))))
 
 (ert-deftest flycheck/html-tidy ()
   "Test an error caused by an unknown tag."
@@ -673,18 +670,13 @@ found)."
 }
 '" :checker puppet-parser)))
 
-(ert-deftest flycheck/puppet-lint-warning ()
+(ert-deftest flycheck/puppet-lint ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'puppet-lint)
   (flycheck-testsuite-should-syntax-check
-   "checkers/puppet-lint-warning.pp" 'puppet-mode
-   '(2 nil warning "case statement without a default case"
+   "checkers/puppet-lint.pp" 'puppet-mode
+   '(2 nil error "foo::bar not in autoload module layout" :checker puppet-lint)
+   '(3 nil warning "case statement without a default case"
        :checker puppet-lint)))
-
-(ert-deftest flycheck/puppet-lint-error ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'puppet-lint)
-  (flycheck-testsuite-should-syntax-check
-   "checkers/puppet-lint/error/manifests/puppet-lint-error.pp" 'puppet-mode
-   '(2 nil error "mlayout not in autoload module layout" :checker puppet-lint)))
 
 (ert-deftest flycheck/python-flake8-syntax-error ()
   "Test a real syntax error with flake8."
