@@ -3180,6 +3180,8 @@ New syntax checkers:
 @ghissue{253, YAML with @command{yaml-jsyaml}}
 @item
 @ghissue{255, Chef recipes with @command{foodcritic}}
+@item
+@ghissue{276, AsciiDoc}
 @end itemize
 
 @item
@@ -3302,8 +3304,8 @@ to the Flake8 syntax checker.
 
 @item
 @gh{yasuyk, Yasuyuki Oka} contribute a lot of syntax checkers for
-various languages, including Chef recipes, Handlebars, Javascript, PHP,
-Ruby, Slim and YAML.
+various languages, including AsciiDoc, Chef recipes, Handlebars,
+Javascript, PHP, Ruby, Slim and YAML.
 
 @item
 @gh{vderyagin, Victor Deryagin} added the Rust syntax checker.
