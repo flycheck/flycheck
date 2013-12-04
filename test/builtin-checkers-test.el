@@ -797,7 +797,8 @@ Why not:
      '(5 7 error "unexpected token tCONSTANT" :checker ruby-rubylint))))
 
 (ert-deftest flycheck/ruby ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
+  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop
+                                                           'ruby-rubylint)
   (flycheck-testsuite-should-syntax-check
      "checkers/ruby-warnings.rb" 'ruby-mode
      '(1 1 info "Missing utf-8 encoding comment." :checker ruby-rubocop)
@@ -819,7 +820,8 @@ Why not:
           :checker ruby-rubylint)))
 
 (ert-deftest flycheck/ruby-rubocop-disabled-warning ()
-  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
+  :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop
+                                                           'ruby-rubylint)
   (flycheck-testsuite-with-hook ruby-mode-hook
       (setq flycheck-rubocoprc "rubocop.yml")
     (flycheck-testsuite-should-syntax-check
