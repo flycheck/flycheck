@@ -118,7 +118,8 @@ buffer-local wherever it is set."
   :link '(info-link "(flycheck)Configuration"))
 
 (defcustom flycheck-checkers
-  '(bash
+  '(asciidoc
+    bash
     c/c++-clang
     c/c++-cppcheck
     chef-foodcritic
@@ -3289,6 +3290,18 @@ variable symbol for a syntax checker."
 
 
 ;;;; Built-in checkers
+(flycheck-define-checker asciidoc
+  "A AsciiDoc syntax checker using the AsciiDoc compiler.
+
+See URL `http://www.methods.co.nz/asciidoc'."
+  :command ("asciidoc" source)
+  :error-patterns
+  ((error line-start "asciidoc: ERROR: " (file-name)
+          ": Line " line ": " (message) line-end)
+   (warning line-start "asciidoc: " (or "WARNING" "DEPRECATED") ": " (file-name)
+            ": Line " line ": " (message) line-end))
+  :modes adoc-mode)
+
 (flycheck-define-checker bash
   "A Bash syntax checker using the Bash shell.
 

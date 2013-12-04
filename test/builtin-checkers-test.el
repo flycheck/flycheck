@@ -34,6 +34,14 @@
 (defvar js3-mode-show-parse-errors)
 (autoload 'sh-set-shell "sh-script")
 
+(ert-deftest flycheck/asciidoc ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'asciidoc)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/asciidoc.adoc" 'adoc-mode
+   '(1 nil warning "missing style: [paradef-default]: paragraph" :checker asciidoc)
+   '(3 nil warning "old tables syntax" :checker asciidoc)
+   '(11 nil error "[tabledef-default] illegal width=%60%" :checker asciidoc)))
+
 (ert-deftest flycheck/bash-missing-semicolon ()
   "Test a syntax error from a missing semicolon."
   :expected-result (flycheck-testsuite-fail-unless-checker 'bash)
