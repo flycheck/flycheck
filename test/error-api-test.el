@@ -109,19 +109,25 @@
     (should (= (flycheck-error-pos (flycheck-error-new-at 4 1)) 19))
     (should (= (flycheck-error-pos (flycheck-error-new-at 4 nil)) 19))))
 
-(ert-deftest flycheck-error-format ()
+(ert-deftest flycheck-error-format/level-warning ()
   (should (string= (flycheck-error-format
                     (flycheck-error-new-at 3 5 'warning "Hello world"
                                            :checker 'emacs-lisp))
-                   "3:5:warning: Hello world (emacs-lisp)"))
+                   "3:5:warning: Hello world (emacs-lisp)")))
+
+(ert-deftest flycheck-error-format/level-error ()
   (should (string= (flycheck-error-format
                     (flycheck-error-new-at 20 7 'error "Spam with eggs"
                                            :checker 'ruby))
-                   "20:7:error: Spam with eggs (ruby)"))
+                   "20:7:error: Spam with eggs (ruby)")))
+
+(ert-deftest flycheck-error-format/no-column ()
   (should (string= (flycheck-error-format
                     (flycheck-error-new-at 14 nil 'warning "Oh no"
                                            :checker 'python-flake8))
-                   "14:warning: Oh no (python-flake8)"))
+                   "14:warning: Oh no (python-flake8)")))
+
+(ert-deftest flycheck-error-format/handles-line-breaks ()
   ;; Specific test for https://github.com/magnars/s.el/issues/34
   (should (string= (flycheck-error-format
                     (flycheck-error-new-at 14 15 'error "dash\\nbroken"

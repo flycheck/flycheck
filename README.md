@@ -32,6 +32,7 @@ Features
 - Built-in syntax checkers for:
   - AsciiDoc
   - C/C++
+  - Chef cookbooks
   - CoffeeScript
   - CSS
   - D

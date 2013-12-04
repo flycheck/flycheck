@@ -150,7 +150,7 @@
      '(12 31 error "E251 unexpected spaces around keyword / parameter equals"
           :checker python-flake8))))
 
-(ert-deftest flycheck-select-checker-automatically ()
+(ert-deftest flycheck/selects-checker-automatically ()
   :expected-result (flycheck-testsuite-fail-unless-checkers 'python-pylint 'python-flake8)
   (flycheck-testsuite-with-resource-buffer "checkers/python.py"
     (python-mode)
