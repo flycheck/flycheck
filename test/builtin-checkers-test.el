@@ -34,7 +34,7 @@
 (defvar js3-mode-show-parse-errors)
 (autoload 'sh-set-shell "sh-script")
 
-(ert-deftest builtin-checker/asciidoc ()
+(ert-deftest flycheck/asciidoc ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'asciidoc)
   (flycheck-testsuite-should-syntax-check
    "checkers/asciidoc.adoc" 'adoc-mode
