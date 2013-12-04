@@ -30,6 +30,7 @@ Features
 - Optional manual selection of a syntax checker with `flycheck-select-checker`
   at `C-c ! s`
 - Built-in syntax checkers for:
+  - AsciiDoc
   - C/C++
   - CoffeeScript
   - CSS
