@@ -149,6 +149,7 @@
 (autoload 'js3-mode        "js3-mode")
 (autoload 'less-css-mode   "less-css-mode")
 (autoload 'lua-mode        "lua-mode")
+(autoload 'motion-mode     "motion-mode")
 (autoload 'php-mode        "php-mode")
 (autoload 'puppet-mode     "puppet-mode")
 (autoload 'rust-mode       "rust-mode")

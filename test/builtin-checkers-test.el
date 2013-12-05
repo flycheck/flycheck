@@ -782,10 +782,13 @@ Why not:
    '(21 nil error "Unknown target name: \"cool\"." :checker rst)
    '(26 nil error "Unexpected section title." :checker rst)))
 
+;; Silence motion-mode
+(setq motion-flymake nil motion-rake-task-list-cache t)
+
 (ert-deftest flycheck/ruby-rubocop-syntax-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
   (flycheck-testsuite-should-syntax-check
-   "checkers/ruby-syntax-error.rb" 'ruby-mode
+   "checkers/ruby-syntax-error.rb" '(ruby-mode motion-mode)
    '(5 7 error "unexpected token tCONSTANT" :checker ruby-rubocop)
    '(5 24 error "unterminated string meets end of file" :checker ruby-rubocop)))
 
@@ -793,14 +796,14 @@ Why not:
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop)
   (flycheck-testsuite-without-checkers ruby-rubocop
     (flycheck-testsuite-should-syntax-check
-     "checkers/ruby-syntax-error.rb" 'ruby-mode
+     "checkers/ruby-syntax-error.rb" '(ruby-mode motion-mode)
      '(5 7 error "unexpected token tCONSTANT" :checker ruby-rubylint))))
 
 (ert-deftest flycheck/ruby ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'ruby-rubocop
                                                            'ruby-rubylint)
   (flycheck-testsuite-should-syntax-check
-     "checkers/ruby-warnings.rb" 'ruby-mode
+     "checkers/ruby-warnings.rb" '(ruby-mode motion-mode)
      '(1 1 info "Missing utf-8 encoding comment." :checker ruby-rubocop)
      '(4 18 warning "unused argument name" :checker ruby-rubylint)
      '(5 5 warning "unused local variable arr" :checker ruby-rubylint)
@@ -825,7 +828,7 @@ Why not:
   (flycheck-testsuite-with-hook ruby-mode-hook
       (setq flycheck-rubocoprc "rubocop.yml")
     (flycheck-testsuite-should-syntax-check
-     "checkers/ruby-warnings.rb" 'ruby-mode
+     "checkers/ruby-warnings.rb" '(ruby-mode motion-mode)
      '(1 1 info "Missing utf-8 encoding comment." :checker ruby-rubocop)
      '(4 18 warning "unused argument name" :checker ruby-rubylint)
      '(5 5 warning "unused local variable arr" :checker ruby-rubylint)
