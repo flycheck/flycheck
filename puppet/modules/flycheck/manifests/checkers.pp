@@ -23,6 +23,20 @@ class flycheck::checkers {
     require => Class['apt::update'],
   }
 
+  # Cfengine
+  apt::source { 'cfengine-community':
+    location    => 'http://cfengine.com/pub/apt',
+    repos       => 'main',
+    key         => '89107B44',
+    key_source  => 'http://cfengine.com/pub/gpg.key',
+    include_src => false,
+  }
+
+  package { 'cfengine-community':
+    ensure => latest,
+    require => Apt::Source['cfengine-community'],
+  }
+
   # This PPA provides Clang 3.2 for Ubuntu 12.04
   apt::ppa { 'ppa:kxstudio-team/builds': }
 
