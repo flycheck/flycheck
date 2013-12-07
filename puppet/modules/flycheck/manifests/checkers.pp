@@ -67,7 +67,7 @@ class flycheck::checkers {
                     'less',          # less
                     ]
   package { $node_packages:
-    ensure   => present,
+    ensure   => latest,
     provider => npm,
     require  => Class['nodejs'],
   }
