@@ -3513,17 +3513,14 @@ See URL `http://coffeescript.org/'."
 (flycheck-define-checker coffee-coffeelint
   "A CoffeeScript style checker using coffeelint.
 
+This syntax checker requires coffeelint 1.0 or newer.
+
 See URL `http://www.coffeelint.org/'."
   :command
-  ("coffeelint" (config-file "--file" flycheck-coffeelintrc) "--csv" source)
-  :error-patterns
-  ((error "SyntaxError: " (message) " on line " line)
-   (error line-start (file-name) "," line ","
-          (optional (optional (one-or-more digit)) ",") ; optional end line
-          "error," (message) line-end)
-   (warning line-start (file-name) "," line ","
-            (optional (optional (one-or-more digit)) ",")
-            "warn," (message) line-end))
+  ("coffeelint"
+   (config-file "--file" flycheck-coffeelintrc)
+   "--checkstyle" source)
+  :error-parser flycheck-parse-checkstyle
   :modes coffee-mode)
 
 (flycheck-define-checker css-csslint

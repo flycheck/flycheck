@@ -217,7 +217,7 @@
   :expected-result (flycheck-testsuite-fail-unless-checker 'coffee-coffeelint)
   (flycheck-testsuite-should-syntax-check
    "checkers/coffee-coffeelint-error.coffee" 'coffee-mode
-   '(4 nil error "Throwing strings is forbidden"
+   '(4 nil error "Throwing strings is forbidden; context:"
        :checker coffee-coffeelint)))
 
 (ert-deftest flycheck/coffee-coffeelint-warning ()
@@ -226,7 +226,7 @@
       (setq flycheck-coffeelintrc "coffeelint.json")
     (flycheck-testsuite-should-syntax-check
      "checkers/coffee-coffeelint-error.coffee" 'coffee-mode
-     '(4 nil warning "Throwing strings is forbidden"
+     '(4 nil warning "Throwing strings is forbidden; context:"
          :checker coffee-coffeelint))))
 
 (ert-deftest flycheck/css-csslint ()

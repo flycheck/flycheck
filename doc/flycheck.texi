@@ -3168,6 +3168,8 @@ Use @code{ruby-rubocop} and @code{ruby-rubylint} instead}
 @ghissue{275, Split out @code{haskell-hdevtools} into a separate
 package}.  See @uref{https://github.com/flycheck/flycheck-hdevtools,
 flycheck-hdevtools}
+@item
+Drop support for coffeelint 0.x
 @end itemize
 
 @item
