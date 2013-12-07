@@ -134,6 +134,7 @@
 
 (autoload 'adoc-mode       "adoc-mode")
 (autoload 'cc-mode         "cc-mode")
+(autoload 'cfengine-mode   "cfengine")
 (autoload 'coffee-mode     "coffee-mode")
 (autoload 'cperl-mode      "cperl-mode")
 (autoload 'css-mode        "css-mode")
