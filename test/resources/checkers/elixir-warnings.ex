@@ -1,11 +1,4 @@
-# Warnings from Elixir
-
-defmodule Shadowed do
-  def func() do
-    a = 1
-    fn(^a) -> a end
-  end
-end
+# A warning from Elixir
 
 defmodule AlwaysMatch do
   def func(_) do

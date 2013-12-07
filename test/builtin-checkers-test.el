@@ -285,9 +285,7 @@
   :expected-result (flycheck-testsuite-fail-unless-checker 'elixir)
   (flycheck-testsuite-should-syntax-check
    "checkers/elixir-warnings.ex" 'elixir-mode
-   '(5 nil warning "variable a is unused" :checker elixir)
-   '(6 nil warning "variable a shadowed in 'fun'" :checker elixir)
-   '(14 nil warning "this clause cannot match because a previous clause at line 11 always matches"
+   '(7 nil warning "this clause cannot match because a previous clause at line 4 always matches"
         :checker elixir)))
 
 (ert-deftest flycheck/emacs-lisp ()
