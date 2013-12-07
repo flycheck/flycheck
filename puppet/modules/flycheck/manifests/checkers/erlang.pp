@@ -10,7 +10,7 @@ class flycheck::checkers::erlang {
   }
 
   package { 'esl-erlang':
-    ensure  => installed,
+    ensure  => latest,
     require => Apt::Source['erlang-solutions']
   }
 
