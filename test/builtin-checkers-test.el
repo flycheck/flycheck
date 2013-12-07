@@ -690,10 +690,12 @@ Why not:
   (flycheck-testsuite-with-hook python-mode-hook
       (setq flycheck-flake8rc "flake8rc")
     (flycheck-testsuite-should-syntax-check
-     "checkers/python.py" 'python-mode
+     "checkers/python/test.py" 'python-mode
      '(7 1 error "E302 expected 2 blank lines, found 1" :checker python-flake8)
      '(9 9 info "N802 function name should be lowercase"
-         :checker python-flake8))))
+         :checker python-flake8)
+     '(22 1 warning "F821 undefined name 'antigravity'"
+          :checker python-flake8))))
 
 (ert-deftest flycheck/python-flake8-maximum-complexity ()
   "Test superfluous spaces with flake8."
@@ -701,8 +703,9 @@ Why not:
   (flycheck-testsuite-with-hook python-mode-hook
       (setq flycheck-flake8-maximum-complexity 4)
     (flycheck-testsuite-should-syntax-check
-     "checkers/python.py" 'python-mode
-     '(5 1 warning "F401 're' imported but unused" :checker python-flake8)
+     "checkers/python/test.py" 'python-mode
+     '(5 1 warning "F401 'antigravit' imported but unused"
+         :checker python-flake8)
      '(7 1 error "E302 expected 2 blank lines, found 1" :checker python-flake8)
      '(9 9 info "N802 function name should be lowercase" :checker python-flake8)
      '(12 1 warning "C901 'Spam.with_ham' is too complex (4)"
@@ -710,37 +713,42 @@ Why not:
      '(12 29 error "E251 unexpected spaces around keyword / parameter equals"
           :checker python-flake8)
      '(12 31 error "E251 unexpected spaces around keyword / parameter equals"
+          :checker python-flake8)
+     '(22 1 warning "F821 undefined name 'antigravity'"
           :checker python-flake8))))
 
 (ert-deftest flycheck/python-flake8-error-maximum-line-length ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
   (flycheck-testsuite-with-hook python-mode-hook
-      (setq flycheck-flake8-maximum-line-length 40)
+      (setq flycheck-flake8-maximum-line-length 45)
     (flycheck-testsuite-should-syntax-check
-     "checkers/python.py" 'python-mode
-     '(5 1 warning "F401 're' imported but unused" :checker python-flake8)
+     "checkers/python/test.py" 'python-mode
+     '(5 1 warning "F401 'antigravit' imported but unused"
+         :checker python-flake8)
      '(7 1 error "E302 expected 2 blank lines, found 1" :checker python-flake8)
      '(9 9 info "N802 function name should be lowercase" :checker python-flake8)
-     '(10 41 error "E501 line too long (46 > 40 characters)"
+     '(10 46 error "E501 line too long (46 > 45 characters)"
           :checker python-flake8)
      '(12 29 error "E251 unexpected spaces around keyword / parameter equals"
           :checker python-flake8)
      '(12 31 error "E251 unexpected spaces around keyword / parameter equals"
           :checker python-flake8)
-     '(14 41 error "E501 line too long (41 > 40 characters)"
+     '(22 1 warning "F821 undefined name 'antigravity'"
           :checker python-flake8))))
 
 (ert-deftest flycheck/python-flake8 ()
   "PEP8 compliant names with Flake8 and pep8-naming."
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-flake8)
   (flycheck-testsuite-should-syntax-check
-   "checkers/python.py" 'python-mode
-   '(5 1 warning "F401 're' imported but unused" :checker python-flake8)
+   "checkers/python/test.py" 'python-mode
+   '(5 1 warning "F401 'antigravit' imported but unused" :checker python-flake8)
    '(7 1 error "E302 expected 2 blank lines, found 1" :checker python-flake8)
    '(9 9 info "N802 function name should be lowercase" :checker python-flake8)
    '(12 29 error "E251 unexpected spaces around keyword / parameter equals"
         :checker python-flake8)
    '(12 31 error "E251 unexpected spaces around keyword / parameter equals"
+        :checker python-flake8)
+   '(22 1 warning "F821 undefined name 'antigravity'"
         :checker python-flake8)))
 
 (ert-deftest flycheck/python-pylint-syntax-error ()
@@ -755,10 +763,12 @@ Why not:
   :expected-result (flycheck-testsuite-fail-unless-checker 'python-pylint)
   (flycheck-testsuite-without-checkers python-flake8
     (flycheck-testsuite-should-syntax-check
-     "checkers/python.py" 'python-mode
+     "checkers/python/test.py" 'python-mode
      '(1 nil info "Missing module docstring (C0111)" :checker python-pylint)
      '(4 nil error "Unable to import 'spam' (F0401)" :checker python-pylint)
-     '(5 nil warning "Unused import re (W0611)" :checker python-pylint)
+     '(5 nil error "No name 'antigravit' in module 'python' (E0611)"
+         :checker python-pylint)
+     '(5 nil warning "Unused import antigravit (W0611)" :checker python-pylint)
      '(7 nil info "Missing class docstring (C0111)" :checker python-pylint)
      '(9 4 info "Invalid method name \"withEggs\" (C0103)"
          :checker python-pylint)
@@ -769,6 +779,8 @@ Why not:
      '(12 4 info "Missing method docstring (C0111)" :checker python-pylint)
      '(12 4 warning "Method could be a function (R0201)" :checker python-pylint)
      '(14 15 error "Module 'sys' has no 'python_version' member (E1101)"
+          :checker python-pylint)
+     '(22 nil error "Undefined variable 'antigravity' (E0602)"
           :checker python-pylint))))
 
 (ert-deftest flycheck/rst ()

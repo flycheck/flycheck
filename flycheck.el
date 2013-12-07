@@ -4170,7 +4170,7 @@ See URL `http://pypi.python.org/pypi/pylint'."
   :command ("pylint" "-r" "n"
             "--msg-template" "{path}:{line}:{column}:{C}:{msg} ({msg_id})"
             (config-file "--rcfile=" flycheck-pylintrc)
-            source)
+            source-inplace)
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ":"
           (or "E" "F") ":" (message) line-end)
