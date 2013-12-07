@@ -3204,6 +3204,14 @@ Improvements:
 Demote Rubocop convention messages to @code{info} level
 @end itemize
 
+@item
+Bug fixes:
+
+@itemize @bullet
+@item
+@ghissue{280, Make relative imports work with @code{python-pylint}}
+@end itemize
+
 @end itemize
 
 @node Credits, GNU Free Documentation License, Changes, Top
