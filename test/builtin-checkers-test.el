@@ -186,14 +186,14 @@
   :expected-result (flycheck-testsuite-fail-unless-checker 'cfengine)
   (flycheck-testsuite-should-syntax-check
    "checkers/cfengine-error.cf" 'cfengine-mode
-   '(4 nil error "Unknown promise type 'nosuchpromisetype'"
+   '(8 20 error "Unknown promise type 'nosuchpromisetype'"
        :checker cfengine)))
 
 (ert-deftest flycheck/cfengine-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'cfengine)
   (flycheck-testsuite-should-syntax-check
    "checkers/cfengine-warning.cf" 'cfengine-mode
-   '(4 nil warning "Removed constraint 'host_licenses_paid' in promise type 'common'"
+   '(3 34 warning "Removed constraint 'host_licenses_paid' in promise type 'common' [-Wremoved]"
        :checker cfengine)))
 
 (ert-deftest flycheck/chef-foodcritic ()
