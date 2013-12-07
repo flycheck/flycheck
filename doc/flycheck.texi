@@ -174,13 +174,13 @@ Built-in syntax checkers for:
 
 @itemize @bullet
 @item
-AsciiDoc
+AsciiDoc (using @command{asciidoc})
 @item
 C/C++ (using @command{clang} and @command{cppcheck})
 @item
-CoffeeScript (using @command{coffee} and @command{coffeelint})
-@item
 Chef cookbooks (using @command{foodcritic}))
+@item
+CoffeeScript (using @command{coffee} and @command{coffeelint})
 @item
 CSS (using @command{csslint}))
 @item
@@ -194,9 +194,9 @@ Erlang (using @command{erlc})
 @item
 Go (using @command{gofmt}, @command{go build} and @command{go test})
 @item
-Haml
+Haml (using @command{haml})
 @item
-Handlebars
+Handlebars (using @command{handlebars})
 @item
 Haskell (using @command{ghc} and @command{hlint})
 @item
@@ -208,9 +208,9 @@ JSON (using @command{jsonlint})
 @item
 LESS (using @command{lessc})
 @item
-Lua
+Lua (using @command{luac})
 @item
-Perl
+Perl (using @command{perl})
 @item
 PHP (using @command{php}, @command{phpmd} and @command{phpcs})
 @item
@@ -222,18 +222,18 @@ Ruby (using @command{rubocop} and @command{ruby-lint})
 @item
 Rust (using @command{rustc})
 @item
-RST (ReStructuredText, using Docutils)
+ReStructuredText (using @command{rst2pseudoxml.py} from Docutils)
 @item
-Sass
+Sass (using @command{sass})
 @item
-Scala
+Scala (using @command{scalac})
 @item
-SCSS
+SCSS (using @command{scss})
 @item
-Shell scripts (using Bash, Dash, or Zsh depending on the type of shell
-script)
+Shell scripts (using @command{bash}, @command{dash}, or @command{zsh}
+depending on the type of shell script)
 @item
-Slim
+Slim (using @command{slimrb})
 @item
 TeX/LaTeX (using @command{chktex} or @command{lacheck})
 @item
