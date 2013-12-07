@@ -55,7 +55,7 @@
 (ert-deftest flycheck-temp-file-inplace/with-just-basename ()
   (let ((filename (flycheck-temp-file-inplace "eggs.el" "flycheck-test")))
     (flycheck-testsuite-trap-temp-file filename
-      (should (string= filename (f-expand "flycheck-test-eggs.el")))
+      (should (string= filename (f-expand "flycheck-test_eggs.el")))
       (should-not (f-exists? filename)))))
 
 (ert-deftest flycheck-temp-file-inplace/with-complete-path ()
@@ -63,7 +63,7 @@
                                               "flycheck-test")))
     (flycheck-testsuite-trap-temp-file filename
       (should (string= filename
-                       (f-expand (f-join "spam/with" "flycheck-test-eggs.el"))))
+                       (f-expand (f-join "spam/with" "flycheck-test_eggs.el"))))
       (should-not (f-exists? filename)))))
 
 (ert-deftest flycheck-temp-file-inplace/without-file-name ()

@@ -42,7 +42,7 @@
 
           (let ((filename (flycheck-substitute-argument 'source-inplace 'emacs-lisp)))
             (should (equal filename (flycheck-testsuite-resource-filename
-                                     "flycheck-substitute-dummy")))
+                                     "flycheck_substitute-dummy")))
             (should (f-exists? filename)))
 
           (let ((filename (flycheck-substitute-argument 'source 'emacs-lisp)))

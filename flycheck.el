@@ -979,7 +979,7 @@ If FILENAME is nil, fall back to `flycheck-temp-file-system'.
 
 Return the path of the file."
   (if filename
-      (let* ((tempname (format "%s-%s" prefix (f-filename filename)))
+      (let* ((tempname (format "%s_%s" prefix (f-filename filename)))
              (tempfile (f-expand (f-join (f-dirname filename) tempname))))
         (push tempfile flycheck-temporaries)
         tempfile)
