@@ -178,6 +178,8 @@ AsciiDoc (using @command{asciidoc})
 @item
 C/C++ (using @command{clang} and @command{cppcheck})
 @item
+CFEngine (using @command{cf-promises})
+@item
 Chef cookbooks (using @command{foodcritic}))
 @item
 CoffeeScript (using @command{coffee} and @command{coffeelint})
@@ -3182,6 +3184,8 @@ New syntax checkers:
 @ghissue{255, Chef recipes with @command{foodcritic}}
 @item
 @ghissue{276, AsciiDoc}
+@item
+@ghissue{271, CFEngine}
 @end itemize
 
 @item
@@ -3302,6 +3306,9 @@ script using @command{bash}, and improved error parsing in the Bash
 script syntax checker.
 
 @item
+@gh{tzz, Ted Zlatanov} added a syntax checker for CFEngine.
+
+@item
 @gh{tom-tan, tom tan} added a syntax checker for the D programming
 language using @command{dmd}, and wrote the cool
 @gh{flycheck/flycheck-d-unittest, flycheck-d-unittest} extension.
@@ -3342,6 +3349,7 @@ order of their appearance in the default value of
 @iflyc bash
 @iflyc c/c++-clang
 @iflyc c/c++-cppcheck
+@iflyc cfengine
 @iflyc chef-foodcritic
 @iflyc coffee
 @iflyc coffee-coffeelint

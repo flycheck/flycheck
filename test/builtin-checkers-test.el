@@ -182,6 +182,20 @@
        '(9 nil warning "Prefix ++/-- operators should be preferred for non-primitive types. Pre-increment/decrement can be more efficient than post-increment/decrement. Post-increment/decrement usually involves keeping a copy of the previous value around and adds a little extra code."
            :checker c/c++-cppcheck)))))
 
+(ert-deftest flycheck/cfengine-error ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'cfengine)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/cfengine-error.cf" 'cfengine-mode
+   '(8 20 error "Unknown promise type 'nosuchpromisetype'"
+       :checker cfengine)))
+
+(ert-deftest flycheck/cfengine-warning ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'cfengine)
+  (flycheck-testsuite-should-syntax-check
+   "checkers/cfengine-warning.cf" 'cfengine-mode
+   '(3 34 warning "Removed constraint 'host_licenses_paid' in promise type 'common' [-Wremoved]"
+       :checker cfengine)))
+
 (ert-deftest flycheck/chef-foodcritic ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'chef-foodcritic)
   (flycheck-testsuite-should-syntax-check
