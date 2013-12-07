@@ -74,7 +74,7 @@
         (flycheck-buffer-automatically it))
       (should-not (flycheck-deferred-check-p)))))
 
-(ert-deftest flycheck-check-syntax-automatically-mode-enabled ()
+(ert-deftest flycheck-check-syntax-automatically/mode-enabled ()
   (flycheck-testsuite-with-resource-buffer "automatic-check-dummy.el"
     (emacs-lisp-mode)
     (should-not (flycheck-deferred-check-p))
@@ -89,7 +89,7 @@
       (flycheck-mode))
     (should (flycheck-deferred-check-p))))
 
-(ert-deftest flycheck-check-syntax-automatically-idle-change ()
+(ert-deftest flycheck-check-syntax-automatically/idle-change ()
   (flycheck-testsuite-with-resource-buffer "automatic-check-dummy.el"
     (emacs-lisp-mode)
     (flycheck-mode-no-check)
@@ -116,7 +116,7 @@
       (sleep-for 1))
     (should (flycheck-deferred-check-p))))
 
-(ert-deftest flycheck-check-syntax-automatically-new-line ()
+(ert-deftest flycheck-check-syntax-automatically/new-line ()
   (flycheck-testsuite-with-resource-buffer "automatic-check-dummy.el"
     (flycheck-mode-no-check)
     (let ((flycheck-check-syntax-automatically
@@ -129,7 +129,7 @@
       (insert "\n"))
     (should (flycheck-deferred-check-p))))
 
-(ert-deftest flycheck-check-syntax-automatically-save ()
+(ert-deftest flycheck-check-syntax-automatically/save ()
   (flycheck-testsuite-with-resource-buffer "automatic-check-dummy.el"
     (flycheck-mode-no-check)
     (set-buffer-modified-p t)
@@ -144,14 +144,14 @@
       (save-buffer 0))
     (should (flycheck-deferred-check-p))))
 
-(ert-deftest flycheck-buffer-automatically-mode-disabled ()
+(ert-deftest flycheck-buffer-automatically/does-not-check-with-disabled-mode ()
   (with-temp-buffer
     (should-not flycheck-mode)
     (should-not (flycheck-deferred-check-p))
     (flycheck-buffer-automatically)
     (should-not (flycheck-deferred-check-p))))
 
-(ert-deftest flycheck-buffer-automatically-deferred ()
+(ert-deftest flycheck-buffer-automatically/defers-the-test ()
   "Test that `flycheck-buffer-safe' properly defers the check."
   (with-temp-buffer
     (flycheck-mode)

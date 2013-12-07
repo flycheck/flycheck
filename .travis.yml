@@ -20,3 +20,8 @@ install:
 # Build documentation and run unit tests
 script:
   - make -k info test
+matrix:
+  allow_failures:
+    # Package installations from MELPA fail on Emacs snapshot, see
+    # https://github.com/milkypostman/melpa/issues/1193
+    - env: EMACS=emacs-snapshot

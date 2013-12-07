@@ -125,6 +125,40 @@
 (require 'flycheck)
 (require 'f)
 
+(with-no-warnings
+  ;; For mocker
+  (require 'cl))
+
+
+;;;; Autoloads
+
+(autoload 'adoc-mode       "adoc-mode")
+(autoload 'cc-mode         "cc-mode")
+(autoload 'coffee-mode     "coffee-mode")
+(autoload 'cperl-mode      "cperl-mode")
+(autoload 'css-mode        "css-mode")
+(autoload 'd-mode          "d-mode")
+(autoload 'elixir-mode     "elixir-mode")
+(autoload 'elixir-mode     "elixir-mode")
+(autoload 'erlang-mode     "erlang")
+(autoload 'go-mode         "go-mode")
+(autoload 'haml-mode       "haml-mode")
+(autoload 'handlebars-mode "handlebars-mode")
+(autoload 'haskell-mode    "haskell-mode")
+(autoload 'js2-mode        "js2-mode")
+(autoload 'js3-mode        "js3-mode")
+(autoload 'less-css-mode   "less-css-mode")
+(autoload 'lua-mode        "lua-mode")
+(autoload 'php-mode        "php-mode")
+(autoload 'puppet-mode     "puppet-mode")
+(autoload 'rust-mode       "rust-mode")
+(autoload 'sass-mode       "sass-mode")
+(autoload 'scala-mode      "scala-mode2")
+(autoload 'scss-mode       "scss-mode")
+(autoload 'slim-mode       "slim-mode")
+(autoload 'web-mode        "web-mode")
+(autoload 'yaml-mode       "yaml-mode")
+
 
 ;;;; Directories
 

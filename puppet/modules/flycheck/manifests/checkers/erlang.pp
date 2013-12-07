@@ -14,13 +14,13 @@ class flycheck::checkers::erlang {
     require => Apt::Source['erlang-solutions']
   }
 
-  $elixir_version = '0.10.0'
+  $elixir_version = '0.11.2'
 
   archive { "elixir-${elixir_version}":
     ensure        => present,
     url           => "https://github.com/elixir-lang/elixir/releases/download/v${elixir_version}/v${elixir_version}.zip",
     extension     => 'zip',
-    digest_string => '8a7611ffb39292d8a43f479e55afdbf3',
+    digest_string => '4dd085c29c0f924893a7e0b2f029785f',
     target        => "/opt/elixir-${elixir_version}",
     root_dir      => '.',
     require       => Package['esl-erlang'],

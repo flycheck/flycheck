@@ -2,7 +2,7 @@
 
 import sys
 import spam
-import re
+from . import antigravit  # Typo intended!
 
 class Spam(object):
 
@@ -19,3 +19,4 @@ class Spam(object):
             return 'foo'
 
 spam.with_eggs()
+antigravity()

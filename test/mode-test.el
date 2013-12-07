@@ -28,7 +28,7 @@
 
 (require 'test-helper)
 
-(ert-deftest flycheck-mode-error-navigation ()
+(ert-deftest flycheck-mode/enables-standard-error-navigation ()
   (with-temp-buffer
     (setq next-error-function :old)
     (flycheck-mode 1)
@@ -36,7 +36,9 @@
     (should (eq next-error-function 'flycheck-next-error-function))
     (flycheck-mode -1)
     (should-not flycheck-mode)
-    (should (eq next-error-function :old)))
+    (should (eq next-error-function :old))))
+
+(ert-deftest flycheck-mode/does-not-enable-standard-error-navigation ()
   (with-temp-buffer
     (let ((flycheck-standard-error-navigation nil))
       (setq next-error-function :old)

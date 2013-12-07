@@ -28,22 +28,26 @@
 
 (require 'test-helper)
 
-(ert-deftest flycheck-buffer-deferred ()
-  "Test that deferred checking is enabled correctly."
+(ert-deftest flycheck-buffer-deferred/schedules-a-deferred-syntax-check ()
   (with-temp-buffer
     (should-not (flycheck-deferred-check-p))
     (flycheck-buffer-deferred)
-    (should (flycheck-deferred-check-p))
+    (should (flycheck-deferred-check-p))))
+
+(ert-deftest flycheck-clean-deferred-check/removes-a-deferred-syntax-check ()
+  (with-temp-buffer
+    (flycheck-buffer-deferred)
     (flycheck-clean-deferred-check)
     (should-not (flycheck-deferred-check-p))))
 
-(ert-deftest flycheck-perform-deferred-syntax-check-no-check ()
-  "Test that a deferred syntax check is correctly performed."
+(ert-deftest flycheck-perform-deferred-syntax-check/does-nothing-without-deferred-check ()
   (mocker-let
       ((flycheck-buffer-automatically (&optional error condition)
                                       ((:min-occur 0 :max-occur 0))))
     (with-temp-buffer
-      (flycheck-perform-deferred-syntax-check)))
+      (flycheck-perform-deferred-syntax-check))))
+
+(ert-deftest flycheck-perform-deferred-syntax-check/conducts-an-automatic-check ()
   (mocker-let
       ((flycheck-buffer-automatically (&optional error condition)
                                       ((:input '(nil nil)))))

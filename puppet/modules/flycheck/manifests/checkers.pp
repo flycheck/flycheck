@@ -8,7 +8,6 @@ class flycheck::checkers {
 
   include flycheck::checkers::erlang
   include flycheck::checkers::go
-  include flycheck::checkers::haskell
   include flycheck::checkers::php
 
   # Do not install Gems on Travis
@@ -47,8 +46,10 @@ class flycheck::checkers {
   $node_packages = ['coffee-script', # coffee
                     'coffeelint',    # coffee-coffeelint
                     'csslint',       # css-csslint
+                    'handlebars',    # handlebars
                     'jshint',        # javascript-jshint
                     'jsonlint',      # json-jsonlint
+                    'js-yaml',       # yaml-jsyaml
                     'less',          # less
                     ]
   package { $node_packages:
@@ -77,8 +78,11 @@ class flycheck::checkers {
     require  => Class['flycheck::python'],
   }
 
-  $packages = [ 'bash',            # bash/sh-bash
+  $packages = [ 'asciidoc',        # asciidoc
+                'bash',            # bash/sh-bash
                 'cppcheck',        # c/c++-cpppcheck
+                'ghc',             # haskell-ghc
+                'hlint',           # haskell-lint
                 'tidy',            # html-tidy
                 'lua5.2',          # lua
                 'perl',            # perl
