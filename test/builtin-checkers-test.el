@@ -182,14 +182,14 @@
        '(9 nil warning "Prefix ++/-- operators should be preferred for non-primitive types. Pre-increment/decrement can be more efficient than post-increment/decrement. Post-increment/decrement usually involves keeping a copy of the previous value around and adds a little extra code."
            :checker c/c++-cppcheck)))))
 
-(ert-deftest builtin-checker/cfengine-error ()
+(ert-deftest flycheck/cfengine-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'cfengine)
   (flycheck-testsuite-should-syntax-check
    "checkers/cfengine-error.cf" 'cfengine-mode
    '(4 nil error "Unknown promise type 'nosuchpromisetype'"
        :checker cfengine)))
 
-(ert-deftest builtin-checker/cfengine-warning ()
+(ert-deftest flycheck/cfengine-warning ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'cfengine)
   (flycheck-testsuite-should-syntax-check
    "checkers/cfengine-warning.cf" 'cfengine-mode
