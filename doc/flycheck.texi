@@ -3184,6 +3184,8 @@ New syntax checkers:
 @ghissue{255, Chef recipes with @command{foodcritic}}
 @item
 @ghissue{276, AsciiDoc}
+@item
+@ghissue{271, CFEngine}
 @end itemize
 
 @item
@@ -3302,6 +3304,9 @@ flycheck-color-mode-line} extension.
 @gh{thisirs, Sylvain Rousseau} added a syntax checker for POSIX shell
 script using @command{bash}, and improved error parsing in the Bash
 script syntax checker.
+
+@item
+@gh{tzz, Ted Zlatanov} added a syntax checker for CFEngine.
 
 @item
 @gh{tom-tan, tom tan} added a syntax checker for the D programming
