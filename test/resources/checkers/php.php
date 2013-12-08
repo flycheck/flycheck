@@ -19,6 +19,8 @@
 class A
 {
     private static $FOO = 2;
+
+    /** Does nothing useful */
     private function bar($baz)
     {
         $i=FALSE;
