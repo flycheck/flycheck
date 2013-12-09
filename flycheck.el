@@ -4225,7 +4225,7 @@ See URL `http://batsov.com/rubocop/'."
    (error line-start
           (file-name) ":" line ":" column ": " (or "E" "F") ": " (message)
           line-end))
-  :modes (enh-ruby-mode ruby-mode)
+  :modes (enh-ruby-mode motion-mode ruby-mode)
   :next-checkers ((warnings-only . ruby-rubylint)))
 
 (flycheck-define-checker ruby-rubylint
@@ -4240,7 +4240,7 @@ See URL `https://github.com/YorickPeterse/ruby-lint'."
             (file-name) ":W:" line ":" column ": " (message) line-end)
    (error line-start
           (file-name) ":E:" line ":" column ": " (message) line-end))
-  :modes (enh-ruby-mode ruby-mode))
+  :modes (enh-ruby-mode motion-mode ruby-mode))
 
 (flycheck-define-checker rust
   "A Rust syntax checker using Rust compiler.
