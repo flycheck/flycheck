@@ -899,9 +899,6 @@ check with.  ERRORS is the list of expected errors."
           (should-not (f-exists? dirname)))
       (ignore-errors (f-delete dirname :force)))))
 
-(ert-deftest flycheck-current-load-file/not-implemented ()
-  (error "Not implemented! Replace with `f-this-file'"))
-
 
 ;;;; Checker definitions
 

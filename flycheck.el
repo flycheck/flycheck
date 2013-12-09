@@ -1123,12 +1123,12 @@ Always return the name of the corresponding source file, never
 any byte-compiled file.
 
 Return nil, if the currently loaded file cannot be determined."
-  ;; If we're loading from a file, just use the file being loaded.  Otherwise
-  ;; use the current buffer file name, in case of `eval-buffer' and the like.
-  (-when-let (filename (if load-in-progress load-file-name (buffer-file-name)))
-    (if (s-ends-with? ".elc" filename)
-        (s-chop-suffix "c" filename)
-      filename)))
+  (-when-let* ((this-file (f-this-file))
+               ;; A best guess for the source file of a compiled library. Works
+               ;; well in most cases, and especially for ELPA packages
+               (source-file (concat (f-no-ext this-file) ".el")))
+    (when (f-exists? source-file)
+      source-file)))
 
 
 ;;;; Minibuffer tools
