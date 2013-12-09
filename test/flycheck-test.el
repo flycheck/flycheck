@@ -893,8 +893,23 @@ check with.  ERRORS is the list of expected errors."
     (flycheck-test-with-resource-buffer filename
       (should (flycheck-encrypted-buffer-p)))))
 
-(ert-deftest flycheck-autoloads-file-p/not-implemented ()
-  (error "Not implemented"))
+(ert-deftest flycheck-autoloads-file-p/ephemeral-buffer ()
+  (with-temp-buffer
+    (should-not (flycheck-autoloads-file-p))))
+
+(ert-deftest flycheck-autoloads-file-p/autoloads-without-backing-file ()
+  (with-temp-buffer
+    (rename-buffer "foo-autoloads.el")
+    (should (flycheck-autoloads-file-p))))
+
+(ert-deftest flycheck-autoloads-file-p/autoloads-with-backing-file ()
+  (flycheck-test-with-file-buffer (locate-library "dash-autoloads")
+    (should (flycheck-autoloads-file-p))))
+
+(ert-deftest flycheck-autoloads-file-p/a-plain-file ()
+  (flycheck-test-with-file-buffer
+      (f-join flycheck-test-source-directory "Cask")
+    (should-not (flycheck-autoloads-file-p))))
 
 (ert-deftest flycheck-in-user-emacs-directory-p/not-implemented ()
   (error "Not implemented"))
