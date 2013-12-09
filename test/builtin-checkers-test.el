@@ -140,6 +140,15 @@
     (flycheck-testsuite-should-syntax-check
      "checkers/c_c++-clang-error-rtti.cpp" 'c++-mode)))
 
+(ert-deftest flycheck/c/c-clang-ms-extensions ()
+  :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-clang)
+  (flycheck-testsuite-with-hook c-mode-hook
+      (setq flycheck-clang-ms-extensions t)
+    ;; -std=c11 doesn't include ms-extensions by default. So anonymous
+    ;; structs/unions are flagged as errors. Allow these when appropriate.
+    (flycheck-testsuite-should-syntax-check
+     "checkers/c_c++-ms-extensions.c" 'c-mode)))
+
 (ert-deftest flycheck/c/c++-cppcheck-error ()
   :expected-result (flycheck-testsuite-fail-unless-checker 'c/c++-cppcheck)
   (flycheck-testsuite-without-checkers c/c++-clang

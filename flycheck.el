@@ -3364,6 +3364,17 @@ When non-nil, disable RTTI for syntax checks, via `-fno-rtti'."
   :safe #'booleanp
   :package-version '(flycheck . "0.15"))
 
+(flycheck-def-option-var flycheck-clang-ms-extensions nil c/c++-clang
+  "Whether to enable Microsoft Extensions to C/C++.
+
+When non-nil, allows Microsoft Extensions to C/C++ via
+`-fms-extensions'.
+
+http://clang.llvm.org/docs/UsersManual.html#microsoft-extensions"
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.16"))
+
 (flycheck-def-option-var flycheck-clang-standard-library nil c/c++-clang
   "The standard library to use for Clang.
 
@@ -3410,6 +3421,7 @@ See URL `http://clang.llvm.org/'."
             (option "-std=" flycheck-clang-language-standard)
             (option "-stdlib=" flycheck-clang-standard-library)
             (option-flag "-fno-rtti" flycheck-clang-no-rtti)
+            (option-flag "-fms-extensions" flycheck-clang-ms-extensions)
             (option-list "-include" flycheck-clang-includes)
             (option-list "-W" flycheck-clang-warnings s-prepend)
             (option-list "-D" flycheck-clang-definitions s-prepend)

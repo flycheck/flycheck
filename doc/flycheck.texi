@@ -685,6 +685,10 @@ The language standard for @code{c/c++-clang}.
 Whether to disable RTTI in @code{c/c++-clang}.
 @end defopt
 
+@defopt flycheck-clang-ms-extensions
+Whether to enable ms-extensions in @code{c/c++-clang}.
+@end defopt
+
 @defopt flycheck-clang-standard-library
 The standard library to use for @code{c/c++-clang}.
 @end defopt
@@ -3216,6 +3220,9 @@ Bug fixes:
 @itemize @bullet
 @item
 @ghissue{280, Make relative imports work with @code{python-pylint}}
+@item
+@ghissue{283, Add @code{flycheck-clang-ms-extensions} to optionally
+enable Microsoft anonymous struct/union extensions for C.}
 @end itemize
 
 @end itemize
@@ -3326,6 +3333,11 @@ Javascript, PHP, Ruby, Slim and YAML.
 
 @item
 @gh{vderyagin, Victor Deryagin} added the Rust syntax checker.
+
+@item
+@gh{mitchty, Mitch Tishmack} added support for Microsoft extensions to
+C/C++ with @code{flycheck-clang-ms-extensions}.
+
 @end itemize
 
 Of course we also need to thank @ref{Top, ,GNU Flymake, flymake}, the
