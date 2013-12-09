@@ -84,19 +84,33 @@ _CHECKER is ignored."
     (when (f-exists? filepath)
       filepath)))
 
+(defmacro flycheck-test-with-file-buffer (file-name &rest body)
+  "Create a buffer from FILE-NAME and eval BODY.
+
+BODY is evaluated with `current-buffer' being a buffer with the
+contents FILE-NAME."
+  (declare (indent 1))
+  `(let ((file-name ,file-name))
+     (unless (f-exists? file-name)
+       (error "%s does not exist" file-name))
+     (with-temp-buffer
+       (insert-file-contents file-name 'visit)
+       (set-visited-file-name file-name 'no-query)
+       (cd (f-parent file-name))
+       ;; Mark the buffer as not modified, because we just loaded the file up to
+       ;; now.
+       (set-buffer-modified-p nil)
+       ,@body)))
+
 (defmacro flycheck-test-with-resource-buffer (resource-file &rest body)
   "Create a temp buffer from a RESOURCE-FILE and execute BODY.
 
 The absolute file name of RESOURCE-FILE is determined with
 `flycheck-test-resource-filename'."
   (declare (indent 1))
-  `(let ((filename (flycheck-test-resource-filename ,resource-file)))
-     (should (f-exists? filename))
-     (with-temp-buffer
-       (insert-file-contents filename t)
-       (cd (f-parent filename))
-       (rename-buffer (f-filename filename))
-       ,@body)))
+  `(flycheck-test-with-file-buffer
+       (flycheck-test-resource-filename ,resource-file)
+     ,@body))
 
 (defmacro flycheck-test-with-env (env &rest body)
   "Add ENV to `process-environment' in BODY.
@@ -552,14 +566,13 @@ check with.  ERRORS is the list of expected errors."
     (should-not (flycheck-may-check-automatically))))
 
 (ert-deftest flycheck-may-check-automatically/in-normal-buffers ()
-  (with-temp-buffer
-    (rename-buffer "foo")
+  (flycheck-test-with-resource-buffer "automatic-check-dummy.el"
     (should (-all? #'flycheck-may-check-automatically
                    '(save idle-change new-line mode-enabled)))
     (should (flycheck-may-check-automatically))))
 
 (ert-deftest flycheck-may-check-automatically/automatic-checking-disabled ()
-  (with-temp-buffer
+  (flycheck-test-with-resource-buffer "automatic-check-dummy.el"
     (let ((flycheck-check-syntax-automatically nil))
       (should-not (-any? #'flycheck-may-check-automatically
                          '(save idle-change new-line mode-enabled)))
@@ -567,7 +580,7 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-may-check-automatically/specific-event-disabled ()
   (--each '(save idle-change new-line mode-enabled)
-    (with-temp-buffer
+    (flycheck-test-with-resource-buffer "automatic-check-dummy.el"
       ;; Disable just a specific event
       (let ((flycheck-check-syntax-automatically
              (remq it flycheck-check-syntax-automatically)))
@@ -1671,11 +1684,9 @@ check with.  ERRORS is the list of expected errors."
 (defmacro flycheck-test-with-manual-buffer (&rest body)
   "Create a temp buffer with flycheck.texi and execute BODY."
   (declare (indent 0))
-  `(let* ((filename (f-join flycheck-test-source-directory
-                            "doc/flycheck.texi")))
-     (with-temp-buffer
-       (insert-file-contents filename)
-       ,@body)))
+  `(flycheck-test-with-file-buffer
+       (f-join flycheck-test-source-directory "doc" "flycheck.texi")
+     ,@body))
 
 (ert-deftest flycheck--manual/all-checkers-are-documented ()
   "Test that all registered checkers are documented in the Flycheck manual."
@@ -2833,9 +2844,8 @@ of the file will be interrupted because there are too many #ifdef configurations
 
 Regression test for https://github.com/flycheck/flycheck/issues/73 and
 https://github.com/bbatsov/prelude/issues/259."
-  (with-temp-buffer
-    (insert-file-contents
-     (flycheck-test-resource-filename "checkers/emacs-lisp.el"))
+  (flycheck-test-with-resource-buffer "checkers/emacs-lisp.el"
+    (set-visited-file-name nil 'no-query)
     (emacs-lisp-mode)
     (should-not (buffer-file-name))
     (flycheck-test-buffer-sync)
@@ -2852,18 +2862,13 @@ checker will refuse to check these.
 
 See URL `https://github.com/flycheck/flycheck/issues/45' and URL
 `https://github.com/bbatsov/prelude/issues/253'."
-  (let ((autoloads-file (locate-library "dash-autoloads")))
-    (should (f-file? autoloads-file))
-    (with-temp-buffer
-      (insert-file-contents autoloads-file 'visit)
-      (should-not (flycheck-may-use-checker 'emacs-lisp))
-      (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc)))))
+  (flycheck-test-with-file-buffer (locate-library "dash-autoloads")
+    (should-not (flycheck-may-use-checker 'emacs-lisp))
+    (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
 
 (ert-deftest flycheck-define-checker/emacs-lisp-checkdoc-does-not-check-cask-files ()
-  (let ((cask-file (f-join flycheck-test-source-directory "Cask")))
-    (with-temp-buffer
-      (insert-file-contents cask-file 'visit)
-      (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc)))))
+  (flycheck-test-with-file-buffer (f-join flycheck-test-source-directory "Cask")
+    (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
 
 (ert-deftest flycheck-define-checker/emacs-lisp-does-not-check-with-no-byte-compile ()
   (flycheck-test-with-hook emacs-lisp-mode-hook
