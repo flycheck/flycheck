@@ -2661,14 +2661,19 @@ of the file will be interrupted because there are too many #ifdef configurations
            :checker c/c++-cppcheck)))))
 
 (ert-deftest flycheck-define-checker/cfengine-error ()
-  :expected-result (flycheck-test-fail-unless-checker 'cfengine)
+  :expected-result (if (fboundp 'cfengine-mode)
+                       ;; Cfengine mode is only available in Emacs 24.4
+                       (flycheck-test-fail-unless-checker 'cfengine)
+                     :failed)
   (flycheck-test-should-syntax-check
    "checkers/cfengine-error.cf" 'cfengine-mode
    '(8 20 error "Unknown promise type 'nosuchpromisetype'"
        :checker cfengine)))
 
 (ert-deftest flycheck-define-checker/cfengine-warning ()
-  :expected-result (flycheck-test-fail-unless-checker 'cfengine)
+  :expected-result (if (fboundp 'cfengine-mode)
+                       (flycheck-test-fail-unless-checker 'cfengine)
+                     :failed)
   (flycheck-test-should-syntax-check
    "checkers/cfengine-warning.cf" 'cfengine-mode
    '(3 34 warning "Removed constraint 'host_licenses_paid' in promise type 'common' [-Wremoved]"

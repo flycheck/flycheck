@@ -15,7 +15,6 @@
 
  ;; Various modes for use in the unit tests
  (depends-on "adoc-mode")
- (depends-on "cfengine")
  (depends-on "coffee-mode")
  (depends-on "haml-mode")
  (depends-on "handlebars-mode")
