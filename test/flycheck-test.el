@@ -923,8 +923,19 @@ check with.  ERRORS is the list of expected errors."
       (f-join flycheck-test-source-directory "Cask")
     (should-not (flycheck-autoloads-file-p))))
 
-(ert-deftest flycheck-in-user-emacs-directory-p/not-implemented ()
-  (error "Not implemented"))
+(ert-deftest flycheck-in-user-emacs-directory-p/no-child-of-user-emacs-directory ()
+  (should-not (flycheck-in-user-emacs-directory-p
+               (flycheck-test-resource-filename "checkers/emacs-lisp.el"))))
+
+(ert-deftest flycheck-in-user-emacs-directory-p/direct-child-of-user-emacs-directory ()
+  (let ((user-emacs-directory flycheck-test-directory))
+    (should (flycheck-in-user-emacs-directory-p
+             (f-join flycheck-test-directory "flycheck-test.el")))))
+
+(ert-deftest flycheck-in-user-emacs-directory-p/indirect-child-of-user-emacs-directory ()
+  (let ((user-emacs-directory flycheck-test-directory))
+    (should (flycheck-in-user-emacs-directory-p
+             (flycheck-test-resource-filename "checkers/emacs-lisp.el")))))
 
 (ert-deftest flycheck-safe-delete/recursive-removal ()
   (let ((dirname (flycheck-temp-dir-system "flycheck-test")))
