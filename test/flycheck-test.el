@@ -2452,29 +2452,49 @@ of the file will be interrupted because there are too many #ifdef configurations
         (flycheck-copy-messages-as-kill 10)))
     (should (equal (-take 2 kill-ring) '("1st message" "2nd message")))))
 
-(ert-deftest flycheck-google-messages ()
+(ert-deftest flycheck-google-messages/error-on-too-many-messages ()
   (flycheck-test-with-temp-buffer
     (insert "A test buffer to copy errors from")
     (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
           (errors (list (flycheck-error-new-at 1 nil 'error "1st message")
                         (flycheck-error-new-at 1 10 'warning "2nd message"))))
       (-each errors #'flycheck-add-overlay)
-      (let ((err (should-error (flycheck-google-messages 10)
-                               :type flycheck-test-user-error-type)))
-        (should (string= (cadr err) "Please install Google This from https://github.com/Bruce-Connor/emacs-google-this")))
+      (let* ((flycheck-google-max-messages 1)
+             (err (should-error (flycheck-google-messages 10)
+                                :type flycheck-test-user-error-type)))
+        (should (string= (cadr err) "More than 1 messages at point"))))))
 
-      (mocker-let
-          ((google-string (quote-flag s confirm)
-                          ((:input '(nil "1st message" :no-confirm))
-                           (:input '(nil "2nd message" :no-confirm))
-                           (:input '(:quote "1st message" :no-confirm))
-                           (:input '(:quote "2nd message" :no-confirm)))))
-        (let* ((flycheck-google-max-messages 1)
-               (err (should-error (flycheck-google-messages 10)
-                                  :type flycheck-test-user-error-type)))
-          (should (string= (cadr err) "More than 1 messages at point")))
+(ert-deftest flycheck-google-messages/searches-google ()
+  (flycheck-test-with-temp-buffer
+    (insert "A test buffer to copy errors from")
+    (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
+          (errors (list (flycheck-error-new-at 1 nil 'error "1st message")
+                        (flycheck-error-new-at 1 10 'warning "2nd message"))))
+      (-each errors #'flycheck-add-overlay)
+      (let* (browsed-urls
+             (browse-url-browser-function (lambda (url &optional _)
+                                            (push url browsed-urls))))
         (flycheck-google-messages 10)
-        (flycheck-google-messages 10 :quote)))))
+        ;; Arguments come out backwards because of `push'
+        (should (equal '("https://www.google.com/search?ion=1&q=2nd%20message"
+                         "https://www.google.com/search?ion=1&q=1st%20message")
+                       browsed-urls))))))
+
+(ert-deftest flycheck-google-messages/searches-google-with-quoted-urls ()
+  (flycheck-test-with-temp-buffer
+    (insert "A test buffer to copy errors from")
+    (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
+          (errors (list (flycheck-error-new-at 1 nil 'error "1st message")
+                        (flycheck-error-new-at 1 10 'warning "2nd message"))))
+      (-each errors #'flycheck-add-overlay)
+      (let* (browsed-urls
+             (browse-url-browser-function (lambda (url &optional _)
+                                            (push url browsed-urls))))
+        (flycheck-google-messages 10 'quote)
+        ;; Arguments come out backwards because of `push'
+        (should (equal '("https://www.google.com/search?ion=1&q=%222nd%20message%22"
+                         "https://www.google.com/search?ion=1&q=%221st%20message%22")
+                       browsed-urls))))))
 
 
 ;;;; Syntax checker executables
