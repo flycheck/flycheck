@@ -3115,41 +3115,43 @@ Why not:
    '(19 6 error "Missing class doc comment" :checker php-phpcs)
    '(21 nil warning "Avoid unused private fields such as '$FOO'."
         :checker php-phpmd)
-   '(21 20 error "Private member variable \"FOO\" must be prefixed with an underscore" :checker php-phpcs)
-   '(22 nil warning "Avoid unused private methods such as 'bar'."
-        :checker php-phpmd)
-   '(22 nil warning "Avoid unused parameters such as '$baz'."
-        :checker php-phpmd)
-   '(22 13 error "Missing function doc comment" :checker php-phpcs)
-   '(22 13 error "Private method name \"A::bar\" must be prefixed with an underscore"
+   '(21 20 error "Private member variable \"FOO\" must be prefixed with an underscore"
         :checker php-phpcs)
-   '(24 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
+   '(23 5 error "Doc comment for \"$baz\" missing" :checker php-phpcs)
+   '(23 5 error "Missing @return tag in function comment" :checker php-phpcs)
+   '(24 nil warning "Avoid unused private methods such as 'bar'."
         :checker php-phpmd)
-   '(24 nil warning "Avoid unused local variables such as '$i'."
+   '(24 nil warning "Avoid unused parameters such as '$baz'."
         :checker php-phpmd)
-   '(24 12 error "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\""
+   '(24 13 error "Private method name \"A::bar\" must be prefixed with an underscore"
+        :checker php-phpcs)
+   '(26 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
+        :checker php-phpmd)
+   '(26 nil warning "Avoid unused local variables such as '$i'."
+        :checker php-phpmd)
+   '(26 12 error "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\""
         :checker php-phpcs)))
 
 (ert-deftest flycheck-define-checker/php-phpmd-rulesets ()
-  :expected-result (flycheck-test-fail-unless-checkers 'php-phpcs
-                                                            'php-phpmd)
+  :expected-result (flycheck-test-fail-unless-checkers 'php-phpcs 'php-phpmd)
   (flycheck-test-with-hook php-mode-hook
       (setq flycheck-phpmd-rulesets (remove "unusedcode" flycheck-phpmd-rulesets))
     (flycheck-test-should-syntax-check
      "checkers/php.php" 'php-mode
      '(19 6 error "Missing class doc comment" :checker php-phpcs)
-     '(21 20 error "Private member variable \"FOO\" must be prefixed with an underscore" :checker php-phpcs)
-     '(22 13 error "Missing function doc comment" :checker php-phpcs)
-     '(22 13 error "Private method name \"A::bar\" must be prefixed with an underscore"
+     '(21 20 error "Private member variable \"FOO\" must be prefixed with an underscore"
           :checker php-phpcs)
-     '(24 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
+     '(23 5 error "Doc comment for \"$baz\" missing" :checker php-phpcs)
+     '(23 5 error "Missing @return tag in function comment" :checker php-phpcs)
+     '(24 13 error "Private method name \"A::bar\" must be prefixed with an underscore"
+          :checker php-phpcs)
+     '(26 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
           :checker php-phpmd)
-     '(24 12 error "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\""
+     '(26 12 error "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\""
           :checker php-phpcs))))
 
 (ert-deftest flycheck-define-checker/php-phpcs-standard ()
-  :expected-result (flycheck-test-fail-unless-checkers 'php-phpcs
-                                                            'php-phpmd)
+  :expected-result (flycheck-test-fail-unless-checkers 'php-phpcs 'php-phpmd)
   (flycheck-test-with-hook php-mode-hook
       (setq flycheck-phpcs-standard "Zend")
     (flycheck-test-should-syntax-check
@@ -3158,15 +3160,15 @@ Why not:
           :checker php-phpmd)
      '(21 20 error "Private member variable \"FOO\" must contain a leading underscore"
           :checker php-phpcs)
-     '(22 nil warning "Avoid unused private methods such as 'bar'."
+     '(24 nil warning "Avoid unused private methods such as 'bar'."
           :checker php-phpmd)
-     '(22 nil warning "Avoid unused parameters such as '$baz'."
+     '(24 nil warning "Avoid unused parameters such as '$baz'."
           :checker php-phpmd)
-     '(24 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
+     '(26 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
           :checker php-phpmd)
-     '(24 nil warning "Avoid unused local variables such as '$i'."
+     '(26 nil warning "Avoid unused local variables such as '$i'."
           :checker php-phpmd)
-     '(28 1 error "A closing tag is not permitted at the end of a PHP file"
+     '(30 1 error "A closing tag is not permitted at the end of a PHP file"
           :checker php-phpcs))))
 
 (ert-deftest flycheck-define-checker/puppet-parser-singleline-syntax-error ()
