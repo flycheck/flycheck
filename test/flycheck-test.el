@@ -84,6 +84,22 @@ _CHECKER is ignored."
     (when (f-exists? filepath)
       filepath)))
 
+(defmacro flycheck-test-with-temp-buffer (&rest body)
+  "Eval BODY within a temporary buffer.
+
+Like `with-temp-buffer', but resets the modification state of the
+temporary buffer to make sure that it is properly killed even if
+it has a backing file and is modified."
+  (declare (indent 0))
+  `(with-temp-buffer
+     (unwind-protect
+         (progn ,@body)
+       ;; Reset modification state of the buffer, and unlink it from its backing
+       ;; file, if any, because Emacs refuses to kill modified buffers with
+       ;; backing files, even if they are temporary.
+       (set-buffer-modified-p nil)
+       (set-visited-file-name nil 'no-query))))
+
 (defmacro flycheck-test-with-file-buffer (file-name &rest body)
   "Create a buffer from FILE-NAME and eval BODY.
 
@@ -93,7 +109,7 @@ contents FILE-NAME."
   `(let ((file-name ,file-name))
      (unless (f-exists? file-name)
        (error "%s does not exist" file-name))
-     (with-temp-buffer
+     (flycheck-test-with-temp-buffer
        (insert-file-contents file-name 'visit)
        (set-visited-file-name file-name 'no-query)
        (cd (f-parent file-name))
@@ -421,7 +437,7 @@ check with.  ERRORS is the list of expected errors."
 ;;;; Minor mode definition
 
 (ert-deftest flycheck-mode/enables-standard-error-navigation ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (setq next-error-function :old)
     (flycheck-mode 1)
     (should flycheck-mode)
@@ -431,7 +447,7 @@ check with.  ERRORS is the list of expected errors."
     (should (eq next-error-function :old))))
 
 (ert-deftest flycheck-mode/does-not-enable-standard-error-navigation ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (let ((flycheck-standard-error-navigation nil))
       (setq next-error-function :old)
       (flycheck-mode +1)
@@ -448,9 +464,9 @@ check with.  ERRORS is the list of expected errors."
 ;;;; Global syntax checking
 
 (ert-deftest flycheck-may-enable-mode/not-in-ephemeral-buffers ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (should-not (flycheck-may-enable-mode)))
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (setq buffer-file-name "foo")
     (emacs-lisp-mode)
     (should (flycheck-get-checker-for-buffer))
@@ -469,7 +485,7 @@ check with.  ERRORS is the list of expected errors."
       (should-not (flycheck-may-enable-mode)))))
 
 (ert-deftest flycheck-may-enable-mode/not-if-no-checker-is-found ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (setq buffer-file-name "foo")
     (rename-buffer "foo")
     (text-mode)
@@ -478,7 +494,7 @@ check with.  ERRORS is the list of expected errors."
     (should-not (flycheck-may-enable-mode))))
 
 (ert-deftest flycheck-may-enable-mode/checker-found ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (setq buffer-file-name "foo")
     (rename-buffer "foo")
     (emacs-lisp-mode)
@@ -487,7 +503,7 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest global-flycheck-mode/does-not-enable-in-ephemeral-buffers ()
   (flycheck-test-with-global-mode
-    (with-temp-buffer
+    (flycheck-test-with-temp-buffer
       (setq buffer-file-name "foo")
       (rename-buffer " foo")
       (emacs-lisp-mode)
@@ -505,14 +521,14 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest global-flycheck-mode/does-not-enable-if-no-checker-is-found ()
   (flycheck-test-with-global-mode
-    (with-temp-buffer
+    (flycheck-test-with-temp-buffer
       (rename-buffer "foo")
       (text-mode)
       (should-not flycheck-mode))))
 
 (ert-deftest global-flycheck-mode/checker-found ()
   (flycheck-test-with-global-mode
-    (with-temp-buffer
+    (flycheck-test-with-temp-buffer
       (setq buffer-file-name "foo")
       (rename-buffer "foo")
       (emacs-lisp-mode)
@@ -530,13 +546,13 @@ check with.  ERRORS is the list of expected errors."
     (should (flycheck-deferred-check-p))))
 
 (ert-deftest flycheck-buffer-deferred/schedules-a-deferred-syntax-check ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (should-not (flycheck-deferred-check-p))
     (flycheck-buffer-deferred)
     (should (flycheck-deferred-check-p))))
 
 (ert-deftest flycheck-clean-deferred-check/removes-a-deferred-syntax-check ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (flycheck-buffer-deferred)
     (flycheck-clean-deferred-check)
     (should-not (flycheck-deferred-check-p))))
@@ -545,14 +561,14 @@ check with.  ERRORS is the list of expected errors."
   (mocker-let
       ((flycheck-buffer-automatically (&optional error condition)
                                       ((:min-occur 0 :max-occur 0))))
-    (with-temp-buffer
+    (flycheck-test-with-temp-buffer
       (flycheck-perform-deferred-syntax-check))))
 
 (ert-deftest flycheck-perform-deferred-syntax-check/conducts-an-automatic-check ()
   (mocker-let
       ((flycheck-buffer-automatically (&optional error condition)
                                       ((:input '(nil nil)))))
-    (with-temp-buffer
+    (flycheck-test-with-temp-buffer
       (flycheck-buffer-deferred)
       (flycheck-perform-deferred-syntax-check))))
 
@@ -560,7 +576,7 @@ check with.  ERRORS is the list of expected errors."
 ;;;; Automatic syntax checking
 
 (ert-deftest flycheck-may-check-automatically/not-in-ephemeral-buffers ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (should-not (-any? #'flycheck-may-check-automatically
                        '(save idle-change new-line mode-enabled)))
     (should-not (flycheck-may-check-automatically))))
@@ -674,14 +690,14 @@ check with.  ERRORS is the list of expected errors."
       (should (flycheck-deferred-check-p)))))
 
 (ert-deftest flycheck-buffer-automatically/does-not-check-with-disabled-mode ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (should-not flycheck-mode)
     (should-not (flycheck-deferred-check-p))
     (flycheck-buffer-automatically)
     (should-not (flycheck-deferred-check-p))))
 
 (ert-deftest flycheck-buffer-automatically/defers-the-test ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (flycheck-mode)
     ;; Flycheck won't check ephemeral buffers
     (rename-buffer "foo")
@@ -693,22 +709,22 @@ check with.  ERRORS is the list of expected errors."
 ;;;; Mode line reporting
 
 (ert-deftest flycheck-report-status/sets-mode-line ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (flycheck-report-status "foo")
     (should (string= flycheck-mode-line " FlyCfoo"))))
 
 (ert-deftest flycheck-report-status/empties-mode-line ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (flycheck-report-status "")
     (should (string= flycheck-mode-line " FlyC"))))
 
 (ert-deftest flycheck-report-error/sets-mode-line ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (flycheck-report-error)
     (should (string= flycheck-mode-line " FlyC!"))))
 
 (ert-deftest flycheck-report-error/runs-hook ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (let* ((was-called nil)
            (flycheck-syntax-check-failed-hook
             (list (lambda () (setq was-called t)))))
@@ -716,18 +732,18 @@ check with.  ERRORS is the list of expected errors."
       (should was-called))))
 
 (ert-deftest flycheck-report-error/clears-errors ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (let ((flycheck-current-errors (list 'foo)))
       (flycheck-report-error)
       (should-not flycheck-current-errors))))
 
 (ert-deftest flycheck-report-error-count/no-errors ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (flycheck-report-error-count nil)
     (should (string= flycheck-mode-line " FlyC"))))
 
 (ert-deftest flycheck-report-error-count/errors-only ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (flycheck-report-error-count
      (list (flycheck-error-new-at 1 2 'error)
            (flycheck-error-new-at 100 50 'error)
@@ -736,7 +752,7 @@ check with.  ERRORS is the list of expected errors."
     (should (string= flycheck-mode-line " FlyC:3/0"))))
 
 (ert-deftest flycheck-report-error-count/warnings-only ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (flycheck-report-error-count
      (list (flycheck-error-new-at 4 6 'warning)
            (flycheck-error-new-at 10 20 'warning)
@@ -744,7 +760,7 @@ check with.  ERRORS is the list of expected errors."
     (should (string= flycheck-mode-line " FlyC:0/2"))))
 
 (ert-deftest flycheck-report-error-count/errors-and-warnings ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (flycheck-report-error-count
      (list (flycheck-error-new-at 1 2 'error)
            (flycheck-error-new-at 4 6 'warning)
@@ -832,7 +848,7 @@ check with.  ERRORS is the list of expected errors."
   (let ((filename (f-expand "tests-temp")))
     (unwind-protect
         (progn
-          (with-temp-buffer
+          (flycheck-test-with-temp-buffer
             (should-not (f-exists? filename))
             (insert "Hello world")
             (flycheck-save-buffer-to-file filename))
@@ -860,21 +876,21 @@ check with.  ERRORS is the list of expected errors."
                  '("-Lfoo" "-Lbar"))))
 
 (ert-deftest flycheck-ephemeral-buffer-p/temporary-buffer ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (should (flycheck-ephemeral-buffer-p))))
 
 (ert-deftest flycheck-ephemeral-buffer-p/buffer-with-leading-whitespace ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (rename-buffer " foo")
     (should (flycheck-ephemeral-buffer-p))))
 
 (ert-deftest flycheck-ephemeral-buffer-p/buffer-without-leading-whitespace ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (rename-buffer "foo")
     (should-not (flycheck-ephemeral-buffer-p))))
 
 (ert-deftest flycheck-encrypted-buffer-p/unencrypted-temporary-buffer ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (should-not (flycheck-encrypted-buffer-p))))
 
 (ert-deftest flycheck-encrypted-buffer-p/unencrypted-file-buffer ()
@@ -890,11 +906,11 @@ check with.  ERRORS is the list of expected errors."
       (should (flycheck-encrypted-buffer-p)))))
 
 (ert-deftest flycheck-autoloads-file-p/ephemeral-buffer ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (should-not (flycheck-autoloads-file-p))))
 
 (ert-deftest flycheck-autoloads-file-p/autoloads-without-backing-file ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (rename-buffer "foo-autoloads.el")
     (should (flycheck-autoloads-file-p))))
 
@@ -1045,7 +1061,7 @@ check with.  ERRORS is the list of expected errors."
     (flycheck-safe-delete flycheck-temporaries)))
 
 (ert-deftest flycheck-substitute-argument/temporary-directory ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (unwind-protect
         (let ((dirname (flycheck-substitute-argument 'temporary-directory
                                                      'emacs-lisp)))
@@ -1054,7 +1070,7 @@ check with.  ERRORS is the list of expected errors."
       (flycheck-safe-delete flycheck-temporaries))))
 
 (ert-deftest flycheck-substitute-argument/temporary-filename ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (unwind-protect
         (let ((filename (flycheck-substitute-argument 'temporary-file-name
                                                       'emacs-lisp)))
@@ -1302,20 +1318,20 @@ check with.  ERRORS is the list of expected errors."
 ;;;; Configuration file functions
 
 (ert-deftest flycheck-locate-config-file-absolute-path/just-a-base-name ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (cd flycheck-test-directory)
     (should-not (flycheck-locate-config-file-absolute-path "flycheck-test.el"
                                                            'emacs-lisp))))
 
 (ert-deftest flycheck-locate-config-file-absolute-path/with-path ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (cd flycheck-test-directory)
     (should (equal (flycheck-locate-config-file-absolute-path "../Makefile"
                                                               'emacs-lisp)
                    (f-join flycheck-test-directory "../Makefile")))))
 
 (ert-deftest flycheck-locate-config-file-projectile/existing-file-inside-a-project ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (set-visited-file-name (f-join flycheck-test-directory "foo")
                            :no-query)
     (should (projectile-project-p))
@@ -1324,34 +1340,34 @@ check with.  ERRORS is the list of expected errors."
              (f-join flycheck-test-directory "../Makefile")))))
 
 (ert-deftest flycheck-locate-config-file-projectile/not-existing-file-inside-a-project ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (set-visited-file-name (f-join flycheck-test-directory "foo")
                            :no-query)
     (should (projectile-project-p))
     (should-not (flycheck-locate-config-file-projectile "Foo" 'emacs-lisp))))
 
 (ert-deftest flycheck-locate-config-file-projectile/outside-a-project ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (set-visited-file-name (f-join temporary-file-directory "foo")
                            :no-query)
     (should-not (projectile-project-p))
     (should-not (flycheck-locate-config-file-projectile "Foo" 'emacs-dir))))
 
 (ert-deftest flycheck-locate-config-file-ancestor-directories/not-existing-file ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (setq buffer-file-name (f-join flycheck-test-directory "flycheck-test.el"))
     (should-not (flycheck-locate-config-file-ancestor-directories
                  "foo" 'emacs-lisp))))
 
 (ert-deftest flycheck-locate-config-file-ancestor-directories/file-on-same-level ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (setq buffer-file-name (f-join flycheck-test-directory "flycheck-test.el"))
     (should (equal (flycheck-locate-config-file-ancestor-directories
                     "test-helper.el" 'emacs-lisp)
                    (f-join flycheck-test-directory "test-helper.el")))))
 
 (ert-deftest flycheck-locate-config-file-ancestor-directories/file-on-parent-level ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (setq buffer-file-name (f-join flycheck-test-directory "flycheck-test.el"))
     (should (equal (flycheck-locate-config-file-ancestor-directories
                     "Makefile" 'emacs-lisp)
@@ -1407,7 +1423,7 @@ check with.  ERRORS is the list of expected errors."
 ;;;; Checker selection
 
 (ert-deftest flycheck-checker/unusable-checker-causes-an-error ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (emacs-lisp-mode)
     (flycheck-mode)
     (let* ((flycheck-checker 'bash)
@@ -1446,14 +1462,14 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-select-checker/selecting-sets-the-syntax-checker ()
   :expected-result (flycheck-test-fail-unless-checker 'python-pylint)
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (python-mode)
     (flycheck-select-checker 'python-pylint)
     (should (eq flycheck-checker 'python-pylint))))
 
 (ert-deftest flycheck-select-checker/unselecting-unsets-the-syntax-checker ()
   :expected-result (flycheck-test-fail-unless-checker 'python-pylint)
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (python-mode)
     (flycheck-select-checker 'python-pylint)
     (flycheck-select-checker nil)
@@ -1751,7 +1767,7 @@ check with.  ERRORS is the list of expected errors."
 ;;;; Checker error API
 
 (ert-deftest flycheck-error-line-region ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (insert "Hello\n    World\n")
     (should (equal (flycheck-error-line-region (flycheck-error-new-at 1 1))
                    '(1 . 6)))
@@ -1766,7 +1782,7 @@ check with.  ERRORS is the list of expected errors."
                    '(16 . 17)))))
 
 (ert-deftest flycheck-error-column-region ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (insert "Hello\n    World\n")
     (should-not (flycheck-error-column-region (flycheck-error-new-at 1 nil)))
     (should (equal (flycheck-error-column-region (flycheck-error-new-at 1 4))
@@ -1786,7 +1802,7 @@ check with.  ERRORS is the list of expected errors."
                    '(16 . 17)))))
 
 (ert-deftest flycheck-error-thing-region ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (insert "    (message)\n    (message")
     (emacs-lisp-mode)
     (should-not (flycheck-error-thing-region 'sexp (flycheck-error-new-at 1 2)))
@@ -1801,7 +1817,7 @@ check with.  ERRORS is the list of expected errors."
     (should-not (flycheck-error-thing-region 'sexp (flycheck-error-new-at 2 5)))))
 
 (ert-deftest flycheck-error-region-for-mode ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (insert "    (message) ;; Hello world\n    (message")
     (emacs-lisp-mode)
     ;; Test an expression at the error column for all modes
@@ -1821,7 +1837,7 @@ check with.  ERRORS is the list of expected errors."
         (should (equal (flycheck-error-region-for-mode err it) '(5 . 29)))))))
 
 (ert-deftest flycheck-error-pos ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (insert "    Hello\n   World\n")
     (should (= (flycheck-error-pos (flycheck-error-new-at 1 1)) 1))
     (should (= (flycheck-error-pos (flycheck-error-new-at 1 4)) 4))
@@ -2102,45 +2118,45 @@ of the file will be interrupted because there are too many #ifdef configurations
       (should (string= (cadr err) "Undefined error level: nil"))))
 
 (ert-deftest flycheck-add-overlay/info-category ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (insert "Foo")
     (let ((overlay (flycheck-add-overlay (flycheck-error-new-at 1 1 'info))))
       (should (eq (overlay-get overlay 'category) 'flycheck-info-overlay)))))
 
 (ert-deftest flycheck-add-overlay/warning-category ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (insert "Foo")
     (let ((overlay (flycheck-add-overlay (flycheck-error-new-at 1 1 'warning))))
       (should (eq (overlay-get overlay 'category) 'flycheck-warning-overlay)))))
 
 (ert-deftest flycheck-add-overlay/error-category ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (insert "Foo")
     (let ((overlay (flycheck-add-overlay (flycheck-error-new-at 1 1 'error))))
       (should (eq (overlay-get overlay 'category) 'flycheck-error-overlay)))))
 
 (ert-deftest flycheck-add-overlay/has-help-echo ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (let ((overlay (flycheck-add-overlay
                     (flycheck-error-new-at 1 1 'info "A bar message"))))
       (should (string= (overlay-get overlay 'help-echo) "A bar message")))))
 
 (ert-deftest flycheck-add-overlay/has-flycheck-overlay-property ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (insert "Foo bar")
     (let* ((err (flycheck-error-new-at 1 1 'error))
            (overlay (flycheck-add-overlay err)))
       (should (overlay-get overlay 'flycheck-overlay)))))
 
 (ert-deftest flycheck-add-overlay/has-flycheck-error-property ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (insert "Foo bar")
     (let* ((err (flycheck-error-new-at 1 1 'warning))
            (overlay (flycheck-add-overlay err)))
       (should (eq (overlay-get overlay 'flycheck-error) err)))))
 
 (ert-deftest flycheck-add-overlay/has-no-fringe-icon-with-disabled-indication ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (insert "Hello\n    World")
     (let ((flycheck-indication-mode nil))
       (--each '(warning info error)
@@ -2148,7 +2164,7 @@ of the file will be interrupted because there are too many #ifdef configurations
           (should-not (overlay-get overlay 'before-string)))))))
 
 (ert-deftest flycheck-add-overlay/has-info-fringe-icon ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (insert "Hello\n    World")
     (pcase-let* ((overlay (flycheck-add-overlay
                            (flycheck-error-new-at 1 1 'info)))
@@ -2158,7 +2174,7 @@ of the file will be interrupted because there are too many #ifdef configurations
       (should (eq bitmap 'empty-line)))))
 
 (ert-deftest flycheck-add-overlay/has-warning-fringe-icon ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (insert "Hello\n    World")
     (pcase-let* ((overlay (flycheck-add-overlay
                            (flycheck-error-new-at 1 1 'warning)))
@@ -2168,7 +2184,7 @@ of the file will be interrupted because there are too many #ifdef configurations
       (should (eq bitmap 'question-mark)))))
 
 (ert-deftest flycheck-add-overlay/has-error-fringe-icon ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (insert "Hello\n    World")
     (pcase-let* ((overlay (flycheck-add-overlay
                            (flycheck-error-new-at 1 1 'error)))
@@ -2178,7 +2194,7 @@ of the file will be interrupted because there are too many #ifdef configurations
       (should (eq bitmap flycheck-fringe-exclamation-mark)))))
 
 (ert-deftest flycheck-add-overlay/has-left-fringe-icon ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (insert "Hello\n    World")
     ;; Test the various indication modes
     (let ((flycheck-indication-mode 'left-fringe))
@@ -2189,7 +2205,7 @@ of the file will be interrupted because there are too many #ifdef configurations
         (should (eq side 'left-fringe))))))
 
 (ert-deftest flycheck-add-overlay/has-right-fringe-icon ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (insert "Hello\n    World")
     ;; Test the various indication modes
     (let ((flycheck-indication-mode 'right-fringe))
@@ -2354,11 +2370,11 @@ of the file will be interrupted because there are too many #ifdef configurations
 ;;;; Error list
 
 (ert-deftest flycheck-error-list-buffer-label ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (rename-buffer "Foo")
     (should (string= (flycheck-error-list-buffer-label (current-buffer))
                      "#<buffer Foo>")))
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (set-visited-file-name (f-join flycheck-test-directory "foo/bar")
                            :no-query)
     (cd flycheck-test-directory)
@@ -2366,17 +2382,17 @@ of the file will be interrupted because there are too many #ifdef configurations
                      "foo/bar"))))
 
 (ert-deftest flycheck-error-list-error-label ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (rename-buffer "Foo")
     (should (string= (flycheck-error-list-error-label (flycheck-error-new-at 1 1))
                      "#<buffer Foo>")))
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (set-visited-file-name (f-join flycheck-test-directory "foo/bar")
                            :no-query)
     (cd flycheck-test-directory)
     (should (string= (flycheck-error-list-error-label (flycheck-error-new-at 1 1))
                      "foo/bar")))
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (cd flycheck-test-directory)
     (let* ((filename (f-join flycheck-test-directory "spam/with/eggs"))
            (err (flycheck-error-new-at 1 1 'warning "Foo" :filename filename)))
@@ -2426,7 +2442,7 @@ of the file will be interrupted because there are too many #ifdef configurations
 ;;;; Working with error messages
 
 (ert-deftest flycheck-copy-messages-as-kill ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (insert "A test buffer to copy errors from")
     (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
           (errors (list (flycheck-error-new-at 1 nil 'error "1st message")
@@ -2437,7 +2453,7 @@ of the file will be interrupted because there are too many #ifdef configurations
     (should (equal (-take 2 kill-ring) '("1st message" "2nd message")))))
 
 (ert-deftest flycheck-google-messages ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (insert "A test buffer to copy errors from")
     (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
           (errors (list (flycheck-error-new-at 1 nil 'error "1st message")
@@ -2475,7 +2491,7 @@ of the file will be interrupted because there are too many #ifdef configurations
      '(19 11 warning "This is a stupid message" :checker emacs-lisp))))
 
 (ert-deftest flycheck-set-checker-executable/real-executable ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     ;; Create a temporary buffer to restrict the scope of
     ;; `flycheck-emacs-lisp-executable'
     (let ((file-name (flycheck-test-resource-filename "bin/dummy-emacs")))
@@ -2487,7 +2503,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (should-not flycheck-emacs-lisp-executable))
 
 (ert-deftest flycheck-set-checker-executable/no-executable-given ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (let ((file-name (flycheck-test-resource-filename "bin/dummy-emacs")))
       (setq flycheck-emacs-lisp-executable file-name)
       (should (string= flycheck-emacs-lisp-executable file-name))
@@ -2495,7 +2511,7 @@ of the file will be interrupted because there are too many #ifdef configurations
       (should-not flycheck-emacs-lisp-executable))))
 
 (ert-deftest flycheck-set-checker-executable/executable-is-nil ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (let ((file-name (flycheck-test-resource-filename "bin/dummy-emacs")))
       (setq flycheck-emacs-lisp-executable file-name)
       (should (string= flycheck-emacs-lisp-executable file-name))
@@ -2741,10 +2757,10 @@ of the file will be interrupted because there are too many #ifdef configurations
    '(5 1 error "Unexpected token '}' at line 5, col 1." :checker css-csslint)))
 
 (ert-deftest flycheck-d-module-name ()
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (insert "Hello world")
     (should-not (flycheck-d-module-name)))
-  (with-temp-buffer
+  (flycheck-test-with-temp-buffer
     (insert "module spam.with.eggs;")
     (should (string= (flycheck-d-module-name) "spam.with.eggs"))))
 
