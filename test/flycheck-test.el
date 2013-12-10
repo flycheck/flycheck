@@ -621,9 +621,8 @@ check with.  ERRORS is the list of expected errors."
 (ert-deftest flycheck-check-syntax-automatically/idle-change-checks-syntax-after-change ()
   (flycheck-test-with-resource-buffer "automatic-check-dummy.el"
     (emacs-lisp-mode)
-    (let ((flycheck-check-syntax-automatically nil))
-      (flycheck-mode))
     (let ((flycheck-check-syntax-automatically '(idle-change)))
+      (flycheck-mode)
       (insert "Hello world")
       (sleep-for 0.55)
       (should (flycheck-deferred-check-p)))))
@@ -631,10 +630,9 @@ check with.  ERRORS is the list of expected errors."
 (ert-deftest flycheck-check-syntax-automatically/idle-change-does-not-check-before-delay ()
   (flycheck-test-with-resource-buffer "automatic-check-dummy.el"
     (emacs-lisp-mode)
-    (let ((flycheck-check-syntax-automatically nil))
-      (flycheck-mode))
     (let ((flycheck-check-syntax-automatically '(idle-change))
           (flycheck-idle-change-delay 1.5))
+      (flycheck-mode)
       (insert "Hello world")
       (sleep-for 0.55)
       (should-not (flycheck-deferred-check-p))
@@ -652,9 +650,8 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-check-syntax-automatically/new-line-checks-syntax-after-new-line ()
   (flycheck-test-with-resource-buffer "automatic-check-dummy.el"
-    (let ((flycheck-check-syntax-automatically nil))
-      (flycheck-mode))
     (let ((flycheck-check-syntax-automatically '(new-line)))
+      (flycheck-mode)
       (insert "\n")
       (should (flycheck-deferred-check-p)))))
 
@@ -670,10 +667,9 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-check-syntax-automatically/save-checks-syntax-after-save ()
   (flycheck-test-with-resource-buffer "automatic-check-dummy.el"
-    (let ((flycheck-check-syntax-automatically nil))
-      (flycheck-mode))
-    (set-buffer-modified-p t)
     (let ((flycheck-check-syntax-automatically '(save)))
+      (flycheck-mode)
+      (set-buffer-modified-p t)
       (save-buffer 0)
       (should (flycheck-deferred-check-p)))))
 
