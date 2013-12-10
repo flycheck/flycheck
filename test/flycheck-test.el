@@ -830,10 +830,6 @@ check with.  ERRORS is the list of expected errors."
 
 
 ;;;; Utility functions
-(ert-deftest flycheck-sexp-to-string/implemented ()
-  :tags '(utility)
-  (error "Not implemented"))
-
 (ert-deftest flycheck-string-to-number-safe/nil ()
   :tags '(utility)
   (should-not (flycheck-string-to-number-safe nil)))
