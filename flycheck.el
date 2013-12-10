@@ -4089,6 +4089,11 @@ See URL `http://www.puppetlabs.com/'."
   "A Puppet DSL style checker using puppet-lint.
 
 See URL `http://www.puppet-lint.com/'."
+  ;; We must check the original file, because Puppetlint is quite picky on the
+  ;; names of files and there place in the directory structure, to comply with
+  ;; Puppet's autoload directory layout.  For instance, a class foo::bar is
+  ;; required to be in a file foo/bar.pp.  Any other place, such as a Flycheck
+  ;; temporary file will cause an error.
   :command ("puppet-lint" "--with-filename" source-original)
   :error-patterns
   ((warning line-start
@@ -4098,6 +4103,8 @@ See URL `http://www.puppet-lint.com/'."
           (file-name) " - ERROR: " (message) " on line " line
           line-end))
   :modes puppet-mode
+  ;; Since we check the original file, we can only use this syntax checker if
+  ;; the buffer is actually linked to a file, and if it is not modified.
   :predicate (lambda () (and (buffer-file-name) (not (buffer-modified-p)))))
 
 (flycheck-def-config-file-var flycheck-flake8rc python-flake8 ".flake8rc"
