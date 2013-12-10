@@ -2761,6 +2761,7 @@ N specifies how many errors to move forwards.  If negative, move backwards."
   (when (consp n)
     ;; Universal prefix argument means reset
     (setq reset t n nil))
+    (push-mark)
   (flycheck-next-error-function n reset))
 
 (defun flycheck-previous-error (&optional n)
