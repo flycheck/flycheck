@@ -796,8 +796,29 @@ check with.  ERRORS is the list of expected errors."
 (ert-deftest flycheck-string-to-number-safe/a-numeric-string-with-trailing-whitespace ()
   (should-not (flycheck-string-to-number-safe "123 ")))
 
-(ert-deftest flycheck-string-list-p/not-implemented ()
-  (error "Not implemented"))
+(ert-deftest flycheck-string-list-p/not-a-list ()
+  (should-not (flycheck-string-list-p ["foo" "bar"])))
+
+(ert-deftest flycheck-string-list-p/a-plain-string ()
+  (should-not (flycheck-string-list-p "foo")))
+
+(ert-deftest flycheck-string-list-p/a-plain-integer ()
+  (should-not (flycheck-string-list-p 1)))
+
+(ert-deftest flycheck-string-list-p/a-plain-symbol ()
+  (should-not (flycheck-string-list-p 'foo)))
+
+(ert-deftest flycheck-string-list-p/a-list-with-mixed-types ()
+  (should-not (flycheck-string-list-p '("foo" 1 test))))
+
+(ert-deftest flycheck-string-list-p/a-list-of-symbols ()
+  (should-not (flycheck-string-list-p '(foo bar))))
+
+(ert-deftest flycheck-string-list-p/a-list-of-strings ()
+  (should (flycheck-string-list-p '("foo" "bar"))))
+
+(ert-deftest flycheck-string-list-p/an-empty-list ()
+  (should (flycheck-string-list-p '("foo" "bar"))))
 
 (ert-deftest flycheck-temp-dir-system ()
   (let ((dirname (flycheck-temp-dir-system "flycheck-test")))
