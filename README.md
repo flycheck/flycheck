@@ -36,6 +36,7 @@ Features
   - Chef cookbooks
   - CoffeeScript
   - CSS
+  - Cucumber
   - D
   - Elixir
   - Emacs Lisp

@@ -142,6 +142,7 @@
 (autoload 'elixir-mode     "elixir-mode")
 (autoload 'elixir-mode     "elixir-mode")
 (autoload 'erlang-mode     "erlang")
+(autoload 'feature-mode    "feature-mode")
 (autoload 'go-mode         "go-mode")
 (autoload 'haml-mode       "haml-mode")
 (autoload 'handlebars-mode "handlebars-mode")
