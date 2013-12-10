@@ -775,8 +775,26 @@ check with.  ERRORS is the list of expected errors."
 (ert-deftest flycheck-sexp-to-string/implemented ()
   (error "Not implemented"))
 
-(ert-deftest flycheck-string-to-number-safe/implemented ()
-  (error "Not implemented"))
+(ert-deftest flycheck-string-to-number-safe/nil ()
+  (should-not (flycheck-string-to-number-safe nil)))
+
+(ert-deftest flycheck-string-to-number-safe/not-a-string ()
+  (should-not (flycheck-string-to-number-safe [1 2 3])))
+
+(ert-deftest flycheck-string-to-number-safe/already-a-number ()
+  (should-not (flycheck-string-to-number-safe 3)))
+
+(ert-deftest flycheck-string-to-number-safe/a-non-numeric-string ()
+  (should-not (flycheck-string-to-number-safe "123helloworld")))
+
+(ert-deftest flycheck-string-to-number-safe/a-numeric-string ()
+  (should (= (flycheck-string-to-number-safe "123") 123)))
+
+(ert-deftest flycheck-string-to-number-safe/a-numeric-string-with-leading-whitespace ()
+  (should-not (flycheck-string-to-number-safe " 123")))
+
+(ert-deftest flycheck-string-to-number-safe/a-numeric-string-with-trailing-whitespace ()
+  (should-not (flycheck-string-to-number-safe "123 ")))
 
 (ert-deftest flycheck-string-list-p/not-implemented ()
   (error "Not implemented"))
