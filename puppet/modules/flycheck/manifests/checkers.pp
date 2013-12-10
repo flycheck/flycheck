@@ -67,7 +67,9 @@ class flycheck::checkers {
                     'less',          # less
                     ]
   package { $node_packages:
-    ensure   => latest,
+    # We can't use latest here, thanks to
+    # https://github.com/puppetlabs/puppetlabs-nodejs/issues/43
+    ensure   => present,
     provider => npm,
     require  => Class['nodejs'],
   }
