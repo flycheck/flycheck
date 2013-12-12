@@ -4,18 +4,15 @@
 (package-file "flycheck.el")
 
 (development
- ;; Make optional dependencies available for development
- (depends-on "google-this")
-
  (depends-on "ert")                     ; Unit test library
  (depends-on "ert-runner")              ; Unit test runner
- (depends-on "mocker")                  ; Mocking library
 
+ ;; Make optional dependencies available for development
+ (depends-on "google-this")             ; Search for messages
  (depends-on "projectile")              ; Projectile integration
 
  ;; Various modes for use in the unit tests
  (depends-on "adoc-mode")
- (depends-on "cfengine")
  (depends-on "coffee-mode")
  (depends-on "haml-mode")
  (depends-on "handlebars-mode")

@@ -2,18 +2,19 @@ language: emacs-lisp
 env:
   - EMACS=emacs24
   - EMACS=emacs-snapshot
-# We pass --debug to all our Puppet commands to prevent Travis from getting
-# stuck, and to aid debugging
+# We pass --verbose to all our Puppet commands to prevent Travis CI from being
+# stuck because of lacking output.  We used to use --debug, but that is just too
+# much information
 before_install:
   # Install Puppet to bootstrap Puppet 3 :)
   - sudo apt-get update
   - sudo apt-get install puppet
   # Bootstrap Puppet, and install our Puppet modules
-  - sudo FACTER_travis=true puppet apply --debug ./puppet/manifests/bootstrap.pp
+  - sudo FACTER_travis=true puppet apply --verbose ./puppet/manifests/bootstrap.pp
   # Bootstrap test environment, except Ruby gemsn
-  - sudo FACTER_travis=true puppet apply --debug --modulepath=/etc/puppet/modules:./puppet/modules ./puppet/manifests/site.pp
+  - sudo FACTER_travis=true puppet apply --verbose --modulepath=/etc/puppet/modules:./puppet/modules ./puppet/manifests/site.pp
   # Install Gems as non-root to not screw up with RVM
-  - FACTER_travis=true puppet apply --debug --modulepath=/etc/puppet/modules:./puppet/modules ./puppet/manifests/travis.pp
+  - FACTER_travis=true puppet apply --verbose --modulepath=/etc/puppet/modules:./puppet/modules ./puppet/manifests/travis.pp
 # Install our packages
 install:
   - make packages
