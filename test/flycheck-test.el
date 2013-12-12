@@ -37,7 +37,6 @@
 ;; Libraries required in tests
 (require 'f)
 (require 'projectile)
-(require 'mocker)
 
 (require 'ert)
 (require 'epa-file)
@@ -590,23 +589,6 @@ check with.  ERRORS is the list of expected errors."
     (flycheck-buffer-deferred)
     (flycheck-clean-deferred-check)
     (should-not (flycheck-deferred-check-p))))
-
-(ert-deftest flycheck-perform-deferred-syntax-check/does-nothing-without-deferred-check ()
-  :tags '(deferred)
-  (mocker-let
-      ((flycheck-buffer-automatically (&optional error condition)
-                                      ((:min-occur 0 :max-occur 0))))
-    (flycheck-test-with-temp-buffer
-      (flycheck-perform-deferred-syntax-check))))
-
-(ert-deftest flycheck-perform-deferred-syntax-check/conducts-an-automatic-check ()
-  :tags '(deferred)
-  (mocker-let
-      ((flycheck-buffer-automatically (&optional error condition)
-                                      ((:input '(nil nil)))))
-    (flycheck-test-with-temp-buffer
-      (flycheck-buffer-deferred)
-      (flycheck-perform-deferred-syntax-check))))
 
 
 ;;;; Automatic syntax checking
@@ -1262,27 +1244,25 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-substitute-argument/config-file ()
   :tags '(checker-api)
-  (let ((flycheck-test-config-var "substitute-dummy")
-        (config-file (flycheck-test-resource-filename "substitute-dummy")))
-    (mocker-let
-        ((locate-config-file-nil
-          (filename checker)
-          ((:input '("substitute-dummy" emacs-lisp) :output nil
-                   :min-occur 2 :max-occur 2)))
-         (locate-config-file-real
-          (filename checker)
-          ((:input '("substitute-dummy" emacs-lisp) :output config-file
-                   :min-occur 2 :max-occur 2))))
-      (let ((flycheck-locate-config-file-functions
-             '(locate-config-file-nil locate-config-file-real)))
-        (should (equal (flycheck-substitute-argument
-                        '(config-file "--foo" flycheck-test-config-var)
-                        'emacs-lisp)
-                       (list "--foo" config-file)))
-        (should (equal (flycheck-substitute-argument
-                        '(config-file "--foo=" flycheck-test-config-var)
-                        'emacs-lisp)
-                       (list (concat "--foo=" config-file))))))))
+  (let* ((flycheck-test-config-var "substitute-dummy")
+         (config-file (flycheck-test-resource-filename "substitute-dummy"))
+         first-args second-args
+         (locate-nil (lambda (&rest args) (setq first-args args) nil))
+         (locate-real (lambda (&rest args) (setq second-args args)
+                        config-file))
+         (flycheck-locate-config-file-functions (list locate-nil locate-real)))
+    (should (equal (flycheck-substitute-argument
+                    '(config-file "--foo" flycheck-test-config-var)
+                    'emacs-lisp)
+                   (list "--foo" config-file)))
+    (should (equal first-args (list "substitute-dummy" 'emacs-lisp)))
+    (should (equal second-args (list "substitute-dummy" 'emacs-lisp)))
+    (setq first-args nil
+          second-args nil)
+    (should (equal (flycheck-substitute-argument
+                    '(config-file "--foo=" flycheck-test-config-var)
+                    'emacs-lisp)
+                   (list (concat "--foo=" config-file))))))
 
 (ert-deftest flycheck-substitute-argument/option ()
   :tags '(checker-api)
@@ -1375,130 +1355,6 @@ check with.  ERRORS is the list of expected errors."
   (--each '(flycheck-substitute-argument flycheck-substitute-shell-argument)
     (should-error (funcall it '(foo "bar") 'emacs-lisp))
     (should-error (funcall it 200 'emacs-lisp))))
-
-;; TODO: Refactor these syntax checks
-
-(ert-deftest flycheck-substitute-shell-argument/source ()
-  :tags '(checker-api)
-  (flycheck-test-with-resource-buffer "substitute-dummy"
-    (--each '(source source-inplace source-original)
-      (should (equal (flycheck-substitute-shell-argument it 'emacs-lisp)
-                     (buffer-file-name))))))
-
-(ert-deftest flycheck-substitute-shell-argument/temporary-directory ()
-  :tags '(checker-api)
-  (mocker-let
-      ((flycheck-substitute-argument
-        (arg checker)
-        ((:input '(temporary-directory emacs-lisp) :output "spam with eggs"))))
-    (should (equal (flycheck-substitute-shell-argument 'temporary-directory
-                                                       'emacs-lisp)
-                   "spam\\ with\\ eggs"))))
-
-(ert-deftest flycheck-substitute-shell-argument/config-file ()
-  :tags '(checker-api)
-  (let ((filename "spam with eggs"))
-    (mocker-let
-        ((flycheck-substitute-argument
-          (arg checker)
-          ((:input '((config-file "--foo" flycheck-test-config-var) emacs-lisp)
-                   :output (list "--foo" filename))
-           (:input '((config-file "--foo=" flycheck-test-config-var) emacs-lisp)
-                   :output (list (concat "--foo=" filename))))))
-      (should (equal (flycheck-substitute-shell-argument
-                      '(config-file "--foo" flycheck-test-config-var)
-                      'emacs-lisp)
-                     (concat "--foo " (shell-quote-argument filename))))
-      (should (equal (flycheck-substitute-shell-argument
-                      '(config-file "--foo=" flycheck-test-config-var)
-                      'emacs-lisp)
-                     (shell-quote-argument (concat "--foo=" filename)))))))
-
-(ert-deftest flycheck-substitute-shell-argument/option ()
-  :tags '(checker-api)
-  (mocker-let
-      ((flycheck-substitute-argument
-        (arg checker)
-        ((:input '((option "--foo" flycheck-test-option-var) emacs-lisp)
-                 :output '("--foo" "spam with eggs"))
-         (:input '((option "--foo=" flycheck-test-option-var) emacs-lisp)
-                 :output '("--foo=spam with eggs"))
-         (:input '((option "--foo" flycheck-test-option-var number-to-string)
-                   emacs-lisp)
-                 :output '("--foo" "spam with eggs"))
-         (:input '((option "--foo=" flycheck-test-option-var number-to-string)
-                   emacs-lisp)
-                 :output '("--foo=spam with eggs")))))
-    (should (equal (flycheck-substitute-shell-argument
-                    '(option "--foo" flycheck-test-option-var)
-                    'emacs-lisp)
-                   "--foo spam\\ with\\ eggs"))
-    (should (equal (flycheck-substitute-shell-argument
-                    '(option "--foo=" flycheck-test-option-var)
-                    'emacs-lisp)
-                   "--foo\\=spam\\ with\\ eggs"))
-    (should (equal (flycheck-substitute-shell-argument
-                    '(option "--foo" flycheck-test-option-var number-to-string)
-                    'emacs-lisp)
-                   "--foo spam\\ with\\ eggs"))
-    (should (equal (flycheck-substitute-shell-argument
-                    '(option "--foo=" flycheck-test-option-var number-to-string)
-                    'emacs-lisp)
-                   "--foo\\=spam\\ with\\ eggs"))))
-
-(ert-deftest flycheck-substitute-shell-argument/option-list ()
-  :tags '(checker-api)
-  (let ((flycheck-test-option-var "spam"))
-    (should-error (flycheck-substitute-shell-argument
-                   '(option-list "-I" flycheck-test-option-var) 'emacs-lisp)))
-  (let ((flycheck-test-option-var '("spam" "with eggs")))
-    (should (equal (flycheck-substitute-shell-argument
-                    '(option-list "-I" flycheck-test-option-var) 'emacs-lisp)
-                   "-I spam -I with\\ eggs"))
-    (should (equal (flycheck-substitute-shell-argument
-                    '(option-list "-I" flycheck-test-option-var s-prepend) 'emacs-lisp)
-                   "-Ispam -Iwith\\ eggs")))
-  (let ((flycheck-test-option-var '(10 20)))
-    (should-error (flycheck-substitute-shell-argument
-                   '(option-list "-I" flycheck-test-option-var) 'emacs-lisp))
-    (should (equal (flycheck-substitute-shell-argument
-                    '(option-list "-I" flycheck-test-option-var nil number-to-string) 'emacs-lisp)
-                   "-I 10 -I 20"))
-    (should (equal (flycheck-substitute-shell-argument
-                    '(option-list "-I" flycheck-test-option-var s-prepend number-to-string) 'emacs-lisp)
-                   "-I10 -I20")))
-  (let (flycheck-test-option-var)
-    (should (equal (flycheck-substitute-shell-argument
-                    '(option-list "-I" flycheck-test-option-var) 'emacs-lisp)
-                   "")))
-  (let ((flycheck-test-option-var '(nil)))
-    ;; Catch an error, because `number-to-string' is called with nil
-    (should-error (flycheck-substitute-shell-argument
-                   '(option-list "-I" flycheck-test-option-var nil number-to-string) 'emacs-lisp)
-                  :type 'wrong-type-argument)))
-
-(ert-deftest flycheck-substitute-shell-argument/option-flag ()
-  :tags '(checker-api)
-  (let ((flycheck-test-option-var nil))
-    (should  (s-blank? (flycheck-substitute-shell-argument
-                        '(option-flag "--foo" flycheck-test-option-var) 'emacs-lisp))))
-  (let ((flycheck-test-option-var t))
-    (should (equal (flycheck-substitute-shell-argument
-                    '(option-flag "--foo" flycheck-test-option-var) 'emacs-lisp)
-                   "--foo")))
-  (let ((flycheck-test-option-var (list "bar")))
-    (should (equal (flycheck-substitute-shell-argument
-                    '(option-flag "--foo" flycheck-test-option-var) 'emacs-lisp)
-                   "--foo"))))
-
-(ert-deftest flycheck-substitute-shell-argument/eval ()
-  :tags '(checker-api)
-  (mocker-let
-      ((flycheck-substitute-argument
-        (arg checker)
-        ((:input '((eval foo) emacs-lisp) :output '("foo bar" "spam eggs")))))
-    (should (equal (flycheck-substitute-shell-argument '(eval foo) 'emacs-lisp)
-                   "foo\\ bar spam\\ eggs"))))
 
 (ert-deftest flycheck-check-executable ()
   :tags '(checker-api)
@@ -2651,19 +2507,6 @@ of the file will be interrupted because there are too many #ifdef configurations
     (goto-char (point-max))
     (flycheck-first-error 2)
     (should (flycheck-test-at-nth-error 2))))
-
-(ert-deftest next-error/calls-flycheck-next-error-function ()
-  :tags '(navigation)
-  (flycheck-test-with-nav-buffer
-    (mocker-let
-     ((flycheck-next-error-function (n reset)
-                                    ((:input '(1 nil))
-                                     (:input '(2 nil))
-                                     (:input '(2 reset)))))
-     (goto-char (point-min))
-     (next-error)
-     (next-error 2)
-     (next-error 2 'reset))))
 
 
 ;;;; Error list
