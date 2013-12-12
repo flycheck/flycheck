@@ -479,6 +479,18 @@ check with.  ERRORS is the list of expected errors."
       ;; Disabling the mode should not affect `next-error-function' now
       (should (eq next-error-function :new)))))
 
+(ert-deftest flycheck-mode/clears-errors-after-revert ()
+  (flycheck-test-with-resource-buffer "checkers/emacs-lisp.el"
+    (emacs-lisp-mode)
+    (goto-char (point-min))
+    (insert "foo-bar")
+    (flycheck-mode)
+    (flycheck-test-buffer-sync)
+    (should flycheck-current-errors)
+    (revert-buffer 'ignore-auto 'no-confirm)
+    (should-not flycheck-current-errors)
+    (should-not (flycheck-deferred-check-p))))
+
 
 ;;;; Global syntax checking
 

@@ -3208,6 +3208,9 @@ Improvements:
 @itemize @bullet
 @item
 Demote Rubocop convention messages to @code{info} level
+@item
+@item
+@ghissue{282, Stop Flycheck before the buffer is reverted}
 @end itemize
 
 @item

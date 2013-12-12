@@ -614,11 +614,12 @@ running checks, and empty all variables used by flycheck."
     ;; Handle events that may triggered pending deferred checks
     (window-configuration-change-hook . flycheck-perform-deferred-syntax-check)
     (post-command-hook                . flycheck-perform-deferred-syntax-check)
-    ;; Tear down Flycheck if the buffer or Emacs are killed, or if the major
-    ;; mode changes, to clean up temporary files and directories.
+    ;; Teardown Flycheck whenever the buffer state is about to get lost, to
+    ;; clean up temporary files and directories.
     (kill-buffer-hook                 . flycheck-teardown)
     (kill-emacs-hook                  . flycheck-teardown)
     (change-major-mode-hook           . flycheck-teardown)
+    (before-revert-hook               . flycheck-teardown)
     ;; Update the error list if necessary
     (post-command-hook                . flycheck-error-list-update-source)
     (post-command-hook                . flycheck-error-list-highlight-errors)
