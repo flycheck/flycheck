@@ -496,6 +496,7 @@ check with.  ERRORS is the list of expected errors."
     (should-not (flycheck-may-enable-mode))))
 
 (ert-deftest flycheck-may-enable-mode/not-in-encrypted-files ()
+  :expected-result (if (executable-find "gpg") :passed :failed)
   :tags '(global-mode)
   (let* ((filename (flycheck-test-resource-filename "encrypted-file.el.gpg"))
          ;; Tell EPA about our passphrase
@@ -535,6 +536,7 @@ check with.  ERRORS is the list of expected errors."
       (should-not flycheck-mode))))
 
 (ert-deftest global-flycheck-mode/does-not-enable-in-encrypted-file ()
+  :expected-result (if (executable-find "gpg") :passed :failed)
   :tags '(global-mode)
   (let* ((filename (flycheck-test-resource-filename "encrypted-file.el.gpg"))
          ;; Tell EPA about our passphrase
