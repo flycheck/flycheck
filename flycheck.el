@@ -668,7 +668,7 @@ buffer manually.
                                                next-error-function
                                              :unset))
     (when flycheck-standard-error-navigation
-      (setq next-error-function 'flycheck-next-error-function)))
+      (setq next-error-function #'flycheck-next-error-function)))
    (t
     (unless (eq flycheck-old-next-error-function :unset)
       (setq next-error-function flycheck-old-next-error-function))
