@@ -194,6 +194,8 @@ Emacs Lisp (using the byte compiler and CheckDoc)
 @item
 Erlang (using @command{erlc})
 @item
+ERuby (using @command{erubis})
+@item
 Go (using @command{gofmt}, @command{go build} and @command{go test})
 @item
 Haml (using @command{haml})
@@ -3386,6 +3388,7 @@ order of their appearance in the default value of
 @iflyc emacs-lisp
 @iflyc emacs-lisp-checkdoc
 @iflyc erlang
+@iflyc eruby-erubis
 @iflyc go-gofmt
 @iflyc go-build
 @iflyc go-test
