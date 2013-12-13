@@ -202,6 +202,7 @@ If disabling syntax checkers, please set this list instead of
 removing the syntax checkers from `flycheck-checkers'."
   :group 'flycheck
   :type '(repeat (symbol :tag "Checker"))
+  :package-version '(flycheck . "0.16")
   :safe #'flycheck-symbol-list-p)
 (make-variable-buffer-local 'flycheck-disabled-checkers)
 
