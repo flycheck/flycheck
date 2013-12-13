@@ -177,11 +177,33 @@ checking a buffer.  Flycheck will automatically select a suitable
 syntax checker from this list, unless `flycheck-checker' is set,
 either directly or with `flycheck-select-checker'.
 
+You should not need to change this variable normally.  In order
+to disable syntax checkers, please use
+`flycheck-disabled-checkers'.
+
 Syntax checkers in this list must be defined with
 `flycheck-define-checker'."
   :group 'flycheck
   :type '(repeat (symbol :tag "Checker"))
   :risky t)
+
+(defcustom flycheck-disabled-checkers nil
+  "Syntax checkers excluded from automatic selection.
+
+A list of Flycheck syntax checkers to exclude from automatic
+selection.  Flycheck will never automatically select a syntax
+checker in this list, regardless of the value of
+`flycheck-checkers'.
+
+However, syntax checkers in this list are still available for
+manual selection with `flycheck-select-checker'.
+
+If disabling syntax checkers, please set this list instead of
+removing the syntax checkers from `flycheck-checkers'."
+  :group 'flycheck
+  :type '(repeat (symbol :tag "Checker"))
+  :safe #'flycheck-symbol-list-p)
+(make-variable-buffer-local 'flycheck-disabled-checkers)
 
 (defvar-local flycheck-checker nil
   "Syntax checker to use for the current buffer.
@@ -190,8 +212,11 @@ If unset or nil, automatically select a suitable syntax checker
 from `flycheck-checkers' on every syntax check.
 
 If set to a syntax checker only use this syntax checker and never
-select one from `flycheck-checkers' automatically.  If the syntax
-checker is unusable in the current buffer an error is signaled.
+select one from `flycheck-checkers' automatically.  The syntax
+checker is used regardless of whether it is contained in
+`flycheck-checkers' or `flycheck-disabled-checkers'.  If the
+syntax checker is unusable in the current buffer an error is
+signaled.
 
 A syntax checker assigned to this variable must be defined with
 `flycheck-define-checker'.
@@ -938,6 +963,10 @@ Otherwise return nil."
   "Determine if OBJ is a list of strings."
   (and (listp obj) (-all? #'stringp obj)))
 
+(defun flycheck-symbol-list-p (obj)
+  "Determine if OBJ is a list of symbols."
+  (and (listp obj) (-all? #'symbolp obj)))
+
 (defvar-local flycheck-temporaries nil
   "Temporary files and directories created by Flycheck.")
 
@@ -1408,6 +1437,13 @@ This variable is an option for the syntax checker `%s'." docstring checker)
 
 
 ;;;; Checker API
+(defun flycheck-valid-checker-p (checker)
+  "Check whether a CHECKER is valid.
+
+A valid checker is a symbol define as syntax checker with
+`flycheck-define-checker'."
+  (get checker :flycheck-checker))
+
 (defun flycheck-defined-checkers ()
   "Find all defined syntax checkers.
 
@@ -1422,15 +1458,33 @@ the syntax checkers."
 (defun flycheck-registered-checker-p (checker)
   "Determine whether CHECKER is registered.
 
-A checker is registered if it is contained in `flycheck-checkers'."
-  (memq checker flycheck-checkers))
+A checker is registered if it is contained in
+`flycheck-checkers'."
+  (and (flycheck-valid-checker-p checker)
+       (memq checker flycheck-checkers)))
 
-(defun flycheck-valid-checker-p (checker)
-  "Check whether a CHECKER is valid.
+(defun flycheck-disabled-checker-p (checker)
+  "Determine whether CHECKER is disabled.
 
-A valid checker is a symbol define as syntax checker with
-`flycheck-define-checker'."
-  (get checker :flycheck-checker))
+A checker is disabled if it is contained in
+`flycheck-disabled-checkers'."
+  (memq checker flycheck-disabled-checkers))
+
+(defun flycheck-enabled-checker-p (checker)
+  "Determine whether CHECKER is an enabled checker.
+
+A syntax checker is enabled, if it is registered and not
+disabled."
+  (and (flycheck-registered-checker-p checker)
+       (not (flycheck-disabled-checker-p checker))))
+
+(defun flycheck-enabled-checkers ()
+  "Get all enabled syntax checkers.
+
+These are all syntax checkers which are registered in
+`flycheck-checkers' and not disabled via
+`flycheck-disabled-checkers'."
+  (-reject #'flycheck-disabled-checker-p flycheck-checkers))
 
 (defun flycheck-checker-executable-variable (checker)
   "Get the executable variable of CHECKER."
@@ -1760,7 +1814,7 @@ otherwise."
                   (not (flycheck-has-current-errors-p)))
              (and (eq predicate 'warnings-only)
                   (not (flycheck-has-current-errors-p 'error))))
-         (flycheck-registered-checker-p next-checker)
+         (flycheck-enabled-checker-p next-checker)
          (flycheck-may-use-checker next-checker))))
 
 
@@ -1867,7 +1921,7 @@ Otherwise, apply FILTER to VALUE and return the result.  FILTER is ignored."
 Return the checker if it may be used, or nil otherwise."
   ;; We should not use the last checker if it was removed from the list of
   ;; allowed checkers in the meantime
-  (when (and (flycheck-registered-checker-p flycheck-last-checker)
+  (when (and (flycheck-enabled-checker-p flycheck-last-checker)
              (flycheck-may-use-checker flycheck-last-checker))
     flycheck-last-checker))
 
@@ -1878,7 +1932,8 @@ If a checker is found set `flycheck-last-checker' to re-use this
 checker for the next check.
 
 Return the checker if there is any, or nil otherwise."
-  (-when-let (checker (-first #'flycheck-may-use-checker flycheck-checkers))
+  (-when-let (checker (-first #'flycheck-may-use-checker
+                              (flycheck-enabled-checkers)))
     (setq flycheck-last-checker checker)))
 
 (defun flycheck-get-checker-for-buffer ()
@@ -1906,8 +1961,8 @@ nil otherwise."
   "Select CHECKER for the current buffer.
 
 CHECKER is a syntax checker symbol (see `flycheck-checkers') or
-nil.  It does _not_ need to be registered in `flycheck-checkers'.
-If nil deselect the current syntax checker (if any) and use
+nil.  In the former case, use CHECKER for the current buffer,
+otherwise deselect the current syntax checker (if any) and use
 automatic checker selection via `flycheck-checkers'.
 
 If called interactively prompt for CHECKER.  With prefix arg
@@ -1915,7 +1970,11 @@ deselect the current syntax checker and enable automatic
 selection again.
 
 Set `flycheck-checker' to CHECKER and automatically start a new
-syntax check if the syntax checker changed."
+syntax check if the syntax checker changed.
+
+CHECKER will be used, even if it is not contained in
+`flycheck-checkers', or if it is disabled via
+`flycheck-disabled-checkers'."
   (interactive
    (if current-prefix-arg
        (list nil)
