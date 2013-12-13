@@ -518,7 +518,9 @@ This variable is a normal hook. @xref{Hooks, , ,elisp}.
 @section Syntax checker selection
 
 By default Flycheck automatically selects a suitable syntax checker from
-@code{flycheck-checkers}:
+all @dfn{enabled} syntax checkers, that is, all syntax checkers
+contained in @code{flycheck-checkers} and not in
+@code{flycheck-disabled-checkers}:
 
 @defopt flycheck-checkers
 A list of all syntax checkers to use as candidates for automatic checker
@@ -539,6 +541,23 @@ and if the syntax checking tool exists.
 A syntax checker contained in this list is said to be @dfn{registered}.
 
 @xref{Syntax checkers}, for a list of available checkers.
+
+You should not need to change this option normally.  Please use
+@code{flycheck-disabled-checkers} to disable specific syntax checkers.
+@end defopt
+
+@defopt flycheck-disabled-checkers
+A list of all syntax checkers which must @emph{not} be used for
+automatic checker selection.
+
+This variable overrides a @code{flycheck-checkers}: A syntax checker in
+this list will never be used, even if it is contained in
+@code{flycheck-checkers}.
+
+A syntax checker contained in this list is said to be @dfn{disabled}.
+If a syntax checker is registered and not disabled, it is @dfn{enabled}.
+
+Use this option to disable specific syntax checkers.
 @end defopt
 
 If no suitable syntax checker is found the syntax check is
@@ -559,7 +578,8 @@ With prefix arg, deselect the current syntax checker if any, and
 re-enable automatic selection.
 
 Any defined syntax checker can be selected with this command, regardless
-of the contents of @code{flycheck-checkers}.
+of whether it is contained in @code{flycheck-checkers} or
+@code{flycheck-disabled-checkers}.
 @end table
 
 By default, the prompt uses IDO for completion and matching, but you can
@@ -3199,6 +3219,9 @@ checkers}
 @item
 @ghissue{272, Interactively set the executable of a syntax checker with
 @code{flycheck-set-checker-executable}}
+@item
+@ghissue{269, Disable syntax checkers easily with
+@code{flycheck-disabled-checkers}}
 @end itemize
 
 @item
