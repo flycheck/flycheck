@@ -570,11 +570,10 @@ The completion system to use.
 
 @table @code
 @item ido
-Use IDO. This is default, but @code{grizzl} is the recommended system.
+Use IDO.
 
 @item grizzl
-Use @uref{https://github.com/d11wtq/grizzl, Grizzl}.  This is the
-recommended system, but you need to install Grizzl separately.
+Use @uref{https://github.com/d11wtq/grizzl, Grizzl}.
 
 @item nil
 Use the standard unfancy @code{completing-read}.  This is @b{not}
