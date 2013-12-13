@@ -884,7 +884,7 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-string-list-p/an-empty-list ()
   :tags '(utility)
-  (should (flycheck-string-list-p '("foo" "bar"))))
+  (should (flycheck-string-list-p '())))
 
 (ert-deftest flycheck-temp-dir-system ()
   :tags '(utility)
