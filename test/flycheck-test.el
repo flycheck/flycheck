@@ -58,30 +58,7 @@
   (f-join flycheck-test-source-directory ".cask" emacs-version "elpa"))
 
 
-;;;; Unit test helpers
-
-(defun flycheck-test-min-emacs-version-p (major &optional minor)
-  "Determine whether Emacs has the required version.
-
-Return t if Emacs is at least MAJOR.MINOR, or nil otherwise."
-  (when (>= emacs-major-version major)
-    (or (null minor) (>= emacs-minor-version minor))))
-
-(defun flycheck-test-resource-filename (resource-file)
-  "Determine the absolute file name of a RESOURCE-FILE.
-
-Relative file names are expanded against
-`flycheck-test-resources-directory'."
-  (f-join flycheck-test-resources-directory resource-file))
-
-(defun flycheck-test-locate-config-file (filename _checker)
-  "Find a configuration FILENAME within unit tests.
-
-_CHECKER is ignored."
-  (let* ((directory (flycheck-test-resource-filename "checkers/config-files"))
-         (filepath (expand-file-name filename directory)))
-    (when (f-exists? filepath)
-      filepath)))
+;;;; Utilities
 
 (defmacro flycheck-test-with-temp-buffer (&rest body)
   "Eval BODY within a temporary buffer.
@@ -117,16 +94,6 @@ contents FILE-NAME."
        (set-buffer-modified-p nil)
        ,@body)))
 
-(defmacro flycheck-test-with-resource-buffer (resource-file &rest body)
-  "Create a temp buffer from a RESOURCE-FILE and execute BODY.
-
-The absolute file name of RESOURCE-FILE is determined with
-`flycheck-test-resource-filename'."
-  (declare (indent 1))
-  `(flycheck-test-with-file-buffer
-       (flycheck-test-resource-filename ,resource-file)
-     ,@body))
-
 (defmacro flycheck-test-with-env (env &rest body)
   "Add ENV to `process-environment' in BODY.
 
@@ -151,9 +118,85 @@ with VALUE."
          ,@body)
      (global-flycheck-mode -1)))
 
+(defmacro flycheck-test-with-help-buffer (&rest body)
+  "Execute BODY and kill the help buffer afterwards."
+  (declare (indent 0))
+  `(unwind-protect
+       (progn ,@body)
+     (when (buffer-live-p (get-buffer (help-buffer)))
+       (kill-buffer (help-buffer)))))
+
+(defmacro flycheck-test-with-hook (hook-var form &rest body)
+  "Set HOOK-VAR to FORM and evaluate BODY.
+
+HOOK-VAR is a hook variable or a list thereof, which is set to
+FORM before evaluating BODY.
+
+After evaluation of BODY, set HOOK-VAR to nil."
+  (declare (indent 2))
+  `(let ((hooks (quote ,(if (listp hook-var) hook-var (list hook-var)))))
+     (unwind-protect
+          (progn
+            (--each hooks (add-hook it #'(lambda () ,form)))
+            ,@body)
+        (--each hooks (set it nil)))))
+
+
+;;;; Environment information and tests
+
+(defun flycheck-test-min-emacs-version-p (major &optional minor)
+  "Determine whether Emacs has the required version.
+
+Return t if Emacs is at least MAJOR.MINOR, or nil otherwise."
+  (when (>= emacs-major-version major)
+    (or (null minor) (>= emacs-minor-version minor))))
+
 (defconst flycheck-test-user-error-type
   (if (flycheck-test-min-emacs-version-p 24 3) 'user-error 'error)
   "The `user-error' type used by Flycheck.")
+
+(defun flycheck-test-travis-ci-p ()
+  "Determine whether the tests are running on Travis CI."
+  (string= (getenv "TRAVIS") "true"))
+
+(defun flycheck-test-not-on-travis ()
+  "Signal an error if run on Travis CI.
+
+Use together with `:expected-result' to skip tests on travis CI."
+  (when (flycheck-test-travis-ci-p)
+    (error "Test skipped on Travis CI.")))
+
+
+;;;; Test resources
+
+(defun flycheck-test-resource-filename (resource-file)
+  "Determine the absolute file name of a RESOURCE-FILE.
+
+Relative file names are expanded against
+`flycheck-test-resources-directory'."
+  (f-join flycheck-test-resources-directory resource-file))
+
+(defun flycheck-test-locate-config-file (filename _checker)
+  "Find a configuration FILENAME within unit tests.
+
+_CHECKER is ignored."
+  (let* ((directory (flycheck-test-resource-filename "checkers/config-files"))
+         (filepath (expand-file-name filename directory)))
+    (when (f-exists? filepath)
+      filepath)))
+
+(defmacro flycheck-test-with-resource-buffer (resource-file &rest body)
+  "Create a temp buffer from a RESOURCE-FILE and execute BODY.
+
+The absolute file name of RESOURCE-FILE is determined with
+`flycheck-test-resource-filename'."
+  (declare (indent 1))
+  `(flycheck-test-with-file-buffer
+       (flycheck-test-resource-filename ,resource-file)
+     ,@body))
+
+
+;;;; Syntax checking in checks
 
 (defvar-local flycheck-test-syntax-checker-finished nil
   "Non-nil if the current checker has finished.")
@@ -211,42 +254,9 @@ Return `:passed' if all CHECKERS are installed, or `:failed' otherwise."
 (defalias 'flycheck-test-fail-unless-checker
   'flycheck-test-fail-unless-checkers)
 
-(defmacro flycheck-test-with-help-buffer (&rest body)
-  "Execute BODY and kill the help buffer afterwards."
-  (declare (indent 0))
-  `(unwind-protect
-       (progn ,@body)
-     (when (buffer-live-p (get-buffer (help-buffer)))
-       (kill-buffer (help-buffer)))))
-
-(defmacro flycheck-test-with-hook (hook-var form &rest body)
-  "Set HOOK-VAR to FORM and evaluate BODY.
-
-HOOK-VAR is a hook variable or a list thereof, which is set to
-FORM before evaluating BODY.
-
-After evaluation of BODY, set HOOK-VAR to nil."
-  (declare (indent 2))
-  `(let ((hooks (quote ,(if (listp hook-var) hook-var (list hook-var)))))
-     (unwind-protect
-          (progn
-            (--each hooks (add-hook it #'(lambda () ,form)))
-            ,@body)
-        (--each hooks (set it nil)))))
-
-(defun flycheck-test-travis-ci-p ()
-  "Determine whether the tests are running on Travis CI."
-  (string= (getenv "TRAVIS") "true"))
-
-(defun flycheck-test-not-on-travis ()
-  "Signal an error if run on Travis CI.
-
-Use together with `:expected-result' to skip tests on travis CI."
-  (when (flycheck-test-travis-ci-p)
-    (error "Test skipped on Travis CI.")))
-
 
 ;;;; Unit test predicates
+
 (defun flycheck-test-should-overlay (error)
   "Test that ERROR has an overlay."
   (let* ((overlay (--first (equal (overlay-get it 'flycheck-error) error)
