@@ -220,7 +220,7 @@ Puppet (using @command{puppet parser} and @command{puppet-lint})
 @item
 Python (using @command{flake8} or @command{pylint})
 @item
-Ruby (using @command{rubocop} and @command{ruby-lint})
+Ruby (using @command{rubocop}, @command{ruby} , @command{jruby} or @command{ruby-lint})
 @item
 Rust (using @command{rustc})
 @item
@@ -3181,9 +3181,6 @@ output@comma{} by simply ignoring them}
 Argument substitution is no longer performed on syntax checker
 executables.  The executable must be a string.
 @item
-@ghissue{250, Remove @code{ruby} and @code{ruby-jruby} syntax checkers.
-Use @code{ruby-rubocop} and @code{ruby-rubylint} instead}
-@item
 @ghissue{275, Split out @code{haskell-hdevtools} into a separate
 package}.  See @uref{https://github.com/flycheck/flycheck-hdevtools,
 flycheck-hdevtools}
@@ -3410,6 +3407,8 @@ order of their appearance in the default value of
 @iflyc rst
 @iflyc ruby-rubocop
 @iflyc ruby-rubylint
+@iflyc ruby
+@iflyc ruby-jruby
 @iflyc rust
 @iflyc sass
 @iflyc scala

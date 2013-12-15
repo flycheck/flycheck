@@ -156,6 +156,8 @@ buffer-local wherever it is set."
     rst
     ruby-rubocop
     ruby-rubylint
+    ruby
+    ruby-jruby
     rust
     sass
     scala
@@ -4308,6 +4310,50 @@ See URL `https://github.com/YorickPeterse/ruby-lint'."
    (error line-start
           (file-name) ":E:" line ":" column ": " (message) line-end))
   :modes (enh-ruby-mode ruby-mode))
+
+(flycheck-define-checker ruby
+  "A Ruby syntax checker using the standard Ruby interpreter.
+
+Please note that the output of different Ruby versions and
+implementations varies wildly.  This syntax checker supports
+current versions of MRI and JRuby, but may break when used with
+other implementations or future versions of these
+implementations.
+
+Please consider using `ruby-rubocop' or `ruby-rubylint' instead.
+
+See URL `http://www.ruby-lang.org/'."
+  :command ("ruby" "-w" "-c" source)
+  :error-patterns
+  ;; These patterns support output from JRuby, too, to deal with RVM or Rbenv
+  ((error line-start
+          "SyntaxError in " (file-name) ":" line ": " (message)
+          line-end)
+   (warning line-start
+            (file-name) ":" line ":" (optional column ":")
+            " warning: " (message) line-end)
+   (error line-start (file-name) ":" line ": " (message) line-end))
+  :modes (enh-ruby-mode ruby-mode)
+  :next-checkers ((warnings-only . ruby-rubylint)))
+
+(flycheck-define-checker ruby-jruby
+  "A Ruby syntax checker using the JRuby interpreter.
+
+This syntax checker is very primitive, and may break on future
+versions of JRuby.
+
+Please consider using `ruby-rubocop' or `ruby-rubylint' instead.
+
+See URL `http://jruby.org/'."
+  :command ("jruby" "-w" "-c" source)
+  :error-patterns
+  ((error line-start
+          "SyntaxError in " (file-name) ":" line ": " (message)
+          line-end)
+   (warning line-start (file-name) ":" line " warning: " (message) line-end)
+   (error line-start (file-name) ":" line ": " (message) line-end))
+  :modes (enh-ruby-mode ruby-mode)
+  :next-checkers ((warnings-only . ruby-rubylint)))
 
 (flycheck-define-checker rust
   "A Rust syntax checker using Rust compiler.

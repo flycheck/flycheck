@@ -3665,10 +3665,28 @@ Why not:
      "checkers/ruby-syntax-error.rb" 'ruby-mode
      '(5 7 error "unexpected token tCONSTANT" :checker ruby-rubylint))))
 
-(ert-deftest flycheck-define-checker/ruby ()
+(ert-deftest flycheck-define-checker/ruby-syntax-error ()
+  :tags '(builtin-checker)
+  :expected-result (flycheck-test-fail-unless-checker 'ruby)
+  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-rubylint)))
+    (flycheck-test-should-syntax-check
+     "checkers/ruby-syntax-error.rb" 'ruby-mode
+     '(5 nil error "syntax error, unexpected tCONSTANT, expecting $end"
+         :checker ruby))))
+
+(ert-deftest flycheck-define-checker/ruby-jruby-syntax-error ()
+  :tags '(builtin-checker)
+  :expected-result (if (flycheck-test-travis-ci-p) :failed
+                     (flycheck-test-fail-unless-checker 'ruby-jruby))
+  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-rubylint ruby)))
+    (flycheck-test-should-syntax-check
+     "checkers/ruby-syntax-error.rb" 'ruby-mode
+     '(5 nil error "syntax error, unexpected tCONSTANT" :checker ruby-jruby))))
+
+(ert-deftest flycheck-define-checker/ruby-rubocop-and-ruby-lint ()
   :tags '(builtin-checker)
   :expected-result (flycheck-test-fail-unless-checker 'ruby-rubocop
-                                                           'ruby-rubylint)
+                                                      'ruby-rubylint)
   (flycheck-test-should-syntax-check
      "checkers/ruby-warnings.rb" 'ruby-mode
      '(1 1 info "Missing utf-8 encoding comment." :checker ruby-rubocop)
@@ -3692,7 +3710,7 @@ Why not:
 (ert-deftest flycheck-define-checker/ruby-rubocop-disabled-warning ()
   :tags '(builtin-checker)
   :expected-result (flycheck-test-fail-unless-checker 'ruby-rubocop
-                                                           'ruby-rubylint)
+                                                      'ruby-rubylint)
   (flycheck-test-with-hook ruby-mode-hook
       (setq flycheck-rubocoprc "rubocop.yml")
     (flycheck-test-should-syntax-check
@@ -3713,6 +3731,27 @@ Why not:
      '(11 24 error "undefined instance variable @name" :checker ruby-rubylint)
      '(16 1 error "wrong number of arguments (expected 2..3 but got 0)"
           :checker ruby-rubylint))))
+
+(ert-deftest flycheck-define-checker/ruby-warnings ()
+  :tags '(builtin-checker)
+  :expected-result (flycheck-test-fail-unless-checker 'ruby)
+  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-rubylint)))
+    (flycheck-test-should-syntax-check
+     "checkers/ruby-warnings.rb" 'ruby-mode
+     '(5 nil warning "assigned but unused variable - arr" :checker ruby)
+     '(16 nil warning "possibly useless use of == in void context"
+          :checker ruby))))
+
+(ert-deftest flycheck-define-checker/ruby-jruby-warnings ()
+  :tags '(builtin-checker)
+  :expected-result (if (flycheck-test-travis-ci-p) :failed
+                     (flycheck-test-fail-unless-checker 'ruby-jruby))
+  (flycheck-test-not-on-travis)
+  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-rubylint ruby)))
+    (flycheck-test-should-syntax-check
+     "checkers/ruby-warnings.rb" 'ruby-mode
+     '(16 nil warning "Useless use of == in void context."
+          :checker ruby-jruby))))
 
 (ert-deftest flycheck-define-checker/rust ()
   :tags '(builtin-checker)
