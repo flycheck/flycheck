@@ -218,7 +218,7 @@ PHP (using @command{php}, @command{phpmd} and @command{phpcs})
 @item
 Puppet (using @command{puppet parser} and @command{puppet-lint})
 @item
-Python (using @command{flake8}, @command{pylint}, or @command{pyflakes})
+Python (using @command{flake8} or @command{pylint})
 @item
 Ruby (using @command{rubocop} and @command{ruby-lint})
 @item
