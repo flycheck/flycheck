@@ -42,6 +42,14 @@
 (require 'epa-file)
 
 
+;;;; Compatibility
+
+(eval-and-compile
+  (unless (fboundp 'ert-skip)
+    (defun skip-unless (&rest args)
+      (message "flycheck-test WARNING: Not skipping test"))))
+
+
 ;;;; Directories
 
 (defconst flycheck-test-directory (f-parent (f-this-file))
