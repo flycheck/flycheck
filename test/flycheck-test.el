@@ -3799,12 +3799,27 @@ Why not:
 
 (ert-deftest flycheck-define-checker/sass ()
   :tags '(builtin-checker external-tool language-sass)
-  "Test a syntax error caused by inconsistent indentation."
   (skip-unless (flycheck-check-executable 'sass))
   (flycheck-test-should-syntax-check
    "checkers/sass-error.sass" 'sass-mode
     '(5 nil error "Inconsistent indentation: 3 spaces were used for indentation, but the rest of the document was indented using 2 spaces."
         :checker sass)))
+
+(ert-deftest flycheck-define-checker/sass-import-error ()
+  :tags '(builtin-checker external-tool language-sass)
+  (skip-unless (flycheck-check-executable 'sass))
+  (flycheck-test-should-syntax-check
+   "checkers/sass-compass.sass" 'sass-mode
+   `(2 nil error ,(format "File to import not found or unreadable: compass/css3.
+              Load path: %s" (flycheck-test-resource-filename "checkers"))
+       :checker sass)))
+
+(ert-deftest flycheck-define-checker/sass-compass ()
+  :tags '(builtin-checker external-tool language-sass)
+  (skip-unless (flycheck-check-executable 'sass))
+  (let ((flycheck-sass-compass t))
+    (flycheck-test-should-syntax-check
+     "checkers/sass-compass.sass" 'sass-mode)))
 
 (ert-deftest flycheck-define-checker/scala ()
   :tags '(builtin-checker external-tool language-scala)
@@ -3822,6 +3837,22 @@ Why not:
    "checkers/scss-error.scss" 'scss-mode
    '(3 nil error "Invalid CSS after \"        c olor:\": expected pseudoclass or pseudoelement, was \" red;\""
        :checker scss)))
+
+(ert-deftest flycheck-define-checker/scss-import-error ()
+  :tags '(builtin-checker external-tool language-scss)
+  (skip-unless (flycheck-check-executable 'scss))
+  (flycheck-test-should-syntax-check
+   "checkers/scss-compass.scss" 'scss-mode
+   `(2 nil error ,(format "File to import not found or unreadable: compass/css3.
+              Load path: %s" (flycheck-test-resource-filename "checkers"))
+       :checker scss)))
+
+(ert-deftest flycheck-define-checker/scss-compass ()
+  :tags '(builtin-checker external-tool language-scss)
+  (skip-unless (flycheck-check-executable 'scss))
+  (let ((flycheck-scss-compass t))
+    (flycheck-test-should-syntax-check
+     "checkers/scss-compass.scss" 'scss-mode)))
 
 (ert-deftest flycheck-define-checker/sh-bash ()
   :tags '(builtin-checker external-tool language-sh)
