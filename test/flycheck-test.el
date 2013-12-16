@@ -3010,17 +3010,17 @@ of the file will be interrupted because there are too many #ifdef configurations
 
 (ert-deftest flycheck-define-checker/cfengine-error ()
   :tags '(builtin-checker external-tool language-cfengine)
-  (skip-unless (fboundp 'cfengine-mode))
+  (skip-unless (fboundp 'cfengine3-mode))
   (flycheck-test-should-syntax-check
-   "checkers/cfengine-error.cf" 'cfengine-mode
+   "checkers/cfengine-error.cf" 'cfengine3-mode
    '(8 20 error "Unknown promise type 'nosuchpromisetype'"
        :checker cfengine)))
 
 (ert-deftest flycheck-define-checker/cfengine-warning ()
   :tags '(builtin-checker external-tool language-cfengine)
-  (skip-unless (fboundp 'cfengine-mode))
+  (skip-unless (fboundp 'cfengine3-mode))
   (flycheck-test-should-syntax-check
-   "checkers/cfengine-warning.cf" 'cfengine-mode
+   "checkers/cfengine-warning.cf" 'cfengine3-mode
    '(3 34 warning "Removed constraint 'host_licenses_paid' in promise type 'common' [-Wremoved]"
        :checker cfengine)))
 
