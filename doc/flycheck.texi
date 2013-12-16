@@ -759,6 +759,14 @@ The coding standard the syntax checker @code{php-phpcs} shall use.
 The rule sets for PHP Mess Detector @code{php-phpmd} shall use
 @end defopt
 
+@defopt flycheck-sass-compass
+Whether to enable the Compass CSS framework for @code{sass}.
+@end defopt
+
+@defopt flycheck-scss-compass
+Whether to enable the Compass CSS framework for @code{scss}.
+@end defopt
+
 @subsection Syntax checker configuration files
 
 Some syntax checkers also read configuration files denoted by associated
@@ -3221,6 +3229,10 @@ checkers}
 @item
 @ghissue{269, Disable syntax checkers easily with
 @code{flycheck-disabled-checkers}}
+@item
+@ghissue{268, Add support for the Compass CSS framework in the
+@code{sass} and @code{scss} checkers, with @code{flycheck-sass-compass}
+and @code{flycheck-scss-compass} respectively}
 @end itemize
 
 @item

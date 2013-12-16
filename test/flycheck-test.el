@@ -3814,6 +3814,13 @@ Why not:
               Load path: %s" (flycheck-test-resource-filename "checkers"))
        :checker sass)))
 
+(ert-deftest flycheck-define-checker/sass-compass ()
+  :tags '(builtin-checker external-tool language-sass)
+  (skip-unless (flycheck-check-executable 'sass))
+  (let ((flycheck-sass-compass t))
+    (flycheck-test-should-syntax-check
+     "checkers/sass-compass.sass" 'sass-mode)))
+
 (ert-deftest flycheck-define-checker/scala ()
   :tags '(builtin-checker external-tool language-scala)
   :expected-result '(or (satisfies flycheck-test-failed-on-travis-ci-p)
@@ -3839,6 +3846,13 @@ Why not:
    `(2 nil error ,(format "File to import not found or unreadable: compass/css3.
               Load path: %s" (flycheck-test-resource-filename "checkers"))
        :checker scss)))
+
+(ert-deftest flycheck-define-checker/scss-compass ()
+  :tags '(builtin-checker external-tool language-scss)
+  (skip-unless (flycheck-check-executable 'scss))
+  (let ((flycheck-scss-compass t))
+    (flycheck-test-should-syntax-check
+     "checkers/scss-compass.scss" 'scss-mode)))
 
 (ert-deftest flycheck-define-checker/sh-bash ()
   :tags '(builtin-checker external-tool language-sh)

@@ -4366,11 +4366,21 @@ See URL `http://rust-lang.org'."
           (message) line-end))
   :modes rust-mode)
 
+(flycheck-def-option-var flycheck-sass-compass nil sass
+  "Whether to enable the Compass CSS framework.
+
+When non-nil, enable the Compass CSS framework, via `--compass'."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.16"))
+
 (flycheck-define-checker sass
   "A Sass syntax checker using the Sass compiler.
 
 See URL `http://sass-lang.com'."
-  :command ("sass" "-c" source)
+  :command ("sass"
+            (option-flag "--compass" flycheck-sass-compass)
+            "-c" source)
   :error-patterns
   ((error line-start "Syntax error on line " line ": " (message))
    (warning line-start "WARNING on line " line " of " (file-name)
@@ -4394,11 +4404,21 @@ See URL `http://www.scala-lang.org/'."
   ((error line-start (file-name) ":" line ": error: " (message) line-end))
   :modes scala-mode)
 
+(flycheck-def-option-var flycheck-scss-compass nil scss
+  "Whether to enable the Compass CSS framework.
+
+When non-nil, enable the Compass CSS framework, via `--compass'."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.16"))
+
 (flycheck-define-checker scss
   "A SCSS syntax checker using the SCSS compiler.
 
 See URL `http://sass-lang.com'."
-  :command ("scss" "-c" source)
+  :command ("scss"
+            (option-flag "--compass" flycheck-scss-compass)
+            "-c" source)
   :error-patterns
   ((error line-start "Syntax error on line " line ": " (message))
    (warning line-start "WARNING on line " line " of " (file-name)
