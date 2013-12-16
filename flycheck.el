@@ -4376,7 +4376,11 @@ See URL `http://sass-lang.com'."
    (warning line-start "WARNING on line " line " of " (file-name)
             ":" (optional "\r") "\n" (message) line-end)
    (error line-start
-          "Syntax error: " (message)
+          "Syntax error: "
+          (message (one-or-more not-newline)
+                   (zero-or-more "\n"
+                                 (one-or-more " ")
+                                 (one-or-more not-newline)))
           (optional "\r") "\n        on line " line " of " (file-name)
           line-end))
   :modes sass-mode)
@@ -4400,8 +4404,12 @@ See URL `http://sass-lang.com'."
    (warning line-start "WARNING on line " line " of " (file-name)
             ":" (optional "\r") "\n" (message) line-end)
    (error line-start
-          "Syntax error: " (message)
-          (optional "\r") "\n        on line " line " of " (file-name)
+          "Syntax error: "
+          (message (one-or-more not-newline)
+                   (zero-or-more "\n"
+                                 (one-or-more " ")
+                                 (one-or-more not-newline)))
+          (optional "\r") "\n" (one-or-more " ") "on line " line " of " (file-name)
           line-end))
   :modes scss-mode)
 

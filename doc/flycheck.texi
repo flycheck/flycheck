@@ -3186,6 +3186,8 @@ package}.  See @uref{https://github.com/flycheck/flycheck-hdevtools,
 flycheck-hdevtools}
 @item
 Drop support for coffeelint 0.x
+@item
+Fix parsing of errors in @code{scss} and @code{sass}
 @end itemize
 
 @item
