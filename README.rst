@@ -1,9 +1,6 @@
-=========================
- Flycheck |build-status|
-=========================
-
-.. |build-status| image:: https://travis-ci.org/flycheck/flycheck.png?branch=master
-                  :target: https://travis-ci.org/flycheck/flycheck<
+==========
+ Flycheck
+==========
 
 .. default-role:: code
 
