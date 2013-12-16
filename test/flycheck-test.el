@@ -27,6 +27,14 @@
 ;; Please keep test cases in the same order as the corresponding definition in
 ;; flycheck.
 
+;;; Tags
+
+;; For new tests, please add the the section tag.  Additionally, add any of the
+;; following tags, if appropriate:
+;;
+;; - `external-tool' for tests which need external tools
+;; - `language-LANG' for tests for the language LANG
+
 ;;; Code:
 
 
@@ -512,6 +520,7 @@ check with.  ERRORS is the list of expected errors."
       (should (eq next-error-function :new)))))
 
 (ert-deftest flycheck-mode/clears-errors-after-revert ()
+  :tags '(minor-mode language-emacs-lisp)
   (flycheck-test-with-resource-buffer "checkers/emacs-lisp.el"
     (emacs-lisp-mode)
     (goto-char (point-min))
@@ -539,7 +548,7 @@ check with.  ERRORS is the list of expected errors."
     (should-not (flycheck-may-enable-mode))))
 
 (ert-deftest flycheck-may-enable-mode/not-in-encrypted-files ()
-  :tags '(global-mode)
+  :tags '(global-mode external-tool)
   (skip-unless (flycheck-test-check-gpg))
   (let* ((filename (flycheck-test-resource-filename "encrypted-file.el.gpg"))
          ;; Tell EPA about our passphrase
@@ -579,7 +588,7 @@ check with.  ERRORS is the list of expected errors."
       (should-not flycheck-mode))))
 
 (ert-deftest global-flycheck-mode/does-not-enable-in-encrypted-file ()
-  :tags '(global-mode)
+  :tags '(global-mode external-tool)
   (skip-unless (flycheck-test-check-gpg))
   (let* ((filename (flycheck-test-resource-filename "encrypted-file.el.gpg"))
          ;; Tell EPA about our passphrase
@@ -1084,7 +1093,7 @@ check with.  ERRORS is the list of expected errors."
     (should-not (flycheck-encrypted-buffer-p))))
 
 (ert-deftest flycheck-encrypted-buffer-p/encrypted-file-buffer ()
-  :tags '(utility)
+  :tags '(utility external-tool)
   (skip-unless (flycheck-test-check-gpg))
   (let* ((filename (flycheck-test-resource-filename "encrypted-file.el.gpg"))
          ;; Tell EPA about our passphrase
@@ -1619,7 +1628,7 @@ check with.  ERRORS is the list of expected errors."
       (should (string= flycheck-mode-line " FlyC!")))))
 
 (ert-deftest flycheck-checker/usable-checker-is-used ()
-  :tags '(selection)
+  :tags '(selection language-emacs-lisp)
   (flycheck-test-with-resource-buffer "checkers/emacs-lisp.el"
     (emacs-lisp-mode)
     (flycheck-mode)
@@ -1632,7 +1641,7 @@ check with.  ERRORS is the list of expected errors."
             :checker emacs-lisp-checkdoc)))))
 
 (ert-deftest flycheck-checker/disabled-checker-is-used ()
-  :tags '(selection)
+  :tags '(selection language-emacs-lisp)
   (flycheck-test-with-resource-buffer "checkers/emacs-lisp.el"
     (emacs-lisp-mode)
     (flycheck-mode)
@@ -1646,7 +1655,7 @@ check with.  ERRORS is the list of expected errors."
               :checker emacs-lisp-checkdoc))))))
 
 (ert-deftest flycheck-checker/unregistered-checker-is-used ()
-  :tags '(selection)
+  :tags '(selection language-emacs-lisp)
   (flycheck-test-with-resource-buffer "checkers/emacs-lisp.el"
     (emacs-lisp-mode)
     (flycheck-mode)
@@ -1661,7 +1670,7 @@ check with.  ERRORS is the list of expected errors."
               :checker emacs-lisp-checkdoc))))))
 
 (ert-deftest flycheck-select-checker/selecting-sets-the-syntax-checker ()
-  :tags '(selection)
+  :tags '(selection external-tool language-python)
   (skip-unless (flycheck-check-executable 'python-pylint))
   (flycheck-test-with-temp-buffer
     (python-mode)
@@ -1669,7 +1678,7 @@ check with.  ERRORS is the list of expected errors."
     (should (eq flycheck-checker 'python-pylint))))
 
 (ert-deftest flycheck-select-checker/unselecting-unsets-the-syntax-checker ()
-  :tags '(selection)
+  :tags '(selection external-tool language-python)
   (skip-unless (flycheck-check-executable 'python-pylint))
   (flycheck-test-with-temp-buffer
     (python-mode)
@@ -1678,7 +1687,7 @@ check with.  ERRORS is the list of expected errors."
     (should-not flycheck-checker)))
 
 (ert-deftest flycheck-select-checker/selecting-runs-a-syntax-check ()
-  :tags '(selection)
+  :tags '(selection external-tool language-python)
   (skip-unless (-all? #'flycheck-check-executable '(python-flake8
                                                     python-pylint)))
   (flycheck-test-with-resource-buffer "checkers/python/test.py"
@@ -1720,7 +1729,7 @@ check with.  ERRORS is the list of expected errors."
           :checker python-pylint))))
 
 (ert-deftest flycheck-select-checker/unselecting-a-checker-goes-back-to-automatic-selection ()
-  :tags '(selection)
+  :tags '(selection external-tool language-python)
   (skip-unless (-all? #'flycheck-check-executable '(python-pylint
                                                     python-flake8)))
   (flycheck-test-with-resource-buffer "checkers/python/test.py"
@@ -1763,7 +1772,7 @@ check with.  ERRORS is the list of expected errors."
           :checker python-flake8))))
 
 (ert-deftest flycheck/selects-checker-automatically/first-enabled-checker ()
-  :tags '(selection)
+  :tags '(selection external-tool language-python)
   (skip-unless (-all? #'flycheck-check-executable '(python-pylint
                                                     python-flake8)))
   (flycheck-test-with-resource-buffer "checkers/python/test.py"
@@ -1784,7 +1793,7 @@ check with.  ERRORS is the list of expected errors."
           :checker python-flake8))))
 
 (ert-deftest flycheck/selects-checker-automatically/no-disabled-checker ()
-  :tags '(selection)
+  :tags '(selection language-emacs-lisp)
   (flycheck-test-with-resource-buffer "checkers/emacs-lisp.el"
     (let ((flycheck-disabled-checkers '(emacs-lisp)))
       (flycheck-test-buffer-sync)
@@ -2472,7 +2481,7 @@ of the file will be interrupted because there are too many #ifdef configurations
         (should (eq side 'right-fringe))))))
 
 (ert-deftest flycheck-add-overlay/right-position-in-narrowed-buffer ()
-  :tags '(overlay)
+  :tags '(overlay language-emacs-lisp)
   "Test that all overlays are added at the right positions with narrowing in place."
   (flycheck-test-with-resource-buffer "narrowing.el"
     (emacs-lisp-mode)
@@ -2841,7 +2850,7 @@ of the file will be interrupted because there are too many #ifdef configurations
 (autoload 'sh-set-shell "sh-script")
 
 (ert-deftest flycheck-define-checker/asciidoc ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-asciidoc)
   (skip-unless (flycheck-check-executable 'asciidoc))
   (flycheck-test-should-syntax-check
    "checkers/asciidoc.adoc" 'adoc-mode
@@ -2850,7 +2859,7 @@ of the file will be interrupted because there are too many #ifdef configurations
    '(11 nil error "[tabledef-default] illegal width=%60%" :checker asciidoc)))
 
 (ert-deftest flycheck-define-checker/bash ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-bash)
   "Test a syntax error from a missing semicolon."
   (skip-unless (flycheck-check-executable 'bash))
   (flycheck-test-with-hook sh-mode-hook (sh-set-shell "bash" :no-query)
@@ -2860,7 +2869,7 @@ of the file will be interrupted because there are too many #ifdef configurations
      '(5 nil error "`fi'" :checker bash))))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-warning ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-c)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
   (let ((flycheck-disabled-checkers '(c/c++-cppcheck)))
     (flycheck-test-should-syntax-check
@@ -2870,7 +2879,7 @@ of the file will be interrupted because there are too many #ifdef configurations
          :checker c/c++-clang))))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-warning-customized ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-c)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
   (flycheck-test-with-hook c-mode-hook
       ;; Disable conversion checks by removing -Wextra, but additionally warn
@@ -2884,7 +2893,7 @@ of the file will be interrupted because there are too many #ifdef configurations
        '(5 10 warning "unused variable 'unused'" :checker c/c++-clang)))))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-fatal-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-c)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
   (flycheck-test-should-syntax-check
    "checkers/c_c++-clang-fatal-error.c" 'c-mode
@@ -2892,7 +2901,7 @@ of the file will be interrupted because there are too many #ifdef configurations
        :checker c/c++-clang)))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-include-path ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-c)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
   (flycheck-test-with-hook c-mode-hook
       (setq flycheck-clang-include-path '("./include"))
@@ -2900,7 +2909,7 @@ of the file will be interrupted because there are too many #ifdef configurations
      "checkers/c_c++-clang-fatal-error.c" 'c-mode)))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-includes ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
   (flycheck-test-with-hook c++-mode-hook
       (setq flycheck-clang-includes
@@ -2911,7 +2920,7 @@ of the file will be interrupted because there are too many #ifdef configurations
           :checker c/c++-clang))))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
   (flycheck-test-should-syntax-check
    "checkers/c_c++-clang-error.cpp" 'c++-mode
@@ -2922,7 +2931,7 @@ of the file will be interrupted because there are too many #ifdef configurations
         :checker c/c++-clang)))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-error-language-standard ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
   (flycheck-test-with-hook c++-mode-hook
       (setq flycheck-clang-language-standard "c++11")
@@ -2933,7 +2942,7 @@ of the file will be interrupted because there are too many #ifdef configurations
          :checker c/c++-clang))))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-error-definitions ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
   (flycheck-test-with-hook c++-mode-hook
       (setq flycheck-clang-definitions '("FLYCHECK_LOCAL" "FLYCHECK_LIBRARY"))
@@ -2943,7 +2952,7 @@ of the file will be interrupted because there are too many #ifdef configurations
           :checker c/c++-clang))))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-error-no-rtti ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
   (flycheck-test-with-hook c++-mode-hook
       (setq flycheck-clang-no-rtti t)
@@ -2953,7 +2962,7 @@ of the file will be interrupted because there are too many #ifdef configurations
      "checkers/c_c++-clang-error-rtti.cpp" 'c++-mode)))
 
 (ert-deftest flycheck-define-checker/c/c++-cppcheck-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-c)
   (skip-unless (flycheck-check-executable 'c/c++-cppcheck))
   (let ((flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-test-should-syntax-check
@@ -2961,7 +2970,7 @@ of the file will be interrupted because there are too many #ifdef configurations
      '(4 nil error "Null pointer dereference" :checker c/c++-cppcheck))))
 
 (ert-deftest flycheck-define-checker/c/c++-cppcheck-warning ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-c)
   (skip-unless (flycheck-check-executable 'c/c++-cppcheck))
   (let ((flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-test-should-syntax-check
@@ -2970,7 +2979,7 @@ of the file will be interrupted because there are too many #ifdef configurations
          :checker c/c++-cppcheck))))
 
 (ert-deftest flycheck-define-checker/c/c++-cppcheck-style ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-c)
   (skip-unless (flycheck-check-executable 'c/c++-cppcheck))
   (let ((flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-test-should-syntax-check
@@ -2978,7 +2987,7 @@ of the file will be interrupted because there are too many #ifdef configurations
      '(3 nil warning "Unused variable: unused" :checker c/c++-cppcheck))))
 
 (ert-deftest flycheck-define-checker/c/c++-cppcheck-style-suppressed ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-c)
   (skip-unless (flycheck-check-executable 'c/c++-cppcheck))
   (flycheck-test-with-hook c-mode-hook
       (setq flycheck-cppcheck-checks nil)
@@ -2987,7 +2996,7 @@ of the file will be interrupted because there are too many #ifdef configurations
                                          'c-mode))))
 
 (ert-deftest flycheck-define-checker/c/c++-cppcheck-multiple-checks ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-cppcheck))
   (flycheck-test-with-hook c++-mode-hook
       (setq flycheck-cppcheck-checks '("performance" "portability"))
@@ -3000,7 +3009,7 @@ of the file will be interrupted because there are too many #ifdef configurations
            :checker c/c++-cppcheck)))))
 
 (ert-deftest flycheck-define-checker/cfengine-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-cfengine)
   (skip-unless (fboundp 'cfengine-mode))
   (flycheck-test-should-syntax-check
    "checkers/cfengine-error.cf" 'cfengine-mode
@@ -3008,7 +3017,7 @@ of the file will be interrupted because there are too many #ifdef configurations
        :checker cfengine)))
 
 (ert-deftest flycheck-define-checker/cfengine-warning ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-cfengine)
   (skip-unless (fboundp 'cfengine-mode))
   (flycheck-test-should-syntax-check
    "checkers/cfengine-warning.cf" 'cfengine-mode
@@ -3016,7 +3025,7 @@ of the file will be interrupted because there are too many #ifdef configurations
        :checker cfengine)))
 
 (ert-deftest flycheck-define-checker/chef-foodcritic ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-chef)
   (skip-unless (flycheck-check-executable 'chef-foodcritic))
   (flycheck-test-should-syntax-check
     "checkers/chef-foodcritic/recipes/chef-foodcritic-error.rb" 'ruby-mode
@@ -3028,14 +3037,14 @@ of the file will be interrupted because there are too many #ifdef configurations
         :checker chef-foodcritic)))
 
 (ert-deftest flycheck-define-checker/coffee-syntax-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-coffee)
   (skip-unless (flycheck-check-executable 'coffee))
   (flycheck-test-should-syntax-check
    "checkers/coffee-syntax-error.coffee" 'coffee-mode
    '(4 7 error "missing \", starting" :checker coffee)))
 
 (ert-deftest flycheck-define-checker/coffee-coffeelint-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-coffee)
   (skip-unless (flycheck-check-executable 'coffee-coffeelint))
   (flycheck-test-should-syntax-check
    "checkers/coffee-coffeelint-error.coffee" 'coffee-mode
@@ -3043,7 +3052,7 @@ of the file will be interrupted because there are too many #ifdef configurations
        :checker coffee-coffeelint)))
 
 (ert-deftest flycheck-define-checker/coffee-coffeelint-warning ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-coffee)
   (skip-unless (flycheck-check-executable 'coffee-coffeelint))
   (flycheck-test-with-hook coffee-mode-hook
       (setq flycheck-coffeelintrc "coffeelint.json")
@@ -3053,7 +3062,7 @@ of the file will be interrupted because there are too many #ifdef configurations
          :checker coffee-coffeelint))))
 
 (ert-deftest flycheck-define-checker/css-csslint ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-css)
   (skip-unless (flycheck-check-executable 'css-csslint))
   (flycheck-test-should-syntax-check
    "checkers/css-csslint-warning.css" 'css-mode
@@ -3061,7 +3070,7 @@ of the file will be interrupted because there are too many #ifdef configurations
        :checker css-csslint)))
 
 (ert-deftest flycheck-define-checker/css-csslint-syntax-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-css)
   (skip-unless (flycheck-check-executable 'css-csslint))
   (flycheck-test-should-syntax-check
    "checkers/css-syntax-error.css" 'css-mode
@@ -3072,7 +3081,7 @@ of the file will be interrupted because there are too many #ifdef configurations
    '(5 1 error "Unexpected token '}' at line 5, col 1." :checker css-csslint)))
 
 (ert-deftest flycheck-d-module-name ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-d)
   (flycheck-test-with-temp-buffer
     (insert "Hello world")
     (should-not (flycheck-d-module-name)))
@@ -3081,7 +3090,7 @@ of the file will be interrupted because there are too many #ifdef configurations
     (should (string= (flycheck-d-module-name) "spam.with.eggs"))))
 
 (ert-deftest flycheck-d-base-directory ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-d)
   (flycheck-test-with-resource-buffer "checkers/d-dmd-warning.d"
     (should (f-same? (flycheck-d-base-directory)
                      (f-join flycheck-test-resources-directory "checkers"))))
@@ -3095,7 +3104,7 @@ of the file will be interrupted because there are too many #ifdef configurations
                      flycheck-test-resources-directory))))
 
 (ert-deftest flycheck-define-checker/d-dmd-syntax-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-d)
   (skip-unless (flycheck-check-executable 'd-dmd))
   (flycheck-test-should-syntax-check
    "checkers/d-dmd-syntax-error.d" 'd-mode
@@ -3103,7 +3112,7 @@ of the file will be interrupted because there are too many #ifdef configurations
        :checker d-dmd)))
 
 (ert-deftest flycheck-define-checker/d-dmd-syntax-error-without-module ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-d)
   (skip-unless (flycheck-check-executable 'd-dmd))
   (flycheck-test-should-syntax-check
    "checkers/d_dmd_syntax_error_without_module.d" 'd-mode
@@ -3111,7 +3120,7 @@ of the file will be interrupted because there are too many #ifdef configurations
        :checker d-dmd)))
 
 (ert-deftest flycheck-define-checker/d-dmd-warning ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-d)
   (skip-unless (flycheck-check-executable 'd-dmd))
   (flycheck-test-should-syntax-check
    "checkers/d-dmd-warning.d" 'd-mode
@@ -3120,14 +3129,14 @@ of the file will be interrupted because there are too many #ifdef configurations
         :checker d-dmd)))
 
 (ert-deftest flycheck-define-checker/elixir-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-elixir)
   (skip-unless (flycheck-check-executable 'elixir))
   (flycheck-test-should-syntax-check
    "checkers/elixir-error.ex" 'elixir-mode
    '(5 nil error "function puts/1 undefined" :checker elixir)))
 
 (ert-deftest flycheck-define-checker/elixir-warnings ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-elixir)
   (skip-unless (flycheck-check-executable 'elixir))
   (flycheck-test-should-syntax-check
    "checkers/elixir-warnings.ex" 'elixir-mode
@@ -3135,7 +3144,7 @@ of the file will be interrupted because there are too many #ifdef configurations
         :checker elixir)))
 
 (ert-deftest flycheck-define-checker/emacs-lisp ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-emacs-lisp)
   ;; Determine how the Emacs message for load file errors looks like: In Emacs
   ;; Snapshot, the message has three parts because the underlying file error is
   ;; contained in the message.  In stable release the file error itself is
@@ -3153,7 +3162,7 @@ of the file will be interrupted because there are too many #ifdef configurations
      `(15 1 error ,msg :checker emacs-lisp))))
 
 (ert-deftest flycheck-define-checker/emacs-lisp-load-path ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-emacs-lisp)
   (flycheck-test-with-hook emacs-lisp-mode-hook
       (setq flycheck-emacs-lisp-load-path
             (list (flycheck-test-resource-filename
@@ -3168,7 +3177,7 @@ of the file will be interrupted because there are too many #ifdef configurations
     not be defined at runtime." :checker emacs-lisp))))
 
 (ert-deftest flycheck-define-checker/emacs-lisp-initialize-packages ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-emacs-lisp)
   (flycheck-test-with-hook emacs-lisp-mode-hook
       (setq flycheck-emacs-lisp-package-user-dir
             (flycheck-test-resource-filename "dummy-elpa")
@@ -3181,7 +3190,7 @@ of the file will be interrupted because there are too many #ifdef configurations
     requires 1+" :checker emacs-lisp))))
 
 (ert-deftest flycheck-define-checker/emacs-lisp-checks-compressed-file ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-emacs-lisp)
   (flycheck-test-should-syntax-check
    "checkers/emacs-lisp.el.gz" 'emacs-lisp-mode
    '(12 nil warning "First sentence should end with punctuation"
@@ -3192,14 +3201,14 @@ of the file will be interrupted because there are too many #ifdef configurations
     not known to be defined." :checker emacs-lisp)))
 
 (ert-deftest flycheck-define-checker/emacs-lisp-sytnax-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-emacs-lisp)
   (let ((flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
     (flycheck-test-should-syntax-check
      "checkers/emacs-lisp-syntax-error.el" 'emacs-lisp-mode
      '(3 1 error "End of file during parsing" :checker emacs-lisp))))
 
 (ert-deftest flycheck-define-checker/emacs-lisp-without-file-name ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-emacs-lisp)
   "Test checkdoc checker in buffers without file names.
 
 Regression test for https://github.com/flycheck/flycheck/issues/73 and
@@ -3214,7 +3223,7 @@ https://github.com/bbatsov/prelude/issues/259."
     (flycheck-test-should-errors)))
 
 (ert-deftest flycheck-define-checker/emacs-lisp-does-not-check-autoloads-buffers ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-emacs-lisp)
   "Test that Emacs Lisp does not check autoloads buffers.
 
 These buffers are temporary buffers generated during package
@@ -3228,12 +3237,12 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
     (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
 
 (ert-deftest flycheck-define-checker/emacs-lisp-checkdoc-does-not-check-cask-files ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-emacs-lisp)
   (flycheck-test-with-file-buffer (f-join flycheck-test-source-directory "Cask")
     (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
 
 (ert-deftest flycheck-define-checker/emacs-lisp-does-not-check-with-no-byte-compile ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-emacs-lisp)
   (flycheck-test-with-hook emacs-lisp-mode-hook
       (set (make-local-variable 'no-byte-compile) t)
     (flycheck-test-should-syntax-check
@@ -3242,21 +3251,21 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
           :checker emacs-lisp-checkdoc))))
 
 (ert-deftest flycheck-define-checker/erlang-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-emacs-lisp)
   (skip-unless (flycheck-check-executable 'erlang))
   (flycheck-test-should-syntax-check
    "checkers/erlang-error.erl" 'erlang-mode
    '(7 nil error "head mismatch" :checker erlang)))
 
 (ert-deftest flycheck-define-checker/erlang-warning ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-erlang)
   (skip-unless (flycheck-check-executable 'erlang))
   (flycheck-test-should-syntax-check
    "checkers/erlang-warning.erl" 'erlang-mode
    '(6 nil warning "wrong number of arguments in format call" :checker erlang)))
 
 (ert-deftest flycheck-define-checker/go-gofmt ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-go)
   "Test a syntax error."
   (skip-unless (flycheck-check-executable 'go-gofmt))
   (flycheck-test-should-syntax-check
@@ -3265,7 +3274,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
    '(6 1 error "expected ')', found '}'" :checker go-gofmt)))
 
 (ert-deftest flycheck-define-checker/go-build ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-go)
   "Test an import error."
   (skip-unless (flycheck-check-executable 'go-build))
   (flycheck-test-with-env
@@ -3275,7 +3284,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
      '(6 nil error "undefined: fmt" :checker go-build)) ))
 
 (ert-deftest flycheck-define-checker/go-build-handles-packages ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-go)
   (skip-unless (flycheck-check-executable 'go-build))
   (flycheck-test-with-env
       `(("GOPATH" . ,(flycheck-test-resource-filename "checkers/go")))
@@ -3283,7 +3292,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
                                             'go-mode)))
 
 (ert-deftest flycheck-define-checker/go-build-missing-package ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-go)
   "Test successful go build with subpackages (used to verify the
 GOPATH environment variable is set properly and subpackages can be
 found)."
@@ -3297,7 +3306,7 @@ found)."
      `(4 2 error ,message :checker go-build))))
 
 (ert-deftest flycheck-define-checker/go-test ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-go)
   "Test an import error."
   (skip-unless (flycheck-check-executable 'go-test))
   (flycheck-test-with-env
@@ -3307,7 +3316,7 @@ found)."
      '(8 nil error "undefined: fmt" :checker go-test))))
 
 (ert-deftest flycheck-define-checker/haml ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-haml)
   (skip-unless (flycheck-check-executable 'haml))
   (flycheck-test-should-syntax-check
    "checkers/haml-error.haml" 'haml-mode
@@ -3315,7 +3324,7 @@ found)."
        :checker haml :filename nil)))
 
 (ert-deftest flycheck-define-checker/handlebars ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-handlebars)
   (skip-unless (flycheck-check-executable 'handlebars))
   (flycheck-test-should-syntax-check
    "checkers/handlebars-error.hbs" 'handlebars-mode
@@ -3323,14 +3332,14 @@ found)."
        :checker handlebars :filename nil)))
 
 (ert-deftest flycheck-define-checker/haskell-ghc-syntax-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-haskell)
   (skip-unless (flycheck-check-executable 'haskell-ghc))
   (flycheck-test-should-syntax-check
    "checkers/haskell-ghc-syntax-error.hs" 'haskell-mode
    '(3 1 error "parse error on input `module'" :checker haskell-ghc)))
 
 (ert-deftest flycheck-define-checker/haskell ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-haskell)
   (skip-unless (-all? #'flycheck-check-executable '(haskell-ghc haskell-hlint)))
   (flycheck-test-should-syntax-check
    "checkers/haskell.hs" 'haskell-mode
@@ -3348,7 +3357,7 @@ Why not:
   putStrLn \"Foobar\"" :checker haskell-hlint)))
 
 (ert-deftest flycheck-define-checker/html-tidy ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-html)
   "Test an error caused by an unknown tag."
   (skip-unless (flycheck-check-executable 'html-tidy))
   (flycheck-test-should-syntax-check
@@ -3361,7 +3370,7 @@ Why not:
        :checker html-tidy :filename nil)))
 
 (ert-deftest flycheck-define-checker/javascript-jshint-syntax-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-javascript)
   "A missing semicolon."
   (skip-unless (flycheck-check-executable 'javascript-jshint))
   ;; Silence JS2 and JS3 parsers
@@ -3376,14 +3385,14 @@ Why not:
      '(4 1 error "Missing semicolon." :checker javascript-jshint))))
 
 (ert-deftest flycheck-define-checker/javascript-jshint-error-disabled ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-javascript)
   "An unused variable."
   (skip-unless (flycheck-check-executable 'javascript-jshint))
   (flycheck-test-should-syntax-check
    "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)))
 
 (ert-deftest flycheck-define-checker/javascript-jshint ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-javascript)
   "An unused variable."
   (skip-unless (flycheck-check-executable 'javascript-jshint))
   (flycheck-test-with-hook (js-mode-hook js2-mode-hook js3-mode-hook)
@@ -3394,7 +3403,7 @@ Why not:
          :checker javascript-jshint))))
 
 (ert-deftest flycheck-define-checker/javascript-gjslint ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-javascript)
   (skip-unless (flycheck-check-executable 'javascript-gjslint))
   (let ((flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-test-should-syntax-check
@@ -3405,29 +3414,29 @@ Why not:
          :checker javascript-gjslint :filename nil))))
 
 (ert-deftest flycheck-define-checker/json-jsonlint ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-json)
   "Test a syntax error from multiple top-level objects."
   (skip-unless (flycheck-check-executable 'json-jsonlint))
   (flycheck-test-should-syntax-check
    "checkers/json-jsonlint-error.json" 'text-mode
     '(1 42 error "found: ',' - expected: 'EOF'." :checker json-jsonlint)))
 
-(ert-deftest flycheck-define-checker/less ()
-  :tags '(builtin-checker)
+(ert-deftest flycheck-define-checker/less-file-error ()
+  :tags '(builtin-checker external-tool language-less)
   (skip-unless (flycheck-check-executable 'less))
   (flycheck-test-should-syntax-check
    "checkers/less-file-error.less" 'less-css-mode
    '(3 1 error "'no-such-file.less' wasn't found" :checker less)))
 
-(ert-deftest flycheck-define-checker/less ()
-  :tags '(builtin-checker)
+(ert-deftest flycheck-define-checker/less-syntax-error ()
+  :tags '(builtin-checker external-tool language-less)
   (skip-unless (flycheck-check-executable 'less))
   (flycheck-test-should-syntax-check
    "checkers/less-syntax-error.less" 'less-css-mode
    '(2 1 error "missing closing `}`" :checker less)))
 
 (ert-deftest flycheck-define-checker/lua ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-lua)
   (skip-unless (flycheck-check-executable 'lua))
   (flycheck-test-should-syntax-check
    "checkers/lua-syntax-error.lua" 'lua-mode
@@ -3435,7 +3444,7 @@ Why not:
        :checker lua :filename nil)))
 
 (ert-deftest flycheck-define-checker/perl ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-perl)
   "Test an unused variable with the Perl checker."
   (skip-unless (flycheck-check-executable 'perl))
   (flycheck-test-should-syntax-check
@@ -3444,7 +3453,7 @@ Why not:
        :checker perl)))
 
 (ert-deftest flycheck-define-checker/perl-syntax-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-perl)
   (skip-unless (flycheck-check-executable 'perl))
   "Test a syntax error with the Perl checker."
   (flycheck-test-should-syntax-check
@@ -3452,7 +3461,7 @@ Why not:
    '(4 nil error "syntax error" :checker perl)))
 
 (ert-deftest flycheck-define-checker/php-syntax-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-php)
   "Test the T_PAAMAYIM_NEKUDOTAYIM error."
   (skip-unless (flycheck-check-executable 'php))
   (flycheck-test-should-syntax-check
@@ -3460,7 +3469,7 @@ Why not:
    '(8 nil error "syntax error, unexpected ')', expecting '('" :checker php)))
 
 (ert-deftest flycheck-define-checker/php ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-php)
   (skip-unless (-all? #'flycheck-check-executable '(php-phpcs php-phpmd)))
   (flycheck-test-should-syntax-check
    "checkers/php.php" 'php-mode
@@ -3485,7 +3494,7 @@ Why not:
         :checker php-phpcs)))
 
 (ert-deftest flycheck-define-checker/php-phpmd-rulesets ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-php)
   (skip-unless (-all? #'flycheck-check-executable '(php-phpcs php-phpmd)))
   (flycheck-test-with-hook php-mode-hook
       (setq flycheck-phpmd-rulesets (remove "unusedcode" flycheck-phpmd-rulesets))
@@ -3504,7 +3513,7 @@ Why not:
           :checker php-phpcs))))
 
 (ert-deftest flycheck-define-checker/php-phpcs-standard ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-php)
   (skip-unless (-all? #'flycheck-check-executable '(php-phpcs php-phpmd)))
   (flycheck-test-with-hook php-mode-hook
       (setq flycheck-phpcs-standard "Zend")
@@ -3526,7 +3535,7 @@ Why not:
           :checker php-phpcs))))
 
 (ert-deftest flycheck-define-checker/puppet-parser-singleline-syntax-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-puppet)
   "Test a real syntax error with puppet parser."
   (skip-unless (flycheck-check-executable 'puppet-parser))
   (flycheck-test-should-syntax-check
@@ -3534,7 +3543,7 @@ Why not:
    '(3 nil error "Syntax error at ','; expected '}'" :checker puppet-parser)))
 
 (ert-deftest flycheck-define-checker/puppet-parser-multiline-syntax-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-puppet)
   "Test a real (multi line) syntax error with puppet parser."
   (skip-unless (flycheck-check-executable 'puppet-parser))
   (flycheck-test-should-syntax-check
@@ -3544,7 +3553,7 @@ Why not:
 '" :checker puppet-parser)))
 
 (ert-deftest flycheck-define-checker/puppet-lint ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-puppet)
   (skip-unless (flycheck-check-executable 'puppet-lint))
   (flycheck-test-should-syntax-check
    "checkers/puppet-lint.pp" 'puppet-mode
@@ -3553,7 +3562,7 @@ Why not:
        :checker puppet-lint)))
 
 (ert-deftest flycheck-define-checker/python-flake8-syntax-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-python)
   "Test a real syntax error with flake8."
   (skip-unless (flycheck-check-executable 'python-flake8))
   (flycheck-test-should-syntax-check
@@ -3561,7 +3570,7 @@ Why not:
     '(3 13 error "E901 SyntaxError: invalid syntax" :checker python-flake8)))
 
 (ert-deftest flycheck-define-checker/python-flake8-warning-ignored ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-python)
   (skip-unless (flycheck-check-executable 'python-flake8))
   (flycheck-test-with-hook python-mode-hook
       (setq flycheck-flake8rc "flake8rc")
@@ -3574,7 +3583,7 @@ Why not:
           :checker python-flake8))))
 
 (ert-deftest flycheck-define-checker/python-flake8-maximum-complexity ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-python)
   "Test superfluous spaces with flake8."
   (skip-unless (flycheck-check-executable 'python-flake8))
   (flycheck-test-with-hook python-mode-hook
@@ -3595,7 +3604,7 @@ Why not:
           :checker python-flake8))))
 
 (ert-deftest flycheck-define-checker/python-flake8-error-maximum-line-length ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-python)
   (skip-unless (flycheck-check-executable 'python-flake8))
   (flycheck-test-with-hook python-mode-hook
       (setq flycheck-flake8-maximum-line-length 45)
@@ -3615,7 +3624,7 @@ Why not:
           :checker python-flake8))))
 
 (ert-deftest flycheck-define-checker/python-flake8 ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-python)
   "PEP8 compliant names with Flake8 and pep8-naming."
   (skip-unless (flycheck-check-executable 'python-flake8))
   (flycheck-test-should-syntax-check
@@ -3631,7 +3640,7 @@ Why not:
         :checker python-flake8)))
 
 (ert-deftest flycheck-define-checker/python-pylint-syntax-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-python)
   "Test a real syntax error with pylint."
   (skip-unless (flycheck-check-executable 'python-pylint))
   (let ((flycheck-disabled-checkers '(python-flake8)))
@@ -3640,7 +3649,7 @@ Why not:
      '(3 nil error "invalid syntax (E0001)" :checker python-pylint))))
 
 (ert-deftest flycheck-define-checker/python-pylint ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-python)
   (skip-unless (flycheck-check-executable 'python-pylint))
   (let ((flycheck-disabled-checkers '(python-flake8)))
     (flycheck-test-should-syntax-check
@@ -3665,7 +3674,7 @@ Why not:
           :checker python-pylint))))
 
 (ert-deftest flycheck-define-checker/rst ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-rst)
   (skip-unless (flycheck-check-executable 'rst))
   (flycheck-test-should-syntax-check
    "checkers/rst.rst" 'rst-mode
@@ -3677,7 +3686,7 @@ Why not:
    '(26 nil error "Unexpected section title." :checker rst)))
 
 (ert-deftest flycheck-define-checker/ruby-rubocop-syntax-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-ruby)
   (skip-unless (flycheck-check-executable 'ruby-rubocop))
   (flycheck-test-should-syntax-check
    "checkers/ruby-syntax-error.rb" 'ruby-mode
@@ -3685,7 +3694,7 @@ Why not:
    '(5 24 error "unterminated string meets end of file" :checker ruby-rubocop)))
 
 (ert-deftest flycheck-define-checker/ruby-rubylint-syntax-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-ruby)
   (skip-unless (flycheck-check-executable 'ruby-rubocop))
   (let ((flycheck-disabled-checkers '(ruby-rubocop)))
     (flycheck-test-should-syntax-check
@@ -3693,7 +3702,7 @@ Why not:
      '(5 7 error "unexpected token tCONSTANT" :checker ruby-rubylint))))
 
 (ert-deftest flycheck-define-checker/ruby-syntax-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-ruby)
   (skip-unless (flycheck-check-executable 'ruby))
   (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-rubylint)))
     (flycheck-test-should-syntax-check
@@ -3702,7 +3711,7 @@ Why not:
          :checker ruby))))
 
 (ert-deftest flycheck-define-checker/ruby-jruby-syntax-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-ruby)
   :expected-result '(or (satisfies flycheck-test-failed-on-travis-ci-p)
                         :passed)
   (skip-unless (flycheck-check-executable 'ruby-jruby))
@@ -3712,7 +3721,7 @@ Why not:
      '(5 nil error "syntax error, unexpected tCONSTANT" :checker ruby-jruby))))
 
 (ert-deftest flycheck-define-checker/ruby-rubocop-and-ruby-lint ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-ruby)
   (skip-unless (-all? #'flycheck-check-executable '(ruby-rubocop
                                                     ruby-rubylint)))
   (flycheck-test-should-syntax-check
@@ -3736,7 +3745,7 @@ Why not:
           :checker ruby-rubylint)))
 
 (ert-deftest flycheck-define-checker/ruby-rubocop-disabled-warning ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-ruby)
   (skip-unless (-all? #'flycheck-check-executable '(ruby-rubocop
                                                     ruby-rubylint)))
   (flycheck-test-with-hook ruby-mode-hook
@@ -3761,7 +3770,7 @@ Why not:
           :checker ruby-rubylint))))
 
 (ert-deftest flycheck-define-checker/ruby-warnings ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-ruby)
   (skip-unless (flycheck-check-executable 'ruby))
   (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-rubylint)))
     (flycheck-test-should-syntax-check
@@ -3771,7 +3780,7 @@ Why not:
           :checker ruby))))
 
 (ert-deftest flycheck-define-checker/ruby-jruby-warnings ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-ruby)
   :expected-result '(or (satisfies flycheck-test-failed-on-travis-ci-p)
                         :passed)
   (skip-unless (flycheck-check-executable 'ruby-jruby))
@@ -3782,14 +3791,14 @@ Why not:
           :checker ruby-jruby))))
 
 (ert-deftest flycheck-define-checker/rust ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-rust)
   (skip-unless (flycheck-check-executable 'rust))
   (flycheck-test-should-syntax-check
    "checkers/rust-syntax-error.rs" 'rust-mode
    '(3 10 error "expected `{` but found `bla`" :checker rust)))
 
 (ert-deftest flycheck-define-checker/sass ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-sass)
   "Test a syntax error caused by inconsistent indentation."
   (skip-unless (flycheck-check-executable 'sass))
   (flycheck-test-should-syntax-check
@@ -3798,7 +3807,7 @@ Why not:
         :checker sass)))
 
 (ert-deftest flycheck-define-checker/scala ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-scala)
   :expected-result '(or (satisfies flycheck-test-failed-on-travis-ci-p)
                         :passed)
   (skip-unless (flycheck-check-executable 'scala))
@@ -3807,7 +3816,7 @@ Why not:
    '(3 nil error "identifier expected but '{' found." :checker scala)))
 
 (ert-deftest flycheck-define-checker/scss ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-scss)
   (skip-unless (flycheck-check-executable 'scss))
   (flycheck-test-should-syntax-check
    "checkers/scss-error.scss" 'scss-mode
@@ -3815,7 +3824,7 @@ Why not:
        :checker scss)))
 
 (ert-deftest flycheck-define-checker/sh-bash ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-sh)
   (skip-unless (flycheck-check-executable 'sh-bash))
   (flycheck-test-with-hook sh-mode-hook
       (sh-set-shell "sh" :no-query)
@@ -3826,7 +3835,7 @@ Why not:
        '(3 nil error "`cat <(echo blah)'" :checker sh-bash)))))
 
 (ert-deftest flycheck-define-checker/sh-dash ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-sh)
   (skip-unless (flycheck-check-executable 'sh-dash))
   (flycheck-test-with-hook sh-mode-hook
       (sh-set-shell "sh" :no-query)
@@ -3835,7 +3844,7 @@ Why not:
      '(3 nil error "Syntax error: \"(\" unexpected" :checker sh-dash))))
 
 (ert-deftest flycheck-define-checker/slim ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-slim)
   (skip-unless (flycheck-check-executable 'slim))
   (let* ((slim-version (cadr (split-string (car (process-lines "slimrb" "-v")))))
          ;; Old Slim compilers do not report column information
@@ -3845,7 +3854,7 @@ Why not:
      `(2 ,column error "Unexpected indentation" :checker slim))))
 
 (ert-deftest flycheck-define-checker/tex-chktex ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-tex language-latex)
   (skip-unless (flycheck-check-executable 'tex-chktex))
   (flycheck-test-should-syntax-check
    "checkers/tex-warning.tex" 'latex-mode
@@ -3853,7 +3862,7 @@ Why not:
        :checker tex-chktex)))
 
 (ert-deftest flycheck-define-checker/tex-lacheck ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-tex language-latex)
   (skip-unless (flycheck-check-executable 'tex-lacheck))
   (let ((flycheck-disabled-checkers '(tex-chktex)))
     (flycheck-test-should-syntax-check
@@ -3864,7 +3873,7 @@ Why not:
          :checker tex-lacheck))))
 
 (ert-deftest flycheck-define-checker/xml-xmlstarlet ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-xml)
   (skip-unless (flycheck-check-executable 'xml-xmlstarlet))
   (flycheck-test-should-syntax-check
    "checkers/xml-syntax-error.xml" 'nxml-mode
@@ -3872,7 +3881,7 @@ Why not:
        :checker xml-xmlstarlet)))
 
 (ert-deftest flycheck-define-checker/xml-xmllint-error ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-xml)
   (skip-unless (flycheck-check-executable 'xml-xmllint))
   (let ((flycheck-disabled-checkers '(xml-xmlstarlet)))
     (flycheck-test-should-syntax-check
@@ -3883,7 +3892,7 @@ Why not:
          :checker xml-xmllint))))
 
 (ert-deftest flycheck-define-checker/yaml-jsyaml ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-yaml)
   (skip-unless (flycheck-check-executable 'yaml-jsyaml))
   (flycheck-test-should-syntax-check
    "checkers/yaml-syntax-error.yaml" 'yaml-mode
@@ -3891,7 +3900,7 @@ Why not:
        :checker yaml-jsyaml :filename nil)))
 
 (ert-deftest flycheck-define-checker/yaml-ruby ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-yaml)
   (skip-unless (flycheck-check-executable 'yaml-ruby))
   (let* ((ruby-version (car (process-lines "ruby" "-e" "puts RUBY_VERSION")))
          (psych-version (when (version<= "1.9.3" ruby-version)
@@ -3915,7 +3924,7 @@ Why not:
        "checkers/yaml-syntax-error.yaml" 'yaml-mode expected-error))))
 
 (ert-deftest flycheck-define-checker/zsh ()
-  :tags '(builtin-checker)
+  :tags '(builtin-checker external-tool language-zsh)
   (skip-unless (flycheck-check-executable 'zsh))
   (flycheck-test-with-hook sh-mode-hook
       (sh-set-shell "zsh" :no-query)
