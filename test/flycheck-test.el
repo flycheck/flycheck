@@ -184,11 +184,9 @@ Return t if Emacs is at least MAJOR.MINOR, or nil otherwise."
   "Determine whether the tests are running on Travis CI."
   (string= (getenv "TRAVIS") "true"))
 
-(defun flycheck-test-gpg-available-p ()
-  "Determine whether GPG is available."
-  (condition-case nil
-      (or (epg-check-configuration (epg-configuration)) t)
-    (error nil)))
+(defun flycheck-test-check-gpg ()
+  "Check whether GPG is available."
+  (epg-check-configuration (epg-configuration)))
 
 
 ;;;; Test resources
@@ -542,7 +540,7 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-may-enable-mode/not-in-encrypted-files ()
   :tags '(global-mode)
-  (skip-unless (flycheck-test-gpg-available-p))
+  (skip-unless (flycheck-test-check-gpg))
   (let* ((filename (flycheck-test-resource-filename "encrypted-file.el.gpg"))
          ;; Tell EPA about our passphrase
          (epa-file-cache-passphrase-for-symmetric-encryption t)
@@ -582,7 +580,7 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest global-flycheck-mode/does-not-enable-in-encrypted-file ()
   :tags '(global-mode)
-  (skip-unless (flycheck-test-gpg-available-p))
+  (skip-unless (flycheck-test-check-gpg))
   (let* ((filename (flycheck-test-resource-filename "encrypted-file.el.gpg"))
          ;; Tell EPA about our passphrase
          (epa-file-cache-passphrase-for-symmetric-encryption t)
@@ -1087,7 +1085,7 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-encrypted-buffer-p/encrypted-file-buffer ()
   :tags '(utility)
-  (skip-unless (flycheck-test-gpg-available-p))
+  (skip-unless (flycheck-test-check-gpg))
   (let* ((filename (flycheck-test-resource-filename "encrypted-file.el.gpg"))
          ;; Tell EPA about our passphrase
          (epa-file-cache-passphrase-for-symmetric-encryption t)
