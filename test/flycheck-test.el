@@ -1679,6 +1679,8 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-select-checker/selecting-runs-a-syntax-check ()
   :tags '(selection)
+  (skip-unless (-all? #'flycheck-check-executable '(python-flake8
+                                                    python-pylint)))
   (flycheck-test-with-resource-buffer "checkers/python/test.py"
     (python-mode)
     (flycheck-mode)
