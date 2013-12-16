@@ -194,7 +194,7 @@ Return t if Emacs is at least MAJOR.MINOR, or nil otherwise."
 
 (defun flycheck-test-check-gpg ()
   "Check whether GPG is available."
-  (epg-check-configuration (epg-configuration)))
+  (or (epg-check-configuration (epg-configuration)) t))
 
 
 ;;;; Test resources
