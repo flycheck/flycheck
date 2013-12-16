@@ -3231,8 +3231,9 @@ checkers}
 @code{flycheck-disabled-checkers}}
 @item
 @ghissue{268, Add support for the Compass CSS framework in the
-@code{sass} and @code{scss} checkers, with @code{flycheck-sass-compass}
-and @code{flycheck-scss-compass} respectively}
+@code{sass} and @code{scss} checkers@comma{} with
+@code{flycheck-sass-compass} and @code{flycheck-scss-compass}
+respectively}
 @end itemize
 
 @item
