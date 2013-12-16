@@ -21,8 +21,3 @@ install:
 # Build documentation and run unit tests
 script:
   - make -k info test
-matrix:
-  allow_failures:
-    # Emacs 24 will fail until we have found a way to port the new skipping
-    # machinery back
-    - env: EMACS=emacs24

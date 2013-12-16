@@ -45,9 +45,26 @@
 ;;;; Compatibility
 
 (eval-and-compile
-  (unless (fboundp 'ert-skip)
-    (defun skip-unless (&rest args)
-      (message "flycheck-test WARNING: Not skipping test"))))
+  (defconst flycheck-test-ert-can-skip (fboundp 'ert-skip)
+    "Whether ERT supports test skipping.")
+
+  (unless flycheck-test-ert-can-skip
+    ;; Fake skipping
+
+    (put 'flycheck-test-skipped 'error-message "Test skipped")
+    (put 'flycheck-test-skipped 'error-conditions '(error))
+
+    (defun ert-skip (data)
+      (signal 'flycheck-test-skipped data))
+
+    (defmacro skip-unless (form)
+      `(unless (ignore-errors ,form)
+         (signal 'flycheck-test-skipped ',form)))
+
+    (defun ert-test-skipped-p (result)
+      (and (ert-test-failed-p result)
+           (eq (car (ert-test-failed-condition result))
+               'flycheck-test-skipped)))))
 
 
 ;;;; Directories
@@ -3905,5 +3922,17 @@ Why not:
     (flycheck-test-should-syntax-check
      "checkers/zsh-syntax-error.zsh" 'sh-mode
      '(5 nil error "parse error near `fi'" :checker zsh))))
+
+
+;;;; Compatibility again
+
+(unless flycheck-test-ert-can-skip
+  ;; If ERT cannot skip tests, we mark skipped tests as expected failures, but
+  ;; adjusting the expected result of all test cases.  Not particularly pretty,
+  ;; but works :)
+  (dolist (test (ert-select-tests t t))
+    (let ((result (ert-test-expected-result-type test)))
+      (setf (ert-test-expected-result-type test)
+            (list 'or result '(satisfies ert-test-skipped-p))))))
 
 ;;; flycheck-test.el ends here
