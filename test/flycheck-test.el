@@ -3335,26 +3335,26 @@ found)."
   :tags '(builtin-checker external-tool language-haskell)
   (skip-unless (flycheck-check-executable 'haskell-ghc))
   (flycheck-test-should-syntax-check
-   "checkers/haskell-ghc-syntax-error.hs" 'haskell-mode
+   "checkers/Haskell/SyntaxError.hs" 'haskell-mode
    '(3 1 error "parse error on input `module'" :checker haskell-ghc)))
 
 (ert-deftest flycheck-define-checker/haskell ()
   :tags '(builtin-checker external-tool language-haskell)
   (skip-unless (-all? #'flycheck-check-executable '(haskell-ghc haskell-hlint)))
   (flycheck-test-should-syntax-check
-   "checkers/haskell.hs" 'haskell-mode
-   '(3 1 warning "Top-level binding with no type signature: foo :: Integer"
+   "checkers/Haskell/Warnings.hs" 'haskell-mode
+   '(6 1 warning "Top-level binding with no type signature: foo :: Integer"
        :checker haskell-ghc)
-   '(6 1 error "Eta reduce
+   '(9 1 error "Eta reduce
 Found:
-  bar xs = map lines xs
+  spam eggs = map lines eggs
 Why not:
-  bar = map lines" :checker haskell-hlint)
-   '(9 8 warning "Redundant bracket
+  spam = map lines" :checker haskell-hlint)
+   '(12 8 warning "Redundant bracket
 Found:
-  (putStrLn \"Foobar\")
+  (putStrLn bar)
 Why not:
-  putStrLn \"Foobar\"" :checker haskell-hlint)))
+  putStrLn bar" :checker haskell-hlint)))
 
 (ert-deftest flycheck-define-checker/html-tidy ()
   :tags '(builtin-checker external-tool language-html)

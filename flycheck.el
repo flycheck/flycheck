@@ -3913,11 +3913,43 @@ See URL `http://handlebarsjs.com/'."
           (message) line-end))
   :modes (handlebars-mode handlebars-sgml-mode))
 
+(defconst flycheck-haskell-module-re
+  (rx "module" (one-or-more (syntax whitespace))
+      (group (one-or-more (not (any space "\n")))))
+  "Regular expression for a Haskell module name.")
+
+(defun flycheck-haskell-this-module ()
+  "Get the name of the module in the current buffer."
+  (save-restriction
+    (widen)
+    (save-excursion
+      (goto-char (point-min))
+      (when (re-search-forward flycheck-haskell-module-re nil 'no-error)
+        (match-string-no-properties 1)))))
+
+(defun flycheck-haskell-base-directory ()
+  "Get the base directory for the current Haskell module."
+  (let ((module-name (flycheck-haskell-this-module))
+        (file-name (buffer-file-name)))
+    (if (and module-name file-name)
+        (let ((parts (nreverse (s-split "\\." module-name)))
+              (base-directory (f-no-ext file-name)))
+          (while (and parts (string= (f-filename base-directory)
+                                     (car parts)))
+            (pop parts)
+            (setq base-directory (f-parent base-directory)))
+          base-directory)
+      default-directory)))
+
 (flycheck-define-checker haskell-ghc
   "A Haskell syntax and type checker using ghc.
 
 See URL `http://www.haskell.org/ghc/'."
-  :command ("ghc" "-Wall" "-fno-code" source-inplace)
+  :command ("ghc" "-Wall" "-fno-code"
+            ;; Include the parent directory of the current module tree, to
+            ;; properly resolve local imports
+            (eval (concat "-i" (flycheck-haskell-base-directory)))
+            source)
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ":"
             (or " " "\n    ") "Warning:" (optional "\n")

@@ -3245,6 +3245,8 @@ Demote Rubocop convention messages to @code{info} level
 @item
 @item
 @ghissue{282, Stop Flycheck before the buffer is reverted}
+@item
+Properly resolve local module imports in @code{haskell-ghc}
 @end itemize
 
 @item
