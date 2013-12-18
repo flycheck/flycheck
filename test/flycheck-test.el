@@ -3348,6 +3348,17 @@ found)."
    '(2 nil error "Expecting 'ID', 'DATA', got 'INVALID'"
        :checker handlebars :filename nil)))
 
+(ert-deftest flycheck-haskell-module-re/matches-module-name ()
+  :tags '(builtin-checker language-haskell)
+  (should (string= "Foo.Bar"
+                   (nth 1 (s-match flycheck-haskell-module-re
+                                   "module Foo.Bar where")))))
+
+(ert-deftest flycheck-haskell-module-re/ignores-commented-code ()
+  :tags '(builtin-checker language-haskell)
+  (should-not (s-match flycheck-haskell-module-re
+                       "-- | module Foo.Bar where")))
+
 (ert-deftest flycheck-define-checker/haskell-ghc-syntax-error ()
   :tags '(builtin-checker external-tool language-haskell)
   (skip-unless (flycheck-check-executable 'haskell-ghc))
