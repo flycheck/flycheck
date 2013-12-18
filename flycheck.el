@@ -1068,6 +1068,18 @@ ITEMS."
     (setq prepend-fn #'list))
   (-flatten (--map (funcall prepend-fn option it) items)))
 
+(defun flycheck-find-in-buffer (pattern)
+  "Find PATTERN in the current buffer.
+
+Return the result of the first matching group of PATTERN, or nil,
+if PATTERN did not match."
+  (save-restriction
+    (widen)
+    (save-excursion
+      (goto-char (point-min))
+      (when (re-search-forward pattern nil 'no-error)
+        (match-string-no-properties 1)))))
+
 (defun flycheck-ephemeral-buffer-p ()
   "Determine whether the current buffer is an ephemeral buffer.
 
@@ -3593,27 +3605,15 @@ See URL `https://github.com/stubbornella/csslint'."
   :error-parser flycheck-parse-checkstyle
   :modes css-mode)
 
-(defconst flycheck-d-module-re (rx "module" (one-or-more (syntax whitespace))
-                                   (group (one-or-more (not (syntax whitespace))))
-                                   ";")
+(defconst flycheck-d-module-re
+  (rx "module" (one-or-more (syntax whitespace))
+      (group (one-or-more (not (syntax whitespace))))
+      ";")
   "Regular expression to match a D module declaration.")
-
-(defun flycheck-d-module-name ()
-  "Determine the D module name of the current buffer.
-
-Return the name as string, or nil if there is no module
-declaration in the current buffer."
-  (save-restriction
-    (widen)
-    (save-excursion
-      (goto-char (point-min))
-      (save-match-data
-        (when (re-search-forward flycheck-d-module-re nil :no-error)
-          (match-string-no-properties 1))))))
 
 (defun flycheck-d-base-directory ()
   "Get the relative base directory path for this module."
-  (let* ((name (flycheck-d-module-name))
+  (let* ((name (flycheck-find-in-buffer flycheck-d-module-re))
          (nesting (if name (cl-count ?. name) 0))
          (basedir (f-dirname (buffer-file-name))))
     (when (equal (f-filename (buffer-file-name)) "package.d")
@@ -3914,22 +3914,14 @@ See URL `http://handlebarsjs.com/'."
   :modes (handlebars-mode handlebars-sgml-mode))
 
 (defconst flycheck-haskell-module-re
-  (rx "module" (one-or-more (syntax whitespace))
+  (rx line-start (zero-or-more (or "\n" (any space)))
+      "module" (one-or-more (or "\n" (any space)))
       (group (one-or-more (not (any space "\n")))))
   "Regular expression for a Haskell module name.")
 
-(defun flycheck-haskell-this-module ()
-  "Get the name of the module in the current buffer."
-  (save-restriction
-    (widen)
-    (save-excursion
-      (goto-char (point-min))
-      (when (re-search-forward flycheck-haskell-module-re nil 'no-error)
-        (match-string-no-properties 1)))))
-
 (defun flycheck-haskell-base-directory ()
   "Get the base directory for the current Haskell module."
-  (let ((module-name (flycheck-haskell-this-module))
+  (let ((module-name (flycheck-find-in-buffer flycheck-haskell-module-re))
         (file-name (buffer-file-name)))
     (if (and module-name file-name)
         (let ((parts (nreverse (s-split "\\." module-name)))

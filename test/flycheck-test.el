@@ -1065,6 +1065,32 @@ check with.  ERRORS is the list of expected errors."
   (should (equal (flycheck-prepend-with-option "-L" '("foo" "bar") #'s-prepend)
                  '("-Lfoo" "-Lbar"))))
 
+(ert-deftest flycheck-find-in-buffer/returns-first-match-on-success ()
+  :tags '(utility)
+  (with-temp-buffer
+    (insert "foo\nbar")
+    (should (string= "bar" (flycheck-find-in-buffer (rx (group "bar")))))))
+
+(ert-deftest flycheck-find-in-buffer/returns-nil-on-failure ()
+  :tags '(utility)
+  (with-temp-buffer
+    (insert "spam\nwith eggs")
+    (should-not (flycheck-find-in-buffer (rx (group "bar"))))))
+
+(ert-deftest flycheck-find-in-buffer/saves-excursion ()
+  :tags '(utility)
+  (with-temp-buffer
+    (insert "spam\nwith eggs")
+    (goto-char (point-min))
+    (forward-line)
+    (should (flycheck-find-in-buffer (rx (group "spam"))))
+    (should (= (point) 6))))
+
+(ert-deftest flycheck-find-in-buffer/ ()
+  (with-temp-buffer
+    (insert "spam\nwith eggs")
+    (should-not (flycheck-find-in-buffer (rx (group "bar"))))))
+
 (ert-deftest flycheck-ephemeral-buffer-p/temporary-buffer ()
   :tags '(utility)
   (flycheck-test-with-temp-buffer
@@ -3079,15 +3105,6 @@ of the file will be interrupted because there are too many #ifdef configurations
        :checker css-csslint)
    '(4 20 error "Unexpected token ';' at line 4, col 20." :checker css-csslint)
    '(5 1 error "Unexpected token '}' at line 5, col 1." :checker css-csslint)))
-
-(ert-deftest flycheck-d-module-name ()
-  :tags '(builtin-checker external-tool language-d)
-  (flycheck-test-with-temp-buffer
-    (insert "Hello world")
-    (should-not (flycheck-d-module-name)))
-  (flycheck-test-with-temp-buffer
-    (insert "module spam.with.eggs;")
-    (should (string= (flycheck-d-module-name) "spam.with.eggs"))))
 
 (ert-deftest flycheck-d-base-directory ()
   :tags '(builtin-checker external-tool language-d)
