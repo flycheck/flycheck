@@ -3106,6 +3106,12 @@ of the file will be interrupted because there are too many #ifdef configurations
    '(4 20 error "Unexpected token ';' at line 4, col 20." :checker css-csslint)
    '(5 1 error "Unexpected token '}' at line 5, col 1." :checker css-csslint)))
 
+(ert-deftest flycheck-d-module-re/matches-module-name ()
+  :tags '(builtin-checker language-d)
+  (should (string= "spam.with.eggs"
+                   (nth 1 (s-match flycheck-d-module-re
+                                   "module spam.with.eggs ;")))))
+
 (ert-deftest flycheck-d-base-directory ()
   :tags '(builtin-checker external-tool language-d)
   (flycheck-test-with-resource-buffer "checkers/d-dmd-warning.d"

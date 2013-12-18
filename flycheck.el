@@ -3608,6 +3608,7 @@ See URL `https://github.com/stubbornella/csslint'."
 (defconst flycheck-d-module-re
   (rx "module" (one-or-more (syntax whitespace))
       (group (one-or-more (not (syntax whitespace))))
+      (zero-or-more (syntax whitespace))
       ";")
   "Regular expression to match a D module declaration.")
 
