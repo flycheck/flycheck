@@ -1,4 +1,4 @@
-module d_dmd_warning;
+module checkers.d_dmd_warning;
 
 auto foo(int a)
 {

@@ -1181,6 +1181,43 @@ check with.  ERRORS is the list of expected errors."
           (should-not (f-exists? dirname)))
       (ignore-errors (f-delete dirname :force)))))
 
+(ert-deftest flycheck-module-root-directory/no-module-name-and-no-file-name ()
+  :tags '(utility)
+  (let ((default-directory flycheck-test-resources-directory))
+    (should (string= flycheck-test-resources-directory
+                     (flycheck-module-root-directory nil)))))
+
+(ert-deftest flycheck-module-root-directory/no-module-name ()
+  :tags '(utility)
+  (let ((default-directory flycheck-test-resources-directory)
+        (file-name (flycheck-test-resource-filename "checkers/emacs-lisp.el")))
+    (should (string= (flycheck-test-resource-filename "checkers")
+                     (flycheck-module-root-directory nil file-name)))))
+
+(ert-deftest flycheck-module-root-directory/module-name-as-string ()
+  :tags '(utility)
+  (let ((default-directory flycheck-test-resources-directory)
+        (file-name (flycheck-test-resource-filename "checkers/emacs-lisp.el")))
+    (should (string= flycheck-test-resources-directory
+                     (flycheck-module-root-directory "checkers.emacs-lisp"
+                                                     file-name)))))
+
+(ert-deftest flycheck-module-root-directory/module-name-as-list ()
+  :tags '(utility)
+  (let ((default-directory flycheck-test-resources-directory)
+        (file-name (flycheck-test-resource-filename "checkers/emacs-lisp.el")))
+    (should (string= flycheck-test-resources-directory
+                     (flycheck-module-root-directory '("checkers" "emacs-lisp")
+                                                     file-name)))))
+
+(ert-deftest flycheck-module-root-directory/mismatching-module-name ()
+  :tags '(utility)
+  (let ((default-directory flycheck-test-resources-directory)
+        (file-name (flycheck-test-resource-filename "checkers/emacs-lisp.el")))
+    (should (string= (flycheck-test-resource-filename "checkers")
+                     (flycheck-module-root-directory '("foo" "emacs-lisp")
+                                                     file-name)))))
+
 
 ;;;; Checker definitions
 
@@ -3112,16 +3149,20 @@ of the file will be interrupted because there are too many #ifdef configurations
                    (nth 1 (s-match flycheck-d-module-re
                                    "module spam.with.eggs ;")))))
 
-(ert-deftest flycheck-d-base-directory ()
-  :tags '(builtin-checker external-tool language-d)
-  (flycheck-test-with-resource-buffer "checkers/d-dmd-warning.d"
+(ert-deftest flycheck-d-base-directory/no-module-declaration ()
+  :tags '(builtin-checker language-d)
+  (flycheck-test-with-resource-buffer "checkers/d_dmd_syntax_error_without_module.d"
     (should (f-same? (flycheck-d-base-directory)
-                     (f-join flycheck-test-resources-directory "checkers"))))
-  (flycheck-test-with-resource-buffer "checkers/d-dmd-warning.d"
-    (goto-char (point-min))
-    (insert "module checkers.d_dmd_warning;")
+                     (f-join flycheck-test-resources-directory "checkers")))))
+
+(ert-deftest flycheck-d-base-directory/with-module-declaration ()
+  :tags '(builtin-checker language-d)
+  (flycheck-test-with-resource-buffer "checkers/d_dmd_warning.d"
     (should (f-same? (flycheck-d-base-directory)
-                     flycheck-test-resources-directory)))
+                     flycheck-test-resources-directory))))
+
+(ert-deftest flycheck-d-base-directory/package-file ()
+  :tags '(builtin-checker language-d)
   (flycheck-test-with-resource-buffer "checkers/package.d"
     (should (f-same? (flycheck-d-base-directory)
                      flycheck-test-resources-directory))))
@@ -3146,9 +3187,9 @@ of the file will be interrupted because there are too many #ifdef configurations
   :tags '(builtin-checker external-tool language-d)
   (skip-unless (flycheck-check-executable 'd-dmd))
   (flycheck-test-should-syntax-check
-   "checkers/d-dmd-warning.d" 'd-mode
+   "checkers/d_dmd_warning.d" 'd-mode
    '(6 nil warning "statement is not reachable" :checker d-dmd)
-   '(17 nil warning "function d_dmd_warning.bar is deprecated"
+   '(17 nil warning "function checkers.d_dmd_warning.bar is deprecated"
         :checker d-dmd)))
 
 (ert-deftest flycheck-define-checker/elixir-error ()

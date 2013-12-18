@@ -1174,6 +1174,36 @@ Return nil, if the currently loaded file cannot be determined."
     (when (f-exists? source-file)
       source-file)))
 
+(defun flycheck-module-root-directory (module &optional file-name)
+  "Get the root directory for a MODULE in FILE-NAME.
+
+MODULE is a qualified module name, either a string with
+components separated by a dot, or as list of components.
+FILE-NAME is the name of the file or directory containing the
+module as string.  When nil or omitted, defaults to the return
+value of function `buffer-file-name'.
+
+Return the root directory of the module, that is, the directory,
+from which FILE-NAME can be reached by descending directories
+along each part of MODULE.
+
+If the MODULE name does not match the directory hierarchy upwards
+from FILE-NAME, return the directory containing FILE-NAME.  When
+FILE-NAME is nil, return `default-directory'."
+  (let ((file-name (or file-name (buffer-file-name)))
+        (module-components (if (stringp module)
+                               (s-split "\\." module)
+                             (copy-sequence module))))
+    (if (and module-components file-name)
+        (let ((parts (nreverse module-components))
+              (base-directory (f-no-ext file-name)))
+          (while (and parts (string= (f-filename base-directory)
+                                     (car parts)))
+            (pop parts)
+            (setq base-directory (f-parent base-directory)))
+          base-directory)
+      (if file-name (f-parent file-name) default-directory))))
+
 
 ;;;; Minibuffer tools
 (defvar read-flycheck-checker-history nil
@@ -3614,17 +3644,13 @@ See URL `https://github.com/stubbornella/csslint'."
 
 (defun flycheck-d-base-directory ()
   "Get the relative base directory path for this module."
-  (let* ((name (flycheck-find-in-buffer flycheck-d-module-re))
-         (nesting (if name (cl-count ?. name) 0))
-         (basedir (f-dirname (buffer-file-name))))
-    (when (equal (f-filename (buffer-file-name)) "package.d")
-      ;; a/b/package.d corresponds to module a.b, hence increment the nesting
-      ;; level to account for the file name, too.
-      (cl-incf nesting))
-    (while (> nesting 0)
-      (setq basedir (f-parent basedir))
-      (cl-decf nesting))
-    basedir))
+  (let* ((file-name (buffer-file-name))
+         (module-file (if (string= (f-filename file-name) "package.d")
+                          (f-parent file-name)
+                        file-name)))
+    (flycheck-module-root-directory
+     (flycheck-find-in-buffer flycheck-d-module-re)
+     module-file)))
 
 (flycheck-define-checker d-dmd
   "A D syntax checker using the DMD compiler.
@@ -3920,20 +3946,6 @@ See URL `http://handlebarsjs.com/'."
       (group (one-or-more (not (any space "\n")))))
   "Regular expression for a Haskell module name.")
 
-(defun flycheck-haskell-base-directory ()
-  "Get the base directory for the current Haskell module."
-  (let ((module-name (flycheck-find-in-buffer flycheck-haskell-module-re))
-        (file-name (buffer-file-name)))
-    (if (and module-name file-name)
-        (let ((parts (nreverse (s-split "\\." module-name)))
-              (base-directory (f-no-ext file-name)))
-          (while (and parts (string= (f-filename base-directory)
-                                     (car parts)))
-            (pop parts)
-            (setq base-directory (f-parent base-directory)))
-          base-directory)
-      default-directory)))
-
 (flycheck-define-checker haskell-ghc
   "A Haskell syntax and type checker using ghc.
 
@@ -3941,7 +3953,10 @@ See URL `http://www.haskell.org/ghc/'."
   :command ("ghc" "-Wall" "-fno-code"
             ;; Include the parent directory of the current module tree, to
             ;; properly resolve local imports
-            (eval (concat "-i" (flycheck-haskell-base-directory)))
+            (eval (concat
+                   "-i"
+                   (flycheck-module-root-directory
+                    (flycheck-find-in-buffer flycheck-haskell-module-re))))
             source)
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ":"
