@@ -2927,13 +2927,13 @@ of the file will be interrupted because there are too many #ifdef configurations
   (skip-unless (flycheck-check-executable 'c/c++-clang))
   ;; Disable conversion checks by removing -Wextra, but additionally warn about
   ;; missing prototypes, which isn't included in -Wextra
-  (let ((flycheck-clang-warnings '("all" "missing-prototypes")))
-    (let ((flycheck-disabled-checkers '(c/c++-cppcheck)))
-      (flycheck-test-should-syntax-check
-       "checkers/c_c++-clang-warning.c" 'c-mode
-       '(3 5 warning "no previous prototype for function 'f'"
-           :checker c/c++-clang)
-       '(5 10 warning "unused variable 'unused'" :checker c/c++-clang)))))
+  (let ((flycheck-clang-warnings '("all" "missing-prototypes"))
+        (flycheck-disabled-checkers '(c/c++-cppcheck)))
+    (flycheck-test-should-syntax-check
+     "checkers/c_c++-clang-warning.c" 'c-mode
+     '(3 5 warning "no previous prototype for function 'f'"
+         :checker c/c++-clang)
+     '(5 10 warning "unused variable 'unused'" :checker c/c++-clang))))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-fatal-error ()
   :tags '(builtin-checker external-tool language-c)
