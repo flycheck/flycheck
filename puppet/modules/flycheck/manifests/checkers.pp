@@ -33,7 +33,7 @@ class flycheck::checkers {
   }
 
   package { 'cfengine-community':
-    ensure => latest,
+    ensure  => latest,
     require => Apt::Source['cfengine-community'],
   }
 
