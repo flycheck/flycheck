@@ -4317,12 +4317,19 @@ See URL `http://docutils.sourceforge.net/'."
 (flycheck-def-config-file-var flycheck-rubocoprc ruby-rubocop ".rubocop.yml"
   :safe #'stringp)
 
+(flycheck-def-option-var flycheck-rubocop-lint-only nil ruby-rubocop
+  "Whether to only report code issues in Rubocop.
+
+When non-nil, only report code issues in Rubocop, via `--lint'.
+Otherwise report style issues as well.")
+
 (flycheck-define-checker ruby-rubocop
   "A Ruby syntax and style checker using the RuboCop tool.
 
 See URL `http://batsov.com/rubocop/'."
   :command ("rubocop" "--format" "emacs" "--silent"
             (config-file "--config" flycheck-rubocoprc)
+            (option-flag "--lint" flycheck-rubocop-lint-only)
             source)
   :error-patterns
   ((info line-start

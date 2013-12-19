@@ -3806,6 +3806,17 @@ Why not:
      '(10 8 warning "Literal true appeared in a condition."
           :checker ruby-rubocop))))
 
+(ert-deftest flycheck-define-checker/ruby-rubocop-lint-only ()
+  :tags '(builtin-checker external-tool language-ruby)
+  (skip-unless (flycheck-check-executable 'ruby-rubocop))
+  (let ((flycheck-rubocop-lint-only t)
+        (flycheck-disabled-checkers '(ruby-rubylint)))
+    (flycheck-test-should-syntax-check
+     "checkers/ruby-warnings.rb" 'ruby-mode
+     '(5 5 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
+     '(10 8 warning "Literal true appeared in a condition."
+          :checker ruby-rubocop))))
+
 (ert-deftest flycheck-define-checker/ruby-warnings ()
   :tags '(builtin-checker external-tool language-ruby)
   (skip-unless (flycheck-check-executable 'ruby))

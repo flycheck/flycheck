@@ -759,6 +759,10 @@ The coding standard the syntax checker @code{php-phpcs} shall use.
 The rule sets for PHP Mess Detector @code{php-phpmd} shall use
 @end defopt
 
+@defopt flycheck-rubocop-lint-only
+Whether to disable style checks for @code{ruby-rubocop}.
+@end defopt
+
 @defopt flycheck-sass-compass
 Whether to enable the Compass CSS framework for @code{sass}.
 @end defopt
@@ -3234,6 +3238,9 @@ checkers}
 @code{sass} and @code{scss} checkers@comma{} with
 @code{flycheck-sass-compass} and @code{flycheck-scss-compass}
 respectively}
+@item
+@ghissue{287, Disable style checks in @code{ruby-rubocop} with
+@code{flycheck-rubocop-lint-only}}
 @end itemize
 
 @item
