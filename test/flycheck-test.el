@@ -2892,6 +2892,7 @@ of the file will be interrupted because there are too many #ifdef configurations
 (defvar js2-mode-show-strict-warnings)
 (defvar js2-mode-show-parse-errors)
 (defvar js3-mode-show-parse-errors)
+(defvar python-indent-guess-indent-offset)
 
 (ert-deftest flycheck-define-checker/asciidoc ()
   :tags '(builtin-checker external-tool language-asciidoc)
@@ -3609,9 +3610,10 @@ Why not:
   :tags '(builtin-checker external-tool language-python)
   "Test a real syntax error with flake8."
   (skip-unless (flycheck-check-executable 'python-flake8))
-  (flycheck-test-should-syntax-check
-   "checkers/python-syntax-error.py" 'python-mode
-    '(3 13 error "E901 SyntaxError: invalid syntax" :checker python-flake8)))
+  (let ((python-indent-guess-indent-offset nil))       ; Silence Python Mode!
+    (flycheck-test-should-syntax-check
+     "checkers/python-syntax-error.py" 'python-mode
+     '(3 13 error "E901 SyntaxError: invalid syntax" :checker python-flake8))))
 
 (ert-deftest flycheck-define-checker/python-flake8-warning-ignored ()
   :tags '(builtin-checker external-tool language-python)
@@ -3684,7 +3686,8 @@ Why not:
   :tags '(builtin-checker external-tool language-python)
   "Test a real syntax error with pylint."
   (skip-unless (flycheck-check-executable 'python-pylint))
-  (let ((flycheck-disabled-checkers '(python-flake8)))
+  (let ((flycheck-disabled-checkers '(python-flake8))
+        (python-indent-guess-indent-offset nil))       ; Silence Python Mode
     (flycheck-test-should-syntax-check
      "checkers/python-syntax-error.py" 'python-mode
      '(3 nil error "invalid syntax (E0001)" :checker python-pylint))))
