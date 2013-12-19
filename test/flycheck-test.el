@@ -1718,19 +1718,17 @@ check with.  ERRORS is the list of expected errors."
               :checker emacs-lisp-checkdoc))))))
 
 (ert-deftest flycheck-select-checker/selecting-sets-the-syntax-checker ()
-  :tags '(selection external-tool language-python)
-  (skip-unless (flycheck-check-executable 'python-pylint))
+  :tags '(selection)
   (flycheck-test-with-temp-buffer
-    (python-mode)
-    (flycheck-select-checker 'python-pylint)
-    (should (eq flycheck-checker 'python-pylint))))
+    (emacs-lisp-mode)
+    (flycheck-select-checker 'emacs-lisp-checkdoc)
+    (should (eq flycheck-checker 'emacs-lisp-checkdoc))))
 
 (ert-deftest flycheck-select-checker/unselecting-unsets-the-syntax-checker ()
-  :tags '(selection external-tool language-python)
-  (skip-unless (flycheck-check-executable 'python-pylint))
+  :tags '(selection)
   (flycheck-test-with-temp-buffer
-    (python-mode)
-    (flycheck-select-checker 'python-pylint)
+    (emacs-lisp-mode)
+    (flycheck-select-checker 'emacs-lisp-checkdoc)
     (flycheck-select-checker nil)
     (should-not flycheck-checker)))
 
