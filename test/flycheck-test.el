@@ -2149,7 +2149,8 @@ check with.  ERRORS is the list of expected errors."
 (flycheck-define-error-level 'test-level
     :overlay-category 'category
     :fringe-bitmap 'left-triangle
-    :fringe-face 'highlight)
+    :fringe-face 'highlight
+    :error-list-face 'font-lock-constant-face)
 
 (ert-deftest flycheck-define-error-level/is-error-level? ()
   :tags '(error-level)
@@ -2166,6 +2167,11 @@ check with.  ERRORS is the list of expected errors."
 (ert-deftest flycheck-define-error-level/has-overlay-category ()
   :tags '(error-level)
   (should (eq (flycheck-error-level-overlay-category 'test-level) 'category)))
+
+(ert-deftest flycheck-define-error-level/has-error-list-face ()
+  :tags '(error-level)
+  (should (eq (flycheck-error-level-error-list-face 'test-level)
+              'font-lock-constant-face)))
 
 (ert-deftest flycheck-error-level-make-fringe-icon/has-fringe-bitmap ()
   :tags '(error-level)
@@ -2208,7 +2214,9 @@ check with.  ERRORS is the list of expected errors."
   (should (eq (flycheck-error-level-fringe-face 'error)
               'flycheck-fringe-error))
   (should (eq (flycheck-error-level-overlay-category 'error)
-              'flycheck-error-overlay)))
+              'flycheck-error-overlay))
+  (should (eq (flycheck-error-level-error-list-face 'error)
+              'flycheck-error-list-error)))
 
 (ert-deftest flycheck-error-level-warning ()
   :tags '(error-level)
@@ -2216,7 +2224,9 @@ check with.  ERRORS is the list of expected errors."
   (should (eq (flycheck-error-level-fringe-face 'warning)
               'flycheck-fringe-warning))
   (should (eq (flycheck-error-level-overlay-category 'warning)
-              'flycheck-warning-overlay)))
+              'flycheck-warning-overlay))
+  (should (eq (flycheck-error-level-error-list-face 'warning)
+              'flycheck-error-list-warning)))
 
 (ert-deftest flycheck-error-level-info ()
   :tags '(error-level)
@@ -2224,7 +2234,9 @@ check with.  ERRORS is the list of expected errors."
   (should (eq (flycheck-error-level-fringe-face 'info)
               'flycheck-fringe-info))
   (should (eq (flycheck-error-level-overlay-category 'info)
-              'flycheck-info-overlay)))
+              'flycheck-info-overlay))
+  (should (eq (flycheck-error-level-error-list-face 'info)
+              'flycheck-error-list-info)))
 
 
 ;;;; General error parsing
@@ -2685,39 +2697,6 @@ of the file will be interrupted because there are too many #ifdef configurations
 
 ;;;; Error list
 
-(ert-deftest flycheck-error-list-buffer-label ()
-  :tags '(error-list)
-  (flycheck-test-with-temp-buffer
-    (rename-buffer "Foo")
-    (should (string= (flycheck-error-list-buffer-label (current-buffer))
-                     "#<buffer Foo>")))
-  (flycheck-test-with-temp-buffer
-    (set-visited-file-name (f-join flycheck-test-directory "foo/bar")
-                           :no-query)
-    (cd flycheck-test-directory)
-    (should (string= (flycheck-error-list-buffer-label (current-buffer))
-                     "foo/bar"))))
-
-(ert-deftest flycheck-error-list-error-label ()
-  :tags '(error-list)
-  (flycheck-test-with-temp-buffer
-    (rename-buffer "Foo")
-    (should (string= (flycheck-error-list-error-label (flycheck-error-new-at 1 1))
-                     "#<buffer Foo>")))
-  (flycheck-test-with-temp-buffer
-    (set-visited-file-name (f-join flycheck-test-directory "foo/bar")
-                           :no-query)
-    (cd flycheck-test-directory)
-    (should (string= (flycheck-error-list-error-label (flycheck-error-new-at 1 1))
-                     "foo/bar")))
-  (flycheck-test-with-temp-buffer
-    (cd flycheck-test-directory)
-    (let* ((filename (f-join flycheck-test-directory "spam/with/eggs"))
-           (err (flycheck-error-new-at 1 1 'warning "Foo" :filename filename)))
-      (should (string= (flycheck-error-list-error-label err)
-                       "spam/with/eggs")))))
-
-(provide 'flycheck-test)
 
 
 ;;;; General error display
@@ -4016,5 +3995,7 @@ Why not:
     (let ((result (ert-test-expected-result-type test)))
       (setf (ert-test-expected-result-type test)
             (list 'or result '(satisfies ert-test-skipped-p))))))
+
+(provide 'flycheck-test)
 
 ;;; flycheck-test.el ends here
