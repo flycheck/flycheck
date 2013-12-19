@@ -752,11 +752,11 @@ syntax checker allows without reporting an error.
 @end defopt
 
 @defopt flycheck-phpcs-standard
-The coding standard the syntax checker @code{php-phpcs} shall use.
+The coding standard @code{php-phpcs} shall use.
 @end defopt
 
 @defopt flycheck-phpmd-rulesets
-The rule sets for PHP Mess Detector @code{php-phpmd} shall use
+The rule sets @code{php-phpmd} shall use.
 @end defopt
 
 @defopt flycheck-rubocop-lint-only
