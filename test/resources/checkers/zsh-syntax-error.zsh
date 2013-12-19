@@ -1,5 +1,5 @@
-# A syntax error resulting from a missing semicolon
+#!/bin/zsh
 
 if true then
-    echo "Hello World"
+   echo "Hello World"
 fi

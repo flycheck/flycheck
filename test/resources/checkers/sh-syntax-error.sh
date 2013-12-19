@@ -1,3 +1,3 @@
-# A Bash-only redirection
+#!/bin/sh
 
 cat <(echo blah)

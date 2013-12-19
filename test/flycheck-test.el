@@ -2909,7 +2909,6 @@ of the file will be interrupted because there are too many #ifdef configurations
 (defvar js2-mode-show-strict-warnings)
 (defvar js2-mode-show-parse-errors)
 (defvar js3-mode-show-parse-errors)
-(autoload 'sh-set-shell "sh-script")
 
 (ert-deftest flycheck-define-checker/asciidoc ()
   :tags '(builtin-checker external-tool language-asciidoc)
@@ -2924,11 +2923,10 @@ of the file will be interrupted because there are too many #ifdef configurations
   :tags '(builtin-checker external-tool language-bash)
   "Test a syntax error from a missing semicolon."
   (skip-unless (flycheck-check-executable 'bash))
-  (flycheck-test-with-hook sh-mode-hook (sh-set-shell "bash" :no-query)
-    (flycheck-test-should-syntax-check
-     "checkers/bash-syntax-error.bash" 'sh-mode
-     '(5 nil error "syntax error near unexpected token `fi'" :checker bash)
-     '(5 nil error "`fi'" :checker bash))))
+  (flycheck-test-should-syntax-check
+   "checkers/bash-syntax-error.bash" 'sh-mode
+   '(5 nil error "syntax error near unexpected token `fi'" :checker bash)
+   '(5 nil error "`fi'" :checker bash)))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-warning ()
   :tags '(builtin-checker external-tool language-c)
@@ -3908,22 +3906,18 @@ Why not:
 (ert-deftest flycheck-define-checker/sh-bash ()
   :tags '(builtin-checker external-tool language-sh)
   (skip-unless (flycheck-check-executable 'sh-bash))
-  (flycheck-test-with-hook sh-mode-hook
-      (sh-set-shell "sh" :no-query)
-    (let ((flycheck-disabled-checkers '(sh-dash)))
-      (flycheck-test-should-syntax-check
-       "checkers/sh-syntax-error.sh" 'sh-mode
-       '(3 nil error "syntax error near unexpected token `('" :checker sh-bash)
-       '(3 nil error "`cat <(echo blah)'" :checker sh-bash)))))
+  (let ((flycheck-disabled-checkers '(sh-dash)))
+    (flycheck-test-should-syntax-check
+     "checkers/sh-syntax-error.sh" 'sh-mode
+     '(3 nil error "syntax error near unexpected token `('" :checker sh-bash)
+     '(3 nil error "`cat <(echo blah)'" :checker sh-bash))))
 
 (ert-deftest flycheck-define-checker/sh-dash ()
   :tags '(builtin-checker external-tool language-sh)
   (skip-unless (flycheck-check-executable 'sh-dash))
-  (flycheck-test-with-hook sh-mode-hook
-      (sh-set-shell "sh" :no-query)
-    (flycheck-test-should-syntax-check
-     "checkers/sh-syntax-error.sh" 'sh-mode
-     '(3 nil error "Syntax error: \"(\" unexpected" :checker sh-dash))))
+  (flycheck-test-should-syntax-check
+   "checkers/sh-syntax-error.sh" 'sh-mode
+   '(3 nil error "Syntax error: \"(\" unexpected" :checker sh-dash)))
 
 (ert-deftest flycheck-define-checker/slim ()
   :tags '(builtin-checker external-tool language-slim)
@@ -4008,11 +4002,9 @@ Why not:
 (ert-deftest flycheck-define-checker/zsh ()
   :tags '(builtin-checker external-tool language-zsh)
   (skip-unless (flycheck-check-executable 'zsh))
-  (flycheck-test-with-hook sh-mode-hook
-      (sh-set-shell "zsh" :no-query)
-    (flycheck-test-should-syntax-check
-     "checkers/zsh-syntax-error.zsh" 'sh-mode
-     '(5 nil error "parse error near `fi'" :checker zsh))))
+  (flycheck-test-should-syntax-check
+   "checkers/zsh-syntax-error.zsh" 'sh-mode
+   '(5 nil error "parse error near `fi'" :checker zsh)))
 
 
 ;;;; Compatibility again

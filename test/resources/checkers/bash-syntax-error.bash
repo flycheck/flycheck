@@ -1,4 +1,4 @@
-# A syntax error resulting from a missing semicolon
+#!/bin/bash
 
 if true then
     echo "Hello World"
