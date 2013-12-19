@@ -2843,9 +2843,8 @@ of the file will be interrupted because there are too many #ifdef configurations
 
 (ert-deftest flycheck-overridden-executable ()
   :tags '(executables)
-  (flycheck-test-with-hook 'emacs-lisp-mode-hook
-      (setq flycheck-emacs-lisp-executable
-            (flycheck-test-resource-filename "bin/dummy-emacs"))
+  (let ((flycheck-emacs-lisp-executable (flycheck-test-resource-filename
+                                         "bin/dummy-emacs")))
     (flycheck-test-should-syntax-check
      "checkers/emacs-lisp.el" 'emacs-lisp-mode
      '(12 nil warning "First sentence should end with punctuation"
@@ -2944,10 +2943,9 @@ of the file will be interrupted because there are too many #ifdef configurations
 (ert-deftest flycheck-define-checker/c/c++-clang-warning-customized ()
   :tags '(builtin-checker external-tool language-c)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
-  (flycheck-test-with-hook c-mode-hook
-      ;; Disable conversion checks by removing -Wextra, but additionally warn
-      ;; about missing prototypes, which isn't included in -Wextra
-      (setq flycheck-clang-warnings '("all" "missing-prototypes"))
+  ;; Disable conversion checks by removing -Wextra, but additionally warn about
+  ;; missing prototypes, which isn't included in -Wextra
+  (let ((flycheck-clang-warnings '("all" "missing-prototypes")))
     (let ((flycheck-disabled-checkers '(c/c++-cppcheck)))
       (flycheck-test-should-syntax-check
        "checkers/c_c++-clang-warning.c" 'c-mode
@@ -2966,17 +2964,15 @@ of the file will be interrupted because there are too many #ifdef configurations
 (ert-deftest flycheck-define-checker/c/c++-clang-include-path ()
   :tags '(builtin-checker external-tool language-c)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
-  (flycheck-test-with-hook c-mode-hook
-      (setq flycheck-clang-include-path '("./include"))
+  (let ((flycheck-clang-include-path '("./include")))
     (flycheck-test-should-syntax-check
      "checkers/c_c++-clang-fatal-error.c" 'c-mode)))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-includes ()
   :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
-  (flycheck-test-with-hook c++-mode-hook
-      (setq flycheck-clang-includes
-            (list (flycheck-test-resource-filename "checkers/include/c_c++-clang-library-header.h")))
+  (let  ((flycheck-clang-includes (list (flycheck-test-resource-filename
+                                         "checkers/include/c_c++-clang-library-header.h"))))
     (flycheck-test-should-syntax-check
      "checkers/c_c++-clang-error.cpp" 'c++-mode
      '(10 16 error "use of undeclared identifier 'nullptr'"
@@ -2996,8 +2992,7 @@ of the file will be interrupted because there are too many #ifdef configurations
 (ert-deftest flycheck-define-checker/c/c++-clang-error-language-standard ()
   :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
-  (flycheck-test-with-hook c++-mode-hook
-      (setq flycheck-clang-language-standard "c++11")
+  (let ((flycheck-clang-language-standard "c++11"))
     (flycheck-test-should-syntax-check
      "checkers/c_c++-clang-error.cpp" 'c++-mode
      '(3 23 info "template is declared here" :checker c/c++-clang)
@@ -3007,8 +3002,7 @@ of the file will be interrupted because there are too many #ifdef configurations
 (ert-deftest flycheck-define-checker/c/c++-clang-error-definitions ()
   :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
-  (flycheck-test-with-hook c++-mode-hook
-      (setq flycheck-clang-definitions '("FLYCHECK_LOCAL" "FLYCHECK_LIBRARY"))
+  (let ((flycheck-clang-definitions '("FLYCHECK_LOCAL" "FLYCHECK_LIBRARY")))
     (flycheck-test-should-syntax-check
      "checkers/c_c++-clang-error.cpp" 'c++-mode
      '(10 16 error "use of undeclared identifier 'nullptr'"
@@ -3017,10 +3011,9 @@ of the file will be interrupted because there are too many #ifdef configurations
 (ert-deftest flycheck-define-checker/c/c++-clang-error-no-rtti ()
   :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
-  (flycheck-test-with-hook c++-mode-hook
-      (setq flycheck-clang-no-rtti t)
-    ;; Clang doesn't throw errors for RTTI operators :|, so we basically just
-    ;; test that the option flag doesn't cause any issues
+  ;; Clang doesn't throw errors for RTTI operators :|, so we basically just test
+  ;; that the option flag doesn't cause any issues
+  (let ((flycheck-clang-no-rtti t))
     (flycheck-test-should-syntax-check
      "checkers/c_c++-clang-error-rtti.cpp" 'c++-mode)))
 
@@ -3052,8 +3045,7 @@ of the file will be interrupted because there are too many #ifdef configurations
 (ert-deftest flycheck-define-checker/c/c++-cppcheck-style-suppressed ()
   :tags '(builtin-checker external-tool language-c)
   (skip-unless (flycheck-check-executable 'c/c++-cppcheck))
-  (flycheck-test-with-hook c-mode-hook
-      (setq flycheck-cppcheck-checks nil)
+  (let ((flycheck-cppcheck-checks nil))
     (let ((flycheck-disabled-checkers '(c/c++-clang)))
       (flycheck-test-should-syntax-check "checkers/c_c++-cppcheck-style.c"
                                          'c-mode))))
@@ -3061,8 +3053,7 @@ of the file will be interrupted because there are too many #ifdef configurations
 (ert-deftest flycheck-define-checker/c/c++-cppcheck-multiple-checks ()
   :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-cppcheck))
-  (flycheck-test-with-hook c++-mode-hook
-      (setq flycheck-cppcheck-checks '("performance" "portability"))
+  (let ((flycheck-cppcheck-checks '("performance" "portability")))
     (let ((flycheck-disabled-checkers '(c/c++-clang)))
       (flycheck-test-should-syntax-check
        "checkers/c_c++-cppcheck-multiple-checks.cpp" 'c++-mode
@@ -3117,8 +3108,7 @@ of the file will be interrupted because there are too many #ifdef configurations
 (ert-deftest flycheck-define-checker/coffee-coffeelint-warning ()
   :tags '(builtin-checker external-tool language-coffee)
   (skip-unless (flycheck-check-executable 'coffee-coffeelint))
-  (flycheck-test-with-hook coffee-mode-hook
-      (setq flycheck-coffeelintrc "coffeelint.json")
+  (let ((flycheck-coffeelintrc "coffeelint.json"))
     (flycheck-test-should-syntax-check
      "checkers/coffee-coffeelint-error.coffee" 'coffee-mode
      '(4 nil warning "Throwing strings is forbidden; context:"
@@ -3227,10 +3217,8 @@ of the file will be interrupted because there are too many #ifdef configurations
 
 (ert-deftest flycheck-define-checker/emacs-lisp-load-path ()
   :tags '(builtin-checker external-tool language-emacs-lisp)
-  (flycheck-test-with-hook emacs-lisp-mode-hook
-      (setq flycheck-emacs-lisp-load-path
-            (list (flycheck-test-resource-filename
-                   "dummy-elpa/dummy-package-0.1")))
+  (let ((flycheck-emacs-lisp-load-path (list (flycheck-test-resource-filename
+                                              "dummy-elpa/dummy-package-0.1"))))
     (flycheck-test-should-syntax-check
      "checkers/emacs-lisp.el" 'emacs-lisp-mode
      '(12 nil warning "First sentence should end with punctuation"
@@ -3242,10 +3230,9 @@ of the file will be interrupted because there are too many #ifdef configurations
 
 (ert-deftest flycheck-define-checker/emacs-lisp-initialize-packages ()
   :tags '(builtin-checker external-tool language-emacs-lisp)
-  (flycheck-test-with-hook emacs-lisp-mode-hook
-      (setq flycheck-emacs-lisp-package-user-dir
-            (flycheck-test-resource-filename "dummy-elpa")
-            flycheck-emacs-lisp-initialize-packages t)
+  (let ((flycheck-emacs-lisp-initialize-packages t)
+        (flycheck-emacs-lisp-package-user-dir (flycheck-test-resource-filename
+                                               "dummy-elpa")))
     (flycheck-test-should-syntax-check
      "checkers/emacs-lisp.el" 'emacs-lisp-mode
      '(12 nil warning "First sentence should end with punctuation"
@@ -3307,6 +3294,8 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
 
 (ert-deftest flycheck-define-checker/emacs-lisp-does-not-check-with-no-byte-compile ()
   :tags '(builtin-checker external-tool language-emacs-lisp)
+  ;; We need to use a hook here, because `no-byte-compile' seems to be
+  ;; explicitly changed when loading Emacs Lisp files
   (flycheck-test-with-hook emacs-lisp-mode-hook
       (set (make-local-variable 'no-byte-compile) t)
     (flycheck-test-should-syntax-check
@@ -3470,8 +3459,7 @@ Why not:
   :tags '(builtin-checker external-tool language-javascript)
   "An unused variable."
   (skip-unless (flycheck-check-executable 'javascript-jshint))
-  (flycheck-test-with-hook (js-mode-hook js2-mode-hook js3-mode-hook)
-      (setq flycheck-jshintrc "jshintrc")
+  (let ((flycheck-jshintrc "jshintrc"))
     (flycheck-test-should-syntax-check
      "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
      '(4 12 error "'foo' is defined but never used."
@@ -3571,8 +3559,7 @@ Why not:
 (ert-deftest flycheck-define-checker/php-phpmd-rulesets ()
   :tags '(builtin-checker external-tool language-php)
   (skip-unless (-all? #'flycheck-check-executable '(php-phpcs php-phpmd)))
-  (flycheck-test-with-hook php-mode-hook
-      (setq flycheck-phpmd-rulesets (remove "unusedcode" flycheck-phpmd-rulesets))
+  (let ((flycheck-phpmd-rulesets (remove "unusedcode" flycheck-phpmd-rulesets)))
     (flycheck-test-should-syntax-check
      "checkers/php.php" 'php-mode
      '(19 6 error "Missing class doc comment" :checker php-phpcs)
@@ -3590,8 +3577,7 @@ Why not:
 (ert-deftest flycheck-define-checker/php-phpcs-standard ()
   :tags '(builtin-checker external-tool language-php)
   (skip-unless (-all? #'flycheck-check-executable '(php-phpcs php-phpmd)))
-  (flycheck-test-with-hook php-mode-hook
-      (setq flycheck-phpcs-standard "Zend")
+  (let ((flycheck-phpcs-standard "Zend"))
     (flycheck-test-should-syntax-check
      "checkers/php.php" 'php-mode
      '(21 nil warning "Avoid unused private fields such as '$FOO'."
@@ -3647,8 +3633,7 @@ Why not:
 (ert-deftest flycheck-define-checker/python-flake8-warning-ignored ()
   :tags '(builtin-checker external-tool language-python)
   (skip-unless (flycheck-check-executable 'python-flake8))
-  (flycheck-test-with-hook python-mode-hook
-      (setq flycheck-flake8rc "flake8rc")
+  (let ((flycheck-flake8rc "flake8rc"))
     (flycheck-test-should-syntax-check
      "checkers/python/test.py" 'python-mode
      '(7 1 error "E302 expected 2 blank lines, found 1" :checker python-flake8)
@@ -3661,8 +3646,7 @@ Why not:
   :tags '(builtin-checker external-tool language-python)
   "Test superfluous spaces with flake8."
   (skip-unless (flycheck-check-executable 'python-flake8))
-  (flycheck-test-with-hook python-mode-hook
-      (setq flycheck-flake8-maximum-complexity 4)
+  (let ((flycheck-flake8-maximum-complexity 4))
     (flycheck-test-should-syntax-check
      "checkers/python/test.py" 'python-mode
      '(5 1 warning "F401 'antigravit' imported but unused"
@@ -3681,8 +3665,7 @@ Why not:
 (ert-deftest flycheck-define-checker/python-flake8-error-maximum-line-length ()
   :tags '(builtin-checker external-tool language-python)
   (skip-unless (flycheck-check-executable 'python-flake8))
-  (flycheck-test-with-hook python-mode-hook
-      (setq flycheck-flake8-maximum-line-length 45)
+  (let ((flycheck-flake8-maximum-line-length 45))
     (flycheck-test-should-syntax-check
      "checkers/python/test.py" 'python-mode
      '(5 1 warning "F401 'antigravit' imported but unused"
