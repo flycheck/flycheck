@@ -159,21 +159,6 @@ with VALUE."
      (when (buffer-live-p (get-buffer (help-buffer)))
        (kill-buffer (help-buffer)))))
 
-(defmacro flycheck-test-with-hook (hook-var form &rest body)
-  "Set HOOK-VAR to FORM and evaluate BODY.
-
-HOOK-VAR is a hook variable or a list thereof, which is set to
-FORM before evaluating BODY.
-
-After evaluation of BODY, set HOOK-VAR to nil."
-  (declare (indent 2))
-  `(let ((hooks (quote ,(if (listp hook-var) hook-var (list hook-var)))))
-     (unwind-protect
-          (progn
-            (--each hooks (add-hook it #'(lambda () ,form)))
-            ,@body)
-        (--each hooks (set it nil)))))
-
 
 ;;;; Environment information and tests
 
@@ -3294,12 +3279,14 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
   :tags '(builtin-checker external-tool language-emacs-lisp)
   ;; We need to use a hook here, because `no-byte-compile' seems to be
   ;; explicitly changed when loading Emacs Lisp files
-  (flycheck-test-with-hook emacs-lisp-mode-hook
-      (set (make-local-variable 'no-byte-compile) t)
-    (flycheck-test-should-syntax-check
-     "checkers/emacs-lisp.el" 'emacs-lisp-mode
-     '(12 nil warning "First sentence should end with punctuation"
-          :checker emacs-lisp-checkdoc))))
+  (let ((disable-byte-comp (lambda () (setq-local no-byte-compile t))))
+    (add-hook 'emacs-lisp-mode-hook disable-byte-comp)
+    (unwind-protect
+        (flycheck-test-should-syntax-check
+         "checkers/emacs-lisp.el" 'emacs-lisp-mode
+         '(12 nil warning "First sentence should end with punctuation"
+              :checker emacs-lisp-checkdoc))
+      (remove-hook 'emacs-lisp-mode-hook disable-byte-comp))))
 
 (ert-deftest flycheck-define-checker/erlang-error ()
   :tags '(builtin-checker external-tool language-emacs-lisp)
