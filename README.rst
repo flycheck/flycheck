@@ -56,14 +56,14 @@ Features
   - PHP
   - Puppet
   - Python
+  - RST (ReStructuredText)
   - Ruby
   - Rust
-  - RST (ReStructuredText)
   - Sass
   - Scala
   - SCSS
-  - Slim
   - Shell scripts (POSIX Shell, Bash and Zsh)
+  - Slim
   - TeX/LaTeX
   - XML
   - YAML

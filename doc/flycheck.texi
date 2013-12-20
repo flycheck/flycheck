@@ -220,11 +220,11 @@ Puppet (using @command{puppet parser} and @command{puppet-lint})
 @item
 Python (using @command{flake8} or @command{pylint})
 @item
+ReStructuredText (using @command{rst2pseudoxml.py} from Docutils)
+@item
 Ruby (using @command{rubocop}, @command{ruby} , @command{jruby} or @command{ruby-lint})
 @item
 Rust (using @command{rustc})
-@item
-ReStructuredText (using @command{rst2pseudoxml.py} from Docutils)
 @item
 Sass (using @command{sass})
 @item
