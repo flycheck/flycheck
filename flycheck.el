@@ -153,6 +153,7 @@ buffer-local wherever it is set."
     puppet-lint
     python-flake8
     python-pylint
+    racket
     rst
     ruby-rubocop
     ruby-rubylint
@@ -4310,6 +4311,15 @@ See URL `http://pypi.python.org/pypi/pylint'."
    (info line-start (file-name) ":" line ":" column ":"
          "C:" (message) line-end))
   :modes python-mode)
+
+(flycheck-define-checker racket
+  "A Racket syntax checker using the Racket compiler.
+
+See URL `http://racket-lang.org/'."
+  :command ("racket" "-f" source)
+  :error-patterns
+  ((error line-start (file-name) ":" line ":" column ":" (message) line-end))
+  :modes racket-mode)
 
 (flycheck-define-checker rst
   "A ReStructuredText (RST) syntax checker using Docutils.

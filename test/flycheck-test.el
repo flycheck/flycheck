@@ -3737,6 +3737,13 @@ Why not:
      '(22 nil error "Undefined variable 'antigravity' (E0602)"
           :checker python-pylint))))
 
+(ert-deftest flycheck-define-checker/racket ()
+  :tags '(builtin-checker external-tool language-racket)
+  (skip-unless (flycheck-check-executable 'racket))
+  (flycheck-test-should-syntax-check
+   "checkers/racket-syntax-error.rkt" 'racket-mode
+   '(4 2 error "read: expected a `)' to close `('" :checker racket)))
+
 (ert-deftest flycheck-define-checker/rst ()
   :tags '(builtin-checker external-tool language-rst)
   (skip-unless (flycheck-check-executable 'rst))

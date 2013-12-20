@@ -45,6 +45,13 @@ class flycheck::checkers {
     require => Apt::Ppa['ppa:kxstudio-team/builds'],
   }
 
+  apt::ppa { 'ppa:plt/racket': }
+
+  package { 'racket':
+    ensure  => latest,
+    require => Apt::Ppa['ppa:plt/racket'],
+  }
+
   apt::ppa { 'ppa:kevincantu/rust': }
 
   package { 'rust':

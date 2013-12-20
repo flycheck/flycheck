@@ -56,6 +56,7 @@ Features
   - PHP
   - Puppet
   - Python
+  - Racket
   - RST (ReStructuredText)
   - Ruby
   - Rust

@@ -34,4 +34,5 @@
  (depends-on "elixir-mode")
  (depends-on "erlang")
  (depends-on "d-mode")
- (depends-on "yaml-mode"))
+ (depends-on "yaml-mode")
+ (depends-on "racket-mode"))

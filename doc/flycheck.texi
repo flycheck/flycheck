@@ -220,6 +220,8 @@ Puppet (using @command{puppet parser} and @command{puppet-lint})
 @item
 Python (using @command{flake8} or @command{pylint})
 @item
+Racket
+@item
 ReStructuredText (using @command{rst2pseudoxml.py} from Docutils)
 @item
 Ruby (using @command{rubocop}, @command{ruby} , @command{jruby} or @command{ruby-lint})
@@ -3222,6 +3224,8 @@ New syntax checkers:
 @ghissue{276, AsciiDoc}
 @item
 @ghissue{271, CFEngine}
+@item
+@ghissue{277, Racket}
 @end itemize
 
 @item
@@ -3378,7 +3382,7 @@ to the Flake8 syntax checker.
 @item
 @gh{yasuyk, Yasuyuki Oka} contribute a lot of syntax checkers for
 various languages, including AsciiDoc, Chef recipes, Handlebars,
-Javascript, PHP, Ruby, Slim and YAML.
+Javascript, PHP, Racket, Ruby, Slim and YAML.
 
 @item
 @gh{vderyagin, Victor Deryagin} added the Rust syntax checker.
@@ -3438,6 +3442,7 @@ order of their appearance in the default value of
 @iflyc puppet-lint
 @iflyc python-flake8
 @iflyc python-pylint
+@iflyc racket
 @iflyc rst
 @iflyc ruby-rubocop
 @iflyc ruby-rubylint
