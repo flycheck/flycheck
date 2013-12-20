@@ -4316,7 +4316,7 @@ See URL `http://pypi.python.org/pypi/pylint'."
   "A Racket syntax checker using the Racket compiler.
 
 See URL `http://racket-lang.org/'."
-  :command ("racket" "-f" source)
+  :command ("racket" "-f" source-inplace)
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ":" (message) line-end))
   :modes racket-mode)
