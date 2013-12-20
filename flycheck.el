@@ -3460,6 +3460,15 @@ pass the language standard via the `-std' option."
   :safe #'stringp
   :package-version '(flycheck . "0.15"))
 
+(flycheck-def-option-var flycheck-clang-ms-extensions nil c/c++-clang
+  "Whether to enable Microsoft extensions to C/C++ in Clang.
+
+When non-nil, enable Microsoft extensions to C/C++ via
+`-fms-extensions'."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.16"))
+
 (flycheck-def-option-var flycheck-clang-no-rtti nil c/c++-clang
   "Whether to disable RTTI in Clang.
 
@@ -3513,6 +3522,7 @@ See URL `http://clang.llvm.org/'."
                                         ; warning group
             (option "-std=" flycheck-clang-language-standard)
             (option "-stdlib=" flycheck-clang-standard-library)
+            (option-flag "-fms-extensions" flycheck-clang-ms-extensions)
             (option-flag "-fno-rtti" flycheck-clang-no-rtti)
             (option-list "-include" flycheck-clang-includes)
             (option-list "-W" flycheck-clang-warnings s-prepend)

@@ -700,6 +700,10 @@ Additional include files for @code{c/c++-clang}.
 The language standard for @code{c/c++-clang}.
 @end defopt
 
+@defopt flycheck-clang-ms-extensions
+Whether to enable Microsoft extensions in @code{c/c++-clang}.
+@end defopt
+
 @defopt flycheck-clang-no-rtti
 Whether to disable RTTI in @code{c/c++-clang}.
 @end defopt
@@ -3241,6 +3245,9 @@ respectively}
 @item
 @ghissue{287, Disable style checks in @code{ruby-rubocop} with
 @code{flycheck-rubocop-lint-only}}
+@item
+@ghissue{283, Add support for Microsoft extensions in @code{c/c++-clang}
+via @code{flycheck-clang-ms-extensions}}
 @end itemize
 
 @item
@@ -3318,8 +3325,12 @@ checkers.
 many of its checkers.
 
 @item
-@gh{BinaryKhaos,Matthias Dahl} improved the performance of Flycheck's
+@gh{BinaryKhaos, Matthias Dahl} improved the performance of Flycheck's
 temp file handling.
+
+@item
+@gh{mitchty, Mitch Tishmack} added support for Microsoft extensions to
+the Clang syntax checker.
 
 @item
 @gh{ptrv, Peter Vasil} contributed syntax checkers for XML, Lua and Go

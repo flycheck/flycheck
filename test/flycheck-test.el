@@ -2990,6 +2990,26 @@ of the file will be interrupted because there are too many #ifdef configurations
      '(10 16 error "use of undeclared identifier 'nullptr'"
           :checker c/c++-clang))))
 
+(ert-deftest flycheck-define-checker/c/c++-clang-ms-extensions-disabled ()
+  :tags '(builtin-checker external-tool language-c)
+  (skip-unless (flycheck-check-executable 'c/c++-clang))
+  ;; A sanity check for the following c/c++-clang-ms-extensions-enabled test
+  ;; case
+  (flycheck-test-should-syntax-check
+   "checkers/c_c++-clang-ms-extensions.c" 'c-mode
+   '(7 5 warning "declaration does not declare anything" :checker c/c++-clang)
+   '(14 24 error "field designator 'a' does not refer to any field in type 'outer_s'"
+        :checker c/c++-clang)))
+
+(ert-deftest flycheck-define-checker/c/c++-clang-ms-extensions-enabled ()
+  :tags '(builtin-checker external-tool language-c)
+  (skip-unless (flycheck-check-executable 'c/c++-clang))
+  (let ((flycheck-clang-ms-extensions t))
+    (flycheck-test-should-syntax-check
+     "checkers/c_c++-clang-ms-extensions.c" 'c-mode
+     '(7 5 warning "anonymous structs are a Microsoft extension"
+         :checker c/c++-clang))))
+
 (ert-deftest flycheck-define-checker/c/c++-clang-error-no-rtti ()
   :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
