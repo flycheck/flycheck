@@ -219,7 +219,7 @@ The absolute file name of RESOURCE-FILE is determined with
 (add-hook 'flycheck-after-syntax-check-hook
           (lambda () (setq flycheck-test-syntax-checker-finished t)))
 
-(defconst flycheck-test-checker-wait-time 5
+(defconst flycheck-test-checker-wait-time 10
   "Time to wait until a checker is finished in seconds.
 
 After this time has elapsed, the checker is considered to have
