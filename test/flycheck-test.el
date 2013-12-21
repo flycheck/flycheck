@@ -2205,7 +2205,7 @@ check with.  ERRORS is the list of expected errors."
 (ert-deftest flycheck-error-level-error ()
   :tags '(error-level)
   (should (eq (flycheck-error-level-fringe-bitmap 'error)
-              flycheck-fringe-exclamation-mark))
+              'exclamation-mark))
   (should (eq (flycheck-error-level-fringe-face 'error)
               'flycheck-fringe-error))
   (should (eq (flycheck-error-level-overlay-category 'error)
@@ -2501,7 +2501,7 @@ of the file will be interrupted because there are too many #ifdef configurations
                  (before-string (overlay-get overlay 'before-string))
                  (`(_ ,bitmap ,face) (get-text-property 0 'display before-string)))
       (should (eq face 'flycheck-fringe-error))
-      (should (eq bitmap flycheck-fringe-exclamation-mark)))))
+      (should (eq bitmap 'exclamation-mark)))))
 
 (ert-deftest flycheck-add-overlay/has-left-fringe-icon ()
   :tags '(overlay)

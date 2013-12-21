@@ -83,6 +83,16 @@ buffer-local wherever it is set."
                      symbol-start (one-or-more not-newline) symbol-end
                      " cannot be used" string-end))))
 
+(when (and (not (get 'exclamation-mark 'fringe))
+           (fboundp 'define-fringe-bitmap))
+  ;; Provide `exclamation-mark' bitmap for Emacs 24.2 and below.  We also check,
+  ;; whether `define-fringe-bitmap' is defined, because this function is not
+  ;; available if Emacs is built without GUI support.  See
+  ;; https://github.com/flycheck/flycheck/issues/57
+  (define-fringe-bitmap 'exclamation-mark
+    [24 60 60 24 24 0 0 24 24] nil nil 'center))
+
+
 
 ;;;; Customization
 (defgroup flycheck nil
@@ -2380,29 +2390,13 @@ show the icon."
 
 
 ;;;; Built-in error levels
-(when (fboundp 'define-fringe-bitmap)
-  ;; Provide `exclamation-mark' bitmap for Emacs 24.2 and below
-  ;; define-fringe-bitmap is not available if Emacs is built without GUI
-  ;; support, see https://github.com/flycheck/flycheck/issues/57
-  (define-fringe-bitmap 'flycheck-fringe-exclamation-mark
-    [24 60 60 24 24 0 0 24 24] nil nil 'center))
-
-(defconst flycheck-fringe-exclamation-mark
-  (if (get 'exclamation-mark 'fringe)
-      'exclamation-mark
-    'flycheck-fringe-exclamation-mark)
-  "The symbol to use as exclamation mark bitmap.
-
-Defaults to the built-in exclamation mark if available or to the
-flycheck exclamation mark otherwise.")
-
 (put 'flycheck-error-overlay 'face 'flycheck-error)
 (put 'flycheck-error-overlay 'priority 110)
 (put 'flycheck-error-overlay 'help-echo "Unknown error.")
 
 (flycheck-define-error-level 'error
   :overlay-category 'flycheck-error-overlay
-  :fringe-bitmap flycheck-fringe-exclamation-mark
+  :fringe-bitmap 'exclamation-mark
   :fringe-face 'flycheck-fringe-error)
 
 (put 'flycheck-warning-overlay 'face 'flycheck-warning)
