@@ -54,6 +54,7 @@
 
 ;;;; Compatibility
 (eval-and-compile
+  ;; Provide `defvar-local' and `setq-local' for Emacs 24.2 and below
   (unless (fboundp 'defvar-local)
     (defmacro defvar-local (var val &optional docstring)
       "Define VAR as a buffer-local variable with default value VAL.
@@ -70,9 +71,9 @@ buffer-local wherever it is set."
       `(set (make-local-variable ',var) ,val)))
 
   (unless (fboundp 'user-error)
-    ;; Provide `user-error' for Emacs 24.2
+    ;; Provide `user-error' for Emacs 24.2 and below
     (defalias 'user-error 'error)
-    ;; And make the debugger ignore our Flycheck user errors in Emacs 24.2
+
     (add-to-list 'debug-ignored-errors
                  (rx string-start "No more Flycheck errors" string-end))
     (add-to-list 'debug-ignored-errors
@@ -2380,6 +2381,7 @@ show the icon."
 
 ;;;; Built-in error levels
 (when (fboundp 'define-fringe-bitmap)
+  ;; Provide `exclamation-mark' bitmap for Emacs 24.2 and below
   ;; define-fringe-bitmap is not available if Emacs is built without GUI
   ;; support, see https://github.com/flycheck/flycheck/issues/57
   (define-fringe-bitmap 'flycheck-fringe-exclamation-mark

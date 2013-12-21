@@ -53,6 +53,7 @@
 ;;;; Compatibility
 
 (eval-and-compile
+  ;; Provide `ert-skip' and friends for Emacs 24.3
   (defconst flycheck-test-ert-can-skip (fboundp 'ert-skip)
     "Whether ERT supports test skipping.")
 
@@ -4036,9 +4037,9 @@ Why not:
 ;;;; Compatibility again
 
 (unless flycheck-test-ert-can-skip
-  ;; If ERT cannot skip tests, we mark skipped tests as expected failures, but
-  ;; adjusting the expected result of all test cases.  Not particularly pretty,
-  ;; but works :)
+  ;; For Emacs 24.3 and below, we mark skipped tests as expected failures, but
+  ;; adjusting the expected result of all test cases, because ERT does not yet
+  ;; support test skipping.  Not particularly pretty, but works :)
   (dolist (test (ert-select-tests t t))
     (let ((result (ert-test-expected-result-type test)))
       (setf (ert-test-expected-result-type test)
