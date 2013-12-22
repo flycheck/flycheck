@@ -182,6 +182,20 @@ Return t if Emacs is at least MAJOR.MINOR, or nil otherwise."
   "Check whether GPG is available."
   (or (epg-check-configuration (epg-configuration)) t))
 
+(defconst flycheck-test-texinfo-version-re
+  (rx "makeinfo (GNU texinfo) "
+      (group (one-or-more (any digit)) "." (one-or-more (any digit))))
+  "A regular expression to get the Texinfo version.")
+
+(defun flycheck-test-texinfo-version ()
+  "Determine the version of Texinfo.
+
+Return the version as string, or nil, if the texinfo version
+could not be determined."
+  (when (executable-find "makeinfo")
+    (cadr (s-match flycheck-test-texinfo-version-re
+                   (car (process-lines "makeinfo" "--version"))))))
+
 
 ;;;; Test resources
 
@@ -4065,6 +4079,31 @@ Why not:
          :checker tex-lacheck)
      '(7 nil warning "possible unwanted space at \"{\""
          :checker tex-lacheck))))
+
+(ert-deftest flycheck-define-checker/texinfo-errors-only ()
+  :tags '(builtin-checker external-tool language-texinfo)
+  (skip-unless (flycheck-check-executable 'texinfo))
+  ;; Before Texinfo 5, makeinfo only prints errors
+  (skip-unless (version< (flycheck-test-texinfo-version) "5"))
+  (flycheck-test-should-syntax-check
+   "checkers/texinfo.texi" 'texinfo-mode
+   '(7 nil error "Unknown command `bold'." :checker texinfo)
+   '(7 nil error "Misplaced {." :checker texinfo)
+   '(7 nil error "Misplaced }." :checker texinfo)))
+
+(ert-deftest flycheck-define-checker/texinfo-errors-and-warnings ()
+  :tags '(builtin-checker external-tool language-texinfo)
+  (skip-unless (flycheck-check-executable 'texinfo))
+  ;; Before Texinfo 5, makeinfo does not output any warnings
+  (skip-unless (version<= "5" (flycheck-test-texinfo-version)))
+  (flycheck-test-should-syntax-check
+   "checkers/texinfo.texi" 'texinfo-mode
+   '(   3 nil warning "@settitle missing argument" :checker texinfo)
+   '(7 nil error "unknown command `bold'" :checker texinfo)
+   '(7 nil error "misplaced {" :checker texinfo)
+   '(7 nil error "misplaced }" :checker texinfo)
+   '(9 nil warning "printindex before document beginning: @printindex cp"
+       :checker texinfo)))
 
 (ert-deftest flycheck-define-checker/xml-xmlstarlet ()
   :tags '(builtin-checker external-tool language-xml)

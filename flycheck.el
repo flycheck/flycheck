@@ -180,6 +180,7 @@ buffer-local wherever it is set."
     slim
     tex-chktex
     tex-lacheck
+    texinfo
     xml-xmlstarlet
     xml-xmllint
     yaml-jsyaml
@@ -4561,6 +4562,20 @@ See URL `http://www.ctan.org/pkg/lacheck'."
             "\"" (file-name) "\", line " line ": " (message)
             line-end))
   :modes latex-mode)
+
+(flycheck-define-checker texinfo
+  "A Texinfo syntax checker using makeinfo.
+
+See URL `http://www.gnu.org/software/texinfo/'."
+  :command ("makeinfo" "-o" temporary-file-name source-inplace)
+  :error-patterns
+  ((warning line-start (file-name) ":"
+            line (optional ":" column) ": "
+            "warning: " (message) line-end)
+   (error line-start (file-name) ":"
+          line (optional ":" column) ": "
+          (message) line-end))
+  :modes texinfo-mode)
 
 (flycheck-define-checker xml-xmlstarlet
   "A XML syntax checker and validator using the xmlstarlet utility.

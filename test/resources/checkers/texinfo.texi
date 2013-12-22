@@ -1,0 +1,11 @@
+\input texinfo
+@setfilename texinfo.info
+@settitle
+
+@contents
+
+@bold{foo}
+
+@printindex cp
+
+@bye

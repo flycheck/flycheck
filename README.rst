@@ -66,6 +66,7 @@ Features
   - Shell scripts (POSIX Shell, Bash and Zsh)
   - Slim
   - TeX/LaTeX
+  - Texinfo
   - XML
   - YAML
 
