@@ -2060,10 +2060,7 @@ CHECKER will be used, even if it is not contained in
   (eval-when-compile
     (rx-to-string
      `(and line-start (zero-or-more (syntax whitespace))
-           "("
-           symbol-start
-           (or "flycheck-declare-checker" "flycheck-define-checker")
-           symbol-end
+           "(" symbol-start "flycheck-define-checker" symbol-end
            (regexp ,find-function-space-re)
            symbol-start
            "%s"
