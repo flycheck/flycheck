@@ -3205,8 +3205,6 @@ flycheck-hdevtools}
 @item
 Drop support for coffeelint 0.x
 @item
-Fix parsing of errors in @code{scss} and @code{sass}
-@item
 @ghissue{230, The error list is reimplemented on top of Tabulated List
 Mode}.  This greatly changes the appearance and behaviour of the error
 list.
@@ -3282,6 +3280,8 @@ Bug fixes:
 @itemize @bullet
 @item
 @ghissue{280, Make relative imports work with @code{python-pylint}}
+@item
+Fix parsing of errors in @code{scss} and @code{sass}
 @end itemize
 
 @end itemize
