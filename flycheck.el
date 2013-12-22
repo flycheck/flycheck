@@ -2953,7 +2953,7 @@ the beginning of the buffer."
 
 (defun flycheck-error-list-update-source ()
   "Update the source buffer of the error list."
-  (when (not (eq (current-buffer) (flycheck-error-list-buffer)))
+  (when (not (eq (current-buffer) (get-buffer flycheck-error-list-buffer)))
     ;; We must not update the source buffer, if the current buffer is the error
     ;; list itself.
     (flycheck-error-list-set-source (current-buffer))))
@@ -3115,7 +3115,7 @@ no next error."
       (flycheck-error-list-mode)))
   (flycheck-error-list-set-source (current-buffer))
   ;; Show the error list in a window, and re-select the old window
-  (display-buffer (flycheck-error-list-buffer))
+  (display-buffer flycheck-error-list-buffer)
   ;; Finally, refresh the error list to show the most recent errors
   (flycheck-error-list-refresh))
 
