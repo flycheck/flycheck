@@ -21,8 +21,8 @@ extension for GNU Emacs 24 with:
 .. figure:: https://github.com/flycheck/flycheck/raw/master/doc/screenshot.png
    :align: center
 
-   The screenshot shows Flycheck on Emacs 24.3.50 with the awesome Zenburn_
-   color theme and the great `Source Code Pro`_ font.
+   The screenshot shows Flycheck on Emacs 24.3.50 with the awesome Solarized_
+   Light color theme and the great `Source Code Pro`_ font.
 
 Features
 ========
