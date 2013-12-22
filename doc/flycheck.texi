@@ -272,8 +272,9 @@ The following extensions provide additional cool features for Flycheck:
 
 @itemize @bullet
 @item
-@uref{https://github.com/flycheck/flycheck-cask} makes Flycheck use Cask
-packages in @uref{https://github.com/cask/cask, Cask} projects.
+@uref{https://github.com/flycheck/flycheck-cask, flycheck-cask} makes
+Flycheck use Cask packages in @uref{https://github.com/cask/cask, Cask}
+projects.
 
 @item
 @uref{https://github.com/flycheck/flycheck-color-mode-line,
