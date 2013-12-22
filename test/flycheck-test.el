@@ -2150,7 +2150,8 @@ check with.  ERRORS is the list of expected errors."
 (flycheck-define-error-level 'test-level
     :overlay-category 'category
     :fringe-bitmap 'left-triangle
-    :fringe-face 'highlight)
+    :fringe-face 'highlight
+    :error-list-face 'font-lock-constant-face)
 
 (ert-deftest flycheck-define-error-level/is-error-level? ()
   :tags '(error-level)
@@ -2167,6 +2168,11 @@ check with.  ERRORS is the list of expected errors."
 (ert-deftest flycheck-define-error-level/has-overlay-category ()
   :tags '(error-level)
   (should (eq (flycheck-error-level-overlay-category 'test-level) 'category)))
+
+(ert-deftest flycheck-define-error-level/has-error-list-face ()
+  :tags '(error-level)
+  (should (eq (flycheck-error-level-error-list-face 'test-level)
+              'font-lock-constant-face)))
 
 (ert-deftest flycheck-error-level-make-fringe-icon/has-fringe-bitmap ()
   :tags '(error-level)
@@ -2209,7 +2215,9 @@ check with.  ERRORS is the list of expected errors."
   (should (eq (flycheck-error-level-fringe-face 'error)
               'flycheck-fringe-error))
   (should (eq (flycheck-error-level-overlay-category 'error)
-              'flycheck-error-overlay)))
+              'flycheck-error-overlay))
+  (should (eq (flycheck-error-level-error-list-face 'error)
+              'flycheck-error-list-error)))
 
 (ert-deftest flycheck-error-level-warning ()
   :tags '(error-level)
@@ -2217,7 +2225,9 @@ check with.  ERRORS is the list of expected errors."
   (should (eq (flycheck-error-level-fringe-face 'warning)
               'flycheck-fringe-warning))
   (should (eq (flycheck-error-level-overlay-category 'warning)
-              'flycheck-warning-overlay)))
+              'flycheck-warning-overlay))
+  (should (eq (flycheck-error-level-error-list-face 'warning)
+              'flycheck-error-list-warning)))
 
 (ert-deftest flycheck-error-level-info ()
   :tags '(error-level)
@@ -2225,7 +2235,9 @@ check with.  ERRORS is the list of expected errors."
   (should (eq (flycheck-error-level-fringe-face 'info)
               'flycheck-fringe-info))
   (should (eq (flycheck-error-level-overlay-category 'info)
-              'flycheck-info-overlay)))
+              'flycheck-info-overlay))
+  (should (eq (flycheck-error-level-error-list-face 'info)
+              'flycheck-error-list-info)))
 
 
 ;;;; General error parsing
@@ -2686,39 +2698,118 @@ of the file will be interrupted because there are too many #ifdef configurations
 
 ;;;; Error list
 
-(ert-deftest flycheck-error-list-buffer-label ()
+(ert-deftest flycheck-error-list-buffer/name ()
   :tags '(error-list)
-  (flycheck-test-with-temp-buffer
-    (rename-buffer "Foo")
-    (should (string= (flycheck-error-list-buffer-label (current-buffer))
-                     "#<buffer Foo>")))
-  (flycheck-test-with-temp-buffer
-    (set-visited-file-name (f-join flycheck-test-directory "foo/bar")
-                           :no-query)
-    (cd flycheck-test-directory)
-    (should (string= (flycheck-error-list-buffer-label (current-buffer))
-                     "foo/bar"))))
+  (should (string= flycheck-error-list-buffer "*Flycheck errors*")))
 
-(ert-deftest flycheck-error-list-error-label ()
+(ert-deftest flycheck-error-list-mode/derived-from-tabulated-list-mode ()
   :tags '(error-list)
-  (flycheck-test-with-temp-buffer
-    (rename-buffer "Foo")
-    (should (string= (flycheck-error-list-error-label (flycheck-error-new-at 1 1))
-                     "#<buffer Foo>")))
-  (flycheck-test-with-temp-buffer
-    (set-visited-file-name (f-join flycheck-test-directory "foo/bar")
-                           :no-query)
-    (cd flycheck-test-directory)
-    (should (string= (flycheck-error-list-error-label (flycheck-error-new-at 1 1))
-                     "foo/bar")))
-  (flycheck-test-with-temp-buffer
-    (cd flycheck-test-directory)
-    (let* ((filename (f-join flycheck-test-directory "spam/with/eggs"))
-           (err (flycheck-error-new-at 1 1 'warning "Foo" :filename filename)))
-      (should (string= (flycheck-error-list-error-label err)
-                       "spam/with/eggs")))))
+  (with-temp-buffer
+    (flycheck-error-list-mode)
+    (derived-mode-p 'tabulated-list)))
 
-(provide 'flycheck-test)
+(ert-deftest flycheck-error-list-mode/tabulated-list-format ()
+  :tags '(error-list)
+  (with-temp-buffer
+    (flycheck-error-list-mode)
+    (should (equal tabulated-list-format [("Line" 4 nil :right-align t)
+                                          ("Col" 3 nil :right-align t)
+                                          ("Level" 8 nil)
+                                          ("Checker" 20 nil)
+                                          ("Message" 0 nil)]))
+    (should (local-variable-p 'tabulated-list-format))))
+
+(ert-deftest flycheck-error-list-mode/tabulated-list-padding ()
+  :tags '(error-list)
+  (with-temp-buffer
+    (flycheck-error-list-mode)
+    (should (equal tabulated-list-padding 1))
+    (should (local-variable-p 'tabulated-list-padding))))
+
+(ert-deftest flycheck-error-list-mode/tabulated-list-entries ()
+  :tags '(error-list)
+  (with-temp-buffer
+    (flycheck-error-list-mode)
+    (should (eq tabulated-list-entries 'flycheck-error-list-entries))
+    (should (local-variable-p 'tabulated-list-entries))))
+
+(ert-deftest flycheck-error-list-mode/initializes-header ()
+  :tags '(error-list)
+  (with-temp-buffer
+    (should-not header-line-format)
+    (flycheck-error-list-mode)
+    (should (string= header-line-format " Line Col Level Checker Message "))))
+
+(ert-deftest flycheck-error-list-source-buffer/is-permanently-local ()
+  :tags '(error-list)
+  (should (get 'flycheck-error-list-source-buffer 'permanent-local)))
+
+(ert-deftest flycheck-error-list-make-number-cell/not-a-number ()
+  :tags '(error-list)
+  (let ((cell (flycheck-error-list-make-number-cell nil 'bold)))
+    (should (string= "" cell))
+    (should-not (get-text-property 0 'font-lock-face cell))))
+
+(ert-deftest flycheck-error-list-make-number-cell/a-number ()
+  :tags '(error-list)
+  (let ((cell (flycheck-error-list-make-number-cell 10 'bold)))
+    (should (string= "10" cell))
+    (should (eq 'bold (get-text-property 0 'font-lock-face cell)))))
+
+(ert-deftest flycheck-error-list-make-entry/entry-id ()
+  :tags '(error-list)
+  (let* ((error (flycheck-error-new-at 10 nil 'warning "foo"))
+         (entry (flycheck-error-list-make-entry error)))
+    (should (eq error (car entry)))))
+
+(ert-deftest flycheck-error-list-make-entry/line ()
+  :tags '(error-list)
+  (let* ((error (flycheck-error-new-at 10 nil 'warning "foo"))
+         (entry (flycheck-error-list-make-entry error))
+         (cells (cadr entry)))
+    (should (string= "10" (aref cells 0)))
+    (should (eq 'flycheck-error-list-line-number
+                (get-text-property 0 'font-lock-face (aref cells 0))))))
+
+(ert-deftest flycheck-error-list-make-entry/column ()
+  :tags '(error-list)
+  (let* ((error (flycheck-error-new-at 10 12 'warning "foo"))
+         (entry (flycheck-error-list-make-entry error))
+         (cells (cadr entry)))
+    (should (string= "12" (aref cells 1)))
+    (should (eq 'flycheck-error-list-column-number
+                (get-text-property 0 'font-lock-face (aref cells 1))))))
+
+(ert-deftest flycheck-error-list-make-entry/no-column ()
+  :tags '(error-list)
+  (let* ((error (flycheck-error-new-at 10 nil 'warning "foo"))
+         (entry (flycheck-error-list-make-entry error))
+         (cells (cadr entry)))
+    (should (string= "" (aref cells 1)))))
+
+(ert-deftest flycheck-error-list-make-entry/error-level ()
+  :tags '(error-list)
+  (let* ((error (flycheck-error-new-at 10 nil 'warning "foo"))
+         (entry (flycheck-error-list-make-entry error))
+         (cells (cadr entry)))
+    (should (string= "warning" (aref cells 2)))
+    (should (eq 'flycheck-error-list-warning
+                (get-text-property 0 'font-lock-face (aref cells 2))))))
+
+(ert-deftest flycheck-error-list-make-entry/checker ()
+  :tags '(error-list)
+  (let* ((error (flycheck-error-new-at 10 nil 'warning "foo"
+                                       :checker 'emacs-lisp-checkdoc))
+         (entry (flycheck-error-list-make-entry error))
+         (cells (cadr entry)))
+    (should (string= "emacs-lisp-checkdoc" (aref cells 3)))))
+
+(ert-deftest flycheck-error-list-make-entry/message ()
+  :tags '(error-list)
+  (let* ((error (flycheck-error-new-at 10 nil 'warning "foo"))
+         (entry (flycheck-error-list-make-entry error))
+         (cells (cadr entry)))
+    (should (string= "foo" (aref cells 4)))))
 
 
 ;;;; General error display
@@ -4044,5 +4135,7 @@ Why not:
     (let ((result (ert-test-expected-result-type test)))
       (setf (ert-test-expected-result-type test)
             (list 'or result '(satisfies ert-test-skipped-p))))))
+
+(provide 'flycheck-test)
 
 ;;; flycheck-test.el ends here

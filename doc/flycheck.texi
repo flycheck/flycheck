@@ -3206,6 +3206,10 @@ flycheck-hdevtools}
 Drop support for coffeelint 0.x
 @item
 Fix parsing of errors in @code{scss} and @code{sass}
+@item
+@ghissue{230, The error list is reimplemented on top of Tabulated List
+Mode}.  This greatly changes the appearance and behaviour of the error
+list.
 @end itemize
 
 @item
@@ -3252,6 +3256,12 @@ respectively}
 @item
 @ghissue{283, Add support for Microsoft extensions in @code{c/c++-clang}
 via @code{flycheck-clang-ms-extensions}}
+@item
+@ghissue{230@comma{} New faces @code{flycheck-error-list-info}@comma{}
+@code{flycheck-error-list-warning}@comma{}
+@code{flycheck-error-list-error}@comma{}
+@code{flycheck-error-list-line-number} and
+@code{flycheck-error-list-column-number}}
 @end itemize
 
 @item
