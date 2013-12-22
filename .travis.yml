@@ -17,7 +17,7 @@ before_install:
   - FACTER_travis=true puppet apply --verbose --modulepath=/etc/puppet/modules:./puppet/modules ./puppet/manifests/travis.pp
 # Install our packages
 install:
-  - make packages
+  - make EMACS=$EMACS packages
 # Build documentation and run unit tests
 script:
-  - make -k info test
+  - make EMACS=$EMACS -k info test
