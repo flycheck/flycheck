@@ -2057,15 +2057,13 @@ CHECKER will be used, even if it is not contained in
 (defconst flycheck-find-checker-regexp
   ;; We use `eval-and-compile' and `rx-to-string' here instead of simply `rx',
   ;; because we need to dynamically add the regexp from `find-function-space-re'
-  (eval-when-compile
-    (rx-to-string
-     `(and line-start (zero-or-more (syntax whitespace))
-           "(" symbol-start "flycheck-define-checker" symbol-end
-           (regexp ,find-function-space-re)
-           symbol-start
-           "%s"
-           symbol-end
-           (or (syntax whitespace) line-end))))
+  (rx line-start (zero-or-more (syntax whitespace))
+      "(" symbol-start "flycheck-define-checker" symbol-end
+      (eval (list 'regexp find-function-space-re))
+      symbol-start
+      "%s"
+      symbol-end
+      (or (syntax whitespace) line-end))
   "Regular expression to find a checker definition.")
 
 (add-to-list 'find-function-regexp-alist
