@@ -2729,7 +2729,6 @@ of the file will be interrupted because there are too many #ifdef configurations
     (should (equal tabulated-list-format [("Line" 4 nil :right-align t)
                                           ("Col" 3 nil :right-align t)
                                           ("Level" 8 nil)
-                                          ("Checker" 20 nil)
                                           ("Message" 0 nil)]))
     (should (local-variable-p 'tabulated-list-format))))
 
@@ -2752,7 +2751,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (with-temp-buffer
     (should-not header-line-format)
     (flycheck-error-list-mode)
-    (should (string= header-line-format " Line Col Level Checker Message "))))
+    (should (string= header-line-format " Line Col Level Message "))))
 
 (ert-deftest flycheck-error-list-source-buffer/is-permanently-local ()
   :tags '(error-list)
@@ -2810,20 +2809,21 @@ of the file will be interrupted because there are too many #ifdef configurations
     (should (eq 'flycheck-error-list-warning
                 (get-text-property 0 'font-lock-face (aref cells 2))))))
 
-(ert-deftest flycheck-error-list-make-entry/checker ()
+(ert-deftest flycheck-error-list-make-entry/message ()
   :tags '(error-list)
   (let* ((error (flycheck-error-new-at 10 nil 'warning "foo"
                                        :checker 'emacs-lisp-checkdoc))
          (entry (flycheck-error-list-make-entry error))
          (cells (cadr entry)))
-    (should (string= "emacs-lisp-checkdoc" (aref cells 3)))))
+    (should (string= "foo (emacs-lisp-checkdoc)" (aref cells 3)))))
 
-(ert-deftest flycheck-error-list-make-entry/message ()
+(ert-deftest flycheck-error-list-make-entry/default-message ()
   :tags '(error-list)
-  (let* ((error (flycheck-error-new-at 10 nil 'warning "foo"))
+  (let* ((error (flycheck-error-new-at 10 nil 'warning nil
+                                       :checker 'emacs-lisp-checkdoc))
          (entry (flycheck-error-list-make-entry error))
          (cells (cadr entry)))
-    (should (string= "foo" (aref cells 4)))))
+    (should (string= "Unknown error (emacs-lisp-checkdoc)" (aref cells 3)))))
 
 
 ;;;; General error display

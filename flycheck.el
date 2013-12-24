@@ -2931,7 +2931,6 @@ the beginning of the buffer."
   (setq tabulated-list-format [("Line" 4 nil :right-align t)
                                ("Col" 3 nil :right-align t)
                                ("Level" 8 nil)
-                               ("Checker" 20 nil)
                                ("Message" 0 nil)]
         tabulated-list-padding 1
         tabulated-list-entries #'flycheck-error-list-entries)
@@ -2974,7 +2973,8 @@ string with attached text properties."
 Return a list with the contents of the table cell."
   (let ((face (-> error
                 flycheck-error-level
-                flycheck-error-level-error-list-face)))
+                flycheck-error-level-error-list-face))
+        (message (or (flycheck-error-message error) "Unknown error")))
     (list error
           (vector (flycheck-error-list-make-number-cell
                    (flycheck-error-line error) 'flycheck-error-list-line-number)
@@ -2983,8 +2983,7 @@ Return a list with the contents of the table cell."
                    'flycheck-error-list-column-number)
                   (propertize (symbol-name (flycheck-error-level error))
                               'font-lock-face face)
-                  (symbol-name (flycheck-error-checker error))
-                  (or (flycheck-error-message error) "")))))
+                  (format "%s (%s)" message (flycheck-error-checker error))))))
 
 (defun flycheck-error-list-entries ()
   "Create the entries for the error list."
