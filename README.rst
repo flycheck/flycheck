@@ -168,11 +168,12 @@ faces to add a striking background color or an underlying, or choose a color
 theme with reasonable Flycheck faces, for instance the excellent light or dark
 Solarized_ themes, or the fancy Zenburn_ theme.
 
-Use `C-c ! n` and `C-c ! p` to navigate between errors.  If the point is on an
-error, the error message is shown in the echo area or in a popup buffer after a
-short delay.  You may also hover the mouse over a highlighted error to get a
-tooltip with the error message.  Read the `Error navigation`_ section in the
-manual for more information.
+Use `C-c ! n` and `C-c ! p` to navigate between errors, or use `C-c ! l` to list
+all errors in a separate buffer.  If the point is on an error, the error message
+is shown in the echo area or in a popup buffer after a short delay.  You may
+also hover the mouse over a highlighted error to get a tooltip with the error
+message.  Read the `Error navigation`_ section in the manual for more
+information.
 
 Read the complete manual inside Emacs with `C-c ! i` or `M-x flycheck-info`, or
 online at http://flycheck.github.io.
