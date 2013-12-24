@@ -3219,7 +3219,7 @@ respectively}
 @ghissue{283, Add support for Microsoft extensions in @code{c/c++-clang}
 via @code{flycheck-clang-ms-extensions}}
 @item
-@ghissue{230@comma{} New faces @code{flycheck-error-list-info}@comma{}
+@ghissue{230, New faces @code{flycheck-error-list-info}@comma{}
 @code{flycheck-error-list-warning}@comma{}
 @code{flycheck-error-list-error}@comma{}
 @code{flycheck-error-list-line-number} and
