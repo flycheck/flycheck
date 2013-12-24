@@ -2972,19 +2972,24 @@ string with attached text properties."
   "Make a table cell for the given ERROR.
 
 Return a list with the contents of the table cell."
-  (let ((face (-> error
+  (let ((level-face (-> error
                 flycheck-error-level
                 flycheck-error-level-error-list-face))
-        (message (or (flycheck-error-message error) "Unknown error")))
+        (line (flycheck-error-line error))
+        (column (flycheck-error-column error))
+        (message (or (flycheck-error-message error) "Unknown error"))
+        (checker (flycheck-error-checker error)))
     (list error
           (vector (flycheck-error-list-make-number-cell
-                   (flycheck-error-line error) 'flycheck-error-list-line-number)
+                   line 'flycheck-error-list-line-number)
                   (flycheck-error-list-make-number-cell
-                   (flycheck-error-column error)
-                   'flycheck-error-list-column-number)
+                   column 'flycheck-error-list-column-number)
                   (propertize (symbol-name (flycheck-error-level error))
-                              'font-lock-face face)
-                  (format "%s (%s)" message (flycheck-error-checker error))))))
+                              'font-lock-face level-face)
+                  (list (format "%s (%s)" message checker)
+                        'follow-link t
+                        'flycheck-error error
+                        'action #'flycheck-error-list-goto-source)))))
 
 (defun flycheck-error-list-entries ()
   "Create the entries for the error list."
@@ -2992,6 +2997,23 @@ Return a list with the contents of the table cell."
     (let ((errors (buffer-local-value 'flycheck-current-errors
                                       flycheck-error-list-source-buffer)))
       (-map #'flycheck-error-list-make-entry errors))))
+
+(defun flycheck-error-list-goto-source (button)
+  "Go to the source of the error associated to BUTTON."
+  (let* ((error (button-get button 'flycheck-error))
+         (buffer (flycheck-error-buffer error)))
+    (when (buffer-live-p buffer)
+      (if (eq (window-buffer) (get-buffer flycheck-error-list-buffer))
+          ;; When called from within the error list, keep the error list,
+          ;; otherwise replace the current buffer.
+          (pop-to-buffer buffer 'other-window)
+        (switch-to-buffer buffer))
+      (let ((pos (flycheck-error-pos error)))
+        (unless (eq (goto-char pos) (point))
+          ;; If widening gets in the way of moving to the right place, remove it
+          ;; and try again
+          (widen)
+          (goto-char pos))))))
 
 (defvar flycheck-error-list-mode-line-map
   (let ((map (make-sparse-keymap)))
