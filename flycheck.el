@@ -3049,7 +3049,8 @@ list."
                                                    'all-frames))
     (with-selected-window error-list-window
       (revert-buffer)
-      (flycheck-error-list-set-mode-line))))
+      (flycheck-error-list-set-mode-line)))
+  (flycheck-error-list-highlight-errors))
 
 (defun flycheck-error-list-next-error-pos (pos)
   "Get the next error in the error list from POS.
