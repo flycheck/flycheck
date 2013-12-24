@@ -58,6 +58,11 @@ Introduction
    target="_blank">
 Github
 </a>
+<a class="btn btn-primary btn-large"
+   href="https://github.com/flycheck/flycheck/wiki"
+   target="_blank">
+Wiki
+</a>
 </p>
 @end html
 
