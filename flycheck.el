@@ -3121,6 +3121,8 @@ no next error."
   ;; Finally, refresh the error list to show the most recent errors
   (flycheck-error-list-refresh))
 
+(defalias 'list-flycheck-errors 'flycheck-list-errors)
+
 
 ;;;; General error display
 (defun flycheck-display-errors (errors)
