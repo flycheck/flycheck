@@ -41,9 +41,10 @@
 ;;;; Requirements
 
 (require 'flycheck)
+(require 'dash)
 (require 'f)
-(require 'ert)
-(require 'epa-file)
+(require 'epa-file)                     ; To test encrypted buffers
+(require 'ert)                          ; Unit test library
 
 ;; Optional dependencies
 (require 'projectile nil 'no-error)
