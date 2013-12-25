@@ -41,13 +41,12 @@
 ;;;; Requirements
 
 (require 'flycheck)
-
-;; Libraries required in tests
 (require 'f)
-(require 'projectile)
-
 (require 'ert)
 (require 'epa-file)
+
+;; Optional dependencies
+(require 'projectile nil 'no-error)
 
 
 ;;;; Compatibility
@@ -1570,6 +1569,7 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-locate-config-file-projectile/existing-file-inside-a-project ()
   :tags '(configuration)
+  (skip-unless (fboundp 'projectile-project-root))
   (flycheck-test-with-temp-buffer
     (set-visited-file-name (f-join flycheck-test-directory "foo")
                            :no-query)
@@ -1580,6 +1580,7 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-locate-config-file-projectile/not-existing-file-inside-a-project ()
   :tags '(configuration)
+  (skip-unless (fboundp 'projectile-project-root))
   (flycheck-test-with-temp-buffer
     (set-visited-file-name (f-join flycheck-test-directory "foo")
                            :no-query)
@@ -1588,6 +1589,7 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-locate-config-file-projectile/outside-a-project ()
   :tags '(configuration)
+  (skip-unless (fboundp 'projectile-project-root))
   (flycheck-test-with-temp-buffer
     (set-visited-file-name (f-join temporary-file-directory "foo")
                            :no-query)
