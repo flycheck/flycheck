@@ -41,6 +41,7 @@
                                         ; `flycheck-temp-file-system'
   (require 'compile)                    ; Compile Mode integration
   (require 'sh-script)                  ; `sh-shell' for sh checker predicates
+  (require 'cl-lib)
 )
 
 (require 's)
@@ -158,6 +159,7 @@ buffer-local wherever it is set."
     json-jsonlint
     less
     lua
+    mercury-mmc
     perl
     php
     php-phpmd
@@ -4130,6 +4132,115 @@ See URL `http://www.lua.org/'."
           (minimal-match (zero-or-more not-newline))
           ":" line ": " (message) line-end))
   :modes lua-mode)
+
+(defvar flycheck-mmc-message-width 80
+  "Soft limit on message width for Mercury errors / warnings.")
+
+(eval-and-compile
+  (defun flycheck-mmc-compute-line-desc-pairs (output)
+    "Compute list of (linenumber . part of message) from OUTPUT.
+
+OUTPUT is the raw mercury warning / error message output of the format:
+'filename ':' linenumber ':' errormessage'."
+    (mapcar #'(lambda (num-desc)
+                (cons (string-to-number (car num-desc))
+                      (cl-reduce #'concat (cdr num-desc))))
+            (cl-remove-if-not #'(lambda (x) (not (eq x nil)))
+                           (mapcar #'(lambda (zeile)
+                                       (cdr (split-string zeile ":")))
+                                   (split-string output "\n"))))))
+
+(eval-and-compile
+  (defun flycheck-mmc-compute-line-desc-maps (line-desc-pairs)
+    "Compute map of line numbers to messages from LINE-DESC-PAIRS.
+
+The input list of pairs of linenumbers and messages is
+transformed to a list of lists where each sublist is a list of
+cons cells containing the linenumber and message part.  The
+result is grouped for line numbers."
+    (mapcar #'(lambda (elem)
+                (cl-remove-if-not #'(lambda (x)
+                                   (eq (car x) elem)) line-desc-pairs))
+            (delete-dups (mapcar #'(lambda (line-desc)
+                                     (car line-desc)) line-desc-pairs)))))
+
+(eval-and-compile
+  (defun flycheck-mmc-compute-final-list (line-desc-maps)
+    "Compute alist from LINE-DESC-MAPS.
+
+Computes an alist from the line numbers to the concatenation of
+messages for that line number."
+    (mapcar #'(lambda (x)
+                (cons (car x) (split-string (cdr x) "\\. ")))
+            (mapcar #'(lambda (entry)
+                        (cons (car (car entry))
+                              (cl-reduce #'concat (mapcar #'cdr entry))))
+                    line-desc-maps))))
+
+(eval-and-compile
+  (defun flycheck-mmc-format-string (maxcol currcol len-word-pair-list acc)
+    "Format mercury warnings. MAXCOL is maximual width, CURRCOL the
+current column, LEN-WORD-PAIR-LIST is a list of pairs (length
+string . string) and ACC is the accumulator string for recursion."
+    (if (eq len-word-pair-list nil)
+        acc
+      (let ((head (car len-word-pair-list))
+            (rest (cdr len-word-pair-list)))
+        (if (and (eq currcol 0)
+                 (>= (car head) maxcol))
+            (flycheck-mmc-format-string maxcol 0 rest (concat acc (cdr head) "\n"))
+          (if (<= (+ currcol (car head) 1) maxcol)
+              (flycheck-mmc-format-string maxcol (+ currcol (car head) 1) rest (concat acc (cdr head) " "))
+            (flycheck-mmc-format-string maxcol 0 (cons head rest) (concat acc "\n"))))))))
+
+(eval-and-compile
+  (defun flycheck-mmc-length-string-pairs (message)
+    "Compute pairs length, string from MESSAGE."
+    (cl-remove-if-not
+     #'(lambda (entry)
+         (> (car entry) 0))
+     (mapcar
+      #'(lambda (y)
+          (cons (length y) y)) (split-string message " ")))))
+
+(eval-and-compile
+  (defun flycheck-mmc-normalize-message (message)
+    "Apply formating to MESSAGE."
+    (replace-regexp-in-string " \n" "\n"
+                              (flycheck-mmc-format-string
+                               flycheck-mmc-message-width 0
+                               (flycheck-mmc-length-string-pairs message) ""))))
+
+(eval-and-compile
+  (defun flycheck-mmc-compute-flycheck-errors (final-list)
+    "Compute the list fo flycheck-error objects from FINAL-LIST."
+    (mapcar #'(lambda (x)
+                (flycheck-error-new :line (car x)
+                                    :message (flycheck-mmc-normalize-message (cdr x))
+                                    :level (if (string-match "rror" (cdr x)) 'error 'warning)))
+            (apply #'append
+                   (mapcar #'(lambda(x)
+                               (mapcar #'(lambda (y)
+                                           (cons (car x) y)) (cdr x))) final-list)))))
+
+(eval-and-compile
+  (defun flycheck-mmc-error-parser (output checker buffer)
+    "Parse the OUTPUT buffer, ignore CHECKER and BUFFER.
+
+Parses the Mercury warning / error output, provides interface
+for :error-parser functions for flycheck."
+    (let ((line-desc-pairs (flycheck-mmc-compute-line-desc-pairs output)))
+      (let ((line-desc-maps (flycheck-mmc-compute-line-desc-maps line-desc-pairs)))
+        (let ((final-list (flycheck-mmc-compute-final-list line-desc-maps)))
+          (flycheck-mmc-compute-flycheck-errors final-list))))))
+
+(flycheck-define-checker mercury-mmc
+  "A Mercury syntax and type checker using mmc.
+
+See URL `http://mercurylang.org/'."
+  :command ("mmc" "-E" "-e" source)
+  :error-parser flycheck-mmc-error-parser
+  :modes (mercury-mode prolog-mode))
 
 (flycheck-define-checker perl
   "A Perl syntax checker using the Perl interpreter.
