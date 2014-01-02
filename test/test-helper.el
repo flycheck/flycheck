@@ -1,6 +1,6 @@
 ;;; test-helper.el --- Flycheck: Initialize test suite -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2013  Sebastian Wiesner
+;; Copyright (C) 2013, 2014  Sebastian Wiesner
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by

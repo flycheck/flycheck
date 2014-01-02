@@ -33,7 +33,7 @@ Modern on-the-fly syntax checking for GNU Emacs 24
 </p>
 
 <p class="text-center">
-<small>Copyright © 2013 Sebastian Wiesner</small>
+<small>Copyright © 2013, 2014 Sebastian Wiesner</small>
 </p>
 
 <p class="text-center">
@@ -77,7 +77,7 @@ Wiki
 @copying
 This manual is for Flycheck, the on-the-fly syntax checker for GNU Emacs.
 
-Copyright @copyright{} 2013 Sebastian Wiesner
+Copyright @copyright{} 2013, 2014 Sebastian Wiesner
 
 @quotation
   Permission is granted to copy, distribute and/or modify this document
