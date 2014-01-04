@@ -3986,6 +3986,35 @@ See URL `http://handlebarsjs.com/'."
       (group (one-or-more (not (any space "\n")))))
   "Regular expression for a Haskell module name.")
 
+(flycheck-def-option-var flycheck-ghc-no-user-package-database nil haskell-ghc
+  "Whether to disable the user package database in GHC.
+
+When non-nil, disable the user package database in GHC, via
+`-no-user-package-db'."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.16"))
+
+(flycheck-def-option-var flycheck-ghc-package-databases nil haskell-ghc
+  "Additional module databases for GHC.
+
+The value of this variable is a list of strings, where each
+string is a directory of a package database.  Each package
+database is given to GHC via `-package-db'."
+  :type '(repeat (directory :tag "Package database"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.16"))
+
+(flycheck-def-option-var flycheck-ghc-search-path nil haskell-ghc
+  "Module search path for GHC.
+
+The value of this variable is a list of strings, where each
+string is a directory containing Haskell modules.  Each directory
+is added to the GHC search path via `-i'."
+  :type '(repeat (directory :tag "Module directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.16"))
+
 (flycheck-define-checker haskell-ghc
   "A Haskell syntax and type checker using ghc.
 
@@ -3997,6 +4026,10 @@ See URL `http://www.haskell.org/ghc/'."
                    "-i"
                    (flycheck-module-root-directory
                     (flycheck-find-in-buffer flycheck-haskell-module-re))))
+            (option-flag "-no-user-package-db"
+                         flycheck-ghc-no-user-package-database)
+            (option-list "-package-db" flycheck-ghc-package-databases)
+            (option-list "-i" flycheck-ghc-search-path s-prepend)
             source)
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ":"
