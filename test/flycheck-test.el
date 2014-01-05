@@ -4108,6 +4108,22 @@ Why not:
    '(9 nil warning "printindex before document beginning: @printindex cp"
        :checker texinfo)))
 
+(ert-deftest flycheck-define-checker/verilog-verilator-error ()
+  :tags '(builtin-checker external-tool language-verilog)
+  (skip-unless (flycheck-check-executable 'verilog-verilator))
+  (flycheck-test-should-syntax-check
+   "checkers/verilog_verilator_error.v" 'verilog-mode
+   '(4 nil error "syntax error, unexpected ')'"
+       :checker verilog-verilator)))
+
+(ert-deftest flycheck-define-checker/verilog-verilator-warning ()
+  :tags '(builtin-checker external-tool language-verilog)
+  (skip-unless (flycheck-check-executable 'verilog-verilator))
+  (flycheck-test-should-syntax-check
+   "checkers/verilog_verilator_warning.v" 'verilog-mode
+   '(2 nil warning "Signal is not driven, nor used: val"
+       :checker verilog-verilator)))
+
 (ert-deftest flycheck-define-checker/xml-xmlstarlet ()
   :tags '(builtin-checker external-tool language-xml)
   (skip-unless (flycheck-check-executable 'xml-xmlstarlet))

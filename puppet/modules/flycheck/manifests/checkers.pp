@@ -112,6 +112,7 @@ class flycheck::checkers {
                 'puppet',          # puppet-parser
                 'scala',           # scala
                 'dash',            # sh-dash
+                'verilator',       # verilog-verilator
                 'chktex',          # tex-chktex
                 'lacheck',         # tex-lacheck
                 'xmlstarlet',      # xml-xmlstarlet

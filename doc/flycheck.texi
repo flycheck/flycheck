@@ -248,6 +248,8 @@ TeX/LaTeX (using @command{chktex} or @command{lacheck})
 @item
 Texinfo (using @command{makeinfo})
 @item
+Verilog (using @command{verilator})
+@item
 XML (using @command{xmlstarlet} or @command{xmllint})
 @item
 YAML (using @command{js-yaml} or @command{ruby})
@@ -3271,7 +3273,8 @@ checker.
 
 @item
 @gh{dholm, David Holm} added C/C++ syntax and style checkers using
-@command{clang} and @command{cppcheck} respectively.
+@command{clang} and @command{cppcheck} respectively.  He also added Verilog
+syntax checking using @command{verilator}.
 
 @item
 @gh{gfrey, Gereon Frey} fixed the @command{go-build} syntax checker and
@@ -3432,6 +3435,7 @@ order of their appearance in the default value of
 @iflyc tex-chktex
 @iflyc tex-lacheck
 @iflyc texinfo
+@iflyc verilog-verilator
 @iflyc xml-xmlstarlet
 @iflyc xml-xmllint
 @iflyc yaml-jsyaml
