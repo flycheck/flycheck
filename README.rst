@@ -67,6 +67,7 @@ Features
   - Slim
   - TeX/LaTeX
   - Texinfo
+  - Verilog
   - XML
   - YAML
 

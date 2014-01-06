@@ -182,6 +182,7 @@ buffer-local wherever it is set."
     tex-chktex
     tex-lacheck
     texinfo
+    verilog-verilator
     xml-xmlstarlet
     xml-xmllint
     yaml-jsyaml
@@ -4601,6 +4602,18 @@ See URL `http://www.gnu.org/software/texinfo/'."
           line (optional ":" column) ": "
           (message) line-end))
   :modes texinfo-mode)
+
+(flycheck-define-checker verilog-verilator
+  "A Verilog syntax checker using the Verilator Verilog HDL simulator.
+
+See URL `http://www.veripool.org/wiki/verilator'."
+  :command ("verilator" "--lint-only" "-Wall" source)
+  :error-patterns
+  ((warning line-start "%Warning-" (zero-or-more not-newline) ": "
+            (file-name) ":" line ": " (message) line-end)
+   (error line-start "%Error: " (file-name) ":"
+          line ": " (message) line-end))
+  :modes (verilog-mode))
 
 (flycheck-define-checker xml-xmlstarlet
   "A XML syntax checker and validator using the xmlstarlet utility.
