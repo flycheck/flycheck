@@ -41,7 +41,6 @@
                                         ; `flycheck-temp-file-system'
   (require 'compile)                    ; Compile Mode integration
   (require 'sh-script)                  ; `sh-shell' for sh checker predicates
-  (require 'cl-lib)
 )
 
 (require 's)
@@ -4144,13 +4143,13 @@ OUTPUT is the raw mercury warning / error message output of the format:
 'filename ':' linenumber ':' errormessage'."
     (mapcar #'(lambda (num-desc)
                 (cons (string-to-number (car num-desc))
-                      (cl-reduce #'(lambda (zeile rest)
-                                     (concat zeile ":" rest))
-                                 (cdr num-desc))))
-            (cl-remove-if-not #'(lambda (x) (not (eq x nil)))
-                           (mapcar #'(lambda (zeile)
-                                       (cdr (split-string zeile ":")))
-                                   (split-string output "\n"))))))
+                      (-reduce #'(lambda (zeile rest)
+				   (concat zeile ":" rest))
+			       (cdr num-desc))))
+            (-remove #'(lambda (x) (eq x nil))
+		     (mapcar #'(lambda (zeile)
+				 (cdr (split-string zeile ":")))
+			     (split-string output "\n"))))))
 
 (eval-and-compile
   (defun flycheck-mmc-compute-line-desc-maps (line-desc-pairs)
@@ -4161,8 +4160,8 @@ transformed to a list of lists where each sublist is a list of
 cons cells containing the linenumber and message part.  The
 result is grouped for line numbers."
     (mapcar #'(lambda (elem)
-                (cl-remove-if-not #'(lambda (x)
-                                   (eq (car x) elem)) line-desc-pairs))
+                (-filter #'(lambda (x)
+			     (eq (car x) elem)) line-desc-pairs))
             (delete-dups (mapcar #'(lambda (line-desc)
                                      (car line-desc)) line-desc-pairs)))))
 
@@ -4176,10 +4175,9 @@ messages for that line number."
                 (cons (car x) (split-string (cdr x) "\\. ")))
             (mapcar #'(lambda (entry)
                         (cons (car (car entry))
-                              (cl-reduce #'(lambda (prefix rest)
-                                             (concat prefix rest "\n"))
-                                         (mapcar #'cdr entry)
-                                         :initial-value "")))
+                              (-reduce #'(lambda (prefix rest)
+					   (concat prefix rest "\n"))
+				       (cons "" (mapcar #'cdr entry)))))
                     line-desc-maps))))
 
 (eval-and-compile
@@ -4188,7 +4186,9 @@ messages for that line number."
     (mapcar #'(lambda (x)
                 (flycheck-error-new :line (car x)
                                     :message (cadr x)
-                                    :level (if (string-match "rror" (cadr x)) 'error 'warning)))
+                                    :level (if (string-match "rror" (cadr x))
+					       'error
+					       'warning)))
             final-list)))
 
 (eval-and-compile
@@ -4206,9 +4206,11 @@ for :error-parser functions for flycheck."
   "A Mercury syntax and type checker using mmc.
 
 See URL `http://mercurylang.org/'."
-  :command ("mmc" "-E" "-e" "--max-error-line-width" (eval
-                                                      (number-to-string
-                                                       flycheck-mmc-message-width))
+  :command ("mmc"
+	    "-E"
+	    "-e"
+	    "--max-error-line-width" (eval (number-to-string
+					    flycheck-mmc-message-width))
             source)
   :error-parser flycheck-mmc-error-parser
   :modes (mercury-mode prolog-mode))
