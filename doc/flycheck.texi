@@ -3194,6 +3194,8 @@ New syntax checkers:
 @ghissue{277, Racket}
 @item
 Texinfo
+@item
+@ghissue{296, Verilog}
 @end itemize
 
 @item
