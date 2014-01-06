@@ -3515,6 +3515,27 @@ found)."
    "checkers/Haskell/SyntaxError.hs" 'haskell-mode
    '(3 1 error "parse error on input `module'" :checker haskell-ghc)))
 
+(ert-deftest flycheck-define-checker/haskell-ghc-no-user-package-database ()
+  :tags '(builtin-checker language-haskell)
+  :expected-result :failed
+  (error "Not implemented!"))
+
+(ert-deftest flycheck-define-checker/haskell-ghc-package-databases ()
+  :tags '(builtin-checker language-haskell)
+  :expected-result :failed
+  (error "Not implemented!"))
+
+(ert-deftest flycheck-define-checker/haskell-ghc-search-path ()
+  :tags '(builtin-checker language-haskell)
+  (skip-unless (flycheck-check-executable 'haskell-ghc))
+  (let* ((lib-dir (flycheck-test-resource-filename "checkers/Haskell/lib"))
+         (flycheck-ghc-search-path (list lib-dir)))
+    (flycheck-test-should-syntax-check
+     "checkers/Haskell/SearchPath.hs" 'haskell-mode
+     '(5 1 warning "Top-level binding with no type signature:
+               helloYou :: IO ()"
+         :checker haskell-ghc))))
+
 (ert-deftest flycheck-define-checker/haskell ()
   :tags '(builtin-checker external-tool language-haskell)
   (skip-unless (-all? #'flycheck-check-executable '(haskell-ghc haskell-hlint)))

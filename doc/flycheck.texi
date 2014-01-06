@@ -767,6 +767,18 @@ The maximum length of a line in characters the @code{python-flake8}
 syntax checker allows without reporting an error.
 @end defopt
 
+@defopt flycheck-ghc-no-user-package-database
+Whether to disable the user package database for @code{haskell-ghc}.
+@end defopt
+
+@defopt flycheck-ghc-package-databases
+A list of package database for @code{haskell-ghc}.
+@end defopt
+
+@defopt flycheck-ghc-search-path
+A list of module directories for the search path of @code{haskell-ghc}.
+@end defopt
+
 @defopt flycheck-phpcs-standard
 The coding standard @code{php-phpcs} shall use.
 @end defopt
@@ -3228,6 +3240,15 @@ via @code{flycheck-clang-ms-extensions}}
 @code{flycheck-error-list-error}@comma{}
 @code{flycheck-error-list-line-number} and
 @code{flycheck-error-list-column-number}}
+@item
+Add @code{flycheck-ghc-no-user-package-database} to disable the user
+package database for @code{haskell-ghc}
+@item
+Add @code{flycheck-ghc-package-databases} to add additional package
+databases to @code{haskell-ghc}
+@item
+Add @code{flycheck-ghc-search-path} to add additional directories to the
+search path of @code{haskell-ghc}
 @end itemize
 
 @item
