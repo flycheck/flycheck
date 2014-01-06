@@ -3640,6 +3640,21 @@ Why not:
    '(5 nil error "unfinished string near '\"oh no'"
        :checker lua :filename nil)))
 
+(ert-deftest flycheck-define-checker/mercury-mmc ()
+  :tags '(builtin-checker external-tool language-mercury)
+  (skip-unless (flycheck-check-executable 'mercury-mmc))
+  (flycheck-test-should-syntax-check
+   "checkers/mercury-mmc-test.m" 'mercury-mode
+   '(1 nil error "Error module must start with a `- module' declaration."
+       :checker mercury-mmc :filename nil)
+   '(12 nil error "In clause for `testme(in, out)' in argument 2 of call to predicate `int.<'/2
+mode error variable `X' has instantiatedness `free', expected instantiatedness
+was `ground'."
+        :checker mercury-mmc :filename nil)
+   '(14 nil warning "In clause for function `mercury-mmc-test.foldtest'/3 warning variables `X, Y'
+each have overlapping scopes."
+        :checker mercury-mmc :filename nil)))
+
 (ert-deftest flycheck-define-checker/perl ()
   :tags '(builtin-checker external-tool language-perl)
   "Test an unused variable with the Perl checker."
