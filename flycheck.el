@@ -4136,20 +4136,34 @@ See URL `http://www.lua.org/'."
   "Max width to pass to mmc --max-error-line-width.")
 
 (eval-and-compile
+  (defun flycheck-mmc-remove-redundant-errors (output)
+    "Removes redundant errors without line number from OUTPUT.
+
+This function removes errors from the list of message lines in
+output where the message is prefixed with
+'mercury_compile:'. These errors represent generated interfaces
+files etc. that cannot be located and do not have a line number
+associated. The errors appear again later when the corresponding
+types etc. are used. "
+    (-remove #'(lambda (zeile)
+                 (s-starts-with? "mercury_compile:" zeile)) output)))
+
+(eval-and-compile
   (defun flycheck-mmc-compute-line-desc-pairs (output)
     "Compute list of (linenumber . part of message) from OUTPUT.
 
 OUTPUT is the raw mercury warning / error message output of the format:
 'filename ':' linenumber ':' errormessage'."
-    (mapcar #'(lambda (num-desc)
-                (cons (string-to-number (car num-desc))
-                      (-reduce #'(lambda (zeile rest)
-				   (concat zeile ":" rest))
-			       (cdr num-desc))))
-            (-remove #'(lambda (x) (eq x nil))
-		     (mapcar #'(lambda (zeile)
-				 (cdr (split-string zeile ":")))
-			     (split-string output "\n"))))))
+     (mapcar #'(lambda (num-desc)
+                 (cons (string-to-number (car num-desc))
+                       (-reduce #'(lambda (zeile rest)
+                                    (concat zeile ":" rest))
+                                (cdr num-desc))))
+             (-remove #'(lambda (x) (eq x nil))
+                      (mapcar #'(lambda (zeile)
+                                  (cdr (split-string zeile ":")))
+                              (flycheck-mmc-remove-redundant-errors
+                               (split-string output "\n")))))))
 
 (eval-and-compile
   (defun flycheck-mmc-compute-line-desc-maps (line-desc-pairs)
