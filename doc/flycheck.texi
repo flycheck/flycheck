@@ -3273,8 +3273,8 @@ checker.
 
 @item
 @gh{dholm, David Holm} added C/C++ syntax and style checkers using
-@command{clang} and @command{cppcheck} respectively.  He also added Verilog
-syntax checking using @command{verilator}.
+@command{clang} and @command{cppcheck} respectively, and contributed a
+Verilog syntax checker using @command{verilator}.
 
 @item
 @gh{gfrey, Gereon Frey} fixed the @command{go-build} syntax checker and
