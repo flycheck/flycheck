@@ -3863,7 +3863,8 @@ See URL `http://www.kuwata-lab.com/erubis/'."
   (lambda ()
     (or (memq major-mode '(html-erb-mode rhtml-mode))
         (and buffer-file-name
-             (string= "erb" (file-name-extension buffer-file-name))))))
+             (member (file-name-extension buffer-file-name)
+                     '("erb" "rhtml"))))))
 
 (flycheck-define-checker go-gofmt
   "A Go syntax and style checker using the gofmt utility.
