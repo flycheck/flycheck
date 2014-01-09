@@ -154,6 +154,7 @@ buffer-local wherever it is set."
     haskell-hlint
     html-tidy
     javascript-jshint
+    javascript-eslint
     javascript-gjslint
     json-jsonlint
     less
@@ -4102,6 +4103,37 @@ See URL `http://www.jshint.com'."
             (config-file "--config" flycheck-jshintrc)
             source)
   :error-parser flycheck-parse-checkstyle
+  :modes (js-mode js2-mode js3-mode))
+
+(flycheck-def-option-var flycheck-eslint-rulesdir nil javascript-eslint
+  "Custom directory from which to load rules files for `javascript-eslint'.
+
+The value of this variable is the name of a custom directory as string, or nil
+otherwise.
+
+Refer to the ESLint manual at URL
+`https://github.com/nzakas/eslint/tree/master/docs/command-line-interface#--rulesdir'
+for more information about the custom directory."
+  :type '(choice (const :tag "No custom rules directory" nil)
+                 (directory :tag "Custom rules directory"))
+  :safe #'stringp)
+
+(flycheck-def-config-file-var flycheck-eslintrc javascript-eslint ".eslintrc"
+  :safe #'stringp)
+
+(flycheck-define-checker javascript-eslint
+  "A JavaScript syntax and style checker using eslint.
+
+See URL `https://github.com/nzakas/eslint'."
+  :command ("eslint"
+            (config-file "--config" flycheck-eslintrc)
+            (option "--rulesdir" flycheck-eslint-rulesdir)
+            source)
+  :error-patterns
+  ((warning line-start (file-name)
+            ": line " line ", col " column ", Warning - " (message) line-end)
+   (error line-start (file-name)
+          ": line " line ", col " column ", Error - " (message) line-end))
   :modes (js-mode js2-mode js3-mode))
 
 (flycheck-def-config-file-var flycheck-gjslintrc javascript-gjslint ".gjslintrc"

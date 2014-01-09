@@ -209,7 +209,7 @@ Haskell (using @command{ghc} and @command{hlint})
 @item
 HTML (using @command{tidy})
 @item
-Javascript (using @command{jshint} and @command{gjslint})
+Javascript (using @command{jshint}, @command{eslint} and @command{gjslint})
 @item
 JSON (using @command{jsonlint})
 @item
@@ -757,6 +757,10 @@ is used.
 The package directory for the @code{emacs-lisp} syntax checker.
 @end defopt
 
+@defopt flycheck-eslint-rulesdir
+Custom directory from which to load rules files for the @code{javascript-eslint} syntax checker.
+@end defopt
+
 @defopt flycheck-flake8-maximum-complexity
 The maximum McCabe complexity the @code{python-flake8} syntax checker
 allows without reporting a warning.
@@ -811,6 +815,10 @@ The configuration file for the @code{tex-chktex} syntax checker.
 
 @defopt flycheck-coffeelintrc
 The configuration file for the @code{coffee-coffeelint} syntax checker.
+@end defopt
+
+@defopt flycheck-eslintrc
+The configuration file for the @code{javascript-eslint} syntax checker.
 @end defopt
 
 @defopt flycheck-flake8rc
@@ -3430,6 +3438,7 @@ order of their appearance in the default value of
 @iflyc haskell-hlint
 @iflyc html-tidy
 @iflyc javascript-jshint
+@iflyc javascript-eslint
 @iflyc javascript-gjslint
 @iflyc json-jsonlint
 @iflyc less
