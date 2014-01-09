@@ -1,3 +1,2 @@
-# Disable snake case for symbol
-SymbolName:
-  Enabled: false
+IfUnlessModifier:
+  Enabled: False

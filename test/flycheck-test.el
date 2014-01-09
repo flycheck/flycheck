@@ -3931,7 +3931,6 @@ Why not:
    '(4 18 warning "unused argument name" :checker ruby-rubylint)
    '(5 5 warning "unused local variable arr" :checker ruby-rubylint)
    '(5 5 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
-   '(5 18 info "Use snake_case for symbols." :checker ruby-rubocop)
    '(6 10 info "Prefer single-quoted strings when you don't need string interpolation or special symbols."
        :checker ruby-rubocop)
    '(10 5 info "the use of then/do is not needed here" :checker ruby-rubylint)
@@ -3956,8 +3955,6 @@ Why not:
      '(5 5 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
      '(6 10 info "Prefer single-quoted strings when you don't need string interpolation or special symbols."
          :checker ruby-rubocop)
-     '(10 5 info "Favor modifier if/unless usage when you have a single-line body. Another good alternative is the usage of control flow &&/||."
-          :checker ruby-rubocop)
      '(10 5 info "Never use then for multi-line if/unless."
           :checker ruby-rubocop)
      '(10 8 warning "Literal true appeared in a condition."
