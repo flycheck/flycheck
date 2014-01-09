@@ -751,7 +751,8 @@ The package directory for the @code{emacs-lisp} syntax checker.
 @end defopt
 
 @defopt flycheck-eslint-rulesdir
-Custom directory from which to load rules files for the @code{javascript-eslint} syntax checker.
+A directory with custom rules for the @code{javascript-eslint} syntax
+checker.
 @end defopt
 
 @defopt flycheck-flake8-maximum-complexity

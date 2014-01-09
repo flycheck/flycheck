@@ -4047,10 +4047,11 @@ See URL `http://www.jshint.com'."
   :modes (js-mode js2-mode js3-mode))
 
 (flycheck-def-option-var flycheck-eslint-rulesdir nil javascript-eslint
-  "Custom directory from which to load rules files for `javascript-eslint'.
+  "The directory of custom rules for `javascript-eslint'.
 
-The value of this variable is the name of a custom directory as string, or nil
-otherwise.
+The value of this variable is either a string containing the path
+to a directory with custom rules, or nil, to not give any custom
+rules to ESLint.
 
 Refer to the ESLint manual at URL
 `https://github.com/nzakas/eslint/tree/master/docs/command-line-interface#--rulesdir'
