@@ -89,9 +89,9 @@ The following extensions provide additional cool features for Flycheck:
 - flycheck-cask_ makes Flycheck use local packages in Cask_ projects.
 - flycheck-color-mode-line_ colors the mode line according to the Flycheck
   status.
-- flycheck-hdevtools_ provides a Flycheck syntax checker for hdevtools_.
 - flycheck-d-unittest_ a Flycheck checker to run unit tests for D programs on
   the fly.
+- flycheck-hdevtools_ provides a Flycheck syntax checker for hdevtools_.
 
 Installation
 ============
