@@ -145,6 +145,7 @@ buffer-local wherever it is set."
     emacs-lisp
     emacs-lisp-checkdoc
     erlang
+    eruby-erubis
     go-gofmt
     go-build
     go-test
@@ -3920,6 +3921,19 @@ The checker runs `checkdoc-current-buffer'."
   ((warning line-start (file-name) ":" line ": Warning:" (message) line-end)
    (error line-start (file-name) ":" line ": " (message) line-end))
   :modes erlang-mode)
+
+(flycheck-define-checker eruby-erubis
+  "A eRuby syntax checker using the `erubis' command.
+
+See URL `http://www.kuwata-lab.com/erubis/'."
+  :command ("erubis" "-z" source)
+  :error-patterns
+  ((error line-start  (file-name) ":" line ": " (message) line-end))
+  :predicate
+  (lambda ()
+    (or (memq major-mode '(html-erb-mode rhtml-mode))
+        (and (buffer-file-name)
+             (member (f-ext (buffer-file-name)) '("erb" "rhtml"))))))
 
 (flycheck-define-checker go-gofmt
   "A Go syntax and style checker using the gofmt utility.

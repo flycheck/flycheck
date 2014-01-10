@@ -199,6 +199,8 @@ Emacs Lisp (using the byte compiler and CheckDoc)
 @item
 Erlang (using @command{erlc})
 @item
+ERuby (using @command{erubis})
+@item
 Go (using @command{gofmt}, @command{go build} and @command{go test})
 @item
 Haml (using @command{haml})
@@ -3219,6 +3221,8 @@ Texinfo
 @ghissue{296, Verilog}
 @item
 @ghissue{291, Javascript with @command{eslint}}
+@item
+@ghissue{285, ERuby}
 @end itemize
 
 @item
@@ -3392,7 +3396,7 @@ to the Flake8 syntax checker.
 
 @item
 @gh{yasuyk, Yasuyuki Oka} contribute a lot of syntax checkers for
-various languages, including AsciiDoc, Chef recipes, Handlebars,
+various languages, including AsciiDoc, Chef recipes, ERuby, Handlebars,
 Javascript, PHP, Racket, Ruby, Slim and YAML.
 
 @item
@@ -3432,6 +3436,7 @@ order of their appearance in the default value of
 @iflyc emacs-lisp
 @iflyc emacs-lisp-checkdoc
 @iflyc erlang
+@iflyc eruby-erubis
 @iflyc go-gofmt
 @iflyc go-build
 @iflyc go-test
