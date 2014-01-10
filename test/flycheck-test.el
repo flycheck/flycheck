@@ -3434,7 +3434,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
   :tags '(builtin-checker external-tool language-eruby)
   (skip-unless (flycheck-check-executable 'eruby-erubis))
   (flycheck-test-should-syntax-check
-   "checkers/eruby-error.erb" '(html-erb-mode rhtml-mode)
+   "checkers/eruby-error.erb" '(html-erb-mode rhtml-mode web-mode)
    '(5 nil error "syntax error, unexpected keyword_end" :checker eruby-erubis)))
 
 (ert-deftest flycheck-define-checker/go-gofmt ()
