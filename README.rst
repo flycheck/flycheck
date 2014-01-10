@@ -92,6 +92,8 @@ The following extensions provide additional cool features for Flycheck:
 - flycheck-d-unittest_ a Flycheck checker to run unit tests for D programs on
   the fly.
 - flycheck-hdevtools_ provides a Flycheck syntax checker for hdevtools_.
+- flycheck-mercury_ provides a Flycheck syntax checker for the `Mercury
+  language`_.
 
 Installation
 ============
@@ -214,6 +216,8 @@ See COPYING_ for details.
 .. _hdevtools: https://github.com/bitc/hdevtools
 .. _flycheck-color-mode-line: https://github.com/flycheck/flycheck-color-mode-line
 .. _flycheck-d-unittest: https://github.com/flycheck/flycheck-d-unittest
+.. _flycheck-mercury: https://github.com/flycheck/flycheck-mercury
+.. _Mercury language: http://mercurylang.org/
 .. _Syntax checker selection: http://flycheck.github.io/Usage.html#Selection
 .. _Syntax checker configuration: http://flycheck.github.io/Usage.html#Configuration
 .. _Error reporting: http://flycheck.github.io/Usage.html#Reporting

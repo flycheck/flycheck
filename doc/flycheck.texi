@@ -300,6 +300,11 @@ programs on the fly.
 flycheck-hdevtools} adds a Flycheck syntax checker for Haskell based on
 @uref{https://github.com/bitc/hdevtools/, hdevtools}.
 
+@item
+@uref{https://github.com/flycheck/flycheck-mercury,flycheck-mercury}
+adds a Flycheck syntax checker for the @uref{http://mercurylang.org/,
+Mercury Language}.
+
 @end itemize
 
 @node Installation, Activation, Features, Introduction
