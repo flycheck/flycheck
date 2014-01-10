@@ -3630,8 +3630,7 @@ See URL `http://acrmp.github.io/foodcritic/'."
   :modes ruby-mode
   :predicate
   (lambda ()
-    (let ((parent-dir (file-name-directory
-                       (directory-file-name default-directory))))
+    (let ((parent-dir (f-parent default-directory)))
       (or
        ;; Chef CookBook
        ;; http://docs.opscode.com/chef/knife.html#id38
@@ -4163,8 +4162,7 @@ See URL `https://github.com/zaach/jsonlint'."
   (lambda ()
     (or
      (eq major-mode 'json-mode)
-     (and buffer-file-name
-          (string= "json" (file-name-extension buffer-file-name))))))
+     (and (buffer-file-name) (f-ext? (buffer-file-name) "json")))))
 
 (flycheck-define-checker less
   "A LESS syntax checker using lessc.
