@@ -3210,6 +3210,8 @@ New syntax checkers:
 Texinfo
 @item
 @ghissue{296, Verilog}
+@item
+@ghissue{285, ERuby}
 @end itemize
 
 @item
@@ -3383,7 +3385,7 @@ to the Flake8 syntax checker.
 
 @item
 @gh{yasuyk, Yasuyuki Oka} contribute a lot of syntax checkers for
-various languages, including AsciiDoc, Chef recipes, Handlebars,
+various languages, including AsciiDoc, Chef recipes, ERuby, Handlebars,
 Javascript, PHP, Racket, Ruby, Slim and YAML.
 
 @item
