@@ -3942,8 +3942,9 @@ See URL `https://golang.org/cmd/go'."
   :modes go-mode
   :predicate
   (lambda ()
-    (and (not (s-ends-with? "_test.go" (buffer-file-name)))
-         (not (buffer-modified-p)))))
+    (and (buffer-file-name)
+         (not (buffer-modified-p))
+         (not (s-ends-with? "_test.go" (buffer-file-name))))))
 
 (flycheck-define-checker go-test
   "A Go syntax and type checker using the `go test' command.
@@ -3957,8 +3958,9 @@ See URL `https://golang.org/cmd/go'."
   :modes go-mode
   :predicate
   (lambda ()
-    (and (s-ends-with? "_test.go" (buffer-file-name))
-         (not (buffer-modified-p)))))
+    (and (buffer-file-name)
+         (not (buffer-modified-p))
+         (s-ends-with? "_test.go" (buffer-file-name)))))
 
 (flycheck-define-checker haml
   "A Haml syntax checker using the Haml compiler.
