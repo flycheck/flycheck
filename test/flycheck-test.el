@@ -1785,9 +1785,15 @@ check with.  ERRORS is the list of expected errors."
      '(9 4 warning "Method could be a function (R0201)" :checker python-pylint)
      '(10 15 warning "Used builtin function 'map' (W0141)"
           :checker python-pylint)
+     '(12 nil info "No space allowed around keyword argument assignment"
+          :checker python-pylint)
      '(12 4 info "Missing method docstring (C0111)" :checker python-pylint)
      '(12 4 warning "Method could be a function (R0201)" :checker python-pylint)
      '(14 15 error "Module 'sys' has no 'python_version' member (E1101)"
+          :checker python-pylint)
+     '(15 nil info "Unnecessary parens after u'print' keyword (C0325)"
+          :checker python-pylint)
+     '(17 nil info "Unnecessary parens after u'print' keyword (C0325)"
           :checker python-pylint)
      '(22 nil error "Undefined variable 'antigravity' (E0602)"
           :checker python-pylint))))
@@ -1815,9 +1821,15 @@ check with.  ERRORS is the list of expected errors."
      '(9 4 warning "Method could be a function (R0201)" :checker python-pylint)
      '(10 15 warning "Used builtin function 'map' (W0141)"
           :checker python-pylint)
+     '(12 nil info "No space allowed around keyword argument assignment"
+          :checker python-pylint)
      '(12 4 info "Missing method docstring (C0111)" :checker python-pylint)
      '(12 4 warning "Method could be a function (R0201)" :checker python-pylint)
      '(14 15 error "Module 'sys' has no 'python_version' member (E1101)"
+          :checker python-pylint)
+     '(15 nil info "Unnecessary parens after u'print' keyword (C0325)"
+          :checker python-pylint)
+     '(17 nil info "Unnecessary parens after u'print' keyword (C0325)"
           :checker python-pylint)
      '(22 nil error "Undefined variable 'antigravity' (E0602)"
           :checker python-pylint))
@@ -3887,9 +3899,15 @@ Why not:
      '(9 4 warning "Method could be a function (R0201)" :checker python-pylint)
      '(10 15 warning "Used builtin function 'map' (W0141)"
           :checker python-pylint)
+     '(12 nil info "No space allowed around keyword argument assignment"
+          :checker python-pylint)
      '(12 4 info "Missing method docstring (C0111)" :checker python-pylint)
      '(12 4 warning "Method could be a function (R0201)" :checker python-pylint)
      '(14 15 error "Module 'sys' has no 'python_version' member (E1101)"
+          :checker python-pylint)
+     '(15 nil info "Unnecessary parens after u'print' keyword (C0325)"
+          :checker python-pylint)
+     '(17 nil info "Unnecessary parens after u'print' keyword (C0325)"
           :checker python-pylint)
      '(22 nil error "Undefined variable 'antigravity' (E0602)"
           :checker python-pylint))))
