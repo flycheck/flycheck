@@ -2185,6 +2185,7 @@ This appendix provides a comprehensive changelog of all releases:
 
 @menu
 * master        :: unreleased
+* 0.16          :: Jan 11, 2014
 * 0.15          :: Nov 15, 2013
 * 0.14.1        :: Aug 15, 2013
 * 0.14          :: Aug 15, 2013
@@ -3179,9 +3180,9 @@ output@comma{} by simply ignoring them}
 
 @end itemize
 
-@node master,  , 0.15, Changes
+@node 0.16, master, 0.15, Changes
 @comment  node-name,  next,  previous,  up
-@unnumberedsec master (unreleased)
+@unnumberedsec 0.16 (Jan 11, 2014)
 
 @itemize @bullet
 @item @b{Breaking changes}:
@@ -3294,6 +3295,10 @@ Fix parsing of errors in @code{scss} and @code{sass}
 @end itemize
 
 @end itemize
+
+@node master, Credits, 0.16, Changes
+@comment  node-name,  next,  previous,  up
+@unnumberedsec master (unreleased)
 
 @node Credits, GNU Free Documentation License, Changes, Top
 @comment  node-name,  next,  previous,  up
