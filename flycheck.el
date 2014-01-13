@@ -656,7 +656,7 @@ This variable is a normal hook."
    ["Compile current buffer" flycheck-compile t]
    "---"
    ["Go to next error" flycheck-next-error t]
-   ["Go to next error" flycheck-previous-error t]
+   ["Go to previous error" flycheck-previous-error t]
    ["Show all errors" flycheck-list-errors t]
    ["Google messages at point" flycheck-google-messages t]
    "---"
