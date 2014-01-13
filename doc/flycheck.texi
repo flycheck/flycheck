@@ -3034,7 +3034,7 @@ Bug fixes:
 
 @end itemize
 
-@node 0.15, master, 0.14.1, Changes
+@node 0.15, 0.16, 0.14.1, Changes
 @comment  node-name,  next,  previous,  up
 @unnumberedsec 0.15 (Nov 15, 2013)
 
@@ -3296,8 +3296,8 @@ Fix parsing of errors in @code{scss} and @code{sass}
 
 @end itemize
 
-@node master, Credits, 0.16, Changes
-@comment  node-name,  next,  previous,  up
+@node master, , 0.16, Changes
+@comment  node-name, next,  previous,  up
 @unnumberedsec master (unreleased)
 
 @node Credits, GNU Free Documentation License, Changes, Top
