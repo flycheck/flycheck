@@ -454,20 +454,27 @@ enabled.  Changing it will not affect buffers which already have
   :package-version '(flycheck . "0.15")
   :safe #'booleanp)
 
-(defcustom flycheck-completion-system 'ido
+(defcustom flycheck-completion-system nil
   "How to complete in minibuffer prompts.
 
 `ido'
-     Use IDO.  This is default, however `grizzl' is the recommended system.
+     Use IDO.  IDO is a built-in alternative completion system,
+     without good flex matching and a powerful UI.  You may want
+     to install flx-ido (see URL `https://github.com/lewang/flx')
+     to improve the flex matching in IDO.
 
 `grizzl'
-
      Use Grizzl, see URL `https://github.com/d11wtq/grizzl'.
-     This is the recommended setting, but you need to install
-     Grizzl separately.
+     Grizzl is an alternative completion system with powerful
+     flex matching, but a very limited UI.
 
 nil
-     Use the standard unfancy `completing-read'.  Not recommended."
+     Use the standard unfancy `completing-read'.
+     `completing-read' has a very simple and primitive UI, and
+     does not offer flex matching.  This is the default setting,
+     though, to match Emacs' defaults.  With this system, you may
+     want enable `icomplete-mode' to improve the display of
+     completion candidates at least."
   :group 'flycheck
   :type '(choice (const :tag "IDO" ido)
                  (const :tag "Grizzl" grizzl)

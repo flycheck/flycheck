@@ -611,12 +611,25 @@ The completion system to use.
 @item ido
 Use IDO.
 
+IDO is a built-in alternative completion system, without good flex
+matching and a powerful UI.  You may want to install
+@uref{https://github.com/lewang/flx, flx-ido} to improve the flex
+matching in IDO.
+
 @item grizzl
 Use @uref{https://github.com/d11wtq/grizzl, Grizzl}.
 
+Grizzl is an alternative completion system with powerful flex matching,
+but a very limited UI.
+
 @item nil
-Use the standard unfancy @code{completing-read}.  This is @b{not}
-recommended.
+Use the standard unfancy @code{completing-read}.
+
+@code{completing-read} has a very simple and primitive UI, and does not
+offer flex matching.  This is the default setting, though, to match
+Emacs' defaults.  With this system, you may want enable
+@code{icomplete-mode} to improve the display of completion candidates at
+least.
 @end table
 @end defopt
 
@@ -3299,6 +3312,24 @@ Fix parsing of errors in @code{scss} and @code{sass}
 @node master, , 0.16, Changes
 @comment  node-name, next,  previous,  up
 @unnumberedsec master (unreleased)
+
+@itemize @bullet
+@item @b{Breaking changes}:
+
+@itemize @bullet
+@item
+The default @code{flycheck-completion-system} was changes to nil,
+i.e. the built-in @code{completing-read}, for compliance with Emacs'
+defaults.  To restore the previous behaviour, add the following to your
+@file{init.el}:
+
+@lisp
+(eval-after-load 'flycheck '(setq flycheck-completion-system 'ido))
+@end lisp
+
+@end itemize
+
+@end itemize
 
 @node Credits, GNU Free Documentation License, Changes, Top
 @comment  node-name,  next,  previous,  up
