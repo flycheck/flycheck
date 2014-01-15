@@ -884,6 +884,11 @@ currently being reverted.
 
 Return t if the check is to be deferred, or nil otherwise."
   (or (not (get-buffer-window))
+      ;; We defer the syntax check if Flycheck is already running, to
+      ;; immediately start a new syntax check after the current one finished,
+      ;; because the result of the current check will most likely be outdated by
+      ;; the time it is finished.
+      (flycheck-running-p)
       ;; We must defer checks while a buffer is being reverted, to avoid race
       ;; conditions while the buffer contents are being restored.
       revert-buffer-in-progress-p))
