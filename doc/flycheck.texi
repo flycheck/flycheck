@@ -3329,6 +3329,15 @@ defaults.  To restore the previous behaviour, add the following to your
 
 @end itemize
 
+@item
+Improvements:
+
+@itemize @bullet
+@item
+@ghissue{301, Immediately re-check the buffer when it was changed during
+a syntax check}
+@end itemize
+
 @end itemize
 
 @node Credits, GNU Free Documentation License, Changes, Top
