@@ -4469,7 +4469,7 @@ Otherwise report style issues as well.")
   "A Ruby syntax and style checker using the RuboCop tool.
 
 See URL `http://batsov.com/rubocop/'."
-  :command ("rubocop" "--format" "emacs" "--silent"
+  :command ("rubocop" "--format" "emacs"
             (config-file "--config" flycheck-rubocoprc)
             (option-flag "--lint" flycheck-rubocop-lint-only)
             source)
