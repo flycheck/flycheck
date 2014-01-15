@@ -3342,7 +3342,11 @@ output: %s\nChecker definition probably flawed."
           (flycheck-error-list-refresh)
           (run-hooks 'flycheck-after-syntax-check-hook)
           (when (eq (current-buffer) (window-buffer))
-            (flycheck-display-error-at-point)))))))
+            (flycheck-display-error-at-point))
+          ;; Immediately try to run any pending deferred syntax check, which
+          ;; were triggered by intermediate automatic check event, to make sure
+          ;; that we quickly refine outdated error information
+          (flycheck-perform-deferred-syntax-check))))))
 
 (defun flycheck-handle-signal (process _event)
   "Handle a signal from the syntax checking PROCESS.
