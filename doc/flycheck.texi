@@ -246,6 +246,8 @@ depending on the type of shell script)
 @item
 Slim (using @command{slimrb})
 @item
+Tcl (using @command{tclchecker})
+@item
 TeX/LaTeX (using @command{chktex} or @command{lacheck})
 @item
 Texinfo (using @command{makeinfo})

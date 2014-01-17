@@ -181,6 +181,7 @@ buffer-local wherever it is set."
     sh-dash
     sh-bash
     slim
+    tclchecker
     tex-chktex
     tex-lacheck
     texinfo
@@ -4660,6 +4661,23 @@ See URL `http://slim-lang.com'."
           (file-name) ", Line " line (optional ", Column " column)
           line-end))
   :modes slim-mode)
+
+(flycheck-def-option-var flycheck-tclchecker-use-packages nil tclchecker
+  "A list of specific Tcl packages to check with `-use'.
+
+The value of this variable is a list of strings, where each
+string is a package name with an optional version number attached such as `Tcl' or `Tcl8.6'."
+  :type '(repeat (string :tag "Package name (optionally with version)"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.17"))
+
+(flycheck-define-checker tclchecker
+  "A Tcl checker using ActiveState's tclchecker."
+  :command ("tclchecker" "-quiet" "-W2" (option-list "-use" flycheck-tclchecker-use-packages) source)
+  :error-patterns
+  ((warning line-start (file-name) ":" line " (warn" (one-or-more (any alpha)) ") " (message) line-end)
+   (error line-start (file-name) ":" line " (" (one-or-more (any alpha)) ") " (message) line-end))
+  :modes tcl-mode)
 
 (flycheck-def-config-file-var flycheck-chktexrc tex-chktex ".chktexrc"
   :safe #'stringp)

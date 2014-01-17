@@ -66,6 +66,7 @@ Features
   - SCSS
   - Shell scripts (POSIX Shell, Bash and Zsh)
   - Slim
+  - Tcl
   - TeX/LaTeX
   - Texinfo
   - Verilog
