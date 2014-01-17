@@ -301,6 +301,11 @@ flycheck-hdevtools} adds a Flycheck syntax checker for Haskell based on
 @uref{https://github.com/bitc/hdevtools/, hdevtools}.
 
 @item
+@uref{https://github.com/flycheck/flycheck-haskell} improves Haskell
+support in Flycheck, by configuring Flycheck according to the current
+Cabal project, and using Cabal sandbox packages.
+
+@item
 @uref{https://github.com/flycheck/flycheck-mercury,flycheck-mercury}
 adds a Flycheck syntax checker for the @uref{http://mercurylang.org/,
 Mercury Language}.
