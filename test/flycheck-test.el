@@ -1349,6 +1349,43 @@ check with.  ERRORS is the list of expected errors."
   (should (flycheck-validate-next-checker '(warnings-only . emacs-lisp) t)))
 
 
+;;;; Checker extensions
+(ert-deftest flycheck-add-next-checker/no-valid-checker ()
+  :tags '(extending)
+  (let ((err-data (should-error (flycheck-add-next-checker 'foo 'emacs-lisp))))
+    (should (string= (cadr err-data) "foo is not a valid syntax checker"))))
+
+(ert-deftest flycheck-add-next-checker/no-valid-next-checker ()
+  :tags '(extending)
+  (should-error (flycheck-add-next-checker 'emacs-lisp '(warnings-only bar)))
+  (should-error (flycheck-add-next-checker 'emacs-lisp "foo"))
+  (should-error (flycheck-add-next-checker 'emacs-lisp 'bar))
+  (should-error (flycheck-add-next-checker 'emacs-lisp '(warnings-only . bar)))
+  (should-error (flycheck-add-next-checker 'emacs-lisp '(foo . emacs-lisp))))
+
+(ert-deftest flycheck-add-next-checker/prepend ()
+  :tags '(extending)
+  (let ((next-checkers (flycheck-checker-next-checkers 'emacs-lisp)))
+    (flycheck-add-next-checker 'emacs-lisp 'texinfo)
+    (unwind-protect
+        (should (equal (flycheck-checker-next-checkers 'emacs-lisp)
+                       (cons 'texinfo next-checkers)))
+      (put 'emacs-lisp :flycheck-next-checkers next-checkers)
+      (should (equal (flycheck-checker-next-checkers 'emacs-lisp)
+                     next-checkers)))))
+
+(ert-deftest flycheck-add-next-checker/append ()
+  :tags '(extending)
+  (let ((next-checkers (flycheck-checker-next-checkers 'emacs-lisp)))
+    (flycheck-add-next-checker 'emacs-lisp 'texinfo 'append)
+    (unwind-protect
+        (should (equal (flycheck-checker-next-checkers 'emacs-lisp)
+                       (append next-checkers '(texinfo))))
+      (put 'emacs-lisp :flycheck-next-checkers next-checkers)
+      (should (equal (flycheck-checker-next-checkers 'emacs-lisp)
+                     next-checkers)))))
+
+
 ;;;; Checker API
 
 (ert-deftest flycheck-disabled-checker-p/enabled-checker ()

@@ -1560,6 +1560,34 @@ This variable is an option for the syntax checker `%s'." docstring checker)
      (make-variable-buffer-local ',symbol)))
 
 
+;;;; Checker extensions
+(defun flycheck-add-next-checker (checker next-checker &optional append)
+  "Add a NEXT-CHECKER after CHECKER.
+
+CHECKER is a syntax checker symbol, to which to add NEXT-CHECKER.
+
+NEXT-CHECKER describes the syntax checker to run after CHECKER.
+It is a either a syntax checker symbol, or a cons
+cell `(PREDICATE . CHECKER)'.  In the former case, always
+consider the syntax checker.  In the later case, only consider
+CHECKER if the PREDICATE matches.  PREDICATE is either `no-errors'
+or `warnings-only'.  In the former case, CHECKER is only
+considered if this checker reported no errors or warnings at all,
+in the latter case, CHECKER is only considered if this checker
+reported only warnings, but no errors.
+
+NEXT-CHECKER is prepended before other checkers to run after
+CHECKER, unless APPEND is non-nil."
+  (unless (flycheck-valid-checker-p checker)
+    (error "%s is not a valid syntax checker" checker))
+  (flycheck-validate-next-checker next-checker 'validate-checker)
+  (let ((next-checkers (flycheck-checker-next-checkers checker)))
+    (put checker :flycheck-next-checkers
+         (if append
+             (append next-checkers (list next-checker))
+           (cons next-checker next-checkers)))))
+
+
 ;;;; Checker API
 (defun flycheck-valid-checker-p (checker)
   "Check whether a CHECKER is valid.

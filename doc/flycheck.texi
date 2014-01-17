@@ -1212,6 +1212,7 @@ syntax checkers}, for more information.
 * Error levels::                Built-in error levels and how to define new
 * Error parsers::               Built-in error parsers
 * Option filters::              Built-in option filters
+* Extending checkers::          How to extend defined syntax checkers
 * Examples::                    Examples on how to define syntax checkers
 @end menu
 
@@ -1673,6 +1674,23 @@ An integral option that handles @code{nil} correctly (unlike
 @item flycheck-option-comma-separated-list
 An option for a comma separated list.
 @end table
+
+@node Extending checkers, Examples, Option filters, Extending
+@comment  node-name,  next,  previous,  up
+@section Extending syntax checkers
+
+There are some means to extend defined syntax checkers:
+
+@defun flycheck-add-next-checker checker next-checker &optional append
+Add a @var{next-checker} to run after @var{checker}.
+
+@var{checker} is a syntax checker symbol.  @var{next-checker} is either
+a syntax checker symbol or a cons cell in the format of a single entry
+to the @code{:next-checkers} property.
+
+@var{next-checker} is prepended before other checkers to run after
+@var{checker}, unless @var{append} is non-nil.
+@end defun
 
 @node Examples,  , Option filters, Extending
 @comment  node-name,  next,  previous,  up
@@ -3332,6 +3350,15 @@ defaults.  To restore the previous behaviour, add the following to your
 (eval-after-load 'flycheck '(setq flycheck-completion-system 'ido))
 @end lisp
 
+@end itemize
+
+@item
+New features:
+
+@itemize @bullet
+@item
+@ghissue{266, Extend syntax checkers with
+@code{flycheck-add-next-checkers}}
 @end itemize
 
 @item
