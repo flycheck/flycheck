@@ -3364,6 +3364,11 @@ awesome @gh{bbatsov/prelude, Prelude project}, and added a Ruby syntax
 checker using @command{rubocop}.
 
 @item
+@gh{bbbscarter, Simon Carter} provided valuable feedback about automatic
+syntax checking, and took great effort to debug some very subtle issues
+in it.
+
+@item
 @gh{dhaley, Damon Haley} helped to shape and test the PHP CodeSniffer
 checker.
 
