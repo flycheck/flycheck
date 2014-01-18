@@ -971,7 +971,7 @@ buffer."
 (defun flycheck-handle-idle-change ()
   "Handle an expired idle time since the last change."
   (flycheck-clear-idle-change-timer)
-  (flycheck-buffer-automatically 'idle-change 'force-deferred))
+  (flycheck-buffer-automatically 'idle-change))
 
 (defun flycheck-handle-save ()
   "Handle a save of the buffer."

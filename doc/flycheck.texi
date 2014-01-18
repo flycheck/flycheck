@@ -3341,6 +3341,8 @@ Improvements:
 @item
 @ghissue{301, Immediately re-check the buffer when it was changed during
 a syntax check}
+@item
+@ghissue{305, Do not defer syntax checker after idle change timeout}
 @end itemize
 
 @end itemize
