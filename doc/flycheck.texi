@@ -231,7 +231,8 @@ Racket
 @item
 ReStructuredText (using @command{rst2pseudoxml.py} from Docutils)
 @item
-Ruby (using @command{rubocop}, @command{ruby} , @command{jruby} or @command{ruby-lint})
+Ruby (using @command{rubocop}, @command{ruby} , @command{jruby} or
+@command{ruby-lint})
 @item
 Rust (using @command{rustc})
 @item
