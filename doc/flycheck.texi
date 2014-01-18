@@ -3379,7 +3379,7 @@ Verilog syntax checker using @command{verilator}.
 
 @item
 @gh{gfrey, Gereon Frey} fixed the @command{go-build} syntax checker and
-improve its tests.
+improved its tests.
 
 @item
 @gh{wyuenho, Jimmy Yuen Ho Wong} added the HTML syntax checker and the
@@ -3458,7 +3458,7 @@ language using @command{dmd}, and wrote the cool
 to the Flake8 syntax checker.
 
 @item
-@gh{yasuyk, Yasuyuki Oka} contribute a lot of syntax checkers for
+@gh{yasuyk, Yasuyuki Oka} contributed a lot of syntax checkers for
 various languages, including AsciiDoc, Chef recipes, ERuby, Handlebars,
 Javascript, PHP, Racket, Ruby, Slim and YAML.
 
