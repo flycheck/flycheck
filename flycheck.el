@@ -1546,9 +1546,9 @@ This variable is an option for the syntax checker `%s'." docstring checker)
 (defun flycheck-valid-checker-p (checker)
   "Check whether a CHECKER is valid.
 
-A valid checker is a symbol define as syntax checker with
+A valid checker is a symbol defined as syntax checker with
 `flycheck-define-checker'."
-  (get checker :flycheck-checker))
+  (and (symbolp checker) (get checker :flycheck-checker)))
 
 (defun flycheck-defined-checkers ()
   "Find all defined syntax checkers.
