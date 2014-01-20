@@ -2,7 +2,7 @@ EMACS = emacs
 EMACSFLAGS =
 CASK = cask
 VAGRANT = vagrant
-INSTALL-INFO = install-info
+SPHINX-BUILD = sphinx-build
 VERSION := $(shell EMACS=$(EMACS) $(CASK) version)
 PKGDIR := $(shell EMACS=$(EMACS) $(CASK) package-directory)
 
@@ -11,11 +11,6 @@ export EMACS
 
 SRCS = flycheck.el
 OBJECTS = $(SRCS:.el=.elc)
-DOC_SRCS = doc/flycheck.texi
-HTML_SRCS = $(DOC_SRCS) doc/htmlxref.cnf
-HTML_TARGETS = doc/html/index.html \
-	doc/html/screenshot.png \
-	doc/html/flycheck.css
 PACKAGE_SRCS = $(SRCS) \
 	flycheck-pkg.el \
 	doc/flycheck.info doc/dir
@@ -72,11 +67,15 @@ clean-info :
 	rm -f doc/flycheck.info doc/dir
 
 .PHONY: html
-html : $(HTML_TARGETS)
+html :
+	$(SPHINX-BUILD) -b html -n -d doc/_build/doctrees doc doc/_build/html
 
-.PHONY: clean-html
-clean-html:
-	rm -rf doc/html
+.PHONY: info
+info : $(SPHINX-BUILD) -b html -n -d doc/_build/doctrees doc doc/_build/info
+
+.PHONY: clean-doc
+clean-doc:
+	rm -rf doc/_build/
 
 %.elc : %.el $(PKGDIR)
 	$(CASK) exec $(EMACS) -Q --batch $(EMACSFLAGS) \
@@ -89,17 +88,3 @@ $(PKGDIR) : Cask
 
 flycheck-pkg.el : Cask
 	$(CASK) package
-
-doc/dir : doc/flycheck.info
-	$(INSTALL-INFO) doc/flycheck.info doc/dir
-
-doc/flycheck.info : $(DOC_SRCS)
-
-doc/html/screenshot.png : doc/screenshot.png
-	cp -f $< $@
-
-doc/html/flycheck.css : doc/flycheck.css
-	cp -f $< $@
-
-doc/html/index.html: $(DOC_SRCS)
-	$(MAKEINFO) --html --split=chapter --css-ref=flycheck.css -o doc/html doc/flycheck.texi
