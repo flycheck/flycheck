@@ -170,6 +170,7 @@ buffer-local wherever it is set."
     python-pylint
     racket
     rst
+    rst-sphinx
     ruby-rubocop
     ruby-rubylint
     ruby
@@ -4447,6 +4448,15 @@ See URL `http://racket-lang.org/'."
   ((error line-start (file-name) ":" line ":" column ":" (message) line-end))
   :modes racket-mode)
 
+(defun flycheck-locate-sphinx-source-directory ()
+  "Locate the Sphinx source directory for the current buffer.
+
+Return the source directory, or nil, if the current buffer is not
+part of a Sphinx project."
+  (-when-let* ((filename (buffer-file-name))
+               (dir (locate-dominating-file filename "conf.py")))
+    (f-expand dir)))
+
 (flycheck-define-checker rst
   "A ReStructuredText (RST) syntax checker using Docutils.
 
@@ -4458,7 +4468,41 @@ See URL `http://docutils.sourceforge.net/'."
           (file-name) ":" line
           ": (" (or "ERROR/3" "SEVERE/4") ") "
           (message) line-end))
-  :modes rst-mode)
+  :modes rst-mode
+  ;; Don't use the generic ReST checker in Sphinx projects, because it'll
+  ;; produce a lot of false positives.
+  :predicate (lambda () (not (flycheck-locate-sphinx-source-directory))))
+
+(flycheck-def-option-var flycheck-sphinx-warn-on-missing-references t rst-sphinx
+  "Whether to enable Microsoft extensions to C/C++ in Clang.
+
+When non-nil, enable Microsoft extensions to C/C++ via
+`-fms-extensions'."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.17"))
+
+(flycheck-define-checker rst-sphinx
+  "A ReStructuredText (RST) syntax checker using Sphinx.
+
+See URL `sphinx-doc.org'."
+  :command ("sphinx-build" "-b" "text"
+            "-q" "-N"                   ; Reduced output and no colors
+            (option-flag "-n" flycheck-sphinx-warn-on-missing-references)
+            (eval (flycheck-locate-sphinx-source-directory))
+            temporary-directory         ; Redirect the output to a temporary
+                                        ; directory
+            source-original)            ; Sphinx needs the original document
+  :error-patterns
+  ((warning line-start (file-name) ":" line ": WARNING: " (message) line-end)
+   (error line-start
+          (file-name) ":" line
+          ": " (or "ERROR" "SEVERE") ": "
+          (message) line-end))
+  :modes rst-mode
+  :predicate (lambda () (and (buffer-file-name)
+                             (not (buffer-modified-p))
+                             (flycheck-locate-sphinx-source-directory))))
 
 (flycheck-def-config-file-var flycheck-rubocoprc ruby-rubocop ".rubocop.yml"
   :safe #'stringp)

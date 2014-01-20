@@ -830,6 +830,10 @@ Whether to enable the Compass CSS framework for @code{sass}.
 Whether to enable the Compass CSS framework for @code{scss}.
 @end defopt
 
+@defopt flycheck-sphinx-warn-on-missing-references
+Whether to warn about missing references in @code{rst-sphinx}
+@end defopt
+
 @subsection Syntax checker configuration files
 
 Some syntax checkers also read configuration files denoted by associated
@@ -3336,6 +3340,14 @@ defaults.  To restore the previous behaviour, add the following to your
 @end itemize
 
 @item
+New syntax checkers:
+
+@itemize @bullet
+@item
+RST (ReStructuredText) using Sphinx
+@end itemize
+
+@item
 Improvements:
 
 @itemize @bullet
@@ -3344,6 +3356,9 @@ Improvements:
 a syntax check}
 @item
 @ghissue{305, Do not defer syntax checker after idle change timeout}
+@item
+Do not use the generic @code{rst} syntax checker in Sphinx projects
+anymore, to avoid false positives by Sphinx-only markup
 @end itemize
 
 @end itemize
@@ -3524,6 +3539,7 @@ order of their appearance in the default value of
 @iflyc python-pylint
 @iflyc racket
 @iflyc rst
+@iflyc rst-sphinx
 @iflyc ruby-rubocop
 @iflyc ruby-rubylint
 @iflyc ruby

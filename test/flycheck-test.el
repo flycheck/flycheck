@@ -3919,6 +3919,17 @@ Why not:
    "checkers/racket-syntax-error.rkt" 'racket-mode
    '(4 2 error "read: expected a `)' to close `('" :checker racket)))
 
+(ert-deftest flycheck-locate-sphinx-source-directory/not-in-a-sphinx-project ()
+  :tags '(builtin-checker language-rst)
+  (flycheck-test-with-resource-buffer "checkers/rst.rst"
+    (should-not (flycheck-locate-sphinx-source-directory))))
+
+(ert-deftest flycheck-locate-sphinx-source-directory/in-a-sphinx-project ()
+  :tags '(builtin-checker language-rst)
+  (flycheck-test-with-resource-buffer "checkers/rst-sphinx/index.rst"
+    (should (string= (flycheck-locate-sphinx-source-directory)
+                     (flycheck-test-resource-filename "checkers/rst-sphinx")))))
+
 (ert-deftest flycheck-define-checker/rst ()
   :tags '(builtin-checker external-tool language-rst)
   (skip-unless (flycheck-check-executable 'rst))
@@ -3930,6 +3941,39 @@ Why not:
    '(19 nil warning "Title underline too short." :checker rst)
    '(21 nil error "Unknown target name: \"cool\"." :checker rst)
    '(26 nil error "Unexpected section title." :checker rst)))
+
+(ert-deftest flycheck-define-checker/rst-not-in-a-sphinx-project ()
+  :tags '(builtin-checker external-tool language-rst)
+  (skip-unless (flycheck-check-executable 'rst))
+  (flycheck-test-with-resource-buffer "checkers/rst-sphinx/index.rst"
+    (rst-mode)
+    (should-not (flycheck-may-use-checker 'rst))))
+
+(ert-deftest flycheck-define-checker/rst-sphinx ()
+  :tags '(builtin-checker external-tool language-rst)
+  (skip-unless (flycheck-check-executable 'rst-sphinx))
+  (flycheck-test-should-syntax-check
+   "checkers/rst-sphinx/index.rst" 'rst-mode
+   '(2 nil warning "Title underline too short." :checker rst-sphinx)
+   '(9 nil error "Unknown target name: \"cool\"." :checker rst-sphinx)
+   '(9 nil warning "envvar reference target not found: FOO"
+       :checker rst-sphinx)))
+
+(ert-deftest flycheck-define-checker/rst-sphinx-no-reference-warnings ()
+  :tags '(builtin-checker external-tool language-rst)
+  (skip-unless (flycheck-check-executable 'rst-sphinx))
+  (let ((flycheck-sphinx-warn-on-missing-references nil))
+    (flycheck-test-should-syntax-check
+     "checkers/rst-sphinx/index.rst" 'rst-mode
+     '(2 nil warning "Title underline too short." :checker rst-sphinx)
+     '(9 nil error "Unknown target name: \"cool\"." :checker rst-sphinx))))
+
+(ert-deftest flycheck-define-checker/rst-sphinx-not-outside-of-a-sphinx-project ()
+  :tags '(builtin-checker external-tool language-rst)
+  (skip-unless (flycheck-check-executable 'rst-sphinx))
+  (flycheck-test-with-resource-buffer "checkers/rst.rst"
+    (rst-mode)
+    (should-not (flycheck-may-use-checker 'rst-sphinx))))
 
 (ert-deftest flycheck-define-checker/ruby-rubocop-syntax-error ()
   :tags '(builtin-checker external-tool language-ruby)
