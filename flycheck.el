@@ -1325,7 +1325,32 @@ https://github.com/d11wtq/grizzl.")))
 
   (defun flycheck-command-arguments-list-p (arguments)
     "Check whether ARGUMENTS is a list of valid arguments."
-    (-all? 'flycheck-command-argument-p arguments)))
+    (-all? 'flycheck-command-argument-p arguments))
+
+  (defun flycheck-validate-next-checker (next-checker &optional validate-checker)
+    "Validate NEXT-CHECKER.
+
+With VALIDATE-CHECKER not nil, also validate the actual checker
+being referred to.  Otherwise just validate the general shape and
+the predicate.
+
+Signal an error if NEXT-CHECKER is not a valid entry for
+`:next-checkers'."
+    (let ((checker (pcase next-checker
+                     ((pred symbolp) next-checker)
+                     (`(no-errors . ,(pred symbolp)) (cdr next-checker))
+                     (`(warnings-only . ,(pred symbolp)) (cdr next-checker))
+                     (`(,predicate . ,(pred symbolp))
+                      (error "%S must be one of `no-errors' or `warnings-only'"
+                             predicate))
+                     (`(_ . ,checker)
+                      (error "%S must be a syntax checker symbol" checker))
+                     (_ (error "%S must be a symbol or a cons cell"
+                               next-checker)))))
+      (when (and validate-checker
+                 (not (flycheck-valid-checker-p checker)))
+        (error "%s is not a valid Flycheck syntax checker" checker))
+      t)))
 
 (defmacro flycheck-define-checker (symbol doc-string &rest properties)
   "Define SYMBOL as syntax checker with DOC-STRING and PROPERTIES.
@@ -1437,15 +1462,8 @@ value."
       (error "Invalid :modes %s, must be a symbol or a list thereof" modes))
     (unless (or (null predicate) (functionp predicate))
       (error "%S is not a function" predicate))
-    (unless (or
-             (null next-checkers)
-             (and (listp next-checkers)
-                  (--all? (or (symbolp it)
-                              (and (listp it)
-                                   (memq (car it) '(no-errors warnings-only))
-                                   (symbolp (cdr it))))
-                          next-checkers)))
-      (error "Invalid next checkers %S" next-checkers))
+    (dolist (checker next-checkers)
+      (flycheck-validate-next-checker checker))
     `(progn
        (put ',symbol :flycheck-documentation ,doc-string)
        (put ',symbol :flycheck-command ',command)
@@ -1543,13 +1561,41 @@ This variable is an option for the syntax checker `%s'." docstring checker)
      (make-variable-buffer-local ',symbol)))
 
 
+;;;; Checker extensions
+(defun flycheck-add-next-checker (checker next-checker &optional append)
+  "Add a NEXT-CHECKER after CHECKER.
+
+CHECKER is a syntax checker symbol, to which to add NEXT-CHECKER.
+
+NEXT-CHECKER describes the syntax checker to run after CHECKER.
+It is a either a syntax checker symbol, or a cons
+cell `(PREDICATE . CHECKER)'.  In the former case, always
+consider the syntax checker.  In the later case, only consider
+CHECKER if the PREDICATE matches.  PREDICATE is either `no-errors'
+or `warnings-only'.  In the former case, CHECKER is only
+considered if this checker reported no errors or warnings at all,
+in the latter case, CHECKER is only considered if this checker
+reported only warnings, but no errors.
+
+NEXT-CHECKER is prepended before other checkers to run after
+CHECKER, unless APPEND is non-nil."
+  (unless (flycheck-valid-checker-p checker)
+    (error "%s is not a valid syntax checker" checker))
+  (flycheck-validate-next-checker next-checker 'validate-checker)
+  (let ((next-checkers (flycheck-checker-next-checkers checker)))
+    (put checker :flycheck-next-checkers
+         (if append
+             (append next-checkers (list next-checker))
+           (cons next-checker next-checkers)))))
+
+
 ;;;; Checker API
 (defun flycheck-valid-checker-p (checker)
   "Check whether a CHECKER is valid.
 
-A valid checker is a symbol define as syntax checker with
+A valid checker is a symbol defined as syntax checker with
 `flycheck-define-checker'."
-  (get checker :flycheck-checker))
+  (and (symbolp checker) (get checker :flycheck-checker)))
 
 (defun flycheck-defined-checkers ()
   "Find all defined syntax checkers.

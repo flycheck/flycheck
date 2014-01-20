@@ -1315,6 +1315,76 @@ check with.  ERRORS is the list of expected errors."
   :tags '(definition)
   (should-not (flycheck-command-argument-p '(foo bar))))
 
+(ert-deftest flycheck-validate-next-checker/any-symbol ()
+  :tags '(definition)
+  (should (flycheck-validate-next-checker 'foo))
+  (should-error (flycheck-validate-next-checker 'foo t)))
+
+(ert-deftest flycheck-validate-next-checker/syntax-checker-symbol ()
+  :tags '(definition)
+  (should (flycheck-validate-next-checker 'emacs-lisp t)))
+
+(ert-deftest flycheck-validate-next-checker/string ()
+  :tags '(definition)
+  (should-error (flycheck-validate-next-checker "foo")))
+
+(ert-deftest flycheck-validate-next-checker/invalid-form ()
+  :tags '(definition)
+  (should-error (flycheck-validate-next-checker '(warnings-only emacs-lisp))))
+
+(ert-deftest flycheck-validate-next-checker/invalid-predicate ()
+  :tags '(definition)
+  (should-error (flycheck-validate-next-checker '(bar . emacs-lisp))))
+
+(ert-deftest flycheck-validate-next-checker/valid-predicate-with-any-symbol ()
+  :tags '(definition)
+  (should (flycheck-validate-next-checker '(no-errors . bar)))
+  (should (flycheck-validate-next-checker '(warnings-only . bar)))
+  (should-error (flycheck-validate-next-checker '(no-errors . bar) t))
+  (should-error (flycheck-validate-next-checker '(warnings-only . bar) t)))
+
+(ert-deftest flycheck-validate-next-checker/valid-predicate-with-syntax-checker-symbol ()
+  :tags '(definition)
+  (should (flycheck-validate-next-checker '(no-errors . emacs-lisp) t))
+  (should (flycheck-validate-next-checker '(warnings-only . emacs-lisp) t)))
+
+
+;;;; Checker extensions
+(ert-deftest flycheck-add-next-checker/no-valid-checker ()
+  :tags '(extending)
+  (let ((err-data (should-error (flycheck-add-next-checker 'foo 'emacs-lisp))))
+    (should (string= (cadr err-data) "foo is not a valid syntax checker"))))
+
+(ert-deftest flycheck-add-next-checker/no-valid-next-checker ()
+  :tags '(extending)
+  (should-error (flycheck-add-next-checker 'emacs-lisp '(warnings-only bar)))
+  (should-error (flycheck-add-next-checker 'emacs-lisp "foo"))
+  (should-error (flycheck-add-next-checker 'emacs-lisp 'bar))
+  (should-error (flycheck-add-next-checker 'emacs-lisp '(warnings-only . bar)))
+  (should-error (flycheck-add-next-checker 'emacs-lisp '(foo . emacs-lisp))))
+
+(ert-deftest flycheck-add-next-checker/prepend ()
+  :tags '(extending)
+  (let ((next-checkers (flycheck-checker-next-checkers 'emacs-lisp)))
+    (flycheck-add-next-checker 'emacs-lisp 'texinfo)
+    (unwind-protect
+        (should (equal (flycheck-checker-next-checkers 'emacs-lisp)
+                       (cons 'texinfo next-checkers)))
+      (put 'emacs-lisp :flycheck-next-checkers next-checkers)
+      (should (equal (flycheck-checker-next-checkers 'emacs-lisp)
+                     next-checkers)))))
+
+(ert-deftest flycheck-add-next-checker/append ()
+  :tags '(extending)
+  (let ((next-checkers (flycheck-checker-next-checkers 'emacs-lisp)))
+    (flycheck-add-next-checker 'emacs-lisp 'texinfo 'append)
+    (unwind-protect
+        (should (equal (flycheck-checker-next-checkers 'emacs-lisp)
+                       (append next-checkers '(texinfo))))
+      (put 'emacs-lisp :flycheck-next-checkers next-checkers)
+      (should (equal (flycheck-checker-next-checkers 'emacs-lisp)
+                     next-checkers)))))
+
 
 ;;;; Checker API
 
