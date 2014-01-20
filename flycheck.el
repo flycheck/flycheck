@@ -1324,7 +1324,32 @@ https://github.com/d11wtq/grizzl.")))
 
   (defun flycheck-command-arguments-list-p (arguments)
     "Check whether ARGUMENTS is a list of valid arguments."
-    (-all? 'flycheck-command-argument-p arguments)))
+    (-all? 'flycheck-command-argument-p arguments))
+
+  (defun flycheck-validate-next-checker (next-checker &optional validate-checker)
+    "Validate NEXT-CHECKER.
+
+With VALIDATE-CHECKER not nil, also validate the actual checker
+being referred to.  Otherwise just validate the general shape and
+the predicate.
+
+Signal an error if NEXT-CHECKER is not a valid entry for
+`:next-checkers'."
+    (let ((checker (pcase next-checker
+                     ((pred symbolp) next-checker)
+                     (`(no-errors . ,(pred symbolp)) (cdr next-checker))
+                     (`(warnings-only . ,(pred symbolp)) (cdr next-checker))
+                     (`(,predicate . ,(pred symbolp))
+                      (error "%S must be one of `no-errors' or `warnings-only'"
+                             predicate))
+                     (`(_ . ,checker)
+                      (error "%S must be a syntax checker symbol" checker))
+                     (_ (error "%S must be a symbol or a cons cell"
+                               next-checker)))))
+      (when (and validate-checker
+                 (not (flycheck-valid-checker-p checker)))
+        (error "%s is not a valid Flycheck syntax checker" checker))
+      t)))
 
 (defmacro flycheck-define-checker (symbol doc-string &rest properties)
   "Define SYMBOL as syntax checker with DOC-STRING and PROPERTIES.
@@ -1436,15 +1461,8 @@ value."
       (error "Invalid :modes %s, must be a symbol or a list thereof" modes))
     (unless (or (null predicate) (functionp predicate))
       (error "%S is not a function" predicate))
-    (unless (or
-             (null next-checkers)
-             (and (listp next-checkers)
-                  (--all? (or (symbolp it)
-                              (and (listp it)
-                                   (memq (car it) '(no-errors warnings-only))
-                                   (symbolp (cdr it))))
-                          next-checkers)))
-      (error "Invalid next checkers %S" next-checkers))
+    (dolist (checker next-checkers)
+      (flycheck-validate-next-checker checker))
     `(progn
        (put ',symbol :flycheck-documentation ,doc-string)
        (put ',symbol :flycheck-command ',command)
