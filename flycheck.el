@@ -3422,7 +3422,11 @@ _EVENT is ignored."
   (condition-case err
       (let* ((program (flycheck-checker-executable checker))
              (args (flycheck-checker-substituted-arguments checker))
-             (process-connection-type nil) ; Use pipes to receive checker output
+             ;; Use pipes to receive output from the syntax checker.  They are
+             ;; more efficient and more robust than PTYs, which Emacs uses by
+             ;; default, and since we don't need any job control features, we
+             ;; can easily use pipes.
+             (process-connection-type nil)
              (process (apply 'start-process
                              "flycheck" (current-buffer)
                              program args)))
