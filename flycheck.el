@@ -3404,7 +3404,7 @@ _EVENT is ignored."
           (files (process-get process :flycheck-temporaries))
           (exit-status (process-exit-status process))
           (output (flycheck-get-output process))
-          (buffer (process-buffer process)))
+          (buffer (process-get process :flycheck-buffer)))
       (flycheck-delete-process process)
       (when (buffer-live-p buffer)
         (with-current-buffer buffer
@@ -3427,9 +3427,16 @@ _EVENT is ignored."
              ;; default, and since we don't need any job control features, we
              ;; can easily use pipes.
              (process-connection-type nil)
-             (process (apply 'start-process
-                             "flycheck" (current-buffer)
-                             program args)))
+             ;; We pass do not associate the process with any buffer, by passing
+             ;; nil for the BUFFER argument of `start-process'.  Instead, we
+             ;; just remember the buffer being checked in a process property
+             ;; (see below).  This neatly avoids all side-effects implied by
+             ;; attached a process to a buffer, which may cause conflicts with
+             ;; other packages.
+             ;;
+             ;; See https://github.com/flycheck/flycheck/issues/298 for an
+             ;; example for such a conflict.
+             (process (apply 'start-process "flycheck" nil program args)))
         (setq flycheck-current-process process)
         (set-process-filter process 'flycheck-receive-checker-output)
         (set-process-sentinel process 'flycheck-handle-signal)
@@ -3439,7 +3446,9 @@ _EVENT is ignored."
         ;; Now that temporary files and directories are attached to the process,
         ;; we can reset the variables used to collect them
         (setq flycheck-temporaries nil)
-        (process-put process :flycheck-checker checker))
+        ;; Remember the syntax checker and the buffer.
+        (process-put process :flycheck-checker checker)
+        (process-put process :flycheck-buffer (current-buffer)))
     (error
      (flycheck-report-error)
      (flycheck-safe-delete-temporaries)

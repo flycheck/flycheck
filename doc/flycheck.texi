@@ -3388,6 +3388,14 @@ Do not use the generic @code{rst} syntax checker in Sphinx projects
 anymore, to avoid false positives by Sphinx-only markup
 @end itemize
 
+@item
+Bug fixes
+
+@itemize @bullet
+@item
+@ghissue{298, Fix compatibility with tabbar-mode}
+@end itemize
+
 @end itemize
 
 @node Credits, GNU Free Documentation License, Changes, Top
