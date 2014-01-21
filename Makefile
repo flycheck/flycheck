@@ -3,6 +3,7 @@ EMACSFLAGS =
 CASK = cask
 VAGRANT = vagrant
 SPHINX-BUILD = sphinx-build
+INSTALL-INFO = install-info
 VERSION := $(shell EMACS=$(EMACS) $(CASK) version)
 PKGDIR := $(shell EMACS=$(EMACS) $(CASK) package-directory)
 
@@ -64,8 +65,7 @@ html :
 	$(SPHINX-BUILD) -b html -n -d doc/_build/doctrees doc doc/_build/html
 
 .PHONY: info
-info :
-	$(SPHINX-BUILD) -b info -n -d doc/_build/doctrees doc doc/_build/info
+info : doc/dir
 
 .PHONY: linkcheck
 linkcheck:
@@ -87,3 +87,15 @@ $(PKGDIR) : Cask
 
 flycheck-pkg.el : Cask
 	$(CASK) package
+
+doc/dir : doc/flycheck.info
+	$(INSTALL-INFO) doc/flycheck.info doc/dir
+
+doc/flycheck.info : doc/_build/info/flycheck.info
+	cp -f $< $@
+
+doc/_build/info/flycheck.texi :
+	$(SPHINX-BUILD) -b texinfo -n -d doc/_build/doctrees doc doc/_build/info
+
+
+
