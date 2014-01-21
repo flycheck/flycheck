@@ -50,23 +50,17 @@ pygments_style = 'emacs'
 
 html_theme = 'agogo'
 
-# Grouping the document tree into Texinfo files. List of tuples
-# (source start file, target name, title, author,
-#  dir menu entry, description, category)
+
 texinfo_documents = [
-  ('index', 'Flycheck', u'Flycheck Documentation',
-   u'Sebastian Wiesner', 'Flycheck', 'One line description of project.',
-   'Miscellaneous'),
+  ('manual/index', 'flycheck', u'Flycheck Documentation',
+   u'Sebastian Wiesner', 'flycheck',
+   'On the fly syntax checking (aka \"flymake done right\").',
+   'Emacs'),
 ]
 
-# Documents to append as an appendix to all manuals.
-#texinfo_appendices = []
-
-# If false, no module index is generated.
-#texinfo_domain_indices = True
-
-# How to display URL addresses: 'footnote', 'no', or 'inline'.
-#texinfo_show_urls = 'footnote'
-
-# If true, do not generate a @detailmenu in the "Top" node's menu.
-#texinfo_no_detailmenu = False
+# Restore standard formatting of emphasis, as by
+# http://sphinx-doc.org/faq.html#notes
+texinfo_elements = {'preamble': """
+@definfoenclose strong,*,*
+@definfoenclose emph,_,_
+"""}
