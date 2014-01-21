@@ -35,4 +35,5 @@ See :doc:`copying` for details.
    :maxdepth: 2
    :hidden:
 
+   manual/index
    copying
