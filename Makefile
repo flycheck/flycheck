@@ -73,6 +73,11 @@ html :
 .PHONY: info
 info : $(SPHINX-BUILD) -b html -n -d doc/_build/doctrees doc doc/_build/info
 
+.PHONY: linkcheck
+linkcheck:
+	$(SPHINX-BUILD) -b linkcheck -n -d doc/_build/doctrees doc doc/_build/linkcheck
+
+
 .PHONY: clean-doc
 clean-doc:
 	rm -rf doc/_build/
