@@ -22,10 +22,10 @@ needs_sphinx = '1.0'
 extensions = [
     'sphinx.ext.ifconfig',
 ]
+default_role = 'code'
 
 source_suffix = '.rst'
 master_doc = 'index'
-
 
 def cask_version():
     version_re = re.compile('^;; Version: (?P<version>.*)$')
