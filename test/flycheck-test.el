@@ -468,9 +468,9 @@ check with.  ERRORS is the list of expected errors."
   :tags '(customization)
   (should (eq flycheck-standard-error-navigation t)))
 
-(ert-deftest flycheck-completion-system/defaults-to-ido ()
+(ert-deftest flycheck-completion-system/defaults-to-nil ()
   :tags '(customization)
-  (should (equal flycheck-completion-system 'ido)))
+  (should (eq flycheck-completion-system nil)))
 
 (ert-deftest flycheck-CHECKER-executable/is-special-variable ()
   :tags '(customization)
