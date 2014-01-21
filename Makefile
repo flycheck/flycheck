@@ -59,19 +59,13 @@ doc : info html
 .PHONY: clean-doc
 clean-doc : clean-info clean-html
 
-.PHONY: info
-info: doc/dir
-
-.PHONY: clean-info
-clean-info :
-	rm -f doc/flycheck.info doc/dir
-
 .PHONY: html
 html :
 	$(SPHINX-BUILD) -b html -n -d doc/_build/doctrees doc doc/_build/html
 
 .PHONY: info
-info : $(SPHINX-BUILD) -b html -n -d doc/_build/doctrees doc doc/_build/info
+info :
+	$(SPHINX-BUILD) -b info -n -d doc/_build/doctrees doc doc/_build/info
 
 .PHONY: linkcheck
 linkcheck:
