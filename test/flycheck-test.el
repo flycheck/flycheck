@@ -3703,9 +3703,9 @@ Why not:
         (flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-test-should-syntax-check
      "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
-     '(3 1 warning "Missing \"use strict\" statement."
+     '(3 1 warning "Missing \"use strict\" statement. (strict)"
          :checker javascript-eslint)
-     '(4 8 warning "foo is defined but never used"
+     '(4 8 warning "foo is defined but never used (no-unused-vars)"
          :checker javascript-eslint))))
 
 (ert-deftest flycheck-define-checker/javascript-gjslint ()
