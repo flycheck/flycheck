@@ -4218,6 +4218,7 @@ for more information about the custom directory."
 
 See URL `https://github.com/nzakas/eslint'."
   :command ("eslint"
+            "--format=compact"    
             (config-file "--config" flycheck-eslintrc)
             (option "--rulesdir" flycheck-eslint-rulesdir)
             source)
