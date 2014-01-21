@@ -128,6 +128,10 @@ Go
 .. seealso:: http://golang.org/
 
 .. syntax-checker:: go-gofmt
+.. syntax-checker:: go-golint
+
+   .. seealso:: https://github.com/golang/lint
+
 .. syntax-checker:: go-build
 .. syntax-checker:: go-test
 

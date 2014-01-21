@@ -145,6 +145,7 @@ buffer-local wherever it is set."
     erlang
     eruby-erubis
     go-gofmt
+    go-golint
     go-build
     go-test
     haml
@@ -4060,7 +4061,19 @@ See URL `http://golang.org/cmd/gofmt/'."
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ": " (message) line-end))
   :modes go-mode
-  :next-checkers ((no-errors . go-build) (no-errors . go-test)))
+  :next-checkers ((no-errors . go-golint)
+                  ;; Fall back, if go-golint doesn't exist
+                  (no-errors . go-build) (no-errors . go-test)))
+
+(flycheck-define-checker go-golint
+  "A Go style checker using Golint.
+
+See URL `https://github.com/golang/lint'."
+  :command ("golint" source)
+  :error-patterns
+  ((warning line-start (file-name) ":" line ":" column ": " (message) line-end))
+  :modes go-mode
+  :next-checkers ((warnings-only . go-build) (warnings-only . go-test)))
 
 (flycheck-define-checker go-build
   "A Go syntax and type checker using the `go build' command.
