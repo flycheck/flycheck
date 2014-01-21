@@ -17,7 +17,7 @@
 import re
 import os
 
-needs_sphinx = '1.0'
+needs_sphinx = '1.2'
 
 extensions = [
     'sphinx.ext.ifconfig',
