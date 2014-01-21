@@ -1,0 +1,6 @@
+=========
+ License
+=========
+
+.. include:: ../COPYING
+   :literal:

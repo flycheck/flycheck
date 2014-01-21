@@ -23,52 +23,9 @@
 @syncodeindex fn cp
 @syncodeindex tp cp
 
-@ifhtml
-@html
-<div id="frontmatter">
-
-<p class="text-center lead">
-Modern on-the-fly syntax checking for GNU Emacs 24
-<small>(aka “Flymake done right”)</small>
-</p>
-
-<p class="text-center">
-<small>Copyright © 2013, 2014 Sebastian Wiesner</small>
-</p>
-
-<p class="text-center">
-<small>Flycheck is distributed under the
-terms of the <a href="http://www.gnu.org/licenses/gpl-3.0.en.html"
-target="_blank">GNU GPL 3 or any later version</a>.</small>
-</p>
-
-<p class="text-center">
-<small>This manual is distributed under the terms of the <a
-href="http://www.gnu.org/licenses/fdl-1.3.en.html" target="_blank">GNU
-FDL 1.3 or any later version</a>, with no Invariant Sections, no
-Front-Cover Texts, and no Back-Cover Texts.</small>
-<p>
-
-<p class="text-center">
-<a class="btn btn-info btn-large" href="Introduction.html#Introduction">
-Introduction
-</a>
-<a class="btn btn-primary btn-large"
-   href="https://github.com/flycheck/flycheck"
-   target="_blank">
-Github
-</a>
-<a class="btn btn-primary btn-large"
-   href="https://github.com/flycheck/flycheck/wiki"
-   target="_blank">
-Wiki
-</a>
-</p>
-@end html
-
-@center @image{screenshot,,,Flycheck in action}
-
-@html
+@center @image{screenshot,,,Flycheck in action}c
+in
+t@html
 </div>
 @end html
 
