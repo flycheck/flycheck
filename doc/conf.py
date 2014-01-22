@@ -16,9 +16,13 @@
 
 import re
 import os
+import sys
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 needs_sphinx = '1.2'
 
+extensions = ['eldomain']
 default_role = 'code'
 
 source_suffix = '.rst'
