@@ -57,9 +57,6 @@ vagrant-test :
 .PHONY: doc
 doc : info html
 
-.PHONY: clean-doc
-clean-doc : clean-info clean-html
-
 .PHONY: html
 html :
 	$(SPHINX-BUILD) -b html -n -d doc/_build/doctrees doc doc/_build/html
@@ -70,7 +67,6 @@ info : doc/dir
 .PHONY: linkcheck
 linkcheck:
 	$(SPHINX-BUILD) -b linkcheck -n -d doc/_build/doctrees doc doc/_build/linkcheck
-
 
 .PHONY: clean-doc
 clean-doc:
