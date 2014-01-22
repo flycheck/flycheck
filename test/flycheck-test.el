@@ -4151,12 +4151,19 @@ Why not:
      '(16 nil warning "Useless use of == in void context."
           :checker ruby-jruby))))
 
-(ert-deftest flycheck-define-checker/rust ()
+(ert-deftest flycheck-define-checker/rust-syntax-error ()
   :tags '(builtin-checker external-tool language-rust)
   (skip-unless (flycheck-check-executable 'rust))
   (flycheck-test-should-syntax-check
    "checkers/rust-syntax-error.rs" 'rust-mode
-   '(3 10 error "expected `{` but found `bla`" :checker rust)))
+   '(4 5 error "unresolved name `bla`." :checker rust)))
+
+(ert-deftest flycheck-define-checker/rust-warning ()
+  :tags '(builtin-checker external-tool language-rust)
+  (skip-unless (flycheck-check-executable 'rust))
+  (flycheck-test-should-syntax-check
+   "checkers/rust-warning.rs" 'rust-mode
+   '(4 9 warning "unused variable: `x`, #[warn(unused_variable)] on by default" :checker rust)))
 
 (ert-deftest flycheck-define-checker/sass ()
   :tags '(builtin-checker external-tool language-sass)

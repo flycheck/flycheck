@@ -1,3 +1,5 @@
 // A simple syntax error
 
-fn main() bla
+fn main() {
+    bla;
+}
