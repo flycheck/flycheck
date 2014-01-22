@@ -25,7 +25,7 @@ from sphinx.util.nodes import make_refnode
 
 
 def scope_for_objtype(objtype):
-    return 'functions' if objtype in ('function', 'command') else 'variables'
+    return 'functions' if objtype in ('function', 'macro', 'command') else 'variables'
 
 
 def make_target(scope, name):
@@ -99,19 +99,22 @@ class EmacsLispDomain(Domain):
     name = 'el'
     label = 'Emacs Lisp'
     object_types = {
-        'command': ObjType('command', 'command'),
         'function': ObjType('function', 'function'),
+        'macro': ObjType('macro', 'macro'),
+        'command': ObjType('command', 'command'),
         'variable': ObjType('variable', 'variable'),
         'option': ObjType('option', 'option'),
         'hook': ObjType('hook', 'hook')}
     directives = {
         'function': EmacsLispSymbol,
+        'macro': EmacsLispSymbol,
         'command': EmacsLispCommand,
         'variable': EmacsLispSymbol,
         'option': EmacsLispSymbol,
         'hook': EmacsLispSymbol}
     roles = {
         'function': XRefRole(),
+        'macro': XRefRole(),
         'command': XRefRole(),
         'variable': XRefRole(),
         'option': XRefRole(),
