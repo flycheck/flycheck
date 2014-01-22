@@ -1,4 +1,5 @@
 *.elc
+*.pyc
 
 # Packages installed for development
 /.cask/
