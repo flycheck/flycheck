@@ -43,7 +43,7 @@ class EmacsLispSymbol(ObjectDescription):
         name = parts[0]
         arguments = parts[1:]
 
-        type_name = self.objtype + ' '
+        type_name = self.objtype.title() + ' '
         signode += addnodes.desc_annotation(type_name, type_name)
 
         signode += addnodes.desc_name(name, name)
