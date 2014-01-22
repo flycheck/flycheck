@@ -19,9 +19,6 @@ import os
 
 needs_sphinx = '1.2'
 
-extensions = [
-    'sphinx.ext.ifconfig',
-]
 default_role = 'code'
 
 source_suffix = '.rst'
