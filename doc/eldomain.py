@@ -23,10 +23,6 @@ from sphinx.directives import ObjectDescription
 from sphinx.util.nodes import make_refnode
 
 
-def scope_for_objtype(objtype):
-    return 'functions' if objtype in ('function', 'macro', 'command') else 'variables'
-
-
 def make_target(scope, name):
     return 'el.{0}.{1}'.format(scope, name)
 
@@ -34,8 +30,12 @@ def make_target(scope, name):
 class EmacsLispSymbol(ObjectDescription):
 
     @property
+    def object_type(self):
+        return self.env.domains[self.domain].object_types[self.objtype]
+
+    @property
     def emacs_lisp_scope(self):
-        return scope_for_objtype(self.objtype)
+        return self.object_type.attrs['scope']
 
     def handle_signature(self, sig, signode):
         parts = sig.split()
@@ -71,7 +71,8 @@ class EmacsLispSymbol(ObjectDescription):
             signode['first'] = not self.names
             self.state.document.note_explicit_target(signode)
 
-            objects = self.env.domaindata['el']['symbols'][self.emacs_lisp_scope]
+            data = self.env.domaindata[self.domain]
+            objects = data['symbols'][self.emacs_lisp_scope]
             if name in objects:
                 self.state_machine.reporter.warning(
                     'duplicate object description of %s, ' % name +
@@ -98,12 +99,18 @@ class EmacsLispDomain(Domain):
     name = 'el'
     label = 'Emacs Lisp'
     object_types = {
-        'function': ObjType('function', 'function'),
-        'macro': ObjType('macro', 'macro'),
-        'command': ObjType('command', 'command'),
-        'variable': ObjType('variable', 'variable'),
-        'option': ObjType('option', 'option'),
-        'hook': ObjType('hook', 'hook')}
+        'function': ObjType('function', 'function', scope='functions',
+                            searchprio=0),
+        'macro': ObjType('macro', 'macro', scope='functions',
+                         searchprio=0),
+        'command': ObjType('command', 'command', scope='functions',
+                           searchprio=1),
+        'variable': ObjType('variable', 'variable', scope='variables',
+                            searchprio=0),
+        'option': ObjType('option', 'option', scope='variables',
+                          searchprio=1),
+        'hook': ObjType('hook', 'hook', scope='variables',
+                        searchprio=0)}
     directives = {
         'function': EmacsLispSymbol,
         'macro': EmacsLispSymbol,
@@ -125,7 +132,7 @@ class EmacsLispDomain(Domain):
         'symbols': {
             # fullname -> docname, objtype
             'functions': {},
-            'variables': {}
+            'variables': {},
         }
     }
 
@@ -138,7 +145,7 @@ class EmacsLispDomain(Domain):
 
     def resolve_xref(self, env, fromdoc, builder, objtype, target, node,
                      content):
-        scope = scope_for_objtype(objtype)
+        scope = self.object_types[objtype].attrs['scope']
         if target not in self.data['symbols'][scope]:
             return None
         docname, _ = self.data['symbols'][scope][target]
@@ -148,10 +155,8 @@ class EmacsLispDomain(Domain):
     def get_objects(self):
         for scope, objects in self.data['symbols'].iteritems():
             for name, (docname, objtype) in objects.iteritems():
-                # Prefer "interactive" symbols over others
-                priority = 0 if objtype in ('option', 'command') else 1
                 yield (name, name, objtype, docname, make_target(scope, name),
-                       priority)
+                       self.object_types[objtype].attrs['searchprio'])
 
 
 def setup(app):
