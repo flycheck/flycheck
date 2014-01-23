@@ -61,14 +61,6 @@ class EmacsLispSymbol(ObjectDescription):
             for arg in arguments:
                 parent += addnodes.desc_parameter(' ' + arg, ' ' + arg)
 
-        binding = self.options.get('binding')
-        if binding:
-            bindingnode = addnodes.desc_signature(binding, '')
-            signode.parent.append(bindingnode)
-            bindingnode += addnodes.desc_annotation(
-                'Key binding ', 'Key binding ')
-            bindingnode += addnodes.desc_name(binding, binding)
-
         return name
 
     def add_target_and_index(self, name, sig, signode):
@@ -93,6 +85,24 @@ class EmacsLispSymbol(ObjectDescription):
 
         indextext = '{0} (Emacs Lisp {1})'.format(name, self.object_type.lname)
         self.indexnode['entries'].append(('single', indextext, targetname, ''))
+
+    def run(self):
+        nodes = ObjectDescription.run(self)
+
+        # Insert a dedicated signature for the key binding before all other
+        # signatures, but only for commands.  Nothing else has key bindings.
+        binding = self.options.get('binding')
+        if binding:
+            desc_node = nodes[-1]
+            assert isinstance(desc_node, addnodes.desc)
+            signode = addnodes.desc_signature(binding, '')
+            # No clue what this property is for, but ObjectDescription sets it
+            # for its signatures, so we should do as well for our signature.
+            signode['first'] = False
+            desc_node.insert(0, signode)
+            signode += addnodes.desc_name(binding, binding)
+
+        return nodes
 
 
 class EmacsLispCommand(EmacsLispSymbol):
