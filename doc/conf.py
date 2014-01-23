@@ -17,6 +17,8 @@
 import re
 import os
 import sys
+from sphinx import addnodes
+from docutils import utils, nodes
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -65,3 +67,35 @@ texinfo_elements = {'preamble': """
 @definfoenclose strong,*,*
 @definfoenclose emph,_,_
 """}
+
+PROPERTY_PARAMETER_RE = re.compile('{([^}]+)}')
+
+def parse_checker_property(env, signature, node):
+    if not signature.startswith(':'):
+        raise ValueError('Invalid signature: ' + signature)
+
+    keyword, value = signature.split(' ', 1)
+    node += addnodes.desc_name(keyword, keyword)
+    node += nodes.Text(' ', ' ')
+
+    # Taken from sphinx.roles.emph_literal_role
+    value = utils.unescape(value)
+    pos = 0
+    for match in PROPERTY_PARAMETER_RE.finditer(value):
+        if match.start() > pos:
+            text = value[pos:match.start()]
+            node += nodes.Text(text, text)
+        param = match.group(1)
+        node += nodes.emphasis(param, param)
+        pos = match.end()
+    if pos < len(value):
+        node += nodes.Text(value[pos:], value[pos:])
+
+    return keyword.strip()
+
+
+def setup(app):
+    app.add_object_type('checker-property', 'checkprop',
+                        indextemplate='pair: %s; Syntax checker property',
+                        parse_node=parse_checker_property,
+                        objname='Syntax checker property')
