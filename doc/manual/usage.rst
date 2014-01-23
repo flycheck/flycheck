@@ -742,7 +742,7 @@ current buffer.  @xref{Compilation Mode, , ,emacs}, for more information about
 these commands.
 
 You can disable this integration by setting
-:el:option:`flycheck-next-error-navigation` to nil:
+:el:option:`flycheck-standard-error-navigation` to nil:
 
 .. el:option:: flycheck-standard-error-navigation
 
