@@ -107,7 +107,7 @@ class EmacsLispDomain(Domain):
                            searchprio=1),
         'variable': ObjType('variable', 'variable', scope='variables',
                             searchprio=0),
-        'option': ObjType('option', 'option', scope='variables',
+        'option': ObjType('user option', 'option', scope='variables',
                           searchprio=1),
         'hook': ObjType('hook', 'hook', scope='variables',
                         searchprio=0),
