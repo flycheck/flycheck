@@ -99,3 +99,6 @@ def setup(app):
                         indextemplate='pair: %s; Syntax checker property',
                         parse_node=parse_checker_property,
                         objname='Syntax checker property')
+    app.add_object_type('syntax-checker', 'syntax-checker',
+                        indextemplate='pair: %s, Syntax checker',
+                        objname='Syntax checker')
