@@ -85,8 +85,8 @@ class EmacsLispSymbol(ObjectDescription):
                     line=self.lineno)
             objects[name] = (self.env.docname, self.objtype)
 
-        indextext = '{0} (Emacs Lisp {1})'.format(name, self.object_type.lname)
-        self.indexnode['entries'].append(('single', indextext, targetname, ''))
+        indextext = '{0}; Emacs Lisp {1}'.format(name, self.object_type.lname)
+        self.indexnode['entries'].append(('pair', indextext, targetname, ''))
 
     def run(self):
         nodes = ObjectDescription.run(self)
