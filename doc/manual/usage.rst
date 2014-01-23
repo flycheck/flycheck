@@ -2,6 +2,8 @@
  Usage
 =======
 
+.. _syntax-checking:
+
 Syntax checking
 ===============
 
@@ -69,12 +71,13 @@ Each syntax check conducts the following steps:
 
 1. Run hooks in :el:hook:`flycheck-before-syntax-check-hook`
 2. Clear error information from previous syntax checks.
-3. Select a :term:`suitable syntax checker`.  See `Syntax checker selection`_,
-   for more information on how syntax checkers are selected.
+3. Select a :term:`suitable syntax checker`.  See
+   :ref:`syntax-checker-selection`, for more information on how syntax checkers
+   are selected.
 4. Copy the contents of the buffer to be checked to a temporary file.
 5. Run the syntax checker.
-6. Parse the output of the tool, and report all errors and warnings.
-   See `Error Reporting`_, for more information.
+6. Parse the output of the tool, and report all errors and warnings.  See
+   :ref:`error-reporting`, for more information.
 7. If the buffer can be checked with another syntax checker, continue from step
    4, but with the next syntax checker.  This is called “chaining” of syntax
    checkers.
@@ -87,8 +90,8 @@ Each syntax check conducts the following steps:
    This hook is run after a syntax check was finished.
 
    At this point, **all** chained checkers were run, and all errors were parsed,
-   highlighted and reported.  See `Error reporting`_, for more information about
-   error reporting.  The variable :el:variable:`flycheck-current-errors`
+   highlighted and reported.  See :ref:`error-reporting`, for more information
+   about error reporting.  The variable :el:variable:`flycheck-current-errors`
    contains all errors from all syntax checkers run during the syntax check, so
    you can use the various error analysis functions.
 
@@ -124,6 +127,8 @@ There is also a hook run whenever a syntax check fails:
    failed.
 
    This variable is a normal hook. @xref{Hooks, , ,elisp}.
+
+.. _syntax-checker-selection:
 
 Syntax checker selection
 ========================
@@ -246,8 +251,12 @@ syntax checker configuration.
 .. _flx-ido: https://github.com/lewang/flx
 .. _Grizzl: https://github.com/d11wtq/grizzl
 
+.. _customization:
+
 Customization
 =============
+
+.. _syntax-checker-executables:
 
 Syntax checker executables
 --------------------------
@@ -279,11 +288,10 @@ them interactively:
    With prefix arg, prompt for a syntax checker and reset its executable to the
    default.
 
-Syntax checker options
-----------------------
+.. _syntax-checker-options:
 
 Syntax checker options
-======================
+----------------------
 
 Some syntax checkers can be configured via options.  The following options are
 provided by Flycheck (in Emacs, use :kbd:`C-h v` or :kbd:`M-x describe-variable`
@@ -400,6 +408,8 @@ on the variable name for detailed help):
 
    Whether to warn about missing references in `rst-sphinx`
 
+.. _syntax-checker-configuration-files:
+
 Syntax checker configuration files
 ----------------------------------
 
@@ -496,11 +506,17 @@ parent directory:
 
 .. _Projectile: https://github.com/bbatsov/projectile
 
+.. _error-reporting:
+
 Error reporting
 ===============
 
+.. _error-navigation:
+
 Error navigation
 ================
+
+.. _mode-line:
 
 Mode line
 =========
