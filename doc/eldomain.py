@@ -42,10 +42,12 @@ class EmacsLispSymbol(ObjectDescription):
         name = parts[0]
         arguments = parts[1:]
 
-        type_name = self.object_type.lname.title() + ' '
-        signode += addnodes.desc_annotation(type_name, type_name)
+        if self.objtype == 'command':
+            signode += addnodes.desc_annotation('M-x ', 'M-x ')
+        else:
+            type_name = self.object_type.lname.title() + ' '
+            signode += addnodes.desc_annotation(type_name, type_name)
 
-        signode += addnodes.desc_name(name, name)
 
         # Do not include parameters for interactive commands
         have_param_list = self.emacs_lisp_scope == 'functions' and not self.objtype == 'command'
