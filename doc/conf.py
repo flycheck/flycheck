@@ -95,10 +95,10 @@ def parse_checker_property(env, signature, node):
 
 
 def setup(app):
-    app.add_object_type('checker-property', 'checkprop',
+    app.add_object_type('checker-property', 'checkerprop',
                         indextemplate='pair: %s; Syntax checker property',
                         parse_node=parse_checker_property,
                         objname='Syntax checker property')
-    app.add_object_type('syntax-checker', 'syntax-checker',
+    app.add_object_type('syntax-checker', 'checker',
                         indextemplate='pair: %s, Syntax checker',
                         objname='Syntax checker')
