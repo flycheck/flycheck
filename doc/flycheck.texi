@@ -1664,7 +1664,7 @@ for more information about Flycheck errors.
 Flycheck provides some utility functions to implement error parsers.
 @xref{Error parser API}.
 
-@node Option filters, Examples, Error parsers, Extending
+@node Option filters, Extending checkers, Error parsers, Extending
 @comment  node-name,  next,  previous,  up
 @section Option filters
 
@@ -1697,7 +1697,7 @@ to the @code{:next-checkers} property.
 @var{checker}, unless @var{append} is non-nil.
 @end defun
 
-@node Examples,  , Option filters, Extending
+@node Examples,  , Extending checkers, Extending
 @comment  node-name,  next,  previous,  up
 @section Examples of syntax checkers
 
