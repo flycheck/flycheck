@@ -42,7 +42,7 @@ class EmacsLispSymbol(ObjectDescription):
         name = parts[0]
         arguments = parts[1:]
 
-        type_name = self.objtype.title() + ' '
+        type_name = self.object_type.lname.title() + ' '
         signode += addnodes.desc_annotation(type_name, type_name)
 
         signode += addnodes.desc_name(name, name)
@@ -81,7 +81,7 @@ class EmacsLispSymbol(ObjectDescription):
                     line=self.lineno)
             objects[name] = (self.env.docname, self.objtype)
 
-        indextext = '{0} ({1})'.format(name, self.objtype)
+        indextext = '{0} (Emacs Lisp {1})'.format(name, self.object_type.lname)
         self.indexnode['entries'].append(('single', indextext, targetname, ''))
 
 
