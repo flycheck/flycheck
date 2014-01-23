@@ -294,10 +294,10 @@ syntax checker configuration.
 .. _flx-ido: https://github.com/lewang/flx
 .. _Grizzl: https://github.com/d11wtq/grizzl
 
-.. _customization:
+.. _syntax-checker-configuration:
 
-Customization
-=============
+Syntax checker configuration
+============================
 
 .. _syntax-checker-executables:
 
