@@ -142,8 +142,8 @@ Flycheck also does not support GNU Emacs 23 and other flavors of Emacs
 (e.g. XEmacs, Aquamacs, etc.).  Don't try, it will *not* work.
 
 Most checkers depend on external tools to perform the actual syntax checking.
-Use `flycheck-describe-checker` to get help about a syntax checker and its
-dependencies.
+Use :el:command:`flycheck-describe-checker` to get help about a syntax checker
+and its dependencies.
 
 .. _MELPA: http://melpa.milkbox.net
 .. _Marmalade: http://marmalade-repo.org/
