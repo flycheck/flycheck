@@ -305,8 +305,8 @@ Syntax checker executables
 --------------------------
 
 For each syntax checker, there is a buffer-local, customizable variable
-`flycheck-CHECKER-executable`, where `CHECKER` is the name of the syntax
-checker.
+:samp:`flycheck-{checker}-executable`, where :samp:`{checker}` is the name of
+the syntax checker.
 
 The value of this variable is either nil, or a string.  In the former case,
 Flycheck uses the default executable from the syntax checker definition when
