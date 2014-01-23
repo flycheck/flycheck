@@ -47,9 +47,19 @@ class EmacsLispSymbol(ObjectDescription):
 
         signode += addnodes.desc_name(name, name)
 
-        if self.emacs_lisp_scope == 'functions':
+        # Do not include parameters for interactive commands
+        have_param_list = self.emacs_lisp_scope == 'functions' and not self.objtype == 'command'
+
+        parent = signode
+        if have_param_list:
+            parent = addnodes.desc_parameterlist(sig, '')
+            signode += parent
+
+        parent += addnodes.desc_name(name, name)
+
+        if have_param_list:
             for arg in arguments:
-                signode += addnodes.desc_parameter(arg, arg)
+                parent += addnodes.desc_parameter(' ' + arg, ' ' + arg)
 
         binding = self.options.get('binding')
         if binding:
