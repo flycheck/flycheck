@@ -511,6 +511,181 @@ parent directory:
 Error reporting
 ===============
 
+Errors and warnings from a syntax checker are
+
+- reported in the mode line or in a popup buffer, depending on the length
+  of the error messages,
+- indicated according to :el:option:`flycheck-indication-mode`,
+- and highlighted in the buffer with the corresponding faces, according to
+  :el:option:`flycheck-highlighting-mode`
+
+.. el:face:: flycheck-error
+             flycheck-warning
+             flycheck-info
+
+   The faces to use to highlight errors, warnings and info messages
+   respectively.
+
+   .. note::
+
+      The default faces provided by GNU Emacs are ill-suited to highlight errors
+      because these are relatively pale and do not specify a background color or
+      underline.  Hence highlights are easily overlook and even **invisible**
+      for white space.
+
+   For best error highlighting customize these faces, or choose a color
+   theme that has reasonable Flycheck faces.  For instance, the Solarized_ and
+   Zenburn_ themes are known to have good Flycheck faces.
+
+.. el:option:: flycheck-highlighting-mode
+
+   This variable determines how to highlight errors:
+
+   `columns`
+       Highlights the error column.  If the error does not have a column,
+       highlight the whole line.
+
+   `symbols`
+       Highlights the symbol at the error column, if there is any, otherwise
+       behave like @code{columns}.  This is the default.
+
+   `sexps`
+       Highlights the expression at the error column, if there is any, otherwise
+       behave like `columns`.  Note that this mode can be **very** slow in some
+       major modes.
+
+   `lines`
+       Highlights the whole line of the error.
+
+   `nil`
+      Do not highlight errors at all.  However, errors will still be reported
+      in the mode line and in error message popups, and indicated according to
+      :el:option:`flycheck-indication-mode`.
+
+.. el:face:: flycheck-fringe-error
+             flycheck-fringe-warning
+             flycheck-fringe-info
+
+   The faces of fringe indicators for errors, warnings and info messages
+   respectively.
+
+.. el:option:: flycheck-indication-mode
+
+   This variable determines how to indicate errors:
+
+   If set to `left-fringe` or `right-fringe`, indicate errors and warnings in
+   the left and right fringe respectively.
+
+   If set to `nil`, do not indicate errors.  Errors will still be reported in
+   the mode line and in error message popups, and highlighted according to
+   :el:option:`flycheck-highlighting-mode`.
+
+
+You can also completely customize error processing by hooking into Flycheck:
+
+.. el:hook:: flycheck-process-error-functions
+
+   Functions to process errors.
+
+   Each function in this hook must accept a single argument: The Flycheck error
+   to process.  See :ref:`error-api`, for more information about Flycheck error
+   objects.
+
+   The functions in this hook are called in order of appearance, until a
+   function returns non-nil.  Thus, a function in this hook may return nil, to
+   allow for further processing of the error, or t, to indicate that the error
+   was fully processed and inhibit any further processing.
+
+You can also show a list with all errors in the current buffer:
+
+.. el:command:: flycheck-list-errors
+                list-flycheck-errors
+   :binding: C-c ! l
+
+   List all errors in the current buffer in a separate buffer.
+
+   The error list automatically refreshes after a syntax check, and follows the
+   current buffer and window, that is, if you switch to another buffer or
+   window, the error list is updated to show the errors of the new buffer or
+   window.
+
+If you hover a highlighted error with the mouse, a tooltip with the top-most
+error message will be shown.
+
+Flycheck also displays errors under point after a short delay:
+
+.. el:option:: flycheck-display-errors-delay
+
+   Delay in seconds before displaying errors at point.
+
+   Use floating point numbers to express fractions of seconds.
+
+The error is displayed via :el:option:`flycheck-display-errors-function`:
+
+.. el:option:: flycheck-display-errors-function
+
+   A function to display errors under point.
+
+   If set to a function, call the function with a list of all errors to
+   show.  If set to nil, to not display errors at all.
+
+   The default function is :el:function:`flycheck-display-error-messages`.
+
+.. el:function:: flycheck-display-error-messages errors
+
+   Show the messages of the given `errors` in the echo area, separated by empty
+   lines.  If the error messages are too long for the echo area, show the error
+   messages in a popup buffer instead.
+
+   The Emacs Lisp function `display-message-or-buffer` is used to show the
+   messages.  Refer to the docstring of this function for details on when popup
+   buffers are used, and how to customize its behaviour.
+
+You can also work with the error messages at point, and copy them into the kill
+ring or search them on Google:
+
+.. el:command:: flycheck-copy-messages-as-kill
+   :binding: C-c ! C-w
+
+   Copy all Flycheck error messages at the current point into kill ring.
+
+.. el:command:: flycheck-google-messages
+   :binding: C-c ! /
+
+   Google for all Flycheck error messages at the current point.
+
+   If there are more than :el:option:`flycheck-google-max-messages` errors at
+   point, signal an error, to avoid spamming your browser with Google tabs.
+
+   Requires the `Google This`_ library, which is available on MELPA_.
+
+.. el:option:: flycheck-google-max-messages
+
+   The maximum number of error messages to Google at once.
+
+   If set to an integer, :el:command:`flycheck-google-messages` will refuse to
+   search, when there are more error messages than the value of this variable at
+   point.
+
+   If set to `nil`, :el:command:`flycheck-google-messages` will always search
+   for **all** messages at point.  This setting is **not** recommended.
+
+Ultimately, you can clear all reported errors at once:
+
+.. el:command:: flycheck-clear
+   :binding: C-c ! C
+
+   Clear all Flycheck errors and warnings in the current buffer.
+
+   You should not normally need this command, because Flycheck checks the buffer
+   periodically anyway.
+
+
+.. _Solarized: https://github.com/bbatsov/solarized-emacs
+.. _Zenburn: https://github.com/bbatsov/zenburn-emacs
+.. _Google This: https://github.com/Bruce-Connor/emacs-google-this
+.. _MELPA: http://melpa.milkbox.net/
+
 .. _error-navigation:
 
 Error navigation
