@@ -2,12 +2,55 @@
  Usage
 =======
 
+.. _flycheck-mode:
+
+Flycheck Mode
+=============
+
+Syntax checking is done in the Flycheck minor mode:
+
+.. el:command:: flycheck-mode
+
+   Toggle Flycheck Mode for the current buffer.
+
+.. el:option:: flycheck-mode
+
+   Whether Flycheck Mode is enabled in the current buffer.
+
+.. el:command:: global-flycheck-mode
+
+   Toggle Flycheck Mode for **all** live buffers, and for new buffers.
+
+   With Global Flycheck Mode, Flycheck Mode is automatically enabled in all
+   buffers, for which a :term:`suitable syntax checker` exists and is enabled.
+
+   .. note::
+
+      Flycheck Mode will **not** be enabled in buffers for remote or encrypted
+      files.  The former is flaky and might be very slow, and the latter might
+      leak confidential data to temporary directories.
+
+      You can still explicitly enable Flycheck Mode in such buffers with
+      :el:command:`flycheck-mode`.  This is **not** recommended though.
+
+.. el:option:: global-flycheck-mode
+
+   Whether Flycheck Mode is enabled globally.
+
+If you like Flycheck Mode, you may want to enable it permanently, either by
+customizing :el:option:`global-flycheck-mode`, or by adding the following code
+to your :file:`init.el`:
+
+.. code-block:: cl
+
+   (add-hook 'after-init-hook #'global-flycheck-mode)
+
 .. _syntax-checking:
 
 Syntax checking
 ===============
 
-By default, Flycheck Mode checks syntax automatically when
+By default, :ref:`flycheck-mode` checks syntax automatically when
 
 - the mode is enabled,
 - the file is saved,
@@ -709,7 +752,8 @@ You can disable this integration by setting
    Otherwise, do not integrate in standard error navigation, and let these
    functions only navigate compilation mode errors.
 
-   Changes to this variable only take effect when enabling Flycheck Mode.
+   Changes to this variable only take effect after re-enabling
+   :ref:`flycheck-mode` with :el:command:`flycheck-mode` again.
 
 Visible compilation buffers take precedence over Flycheck navigation.  If such a
 buffer is visible, :kbd:`M-g n` and :kbd:`M-g p` will ignore Flycheck errors and

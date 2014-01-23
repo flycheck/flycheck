@@ -147,18 +147,3 @@ and its dependencies.
 
 .. _MELPA: http://melpa.milkbox.net
 .. _Marmalade: http://marmalade-repo.org/
-
-Activation
-==========
-
-Once installed, enable Flycheck mode with :kbd:`M-x flycheck-mode`.  To
-automatically enable Flycheck in all buffers, in which it can be used, add the
-following to your :file:`init.el` file:
-
-.. code-block:: cl
-
-   (add-hook 'after-init-hook #'global-flycheck-mode)
-
-Flycheck will not check syntax in buffers for remote or encrypted files.  The
-former is potentially slow, and the latter might leak confidential data to
-temporary directories.
