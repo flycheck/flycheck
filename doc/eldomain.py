@@ -110,21 +110,24 @@ class EmacsLispDomain(Domain):
         'option': ObjType('option', 'option', scope='variables',
                           searchprio=1),
         'hook': ObjType('hook', 'hook', scope='variables',
-                        searchprio=0)}
+                        searchprio=0),
+        'face': ObjType('face', 'face', scope='faces', searchprio=0)}
     directives = {
         'function': EmacsLispSymbol,
         'macro': EmacsLispSymbol,
         'command': EmacsLispCommand,
         'variable': EmacsLispSymbol,
         'option': EmacsLispSymbol,
-        'hook': EmacsLispSymbol}
+        'hook': EmacsLispSymbol,
+        'face': EmacsLispSymbol}
     roles = {
         'function': XRefRole(),
         'macro': XRefRole(),
         'command': XRefRole(),
         'variable': XRefRole(),
         'option': XRefRole(),
-        'hook': XRefRole()}
+        'hook': XRefRole(),
+        'face': XRefRole()}
     indices = []
 
     data_version = 1
@@ -133,6 +136,7 @@ class EmacsLispDomain(Domain):
             # fullname -> docname, objtype
             'functions': {},
             'variables': {},
+            'faces': {},
         }
     }
 
