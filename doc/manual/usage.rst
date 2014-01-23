@@ -68,16 +68,16 @@ However, you can customize automatic syntax checking with
    following events are known:
 
    `mode-enabled`
-       Check syntax immediately when `flycheck-mode` is enabled.
+      Check syntax immediately when `flycheck-mode` is enabled.
 
    `save`
-       Check syntax immediately after the buffer was saved.
+      Check syntax immediately after the buffer was saved.
 
    `new-line`
-       Check syntax immediately after a new line was inserted into the buffer.
+      Check syntax immediately after a new line was inserted into the buffer.
 
    `idle-change`
-       Check syntax a short time after the last change to the buffer.
+      Check syntax a short time after the last change to the buffer.
 
    An syntax check is only conducted for events that are contained in this list.
    For instance, the following setting will cause Flycheck to *only* check if
@@ -261,25 +261,25 @@ You can change the completion system used by
    The completion system to use.
 
    `ido`
-       Use IDO.
+      Use IDO.
 
-       IDO is a built-in alternative completion system, without good flex
-       matching and a powerful UI.  You may want to install flx-ido_ to improve
-       the flex matching in IDO.
+      IDO is a built-in alternative completion system, without good flex
+      matching and a powerful UI.  You may want to install flx-ido_ to improve
+      the flex matching in IDO.
 
    `grizzl`
-       Use Grizzl_.
+      Use Grizzl_.
 
-       Grizzl is an alternative completion system with powerful flex matching,
-       but a very limited UI.
+      Grizzl is an alternative completion system with powerful flex matching,
+      but a very limited UI.
 
    `nil`
-       Use the standard unfancy `completing-read`.
+      Use the standard unfancy `completing-read`.
 
-       `completing-read` has a very simple and primitive UI, and does not offer
-       flex matching.  This is the default setting, though, to match Emacs'
-       defaults.  With this system, you may want enable `icomplete-mode` to
-       improve the display of completion candidates at least.
+      `completing-read` has a very simple and primitive UI, and does not offer
+      flex matching.  This is the default setting, though, to match Emacs'
+      defaults.  With this system, you may want enable `icomplete-mode` to
+      improve the display of completion candidates at least.
 
 Each syntax checker provides documentation with information about the executable
 the syntax checker uses, in which buffers it will be used for syntax checks, and
