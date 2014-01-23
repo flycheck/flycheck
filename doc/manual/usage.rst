@@ -691,7 +691,87 @@ Ultimately, you can clear all reported errors at once:
 Error navigation
 ================
 
+Flycheck integrates into standard error navigation commands of Emacs.  If **no**
+compilation buffer (including those from :kbd:`M-x compile`, :kbd:`M-x grep`,
+:kbd:`M-x occur`, etc.) is visible, :kbd:`M-g n` (`next-error`) and :kbd:`M-g p`
+(`previous-error`) will navigate between Flycheck warnings and errors in the
+current buffer.  @xref{Compilation Mode, , ,emacs}, for more information about
+these commands.
+
+You can disable this integration by setting
+:el:option:`flycheck-next-error-navigation` to nil:
+
+.. el:option:: flycheck-standard-error-navigation
+
+   If non-nil, enable navigation of Flycheck errors with the standard
+   `next-error` and friends.
+
+   Otherwise, do not integrate in standard error navigation, and let these
+   functions only navigate compilation mode errors.
+
+   Changes to this variable only take effect when enabling Flycheck Mode.
+
+Visible compilation buffers take precedence over Flycheck navigation.  If such a
+buffer is visible, :kbd:`M-g n` and :kbd:`M-g p` will ignore Flycheck errors and
+warnings, and navigate errors (or generally results) reported by the compilation
+buffer instead.
+
+To address this issue, Flycheck provides independent error navigation commands,
+which are not affected by :el:option:`flycheck-standard-error-navigation`:
+
+.. el:command:: flycheck-next-error
+   :binding: C-c ! n
+
+   Jump to the next Flycheck error.
+
+   With prefix argument, jump forwards by as many errors as specified by
+   the prefix argument, e.g. :kbd:`M-3 C-c ! n` will move to the 3rd error
+   from the current point.
+
+.. el:command:: flycheck-previous-error
+   :binding: C-c ! p
+
+   Jump to the previous Flycheck error.
+
+   With prefix argument, jump backwards by as many errors as specified by
+   the prefix argument, e.g. :kbd:`M-3 C-c ! p` will move to the 3rd
+   previous error from the current point.
+
+.. el:command:: flycheck-first-error
+
+   Jump to the first Flycheck error.
+
+   With prefix argument, jump forwards to by as many errors as specified by
+   the prefix argument, e.g. :kbd:`M-3 M-x flycheck-first-error` moves to
+   the 3rd error from the beginning of the buffer.
+
 .. _mode-line:
 
 Mode line
 =========
+
+Flycheck indicates its state in the mode line:
+
+`FlyC`
+    There are no errors in the current buffer.
+
+`FlyC*`
+    A syntax check is being performed currently.
+
+`FlyC:3/4`
+    There are three errors and four warnings in the current buffer.
+
+`FlyC-`
+    Automatic syntax checker selection did not find a suitable syntax checker.
+    See :ref:`syntax-checker-selection` for more information.
+
+`FlyC!`
+    The syntax check failed.  Inspect the `*Messages*` buffer for details.
+
+`FlyC?`
+    The syntax check had a dubious result.  The definition of the syntax checker
+    may be flawed.  Inspect the `*Messages*` buffer for details.
+
+    This indicator should **never** be displayed for built-in syntax checkers.
+    If it is, please report an issue to the Flycheck developers, as by
+    :ref:`reporting-issues`.
