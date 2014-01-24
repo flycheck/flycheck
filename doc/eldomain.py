@@ -133,7 +133,9 @@ class EmacsLispDomain(Domain):
                           searchprio=1),
         'hook': ObjType('hook', 'hook', scope='variables',
                         searchprio=0),
-        'face': ObjType('face', 'face', scope='faces', searchprio=0)}
+        'face': ObjType('face', 'face', scope='faces', searchprio=0),
+        'cl-struct': ObjType('CL struct', 'cl-struct', scope='structs',
+                             searchprio=0)}
     directives = {
         'function': EmacsLispSymbol,
         'macro': EmacsLispSymbol,
@@ -141,7 +143,8 @@ class EmacsLispDomain(Domain):
         'variable': EmacsLispSymbol,
         'option': EmacsLispSymbol,
         'hook': EmacsLispSymbol,
-        'face': EmacsLispSymbol}
+        'face': EmacsLispSymbol,
+        'cl-struct': EmacsLispSymbol}
     roles = {
         'function': XRefRole(),
         'macro': XRefRole(),
@@ -149,7 +152,8 @@ class EmacsLispDomain(Domain):
         'variable': XRefRole(),
         'option': XRefRole(),
         'hook': XRefRole(),
-        'face': XRefRole()}
+        'face': XRefRole(),
+        'cl-struct': XRefRole()}
     indices = []
 
     data_version = 1
@@ -159,6 +163,7 @@ class EmacsLispDomain(Domain):
             'functions': {},
             'variables': {},
             'faces': {},
+            'structs': {},
         }
     }
 
