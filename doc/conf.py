@@ -51,8 +51,7 @@ exclude_patterns = ['_build']
 
 pygments_style = 'emacs'
 
-html_theme = 'agogo'
-
+html_theme = 'nature'
 
 texinfo_documents = [
   ('manual/index', 'flycheck', u'Flycheck Documentation',
