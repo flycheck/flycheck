@@ -132,6 +132,52 @@ class EmacsLispCommand(EmacsLispSymbol):
         return nodes
 
 
+class EmacsLispCLStruct(EmacsLispSymbol):
+
+    def before_content(self):
+        EmacsLispSymbol.before_content(self)
+        if self.names:
+            self.env.temp_data['el:cl-struct'] = self.names[0]
+
+    def after_content(self):
+        EmacsLispSymbol.after_content(self)
+        del self.env.temp_data['el:cl-struct']
+
+
+class EmacsLispCLSlot(EmacsLispSymbol):
+
+    def handle_signature(self, sig, signode):
+        name = EmacsLispSymbol.handle_signature(self, sig, signode)
+        struct = self.env.temp_data.get('el:cl-struct')
+        if not struct:
+            raise ValueError('Missing containing structure')
+        return struct + '-' + name
+
+
+class EmacsLispSlotXRefRole(XRefRole):
+
+    def process_link(self, env, refnode, has_explicit_title, title, target):
+        # Obtain the current structure
+        current_struct = env.temp_data.get('el:cl-struct')
+        omit_struct = target.startswith('~')
+        target = target.lstrip('~')
+        parts = target.split(' ', 1)
+        # If the reference is given as "structure slot", adjust the title, and
+        # reconstruct the function name
+        if len(parts) > 1:
+            struct, slot = parts
+            target = parts.join('-')
+            # If the first character is a tilde, or if there is a current
+            # structure, omit the structure name
+            if not has_explicit_title and (omit_struct or current_struct == struct):
+                title = slot
+        elif current_struct:
+            # Resolve slot against the current struct
+            target = current_struct + '-' + target
+
+        return title,target
+
+
 class EmacsLispDomain(Domain):
     """Emacs Lisp domain"""
 
@@ -152,7 +198,9 @@ class EmacsLispDomain(Domain):
                         searchprio=0),
         'face': ObjType('face', 'face', scope='faces', searchprio=0),
         'cl-struct': ObjType('CL struct', 'cl-struct', scope='structs',
-                             searchprio=0)}
+                             searchprio=0),
+        'cl-slot': ObjType('slot', 'cl-slot', scope='functions',
+                           searchprio=0)}
     directives = {
         'function': EmacsLispFunction,
         'macro': EmacsLispFunction,
@@ -161,7 +209,9 @@ class EmacsLispDomain(Domain):
         'option': EmacsLispSymbol,
         'hook': EmacsLispSymbol,
         'face': EmacsLispSymbol,
-        'cl-struct': EmacsLispSymbol}
+        'cl-struct': EmacsLispCLStruct,
+        'cl-slot': EmacsLispCLSlot,
+    }
     roles = {
         'function': XRefRole(),
         'macro': XRefRole(),
@@ -170,7 +220,8 @@ class EmacsLispDomain(Domain):
         'option': XRefRole(),
         'hook': XRefRole(),
         'face': XRefRole(),
-        'cl-struct': XRefRole()}
+        'cl-struct': XRefRole(),
+        'cl-slot': EmacsLispSlotXRefRole()}
     indices = []
 
     data_version = 1
