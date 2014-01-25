@@ -27,6 +27,10 @@ def make_target(scope, name):
     return 'el.{0}.{1}'.format(scope, name)
 
 
+class el_parameterlist(addnodes.desc_parameterlist):
+    child_text_separator = ' '
+
+
 class EmacsLispSymbol(ObjectDescription):
 
     @property
@@ -48,20 +52,20 @@ class EmacsLispSymbol(ObjectDescription):
             type_name = self.object_type.lname.title() + ' '
             signode += addnodes.desc_annotation(type_name, type_name)
 
+        signode += addnodes.desc_name(name, name)
 
         # Do not include parameters for interactive commands
         have_param_list = self.emacs_lisp_scope == 'functions' and not self.objtype == 'command'
-
-        parent = signode
         if have_param_list:
-            parent = addnodes.desc_parameterlist(sig, '')
-            signode += parent
-
-        parent += addnodes.desc_name(name, name)
-
-        if have_param_list:
+            paramlist = el_parameterlist(' '.join(arguments), '')
+            signode += paramlist
             for arg in arguments:
-                parent += addnodes.desc_parameter(' ' + arg, ' ' + arg)
+                if arg.startswith('&'):
+                    paramlist += addnodes.desc_annotation(' ' + arg, ' ' + arg)
+                else:
+                    node = addnodes.desc_parameter(arg, arg)
+                    node['noemph'] = True
+                    paramlist += node
 
         return name
 
@@ -190,5 +194,19 @@ class EmacsLispDomain(Domain):
                        self.object_types[objtype].attrs['searchprio'])
 
 
+def visit_el_parameterlist_html(self, node):
+    self.body.append(' ')
+    self.first_param = 1
+    self.param_separator = node.child_text_separator
+
+
+def visit_el_parameterlist_texinfo(self, node):
+    self.body.append(' ')
+    self.first_param = 1
+
+
 def setup(app):
     app.add_domain(EmacsLispDomain)
+    app.add_node(el_parameterlist,
+                 html=(visit_el_parameterlist_html, lambda s, v: None),
+                 texinfo=(visit_el_parameterlist_texinfo, lambda s, v: None))
