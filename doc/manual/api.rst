@@ -18,15 +18,14 @@ respectively.
 Error API
 =========
 
-Flycheck errors are represented by the CL structure
-:el:cl-struct:`flycheck-error`.  @xref{Structures, , , cl}, for information
-about CL structures.
+Flycheck errors are represented by the CL structure :cl-struct:`flycheck-error`.
+@xref{Structures, , , cl}, for information about CL structures.
 
-.. el:cl-struct:: flycheck-error
+.. cl-struct:: flycheck-error
 
    A Flycheck error with the following slots.  Each of these slots may be `nil`.
 
-   .. el:cl-slot:: buffer
+   .. cl-slot:: buffer
 
       The buffer object referring to the buffer this error belongs to.
 
@@ -35,48 +34,47 @@ about CL structures.
          You do not need to set this attribute when creating errors in an error
          parser.  Flycheck automatically keeps track of the buffer itself.
 
-   .. el:cl-slot:: checker
+   .. cl-slot:: checker
 
       The syntax checker that reported this error.
 
-   .. el:cl-slot:: filename
+   .. cl-slot:: filename
 
       A string containing the filename the error refers to.
 
-   .. el:cl-slot:: line
+   .. cl-slot:: line
 
       An integer providing the line the error refers to.
 
-   .. el:cl-slot:: column
+   .. cl-slot:: column
 
       An integer providing the column the error refers to.
 
       If this attribute is `nil`, Flycheck will assume that the error refers to
       the whole line.
 
-   .. el:cl-slot:: message
+   .. cl-slot:: message
 
       The human-readable error message as string.
 
-   .. el:cl-slot:: level
+   .. cl-slot:: level
 
-      The error level of the message, as symbol denoting an error level
-      defined with :el:function:`flycheck-define-error-level`.
+      The error level of the message, as symbol denoting an error level defined
+      with :function:`flycheck-define-error-level`.
 
-   There are two constructors to create new :el:cl-struct:`flycheck-error` objects:
+   There are two constructors to create new :cl-struct:`flycheck-error` objects:
 
-   .. el:function:: flycheck-error-new-at line column &optional level message &key \
+   .. function:: flycheck-error-new-at line column &optional level message &key \
                     checker filename buffer
 
       Create a new Flycheck error at the given `line` and `column`.
 
-      `line` and `column` refer to the :el:cl-slot:`line` and
-      :el:cl-slot:`column` of the new error.  The optional `level` and `message`
-      arguments fill the :el:cl-slot:`level` and :el:cl-slot:`message` slots
-      respectively.
+      `line` and `column` refer to the :cl-slot:`line` and :cl-slot:`column` of
+      the new error.  The optional `level` and `message` arguments fill the
+      :cl-slot:`level` and :cl-slot:`message` slots respectively.
 
       `checker`, `filename` and `buffer` are keyword arguments, for
-      :el:cl-slot:`checker`, :el:cl-slot:`filename` and :el:cl-slot:`buffer`
+      :cl-slot:`checker`, :cl-slot:`filename` and :cl-slot:`buffer`
       respectively.  `buffer` defaults to the current buffer, the other two
       default to `nil`.
 
@@ -86,13 +84,12 @@ about CL structures.
          specify **all** optional arguments, that is, **both** `level` **and**
          `message`, to pass any keyword arguments.
 
-   .. el:function:: flycheck-error-new &rest attributes
+   .. function:: flycheck-error-new &rest attributes
 
-      Create a new :el:cl-struct:`flycheck-error` with the given `attributes`.
+      Create a new :cl-struct:`flycheck-error` with the given `attributes`.
 
       `attributes` is a property list, where each property specifies the value
-      for the corresponding slot of :el:cl-struct:`flycheck-error`, for
-      instance:
+      for the corresponding slot of :cl-struct:`flycheck-error`, for instance:
 
       .. code-block:: cl
 
@@ -100,32 +97,32 @@ about CL structures.
 
    The following functions and macros work on errors:
 
-   .. el:macro:: flycheck-error-with-buffer error &rest forms
+   .. macro:: flycheck-error-with-buffer error &rest forms
 
-      Evaluate `forms` with the :el:cl-slot:`buffer` of the given `error` as the
+      Evaluate `forms` with the :cl-slot:`buffer` of the given `error` as the
       current buffer.
 
       If the buffer is not live, `forms` are **not** evaluated.
 
-   .. el:function:: flycheck-error-line-region error
+   .. function:: flycheck-error-line-region error
 
-      Get the region marking the whole :el:cl-slot:`line` of the given `error`, as
+      Get the region marking the whole :cl-slot:`line` of the given `error`, as
       a cons cell :samp:`({beg} . {end})`.
 
-   .. el:function:: flycheck-error-column-region error
+   .. function:: flycheck-error-column-region error
 
-      Get the region marking the :el:cl-slot:`column` of the given `error`, as
-      cons cell :samp:`({beg} . {end})`.
+      Get the region marking the :cl-slot:`column` of the given `error`, as cons
+      cell :samp:`({beg} . {end})`.
 
-      If the :el:cl-slot:`column` of `error` is `nil`, return `nil` instead.
+      If the :cl-slot:`column` of `error` is `nil`, return `nil` instead.
 
-   .. el:function:: flycheck-error-sexp-region error
+   .. function:: flycheck-error-sexp-region error
 
-      Get the region marking the expression around the :el:cl-slot:`column` of
-      the `error`, as cons cell :samp:`({beg} . {end})`.
+      Get the region marking the expression around the :cl-slot:`column` of the
+      `error`, as cons cell :samp:`({beg} . {end})`.
 
-      If the :el:cl-slot:`column` of `error` is `nil`, or if there is no
-      expression around this column, return `nil` instead.
+      If the :cl-slot:`column` of `error` is `nil`, or if there is no expression
+      around this column, return `nil` instead.
 
       .. warning::
 
@@ -139,34 +136,33 @@ about CL structures.
          Use this function with care, and at best only in major modes which are
          known to have good support for this feature.
 
-   .. el:function:: flycheck-error-pos error
+   .. function:: flycheck-error-pos error
 
       Get the exact buffer position of `error`.
 
-      Essentially this is the position of the :el:cl-slot:`column` of `error`,
-      if it is not `nil`, or the position of the first non-whitespace character
-      on the :el:cl-slot:`line` of `error` otherwise.
-      @end defun
+      Essentially this is the position of the :cl-slot:`column` of `error`, if
+      it is not `nil`, or the position of the first non-whitespace character on
+      the :cl-slot:`line` of `error` otherwise.  @end defun
 
-   .. el:function:: flycheck-error-format error
+   .. function:: flycheck-error-format error
 
       Format `error` as a human-readable string.
 
 The following functions and variables may be used to analyze the errors of a
 syntax check.
 
-.. el:variable:: flycheck-current-errors
+.. variable:: flycheck-current-errors
 
    This buffer-local variable stores the errors of the last syntax check,
    sorted by line and column number.
 
-.. el:function:: flycheck-count-errors errors
+.. function:: flycheck-count-errors errors
 
    Count the number of errors and warnings in `errors`.
 
    Return a cons cell :samp:`({no-errors} . {no-warnings})`.
 
-.. el:function:: flycheck-has-errors-p errors &optional level
+.. function:: flycheck-has-errors-p errors &optional level
 
    Determine if there are any `errors` with the given `level`.
 
@@ -182,6 +178,6 @@ Error parser API
 
 These functions can be used to implement custom error parsers:
 
-.. el:function:: flycheck-parse-xml-string s
+.. function:: flycheck-parse-xml-string s
 
    Parse a string `s` containing XML and return the parsed document tree.

@@ -26,6 +26,7 @@ needs_sphinx = '1.2'
 
 extensions = ['eldomain']
 default_role = 'code'
+primary_domain = 'el'
 
 source_suffix = '.rst'
 master_doc = 'index'

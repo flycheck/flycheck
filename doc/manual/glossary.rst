@@ -6,15 +6,15 @@
 
    syntax checker
      A symbol which is defined as syntax checker with
-     :el:macro:`flycheck-define-checker`
+     :macro:`flycheck-define-checker`
 
    registered syntax checker
      A :term:`syntax checker` available for automatic selection, i.e. that is
-     contained in :el:option:`flycheck-checkers`.
+     contained in :option:`flycheck-checkers`.
 
    disabled syntax checker
      A :term:`syntax checker` explicitly excluded from available selection,
-     i.e. that is contained in :el:option:`flycheck-disabled-checkers`.
+     i.e. that is contained in :option:`flycheck-disabled-checkers`.
 
    enabled syntax checker
      A :term:`registered syntax checker` which is not a :term:`disabled syntax

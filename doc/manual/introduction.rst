@@ -25,46 +25,45 @@ Features
   at :kbd:`C-c ! s`
 - Built-in syntax checkers for:
 
-  - AsciiDoc (using :command:`asciidoc`)
-  - C/C++ (using :command:`clang` and :command:`cppcheck`)
-  - CFEngine (using :command:`cf-promises`)
-  - Chef cookbooks (using :command:`foodcritic`))
-  - CoffeeScript (using :command:`coffee` and :command:`coffeelint`)
-  - CSS (using :command:`csslint`))
-  - D (using :command:`dmd`)
-  - Elixir (using :command:`elixirc`)
+  - AsciiDoc (using `asciidoc`)
+  - C/C++ (using `clang` and `cppcheck`)
+  - CFEngine (using `cf-promises`)
+  - Chef cookbooks (using `foodcritic`))
+  - CoffeeScript (using `coffee` and `coffeelint`)
+  - CSS (using `csslint`))
+  - D (using `dmd`)
+  - Elixir (using `elixirc`)
   - Emacs Lisp (using the byte compiler and CheckDoc)
-  - Erlang (using :command:`erlc`)
-  - ERuby (using :command:`erubis`)
-  - Go (using :command:`gofmt`, :command:`go build` and :command:`go test`)
-  - Haml (using :command:`haml`)
-  - Handlebars (using :command:`handlebars`)
-  - Haskell (using :command:`ghc` and :command:`hlint`)
-  - HTML (using :command:`tidy`)
-  - Javascript (using :command:`jshint`, :command:`eslint` and :command:`gjslint`)
-  - JSON (using :command:`jsonlint`)
-  - LESS (using :command:`lessc`)
-  - Lua (using :command:`luac`)
-  - Perl (using :command:`perl`)
-  - PHP (using :command:`php`, :command:`phpmd` and :command:`phpcs`)
-  - Puppet (using :command:`puppet parser` and :command:`puppet-lint`)
-  - Python (using :command:`flake8` or :command:`pylint`)
+  - Erlang (using `erlc`)
+  - ERuby (using `erubis`)
+  - Go (using `gofmt`, `go build` and `go test`)
+  - Haml (using `haml`)
+  - Handlebars (using `handlebars`)
+  - Haskell (using `ghc` and `hlint`)
+  - HTML (using `tidy`)
+  - Javascript (using `jshint`, `eslint` and `gjslint`)
+  - JSON (using `jsonlint`)
+  - LESS (using `lessc`)
+  - Lua (using `luac`)
+  - Perl (using `perl`)
+  - PHP (using `php`, `phpmd` and `phpcs`)
+  - Puppet (using `puppet parser` and `puppet-lint`)
+  - Python (using `flake8` or `pylint`)
   - Racket
-  - ReStructuredText (using :command:`rst2pseudoxml.py` from Docutils)
-  - Ruby (using :command:`rubocop`, :command:`ruby` , :command:`jruby` or
-    :command:`ruby-lint`)
-  - Rust (using :command:`rustc`)
-  - Sass (using :command:`sass`)
-  - Scala (using :command:`scalac`)
-  - SCSS (using :command:`scss`)
-  - Shell scripts (using :command:`bash`, :command:`dash`, or :command:`zsh`
-    depending on the type of shell script)
-  - Slim (using :command:`slimrb`)
-  - TeX/LaTeX (using :command:`chktex` or :command:`lacheck`)
-  - Texinfo (using :command:`makeinfo`)
-  - Verilog (using :command:`verilator`)
-  - XML (using :command:`xmlstarlet` or :command:`xmllint`)
-  - YAML (using :command:`js-yaml` or :command:`ruby`)
+  - ReStructuredText (using `rst2pseudoxml.py` from Docutils)
+  - Ruby (using `rubocop`, `ruby` , `jruby` or `ruby-lint`)
+  - Rust (using `rustc`)
+  - Sass (using `sass`)
+  - Scala (using `scalac`)
+  - SCSS (using `scss`)
+  - Shell scripts (using `bash`, `dash`, or `zsh` depending on the type of shell
+    script)
+  - Slim (using `slimrb`)
+  - TeX/LaTeX (using `chktex` or `lacheck`)
+  - Texinfo (using `makeinfo`)
+  - Verilog (using `verilator`)
+  - XML (using `xmlstarlet` or `xmllint`)
+  - YAML (using `js-yaml` or `ruby`)
 
 - Nice error indication and highlighting
 - Easy customization
@@ -142,8 +141,8 @@ Flycheck also does not support GNU Emacs 23 and other flavors of Emacs
 (e.g. XEmacs, Aquamacs, etc.).  Don't try, it will *not* work.
 
 Most checkers depend on external tools to perform the actual syntax checking.
-Use :el:command:`flycheck-describe-checker` to get help about a syntax checker
-and its dependencies.
+Use :command:`flycheck-describe-checker` to get help about a syntax checker and
+its dependencies.
 
 .. _MELPA: http://melpa.milkbox.net
 .. _Marmalade: http://marmalade-repo.org/

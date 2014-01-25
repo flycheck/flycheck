@@ -9,15 +9,15 @@ Flycheck Mode
 
 Syntax checking is done in the Flycheck minor mode:
 
-.. el:command:: flycheck-mode
+.. command:: flycheck-mode
 
    Toggle Flycheck Mode for the current buffer.
 
-.. el:option:: flycheck-mode
+.. option:: flycheck-mode
 
    Whether Flycheck Mode is enabled in the current buffer.
 
-.. el:command:: global-flycheck-mode
+.. command:: global-flycheck-mode
 
    Toggle Flycheck Mode for **all** live buffers, and for new buffers.
 
@@ -31,15 +31,15 @@ Syntax checking is done in the Flycheck minor mode:
       leak confidential data to temporary directories.
 
       You can still explicitly enable Flycheck Mode in such buffers with
-      :el:command:`flycheck-mode`.  This is **not** recommended though.
+      :command:`flycheck-mode`.  This is **not** recommended though.
 
-.. el:option:: global-flycheck-mode
+.. option:: global-flycheck-mode
 
    Whether Flycheck Mode is enabled globally.
 
 If you like Flycheck Mode, you may want to enable it permanently, either by
-customizing :el:option:`global-flycheck-mode`, or by adding the following code
-to your :file:`init.el`:
+customizing :option:`global-flycheck-mode`, or by adding the following code to
+your :file:`init.el`:
 
 .. code-block:: cl
 
@@ -58,9 +58,9 @@ By default, :ref:`flycheck-mode` checks syntax automatically when
 - or some short time after the last change to the buffer.
 
 However, you can customize automatic syntax checking with
-:el:option:`flycheck-check-syntax-automatically`
+:option:`flycheck-check-syntax-automatically`
 
-.. el:option:: flycheck-check-syntax-automatically
+.. option:: flycheck-check-syntax-automatically
 
    When Flycheck should check syntax automatically.
 
@@ -89,9 +89,9 @@ However, you can customize automatic syntax checking with
       (setq flycheck-check-syntax-automatically '(mode-enabled save))
 
    If the list is empty syntax is never checked automatically.  In this case,
-   use :el:command:`flycheck-buffer` to check syntax manually.
+   use :command:`flycheck-buffer` to check syntax manually.
 
-.. el:option:: flycheck-idle-change-delay
+.. option:: flycheck-idle-change-delay
 
    How many seconds to wait before starting a syntax check.
 
@@ -100,19 +100,19 @@ However, you can customize automatic syntax checking with
    during this time, Flycheck starts to wait again.
 
    This variable has no effect, if `idle-change` is not contained in
-   :el:option:`flycheck-check-syntax-automatically`.
+   :option:`flycheck-check-syntax-automatically`.
 
 Regardless of automatic syntax checking you can also check the buffer
 manually:
 
-.. el:command:: flycheck-buffer
+.. command:: flycheck-buffer
    :binding: C-c ! c
 
    Start a syntax check in the current buffer.
 
 Each syntax check conducts the following steps:
 
-1. Run hooks in :el:hook:`flycheck-before-syntax-check-hook`
+1. Run hooks in :hook:`flycheck-before-syntax-check-hook`
 2. Clear error information from previous syntax checks.
 3. Select a :term:`suitable syntax checker`.  See
    :ref:`syntax-checker-selection`, for more information on how syntax checkers
@@ -124,9 +124,9 @@ Each syntax check conducts the following steps:
 7. If the buffer can be checked with another syntax checker, continue from step
    4, but with the next syntax checker.  This is called “chaining” of syntax
    checkers.
-8. Run hooks in :el:hook:`flycheck-after-syntax-check-hook`.
+8. Run hooks in :hook:`flycheck-after-syntax-check-hook`.
 
-.. el:hook:: flycheck-after-syntax-check-hook
+.. hook:: flycheck-after-syntax-check-hook
 
    Functions to run after each syntax check.
 
@@ -134,7 +134,7 @@ Each syntax check conducts the following steps:
 
    At this point, **all** chained checkers were run, and all errors were parsed,
    highlighted and reported.  See :ref:`error-reporting`, for more information
-   about error reporting.  The variable :el:variable:`flycheck-current-errors`
+   about error reporting.  The variable :variable:`flycheck-current-errors`
    contains all errors from all syntax checkers run during the syntax check, so
    you can use the various error analysis functions.
 
@@ -143,7 +143,7 @@ Each syntax check conducts the following steps:
 
    This variable is a normal hook. @xref{Hooks, , ,elisp}.
 
-.. el:hook:: flycheck-before-syntax-check-hook
+.. hook:: flycheck-before-syntax-check-hook
 
    Functions to run before each syntax check.
 
@@ -159,7 +159,7 @@ Each syntax check conducts the following steps:
 
 There is also a hook run whenever a syntax check fails:
 
-.. el:hook:: flycheck-syntax-check-failed-hook
+.. hook:: flycheck-syntax-check-failed-hook
 
    Functions to run if a syntax check failed.
 
@@ -177,10 +177,10 @@ Syntax checker selection
 ========================
 
 By default Flycheck selects a :term:`suitable syntax checker` automatically from
-:el:option:`flycheck-checkers`, with respect to
-:el:option:`flycheck-disabled-checkers`:
+:option:`flycheck-checkers`, with respect to
+:option:`flycheck-disabled-checkers`:
 
-.. el:option:: flycheck-checkers
+.. option:: flycheck-checkers
 
    A list of :term:`syntax checker`\ s available for automatic syntax checker
    selection.  An item in this list is a :term:`registered syntax checker`.
@@ -189,7 +189,7 @@ By default Flycheck selects a :term:`suitable syntax checker` automatically from
    is intended for 3rd party extensions to tell Flycheck about new syntax
    checkers.
 
-.. el:option:: flycheck-disabled-checkers
+.. option:: flycheck-disabled-checkers
 
    A list of :term:`syntax checker`\ s explicitly excluded from automatic
    selection.
@@ -198,8 +198,8 @@ By default Flycheck selects a :term:`suitable syntax checker` automatically from
    You may also use this option as a file or directory local variable to disable
    specific checkers in individual files and directories respectively.
 
-A syntax checker in :el:option:`flycheck-checkers` and **not** in
-:el:option:`flycheck-disabled-checkers` is an :term:`enabled syntax checker`.
+A syntax checker in :option:`flycheck-checkers` and **not** in
+:option:`flycheck-disabled-checkers` is an :term:`enabled syntax checker`.
 
 Flycheck uses the first enabled and suitable syntax checker for the current
 buffer.  See `Languages and syntax checkers` for a list of all available syntax
@@ -211,21 +211,21 @@ informs about the omitted syntax check.  See `Mode line` for details.
 
 You can manually select a specific syntax checker for the current buffer, too:
 
-.. el:command:: flycheck-select-checker
+.. command:: flycheck-select-checker
    :binding: C-c ! s
 
    Prompt for a syntax checker, and select it for the current buffer, by setting
-   :el:variable:`flycheck-checker`.
+   :variable:`flycheck-checker`.
 
    With prefix arg, deselect the current syntax checker if any, and re-enable
-   automatic selection, by setting :el:variable:`flycheck-checker` to `nil`.
+   automatic selection, by setting :variable:`flycheck-checker` to `nil`.
 
    In either case, immediately run a syntax check afterwards.
 
    Any :term:`syntax checker` can be selected with this command, regardless of
    whether it is enabled.
 
-.. el:variable:: flycheck-checker
+.. variable:: flycheck-checker
 
    The :term:`syntax checker` to use for the current buffer.
 
@@ -239,9 +239,9 @@ You can manually select a specific syntax checker for the current buffer, too:
    suitable, signal an error.
 
    You may directly set this variable without
-   :el:command:`flycheck-select-checker`, e.g. via file local variables.  For
-   instance, you can use the following file local variable within a Python
-   file to always use :command:`pylint` for the file:
+   :command:`flycheck-select-checker`, e.g. via file local variables.  For
+   instance, you can use the following file local variable within a Python file
+   to always use `pylint` for the file:
 
    .. code-block:: python
 
@@ -254,9 +254,9 @@ You can manually select a specific syntax checker for the current buffer, too:
 
 
 You can change the completion system used by
-:el:command:`flycheck-select-checker`:
+:command:`flycheck-select-checker`:
 
-.. el:option:: flycheck-completion-system
+.. option:: flycheck-completion-system
 
    The completion system to use.
 
@@ -286,7 +286,7 @@ the syntax checker uses, in which buffers it will be used for syntax checks, and
 whether it can be configured.  See `Configuration`, for more information about
 syntax checker configuration.
 
-.. el:command:: flycheck-describe-checker
+.. command:: flycheck-describe-checker
    :binding: C-c ! ?
 
    Show the documentation of a syntax checker.
@@ -320,7 +320,7 @@ For instance, you could use a different Emacs version with the `emacs-lisp` or
 You can either set these variables directly in your :file:`init.el`, or change
 them interactively:
 
-.. el:command:: flycheck-set-checker-executable
+.. command:: flycheck-set-checker-executable
    :binding: C-c ! e
 
    Set the executable of a syntax checker in the current buffer.
@@ -340,43 +340,43 @@ Some syntax checkers can be configured via options.  The following options are
 provided by Flycheck (in Emacs, use :kbd:`C-h v` or :kbd:`M-x describe-variable`
 on the variable name for detailed help):
 
-.. el:option:: flycheck-clang-definitions
+.. option:: flycheck-clang-definitions
 
    Additional preprocessor definitions for `c/c++-clang`.
 
-.. el:option:: flycheck-clang-include-path
+.. option:: flycheck-clang-include-path
 
    Include search path for `c/c++-clang`.
 
-.. el:option:: flycheck-clang-includes
+.. option:: flycheck-clang-includes
 
    Additional include files for `c/c++-clang`.
 
-.. el:option:: flycheck-clang-language-standard
+.. option:: flycheck-clang-language-standard
 
    The language standard for `c/c++-clang`.
 
-.. el:option:: flycheck-clang-ms-extensions
+.. option:: flycheck-clang-ms-extensions
 
    Whether to enable Microsoft extensions in `c/c++-clang`.
 
-.. el:option:: flycheck-clang-no-rtti
+.. option:: flycheck-clang-no-rtti
 
    Whether to disable RTTI in `c/c++-clang`.
 
-.. el:option:: flycheck-clang-standard-library
+.. option:: flycheck-clang-standard-library
 
    The standard library to use for `c/c++-clang`.
 
-.. el:option:: flycheck-clang-warnings
+.. option:: flycheck-clang-warnings
 
    Additional warnings to enable in `c/c++-clang`.
 
-.. el:option:: flycheck-cppcheck-checks
+.. option:: flycheck-cppcheck-checks
 
    Additional checks to use in `c/c++-cppcheck`.
 
-.. el:option:: flycheck-emacs-lisp-initialize-packages
+.. option:: flycheck-emacs-lisp-initialize-packages
 
    Whether to initialize packages (see `package-initialize`) before
    invoking the byte compiler in the `emacs-lisp` syntax checker.
@@ -386,7 +386,7 @@ on the variable name for detailed help):
    configuration in `user-emacs-directory`.  For any other non-nil
    value, always initialize packages.
 
-.. el:option:: flycheck-emacs-lisp-load-path
+.. option:: flycheck-emacs-lisp-load-path
 
    The `load-path` to use while checking with `emacs-lisp`.
 
@@ -397,57 +397,57 @@ on the variable name for detailed help):
    syntax check, e.g. if an unexpected version of a required library
    is used.
 
-.. el:option:: flycheck-emacs-lisp-package-user-dir
+.. option:: flycheck-emacs-lisp-package-user-dir
 
    The package directory for the `emacs-lisp` syntax checker.
 
-.. el:option:: flycheck-eslint-rulesdir
+.. option:: flycheck-eslint-rulesdir
 
    A directory with custom rules for the `javascript-eslint` syntax checker.
 
-.. el:option:: flycheck-flake8-maximum-complexity
+.. option:: flycheck-flake8-maximum-complexity
 
    The maximum McCabe complexity the `python-flake8` syntax checker allows
    without reporting a warning.
 
-.. el:option:: flycheck-flake8-maximum-line-length
+.. option:: flycheck-flake8-maximum-line-length
 
    The maximum length of a line in characters the `python-flake8` syntax checker
    allows without reporting an error.
 
-.. el:option:: flycheck-ghc-no-user-package-database
+.. option:: flycheck-ghc-no-user-package-database
 
    Whether to disable the user package database for `haskell-ghc`.
 
-.. el:option:: flycheck-ghc-package-databases
+.. option:: flycheck-ghc-package-databases
 
    A list of package database for `haskell-ghc`.
 
-.. el:option:: flycheck-ghc-search-path
+.. option:: flycheck-ghc-search-path
 
    A list of module directories for the search path of `haskell-ghc`.
 
-.. el:option:: flycheck-phpcs-standard
+.. option:: flycheck-phpcs-standard
 
    The coding standard `php-phpcs` shall use.
 
-.. el:option:: flycheck-phpmd-rulesets
+.. option:: flycheck-phpmd-rulesets
 
    The rule sets `php-phpmd` shall use.
 
-.. el:option:: flycheck-rubocop-lint-only
+.. option:: flycheck-rubocop-lint-only
 
    Whether to disable style checks for `ruby-rubocop`.
 
-.. el:option:: flycheck-sass-compass
+.. option:: flycheck-sass-compass
 
    Whether to enable the Compass CSS framework for `sass`.
 
-.. el:option:: flycheck-scss-compass
+.. option:: flycheck-scss-compass
 
    Whether to enable the Compass CSS framework for `scss`.
 
-.. el:option:: flycheck-sphinx-warn-on-missing-references
+.. option:: flycheck-sphinx-warn-on-missing-references
 
    Whether to warn about missing references in `rst-sphinx`
 
@@ -459,47 +459,47 @@ Syntax checker configuration files
 Some syntax checkers also read configuration files, denoted by associated
 *configuration file variables*:
 
-.. el:option:: flycheck-chktexrc
+.. option:: flycheck-chktexrc
 
    The configuration file for the `tex-chktex` syntax checker.
 
-.. el:option:: flycheck-coffeelintrc
+.. option:: flycheck-coffeelintrc
 
    The configuration file for the `coffee-coffeelint` syntax checker.
 
-.. el:option:: flycheck-eslintrc
+.. option:: flycheck-eslintrc
 
    The configuration file for the `javascript-eslint` syntax checker.
 
-.. el:option:: flycheck-flake8rc
+.. option:: flycheck-flake8rc
 
    The configuration file for the `python-flake8` syntax checker.
 
-.. el:option:: flycheck-gjslintrc
+.. option:: flycheck-gjslintrc
 
    The configuration file for the `javascript-gjslint` syntax checker.
 
-.. el:option:: flycheck-jshintrc
+.. option:: flycheck-jshintrc
 
    The configuration file for the `javascript-jshint` syntax checker.
 
-.. el:option:: flycheck-pylintrc
+.. option:: flycheck-pylintrc
 
    The configuration file for the `python-pylint` syntax checker.
 
-.. el:option:: flycheck-rubocoprc
+.. option:: flycheck-rubocoprc
 
    The configuration file for the `ruby-rubocop` syntax checker.
 
-.. el:option:: flycheck-tidyrc
+.. option:: flycheck-tidyrc
 
    The configuration file for the `html-tidy` syntax checker.
 
 The value of these variables is either a string or `nil`.  In the former case,
 locate the configuration file using the functions in
-:el:option:`flycheck-locate-config-file-functions`:
+:option:`flycheck-locate-config-file-functions`:
 
-.. el:option:: flycheck-locate-config-file-functions
+.. option:: flycheck-locate-config-file-functions
 
    Functions to locate syntax checker configuration files.
 
@@ -558,11 +558,11 @@ Errors and warnings from a syntax checker are
 
 - reported in the mode line or in a popup buffer, depending on the length
   of the error messages,
-- indicated according to :el:option:`flycheck-indication-mode`,
+- indicated according to :option:`flycheck-indication-mode`,
 - and highlighted in the buffer with the corresponding faces, according to
-  :el:option:`flycheck-highlighting-mode`
+  :option:`flycheck-highlighting-mode`
 
-.. el:face:: flycheck-error
+.. face:: flycheck-error
              flycheck-warning
              flycheck-info
 
@@ -580,7 +580,7 @@ Errors and warnings from a syntax checker are
    theme that has reasonable Flycheck faces.  For instance, the Solarized_ and
    Zenburn_ themes are known to have good Flycheck faces.
 
-.. el:option:: flycheck-highlighting-mode
+.. option:: flycheck-highlighting-mode
 
    This variable determines how to highlight errors:
 
@@ -603,16 +603,16 @@ Errors and warnings from a syntax checker are
    `nil`
       Do not highlight errors at all.  However, errors will still be reported
       in the mode line and in error message popups, and indicated according to
-      :el:option:`flycheck-indication-mode`.
+      :option:`flycheck-indication-mode`.
 
-.. el:face:: flycheck-fringe-error
+.. face:: flycheck-fringe-error
              flycheck-fringe-warning
              flycheck-fringe-info
 
    The faces of fringe indicators for errors, warnings and info messages
    respectively.
 
-.. el:option:: flycheck-indication-mode
+.. option:: flycheck-indication-mode
 
    This variable determines how to indicate errors:
 
@@ -621,12 +621,12 @@ Errors and warnings from a syntax checker are
 
    If set to `nil`, do not indicate errors.  Errors will still be reported in
    the mode line and in error message popups, and highlighted according to
-   :el:option:`flycheck-highlighting-mode`.
+   :option:`flycheck-highlighting-mode`.
 
 
 You can also completely customize error processing by hooking into Flycheck:
 
-.. el:hook:: flycheck-process-error-functions
+.. hook:: flycheck-process-error-functions
 
    Functions to process errors.
 
@@ -641,7 +641,7 @@ You can also completely customize error processing by hooking into Flycheck:
 
 You can also show a list with all errors in the current buffer:
 
-.. el:command:: flycheck-list-errors
+.. command:: flycheck-list-errors
                 list-flycheck-errors
    :binding: C-c ! l
 
@@ -657,24 +657,24 @@ error message will be shown.
 
 Flycheck also displays errors under point after a short delay:
 
-.. el:option:: flycheck-display-errors-delay
+.. option:: flycheck-display-errors-delay
 
    Delay in seconds before displaying errors at point.
 
    Use floating point numbers to express fractions of seconds.
 
-The error is displayed via :el:option:`flycheck-display-errors-function`:
+The error is displayed via :option:`flycheck-display-errors-function`:
 
-.. el:option:: flycheck-display-errors-function
+.. option:: flycheck-display-errors-function
 
    A function to display errors under point.
 
    If set to a function, call the function with a list of all errors to
    show.  If set to nil, to not display errors at all.
 
-   The default function is :el:function:`flycheck-display-error-messages`.
+   The default function is :function:`flycheck-display-error-messages`.
 
-.. el:function:: flycheck-display-error-messages errors
+.. function:: flycheck-display-error-messages errors
 
    Show the messages of the given `errors` in the echo area, separated by empty
    lines.  If the error messages are too long for the echo area, show the error
@@ -687,35 +687,35 @@ The error is displayed via :el:option:`flycheck-display-errors-function`:
 You can also work with the error messages at point, and copy them into the kill
 ring or search them on Google:
 
-.. el:command:: flycheck-copy-messages-as-kill
+.. command:: flycheck-copy-messages-as-kill
    :binding: C-c ! C-w
 
    Copy all Flycheck error messages at the current point into kill ring.
 
-.. el:command:: flycheck-google-messages
+.. command:: flycheck-google-messages
    :binding: C-c ! /
 
    Google for all Flycheck error messages at the current point.
 
-   If there are more than :el:option:`flycheck-google-max-messages` errors at
+   If there are more than :option:`flycheck-google-max-messages` errors at
    point, signal an error, to avoid spamming your browser with Google tabs.
 
    Requires the `Google This`_ library, which is available on MELPA_.
 
-.. el:option:: flycheck-google-max-messages
+.. option:: flycheck-google-max-messages
 
    The maximum number of error messages to Google at once.
 
-   If set to an integer, :el:command:`flycheck-google-messages` will refuse to
+   If set to an integer, :command:`flycheck-google-messages` will refuse to
    search, when there are more error messages than the value of this variable at
    point.
 
-   If set to `nil`, :el:command:`flycheck-google-messages` will always search
+   If set to `nil`, :command:`flycheck-google-messages` will always search
    for **all** messages at point.  This setting is **not** recommended.
 
 Ultimately, you can clear all reported errors at once:
 
-.. el:command:: flycheck-clear
+.. command:: flycheck-clear
    :binding: C-c ! C
 
    Clear all Flycheck errors and warnings in the current buffer.
@@ -742,9 +742,9 @@ current buffer.  @xref{Compilation Mode, , ,emacs}, for more information about
 these commands.
 
 You can disable this integration by setting
-:el:option:`flycheck-standard-error-navigation` to nil:
+:option:`flycheck-standard-error-navigation` to nil:
 
-.. el:option:: flycheck-standard-error-navigation
+.. option:: flycheck-standard-error-navigation
 
    If non-nil, enable navigation of Flycheck errors with the standard
    `next-error` and friends.
@@ -753,7 +753,7 @@ You can disable this integration by setting
    functions only navigate compilation mode errors.
 
    Changes to this variable only take effect after re-enabling
-   :ref:`flycheck-mode` with :el:command:`flycheck-mode` again.
+   :ref:`flycheck-mode` with :command:`flycheck-mode` again.
 
 Visible compilation buffers take precedence over Flycheck navigation.  If such a
 buffer is visible, :kbd:`M-g n` and :kbd:`M-g p` will ignore Flycheck errors and
@@ -761,9 +761,9 @@ warnings, and navigate errors (or generally results) reported by the compilation
 buffer instead.
 
 To address this issue, Flycheck provides independent error navigation commands,
-which are not affected by :el:option:`flycheck-standard-error-navigation`:
+which are not affected by :option:`flycheck-standard-error-navigation`:
 
-.. el:command:: flycheck-next-error
+.. command:: flycheck-next-error
    :binding: C-c ! n
 
    Jump to the next Flycheck error.
@@ -772,7 +772,7 @@ which are not affected by :el:option:`flycheck-standard-error-navigation`:
    the prefix argument, e.g. :kbd:`M-3 C-c ! n` will move to the 3rd error
    from the current point.
 
-.. el:command:: flycheck-previous-error
+.. command:: flycheck-previous-error
    :binding: C-c ! p
 
    Jump to the previous Flycheck error.
@@ -781,7 +781,7 @@ which are not affected by :el:option:`flycheck-standard-error-navigation`:
    the prefix argument, e.g. :kbd:`M-3 C-c ! p` will move to the 3rd
    previous error from the current point.
 
-.. el:command:: flycheck-first-error
+.. command:: flycheck-first-error
 
    Jump to the first Flycheck error.
 

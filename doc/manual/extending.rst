@@ -14,14 +14,14 @@ more information.
 Defining new syntax checkers
 ============================
 
-You define new syntax checkers with :el:macro:`flycheck-define-checker`:
+You define new syntax checkers with :macro:`flycheck-define-checker`:
 
-.. el:macro:: flycheck-define-checker symbol docstring &rest properties
+.. macro:: flycheck-define-checker symbol docstring &rest properties
 
    Define `symbol` as new syntax checker with `docstring` and `properties`.
 
    `docstring` provides documentation for the syntax checker.  Use
-   :el:command:`flycheck-describe-checker` to view the documentation of a syntax
+   :command:`flycheck-describe-checker` to view the documentation of a syntax
    checker.
 
    The following `properties` constitute a syntax checker.
@@ -34,9 +34,9 @@ You define new syntax checkers with :el:macro:`flycheck-define-checker`:
    a *compile-time* error is signalled.
 
    Any syntax checker defined with this macro is eligible for manual syntax
-   checker selection with :el:command:`flycheck-select-checker`.  To make the
+   checker selection with :command:`flycheck-select-checker`.  To make the
    new syntax checker available for automatic selection, you need to register it
-   in :el:option:`flycheck-checkers`.  See :ref:`syntax-checker-selection` for
+   in :option:`flycheck-checkers`.  See :ref:`syntax-checker-selection` for
    more information.
 
    .. checker-property:: :command ({executable} [{arg} ...])
@@ -142,7 +142,7 @@ You define new syntax checkers with :el:macro:`flycheck-define-checker`:
         obtain the name or path of the configuration file.  See
         :ref:`syntax-checker-configuration-files` for more information about
         syntax checker configuration.  You need to define this variable
-        *explicitly* with :el:macro:`flycheck-def-config-file-var`.
+        *explicitly* with :macro:`flycheck-def-config-file-var`.
 
         If the configuration file is found, pass the :samp:`{option}` and the
         absolute path to the configuration file to the syntax checker.
@@ -165,7 +165,7 @@ You define new syntax checkers with :el:macro:`flycheck-define-checker`:
         :samp:`{variable}` is a symbol referring to a variable whose value to use.
         :See ref:`syntax-checker-configuration` for more information about
         :syntax checker configuration.  You need to define this variable
-        :*explicitly* with :el:macro:`flycheck-def-option-var`.
+        :*explicitly* with :macro:`flycheck-def-option-var`.
 
         If :samp:`{variable}` is not `nil` after applying :samp:`{filter}`, pass
         :samp:`{option}` and the value of :samp:`{variable}` after applying
@@ -232,7 +232,7 @@ You define new syntax checkers with :el:macro:`flycheck-define-checker`:
 
       Flycheck provides the built-in error levels `error`, `warning` and `info`.
       You can define your own error levels with
-      :el:function:`flycheck-define-error-level`.
+      :function:`flycheck-define-error-level`.
 
       The :samp:`{level}` is followed by one or more `rx` :samp:`{sexp}`
       elements.  See the docstring of the function `rx` for more information.
@@ -278,17 +278,17 @@ You define new syntax checkers with :el:macro:`flycheck-define-checker`:
       the syntax checker that was used, and `buffer` a buffer object
       representing the checker buffer.
 
-      The function must return a list of :el:cl-struct:`flycheck-error` objects
+      The function must return a list of :cl-struct:`flycheck-error` objects
       parsed from `output`.  See :ref:`error-api` for information about
-      :el:cl-struct:`flycheck-error`.  See :ref:`error-parsers` for a list of
+      :cl-struct:`flycheck-error`.  See :ref:`error-parsers` for a list of
       built-in error parsers.
 
       If this property is given, it takes precedence over
       :checkprop:`:error-patterns`.  To use an error parser together with
       patterns, you must manually call
-      :el:function:`flycheck-parse-with-patterns` in your error parser to apply
+      :function:`flycheck-parse-with-patterns` in your error parser to apply
       the error patterns.  You can then manipulate the
-      :el:cl-struct:`flycheck-error` objects returned by this function.
+      :cl-struct:`flycheck-error` objects returned by this function.
 
    .. checker-property:: :modes {mode}
                          :modes ({mode} ...)
@@ -335,7 +335,7 @@ You define new syntax checkers with :el:macro:`flycheck-define-checker`:
          The syntax :samp:`{checker}` is only considered if the current syntax
          checker only reported warnings, but no errors.
 
-.. el:macro:: flycheck-def-config-file-var symbol checker &optional filename
+.. macro:: flycheck-def-config-file-var symbol checker &optional filename
 
    Define `symbol` as configuration file variable for a syntax `checker`, with a
    default value of `filename`.
@@ -351,7 +351,7 @@ You define new syntax checkers with :el:macro:`flycheck-define-checker`:
    Use this macro together with the `config-file` form in the
    :checkprop:`:command` of a syntax checker.
 
-.. el:macro:: flycheck-def-option-var symbol initial-value checker &optional custom-args
+.. macro:: flycheck-def-option-var symbol initial-value checker &optional custom-args
 
    Define `symbol` as option variable for a syntax `checker`, with the given
    `initial-value`.
@@ -380,9 +380,9 @@ Flycheck provides some built-in error levels:
 `info`
    Informational annotations
 
-You can define new error levels with :el:function:`flycheck-define-error-level`:
+You can define new error levels with :function:`flycheck-define-error-level`:
 
-.. el:function:: flycheck-define-error-level level &rest properties
+.. function:: flycheck-define-error-level level &rest properties
 
    Define a new error `level` with `properties`.
 
@@ -421,17 +421,17 @@ for information about syntax checker definition.
 
 Flycheck provides the following error parsers for use by syntax checkers:
 
-.. el:function:: flycheck-parse-with-patterns output checker buffer
+.. function:: flycheck-parse-with-patterns output checker buffer
 
    Parse `output` with the :checkprop:`:error-patterns` of the syntax `checker`.
 
-.. el:function:: flycheck-parse-checkstyle output checker buffer
+.. function:: flycheck-parse-checkstyle output checker buffer
 
    Parse `output` as Checkstyle_ XML.
 
 You may also define your own error parsers.  An error parser is any function
 that takes the following three arguments and returns a list of
-:el:cl-struct:`flycheck-error` objects (see :ref:`error-api` for more
+:cl-struct:`flycheck-error` objects (see :ref:`error-api` for more
 information):
 
 `output`
@@ -455,12 +455,12 @@ Flycheck provides the following built-in option filters for use with the
 `option`, `option-list` and `option-flag` forms in the :checkprop:`:command` of
 a syntax checker definition:
 
-.. el:function:: flycheck-option-int value
+.. function:: flycheck-option-int value
 
    Like the built-in `number-to-string`, but returns `nil` when `value` is
    `nil`.
 
-.. el:function:: flycheck-option-comma-separated-list value &optional separator filter
+.. function:: flycheck-option-comma-separated-list value &optional separator filter
 
    Convert `value` into a list separated by `separator`.  `filter` is an
    optional function to apply to each item in `value` first.
@@ -472,7 +472,7 @@ Extending syntax checkers
 
 There are some means to extend defined syntax checkers:
 
-.. el:function:: flycheck-add-next-checker checker next-checker &optional append
+.. function:: flycheck-add-next-checker checker next-checker &optional append
 
    Add a `next-checker` to run after `checker`.
 
@@ -492,7 +492,7 @@ Basic syntax checkers
 ---------------------
 
 As explained in the previous chapter :ref:`defining-new-syntax-checkers`, a
-syntax checker is declared with :el:macro:`flycheck-define-checker`.
+syntax checker is declared with :macro:`flycheck-define-checker`.
 
 We will use this function to define a syntax checker using the PHP CodeSniffer
 utility for the PHP programming language:
@@ -508,8 +508,8 @@ utility for the PHP programming language:
      :modes php-mode)
 
 First we specify the :checkprop:`:command` to execute.  The first element of the
-command list is the name of the executable, :command:`phpcs` in our case.  This
-command is checked for existence with `executable-find` before using this syntax
+command list is the name of the executable, `phpcs` in our case.  This command
+is checked for existence with `executable-find` before using this syntax
 checker.  If the command does not exist, the syntax checker is *not* used.
 
 The executable is following by the arguments, in this case some options and the
@@ -520,7 +520,7 @@ contents of the buffer to check.
 Next we specify how to parse the output of the syntax checker.  PHP CodeSniffer
 provides an option to output errors in an XML format similar to the Java tool
 Checkstyle, so we use the built-in :dfn:`error parser`
-:el:function:`flycheck-parse-checkstyle` to parse the output.
+:function:`flycheck-parse-checkstyle` to parse the output.
 
 Eventually we enable the syntax checker in PHP editing modes.
 
@@ -554,8 +554,8 @@ packages from the source code tree.
 
 Next we give the list of :checkprop:`:error-patterns` to parse errors.  These
 patterns extract the error location and the error message from the output of
-:command:`epylint`.  An error pattern is a list containing a regular expression
-with match groups to extract the error information, and an error level.
+`epylint`.  An error pattern is a list containing a regular expression with
+match groups to extract the error information, and an error level.
 
 Eventually we enable the syntax checker in `python-mode`.
 
@@ -634,13 +634,12 @@ configuration files:
      :error-parser flycheck-parse-checkstyle
      :modes (js-mode js2-mode js3-mode))
 
-As you can see, we define a syntax checker for Javascript, using the
-:command:`jshint` utility.  This utility accepts a configuration file via the
-`--config` option.
+As you can see, we define a syntax checker for Javascript, using the `jshint`
+utility.  This utility accepts a configuration file via the `--config` option.
 
 To use a configuration file with jshint, we first declare the variable
-`flycheck-jshintrc` that provides the name of the file, as
-explained in :ref:`syntax-checker-configuration-files`.
+`flycheck-jshintrc` that provides the name of the file, as explained in
+:ref:`syntax-checker-configuration-files`.
 
 In the :checkprop:`:command` we use a `config-file` form to pass the
 configuration file to the syntax checker.  If the configuration file is found,
@@ -671,9 +670,9 @@ with support for coding standards:
 
 The syntax checker is pretty much the same as before, except that a new element
 was added to :checkprop:`:command`.  This element passes the value of the new
-option variable :el:option:`flycheck-phpcs-standard` to the syntax checker.
-This variable is declared with the special macro
-:el:macro:`flycheck-def-option-var` at the beginning.
+option variable :option:`flycheck-phpcs-standard` to the syntax checker.  This
+variable is declared with the special macro :macro:`flycheck-def-option-var` at
+the beginning.
 
 Chaining syntax checkers
 ------------------------
