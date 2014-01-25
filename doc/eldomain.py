@@ -41,31 +41,20 @@ class EmacsLispSymbol(ObjectDescription):
     def emacs_lisp_scope(self):
         return self.object_type.attrs['scope']
 
+    def make_type_annotation(self):
+        type_name = self.object_type.lname.title() + ' '
+        return addnodes.desc_annotation(type_name, type_name)
+
     def handle_signature(self, sig, signode):
         parts = sig.split()
         name = parts[0]
         arguments = parts[1:]
 
-        if self.objtype == 'command':
-            signode += addnodes.desc_annotation('M-x ', 'M-x ')
-        else:
-            type_name = self.object_type.lname.title() + ' '
-            signode += addnodes.desc_annotation(type_name, type_name)
+        annotation = self.make_type_annotation()
+        if annotation:
+            signode += annotation
 
         signode += addnodes.desc_name(name, name)
-
-        # Do not include parameters for interactive commands
-        have_param_list = self.emacs_lisp_scope == 'functions' and not self.objtype == 'command'
-        if have_param_list:
-            paramlist = el_parameterlist(' '.join(arguments), '')
-            signode += paramlist
-            for arg in arguments:
-                if arg.startswith('&'):
-                    paramlist += addnodes.desc_annotation(' ' + arg, ' ' + arg)
-                else:
-                    node = addnodes.desc_parameter(arg, arg)
-                    node['noemph'] = True
-                    paramlist += node
 
         return name
 
@@ -92,6 +81,38 @@ class EmacsLispSymbol(ObjectDescription):
         indextext = '{0}; Emacs Lisp {1}'.format(name, self.object_type.lname)
         self.indexnode['entries'].append(('pair', indextext, targetname, ''))
 
+
+class EmacsLispFunction(EmacsLispSymbol):
+
+    def handle_signature(self, sig, signode):
+        parts = sig.split(' ')
+        name = parts[0]
+        arguments = parts[1:]
+        name = EmacsLispSymbol.handle_signature(self, name, signode)
+
+        paramlist = el_parameterlist(' '.join(arguments), '')
+        signode += paramlist
+        for arg in arguments:
+            if arg.startswith('&'):
+                paramlist += addnodes.desc_annotation(' ' + arg, ' ' + arg)
+            else:
+                node = addnodes.desc_parameter(arg, arg)
+                node['noemph'] = True
+                paramlist += node
+
+        return name
+
+
+class EmacsLispCommand(EmacsLispSymbol):
+
+    option_spec = {
+        'binding': directives.unchanged
+    }
+    option_spec.update(EmacsLispSymbol.option_spec)
+
+    def make_type_annotation(self):
+        return addnodes.desc_annotation('M-x ', 'M-x ')
+
     def run(self):
         nodes = ObjectDescription.run(self)
 
@@ -109,14 +130,6 @@ class EmacsLispSymbol(ObjectDescription):
             signode += addnodes.desc_name(binding, binding)
 
         return nodes
-
-
-class EmacsLispCommand(EmacsLispSymbol):
-
-    option_spec = {
-        'binding': directives.unchanged
-    }
-    option_spec.update(EmacsLispSymbol.option_spec)
 
 
 class EmacsLispDomain(Domain):
@@ -141,8 +154,8 @@ class EmacsLispDomain(Domain):
         'cl-struct': ObjType('CL struct', 'cl-struct', scope='structs',
                              searchprio=0)}
     directives = {
-        'function': EmacsLispSymbol,
-        'macro': EmacsLispSymbol,
+        'function': EmacsLispFunction,
+        'macro': EmacsLispFunction,
         'command': EmacsLispCommand,
         'variable': EmacsLispSymbol,
         'option': EmacsLispSymbol,
