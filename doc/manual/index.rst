@@ -18,4 +18,5 @@ This manual is for Flycheck, the on-the-fly syntax checker for GNU Emacs.
    usage
    extending
    api
+   contributing
    glossary

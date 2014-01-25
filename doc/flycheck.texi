@@ -54,7 +54,6 @@ Copyright @copyright{} 2013, 2014 Sebastian Wiesner
 @insertcopying
 
 @menu
-* Contribution::                How to contribute to Flycheck development
 * Changes::                     Changes to Flycheck
 * Credits::                     Developers and contributors to Flycheck
 * GNU Free Documentation License::  The license of this documentation
@@ -62,124 +61,7 @@ Copyright @copyright{} 2013, 2014 Sebastian Wiesner
 * Definition Index::            An index of all types, functions and variables
 @end menu
 
-@node Contribution, Changes, , Top
-@comment  node-name,  next,  previous,  up
-@chapter Contribution
-
-Flycheck needs your help, in all aspects.  Please
-
-@itemize @bullet
-@item
-report all bugs and issues you can find,
-@item
-tell us your ideas for improvements or new features,
-@item
-and send us your patches and pull requests!
-@end itemize
-
-This chapter helps you in doing so, by giving you guidelines for
-contribution.
-
-@menu
-* Reporting issues::            How to report issues with Flycheck
-* Contributing syntax checkers::  How to contribute your syntax checkers
-* Contributing code::           How to contribute code
-@end menu
-
-@node Reporting issues, Contributing syntax checkers, Contribution, Contribution
-@comment  node-name,  next,  previous,  up
-@section Reporting issues
-
-Please report any issues to the
-@uref{https://github.com/flycheck/flycheck/issues,Flycheck issue
-tracker}.
-
-When doing so, please respect the following guidelines:
-
-@itemize @bullet
-@item
-Check that the issue has not already been reported.
-@item
-Check that the issue has not already been fixed in the latest code.
-@item
-Be clear and precise.  If possible, name functions and command exactly.
-@item
-Open an issue with a clear title and description in grammatically
-correct, complete sentences.  Include the version of Flycheck as shown
-by @kbd{M-x flycheck-version}.
-@end itemize
-
-We will try to handle each issue appropriately, and adhering to these
-guidelines helps us in doing so.
-
-
-@node Contributing syntax checkers, Contributing code, Reporting issues, Contribution
-@comment  node-name,  next,  previous,  up
-@section Contributing syntax checkers
-
-When creating a new syntax checker, either create an issue (see
-@ref{Reporting issues}) and paste your syntax checker declaration, or
-fork the repository, implement the syntax checker in Flycheck itself and
-send us a pull request (see @ref{Contributing code}).
-
-Whatever way you choose, please respect the following guidelines:
-
-@itemize @bullet
-@item
-Provide a link to the website of the syntax checker tool.
-@item
-Show some example source code that triggered warnings or errors with the
-syntax checker tool.
-@item
-If possible, please add unit tests for your new syntax checker.
-@end itemize
-
-@node Contributing code,  , Contributing syntax checkers, Contribution
-@comment  node-name,  next,  previous,  up
-@section Contributing code
-
-Please contribute patches to Flycheck as pull requests on Github.
-
-When doing so, please respect the following guidelines:
-
-@itemize @bullet
-@item
-Read how to
-@uref{http://gun.io/blog/how-to-github-fork-branch-and-pull-request,
-properly contribute to open source projects on Github}.
-@item
-Use a topic branch to easily amend a pull request later, if necessary.
-@item
-Write
-@uref{http://gun.io/blog/how-to-github-fork-branch-and-pull-request,
-good commit messages}.
-@item
-Use the same coding style and spacing.
-@item
-Verify your Emacs Lisp code with @code{checkdoc} (@kbd{C-c ? d}).
-@item
-Add unit tests for your code, if possible.
-@item
-Open a @uref{https://help.github.com/articles/using-pull-requests,pull
-request} that relates to but one subject with a clear title and
-description in grammatically correct, complete sentences.  Be sure to
-give use cases and rationale for your new feature.
-@end itemize
-
-We will try to respect and include each contribution, however we will
-not do the following:
-
-@itemize @bullet
-@item
-Include a feature without good use cases and rationale.
-@item
-Merge poorly written or incomplete code.
-@end itemize
-
-@noindent
-You will be asked to improve your pull request in these cases.
-
-@node Changes, Credits, Contribution, Top
+@node Changes, Credits, , Top
 @comment  node-name,  next,  previous,  up
 @appendix Changes
 
