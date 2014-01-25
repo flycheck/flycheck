@@ -67,70 +67,8 @@ order of their appearance in the default value of
 @code{flycheck-checkers}:
 
 @itemize @bullet
-@iflyc asciidoc
-@iflyc bash
-@iflyc c/c++-clang
-@iflyc c/c++-cppcheck
-@iflyc cfengine
-@iflyc chef-foodcritic
-@iflyc coffee
-@iflyc coffee-coffeelint
-@iflyc css-csslint
-@iflyc d-dmd
-@iflyc elixir
-@iflyc emacs-lisp
-@iflyc emacs-lisp-checkdoc
-@iflyc erlang
-@iflyc eruby-erubis
-@iflyc go-gofmt
-@iflyc go-build
-@iflyc go-test
-@iflyc haml
-@iflyc handlebars
-@iflyc haskell-ghc
-@iflyc haskell-hlint
-@iflyc html-tidy
-@iflyc javascript-jshint
-@iflyc javascript-eslint
-@iflyc javascript-gjslint
-@iflyc json-jsonlint
-@iflyc less
-@iflyc lua
-@iflyc perl
-@iflyc php
-@iflyc php-phpmd
-@iflyc php-phpcs
-@iflyc puppet-parser
-@iflyc puppet-lint
-@iflyc python-flake8
-@iflyc python-pylint
-@iflyc racket
-@iflyc rst
-@iflyc rst-sphinx
-@iflyc ruby-rubocop
-@iflyc ruby-rubylint
-@iflyc ruby
-@iflyc ruby-jruby
-@iflyc rust
-@iflyc sass
-@iflyc scala
-@iflyc scss
-@iflyc sh-dash
-@iflyc sh-bash
-@iflyc slim
-@iflyc tex-chktex
-@iflyc tex-lacheck
-@iflyc texinfo
-@iflyc verilog-verilator
-@iflyc xml-xmlstarlet
-@iflyc xml-xmllint
-@iflyc yaml-jsyaml
-@iflyc yaml-ruby
-@iflyc zsh
-@end itemize
 
-Use @kbd{M-x flycheck-describe-checker} in this buffer to get help for
-the syntax checker under point.
+@end itemize
 
 @bye
 
