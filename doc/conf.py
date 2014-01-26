@@ -94,11 +94,18 @@ def parse_checker_property(env, signature, node):
     return keyword.strip()
 
 
+def parse_syntax_checker(env, signature, node):
+    node += addnodes.desc_annotation('Syntax checker ', 'Syntax checker ')
+    node += addnodes.desc_name(signature, signature)
+    return signature
+
+
 def setup(app):
     app.add_object_type('checker-property', 'checkprop',
                         indextemplate='pair: %s; Syntax checker property',
                         parse_node=parse_checker_property,
                         objname='Syntax checker property')
     app.add_object_type('syntax-checker', 'checker',
-                        indextemplate='pair: %s, Syntax checker',
+                        indextemplate='pair: %s; Syntax checker',
+                        parse_node=parse_syntax_checker,
                         objname='Syntax checker')
