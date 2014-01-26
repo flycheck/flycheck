@@ -392,8 +392,8 @@ You can define new error levels with :function:`flycheck-define-error-level`:
       The overlay :samp:`{category}` for `level` as symbol.
 
       An overlay category is a symbol whose properties provide the default
-      values for overlays of this category.  @xref{Overlay properties, ,
-      ,elisp}, for more information about overlay properties and categories.
+      values for overlays of this category.  See `Overlay properties`_ for more
+      information about overlay properties and categories.
 
       A category for an error level overlay should at least define the `face`
       property, for error highlighting.  Other useful properties for error level
@@ -407,8 +407,11 @@ You can define new error levels with :function:`flycheck-define-error-level`:
    :samp:`:fringe-bitmap {bitmap}`
       A fringe bitmap to use for fringe indicators for `level` as symbol.
 
-      @xref{Fringe Bitmaps, , ,elisp}, for a list of built-in fringe bitmaps,
-      and instructions on how to define new bitmaps.
+      See `Fringe Bitmaps`_ for a list of built-in fringe bitmaps, and
+      instructions on how to define new bitmaps.
+
+.. _Overlay properties: info:elisp#Overlay-properties
+.. _Fringe Bitmaps: info:elisp#Fringe-Bitmaps
 
 .. _error-parsers:
 

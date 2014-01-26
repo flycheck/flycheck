@@ -100,6 +100,40 @@ def parse_syntax_checker(env, signature, node):
     return signature
 
 
+def is_info_link(node):
+    if isinstance(node, nodes.reference) and 'refuri' in node:
+        return node['refuri'].startswith('info:')
+
+
+INFO_URI_RE = re.compile(r'^info:(?P<manual>[^#]+)(?:#(?P<node>.+))?$')
+
+
+def parse_info_uri(uri):
+    match = INFO_URI_RE.match(uri)
+    return match.group('manual'), match.group('node')
+
+
+INFO_MANUAL_URLS = {
+    'emacs': 'http://www.gnu.org/software/emacs/manual/html_node/emacs/{node}.html#{node}',
+    'elisp': 'http://www.gnu.org/software/emacs/manual/html_node/elisp/{node}.html#{node}',
+    'cl': 'http://www.gnu.org/software/emacs/manual/html_node/cl/{node}.html#{node}',
+}
+
+
+def resolve_info_links(app, doctree, docname):
+    """Resolve ``info:`` links for non-texinfo builders."""
+    if app.builder.format != 'texinfo':
+        for refnode in doctree.traverse(is_info_link):
+            manual, node = parse_info_uri(refnode['refuri'])
+            base_uri = INFO_MANUAL_URLS.get(manual)
+            if not base_uri:
+                app.warn('Cannot resolve info manual {0}'.format(manual))
+            else:
+                node = node.replace(' ', '-')
+                refuri = base_uri.format(node=node)
+                refnode['refuri'] = refuri
+
+
 def setup(app):
     app.add_object_type('checker-property', 'checkprop',
                         indextemplate='pair: %s; Syntax checker property',
@@ -109,3 +143,4 @@ def setup(app):
                         indextemplate='pair: %s; Syntax checker',
                         parse_node=parse_syntax_checker,
                         objname='Syntax checker')
+    app.connect('doctree-resolved', resolve_info_links)

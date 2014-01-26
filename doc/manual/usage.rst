@@ -141,7 +141,7 @@ Each syntax check conducts the following steps:
    Note that this hook does **not** run after each individual syntax checker in
    the syntax checker chain, but only after the **last checker**.
 
-   This variable is a normal hook. @xref{Hooks, , ,elisp}.
+   This variable is a normal hook. See `Hooks`_.
 
 .. hook:: flycheck-before-syntax-check-hook
 
@@ -155,7 +155,7 @@ Each syntax check conducts the following steps:
    Note that this hook does **not** run before each individual syntax checker in
    the syntax checker chain, but only before the **first checker**.
 
-   This variable is a normal hook. @xref{Hooks, , ,elisp}.
+   This variable is a normal hook. See `Hooks`_.
 
 There is also a hook run whenever a syntax check fails:
 
@@ -169,7 +169,9 @@ There is also a hook run whenever a syntax check fails:
    You should use this hook to conduct additional cleanup actions when Flycheck
    failed.
 
-   This variable is a normal hook. @xref{Hooks, , ,elisp}.
+   This variable is a normal hook. See `Hooks`_.
+
+.. _hooks: info:elisp#Hooks
 
 .. _syntax-checker-selection:
 
@@ -249,9 +251,7 @@ You can manually select a specific syntax checker for the current buffer, too:
       # flycheck-checker: python-pylint
       # End:
 
-   @xref{Specifying File Variables, , ,emacs}, for more information about file
-   variables.
-
+   See `Specifying File Variables`_ for more information about file variables.
 
 You can change the completion system used by
 :command:`flycheck-select-checker`:
@@ -293,6 +293,7 @@ syntax checker configuration.
 
 .. _flx-ido: https://github.com/lewang/flx
 .. _Grizzl: https://github.com/d11wtq/grizzl
+.. _Specifying File Variables: info:emacs#Specifying-File-Variables
 
 .. _syntax-checker-configuration:
 
@@ -738,8 +739,8 @@ Flycheck integrates into standard error navigation commands of Emacs.  If **no**
 compilation buffer (including those from :kbd:`M-x compile`, :kbd:`M-x grep`,
 :kbd:`M-x occur`, etc.) is visible, :kbd:`M-g n` (`next-error`) and :kbd:`M-g p`
 (`previous-error`) will navigate between Flycheck warnings and errors in the
-current buffer.  @xref{Compilation Mode, , ,emacs}, for more information about
-these commands.
+current buffer.  See `Compilation Mode`_ for more information about these
+commands.
 
 You can disable this integration by setting
 :option:`flycheck-standard-error-navigation` to nil:
@@ -788,6 +789,8 @@ which are not affected by :option:`flycheck-standard-error-navigation`:
    With prefix argument, jump forwards to by as many errors as specified by
    the prefix argument, e.g. :kbd:`M-3 M-x flycheck-first-error` moves to
    the 3rd error from the beginning of the buffer.
+
+.. _Compilation Mode: info:emacs#Compilation-Mode
 
 .. _mode-line:
 
