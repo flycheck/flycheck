@@ -3,6 +3,9 @@
 master (unreleased)
 -------------------
 
+- #274: The manual was ported to Sphinx_ and is now located at
+  http://flycheck.readthedocs.org
+
 - **Breaking changes**:
 
   - The default `flycheck-completion-system` was changes to nil, qi.e. the
@@ -29,6 +32,8 @@ master (unreleased)
 - Bug fixes
 
   - #298: Fix compatibility with tabbar-mode
+
+.. _Sphinx: http://sphinx-doc.org
 
 0.16 (Jan 11, 2014)
 -------------------
