@@ -1,18 +1,38 @@
-==========
- Flycheck
-==========
+=========================================
+ Flycheck — Modern Emacs syntax checking
+=========================================
 
-.. highlights::
+.. figure:: screenshot.png
+   :scale: 75%
+   :align: center
 
-   Modern on-the-fly syntax checking for GNU Emacs 24 (aka “Flymake done right”)
+   Flycheck with the `Solarized Light`_ theme and the `Source Code Pro`_ font
 
-   .. figure:: screenshot.png
-      :align: center
+.. _Solarized Light: https://github.com/bbatsov/solarized-emacs
+.. _Source Code Pro: https://github.com/adobe/source-code-pro
 
-      Flycheck the `Solarized Light`_ theme and the `Source Code Pro`_ font
+Features
+========
 
-      .. _Solarized Light: https://github.com/bbatsov/solarized-emacs
-      .. _Source Code Pro: https://github.com/adobe/source-code-pro
+Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24.
+
+- :doc:`Support for over 30 languages <manual/checkers>`
+- :ref:`Fully automatic syntax checking in the background <syntax-checking>`
+- :ref:`Nice error indication and highlighting <error-reporting>`
+- Optional error list popup
+- :ref:`Many customization options <syntax-checker-configuration>`
+- :doc:`A comprehensive manual <manual/index>`
+- :ref:`A dead simple API to create new syntax checkers
+  <defining-new-syntax-checkers>`
+- A “doesn't get in your way” guarantee
+
+Documentation
+=============
+
+.. toctree::
+
+   manual/index
+
 
 Licensing
 =========
@@ -41,8 +61,6 @@ License.  A copy of the license can be obtained at
 https://creativecommons.org/licenses/by-sa/4.0/legalcode.
 
 .. toctree::
-   :maxdepth: 2
    :hidden:
 
-   manual/index
    copying
