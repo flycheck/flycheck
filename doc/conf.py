@@ -28,7 +28,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 needs_sphinx = '1.2'
 
-extensions = ['eldomain', 'texinfo', 'flycheck']
+extensions = ['eldomain', 'texinfo', 'issues', 'flycheck']
 default_role = 'code'
 primary_domain = 'el'
 
