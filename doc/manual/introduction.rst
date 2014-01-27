@@ -76,7 +76,7 @@ Features
 
 
 3rd party extensions
---------------------
+====================
 
 The following extensions provide additional cool features for Flycheck:
 
