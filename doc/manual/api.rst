@@ -19,7 +19,7 @@ Error API
 =========
 
 Flycheck errors are represented by the CL structure :cl-struct:`flycheck-error`.
-See `CL Structures`_ for more information about CL structures.
+See :infonode:`Structures(cl)` for more information about CL structures.
 
 .. cl-struct:: flycheck-error
 
@@ -180,5 +180,3 @@ These functions can be used to implement custom error parsers:
 .. function:: flycheck-parse-xml-string s
 
    Parse a string `s` containing XML and return the parsed document tree.
-
-.. _CL Structures: info:cl#Structures

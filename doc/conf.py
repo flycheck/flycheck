@@ -18,6 +18,7 @@ import re
 import os
 import sys
 from sphinx import addnodes
+from sphinx.roles import XRefRole
 from docutils import utils, nodes
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -100,17 +101,16 @@ def parse_syntax_checker(env, signature, node):
     return signature
 
 
-def is_info_link(node):
-    if isinstance(node, nodes.reference) and 'refuri' in node:
-        return node['refuri'].startswith('info:')
+class InfoNodeXRefRole(XRefRole):
+
+    def process_link(self, env, refnode, has_explicit_title, title, target):
+        # Normalize whitespace in info node targets
+        target = re.sub(r'\s+', ' ', target, flags=re.UNICODE)
+        refnode['has_explicit_title'] = has_explicit_title
+        return title, target
 
 
-INFO_URI_RE = re.compile(r'^info:(?P<manual>[^#]+)(?:#(?P<node>.+))?$')
-
-
-def parse_info_uri(uri):
-    match = INFO_URI_RE.match(uri)
-    return match.group('manual'), match.group('node')
+INFO_RE = re.compile(r'^(?P<node>.+?)\((?P<manual>.+)\)$')
 
 
 INFO_MANUAL_URLS = {
@@ -120,18 +120,54 @@ INFO_MANUAL_URLS = {
 }
 
 
-def resolve_info_links(app, doctree, docname):
-    """Resolve ``info:`` links for non-texinfo builders."""
-    if app.builder.format != 'texinfo':
-        for refnode in doctree.traverse(is_info_link):
-            manual, node = parse_info_uri(refnode['refuri'])
-            base_uri = INFO_MANUAL_URLS.get(manual)
-            if not base_uri:
-                app.warn('Cannot resolve info manual {0}'.format(manual))
-            else:
-                node = node.replace(' ', '-')
-                refuri = base_uri.format(node=node)
-                refnode['refuri'] = refuri
+class infonode_reference(nodes.reference):
+    pass
+
+
+def resolve_info_references(app, env, refnode, contnode):
+    if refnode['reftype'] != 'infonode':
+        return None
+
+    target = refnode['reftarget']
+    match = INFO_RE.match(target)
+    if not match:
+        app.warn('Invalid info target: {0}'.format(target))
+        return contnode
+
+    manual = match.group('manual')
+    node = match.group('node')
+
+    if app.builder.format == 'texinfo':
+        reference = infonode_reference('', '')
+        reference['refnode'] = node
+        reference['refmanual'] = manual
+        reference['has_explicit_title'] = refnode['has_explicit_title']
+        reference.append(contnode)
+        return reference
+    else:
+        base_uri = INFO_MANUAL_URLS.get(manual)
+        if not base_uri:
+            app.warn('Cannot resolve info manual {0}'.format(manual))
+            return contnode
+        else:
+            reference = nodes.reference('', '', internal=False)
+            reference['refuri'] = base_uri.format(node=node.replace(' ', '-'))
+            reference['reftitle'] = target
+            reference.append(contnode)
+            return reference
+
+
+def visit_infonode_reference(self, node):
+    infonode = node['refnode']
+    manual = node['refmanual']
+
+    name = node.astext().strip() if node['has_explicit_title'] else ''
+
+    self.body.append('@ref{{{node},,{name},{manual}}}'.format(
+        node=infonode,name=self.escape_menu(name),manual=manual))
+
+    # Skip the node body
+    raise nodes.SkipNode
 
 
 def setup(app):
@@ -143,4 +179,6 @@ def setup(app):
                         indextemplate='pair: %s; Syntax checker',
                         parse_node=parse_syntax_checker,
                         objname='Syntax checker')
-    app.connect('doctree-resolved', resolve_info_links)
+    app.add_role('infonode', InfoNodeXRefRole(innernodeclass=nodes.emphasis))
+    app.add_node(infonode_reference, texinfo=(visit_infonode_reference, None))
+    app.connect('missing-reference', resolve_info_references)
