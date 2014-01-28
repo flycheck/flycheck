@@ -4,85 +4,25 @@
 
 .. default-role:: code
 
-Flycheck (aka “Flymake done right”) is a modern on-the-fly syntax checking
-extension for GNU Emacs 24 with:
-
-- ready-to-use syntax checkers for a bunch of languages,
-- easy customization,
-- a comprehensive manual,
-- a dead simple, declarative API to create new syntax checkers,
-- major-mode based selection of syntax checkers,
-- multiple syntax checkers per buffer,
-- optional error list popup,
-- a “doesn’t get in your way” guarantee,
-- and a clean, concise and understandable implementation with decent test
-  coverage.
-
 .. figure:: https://github.com/flycheck/flycheck/raw/master/doc/screenshot.png
    :align: center
 
    The screenshot shows Flycheck on Emacs 24.3.50 with the awesome Solarized_
    Light color theme and the great `Source Code Pro`_ font.
 
-Features
-========
+Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24
 
-- Automatic on-the-fly syntax checking while editing
-- Fully automatic selection of the best syntax checker
-- Optional manual selection of a syntax checker with `flycheck-select-checker`
-  at `C-c ! s`
-- Built-in syntax checkers for:
-
-  - AsciiDoc
-  - C/C++
-  - CFEngine
-  - Chef cookbooks
-  - CoffeeScript
-  - CSS
-  - D
-  - Elixir
-  - Emacs Lisp
-  - Erlang
-  - ERuby
-  - Go
-  - Haml
-  - Handlebars
-  - Haskell
-  - HTML
-  - Javascript
-  - JSON
-  - LESS
-  - Lua
-  - Perl
-  - PHP
-  - Puppet
-  - Python
-  - Racket
-  - RST (ReStructuredText)
-  - Ruby
-  - Rust
-  - Sass
-  - Scala
-  - SCSS
-  - Shell scripts (POSIX Shell, Bash and Zsh)
-  - Slim
-  - TeX/LaTeX
-  - Texinfo
-  - Verilog
-  - XML
-  - YAML
-
-- Nice error indication and highlighting
-- Easy customization
-- Syntax checker configuration with project-specific configuration files and
-  options
-- Error navigation with `next-error` and `previous-error`
-- Error list with `flycheck-list-errors` at `C-c ! l`
-- Declarative API to define new syntax checkers
-- Error parsers for structured markup formats (e.g. Checkdoc XML)
+- support for over 30 languages,
+- fully automatic syntax checking in the background,
+- nice error indication and highlighting,
+- optional error list popup,
+- many customization options,
+- a comprehensive manual,
+- a dead simple function to create new syntax checkers,
+- a “doesn't get in your way” guarantee
 
 3rd party extensions
---------------------
+====================
 
 The following extensions provide additional cool features for Flycheck:
 

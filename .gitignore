@@ -1,4 +1,5 @@
 *.elc
+*.pyc
 
 # Packages installed for development
 /.cask/
@@ -10,9 +11,5 @@
 # Vagrant cache
 /.vagrant
 
-# Info documentation
-/doc/flycheck.info
-/doc/dir
-
-# HTML documentation
-/doc/html/
+# Documentation builds
+/doc/_build/

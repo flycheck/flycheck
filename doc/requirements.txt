@@ -1,0 +1,2 @@
+Sphinx>=1.2
+pillow>=2.3

@@ -2066,63 +2066,48 @@ check with.  ERRORS is the list of expected errors."
         (should (s-contains? (flycheck-checker-documentation checker)
                              (buffer-substring (point-min) (point-max))))))))
 
-(defmacro flycheck-test-with-manual-buffer (&rest body)
-  "Create a temp buffer with flycheck.texi and execute BODY."
-  (declare (indent 0))
-  `(flycheck-test-with-file-buffer
-       (f-join flycheck-test-source-directory "doc" "flycheck.texi")
-     ,@body))
-
 (ert-deftest flycheck--manual/all-checkers-are-documented ()
   :tags '(documentation)
-  "Test that all registered checkers are documented in the Flycheck manual."
-  (flycheck-test-with-manual-buffer
-    (search-forward "@node Syntax checkers")
-    (search-forward "@itemize")
+  (flycheck-test-with-file-buffer
+      (f-join flycheck-test-source-directory "doc" "manual/checkers.rst")
     (dolist (checker flycheck-checkers)
-      (forward-line 1)
-      (should (looking-at (rx line-start "@iflyc " symbol-start
-                              (group (one-or-more not-newline))
-                              symbol-end line-end)))
-      (should (equal (match-string 1) (symbol-name checker))))
-    (forward-line 1)
-    (should (looking-at (rx "@end itemize")))))
+      (re-search-forward (rx ".. syntax-checker:: "
+                             (group (one-or-more not-newline))
+                             line-end))
+      (should (string= (symbol-name checker) (match-string 1))))))
 
 (ert-deftest flycheck--manual/all-options-are-documented ()
   :tags '(documentation)
-  "Tests that all option variables are documented in the manual."
-  (let ((config-vars (-sort #'string<
+  (let ((option-vars (-sort #'string<
                             (-flatten (-keep #'flycheck-checker-option-vars
-                                            (flycheck-defined-checkers))))))
-    (flycheck-test-with-manual-buffer
-      ;; Go to the beginning of the configuration section
-      (search-forward "@node Configuration")
-      ;; Go to the beginning of the option variable listing
-      (search-forward "configured via options.")
-      ;; Verify that all variables are documented
-      (dolist (var config-vars)
-        (re-search-forward (rx line-start "@defopt " symbol-start
+                                             flycheck-checkers)))))
+    (flycheck-test-with-file-buffer
+        (f-join flycheck-test-source-directory "doc" "manual/usage.rst")
+      ;; Go to the reference label denoting the "options" section
+      (search-forward ".. _syntax-checker-options")
+      ;; Now search forward for all variables
+      (dolist (var option-vars)
+        (re-search-forward (rx ".. option:: "
                                (group (one-or-more not-newline))
-                               symbol-end line-end))
-        (should (equal (match-string 1) (symbol-name var)))))))
+                               line-end))
+        (should (string= (match-string 1) (symbol-name var)))))))
 
 (ert-deftest flycheck--manual/all-config-vars-are-documented ()
   :tags '(documentation)
   "Tests that all configuration file variables are documented in the manual."
-  (let ((option-file-vars (-sort #'string<
-                                (-keep #'flycheck-checker-config-file-var
-                                        (flycheck-defined-checkers)))))
-    (flycheck-test-with-manual-buffer
-      ;; Go to the beginning of the configuration section
-      (search-forward "@node Configuration")
-      ;; Go to the beginning of the option variable listing
-      (search-forward "configuration file variables")
-      ;; Verify that all variables are documented
-      (dolist (var option-file-vars)
-        (re-search-forward (rx line-start "@defopt " symbol-start
+  (let ((config-file-vars (-sort #'string<
+                                 (-keep #'flycheck-checker-config-file-var
+                                        flycheck-checkers))))
+    (flycheck-test-with-file-buffer
+        (f-join flycheck-test-source-directory "doc" "manual/usage.rst")
+      ;; Go to the reference label denoting the "config file variable" section
+      (search-forward ".. _syntax-checker-configuration-files:")
+      ;; And search forward for all variables
+      (dolist (var config-file-vars)
+        (re-search-forward (rx ".. option:: "
                                (group (one-or-more not-newline))
-                               symbol-end line-end))
-        (should (equal (match-string 1) (symbol-name var)))))))
+                               line-end))
+        (should (string= (match-string 1) (symbol-name var)))))))
 
 
 ;;;; Checker error API

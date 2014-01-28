@@ -9,19 +9,31 @@ or want to contribute a new syntax checker, please report to the `issue
 tracker`_ the repository and send a pull request, but respect the following
 guidelines.
 
+.. _reporting-issues:
 
-Issue reporting
-===============
+Reporting issues
+================
 
 - Check that the issue has not already been reported.
 - Check that the issue has not already been fixed in the latest code.
 - Be clear and precise (do not prose, but name functions and commands exactly).
+- Include the version of Flycheck as shown by `M-x flycheck-version`.
 - Open an issue with a clear title and description in grammatically correct,
   complete sentences.
 
+.. _contributing-code:
 
-Code contribution
+Contributing code
 =================
+
+Contributions of code, either as pull requests or as patches, are *very*
+welcome, but please respect the following guidelines.
+
+General
+-------
+
+- Write good and *complete* code.
+- Provide use cases and rationale for new features.
 
 Code style
 ----------
@@ -36,8 +48,7 @@ Code style
 Commit messages
 ---------------
 
-Write commit messages according to `Tim Pope's guidelines`_:
-In short:
+Write commit messages according to `Tim Pope's guidelines`_. In short:
 
 - Start with a capitalized, short (50 characters or less) summary, followed by a
   blank line.
@@ -76,6 +87,25 @@ This is a model commit message::
 
 `Git Commit Mode`_ and Magit_ provide a major mode for Git commit messages,
 which helps you to comply to these guidelines.
+
+.. _contributing-syntax-checkers:
+
+Contributing syntax checkers
+----------------------------
+
+For syntax checkers, some special guidelines apply in addition to the above:
+
+- Provide a link to the website of the syntax checker tool in the comments of
+  your pull request.
+- Add a proper docstring to your syntax checker, including this URL.
+
+Additionally, either
+
+- show example code that triggers errors for each of the error patterns of the
+  syntax checker, or
+- add unit tests for your syntax checker.
+
+.. _pull requests:
 
 Pull requests
 -------------
