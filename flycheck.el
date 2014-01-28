@@ -998,9 +998,11 @@ Clears all Flycheck errors first."
 
 Report a proper flycheck status."
   (if errors
-      (let ((no-err-warnings (flycheck-count-errors errors)))
+      (let ((error-counts (flycheck-count-errors errors)))
         (flycheck-report-status
-         (format ":%s/%s" (car no-err-warnings) (cdr no-err-warnings))))
+         (format ":%s/%s"
+                 (or (cdr (assq 'error error-counts)) 0)
+                 (or (cdr (assq 'warning error-counts)) 0))))
     (flycheck-report-status "")))
 
 
@@ -2838,10 +2840,8 @@ ERRORS is modified by side effects."
 
 Return a cons cell whose `car' is the number of errors and whose
 `car' is the number of warnings."
-  (let* ((groups (-group-by 'flycheck-error-level errors))
-         (errors (cdr (assq 'error groups)))
-         (warnings (cdr (assq 'warning groups))))
-    (cons (length errors) (length warnings))))
+  (--map (cons (car it) (length (cdr it)))
+         (-group-by 'flycheck-error-level errors)))
 
 (defun flycheck-has-errors-p (errors &optional level)
   "Determine if there are any ERRORS with LEVEL.

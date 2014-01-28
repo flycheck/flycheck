@@ -160,7 +160,9 @@ syntax check.
 
    Count the number of errors and warnings in `errors`.
 
-   Return a cons cell :samp:`({no-errors} . {no-warnings})`.
+   Return an alist mapping error level symbols to error counts.  Each item is a
+   cons cell :samp:`({level} . {count})`, where :samp:`{level}` is the level
+   symbol and :samp:`{count}` is the number of errors of of :samp:`{level}`.
 
 .. function:: flycheck-has-errors-p errors &optional level
 
