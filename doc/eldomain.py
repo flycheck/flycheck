@@ -245,7 +245,7 @@ class EmacsLispDomain(Domain):
         for scope, objects in symbols.items():
             for name, (object_docname, _) in objects.items():
                 if docname == object_docname:
-                    del self.data[scope][name]
+                    del symbols[scope][name]
 
     def resolve_xref(self, env, fromdoc, builder, objtype, target, node,
                      content):
