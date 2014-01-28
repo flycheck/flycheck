@@ -111,12 +111,18 @@ class EmacsLispFunction(EmacsLispSymbol):
 class EmacsLispCommand(EmacsLispSymbol):
 
     option_spec = {
-        'binding': directives.unchanged
+        'binding': directives.unchanged,
+        'prefix-arg': directives.unchanged,
     }
     option_spec.update(EmacsLispSymbol.option_spec)
 
+    def with_prefix_arg(self, binding):
+        prefix_arg = self.options.get('prefix-arg')
+        return prefix_arg + ' ' + binding if prefix_arg else binding
+
     def make_type_annotation(self):
-        return addnodes.desc_annotation('M-x ', 'M-x ')
+        keys = self.with_prefix_arg('M-x')
+        return addnodes.desc_annotation(keys + ' ', keys + ' ')
 
     def run(self):
         nodes = ObjectDescription.run(self)
@@ -125,6 +131,7 @@ class EmacsLispCommand(EmacsLispSymbol):
         # signatures, but only for commands.  Nothing else has key bindings.
         binding = self.options.get('binding')
         if binding:
+            binding = self.with_prefix_arg(binding)
             desc_node = nodes[-1]
             assert isinstance(desc_node, addnodes.desc)
             signode = addnodes.desc_signature(binding, '')
