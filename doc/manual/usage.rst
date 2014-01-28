@@ -214,16 +214,24 @@ You can manually select a specific syntax checker for the current buffer, too:
 .. command:: flycheck-select-checker
    :binding: C-c ! s
 
-   Prompt for a syntax checker, and select it for the current buffer, by setting
-   :variable:`flycheck-checker`.
+   Select the syntax checker for the current buffer by setting
+   :variable:`flycheck-checker`, and run a syntax check with the new syntax
+   checker.
 
-   With prefix arg, deselect the current syntax checker if any, and re-enable
-   automatic selection, by setting :variable:`flycheck-checker` to `nil`.
-
-   In either case, immediately run a syntax check afterwards.
+   Prompt for a syntax checker and set :variable:`flycheck-checker`.
 
    Any :term:`syntax checker` can be selected with this command, regardless of
    whether it is enabled.
+
+.. command:: flycheck-select-checker
+   :prefix-arg: C-u
+   :binding: C-c ! s
+   :noindex:
+
+   Deselect the current syntax checker, and run a syntax check with an
+   automatically selected syntax checker.
+
+   Set :variable:`flycheck-checker` to `nil`.
 
 .. variable:: flycheck-checker
 
@@ -324,11 +332,17 @@ them interactively:
 
    Set the executable of a syntax checker in the current buffer.
 
-   Prompt for a syntax checker, and an executable file, and set the
-   corresponding executable variable.
+   Prompt for a syntax checker and an executable file, and set the
+   executable variable of the syntax checker.
 
-   With prefix arg, prompt for a syntax checker and reset its executable to the
-   default.
+.. command:: flycheck-set-checker-executable
+   :prefix-arg: C-u
+   :binding: C-c ! e
+   :noindex:
+
+   Reset the executable of a syntax checker in the current buffer.
+
+   Prompt for a syntax checker and reset its executable to the default.
 
 .. _syntax-checker-options:
 
