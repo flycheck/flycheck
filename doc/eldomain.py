@@ -242,8 +242,8 @@ class EmacsLispDomain(Domain):
 
     def clear_doc(self, docname):
         symbols = self.data['symbols']
-        for scope, objects in symbols.iteritems():
-            for name, (object_docname, _) in objects.iteritems():
+        for scope, objects in symbols.items():
+            for name, (object_docname, _) in objects.items():
                 if docname == object_docname:
                     del self.data[scope][name]
 
