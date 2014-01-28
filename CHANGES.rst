@@ -12,6 +12,8 @@ master (unreleased)
     built-in `completing-read`, for compliance with Emacs' defaults.  To restore
     the previous behaviour, add `(eval-after-load 'flycheck '(setq
     flycheck-completion-system 'ido))` to your `init.el`.
+  - `flycheck-count-errors` counts errors of all levels now, and returns an
+    alist mapping error symbols to error counts.
 
 - New syntax checkers:
 
