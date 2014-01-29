@@ -1,7 +1,7 @@
 This is flycheck.info, produced by makeinfo version 5.2 from
 flycheck.texi.
 
-     Flycheck 0.17-cvs, January 28, 2014
+     Flycheck 0.17-cvs, January 29, 2014
 
      Sebastian Wiesner
 
@@ -21,7 +21,7 @@ File: flycheck.info,  Node: Top,  Next: Introduction,  Up: (dir)
 Flycheck Documentation
 **********************
 
-     Flycheck 0.17-cvs, January 28, 2014
+     Flycheck 0.17-cvs, January 29, 2014
 
      Sebastian Wiesner
 
@@ -53,7 +53,7 @@ Emacs.
 * Credits:: 
 * Changes:: 
 * GNU Free Documentation License:: 
-* Available syntax checkers:: 
+* Supported languages:: 
 * Glossary:: 
 * Index:: 
 
@@ -137,6 +137,50 @@ Changes
 * 0.3 (Nov 21, 2012): 0 3 Nov 21 2012. 
 * 0.2 (Oct 25, 2012): 0 2 Oct 25 2012. 
 * 0.1 (Oct 11, 2012): 0 1 Oct 11 2012. 
+
+Supported languages
+
+* AsciiDoc:: 
+* Bash:: 
+* C/C++:: 
+* CFEngine:: 
+* Chef:: 
+* Coffeescript:: 
+* CSS:: 
+* D:: 
+* Elixir:: 
+* Emacs Lisp:: 
+* Erlang:: 
+* ERuby:: 
+* Go:: 
+* Haml:: 
+* Handlebars:: 
+* Haskell:: 
+* HTML:: 
+* Javascript:: 
+* JSON:: 
+* LESS:: 
+* Lua:: 
+* Make:: 
+* Perl:: 
+* PHP:: 
+* Puppet:: 
+* Python:: 
+* Racket:: 
+* ReStructuredText:: 
+* Ruby:: 
+* Rust:: 
+* Sass:: 
+* Scala:: 
+* Scss:: 
+* Shell (POSIX): Shell POSIX. 
+* Slim:: 
+* TeX/LaTeX:: 
+* Texinfo:: 
+* Verilog:: 
+* XML:: 
+* YAML:: 
+* Zsh:: 
 
 
 
@@ -1352,7 +1396,8 @@ You define new syntax checkers with *note flycheck-define-checker: 75.:
      you need to register it in *note flycheck-checkers: 20.  See *note
      Syntax checker selection: 1a. for more information.
 
-      -- Syntax Checker Property: :command (_executable_ [_arg_ ...])
+      -- Flycheck Syntax Checker Property: :command (_executable_ [_arg_
+               ...])
 
                An unquoted list describing the syntax checker command to
                execute.
@@ -1442,7 +1487,7 @@ You define new syntax checkers with *note flycheck-define-checker: 75.:
                Use this symbol if you need to move files created by a
                syntax checker out of the way.
 
-               See the declaration of the *note elixir: 7c. syntax
+               See the declaration of the *note elixir: 7d. syntax
                checker for an application of this symbol.
 
           ‘temporary-file-name’
@@ -1470,7 +1515,7 @@ You define new syntax checkers with *note flycheck-define-checker: 75.:
                file.  See *note Syntax checker configuration files: 48.
                for more information about syntax checker configuration.
                You need to define this variable _explicitly_ with *note
-               flycheck-def-config-file-var: 7d.
+               flycheck-def-config-file-var: 7e.
 
                If the configuration file is found, pass the ‘_option_’
                and the absolute path to the configuration file to the
@@ -1490,14 +1535,14 @@ You define new syntax checkers with *note flycheck-define-checker: 75.:
                ‘_option_’ is a string containing the option for with to
                specify the value.  ‘_filter_’ is an optional function to
                be applied to the value of ‘_variable_’ before use.  See
-               *note Option filters: 7e. for a list of built-in option
+               *note Option filters: 7f. for a list of built-in option
                filters.
 
                ‘_variable_’ is a symbol referring to a variable whose
-               value to use.  :See ref:‘syntax-checker-configuration’
+               value to :use.  See ref:‘syntax-checker-configuration’
                for more information about :syntax checker configuration.
                You need to define this variable :_explicitly_ with *note
-               flycheck-def-option-var: 7f.
+               flycheck-def-option-var: 80.
 
                If ‘_variable_’ is not ‘nil’ after applying ‘_filter_’,
                pass ‘_option_’ and the value of ‘_variable_’ after
@@ -1524,7 +1569,7 @@ You define new syntax checkers with *note flycheck-define-checker: 75.:
 
                ‘_filter_’ is an optional function to be applied to each
                item in the list before use.  See *note Option filters:
-               7e. for a list of built-in option filters.
+               7f. for a list of built-in option filters.
 
                For each item in the value of ‘_variable_’, which is not
                ‘nil’ after applying ‘_filter_’, pass ‘_option_’ the the
@@ -1558,8 +1603,8 @@ You define new syntax checkers with *note flycheck-define-checker: 75.:
                the syntax checker _literally_.  Special symbols and
                forms in the result of ‘form’ are _not_ replaced.
 
-      -- Syntax Checker Property: :error -patterns ((_level_ _sexp_)
-               ...)
+      -- Flycheck Syntax Checker Property: :error -patterns ((_level_
+               _sexp_) ...)
 
           An unquoted list of one or more error patterns to parse the
           output of the syntax checker *note ;command: 76.
@@ -1570,7 +1615,7 @@ You define new syntax checkers with *note flycheck-define-checker: 75.:
 
           Flycheck provides the built-in error levels ‘error’, ‘warning’
           and ‘info’.  You can define your own error levels with *note
-          flycheck-define-error-level: 80.
+          flycheck-define-error-level: 82.
 
           The ‘_level_’ is followed by one or more ‘rx’ ‘_sexp_’
           elements.  See the docstring of the function ‘rx’ for more
@@ -1611,10 +1656,10 @@ You define new syntax checkers with *note flycheck-define-checker: 75.:
           a pattern will not be matched by subsequent patterns.  In
           other words, the first pattern wins.
 
-      -- Syntax Checker Property: :error -parser _function_
+      -- Flycheck Syntax Checker Property: :error -parser _function_
 
-      -- Syntax Checker Property: :error -parser (lambda (output checker
-               buffer) _body_ ...)
+      -- Flycheck Syntax Checker Property: :error -parser (lambda
+               (output checker buffer) _body_ ...)
 
           A function to parse the output of the syntax checker, either
           as _unquoted_ function symbol or ‘lambda’ form.
@@ -1624,21 +1669,21 @@ You define new syntax checkers with *note flycheck-define-checker: 75.:
           checker as string, ‘checker’ the syntax checker that was used,
           and ‘buffer’ a buffer object representing the checker buffer.
 
-          The function must return a list of *note flycheck-error: 81.
+          The function must return a list of *note flycheck-error: 84.
           objects parsed from ‘output’.  See *note Error API: 5d. for
-          information about *note flycheck-error: 81.  See *note Error
-          parsers: 82. for a list of built-in error parsers.
+          information about *note flycheck-error: 84.  See *note Error
+          parsers: 85. for a list of built-in error parsers.
 
           If this property is given, it takes precedence over *note
           ;error-patterns: 79.  To use an error parser together with
           patterns, you must manually call *note
-          flycheck-parse-with-patterns: 83. in your error parser to
+          flycheck-parse-with-patterns: 86. in your error parser to
           apply the error patterns.  You can then manipulate the *note
-          flycheck-error: 81. objects returned by this function.
+          flycheck-error: 84. objects returned by this function.
 
-      -- Syntax Checker Property: :modes _mode_
+      -- Flycheck Syntax Checker Property: :modes _mode_
 
-      -- Syntax Checker Property: :modes (_mode_ ...)
+      -- Flycheck Syntax Checker Property: :modes (_mode_ ...)
 
           An unquoted major mode symbol or an unquoted list thereof.
 
@@ -1649,9 +1694,10 @@ You define new syntax checkers with *note flycheck-define-checker: 75.:
           If *note ;predicate: 78. is given, it is additionally called
           in buffers of any given ‘_mode_’.
 
-      -- Syntax Checker Property: :predicate _function_
+      -- Flycheck Syntax Checker Property: :predicate _function_
 
-      -- Syntax Checker Property: :predicate (lambda () _body_ ...)
+      -- Flycheck Syntax Checker Property: :predicate (lambda () _body_
+               ...)
 
           A function to determines whether to use this syntax checker in
           the current buffer, either as unquoted function symbol or as
@@ -1663,7 +1709,7 @@ You define new syntax checkers with *note flycheck-define-checker: 75.:
           ;predicate: 78. are given, *both* must match for this syntax
           checker to be used.
 
-      -- Syntax Checker Property: :next -checkers (_item_ ...)
+      -- Flycheck Syntax Checker Property: :next -checkers (_item_ ...)
 
           An unquoted list defining the syntax checker to run after this
           checker.
@@ -1743,7 +1789,7 @@ Flycheck provides some built-in error levels:
      Informational annotations
 
 You can define new error levels with *note flycheck-define-error-level:
-80.:
+82.:
 
  -- Function: Function flycheck-define-error-level level &rest,
           properties
@@ -1805,7 +1851,7 @@ checkers:
 
 You may also define your own error parsers.  An error parser is any
 function that takes the following three arguments and returns a list of
-*note flycheck-error: 81. objects (see *note Error API: 5d. for more
+*note flycheck-error: 84. objects (see *note Error API: 5d. for more
 information):
 
 ‘output’
@@ -1821,7 +1867,7 @@ information):
      A buffer object referring to the buffer that was syntax-checked.
 
 Flycheck provides some utility functions to implement your own error
-parsers.  See *note Error parser API: 88.
+parsers.  See *note Error parser API: 8e.
 
    ---------- Footnotes ----------
 
@@ -1915,7 +1961,7 @@ directory and containing the contents of the buffer to check.
 Next we specify how to parse the output of the syntax checker.  PHP
 CodeSniffer provides an option to output errors in an XML format similar
 to the Java tool Checkstyle, so we use the built-in _error parser_ *note
-flycheck-parse-checkstyle: 87. to parse the output.
+flycheck-parse-checkstyle: 8d. to parse the output.
 
 Eventually we enable the syntax checker in PHP editing modes.
 
@@ -2047,7 +2093,7 @@ is simply omitted from the command line.
 Some Syntax checkers can also be configured using options passed on the
 command line.  Flycheck supports this case, too.  We will use this
 facility to extend the PHP CodeSniffer syntax checker from the *note
-Basic syntax checkers: 91. section with support for coding standards:
+Basic syntax checkers: 97. section with support for coding standards:
 
      (flycheck-def-option-var flycheck-phpcs-standard nil phpcs
        "The coding standard for PHP CodeSniffer."
@@ -2067,7 +2113,7 @@ The syntax checker is pretty much the same as before, except that a new
 element was added to *note ;command: 76.  This element passes the value
 of the new option variable *note flycheck-phpcs-standard: 41. to the
 syntax checker.  This variable is declared with the special macro *note
-flycheck-def-option-var: 7f. at the beginning.
+flycheck-def-option-var: 80. at the beginning.
 
 
 File: flycheck.info,  Node: Chaining syntax checkers,  Prev: Configuration files for syntax checkers,  Up: Examples
@@ -2131,7 +2177,7 @@ File: flycheck.info,  Node: Error API,  Next: Error parser API,  Up: Flycheck AP
 =============
 
 Flycheck errors are represented by the CL structure *note
-flycheck-error: 81.  See *note (cl)Structures:: for more information
+flycheck-error: 84.  See *note (cl)Structures:: for more information
 about CL structures.
 
  -- CL Struct: Cl Struct flycheck-error
@@ -2174,9 +2220,9 @@ about CL structures.
       -- Slot: Slot level
 
           The error level of the message, as symbol denoting an error
-          level defined with *note flycheck-define-error-level: 80.
+          level defined with *note flycheck-define-error-level: 82.
 
-     There are two constructors to create new *note flycheck-error: 81.
+     There are two constructors to create new *note flycheck-error: 84.
      objects:
 
       -- Function: Function flycheck-error-new-at line, column
@@ -2185,13 +2231,13 @@ about CL structures.
 
           Create a new Flycheck error at the given ‘line’ and ‘column’.
 
-          ‘line’ and ‘column’ refer to the *note line: 9b. and *note
-          column: 9c. of the new error.  The optional ‘level’ and
-          ‘message’ arguments fill the *note level: 9e. and *note
-          message: 9d. slots respectively.
+          ‘line’ and ‘column’ refer to the *note line: a1. and *note
+          column: a2. of the new error.  The optional ‘level’ and
+          ‘message’ arguments fill the *note level: a4. and *note
+          message: a3. slots respectively.
 
           ‘checker’, ‘filename’ and ‘buffer’ are keyword arguments, for
-          *note checker: 99, *note filename: 9a. and *note buffer: 98.
+          *note checker: 9f, *note filename: a0. and *note buffer: 9e.
           respectively.  ‘buffer’ defaults to the current buffer, the
           other two default to ‘nil’.
 
@@ -2202,12 +2248,12 @@ about CL structures.
 
       -- Function: Function flycheck-error-new &restattributes
 
-          Create a new *note flycheck-error: 81. with the given
+          Create a new *note flycheck-error: 84. with the given
           ‘attributes’.
 
           ‘attributes’ is a property list, where each property specifies
           the value for the corresponding slot of *note flycheck-error:
-          81, for instance:
+          84, for instance:
 
                (flycheck-error-new :line 10 :column 5 :message "Foo" :level 'warning)
 
@@ -2215,30 +2261,30 @@ about CL structures.
 
       -- Macro: Macro flycheck-error-with-buffer error &rest, forms
 
-          Evaluate ‘forms’ with the *note buffer: 98. of the given
+          Evaluate ‘forms’ with the *note buffer: 9e. of the given
           ‘error’ as the current buffer.
 
           If the buffer is not live, ‘forms’ are *not* evaluated.
 
       -- Function: Function flycheck-error-line-region error
 
-          Get the region marking the whole *note line: 9b. of the given
+          Get the region marking the whole *note line: a1. of the given
           ‘error’, as a cons cell ‘(_beg_ . _end_)’.
 
       -- Function: Function flycheck-error-column-region error
 
-          Get the region marking the *note column: 9c. of the given
+          Get the region marking the *note column: a2. of the given
           ‘error’, as cons cell ‘(_beg_ . _end_)’.
 
-          If the *note column: 9c. of ‘error’ is ‘nil’, return ‘nil’
+          If the *note column: a2. of ‘error’ is ‘nil’, return ‘nil’
           instead.
 
       -- Function: Function flycheck-error-sexp-region error
 
           Get the region marking the expression around the *note column:
-          9c. of the ‘error’, as cons cell ‘(_beg_ . _end_)’.
+          a2. of the ‘error’, as cons cell ‘(_beg_ . _end_)’.
 
-          If the *note column: 9c. of ‘error’ is ‘nil’, or if there is
+          If the *note column: a2. of ‘error’ is ‘nil’, or if there is
           no expression around this column, return ‘nil’ instead.
 
                Warning: Flycheck relies on the major mode to parse the
@@ -2258,9 +2304,9 @@ about CL structures.
 
           Get the exact buffer position of ‘error’.
 
-          Essentially this is the position of the *note column: 9c. of
+          Essentially this is the position of the *note column: a2. of
           ‘error’, if it is not ‘nil’, or the position of the first
-          non-whitespace character on the *note line: 9b. of ‘error’
+          non-whitespace character on the *note line: a1. of ‘error’
           otherwise.  @end defun
 
       -- Function: Function flycheck-error-format error
@@ -2279,7 +2325,9 @@ of a syntax check.
 
      Count the number of errors and warnings in ‘errors’.
 
-     Return a cons cell ‘(_no-errors_ . _no-warnings_)’.
+     Return an alist mapping error level symbols to error counts.  Each
+     item is a cons cell ‘(_level_ . _count_)’, where ‘_level_’ is the
+     level symbol and ‘_count_’ is the number of errors of of ‘_level_’.
 
  -- Function: Function flycheck-has-errors-p errors &optional, level
 
@@ -2566,8 +2614,8 @@ support and patches are greatly appreciated.
      Flake8 syntax checker.
 
    - Yasuyuki Oka(30) contributed a lot of syntax checkers for various
-     languages, including AsciiDoc, Chef recipes, ERuby, Handlebars,
-     Javascript, PHP, Racket, Ruby, Slim and YAML.
+     languages, including AsciiDoc, Chef recipes, ERuby, GNU Make,
+     Handlebars, Javascript, PHP, Racket, Ruby, Slim and YAML.
 
    - Victor Deryagin(31) added the Rust syntax checker.
 
@@ -2686,28 +2734,38 @@ File: flycheck.info,  Node: master unreleased,  Next: 0 16 Jan 11 2014,  Up: Cha
           ‘(eval-after-load 'flycheck '(setq flycheck-completion-system
           'ido))’ to your ‘init.el’.
 
+        - ‘flycheck-count-errors’ counts errors of all levels now, and
+          returns an alist mapping error symbols to error counts.
+
    - New syntax checkers:
 
         - RST (ReStructuredText) using Sphinx
 
+        - #321(3): GNU Make
+
    - New features:
 
-        - #266(3): Extend syntax checkers with
+        - #266(4): Extend syntax checkers with
           ‘flycheck-add-next-checkers’
 
    - Improvements:
 
-        - #301(4): Immediately re-check the buffer when it was changed
+        - #301(5): Immediately re-check the buffer when it was changed
           during a syntax check
 
-        - #305(5): Do not defer syntax checker after idle change timeout
+        - #305(6): Do not defer syntax checker after idle change timeout
 
         - Do not use the generic ‘rst’ syntax checker in Sphinx projects
           anymore, to avoid false positives by Sphinx-only markup
 
+        - #314(7): Check for more than just syntax errors in ‘rust’
+
    - Bug fixes
 
-        - #298(6): Fix compatibility with tabbar-mode
+        - #298(8): Fix compatibility with tabbar-mode
+
+        - #319(9): Do not visit the file to check in ‘emacs-lisp’ and
+          ‘emacs-lisp-checkdoc’ to avoid unintended side effects
 
    ---------- Footnotes ----------
 
@@ -2715,13 +2773,19 @@ File: flycheck.info,  Node: master unreleased,  Next: 0 16 Jan 11 2014,  Up: Cha
 
    (2) http://sphinx-doc.org
 
-   (3) https://github.com/flycheck/flycheck/issues/266
+   (3) https://github.com/flycheck/flycheck/issues/321
 
-   (4) https://github.com/flycheck/flycheck/issues/301
+   (4) https://github.com/flycheck/flycheck/issues/266
 
-   (5) https://github.com/flycheck/flycheck/issues/305
+   (5) https://github.com/flycheck/flycheck/issues/301
 
-   (6) https://github.com/flycheck/flycheck/issues/298
+   (6) https://github.com/flycheck/flycheck/issues/305
+
+   (7) https://github.com/flycheck/flycheck/issues/314
+
+   (8) https://github.com/flycheck/flycheck/issues/298
+
+   (9) https://github.com/flycheck/flycheck/issues/319
 
 
 File: flycheck.info,  Node: 0 16 Jan 11 2014,  Next: 0 15 Nov 15 2013,  Prev: master unreleased,  Up: Changes
@@ -3908,7 +3972,7 @@ Initial release as flymake-checkers
         - Emacs Lisp
 
 
-File: flycheck.info,  Node: GNU Free Documentation License,  Next: Available syntax checkers,  Prev: Changes,  Up: Top
+File: flycheck.info,  Node: GNU Free Documentation License,  Next: Supported languages,  Prev: Changes,  Up: Top
 
 8 GNU Free Documentation License
 ********************************
@@ -4366,141 +4430,793 @@ File: flycheck.info,  Node: GNU Free Documentation License,  Next: Available syn
      to permit their use in free software.
 
 
-File: flycheck.info,  Node: Available syntax checkers,  Next: Glossary,  Prev: GNU Free Documentation License,  Up: Top
+File: flycheck.info,  Node: Supported languages,  Next: Glossary,  Prev: GNU Free Documentation License,  Up: Top
 
-9 Available syntax checkers
-***************************
+9 Supported languages
+*********************
 
-The following syntax checkers are available in Flycheck.  Each syntax
-checker follows a ‘_language_-_tool_’ convention, where ‘_language_’ is
-the programming language supported by this syntax checker, and ‘_tool_’
-the specific syntax checker tool.
+Flycheck supports the following 41 languages with 61 syntax checkers.
 
-In Emacs, use *note flycheck-describe-checker: 9. to see comprehensive
-documenation about a syntax checker.
+Each language has one or more syntax checkers, whose names follow a
+‘_language_-_tool_’ convention, where ‘_language_’ is the programming
+language supported by this syntax checker, and ‘_tool_’ the specific
+syntax checker tool.
 
- -- Syntax Checker: Syntax checker asciidoc
+This document provides just a brief overview, use *note
+flycheck-describe-checker: 9. to see comprehensive documenation about a
+syntax checker.
 
- -- Syntax Checker: Syntax checker bash
+* Menu:
 
- -- Syntax Checker: Syntax checker c/c++-clang
-
- -- Syntax Checker: Syntax checker c/c++-cppcheck
-
- -- Syntax Checker: Syntax checker cfengine
-
- -- Syntax Checker: Syntax checker chef-foodcritic
-
- -- Syntax Checker: Syntax checker coffee
-
- -- Syntax Checker: Syntax checker coffee-coffeelint
-
- -- Syntax Checker: Syntax checker css-csslint
-
- -- Syntax Checker: Syntax checker d-dmd
-
- -- Syntax Checker: Syntax checker elixir
-
- -- Syntax Checker: Syntax checker emacs-lisp
-
- -- Syntax Checker: Syntax checker emacs-lisp-checkdoc
-
- -- Syntax Checker: Syntax checker erlang
-
- -- Syntax Checker: Syntax checker eruby-erubis
-
- -- Syntax Checker: Syntax checker go-gofmt
-
- -- Syntax Checker: Syntax checker go-build
-
- -- Syntax Checker: Syntax checker go-test
-
- -- Syntax Checker: Syntax checker haml
-
- -- Syntax Checker: Syntax checker handlebars
-
- -- Syntax Checker: Syntax checker haskell-ghc
-
- -- Syntax Checker: Syntax checker haskell-hlint
-
- -- Syntax Checker: Syntax checker html-tidy
-
- -- Syntax Checker: Syntax checker javascript-jshint
-
- -- Syntax Checker: Syntax checker javascript-eslint
-
- -- Syntax Checker: Syntax checker javascript-gjslint
-
- -- Syntax Checker: Syntax checker json-jsonlint
-
- -- Syntax Checker: Syntax checker less
-
- -- Syntax Checker: Syntax checker lua
-
- -- Syntax Checker: Syntax checker perl
-
- -- Syntax Checker: Syntax checker php
-
- -- Syntax Checker: Syntax checker php-phpmd
-
- -- Syntax Checker: Syntax checker php-phpcs
-
- -- Syntax Checker: Syntax checker puppet-parser
-
- -- Syntax Checker: Syntax checker puppet-lint
-
- -- Syntax Checker: Syntax checker python-flake8
-
- -- Syntax Checker: Syntax checker python-pylint
-
- -- Syntax Checker: Syntax checker racket
-
- -- Syntax Checker: Syntax checker rst
-
- -- Syntax Checker: Syntax checker rst-sphinx
-
- -- Syntax Checker: Syntax checker ruby-rubocop
-
- -- Syntax Checker: Syntax checker ruby-rubylint
-
- -- Syntax Checker: Syntax checker ruby
-
- -- Syntax Checker: Syntax checker ruby-jruby
-
- -- Syntax Checker: Syntax checker rust
-
- -- Syntax Checker: Syntax checker sass
-
- -- Syntax Checker: Syntax checker scala
-
- -- Syntax Checker: Syntax checker scss
-
- -- Syntax Checker: Syntax checker sh-dash
-
- -- Syntax Checker: Syntax checker sh-bash
-
- -- Syntax Checker: Syntax checker slim
-
- -- Syntax Checker: Syntax checker tex-chktex
-
- -- Syntax Checker: Syntax checker tex-lacheck
-
- -- Syntax Checker: Syntax checker texinfo
-
- -- Syntax Checker: Syntax checker verilog-verilator
-
- -- Syntax Checker: Syntax checker xml-xmlstarlet
-
- -- Syntax Checker: Syntax checker xml-xmllint
-
- -- Syntax Checker: Syntax checker yaml-jsyaml
-
- -- Syntax Checker: Syntax checker yaml-ruby
-
- -- Syntax Checker: Syntax checker zsh
+* AsciiDoc:: 
+* Bash:: 
+* C/C++:: 
+* CFEngine:: 
+* Chef:: 
+* Coffeescript:: 
+* CSS:: 
+* D:: 
+* Elixir:: 
+* Emacs Lisp:: 
+* Erlang:: 
+* ERuby:: 
+* Go:: 
+* Haml:: 
+* Handlebars:: 
+* Haskell:: 
+* HTML:: 
+* Javascript:: 
+* JSON:: 
+* LESS:: 
+* Lua:: 
+* Make:: 
+* Perl:: 
+* PHP:: 
+* Puppet:: 
+* Python:: 
+* Racket:: 
+* ReStructuredText:: 
+* Ruby:: 
+* Rust:: 
+* Sass:: 
+* Scala:: 
+* Scss:: 
+* Shell (POSIX): Shell POSIX. 
+* Slim:: 
+* TeX/LaTeX:: 
+* Texinfo:: 
+* Verilog:: 
+* XML:: 
+* YAML:: 
+* Zsh:: 
 
 
-File: flycheck.info,  Node: Glossary,  Next: Index,  Prev: Available syntax checkers,  Up: Top
+File: flycheck.info,  Node: AsciiDoc,  Next: Bash,  Up: Supported languages
+
+9.1 AsciiDoc
+============
+
+See also
+........
+
+‘http://www.methods.co.nz/asciidoc/’
+
+ -- Flycheck Syntax Checker: Syntax Checker asciidoc
+
+
+File: flycheck.info,  Node: Bash,  Next: C/C++,  Prev: AsciiDoc,  Up: Supported languages
+
+9.2 Bash
+========
+
+See also
+........
+
+‘http://www.gnu.org/software/bash/’
+
+ -- Flycheck Syntax Checker: Syntax Checker bash
+
+
+File: flycheck.info,  Node: C/C++,  Next: CFEngine,  Prev: Bash,  Up: Supported languages
+
+9.3 C/C++
+=========
+
+ -- Flycheck Syntax Checker: Syntax Checker c/c++-clang
+
+     See also
+.............
+
+     ‘http://clang.llvm.org/’
+
+ -- Flycheck Syntax Checker: Syntax Checker c/c++-cppcheck
+
+     See also
+.............
+
+     ‘http://cppcheck.sourceforge.net/’
+
+
+File: flycheck.info,  Node: CFEngine,  Next: Chef,  Prev: C/C++,  Up: Supported languages
+
+9.4 CFEngine
+============
+
+See also
+........
+
+‘http://cfengine.com/’
+
+ -- Flycheck Syntax Checker: Syntax Checker cfengine
+
+
+File: flycheck.info,  Node: Chef,  Next: Coffeescript,  Prev: CFEngine,  Up: Supported languages
+
+9.5 Chef
+========
+
+See also
+........
+
+‘http://www.getchef.com/chef/’
+
+ -- Flycheck Syntax Checker: Syntax Checker chef-foodcritic
+
+     See also
+.............
+
+     ‘http://acrmp.github.io/foodcritic/’
+
+
+File: flycheck.info,  Node: Coffeescript,  Next: CSS,  Prev: Chef,  Up: Supported languages
+
+9.6 Coffeescript
+================
+
+See also
+........
+
+‘http://coffeescript.org/’
+
+ -- Flycheck Syntax Checker: Syntax Checker coffee
+
+ -- Flycheck Syntax Checker: Syntax Checker coffee-coffeelint
+
+     See also
+.............
+
+     ‘http://www.coffeelint.org/’
+
+
+File: flycheck.info,  Node: CSS,  Next: D,  Prev: Coffeescript,  Up: Supported languages
+
+9.7 CSS
+=======
+
+ -- Flycheck Syntax Checker: Syntax Checker css-csslint
+
+     See also
+.............
+
+     ‘https://github.com/stubbornella/csslint’
+
+
+File: flycheck.info,  Node: D,  Next: Elixir,  Prev: CSS,  Up: Supported languages
+
+9.8 D
+=====
+
+See also
+........
+
+‘http://dlang.org/’
+
+ -- Flycheck Syntax Checker: Syntax Checker d-dmd
+
+
+File: flycheck.info,  Node: Elixir,  Next: Emacs Lisp,  Prev: D,  Up: Supported languages
+
+9.9 Elixir
+==========
+
+See also
+........
+
+‘http://elixir-lang.org’
+
+ -- Flycheck Syntax Checker: Syntax Checker elixir
+
+
+File: flycheck.info,  Node: Emacs Lisp,  Next: Erlang,  Prev: Elixir,  Up: Supported languages
+
+9.10 Emacs Lisp
+===============
+
+See also
+........
+
+Emacs
+
+     ‘http://www.gnu.org/software/emacs/’
+
+Emacs Lisp manual
+
+     ‘http://www.gnu.org/software/emacs/manual/html_node/elisp/index.html’
+
+ -- Flycheck Syntax Checker: Syntax Checker emacs-lisp
+
+ -- Flycheck Syntax Checker: Syntax Checker emacs-lisp-checkdoc
+
+     See also
+.............
+
+     Tips for Documentation Strings
+
+          ‘http://www.gnu.org/software/emacs/manual/html_node/elisp/Documentation-Tips.html#Documentation-Tips’
+
+
+File: flycheck.info,  Node: Erlang,  Next: ERuby,  Prev: Emacs Lisp,  Up: Supported languages
+
+9.11 Erlang
+===========
+
+See also
+........
+
+‘http://www.erlang.org/’
+
+ -- Flycheck Syntax Checker: Syntax Checker erlang
+
+
+File: flycheck.info,  Node: ERuby,  Next: Go,  Prev: Erlang,  Up: Supported languages
+
+9.12 ERuby
+==========
+
+ -- Flycheck Syntax Checker: Syntax Checker eruby-erubis
+
+     See also
+.............
+
+     Erubis
+
+          ‘http://www.kuwata-lab.com/erubis/’
+
+
+File: flycheck.info,  Node: Go,  Next: Haml,  Prev: ERuby,  Up: Supported languages
+
+9.13 Go
+=======
+
+See also
+........
+
+‘http://golang.org/’
+
+ -- Flycheck Syntax Checker: Syntax Checker go-gofmt
+
+ -- Flycheck Syntax Checker: Syntax Checker go-build
+
+ -- Flycheck Syntax Checker: Syntax Checker go-test
+
+
+File: flycheck.info,  Node: Haml,  Next: Handlebars,  Prev: Go,  Up: Supported languages
+
+9.14 Haml
+=========
+
+See also
+........
+
+‘http://haml.info/’
+
+ -- Flycheck Syntax Checker: Syntax Checker haml
+
+
+File: flycheck.info,  Node: Handlebars,  Next: Haskell,  Prev: Haml,  Up: Supported languages
+
+9.15 Handlebars
+===============
+
+See also
+........
+
+‘http://handlebarsjs.com/’
+
+ -- Flycheck Syntax Checker: Syntax Checker handlebars
+
+
+File: flycheck.info,  Node: Haskell,  Next: HTML,  Prev: Handlebars,  Up: Supported languages
+
+9.16 Haskell
+============
+
+See also
+........
+
+‘http://www.haskell.org/’
+
+ -- Flycheck Syntax Checker: Syntax Checker haskell-ghc
+
+     See also
+.............
+
+     ‘http://www.haskell.org/ghc/’
+
+ -- Flycheck Syntax Checker: Syntax Checker haskell-hlint
+
+     See also
+.............
+
+     ‘https://github.com/ndmitchell/hlint’
+
+
+File: flycheck.info,  Node: HTML,  Next: Javascript,  Prev: Haskell,  Up: Supported languages
+
+9.17 HTML
+=========
+
+ -- Flycheck Syntax Checker: Syntax Checker html-tidy
+
+     See also
+.............
+
+     HTML Tidy
+
+          ‘http://tidy.sourceforge.net/’
+
+     HTML Tidy for HTML 5
+
+          ‘http://w3c.github.io/tidy-html5/’
+
+
+File: flycheck.info,  Node: Javascript,  Next: JSON,  Prev: HTML,  Up: Supported languages
+
+9.18 Javascript
+===============
+
+ -- Flycheck Syntax Checker: Syntax Checker javascript-jshint
+
+     See also
+.............
+
+     ‘http://www.jshint.com/’
+
+ -- Flycheck Syntax Checker: Syntax Checker javascript-eslint
+
+     See also
+.............
+
+     ‘https://github.com/eslint/eslint’
+
+ -- Flycheck Syntax Checker: Syntax Checker javascript-gjslint
+
+     See also
+.............
+
+     Closure Linter
+
+          ‘https://developers.google.com/closure/utilities/’
+
+
+File: flycheck.info,  Node: JSON,  Next: LESS,  Prev: Javascript,  Up: Supported languages
+
+9.19 JSON
+=========
+
+ -- Flycheck Syntax Checker: Syntax Checker json-jsonlint
+
+     See also
+.............
+
+     ‘https://github.com/zaach/jsonlint’
+
+
+File: flycheck.info,  Node: LESS,  Next: Lua,  Prev: JSON,  Up: Supported languages
+
+9.20 LESS
+=========
+
+ -- Flycheck Syntax Checker: Syntax Checker less
+
+     See also
+.............
+
+     ‘http://www.lesscss.org/’
+
+
+File: flycheck.info,  Node: Lua,  Next: Make,  Prev: LESS,  Up: Supported languages
+
+9.21 Lua
+========
+
+ -- Flycheck Syntax Checker: Syntax Checker lua
+
+     See also
+.............
+
+     ‘http://www.lua.org/’
+
+
+File: flycheck.info,  Node: Make,  Next: Perl,  Prev: Lua,  Up: Supported languages
+
+9.22 Make
+=========
+
+ -- Flycheck Syntax Checker: Syntax Checker make-gmake
+
+     See also
+.............
+
+     ‘http://www.gnu.org/software/make/’
+
+
+File: flycheck.info,  Node: Perl,  Next: PHP,  Prev: Make,  Up: Supported languages
+
+9.23 Perl
+=========
+
+See also
+........
+
+‘http://www.perl.org’
+
+ -- Flycheck Syntax Checker: Syntax Checker perl
+
+
+File: flycheck.info,  Node: PHP,  Next: Puppet,  Prev: Perl,  Up: Supported languages
+
+9.24 PHP
+========
+
+ -- Flycheck Syntax Checker: Syntax Checker php
+
+     See also
+.............
+
+     PHP Command Line
+
+          ‘http://php.net/manual/en/features.commandline.php’
+
+ -- Flycheck Syntax Checker: Syntax Checker php-phpmd
+
+     See also
+.............
+
+     PHP Mess Detector
+
+          ‘http://phpmd.org/’
+
+ -- Flycheck Syntax Checker: Syntax Checker php-phpcs
+
+     See also
+.............
+
+     PHP Code Sniffer
+
+          ‘http://pear.php.net/package/PHP_CodeSniffer/’
+
+
+File: flycheck.info,  Node: Puppet,  Next: Python,  Prev: PHP,  Up: Supported languages
+
+9.25 Puppet
+===========
+
+See also
+........
+
+‘https://puppetlabs.com/’
+
+ -- Flycheck Syntax Checker: Syntax Checker puppet-parser
+
+ -- Flycheck Syntax Checker: Syntax Checker puppet-lint
+
+     See also
+.............
+
+     ‘http://www.puppet-lint.com/’
+
+
+File: flycheck.info,  Node: Python,  Next: Racket,  Prev: Puppet,  Up: Supported languages
+
+9.26 Python
+===========
+
+ -- Flycheck Syntax Checker: Syntax Checker python-flake8
+
+     See also
+.............
+
+     ‘http://flake8.readthedocs.org/’
+
+ -- Flycheck Syntax Checker: Syntax Checker python-pylint
+
+     See also
+.............
+
+     ‘http://www.pylint.org/’
+
+
+File: flycheck.info,  Node: Racket,  Next: ReStructuredText,  Prev: Python,  Up: Supported languages
+
+9.27 Racket
+===========
+
+See also
+........
+
+‘http://racket-lang.org/’
+
+ -- Flycheck Syntax Checker: Syntax Checker racket
+
+
+File: flycheck.info,  Node: ReStructuredText,  Next: Ruby,  Prev: Racket,  Up: Supported languages
+
+9.28 ReStructuredText
+=====================
+
+See also
+........
+
+ReStructuredText
+
+     ‘http://docutils.sourceforge.net/rst.html’
+
+Docutils
+
+     ‘http://docutils.sourceforge.net/’
+
+ -- Flycheck Syntax Checker: Syntax Checker rst
+
+ -- Flycheck Syntax Checker: Syntax Checker rst-sphinx
+
+     See also
+.............
+
+     sphinx-doc.org
+
+
+File: flycheck.info,  Node: Ruby,  Next: Rust,  Prev: ReStructuredText,  Up: Supported languages
+
+9.29 Ruby
+=========
+
+See also
+........
+
+‘https://www.ruby-lang.org/’
+
+ -- Flycheck Syntax Checker: Syntax Checker ruby-rubocop
+
+     See also
+.............
+
+     ‘https://github.com/bbatsov/rubocop’
+
+ -- Flycheck Syntax Checker: Syntax Checker ruby-rubylint
+
+     See also
+.............
+
+     ‘https://github.com/YorickPeterse/ruby-lint’
+
+ -- Flycheck Syntax Checker: Syntax Checker ruby
+
+ -- Flycheck Syntax Checker: Syntax Checker ruby-jruby
+
+     See also
+.............
+
+     ‘http://jruby.org/’
+
+
+File: flycheck.info,  Node: Rust,  Next: Sass,  Prev: Ruby,  Up: Supported languages
+
+9.30 Rust
+=========
+
+See also
+........
+
+‘http://www.rust-lang.org/’
+
+ -- Flycheck Syntax Checker: Syntax Checker rust
+
+
+File: flycheck.info,  Node: Sass,  Next: Scala,  Prev: Rust,  Up: Supported languages
+
+9.31 Sass
+=========
+
+See also
+........
+
+‘http://sass-lang.com/’
+
+ -- Flycheck Syntax Checker: Syntax Checker sass
+
+
+File: flycheck.info,  Node: Scala,  Next: Scss,  Prev: Sass,  Up: Supported languages
+
+9.32 Scala
+==========
+
+See also
+........
+
+‘http://www.scala-lang.org/’
+
+ -- Flycheck Syntax Checker: Syntax Checker scala
+
+
+File: flycheck.info,  Node: Scss,  Next: Shell POSIX,  Prev: Scala,  Up: Supported languages
+
+9.33 Scss
+=========
+
+ -- Flycheck Syntax Checker: Syntax Checker scss
+
+     See also
+.............
+
+     ‘http://sass-lang.com/’
+
+
+File: flycheck.info,  Node: Shell POSIX,  Next: Slim,  Prev: Scss,  Up: Supported languages
+
+9.34 Shell (POSIX)
+==================
+
+See also
+........
+
+POSIX Shell Command Language
+
+     ‘http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html’
+
+ -- Flycheck Syntax Checker: Syntax Checker sh-dash
+
+     See also
+.............
+
+     DASH
+
+          ‘http://gondor.apana.org.au/~herbert/dash/’
+
+ -- Flycheck Syntax Checker: Syntax Checker sh-bash
+
+     See also
+.............
+
+     ‘http://www.gnu.org/software/bash/’
+
+
+File: flycheck.info,  Node: Slim,  Next: TeX/LaTeX,  Prev: Shell POSIX,  Up: Supported languages
+
+9.35 Slim
+=========
+
+See also
+........
+
+‘http://slim-lang.com/’
+
+ -- Flycheck Syntax Checker: Syntax Checker slim
+
+
+File: flycheck.info,  Node: TeX/LaTeX,  Next: Texinfo,  Prev: Slim,  Up: Supported languages
+
+9.36 TeX/LaTeX
+==============
+
+See also
+........
+
+LaTeX
+
+     ‘http://www.latex-project.org/’
+
+TeX Live
+
+     ‘http://www.tug.org/texlive/’
+
+ -- Flycheck Syntax Checker: Syntax Checker tex-chktex
+
+     See also
+.............
+
+     ‘http://www.nongnu.org/chktex/’
+
+ -- Flycheck Syntax Checker: Syntax Checker tex-lacheck
+
+     See also
+.............
+
+     ‘http://www.ctan.org/pkg/lacheck’
+
+
+File: flycheck.info,  Node: Texinfo,  Next: Verilog,  Prev: TeX/LaTeX,  Up: Supported languages
+
+9.37 Texinfo
+============
+
+ -- Flycheck Syntax Checker: Syntax Checker texinfo
+
+     See also
+.............
+
+     www.gnu.org/software/texinfo/
+
+
+File: flycheck.info,  Node: Verilog,  Next: XML,  Prev: Texinfo,  Up: Supported languages
+
+9.38 Verilog
+============
+
+ -- Flycheck Syntax Checker: Syntax Checker verilog-verilator
+
+     See also
+.............
+
+     ‘http://www.veripool.org/wiki/verilator’
+
+
+File: flycheck.info,  Node: XML,  Next: YAML,  Prev: Verilog,  Up: Supported languages
+
+9.39 XML
+========
+
+ -- Flycheck Syntax Checker: Syntax Checker xml-xmlstarlet
+
+     See also
+.............
+
+     ‘http://xmlstar.sourceforge.net/’
+
+ -- Flycheck Syntax Checker: Syntax Checker xml-xmllint
+
+     See also
+.............
+
+     Libxml2
+
+          ‘http://www.xmlsoft.org/’
+
+
+File: flycheck.info,  Node: YAML,  Next: Zsh,  Prev: XML,  Up: Supported languages
+
+9.40 YAML
+=========
+
+ -- Flycheck Syntax Checker: Syntax Checker yaml-jsyaml
+
+     See also
+.............
+
+     ‘https://github.com/nodeca/js-yaml’
+
+ -- Flycheck Syntax Checker: Syntax Checker yaml-ruby
+
+     See also
+.............
+
+     ‘https://www.ruby-lang.org’
+
+
+File: flycheck.info,  Node: Zsh,  Prev: YAML,  Up: Supported languages
+
+9.41 Zsh
+========
+
+See also
+........
+
+‘http://www.zsh.org/’
+
+ -- Flycheck Syntax Checker: Syntax Checker zsh
+
+
+File: flycheck.info,  Node: Glossary,  Next: Index,  Prev: Supported languages,  Up: Top
 
 10 Glossary
 ***********
@@ -4524,7 +5240,7 @@ disabled syntax checker
 enabled syntax checker
 
      A *note registered syntax checker: 23. which is not a *note
-     disabled syntax checker: 115.
+     disabled syntax checker: 146.
 
 suitable syntax checker
 
@@ -4546,50 +5262,35 @@ Index
  [index ]
 * Menu:
 
-* ;command; Syntax checker property:     Defining new syntax checkers.
+* ;command; Flycheck syntax checker property: Defining new syntax checkers.
                                                               (line  33)
-* ;error-parser; Syntax checker property: Defining new syntax checkers.
-                                                              (line 292)
-* ;error-patterns; Syntax checker property: Defining new syntax checkers.
-                                                              (line 239)
-* ;modes; Syntax checker property:       Defining new syntax checkers.
-                                                              (line 317)
-* ;next-checkers; Syntax checker property: Defining new syntax checkers.
-                                                              (line 344)
-* ;predicate; Syntax checker property:   Defining new syntax checkers.
-                                                              (line 330)
-* asciidoc; Syntax checker:              Available syntax checkers.
-                                                              (line  14)
-* bash; Syntax checker:                  Available syntax checkers.
-                                                              (line  16)
-* c/c++-clang; Syntax checker:           Available syntax checkers.
-                                                              (line  18)
-* c/c++-cppcheck; Syntax checker:        Available syntax checkers.
-                                                              (line  20)
-* cfengine; Syntax checker:              Available syntax checkers.
-                                                              (line  22)
-* chef-foodcritic; Syntax checker:       Available syntax checkers.
-                                                              (line  24)
-* coffee-coffeelint; Syntax checker:     Available syntax checkers.
-                                                              (line  28)
-* coffee; Syntax checker:                Available syntax checkers.
-                                                              (line  26)
-* css-csslint; Syntax checker:           Available syntax checkers.
-                                                              (line  30)
-* d-dmd; Syntax checker:                 Available syntax checkers.
-                                                              (line  32)
+* ;error-parser; Flycheck syntax checker property: Defining new syntax checkers.
+                                                              (line 293)
+* ;error-patterns; Flycheck syntax checker property: Defining new syntax checkers.
+                                                              (line 240)
+* ;modes; Flycheck syntax checker property: Defining new syntax checkers.
+                                                              (line 318)
+* ;next-checkers; Flycheck syntax checker property: Defining new syntax checkers.
+                                                              (line 346)
+* ;predicate; Flycheck syntax checker property: Defining new syntax checkers.
+                                                              (line 331)
+* asciidoc; Flycheck syntax checker:     AsciiDoc.            (line  11)
+* bash; Flycheck syntax checker:         Bash.                (line  11)
+* c/c++-clang; Flycheck syntax checker:  C/C++.               (line   6)
+* c/c++-cppcheck; Flycheck syntax checker: C/C++.             (line  13)
+* cfengine; Flycheck syntax checker:     CFEngine.            (line  11)
+* chef-foodcritic; Flycheck syntax checker: Chef.             (line  11)
+* coffee-coffeelint; Flycheck syntax checker: Coffeescript.   (line  13)
+* coffee; Flycheck syntax checker:       Coffeescript.        (line  11)
+* css-csslint; Flycheck syntax checker:  CSS.                 (line   6)
+* d-dmd; Flycheck syntax checker:        D.                   (line  11)
 * disabled syntax checker:               Glossary.            (line  14)
-* elixir; Syntax checker:                Available syntax checkers.
-                                                              (line  34)
-* emacs-lisp-checkdoc; Syntax checker:   Available syntax checkers.
-                                                              (line  38)
-* emacs-lisp; Syntax checker:            Available syntax checkers.
-                                                              (line  36)
+* elixir; Flycheck syntax checker:       Elixir.              (line  11)
+* emacs-lisp-checkdoc; Flycheck syntax checker: Emacs Lisp.   (line  19)
+* emacs-lisp; Flycheck syntax checker:   Emacs Lisp.          (line  17)
 * enabled syntax checker:                Glossary.            (line  20)
-* erlang; Syntax checker:                Available syntax checkers.
-                                                              (line  40)
-* eruby-erubis; Syntax checker:          Available syntax checkers.
-                                                              (line  42)
+* erlang; Flycheck syntax checker:       Erlang.              (line  11)
+* eruby-erubis; Flycheck syntax checker: ERuby.               (line   6)
 * flycheck-add-next-checker; Emacs Lisp function: Extending syntax checkers.
                                                               (line   8)
 * flycheck-after-syntax-check-hook; Emacs Lisp hook: Syntax checking.
@@ -4633,9 +5334,9 @@ Index
                                                               (line  42)
 * flycheck-current-errors; Emacs Lisp variable: Error API.    (line 146)
 * flycheck-def-config-file-var; Emacs Lisp macro: Defining new syntax checkers.
-                                                              (line 369)
+                                                              (line 371)
 * flycheck-def-option-var; Emacs Lisp macro: Defining new syntax checkers.
-                                                              (line 386)
+                                                              (line 388)
 * flycheck-define-checker; Emacs Lisp macro: Defining new syntax checkers.
                                                               (line   8)
 * flycheck-define-error-level; Emacs Lisp function: Error levels.
@@ -4700,7 +5401,7 @@ Index
                                                               (line 164)
 * flycheck-google-messages; Emacs Lisp command: Error reporting.
                                                               (line 152)
-* flycheck-has-errors-p; Emacs Lisp function: Error API.      (line 157)
+* flycheck-has-errors-p; Emacs Lisp function: Error API.      (line 159)
 * flycheck-highlighting-mode; Emacs Lisp user option: Error reporting.
                                                               (line  33)
 * flycheck-idle-change-delay; Emacs Lisp user option: Syntax checking.
@@ -4759,100 +5460,62 @@ Index
 * global-flycheck-mode; Emacs Lisp command: Flycheck Mode.    (line  16)
 * global-flycheck-mode; Emacs Lisp user option: Flycheck Mode.
                                                               (line  33)
-* go-build; Syntax checker:              Available syntax checkers.
-                                                              (line  46)
-* go-gofmt; Syntax checker:              Available syntax checkers.
-                                                              (line  44)
-* go-test; Syntax checker:               Available syntax checkers.
-                                                              (line  48)
-* haml; Syntax checker:                  Available syntax checkers.
-                                                              (line  50)
-* handlebars; Syntax checker:            Available syntax checkers.
-                                                              (line  52)
-* haskell-ghc; Syntax checker:           Available syntax checkers.
-                                                              (line  54)
-* haskell-hlint; Syntax checker:         Available syntax checkers.
-                                                              (line  56)
-* html-tidy; Syntax checker:             Available syntax checkers.
-                                                              (line  58)
-* javascript-eslint; Syntax checker:     Available syntax checkers.
-                                                              (line  62)
-* javascript-gjslint; Syntax checker:    Available syntax checkers.
-                                                              (line  64)
-* javascript-jshint; Syntax checker:     Available syntax checkers.
-                                                              (line  60)
-* json-jsonlint; Syntax checker:         Available syntax checkers.
-                                                              (line  66)
-* less; Syntax checker:                  Available syntax checkers.
-                                                              (line  68)
+* go-build; Flycheck syntax checker:     Go.                  (line  13)
+* go-gofmt; Flycheck syntax checker:     Go.                  (line  11)
+* go-test; Flycheck syntax checker:      Go.                  (line  15)
+* haml; Flycheck syntax checker:         Haml.                (line  11)
+* handlebars; Flycheck syntax checker:   Handlebars.          (line  11)
+* haskell-ghc; Flycheck syntax checker:  Haskell.             (line  11)
+* haskell-hlint; Flycheck syntax checker: Haskell.            (line  18)
+* html-tidy; Flycheck syntax checker:    HTML.                (line   6)
+* javascript-eslint; Flycheck syntax checker: Javascript.     (line  13)
+* javascript-gjslint; Flycheck syntax checker: Javascript.    (line  20)
+* javascript-jshint; Flycheck syntax checker: Javascript.     (line   6)
+* json-jsonlint; Flycheck syntax checker: JSON.               (line   6)
+* less; Flycheck syntax checker:         LESS.                (line   6)
 * list-flycheck-errors; Emacs Lisp command: Error reporting.  (line 100)
-* lua; Syntax checker:                   Available syntax checkers.
-                                                              (line  70)
-* perl; Syntax checker:                  Available syntax checkers.
-                                                              (line  72)
-* php-phpcs; Syntax checker:             Available syntax checkers.
-                                                              (line  78)
-* php-phpmd; Syntax checker:             Available syntax checkers.
-                                                              (line  76)
-* php; Syntax checker:                   Available syntax checkers.
-                                                              (line  74)
-* puppet-lint; Syntax checker:           Available syntax checkers.
-                                                              (line  82)
-* puppet-parser; Syntax checker:         Available syntax checkers.
-                                                              (line  80)
-* python-flake8; Syntax checker:         Available syntax checkers.
-                                                              (line  84)
-* python-pylint; Syntax checker:         Available syntax checkers.
-                                                              (line  86)
-* racket; Syntax checker:                Available syntax checkers.
-                                                              (line  88)
+* lua; Flycheck syntax checker:          Lua.                 (line   6)
+* make-gmake; Flycheck syntax checker:   Make.                (line   6)
+* perl; Flycheck syntax checker:         Perl.                (line  11)
+* php-phpcs; Flycheck syntax checker:    PHP.                 (line  24)
+* php-phpmd; Flycheck syntax checker:    PHP.                 (line  15)
+* php; Flycheck syntax checker:          PHP.                 (line   6)
+* puppet-lint; Flycheck syntax checker:  Puppet.              (line  13)
+* puppet-parser; Flycheck syntax checker: Puppet.             (line  11)
+* python-flake8; Flycheck syntax checker: Python.             (line   6)
+* python-pylint; Flycheck syntax checker: Python.             (line  13)
+* racket; Flycheck syntax checker:       Racket.              (line  11)
 * registered syntax checker:             Glossary.            (line   9)
-* rst-sphinx; Syntax checker:            Available syntax checkers.
-                                                              (line  92)
-* rst; Syntax checker:                   Available syntax checkers.
-                                                              (line  90)
-* ruby-jruby; Syntax checker:            Available syntax checkers.
-                                                              (line 100)
-* ruby-rubocop; Syntax checker:          Available syntax checkers.
-                                                              (line  94)
-* ruby-rubylint; Syntax checker:         Available syntax checkers.
-                                                              (line  96)
-* ruby; Syntax checker:                  Available syntax checkers.
-                                                              (line  98)
-* rust; Syntax checker:                  Available syntax checkers.
-                                                              (line 102)
-* sass; Syntax checker:                  Available syntax checkers.
-                                                              (line 104)
-* scala; Syntax checker:                 Available syntax checkers.
-                                                              (line 106)
-* scss; Syntax checker:                  Available syntax checkers.
-                                                              (line 108)
-* sh-bash; Syntax checker:               Available syntax checkers.
-                                                              (line 112)
-* sh-dash; Syntax checker:               Available syntax checkers.
-                                                              (line 110)
-* slim; Syntax checker:                  Available syntax checkers.
-                                                              (line 114)
+* rst-sphinx; Flycheck syntax checker:   ReStructuredText.    (line  19)
+* rst; Flycheck syntax checker:          ReStructuredText.    (line  17)
+* ruby-jruby; Flycheck syntax checker:   Ruby.                (line  27)
+* ruby-rubocop; Flycheck syntax checker: Ruby.                (line  11)
+* ruby-rubylint; Flycheck syntax checker: Ruby.               (line  18)
+* ruby; Flycheck syntax checker:         Ruby.                (line  25)
+* rust; Flycheck syntax checker:         Rust.                (line  11)
+* sass; Flycheck syntax checker:         Sass.                (line  11)
+* scala; Flycheck syntax checker:        Scala.               (line  11)
+* scss; Flycheck syntax checker:         Scss.                (line   6)
+* sh-bash; Flycheck syntax checker:      Shell POSIX.         (line  22)
+* sh-dash; Flycheck syntax checker:      Shell POSIX.         (line  13)
+* slim; Flycheck syntax checker:         Slim.                (line  11)
 * suitable syntax checker:               Glossary.            (line  25)
 * syntax checker:                        Glossary.            (line   6)
-* tex-chktex; Syntax checker:            Available syntax checkers.
-                                                              (line 116)
-* tex-lacheck; Syntax checker:           Available syntax checkers.
-                                                              (line 118)
-* texinfo; Syntax checker:               Available syntax checkers.
-                                                              (line 120)
-* verilog-verilator; Syntax checker:     Available syntax checkers.
-                                                              (line 122)
-* xml-xmllint; Syntax checker:           Available syntax checkers.
-                                                              (line 126)
-* xml-xmlstarlet; Syntax checker:        Available syntax checkers.
-                                                              (line 124)
-* yaml-jsyaml; Syntax checker:           Available syntax checkers.
-                                                              (line 128)
-* yaml-ruby; Syntax checker:             Available syntax checkers.
-                                                              (line 130)
-* zsh; Syntax checker:                   Available syntax checkers.
-                                                              (line 132)
+* tex-chktex; Flycheck syntax checker:   TeX/LaTeX.           (line  17)
+* tex-lacheck; Flycheck syntax checker:  TeX/LaTeX.           (line  24)
+* texinfo; Flycheck syntax checker:      Texinfo.             (line   6)
+* verilog-verilator; Flycheck syntax checker: Verilog.        (line   6)
+* xml-xmllint; Flycheck syntax checker:  XML.                 (line  13)
+* xml-xmlstarlet; Flycheck syntax checker: XML.               (line   6)
+* yaml-jsyaml; Flycheck syntax checker:  YAML.                (line   6)
+* yaml-ruby; Flycheck syntax checker:    YAML.                (line  13)
+* zsh; Flycheck syntax checker:          Zsh.                 (line  11)
+
+                                                                                            
+                                                                                            
+                                                                                            
+                                                                                            
+                                                             
 
 
 
@@ -4860,841 +5523,983 @@ Tag Table:
 Node: Top364
 Ref: manual/index doc588
 Ref: 0588
-Node: Introduction3367
-Ref: manual/introduction introduction3447
-Ref: 23447
-Ref: manual/introduction the-flycheck-manual3447
-Ref: 33447
-Ref: manual/introduction doc3447
-Ref: 43447
-Node: Features4116
-Ref: manual/introduction features4204
-Ref: 54204
-Node: 3rd party extensions6791
-Ref: manual/introduction rd-party-extensions6900
-Ref: 66900
-Ref: 3rd party extensions-Footnote-17701
-Ref: 3rd party extensions-Footnote-27751
-Ref: 3rd party extensions-Footnote-37788
-Ref: 3rd party extensions-Footnote-47849
-Ref: 3rd party extensions-Footnote-57905
-Ref: 3rd party extensions-Footnote-67960
-Ref: 3rd party extensions-Footnote-78003
-Ref: 3rd party extensions-Footnote-88056
-Ref: 3rd party extensions-Footnote-98109
-Node: Installation8141
-Ref: manual/introduction installation8233
-Ref: 78233
-Ref: manual/introduction mercury-language8233
-Ref: 88233
-Ref: Installation-Footnote-19745
-Ref: Installation-Footnote-29778
-Ref: Installation-Footnote-39813
-Node: Usage9850
-Ref: manual/usage usage9945
-Ref: a9945
-Ref: manual/usage marmalade9945
-Ref: b9945
-Ref: manual/usage doc9945
-Ref: c9945
-Node: Flycheck Mode10134
-Ref: manual/usage flycheck-mode10215
-Ref: d10215
-Ref: manual/usage id110215
-Ref: e10215
-Ref: manual/usage el functions flycheck-mode10305
-Ref: f10305
-Ref: manual/usage el variables flycheck-mode10389
-Ref: 1010389
-Ref: manual/usage el functions global-flycheck-mode10495
-Ref: 1110495
-Ref: manual/usage el variables global-flycheck-mode11172
-Ref: 1311172
-Node: Syntax checking11505
-Ref: manual/usage id211619
-Ref: 1411619
-Ref: manual/usage syntax-checking11619
-Ref: 1511619
-Ref: manual/usage el variables flycheck-check-syntax-automatically11980
-Ref: 1611980
-Ref: manual/usage el variables flycheck-idle-change-delay13087
-Ref: 1813087
-Ref: manual/usage el functions flycheck-buffer13652
-Ref: 1713652
-Ref: manual/usage el variables flycheck-after-syntax-check-hook14545
-Ref: 1c14545
-Ref: manual/usage el variables flycheck-before-syntax-check-hook15302
-Ref: 1915302
-Ref: manual/usage el variables flycheck-syntax-check-failed-hook15837
-Ref: 1e15837
-Node: Syntax checker selection16251
-Ref: manual/usage syntax-checker-selection16380
-Ref: 1a16380
-Ref: manual/usage id316380
-Ref: 1f16380
-Ref: manual/usage el variables flycheck-checkers16608
-Ref: 2016608
-Ref: manual/usage el variables flycheck-disabled-checkers16995
-Ref: 2116995
-Ref: manual/usage el functions flycheck-select-checker18037
-Ref: 2518037
-Ref: manual/usage el variables flycheck-checker18663
-Ref: 2618663
-Ref: manual/usage el variables flycheck-completion-system19662
-Ref: 2719662
-Ref: manual/usage el functions flycheck-describe-checker20850
-Ref: 920850
-Ref: Syntax checker selection-Footnote-120981
-Ref: Syntax checker selection-Footnote-221019
-Node: Syntax checker configuration21060
-Ref: manual/usage syntax-checker-configuration21189
-Ref: 2821189
-Ref: manual/usage id421189
-Ref: 2921189
-Node: Syntax checker executables21366
-Ref: manual/usage syntax-checker-executables21490
-Ref: 2a21490
-Ref: manual/usage id521490
-Ref: 2b21490
-Ref: manual/usage el functions flycheck-set-checker-executable22289
-Ref: 2c22289
-Node: Syntax checker options22758
-Ref: manual/usage id622925
-Ref: 2d22925
-Ref: manual/usage syntax-checker-options22925
-Ref: 2e22925
-Ref: manual/usage el variables flycheck-clang-definitions23184
-Ref: 2f23184
-Ref: manual/usage el variables flycheck-clang-include-path23306
-Ref: 3023306
-Ref: manual/usage el variables flycheck-clang-includes23413
-Ref: 3123413
-Ref: manual/usage el variables flycheck-clang-language-standard23521
-Ref: 3223521
-Ref: manual/usage el variables flycheck-clang-ms-extensions23635
-Ref: 3323635
-Ref: manual/usage el variables flycheck-clang-no-rtti23761
-Ref: 3423761
-Ref: manual/usage el variables flycheck-clang-standard-library23866
-Ref: 3523866
-Ref: manual/usage el variables flycheck-clang-warnings23985
-Ref: 3623985
-Ref: manual/usage el variables flycheck-cppcheck-checks24097
-Ref: 3724097
-Ref: manual/usage el variables flycheck-emacs-lisp-initialize-packages24208
-Ref: 3824208
-Ref: manual/usage el variables flycheck-emacs-lisp-load-path24679
-Ref: 3924679
-Ref: manual/usage el variables flycheck-emacs-lisp-package-user-dir25097
-Ref: 3a25097
-Ref: manual/usage el variables flycheck-eslint-rulesdir25233
-Ref: 3b25233
-Ref: manual/usage el variables flycheck-flake8-maximum-complexity25377
-Ref: 3c25377
-Ref: manual/usage el variables flycheck-flake8-maximum-line-length25558
-Ref: 3d25558
-Ref: manual/usage el variables flycheck-ghc-no-user-package-database25752
-Ref: 3e25752
-Ref: manual/usage el variables flycheck-ghc-package-databases25894
-Ref: 3f25894
-Ref: manual/usage el variables flycheck-ghc-search-path26011
-Ref: 4026011
-Ref: manual/usage el variables flycheck-phpcs-standard26143
-Ref: 4126143
-Ref: manual/usage el variables flycheck-phpmd-rulesets26250
-Ref: 4226250
-Ref: manual/usage el variables flycheck-rubocop-lint-only26351
-Ref: 4326351
-Ref: manual/usage el variables flycheck-sass-compass26470
-Ref: 4426470
-Ref: manual/usage el variables flycheck-scss-compass26588
-Ref: 4526588
-Ref: manual/usage el variables flycheck-sphinx-warn-on-missing-references26706
-Ref: 4626706
-Node: Syntax checker configuration files26846
-Ref: manual/usage id726978
-Ref: 4726978
-Ref: manual/usage syntax-checker-configuration-files26978
-Ref: 4826978
-Ref: manual/usage el variables flycheck-chktexrc27168
-Ref: 4927168
-Ref: manual/usage el variables flycheck-coffeelintrc27286
-Ref: 4a27286
-Ref: manual/usage el variables flycheck-eslintrc27415
-Ref: 4b27415
-Ref: manual/usage el variables flycheck-flake8rc27540
-Ref: 4c27540
-Ref: manual/usage el variables flycheck-gjslintrc27661
-Ref: 4d27661
-Ref: manual/usage el variables flycheck-jshintrc27788
-Ref: 4e27788
-Ref: manual/usage el variables flycheck-pylintrc27913
-Ref: 4f27913
-Ref: manual/usage el variables flycheck-rubocoprc28034
-Ref: 5028034
-Ref: manual/usage el variables flycheck-tidyrc28155
-Ref: 5128155
-Ref: manual/usage el variables flycheck-locate-config-file-functions28457
-Ref: 5228457
-Ref: Syntax checker configuration files-Footnote-130544
-Node: Error reporting30590
-Ref: manual/usage error-reporting30711
-Ref: 1b30711
-Ref: manual/usage id830711
-Ref: 5330711
-Ref: manual/usage el faces flycheck-error31092
-Ref: 5631092
-Ref: manual/usage el faces flycheck-warning31122
-Ref: 5731122
-Ref: manual/usage el faces flycheck-info31154
-Ref: 5831154
-Ref: manual/usage el variables flycheck-highlighting-mode31783
-Ref: 5531783
-Ref: manual/usage el faces flycheck-fringe-error32699
-Ref: 5932699
-Ref: manual/usage el faces flycheck-fringe-warning32736
-Ref: 5a32736
-Ref: manual/usage el faces flycheck-fringe-info32775
-Ref: 5b32775
-Ref: manual/usage el variables flycheck-indication-mode32907
-Ref: 5432907
-Ref: manual/usage el variables flycheck-process-error-functions33434
-Ref: 5c33434
-Ref: manual/usage el functions flycheck-list-errors34091
-Ref: 5e34091
-Ref: manual/usage el functions list-flycheck-errors34130
-Ref: 5f34130
-Ref: manual/usage el variables flycheck-display-errors-delay34658
-Ref: 6034658
-Ref: manual/usage el variables flycheck-display-errors-function34915
-Ref: 6134915
-Ref: manual/usage el functions flycheck-display-error-messages35231
-Ref: 6235231
-Ref: manual/usage el functions flycheck-copy-messages-as-kill35863
-Ref: 6335863
-Ref: manual/usage el functions flycheck-google-messages36016
-Ref: 6436016
-Ref: manual/usage el variables flycheck-google-max-messages36369
-Ref: 6536369
-Ref: manual/usage el functions flycheck-clear36899
-Ref: 6636899
-Ref: Error reporting-Footnote-137147
-Ref: Error reporting-Footnote-237198
-Ref: Error reporting-Footnote-337247
-Ref: Error reporting-Footnote-437305
-Node: Error navigation37339
-Ref: manual/usage error-navigation37441
-Ref: 6737441
-Ref: manual/usage id937441
-Ref: 6837441
-Ref: manual/usage el variables flycheck-standard-error-navigation37998
-Ref: 6937998
-Ref: manual/usage el functions flycheck-next-error38867
-Ref: 6a38867
-Ref: manual/usage el functions flycheck-previous-error39149
-Ref: 6b39149
-Ref: manual/usage el functions flycheck-first-error39427
-Ref: 6c39427
-Node: Mode line39720
-Ref: manual/usage id1039798
-Ref: 6d39798
-Ref: manual/usage mode-line39798
-Ref: 6e39798
-Node: Extending Flycheck40708
-Ref: manual/extending doc40803
-Ref: 7040803
-Ref: manual/extending extending-flycheck40803
-Ref: 7140803
-Node: Defining new syntax checkers41284
-Ref: manual/extending defining-new-syntax-checkers41390
-Ref: 7341390
-Ref: manual/extending id141390
-Ref: 7441390
-Ref: manual/extending el functions flycheck-define-checker41530
-Ref: 7541530
-Ref: manual/extending checker-property- command42667
-Ref: 7642667
-Ref: manual/extending checker-property- error-patterns51913
-Ref: 7951913
-Ref: manual/extending checker-property- error-parser54227
-Ref: 7a54227
-Ref: manual/extending checker-property- modes55508
-Ref: 7755508
-Ref: manual/extending checker-property- predicate55971
-Ref: 7855971
-Ref: manual/extending checker-property- next-checkers56627
-Ref: 7b56627
-Ref: manual/extending el functions flycheck-def-config-file-var57602
-Ref: 7d57602
-Ref: manual/extending el functions flycheck-def-option-var58355
-Ref: 7f58355
-Node: Error levels59100
-Ref: manual/extending id259228
-Ref: 8459228
-Ref: manual/extending error-levels59228
-Ref: 8559228
-Ref: manual/extending el functions flycheck-define-error-level59548
-Ref: 8059548
-Node: Error parsers60877
-Ref: manual/extending error-parsers60991
-Ref: 8260991
-Ref: manual/extending id360991
-Ref: 8660991
-Ref: manual/extending el functions flycheck-parse-with-patterns61303
-Ref: 8361303
-Ref: manual/extending el functions flycheck-parse-checkstyle61485
-Ref: 8761485
-Ref: Error parsers-Footnote-162204
-Node: Option filters62247
-Ref: manual/extending id462374
-Ref: 8962374
-Ref: manual/extending option-filters62374
-Ref: 7e62374
-Ref: manual/extending el functions flycheck-option-int62606
-Ref: 8a62606
-Ref: manual/extending el functions flycheck-option-comma-separated-list62762
-Ref: 8b62762
-Node: Extending syntax checkers63023
-Ref: manual/extending id563145
-Ref: 8c63145
-Ref: manual/extending extending-syntax-checkers63145
-Ref: 8d63145
-Ref: manual/extending el functions flycheck-add-next-checker63263
-Ref: 8e63263
-Node: Examples63749
-Ref: manual/extending examples63848
-Ref: 8f63848
-Node: Basic syntax checkers64024
-Ref: manual/extending id664132
-Ref: 9064132
-Ref: manual/extending basic-syntax-checkers64132
-Ref: 9164132
-Node: Syntax checkers with predicates67239
-Ref: manual/extending syntax-checkers-with-predicates67395
-Ref: 9267395
-Node: Configuration files for syntax checkers69441
-Ref: manual/extending configuration-files-for-syntax-checkers69600
-Ref: 9369600
-Node: Chaining syntax checkers72201
-Ref: manual/extending chaining-syntax-checkers72320
-Ref: 9472320
-Node: Flycheck API73656
-Ref: manual/api doc73758
-Ref: 9573758
-Ref: manual/api flycheck-api73758
-Ref: 9673758
-Node: Error API74348
-Ref: manual/api error-api74433
-Ref: 5d74433
-Ref: manual/api id174433
-Ref: 9774433
-Ref: manual/api el structs flycheck-error74611
-Ref: 8174611
-Ref: manual/api el functions flycheck-error-buffer74745
-Ref: 9874745
-Ref: manual/api el functions flycheck-error-checker75048
-Ref: 9975048
-Ref: manual/api el functions flycheck-error-filename75133
-Ref: 9a75133
-Ref: manual/api el functions flycheck-error-line75228
-Ref: 9b75228
-Ref: manual/api el functions flycheck-error-column75316
-Ref: 9c75316
-Ref: manual/api el functions flycheck-error-message75523
-Ref: 9d75523
-Ref: manual/api el functions flycheck-error-level75607
-Ref: 9e75607
-Ref: manual/api el functions flycheck-error-new-at75860
-Ref: 9f75860
-Ref: manual/api el functions flycheck-error-new76907
-Ref: a076907
-Ref: manual/api el functions flycheck-error-with-buffer77386
-Ref: a177386
-Ref: manual/api el functions flycheck-error-line-region77643
-Ref: a277643
-Ref: manual/api el functions flycheck-error-column-region77839
-Ref: a377839
-Ref: manual/api el functions flycheck-error-sexp-region78132
-Ref: a478132
-Ref: manual/api el functions flycheck-error-pos79109
-Ref: a579109
-Ref: manual/api el functions flycheck-error-format79474
-Ref: a679474
-Ref: manual/api el variables flycheck-current-errors79681
-Ref: 1d79681
-Ref: manual/api el functions flycheck-count-errors79845
-Ref: a779845
-Ref: manual/api el functions flycheck-has-errors-p80023
-Ref: a880023
-Node: Error parser API80349
-Ref: manual/api error-parser-api80434
-Ref: 8880434
-Ref: manual/api id280434
-Ref: a980434
-Ref: manual/api el functions flycheck-parse-xml-string80541
-Ref: aa80541
-Node: Contributing80679
-Ref: manual/contributing contributing80770
-Ref: ab80770
-Ref: manual/contributing doc80770
-Ref: ac80770
-Ref: Contributing-Footnote-181133
-Node: Reporting issues81185
-Ref: manual/contributing id181278
-Ref: ad81278
-Ref: manual/contributing reporting-issues81278
-Ref: 6f81278
-Node: Contributing code81726
-Ref: manual/contributing id281819
-Ref: ae81819
-Ref: manual/contributing contributing-code81819
-Ref: af81819
-Node: General82105
-Ref: manual/contributing general82187
-Ref: b082187
-Node: Code style82310
-Ref: manual/contributing code-style82416
-Ref: b182416
-Node: Commit messages82841
-Ref: manual/contributing commit-messages82968
-Ref: b282968
-Ref: Commit messages-Footnote-184758
-Ref: Commit messages-Footnote-284836
-Ref: Commit messages-Footnote-384880
-Node: Contributing syntax checkers84920
-Ref: manual/contributing contributing-syntax-checkers85050
-Ref: 7285050
-Ref: manual/contributing id385050
-Ref: b385050
-Node: Pull requests85553
-Ref: manual/contributing id485659
-Ref: b485659
-Ref: manual/contributing pull-requests85659
-Ref: b585659
-Ref: Pull requests-Footnote-186165
-Node: Credits86226
-Ref: manual/credits credits86312
-Ref: b686312
-Ref: manual/credits doc86312
-Ref: b786312
-Ref: manual/credits pull-request86312
-Ref: b886312
-Ref: Credits-Footnote-189665
-Ref: Credits-Footnote-289702
-Ref: Credits-Footnote-389737
-Ref: Credits-Footnote-489780
-Ref: Credits-Footnote-589814
-Ref: Credits-Footnote-689847
-Ref: Credits-Footnote-789880
-Ref: Credits-Footnote-889915
-Ref: Credits-Footnote-989949
-Ref: Credits-Footnote-1089992
-Ref: Credits-Footnote-1190033
-Ref: Credits-Footnote-1290066
-Ref: Credits-Footnote-1390108
-Ref: Credits-Footnote-1490147
-Ref: Credits-Footnote-1590196
-Ref: Credits-Footnote-1690236
-Ref: Credits-Footnote-1790272
-Ref: Credits-Footnote-1890305
-Ref: Credits-Footnote-1990345
-Ref: Credits-Footnote-2090388
-Ref: Credits-Footnote-2190427
-Ref: Credits-Footnote-2290469
-Ref: Credits-Footnote-2390505
-Ref: Credits-Footnote-2490542
-Ref: Credits-Footnote-2590604
-Ref: Credits-Footnote-2690640
-Ref: Credits-Footnote-2790672
-Ref: Credits-Footnote-2890708
-Ref: Credits-Footnote-2990765
-Ref: Credits-Footnote-3090805
-Ref: Credits-Footnote-3190840
-Ref: Credits-Footnote-3290878
-Node: Changes90947
-Ref: manual/changes changes91051
-Ref: b991051
-Ref: manual/changes doc91051
-Ref: ba91051
-Node: master unreleased91911
-Ref: manual/changes master-unreleased91999
-Ref: bb91999
-Ref: master unreleased-Footnote-193158
-Ref: master unreleased-Footnote-293214
-Ref: master unreleased-Footnote-393244
-Ref: master unreleased-Footnote-493300
-Ref: master unreleased-Footnote-593356
-Ref: master unreleased-Footnote-693412
-Node: 0 16 Jan 11 201493468
-Ref: manual/changes sphinx93581
-Ref: bc93581
-Ref: manual/changes jan-11-201493581
-Ref: bd93581
-Ref: 0 16 Jan 11 2014-Footnote-196348
-Ref: 0 16 Jan 11 2014-Footnote-296404
-Ref: 0 16 Jan 11 2014-Footnote-396459
-Ref: 0 16 Jan 11 2014-Footnote-496515
-Ref: 0 16 Jan 11 2014-Footnote-596571
-Ref: 0 16 Jan 11 2014-Footnote-696627
-Ref: 0 16 Jan 11 2014-Footnote-796683
-Ref: 0 16 Jan 11 2014-Footnote-896739
-Ref: 0 16 Jan 11 2014-Footnote-996795
-Ref: 0 16 Jan 11 2014-Footnote-1096851
-Ref: 0 16 Jan 11 2014-Footnote-1196908
-Ref: 0 16 Jan 11 2014-Footnote-1296965
-Ref: 0 16 Jan 11 2014-Footnote-1397022
-Ref: 0 16 Jan 11 2014-Footnote-1497079
-Ref: 0 16 Jan 11 2014-Footnote-1597136
-Ref: 0 16 Jan 11 2014-Footnote-1697193
-Ref: 0 16 Jan 11 2014-Footnote-1797250
-Ref: 0 16 Jan 11 2014-Footnote-1897307
-Ref: 0 16 Jan 11 2014-Footnote-1997364
-Ref: 0 16 Jan 11 2014-Footnote-2097421
-Ref: 0 16 Jan 11 2014-Footnote-2197478
-Ref: 0 16 Jan 11 2014-Footnote-2297535
-Node: 0 15 Nov 15 201397592
-Ref: manual/changes nov-15-201397706
-Ref: be97706
-Ref: manual/changes flycheck-hdevtools97706
-Ref: bf97706
-Ref: 0 15 Nov 15 2013-Footnote-1101810
-Ref: 0 15 Nov 15 2013-Footnote-2101866
-Ref: 0 15 Nov 15 2013-Footnote-3101922
-Ref: 0 15 Nov 15 2013-Footnote-4101978
-Ref: 0 15 Nov 15 2013-Footnote-5102034
-Ref: 0 15 Nov 15 2013-Footnote-6102090
-Ref: 0 15 Nov 15 2013-Footnote-7102146
-Ref: 0 15 Nov 15 2013-Footnote-8102187
-Ref: 0 15 Nov 15 2013-Footnote-9102243
-Ref: 0 15 Nov 15 2013-Footnote-10102299
-Ref: 0 15 Nov 15 2013-Footnote-11102356
-Ref: 0 15 Nov 15 2013-Footnote-12102413
-Ref: 0 15 Nov 15 2013-Footnote-13102470
-Ref: 0 15 Nov 15 2013-Footnote-14102527
-Ref: 0 15 Nov 15 2013-Footnote-15102584
-Ref: 0 15 Nov 15 2013-Footnote-16102641
-Ref: 0 15 Nov 15 2013-Footnote-17102698
-Ref: 0 15 Nov 15 2013-Footnote-18102755
-Ref: 0 15 Nov 15 2013-Footnote-19102812
-Ref: 0 15 Nov 15 2013-Footnote-20102869
-Ref: 0 15 Nov 15 2013-Footnote-21102926
-Ref: 0 15 Nov 15 2013-Footnote-22102983
-Ref: 0 15 Nov 15 2013-Footnote-23103040
-Ref: 0 15 Nov 15 2013-Footnote-24103097
-Ref: 0 15 Nov 15 2013-Footnote-25103154
-Ref: 0 15 Nov 15 2013-Footnote-26103211
-Ref: 0 15 Nov 15 2013-Footnote-27103268
-Ref: 0 15 Nov 15 2013-Footnote-28103325
-Ref: 0 15 Nov 15 2013-Footnote-29103382
-Ref: 0 15 Nov 15 2013-Footnote-30103439
-Ref: 0 15 Nov 15 2013-Footnote-31103496
-Node: 0 14 1 Aug 16 2013103553
-Ref: manual/changes grizzl103667
-Ref: c0103667
-Ref: manual/changes aug-16-2013103667
-Ref: c1103667
-Ref: 0 14 1 Aug 16 2013-Footnote-1103818
-Node: 0 14 Aug 15 2013103874
-Ref: manual/changes aug-15-2013103988
-Ref: c2103988
-Ref: 0 14 Aug 15 2013-Footnote-1106886
-Ref: 0 14 Aug 15 2013-Footnote-2106942
-Ref: 0 14 Aug 15 2013-Footnote-3106998
-Ref: 0 14 Aug 15 2013-Footnote-4107054
-Ref: 0 14 Aug 15 2013-Footnote-5107110
-Ref: 0 14 Aug 15 2013-Footnote-6107166
-Ref: 0 14 Aug 15 2013-Footnote-7107222
-Ref: 0 14 Aug 15 2013-Footnote-8107278
-Ref: 0 14 Aug 15 2013-Footnote-9107334
-Ref: 0 14 Aug 15 2013-Footnote-10107390
-Ref: 0 14 Aug 15 2013-Footnote-11107447
-Ref: 0 14 Aug 15 2013-Footnote-12107504
-Ref: 0 14 Aug 15 2013-Footnote-13107561
-Ref: 0 14 Aug 15 2013-Footnote-14107618
-Ref: 0 14 Aug 15 2013-Footnote-15107675
-Ref: 0 14 Aug 15 2013-Footnote-16107732
-Ref: 0 14 Aug 15 2013-Footnote-17107789
-Ref: 0 14 Aug 15 2013-Footnote-18107846
-Ref: 0 14 Aug 15 2013-Footnote-19107903
-Ref: 0 14 Aug 15 2013-Footnote-20107960
-Ref: 0 14 Aug 15 2013-Footnote-21108017
-Ref: 0 14 Aug 15 2013-Footnote-22108074
-Node: 0 13 Jun 28 2013108131
-Ref: manual/changes jun-28-2013108243
-Ref: c3108243
-Ref: 0 13 Jun 28 2013-Footnote-1110836
-Ref: 0 13 Jun 28 2013-Footnote-2110892
-Ref: 0 13 Jun 28 2013-Footnote-3110948
-Ref: 0 13 Jun 28 2013-Footnote-4111004
-Ref: 0 13 Jun 28 2013-Footnote-5111060
-Ref: 0 13 Jun 28 2013-Footnote-6111116
-Ref: 0 13 Jun 28 2013-Footnote-7111172
-Node: 0 12 May 18 2013111228
-Ref: manual/changes may-18-2013111340
-Ref: c4111340
-Ref: 0 12 May 18 2013-Footnote-1112151
-Ref: 0 12 May 18 2013-Footnote-2112207
-Ref: 0 12 May 18 2013-Footnote-3112263
-Ref: 0 12 May 18 2013-Footnote-4112319
-Node: 0 11 May 01 2013112375
-Ref: manual/changes may-01-2013112487
-Ref: c5112487
-Ref: 0 11 May 01 2013-Footnote-1113435
-Ref: 0 11 May 01 2013-Footnote-2113491
-Ref: 0 11 May 01 2013-Footnote-3113547
-Ref: 0 11 May 01 2013-Footnote-4113603
-Ref: 0 11 May 01 2013-Footnote-5113649
-Node: 0 10 Apr 21 2013113705
-Ref: manual/changes apr-21-2013113816
-Ref: c6113816
-Ref: manual/changes projectile113816
-Ref: c7113816
-Ref: 0 10 Apr 21 2013-Footnote-1115439
-Ref: 0 10 Apr 21 2013-Footnote-2115495
-Ref: 0 10 Apr 21 2013-Footnote-3115551
-Ref: 0 10 Apr 21 2013-Footnote-4115607
-Ref: 0 10 Apr 21 2013-Footnote-5115663
-Ref: 0 10 Apr 21 2013-Footnote-6115719
-Ref: 0 10 Apr 21 2013-Footnote-7115777
-Ref: 0 10 Apr 21 2013-Footnote-8115833
-Ref: 0 10 Apr 21 2013-Footnote-9115888
-Node: 0 9 Apr 13 2013115944
-Ref: manual/changes apr-13-2013116053
-Ref: c8116053
-Ref: manual/changes google-this116053
-Ref: c9116053
-Ref: 0 9 Apr 13 2013-Footnote-1116431
-Ref: 0 9 Apr 13 2013-Footnote-2116487
-Node: 0 8 Apr 9 2013116543
-Ref: manual/changes apr-9-2013116653
-Ref: ca116653
-Ref: 0 8 Apr 9 2013-Footnote-1117753
-Ref: 0 8 Apr 9 2013-Footnote-2117808
-Ref: 0 8 Apr 9 2013-Footnote-3117864
-Ref: 0 8 Apr 9 2013-Footnote-4117919
-Ref: 0 8 Apr 9 2013-Footnote-5117974
-Ref: 0 8 Apr 9 2013-Footnote-6118029
-Ref: 0 8 Apr 9 2013-Footnote-7118084
-Ref: 0 8 Apr 9 2013-Footnote-8118139
-Node: 0 7 1 Feb 23 2013118195
-Ref: manual/changes feb-23-2013118305
-Ref: cb118305
-Ref: 0 7 1 Feb 23 2013-Footnote-1118922
-Ref: 0 7 1 Feb 23 2013-Footnote-2118977
-Node: 0 7 Feb 14 2013119032
-Ref: manual/changes feb-14-2013119145
-Ref: cc119145
-Ref: 0 7 Feb 14 2013-Footnote-1119884
-Ref: 0 7 Feb 14 2013-Footnote-2119939
-Ref: 0 7 Feb 14 2013-Footnote-3119994
-Ref: 0 7 Feb 14 2013-Footnote-4120049
-Ref: 0 7 Feb 14 2013-Footnote-5120104
-Node: 0 6 1 Jan 30 2013120159
-Ref: manual/changes jan-30-2013120270
-Ref: cd120270
-Node: 0 6 Jan 29 2013120354
-Ref: manual/changes jan-29-2013120465
-Ref: ce120465
-Ref: 0 6 Jan 29 2013-Footnote-1122416
-Ref: 0 6 Jan 29 2013-Footnote-2122471
-Ref: 0 6 Jan 29 2013-Footnote-3122526
-Ref: 0 6 Jan 29 2013-Footnote-4122581
-Ref: 0 6 Jan 29 2013-Footnote-5122636
-Ref: 0 6 Jan 29 2013-Footnote-6122691
-Ref: 0 6 Jan 29 2013-Footnote-7122746
-Ref: 0 6 Jan 29 2013-Footnote-8122801
-Ref: 0 6 Jan 29 2013-Footnote-9122856
-Ref: 0 6 Jan 29 2013-Footnote-10122911
-Ref: 0 6 Jan 29 2013-Footnote-11122967
-Ref: 0 6 Jan 29 2013-Footnote-12123023
-Ref: 0 6 Jan 29 2013-Footnote-13123079
-Ref: 0 6 Jan 29 2013-Footnote-14123135
-Ref: 0 6 Jan 29 2013-Footnote-15123191
-Ref: 0 6 Jan 29 2013-Footnote-16123247
-Ref: 0 6 Jan 29 2013-Footnote-17123303
-Ref: 0 6 Jan 29 2013-Footnote-18123359
-Ref: 0 6 Jan 29 2013-Footnote-19123415
-Node: 0 5 Dec 28 2012123471
-Ref: manual/changes dec-28-2012123580
-Ref: cf123580
-Ref: 0 5 Dec 28 2012-Footnote-1124360
-Ref: 0 5 Dec 28 2012-Footnote-2124415
-Ref: 0 5 Dec 28 2012-Footnote-3124470
-Ref: 0 5 Dec 28 2012-Footnote-4124525
-Ref: 0 5 Dec 28 2012-Footnote-5124580
-Ref: 0 5 Dec 28 2012-Footnote-6124635
-Ref: 0 5 Dec 28 2012-Footnote-7124690
-Ref: 0 5 Dec 28 2012-Footnote-8124745
-Ref: 0 5 Dec 28 2012-Footnote-9124800
-Node: 0 4 Nov 21 2012124855
-Ref: manual/changes nov-21-2012124964
-Ref: d0124964
-Ref: manual/changes flymake-cursor124964
-Ref: d1124964
-Ref: 0 4 Nov 21 2012-Footnote-1125403
-Ref: 0 4 Nov 21 2012-Footnote-2125457
-Ref: 0 4 Nov 21 2012-Footnote-3125511
-Ref: 0 4 Nov 21 2012-Footnote-4125565
-Ref: 0 4 Nov 21 2012-Footnote-5125619
-Ref: 0 4 Nov 21 2012-Footnote-6125674
-Ref: 0 4 Nov 21 2012-Footnote-7125729
-Node: 0 3 Nov 21 2012125784
-Ref: manual/changes id1125893
-Ref: d2125893
-Ref: 0 3 Nov 21 2012-Footnote-1126064
-Node: 0 2 Oct 25 2012126118
-Ref: manual/changes oct-25-2012126227
-Ref: d3126227
-Ref: 0 2 Oct 25 2012-Footnote-1126428
-Node: 0 1 Oct 11 2012126482
-Ref: manual/changes oct-11-2012126567
-Ref: d4126567
-Node: GNU Free Documentation License126806
-Ref: manual/fdl doc126928
-Ref: 1126928
-Ref: manual/fdl gnu-free-documentation-license126928
-Ref: d5126928
-Node: Available syntax checkers151814
-Ref: manual/checkers doc151937
-Ref: d6151937
-Ref: manual/checkers available-syntax-checkers151937
-Ref: d7151937
-Ref: manual/checkers syntax-checker-asciidoc152364
-Ref: d8152364
-Ref: manual/checkers syntax-checker-bash152409
-Ref: d9152409
-Ref: manual/checkers syntax-checker-c/c++-clang152450
-Ref: da152450
-Ref: manual/checkers syntax-checker-c/c++-cppcheck152498
-Ref: db152498
-Ref: manual/checkers syntax-checker-cfengine152549
-Ref: dc152549
-Ref: manual/checkers syntax-checker-chef-foodcritic152594
-Ref: dd152594
-Ref: manual/checkers syntax-checker-coffee152646
-Ref: de152646
-Ref: manual/checkers syntax-checker-coffee-coffeelint152689
-Ref: df152689
-Ref: manual/checkers syntax-checker-css-csslint152743
-Ref: e0152743
-Ref: manual/checkers syntax-checker-d-dmd152791
-Ref: e1152791
-Ref: manual/checkers syntax-checker-elixir152833
-Ref: 7c152833
-Ref: manual/checkers syntax-checker-emacs-lisp152876
-Ref: e2152876
-Ref: manual/checkers syntax-checker-emacs-lisp-checkdoc152923
-Ref: e3152923
-Ref: manual/checkers syntax-checker-erlang152979
-Ref: e4152979
-Ref: manual/checkers syntax-checker-eruby-erubis153022
-Ref: e5153022
-Ref: manual/checkers syntax-checker-go-gofmt153071
-Ref: e6153071
-Ref: manual/checkers syntax-checker-go-build153116
-Ref: e7153116
-Ref: manual/checkers syntax-checker-go-test153161
-Ref: e8153161
-Ref: manual/checkers syntax-checker-haml153205
-Ref: e9153205
-Ref: manual/checkers syntax-checker-handlebars153246
-Ref: ea153246
-Ref: manual/checkers syntax-checker-haskell-ghc153293
-Ref: eb153293
-Ref: manual/checkers syntax-checker-haskell-hlint153341
-Ref: ec153341
-Ref: manual/checkers syntax-checker-html-tidy153391
-Ref: ed153391
-Ref: manual/checkers syntax-checker-javascript-jshint153437
-Ref: ee153437
-Ref: manual/checkers syntax-checker-javascript-eslint153491
-Ref: ef153491
-Ref: manual/checkers syntax-checker-javascript-gjslint153545
-Ref: f0153545
-Ref: manual/checkers syntax-checker-json-jsonlint153600
-Ref: f1153600
-Ref: manual/checkers syntax-checker-less153650
-Ref: f2153650
-Ref: manual/checkers syntax-checker-lua153691
-Ref: f3153691
-Ref: manual/checkers syntax-checker-perl153731
-Ref: f4153731
-Ref: manual/checkers syntax-checker-php153772
-Ref: f5153772
-Ref: manual/checkers syntax-checker-php-phpmd153812
-Ref: f6153812
-Ref: manual/checkers syntax-checker-php-phpcs153858
-Ref: f7153858
-Ref: manual/checkers syntax-checker-puppet-parser153904
-Ref: f8153904
-Ref: manual/checkers syntax-checker-puppet-lint153954
-Ref: f9153954
-Ref: manual/checkers syntax-checker-python-flake8154002
-Ref: fa154002
-Ref: manual/checkers syntax-checker-python-pylint154052
-Ref: fb154052
-Ref: manual/checkers syntax-checker-racket154102
-Ref: fc154102
-Ref: manual/checkers syntax-checker-rst154145
-Ref: fd154145
-Ref: manual/checkers syntax-checker-rst-sphinx154185
-Ref: fe154185
-Ref: manual/checkers syntax-checker-ruby-rubocop154232
-Ref: ff154232
-Ref: manual/checkers syntax-checker-ruby-rubylint154281
-Ref: 100154281
-Ref: manual/checkers syntax-checker-ruby154331
-Ref: 101154331
-Ref: manual/checkers syntax-checker-ruby-jruby154372
-Ref: 102154372
-Ref: manual/checkers syntax-checker-rust154419
-Ref: 103154419
-Ref: manual/checkers syntax-checker-sass154460
-Ref: 104154460
-Ref: manual/checkers syntax-checker-scala154501
-Ref: 105154501
-Ref: manual/checkers syntax-checker-scss154543
-Ref: 106154543
-Ref: manual/checkers syntax-checker-sh-dash154584
-Ref: 107154584
-Ref: manual/checkers syntax-checker-sh-bash154628
-Ref: 108154628
-Ref: manual/checkers syntax-checker-slim154672
-Ref: 109154672
-Ref: manual/checkers syntax-checker-tex-chktex154713
-Ref: 10a154713
-Ref: manual/checkers syntax-checker-tex-lacheck154760
-Ref: 10b154760
-Ref: manual/checkers syntax-checker-texinfo154808
-Ref: 10c154808
-Ref: manual/checkers syntax-checker-verilog-verilator154852
-Ref: 10d154852
-Ref: manual/checkers syntax-checker-xml-xmlstarlet154906
-Ref: 10e154906
-Ref: manual/checkers syntax-checker-xml-xmllint154957
-Ref: 10f154957
-Ref: manual/checkers syntax-checker-yaml-jsyaml155005
-Ref: 110155005
-Ref: manual/checkers syntax-checker-yaml-ruby155053
-Ref: 111155053
-Ref: manual/checkers syntax-checker-zsh155099
-Ref: 112155099
-Node: Glossary155139
-Ref: manual/glossary glossary155237
-Ref: 113155237
-Ref: manual/glossary doc155237
-Ref: 114155237
-Ref: manual/glossary term-syntax-checker155262
-Ref: 22155262
-Ref: manual/glossary term-registered-syntax-checker155371
-Ref: 23155371
-Ref: manual/glossary term-disabled-syntax-checker155527
-Ref: 115155527
-Ref: manual/glossary term-enabled-syntax-checker155707
-Ref: 24155707
-Ref: manual/glossary term-suitable-syntax-checker155832
-Ref: 12155832
-Node: Index156127
+Node: Introduction3877
+Ref: manual/introduction introduction3957
+Ref: 23957
+Ref: manual/introduction the-flycheck-manual3957
+Ref: 33957
+Ref: manual/introduction doc3957
+Ref: 43957
+Node: Features4626
+Ref: manual/introduction features4714
+Ref: 54714
+Node: 3rd party extensions7301
+Ref: manual/introduction rd-party-extensions7410
+Ref: 67410
+Ref: 3rd party extensions-Footnote-18211
+Ref: 3rd party extensions-Footnote-28261
+Ref: 3rd party extensions-Footnote-38298
+Ref: 3rd party extensions-Footnote-48359
+Ref: 3rd party extensions-Footnote-58415
+Ref: 3rd party extensions-Footnote-68470
+Ref: 3rd party extensions-Footnote-78513
+Ref: 3rd party extensions-Footnote-88566
+Ref: 3rd party extensions-Footnote-98619
+Node: Installation8651
+Ref: manual/introduction installation8743
+Ref: 78743
+Ref: manual/introduction mercury-language8743
+Ref: 88743
+Ref: Installation-Footnote-110255
+Ref: Installation-Footnote-210288
+Ref: Installation-Footnote-310323
+Node: Usage10360
+Ref: manual/usage usage10455
+Ref: a10455
+Ref: manual/usage marmalade10455
+Ref: b10455
+Ref: manual/usage doc10455
+Ref: c10455
+Node: Flycheck Mode10644
+Ref: manual/usage flycheck-mode10725
+Ref: d10725
+Ref: manual/usage id110725
+Ref: e10725
+Ref: manual/usage el functions flycheck-mode10815
+Ref: f10815
+Ref: manual/usage el variables flycheck-mode10899
+Ref: 1010899
+Ref: manual/usage el functions global-flycheck-mode11005
+Ref: 1111005
+Ref: manual/usage el variables global-flycheck-mode11682
+Ref: 1311682
+Node: Syntax checking12015
+Ref: manual/usage id212129
+Ref: 1412129
+Ref: manual/usage syntax-checking12129
+Ref: 1512129
+Ref: manual/usage el variables flycheck-check-syntax-automatically12490
+Ref: 1612490
+Ref: manual/usage el variables flycheck-idle-change-delay13597
+Ref: 1813597
+Ref: manual/usage el functions flycheck-buffer14162
+Ref: 1714162
+Ref: manual/usage el variables flycheck-after-syntax-check-hook15055
+Ref: 1c15055
+Ref: manual/usage el variables flycheck-before-syntax-check-hook15812
+Ref: 1915812
+Ref: manual/usage el variables flycheck-syntax-check-failed-hook16347
+Ref: 1e16347
+Node: Syntax checker selection16761
+Ref: manual/usage syntax-checker-selection16890
+Ref: 1a16890
+Ref: manual/usage id316890
+Ref: 1f16890
+Ref: manual/usage el variables flycheck-checkers17118
+Ref: 2017118
+Ref: manual/usage el variables flycheck-disabled-checkers17505
+Ref: 2117505
+Ref: manual/usage el functions flycheck-select-checker18547
+Ref: 2518547
+Ref: manual/usage el variables flycheck-checker19173
+Ref: 2619173
+Ref: manual/usage el variables flycheck-completion-system20172
+Ref: 2720172
+Ref: manual/usage el functions flycheck-describe-checker21360
+Ref: 921360
+Ref: Syntax checker selection-Footnote-121491
+Ref: Syntax checker selection-Footnote-221529
+Node: Syntax checker configuration21570
+Ref: manual/usage syntax-checker-configuration21699
+Ref: 2821699
+Ref: manual/usage id421699
+Ref: 2921699
+Node: Syntax checker executables21876
+Ref: manual/usage syntax-checker-executables22000
+Ref: 2a22000
+Ref: manual/usage id522000
+Ref: 2b22000
+Ref: manual/usage el functions flycheck-set-checker-executable22799
+Ref: 2c22799
+Node: Syntax checker options23268
+Ref: manual/usage id623435
+Ref: 2d23435
+Ref: manual/usage syntax-checker-options23435
+Ref: 2e23435
+Ref: manual/usage el variables flycheck-clang-definitions23694
+Ref: 2f23694
+Ref: manual/usage el variables flycheck-clang-include-path23816
+Ref: 3023816
+Ref: manual/usage el variables flycheck-clang-includes23923
+Ref: 3123923
+Ref: manual/usage el variables flycheck-clang-language-standard24031
+Ref: 3224031
+Ref: manual/usage el variables flycheck-clang-ms-extensions24145
+Ref: 3324145
+Ref: manual/usage el variables flycheck-clang-no-rtti24271
+Ref: 3424271
+Ref: manual/usage el variables flycheck-clang-standard-library24376
+Ref: 3524376
+Ref: manual/usage el variables flycheck-clang-warnings24495
+Ref: 3624495
+Ref: manual/usage el variables flycheck-cppcheck-checks24607
+Ref: 3724607
+Ref: manual/usage el variables flycheck-emacs-lisp-initialize-packages24718
+Ref: 3824718
+Ref: manual/usage el variables flycheck-emacs-lisp-load-path25189
+Ref: 3925189
+Ref: manual/usage el variables flycheck-emacs-lisp-package-user-dir25607
+Ref: 3a25607
+Ref: manual/usage el variables flycheck-eslint-rulesdir25743
+Ref: 3b25743
+Ref: manual/usage el variables flycheck-flake8-maximum-complexity25887
+Ref: 3c25887
+Ref: manual/usage el variables flycheck-flake8-maximum-line-length26068
+Ref: 3d26068
+Ref: manual/usage el variables flycheck-ghc-no-user-package-database26262
+Ref: 3e26262
+Ref: manual/usage el variables flycheck-ghc-package-databases26404
+Ref: 3f26404
+Ref: manual/usage el variables flycheck-ghc-search-path26521
+Ref: 4026521
+Ref: manual/usage el variables flycheck-phpcs-standard26653
+Ref: 4126653
+Ref: manual/usage el variables flycheck-phpmd-rulesets26760
+Ref: 4226760
+Ref: manual/usage el variables flycheck-rubocop-lint-only26861
+Ref: 4326861
+Ref: manual/usage el variables flycheck-sass-compass26980
+Ref: 4426980
+Ref: manual/usage el variables flycheck-scss-compass27098
+Ref: 4527098
+Ref: manual/usage el variables flycheck-sphinx-warn-on-missing-references27216
+Ref: 4627216
+Node: Syntax checker configuration files27356
+Ref: manual/usage id727488
+Ref: 4727488
+Ref: manual/usage syntax-checker-configuration-files27488
+Ref: 4827488
+Ref: manual/usage el variables flycheck-chktexrc27678
+Ref: 4927678
+Ref: manual/usage el variables flycheck-coffeelintrc27796
+Ref: 4a27796
+Ref: manual/usage el variables flycheck-eslintrc27925
+Ref: 4b27925
+Ref: manual/usage el variables flycheck-flake8rc28050
+Ref: 4c28050
+Ref: manual/usage el variables flycheck-gjslintrc28171
+Ref: 4d28171
+Ref: manual/usage el variables flycheck-jshintrc28298
+Ref: 4e28298
+Ref: manual/usage el variables flycheck-pylintrc28423
+Ref: 4f28423
+Ref: manual/usage el variables flycheck-rubocoprc28544
+Ref: 5028544
+Ref: manual/usage el variables flycheck-tidyrc28665
+Ref: 5128665
+Ref: manual/usage el variables flycheck-locate-config-file-functions28967
+Ref: 5228967
+Ref: Syntax checker configuration files-Footnote-131054
+Node: Error reporting31100
+Ref: manual/usage error-reporting31221
+Ref: 1b31221
+Ref: manual/usage id831221
+Ref: 5331221
+Ref: manual/usage el faces flycheck-error31602
+Ref: 5631602
+Ref: manual/usage el faces flycheck-warning31632
+Ref: 5731632
+Ref: manual/usage el faces flycheck-info31664
+Ref: 5831664
+Ref: manual/usage el variables flycheck-highlighting-mode32293
+Ref: 5532293
+Ref: manual/usage el faces flycheck-fringe-error33209
+Ref: 5933209
+Ref: manual/usage el faces flycheck-fringe-warning33246
+Ref: 5a33246
+Ref: manual/usage el faces flycheck-fringe-info33285
+Ref: 5b33285
+Ref: manual/usage el variables flycheck-indication-mode33417
+Ref: 5433417
+Ref: manual/usage el variables flycheck-process-error-functions33944
+Ref: 5c33944
+Ref: manual/usage el functions flycheck-list-errors34601
+Ref: 5e34601
+Ref: manual/usage el functions list-flycheck-errors34640
+Ref: 5f34640
+Ref: manual/usage el variables flycheck-display-errors-delay35168
+Ref: 6035168
+Ref: manual/usage el variables flycheck-display-errors-function35425
+Ref: 6135425
+Ref: manual/usage el functions flycheck-display-error-messages35741
+Ref: 6235741
+Ref: manual/usage el functions flycheck-copy-messages-as-kill36373
+Ref: 6336373
+Ref: manual/usage el functions flycheck-google-messages36526
+Ref: 6436526
+Ref: manual/usage el variables flycheck-google-max-messages36879
+Ref: 6536879
+Ref: manual/usage el functions flycheck-clear37409
+Ref: 6637409
+Ref: Error reporting-Footnote-137657
+Ref: Error reporting-Footnote-237708
+Ref: Error reporting-Footnote-337757
+Ref: Error reporting-Footnote-437815
+Node: Error navigation37849
+Ref: manual/usage error-navigation37951
+Ref: 6737951
+Ref: manual/usage id937951
+Ref: 6837951
+Ref: manual/usage el variables flycheck-standard-error-navigation38508
+Ref: 6938508
+Ref: manual/usage el functions flycheck-next-error39377
+Ref: 6a39377
+Ref: manual/usage el functions flycheck-previous-error39659
+Ref: 6b39659
+Ref: manual/usage el functions flycheck-first-error39937
+Ref: 6c39937
+Node: Mode line40230
+Ref: manual/usage id1040308
+Ref: 6d40308
+Ref: manual/usage mode-line40308
+Ref: 6e40308
+Node: Extending Flycheck41218
+Ref: manual/extending doc41313
+Ref: 7041313
+Ref: manual/extending extending-flycheck41313
+Ref: 7141313
+Node: Defining new syntax checkers41794
+Ref: manual/extending defining-new-syntax-checkers41900
+Ref: 7341900
+Ref: manual/extending id141900
+Ref: 7441900
+Ref: manual/extending el functions flycheck-define-checker42040
+Ref: 7542040
+Ref: manual/extending flyc command43177
+Ref: 7c43177
+Ref: manual/extending flyc error-patterns52447
+Ref: 8152447
+Ref: manual/extending flyc error-parser54770
+Ref: 8354770
+Ref: manual/extending flyc modes56069
+Ref: 8756069
+Ref: manual/extending flyc predicate56550
+Ref: 8856550
+Ref: manual/extending flyc next-checkers57239
+Ref: 8957239
+Ref: manual/extending el functions flycheck-def-config-file-var58223
+Ref: 7e58223
+Ref: manual/extending el functions flycheck-def-option-var58976
+Ref: 8058976
+Node: Error levels59721
+Ref: manual/extending id259849
+Ref: 8a59849
+Ref: manual/extending error-levels59849
+Ref: 8b59849
+Ref: manual/extending el functions flycheck-define-error-level60169
+Ref: 8260169
+Node: Error parsers61498
+Ref: manual/extending error-parsers61612
+Ref: 8561612
+Ref: manual/extending id361612
+Ref: 8c61612
+Ref: manual/extending el functions flycheck-parse-with-patterns61924
+Ref: 8661924
+Ref: manual/extending el functions flycheck-parse-checkstyle62106
+Ref: 8d62106
+Ref: Error parsers-Footnote-162825
+Node: Option filters62868
+Ref: manual/extending id462995
+Ref: 8f62995
+Ref: manual/extending option-filters62995
+Ref: 7f62995
+Ref: manual/extending el functions flycheck-option-int63227
+Ref: 9063227
+Ref: manual/extending el functions flycheck-option-comma-separated-list63383
+Ref: 9163383
+Node: Extending syntax checkers63644
+Ref: manual/extending id563766
+Ref: 9263766
+Ref: manual/extending extending-syntax-checkers63766
+Ref: 9363766
+Ref: manual/extending el functions flycheck-add-next-checker63884
+Ref: 9463884
+Node: Examples64370
+Ref: manual/extending examples64469
+Ref: 9564469
+Node: Basic syntax checkers64645
+Ref: manual/extending id664753
+Ref: 9664753
+Ref: manual/extending basic-syntax-checkers64753
+Ref: 9764753
+Node: Syntax checkers with predicates67860
+Ref: manual/extending syntax-checkers-with-predicates68016
+Ref: 9868016
+Node: Configuration files for syntax checkers70062
+Ref: manual/extending configuration-files-for-syntax-checkers70221
+Ref: 9970221
+Node: Chaining syntax checkers72822
+Ref: manual/extending chaining-syntax-checkers72941
+Ref: 9a72941
+Node: Flycheck API74277
+Ref: manual/api doc74379
+Ref: 9b74379
+Ref: manual/api flycheck-api74379
+Ref: 9c74379
+Node: Error API74969
+Ref: manual/api error-api75054
+Ref: 5d75054
+Ref: manual/api id175054
+Ref: 9d75054
+Ref: manual/api el structs flycheck-error75232
+Ref: 8475232
+Ref: manual/api el functions flycheck-error-buffer75366
+Ref: 9e75366
+Ref: manual/api el functions flycheck-error-checker75669
+Ref: 9f75669
+Ref: manual/api el functions flycheck-error-filename75754
+Ref: a075754
+Ref: manual/api el functions flycheck-error-line75849
+Ref: a175849
+Ref: manual/api el functions flycheck-error-column75937
+Ref: a275937
+Ref: manual/api el functions flycheck-error-message76144
+Ref: a376144
+Ref: manual/api el functions flycheck-error-level76228
+Ref: a476228
+Ref: manual/api el functions flycheck-error-new-at76481
+Ref: a576481
+Ref: manual/api el functions flycheck-error-new77528
+Ref: a677528
+Ref: manual/api el functions flycheck-error-with-buffer78007
+Ref: a778007
+Ref: manual/api el functions flycheck-error-line-region78264
+Ref: a878264
+Ref: manual/api el functions flycheck-error-column-region78460
+Ref: a978460
+Ref: manual/api el functions flycheck-error-sexp-region78753
+Ref: aa78753
+Ref: manual/api el functions flycheck-error-pos79730
+Ref: ab79730
+Ref: manual/api el functions flycheck-error-format80095
+Ref: ac80095
+Ref: manual/api el variables flycheck-current-errors80302
+Ref: 1d80302
+Ref: manual/api el functions flycheck-count-errors80466
+Ref: ad80466
+Ref: manual/api el functions flycheck-has-errors-p80815
+Ref: ae80815
+Node: Error parser API81141
+Ref: manual/api error-parser-api81226
+Ref: 8e81226
+Ref: manual/api id281226
+Ref: af81226
+Ref: manual/api el functions flycheck-parse-xml-string81333
+Ref: b081333
+Node: Contributing81471
+Ref: manual/contributing contributing81562
+Ref: b181562
+Ref: manual/contributing doc81562
+Ref: b281562
+Ref: Contributing-Footnote-181925
+Node: Reporting issues81977
+Ref: manual/contributing id182070
+Ref: b382070
+Ref: manual/contributing reporting-issues82070
+Ref: 6f82070
+Node: Contributing code82518
+Ref: manual/contributing id282611
+Ref: b482611
+Ref: manual/contributing contributing-code82611
+Ref: b582611
+Node: General82897
+Ref: manual/contributing general82979
+Ref: b682979
+Node: Code style83102
+Ref: manual/contributing code-style83208
+Ref: b783208
+Node: Commit messages83633
+Ref: manual/contributing commit-messages83760
+Ref: b883760
+Ref: Commit messages-Footnote-185550
+Ref: Commit messages-Footnote-285628
+Ref: Commit messages-Footnote-385672
+Node: Contributing syntax checkers85712
+Ref: manual/contributing contributing-syntax-checkers85842
+Ref: 7285842
+Ref: manual/contributing id385842
+Ref: b985842
+Node: Pull requests86345
+Ref: manual/contributing id486451
+Ref: ba86451
+Ref: manual/contributing pull-requests86451
+Ref: bb86451
+Ref: Pull requests-Footnote-186957
+Node: Credits87018
+Ref: manual/credits credits87104
+Ref: bc87104
+Ref: manual/credits doc87104
+Ref: bd87104
+Ref: manual/credits pull-request87104
+Ref: be87104
+Ref: Credits-Footnote-190467
+Ref: Credits-Footnote-290504
+Ref: Credits-Footnote-390539
+Ref: Credits-Footnote-490582
+Ref: Credits-Footnote-590616
+Ref: Credits-Footnote-690649
+Ref: Credits-Footnote-790682
+Ref: Credits-Footnote-890717
+Ref: Credits-Footnote-990751
+Ref: Credits-Footnote-1090794
+Ref: Credits-Footnote-1190835
+Ref: Credits-Footnote-1290868
+Ref: Credits-Footnote-1390910
+Ref: Credits-Footnote-1490949
+Ref: Credits-Footnote-1590998
+Ref: Credits-Footnote-1691038
+Ref: Credits-Footnote-1791074
+Ref: Credits-Footnote-1891107
+Ref: Credits-Footnote-1991147
+Ref: Credits-Footnote-2091190
+Ref: Credits-Footnote-2191229
+Ref: Credits-Footnote-2291271
+Ref: Credits-Footnote-2391307
+Ref: Credits-Footnote-2491344
+Ref: Credits-Footnote-2591406
+Ref: Credits-Footnote-2691442
+Ref: Credits-Footnote-2791474
+Ref: Credits-Footnote-2891510
+Ref: Credits-Footnote-2991567
+Ref: Credits-Footnote-3091607
+Ref: Credits-Footnote-3191642
+Ref: Credits-Footnote-3291680
+Node: Changes91749
+Ref: manual/changes changes91853
+Ref: bf91853
+Ref: manual/changes doc91853
+Ref: c091853
+Node: master unreleased92713
+Ref: manual/changes master-unreleased92801
+Ref: c192801
+Ref: master unreleased-Footnote-194348
+Ref: master unreleased-Footnote-294404
+Ref: master unreleased-Footnote-394434
+Ref: master unreleased-Footnote-494490
+Ref: master unreleased-Footnote-594546
+Ref: master unreleased-Footnote-694602
+Ref: master unreleased-Footnote-794658
+Ref: master unreleased-Footnote-894714
+Ref: master unreleased-Footnote-994770
+Node: 0 16 Jan 11 201494826
+Ref: manual/changes sphinx94939
+Ref: c294939
+Ref: manual/changes jan-11-201494939
+Ref: c394939
+Ref: 0 16 Jan 11 2014-Footnote-197706
+Ref: 0 16 Jan 11 2014-Footnote-297762
+Ref: 0 16 Jan 11 2014-Footnote-397817
+Ref: 0 16 Jan 11 2014-Footnote-497873
+Ref: 0 16 Jan 11 2014-Footnote-597929
+Ref: 0 16 Jan 11 2014-Footnote-697985
+Ref: 0 16 Jan 11 2014-Footnote-798041
+Ref: 0 16 Jan 11 2014-Footnote-898097
+Ref: 0 16 Jan 11 2014-Footnote-998153
+Ref: 0 16 Jan 11 2014-Footnote-1098209
+Ref: 0 16 Jan 11 2014-Footnote-1198266
+Ref: 0 16 Jan 11 2014-Footnote-1298323
+Ref: 0 16 Jan 11 2014-Footnote-1398380
+Ref: 0 16 Jan 11 2014-Footnote-1498437
+Ref: 0 16 Jan 11 2014-Footnote-1598494
+Ref: 0 16 Jan 11 2014-Footnote-1698551
+Ref: 0 16 Jan 11 2014-Footnote-1798608
+Ref: 0 16 Jan 11 2014-Footnote-1898665
+Ref: 0 16 Jan 11 2014-Footnote-1998722
+Ref: 0 16 Jan 11 2014-Footnote-2098779
+Ref: 0 16 Jan 11 2014-Footnote-2198836
+Ref: 0 16 Jan 11 2014-Footnote-2298893
+Node: 0 15 Nov 15 201398950
+Ref: manual/changes nov-15-201399064
+Ref: c499064
+Ref: manual/changes flycheck-hdevtools99064
+Ref: c599064
+Ref: 0 15 Nov 15 2013-Footnote-1103168
+Ref: 0 15 Nov 15 2013-Footnote-2103224
+Ref: 0 15 Nov 15 2013-Footnote-3103280
+Ref: 0 15 Nov 15 2013-Footnote-4103336
+Ref: 0 15 Nov 15 2013-Footnote-5103392
+Ref: 0 15 Nov 15 2013-Footnote-6103448
+Ref: 0 15 Nov 15 2013-Footnote-7103504
+Ref: 0 15 Nov 15 2013-Footnote-8103545
+Ref: 0 15 Nov 15 2013-Footnote-9103601
+Ref: 0 15 Nov 15 2013-Footnote-10103657
+Ref: 0 15 Nov 15 2013-Footnote-11103714
+Ref: 0 15 Nov 15 2013-Footnote-12103771
+Ref: 0 15 Nov 15 2013-Footnote-13103828
+Ref: 0 15 Nov 15 2013-Footnote-14103885
+Ref: 0 15 Nov 15 2013-Footnote-15103942
+Ref: 0 15 Nov 15 2013-Footnote-16103999
+Ref: 0 15 Nov 15 2013-Footnote-17104056
+Ref: 0 15 Nov 15 2013-Footnote-18104113
+Ref: 0 15 Nov 15 2013-Footnote-19104170
+Ref: 0 15 Nov 15 2013-Footnote-20104227
+Ref: 0 15 Nov 15 2013-Footnote-21104284
+Ref: 0 15 Nov 15 2013-Footnote-22104341
+Ref: 0 15 Nov 15 2013-Footnote-23104398
+Ref: 0 15 Nov 15 2013-Footnote-24104455
+Ref: 0 15 Nov 15 2013-Footnote-25104512
+Ref: 0 15 Nov 15 2013-Footnote-26104569
+Ref: 0 15 Nov 15 2013-Footnote-27104626
+Ref: 0 15 Nov 15 2013-Footnote-28104683
+Ref: 0 15 Nov 15 2013-Footnote-29104740
+Ref: 0 15 Nov 15 2013-Footnote-30104797
+Ref: 0 15 Nov 15 2013-Footnote-31104854
+Node: 0 14 1 Aug 16 2013104911
+Ref: manual/changes grizzl105025
+Ref: c6105025
+Ref: manual/changes aug-16-2013105025
+Ref: c7105025
+Ref: 0 14 1 Aug 16 2013-Footnote-1105176
+Node: 0 14 Aug 15 2013105232
+Ref: manual/changes aug-15-2013105346
+Ref: c8105346
+Ref: 0 14 Aug 15 2013-Footnote-1108244
+Ref: 0 14 Aug 15 2013-Footnote-2108300
+Ref: 0 14 Aug 15 2013-Footnote-3108356
+Ref: 0 14 Aug 15 2013-Footnote-4108412
+Ref: 0 14 Aug 15 2013-Footnote-5108468
+Ref: 0 14 Aug 15 2013-Footnote-6108524
+Ref: 0 14 Aug 15 2013-Footnote-7108580
+Ref: 0 14 Aug 15 2013-Footnote-8108636
+Ref: 0 14 Aug 15 2013-Footnote-9108692
+Ref: 0 14 Aug 15 2013-Footnote-10108748
+Ref: 0 14 Aug 15 2013-Footnote-11108805
+Ref: 0 14 Aug 15 2013-Footnote-12108862
+Ref: 0 14 Aug 15 2013-Footnote-13108919
+Ref: 0 14 Aug 15 2013-Footnote-14108976
+Ref: 0 14 Aug 15 2013-Footnote-15109033
+Ref: 0 14 Aug 15 2013-Footnote-16109090
+Ref: 0 14 Aug 15 2013-Footnote-17109147
+Ref: 0 14 Aug 15 2013-Footnote-18109204
+Ref: 0 14 Aug 15 2013-Footnote-19109261
+Ref: 0 14 Aug 15 2013-Footnote-20109318
+Ref: 0 14 Aug 15 2013-Footnote-21109375
+Ref: 0 14 Aug 15 2013-Footnote-22109432
+Node: 0 13 Jun 28 2013109489
+Ref: manual/changes jun-28-2013109601
+Ref: c9109601
+Ref: 0 13 Jun 28 2013-Footnote-1112194
+Ref: 0 13 Jun 28 2013-Footnote-2112250
+Ref: 0 13 Jun 28 2013-Footnote-3112306
+Ref: 0 13 Jun 28 2013-Footnote-4112362
+Ref: 0 13 Jun 28 2013-Footnote-5112418
+Ref: 0 13 Jun 28 2013-Footnote-6112474
+Ref: 0 13 Jun 28 2013-Footnote-7112530
+Node: 0 12 May 18 2013112586
+Ref: manual/changes may-18-2013112698
+Ref: ca112698
+Ref: 0 12 May 18 2013-Footnote-1113509
+Ref: 0 12 May 18 2013-Footnote-2113565
+Ref: 0 12 May 18 2013-Footnote-3113621
+Ref: 0 12 May 18 2013-Footnote-4113677
+Node: 0 11 May 01 2013113733
+Ref: manual/changes may-01-2013113845
+Ref: cb113845
+Ref: 0 11 May 01 2013-Footnote-1114793
+Ref: 0 11 May 01 2013-Footnote-2114849
+Ref: 0 11 May 01 2013-Footnote-3114905
+Ref: 0 11 May 01 2013-Footnote-4114961
+Ref: 0 11 May 01 2013-Footnote-5115007
+Node: 0 10 Apr 21 2013115063
+Ref: manual/changes apr-21-2013115174
+Ref: cc115174
+Ref: manual/changes projectile115174
+Ref: cd115174
+Ref: 0 10 Apr 21 2013-Footnote-1116797
+Ref: 0 10 Apr 21 2013-Footnote-2116853
+Ref: 0 10 Apr 21 2013-Footnote-3116909
+Ref: 0 10 Apr 21 2013-Footnote-4116965
+Ref: 0 10 Apr 21 2013-Footnote-5117021
+Ref: 0 10 Apr 21 2013-Footnote-6117077
+Ref: 0 10 Apr 21 2013-Footnote-7117135
+Ref: 0 10 Apr 21 2013-Footnote-8117191
+Ref: 0 10 Apr 21 2013-Footnote-9117246
+Node: 0 9 Apr 13 2013117302
+Ref: manual/changes apr-13-2013117411
+Ref: ce117411
+Ref: manual/changes google-this117411
+Ref: cf117411
+Ref: 0 9 Apr 13 2013-Footnote-1117789
+Ref: 0 9 Apr 13 2013-Footnote-2117845
+Node: 0 8 Apr 9 2013117901
+Ref: manual/changes apr-9-2013118011
+Ref: d0118011
+Ref: 0 8 Apr 9 2013-Footnote-1119111
+Ref: 0 8 Apr 9 2013-Footnote-2119166
+Ref: 0 8 Apr 9 2013-Footnote-3119222
+Ref: 0 8 Apr 9 2013-Footnote-4119277
+Ref: 0 8 Apr 9 2013-Footnote-5119332
+Ref: 0 8 Apr 9 2013-Footnote-6119387
+Ref: 0 8 Apr 9 2013-Footnote-7119442
+Ref: 0 8 Apr 9 2013-Footnote-8119497
+Node: 0 7 1 Feb 23 2013119553
+Ref: manual/changes feb-23-2013119663
+Ref: d1119663
+Ref: 0 7 1 Feb 23 2013-Footnote-1120280
+Ref: 0 7 1 Feb 23 2013-Footnote-2120335
+Node: 0 7 Feb 14 2013120390
+Ref: manual/changes feb-14-2013120503
+Ref: d2120503
+Ref: 0 7 Feb 14 2013-Footnote-1121242
+Ref: 0 7 Feb 14 2013-Footnote-2121297
+Ref: 0 7 Feb 14 2013-Footnote-3121352
+Ref: 0 7 Feb 14 2013-Footnote-4121407
+Ref: 0 7 Feb 14 2013-Footnote-5121462
+Node: 0 6 1 Jan 30 2013121517
+Ref: manual/changes jan-30-2013121628
+Ref: d3121628
+Node: 0 6 Jan 29 2013121712
+Ref: manual/changes jan-29-2013121823
+Ref: d4121823
+Ref: 0 6 Jan 29 2013-Footnote-1123774
+Ref: 0 6 Jan 29 2013-Footnote-2123829
+Ref: 0 6 Jan 29 2013-Footnote-3123884
+Ref: 0 6 Jan 29 2013-Footnote-4123939
+Ref: 0 6 Jan 29 2013-Footnote-5123994
+Ref: 0 6 Jan 29 2013-Footnote-6124049
+Ref: 0 6 Jan 29 2013-Footnote-7124104
+Ref: 0 6 Jan 29 2013-Footnote-8124159
+Ref: 0 6 Jan 29 2013-Footnote-9124214
+Ref: 0 6 Jan 29 2013-Footnote-10124269
+Ref: 0 6 Jan 29 2013-Footnote-11124325
+Ref: 0 6 Jan 29 2013-Footnote-12124381
+Ref: 0 6 Jan 29 2013-Footnote-13124437
+Ref: 0 6 Jan 29 2013-Footnote-14124493
+Ref: 0 6 Jan 29 2013-Footnote-15124549
+Ref: 0 6 Jan 29 2013-Footnote-16124605
+Ref: 0 6 Jan 29 2013-Footnote-17124661
+Ref: 0 6 Jan 29 2013-Footnote-18124717
+Ref: 0 6 Jan 29 2013-Footnote-19124773
+Node: 0 5 Dec 28 2012124829
+Ref: manual/changes dec-28-2012124938
+Ref: d5124938
+Ref: 0 5 Dec 28 2012-Footnote-1125718
+Ref: 0 5 Dec 28 2012-Footnote-2125773
+Ref: 0 5 Dec 28 2012-Footnote-3125828
+Ref: 0 5 Dec 28 2012-Footnote-4125883
+Ref: 0 5 Dec 28 2012-Footnote-5125938
+Ref: 0 5 Dec 28 2012-Footnote-6125993
+Ref: 0 5 Dec 28 2012-Footnote-7126048
+Ref: 0 5 Dec 28 2012-Footnote-8126103
+Ref: 0 5 Dec 28 2012-Footnote-9126158
+Node: 0 4 Nov 21 2012126213
+Ref: manual/changes nov-21-2012126322
+Ref: d6126322
+Ref: manual/changes flymake-cursor126322
+Ref: d7126322
+Ref: 0 4 Nov 21 2012-Footnote-1126761
+Ref: 0 4 Nov 21 2012-Footnote-2126815
+Ref: 0 4 Nov 21 2012-Footnote-3126869
+Ref: 0 4 Nov 21 2012-Footnote-4126923
+Ref: 0 4 Nov 21 2012-Footnote-5126977
+Ref: 0 4 Nov 21 2012-Footnote-6127032
+Ref: 0 4 Nov 21 2012-Footnote-7127087
+Node: 0 3 Nov 21 2012127142
+Ref: manual/changes id1127251
+Ref: d8127251
+Ref: 0 3 Nov 21 2012-Footnote-1127422
+Node: 0 2 Oct 25 2012127476
+Ref: manual/changes oct-25-2012127585
+Ref: d9127585
+Ref: 0 2 Oct 25 2012-Footnote-1127786
+Node: 0 1 Oct 11 2012127840
+Ref: manual/changes oct-11-2012127925
+Ref: da127925
+Node: GNU Free Documentation License128164
+Ref: manual/fdl doc128280
+Ref: 1128280
+Ref: manual/fdl gnu-free-documentation-license128280
+Ref: db128280
+Node: Supported languages153166
+Ref: manual/languages doc153283
+Ref: dc153283
+Ref: manual/languages supported-languages153283
+Ref: dd153283
+Node: AsciiDoc154289
+Ref: manual/languages asciidoc154368
+Ref: de154368
+Ref: manual/languages flyc asciidoc154456
+Ref: df154456
+Node: Bash154510
+Ref: manual/languages bash154603
+Ref: e0154603
+Ref: manual/languages flyc bash154682
+Ref: e1154682
+Node: C/C++154732
+Ref: manual/languages c-c154825
+Ref: e2154825
+Ref: manual/languages flyc c/c++-clang154846
+Ref: e3154846
+Ref: manual/languages flyc c/c++-cppcheck154967
+Ref: e4154967
+Node: CFEngine155101
+Ref: manual/languages cfengine155194
+Ref: e5155194
+Ref: manual/languages flyc cfengine155268
+Ref: e6155268
+Node: Chef155322
+Ref: manual/languages chef155422
+Ref: e7155422
+Ref: manual/languages flyc chef-foodcritic155496
+Ref: e8155496
+Node: Coffeescript155633
+Ref: manual/languages coffeescript155728
+Ref: e9155728
+Ref: manual/languages flyc coffee155814
+Ref: ea155814
+Ref: manual/languages flyc coffee-coffeelint155866
+Ref: eb155866
+Node: CSS155997
+Ref: manual/languages css156089
+Ref: ec156089
+Ref: manual/languages flyc css-csslint156106
+Ref: ed156106
+Node: D156244
+Ref: manual/languages d156330
+Ref: ee156330
+Ref: manual/languages flyc d-dmd156387
+Ref: ef156387
+Node: Elixir156438
+Ref: manual/languages elixir156531
+Ref: f0156531
+Ref: manual/languages flyc elixir156603
+Ref: f1156603
+Node: Emacs Lisp156655
+Ref: manual/languages emacs-lisp156753
+Ref: f2156753
+Ref: manual/languages flyc emacs-lisp156958
+Ref: f3156958
+Ref: manual/languages flyc emacs-lisp-checkdoc157014
+Ref: f4157014
+Node: Erlang157262
+Ref: manual/languages erlang157359
+Ref: f5157359
+Ref: manual/languages flyc erlang157433
+Ref: f6157433
+Node: ERuby157485
+Ref: manual/languages eruby157574
+Ref: f7157574
+Ref: manual/languages flyc eruby-erubis157597
+Ref: f8157597
+Node: Go157748
+Ref: manual/languages go157835
+Ref: f9157835
+Ref: manual/languages flyc go-gofmt157897
+Ref: fa157897
+Ref: manual/languages flyc go-build157951
+Ref: fb157951
+Ref: manual/languages flyc go-test158005
+Ref: fc158005
+Node: Haml158058
+Ref: manual/languages haml158150
+Ref: fd158150
+Ref: manual/languages flyc haml158215
+Ref: fe158215
+Node: Handlebars158265
+Ref: manual/languages handlebars158362
+Ref: ff158362
+Ref: manual/languages flyc handlebars158446
+Ref: 100158446
+Node: Haskell158502
+Ref: manual/languages haskell158599
+Ref: 101158599
+Ref: manual/languages flyc haskell-ghc158676
+Ref: 102158676
+Ref: manual/languages flyc haskell-hlint158802
+Ref: 103158802
+Node: HTML158938
+Ref: manual/languages html159035
+Ref: 104159035
+Ref: manual/languages flyc html-tidy159056
+Ref: 105159056
+Node: Javascript159279
+Ref: manual/languages javascript159373
+Ref: 106159373
+Ref: manual/languages flyc javascript-jshint159406
+Ref: 107159406
+Ref: manual/languages flyc javascript-eslint159533
+Ref: 108159533
+Ref: manual/languages flyc javascript-gjslint159670
+Ref: 109159670
+Node: JSON159850
+Ref: manual/languages json159944
+Ref: 10a159944
+Ref: manual/languages flyc json-jsonlint159965
+Ref: 10b159965
+Node: LESS160099
+Ref: manual/languages less160186
+Ref: 10c160186
+Ref: manual/languages flyc less160207
+Ref: 10d160207
+Node: Lua160322
+Ref: manual/languages lua160409
+Ref: 10e160409
+Ref: manual/languages flyc lua160428
+Ref: 10f160428
+Node: Make160538
+Ref: manual/languages make160625
+Ref: 110160625
+Ref: manual/languages flyc make-gmake160646
+Ref: 111160646
+Node: Perl160777
+Ref: manual/languages perl160864
+Ref: 112160864
+Ref: manual/languages flyc perl160931
+Ref: 113160931
+Node: PHP160981
+Ref: manual/languages php161070
+Ref: 114161070
+Ref: manual/languages flyc php161089
+Ref: 115161089
+Ref: manual/languages flyc php-phpmd161257
+Ref: 116161257
+Ref: manual/languages flyc php-phpcs161400
+Ref: 117161400
+Node: Puppet161569
+Ref: manual/languages puppet161660
+Ref: 118161660
+Ref: manual/languages flyc puppet-parser161735
+Ref: 119161735
+Ref: manual/languages flyc puppet-lint161794
+Ref: 11a161794
+Node: Python161920
+Ref: manual/languages python162014
+Ref: 11b162014
+Ref: manual/languages flyc python-flake8162039
+Ref: 11c162039
+Ref: manual/languages flyc python-pylint162170
+Ref: 11d162170
+Node: Racket162293
+Ref: manual/languages racket162397
+Ref: 11e162397
+Ref: manual/languages flyc racket162472
+Ref: 11f162472
+Node: ReStructuredText162524
+Ref: manual/languages restructuredtext162626
+Ref: 120162626
+Ref: manual/languages flyc rst162816
+Ref: 121162816
+Ref: manual/languages flyc rst-sphinx162865
+Ref: 122162865
+Node: Ruby162971
+Ref: manual/languages ruby163071
+Ref: 123163071
+Ref: manual/languages flyc ruby-rubocop163145
+Ref: 124163145
+Ref: manual/languages flyc ruby-rubylint163279
+Ref: 125163279
+Ref: manual/languages flyc ruby163422
+Ref: 126163422
+Ref: manual/languages flyc ruby-jruby163472
+Ref: 127163472
+Node: Rust163587
+Ref: manual/languages rust163675
+Ref: 128163675
+Ref: manual/languages flyc rust163748
+Ref: 129163748
+Node: Sass163798
+Ref: manual/languages sass163887
+Ref: 12a163887
+Ref: manual/languages flyc sass163956
+Ref: 12b163956
+Node: Scala164006
+Ref: manual/languages scala164095
+Ref: 12c164095
+Ref: manual/languages flyc scala164171
+Ref: 12d164171
+Node: Scss164222
+Ref: manual/languages scss164318
+Ref: 12e164318
+Ref: manual/languages flyc scss164339
+Ref: 12f164339
+Node: Shell POSIX164452
+Ref: manual/languages shell-posix164547
+Ref: 130164547
+Ref: manual/languages flyc sh-dash164720
+Ref: 131164720
+Ref: manual/languages flyc sh-bash164872
+Ref: 132164872
+Node: Slim165000
+Ref: manual/languages slim165100
+Ref: 133165100
+Ref: manual/languages flyc slim165169
+Ref: 134165169
+Node: TeX/LaTeX165219
+Ref: manual/languages tex-latex165315
+Ref: 135165315
+Ref: manual/languages flyc tex-chktex165464
+Ref: 136165464
+Ref: manual/languages flyc tex-lacheck165591
+Ref: 137165591
+Node: Texinfo165721
+Ref: manual/languages texinfo165820
+Ref: 138165820
+Ref: manual/languages flyc texinfo165847
+Ref: 139165847
+Node: Verilog165965
+Ref: manual/languages verilog166058
+Ref: 13a166058
+Ref: manual/languages flyc verilog-verilator166085
+Ref: 13b166085
+Node: XML166228
+Ref: manual/languages xml166318
+Ref: 13c166318
+Ref: manual/languages flyc xml-xmlstarlet166337
+Ref: 13d166337
+Ref: manual/languages flyc xml-xmllint166470
+Ref: 13e166470
+Node: YAML166611
+Ref: manual/languages yaml166697
+Ref: 13f166697
+Ref: manual/languages flyc yaml-jsyaml166718
+Ref: 140166718
+Ref: manual/languages flyc yaml-ruby166850
+Ref: 141166850
+Node: Zsh166972
+Ref: manual/languages zsh167046
+Ref: 142167046
+Ref: manual/languages flyc zsh167111
+Ref: 143167111
+Node: Glossary167160
+Ref: manual/glossary glossary167252
+Ref: 144167252
+Ref: manual/glossary doc167252
+Ref: 145167252
+Ref: manual/glossary term-syntax-checker167277
+Ref: 22167277
+Ref: manual/glossary term-registered-syntax-checker167386
+Ref: 23167386
+Ref: manual/glossary term-disabled-syntax-checker167542
+Ref: 146167542
+Ref: manual/glossary term-enabled-syntax-checker167722
+Ref: 24167722
+Ref: manual/glossary term-suitable-syntax-checker167847
+Ref: 12167847
+Node: Index168142
+Ref: manual/extending flc command186637
+Ref: manual/extending flc next-checkers186667
+Ref: manual/languages flc elixir186698
+Ref: manual/extending flc predicate186730
+Ref: manual/extending flc error-patterns186760
+Ref: 7d186791
+Ref: 7b186823
+Ref: 7a186853
+Ref: manual/extending flc modes186884
+Ref: 77186916
+Ref: 76186946
+Ref: 79186977
+Ref: 78187009
+Ref: manual/extending flc error-parser187039
 
 End Tag Table
 
