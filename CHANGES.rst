@@ -44,7 +44,6 @@ master (unreleased)
 0.16 (Jan 11, 2014)
 -------------------
 
-
 - **Breaking changes**:
 
   - Argument substitution is no longer performed on syntax checker executables.
@@ -107,7 +106,6 @@ master (unreleased)
 
 0.15 (Nov 15, 2013)
 -------------------
-
 
 - Flycheck has a new home at https://github.com/flycheck/flycheck,
   the online manual moved to http://flycheck.github.io.
