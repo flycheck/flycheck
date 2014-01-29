@@ -4,7 +4,8 @@
 
 .. default-domain:: flyc
 
-Flycheck supports the following languages.
+Flycheck supports the following |#flycheck-languages| languages with
+|#flycheck-checkers| syntax checkers.
 
 Each language has one or more syntax checkers, whose names follow a
 :samp:`{language}-{tool}` convention, where :samp:`{language}` is the

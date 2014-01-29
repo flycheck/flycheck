@@ -118,6 +118,7 @@ class FlycheckDomain(Domain):
     initial_data = {
         # fullname -> docname, objtype
         'objects': {},
+        'info': {'#languages': 0},
     }
 
     def clear_doc(self, docname):
@@ -140,6 +141,50 @@ class FlycheckDomain(Domain):
                    self.object_types[objtype].attrs['searchprio'])
 
 
+FLYCHECK_SUBSTITUTIONS = ('#flycheck-languages', '#flycheck-checkers')
+
+
+class flycheck_info(nodes.inline):
+    pass
+
+
+class FlycheckSubstitutions(Transform):
+
+    default_priority = 100
+
+    def apply(self):
+        for node in self.document.traverse(nodes.substitution_reference):
+            if node['refname'] in FLYCHECK_SUBSTITUTIONS:
+                new_node = flycheck_info()
+                new_node['flycheck-info'] = node['refname']
+                node.replace_self(new_node)
+
+
+def count_languages(app, doctree):
+    if app.env.docname == 'manual/languages':
+        top_level = doctree[doctree.first_child_matching_class(nodes.section)]
+        # The number of languages is the number of second-level sections in the
+        # languages document
+        languages = sum(1 for n in top_level if isinstance(n, nodes.section))
+        app.env.domaindata['flyc']['info']['#languages'] = languages
+
+
+def substitute_flycheck_info(app, doctree, docname):
+    data = app.env.domaindata['flyc']
+    for info in doctree.traverse(flycheck_info):
+        kind = info['flycheck-info']
+        if kind == '#flycheck-languages':
+            value = str(data['info']['#languages'])
+        elif kind == '#flycheck-checkers':
+            value = str(sum(1 for (_, t) in data['objects'].itervalues()
+                            if t == 'syntax-checker'))
+        else:
+            raise ValueError('Unknown kind ' + kind)
+        info.replace_self(nodes.Text(value, value))
+
 
 def setup(app):
     app.add_domain(FlycheckDomain)
+    app.add_transform(FlycheckSubstitutions)
+    app.connect('doctree-read', count_languages)
+    app.connect('doctree-resolved', substitute_flycheck_info)
