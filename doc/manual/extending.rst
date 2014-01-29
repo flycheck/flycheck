@@ -544,6 +544,8 @@ utility for the PHP programming language:
      :error-parser flycheck-parse-checkstyle
      :modes php-mode)
 
+   (add-to-list 'flycheck-checkers 'php-phpcs)
+
 First we specify the :flyc:checkprop:`:command` to execute.  The first element
 of the command list is the name of the executable, `phpcs` in our case.  This
 command is checked for existence with `executable-find` before using this syntax
@@ -559,7 +561,10 @@ provides an option to output errors in an XML format similar to the Java tool
 Checkstyle, so we use the built-in :dfn:`error parser`
 :function:`flycheck-parse-checkstyle` to parse the output.
 
-Eventually we enable the syntax checker in PHP editing modes.
+Then we enable the syntax checker in PHP editing modes.
+
+Ultimately, we make the new syntax checker available for automatic selection by
+adding it to :option:`flycheck-checkers`.
 
 If the syntax checker does not provide any sort of structured output format, we
 have to parse the error messages from the textual output.  To do so, we can use
