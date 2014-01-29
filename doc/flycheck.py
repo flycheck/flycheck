@@ -133,7 +133,7 @@ class FlycheckDomain(Domain):
             return None
         docname, _ = self.data['objects'][target]
         return make_refnode(builder, fromdoc, docname,
-                            'flc:'+target, content, target)
+                            'flyc:'+target, content, target)
 
     def get_objects(self):
         for name, (docname, objtype) in self.data['objects'].iteritems():
