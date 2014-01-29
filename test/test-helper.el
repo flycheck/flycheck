@@ -33,4 +33,9 @@
 
   (load (expand-file-name "flycheck" source-directory)))
 
+;; Local Variables:
+;; coding: utf-8
+;; indent-tabs-mode: nil
+;; End:
+
 ;;; test-helper.el ends here

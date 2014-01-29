@@ -4373,4 +4373,9 @@ Why not:
 
 (provide 'flycheck-test)
 
+;; Local Variables:
+;; coding: utf-8
+;; indent-tabs-mode: nil
+;; End:
+
 ;;; flycheck-test.el ends here

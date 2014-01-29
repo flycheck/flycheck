@@ -4895,6 +4895,7 @@ See URL `http://www.zsh.org/'."
 
 ;; Local Variables:
 ;; coding: utf-8
+;; indent-tabs-mode: nil
 ;; End:
 
 ;;; flycheck.el ends here
