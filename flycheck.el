@@ -4194,7 +4194,7 @@ See URL `http://www.haskell.org/ghc/'."
 (flycheck-define-checker haskell-hlint
   "A Haskell style checker using hlint.
 
-See URL `http://community.haskell.org/~ndm/hlint/'."
+See URL `https://github.com/ndmitchell/hlint'."
   :command ("hlint" source-inplace)
   :error-patterns
   ((warning line-start
