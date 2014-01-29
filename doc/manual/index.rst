@@ -26,5 +26,5 @@ This manual is for Flycheck, the on-the-fly syntax checker for GNU Emacs.
    credits
    changes
    fdl
-   checkers
+   languages
    glossary

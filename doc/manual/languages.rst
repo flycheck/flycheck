@@ -1,14 +1,20 @@
-===========================
- Available syntax checkers
-===========================
+=====================
+ Supported languages
+=====================
 
-The following syntax checkers are available in Flycheck.  Each syntax checker
-follows a :samp:`{language}-{tool}` convention, where :samp:`{language}` is the
+The following languages are supported in Flycheck.
+
+Each language has one or more syntax checkers, whose names follow a
+:samp:`{language}-{tool}` convention, where :samp:`{language}` is the
 programming language supported by this syntax checker, and :samp:`{tool}` the
 specific syntax checker tool.
 
-In Emacs, use :command:`flycheck-describe-checker` to see comprehensive
-documenation about a syntax checker.
+This document provides just a brief overview, use
+:command:`flycheck-describe-checker` to see comprehensive documenation about a
+syntax checker.
+
+.. contents:: Supported languages
+   :local:
 
 AsciiDoc
 ========
