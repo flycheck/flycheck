@@ -18,6 +18,7 @@ master (unreleased)
 - New syntax checkers:
 
   - RST (ReStructuredText) using Sphinx
+  - #321: GNU Make
 
 - New features:
 

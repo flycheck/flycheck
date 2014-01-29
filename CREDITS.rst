@@ -46,8 +46,8 @@ greatly appreciated.
   and wrote the cool flycheck-d-unittest_ extension.
 - `Yannick Roehlly`_ added support for PEP8 naming errors to the Flake8 syntax checker.
 - `Yasuyuki Oka`_ contributed a lot of syntax checkers for various languages,
-  including AsciiDoc, Chef recipes, ERuby, Handlebars, Javascript, PHP, Racket,
-  Ruby, Slim and YAML.
+  including AsciiDoc, Chef recipes, ERuby, GNU Make, Handlebars, Javascript,
+  PHP, Racket, Ruby, Slim and YAML.
 - `Victor Deryagin`_ added the Rust syntax checker.
 
 Of course we also need to thank `GNU Flymake`_, the first, respectable, though
