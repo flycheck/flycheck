@@ -74,6 +74,7 @@ Features
 - Easy declarative API to define new syntax checkers
 - Error parsers for structured markup formats (e.g. Checkdoc XML)
 
+.. _3rd-party-extensions:
 
 3rd party extensions
 ====================

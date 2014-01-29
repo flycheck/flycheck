@@ -30,6 +30,10 @@ Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24.
 :doc:`flycheck-versus-flymake` provides detailed list of Flycheck's features,
 and a comparison with the built-in Flymake library.
 
+Additionally there are various :ref:`3rd-party-extensions`, which enhance the
+support for specific languages, add new languages or provide new features for
+Flycheck.
+
 .. toctree::
    :hidden:
 
