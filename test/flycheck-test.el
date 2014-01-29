@@ -3734,6 +3734,14 @@ Why not:
    '(5 nil error "unfinished string near '\"oh no'"
        :checker lua :filename nil)))
 
+(ert-deftest flycheck-define-checker/make-gmake ()
+  :tags '(builtin-checker external-tool language-make)
+  (skip-unless (flycheck-check-executable 'make-gmake))
+  (flycheck-test-should-syntax-check
+   "checkers/make/GNUmakefile" 'makefile-gmake-mode
+   '(2 nil error "*** missing separator.  Stop."
+	   :checker make-gmake)))
+
 (ert-deftest flycheck-define-checker/perl ()
   :tags '(builtin-checker external-tool language-perl)
   "Test an unused variable with the Perl checker."

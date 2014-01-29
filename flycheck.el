@@ -160,6 +160,7 @@ buffer-local wherever it is set."
     json-jsonlint
     less
     lua
+    make-gmake
     perl
     php
     php-phpmd
@@ -4288,6 +4289,15 @@ See URL `http://www.lua.org/'."
           (minimal-match (zero-or-more not-newline))
           ":" line ": " (message) line-end))
   :modes lua-mode)
+
+(flycheck-define-checker make-gmake
+  "A GNU Makefile syntax checker using the GNU Make command.
+
+See URL `http://www.gnu.org/software/make/'."
+  :command ("make" "--dry-run" "-f" source)
+  :error-patterns
+  ((error line-start (file-name) ":" line ": " (message) line-end))
+  :modes makefile-gmake-mode)
 
 (flycheck-define-checker perl
   "A Perl syntax checker using the Perl interpreter.

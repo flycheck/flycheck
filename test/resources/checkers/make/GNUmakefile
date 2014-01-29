@@ -1,0 +1,2 @@
+.PHONY: compile
+compile

@@ -39,6 +39,7 @@ documenation about a syntax checker.
 .. syntax-checker:: json-jsonlint
 .. syntax-checker:: less
 .. syntax-checker:: lua
+.. syntax-checker:: make-gmake
 .. syntax-checker:: perl
 .. syntax-checker:: php
 .. syntax-checker:: php-phpmd
