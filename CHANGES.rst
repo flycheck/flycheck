@@ -8,7 +8,7 @@ master (unreleased)
 
 - **Breaking changes**:
 
-  - The default `flycheck-completion-system` was changes to nil, qi.e. the
+  - The default `flycheck-completion-system` was changes to nil, i.e. the
     built-in `completing-read`, for compliance with Emacs' defaults.  To restore
     the previous behaviour, add `(eval-after-load 'flycheck '(setq
     flycheck-completion-system 'ido))` to your `init.el`.
