@@ -3811,7 +3811,7 @@ See URL `http://elixir-lang.org/'."
 
 (defconst flycheck-emacs-lisp-check-form
   '(progn
-     (defvar 'jka-compr-inhibit)
+     (defvar jka-compr-inhibit)
 
      (defvar flycheck-byte-compiled-files nil)
      (defun flycheck-byte-compile-dest-file (source)
@@ -3945,7 +3945,7 @@ This variable has no effect, if
   '(progn
      (require 'checkdoc)
 
-     (defvar 'jka-compr-inhibit)
+     (defvar jka-compr-inhibit)
 
      (let ((filename (car command-line-args-left))
            ;; Don't attempt to decompress, because Flycheck never compresses the
