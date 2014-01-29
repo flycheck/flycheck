@@ -367,6 +367,39 @@ You define new syntax checkers with :macro:`flycheck-define-checker`:
    Use this macro together with the `option`, `option-list` and `option-flag`
    forms in the :flyc:checkprop:`:command` of a syntax checker.
 
+.. _registering-new-syntax-checkers:
+
+Registering new syntax checkers
+===============================
+
+After a syntax checker was defined, it should be registered for automatic
+selection, by adding it to :option:`flycheck-checkers`, e.g.
+
+.. code-block:: cl
+
+   (add-to-list 'flycheck-checkers 'my-new-syntax-checker)
+
+.. note::
+
+   :option:`flycheck-checker` and :command:`flycheck-select-checker` are
+   reserved for **user customization**.  Do **not** use them in Flycheck
+   extensions.
+
+   Specifically, please do **not** provide a hook function which selects the syntax
+   checker explicitly by assigning to :option:`flycheck-checker` or by calling
+   :function:`flycheck-select-checker`, e.g.
+
+   .. code-block:: cl
+
+      (defun enable-my-new-syntax-checker ()
+        (setq flycheck-checker 'my-new-syntax-checker)
+        (flycheck-buffer))
+
+      (add-hook 'my-major-mode-hook #'enable-my-new-syntax-checker)
+
+   This circumvents the entire automatic selection of Flycheck, and prevents the
+   user from effectively customizing Flycheck.
+
 .. _error-levels:
 
 Error levels
