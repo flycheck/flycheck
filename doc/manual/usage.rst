@@ -355,44 +355,44 @@ on the variable name for detailed help):
 
 .. option:: flycheck-clang-definitions
 
-   Additional preprocessor definitions for `c/c++-clang`.
+   Additional preprocessor definitions for :flyc:checker:`c/c++-clang`.
 
 .. option:: flycheck-clang-include-path
 
-   Include search path for `c/c++-clang`.
+   Include search path for :flyc:checker:`c/c++-clang`.
 
 .. option:: flycheck-clang-includes
 
-   Additional include files for `c/c++-clang`.
+   Additional include files for :flyc:checker:`c/c++-clang`.
 
 .. option:: flycheck-clang-language-standard
 
-   The language standard for `c/c++-clang`.
+   The language standard for :flyc:checker:`c/c++-clang`.
 
 .. option:: flycheck-clang-ms-extensions
 
-   Whether to enable Microsoft extensions in `c/c++-clang`.
+   Whether to enable Microsoft extensions in :flyc:checker:`c/c++-clang`.
 
 .. option:: flycheck-clang-no-rtti
 
-   Whether to disable RTTI in `c/c++-clang`.
+   Whether to disable RTTI in :flyc:checker:`c/c++-clang`.
 
 .. option:: flycheck-clang-standard-library
 
-   The standard library to use for `c/c++-clang`.
+   The standard library to use for :flyc:checker:`c/c++-clang`.
 
 .. option:: flycheck-clang-warnings
 
-   Additional warnings to enable in `c/c++-clang`.
+   Additional warnings to enable in :flyc:checker:`c/c++-clang`.
 
 .. option:: flycheck-cppcheck-checks
 
-   Additional checks to use in `c/c++-cppcheck`.
+   Additional checks to use in :flyc:checker:`c/c++-cppcheck`.
 
 .. option:: flycheck-emacs-lisp-initialize-packages
 
-   Whether to initialize packages (see `package-initialize`) before
-   invoking the byte compiler in the `emacs-lisp` syntax checker.
+   Whether to initialize packages (see `package-initialize`) before invoking the
+   byte compiler in the :flyc:checker:`emacs-lisp` syntax checker.
 
    When `nil`, never initialize packages.  When `auto`,
    initialize packages only when checking files from the user's Emacs
@@ -401,7 +401,7 @@ on the variable name for detailed help):
 
 .. option:: flycheck-emacs-lisp-load-path
 
-   The `load-path` to use while checking with `emacs-lisp`.
+   The `load-path` to use while checking with :flyc:checker:`emacs-lisp`.
 
    The directory of the file being checked is always added to
    `load-path`, regardless of the value of this variable.
@@ -412,57 +412,59 @@ on the variable name for detailed help):
 
 .. option:: flycheck-emacs-lisp-package-user-dir
 
-   The package directory for the `emacs-lisp` syntax checker.
+   The package directory for the :flyc:checker:`emacs-lisp` syntax checker.
 
 .. option:: flycheck-eslint-rulesdir
 
-   A directory with custom rules for the `javascript-eslint` syntax checker.
+   A directory with custom rules for the :flyc:checker:`javascript-eslint`
+   syntax checker.
 
 .. option:: flycheck-flake8-maximum-complexity
 
-   The maximum McCabe complexity the `python-flake8` syntax checker allows
-   without reporting a warning.
+   The maximum McCabe complexity the :flyc:checker:`python-flake8` syntax
+   checker allows without reporting a warning.
 
 .. option:: flycheck-flake8-maximum-line-length
 
-   The maximum length of a line in characters the `python-flake8` syntax checker
-   allows without reporting an error.
+   The maximum length of a line in characters the :flyc:checker:`python-flake8`
+   syntax checker allows without reporting an error.
 
 .. option:: flycheck-ghc-no-user-package-database
 
-   Whether to disable the user package database for `haskell-ghc`.
+   Whether to disable the user package database for :flyc:checker:`haskell-ghc`.
 
 .. option:: flycheck-ghc-package-databases
 
-   A list of package database for `haskell-ghc`.
+   A list of package database for :flyc:checker:`haskell-ghc`.
 
 .. option:: flycheck-ghc-search-path
 
-   A list of module directories for the search path of `haskell-ghc`.
+   A list of module directories for the search path of
+   :flyc:checker:`haskell-ghc`.
 
 .. option:: flycheck-phpcs-standard
 
-   The coding standard `php-phpcs` shall use.
+   The coding standard :flyc:checker:`php-phpcs` shall use.
 
 .. option:: flycheck-phpmd-rulesets
 
-   The rule sets `php-phpmd` shall use.
+   The rule sets :flyc:checker:`php-phpmd` shall use.
 
 .. option:: flycheck-rubocop-lint-only
 
-   Whether to disable style checks for `ruby-rubocop`.
+   Whether to disable style checks for :flyc:checker:`ruby-rubocop`.
 
 .. option:: flycheck-sass-compass
 
-   Whether to enable the Compass CSS framework for `sass`.
+   Whether to enable the Compass CSS framework for :flyc:checker:`sass`.
 
 .. option:: flycheck-scss-compass
 
-   Whether to enable the Compass CSS framework for `scss`.
+   Whether to enable the Compass CSS framework for :flyc:checker:`scss`.
 
 .. option:: flycheck-sphinx-warn-on-missing-references
 
-   Whether to warn about missing references in `rst-sphinx`
+   Whether to warn about missing references in :flyc:checker:`rst-sphinx`
 
 .. _syntax-checker-configuration-files:
 
@@ -474,39 +476,43 @@ Some syntax checkers also read configuration files, denoted by associated
 
 .. option:: flycheck-chktexrc
 
-   The configuration file for the `tex-chktex` syntax checker.
+   The configuration file for the :flyc:checker:`tex-chktex` syntax checker.
 
 .. option:: flycheck-coffeelintrc
 
-   The configuration file for the `coffee-coffeelint` syntax checker.
+   The configuration file for the :flyc:checker:`coffee-coffeelint` syntax
+   checker.
 
 .. option:: flycheck-eslintrc
 
-   The configuration file for the `javascript-eslint` syntax checker.
+   The configuration file for the :flyc:checker:`javascript-eslint` syntax
+   checker.
 
 .. option:: flycheck-flake8rc
 
-   The configuration file for the `python-flake8` syntax checker.
+   The configuration file for the :flyc:checker:`python-flake8` syntax checker.
 
 .. option:: flycheck-gjslintrc
 
-   The configuration file for the `javascript-gjslint` syntax checker.
+   The configuration file for the :flyc:checker:`javascript-gjslint` syntax
+   checker.
 
 .. option:: flycheck-jshintrc
 
-   The configuration file for the `javascript-jshint` syntax checker.
+   The configuration file for the :flyc:checker:`javascript-jshint` syntax
+   checker.
 
 .. option:: flycheck-pylintrc
 
-   The configuration file for the `python-pylint` syntax checker.
+   The configuration file for the :flyc:checker:`python-pylint` syntax checker.
 
 .. option:: flycheck-rubocoprc
 
-   The configuration file for the `ruby-rubocop` syntax checker.
+   The configuration file for the :flyc:checker:`ruby-rubocop` syntax checker.
 
 .. option:: flycheck-tidyrc
 
-   The configuration file for the `html-tidy` syntax checker.
+   The configuration file for the :flyc:checker:`html-tidy` syntax checker.
 
 The value of these variables is either a string or `nil`.  In the former case,
 locate the configuration file using the functions in
