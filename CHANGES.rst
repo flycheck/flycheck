@@ -30,6 +30,7 @@ master (unreleased)
   - #305: Do not defer syntax checker after idle change timeout
   - Do not use the generic `rst` syntax checker in Sphinx projects anymore, to
     avoid false positives by Sphinx-only markup
+  - #314: Check for more than just syntax errors in `rust`
 
 - Bug fixes
 
