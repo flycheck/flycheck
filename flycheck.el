@@ -4829,7 +4829,7 @@ See URL `http://slim-lang.com'."
 (flycheck-define-checker tex-chktex
   "A TeX and LaTeX syntax and style checker using chktex.
 
-See URL `http://baruch.ev-en.org/proj/chktex/'."
+See URL `http://www.nongnu.org/chktex/'."
   :command ("chktex" (config-file "-l" flycheck-chktexrc) "-v0" "-q" "-I"
             source-inplace)
   :error-patterns
