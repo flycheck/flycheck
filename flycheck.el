@@ -4036,7 +4036,9 @@ The checker runs `checkdoc-current-buffer'."
           flycheck-this-emacs-executable))
 
 (flycheck-define-checker erlang
-  "An Erlang syntax checker using the Erlang interpreter."
+  "An Erlang syntax checker using the Erlang interpreter.
+
+See URL `http://www.erlang.org/'."
   :command ("erlc" "-o" temporary-directory "-Wall" source)
   :error-patterns
   ((warning line-start (file-name) ":" line ": Warning:" (message) line-end)
