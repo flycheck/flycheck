@@ -2,7 +2,7 @@
  Flycheck — Modern Emacs syntax checking
 =========================================
 
-.. figure:: screenshot.png
+.. figure:: /images/screenshot.png
    :scale: 75%
    :align: center
 
@@ -27,13 +27,20 @@ Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24.
   <defining-new-syntax-checkers>`
 - A “doesn't get in your way” guarantee
 
+:doc:`flycheck-versus-flymake` provides detailed list of Flycheck's features,
+and a comparison with the built-in Flymake library.
+
+.. toctree::
+   :hidden:
+
+   flycheck-versus-flymake
+
 Documentation
 =============
 
 .. toctree::
 
    manual/index
-
 
 Licensing
 =========

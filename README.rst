@@ -4,7 +4,7 @@
 
 .. default-role:: code
 
-.. figure:: https://github.com/flycheck/flycheck/raw/master/doc/screenshot.png
+.. figure:: https://github.com/flycheck/flycheck/raw/master/doc/images/screenshot.png
    :align: center
 
    The screenshot shows Flycheck on Emacs 24.3.50 with the awesome Solarized_
