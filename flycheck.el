@@ -4069,7 +4069,7 @@ See URL `http://golang.org/cmd/gofmt/'."
 (flycheck-define-checker go-build
   "A Go syntax and type checker using the `go build' command.
 
-See URL `https://golang.org/cmd/go'."
+See URL `http://golang.org/cmd/go'."
   :command ("go" "build" "-o" temporary-file-name)
   :error-patterns
   ((error line-start (file-name) ":" line ":"
@@ -4084,7 +4084,7 @@ See URL `https://golang.org/cmd/go'."
 (flycheck-define-checker go-test
   "A Go syntax and type checker using the `go test' command.
 
-See URL `https://golang.org/cmd/go'."
+See URL `http://golang.org/cmd/go'."
   ;; This command builds the test executable and leaves it in the current
   ;; directory.  Unfortunately 'go test -c' does not have the '-o' option.
   :command ("go" "test" "-c")
