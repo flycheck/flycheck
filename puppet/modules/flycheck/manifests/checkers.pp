@@ -52,11 +52,12 @@ class flycheck::checkers {
     require => Apt::Ppa['ppa:plt/racket'],
   }
 
-  apt::ppa { 'ppa:kevincantu/rust': }
+  apt::ppa { 'ppa:hansjorg/rust': }
 
-  package { 'rust':
+  package { 'rust-0.9':
     ensure  => latest,
-    require => Apt::Ppa['ppa:kevincantu/rust']
+    require => Apt::Ppa['ppa:hansjorg/rust'],
+    alias   => 'rust',
   }
 
   class { 'nodejs':
