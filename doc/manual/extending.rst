@@ -25,10 +25,10 @@ You define new syntax checkers with :macro:`flycheck-define-checker`:
    checker.
 
    The following `properties` constitute a syntax checker.
-   :checkprop:`:command` is mandatory.  A syntax checker must also have either
-   :checkprop:`:modes` or :checkprop:`:predicate`, and either
-   :checkprop:`:error-patterns` or :checkprop:`:error-parser`.
-   :checkprop:`:next-checkers` is entirely optional.
+   :flyc:checkprop:`:command` is mandatory.  A syntax checker must also have either
+   :flyc:checkprop:`:modes` or :flyc:checkprop:`:predicate`, and either
+   :flyc:checkprop:`:error-patterns` or :flyc:checkprop:`:error-parser`.
+   :flyc:checkprop:`:next-checkers` is entirely optional.
 
    If a mandatory property is missing, or if any property has an invalid value,
    a *compile-time* error is signalled.
@@ -39,7 +39,7 @@ You define new syntax checkers with :macro:`flycheck-define-checker`:
    in :option:`flycheck-checkers`.  See :ref:`syntax-checker-selection` for
    more information.
 
-   .. checker-property:: :command ({executable} [{arg} ...])
+   .. flyc:checker-property:: :command ({executable} [{arg} ...])
 
       An unquoted list describing the syntax checker command to execute.
 
@@ -119,7 +119,7 @@ You define new syntax checkers with :macro:`flycheck-define-checker`:
         Use this symbol if you need to move files created by a syntax checker
         out of the way.
 
-        See the declaration of the :checker:`elixir` syntax checker for an
+        See the declaration of the :flyc:checker:`elixir` syntax checker for an
         application of this symbol.
 
      `temporary-file-name`
@@ -159,11 +159,11 @@ You define new syntax checkers with :macro:`flycheck-define-checker`:
 
         :samp:`{option}` is a string containing the option for with to specify
         the value.  :samp:`{filter}` is an optional function to be applied to
-        the value of :samp:`{variable}` before use.  See :ref:`option-filters` for
-        a list of built-in option filters.
+        the value of :samp:`{variable}` before use.  See :ref:`option-filters`
+        for a list of built-in option filters.
 
-        :samp:`{variable}` is a symbol referring to a variable whose value to use.
-        :See ref:`syntax-checker-configuration` for more information about
+        :samp:`{variable}` is a symbol referring to a variable whose value to
+        :use.  See ref:`syntax-checker-configuration` for more information about
         :syntax checker configuration.  You need to define this variable
         :*explicitly* with :macro:`flycheck-def-option-var`.
 
@@ -221,10 +221,10 @@ You define new syntax checkers with :macro:`flycheck-define-checker`:
         checker *literally*.  Special symbols and forms in the result of `form`
         are *not* replaced.
 
-   .. checker-property:: :error-patterns (({level} {sexp}) ...)
+   .. flyc:checker-property:: :error-patterns (({level} {sexp}) ...)
 
       An unquoted list of one or more error patterns to parse the output of the
-      syntax checker :checkprop:`:command`.
+      syntax checker :flyc:checkprop:`:command`.
 
       :samp:`{level}` is a Flycheck error level, and denotes the severity of
       errors matched by the pattern.  This mainly affects the visual
@@ -267,7 +267,7 @@ You define new syntax checkers with :macro:`flycheck-define-checker`:
       of the syntax checker.  Output already matched by a pattern will not be
       matched by subsequent patterns.  In other words, the first pattern wins.
 
-   .. checker-property:: :error-parser {function}
+   .. flyc:checker-property:: :error-parser {function}
                          :error-parser (lambda (output checker buffer) {body} ...)
 
       A function to parse the output of the syntax checker, either as *unquoted*
@@ -284,13 +284,13 @@ You define new syntax checkers with :macro:`flycheck-define-checker`:
       built-in error parsers.
 
       If this property is given, it takes precedence over
-      :checkprop:`:error-patterns`.  To use an error parser together with
+      :flyc:checkprop:`:error-patterns`.  To use an error parser together with
       patterns, you must manually call
       :function:`flycheck-parse-with-patterns` in your error parser to apply
       the error patterns.  You can then manipulate the
       :cl-struct:`flycheck-error` objects returned by this function.
 
-   .. checker-property:: :modes {mode}
+   .. flyc:checker-property:: :modes {mode}
                          :modes ({mode} ...)
 
       An unquoted major mode symbol or an unquoted list thereof.
@@ -298,10 +298,10 @@ You define new syntax checkers with :macro:`flycheck-define-checker`:
       If given, this syntax checker is only used, if the major mode of the
       buffer to check is equal (as in `eq`) to any given :samp:`{mode}`.
 
-      If :checkprop:`:predicate` is given, it is additionally called in buffers
-      of any given :samp:`{mode}`.
+      If :flyc:checkprop:`:predicate` is given, it is additionally called in
+      buffers of any given :samp:`{mode}`.
 
-   .. checker-property:: :predicate {function}
+   .. flyc:checker-property:: :predicate {function}
                          :predicate (lambda () {body} ...)
 
       A function to determines whether to use this syntax checker in the current
@@ -309,11 +309,12 @@ You define new syntax checkers with :macro:`flycheck-define-checker`:
       syntax checker is only used if this function returns non-nil when called
       in the buffer to check.
 
-      If :checkprop:`:modes` is given, the function is only called in matching
-      major modes.  Thus, if :checkprop:`:modes` and :checkprop:`:predicate` are
-      given, **both** must match for this syntax checker to be used.
+      If :flyc:checkprop:`:modes` is given, the function is only called in
+      matching major modes.  Thus, if :flyc:checkprop:`:modes` and
+      :flyc:checkprop:`:predicate` are given, **both** must match for this
+      syntax checker to be used.
 
-   .. checker-property:: :next-checkers ({item} ...)
+   .. flyc:checker-property:: :next-checkers ({item} ...)
 
       An unquoted list defining the syntax checker to run after this checker.
 
@@ -349,7 +350,7 @@ You define new syntax checkers with :macro:`flycheck-define-checker`:
    initial value is nil.
 
    Use this macro together with the `config-file` form in the
-   :checkprop:`:command` of a syntax checker.
+   :flyc:checkprop:`:command` of a syntax checker.
 
 .. macro:: flycheck-def-option-var symbol initial-value checker &optional custom-args
 
@@ -364,7 +365,7 @@ You define new syntax checkers with :macro:`flycheck-define-checker`:
    customization type, etc.
 
    Use this macro together with the `option`, `option-list` and `option-flag`
-   forms in the :checkprop:`:command` of a syntax checker.
+   forms in the :flyc:checkprop:`:command` of a syntax checker.
 
 .. _error-levels:
 
@@ -417,14 +418,16 @@ Error parsers
 =============
 
 Syntax checkers may use more sophisticated error parsing by using the
-:checkprop:`:error-parser` property.  See :ref:`defining-new-syntax-checkers`
-for information about syntax checker definition.
+:flyc:checkprop:`:error-parser` property.  See
+:ref:`defining-new-syntax-checkers` for information about syntax checker
+definition.
 
 Flycheck provides the following error parsers for use by syntax checkers:
 
 .. function:: flycheck-parse-with-patterns output checker buffer
 
-   Parse `output` with the :checkprop:`:error-patterns` of the syntax `checker`.
+   Parse `output` with the :flyc:checkprop:`:error-patterns` of the syntax
+   `checker`.
 
 .. function:: flycheck-parse-checkstyle output checker buffer
 
@@ -453,8 +456,8 @@ Option filters
 ==============
 
 Flycheck provides the following built-in option filters for use with the
-`option`, `option-list` and `option-flag` forms in the :checkprop:`:command` of
-a syntax checker definition:
+`option`, `option-list` and `option-flag` forms in the
+:flyc:checkprop:`:command` of a syntax checker definition:
 
 .. function:: flycheck-option-int value
 
@@ -479,7 +482,7 @@ There are some means to extend defined syntax checkers:
 
    `checker` is a syntax checker symbol.  `next-checker` is either a syntax
    checker symbol or a cons cell in the format of a single entry to the
-   :checkprop:`:next-checkers` property.
+   :flyc:checkprop:`:next-checkers` property.
 
    `next-checker` is prepended before other checkers to run after
    `checker`, unless `append` is non-nil.
@@ -508,9 +511,9 @@ utility for the PHP programming language:
      :error-parser flycheck-parse-checkstyle
      :modes php-mode)
 
-First we specify the :checkprop:`:command` to execute.  The first element of the
-command list is the name of the executable, `phpcs` in our case.  This command
-is checked for existence with `executable-find` before using this syntax
+First we specify the :flyc:checkprop:`:command` to execute.  The first element
+of the command list is the name of the executable, `phpcs` in our case.  This
+command is checked for existence with `executable-find` before using this syntax
 checker.  If the command does not exist, the syntax checker is *not* used.
 
 The executable is following by the arguments, in this case some options and the
@@ -547,15 +550,15 @@ programming language:
       (error line-start (file-name) ":" line ": [F] " (message) line-end))
      :modes python-mode)
 
-Again, there is a :checkprop:`:command`, however we use the `source-inplace`
+Again, there is a :flyc:checkprop:`:command`, however we use the `source-inplace`
 symbol this time.  This symbol causes the temporary file to be created in the
 same directory as the original file, making information from the source code
 tree available to the syntax checker.  In case of Pylint, these are the Python
 packages from the source code tree.
 
-Next we give the list of :checkprop:`:error-patterns` to parse errors.  These
-patterns extract the error location and the error message from the output of
-`epylint`.  An error pattern is a list containing a regular expression with
+Next we give the list of :flyc:checkprop:`:error-patterns` to parse errors.
+These patterns extract the error location and the error message from the output
+of `epylint`.  An error pattern is a list containing a regular expression with
 match groups to extract the error information, and an error level.
 
 Eventually we enable the syntax checker in `python-mode`.
@@ -582,15 +585,15 @@ written for the right shell:
      :predicate (lambda () (eq sh-shell 'zsh)))
 
 This syntax checker for the Zsh shell is enabled in `sh-mode` as specified by
-:checkprop:`:modes`, however it specifies an additional :checkprop:`:predicate`
-to determine whether the right shell is in use.  Hence this syntax checker is
-only used if a Zsh shell scripting is being edited in `sh-mode`, but not if a
-Bash or POSIX Shell script is being edited.
+:flyc:checkprop:`:modes`, however it specifies an additional
+:flyc:checkprop:`:predicate` to determine whether the right shell is in use.
+Hence this syntax checker is only used if a Zsh shell scripting is being edited
+in `sh-mode`, but not if a Bash or POSIX Shell script is being edited.
 
-A syntax checker may even go as far as not having :checkprop:`:modes` at all.
-For instance, there is no special JSON mode, but syntax checking JSON is still
-desirable.  Hence a JSON syntax checker may use the :checkprop:`:predicate` to
-check the file extension:
+A syntax checker may even go as far as not having :flyc:checkprop:`:modes` at
+all.  For instance, there is no special JSON mode, but syntax checking JSON is
+still desirable.  Hence a JSON syntax checker may use the
+:flyc:checkprop:`:predicate` to check the file extension:
 
 .. code-block:: cl
 
@@ -642,7 +645,7 @@ To use a configuration file with jshint, we first declare the variable
 `flycheck-jshintrc` that provides the name of the file, as explained in
 :ref:`syntax-checker-configuration-files`.
 
-In the :checkprop:`:command` we use a `config-file` form to pass the
+In the :flyc:checkprop:`:command` we use a `config-file` form to pass the
 configuration file to the syntax checker.  If the configuration file is found,
 its path will be passed to the syntax checker, using the option specified after
 the `config-file` symbol.  Otherwise the whole element is simply omitted from
@@ -670,10 +673,10 @@ with support for coding standards:
      :modes 'php-mode)
 
 The syntax checker is pretty much the same as before, except that a new element
-was added to :checkprop:`:command`.  This element passes the value of the new
-option variable :option:`flycheck-phpcs-standard` to the syntax checker.  This
-variable is declared with the special macro :macro:`flycheck-def-option-var` at
-the beginning.
+was added to :flyc:checkprop:`:command`.  This element passes the value of the
+new option variable :option:`flycheck-phpcs-standard` to the syntax checker.
+This variable is declared with the special macro
+:macro:`flycheck-def-option-var` at the beginning.
 
 Chaining syntax checkers
 ------------------------
@@ -685,8 +688,8 @@ Checkdoc.  PHP, too, can be syntax checked with the PHP parser, and verified
 against coding styles using PHP CodeSniffer.
 
 To support such cases, syntax checkers can be :dfn:`chained` using the
-:checkprop:`:next-checkers`.  The standard PHP syntax checker uses this to run
-PHP CodeSniffer if there are no syntax errors:
+:flyc:checkprop:`:next-checkers`.  The standard PHP syntax checker uses this to
+run PHP CodeSniffer if there are no syntax errors:
 
 .. code-block:: cl
 

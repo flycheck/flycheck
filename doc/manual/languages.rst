@@ -2,7 +2,9 @@
  Supported languages
 =====================
 
-The following languages are supported in Flycheck.
+.. default-domain:: flyc
+
+Flycheck supports the following languages.
 
 Each language has one or more syntax checkers, whose names follow a
 :samp:`{language}-{tool}` convention, where :samp:`{language}` is the
@@ -10,8 +12,8 @@ programming language supported by this syntax checker, and :samp:`{tool}` the
 specific syntax checker tool.
 
 This document provides just a brief overview, use
-:command:`flycheck-describe-checker` to see comprehensive documenation about a
-syntax checker.
+:el:command:`flycheck-describe-checker` to see comprehensive documenation about
+a syntax checker.
 
 .. contents:: Supported languages
    :local:
