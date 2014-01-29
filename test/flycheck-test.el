@@ -3740,7 +3740,7 @@ Why not:
   (flycheck-test-should-syntax-check
    "checkers/make/GNUmakefile" 'makefile-gmake-mode
    '(2 nil error "*** missing separator.  Stop."
-	   :checker make-gmake)))
+       :checker make-gmake)))
 
 (ert-deftest flycheck-define-checker/perl ()
   :tags '(builtin-checker external-tool language-perl)
