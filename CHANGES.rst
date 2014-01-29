@@ -36,6 +36,8 @@ master (unreleased)
 - Bug fixes
 
   - #298: Fix compatibility with tabbar-mode
+  - #319: Do not visit the file to check in `emacs-lisp` and
+    `emacs-lisp-checkdoc` to avoid unintended side effects
 
 .. _Sphinx: http://sphinx-doc.org
 
