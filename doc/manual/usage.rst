@@ -642,7 +642,6 @@ Errors and warnings from a syntax checker are
    the mode line and in error message popups, and highlighted according to
    :option:`flycheck-highlighting-mode`.
 
-
 You can also completely customize error processing by hooking into Flycheck:
 
 .. hook:: flycheck-process-error-functions
@@ -657,19 +656,6 @@ You can also completely customize error processing by hooking into Flycheck:
    function returns non-nil.  Thus, a function in this hook may return nil, to
    allow for further processing of the error, or t, to indicate that the error
    was fully processed and inhibit any further processing.
-
-You can also show a list with all errors in the current buffer:
-
-.. command:: flycheck-list-errors
-                list-flycheck-errors
-   :binding: C-c ! l
-
-   List all errors in the current buffer in a separate buffer.
-
-   The error list automatically refreshes after a syntax check, and follows the
-   current buffer and window, that is, if you switch to another buffer or
-   window, the error list is updated to show the errors of the new buffer or
-   window.
 
 If you hover a highlighted error with the mouse, a tooltip with the top-most
 error message will be shown.
@@ -731,6 +717,19 @@ ring or search them on Google:
 
    If set to `nil`, :command:`flycheck-google-messages` will always search
    for **all** messages at point.  This setting is **not** recommended.
+
+You can also show a list with all errors in the current buffer:
+
+.. command:: flycheck-list-errors
+                list-flycheck-errors
+   :binding: C-c ! l
+
+   List all errors in the current buffer in a separate buffer.
+
+   The error list automatically refreshes after a syntax check, and follows the
+   current buffer and window, that is, if you switch to another buffer or
+   window, the error list is updated to show the errors of the new buffer or
+   window.
 
 Ultimately, you can clear all reported errors at once:
 
