@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+# -*- coding: utf-8; -*-
+
+from __future__ import print_function
+
+import sys
+import re
+import os
+from subprocess import Popen, STDOUT
+
+
+TEST_LOG_FILE = 'test_log'
+
+
+UNEXPECTED_RESULT_RE = re.compile(r'^\d+ unexpected results:$', re.MULTILINE)
+
+
+def make_summary(output):
+    match = UNEXPECTED_RESULT_RE.search(output)
+    if match:
+        return output[match.start(0):]
+    else:
+        return 'Unexpected test failure, see log at {0}'.format(TEST_LOG_FILE)
+
+
+def main():
+    for line in sys.stdin:
+        _, _, remote_ref, _ = line.split()
+        if remote_ref != 'refs/heads/master':
+            # Don't force tests on feature branches
+            continue
+        print('Running tests because pushing to master!', file=sys.stderr)
+        with open(TEST_LOG_FILE, 'wb') as sink:
+            make = Popen(['make', 'vagrant-test'], stderr=STDOUT, stdout=sink,
+                         bufsize=0)
+        returncode = make.wait()
+        if returncode != 0:
+            with open(TEST_LOG_FILE, 'rb') as source:
+                print(make_summary(source.read()), file=sys.stderr)
+        else:
+            os.unlink(TEST_LOG_FILE)
+        return returncode
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

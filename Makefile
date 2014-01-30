@@ -4,6 +4,7 @@ CASK = cask
 VAGRANT = vagrant
 SPHINX-BUILD = sphinx-build
 INSTALL-INFO = install-info
+INSTALL = install
 VERSION := $(shell EMACS=$(EMACS) $(CASK) version)
 PKGDIR := $(shell EMACS=$(EMACS) $(CASK) package-directory)
 
@@ -16,12 +17,14 @@ PACKAGE_SRCS = $(SRCS) \
 	flycheck-pkg.el \
 	doc/flycheck.info doc/dir
 PACKAGE = flycheck-$(VERSION).tar
+HOOKS = .git/hooks/pre-push
 
 .PHONY: packages \
 	compile package \
 	clean clean-all clean-doc clean-pkgdir \
 	test vagrant-test \
-	doc html info linkcheck
+	doc html info linkcheck \
+	hooks
 
 compile : $(OBJECTS)
 
@@ -62,8 +65,16 @@ info : doc/dir
 linkcheck:
 	$(SPHINX-BUILD) -b linkcheck -n -d doc/_build/doctrees doc doc/_build/linkcheck
 
+hooks: $(HOOKS)
+
 clean-doc:
 	rm -rf doc/_build/
+
+$(HOOKS): .git/hooks/%: scripts/hooks/% .git/hooks
+	ln -sf ../../$< $@
+
+.git/hooks:
+	install -d $@
 
 %.elc : %.el $(PKGDIR)
 	$(CASK) exec $(EMACS) -Q --batch $(EMACSFLAGS) \
