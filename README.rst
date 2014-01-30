@@ -24,33 +24,6 @@ Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24
 .. _Supported Languages: http://flycheck.readthedocs.org/en/latest/manual/languages.html
 .. _3rd party extensions: http://flycheck.readthedocs.org/en/latest/manual/introduction.html#rd-party-extensions
 
-3rd party extensions
-====================
-
-The following extensions provide additional cool features for Flycheck:
-
-- flycheck-cask_ makes Flycheck use local packages in Cask_ projects.
-- flycheck-color-mode-line_ colors the mode line according to the Flycheck
-  status.
-- flycheck-d-unittest_ a Flycheck checker to run unit tests for D programs on
-  the fly.
-- flycheck-haskell_ improves Haskell support in Flycheck, by configuring
-  Flycheck according to the current Cabal project, and using Cabal sandbox
-  packages.
-- flycheck-hdevtools_ provides a Flycheck syntax checker for hdevtools_.
-- flycheck-mercury_ provides a Flycheck syntax checker for the `Mercury
-  language`_.
-
-.. _flycheck-cask: https://github.com/flycheck/flycheck-cask
-.. _Cask: https://github.com/cask/cask
-.. _flycheck-color-mode-line: https://github.com/flycheck/flycheck-color-mode-line
-.. _flycheck-d-unittest: https://github.com/flycheck/flycheck-d-unittest
-.. _flycheck-hdevtools: https://github.com/flycheck/flycheck-hdevtools
-.. _hdevtools: https://github.com/bitc/hdevtools
-.. _flycheck-haskell: https://github.com/flycheck/flycheck-haskell
-.. _flycheck-mercury: https://github.com/flycheck/flycheck-mercury
-.. _Mercury language: http://mercurylang.org/
-
 Installation
 ============
 
