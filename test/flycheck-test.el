@@ -4086,9 +4086,9 @@ Why not:
    '(6 10 info "Prefer single-quoted strings when you don't need string interpolation or special symbols."
        :checker ruby-rubocop)
    '(10 5 info "the use of then/do is not needed here" :checker ruby-rubylint)
-   '(10 5 info "Favor modifier if/unless usage when you have a single-line body. Another good alternative is the usage of control flow &&/||."
+   '(10 5 info "Favor modifier if usage when you have a single-line body. Another good alternative is the usage of control flow &&/||."
         :checker ruby-rubocop)
-   '(10 5 info "Never use then for multi-line if/unless."
+   '(10 5 info "Never use then for multi-line if."
         :checker ruby-rubocop)
    '(10 8 warning "Literal true appeared in a condition."
         :checker ruby-rubocop)
@@ -4107,7 +4107,7 @@ Why not:
      '(5 5 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
      '(6 10 info "Prefer single-quoted strings when you don't need string interpolation or special symbols."
          :checker ruby-rubocop)
-     '(10 5 info "Never use then for multi-line if/unless."
+     '(10 5 info "Never use then for multi-line if."
           :checker ruby-rubocop)
      '(10 8 warning "Literal true appeared in a condition."
           :checker ruby-rubocop))))
