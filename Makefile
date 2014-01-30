@@ -17,10 +17,14 @@ PACKAGE_SRCS = $(SRCS) \
 	doc/flycheck.info doc/dir
 PACKAGE = flycheck-$(VERSION).tar
 
-.PHONY: compile
+.PHONY: packages \
+	compile package \
+	clean clean-all clean-doc clean-pkgdir \
+	test vagrant-test \
+	doc html info linkcheck
+
 compile : $(OBJECTS)
 
-.PHONY: package
 package : $(PACKAGE)
 
 $(PACKAGE) : $(PACKAGE_SRCS)
@@ -30,45 +34,34 @@ $(PACKAGE) : $(PACKAGE_SRCS)
 	tar cf $(PACKAGE) flycheck-$(VERSION)
 	rm -rf flycheck-$(VERSION)
 
-.PHONY: clean-all
 clean-all : clean clean-pkgdir clean-doc
 
-.PHONY: clean
 clean :
 	rm -f $(OBJECTS)
 	rm -rf flycheck-*.tar flycheck-pkg.el
 
-.PHONY: packages
 packages : $(PKGDIR)
 
-.PHONY: clean-pkgdir
 clean-pkgdir :
 	rm -rf $(PKGDIR)
 
-.PHONY: test
 test : compile
 	$(CASK) exec ert-runner
 
-.PHONY: vagrant-test
 vagrant-test :
 	$(VAGRANT) up
 	$(VAGRANT) ssh -c "make -C /flycheck EMACS=$(EMACS) clean test"
 
-.PHONY: doc
 doc : info html
 
-.PHONY: html
 html :
 	$(SPHINX-BUILD) -b html -n -d doc/_build/doctrees doc doc/_build/html
 
-.PHONY: info
 info : doc/dir
 
-.PHONY: linkcheck
 linkcheck:
 	$(SPHINX-BUILD) -b linkcheck -n -d doc/_build/doctrees doc doc/_build/linkcheck
 
-.PHONY: clean-doc
 clean-doc:
 	rm -rf doc/_build/
 
