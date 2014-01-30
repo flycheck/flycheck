@@ -52,7 +52,7 @@ test : compile
 	$(CASK) exec ert-runner
 
 vagrant-test :
-	$(VAGRANT) up
+	$(VAGRANT) up --provision
 	$(VAGRANT) ssh -c "make -C /flycheck EMACS=$(EMACS) clean test"
 
 doc : info html
