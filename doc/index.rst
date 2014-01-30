@@ -68,6 +68,7 @@ Contents
 ========
 
 .. toctree::
+   :maxdepth: 2
 
    flycheck-versus-flymake
    manual/index
