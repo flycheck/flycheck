@@ -74,4 +74,5 @@ texinfo_elements = {'preamble': """
 @definfoenclose emph,_,_
 """}
 
-extlinks = {'github': ('https://github.com/flycheck/flycheck/%s', None)}
+extlinks = {'github': ('https://github.com/flycheck/flycheck/%s', None),
+            'issue': ('https://github.com/flycheck/flycheck/issues/%s', '#')}

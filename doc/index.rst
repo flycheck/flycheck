@@ -71,6 +71,7 @@ Contents
    :maxdepth: 2
 
    flycheck-versus-flymake
+   news/index
    manual/index
    copying
 
