@@ -12,22 +12,17 @@
 
 Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24
 
-- Support for over 30 languages
-- Fully automatic syntax checking in the background
-- Nice error indication and highlighting
-- Optional error list popup
-- Many customization options
-- A comprehensive manual
-- A dead simple function to create new syntax checkers
-- A “doesn't get in your way” guarantee
-
+- Features_
 - `Flycheck versus Flymake`_
 - `Supported Languages`_
+- `3rd party extensions`_
 
 .. _Solarized: https://github.com/bbatsov/solarized-emacs
 .. _Source Code Pro: https://github.com/adobe/source-code-pro
+.. _Features: http://flycheck.readthedocs.org/en/latest/manual/introduction.html#features
 .. _Flycheck versus Flymake: http://flycheck.readthedocs.org/en/latest/flycheck-versus-flymake.html
 .. _Supported Languages: http://flycheck.readthedocs.org/en/latest/manual/languages.html
+.. _3rd party extensions: http://flycheck.readthedocs.org/en/latest/manual/introduction.html#rd-party-extensions
 
 3rd party extensions
 ====================
