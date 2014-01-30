@@ -2069,7 +2069,7 @@ check with.  ERRORS is the list of expected errors."
 (ert-deftest flycheck--manual/all-checkers-are-documented ()
   :tags '(documentation)
   (flycheck-test-with-file-buffer
-      (f-join flycheck-test-source-directory "doc" "manual/checkers.rst")
+      (f-join flycheck-test-source-directory "doc" "manual/languages.rst")
     (dolist (checker flycheck-checkers)
       (re-search-forward (rx ".. syntax-checker:: "
                              (group (one-or-more not-newline))
