@@ -2,77 +2,25 @@
  Introduction
 ==============
 
-Flycheck (aka “Flymake done right”) is a modern on-the-fly syntax checking
-extension for GNU Emacs 24 with
+Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24.
 
-- ready-to-use syntax checkers for a bunch of languages,
-- easy customization,
-- a comprehensive manual,
-- a dead simple, declarative API to create new syntax checkers,
-- major-mode based selection of syntax checkers,
-- multiple syntax checkers per buffer,
-- optional error list popup,
-- a “doesn't get in your way” guarantee,
-- and a clean, concise and understandable implementation with decent test
-  coverage.
+.. _features:
 
 Features
 ========
 
-- Automatic on-the-fly syntax checking while editing
-- Fully automatic selection of the syntax checker
-- Optional manual selection of a syntax checker with `flycheck-select-checker`
-  at :kbd:`C-c ! s`
-- Built-in syntax checkers for:
+Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24.
 
-  - AsciiDoc (using `asciidoc`)
-  - C/C++ (using `clang` and `cppcheck`)
-  - CFEngine (using `cf-promises`)
-  - Chef cookbooks (using `foodcritic`))
-  - CoffeeScript (using `coffee` and `coffeelint`)
-  - CSS (using `csslint`))
-  - D (using `dmd`)
-  - Elixir (using `elixirc`)
-  - Emacs Lisp (using the byte compiler and CheckDoc)
-  - Erlang (using `erlc`)
-  - ERuby (using `erubis`)
-  - Go (using `gofmt`, `go build` and `go test`)
-  - Haml (using `haml`)
-  - Handlebars (using `handlebars`)
-  - Haskell (using `ghc` and `hlint`)
-  - HTML (using `tidy`)
-  - Javascript (using `jshint`, `eslint` and `gjslint`)
-  - JSON (using `jsonlint`)
-  - LESS (using `lessc`)
-  - Lua (using `luac`)
-  - Perl (using `perl`)
-  - PHP (using `php`, `phpmd` and `phpcs`)
-  - Puppet (using `puppet parser` and `puppet-lint`)
-  - Python (using `flake8` or `pylint`)
-  - Racket
-  - ReStructuredText (using `rst2pseudoxml.py` from Docutils)
-  - Ruby (using `rubocop`, `ruby` , `jruby` or `ruby-lint`)
-  - Rust (using `rustc`)
-  - Sass (using `sass`)
-  - Scala (using `scalac`)
-  - SCSS (using `scss`)
-  - Shell scripts (using `bash`, `dash`, or `zsh` depending on the type of shell
-    script)
-  - Slim (using `slimrb`)
-  - TeX/LaTeX (using `chktex` or `lacheck`)
-  - Texinfo (using `makeinfo`)
-  - Verilog (using `verilator`)
-  - XML (using `xmlstarlet` or `xmllint`)
-  - YAML (using `js-yaml` or `ruby`)
-
-- Nice error indication and highlighting
-- Easy customization
-- Syntax checker configuration with project-specific configuration files and
-  options
-- Error navigation with `next-error` and `previous-error`
-- Error list with `flycheck-list-errors` at :kbd:`C-c ! l`
-- Easy declarative API to define new syntax checkers
-- Error parsers for structured markup formats (e.g. Checkdoc XML)
+- Support for |#flycheck-languages| languages with |#flycheck-checkers| syntax
+  checkers, see :doc:`manual/languages`
+- :ref:`Fully automatic syntax checking in the background <syntax-checking>`
+- :ref:`Nice error indication and highlighting <error-reporting>`
+- Optional error list popup
+- :ref:`Many customization options <syntax-checker-configuration>`
+- :doc:`A comprehensive manual <manual/index>`
+- :ref:`A dead simple API to create new syntax checkers
+  <defining-new-syntax-checkers>`
+- A “doesn't get in your way” guarantee
 
 .. _3rd-party-extensions:
 
