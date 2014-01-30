@@ -103,6 +103,8 @@ The following extensions provide additional cool features for Flycheck:
 .. _flycheck-mercury: https://github.com/flycheck/flycheck-mercury
 .. _Mercury language: http://mercurylang.org/
 
+.. _installation:
+
 Installation
 ============
 
