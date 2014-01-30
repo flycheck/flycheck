@@ -1,6 +1,6 @@
-=====================
- The Flycheck manual
-=====================
+=================
+ Flycheck manual
+=================
 
 This manual is for Flycheck, the on-the-fly syntax checker for GNU Emacs.
 
