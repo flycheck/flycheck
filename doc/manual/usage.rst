@@ -731,6 +731,19 @@ You can also show a list with all errors in the current buffer:
    window, the error list is updated to show the errors of the new buffer or
    window.
 
+When you move the point in the current buffer while the error list is visible,
+all errors at point and at the current line are highlighted in the error list
+with :face:`flycheck-error-list-highlight-at-point` and
+:face:`flycheck-error-list-highlight` respectively.
+
+.. face:: flycheck-error-list-highlight-at-point
+
+   The face for highlighting the errors at point in the error list.
+
+.. face:: flycheck-error-list-highlight
+
+   The face for highlighting the errors at the current line in the error list.
+
 Ultimately, you can clear all reported errors at once:
 
 .. command:: flycheck-clear
