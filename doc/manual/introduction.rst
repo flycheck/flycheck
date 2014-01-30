@@ -12,12 +12,12 @@ Features
 Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24.
 
 - Support for |#flycheck-languages| languages with |#flycheck-checkers| syntax
-  checkers, see :doc:`manual/languages`
+  checkers, see :doc:`languages`
 - :ref:`Fully automatic syntax checking in the background <syntax-checking>`
 - :ref:`Nice error indication and highlighting <error-reporting>`
 - Optional error list popup
 - :ref:`Many customization options <syntax-checker-configuration>`
-- :doc:`A comprehensive manual <manual/index>`
+- :doc:`A comprehensive manual <index>`
 - :ref:`A dead simple API to create new syntax checkers
   <defining-new-syntax-checkers>`
 - A “doesn't get in your way” guarantee
