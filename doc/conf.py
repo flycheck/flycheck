@@ -57,6 +57,7 @@ exclude_patterns = ['_build']
 
 pygments_style = 'emacs'
 
+html_title = '{0} {1}'.format(project, release)
 html_theme = 'nature'
 
 texinfo_documents = [
