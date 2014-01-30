@@ -92,6 +92,3 @@ doc/flycheck.info : doc/_build/info/flycheck.info
 
 doc/_build/info/flycheck.texi :
 	$(SPHINX-BUILD) -b texinfo -n -d doc/_build/doctrees doc doc/_build/info
-
-
-
