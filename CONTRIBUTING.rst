@@ -1,6 +1,6 @@
-==============
- Contributing
-==============
+=========================
+ Contribution guidelines
+=========================
 
 .. default-role:: code
 
