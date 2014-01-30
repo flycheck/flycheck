@@ -12,14 +12,22 @@
 
 Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24
 
-- support for over 30 languages,
-- fully automatic syntax checking in the background,
-- nice error indication and highlighting,
-- optional error list popup,
-- many customization options,
-- a comprehensive manual,
-- a dead simple function to create new syntax checkers,
-- a “doesn't get in your way” guarantee
+- Support for over 30 languages
+- Fully automatic syntax checking in the background
+- Nice error indication and highlighting
+- Optional error list popup
+- Many customization options
+- A comprehensive manual
+- A dead simple function to create new syntax checkers
+- A “doesn't get in your way” guarantee
+
+- `Flycheck versus Flymake`_
+- `Supported Languages`_
+
+.. _Solarized: https://github.com/bbatsov/solarized-emacs
+.. _Source Code Pro: https://github.com/adobe/source-code-pro
+.. _Flycheck versus Flymake: http://flycheck.readthedocs.org/en/latest/flycheck-versus-flymake.html
+.. _Supported Languages: http://flycheck.readthedocs.org/en/latest/manual/languages.html
 
 3rd party extensions
 ====================
@@ -38,11 +46,25 @@ The following extensions provide additional cool features for Flycheck:
 - flycheck-mercury_ provides a Flycheck syntax checker for the `Mercury
   language`_.
 
+.. _flycheck-cask: https://github.com/flycheck/flycheck-cask
+.. _Cask: https://github.com/cask/cask
+.. _flycheck-color-mode-line: https://github.com/flycheck/flycheck-color-mode-line
+.. _flycheck-d-unittest: https://github.com/flycheck/flycheck-d-unittest
+.. _flycheck-hdevtools: https://github.com/flycheck/flycheck-hdevtools
+.. _hdevtools: https://github.com/bitc/hdevtools
+.. _flycheck-haskell: https://github.com/flycheck/flycheck-haskell
+.. _flycheck-mercury: https://github.com/flycheck/flycheck-mercury
+.. _Mercury language: http://mercurylang.org/
+
 Installation
 ============
 
-Install the ELPA package from MELPA_ or Marmalade_.  In your Cask_
-file:
+Flycheck needs Emacs 24, and works best on Unix systems (i.e. Linux or OS X).
+
+Install the ELPA package from MELPA_ or Marmalade_ with `M-x package-install RET
+flycheck`.
+
+In your Cask_ file:
 
 .. code-block:: cl
 
@@ -51,88 +73,44 @@ file:
 
    (depends-on "flycheck")
 
-Flycheck supports Emacs 24.  It is tested with Emacs 24.3, and Emacs snapshot
-builds.  It should work with GNU Emacs 24.1 and 24.2 as well, but it is not
-tested against these versions.  If it does not work with these versions, please
-report an issue.
+Most syntax checkers need external utilities.  See `Supported languages`_ for
+supported languages and utilities, or use `C-c ! ?` to see information about a
+specific syntax checker.
 
-Flycheck does not support Windows, but tries to be compatible with it.  You may
-try to use Flycheck on Windows.  It should mostly work, but expect problems and
-issues.  Pull requests which improve Windows compatibility are welcome.
+See Installation_ for detailed installation instructions.
 
-Flycheck also does not support GNU Emacs 23 and other flavors of Emacs
-(e.g. XEmacs, Aquamacs, etc.).  Don't try, it will *not* work.
+.. _MELPA: http://melpa.milkbox.net/#/flycheck
+.. _Marmalade: http://marmalade-repo.org/packages/flycheck
+.. _Cask: https://github.com/cask/cask
+.. _Supported Languages: http://flycheck.readthedocs.org/en/latest/manual/languages.html
+.. _Installation: http://flycheck.readthedocs.org/en/latest/manual/introduction.html#installation
 
-Most checkers have dependencies against external tools that perform the
-checking.  Use `C-c ! ?` to see what a checker needs, e.g. `C-c ! ?
-python-pylint`.
+Support
+=======
 
-Usage
-=====
+- `User Manual`_
+- `Issue tracker`_
 
-Once installed, enable Flycheck mode with `M-x flycheck-mode`.
+.. _User Manual: http://flycheck.readthedocs.org/en/latest/manual/index.html
+.. _Issue tracker: https://github.com/flycheck/flycheck/issues
 
-To enable Flycheck mode in all buffers, in which it can be used, add the
-following to your `init.el` file:
+Contribute
+==========
 
-.. code-block:: cl
+- Github_
+- `Contribution guidelines`_
 
-   (add-hook 'after-init-hook #'global-flycheck-mode)
-
-In Flycheck mode the buffer will automatically be checked on the fly, if a
-suitable syntax checker exists.  Use `C-c ! c` to start a syntax check manually.
-
-A suitable syntax checker is automatically selected from the list of registered
-checkers in `flycheck-checkers`.  Use `C-c ! s` to manually select a specific
-syntax checker, or configure the syntax checker per file by setting
-`flycheck-checker` as file local variable:
-
-.. code-block:: python
-
-   # Local Variables:
-   # flycheck-checker: python-pylint
-   # End:
-
-Read the section `Syntax checker selection`_ in the Flycheck manual for more
-information.
-
-Some syntax checkers read configuration files, or provide options for
-customization.  Use `M-x customize-group RET flycheck-config-files` and `M-x
-customize-group RET flycheck-options` respectively to customize these.  Refer to
-the section `Syntax checker configuration`_ in the Flycheck manual for more
-information.
-
-Errors and warnings from the syntax checker are reported in the mode line,
-highlighted in the buffer and indicated with icons in the fringe.  Customize
-`flycheck-highlighting-mode` and `flycheck-indication-mode` to change the
-highlighting and indication of errors.  Also look at `M-x customize-group RET
-flycheck-faces` to customize the visual appearance, and read `Error reporting`_
-and `Mode line`_ in the Flycheck manual.
-
-**Note:** The default highlighting faces provided GNU Emacs are ill-suited to
-highlight errors.  They are too easily overlooked.  Make sure to customize these
-faces to add a striking background color or an underlying, or choose a color
-theme with reasonable Flycheck faces, for instance the excellent light or dark
-Solarized_ themes, or the fancy Zenburn_ theme.
-
-Use `C-c ! n` and `C-c ! p` to navigate between errors, or use `C-c ! l` to list
-all errors in a separate buffer.  If the point is on an error, the error message
-is shown in the echo area or in a popup buffer after a short delay.  You may
-also hover the mouse over a highlighted error to get a tooltip with the error
-message.  Read the `Error navigation`_ section in the manual for more
-information.
-
-Read the complete manual inside Emacs with `C-c ! i` or `M-x flycheck-info`, or
-online at http://flycheck.github.io.
+.. _Github: https://github.com/flycheck/flycheck
+.. _Contribution guidelines: https://github.com/flycheck/flycheck/blob/master/CONTRIBUTING.rst
 
 Credits
 =======
 
-Flycheck stands on the shoulders of giants, and was shaped with the help of many
-great people, too many to list them all in this README.
+- Contributors_
+- Credits_
 
-The Credits_ section in the manual contains a complete list of contributors and
-their contributors.
+.. _Contributors: https://github.com/flycheck/flycheck/graphs/contributors
+.. _Credits: http://flycheck.readthedocs.org/en/latest/manual/credits.html
 
 License
 =======
@@ -151,24 +129,4 @@ this program.  If not, see http://www.gnu.org/licenses/.
 
 See COPYING_ for details.
 
-.. _Zenburn: https://github.com/bbatsov/zenburn-emacs
-.. _Source Code Pro: https://github.com/adobe/source-code-pro
-.. _flycheck-cask: https://github.com/flycheck/flycheck-cask
-.. _Cask: https://github.com/cask/cask
-.. _flycheck-color-mode-line: https://github.com/flycheck/flycheck-color-mode-line
-.. _flycheck-d-unittest: https://github.com/flycheck/flycheck-d-unittest
-.. _flycheck-hdevtools: https://github.com/flycheck/flycheck-hdevtools
-.. _hdevtools: https://github.com/bitc/hdevtools
-.. _flycheck-haskell: https://github.com/flycheck/flycheck-haskell
-.. _flycheck-mercury: https://github.com/flycheck/flycheck-mercury
-.. _Mercury language: http://mercurylang.org/
-.. _Syntax checker selection: http://flycheck.github.io/Usage.html#Selection
-.. _Syntax checker configuration: http://flycheck.github.io/Usage.html#Configuration
-.. _Error reporting: http://flycheck.github.io/Usage.html#Reporting
-.. _Mode line: http://flycheck.github.io/Usage.html#Mode-line
-.. _Error navigation: http://flycheck.github.io/Usage.html#Navigation
-.. _MELPA: http://melpa.milkbox.net/#/flycheck
-.. _Marmalade: http://marmalade-repo.org/packages/flycheck
-.. _Solarized: https://github.com/bbatsov/solarized-emacs
-.. _Credits: http://flycheck.github.io/Credits.html#Credits
 .. _COPYING: https://github.com/flycheck/flycheck/blob/master/COPYING

@@ -14,37 +14,64 @@
 Features
 ========
 
-Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24.
+- :ref:`features`
+- :doc:`flycheck-versus-flymake`
+- :doc:`manual/languages`
+- :ref:`3rd-party-extensions`
 
-- Support for |#flycheck-languages| languages with |#flycheck-checkers| syntax
-  checkers, see :doc:`manual/languages`
-- :ref:`Fully automatic syntax checking in the background <syntax-checking>`
-- :ref:`Nice error indication and highlighting <error-reporting>`
-- Optional error list popup
-- :ref:`Many customization options <syntax-checker-configuration>`
-- :doc:`A comprehensive manual <manual/index>`
-- :ref:`A dead simple API to create new syntax checkers
-  <defining-new-syntax-checkers>`
-- A “doesn't get in your way” guarantee
+Installation
+============
 
-:doc:`flycheck-versus-flymake` provides detailed list of Flycheck's features,
-and a comparison with the built-in Flymake library.
+Flycheck needs Emacs 24, and works best on Unix systems (i.e. Linux or OS X).
 
-Additionally there are various :ref:`3rd-party-extensions`, which enhance the
-support for specific languages, add new languages or provide new features for
-Flycheck.
+Install the ELPA package from MELPA_ or Marmalade_ with :kbd:`M-x
+package-install RET flycheck`.
+
+In your Cask_ file:
+
+.. code-block:: cl
+
+   (source gnu)
+   (source melpa)
+
+   (depends-on "flycheck")
+
+Most syntax checkers need external utilities.  See :doc:`manual/languages` for
+supported languages and utilities, or use :kbd:`C-c ! ?` to see information
+about a specific syntax checker.
+
+See :ref:`installation` for detailed installation instructions.
+
+.. _Cask: https://github.com/cask/cask
+.. _MELPA: http://melpa.milkbox.net/#/flycheck
+.. _Marmalade: http://marmalade-repo.org/packages/flycheck
+
+Support
+=======
+
+- :doc:`manual/index`
+- :github:`Issue tracker <issues>`
+
+Contribute
+==========
+
+- :github:`Github <>`
+- :doc:`manual/contributing`
+
+Credits
+=======
+
+- :github:`Contributors <graphs/contributors>`
+- :doc:`manual/credits`
+
+Contents
+========
 
 .. toctree::
-   :hidden:
 
    flycheck-versus-flymake
-
-Documentation
-=============
-
-.. toctree::
-
    manual/index
+   copying
 
 Licensing
 =========
@@ -61,18 +88,13 @@ PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 See :doc:`copying` or http://www.gnu.org/licenses/ for a copy of the GNU General
 Public License.
 
-This manual is free documentation: you can copy, distribute and/or modify it
+This documentation is free documentation: you can copy, distribute and/or modify it
 under the terms of the GNU Free Documentation License, Version 1.3 or any later
 version published by the Free Software Foundation; with no Invariant Sections,
 no Front-Cover Texts, and no Back-Cover Texts.  A copy of the license is
 included in the section :doc:`manual/fdl`.
 
-Alternatively, you may copy, distribute and/or modify this manual under the
-terms of the Creative Commons Attribution-ShareAlike 4.0 International Public
-License.  A copy of the license can be obtained at
+Alternatively, you may copy, distribute and/or modify this documentation under
+the terms of the Creative Commons Attribution-ShareAlike 4.0 International
+Public License.  A copy of the license can be obtained at
 https://creativecommons.org/licenses/by-sa/4.0/legalcode.
-
-.. toctree::
-   :hidden:
-
-   copying
