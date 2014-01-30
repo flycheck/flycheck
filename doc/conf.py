@@ -28,7 +28,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 needs_sphinx = '1.2'
 
-extensions = ['eldomain', 'texinfo', 'issues', 'flycheck']
+extensions = ['sphinx.ext.extlinks',
+              'eldomain', 'texinfo', 'issues', 'flycheck']
 default_role = 'code'
 primary_domain = 'el'
 
@@ -71,3 +72,5 @@ texinfo_elements = {'preamble': """
 @definfoenclose strong,*,*
 @definfoenclose emph,_,_
 """}
+
+extlinks = {'github': ('https://github.com/flycheck/flycheck/%s', None)}
