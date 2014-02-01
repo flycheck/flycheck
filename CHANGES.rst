@@ -1,7 +1,7 @@
 .. default-role:: code
 
-master (unreleased)
--------------------
+0.17 (Feb 1, 2014)
+------------------
 
 - #274: The manual was ported to Sphinx_ and is now located at
   http://flycheck.readthedocs.org
