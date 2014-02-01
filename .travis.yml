@@ -11,13 +11,12 @@ before_install:
   - sudo apt-get install puppet
   # Bootstrap Puppet, and install our Puppet modules
   - sudo FACTER_travis=true puppet apply --verbose ./puppet/manifests/bootstrap.pp
-  # Bootstrap test environment, except Ruby gemsn
+  # Bootstrap test environment
   - sudo FACTER_travis=true puppet apply --verbose --modulepath=/etc/puppet/modules:./puppet/modules ./puppet/manifests/site.pp
-  # Install Gems as non-root to not screw up with RVM
-  - FACTER_travis=true puppet apply --verbose --modulepath=/etc/puppet/modules:./puppet/modules ./puppet/manifests/travis.pp
-# Install our packages
 install:
+  # Install our packages
   - make EMACS=$EMACS packages
-# Build documentation and run unit tests
 script:
-  - make EMACS=$EMACS -k info test
+  # Run unit tests.  We don't build documentation, because we'll get failures
+  # from ReadTheDocs anyway
+  - make EMACS=$EMACS test
