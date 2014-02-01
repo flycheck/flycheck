@@ -3705,7 +3705,7 @@ See URL `http://acrmp.github.io/foodcritic/'."
   :command ("foodcritic" source)
   :error-patterns
   ((error line-start (message) ": " (file-name) ":" line line-end))
-  :modes ruby-mode
+  :modes (enh-ruby-mode ruby-mode)
   :predicate
   (lambda ()
     (let ((parent-dir (f-parent default-directory)))
