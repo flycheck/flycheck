@@ -2,6 +2,9 @@
  Flycheck
 ==========
 
+.. image:: https://travis-ci.org/flycheck/flycheck.png?branch=master
+   :target: https://travis-ci.org/flycheck/flycheck
+
 .. default-role:: code
 
 .. figure:: https://github.com/flycheck/flycheck/raw/master/doc/images/screenshot.png
