@@ -3,55 +3,13 @@
 # Install all syntax checkers
 class flycheck::checkers {
 
+  include flycheck::php
   include flycheck::python
   include flycheck::ruby
 
-  include flycheck::checkers::erlang
-  include flycheck::checkers::go
-  include flycheck::checkers::php
+  include flycheck::checkers::repositories
 
-  # Various other syntax checkers
-  Package {
-    require => Class['apt::update'],
-  }
-
-  # Cfengine
-  apt::source { 'cfengine-community':
-    location    => 'http://cfengine.com/pub/apt',
-    repos       => 'main',
-    key         => '89107B44',
-    key_source  => 'http://cfengine.com/pub/gpg.key',
-    include_src => false,
-  }
-
-  package { 'cfengine-community':
-    ensure  => latest,
-    require => Apt::Source['cfengine-community'],
-  }
-
-  # This PPA provides Clang 3.2 for Ubuntu 12.04
-  apt::ppa { 'ppa:kxstudio-team/builds': }
-
-  package { 'clang':
-    ensure  => latest,
-    require => Apt::Ppa['ppa:kxstudio-team/builds'],
-  }
-
-  apt::ppa { 'ppa:plt/racket': }
-
-  package { 'racket':
-    ensure  => latest,
-    require => Apt::Ppa['ppa:plt/racket'],
-  }
-
-  apt::ppa { 'ppa:hansjorg/rust': }
-
-  package { 'rust-0.9':
-    ensure  => latest,
-    require => Apt::Ppa['ppa:hansjorg/rust'],
-    alias   => 'rust',
-  }
-
+  # Nodejs
   class { 'nodejs':
     manage_repo => true,
     version     => latest
@@ -67,12 +25,23 @@ class flycheck::checkers {
                     'js-yaml',       # yaml-jsyaml
                     'less',          # less
                     ]
+
   package { $node_packages:
     # We can't use latest here, thanks to
     # https://github.com/puppetlabs/puppetlabs-nodejs/issues/43
     ensure   => present,
     provider => npm,
     require  => Class['nodejs'],
+  }
+
+  $php_packages = [ 'pear.phpmd.org/PHP_PMD', # php-phpmd
+                    'PHP_CodeSniffer',        # php-phpcs
+                    ]
+
+  package { $php_packages:
+    ensure   => latest,
+    provider => pear,
+    require  => [Class['flycheck::php'], Exec['php::pear::auto_discover']],
   }
 
   $python_packages = ['flake8',      # python-flake8
@@ -113,25 +82,35 @@ class flycheck::checkers {
     require  => Class['flycheck::python'],
   }
 
-  $packages = [ 'asciidoc',        # asciidoc
-                'bash',            # bash/sh-bash
-                'cppcheck',        # c/c++-cpppcheck
-                'ghc',             # haskell-ghc
-                'hlint',           # haskell-lint
-                'tidy',            # html-tidy
-                'lua5.2',          # lua
-                'perl',            # perl
-                'puppet',          # puppet-parser
-                'scala',           # scala
-                'dash',            # sh-dash
-                'verilator',       # verilog-verilator
-                'chktex',          # tex-chktex
-                'lacheck',         # tex-lacheck
-                'xmlstarlet',      # xml-xmlstarlet
-                'libxml2-utils',   # xml-xmllint
-                'zsh',             # zsh
-                ]
-  package { $packages: ensure => latest }
+  $apt_packages = [ 'asciidoc',           # asciidoc
+                    'bash',               # bash/sh-bash
+                    'clang',              # c/c++-clang
+                    'cppcheck',           # c/c++-cpppcheck
+                    'cfengine-community', # cfengine
+                    'esl-erlang',         # erlang
+                    'golang-stable',      # go-*
+                    'ghc',                # haskell-ghc
+                    'hlint',              # haskell-lint
+                    'tidy',               # html-tidy
+                    'lua5.2',             # lua
+                    'perl',               # perl
+                    'puppet',             # puppet-parser
+                    'racket',             # racket
+                    'rust-0.9',           # rust
+                    'scala',              # scala
+                    'dash',               # sh-dash
+                    'verilator',          # verilog-verilator
+                    'chktex',             # tex-chktex
+                    'lacheck',            # tex-lacheck
+                    'xmlstarlet',         # xml-xmlstarlet
+                    'libxml2-utils',      # xml-xmllint
+                    'zsh',                # zsh
+                    ]
+
+  package { $apt_packages:
+    ensure  => latest,
+    require => [Class['flycheck::checkers::repositories'], Class['apt::update']]
+  }
 
   $dmd_version = '2.063.2'
   $dmd_deb     = "dmd_${dmd_version}-0_amd64.deb"
@@ -153,5 +132,24 @@ class flycheck::checkers {
     source   => "/usr/src/${dmd_deb}",
     require  => [ Archive::Download[$dmd_deb],
                   Package['gcc-multilib'], Package['xdg-utils'] ]
+  }
+
+  # elixir
+  $elixir_version = '0.12.0'
+
+  archive { "elixir-${elixir_version}":
+    ensure        => present,
+    url           => "https://github.com/elixir-lang/elixir/releases/download/v${elixir_version}/v${elixir_version}.zip",
+    extension     => 'zip',
+    digest_string => '62fc9173158ba919b2d0f792b827eca7',
+    target        => "/opt/elixir-${elixir_version}",
+    root_dir      => '.',
+    require       => Package['esl-erlang'],
+  }
+
+  file { '/usr/local/bin/elixirc':
+    ensure  => link,
+    target  => "/opt/elixir-${elixir_version}/bin/elixirc",
+    require => Archive["elixir-${elixir_version}"],
   }
 }
