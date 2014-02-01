@@ -10,14 +10,6 @@ class flycheck::checkers {
   include flycheck::checkers::go
   include flycheck::checkers::php
 
-  # Do not install Gems on Travis
-  if $::travis {
-    notice('Skipping Ruby Gems on Travis CI')
-  }
-  else {
-    include flycheck::checkers::gems
-  }
-
   # Various other syntax checkers
   Package {
     require => Class['apt::update'],
@@ -95,6 +87,23 @@ class flycheck::checkers {
     provider => pip,
     # We must have pip available
     require  => Class['flycheck::python'],
+  }
+
+  $gem_packages = [ 'erubis',      # eruby-erubis
+                    'foodcritic',  # chef-foodcritic
+                    'haml',
+                    'puppet-lint',
+                    'rubocop',     # ruby-rubocop
+                    'sass',        # sass/scss
+                    'slim',        # slim
+                    'ruby-lint',
+                    ]
+
+  package { $gem_packages:
+    ensure   => latest,
+    provider => gem,
+    # We need Ruby and Rubygems
+    require  => Class['flycheck::ruby'],
   }
 
   package { 'closure-linter':
