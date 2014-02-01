@@ -5,7 +5,7 @@
 Time for a new release of Flycheck, the modern syntax-checking extension for
 Emacs:
 
-.. figure:: /images/flycheck-0.16.png
+.. figure:: /images/flycheck-0_16.png
    :align: center
 
    Flycheck 0.16 with `Solarized Light`_ and `Source Code Pro`_

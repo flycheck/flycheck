@@ -2,7 +2,7 @@
  Feb 1, 2014 — Flycheck 0.17 released
 ======================================
 
-.. figure:: /images/flycheck-0.17.png
+.. figure:: /images/flycheck-0_17.png
    :align: center
 
    Flycheck 0.17 with `Solarized Light`_ and `Source Code Pro`_

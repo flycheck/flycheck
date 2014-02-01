@@ -5,7 +5,7 @@
 I have the honour and pleasure to announce a new release of Flycheck, the
 modern syntax-checking extension for Emacs:
 
-.. figure:: /images/flycheck-0.15.png
+.. figure:: /images/flycheck-0_15.png
    :align: center
 
    Flycheck 0.15 with Zenburn_ and `Source Code Pro`_
