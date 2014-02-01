@@ -32,6 +32,7 @@ master (unreleased)
   - Do not use the generic `rst` syntax checker in Sphinx projects anymore, to
     avoid false positives by Sphinx-only markup
   - #314: Check for more than just syntax errors in `rust`
+  - `chef-foodcritic` supports `enh-ruby-mode` now
 
 - Bug fixes
 
