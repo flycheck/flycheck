@@ -35,7 +35,7 @@ master (unreleased)
 
 - Bug fixes
 
-  - #298: Fix compatibility with tabbar-mode
+  - #298: Do not attach syntax checker processes to the buffer anymore
   - #319: Do not visit the file to check in `emacs-lisp` and
     `emacs-lisp-checkdoc` to avoid unintended side effects
 
