@@ -4255,10 +4255,12 @@ Refer to the ESLint manual at URL
 for more information about the custom directory."
   :type '(choice (const :tag "No custom rules directory" nil)
                  (directory :tag "Custom rules directory"))
-  :safe #'stringp)
+  :safe #'stringp
+  :package-version '(flycheck . "0.16"))
 
 (flycheck-def-config-file-var flycheck-eslintrc javascript-eslint ".eslintrc"
-  :safe #'stringp)
+  :safe #'stringp
+  :package-version '(flycheck . "0.16"))
 
 (flycheck-define-checker javascript-eslint
   "A JavaScript syntax and style checker using eslint.
