@@ -4081,6 +4081,8 @@ Why not:
   (flycheck-test-should-syntax-check
    "checkers/ruby-warnings.rb" 'ruby-mode
    '(1 1 info "Missing utf-8 encoding comment." :checker ruby-rubocop)
+   '(3 1 info "Missing top-level class documentation comment."
+       :checker ruby-rubocop)
    '(4 18 warning "unused argument name" :checker ruby-rubylint)
    '(5 5 warning "unused local variable arr" :checker ruby-rubylint)
    '(5 5 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
@@ -4105,6 +4107,8 @@ Why not:
     (flycheck-test-should-syntax-check
      "checkers/ruby-warnings.rb" 'ruby-mode
      '(1 1 info "Missing utf-8 encoding comment." :checker ruby-rubocop)
+     '(3 1 info "Missing top-level class documentation comment."
+         :checker ruby-rubocop)
      '(5 5 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
      '(6 10 info "Prefer single-quoted strings when you don't need string interpolation or special symbols."
          :checker ruby-rubocop)
