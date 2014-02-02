@@ -18,8 +18,8 @@ def run_tests(logfile):
 
 
 def build_docs(logfile):
-    subprocess.check_call(['make', 'doc'], stdout=logfile,
-                          stderr=subprocess.STDOUT, bufsize=0)
+    subprocess.check_call(['vagrant', 'ssh', '-c', 'make -C /flycheck doc'],
+                          stdout=logfile, stderr=subprocess.STDOUT, bufsize=0)
 
 
 def main():
