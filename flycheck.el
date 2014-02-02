@@ -4244,7 +4244,7 @@ See URL `http://www.jshint.com'."
   :modes (js-mode js2-mode js3-mode))
 
 (flycheck-def-option-var flycheck-eslint-rulesdir nil javascript-eslint
-  "The directory of custom rules for `javascript-eslint'.
+  "The directory of custom rules for ESLint.
 
 The value of this variable is either a string containing the path
 to a directory with custom rules, or nil, to not give any custom
