@@ -5,8 +5,9 @@ include flycheck::emacs
 
 # Do not install Gems on Travis
 if $::travis {
-  notice('Skipping syntax checker tools on Travis CI')
+  notice('Skipping Sphinx and syntax checker tools on Travis CI')
 }
 else {
+  include flycheck::sphinx
   include flycheck::checkers
 }

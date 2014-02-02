@@ -48,7 +48,6 @@ class flycheck::checkers {
                       'pep8-naming', # Plugin for flake8
                       'pylint',      # python-pylint
                       'docutils',    # rst
-                      'Sphinx',      # rst-sphinx
                       ]
 
   package { $python_packages:

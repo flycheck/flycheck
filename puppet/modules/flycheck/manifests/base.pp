@@ -57,9 +57,6 @@ class flycheck::base {
   # Archive tools to extract Carton and syntax checker archives
   package { ['tar', 'unzip']: ensure => latest }
 
-  # Texinfo building
-  package { ['texinfo', 'install-info']: ensure => latest }
-
   # Decrypt encrypted files in unit tests
   package { 'gnupg': ensure => latest }
 }

@@ -2,7 +2,7 @@
 #
 # Install Python and bootstrap Pip
 class flycheck::python {
-  package { 'python': ensure => latest}
+  package { ['python', 'python-dev']: ensure => latest}
 
   package { 'python-setuptools' :
     ensure  => latest,
