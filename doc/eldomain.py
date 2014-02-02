@@ -273,6 +273,9 @@ class EmacsLispDomain(Domain):
 def visit_el_parameterlist_html(self, node):
     self.body.append(' ')
     self.first_param = 1
+    self.optional_param_level = 0
+    self.required_params_left = sum([isinstance(c, addnodes.desc_parameter)
+                                         for c in node.children])
     self.param_separator = node.child_text_separator
 
 
