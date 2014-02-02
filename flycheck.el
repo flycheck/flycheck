@@ -3,7 +3,7 @@
 ;; Copyright (c) 2012, 2013, 2014 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
 ;; Author: Sebastian Wiesner <lunaryorn@gmail.com>
-;; URL: https://github.com/flycheck/flycheck
+;; URL: https://flycheck.readthedocs.org
 ;; Keywords: convenience languages tools
 ;; Version: 0.18-cvs
 ;; Package-Requires: ((s "1.9.0") (dash "2.4.0") (f "0.11.0") (pkg-info "0.4") (cl-lib "0.3") (emacs "24.1"))
@@ -100,8 +100,7 @@ buffer-local wherever it is set."
   "On-the-fly syntax checking (aka \"flymake done right\")."
   :prefix "flycheck-"
   :group 'tools
-  :link '(url-link :tag "Online manual" "http://flycheck.github.io")
-  :link '(url-link :tag "Wiki" "https://github.com/flycheck/flycheck/wiki")
+  :link '(url-link :tag "Online manual" "http://flycheck.readthedocs.org")
   :link '(url-link :tag "Github" "https://github.com/flycheck/flycheck")
   :link '(custom-manual "(flycheck)Top")
   :link '(info-link "(flycheck)Usage"))
