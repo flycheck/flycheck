@@ -109,25 +109,25 @@ buffer-local wherever it is set."
   "Configuration files for on-the-fly syntax checkers."
   :prefix "flycheck-"
   :group 'flycheck
-  :link '(info-link "(flycheck)Configuration"))
+  :link '(custom-manual "(flycheck)Syntax checker configuration files"))
 
 (defgroup flycheck-options nil
   "Options for on-the-fly syntax checkers."
   :prefix "flycheck-"
   :group 'flycheck
-  :link '(info-link "(flycheck)Configuration"))
+  :link '(custom-manual "(flycheck)Syntax checker options"))
 
 (defgroup flycheck-executables nil
   "Executables of syntax checkers."
   :prefix "flycheck-"
   :group 'flycheck
-  :link '(info-link "(flycheck)Configuration"))
+  :link '(custom-manual "(flycheck)Syntax checker executables"))
 
 (defgroup flycheck-faces nil
   "Faces used by on-the-fly syntax checking."
   :prefix "flycheck-"
   :group 'flycheck
-  :link '(info-link "(flycheck)Configuration"))
+  :link '(info-link "(flycheck)Error reporting"))
 
 (defcustom flycheck-checkers
   '(asciidoc
