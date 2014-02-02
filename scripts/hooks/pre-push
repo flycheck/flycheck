@@ -5,6 +5,7 @@ from __future__ import print_function
 
 import sys
 import os
+import re
 import subprocess
 
 
@@ -20,6 +21,12 @@ def run_tests(logfile):
 def build_docs(logfile):
     subprocess.check_call(['vagrant', 'ssh', '-c', 'make -C /flycheck doc'],
                           stdout=logfile, stderr=subprocess.STDOUT, bufsize=0)
+
+
+def is_info_manual_current():
+    output = subprocess.check_output(['git', 'status', '--porcelain',
+                                      'doc/flycheck.info'])
+    return 'doc/flycheck.info' not in output
 
 
 def main():
@@ -49,6 +56,10 @@ def main():
         else:
             # Remove the logfile if no errors occurred
             os.unlink(testlog)
+
+        if not is_info_manual_current():
+            log('Info manual not current.  Please commit doc/flycheck.info!\n')
+            return 1
     return 0
 
 
