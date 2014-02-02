@@ -162,6 +162,7 @@ buffer-local wherever it is set."
     lua
     make-gmake
     perl
+    perl-perlcritic
     php
     php-phpmd
     php-phpcs
@@ -4355,7 +4356,37 @@ See URL `http://www.perl.org'."
   ((error line-start (minimal-match (message))
           " at " (file-name) " line " line
           (or "." (and ", " (zero-or-more not-newline))) line-end))
-  :modes (perl-mode cperl-mode))
+  :modes (perl-mode cperl-mode)
+  :next-checkers (perl-perlcritic))
+
+(flycheck-def-option-var flycheck-perlcritic-verbosity nil perl-perlcritic
+  "The message severity for Perl Critic.
+
+The value of this variable is a severity level as integer, for
+the `--severity' option to Perl Critic."
+  :type '(integer :tag "Severity level")
+  :safe #'integerp
+  :package-version '(flycheck . "0.18"))
+
+(flycheck-define-checker perl-perlcritic
+  "A Perl syntax checker using Perl::Critic.
+
+See URL `http://search.cpan.org/~thaljef/Perl-Critic/'."
+  :command ("perlcritic" "--no-color" "--verbose" "%f:%l:%c:%s:%m (%e)\n"
+            (option "--severity" flycheck-perlcritic-verbosity
+                    flycheck-option-int)
+            source)
+  :error-patterns
+  ((info line-start
+         (file-name) ":" line ":" column ":" (any "1") ":" (message)
+         line-end)
+   (warning line-start
+            (file-name) ":" line ":" column ":" (any "234") ":" (message)
+            line-end)
+   (error line-start
+          (file-name) ":" line ":" column ":" (any "5") ":" (message)
+          line-end))
+  :modes (cperl-mode perl-mode))
 
 (flycheck-define-checker php
   "A PHP syntax checker using the PHP command line interpreter.

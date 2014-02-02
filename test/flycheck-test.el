@@ -3745,20 +3745,36 @@ Why not:
 
 (ert-deftest flycheck-define-checker/perl ()
   :tags '(builtin-checker external-tool language-perl)
-  "Test an unused variable with the Perl checker."
-  (skip-unless (flycheck-check-executable 'perl))
+  (skip-unless (-all? #'flycheck-check-executable '(perl perl-perlcritic)))
   (flycheck-test-should-syntax-check
-   "checkers/perl-error.pl" '(perl-mode cperl-mode)
-   '(4 nil error "Name \"main::x\" used only once: possible typo"
-       :checker perl)))
+   "checkers/perl.pl" '(perl-mode cperl-mode)
+   '(6 nil error "Global symbol \"$x\" requires explicit package name"
+       :checker perl)
+   '(6 nil error "BEGIN not safe after errors--compilation aborted"
+       :checker perl)
+   '(6 6 error "Glob written as <...> (See page 167 of PBP)"
+       :checker perl-perlcritic)))
 
-(ert-deftest flycheck-define-checker/perl-syntax-error ()
+(ert-deftest flycheck-define-checker/perl-perlcritic-verbosity-5 ()
   :tags '(builtin-checker external-tool language-perl)
-  (skip-unless (flycheck-check-executable 'perl))
-  "Test a syntax error with the Perl checker."
-  (flycheck-test-should-syntax-check
-   "checkers/perl-syntax-error.pl" '(perl-mode cperl-mode)
-   '(4 nil error "syntax error" :checker perl)))
+  (skip-unless (-all? #'flycheck-check-executable '(perl perl-perlcritic)))
+  (let ((flycheck-perlcritic-verbosity 1))
+    (flycheck-test-should-syntax-check
+     "checkers/perl.pl" '(perl-mode cperl-mode)
+     '(1 1 warning "No package-scoped \"$VERSION\" variable found (See page 404 of PBP)"
+         :checker perl-perlcritic)
+     '(1 1 info "Package \"perl\" does not start with a upper case letter (See pages 45,46 of PBP)"
+         :checker perl-perlcritic)
+     '(6 nil error "Global symbol \"$x\" requires explicit package name"
+         :checker perl)
+     '(6 nil error "BEGIN not safe after errors--compilation aborted"
+         :checker perl)
+     '(6 6 error "Glob written as <...> (See page 167 of PBP)"
+         :checker perl-perlcritic)
+     '(8 1 info "Builtin function called with parentheses (See page 13 of PBP)"
+         :checker perl-perlcritic)
+     '(10 1 warning "\"die\" used instead of \"croak\" (See page 283 of PBP)"
+          :checker perl-perlcritic))))
 
 (ert-deftest flycheck-define-checker/php-syntax-error ()
   :tags '(builtin-checker external-tool language-php)

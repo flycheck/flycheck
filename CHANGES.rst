@@ -3,6 +3,10 @@
 master (in development)
 -----------------------
 
+- New syntax checkers:
+
+  - #88: Perl with Perl Critic
+
 0.17 (Feb 1, 2014)
 ------------------
 

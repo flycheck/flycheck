@@ -57,6 +57,7 @@ define puppet::module($module = $title, $installed_name = undef, $version = unde
 puppet::module { ['puppetlabs/stdlib',
                   'puppetlabs/apt',
                   'puppetlabs/nodejs',
+                  'example42/perl',
                   'gini/archive',
                   'nodes/php',
                   'adrien/alternatives']:

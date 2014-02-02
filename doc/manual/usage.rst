@@ -442,6 +442,10 @@ on the variable name for detailed help):
    A list of module directories for the search path of
    :flyc:checker:`haskell-ghc`.
 
+.. option:: flycheck-perlcritic-verbosity
+
+   The verbosity of :flyc:checker:`perl-perlcritic` as integer.
+
 .. option:: flycheck-phpcs-standard
 
    The coding standard :flyc:checker:`php-phpcs` shall use.

@@ -34,6 +34,13 @@ class flycheck::checkers {
     require  => Class['nodejs'],
   }
 
+  include perl
+
+  $perl_packages = ['Perl::Critic' # perl-perlcritic
+                    ]
+
+  perl::module { $perl_packages: }
+
   $php_packages = [ 'pear.phpmd.org/PHP_PMD', # php-phpmd
                     'PHP_CodeSniffer',        # php-phpcs
                     ]
@@ -92,7 +99,6 @@ class flycheck::checkers {
                     'hlint',              # haskell-lint
                     'tidy',               # html-tidy
                     'lua5.2',             # lua
-                    'perl',               # perl
                     'puppet',             # puppet-parser
                     'racket',             # racket
                     'rust-0.9',           # rust

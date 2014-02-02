@@ -231,6 +231,10 @@ Perl
 
 .. syntax-checker:: perl
 
+.. syntax-checker:: perl-perlcritic
+
+   .. seealso:: http://search.cpan.org/dist/Perl-Critic/
+
 PHP
 ===
 
