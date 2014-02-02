@@ -23,7 +23,7 @@ HOOKS = .git/hooks/pre-push
 	compile package \
 	clean clean-all clean-doc clean-pkgdir \
 	test vagrant-test \
-	doc html info linkcheck \
+	doc html texinfo linkcheck info \
 	hooks
 
 compile : $(OBJECTS)
@@ -60,10 +60,13 @@ doc : info html
 html :
 	$(SPHINX-BUILD) -b html -n -d doc/_build/doctrees doc doc/_build/html
 
-info : doc/dir
+texinfo :
+	$(SPHINX-BUILD) -b texinfo -n -d doc/_build/doctrees doc doc/_build/info
 
 linkcheck:
 	$(SPHINX-BUILD) -b linkcheck -n -d doc/_build/doctrees doc doc/_build/linkcheck
+
+info : doc/dir
 
 hooks: $(HOOKS)
 
@@ -94,5 +97,4 @@ doc/dir : doc/flycheck.info
 doc/flycheck.info : doc/_build/info/flycheck.info
 	cp -f $< $@
 
-doc/_build/info/flycheck.texi :
-	$(SPHINX-BUILD) -b texinfo -n -d doc/_build/doctrees doc doc/_build/info
+doc/_build/info/flycheck.texi: texinfo
