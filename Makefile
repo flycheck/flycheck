@@ -94,7 +94,7 @@ flycheck-pkg.el : Cask
 doc/dir : doc/flycheck.info
 	$(INSTALL-INFO) doc/flycheck.info doc/dir
 
-doc/flycheck.info : doc/_build/info/flycheck.info
+doc/flycheck.texi : doc/_build/info/flycheck.texi
 	cp -f $< $@
 
 doc/_build/info/flycheck.texi: texinfo
