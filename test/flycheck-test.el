@@ -3745,7 +3745,7 @@ Why not:
 (ert-deftest flycheck-define-checker/pmake ()
   :tags '(builtin-checker external-tool language-make)
   (let ((flycheck-make-executable "pmake"))
-    (skip-unless (flycheck-check-executable 'pmake))
+    (skip-unless (flycheck-check-executable 'make))
     (flycheck-test-should-syntax-check
      "checkers/make.mk" 'makefile-bsdmake-mode
      '(2 nil error "Need an operator" :checker make))))
