@@ -19,6 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from docutils import nodes
 from docutils.parsers.rst import directives
 
 from sphinx import addnodes
@@ -36,6 +37,10 @@ class el_parameterlist(addnodes.desc_parameterlist):
     child_text_separator = ' '
 
 
+class el_annotation(addnodes.desc_annotation):
+    pass
+
+
 class EmacsLispSymbol(ObjectDescription):
 
     @property
@@ -48,7 +53,7 @@ class EmacsLispSymbol(ObjectDescription):
 
     def make_type_annotation(self):
         type_name = self.object_type.lname.title() + ' '
-        return addnodes.desc_annotation(type_name, type_name)
+        return el_annotation(type_name, type_name)
 
     def handle_signature(self, sig, signode):
         parts = sig.split()
@@ -122,7 +127,9 @@ class EmacsLispCommand(EmacsLispSymbol):
 
     def make_type_annotation(self):
         keys = self.with_prefix_arg('M-x')
-        return addnodes.desc_annotation(keys + ' ', keys + ' ')
+        node = el_annotation(keys + ' ', keys + ' ')
+        node['keep_texinfo'] = True
+        return node
 
     def run(self):
         nodes = ObjectDescription.run(self)
@@ -274,6 +281,14 @@ def noop(self, node):
     pass
 
 
+def delegate(target_type):
+    visit = lambda s, n: getattr(s, 'visit_{0}'.format(
+        target_type.__name__))(n)
+    depart = lambda s, n: getattr(s, 'depart_{0}'.format(
+        target_type.__name__))(n)
+    return (visit, depart)
+
+
 def visit_el_parameterlist_html(self, node):
     self.body.append(' ')
     self.first_param = 1
@@ -288,17 +303,25 @@ def visit_el_parameterlist_texinfo(self, node):
     self.first_param = 1
 
 
-def visit_el_parameterlist_latex(self, node):
-    self.visit_desc_parameterlist(node)
+def visit_el_annotation_texinfo(self, node):
+    if not node.get('keep_texinfo'):
+        raise nodes.SkipNode
+    else:
+        self.visit_desc_annotation(node)
 
-def depart_el_parameterlist_latex(self, node):
-    self.depart_desc_parameterlist(node)
+
+def depart_el_annotation_texinfo(self, node):
+    self.depart_desc_annotation(node)
 
 
 def setup(app):
     app.add_domain(EmacsLispDomain)
     app.add_node(el_parameterlist,
                  html=(visit_el_parameterlist_html, noop),
-                 latex=(visit_el_parameterlist_latex,
-                        depart_el_parameterlist_latex),
+                 latex=delegate(addnodes.desc_parameterlist),
                  texinfo=(visit_el_parameterlist_texinfo, noop))
+    app.add_node(el_annotation,
+                 html=delegate(addnodes.desc_annotation),
+                 latex=delegate(addnodes.desc_annotation),
+                 texinfo=(visit_el_annotation_texinfo,
+                          depart_el_annotation_texinfo))
