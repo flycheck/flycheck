@@ -3739,7 +3739,7 @@ Why not:
   :tags '(builtin-checker external-tool language-make)
   (skip-unless (flycheck-check-executable 'make))
   (flycheck-test-should-syntax-check
-   "checkers/make/Makefile" '(makefile-mode makefile-gmake-mode)
+   "checkers/make.mk" '(makefile-mode makefile-gmake-mode)
    '(2 nil error "*** missing separator.  Stop." :checker make)))
 
 (ert-deftest flycheck-define-checker/pmake ()
@@ -3747,7 +3747,7 @@ Why not:
   (let ((flycheck-make-executable "pmake"))
     (skip-unless (flycheck-check-executable 'pmake))
     (flycheck-test-should-syntax-check
-     "checkers/make/Makefile" 'makefile-bsdmake-mode
+     "checkers/make.mk" 'makefile-bsdmake-mode
      '(2 nil error "Need an operator" :checker make))))
 
 (ert-deftest flycheck-define-checker/perl ()
