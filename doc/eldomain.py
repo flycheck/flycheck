@@ -41,6 +41,10 @@ class el_annotation(addnodes.desc_annotation):
     pass
 
 
+class el_parameter(addnodes.desc_parameter):
+    pass
+
+
 class EmacsLispSymbol(ObjectDescription):
 
     @property
@@ -107,7 +111,7 @@ class EmacsLispFunction(EmacsLispSymbol):
                 paramlist += addnodes.desc_annotation(' ' + arg + ' ',
                                                       ' ' + arg + ' ')
             else:
-                node = addnodes.desc_parameter(arg, arg)
+                node = el_parameter(arg, arg)
                 node['noemph'] = True
                 paramlist += node
 
@@ -315,6 +319,19 @@ def depart_el_annotation_texinfo(self, node):
     self.depart_desc_annotation(node)
 
 
+def visit_el_parameter_texinfo(self, node):
+    if not self.first_param:
+        self.body.append(' ')
+    else:
+        self.first_param = 0
+    text = self.escape(node.astext())
+    # replace no-break spaces with normal ones
+    text = text.replace(u' ', '@w{ }')
+    self.body.append(text)
+    # Don't process the children
+    raise nodes.SkipNode
+
+
 def setup(app):
     app.add_domain(EmacsLispDomain)
     app.add_node(el_parameterlist,
@@ -326,3 +343,7 @@ def setup(app):
                  latex=delegate(addnodes.desc_annotation),
                  texinfo=(visit_el_annotation_texinfo,
                           depart_el_annotation_texinfo))
+    app.add_node(el_parameter,
+                 html=delegate(addnodes.desc_parameter),
+                 latex=delegate(addnodes.desc_parameter),
+                 texinfo=(visit_el_parameter_texinfo, None))
