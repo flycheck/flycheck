@@ -159,7 +159,7 @@ buffer-local wherever it is set."
     json-jsonlint
     less
     lua
-    make-gmake
+    make
     perl
     perl-perlcritic
     php
@@ -4337,14 +4337,27 @@ See URL `http://www.lua.org/'."
           ":" line ": " (message) line-end))
   :modes lua-mode)
 
-(flycheck-define-checker make-gmake
-  "A GNU Makefile syntax checker using the GNU Make command.
+(flycheck-define-checker make
+  "A Makefile syntax checker using the POSIX compatible Make command.
 
-See URL `http://www.gnu.org/software/make/'."
-  :command ("make" "--dry-run" "-f" source)
+See URL `http://pubs.opengroup.org/onlinepubs/9699919799/utilities/make.html'."
+  :command ("make" "-n" "-f" source-inplace)
   :error-patterns
-  ((error line-start (file-name) ":" line ": " (message) line-end))
-  :modes makefile-gmake-mode)
+  (;; GNU Make
+   ;; http://www.gnu.org/software/make/
+   (error line-start (file-name) ":" line ": " (message) line-end)
+   ;; NetBSD Make
+   ;; http://netbsd.gw.com/cgi-bin/man-cgi?make++NetBSD-current
+   (error line-start
+          (zero-or-more not-newline) ; make command name
+          ": \"" (file-name) "\" line " line ": " (message) line-end)
+   ;; FreeBSD Make (unmaintained)
+   ;; http://www.freebsd.org/cgi/man.cgi?query=make&sektion=1
+   (error line-start "\"" (file-name) "\", line " line ": " (message) line-end)
+   ;; OpenBSD Make (unmaintained)
+   ;; http://www.openbsd.org/cgi-bin/man.cgi?query=make
+   (error line-start (message) " (" (file-name) ":" line ")" line-end))
+  :modes (makefile-mode makefile-gmake-mode makefile-bsdmake-mode))
 
 (flycheck-define-checker perl
   "A Perl syntax checker using the Perl interpreter.

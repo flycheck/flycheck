@@ -3735,13 +3735,20 @@ Why not:
    '(5 nil error "unfinished string near '\"oh no'"
        :checker lua :filename nil)))
 
-(ert-deftest flycheck-define-checker/make-gmake ()
+(ert-deftest flycheck-define-checker/make ()
   :tags '(builtin-checker external-tool language-make)
-  (skip-unless (flycheck-check-executable 'make-gmake))
+  (skip-unless (flycheck-check-executable 'make))
   (flycheck-test-should-syntax-check
-   "checkers/make/GNUmakefile" 'makefile-gmake-mode
-   '(2 nil error "*** missing separator.  Stop."
-       :checker make-gmake)))
+   "checkers/make/Makefile" '(makefile-mode makefile-gmake-mode)
+   '(2 nil error "*** missing separator.  Stop." :checker make)))
+
+(ert-deftest flycheck-define-checker/pmake ()
+  :tags '(builtin-checker external-tool language-make)
+  (let ((flycheck-make-executable "pmake"))
+    (skip-unless (flycheck-check-executable 'pmake))
+    (flycheck-test-should-syntax-check
+     "checkers/make/Makefile" 'makefile-bsdmake-mode
+     '(2 nil error "Need an operator" :checker make))))
 
 (ert-deftest flycheck-define-checker/perl ()
   :tags '(builtin-checker external-tool language-perl)
