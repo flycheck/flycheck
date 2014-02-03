@@ -220,14 +220,26 @@ Lua
 Make
 ====
 
-.. seealso:: http://pubs.opengroup.org/onlinepubs/9699919799/utilities/make.html
+.. seealso::
+
+   IEEE Std 1003.1, 2013 Edition, Make
+      http://pubs.opengroup.org/onlinepubs/9699919799/utilities/make.html
 
 .. syntax-checker:: make
 
-   .. seealso:: http://www.gnu.org/software/make/
-   .. seealso:: http://netbsd.gw.com/cgi-bin/man-cgi?make++NetBSD-current
-   .. seealso:: http://www.freebsd.org/cgi/man.cgi?query=make&sektion=1
-   .. seealso:: http://www.openbsd.org/cgi-bin/man.cgi?query=make
+   .. seealso::
+
+      GNU Make
+         http://www.gnu.org/software/make/
+
+      NetBSD Make
+         http://netbsd.gw.com/cgi-bin/man-cgi?make++NetBSD-current
+
+      FreeBSD Make
+         http://www.freebsd.org/cgi/man.cgi?query=make&sektion=1
+
+      OpenBSD Make
+         http://www.openbsd.org/cgi-bin/man.cgi?query=make
 
 Perl
 ====
