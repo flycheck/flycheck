@@ -270,6 +270,10 @@ class EmacsLispDomain(Domain):
                        self.object_types[objtype].attrs['searchprio'])
 
 
+def noop(self, node):
+    pass
+
+
 def visit_el_parameterlist_html(self, node):
     self.body.append(' ')
     self.first_param = 1
@@ -284,18 +288,17 @@ def visit_el_parameterlist_texinfo(self, node):
     self.first_param = 1
 
 
-# These two are copied from the LaTeX write
 def visit_el_parameterlist_latex(self, node):
-    self.body.append('}{')
-    self.first_param = 1
+    self.visit_desc_parameterlist(node)
+
 def depart_el_parameterlist_latex(self, node):
-    self.body.append('}{')
+    self.depart_desc_parameterlist(node)
 
 
 def setup(app):
     app.add_domain(EmacsLispDomain)
     app.add_node(el_parameterlist,
-                 html=(visit_el_parameterlist_html, lambda s, v: None),
+                 html=(visit_el_parameterlist_html, noop),
                  latex=(visit_el_parameterlist_latex,
                         depart_el_parameterlist_latex),
-                 texinfo=(visit_el_parameterlist_texinfo, lambda s, v: None))
+                 texinfo=(visit_el_parameterlist_texinfo, noop))
