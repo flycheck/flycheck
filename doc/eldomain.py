@@ -104,7 +104,8 @@ class EmacsLispFunction(EmacsLispSymbol):
         signode += paramlist
         for arg in arguments:
             if arg.startswith('&'):
-                paramlist += addnodes.desc_annotation(' ' + arg, ' ' + arg)
+                paramlist += addnodes.desc_annotation(' ' + arg + ' ',
+                                                      ' ' + arg + ' ')
             else:
                 node = addnodes.desc_parameter(arg, arg)
                 node['noemph'] = True
