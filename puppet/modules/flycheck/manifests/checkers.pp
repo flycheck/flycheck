@@ -99,6 +99,7 @@ class flycheck::checkers {
                     'hlint',              # haskell-lint
                     'tidy',               # html-tidy
                     'lua5.2',             # lua
+                    'pmake',              # make (NetBSD Make)
                     'puppet',             # puppet-parser
                     'racket',             # racket
                     'rust-0.9',           # rust

@@ -220,9 +220,14 @@ Lua
 Make
 ====
 
-.. syntax-checker:: make-gmake
+.. seealso:: http://pubs.opengroup.org/onlinepubs/9699919799/utilities/make.html
+
+.. syntax-checker:: make
 
    .. seealso:: http://www.gnu.org/software/make/
+   .. seealso:: http://netbsd.gw.com/cgi-bin/man-cgi?make++NetBSD-current
+   .. seealso:: http://www.freebsd.org/cgi/man.cgi?query=make&sektion=1
+   .. seealso:: http://www.openbsd.org/cgi-bin/man.cgi?query=make
 
 Perl
 ====

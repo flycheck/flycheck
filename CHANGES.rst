@@ -6,6 +6,7 @@ master (in development)
 - New syntax checkers:
 
   - #88: Perl with Perl Critic
+  - #322: Replace GNU Make with POSIX Make
 
 0.17 (Feb 1, 2014)
 ------------------
