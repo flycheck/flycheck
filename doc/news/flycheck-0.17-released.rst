@@ -77,8 +77,8 @@ shortcomings over the time.
 Syntax checkers
 ===============
 
-Flycheck can now check GNU Makefiles (:issue:`321`) with the new
-:flyc:checker:`make-gmake` syntax checker.
+Flycheck can now check GNU Makefiles (:issue:`321`) with the new `make-gmake`
+syntax checker.
 
 The :flyc:checker:`rust` syntax checker now uses `--no-trans` to check for more
 than just syntax errors.  For instance, it will report unused variables now.
