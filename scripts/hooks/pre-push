@@ -8,6 +8,11 @@ import os
 import subprocess
 
 
+class Failed(Exception):
+    def __init__(self, reason):
+        self.reason = reason
+
+
 def log(message):
     print(message, file=sys.stderr, end='')
 
@@ -17,15 +22,24 @@ def run_tests(logfile):
                           stderr=subprocess.STDOUT, bufsize=0)
 
 
-def build_docs(logfile):
-    subprocess.check_call(['vagrant', 'ssh', '-c', 'make -C /flycheck doc'],
-                          stdout=logfile, stderr=subprocess.STDOUT, bufsize=0)
-
-
 def is_info_manual_current():
     output = subprocess.check_output(['git', 'status', '--porcelain',
                                       'doc/flycheck.texi'])
     return 'doc/flycheck.texi' not in output
+
+
+def build_docs(logfile):
+    subprocess.check_call(['vagrant', 'ssh', '-c', 'make -C /flycheck doc'],
+                          stdout=logfile, stderr=subprocess.STDOUT, bufsize=0)
+    if not is_info_manual_current():
+        raise Failed('Texinfo manual not up to date.  Please commit doc/flycheck.texi!')
+
+
+def check_dirty(logfile):
+    output = subprocess.check_output(['git', 'status', '--porcelain'])
+    if output.strip():
+        logfile.write(output)
+        raise Failed('You have uncommmitted changes.')
 
 
 def main():
@@ -36,29 +50,29 @@ def main():
             # Don't force tests on feature branches
             continue
         log('Pushing to master!\n')
-        success = True
+
         # Disable buffering, to support tail -f logfile
         with open(testlog, 'wb', buffering=1) as logfile:
-            for message, action in [('Running tests', run_tests),
-                                    ('Building docs', build_docs)]:
+            for message, action in [('Checking working copy', check_dirty),
+                                    ('Building docs', build_docs),
+                                    ('Running tests', run_tests)]:
                 log(message)
                 log('...')
                 try:
                     action(logfile)
                     log(' ok\n')
-                except subprocess.CalledProcessError:
+                except (subprocess.CalledProcessError, Failed) as error:
                     log(' FAILED\n')
-                    success = False
-        if not success:
-            log('Failures occurred, see {0} for details\n'.format(testlog))
-            return 1
-        else:
-            # Remove the logfile if no errors occurred
-            os.unlink(testlog)
+                    reason = (error.reason if isinstance(error, Failed)
+                              else 'Command {0} failed with code {1}.'.format(
+                                      error.cmd, error.returncode))
+                    log(reason + '\n')
+                    log('See {0} for details\n'.format(testlog))
+                    return 1
 
-        if not is_info_manual_current():
-            log('Info manual not current.  Please commit doc/flycheck.texi!\n')
-            return 1
+        # Remove the logfile if no errors occurred
+        os.unlink(testlog)
+
     return 0
 
 
