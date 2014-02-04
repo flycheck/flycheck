@@ -183,6 +183,7 @@ buffer-local wherever it is set."
     sh-posix-dash
     sh-posix-bash
     sh-zsh
+    sh-shellcheck
     slim
     tex-chktex
     tex-lacheck
@@ -4836,7 +4837,8 @@ See URL `http://www.gnu.org/software/bash/'."
                           line (zero-or-more " ") ":" (zero-or-more " ")
                           (message) line-end))
   :modes sh-mode
-  :predicate (lambda () (eq sh-shell 'bash)))
+  :predicate (lambda () (eq sh-shell 'bash))
+  :next-checkers ((no-errors . sh-shellcheck)))
 
 (flycheck-define-checker sh-posix-dash
   "A POSIX Shell syntax checker using the Dash shell.
@@ -4846,7 +4848,8 @@ See URL `http://gondor.apana.org.au/~herbert/dash/'."
   :error-patterns
   ((error line-start (file-name) ": " line ": " (backref 1) ": " (message)))
   :modes sh-mode
-  :predicate (lambda () (eq sh-shell 'sh)))
+  :predicate (lambda () (eq sh-shell 'sh))
+  :next-checkers ((no-errors . sh-shellcheck)))
 
 (flycheck-define-checker sh-posix-bash
   "A POSIX Shell syntax checker using the Bash shell.
@@ -4859,7 +4862,8 @@ See URL `http://www.gnu.org/software/bash/'."
           line (zero-or-more " ") ":" (zero-or-more " ")
           (message) line-end))
   :modes sh-mode
-  :predicate (lambda () (eq sh-shell 'sh)))
+  :predicate (lambda () (eq sh-shell 'sh))
+  :next-checkers ((no-errors . sh-shellcheck)))
 
 (flycheck-define-checker sh-zsh
   "A Zsh syntax checker using the Zsh shell.
@@ -4869,7 +4873,22 @@ See URL `http://www.zsh.org/'."
   :error-patterns
   ((error line-start (file-name) ":" line ": " (message) line-end))
   :modes sh-mode
-  :predicate (lambda () (eq sh-shell 'zsh)))
+  :predicate (lambda () (eq sh-shell 'zsh))
+  :next-checkers ((no-errors . sh-shellcheck)))
+
+(defconst flycheck-shellcheck-supported-shells '(bash ksh88 sh zsh)
+  "Shells supported by Shellcheck.")
+
+(flycheck-define-checker sh-shellcheck
+  "A shell script syntax and style checker using Shellcheck.
+
+See URL `https://github.com/koalaman/shellcheck/'."
+  :command ("shellcheck" "-f" "checkstyle"
+            "-s" (eval (symbol-name sh-shell))
+            source)
+  :modes sh-mode
+  :error-parser flycheck-parse-checkstyle
+  :predicate (lambda () (memq sh-shell flycheck-shellcheck-supported-shells)))
 
 (flycheck-define-checker slim
   "A Slim syntax checker using the Slim compiler.

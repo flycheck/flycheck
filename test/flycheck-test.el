@@ -4266,6 +4266,16 @@ Why not:
    "checkers/sh-zsh-syntax-error.zsh" 'sh-mode
    '(5 nil error "parse error near `fi'" :checker sh-zsh)))
 
+(ert-deftest flycheck-define-checker/sh-shellcheck ()
+  :tags '(builtin-checker external-tool language-sh)
+  (skip-unless (flycheck-check-executable 'sh-shellcheck))
+  (flycheck-test-should-syntax-check
+   "checkers/sh-shellcheck.sh" 'sh-mode
+   '(2 5 warning "Note that ~ does not expand in quotes."
+       :checker sh-shellcheck)
+   '(3 7 error "Add double quotes around ${@}, otherwise it's just like $* and breaks on spaces."
+       :checker sh-shellcheck)))
+
 (ert-deftest flycheck-define-checker/slim ()
   :tags '(builtin-checker external-tool language-slim)
   (skip-unless (flycheck-check-executable 'slim))

@@ -393,6 +393,10 @@ Shell script languages
 
    .. seealso:: http://www.zsh.org/
 
+.. syntax-checker:: sh-shellcheck
+
+   .. seealso:: https://github.com/koalaman/shellcheck/
+
 Slim
 ====
 

@@ -6,10 +6,13 @@ class flycheck::checkers {
   include flycheck::php
   include flycheck::python
   include flycheck::ruby
+  include flycheck::haskell
 
   include flycheck::checkers::repositories
 
-  # Nodejs
+  $haskell_packages = ['shellcheck']
+  flycheck::haskell::cabal { $haskell_packages: }
+
   class { 'nodejs':
     manage_repo => true,
     version     => latest
@@ -95,7 +98,6 @@ class flycheck::checkers {
                     'cfengine-community', # cfengine
                     'esl-erlang',         # erlang
                     'golang-stable',      # go-*
-                    'ghc',                # haskell-ghc
                     'hlint',              # haskell-lint
                     'tidy',               # html-tidy
                     'lua5.2',             # lua
