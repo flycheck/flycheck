@@ -2728,7 +2728,12 @@ is not a file node."
           :line line
           :column (when (and column (> column 0)) column)
           :message message
-          :level (if (string= severity "error") 'error 'warning)))))))
+          :level (pcase severity
+                   (`"error"   'error)
+                   (`"warning" 'warning)
+                   (`"info"    'info)
+                   ;; Default to error for unknown severity
+                   (_          'error))))))))
 
 (eval-and-compile
   ;; Parser must be defined during compilation, to allow syntax checkers parse

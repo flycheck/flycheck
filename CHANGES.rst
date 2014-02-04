@@ -15,6 +15,10 @@ master (in development)
   - #88: Perl with Perl Critic
   - #322: Replace GNU Make with POSIX Make
 
+- Improvements:
+
+  - `flycheck-parse-checkstyle` supports `info` level messages now
+
 0.17 (Feb 1, 2014)
 ------------------
 

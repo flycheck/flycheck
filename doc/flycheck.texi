@@ -3049,6 +3049,16 @@ New syntax checkers:
 @item 
 #322@footnote{https://github.com/flycheck/flycheck/issues/322}: Replace GNU Make with POSIX Make
 @end itemize
+
+@item 
+Improvements:
+
+
+@itemize -
+
+@item 
+@code{flycheck-parse-checkstyle} supports @code{info} level messages now
+@end itemize
 @end itemize
 
 @node 0 17 Feb 1 2014,0 16 Jan 11 2014,master in development,Changes
