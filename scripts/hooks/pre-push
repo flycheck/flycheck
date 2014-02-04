@@ -6,6 +6,7 @@ from __future__ import print_function
 import sys
 import os
 import subprocess
+from tempfile import NamedTemporaryFile
 
 
 class Failed(Exception):
@@ -17,61 +18,106 @@ def log(message):
     print(message, file=sys.stderr, end='')
 
 
-def run_tests(logfile):
-    subprocess.check_call(['make', 'vagrant-test'], stdout=logfile,
-                          stderr=subprocess.STDOUT, bufsize=0)
+class Check(object):
+
+    def __init__(self, logfile):
+        self.logfile = logfile
+
+    def check_call(self, *args, **kwargs):
+        try:
+            subprocess.check_call(*args, **kwargs)
+        except subprocess.CalledProcessError as error:
+            raise Failed('Command {0} failed with code {1}.'.format(
+                error.cmd, error.returncode))
+
+    def check_output(self, *args, **kwargs):
+        try:
+            return subprocess.check_output(*args, **kwargs)
+        except subprocess.CalledProcessError as error:
+            raise Failed('Command {0} failed with code {1}.'.format(
+                error.cmd, error.returncode))
+
+    def __call__(self):
+        raise NotImplementedError()
 
 
-def is_info_manual_current():
-    output = subprocess.check_output(['git', 'status', '--porcelain',
-                                      'doc/flycheck.texi'])
-    return 'doc/flycheck.texi' not in output
+class TestsSucceed(Check):
+
+    message = 'Running tests'
+
+    def __call__(self):
+        self.check_call(['make', 'vagrant-test'], stdout=self.logfile,
+                        stderr=subprocess.STDOUT, bufsize=0)
 
 
-def build_docs(logfile):
-    subprocess.check_call(['vagrant', 'ssh', '-c', 'make -C /flycheck doc'],
-                          stdout=logfile, stderr=subprocess.STDOUT, bufsize=0)
-    if not is_info_manual_current():
-        raise Failed('Texinfo manual not up to date.  Please commit doc/flycheck.texi!')
+class DocsBuild(Check):
+
+    message = 'Building docs'
+
+    def __call__(self):
+        self.check_call(['vagrant', 'ssh', '-c', 'make -C /flycheck doc'],
+                          stdout=self.logfile, stderr=subprocess.STDOUT,
+                        bufsize=0)
 
 
-def check_dirty(logfile):
-    output = subprocess.check_output(['git', 'status', '--porcelain'])
-    if output.strip():
-        logfile.write(output)
-        raise Failed('You have uncommmitted changes.')
+class TexinfoManualCurrent(Check):
+    message = 'Texinfo manual current'
+
+    def __call__(self):
+        output = self.check_output(['git', 'status', '--porcelain',
+                                    'doc/flycheck.texi'])
+        if 'doc/flycheck.texi' in output:
+            raise Failed('Texinfo manual not up to date.  Please commit doc/flycheck.texi!')
+
+
+class WorkingCopyClean(Check):
+
+    message = 'Checking working copy'
+
+    def __call__(self):
+        output = self.check_output(['git', 'status', '--porcelain'])
+        if output.strip():
+            self.logfile.write(output)
+            raise Failed('You have uncommmitted changes.')
+
+
+def run_checks(checks, logfile):
+    try:
+        for check in checks:
+            pending_check = check(logfile)
+            log(pending_check.message)
+            log('...')
+            pending_check()
+            log(' ok\n')
+    except Failed:
+        log(' FAILED\n')
+        raise
 
 
 def main():
-    testlog = os.path.abspath('testlog')
     for line in sys.stdin:
         _, _, remote_ref, _ = line.split()
-        if remote_ref != 'refs/heads/master':
-            # Don't force tests on feature branches
-            continue
-        log('Pushing to master!\n')
 
-        # Disable buffering, to support tail -f logfile
-        with open(testlog, 'wb', buffering=1) as logfile:
-            for message, action in [('Checking working copy', check_dirty),
-                                    ('Building docs', build_docs),
-                                    ('Running tests', run_tests)]:
-                log(message)
-                log('...')
-                try:
-                    action(logfile)
-                    log(' ok\n')
-                except (subprocess.CalledProcessError, Failed) as error:
-                    log(' FAILED\n')
-                    reason = (error.reason if isinstance(error, Failed)
-                              else 'Command {0} failed with code {1}.'.format(
-                                      error.cmd, error.returncode))
-                    log(reason + '\n')
-                    log('See {0} for details\n'.format(testlog))
-                    return 1
+        # Don't force tests on feature branches
+        checks = [WorkingCopyClean]
+        if remote_ref == 'refs/heads/master':
+            checks.extend([DocsBuild,
+                           TexinfoManualCurrent,
+                           TestsSucceed])
 
-        # Remove the logfile if no errors occurred
-        os.unlink(testlog)
+        with NamedTemporaryFile(
+                'wb', 1, # No buffering for tail -f
+                prefix='flycheck-testlog-', delete=False) as logfile:
+
+            try:
+                run_checks(checks, logfile)
+            except Failed as failure:
+                log(failure.reason + '\n')
+                log('See {0} for details\n'.format(logfile.name))
+                return 1
+
+            # Remove the logfile if no errors occurred
+            os.unlink(logfile.name)
 
     return 0
 
