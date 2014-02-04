@@ -234,7 +234,7 @@ Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24.
 @itemize -
 
 @item 
-Support for 39 languages with 62 syntax
+Support for 39 languages with 63 syntax
 checkers, see @ref{7,,Supported languages}
 
 @item 
@@ -3048,6 +3048,9 @@ New syntax checkers:
 
 @item 
 #322@footnote{https://github.com/flycheck/flycheck/issues/322}: Replace GNU Make with POSIX Make
+
+@item 
+#267@footnote{https://github.com/flycheck/flycheck/issues/267}: Shellcheck
 @end itemize
 
 @item 
@@ -4992,7 +4995,7 @@ to permit their use in free software.
 
 
 Flycheck supports the following 39 languages with
-62 syntax checkers.
+63 syntax checkers.
 
 Each language has one or more syntax checkers, whose names follow a
 @code{@emph{language}-@emph{tool}} convention, where @code{@emph{language}} is the
@@ -5964,8 +5967,20 @@ sphinx-doc.org
 
 @end deffn
 
+@geindex sh-shellcheck; Flycheck syntax checker
+@anchor{manual/languages flyc sh-shellcheck}@anchor{136}
+@deffn {Flycheck Syntax Checker} Syntax Checker sh@w{-}shellcheck
+
+
+@subsubheading See also
+
+
+@indicateurl{https://github.com/koalaman/shellcheck/}
+
+@end deffn
+
 @node Slim,TeX/LaTeX,Shell script languages,Supported languages
-@anchor{manual/languages slim}@anchor{136}
+@anchor{manual/languages slim}@anchor{137}
 @section Slim
 
 
@@ -5977,12 +5992,12 @@ sphinx-doc.org
 
 
 @geindex slim; Flycheck syntax checker
-@anchor{manual/languages flyc slim}@anchor{137}
+@anchor{manual/languages flyc slim}@anchor{138}
 @deffn {Flycheck Syntax Checker} Syntax Checker slim
 @end deffn
 
 @node TeX/LaTeX,Texinfo,Slim,Supported languages
-@anchor{manual/languages tex-latex}@anchor{138}
+@anchor{manual/languages tex-latex}@anchor{139}
 @section TeX/LaTeX
 
 
@@ -6016,7 +6031,7 @@ sphinx-doc.org
 @end deffn
 
 @geindex tex-lacheck; Flycheck syntax checker
-@anchor{manual/languages flyc tex-lacheck}@anchor{139}
+@anchor{manual/languages flyc tex-lacheck}@anchor{13a}
 @deffn {Flycheck Syntax Checker} Syntax Checker tex@w{-}lacheck
 
 
@@ -6028,12 +6043,12 @@ sphinx-doc.org
 @end deffn
 
 @node Texinfo,Verilog,TeX/LaTeX,Supported languages
-@anchor{manual/languages texinfo}@anchor{13a}
+@anchor{manual/languages texinfo}@anchor{13b}
 @section Texinfo
 
 
 @geindex texinfo; Flycheck syntax checker
-@anchor{manual/languages flyc texinfo}@anchor{13b}
+@anchor{manual/languages flyc texinfo}@anchor{13c}
 @deffn {Flycheck Syntax Checker} Syntax Checker texinfo
 
 
@@ -6045,12 +6060,12 @@ www.gnu.org/software/texinfo/
 @end deffn
 
 @node Verilog,XML,Texinfo,Supported languages
-@anchor{manual/languages verilog}@anchor{13c}
+@anchor{manual/languages verilog}@anchor{13d}
 @section Verilog
 
 
 @geindex verilog-verilator; Flycheck syntax checker
-@anchor{manual/languages flyc verilog-verilator}@anchor{13d}
+@anchor{manual/languages flyc verilog-verilator}@anchor{13e}
 @deffn {Flycheck Syntax Checker} Syntax Checker verilog@w{-}verilator
 
 
@@ -6062,12 +6077,12 @@ www.gnu.org/software/texinfo/
 @end deffn
 
 @node XML,YAML,Verilog,Supported languages
-@anchor{manual/languages xml}@anchor{13e}
+@anchor{manual/languages xml}@anchor{13f}
 @section XML
 
 
 @geindex xml-xmlstarlet; Flycheck syntax checker
-@anchor{manual/languages flyc xml-xmlstarlet}@anchor{13f}
+@anchor{manual/languages flyc xml-xmlstarlet}@anchor{140}
 @deffn {Flycheck Syntax Checker} Syntax Checker xml@w{-}xmlstarlet
 
 
@@ -6079,7 +6094,7 @@ www.gnu.org/software/texinfo/
 @end deffn
 
 @geindex xml-xmllint; Flycheck syntax checker
-@anchor{manual/languages flyc xml-xmllint}@anchor{140}
+@anchor{manual/languages flyc xml-xmllint}@anchor{141}
 @deffn {Flycheck Syntax Checker} Syntax Checker xml@w{-}xmllint
 
 
@@ -6097,12 +6112,12 @@ www.gnu.org/software/texinfo/
 @end deffn
 
 @node YAML,,XML,Supported languages
-@anchor{manual/languages yaml}@anchor{141}
+@anchor{manual/languages yaml}@anchor{142}
 @section YAML
 
 
 @geindex yaml-jsyaml; Flycheck syntax checker
-@anchor{manual/languages flyc yaml-jsyaml}@anchor{142}
+@anchor{manual/languages flyc yaml-jsyaml}@anchor{143}
 @deffn {Flycheck Syntax Checker} Syntax Checker yaml@w{-}jsyaml
 
 
@@ -6114,7 +6129,7 @@ www.gnu.org/software/texinfo/
 @end deffn
 
 @geindex yaml-ruby; Flycheck syntax checker
-@anchor{manual/languages flyc yaml-ruby}@anchor{143}
+@anchor{manual/languages flyc yaml-ruby}@anchor{144}
 @deffn {Flycheck Syntax Checker} Syntax Checker yaml@w{-}ruby
 
 
@@ -6126,7 +6141,7 @@ www.gnu.org/software/texinfo/
 @end deffn
 
 @node Glossary,Index,Supported languages,Top
-@anchor{manual/glossary glossary}@anchor{144}@anchor{manual/glossary doc}@anchor{145}
+@anchor{manual/glossary glossary}@anchor{145}@anchor{manual/glossary doc}@anchor{146}
 @chapter Glossary
 
 
@@ -6146,7 +6161,7 @@ A symbol which is defined as syntax checker with
 
 A @ref{27,,syntax checker} available for automatic selection, i.e. that is
 contained in @ref{25,,flycheck-checkers}.
-@anchor{manual/glossary term-disabled-syntax-checker}@anchor{146}
+@anchor{manual/glossary term-disabled-syntax-checker}@anchor{147}
 @geindex disabled syntax checker
 
 @item disabled syntax checker
@@ -6158,7 +6173,7 @@ i.e. that is contained in @ref{26,,flycheck-disabled-checkers}.
 
 @item enabled syntax checker
 
-A @ref{28,,registered syntax checker} which is not a @ref{146,,disabled syntax checker}.
+A @ref{28,,registered syntax checker} which is not a @ref{147,,disabled syntax checker}.
 @anchor{manual/glossary term-suitable-syntax-checker}@anchor{19}
 @geindex suitable syntax checker
 
