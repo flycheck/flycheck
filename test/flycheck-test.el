@@ -4237,24 +4237,22 @@ Why not:
 (ert-deftest flycheck-define-checker/sh-bash ()
   :tags '(builtin-checker external-tool language-sh language-sh-bash)
   (skip-unless (flycheck-check-executable 'sh-bash))
-  (let ((flycheck-disabled-checkers '(sh-shellcheck)))
-    (flycheck-test-should-syntax-check
-     "checkers/sh-bash-syntax-error.bash" 'sh-mode
-     '(5 nil error "syntax error near unexpected token `fi'" :checker sh-bash)
-     '(5 nil error "`fi'" :checker sh-bash))))
+  (flycheck-test-should-syntax-check
+   "checkers/sh-bash-syntax-error.bash" 'sh-mode
+   '(5 nil error "syntax error near unexpected token `fi'" :checker sh-bash)
+   '(5 nil error "`fi'" :checker sh-bash)))
 
 (ert-deftest flycheck-define-checker/sh-posix-dash ()
   :tags '(builtin-checker external-tool language-sh language-sh-posix)
-  (let ((flycheck-disabled-checkers '(sh-shellcheck)))
-    (skip-unless (flycheck-check-executable 'sh-posix-dash))
-    (flycheck-test-should-syntax-check
-     "checkers/sh-posix-syntax-error.sh" 'sh-mode
-     '(3 nil error "Syntax error: \"(\" unexpected" :checker sh-posix-dash))))
+  (skip-unless (flycheck-check-executable 'sh-posix-dash))
+  (flycheck-test-should-syntax-check
+   "checkers/sh-posix-syntax-error.sh" 'sh-mode
+   '(3 nil error "Syntax error: \"(\" unexpected" :checker sh-posix-dash)))
 
 (ert-deftest flycheck-define-checker/sh-posix-bash ()
   :tags '(builtin-checker external-tool language-sh language-sh-posix)
   (skip-unless (flycheck-check-executable 'sh-posix-bash))
-  (let ((flycheck-disabled-checkers '(sh-posix-dash sh-shellcheck)))
+  (let ((flycheck-disabled-checkers '(sh-posix-dash)))
     (flycheck-test-should-syntax-check
      "checkers/sh-posix-syntax-error.sh" 'sh-mode
      '(3 nil error "syntax error near unexpected token `('"
@@ -4263,11 +4261,10 @@ Why not:
 
 (ert-deftest flycheck-define-checker/sh-zsh ()
   :tags '(builtin-checker external-tool language-sh language-sh-zsh)
-  (let ((flycheck-disabled-checkers '(sh-shellcheck)))
-    (skip-unless (flycheck-check-executable 'sh-zsh))
-    (flycheck-test-should-syntax-check
-     "checkers/sh-zsh-syntax-error.zsh" 'sh-mode
-     '(5 nil error "parse error near `fi'" :checker sh-zsh))))
+  (skip-unless (flycheck-check-executable 'sh-zsh))
+  (flycheck-test-should-syntax-check
+   "checkers/sh-zsh-syntax-error.zsh" 'sh-mode
+   '(5 nil error "parse error near `fi'" :checker sh-zsh)))
 
 (ert-deftest flycheck-define-checker/sh-shellcheck ()
   :tags '(builtin-checker external-tool language-sh)
