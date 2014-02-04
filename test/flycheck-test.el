@@ -4270,7 +4270,7 @@ Why not:
      '(5 nil error "parse error near `fi'" :checker sh-zsh))))
 
 (ert-deftest flycheck-define-checker/sh-shellcheck ()
-  :tags '(builtin-checker external-tool language-sh language-sh-shellcheck)
+  :tags '(builtin-checker external-tool language-sh)
   (skip-unless (flycheck-check-executable 'sh-shellcheck))
   (flycheck-test-should-syntax-check
    "checkers/sh-shellcheck.sh" 'sh-mode
