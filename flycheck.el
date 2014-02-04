@@ -4887,6 +4887,7 @@ See URL `https://github.com/koalaman/shellcheck/'."
             "-s" (eval (symbol-name sh-shell))
             source)
   :modes sh-mode
+  :error-parser flycheck-parse-checkstyle
   :predicate (lambda () (memq sh-shell flycheck-shellcheck-supported-shells)))
 
 (flycheck-define-checker slim
