@@ -26,13 +26,6 @@ AsciiDoc
 
 .. syntax-checker:: asciidoc
 
-Bash
-====
-
-.. seealso:: http://www.gnu.org/software/bash/
-
-.. syntax-checker:: bash
-
 C/C++
 =====
 
@@ -369,24 +362,36 @@ Scss
 
    .. seealso:: http://sass-lang.com/
 
-Shell (POSIX)
-=============
+Shell script languages
+======================
 
-.. seealso::
+.. syntax-checker:: sh-bash
 
-   POSIX Shell Command Language
-      http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html
+   .. seealso:: http://www.gnu.org/software/bash/
 
-.. syntax-checker:: sh-dash
+.. syntax-checker:: sh-posix-dash
 
    .. seealso::
 
       DASH
          http://gondor.apana.org.au/~herbert/dash/
 
-.. syntax-checker:: sh-bash
+      POSIX Shell Command Language
+         http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html
 
-   .. seealso:: http://www.gnu.org/software/bash/
+.. syntax-checker:: sh-posix-bash
+
+   .. seealso::
+
+      Bash POSIX Mode
+         http://www.gnu.org/software/bash/manual/html_node/Bash-POSIX-Mode.html#Bash-POSIX-Mode
+
+      POSIX Shell Command Language
+         http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html
+
+.. syntax-checker:: sh-zsh
+
+   .. seealso:: http://www.zsh.org/
 
 Slim
 ====
@@ -452,10 +457,3 @@ YAML
 .. syntax-checker:: yaml-ruby
 
    .. seealso:: https://www.ruby-lang.org
-
-Zsh
-===
-
-.. seealso:: http://www.zsh.org/
-
-.. syntax-checker:: zsh

@@ -21,7 +21,7 @@
 
 @copying
 @quotation
-Flycheck 0.18-cvs, February 03, 2014
+Flycheck 0.18-cvs, February 04, 2014
 
 Sebastian Wiesner
 
@@ -167,7 +167,6 @@ Changes
 Supported languages
 
 * AsciiDoc:: 
-* Bash:: 
 * C/C++:: 
 * CFEngine:: 
 * Chef:: 
@@ -199,14 +198,13 @@ Supported languages
 * Sass:: 
 * Scala:: 
 * Scss:: 
-* Shell (POSIX): Shell POSIX. 
+* Shell script languages:: 
 * Slim:: 
 * TeX/LaTeX:: 
 * Texinfo:: 
 * Verilog:: 
 * XML:: 
 * YAML:: 
-* Zsh:: 
 
 @end detailmenu
 @end menu
@@ -236,7 +234,7 @@ Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24.
 @itemize -
 
 @item 
-Support for 41 languages with 62 syntax
+Support for 39 languages with 62 syntax
 checkers, see @ref{7,,Supported languages}
 
 @item 
@@ -3027,6 +3025,19 @@ somewhat failed attempt at on-the-fly syntax checking.
 @itemize -
 
 @item 
+@strong{Breaking changes}:
+
+
+@itemize -
+
+@item 
+The POSIX script syntax checkers @code{sh-bash} and @code{sh-dash} were renamed to
+@code{sh-posix-bash} and @code{sh-posix-dash} respectively.  The @code{bash} and @code{zsh}
+syntax checkers were renamed to @code{sh-bash} and @code{sh-zsh} respectively.  Thus,
+all shell script syntax checkers now live in the @code{sh-} prefix.
+@end itemize
+
+@item 
 New syntax checkers:
 
 
@@ -4970,7 +4981,7 @@ to permit their use in free software.
 @chapter Supported languages
 
 
-Flycheck supports the following 41 languages with
+Flycheck supports the following 39 languages with
 62 syntax checkers.
 
 Each language has one or more syntax checkers, whose names follow a
@@ -4984,7 +4995,6 @@ a syntax checker.
 
 @menu
 * AsciiDoc:: 
-* Bash:: 
 * C/C++:: 
 * CFEngine:: 
 * Chef:: 
@@ -5016,18 +5026,17 @@ a syntax checker.
 * Sass:: 
 * Scala:: 
 * Scss:: 
-* Shell (POSIX): Shell POSIX. 
+* Shell script languages:: 
 * Slim:: 
 * TeX/LaTeX:: 
 * Texinfo:: 
 * Verilog:: 
 * XML:: 
 * YAML:: 
-* Zsh:: 
 
 @end menu
 
-@node AsciiDoc,Bash,,Supported languages
+@node AsciiDoc,C/C++,,Supported languages
 @anchor{manual/languages asciidoc}@anchor{f3}
 @section AsciiDoc
 
@@ -5044,25 +5053,8 @@ a syntax checker.
 @deffn {Flycheck Syntax Checker} Syntax Checker asciidoc
 @end deffn
 
-@node Bash,C/C++,AsciiDoc,Supported languages
-@anchor{manual/languages bash}@anchor{f5}
-@section Bash
-
-
-
-@subsubheading See also
-
-
-@indicateurl{http://www.gnu.org/software/bash/}
-
-
-@geindex bash; Flycheck syntax checker
-@anchor{manual/languages flyc bash}@anchor{f6}
-@deffn {Flycheck Syntax Checker} Syntax Checker bash
-@end deffn
-
-@node C/C++,CFEngine,Bash,Supported languages
-@anchor{manual/languages c-c}@anchor{f7}
+@node C/C++,CFEngine,AsciiDoc,Supported languages
+@anchor{manual/languages c-c}@anchor{f5}
 @section C/C++
 
 
@@ -5091,7 +5083,7 @@ a syntax checker.
 @end deffn
 
 @node CFEngine,Chef,C/C++,Supported languages
-@anchor{manual/languages cfengine}@anchor{f8}
+@anchor{manual/languages cfengine}@anchor{f6}
 @section CFEngine
 
 
@@ -5103,12 +5095,12 @@ a syntax checker.
 
 
 @geindex cfengine; Flycheck syntax checker
-@anchor{manual/languages flyc cfengine}@anchor{f9}
+@anchor{manual/languages flyc cfengine}@anchor{f7}
 @deffn {Flycheck Syntax Checker} Syntax Checker cfengine
 @end deffn
 
 @node Chef,Coffeescript,CFEngine,Supported languages
-@anchor{manual/languages chef}@anchor{fa}
+@anchor{manual/languages chef}@anchor{f8}
 @section Chef
 
 
@@ -5120,7 +5112,7 @@ a syntax checker.
 
 
 @geindex chef-foodcritic; Flycheck syntax checker
-@anchor{manual/languages flyc chef-foodcritic}@anchor{fb}
+@anchor{manual/languages flyc chef-foodcritic}@anchor{f9}
 @deffn {Flycheck Syntax Checker} Syntax Checker chef@w{-}foodcritic
 
 
@@ -5132,7 +5124,7 @@ a syntax checker.
 @end deffn
 
 @node Coffeescript,CSS,Chef,Supported languages
-@anchor{manual/languages coffeescript}@anchor{fc}
+@anchor{manual/languages coffeescript}@anchor{fa}
 @section Coffeescript
 
 
@@ -5144,7 +5136,7 @@ a syntax checker.
 
 
 @geindex coffee; Flycheck syntax checker
-@anchor{manual/languages flyc coffee}@anchor{fd}
+@anchor{manual/languages flyc coffee}@anchor{fb}
 @deffn {Flycheck Syntax Checker} Syntax Checker coffee
 @end deffn
 
@@ -5161,12 +5153,12 @@ a syntax checker.
 @end deffn
 
 @node CSS,D,Coffeescript,Supported languages
-@anchor{manual/languages css}@anchor{fe}
+@anchor{manual/languages css}@anchor{fc}
 @section CSS
 
 
 @geindex css-csslint; Flycheck syntax checker
-@anchor{manual/languages flyc css-csslint}@anchor{ff}
+@anchor{manual/languages flyc css-csslint}@anchor{fd}
 @deffn {Flycheck Syntax Checker} Syntax Checker css@w{-}csslint
 
 
@@ -5178,7 +5170,7 @@ a syntax checker.
 @end deffn
 
 @node D,Elixir,CSS,Supported languages
-@anchor{manual/languages d}@anchor{100}
+@anchor{manual/languages d}@anchor{fe}
 @section D
 
 
@@ -5190,12 +5182,12 @@ a syntax checker.
 
 
 @geindex d-dmd; Flycheck syntax checker
-@anchor{manual/languages flyc d-dmd}@anchor{101}
+@anchor{manual/languages flyc d-dmd}@anchor{ff}
 @deffn {Flycheck Syntax Checker} Syntax Checker d@w{-}dmd
 @end deffn
 
 @node Elixir,Emacs Lisp,D,Supported languages
-@anchor{manual/languages elixir}@anchor{102}
+@anchor{manual/languages elixir}@anchor{100}
 @section Elixir
 
 
@@ -5212,7 +5204,7 @@ a syntax checker.
 @end deffn
 
 @node Emacs Lisp,Erlang,Elixir,Supported languages
-@anchor{manual/languages emacs-lisp}@anchor{103}
+@anchor{manual/languages emacs-lisp}@anchor{101}
 @section Emacs Lisp
 
 
@@ -5239,7 +5231,7 @@ a syntax checker.
 @end deffn
 
 @geindex emacs-lisp-checkdoc; Flycheck syntax checker
-@anchor{manual/languages flyc emacs-lisp-checkdoc}@anchor{104}
+@anchor{manual/languages flyc emacs-lisp-checkdoc}@anchor{102}
 @deffn {Flycheck Syntax Checker} Syntax Checker emacs@w{-}lisp@w{-}checkdoc
 
 
@@ -5257,7 +5249,7 @@ a syntax checker.
 @end deffn
 
 @node Erlang,ERuby,Emacs Lisp,Supported languages
-@anchor{manual/languages erlang}@anchor{105}
+@anchor{manual/languages erlang}@anchor{103}
 @section Erlang
 
 
@@ -5269,17 +5261,17 @@ a syntax checker.
 
 
 @geindex erlang; Flycheck syntax checker
-@anchor{manual/languages flyc erlang}@anchor{106}
+@anchor{manual/languages flyc erlang}@anchor{104}
 @deffn {Flycheck Syntax Checker} Syntax Checker erlang
 @end deffn
 
 @node ERuby,Go,Erlang,Supported languages
-@anchor{manual/languages eruby}@anchor{107}
+@anchor{manual/languages eruby}@anchor{105}
 @section ERuby
 
 
 @geindex eruby-erubis; Flycheck syntax checker
-@anchor{manual/languages flyc eruby-erubis}@anchor{108}
+@anchor{manual/languages flyc eruby-erubis}@anchor{106}
 @deffn {Flycheck Syntax Checker} Syntax Checker eruby@w{-}erubis
 
 
@@ -5297,7 +5289,7 @@ a syntax checker.
 @end deffn
 
 @node Go,Haml,ERuby,Supported languages
-@anchor{manual/languages go}@anchor{109}
+@anchor{manual/languages go}@anchor{107}
 @section Go
 
 
@@ -5309,22 +5301,22 @@ a syntax checker.
 
 
 @geindex go-gofmt; Flycheck syntax checker
-@anchor{manual/languages flyc go-gofmt}@anchor{10a}
+@anchor{manual/languages flyc go-gofmt}@anchor{108}
 @deffn {Flycheck Syntax Checker} Syntax Checker go@w{-}gofmt
 @end deffn
 
 @geindex go-build; Flycheck syntax checker
-@anchor{manual/languages flyc go-build}@anchor{10b}
+@anchor{manual/languages flyc go-build}@anchor{109}
 @deffn {Flycheck Syntax Checker} Syntax Checker go@w{-}build
 @end deffn
 
 @geindex go-test; Flycheck syntax checker
-@anchor{manual/languages flyc go-test}@anchor{10c}
+@anchor{manual/languages flyc go-test}@anchor{10a}
 @deffn {Flycheck Syntax Checker} Syntax Checker go@w{-}test
 @end deffn
 
 @node Haml,Handlebars,Go,Supported languages
-@anchor{manual/languages haml}@anchor{10d}
+@anchor{manual/languages haml}@anchor{10b}
 @section Haml
 
 
@@ -5336,12 +5328,12 @@ a syntax checker.
 
 
 @geindex haml; Flycheck syntax checker
-@anchor{manual/languages flyc haml}@anchor{10e}
+@anchor{manual/languages flyc haml}@anchor{10c}
 @deffn {Flycheck Syntax Checker} Syntax Checker haml
 @end deffn
 
 @node Handlebars,Haskell,Haml,Supported languages
-@anchor{manual/languages handlebars}@anchor{10f}
+@anchor{manual/languages handlebars}@anchor{10d}
 @section Handlebars
 
 
@@ -5353,12 +5345,12 @@ a syntax checker.
 
 
 @geindex handlebars; Flycheck syntax checker
-@anchor{manual/languages flyc handlebars}@anchor{110}
+@anchor{manual/languages flyc handlebars}@anchor{10e}
 @deffn {Flycheck Syntax Checker} Syntax Checker handlebars
 @end deffn
 
 @node Haskell,HTML,Handlebars,Supported languages
-@anchor{manual/languages haskell}@anchor{111}
+@anchor{manual/languages haskell}@anchor{10f}
 @section Haskell
 
 
@@ -5382,7 +5374,7 @@ a syntax checker.
 @end deffn
 
 @geindex haskell-hlint; Flycheck syntax checker
-@anchor{manual/languages flyc haskell-hlint}@anchor{112}
+@anchor{manual/languages flyc haskell-hlint}@anchor{110}
 @deffn {Flycheck Syntax Checker} Syntax Checker haskell@w{-}hlint
 
 
@@ -5394,7 +5386,7 @@ a syntax checker.
 @end deffn
 
 @node HTML,Javascript,Haskell,Supported languages
-@anchor{manual/languages html}@anchor{113}
+@anchor{manual/languages html}@anchor{111}
 @section HTML
 
 
@@ -5421,7 +5413,7 @@ a syntax checker.
 @end deffn
 
 @node Javascript,JSON,HTML,Supported languages
-@anchor{manual/languages javascript}@anchor{114}
+@anchor{manual/languages javascript}@anchor{112}
 @section Javascript
 
 
@@ -5468,12 +5460,12 @@ a syntax checker.
 @end deffn
 
 @node JSON,LESS,Javascript,Supported languages
-@anchor{manual/languages json}@anchor{115}
+@anchor{manual/languages json}@anchor{113}
 @section JSON
 
 
 @geindex json-jsonlint; Flycheck syntax checker
-@anchor{manual/languages flyc json-jsonlint}@anchor{116}
+@anchor{manual/languages flyc json-jsonlint}@anchor{114}
 @deffn {Flycheck Syntax Checker} Syntax Checker json@w{-}jsonlint
 
 
@@ -5485,12 +5477,12 @@ a syntax checker.
 @end deffn
 
 @node LESS,Lua,JSON,Supported languages
-@anchor{manual/languages less}@anchor{117}
+@anchor{manual/languages less}@anchor{115}
 @section LESS
 
 
 @geindex less; Flycheck syntax checker
-@anchor{manual/languages flyc less}@anchor{118}
+@anchor{manual/languages flyc less}@anchor{116}
 @deffn {Flycheck Syntax Checker} Syntax Checker less
 
 
@@ -5502,12 +5494,12 @@ a syntax checker.
 @end deffn
 
 @node Lua,Make,LESS,Supported languages
-@anchor{manual/languages lua}@anchor{119}
+@anchor{manual/languages lua}@anchor{117}
 @section Lua
 
 
 @geindex lua; Flycheck syntax checker
-@anchor{manual/languages flyc lua}@anchor{11a}
+@anchor{manual/languages flyc lua}@anchor{118}
 @deffn {Flycheck Syntax Checker} Syntax Checker lua
 
 
@@ -5519,7 +5511,7 @@ a syntax checker.
 @end deffn
 
 @node Make,Perl,Lua,Supported languages
-@anchor{manual/languages make}@anchor{11b}
+@anchor{manual/languages make}@anchor{119}
 @section Make
 
 
@@ -5537,7 +5529,7 @@ a syntax checker.
 
 
 @geindex make; Flycheck syntax checker
-@anchor{manual/languages flyc make}@anchor{11c}
+@anchor{manual/languages flyc make}@anchor{11a}
 @deffn {Flycheck Syntax Checker} Syntax Checker make
 
 
@@ -5567,7 +5559,7 @@ a syntax checker.
 @end deffn
 
 @node Perl,PHP,Make,Supported languages
-@anchor{manual/languages perl}@anchor{11d}
+@anchor{manual/languages perl}@anchor{11b}
 @section Perl
 
 
@@ -5579,7 +5571,7 @@ a syntax checker.
 
 
 @geindex perl; Flycheck syntax checker
-@anchor{manual/languages flyc perl}@anchor{11e}
+@anchor{manual/languages flyc perl}@anchor{11c}
 @deffn {Flycheck Syntax Checker} Syntax Checker perl
 @end deffn
 
@@ -5596,12 +5588,12 @@ a syntax checker.
 @end deffn
 
 @node PHP,Puppet,Perl,Supported languages
-@anchor{manual/languages php}@anchor{11f}
+@anchor{manual/languages php}@anchor{11d}
 @section PHP
 
 
 @geindex php; Flycheck syntax checker
-@anchor{manual/languages flyc php}@anchor{120}
+@anchor{manual/languages flyc php}@anchor{11e}
 @deffn {Flycheck Syntax Checker} Syntax Checker php
 
 
@@ -5655,7 +5647,7 @@ a syntax checker.
 @end deffn
 
 @node Puppet,Python,PHP,Supported languages
-@anchor{manual/languages puppet}@anchor{121}
+@anchor{manual/languages puppet}@anchor{11f}
 @section Puppet
 
 
@@ -5667,12 +5659,12 @@ a syntax checker.
 
 
 @geindex puppet-parser; Flycheck syntax checker
-@anchor{manual/languages flyc puppet-parser}@anchor{122}
+@anchor{manual/languages flyc puppet-parser}@anchor{120}
 @deffn {Flycheck Syntax Checker} Syntax Checker puppet@w{-}parser
 @end deffn
 
 @geindex puppet-lint; Flycheck syntax checker
-@anchor{manual/languages flyc puppet-lint}@anchor{123}
+@anchor{manual/languages flyc puppet-lint}@anchor{121}
 @deffn {Flycheck Syntax Checker} Syntax Checker puppet@w{-}lint
 
 
@@ -5684,7 +5676,7 @@ a syntax checker.
 @end deffn
 
 @node Python,Racket,Puppet,Supported languages
-@anchor{manual/languages python}@anchor{124}
+@anchor{manual/languages python}@anchor{122}
 @section Python
 
 
@@ -5713,7 +5705,7 @@ a syntax checker.
 @end deffn
 
 @node Racket,ReStructuredText,Python,Supported languages
-@anchor{manual/languages racket}@anchor{125}
+@anchor{manual/languages racket}@anchor{123}
 @section Racket
 
 
@@ -5725,12 +5717,12 @@ a syntax checker.
 
 
 @geindex racket; Flycheck syntax checker
-@anchor{manual/languages flyc racket}@anchor{126}
+@anchor{manual/languages flyc racket}@anchor{124}
 @deffn {Flycheck Syntax Checker} Syntax Checker racket
 @end deffn
 
 @node ReStructuredText,Ruby,Racket,Supported languages
-@anchor{manual/languages restructuredtext}@anchor{127}
+@anchor{manual/languages restructuredtext}@anchor{125}
 @section ReStructuredText
 
 
@@ -5752,7 +5744,7 @@ a syntax checker.
 
 
 @geindex rst; Flycheck syntax checker
-@anchor{manual/languages flyc rst}@anchor{128}
+@anchor{manual/languages flyc rst}@anchor{126}
 @deffn {Flycheck Syntax Checker} Syntax Checker rst
 @end deffn
 
@@ -5769,7 +5761,7 @@ sphinx-doc.org
 @end deffn
 
 @node Ruby,Rust,ReStructuredText,Supported languages
-@anchor{manual/languages ruby}@anchor{129}
+@anchor{manual/languages ruby}@anchor{127}
 @section Ruby
 
 
@@ -5793,7 +5785,7 @@ sphinx-doc.org
 @end deffn
 
 @geindex ruby-rubylint; Flycheck syntax checker
-@anchor{manual/languages flyc ruby-rubylint}@anchor{12a}
+@anchor{manual/languages flyc ruby-rubylint}@anchor{128}
 @deffn {Flycheck Syntax Checker} Syntax Checker ruby@w{-}rubylint
 
 
@@ -5805,12 +5797,12 @@ sphinx-doc.org
 @end deffn
 
 @geindex ruby; Flycheck syntax checker
-@anchor{manual/languages flyc ruby}@anchor{12b}
+@anchor{manual/languages flyc ruby}@anchor{129}
 @deffn {Flycheck Syntax Checker} Syntax Checker ruby
 @end deffn
 
 @geindex ruby-jruby; Flycheck syntax checker
-@anchor{manual/languages flyc ruby-jruby}@anchor{12c}
+@anchor{manual/languages flyc ruby-jruby}@anchor{12a}
 @deffn {Flycheck Syntax Checker} Syntax Checker ruby@w{-}jruby
 
 
@@ -5822,7 +5814,7 @@ sphinx-doc.org
 @end deffn
 
 @node Rust,Sass,Ruby,Supported languages
-@anchor{manual/languages rust}@anchor{12d}
+@anchor{manual/languages rust}@anchor{12b}
 @section Rust
 
 
@@ -5834,12 +5826,12 @@ sphinx-doc.org
 
 
 @geindex rust; Flycheck syntax checker
-@anchor{manual/languages flyc rust}@anchor{12e}
+@anchor{manual/languages flyc rust}@anchor{12c}
 @deffn {Flycheck Syntax Checker} Syntax Checker rust
 @end deffn
 
 @node Sass,Scala,Rust,Supported languages
-@anchor{manual/languages sass}@anchor{12f}
+@anchor{manual/languages sass}@anchor{12d}
 @section Sass
 
 
@@ -5856,7 +5848,7 @@ sphinx-doc.org
 @end deffn
 
 @node Scala,Scss,Sass,Supported languages
-@anchor{manual/languages scala}@anchor{130}
+@anchor{manual/languages scala}@anchor{12e}
 @section Scala
 
 
@@ -5868,12 +5860,12 @@ sphinx-doc.org
 
 
 @geindex scala; Flycheck syntax checker
-@anchor{manual/languages flyc scala}@anchor{131}
+@anchor{manual/languages flyc scala}@anchor{12f}
 @deffn {Flycheck Syntax Checker} Syntax Checker scala
 @end deffn
 
-@node Scss,Shell POSIX,Scala,Supported languages
-@anchor{manual/languages scss}@anchor{132}
+@node Scss,Shell script languages,Scala,Supported languages
+@anchor{manual/languages scss}@anchor{130}
 @section Scss
 
 
@@ -5889,27 +5881,26 @@ sphinx-doc.org
 
 @end deffn
 
-@node Shell POSIX,Slim,Scss,Supported languages
-@anchor{manual/languages shell-posix}@anchor{133}
-@section Shell (POSIX)
+@node Shell script languages,Slim,Scss,Supported languages
+@anchor{manual/languages shell-script-languages}@anchor{131}
+@section Shell script languages
 
+
+@geindex sh-bash; Flycheck syntax checker
+@anchor{manual/languages flyc sh-bash}@anchor{132}
+@deffn {Flycheck Syntax Checker} Syntax Checker sh@w{-}bash
 
 
 @subsubheading See also
 
 
+@indicateurl{http://www.gnu.org/software/bash/}
 
-@table @asis
+@end deffn
 
-@item POSIX Shell Command Language
-
-@indicateurl{http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html}
-@end table
-
-
-@geindex sh-dash; Flycheck syntax checker
-@anchor{manual/languages flyc sh-dash}@anchor{134}
-@deffn {Flycheck Syntax Checker} Syntax Checker sh@w{-}dash
+@geindex sh-posix-dash; Flycheck syntax checker
+@anchor{manual/languages flyc sh-posix-dash}@anchor{133}
+@deffn {Flycheck Syntax Checker} Syntax Checker sh@w{-}posix@w{-}dash
 
 
 @subsubheading See also
@@ -5921,23 +5912,49 @@ sphinx-doc.org
 @item DASH
 
 @indicateurl{http://gondor.apana.org.au/~herbert/dash/}
+
+@item POSIX Shell Command Language
+
+@indicateurl{http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html}
 @end table
 
 @end deffn
 
-@geindex sh-bash; Flycheck syntax checker
-@anchor{manual/languages flyc sh-bash}@anchor{135}
-@deffn {Flycheck Syntax Checker} Syntax Checker sh@w{-}bash
+@geindex sh-posix-bash; Flycheck syntax checker
+@anchor{manual/languages flyc sh-posix-bash}@anchor{134}
+@deffn {Flycheck Syntax Checker} Syntax Checker sh@w{-}posix@w{-}bash
 
 
 @subsubheading See also
 
 
-@indicateurl{http://www.gnu.org/software/bash/}
+
+@table @asis
+
+@item Bash POSIX Mode
+
+@indicateurl{http://www.gnu.org/software/bash/manual/html_node/Bash-POSIX-Mode.html#Bash-POSIX-Mode}
+
+@item POSIX Shell Command Language
+
+@indicateurl{http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html}
+@end table
 
 @end deffn
 
-@node Slim,TeX/LaTeX,Shell POSIX,Supported languages
+@geindex sh-zsh; Flycheck syntax checker
+@anchor{manual/languages flyc sh-zsh}@anchor{135}
+@deffn {Flycheck Syntax Checker} Syntax Checker sh@w{-}zsh
+
+
+@subsubheading See also
+
+
+@indicateurl{http://www.zsh.org/}
+
+@end deffn
+
+@node Slim,TeX/LaTeX,Shell script languages,Supported languages
 @anchor{manual/languages slim}@anchor{136}
 @section Slim
 
@@ -6069,7 +6086,7 @@ www.gnu.org/software/texinfo/
 
 @end deffn
 
-@node YAML,Zsh,XML,Supported languages
+@node YAML,,XML,Supported languages
 @anchor{manual/languages yaml}@anchor{141}
 @section YAML
 
@@ -6098,25 +6115,8 @@ www.gnu.org/software/texinfo/
 
 @end deffn
 
-@node Zsh,,YAML,Supported languages
-@anchor{manual/languages zsh}@anchor{144}
-@section Zsh
-
-
-
-@subsubheading See also
-
-
-@indicateurl{http://www.zsh.org/}
-
-
-@geindex zsh; Flycheck syntax checker
-@anchor{manual/languages flyc zsh}@anchor{145}
-@deffn {Flycheck Syntax Checker} Syntax Checker zsh
-@end deffn
-
 @node Glossary,Index,Supported languages,Top
-@anchor{manual/glossary glossary}@anchor{146}@anchor{manual/glossary doc}@anchor{147}
+@anchor{manual/glossary glossary}@anchor{144}@anchor{manual/glossary doc}@anchor{145}
 @chapter Glossary
 
 
@@ -6136,7 +6136,7 @@ A symbol which is defined as syntax checker with
 
 A @ref{27,,syntax checker} available for automatic selection, i.e. that is
 contained in @ref{25,,flycheck-checkers}.
-@anchor{manual/glossary term-disabled-syntax-checker}@anchor{148}
+@anchor{manual/glossary term-disabled-syntax-checker}@anchor{146}
 @geindex disabled syntax checker
 
 @item disabled syntax checker
@@ -6148,7 +6148,7 @@ i.e. that is contained in @ref{26,,flycheck-disabled-checkers}.
 
 @item enabled syntax checker
 
-A @ref{28,,registered syntax checker} which is not a @ref{148,,disabled syntax checker}.
+A @ref{28,,registered syntax checker} which is not a @ref{146,,disabled syntax checker}.
 @anchor{manual/glossary term-suitable-syntax-checker}@anchor{19}
 @geindex suitable syntax checker
 

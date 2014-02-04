@@ -3,6 +3,13 @@
 master (in development)
 -----------------------
 
+- **Breaking changes**:
+
+  - The POSIX script syntax checkers `sh-bash` and `sh-dash` were renamed to
+    `sh-posix-bash` and `sh-posix-dash` respectively.  The `bash` and `zsh`
+    syntax checkers were renamed to `sh-bash` and `sh-zsh` respectively.  Thus,
+    all shell script syntax checkers now live in the `sh-` prefix.
+
 - New syntax checkers:
 
   - #88: Perl with Perl Critic

@@ -131,7 +131,6 @@ buffer-local wherever it is set."
 
 (defcustom flycheck-checkers
   '(asciidoc
-    bash
     c/c++-clang
     c/c++-cppcheck
     cfengine
@@ -180,8 +179,10 @@ buffer-local wherever it is set."
     sass
     scala
     scss
-    sh-dash
     sh-bash
+    sh-posix-dash
+    sh-posix-bash
+    sh-zsh
     slim
     tex-chktex
     tex-lacheck
@@ -190,8 +191,7 @@ buffer-local wherever it is set."
     xml-xmlstarlet
     xml-xmllint
     yaml-jsyaml
-    yaml-ruby
-    zsh)
+    yaml-ruby)
   "Syntax checkers available for automatic selection.
 
 A list of Flycheck syntax checkers to choose from when syntax
@@ -3517,18 +3517,6 @@ See URL `http://www.methods.co.nz/asciidoc'."
             ": Line " line ": " (message) line-end))
   :modes adoc-mode)
 
-(flycheck-define-checker bash
-  "A Bash syntax checker using the Bash shell.
-
-See URL `http://www.gnu.org/software/bash/'."
-  :command ("bash" "--norc" "-n" "--" source)
-  :error-patterns ((error line-start
-                          (file-name) ":" (one-or-more (not (any digit)))
-                          line (zero-or-more " ") ":" (zero-or-more " ")
-                          (message) line-end))
-  :modes sh-mode
-  :predicate (lambda () (eq sh-shell 'bash)))
-
 (flycheck-def-option-var flycheck-clang-definitions nil c/c++-clang
   "Additional preprocessor definitions for Clang.
 
@@ -4833,7 +4821,19 @@ See URL `http://sass-lang.com'."
           line-end))
   :modes scss-mode)
 
-(flycheck-define-checker sh-dash
+(flycheck-define-checker sh-bash
+  "A Bash syntax checker using the Bash shell.
+
+See URL `http://www.gnu.org/software/bash/'."
+  :command ("bash" "--norc" "-n" "--" source)
+  :error-patterns ((error line-start
+                          (file-name) ":" (one-or-more (not (any digit)))
+                          line (zero-or-more " ") ":" (zero-or-more " ")
+                          (message) line-end))
+  :modes sh-mode
+  :predicate (lambda () (eq sh-shell 'bash)))
+
+(flycheck-define-checker sh-posix-dash
   "A POSIX Shell syntax checker using the Dash shell.
 
 See URL `http://gondor.apana.org.au/~herbert/dash/'."
@@ -4843,7 +4843,7 @@ See URL `http://gondor.apana.org.au/~herbert/dash/'."
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'sh)))
 
-(flycheck-define-checker sh-bash
+(flycheck-define-checker sh-posix-bash
   "A POSIX Shell syntax checker using the Bash shell.
 
 See URL `http://www.gnu.org/software/bash/'."
@@ -4855,6 +4855,16 @@ See URL `http://www.gnu.org/software/bash/'."
           (message) line-end))
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'sh)))
+
+(flycheck-define-checker sh-zsh
+  "A Zsh syntax checker using the Zsh shell.
+
+See URL `http://www.zsh.org/'."
+  :command ("zsh" "-n" "-d" "-f" source)
+  :error-patterns
+  ((error line-start (file-name) ":" line ": " (message) line-end))
+  :modes sh-mode
+  :predicate (lambda () (eq sh-shell 'zsh)))
 
 (flycheck-define-checker slim
   "A Slim syntax checker using the Slim compiler.
@@ -4970,16 +4980,6 @@ See URL `http://www.ruby-doc.org/stdlib-2.0.0/libdoc/yaml/rdoc/YAML.html'."
    (error line-start (file-name) ":" (zero-or-more not-newline) ":" (message)
           "at line " line " column " column  line-end))
   :modes yaml-mode)
-
-(flycheck-define-checker zsh
-  "A Zsh syntax checker using the Zsh shell.
-
-See URL `http://www.zsh.org/'."
-  :command ("zsh" "-n" "-d" "-f" source)
-  :error-patterns
-  ((error line-start (file-name) ":" line ": " (message) line-end))
-  :modes sh-mode
-  :predicate (lambda () (eq sh-shell 'zsh)))
 
 (provide 'flycheck)
 
