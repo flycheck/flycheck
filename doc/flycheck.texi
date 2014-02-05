@@ -3061,6 +3061,9 @@ Improvements:
 
 @item 
 @code{flycheck-parse-checkstyle} supports @code{info} level messages now
+
+@item 
+Correctly parse multiline error messages of @code{go-build} and @code{go-test}
 @end itemize
 @end itemize
 
