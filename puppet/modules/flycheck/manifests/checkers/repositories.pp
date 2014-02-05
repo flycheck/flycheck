@@ -15,15 +15,6 @@ class flycheck::checkers::repositories {
     include_src => false,
   }
 
-  # Erlang
-  apt::source { 'erlang-solutions':
-    location    => 'http://binaries.erlang-solutions.com/debian',
-    repos       => 'contrib',
-    key         => 'A14F4FCA',
-    key_source  => 'http://binaries.erlang-solutions.com/debian/erlang_solutions.asc',
-    include_src => false,
-  }
-
   # Go
   apt::ppa { 'ppa:juju/golang': }
 
