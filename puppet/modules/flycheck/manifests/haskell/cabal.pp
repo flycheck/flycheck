@@ -10,7 +10,8 @@ define flycheck::haskell::cabal($package = $title) {
     command     => "cabal install --global ${package}",
     path        => ['/usr/local/bin', '/usr/bin', '/bin'],
     environment => 'HOME=/root',
+    timeout     => 900,
     unless      => "ghc-pkg list --global | grep -E '${package}-[[:digit:]]+(\\.[[:digit:]]+)*$'",
-    require     => Class['flycheck::haskell']
+    require     => Class['flycheck::haskell'],
   }
 }
