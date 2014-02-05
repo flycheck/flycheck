@@ -313,7 +313,7 @@ ReStructuredText
 
 .. syntax-checker:: rst-sphinx
 
-   .. seealso:: sphinx-doc.org
+   .. seealso:: http://sphinx-doc.org
 
 Ruby
 ====
@@ -428,7 +428,7 @@ Texinfo
 
 .. syntax-checker:: texinfo
 
-   .. seealso:: www.gnu.org/software/texinfo/
+   .. seealso:: http://www.gnu.org/software/texinfo/
 
 Verilog
 =======
