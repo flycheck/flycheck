@@ -17,6 +17,11 @@ class flycheck::emacs {
     require => Apt::Ppa['ppa:ubuntu-elisp/ppa'],
   }
 
+  alternatives { 'emacs':
+    path    => '/usr/bin/emacs24-nox',
+    require => [Package['emacs24-nox', 'emacs-snapshot-nox']]
+  }
+
   $cask_archive = 'cask-master'
 
   archive { $cask_archive:
