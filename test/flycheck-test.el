@@ -2014,7 +2014,6 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-describe-checker/help-shows-config-file-var ()
   :tags '(documentation)
-  "Test that the config file var appears in syntax checker help."
   (dolist (checker (flycheck-defined-checkers))
     (flycheck-test-with-help-buffer
       (flycheck-describe-checker checker)
@@ -2058,7 +2057,6 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-describe-checker/help-shows-checker-docstring ()
   :tags '(documentation)
-  "Test that the docstring appears in syntax checker help."
   (dolist (checker (flycheck-defined-checkers))
     (flycheck-test-with-help-buffer
       (flycheck-describe-checker checker)
@@ -2378,14 +2376,12 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-parse-checkstyle/with-builtin-xml ()
   :tags '(error-parsing)
-  "Test Checkstyle parsing with xml.el"
   (let ((flycheck-xml-parser 'flycheck-parse-xml-region))
     (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml nil nil)
                    flycheck-checkstyle-expected-errors))))
 
 (ert-deftest flycheck-parse-checkstyle/with-libxml2 ()
   :tags '(error-parsing)
-  "Test Checkstyle parsing with libxml2."
   (skip-unless (fboundp 'libxml-parse-xml-region))
   (let ((flycheck-xml-parser 'libxml-parse-xml-region))
     (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml nil nil)
@@ -2393,7 +2389,6 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-parse-checkstyle/automatic-parser ()
   :tags '(error-parsing)
-  "Test Checkstyle parsing with the automatically chosen parsed."
   (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml nil nil)
                  flycheck-checkstyle-expected-errors)))
 
@@ -3429,11 +3424,11 @@ of the file will be interrupted because there are too many #ifdef configurations
      '(3 1 error "End of file during parsing" :checker emacs-lisp))))
 
 (ert-deftest flycheck-define-checker/emacs-lisp-without-file-name ()
-  :tags '(builtin-checker external-tool language-emacs-lisp)
   "Test checkdoc checker in buffers without file names.
 
 Regression test for https://github.com/flycheck/flycheck/issues/73 and
 https://github.com/bbatsov/prelude/issues/259."
+  :tags '(builtin-checker external-tool language-emacs-lisp)
   (flycheck-test-with-resource-buffer "checkers/emacs-lisp.el"
     (set-visited-file-name nil 'no-query)
     (emacs-lisp-mode)
@@ -3444,7 +3439,6 @@ https://github.com/bbatsov/prelude/issues/259."
     (flycheck-test-should-errors)))
 
 (ert-deftest flycheck-define-checker/emacs-lisp-does-not-check-autoloads-buffers ()
-  :tags '(builtin-checker external-tool language-emacs-lisp)
   "Test that Emacs Lisp does not check autoloads buffers.
 
 These buffers are temporary buffers generated during package
@@ -3453,6 +3447,7 @@ checker will refuse to check these.
 
 See URL `https://github.com/flycheck/flycheck/issues/45' and URL
 `https://github.com/bbatsov/prelude/issues/253'."
+  :tags '(builtin-checker external-tool language-emacs-lisp)
   (flycheck-test-with-file-buffer (locate-library "dash-autoloads")
     (should-not (flycheck-may-use-checker 'emacs-lisp))
     (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
@@ -3498,7 +3493,6 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
 
 (ert-deftest flycheck-define-checker/go-gofmt ()
   :tags '(builtin-checker external-tool language-go)
-  "Test a syntax error."
   (skip-unless (flycheck-check-executable 'go-gofmt))
   (flycheck-test-should-syntax-check
    "checkers/go/src/syntax/syntax-error.go" 'go-mode
@@ -3507,7 +3501,6 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
 
 (ert-deftest flycheck-define-checker/go-build ()
   :tags '(builtin-checker external-tool language-go)
-  "Test an import error."
   (skip-unless (flycheck-check-executable 'go-build))
   (flycheck-test-with-env
       `(("GOPATH" . ,(flycheck-test-resource-filename "checkers/go")))
@@ -3537,7 +3530,6 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
 
 (ert-deftest flycheck-define-checker/go-test ()
   :tags '(builtin-checker external-tool language-go)
-  "Test an import error."
   (skip-unless (flycheck-check-executable 'go-test))
   (flycheck-test-with-env
       `(("GOPATH" . ,(flycheck-test-resource-filename "checkers/go")))
@@ -3624,7 +3616,6 @@ Why not:
 
 (ert-deftest flycheck-define-checker/html-tidy ()
   :tags '(builtin-checker external-tool language-html)
-  "Test an error caused by an unknown tag."
   (skip-unless (flycheck-check-executable 'html-tidy))
   (flycheck-test-should-syntax-check
    "checkers/html-tidy-warning-and-error.html" '(html-mode web-mode)
@@ -3637,7 +3628,6 @@ Why not:
 
 (ert-deftest flycheck-define-checker/javascript-jshint-syntax-error ()
   :tags '(builtin-checker external-tool language-javascript)
-  "A missing semicolon."
   (skip-unless (flycheck-check-executable 'javascript-jshint))
   ;; Silence JS2 and JS3 parsers
   (let ((js2-mode-show-parse-errors nil)
@@ -3652,14 +3642,12 @@ Why not:
 
 (ert-deftest flycheck-define-checker/javascript-jshint-error-disabled ()
   :tags '(builtin-checker external-tool language-javascript)
-  "An unused variable."
   (skip-unless (flycheck-check-executable 'javascript-jshint))
   (flycheck-test-should-syntax-check
    "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)))
 
 (ert-deftest flycheck-define-checker/javascript-jshint ()
   :tags '(builtin-checker external-tool language-javascript)
-  "An unused variable."
   (skip-unless (flycheck-check-executable 'javascript-jshint))
   (let ((flycheck-jshintrc "jshintrc"))
     (flycheck-test-should-syntax-check
@@ -3778,7 +3766,6 @@ Why not:
 
 (ert-deftest flycheck-define-checker/php-syntax-error ()
   :tags '(builtin-checker external-tool language-php)
-  "Test the T_PAAMAYIM_NEKUDOTAYIM error."
   (skip-unless (flycheck-check-executable 'php))
   (flycheck-test-should-syntax-check
    "checkers/php-syntax-error.php" 'php-mode
@@ -3850,7 +3837,6 @@ Why not:
 
 (ert-deftest flycheck-define-checker/puppet-parser-singleline-syntax-error ()
   :tags '(builtin-checker external-tool language-puppet)
-  "Test a real syntax error with puppet parser."
   (skip-unless (flycheck-check-executable 'puppet-parser))
   (flycheck-test-should-syntax-check
    "checkers/puppet-parser-singleline.pp" 'puppet-mode
@@ -3858,7 +3844,6 @@ Why not:
 
 (ert-deftest flycheck-define-checker/puppet-parser-multiline-syntax-error ()
   :tags '(builtin-checker external-tool language-puppet)
-  "Test a real (multi line) syntax error with puppet parser."
   (skip-unless (flycheck-check-executable 'puppet-parser))
   (flycheck-test-should-syntax-check
    "checkers/puppet-parser-multiline.pp" 'puppet-mode
@@ -3877,7 +3862,6 @@ Why not:
 
 (ert-deftest flycheck-define-checker/python-flake8-syntax-error ()
   :tags '(builtin-checker external-tool language-python)
-  "Test a real syntax error with flake8."
   (skip-unless (flycheck-check-executable 'python-flake8))
   (let ((python-indent-guess-indent-offset nil))       ; Silence Python Mode!
     (flycheck-test-should-syntax-check
@@ -3898,7 +3882,6 @@ Why not:
 
 (ert-deftest flycheck-define-checker/python-flake8-maximum-complexity ()
   :tags '(builtin-checker external-tool language-python)
-  "Test superfluous spaces with flake8."
   (skip-unless (flycheck-check-executable 'python-flake8))
   (let ((flycheck-flake8-maximum-complexity 4))
     (flycheck-test-should-syntax-check
@@ -3937,7 +3920,6 @@ Why not:
 
 (ert-deftest flycheck-define-checker/python-flake8 ()
   :tags '(builtin-checker external-tool language-python)
-  "PEP8 compliant names with Flake8 and pep8-naming."
   (skip-unless (flycheck-check-executable 'python-flake8))
   (flycheck-test-should-syntax-check
    "checkers/python/test.py" 'python-mode
@@ -3953,7 +3935,6 @@ Why not:
 
 (ert-deftest flycheck-define-checker/python-pylint-syntax-error ()
   :tags '(builtin-checker external-tool language-python)
-  "Test a real syntax error with pylint."
   (skip-unless (flycheck-check-executable 'python-pylint))
   (let ((flycheck-disabled-checkers '(python-flake8))
         (python-indent-guess-indent-offset nil))       ; Silence Python Mode
