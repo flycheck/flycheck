@@ -21,7 +21,7 @@
 
 @copying
 @quotation
-Flycheck 0.18-cvs, February 04, 2014
+Flycheck 0.18-cvs, February 05, 2014
 
 Sebastian Wiesner
 
@@ -5769,7 +5769,7 @@ a syntax checker.
 @subsubheading See also
 
 
-sphinx-doc.org
+@indicateurl{http://sphinx-doc.org}
 
 @end deffn
 
@@ -6055,7 +6055,7 @@ sphinx-doc.org
 @subsubheading See also
 
 
-www.gnu.org/software/texinfo/
+@indicateurl{http://www.gnu.org/software/texinfo/}
 
 @end deffn
 
