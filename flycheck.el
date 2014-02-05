@@ -146,6 +146,7 @@ buffer-local wherever it is set."
     eruby-erubis
     go-gofmt
     go-golint
+    go-govet
     go-build
     go-test
     haml
@@ -4063,6 +4064,8 @@ See URL `http://golang.org/cmd/gofmt/'."
   :modes go-mode
   :next-checkers ((no-errors . go-golint)
                   ;; Fall back, if go-golint doesn't exist
+                  (no-errors . go-govet)
+                  ;; Fall back, if go-govet doesn't exist
                   (no-errors . go-build) (no-errors . go-test)))
 
 (flycheck-define-checker go-golint
@@ -4072,6 +4075,32 @@ See URL `https://github.com/golang/lint'."
   :command ("golint" source)
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ": " (message) line-end))
+  :modes go-mode
+  :next-checkers ((no-errors . go-govet)
+                  ;; Fall back, if go-govet doesn't exist
+                  (no-errors . go-build) (no-errors . go-test)))
+
+(flycheck-def-option-var flycheck-govet-printfuncs nil go-govet
+  "A comma-separated list of print-like functions for `go tool vet'.
+
+Each entry is in the form Name:N where N is the zero-based argument position of
+the first argument involved in the print: either the format or the first print
+argument for non-formatted prints.  For example, if you have Warn and Warnf
+functions that take an io.Writer as their first argument, like Fprintf,
+-printfuncs=Warn:1,Warnf:1 "
+  :type '(repeat :tag "print-like functions"
+                 (string :tag "function"))
+  :safe #'flycheck-string-list-p)
+
+(flycheck-define-checker go-govet
+  "A Go syntax checker using the `go tool vet' command.
+
+See URL `http://golang.org/cmd/go/'."
+  :command ("go" "tool" "vet"
+            (option "-printfuncs=" flycheck-govet-printfuncs
+                    flycheck-option-comma-separated-list) source)
+  :error-patterns
+  ((warning line-start (file-name) ":" line ": " (message) line-end))
   :modes go-mode
   :next-checkers ((warnings-only . go-build) (warnings-only . go-test)))
 

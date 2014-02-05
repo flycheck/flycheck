@@ -132,6 +132,10 @@ Go
 
    .. seealso:: https://github.com/golang/lint
 
+.. syntax-checker:: go-govet
+
+   .. seealso:: http://golang.org/cmd/go
+
 .. syntax-checker:: go-build
 .. syntax-checker:: go-test
 
