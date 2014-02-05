@@ -20,4 +20,7 @@ Vagrant.configure('2') do |config|
     puppet.options = '--modulepath /etc/puppet/modules:/flycheck/puppet/modules'
   end
 
+  config.vm.provider 'virtualbox' do |v|
+    v.name = 'flycheck'
+  end
 end
