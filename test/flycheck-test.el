@@ -3716,7 +3716,7 @@ Why not:
   (skip-unless (flycheck-check-executable 'less))
   (flycheck-test-should-syntax-check
    "checkers/less-syntax-error.less" 'less-css-mode
-   '(2 1 error "missing closing `}`" :checker less)))
+   '(1 13 error "missing closing `}`" :checker less)))
 
 (ert-deftest flycheck-define-checker/lua ()
   :tags '(builtin-checker external-tool language-lua)
