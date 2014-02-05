@@ -2,10 +2,7 @@
 
 class flycheck::base {
 
-  $should_use_own_sources_list = $::travis ? {
-    undef   => false,
-    default => true,
-  }
+  $should_use_own_sources_list = !$::travis
 
   class { 'apt':
     # When not on Travis, construct our own sources.list to pick good mirrors
