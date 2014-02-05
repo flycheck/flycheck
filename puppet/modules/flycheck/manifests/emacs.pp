@@ -7,12 +7,12 @@ class flycheck::emacs {
   apt::ppa { 'ppa:cassou/emacs': }
   apt::ppa { 'ppa:ubuntu-elisp/ppa': } # For up to date snapshot builds
 
-  package { 'emacs24-nox':
+  package { ['emacs24-common', 'emacs24-bin-common', 'emacs24-nox']:
     ensure  => latest,
     require => Apt::Ppa['ppa:cassou/emacs']
   }
 
-  package { 'emacs-snapshot-nox':
+  package { ['emacs-snapshot-common', 'emacs-snapshot-nox']:
     ensure  => latest,
     require => Apt::Ppa['ppa:ubuntu-elisp/ppa'],
   }
