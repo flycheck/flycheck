@@ -3733,7 +3733,7 @@ Why not:
    "checkers/make.mk" '(makefile-mode makefile-gmake-mode)
    '(2 nil error "*** missing separator.  Stop." :checker make)))
 
-(ert-deftest flycheck-define-checker/pmake ()
+(ert-deftest flycheck-define-checker/make-pmake ()
   :tags '(builtin-checker external-tool language-make)
   (let ((flycheck-make-executable "pmake"))
     (skip-unless (flycheck-check-executable 'make))
