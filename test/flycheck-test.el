@@ -3526,10 +3526,14 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
 (ert-deftest flycheck-define-checker/go-build-missing-package ()
   :tags '(builtin-checker external-tool language-go)
   (skip-unless (flycheck-check-executable 'go-build))
-  (flycheck-test-should-syntax-check
-   "checkers/go/src/b1/main.go" 'go-mode
-   '(4 2 error "cannot find package \"b2\" in any of:\n\t/usr/lib/go/src/pkg/b2 (from $GOROOT)\n\t($GOPATH not set)"
-       :checker go-build)))
+  (let* ((go-root (or (getenv "GOROOT") "/usr/lib/go"))
+         (go-root-pkg (concat go-root "/src/pkg")))
+    (flycheck-test-with-env '(("GOPATH" . nil))
+      (flycheck-test-should-syntax-check
+       "checkers/go/src/b1/main.go" 'go-mode
+       `(4 2 error ,(format "cannot find package \"b2\" in any of:\n\t%s/b2 (from $GOROOT)\n\t($GOPATH not set)"
+                            go-root-pkg)
+           :checker go-build)))))
 
 (ert-deftest flycheck-define-checker/go-test ()
   :tags '(builtin-checker external-tool language-go)
