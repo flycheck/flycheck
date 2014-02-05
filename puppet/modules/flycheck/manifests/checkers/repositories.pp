@@ -25,7 +25,7 @@ class flycheck::checkers::repositories {
   }
 
   # Go
-  apt::ppa { 'ppa:gophers/go': }
+  apt::ppa { 'ppa:juju/golang': }
 
   # Racket
   apt::ppa { 'ppa:plt/racket': }

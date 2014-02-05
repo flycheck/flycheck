@@ -97,7 +97,7 @@ class flycheck::checkers {
                     'cppcheck',           # c/c++-cpppcheck
                     'cfengine-community', # cfengine
                     'esl-erlang',         # erlang
-                    'golang-stable',      # go-*
+                    'golang',             # go-*
                     'hlint',              # haskell-lint
                     'tidy',               # html-tidy
                     'lua5.2',             # lua
