@@ -4059,7 +4059,7 @@ See URL `http://golang.org/cmd/gofmt/'."
   :command ("gofmt" source)
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ": " (message) line-end))
-:modes go-mode
+  :modes go-mode
   :next-checkers ((no-errors . go-build) (no-errors . go-test)))
 
 (flycheck-define-checker go-build
@@ -4069,7 +4069,10 @@ See URL `http://golang.org/cmd/go'."
   :command ("go" "build" "-o" temporary-file-name)
   :error-patterns
   ((error line-start (file-name) ":" line ":"
-          (optional column ":")" " (message) line-end))
+          (optional column ":") " "
+          (message (one-or-more not-newline)
+                   (zero-or-more "\n\t" (one-or-more not-newline)))
+          line-end))
   :modes go-mode
   :predicate
   (lambda ()
@@ -4085,7 +4088,10 @@ See URL `http://golang.org/cmd/go'."
   ;; directory.  Unfortunately 'go test -c' does not have the '-o' option.
   :command ("go" "test" "-c")
   :error-patterns
-  ((error line-start (file-name) ":" line ": " (message) line-end))
+  ((error line-start (file-name) ":" line ": "
+          (message (one-or-more not-newline)
+                   (zero-or-more "\n\t" (one-or-more not-newline)))
+          line-end))
   :modes go-mode
   :predicate
   (lambda ()

@@ -3525,17 +3525,11 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
 
 (ert-deftest flycheck-define-checker/go-build-missing-package ()
   :tags '(builtin-checker external-tool language-go)
-  "Test successful go build with subpackages (used to verify the
-GOPATH environment variable is set properly and subpackages can be
-found)."
   (skip-unless (flycheck-check-executable 'go-build))
-  (let ((message (if (flycheck-test-travis-ci-p)
-                     ;; The Go version in Travis has a different error message
-                     "cannot find package \"b2\" in any of:"
-                   "import \"b2\": cannot find package")))
-    (flycheck-test-should-syntax-check
-     "checkers/go/src/b1/main.go" 'go-mode
-     `(4 2 error ,message :checker go-build))))
+  (flycheck-test-should-syntax-check
+   "checkers/go/src/b1/main.go" 'go-mode
+   '(4 2 error "cannot find package \"b2\" in any of:\n\t/usr/lib/go/src/pkg/b2 (from $GOROOT)\n\t($GOPATH not set)"
+       :checker go-build)))
 
 (ert-deftest flycheck-define-checker/go-test ()
   :tags '(builtin-checker external-tool language-go)

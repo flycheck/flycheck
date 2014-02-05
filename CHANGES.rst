@@ -19,6 +19,7 @@ master (in development)
 - Improvements:
 
   - `flycheck-parse-checkstyle` supports `info` level messages now
+  - Correctly parse multiline error messages of `go-build` and `go-test`
 
 0.17 (Feb 1, 2014)
 ------------------
