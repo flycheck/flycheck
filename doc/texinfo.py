@@ -24,9 +24,11 @@ from sphinx.roles import XRefRole
 from docutils import nodes
 
 
+#: Regular expression object to parse the contents of an Info reference role.
 INFO_RE = re.compile(r'^(?P<node>.+?)\((?P<manual>.+)\)$')
 
 
+#: Web URLs of Info manuals.
 INFO_MANUAL_URLS = {
     'emacs': 'http://www.gnu.org/software/emacs/manual/html_node/emacs/{node}.html#{node}',
     'elisp': 'http://www.gnu.org/software/emacs/manual/html_node/elisp/{node}.html#{node}',
@@ -35,6 +37,7 @@ INFO_MANUAL_URLS = {
 
 
 class InfoNodeXRefRole(XRefRole):
+    """A role to reference a node in an Info manual."""
 
     def process_link(self, env, refnode, has_explicit_title, title, target):
         # Normalize whitespace in info node targets
@@ -44,10 +47,25 @@ class InfoNodeXRefRole(XRefRole):
 
 
 class infonode_reference(nodes.reference):
+    """A reference node to cross-reference an Info manual node."""
     pass
 
 
 def resolve_info_references(app, env, refnode, contnode):
+    """Resolve Info references.
+
+    Process all :class:`~sphinx.addnodes.pending_xref` nodes whose ``reftype``
+    is ``infonode``.
+
+    If the current output format is Texinfo, replace the
+    :class:`~sphinx.addnodes.pending_xref` with a :class:`infonode_reference`
+    node, which is then processed by the Texinfo writer.
+
+    For all other output formats, replace the pending reference with a
+    :class:`~docutils.nodes.reference` node, which references the corresponding
+    web URL, as in :data:`INFO_MANUAL_URLS`.
+
+    """
     if refnode['reftype'] != 'infonode':
         return None
 
@@ -81,6 +99,12 @@ def resolve_info_references(app, env, refnode, contnode):
 
 
 def visit_infonode_reference(self, node):
+    """Process a :class:`infonode_reference` node for Texinfo output.
+
+    Add a corresponding ``@ref`` command to the body, and skip the children of
+    the node.
+
+    """
     infonode = node['refnode']
     manual = node['refmanual']
 

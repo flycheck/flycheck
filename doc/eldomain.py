@@ -30,32 +30,52 @@ from sphinx.util.nodes import make_refnode
 
 
 def make_target(scope, name):
+    """Create a target from ``scope`` and ``name``.
+
+    ``name`` is the name of the Emacs Lisp symbol to reference, and ``scope``
+    is the scope in which to reference the symbol.  Both arguments are strings.
+
+    Return the target name as string.
+
+    """
     return 'el.{0}.{1}'.format(scope, name)
 
 
 class el_parameterlist(addnodes.desc_parameterlist):
+    """A container node for the parameter list of a Emacs Lisp function."""
     child_text_separator = ' '
 
 
 class el_annotation(addnodes.desc_annotation):
+    """A node for the type annotation of Emacs Lisp symbols."""
     pass
 
 
 class el_parameter(addnodes.desc_parameter):
+    """A node for parameters of Emacs Lisp functions."""
     pass
 
 
 class EmacsLispSymbol(ObjectDescription):
+    """A directive to describe an Emacs Lisp symbol."""
 
     @property
     def object_type(self):
+        """The :class:`~sphinx.domains.ObjType` of this directive."""
         return self.env.domains[self.domain].object_types[self.objtype]
 
     @property
     def emacs_lisp_scope(self):
+        """The scope of this object type as string."""
         return self.object_type.attrs['scope']
 
     def make_type_annotation(self):
+        """Create the type annotation for this directive.
+
+        Return the type annotation node, preferably a :class:`el_annotation`
+        node.
+
+        """
         type_name = self.object_type.lname.title() + ' '
         return el_annotation(type_name, type_name)
 
@@ -97,6 +117,12 @@ class EmacsLispSymbol(ObjectDescription):
 
 
 class EmacsLispFunction(EmacsLispSymbol):
+    """A directive to describe an Emacs Lisp function.
+
+    This directive is different from :class:`EmacsLispSymbol` in that it
+    accepts a parameter list.
+
+    """
 
     def handle_signature(self, sig, signode):
         parts = sig.split(' ')
@@ -119,6 +145,21 @@ class EmacsLispFunction(EmacsLispSymbol):
 
 
 class EmacsLispCommand(EmacsLispSymbol):
+    """A directive to describe an interactive Emacs Lisp command.
+
+    This directive is different from :class:`EmacsLispSymbol` in that it
+    describes the command with its keybindings.  For this purpose, it has two
+    additional options ``:binding:`` and ``:prefix-arg``.
+
+    The former documents key bindings for this command (in addition to ``M-x``),
+    and the latter adds a prefix argument to the description of this command.
+
+    Typically, this directive is used multiple times for the same command,
+    where the first use describes the command without prefix argument, and the
+    latter describes the use with prefix argument.  The latter usually has
+    ``:noindex:`` set.
+
+    """
 
     option_spec = {
         'binding': directives.unchanged,
@@ -127,6 +168,12 @@ class EmacsLispCommand(EmacsLispSymbol):
     option_spec.update(EmacsLispSymbol.option_spec)
 
     def with_prefix_arg(self, binding):
+        """Add the ``:prefix-arg:`` option to the given ``binding``.
+
+        Return the complete key binding including the ``:prefix-arg:`` option
+        as string.  If there is no ``:prefix-arg:``, return ``binding``.
+
+        """
         prefix_arg = self.options.get('prefix-arg')
         return prefix_arg + ' ' + binding if prefix_arg else binding
 
@@ -157,6 +204,7 @@ class EmacsLispCommand(EmacsLispSymbol):
 
 
 class EmacsLispCLStruct(EmacsLispSymbol):
+    """A directive to describe a CL struct."""
 
     def before_content(self):
         EmacsLispSymbol.before_content(self)
@@ -169,6 +217,11 @@ class EmacsLispCLStruct(EmacsLispSymbol):
 
 
 class EmacsLispCLSlot(EmacsLispSymbol):
+    """A directive to describe a slot of a CL struct.
+
+    This directive prepends the name of the current CL struct to the slot.
+
+    """
 
     def handle_signature(self, sig, signode):
         name = EmacsLispSymbol.handle_signature(self, sig, signode)
@@ -179,6 +232,7 @@ class EmacsLispCLSlot(EmacsLispSymbol):
 
 
 class EmacsLispSlotXRefRole(XRefRole):
+    """A role to reference a CL slot."""
 
     def process_link(self, env, refnode, has_explicit_title, title, target):
         # Obtain the current structure
@@ -203,7 +257,7 @@ class EmacsLispSlotXRefRole(XRefRole):
 
 
 class EmacsLispDomain(Domain):
-    """Emacs Lisp domain"""
+    """A domain to document Emacs Lisp symbols."""
 
     name = 'el'
     label = 'Emacs Lisp'
@@ -283,10 +337,17 @@ class EmacsLispDomain(Domain):
 
 
 def noop(self, node):
+    """Do nothing with ``node``."""
     pass
 
 
 def delegate(target_type):
+    """Create visitor functions to delegate the processing of a node.
+
+    ``target_type`` is a type object whose visitor functions shall be used to
+    process a node.
+
+    """
     visit = lambda s, n: getattr(s, 'visit_{0}'.format(
         target_type.__name__))(n)
     depart = lambda s, n: getattr(s, 'depart_{0}'.format(
