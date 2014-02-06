@@ -103,14 +103,15 @@ class EmacsLispSymbol(ObjectDescription):
             self.state.document.note_explicit_target(signode)
 
             data = self.env.domaindata[self.domain]
-            objects = data['symbols'][self.emacs_lisp_scope]
-            if name in objects:
+            symbol_scopes = data['symbols'].setdefault(name, {})
+            if self.emacs_lisp_scope in symbol_scopes:
                 self.state_machine.reporter.warning(
                     'duplicate object description of %s, ' % name +
                     'other instance in ' +
-                    self.env.doc2path(objects[name][0]),
+                    self.env.doc2path(symbol_scopes[self.emacs_lisp_scope][0]),
                     line=self.lineno)
-            objects[name] = (self.env.docname, self.objtype)
+            symbol_scopes[self.emacs_lisp_scope] = (self.env.docname,
+                                                    self.objtype)
 
         indextext = '{0}; Emacs Lisp {1}'.format(name, self.object_type.lname)
         self.indexnode['entries'].append(('pair', indextext, targetname, ''))
@@ -302,37 +303,37 @@ class EmacsLispDomain(Domain):
         'cl-slot': EmacsLispSlotXRefRole()}
     indices = []
 
-    data_version = 1
+    data_version = 2
     initial_data = {
-        'symbols': {
-            # fullname -> docname, objtype
-            'functions': {},
-            'variables': {},
-            'faces': {},
-            'structs': {},
-        }
+        # fullname -> scope -> (docname, objtype)
+        'symbols': {}
     }
 
     def clear_doc(self, docname):
         symbols = self.data['symbols']
-        for scope, objects in symbols.items():
-            for name, (object_docname, _) in objects.items():
+        for symbol, scopes in symbols.items():
+            for scope, (object_docname, _) in scopes.items():
                 if docname == object_docname:
-                    del symbols[scope][name]
+                    del symbols[symbol][scope]
 
     def resolve_xref(self, env, fromdoc, builder, objtype, target, node,
                      content):
-        scope = self.object_types[objtype].attrs['scope']
-        if target not in self.data['symbols'][scope]:
+        if objtype == 'symbol':
+            env.warn('Ambiguous reference to {0} ({1})'.format(
+                target, ', '.join(self.data['symbols']['target'].keys())))
             return None
-        docname, _ = self.data['symbols'][scope][target]
+        scope = self.object_types[objtype].attrs['scope']
+        if scope not in self.data['symbols'][target]:
+            return None
+        docname, _ = self.data['symbols'][target][scope]
         return make_refnode(builder, fromdoc, docname,
                             make_target(scope, target), content, target)
 
     def get_objects(self):
-        for scope, objects in self.data['symbols'].iteritems():
-            for name, (docname, objtype) in objects.iteritems():
-                yield (name, name, objtype, docname, make_target(scope, name),
+        for symbol, scopes in self.data['symbols'].iteritems():
+            for scope, (docname, objtype) in scopes.iteritems():
+                yield (symbol, symbol, objtype, docname,
+                       make_target(scope, symbol),
                        self.object_types[objtype].attrs['searchprio'])
 
 
