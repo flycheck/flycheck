@@ -19,6 +19,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from itertools import ifilter
+
 from docutils import nodes
 from docutils.parsers.rst import directives
 
@@ -254,7 +256,7 @@ class EmacsLispSlotXRefRole(XRefRole):
             # Resolve slot against the current struct
             target = current_struct + '-' + target
 
-        return title,target
+        return title, target
 
 
 class EmacsLispDomain(Domain):
@@ -263,22 +265,22 @@ class EmacsLispDomain(Domain):
     name = 'el'
     label = 'Emacs Lisp'
     object_types = {
-        'function': ObjType('function', 'function', scope='functions',
+        'function': ObjType('function', 'function', scope='function',
                             searchprio=0),
-        'macro': ObjType('macro', 'macro', scope='functions',
+        'macro': ObjType('macro', 'macro', scope='function',
                          searchprio=0),
-        'command': ObjType('command', 'command', scope='functions',
+        'command': ObjType('command', 'command', scope='function',
                            searchprio=1),
-        'variable': ObjType('variable', 'variable', scope='variables',
+        'variable': ObjType('variable', 'variable', scope='variable',
                             searchprio=0),
-        'option': ObjType('user option', 'option', scope='variables',
+        'option': ObjType('user option', 'option', scope='variable',
                           searchprio=1),
-        'hook': ObjType('hook', 'hook', scope='variables',
+        'hook': ObjType('hook', 'hook', scope='variable',
                         searchprio=0),
-        'face': ObjType('face', 'face', scope='faces', searchprio=0),
-        'cl-struct': ObjType('CL struct', 'cl-struct', scope='structs',
+        'face': ObjType('face', 'face', scope='face', searchprio=0),
+        'cl-struct': ObjType('CL struct', 'cl-struct', scope='struct',
                              searchprio=0),
-        'cl-slot': ObjType('slot', 'cl-slot', scope='functions',
+        'cl-slot': ObjType('slot', 'cl-slot', scope='function',
                            searchprio=0)}
     directives = {
         'function': EmacsLispFunction,
@@ -292,6 +294,7 @@ class EmacsLispDomain(Domain):
         'cl-slot': EmacsLispCLSlot,
     }
     roles = {
+        'symbol': XRefRole(),
         'function': XRefRole(),
         'macro': XRefRole(),
         'command': XRefRole(),
@@ -318,14 +321,24 @@ class EmacsLispDomain(Domain):
 
     def resolve_xref(self, env, fromdoc, builder, objtype, target, node,
                      content):
-        if objtype == 'symbol':
-            env.warn('Ambiguous reference to {0} ({1})'.format(
-                target, ', '.join(self.data['symbols']['target'].keys())))
+        scopes = self.data['symbols'][target]
+        if objtype == 'symbol' and len(scopes) > 1:
+            # The generic symbol reference is ambiguous, because the symbol has
+            # multiple scopes attached
+            scope = next(ifilter(lambda s: s in scopes, ['function', 'variable',
+                                                         'face', 'struct']),
+                         None)
+            if not scope:
+                # If we have an unknown scope
+                raise ValueError('Unknown scopes: {0!r}'.format(scopes))
+            message = 'Ambiguous reference to {0}, in scopes {1}, using {2}'.format(
+                target, ', '.join(scopes), scope)
+            env.warn(fromdoc, message, getattr(node, 'line'))
+        else:
+            scope = self.object_types[objtype].attrs['scope']
+        if scope not in scopes:
             return None
-        scope = self.object_types[objtype].attrs['scope']
-        if scope not in self.data['symbols'][target]:
-            return None
-        docname, _ = self.data['symbols'][target][scope]
+        docname, _ = scopes[scope]
         return make_refnode(builder, fromdoc, docname,
                             make_target(scope, target), content, target)
 
