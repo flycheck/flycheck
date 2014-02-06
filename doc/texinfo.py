@@ -72,7 +72,8 @@ def resolve_info_references(app, env, refnode, contnode):
     target = refnode['reftarget']
     match = INFO_RE.match(target)
     if not match:
-        app.warn('Invalid info target: {0}'.format(target))
+        app.env.warn(refnode.source, 'Invalid info target: {0}'.format(target),
+                     refnode.line)
         return contnode
 
     manual = match.group('manual')
@@ -88,7 +89,8 @@ def resolve_info_references(app, env, refnode, contnode):
     else:
         base_uri = INFO_MANUAL_URLS.get(manual)
         if not base_uri:
-            app.warn('Cannot resolve info manual {0}'.format(manual))
+            message = 'Cannot resolve info manual {0}'.format(manual)
+            app.env.warn(refnode.source, message, refnode.line)
             return contnode
         else:
             reference = nodes.reference('', '', internal=False)
@@ -111,7 +113,7 @@ def visit_infonode_reference(self, node):
     name = node.astext().strip() if node['has_explicit_title'] else ''
 
     self.body.append('@ref{{{node},,{name},{manual}}}'.format(
-        node=infonode,name=self.escape_menu(name),manual=manual))
+        node=infonode, name=self.escape_menu(name), manual=manual))
 
     # Skip the node body
     raise nodes.SkipNode
