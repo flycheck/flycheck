@@ -75,8 +75,10 @@ class DocsBuild(Check):
     message = 'Building docs'
 
     def __call__(self):
+        self.check_call(['vagrant', 'up'], stdout=self.logfile,
+                        stderr=subprocess.STDOUT, bufsize=0)
         self.check_call(['vagrant', 'ssh', '-c', 'make -C /flycheck doc'],
-                          stdout=self.logfile, stderr=subprocess.STDOUT,
+                        stdout=self.logfile, stderr=subprocess.STDOUT,
                         bufsize=0)
 
 
