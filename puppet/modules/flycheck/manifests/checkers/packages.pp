@@ -10,13 +10,13 @@ class flycheck::checkers::packages {
   include flycheck::ruby
   include flycheck::php
   include flycheck::haskell
+  include flycheck::go
 
   $apt_packages = [ 'asciidoc',           # asciidoc
                     'bash',               # bash/sh-bash
                     'clang',              # c/c++-clang
                     'cppcheck',           # c/c++-cpppcheck
                     'cfengine-community', # cfengine
-                    'golang',             # go-*
                     'hlint',              # haskell-lint
                     'tidy',               # html-tidy
                     'lua5.2',             # lua

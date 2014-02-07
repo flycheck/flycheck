@@ -3499,14 +3499,25 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
    '(5 9 error "expected '(', found 'IDENT' ta" :checker go-gofmt)
    '(6 1 error "expected ')', found '}'" :checker go-gofmt)))
 
+(ert-deftest flycheck-define-checker/go-golint ()
+  :tags '(builtin-checker external-tool language-go)
+  (skip-unless (flycheck-check-executable 'go-golint))
+  (let ((flycheck-disabled-checkers '(go-build)))
+    (flycheck-test-should-syntax-check
+     "checkers/go/src/lint/golint-warings.go" 'go-mode
+     '(4 5 warning "should not use dot imports" :checker go-golint)
+     '(10 12 warning "if block ends with a return statement, so drop this else and outdent its block"
+          :checker go-golint))))
+
 (ert-deftest flycheck-define-checker/go-build ()
   :tags '(builtin-checker external-tool language-go)
   (skip-unless (flycheck-check-executable 'go-build))
-  (flycheck-test-with-env
-      `(("GOPATH" . ,(flycheck-test-resource-filename "checkers/go")))
-    (flycheck-test-should-syntax-check
-     "checkers/go/src/error/build-error.go" 'go-mode
-     '(6 nil error "undefined: fmt" :checker go-build)) ))
+  (let ((flycheck-disabled-checkers '(go-golint)))
+    (flycheck-test-with-env
+        `(("GOPATH" . ,(flycheck-test-resource-filename "checkers/go")))
+      (flycheck-test-should-syntax-check
+       "checkers/go/src/error/build-error.go" 'go-mode
+       '(6 nil error "undefined: fmt" :checker go-build)))))
 
 (ert-deftest flycheck-define-checker/go-build-handles-packages ()
   :tags '(builtin-checker external-tool language-go)

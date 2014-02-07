@@ -15,9 +15,6 @@ class flycheck::checkers::repositories {
     include_src => false,
   }
 
-  # Go
-  apt::ppa { 'ppa:juju/golang': }
-
   # Racket
   apt::ppa { 'ppa:plt/racket': }
 

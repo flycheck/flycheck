@@ -9,6 +9,7 @@ if !$::travis {
 
   include flycheck::checkers::cabal
   include flycheck::checkers::gems
+  include flycheck::checkers::go
   include flycheck::checkers::misc
   include flycheck::checkers::npm
   include flycheck::checkers::packages
