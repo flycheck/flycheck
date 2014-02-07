@@ -15,6 +15,7 @@ master (in development)
   - #88: Perl with Perl Critic
   - #322: Replace GNU Make with POSIX Make
   - #267: Shellcheck
+  - #328: Go with `golint`
 
 - Improvements:
 
