@@ -17,6 +17,7 @@ master (in development)
   - #322: Replace GNU Make with POSIX Make
   - #267: Shellcheck
   - #328: Go with `golint`
+  - #329: Go with `go tool vet`
 
 - Improvements:
 
