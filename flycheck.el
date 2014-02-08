@@ -4100,7 +4100,8 @@ take an io.Writer as their first argument, like Fprintf,
 (flycheck-define-checker go-vet
   "A Go syntax checker using the `go tool vet' command.
 
-See URL `http://golang.org/cmd/go/'."
+See URL `http://golang.org/cmd/go/' and URL
+`http://godoc.org/code.google.com/p/go.tools/cmd/vet'."
   :command ("go" "tool" "vet"
             (option "-printfuncs=" flycheck-go-vet-print-functions
                     flycheck-option-comma-separated-list) source)

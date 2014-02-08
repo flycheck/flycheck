@@ -134,7 +134,13 @@ Go
 
 .. syntax-checker:: go-vet
 
-   .. seealso:: http://golang.org/cmd/go
+   .. seealso::
+
+      `go`
+         http://golang.org/cmd/go
+
+      `go tool vet`
+         http://godoc.org/code.google.com/p/go.tools/cmd/vet
 
 .. syntax-checker:: go-build
 .. syntax-checker:: go-test
