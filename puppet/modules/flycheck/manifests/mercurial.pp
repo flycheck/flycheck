@@ -1,10 +1,9 @@
-# Class: flycheck::hg
+# Class: flycheck::mercurial
 #
 # Install Mercurial
-class flycheck::hg {
+class flycheck::mercurial {
   package { 'mercurial':
     ensure  => latest,
     require => Class['apt::update'],
-    alias   => 'hg'
   }
 }
