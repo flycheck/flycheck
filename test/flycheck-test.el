@@ -3509,30 +3509,30 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
      '(10 12 warning "if block ends with a return statement, so drop this else and outdent its block"
           :checker go-golint))))
 
-(ert-deftest flycheck-define-checker/go-govet ()
+(ert-deftest flycheck-define-checker/go-vet ()
   :tags '(builtin-checker external-tool language-go)
-  (skip-unless (flycheck-check-executable 'go-govet))
+  (skip-unless (flycheck-check-executable 'go-vet))
   (let ((flycheck-disabled-checkers '(go-build)))
     (flycheck-test-should-syntax-check
      "checkers/go/src/vet/warnings.go" 'go-mode
-     '(12 nil warning "unreachable code" :checker go-govet)
+     '(12 nil warning "unreachable code" :checker go-vet)
      '(12 nil warning "arg 1 for printf verb %s of wrong type: int"
-          :checker go-govet))))
+          :checker go-vet))))
 
-(ert-deftest flycheck-define-checker/go-govet-printfuncs ()
+(ert-deftest flycheck-define-checker/go-vet-print-functions ()
   :tags '(builtin-checker external-tool language-go)
-  (skip-unless (flycheck-check-executable 'go-govet))
+  (skip-unless (flycheck-check-executable 'go-vet))
   (let ((flycheck-disabled-checkers '(go-build))
-        (flycheck-govet-printfuncs '("Warn:0" "Warnf:0")))
+        (flycheck-go-vet-print-functions '("Warn:0" "Warnf:0")))
     (flycheck-test-should-syntax-check
      "checkers/go/src/vet/warnings.go" 'go-mode
      '(9 nil warning "possible formatting directive in Warn call"
-         :checker go-govet)
+         :checker go-vet)
      '(10 nil warning "no formatting directive in Warnf call"
-          :checker go-govet)
-     '(12 nil warning "unreachable code" :checker go-govet)
+          :checker go-vet)
+     '(12 nil warning "unreachable code" :checker go-vet)
      '(12 nil warning "arg 1 for printf verb %s of wrong type: int"
-          :checker go-govet))))
+          :checker go-vet))))
 
 (ert-deftest flycheck-define-checker/go-build ()
   :tags '(builtin-checker external-tool language-go)

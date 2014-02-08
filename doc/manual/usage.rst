@@ -442,10 +442,10 @@ on the variable name for detailed help):
    A list of module directories for the search path of
    :flyc:checker:`haskell-ghc`.
 
-.. option:: flycheck-govet-printfuncs
+.. option:: flycheck-go-vet-print-functions
 
-   A comma-separated list of print-like functions for the
-   :flyc:checker:`go-govet` syntax checker.
+   A comma-separated list of print-like functions to check for format string
+   issues in the :flyc:checker:`go-vet` syntax checker.
 
 .. option:: flycheck-perlcritic-verbosity
 

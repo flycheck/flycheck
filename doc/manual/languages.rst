@@ -132,7 +132,7 @@ Go
 
    .. seealso:: https://github.com/golang/lint
 
-.. syntax-checker:: go-govet
+.. syntax-checker:: go-vet
 
    .. seealso:: http://golang.org/cmd/go
 
