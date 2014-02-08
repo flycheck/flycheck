@@ -3,20 +3,9 @@
 # Install checkers with the Go package system.
 class flycheck::checkers::go {
 
-  include flycheck::go
-  include flycheck::git         # To install packages from Github
+  include flycheck::git         # For Github
 
-  exec { 'golint':
-    command     => 'go get github.com/golang/lint/golint',
-    path        => ['/usr/local/bin', '/usr/bin', '/bin'],
-    environment => ["GOPATH=${flycheck::go::gopath}"],
-    require     => [Class['flycheck::go', 'flycheck::git']],
+  flycheck::go::get { 'github.com/golang/lint/golint': # go-golint
+    require => Class['flycheck::git']
   }
-
-  file { '/usr/local/bin/golint':
-    ensure  => link,
-    target  => "${flycheck::go::gopath}/bin/golint",
-    require => Exec['golint']
-  }
-
 }

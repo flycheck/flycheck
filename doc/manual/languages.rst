@@ -132,6 +132,16 @@ Go
 
    .. seealso:: https://github.com/golang/lint
 
+.. syntax-checker:: go-vet
+
+   .. seealso::
+
+      `go`
+         http://golang.org/cmd/go
+
+      `go tool vet`
+         http://godoc.org/code.google.com/p/go.tools/cmd/vet
+
 .. syntax-checker:: go-build
 .. syntax-checker:: go-test
 
