@@ -3555,7 +3555,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
 (ert-deftest flycheck-define-checker/go-build-missing-package ()
   :tags '(builtin-checker external-tool language-go)
   (skip-unless (flycheck-check-executable 'go-build))
-  (let* ((go-root (or (getenv "GOROOT") "/usr/lib/go"))
+  (let* ((go-root (or (getenv "GOROOT") "/usr/local/go"))
          (go-root-pkg (concat go-root "/src/pkg")))
     (flycheck-test-with-env '(("GOPATH" . nil))
       (flycheck-test-should-syntax-check
