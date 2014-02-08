@@ -67,29 +67,31 @@ See :infonode:`Structures(cl)` for more information about CL structures.
    .. function:: flycheck-error-new-at line column &optional level message &key \
                     checker filename buffer
 
-      Create a new Flycheck error at the given `line` and `column`.
+      Create a new Flycheck error at the given :var:`line` and :var:`column`.
 
-      `line` and `column` refer to the :cl-slot:`line` and :cl-slot:`column` of
-      the new error.  The optional `level` and `message` arguments fill the
-      :cl-slot:`level` and :cl-slot:`message` slots respectively.
+      :var:`line` and :var:`column` refer to the :cl-slot:`line` and
+      :cl-slot:`column` of the new error.  The optional :var:`level` and
+      :var:`message` arguments fill the :cl-slot:`level` and cl-slot:`message`
+      slots respectively.
 
-      `checker`, `filename` and `buffer` are keyword arguments, for
-      :cl-slot:`checker`, :cl-slot:`filename` and :cl-slot:`buffer`
-      respectively.  `buffer` defaults to the current buffer, the other two
+      :var:`checker`, :var:`filename` and :var:`buffer` are keyword arguments,
+      for :cl-slot:`checker`, :cl-slot:`filename` and :cl-slot:`buffer`
+      respectively.  :var:`buffer` defaults to the current buffer, the other two
       default to `nil`.
 
       .. warning::
 
          Due to a limitation of Common Lisp functions in Emacs Lisp, you must
-         specify **all** optional arguments, that is, **both** `level` **and**
-         `message`, to pass any keyword arguments.
+         specify **all** optional arguments, that is, **both** :var:`level`
+         **and** :var:`message`, to pass any keyword arguments.
 
    .. function:: flycheck-error-new &rest attributes
 
-      Create a new :cl-struct:`flycheck-error` with the given `attributes`.
+      Create a new :cl-struct:`flycheck-error` with the given :var:`attributes`.
 
-      `attributes` is a property list, where each property specifies the value
-      for the corresponding slot of :cl-struct:`flycheck-error`, for instance:
+      :var:`attributes` is a property list, where each property specifies the
+      value for the corresponding slot of :cl-struct:`flycheck-error`, for
+      instance:
 
       .. code-block:: cl
 
@@ -99,30 +101,30 @@ See :infonode:`Structures(cl)` for more information about CL structures.
 
    .. macro:: flycheck-error-with-buffer error &rest forms
 
-      Evaluate `forms` with the :cl-slot:`buffer` of the given `error` as the
-      current buffer.
+      Evaluate :var:`forms` with the :cl-slot:`buffer` of the given :var:`error`
+      as the current buffer.
 
-      If the buffer is not live, `forms` are **not** evaluated.
+      If the buffer is not live, :var:`forms` are **not** evaluated.
 
    .. function:: flycheck-error-line-region error
 
-      Get the region marking the whole :cl-slot:`line` of the given `error`, as
-      a cons cell :samp:`({beg} . {end})`.
+      Get the region marking the whole :cl-slot:`line` of the given
+      :var:`error`, as a cons cell :varcode:`({beg} . {end})`.
 
    .. function:: flycheck-error-column-region error
 
-      Get the region marking the :cl-slot:`column` of the given `error`, as cons
-      cell :samp:`({beg} . {end})`.
+      Get the region marking the :cl-slot:`column` of the given :var:`error`, as
+      cons cell :varcode:`({beg} . {end})`.
 
-      If the :cl-slot:`column` of `error` is `nil`, return `nil` instead.
+      If the :cl-slot:`column` of :var:`error` is `nil`, return `nil` instead.
 
    .. function:: flycheck-error-sexp-region error
 
       Get the region marking the expression around the :cl-slot:`column` of the
-      `error`, as cons cell :samp:`({beg} . {end})`.
+      :var:`error`, as cons cell :varcode:`({beg} . {end})`.
 
-      If the :cl-slot:`column` of `error` is `nil`, or if there is no expression
-      around this column, return `nil` instead.
+      If the :cl-slot:`column` of :var:`error` is `nil`, or if there is no
+      expression around this column, return `nil` instead.
 
       .. warning::
 
@@ -138,15 +140,15 @@ See :infonode:`Structures(cl)` for more information about CL structures.
 
    .. function:: flycheck-error-pos error
 
-      Get the exact buffer position of `error`.
+      Get the exact buffer position of :var:`error`.
 
-      Essentially this is the position of the :cl-slot:`column` of `error`, if
-      it is not `nil`, or the position of the first non-whitespace character on
-      the :cl-slot:`line` of `error` otherwise.  @end defun
+      Essentially this is the position of the :cl-slot:`column` of :var:`error`,
+      if it is not `nil`, or the position of the first non-whitespace character
+      on the :cl-slot:`line` of :var:`error` otherwise.
 
    .. function:: flycheck-error-format error
 
-      Format `error` as a human-readable string.
+      Format :var:`error` as a human-readable string.
 
 The following functions and variables may be used to analyze the errors of a
 syntax check.
@@ -158,19 +160,20 @@ syntax check.
 
 .. function:: flycheck-count-errors errors
 
-   Count the number of errors and warnings in `errors`.
+   Count the number of errors and warnings in :var:`errors`.
 
    Return an alist mapping error level symbols to error counts.  Each item is a
-   cons cell :samp:`({level} . {count})`, where :samp:`{level}` is the level
-   symbol and :samp:`{count}` is the number of errors of of :samp:`{level}`.
+   cons cell :varcode:`({level} . {count})`, where :varcode:`{level}` is the
+   level symbol and :varcode:`{count}` is the number of errors of of
+   :varcode:`{level}`.
 
 .. function:: flycheck-has-errors-p errors &optional level
 
-   Determine if there are any `errors` with the given `level`.
+   Determine if there are any :var:`errors` with the given :var:`level`.
 
-   If `level` is omitted, determine whether `errors` is not nil.  Otherwise
-   determine whether there are any errors whose level is equal to the given
-   `level`.
+   If :var:`level` is omitted, determine whether :var:`errors` is not nil.
+   Otherwise determine whether there are any errors whose level is equal to the
+   given :var:`level`.
 
 .. _error-parser-api:
 
@@ -181,4 +184,4 @@ These functions can be used to implement custom error parsers:
 
 .. function:: flycheck-parse-xml-string s
 
-   Parse a string `s` containing XML and return the parsed document tree.
+   Parse a string :var:`s` containing XML and return the parsed document tree.

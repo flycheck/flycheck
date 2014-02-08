@@ -8,8 +8,8 @@ Flycheck supports the following |#flycheck-languages| languages with
 |#flycheck-checkers| syntax checkers.
 
 Each language has one or more syntax checkers, whose names follow a
-:samp:`{language}-{tool}` convention, where :samp:`{language}` is the
-programming language supported by this syntax checker, and :samp:`{tool}` the
+:el:varcode:`{language}-{tool}` convention, where :el:var:`language` is the
+programming language supported by this syntax checker, and :el:var:`tool` the
 specific syntax checker tool.
 
 This document provides just a brief overview, use

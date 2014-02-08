@@ -19,9 +19,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import re
 from itertools import ifilter
 
-from docutils import nodes
+from docutils import nodes, utils
 from docutils.parsers.rst import directives
 
 from sphinx import addnodes
@@ -55,6 +56,11 @@ class el_annotation(addnodes.desc_annotation):
 
 class el_parameter(addnodes.desc_parameter):
     """A node for parameters of Emacs Lisp functions."""
+    pass
+
+
+class el_metavariable(nodes.emphasis):
+    """A node for a meta variable."""
     pass
 
 
@@ -259,6 +265,30 @@ class EmacsLispSlotXRefRole(XRefRole):
         return title, target
 
 
+def var_role(role, rawtext, text, lineno, inliner,
+             options={}, content=[]):
+    return [el_metavariable(rawtext, text)], []
+
+
+METAVAR_RE = re.compile('{([^}]+)}')
+
+
+def varcode_role(role, rawtext, text, lineno, inliner,
+                 options={}, content=[]):
+    text = utils.unescape(text)
+    position = 0
+    node = nodes.literal(rawtext, '', role=role, classes=[role])
+    for match in METAVAR_RE.finditer(text):
+        if match.start() > position:
+            trailing_text = text[position:match.start()]
+            node += nodes.Text(trailing_text, trailing_text)
+        node += el_metavariable(match.group(1), match.group(1))
+        position = match.end()
+    if position < len(text):
+        node += nodes.Text(text[position:], text[position:])
+    return [node], []
+
+
 class EmacsLispDomain(Domain):
     """A domain to document Emacs Lisp symbols."""
 
@@ -303,7 +333,11 @@ class EmacsLispDomain(Domain):
         'hook': XRefRole(),
         'face': XRefRole(),
         'cl-struct': XRefRole(),
-        'cl-slot': EmacsLispSlotXRefRole()}
+        'cl-slot': EmacsLispSlotXRefRole(),
+        # Special markup roles
+        'var': var_role,
+        'varcode': varcode_role,
+    }
     indices = []
 
     data_version = 2
@@ -407,6 +441,21 @@ def visit_el_parameter_texinfo(self, node):
     raise nodes.SkipNode
 
 
+def visit_el_metavariable_texinfo(self, node):
+    self.body.append('@var{{{0}}}'.format(self.escape(node.astext())))
+    # Do not process the children of this node, since we do not allow
+    # formatting inside.
+    raise nodes.SkipNode
+
+
+def visit_el_metavariable_html(self, node):
+    self.body.append(self.starttag(node, 'var', ''))
+
+
+def depart_el_metavariable_html(self, node):
+    self.body.append('</var>')
+
+
 def setup(app):
     app.add_domain(EmacsLispDomain)
     app.add_node(el_parameterlist,
@@ -422,3 +471,8 @@ def setup(app):
                  html=delegate(addnodes.desc_parameter),
                  latex=delegate(addnodes.desc_parameter),
                  texinfo=(visit_el_parameter_texinfo, None))
+    app.add_node(el_metavariable,
+                 html=(visit_el_metavariable_html,
+                       depart_el_metavariable_html),
+                 latex=delegate(nodes.emphasis),
+                 texinfo=(visit_el_metavariable_texinfo, None))

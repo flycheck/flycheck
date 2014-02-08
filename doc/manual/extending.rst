@@ -18,15 +18,16 @@ You define new syntax checkers with :macro:`flycheck-define-checker`:
 
 .. macro:: flycheck-define-checker symbol docstring &rest properties
 
-   Define `symbol` as new syntax checker with `docstring` and `properties`.
+   Define :var:`symbol` as new syntax checker with :var:`docstring` and
+   :var:`properties`.
 
-   `docstring` provides documentation for the syntax checker.  Use
+   :var:`docstring` provides documentation for the syntax checker.  Use
    :command:`flycheck-describe-checker` to view the documentation of a syntax
    checker.
 
-   The following `properties` constitute a syntax checker.
-   :flyc:checkprop:`:command` is mandatory.  A syntax checker must also have either
-   :flyc:checkprop:`:modes` or :flyc:checkprop:`:predicate`, and either
+   The following :var:`properties` constitute a syntax checker.
+   :flyc:checkprop:`:command` is mandatory.  A syntax checker must also have
+   either :flyc:checkprop:`:modes` or :flyc:checkprop:`:predicate`, and either
    :flyc:checkprop:`:error-patterns` or :flyc:checkprop:`:error-parser`.
    :flyc:checkprop:`:next-checkers` is entirely optional.
 
@@ -34,27 +35,28 @@ You define new syntax checkers with :macro:`flycheck-define-checker`:
    a *compile-time* error is signalled.
 
    Any syntax checker defined with this macro is eligible for manual syntax
-   checker selection with :command:`flycheck-select-checker`.  To make the
-   new syntax checker available for automatic selection, you need to register it
-   in :option:`flycheck-checkers`.  See :ref:`syntax-checker-selection` for
-   more information.
+   checker selection with :command:`flycheck-select-checker`.  To make the new
+   syntax checker available for automatic selection, you need to register it in
+   :option:`flycheck-checkers`.  See :ref:`syntax-checker-selection` for more
+   information.
 
    .. flyc:checker-property:: :command ({executable} [{arg} ...])
 
       An unquoted list describing the syntax checker command to execute.
 
-      :samp:`{executable}` must be a string with the executable of this syntax
-      checker.
+      :var:`executable` must be a string with the executable of this
+      syntax checker.
 
-      A customizable, buffer-local variable :samp:`flycheck-{symbol}-executable`
-      is implicitly defined to allow overriding of the executable.  See
-      :ref:`syntax-checker-executables` for details about these variables.  If
-      this variable is non-nil, Flycheck uses the value of the variable as
-      executable, otherwise it falls back to :samp:`{executable}`.  In either
-      case, the executable is checked with `executable-find` before use.
+      A customizable, buffer-local variable
+      :varcode:`flycheck-{symbol}-executable` is implicitly defined to allow
+      overriding of the executable.  See :ref:`syntax-checker-executables` for
+      details about these variables.  If this variable is non-nil, Flycheck uses
+      the value of the variable as executable, otherwise it falls back to
+      :var:`executable`.  In either case, the executable is checked with
+      `executable-find` before use.
 
-      Each :samp:`{arg}` is an argument to the executable, either as string, or
-      as one of the following special symbols and forms.
+      Each :var:`arg` is an argument to the executable, either as string,
+      or as one of the following special symbols and forms.
 
       .. note::
 
@@ -132,113 +134,112 @@ You define new syntax checkers with :macro:`flycheck-define-checker`:
         See the declaration of the @code{go-build} syntax checker for an
         application of this symbol.
 
-     :samp:`(config-file {option} {variable})`
+     :varcode:`(config-file {option} {variable})`
         A configuration file for this syntax checker.
 
-        :samp:`{option}` is a string containing the option that specifies a
+        :var:`option` is a string containing the option that specifies a
         configuration file to the syntax checker tool.
 
-        :samp:`{variable}` is a symbol referring to a variable from which to
-        obtain the name or path of the configuration file.  See
+        :var:`variable` is a symbol referring to a variable from which to obtain
+        the name or path of the configuration file.  See
         :ref:`syntax-checker-configuration-files` for more information about
         syntax checker configuration.  You need to define this variable
         *explicitly* with :macro:`flycheck-def-config-file-var`.
 
-        If the configuration file is found, pass the :samp:`{option}` and the
+        If the configuration file is found, pass the :var:`option` and the
         absolute path to the configuration file to the syntax checker.
         Otherwise the cell is simply dropped from the arguments of the syntax
         checker.
 
-        If :samp:`{option}` ends with a `=` character, :samp:`{option}` and the
+        If :var:`option` ends with a `=` character, :var:`option` and the
         absolute path to the configuration file are concatenated and given as a
-        single argument to the syntax checker.  Otherwise, :samp:`{option}` and
-        the configuration file path are given as two separate arguments.
+        single argument to the syntax checker.  Otherwise, :var:`option` and the
+        configuration file path are given as two separate arguments.
 
-     :samp:`(option {option} {variable} [{filter}])`
+     :varcode:`(option {option} {variable} [{filter}])`
         The value of a variable.
 
-        :samp:`{option}` is a string containing the option for with to specify
-        the value.  :samp:`{filter}` is an optional function to be applied to
-        the value of :samp:`{variable}` before use.  See :ref:`option-filters`
-        for a list of built-in option filters.
+        :var:`option` is a string containing the option for with to specify the
+        value.  :var:`filter` is an optional function to be applied to the value
+        of :var:`variable` before use.  See :ref:`option-filters` for a list of
+        built-in option filters.
 
-        :samp:`{variable}` is a symbol referring to a variable whose value to
-        :use.  See ref:`syntax-checker-configuration` for more information about
+        :var:`variable` is a symbol referring to a variable whose value to use.
+        :See ref:`syntax-checker-configuration` for more information about
         :syntax checker configuration.  You need to define this variable
         :*explicitly* with :macro:`flycheck-def-option-var`.
 
-        If :samp:`{variable}` is not `nil` after applying :samp:`{filter}`, pass
-        :samp:`{option}` and the value of :samp:`{variable}` after applying
-        :samp:`{filter}`.  Otherwise the cell is simply dropped from the
-        arguments of the syntax checker.
+        If :var:`variable` is not `nil` after applying :var:`filter`, pass
+        :var:`option` and the value of :var:`variable` after applying
+        :var:`filter`.  Otherwise the cell is simply dropped from the arguments
+        of the syntax checker.
 
-        An :samp:`{option}` ending with a `=` character is treated like in a
+        An :var:`option` ending with a `=` character is treated like in a
         `config-file` cell.
 
-     :samp:`(option-list {option} {variable} [{prepend-fn} [{filter}]])`
-        Like :samp:`{option}`, but for lists of options.
+     :varcode:`(option-list {option} {variable} [{prepend-fn} [{filter}]])`
+        Like :var:`option`, but for lists of options.
 
-        :samp:`{option}` is a string containing the option to specify.
+        :var:`option` is a string containing the option to specify.
 
-        :samp:`{variable}` is a variable whose value must be a list.
+        :var:`variable` is a variable whose value must be a list.
 
-        :samp:`prepend-fn` is a function called with :samp:`{option}` as first
+        :varcode:`prepend-fn` is a function called with :var:`option` as first
         and the item of the list as second argument.  It should return the
-        result of prepending `{option}` to the item, either as list or as
-        string.  If omitted, it defaults to `list`, so by default,
-        :samp:`{option}` will be prepended as a separate argument.
+        result of prepending :var:`option` to the item, either as list or as
+        string.  If omitted, it defaults to `list`, so by default, :var:`option`
+        will be prepended as a separate argument.
 
-        :samp:`{filter}` is an optional function to be applied to each item in
-        the list before use.  See :ref:`option-filters` for a list of built-in
+        :var:`filter` is an optional function to be applied to each item in the
+        list before use.  See :ref:`option-filters` for a list of built-in
         option filters.
 
-        For each item in the value of :samp:`{variable}`, which is not `nil`
-        after applying :samp:`{filter}`, pass :samp:`{option}` the the item
-        after applying :samp:`{filter}`, as returned by :samp:`{prepend-fn}`.
+        For each item in the value of :var:`variable`, which is not `nil` after
+        applying :var:`filter`, pass :var:`option` the the item after applying
+        :var:`filter`, as returned by :var:`prepend-fn`.
 
         Nil items are simply ignored.
 
-     :samp:`(option-flag {option} {variable})`
+     :varcode:`(option-flag {option} {variable})`
         Like `option`, but for boolean flags.
 
-        :samp:`{option}` is a string containing the option to
-        specify. :samp:`{variable}` is a symbol referring to a variable.
+        :var:`option` is a string containing the option to
+        specify. :code:`variable` is a symbol referring to a variable.
 
-        If :samp:`{variable}` is non-nil, pass :samp:`{option}` to the syntax
-        checker.  Otherwise just ignore this argument.
+        If :var:`variable` is non-nil, pass :var:`option` to the syntax checker.
+        Otherwise just ignore this argument.
 
-     :samp:`(eval {form})`
+     :varcode:`(eval {form})`
         The result of evaluating `form`.
 
-        `form` is an arbitrary Emacs Lisp form.  It is evaluated literally *each
-        time* the syntax checker is executed.  Special forms and symbols in
-        `form` are *not* replaced!
+        :var:`form` is an arbitrary Emacs Lisp form.  It is evaluated literally
+        *each time* the syntax checker is executed.  Special forms and symbols
+        in :var:`form` are *not* replaced!
 
-        `form` must evaluate either to a string, a list of strings or nil.  For
-        any other result, signal an error.
+        :var:`form` must evaluate either to a string, a list of strings or nil.
+        For any other result, signal an error.
 
-        If the result of `form` is not nil, pass the result to the syntax
-        checker *literally*.  Special symbols and forms in the result of `form`
-        are *not* replaced.
+        If the result of :var:`form` is not nil, pass the result to the syntax
+        checker *literally*.  Special symbols and forms in the result of
+        :var:`form` are *not* replaced.
 
    .. flyc:checker-property:: :error-patterns (({level} {sexp}) ...)
 
       An unquoted list of one or more error patterns to parse the output of the
       syntax checker :flyc:checkprop:`:command`.
 
-      :samp:`{level}` is a Flycheck error level, and denotes the severity of
-      errors matched by the pattern.  This mainly affects the visual
-      representation of matched errors in buffers.
+      :var:`level` is a Flycheck error level, and denotes the severity of errors
+      matched by the pattern.  This mainly affects the visual representation of
+      matched errors in buffers.
 
       Flycheck provides the built-in error levels `error`, `warning` and `info`.
       You can define your own error levels with
       :function:`flycheck-define-error-level`.
 
-      The :samp:`{level}` is followed by one or more `rx` :samp:`{sexp}`
-      elements.  See the docstring of the function `rx` for more information.
-      In addition to the standard forms of `rx`, Flycheck supports the following
-      additional forms to make specific parts of the error output available to
-      Flycheck:
+      The :var:`level` is followed by one or more `rx` :var:`sexp` elements.
+      See the docstring of the function `rx` for more information.  In addition
+      to the standard forms of `rx`, Flycheck supports the following additional
+      forms to make specific parts of the error output available to Flycheck:
 
       `line`
          Matches the line number the error refers to, as a sequence of one or
@@ -248,17 +249,16 @@ You define new syntax checkers with :macro:`flycheck-define-checker`:
          Matches a column number the error refers to, as a sequence of one or
          more digits.
 
-      :samp:`(file-name {sexp} ...)`
-         Matches the file name the error refers to.  :samp:`{sexp}` matches the
-         name of the file.  If no :samp:`{sexp}` is given, use a default body of
+      :varcode:`(file-name {sexp} ...)`
+         Matches the file name the error refers to.  :var:`sexp` matches the
+         name of the file.  If no :var:`sexp` is given, use a default body of
          `(minimal-match (one-or-more not-newline))`, which is equivalent to
          `".+?"`.
 
-      :samp:`(message {sexp} ...)`
-         Matches the error message to be shown to the user.  :samp:`{sexp}`
-         matches the text of the message.  If no :samp:`{sexp}` is given, use a
-         default body of `(one-or-more not-newline)`, which is equivalent to
-         `".+"`.
+      :varcode:`(message {sexp} ...)`
+         Matches the error message to be shown to the user.  :var:`sexp` matches
+         the text of the message.  If no :var:`sexp` is given, use a default
+         body of `(one-or-more not-newline)`, which is equivalent to `".+"`.
 
       Each of these items is optional, however error messages without a `line`
       will be ignored and are not shown in the buffer.
@@ -273,13 +273,13 @@ You define new syntax checkers with :macro:`flycheck-define-checker`:
       A function to parse the output of the syntax checker, either as *unquoted*
       function symbol or `lambda` form.
 
-      The function must accept three arguments `output`, `checker` and `buffer`,
-      where `output` is the output of the syntax checker as string, `checker`
-      the syntax checker that was used, and `buffer` a buffer object
-      representing the checker buffer.
+      The function must accept three arguments :var:`output`, :var:`checker` and
+      :var:`buffer`, where :var:`output` is the output of the syntax checker as
+      string, :var:`checker` the syntax checker that was used, and :var:`buffer`
+      a buffer object representing the checker buffer.
 
       The function must return a list of :cl-struct:`flycheck-error` objects
-      parsed from `output`.  See :ref:`error-api` for information about
+      parsed from :var:`output`.  See :ref:`error-api` for information about
       :cl-struct:`flycheck-error`.  See :ref:`error-parsers` for a list of
       built-in error parsers.
 
@@ -296,10 +296,10 @@ You define new syntax checkers with :macro:`flycheck-define-checker`:
       An unquoted major mode symbol or an unquoted list thereof.
 
       If given, this syntax checker is only used, if the major mode of the
-      buffer to check is equal (as in `eq`) to any given :samp:`{mode}`.
+      buffer to check is equal (as in `eq`) to any given :var:`mode`.
 
       If :flyc:checkprop:`:predicate` is given, it is additionally called in
-      buffers of any given :samp:`{mode}`.
+      buffers of any given :var:`mode`.
 
    .. flyc:checker-property:: :predicate {function}
                          :predicate (lambda () {body} ...)
@@ -318,35 +318,35 @@ You define new syntax checkers with :macro:`flycheck-define-checker`:
 
       An unquoted list defining the syntax checker to run after this checker.
 
-      Flycheck tries all items in the order of declaration.  Each :samp:`{item}`
-      is either a syntax checker symbol or a cons cell :samp:`({predicate}
+      Flycheck tries all items in the order of declaration.  Each :var:`item` is
+      either a syntax checker symbol or a cons cell :varcode:`({predicate}
       . {checker})`.
 
-      In the former case, the :samp:`{item}` is used, if the syntax checker is
+      In the former case, the :var:`item` is used, if the syntax checker is
       enabled and suitable for the current buffer.  In the latter case, the
-      :samp:`{predicate}` must match additionally.
+      :var:`predicate` must match additionally.
 
-      :samp:`{predicate}` is either `no-errors` or `warnings-only`:
+      :var:`predicate` is either `no-errors` or `warnings-only`:
 
       `no-errors`
-         The syntax :samp:`{checker}` is only considered if the current syntax
+         The syntax :var:`checker` is only considered if the current syntax
          checker reported no errors at all.
 
       `warnings-only`
-         The syntax :samp:`{checker}` is only considered if the current syntax
+         The syntax :var:`checker` is only considered if the current syntax
          checker only reported warnings, but no errors.
 
 .. macro:: flycheck-def-config-file-var symbol checker &optional filename
 
-   Define `symbol` as configuration file variable for a syntax `checker`, with a
-   default value of `filename`.
+   Define :var:`symbol` as configuration file variable for a syntax
+   :var:`checker`, with a default value of :var:`filename`.
 
-   `symbol` is declared as customizable, buffer-local variable using
-   `defcustom`, to provide a configuration file for the given syntax `checker`.
-   The variable has the customization type `string`, and gets a comprehensive
-   docstring, including a reference to `checker`.
+   :var:`symbol` is declared as customizable, buffer-local variable using
+   `defcustom`, to provide a configuration file for the given syntax
+   :var:`checker`.  The variable has the customization type :var:`string`, :and
+   gets a comprehensive docstring, including a reference to :var:`checker`.
 
-   `filename` is used as initial value for the variable.  If omitted, the
+   :var:`filename` is used as initial value for the variable.  If omitted, the
    initial value is nil.
 
    Use this macro together with the `config-file` form in the
@@ -354,14 +354,15 @@ You define new syntax checkers with :macro:`flycheck-define-checker`:
 
 .. macro:: flycheck-def-option-var symbol initial-value checker &optional custom-args
 
-   Define `symbol` as option variable for a syntax `checker`, with the given
-   `initial-value`.
+   Define :var:`symbol` as option variable for a syntax :var:`checker`, with the given
+   :var:`initial-value`.
 
-   `symbol` is declared as customizable variable, buffer-local variable using
-   `defcustom`, to provide an option for the given syntax `checker`.  `symbol`
-   gets a comprehensive docstring, including a reference to `checker`.
+   :var:`symbol` is declared as customizable variable, buffer-local variable
+   using `defcustom`, to provide an option for the given syntax :var:`checker`.
+   :var:`symbol` gets a comprehensive docstring, including a reference to
+   :var:`checker`.
 
-   `custom-args` are forwarded to `defcustom`.  Use them to declare the
+   :var:`custom-args` are forwarded to `defcustom`.  Use them to declare the
    customization type, etc.
 
    Use this macro together with the `option`, `option-list` and `option-flag`
@@ -385,9 +386,9 @@ selection, by adding it to :option:`flycheck-checkers`, e.g.
    reserved for **user customization**.  Do **not** use them in Flycheck
    extensions.
 
-   Specifically, please do **not** provide a hook function which selects the syntax
-   checker explicitly by assigning to :option:`flycheck-checker` or by calling
-   :function:`flycheck-select-checker`, e.g.
+   Specifically, please do **not** provide a hook function which selects the
+   syntax checker explicitly by assigning to :option:`flycheck-checker` or by
+   calling :function:`flycheck-select-checker`, e.g.
 
    .. code-block:: cl
 
@@ -422,8 +423,8 @@ You can define new error levels with :function:`flycheck-define-error-level`:
 
    The following `properties` constitute an error level:
 
-   :samp:`:overlay-category {category}`
-      The overlay :samp:`{category}` for `level` as symbol.
+   :varcode:`:overlay-category {category}`
+      The overlay :var:`category` for `level` as symbol.
 
       An overlay category is a symbol whose properties provide the default
       values for overlays of this category.  See :infonode:`Overlay
@@ -436,11 +437,11 @@ You can define new error levels with :function:`flycheck-define-error-level`:
       level overlays, and `help-echo` to define a default error messages for
       errors without messages.
 
-   :samp:`:fringe-face {face}`
-      A face to use for fringe indicators for `level` as symbol.
+   :varcode:`:fringe-face {face}`
+      A :var:`face` to use for fringe indicators for `level` as symbol.
 
-   :samp:`:fringe-bitmap {bitmap}`
-      A fringe bitmap to use for fringe indicators for `level` as symbol.
+   :varcode:`:fringe-bitmap {bitmap}`
+      A fringe :var:`bitmap` to use for fringe indicators for `level` as symbol.
 
       See :infonode:`Fringe Bitmaps(elisp)` for a list of built-in fringe
       bitmaps, and instructions on how to define new bitmaps.
@@ -459,12 +460,12 @@ Flycheck provides the following error parsers for use by syntax checkers:
 
 .. function:: flycheck-parse-with-patterns output checker buffer
 
-   Parse `output` with the :flyc:checkprop:`:error-patterns` of the syntax
-   `checker`.
+   Parse :var:`output` with the :flyc:checkprop:`:error-patterns` of the syntax
+   :var:`checker`.
 
 .. function:: flycheck-parse-checkstyle output checker buffer
 
-   Parse `output` as Checkstyle_ XML.
+   Parse :var:`output` as Checkstyle_ XML.
 
 You may also define your own error parsers.  An error parser is any function
 that takes the following three arguments and returns a list of
@@ -494,13 +495,14 @@ Flycheck provides the following built-in option filters for use with the
 
 .. function:: flycheck-option-int value
 
-   Like the built-in `number-to-string`, but returns `nil` when `value` is
+   Like the built-in `number-to-string`, but returns `nil` when :var:`value` is
    `nil`.
 
 .. function:: flycheck-option-comma-separated-list value &optional separator filter
 
-   Convert `value` into a list separated by `separator`.  `filter` is an
-   optional function to apply to each item in `value` first.
+   Convert :var:`value` into a list separated by :var:`separator`.
+   :var:`filter` is an optional function to apply to each item in :var:`value`
+   first.
 
 .. _extending-syntax-checkers:
 
@@ -511,14 +513,14 @@ There are some means to extend defined syntax checkers:
 
 .. function:: flycheck-add-next-checker checker next-checker &optional append
 
-   Add a `next-checker` to run after `checker`.
+   Add a :var:`next-checker` to run after :var:`checker`.
 
-   `checker` is a syntax checker symbol.  `next-checker` is either a syntax
-   checker symbol or a cons cell in the format of a single entry to the
+   :var:`checker` is a syntax checker symbol.  :var:`next-checker` is either a
+   syntax checker symbol or a cons cell in the format of a single entry to the
    :flyc:checkprop:`:next-checkers` property.
 
-   `next-checker` is prepended before other checkers to run after
-   `checker`, unless `append` is non-nil.
+   :var:`next-checker` is prepended before other checkers to run after
+   :var:`checker`, unless :var:`append` is non-nil.
 
 Examples
 ========

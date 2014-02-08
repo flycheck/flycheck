@@ -68,7 +68,7 @@ However, you can customize automatic syntax checking with
    following events are known:
 
    `mode-enabled`
-      Check syntax immediately when `flycheck-mode` is enabled.
+      Check syntax immediately when :command:`flycheck-mode` is enabled.
 
    `save`
       Check syntax immediately after the buffer was saved.
@@ -313,7 +313,7 @@ Syntax checker executables
 --------------------------
 
 For each syntax checker, there is a buffer-local, customizable variable
-:samp:`flycheck-{checker}-executable`, where :samp:`{checker}` is the name of
+:varcode:`flycheck-{checker}-executable`, where :var:`checker` is the name of
 the syntax checker.
 
 The value of this variable is either nil, or a string.  In the former case,

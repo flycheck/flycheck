@@ -21,7 +21,7 @@
 
 @copying
 @quotation
-Flycheck 0.18-cvs, February 17, 2014
+Flycheck 0.18-cvs, February 24, 2014
 
 Sebastian Wiesner
 
@@ -470,7 +470,7 @@ following events are known:
 
 @item @code{mode-enabled}
 
-Check syntax immediately when @code{flycheck-mode} is enabled.
+Check syntax immediately when @ref{16,,flycheck-mode} is enabled.
 
 @item @code{save}
 
@@ -787,7 +787,7 @@ Show the documentation of a syntax checker.
 
 
 For each syntax checker, there is a buffer-local, customizable variable
-@code{flycheck-@emph{checker}-executable}, where @code{@emph{checker}} is the name of
+@code{flycheck-@var{checker}-executable}, where @var{checker} is the name of
 the syntax checker.
 
 The value of this variable is either nil, or a string.  In the former case,
@@ -1602,15 +1602,16 @@ You define new syntax checkers with @ref{94,,flycheck-define-checker}:
 @anchor{manual/extending el function flycheck-define-checker}@anchor{94}
 @deffn {Macro} flycheck@w{-}define@w{-}checker symbol docstring &rest  properties
 
-Define @code{symbol} as new syntax checker with @code{docstring} and @code{properties}.
+Define @var{symbol} as new syntax checker with @var{docstring} and
+@var{properties}.
 
-@code{docstring} provides documentation for the syntax checker.  Use
+@var{docstring} provides documentation for the syntax checker.  Use
 @ref{10,,flycheck-describe-checker} to view the documentation of a syntax
 checker.
 
-The following @code{properties} constitute a syntax checker.
-@ref{95,,;command} is mandatory.  A syntax checker must also have either
-@ref{96,,;modes} or @ref{97,,;predicate}, and either
+The following @var{properties} constitute a syntax checker.
+@ref{95,,;command} is mandatory.  A syntax checker must also have
+either @ref{96,,;modes} or @ref{97,,;predicate}, and either
 @ref{98,,;error-patterns} or @ref{99,,;error-parser}.
 @ref{9a,,;next-checkers} is entirely optional.
 
@@ -1618,10 +1619,10 @@ If a mandatory property is missing, or if any property has an invalid value,
 a @emph{compile-time} error is signalled.
 
 Any syntax checker defined with this macro is eligible for manual syntax
-checker selection with @ref{2a,,flycheck-select-checker}.  To make the
-new syntax checker available for automatic selection, you need to register it
-in @ref{25,,flycheck-checkers}.  See @ref{20,,Syntax checker selection} for
-more information.
+checker selection with @ref{2a,,flycheck-select-checker}.  To make the new
+syntax checker available for automatic selection, you need to register it in
+@ref{25,,flycheck-checkers}.  See @ref{20,,Syntax checker selection} for more
+information.
 
 @geindex ;command; Flycheck syntax checker property
 @anchor{manual/extending flyc command}@anchor{95}
@@ -1631,18 +1632,19 @@ more information.
 
 An unquoted list describing the syntax checker command to execute.
 
-@code{@emph{executable}} must be a string with the executable of this syntax
-checker.
+@var{executable} must be a string with the executable of this
+syntax checker.
 
-A customizable, buffer-local variable @code{flycheck-@emph{symbol}-executable}
-is implicitly defined to allow overriding of the executable.  See
-@ref{2e,,Syntax checker executables} for details about these variables.  If
-this variable is non-nil, Flycheck uses the value of the variable as
-executable, otherwise it falls back to @code{@emph{executable}}.  In either
-case, the executable is checked with @code{executable-find} before use.
+A customizable, buffer-local variable
+@code{flycheck-@var{symbol}-executable} is implicitly defined to allow
+overriding of the executable.  See @ref{2e,,Syntax checker executables} for
+details about these variables.  If this variable is non-nil, Flycheck uses
+the value of the variable as executable, otherwise it falls back to
+@var{executable}.  In either case, the executable is checked with
+@code{executable-find} before use.
 
-Each @code{@emph{arg}} is an argument to the executable, either as string, or
-as one of the following special symbols and forms.
+Each @var{arg} is an argument to the executable, either as string,
+or as one of the following special symbols and forms.
 
 @cartouche
 @quotation Note 
@@ -1731,99 +1733,99 @@ out of the way.
 See the declaration of the @@code@{go-build@} syntax checker for an
 application of this symbol.
 
-@item @code{(config-file @emph{option} @emph{variable})}
+@item @code{(config-file @var{option} @var{variable})}
 
 A configuration file for this syntax checker.
 
-@code{@emph{option}} is a string containing the option that specifies a
+@var{option} is a string containing the option that specifies a
 configuration file to the syntax checker tool.
 
-@code{@emph{variable}} is a symbol referring to a variable from which to
-obtain the name or path of the configuration file.  See
+@var{variable} is a symbol referring to a variable from which to obtain
+the name or path of the configuration file.  See
 @ref{60,,Syntax checker configuration files} for more information about
 syntax checker configuration.  You need to define this variable
 @emph{explicitly} with @ref{9c,,flycheck-def-config-file-var}.
 
-If the configuration file is found, pass the @code{@emph{option}} and the
+If the configuration file is found, pass the @var{option} and the
 absolute path to the configuration file to the syntax checker.
 Otherwise the cell is simply dropped from the arguments of the syntax
 checker.
 
-If @code{@emph{option}} ends with a @code{=} character, @code{@emph{option}} and the
+If @var{option} ends with a @code{=} character, @var{option} and the
 absolute path to the configuration file are concatenated and given as a
-single argument to the syntax checker.  Otherwise, @code{@emph{option}} and
-the configuration file path are given as two separate arguments.
+single argument to the syntax checker.  Otherwise, @var{option} and the
+configuration file path are given as two separate arguments.
 
-@item @code{(option @emph{option} @emph{variable} [@emph{filter}])}
+@item @code{(option @var{option} @var{variable} [@var{filter}])}
 
 The value of a variable.
 
-@code{@emph{option}} is a string containing the option for with to specify
-the value.  @code{@emph{filter}} is an optional function to be applied to
-the value of @code{@emph{variable}} before use.  See @ref{9d,,Option filters}
-for a list of built-in option filters.
+@var{option} is a string containing the option for with to specify the
+value.  @var{filter} is an optional function to be applied to the value
+of @var{variable} before use.  See @ref{9d,,Option filters} for a list of
+built-in option filters.
 
-@code{@emph{variable}} is a symbol referring to a variable whose value to
-:use.  See ref:@code{syntax-checker-configuration} for more information about
+@var{variable} is a symbol referring to a variable whose value to use.
+:See ref:@code{syntax-checker-configuration} for more information about
 :syntax checker configuration.  You need to define this variable
 :@emph{explicitly} with @ref{9e,,flycheck-def-option-var}.
 
-If @code{@emph{variable}} is not @code{nil} after applying @code{@emph{filter}}, pass
-@code{@emph{option}} and the value of @code{@emph{variable}} after applying
-@code{@emph{filter}}.  Otherwise the cell is simply dropped from the
-arguments of the syntax checker.
+If @var{variable} is not @code{nil} after applying @var{filter}, pass
+@var{option} and the value of @var{variable} after applying
+@var{filter}.  Otherwise the cell is simply dropped from the arguments
+of the syntax checker.
 
-An @code{@emph{option}} ending with a @code{=} character is treated like in a
+An @var{option} ending with a @code{=} character is treated like in a
 @code{config-file} cell.
 
-@item @code{(option-list @emph{option} @emph{variable} [@emph{prepend-fn} [@emph{filter}]])}
+@item @code{(option-list @var{option} @var{variable} [@var{prepend-fn} [@var{filter}]])}
 
-Like @code{@emph{option}}, but for lists of options.
+Like @var{option}, but for lists of options.
 
-@code{@emph{option}} is a string containing the option to specify.
+@var{option} is a string containing the option to specify.
 
-@code{@emph{variable}} is a variable whose value must be a list.
+@var{variable} is a variable whose value must be a list.
 
-@code{prepend-fn} is a function called with @code{@emph{option}} as first
+@code{prepend-fn} is a function called with @var{option} as first
 and the item of the list as second argument.  It should return the
-result of prepending @code{@{option@}} to the item, either as list or as
-string.  If omitted, it defaults to @code{list}, so by default,
-@code{@emph{option}} will be prepended as a separate argument.
+result of prepending @var{option} to the item, either as list or as
+string.  If omitted, it defaults to @code{list}, so by default, @var{option}
+will be prepended as a separate argument.
 
-@code{@emph{filter}} is an optional function to be applied to each item in
-the list before use.  See @ref{9d,,Option filters} for a list of built-in
+@var{filter} is an optional function to be applied to each item in the
+list before use.  See @ref{9d,,Option filters} for a list of built-in
 option filters.
 
-For each item in the value of @code{@emph{variable}}, which is not @code{nil}
-after applying @code{@emph{filter}}, pass @code{@emph{option}} the the item
-after applying @code{@emph{filter}}, as returned by @code{@emph{prepend-fn}}.
+For each item in the value of @var{variable}, which is not @code{nil} after
+applying @var{filter}, pass @var{option} the the item after applying
+@var{filter}, as returned by @var{prepend-fn}.
 
 Nil items are simply ignored.
 
-@item @code{(option-flag @emph{option} @emph{variable})}
+@item @code{(option-flag @var{option} @var{variable})}
 
 Like @code{option}, but for boolean flags.
 
-@code{@emph{option}} is a string containing the option to
-specify. @code{@emph{variable}} is a symbol referring to a variable.
+@var{option} is a string containing the option to
+specify. @code{variable} is a symbol referring to a variable.
 
-If @code{@emph{variable}} is non-nil, pass @code{@emph{option}} to the syntax
-checker.  Otherwise just ignore this argument.
+If @var{variable} is non-nil, pass @var{option} to the syntax checker.
+Otherwise just ignore this argument.
 
-@item @code{(eval @emph{form})}
+@item @code{(eval @var{form})}
 
 The result of evaluating @code{form}.
 
-@code{form} is an arbitrary Emacs Lisp form.  It is evaluated literally @emph{each
-time} the syntax checker is executed.  Special forms and symbols in
-@code{form} are @emph{not} replaced!
+@var{form} is an arbitrary Emacs Lisp form.  It is evaluated literally
+@emph{each time} the syntax checker is executed.  Special forms and symbols
+in @var{form} are @emph{not} replaced!
 
-@code{form} must evaluate either to a string, a list of strings or nil.  For
-any other result, signal an error.
+@var{form} must evaluate either to a string, a list of strings or nil.
+For any other result, signal an error.
 
-If the result of @code{form} is not nil, pass the result to the syntax
-checker @emph{literally}.  Special symbols and forms in the result of @code{form}
-are @emph{not} replaced.
+If the result of @var{form} is not nil, pass the result to the syntax
+checker @emph{literally}.  Special symbols and forms in the result of
+@var{form} are @emph{not} replaced.
 @end table
 @end deffn
 
@@ -1834,19 +1836,18 @@ are @emph{not} replaced.
 An unquoted list of one or more error patterns to parse the output of the
 syntax checker @ref{95,,;command}.
 
-@code{@emph{level}} is a Flycheck error level, and denotes the severity of
-errors matched by the pattern.  This mainly affects the visual
-representation of matched errors in buffers.
+@var{level} is a Flycheck error level, and denotes the severity of errors
+matched by the pattern.  This mainly affects the visual representation of
+matched errors in buffers.
 
 Flycheck provides the built-in error levels @code{error}, @code{warning} and @code{info}.
 You can define your own error levels with
 @ref{9f,,flycheck-define-error-level}.
 
-The @code{@emph{level}} is followed by one or more @code{rx} @code{@emph{sexp}}
-elements.  See the docstring of the function @code{rx} for more information.
-In addition to the standard forms of @code{rx}, Flycheck supports the following
-additional forms to make specific parts of the error output available to
-Flycheck:
+The @var{level} is followed by one or more @code{rx} @var{sexp} elements.
+See the docstring of the function @code{rx} for more information.  In addition
+to the standard forms of @code{rx}, Flycheck supports the following additional
+forms to make specific parts of the error output available to Flycheck:
 
 
 @table @asis
@@ -1861,19 +1862,18 @@ more digits.
 Matches a column number the error refers to, as a sequence of one or
 more digits.
 
-@item @code{(file-name @emph{sexp} ...)}
+@item @code{(file-name @var{sexp} ...)}
 
-Matches the file name the error refers to.  @code{@emph{sexp}} matches the
-name of the file.  If no @code{@emph{sexp}} is given, use a default body of
+Matches the file name the error refers to.  @var{sexp} matches the
+name of the file.  If no @var{sexp} is given, use a default body of
 @code{(minimal-match (one-or-more not-newline))}, which is equivalent to
 @code{".+?"}.
 
-@item @code{(message @emph{sexp} ...)}
+@item @code{(message @var{sexp} ...)}
 
-Matches the error message to be shown to the user.  @code{@emph{sexp}}
-matches the text of the message.  If no @code{@emph{sexp}} is given, use a
-default body of @code{(one-or-more not-newline)}, which is equivalent to
-@code{".+"}.
+Matches the error message to be shown to the user.  @var{sexp} matches
+the text of the message.  If no @var{sexp} is given, use a default
+body of @code{(one-or-more not-newline)}, which is equivalent to @code{".+"}.
 @end table
 
 Each of these items is optional, however error messages without a @code{line}
@@ -1893,13 +1893,13 @@ matched by subsequent patterns.  In other words, the first pattern wins.
 A function to parse the output of the syntax checker, either as @emph{unquoted}
 function symbol or @code{lambda} form.
 
-The function must accept three arguments @code{output}, @code{checker} and @code{buffer},
-where @code{output} is the output of the syntax checker as string, @code{checker}
-the syntax checker that was used, and @code{buffer} a buffer object
-representing the checker buffer.
+The function must accept three arguments @var{output}, @var{checker} and
+@var{buffer}, where @var{output} is the output of the syntax checker as
+string, @var{checker} the syntax checker that was used, and @var{buffer}
+a buffer object representing the checker buffer.
 
 The function must return a list of @ref{a0,,flycheck-error} objects
-parsed from @code{output}.  See @ref{7b,,Error API} for information about
+parsed from @var{output}.  See @ref{7b,,Error API} for information about
 @ref{a0,,flycheck-error}.  See @ref{a1,,Error parsers} for a list of
 built-in error parsers.
 
@@ -1920,10 +1920,10 @@ the error patterns.  You can then manipulate the
 An unquoted major mode symbol or an unquoted list thereof.
 
 If given, this syntax checker is only used, if the major mode of the
-buffer to check is equal (as in @code{eq}) to any given @code{@emph{mode}}.
+buffer to check is equal (as in @code{eq}) to any given @var{mode}.
 
 If @ref{97,,;predicate} is given, it is additionally called in
-buffers of any given @code{@emph{mode}}.
+buffers of any given @var{mode}.
 @end deffn
 
 @geindex ;predicate; Flycheck syntax checker property
@@ -1949,27 +1949,27 @@ syntax checker to be used.
 
 An unquoted list defining the syntax checker to run after this checker.
 
-Flycheck tries all items in the order of declaration.  Each @code{@emph{item}}
-is either a syntax checker symbol or a cons cell @code{(@emph{predicate}
-. @emph{checker})}.
+Flycheck tries all items in the order of declaration.  Each @var{item} is
+either a syntax checker symbol or a cons cell @code{(@var{predicate}
+. @var{checker})}.
 
-In the former case, the @code{@emph{item}} is used, if the syntax checker is
+In the former case, the @var{item} is used, if the syntax checker is
 enabled and suitable for the current buffer.  In the latter case, the
-@code{@emph{predicate}} must match additionally.
+@var{predicate} must match additionally.
 
-@code{@emph{predicate}} is either @code{no-errors} or @code{warnings-only}:
+@var{predicate} is either @code{no-errors} or @code{warnings-only}:
 
 
 @table @asis
 
 @item @code{no-errors}
 
-The syntax @code{@emph{checker}} is only considered if the current syntax
+The syntax @var{checker} is only considered if the current syntax
 checker reported no errors at all.
 
 @item @code{warnings-only}
 
-The syntax @code{@emph{checker}} is only considered if the current syntax
+The syntax @var{checker} is only considered if the current syntax
 checker only reported warnings, but no errors.
 @end table
 @end deffn
@@ -1979,15 +1979,15 @@ checker only reported warnings, but no errors.
 @anchor{manual/extending el function flycheck-def-config-file-var}@anchor{9c}
 @deffn {Macro} flycheck@w{-}def@w{-}config@w{-}file@w{-}var symbol checker &optional  filename
 
-Define @code{symbol} as configuration file variable for a syntax @code{checker}, with a
-default value of @code{filename}.
+Define @var{symbol} as configuration file variable for a syntax
+@var{checker}, with a default value of @var{filename}.
 
-@code{symbol} is declared as customizable, buffer-local variable using
-@code{defcustom}, to provide a configuration file for the given syntax @code{checker}.
-The variable has the customization type @code{string}, and gets a comprehensive
-docstring, including a reference to @code{checker}.
+@var{symbol} is declared as customizable, buffer-local variable using
+@code{defcustom}, to provide a configuration file for the given syntax
+@var{checker}.  The variable has the customization type @var{string}, :and
+gets a comprehensive docstring, including a reference to @var{checker}.
 
-@code{filename} is used as initial value for the variable.  If omitted, the
+@var{filename} is used as initial value for the variable.  If omitted, the
 initial value is nil.
 
 Use this macro together with the @code{config-file} form in the
@@ -1998,14 +1998,15 @@ Use this macro together with the @code{config-file} form in the
 @anchor{manual/extending el function flycheck-def-option-var}@anchor{9e}
 @deffn {Macro} flycheck@w{-}def@w{-}option@w{-}var symbol initial-value checker &optional  custom-args
 
-Define @code{symbol} as option variable for a syntax @code{checker}, with the given
-@code{initial-value}.
+Define @var{symbol} as option variable for a syntax @var{checker}, with the given
+@var{initial-value}.
 
-@code{symbol} is declared as customizable variable, buffer-local variable using
-@code{defcustom}, to provide an option for the given syntax @code{checker}.  @code{symbol}
-gets a comprehensive docstring, including a reference to @code{checker}.
+@var{symbol} is declared as customizable variable, buffer-local variable
+using @code{defcustom}, to provide an option for the given syntax @var{checker}.
+@var{symbol} gets a comprehensive docstring, including a reference to
+@var{checker}.
 
-@code{custom-args} are forwarded to @code{defcustom}.  Use them to declare the
+@var{custom-args} are forwarded to @code{defcustom}.  Use them to declare the
 customization type, etc.
 
 Use this macro together with the @code{option}, @code{option-list} and @code{option-flag}
@@ -2030,9 +2031,9 @@ selection, by adding it to @ref{25,,flycheck-checkers}, e.g.
 reserved for @strong{user customization}.  Do @strong{not} use them in Flycheck
 extensions.
 
-Specifically, please do @strong{not} provide a hook function which selects the syntax
-checker explicitly by assigning to @ref{2b,,flycheck-checker} or by calling
-@ref{2a,,flycheck-select-checker}, e.g.
+Specifically, please do @strong{not} provide a hook function which selects the
+syntax checker explicitly by assigning to @ref{2b,,flycheck-checker} or by
+calling @ref{2a,,flycheck-select-checker}, e.g.
 
 @example
 (defun enable-my-new-syntax-checker ()
@@ -2083,9 +2084,9 @@ The following @code{properties} constitute an error level:
 
 @table @asis
 
-@item @code{:overlay-category @emph{category}}
+@item @code{:overlay-category @var{category}}
 
-The overlay @code{@emph{category}} for @code{level} as symbol.
+The overlay @var{category} for @code{level} as symbol.
 
 An overlay category is a symbol whose properties provide the default
 values for overlays of this category.  See @ref{Overlay Properties,,,elisp} for more information about overlay properties and
@@ -2097,13 +2098,13 @@ categories are @code{priority} to influence the stacking of multiple error
 level overlays, and @code{help-echo} to define a default error messages for
 errors without messages.
 
-@item @code{:fringe-face @emph{face}}
+@item @code{:fringe-face @var{face}}
 
-A face to use for fringe indicators for @code{level} as symbol.
+A @var{face} to use for fringe indicators for @code{level} as symbol.
 
-@item @code{:fringe-bitmap @emph{bitmap}}
+@item @code{:fringe-bitmap @var{bitmap}}
 
-A fringe bitmap to use for fringe indicators for @code{level} as symbol.
+A fringe @var{bitmap} to use for fringe indicators for @code{level} as symbol.
 
 See @ref{Fringe Bitmaps,,,elisp} for a list of built-in fringe
 bitmaps, and instructions on how to define new bitmaps.
@@ -2126,15 +2127,15 @@ Flycheck provides the following error parsers for use by syntax checkers:
 @anchor{manual/extending el function flycheck-parse-with-patterns}@anchor{a2}
 @deffn {Function} flycheck@w{-}parse@w{-}with@w{-}patterns output checker buffer
 
-Parse @code{output} with the @ref{98,,;error-patterns} of the syntax
-@code{checker}.
+Parse @var{output} with the @ref{98,,;error-patterns} of the syntax
+@var{checker}.
 @end deffn
 
 @geindex flycheck-parse-checkstyle; Emacs Lisp function
 @anchor{manual/extending el function flycheck-parse-checkstyle}@anchor{a8}
 @deffn {Function} flycheck@w{-}parse@w{-}checkstyle output checker buffer
 
-Parse @code{output} as Checkstyle@footnote{http://checkstyle.sourceforge.net/} XML.
+Parse @var{output} as Checkstyle@footnote{http://checkstyle.sourceforge.net/} XML.
 @end deffn
 
 You may also define your own error parsers.  An error parser is any function
@@ -2174,7 +2175,7 @@ Flycheck provides the following built-in option filters for use with the
 @anchor{manual/extending el function flycheck-option-int}@anchor{ab}
 @deffn {Function} flycheck@w{-}option@w{-}int value
 
-Like the built-in @code{number-to-string}, but returns @code{nil} when @code{value} is
+Like the built-in @code{number-to-string}, but returns @code{nil} when @var{value} is
 @code{nil}.
 @end deffn
 
@@ -2182,8 +2183,9 @@ Like the built-in @code{number-to-string}, but returns @code{nil} when @code{val
 @anchor{manual/extending el function flycheck-option-comma-separated-list}@anchor{ac}
 @deffn {Function} flycheck@w{-}option@w{-}comma@w{-}separated@w{-}list value &optional  separator filter
 
-Convert @code{value} into a list separated by @code{separator}.  @code{filter} is an
-optional function to apply to each item in @code{value} first.
+Convert @var{value} into a list separated by @var{separator}.
+@var{filter} is an optional function to apply to each item in @var{value}
+first.
 @end deffn
 
 @node Extending syntax checkers,Examples,Option filters,Extending Flycheck
@@ -2197,14 +2199,14 @@ There are some means to extend defined syntax checkers:
 @anchor{manual/extending el function flycheck-add-next-checker}@anchor{af}
 @deffn {Function} flycheck@w{-}add@w{-}next@w{-}checker checker next-checker &optional  append
 
-Add a @code{next-checker} to run after @code{checker}.
+Add a @var{next-checker} to run after @var{checker}.
 
-@code{checker} is a syntax checker symbol.  @code{next-checker} is either a syntax
-checker symbol or a cons cell in the format of a single entry to the
+@var{checker} is a syntax checker symbol.  @var{next-checker} is either a
+syntax checker symbol or a cons cell in the format of a single entry to the
 @ref{9a,,;next-checkers} property.
 
-@code{next-checker} is prepended before other checkers to run after
-@code{checker}, unless @code{append} is non-nil.
+@var{next-checker} is prepended before other checkers to run after
+@var{checker}, unless @var{append} is non-nil.
 @end deffn
 
 @node Examples,,Extending syntax checkers,Extending Flycheck
@@ -2552,22 +2554,23 @@ There are two constructors to create new @ref{a0,,flycheck-error} objects:
 @anchor{manual/api el function flycheck-error-new-at}@anchor{c0}
 @deffn {Function} flycheck@w{-}error@w{-}new@w{-}at line column &optional  level message &key                checker filename buffer
 
-Create a new Flycheck error at the given @code{line} and @code{column}.
+Create a new Flycheck error at the given @var{line} and @var{column}.
 
-@code{line} and @code{column} refer to the @ref{bc,,line} and @ref{bd,,column} of
-the new error.  The optional @code{level} and @code{message} arguments fill the
-@ref{bf,,level} and @ref{be,,message} slots respectively.
+@var{line} and @var{column} refer to the @ref{bc,,line} and
+@ref{bd,,column} of the new error.  The optional @var{level} and
+@var{message} arguments fill the @ref{bf,,level} and cl-slot:@code{message}
+slots respectively.
 
-@code{checker}, @code{filename} and @code{buffer} are keyword arguments, for
-@ref{ba,,checker}, @ref{bb,,filename} and @ref{b9,,buffer}
-respectively.  @code{buffer} defaults to the current buffer, the other two
+@var{checker}, @var{filename} and @var{buffer} are keyword arguments,
+for @ref{ba,,checker}, @ref{bb,,filename} and @ref{b9,,buffer}
+respectively.  @var{buffer} defaults to the current buffer, the other two
 default to @code{nil}.
 
 @cartouche
 @quotation Warning 
 Due to a limitation of Common Lisp functions in Emacs Lisp, you must
-specify @strong{all} optional arguments, that is, @strong{both} @code{level} @strong{and}
-@code{message}, to pass any keyword arguments.
+specify @strong{all} optional arguments, that is, @strong{both} @var{level}
+@strong{and} @var{message}, to pass any keyword arguments.
 @end quotation
 @end cartouche
 @end deffn
@@ -2576,10 +2579,11 @@ specify @strong{all} optional arguments, that is, @strong{both} @code{level} @st
 @anchor{manual/api el function flycheck-error-new}@anchor{c1}
 @deffn {Function} flycheck@w{-}error@w{-}new  &rest attributes
 
-Create a new @ref{a0,,flycheck-error} with the given @code{attributes}.
+Create a new @ref{a0,,flycheck-error} with the given @var{attributes}.
 
-@code{attributes} is a property list, where each property specifies the value
-for the corresponding slot of @ref{a0,,flycheck-error}, for instance:
+@var{attributes} is a property list, where each property specifies the
+value for the corresponding slot of @ref{a0,,flycheck-error}, for
+instance:
 
 @example
 (flycheck-error-new :line 10 :column 5 :message "Foo" :level 'warning)
@@ -2592,28 +2596,28 @@ The following functions and macros work on errors:
 @anchor{manual/api el function flycheck-error-with-buffer}@anchor{c2}
 @deffn {Macro} flycheck@w{-}error@w{-}with@w{-}buffer error &rest  forms
 
-Evaluate @code{forms} with the @ref{b9,,buffer} of the given @code{error} as the
-current buffer.
+Evaluate @var{forms} with the @ref{b9,,buffer} of the given @var{error}
+as the current buffer.
 
-If the buffer is not live, @code{forms} are @strong{not} evaluated.
+If the buffer is not live, @var{forms} are @strong{not} evaluated.
 @end deffn
 
 @geindex flycheck-error-line-region; Emacs Lisp function
 @anchor{manual/api el function flycheck-error-line-region}@anchor{c3}
 @deffn {Function} flycheck@w{-}error@w{-}line@w{-}region error
 
-Get the region marking the whole @ref{bc,,line} of the given @code{error}, as
-a cons cell @code{(@emph{beg} . @emph{end})}.
+Get the region marking the whole @ref{bc,,line} of the given
+@var{error}, as a cons cell @code{(@var{beg} . @var{end})}.
 @end deffn
 
 @geindex flycheck-error-column-region; Emacs Lisp function
 @anchor{manual/api el function flycheck-error-column-region}@anchor{c4}
 @deffn {Function} flycheck@w{-}error@w{-}column@w{-}region error
 
-Get the region marking the @ref{bd,,column} of the given @code{error}, as cons
-cell @code{(@emph{beg} . @emph{end})}.
+Get the region marking the @ref{bd,,column} of the given @var{error}, as
+cons cell @code{(@var{beg} . @var{end})}.
 
-If the @ref{bd,,column} of @code{error} is @code{nil}, return @code{nil} instead.
+If the @ref{bd,,column} of @var{error} is @code{nil}, return @code{nil} instead.
 @end deffn
 
 @geindex flycheck-error-sexp-region; Emacs Lisp function
@@ -2621,10 +2625,10 @@ If the @ref{bd,,column} of @code{error} is @code{nil}, return @code{nil} instead
 @deffn {Function} flycheck@w{-}error@w{-}sexp@w{-}region error
 
 Get the region marking the expression around the @ref{bd,,column} of the
-@code{error}, as cons cell @code{(@emph{beg} . @emph{end})}.
+@var{error}, as cons cell @code{(@var{beg} . @var{end})}.
 
-If the @ref{bd,,column} of @code{error} is @code{nil}, or if there is no expression
-around this column, return @code{nil} instead.
+If the @ref{bd,,column} of @var{error} is @code{nil}, or if there is no
+expression around this column, return @code{nil} instead.
 
 @cartouche
 @quotation Warning 
@@ -2645,18 +2649,18 @@ known to have good support for this feature.
 @anchor{manual/api el function flycheck-error-pos}@anchor{c6}
 @deffn {Function} flycheck@w{-}error@w{-}pos error
 
-Get the exact buffer position of @code{error}.
+Get the exact buffer position of @var{error}.
 
-Essentially this is the position of the @ref{bd,,column} of @code{error}, if
-it is not @code{nil}, or the position of the first non-whitespace character on
-the @ref{bc,,line} of @code{error} otherwise.  @@end defun
+Essentially this is the position of the @ref{bd,,column} of @var{error},
+if it is not @code{nil}, or the position of the first non-whitespace character
+on the @ref{bc,,line} of @var{error} otherwise.
 @end deffn
 
 @geindex flycheck-error-format; Emacs Lisp function
 @anchor{manual/api el function flycheck-error-format}@anchor{c7}
 @deffn {Function} flycheck@w{-}error@w{-}format error
 
-Format @code{error} as a human-readable string.
+Format @var{error} as a human-readable string.
 @end deffn
 @end deffn
 
@@ -2675,22 +2679,23 @@ sorted by line and column number.
 @anchor{manual/api el function flycheck-count-errors}@anchor{c8}
 @deffn {Function} flycheck@w{-}count@w{-}errors errors
 
-Count the number of errors and warnings in @code{errors}.
+Count the number of errors and warnings in @var{errors}.
 
 Return an alist mapping error level symbols to error counts.  Each item is a
-cons cell @code{(@emph{level} . @emph{count})}, where @code{@emph{level}} is the level
-symbol and @code{@emph{count}} is the number of errors of of @code{@emph{level}}.
+cons cell @code{(@var{level} . @var{count})}, where @code{@var{level}} is the
+level symbol and @code{@var{count}} is the number of errors of of
+@code{@var{level}}.
 @end deffn
 
 @geindex flycheck-has-errors-p; Emacs Lisp function
 @anchor{manual/api el function flycheck-has-errors-p}@anchor{c9}
 @deffn {Function} flycheck@w{-}has@w{-}errors@w{-}p errors &optional  level
 
-Determine if there are any @code{errors} with the given @code{level}.
+Determine if there are any @var{errors} with the given @var{level}.
 
-If @code{level} is omitted, determine whether @code{errors} is not nil.  Otherwise
-determine whether there are any errors whose level is equal to the given
-@code{level}.
+If @var{level} is omitted, determine whether @var{errors} is not nil.
+Otherwise determine whether there are any errors whose level is equal to the
+given @var{level}.
 @end deffn
 
 @node Error parser API,,Error API,Flycheck API
@@ -2704,7 +2709,7 @@ These functions can be used to implement custom error parsers:
 @anchor{manual/api el function flycheck-parse-xml-string}@anchor{cb}
 @deffn {Function} flycheck@w{-}parse@w{-}xml@w{-}string s
 
-Parse a string @code{s} containing XML and return the parsed document tree.
+Parse a string @var{s} containing XML and return the parsed document tree.
 @end deffn
 
 @node Contribution guidelines,Credits,Flycheck API,Top
@@ -5076,8 +5081,8 @@ Flycheck supports the following 39 languages with
 65 syntax checkers.
 
 Each language has one or more syntax checkers, whose names follow a
-@code{@emph{language}-@emph{tool}} convention, where @code{@emph{language}} is the
-programming language supported by this syntax checker, and @code{@emph{tool}} the
+@code{@var{language}-@var{tool}} convention, where @var{language} is the
+programming language supported by this syntax checker, and @var{tool} the
 specific syntax checker tool.
 
 This document provides just a brief overview, use
