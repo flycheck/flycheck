@@ -4658,8 +4658,8 @@ When non-nil, enable Microsoft extensions to C/C++ via
 (flycheck-define-checker rst-sphinx
   "A ReStructuredText (RST) syntax checker using Sphinx.
 
-See URL `sphinx-doc.org'."
-  :command ("sphinx-build" "-b" "text"
+Requires Sphinx 1.2 or newer.  See URL `http://sphinx-doc.org'."
+  :command ("sphinx-build" "-b" "pseudoxml"
             "-q" "-N"                   ; Reduced output and no colors
             (option-flag "-n" flycheck-sphinx-warn-on-missing-references)
             (eval (flycheck-locate-sphinx-source-directory))

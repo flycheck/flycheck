@@ -9,6 +9,7 @@ master (in development)
     `sh-posix-bash` and `sh-posix-dash` respectively.  The `bash` and `zsh`
     syntax checkers were renamed to `sh-bash` and `sh-zsh` respectively.  Thus,
     all shell script syntax checkers now live in the `sh-` prefix.
+  - `rst-sphinx` requires Sphinx 1.2 or newer now.
 
 - New syntax checkers:
 
@@ -21,6 +22,8 @@ master (in development)
 
   - `flycheck-parse-checkstyle` supports `info` level messages now
   - Correctly parse multiline error messages of `go-build` and `go-test`
+  - `rst-sphinx` supports custom nodes without explicit writer support now, by
+    using the `pseudoxml` builder.
 
 0.17 (Feb 1, 2014)
 ------------------
