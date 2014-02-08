@@ -3512,6 +3512,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
 (ert-deftest flycheck-define-checker/go-vet ()
   :tags '(builtin-checker external-tool language-go)
   (skip-unless (flycheck-check-executable 'go-vet))
+  (skip-unless (flycheck-check-predicate 'go-vet))
   (let ((flycheck-disabled-checkers '(go-build)))
     (flycheck-test-should-syntax-check
      "checkers/go/src/vet/warnings.go" 'go-mode
@@ -3522,6 +3523,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
 (ert-deftest flycheck-define-checker/go-vet-print-functions ()
   :tags '(builtin-checker external-tool language-go)
   (skip-unless (flycheck-check-executable 'go-vet))
+  (skip-unless (flycheck-check-predicate 'go-vet))
   (let ((flycheck-disabled-checkers '(go-build))
         (flycheck-go-vet-print-functions '("Warn:0" "Warnf:0")))
     (flycheck-test-should-syntax-check
