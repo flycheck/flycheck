@@ -3491,7 +3491,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
    "checkers/eruby-error.erb" '(html-erb-mode rhtml-mode web-mode)
    '(5 nil error "syntax error, unexpected keyword_end" :checker eruby-erubis)))
 
-(ert-deftest flycheck-define-checker/go-gofmt ()
+(ert-deftest flycheck-define-checker/go-syntax-error ()
   :tags '(builtin-checker external-tool language-go)
   (skip-unless (flycheck-check-executable 'go-gofmt))
   (flycheck-test-should-syntax-check
@@ -3499,60 +3499,41 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
    '(5 9 error "expected '(', found 'IDENT' ta" :checker go-gofmt)
    '(6 1 error "expected ')', found '}'" :checker go-gofmt)))
 
-(ert-deftest flycheck-define-checker/go-golint ()
-  :tags '(builtin-checker external-tool language-go)
-  (skip-unless (flycheck-check-executable 'go-golint))
-  (let ((flycheck-disabled-checkers '(go-build)))
-    (flycheck-test-should-syntax-check
-     "checkers/go/src/lint/golint-warings.go" 'go-mode
-     '(4 5 warning "should not use dot imports" :checker go-golint)
-     '(10 12 warning "if block ends with a return statement, so drop this else and outdent its block"
-          :checker go-golint))))
-
-(ert-deftest flycheck-define-checker/go-vet ()
-  :tags '(builtin-checker external-tool language-go)
-  (skip-unless (flycheck-check-executable 'go-vet))
-  (skip-unless (flycheck-check-predicate 'go-vet))
-  (let ((flycheck-disabled-checkers '(go-build)))
-    (flycheck-test-should-syntax-check
-     "checkers/go/src/vet/warnings.go" 'go-mode
-     '(12 nil warning "unreachable code" :checker go-vet)
-     '(12 nil warning "arg 1 for printf verb %s of wrong type: int"
-          :checker go-vet))))
-
 (ert-deftest flycheck-define-checker/go-vet-print-functions ()
   :tags '(builtin-checker external-tool language-go)
   (skip-unless (flycheck-check-executable 'go-vet))
-  (skip-unless (flycheck-check-predicate 'go-vet))
-  (let ((flycheck-disabled-checkers '(go-build))
-        (flycheck-go-vet-print-functions '("Warn:0" "Warnf:0")))
+  (let ((flycheck-disabled-checkers '(go-build go-golint))
+        (flycheck-go-vet-print-functions '("Warn:0" "Warnf:1")))
     (flycheck-test-should-syntax-check
-     "checkers/go/src/vet/warnings.go" 'go-mode
-     '(9 nil warning "possible formatting directive in Warn call"
+     "checkers/go/src/vet/print-functions.go" 'go-mode
+     '(19 nil warning "possible formatting directive in Warn call"
          :checker go-vet)
-     '(10 nil warning "no formatting directive in Warnf call"
-          :checker go-vet)
-     '(12 nil warning "unreachable code" :checker go-vet)
-     '(12 nil warning "arg 1 for printf verb %s of wrong type: int"
+     '(20 nil warning "constant 1 not a string in call to Warnf"
           :checker go-vet))))
 
-(ert-deftest flycheck-define-checker/go-build ()
+(ert-deftest flycheck-define-checker/go ()
   :tags '(builtin-checker external-tool language-go)
-  (skip-unless (flycheck-check-executable 'go-build))
-  (let ((flycheck-disabled-checkers '(go-golint)))
-    (flycheck-test-with-env
-        `(("GOPATH" . ,(flycheck-test-resource-filename "checkers/go")))
-      (flycheck-test-should-syntax-check
-       "checkers/go/src/error/build-error.go" 'go-mode
-       '(6 nil error "undefined: fmt" :checker go-build)))))
+  (skip-unless (-all? #'flycheck-check-executable '(go-build go-golint go-vet)))
+  (skip-unless (flycheck-check-predicate 'go-vet))
+  (flycheck-test-with-env
+      `(("GOPATH" . ,(flycheck-test-resource-filename "checkers/go")))
+    (flycheck-test-should-syntax-check
+     "checkers/go/src/warnings.go" 'go-mode
+     '(4 nil error "imported and not used: \"fmt\"" :checker go-build)
+     '(4 2 warning "should not use dot imports" :checker go-golint)
+     '(8 nil error "undefined: fmt" :checker go-build)
+     '(8 nil warning "arg 1 for printf verb %s of wrong type: untyped integer"
+         :checker go-vet)
+     '(12 nil warning "unreachable code" :checker go-vet)
+     '(14 9 warning "if block ends with a return statement, so drop this else and outdent its block"
+          :checker go-golint))))
 
 (ert-deftest flycheck-define-checker/go-build-handles-packages ()
   :tags '(builtin-checker external-tool language-go)
   (skip-unless (flycheck-check-executable 'go-build))
   (flycheck-test-with-env
       `(("GOPATH" . ,(flycheck-test-resource-filename "checkers/go")))
-    (flycheck-test-should-syntax-check "checkers/go/src/b1/main.go"
-                                            'go-mode)))
+    (flycheck-test-should-syntax-check "checkers/go/src/b1/main.go" 'go-mode)))
 
 (ert-deftest flycheck-define-checker/go-build-missing-package ()
   :tags '(builtin-checker external-tool language-go)
