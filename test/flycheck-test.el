@@ -3580,10 +3580,6 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
 
 (ert-deftest flycheck-define-checker/handlebars ()
   :tags '(builtin-checker external-tool language-handlebars)
-  ;; Error reporting apparently broken in Handlebars 1.3, see
-  ;; https://github.com/flycheck/flycheck/pull/270#issuecomment-34166125 and
-  ;; https://github.com/wycats/handlebars.js/issues/727
-  :expected-result :failed
   (skip-unless (flycheck-check-executable 'handlebars))
   (flycheck-test-should-syntax-check
    "checkers/handlebars-error.hbs" 'handlebars-mode
