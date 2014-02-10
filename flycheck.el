@@ -4684,10 +4684,10 @@ See URL `http://docutils.sourceforge.net/'."
   :predicate (lambda () (not (flycheck-locate-sphinx-source-directory))))
 
 (flycheck-def-option-var flycheck-sphinx-warn-on-missing-references t rst-sphinx
-  "Whether to enable Microsoft extensions to C/C++ in Clang.
+  "Whether to warn about missing references in Sphinx.
 
-When non-nil, enable Microsoft extensions to C/C++ via
-`-fms-extensions'."
+When non-nil (the default), warn about all missing references in
+Sphinx via `-n'."
   :type 'boolean
   :safe #'booleanp
   :package-version '(flycheck . "0.17"))
