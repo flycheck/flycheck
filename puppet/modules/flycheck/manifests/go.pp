@@ -13,6 +13,7 @@ class flycheck::go {
     ensure        => present,
     url           => $url,
     extension     => 'tar.gz',
+    root_dir      => 'go',
     digest_type   => 'sha1',
     digest_string => '664e5025eae91412a96a10f4ed1a8af6f0f32b7d',
     target        => '/usr/local/',
