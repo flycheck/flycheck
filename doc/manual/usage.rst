@@ -77,7 +77,8 @@ However, you can customize automatic syntax checking with
       Check syntax immediately after a new line was inserted into the buffer.
 
    `idle-change`
-      Check syntax a short time after the last change to the buffer.
+      Check syntax a short time (see :option:`flycheck-idle-change-delay`) after
+      the last change to the buffer.
 
    An syntax check is only conducted for events that are contained in this list.
    For instance, the following setting will cause Flycheck to *only* check if
