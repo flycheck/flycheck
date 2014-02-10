@@ -58,7 +58,7 @@ By default, :ref:`flycheck-mode` checks syntax automatically when
 - or some short time after the last change to the buffer.
 
 However, you can customize automatic syntax checking with
-:option:`flycheck-check-syntax-automatically`
+:option:`flycheck-check-syntax-automatically`:
 
 .. option:: flycheck-check-syntax-automatically
 
