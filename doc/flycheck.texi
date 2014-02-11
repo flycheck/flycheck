@@ -21,7 +21,7 @@
 
 @copying
 @quotation
-Flycheck 0.18-cvs, February 08, 2014
+Flycheck 0.18-cvs, February 11, 2014
 
 Sebastian Wiesner
 
@@ -281,13 +281,13 @@ flycheck-d-unittest@footnote{https://github.com/flycheck/flycheck-d-unittest} ad
 on the fly.
 
 @item 
-flycheck-hdevtools@footnote{https://github.com/flycheck/flycheck-hdevtools} adds a Flycheck syntax checker for Haskell based on
-hdevtools@footnote{https://github.com/bitc/hdevtools/}.
-
-@item 
 flycheck-haskell@footnote{https://github.com/flycheck/flycheck-haskell} improves Haskell support in Flycheck, by configuring
 Flycheck according to the current Cabal project, and using Cabal sandbox
 packages.
+
+@item 
+flycheck-hdevtools@footnote{https://github.com/flycheck/flycheck-hdevtools} adds a Flycheck syntax checker for Haskell based on
+hdevtools@footnote{https://github.com/bitc/hdevtools/}.
 
 @item 
 flycheck-mercury@footnote{https://github.com/flycheck/flycheck-mercury} adds a Flycheck syntax checker for the Mercury Language@footnote{http://mercurylang.org/}.
@@ -434,7 +434,7 @@ or some short time after the last change to the buffer.
 @end itemize
 
 However, you can customize automatic syntax checking with
-@ref{1c,,flycheck-check-syntax-automatically}
+@ref{1c,,flycheck-check-syntax-automatically}:
 
 @geindex flycheck-check-syntax-automatically; Emacs Lisp user option
 @anchor{manual/usage el variable flycheck-check-syntax-automatically}@anchor{1c}
@@ -462,7 +462,8 @@ Check syntax immediately after a new line was inserted into the buffer.
 
 @item @code{idle-change}
 
-Check syntax a short time after the last change to the buffer.
+Check syntax a short time (see @ref{1d,,flycheck-idle-change-delay}) after
+the last change to the buffer.
 @end table
 
 An syntax check is only conducted for events that are contained in this list.
@@ -475,11 +476,11 @@ buffer contents:
 @end example
 
 If the list is empty syntax is never checked automatically.  In this case,
-use @ref{1d,,flycheck-buffer} to check syntax manually.
+use @ref{1e,,flycheck-buffer} to check syntax manually.
 @end deffn
 
 @geindex flycheck-idle-change-delay; Emacs Lisp user option
-@anchor{manual/usage el variable flycheck-idle-change-delay}@anchor{1e}
+@anchor{manual/usage el variable flycheck-idle-change-delay}@anchor{1d}
 @deffn {User Option} flycheck@w{-}idle@w{-}change@w{-}delay
 
 How many seconds to wait before starting a syntax check.
@@ -498,7 +499,7 @@ manually:
 @geindex flycheck-buffer; Emacs Lisp command
 
 @deffn {Command} C@w{-}c ! c
-@anchor{manual/usage el function flycheck-buffer}@anchor{1d}
+@anchor{manual/usage el function flycheck-buffer}@anchor{1e}
 @deffnx {Command} M@w{-}x flycheck@w{-}buffer
 
 Start a syntax check in the current buffer.

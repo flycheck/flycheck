@@ -34,11 +34,11 @@ The following extensions provide additional cool features for Flycheck:
   status.
 - flycheck-d-unittest_ adds a Flycheck checker to run unit tests for D programs
   on the fly.
-- flycheck-hdevtools_ adds a Flycheck syntax checker for Haskell based on
-  hdevtools_.
 - flycheck-haskell_ improves Haskell support in Flycheck, by configuring
   Flycheck according to the current Cabal project, and using Cabal sandbox
   packages.
+- flycheck-hdevtools_ adds a Flycheck syntax checker for Haskell based on
+  hdevtools_.
 - flycheck-mercury_ adds a Flycheck syntax checker for the `Mercury Language`_.
 
 .. _flycheck-cask: https://github.com/flycheck/flycheck-cask
