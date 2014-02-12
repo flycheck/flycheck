@@ -1,0 +1,9 @@
+{%- if show_source and display_github %}
+  <div role="note" aria-label="source link">
+    <h3>{{ _('This Page') }}</h3>
+    <ul class="this-page-menu">
+      <li><a href="https://github.com/{{ github_user }}/{{ github_repo }}/blob/{{ github_version }}{{ conf_py_path }}{{ pagename }}.rst"
+             rel="nofollow">Show source on Github</a></li>
+    </ul>
+  </div>
+{%- endif %}

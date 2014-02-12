@@ -26,6 +26,9 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+# Whether we are building on ReadTheDocs or not
+ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'
+
 needs_sphinx = '1.2'
 
 extensions = ['sphinx.ext.extlinks',
@@ -63,7 +66,8 @@ html_theme = 'nature'
 html_sidebars = {'**': ['info.html',
                         'localtoc.html',
                         'relations.html',
-                        'sourcelink.html',
+                        # For RTD, we point to the source on Github
+                        'rtdsourcelink.html' if ON_RTD else 'sourcelink.html',
                         'searchbox.html']}
 
 texinfo_documents = [
