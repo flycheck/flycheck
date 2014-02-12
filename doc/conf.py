@@ -54,11 +54,17 @@ version = release.split('-')[0]
 
 # Exclude the build directory
 exclude_patterns = ['_build']
+templates_path = ['_templates']
 
 pygments_style = 'emacs'
 
 html_title = '{0} {1}'.format(project, release)
 html_theme = 'nature'
+html_sidebars = {'**': ['info.html',
+                        'localtoc.html',
+                        'relations.html',
+                        'sourcelink.html',
+                        'searchbox.html']}
 
 texinfo_documents = [
   ('manual/index', 'flycheck', u'Flycheck Documentation',
