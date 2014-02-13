@@ -24,6 +24,14 @@ Installation
 
 Flycheck needs Emacs 24, and works best on Unix systems (i.e. Linux or OS X).
 
+.. note::
+
+   For almost all supported languages, Flycheck also needs additional
+   **external** checker programs.  See :doc:`manual/languages` for a list of
+   supported languages and the corresponding checkers programs, and use
+   :command:`flycheck-describe-checker` to get help about specific checkers
+   inside Emacs.
+
 Install the ELPA package from MELPA_ or Marmalade_ with :kbd:`M-x
 package-install RET flycheck`.
 
@@ -35,10 +43,6 @@ In your Cask_ file:
    (source melpa)
 
    (depends-on "flycheck")
-
-Most syntax checkers need external utilities.  See :doc:`manual/languages` for
-supported languages and utilities, or use :kbd:`C-c ! ?` to see information
-about a specific syntax checker.
 
 See :ref:`installation` for detailed installation instructions.
 
