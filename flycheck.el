@@ -4639,6 +4639,8 @@ See URL `http://pypi.python.org/pypi/pylint'."
   :command ("pylint" "-r" "n"
             "--msg-template" "{path}:{line}:{column}:{C}:{msg} ({msg_id})"
             (config-file "--rcfile=" flycheck-pylintrc)
+            ;; Need `source-inplace' for relative imports (e.g. `from .foo
+            ;; import bar'), see https://github.com/flycheck/flycheck/issues/280
             source-inplace)
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ":"
