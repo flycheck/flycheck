@@ -19,6 +19,10 @@ master (in development)
   - #328: Go with `golint`
   - #329: Go with `go tool vet`
 
+- New features:
+
+  - Add `flycheck-rust-library-path` to specify library locations for `rust`
+
 - Improvements:
 
   - `flycheck-parse-checkstyle` supports `info` level messages now

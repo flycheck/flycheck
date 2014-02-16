@@ -4804,11 +4804,23 @@ See URL `http://jruby.org/'."
   :modes (enh-ruby-mode ruby-mode)
   :next-checkers ((warnings-only . ruby-rubylint)))
 
+(flycheck-def-option-var flycheck-rust-library-path nil rust
+  "A list of library directories for Rust.
+
+The value of this variable is a list of strings, where each
+string is a directory to add to the library path of Rust.
+Relative paths are relative to the file being checked."
+  :type '(repeat (directory :tag "Library directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.18"))
+
 (flycheck-define-checker rust
   "A Rust syntax checker using Rust compiler.
 
 See URL `http://rust-lang.org'."
-  :command ("rustc" "--lib" "--no-trans" source-inplace)
+  :command ("rustc" "--lib" "--no-trans"
+            (option-list "-L" flycheck-rust-library-path s-prepend)
+            source-inplace)
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ": "
           (one-or-more digit) ":" (one-or-more digit) " error: "

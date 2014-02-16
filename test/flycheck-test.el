@@ -4192,6 +4192,12 @@ Why not:
    '(4 9 warning "unused variable: `x`, #[warn(unused_variable)] on by default"
        :checker rust)))
 
+(ert-deftest flycheck-define-checker/rust-library-path ()
+  :tags '(builtin-checker external-tool language-rust)
+  :expected-result :failed
+  ;; TODO: How can we test this without adding binary libraries to our repo?
+  (error "Not implemented!"))
+
 (ert-deftest flycheck-define-checker/sass ()
   :tags '(builtin-checker external-tool language-sass)
   (skip-unless (flycheck-check-executable 'sass))

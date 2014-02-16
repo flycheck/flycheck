@@ -464,6 +464,10 @@ on the variable name for detailed help):
 
    Whether to disable style checks for :flyc:checker:`ruby-rubocop`.
 
+.. option:: flycheck-rust-library-path
+
+   The library path for :flyc:checker:`rust`.
+
 .. option:: flycheck-sass-compass
 
    Whether to enable the Compass CSS framework for :flyc:checker:`sass`.
