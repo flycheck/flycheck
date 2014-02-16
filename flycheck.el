@@ -4808,7 +4808,7 @@ See URL `http://jruby.org/'."
   "A Rust syntax checker using Rust compiler.
 
 See URL `http://rust-lang.org'."
-  :command ("rustc" "--no-trans" source-inplace)
+  :command ("rustc" "--lib" "--no-trans" source-inplace)
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ": "
           (one-or-more digit) ":" (one-or-more digit) " error: "

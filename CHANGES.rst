@@ -25,6 +25,7 @@ master (in development)
   - Correctly parse multiline error messages of `go-build` and `go-test`
   - `rst-sphinx` supports custom nodes without explicit writer support now, by
     using the `pseudoxml` builder.
+  - Avoid warnings about missing main functions in `rust`
 
 0.17 (Feb 1, 2014)
 ------------------

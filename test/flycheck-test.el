@@ -4187,7 +4187,10 @@ Why not:
   (skip-unless (flycheck-check-executable 'rust))
   (flycheck-test-should-syntax-check
    "checkers/rust-warning.rs" 'rust-mode
-   '(4 9 warning "unused variable: `x`, #[warn(unused_variable)] on by default" :checker rust)))
+   '(3 1 warning "code is never used: `main`, #[warn(dead_code)] on by default"
+       :checker rust)
+   '(4 9 warning "unused variable: `x`, #[warn(unused_variable)] on by default"
+       :checker rust)))
 
 (ert-deftest flycheck-define-checker/sass ()
   :tags '(builtin-checker external-tool language-sass)
