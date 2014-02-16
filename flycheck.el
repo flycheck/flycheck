@@ -3767,6 +3767,17 @@ See URL `https://github.com/stubbornella/csslint'."
      (flycheck-find-in-buffer flycheck-d-module-re)
      module-file)))
 
+(flycheck-def-option-var flycheck-dmd-include-path nil d-dmd
+  "A list of include directories for dmd.
+
+The value of this variable is a list of strings, where each
+string is a directory to add to the include path of dmd.
+Relative paths are relative to the file being checked."
+  :type '(repeat (directory :tag "Include directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.18"))
+
+
 (flycheck-define-checker d-dmd
   "A D syntax checker using the DMD compiler.
 
@@ -3774,6 +3785,7 @@ See URL `http://dlang.org/'."
   :command ("dmd" "-debug" "-o-"
                   "-wi" ; Compilation will continue even if there are warnings
                   (eval (s-concat "-I" (flycheck-d-base-directory)))
+                  (option-list "-I" flycheck-dmd-include-path s-prepend)
                   source)
   :error-patterns
   ((error line-start (file-name) "(" line "): Error: " (message) line-end)
