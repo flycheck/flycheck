@@ -390,6 +390,10 @@ on the variable name for detailed help):
 
    Additional checks to use in :flyc:checker:`c/c++-cppcheck`.
 
+.. option:: flycheck-dmd-include-path
+
+   Include search path for :flyc:checker:`d-dmd`.
+
 .. option:: flycheck-emacs-lisp-initialize-packages
 
    Whether to initialize packages (see `package-initialize`) before invoking the

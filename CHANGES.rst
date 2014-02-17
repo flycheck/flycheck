@@ -22,6 +22,7 @@ master (in development)
 - New features:
 
   - Add `flycheck-rust-library-path` to specify library locations for `rust`
+  - #344: Add `flycheck-dmd-include-path` to change the include path of `d-dmd`
 
 - Improvements:
 

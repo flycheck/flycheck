@@ -6,6 +6,7 @@ Flycheck is written and maintained by `Sebastian Wiesner`_, with contributions
 from the following people.  Their help and ideas, their support and patches are
 greatly appreciated.
 
+- `Atila Neves`_ added support for include paths of DMD.
 - `Bozhidar Batsov`_ provided valuable feedback and refinements, brought
   Flycheck to a larger user base by adding it to his Prelude_ project, and added
   a Ruby syntax checker using `rubocop`.
@@ -61,6 +62,7 @@ somewhat failed attempt at on-the-fly syntax checking.
 .. _flycheck-d-unittest: https://github.com/flycheck/flycheck-d-unittest
 .. _GNU Flymake: http://www.gnu.org/software/emacs/manual/html_node/flymake/
 
+.. _Atila Neves: https://github.com/atilaneves
 .. _Bozhidar Batsov: https://github.com/bbatsov
 .. _Damon Haley: https://github.com/dhaley
 .. _David Holm: https://github.com/dholm
