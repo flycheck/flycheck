@@ -1,0 +1,1 @@
+module external_library;

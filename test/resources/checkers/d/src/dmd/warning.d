@@ -1,6 +1,7 @@
 module dmd.warning;
 
 import dmd.library;
+import external_library;
 
 auto foo(int a)
 {
