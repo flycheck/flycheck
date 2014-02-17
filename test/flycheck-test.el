@@ -3306,27 +3306,27 @@ of the file will be interrupted because there are too many #ifdef configurations
 
 (ert-deftest flycheck-d-base-directory/no-module-declaration ()
   :tags '(builtin-checker language-d)
-  (flycheck-test-with-resource-buffer "checkers/d_dmd_syntax_error_without_module.d"
+  (flycheck-test-with-resource-buffer "checkers/d/src/dmd/syntax_error_without_module.d"
     (should (f-same? (flycheck-d-base-directory)
-                     (f-join flycheck-test-resources-directory "checkers")))))
+                     (flycheck-test-resource-filename "checkers/d/src/dmd")))))
 
 (ert-deftest flycheck-d-base-directory/with-module-declaration ()
   :tags '(builtin-checker language-d)
-  (flycheck-test-with-resource-buffer "checkers/d_dmd_warning.d"
+  (flycheck-test-with-resource-buffer "checkers/d/src/dmd/warning.d"
     (should (f-same? (flycheck-d-base-directory)
-                     flycheck-test-resources-directory))))
+                     (flycheck-test-resource-filename "checkers/d/src")))))
 
 (ert-deftest flycheck-d-base-directory/package-file ()
   :tags '(builtin-checker language-d)
-  (flycheck-test-with-resource-buffer "checkers/package.d"
+  (flycheck-test-with-resource-buffer "checkers/d/src/dmd/package.d"
     (should (f-same? (flycheck-d-base-directory)
-                     flycheck-test-resources-directory))))
+                     (flycheck-test-resource-filename "checkers/d/src")))))
 
 (ert-deftest flycheck-define-checker/d-dmd-syntax-error ()
   :tags '(builtin-checker external-tool language-d)
   (skip-unless (flycheck-check-executable 'd-dmd))
   (flycheck-test-should-syntax-check
-   "checkers/d-dmd-syntax-error.d" 'd-mode
+   "checkers/d/src/dmd/syntax_error.d" 'd-mode
    '(2 nil error "module studio is in file 'std/studio.d' which cannot be read"
        :checker d-dmd)))
 
@@ -3334,7 +3334,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   :tags '(builtin-checker external-tool language-d)
   (skip-unless (flycheck-check-executable 'd-dmd))
   (flycheck-test-should-syntax-check
-   "checkers/d_dmd_syntax_error_without_module.d" 'd-mode
+   "checkers/d/src/dmd/syntax_error_without_module.d" 'd-mode
    '(5 nil error "undefined identifier writel, did you mean template write(T...)(T args) if (!is(T[0] : File))?"
        :checker d-dmd)))
 
@@ -3342,10 +3342,9 @@ of the file will be interrupted because there are too many #ifdef configurations
   :tags '(builtin-checker external-tool language-d)
   (skip-unless (flycheck-check-executable 'd-dmd))
   (flycheck-test-should-syntax-check
-   "checkers/d_dmd_warning.d" 'd-mode
-   '(6 nil warning "statement is not reachable" :checker d-dmd)
-   '(17 nil warning "function checkers.d_dmd_warning.bar is deprecated"
-        :checker d-dmd)))
+   "checkers/d/src/dmd/warning.d" 'd-mode
+   '(8 nil warning "statement is not reachable" :checker d-dmd)
+   '(19 nil warning "function dmd.warning.bar is deprecated" :checker d-dmd)))
 
 (ert-deftest flycheck-define-checker/elixir-error ()
   :tags '(builtin-checker external-tool language-elixir)
