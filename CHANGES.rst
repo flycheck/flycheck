@@ -19,6 +19,10 @@ master (in development)
   - #328: Go with `golint`
   - #329: Go with `go tool vet`
 
+- New features:
+
+  - #344: Add `flycheck-dmd-include-path` to change the include path of `d-dmd`
+
 - Improvements:
 
   - `flycheck-parse-checkstyle` supports `info` level messages now
