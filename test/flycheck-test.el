@@ -3108,7 +3108,7 @@ of the file will be interrupted because there are too many #ifdef configurations
 (ert-deftest flycheck-define-checker/c/c++-clang-include-path ()
   :tags '(builtin-checker external-tool language-c)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
-  (let ((flycheck-clang-include-path '("./include")))
+  (let ((flycheck-clang-include-path '("./c_c++-include")))
     (flycheck-test-should-syntax-check
      "checkers/c_c++-clang-fatal-error.c" 'c-mode)))
 
@@ -3116,7 +3116,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
   (let  ((flycheck-clang-includes (list (flycheck-test-resource-filename
-                                         "checkers/include/c_c++-clang-library-header.h"))))
+                                         "checkers/c_c++-include/c_c++-clang-library-header.h"))))
     (flycheck-test-should-syntax-check
      "checkers/c_c++-clang-error.cpp" 'c++-mode
      '(10 16 error "use of undeclared identifier 'nullptr'"
