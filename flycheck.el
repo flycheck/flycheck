@@ -3788,7 +3788,8 @@ See URL `http://dlang.org/'."
                   source)
   :error-patterns
   ((error line-start (file-name) "(" line "): Error: " (message) line-end)
-   (warning line-start (file-name) "(" line "): " (or "Warning" "Deprecation") ": " (message) line-end))
+   (warning line-start (file-name) "(" line "): "
+            (or "Warning" "Deprecation") ": " (message) line-end))
   :modes d-mode)
 
 (flycheck-define-checker elixir
