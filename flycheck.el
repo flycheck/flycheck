@@ -133,6 +133,7 @@ buffer-local wherever it is set."
   '(asciidoc
     c/c++-clang
     c/c++-cppcheck
+    c/c++-googlelint
     cfengine
     chef-foodcritic
     coffee
@@ -3678,6 +3679,23 @@ See URL `http://cppcheck.sourceforge.net/'."
                     flycheck-option-comma-separated-list)
             source)
   :error-parser flycheck-parse-cppcheck
+  :modes (c-mode c++-mode))
+
+(flycheck-define-checker c/c++-googlelint
+  "A C/C++ style checker using google cpplint.
+
+See URL
+`http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py'."
+  :command ("cpplint.py"
+            ;;(option "--verbose=" flycheck-cpplint-verbose)
+            ;;(option "--filter=" flycheck-cpplint-filter
+            ;;        flycheck-option-comma-separated-list)
+            ;;(option "--counting=" flycheck-cpplint-counting)
+            ;;(option "--root=" flycheck-cpplint-root)
+            ;;(option "--linelength=" flycheck-cpplint-linelength)
+            source)
+  :error-patterns
+  ((error line-start (file-name) ":" line ":  " (message) line-end))
   :modes (c-mode c++-mode))
 
 (flycheck-define-checker cfengine
