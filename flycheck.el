@@ -3681,19 +3681,99 @@ See URL `http://cppcheck.sourceforge.net/'."
   :error-parser flycheck-parse-cppcheck
   :modes (c-mode c++-mode))
 
+(flycheck-def-option-var flycheck-googlelint-verbose nil c/c++-googlelint
+  "The verbosity level for Google C++ lint.
+
+verbose=#
+Specify a number 0-5 to restrict errors to certain verbosity levels."
+  :type '(string :tag "Verbosity level")
+  :safe #'stringp
+  :package-version '(flycheck . "0.18"))
+
+(flycheck-def-option-var flycheck-googlelint-filter nil c/c++-googlelint
+  "The category-filters for Google C++ lint.
+
+filter=-x,+y,...
+  Specify a comma-separated list of category-filters to apply: only
+  error messages whose category names pass the filters will be printed.
+  (Category names are printed with the message and look like
+  '[whitespace/indent]'.)  Filters are evaluated left to right.
+  '-FOO' and 'FOO' means 'do not print categories that start with FOO'.
+  '+FOO' means 'do print categories that start with FOO'.
+
+  Examples: --filter=-whitespace,+whitespace/braces
+            --filter=whitespace,runtime/printf,+runtime/printf_format
+            --filter=-,+build/include_what_you_use
+
+  To see a list of all the categories used in cpplint, pass no arg:
+    --filter="
+  :type '(string :tag "Filtering error messages")
+  :safe #'stringp
+  :package-version '(flycheck . "0.18"))
+
+(flycheck-def-option-var flycheck-googlelint-counting nil c/c++-googlelint
+  "The counting errors for Google C++ lint.
+
+counting=total|toplevel|detailed
+  The total number of errors found is always printed. If
+  'toplevel' is provided, then the count of errors in each of
+  the top-level categories like 'build' and 'whitespace' will
+  also be printed. If 'detailed' is provided, then a count
+  is provided for each category like 'build/class'."
+  :type '(choice (const "total")
+                 (const "toplevel")
+                 (const "detailed"))
+  :safe #'stringp
+  :package-version '(flycheck . "0.18"))
+
+(flycheck-def-option-var flycheck-googlelint-root nil c/c++-googlelint
+  "The root directory for Google C++ lint.
+
+root=subdir
+  The root directory used for deriving header guard CPP variable.
+  By default, the header guard CPP variable is calculated as the relative
+  path to the directory that contains .git, .hg, or .svn.  When this flag
+  is specified, the relative path is calculated from the specified
+  directory. If the specified directory does not exist, this flag is
+  ignored.
+
+  Examples:
+    Assuing that src/.git exists, the header guard CPP variables for
+    src/chrome/browser/ui/browser.h are:
+
+    No flag => CHROME_BROWSER_UI_BROWSER_H_
+    --root=chrome => BROWSER_UI_BROWSER_H_
+    --root=chrome/browser => UI_BROWSER_H_"
+  :type '(choice (const :tag "Default root directory" nil)
+                 (string :tag "Directory name"))
+  :safe #'stringp)
+
+(flycheck-def-option-var flycheck-googlelint-linelength nil c/c++-googlelint
+  "The allowed line length for Google C++ lint.
+
+linelength=digits
+  This is the allowed line length for the project. The default value is
+  80 characters.
+
+  Examples:
+    --linelength=120"
+  :type '(string :tag "Line length")
+  :safe #'stringp
+  :package-version '(flycheck . "0.18"))
+
 (flycheck-define-checker c/c++-googlelint
   "A C/C++ style checker using google cpplint.
 
 See URL
 `http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py'."
   :command ("cpplint.py"
-            ;;(option "--verbose=" flycheck-cpplint-verbose)
-            ;;(option "--filter=" flycheck-cpplint-filter
-            ;;        flycheck-option-comma-separated-list)
-            ;;(option "--counting=" flycheck-cpplint-counting)
-            ;;(option "--root=" flycheck-cpplint-root)
-            ;;(option "--linelength=" flycheck-cpplint-linelength)
-            source)
+            (option "--verbose=" flycheck-googlelint-verbose)
+            (option "--filter=" flycheck-googlelint-filter
+                    flycheck-option-comma-separated-list)
+            (option "--counting=" flycheck-googlelint-counting)
+            (option "--root=" flycheck-googlelint-root)
+            (option "--linelength=" flycheck-googlelint-linelength)
+            source-original)
   :error-patterns
   ((error line-start (file-name) ":" line ":  " (message) line-end))
   :modes (c-mode c++-mode))
