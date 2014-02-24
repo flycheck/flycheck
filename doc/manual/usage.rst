@@ -452,6 +452,22 @@ on the variable name for detailed help):
    A comma-separated list of print-like functions to check for format string
    issues in the :flyc:checker:`go-vet` syntax checker.
 
+.. option:: flycheck-googlelint-filter
+
+   Additional filters to use in :flyc:checker:`c/c++-googlelint`.
+
+.. option:: flycheck-googlelint-linelength
+
+   The allowed line length for :flyc:checker:`c/c++-googlelint`.
+
+.. option:: flycheck-googlelint-root
+
+   The root directory for :flyc:checker:`c/c++-googlelint`.
+
+.. option:: flycheck-googlelint-verbose
+
+   The verbose level for :flyc:checker:`c/c++-googlelint`.
+
 .. option:: flycheck-perlcritic-verbosity
 
    The verbosity of :flyc:checker:`perl-perlcritic` as integer.
