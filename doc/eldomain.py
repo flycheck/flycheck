@@ -71,6 +71,11 @@ class el_metavariable(nodes.emphasis):
 class EmacsLispSymbol(ObjectDescription):
     """A directive to describe an Emacs Lisp symbol."""
 
+    option_spec = {
+        'auto': directives.flag
+    }
+    option_spec.update(ObjectDescription.option_spec)
+
     @property
     def object_type(self):
         """The :class:`~sphinx.domains.ObjType` of this directive."""
@@ -90,6 +95,12 @@ class EmacsLispSymbol(ObjectDescription):
         """
         type_name = self.object_type.lname.title() + ' '
         return el_annotation(type_name, type_name)
+
+    def get_signatures(self):
+        if 'auto' in self.options:
+            return [self.get_auto_signature()]
+        else:
+            return ObjectDescription.get_signatures(self)
 
     def handle_signature(self, sig, signode):
         parts = sig.split()
@@ -128,6 +139,44 @@ class EmacsLispSymbol(ObjectDescription):
         indextext = '{0}; Emacs Lisp {1}'.format(name, self.object_type.lname)
         self.indexnode['entries'].append(('pair', indextext, targetname, ''))
 
+    def get_auto_signature(self):
+        name = self.arguments[0].strip()
+        if not self.lookup_symbol(name):
+            self.state_machine.reporter.warning(
+                'Undefined symbol {0}'.format(name), line=self.lineno)
+        return name
+
+    def lookup_symbol(self, name):
+        return self.env.domaindata[self.domain]['loaded_symbols'].get(name)
+
+    def get_auto_docstring(self):
+        symbol = self.lookup_symbol(self.names[0])
+        if symbol:
+            return symbol.properties.get('variable_documentation')
+
+    def get_auto_doc(self):
+        docstring = self.get_auto_docstring()
+        if not docstring:
+            self.state_machine.reporter.warning(
+                'no docstring for symbol {0}'.format(self.names[0]),
+                line=self.lineno)
+            return []
+        else:
+            return [nodes.literal_block(docstring, docstring)]
+
+    def run(self):
+        nodes = ObjectDescription.run(self)
+
+        if 'auto' in self.options:
+            desc_node = nodes[-1]
+            cont_node = desc_node[-1]
+            self.before_content()
+            for i, node in enumerate(self.get_auto_doc()):
+                cont_node.insert(0 + i, node)
+            self.after_content()
+
+        return nodes
+
 
 class EmacsLispFunction(EmacsLispSymbol):
     """A directive to describe an Emacs Lisp function.
@@ -136,6 +185,19 @@ class EmacsLispFunction(EmacsLispSymbol):
     accepts a parameter list.
 
     """
+
+    def get_auto_signature(self):
+        symbol = self.lookup_symbol(self.arguments[0])
+        sig = self.arguments[0]
+        if symbol:
+            arglist = ' '.join(symbol.properties.get('function_arglist', []))
+            sig += ' ' + arglist
+        return sig
+
+    def get_auto_docstring(self):
+        symbol = self.lookup_symbol(self.names[0])
+        if symbol:
+            return symbol.properties.get('function_documentation')
 
     def handle_signature(self, sig, signode):
         parts = sig.split(' ')
@@ -180,6 +242,11 @@ class EmacsLispCommand(EmacsLispSymbol):
     }
     option_spec.update(EmacsLispSymbol.option_spec)
 
+    def get_auto_docstring(self):
+        symbol = self.lookup_symbol(self.names[0])
+        if symbol:
+            return symbol.properties.get('function_documentation')
+
     def with_prefix_arg(self, binding):
         """Add the ``:prefix-arg:`` option to the given ``binding``.
 
@@ -197,7 +264,7 @@ class EmacsLispCommand(EmacsLispSymbol):
         return node
 
     def run(self):
-        nodes = ObjectDescription.run(self)
+        nodes = EmacsLispSymbol.run(self)
 
         # Insert a dedicated signature for the key binding before all other
         # signatures, but only for commands.  Nothing else has key bindings.
@@ -295,7 +362,8 @@ def varcode_role(role, rawtext, text, lineno, inliner,
 
 class Symbol(object):
     def __init__(self, name):
-        self.name = name
+        self.name = name,
+        self.scopes = set()
         self.properties = {}
 
     def __str__(self):
@@ -318,6 +386,7 @@ class AbstractInterpreter(object):
 
     def defun(self, function, name, arglist, docstring=None, *rest):
         symbol = self.intern(name)
+        symbol.scopes.add('function')
         symbol.properties['function_arglist'] = [s.value() for s in arglist]
         if docstring:
             symbol.properties['function_documentation'] = docstring
@@ -325,6 +394,7 @@ class AbstractInterpreter(object):
     def defvar(self, function, name, _initial_value=None, docstring=None,
                *rest):
         symbol = self.intern(name)
+        symbol.scopes.add('variable')
         if docstring:
             symbol.properties['variable_documentation'] = docstring
         symbol.properties['local_variable'] = function.endswith('-local')
@@ -336,6 +406,7 @@ class AbstractInterpreter(object):
         'defun': defun,
         'defmacro': defun,
         'defvar': defvar,
+        'defcustom': defvar,
         'defvar-local': defvar,
         'eval-and-compile': eval_inner,
         'eval-when-compile': eval_inner,
