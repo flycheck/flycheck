@@ -3226,6 +3226,49 @@ of the file will be interrupted because there are too many #ifdef configurations
        '(9 nil warning "Prefix ++/-- operators should be preferred for non-primitive types. Pre-increment/decrement can be more efficient than post-increment/decrement. Post-increment/decrement usually involves keeping a copy of the previous value around and adds a little extra code."
            :checker c/c++-cppcheck)))))
 
+(ert-deftest flycheck-define-checker/c/c++-googlelint-error ()
+  :tags '(builtin-checker external-tool language-c++)
+  (skip-unless (flycheck-check-executable 'c/c++-googlelint))
+  (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck)))
+    (flycheck-test-should-syntax-check
+     "checkers/c_c++-googlelint-error.cpp" 'c++-mode
+     '(2 nil error "Extra space before ( in function call  [whitespace/parens] [4]"
+         :checker c/c++-googlelint))))
+
+(ert-deftest flycheck-define-checker/c/c++-googlelint-verbose ()
+  :tags '(builtin-checker external-tool language-c++)
+  (skip-unless (flycheck-check-executable 'c/c++-googlelint))
+  (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck)))
+    (let ((flycheck-googlelint-verbose "5"))
+      (flycheck-test-should-syntax-check
+       "checkers/c_c++-googlelint-error.cpp" 'c++-mode))))
+
+(ert-deftest flycheck-define-checker/c/c++-googlelint-filter ()
+  :tags '(builtin-checker external-tool language-c++)
+  (skip-unless (flycheck-check-executable 'c/c++-googlelint))
+  (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck)))
+    (let ((flycheck-googlelint-filter '("-whitespace")))
+      (flycheck-test-should-syntax-check
+       "checkers/c_c++-googlelint-error.cpp" 'c++-mode))))
+
+(ert-deftest flycheck-define-checker/c/c++-googlelint-root ()
+  :tags '(builtin-checker external-tool language-c++)
+  (skip-unless (flycheck-check-executable 'c/c++-googlelint))
+  (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck)))
+    (let ((flycheck-googlelint-root "test/resources"))
+      (flycheck-test-should-syntax-check
+       "checkers/c_c++-googlelint-root.h" 'c++-mode
+       '(0 nil error "No #ifndef header guard found, suggested CPP variable is: CHECKERS_C_C++_GOOGLELINT_ROOT_H_  [build/header_guard] [5]"
+           :checker c/c++-googlelint)))))
+
+(ert-deftest flycheck-define-checker/c/c++-googlelint-linelength ()
+  :tags '(builtin-checker external-tool language-c++)
+  (skip-unless (flycheck-check-executable 'c/c++-googlelint))
+  (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck)))
+    (let ((flycheck-googlelint-linelength "120"))
+      (flycheck-test-should-syntax-check
+       "checkers/c_c++-googlelint-linelength.cpp" 'c++-mode))))
+
 (ert-deftest flycheck-define-checker/cfengine-error ()
   :tags '(builtin-checker external-tool language-cfengine)
   (skip-unless (fboundp 'cfengine3-mode))

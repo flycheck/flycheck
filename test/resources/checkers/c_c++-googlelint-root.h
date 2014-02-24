@@ -1,0 +1,3 @@
+// Copyright
+class Test {
+};
