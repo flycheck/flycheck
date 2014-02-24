@@ -39,7 +39,7 @@ C/C++
 
 .. syntax-checker:: c/c++-googlelint
 
-   .. seealso:: http://http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py
+   .. seealso:: http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py
 
 CFEngine
 ========
