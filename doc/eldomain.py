@@ -19,11 +19,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import os
 import re
 from itertools import ifilter
 
+import sexpdata
+
 from docutils import nodes, utils
 from docutils.parsers.rst import directives
+from docutils.parsers.rst import Directive
 
 from sphinx import addnodes
 from sphinx.domains import Domain, ObjType
@@ -50,7 +54,7 @@ class el_parameterlist(addnodes.desc_parameterlist):
 
 
 class el_annotation(addnodes.desc_annotation):
-    """A node for the type annotation of Emacs Lisp symbols."""
+    """A node for the type annotation of Emacs Lisp namespace."""
     pass
 
 
@@ -111,7 +115,7 @@ class EmacsLispSymbol(ObjectDescription):
             self.state.document.note_explicit_target(signode)
 
             data = self.env.domaindata[self.domain]
-            symbol_scopes = data['symbols'].setdefault(name, {})
+            symbol_scopes = data['namespace'].setdefault(name, {})
             if self.emacs_lisp_scope in symbol_scopes:
                 self.state_machine.reporter.warning(
                     'duplicate object description of %s, ' % name +
@@ -289,8 +293,128 @@ def varcode_role(role, rawtext, text, lineno, inliner,
     return [node], []
 
 
+class Symbol(object):
+    def __init__(self, name):
+        self.name = name
+        self.properties = {}
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return 'Symbol({0}, {1!r})'.format(self.name, self.properties)
+
+    def __hash__(self):
+        return hash(self.name)
+
+    def __eq__(self, other):
+        return self.name == other.name
+
+    def __ne__(self, other):
+        return self.name != other.name
+
+
+class AbstractInterpreter(object):
+
+    def defun(self, function, name, arglist, docstring=None, *rest):
+        symbol = self.intern(name)
+        symbol.properties['function_arglist'] = [s.value() for s in arglist]
+        if docstring:
+            symbol.properties['function_documentation'] = docstring
+
+    def defvar(self, function, name, _initial_value=None, docstring=None,
+               *rest):
+        symbol = self.intern(name)
+        if docstring:
+            symbol.properties['variable_documentation'] = docstring
+        symbol.properties['local_variable'] = function.endswith('-local')
+
+    def eval_inner(self, function, *args):
+        self.eval_all(args)
+
+    DEFAULT_FUNCTIONS = {
+        'defun': defun,
+        'defmacro': defun,
+        'defvar': defvar,
+        'defvar-local': defvar,
+        'eval-and-compile': eval_inner,
+        'eval-when-compile': eval_inner,
+    }
+
+    def __init__(self, namespace=None, **functions):
+        self.functions = dict(self.DEFAULT_FUNCTIONS)
+        self.functions.update(functions)
+        self.namespace = namespace if namespace is not None else {}
+
+    def intern(self, symbol):
+        name = symbol.value()
+        return self.namespace.setdefault(name, Symbol(name))
+
+    def eval(self, sexp):
+        function_name = sexp[0]
+        args = sexp[1:]
+        function = self.functions.get(function_name.value())
+        if function:
+            return function(self, function_name.value(), *args)
+
+    def eval_all(self, sexps):
+        for sexp in sexps:
+            self.eval(sexp)
+
+
+class RequireLibrary(Directive):
+    """Load and parse an Emacs Lisp library."""
+
+    required_arguments = 1
+    optional_arguments = 0
+    has_content = False
+
+    def _find_library(self, feature):
+        config = self.env.config
+        if not config.emacs_lisp_load_path:
+            self.state_machine.reporter.warning('Empty load path!',
+                                                line=self.lineno)
+        filename = feature + '.el'
+        candidates = (os.path.join(d, filename)
+                      for d in config.emacs_lisp_load_path)
+        return next((f for f in candidates if os.path.isfile(f)), None)
+
+    def _load(self, library):
+        with open(library, 'r') as source:
+            # Wrap source into a top-level sexp, to make it consumable for
+            # sexpdata
+            whole_file_sexp = '(\n{0}\n)'.format(source.read())
+            # Read the sexp, and don't mangle it!
+            expressions = sexpdata.loads(
+                whole_file_sexp, nil=None, true=None, false=None)
+            return expressions
+
+    def run(self):
+        self.domain, self.objtype = self.name.split(':', 1)
+        self.env = self.state.document.settings.env
+        feature = self.arguments[0]
+
+        library = self._find_library(feature)
+        if not library:
+            self.state_machine.reporter.warning(
+                'Cannot find library for feature {0}'.format(feature),
+                line=self.lineno)
+            return []
+        else:
+            self.env.note_dependency(library)
+            data = self.env.domaindata[self.domain]
+            if feature not in data['features']:
+                expressions = self._load(library)
+                interpreter = AbstractInterpreter(
+                    namespace=data['loaded_symbols'])
+                interpreter.eval_all(expressions)
+                data['features'].add(feature)
+
+            return []
+
+
 class EmacsLispDomain(Domain):
-    """A domain to document Emacs Lisp symbols."""
+    """A domain to document Emacs Lisp namespace."""
 
     name = 'el'
     label = 'Emacs Lisp'
@@ -322,6 +446,7 @@ class EmacsLispDomain(Domain):
         'face': EmacsLispSymbol,
         'cl-struct': EmacsLispCLStruct,
         'cl-slot': EmacsLispCLSlot,
+        'require': RequireLibrary,
     }
     roles = {
         'symbol': XRefRole(),
@@ -340,22 +465,24 @@ class EmacsLispDomain(Domain):
     }
     indices = []
 
-    data_version = 2
+    data_version = 3
     initial_data = {
         # fullname -> scope -> (docname, objtype)
-        'symbols': {}
+        'namespace': {},
+        'features': set(),
+        'loaded_symbols': {}
     }
 
     def clear_doc(self, docname):
-        symbols = self.data['symbols']
-        for symbol, scopes in symbols.items():
+        namespace = self.data['namespace']
+        for symbol, scopes in namespace.items():
             for scope, (object_docname, _) in scopes.items():
                 if docname == object_docname:
-                    del symbols[symbol][scope]
+                    del namespace[symbol][scope]
 
     def resolve_xref(self, env, fromdoc, builder, objtype, target, node,
                      content):
-        scopes = self.data['symbols'][target]
+        scopes = self.data['namespace'][target]
         if objtype == 'symbol' and len(scopes) > 1:
             # The generic symbol reference is ambiguous, because the symbol has
             # multiple scopes attached
@@ -377,7 +504,7 @@ class EmacsLispDomain(Domain):
                             make_target(scope, target), content, target)
 
     def get_objects(self):
-        for symbol, scopes in self.data['symbols'].iteritems():
+        for symbol, scopes in self.data['namespace'].iteritems():
             for scope, (docname, objtype) in scopes.iteritems():
                 yield (symbol, symbol, objtype, docname,
                        make_target(scope, symbol),
@@ -476,3 +603,5 @@ def setup(app):
                        depart_el_metavariable_html),
                  latex=delegate(nodes.emphasis),
                  texinfo=(visit_el_metavariable_texinfo, None))
+    # Auto docs
+    app.add_config_value('emacs_lisp_load_path', [], 'env')

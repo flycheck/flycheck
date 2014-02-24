@@ -86,3 +86,6 @@ texinfo_elements = {'preamble': """
 
 extlinks = {'github': ('https://github.com/flycheck/flycheck/%s', None),
             'issue': ('https://github.com/flycheck/flycheck/issues/%s', '#')}
+
+emacs_lisp_load_path = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), os.pardir)
