@@ -542,8 +542,15 @@ class Inliner(object):
     inline_patterns = re.compile(
         """
         (?:\*(?P<emphasis>[^*]+)\*) | # An emphasis
-        (?:(?P<prefix>[Ii]nfo\s+(?:node|anchor)\s+)`(?P<infonode>[^']+)') | # An info reference
-        (?:`(?P<literal>[^']+)') # A plain literal text
+        (?:(?P<infoprefix>[Ii]nfo\s+(?:node|anchor)\s+)`(?P<infonode>[^']+)') | # An info reference
+        (?:(?P<cmdprefix>[Cc]ommand\s+)`(?P<command>[^']+)') | # A command reference
+        (?:(?P<funprefix>[Ff]unction\s+)`(?P<function>[^']+)') | # A function reference
+        (?:(?P<optprefix>[Oo]ption\s+)`(?P<option>[^']+)') | # A option reference
+        (?:(?P<varprefix>[Vv]ariable\s+)`(?P<variable>[^']+)') | # A variable reference
+        (?:(?P<faceprefix>[Ff]ace\s+)`(?P<face>[^']+)') | # A face reference
+        (?:(?P<symprefix>[Ss]ymbol\s+)`(?P<symbol>[^']+)') | # A literal symbol
+        (?:(?P<urlprefix>URL\s+)`(?P<url>[^']+)') | # A URL reference
+        (?:`(?P<symbol_reference>[^']+)') # A generic symbol reference
         """,
         re.MULTILINE | re.UNICODE | re.VERBOSE)
 
@@ -551,22 +558,58 @@ class Inliner(object):
         return [nodes.strong(rawtext, value)]
 
     def handle_infonode(self, rawtext, value, groups):
-        ref = addnodes.pending_xref(rawtext, reftype='infonode',
-                                    reftarget=value, refexplicit=False,
-                                    refwarn=False)
-        ref += nodes.emphasis(value, value)
-        return [nodes.Text(groups['prefix'], groups['prefix']) ,ref]
+        return self._make_reference(rawtext, value, 'infonode',
+                                    innernodeclass=nodes.emphasis,
+                                    prefix=groups['infoprefix'])
 
-    def handle_literal(self, rawtext, value, _groups):
-        # A literal in a docstring may reference a known symbol, so we
-        # turn it into a pending reference.  If the literal doesn't
-        # refer to a symbol, Sphinx will fail to resolve the reference
-        # and automatically degrade it to a plain literal.
-        ref = addnodes.pending_xref(rawtext, reftype='symbol', refdomain='el',
-                                    refexplicit=False, reftarget=value,
-                                    refwarn=False)
-        ref += nodes.literal(value, value)
-        return [ref]
+    def handle_command(self, rawtext, value, groups):
+        return self._make_reference(rawtext, value, ('el', 'command'),
+                                    prefix=groups['cmdprefix'])
+
+    def handle_function(self, rawtext, value, groups):
+        return self._make_reference(rawtext, value, ('el', 'function'),
+                                    prefix=groups['funprefix'])
+
+    def handle_option(self, rawtext, value, groups):
+        return self._make_reference(rawtext, value, ('el', 'option'),
+                                    prefix=groups['optprefix'],)
+
+    def handle_variable(self, rawtext, value, groups):
+        return self._make_reference(rawtext, value, ('el', 'variable'),
+                                    prefix=groups['varprefix'])
+
+    def handle_face(self, rawtext, value, groups):
+        return self._make_reference(rawtext, value, ('el', 'face'),
+                                    prefix=groups['faceprefix'])
+
+    def handle_symbol(self, rawtext, value, groups):
+        return [nodes.Text(groups['symprefix'], groups['symprefix']),
+                nodes.literal(rawtext, value)]
+
+    def handle_url(self, rawtext, value, groups):
+        ref = nodes.references(rawtext, '', internal=False)
+        ref['refuri'] = value
+        ref += nodes.Text(value)
+        return [nodes.Text(groups['urlprefix'], groups['urlprefix']), ref]
+
+    def handle_symbol_reference(self, rawtext, value, _groups):
+        return self._make_reference(rawtext, value, ('el', 'symbol'))
+
+    def _make_reference(self, rawtext, target, reftype,
+                        innernodeclass=nodes.literal, prefix=None):
+        if isinstance(reftype, basestring):
+            refdomain = None
+        else:
+            refdomain, reftype = reftype
+        ref = addnodes.pending_xref(rawtext, refwarn=False,
+                                    reftype=reftype, refdomain=refdomain,
+                                    refexplicit=False, reftarget=target)
+        ref += innernodeclass(target, target)
+        result = []
+        if prefix:
+            result.append(nodes.Text(prefix, prefix))
+        result.append(ref)
+        return result
 
     def parse(self, text):
         position = 0
