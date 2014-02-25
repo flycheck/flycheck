@@ -26,8 +26,10 @@ from itertools import ifilter
 import sexpdata
 
 from docutils import nodes, utils
-from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
+from docutils.statemachine import (string2lines,
+                                   StateMachineWS, StateWS,
+                                   UnexpectedIndentationError)
+from docutils.parsers.rst import Directive, directives
 
 from sphinx import addnodes
 from sphinx.domains import Domain, ObjType
@@ -154,6 +156,12 @@ class EmacsLispSymbol(ObjectDescription):
         if symbol:
             return symbol.properties.get('variable_documentation')
 
+    def parse_docstring(self, docstring):
+        parser = DocstringParser(self.state_machine.reporter)
+        doc = nodes.document(self.state.document.settings,
+                             self.state_machine.reporter)
+        return parser.parse(docstring)
+
     def get_auto_doc(self):
         docstring = self.get_auto_docstring()
         if not docstring:
@@ -162,7 +170,7 @@ class EmacsLispSymbol(ObjectDescription):
                 line=self.lineno)
             return []
         else:
-            return [nodes.literal_block(docstring, docstring)]
+            return [nodes.literal_block(docstring, docstring)] + self.parse_docstring(docstring)
 
     def run(self):
         nodes = ObjectDescription.run(self)
@@ -482,6 +490,60 @@ class RequireLibrary(Directive):
                 data['features'].add(feature)
 
             return []
+
+
+class Body(StateWS):
+    patterns = { 'text': r'' }
+    initial_transitions = ('text',)
+
+    def text(self, match, context, next_state):
+        return [match.string], 'Text', []
+
+
+class Text(StateWS):
+    patterns = { 'text': r'' }
+    initial_transitions = [('text', 'Body')]
+
+    def paragraph(self, lines, lineno):
+        text = '\n'.join(lines).rstrip()
+        p = nodes.paragraph(text, '', nodes.Text(text, text))
+        p.source, p.line = self.state_machine.get_source_and_line(lineno)
+        return p
+
+    def blank(self, match, context, next_state):
+        """End of a paragraph"""
+        p = self.paragraph(
+            context, self.state_machine.abs_line_number() - 1)
+        return [], 'Body', [p]
+
+    def text(self, match, context, next_state):
+        startline = self.state_machine.abs_line_number() - 1
+        msg = None
+        try:
+            block = self.state_machine.get_text_block(flush_left=True)
+        except UnexpectedIndentationError as err:
+            block, src, srcline = err.args
+            msg = self.state_machine.reporter.error(
+                'Unexpected indentation.', source=src, line=srcline)
+        lines = context + list(block)
+        paragraph = self.paragraph(lines, startline)
+        return [], next_state, [paragraph, msg]
+
+
+class DocstringParser(object):
+    def __init__(self, reporter):
+        self.state_classes = [Body, Text]
+        self.reporter = reporter
+
+    def parse(self, inputstring):
+        self.statemachine = StateMachineWS(state_classes=self.state_classes,
+                                           initial_state='Body',
+                                           debug=True)
+        self.statemachine.reporter = self.reporter
+        inputlines = string2lines(inputstring, tab_width=8,
+                                  convert_whitespace=True)
+        nodes = self.statemachine.run(inputlines)
+        return nodes
 
 
 class EmacsLispDomain(Domain):
