@@ -6,6 +6,8 @@
 
 .. _flycheck-mode:
 
+.. require:: flycheck
+
 Flycheck Mode
 =============
 
@@ -95,23 +97,14 @@ However, you can customize automatic syntax checking with
    use :command:`flycheck-buffer` to check syntax manually.
 
 .. option:: flycheck-idle-change-delay
-
-   How many seconds to wait before starting a syntax check.
-
-   After the buffer was changed, Flycheck waits as many seconds as the value of
-   this variable before starting a syntax check.  If the buffer is changed
-   during this time, Flycheck starts to wait again.
-
-   This variable has no effect, if `idle-change` is not contained in
-   :option:`flycheck-check-syntax-automatically`.
+   :auto:
 
 Regardless of automatic syntax checking you can also check the buffer
 manually:
 
 .. command:: flycheck-buffer
+   :auto:
    :binding: C-c ! c
-
-   Start a syntax check in the current buffer.
 
 Each syntax check conducts the following steps:
 
@@ -147,31 +140,12 @@ Each syntax check conducts the following steps:
    This variable is a normal hook. See :infonode:`(elisp)Hooks`.
 
 .. hook:: flycheck-before-syntax-check-hook
-   Functions to run before each syntax check.
-
-   This hook is run right before a syntax check starts.
-
-   Error information from the previous syntax check is **not** cleared before
-   this hook runs.
-
-   Note that this hook does **not** run before each individual syntax checker in
-   the syntax checker chain, but only before the **first checker**.
-
-   This variable is a normal hook. See :infonode:`(elisp)Hooks`.
+   :auto:
 
 There is also a hook run whenever a syntax check fails:
 
 .. hook:: flycheck-syntax-check-failed-hook
-
-   Functions to run if a syntax check failed.
-
-   This hook is run whenever an error occurs during Flycheck's internal
-   processing.  No information about the error is given to this hook.
-
-   You should use this hook to conduct additional cleanup actions when Flycheck
-   failed.
-
-   This variable is a normal hook. See :infonode:`(elisp)Hooks`.
+   :auto:
 
 .. _syntax-checker-selection:
 
