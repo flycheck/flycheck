@@ -607,8 +607,7 @@ class DocstringParser(object):
         self.statemachine.inliner = Inliner()
         inputlines = string2lines(inputstring, tab_width=8,
                                   convert_whitespace=True)
-        nodes = self.statemachine.run(inputlines)
-        return nodes
+        return self.statemachine.run(inputlines)
 
 
 class EmacsLispDomain(Domain):
