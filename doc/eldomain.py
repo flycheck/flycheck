@@ -546,6 +546,9 @@ class Text(StateWS):
         p.source, p.line = self.state_machine.get_source_and_line(lineno)
         return p
 
+    def eof(self, context):
+        return [self.paragraph(context)]
+
     def blank(self, match, context, next_state):
         """End of a paragraph"""
         return [], 'Body', [self.paragraph(context)]
