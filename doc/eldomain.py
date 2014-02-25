@@ -179,8 +179,9 @@ class EmacsLispSymbol(ObjectDescription):
             desc_node = nodes[-1]
             cont_node = desc_node[-1]
             self.before_content()
-            for i, node in enumerate(self.get_auto_doc()):
-                cont_node.insert(0 + i, node)
+            children = self.get_auto_doc() + cont_node.children
+            cont_node.clear()
+            cont_node.extend(children)
             self.after_content()
 
         return nodes
