@@ -144,10 +144,9 @@ Each syntax check conducts the following steps:
    Note that this hook does **not** run after each individual syntax checker in
    the syntax checker chain, but only after the **last checker**.
 
-   This variable is a normal hook. See :infonode:`Hooks(elisp)`.
+   This variable is a normal hook. See :infonode:`(elisp)Hooks`.
 
 .. hook:: flycheck-before-syntax-check-hook
-
    Functions to run before each syntax check.
 
    This hook is run right before a syntax check starts.
@@ -158,7 +157,7 @@ Each syntax check conducts the following steps:
    Note that this hook does **not** run before each individual syntax checker in
    the syntax checker chain, but only before the **first checker**.
 
-   This variable is a normal hook. See :infonode:`Hooks(elisp)`.
+   This variable is a normal hook. See :infonode:`(elisp)Hooks`.
 
 There is also a hook run whenever a syntax check fails:
 
@@ -172,7 +171,7 @@ There is also a hook run whenever a syntax check fails:
    You should use this hook to conduct additional cleanup actions when Flycheck
    failed.
 
-   This variable is a normal hook. See :infonode:`Hooks(elisp)`.
+   This variable is a normal hook. See :infonode:`(elisp)Hooks`.
 
 .. _syntax-checker-selection:
 
@@ -260,7 +259,7 @@ You can manually select a specific syntax checker for the current buffer, too:
       # flycheck-checker: python-pylint
       # End:
 
-   See :infonode:`Specifying File Variables(emacs)` for more information about
+   See :infonode:`(emacs)Specifying File Variables` for more information about
    file variables.
 
 You can change the completion system used by
@@ -789,7 +788,7 @@ Flycheck integrates into standard error navigation commands of Emacs.  If **no**
 compilation buffer (including those from :kbd:`M-x compile`, :kbd:`M-x grep`,
 :kbd:`M-x occur`, etc.) is visible, :kbd:`M-g n` (`next-error`) and :kbd:`M-g p`
 (`previous-error`) will navigate between Flycheck warnings and errors in the
-current buffer.  See :infonode:`Compilation Mode(emacs)` for more information
+current buffer.  See :infonode:`(emacs)Compilation Mode` for more information
 about these commands.
 
 You can disable this integration by setting

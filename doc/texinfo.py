@@ -25,7 +25,7 @@ from docutils import nodes
 
 
 #: Regular expression object to parse the contents of an Info reference role.
-INFO_RE = re.compile(r'^(?P<node>.+?)\((?P<manual>.+)\)$')
+INFO_RE = re.compile(r'^\((?P<manual>.+)\)(?P<node>.+?)$')
 
 
 #: Web URLs of Info manuals.
@@ -43,6 +43,12 @@ class InfoNodeXRefRole(XRefRole):
         # Normalize whitespace in info node targets
         target = re.sub(r'\s+', ' ', target, flags=re.UNICODE)
         refnode['has_explicit_title'] = has_explicit_title
+        if not has_explicit_title:
+            match = INFO_RE.match(target)
+            if match:
+                # Swap title and node to create a title like info does
+                title = '{0}({1})'.format(match.group('node'),
+                                          match.group('manual'))
         return title, target
 
 

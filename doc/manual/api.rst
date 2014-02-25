@@ -19,7 +19,7 @@ Error API
 =========
 
 Flycheck errors are represented by the CL structure :cl-struct:`flycheck-error`.
-See :infonode:`Structures(cl)` for more information about CL structures.
+See :infonode:`(cl)Structures` for more information about CL structures.
 
 .. cl-struct:: flycheck-error
 
