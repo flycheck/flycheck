@@ -538,7 +538,9 @@ class Text(StateWS):
             result_nodes.append(nodes.Text(trailing_text, trailing_text))
         return result_nodes
 
-    def paragraph(self, lines, lineno):
+    def paragraph(self, lines, lineno=None):
+        if lineno is None:
+            lineno = self.state_machine.abs_line_number() - 1
         text = '\n'.join(lines).rstrip()
         p = nodes.paragraph(text, '', *self.parse_inline(text))
         p.source, p.line = self.state_machine.get_source_and_line(lineno)
@@ -546,12 +548,9 @@ class Text(StateWS):
 
     def blank(self, match, context, next_state):
         """End of a paragraph"""
-        p = self.paragraph(
-            context, self.state_machine.abs_line_number() - 1)
-        return [], 'Body', [p]
+        return [], 'Body', [self.paragraph(context)]
 
     def text(self, match, context, next_state):
-        startline = self.state_machine.abs_line_number() - 1
         msg = None
         try:
             block = self.state_machine.get_text_block(flush_left=True)
@@ -560,7 +559,7 @@ class Text(StateWS):
             msg = self.state_machine.reporter.error(
                 'Unexpected indentation.', source=src, line=srcline)
         lines = context + list(block)
-        paragraph = self.paragraph(lines, startline)
+        paragraph = self.paragraph(lines)
         return [], next_state, [paragraph, msg]
 
 
