@@ -504,45 +504,12 @@ class Text(StateWS):
     patterns = { 'text': r'' }
     initial_transitions = [('text', 'Body')]
 
-    inline_patterns = re.compile(
-        """
-        (?:`(?P<literal>[^']+)') # A literal text
-        """,
-        re.MULTILINE | re.UNICODE | re.VERBOSE)
-
-    def parse_inline(self, text):
-        position = 0
-        result_nodes = []
-        for match in self.inline_patterns.finditer(text):
-            if match.start() > position:
-                leading_text = text[position:match.start()]
-                result_nodes.append(nodes.Text(leading_text, leading_text))
-            position = match.end()
-            if match.group('literal'):
-                target = match.group('literal')
-                # A literal in a docstring may reference a known symbol, so we
-                # turn it into a pending reference.  If the literal doesn't
-                # refer to a symbol, Sphinx will fail to resolve the reference
-                # and automatically degrade it to a plain literal.
-                ref = addnodes.pending_xref("`{0}'".format(target),
-                                            reftype='symbol', refdomain='el',
-                                            refexplicit=False,
-                                            reftarget=target,
-                                            refwarn=False)
-                ref += nodes.literal(target, target)
-                result_nodes.append(ref)
-            else:
-                raise NotImplementedError('Failed to handle a branch of the inline patterns!')
-        if position < len(text):
-            trailing_text = text[position:]
-            result_nodes.append(nodes.Text(trailing_text, trailing_text))
-        return result_nodes
-
     def paragraph(self, lines, lineno=None):
         if lineno is None:
             lineno = self.state_machine.abs_line_number() - 1
         text = '\n'.join(lines).rstrip()
-        p = nodes.paragraph(text, '', *self.parse_inline(text))
+        children = self.state_machine.inliner.parse(text)
+        p = nodes.paragraph(text, '', *children)
         p.source, p.line = self.state_machine.get_source_and_line(lineno)
         return p
 
@@ -566,6 +533,67 @@ class Text(StateWS):
         return [], next_state, [paragraph, msg]
 
 
+class Inliner(object):
+
+    inline_patterns = re.compile(
+        """
+        (?:\*(?P<emphasis>[^*]+)\*) | # An emphasis
+        (?:(?P<prefix>[Ii]nfo\s+(?:node|anchor)\s+)`(?P<infonode>[^']+)') | # An info reference
+        (?:`(?P<literal>[^']+)') # A plain literal text
+        """,
+        re.MULTILINE | re.UNICODE | re.VERBOSE)
+
+    def handle_emphasis(self, rawtext, value, _groups):
+        return [nodes.strong(rawtext, value)]
+
+    def handle_infonode(self, rawtext, value, groups):
+        ref = addnodes.pending_xref(rawtext, reftype='infonode',
+                                    reftarget=value, refexplicit=False,
+                                    refwarn=False)
+        ref += nodes.emphasis(value, value)
+        return [nodes.Text(groups['prefix'], groups['prefix']) ,ref]
+
+    def handle_literal(self, rawtext, value, _groups):
+        # A literal in a docstring may reference a known symbol, so we
+        # turn it into a pending reference.  If the literal doesn't
+        # refer to a symbol, Sphinx will fail to resolve the reference
+        # and automatically degrade it to a plain literal.
+        ref = addnodes.pending_xref(rawtext, reftype='symbol', refdomain='el',
+                                    refexplicit=False, reftarget=value,
+                                    refwarn=False)
+        ref += nodes.literal(value, value)
+        return [ref]
+
+    def parse(self, text):
+        position = 0
+        result_nodes = []
+        for match in self.inline_patterns.finditer(text):
+            if match.start() > position:
+                leading_text = text[position:match.start()]
+                result_nodes.append(nodes.Text(leading_text, leading_text))
+            position = match.end()
+            groups = match.groupdict()
+            handled = False
+            for key, value in groups.iteritems():
+                if value is not None:
+                    makenode = getattr(self, 'handle_' + key, None)
+                    if makenode:
+                        result_nodes.extend(makenode(match.group(0), value,
+                                                     groups))
+                        handled = True
+            if not handled:
+                raise NotImplementedError(
+                    'Failed to handle a branch of the inline patterns!')
+
+            elif match.group('literal'):
+                target = match.group('literal')
+
+        if position < len(text):
+            trailing_text = text[position:]
+            result_nodes.append(nodes.Text(trailing_text, trailing_text))
+        return result_nodes
+
+
 class DocstringParser(object):
     def __init__(self, reporter):
         self.state_classes = [Body, Text]
@@ -576,6 +604,7 @@ class DocstringParser(object):
                                            initial_state='Body',
                                            debug=True)
         self.statemachine.reporter = self.reporter
+        self.statemachine.inliner = Inliner()
         inputlines = string2lines(inputstring, tab_width=8,
                                   convert_whitespace=True)
         nodes = self.statemachine.run(inputlines)
