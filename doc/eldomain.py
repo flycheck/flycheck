@@ -584,10 +584,6 @@ class Inliner(object):
             if not handled:
                 raise NotImplementedError(
                     'Failed to handle a branch of the inline patterns!')
-
-            elif match.group('literal'):
-                target = match.group('literal')
-
         if position < len(text):
             trailing_text = text[position:]
             result_nodes.append(nodes.Text(trailing_text, trailing_text))
