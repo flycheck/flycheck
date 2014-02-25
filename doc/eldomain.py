@@ -504,9 +504,43 @@ class Text(StateWS):
     patterns = { 'text': r'' }
     initial_transitions = [('text', 'Body')]
 
+    inline_patterns = re.compile(
+        """
+        (?:`(?P<literal>[^']+)') # A literal text
+        """,
+        re.MULTILINE | re.UNICODE | re.VERBOSE)
+
+    def parse_inline(self, text):
+        position = 0
+        result_nodes = []
+        for match in self.inline_patterns.finditer(text):
+            if match.start() > position:
+                leading_text = text[position:match.start()]
+                result_nodes.append(nodes.Text(leading_text, leading_text))
+            position = match.end()
+            if match.group('literal'):
+                target = match.group('literal')
+                # A literal in a docstring may reference a known symbol, so we
+                # turn it into a pending reference.  If the literal doesn't
+                # refer to a symbol, Sphinx will fail to resolve the reference
+                # and automatically degrade it to a plain literal.
+                ref = addnodes.pending_xref("`{0}'".format(target),
+                                            reftype='symbol', refdomain='el',
+                                            refexplicit=False,
+                                            reftarget=target,
+                                            refwarn=False)
+                ref += nodes.literal(target, target)
+                result_nodes.append(ref)
+            else:
+                raise NotImplementedError('Failed to handle a branch of the inline patterns!')
+        if position < len(text):
+            trailing_text = text[position:]
+            result_nodes.append(nodes.Text(trailing_text, trailing_text))
+        return result_nodes
+
     def paragraph(self, lines, lineno):
         text = '\n'.join(lines).rstrip()
-        p = nodes.paragraph(text, '', nodes.Text(text, text))
+        p = nodes.paragraph(text, '', *self.parse_inline(text))
         p.source, p.line = self.state_machine.get_source_and_line(lineno)
         return p
 
