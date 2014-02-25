@@ -531,7 +531,10 @@ class Text(StateWS):
                 'Unexpected indentation.', source=src, line=srcline)
         lines = context + list(block)
         paragraph = self.paragraph(lines)
-        return [], next_state, [paragraph, msg]
+        result = [paragraph]
+        if msg is not None:
+            result.append(msg)
+        return [], next_state, result
 
 
 class Inliner(object):
