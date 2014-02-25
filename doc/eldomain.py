@@ -615,21 +615,31 @@ class EmacsLispDomain(Domain):
 
     def resolve_xref(self, env, fromdoc, builder, objtype, target, node,
                      content):
-        scopes = self.data['namespace'][target]
-        if objtype == 'symbol' and len(scopes) > 1:
-            # The generic symbol reference is ambiguous, because the symbol has
-            # multiple scopes attached
-            scope = next(ifilter(lambda s: s in scopes, ['function', 'variable',
-                                                         'face', 'struct']),
-                         None)
-            if not scope:
-                # If we have an unknown scope
-                raise ValueError('Unknown scopes: {0!r}'.format(scopes))
-            message = 'Ambiguous reference to {0}, in scopes {1}, using {2}'.format(
-                target, ', '.join(scopes), scope)
-            env.warn(fromdoc, message, getattr(node, 'line'))
+        scopes = self.data['namespace'].get(target, {})
+        scope = None
+        if objtype == 'symbol':
+            # A generic reference.  Figure out the target scope
+            if len(scopes) == 1:
+                # The symbol has just one scope, so use it
+                scope = scopes.keys()[0]
+            elif len(scopes) > 1:
+                # The generic symbol reference is ambiguous, because the
+                # symbol has multiple scopes attached
+                scope = next(ifilter(lambda s: s in scopes,
+                                     ['function', 'variable', 'face', 'struct']),
+                             None)
+                if not scope:
+                    # If we have an unknown scope
+                    raise ValueError('Unknown scope: {0!r}'.format(scopes))
+                message = 'Ambiguous reference to {0}, in scopes {1}, using {2}'.format(
+                    target, ', '.join(scopes), scope)
+                env.warn(fromdoc, message, getattr(node, 'line'))
         else:
+            # A reference with a specific objtype, so get the scope
+            # corresponding to the object type
             scope = self.object_types[objtype].attrs['scope']
+        # If the target isn't present in the scope, we can't resolve the
+        # reference
         if scope not in scopes:
             return None
         docname, _ = scopes[scope]
