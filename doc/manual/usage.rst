@@ -103,8 +103,8 @@ Regardless of automatic syntax checking you can also check the buffer
 manually:
 
 .. command:: flycheck-buffer
-   :auto:
    :binding: C-c ! c
+   :auto:
 
 Each syntax check conducts the following steps:
 
@@ -123,21 +123,9 @@ Each syntax check conducts the following steps:
 8. Run hooks in :hook:`flycheck-after-syntax-check-hook`.
 
 .. hook:: flycheck-after-syntax-check-hook
+   :auto:
 
-   Functions to run after each syntax check.
-
-   This hook is run after a syntax check was finished.
-
-   At this point, **all** chained checkers were run, and all errors were parsed,
-   highlighted and reported.  See :ref:`error-reporting`, for more information
-   about error reporting.  The variable :variable:`flycheck-current-errors`
-   contains all errors from all syntax checkers run during the syntax check, so
-   you can use the various error analysis functions.
-
-   Note that this hook does **not** run after each individual syntax checker in
-   the syntax checker chain, but only after the **last checker**.
-
-   This variable is a normal hook. See :infonode:`(elisp)Hooks`.
+   See :ref:`error-reporting`, for more information about error reporting.
 
 .. hook:: flycheck-before-syntax-check-hook
    :auto:
