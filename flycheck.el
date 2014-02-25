@@ -503,8 +503,8 @@ This hook is run after a syntax check was finished.
 At this point, *all* chained checkers were run, and all errors
 were parsed, highlighted and reported.  The variable
 `flycheck-current-errors' contains all errors from all syntax
-checkers run during the syntax check, so you can use the various
-error analysis functions.
+checkers run during the syntax check, so you can apply any error
+analysis functions.
 
 Note that this hook does *not* run after each individual syntax
 checker in the syntax checker chain, but only after the *last
