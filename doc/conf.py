@@ -23,8 +23,8 @@ import re
 import os
 import sys
 
-
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+SOURCE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(SOURCE_DIR)
 
 # Whether we are building on ReadTheDocs or not
 ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'
@@ -87,5 +87,4 @@ texinfo_elements = {'preamble': """
 extlinks = {'github': ('https://github.com/flycheck/flycheck/%s', None),
             'issue': ('https://github.com/flycheck/flycheck/issues/%s', '#')}
 
-emacs_lisp_load_path = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), os.pardir)
+emacs_lisp_load_path = os.path.abspath(os.path.join(SOURCE_DIR, os.pardir))
