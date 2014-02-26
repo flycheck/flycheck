@@ -31,6 +31,7 @@ master (in development)
   - `rst-sphinx` supports custom nodes without explicit writer support now, by
     using the `pseudoxml` builder.
   - Avoid warnings about missing main functions in `rust`
+  - Properly resolve relative filenames in `.. include::` directives in `rst`
 
 0.17 (Feb 1, 2014)
 ------------------

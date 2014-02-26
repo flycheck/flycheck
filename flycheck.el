@@ -4685,7 +4685,9 @@ part of a Sphinx project."
   "A ReStructuredText (RST) syntax checker using Docutils.
 
 See URL `http://docutils.sourceforge.net/'."
-  :command ("rst2pseudoxml.py" "--report=2" "--halt=5" source)
+  ;; We need to use source-inplace to properly resolve relative paths in
+  ;; include:: directives
+  :command ("rst2pseudoxml.py" "--report=2" "--halt=5" source-inplace)
   :error-patterns
   ((warning line-start (file-name) ":" line ": (WARNING/2) " (message) line-end)
    (error line-start
