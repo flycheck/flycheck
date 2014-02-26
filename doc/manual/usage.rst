@@ -187,6 +187,10 @@ You can manually select a specific syntax checker for the current buffer, too:
 
    Set :variable:`flycheck-checker` to `nil`.
 
+.. function:: flycheck-select-checker
+   :noindex:
+   :auto:
+
 .. variable:: flycheck-checker
 
    The :term:`syntax checker` to use for the current buffer.
