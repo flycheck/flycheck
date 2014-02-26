@@ -540,7 +540,7 @@ class Text(StateWS):
 class Inliner(object):
 
     inline_patterns = re.compile(
-        """
+        r"""
         (?:\*(?P<emphasis>[^*]+)\*) | # An emphasis
         (?:(?P<infoprefix>[Ii]nfo\s+(?:node|anchor)\s+)`(?P<infonode>[^']+)') | # An info reference
         (?:(?P<cmdprefix>[Cc]ommand\s+)`(?P<command>[^']+)') | # A command reference
@@ -550,7 +550,8 @@ class Inliner(object):
         (?:(?P<faceprefix>[Ff]ace\s+)`(?P<face>[^']+)') | # A face reference
         (?:(?P<symprefix>[Ss]ymbol\s+)`(?P<symbol>[^']+)') | # A literal symbol
         (?:(?P<urlprefix>URL\s+)`(?P<url>[^']+)') | # A URL reference
-        (?:`(?P<symbol_reference>[^']+)') # A generic symbol reference
+        (?:`(?P<symbol_reference>[^']+)') | # A generic symbol reference
+        (?:\b(?P<metavar>[-_A-Z]{4,})\b) # A meta variable, as four or more uppercase letters
         """,
         re.MULTILINE | re.UNICODE | re.VERBOSE)
 
@@ -594,6 +595,9 @@ class Inliner(object):
 
     def handle_symbol_reference(self, rawtext, value, _groups):
         return self._make_reference(rawtext, value, ('el', 'symbol'))
+
+    def handle_metavar(self, rawtext, value, _groups):
+        return [el_metavariable(rawtext, value.lower())]
 
     def _make_reference(self, rawtext, target, reftype,
                         innernodeclass=nodes.literal, prefix=None):
