@@ -208,7 +208,8 @@ either directly or with `flycheck-select-checker'.
 
 You should not need to change this variable normally.  In order
 to disable syntax checkers, please use
-`flycheck-disabled-checkers'.
+`flycheck-disabled-checkers'.  This variable is intended for 3rd
+party extensions to tell Flycheck about new syntax checkers.
 
 Syntax checkers in this list must be defined with
 `flycheck-define-checker'."
@@ -227,8 +228,11 @@ checker in this list, regardless of the value of
 However, syntax checkers in this list are still available for
 manual selection with `flycheck-select-checker'.
 
-If disabling syntax checkers, please set this list instead of
-removing the syntax checkers from `flycheck-checkers'."
+Use this variable to disable syntax checkers, instead of removing
+the syntax checkers from `flycheck-checkers'.  You may also use
+this option as a file or directory local variable to disable
+specific checkers in individual files and directories
+respectively."
   :group 'flycheck
   :type '(repeat (symbol :tag "Checker"))
   :package-version '(flycheck . "0.16")

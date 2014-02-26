@@ -145,22 +145,12 @@ By default Flycheck selects a :term:`suitable syntax checker` automatically from
 :option:`flycheck-disabled-checkers`:
 
 .. option:: flycheck-checkers
+   :auto:
 
-   A list of :term:`syntax checker`\ s available for automatic syntax checker
-   selection.  An item in this list is a :term:`registered syntax checker`.
-
-   You may modify this list, but you should normally not need to.  Instead, it
-   is intended for 3rd party extensions to tell Flycheck about new syntax
-   checkers.
+   An item in this list is a :term:`registered syntax checker`.
 
 .. option:: flycheck-disabled-checkers
-
-   A list of :term:`syntax checker`\ s explicitly excluded from automatic
-   selection.
-
-   Change this list to disable syntax checkers which you do not want to use.
-   You may also use this option as a file or directory local variable to disable
-   specific checkers in individual files and directories respectively.
+   :auto:
 
 A syntax checker in :option:`flycheck-checkers` and **not** in
 :option:`flycheck-disabled-checkers` is an :term:`enabled syntax checker`.
