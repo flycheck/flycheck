@@ -3703,10 +3703,10 @@ Why not:
   (let ((flycheck-disabled-checkers '(javascript-jshint javascript-eslint)))
     (flycheck-test-should-syntax-check
      "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
-     '(4 nil error "E:0131: Single-quoted string preferred over double-quoted string."
-         :checker javascript-gjslint :filename nil)
-     '(4 nil error "E:0001: Extra space before \"]\""
-         :checker javascript-gjslint :filename nil))))
+     '(4 nil error "(0131) Single-quoted string preferred over double-quoted string."
+         :checker javascript-gjslint)
+     '(4 nil error "(0001) Extra space before \"]\""
+         :checker javascript-gjslint))))
 
 (ert-deftest flycheck-define-checker/json-jsonlint ()
   :tags '(builtin-checker external-tool language-json)
