@@ -4347,8 +4347,12 @@ See URL `https://github.com/nzakas/eslint'."
   "A JavaScript syntax and style checker using Closure Linter.
 
 See URL `https://developers.google.com/closure/utilities'."
-  :command ("gjslint" (config-file "--flagfile" flycheck-gjslintrc) source)
-  :error-patterns ((error line-start "Line " line ", " (message) line-end))
+  :command ("gjslint" "--unix_mode"
+            (config-file "--flagfile" flycheck-gjslintrc)
+            source)
+  :error-patterns ((error line-start
+                          (file-name) ":" line ":" (message)
+                          line-end))
   :modes (js-mode js2-mode js3-mode))
 
 (flycheck-define-checker json-jsonlint
