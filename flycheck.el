@@ -258,7 +258,8 @@ A syntax checker assigned to this variable must be defined with
 Use the command `flycheck-select-checker' to select a syntax
 checker for the current buffer, or set this variable as file
 local variable to always use a specific syntax checker for a
-file.")
+file.  See Info Node `(emacs)Specifying File Variables' for more
+information about file variables.")
 (put 'flycheck-checker 'safe-local-variable 'flycheck-registered-checker-p)
 
 (defcustom flycheck-locate-config-file-functions

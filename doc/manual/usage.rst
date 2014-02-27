@@ -192,31 +192,7 @@ You can manually select a specific syntax checker for the current buffer, too:
    :auto:
 
 .. variable:: flycheck-checker
-
-   The :term:`syntax checker` to use for the current buffer.
-
-   The variable is buffer local, and safe as file local variable for registered
-   checkers.
-
-   If set to `nil`, automatically select a suitable syntax checker.
-
-   If set to a :term:`syntax checker`, only use this syntax checker.  Automatic
-   selection as described above is *disabled*.  If the syntax checker not
-   suitable, signal an error.
-
-   You may directly set this variable without
-   :command:`flycheck-select-checker`, e.g. via file local variables.  For
-   instance, you can use the following file local variable within a Python file
-   to always use `pylint` for the file:
-
-   .. code-block:: python
-
-      # Local Variables:
-      # flycheck-checker: python-pylint
-      # End:
-
-   See :infonode:`(emacs)Specifying File Variables` for more information about
-   file variables.
+   :auto:
 
 You can change the completion system used by
 :command:`flycheck-select-checker`:
