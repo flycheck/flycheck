@@ -508,7 +508,8 @@ checker*.
 
 This variable is a normal hook."
   :group 'flycheck
-  :type 'hook)
+  :type 'hook
+  :risky t)
 
 (defcustom flycheck-before-syntax-check-hook nil
   "Functions to run before each syntax check.
