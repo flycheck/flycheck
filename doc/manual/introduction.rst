@@ -34,6 +34,7 @@ The following extensions provide additional cool features for Flycheck:
   status.
 - flycheck-d-unittest_ adds a Flycheck checker to run unit tests for D programs
   on the fly.
+- flycheck-google-cpplint_ adds a syntax checker for Google's C++ style checker.
 - flycheck-haskell_ improves Haskell support in Flycheck, by configuring
   Flycheck according to the current Cabal project, and using Cabal sandbox
   packages.
@@ -45,9 +46,10 @@ The following extensions provide additional cool features for Flycheck:
 .. _Cask: https://github.com/cask/cask
 .. _flycheck-color-mode-line: https://github.com/flycheck/flycheck-color-mode-line
 .. _flycheck-d-unittest: https://github.com/flycheck/flycheck-d-unittest
+.. _flycheck-google-cpplint: https://github.com/flycheck/flycheck-google-cpplint
+.. _flycheck-haskell: https://github.com/flycheck/flycheck-haskell
 .. _flycheck-hdevtools: https://github.com/flycheck/flycheck-hdevtools
 .. _hdevtools: https://github.com/bitc/hdevtools/
-.. _flycheck-haskell: https://github.com/flycheck/flycheck-haskell
 .. _flycheck-mercury: https://github.com/flycheck/flycheck-mercury
 .. _Mercury language: http://mercurylang.org/
 
