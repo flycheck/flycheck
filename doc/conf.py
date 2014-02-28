@@ -88,3 +88,4 @@ extlinks = {'github': ('https://github.com/flycheck/flycheck/%s', None),
             'issue': ('https://github.com/flycheck/flycheck/issues/%s', '#')}
 
 emacs_lisp_load_path = [os.path.abspath(os.path.join(SOURCE_DIR, os.pardir))]
+emacs_lisp_debug_docstring_parser = True
