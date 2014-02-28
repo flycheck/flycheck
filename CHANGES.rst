@@ -32,6 +32,7 @@ master (in development)
     using the `pseudoxml` builder.
   - Avoid warnings about missing main functions in `rust`
   - Properly resolve relative filenames in `.. include::` directives in `rst`
+  - #348: Use `--unix_mode` option in `javascript-gjslint` to get the file name
 
 0.17 (Feb 1, 2014)
 ------------------
