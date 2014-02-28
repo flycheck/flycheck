@@ -2733,8 +2733,8 @@ back to `xml-parse-region'.")
 (defun flycheck-parse-xml-string (xml)
   "Parse an XML string.
 
-Return the document tree parsed from XML in the form (ROOT ATTRS
-BODY...).  ROOT is a symbol identifying the name of the root
+Return the document tree parsed from XML in the form `(ROOT ATTRS
+BODY...)'.  ROOT is a symbol identifying the name of the root
 element.  ATTRS is an alist of the attributes of the root node.
 BODY is zero or more body elements, either as strings (in case of
 text nodes) or as XML nodes, in the same for as the root node."
