@@ -65,36 +65,7 @@ However, you can customize automatic syntax checking with
 :option:`flycheck-check-syntax-automatically`:
 
 .. option:: flycheck-check-syntax-automatically
-
-   When Flycheck should check syntax automatically.
-
-   This variable is list of events that may trigger syntax checks.  The
-   following events are known:
-
-   `mode-enabled`
-      Check syntax immediately when :command:`flycheck-mode` is enabled.
-
-   `save`
-      Check syntax immediately after the buffer was saved.
-
-   `new-line`
-      Check syntax immediately after a new line was inserted into the buffer.
-
-   `idle-change`
-      Check syntax a short time (see :option:`flycheck-idle-change-delay`) after
-      the last change to the buffer.
-
-   An syntax check is only conducted for events that are contained in this list.
-   For instance, the following setting will cause Flycheck to *only* check if
-   the mode is enabled or the buffer was saved, but *never* after changes to the
-   buffer contents:
-
-   .. code-block:: cl
-
-      (setq flycheck-check-syntax-automatically '(mode-enabled save))
-
-   If the list is empty syntax is never checked automatically.  In this case,
-   use :command:`flycheck-buffer` to check syntax manually.
+   :auto:
 
 .. option:: flycheck-idle-change-delay
    :auto:
@@ -198,29 +169,7 @@ You can change the completion system used by
 :command:`flycheck-select-checker`:
 
 .. option:: flycheck-completion-system
-
-   The completion system to use.
-
-   `ido`
-      Use IDO.
-
-      IDO is a built-in alternative completion system, without good flex
-      matching and a powerful UI.  You may want to install flx-ido_ to improve
-      the flex matching in IDO.
-
-   `grizzl`
-      Use Grizzl_.
-
-      Grizzl is an alternative completion system with powerful flex matching,
-      but a very limited UI.
-
-   `nil`
-      Use the standard unfancy `completing-read`.
-
-      `completing-read` has a very simple and primitive UI, and does not offer
-      flex matching.  This is the default setting, though, to match Emacs'
-      defaults.  With this system, you may want enable `icomplete-mode` to
-      improve the display of completion candidates at least.
+   :auto:
 
 Each syntax checker provides documentation with information about the executable
 the syntax checker uses, in which buffers it will be used for syntax checks, and
@@ -231,9 +180,6 @@ syntax checker configuration.
    :binding: C-c ! ?
 
    Show the documentation of a syntax checker.
-
-.. _flx-ido: https://github.com/lewang/flx
-.. _Grizzl: https://github.com/d11wtq/grizzl
 
 .. _syntax-checker-configuration:
 
@@ -286,6 +232,9 @@ Syntax checker options
 Some syntax checkers can be configured via options.  The following options are
 provided by Flycheck (in Emacs, use :kbd:`C-h v` or :kbd:`M-x describe-variable`
 on the variable name for detailed help):
+
+.. FIXME: Move these into the languages document, under each specific syntax
+   checker.
 
 .. option:: flycheck-clang-definitions
 
@@ -422,6 +371,9 @@ on the variable name for detailed help):
 Syntax checker configuration files
 ----------------------------------
 
+.. FIXME: Move these into the languages document, under each specific syntax
+   checker.
+
 Some syntax checkers also read configuration files, denoted by associated
 *configuration file variables*:
 
@@ -470,17 +422,7 @@ locate the configuration file using the functions in
 :option:`flycheck-locate-config-file-functions`:
 
 .. option:: flycheck-locate-config-file-functions
-
-   Functions to locate syntax checker configuration files.
-
-   Each function in this hook must accept two arguments: The value of the
-   configuration file variable, and the syntax checker symbol.  It must
-   return either a string with an absolute path to the configuration file,
-   or nil, if it cannot locate the configuration file.
-
-   The functions in this hook are called in order of appearance, until a
-   function returns non-nil.  The configuration file returned by that
-   function is then given to the syntax checker if it exists.
+   :auto:
 
 With the default value of this variable, configuration files are located by the
 following algorithm:
@@ -551,6 +493,7 @@ Errors and warnings from a syntax checker are
    Zenburn_ themes are known to have good Flycheck faces.
 
 .. option:: flycheck-highlighting-mode
+   :auto:
 
    This variable determines how to highlight errors:
 
@@ -583,30 +526,16 @@ Errors and warnings from a syntax checker are
    respectively.
 
 .. option:: flycheck-indication-mode
-
-   This variable determines how to indicate errors:
-
-   If set to `left-fringe` or `right-fringe`, indicate errors and warnings in
-   the left and right fringe respectively.
-
-   If set to `nil`, do not indicate errors.  Errors will still be reported in
-   the mode line and in error message popups, and highlighted according to
-   :option:`flycheck-highlighting-mode`.
+   :auto:
 
 You can also completely customize error processing by hooking into Flycheck:
 
 .. hook:: flycheck-process-error-functions
+   :auto:
 
-   Functions to process errors.
+   .. seealso::
 
-   Each function in this hook must accept a single argument: The Flycheck error
-   to process.  See :ref:`error-api`, for more information about Flycheck error
-   objects.
-
-   The functions in this hook are called in order of appearance, until a
-   function returns non-nil.  Thus, a function in this hook may return nil, to
-   allow for further processing of the error, or t, to indicate that the error
-   was fully processed and inhibit any further processing.
+      :ref:`error-api`
 
 If you hover a highlighted error with the mouse, a tooltip with the top-most
 error message will be shown.
@@ -614,31 +543,17 @@ error message will be shown.
 Flycheck also displays errors under point after a short delay:
 
 .. option:: flycheck-display-errors-delay
-
-   Delay in seconds before displaying errors at point.
-
-   Use floating point numbers to express fractions of seconds.
+   :auto:
 
 The error is displayed via :option:`flycheck-display-errors-function`:
 
 .. option:: flycheck-display-errors-function
+   :auto:
 
-   A function to display errors under point.
+The default function displays the error messages in the echo area:
 
-   If set to a function, call the function with a list of all errors to
-   show.  If set to nil, to not display errors at all.
-
-   The default function is :function:`flycheck-display-error-messages`.
-
-.. function:: flycheck-display-error-messages errors
-
-   Show the messages of the given `errors` in the echo area, separated by empty
-   lines.  If the error messages are too long for the echo area, show the error
-   messages in a popup buffer instead.
-
-   The Emacs Lisp function `display-message-or-buffer` is used to show the
-   messages.  Refer to the docstring of this function for details on when popup
-   buffers are used, and how to customize its behaviour.
+.. function:: flycheck-display-error-messages
+   :auto:
 
 You can also work with the error messages at point, and copy them into the kill
 ring or search them on Google:
@@ -659,20 +574,12 @@ ring or search them on Google:
    Requires the `Google This`_ library, which is available on MELPA_.
 
 .. option:: flycheck-google-max-messages
-
-   The maximum number of error messages to Google at once.
-
-   If set to an integer, :command:`flycheck-google-messages` will refuse to
-   search, when there are more error messages than the value of this variable at
-   point.
-
-   If set to `nil`, :command:`flycheck-google-messages` will always search
-   for **all** messages at point.  This setting is **not** recommended.
+   :auto:
 
 You can also show a list with all errors in the current buffer:
 
 .. command:: flycheck-list-errors
-                list-flycheck-errors
+             list-flycheck-errors
    :binding: C-c ! l
 
    List all errors in the current buffer in a separate buffer.
@@ -727,15 +634,7 @@ You can disable this integration by setting
 :option:`flycheck-standard-error-navigation` to nil:
 
 .. option:: flycheck-standard-error-navigation
-
-   If non-nil, enable navigation of Flycheck errors with the standard
-   `next-error` and friends.
-
-   Otherwise, do not integrate in standard error navigation, and let these
-   functions only navigate compilation mode errors.
-
-   Changes to this variable only take effect after re-enabling
-   :ref:`flycheck-mode` with :command:`flycheck-mode` again.
+   :auto:
 
 Visible compilation buffers take precedence over Flycheck navigation.  If such a
 buffer is visible, :kbd:`M-g n` and :kbd:`M-g p` will ignore Flycheck errors and

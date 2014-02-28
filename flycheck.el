@@ -279,7 +279,8 @@ The functions in this hook are called in order of appearance, until a
 function returns non-nil.  The configuration file returned by that
 function is then given to the syntax checker if it exists.
 
-This variable is an abnormal hook."
+This variable is an abnormal hook.  See Info
+node `(elisp)Hooks'."
   :group 'flycheck
   :type 'hook
   :risky t)
@@ -301,7 +302,8 @@ after the corresponding syntax checker finished.  At this stage,
 the overlays from the previous syntax checks are still present,
 and there may be further syntax checkers in the chain.
 
-This variable is an abnormal hook."
+This variable is an abnormal hook.  See Info
+node `(elisp)Hooks'."
   :group 'flycheck
   :type 'hook
   :package-version '(flycheck . "0.13")
@@ -334,8 +336,8 @@ If set to nil, do not display errors at all."
 (defcustom flycheck-indication-mode 'left-fringe
   "The indication mode for Flycheck errors and warnings.
 
-Controls how Flycheck indicates errors in buffers.  May either be
-`left-fringe', `right-fringe', or nil.
+This variable controls how Flycheck indicates errors in buffers.
+May either be `left-fringe', `right-fringe', or nil.
 
 If set to `left-fringe' or `right-fringe', indicate errors and
 warnings via icons in the left and right fringe respectively.
@@ -355,24 +357,25 @@ The highlighting mode controls how Flycheck highlights errors in
 buffers.  The following modes are known:
 
 `columns'
-     highlights the error column.  If the error does not have a
-     column, highlight the whole line.
+     Highlight the error column.  If the error does not have a column,
+     highlight the whole line.
 
 `symbols'
-     highlights the symbol at the error column, if there is any, otherwise
-     behave like `columns'.
+     Highlight the symbol at the error column, if there is any,
+     otherwise behave like `columns'.  This is the default.
 
 `sexps'
-     highlights the expression at the error column, if there is
-     any, otherwise behave like `columns'.  Note that this mode
-     can be *very* slow in some modes.
+     Highlight the expression at the error column, if there is
+     any, otherwise behave like `columns`.  Note that this mode
+     can be *very* slow in some major modes.
 
 `lines'
-     highlights the whole line.
+     Highlight the whole line.
 
 nil
-     does not highlight errors at all.  Errors will still be
-     indicated according to `flycheck-indication-mode'."
+     Do not highlight errors at all.  However, errors will still
+     be reported in the mode line and in error message popups,
+     and indicated according to `flycheck-indication-mode'."
   :group 'flycheck
   :type '(choice (const :tag "Highlight columns only" columns)
                  (const :tag "Highlight symbols" symbols)
@@ -392,25 +395,27 @@ This variable is a list of events that may trigger syntax checks.
 The following events are known:
 
 `save'
-     checks syntax automatically each time the buffer is saved.
+     Check syntax immediately after the buffer was saved.
 
 `idle-change'
-     checks syntax automatically some time after the last change
-     to the buffer occurred.
+     Check syntax a short time (see `flycheck-idle-change-delay')
+     after the last change to the buffer.
 
 `new-line'
-     checks syntax automatically each time a new line is inserted
-     into the buffer.
+     Check syntax immediately after a new line was inserted into
+     the buffer.
 
 `mode-enabled'
-     checks syntax automatically when `flycheck-mode' is enabled.
+     Check syntax immediately when `flycheck-mode' is enabled.
 
-For instance, set this variable to '(mode-enabled save) to only
-check syntax automatically when saving a buffer, but never when
-modifying its contents.
+Flycheck performs a syntax checks only on evens, which are
+contained in this list.  For instance, if the value of this
+variable is `(mode-enabled save)', Flycheck will only check if
+the mode is enabled or the buffer was saved, but never after
+changes to the buffer contents.
 
-If nil, never check syntax automatically.  Use `flycheck-buffer'
-to start a syntax check manually."
+If nil, never check syntax automatically.  In this case, use
+`flycheck-buffer' to start a syntax check manually."
   :group 'flycheck
   :type '(set (const :tag "After the buffer was saved" save)
               (const :tag "After the buffer was changed and idle" idle-change)
@@ -441,8 +446,8 @@ If set to an integer, `flycheck-google-messages' will signal an
 error if there are more Flycheck messages at point than the value
 of this variable.
 
-If set to nil, `flycheck-google-messages' will always google all
-messages at point."
+If set to nil, `flycheck-google-messages' will always google *all*
+messages at point.  This setting is *not* recommended."
   :group 'flycheck
   :type '(choice (const :tag "Always google all messages" nil)
                  (integer :tag "Maximum messages to google"))
@@ -469,21 +474,26 @@ enabled.  Changing it will not affect buffers which already have
   :safe #'booleanp)
 
 (defcustom flycheck-completion-system nil
-  "How to complete in minibuffer prompts.
+  "The completion system to use.
 
 `ido'
-     Use IDO.  IDO is a built-in alternative completion system,
-     without good flex matching and a powerful UI.  You may want
-     to install flx-ido (see URL `https://github.com/lewang/flx')
-     to improve the flex matching in IDO.
+     Use IDO.
+
+     IDO is a built-in alternative completion system, without
+     good flex matching and a powerful UI.  You may want to
+     install flx-ido (see URL `https://github.com/lewang/flx') to
+     improve the flex matching in IDO.
 
 `grizzl'
-     Use Grizzl, see URL `https://github.com/d11wtq/grizzl'.
+     Use Grizzl.
+
      Grizzl is an alternative completion system with powerful
-     flex matching, but a very limited UI.
+     flex matching, but a very limited UI.  See URL
+     `https://github.com/d11wtq/grizzl'.
 
 nil
      Use the standard unfancy `completing-read'.
+
      `completing-read' has a very simple and primitive UI, and
      does not offer flex matching.  This is the default setting,
      though, to match Emacs' defaults.  With this system, you may
@@ -3293,7 +3303,8 @@ and if the echo area is not occupied by minibuffer input."
 Concatenate all non-nil messages of ERRORS separated by empty
 lines, and display them with `display-message-or-buffer', which
 shows the messages either in the echo area or in a separate
-buffer, depending on the number of lines.
+buffer, depending on the number of lines.  See Info
+node `(elisp)Displaying Messages' for more information.
 
 In the latter case, show messages in
 `flycheck-error-message-buffer'."
