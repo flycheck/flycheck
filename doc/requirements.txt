@@ -1,2 +1,3 @@
+Sphinx>=1.2.1
 pillow>=2.3
 git+https://github.com/flycheck/sphinxcontrib-emacs#egg=sphinxcontrib-emacs
