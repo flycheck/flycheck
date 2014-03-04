@@ -20,16 +20,27 @@
 # SOFTWARE.
 
 
+"""A Sphinx extension to replace textual issue references such as ``#1`` with
+real references to issues.
+
+"""
+
+
 import re
 
 from docutils import nodes
 from docutils.transforms import Transform
 
 
+#: Regular expression for issue references
 ISSUE_RE = re.compile(r'#(?P<id>\d+)')
 
 
+#: Base URL for issue references
 ISSUE_URL = 'https://github.com/flycheck/flycheck/issues/{id}'
+
+
+ISSUE_DOCUMENTS = ['manual/changes']
 
 
 class IssueReferences(Transform):
@@ -38,7 +49,7 @@ class IssueReferences(Transform):
 
     def apply(self):
         docname = self.document.settings.env.docname
-        if docname != 'manual/changes':
+        if docname not in ISSUE_DOCUMENTS:
             # Substitute in the change log only
             return
         for node in self.document.traverse(nodes.Text):
