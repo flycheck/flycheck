@@ -2,7 +2,7 @@
 #
 # Install syntax checkers from CPAN
 class flycheck::checkers::perl {
-  include ::perl
+  require flycheck::perl
 
   $perl_packages = ['Perl::Critic' # perl-perlcritic
                     ]

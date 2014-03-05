@@ -2,14 +2,13 @@
 #
 # Install Sphinx and related packages to build documentation
 class flycheck::sphinx {
-  include flycheck::python
+  require flycheck::python
 
   package { [ 'Sphinx',
               'Pillow'           # For image support
               ]:
     ensure   => latest,
     provider => pip,
-    require  => Class['flycheck::python']
   }
 
   # For Texinfo building

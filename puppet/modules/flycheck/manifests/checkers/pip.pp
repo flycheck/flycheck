@@ -2,7 +2,7 @@
 #
 # Install syntax checkers from Pip
 class flycheck::checkers::pip {
-  include flycheck::python
+  require flycheck::python
 
   # Sphinx also comes from Pip
   include flycheck::sphinx
@@ -16,14 +16,11 @@ class flycheck::checkers::pip {
   package { $python_packages:
     ensure   => latest,
     provider => pip,
-    # We must have pip available
-    require  => Class['flycheck::python'],
   }
 
   package { 'closure-linter':
     ensure   => installed,
     provider => pip,
     source   => 'http://closure-linter.googlecode.com/files/closure_linter-latest.tar.gz',
-    require  => Class['flycheck::python'],
   }
 }

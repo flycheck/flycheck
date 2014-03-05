@@ -49,9 +49,12 @@ class flycheck::base {
     require => Class['apt::update']
   }
 
-  package { 'make': ensure => latest }
+  # Important utilities
+  package { ['curl', 'make']:
+    ensure => latest
+  }
 
-  # Archive tools to extract Carton and syntax checker archives
+  # Archive tools to extract Cask and syntax checker archives
   package { ['tar', 'unzip']: ensure => latest }
 
   # Decrypt encrypted files in unit tests

@@ -2,9 +2,10 @@
 #
 # Install Ruby, and select Ruby 1.9 as default
 class flycheck::ruby {
+  require apt::update
+
   package { ['ruby1.9.1', 'ruby1.9.1-dev', 'jruby']:
     ensure  => latest,
-    require => Class['apt::update'],
   }
 
   # Make Ruby 1.9 the default Ruby
@@ -17,6 +18,5 @@ class flycheck::ruby {
   $xml_headers = ['libxslt1-dev', 'libxml2-dev']
   package { $xml_headers:
     ensure  => latest,
-    require => Class['apt::update']
   }
 }

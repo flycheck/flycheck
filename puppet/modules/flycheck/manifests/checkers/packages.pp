@@ -3,7 +3,8 @@
 # Install syntax checkers from system packages
 class flycheck::checkers::packages {
 
-  include flycheck::checkers::repositories
+  require flycheck::checkers::repositories
+  require apt::update
 
   # These language environments also provide syntax checkers
   include flycheck::erlang
@@ -36,7 +37,6 @@ class flycheck::checkers::packages {
 
   package { $apt_packages:
     ensure  => latest,
-    require => [Class['flycheck::checkers::repositories'], Class['apt::update']]
   }
 
   $dmd_version = '2.063.2'

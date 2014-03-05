@@ -2,5 +2,9 @@
 #
 # Install a Haskell environment
 class flycheck::haskell {
-  package { ['haskell-platform']: ensure => latest }
+  require apt::update
+
+  package { 'haskell-platform':
+    ensure  => latest,
+  }
 }
