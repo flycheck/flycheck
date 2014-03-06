@@ -3803,13 +3803,13 @@ See URL `http://elixir-lang.org/'."
                                         ; warning.
             source)
   :error-patterns
+  ;; Elixir compiler errors
   ((error line-start "** (" (zero-or-more not-newline) ") "
           (file-name) ":" line ": " (message) line-end)
-   (warning line-start
-            (file-name) ":"
-            line ": "
-            (message)
-            line-end))
+   ;; Warnings from Elixir >= 0.12.4
+   (warning line-start (file-name) ":" line ": warning:" (message) line-end)
+   ;; Warnings from older Elixir versions
+   (warning line-start (file-name) ":" line ": " (message) line-end))
   :modes elixir-mode)
 
 (defconst flycheck-this-emacs-executable
