@@ -5,13 +5,13 @@ class flycheck::checkers::misc {
 
   require flycheck::erlang
 
-  $elixir_version = '0.12.0'
+  $elixir_version = '0.12.4'
 
   archive { "elixir-${elixir_version}":
     ensure        => present,
-    url           => "https://github.com/elixir-lang/elixir/releases/download/v${elixir_version}/v${elixir_version}.zip",
+    url           => "https://github.com/elixir-lang/elixir/releases/download/v${elixir_version}/Precompiled.zip",
     extension     => 'zip',
-    digest_string => '62fc9173158ba919b2d0f792b827eca7',
+    digest_string => 'c6a41e761ee26687ec0939d666e0bc07',
     target        => "/opt/elixir-${elixir_version}",
     root_dir      => '.',
   }
