@@ -15,7 +15,7 @@ class flycheck::checkers::packages {
 
   $apt_packages = [ 'asciidoc',           # asciidoc
                     'bash',               # bash/sh-bash
-                    'clang',              # c/c++-clang
+                    'clang-3.4',          # c/c++-clang
                     'cppcheck',           # c/c++-cpppcheck
                     'cfengine-community', # cfengine
                     'hlint',              # haskell-lint
