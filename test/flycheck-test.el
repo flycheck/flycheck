@@ -3878,8 +3878,9 @@ Why not:
   (skip-unless (flycheck-check-executable 'puppet-lint))
   (flycheck-test-should-syntax-check
    "checkers/puppet-lint.pp" 'puppet-mode
-   '(2 nil error "foo::bar not in autoload module layout" :checker puppet-lint)
-   '(3 nil warning "case statement without a default case"
+   '(2 nil error "foo::bar not in autoload module layout (autoloader_layout)"
+       :checker puppet-lint)
+   '(3 nil warning "case statement without a default case (case_without_default)"
        :checker puppet-lint)))
 
 (ert-deftest flycheck-define-checker/python-flake8-syntax-error ()

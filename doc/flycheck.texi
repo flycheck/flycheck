@@ -21,7 +21,7 @@
 
 @copying
 @quotation
-Flycheck 0.18-cvs, March 10, 2014
+Flycheck 0.18-cvs, March 11, 2014
 
 Sebastian Wiesner
 
@@ -3150,6 +3150,9 @@ Properly resolve relative filenames in @code{.. include::} directives in @code{r
 
 @item 
 #348@footnote{https://github.com/flycheck/flycheck/issues/348}: Use @code{--unix_mode} option in @code{javascript-gjslint} to get the file name
+
+@item 
+Puppet Lint messages now include the name of the corresponding check
 @end itemize
 @end itemize
 
