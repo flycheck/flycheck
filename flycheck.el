@@ -166,6 +166,7 @@ buffer-local wherever it is set."
     php
     php-phpmd
     php-phpcs
+    postgresql
     puppet-parser
     puppet-lint
     python-flake8
@@ -4536,6 +4537,16 @@ See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
             (file-name) ":" line ":" column ": warning - " (message)
             line-end))
   :modes (php-mode php+-mode))
+
+(flycheck-define-checker postgresql
+  "A SQL syntax checker using pgsanity. Linter is designed to work
+  specifically with postgresql, but works with all non-product specific
+  SQL as well.
+
+  See URL `https://github.com/markdrago/pgsanity'."
+  :command ("pgsanity" source)
+  :error-patterns ((error line-start "line " line ": ERROR: " (message) line-end))
+  :modes sql-mode)
 
 (flycheck-define-checker puppet-parser
   "A Puppet DSL syntax checker using puppet's own parser.
