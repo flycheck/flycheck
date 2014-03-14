@@ -80,12 +80,12 @@ Syntax checkers
 Flycheck can now check GNU Makefiles (:issue:`321`) with the new `make-gmake`
 syntax checker.
 
-The :flyc:checker:`rust` syntax checker now uses `--no-trans` to check for more
+The :flyc-checker:`rust` syntax checker now uses `--no-trans` to check for more
 than just syntax errors.  For instance, it will report unused variables now.
 
 As part of the transition to the new manual, Flycheck now provides a syntax
-checker for Sphinx documents (:flyc:checker:`rst-sphinx`).  The
-:flyc:checker:`rst` syntax checker does not check documents within a Sphinx
+checker for Sphinx documents (:flyc-checker:`rst-sphinx`).  The
+:flyc-checker:`rst` syntax checker does not check documents within a Sphinx
 project anymore, do avoid false positives from Sphinx-specific markup.
 
 Extending syntax checkers
@@ -96,7 +96,7 @@ Other bug fixes and improvements
 
 - Flycheck does not longer attach syntax checker processes to the buffer
   anymore, improving compatibility with Tabbar Mode (:issue:`298`).
-- The :flyc:checker:`emacs-lisp` and :flyc:checker:`emacs-lisp-checkdoc` syntax
+- The :flyc-checker:`emacs-lisp` and :flyc-checker:`emacs-lisp-checkdoc` syntax
   checkers do not visit the file being checked anymore, to avoid unintended side
   effects from unsafe local variables, etc. (:issue:`319`)
 - When a buffer changes while being checked, Flycheck immediately re-checks the

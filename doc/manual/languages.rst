@@ -2,8 +2,6 @@
  Supported languages
 =====================
 
-.. default-domain:: flyc
-
 Flycheck supports the following |#flycheck-languages| languages with
 |#flycheck-checkers| syntax checkers.
 
@@ -22,68 +20,58 @@ a syntax checker.
 AsciiDoc
 ========
 
-.. seealso::  http://www.methods.co.nz/asciidoc/
-
-.. syntax-checker:: asciidoc
+.. flyc-checker:: asciidoc
+   :auto:
 
 C/C++
 =====
 
-.. syntax-checker:: c/c++-clang
+.. flyc-checker:: c/c++-clang
+   :auto:
 
-   .. seealso:: http://clang.llvm.org/
-
-.. syntax-checker:: c/c++-cppcheck
-
-   .. seealso:: http://cppcheck.sourceforge.net/
+.. flyc-checker:: c/c++-cppcheck
+   :auto:
 
 CFEngine
 ========
 
-.. seealso:: http://cfengine.com/
-
-.. syntax-checker:: cfengine
+.. flyc-checker:: cfengine
+   :auto:
 
 Chef
 ====
 
 .. seealso:: http://www.getchef.com/chef/
 
-.. syntax-checker:: chef-foodcritic
-
-   .. seealso:: http://acrmp.github.io/foodcritic/
+.. flyc-checker:: chef-foodcritic
+   :auto:
 
 Coffeescript
 ============
 
-.. seealso:: http://coffeescript.org/
+.. flyc-checker:: coffee
+   :auto:
 
-.. syntax-checker:: coffee
-
-.. syntax-checker:: coffee-coffeelint
-
-   .. seealso:: http://www.coffeelint.org/
+.. flyc-checker:: coffee-coffeelint
+   :auto:
 
 CSS
 ===
 
-.. syntax-checker:: css-csslint
-
-   .. seealso:: https://github.com/stubbornella/csslint
+.. flyc-checker:: css-csslint
+   :auto:
 
 D
 =
 
-.. seealso:: http://dlang.org/
-
-.. syntax-checker:: d-dmd
+.. flyc-checker:: d-dmd
+   :auto:
 
 Elixir
 ======
 
-.. seealso:: http://elixir-lang.org
-
-.. syntax-checker:: elixir
+.. flyc-checker:: elixir
+   :auto:
 
 Emacs Lisp
 ==========
@@ -96,9 +84,11 @@ Emacs Lisp
    Emacs Lisp manual
       http://www.gnu.org/software/emacs/manual/html_node/elisp/index.html
 
-.. syntax-checker:: emacs-lisp
+.. flyc-checker:: emacs-lisp
+   :auto:
 
-.. syntax-checker:: emacs-lisp-checkdoc
+.. flyc-checker:: emacs-lisp-checkdoc
+   :auto:
 
    .. seealso::
 
@@ -108,131 +98,94 @@ Emacs Lisp
 Erlang
 ======
 
-.. seealso:: http://www.erlang.org/
-
-.. syntax-checker:: erlang
+.. flyc-checker:: erlang
+   :auto:
 
 ERuby
 =====
 
-.. syntax-checker:: eruby-erubis
-
-   .. seealso::
-
-      Erubis
-         http://www.kuwata-lab.com/erubis/
+.. flyc-checker:: eruby-erubis
+   :auto:
 
 Go
 ==
 
-.. seealso:: http://golang.org/
+.. flyc-checker:: go-gofmt
+   :auto:
 
-.. syntax-checker:: go-gofmt
-.. syntax-checker:: go-golint
+.. flyc-checker:: go-golint
+   :auto:
 
-   .. seealso:: https://github.com/golang/lint
+.. flyc-checker:: go-vet
+   :auto:
 
-.. syntax-checker:: go-vet
-
-   .. seealso::
-
-      `go`
-         http://golang.org/cmd/go
-
-      `go tool vet`
-         http://godoc.org/code.google.com/p/go.tools/cmd/vet
-
-.. syntax-checker:: go-build
-.. syntax-checker:: go-test
+.. flyc-checker:: go-build
+   :auto:
+.. flyc-checker:: go-test
+   :auto:
 
 Haml
 ====
 
-.. seealso:: http://haml.info/
-
-.. syntax-checker:: haml
+.. flyc-checker:: haml
+   :auto:
 
 Handlebars
 ==========
 
-.. seealso:: http://handlebarsjs.com/
-
-.. syntax-checker:: handlebars
+.. flyc-checker:: handlebars
+   :auto:
 
 Haskell
 =======
 
-.. seealso:: http://www.haskell.org/
+.. flyc-checker:: haskell-ghc
+   :auto:
 
-.. syntax-checker:: haskell-ghc
-
-   .. seealso:: http://www.haskell.org/ghc/
-
-.. syntax-checker:: haskell-hlint
-
-   .. seealso:: https://github.com/ndmitchell/hlint
+.. flyc-checker:: haskell-hlint
+   :auto:
 
 HTML
 ====
 
-.. syntax-checker:: html-tidy
-
-   .. seealso::
-
-      HTML Tidy
-         http://tidy.sourceforge.net/
-
-      HTML Tidy for HTML 5
-         http://w3c.github.io/tidy-html5/
+.. flyc-checker:: html-tidy
+   :auto:
 
 Javascript
 ==========
 
-.. syntax-checker:: javascript-jshint
+.. flyc-checker:: javascript-jshint
+   :auto:
 
-   .. seealso:: http://www.jshint.com/
+.. flyc-checker:: javascript-eslint
+   :auto:
 
-.. syntax-checker:: javascript-eslint
-
-   .. seealso:: https://github.com/eslint/eslint
-
-.. syntax-checker:: javascript-gjslint
-
-   .. seealso::
-
-      Closure Linter
-         https://developers.google.com/closure/utilities/
+.. flyc-checker:: javascript-gjslint
+   :auto:
 
 JSON
 ====
 
-.. syntax-checker:: json-jsonlint
-
-   .. seealso:: https://github.com/zaach/jsonlint
+.. flyc-checker:: json-jsonlint
+   :auto:
 
 LESS
 ====
 
-.. syntax-checker:: less
-
-   .. seealso:: http://lesscss.org/
+.. flyc-checker:: less
+   :auto:
 
 Lua
 ===
 
-.. syntax-checker:: lua
-
-   .. seealso:: http://www.lua.org/
+.. flyc-checker:: lua
+   :auto:
 
 Make
 ====
 
-.. seealso::
-
-   IEEE Std 1003.1, 2013 Edition, Make
-      http://pubs.opengroup.org/onlinepubs/9699919799/utilities/make.html
-
-.. syntax-checker:: make
+.. flyc-checker:: make
+   :auto:
 
    .. seealso::
 
@@ -251,149 +204,112 @@ Make
 Perl
 ====
 
-.. seealso:: http://www.perl.org
+.. flyc-checker:: perl
+   :auto:
 
-.. syntax-checker:: perl
-
-.. syntax-checker:: perl-perlcritic
-
-   .. seealso:: http://search.cpan.org/dist/Perl-Critic/
+.. flyc-checker:: perl-perlcritic
+   :auto:
 
 PHP
 ===
 
-.. syntax-checker:: php
+.. flyc-checker:: php
+   :auto:
 
-   .. seealso::
+.. flyc-checker:: php-phpmd
+   :auto:
 
-      PHP Command Line
-         http://php.net/manual/en/features.commandline.php
-
-.. syntax-checker:: php-phpmd
-
-   .. seealso::
-
-      PHP Mess Detector
-         http://phpmd.org/
-
-.. syntax-checker:: php-phpcs
-
-   .. seealso::
-
-      PHP Code Sniffer
-         http://pear.php.net/package/PHP_CodeSniffer/
+.. flyc-checker:: php-phpcs
+   :auto:
 
 Puppet
 ======
 
-.. seealso:: https://puppetlabs.com/
+.. flyc-checker:: puppet-parser
+   :auto:
 
-.. syntax-checker:: puppet-parser
-
-.. syntax-checker:: puppet-lint
-
-   .. seealso:: http://www.puppet-lint.com/
+.. flyc-checker:: puppet-lint
+   :auto:
 
 Python
 ======
 
-.. syntax-checker:: python-flake8
+.. flyc-checker:: python-flake8
+   :auto:
 
-   .. seealso:: http://flake8.readthedocs.org/
-
-.. syntax-checker:: python-pylint
-
-   .. seealso:: http://www.pylint.org/
+.. flyc-checker:: python-pylint
+   :auto:
 
 Racket
 ======
 
-.. seealso:: http://racket-lang.org/
-
-.. syntax-checker:: racket
+.. flyc-checker:: racket
+   :auto:
 
 ReStructuredText
 ================
 
-.. seealso::
+.. flyc-checker:: rst
+   :auto:
 
-   ReStructuredText
-      http://docutils.sourceforge.net/rst.html
-
-   Docutils
-      http://docutils.sourceforge.net/
-
-.. syntax-checker:: rst
-
-.. syntax-checker:: rst-sphinx
-
-   .. seealso:: http://sphinx-doc.org
+.. flyc-checker:: rst-sphinx
+   :auto:
 
 Ruby
 ====
 
-.. seealso:: https://www.ruby-lang.org/
+.. flyc-checker:: ruby-rubocop
+   :auto:
 
-.. syntax-checker:: ruby-rubocop
+.. flyc-checker:: ruby-rubylint
+   :auto:
 
-   .. seealso:: https://github.com/bbatsov/rubocop
+.. flyc-checker:: ruby
+   :auto:
 
-.. syntax-checker:: ruby-rubylint
-
-   .. seealso:: https://github.com/YorickPeterse/ruby-lint
-
-.. syntax-checker:: ruby
-
-.. syntax-checker:: ruby-jruby
-
-   .. seealso:: http://jruby.org/
+.. flyc-checker:: ruby-jruby
+   :auto:
 
 Rust
 ====
 
-.. seealso:: http://www.rust-lang.org/
-
-.. syntax-checker:: rust
+.. flyc-checker:: rust
+   :auto:
 
 Sass
 ====
 
-.. seealso:: http://sass-lang.com/
-
-.. syntax-checker:: sass
+.. flyc-checker:: sass
+   :auto:
 
 Scala
 =====
 
-.. seealso:: http://www.scala-lang.org/
-
-.. syntax-checker:: scala
+.. flyc-checker:: scala
+   :auto:
 
 Scss
 ====
 
-.. syntax-checker:: scss
-
-   .. seealso:: http://sass-lang.com/
+.. flyc-checker:: scss
+   :auto:
 
 Shell script languages
 ======================
 
-.. syntax-checker:: sh-bash
+.. flyc-checker:: sh-bash
+   :auto:
 
-   .. seealso:: http://www.gnu.org/software/bash/
-
-.. syntax-checker:: sh-posix-dash
+.. flyc-checker:: sh-posix-dash
+   :auto:
 
    .. seealso::
-
-      DASH
-         http://gondor.apana.org.au/~herbert/dash/
 
       POSIX Shell Command Language
          http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html
 
-.. syntax-checker:: sh-posix-bash
+.. flyc-checker:: sh-posix-bash
+   :auto:
 
    .. seealso::
 
@@ -403,20 +319,17 @@ Shell script languages
       POSIX Shell Command Language
          http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html
 
-.. syntax-checker:: sh-zsh
+.. flyc-checker:: sh-zsh
+   :auto:
 
-   .. seealso:: http://www.zsh.org/
-
-.. syntax-checker:: sh-shellcheck
-
-   .. seealso:: https://github.com/koalaman/shellcheck/
+.. flyc-checker:: sh-shellcheck
+   :auto:
 
 Slim
 ====
 
-.. seealso:: http://slim-lang.com/
-
-.. syntax-checker:: slim
+.. flyc-checker:: slim
+   :auto:
 
 TeX/LaTeX
 =========
@@ -429,49 +342,38 @@ TeX/LaTeX
    TeX Live
       http://www.tug.org/texlive/
 
-.. syntax-checker:: tex-chktex
+.. flyc-checker:: tex-chktex
+   :auto:
 
-   .. seealso:: http://www.nongnu.org/chktex/
-
-.. syntax-checker:: tex-lacheck
-
-   .. seealso:: http://www.ctan.org/pkg/lacheck
+.. flyc-checker:: tex-lacheck
+   :auto:
 
 Texinfo
 =======
 
-.. syntax-checker:: texinfo
-
-   .. seealso:: http://www.gnu.org/software/texinfo/
+.. flyc-checker:: texinfo
+   :auto:
 
 Verilog
 =======
 
-.. syntax-checker:: verilog-verilator
-
-   .. seealso:: http://www.veripool.org/wiki/verilator
+.. flyc-checker:: verilog-verilator
+   :auto:
 
 XML
 ===
 
-.. syntax-checker:: xml-xmlstarlet
+.. flyc-checker:: xml-xmlstarlet
+   :auto:
 
-   .. seealso:: http://xmlstar.sourceforge.net/
-
-.. syntax-checker:: xml-xmllint
-
-   .. seealso::
-
-      Libxml2
-         http://www.xmlsoft.org/
+.. flyc-checker:: xml-xmllint
+   :auto:
 
 YAML
 ====
 
-.. syntax-checker:: yaml-jsyaml
+.. flyc-checker:: yaml-jsyaml
+   :auto:
 
-   .. seealso:: https://github.com/nodeca/js-yaml
-
-.. syntax-checker:: yaml-ruby
-
-   .. seealso:: https://www.ruby-lang.org
+.. flyc-checker:: yaml-ruby
+   :auto:
