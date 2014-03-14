@@ -40,7 +40,6 @@
   (require 'jka-compr)      ; For JKA workarounds in `flycheck-temp-file-system'
   (require 'compile)        ; Compile Mode integration
   (require 'sh-script)      ; `sh-shell' for sh checker predicates
-  (require 'find-func)      ; `find-function-space-re' in an `rx' form
   (require 'package)        ; Tell Emacs about package-user-dir
 )
 
@@ -52,6 +51,7 @@
 (require 'rx)                    ; Regexp fanciness in `flycheck-define-checker'
 (require 'cl-lib)                ; `cl-defstruct'
 (require 'help-mode)             ; `define-button-type'
+(require 'find-func)             ; `find-function-regexp-alist'
 
 ;; Tell the byte compiler about autoloaded functions from packages
 (declare-function pkg-info-version-info "pkg-info" (package))
