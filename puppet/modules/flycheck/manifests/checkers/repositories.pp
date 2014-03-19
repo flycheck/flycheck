@@ -17,8 +17,9 @@ class flycheck::checkers::repositories {
 
   # Cfengine
   apt::source { 'cfengine-community':
-    location    => 'http://cfengine.com/pub/apt',
+    location    => 'http://cfengine.com/pub/apt/packages',
     repos       => 'main',
+    release     => 'stable',
     key         => '89107B44',
     key_source  => 'http://cfengine.com/pub/gpg.key',
     include_src => false,
