@@ -4101,6 +4101,7 @@ Why not:
   (flycheck-test-should-syntax-check
    "checkers/ruby-warnings.rb" 'ruby-mode
    '(1 1 info "Missing utf-8 encoding comment." :checker ruby-rubocop)
+   '(2 1 info "Use snake_case for source file names." :checker ruby-rubocop)
    '(3 1 info "Missing top-level class documentation comment."
        :checker ruby-rubocop)
    '(4 18 warning "unused argument name" :checker ruby-rubylint)
@@ -4127,6 +4128,7 @@ Why not:
     (flycheck-test-should-syntax-check
      "checkers/ruby-warnings.rb" 'ruby-mode
      '(1 1 info "Missing utf-8 encoding comment." :checker ruby-rubocop)
+     '(2 1 info "Use snake_case for source file names." :checker ruby-rubocop)
      '(3 1 info "Missing top-level class documentation comment."
          :checker ruby-rubocop)
      '(5 5 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
