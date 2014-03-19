@@ -4838,8 +4838,10 @@ Relative paths are relative to the file being checked."
 (flycheck-define-checker rust
   "A Rust syntax checker using Rust compiler.
 
+This syntax checker needs Rust 0.10 or newer.
+
 See URL `http://rust-lang.org'."
-  :command ("rustc" "--lib" "--no-trans"
+  :command ("rustc" "--crate-type=lib" "--no-trans"
             (option-list "-L" flycheck-rust-library-path s-prepend)
             source-inplace)
   :error-patterns

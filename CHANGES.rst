@@ -10,6 +10,8 @@ master (in development)
     syntax checkers were renamed to `sh-bash` and `sh-zsh` respectively.  Thus,
     all shell script syntax checkers now live in the `sh-` prefix.
   - `rst-sphinx` requires Sphinx 1.2 or newer now.
+  - #353: `rustc` requires Rust 0.10 (not yet released at the time of writing)
+    or newer now
 
 - New syntax checkers:
 
@@ -34,6 +36,7 @@ master (in development)
   - Properly resolve relative filenames in `.. include::` directives in `rst`
   - #348: Use `--unix_mode` option in `javascript-gjslint` to get the file name
   - Puppet Lint messages now include the name of the corresponding check
+  - #353: `rustc` supports upcoming Rust 0.10 now
 
 0.17 (Feb 1, 2014)
 ------------------

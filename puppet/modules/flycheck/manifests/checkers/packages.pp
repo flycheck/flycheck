@@ -24,7 +24,7 @@ class flycheck::checkers::packages {
                     'pmake',              # make (NetBSD Make)
                     'puppet',             # puppet-parser
                     'racket',             # racket
-                    'rust-0.9',           # rust
+                    'rust-nightly',       # rust
                     'scala',              # scala
                     'dash',               # sh-dash
                     'verilator',          # verilog-verilator
@@ -34,6 +34,12 @@ class flycheck::checkers::packages {
                     'libxml2-utils',      # xml-xmllint
                     'zsh',                # zsh
                     ]
+
+  # Force the nightly builds on
+  alternatives { 'rustc':
+    path    => '/usr/lib/rust/rust-nightly/bin/rustc',
+    require => Package['rust-nightly'],
+  }
 
   package { $apt_packages:
     ensure  => latest,
