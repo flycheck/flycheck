@@ -21,7 +21,7 @@
 
 @copying
 @quotation
-Flycheck 0.18-cvs, March 11, 2014
+Flycheck 0.18-cvs, March 20, 2014
 
 Sebastian Wiesner
 
@@ -279,6 +279,9 @@ status.
 @item 
 flycheck-d-unittest@footnote{https://github.com/flycheck/flycheck-d-unittest} adds a Flycheck checker to run unit tests for D programs
 on the fly.
+
+@item 
+flycheck-google-cpplint@footnote{https://github.com/flycheck/flycheck-google-cpplint} adds a syntax checker for Google's C++ style checker.
 
 @item 
 flycheck-haskell@footnote{https://github.com/flycheck/flycheck-haskell} improves Haskell support in Flycheck, by configuring
@@ -3089,6 +3092,10 @@ all shell script syntax checkers now live in the @code{sh-} prefix.
 
 @item 
 @code{rst-sphinx} requires Sphinx 1.2 or newer now.
+
+@item 
+#353@footnote{https://github.com/flycheck/flycheck/issues/353}: @code{rustc} requires Rust 0.10 (not yet released at the time of writing)
+or newer now
 @end itemize
 
 @item 
@@ -3153,6 +3160,9 @@ Properly resolve relative filenames in @code{.. include::} directives in @code{r
 
 @item 
 Puppet Lint messages now include the name of the corresponding check
+
+@item 
+#353@footnote{https://github.com/flycheck/flycheck/issues/353}: @code{rustc} supports upcoming Rust 0.10 now
 @end itemize
 @end itemize
 
