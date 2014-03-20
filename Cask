@@ -3,6 +3,10 @@
 
 (package-file "flycheck.el")
 
+(files "flycheck.el"
+       ;; Cask automatically builds docs for us :)
+       "doc/flycheck.texi")
+
 (development
  (depends-on "ert")                     ; Unit test library
  (depends-on "ert-runner")              ; Unit test runner
