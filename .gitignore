@@ -4,9 +4,8 @@
 # Packages installed for development
 /.cask/
 
-# Generated package archive
-/flycheck-pkg.el
-/flycheck-*.tar
+# Generated distribution packages
+/dist/
 
 # Vagrant cache
 /.vagrant
