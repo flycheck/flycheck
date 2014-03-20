@@ -12,8 +12,6 @@
 
 # Documentation builds
 /doc/_build/
-/doc/dir
-/doc/flycheck.info
 
 # Directory local variables
 .dir-locals.el

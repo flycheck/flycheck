@@ -13,41 +13,27 @@ export EMACS
 
 SRCS = flycheck.el
 OBJECTS = $(SRCS:.el=.elc)
-PACKAGE_SRCS = $(SRCS) \
-	flycheck-pkg.el \
-	doc/flycheck.info doc/dir
-PACKAGE = flycheck-$(VERSION).tar
 HOOKS = .git/hooks/pre-push
 
-.PHONY: packages \
-	compile package \
-	clean clean-all clean-doc clean-pkgdir \
+.PHONY: compile dist doc html texinfo \
+	clean clean-elc clean-dist clean-doc clean-deps \
 	test vagrant-test \
-	doc html linkcheck info doc/_build/info/flycheck.texi \
-	hooks
+	deps linkcheck hooks
 
+# Build targets
 compile : $(OBJECTS)
 
-package : $(PACKAGE)
+dist :
+	$(CASK) package
 
-$(PACKAGE) : $(PACKAGE_SRCS)
-	rm -rf flycheck-$(VERSION)
-	mkdir -p flycheck-$(VERSION)
-	cp -f $(PACKAGE_SRCS) flycheck-$(VERSION)
-	tar cf $(PACKAGE) flycheck-$(VERSION)
-	rm -rf flycheck-$(VERSION)
+doc : html texinfo
 
-clean-all : clean clean-pkgdir clean-doc
+html :
+	$(SPHINX-BUILD) -b html -n -d doc/_build/doctrees doc doc/_build/html
 
-clean :
-	rm -f $(OBJECTS)
-	rm -rf flycheck-*.tar flycheck-pkg.el
+texinfo : doc/flycheck.texi
 
-packages : $(PKGDIR)
-
-clean-pkgdir :
-	rm -rf $(PKGDIR)
-
+# Test targets
 test : compile
 	$(CASK) exec ert-runner
 
@@ -55,42 +41,50 @@ vagrant-test :
 	$(VAGRANT) up --provision
 	$(VAGRANT) ssh -c "make -C /flycheck EMACS=$(EMACS) clean test"
 
-doc : info html
-
-html :
-	$(SPHINX-BUILD) -b html -n -d doc/_build/doctrees doc doc/_build/html
+# Support targets
+deps : $(PKGDIR)
 
 linkcheck :
 	$(SPHINX-BUILD) -b linkcheck -n -d doc/_build/doctrees doc doc/_build/linkcheck
 
-info : doc/dir
-
 hooks: $(HOOKS)
+
+# Cleanup targets
+clean : clean-elc clean-pkgdir clean-doc
+
+clean-elc :
+	rm -rf $(OBJECTS)
+
+clean-dist :
+	rm -rf dist/
 
 clean-doc:
 	rm -rf doc/_build/
 
-$(HOOKS): .git/hooks/%: scripts/hooks/% .git/hooks
-	ln -sf ../../$< $@
+clean-deps :
+	rm -rf $(PKGDIR)
 
+# File targets
 .git/hooks:
 	install -d $@
-
-%.elc : %.el $(PKGDIR)
-	$(CASK) exec $(EMACS) -Q --batch $(EMACSFLAGS) -f batch-byte-compile $<
 
 $(PKGDIR) : Cask
 	$(CASK) install
 	touch $(PKGDIR)
 
-flycheck-pkg.el : Cask
-	$(CASK) package
-
-doc/dir : doc/flycheck.info
-	$(INSTALL-INFO) doc/flycheck.info doc/dir
-
 doc/flycheck.texi : doc/_build/info/flycheck.texi
 	cp -f $< $@
 
+# Sphinx has its own sophisticated dependency tracking, so we mark this rule as
+# phony to always let Sphinx attempt to rebuild it.  If its up to date that's a
+# noop anyway.
+.PHONY : doc/_build/info/flycheck.texi
 doc/_build/info/flycheck.texi :
 	$(SPHINX-BUILD) -b texinfo -n -d doc/_build/doctrees doc doc/_build/info
+
+# Pattern rules
+$(HOOKS): .git/hooks/%: scripts/hooks/% .git/hooks
+	ln -sf ../../$< $@
+
+%.elc : %.el $(PKGDIR)
+	$(CASK) exec $(EMACS) -Q --batch $(EMACSFLAGS) -f batch-byte-compile $<
