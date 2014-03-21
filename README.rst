@@ -2,25 +2,34 @@
  Flycheck
 ==========
 
+.. default-role:: code
+
 .. image:: https://travis-ci.org/flycheck/flycheck.png?branch=master
    :target: https://travis-ci.org/flycheck/flycheck
 
-.. default-role:: code
+Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24.
+
+It uses various syntax checking and linting tools to check the contents of
+buffers, and reports warnings and errors directly in the buffer, or in an
+optional error list.  The following screenshot shows Flycheck at work in an
+Emacs Lisp buffer, with with the `Solarized Light`_ color theme and the `Source
+Code Pro`_ font:
 
 .. figure:: https://github.com/flycheck/flycheck/raw/master/doc/images/screenshot.png
    :align: center
+   :width: 731
+   :height: 519
+   :scale: 75%
 
-   The screenshot shows Flycheck on Emacs 24.3.50 with the awesome Solarized_
-   Light color theme and the great `Source Code Pro`_ font.
-
-Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24
+It is a replacement for the older Flymake extension, which is part of Emacs,
+with more supported languages, more features, and better extensibility:
 
 - Features_
-- `Flycheck versus Flymake`_
 - `Supported Languages`_
+- `Flycheck versus Flymake`_
 - `3rd party extensions`_
 
-.. _Solarized: https://github.com/bbatsov/solarized-emacs
+.. _Solarized Light: https://github.com/bbatsov/solarized-emacs
 .. _Source Code Pro: https://github.com/adobe/source-code-pro
 .. _Features: http://flycheck.readthedocs.org/en/latest/manual/introduction.html#features
 .. _Flycheck versus Flymake: http://flycheck.readthedocs.org/en/latest/flycheck-versus-flymake.html
