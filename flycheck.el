@@ -686,10 +686,10 @@ This variable is a normal hook."
 (easy-menu-change '("Tools") "--" nil "Spell Checking")
 
 (defun flycheck-teardown ()
-  "Teardown flyheck.
+  "Teardown Flycheck in the current buffer..
 
-Completely clear the whole flycheck state.  Remove overlays, kill
-running checks, and empty all variables used by flycheck."
+Completely clear the whole Flycheck state.  Remove overlays, kill
+running checks, and empty all variables used by Flycheck."
   (flycheck-clean-deferred-check)
   (flycheck-clear)
   (flycheck-stop-checker)
@@ -711,7 +711,6 @@ running checks, and empty all variables used by flycheck."
     ;; Teardown Flycheck whenever the buffer state is about to get lost, to
     ;; clean up temporary files and directories.
     (kill-buffer-hook                 . flycheck-teardown)
-    (kill-emacs-hook                  . flycheck-teardown)
     (change-major-mode-hook           . flycheck-teardown)
     (before-revert-hook               . flycheck-teardown)
     ;; Update the error list if necessary
@@ -772,6 +771,21 @@ buffer manually.
       (remove-hook (car it) (cdr it) t))
 
     (flycheck-teardown))))
+
+(defun flycheck-global-teardown ()
+  "Teardown Flycheck in all buffers.
+
+Completely clear the whole Flycheck state in all buffers, stop
+all running checks, remove all temporary files, and empty all
+variables of Flycheck."
+  (dolist (buffer (buffer-list))
+    (with-current-buffer buffer
+      (when flycheck-mode
+        (flycheck-teardown)))))
+
+;; Clean up the entire state of Flycheck when Emacs is killed, to get rid of any
+;; pending temporary files.
+(add-hook 'kill-emacs-hook #'flycheck-global-teardown)
 
 
 ;;; Version information
