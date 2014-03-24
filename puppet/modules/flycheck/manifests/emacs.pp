@@ -22,14 +22,15 @@ class flycheck::emacs {
     require => [Package['emacs24-nox', 'emacs-snapshot-nox']]
   }
 
-  $cask_archive = 'cask-master'
+  $cask_version = '0.6.0'
+  $cask_archive = "cask-${cask_version}"
 
   archive { $cask_archive:
-    ensure    => present,
-    # Don't verify the checksum, since master changes frequently
-    checksum  => false,
-    url       => 'https://github.com/cask/cask/archive/master.tar.gz',
-    target    => '/opt/',
+    ensure        => present,
+    digest_type   => 'sha1',
+    digest_string => '6f836bb41f034d6be9611ee09c78eb8cc52b53ca',
+    url           => "https://github.com/cask/cask/archive/v${cask_version}.tar.gz",
+    target        => '/opt/',
   }
 
   file { '/usr/local/bin/cask':
@@ -37,5 +38,4 @@ class flycheck::emacs {
     target  => "/opt/${cask_archive}/bin/cask",
     require => Archive[$cask_archive],
   }
-
 }
