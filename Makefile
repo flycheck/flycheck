@@ -39,7 +39,7 @@ test : compile
 
 vagrant-test :
 	$(VAGRANT) up --provision
-	$(VAGRANT) ssh -c "make -C /flycheck EMACS=$(EMACS) clean test"
+	$(VAGRANT) ssh -c "make -C /flycheck EMACS=$(EMACS) clean-elc test"
 
 # Support targets
 deps : $(PKGDIR)
@@ -50,7 +50,7 @@ linkcheck :
 hooks: $(HOOKS)
 
 # Cleanup targets
-clean : clean-elc clean-pkgdir clean-doc
+clean : clean-elc clean-deps clean-doc
 
 clean-elc :
 	rm -rf $(OBJECTS)
