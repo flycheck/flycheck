@@ -1,7 +1,7 @@
 .. default-role:: code
 
-master (in development)
------------------------
+0.18 (Mar 24, 2014)
+-------------------
 
 - **Breaking changes**:
 
