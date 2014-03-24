@@ -21,7 +21,7 @@
 
 @copying
 @quotation
-Flycheck 0.18-cvs, March 20, 2014
+Flycheck 0.18-cvs, March 24, 2014
 
 Sebastian Wiesner
 
@@ -3163,6 +3163,9 @@ Puppet Lint messages now include the name of the corresponding check
 
 @item 
 #353@footnote{https://github.com/flycheck/flycheck/issues/353}: @code{rustc} supports upcoming Rust 0.10 now
+
+@item 
+#367@footnote{https://github.com/flycheck/flycheck/issues/367}: Flycheck now handles Clang errors from included files
 @end itemize
 @end itemize
 

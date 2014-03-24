@@ -3112,6 +3112,14 @@ of the file will be interrupted because there are too many #ifdef configurations
     (flycheck-test-should-syntax-check
      "checkers/c_c++-clang-fatal-error.c" 'c-mode)))
 
+(ert-deftest flycheck-define-checker/c/c++-clang-included-file-error ()
+  :tags '(builtin-checker external-tool language-c++)
+  (skip-unless (flycheck-check-executable 'c/c++-clang))
+  (let ((flycheck-clang-include-path '("./c_c++-include")))
+    (flycheck-test-should-syntax-check
+     "checkers/c_c++-clang-included-file-error.cpp" 'c++-mode
+     '(3 nil error "In file included from" :checker c/c++-clang))))
+
 (ert-deftest flycheck-define-checker/c/c++-clang-includes ()
   :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
@@ -3146,7 +3154,7 @@ of the file will be interrupted because there are too many #ifdef configurations
 (ert-deftest flycheck-define-checker/c/c++-clang-error-definitions ()
   :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
-  (let ((flycheck-clang-definitions '("FLYCHECK_LOCAL" "FLYCHECK_LIBRARY")))
+  (let ((flycheck-clang-definitions '("FLYCHECK_LIBRARY")))
     (flycheck-test-should-syntax-check
      "checkers/c_c++-clang-error.cpp" 'c++-mode
      '(10 16 error "use of undeclared identifier 'nullptr'"

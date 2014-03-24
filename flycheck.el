@@ -3661,7 +3661,10 @@ See URL `http://clang.llvm.org/'."
             ;; with quotes
             source-inplace)
   :error-patterns
-  ((info line-start (file-name) ":" line ":" column
+  ((error line-start
+          (message "In file included from") " " (file-name) ":" line ":"
+          line-end)
+   (info line-start (file-name) ":" line ":" column
             ": note: " (message) line-end)
    (warning line-start (file-name) ":" line ":" column
             ": warning: " (message) line-end)

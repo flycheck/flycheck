@@ -37,6 +37,7 @@ master (in development)
   - #348: Use `--unix_mode` option in `javascript-gjslint` to get the file name
   - Puppet Lint messages now include the name of the corresponding check
   - #353: `rustc` supports upcoming Rust 0.10 now
+  - #367: Flycheck now handles Clang errors from included files
 
 0.17 (Feb 1, 2014)
 ------------------
