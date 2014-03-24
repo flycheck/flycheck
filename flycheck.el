@@ -482,8 +482,8 @@ nil
      `completing-read' has a very simple and primitive UI, and
      does not offer flex matching.  This is the default setting,
      though, to match Emacs' defaults.  With this system, you may
-     want enable `icomplete-mode' to improve the display of
-     completion candidates at least."
+     want enable option `icomplete-mode' to improve the display
+     of completion candidates at least."
   :group 'flycheck
   :type '(choice (const :tag "IDO" ido)
                  (const :tag "Grizzl" grizzl)
@@ -3942,7 +3942,7 @@ For any other non-nil value, always initialize packages."
   :package-version '(flycheck . "0.14"))
 
 (defun flycheck-option-emacs-lisp-package-initialize (value)
-  "Option filter for `flycheck-emacs-lisp-initialize-packages'."
+  "Option VALUE filter for `flycheck-emacs-lisp-initialize-packages'."
   (when (eq value 'auto)
     (setq value (flycheck-in-user-emacs-directory-p (buffer-file-name))))
   ;; Return the function name, if packages shall be initialized, otherwise
@@ -3963,7 +3963,7 @@ This variable has no effect, if
   :package-version '(flycheck . "0.14"))
 
 (defun flycheck-option-emacs-lisp-package-user-dir (value)
-  "Option filter for `flycheck-emacs-lisp-package-user-dir'."
+  "Option VALUE filter for `flycheck-emacs-lisp-package-user-dir'."
   (unless value
     ;; Inherit the package directory from our Emacs session
     (setq value package-user-dir))
