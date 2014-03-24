@@ -15,8 +15,7 @@ before_install:
   - sudo FACTER_travis=true puppet apply --verbose --modulepath=/etc/puppet/modules:./puppet/modules ./puppet/manifests/site.pp
 install:
   # Install our packages
-  - make EMACS=$EMACS packages
+  - make EMACS=$EMACS deps
 script:
-  # Run unit tests.  We don't build documentation, because we'll get failures
-  # from ReadTheDocs anyway
+  # Run unit tests.
   - make EMACS=$EMACS test

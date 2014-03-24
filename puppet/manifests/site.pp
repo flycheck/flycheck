@@ -3,7 +3,7 @@
 include flycheck::base
 include flycheck::emacs
 
-# Do not install Gems on Travis
+# Do not install any checker tools on Travis
 if !$::travis {
   include flycheck::sphinx
 
