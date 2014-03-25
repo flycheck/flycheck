@@ -22,6 +22,7 @@ It is a replacement for the older Flymake extension, which is part of Emacs,
 with more supported languages, more features, and better extensibility:
 
 - :ref:`features`
+- :doc:`Changes in this version <manual/changes>`
 - :doc:`manual/languages`
 - :ref:`3rd-party-extensions`
 - :doc:`flycheck-versus-flymake`

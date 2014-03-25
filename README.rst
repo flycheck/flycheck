@@ -25,6 +25,7 @@ It is a replacement for the older Flymake extension, which is part of Emacs,
 with more supported languages, more features, and better extensibility:
 
 - Features_
+- Changelog_
 - `Supported Languages`_
 - `Flycheck versus Flymake`_
 - `3rd party extensions`_
@@ -32,6 +33,7 @@ with more supported languages, more features, and better extensibility:
 .. _Solarized Light: https://github.com/bbatsov/solarized-emacs
 .. _Source Code Pro: https://github.com/adobe/source-code-pro
 .. _Features: http://flycheck.readthedocs.org/en/latest/manual/introduction.html#features
+.. _Changelog: http://flycheck.readthedocs.org/en/latest/manual/changes.html
 .. _Flycheck versus Flymake: http://flycheck.readthedocs.org/en/latest/flycheck-versus-flymake.html
 .. _Supported Languages: http://flycheck.readthedocs.org/en/latest/manual/languages.html
 .. _3rd party extensions: http://flycheck.readthedocs.org/en/latest/manual/introduction.html#rd-party-extensions
