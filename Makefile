@@ -15,6 +15,11 @@ SRCS = flycheck.el
 OBJECTS = $(SRCS:.el=.elc)
 HOOKS = .git/hooks/pre-push
 
+DISTDIR = dist
+BUILDDIR = build
+DOCBUILDDIR = $(BUILDDIR)/doc
+DOCTREEDIR = $(DOCBUILDDIR)/doctrees
+
 .PHONY: compile dist doc html texinfo \
 	clean clean-elc clean-dist clean-doc clean-deps \
 	test vagrant-test \
@@ -29,7 +34,7 @@ dist :
 doc : html texinfo
 
 html :
-	$(SPHINX-BUILD) -b html -n -d doc/_build/doctrees doc doc/_build/html
+	$(SPHINX-BUILD) -b html -n -d $(DOCTREEDIR) doc $(DOCBUILDDIR)/html
 
 texinfo : doc/flycheck.texi
 
@@ -45,7 +50,7 @@ vagrant-test :
 deps : $(PKGDIR)
 
 linkcheck :
-	$(SPHINX-BUILD) -b linkcheck -n -d doc/_build/doctrees doc doc/_build/linkcheck
+	$(SPHINX-BUILD) -b linkcheck -n -d $(DOCTREEDIR) doc $(DOCBUILDDIR)/linkcheck
 
 hooks: $(HOOKS)
 
@@ -56,10 +61,10 @@ clean-elc :
 	rm -rf $(OBJECTS)
 
 clean-dist :
-	rm -rf dist/
+	rm -rf $(DISTDIR)
 
 clean-doc:
-	rm -rf doc/_build/
+	rm -rf $(DOCBUILDDIR)
 
 clean-deps :
 	rm -rf $(PKGDIR)
@@ -72,15 +77,15 @@ $(PKGDIR) : Cask
 	$(CASK) install
 	touch $(PKGDIR)
 
-doc/flycheck.texi : doc/_build/info/flycheck.texi
+doc/flycheck.texi : $(DOCBUILDDIR)/info/flycheck.texi
 	cp -f $< $@
 
 # Sphinx has its own sophisticated dependency tracking, so we mark this rule as
 # phony to always let Sphinx attempt to rebuild it.  If its up to date that's a
 # noop anyway.
-.PHONY : doc/_build/info/flycheck.texi
-doc/_build/info/flycheck.texi :
-	$(SPHINX-BUILD) -b texinfo -n -d doc/_build/doctrees doc doc/_build/info
+.PHONY : $(DOCBUILDDIR)/info/flycheck.texi
+$(DOCBUILDDIR)/info/flycheck.texi :
+	$(SPHINX-BUILD) -b texinfo -n -d $(DOCTREEDIR) doc $(DOCBUILDDIR)/info
 
 # Pattern rules
 $(HOOKS): .git/hooks/%: scripts/hooks/% .git/hooks

@@ -4,14 +4,14 @@
 # Packages installed for development
 /.cask/
 
+# Build files
+/build/
+
 # Generated distribution packages
 /dist/
 
 # Vagrant cache
 /.vagrant
-
-# Documentation builds
-/doc/_build/
 
 # Directory local variables
 .dir-locals.el
