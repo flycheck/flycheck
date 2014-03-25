@@ -40,7 +40,7 @@ Support for Perl and for shell scripts was greatly improved by introducing two
 new syntax checkers:
 
 - :flyc:checker:`perl-perlcritic` checks Perl with the powerful `Perl-Critic`_
-  Golint.
+  tool.
 - :flyc:checker:`sh-shellcheck` checks Shell scripts with the awesome
   `Shellcheck`_ tool, which finds all sorts of idiomatic and semantics mistakes
   in shell scripts of various shell languages, and will greatly improve your
