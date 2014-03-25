@@ -215,7 +215,7 @@ LESS
 
 .. syntax-checker:: less
 
-   .. seealso:: http://www.lesscss.org/
+   .. seealso:: http://lesscss.org/
 
 Lua
 ===
