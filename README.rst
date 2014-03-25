@@ -39,9 +39,10 @@ with more supported languages, more features, and better extensibility:
 Installation
 ============
 
-Flycheck needs Emacs 24, and works best on Unix systems (i.e. Linux or OS X).
+Flycheck needs GNU Emacs 24, and works best on Unix systems (i.e. Linux or OS
+X).  Windows or other flavors of Emacs are **not** supported.
 
-**Note:** For almost all supported languages, Flycheck also needs additional
+For almost all supported languages, Flycheck also needs additional
 **external** programs.  See `Supported Languages`_ for a list of supported
 languages and the corresponding checker programs, and use `C-c ! ?` to get help
 about specific checkers inside Emacs.
@@ -65,6 +66,68 @@ See Installation_ for detailed installation instructions.
 .. _Cask: https://github.com/cask/cask
 .. _Supported Languages: http://flycheck.readthedocs.org/en/latest/manual/languages.html
 .. _Installation: http://flycheck.readthedocs.org/en/latest/manual/installation.html
+
+Quick start
+===========
+
+Once installed, enable Flycheck globally with the following line in your
+`init.el`:
+
+.. code-block:: cl
+
+   (add-hook 'after-init-hook #'global-flycheck-mode)
+
+Enable Flycheck globally by adding the following to your `init.el`, and
+restart Emacs:
+
+.. code-block:: cl
+
+   (add-hook 'after-init-hook #'global-flycheck-mode)
+
+Install some syntax checking tools for the programming or markup language you
+are using.  For Python:
+
+.. code-block:: console
+
+   $ pip install --user pylint
+
+Or for Ruby:
+
+.. code-block:: console
+
+   $ gem install rubocop ruby-lint
+
+Or for Haskell:
+
+.. code-block:: console
+
+   $ brew install haskell-platform
+   $ cabal install hlint
+
+Now browse the `syntax checker options`_ to configure your syntax checkers.
+Typically you don't need to change any options, though.  Flycheck will mostly
+work automatically.
+
+Flycheck will now check syntax using these tools, when you visit a buffer in any
+of these languages.  Syntax checking happens automatically when you save the
+buffer or make any changes.  Flycheck highlights errors and warnings in the
+buffer, indicates them in the fringe, and reports their numbers in the mode
+line.
+
+Use `C-c ! n` and `C-c ! p` to navigate between error locations.  If you keep
+the point at an error location, Flycheck will show the error message in the echo
+area after a short delay.  You can also hover error locations with the mouse and
+see the error message in a tooltip.
+
+To get an overview of all errors and warnings in the current buffer, type `C-c !
+l` to pop up a list of all errors in your current buffer.  The error list
+updates automatically when you fix errors or introduce new ones, or when you
+switch to another buffer.
+
+For more details, read the `Usage`_ instructions in the manual.
+
+.. _Syntax checker options: http://flycheck.readthedocs.org/en/latest/manual/usage.html#syntax-checker-configuration
+.. _Usage: http://flycheck.readthedocs.org/en/latest/manual/usage.html
 
 Support
 =======
