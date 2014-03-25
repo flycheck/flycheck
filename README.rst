@@ -64,7 +64,7 @@ See Installation_ for detailed installation instructions.
 .. _Marmalade: http://marmalade-repo.org/packages/flycheck
 .. _Cask: https://github.com/cask/cask
 .. _Supported Languages: http://flycheck.readthedocs.org/en/latest/manual/languages.html
-.. _Installation: http://flycheck.readthedocs.org/en/latest/manual/introduction.html#installation
+.. _Installation: http://flycheck.readthedocs.org/en/latest/manual/installation.html
 
 Support
 =======

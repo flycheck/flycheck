@@ -19,6 +19,7 @@ This manual is for Flycheck, the on-the-fly syntax checker for GNU Emacs.
    :maxdepth: 2
 
    introduction
+   installation
    usage
    extending
    api
