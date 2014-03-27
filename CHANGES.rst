@@ -3,6 +3,11 @@
 master (in development)
 -----------------------
 
+- Bug fixes:
+
+  - #334: When stopping Flycheck, correctly kill running processes and cleanup
+    their temporary files
+
 0.18 (Mar 24, 2014)
 -------------------
 

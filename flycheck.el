@@ -3438,12 +3438,20 @@ _EVENT is ignored."
         (with-current-buffer buffer
           (setq flycheck-current-process nil)
           (flycheck-report-status "")
-          (when flycheck-mode
-            (condition-case err
-                (flycheck-finish-syntax-check checker exit-status files output)
+          (condition-case err
+              (pcase (process-status process)
+                (`signal
+                 ;; The process was killed, so let's just delete all overlays,
+                 ;; and report a bad state
+                 (flycheck-delete-marked-overlays)
+                 (flycheck-report-status "-"))
+                (`exit
+                 (when flycheck-mode
+                   (flycheck-finish-syntax-check checker exit-status
+                                                 files output))))
               (error
                (flycheck-report-error)
-               (signal (car err) (cdr err))))))))))
+               (signal (car err) (cdr err)))))))))
 
 (defun flycheck-start-checker (checker)
   "Start a syntax CHECKER."
@@ -3489,7 +3497,9 @@ _EVENT is ignored."
 (defun flycheck-stop-checker ()
   "Stop any syntax checker for the current buffer."
   (when (flycheck-running-p)
-    (interrupt-process flycheck-current-process)))
+    ;; Killing the current process will force the sentinel, which does the
+    ;; cleanup
+    (kill-process flycheck-current-process)))
 
 
 ;;;; Syntax checker executable
