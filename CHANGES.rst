@@ -7,6 +7,7 @@ master (in development)
 
   - #334: When stopping Flycheck, correctly kill running processes and cleanup
     their temporary files
+  - Do not choke on files without extensions in `haskell-ghc`
 
 0.18 (Mar 24, 2014)
 -------------------

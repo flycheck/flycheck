@@ -4262,7 +4262,10 @@ See URL `http://www.haskell.org/ghc/'."
                          flycheck-ghc-no-user-package-database)
             (option-list "-package-db" flycheck-ghc-package-databases)
             (option-list "-i" flycheck-ghc-search-path s-prepend)
-            source)
+            ;; Force GHC to treat the file as Haskell file, even if it doesn't
+            ;; have an extension.  Otherwise GHC would fail on files without an
+            ;; extension
+            "-x" "hs" source)
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ":"
             (or " " "\n    ") "Warning:" (optional "\n")
