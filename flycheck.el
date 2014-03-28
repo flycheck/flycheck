@@ -37,10 +37,11 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'jka-compr)      ; For JKA workarounds in `flycheck-temp-file-system'
+  (require 'cl-lib)         ; `cl-defstruct'
   (require 'compile)        ; Compile Mode integration
-  (require 'sh-script)      ; `sh-shell' for sh checker predicates
   (require 'package)        ; Tell Emacs about package-user-dir
+  (require 'sh-script)      ; `sh-shell' for sh checker predicates
+  (require 'jka-compr)      ; For JKA workarounds in `flycheck-temp-file-system'
 )
 
 (require 's)
@@ -49,7 +50,6 @@
 
 (require 'tabulated-list)        ; To list errors
 (require 'rx)                    ; Regexp fanciness in `flycheck-define-checker'
-(require 'cl-lib)                ; `cl-defstruct'
 (require 'help-mode)             ; `define-button-type'
 (require 'find-func)             ; `find-function-regexp-alist'
 
