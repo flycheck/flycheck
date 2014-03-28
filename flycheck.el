@@ -1302,21 +1302,19 @@ FILE-NAME is nil, return `default-directory'."
 Return the checker as symbol, or nil if no checker was
 chosen."
   (let* ((candidates (-map #'symbol-name (flycheck-defined-checkers)))
-         (input (cl-case flycheck-completion-system
-                  (ido
-                   (ido-completing-read prompt candidates nil 'require-match
-                                        nil 'read-flycheck-checker-history))
-                  (grizzl
-                   (if (and (fboundp 'grizzl-make-index)
-                            (fboundp 'grizzl-completing-read))
-                       (->> candidates
-                         grizzl-make-index
-                         (grizzl-completing-read prompt))
-                     (user-error "Please install Grizzl from \
+         (input (pcase flycheck-completion-system
+                  (`ido (ido-completing-read prompt candidates nil
+                                             'require-match nil
+                                             'read-flycheck-checker-history))
+                  (`grizzl (if (and (fboundp 'grizzl-make-index)
+                                    (fboundp 'grizzl-completing-read))
+                               (->> candidates
+                                 grizzl-make-index
+                                 (grizzl-completing-read prompt))
+                             (user-error "Please install Grizzl from \
 https://github.com/d11wtq/grizzl.")))
-                  (otherwise
-                   (completing-read prompt candidates nil 'require-match
-                                    nil 'read-flycheck-checker-history)))))
+                  (_ (completing-read prompt candidates nil 'require-match
+                                      nil 'read-flycheck-checker-history)))))
     (if (string= input "")
         (user-error "No syntax checker entered")
       (intern input))))
@@ -3664,9 +3662,9 @@ See URL `http://clang.llvm.org/'."
             (option-list "-D" flycheck-clang-definitions s-prepend)
             (option-list "-I" flycheck-clang-include-path)
             "-x" (eval
-                  (cl-case major-mode
-                    (c++-mode "c++")
-                    (c-mode "c")))
+                  (pcase major-mode
+                    (`c++-mode "c++")
+                    (`c-mode "c")))
             ;; We must stay in the same directory, to properly resolve #include
             ;; with quotes
             source-inplace)
