@@ -4,8 +4,13 @@
 
 .. default-role:: code
 
-.. image:: https://travis-ci.org/flycheck/flycheck.svg?branch=master
-   :target: https://travis-ci.org/flycheck/flycheck
+.. |travis| image:: https://travis-ci.org/flycheck/flycheck.svg?branch=master
+            :target: https://travis-ci.org/flycheck/flycheck
+
+.. |license| image:: https://img.shields.io/badge/license-GPL_3-green.svg?dummy
+             :target: https://github.com/flycheck/flycheck/blob/master/COPYING
+
+|license| |travis|
 
 Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24.
 
