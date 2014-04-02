@@ -6,7 +6,7 @@
 ;; URL: https://flycheck.readthedocs.org
 ;; Keywords: convenience languages tools
 ;; Version: 0.19-cvs
-;; Package-Requires: ((f "0.11.0") (pkg-info "0.4") (cl-lib "0.3") (emacs "24.1"))
+;; Package-Requires: ((f "0.11.0") (dash "2.4.0") (s "1.9.0") (pkg-info "0.4") (cl-lib "0.3") (emacs "24.1"))
 
 ;; This file is not part of GNU Emacs.
 
