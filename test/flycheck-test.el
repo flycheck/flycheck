@@ -3761,6 +3761,16 @@ Why not:
      "checkers/make.mk" 'makefile-bsdmake-mode
      '(2 nil error "Need an operator" :checker make))))
 
+(ert-deftest flycheck-define-checker/ocaml-ocamlc ()
+  :tags '(builtin-checker external-tool language-ocamlc)
+  (skip-unless (-all? #'flycheck-check-executable '(ocamlc)))
+  (flycheck-test-should-syntax-check
+   "checkers/ocamlOCamlc.ml" '(tuareg-mode)
+   '(7 4 warning "Warning 8: this pattern-matching is not exhaustive.\nHere is an example of a value that is not matched:\n2\n"
+       :checker ocaml-ocamlc)
+   '(11 0 error "Error: Unbound value undefined\n"
+       :checker ocaml-ocamlc)))
+
 (ert-deftest flycheck-define-checker/perl ()
   :tags '(builtin-checker external-tool language-perl)
   (skip-unless (-all? #'flycheck-check-executable '(perl perl-perlcritic)))
