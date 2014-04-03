@@ -495,29 +495,6 @@ Errors and warnings from a syntax checker are
 .. option:: flycheck-highlighting-mode
    :auto:
 
-   This variable determines how to highlight errors:
-
-   `columns`
-       Highlights the error column.  If the error does not have a column,
-       highlight the whole line.
-
-   `symbols`
-       Highlights the symbol at the error column, if there is any, otherwise
-       behave like @code{columns}.  This is the default.
-
-   `sexps`
-       Highlights the expression at the error column, if there is any, otherwise
-       behave like `columns`.  Note that this mode can be **very** slow in some
-       major modes.
-
-   `lines`
-       Highlights the whole line of the error.
-
-   `nil`
-      Do not highlight errors at all.  However, errors will still be reported
-      in the mode line and in error message popups, and indicated according to
-      :option:`flycheck-indication-mode`.
-
 .. face:: flycheck-fringe-error
           flycheck-fringe-warning
           flycheck-fringe-info
