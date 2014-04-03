@@ -2,6 +2,8 @@
  Supported languages
 =====================
 
+.. require:: flycheck
+
 Flycheck supports the following |#flycheck-languages| languages with
 |#flycheck-checkers| syntax checkers.
 
