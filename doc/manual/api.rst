@@ -10,11 +10,6 @@ You may use this API to extend Flycheck, e.g. by implementing new error parsers
 or more in-depth error analysis.  You will also find this API helpful if you
 want to develop Flycheck itself.
 
-The documentation provided in this chapter is intended as brief overview.  For a
-definite reference on functions and variables, please consult the excellent
-online help system of Emcas, via `describe-function` and `describe-variable`
-respectively.
-
 .. _error-api:
 
 Error API
@@ -131,6 +126,17 @@ syntax check.
 .. function:: flycheck-has-errors-p
    :auto:
 
+.. _builtin-error-parsers:
+
+Builtin error parsers
+=====================
+
+.. function:: flycheck-parse-with-patterns
+   :auto:
+
+.. function:: flycheck-parse-checkstyle
+   :auto:
+
 .. _error-parser-api:
 
 Error parser API
@@ -139,4 +145,35 @@ Error parser API
 These functions can be used to implement custom error parsers:
 
 .. function:: flycheck-parse-xml-string
+   :auto:
+
+.. _syntax-checker-api:
+
+Syntax checker API
+==================
+
+.. function:: flycheck-substitute-argument
+   :auto:
+
+.. function:: flycheck-locate-config-file
+   :auto:
+
+.. function:: flycheck-define-error-level
+   :auto:
+
+.. _builtin-option-filters:
+
+Builtin option filters
+======================
+
+.. function:: flycheck-option-int
+   :auto:
+
+.. function:: flycheck-option-comma-separated-list
+   :auto:
+
+Utilities
+=========
+
+.. function:: flycheck-rx-to-string
    :auto:
