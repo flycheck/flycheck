@@ -55,7 +55,7 @@ linkcheck :
 hooks: $(HOOKS)
 
 # Cleanup targets
-clean : clean-elc clean-deps clean-doc
+clean : clean-elc clean-dist clean-deps clean-doc
 
 clean-elc :
 	rm -rf $(OBJECTS)
