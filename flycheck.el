@@ -366,7 +366,7 @@ buffers.  The following modes are known:
 
 `sexps'
      Highlight the expression at the error column, if there is
-     any, otherwise behave like `columns`.  Note that this mode
+     any, otherwise behave like `columns'.  Note that this mode
      can be *very* slow in some major modes.
 
 `lines'
