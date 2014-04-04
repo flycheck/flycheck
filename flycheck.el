@@ -57,7 +57,7 @@
 (declare-function pkg-info-version-info "pkg-info" (package))
 
 
-;;;; Compatibility
+;;; Compatibility
 (eval-and-compile
   ;; Provide `defvar-local' and `setq-local' for Emacs 24.2 and below
   (unless (fboundp 'defvar-local)
@@ -99,7 +99,7 @@ buffer-local wherever it is set."
 
 
 
-;;;; Customization
+;;; Customization
 (defgroup flycheck nil
   "On-the-fly syntax checking (aka \"flymake done right\")."
   :prefix "flycheck-"
@@ -638,7 +638,7 @@ This variable is a normal hook."
   :group 'flycheck-faces)
 
 
-;;;; Minor mode definition
+;;; Minor mode definition
 ;;;###autoload
 (defconst flycheck-mode-line-lighter " FlyC"
   "The standard lighter for flycheck mode.")
@@ -896,7 +896,7 @@ _NAME is ignored."
       (user-error "No suitable checker available"))))
 
 
-;;;; Deferred syntax checking
+;;; Deferred syntax checking
 (defvar-local flycheck-deferred-syntax-check nil
   "If non-nil, a deferred syntax check is pending.")
 
@@ -938,7 +938,7 @@ Return t if so, or nil otherwise."
     (flycheck-buffer-automatically)))
 
 
-;;;; Automatic syntax checking
+;;; Automatic syntax checking
 (defun flycheck-may-check-automatically (&optional condition)
   "Determine whether the buffer may be checked under CONDITION.
 
@@ -1002,7 +1002,7 @@ buffer."
   (flycheck-buffer-automatically 'save))
 
 
-;;;; Mode line reporting
+;;; Mode line reporting
 (defun flycheck-report-status (status)
   "Report Flycheck STATUS."
   (setq flycheck-mode-line (concat flycheck-mode-line-lighter status))
@@ -1029,7 +1029,7 @@ Report a proper flycheck status."
     (flycheck-report-status "")))
 
 
-;;;; Utility functions
+;;; Utility functions
 (defun flycheck-sexp-to-string (sexp)
   "Convert SEXP to a string.
 
@@ -1292,7 +1292,7 @@ FILE-NAME is nil, return `default-directory'."
       (if file-name (f-parent file-name) default-directory))))
 
 
-;;;; Minibuffer tools
+;;; Minibuffer tools
 (defvar read-flycheck-checker-history nil
   "`completing-read' history of `read-flycheck-checker'.")
 
@@ -1320,7 +1320,7 @@ https://github.com/d11wtq/grizzl.")))
       (intern input))))
 
 
-;;;; Checker definitions
+;;; Checker definitions
 (eval-and-compile
   (defun flycheck-command-argument-p (arg)
     "Check whether ARG is a valid command argument."
@@ -1584,7 +1584,7 @@ This variable is an option for the syntax checker `%s'." docstring checker)
      (make-variable-buffer-local ',symbol)))
 
 
-;;;; Checker extensions
+;;; Checker extensions
 (defun flycheck-add-next-checker (checker next-checker &optional append)
   "Add a NEXT-CHECKER after CHECKER.
 
@@ -1612,7 +1612,7 @@ CHECKER, unless APPEND is non-nil."
            (cons next-checker next-checkers)))))
 
 
-;;;; Checker API
+;;; Checker API
 (defun flycheck-valid-checker-p (checker)
   "Check whether a CHECKER is valid.
 
@@ -1994,7 +1994,7 @@ otherwise."
          (flycheck-may-use-checker next-checker))))
 
 
-;;;; Configuration file functions
+;;; Configuration file functions
 (defun flycheck-locate-config-file-absolute-path (filepath _checker)
   "Locate a configuration file by a FILEPATH.
 
@@ -2054,7 +2054,7 @@ directory, or nil otherwise."
   (custom-add-frequent-value 'flycheck-locate-config-file-functions it))
 
 
-;;;; Generic option filters
+;;; Generic option filters
 (defun flycheck-option-int (value)
   "Convert an integral option VALUE to a string.
 
@@ -2083,7 +2083,7 @@ Otherwise, apply FILTER to VALUE and return the result.  FILTER is ignored."
       (funcall filter value))))
 
 
-;;;; Checker selection
+;;; Checker selection
 (defvar-local flycheck-last-checker nil
   "The last checker used for the current buffer.")
 
@@ -2161,7 +2161,7 @@ CHECKER will be used, even if it is not contained in
       (flycheck-buffer))))
 
 
-;;;; Documentation
+;;; Documentation
 ;;;###autoload
 (defun flycheck-info ()
   "Open the Flycheck manual."
@@ -2265,7 +2265,7 @@ Pop up a help buffer with the documentation of CHECKER."
                        (flycheck-checker-documentation checker)))))))
 
 
-;;;; Checker error API
+;;; Checker error API
 (cl-defstruct (flycheck-error
                (:constructor flycheck-error-new)
                (:constructor flycheck-error-new-at (line column
@@ -2435,7 +2435,7 @@ _not_ include the file name."
       (s-lex-format "${line}:${level}: ${message} (${checker})"))))
 
 
-;;;; Error levels
+;;; Error levels
 
 ;;;###autoload
 (defun flycheck-define-error-level (level &rest properties)
@@ -2513,7 +2513,7 @@ show the icon."
                     (flycheck-error-level-fringe-face level))))
 
 
-;;;; Built-in error levels
+;;; Built-in error levels
 (put 'flycheck-error-overlay 'face 'flycheck-error)
 (put 'flycheck-error-overlay 'priority 110)
 (put 'flycheck-error-overlay 'help-echo "Unknown error.")
@@ -2548,7 +2548,7 @@ show the icon."
   :error-list-face 'flycheck-error-list-info)
 
 
-;;;; General error parsing
+;;; General error parsing
 (defun flycheck-parse-output (output checker buffer)
   "Parse OUTPUT from CHECKER in BUFFER.
 
@@ -2599,7 +2599,7 @@ See `flycheck-fix-error-filename' for details."
   err)
 
 
-;;;; Error parsing with regular expressions
+;;; Error parsing with regular expressions
 (defun flycheck-match-string-non-empty (group match &optional trim-first)
   "Get a non-empty string from a GROUP in MATCH.
 
@@ -2697,7 +2697,7 @@ objects)."
       (flycheck-parse-errors-with-patterns patterns))))
 
 
-;;;; Error parsers
+;;; Error parsers
 (defun flycheck-parse-xml-region (beg end)
   "Parse the xml region between BEG and END.
 
@@ -2813,7 +2813,7 @@ about Cppcheck."
         (-mapcat #'flycheck-parse-cppcheck-error-node)))))
 
 
-;;;; Error analysis
+;;; Error analysis
 (defvar-local flycheck-current-errors nil
   "A list of all errors and warnings in the current buffer.")
 
@@ -2884,7 +2884,7 @@ If LEVEL is omitted if the current buffer has any errors at all."
   (flycheck-has-errors-p flycheck-current-errors level))
 
 
-;;;; Error overlay management
+;;; Error overlay management
 (defun flycheck-add-overlay (err)
   "Add overlay for ERR.
 
@@ -2957,7 +2957,7 @@ Return the created overlay."
   (setq flycheck-overlays-to-delete nil))
 
 
-;;;; Error navigation
+;;; Error navigation
 (defun flycheck-next-error-function (n reset)
   "Visit the N-th error from the current point.
 
@@ -3011,7 +3011,7 @@ the beginning of the buffer."
   (flycheck-next-error n 'reset))
 
 
-;;;; Error list
+;;; Error list
 (defconst flycheck-error-list-buffer "*Flycheck errors*"
   "The name of the buffer to show error lists.")
 
@@ -3234,7 +3234,7 @@ no next error."
 (defalias 'list-flycheck-errors 'flycheck-list-errors)
 
 
-;;;; General error display
+;;; General error display
 (defun flycheck-display-errors (errors)
   "Display ERRORS using `flycheck-display-errors-function'."
   (when flycheck-display-errors-function
@@ -3264,7 +3264,7 @@ no next error."
           (run-at-time flycheck-display-errors-delay nil 'flycheck-display-error-at-point))))
 
 
-;;;; Error display functions
+;;; Error display functions
 (defconst flycheck-error-message-buffer "*Flycheck error messages*"
   "The name of the buffer to show long error messages in.")
 
@@ -3307,7 +3307,7 @@ Hide the error buffer if there is no error under point."
       (quit-window nil window))))
 
 
-;;;; Working with error messages
+;;; Working with error messages
 (defun flycheck-copy-messages-as-kill (pos)
   "Copy each error message under POS into kill ring.
 
@@ -3346,7 +3346,7 @@ This function requires the Google This library from URL
 https://github.com/Bruce-Connor/emacs-google-this")))
 
 
-;;;; Checker process management
+;;; Checker process management
 (defvar-local flycheck-current-process nil
   "The current syntax checking process.")
 (put 'flycheck-current-process 'permanent-local t)
@@ -3500,7 +3500,7 @@ _EVENT is ignored."
     (kill-process flycheck-current-process)))
 
 
-;;;; Syntax checker executable
+;;; Syntax checker executable
 (defun flycheck-set-checker-executable (checker &optional executable)
   "Set the EXECUTABLE of CHECKER.
 
@@ -3539,7 +3539,7 @@ variable symbol for a syntax checker."
      "Set the executable variable directly instead")
 
 
-;;;; Built-in checkers
+;;; Built-in checkers
 (flycheck-define-checker asciidoc
   "A AsciiDoc syntax checker using the AsciiDoc compiler.
 
