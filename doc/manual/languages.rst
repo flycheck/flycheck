@@ -31,8 +31,39 @@ C/C++
 .. flyc-checker:: c/c++-clang
    :auto:
 
+   .. rubric:: Options
+
+   .. option:: flycheck-clang-definitions
+      :auto:
+
+   .. option:: flycheck-clang-include-path
+      :auto:
+
+   .. option:: flycheck-clang-includes
+      :auto:
+
+   .. option:: flycheck-clang-language-standard
+      :auto:
+
+   .. option:: flycheck-clang-ms-extensions
+      :auto:
+
+   .. option:: flycheck-clang-no-rtti
+      :auto:
+
+   .. option:: flycheck-clang-standard-library
+      :auto:
+
+   .. option:: flycheck-clang-warnings
+      :auto:
+
 .. flyc-checker:: c/c++-cppcheck
    :auto:
+
+   .. rubric:: Options
+
+   .. option:: flycheck-cppcheck-checks
+      :auto:
 
 CFEngine
 ========
@@ -69,6 +100,11 @@ D
 .. flyc-checker:: d-dmd
    :auto:
 
+   .. rubric:: Options
+
+   .. option:: flycheck-dmd-include-path
+      :auto:
+
 Elixir
 ======
 
@@ -88,6 +124,17 @@ Emacs Lisp
 
 .. flyc-checker:: emacs-lisp
    :auto:
+
+   .. rubric:: Options
+
+   .. option:: flycheck-emacs-lisp-initialize-packages
+      :auto:
+
+   .. option:: flycheck-emacs-lisp-load-path
+      :auto:
+
+   .. option:: flycheck-emacs-lisp-package-user-dir
+      :auto:
 
 .. flyc-checker:: emacs-lisp-checkdoc
    :auto:
@@ -121,6 +168,11 @@ Go
 .. flyc-checker:: go-vet
    :auto:
 
+   .. rubric:: Options
+
+   .. option:: flycheck-go-vet-print-functions
+      :auto:
+
 .. flyc-checker:: go-build
    :auto:
 .. flyc-checker:: go-test
@@ -144,6 +196,17 @@ Haskell
 .. flyc-checker:: haskell-ghc
    :auto:
 
+   .. rubric:: Options
+
+   .. option:: flycheck-ghc-no-user-package-database
+      :auto:
+
+   .. option:: flycheck-ghc-package-databases
+      :auto:
+
+   .. option:: flycheck-ghc-search-path
+      :auto:
+
 .. flyc-checker:: haskell-hlint
    :auto:
 
@@ -161,6 +224,11 @@ Javascript
 
 .. flyc-checker:: javascript-eslint
    :auto:
+
+   .. rubric:: Options
+
+   .. option:: flycheck-eslint-rulesdir
+      :auto:
 
 .. flyc-checker:: javascript-gjslint
    :auto:
@@ -212,6 +280,11 @@ Perl
 .. flyc-checker:: perl-perlcritic
    :auto:
 
+   .. rubric:: Options
+
+   .. option:: flycheck-perlcritic-verbosity
+      :auto:
+
 PHP
 ===
 
@@ -221,8 +294,18 @@ PHP
 .. flyc-checker:: php-phpmd
    :auto:
 
+   .. rubric:: Options
+
+   .. option:: flycheck-phpmd-rulesets
+      :auto:
+
 .. flyc-checker:: php-phpcs
    :auto:
+
+   .. rubric:: Options
+
+   .. option:: flycheck-phpcs-standard
+      :auto:
 
 Puppet
 ======
@@ -238,6 +321,14 @@ Python
 
 .. flyc-checker:: python-flake8
    :auto:
+
+   .. rubric:: Options
+
+   .. option:: flycheck-flake8-maximum-complexity
+      :auto:
+
+   .. option:: flycheck-flake8-maximum-line-length
+      :auto:
 
 .. flyc-checker:: python-pylint
    :auto:
@@ -257,11 +348,21 @@ ReStructuredText
 .. flyc-checker:: rst-sphinx
    :auto:
 
+   .. rubric:: Options
+
+   .. option:: flycheck-sphinx-warn-on-missing-references
+      :auto:
+
 Ruby
 ====
 
 .. flyc-checker:: ruby-rubocop
    :auto:
+
+   .. rubric:: Options
+
+   .. option:: flycheck-rubocop-lint-only
+      :auto:
 
 .. flyc-checker:: ruby-rubylint
    :auto:
@@ -278,11 +379,21 @@ Rust
 .. flyc-checker:: rust
    :auto:
 
+   .. rubric:: Options
+
+   .. option:: flycheck-rust-library-path
+      :auto:
+
 Sass
 ====
 
 .. flyc-checker:: sass
    :auto:
+
+   .. rubric:: Options
+
+   .. option:: flycheck-sass-compass
+      :auto:
 
 Scala
 =====
@@ -295,6 +406,11 @@ Scss
 
 .. flyc-checker:: scss
    :auto:
+
+   .. rubric:: Options
+
+   .. option:: flycheck-scss-compass
+      :auto:
 
 Shell script languages
 ======================

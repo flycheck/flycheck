@@ -37,8 +37,28 @@ def flycheck_define_checker(interpreter, context, _function, name, docstring,
     symbol.properties['flycheck-documentation'] = docstring
 
 
+def flycheck_def_option_var(interpreter, context, function,
+                            name, initial_value, checker, docstring, *rest):
+    # Let the standard variable command do the heavy lifting
+    interpreter.defvar(
+        context, 'defcustom', name, initial_value, docstring, *rest)
+    symbol = interpreter.env.intern(name)
+    checker = interpreter.env.intern(checker)
+    checker.properties.setdefault('flycheck-options', set()).add(symbol.name)
+    # Our variables are always buffer-local
+    symbol.properties['buffer-local'] = True
+    # Add the checker to the documentation
+    doc = symbol.properties['variable-documentation']
+    symbol.properties['variable-documentation'] = """{0}
+
+This variable is an option for the syntax checker `{1}'""".format(
+    doc, checker.name)
+
+
 register_interpreter_function('flycheck-define-checker',
                               flycheck_define_checker)
+register_interpreter_function('flycheck-def-option-var',
+                              flycheck_def_option_var)
 
 
 # Register our object type

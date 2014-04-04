@@ -229,142 +229,16 @@ them interactively:
 Syntax checker options
 ----------------------
 
-Some syntax checkers can be configured via options.  The following options are
-provided by Flycheck (in Emacs, use :kbd:`C-h v` or :kbd:`M-x describe-variable`
-on the variable name for detailed help):
+Some syntax checkers can be configured via options.  See :doc:`languages` for a
+complete list of options for each syntax checkers.
 
-.. FIXME: Move these into the languages document, under each specific syntax
-   checker.
+All options are customizable via :kbd:`M-x customize-group RET
+flycheck-options`, and automatically buffer-local to easily set them in hooks.
 
-.. option:: flycheck-clang-definitions
-
-   Additional preprocessor definitions for :flyc-checker:`c/c++-clang`.
-
-.. option:: flycheck-clang-include-path
-
-   Include search path for :flyc-checker:`c/c++-clang`.
-
-.. option:: flycheck-clang-includes
-
-   Additional include files for :flyc-checker:`c/c++-clang`.
-
-.. option:: flycheck-clang-language-standard
-
-   The language standard for :flyc-checker:`c/c++-clang`.
-
-.. option:: flycheck-clang-ms-extensions
-
-   Whether to enable Microsoft extensions in :flyc-checker:`c/c++-clang`.
-
-.. option:: flycheck-clang-no-rtti
-
-   Whether to disable RTTI in :flyc-checker:`c/c++-clang`.
-
-.. option:: flycheck-clang-standard-library
-
-   The standard library to use for :flyc-checker:`c/c++-clang`.
-
-.. option:: flycheck-clang-warnings
-
-   Additional warnings to enable in :flyc-checker:`c/c++-clang`.
-
-.. option:: flycheck-cppcheck-checks
-
-   Additional checks to use in :flyc-checker:`c/c++-cppcheck`.
-
-.. option:: flycheck-dmd-include-path
-
-   Include search path for :flyc-checker:`d-dmd`.
-
-.. option:: flycheck-emacs-lisp-initialize-packages
-
-   Whether to initialize packages (see `package-initialize`) before invoking the
-   byte compiler in the :flyc-checker:`emacs-lisp` syntax checker.
-
-   When `nil`, never initialize packages.  When `auto`,
-   initialize packages only when checking files from the user's Emacs
-   configuration in `user-emacs-directory`.  For any other non-nil
-   value, always initialize packages.
-
-.. option:: flycheck-emacs-lisp-load-path
-
-   The `load-path` to use while checking with :flyc-checker:`emacs-lisp`.
-
-   The directory of the file being checked is always added to
-   `load-path`, regardless of the value of this variable.
-
-   Note that changing this variable can lead to wrong results of the
-   syntax check, e.g. if an unexpected version of a required library
-   is used.
-
-.. option:: flycheck-emacs-lisp-package-user-dir
-
-   The package directory for the :flyc-checker:`emacs-lisp` syntax checker.
-
-.. option:: flycheck-eslint-rulesdir
-
-   A directory with custom rules for the :flyc-checker:`javascript-eslint`
-   syntax checker.
-
-.. option:: flycheck-flake8-maximum-complexity
-
-   The maximum McCabe complexity the :flyc-checker:`python-flake8` syntax
-   checker allows without reporting a warning.
-
-.. option:: flycheck-flake8-maximum-line-length
-
-   The maximum length of a line in characters the :flyc-checker:`python-flake8`
-   syntax checker allows without reporting an error.
-
-.. option:: flycheck-ghc-no-user-package-database
-
-   Whether to disable the user package database for :flyc-checker:`haskell-ghc`.
-
-.. option:: flycheck-ghc-package-databases
-
-   A list of package database for :flyc-checker:`haskell-ghc`.
-
-.. option:: flycheck-ghc-search-path
-
-   A list of module directories for the search path of
-   :flyc-checker:`haskell-ghc`.
-
-.. option:: flycheck-go-vet-print-functions
-
-   A comma-separated list of print-like functions to check for format string
-   issues in the :flyc-checker:`go-vet` syntax checker.
-
-.. option:: flycheck-perlcritic-verbosity
-
-   The verbosity of :flyc-checker:`perl-perlcritic` as integer.
-
-.. option:: flycheck-phpcs-standard
-
-   The coding standard :flyc-checker:`php-phpcs` shall use.
-
-.. option:: flycheck-phpmd-rulesets
-
-   The rule sets :flyc-checker:`php-phpmd` shall use.
-
-.. option:: flycheck-rubocop-lint-only
-
-   Whether to disable style checks for :flyc-checker:`ruby-rubocop`.
-
-.. option:: flycheck-rust-library-path
-
-   The library path for :flyc-checker:`rust`.
-
-.. option:: flycheck-sass-compass
-
-   Whether to enable the Compass CSS framework for :flyc-checker:`sass`.
-
-.. option:: flycheck-scss-compass
-
-   Whether to enable the Compass CSS framework for :flyc-checker:`scss`.
-
-.. option:: flycheck-sphinx-warn-on-missing-references
-
-   Whether to warn about missing references in :flyc-checker:`rst-sphinx`
+Options are mainly intended to be used by :ref:`extensions
+<3rd-party-extensions>`, and via File or Directory Local variables.  See
+:infonode:`(emacs)File Variables` and :infonode:`(emacs)Directory Variables`
+respectively.
 
 .. _syntax-checker-configuration-files:
 
