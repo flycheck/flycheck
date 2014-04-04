@@ -249,51 +249,17 @@ Syntax checker configuration files
    checker.
 
 Some syntax checkers also read configuration files, denoted by associated
-*configuration file variables*:
+*configuration file variables*.  See :doc:`languages` of these variables.
 
-.. option:: flycheck-chktexrc
+All options are customizable via :kbd:`M-x customize-group RET
+flycheck-config-files`, and automatically buffer-local to easily set them in
+hooks.  You may also set them via File or Directory Local variables.  See
+:infonode:`(emacs)File Variables` and :infonode:`(emacs)Directory Variables`
+respectively.
 
-   The configuration file for the :flyc-checker:`tex-chktex` syntax checker.
-
-.. option:: flycheck-coffeelintrc
-
-   The configuration file for the :flyc-checker:`coffee-coffeelint` syntax
-   checker.
-
-.. option:: flycheck-eslintrc
-
-   The configuration file for the :flyc-checker:`javascript-eslint` syntax
-   checker.
-
-.. option:: flycheck-flake8rc
-
-   The configuration file for the :flyc-checker:`python-flake8` syntax checker.
-
-.. option:: flycheck-gjslintrc
-
-   The configuration file for the :flyc-checker:`javascript-gjslint` syntax
-   checker.
-
-.. option:: flycheck-jshintrc
-
-   The configuration file for the :flyc-checker:`javascript-jshint` syntax
-   checker.
-
-.. option:: flycheck-pylintrc
-
-   The configuration file for the :flyc-checker:`python-pylint` syntax checker.
-
-.. option:: flycheck-rubocoprc
-
-   The configuration file for the :flyc-checker:`ruby-rubocop` syntax checker.
-
-.. option:: flycheck-tidyrc
-
-   The configuration file for the :flyc-checker:`html-tidy` syntax checker.
-
-The value of these variables is either a string or `nil`.  In the former case,
-locate the configuration file using the functions in
-:option:`flycheck-locate-config-file-functions`:
+When set to a string, Flycheck tries to locate the configuration file using the
+functions in :option:`flycheck-locate-config-file-functions` and passes the name
+of the file to the syntax checker:
 
 .. option:: flycheck-locate-config-file-functions
    :auto:
@@ -312,26 +278,6 @@ following algorithm:
    directory.
 
 If any of these steps succeeds, the subsequent steps are not executed.
-
-If the configuration file is found, pass it to the syntax checker upon
-invocation.
-
-If the configuration file is not found, or if the value of the variable is nil,
-invoke the syntax checker without a configuration file.
-
-Customize these variables using :kbd:`M-x customize-group RET
-flycheck-config-files`.  Use `flycheck-describe-checker` to find out whether a
-syntax checker has a configuration file.
-
-You may also use these variables as file-local variables.  For instance, the
-following checks the Javascript file always with :file:`.jshintrc` from the
-parent directory:
-
-.. code-block:: javascript
-
-   // Local variables:
-   // flycheck-jshintrc: "../.jshintrc"
-   // End:
 
 .. _Projectile: https://github.com/bbatsov/projectile
 

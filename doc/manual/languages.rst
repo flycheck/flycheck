@@ -88,6 +88,11 @@ Coffeescript
 .. flyc-checker:: coffee-coffeelint
    :auto:
 
+   .. rubric:: Configuration file
+
+   .. option:: flycheck-coffeelintrc
+      :auto:
+
 CSS
 ===
 
@@ -216,11 +221,21 @@ HTML
 .. flyc-checker:: html-tidy
    :auto:
 
+   .. rubric:: Configuration file
+
+   .. option:: flycheck-tidyrc
+      :auto:
+
 Javascript
 ==========
 
 .. flyc-checker:: javascript-jshint
    :auto:
+
+   .. rubric:: Configuration file
+
+   .. option:: flycheck-jshintrc
+      :auto:
 
 .. flyc-checker:: javascript-eslint
    :auto:
@@ -230,8 +245,18 @@ Javascript
    .. option:: flycheck-eslint-rulesdir
       :auto:
 
+   .. rubric:: Configuration file
+
+   .. option:: flycheck-eslintrc
+      :auto:
+
 .. flyc-checker:: javascript-gjslint
    :auto:
+
+   .. rubric:: Configuration file
+
+   .. option:: flycheck-gjslintrc
+      :auto:
 
 JSON
 ====
@@ -330,8 +355,18 @@ Python
    .. option:: flycheck-flake8-maximum-line-length
       :auto:
 
+   .. rubric:: Configuration file
+
+   .. option:: flycheck-flake8rc
+      :auto:
+
 .. flyc-checker:: python-pylint
    :auto:
+
+   .. rubric:: Configuration file
+
+   .. option:: flycheck-pylintrc
+      :auto:
 
 Racket
 ======
@@ -362,6 +397,11 @@ Ruby
    .. rubric:: Options
 
    .. option:: flycheck-rubocop-lint-only
+      :auto:
+
+   .. rubric:: Configuration file
+
+   .. option:: flycheck-rubocoprc
       :auto:
 
 .. flyc-checker:: ruby-rubylint
@@ -462,6 +502,11 @@ TeX/LaTeX
 
 .. flyc-checker:: tex-chktex
    :auto:
+
+   .. rubric:: Configuration file
+
+   .. option:: flycheck-chktexrc
+      :auto:
 
 .. flyc-checker:: tex-lacheck
    :auto:
