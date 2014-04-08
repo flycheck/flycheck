@@ -4186,6 +4186,13 @@ Why not:
    "checkers/rust-syntax-error.rs" 'rust-mode
    '(4 5 error "unresolved name `bla`." :checker rust)))
 
+(ert-deftest flycheck-define-checker/rust-test-syntax-error ()
+  :tags '(builtin-checker external-tool language-rust)
+  (skip-unless (flycheck-check-executable 'rust))
+  (flycheck-test-should-syntax-check
+   "checkers/rust-test-syntax-error.rs" 'rust-mode
+   '(5 5 error "unresolved name `bla`." :checker rust)))
+
 (ert-deftest flycheck-define-checker/rust-warning ()
   :tags '(builtin-checker external-tool language-rust)
   (skip-unless (flycheck-check-executable 'rust))
