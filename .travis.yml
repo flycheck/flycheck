@@ -5,7 +5,6 @@ env:
 before_install:
   - bash ./install-travis.bash
   - export PATH="${GOPATH}/bin:${HOME}/.local/bin:${HOME}/.cabal/bin:$PATH"
-  - erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell
 install:
   # Install our packages
   - make EMACS=$EMACS deps
