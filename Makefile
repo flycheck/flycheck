@@ -2,6 +2,7 @@ EMACS = emacs
 EMACSFLAGS =
 CASK = cask
 SPHINX-BUILD = sphinx-build
+SPHINXFLAGS =
 INSTALL-INFO = install-info
 INSTALL = install
 VERSION := $(shell EMACS=$(EMACS) $(CASK) version)
@@ -32,7 +33,7 @@ dist :
 doc : html texinfo
 
 html :
-	$(SPHINX-BUILD) -b html -n -d $(DOCTREEDIR) doc $(DOCBUILDDIR)/html
+	$(SPHINX-BUILD) -b html -n -d $(DOCTREEDIR) $(SPHINXFLAGS) doc $(DOCBUILDDIR)/html
 
 texinfo : doc/flycheck.texi
 
@@ -44,7 +45,7 @@ test : compile
 deps : $(PKGDIR)
 
 linkcheck :
-	$(SPHINX-BUILD) -b linkcheck -n -d $(DOCTREEDIR) doc $(DOCBUILDDIR)/linkcheck
+	$(SPHINX-BUILD) -b linkcheck -n -d $(DOCTREEDIR) $(SPHINXFLAGS) doc $(DOCBUILDDIR)/linkcheck
 
 # Cleanup targets
 clean : clean-elc clean-dist clean-deps clean-doc
@@ -73,7 +74,7 @@ doc/flycheck.texi : $(DOCBUILDDIR)/info/flycheck.texi
 # noop anyway.
 .PHONY : $(DOCBUILDDIR)/info/flycheck.texi
 $(DOCBUILDDIR)/info/flycheck.texi :
-	$(SPHINX-BUILD) -b texinfo -n -d $(DOCTREEDIR) doc $(DOCBUILDDIR)/info
+	$(SPHINX-BUILD) -b texinfo -n -d $(DOCTREEDIR) $(SPHINXFLAGS) doc $(DOCBUILDDIR)/info
 
 # Pattern rules
 $(HOOKS): .git/hooks/%: scripts/hooks/% .git/hooks
