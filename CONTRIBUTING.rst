@@ -98,12 +98,13 @@ For syntax checkers, some special guidelines apply in addition to the above:
 - Provide a link to the website of the syntax checker tool in the comments of
   your pull request.
 - Add a proper docstring to your syntax checker, including this URL.
+- Add unit tests for your syntax checker, or provide example code that triggers
+  errors for each error pattern of the syntax checker.
+- Extend `install-travis.sh` to install the required tools in the CI
+  environment, or explain how to install the tool on an Ubuntu 12.04 system.
 
-Additionally, either
-
-- show example code that triggers errors for each of the error patterns of the
-  syntax checker, or
-- add unit tests for your syntax checker.
+**Note:** We will *not* merge syntax checkers which cannot be tested on
+ Travis CI.
 
 .. _pull requests:
 
