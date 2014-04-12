@@ -1,7 +1,6 @@
 EMACS = emacs
 EMACSFLAGS =
 CASK = cask
-VAGRANT = vagrant
 SPHINX-BUILD = sphinx-build
 INSTALL-INFO = install-info
 INSTALL = install
@@ -13,7 +12,6 @@ export EMACS
 
 SRCS = flycheck.el
 OBJECTS = $(SRCS:.el=.elc)
-HOOKS = .git/hooks/pre-push
 
 DISTDIR = dist
 BUILDDIR = build
@@ -22,8 +20,8 @@ DOCTREEDIR = $(DOCBUILDDIR)/doctrees
 
 .PHONY: compile dist doc html texinfo \
 	clean clean-elc clean-dist clean-doc clean-deps \
-	test vagrant-test \
-	deps linkcheck hooks
+	test \
+	deps linkcheck
 
 # Build targets
 compile : $(OBJECTS)
@@ -42,17 +40,11 @@ texinfo : doc/flycheck.texi
 test : compile
 	$(CASK) exec ert-runner
 
-vagrant-test :
-	$(VAGRANT) up --provision
-	$(VAGRANT) ssh -c "make -C /flycheck EMACS=$(EMACS) clean-elc test"
-
 # Support targets
 deps : $(PKGDIR)
 
 linkcheck :
 	$(SPHINX-BUILD) -b linkcheck -n -d $(DOCTREEDIR) doc $(DOCBUILDDIR)/linkcheck
-
-hooks: $(HOOKS)
 
 # Cleanup targets
 clean : clean-elc clean-dist clean-deps clean-doc
@@ -68,10 +60,6 @@ clean-doc:
 
 clean-deps :
 	rm -rf $(PKGDIR)
-
-# File targets
-.git/hooks:
-	install -d $@
 
 $(PKGDIR) : Cask
 	$(CASK) install
