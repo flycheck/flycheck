@@ -429,11 +429,7 @@ Unit tests
 
 **Flycheck** has unit tests for all built-in syntax checkers, and for large
 parts of the underlying machinery and API.  Contributed syntax checkers are
-required to have test cases.
-
-A virtual machine specification based on Vagrant_ and Puppet_ is provided to
-setup a complete testing environment with all supported syntax checker tools and
-Emacs versions, plus necessary utilities.
+required to have test cases.  The tests are continuously run on `Travis CI`_.
 
 .. [#] Flycheck is **unlikely to ever become part of Emacs**.
 .. [#] The 3rd party library flymake-easy_ allows to use syntax checkers per
@@ -464,3 +460,4 @@ Emacs versions, plus necessary utilities.
 .. _Puppet: http://puppetlabs.com/
 .. _MELPA: http://melpa.milkbox.net/
 .. _Github: https://github.com/flycheck/flycheck
+.. _Travis CI: https://travis-ci.org/flycheck/flycheck
