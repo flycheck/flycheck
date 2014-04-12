@@ -4118,11 +4118,11 @@ Why not:
    '(6 10 info "Prefer single-quoted strings when you don't need string interpolation or special symbols."
        :checker ruby-rubocop)
    '(10 5 info "the use of then/do is not needed here" :checker ruby-rubylint)
-   '(10 5 info "Favor modifier if usage when you have a single-line body. Another good alternative is the usage of control flow &&/||."
+   '(10 5 info "Favor modifier `if` usage when having a single-line body. Another good alternative is the usage of control flow `&&`/`||`."
         :checker ruby-rubocop)
-   '(10 5 info "Never use then for multi-line if."
+   '(10 5 info "Never use `then` for multi-line `if`."
         :checker ruby-rubocop)
-   '(10 8 warning "Literal true appeared in a condition."
+   '(10 8 warning "Literal `true` appeared in a condition."
         :checker ruby-rubocop)
    '(11 24 error "undefined instance variable @name" :checker ruby-rubylint)
    '(16 1 error "wrong number of arguments (expected 2..3 but got 0)"
@@ -4142,9 +4142,9 @@ Why not:
      '(5 5 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
      '(6 10 info "Prefer single-quoted strings when you don't need string interpolation or special symbols."
          :checker ruby-rubocop)
-     '(10 5 info "Never use then for multi-line if."
+     '(10 5 info "Never use `then` for multi-line `if`."
           :checker ruby-rubocop)
-     '(10 8 warning "Literal true appeared in a condition."
+     '(10 8 warning "Literal `true` appeared in a condition."
           :checker ruby-rubocop))))
 
 (ert-deftest flycheck-define-checker/ruby-rubocop-lint-only ()
@@ -4155,7 +4155,7 @@ Why not:
     (flycheck-test-should-syntax-check
      "checkers/ruby-warnings.rb" 'ruby-mode
      '(5 5 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
-     '(10 8 warning "Literal true appeared in a condition."
+     '(10 8 warning "Literal `true` appeared in a condition."
           :checker ruby-rubocop))))
 
 (ert-deftest flycheck-define-checker/ruby-warnings ()
