@@ -2,17 +2,10 @@ language: emacs-lisp
 env:
   - EMACS=emacs24
   - EMACS=emacs-snapshot
-# We pass --verbose to all our Puppet commands to prevent Travis CI from being
-# stuck because of lacking output.  We used to use --debug, but that is just too
-# much information
 before_install:
-  # Install Puppet to bootstrap Puppet 3 :)
-  - sudo apt-get update
-  - sudo apt-get install puppet
-  # Bootstrap Puppet, and install our Puppet modules
-  - sudo FACTER_travis=true puppet apply --verbose ./puppet/manifests/bootstrap.pp
-  # Bootstrap test environment
-  - sudo FACTER_travis=true puppet apply --verbose --modulepath=/etc/puppet/modules:./puppet/modules ./puppet/manifests/site.pp
+  - bash ./install-travis.bash
+  - export PATH="${GOPATH}/bin:${HOME}/.local/bin:${HOME}/.cabal/bin:$PATH"
+  - erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell
 install:
   # Install our packages
   - make EMACS=$EMACS deps
