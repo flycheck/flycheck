@@ -3517,7 +3517,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
           :checker go-golint)
      '(12 nil error "undefined: fmt" :checker go-build)
      '(17 nil error "undefined: fmt" :checker go-build)
-     '(17 nil warning "arg 1 for printf verb %s of wrong type: untyped integer"
+     '(17 nil warning "arg 1 for printf verb %s of wrong type: untyped int"
           :checker go-vet)
      '(19 nil error "cannot use 1 (type int) as type string in function argument"
           :checker go-build)
@@ -3535,7 +3535,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
         `(("GOPATH" . ,(flycheck-test-resource-filename "checkers/go")))
       (flycheck-test-should-syntax-check
        "checkers/go/src/warnings.go" 'go-mode
-       '(17 nil warning "arg 1 for printf verb %s of wrong type: untyped integer"
+       '(17 nil warning "arg 1 for printf verb %s of wrong type: untyped int"
             :checker go-vet)
        '(18 nil warning "possible formatting directive in Warn call"
             :checker go-vet)
