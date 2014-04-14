@@ -4280,16 +4280,16 @@ is added to the GHC search path via `-i'."
 
 See URL `http://www.haskell.org/ghc/'."
   :command ("ghc" "-Wall" "-fno-code"
+            (option-flag "-no-user-package-db"
+                         flycheck-ghc-no-user-package-database)
+            (option-list "-package-db" flycheck-ghc-package-databases)
+            (option-list "-i" flycheck-ghc-search-path s-prepend)
             ;; Include the parent directory of the current module tree, to
             ;; properly resolve local imports
             (eval (concat
                    "-i"
                    (flycheck-module-root-directory
                     (flycheck-find-in-buffer flycheck-haskell-module-re))))
-            (option-flag "-no-user-package-db"
-                         flycheck-ghc-no-user-package-database)
-            (option-list "-package-db" flycheck-ghc-package-databases)
-            (option-list "-i" flycheck-ghc-search-path s-prepend)
             ;; Force GHC to treat the file as Haskell file, even if it doesn't
             ;; have an extension.  Otherwise GHC would fail on files without an
             ;; extension
