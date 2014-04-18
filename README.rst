@@ -84,13 +84,6 @@ Once installed, enable Flycheck globally with the following line in your
 
    (add-hook 'after-init-hook #'global-flycheck-mode)
 
-Enable Flycheck globally by adding the following to your `init.el`, and
-restart Emacs:
-
-.. code-block:: cl
-
-   (add-hook 'after-init-hook #'global-flycheck-mode)
-
 Install some syntax checking tools for the programming or markup language you
 are using.  For Python:
 
