@@ -57,6 +57,9 @@
 
 (autoload 'coq-mode "coq")
 
+;; Load ESS for R-mode (its autoloads are broken)
+(require 'ess-site nil 'noerror)
+
 
 ;;; Directories
 
@@ -4659,6 +4662,14 @@ Why not:
   (let ((flycheck-disabled-checkers '(python-flake8 python-pylint)))
     (flycheck-ert-should-syntax-check
      "checkers/python/test.py" 'python-mode)))
+
+(flycheck-ert-def-checker-test r-lintr r nil
+  (flycheck-ert-should-syntax-check
+   "checkers/r-lintr.R" 'R-mode
+   '(1 28 info "Opening curly braces should never go on their own line and should always be followed by a new line."
+       :checker r-lintr)
+   '(4 6 warning "Do not use absolute paths." :checker r-lintr)
+   '(7 5 error "unexpected end of input" :checker r-lintr)))
 
 (flycheck-ert-def-checker-test racket racket nil
   (flycheck-ert-should-syntax-check

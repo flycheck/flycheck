@@ -521,6 +521,12 @@ Python
 
 .. _flycheck-pyflakes: https://github.com/Wilfred/flycheck-pyflakes
 
+R
+=
+
+.. flyc-checker:: r-lintr
+   :auto:
+
 Racket
 ======
 
