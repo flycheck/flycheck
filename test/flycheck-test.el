@@ -4660,6 +4660,13 @@ Why not:
     (flycheck-ert-should-syntax-check
      "checkers/python/test.py" 'python-mode)))
 
+(ert-deftest flycheck-define-checker/r-lint ()
+  :tags '(builtin-checker external-tool language-R)
+  (skip-unless (flycheck-check-executable 'R))
+  (flycheck-test-should-syntax-check
+   "checkers/r-lint-info.R" 'R-mode
+   '(1 nil info "needs space around `=`" :checker r-lint)))
+
 (flycheck-ert-def-checker-test racket racket nil
   (flycheck-ert-should-syntax-check
    "checkers/racket-syntax-error.rkt" 'racket-mode

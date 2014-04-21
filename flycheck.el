@@ -220,6 +220,7 @@ attention to case differences."
     python-flake8
     python-pylint
     python-pycompile
+    r-lint
     racket
     rpm-rpmlint
     rst
@@ -6557,6 +6558,21 @@ See URL `https://docs.python.org/3.4/library/py_compile.html'."
           "', ('" (file-name (one-or-more (not (any "'")))) "', "
           line ", " column ", " (one-or-more not-newline) line-end))
   :modes python-mode)
+
+(flycheck-define-checker r-lint
+  "An R style checker using the lint package.
+
+See URL `http://cran.r-project.org/web/packages/lint/'."
+  :command ("R" "--slave" "--restore" "--no-save" "-e"
+            (eval (concat
+                   "library(lint);"
+                   "try(lint(commandArgs(TRUE), lint.style))"))
+            "--args" source)
+  :error-patterns
+  ((info line-start "Lint: " (minimal-match (message))
+         ": found on lines " line (optional (one-or-more ", " line))
+         line-end))
+  :modes ess-mode)
 
 (flycheck-define-checker racket
   "A Racket syntax checker using the Racket compiler.
