@@ -133,6 +133,21 @@ buffer-local wherever it is set."
   :group 'flycheck
   :link '(info-link "(flycheck)Error reporting"))
 
+(defcustom flycheck-keymap-prefix (kbd "C-c !")
+  "Prefix for key bindings of Flycheck.
+
+It will have no effect when changed via `setq' after Flycheck was loaded.
+Changing the variable is at your own risk."
+  :group 'flycheck
+  :type 'string
+  :risky t
+  :set
+  (lambda (variable key)
+    (when (and (boundp variable) (boundp 'flycheck-mode-map))
+      (define-key flycheck-mode-map (symbol-value variable) nil)
+      (define-key flycheck-mode-map key flycheck-command-map))
+    (set variable key)))
+
 (defcustom flycheck-checkers
   '(asciidoc
     c/c++-clang
@@ -646,23 +661,27 @@ This variable is a normal hook."
 (defvar-local flycheck-mode-line nil
   "The mode line lighter of variable `flycheck-mode'.")
 
+(defvar flycheck-command-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "c" 'flycheck-buffer)
+    (define-key map "C" 'flycheck-clear)
+    (define-key map (kbd "C-c") 'flycheck-compile)
+    (define-key map "n" 'flycheck-next-error)
+    (define-key map "p" 'flycheck-previous-error)
+    (define-key map "l" 'flycheck-list-errors)
+    (define-key map (kbd "C-w") 'flycheck-copy-messages-as-kill)
+    (define-key map "/" 'flycheck-google-messages)
+    (define-key map "s" 'flycheck-select-checker)
+    (define-key map "e" 'flycheck-set-checker-executable)
+    (define-key map "?" 'flycheck-describe-checker)
+    (define-key map "i" 'flycheck-info)
+    (define-key map "V" 'flycheck-version)
+    map)
+  "Keymap of Flycheck interactive commands.")
+
 (defvar flycheck-mode-map
-  (let ((map (make-sparse-keymap))
-        (pmap (make-sparse-keymap)))
-    (define-key pmap "c" 'flycheck-buffer)
-    (define-key pmap "C" 'flycheck-clear)
-    (define-key pmap (kbd "C-c") 'flycheck-compile)
-    (define-key pmap "n" 'flycheck-next-error)
-    (define-key pmap "p" 'flycheck-previous-error)
-    (define-key pmap "l" 'flycheck-list-errors)
-    (define-key pmap (kbd "C-w") 'flycheck-copy-messages-as-kill)
-    (define-key pmap "/" 'flycheck-google-messages)
-    (define-key pmap "s" 'flycheck-select-checker)
-    (define-key pmap "e" 'flycheck-set-checker-executable)
-    (define-key pmap "?" 'flycheck-describe-checker)
-    (define-key pmap "i" 'flycheck-info)
-    (define-key pmap "V" 'flycheck-version)
-    (define-key map (kbd "C-c !") pmap)
+  (let ((map (make-sparse-keymap)))
+    (define-key map flycheck-keymap-prefix flycheck-command-map)
     map)
   "Keymap of `flycheck-mode'.")
 

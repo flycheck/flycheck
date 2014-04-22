@@ -490,6 +490,18 @@ check with.  ERRORS is the list of expected errors."
     (let ((variable (flycheck-checker-executable-variable checker)))
       (should (null (symbol-value variable))))))
 
+(ert-deftest flycheck-keymap-prefix/customize-variable-will-modify-keymap ()
+  :tags '(customization)
+  (unwind-protect
+      (progn
+        (custom-set-variables
+         '(flycheck-keymap-prefix (kbd "C-c e")))
+        (should (eq 'flycheck-next-error
+                    (lookup-key flycheck-mode-map (kbd "C-c e n")))))
+    (ignore-errors
+      (custom-set-variables
+       '(flycheck-keymap-prefix (kbd "C-c !"))))))
+
 
 ;;;; Minor mode definition
 
