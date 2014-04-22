@@ -133,21 +133,6 @@ buffer-local wherever it is set."
   :group 'flycheck
   :link '(info-link "(flycheck)Error reporting"))
 
-(defcustom flycheck-keymap-prefix (kbd "C-c !")
-  "Prefix for key bindings of Flycheck.
-
-It will have no effect when changed via `setq' after Flycheck was loaded.
-Changing the variable is at your own risk."
-  :group 'flycheck
-  :type 'string
-  :risky t
-  :set
-  (lambda (variable key)
-    (when (and (boundp variable) (boundp 'flycheck-mode-map))
-      (define-key flycheck-mode-map (symbol-value variable) nil)
-      (define-key flycheck-mode-map key flycheck-command-map))
-    (set variable key)))
-
 (defcustom flycheck-checkers
   '(asciidoc
     c/c++-clang
@@ -652,15 +637,6 @@ This variable is a normal hook."
   :package-version '(flycheck . "0.15")
   :group 'flycheck-faces)
 
-
-;;; Minor mode definition
-;;;###autoload
-(defconst flycheck-mode-line-lighter " FlyC"
-  "The standard lighter for flycheck mode.")
-
-(defvar-local flycheck-mode-line nil
-  "The mode line lighter of variable `flycheck-mode'.")
-
 (defvar flycheck-command-map
   (let ((map (make-sparse-keymap)))
     (define-key map "c" 'flycheck-buffer)
@@ -678,6 +654,30 @@ This variable is a normal hook."
     (define-key map "V" 'flycheck-version)
     map)
   "Keymap of Flycheck interactive commands.")
+
+(defcustom flycheck-keymap-prefix (kbd "C-c !")
+  "Prefix for key bindings of Flycheck.
+
+It will have no effect when changed via `setq' after Flycheck was loaded.
+Changing the variable is at your own risk."
+  :group 'flycheck
+  :type 'string
+  :risky t
+  :set
+  (lambda (variable key)
+    (when (and (boundp variable) (boundp 'flycheck-mode-map))
+      (define-key flycheck-mode-map (symbol-value variable) nil)
+      (define-key flycheck-mode-map key flycheck-command-map))
+    (set variable key)))
+
+
+;;; Minor mode definition
+;;;###autoload
+(defconst flycheck-mode-line-lighter " FlyC"
+  "The standard lighter for flycheck mode.")
+
+(defvar-local flycheck-mode-line nil
+  "The mode line lighter of variable `flycheck-mode'.")
 
 (defvar flycheck-mode-map
   (let ((map (make-sparse-keymap)))
