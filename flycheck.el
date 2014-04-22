@@ -658,8 +658,8 @@ This variable is a normal hook."
 (defcustom flycheck-keymap-prefix (kbd "C-c !")
   "Prefix for key bindings of Flycheck.
 
-It will have no effect when changed via `setq' after Flycheck was loaded.
-Changing the variable is at your own risk."
+It will have no effect when changed via `setq' after Flycheck was
+loaded.  Changing the variable is at your own risk."
   :group 'flycheck
   :type 'string
   :risky t

@@ -494,13 +494,11 @@ check with.  ERRORS is the list of expected errors."
   :tags '(customization)
   (unwind-protect
       (progn
-        (custom-set-variables
-         '(flycheck-keymap-prefix (kbd "C-c e")))
+        (custom-set-variables '(flycheck-keymap-prefix (kbd "C-c e")))
         (should (eq 'flycheck-next-error
                     (lookup-key flycheck-mode-map (kbd "C-c e n")))))
     (ignore-errors
-      (custom-set-variables
-       '(flycheck-keymap-prefix (kbd "C-c !"))))))
+      (custom-set-variables '(flycheck-keymap-prefix (kbd "C-c !"))))))
 
 
 ;;;; Minor mode definition
