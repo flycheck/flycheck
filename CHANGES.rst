@@ -3,6 +3,11 @@
 master (in development)
 -----------------------
 
+- New features:
+
+  - #381: Add `flycheck-keymap-prefix` to change the prefix key for Flycheck
+    keybindings
+
 - Bug fixes:
 
   - #334: When stopping Flycheck, correctly kill running processes and cleanup

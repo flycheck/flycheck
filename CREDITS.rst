@@ -20,6 +20,8 @@ greatly appreciated.
 - `Krzysztof Witkowski`_ implemented `eval` support in Flycheck commands.
 - `Magnar Sveen`_ developed the awesome `dash.el` and `s.el`_
   libraries, that drive considerable parts of Flycheck's internals.
+- `Malyshev Artem`_ made Flycheck's keybindings customizable with
+  `flycheck-keymap-prefix`.
 - `Marian Schubert`_ added the Perl syntax checker.
 - `Mark Hellewell`_ added the Puppet syntax and style checkers.
 - `Martin Grenfell`_ created the awesome Vim library syntastic_ which inspired
@@ -70,6 +72,7 @@ somewhat failed attempt at on-the-fly syntax checking.
 .. _Jimmy Yuen Ho Wong: https://github.com/wyuenho
 .. _Krzysztof Witkowski: https://github.com/kwitek
 .. _Magnar Sveen: https://github.com/magnars/dash.el
+.. _Malyshev Artem: https://github.com/proofit404
 .. _Marian Schubert: https://github.com/maio
 .. _Mark Hellewell: https://github.com/markhellewell
 .. _Martin Grenfell: https://github.com/scrooloose
