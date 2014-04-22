@@ -668,7 +668,7 @@ loaded.  Changing the variable is at your own risk."
     (when (and (boundp variable) (boundp 'flycheck-mode-map))
       (define-key flycheck-mode-map (symbol-value variable) nil)
       (define-key flycheck-mode-map key flycheck-command-map))
-    (set variable key)))
+    (set-default variable key)))
 
 
 ;;; Minor mode definition
