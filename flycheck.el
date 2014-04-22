@@ -658,8 +658,17 @@ This variable is a normal hook."
 (defcustom flycheck-keymap-prefix (kbd "C-c !")
   "Prefix for key bindings of Flycheck.
 
-It will have no effect when changed via `setq' after Flycheck was
-loaded.  Changing the variable is at your own risk."
+Changing this variable outside Customize does not have any
+effect.  To change the keymap prefix from Lisp, you need to
+explicitly re-define the prefix key:
+
+    (define-key flycheck-mode-map flycheck-keymap-prefix nil)
+    (setq flycheck-keymap-prefix (kbd \"C-c f\"))
+    (define-key flycheck-mode-map flycheck-keymap-prefix
+                flycheck-command-map)
+
+Please note that Flycheck's manual documents the default
+keybindings.  Changing this variable is at your own risk."
   :group 'flycheck
   :type 'string
   :risky t
