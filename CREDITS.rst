@@ -71,7 +71,7 @@ somewhat failed attempt at on-the-fly syntax checking.
 .. _Gereon Frey: https://github.com/gfrey
 .. _Jimmy Yuen Ho Wong: https://github.com/wyuenho
 .. _Krzysztof Witkowski: https://github.com/kwitek
-.. _Magnar Sveen: https://github.com/magnars/dash.el
+.. _Magnar Sveen: https://github.com/magnars
 .. _Malyshev Artem: https://github.com/proofit404
 .. _Marian Schubert: https://github.com/maio
 .. _Mark Hellewell: https://github.com/markhellewell
