@@ -20,7 +20,7 @@ optional error list.  The following screenshot shows Flycheck at work in an
 Emacs Lisp buffer, with with the `Solarized Light`_ color theme and the `Source
 Code Pro`_ font:
 
-.. figure:: https://github.com/flycheck/flycheck/raw/master/doc/images/screenshot.png
+.. figure:: https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/screenshot.png
    :align: center
    :width: 731
    :height: 519
