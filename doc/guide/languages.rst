@@ -184,6 +184,8 @@ Go
    :auto:
 .. flyc-checker:: go-test
    :auto:
+.. flyc-checker:: go-errcheck
+   :auto:
 
 Haml
 ====
