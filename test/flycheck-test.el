@@ -4122,7 +4122,6 @@ Why not:
    '(2 1 info "Use snake_case for source file names." :checker ruby-rubocop)
    '(3 1 info "Missing top-level class documentation comment."
        :checker ruby-rubocop)
-   '(4 18 warning "unused argument name" :checker ruby-rubylint)
    '(5 5 warning "unused local variable arr" :checker ruby-rubylint)
    '(5 5 warning "Useless assignment to variable - `arr`."
        :checker ruby-rubocop)
