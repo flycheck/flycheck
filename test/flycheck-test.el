@@ -4087,7 +4087,7 @@ Why not:
 
 (ert-deftest flycheck-define-checker/ruby-rubylint-syntax-error ()
   :tags '(builtin-checker external-tool language-ruby)
-  (skip-unless (flycheck-check-executable 'ruby-rubocop))
+  (skip-unless (flycheck-check-executable 'ruby-rubylint))
   (let ((flycheck-disabled-checkers '(ruby-rubocop)))
     (flycheck-test-should-syntax-check
      "checkers/ruby-syntax-error.rb" 'ruby-mode
