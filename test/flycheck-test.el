@@ -4124,7 +4124,8 @@ Why not:
        :checker ruby-rubocop)
    '(4 18 warning "unused argument name" :checker ruby-rubylint)
    '(5 5 warning "unused local variable arr" :checker ruby-rubylint)
-   '(5 5 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
+   '(5 5 warning "Useless assignment to variable - `arr`."
+       :checker ruby-rubocop)
    '(6 10 info "Prefer single-quoted strings when you don't need string interpolation or special symbols."
        :checker ruby-rubocop)
    '(10 5 info "the use of then/do is not needed here" :checker ruby-rubylint)
@@ -4149,7 +4150,8 @@ Why not:
      '(2 1 info "Use snake_case for source file names." :checker ruby-rubocop)
      '(3 1 info "Missing top-level class documentation comment."
          :checker ruby-rubocop)
-     '(5 5 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
+     '(5 5 warning "Useless assignment to variable - `arr`."
+         :checker ruby-rubocop)
      '(6 10 info "Prefer single-quoted strings when you don't need string interpolation or special symbols."
          :checker ruby-rubocop)
      '(10 5 info "Never use `then` for multi-line `if`."
@@ -4164,7 +4166,8 @@ Why not:
         (flycheck-disabled-checkers '(ruby-rubylint)))
     (flycheck-test-should-syntax-check
      "checkers/ruby-warnings.rb" 'ruby-mode
-     '(5 5 warning "Useless assignment to variable - arr" :checker ruby-rubocop)
+     '(5 5 warning "Useless assignment to variable - `arr`."
+         :checker ruby-rubocop)
      '(10 8 warning "Literal `true` appeared in a condition."
           :checker ruby-rubocop))))
 

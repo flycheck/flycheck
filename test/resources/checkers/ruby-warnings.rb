@@ -1,7 +1,7 @@
 # A bunch of questionable Ruby stuff
 
 class Person
-  def initialize(name)
+  def initialize(_name)
     arr = [:one, :twoTho, :top_gun]
     puts "test"
   end
