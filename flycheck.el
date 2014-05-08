@@ -4275,6 +4275,18 @@ is added to the GHC search path via `-i'."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.16"))
 
+(flycheck-def-option-var flycheck-ghc-extensions nil haskell-ghc
+  "Haskell language extensions enabled for GHC.
+
+The value of this variable is a list of strings, where each
+string is a language extension name as it appears in LANGUAGE
+pragma.  Each extension is added to the GHC command line via
+`-X'."
+  :type '(repeat :tag "extensions"
+                 (string :tag "An extension"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.19"))
+
 (flycheck-define-checker haskell-ghc
   "A Haskell syntax and type checker using ghc.
 
@@ -4284,6 +4296,7 @@ See URL `http://www.haskell.org/ghc/'."
                          flycheck-ghc-no-user-package-database)
             (option-list "-package-db" flycheck-ghc-package-databases)
             (option-list "-i" flycheck-ghc-search-path s-prepend)
+            (option-list "-X" flycheck-ghc-extensions s-prepend)
             ;; Include the parent directory of the current module tree, to
             ;; properly resolve local imports
             (eval (concat
