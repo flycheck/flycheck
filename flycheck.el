@@ -5282,6 +5282,16 @@ pragma.  Each extension is enabled via `-X'."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.19"))
 
+(flycheck-def-option-var flycheck-ghc-packages nil haskell-ghc
+  "GHC packages available for this build.
+
+The value of this variable is a list of package names that should
+be made available to flycheck compilation. Each package is added
+to the GHC command line via `-package'."
+  :type '(repeat (string :tag "A Cabal package"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.22"))
+
 (flycheck-define-checker haskell-ghc
   "A Haskell syntax and type checker using ghc.
 
@@ -5291,6 +5301,9 @@ See URL `http://www.haskell.org/ghc/'."
                          flycheck-ghc-no-user-package-database)
             (option-list "-package-db" flycheck-ghc-package-databases)
             (option-list "-i" flycheck-ghc-search-path concat)
+            ;; given list of packages disables all other packages
+            (option-flag "-hide-all-packages" flycheck-ghc-packages)
+            (option-list "-package" flycheck-ghc-packages)
             ;; Include the parent directory of the current module tree, to
             ;; properly resolve local imports
             (eval (concat

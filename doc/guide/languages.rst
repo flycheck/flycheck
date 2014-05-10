@@ -317,6 +317,9 @@ Haskell
    .. option:: flycheck-ghc-package-databases
       :auto:
 
+   .. option:: flycheck-ghc-packages
+      :auto:
+
    .. option:: flycheck-ghc-search-path
       :auto:
 
