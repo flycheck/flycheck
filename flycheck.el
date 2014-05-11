@@ -208,7 +208,8 @@ either directly or with `flycheck-select-checker'.
 
 You should not need to change this variable normally.  In order
 to disable syntax checkers, please use
-`flycheck-disabled-checkers'.
+`flycheck-disabled-checkers'.  This variable is intended for 3rd
+party extensions to tell Flycheck about new syntax checkers.
 
 Syntax checkers in this list must be defined with
 `flycheck-define-checker'."
@@ -227,8 +228,11 @@ checker in this list, regardless of the value of
 However, syntax checkers in this list are still available for
 manual selection with `flycheck-select-checker'.
 
-If disabling syntax checkers, please set this list instead of
-removing the syntax checkers from `flycheck-checkers'."
+Use this variable to disable syntax checkers, instead of removing
+the syntax checkers from `flycheck-checkers'.  You may also use
+this option as a file or directory local variable to disable
+specific checkers in individual files and directories
+respectively."
   :group 'flycheck
   :type '(repeat (symbol :tag "Checker"))
   :package-version '(flycheck . "0.16")
@@ -254,7 +258,8 @@ A syntax checker assigned to this variable must be defined with
 Use the command `flycheck-select-checker' to select a syntax
 checker for the current buffer, or set this variable as file
 local variable to always use a specific syntax checker for a
-file.")
+file.  See Info Node `(emacs)Specifying File Variables' for more
+information about file variables.")
 (put 'flycheck-checker 'safe-local-variable 'flycheck-registered-checker-p)
 
 (defcustom flycheck-locate-config-file-functions
@@ -274,7 +279,8 @@ The functions in this hook are called in order of appearance, until a
 function returns non-nil.  The configuration file returned by that
 function is then given to the syntax checker if it exists.
 
-This variable is an abnormal hook."
+This variable is an abnormal hook.  See Info
+node `(elisp)Hooks'."
   :group 'flycheck
   :type 'hook
   :risky t)
@@ -296,7 +302,8 @@ after the corresponding syntax checker finished.  At this stage,
 the overlays from the previous syntax checks are still present,
 and there may be further syntax checkers in the chain.
 
-This variable is an abnormal hook."
+This variable is an abnormal hook.  See Info
+node `(elisp)Hooks'."
   :group 'flycheck
   :type 'hook
   :package-version '(flycheck . "0.13")
@@ -329,8 +336,8 @@ If set to nil, do not display errors at all."
 (defcustom flycheck-indication-mode 'left-fringe
   "The indication mode for Flycheck errors and warnings.
 
-Controls how Flycheck indicates errors in buffers.  May either be
-`left-fringe', `right-fringe', or nil.
+This variable controls how Flycheck indicates errors in buffers.
+May either be `left-fringe', `right-fringe', or nil.
 
 If set to `left-fringe' or `right-fringe', indicate errors and
 warnings via icons in the left and right fringe respectively.
@@ -350,24 +357,25 @@ The highlighting mode controls how Flycheck highlights errors in
 buffers.  The following modes are known:
 
 `columns'
-     highlights the error column.  If the error does not have a
-     column, highlight the whole line.
+     Highlight the error column.  If the error does not have a column,
+     highlight the whole line.
 
 `symbols'
-     highlights the symbol at the error column, if there is any, otherwise
-     behave like `columns'.
+     Highlight the symbol at the error column, if there is any,
+     otherwise behave like `columns'.  This is the default.
 
 `sexps'
-     highlights the expression at the error column, if there is
+     Highlight the expression at the error column, if there is
      any, otherwise behave like `columns'.  Note that this mode
-     can be *very* slow in some modes.
+     can be *very* slow in some major modes.
 
 `lines'
-     highlights the whole line.
+     Highlight the whole line.
 
 nil
-     does not highlight errors at all.  Errors will still be
-     indicated according to `flycheck-indication-mode'."
+     Do not highlight errors at all.  However, errors will still
+     be reported in the mode line and in error message popups,
+     and indicated according to `flycheck-indication-mode'."
   :group 'flycheck
   :type '(choice (const :tag "Highlight columns only" columns)
                  (const :tag "Highlight symbols" symbols)
@@ -387,25 +395,27 @@ This variable is a list of events that may trigger syntax checks.
 The following events are known:
 
 `save'
-     checks syntax automatically each time the buffer is saved.
+     Check syntax immediately after the buffer was saved.
 
 `idle-change'
-     checks syntax automatically some time after the last change
-     to the buffer occurred.
+     Check syntax a short time (see `flycheck-idle-change-delay')
+     after the last change to the buffer.
 
 `new-line'
-     checks syntax automatically each time a new line is inserted
-     into the buffer.
+     Check syntax immediately after a new line was inserted into
+     the buffer.
 
 `mode-enabled'
-     checks syntax automatically when `flycheck-mode' is enabled.
+     Check syntax immediately when `flycheck-mode' is enabled.
 
-For instance, set this variable to '(mode-enabled save) to only
-check syntax automatically when saving a buffer, but never when
-modifying its contents.
+Flycheck performs a syntax checks only on evens, which are
+contained in this list.  For instance, if the value of this
+variable is `(mode-enabled save)', Flycheck will only check if
+the mode is enabled or the buffer was saved, but never after
+changes to the buffer contents.
 
-If nil, never check syntax automatically.  Use `flycheck-buffer'
-to start a syntax check manually."
+If nil, never check syntax automatically.  In this case, use
+`flycheck-buffer' to start a syntax check manually."
   :group 'flycheck
   :type '(set (const :tag "After the buffer was saved" save)
               (const :tag "After the buffer was changed and idle" idle-change)
@@ -436,8 +446,8 @@ If set to an integer, `flycheck-google-messages' will signal an
 error if there are more Flycheck messages at point than the value
 of this variable.
 
-If set to nil, `flycheck-google-messages' will always google all
-messages at point."
+If set to nil, `flycheck-google-messages' will always google *all*
+messages at point.  This setting is *not* recommended."
   :group 'flycheck
   :type '(choice (const :tag "Always google all messages" nil)
                  (integer :tag "Maximum messages to google"))
@@ -464,21 +474,26 @@ enabled.  Changing it will not affect buffers which already have
   :safe #'booleanp)
 
 (defcustom flycheck-completion-system nil
-  "How to complete in minibuffer prompts.
+  "The completion system to use.
 
 `ido'
-     Use IDO.  IDO is a built-in alternative completion system,
-     without good flex matching and a powerful UI.  You may want
-     to install flx-ido (see URL `https://github.com/lewang/flx')
-     to improve the flex matching in IDO.
+     Use IDO.
+
+     IDO is a built-in alternative completion system, without
+     good flex matching and a powerful UI.  You may want to
+     install flx-ido (see URL `https://github.com/lewang/flx') to
+     improve the flex matching in IDO.
 
 `grizzl'
-     Use Grizzl, see URL `https://github.com/d11wtq/grizzl'.
+     Use Grizzl.
+
      Grizzl is an alternative completion system with powerful
-     flex matching, but a very limited UI.
+     flex matching, but a very limited UI.  See URL
+     `https://github.com/d11wtq/grizzl'.
 
 nil
      Use the standard unfancy `completing-read'.
+
      `completing-read' has a very simple and primitive UI, and
      does not offer flex matching.  This is the default setting,
      though, to match Emacs' defaults.  With this system, you may
@@ -503,14 +518,14 @@ This hook is run after a syntax check was finished.
 At this point, *all* chained checkers were run, and all errors
 were parsed, highlighted and reported.  The variable
 `flycheck-current-errors' contains all errors from all syntax
-checkers run during the syntax check, so you can use the various
-error analysis functions.
+checkers run during the syntax check, so you can apply any error
+analysis functions.
 
 Note that this hook does *not* run after each individual syntax
 checker in the syntax checker chain, but only after the *last
 checker*.
 
-This variable is a normal hook."
+This variable is a normal hook.  See Info node `(elisp)Hooks'."
   :group 'flycheck
   :type 'hook
   :risky t)
@@ -527,7 +542,7 @@ Note that this hook does *not* run before each individual syntax
 checker in the syntax checker chain, but only before the *first
 checker*.
 
-This variable is a normal hook."
+This variable is a normal hook.  See Info node `(elisp)Hooks'."
   :group 'flycheck
   :type 'hook
   :risky t)
@@ -542,7 +557,7 @@ this hook.
 You should use this hook to conduct additional cleanup actions
 when Flycheck failed.
 
-This variable is a normal hook."
+This variable is a normal hook.  See Info node `(elisp)Hooks.'"
   :group 'flycheck
   :type 'hook
   :risky t)
@@ -1403,25 +1418,40 @@ Signal an error if NEXT-CHECKER is not a valid entry for
         (error "%s is not a valid Flycheck syntax checker" checker))
       t)))
 
-(defmacro flycheck-define-checker (symbol doc-string &rest properties)
-  "Define SYMBOL as syntax checker with DOC-STRING and PROPERTIES.
+(defmacro flycheck-define-checker (symbol docstring &rest properties)
+  "Define SYMBOL as syntax checker with DOCSTRING and PROPERTIES.
 
-DOCSTRING provides documentation for the new syntax checker, as
-shown with `flycheck-describe-checker'.
+DOCSTRING provides documentation for the new syntax checker.  Use
+`flycheck-describe-checker' to view the documentation of a syntax
+checker.
 
-The following PROPERTIES constitute a syntax checker:
+The following PROPERTIES constitute a syntax checker.  `:command'
+is mandatory.  A syntax checker must also have either `:modes' or
+`:predicate', and either `:error-patterns' or `:error-parser'.
+`:next-checkers' is entirely optional.
+
+Signal an error at macro-expansion time if a mandatory property
+is missing or if any property as an invalid value.
+
+Any syntax checker defined with this macro is eligible for manual
+syntax checker selection with `flycheck-select-checker'.  To make
+the new syntax checker available for automatic selection, it must
+be registered in `flycheck-checkers'.
 
 `:command (EXECUTABLE ARG ...)'
      An unquoted list describing the syntax checker command to
      execute.
 
      EXECUTABLE must be a string with the executable of this
-     syntax checker.  A customizable, buffer-local variable
-     `flycheck-CHECKER-executable' is implicitly defined to allow
-     overriding of the executable.  If this variable is non-nil,
-     Flycheck uses the value of the variable as executable,
-     otherwise it falls back to EXECUTABLE.  In either case, the
-     executable is checked with `executable-find' before use.
+     syntax checker.
+
+     A variable `flycheck-CHECKER-executable' is implicitly
+     defined to allow overriding of the executable.  The variable
+     is customizable and buffer-local.  If this variable is
+     non-nil, Flycheck uses the value of the variable as
+     executable, otherwise it falls back to EXECUTABLE.  In
+     either case, the executable is checked with
+     `executable-find' before use.
 
      Each ARG is an argument to the executable, either as string,
      or as special symbol or form for
@@ -1429,26 +1459,33 @@ The following PROPERTIES constitute a syntax checker:
 
 `:error-patterns ((LEVEL SEXP ...) ...)'
      An unquoted list of error patterns to parse the output of
-     the syntax checker `:command'.  LEVEL is either `error' or
-     `warning' and denotes the severity of errors matched by the
-     pattern.  The LEVEL is followed by one or more RX `SEXP's
-     which parse the error and extract line, column, file name
-     and error message.  See `rx' for general information about
-     RX, and `flycheck-rx-to-string' for special RX forms
-     provided by Flycheck.
+     the syntax checker `:command'.
+
+     LEVEL is either `error' or `warning' and denotes the
+     severity of errors matched by the pattern.  The LEVEL is
+     followed by one or more RX `SEXP's which parse the error and
+     extract line, column, file name and error message.
+
+     See `rx' for general information about RX, and
+     `flycheck-rx-to-string' for special RX forms provided by
+     Flycheck.
+
+     All patterns are applied in the order of declaration to the
+     whole output of the syntax checker.  Output already matched
+     by a pattern will not be matched by subsequent patterns.  In
+     other words, the first pattern wins.
 
 `:error-parser FUNCTION'
 `:error-parser (lambda (output checker buffer) BODY ...)'
      A function to parse errors with, either as unquoted symbol,
-     or `lambda' form.  The function must accept three arguments
-     OUTPUT CHECKER BUFFER, where OUTPUT is the syntax checker
-     output as string, CHECKER the syntax checker that was used,
-     and BUFFER a buffer object representing the checked buffer.
-     The function must return a list of `flycheck-error' objects
-     parsed from OUTPUT.  See Info node `(flycheck)Error API' for
-     more information about `flycheck-error', and Info
-     node `(flycheck)Error parsers' for a list of existing
-     parsers.
+     or `lambda' form.
+
+     The function must accept three arguments OUTPUT CHECKER
+     BUFFER, where OUTPUT is the syntax checker output as string,
+     CHECKER the syntax checker that was used, and BUFFER a
+     buffer object representing the checked buffer.  The function
+     must return a list of `flycheck-error' objects parsed from
+     OUTPUT.
 
 `:modes MODE'
 `:modes (MODE ...)'
@@ -1456,6 +1493,9 @@ The following PROPERTIES constitute a syntax checker:
      present, the syntax checker is only used if the major mode
      of the buffer to check is equal (as in `eq') to any given
      MODE.
+
+     If a `:predicate' is present, it is additionally used in
+     each buffer of these MODEs.
 
 `:predicate FUNCTION'
 `:predicate (lambda () BODY ...)'
@@ -1468,26 +1508,24 @@ The following PROPERTIES constitute a syntax checker:
 
 `:next-checkers (ITEM ...)'
      An unquoted list defining the syntax checker to run after
-     this syntax checker.  Each ITEM is either a syntax checker
-     symbol, or a cons cell `(PREDICATE . CHECKER)'.  In the
-     former case, the syntax checker is always considered.  In
-     the later case, CHECKER is only considered if the PREDICATE
-     matches.  PREDICATE is either `no-errors' or
-     `warnings-only'.  In the former case, CHECKER is only
-     considered if this checker reported no errors or warnings at
-     all, in the latter case, CHECKER is only considered if this
-     checker reported only warnings, but no errors.  The first
-     registered and available syntax checker with matching
-     predicate is executed after this checker.
+     this syntax checker.
 
-A syntax checker must have a `:command', and at least one of
-`:error-patterns' or `:error-parser', and at least one of
-`:modes' and `:predicate'.  If `:predicate' and `:modes' are
-given, both must match for the syntax checker to be used.
-`:next-checkers' is entirely optional.
+     Flycheck tries all items in order of declaration.  Each ITEM
+     is either a syntax checker symbol, or a cons
+     cell `(PREDICATE . CHECKER)'.
 
-Signal a (compile-time) error if any property has an invalid
-value."
+     In the former case, the syntax checker is always considered.
+     In the later case, CHECKER is only considered if the
+     PREDICATE matches.
+
+     PREDICATE is either `no-errors' or `warnings-only'.  With
+     `no-errors' CHECKER is only considered if this checker
+     reported no errors or warnings at all.  With `warnings-only'
+     CHECKER is only considered if this checker reported only
+     warnings, but no errors.
+
+     The first registered and available syntax checker with
+     matching predicate is executed after this checker."
   (declare (indent 1)
            (doc-string 2))
   (let ((command (plist-get properties :command))
@@ -1516,7 +1554,7 @@ value."
     (dolist (checker next-checkers)
       (flycheck-validate-next-checker checker))
     `(progn
-       (put ',symbol :flycheck-documentation ,doc-string)
+       (put ',symbol :flycheck-documentation ,docstring)
        (put ',symbol :flycheck-command ',command)
        (put ',symbol :flycheck-error-parser
             #',(or parser 'flycheck-parse-with-patterns))
@@ -1553,16 +1591,15 @@ The default executable is %S." symbol (car command))
                                                &rest custom-args)
   "Define SYMBOL as config file variable for CHECKER, with default FILE-NAME.
 
-SYMBOL is declared as customizable variable (see `defcustom`)
-providing a configuration file for CHECKER.  The CHECKER argument
-is used for documentation purposes only.  If given use FILE-NAME
-as initial value.
+SYMBOL is declared as customizable, buffer-local variable using
+`defcustom', to provide a configuration file for the given syntax
+CHECKER.  CUSTOM-ARGS are forwarded to `defcustom'.
 
-The variable is declared with `defcustom', and declared
-buffer-local.  CUSTOM-ARGS are forwarded to `defcustom'
+FILE-NAME is the initial value of the new variable.  If omitted,
+the default value is nil.
 
-Use this together with the `config-file' cell in syntax checker
-commands."
+Use this together with the `config-file' form in the `:command'
+argument to `flycheck-define-checker'."
   (declare (indent 3))
   `(progn
      (put ',checker :flycheck-config-file-var ',symbol)
@@ -1590,14 +1627,15 @@ configuration file a buffer." checker)
                                           &rest custom-args)
   "Define SYMBOL as option variable with INIT-VALUE for CHECKER.
 
-INIT-VALUE is the initial value for the new variable.  DOCSTRING
-is its docstring.
+SYMBOL is declared as customizable variable, buffer-local
+variable using `defcustom', to provide an option for the given
+syntax CHECKER.  INIT-VALUE is the initial value of the variable,
+and DOCSTRING is its docstring.  CUSTOM-ARGS are forwarded to
+`defcustom'.
 
-The variable is declared with `defcustom', and declared
-buffer-local.  CUSTOM-ARGS are forwarded to `defcustom'.
-
-Use this together with the `option' cell in syntax checker
-commands."
+Use this together with the `option', `option-list' and
+`option-flag' forms in the `:command' argument to
+`flycheck-define-checker'."
   (declare (indent 3)
            (doc-string 4))
   `(progn
@@ -1805,16 +1843,27 @@ STRING
 `source', `source-inplace'
      Create a temporary file to check and return its path.  With
      `source-inplace' create the temporary file in the same
-     directory as the original file.  With `source', try to
-     retain the non-directory component of the buffer's file name
-     in the temporary file.
+     directory as the original file.
+
+     With `source', try to retain the non-directory component of
+     the buffer's file name in the temporary file.
+
+     `source' is the preferred way to pass the input file to a
+     syntax checker.  `source-inplace' should only be used if the
+     syntax checker needs other files from the source directory,
+     such as include files in C.
 
 `source-original'
      Return the path of the actual file to check, or an empty
-     string if the buffer has no file name.  Note that the
-     contents of the file may not be up to date with the contents
-     of the buffer to check.  Do not use this as primary input to
-     a checker!
+     string if the buffer has no file name.
+
+     Note that the contents of the file may not be up to date
+     with the contents of the buffer to check.  Do not use this
+     as primary input to a checker, unless absolutely necessary.
+
+     When using this symbol as primary input to the syntax
+     checker, add a `:predicate' which checks `buffer-file-name'
+     and `buffer-modified-p' accordingly.
 
 `temporary-directory'
      Create a unique temporary directory and return its path.
@@ -1825,7 +1874,7 @@ STRING
 
 `(config-file OPTION VARIABLE)'
      Search the configuration file bound to VARIABLE with
-     `flycheck-find-config-file' and return a list of arguments
+     `flycheck-locate-config-file' and return a list of arguments
      that pass this configuration file to the syntax checker, or
      nil if the configuration file was not found.
 
@@ -2477,10 +2526,18 @@ The following PROPERTIES constitute an error level:
      node `(elisp)Overlay properties' for more information about
      overlay categories.
 
+     A category for an error level overlay should at least define
+     the `face' property, for error highlighting.  Other useful
+     properties for error level categories are `priority' to
+     influence the stacking of multiple error level overlays, and
+     `help-echo' to define a default error messages for errors
+     without messages.
+
 `:fringe-bitmap BITMAP'
      A fringe bitmap symbol denoting the bitmap to use for fringe
      indicators for this level.  See Info node `(elisp)Fringe
-     Bitmaps' for more information about fringe bitmaps.
+     Bitmaps' for more information about fringe bitmaps,
+     including a list of built-in fringe bitmaps.
 
 `:fringe-face FACE'
      A face symbol denoting the face to use for fringe indicators
@@ -2746,8 +2803,8 @@ back to `xml-parse-region'.")
 (defun flycheck-parse-xml-string (xml)
   "Parse an XML string.
 
-Return the document tree parsed from XML in the form (ROOT ATTRS
-BODY...).  ROOT is a symbol identifying the name of the root
+Return the document tree parsed from XML in the form `(ROOT ATTRS
+BODY...)'.  ROOT is a symbol identifying the name of the root
 element.  ATTRS is an alist of the attributes of the root node.
 BODY is zero or more body elements, either as strings (in case of
 text nodes) or as XML nodes, in the same for as the root node."
@@ -3316,7 +3373,8 @@ and if the echo area is not occupied by minibuffer input."
 Concatenate all non-nil messages of ERRORS separated by empty
 lines, and display them with `display-message-or-buffer', which
 shows the messages either in the echo area or in a separate
-buffer, depending on the number of lines.
+buffer, depending on the number of lines.  See Info
+node `(elisp)Displaying Messages' for more information.
 
 In the latter case, show messages in
 `flycheck-error-message-buffer'."

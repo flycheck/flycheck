@@ -6,6 +6,8 @@
 
 .. _flycheck-mode:
 
+.. require:: flycheck
+
 Flycheck Mode
 =============
 
@@ -63,55 +65,17 @@ However, you can customize automatic syntax checking with
 :option:`flycheck-check-syntax-automatically`:
 
 .. option:: flycheck-check-syntax-automatically
-
-   When Flycheck should check syntax automatically.
-
-   This variable is list of events that may trigger syntax checks.  The
-   following events are known:
-
-   `mode-enabled`
-      Check syntax immediately when :command:`flycheck-mode` is enabled.
-
-   `save`
-      Check syntax immediately after the buffer was saved.
-
-   `new-line`
-      Check syntax immediately after a new line was inserted into the buffer.
-
-   `idle-change`
-      Check syntax a short time (see :option:`flycheck-idle-change-delay`) after
-      the last change to the buffer.
-
-   An syntax check is only conducted for events that are contained in this list.
-   For instance, the following setting will cause Flycheck to *only* check if
-   the mode is enabled or the buffer was saved, but *never* after changes to the
-   buffer contents:
-
-   .. code-block:: cl
-
-      (setq flycheck-check-syntax-automatically '(mode-enabled save))
-
-   If the list is empty syntax is never checked automatically.  In this case,
-   use :command:`flycheck-buffer` to check syntax manually.
+   :auto:
 
 .. option:: flycheck-idle-change-delay
-
-   How many seconds to wait before starting a syntax check.
-
-   After the buffer was changed, Flycheck waits as many seconds as the value of
-   this variable before starting a syntax check.  If the buffer is changed
-   during this time, Flycheck starts to wait again.
-
-   This variable has no effect, if `idle-change` is not contained in
-   :option:`flycheck-check-syntax-automatically`.
+   :auto:
 
 Regardless of automatic syntax checking you can also check the buffer
 manually:
 
 .. command:: flycheck-buffer
    :binding: C-c ! c
-
-   Start a syntax check in the current buffer.
+   :auto:
 
 Each syntax check conducts the following steps:
 
@@ -130,49 +94,17 @@ Each syntax check conducts the following steps:
 8. Run hooks in :hook:`flycheck-after-syntax-check-hook`.
 
 .. hook:: flycheck-after-syntax-check-hook
+   :auto:
 
-   Functions to run after each syntax check.
-
-   This hook is run after a syntax check was finished.
-
-   At this point, **all** chained checkers were run, and all errors were parsed,
-   highlighted and reported.  See :ref:`error-reporting`, for more information
-   about error reporting.  The variable :variable:`flycheck-current-errors`
-   contains all errors from all syntax checkers run during the syntax check, so
-   you can use the various error analysis functions.
-
-   Note that this hook does **not** run after each individual syntax checker in
-   the syntax checker chain, but only after the **last checker**.
-
-   This variable is a normal hook. See :infonode:`Hooks(elisp)`.
+   See :ref:`error-reporting`, for more information about error reporting.
 
 .. hook:: flycheck-before-syntax-check-hook
-
-   Functions to run before each syntax check.
-
-   This hook is run right before a syntax check starts.
-
-   Error information from the previous syntax check is **not** cleared before
-   this hook runs.
-
-   Note that this hook does **not** run before each individual syntax checker in
-   the syntax checker chain, but only before the **first checker**.
-
-   This variable is a normal hook. See :infonode:`Hooks(elisp)`.
+   :auto:
 
 There is also a hook run whenever a syntax check fails:
 
 .. hook:: flycheck-syntax-check-failed-hook
-
-   Functions to run if a syntax check failed.
-
-   This hook is run whenever an error occurs during Flycheck's internal
-   processing.  No information about the error is given to this hook.
-
-   You should use this hook to conduct additional cleanup actions when Flycheck
-   failed.
-
-   This variable is a normal hook. See :infonode:`Hooks(elisp)`.
+   :auto:
 
 .. _syntax-checker-selection:
 
@@ -184,22 +116,12 @@ By default Flycheck selects a :term:`suitable syntax checker` automatically from
 :option:`flycheck-disabled-checkers`:
 
 .. option:: flycheck-checkers
+   :auto:
 
-   A list of :term:`syntax checker`\ s available for automatic syntax checker
-   selection.  An item in this list is a :term:`registered syntax checker`.
-
-   You may modify this list, but you should normally not need to.  Instead, it
-   is intended for 3rd party extensions to tell Flycheck about new syntax
-   checkers.
+   An item in this list is a :term:`registered syntax checker`.
 
 .. option:: flycheck-disabled-checkers
-
-   A list of :term:`syntax checker`\ s explicitly excluded from automatic
-   selection.
-
-   Change this list to disable syntax checkers which you do not want to use.
-   You may also use this option as a file or directory local variable to disable
-   specific checkers in individual files and directories respectively.
+   :auto:
 
 A syntax checker in :option:`flycheck-checkers` and **not** in
 :option:`flycheck-disabled-checkers` is an :term:`enabled syntax checker`.
@@ -236,60 +158,18 @@ You can manually select a specific syntax checker for the current buffer, too:
 
    Set :variable:`flycheck-checker` to `nil`.
 
+.. function:: flycheck-select-checker
+   :noindex:
+   :auto:
+
 .. variable:: flycheck-checker
-
-   The :term:`syntax checker` to use for the current buffer.
-
-   The variable is buffer local, and safe as file local variable for registered
-   checkers.
-
-   If set to `nil`, automatically select a suitable syntax checker.
-
-   If set to a :term:`syntax checker`, only use this syntax checker.  Automatic
-   selection as described above is *disabled*.  If the syntax checker not
-   suitable, signal an error.
-
-   You may directly set this variable without
-   :command:`flycheck-select-checker`, e.g. via file local variables.  For
-   instance, you can use the following file local variable within a Python file
-   to always use `pylint` for the file:
-
-   .. code-block:: python
-
-      # Local Variables:
-      # flycheck-checker: python-pylint
-      # End:
-
-   See :infonode:`Specifying File Variables(emacs)` for more information about
-   file variables.
+   :auto:
 
 You can change the completion system used by
 :command:`flycheck-select-checker`:
 
 .. option:: flycheck-completion-system
-
-   The completion system to use.
-
-   `ido`
-      Use IDO.
-
-      IDO is a built-in alternative completion system, without good flex
-      matching and a powerful UI.  You may want to install flx-ido_ to improve
-      the flex matching in IDO.
-
-   `grizzl`
-      Use Grizzl_.
-
-      Grizzl is an alternative completion system with powerful flex matching,
-      but a very limited UI.
-
-   `nil`
-      Use the standard unfancy `completing-read`.
-
-      `completing-read` has a very simple and primitive UI, and does not offer
-      flex matching.  This is the default setting, though, to match Emacs'
-      defaults.  With this system, you may want enable `icomplete-mode` to
-      improve the display of completion candidates at least.
+   :auto:
 
 Each syntax checker provides documentation with information about the executable
 the syntax checker uses, in which buffers it will be used for syntax checks, and
@@ -300,9 +180,6 @@ syntax checker configuration.
    :binding: C-c ! ?
 
    Show the documentation of a syntax checker.
-
-.. _flx-ido: https://github.com/lewang/flx
-.. _Grizzl: https://github.com/d11wtq/grizzl
 
 .. _syntax-checker-configuration:
 
@@ -352,204 +229,40 @@ them interactively:
 Syntax checker options
 ----------------------
 
-Some syntax checkers can be configured via options.  The following options are
-provided by Flycheck (in Emacs, use :kbd:`C-h v` or :kbd:`M-x describe-variable`
-on the variable name for detailed help):
+Some syntax checkers can be configured via options.  See :doc:`languages` for a
+complete list of options for each syntax checkers.
 
-.. option:: flycheck-clang-definitions
+All options are customizable via :kbd:`M-x customize-group RET
+flycheck-options`, and automatically buffer-local to easily set them in hooks.
 
-   Additional preprocessor definitions for :flyc:checker:`c/c++-clang`.
-
-.. option:: flycheck-clang-include-path
-
-   Include search path for :flyc:checker:`c/c++-clang`.
-
-.. option:: flycheck-clang-includes
-
-   Additional include files for :flyc:checker:`c/c++-clang`.
-
-.. option:: flycheck-clang-language-standard
-
-   The language standard for :flyc:checker:`c/c++-clang`.
-
-.. option:: flycheck-clang-ms-extensions
-
-   Whether to enable Microsoft extensions in :flyc:checker:`c/c++-clang`.
-
-.. option:: flycheck-clang-no-rtti
-
-   Whether to disable RTTI in :flyc:checker:`c/c++-clang`.
-
-.. option:: flycheck-clang-standard-library
-
-   The standard library to use for :flyc:checker:`c/c++-clang`.
-
-.. option:: flycheck-clang-warnings
-
-   Additional warnings to enable in :flyc:checker:`c/c++-clang`.
-
-.. option:: flycheck-cppcheck-checks
-
-   Additional checks to use in :flyc:checker:`c/c++-cppcheck`.
-
-.. option:: flycheck-dmd-include-path
-
-   Include search path for :flyc:checker:`d-dmd`.
-
-.. option:: flycheck-emacs-lisp-initialize-packages
-
-   Whether to initialize packages (see `package-initialize`) before invoking the
-   byte compiler in the :flyc:checker:`emacs-lisp` syntax checker.
-
-   When `nil`, never initialize packages.  When `auto`,
-   initialize packages only when checking files from the user's Emacs
-   configuration in `user-emacs-directory`.  For any other non-nil
-   value, always initialize packages.
-
-.. option:: flycheck-emacs-lisp-load-path
-
-   The `load-path` to use while checking with :flyc:checker:`emacs-lisp`.
-
-   The directory of the file being checked is always added to
-   `load-path`, regardless of the value of this variable.
-
-   Note that changing this variable can lead to wrong results of the
-   syntax check, e.g. if an unexpected version of a required library
-   is used.
-
-.. option:: flycheck-emacs-lisp-package-user-dir
-
-   The package directory for the :flyc:checker:`emacs-lisp` syntax checker.
-
-.. option:: flycheck-eslint-rulesdir
-
-   A directory with custom rules for the :flyc:checker:`javascript-eslint`
-   syntax checker.
-
-.. option:: flycheck-flake8-maximum-complexity
-
-   The maximum McCabe complexity the :flyc:checker:`python-flake8` syntax
-   checker allows without reporting a warning.
-
-.. option:: flycheck-flake8-maximum-line-length
-
-   The maximum length of a line in characters the :flyc:checker:`python-flake8`
-   syntax checker allows without reporting an error.
-
-.. option:: flycheck-ghc-no-user-package-database
-
-   Whether to disable the user package database for :flyc:checker:`haskell-ghc`.
-
-.. option:: flycheck-ghc-package-databases
-
-   A list of package database for :flyc:checker:`haskell-ghc`.
-
-.. option:: flycheck-ghc-search-path
-
-   A list of module directories for the search path of
-   :flyc:checker:`haskell-ghc`.
-
-.. option:: flycheck-go-vet-print-functions
-
-   A comma-separated list of print-like functions to check for format string
-   issues in the :flyc:checker:`go-vet` syntax checker.
-
-.. option:: flycheck-perlcritic-verbosity
-
-   The verbosity of :flyc:checker:`perl-perlcritic` as integer.
-
-.. option:: flycheck-phpcs-standard
-
-   The coding standard :flyc:checker:`php-phpcs` shall use.
-
-.. option:: flycheck-phpmd-rulesets
-
-   The rule sets :flyc:checker:`php-phpmd` shall use.
-
-.. option:: flycheck-rubocop-lint-only
-
-   Whether to disable style checks for :flyc:checker:`ruby-rubocop`.
-
-.. option:: flycheck-rust-library-path
-
-   The library path for :flyc:checker:`rust`.
-
-.. option:: flycheck-sass-compass
-
-   Whether to enable the Compass CSS framework for :flyc:checker:`sass`.
-
-.. option:: flycheck-scss-compass
-
-   Whether to enable the Compass CSS framework for :flyc:checker:`scss`.
-
-.. option:: flycheck-sphinx-warn-on-missing-references
-
-   Whether to warn about missing references in :flyc:checker:`rst-sphinx`
+Options are mainly intended to be used by :ref:`extensions
+<3rd-party-extensions>`, and via File or Directory Local variables.  See
+:infonode:`(emacs)File Variables` and :infonode:`(emacs)Directory Variables`
+respectively.
 
 .. _syntax-checker-configuration-files:
 
 Syntax checker configuration files
 ----------------------------------
 
+.. FIXME: Move these into the languages document, under each specific syntax
+   checker.
+
 Some syntax checkers also read configuration files, denoted by associated
-*configuration file variables*:
+*configuration file variables*.  See :doc:`languages` of these variables.
 
-.. option:: flycheck-chktexrc
+All options are customizable via :kbd:`M-x customize-group RET
+flycheck-config-files`, and automatically buffer-local to easily set them in
+hooks.  You may also set them via File or Directory Local variables.  See
+:infonode:`(emacs)File Variables` and :infonode:`(emacs)Directory Variables`
+respectively.
 
-   The configuration file for the :flyc:checker:`tex-chktex` syntax checker.
-
-.. option:: flycheck-coffeelintrc
-
-   The configuration file for the :flyc:checker:`coffee-coffeelint` syntax
-   checker.
-
-.. option:: flycheck-eslintrc
-
-   The configuration file for the :flyc:checker:`javascript-eslint` syntax
-   checker.
-
-.. option:: flycheck-flake8rc
-
-   The configuration file for the :flyc:checker:`python-flake8` syntax checker.
-
-.. option:: flycheck-gjslintrc
-
-   The configuration file for the :flyc:checker:`javascript-gjslint` syntax
-   checker.
-
-.. option:: flycheck-jshintrc
-
-   The configuration file for the :flyc:checker:`javascript-jshint` syntax
-   checker.
-
-.. option:: flycheck-pylintrc
-
-   The configuration file for the :flyc:checker:`python-pylint` syntax checker.
-
-.. option:: flycheck-rubocoprc
-
-   The configuration file for the :flyc:checker:`ruby-rubocop` syntax checker.
-
-.. option:: flycheck-tidyrc
-
-   The configuration file for the :flyc:checker:`html-tidy` syntax checker.
-
-The value of these variables is either a string or `nil`.  In the former case,
-locate the configuration file using the functions in
-:option:`flycheck-locate-config-file-functions`:
+When set to a string, Flycheck tries to locate the configuration file using the
+functions in :option:`flycheck-locate-config-file-functions` and passes the name
+of the file to the syntax checker:
 
 .. option:: flycheck-locate-config-file-functions
-
-   Functions to locate syntax checker configuration files.
-
-   Each function in this hook must accept two arguments: The value of the
-   configuration file variable, and the syntax checker symbol.  It must
-   return either a string with an absolute path to the configuration file,
-   or nil, if it cannot locate the configuration file.
-
-   The functions in this hook are called in order of appearance, until a
-   function returns non-nil.  The configuration file returned by that
-   function is then given to the syntax checker if it exists.
+   :auto:
 
 With the default value of this variable, configuration files are located by the
 following algorithm:
@@ -565,26 +278,6 @@ following algorithm:
    directory.
 
 If any of these steps succeeds, the subsequent steps are not executed.
-
-If the configuration file is found, pass it to the syntax checker upon
-invocation.
-
-If the configuration file is not found, or if the value of the variable is nil,
-invoke the syntax checker without a configuration file.
-
-Customize these variables using :kbd:`M-x customize-group RET
-flycheck-config-files`.  Use `flycheck-describe-checker` to find out whether a
-syntax checker has a configuration file.
-
-You may also use these variables as file-local variables.  For instance, the
-following checks the Javascript file always with :file:`.jshintrc` from the
-parent directory:
-
-.. code-block:: javascript
-
-   // Local variables:
-   // flycheck-jshintrc: "../.jshintrc"
-   // End:
 
 .. _Projectile: https://github.com/bbatsov/projectile
 
@@ -602,8 +295,8 @@ Errors and warnings from a syntax checker are
   :option:`flycheck-highlighting-mode`
 
 .. face:: flycheck-error
-             flycheck-warning
-             flycheck-info
+          flycheck-warning
+          flycheck-info
 
    The faces to use to highlight errors, warnings and info messages
    respectively.
@@ -620,62 +313,26 @@ Errors and warnings from a syntax checker are
    Zenburn_ themes are known to have good Flycheck faces.
 
 .. option:: flycheck-highlighting-mode
-
-   This variable determines how to highlight errors:
-
-   `columns`
-       Highlights the error column.  If the error does not have a column,
-       highlight the whole line.
-
-   `symbols`
-       Highlights the symbol at the error column, if there is any, otherwise
-       behave like @code{columns}.  This is the default.
-
-   `sexps`
-       Highlights the expression at the error column, if there is any, otherwise
-       behave like `columns`.  Note that this mode can be **very** slow in some
-       major modes.
-
-   `lines`
-       Highlights the whole line of the error.
-
-   `nil`
-      Do not highlight errors at all.  However, errors will still be reported
-      in the mode line and in error message popups, and indicated according to
-      :option:`flycheck-indication-mode`.
+   :auto:
 
 .. face:: flycheck-fringe-error
-             flycheck-fringe-warning
-             flycheck-fringe-info
+          flycheck-fringe-warning
+          flycheck-fringe-info
 
    The faces of fringe indicators for errors, warnings and info messages
    respectively.
 
 .. option:: flycheck-indication-mode
-
-   This variable determines how to indicate errors:
-
-   If set to `left-fringe` or `right-fringe`, indicate errors and warnings in
-   the left and right fringe respectively.
-
-   If set to `nil`, do not indicate errors.  Errors will still be reported in
-   the mode line and in error message popups, and highlighted according to
-   :option:`flycheck-highlighting-mode`.
+   :auto:
 
 You can also completely customize error processing by hooking into Flycheck:
 
 .. hook:: flycheck-process-error-functions
+   :auto:
 
-   Functions to process errors.
+   .. seealso::
 
-   Each function in this hook must accept a single argument: The Flycheck error
-   to process.  See :ref:`error-api`, for more information about Flycheck error
-   objects.
-
-   The functions in this hook are called in order of appearance, until a
-   function returns non-nil.  Thus, a function in this hook may return nil, to
-   allow for further processing of the error, or t, to indicate that the error
-   was fully processed and inhibit any further processing.
+      :ref:`error-api`
 
 If you hover a highlighted error with the mouse, a tooltip with the top-most
 error message will be shown.
@@ -683,31 +340,17 @@ error message will be shown.
 Flycheck also displays errors under point after a short delay:
 
 .. option:: flycheck-display-errors-delay
-
-   Delay in seconds before displaying errors at point.
-
-   Use floating point numbers to express fractions of seconds.
+   :auto:
 
 The error is displayed via :option:`flycheck-display-errors-function`:
 
 .. option:: flycheck-display-errors-function
+   :auto:
 
-   A function to display errors under point.
+The default function displays the error messages in the echo area:
 
-   If set to a function, call the function with a list of all errors to
-   show.  If set to nil, to not display errors at all.
-
-   The default function is :function:`flycheck-display-error-messages`.
-
-.. function:: flycheck-display-error-messages errors
-
-   Show the messages of the given `errors` in the echo area, separated by empty
-   lines.  If the error messages are too long for the echo area, show the error
-   messages in a popup buffer instead.
-
-   The Emacs Lisp function `display-message-or-buffer` is used to show the
-   messages.  Refer to the docstring of this function for details on when popup
-   buffers are used, and how to customize its behaviour.
+.. function:: flycheck-display-error-messages
+   :auto:
 
 You can also work with the error messages at point, and copy them into the kill
 ring or search them on Google:
@@ -728,20 +371,12 @@ ring or search them on Google:
    Requires the `Google This`_ library, which is available on MELPA_.
 
 .. option:: flycheck-google-max-messages
-
-   The maximum number of error messages to Google at once.
-
-   If set to an integer, :command:`flycheck-google-messages` will refuse to
-   search, when there are more error messages than the value of this variable at
-   point.
-
-   If set to `nil`, :command:`flycheck-google-messages` will always search
-   for **all** messages at point.  This setting is **not** recommended.
+   :auto:
 
 You can also show a list with all errors in the current buffer:
 
 .. command:: flycheck-list-errors
-                list-flycheck-errors
+             list-flycheck-errors
    :binding: C-c ! l
 
    List all errors in the current buffer in a separate buffer.
@@ -757,12 +392,10 @@ with :face:`flycheck-error-list-highlight-at-point` and
 :face:`flycheck-error-list-highlight` respectively.
 
 .. face:: flycheck-error-list-highlight-at-point
-
-   The face for highlighting the errors at point in the error list.
+   :auto:
 
 .. face:: flycheck-error-list-highlight
-
-   The face for highlighting the errors at the current line in the error list.
+   :auto:
 
 Ultimately, you can clear all reported errors at once:
 
@@ -789,22 +422,14 @@ Flycheck integrates into standard error navigation commands of Emacs.  If **no**
 compilation buffer (including those from :kbd:`M-x compile`, :kbd:`M-x grep`,
 :kbd:`M-x occur`, etc.) is visible, :kbd:`M-g n` (`next-error`) and :kbd:`M-g p`
 (`previous-error`) will navigate between Flycheck warnings and errors in the
-current buffer.  See :infonode:`Compilation Mode(emacs)` for more information
+current buffer.  See :infonode:`(emacs)Compilation Mode` for more information
 about these commands.
 
 You can disable this integration by setting
 :option:`flycheck-standard-error-navigation` to nil:
 
 .. option:: flycheck-standard-error-navigation
-
-   If non-nil, enable navigation of Flycheck errors with the standard
-   `next-error` and friends.
-
-   Otherwise, do not integrate in standard error navigation, and let these
-   functions only navigate compilation mode errors.
-
-   Changes to this variable only take effect after re-enabling
-   :ref:`flycheck-mode` with :command:`flycheck-mode` again.
+   :auto:
 
 Visible compilation buffers take precedence over Flycheck navigation.  If such a
 buffer is visible, :kbd:`M-g n` and :kbd:`M-g p` will ignore Flycheck errors and

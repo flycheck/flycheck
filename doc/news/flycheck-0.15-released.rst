@@ -80,7 +80,7 @@ highlights all other errors at the current line with the new
 C/C++ support
 =============
 
-The :flyc:checker:`c/c++-clang` syntax checker for C and C++ got a bunch
+The :flyc-checker:`c/c++-clang` syntax checker for C and C++ got a bunch
 of new options:
 
 - Set additional preprocessor definitions for syntax checking with
@@ -123,10 +123,10 @@ the semantics of error levels is as follows:
 Some syntax checkers were changed to use this new level for messages, which do
 not really fit into the `warning` level:
 
-- :flyc:checker:`c/c++-clang` for `note:` messages
-- :flyc:checker:`python-flake8` for PEP8 naming issues emitted by the
+- :flyc-checker:`c/c++-clang` for `note:` messages
+- :flyc-checker:`python-flake8` for PEP8 naming issues emitted by the
   `pep8-naming` plugin
-- :flyc:checker:`python-pylint` for convention level messages, e.g. naming
+- :flyc-checker:`python-pylint` for convention level messages, e.g. naming
   issues, etc.
 
 The new level is already supported by the popular Solarized_ and Zenburn_
@@ -162,13 +162,13 @@ Other improvements
 Beside these important changes, there are also a number of smaller improvements:
 
 - Flycheck does not longer check encrypted files for obvious reasons.
-- The :flyc:checker:`emacs-lisp-checkdoc` syntax checker does not check
+- The :flyc-checker:`emacs-lisp-checkdoc` syntax checker does not check
   `.dir-locals.el` anymore.
-- :flyc:checker:`python-pylint` now parses error columns from the output of
+- :flyc-checker:`python-pylint` now parses error columns from the output of
   `pylint`.
-- Spurious “flawed definition” warnings in :flyc:checker:`lua`,
-  :flyc:checker:`rst` and :flyc:checker:`go-build` were fixed.
-- :flyc:checker:`c/c++-cppcheck` output now parses correctly when using the pure
+- Spurious “flawed definition” warnings in :flyc-checker:`lua`,
+  :flyc-checker:`rst` and :flyc-checker:`go-build` were fixed.
+- :flyc-checker:`c/c++-cppcheck` output now parses correctly when using the pure
   Emacs Lisp XML parser in `xml.el`.
 
   .. note::
