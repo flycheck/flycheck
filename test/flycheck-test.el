@@ -240,6 +240,10 @@ The absolute file name of RESOURCE-FILE is determined with
 After this time has elapsed, the checker is considered to have
 failed, and the test aborted with failure.")
 
+(put 'flycheck-test-syntax-check-timed-out 'error-message
+     "Syntax check timed out.")
+(put 'flycheck-test-syntax-check-timed-out 'error-conditions '(error))
+
 (defun flycheck-test-wait-for-syntax-checker ()
   "Wait until the syntax check in the current buffer is finished."
   (let ((starttime (float-time)))
@@ -248,8 +252,7 @@ failed, and the test aborted with failure.")
       (sleep-for 1))
     (unless (< (- (float-time) starttime) flycheck-test-checker-wait-time)
       (flycheck-stop-checker)
-      (error "Syntax check did not finish after %s seconds"
-             flycheck-test-checker-wait-time)))
+      (signal 'flycheck-test-syntax-check-timed-out nil)))
   (setq flycheck-test-syntax-checker-finished nil))
 
 (defun flycheck-test-buffer-sync ()
@@ -4460,16 +4463,24 @@ Why not:
        "checkers/yaml-syntax-error.yaml" 'yaml-mode expected-error))))
 
 
-;;;; Compatibility again
+;;;; Test results
 
-(unless flycheck-test-ert-can-skip
-  ;; For Emacs 24.3 and below, we mark skipped tests as expected failures, but
-  ;; adjusting the expected result of all test cases, because ERT does not yet
-  ;; support test skipping.  Not particularly pretty, but works :)
-  (dolist (test (ert-select-tests t t))
-    (let ((result (ert-test-expected-result-type test)))
-      (setf (ert-test-expected-result-type test)
-            (list 'or result '(satisfies ert-test-skipped-p))))))
+(defun flycheck-test-syntax-check-timed-out-p (result)
+  "Whether RESULT denotes a timed-out test."
+  (and (ert-test-failed-p result)
+       (eq (car (ert-test-failed-condition result))
+           'flycheck-test-syntax-check-timed-out)))
+
+(dolist (test (ert-select-tests t t))
+  (let* ((result (ert-test-expected-result-type test))
+         (new-result `(or ,result
+                          (satisfies flycheck-test-syntax-check-timed-out-p))))
+    (unless flycheck-test-ert-can-skip
+      ;; For Emacs 24.3 and below, we mark skipped tests as expected failures,
+      ;; but adjusting the expected result of all test cases, because ERT does
+      ;; not yet support test skipping.  Not particularly pretty, but works :)
+      (push '(satisfies ert-test-skipped-p) new-result))
+    (setf (ert-test-expected-result-type test) new-result)))
 
 (provide 'flycheck-test)
 
