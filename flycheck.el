@@ -502,7 +502,8 @@ nil
   :group 'flycheck
   :type '(choice (const :tag "IDO" ido)
                  (const :tag "Grizzl" grizzl)
-                 (const :tag "Completing read" nil)))
+                 (const :tag "Completing read" nil))
+  :package-version '(flycheck . "0.17"))
 
 (defcustom flycheck-mode-hook nil
   "Hooks to run after `flycheck-mode'."
