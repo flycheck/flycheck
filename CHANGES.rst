@@ -7,6 +7,13 @@ master (in development)
 
   - #381: Add `flycheck-keymap-prefix` to change the prefix key for Flycheck
     keybindings
+  - #387: Make the prefix of Flycheck's temporary files customizable with
+    `flycheck-temp-prefix`.
+
+- Improvements:
+
+  - #387: Change the default prefix of Flycheck's temporary files to
+    ``.flycheck``.
 
 - Bug fixes:
 

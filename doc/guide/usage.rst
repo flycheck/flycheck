@@ -106,6 +106,13 @@ There is also a hook run whenever a syntax check fails:
 .. hook:: flycheck-syntax-check-failed-hook
    :auto:
 
+During syntax checks, Flycheck generates some temporary files for syntax checker
+input and output.   Use :option:`flycheck-temp-prefix` to change the prefix of
+these temporary files:
+
+.. option:: flycheck-temp-prefix
+   :auto:
+
 .. _syntax-checker-selection:
 
 Syntax checker selection

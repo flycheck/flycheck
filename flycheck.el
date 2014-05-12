@@ -505,6 +505,13 @@ nil
                  (const :tag "Completing read" nil))
   :package-version '(flycheck . "0.17"))
 
+(defcustom flycheck-temp-prefix ".flycheck"
+  "Prefix for temporary files created by Flycheck."
+  :group 'flycheck
+  :type 'string
+  :package-version '(flycheck . "0.19")
+  :risky t)
+
 (defcustom flycheck-mode-hook nil
   "Hooks to run after `flycheck-mode'."
   :group 'flycheck
@@ -1104,51 +1111,56 @@ Otherwise return nil."
 (defvar-local flycheck-temporaries nil
   "Temporary files and directories created by Flycheck.")
 
-(defun flycheck-temp-dir-system (prefix)
-  "Create a unique temporary directory from PREFIX.
+(defun flycheck-temp-dir-system ()
+  "Create a unique temporary directory.
 
-Add the directory to `flycheck-temporaries'.
+Use `flycheck-temp-prefix' as prefix, and add the directory to
+`flycheck-temporaries'.
 
 Return the path of the directory"
-  (let* ((tempdir (make-temp-file prefix 'directory)))
+  (let* ((tempdir (make-temp-file flycheck-temp-prefix 'directory)))
     (push tempdir flycheck-temporaries)
     tempdir))
 
-(defun flycheck-temp-file-system (filename prefix)
-  "Create a temporary file named after FILENAME with PREFIX.
-
-If FILENAME is nil, this function creates a temporary file with
-PREFIX and a random suffix.  The path of the file is added to
-`flycheck-temporaries'.
+(defun flycheck-temp-file-system (filename )
+  "Create a temporary file named after FILENAME.
 
 If FILENAME is non-nil, this function creates a temporary
-directory with PREFIX and a random suffix using
-`flycheck-temp-dir-system', and creates a file with the same name
-as FILENAME in this directory
+directory with `flycheck-temp-dir-system', and creates a file
+with the same name as FILENAME in this directory.
+
+Otherwise this function creates a temporary file with
+`flycheck-temp-prefix' and a random suffix.  The path of the file
+is added to `flycheck-temporaries'.
+
+Add the path of the file to `flycheck-temporaries'.
 
 Return the path of the file."
   (let (tempfile)
     (if filename
-        (let ((directory (flycheck-temp-dir-system prefix)))
+        (let ((directory (flycheck-temp-dir-system)))
           (setq tempfile (f-join directory (f-filename filename))))
-      (setq tempfile (make-temp-file prefix)))
+      (setq tempfile (make-temp-file flycheck-temp-prefix)))
     (push tempfile flycheck-temporaries)
     tempfile))
 
-(defun flycheck-temp-file-inplace (filename prefix)
-  "Create an in-place copy of FILENAME with PREFIX added.
+(defun flycheck-temp-file-inplace (filename)
+  "Create an in-place copy of FILENAME.
 
-Add the path of the file to `flycheck-temporaries'.
+Prefix the file with `flycheck-temp-prefix' and add the path of
+the file to `flycheck-temporaries'.
 
 If FILENAME is nil, fall back to `flycheck-temp-file-system'.
 
 Return the path of the file."
   (if filename
-      (let* ((tempname (format "%s_%s" prefix (f-filename filename)))
+      (let* ((tempname (format "%s_%s"
+                               flycheck-temp-prefix
+                               (f-filename filename)))
              (tempfile (f-expand (f-join (f-dirname filename) tempname))))
         (push tempfile flycheck-temporaries)
         tempfile)
-    (flycheck-temp-file-system filename prefix)))
+    (flycheck-temp-file-system filename)))
 
 (defun flycheck-save-buffer-to-file (file-name)
   "Save the contents of the current buffer to FILE-NAME."
@@ -1156,11 +1168,11 @@ Return the path of the file."
   (let ((jka-compr-inhibit t))
     (write-region nil nil file-name nil 0)))
 
-(defun flycheck-save-buffer-to-temp (temp-file-fn prefix)
-  "Save buffer to temp file returned by TEMP-FILE-FN with PREFIX.
+(defun flycheck-save-buffer-to-temp (temp-file-fn)
+  "Save buffer to temp file returned by TEMP-FILE-FN.
 
 Return the name of the temporary file."
-  (let ((filename (funcall temp-file-fn (buffer-file-name) prefix)))
+  (let ((filename (funcall temp-file-fn (buffer-file-name))))
     ;; Do not flush short-lived temporary files onto disk
     (let ((write-region-inhibit-fsync t))
       (flycheck-save-buffer-to-file filename))
@@ -1933,13 +1945,13 @@ are substituted within the body of cells!"
   (pcase arg
     ((pred stringp) arg)
     (`source
-     (flycheck-save-buffer-to-temp #'flycheck-temp-file-system "flycheck"))
+     (flycheck-save-buffer-to-temp #'flycheck-temp-file-system))
     (`source-inplace
-     (flycheck-save-buffer-to-temp #'flycheck-temp-file-inplace "flycheck"))
+     (flycheck-save-buffer-to-temp #'flycheck-temp-file-inplace))
     (`source-original (or (buffer-file-name) ""))
-    (`temporary-directory (flycheck-temp-dir-system "flycheck"))
+    (`temporary-directory (flycheck-temp-dir-system))
     (`temporary-file-name
-     (let ((directory (flycheck-temp-dir-system "flycheck")))
+     (let ((directory (flycheck-temp-dir-system)))
        (make-temp-name (f-join directory "flycheck"))))
     (`(config-file ,option-name ,file-name-var)
      (-when-let* ((value (symbol-value file-name-var))
@@ -4338,7 +4350,7 @@ is added to the GHC search path via `-i'."
   "A Haskell syntax and type checker using ghc.
 
 See URL `http://www.haskell.org/ghc/'."
-  :command ("ghc" "-Wall" "-fno-code"
+  :command ("ghc" "-Wall" "-fno-code" "-c"
             (option-flag "-no-user-package-db"
                          flycheck-ghc-no-user-package-database)
             (option-list "-package-db" flycheck-ghc-package-databases)

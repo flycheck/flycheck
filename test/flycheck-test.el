@@ -500,6 +500,10 @@ check with.  ERRORS is the list of expected errors."
     (ignore-errors
       (custom-set-variables '(flycheck-keymap-prefix (kbd "C-c !"))))))
 
+(ert-deftest flycheck-temp-prefix/default ()
+  :tags '(customization)
+  (should (equal flycheck-temp-prefix ".flycheck")))
+
 
 ;;;; Minor mode definition
 
@@ -971,28 +975,27 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-temp-dir-system ()
   :tags '(utility)
-  (let ((dirname (flycheck-temp-dir-system "flycheck-test")))
+  (let ((dirname (flycheck-temp-dir-system)))
     (unwind-protect
         (should (f-directory? dirname))
       (flycheck-safe-delete-temporaries))
     (should-not (f-exists? dirname))
     (should (f-child-of? dirname temporary-file-directory))
-    (should (s-starts-with? "flycheck-test" (f-filename dirname)))))
+    (should (s-starts-with? flycheck-temp-prefix (f-filename dirname)))))
 
 (ert-deftest flycheck-temp-file-system/without-file-name ()
   :tags '(utility)
-  (let ((filename (flycheck-temp-file-system nil "flycheck-test")))
+  (let ((filename (flycheck-temp-file-system nil)))
     (unwind-protect
         (should (f-file? filename))
       (flycheck-safe-delete-temporaries))
     (should-not (f-exists? filename))
     (should (f-child-of? filename temporary-file-directory))
-    (should (s-starts-with? "flycheck-test" (f-filename filename)))))
+    (should (s-starts-with? flycheck-temp-prefix (f-filename filename)))))
 
 (ert-deftest flycheck-temp-file-system/with-complete-path ()
   :tags '(utility)
-  (let* ((filename (flycheck-temp-file-system "spam/with/eggs.el"
-                                              "flycheck-test"))
+  (let* ((filename (flycheck-temp-file-system "spam/with/eggs.el"))
          (dirname (directory-file-name (f-parent filename))))
     (unwind-protect
         (progn
@@ -1006,37 +1009,38 @@ check with.  ERRORS is the list of expected errors."
     ;; subdirectory of the temporary directory
     (should (string= "eggs.el" (f-filename filename)))
     (should (f-child-of? dirname temporary-file-directory))
-    (should (s-starts-with? "flycheck-test" (f-filename dirname)))))
+    (should (s-starts-with? flycheck-temp-prefix (f-filename dirname)))))
 
 (ert-deftest flycheck-temp-file-inplace/with-just-basename ()
   :tags '(utility)
   (let* ((default-directory flycheck-test-directory)
-         (filename (flycheck-temp-file-inplace "eggs.el" "flycheck-test")))
+         (filename (flycheck-temp-file-inplace "eggs.el")))
     (unwind-protect
         ;; In place files should not be created early
         (should-not (f-exists? filename))
       (flycheck-safe-delete-temporaries))
-    (should (string= filename (f-expand "flycheck-test_eggs.el")))))
+    (should (string= filename (f-expand (concat flycheck-temp-prefix
+                                                "_eggs.el"))))))
 
 (ert-deftest flycheck-temp-file-inplace/with-complete-path ()
   :tags '(utility)
   (let* ((default-directory flycheck-test-directory)
-         (filename (flycheck-temp-file-inplace "spam/with/eggs.el"
-                                               "flycheck-test")))
+         (filename (flycheck-temp-file-inplace "spam/with/eggs.el")))
     (unwind-protect
         (should-not (f-exists? filename))
       (flycheck-safe-delete-temporaries))
     (should (string= filename
-                     (f-expand (f-join "spam/with" "flycheck-test_eggs.el"))))))
+                     (f-expand (f-join "spam/with" (concat flycheck-temp-prefix
+                                                           "_eggs.el")))))))
 
 (ert-deftest flycheck-temp-file-inplace/without-file-name ()
   :tags '(utility)
-  (let ((filename (flycheck-temp-file-inplace nil "flycheck-test")))
+  (let ((filename (flycheck-temp-file-inplace nil)))
     (unwind-protect
         (should (f-file? filename))
       (flycheck-safe-delete-temporaries))
     (should-not (file-name-extension filename))
-    (should (s-starts-with? "flycheck-test" (f-filename filename)))))
+    (should (s-starts-with? flycheck-temp-prefix (f-filename filename)))))
 
 (ert-deftest flycheck-save-buffer-to-file ()
   :tags '(utility)
@@ -1179,7 +1183,7 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-safe-delete/recursive-removal ()
   :tags '(utility)
-  (let ((dirname (flycheck-temp-dir-system "flycheck-test")))
+  (let ((dirname (flycheck-temp-dir-system)))
     (unwind-protect
         (let ((filename (f-join dirname "foo")))
           (process-lines "touch" filename)
@@ -1478,7 +1482,8 @@ check with.  ERRORS is the list of expected errors."
 
           (let ((filename (flycheck-substitute-argument 'source-inplace 'emacs-lisp)))
             (should (equal filename (flycheck-test-resource-filename
-                                     "flycheck_substitute-dummy")))
+                                     (concat flycheck-temp-prefix
+                                             "_substitute-dummy"))))
             (should (f-exists? filename)))
 
           (let ((filename (flycheck-substitute-argument 'source 'emacs-lisp)))
