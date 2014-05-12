@@ -61,6 +61,20 @@ templates_path = ['_templates']
 
 pygments_style = 'emacs'
 
+nitpicky = True
+# Do not warn about missing references to built-in Emacs functions
+nitpick_ignore =[
+    ('el:function', 'symbolp'),
+    ('el:function', 'stringp'),
+    ('el:function', 'numberp'),
+    ('el:function', 'integerp'),
+    ('el:function', 'booleanp'),
+    ('el:option', 'icomplete-mode'),
+    # This is a markup artifact
+    ('el:variable', 'flycheck-CHECKER-executable'),
+]
+
+
 html_title = '{0} {1}'.format(project, release)
 html_theme = 'nature'
 html_sidebars = {'**': ['info.html',
