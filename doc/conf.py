@@ -92,10 +92,29 @@ texinfo_documents = [
 
 # Restore standard formatting of emphasis, as by
 # http://sphinx-doc.org/faq.html#notes
-texinfo_elements = {'preamble': """
+texinfo_elements = {
+    'preamble': """
 @definfoenclose strong,*,*
 @definfoenclose emph,_,_
-"""}
+""",
+    'copying': """\
+This manual is for Flycheck version {release}.
+
+Copyright @copyright{{}} {copyright}
+
+@quotation
+Permission is granted to copy, distribute and/or modify this documentation under
+the terms of the GNU Free Documentation License, Version 1.3 or any later
+version published by the Free Software Foundation; with no Invariant Sections,
+no Front-Cover Texts, and no Back-Cover Texts.  A copy of the license is
+included in the section entitled ``GNU Free Documentation License.''.
+
+Alternatively, you may copy, distribute and/or modify this documentation under
+the terms of the Creative Commons Attribution-ShareAlike 4.0 International
+Public License.  A copy of the license can be obtained at
+@uref{{https://creativecommons.org/licenses/by-sa/4.0/legalcode}}.
+@end quotation
+""".format(release=release, copyright=copyright)}
 
 extlinks = {'github': ('https://github.com/flycheck/flycheck/%s', None),
             'issue': ('https://github.com/flycheck/flycheck/issues/%s', '#')}
