@@ -4346,6 +4346,29 @@ is added to the GHC search path via `-i'."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.16"))
 
+(flycheck-def-option-var flycheck-ghc-extensions nil haskell-ghc
+  "Haskell language extensions enabled for GHC.
+
+The value of this variable is a list of strings, where each
+string is a language extension name as it appears in LANGUAGE
+pragma.  Each extension is added to the GHC command line via
+`-X'."
+  :type '(repeat :tag "extensions"
+                 (string :tag "An extension"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.19"))
+
+(flycheck-def-option-var flycheck-ghc-packages nil haskell-ghc
+  "GHC packages available for this build.
+
+The value of this variable is a list of package names that should
+be made available to flycheck compilation. Each package is added
+to the GHC command line via `-package'."
+  :type '(repeat :tag "extensions"
+                 (string :tag "A package"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.19"))
+
 (flycheck-define-checker haskell-ghc
   "A Haskell syntax and type checker using ghc.
 
@@ -4353,8 +4376,12 @@ See URL `http://www.haskell.org/ghc/'."
   :command ("ghc" "-Wall" "-fno-code" "-c"
             (option-flag "-no-user-package-db"
                          flycheck-ghc-no-user-package-database)
+            (option-flag "-hide-all-packages"
+                         flycheck-ghc-no-user-package-database)
             (option-list "-package-db" flycheck-ghc-package-databases)
+            (option-list "-package" flycheck-ghc-packages)
             (option-list "-i" flycheck-ghc-search-path s-prepend)
+            (option-list "-X" flycheck-ghc-extensions s-prepend)
             ;; Include the parent directory of the current module tree, to
             ;; properly resolve local imports
             (eval (concat
