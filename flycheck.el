@@ -557,7 +557,7 @@ this hook.
 You should use this hook to conduct additional cleanup actions
 when Flycheck failed.
 
-This variable is a normal hook.  See Info node `(elisp)Hooks.'"
+This variable is a normal hook.  See Info node `(elisp)Hooks'."
   :group 'flycheck
   :type 'hook
   :risky t)
@@ -2523,7 +2523,7 @@ The following PROPERTIES constitute an error level:
 `:overlay-category CATEGORY'
      A symbol denoting the overlay category to use for error
      highlight overlays for this level.  See Info
-     node `(elisp)Overlay properties' for more information about
+     node `(elisp)Overlay Properties' for more information about
      overlay categories.
 
      A category for an error level overlay should at least define
