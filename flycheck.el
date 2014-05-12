@@ -3861,7 +3861,7 @@ See URL `http://www.coffeelint.org/'."
 (flycheck-define-checker css-csslint
   "A CSS syntax and style checker using csslint.
 
-See URL `https://github.com/stubbornella/csslint'."
+See URL `https://github.com/CSSLint/csslint'."
   :command ("csslint" "--format=checkstyle-xml" source)
   :error-parser flycheck-parse-checkstyle
   :modes css-mode)
@@ -4432,7 +4432,7 @@ to a directory with custom rules, or nil, to not give any custom
 rules to ESLint.
 
 Refer to the ESLint manual at URL
-`https://github.com/nzakas/eslint/tree/master/docs/command-line-interface#--rulesdir'
+`https://github.com/eslint/eslint/tree/master/docs/command-line-interface#--rulesdir'
 for more information about the custom directory."
   :type '(choice (const :tag "No custom rules directory" nil)
                  (directory :tag "Custom rules directory"))
@@ -4446,7 +4446,7 @@ for more information about the custom directory."
 (flycheck-define-checker javascript-eslint
   "A JavaScript syntax and style checker using eslint.
 
-See URL `https://github.com/nzakas/eslint'."
+See URL `https://github.com/eslint/eslint'."
   :command ("eslint" "--format=compact"
             (config-file "--config" flycheck-eslintrc)
             (option "--rulesdir" flycheck-eslint-rulesdir)
@@ -4568,7 +4568,7 @@ the `--severity' option to Perl Critic."
 (flycheck-define-checker perl-perlcritic
   "A Perl syntax checker using Perl::Critic.
 
-See URL `http://search.cpan.org/~thaljef/Perl-Critic/'."
+See URL `https://metacpan.org/pod/Perl::Critic'."
   :command ("perlcritic" "--no-color" "--verbose" "%f:%l:%c:%s:%m (%e)\n"
             (option "--severity" flycheck-perlcritic-verbosity
                     flycheck-option-int)
@@ -4658,7 +4658,7 @@ See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
 (flycheck-define-checker puppet-parser
   "A Puppet DSL syntax checker using puppet's own parser.
 
-See URL `http://www.puppetlabs.com/'."
+See URL `http://puppetlabs.com/'."
   :command ("puppet" "parser" "validate" "--color=false" source)
   :error-patterns
   ((error line-start
@@ -4726,7 +4726,7 @@ of 79 characters if there is no configuration with this setting."
 
 For best error reporting, use Flake8 2.0 or newer.
 
-See URL `http://pypi.python.org/pypi/flake8'."
+See URL `https://pypi.python.org/pypi/flake8'."
   :command ("flake8"
             (config-file "--config" flycheck-flake8rc)
             (option "--max-complexity"
@@ -4767,7 +4767,7 @@ See URL `http://pypi.python.org/pypi/flake8'."
 
 This syntax checker requires Pylint 1.0 or newer.
 
-See URL `http://pypi.python.org/pypi/pylint'."
+See URL `http://www.pylint.org/'."
   ;; -r n disables the scoring report
   :command ("pylint" "-r" "n"
             "--msg-template" "{path}:{line}:{column}:{C}:{msg} ({msg_id})"
@@ -4906,7 +4906,7 @@ implementations.
 
 Please consider using `ruby-rubocop' or `ruby-rubylint' instead.
 
-See URL `http://www.ruby-lang.org/'."
+See URL `https://www.ruby-lang.org/'."
   :command ("ruby" "-w" "-c" source)
   :error-patterns
   ;; These patterns support output from JRuby, too, to deal with RVM or Rbenv
@@ -4954,7 +4954,7 @@ Relative paths are relative to the file being checked."
 
 This syntax checker needs Rust 0.10 or newer.
 
-See URL `http://rust-lang.org'."
+See URL `http://www.rust-lang.org'."
   :command ("rustc" "--crate-type=lib" "--no-trans" "--test"
             (option-list "-L" flycheck-rust-library-path s-prepend)
             source-inplace)

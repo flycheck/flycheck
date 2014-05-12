@@ -51,7 +51,7 @@ new option :option:`flycheck-dmd-include-path`.  Likewise, Rust users can use
 :option:`flycheck-rust-library-path` now.
 
 .. _golint: https://github.com/golang/lint
-.. _Perl-Critic: http://search.cpan.org/dist/Perl-Critic/
+.. _Perl-Critic: https://metacpan.org/pod/Perl::Critic
 .. _shellcheck: https://github.com/koalaman/shellcheck
 
 Bug fixes

@@ -51,7 +51,7 @@ new syntax checker for Javascript (eslint_), Ruby (ruby-lint_), and YAML
 .. _Racket: http://racket-lang.org/
 .. _Texinfo: https://www.gnu.org/s/texinfo
 .. _Verilog: https://en.wikipedia.org/wiki/Verilog
-.. _eslint: https://github.com/nzakas/eslint
+.. _eslint: https://github.com/eslint/eslint
 .. _ruby-lint: https://github.com/YorickPeterse/ruby-lint
 .. _js-yaml: https://github.com/visionmedia/js-yaml
 
