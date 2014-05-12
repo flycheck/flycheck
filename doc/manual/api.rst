@@ -152,6 +152,9 @@ These functions can be used to implement custom error parsers:
 Syntax checker API
 ==================
 
+.. function:: flycheck-registered-checker-p
+   :auto:
+
 .. function:: flycheck-substitute-argument
    :auto:
 
@@ -176,4 +179,10 @@ Utilities
 =========
 
 .. function:: flycheck-rx-to-string
+   :auto:
+
+.. function:: flycheck-string-list-p
+   :auto:
+
+.. function:: flycheck-symbol-list-p
    :auto:
