@@ -1,1 +1,0 @@
-.. include:: ../../CREDITS.rst

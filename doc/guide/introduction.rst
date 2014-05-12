@@ -2,22 +2,26 @@
  Introduction
 ==============
 
-Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24.
+Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24,
+intended as replacement for the older Flymake extension which is part of GNU
+Emacs.
+
+It uses various syntax checking and linting tools to automatically check the
+contents of buffers while you type, and reports warnings and errors directly in
+the buffer, or in an optional error list.
 
 .. _features:
 
 Features
 ========
 
-Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24.
-
-- Support for |#flycheck-languages| languages with |#flycheck-checkers| syntax
-  checkers, see :doc:`languages`
+- |#flycheck-languages| languages with |#flycheck-checkers| syntax checkers, see
+  :ref:`supported-languages`
 - :ref:`Fully automatic syntax checking in the background <syntax-checking>`
 - :ref:`Nice error indication and highlighting <error-reporting>`
 - Optional error list popup
 - :ref:`Many customization options <syntax-checker-configuration>`
-- :doc:`A comprehensive manual <index>`
+- :ref:`A comprehensive manual <usage>`
 - :ref:`A dead simple API to create new syntax checkers
   <defining-new-syntax-checkers>`
 - A “doesn't get in your way” guarantee

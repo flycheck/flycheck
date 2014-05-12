@@ -5,17 +5,19 @@
 Time for a new release of Flycheck, the modern syntax-checking extension for
 Emacs:
 
-.. figure:: /images/flycheck-0_16.png
-   :align: center
+.. only:: not format_texinfo
 
-   Flycheck 0.16 with `Solarized Light`_ and `Source Code Pro`_
+   .. figure:: /images/flycheck-0_16.png
+      :align: center
+
+      Flycheck 0.16 with `Solarized Light`_ and `Source Code Pro`_
 
 In two months since the last release, Flycheck got a bunch of new syntax
 checkers, a brand-new error list, and the ability to override the executables of
 syntax checkers.
 
 Let's go through the list of important changes.  For a detailed list, please
-read the :doc:`changelog <../manual/changes>`.
+read the :ref:`changelog <changes>`.
 
 .. _Source Code Pro: https://github.com/adobe/source-code-pro
 .. _Solarized Light: https://github.com/bbatsov/solarized-emacs

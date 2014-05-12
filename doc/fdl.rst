@@ -2,4 +2,4 @@
  GNU Free Documentation License
 ================================
 
-.. literalinclude:: ../fdl.txt
+.. literalinclude:: fdl.txt

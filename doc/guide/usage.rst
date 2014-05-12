@@ -245,9 +245,6 @@ respectively.
 Syntax checker configuration files
 ----------------------------------
 
-.. FIXME: Move these into the languages document, under each specific syntax
-   checker.
-
 Some syntax checkers also read configuration files, denoted by associated
 *configuration file variables*.  See :doc:`languages` of these variables.
 

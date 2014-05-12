@@ -3,17 +3,19 @@
 =======================================
 
 I have the honour and pleasure to announce a new release of Flycheck, the
-modern syntax-checking extension for Emacs:
+modern syntax-checking extension for Emacs.
 
-.. figure:: /images/flycheck-0_15.png
-   :align: center
+.. only:: not format_texinfo
 
-   Flycheck 0.15 with Zenburn_ and `Source Code Pro`_
+   .. figure:: /images/flycheck-0_15.png
+      :align: center
+
+      Flycheck 0.15 with Zenburn_ and `Source Code Pro`_
 
 It is three months since the last release, so this release brings quite a lot of
 changes.  For a complete list of all changes, please read the complete list of
-:doc:`changes <../manual/changes>`.  This article will just cover the most
-important changes.
+:ref:`changes <changes>`.  This article will just cover the most important
+changes.
 
 .. _Zenburn: https://github.com/bbatsov/zenburn-emacs
 .. _Source Code Pro: https://github.com/adobe/source-code-pro

@@ -1,3 +1,5 @@
+.. _flycheck-versus-flymake:
+
 =========================
  Flycheck versus Flymake
 =========================
@@ -124,12 +126,14 @@ instead silently hangs.  The same occurs, when a syntax checker tool becomes
 unavailable after Flymake Mode is enabled, for instance, because the underlying
 tool was uninstalled.
 
-.. figure:: /images/flymake-error.png
-   :scale: 75%
-   :align: center
+.. only:: not format_texinfo
 
-   Flymake showing a GUI dialog to inform that a syntax checker tool is not
-   available
+   .. figure:: /images/flymake-error.png
+      :scale: 75%
+      :align: center
+
+      Flymake showing a GUI dialog to inform that a syntax checker tool is not
+      available
 
 The third-party library `flymake-easy`_ provides an alternate way to enable
 Flymake Mode, which gracefully handles unavailable syntax checkers.  It does not
@@ -155,9 +159,9 @@ the `Flymake page`_ in the EmacsWiki, and many extension packages for other
 languages in the popular ELPA archive MELPA_.
 
 **Flycheck** provides support for |#flycheck-languages| languages (see
-:doc:`manual/languages`) with |#flycheck-checkers| syntax checkers, most of them
-contributed by the community.  Notably, Flycheck does *not* support Java and
-Makefiles.
+:ref:`supported-languages`) with |#flycheck-checkers| syntax checkers, most of
+them contributed by the community.  Notably, Flycheck does *not* support Java
+and Makefiles.
 
 Definition of new syntax checkers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -343,11 +347,13 @@ In GUI frames, **Flymake** shows error messages in a tool tip, if the user
 hovers the mouse over an error location.  It does not provide means to show
 error messages in a TTY frame, or with the keyboard only.
 
-.. figure:: /images/flymake-tooltip.png
-   :scale: 75%
-   :align: center
+.. only:: not format_texinfo
 
-   Tooltip showing a Flymake error message
+   .. figure:: /images/flymake-tooltip.png
+      :scale: 75%
+      :align: center
+
+      Tooltip showing a Flymake error message
 
 The third-party library `flymake-cursor`_ shows Flymake error messages at point
 in the echo area, by overriding internal Flymake functions.
@@ -356,17 +362,19 @@ in the echo area, by overriding internal Flymake functions.
 messages in the echo area, if the point is at an error location.  This feature
 is fully customizable via :option:`flycheck-display-errors-function`.
 
-.. figure:: /images/flycheck-tooltip-and-echo-area.png
-   :scale: 75%
-   :align: center
+.. only:: not format_texinfo
 
-   Tooltip and echo area showing a Flycheck error message
+   .. figure:: /images/flycheck-tooltip-and-echo-area.png
+      :scale: 75%
+      :align: center
 
-.. figure:: /images/flycheck-echo-area-in-tty-frame.png
-   :scale: 75%
-   :align: center
+      Tooltip and echo area showing a Flycheck error message
 
-   Echo area showing a Flycheck error messages in a TTY frame.
+   .. figure:: /images/flycheck-echo-area-in-tty-frame.png
+      :scale: 75%
+      :align: center
+
+      Echo area showing a Flycheck error messages in a TTY frame.
 
 Error list
 ----------
@@ -377,11 +385,13 @@ Error list
 This error list is automatically updated after each syntax check, and follows
 the focus.
 
-.. figure:: /images/flycheck-error-list.png
-   :scale: 75%
-   :align: center
+.. only:: not format_texinfo
 
-   Listing all errors in the current buffer
+   .. figure:: /images/flycheck-error-list.png
+      :scale: 75%
+      :align: center
+
+      Listing all errors in the current buffer
 
 Resource consumption
 --------------------

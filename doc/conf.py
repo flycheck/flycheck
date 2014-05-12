@@ -85,9 +85,9 @@ html_sidebars = {'**': ['info.html',
                         'searchbox.html']}
 
 texinfo_documents = [
-  ('manual/index', 'flycheck', '', u'Sebastian Wiesner',
+  ('index', 'flycheck', 'Flycheck', u'Sebastian Wiesner',
    'flycheck', 'On the fly syntax checking for GNU Emacs',
-   'Emacs', False),
+   'Emacs', True),
 ]
 
 # Restore standard formatting of emphasis, as by

@@ -102,7 +102,7 @@ class FlycheckSubstitutions(Transform):
 
 
 def count_languages(app, doctree):
-    if app.env.docname == 'manual/languages':
+    if app.env.docname == 'guide/languages':
         top_level = doctree[doctree.first_child_matching_class(nodes.section)]
         # The number of languages is the number of second-level sections in the
         # languages document

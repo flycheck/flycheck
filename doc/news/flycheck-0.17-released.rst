@@ -2,10 +2,12 @@
  Feb 1, 2014 — Flycheck 0.17 released
 ======================================
 
-.. figure:: /images/flycheck-0_17.png
-   :align: center
+.. only:: not format_texinfo
 
-   Flycheck 0.17 with `Solarized Light`_ and `Source Code Pro`_
+   .. figure:: /images/flycheck-0_17.png
+      :align: center
+
+      Flycheck 0.17 with `Solarized Light`_ and `Source Code Pro`_
 
 Flycheck 0.17 was released today.  Though it's just about two weeks since the
 last release, there are quite some changes.
@@ -60,9 +62,9 @@ http://flycheck.readthedocs.org/en/0.17 now hosts the documentation of Flycheck
 
 Beyond the manual itself, the new documentation now also includes the release
 notes, which were previously hosted at http://lunaryorn.com, and the
-:doc:`comparison with Flymake <../flycheck-versus-flymake>`, which was
-previously hosted at the Github Wiki of Flycheck.  The Github Wiki is disabled
-now, to make all documentation available from a single place.
+:ref:`comparison with Flymake <flycheck-versus-flymake>`, which was previously
+hosted at the Github Wiki of Flycheck.  The Github Wiki is disabled now, to make
+all documentation available from a single place.
 
 Unfortunately, the Info manual included in the Flycheck ELPA packages is
 somewhat inferior now, because there is some idiomatic gap between Sphinx and
