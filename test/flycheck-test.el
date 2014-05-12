@@ -2077,7 +2077,7 @@ check with.  ERRORS is the list of expected errors."
 (ert-deftest flycheck--manual/all-checkers-are-documented ()
   :tags '(documentation)
   (flycheck-test-with-file-buffer
-      (f-join flycheck-test-source-directory "doc" "manual/languages.rst")
+      (f-join flycheck-test-source-directory "doc" "guide/languages.rst")
     (dolist (checker flycheck-checkers)
       (re-search-forward (rx ".. flyc-checker:: "
                              (group (one-or-more not-newline))
@@ -2087,7 +2087,7 @@ check with.  ERRORS is the list of expected errors."
 (ert-deftest flycheck--manual/all-options-are-documented ()
   :tags '(documentation)
   (flycheck-test-with-file-buffer
-      (f-join flycheck-test-source-directory "doc" "manual/languages.rst")
+      (f-join flycheck-test-source-directory "doc" "guide/languages.rst")
     (dolist (checker flycheck-checkers)
       (-when-let (vars (-sort #'string< (flycheck-checker-option-vars checker)))
         (re-search-forward (concat (rx line-start ".. flyc-checker::"
@@ -2109,7 +2109,7 @@ check with.  ERRORS is the list of expected errors."
 (ert-deftest flycheck--manual/all-config-file-vars-are-documented ()
   :tags '(documentation)
   (flycheck-test-with-file-buffer
-      (f-join flycheck-test-source-directory "doc" "manual/languages.rst")
+      (f-join flycheck-test-source-directory "doc" "guide/languages.rst")
     (dolist (checker flycheck-checkers)
       (-when-let (config-file-var (flycheck-checker-config-file-var checker))
         (re-search-forward (concat (rx line-start ".. flyc-checker::"
