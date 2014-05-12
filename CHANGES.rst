@@ -10,11 +10,6 @@ master (in development)
   - #387: Make the prefix of Flycheck's temporary files customizable with
     `flycheck-temp-prefix`.
 
-- Improvements:
-
-  - #387: Change the default prefix of Flycheck's temporary files to
-    ``.flycheck``.
-
 - Bug fixes:
 
   - #334: When stopping Flycheck, correctly kill running processes and cleanup

@@ -505,7 +505,7 @@ nil
                  (const :tag "Completing read" nil))
   :package-version '(flycheck . "0.17"))
 
-(defcustom flycheck-temp-prefix ".flycheck"
+(defcustom flycheck-temp-prefix "flycheck"
   "Prefix for temporary files created by Flycheck."
   :group 'flycheck
   :type 'string
@@ -1122,7 +1122,7 @@ Return the path of the directory"
     (push tempdir flycheck-temporaries)
     tempdir))
 
-(defun flycheck-temp-file-system (filename )
+(defun flycheck-temp-file-system (filename)
   "Create a temporary file named after FILENAME.
 
 If FILENAME is non-nil, this function creates a temporary
