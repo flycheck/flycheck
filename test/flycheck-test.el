@@ -2079,43 +2079,54 @@ check with.  ERRORS is the list of expected errors."
   (flycheck-test-with-file-buffer
       (f-join flycheck-test-source-directory "doc" "manual/languages.rst")
     (dolist (checker flycheck-checkers)
-      (re-search-forward (rx ".. syntax-checker:: "
+      (re-search-forward (rx ".. flyc-checker:: "
                              (group (one-or-more not-newline))
                              line-end))
       (should (string= (symbol-name checker) (match-string 1))))))
 
 (ert-deftest flycheck--manual/all-options-are-documented ()
   :tags '(documentation)
-  (let ((option-vars (-sort #'string<
-                            (-flatten (-keep #'flycheck-checker-option-vars
-                                             flycheck-checkers)))))
-    (flycheck-test-with-file-buffer
-        (f-join flycheck-test-source-directory "doc" "manual/usage.rst")
-      ;; Go to the reference label denoting the "options" section
-      (search-forward ".. _syntax-checker-options")
-      ;; Now search forward for all variables
-      (dolist (var option-vars)
-        (re-search-forward (rx ".. option:: "
-                               (group (one-or-more not-newline))
-                               line-end))
-        (should (string= (match-string 1) (symbol-name var)))))))
+  (flycheck-test-with-file-buffer
+      (f-join flycheck-test-source-directory "doc" "manual/languages.rst")
+    (dolist (checker flycheck-checkers)
+      (-when-let (vars (-sort #'string< (flycheck-checker-option-vars checker)))
+        (re-search-forward (concat (rx line-start ".. flyc-checker::"
+                                     (one-or-more space))
+                                 (regexp-quote (symbol-name checker))))
+        (re-search-forward (rx line-start "   .. rubric:: Options" line-end))
+        (dolist (var vars)
+          ;; Move across empty lines
+          (while (progn
+                   (forward-line 1)
+                   (looking-at (rx line-start (zero-or-more space) line-end))))
+          (should (looking-at (rx line-start "   .. option:: "
+                                  (group (one-or-more not-newline))
+                                  line-end)))
+          (should (string= (match-string 1) (symbol-name var)))
+          (forward-line 1)
+          (should (looking-at (rx line-start (= 6 " ") ":auto:" line-end))))))))
 
-(ert-deftest flycheck--manual/all-config-vars-are-documented ()
+(ert-deftest flycheck--manual/all-config-file-vars-are-documented ()
   :tags '(documentation)
-  "Tests that all configuration file variables are documented in the manual."
-  (let ((config-file-vars (-sort #'string<
-                                 (-keep #'flycheck-checker-config-file-var
-                                        flycheck-checkers))))
-    (flycheck-test-with-file-buffer
-        (f-join flycheck-test-source-directory "doc" "manual/usage.rst")
-      ;; Go to the reference label denoting the "config file variable" section
-      (search-forward ".. _syntax-checker-configuration-files:")
-      ;; And search forward for all variables
-      (dolist (var config-file-vars)
-        (re-search-forward (rx ".. option:: "
-                               (group (one-or-more not-newline))
+  (flycheck-test-with-file-buffer
+      (f-join flycheck-test-source-directory "doc" "manual/languages.rst")
+    (dolist (checker flycheck-checkers)
+      (-when-let (config-file-var (flycheck-checker-config-file-var checker))
+        (re-search-forward (concat (rx line-start ".. flyc-checker::"
+                                       (one-or-more space))
+                                   (regexp-quote (symbol-name checker))))
+        (re-search-forward (rx line-start
+                               "   .. rubric:: Configuration file"
                                line-end))
-        (should (string= (match-string 1) (symbol-name var)))))))
+        (while (progn
+                 (forward-line 1)
+                 (looking-at (rx line-start (zero-or-more space) line-end))))
+        (should (looking-at (rx line-start "   .. option:: "
+                                (group (one-or-more not-newline))
+                                line-end)))
+        (should (string= (match-string 1) (symbol-name config-file-var)))
+        (forward-line 1)
+        (should (looking-at (rx line-start (= 6 " ") ":auto:" line-end)))))))
 
 
 ;;;; Checker error API
