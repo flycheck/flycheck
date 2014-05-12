@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Print commands (-v) and fail on errors (-e)
-set -ve
+set -v
 
 get() {
     curl -fsSL "$@"
