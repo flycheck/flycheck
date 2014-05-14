@@ -505,7 +505,7 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-temp-prefix/default ()
   :tags '(customization)
-  (should (equal flycheck-temp-prefix ".flycheck")))
+  (should (equal flycheck-temp-prefix "flycheck")))
 
 
 ;;;; Minor mode definition
