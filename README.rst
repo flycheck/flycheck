@@ -37,11 +37,11 @@ with more supported languages, more features, and better extensibility:
 
 .. _Solarized Light: https://github.com/bbatsov/solarized-emacs
 .. _Source Code Pro: https://github.com/adobe/source-code-pro
-.. _Features: http://flycheck.readthedocs.org/en/latest/manual/introduction.html#features
-.. _Changelog: http://flycheck.readthedocs.org/en/latest/manual/changes.html
-.. _Flycheck versus Flymake: http://flycheck.readthedocs.org/en/latest/flycheck-versus-flymake.html
-.. _Supported Languages: http://flycheck.readthedocs.org/en/latest/manual/languages.html
-.. _3rd party extensions: http://flycheck.readthedocs.org/en/latest/manual/introduction.html#rd-party-extensions
+.. _Features: http://flycheck.readthedocs.org/en/latest/guide/introduction.html#features
+.. _Changelog: http://flycheck.readthedocs.org/en/latest/changes.html
+.. _Flycheck versus Flymake: http://flycheck.readthedocs.org/en/latest/guide/flycheck-versus-flymake.html
+.. _Supported Languages: http://flycheck.readthedocs.org/en/latest/guide/languages.html
+.. _3rd party extensions: http://flycheck.readthedocs.org/en/latest/guide/introduction.html#rd-party-extensions
 
 Installation
 ============
