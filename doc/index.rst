@@ -27,22 +27,22 @@ User guide
 ==========
 
 This part of the documentation explains how to use Flycheck.  It starts with a
-little introduction into Flycheck, and then guides you through the installation
-and gives you a quick start.  Eventually it provides comprehensive usage
-instructions covering all commands and options of Flycheck, and concludes with a
-list of supported languages and syntax checking tools, and a in-depth
-comparison of Flycheck and the older Flymake extension, which is part of Emacs.
+little introduction into Flycheck and a comparison with the built-in Flymake
+package, and then guides you through the installation and gives you a quick
+start.  Eventually it provides comprehensive usage instructions covering all
+commands and options of Flycheck, and concludes with a list of supported
+languages and syntax checking tools.
 
 .. toctree::
    :maxdepth: 2
 
    guide/introduction
+   guide/flycheck-versus-flymake
    guide/installation
    guide/quickstart
    guide/usage
    guide/languages
    guide/glossary
-   guide/flycheck-versus-flymake
 
 Developer guide
 ===============
