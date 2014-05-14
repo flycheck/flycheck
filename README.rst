@@ -12,7 +12,9 @@
 
 |license| |travis|
 
-Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24.
+Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24,
+intended as replacement for the older Flymake extension which is part of GNU
+Emacs.
 
 It uses various syntax checking and linting tools to check the contents of
 buffers, and reports warnings and errors directly in the buffer, or in an
@@ -26,36 +28,31 @@ Code Pro`_ font:
    :height: 519
    :scale: 75%
 
-It is a replacement for the older Flymake extension, which is part of Emacs,
-with more supported languages, more features, and better extensibility:
-
-- Features_
-- Changelog_
-- `Supported Languages`_
-- `Flycheck versus Flymake`_
-- `3rd party extensions`_
-
 .. _Solarized Light: https://github.com/bbatsov/solarized-emacs
 .. _Source Code Pro: https://github.com/adobe/source-code-pro
-.. _Features: http://flycheck.readthedocs.org/en/latest/guide/introduction.html#features
-.. _Changelog: http://flycheck.readthedocs.org/en/latest/changes.html
-.. _Flycheck versus Flymake: http://flycheck.readthedocs.org/en/latest/guide/flycheck-versus-flymake.html
-.. _Supported Languages: http://flycheck.readthedocs.org/en/latest/guide/languages.html
+
+Features
+========
+
+- Supports over 30 programming and markup languages with more than 60 different
+  syntax checking tools
+- Fully automatic, fail-safe, on-the-fly syntax checking in background
+- Nice error indication and highlighting
+- Optional error list popup
+- Many customization options
+- A comprehensive manual
+- A simple interface to define new syntax checkers (`extending`)
+- A “doesn't get in your way” guarantee
+- Many `3rd party extensions`_
+
 .. _3rd party extensions: http://flycheck.readthedocs.org/en/latest/guide/introduction.html#rd-party-extensions
 
 Installation
 ============
 
-Flycheck needs GNU Emacs 24, and works best on Unix systems (i.e. Linux or OS
-X).  Windows or other flavors of Emacs are **not** supported.
+Install Flycheck from MELPA_ or Marmalade_ with::
 
-For almost all supported languages, Flycheck also needs additional
-**external** programs.  See `Supported Languages`_ for a list of supported
-languages and the corresponding checker programs, and use `C-c ! ?` to get help
-about specific checkers inside Emacs.
-
-Install the ELPA package from MELPA_ or Marmalade_ with `M-x package-install RET
-flycheck`.
+   M-x package-install RET flycheck
 
 In your Cask_ file:
 
@@ -66,84 +63,36 @@ In your Cask_ file:
 
    (depends-on "flycheck")
 
-See Installation_ for detailed installation instructions.
+You need GNU Emacs 24 on a Unix system (Linux, OS X, …), and additional
+**external** programs for the languages you use.  See Installation_ and
+`Supported languages`_ for more information.
+
+Flycheck does **not** support GNU Emacs 23, other flavors of Emacs, or Windows.
 
 .. _MELPA: http://melpa.milkbox.net/#/flycheck
 .. _Marmalade: http://marmalade-repo.org/packages/flycheck
 .. _Cask: https://github.com/cask/cask
-.. _Supported Languages: http://flycheck.readthedocs.org/en/latest/manual/languages.html
-.. _Installation: http://flycheck.readthedocs.org/en/latest/manual/installation.html
+.. _Supported Languages: http://flycheck.readthedocs.org/en/latest/guide/languages.html
 
-Quick start
-===========
+Documentation
+=============
 
-Once installed, enable Flycheck globally with the following line in your
-`init.el`:
+Documentation is available at http://flycheck.readthedocs.org:
 
-.. code-block:: cl
+- `Quick start`_ (tutorial)
+- `User manual`_ (reference information)
 
-   (add-hook 'after-init-hook #'global-flycheck-mode)
+.. _Quick start: http://flycheck.readthedocs.org/en/latest/guide/quickstart.html
+.. _User manual: http://flycheck.readthedocs.org/en/latest/guide/usage.html
 
-Install some syntax checking tools for the programming or markup language you
-are using.  For Python:
+Support & Contribution
+======================
 
-.. code-block:: console
-
-   $ pip install --user pylint
-
-Or for Ruby:
-
-.. code-block:: console
-
-   $ gem install rubocop ruby-lint
-
-Or for Haskell:
-
-.. code-block:: console
-
-   $ brew install haskell-platform
-   $ cabal install hlint
-
-Now browse the `syntax checker options`_ to configure your syntax checkers.
-Typically you don't need to change any options, though.  Flycheck will mostly
-work automatically.
-
-Flycheck will now check syntax using these tools, when you visit a buffer in any
-of these languages.  Syntax checking happens automatically when you save the
-buffer or make any changes.  Flycheck highlights errors and warnings in the
-buffer, indicates them in the fringe, and reports their numbers in the mode
-line.
-
-Use `C-c ! n` and `C-c ! p` to navigate between error locations.  If you keep
-the point at an error location, Flycheck will show the error message in the echo
-area after a short delay.  You can also hover error locations with the mouse and
-see the error message in a tooltip.
-
-To get an overview of all errors and warnings in the current buffer, type `C-c !
-l` to pop up a list of all errors in your current buffer.  The error list
-updates automatically when you fix errors or introduce new ones, or when you
-switch to another buffer.
-
-For more details, read the `Usage`_ instructions in the manual.
-
-.. _Syntax checker options: http://flycheck.readthedocs.org/en/latest/manual/usage.html#syntax-checker-configuration
-.. _Usage: http://flycheck.readthedocs.org/en/latest/manual/usage.html
-
-Support
-=======
-
-- `User Manual`_
 - `Issue tracker`_
-
-.. _User Manual: http://flycheck.readthedocs.org/en/latest/manual/index.html
-.. _Issue tracker: https://github.com/flycheck/flycheck/issues
-
-Contribute
-==========
-
 - Github_
 - `Contribution guidelines`_
 
+.. _Issue tracker: https://github.com/flycheck/flycheck/issues
 .. _Github: https://github.com/flycheck/flycheck
 .. _Contribution guidelines: https://github.com/flycheck/flycheck/blob/master/CONTRIBUTING.rst
 
