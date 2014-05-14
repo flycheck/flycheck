@@ -3632,7 +3632,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
   (skip-unless (flycheck-check-executable 'haskell-ghc))
   (flycheck-test-should-syntax-check
    "checkers/Haskell/SyntaxError.hs" 'haskell-mode
-   '(3 1 error "parse error on input `module'" :checker haskell-ghc)))
+   '(3 1 error "parse error on input ‘module’" :checker haskell-ghc)))
 
 (ert-deftest flycheck-define-checker/haskell-ghc-no-user-package-database ()
   :tags '(builtin-checker language-haskell)
@@ -3651,8 +3651,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
          (flycheck-ghc-search-path (list lib-dir)))
     (flycheck-test-should-syntax-check
      "checkers/Haskell/SearchPath.hs" 'haskell-mode
-     '(5 1 warning "Top-level binding with no type signature:
-               helloYou :: IO ()"
+     '(5 1 warning "Top-level binding with no type signature: helloYou :: IO ()"
          :checker haskell-ghc))))
 
 (ert-deftest flycheck-define-checker/haskell ()
