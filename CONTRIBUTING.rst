@@ -103,8 +103,9 @@ For syntax checkers, some special guidelines apply in addition to the above:
 - Extend `install-travis.sh` to install the required tools in the CI
   environment, or explain how to install the tool on an Ubuntu 12.04 system.
 
-**Note:** We will *not* merge syntax checkers which cannot be tested on
- Travis CI.
+.. note::
+
+   We will *not* merge syntax checkers which cannot be tested on Travis CI.
 
 .. _pull requests:
 
