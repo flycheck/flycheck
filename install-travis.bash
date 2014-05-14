@@ -13,6 +13,7 @@ apt_repos=(
     'ppa:hansjorg/rust'         # Nightly Rust builds
     'ppa:ondrej/php5'           # Recent PHP versions
     'ppa:plt/racket'            # Racket
+    'ppa:hvr/ghc'               # Latest GHC and Cabal
 )
 
 for repo in "${apt_repos[@]}"; do
@@ -49,7 +50,7 @@ apt_pkgs=(
     chktex                      # tex-chktex
     cppcheck                    # c/c++-cppcheck
     dash                        # sh-posix-dash
-    ghc                         # haskell-ghc
+    ghc-"${GHC_VERSION}"        # haskell-ghc
     hlint                       # haskell-hlint
     lacheck                     # tex-lacheck
     libperl-critic-perl         # perl-perlcritic
