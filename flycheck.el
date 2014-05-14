@@ -4350,7 +4350,7 @@ is added to the GHC search path via `-i'."
   "A Haskell syntax and type checker using ghc.
 
 See URL `http://www.haskell.org/ghc/'."
-  :command ("ghc" "-Wall" "-fno-code" "-c"
+  :command ("ghc" "-Wall" "-fno-code"
             (option-flag "-no-user-package-db"
                          flycheck-ghc-no-user-package-database)
             (option-list "-package-db" flycheck-ghc-package-databases)
