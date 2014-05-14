@@ -94,7 +94,7 @@ Support & Contribution
 
 .. _Issue tracker: https://github.com/flycheck/flycheck/issues
 .. _Github: https://github.com/flycheck/flycheck
-.. _Contribution guidelines: https://github.com/flycheck/flycheck/blob/master/CONTRIBUTING.rst
+.. _Contribution guidelines: http://flycheck.readthedocs.org/en/latest/contributing.html
 
 Credits
 =======
