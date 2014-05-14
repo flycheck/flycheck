@@ -3501,7 +3501,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
       (remove-hook 'emacs-lisp-mode-hook disable-byte-comp))))
 
 (ert-deftest flycheck-define-checker/erlang-error ()
-  :tags '(builtin-checker external-tool language-emacs-lisp)
+  :tags '(builtin-checker external-tool language-erlang)
   (skip-unless (flycheck-check-executable 'erlang))
   (flycheck-test-should-syntax-check
    "checkers/erlang-error.erl" 'erlang-mode
