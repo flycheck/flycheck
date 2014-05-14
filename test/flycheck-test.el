@@ -4473,14 +4473,14 @@ Why not:
 
 (dolist (test (ert-select-tests t t))
   (let* ((result (ert-test-expected-result-type test))
-         (new-result `(or ,result
-                          (satisfies flycheck-test-syntax-check-timed-out-p))))
+         (result `(or ,result
+                      (satisfies flycheck-test-syntax-check-timed-out-p))))
     (unless flycheck-test-ert-can-skip
       ;; For Emacs 24.3 and below, we mark skipped tests as expected failures,
       ;; but adjusting the expected result of all test cases, because ERT does
       ;; not yet support test skipping.  Not particularly pretty, but works :)
-      (push '(satisfies ert-test-skipped-p) new-result))
-    (setf (ert-test-expected-result-type test) new-result)))
+      (setq result `(or ,result (satisfies ert-test-skipped-p))))
+    (setf (ert-test-expected-result-type test) result)))
 
 (provide 'flycheck-test)
 
