@@ -17,12 +17,13 @@ Features
 
 - |#flycheck-languages| languages with |#flycheck-checkers| syntax checkers, see
   :ref:`supported-languages`
-- :ref:`Fully automatic syntax checking in the background <syntax-checking>`
+- :ref:`Fully automatic, fail-safe, on-the-fly syntax checking in background
+  <syntax-checking>`
 - :ref:`Nice error indication and highlighting <error-reporting>`
 - Optional error list popup
 - :ref:`Many customization options <syntax-checker-configuration>`
 - :ref:`A comprehensive manual <usage>`
-- :ref:`A dead simple API to create new syntax checkers
+- :ref:`A simple API to define new syntax checkers
   <defining-new-syntax-checkers>`
 - A “doesn't get in your way” guarantee
 
