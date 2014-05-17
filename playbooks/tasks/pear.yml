@@ -1,0 +1,11 @@
+- name: Discover PEAR channels
+  pearchannel: name='{{item}}'
+  with_items:
+    - pear.phpmd.org
+    - pear.pdepend.org
+- name: Install PEAR packages
+  command: pear install '{{item}}'
+  ignore_errors: True
+  with_items:
+    - PHP_CodeSniffer
+    - phpmd/PHP_PMD

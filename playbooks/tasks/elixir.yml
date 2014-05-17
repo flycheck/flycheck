@@ -1,0 +1,13 @@
+- name: Download elixir
+  get_url: url=https://github.com/elixir-lang/elixir/releases/download/v{{elixir_version}}/Precompiled.zip
+           dest=/usr/src/elixir-{{elixir_version}}.zip
+- name: Create Elixir directory
+  file: path=/opt/elixir-{{elixir_version}} state=directory
+        owner=root group=root mode=0755
+- name: Extract Elixir
+  unarchive: src=/usr/src/elixir-{{elixir_version}}.zip copy=no
+             dest=/opt/elixir-{{elixir_version}}
+             creates=/opt/elixir-{{elixir_version}}/bin/elixirc
+- name: Put Elixir compiler in PATH
+  file: path=/usr/local/bin/elixirc state=link
+        src=/opt/elixir-{{elixir_version}}/bin/elixirc

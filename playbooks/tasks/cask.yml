@@ -1,0 +1,9 @@
+- name: Download Cask
+  get_url: url=https://github.com/cask/cask/archive/v{{cask_version}}.tar.gz
+           dest=/usr/src/cask-{{cask_version}}.tar.gz
+- name: Extract Cask
+  unarchive: src=/usr/src/cask-{{cask_version}}.tar.gz copy=no dest=/opt/
+             creates=/opt/cask-{{cask_version}}/bin/cask
+- name: Put Cask into PATH
+  file: path=/usr/local/bin/cask state=link
+        src=/opt/cask-{{cask_version}}/bin/cask
