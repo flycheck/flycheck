@@ -1,0 +1,27 @@
+- name: Setup testing environment on Travis CI
+  hosts: 127.0.0.1
+  connection: local
+  gather_facts: false
+  vars:
+    pip_extra_args: --user
+    go_env: {}
+  vars_files:
+    - versions.yml
+  tasks:
+    - include: tasks/packages.yml
+      sudo: True
+    - name: Install Emacs for Travis CI
+      apt: name={{lookup('env', 'EMACS')}}-nox
+      sudo: True
+    - include: tasks/elixir.yml
+      sudo: True
+    - include: tasks/cask.yml
+      sudo: True
+    - include: tasks/perl.yml
+      sudo: True
+    - include: tasks/pear.yml
+      sudo: True
+    - include: tasks/npm.yml
+    - include: tasks/goget.yml
+    - include: tasks/eggs.yml
+    - include: tasks/gems.yml
