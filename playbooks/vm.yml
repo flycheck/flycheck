@@ -1,0 +1,54 @@
+- name: Setup the Flycheck VM
+  hosts: flycheck
+  gather_facts: false
+  vars:
+    gem_executable: gem1.9.1
+    go_executable: /usr/local/go/bin/go
+    go_env:
+      GOPATH: /usr/local/lib/go
+  vars_files:
+    - versions.yml
+  sudo: True
+  tasks:
+    - name: Add additional repositories
+      apt_repository: repo='{{item}}' update_cache=false state=present
+      with_items:
+        - ppa:chris-lea/node.js
+        - ppa:ubuntu-toolchain-r/test # For Clang 3.4
+        - 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.4 main'
+    - name: Add additional repo keys
+      apt_key: url='{{item}}' state=present
+      with_items:
+        - http://llvm.org/apt/llvm-snapshot.gpg.key
+    - include: tasks/packages.yml
+    - name: Install additional packages
+      apt: name={{item}} state=latest install_recommends=false
+      with_items:
+        - clang-3.4
+        - ruby1.9.1
+        - ruby1.9.1-dev
+    - name: Install Emacs stable and snapshot
+      apt: name={{item}} state=latest install_recommends=false
+      with_items:
+        - emacs24-nox
+        - emacs-snapshot-nox
+    - name: Download Go
+      get_url: url=https://storage.googleapis.com/golang/go{{go_version}}.linux-amd64.tar.gz
+               dest=/usr/src/go{{go_version}}.tar.gz
+    - name: Extract Go
+      unarchive: src=/usr/src/go{{go_version}}.tar.gz copy=no dest=/usr/local/
+                 creates=/usr/local/go/bin/go
+    - name: Put Go into $PATH
+      copy: dest=/etc/profile.d/go.sh mode=0644 owner=root group=root
+            content="export PATH=/usr/local/lib/go/bin:/usr/local/go/bin/:$PATH"
+    - name: Put Haskell into $PATH
+      copy: dest=/etc/profile.d/ghc.sh mode=0644 owner=root group=root
+            content="export PATH=/opt/ghc/{{ghc_version}}/bin:$PATH"
+    - include: tasks/perl.yml
+    - include: tasks/pear.yml
+    - include: tasks/npm.yml
+    - include: tasks/goget.yml
+    - include: tasks/elixir.yml
+    - include: tasks/cask.yml
+    - include: tasks/eggs.yml
+    - include: tasks/gems.yml
