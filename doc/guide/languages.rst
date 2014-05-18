@@ -205,6 +205,9 @@ Haskell
 
    .. rubric:: Options
 
+   .. option:: flycheck-ghc-language-extensions
+      :auto:
+
    .. option:: flycheck-ghc-no-user-package-database
       :auto:
 
