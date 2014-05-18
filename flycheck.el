@@ -4321,6 +4321,18 @@ See URL `http://handlebarsjs.com/'."
       (group (one-or-more (not (any space "\n")))))
   "Regular expression for a Haskell module name.")
 
+(flycheck-def-option-var flycheck-ghc-options nil haskell-ghc
+  "Additional options for GHC.
+
+The value of this variable is a list of strings, where each
+string is a GHC options passed verbatim to ghc compiler. Examples
+of options include warning flags, context stack, SafeHaskell
+modifiers and so on."
+  :type '(repeat (string :tag "Options"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.19"))
+
+
 (flycheck-def-option-var flycheck-ghc-no-user-package-database nil haskell-ghc
   "Whether to disable the user package database in GHC.
 
@@ -4376,6 +4388,7 @@ See URL `http://www.haskell.org/ghc/'."
                    (flycheck-module-root-directory
                     (flycheck-find-in-buffer flycheck-haskell-module-re))))
             (option-list "-X" flycheck-ghc-language-extensions s-prepend)
+            (eval flycheck-ghc-options)
             ;; Force GHC to treat the file as Haskell file, even if it doesn't
             ;; have an extension.  Otherwise GHC would fail on files without an
             ;; extension
