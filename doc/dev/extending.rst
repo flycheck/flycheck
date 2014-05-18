@@ -313,8 +313,8 @@ compiler, and for adherence to the Emacs Lisp documentation style using
 Checkdoc.  PHP, too, can be syntax checked with the PHP parser, and verified
 against coding styles using PHP CodeSniffer.
 
-To support such cases, syntax checkers can be :dfn:`chained` using the
-`:next-checkers`.  The standard PHP syntax checker uses this to run PHP
+To support such cases, syntax checkers can be :term:`chained <chaining>` using
+the `:next-checkers`.  The standard PHP syntax checker uses this to run PHP
 CodeSniffer if there are no syntax errors:
 
 .. code-block:: cl

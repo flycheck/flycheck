@@ -89,8 +89,8 @@ Each syntax check conducts the following steps:
 6. Parse the output of the tool, and report all errors and warnings.  See
    :ref:`error-reporting`, for more information.
 7. If the buffer can be checked with another syntax checker, continue from step
-   4, but with the next syntax checker.  This is called “chaining” of syntax
-   checkers.
+   4, but with the next syntax checker.  This is called :term:`chaining` of
+   syntax checkers.
 8. Run hooks in :hook:`flycheck-after-syntax-check-hook`.
 
 .. hook:: flycheck-after-syntax-check-hook
