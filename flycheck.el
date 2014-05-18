@@ -3483,7 +3483,7 @@ is the output of the syntax checker.
 
 Parse the OUTPUT and report an appropriate error status."
   (flycheck-report-status "")
-  (let (errors)
+  (let (errors parsed-errors)
     (condition-case err
         (setq errors (flycheck-parse-output output checker (current-buffer)))
       (error
@@ -3492,6 +3492,7 @@ Error: %s" checker output (error-message-string err))
        (flycheck-report-error)
        (setq errors :errored)))
     (unless (eq errors :errored)
+      (setq parsed-errors (length errors))
       (setq errors (-> errors
                      (flycheck-fix-error-filenames files)
                      flycheck-relevant-errors))
@@ -3502,7 +3503,7 @@ Error: %s" checker output (error-message-string err))
       (--each errors
         (run-hook-with-args-until-success 'flycheck-process-error-functions it))
       (flycheck-report-error-count flycheck-current-errors)
-      (when (and (/= exit-status 0) (not errors))
+      (when (and (/= exit-status 0) (zerop parsed-errors))
         (message "Checker %S returned non-zero exit code %s, but no errors from \
 output: %s\nChecker definition probably flawed."
                  checker exit-status output)
