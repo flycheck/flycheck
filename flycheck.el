@@ -3492,6 +3492,15 @@ Error: %s" checker output (error-message-string err))
        (flycheck-report-error)
        (setq errors :errored)))
     (unless (eq errors :errored)
+      (when (and (/= exit-status 0) (not errors))
+        ;; Warn about a suspicious result from the syntax checker.  We do right
+        ;; after parsing the errors, before filtering, because a syntax checker
+        ;; might report errors from other files (e.g. includes) even if there
+        ;; are no errors in the file being checked.
+        (message "Checker %S returned non-zero exit code %s, but no errors from \
+output: %s\nChecker definition probably flawed."
+                 checker exit-status output)
+        (flycheck-report-status "?"))
       (setq errors (-> errors
                      (flycheck-fix-error-filenames files)
                      flycheck-relevant-errors))
@@ -3502,11 +3511,6 @@ Error: %s" checker output (error-message-string err))
       (--each errors
         (run-hook-with-args-until-success 'flycheck-process-error-functions it))
       (flycheck-report-error-count flycheck-current-errors)
-      (when (and (/= exit-status 0) (not errors))
-        (message "Checker %S returned non-zero exit code %s, but no errors from \
-output: %s\nChecker definition probably flawed."
-                 checker exit-status output)
-        (flycheck-report-status "?"))
       (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
         (if next-checker
             (flycheck-start-checker next-checker)
