@@ -76,9 +76,5 @@ doc/flycheck.texi : $(DOCBUILDDIR)/info/flycheck.texi
 $(DOCBUILDDIR)/info/flycheck.texi :
 	$(SPHINX-BUILD) -b texinfo -d $(DOCTREEDIR) $(SPHINXFLAGS) doc $(DOCBUILDDIR)/info
 
-# Pattern rules
-$(HOOKS): .git/hooks/%: scripts/hooks/% .git/hooks
-	ln -sf ../../$< $@
-
 %.elc : %.el $(PKGDIR)
 	$(CASK) exec $(EMACS) -Q --batch $(EMACSFLAGS) -f batch-byte-compile $<
