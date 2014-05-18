@@ -21,20 +21,56 @@
 
 
 import re
+from collections import namedtuple
 
+from sexpdata import Symbol
 from docutils import nodes
 from docutils.transforms import Transform
+from sphinx import addnodes
 from sphinx.roles import XRefRole
 from sphinx.domains import ObjType
+from sphinx.util.nodes import set_role_source_info
 from sphinxcontrib.emacs import register_interpreter_function
 from sphinxcontrib.emacs.domain import EmacsLispDomain
 from sphinxcontrib.emacs.directives.desc import EmacsLispSymbol
+from sphinxcontrib.emacs.lisp.util import parse_plist, parse_cons_cell
+
+
+class NextChecker(namedtuple('_NextChecker',
+                             'checker warnings_only no_errors')):
+
+    @classmethod
+    def from_sexp(cls, sexp):
+        if isinstance(sexp, Symbol):
+            return cls(checker=sexp.value(), warnings_only=False,
+                       no_errors=False)
+        else:
+            predicate, checker = parse_cons_cell(sexp)
+            if not isinstance(checker, Symbol):
+                raise ValueError('Invalid checker: ' + repr(checker))
+            if not isinstance(predicate, Symbol):
+                raise ValueError('Invalid predicate: ' + repr(predicate))
+            predicate = predicate.value()
+            if predicate not in {'no-errors', 'warnings-only'}:
+                raise ValueError('Invalid predicate: ' + repr(predicate))
+            return cls(checker=checker.value(),
+                       warnings_only=predicate == 'warnings-only',
+                       no_errors=predicate == 'no-errors')
+
+
+def parse_next_checkers(properties):
+    next_checkers = properties.get(':next-checkers', [])
+    if isinstance(next_checkers, Symbol):
+        next_checkers = [next_checkers]
+    return map(NextChecker.from_sexp, next_checkers)
 
 
 def flycheck_define_checker(interpreter, context, _function, name, docstring,
-                            *_rest):
+                            *properties):
     symbol = interpreter.intern_in_scope(name, 'flycheck-checker', context)
     symbol.properties['flycheck-documentation'] = docstring
+    symbol.properties['flycheck-next-checkers'] = parse_next_checkers(
+        parse_plist(properties))
 
 
 def flycheck_def_option_var(interpreter, context, function,
@@ -65,6 +101,7 @@ def flycheck_def_config_file_var(interpreter, context, function,
     doc = "Configuration file for `{0}'".format(checker.name)
     symbol.properties['variable-documentation'] = doc
 
+
 register_interpreter_function('flycheck-define-checker',
                               flycheck_define_checker)
 register_interpreter_function('flycheck-def-option-var',
@@ -80,6 +117,61 @@ EmacsLispDomain.object_types['flyc-checker'] = ObjType(
 
 class FlycheckChecker(EmacsLispSymbol):
     docstring_property = 'flycheck-documentation'
+
+    def make_checker_chaining(self):
+        symbol = self.lookup_auto_symbol()
+        if not symbol:
+            return
+        next_checkers = symbol.properties.get('flycheck-next-checkers')
+        if not next_checkers:
+            return
+        title = nodes.title('', 'Chained syntax checkers')
+        intro = nodes.paragraph()
+        intro += nodes.Text('The following syntax checkers are ')
+        chained = addnodes.pending_xref(
+            'chained', reftype='term', refdomain='std', reftarget='chaining',
+            refwarn=True, refexplicit=True, reftitle='chaining',
+            refdoc=self.env.docname)
+        chained += nodes.emphasis('', 'chained')
+        intro += chained
+        intro += nodes.Text(' after this syntax checker:')
+        checker_list = nodes.enumerated_list()
+        para = nodes.paragraph()
+        para += checker_list
+        outro = nodes.paragraph()
+        outro += nodes.Text('The ')
+        outro += nodes.strong('', 'first')
+        outro += nodes.Text(' suitable syntax checker is used.')
+        chaining = nodes.admonition(
+            '', title, intro, para, outro,
+            classes=['note', 'el-flycheck-checker-chaining'])
+        for next_checker in next_checkers:
+            xref = addnodes.pending_xref(
+                next_checker.checker,
+                reftype='flyc-checker', refdomain='el',
+                refexplicit=False, reftarget=next_checker.checker,
+                refwarn=False, refdoc=self.env.docname)
+            set_role_source_info(self.state.inliner, self.lineno, xref)
+            xref += nodes.literal('', next_checker.checker,
+                                  classes=['xref', 'el', 'el-flyc-checker'])
+            para = nodes.paragraph()
+            para += xref
+            if next_checker.warnings_only:
+                para += nodes.Text(', if there are only warnings')
+            if next_checker.no_errors:
+                para += nodes.Text(', if there are no errors')
+            checker_list += nodes.list_item('', para)
+        return chaining
+
+    def run(self):
+        result_nodes = EmacsLispSymbol.run(self)
+        cont_node = result_nodes[-1][-1]
+
+        chaining = self.make_checker_chaining()
+        if chaining:
+            cont_node.insert(0, chaining)
+
+        return result_nodes
 
 
 FLYCHECK_SUBSTITUTIONS = ('#flycheck-languages', '#flycheck-checkers')
