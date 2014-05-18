@@ -1500,6 +1500,21 @@ be registered in `flycheck-checkers'.
      must return a list of `flycheck-error' objects parsed from
      OUTPUT.
 
+`:error-filter FUNCTION'
+`:error-filter (lambda (errors) BODY ...)'
+     A function to filter or modify errors parsed by
+     `:error-parser' or `:error-patterns'.
+
+     The function takes the list of parsed `flycheck-error'
+     objects as sole argument and shall return a list of
+     `flycheck-error' as the result of the syntax checker.  The
+     function is free to add or remove errors, or modify
+     individual errors.  It may modify the list of errors as well
+     as individual errors in place.
+
+     Syntax checkers will mostly use this feature to fix
+     misplaced error locations, or improve error messages.
+
 `:modes MODE'
 `:modes (MODE ...)'
      An unquoted major mode symbol or a list thereof.  If
@@ -1544,6 +1559,7 @@ be registered in `flycheck-checkers'.
   (let ((command (plist-get properties :command))
         (parser (plist-get properties :error-parser))
         (patterns (plist-get properties :error-patterns))
+        (filter (plist-get properties :error-filter))
         (modes (plist-get properties :modes))
         (predicate (plist-get properties :predicate))
         (next-checkers (plist-get properties :next-checkers))
@@ -1558,6 +1574,8 @@ be registered in `flycheck-checkers'.
       (error "Missing :error-pattern or :error-parser"))
     (unless (or (null parser) (functionp parser))
       (error "%S is not a function" parser))
+    (unless (or (null filter) (functionp filter))
+      (error "%S is not a function" filter))
     (unless (or modes predicate)
       (error "Missing :modes or :predicate"))
     (unless (or (symbolp modes) (-all? #'symbolp modes))
@@ -1575,6 +1593,8 @@ be registered in `flycheck-checkers'.
             ',(--map (cons (flycheck-rx-to-string `(and ,@(cdr it)) 'no-group)
                            (car it))
                      (plist-get properties :error-patterns)))
+       (put ',symbol :flycheck-error-filter
+            #',(or filter 'flycheck-sanitize-errors))
        (put ',symbol :flycheck-modes
             ',(if (and modes (symbolp modes)) (list modes) modes))
        (put ',symbol :flycheck-predicate #',predicate)
@@ -1787,6 +1807,10 @@ regular expression, and LEVEL the corresponding level symbol."
 (defun flycheck-checker-error-parser (checker)
   "Get the error parser of CHECKER."
   (get checker :flycheck-error-parser))
+
+(defun flycheck-checker-error-filter (checker)
+  "Get the error filter of CHECKER."
+  (get checker :flycheck-error-filter))
 
 (defun flycheck-checker-pattern-to-error-regexp (pattern)
   "Convert PATTERN into an error regexp for compile.el.
@@ -2657,19 +2681,23 @@ Return the errors parsed with the error patterns of CHECKER."
   (let* ((parser (flycheck-checker-error-parser checker))
          (errors (funcall parser output checker buffer)))
     (--each errors
+      ;; Remember the source buffer and checker in the error
       (setf (flycheck-error-buffer it) buffer)
       (setf (flycheck-error-checker it) checker))
-    (-map #'flycheck-sanitize-error errors)))
+    errors))
 
 (defun flycheck-fix-error-filename (err buffer-files)
   "Fix the file name of ERR from BUFFER-FILES.
 
-If the file name of ERR is in BUFFER-FILES, replace it with the
-return value of the function `buffer-file-name'."
+Make the file name of ERR absolute.  If the absolute file name of
+ERR is in BUFFER-FILES, replace it with the return value of the
+function `buffer-file-name'."
   (flycheck-error-with-buffer err
     (-when-let (filename (flycheck-error-filename err))
+      (setq filename (f-expand filename))
       (when (--any? (f-same? filename it) buffer-files)
-        (setf (flycheck-error-filename err) (buffer-file-name)))))
+        (setq filename (buffer-file-name)))
+      (setf (flycheck-error-filename err) filename)))
   err)
 
 (defun flycheck-fix-error-filenames (errors buffer-files)
@@ -2677,24 +2705,6 @@ return value of the function `buffer-file-name'."
 
 See `flycheck-fix-error-filename' for details."
   (--map (flycheck-fix-error-filename it buffer-files) errors))
-
-(defun flycheck-sanitize-error (err)
-  "Sanitize ERR.
-
-- Make the error filename absolute
-- Trim leading and trailing whitespace in the error message
-- Remove 0 column"
-  (flycheck-error-with-buffer err
-    (let ((filename (flycheck-error-filename err))
-          (message (flycheck-error-message err))
-          (column (flycheck-error-column err)))
-      (when message
-        (setf (flycheck-error-message err) (s-trim message)))
-      (when filename
-        (setf (flycheck-error-filename err) (f-expand filename)))
-      (when (eq column 0)
-        (setf (flycheck-error-column err) nil))))
-  err)
 
 
 ;;; Error parsing with regular expressions
@@ -2911,6 +2921,35 @@ about Cppcheck."
         (-mapcat #'flycheck-parse-cppcheck-error-node)))))
 
 
+;;; Error filtering
+
+(defun flycheck-filter-errors (errors checker)
+  "Filter ERRORS from CHECKER.
+
+Apply the error filter of CHECKER to ERRORs and return the
+result.  If CHECKER has no error filter, fall back to
+`flycheck-sanitize-errors'."
+  (let ((filter (or (flycheck-checker-error-filter checker)
+                    #'flycheck-sanitize-errors)))
+    (funcall filter errors)))
+
+(defun flycheck-sanitize-errors (errors)
+  "Sanitize ERRORS.
+
+Sanitize ERRORS by trimming leading and trailing whitespace in
+all error messages, and by replacing 0 columns with nil.
+
+Returns sanitized ERRORS."
+  (--each errors
+    (flycheck-error-with-buffer it
+      (let ((message (flycheck-error-message it))
+            (column (flycheck-error-column it)))
+        (when message
+          (setf (flycheck-error-message it) (s-trim message)))
+        (when (eq column 0)
+          (setf (flycheck-error-column it) nil)))))
+  errors)
+
 ;;; Error analysis
 (defvar-local flycheck-current-errors nil
   "A list of all errors and warnings in the current buffer.")
@@ -3503,6 +3542,7 @@ output: %s\nChecker definition probably flawed."
         (flycheck-report-status "?"))
       (setq errors (-> errors
                      (flycheck-fix-error-filenames files)
+                     (flycheck-filter-errors checker)
                      flycheck-relevant-errors))
       (setq flycheck-current-errors (-> errors
                                       (append flycheck-current-errors nil)

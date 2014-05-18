@@ -2351,21 +2351,6 @@ check with.  ERRORS is the list of expected errors."
               'flycheck-error-list-info)))
 
 
-;;;; General error parsing
-
-(ert-deftest flycheck-sanitize-error/trailing-whitespace ()
-  :tags '(error-parsing)
-  (let ((err (flycheck-error-new-at 1 1 'error " foo " :checker 'emacs-lisp)))
-    (equal (flycheck-sanitize-error err)
-           (flycheck-error-new-at 1 1 'error "foo" :checker 'emacs-lisp))))
-
-(ert-deftest flycheck-sanitize-error/zero-column ()
-  :tags '(error-parsing)
-  (let ((err (flycheck-error-new-at 1 0 'error "foo" :checker 'emacs-lisp)))
-    (equal (flycheck-sanitize-error err)
-           (flycheck-error-new-at 1 nil 'error "foo" :checker 'emacs-lisp))))
-
-
 ;;;; Error parsers
 
 (defconst flycheck-checkstyle-xml
@@ -2485,6 +2470,29 @@ of the file will be interrupted because there are too many #ifdef configurations
   <errors>
   </errors>
 </results>" nil nil))))
+
+
+;;; Error filters
+
+(ert-deftest flycheck-sanitize-errors/trailing-whitespace ()
+  :tags '(error-filtering)
+  (let ((err (flycheck-error-new-at 1 1 'error " foo ")))
+    (should (equal (flycheck-sanitize-errors (list err))
+                   (list (flycheck-error-new-at 1 1 'error "foo"))))))
+
+(ert-deftest flycheck-sanitize-errors/zero-column ()
+  :tags '(error-filtering)
+  (let ((err (flycheck-error-new-at 1 0 'error "foo")))
+    (should (equal (flycheck-sanitize-errors (list err))
+                   (list (flycheck-error-new-at 1 nil 'error "foo"))))))
+
+(ert-deftest flycheck-collapse-error-message-whitespace ()
+  :tags '(error-filtering)
+  (let ((err (flycheck-error-new-at 1 1 'error
+                                    "spam  \nwith\t   eggs")))
+    (should (equal (flycheck-collapse-error-message-whitespace (list err))
+                   (list (flycheck-error-new-at 1 1 'error
+                                                "spam with eggs"))))))
 
 
 ;;;; Error overlay management
