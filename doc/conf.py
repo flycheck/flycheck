@@ -74,15 +74,7 @@ nitpick_ignore =[
     ('el:variable', 'flycheck-CHECKER-executable'),
 ]
 
-
 html_title = '{0} {1}'.format(project, release)
-html_theme = 'nature'
-html_sidebars = {'**': ['info.html',
-                        'localtoc.html',
-                        'relations.html',
-                        # For RTD, we point to the source on Github
-                        'rtdsourcelink.html' if ON_RTD else 'sourcelink.html',
-                        'searchbox.html']}
 
 texinfo_documents = [
   ('index', 'flycheck', 'Flycheck', u'Sebastian Wiesner',
