@@ -6,6 +6,7 @@
     go_executable: /usr/local/go/bin/go
     go_env:
       GOPATH: /usr/local/lib/go
+    home: /home/vagrant
   vars_files:
     - versions.yml
   sudo: True
@@ -54,3 +55,6 @@
     - include: tasks/cask.yml
     - include: tasks/eggs.yml
     - include: tasks/gems.yml
+    - name: Automatically change to /flycheck directory on login
+      lineinfile: dest="{{home}}/.bashrc" state=present
+                  line="cd /flycheck" insertafter=EOF
