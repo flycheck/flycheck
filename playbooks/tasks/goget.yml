@@ -4,3 +4,4 @@
     - code.google.com/p/go.tools/cmd/vet # go-vet
     - github.com/golang/lint/golint      # go-golint
   environment: go_env
+  ignore_errors: True

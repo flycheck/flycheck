@@ -11,3 +11,4 @@
     - ruby-lint             # ruby-rubylint
     - sass                  # sass
     - slim                  # slim
+  ignore_errors: True

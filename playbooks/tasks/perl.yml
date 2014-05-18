@@ -17,3 +17,4 @@
     - libstring-format-perl
 - name: Install current Perl::Critic
   cpanm: name=Perl::Critic notest=true
+  ignore_errors: True

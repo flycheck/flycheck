@@ -69,5 +69,7 @@
 - name: Download DMD
   get_url: url=http://downloads.dlang.org/releases/2014/dmd_{{dmd_version}}.0-0_amd64.deb
            dest=/usr/src/dmd_{{dmd_version}}.0-0_amd64.deb
+  ignore_errors: True
 - name: Install DMD
   apt: deb=/usr/src/dmd_{{dmd_version}}.0-0_amd64.deb state=installed
+  ignore_errors: True

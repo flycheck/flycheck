@@ -10,3 +10,4 @@
     - jshint                # javascript-jshint
     - jsonlint              # json-jsonlint
     - less                  # less
+  ignore_errors: True
