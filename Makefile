@@ -47,6 +47,9 @@ deps : $(PKGDIR)
 linkcheck :
 	$(SPHINX-BUILD) -b linkcheck -d $(DOCTREEDIR) $(SPHINXFLAGS) doc $(DOCBUILDDIR)/linkcheck
 
+pseudoxml :
+	$(SPHINX-BUILD) -b pseudoxml -d $(DOCTREEDIR) $(SPHINXFLAGS) doc $(DOCBUILDDIR)/pseudoxml
+
 # Cleanup targets
 clean : clean-elc clean-dist clean-deps clean-doc
 
