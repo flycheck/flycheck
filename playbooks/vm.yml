@@ -28,6 +28,7 @@
         - clang-3.4
         - ruby1.9.1
         - ruby1.9.1-dev
+        - nodejs
     - name: Install Emacs stable and snapshot
       apt: name={{item}} state=latest install_recommends=false
       with_items:
