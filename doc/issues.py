@@ -40,7 +40,7 @@ ISSUE_RE = re.compile(r'#(?P<id>\d+)')
 ISSUE_URL = 'https://github.com/flycheck/flycheck/issues/{id}'
 
 
-ISSUE_DOCUMENTS = ['manual/changes']
+ISSUE_DOCUMENTS = ['changes']
 
 
 class IssueReferences(Transform):
