@@ -3155,7 +3155,12 @@ of the file will be interrupted because there are too many #ifdef configurations
   (let ((flycheck-clang-include-path '("./c_c++-include")))
     (flycheck-test-should-syntax-check
      "checkers/c_c++-clang-included-file-error.cpp" 'c++-mode
-     '(3 nil error "In file included from" :checker c/c++-clang))))
+     '(3 nil error "Errors in included file:
+2:3:error: unknown type name 'this_is_bad' (c/c++-clang)
+3:1:error: expected member name or ';' after declaration specifiers (c/c++-clang)
+3:2:error: expected ';' after class (c/c++-clang)
+1:1:error: anonymous structs and classes must be class members (c/c++-clang)"
+         :checker c/c++-clang))))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-includes ()
   :tags '(builtin-checker external-tool language-c++)
