@@ -147,6 +147,17 @@ These functions can be used to implement custom error parsers:
 .. function:: flycheck-parse-xml-string
    :auto:
 
+.. _builtin-error-filters:
+
+Error filters
+=============
+
+.. function:: flycheck-sanitize-errors
+   :auto:
+
+.. function:: flycheck-collapse-error-message-whitespace
+   :auto:
+
 .. _syntax-checker-api:
 
 Syntax checker API

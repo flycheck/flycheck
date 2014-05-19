@@ -2351,21 +2351,6 @@ check with.  ERRORS is the list of expected errors."
               'flycheck-error-list-info)))
 
 
-;;;; General error parsing
-
-(ert-deftest flycheck-sanitize-error/trailing-whitespace ()
-  :tags '(error-parsing)
-  (let ((err (flycheck-error-new-at 1 1 'error " foo " :checker 'emacs-lisp)))
-    (equal (flycheck-sanitize-error err)
-           (flycheck-error-new-at 1 1 'error "foo" :checker 'emacs-lisp))))
-
-(ert-deftest flycheck-sanitize-error/zero-column ()
-  :tags '(error-parsing)
-  (let ((err (flycheck-error-new-at 1 0 'error "foo" :checker 'emacs-lisp)))
-    (equal (flycheck-sanitize-error err)
-           (flycheck-error-new-at 1 nil 'error "foo" :checker 'emacs-lisp))))
-
-
 ;;;; Error parsers
 
 (defconst flycheck-checkstyle-xml
@@ -2485,6 +2470,29 @@ of the file will be interrupted because there are too many #ifdef configurations
   <errors>
   </errors>
 </results>" nil nil))))
+
+
+;;; Error filters
+
+(ert-deftest flycheck-sanitize-errors/trailing-whitespace ()
+  :tags '(error-filtering)
+  (let ((err (flycheck-error-new-at 1 1 'error " foo ")))
+    (should (equal (flycheck-sanitize-errors (list err))
+                   (list (flycheck-error-new-at 1 1 'error "foo"))))))
+
+(ert-deftest flycheck-sanitize-errors/zero-column ()
+  :tags '(error-filtering)
+  (let ((err (flycheck-error-new-at 1 0 'error "foo")))
+    (should (equal (flycheck-sanitize-errors (list err))
+                   (list (flycheck-error-new-at 1 nil 'error "foo"))))))
+
+(ert-deftest flycheck-collapse-error-message-whitespace ()
+  :tags '(error-filtering)
+  (let ((err (flycheck-error-new-at 1 1 'error
+                                    "spam  \nwith\t   eggs")))
+    (should (equal (flycheck-collapse-error-message-whitespace (list err))
+                   (list (flycheck-error-new-at 1 1 'error
+                                                "spam with eggs"))))))
 
 
 ;;;; Error overlay management
@@ -2665,13 +2673,13 @@ of the file will be interrupted because there are too many #ifdef configurations
     (widen)
     (should (= (length (flycheck-overlays-in (point-min) (point-max))) 4))
     (flycheck-test-should-errors
-     '(9 1 warning "`message' called with 0 args to fill 1\n    format field(s)"
+     '(9 1 warning "`message' called with 0 args to fill 1 format field(s)"
          :checker emacs-lisp)
-     '(11 8 warning "`message' called with 0 args to fill 1\n    format field(s)"
+     '(11 8 warning "`message' called with 0 args to fill 1 format field(s)"
           :checker emacs-lisp)
      '(12 nil warning "First sentence should end with punctuation"
           :checker emacs-lisp-checkdoc)
-     '(15 1 warning "`message' called with 0 args to fill 1\n    format field(s)"
+     '(15 1 warning "`message' called with 0 args to fill 1 format field(s)"
           :checker emacs-lisp))))
 
 
@@ -3147,7 +3155,12 @@ of the file will be interrupted because there are too many #ifdef configurations
   (let ((flycheck-clang-include-path '("./c_c++-include")))
     (flycheck-test-should-syntax-check
      "checkers/c_c++-clang-included-file-error.cpp" 'c++-mode
-     '(3 nil error "In file included from" :checker c/c++-clang))))
+     '(3 nil error "Errors in included file:
+2:3:error: unknown type name 'this_is_bad' (c/c++-clang)
+3:1:error: expected member name or ';' after declaration specifiers (c/c++-clang)
+3:2:error: expected ';' after class (c/c++-clang)
+1:1:error: anonymous structs and classes must be class members (c/c++-clang)"
+         :checker c/c++-clang))))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-includes ()
   :tags '(builtin-checker external-tool language-c++)
@@ -3418,10 +3431,10 @@ of the file will be interrupted because there are too many #ifdef configurations
      "checkers/emacs-lisp.el" 'emacs-lisp-mode
      '(12 nil warning "First sentence should end with punctuation"
           :checker emacs-lisp-checkdoc)
-     '(18 6 warning "message called with 0 arguments, but
-    requires 1+" :checker emacs-lisp)
-     '(23 1 warning "the function `dummy-package-foo' might
-    not be defined at runtime." :checker emacs-lisp))))
+     '(18 6 warning "message called with 0 arguments, but requires 1+"
+          :checker emacs-lisp)
+     '(23 1 warning "the function `dummy-package-foo' might not be defined at runtime."
+          :checker emacs-lisp))))
 
 (ert-deftest flycheck-define-checker/emacs-lisp-initialize-packages ()
   :tags '(builtin-checker external-tool language-emacs-lisp)
@@ -3432,8 +3445,8 @@ of the file will be interrupted because there are too many #ifdef configurations
      "checkers/emacs-lisp.el" 'emacs-lisp-mode
      '(12 nil warning "First sentence should end with punctuation"
           :checker emacs-lisp-checkdoc)
-     '(18 6 warning "message called with 0 arguments, but
-    requires 1+" :checker emacs-lisp))))
+     '(18 6 warning "message called with 0 arguments, but requires 1+"
+          :checker emacs-lisp))))
 
 (ert-deftest flycheck-define-checker/emacs-lisp-checks-compressed-file ()
   :tags '(builtin-checker external-tool language-emacs-lisp)
@@ -3441,10 +3454,10 @@ of the file will be interrupted because there are too many #ifdef configurations
    "checkers/emacs-lisp.el.gz" 'emacs-lisp-mode
    '(12 nil warning "First sentence should end with punctuation"
         :checker emacs-lisp-checkdoc)
-   '(16 6 warning "message called with 0 arguments, but
-    requires 1+" :checker emacs-lisp)
-   '(21 1 warning "the function `dummy-package-foo' is
-    not known to be defined." :checker emacs-lisp)))
+   '(16 6 warning "message called with 0 arguments, but requires 1+"
+        :checker emacs-lisp)
+   '(21 1 warning "the function `dummy-package-foo' is not known to be defined."
+        :checker emacs-lisp)))
 
 (ert-deftest flycheck-define-checker/emacs-lisp-sytnax-error ()
   :tags '(builtin-checker external-tool language-emacs-lisp)
@@ -3660,10 +3673,10 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
   (flycheck-test-should-syntax-check
    "checkers/Haskell/LanguageExtension.hs" 'haskell-mode
    '(4 18 error "Couldn't match expected type ‘BS.ByteString’
-                with actual type ‘[Char]’
-    In the first argument of ‘BS.putStr’, namely ‘\"Hello World\"’
-    In the expression: BS.putStr \"Hello World\"
-    In an equation for ‘main’: main = BS.putStr \"Hello World\""
+            with actual type ‘[Char]’
+In the first argument of ‘BS.putStr’, namely ‘\"Hello World\"’
+In the expression: BS.putStr \"Hello World\"
+In an equation for ‘main’: main = BS.putStr \"Hello World\""
        :checker haskell-ghc)))
 
 (ert-deftest flycheck-define-checker/haskell-ghc-language-extensions ()
