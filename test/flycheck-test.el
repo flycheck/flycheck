@@ -2673,13 +2673,13 @@ of the file will be interrupted because there are too many #ifdef configurations
     (widen)
     (should (= (length (flycheck-overlays-in (point-min) (point-max))) 4))
     (flycheck-test-should-errors
-     '(9 1 warning "`message' called with 0 args to fill 1\n    format field(s)"
+     '(9 1 warning "`message' called with 0 args to fill 1 format field(s)"
          :checker emacs-lisp)
-     '(11 8 warning "`message' called with 0 args to fill 1\n    format field(s)"
+     '(11 8 warning "`message' called with 0 args to fill 1 format field(s)"
           :checker emacs-lisp)
      '(12 nil warning "First sentence should end with punctuation"
           :checker emacs-lisp-checkdoc)
-     '(15 1 warning "`message' called with 0 args to fill 1\n    format field(s)"
+     '(15 1 warning "`message' called with 0 args to fill 1 format field(s)"
           :checker emacs-lisp))))
 
 
@@ -3426,10 +3426,10 @@ of the file will be interrupted because there are too many #ifdef configurations
      "checkers/emacs-lisp.el" 'emacs-lisp-mode
      '(12 nil warning "First sentence should end with punctuation"
           :checker emacs-lisp-checkdoc)
-     '(18 6 warning "message called with 0 arguments, but
-    requires 1+" :checker emacs-lisp)
-     '(23 1 warning "the function `dummy-package-foo' might
-    not be defined at runtime." :checker emacs-lisp))))
+     '(18 6 warning "message called with 0 arguments, but requires 1+"
+          :checker emacs-lisp)
+     '(23 1 warning "the function `dummy-package-foo' might not be defined at runtime."
+          :checker emacs-lisp))))
 
 (ert-deftest flycheck-define-checker/emacs-lisp-initialize-packages ()
   :tags '(builtin-checker external-tool language-emacs-lisp)
@@ -3440,8 +3440,8 @@ of the file will be interrupted because there are too many #ifdef configurations
      "checkers/emacs-lisp.el" 'emacs-lisp-mode
      '(12 nil warning "First sentence should end with punctuation"
           :checker emacs-lisp-checkdoc)
-     '(18 6 warning "message called with 0 arguments, but
-    requires 1+" :checker emacs-lisp))))
+     '(18 6 warning "message called with 0 arguments, but requires 1+"
+          :checker emacs-lisp))))
 
 (ert-deftest flycheck-define-checker/emacs-lisp-checks-compressed-file ()
   :tags '(builtin-checker external-tool language-emacs-lisp)
@@ -3449,10 +3449,10 @@ of the file will be interrupted because there are too many #ifdef configurations
    "checkers/emacs-lisp.el.gz" 'emacs-lisp-mode
    '(12 nil warning "First sentence should end with punctuation"
         :checker emacs-lisp-checkdoc)
-   '(16 6 warning "message called with 0 arguments, but
-    requires 1+" :checker emacs-lisp)
-   '(21 1 warning "the function `dummy-package-foo' is
-    not known to be defined." :checker emacs-lisp)))
+   '(16 6 warning "message called with 0 arguments, but requires 1+"
+        :checker emacs-lisp)
+   '(21 1 warning "the function `dummy-package-foo' is not known to be defined."
+        :checker emacs-lisp)))
 
 (ert-deftest flycheck-define-checker/emacs-lisp-sytnax-error ()
   :tags '(builtin-checker external-tool language-emacs-lisp)
