@@ -2962,6 +2962,37 @@ Return ERRORS."
       (setf (flycheck-error-message it) (s-collapse-whitespace message))))
   errors)
 
+(defun flycheck-dedent-error-messages (errors)
+  "Dedent all messages of ERRORS.
+
+For each error in ERRORS, determine the indentation offset from
+the leading whitespace of the first line, and dedent all further
+lines accordingly.
+
+Return ERRORS, with in-place modifications."
+  (--each errors
+    (-when-let (message (flycheck-error-message it))
+      (with-temp-buffer
+        (insert message)
+        ;; Determine the indentation offset
+        (goto-char (point-min))
+        (back-to-indentation)
+        (let* ((indent-offset (- (point) (point-min))))
+          ;; Now iterate over all lines and dedent each according to
+          ;; `indent-offset'
+          (while (< (point) (point-max))
+            (back-to-indentation)
+            ;; If the current line starts with sufficient whitespace, delete the
+            ;; indendation offset.  Otherwise keep the line intact, as we might
+            ;; loose valuable information
+            (when (>= (- (point) (line-beginning-position)) indent-offset)
+              (delete-char (- indent-offset)))
+            (forward-line 1)))
+        (delete-trailing-whitespace (point-min) (point-max))
+        (setf (flycheck-error-message it)
+              (buffer-substring-no-properties (point-min) (point-max))))))
+  errors)
+
 
 ;;; Error analysis
 (defvar-local flycheck-current-errors nil
@@ -4441,20 +4472,26 @@ See URL `http://www.haskell.org/ghc/'."
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ":"
             (or " " "\n    ") "Warning:" (optional "\n")
-            (one-or-more " ")
-            (message (one-or-more not-newline)
-                     (zero-or-more "\n"
-                                   (one-or-more " ")
-                                   (one-or-more not-newline)))
+            (message
+             (one-or-more " ") (one-or-more not-newline)
+             (zero-or-more "\n"
+                           (one-or-more " ")
+                           (one-or-more not-newline)))
             line-end)
    (error line-start (file-name) ":" line ":" column ":"
           (or (message (one-or-more not-newline))
-              (and "\n" (one-or-more " ")
-                   (message (one-or-more not-newline)
-                            (zero-or-more "\n"
-                                          (one-or-more " ")
-                                          (one-or-more not-newline)))))
+              (and "\n"
+                   (message
+                    (one-or-more " ") (one-or-more not-newline)
+                    (zero-or-more "\n"
+                                  (one-or-more " ")
+                                  (one-or-more not-newline)))))
           line-end))
+  :error-filter
+  (lambda (errors)
+    (-> errors
+      flycheck-dedent-error-messages
+      flycheck-sanitize-errors))
   :modes haskell-mode
   :next-checkers ((warnings-only . haskell-hlint)))
 

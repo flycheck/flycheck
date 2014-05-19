@@ -3668,10 +3668,10 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
   (flycheck-test-should-syntax-check
    "checkers/Haskell/LanguageExtension.hs" 'haskell-mode
    '(4 18 error "Couldn't match expected type ‘BS.ByteString’
-                with actual type ‘[Char]’
-    In the first argument of ‘BS.putStr’, namely ‘\"Hello World\"’
-    In the expression: BS.putStr \"Hello World\"
-    In an equation for ‘main’: main = BS.putStr \"Hello World\""
+            with actual type ‘[Char]’
+In the first argument of ‘BS.putStr’, namely ‘\"Hello World\"’
+In the expression: BS.putStr \"Hello World\"
+In an equation for ‘main’: main = BS.putStr \"Hello World\""
        :checker haskell-ghc)))
 
 (ert-deftest flycheck-define-checker/haskell-ghc-language-extensions ()
