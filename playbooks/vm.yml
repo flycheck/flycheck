@@ -8,7 +8,8 @@
       GOPATH: /usr/local/lib/go
     home: /home/vagrant
   vars_files:
-    - versions.yml
+    - vars/versions.yml
+    - vars/mirrors.yml
   sudo: True
   tasks:
     - name: Add additional repositories

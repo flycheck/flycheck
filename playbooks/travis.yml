@@ -6,7 +6,8 @@
     pip_extra_args: --user
     go_env: {}
   vars_files:
-    - versions.yml
+    - vars/versions.yml
+    - vars/mirrors.yml
   tasks:
     - include: tasks/packages.yml
       sudo: True
