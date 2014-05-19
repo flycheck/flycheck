@@ -8,7 +8,16 @@ master (in development)
   - #381: Add `flycheck-keymap-prefix` to change the prefix key for Flycheck
     keybindings
   - #387: Make the prefix of Flycheck's temporary files customizable with
-    `flycheck-temp-prefix`.
+    `flycheck-temp-prefix`
+  - #397: Add `:error-filter` property for syntax checkers to apply a custom
+    function to modify or filter errors after parsing
+
+- Improvements:
+
+  - #397: Collapse redundant whitespace in messages from `emacs-lisp`
+  - #397: Dedent messages from `haskell-ghc`
+  - #397: Fold errors in included files into the error messages of the
+    corresponding include in `c/c++-clang`
 
 - Bug fixes:
 
