@@ -2729,7 +2729,7 @@ string."
 
 Return nil if the group did not match a number."
   (flycheck-string-to-number-safe
-   (flycheck-match-string-non-empty group match t)))
+   (flycheck-match-string-non-empty group match 'trim-first)))
 
 (defun flycheck-get-regexp (patterns)
   "Create a single regular expression from PATTERNS."
