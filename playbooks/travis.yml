@@ -7,6 +7,7 @@
     go_env: {}
   vars_files:
     - vars/versions.yml
+    - vars/mirrors.yml
   tasks:
     - include: tasks/packages.yml
       sudo: True

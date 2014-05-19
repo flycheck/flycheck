@@ -16,5 +16,5 @@
     - libreadonly-xs-perl
     - libstring-format-perl
 - name: Install current Perl::Critic
-  cpanm: name=Perl::Critic notest=true
+  cpanm: name=Perl::Critic notest=true mirror={{cpan_mirror}}
   ignore_errors: True

@@ -9,6 +9,7 @@
     home: /home/vagrant
   vars_files:
     - vars/versions.yml
+    - vars/mirrors.yml
   sudo: True
   tasks:
     - name: Add additional repositories
