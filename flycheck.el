@@ -2937,7 +2937,8 @@ result.  If CHECKER has no error filter, fall back to
   "Sanitize ERRORS.
 
 Sanitize ERRORS by trimming leading and trailing whitespace in
-all error messages, and by replacing 0 columns with nil.
+all error messages, and by replacing 0 columns and empty error
+messages with nil.
 
 Returns sanitized ERRORS."
   (--each errors
@@ -2945,7 +2946,9 @@ Returns sanitized ERRORS."
       (let ((message (flycheck-error-message it))
             (column (flycheck-error-column it)))
         (when message
-          (setf (flycheck-error-message it) (s-trim message)))
+          (setq message (s-trim message))
+          (setf (flycheck-error-message it)
+                (if (s-blank? message) nil message)))
         (when (eq column 0)
           (setf (flycheck-error-column it) nil)))))
   errors)
