@@ -2765,7 +2765,7 @@ otherwise."
        :filename (flycheck-match-string-non-empty 1 match)
        :line (flycheck-match-int 2 match)
        :column (flycheck-match-int 3 match)
-       :message (flycheck-match-string-non-empty 4 match t)
+       :message (flycheck-match-string-non-empty 4 match)
        :level level))))
 
 (defun flycheck-parse-error-with-patterns (err patterns)
