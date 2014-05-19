@@ -2678,7 +2678,8 @@ OUTPUT is a string with the output from the checker symbol
 CHECKER.  BUFFER is the buffer which was checked.
 
 Return the errors parsed with the error patterns of CHECKER."
-  (let* ((parser (flycheck-checker-error-parser checker))
+  (let* ((parser (or (flycheck-checker-error-parser checker)
+                     #'flycheck-parse-with-patterns))
          (errors (funcall parser output checker buffer)))
     (--each errors
       ;; Remember the source buffer and checker in the error
