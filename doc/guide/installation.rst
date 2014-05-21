@@ -56,6 +56,12 @@ Manual
 Install the ELPA package from MELPA_ or `MELPA Stable`_ using :kbd:`M-x
 package-install RET flycheck`.
 
+.. warning::
+
+   Flycheck is available from Marmalade_ as well, but this repository is **not
+   recommended**.  Due to frequent outages the package is not guaranteed to be
+   updated regularly.
+
 Neither of these repositories is included in GNU Emacs by default.  You need to
 enable these repositories explicitly.  For instance, to add the MELPA
 repository, add the following code to :file:`init.el`:
