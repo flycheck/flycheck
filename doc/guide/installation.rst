@@ -53,8 +53,8 @@ Package installation
 Manual
 ------
 
-Install the ELPA package from MELPA_ or Marmalade_ using :kbd:`M-x
-package-install RET flycheck`.  The former is the *recommended* repository.
+Install the ELPA package from MELPA_ or `MELPA Stable`_ using :kbd:`M-x
+package-install RET flycheck`.
 
 Neither of these repositories is included in GNU Emacs by default.  You need to
 enable these repositories explicitly.  For instance, to add the MELPA
@@ -92,4 +92,5 @@ To permanently enable Flycheck, add the following to your :file:`init.el`::
     (add-hook 'after-init-hook #'global-flycheck-mode)
 
 .. _MELPA: http://melpa.milkbox.net
+.. _MELPA Stable: http://melpa-stable.milkbox.net
 .. _Marmalade: http://marmalade-repo.org/

@@ -50,7 +50,7 @@ Features
 Installation
 ============
 
-Install Flycheck from MELPA_ or Marmalade_ with::
+Install Flycheck from MELPA_ or `MELPA Stable`_ with::
 
    M-x package-install RET flycheck
 
@@ -69,8 +69,8 @@ You need GNU Emacs 24 on a Unix system (Linux, OS X, …), and additional
 
 Flycheck does **not** support GNU Emacs 23, other flavors of Emacs, or Windows.
 
-.. _MELPA: http://melpa.milkbox.net/#/flycheck
-.. _Marmalade: http://marmalade-repo.org/packages/flycheck
+.. _MELPA: http://melpa.milkbox.net
+.. _MELPA Stable: http://melpa-stable.milkbox.net
 .. _Cask: https://github.com/cask/cask
 .. _Supported Languages: http://flycheck.readthedocs.org/en/latest/guide/languages.html
 
