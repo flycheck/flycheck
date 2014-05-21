@@ -4178,10 +4178,10 @@ Why not:
    '(6 10 info "Prefer single-quoted strings when you don't need string interpolation or special symbols."
        :checker ruby-rubocop)
    '(10 5 info "the use of then/do is not needed here" :checker ruby-rubylint)
-   '(10 5 info "Favor modifier `if` usage when having a single-line body. Another good alternative is the usage of control flow `&&`/`||`."
-        :checker ruby-rubocop)
    '(10 5 info "Use a guard clause instead of wrapping the code inside a conditional expression."
           :checker ruby-rubocop)
+   '(10 5 info "Favor modifier `if` usage when having a single-line body. Another good alternative is the usage of control flow `&&`/`||`."
+        :checker ruby-rubocop)
    '(10 5 info "Never use `then` for multi-line `if`."
         :checker ruby-rubocop)
    '(10 8 warning "Literal `true` appeared in a condition."
