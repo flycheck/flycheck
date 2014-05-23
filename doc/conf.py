@@ -41,8 +41,7 @@ master_doc = 'index'
 
 def flycheck_version():
     version_re = re.compile('^;; Version: (?P<version>.*)$')
-    doc_directory = os.path.abspath(os.path.dirname(__file__))
-    flycheck = os.path.join(doc_directory, os.pardir, 'flycheck.el')
+    flycheck = os.path.join(SOURCE_DIR, os.pardir, 'flycheck.el')
     with open(flycheck) as source:
         for line in source:
             match = version_re.match(line)
