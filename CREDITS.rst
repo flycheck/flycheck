@@ -19,7 +19,7 @@ greatly appreciated.
 - `Jimmy Yuen Ho Wong`_ added the HTML syntax checker and the jshint Javascript
   checker, and did valuable testing and bug fixing.
 - `Krzysztof Witkowski`_ implemented `eval` support in Flycheck commands.
-- `Magnar Sveen`_ developed the awesome `dash.el` and `s.el`_
+- `Magnar Sveen`_ developed the awesome `dash.el`_ and `s.el`_
   libraries, that drive considerable parts of Flycheck's internals.
 - `Malyshev Artem`_ made Flycheck's keybindings customizable with
   `flycheck-keymap-prefix`.
