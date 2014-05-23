@@ -4345,7 +4345,8 @@ See URL `http://golang.org/cmd/gofmt/'."
                   ;; Fall back, if go-golint doesn't exist
                   (no-errors . go-vet)
                   ;; Fall back, if go-vet doesn't exist
-                  (no-errors . go-build) (no-errors . go-test)))
+                  (no-errors . go-build) (no-errors . go-test)
+                  (no-errors . go-errcheck)))
 
 (flycheck-define-checker go-golint
   "A Go style checker using Golint.
@@ -4357,7 +4358,7 @@ See URL `https://github.com/golang/lint'."
   :modes go-mode
   :next-checkers (go-vet
                   ;; Fall back, if go-vet doesn't exist
-                  go-build go-test))
+                  go-build go-test go-errcheck))
 
 (flycheck-def-option-var flycheck-go-vet-print-functions nil go-vet
   "A comma-separated list of print-like functions for `go tool vet'.
@@ -4390,7 +4391,9 @@ See URL `http://golang.org/cmd/go/' and URL
   ;; We must explicitly check whether the "vet" tool is available
   :predicate (lambda () (member "vet" (ignore-errors
                                         (process-lines "go" "tool"))))
-  :next-checkers (go-build go-test))
+  :next-checkers (go-build go-test
+                  ;; Fall back if `go build' or `go test' can be used
+                  go-errcheck))
 
 (flycheck-define-checker go-build
   "A Go syntax and type checker using the `go build' command.
