@@ -54,10 +54,6 @@ copyright = u'2014, Sebastian Wiesner'
 release = flycheck_version()
 version = release.split('-')[0]
 
-# Exclude the build directory
-exclude_patterns = ['_build']
-templates_path = ['_templates']
-
 pygments_style = 'emacs'
 
 nitpicky = True
