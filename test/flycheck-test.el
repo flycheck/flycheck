@@ -3613,6 +3613,16 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
      "checkers/go/src/test/test-error_test.go" 'go-mode
      '(8 nil error "undefined: fmt" :checker go-test))))
 
+(ert-deftest flycheck-define-checker/go-errcheck ()
+  :tags '(builtin-checker external-tool language-go)
+  (skip-unless (flycheck-check-executable 'go-errcheck))
+  (flycheck-test-with-env
+   `(("GOPATH" . ,(flycheck-test-resource-filename "checkers/go")))
+   (flycheck-test-should-syntax-check
+    "checkers/go/src/errcheck/errcheck.go" 'go-mode
+    '(7 9 warning "Unchecked error: f.Close()" :checker go-errcheck)
+    '(9 9 warning "Unchecked error: os.Stat(\"enoent\")" :checker go-errcheck))))
+
 (ert-deftest flycheck-define-checker/haml ()
   :tags '(builtin-checker external-tool language-haml)
   (skip-unless (flycheck-check-executable 'haml))

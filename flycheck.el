@@ -153,6 +153,7 @@ buffer-local wherever it is set."
     go-vet
     go-build
     go-test
+    go-errcheck
     haml
     handlebars
     haskell-ghc
@@ -4406,7 +4407,27 @@ See URL `http://golang.org/cmd/go'."
   (lambda ()
     (and (buffer-file-name)
          (not (buffer-modified-p))
-         (not (s-ends-with? "_test.go" (buffer-file-name))))))
+         (not (s-ends-with? "_test.go" (buffer-file-name)))))
+  :next-checkers ((no-errors . go-errcheck)))
+
+(flycheck-define-checker go-errcheck
+  "A Go checker for unchecked errors.
+
+See URL `https://github.com/kisielk/errcheck'."
+  :command ("errcheck" ".")
+  :error-patterns
+  ((warning line-start (file-name) ":" line ":" column (one-or-more "\t") (message) line-end))
+  :error-filter
+  (lambda (errors)
+    ;; Add "Unchecked error" context to otherwise terse errcheck messages.
+    (let ((errors (flycheck-sanitize-errors errors)))
+      (--each errors
+        (-when-let (message (flycheck-error-message it))
+          (setf (flycheck-error-message it)
+                (concat "Unchecked error: " message)))))
+    errors)
+  :modes go-mode
+  :predicate (lambda () (and (buffer-file-name) (not (buffer-modified-p)))))
 
 (flycheck-define-checker go-test
   "A Go syntax and type checker using the `go test' command.
