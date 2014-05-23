@@ -21,6 +21,9 @@ the buffer, or in an optional error list:
    Flycheck at work in an Emacs Lisp buffer, with the `Solarized Light`_ theme
    and the `Source Code Pro`_ font.
 
+.. contents:: Table of Contents
+   :local:
+
 .. _Solarized Light: https://github.com/bbatsov/solarized-emacs
 .. _Source Code Pro: https://github.com/adobe/source-code-pro
 
