@@ -4410,6 +4410,26 @@ See URL `http://golang.org/cmd/go'."
          (not (s-ends-with? "_test.go" (buffer-file-name)))))
   :next-checkers ((no-errors . go-errcheck)))
 
+(flycheck-define-checker go-test
+  "A Go syntax and type checker using the `go test' command.
+
+See URL `http://golang.org/cmd/go'."
+  ;; This command builds the test executable and leaves it in the current
+  ;; directory.  Unfortunately 'go test -c' does not have the '-o' option.
+  :command ("go" "test" "-c")
+  :error-patterns
+  ((error line-start (file-name) ":" line ": "
+          (message (one-or-more not-newline)
+                   (zero-or-more "\n\t" (one-or-more not-newline)))
+          line-end))
+  :modes go-mode
+  :predicate
+  (lambda ()
+    (and (buffer-file-name)
+         (not (buffer-modified-p))
+         (s-ends-with? "_test.go" (buffer-file-name))))
+  :next-checkers ((no-errors . go-errcheck)))
+
 (flycheck-define-checker go-errcheck
   "A Go checker for unchecked errors.
 
@@ -4428,25 +4448,6 @@ See URL `https://github.com/kisielk/errcheck'."
     errors)
   :modes go-mode
   :predicate (lambda () (and (buffer-file-name) (not (buffer-modified-p)))))
-
-(flycheck-define-checker go-test
-  "A Go syntax and type checker using the `go test' command.
-
-See URL `http://golang.org/cmd/go'."
-  ;; This command builds the test executable and leaves it in the current
-  ;; directory.  Unfortunately 'go test -c' does not have the '-o' option.
-  :command ("go" "test" "-c")
-  :error-patterns
-  ((error line-start (file-name) ":" line ": "
-          (message (one-or-more not-newline)
-                   (zero-or-more "\n\t" (one-or-more not-newline)))
-          line-end))
-  :modes go-mode
-  :predicate
-  (lambda ()
-    (and (buffer-file-name)
-         (not (buffer-modified-p))
-         (s-ends-with? "_test.go" (buffer-file-name)))))
 
 (flycheck-define-checker haml
   "A Haml syntax checker using the Haml compiler.
