@@ -4439,12 +4439,12 @@ See URL `https://github.com/kisielk/errcheck'."
   ((warning line-start (file-name) ":" line ":" column (one-or-more "\t") (message) line-end))
   :error-filter
   (lambda (errors)
-    ;; Add "Unchecked error" context to otherwise terse errcheck messages.
     (let ((errors (flycheck-sanitize-errors errors)))
       (--each errors
         (-when-let (message (flycheck-error-message it))
+          ;; Improve the messages reported by errcheck to make them more clear.
           (setf (flycheck-error-message it)
-                (concat "Unchecked error: " message)))))
+                (format "Ignored `error` returned from `%s`" message)))))
     errors)
   :modes go-mode
   :predicate (lambda () (and (buffer-file-name) (not (buffer-modified-p)))))

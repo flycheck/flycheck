@@ -3620,8 +3620,10 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
    `(("GOPATH" . ,(flycheck-test-resource-filename "checkers/go")))
    (flycheck-test-should-syntax-check
     "checkers/go/src/errcheck/errcheck.go" 'go-mode
-    '(7 9 warning "Unchecked error: f.Close()" :checker go-errcheck)
-    '(9 9 warning "Unchecked error: os.Stat(\"enoent\")" :checker go-errcheck))))
+    '(7 9 warning "Ignored `error` returned from `f.Close()`"
+        :checker go-errcheck)
+    '(9 9 warning "Ignored `error` returned from `os.Stat(\"enoent\")`"
+        :checker go-errcheck))))
 
 (ert-deftest flycheck-define-checker/haml ()
   :tags '(builtin-checker external-tool language-haml)
