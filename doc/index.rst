@@ -115,3 +115,11 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode.
 
    gpl
    fdl
+
+Index
+=====
+
+The index provides a sorted list of all symbols and concept explained throughout
+Flycheck's documentation:
+
+- :ref:`genindex`
