@@ -14,6 +14,7 @@ greatly appreciated.
 - `David Holm`_ added C/C++ syntax and style checkers using `clang` and
   `cppcheck` respectively, and contributed a Verilog syntax checker using
   `verilator`.
+- `Doug MacEachern`_ added a Go syntax checker using `errcheck`.
 - `Gereon Frey`_ fixed the `go-build` syntax checker and improved its tests.
 - `Jimmy Yuen Ho Wong`_ added the HTML syntax checker and the jshint Javascript
   checker, and did valuable testing and bug fixing.
@@ -68,6 +69,7 @@ somewhat failed attempt at on-the-fly syntax checking.
 .. _Bozhidar Batsov: https://github.com/bbatsov
 .. _Damon Haley: https://github.com/dhaley
 .. _David Holm: https://github.com/dholm
+.. _Doug MacEachern: https://github.com/dougm
 .. _Gereon Frey: https://github.com/gfrey
 .. _Jimmy Yuen Ho Wong: https://github.com/wyuenho
 .. _Krzysztof Witkowski: https://github.com/kwitek

@@ -3,6 +3,10 @@
 master (in development)
 -----------------------
 
+- New syntax checkers:
+
+  - #393: Go with `errcheck`
+
 - New features:
 
   - #381: Add `flycheck-keymap-prefix` to change the prefix key for Flycheck
