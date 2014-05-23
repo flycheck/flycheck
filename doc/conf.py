@@ -39,7 +39,7 @@ primary_domain = 'el'
 source_suffix = '.rst'
 master_doc = 'index'
 
-def cask_version():
+def flycheck_version():
     version_re = re.compile('^;; Version: (?P<version>.*)$')
     doc_directory = os.path.abspath(os.path.dirname(__file__))
     flycheck = os.path.join(doc_directory, os.pardir, 'flycheck.el')
@@ -52,7 +52,7 @@ def cask_version():
 
 project = u'Flycheck'
 copyright = u'2014, Sebastian Wiesner'
-release = cask_version()
+release = flycheck_version()
 version = release.split('-')[0]
 
 # Exclude the build directory
