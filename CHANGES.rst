@@ -30,6 +30,7 @@ master (in development)
   - Do not choke on files without extensions in `haskell-ghc`
   - #391: Fix spurious warning when a syntax checker reports errors, but not for
     the file being checked
+  - Do not signal errors in Go Mode, when `go` is not available
 
 0.18 (Mar 24, 2014)
 -------------------

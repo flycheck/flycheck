@@ -4388,7 +4388,8 @@ See URL `http://golang.org/cmd/go/' and URL
   ((warning line-start (file-name) ":" line ": " (message) line-end))
   :modes go-mode
   ;; We must explicitly check whether the "vet" tool is available
-  :predicate (lambda () (member "vet" (process-lines "go" "tool")))
+  :predicate (lambda () (member "vet" (ignore-errors
+                                        (process-lines "go" "tool"))))
   :next-checkers (go-build go-test))
 
 (flycheck-define-checker go-build
