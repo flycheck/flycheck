@@ -1942,13 +1942,15 @@ STRING
 
      PREPEND-FN is called with the OPTION and each item of the
      list as second argument, and should return OPTION prepended
-     before the item, either as string or as list.
+     before the item, either as string or as list.  If omitted,
+     PREPEND-FN defaults to `list'.
 
      FILTER is an optional function to be applied to each item in
      the list.  Items for which FILTER returns nil are dropped.
+
      If the list is non-nil after the application of FILTER,
-     return a list `(OPTION ITEM1 OPTION ITEM2 ...)'.  Otherwise
-     return nil.
+     return a flattened list with OPTION prepended to each ITEM
+     in the value of VARIABLE after the application of FILTER.
 
 `(option-flag OPTION VARIABLE)'
      Retrieve the value of VARIABLE and return OPTION, if the
