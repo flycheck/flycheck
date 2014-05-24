@@ -1879,9 +1879,11 @@ STRING
      Return ARG unchanged.
 
 `source', `source-inplace'
+
      Create a temporary file to check and return its path.  With
      `source-inplace' create the temporary file in the same
-     directory as the original file.
+     directory as the original file.  The value of
+     `flycheck-temp-prefix' is used as prefix of the file name.
 
      With `source', try to retain the non-directory component of
      the buffer's file name in the temporary file.
