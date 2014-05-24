@@ -1952,7 +1952,7 @@ STRING
      Retrieve the value of VARIABLE and return OPTION, if the
      value is non-nil.  Otherwise return nil.
 
-`(eval FORM)
+`(eval FORM)'
      Return the result of evaluating FORM in the buffer to be
      checked.  FORM must either return a string or a list of
      strings, or nil to indicate that nothing should be
@@ -2189,7 +2189,8 @@ If VALUE is a list, apply FILTER to each item in VALUE, remove
 all nil items, and return a single string of all remaining items
 separated by SEPARATOR.
 
-Otherwise, apply FILTER to VALUE and return the result.  FILTER is ignored."
+Otherwise, apply FILTER to VALUE and return the result.
+SEPARATOR is ignored in this case."
   (let ((filter (or filter #'identity))
         (separator (or separator ",")))
     (if (listp value)
