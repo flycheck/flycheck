@@ -4216,7 +4216,9 @@ This variable has no effect, if
     (flycheck-sexp-to-string `(setq package-user-dir ,value))))
 
 (flycheck-define-checker emacs-lisp
-  "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler."
+  "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler.
+
+See Info Node `(elisp)Byte Compilation'."
   :command ("emacs" (eval flycheck-emacs-args)
             (option-list "--directory" flycheck-emacs-lisp-load-path nil
                          ;; Expand relative paths against the directory of the
