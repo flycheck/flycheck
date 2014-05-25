@@ -76,7 +76,7 @@ CFEngine
 Chef
 ====
 
-.. seealso:: `Chef_
+.. seealso:: Chef_
 
 .. flyc-checker:: chef-foodcritic
    :auto:
