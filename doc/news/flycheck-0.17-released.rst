@@ -61,7 +61,7 @@ http://flycheck.readthedocs.org/en/0.17 now hosts the documentation of Flycheck
 0.17 now.
 
 Beyond the manual itself, the new documentation now also includes the release
-notes, which were previously hosted at http://lunaryorn.com, and the
+notes, which were previously hosted at http://www.lunaryorn.com, and the
 :ref:`comparison with Flymake <flycheck-versus-flymake>`, which was previously
 hosted at the Github Wiki of Flycheck.  The Github Wiki is disabled now, to make
 all documentation available from a single place.
