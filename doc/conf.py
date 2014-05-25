@@ -69,6 +69,11 @@ nitpick_ignore =[
     ('el:variable', 'flycheck-CHECKER-executable'),
 ]
 
+linkcheck_ignore = [
+    r'^https://help.github.com/.*$', # Gives 404 for some strange reason
+    r'^http://www.erlang.org/$',     # Gives 500 during linkcheck
+]
+
 html_title = '{0} {1}'.format(project, release)
 
 texinfo_documents = [
