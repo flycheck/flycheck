@@ -76,10 +76,12 @@ CFEngine
 Chef
 ====
 
-.. seealso:: http://www.getchef.com/chef/
+.. seealso:: `Chef_
 
 .. flyc-checker:: chef-foodcritic
    :auto:
+
+.. _Chef: http://www.getchef.com/chef/
 
 Coffeescript
 ============
@@ -121,13 +123,7 @@ Elixir
 Emacs Lisp
 ==========
 
-.. seealso::
-
-   Emacs
-      http://www.gnu.org/software/emacs/
-
-   Emacs Lisp manual
-      http://www.gnu.org/software/emacs/manual/html_node/elisp/index.html
+.. seealso:: `Emacs`_, `Emacs Lisp reference`_
 
 .. flyc-checker:: emacs-lisp
    :auto:
@@ -146,10 +142,10 @@ Emacs Lisp
 .. flyc-checker:: emacs-lisp-checkdoc
    :auto:
 
-   .. seealso::
+   .. seealso:: :infonode:`(elisp)Documentation Tips`
 
-      Tips for Documentation Strings
-         http://www.gnu.org/software/emacs/manual/html_node/elisp/Documentation-Tips.html#Documentation-Tips
+.. _Emacs: http://www.gnu.org/software/emacs/
+.. _Emacs Lisp reference: http://www.gnu.org/software/emacs/manual/html_node/elisp/index.html
 
 Erlang
 ======
@@ -289,19 +285,12 @@ Make
 .. flyc-checker:: make
    :auto:
 
-   .. seealso::
+   .. seealso:: `GNU Make`_, `NetBSD Make`_, `FreeBSD Make`_, `OpenBSD Make`_
 
-      GNU Make
-         http://www.gnu.org/software/make/
-
-      NetBSD Make
-         http://netbsd.gw.com/cgi-bin/man-cgi?make++NetBSD-current
-
-      FreeBSD Make
-         http://www.freebsd.org/cgi/man.cgi?query=make&sektion=1
-
-      OpenBSD Make
-         http://www.openbsd.org/cgi-bin/man.cgi?query=make
+.. _GNU Make: http://www.gnu.org/software/make/
+.. _NetBSD Make: http://netbsd.gw.com/cgi-bin/man-cgi?make++NetBSD-current
+.. _FreeBSD Make: http://www.freebsd.org/cgi/man.cgi?query=make&sektion=1
+.. _OpenBSD Make: http://www.openbsd.org/cgi-bin/man.cgi?query=make
 
 Perl
 ====
@@ -468,27 +457,21 @@ Shell script languages
 .. flyc-checker:: sh-posix-dash
    :auto:
 
-   .. seealso::
-
-      POSIX Shell Command Language
-         http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html
+   .. seealso:: `POSIX Shell Command Language`_
 
 .. flyc-checker:: sh-posix-bash
    :auto:
 
-   .. seealso::
-
-      Bash POSIX Mode
-         http://www.gnu.org/software/bash/manual/html_node/Bash-POSIX-Mode.html#Bash-POSIX-Mode
-
-      POSIX Shell Command Language
-         http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html
+   .. seealso::  `GNU Bash POSIX Mode`_, `POSIX Shell Command Language`_
 
 .. flyc-checker:: sh-zsh
    :auto:
 
 .. flyc-checker:: sh-shellcheck
    :auto:
+
+.. _POSIX Shell Command Language: http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html
+.. _GNU Bash POSIX Mode: http://www.gnu.org/software/bash/manual/html_node/Bash-POSIX-Mode.html#Bash-POSIX-Mode
 
 Slim
 ====
@@ -499,13 +482,7 @@ Slim
 TeX/LaTeX
 =========
 
-.. seealso::
-
-   LaTeX
-      http://www.latex-project.org/
-
-   TeX Live
-      http://www.tug.org/texlive/
+.. seealso:: LaTeX_, `TeX Live`_
 
 .. flyc-checker:: tex-chktex
    :auto:
@@ -517,6 +494,9 @@ TeX/LaTeX
 
 .. flyc-checker:: tex-lacheck
    :auto:
+
+.. _LaTeX: http://www.latex-project.org/
+.. _TeX Live: http://www.tug.org/texlive/
 
 Texinfo
 =======
