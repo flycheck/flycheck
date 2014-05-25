@@ -18,15 +18,17 @@ Emacs.
 
 It uses various syntax checking and linting tools to check the contents of
 buffers, and reports warnings and errors directly in the buffer, or in an
-optional error list.  The following screenshot shows Flycheck at work in an
-Emacs Lisp buffer, with with the `Solarized Light`_ color theme and the `Source
-Code Pro`_ font:
+optional error list.  The following screenshot shows Flycheck in an Emacs Lisp
+buffer, with error highlights, indicators and the error list:
 
 .. figure:: https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/screenshot.png
    :align: center
    :width: 731
    :height: 519
    :scale: 75%
+
+The color theme in the screenshot is `Solarized Light`_, together with the the
+ `Source Code Pro`_ font.
 
 .. _Solarized Light: https://github.com/bbatsov/solarized-emacs
 .. _Source Code Pro: https://github.com/adobe/source-code-pro

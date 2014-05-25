@@ -18,8 +18,9 @@ the buffer, or in an optional error list:
    :height: 519
    :scale: 75%
 
-   Flycheck at work in an Emacs Lisp buffer, with the `Solarized Light`_ theme
-   and the `Source Code Pro`_ font.
+   Flycheck in an Emacs Lisp buffer, with error highlights, indicators, and the
+   error list.  The color theme is `Solarized Light`_, together with the `Source
+   Code Pro`_ font.
 
 .. contents:: Table of Contents
    :local:
