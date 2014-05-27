@@ -1572,7 +1572,7 @@ be registered in `flycheck-checkers'.
     (unless (flycheck-command-arguments-list-p (cdr command))
       (error "Invalid command arguments %S" command))
     (when (and (null parser) (null patterns))
-      (error "Missing :error-pattern or :error-parser"))
+      (error "Missing :error-patterns or :error-parser"))
     (unless (or (null parser) (functionp parser))
       (error "%S is not a function" parser))
     (unless (or (null filter) (functionp filter))
