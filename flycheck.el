@@ -3904,7 +3904,7 @@ See URL `http://clang.llvm.org/'."
              (include-error
               ;; We are looking at an unrelated error, so fold all include
               ;; errors, if there are any
-              (when errors-in-include
+              (when (and include-error errors-in-include)
                 (setf (flycheck-error-message include-error)
                       (s-join "\n" (nreverse errors-in-include))))
               (setq include-error nil
