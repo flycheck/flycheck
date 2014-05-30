@@ -43,7 +43,7 @@ Features
 - Optional error list popup
 - Many customization options
 - A comprehensive manual
-- A simple interface to define new syntax checkers (`extending`)
+- A simple interface to define new syntax checkers
 - A “doesn't get in your way” guarantee
 - Many `3rd party extensions`_
 
