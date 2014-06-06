@@ -3,6 +3,8 @@
 master (in development)
 -----------------------
 
+- #331: Flycheck now has an official logo
+
 - New syntax checkers:
 
   - #393: Go with `errcheck`

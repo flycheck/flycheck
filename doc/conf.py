@@ -75,6 +75,8 @@ linkcheck_ignore = [
 ]
 
 html_title = '{0} {1}'.format(project, release)
+html_logo = 'images/logo.png'
+html_favicon = 'images/favicon.ico'
 
 texinfo_documents = [
   ('index', 'flycheck', 'Flycheck', u'Sebastian Wiesner',

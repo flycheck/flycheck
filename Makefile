@@ -3,6 +3,7 @@ EMACSFLAGS =
 CASK = cask
 SPHINX-BUILD = sphinx-build
 SPHINXFLAGS =
+CONVERT = convert
 INSTALL-INFO = install-info
 INSTALL = install
 VERSION := $(shell EMACS=$(EMACS) $(CASK) version)
@@ -19,7 +20,7 @@ BUILDDIR = build
 DOCBUILDDIR = $(BUILDDIR)/doc
 DOCTREEDIR = $(DOCBUILDDIR)/doctrees
 
-.PHONY: compile dist doc html texinfo \
+.PHONY: compile dist doc html texinfo images \
 	clean clean-elc clean-dist clean-doc clean-deps \
 	test \
 	deps linkcheck
@@ -36,6 +37,8 @@ html :
 	$(SPHINX-BUILD) -b html -d $(DOCTREEDIR) $(SPHINXFLAGS) doc $(DOCBUILDDIR)/html
 
 texinfo : doc/flycheck.texi
+
+images: doc/images/logo.png doc/images/favicon.ico # To update the image files
 
 # Test targets
 test : compile
@@ -81,3 +84,18 @@ $(DOCBUILDDIR)/info/flycheck.texi :
 
 %.elc : %.el $(PKGDIR)
 	$(CASK) exec $(EMACS) -Q --batch $(EMACSFLAGS) -f batch-byte-compile $<
+
+doc/images/favicon.ico: flycheck.svg
+	$(CONVERT) $< -background white \
+		\( -clone 0 -resize 16x16 \) \
+		\( -clone 0 -resize 32x32 \) \
+		\( -clone 0 -resize 48x48 \) \
+		\( -clone 0 -resize 64x64 \) \
+		\( -clone 0 -resize 96x96 \) \
+		\( -clone 0 -resize 196x196 \) \
+		-delete 0 -alpha off -colors 256 $@
+
+doc/images/logo.png: flycheck.svg
+	$(CONVERT) $< -background white \
+		-bordercolor white -border 5 \
+		-trim $@

@@ -1,16 +1,18 @@
-==========
- Flycheck
-==========
-
-.. default-role:: code
-
 .. |travis| image:: https://travis-ci.org/flycheck/flycheck.svg?branch=master
             :target: https://travis-ci.org/flycheck/flycheck
 
 .. |license| image:: https://img.shields.io/badge/license-GPL_3-green.svg?dummy
              :target: https://github.com/flycheck/flycheck/blob/master/COPYING
 
-|license| |travis|
+=============================
+ Flycheck |license| |travis|
+=============================
+
+.. image:: https://raw.githubusercontent.com/flycheck/flycheck/logo/doc/images/logo.png
+   :target: http://flycheck.readthedocs.org
+   :align: center
+
+.. default-role:: code
 
 Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24,
 intended as replacement for the older Flymake extension which is part of GNU
@@ -133,6 +135,11 @@ is available at https://github.com/flycheck/flycheck/blob/master/doc/fdl.txt.
 Alternatively, you may copy, distribute and/or modify the Flycheck documentation
 under the terms of the Creative Commons Attribution-ShareAlike 4.0 International
 Public License.  A copy of the license can be obtained at
+https://creativecommons.org/licenses/by-sa/4.0/legalcode.
+
+Permission is granted to copy, distribute and/or modify the Flycheck logo in
+``/flycheck.svg`` under the terms of the Creative Commons Attribution-ShareAlike
+4.0 International Public License.  A copy of the license can be obtained at
 https://creativecommons.org/licenses/by-sa/4.0/legalcode.
 
 .. _COPYING: https://github.com/flycheck/flycheck/blob/master/COPYING
