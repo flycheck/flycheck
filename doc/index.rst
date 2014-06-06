@@ -85,7 +85,7 @@ contribution guidelines.
 .. toctree::
    :maxdepth: 2
 
-   contributing
+   contrib/guidelines
    credits
 
 Licensing
