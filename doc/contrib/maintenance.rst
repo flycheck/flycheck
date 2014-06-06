@@ -17,11 +17,8 @@ Flycheck contains a Texinfo version of the documentation at
    documentation.
 
 When making changes to the documentation, you need to rebuild the Texinfo
-version with:
-
-.. code-block:: console
-
-   $ make texinfo
+version with, by following the :ref:`instructions to build the documentation
+<building-docs>`.
 
 .. _MELPA: http://melpa.milkbox.net/
 

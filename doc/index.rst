@@ -85,6 +85,7 @@ contribution guidelines.
 .. toctree::
    :maxdepth: 2
 
+   contrib/docs
    contrib/maintenance
    contrib/guidelines
    credits
