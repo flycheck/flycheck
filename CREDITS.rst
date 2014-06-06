@@ -28,6 +28,9 @@ greatly appreciated.
 - `Martin Grenfell`_ created the awesome Vim library syntastic_ which inspired
   this project and many of its checkers.
 - `Matthias Dahl`_ improved the performance of Flycheck's temp file handling.
+- `Matthias Güdemann`_ contributed an initial version of the Flycheck logo, and
+  provided very valuable input, ideas and feedback during the design of official
+  logo.
 - `Mitch Tishmack`_ added support for Microsoft extensions to the Clang syntax
   checker.
 - `Peter Vasil`_ contributed syntax checkers for XML, Lua and Go (using `go
@@ -79,6 +82,7 @@ somewhat failed attempt at on-the-fly syntax checking.
 .. _Mark Hellewell: https://github.com/markhellewell
 .. _Martin Grenfell: https://github.com/scrooloose
 .. _Matthias Dahl: https://github.com/BinaryKhaos
+.. _Matthias Güdemann: https://github.com/mgudemann
 .. _Mitch Tishmack: https://github.com/mitchty
 .. _Peter Vasil: https://github.com/ptrv
 .. _Robert Dallas Gray: https://github.com/rdallasgray
