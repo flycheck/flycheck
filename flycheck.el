@@ -1,4 +1,4 @@
-;;; flycheck.el --- On-the-fly syntax checking (Flymake done right) -*- lexical-binding: t; -*-
+;;; flycheck.el --- Modern on-the-fly syntax checking for GNU Emacs -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2012, 2013, 2014 Sebastian Wiesner <lunaryorn@gmail.com>
 ;;
@@ -25,7 +25,7 @@
 
 ;;; Commentary:
 
-;; Modern on-the-fly syntax checking for GNU Emacs (aka "flymake done right")
+;; Modern on-the-fly syntax checking for GNU Emacs.
 
 ;; Provide `flycheck-mode' which enables on-the-fly syntax checking for a large
 ;; number of different modes and languages (see `flycheck-checkers' for a
@@ -101,7 +101,7 @@ buffer-local wherever it is set."
 
 ;;; Customization
 (defgroup flycheck nil
-  "On-the-fly syntax checking (aka \"flymake done right\")."
+  "Modern on-the-fly syntax checking for GNU Emacs."
   :prefix "flycheck-"
   :group 'tools
   :link '(url-link :tag "Online manual" "http://flycheck.readthedocs.org")
