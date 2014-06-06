@@ -28,7 +28,7 @@ buffer, with error highlights, indicators and the error list:
    :scale: 75%
 
 The color theme in the screenshot is `Solarized Light`_, together with the the
- `Source Code Pro`_ font.
+`Source Code Pro`_ font.
 
 .. _Solarized Light: https://github.com/bbatsov/solarized-emacs
 .. _Source Code Pro: https://github.com/adobe/source-code-pro
