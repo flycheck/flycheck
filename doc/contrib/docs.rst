@@ -1,6 +1,6 @@
-========================================
- Editing and building the documentation
-========================================
+=======================
+ Writing documentation
+=======================
 
 This document explains how to edit and building the documentation of Flycheck.
 

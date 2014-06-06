@@ -79,15 +79,17 @@ notes, and the complete changelog.
 Contributor guide
 =================
 
-This part of the documentation is for contributors to Flycheck, and provides
-contribution guidelines.
+This part of the documentation targets contributors to Flycheck.  It provides
+general contribution guidelines, by which we review pull requests and other
+contributions, and instructions for specific tasks Flycheck contributors need to
+perform and problems they face.
 
 .. toctree::
    :maxdepth: 2
 
+   contrib/guidelines
    contrib/docs
    contrib/maintenance
-   contrib/guidelines
    credits
 
 Licensing
