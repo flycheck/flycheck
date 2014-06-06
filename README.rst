@@ -8,7 +8,7 @@
  Flycheck |license| |travis|
 =============================
 
-.. image:: https://raw.githubusercontent.com/flycheck/flycheck/logo/doc/images/logo.png
+.. image:: https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/logo.png
    :target: http://flycheck.readthedocs.org
    :align: center
 
