@@ -5,6 +5,26 @@
 This document explains various maintenance tasks for Flycheck, that contributors
 have to perform under specific circumstances.
 
+Rebuilding the Texinfo
+======================
+
+Flycheck contains a Texinfo version of the documentation at
+``doc/flycheck.texi``, to allow MELPA_ to build the Info manual for Flycheck.
+
+.. warning::
+
+   Do **not** edit this file.  It is generated automatically from Flycheck's
+   documentation.
+
+When making changes to the documentation, you need to rebuild the Texinfo
+version with:
+
+.. code-block:: console
+
+   $ make texinfo
+
+.. _MELPA: http://melpa.milkbox.net/
+
 Rasterized logo files
 =====================
 
