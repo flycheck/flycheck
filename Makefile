@@ -96,6 +96,5 @@ doc/images/favicon.ico: flycheck.svg
 		-delete 0 -alpha off -colors 256 $@
 
 doc/images/logo.png: flycheck.svg
-	$(CONVERT) $< -background white \
-		-bordercolor white -border 5 \
-		-trim $@
+	$(CONVERT) $< -trim -background white \
+		-bordercolor white -border 5 $@
