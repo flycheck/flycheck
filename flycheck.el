@@ -5084,8 +5084,9 @@ See URL `http://batsov.com/rubocop/'."
 (flycheck-define-checker ruby-rubylint
   "A Ruby syntax and code analysis checker using ruby-lint.
 
-See URL `https://github.com/YorickPeterse/ruby-lint'."
-  :command ("ruby-lint" "analyze" "--presenter=syntastic" source)
+Requires ruby-lint 2.0 or newer.  See URL
+`https://github.com/YorickPeterse/ruby-lint'."
+  :command ("ruby-lint" "--presenter=syntastic" source)
   :error-patterns
   ((info line-start
          (file-name) ":I:" line ":" column ": " (message) line-end)

@@ -5,6 +5,11 @@ master (in development)
 
 - #331: Flycheck now has an official logo
 
+- **Breaking changes**:
+
+  - #405: The `ruby-rubylint` syntax checker now requires Ruby Lint 2.0 or
+    newer.
+
 - New syntax checkers:
 
   - #393: Go with `errcheck`
@@ -24,6 +29,8 @@ master (in development)
   - #397: Dedent messages from `haskell-ghc`
   - #397: Fold errors in included files into the error messages of the
     corresponding include in `c/c++-clang`
+  - #405: The `ruby-rubylint` syntax checker now supports ruby-lint 2.0 and
+    newer.
 
 - Bug fixes:
 
