@@ -73,6 +73,8 @@ Public License.  A copy of the license can be obtained at
 * Flycheck news:: 
 * Changes:: 
 * Contribution guidelines:: 
+* Writing documentation:: 
+* Maintenance tasks:: 
 * Credits:: 
 * GNU General Public License:: 
 * GNU Free Documentation License:: 
@@ -322,6 +324,17 @@ Contributing code
 * Commit messages:: 
 * Contributing syntax checkers:: 
 * Pull requests:: 
+
+Writing documentation
+
+* Build environment setup:: 
+* Building HTML and Texinfo:: 
+* Verifying references:: 
+
+Maintenance tasks
+
+* Rebuilding the Texinfo:: 
+* Rasterized logo files:: 
 
 @end detailmenu
 @end menu
@@ -4441,7 +4454,8 @@ Configuration file for @code{`ruby-rubocop'}
 @format
 A Ruby syntax and code analysis checker using ruby-lint.
 
-See URL `https://github.com/YorickPeterse/ruby-lint'@footnote{https://github.com/YorickPeterse/ruby-lint}.
+Requires ruby-lint 2.0 or newer.  See URL
+`https://github.com/YorickPeterse/ruby-lint'@footnote{https://github.com/YorickPeterse/ruby-lint}.
 @end format
 @end deffn
 
@@ -6408,7 +6422,7 @@ versioned release of Flycheck.  For instance,
 0.17 now.
 
 Beyond the manual itself, the new documentation now also includes the release
-notes, which were previously hosted at @indicateurl{http://lunaryorn.com}, and the
+notes, which were previously hosted at @indicateurl{http://www.lunaryorn.com}, and the
 @ref{d,,comparison with Flymake}, which was previously
 hosted at the Github Wiki of Flycheck.  The Github Wiki is disabled now, to make
 all documentation available from a single place.
@@ -6520,7 +6534,7 @@ Support for coffeelint 0.x is dropped.
 
 
 Flycheck supports @emph{eight} new languages: AsciiDoc@footnote{http://asciidoc.org/}, Cfengine@footnote{http://cfengine.com/}, Chef@footnote{http://www.getchef.com/} recipes,
-ERuby@footnote{http://www.kuwata-lab.com/erubis/}, Handlebars@footnote{http://handlebarsjs.com/}, Racket@footnote{http://racket-lang.org/}, Texinfo@footnote{https://www.gnu.org/s/texinfo}, and Verilog@footnote{https://en.wikipedia.org/wiki/Verilog}.  Additionally, there are a
+ERuby@footnote{http://www.kuwata-lab.com/erubis/}, Handlebars@footnote{http://handlebarsjs.com/}, Racket@footnote{http://racket-lang.org/}, Texinfo@footnote{https://www.gnu.org/software/texinfo}, and Verilog@footnote{https://en.wikipedia.org/wiki/Verilog}.  Additionally, there are a
 new syntax checker for Javascript (eslint@footnote{https://github.com/eslint/eslint}), Ruby (ruby-lint@footnote{https://github.com/YorickPeterse/ruby-lint}), and YAML
 (js-yaml@footnote{https://github.com/visionmedia/js-yaml}).
 
@@ -6911,6 +6925,20 @@ See @ref{30,,Installation}.
 @itemize -
 
 @item 
+#331@footnote{https://github.com/flycheck/flycheck/issues/331}: Flycheck now has an official logo
+
+@item 
+@strong{Breaking changes}:
+
+
+@itemize -
+
+@item 
+#405@footnote{https://github.com/flycheck/flycheck/issues/405}: The @code{ruby-rubylint} syntax checker now requires Ruby Lint 2.0 or
+newer.
+@end itemize
+
+@item 
 New syntax checkers:
 
 
@@ -6954,6 +6982,10 @@ Improvements:
 @item 
 #397@footnote{https://github.com/flycheck/flycheck/issues/397}: Fold errors in included files into the error messages of the
 corresponding include in @code{c/c++-clang}
+
+@item 
+#405@footnote{https://github.com/flycheck/flycheck/issues/405}: The @code{ruby-rubylint} syntax checker now supports ruby-lint 2.0 and
+newer.
 @end itemize
 
 @item 
@@ -8543,8 +8575,8 @@ Emacs Lisp
 @end itemize
 @end itemize
 
-@node Contribution guidelines,Credits,Changes,Top
-@anchor{contributing doc}@anchor{1a8}@anchor{contributing contribution-guidelines}@anchor{1a9}
+@node Contribution guidelines,Writing documentation,Changes,Top
+@anchor{contrib/guidelines doc}@anchor{1a8}@anchor{contrib/guidelines contribution-guidelines}@anchor{1a9}
 @chapter Contribution guidelines
 
 
@@ -8559,7 +8591,7 @@ guidelines.
 @end menu
 
 @node Reporting issues,Contributing code,,Contribution guidelines
-@anchor{contributing id1}@anchor{1aa}@anchor{contributing reporting-issues}@anchor{85}
+@anchor{contrib/guidelines id1}@anchor{1aa}@anchor{contrib/guidelines reporting-issues}@anchor{85}
 @section Reporting issues
 
 
@@ -8584,7 +8616,7 @@ complete sentences.
 @end itemize
 
 @node Contributing code,,Reporting issues,Contribution guidelines
-@anchor{contributing id2}@anchor{1ab}@anchor{contributing contributing-code}@anchor{1ac}
+@anchor{contrib/guidelines id2}@anchor{1ab}@anchor{contrib/guidelines contributing-code}@anchor{1ac}
 @section Contributing code
 
 
@@ -8601,7 +8633,7 @@ welcome, but please respect the following guidelines.
 @end menu
 
 @node General,Code style,,Contributing code
-@anchor{contributing general}@anchor{1ad}
+@anchor{contrib/guidelines general}@anchor{1ad}
 @subsection General
 
 
@@ -8616,7 +8648,7 @@ Provide use cases and rationale for new features.
 @end itemize
 
 @node Code style,Commit messages,General,Contributing code
-@anchor{contributing code-style}@anchor{1ae}
+@anchor{contrib/guidelines code-style}@anchor{1ae}
 @subsection Code style
 
 
@@ -8639,7 +8671,7 @@ Flycheck, just make sure that your code has no Flycheck warnings.
 @end itemize
 
 @node Commit messages,Contributing syntax checkers,Code style,Contributing code
-@anchor{contributing commit-messages}@anchor{1af}
+@anchor{contrib/guidelines commit-messages}@anchor{1af}
 @subsection Commit messages
 
 
@@ -8699,7 +8731,7 @@ Git Commit Mode@footnote{https://github.com/magit/git-modes/} and Magit@footnote
 which helps you to comply to these guidelines.
 
 @node Contributing syntax checkers,Pull requests,Commit messages,Contributing code
-@anchor{contributing contributing-syntax-checkers}@anchor{120}@anchor{contributing id3}@anchor{1b0}
+@anchor{contrib/guidelines contributing-syntax-checkers}@anchor{120}@anchor{contrib/guidelines id3}@anchor{1b0}
 @subsection Contributing syntax checkers
 
 
@@ -8731,7 +8763,7 @@ We will @emph{not} merge syntax checkers which cannot be tested on Travis CI.
 @end cartouche
 
 @node Pull requests,,Contributing syntax checkers,Contributing code
-@anchor{contributing id4}@anchor{1b1}@anchor{contributing pull-requests}@anchor{1b2}
+@anchor{contrib/guidelines id4}@anchor{1b1}@anchor{contrib/guidelines pull-requests}@anchor{1b2}
 @subsection Pull requests
 
 
@@ -8751,8 +8783,175 @@ Open a pull request@footnote{https://help.github.com/articles/using-pull-request
 description in grammatically correct, complete sentences.
 @end itemize
 
-@node Credits,GNU General Public License,Contribution guidelines,Top
-@anchor{credits credits}@anchor{1b3}@anchor{credits doc}@anchor{1b4}@anchor{credits pull-request}@anchor{1b5}
+@node Writing documentation,Maintenance tasks,Contribution guidelines,Top
+@anchor{contrib/docs writing-documentation}@anchor{1b3}@anchor{contrib/docs doc}@anchor{1b4}@anchor{contrib/docs pull-request}@anchor{1b5}
+@chapter Writing documentation
+
+
+This document explains how to edit and building the documentation of Flycheck.
+
+@menu
+* Build environment setup:: 
+* Building HTML and Texinfo:: 
+* Verifying references:: 
+
+@end menu
+
+@node Build environment setup,Building HTML and Texinfo,,Writing documentation
+@anchor{contrib/docs doc-build-env}@anchor{1b6}@anchor{contrib/docs build-environment-setup}@anchor{1b7}
+@section Build environment setup
+
+
+Flycheck's documentation is written using Sphinx@footnote{http://sphinx-doc.org} and sphinxcontrib-emacs@footnote{http://sphinxcontrib-emacs.readthedocs.org/en/latest/}.  To
+build the documentation locally, you need to install these tools first.  This
+section guides you through the process of installing them.
+
+First make sure, that you have Python 2.7 and virtualenv@footnote{http://virtualenv.readthedocs.org/en/latest/} available.  To install
+virtualenv, use:
+
+@example
+$ pip install --user virtualenv
+@end example
+
+@cartouche
+@quotation Note 
+You probably need to install pip@footnote{https://pip.pypa.io/} first. It is available in the package
+repositories of most Linux distributions, as @code{python-pip} or similar. If
+@code{pip} is not available for your Linux distribution, or if you are using OS
+X, please follow the instructions to install pip@footnote{https://pip.pypa.io/en/latest/installing.html}.
+@end quotation
+@end cartouche
+
+Then add @code{~/Library/Python/2.7/bin} (on OS X) or @code{~/.local/bin} (on other
+Unix variants) to @code{$PATH}.
+
+Now create a virtual environment and install the requirements of the
+documentation:
+
+@example
+$ mkdir -p ~/.virtualenvs
+$ virtualenv -p python2.7 ~/.virtualenvs/cask
+$ pip install -r doc/requirements.txt
+@end example
+
+Now you are set up to build the documentation.
+
+@node Building HTML and Texinfo,Verifying references,Build environment setup,Writing documentation
+@anchor{contrib/docs building-docs}@anchor{1b8}@anchor{contrib/docs building-html-and-texinfo}@anchor{1b9}
+@section Building HTML and Texinfo
+
+
+First, switch to the virtual environment you created in the
+@ref{1b6,,Build environment setup}, and make sure that the requirements are up to date:
+
+@example
+$ source ~/.virtualenvs/cask/bin/activate
+$ pip install -r doc/requirements.txt
+@end example
+
+Now build the documentation:
+
+@example
+$ make html
+$ make texinfo
+@end example
+
+The HTML documentation is build to @code{build/doc/html/}, where you can preview
+it.  The Texinfo build goes to @code{doc/flycheck.texi}.
+
+@cartouche
+@quotation Warning 
+Unlike the HTML output, the Texinfo output is @emph{committed} to the repository,
+since it is needed by MELPA@footnote{http://melpa.milkbox.net/} to build an Info manual for inclusion in the
+Flycheck packages.
+@end quotation
+@end cartouche
+
+@node Verifying references,,Building HTML and Texinfo,Writing documentation
+@anchor{contrib/docs verifying-references}@anchor{1ba}
+@section Verifying references
+
+
+Sphinx emits warnings for internal references and cross-references to Emacs Lisp
+symbols that could not be resolved.  Your documentation should build without any
+such warnings.
+
+You can additionally verify all external references with:
+
+@example
+$ source ~/.virtualenvs/cask/bin/activate
+$ make linkcheck
+@end example
+
+@node Maintenance tasks,Credits,Writing documentation,Top
+@anchor{contrib/maintenance maintenance-tasks}@anchor{1bb}@anchor{contrib/maintenance doc}@anchor{1bc}
+@chapter Maintenance tasks
+
+
+This document explains various maintenance tasks for Flycheck, that contributors
+have to perform under specific circumstances.
+
+@menu
+* Rebuilding the Texinfo:: 
+* Rasterized logo files:: 
+
+@end menu
+
+@node Rebuilding the Texinfo,Rasterized logo files,,Maintenance tasks
+@anchor{contrib/maintenance rebuilding-the-texinfo}@anchor{1bd}
+@section Rebuilding the Texinfo
+
+
+Flycheck contains a Texinfo version of the documentation at
+@code{doc/flycheck.texi}, to allow MELPA@footnote{http://melpa.milkbox.net/} to build the Info manual for Flycheck.
+
+@cartouche
+@quotation Warning 
+Do @strong{not} edit this file.  It is generated automatically from Flycheck's
+documentation.
+@end quotation
+@end cartouche
+
+When making changes to the documentation, you need to rebuild the Texinfo
+version with, by following the @ref{1b8,,instructions to build the documentation}.
+
+@node Rasterized logo files,,Rebuilding the Texinfo,Maintenance tasks
+@anchor{contrib/maintenance rasterized-logo-files}@anchor{1be}@anchor{contrib/maintenance melpa}@anchor{1bf}
+@section Rasterized logo files
+
+
+The source of the Flycheck logo is @code{flycheck.svg}.  The documentation contains
+rasterized versions of this logo at
+
+
+@itemize -
+
+@item 
+@code{doc/images/logo.png} (the logo shown in the documentation and the README)
+
+@item 
+@code{doc/images/favicon.ico} (the logo for use as favicon of the documentation)
+@end itemize
+
+@cartouche
+@quotation Warning 
+Do @strong{not} change these files directly.  They are generated automatically
+from the SVG source.
+@end quotation
+@end cartouche
+
+When changing the Flycheck logo, you need to rebuild these files with:
+
+@example
+make images
+@end example
+
+You need @strong{convert} from ImageMagick@footnote{http://www.imagemagick.org/} and Inkscape@footnote{http://www.inkscape.org/}.  Make sure that
+@code{inkscape} is in @code{$PATH}, because ImageMagick's own SVG renderer cannot
+properly render the logo.
+
+@node Credits,GNU General Public License,Maintenance tasks,Top
+@anchor{credits credits}@anchor{1c0}@anchor{credits doc}@anchor{1c1}@anchor{credits inkscape}@anchor{1c2}
 @chapter Credits
 
 
@@ -8812,6 +9011,11 @@ this project and many of its checkers.
 
 @item 
 Matthias Dahl@footnote{https://github.com/BinaryKhaos} improved the performance of Flycheck's temp file handling.
+
+@item 
+Matthias Güdemann@footnote{https://github.com/mgudemann} contributed an initial version of the Flycheck logo, and
+provided very valuable input, ideas and feedback during the design of official
+logo.
 
 @item 
 Mitch Tishmack@footnote{https://github.com/mitchty} added support for Microsoft extensions to the Clang syntax
@@ -8877,7 +9081,7 @@ somewhat failed attempt at on-the-fly syntax checking.
 @c End:
 
 @node GNU General Public License,GNU Free Documentation License,Credits,Top
-@anchor{gpl gnu-general-public-license}@anchor{1b6}@anchor{gpl doc}@anchor{1b7}
+@anchor{gpl gnu-general-public-license}@anchor{1c3}@anchor{gpl doc}@anchor{1c4}
 @chapter GNU General Public License
 
 
@@ -9559,7 +9763,7 @@ Public License instead of this License.  But first, please read
 @end example
 
 @node GNU Free Documentation License,Index,GNU General Public License,Top
-@anchor{fdl doc}@anchor{1b8}@anchor{fdl gnu-free-documentation-license}@anchor{1b9}
+@anchor{fdl doc}@anchor{1c5}@anchor{fdl gnu-free-documentation-license}@anchor{1c6}
 @chapter GNU Free Documentation License
 
 
