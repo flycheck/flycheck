@@ -417,6 +417,9 @@ Rust
 
    .. rubric:: Options
 
+   .. option:: flycheck-rust-check-tests
+      :auto:
+
    .. option:: flycheck-rust-library-path
       :auto:
 
