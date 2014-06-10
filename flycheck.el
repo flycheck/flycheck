@@ -1,8 +1,8 @@
 ;;; flycheck.el --- Modern on-the-fly syntax checking for GNU Emacs -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2012, 2013, 2014 Sebastian Wiesner <lunaryorn@gmail.com>
+;; Copyright (c) 2012, 2013, 2014 Sebastian Wiesner <swiesner@lunaryorn.com>
 ;;
-;; Author: Sebastian Wiesner <lunaryorn@gmail.com>
+;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
 ;; URL: https://flycheck.readthedocs.org
 ;; Keywords: convenience languages tools
 ;; Version: 0.19-cvs
