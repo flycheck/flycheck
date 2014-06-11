@@ -22,6 +22,8 @@ master (in development)
     `flycheck-temp-prefix`
   - #397: Add `:error-filter` property for syntax checkers to apply a custom
     function to modify or filter errors after parsing
+  - #406: Add `flycheck-rust-check-tests` to disable syntax checking of test
+    code in Rust
 
 - Improvements:
 

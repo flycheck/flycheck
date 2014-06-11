@@ -49,6 +49,8 @@ greatly appreciated.
 - `Sylvain Rousseau`_ added a syntax checker for POSIX shell script using
   `bash`, and improved error parsing in the Bash script syntax checker.
 - `Ted Zlatanov`_ added a syntax checker for CFEngine.
+- `Tom Jakubowski`_ added `flycheck-rust-check-tests` to the Rust syntax
+  checker.
 - `tom tan`_ added a syntax checker for the D programming language using `dmd`,
   and wrote the cool flycheck-d-unittest_ extension.
 - `Yannick Roehlly`_ added support for PEP8 naming errors to the Flake8 syntax checker.
@@ -94,6 +96,7 @@ somewhat failed attempt at on-the-fly syntax checking.
 .. _Sylvain Benner: https://github.com/syl20bnr
 .. _Sylvain Rousseau: https://github.com/thisirs
 .. _Ted Zlatanov: https://github.com/tzz
+.. _Tom Jakubowski: https://github.com/tomjakubowski
 .. _tom tan: https://github.com/tom-tan
 .. _Victor Deryagin: https://github.com/vderyagin
 .. _Yannick Roehlly: https://github.com/yannick1974
