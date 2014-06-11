@@ -67,6 +67,9 @@ C/C++
    .. option:: flycheck-cppcheck-checks
       :auto:
 
+   .. option:: flycheck-cppcheck-enable-inconclusive
+      :auto:
+
 CFEngine
 ========
 
