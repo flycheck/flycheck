@@ -3275,10 +3275,10 @@ of the file will be interrupted because there are too many #ifdef configurations
 (ert-deftest flycheck-define-checker/c/c++-cppcheck-style-suppressed ()
   :tags '(builtin-checker external-tool language-c)
   (skip-unless (flycheck-check-executable 'c/c++-cppcheck))
-  (let ((flycheck-cppcheck-checks nil))
-    (let ((flycheck-disabled-checkers '(c/c++-clang)))
-      (flycheck-test-should-syntax-check "checkers/c_c++-cppcheck-style.c"
-                                         'c-mode))))
+  (let ((flycheck-cppcheck-checks nil)
+        (flycheck-disabled-checkers '(c/c++-clang)))
+    (flycheck-test-should-syntax-check "checkers/c_c++-cppcheck-style.c"
+                                       'c-mode)))
 
 (ert-deftest flycheck-define-checker/c/c++-cppcheck-inconclusive ()
   :tags '(builtin-checker external-tool language-c++)
@@ -3309,14 +3309,14 @@ of the file will be interrupted because there are too many #ifdef configurations
 (ert-deftest flycheck-define-checker/c/c++-cppcheck-multiple-checks ()
   :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-cppcheck))
-  (let ((flycheck-cppcheck-checks '("performance" "portability")))
-    (let ((flycheck-disabled-checkers '(c/c++-clang)))
-      (flycheck-test-should-syntax-check
-       "checkers/c_c++-cppcheck-multiple-checks.cpp" 'c++-mode
-       '(2 nil warning "Extra qualification 'A::' unnecessary and considered an error by many compilers."
-           :checker c/c++-cppcheck)
-       '(9 nil warning "Prefix ++/-- operators should be preferred for non-primitive types. Pre-increment/decrement can be more efficient than post-increment/decrement. Post-increment/decrement usually involves keeping a copy of the previous value around and adds a little extra code."
-           :checker c/c++-cppcheck)))))
+  (let ((flycheck-cppcheck-checks '("performance" "portability"))
+        (flycheck-disabled-checkers '(c/c++-clang)))
+    (flycheck-test-should-syntax-check
+     "checkers/c_c++-cppcheck-multiple-checks.cpp" 'c++-mode
+     '(2 nil warning "Extra qualification 'A::' unnecessary and considered an error by many compilers."
+         :checker c/c++-cppcheck)
+     '(9 nil warning "Prefix ++/-- operators should be preferred for non-primitive types. Pre-increment/decrement can be more efficient than post-increment/decrement. Post-increment/decrement usually involves keeping a copy of the previous value around and adds a little extra code."
+         :checker c/c++-cppcheck))))
 
 (ert-deftest flycheck-define-checker/cfengine-error ()
   :tags '(builtin-checker external-tool language-cfengine)
