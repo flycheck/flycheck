@@ -3936,7 +3936,7 @@ including a list of supported checks."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.14"))
 
-(flycheck-def-option-var flycheck-cppcheck-enable-inconclusive nil c/c++-cppcheck
+(flycheck-def-option-var flycheck-cppcheck-inconclusive nil c/c++-cppcheck
   "Whether to enable Cppcheck inconclusive checks.
 
 When non-nil, enable Cppcheck inconclusive checks.  This allows Cppcheck to
@@ -3954,7 +3954,7 @@ See URL `http://cppcheck.sourceforge.net/'."
   :command ("cppcheck" "--quiet" "--xml-version=2" "--inline-suppr"
             (option "--enable=" flycheck-cppcheck-checks
                     flycheck-option-comma-separated-list)
-            (option-flag "--inconclusive" flycheck-cppcheck-enable-inconclusive)
+            (option-flag "--inconclusive" flycheck-cppcheck-inconclusive)
             source)
   :error-parser flycheck-parse-cppcheck
   :modes (c-mode c++-mode))

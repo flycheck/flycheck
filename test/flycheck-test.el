@@ -3287,7 +3287,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   ;; XML output.
   (skip-unless (version< "1.53" (flycheck-test-cppcheck-version)))
   (let ((flycheck-cppcheck-checks '("style"))
-        (flycheck-cppcheck-enable-inconclusive t)
+        (flycheck-cppcheck-inconclusive t)
         (flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-test-should-syntax-check
      "checkers/c_c++-cppcheck-inconclusive.cpp" 'c++-mode
@@ -3301,7 +3301,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   ;; XML output.
   (skip-unless (version< "1.53" (flycheck-test-cppcheck-version)))
   (let ((flycheck-cppcheck-checks '("style"))
-        (flycheck-cppcheck-enable-inconclusive nil)
+        (flycheck-cppcheck-inconclusive nil)
         (flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-test-should-syntax-check
      "checkers/c_c++-cppcheck-inconclusive.cpp" 'c++-mode)))

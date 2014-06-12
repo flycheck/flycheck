@@ -24,8 +24,8 @@ master (in development)
     function to modify or filter errors after parsing
   - #406: Add `flycheck-rust-check-tests` to disable syntax checking of test
     code in Rust
-  - #407: Add `flycheck-cppcheck-enable-inconclusive` to enable Cppcheck tests
-    that might give false positives
+  - #407: Add `flycheck-cppcheck-inconclusive` to enable cppcheck tests that
+    might give false positives
 
 - Improvements:
 
