@@ -1,7 +1,7 @@
 .. default-role:: code
 
-master (in development)
------------------------
+0.19 (Jun 12, 2014)
+-------------------
 
 - #331: Flycheck now has an official logo
 
