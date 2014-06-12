@@ -196,6 +196,22 @@ could not be determined."
     (cadr (s-match flycheck-test-texinfo-version-re
                    (car (process-lines "makeinfo" "--version"))))))
 
+(defconst flycheck-test-cppcheck-version-re
+  (rx "Cppcheck "
+      (group (one-or-more (any digit)) "." (one-or-more (any digit)))
+      (zero-or-more any))
+  "A regular expression to get the Cppcheck version.")
+
+(defun flycheck-test-cppcheck-version ()
+  "Determine the version of Cppcheck.
+
+Return the version as string, or nil, if the Cppcheck version
+could not be determined."
+  (let ((cppcheck (flycheck-checker-executable 'c/c++-cppcheck)))
+    (when (executable-find cppcheck)
+      (cadr (s-match flycheck-test-cppcheck-version-re
+                     (car (process-lines cppcheck "--version")))))))
+
 
 ;;;; Test resources
 
@@ -3263,6 +3279,32 @@ of the file will be interrupted because there are too many #ifdef configurations
     (let ((flycheck-disabled-checkers '(c/c++-clang)))
       (flycheck-test-should-syntax-check "checkers/c_c++-cppcheck-style.c"
                                          'c-mode))))
+
+(ert-deftest flycheck-define-checker/c/c++-cppcheck-inconclusive ()
+  :tags '(builtin-checker external-tool language-c++)
+  (skip-unless (flycheck-check-executable 'c/c++-cppcheck))
+  ;; Cppcheck 1.53 and older do not report inconclusive warnings when using
+  ;; XML output.
+  (skip-unless (version< "1.53" (flycheck-test-cppcheck-version)))
+  (let ((flycheck-cppcheck-checks '("style"))
+        (flycheck-cppcheck-enable-inconclusive t)
+        (flycheck-disabled-checkers '(c/c++-clang)))
+    (flycheck-test-should-syntax-check
+     "checkers/c_c++-cppcheck-inconclusive.cpp" 'c++-mode
+     '(1 nil warning "Boolean variable 'a' is used in bitwise operation. Did you mean '&&'?"
+         :checker c/c++-cppcheck))))
+
+(ert-deftest flycheck-define-checker/c/c++-cppcheck-inconclusive-suppressed ()
+  :tags '(builtin-checker external-tool language-c++)
+  (skip-unless (flycheck-check-executable 'c/c++-cppcheck))
+  ;; Cppcheck 1.53 and older do not report inconclusive warnings when using
+  ;; XML output.
+  (skip-unless (version< "1.53" (flycheck-test-cppcheck-version)))
+  (let ((flycheck-cppcheck-checks '("style"))
+        (flycheck-cppcheck-enable-inconclusive nil)
+        (flycheck-disabled-checkers '(c/c++-clang)))
+    (flycheck-test-should-syntax-check
+     "checkers/c_c++-cppcheck-inconclusive.cpp" 'c++-mode)))
 
 (ert-deftest flycheck-define-checker/c/c++-cppcheck-multiple-checks ()
   :tags '(builtin-checker external-tool language-c++)
