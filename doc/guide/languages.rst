@@ -59,6 +59,29 @@ C/C++
    .. option:: flycheck-clang-warnings
       :auto:
 
+.. flyc-checker:: c/c++-gcc
+   :auto:
+
+   .. rubric:: Options
+
+   .. option:: flycheck-gcc-definitions
+      :auto:
+
+   .. option:: flycheck-gcc-include-path
+      :auto:
+
+   .. option:: flycheck-gcc-includes
+      :auto:
+
+   .. option:: flycheck-gcc-language-standard
+      :auto:
+
+   .. option:: flycheck-gcc-no-rtti
+      :auto:
+
+   .. option:: flycheck-gcc-warnings
+      :auto:
+
 .. flyc-checker:: c/c++-cppcheck
    :auto:
 
