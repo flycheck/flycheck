@@ -3241,11 +3241,11 @@ of the file will be interrupted because there are too many #ifdef configurations
 (ert-deftest flycheck-define-checker/c/c++-clang-error-no-rtti ()
   :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
-  ;; Clang doesn't throw errors for RTTI operators :|, so we basically just test
-  ;; that the option flag doesn't cause any issues
   (let ((flycheck-clang-no-rtti t))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-error-rtti.cpp" 'c++-mode)))
+     "checkers/c_c++-clang-error-rtti.cpp" 'c++-mode
+     '(11 18 error "cannot use dynamic_cast with -fno-rtti"
+          :checker c/c++-clang))))
 
 (ert-deftest flycheck-define-checker/c/c++-cppcheck-error ()
   :tags '(builtin-checker external-tool language-c)
