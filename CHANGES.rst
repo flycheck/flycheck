@@ -3,6 +3,10 @@
 master (in development)
 -----------------------
 
+- New syntax checkers:
+
+  - #408: C/C++ with GCC
+
 0.19 (Jun 12, 2014)
 -------------------
 
