@@ -3245,6 +3245,16 @@ of the file will be interrupted because there are too many #ifdef configurations
      '(7 5 warning "anonymous structs are a Microsoft extension"
          :checker c/c++-clang))))
 
+(ert-deftest flycheck-define-checker/c/c++-clang-error-no-exceptions ()
+  :tags '(builtin-checker external-tool language-c++)
+  (skip-unless (flycheck-check-executable 'c/c++-clang))
+  (let ((flycheck-disabled-checkers '(c/c++-gcc))
+        (flycheck-clang-no-exceptions t))
+    (flycheck-test-should-syntax-check
+     "checkers/c_c++-error-exceptions.cpp" 'c++-mode
+     '(1 14 error "cannot use 'throw' with exceptions disabled"
+          :checker c/c++-clang))))
+
 (ert-deftest flycheck-define-checker/c/c++-clang-error-no-rtti ()
   :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
@@ -3362,6 +3372,16 @@ of the file will be interrupted because there are too many #ifdef configurations
      '(10 10 warning "unused variable ‘foo’"
           :checker c/c++-gcc)
      '(10 16 error "‘nullptr’ was not declared in this scope"
+          :checker c/c++-gcc))))
+
+(ert-deftest flycheck-define-checker/c/c++-gcc-error-no-exceptions ()
+  :tags '(builtin-checker external-tool language-c++)
+  (skip-unless (flycheck-check-executable 'c/c++-gcc))
+  (let ((flycheck-disabled-checkers '(c/c++-clang))
+        (flycheck-gcc-no-exceptions t))
+    (flycheck-test-should-syntax-check
+     "checkers/c_c++-error-exceptions.cpp" 'c++-mode
+     '(1 20 error "exception handling disabled, use -fexceptions to enable"
           :checker c/c++-gcc))))
 
 (ert-deftest flycheck-define-checker/c/c++-gcc-error-no-rtti ()

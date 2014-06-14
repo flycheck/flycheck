@@ -50,6 +50,9 @@ C/C++
    .. option:: flycheck-clang-ms-extensions
       :auto:
 
+   .. option:: flycheck-clang-no-exceptions
+      :auto:
+
    .. option:: flycheck-clang-no-rtti
       :auto:
 
@@ -74,6 +77,9 @@ C/C++
       :auto:
 
    .. option:: flycheck-gcc-language-standard
+      :auto:
+
+   .. option:: flycheck-gcc-no-exceptions
       :auto:
 
    .. option:: flycheck-gcc-no-rtti
