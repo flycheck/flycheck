@@ -1,4 +1,4 @@
-#include "c_c++-clang-local-header.h"
+#include "c_c++-local-header.h"
 
 template<bool> struct test;
 template<> struct test<true> {};

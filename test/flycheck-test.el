@@ -3132,7 +3132,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (skip-unless (flycheck-check-executable 'c/c++-clang))
   (let ((flycheck-disabled-checkers '(c/c++-gcc c/c++-cppcheck)))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-warning.c" 'c-mode
+     "checkers/c_c++-warning.c" 'c-mode
      '(5 10 warning "unused variable 'unused'" :checker c/c++-clang)
      '(7 15 warning "comparison of integers of different signs: 'int' and 'unsigned int'"
          :checker c/c++-clang))))
@@ -3145,7 +3145,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (let ((flycheck-clang-warnings '("all" "missing-prototypes"))
         (flycheck-disabled-checkers '(c/c++-gcc c/c++-cppcheck)))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-warning.c" 'c-mode
+     "checkers/c_c++-warning.c" 'c-mode
      '(3 5 warning "no previous prototype for function 'f'"
          :checker c/c++-clang)
      '(5 10 warning "unused variable 'unused'" :checker c/c++-clang))))
@@ -3155,8 +3155,8 @@ of the file will be interrupted because there are too many #ifdef configurations
   (skip-unless (flycheck-check-executable 'c/c++-clang))
   (let ((flycheck-disabled-checkers '(c/c++-gcc)))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-fatal-error.c" 'c-mode
-     '(2 10 error "'c_c++-clang-library-header.h' file not found"
+     "checkers/c_c++-fatal-error.c" 'c-mode
+     '(2 10 error "'c_c++-library-header.h' file not found"
          :checker c/c++-clang))))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-include-path ()
@@ -3165,7 +3165,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (let ((flycheck-clang-include-path '("./c_c++-include"))
         (flycheck-disabled-checkers '(c/c++-gcc)))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-fatal-error.c" 'c-mode)))
+     "checkers/c_c++-fatal-error.c" 'c-mode)))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-included-file-error ()
   :tags '(builtin-checker external-tool language-c++)
@@ -3173,7 +3173,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (let ((flycheck-clang-include-path '("./c_c++-include"))
         (flycheck-disabled-checkers '(c/c++-gcc)))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-included-file-error.cpp" 'c++-mode
+     "checkers/c_c++-included-file-error.cpp" 'c++-mode
      '(3 nil error "Errors in included file:
 2:3:error: unknown type name 'this_is_bad' (c/c++-clang)
 3:1:error: expected member name or ';' after declaration specifiers (c/c++-clang)
@@ -3185,10 +3185,10 @@ of the file will be interrupted because there are too many #ifdef configurations
   :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
   (let  ((flycheck-clang-includes (list (flycheck-test-resource-filename
-                                         "checkers/c_c++-include/c_c++-clang-library-header.h")))
+                                         "checkers/c_c++-include/c_c++-library-header.h")))
          (flycheck-disabled-checkers '(c/c++-gcc)))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-error.cpp" 'c++-mode
+     "checkers/c_c++-error.cpp" 'c++-mode
      '(10 16 error "use of undeclared identifier 'nullptr'"
           :checker c/c++-clang))))
 
@@ -3197,7 +3197,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (skip-unless (flycheck-check-executable 'c/c++-clang))
   (let ((flycheck-disabled-checkers '(c/c++-gcc)))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-error.cpp" 'c++-mode
+     "checkers/c_c++-error.cpp" 'c++-mode
      '(3 23 info "template is declared here" :checker c/c++-clang)
      '(8 17 error "implicit instantiation of undefined template 'test<false>'"
          :checker c/c++-clang)
@@ -3210,7 +3210,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (let ((flycheck-clang-language-standard "c++11")
         (flycheck-disabled-checkers '(c/c++-gcc)))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-error.cpp" 'c++-mode
+     "checkers/c_c++-error.cpp" 'c++-mode
      '(3 23 info "template is declared here" :checker c/c++-clang)
      '(8 17 error "implicit instantiation of undefined template 'test<false>'"
          :checker c/c++-clang))))
@@ -3221,7 +3221,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (let ((flycheck-clang-definitions '("FLYCHECK_LIBRARY"))
         (flycheck-disabled-checkers '(c/c++-gcc)))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-error.cpp" 'c++-mode
+     "checkers/c_c++-error.cpp" 'c++-mode
      '(10 16 error "use of undeclared identifier 'nullptr'"
           :checker c/c++-clang))))
 
@@ -3231,7 +3231,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   ;; A sanity check for the following c/c++-clang-ms-extensions-enabled test
   ;; case
   (flycheck-test-should-syntax-check
-   "checkers/c_c++-clang-ms-extensions.c" 'c-mode
+   "checkers/c_c++-ms-extensions.c" 'c-mode
    '(7 5 warning "declaration does not declare anything" :checker c/c++-clang)
    '(14 24 error "field designator 'a' does not refer to any field in type 'outer_s'"
         :checker c/c++-clang)))
@@ -3241,7 +3241,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (skip-unless (flycheck-check-executable 'c/c++-clang))
   (let ((flycheck-clang-ms-extensions t))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-ms-extensions.c" 'c-mode
+     "checkers/c_c++-ms-extensions.c" 'c-mode
      '(7 5 warning "anonymous structs are a Microsoft extension"
          :checker c/c++-clang))))
 
@@ -3251,7 +3251,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (let ((flycheck-clang-no-rtti t)
         (flycheck-disabled-checkers '(c/c++-gcc)))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-error-rtti.cpp" 'c++-mode
+     "checkers/c_c++-error-rtti.cpp" 'c++-mode
      '(11 18 error "cannot use dynamic_cast with -fno-rtti"
           :checker c/c++-clang))))
 
@@ -3260,7 +3260,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (skip-unless (flycheck-check-executable 'c/c++-gcc))
   (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck)))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-warning.c" 'c-mode
+     "checkers/c_c++-warning.c" 'c-mode
      '(5 10 warning "unused variable ‘unused’" :checker c/c++-gcc)
      '(7 15 warning "comparison between signed and unsigned integer expressions"
          :checker c/c++-gcc))))
@@ -3273,7 +3273,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (let ((flycheck-gcc-warnings '("all" "missing-prototypes"))
         (flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck)))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-warning.c" 'c-mode
+     "checkers/c_c++-warning.c" 'c-mode
      '(3 5 warning "no previous prototype for ‘f’"
          :checker c/c++-gcc)
      '(5 10 warning "unused variable ‘unused’" :checker c/c++-gcc))))
@@ -3283,8 +3283,8 @@ of the file will be interrupted because there are too many #ifdef configurations
   (skip-unless (flycheck-check-executable 'c/c++-gcc))
   (let ((flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-fatal-error.c" 'c-mode
-     '(2 40 error "c_c++-clang-library-header.h: No such file or directory"
+     "checkers/c_c++-fatal-error.c" 'c-mode
+     '(2 34 error "c_c++-library-header.h: No such file or directory"
          :checker c/c++-gcc))))
 
 (ert-deftest flycheck-define-checker/c/c++-gcc-include-path ()
@@ -3293,7 +3293,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (let ((flycheck-gcc-include-path '("./c_c++-include"))
         (flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-fatal-error.c" 'c-mode)))
+     "checkers/c_c++-fatal-error.c" 'c-mode)))
 
 (ert-deftest flycheck-define-checker/c/c++-gcc-included-file-error ()
   :tags '(builtin-checker external-tool language-c++)
@@ -3301,7 +3301,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (let ((flycheck-gcc-include-path '("./c_c++-include"))
         (flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-included-file-error.cpp" 'c++-mode
+     "checkers/c_c++-included-file-error.cpp" 'c++-mode
      '(3 nil error "Errors in included file:
 2:3:error: ‘this_is_bad’ does not name a type (c/c++-gcc)
 3:1:error: expected ‘;’ after class definition (c/c++-gcc)
@@ -3312,10 +3312,10 @@ of the file will be interrupted because there are too many #ifdef configurations
   :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-gcc))
   (let  ((flycheck-gcc-includes (list (flycheck-test-resource-filename
-                                         "checkers/c_c++-include/c_c++-clang-library-header.h")))
+                                         "checkers/c_c++-include/c_c++-library-header.h")))
          (flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-error.cpp" 'c++-mode
+     "checkers/c_c++-error.cpp" 'c++-mode
      '(10 5 warning "identifier ‘nullptr’ is a keyword in C++11"
           :checker c/c++-gcc)
      '(10 10 warning "unused variable ‘foo’"
@@ -3328,7 +3328,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (skip-unless (flycheck-check-executable 'c/c++-gcc))
   (let ((flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-error.cpp" 'c++-mode
+     "checkers/c_c++-error.cpp" 'c++-mode
      '(8 17 error "aggregate ‘test<false> t’ has incomplete type and cannot be defined"
          :checker c/c++-gcc)
      '(10 5 warning "identifier ‘nullptr’ is a keyword in C++11"
@@ -3344,7 +3344,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (let ((flycheck-gcc-language-standard "c++11")
         (flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-error.cpp" 'c++-mode
+     "checkers/c_c++-error.cpp" 'c++-mode
      '(8 17 error "aggregate ‘test<false> t’ has incomplete type and cannot be defined"
          :checker c/c++-gcc)
      '(10 10 warning "unused variable ‘foo’"
@@ -3356,7 +3356,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (let ((flycheck-gcc-definitions '("FLYCHECK_LIBRARY"))
         (flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-error.cpp" 'c++-mode
+     "checkers/c_c++-error.cpp" 'c++-mode
      '(10 5 warning "identifier ‘nullptr’ is a keyword in C++11"
           :checker c/c++-gcc)
      '(10 10 warning "unused variable ‘foo’"
@@ -3370,7 +3370,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (let ((flycheck-disabled-checkers '(c/c++-clang))
         (flycheck-gcc-no-rtti t))
     (flycheck-test-should-syntax-check
-     "checkers/c_c++-clang-error-rtti.cpp" 'c++-mode
+     "checkers/c_c++-error-rtti.cpp" 'c++-mode
      '(11 42 error "‘dynamic_cast’ not permitted with -fno-rtti"
           :checker c/c++-gcc))))
 
