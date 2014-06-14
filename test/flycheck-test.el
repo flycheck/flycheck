@@ -3252,7 +3252,7 @@ of the file will be interrupted because there are too many #ifdef configurations
         (flycheck-disabled-checkers '(c/c++-gcc)))
     (flycheck-test-should-syntax-check
      "checkers/c_c++-error-rtti.cpp" 'c++-mode
-     '(11 18 error "cannot use dynamic_cast with -fno-rtti"
+     '(4 32 error "cannot use dynamic_cast with -fno-rtti"
           :checker c/c++-clang))))
 
 (ert-deftest flycheck-define-checker/c/c++-gcc-warning ()
@@ -3371,7 +3371,7 @@ of the file will be interrupted because there are too many #ifdef configurations
         (flycheck-gcc-no-rtti t))
     (flycheck-test-should-syntax-check
      "checkers/c_c++-error-rtti.cpp" 'c++-mode
-     '(11 42 error "‘dynamic_cast’ not permitted with -fno-rtti"
+     '(4 56 error "‘dynamic_cast’ not permitted with -fno-rtti"
           :checker c/c++-gcc))))
 
 (ert-deftest flycheck-define-checker/c/c++-cppcheck-error ()
