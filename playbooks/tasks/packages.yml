@@ -9,6 +9,7 @@
     - ppa:ondrej/php5           # Recent PHP versions
     - ppa:plt/racket            # Racket
     - ppa:hvr/ghc               # Latest GHC and Cabal
+    - ppa:ubuntu-toolchain-r/test # Latest GCC
     # Latest Erlang version
     - deb http://packages.erlang-solutions.com/debian precise contrib
     # CFEngine
@@ -51,6 +52,7 @@
     - chktex                      # tex-chktex
     - cppcheck                    # c/c++-cppcheck
     - dash                        # sh-posix-dash
+    - g++-4.8                     # c/c++-gcc
     - ghc-{{ghc_version}}         # haskell-ghc
     - hlint                       # haskell-hlint
     - lacheck                     # tex-lacheck
@@ -73,3 +75,8 @@
 - name: Install DMD
   apt: deb=/usr/src/dmd_{{dmd_version}}.0-0_amd64.deb state=installed
   ignore_errors: True
+- name: Make GCC 4.8 the default GCC
+  alternatives : name={{item}} link=/usr/bin/{{item}} path=/usr/bin/{{item}}-4.8
+  with_items:
+    - gcc
+    - g++

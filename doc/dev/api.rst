@@ -158,6 +158,8 @@ Error filters
 .. function:: flycheck-collapse-error-message-whitespace
    :auto:
 
+.. function:: flycheck-fold-include-errors
+
 .. _syntax-checker-api:
 
 Syntax checker API

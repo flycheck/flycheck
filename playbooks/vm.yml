@@ -16,7 +16,6 @@
       apt_repository: repo='{{item}}' update_cache=false state=present
       with_items:
         - ppa:chris-lea/node.js
-        - ppa:ubuntu-toolchain-r/test # For Clang 3.4
         - 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.4 main'
     - name: Add additional repo keys
       apt_key: url='{{item}}' state=present
