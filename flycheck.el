@@ -3849,6 +3849,15 @@ When non-nil, enable Microsoft extensions to C/C++ via
   :safe #'booleanp
   :package-version '(flycheck . "0.16"))
 
+(flycheck-def-option-var flycheck-clang-no-exceptions nil c/c++-clang
+  "Whether to disable exceptions in Clang.
+
+When non-nil, disable exceptions for syntax checks, via
+`-fno-exceptions'."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.20"))
+
 (flycheck-def-option-var flycheck-clang-no-rtti nil c/c++-clang
   "Whether to disable RTTI in Clang.
 
@@ -3903,6 +3912,7 @@ See URL `http://clang.llvm.org/'."
             (option "-std=" flycheck-clang-language-standard)
             (option "-stdlib=" flycheck-clang-standard-library)
             (option-flag "-fms-extensions" flycheck-clang-ms-extensions)
+            (option-flag "-fno-exceptions" flycheck-clang-no-exceptions)
             (option-flag "-fno-rtti" flycheck-clang-no-rtti)
             (option-list "-include" flycheck-clang-includes)
             (option-list "-W" flycheck-clang-warnings s-prepend)
@@ -3973,6 +3983,15 @@ pass the language standard via the `-std' option."
   :safe #'stringp
   :package-version '(flycheck . "0.20"))
 
+(flycheck-def-option-var flycheck-gcc-no-exceptions nil c/c++-gcc
+  "Whether to disable exceptions in gcc.
+
+When non-nil, disable exceptions for syntax checks, via
+`-fno-exceptions'."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.20"))
+
 (flycheck-def-option-var flycheck-gcc-no-rtti nil c/c++-gcc
   "Whether to disable RTTI in gcc.
 
@@ -4009,6 +4028,7 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
             "-fno-diagnostics-show-option" ; Do not show the corresponding
                                         ; warning group
             (option "-std=" flycheck-gcc-language-standard)
+            (option-flag "-fno-exceptions" flycheck-gcc-no-exceptions)
             (option-flag "-fno-rtti" flycheck-gcc-no-rtti)
             (option-list "-include" flycheck-gcc-includes)
             (option-list "-W" flycheck-gcc-warnings s-prepend)
