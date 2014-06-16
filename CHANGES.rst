@@ -7,6 +7,11 @@ master (in development)
 
   - #408: C/C++ with GCC
 
+- New features:
+
+  - #412: Add `flycheck-clang-no-exceptions` and `flycheck-gcc-no-exceptions` to
+    flag exceptions as errors in C++
+
 0.19 (Jun 12, 2014)
 -------------------
 
