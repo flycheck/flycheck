@@ -4378,7 +4378,7 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
   :command ("gcc-4.8"                   ;TODO: How do I specify `flycheck-ada-gnat-gcc-executable'?
             "-x" "ada"
             "-c"
-            "-gnat2012"                 ;TODO: parameterize to either -gnat95, -gnat2008, -gnat2012
+            ;; "-gnat2012"                 ;TODO: parameterize to either -gnat95, -gnat2008, -gnat2012
             "-fsyntax-only"
             "-fshow-column"
             "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
@@ -4394,10 +4394,13 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
           (message "In file included from") " " (file-name) ":" line ":"
           column ":"
           line-end)
-   ;; (info line-start (file-name) ":" line ":" column
-   ;;       ": note: " (message) line-end)
-   ;; (warning line-start (file-name) ":" line ":" column
-   ;;          ": warning: " (message) line-end)
+   (info line-start (file-name) ":" line ":" column
+         ": note: " (message) line-end)
+   (warning line-start (file-name) ":" line ":" column
+            ": warning: " (message) line-end)
+   ;; (error line-start (file-name) ":" line ":" column
+   ;;        ": " (or "fatal error" "error")
+   ;;        ": " (message) line-end)
    (error line-start (file-name) ":" line ":" column
           ;; ": " (or "fatal error" "error")
           ": " (message) line-end))
