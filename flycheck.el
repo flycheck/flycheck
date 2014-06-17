@@ -179,6 +179,7 @@ attention to case differences."
     c/c++-gcc
     c/c++-cppcheck
     ada-gcc
+    fortran-gcc
     cfengine
     chef-foodcritic
     coffee
@@ -4280,22 +4281,6 @@ warnings."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.20"))
 
-(flycheck-def-option-var flycheck-gcc-ada-warnings '("a" "wu" "wa" "ef" "f") ada-gcc
-  "A list of additional Ada warnings to enable in GCC.
-
-The value of this variable is a list of strings, where each string
-is the name of a warning category to enable.  By default, all
-recommended warnings and some extra warnings are enabled (as by
-`-Wall' and `-Wextra' respectively).
-
-Refer to the gcc manual at URL
-`https://gcc.gnu.org/onlinedocs/gcc/' for more information about
-warnings."
-  :type '(choice (const :tag "No additional warnings" nil)
-                 (repeat :tag "Additional warnings"
-                         (string :tag "Warning name")))
-  :safe #'flycheck-string-list-p
-  :package-version '(flycheck . "0.20"))
 
 (flycheck-define-checker c/c++-gcc
   "A C/C++ syntax checker using GCC.
@@ -4339,6 +4324,23 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
   :modes (c-mode c++-mode)
   :next-checkers ((warnings-only . c/c++-cppcheck)))
 
+(flycheck-def-option-var flycheck-gcc-ada-warnings '("a" "wu" "wa" "ef" "f") ada-gcc
+  "A list of additional Ada warnings to enable in GCC.
+
+The value of this variable is a list of strings, where each string
+is the name of a warning category to enable.  By default, all
+recommended warnings and some extra warnings are enabled (as by
+`-gnata', `-gnatwu', `-gnatwa', `-gnatef' and `-gnatf' respectively).
+
+Refer to the gcc manual at URL
+`https://gcc.gnu.org/onlinedocs/gcc/' for more information about
+warnings."
+  :type '(choice (const :tag "No additional warnings" nil)
+                 (repeat :tag "Additional warnings"
+                         (string :tag "Warning name")))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.20"))
+
 (flycheck-define-checker ada-gcc
   "An Ada syntax checker using GCC.
 
@@ -4351,16 +4353,7 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
                                         ; warning group
             (option-list "-gnat" flycheck-gcc-ada-warnings s-prepend)
             (option-list "-I" flycheck-gcc-ada-include-path)
-            "-x" (eval
-                  (pcase major-mode
-                    (`ada-mode "ada")
-                    ;; (`objc-mode "objective-c")
-                    ;; (`java-mode "java")
-                    ;; (`go-mode "go")
-                    ;; (`fortran-mode "fortran")
-                    ;; (`f77-mode "f77")
-                    ;; (`f95-mode "f95")
-                    ))
+            "-x" "ada"
             ;; We must stay in the same directory, to properly resolve #include
             ;; with quotes
             source-inplace)
@@ -4380,6 +4373,50 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
                     flycheck-sanitize-errors
                     (flycheck-fold-include-errors "In file included from")))
   :modes (ada-mode)
+  :next-checkers ((warnings-only . c/c++-cppcheck)))
+
+(flycheck-def-option-var flycheck-gcc-fortran-include-path nil fortran-gcc
+  "A list of include directories for GCC Fortran.
+
+The value of this variable is a list of strings, where each
+string is a directory to add to the include path of gcc.
+Relative paths are relative to the file being checked."
+  :type '(repeat (directory :tag "Include directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.20"))
+
+(flycheck-define-checker fortran-gcc
+  "An Fortran syntax checker using GCC.
+
+Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
+  :command ("gcc"
+            "-fsyntax-only"
+            "-fshow-column"
+            "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
+            "-fno-diagnostics-show-option" ; Do not show the corresponding
+                                        ; warning group
+            (option-list "-W" flycheck-gcc-warnings s-prepend)
+            (option-list "-I" flycheck-gcc-fortran-include-path)
+            "-x" "fortran"
+            ;; We must stay in the same directory, to properly resolve #include
+            ;; with quotes
+            source-inplace)
+  :error-patterns
+  ((error line-start
+          (message "In file included from") " " (file-name) ":" line ":"
+          column ":"
+          line-end)
+   (info line-start (file-name) ":" line ":" column
+         ": note: " (message) line-end)
+   (warning line-start (file-name) ":" line ":" column
+            ": warning: " (message) line-end)
+   (error line-start (file-name) ":" line ":" column
+          ": " (or "fatal error" "error") ": " (message) line-end))
+  :error-filter (lambda (errors)
+                  (-> errors
+                    flycheck-sanitize-errors
+                    (flycheck-fold-include-errors "In file included from")))
+  :modes (fortran-mode)
   :next-checkers ((warnings-only . c/c++-cppcheck)))
 
 (flycheck-def-option-var flycheck-cppcheck-checks '("style") c/c++-cppcheck
