@@ -4425,7 +4425,7 @@ Relative paths are relative to the file being checked."
   "An Fortran syntax checker using GCC.
 
 Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
-  :command ("gcc"
+  :command ("gfortran"
             "-fsyntax-only"
             "-fshow-column"
             "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
@@ -4433,21 +4433,12 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
                                         ; warning group
             (option-list "-W" flycheck-gcc-warnings s-prepend)
             (option-list "-I" flycheck-gcc-fortran-include-path)
-            "-x" "fortran"
             ;; We must stay in the same directory, to properly resolve #include
             ;; with quotes
             source-inplace)
   :error-patterns
-  ((error line-start
-          (message "In file included from") " " (file-name) ":" line ":"
-          column ":"
-          line-end)
-   (info line-start (file-name) ":" line ":" column
-         ": note: " (message) line-end)
-   (warning line-start (file-name) ":" line ":" column
-            ": warning: " (message) line-end)
-   (error line-start (file-name) ":" line ":" column
-          ": " (or "fatal error" "error") ": " (message) line-end))
+  ((error line-start (file-name) ":" line "." column ":"
+          "Error" ": " (message) line-end))
   :error-filter (lambda (errors)
                   (-> errors
                     flycheck-sanitize-errors
