@@ -178,8 +178,10 @@ attention to case differences."
     c/c++-clang
     c/c++-gcc
     c/c++-cppcheck
+
     ada-gcc
     fortran-gcc
+
     cfengine
     chef-foodcritic
     coffee
@@ -4324,6 +4326,34 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
   :modes (c-mode c++-mode)
   :next-checkers ((warnings-only . c/c++-cppcheck)))
 
+(defcustom flycheck-ada-gnat-gcc-executable
+  (cond ((file-exists-p "/usr/lib/gcc/x86_64-linux-gnu/4.9/gnat1")
+         "gcc-4.9")
+        ((file-exists-p "/usr/lib/gcc/x86_64-linux-gnu/4.8/gnat1")
+         "gcc-4.8")
+        (t
+         "gcc")               ;hope for the best :)
+        )
+  "Syntax checkers excluded from automatic selection.
+
+A list of Flycheck syntax checkers to exclude from automatic
+selection.  Flycheck will never automatically select a syntax
+checker in this list, regardless of the value of
+`flycheck-checkers'.
+
+However, syntax checkers in this list are still available for
+manual selection with `flycheck-select-checker'.
+
+Use this variable to disable syntax checkers, instead of removing
+the syntax checkers from `flycheck-checkers'.  You may also use
+this option as a file or directory local variable to disable
+specific checkers in individual files and directories
+respectively."
+  :group 'flycheck
+  :type '(repeat (symbol :tag "Checker"))
+  :package-version '(flycheck . "0.16")
+  :safe #'flycheck-symbol-list-p)
+
 (flycheck-def-option-var flycheck-gcc-ada-warnings '("a" "wu" "wa" "ef" "f") ada-gcc
   "A list of additional Ada warnings to enable in GCC.
 
@@ -4345,7 +4375,10 @@ warnings."
   "An Ada syntax checker using GCC.
 
 Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
-  :command ("gcc"
+  :command ("gcc-4.8"                   ;TODO: How do I specify `flycheck-ada-gnat-gcc-executable'?
+            "-x" "ada"
+            "-c"
+            "-gnat2012"
             "-fsyntax-only"
             "-fshow-column"
             "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
@@ -4353,7 +4386,6 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
                                         ; warning group
             (option-list "-gnat" flycheck-gcc-ada-warnings s-prepend)
             (option-list "-I" flycheck-gcc-ada-include-path)
-            "-x" "ada"
             ;; We must stay in the same directory, to properly resolve #include
             ;; with quotes
             source-inplace)
