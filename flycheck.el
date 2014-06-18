@@ -4215,16 +4215,6 @@ Relative paths are relative to the file being checked."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.20"))
 
-(flycheck-def-option-var flycheck-gcc-ada-include-path nil ada-gcc
-  "A list of include directories for GCC Ada.
-
-The value of this variable is a list of strings, where each
-string is a directory to add to the include path of gcc.
-Relative paths are relative to the file being checked."
-  :type '(repeat (directory :tag "Include directory"))
-  :safe #'flycheck-string-list-p
-  :package-version '(flycheck . "0.20"))
-
 (flycheck-def-option-var flycheck-gcc-includes nil c/c++-gcc
   "A list of additional include files for GCC.
 
@@ -4323,8 +4313,7 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
   :modes (c-mode c++-mode)
   :next-checkers ((warnings-only . c/c++-cppcheck)))
 
-
-(flycheck-def-option-var flycheck-gcc-ada-warnings '("a" "wu" "wa" "ef" "f") ada-gcc
+(flycheck-def-option-var flycheck-ada-gcc-warnings '("a" "wu" "wa" "ef" "f") ada-gcc
   "A list of additional Ada warnings to enable in GCC.
 
 The value of this variable is a list of strings, where each string
@@ -4341,7 +4330,7 @@ warnings."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.20"))
 
-(flycheck-def-option-var flycheck-gnat-language-standard "2012" ada-gcc
+(flycheck-def-option-var flycheck-ada-gcc-language-standard "2012" ada-gcc
   "The language standard to use in GNAT.
 
 The value of this variable is either a string denoting a language
@@ -4352,20 +4341,30 @@ pass the language standard via the `-gnat' option."
   :safe #'stringp
   :package-version '(flycheck . "0.20"))
 
+(flycheck-def-option-var flycheck-ada-gcc-include-path nil ada-gcc
+  "A list of include directories for GCC Ada.
+
+The value of this variable is a list of strings, where each
+string is a directory to add to the include path of gcc.
+Relative paths are relative to the file being checked."
+  :type '(repeat (directory :tag "Include directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.20"))
+
 (flycheck-define-checker ada-gcc
   "An Ada syntax checker using GCC.
 
 Uses GCC's Ada compiler gnat. See URL `https://gcc.gnu.org/'."
   :command ("gnat"
             "compile"
-            "-gnat2012" ;TODO: How do I make use of `flycheck-gnat-language-standard' here?
+            "-gnat2012" ;TODO: How do I make use of `flycheck-ada-gcc-language-standard' here?
             "-fsyntax-only"
             "-fshow-column"
             "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
             "-fno-diagnostics-show-option" ; Do not show the corresponding
                                         ; warning group
-            (option-list "-gnat" flycheck-gcc-ada-warnings s-prepend)
-            (option-list "-I" flycheck-gcc-ada-include-path)
+            (option-list "-gnat" flycheck-ada-gcc-warnings s-prepend)
+            (option-list "-I" flycheck-ada-gcc-include-path)
             ;; We must stay in the same directory, to properly resolve #include
             ;; with quotes
             source-inplace)
