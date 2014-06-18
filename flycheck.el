@@ -174,14 +174,11 @@ attention to case differences."
   :link '(info-link "(flycheck)Error reporting"))
 
 (defcustom flycheck-checkers
-  '(asciidoc
+  '(ada-gcc
+    asciidoc
     c/c++-clang
     c/c++-gcc
     c/c++-cppcheck
-
-    ada-gcc
-    fortran-gcc
-
     cfengine
     chef-foodcritic
     coffee
@@ -193,7 +190,7 @@ attention to case differences."
     emacs-lisp-checkdoc
     erlang
     eruby-erubis
-    fortran-gfortran
+    fortran-gcc
     go-gofmt
     go-golint
     go-vet
@@ -4250,7 +4247,7 @@ pass the language standard via the `-std' option."
   :package-version '(flycheck . "0.20"))
 
 (flycheck-def-option-var flycheck-gcc-no-exceptions nil c/c++-gcc
-  "Whether to disable exceptions in GCC.
+  "Whether to disable exceptions in gcc.
 
 When non-nil, disable exceptions for syntax checks, via
 `-fno-exceptions'."
@@ -4259,7 +4256,7 @@ When non-nil, disable exceptions for syntax checks, via
   :package-version '(flycheck . "0.20"))
 
 (flycheck-def-option-var flycheck-gcc-no-rtti nil c/c++-gcc
-  "Whether to disable RTTI in GCC.
+  "Whether to disable RTTI in gcc.
 
 When non-nil, disable RTTI for syntax checks, via `-fno-rtti'."
   :type 'boolean
@@ -4267,7 +4264,7 @@ When non-nil, disable RTTI for syntax checks, via `-fno-rtti'."
   :package-version '(flycheck . "0.20"))
 
 (flycheck-def-option-var flycheck-gcc-warnings '("all" "extra") c/c++-gcc
-  "A list of additional C/C++ warnings to enable in GCC.
+  "A list of additional warnings to enable in gcc.
 
 The value of this variable is a list of strings, where each string
 is the name of a warning category to enable.  By default, all
@@ -4326,33 +4323,6 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
   :modes (c-mode c++-mode)
   :next-checkers ((warnings-only . c/c++-cppcheck)))
 
-(defcustom flycheck-ada-gnat-gcc-executable
-  (cond ((file-exists-p "/usr/lib/gcc/x86_64-linux-gnu/4.9/gnat1")
-         "gcc-4.9")
-        ((file-exists-p "/usr/lib/gcc/x86_64-linux-gnu/4.8/gnat1")
-         "gcc-4.8")
-        (t
-         "gcc")               ;hope for the best :)
-        )
-  "Syntax checkers excluded from automatic selection.
-
-A list of Flycheck syntax checkers to exclude from automatic
-selection.  Flycheck will never automatically select a syntax
-checker in this list, regardless of the value of
-`flycheck-checkers'.
-
-However, syntax checkers in this list are still available for
-manual selection with `flycheck-select-checker'.
-
-Use this variable to disable syntax checkers, instead of removing
-the syntax checkers from `flycheck-checkers'.  You may also use
-this option as a file or directory local variable to disable
-specific checkers in individual files and directories
-respectively."
-  :group 'flycheck
-  :type '(repeat (symbol :tag "Checker"))
-  :package-version '(flycheck . "0.16")
-  :safe #'flycheck-symbol-list-p)
 
 (flycheck-def-option-var flycheck-gcc-ada-warnings '("a" "wu" "wa" "ef" "f") ada-gcc
   "A list of additional Ada warnings to enable in GCC.
@@ -4371,14 +4341,24 @@ warnings."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.20"))
 
+(flycheck-def-option-var flycheck-gnat-language-standard "2012" ada-gcc
+  "The language standard to use in GNAT.
+
+The value of this variable is either a string denoting a language
+standard, or nil, to use the default standard.  When non-nil,
+pass the language standard via the `-gnat' option."
+  :type '(choice (const :tag "Default standard" nil)
+                 (string :tag "Language standard"))
+  :safe #'stringp
+  :package-version '(flycheck . "0.20"))
+
 (flycheck-define-checker ada-gcc
   "An Ada syntax checker using GCC.
 
-Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
-  :command ("gcc-4.8"                   ;TODO: How do I specify `flycheck-ada-gnat-gcc-executable'?
-            "-x" "ada"
-            "-c"
-            ;; "-gnat2012"                 ;TODO: parameterize to either -gnat95, -gnat2008, -gnat2012
+Uses GCC's Ada compiler gnat. See URL `https://gcc.gnu.org/'."
+  :command ("gnat"
+            "compile"
+            "-gnat2012" ;TODO: How do I make use of `flycheck-gnat-language-standard' here?
             "-fsyntax-only"
             "-fshow-column"
             "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
@@ -4424,7 +4404,7 @@ Relative paths are relative to the file being checked."
 (flycheck-define-checker fortran-gcc
   "An Fortran syntax checker using GCC.
 
-Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
+Uses GCC's Fortran compiler gfortran.  See URL `https://gcc.gnu.org/'."
   :command ("gfortran"
             "-fsyntax-only"
             "-fshow-column"
