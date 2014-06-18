@@ -4404,15 +4404,13 @@ Relative paths are relative to the file being checked."
   "An Fortran syntax checker using GCC.
 
 Uses GCC's Fortran compiler gfortran.  See URL `https://gcc.gnu.org/'."
-  :command ("gfortran"                  ;TODO: Should we use gcc -x [f77|f95]
-                                        ;instead? If so we need a variable to
-                                        ;specify Fortran version as either "77"
-                                        ;or "95". We may be able to figure that
-                                        ;out from the major-mode being either
-                                        ;fortran-mode, f77-mode or
-                                        ;f95-mode. However it currently doesn't
-                                        ;seem to possible ask fortran-mode about
-                                        ;which fortran version it detected.
+  :command ("gfortran"
+            ;; TODO: Should we use gcc -x [f77|f95] instead? If so we need a
+            ;; variable to specify Fortran version as either "77" or "95". We
+            ;; may be able to figure that out from the major-mode being either
+            ;; fortran-mode, f77-mode or f95-mode. However it currently doesn't
+            ;; seem to possible ask fortran-mode about which fortran version it
+            ;; detected.
             "-fsyntax-only"
             "-fshow-column"
             "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
