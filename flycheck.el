@@ -2988,7 +2988,7 @@ Return ERRORS, with in-place modifications."
         (let* ((indent-offset (- (point) (point-min))))
           ;; Now iterate over all lines and dedent each according to
           ;; `indent-offset'
-          (while (< (point) (point-max))
+          (while (not (eobp))
             (back-to-indentation)
             ;; If the current line starts with sufficient whitespace, delete the
             ;; indendation offset.  Otherwise keep the line intact, as we might
