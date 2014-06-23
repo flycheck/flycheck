@@ -4330,7 +4330,7 @@ warnings."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.20"))
 
-(flycheck-def-option-var flycheck-ada-gcc-language-standard "2012" ada-gcc
+(flycheck-def-option-var flycheck-ada-gcc-language-standard '("2012") ada-gcc
   "The language standard to use in GNAT.
 
 The value of this variable is either a string denoting a language
@@ -4357,7 +4357,8 @@ Relative paths are relative to the file being checked."
 Uses GCC's Ada compiler gnat. See URL `https://gcc.gnu.org/'."
   :command ("gnat"
             "compile"
-            "-gnat2012" ;TODO: How do I make use of `flycheck-ada-gcc-language-standard' here?
+            (eval (s-concat "-gnat"
+                            flycheck-ada-gcc-language-standard))
             "-fsyntax-only"
             "-fshow-column"
             "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
@@ -4428,8 +4429,7 @@ Uses GCC's Fortran compiler gfortran.  See URL `https://gcc.gnu.org/'."
                   (-> errors
                     flycheck-sanitize-errors
                     (flycheck-fold-include-errors "In file included from")))
-  :modes (fortran-mode)
-  :next-checkers ((warnings-only . c/c++-cppcheck)))
+  :modes (fortran-mode))
 
 (flycheck-def-option-var flycheck-cppcheck-checks '("style") c/c++-cppcheck
   "Enabled checks for Cppcheck.
