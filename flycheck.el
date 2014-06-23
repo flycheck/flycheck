@@ -4357,7 +4357,7 @@ Relative paths are relative to the file being checked."
 Uses GCC's Ada compiler gnat. See URL `https://gcc.gnu.org/'."
   :command ("gnat"
             "compile"
-            (eval (s-concat "-gnat" flycheck-ada-gcc-language-standard))
+            ;; (eval (s-concat "-gnat" flycheck-ada-gcc-language-standard))
             "-fsyntax-only"
             "-fshow-column"
             "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
