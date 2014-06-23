@@ -4357,8 +4357,7 @@ Relative paths are relative to the file being checked."
 Uses GCC's Ada compiler gnat. See URL `https://gcc.gnu.org/'."
   :command ("gnat"
             "compile"
-            (eval (s-concat "-gnat"
-                            flycheck-ada-gcc-language-standard))
+            (eval (s-concat "-gnat" flycheck-ada-gcc-language-standard))
             "-fsyntax-only"
             "-fshow-column"
             "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
@@ -4378,16 +4377,8 @@ Uses GCC's Ada compiler gnat. See URL `https://gcc.gnu.org/'."
          ": note: " (message) line-end)
    (warning line-start (file-name) ":" line ":" column
             ": warning: " (message) line-end)
-   ;; (error line-start (file-name) ":" line ":" column
-   ;;        ": " (or "fatal error" "error")
-   ;;        ": " (message) line-end)
-   (error line-start (file-name) ":" line ":" column
-          ;; ": " (or "fatal error" "error")
+   (error line-start (file-name) ":" line ":" column ;no specific error prefix in Ada
           ": " (message) line-end))
-  :error-filter (lambda (errors)
-                  (-> errors
-                    flycheck-sanitize-errors
-                    (flycheck-fold-include-errors "In file included from")))
   :modes (ada-mode)
   :next-checkers ((warnings-only . c/c++-cppcheck)))
 
@@ -4425,10 +4416,6 @@ Uses GCC's Fortran compiler gfortran.  See URL `https://gcc.gnu.org/'."
   :error-patterns
   ((error line-start (file-name) ":" line "." column ":"
           "Error" ": " (message) line-end))
-  :error-filter (lambda (errors)
-                  (-> errors
-                    flycheck-sanitize-errors
-                    (flycheck-fold-include-errors "In file included from")))
   :modes (fortran-mode))
 
 (flycheck-def-option-var flycheck-cppcheck-checks '("style") c/c++-cppcheck
