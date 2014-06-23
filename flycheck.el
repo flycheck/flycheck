@@ -4330,7 +4330,7 @@ warnings."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.20"))
 
-(flycheck-def-option-var flycheck-ada-gcc-language-standard '("2012") ada-gcc
+(flycheck-def-option-var flycheck-ada-gcc-language-standard "2012" ada-gcc
   "The language standard to use in GNAT.
 
 The value of this variable is either a string denoting a language
@@ -4392,7 +4392,7 @@ Relative paths are relative to the file being checked."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.20"))
 
-(flycheck-def-option-var flycheck-fortran-gcc-language-standard '("77" "95") fortran-gcc
+(flycheck-def-option-var flycheck-fortran-gcc-language-standard "95" fortran-gcc
   "The language standard to use in GCC Fortran compiler gfortran.
 
 The value of this variable is either a string denoting a language
