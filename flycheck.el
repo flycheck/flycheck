@@ -4392,17 +4392,23 @@ Relative paths are relative to the file being checked."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.20"))
 
+(flycheck-def-option-var flycheck-fortran-gcc-language-standard '("77" "95") fortran-gcc
+  "The language standard to use in GCC Fortran compiler gfortran.
+
+The value of this variable is either a string denoting a language
+standard, or nil, to use the default standard.  When non-nil,
+pass the language standard via the `-gnat' option."
+  :type '(choice (const :tag "Default standard" nil)
+                 (string :tag "Language standard"))
+  :safe #'stringp
+  :package-version '(flycheck . "0.20"))
+
 (flycheck-define-checker fortran-gcc
   "An Fortran syntax checker using GCC.
 
 Uses GCC's Fortran compiler gfortran.  See URL `https://gcc.gnu.org/'."
   :command ("gfortran"
-            ;; TODO: Should we use gcc -x [f77|f95] instead? If so we need a
-            ;; variable to specify Fortran version as either "77" or "95". We
-            ;; may be able to figure that out from the major-mode being either
-            ;; fortran-mode, f77-mode or f95-mode. However it currently doesn't
-            ;; seem to possible ask fortran-mode about which fortran version it
-            ;; detected.
+            ;; TODO: Make use of `flycheck-fortran-gcc-language-standard'.
             "-fsyntax-only"
             "-fshow-column"
             "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
