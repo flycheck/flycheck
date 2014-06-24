@@ -1425,7 +1425,7 @@ check with.  ERRORS is the list of expected errors."
     (unwind-protect
         (should (equal (flycheck-checker-next-checkers 'emacs-lisp)
                        (cons 'texinfo next-checkers)))
-      (put 'emacs-lisp :flycheck-next-checkers next-checkers)
+      (put 'emacs-lisp 'flycheck-next-checkers next-checkers)
       (should (equal (flycheck-checker-next-checkers 'emacs-lisp)
                      next-checkers)))))
 
@@ -1436,7 +1436,7 @@ check with.  ERRORS is the list of expected errors."
     (unwind-protect
         (should (equal (flycheck-checker-next-checkers 'emacs-lisp)
                        (append next-checkers '(texinfo))))
-      (put 'emacs-lisp :flycheck-next-checkers next-checkers)
+      (put 'emacs-lisp 'flycheck-next-checkers next-checkers)
       (should (equal (flycheck-checker-next-checkers 'emacs-lisp)
                      next-checkers)))))
 
