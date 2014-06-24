@@ -407,7 +407,7 @@ check with.  ERRORS is the list of expected errors."
       (emacs-lisp-mode)
       (shut-up
         (indent-region (point-min) (point-max)))
-      (should (not (buffer-modified-p))))))
+      (should-not (buffer-modified-p)))))
 
 (ert-deftest flycheck-code-style/test-suite-properly-indented ()
   :tags '(style)
@@ -416,7 +416,7 @@ check with.  ERRORS is the list of expected errors."
       (emacs-lisp-mode)
       (shut-up
         (indent-region (point-min) (point-max)))
-      (should (not (buffer-modified-p))))))
+      (should-not (buffer-modified-p)))))
 
 
 ;;; Customization
