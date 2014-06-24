@@ -1043,7 +1043,8 @@ buffer."
       (if (s-contains? "\n" (buffer-substring beg end))
           (flycheck-buffer-automatically 'new-line 'force-deferred)
         (setq flycheck-idle-change-timer
-              (run-at-time flycheck-idle-change-delay nil #'flycheck-handle-idle-change))))))
+              (run-at-time flycheck-idle-change-delay nil
+                           #'flycheck-handle-idle-change))))))
 
 (defun flycheck-handle-idle-change ()
   "Handle an expired idle time since the last change."
