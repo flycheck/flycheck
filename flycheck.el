@@ -1015,7 +1015,7 @@ The syntax check is deferred if FORCE-DEFERRED is non-nil, or if
   (when (and flycheck-mode (flycheck-may-check-automatically condition))
     (if (or force-deferred (flycheck-must-defer-check))
         (flycheck-buffer-deferred)
-      (with-demoted-errors
+      (with-demoted-errors "Error while checking syntax automatically: %S"
         (flycheck-buffer)))))
 
 (defvar-local flycheck-idle-change-timer nil
@@ -3615,7 +3615,7 @@ https://github.com/Bruce-Connor/emacs-google-this")))
 
 (defun flycheck-get-output (process)
   "Get the complete output of PROCESS."
-  (with-demoted-errors
+  (with-demoted-errors "Error while retrieving process output: %S"
     (let ((pending-output (process-get process :flycheck-pending-output)))
       (apply #'concat (nreverse pending-output)))))
 
@@ -4439,7 +4439,7 @@ See Info Node `(elisp)Byte Compilation'."
          ;; And change back to the process default directory to make file-name
          ;; back-substutition work
          (setq default-directory process-default-directory)
-         (with-demoted-errors
+         (with-demoted-errors "Error in checkdoc: %S"
            (checkdoc-current-buffer t)
            (with-current-buffer checkdoc-diagnostic-buffer
              (princ (buffer-substring-no-properties (point-min)
