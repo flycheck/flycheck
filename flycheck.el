@@ -2296,8 +2296,6 @@ CHECKER will be used, even if it is not contained in
   'help-echo (purecopy "mouse-2, RET: find Flycheck checker definition"))
 
 (defconst flycheck-find-checker-regexp
-  ;; We use `eval-and-compile' and `rx-to-string' here instead of simply `rx',
-  ;; because we need to dynamically add the regexp from `find-function-space-re'
   (rx line-start (zero-or-more (syntax whitespace))
       "(" symbol-start "flycheck-define-checker" symbol-end
       (eval (list 'regexp find-function-space-re))
