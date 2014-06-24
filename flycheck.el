@@ -5317,6 +5317,38 @@ runner requires `std'."
   :safe #'booleanp
   :package-version '("flycheck" . "0.19"))
 
+(flycheck-def-option-var flycheck-rust-crate-root nil rust
+  "A path to the root of the crate of this buffer, if applicable.
+
+If nil, the buffer is treated as a compilable unit and passed directly
+to `rustc` for syntax checking.  Otherwise, it is assumed the buffer is
+actually part of a crate.  In this case it is likely to be able to be
+syntax checked in isolation as it will contain unresolvable references.
+Instead the value of this variable is taken to be the file that represents
+the root of the crate and it will be `rustc` instead.
+
+Note that in this case, a syntax check can only be performed when the file
+has been saved.
+
+For example, if we have:
+
+    -- file: mod.rs
+    !#[crate_id = \"a_crate\"]
+
+    mod a_submodule;
+    fn wobble() {true}
+
+    -- file: submodule.rs
+    // -*- flycheck-rust-crate-root: \"./mod.rs\" -*-
+    use super::wobble;
+
+Then to syntax check `submodule.rs`, `rustc` must be invoked on `mod.rs`.
+To manage this, a file local variable has been set within `submodule.rs`
+to give flycheck this information.
+"
+  :type 'string
+  :safe #'stringp)
+
 (flycheck-define-checker rust
   "A Rust syntax checker using Rust compiler.
 
@@ -5326,15 +5358,24 @@ See URL `http://www.rust-lang.org'."
   :command ("rustc" "--crate-type=lib" "--no-trans"
             (option-flag "--test" flycheck-rust-check-tests)
             (option-list "-L" flycheck-rust-library-path s-prepend)
-            source-inplace)
+            (eval (or flycheck-rust-crate-root
+                      (flycheck-save-buffer-to-temp #'flycheck-temp-file-inplace))
+                  )
+            )
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ": "
           (one-or-more digit) ":" (one-or-more digit) " error: "
           (message) line-end)
    (warning line-start (file-name) ":" line ":" column ": "
-          (one-or-more digit) ":" (one-or-more digit) " warning: "
-          (message) line-end))
-  :modes rust-mode)
+            (one-or-more digit) ":" (one-or-more digit) " warning: "
+            (message) line-end))
+  :modes rust-mode
+  :predicate (lambda ()
+               (or (not flycheck-rust-crate-root)
+                   (and (buffer-file-name)
+                        (not (buffer-modified-p))))
+               )
+  )
 
 (flycheck-def-option-var flycheck-sass-compass nil sass
   "Whether to enable the Compass CSS framework.
