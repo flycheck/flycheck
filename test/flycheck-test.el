@@ -341,8 +341,7 @@ Each error in ERRORS is a list as expected by
     (should (= (length errors)
                (length (flycheck-overlays-in (point-min) (point-max)))))))
 
-(defun flycheck-test-should-syntax-check
-  (resource-file modes &rest errors)
+(defun flycheck-test-should-syntax-check (resource-file modes &rest errors)
   "Test a syntax check in RESOURCE-FILE with MODES.
 
 RESOURCE-FILE is the file to check.  MODES is a single major mode
@@ -2115,8 +2114,8 @@ check with.  ERRORS is the list of expected errors."
     (dolist (checker flycheck-checkers)
       (-when-let (vars (-sort #'string< (flycheck-checker-option-vars checker)))
         (re-search-forward (concat (rx line-start ".. flyc-checker::"
-                                     (one-or-more space))
-                                 (regexp-quote (symbol-name checker))))
+                                       (one-or-more space))
+                                   (regexp-quote (symbol-name checker))))
         (re-search-forward (rx line-start "   .. rubric:: Options" line-end))
         (dolist (var vars)
           ;; Move across empty lines
@@ -2275,10 +2274,10 @@ check with.  ERRORS is the list of expected errors."
 
 ;; A level for the following unit tests
 (flycheck-define-error-level 'test-level
-    :overlay-category 'category
-    :fringe-bitmap 'left-triangle
-    :fringe-face 'highlight
-    :error-list-face 'font-lock-constant-face)
+  :overlay-category 'category
+  :fringe-bitmap 'left-triangle
+  :fringe-face 'highlight
+  :error-list-face 'font-lock-constant-face)
 
 (ert-deftest flycheck-define-error-level/is-error-level? ()
   :tags '(error-level)
@@ -2422,7 +2421,7 @@ check with.  ERRORS is the list of expected errors."
   (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml nil nil)
                  flycheck-checkstyle-expected-errors)))
 
- (defconst flycheck-cppcheck-xml
+(defconst flycheck-cppcheck-xml
   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <results version=\"2\">
   <cppcheck version=\"1.52\"/>
@@ -2554,12 +2553,12 @@ of the file will be interrupted because there are too many #ifdef configurations
   :tags '(overlay)
   (let ((err (should-error (flycheck-add-overlay
                             (flycheck-error-new-at 1 1 'foo)))))
-      (should (string= (cadr err) "Undefined error level: foo"))))
+    (should (string= (cadr err) "Undefined error level: foo"))))
 
 (ert-deftest flycheck-add-overlay/no-error-level ()
   :tags '(overlay)
   (let ((err (should-error (flycheck-add-overlay (flycheck-error-new-at 1 1)))))
-      (should (string= (cadr err) "Undefined error level: nil"))))
+    (should (string= (cadr err) "Undefined error level: nil"))))
 
 (ert-deftest flycheck-add-overlay/info-category ()
   :tags '(overlay)
@@ -3253,7 +3252,7 @@ of the file will be interrupted because there are too many #ifdef configurations
     (flycheck-test-should-syntax-check
      "checkers/c_c++-error-exceptions.cpp" 'c++-mode
      '(1 14 error "cannot use 'throw' with exceptions disabled"
-          :checker c/c++-clang))))
+         :checker c/c++-clang))))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-error-no-rtti ()
   :tags '(builtin-checker external-tool language-c++)
@@ -3263,7 +3262,7 @@ of the file will be interrupted because there are too many #ifdef configurations
     (flycheck-test-should-syntax-check
      "checkers/c_c++-error-rtti.cpp" 'c++-mode
      '(4 32 error "cannot use dynamic_cast with -fno-rtti"
-          :checker c/c++-clang))))
+         :checker c/c++-clang))))
 
 (ert-deftest flycheck-define-checker/c/c++-gcc-warning ()
   :tags '(builtin-checker external-tool language-c)
@@ -3322,7 +3321,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-gcc))
   (let  ((flycheck-gcc-includes (list (flycheck-test-resource-filename
-                                         "checkers/c_c++-include/c_c++-library-header.h")))
+                                       "checkers/c_c++-include/c_c++-library-header.h")))
          (flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-test-should-syntax-check
      "checkers/c_c++-error.cpp" 'c++-mode
@@ -3382,7 +3381,7 @@ of the file will be interrupted because there are too many #ifdef configurations
     (flycheck-test-should-syntax-check
      "checkers/c_c++-error-exceptions.cpp" 'c++-mode
      '(1 20 error "exception handling disabled, use -fexceptions to enable"
-          :checker c/c++-gcc))))
+         :checker c/c++-gcc))))
 
 (ert-deftest flycheck-define-checker/c/c++-gcc-error-no-rtti ()
   :tags '(builtin-checker external-tool language-c++)
@@ -3392,7 +3391,7 @@ of the file will be interrupted because there are too many #ifdef configurations
     (flycheck-test-should-syntax-check
      "checkers/c_c++-error-rtti.cpp" 'c++-mode
      '(4 56 error "‘dynamic_cast’ not permitted with -fno-rtti"
-          :checker c/c++-gcc))))
+         :checker c/c++-gcc))))
 
 (ert-deftest flycheck-define-checker/c/c++-cppcheck-error ()
   :tags '(builtin-checker external-tool language-c)
@@ -3486,7 +3485,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   :tags '(builtin-checker external-tool language-chef)
   (skip-unless (flycheck-check-executable 'chef-foodcritic))
   (flycheck-test-should-syntax-check
-    "checkers/chef-foodcritic/recipes/chef-foodcritic-error.rb" 'ruby-mode
+   "checkers/chef-foodcritic/recipes/chef-foodcritic-error.rb" 'ruby-mode
    '(3 nil error "FC002: Avoid string interpolation where not required"
        :checker chef-foodcritic)
    '(8 nil error "FC003: Check whether you are running with chef server before using server-specific features"
@@ -3592,7 +3591,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (flycheck-test-should-syntax-check
    "checkers/elixir-warnings.ex" 'elixir-mode
    '(7 nil warning "this clause cannot match because a previous clause at line 4 always matches"
-        :checker elixir)))
+       :checker elixir)))
 
 (ert-deftest flycheck-define-checker/emacs-lisp ()
   :tags '(builtin-checker external-tool language-emacs-lisp)
@@ -3806,13 +3805,13 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
   :tags '(builtin-checker external-tool language-go)
   (skip-unless (flycheck-check-executable 'go-errcheck))
   (flycheck-test-with-env
-   `(("GOPATH" . ,(flycheck-test-resource-filename "checkers/go")))
-   (flycheck-test-should-syntax-check
-    "checkers/go/src/errcheck/errcheck.go" 'go-mode
-    '(7 9 warning "Ignored `error` returned from `f.Close()`"
-        :checker go-errcheck)
-    '(9 9 warning "Ignored `error` returned from `os.Stat(\"enoent\")`"
-        :checker go-errcheck))))
+      `(("GOPATH" . ,(flycheck-test-resource-filename "checkers/go")))
+    (flycheck-test-should-syntax-check
+     "checkers/go/src/errcheck/errcheck.go" 'go-mode
+     '(7 9 warning "Ignored `error` returned from `f.Close()`"
+         :checker go-errcheck)
+     '(9 9 warning "Ignored `error` returned from `os.Stat(\"enoent\")`"
+         :checker go-errcheck))))
 
 (ert-deftest flycheck-define-checker/haml ()
   :tags '(builtin-checker external-tool language-haml)
@@ -3983,7 +3982,7 @@ Why not:
   (skip-unless (flycheck-check-executable 'json-jsonlint))
   (flycheck-test-should-syntax-check
    "checkers/json-jsonlint-error.json" 'text-mode
-    '(1 42 error "found: ',' - expected: 'EOF'." :checker json-jsonlint)))
+   '(1 42 error "found: ',' - expected: 'EOF'." :checker json-jsonlint)))
 
 (ert-deftest flycheck-define-checker/less-file-error ()
   :tags '(builtin-checker external-tool language-less)
@@ -4380,7 +4379,7 @@ Why not:
        :checker ruby-rubocop)
    '(10 5 info "the use of then/do is not needed here" :checker ruby-rubylint)
    '(10 5 info "Use a guard clause instead of wrapping the code inside a conditional expression."
-          :checker ruby-rubocop)
+        :checker ruby-rubocop)
    '(10 5 info "Favor modifier `if` usage when having a single-line body. Another good alternative is the usage of control flow `&&`/`||`."
         :checker ruby-rubocop)
    '(10 5 info "Never use `then` for multi-line `if`."
@@ -4488,8 +4487,8 @@ Why not:
   (skip-unless (flycheck-check-executable 'sass))
   (flycheck-test-should-syntax-check
    "checkers/sass-error.sass" 'sass-mode
-    '(5 nil error "Inconsistent indentation: 3 spaces were used for indentation, but the rest of the document was indented using 2 spaces."
-        :checker sass)))
+   '(5 nil error "Inconsistent indentation: 3 spaces were used for indentation, but the rest of the document was indented using 2 spaces."
+       :checker sass)))
 
 (ert-deftest flycheck-define-checker/sass-import-error ()
   :tags '(builtin-checker external-tool language-sass)
