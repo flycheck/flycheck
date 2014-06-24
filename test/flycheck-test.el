@@ -43,8 +43,10 @@
 (require 'flycheck)
 (require 'dash)
 (require 'f)
+(require 'cl-lib)
 (require 'epa-file)                     ; To test encrypted buffers
 (require 'ert)                          ; Unit test library
+(require 'shut-up)                      ; Silence Emacs
 
 ;; Optional dependencies
 (require 'projectile nil 'no-error)
@@ -394,6 +396,27 @@ check with.  ERRORS is the list of expected errors."
 (defun flycheck-test-failed-on-travis-ci-p (result)
   "Determine whether RESULT is failed on Travis CI."
   (and (flycheck-test-travis-ci-p) (ert-test-failed-p result)))
+
+
+;;; Code style
+(ert-deftest flycheck-code-style/source-properly-indented ()
+  :tags '(style)
+  (cl-letf ((flycheck (f-join flycheck-test-source-directory "flycheck.el"))
+            ((get 'with-demoted-errors 'lisp-indent-function) 1))
+    (flycheck-test-with-file-buffer flycheck
+      (emacs-lisp-mode)
+      (shut-up
+        (indent-region (point-min) (point-max)))
+      (should (not (buffer-modified-p))))))
+
+(ert-deftest flycheck-code-style/test-suite-properly-indented ()
+  :tags '(style)
+  (let ((flycheck-test (f-join flycheck-test-directory "flycheck-test.el")))
+    (flycheck-test-with-file-buffer flycheck-test
+      (emacs-lisp-mode)
+      (shut-up
+        (indent-region (point-min) (point-max)))
+      (should (not (buffer-modified-p))))))
 
 
 ;;; Customization
