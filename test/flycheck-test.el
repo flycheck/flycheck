@@ -46,7 +46,7 @@
 (require 'cl-lib)
 (require 'epa-file)                     ; To test encrypted buffers
 (require 'ert)                          ; Unit test library
-(require 'shut-up)                      ; Silence Emacs
+(require 'shut-up)                      ; Silence Emacs and intercept `message'
 
 ;; Optional dependencies
 (require 'projectile nil 'no-error)
@@ -2972,14 +2972,10 @@ of the file will be interrupted because there are too many #ifdef configurations
   :tags '(error-display)
   (let ((err (flycheck-error-new-at 10 20 'warning "This is a Flycheck error."))
         (flycheck-display-errors-function nil))
-    ;; Error display must not fail with nil
-    (with-current-buffer "*Messages*"
-      (let ((inhibit-read-only t))
-        (erase-buffer)))
-    (flycheck-display-errors (list err))
-    (with-current-buffer "*Messages*"
-      (should-not (s-contains? (flycheck-error-message err)
-                               (buffer-string))))))
+    (shut-up
+      ;; Without an error function, error display should be a no-op.
+      (flycheck-display-errors (list err))
+      (should (equal (shut-up-current-output) "")))))
 
 (ert-deftest flycheck-display-errors/custom-function ()
   :tags '(error-display)
@@ -2998,12 +2994,10 @@ of the file will be interrupted because there are too many #ifdef configurations
   :tags '(error-display)
   (let ((err (flycheck-error-new-at 10 20 'warning
                                     "This is a Flycheck error.")))
-    (with-current-buffer "*Messages*"
-      (let ((inhibit-read-only t))
-        (erase-buffer)))
-    (flycheck-display-error-messages (list err))
-    (with-current-buffer "*Messages*"
-      (should (s-contains? (flycheck-error-message err) (buffer-string))))))
+    (shut-up
+      (flycheck-display-error-messages (list err))
+      (should (equal (shut-up-current-output)
+                     (concat (flycheck-error-message err) "\n"))))))
 
 
 ;;; Working with error messages
