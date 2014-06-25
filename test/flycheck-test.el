@@ -1442,6 +1442,38 @@ check with.  ERRORS is the list of expected errors."
 
 
 ;;; Checker API
+(ert-deftest flycheck-valid-checker-p/not-a-symbol ()
+  :tags '(checker-api)
+  (should-not (flycheck-valid-checker-p "foo")))
+
+(ert-deftest flycheck-valid-checker-p/no-checker-version ()
+  :tags '(checker-api)
+  (should-not (get 'foo 'flycheck-checker-version))
+  (should-not (flycheck-valid-checker-p 'foo)))
+
+(ert-deftest flycheck-valid-checker-p/checker-version-too-low ()
+  :tags '(checker-api)
+  (cl-letf* ((version (- flycheck-checker-version 1))
+             ((get 'foo 'flycheck-checker-version) version))
+    (should (= (get 'foo 'flycheck-checker-version) version))
+    (should-not (flycheck-valid-checker-p 'foo)))
+  (should-not (get 'foo 'flycheck-checker-version)))
+
+(ert-deftest flycheck-valid-checker-p/checker-version-too-high ()
+  :tags '(checker-api)
+  (cl-letf* ((version (+ flycheck-checker-version 1))
+             ((get 'foo 'flycheck-checker-version) version))
+    (should (= (get 'foo 'flycheck-checker-version) version))
+    (should-not (flycheck-valid-checker-p 'foo)))
+  (should-not (get 'foo 'flycheck-checker-version)))
+
+(ert-deftest flycheck-valid-checker-p/checker-version-ok ()
+  :tags '(checker-api)
+  (cl-letf* ((version flycheck-checker-version)
+             ((get 'foo 'flycheck-checker-version) version))
+    (should (= (get 'foo 'flycheck-checker-version) version))
+    (should (flycheck-valid-checker-p 'foo)))
+  (should-not (get 'foo 'flycheck-checker-version)))
 
 (ert-deftest flycheck-disabled-checker-p/enabled-checker ()
   :tags '(checker-api)

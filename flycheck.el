@@ -1434,6 +1434,12 @@ Signal an error if NEXT-CHECKER is not a valid entry for
         (error "%s is not a valid Flycheck syntax checker" checker))
       t)))
 
+(defconst flycheck-checker-version 1
+  "The internal version of syntax checker declarations.
+
+Flycheck will not use syntax checkers whose version is less than
+this constant.")
+
 (defun flycheck-verify-checker-properties (symbol)
   "Verify the syntax checker properties of SYMBOL."
   (let ((command (get symbol 'flycheck-command))
@@ -1472,7 +1478,7 @@ PROPERTIES is an alist of properties to set."
     (pcase-let ((`(,prop . ,value) it))
       (put symbol prop value)))
   (flycheck-verify-checker-properties symbol)
-  (put symbol 'flycheck-checker t))
+  (put symbol 'flycheck-checker-version flycheck-checker-version))
 
 (defmacro flycheck-define-checker (symbol docstring &rest properties)
   "Define SYMBOL as syntax checker with DOCSTRING and PROPERTIES.
@@ -1738,7 +1744,9 @@ CHECKER, unless APPEND is non-nil."
 
 A valid checker is a symbol defined as syntax checker with
 `flycheck-define-checker'."
-  (and (symbolp checker) (get checker 'flycheck-checker)))
+  (and (symbolp checker)
+       (= (or (get checker 'flycheck-checker-version) 0)
+          flycheck-checker-version)))
 
 (defun flycheck-defined-checkers ()
   "Find all defined syntax checkers.
