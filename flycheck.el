@@ -1380,37 +1380,36 @@ https://github.com/d11wtq/grizzl.")))
 
 
 ;;; Checker definitions
-(eval-and-compile
-  (defun flycheck-command-argument-p (arg)
-    "Check whether ARG is a valid command argument."
-    (pcase arg
-      ((pred stringp) t)
-      ((or `source `source-inplace `source-original) t)
-      ((or `temporary-directory `temporary-file-name) t)
-      (`(config-file ,option-name ,config-file-var)
-       (and (stringp option-name)
-            (symbolp config-file-var)))
-      (`(,(or `option `option-list) ,option-name ,option-var)
-       (and (stringp option-name)
-            (symbolp option-var)))
-      (`(option-flag ,option-name ,option-var)
-       (and (stringp option-name)
-            (symbolp option-var)))
-      (`(,(or `option `option-list) ,option-name ,option-var ,prepender-or-filter)
-       (and (stringp option-name)
-            (-all? #'symbolp (list option-var prepender-or-filter))))
-      (`(option-list ,option-name ,option-var ,prepender ,filter)
-       (and (stringp option-name)
-            (-all? #'symbolp (list option-var prepender filter))))
-      (`(eval ,_) t)
-      (_ nil)))
+(defun flycheck-command-argument-p (arg)
+  "Check whether ARG is a valid command argument."
+  (pcase arg
+    ((pred stringp) t)
+    ((or `source `source-inplace `source-original) t)
+    ((or `temporary-directory `temporary-file-name) t)
+    (`(config-file ,option-name ,config-file-var)
+     (and (stringp option-name)
+          (symbolp config-file-var)))
+    (`(,(or `option `option-list) ,option-name ,option-var)
+     (and (stringp option-name)
+          (symbolp option-var)))
+    (`(option-flag ,option-name ,option-var)
+     (and (stringp option-name)
+          (symbolp option-var)))
+    (`(,(or `option `option-list) ,option-name ,option-var ,prepender-or-filter)
+     (and (stringp option-name)
+          (-all? #'symbolp (list option-var prepender-or-filter))))
+    (`(option-list ,option-name ,option-var ,prepender ,filter)
+     (and (stringp option-name)
+          (-all? #'symbolp (list option-var prepender filter))))
+    (`(eval ,_) t)
+    (_ nil)))
 
-  (defun flycheck-command-arguments-list-p (arguments)
-    "Check whether ARGUMENTS is a list of valid arguments."
-    (-all? 'flycheck-command-argument-p arguments))
+(defun flycheck-command-arguments-list-p (arguments)
+  "Check whether ARGUMENTS is a list of valid arguments."
+  (-all? 'flycheck-command-argument-p arguments))
 
-  (defun flycheck-validate-next-checker (next-checker &optional validate-checker)
-    "Validate NEXT-CHECKER.
+(defun flycheck-validate-next-checker (next-checker &optional validate-checker)
+  "Validate NEXT-CHECKER.
 
 With VALIDATE-CHECKER not nil, also validate the actual checker
 being referred to.  Otherwise just validate the general shape and
@@ -1418,21 +1417,21 @@ the predicate.
 
 Signal an error if NEXT-CHECKER is not a valid entry for
 `:next-checkers'."
-    (let ((checker (pcase next-checker
-                     ((pred symbolp) next-checker)
-                     (`(no-errors . ,(pred symbolp)) (cdr next-checker))
-                     (`(warnings-only . ,(pred symbolp)) (cdr next-checker))
-                     (`(,predicate . ,(pred symbolp))
-                      (error "%S must be one of `no-errors' or `warnings-only'"
-                             predicate))
-                     (`(_ . ,checker)
-                      (error "%S must be a syntax checker symbol" checker))
-                     (_ (error "%S must be a symbol or a cons cell"
-                               next-checker)))))
-      (when (and validate-checker
-                 (not (flycheck-valid-checker-p checker)))
-        (error "%s is not a valid Flycheck syntax checker" checker))
-      t)))
+  (let ((checker (pcase next-checker
+                   ((pred symbolp) next-checker)
+                   (`(no-errors . ,(pred symbolp)) (cdr next-checker))
+                   (`(warnings-only . ,(pred symbolp)) (cdr next-checker))
+                   (`(,predicate . ,(pred symbolp))
+                    (error "%S must be one of `no-errors' or `warnings-only'"
+                           predicate))
+                   (`(_ . ,checker)
+                    (error "%S must be a syntax checker symbol" checker))
+                   (_ (error "%S must be a symbol or a cons cell"
+                             next-checker)))))
+    (when (and validate-checker
+               (not (flycheck-valid-checker-p checker)))
+      (error "%s is not a valid Flycheck syntax checker" checker))
+    t))
 
 (defconst flycheck-checker-version 1
   "The internal version of syntax checker declarations.
@@ -2232,16 +2231,15 @@ SEPARATOR is ignored in this case."
 
 
 ;;; Syntax checker predicates
-(eval-and-compile
-  (defun flycheck-buffer-saved-p (&optional buffer)
-    "Determine whether BUFFER is saved to a file.
+(defun flycheck-buffer-saved-p (&optional buffer)
+  "Determine whether BUFFER is saved to a file.
 
 BUFFER is the buffer to check.  If omitted or nil, use the
 current buffer as BUFFER.
 
 Return non-nil if the BUFFER is backed by a file, and not
 modified, or nil otherwise."
-    (and (buffer-file-name buffer) (not (buffer-modified-p buffer)))))
+  (and (buffer-file-name buffer) (not (buffer-modified-p buffer))))
 
 
 ;;; Checker selection
@@ -2909,11 +2907,8 @@ is not a file node."
                    ;; Default to error for unknown severity
                    (_          'error))))))))
 
-(eval-and-compile
-  ;; Parser must be defined during compilation, to allow syntax checkers parse
-  ;; the verification
-  (defun flycheck-parse-checkstyle (output _checker _buffer)
-    "Parse Checkstyle errors from OUTPUT.
+(defun flycheck-parse-checkstyle (output _checker _buffer)
+  "Parse Checkstyle errors from OUTPUT.
 
 Parse Checkstyle-like XML output.  Use this error parser for
 checkers that have an option to output errors in this format.
@@ -2922,13 +2917,13 @@ _CHECKER and _BUFFER are ignored.
 
 See URL `http://checkstyle.sourceforge.net/' for information
 about Checkstyle."
-    (-when-let (root (flycheck-parse-xml-string output))
-      (unless (eq (car root) 'checkstyle)
-        (error "Unexpected root element %s" (car root)))
-      ;; cddr gets us the body of the node without its name and its attributes
-      (->> (cddr root)
-        (--filter (and (listp it) (eq (car it) 'file)))
-        (-mapcat #'flycheck-parse-checkstyle-file-node)))))
+  (-when-let (root (flycheck-parse-xml-string output))
+    (unless (eq (car root) 'checkstyle)
+      (error "Unexpected root element %s" (car root)))
+    ;; cddr gets us the body of the node without its name and its attributes
+    (->> (cddr root)
+      (--filter (and (listp it) (eq (car it) 'file)))
+      (-mapcat #'flycheck-parse-checkstyle-file-node))))
 
 (defun flycheck-parse-cppcheck-error-node (node)
   "Parse a single error NODE from Cppcheck XML.
@@ -2946,9 +2941,8 @@ Return a list of all Flycheck errors this node represents."
                 :level (if (string= (cdr (assq 'severity attrs)) "error")
                            'error 'warning)))))))
 
-(eval-and-compile
-  (defun flycheck-parse-cppcheck (output _checker _buffer)
-    "Parse Cppcheck errors from OUTPUT.
+(defun flycheck-parse-cppcheck (output _checker _buffer)
+  "Parse Cppcheck errors from OUTPUT.
 
 Parse Cppcheck XML v2 output.
 
@@ -2956,15 +2950,15 @@ _BUFFER and _ERROR are ignored.
 
 See URL `http://cppcheck.sourceforge.net/' for more information
 about Cppcheck."
-    (-when-let* ((root (flycheck-parse-xml-string output))
-                 (errors (--first (and (listp it) (eq (car it) 'errors))
-                                  (cddr root))))
-      (unless (eq (car root) 'results)
-        (error "Unexpected root element %s" (car root)))
-      (->> errors
-        ;; Filter error nodes
-        (--filter (and (listp it) (eq (car it) 'error)))
-        (-mapcat #'flycheck-parse-cppcheck-error-node)))))
+  (-when-let* ((root (flycheck-parse-xml-string output))
+               (errors (--first (and (listp it) (eq (car it) 'errors))
+                                (cddr root))))
+    (unless (eq (car root) 'results)
+      (error "Unexpected root element %s" (car root)))
+    (->> errors
+      ;; Filter error nodes
+      (--filter (and (listp it) (eq (car it) 'error)))
+      (-mapcat #'flycheck-parse-cppcheck-error-node))))
 
 
 ;;; Error filtering
