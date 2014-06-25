@@ -2118,12 +2118,13 @@ predicate function."
 
 Return t if CHECKER may be used for the current buffer and nil
 otherwise."
-  (unless (flycheck-valid-checker-p checker)
-    (error "%s is no defined flycheck syntax checker (see `flycheck-define-checker')"
-           checker))
-  (and (flycheck-check-modes checker)
-       (flycheck-check-predicate checker)
-       (flycheck-check-executable checker)))
+  (if (flycheck-valid-checker-p checker)
+      (and (flycheck-check-modes checker)
+           (flycheck-check-predicate checker)
+           (flycheck-check-executable checker))
+    (message "Warning: %S is no valid Flycheck syntax checker.
+Try to reinstall the package defining this syntax checker." checker)
+    nil))
 
 (defun flycheck-may-use-next-checker (next-checker)
   "Determine whether NEXT-CHECKER may be used."
