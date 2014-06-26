@@ -1425,7 +1425,7 @@ check with.  ERRORS is the list of expected errors."
     (unwind-protect
         (should (equal (flycheck-checker-next-checkers 'emacs-lisp)
                        (cons 'texinfo next-checkers)))
-      (put 'emacs-lisp :flycheck-next-checkers next-checkers)
+      (put 'emacs-lisp 'flycheck-next-checkers next-checkers)
       (should (equal (flycheck-checker-next-checkers 'emacs-lisp)
                      next-checkers)))))
 
@@ -1436,12 +1436,44 @@ check with.  ERRORS is the list of expected errors."
     (unwind-protect
         (should (equal (flycheck-checker-next-checkers 'emacs-lisp)
                        (append next-checkers '(texinfo))))
-      (put 'emacs-lisp :flycheck-next-checkers next-checkers)
+      (put 'emacs-lisp 'flycheck-next-checkers next-checkers)
       (should (equal (flycheck-checker-next-checkers 'emacs-lisp)
                      next-checkers)))))
 
 
 ;;; Checker API
+(ert-deftest flycheck-valid-checker-p/not-a-symbol ()
+  :tags '(checker-api)
+  (should-not (flycheck-valid-checker-p "foo")))
+
+(ert-deftest flycheck-valid-checker-p/no-checker-version ()
+  :tags '(checker-api)
+  (should-not (get 'foo 'flycheck-checker-version))
+  (should-not (flycheck-valid-checker-p 'foo)))
+
+(ert-deftest flycheck-valid-checker-p/checker-version-too-low ()
+  :tags '(checker-api)
+  (cl-letf* ((version (- flycheck-checker-version 1))
+             ((get 'foo 'flycheck-checker-version) version))
+    (should (= (get 'foo 'flycheck-checker-version) version))
+    (should-not (flycheck-valid-checker-p 'foo)))
+  (should-not (get 'foo 'flycheck-checker-version)))
+
+(ert-deftest flycheck-valid-checker-p/checker-version-too-high ()
+  :tags '(checker-api)
+  (cl-letf* ((version (+ flycheck-checker-version 1))
+             ((get 'foo 'flycheck-checker-version) version))
+    (should (= (get 'foo 'flycheck-checker-version) version))
+    (should-not (flycheck-valid-checker-p 'foo)))
+  (should-not (get 'foo 'flycheck-checker-version)))
+
+(ert-deftest flycheck-valid-checker-p/checker-version-ok ()
+  :tags '(checker-api)
+  (cl-letf* ((version flycheck-checker-version)
+             ((get 'foo 'flycheck-checker-version) version))
+    (should (= (get 'foo 'flycheck-checker-version) version))
+    (should (flycheck-valid-checker-p 'foo)))
+  (should-not (get 'foo 'flycheck-checker-version)))
 
 (ert-deftest flycheck-disabled-checker-p/enabled-checker ()
   :tags '(checker-api)
@@ -1675,6 +1707,15 @@ check with.  ERRORS is the list of expected errors."
     (if (executable-find (flycheck-checker-executable checker))
         (should (flycheck-check-executable checker))
       (should-not (flycheck-check-executable checker)))))
+
+(ert-deftest flycheck-may-use-checker/invalid-checker ()
+  :tags '(checker-api)
+  (shut-up
+    (should-not (flycheck-valid-checker-p 'foo))
+    (should-not (flycheck-may-use-checker 'foo))
+    (should (equal (shut-up-current-output)
+                   "Warning: foo is no valid Flycheck syntax checker.
+Try to reinstall the package defining this syntax checker.\n"))))
 
 
 ;;; Configuration file functions

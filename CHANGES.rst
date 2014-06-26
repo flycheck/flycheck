@@ -3,6 +3,11 @@
 master (in development)
 -----------------------
 
+- **Breaking changes**:
+
+  - The internal names of syntax checker properties changed.  **All packages
+    depending on Flycheck must be recompiled!**
+
 - New syntax checkers:
 
   - #408: C/C++ with GCC
