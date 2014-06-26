@@ -2205,15 +2205,16 @@ SEPARATOR is ignored in this case."
 
 
 ;;; Syntax checker predicates
-(defun flycheck-buffer-saved-p (&optional buffer)
-  "Determine whether BUFFER is saved to a file.
+(eval-and-compile
+  (defun flycheck-buffer-saved-p (&optional buffer)
+    "Determine whether BUFFER is saved to a file.
 
 BUFFER is the buffer to check.  If omitted or nil, use the
 current buffer as BUFFER.
 
 Return non-nil if the BUFFER is backed by a file, and not
 modified, or nil otherwise."
-  (and (buffer-file-name buffer) (not (buffer-modified-p buffer))))
+    (and (buffer-file-name buffer) (not (buffer-modified-p buffer)))))
 
 
 ;;; Checker selection
