@@ -11,6 +11,8 @@ master (in development)
 
   - #412: Add `flycheck-clang-no-exceptions` and `flycheck-gcc-no-exceptions` to
     flag exceptions as errors in C++
+  - #417: Add `flycheck-rust-crate-root` to resolve inter-crate references in
+    `rust`
 
 0.19 (Jun 12, 2014)
 -------------------
