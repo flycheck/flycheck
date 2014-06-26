@@ -452,6 +452,9 @@ Rust
    .. option:: flycheck-rust-check-tests
       :auto:
 
+   .. option:: flycheck-rust-crate-root
+      :auto:
+
    .. option:: flycheck-rust-library-path
       :auto:
 

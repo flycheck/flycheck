@@ -4499,6 +4499,23 @@ Why not:
   ;; TODO: How can we test this without adding binary libraries to our repo?
   (error "Not implemented!"))
 
+(ert-deftest flycheck-define-checker/rust-crate-root-not-set ()
+  :tags '(builtin-checker external-tool language-rust)
+  (skip-unless (flycheck-check-executable 'rust))
+  (flycheck-test-should-syntax-check
+   "checkers/rust_crate/foo.rs" 'rust-mode
+   '(1 5 error "unresolved import `super::bar`" :checker rust)))
+
+(ert-deftest flycheck-define-checker/rust-crate-root ()
+  :tags '(builtin-checker external-tool language-rust)
+  (skip-unless (flycheck-check-executable 'rust))
+  (let ((flycheck-rust-crate-root (flycheck-test-resource-filename
+                                   "checkers/rust_crate/main.rs")))
+    (flycheck-test-should-syntax-check
+     "checkers/rust_crate/foo.rs" 'rust-mode
+     '(3 9 warning "unused variable: `x`, #[warn(unused_variable)] on by default"
+         :checker rust))))
+
 (ert-deftest flycheck-define-checker/sass ()
   :tags '(builtin-checker external-tool language-sass)
   (skip-unless (flycheck-check-executable 'sass))
