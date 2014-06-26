@@ -59,6 +59,9 @@ C/C++
    .. option:: flycheck-clang-standard-library
       :auto:
 
+   .. option:: flycheck-clang-system-include-path
+      :auto:
+
    .. option:: flycheck-clang-warnings
       :auto:
 
@@ -83,6 +86,9 @@ C/C++
       :auto:
 
    .. option:: flycheck-gcc-no-rtti
+      :auto:
+
+   .. option:: flycheck-gcc-system-include-path
       :auto:
 
    .. option:: flycheck-gcc-warnings

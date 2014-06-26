@@ -3224,6 +3224,14 @@ of the file will be interrupted because there are too many #ifdef configurations
     (flycheck-test-should-syntax-check
      "checkers/c_c++-fatal-error.c" 'c-mode)))
 
+(ert-deftest flycheck-define-checker/c/c++-clang-system-include-path ()
+  :tags '(builtin-checker external-tool language-c)
+  (skip-unless (flycheck-check-executable 'c/c++-clang))
+  (let ((flycheck-clang-system-include-path '("."))
+        (flycheck-disabled-checkers '(c/c++-gcc)))
+    (flycheck-test-should-syntax-check
+     "checkers/c_c++-system-include-path.c" 'c-mode)))
+
 (ert-deftest flycheck-define-checker/c/c++-clang-included-file-error ()
   :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
@@ -3361,6 +3369,14 @@ of the file will be interrupted because there are too many #ifdef configurations
         (flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-test-should-syntax-check
      "checkers/c_c++-fatal-error.c" 'c-mode)))
+
+(ert-deftest flycheck-define-checker/c/c++-gcc-system-include-path ()
+  :tags '(builtin-checker external-tool language-c)
+  (skip-unless (flycheck-check-executable 'c/c++-gcc))
+  (let ((flycheck-gcc-system-include-path '("."))
+        (flycheck-disabled-checkers '(c/c++-clang)))
+    (flycheck-test-should-syntax-check
+     "checkers/c_c++-system-include-path.c" 'c-mode)))
 
 (ert-deftest flycheck-define-checker/c/c++-gcc-included-file-error ()
   :tags '(builtin-checker external-tool language-c++)
