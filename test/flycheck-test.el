@@ -38,19 +38,21 @@
 ;;; Code:
 
 
-;;;; Requirements
+;;; Requirements
 
 (require 'flycheck)
 (require 'dash)
 (require 'f)
+(require 'cl-lib)
 (require 'epa-file)                     ; To test encrypted buffers
 (require 'ert)                          ; Unit test library
+(require 'shut-up)                      ; Silence Emacs and intercept `message'
 
 ;; Optional dependencies
 (require 'projectile nil 'no-error)
 
 
-;;;; Compatibility
+;;; Compatibility
 
 (eval-and-compile
   ;; Provide `ert-skip' and friends for Emacs 24.3
@@ -76,7 +78,7 @@
                'flycheck-test-skipped)))))
 
 
-;;;; Directories
+;;; Directories
 
 (defconst flycheck-test-directory (f-parent (f-this-file))
   "The test directory.")
@@ -92,7 +94,7 @@
   (f-join flycheck-test-source-directory ".cask" emacs-version "elpa"))
 
 
-;;;; Utilities
+;;; Utilities
 
 (defmacro flycheck-test-with-temp-buffer (&rest body)
   "Eval BODY within a temporary buffer.
@@ -161,7 +163,7 @@ with VALUE."
        (kill-buffer (help-buffer)))))
 
 
-;;;; Environment information and tests
+;;; Environment information and tests
 
 (defun flycheck-test-min-emacs-version-p (major &optional minor)
   "Determine whether Emacs has the required version.
@@ -213,7 +215,7 @@ could not be determined."
                      (car (process-lines cppcheck "--version")))))))
 
 
-;;;; Test resources
+;;; Test resources
 
 (defun flycheck-test-resource-filename (resource-file)
   "Determine the absolute file name of a RESOURCE-FILE.
@@ -242,7 +244,7 @@ The absolute file name of RESOURCE-FILE is determined with
      ,@body))
 
 
-;;;; Syntax checking in checks
+;;; Syntax checking in checks
 
 (defvar-local flycheck-test-syntax-checker-finished nil
   "Non-nil if the current checker has finished.")
@@ -295,7 +297,7 @@ Raise an assertion error if the buffer is not clear afterwards."
                        (overlays-in (point-min) (point-max))))))
 
 
-;;;; Unit test predicates
+;;; Unit test predicates
 
 (defun flycheck-test-should-overlay (error)
   "Test that ERROR has an overlay."
@@ -341,8 +343,7 @@ Each error in ERRORS is a list as expected by
     (should (= (length errors)
                (length (flycheck-overlays-in (point-min) (point-max)))))))
 
-(defun flycheck-test-should-syntax-check
-  (resource-file modes &rest errors)
+(defun flycheck-test-should-syntax-check (resource-file modes &rest errors)
   "Test a syntax check in RESOURCE-FILE with MODES.
 
 RESOURCE-FILE is the file to check.  MODES is a single major mode
@@ -390,14 +391,35 @@ check with.  ERRORS is the list of expected errors."
      'flycheck-test-explain--at-nth-error)
 
 
-;;;; Test results
+;;; Test results
 
 (defun flycheck-test-failed-on-travis-ci-p (result)
   "Determine whether RESULT is failed on Travis CI."
   (and (flycheck-test-travis-ci-p) (ert-test-failed-p result)))
 
 
-;;;; Customization
+;;; Code style
+(ert-deftest flycheck-code-style/source-properly-indented ()
+  :tags '(style)
+  (cl-letf ((flycheck (f-join flycheck-test-source-directory "flycheck.el"))
+            ((get 'with-demoted-errors 'lisp-indent-function) 1))
+    (flycheck-test-with-file-buffer flycheck
+      (emacs-lisp-mode)
+      (shut-up
+        (indent-region (point-min) (point-max)))
+      (should-not (buffer-modified-p)))))
+
+(ert-deftest flycheck-code-style/test-suite-properly-indented ()
+  :tags '(style)
+  (let ((flycheck-test (f-join flycheck-test-directory "flycheck-test.el")))
+    (flycheck-test-with-file-buffer flycheck-test
+      (emacs-lisp-mode)
+      (shut-up
+        (indent-region (point-min) (point-max)))
+      (should-not (buffer-modified-p)))))
+
+
+;;; Customization
 
 (ert-deftest flycheck-checkers/there-are-registered-checkers ()
   :tags '(customization)
@@ -524,7 +546,7 @@ check with.  ERRORS is the list of expected errors."
   (should (equal flycheck-temp-prefix "flycheck")))
 
 
-;;;; Minor mode definition
+;;; Minor mode definition
 
 (ert-deftest flycheck-mode/enables-standard-error-navigation ()
   :tags '(minor-mode)
@@ -566,7 +588,7 @@ check with.  ERRORS is the list of expected errors."
     (should-not (flycheck-deferred-check-p))))
 
 
-;;;; Global syntax checking
+;;; Global syntax checking
 
 (ert-deftest flycheck-may-enable-mode/not-in-ephemeral-buffers ()
   :tags '(global-mode)
@@ -650,7 +672,7 @@ check with.  ERRORS is the list of expected errors."
       (should flycheck-mode))))
 
 
-;;;; Deferred syntax checking
+;;; Deferred syntax checking
 
 (ert-deftest flycheck-deferred-check-p/nil ()
   :tags '(deferred)
@@ -677,7 +699,7 @@ check with.  ERRORS is the list of expected errors."
     (should-not (flycheck-deferred-check-p))))
 
 
-;;;; Automatic syntax checking
+;;; Automatic syntax checking
 
 (ert-deftest flycheck-may-check-automatically/not-in-ephemeral-buffers ()
   :tags '(automatic)
@@ -825,7 +847,7 @@ check with.  ERRORS is the list of expected errors."
     (should (flycheck-deferred-check-p))))
 
 
-;;;; Mode line reporting
+;;; Mode line reporting
 
 (ert-deftest flycheck-report-status/sets-mode-line ()
   :tags '(mode-line)
@@ -899,7 +921,7 @@ check with.  ERRORS is the list of expected errors."
     (should (string= flycheck-mode-line " FlyC:3/2"))))
 
 
-;;;; Utility functions
+;;; Utility functions
 (ert-deftest flycheck-string-to-number-safe/nil ()
   :tags '(utility)
   (should-not (flycheck-string-to-number-safe nil)))
@@ -1252,7 +1274,7 @@ check with.  ERRORS is the list of expected errors."
                                                      file-name)))))
 
 
-;;;; Checker definitions
+;;; Checker definitions
 
 (ert-deftest flycheck-command-argument-p/with-symbols ()
   :tags '(definition)
@@ -1382,7 +1404,7 @@ check with.  ERRORS is the list of expected errors."
   (should (flycheck-validate-next-checker '(warnings-only . emacs-lisp) t)))
 
 
-;;;; Checker extensions
+;;; Checker extensions
 (ert-deftest flycheck-add-next-checker/no-valid-checker ()
   :tags '(extending)
   (let ((err-data (should-error (flycheck-add-next-checker 'foo 'emacs-lisp))))
@@ -1419,7 +1441,7 @@ check with.  ERRORS is the list of expected errors."
                      next-checkers)))))
 
 
-;;;; Checker API
+;;; Checker API
 
 (ert-deftest flycheck-disabled-checker-p/enabled-checker ()
   :tags '(checker-api)
@@ -1655,7 +1677,7 @@ check with.  ERRORS is the list of expected errors."
       (should-not (flycheck-check-executable checker)))))
 
 
-;;;; Configuration file functions
+;;; Configuration file functions
 
 (ert-deftest flycheck-locate-config-file-absolute-path/just-a-base-name ()
   :tags '(configuration)
@@ -1742,7 +1764,7 @@ check with.  ERRORS is the list of expected errors."
                    (f-join flycheck-test-directory "flycheck-test.el")))))
 
 
-;;;; Generic option filters
+;;; Generic option filters
 
 (ert-deftest flycheck-option-int/pass-through-nil ()
   :tags '(option-filters)
@@ -1782,7 +1804,7 @@ check with.  ERRORS is the list of expected errors."
                  "10,20")))
 
 
-;;;; Checker selection
+;;; Checker selection
 
 (ert-deftest flycheck-checker/unusable-checker-causes-an-error ()
   :tags '(selection)
@@ -1984,7 +2006,7 @@ check with.  ERRORS is the list of expected errors."
             :checker emacs-lisp-checkdoc)))))
 
 
-;;;; Documentation
+;;; Documentation
 
 (ert-deftest flycheck-describe-checker/pops-up-help-buffer ()
   :tags '(documentation)
@@ -2115,8 +2137,8 @@ check with.  ERRORS is the list of expected errors."
     (dolist (checker flycheck-checkers)
       (-when-let (vars (-sort #'string< (flycheck-checker-option-vars checker)))
         (re-search-forward (concat (rx line-start ".. flyc-checker::"
-                                     (one-or-more space))
-                                 (regexp-quote (symbol-name checker))))
+                                       (one-or-more space))
+                                   (regexp-quote (symbol-name checker))))
         (re-search-forward (rx line-start "   .. rubric:: Options" line-end))
         (dolist (var vars)
           ;; Move across empty lines
@@ -2153,7 +2175,7 @@ check with.  ERRORS is the list of expected errors."
         (should (looking-at (rx line-start (= 6 " ") ":auto:" line-end)))))))
 
 
-;;;; Checker error API
+;;; Checker error API
 
 (ert-deftest flycheck-error-line-region ()
   :tags '(error-api)
@@ -2271,14 +2293,14 @@ check with.  ERRORS is the list of expected errors."
                    "14:15:error: dash\\nbroken (foo)")))
 
 
-;;;; Error levels
+;;; Error levels
 
 ;; A level for the following unit tests
 (flycheck-define-error-level 'test-level
-    :overlay-category 'category
-    :fringe-bitmap 'left-triangle
-    :fringe-face 'highlight
-    :error-list-face 'font-lock-constant-face)
+  :overlay-category 'category
+  :fringe-bitmap 'left-triangle
+  :fringe-face 'highlight
+  :error-list-face 'font-lock-constant-face)
 
 (ert-deftest flycheck-define-error-level/is-error-level? ()
   :tags '(error-level)
@@ -2333,7 +2355,7 @@ check with.  ERRORS is the list of expected errors."
     (should (string= (cadr err) "Invalid fringe side: up-fringe"))))
 
 
-;;;; Built-in error levels
+;;; Built-in error levels
 
 (ert-deftest flycheck-error-level-error ()
   :tags '(error-level)
@@ -2367,7 +2389,7 @@ check with.  ERRORS is the list of expected errors."
               'flycheck-error-list-info)))
 
 
-;;;; Error parsers
+;;; Error parsers
 
 (defconst flycheck-checkstyle-xml
   "<?xml version=\"1.0\" encoding=\"utf-8\"?>
@@ -2422,7 +2444,7 @@ check with.  ERRORS is the list of expected errors."
   (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml nil nil)
                  flycheck-checkstyle-expected-errors)))
 
- (defconst flycheck-cppcheck-xml
+(defconst flycheck-cppcheck-xml
   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <results version=\"2\">
   <cppcheck version=\"1.52\"/>
@@ -2511,7 +2533,7 @@ of the file will be interrupted because there are too many #ifdef configurations
                                                 "spam with eggs"))))))
 
 
-;;;; Error overlay management
+;;; Error overlay management
 
 (ert-deftest flycheck-info-overlay/priority ()
   :tags '(overlay)
@@ -2554,12 +2576,12 @@ of the file will be interrupted because there are too many #ifdef configurations
   :tags '(overlay)
   (let ((err (should-error (flycheck-add-overlay
                             (flycheck-error-new-at 1 1 'foo)))))
-      (should (string= (cadr err) "Undefined error level: foo"))))
+    (should (string= (cadr err) "Undefined error level: foo"))))
 
 (ert-deftest flycheck-add-overlay/no-error-level ()
   :tags '(overlay)
   (let ((err (should-error (flycheck-add-overlay (flycheck-error-new-at 1 1)))))
-      (should (string= (cadr err) "Undefined error level: nil"))))
+    (should (string= (cadr err) "Undefined error level: nil"))))
 
 (ert-deftest flycheck-add-overlay/info-category ()
   :tags '(overlay)
@@ -2699,7 +2721,7 @@ of the file will be interrupted because there are too many #ifdef configurations
           :checker emacs-lisp))))
 
 
-;;;; Error navigation
+;;; Error navigation
 
 (defmacro flycheck-test-with-nav-buffer (&rest body)
   (declare (indent 0))
@@ -2828,7 +2850,7 @@ of the file will be interrupted because there are too many #ifdef configurations
     (should (flycheck-test-at-nth-error 2))))
 
 
-;;;; Error list
+;;; Error list
 
 (ert-deftest flycheck-error-list-buffer/name ()
   :tags '(error-list)
@@ -2944,20 +2966,16 @@ of the file will be interrupted because there are too many #ifdef configurations
     (should (string= "Unknown error (emacs-lisp-checkdoc)" (car (aref cells 3))))))
 
 
-;;;; General error display
+;;; General error display
 
 (ert-deftest flycheck-display-errors/no-display-function-set ()
   :tags '(error-display)
   (let ((err (flycheck-error-new-at 10 20 'warning "This is a Flycheck error."))
         (flycheck-display-errors-function nil))
-    ;; Error display must not fail with nil
-    (with-current-buffer "*Messages*"
-      (let ((inhibit-read-only t))
-        (erase-buffer)))
-    (flycheck-display-errors (list err))
-    (with-current-buffer "*Messages*"
-      (should-not (s-contains? (flycheck-error-message err)
-                               (buffer-string))))))
+    (shut-up
+      ;; Without an error function, error display should be a no-op.
+      (flycheck-display-errors (list err))
+      (should (equal (shut-up-current-output) "")))))
 
 (ert-deftest flycheck-display-errors/custom-function ()
   :tags '(error-display)
@@ -2970,21 +2988,19 @@ of the file will be interrupted because there are too many #ifdef configurations
     (should (equal displayed-errors (list err)))))
 
 
-;;;; Error display functions
+;;; Error display functions
 
 (ert-deftest flycheck-display-error-messages ()
   :tags '(error-display)
   (let ((err (flycheck-error-new-at 10 20 'warning
                                     "This is a Flycheck error.")))
-    (with-current-buffer "*Messages*"
-      (let ((inhibit-read-only t))
-        (erase-buffer)))
-    (flycheck-display-error-messages (list err))
-    (with-current-buffer "*Messages*"
-      (should (s-contains? (flycheck-error-message err) (buffer-string))))))
+    (shut-up
+      (flycheck-display-error-messages (list err))
+      (should (equal (shut-up-current-output)
+                     (concat (flycheck-error-message err) "\n"))))))
 
 
-;;;; Working with error messages
+;;; Working with error messages
 
 (ert-deftest flycheck-copy-messages-as-kill ()
   :tags '(error-messages)
@@ -3046,7 +3062,7 @@ of the file will be interrupted because there are too many #ifdef configurations
                        browsed-urls))))))
 
 
-;;;; Syntax checker executables
+;;; Syntax checker executables
 
 (ert-deftest flycheck-overridden-executable ()
   :tags '(executables)
@@ -3110,7 +3126,7 @@ of the file will be interrupted because there are too many #ifdef configurations
       (should (string= (cadr err) (format "%s is no executable" file-name))))))
 
 
-;;;; Built-in syntax checkers
+;;; Built-in syntax checkers
 
 ;; Tell the byte compiler about the variables we'll use
 (defvar js2-mode-show-strict-warnings)
@@ -3253,7 +3269,7 @@ of the file will be interrupted because there are too many #ifdef configurations
     (flycheck-test-should-syntax-check
      "checkers/c_c++-error-exceptions.cpp" 'c++-mode
      '(1 14 error "cannot use 'throw' with exceptions disabled"
-          :checker c/c++-clang))))
+         :checker c/c++-clang))))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-error-no-rtti ()
   :tags '(builtin-checker external-tool language-c++)
@@ -3263,7 +3279,7 @@ of the file will be interrupted because there are too many #ifdef configurations
     (flycheck-test-should-syntax-check
      "checkers/c_c++-error-rtti.cpp" 'c++-mode
      '(4 32 error "cannot use dynamic_cast with -fno-rtti"
-          :checker c/c++-clang))))
+         :checker c/c++-clang))))
 
 (ert-deftest flycheck-define-checker/c/c++-gcc-warning ()
   :tags '(builtin-checker external-tool language-c)
@@ -3322,7 +3338,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-gcc))
   (let  ((flycheck-gcc-includes (list (flycheck-test-resource-filename
-                                         "checkers/c_c++-include/c_c++-library-header.h")))
+                                       "checkers/c_c++-include/c_c++-library-header.h")))
          (flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-test-should-syntax-check
      "checkers/c_c++-error.cpp" 'c++-mode
@@ -3382,7 +3398,7 @@ of the file will be interrupted because there are too many #ifdef configurations
     (flycheck-test-should-syntax-check
      "checkers/c_c++-error-exceptions.cpp" 'c++-mode
      '(1 20 error "exception handling disabled, use -fexceptions to enable"
-          :checker c/c++-gcc))))
+         :checker c/c++-gcc))))
 
 (ert-deftest flycheck-define-checker/c/c++-gcc-error-no-rtti ()
   :tags '(builtin-checker external-tool language-c++)
@@ -3392,7 +3408,7 @@ of the file will be interrupted because there are too many #ifdef configurations
     (flycheck-test-should-syntax-check
      "checkers/c_c++-error-rtti.cpp" 'c++-mode
      '(4 56 error "‘dynamic_cast’ not permitted with -fno-rtti"
-          :checker c/c++-gcc))))
+         :checker c/c++-gcc))))
 
 (ert-deftest flycheck-define-checker/c/c++-cppcheck-error ()
   :tags '(builtin-checker external-tool language-c)
@@ -3486,7 +3502,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   :tags '(builtin-checker external-tool language-chef)
   (skip-unless (flycheck-check-executable 'chef-foodcritic))
   (flycheck-test-should-syntax-check
-    "checkers/chef-foodcritic/recipes/chef-foodcritic-error.rb" 'ruby-mode
+   "checkers/chef-foodcritic/recipes/chef-foodcritic-error.rb" 'ruby-mode
    '(3 nil error "FC002: Avoid string interpolation where not required"
        :checker chef-foodcritic)
    '(8 nil error "FC003: Check whether you are running with chef server before using server-specific features"
@@ -3592,7 +3608,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (flycheck-test-should-syntax-check
    "checkers/elixir-warnings.ex" 'elixir-mode
    '(7 nil warning "this clause cannot match because a previous clause at line 4 always matches"
-        :checker elixir)))
+       :checker elixir)))
 
 (ert-deftest flycheck-define-checker/emacs-lisp ()
   :tags '(builtin-checker external-tool language-emacs-lisp)
@@ -3806,13 +3822,13 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
   :tags '(builtin-checker external-tool language-go)
   (skip-unless (flycheck-check-executable 'go-errcheck))
   (flycheck-test-with-env
-   `(("GOPATH" . ,(flycheck-test-resource-filename "checkers/go")))
-   (flycheck-test-should-syntax-check
-    "checkers/go/src/errcheck/errcheck.go" 'go-mode
-    '(7 9 warning "Ignored `error` returned from `f.Close()`"
-        :checker go-errcheck)
-    '(9 9 warning "Ignored `error` returned from `os.Stat(\"enoent\")`"
-        :checker go-errcheck))))
+      `(("GOPATH" . ,(flycheck-test-resource-filename "checkers/go")))
+    (flycheck-test-should-syntax-check
+     "checkers/go/src/errcheck/errcheck.go" 'go-mode
+     '(7 9 warning "Ignored `error` returned from `f.Close()`"
+         :checker go-errcheck)
+     '(9 9 warning "Ignored `error` returned from `os.Stat(\"enoent\")`"
+         :checker go-errcheck))))
 
 (ert-deftest flycheck-define-checker/haml ()
   :tags '(builtin-checker external-tool language-haml)
@@ -3983,7 +3999,7 @@ Why not:
   (skip-unless (flycheck-check-executable 'json-jsonlint))
   (flycheck-test-should-syntax-check
    "checkers/json-jsonlint-error.json" 'text-mode
-    '(1 42 error "found: ',' - expected: 'EOF'." :checker json-jsonlint)))
+   '(1 42 error "found: ',' - expected: 'EOF'." :checker json-jsonlint)))
 
 (ert-deftest flycheck-define-checker/less-file-error ()
   :tags '(builtin-checker external-tool language-less)
@@ -4370,7 +4386,7 @@ Why not:
   (flycheck-test-should-syntax-check
    "checkers/ruby-warnings.rb" 'ruby-mode
    '(1 1 info "Missing utf-8 encoding comment." :checker ruby-rubocop)
-   '(2 1 info "Use snake_case for source file names." :checker ruby-rubocop)
+   '(1 1 info "Use snake_case for source file names." :checker ruby-rubocop)
    '(3 1 info "Missing top-level class documentation comment."
        :checker ruby-rubocop)
    '(5 5 warning "unused local variable arr" :checker ruby-rubylint)
@@ -4380,7 +4396,7 @@ Why not:
        :checker ruby-rubocop)
    '(10 5 info "the use of then/do is not needed here" :checker ruby-rubylint)
    '(10 5 info "Use a guard clause instead of wrapping the code inside a conditional expression."
-          :checker ruby-rubocop)
+        :checker ruby-rubocop)
    '(10 5 info "Favor modifier `if` usage when having a single-line body. Another good alternative is the usage of control flow `&&`/`||`."
         :checker ruby-rubocop)
    '(10 5 info "Never use `then` for multi-line `if`."
@@ -4399,7 +4415,7 @@ Why not:
     (flycheck-test-should-syntax-check
      "checkers/ruby-warnings.rb" 'ruby-mode
      '(1 1 info "Missing utf-8 encoding comment." :checker ruby-rubocop)
-     '(2 1 info "Use snake_case for source file names." :checker ruby-rubocop)
+     '(1 1 info "Use snake_case for source file names." :checker ruby-rubocop)
      '(3 1 info "Missing top-level class documentation comment."
          :checker ruby-rubocop)
      '(5 5 warning "Useless assignment to variable - `arr`."
@@ -4488,8 +4504,8 @@ Why not:
   (skip-unless (flycheck-check-executable 'sass))
   (flycheck-test-should-syntax-check
    "checkers/sass-error.sass" 'sass-mode
-    '(5 nil error "Inconsistent indentation: 3 spaces were used for indentation, but the rest of the document was indented using 2 spaces."
-        :checker sass)))
+   '(5 nil error "Inconsistent indentation: 3 spaces were used for indentation, but the rest of the document was indented using 2 spaces."
+       :checker sass)))
 
 (ert-deftest flycheck-define-checker/sass-import-error ()
   :tags '(builtin-checker external-tool language-sass)
@@ -4706,7 +4722,7 @@ Why not:
        "checkers/yaml-syntax-error.yaml" 'yaml-mode expected-error))))
 
 
-;;;; Test results
+;;; Test results
 
 (defun flycheck-test-syntax-check-timed-out-p (result)
   "Whether RESULT denotes a timed-out test."

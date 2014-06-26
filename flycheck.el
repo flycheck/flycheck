@@ -42,7 +42,7 @@
   (require 'package)        ; Tell Emacs about package-user-dir
   (require 'sh-script)      ; `sh-shell' for sh checker predicates
   (require 'jka-compr)      ; For JKA workarounds in `flycheck-temp-file-system'
-)
+  )
 
 (require 's)
 (require 'dash)
@@ -1015,7 +1015,7 @@ The syntax check is deferred if FORCE-DEFERRED is non-nil, or if
   (when (and flycheck-mode (flycheck-may-check-automatically condition))
     (if (or force-deferred (flycheck-must-defer-check))
         (flycheck-buffer-deferred)
-      (with-demoted-errors
+      (with-demoted-errors "Error while checking syntax automatically: %S"
         (flycheck-buffer)))))
 
 (defvar-local flycheck-idle-change-timer nil
@@ -1043,7 +1043,8 @@ buffer."
       (if (s-contains? "\n" (buffer-substring beg end))
           (flycheck-buffer-automatically 'new-line 'force-deferred)
         (setq flycheck-idle-change-timer
-              (run-at-time flycheck-idle-change-delay nil #'flycheck-handle-idle-change))))))
+              (run-at-time flycheck-idle-change-delay nil
+                           #'flycheck-handle-idle-change))))))
 
 (defun flycheck-handle-idle-change ()
   "Handle an expired idle time since the last change."
@@ -2295,8 +2296,6 @@ CHECKER will be used, even if it is not contained in
   'help-echo (purecopy "mouse-2, RET: find Flycheck checker definition"))
 
 (defconst flycheck-find-checker-regexp
-  ;; We use `eval-and-compile' and `rx-to-string' here instead of simply `rx',
-  ;; because we need to dynamically add the regexp from `find-function-space-re'
   (rx line-start (zero-or-more (syntax whitespace))
       "(" symbol-start "flycheck-define-checker" symbol-end
       (eval (list 'regexp find-function-space-re))
@@ -2366,9 +2365,9 @@ Pop up a help buffer with the documentation of CHECKER."
               (princ (format ", using a configuration file from `%s'.\n"
                              config-file-var))
             (princ ".\n"))
-          (if modes
-           (princ (format "  It checks syntax in the major mode(s) %s. "
-                          (s-join ", " (--map (format "`%s'" it) modes)))))
+          (when modes
+            (princ (format "  It checks syntax in the major mode(s) %s. "
+                           (s-join ", " (--map (format "`%s'" it) modes)))))
           (with-current-buffer (help-buffer)
             (save-excursion
               (goto-char (point-min))
@@ -2470,8 +2469,8 @@ if ERR has no column."
             ;; column in the file
             (cons (- (point-max) 1) (point-max)))
            ((= (line-beginning-position) (line-end-position))
-              ;; The line is empty, so there is no column to highlight on this
-              ;; line.  Thus, return the last column of the previous line
+            ;; The line is empty, so there is no column to highlight on this
+            ;; line.  Thus, return the last column of the previous line
             (let ((end (line-beginning-position)))
               (forward-line -1)
               (cons (line-end-position) end)))
@@ -2480,7 +2479,7 @@ if ERR has no column."
             ;; the end of the line, if the column offset points beyond the end
             ;; of the line.
             (let ((end (min (+ (line-beginning-position) column)
-                           (+ (line-end-position) 1))))
+                            (+ (line-end-position) 1))))
               (cons (- end 1) end)))))))))
 
 (defun flycheck-error-thing-region (thing err)
@@ -2988,7 +2987,7 @@ Return ERRORS, with in-place modifications."
         (let* ((indent-offset (- (point) (point-min))))
           ;; Now iterate over all lines and dedent each according to
           ;; `indent-offset'
-          (while (< (point) (point-max))
+          (while (not (eobp))
             (back-to-indentation)
             ;; If the current line starts with sufficient whitespace, delete the
             ;; indendation offset.  Otherwise keep the line intact, as we might
@@ -3302,8 +3301,8 @@ string with attached text properties."
 
 Return a list with the contents of the table cell."
   (let ((level-face (-> error
-                flycheck-error-level
-                flycheck-error-level-error-list-face))
+                      flycheck-error-level
+                      flycheck-error-level-error-list-face))
         (line (flycheck-error-line error))
         (column (flycheck-error-column error))
         (message (or (flycheck-error-message error) "Unknown error"))
@@ -3614,7 +3613,7 @@ https://github.com/Bruce-Connor/emacs-google-this")))
 
 (defun flycheck-get-output (process)
   "Get the complete output of PROCESS."
-  (with-demoted-errors
+  (with-demoted-errors "Error while retrieving process output: %S"
     (let ((pending-output (process-get process :flycheck-pending-output)))
       (apply #'concat (nreverse pending-output)))))
 
@@ -3694,9 +3693,9 @@ _EVENT is ignored."
                  (when flycheck-mode
                    (flycheck-finish-syntax-check checker exit-status
                                                  files output))))
-              (error
-               (flycheck-report-error)
-               (signal (car err) (cdr err)))))))))
+            (error
+             (flycheck-report-error)
+             (signal (car err) (cdr err)))))))))
 
 (defun flycheck-start-checker (checker)
   "Start a syntax CHECKER."
@@ -4202,10 +4201,10 @@ Relative paths are relative to the file being checked."
 
 See URL `http://dlang.org/'."
   :command ("dmd" "-debug" "-o-"
-                  "-wi" ; Compilation will continue even if there are warnings
-                  (eval (s-concat "-I" (flycheck-d-base-directory)))
-                  (option-list "-I" flycheck-dmd-include-path s-prepend)
-                  source)
+            "-wi" ; Compilation will continue even if there are warnings
+            (eval (s-concat "-I" (flycheck-d-base-directory)))
+            (option-list "-I" flycheck-dmd-include-path s-prepend)
+            source)
   :error-patterns
   ((error line-start (file-name) "(" line "): Error: " (message) line-end)
    (warning line-start (file-name) "(" line "): "
@@ -4438,7 +4437,7 @@ See Info Node `(elisp)Byte Compilation'."
          ;; And change back to the process default directory to make file-name
          ;; back-substutition work
          (setq default-directory process-default-directory)
-         (with-demoted-errors
+         (with-demoted-errors "Error in checkdoc: %S"
            (checkdoc-current-buffer t)
            (with-current-buffer checkdoc-diagnostic-buffer
              (princ (buffer-substring-no-properties (point-min)
@@ -4552,7 +4551,8 @@ See URL `http://golang.org/cmd/go/' and URL
   :predicate (lambda ()
                (let ((go (flycheck-checker-executable 'go-vet)))
                  (member "vet" (ignore-errors (process-lines go "tool")))))
-  :next-checkers (go-build go-test
+  :next-checkers (go-build
+                  go-test
                   ;; Fall back if `go build' or `go test' can be used
                   go-errcheck))
 
@@ -5017,8 +5017,8 @@ See URL `http://puppetlabs.com/'."
   :command ("puppet" "parser" "validate" "--color=false" source)
   :error-patterns
   ((error line-start
-          (minimal-match (zero-or-more not-newline)) ; Skip puppetc executable
-                                                     ; name
+          ;; Skip over the path of the Puppet executable
+          (minimal-match (zero-or-more not-newline))
           ": Could not parse for environment " (one-or-more word)
           ": " (message (minimal-match (zero-or-more anything)))
           " at "  (file-name "/" (zero-or-more not-newline)) ":" line line-end))
@@ -5584,8 +5584,7 @@ This syntax checker uses the YAML parser from Ruby's standard
 library.
 
 See URL `http://www.ruby-doc.org/stdlib-2.0.0/libdoc/yaml/rdoc/YAML.html'."
-  :command ("ruby" "-ryaml" "-e"
-"begin;
+  :command ("ruby" "-ryaml" "-e" "begin;
    file_name = ARGV[0]; \
    YAML.load(ARGF); \
  rescue Exception => e; \
