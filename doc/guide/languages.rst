@@ -56,6 +56,9 @@ C/C++
    .. option:: flycheck-clang-no-rtti
       :auto:
 
+   .. option:: flycheck-clang-pedantic
+      :auto:
+
    .. option:: flycheck-clang-standard-library
       :auto:
 

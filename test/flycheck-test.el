@@ -3322,6 +3322,16 @@ of the file will be interrupted because there are too many #ifdef configurations
      '(4 32 error "cannot use dynamic_cast with -fno-rtti"
          :checker c/c++-clang))))
 
+(ert-deftest flycheck-define-checker/c/c++-clang-pedantic-warning ()
+  :tags '(builtin-checker external-tool language-c++)
+  (skip-unless (flycheck-check-executable 'c/c++-clang))
+  (let ((flycheck-clang-pedantic t)
+        (flycheck-disabled-checkers '(c/c++-gcc c/c++-cppcheck)))
+    (flycheck-test-should-syntax-check
+     "checkers/c_c++-pedantic.cpp" 'c++-mode
+     '(3 11 warning "use of GNU statement expression extension"
+         :checker c/c++-clang))))
+
 (ert-deftest flycheck-define-checker/c/c++-gcc-warning ()
   :tags '(builtin-checker external-tool language-c)
   (skip-unless (flycheck-check-executable 'c/c++-gcc))
