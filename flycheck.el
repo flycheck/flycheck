@@ -1904,8 +1904,7 @@ STRING
      as primary input to a checker, unless absolutely necessary.
 
      When using this symbol as primary input to the syntax
-     checker, add a `:predicate' which checks `buffer-file-name'
-     and `buffer-modified-p' accordingly.
+     checker, add `flycheck-buffer-saved-p' to the `:predicate'.
 
 `temporary-directory'
      Create a unique temporary directory and return its path.
@@ -2203,6 +2202,18 @@ SEPARATOR is ignored in this case."
         (-when-let (value (-keep filter value))
           (s-join separator value))
       (funcall filter value))))
+
+
+;;; Syntax checker predicates
+(defun flycheck-buffer-saved-p (&optional buffer)
+  "Determine whether BUFFER is saved to a file.
+
+BUFFER is the buffer to check.  If omitted or nil, use the
+current buffer as BUFFER.
+
+Return non-nil if the BUFFER is backed by a file, and not
+modified, or nil otherwise."
+  (and (buffer-file-name buffer) (not (buffer-modified-p buffer))))
 
 
 ;;; Checker selection
@@ -4568,11 +4579,9 @@ See URL `http://golang.org/cmd/go'."
                    (zero-or-more "\n\t" (one-or-more not-newline)))
           line-end))
   :modes go-mode
-  :predicate
-  (lambda ()
-    (and (buffer-file-name)
-         (not (buffer-modified-p))
-         (not (s-ends-with? "_test.go" (buffer-file-name)))))
+  :predicate (lambda ()
+               (and (flycheck-buffer-saved-p)
+                    (not (s-ends-with? "_test.go" (buffer-file-name)))))
   :next-checkers ((no-errors . go-errcheck)))
 
 (flycheck-define-checker go-test
@@ -4589,10 +4598,8 @@ See URL `http://golang.org/cmd/go'."
           line-end))
   :modes go-mode
   :predicate
-  (lambda ()
-    (and (buffer-file-name)
-         (not (buffer-modified-p))
-         (s-ends-with? "_test.go" (buffer-file-name))))
+  (lambda () (and (flycheck-buffer-saved-p)
+                  (s-ends-with? "_test.go" (buffer-file-name))))
   :next-checkers ((no-errors . go-errcheck)))
 
 (flycheck-define-checker go-errcheck
@@ -4612,7 +4619,7 @@ See URL `https://github.com/kisielk/errcheck'."
                 (format "Ignored `error` returned from `%s`" message)))))
     errors)
   :modes go-mode
-  :predicate (lambda () (and (buffer-file-name) (not (buffer-modified-p)))))
+  :predicate flycheck-buffer-saved-p)
 
 (flycheck-define-checker haml
   "A Haml syntax checker using the Haml compiler.
@@ -5043,7 +5050,7 @@ See URL `http://www.puppet-lint.com/'."
   :modes puppet-mode
   ;; Since we check the original file, we can only use this syntax checker if
   ;; the buffer is actually linked to a file, and if it is not modified.
-  :predicate (lambda () (and (buffer-file-name) (not (buffer-modified-p)))))
+  :predicate flycheck-buffer-saved-p)
 
 (flycheck-def-config-file-var flycheck-flake8rc python-flake8 ".flake8rc"
   :safe #'stringp)
@@ -5202,8 +5209,7 @@ Requires Sphinx 1.2 or newer.  See URL `http://sphinx-doc.org'."
           ": " (or "ERROR" "SEVERE") ": "
           (message) line-end))
   :modes rst-mode
-  :predicate (lambda () (and (buffer-file-name)
-                             (not (buffer-modified-p))
+  :predicate (lambda () (and (flycheck-buffer-saved-p)
                              (flycheck-locate-sphinx-source-directory))))
 
 (flycheck-def-config-file-var flycheck-rubocoprc ruby-rubocop ".rubocop.yml"
@@ -5351,8 +5357,7 @@ See URL `http://www.rust-lang.org'."
             (message) line-end))
   :modes rust-mode
   :predicate (lambda ()
-               (or (not flycheck-rust-crate-root)
-                   (and (buffer-file-name) (not (buffer-modified-p))))))
+               (or (not flycheck-rust-crate-root) (flycheck-buffer-saved-p))))
 
 (flycheck-def-option-var flycheck-sass-compass nil sass
   "Whether to enable the Compass CSS framework.

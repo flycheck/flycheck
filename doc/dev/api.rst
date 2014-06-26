@@ -188,6 +188,12 @@ Builtin option filters
 .. function:: flycheck-option-comma-separated-list
    :auto:
 
+Builtin syntax checker predicates
+=================================
+
+.. function:: flycheck-buffer-saved-p
+   :auto:
+
 Utilities
 =========
 
