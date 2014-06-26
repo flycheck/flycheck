@@ -455,6 +455,9 @@ Rust
    .. option:: flycheck-rust-library-path
       :auto:
 
+   .. option:: flycheck-rust-crate-root
+      :auto:
+
 Sass
 ====
 

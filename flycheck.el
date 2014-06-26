@@ -4846,6 +4846,7 @@ See URL `https://github.com/zaach/jsonlint'."
 
 (flycheck-define-checker less
   "A LESS syntax checker using lessc.
+
 At least version 1.4 of lessc is required.
 
 See URL `http://lesscss.org'."
@@ -5317,6 +5318,19 @@ runner requires `std'."
   :safe #'booleanp
   :package-version '("flycheck" . "0.19"))
 
+(flycheck-def-option-var flycheck-rust-crate-root nil rust
+  "A path to the crate root for the current buffer.
+
+The value of this variable is either a string with the path to
+the crate root for the current buffer, or nil if the current buffer
+is a crate.  A relative path is relative to the current buffer.
+
+If this variable is non nil the current buffer will only be checked
+if it is not modified, i.e. after it has been saved."
+  :type 'string
+  :package-version '(flycheck . "0.20")
+  :safe #'stringp)
+
 (flycheck-define-checker rust
   "A Rust syntax checker using Rust compiler.
 
@@ -5326,7 +5340,8 @@ See URL `http://www.rust-lang.org'."
   :command ("rustc" "--crate-type=lib" "--no-trans"
             (option-flag "--test" flycheck-rust-check-tests)
             (option-list "-L" flycheck-rust-library-path s-prepend)
-            source-inplace)
+            (eval (or flycheck-rust-crate-root
+                      (flycheck-substitute-argument 'source-inplace))))
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ": "
           (one-or-more digit) ":" (one-or-more digit) " error: "
@@ -5334,7 +5349,11 @@ See URL `http://www.rust-lang.org'."
    (warning line-start (file-name) ":" line ":" column ": "
             (one-or-more digit) ":" (one-or-more digit) " warning: "
             (message) line-end))
-  :modes rust-mode)
+  :modes rust-mode
+  :predicate (lambda ()
+               (or (not flycheck-rust-crate-root)
+                   (and (buffer-file-name)
+                        (not (buffer-modified-p))))))
 
 (flycheck-def-option-var flycheck-sass-compass nil sass
   "Whether to enable the Compass CSS framework.
