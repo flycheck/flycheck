@@ -18,6 +18,7 @@ master (in development)
     flag exceptions as errors in C++
   - #417: Add `flycheck-rust-crate-root` to resolve inter-crate references in
     `rust`
+  - #420: Add `flycheck-clang-blocks` to enable the block syntax in Clang
 
 - Improvements:
 

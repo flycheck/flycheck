@@ -3322,6 +3322,31 @@ of the file will be interrupted because there are too many #ifdef configurations
      '(4 32 error "cannot use dynamic_cast with -fno-rtti"
          :checker c/c++-clang))))
 
+(ert-deftest flycheck-define-checker/c/c++-clang-block-error ()
+  ;; On Travis CI and OS X, -fblocks seems to be default for Clang, so this test
+  ;; won't pass
+  :expected-result '(or (satisfies flycheck-test-failed-on-travis-ci-p)
+                        (satisfies (lambda (result)
+                                     (and (eq system-type 'darwin)
+                                          (ert-test-failed-p result))))
+                        :passed)
+  :tags '(builtin-checker external-tool language-c)
+  (skip-unless (flycheck-check-executable 'c/c++-clang))
+  (flycheck-test-should-syntax-check
+   "checkers/c_c++-clang-blocks.c" 'c-mode
+   '(3 15 error "blocks support disabled - compile with -fblocks or pick a deployment target that supports them"
+       :checker c/c++-clang)
+   '(7 20 error "blocks support disabled - compile with -fblocks or pick a deployment target that supports them"
+       :checker c/c++-clang)))
+
+(ert-deftest flycheck-define-checker/c/c++-clang-blocks ()
+  :tags '(builtin-checker external-tool language-c)
+  (skip-unless (flycheck-check-executable 'c/c++-clang))
+  (let ((flycheck-clang-blocks t))
+    (flycheck-test-should-syntax-check
+     "checkers/c_c++-clang-blocks.c" 'c-mode
+     '(7 16 warning "unused variable 'p'" :checker c/c++-clang))))
+
 (ert-deftest flycheck-define-checker/c/c++-gcc-warning ()
   :tags '(builtin-checker external-tool language-c)
   (skip-unless (flycheck-check-executable 'c/c++-gcc))

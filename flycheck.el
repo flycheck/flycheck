@@ -3831,6 +3831,16 @@ See URL `http://www.methods.co.nz/asciidoc'."
             ": Line " line ": " (message) line-end))
   :modes adoc-mode)
 
+(flycheck-def-option-var flycheck-clang-blocks nil c/c++-clang
+  "Enable blocks in Clang.
+
+When non-nil, enable blocks in Clang with `-fblocks'.  See URL
+`http://clang.llvm.org/docs/BlockLanguageSpec.html' for more
+information about blocks."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.20"))
+
 (flycheck-def-option-var flycheck-clang-definitions nil c/c++-clang
   "Additional preprocessor definitions for Clang.
 
@@ -3946,6 +3956,7 @@ See URL `http://clang.llvm.org/'."
             (option-flag "-fms-extensions" flycheck-clang-ms-extensions)
             (option-flag "-fno-exceptions" flycheck-clang-no-exceptions)
             (option-flag "-fno-rtti" flycheck-clang-no-rtti)
+            (option-flag "-fblocks" flycheck-clang-blocks)
             (option-list "-include" flycheck-clang-includes)
             (option-list "-W" flycheck-clang-warnings s-prepend)
             (option-list "-D" flycheck-clang-definitions s-prepend)

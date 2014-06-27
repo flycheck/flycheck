@@ -35,6 +35,9 @@ C/C++
 
    .. rubric:: Options
 
+   .. option:: flycheck-clang-blocks
+      :auto:
+
    .. option:: flycheck-clang-definitions
       :auto:
 
