@@ -3930,6 +3930,14 @@ information about warnings."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.14"))
 
+(flycheck-def-option-var flycheck-clang-pedantic nil c/c++-clang
+  "Whether to enable pedantic warnings in Clang.
+
+When non-nil, enable pedantic warnings via `-pedantic'."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.20"))
+
 (flycheck-define-checker c/c++-clang
   "A C/C++ syntax checker using Clang.
 
@@ -3946,6 +3954,7 @@ See URL `http://clang.llvm.org/'."
             (option-flag "-fms-extensions" flycheck-clang-ms-extensions)
             (option-flag "-fno-exceptions" flycheck-clang-no-exceptions)
             (option-flag "-fno-rtti" flycheck-clang-no-rtti)
+            (option-flag "-pedantic" flycheck-clang-pedantic)
             (option-list "-include" flycheck-clang-includes)
             (option-list "-W" flycheck-clang-warnings s-prepend)
             (option-list "-D" flycheck-clang-definitions s-prepend)
