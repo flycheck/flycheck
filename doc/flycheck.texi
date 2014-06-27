@@ -7432,6 +7432,17 @@ See @ref{30,,Installation}.
 @itemize -
 
 @item 
+@strong{Breaking changes}:
+
+
+@itemize -
+
+@item 
+The internal names of syntax checker properties changed.  @strong{All packages
+depending on Flycheck must be recompiled!}
+@end itemize
+
+@item 
 New syntax checkers:
 
 
@@ -7454,6 +7465,16 @@ flag exceptions as errors in C++
 @item 
 #417@footnote{https://github.com/flycheck/flycheck/issues/417}: Add @code{flycheck-rust-crate-root} to resolve inter-crate references in
 @code{rust}
+@end itemize
+
+@item 
+Improvements:
+
+
+@itemize -
+
+@item 
+#421@footnote{https://github.com/flycheck/flycheck/issues/421}: Use proper temporary files in @code{python-flake8}
 @end itemize
 @end itemize
 
