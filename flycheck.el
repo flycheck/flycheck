@@ -5119,7 +5119,7 @@ See URL `https://pypi.python.org/pypi/flake8'."
             (option "--max-line-length"
                     flycheck-flake8-maximum-line-length
                     flycheck-option-int)
-            source-inplace)
+            source)
   :error-patterns
   ((error line-start
           (file-name) ":" line ":" (optional column ":") " "

@@ -19,6 +19,10 @@ master (in development)
   - #417: Add `flycheck-rust-crate-root` to resolve inter-crate references in
     `rust`
 
+- Improvements:
+
+  - #421: Use proper temporary files in `python-flake8`
+
 0.19 (Jun 12, 2014)
 -------------------
 
