@@ -3851,6 +3851,16 @@ Relative paths are relative to the file being checked."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.14"))
 
+(flycheck-def-option-var flycheck-clang-system-include-path nil c/c++-clang
+  "A list of system include directories for Clang.
+
+The value of this variable is a list of strings, where each
+string is a directory to add to the system include path of Clang.
+Relative paths are relative to the file being checked."
+  :type '(repeat (directory :tag "Include directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.20"))
+
 (flycheck-def-option-var flycheck-clang-includes nil c/c++-clang
   "A list of additional include files for Clang.
 
@@ -3950,6 +3960,7 @@ See URL `http://clang.llvm.org/'."
             (option-list "-W" flycheck-clang-warnings s-prepend)
             (option-list "-D" flycheck-clang-definitions s-prepend)
             (option-list "-I" flycheck-clang-include-path)
+            (option-list "-isystem" flycheck-clang-system-include-path)
             "-x" (eval
                   (pcase major-mode
                     (`c++-mode "c++")
@@ -3989,6 +4000,16 @@ option."
 
 The value of this variable is a list of strings, where each
 string is a directory to add to the include path of gcc.
+Relative paths are relative to the file being checked."
+  :type '(repeat (directory :tag "Include directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.20"))
+
+(flycheck-def-option-var flycheck-gcc-system-include-path nil c/c++-gcc
+  "A list of system include directories for GCC.
+
+The value of this variable is a list of strings, where each
+string is a directory to add to the system include path of gcc.
 Relative paths are relative to the file being checked."
   :type '(repeat (directory :tag "Include directory"))
   :safe #'flycheck-string-list-p
@@ -4066,6 +4087,7 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
             (option-list "-W" flycheck-gcc-warnings s-prepend)
             (option-list "-D" flycheck-gcc-definitions s-prepend)
             (option-list "-I" flycheck-gcc-include-path)
+            (option-list "-isystem" flycheck-gcc-system-include-path)
             "-x" (eval
                   (pcase major-mode
                     (`c++-mode "c++")
