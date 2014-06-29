@@ -4270,67 +4270,27 @@ See URL `http://elixir-lang.org/'."
 (defconst flycheck-emacs-args '("-Q" "--batch")
   "Common arguments to Emacs invocations.")
 
-(defun flycheck-emacs-lisp-eval-with-source (form source checker)
-  "Create Emacs arguments to eval FORM with SOURCE for CHECKER.
-
-Create arguments that you can pass to an Emacs subprocess to
-evaluate FORM.
-
-FORM is an s-expression to evaluate.  SOURCE is a string, symbol
-or form suitable for `flycheck-substitute-argument', which see.
-CHECKER is the syntax checker symbol for which FORM is evaluated.
-
-Apply `flycheck-substitute-argument' to SOURCE, wrap a `let'
-expression around FORM, which binds the result of this to the
-variable `flycheck-source' while evaluating FORM, and turn the
-resulting expression into a string with
-`flycheck-sexp-to-string'.
-
-Use this function to pass the file to check to an Emacs Lisp
-subprocess.  Do *not* attempt to pass the file to check as normal
-argument to Emacs.  Even in batch, Emacs will *visit* all files
-specified on the command line.
-
-This can cause various unintended side-effects, ranging from
-unintended loading of libraries or changes to global variables,
-to making the syntax checker process hang, i.e. when Emacs wants
-to ask the user and tries to read the user's answer from standard
-input.  This occurs for instance, if the file to check as unsafe
-local variables.
-
-Instead, use this function to safely splice the file to check
-into the Emacs Lisp form that does the syntax checking.
-
-Return a list of strings, which contains the arguments that can
-be passed to an Emacs executable in order to evaluate FORM with
-the given SOURCE."
-  ;; We use this convoluted way to pass the file check to avoid visiting files.
-  ;; See https://github.com/flycheck/flycheck/issues/319 for an example of the
-  ;; troubles that arise from visiting the file to check
-  (list
-   "--eval"
-   (flycheck-sexp-to-string
-    `(let ((flycheck-source ,(flycheck-substitute-argument source checker)))
-       ,form))))
-
 (defconst flycheck-emacs-lisp-check-form
-  '(progn
-     (defvar jka-compr-inhibit)
+  (flycheck-sexp-to-string
+   '(progn
+      (defvar jka-compr-inhibit)
 
-     (defvar flycheck-byte-compiled-files nil)
-     (defun flycheck-byte-compile-dest-file (source)
-       (let ((temp-file (make-temp-file (file-name-nondirectory source))))
-         (add-to-list 'flycheck-byte-compiled-files temp-file)
-         temp-file))
+      (defvar flycheck-byte-compiled-files nil)
+      (defun flycheck-byte-compile-dest-file (source)
+        (let ((temp-file (make-temp-file (file-name-nondirectory source))))
+          (add-to-list 'flycheck-byte-compiled-files temp-file)
+          temp-file))
 
-     (setq byte-compile-dest-file-function 'flycheck-byte-compile-dest-file)
-     ;; Flycheck inhibits compression of temporary files, thus we must not
-     ;; attempt to decompress.
-     (let ((jka-compr-inhibit t))
-       ;; `flycheck-source' is given to us by
-       ;; `flycheck-emacs-lisp-eval-with-source'
-       (byte-compile-file flycheck-source))
-     (mapc 'delete-file flycheck-byte-compiled-files)))
+      (setq byte-compile-dest-file-function 'flycheck-byte-compile-dest-file)
+      ;; Flycheck inhibits compression of temporary files, thus we must not
+      ;; attempt to decompress.
+      (let ((jka-compr-inhibit t)
+            (source (cadr command-line-args-left)))
+        (byte-compile-file source))
+      (mapc 'delete-file flycheck-byte-compiled-files)
+      ;; Prevent Emacs from processing the arguments on its own, see
+      ;; https://github.com/flycheck/flycheck/issues/319
+      (setq command-line-args-left nil))))
 
 (flycheck-def-option-var flycheck-emacs-lisp-load-path nil emacs-lisp
   "Load path to use in the Emacs Lisp syntax checker.
@@ -4413,8 +4373,9 @@ See Info Node `(elisp)Byte Compilation'."
                     flycheck-option-emacs-lisp-package-user-dir)
             (option "--funcall" flycheck-emacs-lisp-initialize-packages
                     flycheck-option-emacs-lisp-package-initialize)
-            (eval (flycheck-emacs-lisp-eval-with-source
-                   flycheck-emacs-lisp-check-form 'source-inplace 'emacs-lisp)))
+            "--eval" (eval flycheck-emacs-lisp-check-form)
+            "--"
+            source-inplace)
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ":Error:"
           (message (zero-or-more not-newline)
@@ -4454,36 +4415,41 @@ See Info Node `(elisp)Byte Compilation'."
   :next-checkers (emacs-lisp-checkdoc))
 
 (defconst flycheck-emacs-lisp-checkdoc-form
-  '(progn
-     (require 'checkdoc)
+  (flycheck-sexp-to-string
+   '(progn
+      (require 'checkdoc)
 
-     (defvar jka-compr-inhibit)
+      (defvar jka-compr-inhibit)
 
-     (let (;; Don't attempt to decompress, because Flycheck never compresses the
-           ;; temporary files for syntax checking
-           (jka-compr-inhibit t)
-           ;; Remember the default directory of the process
-           (process-default-directory default-directory))
-       (with-temp-buffer
-         (insert-file-contents flycheck-source 'visit)
-         (setq buffer-file-name flycheck-source)
-         ;; And change back to the process default directory to make file-name
-         ;; back-substutition work
-         (setq default-directory process-default-directory)
-         (with-demoted-errors "Error in checkdoc: %S"
-           (checkdoc-current-buffer t)
-           (with-current-buffer checkdoc-diagnostic-buffer
-             (princ (buffer-substring-no-properties (point-min)
-                                                    (point-max)))
-             (kill-buffer)))))))
+      (let ((source (cadr command-line-args-left))
+            ;; Don't attempt to decompress, because Flycheck never compresses
+            ;; the temporary files for syntax checking
+            (jka-compr-inhibit t)
+            ;; Remember the default directory of the process
+            (process-default-directory default-directory))
+        (with-temp-buffer
+          (insert-file-contents source 'visit)
+          (setq buffer-file-name source)
+          ;; And change back to the process default directory to make file-name
+          ;; back-substutition work
+          (setq default-directory process-default-directory)
+          (with-demoted-errors "Error in checkdoc: %S"
+            (checkdoc-current-buffer t)
+            (with-current-buffer checkdoc-diagnostic-buffer
+              (princ (buffer-substring-no-properties (point-min)
+                                                     (point-max)))
+              (kill-buffer)))))
+      ;; Prevent Emacs from processing the arguments on its own, see
+      ;; https://github.com/flycheck/flycheck/issues/319
+      (setq command-line-args-left nil))))
 
 (flycheck-define-checker emacs-lisp-checkdoc
   "An Emacs Lisp style checker using CheckDoc.
 
 The checker runs `checkdoc-current-buffer'."
   :command ("emacs" (eval flycheck-emacs-args)
-            (eval (flycheck-emacs-lisp-eval-with-source
-                   flycheck-emacs-lisp-checkdoc-form 'source 'emacs-lisp-checkdoc)))
+            "--eval" (eval flycheck-emacs-lisp-checkdoc-form)
+            "--" source)
   :error-patterns
   ((warning line-start (file-name) ":" line ": " (message) line-end))
   :modes (emacs-lisp-mode)
