@@ -6,9 +6,7 @@ from __future__ import print_function
 import sys
 import re
 
-expression = sys.argv[-1]
-
-filename = re.search(r'\(flycheck-source "([^"]+)"\)', expression).group(1)
+filename = sys.argv[-1]
 
 print('{0}:17:4:Error: t is not true!'.format(filename))
 print('{0}:19:11:Warning: This is a stupid message'.format(filename))

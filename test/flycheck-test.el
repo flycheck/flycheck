@@ -3106,7 +3106,7 @@ of the file will be interrupted because there are too many #ifdef configurations
 ;;; Syntax checker executables
 
 (ert-deftest flycheck-overridden-executable ()
-  :tags '(executables)
+  :tags '(executables language-emacs-lisp)
   (let ((flycheck-emacs-lisp-executable (flycheck-test-resource-filename
                                          "bin/dummy-emacs")))
     (flycheck-test-should-syntax-check
