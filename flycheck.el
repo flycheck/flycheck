@@ -4402,27 +4402,28 @@ See Info Node `(elisp)Byte Compilation'."
       flycheck-sanitize-errors
       flycheck-collapse-error-message-whitespace))
   :modes (emacs-lisp-mode lisp-interaction-mode)
-  ;; Ensure that we only check buffers with a backing file.  For buffers without
-  ;; a backing file we cannot guarantee that file names in error messages are
-  ;; properly resolved, because `byte-compile-file' emits file names *relative
-  ;; to the directory of the checked file* instead of the working directory.
-  ;; Hence our backwards-substitution will fail, because the checker process has
-  ;; a different base directory to resolve relative file names than the Flycheck
-  ;; code working on the buffer to check.
   :predicate
   (lambda ()
-    (and (buffer-file-name)
-         ;; Do not check buffers which should not be byte-compiled.  The checker
-         ;; process will refuse to compile these, which would confuse Flycheck
-         (not (or (bound-and-true-p no-byte-compile)
-                  ;; Do not check buffers used for autoloads generation during
-                  ;; package installation.  These buffers are too short-lived
-                  ;; for being checked, and doing so causes spurious errors.
-                  ;; See https://github.com/flycheck/flycheck/issues/45 and
-                  ;; https://github.com/bbatsov/prelude/issues/248.  We must
-                  ;; also not check compilation buffers, but as these are
-                  ;; ephemeral, Flycheck won't check them anyway.
-                  (flycheck-autoloads-file-p)))))
+    (and
+     ;; Ensure that we only check buffers with a backing file.  For buffers
+     ;; without a backing file we cannot guarantee that file names in error
+     ;; messages are properly resolved, because `byte-compile-file' emits file
+     ;; names *relative to the directory of the checked file* instead of the
+     ;; working directory.  Hence our backwards-substitution will fail, because
+     ;; the checker process has a different base directory to resolve relative
+     ;; file names than the Flycheck code working on the buffer to check.
+     (buffer-file-name)
+     ;; Do not check buffers which should not be byte-compiled.  The checker
+     ;; process will refuse to compile these, which would confuse Flycheck
+     (not (bound-and-true-p no-byte-compile))
+     ;; Do not check buffers used for autoloads generation during package
+     ;; installation.  These buffers are too short-lived for being checked, and
+     ;; doing so causes spurious errors.  See
+     ;; https://github.com/flycheck/flycheck/issues/45 and
+     ;; https://github.com/bbatsov/prelude/issues/248.  We must also not check
+     ;; compilation buffers, but as these are ephemeral, Flycheck won't check
+     ;; them anyway.
+     (not (flycheck-autoloads-file-p))))
   :next-checkers (emacs-lisp-checkdoc))
 
 (defconst flycheck-emacs-lisp-checkdoc-form
@@ -4456,9 +4457,9 @@ The checker runs `checkdoc-current-buffer'."
   :modes (emacs-lisp-mode)
   :predicate
   (lambda ()
+    ;; Do not check Autoloads, Cask/Carton and dir-locals files.  These files
+    ;; really don't need to follow Checkdoc conventions.
     (not (or (flycheck-autoloads-file-p)
-             ;; Do not check Cask/Carton and dir-locals files.  These really
-             ;; don't need to follow Checkdoc conventions
              (and (buffer-file-name)
                   (member (f-filename (buffer-file-name))
                           '("Cask" "Carton" ".dir-locals.el")))))))
