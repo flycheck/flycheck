@@ -5304,12 +5304,9 @@ Relative paths are relative to the file being checked."
 (flycheck-def-option-var flycheck-rust-check-tests t rust
   "Whether to check test code in Rust.
 
-When non-nil, `rustc' is passed the `--test' flag, which will
-check any code marked with the `#[cfg(test)]' attribute and any
-functions marked with `#[test]'. Otherwise, `rustc' is not passed
-`--test' and test code will not be checked.  Skipping `--test' is
-necessary when using `#![no_std]', because compiling the test
-runner requires `std'."
+When non-nil, `rustc' will check any code marked with the
+`#[cfg(test)]' attribute and any functions marked with `#[test]'.
+Otherwise, test code will not be checked."
   :type 'boolean
   :safe #'booleanp
   :package-version '("flycheck" . "0.19"))
@@ -5334,7 +5331,8 @@ This syntax checker needs Rust 0.10 or newer.
 
 See URL `http://www.rust-lang.org'."
   :command ("rustc" "--crate-type=lib" "--no-trans"
-            (option-flag "--test" flycheck-rust-check-tests)
+            (option-flag "--cfg" flycheck-rust-check-tests)
+            (option-flag "test" flycheck-rust-check-tests)
             (option-list "-L" flycheck-rust-library-path s-prepend)
             (eval (or flycheck-rust-crate-root
                       (flycheck-substitute-argument 'source-inplace 'rust))))
