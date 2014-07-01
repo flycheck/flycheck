@@ -22,6 +22,7 @@ master (in development)
 - Improvements:
 
   - #421: Use proper temporary files in `python-flake8`
+  - #423: Demote errors from `package-initialize` in the `emacs-lisp` checker
 
 0.19 (Jun 12, 2014)
 -------------------

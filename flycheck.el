@@ -4342,13 +4342,22 @@ For any other non-nil value, always initialize packages."
   :risky t
   :package-version '(flycheck . "0.14"))
 
+(defconst flycheck-emacs-lisp-package-initialize-form
+  (flycheck-sexp-to-string
+   '(with-demoted-errors "Error during package initialization: %S"
+      (package-initialize)))
+  "Form used to initialize packages.")
+
 (defun flycheck-option-emacs-lisp-package-initialize (value)
   "Option VALUE filter for `flycheck-emacs-lisp-initialize-packages'."
-  (when (eq value 'auto)
-    (setq value (flycheck-in-user-emacs-directory-p (buffer-file-name))))
-  ;; Return the function name, if packages shall be initialized, otherwise
-  ;; return nil to have Flycheck drop the whole option
-  (when value "package-initialize"))
+  (let ((shall-initialize
+         (if (eq value 'auto)
+             (flycheck-in-user-emacs-directory-p (buffer-file-name))
+           value)))
+    (when shall-initialize
+      ;; If packages shall be initialized, return the corresponding form,
+      ;; otherwise make Flycheck ignore the option by returning nil.
+      flycheck-emacs-lisp-package-initialize-form)))
 
 (flycheck-def-option-var flycheck-emacs-lisp-package-user-dir nil emacs-lisp
   "Package directory for the Emacs Lisp syntax checker.
@@ -4382,7 +4391,7 @@ See Info Node `(elisp)Byte Compilation'."
                          f-expand)
             (option "--eval" flycheck-emacs-lisp-package-user-dir
                     flycheck-option-emacs-lisp-package-user-dir)
-            (option "--funcall" flycheck-emacs-lisp-initialize-packages
+            (option "--eval" flycheck-emacs-lisp-initialize-packages
                     flycheck-option-emacs-lisp-package-initialize)
             "--eval" (eval flycheck-emacs-lisp-check-form)
             "--"
