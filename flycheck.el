@@ -2165,11 +2165,10 @@ Otherwise return nil.
 
 _CHECKER is ignored."
   (when (fboundp 'projectile-project-root)
-    (condition-case nil
-        (let ((filepath (f-join (projectile-project-root) filename)))
-          (when (f-exists? filepath)
-            filepath))
-      (error nil))))
+    (-when-let* ((root (ignore-errors (projectile-project-root)))
+                 (filepath (f-join root filename)))
+      (when (f-exists? filepath)
+        filepath))))
 
 (defun flycheck-locate-config-file-ancestor-directories (filename _checker)
   "Locate a configuration FILENAME in ancestor directories.
