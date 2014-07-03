@@ -5045,7 +5045,7 @@ See URL `http://puppetlabs.com/'."
 (flycheck-define-checker puppet-lint
   "A Puppet DSL style checker using puppet-lint.
 
-See URL `http://www.puppet-lint.com/'."
+See URL `http://puppet-lint.com/'."
   ;; We must check the original file, because Puppetlint is quite picky on the
   ;; names of files and there place in the directory structure, to comply with
   ;; Puppet's autoload directory layout.  For instance, a class foo::bar is
