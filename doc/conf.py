@@ -72,6 +72,9 @@ nitpick_ignore =[
 linkcheck_ignore = [
     r'^https://help.github.com/.*$', # Gives 404 for some strange reason
     r'^http://www.erlang.org/$',     # Gives 500 during linkcheck
+    # We know that our issue references are correct, so don't waste time on
+    # checking them
+    r'^https://github.com/flycheck/flycheck/issues/.*$',
 ]
 
 html_title = '{0} {1}'.format(project, release)
