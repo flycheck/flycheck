@@ -3906,13 +3906,13 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
    '(3 1 error "parse error on input ‘module’" :checker haskell-ghc)))
 
 (ert-deftest flycheck-define-checker/haskell-ghc-no-user-package-database ()
-  :tags '(builtin-checker language-haskell)
   :expected-result :failed
+  :tags '(builtin-checker language-haskell)
   (error "Not implemented!"))
 
 (ert-deftest flycheck-define-checker/haskell-ghc-package-databases ()
-  :tags '(builtin-checker language-haskell)
   :expected-result :failed
+  :tags '(builtin-checker language-haskell)
   (error "Not implemented!"))
 
 (ert-deftest flycheck-define-checker/haskell-ghc-search-path ()
@@ -4411,9 +4411,9 @@ Why not:
          :checker ruby))))
 
 (ert-deftest flycheck-define-checker/ruby-jruby-syntax-error ()
-  :tags '(builtin-checker external-tool language-ruby)
   :expected-result '(or (satisfies flycheck-test-failed-on-travis-ci-p)
                         :passed)
+  :tags '(builtin-checker external-tool language-ruby)
   (skip-unless (flycheck-check-executable 'ruby-jruby))
   (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-rubylint ruby)))
     (flycheck-test-should-syntax-check
@@ -4493,9 +4493,9 @@ Why not:
           :checker ruby))))
 
 (ert-deftest flycheck-define-checker/ruby-jruby-warnings ()
-  :tags '(builtin-checker external-tool language-ruby)
   :expected-result '(or (satisfies flycheck-test-failed-on-travis-ci-p)
                         :passed)
+  :tags '(builtin-checker external-tool language-ruby)
   (skip-unless (flycheck-check-executable 'ruby-jruby))
   (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-rubylint ruby)))
     (flycheck-test-should-syntax-check
@@ -4535,8 +4535,8 @@ Why not:
        :checker rust)))
 
 (ert-deftest flycheck-define-checker/rust-library-path ()
-  :tags '(builtin-checker external-tool language-rust)
   :expected-result :failed
+  :tags '(builtin-checker external-tool language-rust)
   ;; TODO: How can we test this without adding binary libraries to our repo?
   (error "Not implemented!"))
 
@@ -4583,9 +4583,9 @@ Why not:
      "checkers/sass-compass.sass" 'sass-mode)))
 
 (ert-deftest flycheck-define-checker/scala ()
-  :tags '(builtin-checker external-tool language-scala)
   :expected-result '(or (satisfies flycheck-test-failed-on-travis-ci-p)
                         :passed)
+  :tags '(builtin-checker external-tool language-scala)
   (skip-unless (flycheck-check-executable 'scala))
   (flycheck-test-should-syntax-check
    "checkers/scala-syntax-error.scala" 'scala-mode
