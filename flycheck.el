@@ -4903,11 +4903,24 @@ See URL `http://pubs.opengroup.org/onlinepubs/9699919799/utilities/make.html'."
    (error line-start (message) " (" (file-name) ":" line ")" line-end))
   :modes (makefile-mode makefile-gmake-mode makefile-bsdmake-mode))
 
+(defconst flycheck-perl-module-re
+  "^package\\s-+\\([^ ]+\\)\\s-*;"
+  "Regular expression to match a perl module declaration.")
+
+(defun flycheck-perl-base-directory ()
+  "Get the relative base directory path for this module."
+    (flycheck-module-root-directory
+     (replace-regexp-in-string "::" "."
+                               (flycheck-find-in-buffer flycheck-perl-module-re))))
+
+
 (flycheck-define-checker perl
   "A Perl syntax checker using the Perl interpreter.
 
 See URL `http://www.perl.org'."
-  :command ("perl" "-w" "-c" source)
+  :command ("perl" "-w" "-c"
+            (eval (s-concat "-I" (flycheck-perl-base-directory)))
+            source)
   :error-patterns
   ((error line-start (minimal-match (message))
           " at " (file-name) " line " line
@@ -4929,6 +4942,7 @@ the `--severity' option to Perl Critic."
 
 See URL `https://metacpan.org/pod/Perl::Critic'."
   :command ("perlcritic" "--no-color" "--verbose" "%f:%l:%c:%s:%m (%e)\n"
+             "--exclude=RequireFilenameMatchesPackage"
             (option "--severity" flycheck-perlcritic-verbosity
                     flycheck-option-int)
             source)
