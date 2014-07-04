@@ -2063,20 +2063,6 @@ symbols in the command."
   (-flatten (--keep (flycheck-substitute-argument it checker)
                     (flycheck-checker-arguments checker))))
 
-(defun flycheck-substitute-shell-argument (arg checker)
-  "Substitute ARG for CHECKER.
-
-Like `flycheck-substitute-argument', but return a single string
-suitable for use as argument to a shell command, and do not
-substitute with temporary files.  `source' and `source-inplace'
-are substituted with the buffer file name."
-  (if (memq arg '(source source-inplace source-original))
-      (shell-quote-argument (buffer-file-name))
-    (let ((args (flycheck-substitute-argument arg checker)))
-      (if (stringp args)
-          (shell-quote-argument args)
-        (s-join " " (-map #'shell-quote-argument args))))))
-
 (defun flycheck-checker-shell-command (checker)
   "Get a shell command for CHECKER.
 
@@ -2085,11 +2071,13 @@ Perform substitution in the arguments of CHECKER, but with
 
 Return the command of CHECKER as single string, suitable for
 shell execution."
-  (concat
-   (shell-quote-argument (flycheck-checker-executable checker))
-   " "
-   (s-join " " (--keep (flycheck-substitute-shell-argument it checker)
-                       (flycheck-checker-arguments checker)))))
+  (combine-and-quote-strings
+   (cons (flycheck-checker-executable checker)
+         (-flatten
+          (--keep (if (memq it '(source source-inplace source-original))
+                      (or (buffer-file-name) "")
+                    (flycheck-substitute-argument it checker))
+                  (flycheck-checker-arguments checker))))))
 
 (defun flycheck-check-modes (checker)
   "Check the allowed modes of CHECKER.

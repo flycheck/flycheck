@@ -1697,9 +1697,8 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-substitute-argument/unknown ()
   :tags '(checker-api)
-  (--each '(flycheck-substitute-argument flycheck-substitute-shell-argument)
-    (should-error (funcall it '(foo "bar") 'emacs-lisp))
-    (should-error (funcall it 200 'emacs-lisp))))
+  (should-error (flycheck-substitute-argument '(foo "bar") 'emacs-lisp))
+  (should-error (flycheck-substitute-argument  200 'emacs-lisp)))
 
 (ert-deftest flycheck-check-executable ()
   :tags '(checker-api)
