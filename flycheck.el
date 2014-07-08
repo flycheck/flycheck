@@ -4714,7 +4714,6 @@ Requires DMD 2.066 or newer.  See URL `http://dlang.org/'."
   "A D syntax checker using the Dscanner checker."
   :command ("dscanner"
             "--syntaxCheck"
-            "--styleCheck"
             source)
   :error-patterns
   ((error line-start (file-name) "(" line ":" column ")[error]: " (message) line-end))
