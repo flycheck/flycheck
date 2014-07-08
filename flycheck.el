@@ -4712,7 +4712,9 @@ Requires DMD 2.066 or newer.  See URL `http://dlang.org/'."
 
 (flycheck-define-checker d-dscanner
   "A D syntax checker using the Dscanner checker."
-  :command ("dscanner" "-s"
+  :command ("dscanner"
+            "--syntaxCheck"
+            "--styleCheck"
             source)
   :error-patterns
   ((error line-start (file-name) "(" line ":" column ")[error]: " (message) line-end))
