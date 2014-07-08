@@ -4714,7 +4714,9 @@ Requires DMD 2.066 or newer.  See URL `http://dlang.org/'."
                   (no-errors . d-dscanner-style)))
 
 (flycheck-define-checker d-dscanner-syntax
-  "A D syntax checker using Dscanner."
+  "A D syntax checker using Dscanner.
+
+See URL `https://github.com/Hackerpilot/Dscanner/'."
   :command ("dscanner"
             "--syntaxCheck"
             source)
@@ -4724,7 +4726,9 @@ Requires DMD 2.066 or newer.  See URL `http://dlang.org/'."
   :modes d-mode)
 
 (flycheck-define-checker d-dscanner-style
-  "A D style checker using Dscanner."
+  "A D style checker using Dscanner.
+
+See URL `https://github.com/Hackerpilot/Dscanner/'."
   :command ("dscanner"
             "--styleCheck"
             source)
