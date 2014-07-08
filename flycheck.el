@@ -185,6 +185,7 @@ attention to case differences."
     coq
     css-csslint
     d-dmd
+    d-dscanner-style
     d-dscanner-syntax
     elixir
     emacs-lisp
