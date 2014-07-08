@@ -185,7 +185,7 @@ attention to case differences."
     coq
     css-csslint
     d-dmd
-    d-dscanner
+    d-dscanner-syntax
     elixir
     emacs-lisp
     emacs-lisp-checkdoc
@@ -4710,13 +4710,24 @@ Requires DMD 2.066 or newer.  See URL `http://dlang.org/'."
             (or "Warning" "Deprecation") ": " (message) line-end))
   :modes d-mode)
 
-(flycheck-define-checker d-dscanner
-  "A D syntax checker using the Dscanner checker."
+(flycheck-define-checker d-dscanner-syntax
+  "A D syntax checker using Dscanner."
   :command ("dscanner"
             "--syntaxCheck"
             source)
   :error-patterns
-  ((error line-start (file-name) "(" line ":" column ")[error]: " (message) line-end))
+  ((error line-start (file-name) "(" line ":" column ")[error]: " (message) line-end)
+   (warning line-start (file-name) "(" line ":" column ")[warn]: " (message) line-end))
+  :modes d-mode)
+
+(flycheck-define-checker d-dscanner-style
+  "A D style checker using Dscanner."
+  :command ("dscanner"
+            "--styleCheck"
+            source)
+  :error-patterns
+  ((error line-start (file-name) "(" line ":" column ")[error]: " (message) line-end)
+   (warning line-start (file-name) "(" line ":" column ")[warn]: " (message) line-end))
   :modes d-mode)
 
 (flycheck-define-checker elixir
