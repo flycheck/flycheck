@@ -19,6 +19,7 @@ master (in development)
   - #417: Add `flycheck-rust-crate-root` to resolve inter-crate references in
     `rust`
   - #420: Add `flycheck-clang-blocks` to enable the block syntax in Clang
+  - `read-flycheck-checker` now accepts a default value
 
 - Improvements:
 
