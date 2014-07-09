@@ -933,20 +933,22 @@ returns t."
 _NAME is ignored."
   (format "*Flycheck %s*" (buffer-file-name)))
 
-(defun flycheck-compile ()
-  "Run syntax checker as compiler."
-  (interactive)
+(defun flycheck-compile (checker)
+  "Run CHECKER as in `compile'."
+  (interactive
+   (list (read-flycheck-checker "Run syntax checker as compile command: "
+                                (or flycheck-checker flycheck-last-checker))))
+  (unless (flycheck-valid-checker-p checker)
+    (user-error "%S is not a valid syntax checker" checker))
   (unless (buffer-file-name)
     (user-error "Cannot compile buffers without backing file"))
-  (let ((checker (flycheck-get-checker-for-buffer)))
-    (if checker
-        (let* ((command (flycheck-checker-shell-command checker))
-               (buffer (compilation-start command nil
-                                          #'flycheck-compile-name)))
-          (with-current-buffer buffer
-            (set (make-local-variable 'compilation-error-regexp-alist)
-                 (flycheck-checker-compilation-error-regexp-alist checker))))
-      (user-error "No suitable checker available"))))
+  (unless (flycheck-may-use-checker checker)
+    (user-error "Cannot use syntax checker %S in this buffer" checker))
+  (let* ((command (flycheck-checker-shell-command checker))
+         (buffer (compilation-start command nil #'flycheck-compile-name)))
+    (with-current-buffer buffer
+      (set (make-local-variable 'compilation-error-regexp-alist)
+           (flycheck-checker-compilation-error-regexp-alist checker)))))
 
 
 ;;; Deferred syntax checking
