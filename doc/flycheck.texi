@@ -7493,6 +7493,9 @@ flag exceptions as errors in C++
 
 @item 
 #420@footnote{https://github.com/flycheck/flycheck/issues/420}: Add @code{flycheck-clang-blocks} to enable the block syntax in Clang
+
+@item 
+@code{read-flycheck-checker} now accepts a default value
 @end itemize
 
 @item 
@@ -7503,6 +7506,17 @@ Improvements:
 
 @item 
 #421@footnote{https://github.com/flycheck/flycheck/issues/421}: Use proper temporary files in @code{python-flake8}
+
+@item 
+#423@footnote{https://github.com/flycheck/flycheck/issues/423}: Demote errors from @code{package-initialize} in the @code{emacs-lisp} checker
+
+@item 
+@code{flycheck-select-checker} now uses the last used syntax checker as default
+when reading from minibuffer
+
+@item 
+#428@footnote{https://github.com/flycheck/flycheck/issues/428}: @code{flycheck-compile} now prompts for the syntax checker to run as
+@code{compile} command
 @end itemize
 @end itemize
 
