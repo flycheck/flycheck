@@ -4723,7 +4723,7 @@ See URL `https://github.com/Hackerpilot/Dscanner/'."
   ((error line-start (file-name) "(" line ":" column ")[error]: " (message) line-end)
    (warning line-start (file-name) "(" line ":" column ")[warn]: " (message) line-end))
   :modes d-mode
-  :next-checkers ((no-errors . d-dscanner-style)))
+  :next-checkers (d-dscanner-style))
 
 (flycheck-define-checker d-dscanner-style
   "A D style checker using Dscanner.
