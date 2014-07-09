@@ -4390,7 +4390,7 @@ Relative paths are relative to the file being checked."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.20"))
 
-(flycheck-def-option-var flycheck-gfortran-language-standard "95" fortran-gcc
+(flycheck-def-option-var flycheck-gfortran-language-standard "f95" fortran-gcc
   "The language standard to use in GCC Fortran compiler gfortran.
 
 The value of this variable is either a string denoting a language
@@ -4406,7 +4406,7 @@ pass the language standard via the `-gnat' option."
 
 Uses GCC's Fortran compiler gfortran.  See URL `https://gcc.gnu.org/'."
   :command ("gfortran"
-            (eval (s-concat "-std=f" flycheck-gfortran-language-standard))
+            (eval (s-concat "-std=" flycheck-gfortran-language-standard))
             "-fsyntax-only"
             "-fshow-column"
             "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
