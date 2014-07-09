@@ -19,11 +19,16 @@ master (in development)
   - #417: Add `flycheck-rust-crate-root` to resolve inter-crate references in
     `rust`
   - #420: Add `flycheck-clang-blocks` to enable the block syntax in Clang
+  - `read-flycheck-checker` now accepts a default value
 
 - Improvements:
 
   - #421: Use proper temporary files in `python-flake8`
   - #423: Demote errors from `package-initialize` in the `emacs-lisp` checker
+  - `flycheck-select-checker` now uses the last used syntax checker as default
+    when reading from minibuffer
+  - #428: `flycheck-compile` now prompts for the syntax checker to run as
+    `compile` command
 
 0.19 (Jun 12, 2014)
 -------------------

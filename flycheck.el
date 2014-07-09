@@ -927,27 +927,6 @@ returns t."
            (signal (car err) (cdr err)))))
     (user-error "Flycheck mode disabled")))
 
-(defun flycheck-compile-name (_name)
-  "Get a name for a Flycheck compilation buffer.
-
-_NAME is ignored."
-  (format "*Flycheck %s*" (buffer-file-name)))
-
-(defun flycheck-compile ()
-  "Run syntax checker as compiler."
-  (interactive)
-  (unless (buffer-file-name)
-    (user-error "Cannot compile buffers without backing file"))
-  (let ((checker (flycheck-get-checker-for-buffer)))
-    (if checker
-        (let* ((command (flycheck-checker-shell-command checker))
-               (buffer (compilation-start command nil
-                                          #'flycheck-compile-name)))
-          (with-current-buffer buffer
-            (set (make-local-variable 'compilation-error-regexp-alist)
-                 (flycheck-checker-compilation-error-regexp-alist checker))))
-      (user-error "No suitable checker available"))))
-
 
 ;;; Deferred syntax checking
 (defvar-local flycheck-deferred-syntax-check nil
@@ -1355,28 +1334,40 @@ FILE-NAME is nil, return `default-directory'."
 (defvar read-flycheck-checker-history nil
   "`completing-read' history of `read-flycheck-checker'.")
 
-(defun read-flycheck-checker (prompt)
-  "Read a flycheck checker from minibuffer with PROMPT.
+(defun read-flycheck-checker (prompt &optional default)
+  "Read a flycheck checker from minibuffer with PROMPT and DEFAULT.
 
-Return the checker as symbol, or nil if no checker was
-chosen."
+Return the checker as symbol, or default, if no checker was
+chosen.  If DEFAULT is nil and no checker was chosen, signal a
+`user-error', if the underlying completion system does not
+provide a default on its own."
+  (when (and default (not (flycheck-valid-checker-p default)))
+    (error "%S is no valid Flycheck checker" default))
   (let* ((candidates (-map #'symbol-name (flycheck-defined-checkers)))
+         (default (and default (symbol-name default)))
          (input (pcase flycheck-completion-system
                   (`ido (ido-completing-read prompt candidates nil
                                              'require-match nil
-                                             'read-flycheck-checker-history))
+                                             'read-flycheck-checker-history
+                                             default))
                   (`grizzl (if (and (fboundp 'grizzl-make-index)
                                     (fboundp 'grizzl-completing-read))
                                (->> candidates
                                  grizzl-make-index
                                  (grizzl-completing-read prompt))
                              (user-error "Please install Grizzl from \
-https://github.com/d11wtq/grizzl.")))
+https://github.com/d11wtq/grizzl")))
                   (_ (completing-read prompt candidates nil 'require-match
-                                      nil 'read-flycheck-checker-history)))))
-    (if (string= input "")
-        (user-error "No syntax checker entered")
-      (intern input))))
+                                      nil 'read-flycheck-checker-history
+                                      default)))))
+    (when (string= input "")
+      (unless default
+        (user-error "No syntax checker entered"))
+      (setq input default))
+    (let ((checker (intern input)))
+      (unless (flycheck-valid-checker-p checker)
+        (error "%S is no Flycheck syntax checker" checker))
+      checker)))
 
 
 ;;; Checker definitions
@@ -2300,11 +2291,36 @@ CHECKER will be used, even if it is not contained in
   (interactive
    (if current-prefix-arg
        (list nil)
-     (list (read-flycheck-checker "Select checker: "))))
+     (list (read-flycheck-checker "Select checker: " flycheck-last-checker))))
   (when (not (eq checker flycheck-checker))
     (setq flycheck-checker checker)
     (when flycheck-mode
       (flycheck-buffer))))
+
+
+;;; Checkers as compile commands
+(defun flycheck-compile-name (_name)
+  "Get a name for a Flycheck compilation buffer.
+
+_NAME is ignored."
+  (format "*Flycheck %s*" (buffer-file-name)))
+
+(defun flycheck-compile (checker)
+  "Run CHECKER as in `compile'."
+  (interactive
+   (list (read-flycheck-checker "Run syntax checker as compile command: "
+                                (or flycheck-checker flycheck-last-checker))))
+  (unless (flycheck-valid-checker-p checker)
+    (user-error "%S is not a valid syntax checker" checker))
+  (unless (buffer-file-name)
+    (user-error "Cannot compile buffers without backing file"))
+  (unless (flycheck-may-use-checker checker)
+    (user-error "Cannot use syntax checker %S in this buffer" checker))
+  (let* ((command (flycheck-checker-shell-command checker))
+         (buffer (compilation-start command nil #'flycheck-compile-name)))
+    (with-current-buffer buffer
+      (set (make-local-variable 'compilation-error-regexp-alist)
+           (flycheck-checker-compilation-error-regexp-alist checker)))))
 
 
 ;;; Documentation
