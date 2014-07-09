@@ -927,29 +927,6 @@ returns t."
            (signal (car err) (cdr err)))))
     (user-error "Flycheck mode disabled")))
 
-(defun flycheck-compile-name (_name)
-  "Get a name for a Flycheck compilation buffer.
-
-_NAME is ignored."
-  (format "*Flycheck %s*" (buffer-file-name)))
-
-(defun flycheck-compile (checker)
-  "Run CHECKER as in `compile'."
-  (interactive
-   (list (read-flycheck-checker "Run syntax checker as compile command: "
-                                (or flycheck-checker flycheck-last-checker))))
-  (unless (flycheck-valid-checker-p checker)
-    (user-error "%S is not a valid syntax checker" checker))
-  (unless (buffer-file-name)
-    (user-error "Cannot compile buffers without backing file"))
-  (unless (flycheck-may-use-checker checker)
-    (user-error "Cannot use syntax checker %S in this buffer" checker))
-  (let* ((command (flycheck-checker-shell-command checker))
-         (buffer (compilation-start command nil #'flycheck-compile-name)))
-    (with-current-buffer buffer
-      (set (make-local-variable 'compilation-error-regexp-alist)
-           (flycheck-checker-compilation-error-regexp-alist checker)))))
-
 
 ;;; Deferred syntax checking
 (defvar-local flycheck-deferred-syntax-check nil
@@ -2319,6 +2296,31 @@ CHECKER will be used, even if it is not contained in
     (setq flycheck-checker checker)
     (when flycheck-mode
       (flycheck-buffer))))
+
+
+;;; Checkers as compile commands
+(defun flycheck-compile-name (_name)
+  "Get a name for a Flycheck compilation buffer.
+
+_NAME is ignored."
+  (format "*Flycheck %s*" (buffer-file-name)))
+
+(defun flycheck-compile (checker)
+  "Run CHECKER as in `compile'."
+  (interactive
+   (list (read-flycheck-checker "Run syntax checker as compile command: "
+                                (or flycheck-checker flycheck-last-checker))))
+  (unless (flycheck-valid-checker-p checker)
+    (user-error "%S is not a valid syntax checker" checker))
+  (unless (buffer-file-name)
+    (user-error "Cannot compile buffers without backing file"))
+  (unless (flycheck-may-use-checker checker)
+    (user-error "Cannot use syntax checker %S in this buffer" checker))
+  (let* ((command (flycheck-checker-shell-command checker))
+         (buffer (compilation-start command nil #'flycheck-compile-name)))
+    (with-current-buffer buffer
+      (set (make-local-variable 'compilation-error-regexp-alist)
+           (flycheck-checker-compilation-error-regexp-alist checker)))))
 
 
 ;;; Documentation
