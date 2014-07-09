@@ -4406,7 +4406,7 @@ pass the language standard via the `-gnat' option."
 
 Uses GCC's Fortran compiler gfortran.  See URL `https://gcc.gnu.org/'."
   :command ("gfortran"
-            (eval (s-concat "-std=" flycheck-gfortran-language-standard))
+            (option "-std=" flycheck-gfortran-language-standard)
             "-fsyntax-only"
             "-fshow-column"
             "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
