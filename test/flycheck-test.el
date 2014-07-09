@@ -4024,7 +4024,7 @@ Why not:
   (let ((flycheck-jshintrc "jshintrc"))
     (flycheck-test-should-syntax-check
      "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
-     '(4 12 error "'foo' is defined but never used."
+     '(4 9 error "'foo' is defined but never used."
          :checker javascript-jshint))))
 
 (ert-deftest flycheck-define-checker/javascript-eslint-error ()
