@@ -2312,7 +2312,7 @@ CHECKER will be used, even if it is not contained in
   (interactive
    (if current-prefix-arg
        (list nil)
-     (list (read-flycheck-checker "Select checker: "))))
+     (list (read-flycheck-checker "Select checker: " flycheck-last-checker))))
   (when (not (eq checker flycheck-checker))
     (setq flycheck-checker checker)
     (when flycheck-mode
