@@ -30,6 +30,10 @@ master (in development)
   - #428: `flycheck-compile` now prompts for the syntax checker to run as
     `compile` command
 
+- Other changes:
+
+  - Remove dependency on f.el
+
 0.19 (Jun 12, 2014)
 -------------------
 
