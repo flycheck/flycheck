@@ -33,6 +33,7 @@ master (in development)
 - Other changes:
 
   - Remove dependency on f.el
+  - Remove dependency on s.el
 
 0.19 (Jun 12, 2014)
 -------------------

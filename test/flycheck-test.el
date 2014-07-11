@@ -196,9 +196,12 @@ Return t if Emacs is at least MAJOR.MINOR, or nil otherwise."
 
 Return the version as string, or nil, if the texinfo version
 could not be determined."
-  (when (executable-find "makeinfo")
-    (cadr (s-match flycheck-test-texinfo-version-re
-                   (car (process-lines "makeinfo" "--version"))))))
+  (-when-let (makeinfo (executable-find "makeinfo"))
+    (with-temp-buffer
+      (call-process makeinfo nil t nil "--version")
+      (goto-char (point-min))
+      (when (re-search-forward flycheck-test-texinfo-version-re nil 'no-error)
+        (match-string 1)))))
 
 (defconst flycheck-test-cppcheck-version-re
   (rx "Cppcheck "
@@ -211,10 +214,12 @@ could not be determined."
 
 Return the version as string, or nil, if the Cppcheck version
 could not be determined."
-  (let ((cppcheck (flycheck-checker-executable 'c/c++-cppcheck)))
-    (when (executable-find cppcheck)
-      (cadr (s-match flycheck-test-cppcheck-version-re
-                     (car (process-lines cppcheck "--version")))))))
+  (-when-let (cppcheck (executable-find "cppcheck"))
+    (with-temp-buffer
+      (call-process cppcheck nil t nil "--version")
+      (goto-char (point-min))
+      (when (re-search-forward flycheck-test-cppcheck-version-re nil 'no-error)
+        (match-string 1)))))
 
 
 ;;; Test resources
@@ -624,7 +629,7 @@ check with.  ERRORS is the list of expected errors."
     (setq buffer-file-name "foo")
     (rename-buffer "foo")
     (text-mode)
-    (should-not (s-starts-with? " " (buffer-name)))
+    (should-not (string-prefix-p " " (buffer-name)))
     (should-not (flycheck-get-checker-for-buffer))
     (should-not (flycheck-may-enable-mode))))
 
@@ -1025,12 +1030,12 @@ check with.  ERRORS is the list of expected errors."
         (should (file-directory-p dirname))
       (flycheck-safe-delete-temporaries))
     (should-not (file-exists-p dirname))
-    (should (s-starts-with? (file-name-as-directory
-                             (file-truename temporary-file-directory))
-                            (file-truename dirname)))
-    (should (s-starts-with? flycheck-temp-prefix
-                            (file-name-nondirectory
-                             (directory-file-name dirname))))))
+    (should (string-prefix-p (file-name-as-directory
+                              (file-truename temporary-file-directory))
+                             (file-truename dirname)))
+    (should (string-prefix-p flycheck-temp-prefix
+                             (file-name-nondirectory
+                              (directory-file-name dirname))))))
 
 (ert-deftest flycheck-temp-file-system/without-file-name ()
   :tags '(utility)
@@ -1039,11 +1044,11 @@ check with.  ERRORS is the list of expected errors."
         (should (file-exists-p filename))
       (flycheck-safe-delete-temporaries))
     (should-not (file-exists-p filename))
-    (should (s-starts-with? (file-name-as-directory
-                             (file-truename temporary-file-directory))
-                            (file-truename filename)))
-    (should (s-starts-with? flycheck-temp-prefix
-                            (file-name-nondirectory filename)))))
+    (should (string-prefix-p (file-name-as-directory
+                              (file-truename temporary-file-directory))
+                             (file-truename filename)))
+    (should (string-prefix-p flycheck-temp-prefix
+                             (file-name-nondirectory filename)))))
 
 (ert-deftest flycheck-temp-file-system/with-complete-path ()
   :tags '(utility)
@@ -1060,12 +1065,12 @@ check with.  ERRORS is the list of expected errors."
     ;; The file name should be preserved.  The temporary file should reside in a
     ;; subdirectory of the temporary directory
     (should (string= "eggs.el" (file-name-nondirectory filename)))
-    (should (s-starts-with? flycheck-temp-prefix
-                            (file-name-nondirectory
-                             (directory-file-name dirname))))
-    (should (s-starts-with? flycheck-temp-prefix
-                            (file-name-nondirectory
-                             (directory-file-name dirname))))))
+    (should (string-prefix-p flycheck-temp-prefix
+                             (file-name-nondirectory
+                              (directory-file-name dirname))))
+    (should (string-prefix-p flycheck-temp-prefix
+                             (file-name-nondirectory
+                              (directory-file-name dirname))))))
 
 (ert-deftest flycheck-temp-file-inplace/with-just-basename ()
   :tags '(utility)
@@ -1096,8 +1101,8 @@ check with.  ERRORS is the list of expected errors."
         (should (file-exists-p filename))
       (flycheck-safe-delete-temporaries))
     (should-not (file-name-extension filename))
-    (should (s-starts-with? flycheck-temp-prefix
-                            (file-name-nondirectory filename)))))
+    (should (string-prefix-p flycheck-temp-prefix
+                             (file-name-nondirectory filename)))))
 
 (ert-deftest flycheck-save-buffer-to-file ()
   :tags '(utility)
@@ -1246,7 +1251,7 @@ check with.  ERRORS is the list of expected errors."
     (unwind-protect
         (let ((filename (expand-file-name "foo" dirname)))
           (process-lines "touch" filename)
-          (should (s-starts-with? dirname filename))
+          (should (string-prefix-p dirname filename))
           (should (file-exists-p filename))
           (flycheck-safe-delete dirname)
           (should-not (file-exists-p filename))
@@ -1578,7 +1583,7 @@ check with.  ERRORS is the list of expected errors."
             (should (file-exists-p filename)))
 
           (let ((filename (flycheck-substitute-argument 'source 'emacs-lisp)))
-            (should (s-starts-with? temporary-file-directory filename))
+            (should (string-prefix-p temporary-file-directory filename))
             (should (file-exists-p filename)))))
     (mapc #'flycheck-safe-delete flycheck-temporaries)))
 
@@ -1589,7 +1594,7 @@ check with.  ERRORS is the list of expected errors."
         (let ((dirname (flycheck-substitute-argument 'temporary-directory
                                                      'emacs-lisp)))
           (should (file-directory-p dirname))
-          (should (s-starts-with? temporary-file-directory dirname)))
+          (should (string-prefix-p temporary-file-directory dirname)))
       (mapc #'flycheck-safe-delete flycheck-temporaries))))
 
 (ert-deftest flycheck-substitute-argument/temporary-filename ()
@@ -1601,7 +1606,7 @@ check with.  ERRORS is the list of expected errors."
           ;; The filename should not exist, but it's parent directory should
           (should-not (file-exists-p filename))
           (should (file-directory-p (file-name-directory filename)))
-          (should (s-starts-with? temporary-file-directory filename))
+          (should (string-prefix-p temporary-file-directory filename))
           (should (member (directory-file-name (file-name-directory filename))
                           flycheck-temporaries)))
       (mapc #'flycheck-safe-delete flycheck-temporaries))))
@@ -2141,8 +2146,9 @@ Try to reinstall the package defining this syntax checker.\n"))))
       (with-current-buffer (help-buffer)
         (let ((config-file-var (flycheck-checker-config-file-var checker)))
           (if (not config-file-var)
-              (should-not (s-contains? "configuration file"
-                                       (buffer-substring (point-min) (point-max))))
+              (should-not (string-match-p
+                           (rx "configuration file")
+                           (buffer-substring (point-min) (point-max))))
             (goto-char (point-min))
             (re-search-forward
              ", using\\s-+a\\s-+configuration\\s-+file\\s-+from\\s-+`\\(.+?\\)'\\.")
@@ -2182,8 +2188,9 @@ Try to reinstall the package defining this syntax checker.\n"))))
     (flycheck-test-with-help-buffer
       (flycheck-describe-checker checker)
       (with-current-buffer (help-buffer)
-        (should (s-contains? (flycheck-checker-documentation checker)
-                             (buffer-substring (point-min) (point-max))))))))
+        (should (string-match-p
+                 (regexp-quote (flycheck-checker-documentation checker))
+                 (buffer-substring (point-min) (point-max))))))))
 
 (ert-deftest flycheck--manual/all-checkers-are-documented ()
   :tags '(documentation)
@@ -3647,9 +3654,9 @@ of the file will be interrupted because there are too many #ifdef configurations
 
 (ert-deftest flycheck-d-module-re/matches-module-name ()
   :tags '(builtin-checker language-d)
-  (should (string= "spam.with.eggs"
-                   (nth 1 (s-match flycheck-d-module-re
-                                   "module spam.with.eggs ;")))))
+  (let ((s "module spam.with.eggs ;"))
+    (should (string-match flycheck-d-module-re s))
+    (should (string= "spam.with.eggs" (match-string 1 s)))))
 
 (ert-deftest flycheck-d-base-directory/no-module-declaration ()
   :tags '(builtin-checker language-d)
@@ -3944,14 +3951,14 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
 
 (ert-deftest flycheck-haskell-module-re/matches-module-name ()
   :tags '(builtin-checker language-haskell)
-  (should (string= "Foo.Bar"
-                   (nth 1 (s-match flycheck-haskell-module-re
-                                   "module Foo.Bar where")))))
+  (let ((s "module Foo.Bar where"))
+    (should (string-match flycheck-haskell-module-re s))
+    (should (string= "Foo.Bar" (match-string 1 s)))))
 
 (ert-deftest flycheck-haskell-module-re/ignores-commented-code ()
   :tags '(builtin-checker language-haskell)
-  (should-not (s-match flycheck-haskell-module-re
-                       "-- | module Foo.Bar where")))
+  (should-not (string-match-p flycheck-haskell-module-re
+                              "-- | module Foo.Bar where")))
 
 (ert-deftest flycheck-define-checker/haskell-ghc-syntax-error ()
   :tags '(builtin-checker external-tool language-haskell)
