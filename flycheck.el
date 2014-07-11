@@ -3298,10 +3298,10 @@ Intended for use with `next-error-function'."
                 point))
          (min (if forward? pos (point-min)))
          (max (if forward? (point-max) pos))
-         (candidates (-sort (if forward? #'<= #'>=)
-                            ;; Determine unique start locations
-                            (-uniq (mapcar #'overlay-start
-                                           (flycheck-overlays-in min max)))))
+         (candidates (sort ;; Determine unique start locations
+                      (-uniq (mapcar #'overlay-start
+                                     (flycheck-overlays-in min max)))
+                      (if forward? #'<= #'>=)))
          (error-pos (nth (- (abs n) 1) candidates)))
     (if error-pos
         (goto-char error-pos)
