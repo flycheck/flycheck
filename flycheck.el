@@ -1305,7 +1305,7 @@ any byte-compiled file.
 Return nil, if the currently loaded file cannot be determined."
   (-when-let* ((this-file (cond
                            (load-in-progress load-file-name)
-                           ((bound-and-true-p 'byte-compile-current-file))
+                           ((bound-and-true-p byte-compile-current-file))
                            (t (buffer-file-name))))
                ;; A best guess for the source file of a compiled library. Works
                ;; well in most cases, and especially for ELPA packages
