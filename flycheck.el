@@ -843,8 +843,8 @@ buffer manually.
    (flycheck-mode
     (flycheck-clear)
 
-    (--each flycheck-hooks-alist
-      (add-hook (car it) (cdr it) nil t))
+    (dolist (hook flycheck-hooks-alist)
+      (add-hook (car hook) (cdr hook) nil 'local))
 
     (setq flycheck-old-next-error-function (if flycheck-standard-error-navigation
                                                next-error-function
@@ -855,8 +855,8 @@ buffer manually.
     (unless (eq flycheck-old-next-error-function :unset)
       (setq next-error-function flycheck-old-next-error-function))
 
-    (--each flycheck-hooks-alist
-      (remove-hook (car it) (cdr it) t))
+    (dolist (hook flycheck-hooks-alist)
+      (remove-hook (car hook) (cdr hook) 'local))
 
     (flycheck-teardown))))
 
@@ -1517,9 +1517,8 @@ this constant.")
   "Set and verify syntax checker PROPERTIES on SYMBOL.
 
 PROPERTIES is an alist of properties to set."
-  (--each properties
-    (pcase-let ((`(,prop . ,value) it))
-      (put symbol prop value)))
+  (dolist (prop properties)
+    (put symbol (car prop) (cdr prop)))
   (flycheck-verify-checker-properties symbol)
   (put symbol 'flycheck-checker-version flycheck-checker-version))
 
@@ -2224,11 +2223,12 @@ directory, or nil otherwise."
     (when (file-exists-p path)
       path)))
 
-(--each '(flycheck-locate-config-file-absolute-path
-          flycheck-locate-config-file-projectile
-          flycheck-locate-config-file-ancestor-directories
-          flycheck-locate-config-file-home)
-  (custom-add-frequent-value 'flycheck-locate-config-file-functions it))
+(mapc (apply-partially #'custom-add-frequent-value
+                       'flycheck-locate-config-file-functions)
+      '(flycheck-locate-config-file-absolute-path
+        flycheck-locate-config-file-projectile
+        flycheck-locate-config-file-ancestor-directories
+        flycheck-locate-config-file-home))
 
 
 ;;; Generic option filters
@@ -2472,8 +2472,8 @@ Pop up a help buffer with the documentation of CHECKER."
           (princ "\n")
           (when option-vars
             (princ "\n  This syntax checker can be configured with these options:\n\n")
-            (--each option-vars
-              (princ (format "     * `%s'\n" it)))))
+            (dolist (var option-vars)
+              (princ (format "     * `%s'\n" var)))))
         (princ (format "\nDocumentation:\n%s"
                        (flycheck-checker-documentation checker)))))))
 
@@ -2782,10 +2782,10 @@ Return the errors parsed with the error patterns of CHECKER."
   (let* ((parser (or (flycheck-checker-error-parser checker)
                      #'flycheck-parse-with-patterns))
          (errors (funcall parser output checker buffer)))
-    (--each errors
+    (dolist (err errors)
       ;; Remember the source buffer and checker in the error
-      (setf (flycheck-error-buffer it) buffer)
-      (setf (flycheck-error-checker it) checker))
+      (setf (flycheck-error-buffer err) buffer)
+      (setf (flycheck-error-checker err) checker))
     errors))
 
 (defun flycheck-fix-error-filename (err buffer-files)
@@ -3022,25 +3022,25 @@ all error messages, and by replacing 0 columns and empty error
 messages with nil.
 
 Returns sanitized ERRORS."
-  (--each errors
-    (flycheck-error-with-buffer it
-      (let ((message (flycheck-error-message it))
-            (column (flycheck-error-column it)))
+  (dolist (err errors)
+    (flycheck-error-with-buffer err
+      (let ((message (flycheck-error-message err))
+            (column (flycheck-error-column err)))
         (when message
           (setq message (string-trim message))
-          (setf (flycheck-error-message it)
+          (setf (flycheck-error-message err)
                 (if (string= message "") nil message)))
         (when (eq column 0)
-          (setf (flycheck-error-column it) nil)))))
+          (setf (flycheck-error-column err) nil)))))
   errors)
 
 (defun flycheck-collapse-error-message-whitespace (errors)
   "Collapse whitespace in all messages of ERRORS.
 
 Return ERRORS."
-  (--each errors
-    (-when-let (message (flycheck-error-message it))
-      (setf (flycheck-error-message it)
+  (dolist (err errors)
+    (-when-let (message (flycheck-error-message err))
+      (setf (flycheck-error-message err)
             (replace-regexp-in-string (rx (one-or-more (any space "\n" "\r")))
                                       " " message 'fixed-case 'literal))))
   errors)
@@ -3053,8 +3053,8 @@ the leading whitespace of the first line, and dedent all further
 lines accordingly.
 
 Return ERRORS, with in-place modifications."
-  (--each errors
-    (-when-let (message (flycheck-error-message it))
+  (dolist (err errors)
+    (-when-let (message (flycheck-error-message err))
       (with-temp-buffer
         (insert message)
         ;; Determine the indentation offset
@@ -3072,7 +3072,7 @@ Return ERRORS, with in-place modifications."
               (delete-char (- indent-offset)))
             (forward-line 1)))
         (delete-trailing-whitespace (point-min) (point-max))
-        (setf (flycheck-error-message it)
+        (setf (flycheck-error-message err)
               (buffer-substring-no-properties (point-min) (point-max))))))
   errors)
 
@@ -3091,13 +3091,13 @@ Returns ERRORS, with folded messages."
   ;; include lines.  The user still needs to visit the affected include to
   ;; list and navigate these errors, but they can at least get an idea of
   ;; what is wrong.
-  (let (including-filename          ; The name of the file including a
+  (let (including-filename              ; The name of the file including a
                                         ; faulty include
-        include-error               ; The error on the include line
-        errors-in-include)          ; All errors in the include, as strings
-    (--each errors
-      (-when-let* ((message (flycheck-error-message it))
-                   (filename (flycheck-error-filename it)))
+        include-error                   ; The error on the include line
+        errors-in-include)              ; All errors in the include, as strings
+    (dolist (err errors)
+      (-when-let* ((message (flycheck-error-message err))
+                   (filename (flycheck-error-filename err)))
         (cond
          ((and (string= message sentinel-message)
                ;; Don't handle faulty includes recursively, we are only
@@ -3106,13 +3106,13 @@ Returns ERRORS, with folded messages."
           ;; We are looking at an error denoting a faulty include, so let's
           ;; remember the error and the name of the include, and initialize
           ;; our folded error message
-          (setq include-error it
+          (setq include-error err
                 including-filename filename
                 errors-in-include (list "Errors in included file:")))
          ((and include-error (not (string= filename including-filename)))
           ;; We are looking at an error *inside* the last faulty include, so
-          ;; let's record it, as human-readable string
-          (push (flycheck-error-format it) errors-in-include))
+          ;; let's record err, as human-readable string
+          (push (flycheck-error-format err) errors-in-include))
          (include-error
           ;; We are looking at an unrelated error, so fold all include
           ;; errors, if there are any
@@ -3261,7 +3261,7 @@ Return the created overlay."
   (flycheck-delete-marked-overlays)
   (save-restriction
     (widen)
-    (-each (flycheck-overlays-in (point-min) (point-max)) #'delete-overlay)))
+    (mapc #'delete-overlay (flycheck-overlays-in (point-min) (point-max)))))
 
 (defun flycheck-mark-all-overlays-for-deletion ()
   "Mark all current overlays for deletion."
@@ -3271,7 +3271,7 @@ Return the created overlay."
 
 (defun flycheck-delete-marked-overlays ()
   "Delete all overlays marked for deletion."
-  (-each flycheck-overlays-to-delete #'delete-overlay)
+  (mapc #'delete-overlay flycheck-overlays-to-delete)
   (setq flycheck-overlays-to-delete nil))
 
 
@@ -3458,9 +3458,9 @@ The mode line shows the file name of the source buffer."
 
 (defun flycheck-error-list-recenter-at (pos)
   "Recenter the error list at POS."
-  (--each (get-buffer-window-list flycheck-error-list-buffer
-                                  nil 'all-frames)
-    (with-selected-window it
+  (dolist (window (get-buffer-window-list flycheck-error-list-buffer
+                                          nil 'all-frames))
+    (with-selected-window window
       (goto-char pos)
       (recenter))))
 
@@ -3529,7 +3529,7 @@ no next error."
                       (overlay-put ov 'face face)))
                   (setq next-error-pos end)))))
           ;; Delete the old overlays
-          (-each old-overlays #'delete-overlay)
+          (mapc #'delete-overlay old-overlays)
           ;; Move point to the middle error
           (goto-char (+ min-point (/ (- max-point min-point) 2)))
           (beginning-of-line)
@@ -3636,7 +3636,7 @@ Each error message under point is copied into the kill ring."
   (interactive "d")
   (-when-let* ((errors (flycheck-overlay-errors-at pos))
                (messages (-keep #'flycheck-error-message errors)))
-    (-each (reverse messages) #'kill-new)
+    (mapc #'kill-new (reverse messages))
     (message (string-join messages "\n"))))
 
 (defun flycheck-google-messages (pos &optional quote-flag)
@@ -3660,8 +3660,8 @@ This function requires the Google This library from URL
                    (> (length messages) flycheck-google-max-messages))
           (user-error "More than %s messages at point"
                       flycheck-google-max-messages))
-        (--each messages
-          (google-string quote-flag it 'no-confirm)))
+        (dolist (msg messages)
+          (google-string quote-flag msg 'no-confirm)))
     (user-error "Please install Google This from \
 https://github.com/Bruce-Connor/emacs-google-this")))
 
@@ -3728,8 +3728,8 @@ output: %s\nChecker definition probably flawed."
       (setq flycheck-current-errors
             (flycheck-sort-errors (append errors flycheck-current-errors nil)))
       ;; Process all new errors
-      (--each errors
-        (run-hook-with-args-until-success 'flycheck-process-error-functions it))
+      (mapc (apply-partially #'run-hook-with-args-until-success
+                             'flycheck-process-error-functions) errors)
       (flycheck-report-error-count flycheck-current-errors)
       (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
         (if next-checker
@@ -4668,10 +4668,10 @@ See URL `https://github.com/kisielk/errcheck'."
   :error-filter
   (lambda (errors)
     (let ((errors (flycheck-sanitize-errors errors)))
-      (--each errors
-        (-when-let (message (flycheck-error-message it))
+      (dolist (err errors)
+        (-when-let (message (flycheck-error-message err))
           ;; Improve the messages reported by errcheck to make them more clear.
-          (setf (flycheck-error-message it)
+          (setf (flycheck-error-message err)
                 (format "Ignored `error` returned from `%s`" message)))))
     errors)
   :modes go-mode

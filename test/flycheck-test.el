@@ -143,8 +143,8 @@ environment variable VAR to be added to `process-environment'
 with VALUE."
   (declare (indent 1))
   `(let ((process-environment (copy-sequence process-environment)))
-     (--each ,env
-       (setenv (car it) (cdr it)))
+     (dolist (env ,env)
+       (setenv (car env) (cdr env)))
      ,@body))
 
 (defmacro flycheck-test-with-global-mode (&rest body)
@@ -346,7 +346,7 @@ Each error in ERRORS is a list as expected by
       (should flycheck-current-errors)
     (let ((expected (--map (apply #'flycheck-error-new-at it) errors)))
       (should (equal expected flycheck-current-errors))
-      (-each expected #'flycheck-test-should-overlay))
+      (mapc #'flycheck-test-should-overlay expected))
     (should (= (length errors)
                (length (flycheck-overlays-in (point-min) (point-max)))))))
 
@@ -358,13 +358,13 @@ symbol or a list thereof, specifying the major modes to syntax
 check with.  ERRORS is the list of expected errors."
   (when (symbolp modes)
     (setq modes (list modes)))
-  (--each modes
+  (dolist (mode modes)
     (flycheck-test-with-resource-buffer resource-file
-      (funcall it)
+      (funcall mode)
       ;; Configure config file locating for unit tests
-      (--each '(flycheck-locate-config-file-absolute-path
-                flycheck-test-locate-config-file)
-        (add-hook 'flycheck-locate-config-file-functions it :append :local))
+      (dolist (fn '(flycheck-locate-config-file-absolute-path
+                    flycheck-test-locate-config-file))
+        (add-hook 'flycheck-locate-config-file-functions fn 'append 'local))
       (let ((process-hook-called 0))
         (add-hook 'flycheck-process-error-functions
                   (lambda (_err)
@@ -734,13 +734,13 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-may-check-automatically/specific-event-disabled ()
   :tags '(automatic)
-  (--each '(save idle-change new-line mode-enabled)
+  (dolist (event '(save idle-change new-line mode-enabled))
     (flycheck-test-with-resource-buffer "automatic-check-dummy.el"
       ;; Disable just a specific event
       (let ((flycheck-check-syntax-automatically
-             (remq it flycheck-check-syntax-automatically)))
+             (remq event flycheck-check-syntax-automatically)))
         (should flycheck-check-syntax-automatically)
-        (should-not (flycheck-may-check-automatically it))
+        (should-not (flycheck-may-check-automatically event))
         (should (-all? #'flycheck-may-check-automatically
                        flycheck-check-syntax-automatically))
         (should (flycheck-may-check-automatically))))))
@@ -1301,9 +1301,9 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-command-argument-p/with-symbols ()
   :tags '(definition)
-  (--each '(source source-inplace source-original
-                   temporary-directory temporary-file-name)
-    (should (flycheck-command-argument-p it))))
+  (dolist (symbol '(source source-inplace source-original
+                           temporary-directory temporary-file-name))
+    (should (flycheck-command-argument-p symbol))))
 
 (ert-deftest flycheck-command-argument-p/config-file-with-variable-symbol ()
   :tags '(definition)
@@ -2318,12 +2318,12 @@ Try to reinstall the package defining this syntax checker.\n"))))
     ;; Test an error column which does not point to an expression
     (let ((err (flycheck-error-new-at 2 5)))
       (should (equal (flycheck-error-region-for-mode err 'lines) '(34 . 42)))
-      (--each '(columns symbols sexps)
-        (should (equal (flycheck-error-region-for-mode err it) '(34 . 35)))))
+      (dolist (mode '(columns symbols sexps))
+        (should (equal (flycheck-error-region-for-mode err mode) '(34 . 35)))))
     ;; Test an error without column for all modes
     (let ((err (flycheck-error-new-at 1 nil)))
-      (--each '(lines columns symbols sexps)
-        (should (equal (flycheck-error-region-for-mode err it) '(5 . 29)))))))
+      (dolist (mode '(lines columns symbols sexps))
+        (should (equal (flycheck-error-region-for-mode err mode) '(5 . 29)))))))
 
 (ert-deftest flycheck-error-pos ()
   :tags '(error-api)
@@ -2706,8 +2706,8 @@ of the file will be interrupted because there are too many #ifdef configurations
   (flycheck-test-with-temp-buffer
     (insert "Hello\n    World")
     (let ((flycheck-indication-mode nil))
-      (--each '(warning info error)
-        (let ((overlay (flycheck-add-overlay (flycheck-error-new-at 1 1 it))))
+      (dolist (level '(warning info error))
+        (let ((overlay (flycheck-add-overlay (flycheck-error-new-at 1 1 level))))
           (should-not (overlay-get overlay 'before-string)))))))
 
 (ert-deftest flycheck-add-overlay/has-info-fringe-icon ()
@@ -3056,8 +3056,8 @@ of the file will be interrupted because there are too many #ifdef configurations
   (let* ((err (flycheck-error-new-at 10 20 'warning "Foo"))
          (displayed-errors nil)
          (flycheck-display-errors-function (lambda (errors)
-                                             (--each errors
-                                               (push it displayed-errors)))))
+                                             (dolist (err errors)
+                                               (push err displayed-errors)))))
     (flycheck-display-errors (list err))
     (should (equal displayed-errors (list err)))))
 
@@ -3083,7 +3083,7 @@ of the file will be interrupted because there are too many #ifdef configurations
     (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
           (errors (list (flycheck-error-new-at 1 nil 'error "1st message")
                         (flycheck-error-new-at 1 10 'warning "2nd message"))))
-      (-each errors #'flycheck-add-overlay)
+      (mapc #'flycheck-add-overlay errors)
       (let ((flycheck-display-errors-function 'display-function))
         (flycheck-copy-messages-as-kill 10)))
     (should (equal (-take 2 kill-ring) '("1st message" "2nd message")))))
@@ -3095,7 +3095,7 @@ of the file will be interrupted because there are too many #ifdef configurations
     (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
           (errors (list (flycheck-error-new-at 1 nil 'error "1st message")
                         (flycheck-error-new-at 1 10 'warning "2nd message"))))
-      (-each errors #'flycheck-add-overlay)
+      (mapc #'flycheck-add-overlay errors)
       (let* ((flycheck-google-max-messages 1)
              (err (should-error (flycheck-google-messages 10)
                                 :type flycheck-test-user-error-type)))
@@ -3108,7 +3108,7 @@ of the file will be interrupted because there are too many #ifdef configurations
     (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
           (errors (list (flycheck-error-new-at 1 nil 'error "1st message")
                         (flycheck-error-new-at 1 10 'warning "2nd message"))))
-      (-each errors #'flycheck-add-overlay)
+      (mapc #'flycheck-add-overlay errors)
       (let* (browsed-urls
              (browse-url-browser-function (lambda (url &optional _)
                                             (push url browsed-urls))))
@@ -3125,7 +3125,7 @@ of the file will be interrupted because there are too many #ifdef configurations
     (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
           (errors (list (flycheck-error-new-at 1 nil 'error "1st message")
                         (flycheck-error-new-at 1 10 'warning "2nd message"))))
-      (-each errors #'flycheck-add-overlay)
+      (mapc #'flycheck-add-overlay errors)
       (let* (browsed-urls
              (browse-url-browser-function (lambda (url &optional _)
                                             (push url browsed-urls))))
