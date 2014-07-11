@@ -101,7 +101,7 @@ attention to case differences."
              (eq t (compare-strings suffix nil nil
                                     string start-pos nil ignore-case))))))
 
-  (unless (featurep 'subrx)
+  (unless (featurep 'subr-x)
     ;; `subr-x' function for Emacs 24.3 and below
     (defun string-join (strings &optional separator)
       "Join all STRINGS using SEPARATOR."
