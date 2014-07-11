@@ -1406,9 +1406,8 @@ provide a default on its own."
                                              default))
                   (`grizzl (if (and (fboundp 'grizzl-make-index)
                                     (fboundp 'grizzl-completing-read))
-                               (->> candidates
-                                 grizzl-make-index
-                                 (grizzl-completing-read prompt))
+                               (grizzl-completing-read
+                                prompt (grizzl-make-index candidates))
                              (user-error "Please install Grizzl from \
 https://github.com/d11wtq/grizzl")))
                   (_ (completing-read prompt candidates nil 'require-match
@@ -2884,9 +2883,8 @@ _BUFFER is ignored.
 Return a list of parsed errors and warnings (as `flycheck-error'
 objects)."
   (let ((patterns (flycheck-checker-error-patterns checker)))
-    (-> output
-      (flycheck-tokenize-output-with-patterns patterns)
-      (flycheck-parse-errors-with-patterns patterns))))
+    (flycheck-parse-errors-with-patterns
+     (flycheck-tokenize-output-with-patterns output patterns) patterns)))
 
 
 ;;; Error parsers
@@ -2924,28 +2922,30 @@ text nodes) or as XML nodes, in the same for as the root node."
 
 Return a list of all errors contained in the NODE, or nil if NODE
 is not a file node."
-  (let ((filename (cdr (assq 'name (cadr node)))))
-    (->> (cddr node)
-      (--filter (and (listp it) (eq (car it) 'error)))
-      (--map
-       (let* ((attrs (cadr it))
-              (line (flycheck-string-to-number-safe
-                     (cdr (assq 'line attrs))))
-              (column (flycheck-string-to-number-safe
-                       (cdr (assq 'column attrs))))
-              (severity (cdr (assq 'severity attrs)))
-              (message (cdr (assq 'message attrs))))
-         (flycheck-error-new
-          :filename filename
-          :line line
-          :column (when (and column (> column 0)) column)
-          :message message
-          :level (pcase severity
-                   (`"error"   'error)
-                   (`"warning" 'warning)
-                   (`"info"    'info)
-                   ;; Default to error for unknown severity
-                   (_          'error))))))))
+  (let ((filename (cdr (assq 'name (cadr node))))
+        errors)
+    (dolist (child-node (cddr node))
+      (when (and (listp child-node) (eq (car child-node) 'error))
+        (let* ((attrs (cadr child-node))
+               (line (flycheck-string-to-number-safe
+                      (cdr (assq 'line attrs))))
+               (column (flycheck-string-to-number-safe
+                        (cdr (assq 'column attrs))))
+               (severity (cdr (assq 'severity attrs)))
+               (message (cdr (assq 'message attrs))))
+          (push (flycheck-error-new
+                 :filename filename
+                 :line line
+                 :column (when (and column (> column 0)) column)
+                 :message message
+                 :level (pcase severity
+                          (`"error"   'error)
+                          (`"warning" 'warning)
+                          (`"info"    'info)
+                          ;; Default to error for unknown severity
+                          (_          'error)))
+                errors))))
+    (nreverse errors)))
 
 (defun flycheck-parse-checkstyle (output _checker _buffer)
   "Parse Checkstyle errors from OUTPUT.
@@ -2961,25 +2961,27 @@ about Checkstyle."
     (unless (eq (car root) 'checkstyle)
       (error "Unexpected root element %s" (car root)))
     ;; cddr gets us the body of the node without its name and its attributes
-    (->> (cddr root)
-      (--filter (and (listp it) (eq (car it) 'file)))
-      (-mapcat #'flycheck-parse-checkstyle-file-node))))
+    (-mapcat #'flycheck-parse-checkstyle-file-node
+             (--filter (and (listp it) (eq (car it) 'file)) (cddr root)))))
 
 (defun flycheck-parse-cppcheck-error-node (node)
   "Parse a single error NODE from Cppcheck XML.
 
 Return a list of all Flycheck errors this node represents."
-  (let ((attrs (cadr node)))
-    (->> (cddr node)
-      (--filter (and (listp it) (eq (car it) 'location)))
-      (--map (let ((locattrs (cadr it)))
-               (flycheck-error-new
-                :filename (cdr (assq 'file locattrs))
-                :line (flycheck-string-to-number-safe
-                       (cdr (assq 'line locattrs)))
-                :message (cdr (assq 'verbose attrs))
-                :level (if (string= (cdr (assq 'severity attrs)) "error")
-                           'error 'warning)))))))
+  (let ((node-attrs (cadr node))
+        errors)
+    (dolist (child-node (cddr node))
+      (when (and (listp child-node) (eq (car child-node) 'location))
+        (let ((child-attrs (cadr child-node)))
+          (push (flycheck-error-new
+                 :filename (cdr (assq 'file child-attrs))
+                 :line (flycheck-string-to-number-safe
+                        (cdr (assq 'line child-attrs)))
+                 :message (cdr (assq 'verbose node-attrs))
+                 :level (if (string= (cdr (assq 'severity node-attrs)) "error")
+                            'error 'warning))
+                errors))))
+    (nreverse errors)))
 
 (defun flycheck-parse-cppcheck (output _checker _buffer)
   "Parse Cppcheck errors from OUTPUT.
@@ -2995,10 +2997,9 @@ about Cppcheck."
                                 (cddr root))))
     (unless (eq (car root) 'results)
       (error "Unexpected root element %s" (car root)))
-    (->> errors
-      ;; Filter error nodes
-      (--filter (and (listp it) (eq (car it) 'error)))
-      (-mapcat #'flycheck-parse-cppcheck-error-node))))
+    ;; Filter error nodes
+    (-mapcat #'flycheck-parse-cppcheck-error-node
+             (--filter (and (listp it) (eq (car it) 'error)) errors))))
 
 
 ;;; Error filtering
@@ -3290,10 +3291,10 @@ Intended for use with `next-error-function'."
                 point))
          (min (if forward? pos (point-min)))
          (max (if forward? (point-max) pos))
-         (candidates (->> (flycheck-overlays-in min max)
-                       (-map #'overlay-start)
-                       -uniq
-                       (-sort (if forward? #'<= #'>=))))
+         (candidates (-sort (if forward? #'<= #'>=)
+                            ;; Determine unique start locations
+                            (-uniq (-map (function overlay-start)
+                                         (flycheck-overlays-in min max)))))
          (error-pos (nth (- (abs n) 1) candidates)))
     (if error-pos
         (goto-char error-pos)
@@ -3377,9 +3378,8 @@ string with attached text properties."
   "Make a table cell for the given ERROR.
 
 Return a list with the contents of the table cell."
-  (let ((level-face (-> error
-                      flycheck-error-level
-                      flycheck-error-level-error-list-face))
+  (let ((level-face (flycheck-error-level-error-list-face
+                     (flycheck-error-level error)))
         (line (flycheck-error-line error))
         (column (flycheck-error-column error))
         (message (or (flycheck-error-message error) "Unknown error"))
@@ -3654,9 +3654,8 @@ This function requires the Google This library from URL
 `https://github.com/Bruce-Connor/emacs-google-this'."
   (interactive "d\nP")
   (if (fboundp 'google-string)
-      (-when-let (messages (->> pos
-                             flycheck-overlay-errors-at
-                             (-keep #'flycheck-error-message)))
+      (-when-let (messages (-keep #'flycheck-error-message
+                                  (flycheck-overlay-errors-at pos)))
         (when (and flycheck-google-max-messages
                    (> (length messages) flycheck-google-max-messages))
           (user-error "More than %s messages at point"
@@ -3723,13 +3722,11 @@ Error: %s" checker output (error-message-string err))
 output: %s\nChecker definition probably flawed."
                  checker exit-status output)
         (flycheck-report-status "?"))
-      (setq errors (-> errors
-                     (flycheck-fix-error-filenames files)
-                     (flycheck-filter-errors checker)
-                     flycheck-relevant-errors))
-      (setq flycheck-current-errors (-> errors
-                                      (append flycheck-current-errors nil)
-                                      flycheck-sort-errors))
+      (setq errors (flycheck-relevant-errors
+                    (flycheck-filter-errors
+                     (flycheck-fix-error-filenames errors files) checker)))
+      (setq flycheck-current-errors
+            (flycheck-sort-errors (append errors flycheck-current-errors nil)))
       ;; Process all new errors
       (--each errors
         (run-hook-with-args-until-success 'flycheck-process-error-functions it))
@@ -4025,10 +4022,10 @@ See URL `http://clang.llvm.org/'."
             ": warning: " (message) line-end)
    (error line-start (file-name) ":" line ":" column
           ": " (or "fatal error" "error") ": " (message) line-end))
-  :error-filter (lambda (errors)
-                  (-> errors
-                    flycheck-sanitize-errors
-                    (flycheck-fold-include-errors "In file included from")))
+  :error-filter
+  (lambda (errors)
+    (flycheck-fold-include-errors
+     (flycheck-sanitize-errors errors) "In file included from"))
   :modes (c-mode c++-mode)
   :next-checkers ((warnings-only . c/c++-cppcheck)))
 
@@ -4142,10 +4139,10 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
             ": warning: " (message) line-end)
    (error line-start (file-name) ":" line ":" column
           ": " (or "fatal error" "error") ": " (message) line-end))
-  :error-filter (lambda (errors)
-                  (-> errors
-                    flycheck-sanitize-errors
-                    (flycheck-fold-include-errors "In file included from")))
+  :error-filter
+  (lambda (errors)
+    (flycheck-fold-include-errors
+     (flycheck-sanitize-errors errors) "In file included from"))
   :modes (c-mode c++-mode)
   :next-checkers ((warnings-only . c/c++-cppcheck)))
 
@@ -4467,9 +4464,8 @@ See Info Node `(elisp)Byte Compilation'."
             line-end))
   :error-filter
   (lambda (errors)
-    (-> errors
-      flycheck-sanitize-errors
-      flycheck-collapse-error-message-whitespace))
+    (flycheck-collapse-error-message-whitespace
+     (flycheck-sanitize-errors errors)))
   :modes (emacs-lisp-mode lisp-interaction-mode)
   :predicate
   (lambda ()
@@ -4787,9 +4783,7 @@ See URL `http://www.haskell.org/ghc/'."
           line-end))
   :error-filter
   (lambda (errors)
-    (-> errors
-      flycheck-dedent-error-messages
-      flycheck-sanitize-errors))
+    (flycheck-sanitize-errors (flycheck-dedent-error-messages errors)))
   :modes haskell-mode
   :next-checkers ((warnings-only . haskell-hlint)))
 
