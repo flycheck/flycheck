@@ -144,8 +144,8 @@ environment variable VAR to be added to `process-environment'
 with VALUE."
   (declare (indent 1))
   `(let ((process-environment (copy-sequence process-environment)))
-     (dolist (env ,env)
-       (setenv (car env) (cdr env)))
+     (pcase-dolist (`(,var . ,value) ,env)
+       (setenv var value))
      ,@body))
 
 (defmacro flycheck-test-with-global-mode (&rest body)

@@ -48,6 +48,7 @@
 (require 'dash)
 
 (require 'subr-x nil 'no-error)  ; Additional utilities, Emacs 24.4 and upwards
+(require 'pcase)                 ; Pattern matching for Emacs Lisp
 (require 'tabulated-list)        ; To list errors
 (require 'rx)                    ; Regexp fanciness in `flycheck-define-checker'
 (require 'help-mode)             ; `define-button-type'
@@ -842,8 +843,8 @@ buffer manually.
    (flycheck-mode
     (flycheck-clear)
 
-    (dolist (hook flycheck-hooks-alist)
-      (add-hook (car hook) (cdr hook) nil 'local))
+    (pcase-dolist (`(,hook . ,fn) flycheck-hooks-alist)
+      (add-hook hook fn nil 'local))
 
     (setq flycheck-old-next-error-function (if flycheck-standard-error-navigation
                                                next-error-function
@@ -854,8 +855,8 @@ buffer manually.
     (unless (eq flycheck-old-next-error-function :unset)
       (setq next-error-function flycheck-old-next-error-function))
 
-    (dolist (hook flycheck-hooks-alist)
-      (remove-hook (car hook) (cdr hook) 'local))
+    (pcase-dolist (`(,hook . ,fn) flycheck-hooks-alist)
+      (remove-hook hook fn 'local))
 
     (flycheck-teardown))))
 
@@ -1516,8 +1517,8 @@ this constant.")
   "Set and verify syntax checker PROPERTIES on SYMBOL.
 
 PROPERTIES is an alist of properties to set."
-  (dolist (prop properties)
-    (put symbol (car prop) (cdr prop)))
+  (pcase-dolist (`(,prop . ,value) properties)
+    (put symbol prop value))
   (flycheck-verify-checker-properties symbol)
   (put symbol 'flycheck-checker-version flycheck-checker-version))
 
