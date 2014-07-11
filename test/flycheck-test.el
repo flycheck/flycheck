@@ -3874,7 +3874,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
   (skip-unless (-all? #'flycheck-check-executable '(go-build go-golint go-vet)))
   (skip-unless (flycheck-check-predicate 'go-vet))
   (let ((flycheck-go-vet-print-functions '("Warn:0" "Warnf:1"))
-        (flycheck-disabled-checkers '(go-golint go-build)))
+        (flycheck-disabled-checkers '(go-golint go-build go-errcheck)))
     (flycheck-test-with-env
         `(("GOPATH" . ,(flycheck-test-resource-filename "checkers/go")))
       (flycheck-test-should-syntax-check
