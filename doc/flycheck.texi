@@ -7518,6 +7518,19 @@ when reading from minibuffer
 #428@footnote{https://github.com/flycheck/flycheck/issues/428}: @code{flycheck-compile} now prompts for the syntax checker to run as
 @code{compile} command
 @end itemize
+
+@item 
+Other changes:
+
+
+@itemize -
+
+@item 
+Remove dependency on f.el
+
+@item 
+Remove dependency on s.el
+@end itemize
 @end itemize
 
 @node 0 19 Jun 12 2014,0 18 Mar 24 2014,master in development,Changes
