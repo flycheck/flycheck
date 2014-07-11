@@ -1744,7 +1744,8 @@ Use this together with the `option', `option-list' and
            (doc-string 4))
   `(progn
      (let ((options (flycheck-checker-option-vars ',checker)))
-       (put ',checker 'flycheck-option-vars (-uniq (cons ',symbol options))))
+       (unless (memq ',symbol options)
+         (put ',checker 'flycheck-option-vars (cons ',symbol options))))
      (defcustom ,symbol ,init-value
        ,(format "%s
 
