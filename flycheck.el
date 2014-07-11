@@ -1,6 +1,7 @@
 ;;; flycheck.el --- Modern on-the-fly syntax checking for GNU Emacs -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2012, 2013, 2014 Sebastian Wiesner <swiesner@lunaryorn.com>
+;; Copyright (C) 2013, 2014 Free Software Foundation, Inc.
 ;;
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
 ;; URL: https://flycheck.readthedocs.org
