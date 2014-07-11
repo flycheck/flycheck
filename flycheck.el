@@ -1234,7 +1234,7 @@ ITEMS."
     (error "Option %S is not a string" option))
   (unless prepend-fn
     (setq prepend-fn #'list))
-  (-flatten (--map (funcall prepend-fn option it) items)))
+  (-flatten (mapcar (apply-partially #'funcall prepend-fn option) items)))
 
 (defun flycheck-find-in-buffer (pattern)
   "Find PATTERN in the current buffer.
@@ -1397,7 +1397,7 @@ chosen.  If DEFAULT is nil and no checker was chosen, signal a
 provide a default on its own."
   (when (and default (not (flycheck-valid-checker-p default)))
     (error "%S is no valid Flycheck checker" default))
-  (let* ((candidates (-map #'symbol-name (flycheck-defined-checkers)))
+  (let* ((candidates (mapcar #'symbol-name (flycheck-defined-checkers)))
          (default (and default (symbol-name default)))
          (input (pcase flycheck-completion-system
                   (`ido (ido-completing-read prompt candidates nil
@@ -1675,9 +1675,11 @@ The default executable is %S." symbol (car command))
                            'flycheck-parse-with-patterns))
               '(flycheck-error-patterns
                 .
-                ,(--map (cons (flycheck-rx-to-string `(and ,@(cdr it)) 'no-group)
-                              (car it))
-                        (plist-get properties :error-patterns)))
+                ,(mapcar
+                  (lambda (p)
+                    (cons (flycheck-rx-to-string `(and ,@(cdr p)) 'no-group)
+                          (car p)))
+                  (plist-get properties :error-patterns)))
               (cons 'flycheck-error-filter
                     #',(or (plist-get properties :error-filter)
                            'flycheck-sanitize-errors))
@@ -1900,8 +1902,8 @@ Return a list representing PATTERN, suitable as element in
 
 Return an alist of all error patterns of CHECKER, suitable for
 use with `compilation-error-regexp-alist'."
-  (-map #'flycheck-checker-pattern-to-error-regexp
-        (flycheck-checker-error-patterns checker)))
+  (mapcar #'flycheck-checker-pattern-to-error-regexp
+          (flycheck-checker-error-patterns checker)))
 
 (defun flycheck-checker-documentation (checker)
   "Get the documentation of CHECKER."
@@ -2460,7 +2462,9 @@ Pop up a help buffer with the documentation of CHECKER."
             (princ ".\n"))
           (when modes
             (princ (format "  It checks syntax in the major mode(s) %s. "
-                           (string-join (--map (format "`%s'" it) modes) ", "))))
+                           (string-join
+                            (mapcar (apply-partially #'format "`%s'") modes)
+                            ", "))))
           (with-current-buffer (help-buffer)
             (save-excursion
               (goto-char (point-min))
@@ -2802,17 +2806,12 @@ function `buffer-file-name'."
       (setf (flycheck-error-filename err) filename)))
   err)
 
-(defun flycheck-fix-error-filenames (errors buffer-files)
-  "Fix the file names of all ERRORS from BUFFER-FILES.
-
-See `flycheck-fix-error-filename' for details."
-  (--map (flycheck-fix-error-filename it buffer-files) errors))
-
 
 ;;; Error parsing with regular expressions
 (defun flycheck-get-regexp (patterns)
   "Create a single regular expression from PATTERNS."
-  (rx-to-string `(or ,@(--map `(regexp ,(car it)) patterns)) :no-group))
+  (rx-to-string `(or ,@(mapcar (lambda (p) (list 'regexp (car p))) patterns))
+                'no-group))
 
 (defun flycheck-tokenize-output-with-patterns (output patterns)
   "Tokenize OUTPUT with PATTERNS.
@@ -2868,7 +2867,7 @@ error message, typically from `flycheck-split-output'.  PATTERNS
 is a list of error patterns to parse ERRORS with.
 
 Return a list of parsed errors."
-  (--map (flycheck-parse-error-with-patterns it patterns) errors))
+  (mapcar (lambda (e) (flycheck-parse-error-with-patterns e patterns)) errors))
 
 (defun flycheck-parse-with-patterns (output checker _buffer)
   "Parse OUTPUT from CHECKER with error patterns.
@@ -3184,8 +3183,8 @@ ERRORS is modified by side effects."
 
 Return a cons cell whose `car' is the number of errors and whose
 `car' is the number of warnings."
-  (--map (cons (car it) (length (cdr it)))
-         (-group-by 'flycheck-error-level errors)))
+  (mapcar (lambda (e) (cons (car e) (length (cdr e))))
+          (-group-by 'flycheck-error-level errors)))
 
 (defun flycheck-has-errors-p (errors &optional level)
   "Determine if there are any ERRORS with LEVEL.
@@ -3246,11 +3245,13 @@ Return the created overlay."
 
 (defun flycheck-overlay-errors-at (pos)
   "Return a list of all flycheck errors overlayed at POS."
-  (--map (overlay-get it 'flycheck-error) (flycheck-overlays-at pos)))
+  (mapcar (lambda (o) (overlay-get o 'flycheck-error))
+          (flycheck-overlays-at pos)))
 
 (defun flycheck-overlay-errors-in (beg end)
   "Return a list of all flycheck errors overlayed between BEG and END."
-  (--map (overlay-get it 'flycheck-error) (flycheck-overlays-in beg end)))
+  (mapcar (lambda (o) (overlay-get o 'flycheck-error))
+          (flycheck-overlays-in beg end)))
 
 (defvar-local flycheck-overlays-to-delete nil
   "Overlays mark for deletion after all syntax checks completed.")
@@ -3286,15 +3287,15 @@ Intended for use with `next-error-function'."
          (overlays-at-point (flycheck-overlays-at point))
          (pos (if overlays-at-point
                   (if forward?
-                      (-max (-map #'overlay-end overlays-at-point))
-                    (-min (-map #'overlay-start overlays-at-point)))
+                      (-max (mapcar #'overlay-end overlays-at-point))
+                    (-min (mapcar #'overlay-start overlays-at-point)))
                 point))
          (min (if forward? pos (point-min)))
          (max (if forward? (point-max) pos))
          (candidates (-sort (if forward? #'<= #'>=)
                             ;; Determine unique start locations
-                            (-uniq (-map (function overlay-start)
-                                         (flycheck-overlays-in min max)))))
+                            (-uniq (mapcar #'overlay-start
+                                           (flycheck-overlays-in min max)))))
          (error-pos (nth (- (abs n) 1) candidates)))
     (if error-pos
         (goto-char error-pos)
@@ -3401,7 +3402,7 @@ Return a list with the contents of the table cell."
   (when (buffer-live-p flycheck-error-list-source-buffer)
     (let ((errors (buffer-local-value 'flycheck-current-errors
                                       flycheck-error-list-source-buffer)))
-      (-map #'flycheck-error-list-make-entry errors))))
+      (mapcar #'flycheck-error-list-make-entry errors))))
 
 (defun flycheck-error-list-goto-source (button)
   "Go to the source of the error associated to BUTTON."
@@ -3724,7 +3725,8 @@ output: %s\nChecker definition probably flawed."
         (flycheck-report-status "?"))
       (setq errors (flycheck-relevant-errors
                     (flycheck-filter-errors
-                     (flycheck-fix-error-filenames errors files) checker)))
+                     (mapcar (lambda (e) (flycheck-fix-error-filename e files))
+                             errors) checker)))
       (setq flycheck-current-errors
             (flycheck-sort-errors (append errors flycheck-current-errors nil)))
       ;; Process all new errors

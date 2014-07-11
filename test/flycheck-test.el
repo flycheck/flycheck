@@ -344,7 +344,8 @@ Each error in ERRORS is a list as expected by
 `flycheck-test-should-error'."
   (if (not errors)
       (should flycheck-current-errors)
-    (let ((expected (--map (apply #'flycheck-error-new-at it) errors)))
+    (let ((expected (mapcar (apply-partially #'apply #'flycheck-error-new-at)
+                            errors)))
       (should (equal expected flycheck-current-errors))
       (mapc #'flycheck-test-should-overlay expected))
     (should (= (length errors)
