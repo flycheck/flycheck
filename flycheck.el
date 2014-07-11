@@ -2105,8 +2105,8 @@ are substituted within the body of cells!"
 Substitute each argument of CHECKER using
 `flycheck-substitute-argument'.  This replaces any special
 symbols in the command."
-  (-flatten (--keep (flycheck-substitute-argument it checker)
-                    (flycheck-checker-arguments checker))))
+  (-flatten (-keep (lambda (arg) (flycheck-substitute-argument arg checker))
+                   (flycheck-checker-arguments checker))))
 
 (defun flycheck-checker-shell-command (checker)
   "Get a shell command for CHECKER.
@@ -2119,10 +2119,11 @@ shell execution."
   (combine-and-quote-strings
    (cons (flycheck-checker-executable checker)
          (-flatten
-          (--keep (if (memq it '(source source-inplace source-original))
-                      (or (buffer-file-name) "")
-                    (flycheck-substitute-argument it checker))
-                  (flycheck-checker-arguments checker))))))
+          (-keep (lambda (arg)
+                   (if (memq arg '(source source-inplace source-original))
+                       (or (buffer-file-name) "")
+                     (flycheck-substitute-argument arg checker)))
+                 (flycheck-checker-arguments checker))))))
 
 (defun flycheck-check-modes (checker)
   "Check the allowed modes of CHECKER.
@@ -2801,7 +2802,8 @@ function `buffer-file-name'."
   (flycheck-error-with-buffer err
     (-when-let (filename (flycheck-error-filename err))
       (setq filename (expand-file-name filename))
-      (when (--any? (flycheck-same-files-p filename it) buffer-files)
+      (when (-any? (apply-partially #'flycheck-same-files-p filename)
+                   buffer-files)
         (setq filename (buffer-file-name)))
       (setf (flycheck-error-filename err) filename)))
   err)
@@ -2857,7 +2859,8 @@ Apply each pattern in PATTERNS to ERR, in the given order, and
 return the first parsed error."
   ;; Try to parse patterns in the order of declaration to make sure that the
   ;; first match wins.
-  (car (--keep (flycheck-try-parse-error-with-pattern err it) patterns)))
+  (car (-keep (apply-partially #'flycheck-try-parse-error-with-pattern err)
+              patterns)))
 
 (defun flycheck-parse-errors-with-patterns (errors patterns)
   "Parse ERRORS with PATTERNS.
@@ -2961,7 +2964,8 @@ about Checkstyle."
       (error "Unexpected root element %s" (car root)))
     ;; cddr gets us the body of the node without its name and its attributes
     (-mapcat #'flycheck-parse-checkstyle-file-node
-             (--filter (and (listp it) (eq (car it) 'file)) (cddr root)))))
+             (-filter (lambda (n) (and (listp n) (eq (car n) 'file)))
+                      (cddr root)))))
 
 (defun flycheck-parse-cppcheck-error-node (node)
   "Parse a single error NODE from Cppcheck XML.
@@ -2992,13 +2996,14 @@ _BUFFER and _ERROR are ignored.
 See URL `http://cppcheck.sourceforge.net/' for more information
 about Cppcheck."
   (-when-let* ((root (flycheck-parse-xml-string output))
-               (errors (--first (and (listp it) (eq (car it) 'errors))
-                                (cddr root))))
+               (errors (-first (lambda (n) (and (listp n) (eq (car n) 'errors)))
+                               (cddr root))))
     (unless (eq (car root) 'results)
       (error "Unexpected root element %s" (car root)))
     ;; Filter error nodes
     (-mapcat #'flycheck-parse-cppcheck-error-node
-             (--filter (and (listp it) (eq (car it) 'error)) errors))))
+             (-filter (lambda (n) (and (listp n) (eq (car n) 'error)))
+                      errors))))
 
 
 ;;; Error filtering
@@ -3191,7 +3196,7 @@ Return a cons cell whose `car' is the number of errors and whose
 
 If LEVEL is omitted check if ERRORS is not nil."
   (if level
-      (--any? (eq (flycheck-error-level it) level) errors)
+      (-any? (lambda (e) (eq (flycheck-error-level e) level)) errors)
     (when errors t)))
 
 (defun flycheck-has-current-errors-p (&optional level)
@@ -3233,7 +3238,7 @@ Return the created overlay."
 
 (defun flycheck-filter-overlays (overlays)
   "Get all Flycheck overlays from OVERLAYS."
-  (--filter (overlay-get it 'flycheck-overlay) overlays))
+  (-filter (lambda (o) (overlay-get o 'flycheck-overlay)) overlays))
 
 (defun flycheck-overlays-at (pos)
   "Get all Flycheck overlays at POS."

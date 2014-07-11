@@ -300,16 +300,17 @@ failed, and the test aborted with failure.")
 Raise an assertion error if the buffer is not clear afterwards."
   (flycheck-clear)
   (should (not flycheck-current-errors))
-  (should (not (--any? (overlay-get it 'flycheck-overlay)
-                       (overlays-in (point-min) (point-max))))))
+  (should (not (-any? (lambda (ov) (overlay-get ov 'flycheck-overlay))
+                      (overlays-in (point-min) (point-max))))))
 
 
 ;;; Unit test predicates
 
 (defun flycheck-test-should-overlay (error)
   "Test that ERROR has an overlay."
-  (let* ((overlay (--first (equal (overlay-get it 'flycheck-error) error)
-                           (flycheck-overlays-in 0 (+ 1 (buffer-size)))))
+  (let* ((overlay (-first (lambda (ov) (equal (overlay-get ov 'flycheck-error)
+                                              error))
+                          (flycheck-overlays-in 0 (+ 1 (buffer-size)))))
          (region (flycheck-error-region-for-mode error 'symbols))
          (message (flycheck-error-message error))
          (level (flycheck-error-level error))
