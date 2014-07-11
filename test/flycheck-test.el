@@ -42,7 +42,6 @@
 
 (require 'flycheck)
 (require 'dash)
-(require 'f)
 (require 'cl-lib)
 (require 'epa-file)                     ; To test encrypted buffers
 (require 'ert)                          ; Unit test library
