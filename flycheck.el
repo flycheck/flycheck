@@ -45,7 +45,6 @@
   (require 'jka-compr)      ; For JKA workarounds in `flycheck-temp-file-system'
   )
 
-(require 's)
 (require 'dash)
 
 (require 'subr-x nil 'no-error)  ; Additional utilities, Emacs 24.4 and upwards
