@@ -43,6 +43,7 @@
 (require 'flycheck)
 (require 'dash)
 (require 'cl-lib)
+(require 'macroexp)                     ; For macro utilities
 (require 'epa-file)                     ; To test encrypted buffers
 (require 'ert)                          ; Unit test library
 (require 'shut-up)                      ; Silence Emacs and intercept `message'
@@ -107,7 +108,7 @@ it has a backing file and is modified."
   (declare (indent 0))
   `(with-temp-buffer
      (unwind-protect
-         (progn ,@body)
+         ,(macroexp-progn body)
        ;; Reset modification state of the buffer, and unlink it from its backing
        ;; file, if any, because Emacs refuses to kill modified buffers with
        ;; backing files, even if they are temporary.
@@ -160,7 +161,7 @@ with VALUE."
   "Execute BODY and kill the help buffer afterwards."
   (declare (indent 0))
   `(unwind-protect
-       (progn ,@body)
+       ,(macroexp-progn body)
      (when (buffer-live-p (get-buffer (help-buffer)))
        (kill-buffer (help-buffer)))))
 
