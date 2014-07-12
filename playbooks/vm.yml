@@ -34,23 +34,13 @@
       with_items:
         - emacs24-nox
         - emacs-snapshot-nox
-    - name: Download Go
-      get_url: url=http://golang.org/dl/go{{go_version}}.linux-amd64.tar.gz
-               dest=/usr/src/go{{go_version}}.tar.gz
-      ignore_errors: True
-    - name: Extract Go
-      unarchive: src=/usr/src/go{{go_version}}.tar.gz copy=no dest=/usr/local/
-                 creates=/usr/local/go/bin/go
-      ignore_errors: True
-    - name: Put Go into $PATH
-      copy: dest=/etc/profile.d/go.sh mode=0644 owner=root group=root
-            content="export PATH=/usr/local/lib/go/bin:/usr/local/go/bin/:$PATH"
     - name: Put Haskell into $PATH
       copy: dest=/etc/profile.d/ghc.sh mode=0644 owner=root group=root
             content="export PATH=/opt/ghc/{{ghc_version}}/bin:$PATH"
     - include: tasks/perl.yml
     - include: tasks/pear.yml
     - include: tasks/npm.yml
+    - include: tasks/go.yml
     - include: tasks/goget.yml
     - include: tasks/elixir.yml
     - include: tasks/cask.yml
