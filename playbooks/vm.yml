@@ -35,7 +35,7 @@
         - emacs24-nox
         - emacs-snapshot-nox
     - name: Download Go
-      get_url: url=https://storage.googleapis.com/golang/go{{go_version}}.linux-amd64.tar.gz
+      get_url: url=http://golang.org/dl/go{{go_version}}.linux-amd64.tar.gz
                dest=/usr/src/go{{go_version}}.tar.gz
       ignore_errors: True
     - name: Extract Go
