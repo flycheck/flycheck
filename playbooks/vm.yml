@@ -29,6 +29,7 @@
         - ruby1.9.1
         - ruby1.9.1-dev
         - nodejs
+        - openjdk-7-jre
     - name: Install Emacs stable and snapshot
       apt: name={{item}} state=latest install_recommends=false
       with_items:
@@ -46,6 +47,7 @@
     - include: tasks/cask.yml
     - include: tasks/eggs.yml
     - include: tasks/gems.yml
+    - include: tasks/java.yml
     - name: Automatically change to /flycheck directory on login
       lineinfile: dest="{{home}}/.bashrc" state=present
                   line="cd /flycheck" insertafter=EOF

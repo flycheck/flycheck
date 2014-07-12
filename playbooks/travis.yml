@@ -26,3 +26,5 @@
     - include: tasks/goget.yml
     - include: tasks/eggs.yml
     - include: tasks/gems.yml
+    - include: tasks/java.yml
+      sudo: True
