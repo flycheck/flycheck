@@ -7,6 +7,11 @@
 - name: Link Scala into PATH
   file: src=/opt/scala-{{scala_version}}/bin/scalac dest=/usr/local/bin/scalac
         state=link
+- name: Download scalastyle
+  get_url: url=https://oss.sonatype.org/content/repositories/releases/org/scalastyle/scalastyle-batch_2.10/{{scalastyle_version}}/scalastyle-batch_2.10-{{scalastyle_version}}-distribution.zip
+           dest=/usr/src/scalastyle-batch_2.10-{{scalastyle_version}}-distribution.zip
+- name: Extract scalastyle
+  unarchive: src=/usr/src/scalastyle-batch_2.10-{{scalastyle_version}}-distribution.zip copy=no dest=/opt/
 - name: Download JRuby
   get_url: url=http://jruby.org.s3.amazonaws.com/downloads/{{jruby_version}}/jruby-bin-{{jruby_version}}.tar.gz
            dest=/usr/src/jruby-{{jruby_version}}.tar.gz

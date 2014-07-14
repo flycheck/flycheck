@@ -1,0 +1,10 @@
+<scalastyle commentFilter="enabled">
+ <name>Scalastyle test configuration</name>
+ <check enabled="true" class="org.scalastyle.scalariform.EmptyClassChecker" level="warning" />
+ <check level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
+   <parameters>
+     <parameter name="regex"><![CDATA[println]]></parameter>
+   </parameters>
+   <customMessage>Don't use println</customMessage>
+ </check>
+</scalastyle>

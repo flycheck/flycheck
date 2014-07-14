@@ -221,6 +221,7 @@ attention to case differences."
     rust
     sass
     scala
+    scalastyle
     scss
     sh-bash
     sh-posix-dash
@@ -5457,7 +5458,40 @@ See URL `http://www.scala-lang.org/'."
   :command ("scalac" "-Ystop-after:parser" source)
   :error-patterns
   ((error line-start (file-name) ":" line ": error: " (message) line-end))
-  :modes scala-mode)
+  :modes scala-mode
+  :next-checkers ((warnings-only . scalastyle)))
+
+(flycheck-def-config-file-var flycheck-scalastylerc scalastyle nil
+  :safe #'stringp
+  :package-version '(flycheck . "0.20"))
+
+(flycheck-def-option-var flycheck-scalastyle-jar nil scalastyle
+  "The JAR file which implements scalastyle"
+  :type '(file :must-match t)
+  :safe #'stringp
+  :package-version '(flycheck . "0.20"))
+
+(flycheck-define-checker scalastyle
+  "A Scala style checker using scalastyle.
+
+See URL `http://www.scalastyle.org'."
+  :command ("java"
+            (option "-jar" flycheck-scalastyle-jar)
+            (config-file "-c" flycheck-scalastylerc)
+            source)
+  :error-patterns
+  ((error line-start "error file=" (file-name) " message="
+          (message) " line=" line (optional " column=" column) line-end)
+   (warning line-start "warning file=" (file-name) " message="
+            (message) " line=" line (optional " column=" column) line-end))
+  :modes scala-mode
+  :predicate
+  ;; Inhibit this syntax checker if the JAR or the configuration are unset or
+  ;; missing
+  (lambda () (and flycheck-scalastyle-jar flycheck-scalastylerc
+                  (file-exists-p flycheck-scalastyle-jar)
+                  (file-exists-p (flycheck-locate-config-file
+                                  flycheck-scalastylerc 'scalastyle)))))
 
 (flycheck-def-option-var flycheck-scss-compass nil scss
   "Whether to enable the Compass CSS framework.
