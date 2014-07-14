@@ -1111,9 +1111,8 @@ is loadable."
 (defun flycheck-string-to-number-safe (string)
   "Safely convert STRING to a number.
 
-If STRING is of string type, and a numeric string (see
-`s-numeric?'), convert STRING to a number and return it.
-Otherwise return nil."
+If STRING is of string type and a numeric string, convert STRING
+to a number and return it.  Otherwise return nil."
   (let ((number-re (rx string-start (one-or-more (any digit)) string-end)))
     (when (and (stringp string) (string-match-p number-re string))
       (string-to-number string))))
@@ -4010,8 +4009,8 @@ See URL `http://clang.llvm.org/'."
             (option-flag "-fno-rtti" flycheck-clang-no-rtti)
             (option-flag "-fblocks" flycheck-clang-blocks)
             (option-list "-include" flycheck-clang-includes)
-            (option-list "-W" flycheck-clang-warnings s-prepend)
-            (option-list "-D" flycheck-clang-definitions s-prepend)
+            (option-list "-W" flycheck-clang-warnings concat)
+            (option-list "-D" flycheck-clang-definitions concat)
             (option-list "-I" flycheck-clang-include-path)
             "-x" (eval
                   (pcase major-mode
@@ -4126,8 +4125,8 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
             (option-flag "-fno-exceptions" flycheck-gcc-no-exceptions)
             (option-flag "-fno-rtti" flycheck-gcc-no-rtti)
             (option-list "-include" flycheck-gcc-includes)
-            (option-list "-W" flycheck-gcc-warnings s-prepend)
-            (option-list "-D" flycheck-gcc-definitions s-prepend)
+            (option-list "-W" flycheck-gcc-warnings concat)
+            (option-list "-D" flycheck-gcc-definitions concat)
             (option-list "-I" flycheck-gcc-include-path)
             "-x" (eval
                   (pcase major-mode
@@ -4301,7 +4300,7 @@ See URL `http://dlang.org/'."
   :command ("dmd" "-debug" "-o-"
             "-wi" ; Compilation will continue even if there are warnings
             (eval (concat "-I" (flycheck-d-base-directory)))
-            (option-list "-I" flycheck-dmd-include-path s-prepend)
+            (option-list "-I" flycheck-dmd-include-path concat)
             source)
   :error-patterns
   ((error line-start (file-name) "(" line "): Error: " (message) line-end)
@@ -4453,7 +4452,7 @@ See Info Node `(elisp)Byte Compilation'."
             (option-list "--directory" flycheck-emacs-lisp-load-path nil
                          ;; Expand relative paths against the directory of the
                          ;; buffer to check
-                         f-expand)
+                         expand-file-name)
             (option "--eval" flycheck-emacs-lisp-package-user-dir
                     flycheck-option-emacs-lisp-package-user-dir)
             (option "--eval" flycheck-emacs-lisp-initialize-packages
@@ -4759,14 +4758,14 @@ See URL `http://www.haskell.org/ghc/'."
             (option-flag "-no-user-package-db"
                          flycheck-ghc-no-user-package-database)
             (option-list "-package-db" flycheck-ghc-package-databases)
-            (option-list "-i" flycheck-ghc-search-path s-prepend)
+            (option-list "-i" flycheck-ghc-search-path concat)
             ;; Include the parent directory of the current module tree, to
             ;; properly resolve local imports
             (eval (concat
                    "-i"
                    (flycheck-module-root-directory
                     (flycheck-find-in-buffer flycheck-haskell-module-re))))
-            (option-list "-X" flycheck-ghc-language-extensions s-prepend)
+            (option-list "-X" flycheck-ghc-language-extensions concat)
             ;; Force GHC to treat the file as Haskell file, even if it doesn't
             ;; have an extension.  Otherwise GHC would fail on files without an
             ;; extension
@@ -5408,7 +5407,7 @@ This syntax checker needs Rust 0.10 or newer.
 See URL `http://www.rust-lang.org'."
   :command ("rustc" "--crate-type=lib" "--no-trans"
             (option-flag "--test" flycheck-rust-check-tests)
-            (option-list "-L" flycheck-rust-library-path s-prepend)
+            (option-list "-L" flycheck-rust-library-path concat)
             (eval (or flycheck-rust-crate-root
                       (flycheck-substitute-argument 'source-inplace 'rust))))
   :error-patterns
