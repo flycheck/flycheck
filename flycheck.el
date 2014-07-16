@@ -3692,9 +3692,7 @@ https://github.com/Bruce-Connor/emacs-google-this")))
 
 (defun flycheck-receive-checker-output (process output)
   "Receive a syntax checking PROCESS OUTPUT."
-  (let ((pending-output (process-get process 'flycheck-pending-output)))
-    (process-put process 'flycheck-pending-output
-                 (cons output pending-output))))
+  (push output (process-get process 'flycheck-pending-output)))
 
 (defun flycheck-get-output (process)
   "Get the complete output of PROCESS."
