@@ -778,11 +778,11 @@ keybindings.  Changing this variable is at your own risk."
 
 Completely clear the whole Flycheck state.  Remove overlays, kill
 running checks, and empty all variables used by Flycheck."
+  (flycheck-safe-delete-temporaries)
+  (flycheck-stop-checker)
   (flycheck-clean-deferred-check)
   (flycheck-clear)
-  (flycheck-stop-checker)
   (flycheck-cancel-error-display-error-at-point-timer)
-  (flycheck-safe-delete-temporaries)
   (flycheck-clear-checker))
 
 (defvar-local flycheck-old-next-error-function nil
