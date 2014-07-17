@@ -121,7 +121,11 @@ attention to case differences."
 
     (defsubst string-trim (string)
       "Remove leading and trailing whitespace from STRING."
-      (string-trim-left (string-trim-right string)))))
+      (string-trim-left (string-trim-right string)))
+
+    (defsubst string-empty-p (string)
+      "Check whether STRING is empty."
+      (string= string ""))))
 
 (when (and (not (get 'exclamation-mark 'fringe))
            (fboundp 'define-fringe-bitmap))
@@ -1412,7 +1416,7 @@ https://github.com/d11wtq/grizzl")))
                   (_ (completing-read prompt candidates nil 'require-match
                                       nil 'read-flycheck-checker-history
                                       default)))))
-    (when (string= input "")
+    (when (string-empty-p input)
       (unless default
         (user-error "No syntax checker entered"))
       (setq input default))
@@ -2845,10 +2849,10 @@ otherwise."
             (column (match-string 3 err))
             (message (match-string 4 err)))
         (flycheck-error-new
-         :filename (unless (string= filename "") filename)
+         :filename (unless (string-empty-p filename) filename)
          :line (flycheck-string-to-number-safe line)
          :column (flycheck-string-to-number-safe column)
-         :message (unless (string= message "") message)
+         :message (unless (string-empty-p message) message)
          :level level)))))
 
 (defun flycheck-parse-error-with-patterns (err patterns)
@@ -3032,7 +3036,7 @@ Returns sanitized ERRORS."
         (when message
           (setq message (string-trim message))
           (setf (flycheck-error-message err)
-                (if (string= message "") nil message)))
+                (if (string-empty-p message) nil message)))
         (when (eq column 0)
           (setf (flycheck-error-column err) nil)))))
   errors)
@@ -3152,7 +3156,7 @@ otherwise."
       (and
        (or (not file-name) (flycheck-same-files-p file-name (buffer-file-name)))
        message
-       (not (string= message ""))
+       (not (string-empty-p message))
        (flycheck-error-line err)))))
 
 (defun flycheck-relevant-errors (errors)

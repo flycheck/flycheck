@@ -2977,7 +2977,7 @@ of the file will be interrupted because there are too many #ifdef configurations
 (ert-deftest flycheck-error-list-make-number-cell/not-a-number ()
   :tags '(error-list)
   (let ((cell (flycheck-error-list-make-number-cell nil 'bold)))
-    (should (string= "" cell))
+    (should (string-empty-p cell))
     (should-not (get-text-property 0 'font-lock-face cell))))
 
 (ert-deftest flycheck-error-list-make-number-cell/a-number ()
@@ -3015,7 +3015,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (let* ((error (flycheck-error-new-at 10 nil 'warning "foo"))
          (entry (flycheck-error-list-make-entry error))
          (cells (cadr entry)))
-    (should (string= "" (aref cells 1)))))
+    (should (string-empty-p (aref cells 1)))))
 
 (ert-deftest flycheck-error-list-make-entry/error-level ()
   :tags '(error-list)
