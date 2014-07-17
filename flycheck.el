@@ -103,23 +103,23 @@ attention to case differences."
 
   (unless (featurep 'subr-x)
     ;; `subr-x' function for Emacs 24.3 and below
-    (defun string-join (strings &optional separator)
+    (defsubst string-join (strings &optional separator)
       "Join all STRINGS using SEPARATOR."
       (mapconcat 'identity strings separator))
 
-    (defun string-trim-left (string)
+    (defsubst string-trim-left (string)
       "Remove leading whitespace from STRING."
       (if (string-match "\\`[ \t\n\r]+" string)
           (replace-match "" t t string)
         string))
 
-    (defun string-trim-right (string)
+    (defsubst string-trim-right (string)
       "Remove trailing whitespace from STRING."
       (if (string-match "[ \t\n\r]+\\'" string)
           (replace-match "" t t string)
         string))
 
-    (defun string-trim (string)
+    (defsubst string-trim (string)
       "Remove leading and trailing whitespace from STRING."
       (string-trim-left (string-trim-right string)))))
 
