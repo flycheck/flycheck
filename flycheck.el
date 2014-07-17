@@ -1775,11 +1775,10 @@ CHECKER, unless APPEND is non-nil."
   (unless (flycheck-valid-checker-p checker)
     (error "%s is not a valid syntax checker" checker))
   (flycheck-validate-next-checker next-checker 'validate-checker)
-  (let ((next-checkers (flycheck-checker-next-checkers checker)))
-    (put checker 'flycheck-next-checkers
-         (if append
-             (append next-checkers (list next-checker))
-           (cons next-checker next-checkers)))))
+  (if append
+      (put checker 'flycheck-next-checkers
+           (append (get checker 'flycheck-next-checkers) (list next-checker)))
+    (push next-checker (get checker 'flycheck-next-checkers))))
 
 
 ;;; Checker API
@@ -2162,7 +2161,7 @@ Try to reinstall the package defining this syntax checker." checker)
 (defun flycheck-may-use-next-checker (next-checker)
   "Determine whether NEXT-CHECKER may be used."
   (when (symbolp next-checker)
-    (setq next-checker (cons t next-checker)))
+    (push t next-checker))
   (let ((predicate (car next-checker))
         (next-checker (cdr next-checker)))
     (and (or (eq predicate t)
