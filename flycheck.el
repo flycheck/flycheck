@@ -2841,10 +2841,10 @@ see `flycheck-parse-errors-with-patterns'.
 
 Return a list of error tokens."
   (let ((regexp (flycheck-get-regexp patterns))
-        (errors nil)
-        (last-match 0))
+        (last-match 0)
+        errors)
     (while (string-match regexp output last-match)
-      (!cons (match-string 0 output) errors)
+      (push (match-string 0 output) errors)
       (setq last-match (match-end 0)))
     (reverse errors)))
 
