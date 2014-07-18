@@ -2085,19 +2085,19 @@ are substituted within the body of cells!"
                 value variable filter option-name))
        (flycheck-option-with-value-argument option-name value)))
     (`(option-list ,option-name ,variable)
-     (-when-let (value (symbol-value variable))
+     (let ((value (symbol-value variable)))
        (unless (and (listp value) (-all? #'stringp value))
          (error "Value %S of %S for option %S is not a list of strings"
                 value variable option-name))
        (flycheck-prepend-with-option option-name value)))
     (`(option-list ,option-name ,variable ,prepend-fn)
-     (-when-let (value (symbol-value variable))
+     (let ((value (symbol-value variable)))
        (unless (and (listp value) (-all? #'stringp value))
          (error "Value %S of %S for option %S is not a list of strings"
                 value variable option-name))
        (flycheck-prepend-with-option option-name value prepend-fn)))
     (`(option-list ,option-name ,variable ,prepend-fn ,filter)
-     (-when-let (value (-keep filter (symbol-value variable)))
+     (let ((value (delq nil (mapcar filter (symbol-value variable)))))
        (unless (and (listp value) (-all? #'stringp value))
          (error "Value %S of %S for option %S is not a list of strings"
                 value variable option-name))
@@ -2274,7 +2274,7 @@ SEPARATOR is ignored in this case."
   (let ((filter (or filter #'identity))
         (separator (or separator ",")))
     (if (listp value)
-        (-when-let (value (-keep filter value))
+        (-when-let (value (delq nil (mapcar filter value)))
           (string-join value separator))
       (funcall filter value))))
 
@@ -2874,8 +2874,13 @@ Apply each pattern in PATTERNS to ERR, in the given order, and
 return the first parsed error."
   ;; Try to parse patterns in the order of declaration to make sure that the
   ;; first match wins.
-  (car (-keep (apply-partially #'flycheck-try-parse-error-with-pattern err)
-              patterns)))
+  (let (parsed-error)
+    (while (and patterns
+                (not (setq parsed-error
+                           (flycheck-try-parse-error-with-pattern
+                            err (car patterns)))))
+      (setq patterns (cdr patterns)))
+    parsed-error))
 
 (defun flycheck-parse-errors-with-patterns (errors patterns)
   "Parse ERRORS with PATTERNS.
@@ -3634,8 +3639,8 @@ node `(elisp)Displaying Messages' for more information.
 
 In the latter case, show messages in
 `flycheck-error-message-buffer'."
-  (-when-let (messages (-keep #'flycheck-error-message errors))
-    (when (flycheck-may-use-echo-area-p)
+  (let ((messages (delq nil (mapcar #'flycheck-error-message errors))))
+    (when (and errors (flycheck-may-use-echo-area-p))
       (display-message-or-buffer (string-join messages "\n\n")
                                  flycheck-error-message-buffer))))
 
@@ -3655,10 +3660,11 @@ Hide the error buffer if there is no error under point."
 
 Each error message under point is copied into the kill ring."
   (interactive "d")
-  (-when-let* ((errors (flycheck-overlay-errors-at pos))
-               (messages (-keep #'flycheck-error-message errors)))
-    (mapc #'kill-new (reverse messages))
-    (message (string-join messages "\n"))))
+  (let ((messages (delq nil (mapcar #'flycheck-error-message
+                                    (flycheck-overlay-errors-at pos)))))
+    (when messages
+      (mapc #'kill-new (reverse messages))
+      (message (string-join messages "\n")))))
 
 (defun flycheck-google-messages (pos &optional quote-flag)
   "Google each error message at POS.
@@ -3675,8 +3681,8 @@ This function requires the Google This library from URL
 `https://github.com/Bruce-Connor/emacs-google-this'."
   (interactive "d\nP")
   (if (fboundp 'google-string)
-      (-when-let (messages (-keep #'flycheck-error-message
-                                  (flycheck-overlay-errors-at pos)))
+      (let ((messages (delq nil (mapcar #'flycheck-error-message
+                                        (flycheck-overlay-errors-at pos)))))
         (when (and flycheck-google-max-messages
                    (> (length messages) flycheck-google-max-messages))
           (user-error "More than %s messages at point"
