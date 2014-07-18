@@ -3212,8 +3212,14 @@ ERRORS is modified by side effects."
 
 Return a cons cell whose `car' is the number of errors and whose
 `car' is the number of warnings."
-  (mapcar (lambda (e) (cons (car e) (length (cdr e))))
-          (-group-by 'flycheck-error-level errors)))
+  (let (counts-by-level)
+    (dolist (err errors)
+      (let* ((level (flycheck-error-level err))
+             (item (assq level counts-by-level)))
+        (if item
+            (setcdr item (1+ (cdr item)))
+          (push (cons level 1) counts-by-level))))
+    counts-by-level))
 
 (defun flycheck-has-errors-p (errors &optional level)
   "Determine if there are any ERRORS with LEVEL.
