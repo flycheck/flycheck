@@ -1134,7 +1134,7 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-prepend-with-option/empty-list ()
   :tags '(utility)
-  (should (null (flycheck-prepend-with-option "-f" nil))))
+  (should-not (flycheck-prepend-with-option "-f" nil)))
 
 (ert-deftest flycheck-prepend-with-option/default-prepend-function ()
   :tags '(utility)

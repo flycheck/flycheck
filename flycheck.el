@@ -1228,16 +1228,26 @@ Prepend OPTION to each item in ITEMS.
 
 ITEMS is a list of strings to pass to the syntax checker.  OPTION
 is the option, as string.  PREPEND-FN is a function called to
-prepend OPTION to each item in ITEMS.  If nil or omitted, use
-`list'.
+prepend OPTION to each item in ITEMS.  It receives the option and
+a single item from ITEMS as argument, and must return a string or
+a list of strings with OPTION prepended to the item.  If
+PREPEND-FN is nil or omitted, use `list'.
 
-Return a flattened list where OPTION is prepended to each item in
-ITEMS."
+Return a list of strings where OPTION is prepended to each item
+in ITEMS using PREPEND-FN.  If PREPEND-FN returns a list, it is
+spliced into the resulting list."
   (unless (stringp option)
     (error "Option %S is not a string" option))
   (unless prepend-fn
     (setq prepend-fn #'list))
-  (-flatten (mapcar (apply-partially #'funcall prepend-fn option) items)))
+  (let ((prepend
+         (lambda (item)
+           (let ((result (funcall prepend-fn option item)))
+             (cond
+              ((and (listp result) (-all? #'stringp result)) result)
+              ((stringp result) (list result))
+              (t (error "Invalid result type for option: %S" result)))))))
+    (apply #'append (mapcar prepend items))))
 
 (defun flycheck-find-in-buffer (pattern)
   "Find PATTERN in the current buffer.
