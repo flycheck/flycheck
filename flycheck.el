@@ -2316,9 +2316,11 @@ If a checker is found set `flycheck-last-checker' to re-use this
 checker for the next check.
 
 Return the checker if there is any, or nil otherwise."
-  (-when-let (checker (-first #'flycheck-may-use-checker
-                              (flycheck-enabled-checkers)))
-    (setq flycheck-last-checker checker)))
+  (let ((checkers (flycheck-enabled-checkers)))
+    (while (and checkers (not (flycheck-may-use-checker (car checkers))))
+      (setq checkers (cdr checkers)))
+    (when checkers
+      (setq flycheck-last-checker (car checkers)))))
 
 (defun flycheck-get-checker-for-buffer ()
   "Find the checker for the current buffer.
@@ -2335,11 +2337,14 @@ nil otherwise."
 
 (defun flycheck-get-next-checker-for-buffer (checker)
   "Get the checker to run after CHECKER for the current buffer."
-  (-when-let (next-checkers (flycheck-checker-next-checkers checker))
-    (let ((next-checker (-first #'flycheck-may-use-next-checker next-checkers)))
-      (if (symbolp next-checker)
-          next-checker
-        (cdr next-checker)))))
+  (let ((next-checkers (flycheck-checker-next-checkers checker)))
+    (while (and next-checkers
+                (not (flycheck-may-use-next-checker (car next-checkers))))
+      (setq next-checkers (cdr next-checkers)))
+    (when next-checkers
+      (if (symbolp (car next-checkers))
+          (car next-checkers)
+        (cdar next-checkers)))))
 
 (defun flycheck-select-checker (checker)
   "Select CHECKER for the current buffer.
@@ -2979,13 +2984,11 @@ _CHECKER and _BUFFER are ignored.
 
 See URL `http://checkstyle.sourceforge.net/' for information
 about Checkstyle."
-  (-when-let (root (flycheck-parse-xml-string output))
-    (unless (eq (car root) 'checkstyle)
-      (error "Unexpected root element %s" (car root)))
-    ;; cddr gets us the body of the node without its name and its attributes
-    (-mapcat #'flycheck-parse-checkstyle-file-node
-             (-filter (lambda (n) (and (listp n) (eq (car n) 'file)))
-                      (cddr root)))))
+  (let ((root (flycheck-parse-xml-string output)))
+    (when (eq (car root) 'checkstyle)
+      (-mapcat #'flycheck-parse-checkstyle-file-node
+               (-filter (lambda (n) (and (listp n) (eq (car n) 'file)))
+                        (cddr root))))))
 
 (defun flycheck-parse-cppcheck-error-node (node)
   "Parse a single error NODE from Cppcheck XML.
@@ -3015,15 +3018,16 @@ _BUFFER and _ERROR are ignored.
 
 See URL `http://cppcheck.sourceforge.net/' for more information
 about Cppcheck."
-  (-when-let* ((root (flycheck-parse-xml-string output))
-               (errors (-first (lambda (n) (and (listp n) (eq (car n) 'errors)))
-                               (cddr root))))
-    (unless (eq (car root) 'results)
-      (error "Unexpected root element %s" (car root)))
-    ;; Filter error nodes
-    (-mapcat #'flycheck-parse-cppcheck-error-node
-             (-filter (lambda (n) (and (listp n) (eq (car n) 'error)))
-                      errors))))
+  (let ((root (flycheck-parse-xml-string output)))
+    (when (eq (car root) 'results)
+      (let ((nodes (cddr root)))
+        (while (and nodes
+                    (not (and (listp (car nodes)) (eq (caar nodes) 'errors))))
+          (setq nodes (cdr nodes)))
+        ;; Filter error nodes
+        (-mapcat #'flycheck-parse-cppcheck-error-node
+                 (-filter (lambda (n) (and (listp n) (eq (car n) 'error)))
+                          (car nodes)))))))
 
 
 ;;; Error filtering
