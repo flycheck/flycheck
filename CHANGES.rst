@@ -7,6 +7,7 @@ master (in development)
 
   - The internal names of syntax checker properties changed.  **All packages
     depending on Flycheck must be recompiled!**
+  - `flycheck-substitute-argument` always returns a list now
 
 - New syntax checkers:
 

@@ -1577,25 +1577,25 @@ check with.  ERRORS is the list of expected errors."
     (unwind-protect
         (progn
           (should (equal (flycheck-substitute-argument 'source-original 'emacs-lisp)
-                         (buffer-file-name)))
+                         (list (buffer-file-name))))
 
           (let ((filename (flycheck-substitute-argument 'source-inplace 'emacs-lisp)))
-            (should (equal filename (flycheck-test-resource-filename
-                                     (concat flycheck-temp-prefix
-                                             "_substitute-dummy"))))
-            (should (file-exists-p filename)))
+            (should (equal filename (list (flycheck-test-resource-filename
+                                           (concat flycheck-temp-prefix
+                                                   "_substitute-dummy")))))
+            (should (file-exists-p (car filename))))
 
           (let ((filename (flycheck-substitute-argument 'source 'emacs-lisp)))
-            (should (string-prefix-p temporary-file-directory filename))
-            (should (file-exists-p filename)))))
+            (should (string-prefix-p temporary-file-directory (car filename)))
+            (should (file-exists-p (car filename))))))
     (mapc #'flycheck-safe-delete flycheck-temporaries)))
 
 (ert-deftest flycheck-substitute-argument/temporary-directory ()
   :tags '(checker-api)
   (flycheck-test-with-temp-buffer
     (unwind-protect
-        (let ((dirname (flycheck-substitute-argument 'temporary-directory
-                                                     'emacs-lisp)))
+        (let ((dirname (car (flycheck-substitute-argument 'temporary-directory
+                                                          'emacs-lisp))))
           (should (file-directory-p dirname))
           (should (string-prefix-p temporary-file-directory dirname)))
       (mapc #'flycheck-safe-delete flycheck-temporaries))))
@@ -1604,8 +1604,8 @@ check with.  ERRORS is the list of expected errors."
   :tags '(checker-api)
   (flycheck-test-with-temp-buffer
     (unwind-protect
-        (let ((filename (flycheck-substitute-argument 'temporary-file-name
-                                                      'emacs-lisp)))
+        (let ((filename (car (flycheck-substitute-argument 'temporary-file-name
+                                                           'emacs-lisp))))
           ;; The filename should not exist, but it's parent directory should
           (should-not (file-exists-p filename))
           (should (file-directory-p (file-name-directory filename)))
@@ -1704,11 +1704,11 @@ check with.  ERRORS is the list of expected errors."
   (let ((flycheck-test-option-var t))
     (should (equal (flycheck-substitute-argument
                     '(option-flag "--foo" flycheck-test-option-var) 'emacs-lisp)
-                   "--foo")))
+                   (list "--foo"))))
   (let ((flycheck-test-option-var (list "bar")))
     (should (equal (flycheck-substitute-argument
                     '(option-flag "--foo" flycheck-test-option-var) 'emacs-lisp)
-                   "--foo"))))
+                   (list "--foo")))))
 
 (ert-deftest flycheck-substitute-argument/eval ()
   :tags '(checker-api)
@@ -1716,7 +1716,7 @@ check with.  ERRORS is the list of expected errors."
     (should (equal (flycheck-substitute-argument '(eval flycheck-test-option-var) 'emacs-lisp)
                    '("Hello " "World"))))
   (should (equal (flycheck-substitute-argument '(eval (concat "Hello" "World")) 'emacs-lisp)
-                 "HelloWorld"))
+                 '("HelloWorld")))
   (should-not (flycheck-substitute-argument
                '(eval (when (string= "foo" "bar") "yes")) 'emacs-lisp))
   (should-error (flycheck-substitute-argument '(eval 200) 'emacs-lisp))

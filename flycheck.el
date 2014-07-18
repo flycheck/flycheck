@@ -1948,6 +1948,10 @@ configuration file was found."
 (defun flycheck-substitute-argument (arg checker)
   "Substitute ARG for CHECKER.
 
+Return a list of real arguments for the executable of CHECKER,
+substituted for the symbolic argument ARG.  Single arguments,
+e.g. if ARG is a literal strings, are wrapped in a list.
+
 ARG may be one of the following forms:
 
 STRING
@@ -2046,16 +2050,16 @@ In all other cases, signal an error.
 Note that substitution is *not* recursive.  No symbols or cells
 are substituted within the body of cells!"
   (pcase arg
-    ((pred stringp) arg)
+    ((pred stringp) (list arg))
     (`source
-     (flycheck-save-buffer-to-temp #'flycheck-temp-file-system))
+     (list (flycheck-save-buffer-to-temp #'flycheck-temp-file-system)))
     (`source-inplace
-     (flycheck-save-buffer-to-temp #'flycheck-temp-file-inplace))
-    (`source-original (or (buffer-file-name) ""))
-    (`temporary-directory (flycheck-temp-dir-system))
+     (list (flycheck-save-buffer-to-temp #'flycheck-temp-file-inplace)))
+    (`source-original (list (or (buffer-file-name) "")))
+    (`temporary-directory (list (flycheck-temp-dir-system)))
     (`temporary-file-name
      (let ((directory (flycheck-temp-dir-system)))
-       (make-temp-name (expand-file-name "flycheck" directory))))
+       (list (make-temp-name (expand-file-name "flycheck" directory)))))
     (`(config-file ,option-name ,file-name-var)
      (-when-let* ((value (symbol-value file-name-var))
                   (file-name (flycheck-locate-config-file value checker)))
@@ -2092,14 +2096,13 @@ are substituted within the body of cells!"
        (flycheck-prepend-with-option option-name value prepend-fn)))
     (`(option-flag ,option-name ,variable)
      (when (symbol-value variable)
-       option-name))
+       (list option-name)))
     (`(eval ,form)
      (let ((result (eval form)))
-       (if (or (null result)
-               (stringp result)
-               (and (listp result) (-all? #'stringp result)))
-           result
-         (error "Invalid result from evaluation of %S: %S" form result))))
+       (cond
+        ((and (listp result) (-all? #'stringp result)) result)
+        ((stringp result) (list result))
+        (t (error "Invalid result from evaluation of %S: %S" form result)))))
     (_ (error "Unsupported argument %S" arg))))
 
 (defun flycheck-checker-substituted-arguments (checker)
@@ -2108,8 +2111,9 @@ are substituted within the body of cells!"
 Substitute each argument of CHECKER using
 `flycheck-substitute-argument'.  This replaces any special
 symbols in the command."
-  (-flatten (-keep (lambda (arg) (flycheck-substitute-argument arg checker))
-                   (flycheck-checker-arguments checker))))
+  (apply #'append
+         (mapcar (lambda (arg) (flycheck-substitute-argument arg checker))
+                 (flycheck-checker-arguments checker))))
 
 (defun flycheck-checker-shell-command (checker)
   "Get a shell command for CHECKER.
@@ -2121,12 +2125,12 @@ Return the command of CHECKER as single string, suitable for
 shell execution."
   (combine-and-quote-strings
    (cons (flycheck-checker-executable checker)
-         (-flatten
-          (-keep (lambda (arg)
-                   (if (memq arg '(source source-inplace source-original))
-                       (or (buffer-file-name) "")
-                     (flycheck-substitute-argument arg checker)))
-                 (flycheck-checker-arguments checker))))))
+         (apply #'append
+                (mapcar (lambda (arg)
+                          (if (memq arg '(source source-inplace source-original))
+                              (list (or (buffer-file-name) ""))
+                            (flycheck-substitute-argument arg checker)))
+                        (flycheck-checker-arguments checker))))))
 
 (defun flycheck-check-modes (checker)
   "Check the allowed modes of CHECKER.
