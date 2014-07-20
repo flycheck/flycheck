@@ -478,6 +478,19 @@ Scala
 .. flyc-checker:: scala
    :auto:
 
+.. flyc-checker:: scalastyle
+   :auto:
+
+   .. rubric:: Options
+
+   .. option:: flycheck-scalastyle-jar
+      :auto:
+
+   .. rubric:: Configuration file
+
+   .. option:: flycheck-scalastylerc
+      :auto:
+
 Scss
 ====
 
