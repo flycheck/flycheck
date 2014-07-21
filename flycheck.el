@@ -5447,8 +5447,8 @@ See URL `http://www.rust-lang.org'."
             (one-or-more digit) ":" (one-or-more digit) " warning: "
             (message) line-end)
    (info line-start (file-name) ":" line ":" column ": "
-             (one-or-more digit) ":" (one-or-more digit) " note: "
-             (message) line-end))
+         (one-or-more digit) ":" (one-or-more digit) " note: "
+         (message) line-end))
   :modes rust-mode
   :predicate (lambda ()
                (or (not flycheck-rust-crate-root) (flycheck-buffer-saved-p))))
