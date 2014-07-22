@@ -31,6 +31,7 @@ master (in development)
     when reading from minibuffer
   - #428: `flycheck-compile` now prompts for the syntax checker to run as
     `compile` command
+  - #439: The `rust` syntax checker shows info messages now
 
 - Other changes:
 
