@@ -4654,6 +4654,32 @@ Why not:
    "checkers/scala-syntax-error.scala" 'scala-mode
    '(3 nil error "identifier expected but '{' found." :checker scala)))
 
+(ert-deftest flycheck-define-checker/scalastyle-error ()
+  :tags '(builtin-checker external-tool language-scala)
+  (skip-unless (flycheck-check-executable 'scalastyle))
+  (let ((flycheck-scalastylerc "scalastyle.xml")
+        (flycheck-scalastyle-jar "/opt/scalastyle-batch_2.10-0.5.0/scalastyle-batch_2.10.jar"))
+    (flycheck-test-should-syntax-check
+     "checkers/scalastyle-style-error.scala" 'scala-mode
+     '(6 4 error "Don't use println" :checker scalastyle))))
+
+(ert-deftest flycheck-define-checker/scalastyle-warning ()
+  :tags '(builtin-checker external-tool language-scala)
+  (skip-unless (flycheck-check-executable 'scalastyle))
+  (let ((flycheck-scalastylerc "scalastyle.xml")
+        (flycheck-scalastyle-jar "/opt/scalastyle-batch_2.10-0.5.0/scalastyle-batch_2.10.jar"))
+    (flycheck-test-should-syntax-check
+     "checkers/scalastyle-style-warning.scala" 'scala-mode
+     '(5 8 warning "Redundant braces after class definition"
+         :checker scalastyle))))
+
+(ert-deftest flycheck-define-checker/scalastyle-inhibited-without-jar ()
+  :tags '(builtin-checker external-tool language-scala)
+  (skip-unless (flycheck-check-executable 'scalastyle))
+  (let ((flycheck-scalastylerc "scalastyle.xml"))
+    (flycheck-test-should-syntax-check
+     "checkers/scalastyle-style-warning.scala" 'scala-mode)))
+
 (ert-deftest flycheck-define-checker/scss ()
   :tags '(builtin-checker external-tool language-scss)
   (skip-unless (flycheck-check-executable 'scss))
