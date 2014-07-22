@@ -7603,6 +7603,9 @@ when reading from minibuffer
 @item 
 #428@footnote{https://github.com/flycheck/flycheck/issues/428}: @code{flycheck-compile} now prompts for the syntax checker to run as
 @code{compile} command
+
+@item 
+#439@footnote{https://github.com/flycheck/flycheck/issues/439}: The @code{rust} syntax checker shows info messages now
 @end itemize
 
 @item 
@@ -9687,7 +9690,8 @@ David Holm@footnote{https://github.com/dholm} added C/C++ syntax and style check
 @code{verilator}.
 
 @item 
-Derek Harland@footnote{https://github.com/donkopotamus} added @code{flycheck-rust-create-root} to the Rust syntax checker.
+Derek Harland@footnote{https://github.com/donkopotamus} improved Rust syntax checking by adding support for info
+messages, and for crates with @code{flycheck-rust-create-root}
 
 @item 
 Doug MacEachern@footnote{https://github.com/dougm} added a Go syntax checker using @code{errcheck}.
