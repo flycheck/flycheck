@@ -4597,6 +4597,16 @@ Why not:
    '(4 9 warning "unused variable: `x`, #[warn(unused_variable)] on by default"
        :checker rust)))
 
+(ert-deftest flycheck-define-checker/rust-info ()
+  :tags '(builtin-checker external-tool language-rust)
+  (skip-unless (flycheck-check-executable 'rust))
+  (flycheck-test-should-syntax-check
+   "checkers/rust-info.rs" 'rust-mode
+   '(11 9 info "`x` moved here because it has type `NonPOD`, which is moved by default (use `ref` to override)"
+        :checker rust)
+   '(12 9 error "use of moved value: `x`"
+        :checker rust)))
+
 (ert-deftest flycheck-define-checker/rust-library-path ()
   :expected-result :failed
   :tags '(builtin-checker external-tool language-rust)
