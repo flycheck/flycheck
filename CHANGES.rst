@@ -12,6 +12,7 @@ master (in development)
 - New syntax checkers:
 
   - #408: C/C++ with GCC
+  - #425: Scala with scalastyle
 
 - New features:
 
