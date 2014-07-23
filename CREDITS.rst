@@ -17,7 +17,7 @@ greatly appreciated.
 - `Derek Harland`_ improved Rust syntax checking by adding support for info
   messages, and for crates with `flycheck-rust-create-root`
 - `Doug MacEachern`_ added a Go syntax checker using `errcheck`.
-- `Fanael Linithien`_ greatly improve C/C++ support in Flycheck, by adding
+- `Fanael Linithien`_ greatly improved C/C++ support in Flycheck, by adding
   GCC-based syntax checker, and extending the C/C++ syntax checkers with new
   features and options.
 - `Gereon Frey`_ fixed the `go-build` syntax checker and improved its tests.
