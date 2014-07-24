@@ -1969,7 +1969,6 @@ STRING
      Return ARG unchanged.
 
 `source', `source-inplace'
-
      Create a temporary file to check and return its path.  With
      `source-inplace' create the temporary file in the same
      directory as the original file.  The value of
