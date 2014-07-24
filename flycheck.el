@@ -612,6 +612,21 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
   :type 'hook
   :risky t)
 
+(defcustom flycheck-status-changed-functions
+  '(flycheck-report-mode-line-status)
+  "Functions to run if the Flycheck status changed.
+
+This hook is run whenever the status of Flycheck changes.  Each
+hook function takes the status symbol as sinlge argument, as
+given to `flycheck-report-status', which see.
+
+This variable is a abnormal hook.  See Info
+node `(elisp)Hooks'."
+  :group 'flycheck
+  :type 'hook
+  :risky t
+  :package-version '(flycheck . "0.20"))
+
 (defface flycheck-error
   '((((supports :underline (:style wave)))
      :underline (:style wave :color "Red1"))
@@ -962,7 +977,7 @@ returns t."
               (if checker
                   (flycheck-start-checker checker)
                 (flycheck-clear)
-                (flycheck-report-status "-")))
+                (flycheck-report-status 'no-checker)))
           (error
            (flycheck-report-error)
            (signal (car err) (cdr err)))))
@@ -1074,33 +1089,6 @@ buffer."
 (defun flycheck-handle-save ()
   "Handle a save of the buffer."
   (flycheck-buffer-automatically 'save))
-
-
-;;; Mode line reporting
-(defun flycheck-report-status (status)
-  "Report Flycheck STATUS."
-  (setq flycheck-mode-line (concat flycheck-mode-line-lighter status))
-  (force-mode-line-update))
-
-(defun flycheck-report-error ()
-  "Report a Flycheck error status.
-
-Clears all Flycheck errors first."
-  (flycheck-clear)
-  (run-hooks 'flycheck-syntax-check-failed-hook)
-  (flycheck-report-status "!"))
-
-(defun flycheck-report-error-count (errors)
-  "Report ERRORS in the current buffer.
-
-Report a proper flycheck status."
-  (if errors
-      (let ((error-counts (flycheck-count-errors errors)))
-        (flycheck-report-status
-         (format ":%s/%s"
-                 (or (cdr (assq 'error error-counts)) 0)
-                 (or (cdr (assq 'warning error-counts)) 0))))
-    (flycheck-report-status "")))
 
 
 ;;; Utility functions
@@ -3165,7 +3153,7 @@ Returns ERRORS, with folded messages."
 (defun flycheck-clear-errors ()
   "Remove all error information from the current buffer."
   (setq flycheck-current-errors nil)
-  (flycheck-report-status ""))
+  (flycheck-report-status 'not-checked))
 
 (defun flycheck-relevant-error-p (err)
   "Determine whether ERR is relevant for the current buffer.
@@ -3591,6 +3579,71 @@ no next error."
 (defalias 'list-flycheck-errors 'flycheck-list-errors)
 
 
+;;; Status reporting
+(defun flycheck-report-error ()
+  "Report a Flycheck error status.
+
+Clears all Flycheck errors first, runs
+`flycheck-syntax-check-failed-hook' and reports the status with
+`flycheck-report-status'."
+  (flycheck-clear)
+  (run-hooks 'flycheck-syntax-check-failed-hook)
+  (flycheck-report-status 'errored))
+
+(defun flycheck-report-status (status)
+  "Report Flycheck STATUS.
+
+STATUS is one of the following symbols:
+
+`not-checked'
+     The current buffer was not checked.
+
+`no-checker'
+     Automatic syntax checker selection did not find a suitable
+     syntax checker.
+
+`running'
+     A syntax check is now running in the current buffer.
+
+`errored'
+     The current syntax check has errored.
+
+`finished'
+     The current syntax check was finished normally.
+
+`interrupted'
+     The current syntax check was interrupted.
+
+`suspicious'
+     The last syntax check had a suspicious result.
+
+ Call `flycheck-status-changed-functions' with STATUS."
+  (run-hook-with-args 'flycheck-status-changed-functions status))
+
+
+;;; Mode line reporting
+(defun flycheck-report-mode-line-status (status)
+  "Report Flycheck STATUS."
+  (let ((status-text
+         (pcase status
+           (`not-checked "")
+           (`no-checker "-")
+           (`running "*")
+           (`errored "!")
+           (`finished
+            (if flycheck-current-errors
+                (let ((error-counts (flycheck-count-errors
+                                     flycheck-current-errors)))
+                  (format ":%s/%s"
+                          (or (cdr (assq 'error error-counts)) 0)
+                          (or (cdr (assq 'warning error-counts)) 0)))
+              ""))
+           (`interrupted "-")
+           (`suspicious "?"))))
+    (setq flycheck-mode-line (concat flycheck-mode-line-lighter status-text))
+    (force-mode-line-update)))
+
+
 ;;; General error display
 (defun flycheck-display-errors (errors)
   "Display ERRORS using `flycheck-display-errors-function'."
@@ -3739,7 +3792,6 @@ FILES is a list of files given as input to the checker.  OUTPUT
 is the output of the syntax checker.
 
 Parse the OUTPUT and report an appropriate error status."
-  (flycheck-report-status "")
   (let (errors)
     (condition-case err
         (setq errors (flycheck-parse-output output checker (current-buffer)))
@@ -3757,7 +3809,7 @@ Error: %s" checker output (error-message-string err))
         (message "Checker %S returned non-zero exit code %s, but no errors from \
 output: %s\nChecker definition probably flawed."
                  checker exit-status output)
-        (flycheck-report-status "?"))
+        (flycheck-report-status 'suspicious))
       (setq errors (flycheck-relevant-errors
                     (flycheck-filter-errors
                      (mapcar (lambda (e) (flycheck-fix-error-filename e files))
@@ -3767,7 +3819,7 @@ output: %s\nChecker definition probably flawed."
       ;; Process all new errors
       (mapc (apply-partially #'run-hook-with-args-until-success
                              'flycheck-process-error-functions) errors)
-      (flycheck-report-error-count flycheck-current-errors)
+      (flycheck-report-status 'finished)
       (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
         (if next-checker
             (flycheck-start-checker next-checker)
@@ -3795,14 +3847,13 @@ _EVENT is ignored."
       (when (buffer-live-p buffer)
         (with-current-buffer buffer
           (setq flycheck-current-process nil)
-          (flycheck-report-status "")
           (condition-case err
               (pcase (process-status process)
                 (`signal
                  ;; The process was killed, so let's just delete all overlays,
                  ;; and report a bad state
                  (flycheck-delete-marked-overlays)
-                 (flycheck-report-status "-"))
+                 (flycheck-report-status 'interrupted))
                 (`exit
                  (when flycheck-mode
                    (flycheck-finish-syntax-check checker exit-status
@@ -3835,7 +3886,7 @@ _EVENT is ignored."
         (set-process-filter process 'flycheck-receive-checker-output)
         (set-process-sentinel process 'flycheck-handle-signal)
         (set-process-query-on-exit-flag process nil)
-        (flycheck-report-status "*")
+        (flycheck-report-status 'running)
         (process-put process 'flycheck-temporaries flycheck-temporaries)
         ;; Now that temporary files and directories are attached to the process,
         ;; we can reset the variables used to collect them
