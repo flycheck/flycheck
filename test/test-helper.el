@@ -25,7 +25,8 @@
 
 ;;; Code:
 
-(let* ((current-file (if load-in-progress load-file-name (buffer-file-name)))
+(let* ((debug-on-error t)               ; Show stack-traces on errors
+       (current-file (if load-in-progress load-file-name (buffer-file-name)))
        (source-directory (locate-dominating-file current-file "Cask"))
        (pkg-rel-dir (format ".cask/%s/elpa" emacs-version)))
   (setq package-user-dir (expand-file-name pkg-rel-dir source-directory))
