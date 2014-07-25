@@ -735,6 +735,7 @@ explicitly re-define the prefix key:
 Please note that Flycheck's manual documents the default
 keybindings.  Changing this variable is at your own risk."
   :group 'flycheck
+  :package-version '(flycheck . "0.19")
   :type 'string
   :risky t
   :set
