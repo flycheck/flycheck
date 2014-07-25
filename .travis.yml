@@ -13,5 +13,5 @@ install:
   - make EMACS=$EMACS deps
 script:
   # Run unit tests.
-  - make EMACS=$EMACS test
+  - make EMACS=$EMACS ERTFLAGS=--debug test
   - make EMACS=$EMACS compile
