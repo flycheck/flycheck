@@ -1,6 +1,7 @@
 EMACS = emacs
 EMACSFLAGS =
 CASK = cask
+ERTFLAGS =
 SPHINX-BUILD = sphinx-build
 SPHINXFLAGS =
 CONVERT = convert
@@ -42,7 +43,7 @@ images: doc/images/logo.png doc/images/favicon.ico # To update the image files
 
 # Test targets
 test :
-	$(CASK) exec ert-runner
+	$(CASK) exec ert-runner $(ERTFLAGS)
 
 # Support targets
 deps : $(PKGDIR)
