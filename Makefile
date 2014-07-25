@@ -41,7 +41,7 @@ texinfo : doc/flycheck.texi
 images: doc/images/logo.png doc/images/favicon.ico # To update the image files
 
 # Test targets
-test : compile
+test :
 	$(CASK) exec ert-runner
 
 # Support targets
