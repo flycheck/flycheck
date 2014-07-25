@@ -612,8 +612,7 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
   :type 'hook
   :risky t)
 
-(defcustom flycheck-status-changed-functions
-  '(flycheck-report-mode-line-status)
+(defcustom flycheck-status-changed-functions nil
   "Functions to run if the Flycheck status changed.
 
 This hook is run whenever the status of Flycheck changes.  Each
@@ -760,15 +759,34 @@ keybindings.  Changing this variable is at your own risk."
       (define-key flycheck-mode-map key flycheck-command-map))
     (set-default variable key)))
 
+(defcustom flycheck-mode-line
+  '(" FlyC" (:eval (flycheck-mode-line-status-text)))
+  "Mode line lighter for Flycheck.
+
+The value of this variable is a mode line template as in
+`mode-line-format'.  See Info Node `(elisp)Mode Line Format' for
+more information.
+
+Customize this variable to change how Flycheck reports its status
+in the mode line.  You may use `flycheck-mode-line-status-text'
+to obtain a human-readable status text, including an
+error/warning count.
+
+You may also assemble your own status text.  The current status
+of Flycheck is available in `flycheck-last-status-change'.  The
+errors in the current buffer are stored in
+`flycheck-current-errors', and the function
+`flycheck-count-errors' may be used to obtain the number of
+errors grouped by error level.
+
+Set this variable to nil to disable the mode line completely."
+  :group 'flycheck
+  :type 'sexp
+  :risky t
+  :package-version '(flycheck . "0.20"))
+
 
 ;;; Minor mode definition
-;;;###autoload
-(defconst flycheck-mode-line-lighter " FlyC"
-  "The standard lighter for flycheck mode.")
-
-(defvar-local flycheck-mode-line nil
-  "The mode line lighter of variable `flycheck-mode'.")
-
 (defvar flycheck-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map flycheck-keymap-prefix flycheck-command-map)
@@ -3580,6 +3598,9 @@ no next error."
 
 
 ;;; Status reporting
+(defvar-local flycheck-last-status-change 'not-checked
+  "The last status change in the current buffer.")
+
 (defun flycheck-report-error ()
   "Report a Flycheck error status.
 
@@ -3617,31 +3638,35 @@ STATUS is one of the following symbols:
 `suspicious'
      The last syntax check had a suspicious result.
 
- Call `flycheck-status-changed-functions' with STATUS."
-  (run-hook-with-args 'flycheck-status-changed-functions status))
+Set `flycheck-last-status-change' and call
+`flycheck-status-changed-functions' with STATUS.  Afterwards
+refresh the mode line."
+  (setq flycheck-last-status-change status)
+  (run-hook-with-args 'flycheck-status-changed-functions status)
+  (force-mode-line-update))
 
 
 ;;; Mode line reporting
-(defun flycheck-report-mode-line-status (status)
-  "Report Flycheck STATUS."
-  (let ((status-text
-         (pcase status
-           (`not-checked "")
-           (`no-checker "-")
-           (`running "*")
-           (`errored "!")
-           (`finished
-            (if flycheck-current-errors
-                (let ((error-counts (flycheck-count-errors
-                                     flycheck-current-errors)))
-                  (format ":%s/%s"
-                          (or (cdr (assq 'error error-counts)) 0)
-                          (or (cdr (assq 'warning error-counts)) 0)))
-              ""))
-           (`interrupted "-")
-           (`suspicious "?"))))
-    (setq flycheck-mode-line (concat flycheck-mode-line-lighter status-text))
-    (force-mode-line-update)))
+(defun flycheck-mode-line-status-text (&optional status)
+  "Get a text describing STATUS for use in the mode line.
+
+STATUS defaults to `flycheck-last-status-change' if omitted or
+nil."
+  (pcase (or status flycheck-last-status-change)
+    (`not-checked "")
+    (`no-checker "-")
+    (`running "*")
+    (`errored "!")
+    (`finished
+     (if flycheck-current-errors
+         (let ((error-counts (flycheck-count-errors
+                              flycheck-current-errors)))
+           (format ":%s/%s"
+                   (or (cdr (assq 'error error-counts)) 0)
+                   (or (cdr (assq 'warning error-counts)) 0)))
+       ""))
+    (`interrupted "-")
+    (`suspicious "?")))
 
 
 ;;; General error display

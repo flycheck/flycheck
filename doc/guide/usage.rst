@@ -506,6 +506,7 @@ Flycheck indicates its state in the mode line:
     If it is, please report an issue to the Flycheck developers, as by
     :ref:`reporting-issues`.
 
-To disable mode line reporting, remove `flycheck-report-mode-line-status` from
-:hook:`flycheck-status-changed-functions`, and replace it with a custom function
-for status reporting.
+Change :option:`flycheck-mode-line` to customize the mode line reporting:
+
+.. option:: flycheck-mode-line
+   :auto:

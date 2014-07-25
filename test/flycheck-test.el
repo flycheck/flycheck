@@ -1844,7 +1844,7 @@ Try to reinstall the package defining this syntax checker.\n"))))
       (should (eq flycheck-checker 'sh-bash))
       (should (string= (cadr err)
                        "Configured syntax checker sh-bash cannot be used"))
-      (should (string= flycheck-mode-line " FlyC!")))))
+      (should (string= flycheck-last-status-change 'errored)))))
 
 (ert-deftest flycheck-checker/usable-checker-is-used ()
   :tags '(selection language-emacs-lisp)
