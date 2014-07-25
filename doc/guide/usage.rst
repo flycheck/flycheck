@@ -93,10 +93,16 @@ Each syntax check conducts the following steps:
    syntax checkers.
 8. Run hooks in :hook:`flycheck-after-syntax-check-hook`.
 
-.. hook:: flycheck-after-syntax-check-hook
+Whenever the status of Flycheck changes, Flycheck runs
+:hook:`flycheck-status-changed-functions`:
+
+.. hook:: flycheck-status-changed-functions
    :auto:
 
-   See :ref:`error-reporting`, for more information about error reporting.
+There are also special hooks, which run only for certain status changes:
+
+.. hook:: flycheck-after-syntax-check-hook
+   :auto:
 
 .. hook:: flycheck-before-syntax-check-hook
    :auto:
@@ -499,3 +505,8 @@ Flycheck indicates its state in the mode line:
     This indicator should **never** be displayed for built-in syntax checkers.
     If it is, please report an issue to the Flycheck developers, as by
     :ref:`reporting-issues`.
+
+Change :option:`flycheck-mode-line` to customize the mode line reporting:
+
+.. option:: flycheck-mode-line
+   :auto:

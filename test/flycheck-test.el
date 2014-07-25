@@ -859,28 +859,19 @@ check with.  ERRORS is the list of expected errors."
     (should (flycheck-deferred-check-p))))
 
 
-;;; Mode line reporting
+;;; Status reporting
 
-(ert-deftest flycheck-report-status/sets-mode-line ()
-  :tags '(mode-line)
+(ert-deftest flycheck-report-status/runs-functions ()
+  :tags '(status-reporting)
   (flycheck-test-with-temp-buffer
-    (flycheck-report-status "foo")
-    (should (string= flycheck-mode-line " FlyCfoo"))))
-
-(ert-deftest flycheck-report-status/empties-mode-line ()
-  :tags '(mode-line)
-  (flycheck-test-with-temp-buffer
-    (flycheck-report-status "")
-    (should (string= flycheck-mode-line " FlyC"))))
-
-(ert-deftest flycheck-report-error/sets-mode-line ()
-  :tags '(mode-line)
-  (flycheck-test-with-temp-buffer
-    (flycheck-report-error)
-    (should (string= flycheck-mode-line " FlyC!"))))
+    (let* ((was-called nil)
+           (flycheck-status-changed-functions
+            (list (lambda (status) (setq was-called status)))))
+      (flycheck-report-status 'running)
+      (should (eq was-called 'running)))))
 
 (ert-deftest flycheck-report-error/runs-hook ()
-  :tags '(mode-line)
+  :tags '(status-reporting)
   (flycheck-test-with-temp-buffer
     (let* ((was-called nil)
            (flycheck-syntax-check-failed-hook
@@ -889,48 +880,11 @@ check with.  ERRORS is the list of expected errors."
       (should was-called))))
 
 (ert-deftest flycheck-report-error/clears-errors ()
-  :tags '(mode-line)
+  :tags '(status-reporting)
   (flycheck-test-with-temp-buffer
     (let ((flycheck-current-errors (list 'foo)))
       (flycheck-report-error)
       (should-not flycheck-current-errors))))
-
-(ert-deftest flycheck-report-error-count/no-errors ()
-  :tags '(mode-line)
-  (flycheck-test-with-temp-buffer
-    (flycheck-report-error-count nil)
-    (should (string= flycheck-mode-line " FlyC"))))
-
-(ert-deftest flycheck-report-error-count/errors-only ()
-  :tags '(mode-line)
-  (flycheck-test-with-temp-buffer
-    (flycheck-report-error-count
-     (list (flycheck-error-new-at 1 2 'error)
-           (flycheck-error-new-at 100 50 'error)
-           (flycheck-error-new-at 8 9 'error)
-           (flycheck-error-new-at 9 24 'info)))
-    (should (string= flycheck-mode-line " FlyC:3/0"))))
-
-(ert-deftest flycheck-report-error-count/warnings-only ()
-  :tags '(mode-line)
-  (flycheck-test-with-temp-buffer
-    (flycheck-report-error-count
-     (list (flycheck-error-new-at 4 6 'warning)
-           (flycheck-error-new-at 10 20 'warning)
-           (flycheck-error-new-at 9 24 'info)))
-    (should (string= flycheck-mode-line " FlyC:0/2"))))
-
-(ert-deftest flycheck-report-error-count/errors-and-warnings ()
-  :tags '(mode-line)
-  (flycheck-test-with-temp-buffer
-    (flycheck-report-error-count
-     (list (flycheck-error-new-at 1 2 'error)
-           (flycheck-error-new-at 4 6 'warning)
-           (flycheck-error-new-at 10 20 'warning)
-           (flycheck-error-new-at 100 50 'error)
-           (flycheck-error-new-at 8 9 'error)
-           (flycheck-error-new-at 9 24 'info)))
-    (should (string= flycheck-mode-line " FlyC:3/2"))))
 
 
 ;;; Utility functions
@@ -1890,7 +1844,7 @@ Try to reinstall the package defining this syntax checker.\n"))))
       (should (eq flycheck-checker 'sh-bash))
       (should (string= (cadr err)
                        "Configured syntax checker sh-bash cannot be used"))
-      (should (string= flycheck-mode-line " FlyC!")))))
+      (should (string= flycheck-last-status-change 'errored)))))
 
 (ert-deftest flycheck-checker/usable-checker-is-used ()
   :tags '(selection language-emacs-lisp)

@@ -10,6 +10,23 @@ You may use this API to extend Flycheck, e.g. by implementing new error parsers
 or more in-depth error analysis.  You will also find this API helpful if you
 want to develop Flycheck itself.
 
+.. _status-api:
+
+Status API
+==========
+
+.. function:: flycheck-report-status
+   :auto:
+
+.. function:: flycheck-report-error
+   :auto:
+
+.. variable:: flycheck-last-status-change
+   :auto:
+
+.. function:: flycheck-mode-line-status-text
+   :auto:
+
 .. _error-api:
 
 Error API

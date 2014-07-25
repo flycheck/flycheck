@@ -22,6 +22,9 @@ master (in development)
     `rust`
   - #420: Add `flycheck-clang-blocks` to enable the block syntax in Clang
   - `read-flycheck-checker` now accepts a default value
+  - Add `flycheck-status-changed-functions` to react on status changes
+  - Make the mode line lighter of Flycheck customizable with
+    `flycheck-mode-line`
 
 - Improvements:
 
