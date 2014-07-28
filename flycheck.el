@@ -5532,6 +5532,18 @@ See URL `http://www.rust-lang.org'."
   :predicate (lambda ()
                (or (not flycheck-rust-crate-root) (flycheck-buffer-saved-p))))
 
+(defvar flycheck-sass-scss-cache-directory nil
+  "The cache directory for `sass' and `scss'.")
+
+(defun flycheck-sass-scss-cache-location ()
+  "Get the cache location for `sass' and `scss'.
+
+If no cache directory exists yet, create one and return it.
+Otherwise return the previously used cache directory."
+  (setq flycheck-sass-scss-cache-directory
+        (or flycheck-sass-scss-cache-directory
+            (make-temp-file "flycheck-sass-scss-cache" 'directory))))
+
 (flycheck-def-option-var flycheck-sass-compass nil sass
   "Whether to enable the Compass CSS framework.
 
@@ -5545,6 +5557,7 @@ When non-nil, enable the Compass CSS framework, via `--compass'."
 
 See URL `http://sass-lang.com'."
   :command ("sass"
+            "--cache-location" (eval (flycheck-sass-scss-cache-location))
             (option-flag "--compass" flycheck-sass-compass)
             "-c" source)
   :error-patterns
@@ -5620,6 +5633,7 @@ When non-nil, enable the Compass CSS framework, via `--compass'."
 
 See URL `http://sass-lang.com'."
   :command ("scss"
+            "--cache-location" (eval (flycheck-sass-scss-cache-location))
             (option-flag "--compass" flycheck-scss-compass)
             "-c" source)
   :error-patterns

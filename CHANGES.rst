@@ -35,6 +35,8 @@ master (in development)
   - #428: `flycheck-compile` now prompts for the syntax checker to run as
     `compile` command
   - #439: The `rust` syntax checker shows info messages now
+  - #443, #444: The `sass` and `scss` syntax checkers now use a temporary
+    directory for their cache
 
 - Other changes:
 
