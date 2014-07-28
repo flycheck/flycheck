@@ -4722,8 +4722,10 @@ take an io.Writer as their first argument, like Fprintf,
 See URL `http://golang.org/cmd/go/' and URL
 `http://godoc.org/code.google.com/p/go.tools/cmd/vet'."
   :command ("go" "tool" "vet"
-            (option "-printfuncs=" flycheck-go-vet-print-functions
-                    flycheck-option-comma-separated-list) source)
+            (option "-printfuncs="
+                    flycheck-go-vet-print-functions
+                    flycheck-option-comma-separated-list)
+            source)
   :error-patterns
   ((warning line-start (file-name) ":" line ": " (message) line-end))
   :modes go-mode
