@@ -5545,6 +5545,8 @@ When non-nil, enable the Compass CSS framework, via `--compass'."
 
 See URL `http://sass-lang.com'."
   :command ("sass"
+            "--cache-location"
+            (eval (expand-file-name "flycheck-sass/" temporary-file-directory))
             (option-flag "--compass" flycheck-sass-compass)
             "-c" source)
   :error-patterns
@@ -5620,6 +5622,8 @@ When non-nil, enable the Compass CSS framework, via `--compass'."
 
 See URL `http://sass-lang.com'."
   :command ("scss"
+            "--cache-location"
+            (eval (expand-file-name "flycheck-scss/" temporary-file-directory))
             (option-flag "--compass" flycheck-scss-compass)
             "-c" source)
   :error-patterns
