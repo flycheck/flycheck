@@ -487,6 +487,9 @@ Rust
    .. option:: flycheck-rust-crate-root
       :auto:
 
+   .. option:: flycheck-rust-crate-type
+      :auto:
+
    .. option:: flycheck-rust-library-path
       :auto:
 

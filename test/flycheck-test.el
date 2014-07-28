@@ -4609,6 +4609,16 @@ Why not:
    '(4 9 warning "unused variable: `x`, #[warn(unused_variable)] on by default"
        :checker rust)))
 
+(ert-deftest flycheck-define-checker/rust-test-crate-type-bin ()
+  :tags '(builtin-checker external-tool language-rust)
+  (skip-unless (flycheck-check-executable 'rust))
+  (let ((flycheck-rust-crate-type "bin")
+        (flycheck-rust-check-tests nil))
+    (flycheck-test-should-syntax-check
+     "checkers/rust-warning.rs" 'rust-mode
+     '(4 9 warning "unused variable: `x`, #[warn(unused_variable)] on by default"
+         :checker rust))))
+
 (ert-deftest flycheck-define-checker/rust-info ()
   :tags '(builtin-checker external-tool language-rust)
   (skip-unless (flycheck-check-executable 'rust))

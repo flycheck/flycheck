@@ -5641,6 +5641,15 @@ runner requires `std'."
   :safe #'booleanp
   :package-version '("flycheck" . "0.19"))
 
+(flycheck-def-option-var flycheck-rust-crate-type "lib" rust
+  "The type of crate to compile.
+
+The value of this variable is a string that will be passed to the
+--crate-type compiler flag."
+  :type 'string
+  :safe #'stringp
+  :package-version '("flycheck" . "0.20"))
+
 (flycheck-def-option-var flycheck-rust-crate-root nil rust
   "A path to the crate root for the current buffer.
 
@@ -5660,7 +5669,8 @@ if it is not modified, i.e. after it has been saved."
 This syntax checker needs Rust 0.10 or newer.
 
 See URL `http://www.rust-lang.org'."
-  :command ("rustc" "--crate-type=lib" "--no-trans"
+  :command ("rustc" "--no-trans"
+            (option "--crate-type" flycheck-rust-crate-type)
             (option-flag "--test" flycheck-rust-check-tests)
             (option-list "-L" flycheck-rust-library-path concat)
             (eval (or flycheck-rust-crate-root
