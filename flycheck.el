@@ -4969,9 +4969,9 @@ for more information about the custom directory."
   :safe #'stringp
   :package-version '(flycheck . "0.16"))
 
-(flycheck-def-config-file-var flycheck-eslintrc javascript-eslint ".eslintrc"
+(flycheck-def-config-file-var flycheck-eslintrc javascript-eslint nil
   :safe #'stringp
-  :package-version '(flycheck . "0.16"))
+  :package-version '(flycheck . "0.20"))
 
 (flycheck-define-checker javascript-eslint
   "A JavaScript syntax and style checker using eslint.

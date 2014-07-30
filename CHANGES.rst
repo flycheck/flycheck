@@ -37,6 +37,7 @@ master (in development)
   - #439: The `rust` syntax checker shows info messages now
   - #443, #444: The `sass` and `scss` syntax checkers now use a temporary
     directory for their cache
+  - #447: Change the default of `flycheck-eslintrc` to `nil`
 
 - Other changes:
 
