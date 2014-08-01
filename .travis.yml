@@ -15,8 +15,3 @@ script:
   # Run unit tests.
   - make EMACS=$EMACS compile
   - make EMACS=$EMACS test
-matrix:
-  # ERT has some hiccups on Emacs Snapshot, for whatever reason.  Ignore
-  # failures on snapshot for now.
-  allow_failures:
-    - env: EMACS=emacs-snapshot
