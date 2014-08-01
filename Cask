@@ -9,7 +9,6 @@
 
 (development
  (depends-on "ert")                     ; Unit test library
- (depends-on "ert-runner")              ; Unit test runner
  (depends-on "shut-up")                 ; Silence Emacs
 
  ;; Make optional dependencies available for development
