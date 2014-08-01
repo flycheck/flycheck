@@ -73,6 +73,7 @@ Public License.  A copy of the license can be obtained at
 * Flycheck news:: 
 * Changes:: 
 * Contribution guidelines:: 
+* Testing Flycheck:: 
 * Writing documentation:: 
 * Maintenance tasks:: 
 * Credits:: 
@@ -345,6 +346,13 @@ Contributing code
 * Commit messages:: 
 * Contributing syntax checkers:: 
 * Pull requests:: 
+
+Testing Flycheck
+
+* Test suite layout:: 
+* Test running:: 
+* Virtual test environment:: 
+* Travis CI:: 
 
 Writing documentation
 
@@ -9451,7 +9459,7 @@ Emacs Lisp
 @end itemize
 @end itemize
 
-@node Contribution guidelines,Writing documentation,Changes,Top
+@node Contribution guidelines,Testing Flycheck,Changes,Top
 @anchor{contrib/guidelines doc}@anchor{1d2}@anchor{contrib/guidelines contribution-guidelines}@anchor{1d3}
 @chapter Contribution guidelines
 
@@ -9634,7 +9642,8 @@ environment, or explain how to install the tool on an Ubuntu 12.04 system.
 
 @cartouche
 @quotation Note 
-We will @emph{not} merge syntax checkers which cannot be tested on Travis CI.
+Unit tests that can run on Travis CI are @strong{mandatory} for all syntax
+checkers in Flycheck.
 @end quotation
 @end cartouche
 
@@ -9659,8 +9668,240 @@ Open a pull request@footnote{https://help.github.com/articles/using-pull-request
 description in grammatically correct, complete sentences.
 @end itemize
 
-@node Writing documentation,Maintenance tasks,Contribution guidelines,Top
-@anchor{contrib/docs writing-documentation}@anchor{1dd}@anchor{contrib/docs doc}@anchor{1de}@anchor{contrib/docs pull-request}@anchor{1df}
+@cartouche
+@quotation Note 
+Pull requests @strong{must} pass all tests on Travis CI before being merged.
+@end quotation
+@end cartouche
+
+@node Testing Flycheck,Writing documentation,Contribution guidelines,Top
+@anchor{contrib/testing testing-flycheck}@anchor{1dd}@anchor{contrib/testing doc}@anchor{1de}@anchor{contrib/testing pull-request}@anchor{1df}
+@chapter Testing Flycheck
+
+
+Flycheck comes with a large unit test suite, which tests all syntax checkers and
+large parts of Flychecks internal API and interactive commands.
+
+This document explains how to use this test suite.
+
+@menu
+* Test suite layout:: 
+* Test running:: 
+* Virtual test environment:: 
+* Travis CI:: 
+
+@end menu
+
+@node Test suite layout,Test running,,Testing Flycheck
+@anchor{contrib/testing test-suite-layout}@anchor{1e0}
+@section Test suite layout
+
+
+All test code is contained in the @code{test/} sub-directory, which has the following
+contents:
+
+
+@itemize -
+
+@item 
+@code{flycheck-test.el}: The actual unit test suite, that is, the test cases and
+the utility functions.
+
+@item 
+@code{resources/}: Resource files used by the test suite, including example code
+in various programming languages to test syntax checkers.
+
+@item 
+@code{init.el}: A simple init file which initializes a bare-bones Emacs session
+for the Flycheck test suite.
+
+@item 
+@code{run.el}: A simple test runner for non-interactive use, which reads ERT
+selectors from the command line and runs all matching tests.
+@end itemize
+
+@node Test running,Virtual test environment,Test suite layout,Testing Flycheck
+@anchor{contrib/testing test-running}@anchor{1e1}@anchor{contrib/testing id1}@anchor{1e2}
+@section Test running
+
+
+First install Emacs Lisp dependencies using Cask@footnote{http://cask.readthedocs.org}:
+
+@example
+$ make deps
+@end example
+
+Then install the syntax checkers that you'd like to test:
+
+@example
+$ brew install go
+$ pip install --user pylint
+$ npm install --global coffee coffee-lint jshint
+$ cabal install hlint shellcheck
+@end example
+
+@cartouche
+@quotation Note 
+If you'd like to keep your environment clean, use the
+@ref{1e3,,Virtual test environment} instead.
+@end quotation
+@end cartouche
+
+Run the entire test suite:
+
+@example
+$ make test
+@end example
+
+@cartouche
+@quotation Note 
+Tests which can't be run because of missing tools are gracefully skipped.
+@end quotation
+@end cartouche
+
+You may also run a specific subset of test cases by passing an ERT selector
+expression.  The following example runs all tests for C and C++, except those
+whose name matches @code{gcc}:
+
+@example
+$ make ERTSELECTOR='(and (or (tag language-c) (tag language-c++)) (not "gcc"))' test
+@end example
+
+See @ref{Test Selectors,,,ert} for the syntax of test selectors.
+
+@cartouche
+@quotation Note 
+Keep in mind that you must quote the expression for your shell @emph{and} for
+Emacs Lisp.
+@end quotation
+@end cartouche
+
+@node Virtual test environment,Travis CI,Test running,Testing Flycheck
+@anchor{contrib/testing id2}@anchor{1e4}@anchor{contrib/testing virtual-test-environment}@anchor{1e3}
+@section Virtual test environment
+
+
+To run all tests successfully, you need a large amount of external tools.  To
+keep your environment clean, and test against a reference environment, Flycheck
+provides a virtual machine with a complete test environment, based on VirtualBox
+and Vagrant.
+
+The virtual machine contains
+
+
+@itemize -
+
+@item 
+The latest stable Emacs release
+
+@item 
+A nightly build of Emacs trunk
+
+@item 
+@code{make} and Cask@footnote{http://cask.readthedocs.org}
+
+@item 
+All syntax checkers supported by Flycheck
+@end itemize
+
+To use this VM, first install the following tools on your system:
+
+
+@itemize -
+
+@item 
+VirtualBox@footnote{https://www.virtualbox.org/}
+
+@item 
+Vagrant@footnote{http://www.vagrantup.com/}
+
+@item 
+Ansible@footnote{http://www.ansible.com/home}
+@end itemize
+
+On Linux, these packages are typically available from the package manager of
+your distribution.  On OS X, use the binaries provided for Vagrant and
+VirtualBox, and install Ansible from Homebrew@footnote{http://brew.sh/} with @code{brew install ansible}.
+
+To start the VM run the following command in the root directory of Flycheck:
+
+@example
+$ vagrant up
+@end example
+
+@cartouche
+@quotation Warning 
+On the first time, this command will setup and provision the VM, and
+@strong{download and install over 1GB} of images and packages along the way.
+Depending on your network connection and disk speed, this can take @strong{several
+hours}.
+@end quotation
+@end cartouche
+
+After the VM is started, you can connect to it:
+
+@example
+$ vagrant ssh
+@end example
+
+This will give you a bash prompt within the VM, on which you can run the tests
+as explained in @ref{1e1,,Test running}.
+
+To switch between Emacs versions, pass @code{EMACS} to @code{make test}:
+
+@example
+$ make EMACS=emacs-snapshot test
+$ make EMACS=emacs24 test
+@end example
+
+The latter is the default.
+
+When finished, you can shutdown the VM with:
+
+@example
+$ vagrant halt
+@end example
+
+Occasionally you should provision the test environment again, to update to the
+latest Emacs nightly build, and to follow updates of syntax checker tools.  To
+do so, use the @code{--provision} flag when starting the VM:
+
+@example
+$ vagrant up --provision
+@end example
+
+You can also provision a running machine with:
+
+@example
+$ vagrant provision
+@end example
+
+The VM is provisioned from Ansible playbooks in the @code{playbooks/} sub-directory
+of the top-level source directory.
+
+@node Travis CI,,Virtual test environment,Testing Flycheck
+@anchor{contrib/testing homebrew}@anchor{1e5}@anchor{contrib/testing travis-ci}@anchor{1e6}
+@section Travis CI
+
+
+The entire test suite continuously runs on @ref{1e6,,Travis CI} after every push, with
+the latest Emacs release and a nightly Emacs snapshot.
+
+Travis CI is configured from @code{.travis.yml} in the top-level source directory,
+and uses mostly the same playbooks for provisioning.
+
+@cartouche
+@quotation Note 
+Travis CI is the @strong{reference environment} for Flycheck's test suite.  All
+tests @strong{must pass} on Travis CI.
+
+In case Travis CI diverges from the @ref{1e3,,VM},
+Travis CI is authoritative.
+@end quotation
+@end cartouche
+
+@node Writing documentation,Maintenance tasks,Testing Flycheck,Top
+@anchor{contrib/docs writing-documentation}@anchor{1e7}@anchor{contrib/docs doc}@anchor{1e8}
 @chapter Writing documentation
 
 
@@ -9674,7 +9915,7 @@ This document explains how to edit and building the documentation of Flycheck.
 @end menu
 
 @node Build environment setup,Building HTML and Texinfo,,Writing documentation
-@anchor{contrib/docs doc-build-env}@anchor{1e0}@anchor{contrib/docs build-environment-setup}@anchor{1e1}
+@anchor{contrib/docs doc-build-env}@anchor{1e9}@anchor{contrib/docs build-environment-setup}@anchor{1ea}
 @section Build environment setup
 
 
@@ -9713,12 +9954,12 @@ $ pip install -r doc/requirements.txt
 Now you are set up to build the documentation.
 
 @node Building HTML and Texinfo,Verifying references,Build environment setup,Writing documentation
-@anchor{contrib/docs building-docs}@anchor{1e2}@anchor{contrib/docs building-html-and-texinfo}@anchor{1e3}
+@anchor{contrib/docs building-docs}@anchor{1eb}@anchor{contrib/docs building-html-and-texinfo}@anchor{1ec}
 @section Building HTML and Texinfo
 
 
 First, switch to the virtual environment you created in the
-@ref{1e0,,Build environment setup}, and make sure that the requirements are up to date:
+@ref{1e9,,Build environment setup}, and make sure that the requirements are up to date:
 
 @example
 $ source ~/.virtualenvs/cask/bin/activate
@@ -9744,7 +9985,7 @@ Flycheck packages.
 @end cartouche
 
 @node Verifying references,,Building HTML and Texinfo,Writing documentation
-@anchor{contrib/docs verifying-references}@anchor{1e4}
+@anchor{contrib/docs verifying-references}@anchor{1ed}
 @section Verifying references
 
 
@@ -9760,7 +10001,7 @@ $ make linkcheck
 @end example
 
 @node Maintenance tasks,Credits,Writing documentation,Top
-@anchor{contrib/maintenance maintenance-tasks}@anchor{1e5}@anchor{contrib/maintenance doc}@anchor{1e6}
+@anchor{contrib/maintenance maintenance-tasks}@anchor{1ee}@anchor{contrib/maintenance doc}@anchor{1ef}
 @chapter Maintenance tasks
 
 
@@ -9774,7 +10015,7 @@ have to perform under specific circumstances.
 @end menu
 
 @node Rebuilding the Texinfo,Rasterized logo files,,Maintenance tasks
-@anchor{contrib/maintenance rebuilding-the-texinfo}@anchor{1e7}
+@anchor{contrib/maintenance rebuilding-the-texinfo}@anchor{1f0}
 @section Rebuilding the Texinfo
 
 
@@ -9789,10 +10030,10 @@ documentation.
 @end cartouche
 
 When making changes to the documentation, you need to rebuild the Texinfo
-version with, by following the @ref{1e2,,instructions to build the documentation}.
+version with, by following the @ref{1eb,,instructions to build the documentation}.
 
 @node Rasterized logo files,,Rebuilding the Texinfo,Maintenance tasks
-@anchor{contrib/maintenance rasterized-logo-files}@anchor{1e8}@anchor{contrib/maintenance melpa}@anchor{1e9}
+@anchor{contrib/maintenance rasterized-logo-files}@anchor{1f1}@anchor{contrib/maintenance melpa}@anchor{1f2}
 @section Rasterized logo files
 
 
@@ -9827,7 +10068,7 @@ You need @strong{convert} from ImageMagick@footnote{http://www.imagemagick.org/}
 properly render the logo.
 
 @node Credits,GNU General Public License,Maintenance tasks,Top
-@anchor{credits credits}@anchor{1ea}@anchor{credits doc}@anchor{1eb}@anchor{credits inkscape}@anchor{1ec}
+@anchor{credits credits}@anchor{1f3}@anchor{credits doc}@anchor{1f4}@anchor{credits inkscape}@anchor{1f5}
 @chapter Credits
 
 
@@ -9973,7 +10214,7 @@ somewhat failed attempt at on-the-fly syntax checking.
 @c End:
 
 @node GNU General Public License,GNU Free Documentation License,Credits,Top
-@anchor{gpl gnu-general-public-license}@anchor{1ed}@anchor{gpl doc}@anchor{1ee}
+@anchor{gpl gnu-general-public-license}@anchor{1f6}@anchor{gpl doc}@anchor{1f7}
 @chapter GNU General Public License
 
 
@@ -10655,7 +10896,7 @@ Public License instead of this License.  But first, please read
 @end example
 
 @node GNU Free Documentation License,Index,GNU General Public License,Top
-@anchor{fdl doc}@anchor{1ef}@anchor{fdl gnu-free-documentation-license}@anchor{1f0}
+@anchor{fdl doc}@anchor{1f8}@anchor{fdl gnu-free-documentation-license}@anchor{1f9}
 @chapter GNU Free Documentation License
 
 
