@@ -13,10 +13,5 @@ install:
   - make EMACS=$EMACS deps
 script:
   # Run unit tests.
-  - make EMACS=$EMACS ERTFLAGS=--debug test
   - make EMACS=$EMACS compile
-matrix:
-  # ERT has some hiccups on Emacs Snapshot, for whatever reason.  Ignore
-  # failures on snapshot for now.
-  allow_failures:
-    - env: EMACS=emacs-snapshot
+  - make EMACS=$EMACS test

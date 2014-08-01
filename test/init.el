@@ -1,6 +1,8 @@
-;;; test-helper.el --- Flycheck: Initialize test suite -*- lexical-binding: t; -*-
+;;; init.el --- Flycheck: Initialize test suite -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2013, 2014  Sebastian Wiesner
+;; Copyright (C) 2013, 2014  Sebastian Wiesner <swiesner@lunaryorn.com>
+
+;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
 
 ;; This file is not part of GNU Emacs.
 
@@ -19,24 +21,23 @@
 
 ;;; Commentary:
 
-;; Initializes the test suite for use with `ert-runner'.
+;; Init file for Flycheck's test suite.
 ;;
-;; Also serves as init file for interactive test running.
+;; Initialize the package system.
+;;
+;; Also serves as init file for interactive test in an uncluttered environment.
 
 ;;; Code:
 
-(let* ((debug-on-error t)               ; Show stack-traces on errors
-       (current-file (if load-in-progress load-file-name (buffer-file-name)))
+(let* ((current-file (if load-in-progress load-file-name (buffer-file-name)))
        (source-directory (locate-dominating-file current-file "Cask"))
        (pkg-rel-dir (format ".cask/%s/elpa" emacs-version)))
   (setq package-user-dir (expand-file-name pkg-rel-dir source-directory))
-  (package-initialize)
-
-  (load (expand-file-name "flycheck" source-directory)))
+  (package-initialize))
 
 ;; Local Variables:
 ;; coding: utf-8
 ;; indent-tabs-mode: nil
 ;; End:
 
-;;; test-helper.el ends here
+;;; init.el ends here
