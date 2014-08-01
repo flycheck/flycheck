@@ -117,3 +117,5 @@ extlinks = {'github': ('https://github.com/flycheck/flycheck/%s', None),
             'issue': ('https://github.com/flycheck/flycheck/issues/%s', '#')}
 
 emacs_lisp_load_path = [os.path.abspath(os.path.join(SOURCE_DIR, os.pardir))]
+
+info_xref = {'ert': 'http://www.gnu.org/software/emacs/manual/html_node/ert/'}

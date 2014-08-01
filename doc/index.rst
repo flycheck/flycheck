@@ -88,6 +88,7 @@ perform and problems they face.
    :maxdepth: 2
 
    contrib/guidelines
+   contrib/testing
    contrib/docs
    contrib/maintenance
    credits
