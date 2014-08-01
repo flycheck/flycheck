@@ -2850,7 +2850,7 @@ of the file will be interrupted because there are too many #ifdef configurations
     (flycheck-previous-error -2)
     (should (flycheck-test-at-nth-error 2))))
 
-(ert-deftest flycheck-previous-errors/errors-when-moving-too-far ()
+(ert-deftest flycheck-previous-error/errors-when-moving-too-far ()
   :tags '(navigation)
   (flycheck-test-with-nav-buffer
     (goto-char (point-max))
