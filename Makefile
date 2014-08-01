@@ -1,7 +1,7 @@
 EMACS = emacs
 EMACSFLAGS =
 CASK = cask
-ERTFLAGS =
+ERTSELECTOR =
 SPHINX-BUILD = sphinx-build
 SPHINXFLAGS =
 CONVERT = convert
@@ -46,7 +46,8 @@ images: doc/images/logo.png doc/images/favicon.ico # To update the image files
 # Test targets
 test : flycheck.elc
 	$(EMACSBATCH) -l test/init.el -l flycheck.elc -l test/flycheck-test.el \
-		-f ert-run-tests-batch-and-exit
+		-l test/run.el -f flycheck-run-tests-batch-and-exit \
+		-- '$(ERTSELECTOR)'
 
 # Support targets
 deps : $(PKGDIR)
