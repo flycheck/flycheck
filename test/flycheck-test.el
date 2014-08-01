@@ -3826,7 +3826,7 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
      '(17 nil error "undefined: fmt" :checker go-build)
      '(17 nil warning "arg 1 for printf verb %s of wrong type: untyped int"
           :checker go-vet)
-     '(19 nil error "cannot use 1 (type int) as type string in function argument"
+     '(19 nil error "cannot use 1 (type int) as type string in argument to Warnf"
           :checker go-build)
      '(23 nil warning "unreachable code" :checker go-vet)
      '(25 9 warning "if block ends with a return statement, so drop this else and outdent its block"
