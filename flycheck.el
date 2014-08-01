@@ -3319,28 +3319,59 @@ Return the created overlay."
 
 
 ;;; Error navigation
+(defun flycheck-next-error-pos (n &optional reset)
+  "Get the position of the N-th next error.
+
+With negative n, get the position of the (-N)-th previous error
+instead.  With non-nil RESET, search from `point-min', otherwise
+search from the current point.
+
+Return the position of the next or previous error, or nil if
+there is none."
+  (let ((n (or n 1))
+        (pos (if reset (point-min) (point))))
+    (if (>= n 0)
+        ;; Search forwards
+        (while (and pos (> n 0))
+          (setq n (1- n))
+          (when (get-char-property pos 'flycheck-error)
+            ;; Move beyond from the current error if any
+            (setq pos (next-single-char-property-change pos 'flycheck-error)))
+          (while (not (or (= pos (point-max))
+                          (get-char-property pos 'flycheck-error)))
+            ;; Scan for the next error
+            (setq pos (next-single-char-property-change pos 'flycheck-error)))
+          (when (and (= pos (point-max))
+                     (not (get-char-property pos 'flycheck-error)))
+            ;; If we reached the end of the buffer, but no error, we didn't find
+            ;; any
+            (setq pos nil)))
+      ;; Search backwards
+      (while (and pos (< n 0))
+        (setq n (1+ n))
+        ;; Loop until we find an error.  We need to check the position *before*
+        ;; the current one, because `previous-single-char-property-change'
+        ;; always moves to the position *of* the change.
+        (while (not (or (= pos (point-min))
+                        (get-char-property (1- pos) 'flycheck-error)))
+          (setq pos (previous-single-char-property-change pos 'flycheck-error)))
+        (when (and (= pos (point-min))
+                   (not (get-char-property pos 'flycheck-error)))
+          ;; We didn't find any error.
+          (setq pos nil))
+        (when pos
+          ;; We found an error, so move to its beginning
+          (setq pos (previous-single-char-property-change pos
+                                                          'flycheck-error)))))
+    pos))
+
 (defun flycheck-next-error-function (n reset)
   "Visit the N-th error from the current point.
 
 Intended for use with `next-error-function'."
-  (let* ((n (or n 1))
-         (forward? (> n 0))
-         (point (if reset (point-min) (point)))
-         (overlays-at-point (flycheck-overlays-at point))
-         (pos (if overlays-at-point
-                  (if forward?
-                      (-max (mapcar #'overlay-end overlays-at-point))
-                    (-min (mapcar #'overlay-start overlays-at-point)))
-                point))
-         (min (if forward? pos (point-min)))
-         (max (if forward? (point-max) pos))
-         (candidates (sort ;; Determine unique start locations
-                      (-uniq (mapcar #'overlay-start
-                                     (flycheck-overlays-in min max)))
-                      (if forward? #'<= #'>=)))
-         (error-pos (nth (- (abs n) 1) candidates)))
-    (if error-pos
-        (goto-char error-pos)
+  (let ((pos (flycheck-next-error-pos n reset)))
+    (if pos
+        (goto-char pos)
       (user-error "No more Flycheck errors"))))
 
 (defun flycheck-next-error (&optional n reset)
