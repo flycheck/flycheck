@@ -105,7 +105,8 @@ For syntax checkers, some special guidelines apply in addition to the above:
 
 .. note::
 
-   We will *not* merge syntax checkers which cannot be tested on Travis CI.
+   Unit tests that can run on Travis CI are **mandatory** for all syntax
+   checkers in Flycheck.
 
 .. _pull requests:
 
@@ -118,6 +119,10 @@ Pull requests
   `git push --force`
 - Open a `pull request`_ that relates to but one subject with a clear title and
   description in grammatically correct, complete sentences.
+
+.. note::
+
+   Pull requests **must** pass all tests on Travis CI before being merged.
 
 .. _issue tracker: https://github.com/flycheck/flycheck/issues
 .. _Tim Pope's guidelines: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
