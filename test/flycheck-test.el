@@ -1758,8 +1758,8 @@ Try to reinstall the package defining this syntax checker.\n"))))
     (setq buffer-file-name (expand-file-name "flycheck-test.el"
                                              flycheck-test-directory))
     (should (equal (flycheck-locate-config-file-ancestor-directories
-                    "test-helper.el" 'emacs-lisp)
-                   (expand-file-name "test-helper.el"
+                    "init.el" 'emacs-lisp)
+                   (expand-file-name "init.el"
                                      flycheck-test-directory)))))
 
 (ert-deftest flycheck-locate-config-file-ancestor-directories/file-on-parent-level ()

@@ -21,6 +21,8 @@ BUILDDIR = build
 DOCBUILDDIR = $(BUILDDIR)/doc
 DOCTREEDIR = $(DOCBUILDDIR)/doctrees
 
+EMACSBATCH = $(EMACS) -Q --batch $(EMACSFLAGS)
+
 .PHONY: compile dist doc html texinfo images \
 	clean clean-elc clean-dist clean-doc clean-deps \
 	test \
@@ -42,8 +44,9 @@ texinfo : doc/flycheck.texi
 images: doc/images/logo.png doc/images/favicon.ico # To update the image files
 
 # Test targets
-test :
-	$(CASK) exec ert-runner $(ERTFLAGS)
+test : flycheck.elc
+	$(EMACSBATCH) -l test/init.el -l flycheck.elc -l test/flycheck-test.el \
+		-f ert-run-tests-batch-and-exit
 
 # Support targets
 deps : $(PKGDIR)
@@ -84,7 +87,7 @@ $(DOCBUILDDIR)/info/flycheck.texi :
 	$(SPHINX-BUILD) -b texinfo -d $(DOCTREEDIR) $(SPHINXFLAGS) doc $(DOCBUILDDIR)/info
 
 %.elc : %.el $(PKGDIR)
-	$(CASK) exec $(EMACS) -Q --batch $(EMACSFLAGS) -f batch-byte-compile $<
+	$(CASK) exec $(EMACSBATCH) -f batch-byte-compile $<
 
 doc/images/favicon.ico: flycheck.svg
 	$(CONVERT) $< -background white \
