@@ -45,7 +45,7 @@
   "Run test cases matching tags in `argv' and exit."
   (when (string= (car argv) "--")
     ;; Skip over the command line argument separator
-    (setq argv (cdr argv)))
+    (pop argv))
   (let ((selector (car argv)))
     (when (cdr argv)
       (message "WARNING: Unused trailing arguments: %S" (cdr argv)))
