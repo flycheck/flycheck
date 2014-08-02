@@ -49,13 +49,13 @@
   (let ((selector (car argv)))
     (when (cdr argv)
       (message "WARNING: Unused trailing arguments: %S" (cdr argv)))
+    ;; Reset argv after processing, to prevent Emacs from processing the options
+    ;; on its own.
+    (setq argv nil)
+    ;; Parse the selector and run the matching tests
     (setq selector (if (and selector (> (length selector) 0))
                        (read-from-whole-string selector)
                      t))
-    ;; Reset argv to prevent Emacs from doing anything stupid afterwards, see
-    ;; http://stackoverflow.com/a/7769370/355252
-    (setq argv nil)
-    ;; Run matching tests and exit
     (ert-run-tests-batch-and-exit selector)))
 
 ;;; run.el ends here
