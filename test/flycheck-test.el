@@ -2039,7 +2039,7 @@ Try to reinstall the package defining this syntax checker.\n"))))
   :tags '(documentation)
   (dolist (checker (flycheck-defined-checkers))
     (flycheck-test-with-help-buffer
-      (flycheck-describe-checker checker)
+      (shut-up (flycheck-describe-checker checker))
       (should (buffer-live-p (get-buffer (help-buffer))))
       (should (get-buffer-window (help-buffer)))
       (with-current-buffer (help-buffer)
@@ -2053,7 +2053,7 @@ Try to reinstall the package defining this syntax checker.\n"))))
   :tags '(documentation)
   (dolist (checker (flycheck-defined-checkers))
     (flycheck-test-with-help-buffer
-      (flycheck-describe-checker checker)
+      (shut-up (flycheck-describe-checker checker))
       (with-current-buffer (help-buffer)
         (goto-char (point-min))
         (re-search-forward
@@ -2075,7 +2075,7 @@ Try to reinstall the package defining this syntax checker.\n"))))
   :tags '(documentation)
   (dolist (checker (flycheck-defined-checkers))
     (flycheck-test-with-help-buffer
-      (flycheck-describe-checker checker)
+      (shut-up (flycheck-describe-checker checker))
       (with-current-buffer (help-buffer)
         (goto-char (point-min))
         (re-search-forward
@@ -2087,7 +2087,7 @@ Try to reinstall the package defining this syntax checker.\n"))))
   :tags '(documentation)
   (dolist (checker (flycheck-defined-checkers))
     (flycheck-test-with-help-buffer
-      (flycheck-describe-checker checker)
+      (shut-up (flycheck-describe-checker checker))
       (with-current-buffer (help-buffer)
         (goto-char (point-min))
         (re-search-forward
@@ -2099,7 +2099,7 @@ Try to reinstall the package defining this syntax checker.\n"))))
   :tags '(documentation)
   (dolist (checker (flycheck-defined-checkers))
     (flycheck-test-with-help-buffer
-      (flycheck-describe-checker checker)
+      (shut-up (flycheck-describe-checker checker))
       (with-current-buffer (help-buffer)
         (let ((config-file-var (flycheck-checker-config-file-var checker)))
           (if (not config-file-var)
@@ -2115,7 +2115,7 @@ Try to reinstall the package defining this syntax checker.\n"))))
   :tags '(documentation)
   (dolist (checker (flycheck-defined-checkers))
     (flycheck-test-with-help-buffer
-      (flycheck-describe-checker checker)
+      (shut-up (flycheck-describe-checker checker))
       (with-current-buffer (help-buffer)
         (let ((option-vars (-sort #'string<
                                   (flycheck-checker-option-vars checker)))
@@ -2143,7 +2143,7 @@ Try to reinstall the package defining this syntax checker.\n"))))
   :tags '(documentation)
   (dolist (checker (flycheck-defined-checkers))
     (flycheck-test-with-help-buffer
-      (flycheck-describe-checker checker)
+      (shut-up (flycheck-describe-checker checker))
       (with-current-buffer (help-buffer)
         (should (string-match-p
                  (regexp-quote (flycheck-checker-documentation checker))
