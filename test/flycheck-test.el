@@ -4708,7 +4708,7 @@ Why not:
    "checkers/sh-shellcheck.sh" 'sh-mode
    '(2 5 warning "Note that ~ does not expand in quotes."
        :checker sh-shellcheck)
-   '(3 7 error "Add double quotes around ${@}, otherwise it's just like $* and breaks on spaces."
+   '(3 7 error "Double quote array expansions, otherwise they're like $* and break on spaces."
        :checker sh-shellcheck)))
 
 (ert-deftest flycheck-define-checker/slim ()
