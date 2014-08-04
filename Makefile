@@ -44,7 +44,7 @@ texinfo : doc/flycheck.texi
 images: doc/images/logo.png doc/images/favicon.ico # To update the image files
 
 # Test targets
-test : flycheck.elc
+test : $(OBJECTS)
 	$(EMACSBATCH) -l test/init.el -l flycheck.elc -l test/flycheck-test.el \
 		-l test/run.el -f flycheck-run-tests-batch-and-exit \
 		-- '$(ERTSELECTOR)'
