@@ -7803,7 +7803,7 @@ when reading from minibuffer
 #439@footnote{https://github.com/flycheck/flycheck/issues/439}: The @code{rust} syntax checker shows info messages now
 
 @item 
-#443@footnote{https://github.com/flycheck/flycheck/issues/443}#444@footnote{https://github.com/flycheck/flycheck/issues/444}: The @code{sass} and @code{scss} syntax checkers now use a temporary
+#443@footnote{https://github.com/flycheck/flycheck/issues/443}, #444@footnote{https://github.com/flycheck/flycheck/issues/444}: The @code{sass} and @code{scss} syntax checkers now use a temporary
 directory for their cache
 
 @item 
@@ -8400,7 +8400,7 @@ list
 #215@footnote{https://github.com/flycheck/flycheck/issues/215}: Parse notes from @code{c/c++-clang} into info level messages
 
 @item 
-#204@footnote{https://github.com/flycheck/flycheck/issues/204}: Parse convention warnings from @code{pylint}#215@footnote{https://github.com/flycheck/flycheck/issues/215}: info level
+#204@footnote{https://github.com/flycheck/flycheck/issues/204}: Parse convention warnings from @code{pylint} to info level
 
 @item 
 #215@footnote{https://github.com/flycheck/flycheck/issues/215}: Demote naming warnings from @code{python-flake8} to info level
