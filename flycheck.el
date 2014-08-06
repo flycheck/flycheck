@@ -5446,12 +5446,20 @@ See URL `http://batsov.com/rubocop/'."
   :modes (enh-ruby-mode ruby-mode)
   :next-checkers ((warnings-only . ruby-rubylint)))
 
+;; Default to `nil' to let Rubylint find its configuration file by itself, and
+;; to maintain backwards compatibility with older Rubylint and Flycheck releases
+(flycheck-def-config-file-var flycheck-rubylintrc ruby-rubylint nil
+  :safe #'stringp)
+
 (flycheck-define-checker ruby-rubylint
   "A Ruby syntax and code analysis checker using ruby-lint.
 
-Requires ruby-lint 2.0 or newer.  See URL
+Requires ruby-lint 2.0 or newer.  To use `flycheck-rubylintrc',
+ruby-lint 2.0.2 or newer is required.  See URL
 `https://github.com/YorickPeterse/ruby-lint'."
-  :command ("ruby-lint" "--presenter=syntastic" source)
+  :command ("ruby-lint" "--presenter=syntastic"
+            (config-file "--config" flycheck-rubylintrc)
+            source)
   :error-patterns
   ((info line-start
          (file-name) ":I:" line ":" column ": " (message) line-end)

@@ -222,6 +222,16 @@ could not be determined."
        (zero-or-more any))
    "cppcheck" "--version"))
 
+(defun flycheck-test-rubylint-version ()
+  "Determine the version of rubylint.
+
+Return the version as string, or nil, if the rubylint version
+could not be determined."
+  (flycheck-test-extract-version-command
+   (rx "ruby-lint v" (group (one-or-more (any digit))
+                            (one-or-more "." (one-or-more (any digit)))) " on")
+   "ruby-lint" "--version"))
+
 
 ;;; Test resources
 
@@ -4498,6 +4508,18 @@ Why not:
          :checker ruby-rubocop)
      '(10 8 warning "Literal `true` appeared in a condition."
           :checker ruby-rubocop))))
+
+(ert-deftest flycheck-define-checker/ruby-rubylint-errors-only ()
+  :tags '(builtin-checker external-tool language-ruby)
+  (skip-unless (flycheck-check-executable 'ruby-rubylint))
+  (skip-unless (version<= "2.0.2" (flycheck-test-rubylint-version)))
+  (let ((flycheck-disabled-checkers '(ruby-rubocop))
+        (flycheck-rubylintrc "rubylint.yml"))
+    (flycheck-test-should-syntax-check
+     "checkers/ruby-warnings.rb" 'ruby-mode
+     '(11 24 error "undefined instance variable @name" :checker ruby-rubylint)
+     '(16 1 error "wrong number of arguments (expected 2..3 but got 0)"
+          :checker ruby-rubylint))))
 
 (ert-deftest flycheck-define-checker/ruby-warnings ()
   :tags '(builtin-checker external-tool language-ruby)

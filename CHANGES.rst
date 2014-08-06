@@ -25,6 +25,8 @@ master (in development)
   - Add `flycheck-status-changed-functions` to react on status changes
   - Make the mode line lighter of Flycheck customizable with
     `flycheck-mode-line`
+  - #424: Add `flycheck-rubylintrc` to support configuration files for
+    `ruby-rubylint`
 
 - Improvements:
 

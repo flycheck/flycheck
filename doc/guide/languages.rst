@@ -438,6 +438,15 @@ Ruby
 .. flyc-checker:: ruby-rubylint
    :auto:
 
+   .. rubric:: Configuration file
+
+   .. option:: flycheck-rubylintrc
+      :auto:
+
+      .. warning::
+
+         You need ruby-lint version 2.0.2 or newer to use this variable.
+
 .. flyc-checker:: ruby
    :auto:
 
