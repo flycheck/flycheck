@@ -53,6 +53,7 @@
     - cppcheck                    # c/c++-cppcheck
     - dash                        # sh-posix-dash
     - g++-4.8                     # c/c++-gcc
+    - gfortran-4.8                # fortran-gfortran
     - ghc-{{ghc_version}}         # haskell-ghc
     - hlint                       # haskell-hlint
     - lacheck                     # tex-lacheck
@@ -80,3 +81,4 @@
   with_items:
     - gcc
     - g++
+    - gfortran

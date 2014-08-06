@@ -188,6 +188,7 @@ attention to case differences."
     emacs-lisp-checkdoc
     erlang
     eruby-erubis
+    fortran-gfortran
     go-gofmt
     go-golint
     go-vet
@@ -4703,6 +4704,93 @@ See URL `http://www.kuwata-lab.com/erubis/'."
         (and (buffer-file-name)
              (member (file-name-extension (buffer-file-name))
                      '("erb" "rhtml"))))))
+
+(flycheck-def-option-var flycheck-gfortran-include-path nil fortran-gfortran
+  "A list of include directories for GCC Fortran.
+
+The value of this variable is a list of strings, where each
+string is a directory to add to the include path of gcc.
+Relative paths are relative to the file being checked."
+  :type '(repeat (directory :tag "Include directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.20"))
+
+(flycheck-def-option-var flycheck-gfortran-language-standard "f95" fortran-gfortran
+  "The language standard to use in GFortran.
+
+The value of this variable is either a string denoting a language
+standard, or nil, to use the default standard.  When non-nil,
+pass the language standard via the `-std' option."
+  :type '(choice (const :tag "Default standard" nil)
+                 (string :tag "Language standard"))
+  :safe #'stringp
+  :package-version '(flycheck . "0.20"))
+
+(flycheck-def-option-var flycheck-gfortran-layout nil fortran-gfortran
+  "The source code layout to use in GFortran.
+
+The value of this variable is one of the following symbols:
+
+nil
+     Let gfortran determine the layout from the extension
+
+`free'
+     Use free form layout
+
+
+`fixed'
+     Use fixed form layout
+
+In any other case, an error is signaled.")
+
+(defun flycheck-option-gfortran-layout (value)
+  "Option VALUE filter for `flycheck-gfortran-layout'."
+  (pcase value
+    (`nil nil)
+    (`free "free-form")
+    (`fixed "fixed-form")
+    (_ (error "Invalid value for flycheck-gfortran-layout: %S" value))))
+
+(flycheck-def-option-var flycheck-gfortran-warnings  '("all" "extra")
+                         fortran-gfortran
+  "A list of warnings for GCC Fortran.
+
+The value of this variable is a list of strings, where each string
+is the name of a warning category to enable.  By default, all
+recommended warnings and some extra warnings are enabled (as by
+`-Wall' and `-Wextra' respectively).
+
+Refer to the gfortran manual at URL
+`https://gcc.gnu.org/onlinedocs/gfortran/' for more information
+about warnings")
+
+(flycheck-define-checker fortran-gfortran
+  "An Fortran syntax checker using GCC.
+
+Uses GCC's Fortran compiler gfortran.  See URL
+`https://gcc.gnu.org/onlinedocs/gfortran/'."
+  :command ("gfortran"
+            (option "-std=" flycheck-gfortran-language-standard concat)
+            (option "-f" flycheck-gfortran-layout concat
+                    flycheck-option-gfortran-layout)
+            "-fsyntax-only"
+            "-fshow-column"
+            "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
+            "-fno-diagnostics-show-option" ; Do not show the corresponding
+                                        ; warning group
+            (option-list "-W" flycheck-gfortran-warnings concat)
+            (option-list "-I" flycheck-gfortran-include-path concat)
+            ;; We must stay in the same directory, to properly resolve #include
+            ;; with quotes
+            source-inplace)
+  :error-patterns
+  ((error line-start (file-name) ":" line "." column ":\n"
+          (= 3 (zero-or-more not-newline) "\n")
+          (or "Error" "Fatal Error") ": " (message) line-end)
+   (warning line-start (file-name) ":" line "." column ":\n"
+            (= 3 (zero-or-more not-newline) "\n")
+            "Warning: " (message) line-end))
+  :modes (fortran-mode f90-mode))
 
 (flycheck-define-checker go-gofmt
   "A Go syntax and style checker using the gofmt utility.

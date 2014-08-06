@@ -194,6 +194,26 @@ ERuby
 .. flyc-checker:: eruby-erubis
    :auto:
 
+Fortran
+=======
+
+.. flyc-checker:: fortran-gfortran
+   :auto:
+
+   .. rubric:: Options
+
+   .. option:: flycheck-gfortran-include-path
+      :auto:
+
+   .. option:: flycheck-gfortran-language-standard
+      :auto:
+
+   .. option:: flycheck-gfortran-layout
+      :auto:
+
+   .. option:: flycheck-gfortran-warnings
+      :auto:
+
 Go
 ==
 
