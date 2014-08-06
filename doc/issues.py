@@ -61,7 +61,7 @@ class IssueReferences(Transform):
             new_nodes = []
             pos = 0
             for match in ISSUE_RE.finditer(text):
-                if match.start() < pos:
+                if match.start() > pos:
                     leading_text = text[pos:match.start()]
                     new_nodes.append(nodes.Text(leading_text, leading_text))
                 issue_id = match.group('id')
