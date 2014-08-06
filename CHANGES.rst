@@ -16,6 +16,7 @@ master (in development)
 
   - #408: C/C++ with GCC
   - #425: Scala with scalastyle
+  - #414, #450: Fortran with GFortran
 
 - New features:
 

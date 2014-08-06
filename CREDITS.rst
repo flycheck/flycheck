@@ -39,6 +39,7 @@ greatly appreciated.
   logo.
 - `Mitch Tishmack`_ added support for Microsoft extensions to the Clang syntax
   checker.
+- `Per Nordlöw`_ contributed a syntax checker for Fortran using gfortran.
 - `Peter Vasil`_ contributed syntax checkers for XML, Lua and Go (using `go
   build` and `go test`), added unit tests and did valuable testing.
 - `Robert Dallas Gray`_ made error display customizable with
@@ -95,6 +96,7 @@ somewhat failed attempt at on-the-fly syntax checking.
 .. _Matthias Dahl: https://github.com/BinaryKhaos
 .. _Matthias Güdemann: https://github.com/mgudemann
 .. _Mitch Tishmack: https://github.com/mitchty
+.. _Per Nordlöw: https://github.com/nordlow
 .. _Peter Vasil: https://github.com/ptrv
 .. _Robert Dallas Gray: https://github.com/rdallasgray
 .. _Robert Zaremba: https://github.com/robert-zaremba

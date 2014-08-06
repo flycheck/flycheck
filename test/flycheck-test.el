@@ -3803,6 +3803,48 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
    "checkers/eruby-error.erb" '(html-erb-mode rhtml-mode web-mode)
    '(5 nil error "syntax error, unexpected keyword_end" :checker eruby-erubis)))
 
+(ert-deftest flycheck-define-checker/fortran-gfortran-error ()
+  :tags '(builtin-checker external-tool language-fortran)
+  (skip-unless (flycheck-check-executable 'fortran-gfortran))
+  (flycheck-test-should-syntax-check
+   "checkers/fortran-error.f" '(fortran-mode f90-mode)
+   '(1 1 error "Non-numeric character in statement label at (1)"
+       :checker fortran-gfortran)
+   '(1 1 error "Unclassifiable statement at (1)" :checker fortran-gfortran)
+   '(2 1 error "Non-numeric character in statement label at (1)"
+       :checker fortran-gfortran)
+   '(2 1 error "Unclassifiable statement at (1)" :checker fortran-gfortran)
+   '(3 1 error "Non-numeric character in statement label at (1)"
+       :checker fortran-gfortran)
+   '(3 1 error "Unclassifiable statement at (1)" :checker fortran-gfortran)))
+
+(ert-deftest flycheck-define-checker/fortran-gfortran-free-form-error ()
+  :tags '(builtin-checker external-tool language-fortran)
+  (skip-unless (flycheck-check-executable 'fortran-gfortran))
+  (let ((flycheck-gfortran-layout 'free))
+    (flycheck-test-should-syntax-check
+     "checkers/fortran-error.f" '(fortran-mode f90-mode)
+     '(3 3 error "Expecting END PROGRAM statement at (1)"
+         :checker fortran-gfortran))))
+
+(ert-deftest flycheck-define-checker/fortran-gfortran-warning ()
+  :tags '(builtin-checker external-tool language-fortran)
+  (skip-unless (flycheck-check-executable 'fortran-gfortran))
+  (flycheck-test-should-syntax-check
+   "checkers/fortran-warning.f90" '(fortran-mode f90-mode)
+   '(1 20 warning "Unused dummy argument 'p' at (1)" :checker fortran-gfortran)
+   '(18 9 warning "Same actual argument associated with INTENT(IN) argument 'a' and INTENT(OUT) argument 'b' at (1)"
+        :checker fortran-gfortran)))
+
+(ert-deftest flycheck-define-checker/fortran-gfortran-specific-warnings ()
+  :tags '(builtin-checker external-tool language-fortran)
+  (skip-unless (flycheck-check-executable 'fortran-gfortran))
+  (let ((flycheck-gfortran-warnings '("unused-dummy-argument")))
+    (flycheck-test-should-syntax-check
+     "checkers/fortran-warning.f90" '(fortran-mode f90-mode)
+     '(1 20 warning "Unused dummy argument 'p' at (1)"
+         :checker fortran-gfortran))))
+
 (ert-deftest flycheck-define-checker/go-syntax-error ()
   :tags '(builtin-checker external-tool language-go)
   (skip-unless (flycheck-check-executable 'go-gofmt))
