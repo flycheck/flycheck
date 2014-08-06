@@ -40,6 +40,8 @@
       with_items:
         - emacs24-nox
         - emacs-snapshot-nox
+    - name: Make Emacs snapshot the default
+      alternatives: name=emacs link=/usr/bin/emacs path=/usr/bin/emacs-snapshot
     - name: Put Haskell into $PATH
       copy: dest=/etc/profile.d/ghc.sh mode=0644 owner=root group=root
             content="export PATH=/opt/ghc/{{ghc_version}}/bin:$PATH\n"

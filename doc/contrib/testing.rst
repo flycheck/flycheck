@@ -119,8 +119,8 @@ as explained in :ref:`test-running`.
 
 To switch between Emacs versions, pass ``EMACS`` to ``make test``::
 
-   $ make EMACS=emacs-snapshot test
    $ make EMACS=emacs24 test
+   $ make EMACS=emacs-snapshot test
 
 The latter is the default.
 
