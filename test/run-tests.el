@@ -24,6 +24,8 @@
 ;;; Commentary:
 
 ;; Flycheck test runner.
+;;
+;; See URL `http://stackoverflow.com/a/6259330/355252' for the shebang.
 
 ;;; Code:
 
