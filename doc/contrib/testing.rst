@@ -107,8 +107,8 @@ To start the VM run the following command in the root directory of Flycheck::
 
    On the first time, this command will setup and provision the VM, and
    **download and install over 1GB** of images and packages along the way.
-   Depending on your network connection and disk speed, this can take **several
-   hours**.
+   Depending on your network connection and disk speed, this can take an hour or
+   more.
 
 After the VM is started, you can connect to it::
 
