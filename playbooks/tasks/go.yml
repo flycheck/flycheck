@@ -8,4 +8,4 @@
   ignore_errors: True
 - name: Put Go into $PATH
   copy: dest=/etc/profile.d/go.sh mode=0644 owner=root group=root
-        content="export PATH=/usr/local/lib/go/bin:/usr/local/go/bin/:$PATH"
+        content="export PATH=/usr/local/lib/go/bin:/usr/local/go/bin/:$PATH\n"

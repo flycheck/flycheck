@@ -40,7 +40,7 @@
         - emacs-snapshot-nox
     - name: Put Haskell into $PATH
       copy: dest=/etc/profile.d/ghc.sh mode=0644 owner=root group=root
-            content="export PATH=/opt/ghc/{{ghc_version}}/bin:$PATH"
+            content="export PATH=/opt/ghc/{{ghc_version}}/bin:$PATH\n"
     - include: tasks/perl.yml
     - include: tasks/pear.yml
     - include: tasks/npm.yml
