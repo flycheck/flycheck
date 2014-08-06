@@ -4437,7 +4437,7 @@ Why not:
      "checkers/ruby-syntax-error.rb" 'ruby-mode
      '(5 nil error "syntax error, unexpected tCONSTANT" :checker ruby-jruby))))
 
-(ert-deftest flycheck-define-checker/ruby-rubocop-and-ruby-lint ()
+(ert-deftest flycheck-define-checker/ruby-rubocop-and-rubylint ()
   :tags '(builtin-checker external-tool language-ruby)
   (skip-unless (-all? #'flycheck-check-executable '(ruby-rubocop
                                                     ruby-rubylint)))
