@@ -1086,16 +1086,6 @@ check with.  ERRORS is the list of expected errors."
                                            (buffer-string)))))
       (ignore-errors (delete-file filename)))))
 
-(ert-deftest flycheck-option-with-value-argument/no-trailing-equal-sign ()
-  :tags '(utility)
-  (should (equal (flycheck-option-with-value-argument "--foo" "bar")
-                 '("--foo" "bar"))))
-
-(ert-deftest flycheck-option-with-value-argument/trailing-equal-sign ()
-  :tags '(utility)
-  (should (equal (flycheck-option-with-value-argument "--foo=" "bar")
-                 '("--foo=bar"))))
-
 (ert-deftest flycheck-prepend-with-option/empty-list ()
   :tags '(utility)
   (should-not (flycheck-prepend-with-option "-f" nil)))
@@ -1596,7 +1586,7 @@ check with.  ERRORS is the list of expected errors."
     (setq first-args nil
           second-args nil)
     (should (equal (flycheck-substitute-argument
-                    '(config-file "--foo=" flycheck-test-config-var)
+                    '(config-file "--foo=" flycheck-test-config-var concat)
                     'emacs-lisp)
                    (list (concat "--foo=" config-file))))))
 
@@ -1607,26 +1597,30 @@ check with.  ERRORS is the list of expected errors."
                     '(option "--foo" flycheck-test-option-var) 'emacs-lisp)
                    '("--foo" "bar")))
     (should (equal (flycheck-substitute-argument
-                    '(option "--foo=" flycheck-test-option-var) 'emacs-lisp)
+                    '(option "--foo=" flycheck-test-option-var concat)
+                    'emacs-lisp)
                    '("--foo=bar"))))
   (let ((flycheck-test-option-var 200))
     (should-error (flycheck-substitute-argument
                    '(option "--foo" flycheck-test-option-var) 'emacs-lisp))
     (should (equal (flycheck-substitute-argument
-                    '(option "--foo" flycheck-test-option-var number-to-string) 'emacs-lisp)
+                    '(option "--foo" flycheck-test-option-var nil number-to-string)
+                    'emacs-lisp)
                    '("--foo" "200")))
     (should (equal (flycheck-substitute-argument
-                    '(option "--foo=" flycheck-test-option-var number-to-string) 'emacs-lisp)
+                    '(option "--foo=" flycheck-test-option-var concat number-to-string) 'emacs-lisp)
                    '("--foo=200"))))
   (let (flycheck-test-option-var)
     (should-not (flycheck-substitute-argument
                  '(option "--foo" flycheck-test-option-var) 'emacs-lisp))
     ;; Catch an error, because `number-to-string' is called with nil
     (should-error (flycheck-substitute-argument
-                   '(option "--foo" flycheck-test-option-var number-to-string) 'emacs-lisp)
+                   '(option "--foo" flycheck-test-option-var nil number-to-string)
+                   'emacs-lisp)
                   :type 'wrong-type-argument)
     (should-error (flycheck-substitute-argument
-                   '(option "--foo=" flycheck-test-option-var number-to-string) 'emacs-lisp)
+                   '(option "--foo=" flycheck-test-option-var concat number-to-string)
+                   'emacs-lisp)
                   :type 'wrong-type-argument)))
 
 (ert-deftest flycheck-substitute-argument/option-list ()

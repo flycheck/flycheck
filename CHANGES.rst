@@ -8,6 +8,9 @@ master (in development)
   - The internal names of syntax checker properties changed.  **All packages
     depending on Flycheck must be recompiled!**
   - `flycheck-substitute-argument` always returns a list now
+  - The special meaning of a trailing ``=`` in `(option …)` and `(config-file
+    …)` is removed.  Both arguments must now explicitly specify `concat` to
+    prepend the option as string.
 
 - New syntax checkers:
 

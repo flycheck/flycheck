@@ -293,7 +293,7 @@ with support for coding standards:
    (flycheck-declare-checker php-phpcs
      "A PHP syntax checker using PHP_CodeSniffer."
      :command '("phpcs" "--report=checkstyle"
-                (option "--standard=" flycheck-phpcs-standard)
+                (option "--standard=" flycheck-phpcs-standard concat)
                 source)
      :error-parser 'flycheck-parse-checkstyle
      :modes 'php-mode)
