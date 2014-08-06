@@ -187,40 +187,40 @@ Return t if Emacs is at least MAJOR.MINOR, or nil otherwise."
   "Check whether GPG is available."
   (or (epg-check-configuration (epg-configuration)) t))
 
-(defconst flycheck-test-texinfo-version-re
-  (rx "makeinfo (GNU texinfo) "
-      (group (one-or-more (any digit)) "." (one-or-more (any digit))))
-  "A regular expression to get the Texinfo version.")
+(defun flycheck-test-extract-version-command (re executable &rest args)
+  "Use RE to extract the version from EXECUTABLE with ARGS.
+
+Run EXECUTABLE with ARGS, catch the output, and apply RE to find
+the version number.  Return the text captured by the first group
+in RE, or nil, if EXECUTABLE is missing, or if RE failed to
+match."
+  (-when-let (executable (executable-find executable))
+    (with-temp-buffer
+      (apply #'call-process executable nil t nil args)
+      (goto-char (point-min))
+      (when (re-search-forward re nil 'no-error)
+        (match-string 1)))))
 
 (defun flycheck-test-texinfo-version ()
   "Determine the version of Texinfo.
 
 Return the version as string, or nil, if the texinfo version
 could not be determined."
-  (-when-let (makeinfo (executable-find "makeinfo"))
-    (with-temp-buffer
-      (call-process makeinfo nil t nil "--version")
-      (goto-char (point-min))
-      (when (re-search-forward flycheck-test-texinfo-version-re nil 'no-error)
-        (match-string 1)))))
-
-(defconst flycheck-test-cppcheck-version-re
-  (rx "Cppcheck "
-      (group (one-or-more (any digit)) "." (one-or-more (any digit)))
-      (zero-or-more any))
-  "A regular expression to get the Cppcheck version.")
+  (flycheck-test-extract-version-command
+   (rx "makeinfo (GNU texinfo) "
+       (group (one-or-more (any digit)) "." (one-or-more (any digit))))
+   "makeinfo" "--version"))
 
 (defun flycheck-test-cppcheck-version ()
   "Determine the version of Cppcheck.
 
 Return the version as string, or nil, if the Cppcheck version
 could not be determined."
-  (-when-let (cppcheck (executable-find "cppcheck"))
-    (with-temp-buffer
-      (call-process cppcheck nil t nil "--version")
-      (goto-char (point-min))
-      (when (re-search-forward flycheck-test-cppcheck-version-re nil 'no-error)
-        (match-string 1)))))
+  (flycheck-test-extract-version-command
+   (rx "Cppcheck "
+       (group (one-or-more (any digit)) "." (one-or-more (any digit)))
+       (zero-or-more any))
+   "cppcheck" "--version"))
 
 
 ;;; Test resources
