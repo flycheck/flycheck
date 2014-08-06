@@ -4401,6 +4401,23 @@ pass the language standard via the `-gnat' option."
   :safe #'stringp
   :package-version '(flycheck . "0.20"))
 
+(flycheck-def-option-var flycheck-gcc-gfortran-warnings '("all" "extra") fortran-gcc
+  "A list of additional warnings to enable in gfortran.
+
+The value of this variable is a list of strings, where each string
+is the name of a warning category to enable.  By default, all
+recommended warnings and some extra warnings are enabled (as by
+`-Wall' and `-Wextra' respectively).
+
+Refer to the gcc manual at URL
+`https://gcc.gnu.org/onlinedocs/gcc/' for more information about
+warnings."
+  :type '(choice (const :tag "No additional warnings" nil)
+                 (repeat :tag "Additional warnings"
+                         (string :tag "Warning name")))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.20"))
+
 (flycheck-define-checker fortran-gcc
   "An Fortran syntax checker using GCC.
 
@@ -4412,7 +4429,7 @@ Uses GCC's Fortran compiler gfortran.  See URL `https://gcc.gnu.org/'."
             "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
             "-fno-diagnostics-show-option" ; Do not show the corresponding
                                         ; warning group
-            (option-list "-W" flycheck-gcc-warnings s-prepend)
+            (option-list "-W" flycheck-gcc-gfortran-warnings s-prepend)
             (option-list "-I" flycheck-gcc-gfortran-include-path)
             ;; We must stay in the same directory, to properly resolve #include
             ;; with quotes
