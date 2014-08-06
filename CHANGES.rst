@@ -295,7 +295,7 @@ master (in development)
   - `emacs-lisp-checkdoc` does not longer check `.dir-locals.el` files
   - #222: Do not automatically check syntax in encrypted files
   - #215: Parse notes from `c/c++-clang` into info level messages
-  - #204: Parse convention warnings from `pylint` to #215: info level
+  - #204: Parse convention warnings from `pylint` to info level
   - #215: Demote naming warnings from `python-flake8` to info level
   - #256: Support `enh-ruby-mode` in Ruby syntax checkers
   - Parse columns from `python-pylint` errors
