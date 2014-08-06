@@ -61,6 +61,10 @@ whose name matches ``gcc``::
 
 See :infonode:`(ert)Test Selectors` for the syntax of test selectors.
 
+You can also use a different Emacs to run the tests with::
+
+   $ make EMACS=emacs-snapshot test
+
 .. note::
 
    Keep in mind that you must quote the expression for your shell *and* for
