@@ -33,6 +33,8 @@
         - ruby1.9.1-dev
         - nodejs
         - openjdk-7-jre
+    - name: Make Clang 3.4 the default Clang
+      alternatives: name=clang link=/usr/bin/clang path=/usr/bin/clang-3.4
     - name: Install Emacs stable and snapshot
       apt: name={{item}} state=latest install_recommends=false
       with_items:
