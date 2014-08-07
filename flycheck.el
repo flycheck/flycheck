@@ -798,7 +798,8 @@ Set this variable to nil to disable the mode line completely."
      ["Go to next error" flycheck-next-error flycheck-mode]
      ["Go to previous error" flycheck-previous-error flycheck-mode]
      ["Show all errors" flycheck-list-errors flycheck-mode]
-     ["Google messages at point" flycheck-google-messages flycheck-mode]
+     ["Google messages at point" flycheck-google-messages
+      (flycheck-overlays-at (point))]
      "---"
      ["Select syntax checker" flycheck-select-checker flycheck-mode]
      "---"
