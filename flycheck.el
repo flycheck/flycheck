@@ -762,7 +762,7 @@ keybindings.  Changing this variable is at your own risk."
     (set-default variable key)))
 
 (defcustom flycheck-mode-line
-  '(" FlyC" (:eval (flycheck-mode-line-status-text)))
+  '(:eval (flycheck-mode-line-status-text))
   "Mode line lighter for Flycheck.
 
 The value of this variable is a mode line template as in
@@ -3703,21 +3703,22 @@ refresh the mode line."
 
 STATUS defaults to `flycheck-last-status-change' if omitted or
 nil."
-  (pcase (or status flycheck-last-status-change)
-    (`not-checked "")
-    (`no-checker "-")
-    (`running "*")
-    (`errored "!")
-    (`finished
-     (if flycheck-current-errors
-         (let ((error-counts (flycheck-count-errors
-                              flycheck-current-errors)))
-           (format ":%s/%s"
-                   (or (cdr (assq 'error error-counts)) 0)
-                   (or (cdr (assq 'warning error-counts)) 0)))
-       ""))
-    (`interrupted "-")
-    (`suspicious "?")))
+  (let ((text (pcase (or status flycheck-last-status-change)
+                (`not-checked "")
+                (`no-checker "-")
+                (`running "*")
+                (`errored "!")
+                (`finished
+                 (if flycheck-current-errors
+                     (let ((error-counts (flycheck-count-errors
+                                          flycheck-current-errors)))
+                       (format ":%s/%s"
+                               (or (cdr (assq 'error error-counts)) 0)
+                               (or (cdr (assq 'warning error-counts)) 0)))
+                   ""))
+                (`interrupted "-")
+                (`suspicious "?"))))
+    (concat " FlyC" text)))
 
 
 ;;; General error display
