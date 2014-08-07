@@ -792,7 +792,12 @@ Set this variable to nil to disable the mode line completely."
 (defvar flycheck-mode-menu-map
   (easy-menu-create-menu
    "Syntax checking"
-   '(["Check current buffer" flycheck-buffer flycheck-mode]
+   '(["Enable on-the-fly syntax checking" flycheck-mode
+      :style toggle :selected flycheck-mode
+      ;; Don't let users toggle the mode if there is no syntax checker for this
+      ;; buffer
+      :enable (flycheck-get-checker-for-buffer)]
+     ["Check current buffer" flycheck-buffer flycheck-mode]
      ["Clear errors in buffer" flycheck-clear t]
      "---"
      ["Go to next error" flycheck-next-error flycheck-mode]
