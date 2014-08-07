@@ -794,7 +794,6 @@ Set this variable to nil to disable the mode line completely."
    "Syntax checking"
    '(["Check current buffer" flycheck-buffer flycheck-mode]
      ["Clear errors in buffer" flycheck-clear t]
-     ["Compile current buffer" flycheck-compile flycheck-mode]
      "---"
      ["Go to next error" flycheck-next-error flycheck-mode]
      ["Go to previous error" flycheck-previous-error flycheck-mode]
