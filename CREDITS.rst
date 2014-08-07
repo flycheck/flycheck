@@ -21,6 +21,7 @@ greatly appreciated.
   GCC-based syntax checker, and extending the C/C++ syntax checkers with new
   features and options.
 - `Gereon Frey`_ fixed the `go-build` syntax checker and improved its tests.
+- `Gulshan Singh`_ added `flycheck-rust-crate-type`
 - `Jimmy Yuen Ho Wong`_ added the HTML syntax checker and the jshint Javascript
   checker, and did valuable testing and bug fixing.
 - `Krzysztof Witkowski`_ implemented `eval` support in Flycheck commands.
@@ -85,6 +86,7 @@ somewhat failed attempt at on-the-fly syntax checking.
 .. _Doug MacEachern: https://github.com/dougm
 .. _Fanael Linithien: https://github.com/Fanael
 .. _Gereon Frey: https://github.com/gfrey
+.. _Gulshan Singh: https://github.com/gsingh93
 .. _Jimmy Yuen Ho Wong: https://github.com/wyuenho
 .. _Krzysztof Witkowski: https://github.com/kwitek
 .. _Lee Adams: https://github.com/leeaustinadams

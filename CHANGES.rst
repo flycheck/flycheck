@@ -31,6 +31,7 @@ master (in development)
     `flycheck-mode-line`
   - #424: Add `flycheck-rubylintrc` to support configuration files for
     `ruby-rubylint`
+  - #446: Add `flycheck-rust-crate-type` to make the Crate type customizable
 
 - Improvements:
 
