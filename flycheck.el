@@ -761,13 +761,13 @@ keybindings.  Changing this variable is at your own risk."
       (define-key flycheck-mode-map key flycheck-command-map))
     (set-default variable key)))
 
-(defcustom flycheck-mode-line
-  '(:eval (flycheck-mode-line-status-text))
+(defcustom flycheck-mode-line '(:eval (flycheck-mode-line-status-text))
   "Mode line lighter for Flycheck.
 
 The value of this variable is a mode line template as in
 `mode-line-format'.  See Info Node `(elisp)Mode Line Format' for
-more information.
+more information.  Note that it should contain a _single_ mode
+line construct only.
 
 Customize this variable to change how Flycheck reports its status
 in the mode line.  You may use `flycheck-mode-line-status-text'
