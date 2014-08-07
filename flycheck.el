@@ -190,7 +190,7 @@ attention to case differences."
     emacs-lisp-checkdoc
     erlang
     eruby-erubis
-    fortran-gcc
+    fortran-gfortran
     go-gofmt
     go-golint
     go-vet
@@ -4237,7 +4237,7 @@ pass the language standard via the `-std' option."
   :package-version '(flycheck . "0.20"))
 
 (flycheck-def-option-var flycheck-gcc-no-exceptions nil c/c++-gcc
-  "Whether to disable exceptions in gcc.
+  "Whether to disable exceptions in GCC.
 
 When non-nil, disable exceptions for syntax checks, via
 `-fno-exceptions'."
@@ -4246,7 +4246,7 @@ When non-nil, disable exceptions for syntax checks, via
   :package-version '(flycheck . "0.20"))
 
 (flycheck-def-option-var flycheck-gcc-no-rtti nil c/c++-gcc
-  "Whether to disable RTTI in gcc.
+  "Whether to disable RTTI in GCC.
 
 When non-nil, disable RTTI for syntax checks, via `-fno-rtti'."
   :type 'boolean
@@ -4254,7 +4254,7 @@ When non-nil, disable RTTI for syntax checks, via `-fno-rtti'."
   :package-version '(flycheck . "0.20"))
 
 (flycheck-def-option-var flycheck-gcc-warnings '("all" "extra") c/c++-gcc
-  "A list of additional warnings to enable in gcc.
+  "A list of additional warnings to enable in GCC.
 
 The value of this variable is a list of strings, where each string
 is the name of a warning category to enable.  By default, all
