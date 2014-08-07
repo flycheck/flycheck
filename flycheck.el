@@ -5645,10 +5645,10 @@ if it is not modified, i.e. after it has been saved."
   :safe #'stringp)
 
 (flycheck-def-option-var flycheck-rust-crate-type "lib" rust
-  "The type of crate to compile.
+  "The type of the Rust Crate to check.
 
-The value of this variable is a string that will be passed to the
---crate-type compiler flag."
+The value of this variable is a string denoting the crate type,
+for the `--crate-type' flag."
   :type 'string
   :safe #'stringp
   :package-version '("flycheck" . "0.20"))
