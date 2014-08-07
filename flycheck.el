@@ -45,6 +45,7 @@
   (require 'jka-compr)      ; For JKA workarounds in `flycheck-temp-file-system'
   )
 
+(require 's)
 (require 'dash)
 
 (require 'subr-x nil 'no-error)  ; Additional utilities, Emacs 24.4 and upwards
@@ -2712,7 +2713,7 @@ _not_ include the file name."
 The following PROPERTIES constitute an error level:
 
 `:overlay-category CATEGORY'
-     A symbol denoting the overlay category to use for error
+     A symbol denotigng the overlay category to use for error
      highlight overlays for this level.  See Info
      node `(elisp)Overlay Properties' for more information about
      overlay categories.
