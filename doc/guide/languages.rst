@@ -484,6 +484,9 @@ Rust
    .. option:: flycheck-rust-check-tests
       :auto:
 
+   .. option:: flycheck-rust-crate-type
+      :auto:
+
    .. option:: flycheck-rust-crate-root
       :auto:
 
