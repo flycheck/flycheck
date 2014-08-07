@@ -792,16 +792,16 @@ Set this variable to nil to disable the mode line completely."
 (defvar flycheck-mode-menu-map
   (easy-menu-create-menu
    "Syntax checking"
-   '(["Check current buffer" flycheck-buffer t]
+   '(["Check current buffer" flycheck-buffer flycheck-mode]
      ["Clear errors in buffer" flycheck-clear t]
-     ["Compile current buffer" flycheck-compile t]
+     ["Compile current buffer" flycheck-compile flycheck-mode]
      "---"
-     ["Go to next error" flycheck-next-error t]
-     ["Go to previous error" flycheck-previous-error t]
-     ["Show all errors" flycheck-list-errors t]
-     ["Google messages at point" flycheck-google-messages t]
+     ["Go to next error" flycheck-next-error flycheck-mode]
+     ["Go to previous error" flycheck-previous-error flycheck-mode]
+     ["Show all errors" flycheck-list-errors flycheck-mode]
+     ["Google messages at point" flycheck-google-messages flycheck-mode]
      "---"
-     ["Select syntax checker" flycheck-select-checker t]
+     ["Select syntax checker" flycheck-select-checker flycheck-mode]
      "---"
      ["Describe syntax checker" flycheck-describe-checker t]
      ["Read the Flycheck manual" flycheck-info t]))
