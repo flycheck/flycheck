@@ -45,7 +45,6 @@
   (require 'jka-compr)      ; For JKA workarounds in `flycheck-temp-file-system'
   )
 
-(require 's)
 (require 'dash)
 
 (require 'subr-x nil 'no-error)  ; Additional utilities, Emacs 24.4 and upwards
@@ -4357,7 +4356,7 @@ Relative paths are relative to the file being checked."
 Uses GCC's Ada compiler gnat. See URL `https://gcc.gnu.org/'."
   :command ("gnat"
             "compile"
-            (eval (s-concat "-gnat" flycheck-gnat-language-standard))
+            (eval (concat "-gnat" flycheck-gnat-language-standard))
             "-fsyntax-only"
             "-fshow-column"
             "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
