@@ -45,6 +45,7 @@ master (in development)
     directory for their cache
   - #447: Change the default of `flycheck-eslintrc` to `nil`
   - #365: Show the menu on the mode line lighter
+  - Greatly improve Flycheck's menu
 
 - Other changes:
 
