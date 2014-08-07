@@ -15,7 +15,7 @@ greatly appreciated.
   `cppcheck` respectively, and contributed a Verilog syntax checker using
   `verilator`.
 - `Derek Harland`_ improved Rust syntax checking by adding support for info
-  messages, and for crates with `flycheck-rust-create-root`
+  messages, and for crates with `flycheck-rust-crate-root`
 - `Doug MacEachern`_ added a Go syntax checker using `errcheck`.
 - `Fanael Linithien`_ greatly improved C/C++ support in Flycheck, by adding
   GCC-based syntax checker, and extending the C/C++ syntax checkers with new
