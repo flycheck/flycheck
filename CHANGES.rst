@@ -44,6 +44,7 @@ master (in development)
   - #443, #444: The `sass` and `scss` syntax checkers now use a temporary
     directory for their cache
   - #447: Change the default of `flycheck-eslintrc` to `nil`
+  - #365: Show the menu on the mode line lighter
 
 - Other changes:
 

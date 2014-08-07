@@ -50,6 +50,7 @@
 (require 'subr-x nil 'no-error)  ; Additional utilities, Emacs 24.4 and upwards
 (require 'pcase)                 ; Pattern matching for Emacs Lisp
 (require 'tabulated-list)        ; To list errors
+(require 'easymenu)             ; Flycheck Mode menu definition
 (require 'rx)                    ; Regexp fanciness in `flycheck-define-checker'
 (require 'help-mode)             ; `define-button-type'
 (require 'find-func)             ; `find-function-regexp-alist'
@@ -788,30 +789,36 @@ Set this variable to nil to disable the mode line completely."
 
 
 ;;; Minor mode definition
+(defvar flycheck-mode-menu-map
+  (easy-menu-create-menu
+   "Syntax checking"
+   '(["Check current buffer" flycheck-buffer t]
+     ["Clear errors in buffer" flycheck-clear t]
+     ["Compile current buffer" flycheck-compile t]
+     "---"
+     ["Go to next error" flycheck-next-error t]
+     ["Go to previous error" flycheck-previous-error t]
+     ["Show all errors" flycheck-list-errors t]
+     ["Google messages at point" flycheck-google-messages t]
+     "---"
+     ["Select syntax checker" flycheck-select-checker t]
+     "---"
+     ["Describe syntax checker" flycheck-describe-checker t]
+     ["Read the Flycheck manual" flycheck-info t]))
+  "Menu of `flycheck-mode'.")
+
 (defvar flycheck-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map flycheck-keymap-prefix flycheck-command-map)
+    ;; We place the menu under a custom menu key.  Since this menu key is not
+    ;; present in the menu of the global map, no top-level menu entry is added
+    ;; to the global menu bar.  However, it still appears on the mode line
+    ;; lighter.
+    (define-key map [menu-bar flycheck] flycheck-mode-menu-map)
     map)
   "Keymap of `flycheck-mode'.")
 
-(easy-menu-change
- '("Tools") "Syntax Checking"
- '(["Check current buffer" flycheck-buffer t]
-   ["Clear errors in buffer" flycheck-clear t]
-   ["Compile current buffer" flycheck-compile t]
-   "---"
-   ["Go to next error" flycheck-next-error t]
-   ["Go to previous error" flycheck-previous-error t]
-   ["Show all errors" flycheck-list-errors t]
-   ["Google messages at point" flycheck-google-messages t]
-   "---"
-   ["Select syntax checker" flycheck-select-checker t]
-   "---"
-   ["Describe syntax checker" flycheck-describe-checker t]
-   ["Read the Flycheck manual" flycheck-info t])
- "Spell Checking")
-
-(easy-menu-change '("Tools") "--" nil "Spell Checking")
+(easy-menu-add-item nil '("Tools") flycheck-mode-menu-map "Spell Checking")
 
 (defun flycheck-teardown ()
   "Teardown Flycheck in the current buffer..
