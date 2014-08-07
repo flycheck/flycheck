@@ -798,12 +798,18 @@ Set this variable to nil to disable the mode line completely."
      ["Go to next error" flycheck-next-error flycheck-mode]
      ["Go to previous error" flycheck-previous-error flycheck-mode]
      ["Show all errors" flycheck-list-errors flycheck-mode]
+     "---"
+     ["Copy messages at point" flycheck-copy-messages-as-kill
+      (flycheck-overlays-at (point))]
      ["Google messages at point" flycheck-google-messages
       (flycheck-overlays-at (point))]
      "---"
      ["Select syntax checker" flycheck-select-checker flycheck-mode]
+     ["Set executable of syntax checker" flycheck-set-checker-executable
+      flycheck-mode]
      "---"
      ["Describe syntax checker" flycheck-describe-checker t]
+     ["Show Flycheck version" flycheck-version t]
      ["Read the Flycheck manual" flycheck-info t]))
   "Menu of `flycheck-mode'.")
 
