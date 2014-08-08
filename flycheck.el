@@ -3451,6 +3451,7 @@ the beginning of the buffer."
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "n") #'flycheck-error-list-next-error)
     (define-key map (kbd "p") #'flycheck-error-list-previous-error)
+    (define-key map (kbd "RET") #'flycheck-error-list-goto-error)
     map)
   "The keymap of `flycheck-error-list-mode'.")
 
@@ -3517,10 +3518,7 @@ Return a list with the contents of the table cell."
                    column 'flycheck-error-list-column-number)
                   (propertize (symbol-name (flycheck-error-level error))
                               'font-lock-face level-face)
-                  (list (format "%s (%s)" message checker)
-                        'follow-link t
-                        'flycheck-error error
-                        'action #'flycheck-error-list-button-goto-error)))))
+                  (format "%s (%s)" message checker)))))
 
 (defun flycheck-error-list-entries ()
   "Create the entries for the error list."
@@ -3528,10 +3526,6 @@ Return a list with the contents of the table cell."
     (let ((errors (buffer-local-value 'flycheck-current-errors
                                       flycheck-error-list-source-buffer)))
       (mapcar #'flycheck-error-list-make-entry errors))))
-
-(defun flycheck-error-list-button-goto-error (button)
-  "Go to the location of the error associated to BUTTON."
-  (flycheck-error-list-goto-error (button-get button 'flycheck-error)))
 
 (defvar flycheck-error-list-mode-line-map
   (let ((map (make-sparse-keymap)))
@@ -3591,7 +3585,9 @@ list."
 (defun flycheck-error-list-goto-error (&optional error)
   "Go to the location of an ERROR from the error list.
 
-If ERROR is not given it defaults to the error at point."
+Interactively or when ERROR is not given, go to the error at
+point."
+  (interactive)
   (-when-let* ((error (or error (tabulated-list-get-id)))
                (buffer (flycheck-error-buffer error)))
     (when (buffer-live-p buffer)

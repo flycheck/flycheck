@@ -2990,7 +2990,7 @@ of the file will be interrupted because there are too many #ifdef configurations
                                        :checker 'emacs-lisp-checkdoc))
          (entry (flycheck-error-list-make-entry error))
          (cells (cadr entry)))
-    (should (string= "foo (emacs-lisp-checkdoc)" (car (aref cells 3))))))
+    (should (string= "foo (emacs-lisp-checkdoc)" (aref cells 3)))))
 
 (ert-deftest flycheck-error-list-make-entry/default-message ()
   :tags '(error-list)
@@ -2998,7 +2998,7 @@ of the file will be interrupted because there are too many #ifdef configurations
                                        :checker 'emacs-lisp-checkdoc))
          (entry (flycheck-error-list-make-entry error))
          (cells (cadr entry)))
-    (should (string= "Unknown error (emacs-lisp-checkdoc)" (car (aref cells 3))))))
+    (should (string= "Unknown error (emacs-lisp-checkdoc)" (aref cells 3)))))
 
 
 ;;; General error display
