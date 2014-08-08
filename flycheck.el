@@ -3252,7 +3252,7 @@ corresponding buffer."
   (-filter #'flycheck-relevant-error-p errors))
 
 (defun flycheck-error-< (err1 err2)
-  "Determine whether ERR1 goes before ERR2.
+  "Determine whether ERR1 goes before ERR2 by location.
 
 Compare by line numbers and then by column numbers."
   (let ((line1 (flycheck-error-line err1))
@@ -3264,6 +3264,22 @@ Compare by line numbers and then by column numbers."
                ;; Sort errors for the whole line first
                (or (not col1) (< col1 col2))))
       (< line1 line2))))
+
+(defun flycheck-error-level-< (err1 err2)
+  "Determine whether ERR1 goes before ERR2 by error level.
+
+Like `flycheck-error-<', but compares by error level severity
+first.  Levels of the same severity are compared by name."
+  (let* ((level1 (flycheck-error-level err1))
+         (level2 (flycheck-error-level err2))
+         (severity1 (flycheck-error-level-severity level1))
+         (severity2 (flycheck-error-level-severity level2)))
+    (cond
+     ((= severity1 severity2)
+      (if (string= level1 level2)
+          (flycheck-error-< err1 err2)
+        (string< level1 level2)))
+     (t (< severity1 severity2)))))
 
 (defun flycheck-sort-errors (errors)
   "Sort ERRORS by line and column numbers.
