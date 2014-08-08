@@ -7937,13 +7937,13 @@ New syntax checkers:
 @itemize -
 
 @item 
-#408@footnote{https://github.com/flycheck/flycheck/issues/408}: C/C++ with GCC
+C/C++ with GCC [GH-408]@footnote{https://github.com/flycheck/flycheck/issues/408}
 
 @item 
-#425@footnote{https://github.com/flycheck/flycheck/issues/425}: Scala with scalastyle
+Scala with scalastyle [GH-425]@footnote{https://github.com/flycheck/flycheck/issues/425}
 
 @item 
-#414@footnote{https://github.com/flycheck/flycheck/issues/414}, #450@footnote{https://github.com/flycheck/flycheck/issues/450}: Fortran with GFortran
+Fortran with GFortran [GH-414]@footnote{https://github.com/flycheck/flycheck/issues/414} [GH-450]@footnote{https://github.com/flycheck/flycheck/issues/450}
 @end itemize
 
 @item 
@@ -7953,15 +7953,15 @@ New features:
 @itemize -
 
 @item 
-#412@footnote{https://github.com/flycheck/flycheck/issues/412}: Add @code{flycheck-clang-no-exceptions} and @code{flycheck-gcc-no-exceptions} to
-flag exceptions as errors in C++
+Add @code{flycheck-clang-no-exceptions} and @code{flycheck-gcc-no-exceptions} to
+flag exceptions as errors in C++ [GH-412]@footnote{https://github.com/flycheck/flycheck/issues/412}
 
 @item 
-#417@footnote{https://github.com/flycheck/flycheck/issues/417}: Add @code{flycheck-rust-crate-root} to resolve inter-crate references in
-@code{rust}
+Add @code{flycheck-rust-crate-root} to resolve inter-crate references in @code{rust}
+[GH-417]@footnote{https://github.com/flycheck/flycheck/issues/417}
 
 @item 
-#420@footnote{https://github.com/flycheck/flycheck/issues/420}: Add @code{flycheck-clang-blocks} to enable the block syntax in Clang
+Add @code{flycheck-clang-blocks} to enable the block syntax in Clang [GH-420]@footnote{https://github.com/flycheck/flycheck/issues/420}
 
 @item 
 @code{read-flycheck-checker} now accepts a default value
@@ -7974,30 +7974,31 @@ Make the mode line lighter of Flycheck customizable with
 @code{flycheck-mode-line}
 
 @item 
-#424@footnote{https://github.com/flycheck/flycheck/issues/424}: Add @code{flycheck-rubylintrc} to support configuration files for
-@code{ruby-rubylint}
+Add @code{flycheck-rubylintrc} to support configuration files for
+@code{ruby-rubylint} [GH-424]@footnote{https://github.com/flycheck/flycheck/issues/424}
 
 @item 
-#446@footnote{https://github.com/flycheck/flycheck/issues/446}: Add @code{flycheck-rust-crate-type} to make the Crate type customizable
+Add @code{flycheck-rust-crate-type} to make the Crate type customizable [GH-446]@footnote{https://github.com/flycheck/flycheck/issues/446}
 
 @item 
-#454@footnote{https://github.com/flycheck/flycheck/issues/454}: The mode line of the error list is now customizable with
-@code{flycheck-error-list-mode-line}
+The mode line of the error list is now customizable with
+@code{flycheck-error-list-mode-line} [GH-454]@footnote{https://github.com/flycheck/flycheck/issues/454}
 
 @item 
-#452@footnote{https://github.com/flycheck/flycheck/issues/452}, #454@footnote{https://github.com/flycheck/flycheck/issues/454}: Pressing @code{n} or @code{p} in the error list now shows the error at
-point in a separate window
+Pressing @code{n} or @code{p} in the error list now shows the error at point in a
+separate window [GH-452]@footnote{https://github.com/flycheck/flycheck/issues/452} [GH-454]@footnote{https://github.com/flycheck/flycheck/issues/454}
 
 @item 
-#454@footnote{https://github.com/flycheck/flycheck/issues/454}: Pressing @code{RET} in the error list now jumps to the error at point
+Pressing @code{RET} in the error list now jumps to the error at point [GH-454]@footnote{https://github.com/flycheck/flycheck/issues/454}
 
 @item 
-#454@footnote{https://github.com/flycheck/flycheck/issues/454}: The error list can now be sorted by error level by clicking on the
+The error list can now be sorted by error level by clicking on the
 corresponding list header, or by pressing @code{S} with point on the column text
+[GH-454]@footnote{https://github.com/flycheck/flycheck/issues/454}
 
 @item 
-#454@footnote{https://github.com/flycheck/flycheck/issues/454}: Error levels defined with @code{flycheck-define-error-level} can now have a
-numeric severity used for sorting
+Error levels defined with @code{flycheck-define-error-level} can now have a
+numeric severity used for sorting [GH-454]@footnote{https://github.com/flycheck/flycheck/issues/454}
 @end itemize
 
 @item 
@@ -8007,37 +8008,38 @@ Improvements:
 @itemize -
 
 @item 
-#421@footnote{https://github.com/flycheck/flycheck/issues/421}: Use proper temporary files in @code{python-flake8}
+Use proper temporary files in @code{python-flake8} [GH-421]@footnote{https://github.com/flycheck/flycheck/issues/421}
 
 @item 
-#423@footnote{https://github.com/flycheck/flycheck/issues/423}: Demote errors from @code{package-initialize} in the @code{emacs-lisp} checker
+Demote errors from @code{package-initialize} in the @code{emacs-lisp} checker [GH-423]@footnote{https://github.com/flycheck/flycheck/issues/423}
 
 @item 
 @code{flycheck-select-checker} now uses the last used syntax checker as default
 when reading from minibuffer
 
 @item 
-#428@footnote{https://github.com/flycheck/flycheck/issues/428}: @code{flycheck-compile} now prompts for the syntax checker to run as
-@code{compile} command
+@code{flycheck-compile} now prompts for the syntax checker to run as @code{compile}
+command [GH-428]@footnote{https://github.com/flycheck/flycheck/issues/428}
 
 @item 
-#439@footnote{https://github.com/flycheck/flycheck/issues/439}: The @code{rust} syntax checker shows info messages now
+The @code{rust} syntax checker shows info messages now [GH-439]@footnote{https://github.com/flycheck/flycheck/issues/439}
 
 @item 
-#443@footnote{https://github.com/flycheck/flycheck/issues/443}, #444@footnote{https://github.com/flycheck/flycheck/issues/444}: The @code{sass} and @code{scss} syntax checkers now use a temporary
-directory for their cache
+The @code{sass} and @code{scss} syntax checkers now use a temporary directory for
+their cache [GH-443]@footnote{https://github.com/flycheck/flycheck/issues/443} [GH-454]@footnote{https://github.com/flycheck/flycheck/issues/454}
 
 @item 
-#447@footnote{https://github.com/flycheck/flycheck/issues/447}: Change the default of @code{flycheck-eslintrc} to @code{nil}
+Change the default of @code{flycheck-eslintrc} to @code{nil} [GH-447]@footnote{https://github.com/flycheck/flycheck/issues/447}
 
 @item 
-#365@footnote{https://github.com/flycheck/flycheck/issues/365}: Show the menu on the mode line lighter
+Show the menu on the mode line lighter [GH-365]@footnote{https://github.com/flycheck/flycheck/issues/365}
 
 @item 
 Greatly improve Flycheck's menu
 
 @item 
-#452@footnote{https://github.com/flycheck/flycheck/issues/452}, #454@footnote{https://github.com/flycheck/flycheck/issues/454}: @code{n} and @code{p} now navigate the error list by errors, not by lines
+@code{n} and @code{p} now navigate the error list by errors, not by lines [GH-452]@footnote{https://github.com/flycheck/flycheck/issues/452}
+[GH-444]@footnote{https://github.com/flycheck/flycheck/issues/444}
 @end itemize
 
 @item 
@@ -8060,7 +8062,7 @@ Remove dependencies on f.el and s.el
 @itemize -
 
 @item 
-#331@footnote{https://github.com/flycheck/flycheck/issues/331}: Flycheck now has an official logo
+Flycheck now has an official logo [GH-331]@footnote{https://github.com/flycheck/flycheck/issues/331}
 
 @item 
 @strong{Breaking changes}:
@@ -8069,8 +8071,8 @@ Remove dependencies on f.el and s.el
 @itemize -
 
 @item 
-#405@footnote{https://github.com/flycheck/flycheck/issues/405}: The @code{ruby-rubylint} syntax checker now requires Ruby Lint 2.0 or
-newer.
+The @code{ruby-rubylint} syntax checker now requires Ruby Lint 2.0 or
+newer. [GH-405]@footnote{https://github.com/flycheck/flycheck/issues/405}
 @end itemize
 
 @item 
@@ -8080,7 +8082,7 @@ New syntax checkers:
 @itemize -
 
 @item 
-#393@footnote{https://github.com/flycheck/flycheck/issues/393}: Go with @code{errcheck}
+Go with @code{errcheck} [GH-393]@footnote{https://github.com/flycheck/flycheck/issues/393}
 @end itemize
 
 @item 
@@ -8090,24 +8092,24 @@ New features:
 @itemize -
 
 @item 
-#381@footnote{https://github.com/flycheck/flycheck/issues/381}: Add @code{flycheck-keymap-prefix} to change the prefix key for Flycheck
-keybindings
+Add @code{flycheck-keymap-prefix} to change the prefix key for Flycheck
+keybindings [GH-381]@footnote{https://github.com/flycheck/flycheck/issues/381}
 
 @item 
-#387@footnote{https://github.com/flycheck/flycheck/issues/387}: Make the prefix of Flycheck's temporary files customizable with
-@code{flycheck-temp-prefix}
+Make the prefix of Flycheck's temporary files customizable with
+@code{flycheck-temp-prefix} [GH-387]@footnote{https://github.com/flycheck/flycheck/issues/387}
 
 @item 
-#397@footnote{https://github.com/flycheck/flycheck/issues/397}: Add @code{:error-filter} property for syntax checkers to apply a custom
-function to modify or filter errors after parsing
+Add @code{:error-filter} property for syntax checkers to apply a custom function
+to modify or filter errors after parsing [GH-397]@footnote{https://github.com/flycheck/flycheck/issues/397}
 
 @item 
-#406@footnote{https://github.com/flycheck/flycheck/issues/406}: Add @code{flycheck-rust-check-tests} to disable syntax checking of test
-code in Rust
+Add @code{flycheck-rust-check-tests} to disable syntax checking of test code in
+Rust [GH-406]@footnote{https://github.com/flycheck/flycheck/issues/406}
 
 @item 
-#407@footnote{https://github.com/flycheck/flycheck/issues/407}: Add @code{flycheck-cppcheck-inconclusive} to enable cppcheck tests that
-might give false positives
+Add @code{flycheck-cppcheck-inconclusive} to enable cppcheck tests that might
+give false positives [GH-407]@footnote{https://github.com/flycheck/flycheck/issues/407}
 @end itemize
 
 @item 
@@ -8117,18 +8119,18 @@ Improvements:
 @itemize -
 
 @item 
-#397@footnote{https://github.com/flycheck/flycheck/issues/397}: Collapse redundant whitespace in messages from @code{emacs-lisp}
+Collapse redundant whitespace in messages from @code{emacs-lisp} [GH-397]@footnote{https://github.com/flycheck/flycheck/issues/397}
 
 @item 
-#397@footnote{https://github.com/flycheck/flycheck/issues/397}: Dedent messages from @code{haskell-ghc}
+Dedent messages from @code{haskell-ghc} [GH-397]@footnote{https://github.com/flycheck/flycheck/issues/397}
 
 @item 
-#397@footnote{https://github.com/flycheck/flycheck/issues/397}: Fold errors in included files into the error messages of the
-corresponding include in @code{c/c++-clang}
+Fold errors in included files into the error messages of the corresponding
+include in @code{c/c++-clang} [GH-397]@footnote{https://github.com/flycheck/flycheck/issues/397}
 
 @item 
-#405@footnote{https://github.com/flycheck/flycheck/issues/405}: The @code{ruby-rubylint} syntax checker now supports ruby-lint 2.0 and
-newer.
+The @code{ruby-rubylint} syntax checker now supports ruby-lint 2.0 and
+newer [GH-405]@footnote{https://github.com/flycheck/flycheck/issues/405}
 @end itemize
 
 @item 
@@ -8138,15 +8140,15 @@ Bug fixes:
 @itemize -
 
 @item 
-#334@footnote{https://github.com/flycheck/flycheck/issues/334}: When stopping Flycheck, correctly kill running processes and cleanup
-their temporary files
+When stopping Flycheck, correctly kill running processes and cleanup their
+temporary files [GH-334]@footnote{https://github.com/flycheck/flycheck/issues/334}
 
 @item 
 Do not choke on files without extensions in @code{haskell-ghc}
 
 @item 
-#391@footnote{https://github.com/flycheck/flycheck/issues/391}: Fix spurious warning when a syntax checker reports errors, but not for
-the file being checked
+Fix spurious warning when a syntax checker reports errors, but not for the
+file being checked [GH-391]@footnote{https://github.com/flycheck/flycheck/issues/391}
 
 @item 
 Do not signal errors in Go Mode, when @code{go} is not available
@@ -8177,8 +8179,8 @@ all shell script syntax checkers now live in the @code{sh-} prefix.
 @code{rst-sphinx} requires Sphinx 1.2 or newer now.
 
 @item 
-#353@footnote{https://github.com/flycheck/flycheck/issues/353}: @code{rustc} requires Rust 0.10 (not yet released at the time of writing)
-or newer now
+@code{rustc} requires Rust 0.10 (not yet released at the time of writing) or
+newer now [GH-353]@footnote{https://github.com/flycheck/flycheck/issues/353}
 @end itemize
 
 @item 
@@ -8188,19 +8190,19 @@ New syntax checkers:
 @itemize -
 
 @item 
-#88@footnote{https://github.com/flycheck/flycheck/issues/88}: Perl with Perl Critic
+Perl with Perl Critic [GH-88]@footnote{https://github.com/flycheck/flycheck/issues/88}
 
 @item 
-#322@footnote{https://github.com/flycheck/flycheck/issues/322}: Replace GNU Make with POSIX Make
+Replace GNU Make with POSIX Make [GH-322]@footnote{https://github.com/flycheck/flycheck/issues/322}
 
 @item 
-#267@footnote{https://github.com/flycheck/flycheck/issues/267}: Shellcheck
+Shellcheck [GH-267]@footnote{https://github.com/flycheck/flycheck/issues/267}
 
 @item 
-#328@footnote{https://github.com/flycheck/flycheck/issues/328}: Go with @code{golint}
+Go with @code{golint} [GH-328]@footnote{https://github.com/flycheck/flycheck/issues/328}
 
 @item 
-#329@footnote{https://github.com/flycheck/flycheck/issues/329}: Go with @code{go tool vet}
+Go with @code{go tool vet} [GH-329]@footnote{https://github.com/flycheck/flycheck/issues/329}
 @end itemize
 
 @item 
@@ -8213,7 +8215,8 @@ New features:
 Add @code{flycheck-rust-library-path} to specify library locations for @code{rust}
 
 @item 
-#344@footnote{https://github.com/flycheck/flycheck/issues/344}: Add @code{flycheck-dmd-include-path} to change the include path of @code{d-dmd}
+Add @code{flycheck-dmd-include-path} to change the include path of @code{d-dmd}
+[GH-344]@footnote{https://github.com/flycheck/flycheck/issues/344}
 @end itemize
 
 @item 
@@ -8239,16 +8242,17 @@ Avoid warnings about missing main functions in @code{rust}
 Properly resolve relative filenames in @code{.. include::} directives in @code{rst}
 
 @item 
-#348@footnote{https://github.com/flycheck/flycheck/issues/348}: Use @code{--unix_mode} option in @code{javascript-gjslint} to get the file name
+Use @code{--unix_mode} option in @code{javascript-gjslint} to get the file name
+[GH-348]@footnote{https://github.com/flycheck/flycheck/issues/348}
 
 @item 
 Puppet Lint messages now include the name of the corresponding check
 
 @item 
-#353@footnote{https://github.com/flycheck/flycheck/issues/353}: @code{rustc} supports upcoming Rust 0.10 now
+@code{rustc} supports upcoming Rust 0.10 now [GH-353]@footnote{https://github.com/flycheck/flycheck/issues/353}
 
 @item 
-#367@footnote{https://github.com/flycheck/flycheck/issues/367}: Flycheck now handles Clang errors from included files
+Flycheck now handles Clang errors from included files [GH-367]@footnote{https://github.com/flycheck/flycheck/issues/367}
 @end itemize
 @end itemize
 
@@ -8261,8 +8265,8 @@ Puppet Lint messages now include the name of the corresponding check
 @itemize -
 
 @item 
-#274@footnote{https://github.com/flycheck/flycheck/issues/274}: The manual was ported to Sphinx@footnote{http://sphinx-doc.org} and is now located at
-@indicateurl{http://flycheck.readthedocs.org}
+The manual was ported to Sphinx@footnote{http://sphinx-doc.org} and is now located at
+@indicateurl{http://flycheck.readthedocs.org} [GH-274]@footnote{https://github.com/flycheck/flycheck/issues/274}
 
 @item 
 @strong{Breaking changes}:
@@ -8291,7 +8295,7 @@ New syntax checkers:
 RST (ReStructuredText) using Sphinx
 
 @item 
-#321@footnote{https://github.com/flycheck/flycheck/issues/321}: GNU Make
+GNU Make [GH-321]@footnote{https://github.com/flycheck/flycheck/issues/321}
 @end itemize
 
 @item 
@@ -8301,7 +8305,7 @@ New features:
 @itemize -
 
 @item 
-#266@footnote{https://github.com/flycheck/flycheck/issues/266}: Extend syntax checkers with @code{flycheck-add-next-checkers}
+Extend syntax checkers with @code{flycheck-add-next-checkers} [GH-266]@footnote{https://github.com/flycheck/flycheck/issues/266}
 @end itemize
 
 @item 
@@ -8311,18 +8315,18 @@ Improvements:
 @itemize -
 
 @item 
-#301@footnote{https://github.com/flycheck/flycheck/issues/301}: Immediately re-check the buffer when it was changed during a syntax
-check
+Immediately re-check the buffer when it was changed during a syntax check
+[GH-301]@footnote{https://github.com/flycheck/flycheck/issues/301}
 
 @item 
-#305@footnote{https://github.com/flycheck/flycheck/issues/305}: Do not defer syntax checker after idle change timeout
+Do not defer syntax checker after idle change timeout [GH-305]@footnote{https://github.com/flycheck/flycheck/issues/305}
 
 @item 
 Do not use the generic @code{rst} syntax checker in Sphinx projects anymore, to
 avoid false positives by Sphinx-only markup
 
 @item 
-#314@footnote{https://github.com/flycheck/flycheck/issues/314}: Check for more than just syntax errors in @code{rust}
+Check for more than just syntax errors in @code{rust} [GH-314]@footnote{https://github.com/flycheck/flycheck/issues/314}
 
 @item 
 @code{chef-foodcritic} supports @code{enh-ruby-mode} now
@@ -8335,11 +8339,11 @@ Bug fixes
 @itemize -
 
 @item 
-#298@footnote{https://github.com/flycheck/flycheck/issues/298}: Do not attach syntax checker processes to the buffer anymore
+Do not attach syntax checker processes to the buffer anymore [GH-298]@footnote{https://github.com/flycheck/flycheck/issues/298}
 
 @item 
-#319@footnote{https://github.com/flycheck/flycheck/issues/319}: Do not visit the file to check in @code{emacs-lisp} and
-@code{emacs-lisp-checkdoc} to avoid unintended side effects
+Do not visit the file to check in @code{emacs-lisp} and @code{emacs-lisp-checkdoc} to
+avoid unintended side effects [GH-319]@footnote{https://github.com/flycheck/flycheck/issues/319}
 @end itemize
 @end itemize
 
@@ -8362,15 +8366,15 @@ Argument substitution is no longer performed on syntax checker executables.
 The executable must be a string.
 
 @item 
-#275@footnote{https://github.com/flycheck/flycheck/issues/275}: Split out @code{haskell-hdevtools} into a separate package.  See
-flycheck-hdevtools@footnote{https://github.com/flycheck/flycheck-hdevtools}
+Split out @code{haskell-hdevtools} into a separate package.  See
+flycheck-hdevtools@footnote{https://github.com/flycheck/flycheck-hdevtools} [GH-275]@footnote{https://github.com/flycheck/flycheck/issues/275}
 
 @item 
 Drop support for coffeelint 0.x
 
 @item 
-#230@footnote{https://github.com/flycheck/flycheck/issues/230}: The error list is reimplemented on top of Tabulated List Mode.  This
-greatly changes the appearance and behaviour of the error list.
+The error list is reimplemented on top of Tabulated List Mode.  This greatly
+changes the appearance and behaviour of the error list [GH-230]@footnote{https://github.com/flycheck/flycheck/issues/230}
 @end itemize
 
 @item 
@@ -8380,37 +8384,37 @@ New syntax checkers:
 @itemize -
 
 @item 
-#250@footnote{https://github.com/flycheck/flycheck/issues/250}: Ruby with @code{ruby-lint}
+Ruby with @code{ruby-lint} [GH-250]@footnote{https://github.com/flycheck/flycheck/issues/250}
 
 @item 
-#270@footnote{https://github.com/flycheck/flycheck/issues/270}: Handlebars
+Handlebars [GH-270]@footnote{https://github.com/flycheck/flycheck/issues/270}
 
 @item 
-#253@footnote{https://github.com/flycheck/flycheck/issues/253}: YAML with @code{yaml-jsyaml}
+YAML with @code{yaml-jsyaml} [GH-253]@footnote{https://github.com/flycheck/flycheck/issues/253}
 
 @item 
-#255@footnote{https://github.com/flycheck/flycheck/issues/255}: Chef recipes with @code{foodcritic}
+Chef recipes with @code{foodcritic} [GH-255]@footnote{https://github.com/flycheck/flycheck/issues/255}
 
 @item 
-#276@footnote{https://github.com/flycheck/flycheck/issues/276}: AsciiDoc
+AsciiDoc [GH-276]@footnote{https://github.com/flycheck/flycheck/issues/276}
 
 @item 
-#271@footnote{https://github.com/flycheck/flycheck/issues/271}: CFEngine
+CFEngine [GH-271]@footnote{https://github.com/flycheck/flycheck/issues/271}
 
 @item 
-#277@footnote{https://github.com/flycheck/flycheck/issues/277}: Racket
+Racket [GH-277]@footnote{https://github.com/flycheck/flycheck/issues/277}
 
 @item 
 Texinfo
 
 @item 
-#296@footnote{https://github.com/flycheck/flycheck/issues/296}: Verilog
+Verilog [GH-296]@footnote{https://github.com/flycheck/flycheck/issues/296}
 
 @item 
-#291@footnote{https://github.com/flycheck/flycheck/issues/291}: Javascript with @code{eslint}
+Javascript with @code{eslint} [GH-291]@footnote{https://github.com/flycheck/flycheck/issues/291}
 
 @item 
-#285@footnote{https://github.com/flycheck/flycheck/issues/285}: ERuby
+ERuby [GH-285]@footnote{https://github.com/flycheck/flycheck/issues/285}
 @end itemize
 
 @item 
@@ -8420,32 +8424,32 @@ New features:
 @itemize -
 
 @item 
-#272@footnote{https://github.com/flycheck/flycheck/issues/272}: Define variables to override the executables of syntax checkers
+Define variables to override the executables of syntax checkers [GH-272]@footnote{https://github.com/flycheck/flycheck/issues/272}
 
 @item 
-#272@footnote{https://github.com/flycheck/flycheck/issues/272}: Interactively set the executable of a syntax checker with
-@code{flycheck-set-checker-executable}
+Interactively set the executable of a syntax checker with
+@code{flycheck-set-checker-executable} [GH-272]@footnote{https://github.com/flycheck/flycheck/issues/272}
 
 @item 
-#269@footnote{https://github.com/flycheck/flycheck/issues/269}: Disable syntax checkers easily with @code{flycheck-disabled-checkers}
+Disable syntax checkers easily with @code{flycheck-disabled-checkers} [GH-269]@footnote{https://github.com/flycheck/flycheck/issues/269}
 
 @item 
-#268@footnote{https://github.com/flycheck/flycheck/issues/268}: Add support for the Compass CSS framework in the @code{sass} and @code{scss}
-checkers, with @code{flycheck-sass-compass} and @code{flycheck-scss-compass}
-respectively
+Add support for the Compass CSS framework in the @code{sass} and @code{scss} checkers,
+with @code{flycheck-sass-compass} and @code{flycheck-scss-compass} respectively
+[GH-268]@footnote{https://github.com/flycheck/flycheck/issues/268}
 
 @item 
-#287@footnote{https://github.com/flycheck/flycheck/issues/287}: Disable style checks in @code{ruby-rubocop} with
-@code{flycheck-rubocop-lint-only}
+Disable style checks in @code{ruby-rubocop} with @code{flycheck-rubocop-lint-only}
+[GH-287]@footnote{https://github.com/flycheck/flycheck/issues/287}
 
 @item 
-#283@footnote{https://github.com/flycheck/flycheck/issues/283}: Add support for Microsoft extensions in @code{c/c++-clang} via
-@code{flycheck-clang-ms-extensions}
+Add support for Microsoft extensions in @code{c/c++-clang} via
+@code{flycheck-clang-ms-extensions} [GH-283]@footnote{https://github.com/flycheck/flycheck/issues/283}
 
 @item 
-#230@footnote{https://github.com/flycheck/flycheck/issues/230}: New faces @code{flycheck-error-list-info}, @code{flycheck-error-list-warning},
+New faces @code{flycheck-error-list-info}, @code{flycheck-error-list-warning},
 @code{flycheck-error-list-error}, @code{flycheck-error-list-line-number} and
-@code{flycheck-error-list-column-number}
+@code{flycheck-error-list-column-number} [GH-230]@footnote{https://github.com/flycheck/flycheck/issues/230}
 
 @item 
 Add @code{flycheck-ghc-no-user-package-database} to disable the user package
@@ -8470,7 +8474,7 @@ Improvements:
 Demote Rubocop convention messages to @code{info} level
 
 @item 
-#282@footnote{https://github.com/flycheck/flycheck/issues/282}: Stop Flycheck before the buffer is reverted
+Stop Flycheck before the buffer is reverted [GH-282]@footnote{https://github.com/flycheck/flycheck/issues/282}
 
 @item 
 Properly resolve local module imports in @code{haskell-ghc}
@@ -8483,7 +8487,7 @@ Bug fixes:
 @itemize -
 
 @item 
-#280@footnote{https://github.com/flycheck/flycheck/issues/280}: Make relative imports work with @code{python-pylint}
+Make relative imports work with @code{python-pylint} [GH-280]@footnote{https://github.com/flycheck/flycheck/issues/280}
 
 @item 
 Fix parsing of errors in @code{scss} and @code{sass}
@@ -8513,12 +8517,12 @@ Do not add the current directory to the @code{emacs-lisp} syntax checker load
 path
 
 @item 
-#214@footnote{https://github.com/flycheck/flycheck/issues/214}: @code{flycheck-list-errors} cannot list errors at point anymore.  It does
-not accept a prefix argument anymore, and takes zero arguments now
+@code{flycheck-list-errors} cannot list errors at point anymore.  It does not
+accept a prefix argument anymore, and takes zero arguments now [GH-214]@footnote{https://github.com/flycheck/flycheck/issues/214}
 
 @item 
-#214@footnote{https://github.com/flycheck/flycheck/issues/214}: @code{flycheck-display-errors-in-list} is gone.  The error list
-automatically highlights the error at point now
+@code{flycheck-display-errors-in-list} is gone.  The error list automatically
+highlights the error at point now [GH-214]@footnote{https://github.com/flycheck/flycheck/issues/214}
 
 @item 
 Remove obsolete @code{flycheck-declare-checker}
@@ -8531,16 +8535,16 @@ New syntax checkers:
 @itemize -
 
 @item 
-#236@footnote{https://github.com/flycheck/flycheck/issues/236}: YAML
+YAML [GH-236]@footnote{https://github.com/flycheck/flycheck/issues/236}
 
 @item 
-#245@footnote{https://github.com/flycheck/flycheck/issues/245}: Javascript with @code{gjslint}
+Javascript with @code{gjslint} [GH-245]@footnote{https://github.com/flycheck/flycheck/issues/245}
 
 @item 
-#246@footnote{https://github.com/flycheck/flycheck/issues/246}: Slim
+Slim [GH-246]@footnote{https://github.com/flycheck/flycheck/issues/246}
 
 @item 
-#249@footnote{https://github.com/flycheck/flycheck/issues/249}: PHP using @code{phpmd}
+PHP using @code{phpmd} [GH-249]@footnote{https://github.com/flycheck/flycheck/issues/249}
 @end itemize
 
 @item 
@@ -8554,57 +8558,58 @@ Support IDO or Grizzl@footnote{https://github.com/d11wtq/grizzl} as completion s
 at @code{C-c ! s}
 
 @item 
-#202@footnote{https://github.com/flycheck/flycheck/issues/202}: Disable standard error navigation with
-@code{flycheck-standard-error-navigation}
+Disable standard error navigation with @code{flycheck-standard-error-navigation}
+[GH-202]@footnote{https://github.com/flycheck/flycheck/issues/202}
 
 @item 
-#207@footnote{https://github.com/flycheck/flycheck/issues/207}: Add @code{flycheck-clang-language-standard} to choose the language standard
-for C/C++ syntax checking
+Add @code{flycheck-clang-language-standard} to choose the language standard for
+C/C++ syntax checking [GH-207]@footnote{https://github.com/flycheck/flycheck/issues/207}
 
 @item 
-#207@footnote{https://github.com/flycheck/flycheck/issues/207}: Add @code{flycheck-clang-definitions} to set additional definitions for
-C/C++ syntax checking
+Add @code{flycheck-clang-definitions} to set additional definitions for C/C++
+syntax checking [GH-207]@footnote{https://github.com/flycheck/flycheck/issues/207}
 
 @item 
-#207@footnote{https://github.com/flycheck/flycheck/issues/207}: Add @code{flycheck-clang-no-rtti} to disable RTTI for C/C++ syntax checking
+Add @code{flycheck-clang-no-rtti} to disable RTTI for C/C++ syntax checking
+[GH-207]@footnote{https://github.com/flycheck/flycheck/issues/207}
 
 @item 
 Add new option cell @code{option-flag} for boolean flags in syntax checker
 commands
 
 @item 
-#207@footnote{https://github.com/flycheck/flycheck/issues/207}: Add @code{flycheck-clang-includes} to include additional files for C/C++
-syntax checking
+Add @code{flycheck-clang-includes} to include additional files for C/C++ syntax
+checking [GH-207]@footnote{https://github.com/flycheck/flycheck/issues/207}
 
 @item 
 Add configuration file variable @code{flycheck-pylintrc} for Pylint
 
 @item 
-#214@footnote{https://github.com/flycheck/flycheck/issues/214}: New faces @code{flycheck-error-list-highlight-at-point} and
+New faces @code{flycheck-error-list-highlight-at-point} and
 @code{flycheck-error-list-highlight} to highlight the errors at point and at the
-current line respectively in the error list
+current line respectively in the error list [GH-214]@footnote{https://github.com/flycheck/flycheck/issues/214}
 
 @item 
-#214@footnote{https://github.com/flycheck/flycheck/issues/214}: The error list now automatically updates to show the errors of the
-current buffer
+The error list now automatically updates to show the errors of the current
+buffer [GH-214]@footnote{https://github.com/flycheck/flycheck/issues/214}
 
 @item 
-#212@footnote{https://github.com/flycheck/flycheck/issues/212}: Define new error levels with @code{flycheck-define-error-level}
+Define new error levels with @code{flycheck-define-error-level} [GH-212]@footnote{https://github.com/flycheck/flycheck/issues/212}
 
 @item 
-#234@footnote{https://github.com/flycheck/flycheck/issues/234}: Add @code{flycheck-clang-standard-library} to choose the standard library
-for C/C++ syntax checking
+Add @code{flycheck-clang-standard-library} to choose the standard library for
+C/C++ syntax checking [GH-234]@footnote{https://github.com/flycheck/flycheck/issues/234}
 
 @item 
-#243@footnote{https://github.com/flycheck/flycheck/issues/243}: Customize the delay for displaying errors via
-@code{flycheck-display-errors-delay}
+Customize the delay for displaying errors via
+@code{flycheck-display-errors-delay} [GH-243]@footnote{https://github.com/flycheck/flycheck/issues/243}
 
 @item 
-#215@footnote{https://github.com/flycheck/flycheck/issues/215}: Add @code{info} level for informational annotations by syntax checkers
+Add @code{info} level for informational annotations by syntax checkers [GH-215]@footnote{https://github.com/flycheck/flycheck/issues/215}
 
 @item 
-#259@footnote{https://github.com/flycheck/flycheck/issues/259}: Add a new symbol @code{temporary-file-name} to pass temporary file names to
-syntax checkers
+Add a new symbol @code{temporary-file-name} to pass temporary file names to
+syntax checkers [GH-259]@footnote{https://github.com/flycheck/flycheck/issues/259}
 @end itemize
 
 @item 
@@ -8614,29 +8619,29 @@ Improvements:
 @itemize -
 
 @item 
-#214@footnote{https://github.com/flycheck/flycheck/issues/214}: The error list now refreshes automatically after each syntax check
+The error list now refreshes automatically after each syntax check [GH-214]@footnote{https://github.com/flycheck/flycheck/issues/214}
 
 @item 
-#214@footnote{https://github.com/flycheck/flycheck/issues/214}: The errors at point are now automatically highlighted in the error
-list
+The errors at point are now automatically highlighted in the error list
+[GH-214]@footnote{https://github.com/flycheck/flycheck/issues/214}
 
 @item 
 @code{emacs-lisp-checkdoc} does not longer check @code{.dir-locals.el} files
 
 @item 
-#222@footnote{https://github.com/flycheck/flycheck/issues/222}: Do not automatically check syntax in encrypted files
+Do not automatically check syntax in encrypted files [GH-222]@footnote{https://github.com/flycheck/flycheck/issues/222}
 
 @item 
-#215@footnote{https://github.com/flycheck/flycheck/issues/215}: Parse notes from @code{c/c++-clang} into info level messages
+Parse notes from @code{c/c++-clang} into info level messages [GH-215]@footnote{https://github.com/flycheck/flycheck/issues/215}
 
 @item 
-#204@footnote{https://github.com/flycheck/flycheck/issues/204}: Parse convention warnings from @code{pylint} to info level
+Parse convention warnings from @code{pylint} to info level [GH-204]@footnote{https://github.com/flycheck/flycheck/issues/204}
 
 @item 
-#215@footnote{https://github.com/flycheck/flycheck/issues/215}: Demote naming warnings from @code{python-flake8} to info level
+Demote naming warnings from @code{python-flake8} to info level [GH-215]@footnote{https://github.com/flycheck/flycheck/issues/215}
 
 @item 
-#256@footnote{https://github.com/flycheck/flycheck/issues/256}: Support @code{enh-ruby-mode} in Ruby syntax checkers
+Support @code{enh-ruby-mode} in Ruby syntax checkers [GH-256]@footnote{https://github.com/flycheck/flycheck/issues/256}
 
 @item 
 Parse columns from @code{python-pylint} errors
@@ -8653,20 +8658,21 @@ Bug fixes:
 @itemize -
 
 @item 
-#225@footnote{https://github.com/flycheck/flycheck/issues/225}: Find local includes in the Clang syntax checker
+Find local includes in the Clang syntax checker [GH-225]@footnote{https://github.com/flycheck/flycheck/issues/225}
 
 @item 
 Do not emit spurious flawed definition warning in the @code{rst} syntax checker
 
 @item 
-#251@footnote{https://github.com/flycheck/flycheck/issues/251}: Handle abbreviated file names in @code{luac} output, by simply ignoring
-them
+Handle abbreviated file names in @code{luac} output, by simply ignoring them
+[GH-251]@footnote{https://github.com/flycheck/flycheck/issues/251}
 
 @item 
-#259@footnote{https://github.com/flycheck/flycheck/issues/259}: Correctly redirect the output binary of the @code{go-build} syntax checker
+Correctly redirect the output binary of the @code{go-build} syntax checker
+[GH-259]@footnote{https://github.com/flycheck/flycheck/issues/259}
 
 @item 
-#263@footnote{https://github.com/flycheck/flycheck/issues/263}: Fix Cppcheck parsing with the built-in Emacs XML parser
+Fix Cppcheck parsing with the built-in Emacs XML parser [GH-263]@footnote{https://github.com/flycheck/flycheck/issues/263}
 @end itemize
 @end itemize
 
@@ -8685,7 +8691,7 @@ Bug fixes:
 @itemize -
 
 @item 
-#194@footnote{https://github.com/flycheck/flycheck/issues/194}: Add a missing dependency
+Add a missing dependency [GH-194]@footnote{https://github.com/flycheck/flycheck/issues/194}
 @end itemize
 @end itemize
 
@@ -8704,21 +8710,21 @@ Bug fixes:
 @itemize -
 
 @item 
-#163@footnote{https://github.com/flycheck/flycheck/issues/163}: Introduce @code{flycheck-define-checker} and obsolete
-@code{flycheck-declare-checker}
+Introduce @code{flycheck-define-checker} and obsolete @code{flycheck-declare-checker}
+[GH-163]@footnote{https://github.com/flycheck/flycheck/issues/163}
 
 @item 
 Remove the obsolete @code{flycheck-error-face} and @code{flycheck-warning-face}
 
 @item 
-#176@footnote{https://github.com/flycheck/flycheck/issues/176}: Do not initialize packages by default in @code{emacs-lisp} syntax checker
-for non-configuration files
+Do not initialize packages by default in @code{emacs-lisp} syntax checker for
+non-configuration files [GH-176]@footnote{https://github.com/flycheck/flycheck/issues/176}
 
 @item 
-#179@footnote{https://github.com/flycheck/flycheck/issues/179}: Change the default @code{flycheck-highlighting-mode} to @code{symbols}
+Change the default @code{flycheck-highlighting-mode} to @code{symbols} [GH-179]@footnote{https://github.com/flycheck/flycheck/issues/179}
 
 @item 
-#184@footnote{https://github.com/flycheck/flycheck/issues/184}: Drop support for Pylint 0.x in @code{python-pylint}
+Drop support for Pylint 0.x in @code{python-pylint} [GH-184]@footnote{https://github.com/flycheck/flycheck/issues/184}
 @end itemize
 
 @item 
@@ -8728,34 +8734,34 @@ New features:
 @itemize -
 
 @item 
-#166@footnote{https://github.com/flycheck/flycheck/issues/166}: List errors at point only with prefix arg to @code{flycheck-list-errors}
+List errors at point only with prefix arg to @code{flycheck-list-errors} [GH-166]@footnote{https://github.com/flycheck/flycheck/issues/166}
 
 @item 
-#166@footnote{https://github.com/flycheck/flycheck/issues/166}: Add new display function @code{flycheck-display-errors-in-list} to display
-errors at point in the error list
+Add new display function @code{flycheck-display-errors-in-list} to display errors
+at point in the error list [GH-166]@footnote{https://github.com/flycheck/flycheck/issues/166}
 
 @item 
 New @code{option-list} argument cell to pass option lists to a syntax checker
 
 @item 
-#174@footnote{https://github.com/flycheck/flycheck/issues/174}: New @code{flycheck-emacs-lisp-load-path} option to customize the @code{load-path}
-used by the @code{emacs-lisp} syntax checker
+New @code{flycheck-emacs-lisp-load-path} option to customize the @code{load-path} used
+by the @code{emacs-lisp} syntax checker [GH-174]@footnote{https://github.com/flycheck/flycheck/issues/174}
 
 @item 
-#176@footnote{https://github.com/flycheck/flycheck/issues/176}: New @code{flycheck-emacs-lisp-initialize-packages} option to initialize
-packages in the @code{emacs-lisp} syntax checker
+New @code{flycheck-emacs-lisp-initialize-packages} option to initialize packages
+in the @code{emacs-lisp} syntax checker [GH-176]@footnote{https://github.com/flycheck/flycheck/issues/176}
 
 @item 
-#176@footnote{https://github.com/flycheck/flycheck/issues/176}: New @code{flycheck-emacs-lisp-package-user-dir} option to configure the
-package directory for the @code{emacs-lisp} syntax checker
+New @code{flycheck-emacs-lisp-package-user-dir} option to configure the package
+directory for the @code{emacs-lisp} syntax checker [GH-176]@footnote{https://github.com/flycheck/flycheck/issues/176}
 
 @item 
 New option filter @code{flycheck-option-comma-separated-list} for options with
 comma separated lists as values
 
 @item 
-#179@footnote{https://github.com/flycheck/flycheck/issues/179}: New highlighting mode @code{symbols} to highlight the symbol pointed to by an
-error
+New highlighting mode @code{symbols} to highlight the symbol pointed to by an
+error [GH-179]@footnote{https://github.com/flycheck/flycheck/issues/179}
 @end itemize
 
 @item 
@@ -8765,25 +8771,25 @@ New syntax checkers:
 @itemize -
 
 @item 
-#160@footnote{https://github.com/flycheck/flycheck/issues/160}: LESS
+LESS [GH-160]@footnote{https://github.com/flycheck/flycheck/issues/160}
 
 @item 
-#162@footnote{https://github.com/flycheck/flycheck/issues/162}: Haskell with @code{ghc}, @code{hdevtools} and @code{hlint}
+Haskell with @code{ghc}, @code{hdevtools} and @code{hlint} [GH-162]@footnote{https://github.com/flycheck/flycheck/issues/162}
 
 @item 
-#170@footnote{https://github.com/flycheck/flycheck/issues/170}: C/C++ with @code{cppcheck}
+C/C++ with @code{cppcheck} [GH-170]@footnote{https://github.com/flycheck/flycheck/issues/170}
 
 @item 
-#172@footnote{https://github.com/flycheck/flycheck/issues/172}: C/C++ with @code{clang}
+C/C++ with @code{clang} [GH-172]@footnote{https://github.com/flycheck/flycheck/issues/172}
 
 @item 
 CoffeeScript with @code{coffee}
 
 @item 
-#180@footnote{https://github.com/flycheck/flycheck/issues/180}: XML with @code{xmllint}
+XML with @code{xmllint} [GH-180]@footnote{https://github.com/flycheck/flycheck/issues/180}
 
 @item 
-#167@footnote{https://github.com/flycheck/flycheck/issues/167}: D with @code{dmd}
+D with @code{dmd} [GH-167]@footnote{https://github.com/flycheck/flycheck/issues/167}
 @end itemize
 
 @item 
@@ -8793,10 +8799,10 @@ Improvements:
 @itemize -
 
 @item 
-#157@footnote{https://github.com/flycheck/flycheck/issues/157}: Support Web Mode in @code{html-tidy} syntax checker
+Support Web Mode in @code{html-tidy} syntax checker [GH-157]@footnote{https://github.com/flycheck/flycheck/issues/157}
 
 @item 
-#159@footnote{https://github.com/flycheck/flycheck/issues/159}: Support Rubocop 0.9 and drop support for older Rubocop releases
+Support Rubocop 0.9 and drop support for older Rubocop releases [GH-159]@footnote{https://github.com/flycheck/flycheck/issues/159}
 
 @item 
 Include the message ID in error messages from @code{python-pylint}
@@ -8813,20 +8819,20 @@ Fix warnings about flawed definitions in @code{emacs-lisp} and
 @code{emacs-lisp-checkdoc}, caused by faulty formatting of sexps
 
 @item 
-#166@footnote{https://github.com/flycheck/flycheck/issues/166}: Refresh error lists when pressing @code{g}
+Refresh error lists when pressing @code{g} [GH-166]@footnote{https://github.com/flycheck/flycheck/issues/166}
 
 @item 
-#175@footnote{https://github.com/flycheck/flycheck/issues/175}: Do not obscure active minibuffer input when displaying errors in the
-echo area
+Do not obscure active minibuffer input when displaying errors in the echo
+area [GH-175]@footnote{https://github.com/flycheck/flycheck/issues/175}
 
 @item 
 Fix universal prefix argument for @code{flycheck-next-error} at @code{C-c ! n}
 
 @item 
-#192@footnote{https://github.com/flycheck/flycheck/issues/192}: Correctly parse output of @code{coffeelint} 0.5.7
+Correctly parse output of @code{coffeelint} 0.5.7 [GH-192]@footnote{https://github.com/flycheck/flycheck/issues/192}
 
 @item 
-#184@footnote{https://github.com/flycheck/flycheck/issues/184}: Correctly parse output of @code{pylint} 1.0
+Correctly parse output of @code{pylint} 1.0 [GH-184]@footnote{https://github.com/flycheck/flycheck/issues/184}
 @end itemize
 @end itemize
 
@@ -8871,15 +8877,16 @@ Improve the default faces by using underlines instead of foreground colors,
 if possible
 
 @item 
-#141@footnote{https://github.com/flycheck/flycheck/issues/141}: Customizable error processing with @code{flycheck-process-error-functions}
+Customizable error processing with @code{flycheck-process-error-functions}
+[GH-141]@footnote{https://github.com/flycheck/flycheck/issues/141}
 
 @item 
-#144@footnote{https://github.com/flycheck/flycheck/issues/144}: Make the delay before starting a syntax check customizable via
-@code{flycheck-idle-change-delay}
+Make the delay before starting a syntax check customizable via
+@code{flycheck-idle-change-delay} [GH-144]@footnote{https://github.com/flycheck/flycheck/issues/144}
 
 @item 
-#156@footnote{https://github.com/flycheck/flycheck/issues/156}: Make display of errors under point customizable via
-@code{flycheck-display-errors-function}
+Make display of errors under point customizable via
+@code{flycheck-display-errors-function} [GH-156]@footnote{https://github.com/flycheck/flycheck/issues/156}
 @end itemize
 
 @item 
@@ -8892,7 +8899,7 @@ Improvements
 Always highlight errors on top of warnings now
 
 @item 
-#141@footnote{https://github.com/flycheck/flycheck/issues/141}: Do not trigger syntax checks in the middle of commands
+Do not trigger syntax checks in the middle of commands [GH-141]@footnote{https://github.com/flycheck/flycheck/issues/141}
 
 @item 
 Add the current directory to load path in the @code{emacs-lisp} syntax checker
@@ -8902,7 +8909,7 @@ Do not longer use the @code{emacs-lisp-checkdoc} syntax checker in Scratch
 buffers
 
 @item 
-#149@footnote{https://github.com/flycheck/flycheck/issues/149}: Do not flush temporary files onto disk
+Do not flush temporary files onto disk [GH-149]@footnote{https://github.com/flycheck/flycheck/issues/149}
 
 @item 
 Syntax checkers may have error patterns and error parser now
@@ -8937,14 +8944,14 @@ Do not start a syntax check before the @code{flycheck-mode-hook} was run
 Do not start automatic syntax checks if Flycheck Mode is disabled
 
 @item 
-#143@footnote{https://github.com/flycheck/flycheck/issues/143}: Defer the initial syntax check until after the current interactive
-command
+Defer the initial syntax check until after the current interactive command
+[GH-143]@footnote{https://github.com/flycheck/flycheck/issues/143}
 
 @item 
 Correctly clean up information about running processes
 
 @item 
-#150@footnote{https://github.com/flycheck/flycheck/issues/150}: Fix compatibility with Emacs 24.2 and earlier
+Fix compatibility with Emacs 24.2 and earlier [GH-150]@footnote{https://github.com/flycheck/flycheck/issues/150}
 
 @item 
 Fix version information on Emacs trunk builds
@@ -8966,10 +8973,10 @@ New syntax checkers:
 @itemize -
 
 @item 
-#136@footnote{https://github.com/flycheck/flycheck/issues/136}: Ruby using @code{jruby}
+Ruby using @code{jruby} [GH-136]@footnote{https://github.com/flycheck/flycheck/issues/136}
 
 @item 
-#138@footnote{https://github.com/flycheck/flycheck/issues/138}: Puppet
+Puppet [GH-138]@footnote{https://github.com/flycheck/flycheck/issues/138}
 @end itemize
 
 @item 
@@ -8983,8 +8990,8 @@ Highlight error expressions by default, with the new @code{sexps} highlighting
 mode
 
 @item 
-#140@footnote{https://github.com/flycheck/flycheck/issues/140}: Automatically check syntax some time after the last change in the
-buffer
+Automatically check syntax some time after the last change in the buffer
+[GH-140]@footnote{https://github.com/flycheck/flycheck/issues/140}
 
 @item 
 Add @code{flycheck-version} to determine the installed Flycheck version
@@ -9011,7 +9018,7 @@ Bug fixes:
 @itemize -
 
 @item 
-#136@footnote{https://github.com/flycheck/flycheck/issues/136}: Correctly parse syntax errors from JRuby
+Correctly parse syntax errors from JRuby [GH-136]@footnote{https://github.com/flycheck/flycheck/issues/136}
 @end itemize
 @end itemize
 
@@ -9030,7 +9037,7 @@ New syntax checkers:
 @itemize -
 
 @item 
-#124@footnote{https://github.com/flycheck/flycheck/issues/124}: Scala
+Scala [GH-124]@footnote{https://github.com/flycheck/flycheck/issues/124}
 @end itemize
 
 @item 
@@ -9044,12 +9051,12 @@ Customizable error indication with control of the fringe side, via
 @code{flycheck-indication-mode}
 
 @item 
-#128@footnote{https://github.com/flycheck/flycheck/issues/128}: Customizable automatic syntax checking, via
-@code{flycheck-check-syntax-automatically}
+Customizable automatic syntax checking, via
+@code{flycheck-check-syntax-automatically} [GH-128]@footnote{https://github.com/flycheck/flycheck/issues/128}
 
 @item 
-#133@footnote{https://github.com/flycheck/flycheck/issues/133}: Customizable configuration file search, via
-@code{flycheck-locate-config-file-functions}
+Customizable configuration file search, via
+@code{flycheck-locate-config-file-functions} [GH-133]@footnote{https://github.com/flycheck/flycheck/issues/133}
 
 @item 
 Find configuration files in Projectile@footnote{https://github.com/bbatsov/projectile} projects
@@ -9066,7 +9073,7 @@ Improvements:
 @itemize -
 
 @item 
-#123@footnote{https://github.com/flycheck/flycheck/issues/123}: The @code{ruby} syntax checker now differentiates warnings from errors
+The @code{ruby} syntax checker now differentiates warnings from errors [GH-123]@footnote{https://github.com/flycheck/flycheck/issues/123}
 
 @item 
 Faces are now in a separate customization group
@@ -9103,16 +9110,16 @@ New syntax checkers:
 @itemize -
 
 @item 
-#112@footnote{https://github.com/flycheck/flycheck/issues/112}: POSIX Shell script using @code{bash}
+POSIX Shell script using @code{bash} [GH-112]@footnote{https://github.com/flycheck/flycheck/issues/112}
 
 @item 
-#113@footnote{https://github.com/flycheck/flycheck/issues/113}: Ruby using @code{rubocop}
+Ruby using @code{rubocop} [GH-113]@footnote{https://github.com/flycheck/flycheck/issues/113}
 
 @item 
-#108@footnote{https://github.com/flycheck/flycheck/issues/108}: Elixir
+Elixir [GH-108]@footnote{https://github.com/flycheck/flycheck/issues/108}
 
 @item 
-#122@footnote{https://github.com/flycheck/flycheck/issues/122}: Erlang
+Erlang [GH-122]@footnote{https://github.com/flycheck/flycheck/issues/122}
 @end itemize
 
 @item 
@@ -9122,7 +9129,7 @@ Removed syntax checkers:
 @itemize -
 
 @item 
-#115@footnote{https://github.com/flycheck/flycheck/issues/115}: Python using Pyflakes.  Use the superior Flake8 syntax checker
+Python using Pyflakes.  Use the superior Flake8 syntax checker [GH-115]@footnote{https://github.com/flycheck/flycheck/issues/115}
 @end itemize
 
 @item 
@@ -9154,14 +9161,14 @@ Improvements:
 Call option filters for @code{nil} values, too
 
 @item 
-#112@footnote{https://github.com/flycheck/flycheck/issues/112}: Improve error parsing in Bash syntax checker
+Improve error parsing in Bash syntax checker [GH-112]@footnote{https://github.com/flycheck/flycheck/issues/112}
 
 @item 
 Error navigation does not cross restrictions in narrowed buffers anymore
 
 @item 
-#99@footnote{https://github.com/flycheck/flycheck/issues/99}: Try to preserve the non-directory part of the buffer's file name when
-substituting the @code{source} symbol
+Try to preserve the non-directory part of the buffer's file name when
+substituting the @code{source} symbol [GH-99]@footnote{https://github.com/flycheck/flycheck/issues/99}
 @end itemize
 
 @item 
@@ -9174,7 +9181,8 @@ Bug fixes:
 Fix error highlighting and navigation in narrowed buffers
 
 @item 
-#118@footnote{https://github.com/flycheck/flycheck/issues/118}: Use a hopefully more reliable way to parse output of PHP CodeSniffer
+Use a hopefully more reliable way to parse output of PHP CodeSniffer
+[GH-118]@footnote{https://github.com/flycheck/flycheck/issues/118}
 @end itemize
 @end itemize
 
@@ -9193,13 +9201,13 @@ New syntax checkers:
 @itemize -
 
 @item 
-#103@footnote{https://github.com/flycheck/flycheck/issues/103}: SCSS using @code{scss}
+SCSS using @code{scss} [GH-103]@footnote{https://github.com/flycheck/flycheck/issues/103}
 
 @item 
 RST (ReStructuredText) using Docutils
 
 @item 
-#107@footnote{https://github.com/flycheck/flycheck/issues/107}: Go using @code{go build} and @code{go test}
+Go using @code{go build} and @code{go test} [GH-107]@footnote{https://github.com/flycheck/flycheck/issues/107}
 @end itemize
 
 @item 
@@ -9228,10 +9236,10 @@ New syntax checkers:
 @itemize -
 
 @item 
-#91@footnote{https://github.com/flycheck/flycheck/issues/91}: Go using @code{gofmt}
+Go using @code{gofmt} [GH-91]@footnote{https://github.com/flycheck/flycheck/issues/91}
 
 @item 
-#101@footnote{https://github.com/flycheck/flycheck/issues/101}: Rust using @code{rustc}
+Rust using @code{rustc} [GH-101]@footnote{https://github.com/flycheck/flycheck/issues/101}
 @end itemize
 
 @item 
@@ -9241,11 +9249,11 @@ New features:
 @itemize -
 
 @item 
-#29@footnote{https://github.com/flycheck/flycheck/issues/29}: Add a global Flycheck mode.  @code{(global-flycheck-mode)}
-is now the recommended way to enable Flycheck
+Add a global Flycheck mode.  @code{(global-flycheck-mode)} is now the recommended
+way to enable Flycheck [GH-29]@footnote{https://github.com/flycheck/flycheck/issues/29}
 
 @item 
-#72@footnote{https://github.com/flycheck/flycheck/issues/72}: Add support for syntax checker options
+Add support for syntax checker options [GH-72]@footnote{https://github.com/flycheck/flycheck/issues/72}
 
 @item 
 Add option for the coding standard used by the @code{php-phpcs} syntax
@@ -9269,20 +9277,20 @@ Support McCabe warnings in @code{python-flake8}
 Support warnings from @code{flake8} 2
 
 @item 
-#94@footnote{https://github.com/flycheck/flycheck/issues/94}: Show long error messages in a popup buffer
+Show long error messages in a popup buffer [GH-94]@footnote{https://github.com/flycheck/flycheck/issues/94}
 
 @item 
-#96@footnote{https://github.com/flycheck/flycheck/issues/96}: Show all error messages at point
+Show all error messages at point [GH-96]@footnote{https://github.com/flycheck/flycheck/issues/96}
 
 @item 
-#98@footnote{https://github.com/flycheck/flycheck/issues/98}: Add support for naming warings from @code{flake8} 2
+Add support for naming warings from @code{flake8} 2 [GH-98]@footnote{https://github.com/flycheck/flycheck/issues/98}
 
 @item 
 Flycheck mode is not longer enabled for buffers whose names start with a
 space
 
 @item 
-#100@footnote{https://github.com/flycheck/flycheck/issues/100}: Improve highlighting to reduce screen flickering
+Improve highlighting to reduce screen flickering [GH-100]@footnote{https://github.com/flycheck/flycheck/issues/100}
 @end itemize
 @end itemize
 
@@ -9301,7 +9309,7 @@ Bug fixes:
 @itemize -
 
 @item 
-#87@footnote{https://github.com/flycheck/flycheck/issues/87}: Do not signal errors from @code{flycheck-mode}
+Do not signal errors from @code{flycheck-mode} [GH-87]@footnote{https://github.com/flycheck/flycheck/issues/87}
 
 @item 
 Correctly fall back to @code{$HOME} when searching configuration files
@@ -9323,7 +9331,7 @@ Rename @code{config} cell to @code{config-file}
 Allow to pass the result of @code{config-file} cells as single argument
 
 @item 
-#86@footnote{https://github.com/flycheck/flycheck/issues/86}: Add support for evaluating Lisp forms in syntax checker commands
+Add support for evaluating Lisp forms in syntax checker commands [GH-86]@footnote{https://github.com/flycheck/flycheck/issues/86}
 @end itemize
 @end itemize
 
@@ -9345,7 +9353,7 @@ New features:
 Navigate to source of syntax checker declarations from syntax checker help
 
 @item 
-#60@footnote{https://github.com/flycheck/flycheck/issues/60}: Add online Info manual
+Add online Info manual [GH-60]@footnote{https://github.com/flycheck/flycheck/issues/60}
 @end itemize
 
 @item 
@@ -9358,10 +9366,10 @@ Improvements:
 Use pipes instead of TTYs to read output from syntax checkers
 
 @item 
-#80@footnote{https://github.com/flycheck/flycheck/issues/80}: Defer syntax checks for invisible buffers
+Defer syntax checks for invisible buffers [GH-80]@footnote{https://github.com/flycheck/flycheck/issues/80}
 
 @item 
-#62@footnote{https://github.com/flycheck/flycheck/issues/62}: Immediately display error messages after error navigation
+Immediately display error messages after error navigation [GH-62]@footnote{https://github.com/flycheck/flycheck/issues/62}
 @end itemize
 
 @item 
@@ -9377,10 +9385,10 @@ Never select deleted buffers
 Do not let the debugger interfere with necessary cleanup actions
 
 @item 
-#78@footnote{https://github.com/flycheck/flycheck/issues/78}: Do not attempt to parse empty XML trees
+Do not attempt to parse empty XML trees [GH-78]@footnote{https://github.com/flycheck/flycheck/issues/78}
 
 @item 
-#81@footnote{https://github.com/flycheck/flycheck/issues/81}: Fix infinite recursion on Windows
+Fix infinite recursion on Windows [GH-81]@footnote{https://github.com/flycheck/flycheck/issues/81}
 @end itemize
 @end itemize
 
@@ -9411,10 +9419,10 @@ New syntax checkers:
 @itemize -
 
 @item 
-#53@footnote{https://github.com/flycheck/flycheck/issues/53}: Emacs Lisp with @code{checkdoc-current-buffer}
+Emacs Lisp with @code{checkdoc-current-buffer} [GH-53]@footnote{https://github.com/flycheck/flycheck/issues/53}
 
 @item 
-#72@footnote{https://github.com/flycheck/flycheck/issues/72}: PHP with PHP CodeSniffer
+PHP with PHP CodeSniffer [GH-72]@footnote{https://github.com/flycheck/flycheck/issues/72}
 @end itemize
 
 @item 
@@ -9434,16 +9442,17 @@ New features:
 @itemize -
 
 @item 
-#26@footnote{https://github.com/flycheck/flycheck/issues/26}: Error navigation with @code{next-error} and @code{previous-error}
+Error navigation with @code{next-error} and @code{previous-error} [GH-26]@footnote{https://github.com/flycheck/flycheck/issues/26}
 
 @item 
-#33@footnote{https://github.com/flycheck/flycheck/issues/33}: Fringe icons instead of error indicators
+Fringe icons instead of error indicators [GH-33]@footnote{https://github.com/flycheck/flycheck/issues/33}
 
 @item 
-#59@footnote{https://github.com/flycheck/flycheck/issues/59}: Menu entry for Flycheck
+Menu entry for Flycheck [GH-59]@footnote{https://github.com/flycheck/flycheck/issues/59}
 
 @item 
-#35@footnote{https://github.com/flycheck/flycheck/issues/35}: Customizable error highlighting, taking the column number into account
+Customizable error highlighting, taking the column number into account
+[GH-35]@footnote{https://github.com/flycheck/flycheck/issues/35}
 
 @item 
 Configuration files for syntax checkers
@@ -9453,13 +9462,13 @@ Add configuration file support to the syntax checkers @code{coffee-coffeelint},
 @code{html-tidy}, @code{javascript-jshint}, @code{pyton-flake8} and @code{tex-chktex}
 
 @item 
-#58@footnote{https://github.com/flycheck/flycheck/issues/58}: Allow to compile a buffer with a syntax checker for testing purposes
+Allow to compile a buffer with a syntax checker for testing purposes [GH-58]@footnote{https://github.com/flycheck/flycheck/issues/58}
 
 @item 
-#31@footnote{https://github.com/flycheck/flycheck/issues/31}: Use multiple syntax checkers during a syntax check
+Use multiple syntax checkers during a syntax check [GH-31]@footnote{https://github.com/flycheck/flycheck/issues/31}
 
 @item 
-#52@footnote{https://github.com/flycheck/flycheck/issues/52}: Add dedicated help for syntax checkers
+Add dedicated help for syntax checkers [GH-52]@footnote{https://github.com/flycheck/flycheck/issues/52}
 @end itemize
 
 @item 
@@ -9469,7 +9478,7 @@ Improvements:
 @itemize -
 
 @item 
-#55@footnote{https://github.com/flycheck/flycheck/issues/55}: Match error patterns in order of declaration
+Match error patterns in order of declaration [GH-55]@footnote{https://github.com/flycheck/flycheck/issues/55}
 @end itemize
 
 @item 
@@ -9479,25 +9488,25 @@ Bug fixes:
 @itemize -
 
 @item 
-#24@footnote{https://github.com/flycheck/flycheck/issues/24}: Inherit highlighting faces from built-in faces
+Inherit highlighting faces from built-in faces [GH-24]@footnote{https://github.com/flycheck/flycheck/issues/24}
 
 @item 
-#36@footnote{https://github.com/flycheck/flycheck/issues/36}: Correct error patterns of the HTML syntax checker
+Correct error patterns of the HTML syntax checker [GH-36]@footnote{https://github.com/flycheck/flycheck/issues/36}
 
 @item 
-#42@footnote{https://github.com/flycheck/flycheck/issues/42}: Detect syntax errors in the @code{python-flake8} syntax checker
+Detect syntax errors in the @code{python-flake8} syntax checker [GH-42]@footnote{https://github.com/flycheck/flycheck/issues/42}
 
 @item 
 Fix various regressions after introducing unit tests
 
 @item 
-#45@footnote{https://github.com/flycheck/flycheck/issues/45}: Inhibit syntax checking during package installation
+Inhibit syntax checking during package installation [GH-45]@footnote{https://github.com/flycheck/flycheck/issues/45}
 
 @item 
-#54@footnote{https://github.com/flycheck/flycheck/issues/54}: Disable syntax checking in Tramp buffers
+Disable syntax checking in Tramp buffers [GH-54]@footnote{https://github.com/flycheck/flycheck/issues/54}
 
 @item 
-#65@footnote{https://github.com/flycheck/flycheck/issues/65}: Preserve whitespace in error messages
+Preserve whitespace in error messages [GH-65]@footnote{https://github.com/flycheck/flycheck/issues/65}
 @end itemize
 
 @item 
@@ -9507,14 +9516,14 @@ API changes:
 @itemize -
 
 @item 
-#41@footnote{https://github.com/flycheck/flycheck/issues/41}: Replace syntax checker variables with syntax checker declarations
+Replace syntax checker variables with syntax checker declarations [GH-41]@footnote{https://github.com/flycheck/flycheck/issues/41}
 
 @item 
-#38@footnote{https://github.com/flycheck/flycheck/issues/38}: Support parsing errors with arbitrary functions instead of error
-patterns
+Support parsing errors with arbitrary functions instead of error patterns
+[GH-38]@footnote{https://github.com/flycheck/flycheck/issues/38}
 
 @item 
-#38@footnote{https://github.com/flycheck/flycheck/issues/38}: Add an error parser for Checkstyle-like XML output
+Add an error parser for Checkstyle-like XML output [GH-38]@footnote{https://github.com/flycheck/flycheck/issues/38}
 @end itemize
 @end itemize
 
@@ -9533,16 +9542,16 @@ New syntax checkers:
 @itemize -
 
 @item 
-#15@footnote{https://github.com/flycheck/flycheck/issues/15}: SASS
+SASS [GH-15]@footnote{https://github.com/flycheck/flycheck/issues/15}
 
 @item 
-#21@footnote{https://github.com/flycheck/flycheck/issues/21}: Perl
+Perl [GH-21]@footnote{https://github.com/flycheck/flycheck/issues/21}
 
 @item 
 XML
 
 @item 
-#30@footnote{https://github.com/flycheck/flycheck/issues/30}: Lua
+Lua [GH-30]@footnote{https://github.com/flycheck/flycheck/issues/30}
 @end itemize
 
 @item 
@@ -9552,14 +9561,14 @@ New features:
 @itemize -
 
 @item 
-#25@footnote{https://github.com/flycheck/flycheck/issues/25}: Support manual buffer-local selection of syntax checker
+Support manual buffer-local selection of syntax checker [GH-25]@footnote{https://github.com/flycheck/flycheck/issues/25}
 
 @item 
-#28@footnote{https://github.com/flycheck/flycheck/issues/28}: Add customizable error indicators
+Add customizable error indicators [GH-28]@footnote{https://github.com/flycheck/flycheck/issues/28}
 
 @item 
-#27@footnote{https://github.com/flycheck/flycheck/issues/27}: Echo error messages at point without 3rd-party libraries like
-flymake-cursor
+Echo error messages at point without 3rd-party libraries like flymake-cursor
+[GH-27]@footnote{https://github.com/flycheck/flycheck/issues/27}
 @end itemize
 
 @item 
@@ -9569,7 +9578,7 @@ Improvements:
 @itemize -
 
 @item 
-#24@footnote{https://github.com/flycheck/flycheck/issues/24}: Remember the last automatically selected syntax checker
+Remember the last automatically selected syntax checker [GH-24]@footnote{https://github.com/flycheck/flycheck/issues/24}
 @end itemize
 
 @item 
@@ -9579,7 +9588,7 @@ Bug fixes:
 @itemize -
 
 @item 
-#19@footnote{https://github.com/flycheck/flycheck/issues/19}: Fix syntax checking of buffers without backing files
+Fix syntax checking of buffers without backing files [GH-19]@footnote{https://github.com/flycheck/flycheck/issues/19}
 @end itemize
 
 @item 
@@ -9589,8 +9598,8 @@ API changes:
 @itemize -
 
 @item 
-#15@footnote{https://github.com/flycheck/flycheck/issues/15}: Replace underlying Flymake API with a custom syntax checking
-implementation
+Replace underlying Flymake API with a custom syntax checking implementation
+[GH-15]@footnote{https://github.com/flycheck/flycheck/issues/15}
 @end itemize
 @end itemize
 
@@ -9603,7 +9612,7 @@ implementation
 @itemize -
 
 @item 
-#5@footnote{https://github.com/flycheck/flycheck/issues/5}: Rename the project to Flycheck
+Rename the project to Flycheck [GH-5]@footnote{https://github.com/flycheck/flycheck/issues/5}
 
 @item 
 New syntax checkers
@@ -9612,19 +9621,19 @@ New syntax checkers
 @itemize -
 
 @item 
-#9@footnote{https://github.com/flycheck/flycheck/issues/9}: HAML
+HAML [GH-9]@footnote{https://github.com/flycheck/flycheck/issues/9}
 
 @item 
-#9@footnote{https://github.com/flycheck/flycheck/issues/9}: CSS
+CSS [GH-9]@footnote{https://github.com/flycheck/flycheck/issues/9}
 
 @item 
-#9@footnote{https://github.com/flycheck/flycheck/issues/9}: Javascript with @code{jsl}
+Javascript with @code{jsl} [GH-9]@footnote{https://github.com/flycheck/flycheck/issues/9}
 
 @item 
-#16@footnote{https://github.com/flycheck/flycheck/issues/16}: Javascript with @code{jshint}
+Javascript with @code{jshint} [GH-16]@footnote{https://github.com/flycheck/flycheck/issues/16}
 
 @item 
-#12@footnote{https://github.com/flycheck/flycheck/issues/12}: JSON
+JSON [GH-12]@footnote{https://github.com/flycheck/flycheck/issues/12}
 
 @item 
 LaTeX with @code{lacheck}
@@ -9637,7 +9646,7 @@ Bug fixes:
 @itemize -
 
 @item 
-#10@footnote{https://github.com/flycheck/flycheck/issues/10}: Fix type error when checking compressed Emacs Lisp
+Fix type error when checking compressed Emacs Lisp [GH-10]@footnote{https://github.com/flycheck/flycheck/issues/10}
 @end itemize
 @end itemize
 
@@ -9650,7 +9659,7 @@ Bug fixes:
 @itemize -
 
 @item 
-#4@footnote{https://github.com/flycheck/flycheck/issues/4}: Replace @code{flymake-mode} with a custom syntax checking minor mode
+Replace @code{flymake-mode} with a custom syntax checking minor mode [GH-4]@footnote{https://github.com/flycheck/flycheck/issues/4}
 @end itemize
 
 @node 0 2 Oct 25 2012,0 1 Oct 11 2012,0 3 Nov 21 2012,Changes
@@ -9678,7 +9687,7 @@ API changes:
 @itemize -
 
 @item 
-#2@footnote{https://github.com/flycheck/flycheck/issues/2}: Simplify syntax checker declarations
+Simplify syntax checker declarations [GH-2]@footnote{https://github.com/flycheck/flycheck/issues/2}
 @end itemize
 @end itemize
 
