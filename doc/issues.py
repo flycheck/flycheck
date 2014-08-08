@@ -33,7 +33,7 @@ from docutils.transforms import Transform
 
 
 #: Regular expression for issue references
-ISSUE_RE = re.compile(r'#(?P<id>\d+)')
+ISSUE_RE = re.compile(r'\[GH-(?P<id>\d+)\]')
 
 
 #: Base URL for issue references

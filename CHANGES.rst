@@ -14,49 +14,51 @@ master (in development)
 
 - New syntax checkers:
 
-  - #408: C/C++ with GCC
-  - #425: Scala with scalastyle
-  - #414, #450: Fortran with GFortran
+  - C/C++ with GCC [GH-408]
+  - Scala with scalastyle [GH-425]
+  - Fortran with GFortran [GH-414] [GH-450]
 
 - New features:
 
-  - #412: Add `flycheck-clang-no-exceptions` and `flycheck-gcc-no-exceptions` to
-    flag exceptions as errors in C++
-  - #417: Add `flycheck-rust-crate-root` to resolve inter-crate references in
-    `rust`
-  - #420: Add `flycheck-clang-blocks` to enable the block syntax in Clang
+  - Add `flycheck-clang-no-exceptions` and `flycheck-gcc-no-exceptions` to
+    flag exceptions as errors in C++ [GH-412]
+  - Add `flycheck-rust-crate-root` to resolve inter-crate references in `rust`
+    [GH-417]
+  - Add `flycheck-clang-blocks` to enable the block syntax in Clang [GH-420]
   - `read-flycheck-checker` now accepts a default value
   - Add `flycheck-status-changed-functions` to react on status changes
   - Make the mode line lighter of Flycheck customizable with
     `flycheck-mode-line`
-  - #424: Add `flycheck-rubylintrc` to support configuration files for
-    `ruby-rubylint`
-  - #446: Add `flycheck-rust-crate-type` to make the Crate type customizable
-  - #454: The mode line of the error list is now customizable with
-    `flycheck-error-list-mode-line`
-  - #452, #454: Pressing `n` or `p` in the error list now shows the error at
-    point in a separate window
-  - #454: Pressing `RET` in the error list now jumps to the error at point
-  - #454: The error list can now be sorted by error level by clicking on the
+  - Add `flycheck-rubylintrc` to support configuration files for
+    `ruby-rubylint` [GH-424]
+  - Add `flycheck-rust-crate-type` to make the Crate type customizable [GH-446]
+  - The mode line of the error list is now customizable with
+    `flycheck-error-list-mode-line` [GH-454]
+  - Pressing `n` or `p` in the error list now shows the error at point in a
+    separate window [GH-452] [GH-454]
+  - Pressing `RET` in the error list now jumps to the error at point [GH-454]
+  - The error list can now be sorted by error level by clicking on the
     corresponding list header, or by pressing `S` with point on the column text
-  - #454: Error levels defined with `flycheck-define-error-level` can now have a
-    numeric severity used for sorting
+    [GH-454]
+  - Error levels defined with `flycheck-define-error-level` can now have a
+    numeric severity used for sorting [GH-454]
 
 - Improvements:
 
-  - #421: Use proper temporary files in `python-flake8`
-  - #423: Demote errors from `package-initialize` in the `emacs-lisp` checker
+  - Use proper temporary files in `python-flake8` [GH-421]
+  - Demote errors from `package-initialize` in the `emacs-lisp` checker [GH-423]
   - `flycheck-select-checker` now uses the last used syntax checker as default
     when reading from minibuffer
-  - #428: `flycheck-compile` now prompts for the syntax checker to run as
-    `compile` command
-  - #439: The `rust` syntax checker shows info messages now
-  - #443, #444: The `sass` and `scss` syntax checkers now use a temporary
-    directory for their cache
-  - #447: Change the default of `flycheck-eslintrc` to `nil`
-  - #365: Show the menu on the mode line lighter
+  - `flycheck-compile` now prompts for the syntax checker to run as `compile`
+    command [GH-428]
+  - The `rust` syntax checker shows info messages now [GH-439]
+  - The `sass` and `scss` syntax checkers now use a temporary directory for
+    their cache [GH-443] [GH-454]
+  - Change the default of `flycheck-eslintrc` to `nil` [GH-447]
+  - Show the menu on the mode line lighter [GH-365]
   - Greatly improve Flycheck's menu
-  - #452, #454: `n` and `p` now navigate the error list by errors, not by lines
+  - `n` and `p` now navigate the error list by errors, not by lines [GH-452]
+    [GH-444]
 
 - Other changes:
 
@@ -65,46 +67,46 @@ master (in development)
 0.19 (Jun 12, 2014)
 -------------------
 
-- #331: Flycheck now has an official logo
+- Flycheck now has an official logo [GH-331]
 
 - **Breaking changes**:
 
-  - #405: The `ruby-rubylint` syntax checker now requires Ruby Lint 2.0 or
-    newer.
+  - The `ruby-rubylint` syntax checker now requires Ruby Lint 2.0 or
+    newer. [GH-405]
 
 - New syntax checkers:
 
-  - #393: Go with `errcheck`
+  - Go with `errcheck` [GH-393]
 
 - New features:
 
-  - #381: Add `flycheck-keymap-prefix` to change the prefix key for Flycheck
-    keybindings
-  - #387: Make the prefix of Flycheck's temporary files customizable with
-    `flycheck-temp-prefix`
-  - #397: Add `:error-filter` property for syntax checkers to apply a custom
-    function to modify or filter errors after parsing
-  - #406: Add `flycheck-rust-check-tests` to disable syntax checking of test
-    code in Rust
-  - #407: Add `flycheck-cppcheck-inconclusive` to enable cppcheck tests that
-    might give false positives
+  - Add `flycheck-keymap-prefix` to change the prefix key for Flycheck
+    keybindings [GH-381]
+  - Make the prefix of Flycheck's temporary files customizable with
+    `flycheck-temp-prefix` [GH-387]
+  - Add `:error-filter` property for syntax checkers to apply a custom function
+    to modify or filter errors after parsing [GH-397]
+  - Add `flycheck-rust-check-tests` to disable syntax checking of test code in
+    Rust [GH-406]
+  - Add `flycheck-cppcheck-inconclusive` to enable cppcheck tests that might
+    give false positives [GH-407]
 
 - Improvements:
 
-  - #397: Collapse redundant whitespace in messages from `emacs-lisp`
-  - #397: Dedent messages from `haskell-ghc`
-  - #397: Fold errors in included files into the error messages of the
-    corresponding include in `c/c++-clang`
-  - #405: The `ruby-rubylint` syntax checker now supports ruby-lint 2.0 and
-    newer.
+  - Collapse redundant whitespace in messages from `emacs-lisp` [GH-397]
+  - Dedent messages from `haskell-ghc` [GH-397]
+  - Fold errors in included files into the error messages of the corresponding
+    include in `c/c++-clang` [GH-397]
+  - The `ruby-rubylint` syntax checker now supports ruby-lint 2.0 and
+    newer [GH-405]
 
 - Bug fixes:
 
-  - #334: When stopping Flycheck, correctly kill running processes and cleanup
-    their temporary files
+  - When stopping Flycheck, correctly kill running processes and cleanup their
+    temporary files [GH-334]
   - Do not choke on files without extensions in `haskell-ghc`
-  - #391: Fix spurious warning when a syntax checker reports errors, but not for
-    the file being checked
+  - Fix spurious warning when a syntax checker reports errors, but not for the
+    file being checked [GH-391]
   - Do not signal errors in Go Mode, when `go` is not available
 
 0.18 (Mar 24, 2014)
@@ -117,21 +119,22 @@ master (in development)
     syntax checkers were renamed to `sh-bash` and `sh-zsh` respectively.  Thus,
     all shell script syntax checkers now live in the `sh-` prefix.
   - `rst-sphinx` requires Sphinx 1.2 or newer now.
-  - #353: `rustc` requires Rust 0.10 (not yet released at the time of writing)
-    or newer now
+  - `rustc` requires Rust 0.10 (not yet released at the time of writing) or
+    newer now [GH-353]
 
 - New syntax checkers:
 
-  - #88: Perl with Perl Critic
-  - #322: Replace GNU Make with POSIX Make
-  - #267: Shellcheck
-  - #328: Go with `golint`
-  - #329: Go with `go tool vet`
+  - Perl with Perl Critic [GH-88]
+  - Replace GNU Make with POSIX Make [GH-322]
+  - Shellcheck [GH-267]
+  - Go with `golint` [GH-328]
+  - Go with `go tool vet` [GH-329]
 
 - New features:
 
   - Add `flycheck-rust-library-path` to specify library locations for `rust`
-  - #344: Add `flycheck-dmd-include-path` to change the include path of `d-dmd`
+  - Add `flycheck-dmd-include-path` to change the include path of `d-dmd`
+    [GH-344]
 
 - Improvements:
 
@@ -141,16 +144,17 @@ master (in development)
     using the `pseudoxml` builder.
   - Avoid warnings about missing main functions in `rust`
   - Properly resolve relative filenames in `.. include::` directives in `rst`
-  - #348: Use `--unix_mode` option in `javascript-gjslint` to get the file name
+  - Use `--unix_mode` option in `javascript-gjslint` to get the file name
+    [GH-348]
   - Puppet Lint messages now include the name of the corresponding check
-  - #353: `rustc` supports upcoming Rust 0.10 now
-  - #367: Flycheck now handles Clang errors from included files
+  - `rustc` supports upcoming Rust 0.10 now [GH-353]
+  - Flycheck now handles Clang errors from included files [GH-367]
 
 0.17 (Feb 1, 2014)
 ------------------
 
-- #274: The manual was ported to Sphinx_ and is now located at
-  http://flycheck.readthedocs.org
+- The manual was ported to Sphinx_ and is now located at
+  http://flycheck.readthedocs.org [GH-274]
 
 - **Breaking changes**:
 
@@ -164,27 +168,27 @@ master (in development)
 - New syntax checkers:
 
   - RST (ReStructuredText) using Sphinx
-  - #321: GNU Make
+  - GNU Make [GH-321]
 
 - New features:
 
-  - #266: Extend syntax checkers with `flycheck-add-next-checkers`
+  - Extend syntax checkers with `flycheck-add-next-checkers` [GH-266]
 
 - Improvements:
 
-  - #301: Immediately re-check the buffer when it was changed during a syntax
-    check
-  - #305: Do not defer syntax checker after idle change timeout
+  - Immediately re-check the buffer when it was changed during a syntax check
+    [GH-301]
+  - Do not defer syntax checker after idle change timeout [GH-305]
   - Do not use the generic `rst` syntax checker in Sphinx projects anymore, to
     avoid false positives by Sphinx-only markup
-  - #314: Check for more than just syntax errors in `rust`
+  - Check for more than just syntax errors in `rust` [GH-314]
   - `chef-foodcritic` supports `enh-ruby-mode` now
 
 - Bug fixes
 
-  - #298: Do not attach syntax checker processes to the buffer anymore
-  - #319: Do not visit the file to check in `emacs-lisp` and
-    `emacs-lisp-checkdoc` to avoid unintended side effects
+  - Do not attach syntax checker processes to the buffer anymore [GH-298]
+  - Do not visit the file to check in `emacs-lisp` and `emacs-lisp-checkdoc` to
+    avoid unintended side effects [GH-319]
 
 .. _Sphinx: http://sphinx-doc.org
 
@@ -195,42 +199,42 @@ master (in development)
 
   - Argument substitution is no longer performed on syntax checker executables.
     The executable must be a string.
-  - #275: Split out `haskell-hdevtools` into a separate package.  See
-    flycheck-hdevtools_
+  - Split out `haskell-hdevtools` into a separate package.  See
+    flycheck-hdevtools_ [GH-275]
   - Drop support for coffeelint 0.x
-  - #230: The error list is reimplemented on top of Tabulated List Mode.  This
-    greatly changes the appearance and behaviour of the error list.
+  - The error list is reimplemented on top of Tabulated List Mode.  This greatly
+    changes the appearance and behaviour of the error list [GH-230]
 
 - New syntax checkers:
 
-  - #250: Ruby with `ruby-lint`
-  - #270: Handlebars
-  - #253: YAML with `yaml-jsyaml`
-  - #255: Chef recipes with `foodcritic`
-  - #276: AsciiDoc
-  - #271: CFEngine
-  - #277: Racket
+  - Ruby with `ruby-lint` [GH-250]
+  - Handlebars [GH-270]
+  - YAML with `yaml-jsyaml` [GH-253]
+  - Chef recipes with `foodcritic` [GH-255]
+  - AsciiDoc [GH-276]
+  - CFEngine [GH-271]
+  - Racket [GH-277]
   - Texinfo
-  - #296: Verilog
-  - #291: Javascript with `eslint`
-  - #285: ERuby
+  - Verilog [GH-296]
+  - Javascript with `eslint` [GH-291]
+  - ERuby [GH-285]
 
 - New features:
 
-  - #272: Define variables to override the executables of syntax checkers
-  - #272: Interactively set the executable of a syntax checker with
-    `flycheck-set-checker-executable`
-  - #269: Disable syntax checkers easily with `flycheck-disabled-checkers`
-  - #268: Add support for the Compass CSS framework in the `sass` and `scss`
-    checkers, with `flycheck-sass-compass` and `flycheck-scss-compass`
-    respectively
-  - #287: Disable style checks in `ruby-rubocop` with
-    `flycheck-rubocop-lint-only`
-  - #283: Add support for Microsoft extensions in `c/c++-clang` via
-    `flycheck-clang-ms-extensions`
-  - #230: New faces `flycheck-error-list-info`, `flycheck-error-list-warning`,
+  - Define variables to override the executables of syntax checkers [GH-272]
+  - Interactively set the executable of a syntax checker with
+    `flycheck-set-checker-executable` [GH-272]
+  - Disable syntax checkers easily with `flycheck-disabled-checkers` [GH-269]
+  - Add support for the Compass CSS framework in the `sass` and `scss` checkers,
+    with `flycheck-sass-compass` and `flycheck-scss-compass` respectively
+    [GH-268]
+  - Disable style checks in `ruby-rubocop` with `flycheck-rubocop-lint-only`
+    [GH-287]
+  - Add support for Microsoft extensions in `c/c++-clang` via
+    `flycheck-clang-ms-extensions` [GH-283]
+  - New faces `flycheck-error-list-info`, `flycheck-error-list-warning`,
     `flycheck-error-list-error`, `flycheck-error-list-line-number` and
-    `flycheck-error-list-column-number`
+    `flycheck-error-list-column-number` [GH-230]
   - Add `flycheck-ghc-no-user-package-database` to disable the user package
     database for `haskell-ghc`
   - Add `flycheck-ghc-package-databases` to add additional package databases to
@@ -241,12 +245,12 @@ master (in development)
 - Improvements:
 
   - Demote Rubocop convention messages to `info` level
-  - #282: Stop Flycheck before the buffer is reverted
+  - Stop Flycheck before the buffer is reverted [GH-282]
   - Properly resolve local module imports in `haskell-ghc`
 
 - Bug fixes:
 
-  - #280: Make relative imports work with `python-pylint`
+  - Make relative imports work with `python-pylint` [GH-280]
   - Fix parsing of errors in `scss` and `sass`
 
 .. _flycheck-hdevtools: https://github.com/flycheck/flycheck-hdevtools
@@ -261,72 +265,74 @@ master (in development)
 
   - Do not add the current directory to the `emacs-lisp` syntax checker load
     path
-  - #214: `flycheck-list-errors` cannot list errors at point anymore.  It does
-    not accept a prefix argument anymore, and takes zero arguments now
-  - #214: `flycheck-display-errors-in-list` is gone.  The error list
-    automatically highlights the error at point now
+  - `flycheck-list-errors` cannot list errors at point anymore.  It does not
+    accept a prefix argument anymore, and takes zero arguments now [GH-214]
+  - `flycheck-display-errors-in-list` is gone.  The error list automatically
+    highlights the error at point now [GH-214]
   - Remove obsolete `flycheck-declare-checker`
 
 - New syntax checkers:
 
-  - #236: YAML
-  - #245: Javascript with `gjslint`
-  - #246: Slim
-  - #249: PHP using `phpmd`
+  - YAML [GH-236]
+  - Javascript with `gjslint` [GH-245]
+  - Slim [GH-246]
+  - PHP using `phpmd` [GH-249]
 
 - New features:
 
   - Support IDO or Grizzl_ as completion systems for `flycheck-select-checker`
     at `C-c ! s`
-  - #202: Disable standard error navigation with
-    `flycheck-standard-error-navigation`
-  - #207: Add `flycheck-clang-language-standard` to choose the language standard
-    for C/C++ syntax checking
-  - #207: Add `flycheck-clang-definitions` to set additional definitions for
-    C/C++ syntax checking
-  - #207: Add `flycheck-clang-no-rtti` to disable RTTI for C/C++ syntax checking
+  - Disable standard error navigation with `flycheck-standard-error-navigation`
+    [GH-202]
+  - Add `flycheck-clang-language-standard` to choose the language standard for
+    C/C++ syntax checking [GH-207]
+  - Add `flycheck-clang-definitions` to set additional definitions for C/C++
+    syntax checking [GH-207]
+  - Add `flycheck-clang-no-rtti` to disable RTTI for C/C++ syntax checking
+    [GH-207]
   - Add new option cell `option-flag` for boolean flags in syntax checker
     commands
-  - #207: Add `flycheck-clang-includes` to include additional files for C/C++
-    syntax checking
+  - Add `flycheck-clang-includes` to include additional files for C/C++ syntax
+    checking [GH-207]
   - Add configuration file variable `flycheck-pylintrc` for Pylint
-  - #214: New faces `flycheck-error-list-highlight-at-point` and
+  - New faces `flycheck-error-list-highlight-at-point` and
     `flycheck-error-list-highlight` to highlight the errors at point and at the
-    current line respectively in the error list
-  - #214: The error list now automatically updates to show the errors of the
-    current buffer
-  - #212: Define new error levels with `flycheck-define-error-level`
-  - #234: Add `flycheck-clang-standard-library` to choose the standard library
-    for C/C++ syntax checking
-  - #243: Customize the delay for displaying errors via
-    `flycheck-display-errors-delay`
-  - #215: Add `info` level for informational annotations by syntax checkers
-  - #259: Add a new symbol `temporary-file-name` to pass temporary file names to
-    syntax checkers
+    current line respectively in the error list [GH-214]
+  - The error list now automatically updates to show the errors of the current
+    buffer [GH-214]
+  - Define new error levels with `flycheck-define-error-level` [GH-212]
+  - Add `flycheck-clang-standard-library` to choose the standard library for
+    C/C++ syntax checking [GH-234]
+  - Customize the delay for displaying errors via
+    `flycheck-display-errors-delay` [GH-243]
+  - Add `info` level for informational annotations by syntax checkers [GH-215]
+  - Add a new symbol `temporary-file-name` to pass temporary file names to
+    syntax checkers [GH-259]
 
 - Improvements:
 
-  - #214: The error list now refreshes automatically after each syntax check
-  - #214: The errors at point are now automatically highlighted in the error
-    list
+  - The error list now refreshes automatically after each syntax check [GH-214]
+  - The errors at point are now automatically highlighted in the error list
+    [GH-214]
   - `emacs-lisp-checkdoc` does not longer check `.dir-locals.el` files
-  - #222: Do not automatically check syntax in encrypted files
-  - #215: Parse notes from `c/c++-clang` into info level messages
-  - #204: Parse convention warnings from `pylint` to info level
-  - #215: Demote naming warnings from `python-flake8` to info level
-  - #256: Support `enh-ruby-mode` in Ruby syntax checkers
+  - Do not automatically check syntax in encrypted files [GH-222]
+  - Parse notes from `c/c++-clang` into info level messages [GH-215]
+  - Parse convention warnings from `pylint` to info level [GH-204]
+  - Demote naming warnings from `python-flake8` to info level [GH-215]
+  - Support `enh-ruby-mode` in Ruby syntax checkers [GH-256]
   - Parse columns from `python-pylint` errors
   - Do not compress temporary files for syntax checks if the original file was
     compressed
 
 - Bug fixes:
 
-  - #225: Find local includes in the Clang syntax checker
+  - Find local includes in the Clang syntax checker [GH-225]
   - Do not emit spurious flawed definition warning in the `rst` syntax checker
-  - #251: Handle abbreviated file names in `luac` output, by simply ignoring
-    them
-  - #259: Correctly redirect the output binary of the `go-build` syntax checker
-  - #263: Fix Cppcheck parsing with the built-in Emacs XML parser
+  - Handle abbreviated file names in `luac` output, by simply ignoring them
+    [GH-251]
+  - Correctly redirect the output binary of the `go-build` syntax checker
+    [GH-259]
+  - Fix Cppcheck parsing with the built-in Emacs XML parser [GH-263]
 
 .. _grizzl: https://github.com/d11wtq/grizzl
 
@@ -335,64 +341,64 @@ master (in development)
 
 - Bug fixes:
 
-  - #194: Add a missing dependency
+  - Add a missing dependency [GH-194]
 
 0.14 (Aug 15, 2013)
 -------------------
 
 - **Breaking changes**:
 
-  - #163: Introduce `flycheck-define-checker` and obsolete
-    `flycheck-declare-checker`
+  - Introduce `flycheck-define-checker` and obsolete `flycheck-declare-checker`
+    [GH-163]
   - Remove the obsolete `flycheck-error-face` and `flycheck-warning-face`
-  - #176: Do not initialize packages by default in `emacs-lisp` syntax checker
-    for non-configuration files
-  - #179: Change the default `flycheck-highlighting-mode` to `symbols`
-  - #184: Drop support for Pylint 0.x in `python-pylint`
+  - Do not initialize packages by default in `emacs-lisp` syntax checker for
+    non-configuration files [GH-176]
+  - Change the default `flycheck-highlighting-mode` to `symbols` [GH-179]
+  - Drop support for Pylint 0.x in `python-pylint` [GH-184]
 
 - New features:
 
-  - #166: List errors at point only with prefix arg to `flycheck-list-errors`
-  - #166: Add new display function `flycheck-display-errors-in-list` to display
-    errors at point in the error list
+  - List errors at point only with prefix arg to `flycheck-list-errors` [GH-166]
+  - Add new display function `flycheck-display-errors-in-list` to display errors
+    at point in the error list [GH-166]
   - New `option-list` argument cell to pass option lists to a syntax checker
-  - #174: New `flycheck-emacs-lisp-load-path` option to customize the `load-path`
-    used by the `emacs-lisp` syntax checker
-  - #176: New `flycheck-emacs-lisp-initialize-packages` option to initialize
-    packages in the `emacs-lisp` syntax checker
-  - #176: New `flycheck-emacs-lisp-package-user-dir` option to configure the
-    package directory for the `emacs-lisp` syntax checker
+  - New `flycheck-emacs-lisp-load-path` option to customize the `load-path` used
+    by the `emacs-lisp` syntax checker [GH-174]
+  - New `flycheck-emacs-lisp-initialize-packages` option to initialize packages
+    in the `emacs-lisp` syntax checker [GH-176]
+  - New `flycheck-emacs-lisp-package-user-dir` option to configure the package
+    directory for the `emacs-lisp` syntax checker [GH-176]
   - New option filter `flycheck-option-comma-separated-list` for options with
     comma separated lists as values
-  - #179: New highlighting mode `symbols` to highlight the symbol pointed to by an
-    error
+  - New highlighting mode `symbols` to highlight the symbol pointed to by an
+    error [GH-179]
 
 - New syntax checkers:
 
-  - #160: LESS
-  - #162: Haskell with `ghc`, `hdevtools` and `hlint`
-  - #170: C/C++ with `cppcheck`
-  - #172: C/C++ with `clang`
+  - LESS [GH-160]
+  - Haskell with `ghc`, `hdevtools` and `hlint` [GH-162]
+  - C/C++ with `cppcheck` [GH-170]
+  - C/C++ with `clang` [GH-172]
   - CoffeeScript with `coffee`
-  - #180: XML with `xmllint`
-  - #167: D with `dmd`
+  - XML with `xmllint` [GH-180]
+  - D with `dmd` [GH-167]
 
 - Improvements:
 
-  - #157: Support Web Mode in `html-tidy` syntax checker
-  - #159: Support Rubocop 0.9 and drop support for older Rubocop releases
+  - Support Web Mode in `html-tidy` syntax checker [GH-157]
+  - Support Rubocop 0.9 and drop support for older Rubocop releases [GH-159]
   - Include the message ID in error messages from `python-pylint`
 
 - Bug fixes:
 
   - Fix warnings about flawed definitions in `emacs-lisp` and
     `emacs-lisp-checkdoc`, caused by faulty formatting of sexps
-  - #166: Refresh error lists when pressing `g`
-  - #175: Do not obscure active minibuffer input when displaying errors in the
-    echo area
+  - Refresh error lists when pressing `g` [GH-166]
+  - Do not obscure active minibuffer input when displaying errors in the echo
+    area [GH-175]
   - Fix universal prefix argument for `flycheck-next-error` at `C-c ! n`
-  - #192: Correctly parse output of `coffeelint` 0.5.7
-  - #184: Correctly parse output of `pylint` 1.0
+  - Correctly parse output of `coffeelint` 0.5.7 [GH-192]
+  - Correctly parse output of `pylint` 1.0 [GH-184]
 
 0.13 (Jun 28, 2013)
 -------------------
@@ -411,20 +417,21 @@ master (in development)
     `flycheck-fringe-error` and `flycheck-fringe-warning`
   - Improve the default faces by using underlines instead of foreground colors,
     if possible
-  - #141: Customizable error processing with `flycheck-process-error-functions`
-  - #144: Make the delay before starting a syntax check customizable via
-    `flycheck-idle-change-delay`
-  - #156: Make display of errors under point customizable via
-    `flycheck-display-errors-function`
+  - Customizable error processing with `flycheck-process-error-functions`
+    [GH-141]
+  - Make the delay before starting a syntax check customizable via
+    `flycheck-idle-change-delay` [GH-144]
+  - Make display of errors under point customizable via
+    `flycheck-display-errors-function` [GH-156]
 
 - Improvements
 
   - Always highlight errors on top of warnings now
-  - #141: Do not trigger syntax checks in the middle of commands
+  - Do not trigger syntax checks in the middle of commands [GH-141]
   - Add the current directory to load path in the `emacs-lisp` syntax checker
   - Do not longer use the `emacs-lisp-checkdoc` syntax checker in Scratch
     buffers
-  - #149: Do not flush temporary files onto disk
+  - Do not flush temporary files onto disk [GH-149]
   - Syntax checkers may have error patterns and error parser now
   - Predicate forms are now wrapped into functions and compiled into functions
     during byte compilation
@@ -439,10 +446,10 @@ master (in development)
     project
   - Do not start a syntax check before the `flycheck-mode-hook` was run
   - Do not start automatic syntax checks if Flycheck Mode is disabled
-  - #143: Defer the initial syntax check until after the current interactive
-    command
+  - Defer the initial syntax check until after the current interactive command
+    [GH-143]
   - Correctly clean up information about running processes
-  - #150: Fix compatibility with Emacs 24.2 and earlier
+  - Fix compatibility with Emacs 24.2 and earlier [GH-150]
   - Fix version information on Emacs trunk builds
 
 0.12 (May 18, 2013)
@@ -450,15 +457,15 @@ master (in development)
 
 - New syntax checkers:
 
-  - #136: Ruby using `jruby`
-  - #138: Puppet
+  - Ruby using `jruby` [GH-136]
+  - Puppet [GH-138]
 
 - New features:
 
   - Highlight error expressions by default, with the new `sexps` highlighting
     mode
-  - #140: Automatically check syntax some time after the last change in the
-    buffer
+  - Automatically check syntax some time after the last change in the buffer
+    [GH-140]
   - Add `flycheck-version` to determine the installed Flycheck version
   - Add `flycheck-list-errors`, mapped to `C-c ! l`, to list all errors in a
     separate buffer
@@ -469,30 +476,30 @@ master (in development)
 
 - Bug fixes:
 
-  - #136: Correctly parse syntax errors from JRuby
+  - Correctly parse syntax errors from JRuby [GH-136]
 
 0.11 (May 01, 2013)
 -------------------
 
 - New syntax checkers:
 
-  - #124: Scala
+  - Scala [GH-124]
 
 - New features:
 
   - Customizable error indication with control of the fringe side, via
     `flycheck-indication-mode`
-  - #128: Customizable automatic syntax checking, via
-    `flycheck-check-syntax-automatically`
-  - #133: Customizable configuration file search, via
-    `flycheck-locate-config-file-functions`
+  - Customizable automatic syntax checking, via
+    `flycheck-check-syntax-automatically` [GH-128]
+  - Customizable configuration file search, via
+    `flycheck-locate-config-file-functions` [GH-133]
   - Find configuration files in Projectile_ projects
   - Add `flycheck-before-syntax-check-hook` and
     `flycheck-syntax-check-failed-hook`
 
 - Improvements:
 
-  - #123: The `ruby` syntax checker now differentiates warnings from errors
+  - The `ruby` syntax checker now differentiates warnings from errors [GH-123]
   - Faces are now in a separate customization group
 
 - Bug fixes:
@@ -510,14 +517,14 @@ master (in development)
 
 - New syntax checkers:
 
-  - #112: POSIX Shell script using `bash`
-  - #113: Ruby using `rubocop`
-  - #108: Elixir
-  - #122: Erlang
+  - POSIX Shell script using `bash` [GH-112]
+  - Ruby using `rubocop` [GH-113]
+  - Elixir [GH-108]
+  - Erlang [GH-122]
 
 - Removed syntax checkers:
 
-  - #115: Python using Pyflakes.  Use the superior Flake8 syntax checker
+  - Python using Pyflakes.  Use the superior Flake8 syntax checker [GH-115]
 
 - New features:
 
@@ -531,15 +538,16 @@ master (in development)
 - Improvements:
 
   - Call option filters for `nil` values, too
-  - #112: Improve error parsing in Bash syntax checker
+  - Improve error parsing in Bash syntax checker [GH-112]
   - Error navigation does not cross restrictions in narrowed buffers anymore
-  - #99: Try to preserve the non-directory part of the buffer's file name when
-    substituting the `source` symbol
+  - Try to preserve the non-directory part of the buffer's file name when
+    substituting the `source` symbol [GH-99]
 
 - Bug fixes:
 
   - Fix error highlighting and navigation in narrowed buffers
-  - #118: Use a hopefully more reliable way to parse output of PHP CodeSniffer
+  - Use a hopefully more reliable way to parse output of PHP CodeSniffer
+    [GH-118]
 
 .. _google This: https://github.com/Bruce-Connor/emacs-google-this
 
@@ -548,9 +556,9 @@ master (in development)
 
 - New syntax checkers:
 
-  - #103: SCSS using `scss`
+  - SCSS using `scss` [GH-103]
   - RST (ReStructuredText) using Docutils
-  - #107: Go using `go build` and `go test`
+  - Go using `go build` and `go test` [GH-107]
 
 - Improvements:
 
@@ -561,14 +569,14 @@ master (in development)
 
 - New syntax checkers:
 
-  - #91: Go using `gofmt`
-  - #101: Rust using `rustc`
+  - Go using `gofmt` [GH-91]
+  - Rust using `rustc` [GH-101]
 
 - New features:
 
-  - #29: Add a global Flycheck mode.  `(global-flycheck-mode)`
-    is now the recommended way to enable Flycheck
-  - #72: Add support for syntax checker options
+  - Add a global Flycheck mode.  `(global-flycheck-mode)` is now the recommended
+    way to enable Flycheck [GH-29]
+  - Add support for syntax checker options [GH-72]
   - Add option for the coding standard used by the `php-phpcs` syntax
     checker
   - Add options for the maximum McCabe complexity and the maximum line
@@ -578,19 +586,19 @@ master (in development)
 
   - Support McCabe warnings in `python-flake8`
   - Support warnings from `flake8` 2
-  - #94: Show long error messages in a popup buffer
-  - #96: Show all error messages at point
-  - #98: Add support for naming warings from `flake8` 2
+  - Show long error messages in a popup buffer [GH-94]
+  - Show all error messages at point [GH-96]
+  - Add support for naming warings from `flake8` 2 [GH-98]
   - Flycheck mode is not longer enabled for buffers whose names start with a
     space
-  - #100: Improve highlighting to reduce screen flickering
+  - Improve highlighting to reduce screen flickering [GH-100]
 
 0.7.1 (Feb 23, 2013)
 --------------------
 
 - Bug fixes:
 
-  - #87: Do not signal errors from `flycheck-mode`
+  - Do not signal errors from `flycheck-mode` [GH-87]
   - Correctly fall back to `$HOME` when searching configuration files
   - Correctly ascend to parent directory when searching configuration files
 
@@ -598,7 +606,7 @@ master (in development)
 
   - Rename `config` cell to `config-file`
   - Allow to pass the result of `config-file` cells as single argument
-  - #86: Add support for evaluating Lisp forms in syntax checker commands
+  - Add support for evaluating Lisp forms in syntax checker commands [GH-86]
 
 0.7 (Feb 14, 2013)
 ------------------
@@ -606,20 +614,20 @@ master (in development)
 - New features:
 
   - Navigate to source of syntax checker declarations from syntax checker help
-  - #60: Add online Info manual
+  - Add online Info manual [GH-60]
 
 - Improvements:
 
   - Use pipes instead of TTYs to read output from syntax checkers
-  - #80: Defer syntax checks for invisible buffers
-  - #62: Immediately display error messages after error navigation
+  - Defer syntax checks for invisible buffers [GH-80]
+  - Immediately display error messages after error navigation [GH-62]
 
 - Bug fixes:
 
   - Never select deleted buffers
   - Do not let the debugger interfere with necessary cleanup actions
-  - #78: Do not attempt to parse empty XML trees
-  - #81: Fix infinite recursion on Windows
+  - Do not attempt to parse empty XML trees [GH-78]
+  - Fix infinite recursion on Windows [GH-81]
 
 0.6.1 (Jan 30, 2013)
 --------------------
@@ -631,8 +639,8 @@ master (in development)
 
 - New syntax checkers:
 
-  - #53: Emacs Lisp with `checkdoc-current-buffer`
-  - #72: PHP with PHP CodeSniffer
+  - Emacs Lisp with `checkdoc-current-buffer` [GH-53]
+  - PHP with PHP CodeSniffer [GH-72]
 
 - Removed syntax checkers:
 
@@ -640,92 +648,93 @@ master (in development)
 
 - New features:
 
-  - #26: Error navigation with `next-error` and `previous-error`
-  - #33: Fringe icons instead of error indicators
-  - #59: Menu entry for Flycheck
-  - #35: Customizable error highlighting, taking the column number into account
+  - Error navigation with `next-error` and `previous-error` [GH-26]
+  - Fringe icons instead of error indicators [GH-33]
+  - Menu entry for Flycheck [GH-59]
+  - Customizable error highlighting, taking the column number into account
+    [GH-35]
   - Configuration files for syntax checkers
   - Add configuration file support to the syntax checkers `coffee-coffeelint`,
     `html-tidy`, `javascript-jshint`, `pyton-flake8` and `tex-chktex`
-  - #58: Allow to compile a buffer with a syntax checker for testing purposes
-  - #31: Use multiple syntax checkers during a syntax check
-  - #52: Add dedicated help for syntax checkers
+  - Allow to compile a buffer with a syntax checker for testing purposes [GH-58]
+  - Use multiple syntax checkers during a syntax check [GH-31]
+  - Add dedicated help for syntax checkers [GH-52]
 
 - Improvements:
 
-  - #55: Match error patterns in order of declaration
+  - Match error patterns in order of declaration [GH-55]
 
 - Bug fixes:
 
-  - #24: Inherit highlighting faces from built-in faces
-  - #36: Correct error patterns of the HTML syntax checker
-  - #42: Detect syntax errors in the `python-flake8` syntax checker
+  - Inherit highlighting faces from built-in faces [GH-24]
+  - Correct error patterns of the HTML syntax checker [GH-36]
+  - Detect syntax errors in the `python-flake8` syntax checker [GH-42]
   - Fix various regressions after introducing unit tests
-  - #45: Inhibit syntax checking during package installation
-  - #54: Disable syntax checking in Tramp buffers
-  - #65: Preserve whitespace in error messages
+  - Inhibit syntax checking during package installation [GH-45]
+  - Disable syntax checking in Tramp buffers [GH-54]
+  - Preserve whitespace in error messages [GH-65]
 
 - API changes:
 
-  - #41: Replace syntax checker variables with syntax checker declarations
-  - #38: Support parsing errors with arbitrary functions instead of error
-    patterns
-  - #38: Add an error parser for Checkstyle-like XML output
+  - Replace syntax checker variables with syntax checker declarations [GH-41]
+  - Support parsing errors with arbitrary functions instead of error patterns
+    [GH-38]
+  - Add an error parser for Checkstyle-like XML output [GH-38]
 
 0.5 (Dec 28, 2012)
 ------------------
 
 - New syntax checkers:
 
-  - #15: SASS
-  - #21: Perl
+  - SASS [GH-15]
+  - Perl [GH-21]
   - XML
-  - #30: Lua
+  - Lua [GH-30]
 
 - New features:
 
-  - #25: Support manual buffer-local selection of syntax checker
-  - #28: Add customizable error indicators
-  - #27: Echo error messages at point without 3rd-party libraries like
-    flymake-cursor
+  - Support manual buffer-local selection of syntax checker [GH-25]
+  - Add customizable error indicators [GH-28]
+  - Echo error messages at point without 3rd-party libraries like flymake-cursor
+    [GH-27]
 
 - Improvements:
 
-  - #24: Remember the last automatically selected syntax checker
+  - Remember the last automatically selected syntax checker [GH-24]
 
 - Bug fixes:
 
-  - #19: Fix syntax checking of buffers without backing files
+  - Fix syntax checking of buffers without backing files [GH-19]
 
 - API changes:
 
-  - #15: Replace underlying Flymake API with a custom syntax checking
-    implementation
+  - Replace underlying Flymake API with a custom syntax checking implementation
+    [GH-15]
 
 .. _flymake-cursor: http://www.emacswiki.org/emacs/FlymakeCursor
 
 0.4 (Nov 21, 2012)
 ------------------
 
-- #5: Rename the project to Flycheck
+- Rename the project to Flycheck [GH-5]
 - New syntax checkers
 
-  - #9: HAML
-  - #9: CSS
-  - #9: Javascript with `jsl`
-  - #16: Javascript with `jshint`
-  - #12: JSON
+  - HAML [GH-9]
+  - CSS [GH-9]
+  - Javascript with `jsl` [GH-9]
+  - Javascript with `jshint` [GH-16]
+  - JSON [GH-12]
   - LaTeX with `lacheck`
 
 - Bug fixes:
 
-  - #10: Fix type error when checking compressed Emacs Lisp
+  - Fix type error when checking compressed Emacs Lisp [GH-10]
 
 
 0.3 (Nov 21, 2012)
 ------------------
 
-- #4: Replace `flymake-mode` with a custom syntax checking minor mode
+- Replace `flymake-mode` with a custom syntax checking minor mode [GH-4]
 
 0.2 (Oct 25, 2012)
 ------------------
@@ -736,7 +745,7 @@ master (in development)
 
 - API changes:
 
-  - #2: Simplify syntax checker declarations
+  - Simplify syntax checker declarations [GH-2]
 
 0.1 (Oct 11, 2012)
 ------------------
