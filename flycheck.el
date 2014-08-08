@@ -3520,7 +3520,7 @@ Return a list with the contents of the table cell."
                   (list (format "%s (%s)" message checker)
                         'follow-link t
                         'flycheck-error error
-                        'action #'flycheck-error-list-goto-source)))))
+                        'action #'flycheck-error-list-button-goto-error)))))
 
 (defun flycheck-error-list-entries ()
   "Create the entries for the error list."
@@ -3529,22 +3529,9 @@ Return a list with the contents of the table cell."
                                       flycheck-error-list-source-buffer)))
       (mapcar #'flycheck-error-list-make-entry errors))))
 
-(defun flycheck-error-list-goto-source (button)
-  "Go to the source of the error associated to BUTTON."
-  (let* ((error (button-get button 'flycheck-error))
-         (buffer (flycheck-error-buffer error)))
-    (when (buffer-live-p buffer)
-      (if (eq (window-buffer) (get-buffer flycheck-error-list-buffer))
-          ;; When called from within the error list, keep the error list,
-          ;; otherwise replace the current buffer.
-          (pop-to-buffer buffer 'other-window)
-        (switch-to-buffer buffer))
-      (let ((pos (flycheck-error-pos error)))
-        (unless (eq (goto-char pos) (point))
-          ;; If widening gets in the way of moving to the right place, remove it
-          ;; and try again
-          (widen)
-          (goto-char pos))))))
+(defun flycheck-error-list-button-goto-error (button)
+  "Go to the location of the error associated to BUTTON."
+  (flycheck-error-list-goto-error (button-get button 'flycheck-error)))
 
 (defvar flycheck-error-list-mode-line-map
   (let ((map (make-sparse-keymap)))
@@ -3601,6 +3588,27 @@ list."
       (revert-buffer))
     (flycheck-error-list-highlight-errors)))
 
+(defun flycheck-error-list-goto-error (&optional error)
+  "Go to the location of an ERROR from the error list.
+
+If ERROR is not given it defaults to the error at point."
+  (-when-let* ((error (or error (tabulated-list-get-id)))
+               (buffer (flycheck-error-buffer error)))
+    (when (buffer-live-p buffer)
+      (if (eq (window-buffer) (get-buffer flycheck-error-list-buffer))
+          ;; When called from within the error list, keep the error list,
+          ;; otherwise replace the current buffer.
+          (pop-to-buffer buffer 'other-window)
+        (switch-to-buffer buffer))
+      (let ((pos (flycheck-error-pos error)))
+        (unless (eq (goto-char pos) (point))
+          ;; If widening gets in the way of moving to the right place, remove it
+          ;; and try again
+          (widen)
+          (goto-char pos)))
+      ;; Re-highlight the errors
+      (flycheck-error-list-highlight-errors))))
+
 (defun flycheck-error-list-next-error-pos (pos &optional n)
   "Get the N'th next error in the error list from POS.
 
@@ -3634,8 +3642,14 @@ nil, if there is no next error."
 (defun flycheck-error-list-next-error (n)
   "Go to the N'th next error in the error list."
   (interactive "P")
-  (-when-let (pos (flycheck-error-list-next-error-pos (point) n))
-    (goto-char pos)))
+  (let ((pos (flycheck-error-list-next-error-pos (point) n)))
+    (when (and pos (/= pos (point)))
+      (goto-char pos)
+      (save-selected-window
+        ;; Keep the error list selected, so that the user can navigate errors by
+        ;; repeatedly pressing n/p, without having to re-select the error list
+        ;; window.
+        (flycheck-error-list-goto-error)))))
 
 (defvar-local flycheck-error-list-highlight-overlays nil
   "Error highlight overlays in the error list buffer.")
