@@ -2327,6 +2327,56 @@ Try to reinstall the package defining this syntax checker.\n"))))
                                            :checker 'foo))
                    "14:15:error: dash\\nbroken (foo)")))
 
+(ert-deftest flycheck-error-</no-column ()
+  :tags '(error-api)
+  (should (flycheck-error-< (flycheck-error-new-at 10 nil)
+                            (flycheck-error-new-at 11 nil)))
+  (should-not (flycheck-error-< (flycheck-error-new-at 10 nil)
+                                (flycheck-error-new-at 10 nil)))
+  (should-not (flycheck-error-< (flycheck-error-new-at 10 nil)
+                                (flycheck-error-new-at 9 nil))))
+
+(ert-deftest flycheck-error-</by-line-with-column ()
+  :tags '(error-api)
+  (should (flycheck-error-< (flycheck-error-new-at 10 2)
+                            (flycheck-error-new-at 11 1)))
+  (should-not (flycheck-error-< (flycheck-error-new-at 10 1)
+                                (flycheck-error-new-at 9 2))))
+
+(ert-deftest flycheck-error-</by-column ()
+  :tags '(error-api)
+  (should (flycheck-error-< (flycheck-error-new-at 10 10)
+                            (flycheck-error-new-at 10 11)))
+  (should-not (flycheck-error-< (flycheck-error-new-at 10 10)
+                                (flycheck-error-new-at 10 10)))
+  (should-not (flycheck-error-< (flycheck-error-new-at 10 11)
+                                (flycheck-error-new-at 10 10))))
+
+(ert-deftest flycheck-error-level-</by-level-severity ()
+  :tags '(error-api)
+  (should (flycheck-error-level-< (flycheck-error-new-at 10 nil 'info)
+                                  (flycheck-error-new-at 8 nil 'warning)))
+  (should-not (flycheck-error-level-< (flycheck-error-new-at 8 nil 'warning)
+                                      (flycheck-error-new-at 8 nil 'warning)))
+  (should-not (flycheck-error-level-< (flycheck-error-new-at 7 nil 'error)
+                                      (flycheck-error-new-at 8 nil 'warning))))
+
+(ert-deftest flycheck-error-level-</by-level-name ()
+  :tags '(error-api)
+  (should (flycheck-error-level-< (flycheck-error-new-at 10 nil 'a)
+                                  (flycheck-error-new-at 8 nil 'b)))
+  (should-not (flycheck-error-level-< (flycheck-error-new-at 7 nil 'c)
+                                      (flycheck-error-new-at 8 nil 'b))))
+
+(ert-deftest flycheck-error-level-</by-location ()
+  :tags '(error-api)
+  (should (flycheck-error-level-< (flycheck-error-new-at 8 nil 'info)
+                                  (flycheck-error-new-at 10 nil 'info)))
+  (should-not (flycheck-error-level-< (flycheck-error-new-at 8 nil 'info)
+                                      (flycheck-error-new-at 8 nil 'info)))
+  (should-not (flycheck-error-level-< (flycheck-error-new-at 8 nil 'info)
+                                      (flycheck-error-new-at 7 nil 'info))))
+
 
 ;;; Error levels
 
