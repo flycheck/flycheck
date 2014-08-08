@@ -137,7 +137,6 @@ attention to case differences."
   (define-fringe-bitmap 'exclamation-mark
     [24 60 60 24 24 0 0 24 24] nil nil 'center))
 
-
 
 ;;; Customization
 (defgroup flycheck nil
