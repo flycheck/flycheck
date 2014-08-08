@@ -3462,6 +3462,8 @@ the beginning of the buffer."
 
 (defvar-local flycheck-error-list-source-buffer nil
   "The current source buffer of the error list.")
+;; Needs to permanently local to preserve the source buffer across buffer
+;; reversions
 (put 'flycheck-error-list-source-buffer 'permanent-local t)
 
 (defun flycheck-error-list-set-source (buffer)
