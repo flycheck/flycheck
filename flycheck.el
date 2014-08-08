@@ -3447,8 +3447,17 @@ the beginning of the buffer."
 (defconst flycheck-error-list-buffer "*Flycheck errors*"
   "The name of the buffer to show error lists.")
 
+(defvar flycheck-error-list-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "n") #'flycheck-error-list-next-error)
+    (define-key map (kbd "p") #'flycheck-error-list-previous-error)
+    map)
+  "The keymap of `flycheck-error-list-mode'.")
+
 (define-derived-mode flycheck-error-list-mode tabulated-list-mode "Flycheck errors"
-  "Major mode for listing Flycheck errors."
+  "Major mode for listing Flycheck errors.
+
+\\{flycheck-error-list-mode-map}"
   (setq tabulated-list-format [("Line" 4 nil :right-align t)
                                ("Col" 3 nil :right-align t)
                                ("Level" 8 nil)
@@ -3592,12 +3601,41 @@ list."
       (revert-buffer))
     (flycheck-error-list-highlight-errors)))
 
-(defun flycheck-error-list-next-error-pos (pos)
-  "Get the next error in the error list from POS.
+(defun flycheck-error-list-next-error-pos (pos &optional n)
+  "Get the N'th next error in the error list from POS.
 
-Get the beginning position of the next error, or nil, if there is
-no next error."
-  (next-single-property-change pos 'tabulated-list-id))
+N defaults to 1.  If N is negative, search for the previous error
+instead.
+
+Get the beginning position of the N'th next error from POS, or
+nil, if there is no next error."
+  (let ((n (or n 1))
+        )
+    (if (>= n 0)
+        ;; Search forward
+        (while (and pos (/= n 0))
+          (setq n (1- n))
+          (setq pos (next-single-property-change pos 'tabulated-list-id)))
+      ;; Search backwards
+      (while (/= n 0)
+        (setq n (1+ n))
+        ;; We explicitly give the limit here to explicitly have the minimum
+        ;; point returned, to be able to move to the first error (which starts
+        ;; at `point-min')
+        (setq pos (previous-single-property-change pos 'tabulated-list-id
+                                                   nil (point-min)))))
+    pos))
+
+(defun flycheck-error-list-previous-error (n)
+  "Go to the N'th previous error in the error list."
+  (interactive "P")
+  (flycheck-error-list-next-error (- (or n 1))))
+
+(defun flycheck-error-list-next-error (n)
+  "Go to the N'th next error in the error list."
+  (interactive "P")
+  (-when-let (pos (flycheck-error-list-next-error-pos (point) n))
+    (goto-char pos)))
 
 (defvar-local flycheck-error-list-highlight-overlays nil
   "Error highlight overlays in the error list buffer.")
