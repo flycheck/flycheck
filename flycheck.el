@@ -787,6 +787,26 @@ Set this variable to nil to disable the mode line completely."
   :risky t
   :package-version '(flycheck . "0.20"))
 
+(defcustom flycheck-error-list-mode-line
+  `(,(propertized-buffer-identification "%12b")
+    " for buffer "
+    (:eval (flycheck-error-list-propertized-source-name)))
+  "Mode line construct for Flycheck error list.
+
+The value of this variable is a mode line template as in
+`mode-line-format', to be used as
+`mode-line-buffer-identification' in `flycheck-error-list-mode'.
+See Info Node `(elisp)Mode Line Format' for more information.
+
+Customize this variable to change how the error list appears in
+the mode line.  The default shows the name of the buffer and the
+name of the source buffer, i.e. the buffer whose errors are
+currently listed."
+  :group 'flycheck
+  :type 'sexp
+  :risky t
+  :package-version '(flycheck . "0.20"))
+
 
 ;;; Minor mode definition
 (defvar flycheck-mode-menu-map
@@ -3434,9 +3454,10 @@ the beginning of the buffer."
                                ("Level" 8 nil)
                                ("Message" 0 nil)]
         tabulated-list-padding 1
-        tabulated-list-entries #'flycheck-error-list-entries)
-  (add-hook 'tabulated-list-revert-hook #'flycheck-error-list-set-mode-line
-            nil 'local)
+        tabulated-list-entries #'flycheck-error-list-entries
+        ;; `revert-buffer' updates the mode line for us, so all we need to do is
+        ;; set the corresponding mode line construct.
+        mode-line-buffer-identification flycheck-error-list-mode-line)
   (tabulated-list-init-header))
 
 (defvar-local flycheck-error-list-source-buffer nil
@@ -3521,25 +3542,19 @@ Return a list with the contents of the table cell."
     map)
   "Keymap for error list mode line.")
 
-(defun flycheck-error-list-set-mode-line ()
-  "Update the mode line of the error list.
+(defun flycheck-error-list-propertized-source-name ()
+  "Get the name of the current source buffer for the mode line.
 
-The mode line shows the file name of the source buffer."
-  ;; Escape "%" in names to avoid accidental substitution
-  (let ((source-name (replace-regexp-in-string
-                      (rx "%") "%%"
-                      (buffer-name flycheck-error-list-source-buffer)
-                      'fixed-case 'literal)))
-    (setq mode-line-buffer-identification
-          (nconc (propertized-buffer-identification "%b")
-                 (list
-                  (concat
-                   " for buffer "
-                   (propertize source-name
-                               'face 'mode-line-buffer-id
-                               'mouse-face 'mode-line-highlight
-                               'help-echo "mouse-1: switch to source"
-                               'local-map flycheck-error-list-mode-line-map)))))))
+Propertize the name of the current source buffer for use in the
+mode line indication of `flycheck-error-list-mode'."
+  (let ((name (replace-regexp-in-string
+               (rx "%") "%%"
+               (buffer-name flycheck-error-list-source-buffer)
+               'fixed-case 'literal)))
+    (propertize name 'face 'mode-line-buffer-id
+                'mouse-face 'mode-line-highlight
+                'help-echo "mouse-1: switch to source"
+                'local-map flycheck-error-list-mode-line-map)))
 
 (defun flycheck-error-list-mouse-switch-to-source (event)
   "Switch to the error list source buffer of the EVENT window."
@@ -3572,8 +3587,7 @@ list."
   (-when-let (error-list-window (get-buffer-window flycheck-error-list-buffer
                                                    'all-frames))
     (with-selected-window error-list-window
-      (revert-buffer)
-      (flycheck-error-list-set-mode-line)))
+      (revert-buffer)))
   (flycheck-error-list-highlight-errors))
 
 (defun flycheck-error-list-next-error-pos (pos)
