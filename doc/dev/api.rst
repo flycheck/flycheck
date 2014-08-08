@@ -131,6 +131,15 @@ See :infonode:`(cl)Structures` for more information about CL structures.
    .. function:: flycheck-error-format
       :auto:
 
+   .. function:: flycheck-error-<
+      :auto:
+
+   .. function:: flycheck-error-level-<
+      :auto:
+
+Error Analysis
+==============
+
 The following functions and variables may be used to analyze the errors of a
 syntax check.
 

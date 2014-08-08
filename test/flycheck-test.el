@@ -2327,11 +2327,62 @@ Try to reinstall the package defining this syntax checker.\n"))))
                                            :checker 'foo))
                    "14:15:error: dash\\nbroken (foo)")))
 
+(ert-deftest flycheck-error-</no-column ()
+  :tags '(error-api)
+  (should (flycheck-error-< (flycheck-error-new-at 10 nil)
+                            (flycheck-error-new-at 11 nil)))
+  (should-not (flycheck-error-< (flycheck-error-new-at 10 nil)
+                                (flycheck-error-new-at 10 nil)))
+  (should-not (flycheck-error-< (flycheck-error-new-at 10 nil)
+                                (flycheck-error-new-at 9 nil))))
+
+(ert-deftest flycheck-error-</by-line-with-column ()
+  :tags '(error-api)
+  (should (flycheck-error-< (flycheck-error-new-at 10 2)
+                            (flycheck-error-new-at 11 1)))
+  (should-not (flycheck-error-< (flycheck-error-new-at 10 1)
+                                (flycheck-error-new-at 9 2))))
+
+(ert-deftest flycheck-error-</by-column ()
+  :tags '(error-api)
+  (should (flycheck-error-< (flycheck-error-new-at 10 10)
+                            (flycheck-error-new-at 10 11)))
+  (should-not (flycheck-error-< (flycheck-error-new-at 10 10)
+                                (flycheck-error-new-at 10 10)))
+  (should-not (flycheck-error-< (flycheck-error-new-at 10 11)
+                                (flycheck-error-new-at 10 10))))
+
+(ert-deftest flycheck-error-level-</by-level-severity ()
+  :tags '(error-api)
+  (should (flycheck-error-level-< (flycheck-error-new-at 10 nil 'info)
+                                  (flycheck-error-new-at 8 nil 'warning)))
+  (should-not (flycheck-error-level-< (flycheck-error-new-at 8 nil 'warning)
+                                      (flycheck-error-new-at 8 nil 'warning)))
+  (should-not (flycheck-error-level-< (flycheck-error-new-at 7 nil 'error)
+                                      (flycheck-error-new-at 8 nil 'warning))))
+
+(ert-deftest flycheck-error-level-</by-level-name ()
+  :tags '(error-api)
+  (should (flycheck-error-level-< (flycheck-error-new-at 10 nil 'a)
+                                  (flycheck-error-new-at 8 nil 'b)))
+  (should-not (flycheck-error-level-< (flycheck-error-new-at 7 nil 'c)
+                                      (flycheck-error-new-at 8 nil 'b))))
+
+(ert-deftest flycheck-error-level-</by-location ()
+  :tags '(error-api)
+  (should (flycheck-error-level-< (flycheck-error-new-at 8 nil 'info)
+                                  (flycheck-error-new-at 10 nil 'info)))
+  (should-not (flycheck-error-level-< (flycheck-error-new-at 8 nil 'info)
+                                      (flycheck-error-new-at 8 nil 'info)))
+  (should-not (flycheck-error-level-< (flycheck-error-new-at 8 nil 'info)
+                                      (flycheck-error-new-at 7 nil 'info))))
+
 
 ;;; Error levels
 
 ;; A level for the following unit tests
 (flycheck-define-error-level 'test-level
+  :severity 1337
   :overlay-category 'category
   :fringe-bitmap 'left-triangle
   :fringe-face 'highlight
@@ -2340,6 +2391,10 @@ Try to reinstall the package defining this syntax checker.\n"))))
 (ert-deftest flycheck-define-error-level/is-error-level? ()
   :tags '(error-level)
   (should (flycheck-error-level-p 'test-level)))
+
+(ert-deftest flycheck-define-error-level/has-severity ()
+  :tags '(error-level)
+  (should (= (flycheck-error-level-severity 'test-level) 1337)))
 
 (ert-deftest flycheck-define-error-level/has-fringe-bitmap ()
   :tags '(error-level)
@@ -2394,6 +2449,7 @@ Try to reinstall the package defining this syntax checker.\n"))))
 
 (ert-deftest flycheck-error-level-error ()
   :tags '(error-level)
+  (should (= (flycheck-error-level-severity 'error) 100))
   (should (eq (flycheck-error-level-fringe-bitmap 'error)
               'exclamation-mark))
   (should (eq (flycheck-error-level-fringe-face 'error)
@@ -2405,6 +2461,7 @@ Try to reinstall the package defining this syntax checker.\n"))))
 
 (ert-deftest flycheck-error-level-warning ()
   :tags '(error-level)
+  (should (= (flycheck-error-level-severity 'warning) 10))
   (should (eq (flycheck-error-level-fringe-bitmap 'warning) 'question-mark))
   (should (eq (flycheck-error-level-fringe-face 'warning)
               'flycheck-fringe-warning))
@@ -2415,6 +2472,7 @@ Try to reinstall the package defining this syntax checker.\n"))))
 
 (ert-deftest flycheck-error-level-info ()
   :tags '(error-level)
+  (should (= (flycheck-error-level-severity 'info) -1))
   (should (eq (flycheck-error-level-fringe-bitmap 'info) 'empty-line))
   (should (eq (flycheck-error-level-fringe-face 'info)
               'flycheck-fringe-info))
@@ -2901,10 +2959,11 @@ of the file will be interrupted because there are too many #ifdef configurations
   :tags '(error-list)
   (with-temp-buffer
     (flycheck-error-list-mode)
-    (should (equal tabulated-list-format [("Line" 4 nil :right-align t)
-                                          ("Col" 3 nil :right-align t)
-                                          ("Level" 8 nil)
-                                          ("Message" 0 nil)]))
+    (should (equal tabulated-list-format
+                   [("Line" 4 flycheck-error-list-entry-< :right-align t)
+                    ("Col" 3 nil :right-align t)
+                    ("Level" 8 flycheck-error-list-entry-level-<)
+                    ("Message" 0 nil)]))
     (should (local-variable-p 'tabulated-list-format))))
 
 (ert-deftest flycheck-error-list-mode/tabulated-list-padding ()
@@ -2990,7 +3049,7 @@ of the file will be interrupted because there are too many #ifdef configurations
                                        :checker 'emacs-lisp-checkdoc))
          (entry (flycheck-error-list-make-entry error))
          (cells (cadr entry)))
-    (should (string= "foo (emacs-lisp-checkdoc)" (car (aref cells 3))))))
+    (should (string= "foo (emacs-lisp-checkdoc)" (aref cells 3)))))
 
 (ert-deftest flycheck-error-list-make-entry/default-message ()
   :tags '(error-list)
@@ -2998,7 +3057,7 @@ of the file will be interrupted because there are too many #ifdef configurations
                                        :checker 'emacs-lisp-checkdoc))
          (entry (flycheck-error-list-make-entry error))
          (cells (cadr entry)))
-    (should (string= "Unknown error (emacs-lisp-checkdoc)" (car (aref cells 3))))))
+    (should (string= "Unknown error (emacs-lisp-checkdoc)" (aref cells 3)))))
 
 
 ;;; General error display
