@@ -3587,8 +3587,8 @@ list."
   (-when-let (error-list-window (get-buffer-window flycheck-error-list-buffer
                                                    'all-frames))
     (with-selected-window error-list-window
-      (revert-buffer)))
-  (flycheck-error-list-highlight-errors))
+      (revert-buffer))
+    (flycheck-error-list-highlight-errors)))
 
 (defun flycheck-error-list-next-error-pos (pos)
   "Get the next error in the error list from POS.
