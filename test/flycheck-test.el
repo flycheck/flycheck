@@ -2909,10 +2909,11 @@ of the file will be interrupted because there are too many #ifdef configurations
   :tags '(error-list)
   (with-temp-buffer
     (flycheck-error-list-mode)
-    (should (equal tabulated-list-format [("Line" 4 nil :right-align t)
-                                          ("Col" 3 nil :right-align t)
-                                          ("Level" 8 nil)
-                                          ("Message" 0 nil)]))
+    (should (equal tabulated-list-format
+                   [("Line" 4 flycheck-error-list-entry-< :right-align t)
+                    ("Col" 3 nil :right-align t)
+                    ("Level" 8 flycheck-error-list-entry-level-<)
+                    ("Message" 0 nil)]))
     (should (local-variable-p 'tabulated-list-format))))
 
 (ert-deftest flycheck-error-list-mode/tabulated-list-padding ()

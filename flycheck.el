@@ -3492,10 +3492,13 @@ the beginning of the buffer."
   "Major mode for listing Flycheck errors.
 
 \\{flycheck-error-list-mode-map}"
-  (setq tabulated-list-format [("Line" 4 nil :right-align t)
-                               ("Col" 3 nil :right-align t)
-                               ("Level" 8 nil)
-                               ("Message" 0 nil)]
+  (setq tabulated-list-format
+        [("Line" 4 flycheck-error-list-entry-< :right-align t)
+         ("Col" 3 nil :right-align t)
+         ("Level" 8 flycheck-error-list-entry-level-<)
+         ("Message" 0 nil)]
+        ;; Sort by location initially
+        tabulated-list-sort-key (cons "Line" nil)
         tabulated-list-padding 1
         tabulated-list-entries #'flycheck-error-list-entries
         ;; `revert-buffer' updates the mode line for us, so all we need to do is
@@ -3559,6 +3562,18 @@ Return a list with the contents of the table cell."
     (let ((errors (buffer-local-value 'flycheck-current-errors
                                       flycheck-error-list-source-buffer)))
       (mapcar #'flycheck-error-list-make-entry errors))))
+
+(defun flycheck-error-list-entry-< (entry1 entry2)
+  "Determine whether ENTRY1 is before ENTRY2 by location.
+
+See `flycheck-error-<'."
+  (flycheck-error-< (car entry1) (car entry2)))
+
+(defun flycheck-error-list-entry-level-< (entry1 entry2)
+  "Determine whether ENTRY1 is before ENTRY2 by level.
+
+See `flycheck-error-level-<'."
+  (not (flycheck-error-level-< (car entry1) (car entry2))))
 
 (defvar flycheck-error-list-mode-line-map
   (let ((map (make-sparse-keymap)))
