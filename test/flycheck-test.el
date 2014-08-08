@@ -4385,6 +4385,24 @@ Why not:
      '(22 nil error "Undefined variable 'antigravity' (E0602)"
           :checker python-pylint))))
 
+(ert-deftest flycheck-define-checker/python-pylint-disabled-warnings ()
+  :tags '(builtin-checker external-tool language-python)
+  (skip-unless (flycheck-check-executable 'python-pylint))
+  (let ((flycheck-pylintrc "pylintrc")
+        (flycheck-disabled-checkers '(python-flake8)))
+    (flycheck-test-should-syntax-check
+     "checkers/python/test.py" 'python-mode
+     '(4 nil error "Unable to import 'spam' (F0401)" :checker python-pylint)
+     '(5 nil error "No name 'antigravit' in module 'python' (E0611)"
+         :checker python-pylint)
+     '(5 nil warning "Unused import antigravit (W0611)" :checker python-pylint)
+     '(10 15 warning "Used builtin function 'map' (W0141)"
+          :checker python-pylint)
+     '(14 15 error "Module 'sys' has no 'python_version' member (E1101)"
+          :checker python-pylint)
+     '(22 nil error "Undefined variable 'antigravity' (E0602)"
+          :checker python-pylint))))
+
 (ert-deftest flycheck-define-checker/racket ()
   :tags '(builtin-checker external-tool language-racket)
   (skip-unless (flycheck-check-executable 'racket))
