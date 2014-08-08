@@ -32,6 +32,15 @@ master (in development)
   - #424: Add `flycheck-rubylintrc` to support configuration files for
     `ruby-rubylint`
   - #446: Add `flycheck-rust-crate-type` to make the Crate type customizable
+  - #454: The mode line of the error list is now customizable with
+    `flycheck-error-list-mode-line`
+  - #452, #454: Pressing `n` or `p` in the error list now shows the error at
+    point in a separate window
+  - #454: Pressing `RET` in the error list now jumps to the error at point
+  - #454: The error list can now be sorted by error level by clicking on the
+    corresponding list header, or by pressing `S` with point on the column text
+  - #454: Error levels defined with `flycheck-define-error-level` can now have a
+    numeric severity used for sorting
 
 - Improvements:
 
@@ -47,6 +56,7 @@ master (in development)
   - #447: Change the default of `flycheck-eslintrc` to `nil`
   - #365: Show the menu on the mode line lighter
   - Greatly improve Flycheck's menu
+  - #452, #454: `n` and `p` now navigate the error list by errors, not by lines
 
 - Other changes:
 
