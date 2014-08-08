@@ -2730,6 +2730,14 @@ _not_ include the file name."
 
 The following PROPERTIES constitute an error level:
 
+`:severity SEVERITY'
+     A number denoting the severity of this level.  The higher
+     the number, the more severe is this level compared to other
+     levels.  Defaults to 0.
+
+     The severity is used by `flycheck-error-level-<' to
+     determine the ordering of errors according to their levels.
+
 `:overlay-category CATEGORY'
      A symbol denoting the overlay category to use for error
      highlight overlays for this level.  See Info
@@ -2758,6 +2766,8 @@ The following PROPERTIES constitute an error level:
      level in the error list.  See `flycheck-list-errors'."
   (declare (indent 1))
   (put level 'flycheck-error-level t)
+  (put level 'flycheck-error-severity
+       (or (plist-get properties :severity) 0))
   (put level 'flycheck-overlay-category
        (plist-get properties :overlay-category))
   (put level 'flycheck-fringe-bitmap
@@ -2770,6 +2780,10 @@ The following PROPERTIES constitute an error level:
 (defun flycheck-error-level-p (level)
   "Determine whether LEVEL is a Flycheck error level."
   (get level 'flycheck-error-level))
+
+(defun flycheck-error-level-severity (level)
+  "Get the numeric severity of LEVEL."
+  (or (get level 'flycheck-error-severity) 0))
 
 (defun flycheck-error-level-overlay-category (level)
   "Get the overlay category for LEVEL."
@@ -2814,6 +2828,7 @@ show the icon."
 (put 'flycheck-error-overlay 'help-echo "Unknown error.")
 
 (flycheck-define-error-level 'error
+  :severity 100
   :overlay-category 'flycheck-error-overlay
   :fringe-bitmap 'exclamation-mark
   :fringe-face 'flycheck-fringe-error
@@ -2824,6 +2839,7 @@ show the icon."
 (put 'flycheck-warning-overlay 'help-echo "Unknown warning.")
 
 (flycheck-define-error-level 'warning
+  :severity 10
   :overlay-category 'flycheck-warning-overlay
   :fringe-bitmap 'question-mark
   :fringe-face 'flycheck-fringe-warning
@@ -2834,6 +2850,7 @@ show the icon."
 (put 'flycheck-info-overlay 'help-echo "Unknown info.")
 
 (flycheck-define-error-level 'info
+  :severity -1
   :overlay-category 'flycheck-info-overlay
   ;; Not exactly the right indicator, but looks pretty, and I prefer to use
   ;; built-in bitmaps over diving into the hassle of messing around with custom

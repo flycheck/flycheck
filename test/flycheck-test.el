@@ -2332,6 +2332,7 @@ Try to reinstall the package defining this syntax checker.\n"))))
 
 ;; A level for the following unit tests
 (flycheck-define-error-level 'test-level
+  :severity 1337
   :overlay-category 'category
   :fringe-bitmap 'left-triangle
   :fringe-face 'highlight
@@ -2340,6 +2341,10 @@ Try to reinstall the package defining this syntax checker.\n"))))
 (ert-deftest flycheck-define-error-level/is-error-level? ()
   :tags '(error-level)
   (should (flycheck-error-level-p 'test-level)))
+
+(ert-deftest flycheck-define-error-level/has-severity ()
+  :tags '(error-level)
+  (should (= (flycheck-error-level-severity 'test-level) 1337)))
 
 (ert-deftest flycheck-define-error-level/has-fringe-bitmap ()
   :tags '(error-level)
@@ -2394,6 +2399,7 @@ Try to reinstall the package defining this syntax checker.\n"))))
 
 (ert-deftest flycheck-error-level-error ()
   :tags '(error-level)
+  (should (= (flycheck-error-level-severity 'error) 100))
   (should (eq (flycheck-error-level-fringe-bitmap 'error)
               'exclamation-mark))
   (should (eq (flycheck-error-level-fringe-face 'error)
@@ -2405,6 +2411,7 @@ Try to reinstall the package defining this syntax checker.\n"))))
 
 (ert-deftest flycheck-error-level-warning ()
   :tags '(error-level)
+  (should (= (flycheck-error-level-severity 'warning) 10))
   (should (eq (flycheck-error-level-fringe-bitmap 'warning) 'question-mark))
   (should (eq (flycheck-error-level-fringe-face 'warning)
               'flycheck-fringe-warning))
@@ -2415,6 +2422,7 @@ Try to reinstall the package defining this syntax checker.\n"))))
 
 (ert-deftest flycheck-error-level-info ()
   :tags '(error-level)
+  (should (= (flycheck-error-level-severity 'info) -1))
   (should (eq (flycheck-error-level-fringe-bitmap 'info) 'empty-line))
   (should (eq (flycheck-error-level-fringe-face 'info)
               'flycheck-fringe-info))
