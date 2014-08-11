@@ -2224,7 +2224,7 @@ otherwise."
       (and (flycheck-check-modes checker)
            (flycheck-check-predicate checker)
            (flycheck-check-executable checker))
-    (message "Warning: %S is no valid Flycheck syntax checker.
+    (lwarn 'flycheck :warning "Warning: %S is no valid Flycheck syntax checker.
 Try to reinstall the package defining this syntax checker." checker)
     nil))
 
