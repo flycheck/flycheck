@@ -1694,12 +1694,16 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-may-use-checker/invalid-checker ()
   :tags '(checker-api)
-  (shut-up
-    (should-not (flycheck-valid-checker-p 'foo))
-    (should-not (flycheck-may-use-checker 'foo))
-    (should (equal (shut-up-current-output)
-                   "Warning: foo is no valid Flycheck syntax checker.
-Try to reinstall the package defining this syntax checker.\n"))))
+  (should-not (flycheck-valid-checker-p 'foo))
+  (shut-up                              ; Inhibit warning display on terminal
+    (should-not (flycheck-may-use-checker 'foo)))
+  (with-current-buffer "*Warnings*"
+    (save-excursion
+      (goto-char (point-min))
+      (search-forward "Warning (flycheck): ")
+      (should (string= (buffer-substring-no-properties (point) (point-max))
+                       "foo is no valid Flycheck syntax checker.
+Try to reinstall the package defining this syntax checker.\n")))))
 
 
 ;;; Configuration file functions
