@@ -62,9 +62,34 @@ To get an overview of all errors and warnings in the current buffer, type
 in your current buffer.  The error list updates automatically when you fix
 errors or introduce new ones, or when you switch to another buffer.
 
+Explore the menu
+================
+
+All Flycheck commands are available in the Emacs menu at :menuselection:`Tools
+--> Syntax Checking`.  Explore this menu to see what features Flycheck has to
+offer.
+
+.. only:: not texinfo
+
+   .. image:: /images/flycheck-menu.png
+      :align: center
+      :width: 678
+      :height: 513
+      :scale: 75%
+
+The menu can also be opened by clicking on the mode line lighter of Flycheck.
+
+.. only:: not texinfo
+
+   .. image:: /images/flycheck-mode-line-menu.png
+      :align: center
+      :width: 444
+      :height: 361
+      :scale: 75%
+
 Further reading
 ===============
 
-- :doc:`usage` describes commands and options in detail.
+- :doc:`usage` describes all commands and options in detail.
 - :doc:`languages` has a list of all supported languages, and the corresponding
   syntax checker tools and their options.
