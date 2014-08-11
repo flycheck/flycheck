@@ -71,7 +71,7 @@ offer.
 
 .. only:: not texinfo
 
-   .. image:: /images/flycheck-menu.png
+   .. figure:: /images/flycheck-menu.png
       :align: center
       :width: 678
       :height: 513
@@ -81,7 +81,7 @@ The menu can also be opened by clicking on the mode line lighter of Flycheck.
 
 .. only:: not texinfo
 
-   .. image:: /images/flycheck-mode-line-menu.png
+   .. figure:: /images/flycheck-mode-line-menu.png
       :align: center
       :width: 444
       :height: 361
