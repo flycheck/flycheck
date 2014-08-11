@@ -60,6 +60,10 @@ master (in development)
   - `n` and `p` now navigate the error list by errors, not by lines [GH-452]
     [GH-444]
 
+- Bug fixes:
+
+  - Properly support `unload-feature` now
+
 - Other changes:
 
   - Remove dependencies on f.el and s.el

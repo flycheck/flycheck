@@ -952,6 +952,14 @@ variables of Flycheck."
 ;; pending temporary files.
 (add-hook 'kill-emacs-hook #'flycheck-global-teardown)
 
+(defun flycheck-unload-function ()
+  "Unload function for Flycheck."
+  (global-flycheck-mode -1)
+  (easy-menu-remove-item nil '("Tools") (cadr flycheck-mode-menu-map))
+  (remove-hook 'kill-emacs-hook #'flycheck-global-teardown)
+  (setq find-function-regexp-alist
+        (assq-delete-all 'flycheck-checker find-function-regexp-alist)))
+
 
 ;;; Version information
 (defun flycheck-version (&optional show-version)
