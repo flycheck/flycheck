@@ -59,6 +59,7 @@ master (in development)
   - Greatly improve Flycheck's menu
   - `n` and `p` now navigate the error list by errors, not by lines [GH-452]
     [GH-444]
+  - `c/c++-clang` does not use in-place temporary files anymore [GH-456]
 
 - Bug fixes:
 
