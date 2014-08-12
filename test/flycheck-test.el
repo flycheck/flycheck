@@ -4802,7 +4802,7 @@ Why not:
 
 (ert-deftest flycheck-define-checker/scala-scalastyle-warning ()
   :tags '(builtin-checker external-tool language-scala)
-  (skip-unless (flycheck-check-executable 'sca;a-scalastyle))
+  (skip-unless (flycheck-check-executable 'scala-scalastyle))
   (let ((flycheck-scalastylerc "scalastyle.xml")
         (flycheck-scalastyle-jar "/opt/scalastyle-batch_2.10-0.5.0/scalastyle-batch_2.10.jar"))
     (flycheck-test-should-syntax-check
