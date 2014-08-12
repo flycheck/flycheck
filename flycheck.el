@@ -4921,19 +4921,19 @@ about warnings")
 Uses GCC's Fortran compiler gfortran.  See URL
 `https://gcc.gnu.org/onlinedocs/gfortran/'."
   :command ("gfortran"
-            (option "-std=" flycheck-gfortran-language-standard concat)
-            (option "-f" flycheck-gfortran-layout concat
-                    flycheck-option-gfortran-layout)
             "-fsyntax-only"
             "-fshow-column"
             "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
             "-fno-diagnostics-show-option" ; Do not show the corresponding
                                         ; warning group
+            ;; Fortran has similar include processing as C/C++
+            "-iquote" (eval (flycheck-c/c++-quoted-include-directory))
+            (option "-std=" flycheck-gfortran-language-standard concat)
+            (option "-f" flycheck-gfortran-layout concat
+                    flycheck-option-gfortran-layout)
             (option-list "-W" flycheck-gfortran-warnings concat)
             (option-list "-I" flycheck-gfortran-include-path concat)
-            ;; We must stay in the same directory, to properly resolve #include
-            ;; with quotes
-            source-inplace)
+            source)
   :error-patterns
   ((error line-start (file-name) ":" line "." column ":\n"
           (= 3 (zero-or-more not-newline) "\n")
