@@ -173,7 +173,8 @@ attention to case differences."
   :link '(info-link "(flycheck)Error reporting"))
 
 (defcustom flycheck-checkers
-  '(asciidoc
+  '(ada-gcc
+    asciidoc
     c/c++-clang
     c/c++-gcc
     c/c++-cppcheck
@@ -2776,7 +2777,7 @@ The following PROPERTIES constitute an error level:
      determine the ordering of errors according to their levels.
 
 `:overlay-category CATEGORY'
-     A symbol denoting the overlay category to use for error
+     A symbol denotigng the overlay category to use for error
      highlight overlays for this level.  See Info
      node `(elisp)Overlay Properties' for more information about
      overlay categories.
@@ -4442,6 +4443,137 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
      (flycheck-sanitize-errors errors) "In file included from"))
   :modes (c-mode c++-mode)
   :next-checkers ((warnings-only . c/c++-cppcheck)))
+
+(flycheck-def-option-var flycheck-gnat-warnings '("a" "wu" "wa" "ef" "f") ada-gcc
+  "A list of additional Ada warnings to enable in GCC.
+
+The value of this variable is a list of strings, where each string
+is the name of a warning category to enable.  By default, all
+recommended warnings and some extra warnings are enabled (as by
+`-gnata', `-gnatwu', `-gnatwa', `-gnatef' and `-gnatf' respectively).
+
+Refer to the gcc manual at URL
+`https://gcc.gnu.org/onlinedocs/gcc/' for more information about
+warnings."
+  :type '(choice (const :tag "No additional warnings" nil)
+                 (repeat :tag "Additional warnings"
+                         (string :tag "Warning name")))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.20"))
+
+(flycheck-def-option-var flycheck-gnat-language-standard "2012" ada-gcc
+  "The language standard to use in GNAT.
+
+The value of this variable is either a string denoting a language
+standard, or nil, to use the default standard.  When non-nil,
+pass the language standard via the `-std' option."
+  :type '(choice (const :tag "Default standard" nil)
+                 (string :tag "Language standard"))
+  :safe #'stringp
+  :package-version '(flycheck . "0.20"))
+
+(flycheck-def-option-var flycheck-gnat-include-path nil ada-gcc
+  "A list of include directories for GCC Ada.
+
+The value of this variable is a list of strings, where each
+string is a directory to add to the include path of gcc.
+Relative paths are relative to the file being checked."
+  :type '(repeat (directory :tag "Include directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.20"))
+
+(flycheck-define-checker ada-gcc
+  "An Ada syntax checker using GCC.
+
+Uses GCC's Ada compiler gnat. See URL `https://gcc.gnu.org/'."
+  :command ("gnat"
+            "compile"
+            (eval (concat "-gnat" flycheck-gnat-language-standard))
+            "-fsyntax-only"
+            "-fshow-column"
+            "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
+            "-fno-diagnostics-show-option" ; Do not show the corresponding
+                                        ; warning group
+            (option-list "-gnat" flycheck-gnat-warnings concat)
+            (option-list "-I" flycheck-gnat-include-path concat)
+            ;; We must stay in the same directory, to properly resolve #include
+            ;; with quotes
+            source-inplace)
+  :error-patterns
+  ((error line-start
+          (message "In file included from") " " (file-name) ":" line ":"
+          column ":"
+          line-end)
+   (info line-start (file-name) ":" line ":" column
+         ": note: " (message) line-end)
+   (warning line-start (file-name) ":" line ":" column
+            ": warning: " (message) line-end)
+   (error line-start (file-name) ":" line ":" column ;no specific error prefix in Ada
+          ": " (message) line-end))
+  :modes (ada-mode))
+
+(flycheck-def-option-var flycheck-gcc-gfortran-include-path nil fortran-gcc
+  "A list of include directories for GCC Fortran.
+
+The value of this variable is a list of strings, where each
+string is a directory to add to the include path of gcc.
+Relative paths are relative to the file being checked."
+  :type '(repeat (directory :tag "Include directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.20"))
+
+(flycheck-def-option-var flycheck-gfortran-language-standard "f95" fortran-gcc
+  "The language standard to use in GCC Fortran compiler gfortran.
+
+The value of this variable is either a string denoting a language
+standard, or nil, to use the default standard.  When non-nil,
+pass the language standard via the `-gnat' option."
+  :type '(choice (const :tag "Default standard" nil)
+                 (string :tag "Language standard"))
+  :safe #'stringp
+  :package-version '(flycheck . "0.20"))
+
+(flycheck-def-option-var flycheck-gcc-gfortran-warnings '("all" "extra") fortran-gcc
+  "A list of additional warnings to enable in gfortran.
+
+The value of this variable is a list of strings, where each string
+is the name of a warning category to enable.  By default, all
+recommended warnings and some extra warnings are enabled (as by
+`-Wall' and `-Wextra' respectively).
+
+Refer to the gcc manual at URL
+`https://gcc.gnu.org/onlinedocs/gcc/' for more information about
+warnings."
+  :type '(choice (const :tag "No additional warnings" nil)
+                 (repeat :tag "Additional warnings"
+                         (string :tag "Warning name")))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.20"))
+
+(flycheck-define-checker fortran-gcc
+  "An Fortran syntax checker using GCC.
+
+Uses GCC's Fortran compiler gfortran.  See URL `https://gcc.gnu.org/'."
+  :command ("gfortran"
+            (option "-std=" flycheck-gfortran-language-standard)
+            "-fsyntax-only"
+            "-fshow-column"
+            "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
+            "-fno-diagnostics-show-option" ; Do not show the corresponding
+                                        ; warning group
+            (option-list "-W" flycheck-gcc-gfortran-warnings concat)
+            (option-list "-I" flycheck-gcc-gfortran-include-path)
+            ;; We must stay in the same directory, to properly resolve #include
+            ;; with quotes
+            source-inplace)
+  :error-patterns
+  ((error line-start (file-name) ":" line "." column ":\n"
+          (= 3 (zero-or-more not-newline) "\n")
+          (or "Error" "Fatal Error") ": " (message) line-end)
+   (warning line-start (file-name) ":" line "." column ":\n"
+            (= 3 (zero-or-more not-newline) "\n")
+            "Warning: " (message) line-end))
+  :modes (fortran-mode f90-mode))
 
 (flycheck-def-option-var flycheck-cppcheck-checks '("style") c/c++-cppcheck
   "Enabled checks for Cppcheck.
