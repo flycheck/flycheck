@@ -527,7 +527,7 @@ Scala
 .. flyc-checker:: scala
    :auto:
 
-.. flyc-checker:: scalastyle
+.. flyc-checker:: scala-scalastyle
    :auto:
 
    .. rubric:: Options

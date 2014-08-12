@@ -227,7 +227,7 @@ attention to case differences."
     rust
     sass
     scala
-    scalastyle
+    scala-scalastyle
     scss
     sh-bash
     sh-posix-dash
@@ -5943,19 +5943,22 @@ See URL `http://www.scala-lang.org/'."
   :error-patterns
   ((error line-start (file-name) ":" line ": error: " (message) line-end))
   :modes scala-mode
-  :next-checkers ((warnings-only . scalastyle)))
+  :next-checkers ((warnings-only . scala-scalastyle)))
 
-(flycheck-def-config-file-var flycheck-scalastylerc scalastyle nil
+(flycheck-def-config-file-var flycheck-scalastylerc scala-scalastyle nil
   :safe #'stringp
   :package-version '(flycheck . "0.20"))
 
-(flycheck-def-option-var flycheck-scalastyle-jar nil scalastyle
-  "The JAR file which implements scalastyle"
+(flycheck-def-option-var flycheck-scalastyle-jar nil scala-scalastyle
+  "The path to the main JAR file of Scalastyle.
+
+If this option is nil, or points to a non-existing file,
+`scala-scalastyle' can not be used."
   :type '(file :must-match t)
   :safe #'stringp
   :package-version '(flycheck . "0.20"))
 
-(flycheck-define-checker scalastyle
+(flycheck-define-checker scala-scalastyle
   "A Scala style checker using scalastyle.
 
 Note that this syntax checker is not used if
@@ -5979,7 +5982,7 @@ See URL `http://www.scalastyle.org'."
   (lambda () (and flycheck-scalastyle-jar flycheck-scalastylerc
                   (file-exists-p flycheck-scalastyle-jar)
                   (file-exists-p (flycheck-locate-config-file
-                                  flycheck-scalastylerc 'scalastyle)))))
+                                  flycheck-scalastylerc 'scala-scalastyle)))))
 
 (flycheck-def-option-var flycheck-scss-compass nil scss
   "Whether to enable the Compass CSS framework.
