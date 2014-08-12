@@ -2437,7 +2437,14 @@ _NAME is ignored."
   (format "*Flycheck %s*" (buffer-file-name)))
 
 (defun flycheck-compile (checker)
-  "Run CHECKER as in `compile'."
+  "Run CHECKER via `compile'.
+
+CHECKER must be a valid syntax checker.  Interactively, prompt
+for a syntax checker to run.
+
+Instead of highlighting errors in the buffer, this command pops
+up a separate buffer with the entire output of the syntax checker
+tool, just like `compile' (\\[compile])."
   (interactive
    (list (read-flycheck-checker "Run syntax checker as compile command: "
                                 (or flycheck-checker flycheck-last-checker))))
