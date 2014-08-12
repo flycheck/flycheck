@@ -3232,6 +3232,30 @@ of the file will be interrupted because there are too many #ifdef configurations
 (defvar js3-mode-show-parse-errors)
 (defvar python-indent-guess-indent-offset)
 
+(ert-deftest flycheck-define-checker/ada-gnat-syntax-error ()
+  :tags '(builtin-checker external-tool language-ada)
+  (skip-unless (flycheck-check-executable 'ada-gnat))
+  (flycheck-test-should-syntax-check
+   "checkers/ada/syntaxerror.adb" 'ada-mode
+   '(7  32 error "missing \";\"" :checker ada-gnat)
+   '(8 5 error "misspelling of \"SYNTAXERROR\"" :checker ada-gnat)))
+
+(ert-deftest flycheck-define-checker/ada-gnat-warnings ()
+  :tags '(builtin-checker external-tool language-ada)
+  (skip-unless (flycheck-check-executable 'ada-gnat))
+  (flycheck-test-should-syntax-check
+   "checkers/ada/hello.adb" 'ada-mode
+   '(   6 4 warning "variable \"Name\" is not referenced" :checker ada-gnat)
+   '(8  11 warning "unrecognized pragma \"Foo\"" :checker ada-gnat)))
+
+(ert-deftest flycheck-define-checker/ada-gnat-disable-warnings ()
+  :tags '(builtin-checker external-tool language-ada)
+  (skip-unless (flycheck-check-executable 'ada-gnat))
+  (let ((flycheck-gnat-warnings nil))
+    (flycheck-test-should-syntax-check
+     "checkers/ada/hello.adb" 'ada-mode
+     '(8  11 warning "unrecognized pragma \"Foo\"" :checker ada-gnat))))
+
 (ert-deftest flycheck-define-checker/asciidoc ()
   :tags '(builtin-checker external-tool language-asciidoc)
   (skip-unless (flycheck-check-executable 'asciidoc))
