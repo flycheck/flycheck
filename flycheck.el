@@ -173,7 +173,8 @@ attention to case differences."
   :link '(info-link "(flycheck)Error reporting"))
 
 (defcustom flycheck-checkers
-  '(asciidoc
+  '(ada-gnat
+    asciidoc
     c/c++-clang
     c/c++-gcc
     c/c++-cppcheck
@@ -4147,6 +4148,70 @@ variable symbol for a syntax checker."
 
 
 ;;; Built-in checkers
+(flycheck-def-option-var flycheck-gnat-include-path nil ada-gnat
+  "A list of include directories for GNAT.
+
+The value of this variable is a list of strings, where each
+string is a directory to add to the include path of gcc.
+Relative paths are relative to the file being checked."
+  :type '(repeat (directory :tag "Include directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.20"))
+
+(flycheck-def-option-var flycheck-gnat-language-standard "2012" ada-gnat
+  "The language standard to use in GNAT.
+
+The value of this variable is either a string denoting a language
+standard, or nil, to use the default standard. When non-nil, pass
+the language standard via the `-std' option."
+  :type '(choice (const :tag "Default standard" nil)
+                 (string :tag "Language standard"))
+  :safe #'stringp
+  :package-version '(flycheck . "0.20"))
+
+(flycheck-def-option-var flycheck-gnat-warnings
+    '("wa") ada-gnat
+  "A list of additional Ada warnings to enable in GNAT.
+
+The value of this variable is a list of strings, where each
+string is the name of a warning category to enable. By default,
+most optional warnings are recommended, as in `-gnata'.
+
+Refer to Info Node `(gnat_ugn_unw)Warning Message Control' for
+more information about GNAT warnings."
+  :type '(repeat :tag "Warnings" (string :tag "Warning name"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.20"))
+
+(flycheck-define-checker ada-gnat
+  "An Ada syntax checker using GNAT.
+
+Uses the GNAT compiler from GCC.  See URL
+`https://gcc.gnu.org/onlinedocs/gnat_ugn_unw/'."
+  :command ("gnatmake"
+            "-c"                        ; Just compile, don't bind
+            "-f"                        ; Force re-compilation
+            "-u"                        ; Compile the main file only
+            "-gnatf"                    ; Full error information
+            "-gnatef"                   ; Full source file name
+            "-D" temporary-directory
+            (option-list "-gnat" flycheck-gnat-warnings concat)
+            (option-list "-I" flycheck-gnat-include-path concat)
+            (option "-gnat" flycheck-gnat-language-standard concat)
+            source)
+  :error-patterns
+  ((error line-start
+          (message "In file included from") " " (file-name) ":" line ":"
+          column ":"
+          line-end)
+   (info line-start (file-name) ":" line ":" column
+         ": note: " (message) line-end)
+   (warning line-start (file-name) ":" line ":" column
+            ": warning: " (message) line-end)
+   (error line-start (file-name) ":" line ":" column ;no specific error prefix in Ada
+          ": " (message) line-end))
+  :modes (ada-mode))
+
 (flycheck-define-checker asciidoc
   "A AsciiDoc syntax checker using the AsciiDoc compiler.
 

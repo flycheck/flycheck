@@ -21,6 +21,23 @@ a syntax checker.
 .. contents:: Supported languages
    :local:
 
+Ada
+===
+
+.. flyc-checker:: ada-gnat
+   :auto:
+
+   .. rubric:: Options
+
+   .. option:: flycheck-gnat-include-path
+      :auto:
+
+   .. option:: flycheck-gnat-language-standard
+      :auto:
+
+   .. option:: flycheck-gnat-warnings
+      :auto:
+
 AsciiDoc
 ========
 
