@@ -4362,7 +4362,7 @@ Uses GCC's Ada compiler gnat. See URL `https://gcc.gnu.org/'."
             "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
             "-fno-diagnostics-show-option" ; Do not show the corresponding
                                         ; warning group
-            (option-list "-gnat" flycheck-gnat-warnings s-prepend)
+            (option-list "-gnat" flycheck-gnat-warnings concat)
             (option-list "-I" flycheck-gnat-include-path concat)
             ;; We must stay in the same directory, to properly resolve #include
             ;; with quotes
@@ -4429,7 +4429,7 @@ Uses GCC's Fortran compiler gfortran.  See URL `https://gcc.gnu.org/'."
             "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
             "-fno-diagnostics-show-option" ; Do not show the corresponding
                                         ; warning group
-            (option-list "-W" flycheck-gcc-gfortran-warnings s-prepend)
+            (option-list "-W" flycheck-gcc-gfortran-warnings concat)
             (option-list "-I" flycheck-gcc-gfortran-include-path)
             ;; We must stay in the same directory, to properly resolve #include
             ;; with quotes
