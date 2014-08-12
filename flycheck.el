@@ -4268,6 +4268,21 @@ information about warnings."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.14"))
 
+(defun flycheck-c/c++-quoted-include-directory ()
+  "Get the directory for quoted includes.
+
+C/C++ compiles typicall look up includes with quotation marks in
+the directory of the file being compiled.  However, since
+Flycheck uses temporary copies for syntax checking, it needs to
+explicitly determine the directory for quoted includes.
+
+This function determines the directory by looking at
+`buffer-file-name', or if that is nil, at `default-directory'."
+  (-if-let (fn (buffer-file-name))
+      (file-name-directory fn)
+    ;; If the buffer has no file name, fall back to its default directory
+    default-directory))
+
 (flycheck-define-checker c/c++-clang
   "A C/C++ syntax checker using Clang.
 
@@ -4279,6 +4294,7 @@ See URL `http://clang.llvm.org/'."
                                         ; location
             "-fno-diagnostics-show-option" ; Do not show the corresponding
                                         ; warning group
+            "-iquote" (eval (flycheck-c/c++-quoted-include-directory))
             (option "-std=" flycheck-clang-language-standard concat)
             (option "-stdlib=" flycheck-clang-standard-library concat)
             (option-flag "-fms-extensions" flycheck-clang-ms-extensions)
@@ -4293,9 +4309,7 @@ See URL `http://clang.llvm.org/'."
                   (pcase major-mode
                     (`c++-mode "c++")
                     (`c-mode "c")))
-            ;; We must stay in the same directory, to properly resolve #include
-            ;; with quotes
-            source-inplace)
+            source)
   :error-patterns
   ((error line-start
           (message "In file included from") " " (file-name) ":" line ":"
@@ -4398,6 +4412,7 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
             "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
             "-fno-diagnostics-show-option" ; Do not show the corresponding
                                         ; warning group
+            "-iquote" (eval (flycheck-c/c++-quoted-include-directory))
             (option "-std=" flycheck-gcc-language-standard concat)
             (option-flag "-fno-exceptions" flycheck-gcc-no-exceptions)
             (option-flag "-fno-rtti" flycheck-gcc-no-rtti)
@@ -4409,9 +4424,7 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
                   (pcase major-mode
                     (`c++-mode "c++")
                     (`c-mode "c")))
-            ;; We must stay in the same directory, to properly resolve #include
-            ;; with quotes
-            source-inplace)
+            source)
   :error-patterns
   ((error line-start
           (message "In file included from") " " (file-name) ":" line ":"
@@ -4908,19 +4921,19 @@ about warnings")
 Uses GCC's Fortran compiler gfortran.  See URL
 `https://gcc.gnu.org/onlinedocs/gfortran/'."
   :command ("gfortran"
-            (option "-std=" flycheck-gfortran-language-standard concat)
-            (option "-f" flycheck-gfortran-layout concat
-                    flycheck-option-gfortran-layout)
             "-fsyntax-only"
             "-fshow-column"
             "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
             "-fno-diagnostics-show-option" ; Do not show the corresponding
                                         ; warning group
+            ;; Fortran has similar include processing as C/C++
+            "-iquote" (eval (flycheck-c/c++-quoted-include-directory))
+            (option "-std=" flycheck-gfortran-language-standard concat)
+            (option "-f" flycheck-gfortran-layout concat
+                    flycheck-option-gfortran-layout)
             (option-list "-W" flycheck-gfortran-warnings concat)
             (option-list "-I" flycheck-gfortran-include-path concat)
-            ;; We must stay in the same directory, to properly resolve #include
-            ;; with quotes
-            source-inplace)
+            source)
   :error-patterns
   ((error line-start (file-name) ":" line "." column ":\n"
           (= 3 (zero-or-more not-newline) "\n")
