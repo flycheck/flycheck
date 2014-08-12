@@ -138,7 +138,7 @@ Miscellaneous fixes
 Flycheck now properly unloads with `unload-feature`.
 
 The :flyc-checker:`emacs-lisp` checker does not longer choke when
-`package-initialize` signals an error.x
+`package-initialize` signals an error.
 
 Get it
 ======
