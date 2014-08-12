@@ -17,6 +17,7 @@ master (in development)
   - C/C++ with GCC [GH-408]
   - Scala with scalastyle [GH-425]
   - Fortran with GFortran [GH-414] [GH-450]
+  - Ada with GNAT [GH-414] [GH-457]
 
 - New features:
 

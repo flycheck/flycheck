@@ -40,7 +40,8 @@ greatly appreciated.
   logo.
 - `Mitch Tishmack`_ added support for Microsoft extensions to the Clang syntax
   checker.
-- `Per Nordlöw`_ contributed a syntax checker for Fortran using gfortran.
+- `Per Nordlöw`_ contributed a syntax checker for Fortran using GFortran, and
+  helped to shape an Ada syntax checker with GNAT.
 - `Peter Vasil`_ contributed syntax checkers for XML, Lua and Go (using `go
   build` and `go test`), added unit tests and did valuable testing.
 - `Robert Dallas Gray`_ made error display customizable with
