@@ -452,7 +452,7 @@ The following events are known:
 `mode-enabled'
      Check syntax immediately when `flycheck-mode' is enabled.
 
-Flycheck performs a syntax checks only on evens, which are
+Flycheck performs a syntax checks only on events, which are
 contained in this list.  For instance, if the value of this
 variable is `(mode-enabled save)', Flycheck will only check if
 the mode is enabled or the buffer was saved, but never after

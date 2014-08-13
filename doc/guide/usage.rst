@@ -315,12 +315,12 @@ Errors and warnings from a syntax checker are
 
       The default faces provided by GNU Emacs are ill-suited to highlight errors
       because these are relatively pale and do not specify a background color or
-      underline.  Hence highlights are easily overlook and even **invisible**
+      underline.  Hence highlights are easy to overlook and even **invisible**
       for white space.
 
-   For best error highlighting customize these faces, or choose a color
-   theme that has reasonable Flycheck faces.  For instance, the Solarized_ and
-   Zenburn_ themes are known to have good Flycheck faces.
+   For best error highlighting customize these faces, or choose a color theme
+   that has reasonable Flycheck faces.  The popular Solarized_ and Zenburn_
+   themes are known to have good Flycheck faces.
 
 .. option:: flycheck-highlighting-mode
    :auto:
