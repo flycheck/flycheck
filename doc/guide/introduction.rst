@@ -47,6 +47,8 @@ The following extensions provide additional cool features for Flycheck:
   hdevtools_.
 - flycheck-mercury_ adds a Flycheck syntax checker for the `Mercury Language`_.
 - flycheck-pos-tip_ shows Flycheck error messages in a popup.
+- flycheck-rust_ improves Rust support in Flycheck, by configuring Flycheck
+  according to Cargo settings and layouts.
 
 .. _flycheck-cask: https://github.com/flycheck/flycheck-cask
 .. _Cask: https://github.com/cask/cask
@@ -59,3 +61,4 @@ The following extensions provide additional cool features for Flycheck:
 .. _flycheck-mercury: https://github.com/flycheck/flycheck-mercury
 .. _Mercury language: http://mercurylang.org/
 .. _flycheck-pos-tip: https://github.com/flycheck/flycheck-pos-tip
+.. _flycheck-rust: https://github.com/flycheck/flycheck-rust
