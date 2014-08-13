@@ -1434,7 +1434,9 @@ FILE-NAME is nil, return `default-directory'."
             (setq base-directory (directory-file-name
                                   (file-name-directory base-directory))))
           (file-name-as-directory base-directory))
-      (if file-name (file-name-directory file-name) default-directory))))
+      (if file-name
+          (file-name-directory file-name)
+        (expand-file-name default-directory)))))
 
 
 ;;; Minibuffer tools
@@ -4581,7 +4583,8 @@ See URL `http://acrmp.github.io/foodcritic/'."
   :predicate
   (lambda ()
     (let ((parent-dir (file-name-directory
-                       (directory-file-name default-directory))))
+                       (directory-file-name
+                        (expand-file-name default-directory)))))
       (or
        ;; Chef CookBook
        ;; http://docs.opscode.com/chef/knife.html#id38
