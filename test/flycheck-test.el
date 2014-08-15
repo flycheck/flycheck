@@ -3342,6 +3342,17 @@ of the file will be interrupted because there are too many #ifdef configurations
      '(10 16 error "use of undeclared identifier 'nullptr'"
           :checker c/c++-clang))))
 
+(ert-deftest flycheck-define-checker/c/c++-clang-error-template ()
+  :tags '(builtin-checker external-tool language-c++)
+  (skip-unless (flycheck-check-executable 'c/c++-clang))
+  (let ((flycheck-disabled-checkers '(c/c++-gcc)))
+    (flycheck-test-should-syntax-check
+     "checkers/c_c++-error-template.cpp" 'c++-mode
+     '(2 20 error "no member named 'bar' in 'A'"
+         :checker c/c++-clang)
+     '(6 19 info "in instantiation of function template specialization 'foo<A>' requested here"
+         :checker c/c++-clang))))
+
 (ert-deftest flycheck-define-checker/c/c++-clang-error-language-standard ()
   :tags '(builtin-checker external-tool language-c++)
   (skip-unless (flycheck-check-executable 'c/c++-clang))
@@ -3510,6 +3521,15 @@ of the file will be interrupted because there are too many #ifdef configurations
           :checker c/c++-gcc)
      '(10 16 error "‘nullptr’ was not declared in this scope"
           :checker c/c++-gcc))))
+
+(ert-deftest flycheck-define-checker/c/c++-gcc-error-template ()
+  :tags '(builtin-checker external-tool language-c++)
+  (skip-unless (flycheck-check-executable 'c/c++-gcc))
+  (let ((flycheck-disabled-checkers '(c/c++-clang)))
+    (flycheck-test-should-syntax-check
+     "checkers/c_c++-error-template.cpp" 'c++-mode
+     '(2 18 error "‘struct A’ has no member named ‘bar’"
+         :checker c/c++-gcc))))
 
 (ert-deftest flycheck-define-checker/c/c++-gcc-error-language-standard ()
   :tags '(builtin-checker external-tool language-c++)

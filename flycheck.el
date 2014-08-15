@@ -4481,7 +4481,6 @@ warnings."
 
 Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
   :command ("gcc"
-            "-fsyntax-only"
             "-fshow-column"
             "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
             "-fno-diagnostics-show-option" ; Do not show the corresponding
@@ -4498,7 +4497,11 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
                   (pcase major-mode
                     (`c++-mode "c++")
                     (`c-mode "c")))
-            source)
+            source
+            ;; GCC performs full checking only when actually compiling, so
+            ;; `-fsyntax-only' is not enough. Just let it generate assembly
+            ;; code.
+            "-S" "-o" (eval null-device))
   :error-patterns
   ((error line-start
           (message "In file included from") " " (file-name) ":" line ":"
