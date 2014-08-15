@@ -5104,7 +5104,7 @@ See URL `http://golang.org/cmd/go/' and URL
   "A Go syntax and type checker using the `go build' command.
 
 See URL `http://golang.org/cmd/go'."
-  :command ("go" "build" "-o" temporary-file-name)
+  :command ("go" "build" "-o" null-device)
   :error-patterns
   ((error line-start (file-name) ":" line ":"
           (optional column ":") " "
@@ -6137,7 +6137,7 @@ See URL `http://www.ctan.org/pkg/lacheck'."
   "A Texinfo syntax checker using makeinfo.
 
 See URL `http://www.gnu.org/software/texinfo/'."
-  :command ("makeinfo" "-o" temporary-file-name source-inplace)
+  :command ("makeinfo" "-o" null-device source-inplace)
   :error-patterns
   ((warning line-start (file-name) ":"
             line (optional ":" column) ": "
