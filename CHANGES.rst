@@ -3,6 +3,10 @@
 master (in development)
 -----------------------
 
+- New features:
+
+  - Add `null-device` symbol for syntax checker commands
+
 - Improvements:
 
   - Improve GCC syntax checking by expanding templates [GH-459]

@@ -20,7 +20,7 @@
 @c %**end of header
 
 @copying
-This manual is for Flycheck version 0.20.
+This manual is for Flycheck version 0.21-cvs.
 
 Copyright @copyright{} 2014, Sebastian Wiesner
 
@@ -334,6 +334,7 @@ Nov 15, 2013 – Flycheck 0.15 released
 
 Changes
 
+* master (in development): master in development. 
 * 0.20 (Aug 12@comma{} 2014): 0 20 Aug 12 2014. 
 * 0.19 (Jun 12@comma{} 2014): 0 19 Jun 12 2014. 
 * 0.18 (Mar 24@comma{} 2014): 0 18 Mar 24 2014. 
@@ -480,10 +481,17 @@ hdevtools@footnote{https://github.com/bitc/hdevtools/}.
 
 @item 
 flycheck-mercury@footnote{https://github.com/flycheck/flycheck-mercury} adds a Flycheck syntax checker for the Mercury Language@footnote{http://mercurylang.org/}.
+
+@item 
+flycheck-pos-tip@footnote{https://github.com/flycheck/flycheck-pos-tip} shows Flycheck error messages in a popup.
+
+@item 
+flycheck-rust@footnote{https://github.com/flycheck/flycheck-rust} improves Rust support in Flycheck, by configuring Flycheck
+according to Cargo settings and layouts.
 @end itemize
 
 @node Flycheck versus Flymake,Installation,Introduction,Top
-@anchor{guide/flycheck-versus-flymake flycheck-versus-flymake}@anchor{d}@anchor{guide/flycheck-versus-flymake doc}@anchor{e}@anchor{guide/flycheck-versus-flymake mercury-language}@anchor{f}@anchor{guide/flycheck-versus-flymake id1}@anchor{10}
+@anchor{guide/flycheck-versus-flymake flycheck-versus-flymake}@anchor{d}@anchor{guide/flycheck-versus-flymake doc}@anchor{e}@anchor{guide/flycheck-versus-flymake flycheck-rust}@anchor{f}@anchor{guide/flycheck-versus-flymake id1}@anchor{10}
 @chapter Flycheck versus Flymake
 
 
@@ -1598,7 +1606,7 @@ The following events are known:
 @code{`mode-enabled'}
      Check syntax immediately when @ref{4e,,`flycheck-mode'} is enabled.
 
-Flycheck performs a syntax checks only on evens, which are
+Flycheck performs a syntax checks only on events, which are
 contained in this list.  For instance, if the value of this
 variable is @code{(mode-enabled save)}, Flycheck will only check if
 the mode is enabled or the buffer was saved, but never after
@@ -2229,14 +2237,14 @@ respectively.
 @quotation Note 
 The default faces provided by GNU Emacs are ill-suited to highlight errors
 because these are relatively pale and do not specify a background color or
-underline.  Hence highlights are easily overlook and even @strong{invisible}
+underline.  Hence highlights are easy to overlook and even @strong{invisible}
 for white space.
 @end quotation
 @end cartouche
 
-For best error highlighting customize these faces, or choose a color
-theme that has reasonable Flycheck faces.  For instance, the Solarized@footnote{https://github.com/bbatsov/solarized-emacs} and
-Zenburn@footnote{https://github.com/bbatsov/zenburn-emacs} themes are known to have good Flycheck faces.
+For best error highlighting customize these faces, or choose a color theme
+that has reasonable Flycheck faces.  The popular Solarized@footnote{https://github.com/bbatsov/solarized-emacs} and Zenburn@footnote{https://github.com/bbatsov/zenburn-emacs}
+themes are known to have good Flycheck faces.
 @end deffn
 
 @geindex flycheck-highlighting-mode; Emacs Lisp user option
@@ -6975,6 +6983,18 @@ STRING
      Return a unique temporary filename.  The file is *not*
      created.
 
+     To ignore the output of syntax checkers, try @code{`null-device'}
+     first.
+
+@code{`null-device'}
+     Return the value of @code{`null-device'}, i.e the system null
+     device.
+
+     Use this option to ignore the output of a syntax checker.
+     If the syntax checker cannot handle the null device, or
+     won't write to an existing file, try @code{`temporary-file-name'}
+     instead.
+
 @code{(config-file OPTION VARIABLE [PREPEND-FN])}
      Search the configuration file bound to VARIABLE with
      @ref{182,,`flycheck-locate-config-file'} and return a list of arguments
@@ -7408,7 +7428,7 @@ severity used for sorting, with @code{:severity}.
 Flycheck now properly unloads with @code{unload-feature}.
 
 The @ref{bd,,emacs-lisp} checker does not longer choke when
-@code{package-initialize} signals an error.x
+@code{package-initialize} signals an error.
 
 @node Get it,,Miscellaneous fixes,Aug 12 2014 — Flycheck 0 20 released
 @anchor{news/flycheck-0 20-released get-it}@anchor{19c}
@@ -8215,6 +8235,7 @@ See @ref{30,,Installation}.
 
 
 @menu
+* master (in development): master in development. 
 * 0.20 (Aug 12@comma{} 2014): 0 20 Aug 12 2014. 
 * 0.19 (Jun 12@comma{} 2014): 0 19 Jun 12 2014. 
 * 0.18 (Mar 24@comma{} 2014): 0 18 Mar 24 2014. 
@@ -8241,8 +8262,48 @@ See @ref{30,,Installation}.
 
 @end menu
 
-@node 0 20 Aug 12 2014,0 19 Jun 12 2014,,Changes
-@anchor{changes aug-12-2014}@anchor{1d7}
+@node master in development,0 20 Aug 12 2014,,Changes
+@anchor{changes master-in-development}@anchor{1d7}
+@section master (in development)
+
+
+
+@itemize -
+
+@item 
+New features:
+
+
+@itemize -
+
+@item 
+Add @code{null-device} symbol for syntax checker commands
+@end itemize
+
+@item 
+Improvements:
+
+
+@itemize -
+
+@item 
+Improve GCC syntax checking by expanding templates [GH-459]@footnote{https://github.com/flycheck/flycheck/issues/459}
+@end itemize
+
+@item 
+Bug fixes:
+
+
+@itemize -
+
+@item 
+Expand @code{default-directory} before using it, to handle abbreviated paths
+gracefully [GH-434]@footnote{https://github.com/flycheck/flycheck/issues/434}
+@end itemize
+@end itemize
+
+@node 0 20 Aug 12 2014,0 19 Jun 12 2014,master in development,Changes
+@anchor{changes aug-12-2014}@anchor{1d8}
 @section 0.20 (Aug 12, 2014)
 
 
@@ -8408,7 +8469,7 @@ Remove dependencies on f.el and s.el
 @end itemize
 
 @node 0 19 Jun 12 2014,0 18 Mar 24 2014,0 20 Aug 12 2014,Changes
-@anchor{changes jun-12-2014}@anchor{1d8}
+@anchor{changes jun-12-2014}@anchor{1d9}
 @section 0.19 (Jun 12, 2014)
 
 
@@ -8510,7 +8571,7 @@ Do not signal errors in Go Mode, when @code{go} is not available
 @end itemize
 
 @node 0 18 Mar 24 2014,0 17 Feb 1 2014,0 19 Jun 12 2014,Changes
-@anchor{changes mar-24-2014}@anchor{1d9}
+@anchor{changes mar-24-2014}@anchor{1da}
 @section 0.18 (Mar 24, 2014)
 
 
@@ -8611,7 +8672,7 @@ Flycheck now handles Clang errors from included files [GH-367]@footnote{https://
 @end itemize
 
 @node 0 17 Feb 1 2014,0 16 Jan 11 2014,0 18 Mar 24 2014,Changes
-@anchor{changes feb-1-2014}@anchor{1da}
+@anchor{changes feb-1-2014}@anchor{1db}
 @section 0.17 (Feb 1, 2014)
 
 
@@ -8702,7 +8763,7 @@ avoid unintended side effects [GH-319]@footnote{https://github.com/flycheck/flyc
 @end itemize
 
 @node 0 16 Jan 11 2014,0 15 Nov 15 2013,0 17 Feb 1 2014,Changes
-@anchor{changes sphinx}@anchor{1db}@anchor{changes jan-11-2014}@anchor{1dc}
+@anchor{changes sphinx}@anchor{1dc}@anchor{changes jan-11-2014}@anchor{1dd}
 @section 0.16 (Jan 11, 2014)
 
 
@@ -8849,7 +8910,7 @@ Fix parsing of errors in @code{scss} and @code{sass}
 @end itemize
 
 @node 0 15 Nov 15 2013,0 14 1 Aug 16 2013,0 16 Jan 11 2014,Changes
-@anchor{changes nov-15-2013}@anchor{1dd}@anchor{changes flycheck-hdevtools}@anchor{1de}
+@anchor{changes nov-15-2013}@anchor{1de}@anchor{changes flycheck-hdevtools}@anchor{1df}
 @section 0.15 (Nov 15, 2013)
 
 
@@ -9031,7 +9092,7 @@ Fix Cppcheck parsing with the built-in Emacs XML parser [GH-263]@footnote{https:
 @end itemize
 
 @node 0 14 1 Aug 16 2013,0 14 Aug 15 2013,0 15 Nov 15 2013,Changes
-@anchor{changes grizzl}@anchor{1df}@anchor{changes aug-16-2013}@anchor{1e0}
+@anchor{changes grizzl}@anchor{1e0}@anchor{changes aug-16-2013}@anchor{1e1}
 @section 0.14.1 (Aug 16, 2013)
 
 
@@ -9050,7 +9111,7 @@ Add a missing dependency [GH-194]@footnote{https://github.com/flycheck/flycheck/
 @end itemize
 
 @node 0 14 Aug 15 2013,0 13 Jun 28 2013,0 14 1 Aug 16 2013,Changes
-@anchor{changes aug-15-2013}@anchor{1e1}
+@anchor{changes aug-15-2013}@anchor{1e2}
 @section 0.14 (Aug 15, 2013)
 
 
@@ -9191,7 +9252,7 @@ Correctly parse output of @code{pylint} 1.0 [GH-184]@footnote{https://github.com
 @end itemize
 
 @node 0 13 Jun 28 2013,0 12 May 18 2013,0 14 Aug 15 2013,Changes
-@anchor{changes jun-28-2013}@anchor{1e2}
+@anchor{changes jun-28-2013}@anchor{1e3}
 @section 0.13 (Jun 28, 2013)
 
 
@@ -9313,7 +9374,7 @@ Fix version information on Emacs trunk builds
 @end itemize
 
 @node 0 12 May 18 2013,0 11 May 01 2013,0 13 Jun 28 2013,Changes
-@anchor{changes may-18-2013}@anchor{1e3}
+@anchor{changes may-18-2013}@anchor{1e4}
 @section 0.12 (May 18, 2013)
 
 
@@ -9377,7 +9438,7 @@ Correctly parse syntax errors from JRuby [GH-136]@footnote{https://github.com/fl
 @end itemize
 
 @node 0 11 May 01 2013,0 10 Apr 21 2013,0 12 May 18 2013,Changes
-@anchor{changes may-01-2013}@anchor{1e4}
+@anchor{changes may-01-2013}@anchor{1e5}
 @section 0.11 (May 01, 2013)
 
 
@@ -9445,7 +9506,7 @@ Add missing customization group for syntax checker options
 @end itemize
 
 @node 0 10 Apr 21 2013,0 9 Apr 13 2013,0 11 May 01 2013,Changes
-@anchor{changes apr-21-2013}@anchor{1e5}@anchor{changes projectile}@anchor{1e6}
+@anchor{changes apr-21-2013}@anchor{1e6}@anchor{changes projectile}@anchor{1e7}
 @section 0.10 (Apr 21, 2013)
 
 
@@ -9541,7 +9602,7 @@ Use a hopefully more reliable way to parse output of PHP CodeSniffer
 @end itemize
 
 @node 0 9 Apr 13 2013,0 8 Apr 9 2013,0 10 Apr 21 2013,Changes
-@anchor{changes apr-13-2013}@anchor{1e7}@anchor{changes google-this}@anchor{1e8}
+@anchor{changes apr-13-2013}@anchor{1e8}@anchor{changes google-this}@anchor{1e9}
 @section 0.9 (Apr 13, 2013)
 
 
@@ -9576,7 +9637,7 @@ Quit the error message window when navigating away from error locations
 @end itemize
 
 @node 0 8 Apr 9 2013,0 7 1 Feb 23 2013,0 9 Apr 13 2013,Changes
-@anchor{changes apr-9-2013}@anchor{1e9}
+@anchor{changes apr-9-2013}@anchor{1ea}
 @section 0.8 (Apr 9, 2013)
 
 
@@ -9649,7 +9710,7 @@ Improve highlighting to reduce screen flickering [GH-100]@footnote{https://githu
 @end itemize
 
 @node 0 7 1 Feb 23 2013,0 7 Feb 14 2013,0 8 Apr 9 2013,Changes
-@anchor{changes feb-23-2013}@anchor{1ea}
+@anchor{changes feb-23-2013}@anchor{1eb}
 @section 0.7.1 (Feb 23, 2013)
 
 
@@ -9690,7 +9751,7 @@ Add support for evaluating Lisp forms in syntax checker commands [GH-86]@footnot
 @end itemize
 
 @node 0 7 Feb 14 2013,0 6 1 Jan 30 2013,0 7 1 Feb 23 2013,Changes
-@anchor{changes feb-14-2013}@anchor{1eb}
+@anchor{changes feb-14-2013}@anchor{1ec}
 @section 0.7 (Feb 14, 2013)
 
 
@@ -9747,7 +9808,7 @@ Fix infinite recursion on Windows [GH-81]@footnote{https://github.com/flycheck/f
 @end itemize
 
 @node 0 6 1 Jan 30 2013,0 6 Jan 29 2013,0 7 Feb 14 2013,Changes
-@anchor{changes jan-30-2013}@anchor{1ec}
+@anchor{changes jan-30-2013}@anchor{1ed}
 @section 0.6.1 (Jan 30, 2013)
 
 
@@ -9759,7 +9820,7 @@ Fix package dependencies
 @end itemize
 
 @node 0 6 Jan 29 2013,0 5 Dec 28 2012,0 6 1 Jan 30 2013,Changes
-@anchor{changes jan-29-2013}@anchor{1ed}
+@anchor{changes jan-29-2013}@anchor{1ee}
 @section 0.6 (Jan 29, 2013)
 
 
@@ -9882,7 +9943,7 @@ Add an error parser for Checkstyle-like XML output [GH-38]@footnote{https://gith
 @end itemize
 
 @node 0 5 Dec 28 2012,0 4 Nov 21 2012,0 6 Jan 29 2013,Changes
-@anchor{changes dec-28-2012}@anchor{1ee}
+@anchor{changes dec-28-2012}@anchor{1ef}
 @section 0.5 (Dec 28, 2012)
 
 
@@ -9958,7 +10019,7 @@ Replace underlying Flymake API with a custom syntax checking implementation
 @end itemize
 
 @node 0 4 Nov 21 2012,0 3 Nov 21 2012,0 5 Dec 28 2012,Changes
-@anchor{changes nov-21-2012}@anchor{1ef}@anchor{changes flymake-cursor}@anchor{1f0}
+@anchor{changes nov-21-2012}@anchor{1f0}@anchor{changes flymake-cursor}@anchor{1f1}
 @section 0.4 (Nov 21, 2012)
 
 
@@ -10005,7 +10066,7 @@ Fix type error when checking compressed Emacs Lisp [GH-10]@footnote{https://gith
 @end itemize
 
 @node 0 3 Nov 21 2012,0 2 Oct 25 2012,0 4 Nov 21 2012,Changes
-@anchor{changes id2}@anchor{1f1}
+@anchor{changes id2}@anchor{1f2}
 @section 0.3 (Nov 21, 2012)
 
 
@@ -10017,7 +10078,7 @@ Replace @code{flymake-mode} with a custom syntax checking minor mode [GH-4]@foot
 @end itemize
 
 @node 0 2 Oct 25 2012,0 1 Oct 11 2012,0 3 Nov 21 2012,Changes
-@anchor{changes oct-25-2012}@anchor{1f2}
+@anchor{changes oct-25-2012}@anchor{1f3}
 @section 0.2 (Oct 25, 2012)
 
 
@@ -10046,7 +10107,7 @@ Simplify syntax checker declarations [GH-2]@footnote{https://github.com/flycheck
 @end itemize
 
 @node 0 1 Oct 11 2012,,0 2 Oct 25 2012,Changes
-@anchor{changes oct-11-2012}@anchor{1f3}
+@anchor{changes oct-11-2012}@anchor{1f4}
 @section 0.1 (Oct 11, 2012)
 
 
@@ -10082,7 +10143,7 @@ Emacs Lisp
 @end itemize
 
 @node Contribution guidelines,Testing Flycheck,Changes,Top
-@anchor{contrib/guidelines doc}@anchor{1f4}@anchor{contrib/guidelines contribution-guidelines}@anchor{1f5}
+@anchor{contrib/guidelines doc}@anchor{1f5}@anchor{contrib/guidelines contribution-guidelines}@anchor{1f6}
 @chapter Contribution guidelines
 
 
@@ -10097,7 +10158,7 @@ guidelines.
 @end menu
 
 @node Reporting issues,Contributing code,,Contribution guidelines
-@anchor{contrib/guidelines id1}@anchor{1f6}@anchor{contrib/guidelines reporting-issues}@anchor{88}
+@anchor{contrib/guidelines id1}@anchor{1f7}@anchor{contrib/guidelines reporting-issues}@anchor{88}
 @section Reporting issues
 
 
@@ -10122,7 +10183,7 @@ complete sentences.
 @end itemize
 
 @node Contributing code,,Reporting issues,Contribution guidelines
-@anchor{contrib/guidelines id2}@anchor{1f7}@anchor{contrib/guidelines contributing-code}@anchor{1f8}
+@anchor{contrib/guidelines id2}@anchor{1f8}@anchor{contrib/guidelines contributing-code}@anchor{1f9}
 @section Contributing code
 
 
@@ -10139,7 +10200,7 @@ welcome, but please respect the following guidelines.
 @end menu
 
 @node General,Code style,,Contributing code
-@anchor{contrib/guidelines general}@anchor{1f9}
+@anchor{contrib/guidelines general}@anchor{1fa}
 @subsection General
 
 
@@ -10154,7 +10215,7 @@ Provide use cases and rationale for new features.
 @end itemize
 
 @node Code style,Commit messages,General,Contributing code
-@anchor{contrib/guidelines code-style}@anchor{1fa}
+@anchor{contrib/guidelines code-style}@anchor{1fb}
 @subsection Code style
 
 
@@ -10177,7 +10238,7 @@ Flycheck, just make sure that your code has no Flycheck warnings.
 @end itemize
 
 @node Commit messages,Contributing syntax checkers,Code style,Contributing code
-@anchor{contrib/guidelines commit-messages}@anchor{1fb}
+@anchor{contrib/guidelines commit-messages}@anchor{1fc}
 @subsection Commit messages
 
 
@@ -10237,7 +10298,7 @@ Git Commit Mode@footnote{https://github.com/magit/git-modes/} and Magit@footnote
 which helps you to comply to these guidelines.
 
 @node Contributing syntax checkers,Pull requests,Commit messages,Contributing code
-@anchor{contrib/guidelines contributing-syntax-checkers}@anchor{144}@anchor{contrib/guidelines id3}@anchor{1fc}
+@anchor{contrib/guidelines contributing-syntax-checkers}@anchor{144}@anchor{contrib/guidelines id3}@anchor{1fd}
 @subsection Contributing syntax checkers
 
 
@@ -10270,7 +10331,7 @@ checkers in Flycheck.
 @end cartouche
 
 @node Pull requests,,Contributing syntax checkers,Contributing code
-@anchor{contrib/guidelines id4}@anchor{1fd}@anchor{contrib/guidelines pull-requests}@anchor{1fe}
+@anchor{contrib/guidelines id4}@anchor{1fe}@anchor{contrib/guidelines pull-requests}@anchor{1ff}
 @subsection Pull requests
 
 
@@ -10297,7 +10358,7 @@ Pull requests @strong{must} pass all tests on Travis CI before being merged.
 @end cartouche
 
 @node Testing Flycheck,Writing documentation,Contribution guidelines,Top
-@anchor{contrib/testing testing-flycheck}@anchor{1ff}@anchor{contrib/testing doc}@anchor{200}@anchor{contrib/testing pull-request}@anchor{201}
+@anchor{contrib/testing testing-flycheck}@anchor{200}@anchor{contrib/testing doc}@anchor{201}@anchor{contrib/testing pull-request}@anchor{202}
 @chapter Testing Flycheck
 
 
@@ -10315,7 +10376,7 @@ This document explains how to use this test suite.
 @end menu
 
 @node Test suite layout,Test running,,Testing Flycheck
-@anchor{contrib/testing test-suite-layout}@anchor{202}
+@anchor{contrib/testing test-suite-layout}@anchor{203}
 @section Test suite layout
 
 
@@ -10343,7 +10404,7 @@ selectors from the command line and runs all matching tests.
 @end itemize
 
 @node Test running,Virtual test environment,Test suite layout,Testing Flycheck
-@anchor{contrib/testing test-running}@anchor{203}@anchor{contrib/testing id1}@anchor{204}
+@anchor{contrib/testing test-running}@anchor{204}@anchor{contrib/testing id1}@anchor{205}
 @section Test running
 
 
@@ -10365,7 +10426,7 @@ $ cabal install hlint shellcheck
 @cartouche
 @quotation Note 
 If you'd like to keep your environment clean, use the
-@ref{205,,Virtual test environment} instead.
+@ref{206,,Virtual test environment} instead.
 @end quotation
 @end cartouche
 
@@ -10405,7 +10466,7 @@ Emacs Lisp.
 @end cartouche
 
 @node Virtual test environment,Travis CI,Test running,Testing Flycheck
-@anchor{contrib/testing id2}@anchor{206}@anchor{contrib/testing virtual-test-environment}@anchor{205}
+@anchor{contrib/testing id2}@anchor{207}@anchor{contrib/testing virtual-test-environment}@anchor{206}
 @section Virtual test environment
 
 
@@ -10473,7 +10534,7 @@ $ vagrant ssh
 @end example
 
 This will give you a bash prompt within the VM, on which you can run the tests
-as explained in @ref{203,,Test running}.
+as explained in @ref{204,,Test running}.
 
 To switch between Emacs versions, pass @code{EMACS} to @code{make test}:
 
@@ -10508,11 +10569,11 @@ The VM is provisioned from Ansible playbooks in the @code{playbooks/} sub-direct
 of the top-level source directory.
 
 @node Travis CI,,Virtual test environment,Testing Flycheck
-@anchor{contrib/testing homebrew}@anchor{207}@anchor{contrib/testing travis-ci}@anchor{208}
+@anchor{contrib/testing homebrew}@anchor{208}@anchor{contrib/testing travis-ci}@anchor{209}
 @section Travis CI
 
 
-The entire test suite continuously runs on @ref{208,,Travis CI} after every push, with
+The entire test suite continuously runs on @ref{209,,Travis CI} after every push, with
 the latest Emacs release and a nightly Emacs snapshot.
 
 Travis CI is configured from @code{.travis.yml} in the top-level source directory,
@@ -10523,13 +10584,13 @@ and uses mostly the same playbooks for provisioning.
 Travis CI is the @strong{reference environment} for Flycheck's test suite.  All
 tests @strong{must pass} on Travis CI.
 
-In case Travis CI diverges from the @ref{205,,VM},
+In case Travis CI diverges from the @ref{206,,VM},
 Travis CI is authoritative.
 @end quotation
 @end cartouche
 
 @node Writing documentation,Maintenance tasks,Testing Flycheck,Top
-@anchor{contrib/docs writing-documentation}@anchor{209}@anchor{contrib/docs doc}@anchor{20a}
+@anchor{contrib/docs writing-documentation}@anchor{20a}@anchor{contrib/docs doc}@anchor{20b}
 @chapter Writing documentation
 
 
@@ -10543,7 +10604,7 @@ This document explains how to edit and building the documentation of Flycheck.
 @end menu
 
 @node Build environment setup,Building HTML and Texinfo,,Writing documentation
-@anchor{contrib/docs doc-build-env}@anchor{20b}@anchor{contrib/docs build-environment-setup}@anchor{20c}
+@anchor{contrib/docs doc-build-env}@anchor{20c}@anchor{contrib/docs build-environment-setup}@anchor{20d}
 @section Build environment setup
 
 
@@ -10582,12 +10643,12 @@ $ pip install -r doc/requirements.txt
 Now you are set up to build the documentation.
 
 @node Building HTML and Texinfo,Verifying references,Build environment setup,Writing documentation
-@anchor{contrib/docs building-docs}@anchor{20d}@anchor{contrib/docs building-html-and-texinfo}@anchor{20e}
+@anchor{contrib/docs building-docs}@anchor{20e}@anchor{contrib/docs building-html-and-texinfo}@anchor{20f}
 @section Building HTML and Texinfo
 
 
 First, switch to the virtual environment you created in the
-@ref{20b,,Build environment setup}, and make sure that the requirements are up to date:
+@ref{20c,,Build environment setup}, and make sure that the requirements are up to date:
 
 @example
 $ source ~/.virtualenvs/cask/bin/activate
@@ -10613,7 +10674,7 @@ Flycheck packages.
 @end cartouche
 
 @node Verifying references,,Building HTML and Texinfo,Writing documentation
-@anchor{contrib/docs verifying-references}@anchor{20f}
+@anchor{contrib/docs verifying-references}@anchor{210}
 @section Verifying references
 
 
@@ -10629,7 +10690,7 @@ $ make linkcheck
 @end example
 
 @node Maintenance tasks,Credits,Writing documentation,Top
-@anchor{contrib/maintenance maintenance-tasks}@anchor{210}@anchor{contrib/maintenance doc}@anchor{211}
+@anchor{contrib/maintenance maintenance-tasks}@anchor{211}@anchor{contrib/maintenance doc}@anchor{212}
 @chapter Maintenance tasks
 
 
@@ -10643,7 +10704,7 @@ have to perform under specific circumstances.
 @end menu
 
 @node Rebuilding the Texinfo,Rasterized logo files,,Maintenance tasks
-@anchor{contrib/maintenance rebuilding-the-texinfo}@anchor{212}
+@anchor{contrib/maintenance rebuilding-the-texinfo}@anchor{213}
 @section Rebuilding the Texinfo
 
 
@@ -10658,10 +10719,10 @@ documentation.
 @end cartouche
 
 When making changes to the documentation, you need to rebuild the Texinfo
-version with, by following the @ref{20d,,instructions to build the documentation}.
+version with, by following the @ref{20e,,instructions to build the documentation}.
 
 @node Rasterized logo files,,Rebuilding the Texinfo,Maintenance tasks
-@anchor{contrib/maintenance rasterized-logo-files}@anchor{213}@anchor{contrib/maintenance melpa}@anchor{214}
+@anchor{contrib/maintenance rasterized-logo-files}@anchor{214}@anchor{contrib/maintenance melpa}@anchor{215}
 @section Rasterized logo files
 
 
@@ -10696,7 +10757,7 @@ You need @strong{convert} from ImageMagick@footnote{http://www.imagemagick.org/}
 properly render the logo.
 
 @node Credits,GNU General Public License,Maintenance tasks,Top
-@anchor{credits credits}@anchor{215}@anchor{credits doc}@anchor{216}@anchor{credits inkscape}@anchor{217}
+@anchor{credits credits}@anchor{216}@anchor{credits doc}@anchor{217}@anchor{credits inkscape}@anchor{218}
 @chapter Credits
 
 
@@ -10849,7 +10910,7 @@ somewhat failed attempt at on-the-fly syntax checking.
 @c End:
 
 @node GNU General Public License,GNU Free Documentation License,Credits,Top
-@anchor{gpl gnu-general-public-license}@anchor{218}@anchor{gpl doc}@anchor{219}
+@anchor{gpl gnu-general-public-license}@anchor{219}@anchor{gpl doc}@anchor{21a}
 @chapter GNU General Public License
 
 
@@ -11531,7 +11592,7 @@ Public License instead of this License.  But first, please read
 @end example
 
 @node GNU Free Documentation License,Index,GNU General Public License,Top
-@anchor{fdl doc}@anchor{21a}@anchor{fdl gnu-free-documentation-license}@anchor{21b}
+@anchor{fdl doc}@anchor{21b}@anchor{fdl gnu-free-documentation-license}@anchor{21c}
 @chapter GNU Free Documentation License
 
 
