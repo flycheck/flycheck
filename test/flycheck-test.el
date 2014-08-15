@@ -1258,8 +1258,12 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-command-argument-p/with-symbols ()
   :tags '(definition)
-  (dolist (symbol '(source source-inplace source-original
-                           temporary-directory temporary-file-name))
+  (dolist (symbol '(source
+                    source-inplace
+                    source-original
+                    temporary-directory
+                    temporary-file-name
+                    null-device))
     (should (flycheck-command-argument-p symbol))))
 
 (ert-deftest flycheck-command-argument-p/config-file-with-variable-symbol ()
@@ -1565,6 +1569,11 @@ check with.  ERRORS is the list of expected errors."
         (should (member (directory-file-name (file-name-directory filename))
                         flycheck-temporaries)))
     (mapc #'flycheck-safe-delete flycheck-temporaries)))
+
+(ert-deftest flycheck-substitute-argument/null-device ()
+  :tags '(checker-api)
+  (should (equal (flycheck-substitute-argument 'null-device 'emacs-lisp)
+                 (list null-device))))
 
 (ert-deftest flycheck-substitute-argument/config-file ()
   :tags '(checker-api)
