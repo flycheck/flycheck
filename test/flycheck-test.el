@@ -1546,27 +1546,25 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-substitute-argument/temporary-directory ()
   :tags '(checker-api)
-  (flycheck-test-with-temp-buffer
-    (unwind-protect
-        (let ((dirname (car (flycheck-substitute-argument 'temporary-directory
-                                                          'emacs-lisp))))
-          (should (file-directory-p dirname))
-          (should (string-prefix-p temporary-file-directory dirname)))
-      (mapc #'flycheck-safe-delete flycheck-temporaries))))
+  (unwind-protect
+      (let ((dirname (car (flycheck-substitute-argument 'temporary-directory
+                                                        'emacs-lisp))))
+        (should (file-directory-p dirname))
+        (should (string-prefix-p temporary-file-directory dirname)))
+    (mapc #'flycheck-safe-delete flycheck-temporaries)))
 
 (ert-deftest flycheck-substitute-argument/temporary-filename ()
   :tags '(checker-api)
-  (flycheck-test-with-temp-buffer
-    (unwind-protect
-        (let ((filename (car (flycheck-substitute-argument 'temporary-file-name
-                                                           'emacs-lisp))))
-          ;; The filename should not exist, but it's parent directory should
-          (should-not (file-exists-p filename))
-          (should (file-directory-p (file-name-directory filename)))
-          (should (string-prefix-p temporary-file-directory filename))
-          (should (member (directory-file-name (file-name-directory filename))
-                          flycheck-temporaries)))
-      (mapc #'flycheck-safe-delete flycheck-temporaries))))
+  (unwind-protect
+      (let ((filename (car (flycheck-substitute-argument 'temporary-file-name
+                                                         'emacs-lisp))))
+        ;; The filename should not exist, but it's parent directory should
+        (should-not (file-exists-p filename))
+        (should (file-directory-p (file-name-directory filename)))
+        (should (string-prefix-p temporary-file-directory filename))
+        (should (member (directory-file-name (file-name-directory filename))
+                        flycheck-temporaries)))
+    (mapc #'flycheck-safe-delete flycheck-temporaries)))
 
 (ert-deftest flycheck-substitute-argument/config-file ()
   :tags '(checker-api)
