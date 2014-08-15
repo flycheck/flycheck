@@ -3,6 +3,10 @@
 master (in development)
 -----------------------
 
+- Improvements:
+
+  - Improve GCC syntax checking by expanding templates [GH-459]
+
 - Bug fixes:
 
   - Expand `default-directory` before using it, to handle abbreviated paths
