@@ -1,8 +1,10 @@
 .. |travis| image:: https://travis-ci.org/flycheck/flycheck.svg?branch=master
             :target: https://travis-ci.org/flycheck/flycheck
+            :alt: Test status
 
 .. |license| image:: https://img.shields.io/badge/license-GPL_3-green.svg?dummy
              :target: https://github.com/flycheck/flycheck/blob/master/COPYING
+             :alt: License GPL 3
 
 =============================
  Flycheck |license| |travis|
