@@ -104,7 +104,7 @@ Support & Contribution
 
 .. _Issue tracker: https://github.com/flycheck/flycheck/issues
 .. _Github: https://github.com/flycheck/flycheck
-.. _Contribution guidelines: http://flycheck.readthedocs.org/en/latest/contributing.html
+.. _Contribution guidelines: http://flycheck.readthedocs.org/en/latest/contrib/guidelines.html
 
 Credits
 =======
@@ -113,7 +113,7 @@ Credits
 - Credits_
 
 .. _Contributors: https://github.com/flycheck/flycheck/graphs/contributors
-.. _Credits: http://flycheck.readthedocs.org/en/latest/manual/credits.html
+.. _Credits: http://flycheck.readthedocs.org/en/latest/credits.html
 
 License
 =======
