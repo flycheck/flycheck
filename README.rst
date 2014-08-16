@@ -6,9 +6,13 @@
              :target: https://github.com/flycheck/flycheck/blob/master/COPYING
              :alt: License GPL 3
 
-=============================
- Flycheck |license| |travis|
-=============================
+.. |docs| image:: https://readthedocs.org/projects/flycheck/badge/?version=latest
+          :target: https://readthedocs.org/projects/flycheck/?badge=latest
+          :alt: Documentation Status
+
+====================================
+ Flycheck |license| |docs| |travis|
+====================================
 
 .. image:: https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/logo.png
    :target: http://flycheck.readthedocs.org
