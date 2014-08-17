@@ -45,8 +45,10 @@ The following extensions provide additional cool features for Flycheck:
   packages.
 - flycheck-hdevtools_ adds a Flycheck syntax checker for Haskell based on
   hdevtools_.
+- flycheck-ledger_ adds a syntax checker for the Ledger_ accounting tool.
 - flycheck-mercury_ adds a Flycheck syntax checker for the `Mercury Language`_.
 - flycheck-pos-tip_ shows Flycheck error messages in a popup.
+- flycheck-pyflakes_ adds a Python syntax checker using Pyflakes.
 - flycheck-rust_ improves Rust support in Flycheck, by configuring Flycheck
   according to Cargo settings and layouts.
 
@@ -58,7 +60,10 @@ The following extensions provide additional cool features for Flycheck:
 .. _flycheck-haskell: https://github.com/flycheck/flycheck-haskell
 .. _flycheck-hdevtools: https://github.com/flycheck/flycheck-hdevtools
 .. _hdevtools: https://github.com/bitc/hdevtools/
+.. _flycheck-ledger: https://github.com/purcell/flycheck-ledger
+.. _Ledger: http://ledger-cli.org/
 .. _flycheck-mercury: https://github.com/flycheck/flycheck-mercury
 .. _Mercury language: http://mercurylang.org/
 .. _flycheck-pos-tip: https://github.com/flycheck/flycheck-pos-tip
+.. _flycheck-pyflakes: https://github.com/Wilfred/flycheck-pyflakes
 .. _flycheck-rust: https://github.com/flycheck/flycheck-rust

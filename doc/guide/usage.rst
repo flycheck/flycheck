@@ -357,6 +357,13 @@ The error is displayed via :option:`flycheck-display-errors-function`:
 .. option:: flycheck-display-errors-function
    :auto:
 
+   .. seealso::
+
+      The `flycheck-pos-tip`_ extension provides a display function to show
+      errors at point in a graphical popup.
+
+      .. _flycheck-pos-tip: https://github.com/flycheck/flycheck-pos-tip
+
 The default function displays the error messages in the echo area:
 
 .. function:: flycheck-display-error-messages
@@ -510,3 +517,10 @@ Change :option:`flycheck-mode-line` to customize the mode line reporting:
 
 .. option:: flycheck-mode-line
    :auto:
+
+.. seealso::
+
+   The flycheck-color-mode-line_ extension changes the background colour of the
+   mode line according to the result of the last syntax check.
+
+.. _flycheck-color-mode-line: https://github.com/flycheck/flycheck-color-mode-line

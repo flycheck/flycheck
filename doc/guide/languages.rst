@@ -14,9 +14,15 @@ Each language has one or more syntax checkers, whose names follow a
 programming language supported by this syntax checker, and :var:`tool` the
 specific syntax checker tool.
 
-This document provides just a brief overview, use
-:el:command:`flycheck-describe-checker` to see comprehensive documenation about
-a syntax checker.
+There are some 3rd party extensions which add support for more languages:
+
+- flycheck-ledger_ adds a syntax checker for the Ledger_ accounting tool.
+- flycheck-mercury_ adds a syntax checker for the Mercury_ language.
+
+.. _flycheck-ledger: https://github.com/purcell/flycheck-ledger
+.. _Ledger: http://ledger-cli.org/
+.. _flycheck-mercury: https://github.com/flycheck/flycheck-mercury
+.. _Mercury: http://mercurylang.org/
 
 .. contents:: Supported languages
    :local:
@@ -119,6 +125,13 @@ C/C++
    .. option:: flycheck-cppcheck-inconclusive
       :auto:
 
+.. seealso::
+
+   The flycheck-google-cpplint_ extension adds a syntax checker using Google's
+   C++ style checker.
+
+.. _flycheck-google-cpplint: https://github.com/flycheck/flycheck-google-cpplint
+
 CFEngine
 ========
 
@@ -166,6 +179,13 @@ D
    .. option:: flycheck-dmd-include-path
       :auto:
 
+.. seealso::
+
+   The flycheck-d-unittest_ extension adds a syntax checker that runs D unit
+   tests on the fly.
+
+.. _flycheck-d-unittest: https://github.com/flycheck/flycheck-d-unittest
+
 Elixir
 ======
 
@@ -191,6 +211,11 @@ Emacs Lisp
    .. option:: flycheck-emacs-lisp-package-user-dir
       :auto:
 
+   .. seealso::
+
+      With the flycheck-cask_ extension this syntax checker automatically uses
+      packages from Cask_ projects.
+
 .. flyc-checker:: emacs-lisp-checkdoc
    :auto:
 
@@ -198,6 +223,8 @@ Emacs Lisp
 
 .. _Emacs: http://www.gnu.org/software/emacs/
 .. _Emacs Lisp reference: http://www.gnu.org/software/emacs/manual/html_node/elisp/index.html
+.. _flycheck-cask: https://github.com/flycheck/flycheck-cask
+.. _Cask: https://github.com/cask/cask
 
 Erlang
 ======
@@ -287,8 +314,22 @@ Haskell
    .. option:: flycheck-ghc-search-path
       :auto:
 
+   .. seealso::
+
+      The flycheck-haskell_ extension configures this syntax checker according
+      to the corresponding Cabal project, and adds Cabal sandboxes.
+
 .. flyc-checker:: haskell-hlint
    :auto:
+
+.. seealso::
+
+   The flycheck-hdevtools_ extension adds a Haskell syntax checker using
+   hdevtools_.
+
+.. _flycheck-haskell: https://github.com/flycheck/flycheck-haskell
+.. _flycheck-hdevtools: https://github.com/flycheck/flycheck-hdevtools
+.. _hdevtools: https://github.com/bitc/hdevtools/
 
 HTML
 ====
@@ -436,6 +477,12 @@ Python
    .. option:: flycheck-pylintrc
       :auto:
 
+.. seealso::
+
+   flycheck-pyflakes_ adds a Python syntax checker using Pyflakes.
+
+.. _flycheck-pyflakes: https://github.com/Wilfred/flycheck-pyflakes
+
 Racket
 ======
 
@@ -509,6 +556,13 @@ Rust
 
    .. option:: flycheck-rust-library-path
       :auto:
+
+   .. seealso::
+
+      The flycheck-rust_ extension customizes this syntax checker according to
+      the Cargo project layout and settings.
+
+.. _flycheck-rust: https://github.com/flycheck/flycheck-rust
 
 Sass
 ====
