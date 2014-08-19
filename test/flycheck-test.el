@@ -4798,8 +4798,7 @@ Why not:
   (flycheck-test-should-syntax-check
    "checkers/sass-compass.sass" 'sass-mode
    `(2 nil error ,(format "File to import not found or unreadable: compass/css3.
-              Load path: %s (DEPRECATED)"
-                          (flycheck-test-resource-filename "checkers"))
+       Load path: %s" (flycheck-test-resource-filename "checkers"))
        :checker sass)))
 
 (ert-deftest flycheck-define-checker/sass-compass ()
@@ -4849,7 +4848,7 @@ Why not:
   (skip-unless (flycheck-check-executable 'scss))
   (flycheck-test-should-syntax-check
    "checkers/scss-error.scss" 'scss-mode
-   '(3 nil error "Invalid CSS after \"        c olor:\": expected pseudoclass or pseudoelement, was \" red;\""
+   '(3 nil error "Invalid CSS after \"...    c olor: red\": expected \"{\", was \";\""
        :checker scss)))
 
 (ert-deftest flycheck-define-checker/scss-import-error ()
@@ -4858,8 +4857,7 @@ Why not:
   (flycheck-test-should-syntax-check
    "checkers/scss-compass.scss" 'scss-mode
    `(2 nil error ,(format "File to import not found or unreadable: compass/css3.
-              Load path: %s (DEPRECATED)"
-                          (flycheck-test-resource-filename "checkers"))
+       Load path: %s" (flycheck-test-resource-filename "checkers"))
        :checker scss)))
 
 (ert-deftest flycheck-define-checker/scss-compass ()

@@ -5941,7 +5941,7 @@ See URL `http://sass-lang.com'."
    (warning line-start "WARNING on line " line " of " (file-name)
             ":" (optional "\r") "\n" (message) line-end)
    (error line-start
-          "Syntax error: "
+          (or "Syntax error: " "Error: ")
           (message (one-or-more not-newline)
                    (zero-or-more "\n"
                                  (one-or-more " ")
@@ -6020,7 +6020,7 @@ See URL `http://sass-lang.com'."
    (warning line-start "WARNING on line " line " of " (file-name)
             ":" (optional "\r") "\n" (message) line-end)
    (error line-start
-          "Syntax error: "
+          (or "Syntax error: " "Error: ")
           (message (one-or-more not-newline)
                    (zero-or-more "\n"
                                  (one-or-more " ")
