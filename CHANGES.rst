@@ -3,6 +3,10 @@
 master (in development)
 -----------------------
 
+- **Breaking changes**:
+
+  - `html-tidy` is not enabled in Web Mode anymore [GH-464]
+
 - New features:
 
   - Add `null-device` symbol for syntax checker commands

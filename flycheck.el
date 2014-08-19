@@ -5301,7 +5301,7 @@ See URL `https://github.com/w3c/tidy-html5'."
             "line " line
             " column " column
             " - Warning: " (message) line-end))
-  :modes (html-mode nxhtml-mode web-mode))
+  :modes (html-mode nxhtml-mode))
 
 (flycheck-def-config-file-var flycheck-jshintrc javascript-jshint ".jshintrc"
   :safe #'stringp)
