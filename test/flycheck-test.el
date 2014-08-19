@@ -3710,6 +3710,34 @@ of the file will be interrupted because there are too many #ifdef configurations
      '(4 nil warning "Throwing strings is forbidden; context:"
          :checker coffee-coffeelint))))
 
+(ert-deftest flycheck-define-checker/coq-syntax-error-simple ()
+  :tags '(builtin-checker external-tool language-coq)
+  (skip-unless (flycheck-check-executable 'coq))
+  (flycheck-test-should-syntax-check
+   "checkers/coq-syntax-error-simple.v" 'coq-mode
+   '(3 18 error "Lexer: Undefined token" :checker coq)))
+
+(ert-deftest flycheck-define-checker/coq-syntax-error ()
+  :tags '(builtin-checker external-tool language-coq)
+  (skip-unless (flycheck-check-executable 'coq))
+  (flycheck-test-should-syntax-check
+   "checkers/coq-syntax-error.v" 'coq-mode
+   '(6 12 error "'end' expected after [branches] (in [match_constr])."
+       :checker coq)))
+
+(ert-deftest flycheck-define-checker/coq-error ()
+  :tags '(builtin-checker external-tool language-coq)
+  (skip-unless (flycheck-check-executable 'coq))
+  (flycheck-test-should-syntax-check
+   "checkers/coq-error.v" 'coq-mode
+   '(7 21 error "In environment
+evenb : nat -> bool
+n : nat
+n0 : nat
+n' : nat
+The term \"1\" has type \"nat\" while it is expected to have type
+\"bool\"." :checker coq)))
+
 (ert-deftest flycheck-define-checker/css-csslint ()
   :tags '(builtin-checker external-tool language-css)
   (skip-unless (flycheck-check-executable 'css-csslint))
