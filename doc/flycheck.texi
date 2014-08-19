@@ -3647,7 +3647,7 @@ See URL `https://github.com/CSSLint/csslint'@footnote{https://github.com/CSSLint
 @format
 A D syntax checker using the DMD compiler.
 
-See URL `http://dlang.org/'@footnote{http://dlang.org/}.
+Requires DMD 2.066 or newer.  See URL `http://dlang.org/'@footnote{http://dlang.org/}.
 @end format
 
 @subsubheading Options
@@ -8356,6 +8356,19 @@ See @ref{30,,Installation}.
 @itemize -
 
 @item 
+@strong{Breaking changes}:
+
+
+@itemize -
+
+@item 
+@code{html-tidy} is not enabled in Web Mode anymore [GH-464]@footnote{https://github.com/flycheck/flycheck/issues/464}
+
+@item 
+@code{d-dmd} now requires DMD 2.066 or newer [GH-460]@footnote{https://github.com/flycheck/flycheck/issues/460}
+@end itemize
+
+@item 
 New features:
 
 
@@ -8373,6 +8386,9 @@ Improvements:
 
 @item 
 Improve GCC syntax checking by expanding templates [GH-459]@footnote{https://github.com/flycheck/flycheck/issues/459}
+
+@item 
+@code{d-dmd} reports errors with columns now [GH-460]@footnote{https://github.com/flycheck/flycheck/issues/460}
 @end itemize
 
 @item 
