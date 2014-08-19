@@ -100,11 +100,11 @@ Support & Contribution
 
 - `Issue tracker`_
 - Github_
-- `Contribution guidelines`_
+- `Contributor Guide`_
 
 .. _Issue tracker: https://github.com/flycheck/flycheck/issues
 .. _Github: https://github.com/flycheck/flycheck
-.. _Contribution guidelines: http://flycheck.readthedocs.org/en/latest/contrib/guidelines.html
+.. _Contributor Guide: http://flycheck.readthedocs.org/en/latest/index.html#contributor-guide
 
 Credits
 =======
