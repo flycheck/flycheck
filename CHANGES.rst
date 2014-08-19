@@ -6,6 +6,7 @@ master (in development)
 - **Breaking changes**:
 
   - `html-tidy` is not enabled in Web Mode anymore [GH-464]
+  - `d-dmd` now requires DMD 2.066 or newer [GH-460]
 
 - New features:
 
@@ -14,6 +15,7 @@ master (in development)
 - Improvements:
 
   - Improve GCC syntax checking by expanding templates [GH-459]
+  - `d-dmd` reports errors with columns now [GH-460]
 
 - Bug fixes:
 

@@ -3763,8 +3763,8 @@ of the file will be interrupted because there are too many #ifdef configurations
   (let ((flycheck-dmd-include-path '("../../lib")))
     (flycheck-test-should-syntax-check
      "checkers/d/src/dmd/warning.d" 'd-mode
-     '(9 nil warning "statement is not reachable" :checker d-dmd)
-     '(20 nil warning "function dmd.warning.bar is deprecated"
+     '(9 5 warning "statement is not reachable" :checker d-dmd)
+     '(20 17 warning "function dmd.warning.bar is deprecated"
           :checker d-dmd))))
 
 (ert-deftest flycheck-define-checker/d-dmd-missing-import ()
@@ -3773,7 +3773,7 @@ of the file will be interrupted because there are too many #ifdef configurations
   (with-no-warnings (require 'cl))
   (flycheck-test-should-syntax-check
    "checkers/d/src/dmd/warning.d" 'd-mode
-   '(4 nil error "module external_library is in file 'external_library.d' which cannot be read"
+   '(4 8 error "module external_library is in file 'external_library.d' which cannot be read"
        :checker d-dmd)))
 
 (ert-deftest flycheck-define-checker/elixir-error ()
