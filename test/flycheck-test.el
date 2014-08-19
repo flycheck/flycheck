@@ -3757,6 +3757,9 @@ of the file will be interrupted because there are too many #ifdef configurations
 (ert-deftest flycheck-define-checker/d-dmd-warning-include-path ()
   :tags '(builtin-checker external-tool language-d)
   (skip-unless (flycheck-check-executable 'd-dmd))
+  ;; Work around issue in D Mode, see
+  ;; https://github.com/Emacs-D-Mode-Maintainers/Emacs-D-Mode/issues/23
+  (with-no-warnings (require 'cl))
   (let ((flycheck-dmd-include-path '("../../lib")))
     (flycheck-test-should-syntax-check
      "checkers/d/src/dmd/warning.d" 'd-mode
@@ -3767,6 +3770,7 @@ of the file will be interrupted because there are too many #ifdef configurations
 (ert-deftest flycheck-define-checker/d-dmd-missing-import ()
   :tags '(builtin-checker external-tool language-d)
   (skip-unless (flycheck-check-executable 'd-dmd))
+  (with-no-warnings (require 'cl))
   (flycheck-test-should-syntax-check
    "checkers/d/src/dmd/warning.d" 'd-mode
    '(4 nil error "module external_library is in file 'external_library.d' which cannot be read"
