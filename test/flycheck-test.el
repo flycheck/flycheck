@@ -1093,7 +1093,7 @@ check with.  ERRORS is the list of expected errors."
 
 (ert-deftest flycheck-prepend-with-option/prepend-by-string-concatentation ()
   :tags '(utility)
-  (should (equal (flycheck-prepend-with-option "-L" '("foo" "bar") #'s-prepend)
+  (should (equal (flycheck-prepend-with-option "-L" '("foo" "bar") #'concat)
                  '("-Lfoo" "-Lbar"))))
 
 (ert-deftest flycheck-find-in-buffer/returns-first-match-on-success ()
@@ -1636,7 +1636,7 @@ check with.  ERRORS is the list of expected errors."
                     '(option-list "-I" flycheck-test-option-var) 'emacs-lisp)
                    '("-I" "spam" "-I" "eggs")))
     (should (equal (flycheck-substitute-argument
-                    '(option-list "-I" flycheck-test-option-var s-prepend) 'emacs-lisp)
+                    '(option-list "-I" flycheck-test-option-var concat) 'emacs-lisp)
                    '("-Ispam" "-Ieggs"))))
   (let ((flycheck-test-option-var '(10 20)))
     (should-error (flycheck-substitute-argument
@@ -1646,7 +1646,7 @@ check with.  ERRORS is the list of expected errors."
                    '("-I" "10" "-I" "20")))
     (should (equal (flycheck-substitute-argument
                     '(option-list "-I" flycheck-test-option-var
-                                  s-prepend number-to-string) 'emacs-lisp)
+                                  concat number-to-string) 'emacs-lisp)
                    '("-I10" "-I20"))))
   (let (flycheck-test-option-var)
     (should-not (flycheck-substitute-argument
