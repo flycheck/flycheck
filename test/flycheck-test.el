@@ -48,9 +48,6 @@
 (require 'ert)                          ; Unit test library
 (require 'shut-up)                      ; Silence Emacs and intercept `message'
 
-;; Optional dependencies
-(require 'projectile nil 'no-error)
-
 
 ;;; Compatibility
 
@@ -489,7 +486,6 @@ check with.  ERRORS is the list of expected errors."
   :tags '(customization)
   (should (equal flycheck-locate-config-file-functions
                  '(flycheck-locate-config-file-absolute-path
-                   flycheck-locate-config-file-projectile
                    flycheck-locate-config-file-ancestor-directories
                    flycheck-locate-config-file-home))))
 
@@ -1729,35 +1725,6 @@ Try to reinstall the package defining this syntax checker.\n")))))
     (should (equal (flycheck-locate-config-file-absolute-path "../Makefile"
                                                               'emacs-lisp)
                    (expand-file-name "../Makefile" flycheck-test-directory)))))
-
-(ert-deftest flycheck-locate-config-file-projectile/existing-file-inside-a-project ()
-  :tags '(configuration)
-  (skip-unless (fboundp 'projectile-project-root))
-  (flycheck-test-with-temp-buffer
-    (set-visited-file-name (expand-file-name "foo" flycheck-test-directory)
-                           'no-query)
-    (should (projectile-project-p))
-    (should (equal
-             (flycheck-locate-config-file-projectile "Makefile" 'emacs-lisp)
-             (expand-file-name "../Makefile" flycheck-test-directory)))))
-
-(ert-deftest flycheck-locate-config-file-projectile/not-existing-file-inside-a-project ()
-  :tags '(configuration)
-  (skip-unless (fboundp 'projectile-project-root))
-  (flycheck-test-with-temp-buffer
-    (set-visited-file-name (expand-file-name "foo" flycheck-test-directory)
-                           'no-query)
-    (should (projectile-project-p))
-    (should-not (flycheck-locate-config-file-projectile "Foo" 'emacs-lisp))))
-
-(ert-deftest flycheck-locate-config-file-projectile/outside-a-project ()
-  :tags '(configuration)
-  (skip-unless (fboundp 'projectile-project-root))
-  (flycheck-test-with-temp-buffer
-    (set-visited-file-name (expand-file-name "foo" temporary-file-directory)
-                           'no-query)
-    (should-not (projectile-project-p))
-    (should-not (flycheck-locate-config-file-projectile "Foo" 'emacs-dir))))
 
 (ert-deftest flycheck-locate-config-file-ancestor-directories/not-existing-file ()
   :tags '(configuration)

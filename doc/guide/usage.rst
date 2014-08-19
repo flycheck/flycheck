@@ -280,16 +280,12 @@ following algorithm:
 1. If the configuration file variable contains a path a directory
    separator, expand the path against the buffer's default directory and
    use the resulting path as configuration file.
-2. If Projectile_ is available and the current buffer is part of a project
-   project, search the configuration file in the root directory of the project.
-3. If the buffer has a file name, search the buffer's directory and any
+2. If the buffer has a file name, search the buffer's directory and any
    ancestors thereof for the configuration file.
-4. Eventually attempt to locate the configuration file in the user's home
+3. Eventually attempt to locate the configuration file in the user's home
    directory.
 
 If any of these steps succeeds, the subsequent steps are not executed.
-
-.. _Projectile: https://github.com/bbatsov/projectile
 
 .. _error-reporting:
 
