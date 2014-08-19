@@ -4678,15 +4678,20 @@ Relative paths are relative to the file being checked."
 (flycheck-define-checker d-dmd
   "A D syntax checker using the DMD compiler.
 
-See URL `http://dlang.org/'."
-  :command ("dmd" "-debug" "-o-"
+Requires DMD 2.066 or newer.  See URL `http://dlang.org/'."
+  :command ("dmd"
+            "-debug"                    ; Compile in debug mode
+            "-o-"                       ; Don't generate an object file
+            "-vcolumns"                 ; Add columns in output
             "-wi" ; Compilation will continue even if there are warnings
             (eval (concat "-I" (flycheck-d-base-directory)))
             (option-list "-I" flycheck-dmd-include-path concat)
             source)
   :error-patterns
-  ((error line-start (file-name) "(" line "): Error: " (message) line-end)
-   (warning line-start (file-name) "(" line "): "
+  ((error line-start
+          (file-name) "(" line "," column "): Error: " (message)
+          line-end)
+   (warning line-start (file-name) "(" line "," column "): "
             (or "Warning" "Deprecation") ": " (message) line-end))
   :modes d-mode)
 

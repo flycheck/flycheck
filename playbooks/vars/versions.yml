@@ -1,5 +1,5 @@
 ---
-dmd_version: '2.065'
+dmd_version: '2.066'
 elixir_version: '0.14.0'
 cask_version: '0.7.0'
 go_version: '1.3'
