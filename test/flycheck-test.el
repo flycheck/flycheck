@@ -48,6 +48,14 @@
 (require 'ert)                          ; Unit test library
 (require 'shut-up)                      ; Silence Emacs and intercept `message'
 
+;; Make a best effort to make Coq Mode available
+(mapc (lambda (dir)
+        (add-to-list 'load-path (expand-file-name "coq/" dir)))
+      '("/usr/share/emacs/site-lisp/"
+        "/usr/local/share/emacs/site-lisp/"))
+
+(autoload 'coq-mode "coq")
+
 ;; Optional dependencies
 (require 'projectile nil 'no-error)
 
@@ -231,6 +239,16 @@ could not be determined."
    (rx "ruby-lint v" (group (one-or-more (any digit))
                             (one-or-more "." (one-or-more (any digit)))) " on")
    "ruby-lint" "--version"))
+
+(defun flycheck-test-coq-version ()
+  "Determine the version of Coq.
+
+Return the version as string, or nil if the version could not be
+determined."
+  (flycheck-test-extract-version-command
+   (rx "The Coq Proof Assistant, version "
+       (group (one-or-more (any digit)) "." (one-or-more (any digit))))
+   "coqtop" "-v"))
 
 
 ;;; Test resources
@@ -3713,9 +3731,13 @@ of the file will be interrupted because there are too many #ifdef configurations
 (ert-deftest flycheck-define-checker/coq-syntax-error-simple ()
   :tags '(builtin-checker external-tool language-coq)
   (skip-unless (flycheck-check-executable 'coq))
-  (flycheck-test-should-syntax-check
-   "checkers/coq-syntax-error-simple.v" 'coq-mode
-   '(3 18 error "Lexer: Undefined token" :checker coq)))
+  (let* ((version (flycheck-test-coq-version))
+         (msg (if (version< "8.3" version)
+                  "Lexer: Undefined token"
+                "Undefined token.")))
+    (flycheck-test-should-syntax-check
+     "checkers/coq-syntax-error-simple.v" 'coq-mode
+     `(3 18 error ,msg :checker coq))))
 
 (ert-deftest flycheck-define-checker/coq-syntax-error ()
   :tags '(builtin-checker external-tool language-coq)
