@@ -4941,12 +4941,7 @@ See URL `http://www.kuwata-lab.com/erubis/'."
   :command ("erubis" "-z" source)
   :error-patterns
   ((error line-start  (file-name) ":" line ": " (message) line-end))
-  :predicate
-  (lambda ()
-    (or (memq major-mode '(html-erb-mode rhtml-mode))
-        (and (buffer-file-name)
-             (member (file-name-extension (buffer-file-name))
-                     '("erb" "rhtml"))))))
+  :modes (html-erb-mode rhtml-mode))
 
 (flycheck-def-option-var flycheck-gfortran-include-path nil fortran-gfortran
   "A list of include directories for GCC Fortran.
