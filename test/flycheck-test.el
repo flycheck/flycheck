@@ -48,6 +48,14 @@
 (require 'ert)                          ; Unit test library
 (require 'shut-up)                      ; Silence Emacs and intercept `message'
 
+;; Make a best effort to make Coq Mode available
+(mapc (lambda (dir)
+        (add-to-list 'load-path (expand-file-name "coq/" dir)))
+      '("/usr/share/emacs/site-lisp/"
+        "/usr/local/share/emacs/site-lisp/"))
+
+(autoload 'coq-mode "coq")
+
 
 ;;; Compatibility
 
@@ -229,6 +237,16 @@ could not be determined."
                             (one-or-more "." (one-or-more (any digit)))) " on")
    "ruby-lint" "--version"))
 
+(defun flycheck-test-coq-version ()
+  "Determine the version of Coq.
+
+Return the version as string, or nil if the version could not be
+determined."
+  (flycheck-test-extract-version-command
+   (rx "The Coq Proof Assistant, version "
+       (group (one-or-more (any digit)) "." (one-or-more (any digit))))
+   "coqtop" "-v"))
+
 
 ;;; Test resources
 
@@ -369,6 +387,8 @@ check with.  ERRORS is the list of expected errors."
   (when (symbolp modes)
     (setq modes (list modes)))
   (dolist (mode modes)
+    (unless (fboundp mode)
+      (ert-skip (format "%S missing" mode)))
     (flycheck-test-with-resource-buffer resource-file
       (funcall mode)
       ;; Configure config file locating for unit tests
@@ -3674,6 +3694,38 @@ of the file will be interrupted because there are too many #ifdef configurations
      "checkers/coffee-coffeelint-error.coffee" 'coffee-mode
      '(4 nil warning "Throwing strings is forbidden; context:"
          :checker coffee-coffeelint))))
+
+(ert-deftest flycheck-define-checker/coq-syntax-error-simple ()
+  :tags '(builtin-checker external-tool language-coq)
+  (skip-unless (flycheck-check-executable 'coq))
+  (let* ((version (flycheck-test-coq-version))
+         (msg (if (version< "8.3" version)
+                  "Lexer: Undefined token"
+                "Undefined token.")))
+    (flycheck-test-should-syntax-check
+     "checkers/coq-syntax-error-simple.v" 'coq-mode
+     `(3 18 error ,msg :checker coq))))
+
+(ert-deftest flycheck-define-checker/coq-syntax-error ()
+  :tags '(builtin-checker external-tool language-coq)
+  (skip-unless (flycheck-check-executable 'coq))
+  (flycheck-test-should-syntax-check
+   "checkers/coq-syntax-error.v" 'coq-mode
+   '(6 12 error "'end' expected after [branches] (in [match_constr])."
+       :checker coq)))
+
+(ert-deftest flycheck-define-checker/coq-error ()
+  :tags '(builtin-checker external-tool language-coq)
+  (skip-unless (flycheck-check-executable 'coq))
+  (flycheck-test-should-syntax-check
+   "checkers/coq-error.v" 'coq-mode
+   '(7 21 error "In environment
+evenb : nat -> bool
+n : nat
+n0 : nat
+n' : nat
+The term \"1\" has type \"nat\" while it is expected to have type
+\"bool\"." :checker coq)))
 
 (ert-deftest flycheck-define-checker/css-csslint ()
   :tags '(builtin-checker external-tool language-css)

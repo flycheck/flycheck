@@ -51,6 +51,7 @@
     - cfengine-community          # cfengine
     - chktex                      # tex-chktex
     - cppcheck                    # c/c++-cppcheck
+    - coq                         # coq
     - dash                        # sh-posix-dash
     - g++-4.8                     # c/c++-gcc
     - gfortran-4.8                # fortran-gfortran

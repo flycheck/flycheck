@@ -162,6 +162,12 @@ Coffeescript
    .. option:: flycheck-coffeelintrc
       :auto:
 
+Coq
+===
+
+.. flyc-checker:: coq
+   :auto:
+
 CSS
 ===
 
