@@ -19,8 +19,6 @@ contents:
   the utility functions.
 - ``resources/``: Resource files used by the test suite, including example code
   in various programming languages to test syntax checkers.
-- ``init.el``: A simple init file which initializes a bare-bones Emacs session
-  for the Flycheck test suite.
 - ``run-tests.el``: A simple test runner for non-interactive use, which reads
   ERT selectors from the command line and runs all matching tests.
 
