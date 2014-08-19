@@ -372,6 +372,8 @@ check with.  ERRORS is the list of expected errors."
   (when (symbolp modes)
     (setq modes (list modes)))
   (dolist (mode modes)
+    (unless (fboundp mode)
+      (ert-skip (format "%S missing" mode)))
     (flycheck-test-with-resource-buffer resource-file
       (funcall mode)
       ;; Configure config file locating for unit tests
