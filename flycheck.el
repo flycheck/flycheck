@@ -5118,7 +5118,10 @@ See URL `http://golang.org/cmd/go/' and URL
   "A Go syntax and type checker using the `go build' command.
 
 See URL `http://golang.org/cmd/go'."
-  :command ("go" "build" "-o" null-device)
+  ;; We need to use `temporary-file-name' instead of `null-device', because Go
+  ;; can't write to the null device.  It's “too magic”.  See
+  ;; https://code.google.com/p/go/issues/detail?id=4851 for details.
+  :command ("go" "build" "-o" temporary-file-name)
   :error-patterns
   ((error line-start (file-name) ":" line ":"
           (optional column ":") " "
