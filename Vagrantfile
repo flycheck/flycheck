@@ -8,6 +8,7 @@ Vagrant.configure('2') do |config|
 
     flycheck.vm.provider "virtualbox" do |vb|
       vb.name = 'flycheck'
+      vb.memory = 1024
     end
 
     flycheck.vm.provision "ansible" do |ansible|
