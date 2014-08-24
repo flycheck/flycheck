@@ -365,6 +365,11 @@ The default function displays the error messages in the echo area:
 .. function:: flycheck-display-error-messages
    :auto:
 
+Alternatively, the following error display functions are available:
+
+.. function:: flycheck-display-error-messages-unless-error-list
+   :auto:
+
 You can also work with the error messages at point, and copy them into the kill
 ring or search them on Google:
 

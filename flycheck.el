@@ -373,6 +373,8 @@ If set to nil, do not display errors at all."
   :group 'flycheck
   :type '(choice (const :tag "Display error messages"
                         flycheck-display-error-messages)
+                 (const :tag "Display error messages only if no error list"
+                        flycheck-display-error-messages-unless-error-list)
                  (function :tag "Error display function"))
   :package-version '(flycheck . "0.13")
   :risky t)
@@ -3922,6 +3924,15 @@ In the latter case, show messages in
     (when (and errors (flycheck-may-use-echo-area-p))
       (display-message-or-buffer (string-join messages "\n\n")
                                  flycheck-error-message-buffer))))
+
+(defun flycheck-display-error-messages-unless-error-list (errors)
+  "Show messages of ERRORS unless the error list is visible.
+
+Like `flycheck-display-error-messages', but only if the error
+list (see `flycheck-list-errors') is not visible in any window in
+the current frame."
+  (unless (flycheck-get-error-list-window 'current-frame)
+    (flycheck-display-error-messages errors)))
 
 (defun flycheck-hide-error-buffer ()
   "Hide the Flycheck error buffer if necessary.

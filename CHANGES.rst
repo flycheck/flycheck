@@ -15,6 +15,8 @@ master (in development)
 - New features:
 
   - Add `null-device` symbol for syntax checker commands
+  - Add `flycheck-display-error-messages-unless-error-list` for
+    `flycheck-error-display-function`
 
 - Improvements:
 
