@@ -3617,10 +3617,25 @@ mode line indication of `flycheck-error-list-mode'."
     (when (buffer-live-p flycheck-error-list-source-buffer)
       (switch-to-buffer flycheck-error-list-source-buffer))))
 
+(defun flycheck-get-error-list-window-list (&optional all-frames)
+  "Get all windows displaying the error list.
+
+ALL-FRAMES specifies the frames to consider, as in
+`get-buffer-window-list'."
+  (-when-let (buf (get-buffer flycheck-error-list-buffer))
+    (get-buffer-window-list buf nil all-frames)))
+
+(defun flycheck-get-error-list-window (&optional all-frames)
+  "Get a window displaying the error list, or nil if none.
+
+ALL-FRAMES specifies the frames to consider, as in
+`get-buffer-window'."
+  (-when-let (buf (get-buffer flycheck-error-list-buffer))
+    (get-buffer-window buf all-frames)))
+
 (defun flycheck-error-list-recenter-at (pos)
   "Recenter the error list at POS."
-  (dolist (window (get-buffer-window-list flycheck-error-list-buffer
-                                          nil 'all-frames))
+  (dolist (window (flycheck-get-error-list-window-list t))
     (with-selected-window window
       (goto-char pos)
       (recenter))))
@@ -3636,9 +3651,8 @@ list."
   ;; select this window while reverting, because Tabulated List mode attempts to
   ;; recenter the error at the old location, so it must have the proper window
   ;; selected.
-  (-when-let (error-list-window (get-buffer-window flycheck-error-list-buffer
-                                                   'all-frames))
-    (with-selected-window error-list-window
+  (-when-let (window (flycheck-get-error-list-window t))
+    (with-selected-window window
       (revert-buffer))
     (flycheck-error-list-highlight-errors)))
 
