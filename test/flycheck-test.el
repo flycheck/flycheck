@@ -2989,73 +2989,79 @@ of the file will be interrupted because there are too many #ifdef configurations
   :tags '(error-list)
   (should (get 'flycheck-error-list-source-buffer 'permanent-local)))
 
-(ert-deftest flycheck-error-list-make-number-cell/not-a-number ()
+(ert-deftest flycheck-error-list-make-entry/line-and-column ()
   :tags '(error-list)
-  (let ((cell (flycheck-error-list-make-number-cell nil 'bold)))
-    (should (string-empty-p cell))
-    (should-not (get-text-property 0 'font-lock-face cell))))
-
-(ert-deftest flycheck-error-list-make-number-cell/a-number ()
-  :tags '(error-list)
-  (let ((cell (flycheck-error-list-make-number-cell 10 'bold)))
-    (should (string= "10" cell))
-    (should (eq 'bold (get-text-property 0 'font-lock-face cell)))))
-
-(ert-deftest flycheck-error-list-make-entry/entry-id ()
-  :tags '(error-list)
-  (let* ((error (flycheck-error-new-at 10 nil 'warning "foo"))
-         (entry (flycheck-error-list-make-entry error)))
-    (should (eq error (car entry)))))
-
-(ert-deftest flycheck-error-list-make-entry/line ()
-  :tags '(error-list)
-  (let* ((error (flycheck-error-new-at 10 nil 'warning "foo"))
+  (let* ((error (flycheck-error-new-at 10 12 'warning "A foo warning"
+                                       :checker 'emacs-lisp-checkdoc))
          (entry (flycheck-error-list-make-entry error))
          (cells (cadr entry)))
-    (should (string= "10" (aref cells 0)))
-    (should (eq 'flycheck-error-list-line-number
-                (get-text-property 0 'font-lock-face (aref cells 0))))))
-
-(ert-deftest flycheck-error-list-make-entry/column ()
-  :tags '(error-list)
-  (let* ((error (flycheck-error-new-at 10 12 'warning "foo"))
-         (entry (flycheck-error-list-make-entry error))
-         (cells (cadr entry)))
-    (should (string= "12" (aref cells 1)))
-    (should (eq 'flycheck-error-list-column-number
-                (get-text-property 0 'font-lock-face (aref cells 1))))))
+    (should (eq (car entry) error))
+    (should (equal (aref cells 0)
+                   (list "10"
+                         'type 'flycheck-error-list
+                         'face 'flycheck-error-list-line-number)))
+    (should (equal (aref cells 1)
+                   (list "12"
+                         'type 'flycheck-error-list
+                         'face 'flycheck-error-list-column-number)))
+    (let ((face (flycheck-error-level-error-list-face 'warning)))
+      (should (equal (aref cells 2)
+                     (list "warning"
+                           'type 'flycheck-error-list
+                           'face face))))
+    (should (equal (aref cells 3)
+                   (list "A foo warning (emacs-lisp-checkdoc)"
+                         'type 'flycheck-error-list
+                         'face 'default)))))
 
 (ert-deftest flycheck-error-list-make-entry/no-column ()
   :tags '(error-list)
-  (let* ((error (flycheck-error-new-at 10 nil 'warning "foo"))
-         (entry (flycheck-error-list-make-entry error))
-         (cells (cadr entry)))
-    (should (string-empty-p (aref cells 1)))))
-
-(ert-deftest flycheck-error-list-make-entry/error-level ()
-  :tags '(error-list)
-  (let* ((error (flycheck-error-new-at 10 nil 'warning "foo"))
-         (entry (flycheck-error-list-make-entry error))
-         (cells (cadr entry)))
-    (should (string= "warning" (aref cells 2)))
-    (should (eq 'flycheck-error-list-warning
-                (get-text-property 0 'font-lock-face (aref cells 2))))))
-
-(ert-deftest flycheck-error-list-make-entry/message ()
-  :tags '(error-list)
-  (let* ((error (flycheck-error-new-at 10 nil 'warning "foo"
+  (let* ((error (flycheck-error-new-at 10 nil 'error "A foo error"
                                        :checker 'emacs-lisp-checkdoc))
          (entry (flycheck-error-list-make-entry error))
          (cells (cadr entry)))
-    (should (string= "foo (emacs-lisp-checkdoc)" (aref cells 3)))))
+    (should (eq (car entry) error))
+    (should (equal (aref cells 0)
+                   (list "10"
+                         'type 'flycheck-error-list
+                         'face 'flycheck-error-list-line-number)))
+    (should (equal (aref cells 1)
+                   (list ""
+                         'type 'flycheck-error-list
+                         'face 'flycheck-error-list-column-number)))
+    (let ((face (flycheck-error-level-error-list-face 'error)))
+      (should (equal (aref cells 2)
+                     (list "error"
+                           'type 'flycheck-error-list
+                           'face face))))
+    (should (equal (aref cells 3)
+                   (list "A foo error (emacs-lisp-checkdoc)"
+                         'type 'flycheck-error-list
+                         'face 'default)))))
 
-(ert-deftest flycheck-error-list-make-entry/default-message ()
+(ert-deftest flycheck-error-list-make-entry/no-message ()
   :tags '(error-list)
-  (let* ((error (flycheck-error-new-at 10 nil 'warning nil
-                                       :checker 'emacs-lisp-checkdoc))
+  (let* ((error (flycheck-error-new-at 10 nil 'info nil :checker 'coq))
          (entry (flycheck-error-list-make-entry error))
          (cells (cadr entry)))
-    (should (string= "Unknown error (emacs-lisp-checkdoc)" (aref cells 3)))))
+    (should (eq (car entry) error))
+    (should (equal (aref cells 0)
+                   (list "10"
+                         'type 'flycheck-error-list
+                         'face 'flycheck-error-list-line-number)))
+    (should (equal (aref cells 1)
+                   (list ""
+                         'type 'flycheck-error-list
+                         'face 'flycheck-error-list-column-number)))
+    (let ((face (flycheck-error-level-error-list-face 'info)))
+      (should (equal (aref cells 2)
+                     (list "info"
+                           'type 'flycheck-error-list
+                           'face face))))
+    (should (equal (aref cells 3)
+                   (list "Unknown error (coq)"
+                         'type 'flycheck-error-list
+                         'face 'default)))))
 
 
 ;;; General error display
