@@ -28,6 +28,7 @@ master (in development)
 
   - Expand `default-directory` before using it, to handle abbreviated paths
     gracefully [GH-434]
+  - Restore mouse support in the error list [GH-468]
 
 0.20 (Aug 12, 2014)
 -------------------
