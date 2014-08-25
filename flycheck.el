@@ -3568,12 +3568,13 @@ string with attached text properties."
   "Make a table cell for the given ERROR.
 
 Return a list with the contents of the table cell."
-  (let ((level-face (flycheck-error-level-error-list-face
-                     (flycheck-error-level error)))
-        (line (flycheck-error-line error))
-        (column (flycheck-error-column error))
-        (message (or (flycheck-error-message error) "Unknown error"))
-        (checker (flycheck-error-checker error)))
+  (let* ((level (flycheck-error-level error))
+         (level-face (flycheck-error-level-error-list-face level))
+         (line (flycheck-error-line error))
+         (column (flycheck-error-column error))
+         (message (or (flycheck-error-message error)
+                      (format "Unknown %s" (symbol-name level))))
+         (checker (flycheck-error-checker error)))
     (list error
           (vector (flycheck-error-list-make-number-cell
                    line 'flycheck-error-list-line-number)

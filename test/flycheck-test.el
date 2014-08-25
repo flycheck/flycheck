@@ -3059,7 +3059,7 @@ of the file will be interrupted because there are too many #ifdef configurations
                            'type 'flycheck-error-list
                            'face face))))
     (should (equal (aref cells 3)
-                   (list "Unknown error (coq)"
+                   (list "Unknown info (coq)"
                          'type 'flycheck-error-list
                          'face 'default)))))
 
