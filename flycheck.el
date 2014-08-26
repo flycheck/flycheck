@@ -5448,7 +5448,10 @@ See URL `https://github.com/zaach/jsonlint'."
 At least version 1.4 of lessc is required.
 
 See URL `http://lesscss.org'."
-  :command ("lessc" "--lint" "--no-color" source)
+  :command ("lessc" "--lint" "--no-color"
+            ;; We need `source-inplace' to resolve relative `data-uri' paths,
+            ;; see https://github.com/flycheck/flycheck/issues/471
+            source-inplace)
   :error-patterns
   ((error line-start (one-or-more word) ":"
           (message)

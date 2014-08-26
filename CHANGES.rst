@@ -29,6 +29,7 @@ master (in development)
   - Expand `default-directory` before using it, to handle abbreviated paths
     gracefully [GH-434]
   - Restore mouse support in the error list [GH-468]
+  - `less` now correctly resolves relative paths in `data-uri` [GH-471]
 
 0.20 (Aug 12, 2014)
 -------------------
