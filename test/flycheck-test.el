@@ -1387,21 +1387,19 @@ check with.  ERRORS is the list of expected errors."
   :tags '(definition)
   (should-error (flycheck-validate-next-checker '(warnings-only emacs-lisp))))
 
-(ert-deftest flycheck-validate-next-checker/invalid-predicate ()
+(ert-deftest flycheck-validate-next-checker/invalid-level ()
   :tags '(definition)
-  (should-error (flycheck-validate-next-checker '(bar . emacs-lisp))))
+  (should-error (flycheck-validate-next-checker '("foo" . emacs-lisp)))
+  (should-error (flycheck-validate-next-checker '(foo . emacs-lisp) 'strict)))
 
 (ert-deftest flycheck-validate-next-checker/valid-predicate-with-any-symbol ()
   :tags '(definition)
-  (should (flycheck-validate-next-checker '(no-errors . bar)))
-  (should (flycheck-validate-next-checker '(warnings-only . bar)))
-  (should-error (flycheck-validate-next-checker '(no-errors . bar) t))
-  (should-error (flycheck-validate-next-checker '(warnings-only . bar) t)))
+  (should (flycheck-validate-next-checker '(warning . bar)))
+  (should-error (flycheck-validate-next-checker '(warning . bar) 'strict)))
 
 (ert-deftest flycheck-validate-next-checker/valid-predicate-with-syntax-checker-symbol ()
   :tags '(definition)
-  (should (flycheck-validate-next-checker '(no-errors . emacs-lisp) t))
-  (should (flycheck-validate-next-checker '(warnings-only . emacs-lisp) t)))
+  (should (flycheck-validate-next-checker '(warning . emacs-lisp) 'strict)))
 
 
 ;;; Checker extensions
@@ -2622,6 +2620,18 @@ of the file will be interrupted because there are too many #ifdef configurations
     (should (equal (flycheck-collapse-error-message-whitespace (list err))
                    (list (flycheck-error-new-at 1 1 'error
                                                 "spam with eggs"))))))
+
+
+;;; Error analysis
+
+(ert-deftest flycheck-has-max-errors-p ()
+  :tags '(error-analysis)
+  (should (flycheck-has-max-errors-p nil 'error))
+  (let ((errors (list (flycheck-error-new-at 10 10 'warning)
+                      (flycheck-error-new-at 10 10 'info))))
+    (should (flycheck-has-max-errors-p errors 'error))
+    (should (flycheck-has-max-errors-p errors 'warning))
+    (should-not (flycheck-has-max-errors-p errors 'info))))
 
 
 ;;; Error overlay management

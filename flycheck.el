@@ -3310,6 +3310,19 @@ level."
           (push (cons level 1) counts-by-level))))
     counts-by-level))
 
+(defun flycheck-has-max-errors-p (errors level)
+  "Check if there is no error in ERRORS more severe than LEVEL."
+  (let ((severity (flycheck-error-level-severity level))
+        found)
+    (while (and errors (not found))
+      (setq found (< severity (flycheck-error-level-severity
+                               (flycheck-error-level (pop errors))))))
+    (not found)))
+
+(defun flycheck-has-max-current-errors-p (level)
+  "Check if there is no current error more severe than LEVEL."
+  (flycheck-has-max-errors-p flycheck-current-errors level))
+
 (defun flycheck-has-errors-p (errors level)
   "Determine if there are any ERRORS with LEVEL."
   (let (found)
