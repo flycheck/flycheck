@@ -3295,12 +3295,6 @@ Return a list of all errors that are relevant for their
 corresponding buffer."
   (-filter #'flycheck-relevant-error-p errors))
 
-(defun flycheck-sort-errors (errors)
-  "Sort ERRORS by location.
-
-ERRORS is modified by side effects."
-  (sort errors 'flycheck-error-<))
-
 (defun flycheck-count-errors (errors)
   "Count the number of ERRORS, grouped by level..
 
@@ -4059,7 +4053,8 @@ output: %s\nChecker definition probably flawed."
                      (mapcar (lambda (e) (flycheck-fix-error-filename e files))
                              errors) checker)))
       (setq flycheck-current-errors
-            (flycheck-sort-errors (append errors flycheck-current-errors nil)))
+            ;; Keep errors sorted by location
+            (sort (append errors flycheck-current-errors) #'flycheck-error-<))
       ;; Process all new errors
       (mapc (apply-partially #'run-hook-with-args-until-success
                              'flycheck-process-error-functions) errors)
