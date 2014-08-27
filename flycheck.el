@@ -3296,16 +3296,17 @@ corresponding buffer."
   (-filter #'flycheck-relevant-error-p errors))
 
 (defun flycheck-sort-errors (errors)
-  "Sort ERRORS by line and column numbers.
+  "Sort ERRORS by location.
 
 ERRORS is modified by side effects."
   (sort errors 'flycheck-error-<))
 
 (defun flycheck-count-errors (errors)
-  "Count the number of warnings and errors in ERRORS.
+  "Count the number of ERRORS, grouped by level..
 
-Return a cons cell whose `car' is the number of errors and whose
-`car' is the number of warnings."
+Return an alist, where each ITEM is a cons cell whose `car' is an
+error level, and whose `cdr' is the number of errors of that
+level."
   (let (counts-by-level)
     (dolist (err errors)
       (let* ((level (flycheck-error-level err))
