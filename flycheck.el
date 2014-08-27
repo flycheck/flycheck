@@ -3321,7 +3321,10 @@ level."
 
 If LEVEL is omitted check if ERRORS is not nil."
   (if level
-      (-any? (lambda (e) (eq (flycheck-error-level e) level)) errors)
+      (let (found)
+        (while (and errors (not found))
+          (setq found (eq (flycheck-error-level (pop errors)) level)))
+        found)
     (when errors t)))
 
 (defun flycheck-has-current-errors-p (&optional level)
