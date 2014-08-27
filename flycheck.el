@@ -3310,22 +3310,20 @@ level."
           (push (cons level 1) counts-by-level))))
     counts-by-level))
 
-(defun flycheck-has-errors-p (errors &optional level)
-  "Determine if there are any ERRORS with LEVEL.
-
-If LEVEL is omitted check if ERRORS is not nil."
-  (if level
-      (let (found)
-        (while (and errors (not found))
-          (setq found (eq (flycheck-error-level (pop errors)) level)))
-        found)
-    (when errors t)))
+(defun flycheck-has-errors-p (errors level)
+  "Determine if there are any ERRORS with LEVEL."
+  (let (found)
+    (while (and errors (not found))
+      (setq found (eq (flycheck-error-level (pop errors)) level)))
+    found))
 
 (defun flycheck-has-current-errors-p (&optional level)
   "Determine if the current buffer has errors with LEVEL.
 
 If LEVEL is omitted if the current buffer has any errors at all."
-  (flycheck-has-errors-p flycheck-current-errors level))
+  (if level
+      (flycheck-has-errors-p flycheck-current-errors level)
+    (and flycheck-current-errors t)))
 
 
 ;;; Error overlay management
