@@ -1513,30 +1513,31 @@ https://github.com/d11wtq/grizzl")))
     (`(eval ,_) t)
     (_ nil)))
 
-(defun flycheck-validate-next-checker (next-checker &optional validate-checker)
-  "Validate NEXT-CHECKER.
+(defun flycheck-validate-next-checker (next &optional strict)
+  "Validate NEXT checker.
 
-With VALIDATE-CHECKER not nil, also validate the actual checker
-being referred to.  Otherwise just validate the general shape and
-the predicate.
+With STRICT non-nil, also check whether the syntax checker and
+the error level in NEXT are valid.  Otherwise just check whether
+these are symbols.
 
-Signal an error if NEXT-CHECKER is not a valid entry for
+Signal an error if NEXT is not a valid entry for
 `:next-checkers'."
-  (let ((checker (pcase next-checker
-                   ((pred symbolp) next-checker)
-                   (`(no-errors . ,(pred symbolp)) (cdr next-checker))
-                   (`(warnings-only . ,(pred symbolp)) (cdr next-checker))
-                   (`(,predicate . ,(pred symbolp))
-                    (error "%S must be one of `no-errors' or `warnings-only'"
-                           predicate))
-                   (`(_ . ,checker)
-                    (error "%S must be a syntax checker symbol" checker))
-                   (_ (error "%S must be a symbol or a cons cell"
-                             next-checker)))))
-    (when (and validate-checker
-               (not (flycheck-valid-checker-p checker)))
-      (error "%s is not a valid Flycheck syntax checker" checker))
-    t))
+  (when (symbolp next)
+    (setq next (cons t next)))
+  (pcase next
+    (`(,level . ,checker)
+     (if strict
+         (progn
+           (unless (or (eq level t) (flycheck-error-level-p level))
+             (error "%S is not a valid Flycheck error level" level))
+           (unless (flycheck-valid-checker-p checker)
+             (error "%s is not a valid Flycheck syntax checker" checker)))
+       (unless (symbolp level)
+         (error "Error level %S must be a symbol" level))
+       (unless (symbolp checker)
+         (error "Checker %S must be a symbol" checker))))
+    (_ (error "%S must be a symbol or cons cell" next)))
+  t)
 
 (defconst flycheck-checker-version 1
   "The internal version of syntax checker declarations.
@@ -1690,22 +1691,18 @@ be registered in `flycheck-checkers'.
      An unquoted list defining the syntax checker to run after
      this syntax checker.
 
-     Flycheck tries all items in order of declaration.  Each ITEM
-     is either a syntax checker symbol, or a cons
-     cell `(PREDICATE . CHECKER)'.
+     Each ITEM is a cons cell `(LEVEL . CHECKER)'.  CHECKER is a
+     syntax checker to run after this syntax checker.  LEVEL is
+     an error level.  CHECKER will only be used if there are no
+     current errors of at least LEVEL.  LEVEL may also be t, in
+     which case CHECKER is used regardless of the current errors.
 
-     In the former case, the syntax checker is always considered.
-     In the later case, CHECKER is only considered if the
-     PREDICATE matches.
+     ITEM may also be a syntax checker symbol, which is
+     equivalent to `(t . ITEM)'.
 
-     PREDICATE is either `no-errors' or `warnings-only'.  With
-     `no-errors' CHECKER is only considered if this checker
-     reported no errors or warnings at all.  With `warnings-only'
-     CHECKER is only considered if this checker reported only
-     warnings, but no errors.
-
-     The first registered and available syntax checker with
-     matching predicate is executed after this checker."
+     Flycheck tries all items in order of declaration, and uses
+     the first whose LEVEL matches and whose CHECKER is
+     registered and can be used for the current buffer."
   (declare (indent 1)
            (doc-string 2))
   (let ((modes (plist-get properties :modes))
@@ -1817,30 +1814,30 @@ This variable is an option for the syntax checker `%s'." docstring checker)
 
 
 ;;; Checker extensions
-(defun flycheck-add-next-checker (checker next-checker &optional append)
-  "Add a NEXT-CHECKER after CHECKER.
+(defun flycheck-add-next-checker (checker next &optional append)
+  "Add a NEXT checker after CHECKER.
 
-CHECKER is a syntax checker symbol, to which to add NEXT-CHECKER.
+CHECKER is a syntax checker symbol, to which to add NEXT checker.
 
-NEXT-CHECKER describes the syntax checker to run after CHECKER.
-It is a either a syntax checker symbol, or a cons
-cell `(PREDICATE . CHECKER)'.  In the former case, always
-consider the syntax checker.  In the later case, only consider
-CHECKER if the PREDICATE matches.  PREDICATE is either `no-errors'
-or `warnings-only'.  In the former case, CHECKER is only
-considered if this checker reported no errors or warnings at all,
-in the latter case, CHECKER is only considered if this checker
-reported only warnings, but no errors.
+NEXT is a cons cell `(LEVEL . NEXT-CHECKER)'.  NEXT-CHECKER is a
+symbol denoting the syntax checker to run after CHECKER.  LEVEL
+is an error level.  NEXT-CHECKER will only be used if there is no
+current error whose level is more severe than LEVEL.  LEVEL may
+also be t, in which case NEXT-CHECKER is used regardless of the
+current errors.
 
-NEXT-CHECKER is prepended before other checkers to run after
-CHECKER, unless APPEND is non-nil."
+NEXT can also be a syntax checker symbol only, which is
+equivalent to `(t . NEXT)'.
+
+NEXT-CHECKER is prepended before other next checkers, unless
+APPEND is non-nil."
   (unless (flycheck-valid-checker-p checker)
     (error "%s is not a valid syntax checker" checker))
-  (flycheck-validate-next-checker next-checker 'validate-checker)
+  (flycheck-validate-next-checker next 'strict)
   (if append
       (put checker 'flycheck-next-checkers
-           (append (get checker 'flycheck-next-checkers) (list next-checker)))
-    (push next-checker (get checker 'flycheck-next-checkers))))
+           (append (get checker 'flycheck-next-checkers) (list next)))
+    (push next (get checker 'flycheck-next-checkers))))
 
 
 ;;; Checker API
@@ -2251,13 +2248,10 @@ Try to reinstall the package defining this syntax checker." checker)
   "Determine whether NEXT-CHECKER may be used."
   (when (symbolp next-checker)
     (push t next-checker))
-  (let ((predicate (car next-checker))
+  (let ((level (car next-checker))
         (next-checker (cdr next-checker)))
-    (and (or (eq predicate t)
-             (and (eq predicate 'no-errors)
-                  (not (flycheck-has-current-errors-p)))
-             (and (eq predicate 'warnings-only)
-                  (not (flycheck-has-current-errors-p 'error))))
+    (and (or (eq level t)
+             (flycheck-has-max-current-errors-p level))
          (flycheck-enabled-checker-p next-checker)
          (flycheck-may-use-checker next-checker))))
 
@@ -4443,7 +4437,7 @@ See URL `http://clang.llvm.org/'."
     (flycheck-fold-include-errors
      (flycheck-sanitize-errors errors) "In file included from"))
   :modes (c-mode c++-mode)
-  :next-checkers ((warnings-only . c/c++-cppcheck)))
+  :next-checkers ((warning . c/c++-cppcheck)))
 
 (flycheck-def-option-var flycheck-gcc-definitions nil c/c++-gcc
   "Additional preprocessor definitions for GCC.
@@ -4562,7 +4556,7 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
     (flycheck-fold-include-errors
      (flycheck-sanitize-errors errors) "In file included from"))
   :modes (c-mode c++-mode)
-  :next-checkers ((warnings-only . c/c++-cppcheck)))
+  :next-checkers ((warning . c/c++-cppcheck)))
 
 (flycheck-def-option-var flycheck-cppcheck-checks '("style") c/c++-cppcheck
   "Enabled checks for Cppcheck.
@@ -4650,7 +4644,7 @@ See URL `http://coffeescript.org/'."
   ((error line-start (file-name) ":" line ":" column
           ": error: " (message) line-end))
   :modes coffee-mode
-  :next-checkers ((warnings-only . coffee-coffeelint)))
+  :next-checkers ((warning . coffee-coffeelint)))
 
 (flycheck-def-config-file-var flycheck-coffeelintrc coffee-coffeelint
                               ".coffeelint.json"
@@ -5106,12 +5100,12 @@ See URL `http://golang.org/cmd/gofmt/'."
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ": " (message) line-end))
   :modes go-mode
-  :next-checkers ((no-errors . go-golint)
+  :next-checkers ((warning . go-golint)
                   ;; Fall back, if go-golint doesn't exist
-                  (no-errors . go-vet)
+                  (warning . go-vet)
                   ;; Fall back, if go-vet doesn't exist
-                  (no-errors . go-build) (no-errors . go-test)
-                  (no-errors . go-errcheck)))
+                  (warning . go-build) (warning . go-test)
+                  (warning . go-errcheck)))
 
 (flycheck-define-checker go-golint
   "A Go style checker using Golint.
@@ -5181,7 +5175,7 @@ See URL `http://golang.org/cmd/go'."
   :predicate (lambda ()
                (and (flycheck-buffer-saved-p)
                     (not (string-suffix-p "_test.go" (buffer-file-name)))))
-  :next-checkers ((no-errors . go-errcheck)))
+  :next-checkers ((warning . go-errcheck)))
 
 (flycheck-define-checker go-test
   "A Go syntax and type checker using the `go test' command.
@@ -5199,7 +5193,7 @@ See URL `http://golang.org/cmd/go'."
   :predicate
   (lambda () (and (flycheck-buffer-saved-p)
                   (string-suffix-p "_test.go" (buffer-file-name))))
-  :next-checkers ((no-errors . go-errcheck)))
+  :next-checkers ((warning . go-errcheck)))
 
 (flycheck-define-checker go-errcheck
   "A Go checker for unchecked errors.
@@ -5328,7 +5322,7 @@ See URL `http://www.haskell.org/ghc/'."
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-dedent-error-messages errors)))
   :modes haskell-mode
-  :next-checkers ((warnings-only . haskell-hlint)))
+  :next-checkers ((warning . haskell-hlint)))
 
 (flycheck-define-checker haskell-hlint
   "A Haskell style checker using hlint.
@@ -5561,8 +5555,8 @@ See URL `http://php.net/manual/en/features.commandline.php'."
   ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
           (message) " in " (file-name) " on line " line line-end))
   :modes (php-mode php+-mode)
-  :next-checkers ((warnings-only . php-phpmd)
-                  (warnings-only . php-phpcs)))
+  :next-checkers ((warning . php-phpmd)
+                  (warning . php-phpcs)))
 
 (flycheck-def-option-var flycheck-phpmd-rulesets
     '("cleancode" "codesize" "controversial" "design" "naming" "unusedcode")
@@ -5634,7 +5628,7 @@ See URL `http://puppetlabs.com/'."
           ": " (message (minimal-match (zero-or-more anything)))
           " at "  (file-name "/" (zero-or-more not-newline)) ":" line line-end))
   :modes puppet-mode
-  :next-checkers ((no-errors . puppet-lint)))
+  :next-checkers ((warning . puppet-lint)))
 
 (flycheck-define-checker puppet-lint
   "A Puppet DSL style checker using puppet-lint.
@@ -5842,7 +5836,7 @@ See URL `http://batsov.com/rubocop/'."
           (file-name) ":" line ":" column ": " (or "E" "F") ": " (message)
           line-end))
   :modes (enh-ruby-mode ruby-mode)
-  :next-checkers ((warnings-only . ruby-rubylint)))
+  :next-checkers ((warning . ruby-rubylint)))
 
 ;; Default to `nil' to let Rubylint find its configuration file by itself, and
 ;; to maintain backwards compatibility with older Rubylint and Flycheck releases
@@ -5890,7 +5884,7 @@ See URL `https://www.ruby-lang.org/'."
             " warning: " (message) line-end)
    (error line-start (file-name) ":" line ": " (message) line-end))
   :modes (enh-ruby-mode ruby-mode)
-  :next-checkers ((warnings-only . ruby-rubylint)))
+  :next-checkers ((warning . ruby-rubylint)))
 
 (flycheck-define-checker ruby-jruby
   "A Ruby syntax checker using the JRuby interpreter.
@@ -5909,7 +5903,7 @@ See URL `http://jruby.org/'."
    (warning line-start (file-name) ":" line " warning: " (message) line-end)
    (error line-start (file-name) ":" line ": " (message) line-end))
   :modes (enh-ruby-mode ruby-mode)
-  :next-checkers ((warnings-only . ruby-rubylint)))
+  :next-checkers ((warning . ruby-rubylint)))
 
 (flycheck-def-option-var flycheck-rust-check-tests t rust
   "Whether to check test code in Rust.
@@ -6032,7 +6026,7 @@ See URL `http://www.scala-lang.org/'."
   :error-patterns
   ((error line-start (file-name) ":" line ": error: " (message) line-end))
   :modes scala-mode
-  :next-checkers ((warnings-only . scala-scalastyle)))
+  :next-checkers ((warning . scala-scalastyle)))
 
 (flycheck-def-config-file-var flycheck-scalastylerc scala-scalastyle nil
   :safe #'stringp
@@ -6114,7 +6108,7 @@ See URL `http://www.gnu.org/software/bash/'."
                           (message) line-end))
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'bash))
-  :next-checkers ((no-errors . sh-shellcheck)))
+  :next-checkers ((warning . sh-shellcheck)))
 
 (flycheck-define-checker sh-posix-dash
   "A POSIX Shell syntax checker using the Dash shell.
@@ -6125,7 +6119,7 @@ See URL `http://gondor.apana.org.au/~herbert/dash/'."
   ((error line-start (file-name) ": " line ": " (backref 1) ": " (message)))
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'sh))
-  :next-checkers ((no-errors . sh-shellcheck)))
+  :next-checkers ((warning . sh-shellcheck)))
 
 (flycheck-define-checker sh-posix-bash
   "A POSIX Shell syntax checker using the Bash shell.
@@ -6139,7 +6133,7 @@ See URL `http://www.gnu.org/software/bash/'."
           (message) line-end))
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'sh))
-  :next-checkers ((no-errors . sh-shellcheck)))
+  :next-checkers ((warning . sh-shellcheck)))
 
 (flycheck-define-checker sh-zsh
   "A Zsh syntax checker using the Zsh shell.
@@ -6150,7 +6144,7 @@ See URL `http://www.zsh.org/'."
   ((error line-start (file-name) ":" line ": " (message) line-end))
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'zsh))
-  :next-checkers ((no-errors . sh-shellcheck)))
+  :next-checkers ((warning . sh-shellcheck)))
 
 (defconst flycheck-shellcheck-supported-shells '(bash ksh88 sh zsh)
   "Shells supported by Shellcheck.")
