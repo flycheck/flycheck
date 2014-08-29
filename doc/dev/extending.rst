@@ -329,8 +329,8 @@ CodeSniffer if there are no syntax errors:
      ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
              (message) " in " (file-name) " on line " line line-end))
      :modes (php-mode php+-mode)
-     :next-checkers ((warnings-only . php-phpcs)))
+     :next-checkers ((warning . php-phpcs)))
 
-Now PHP CodeSniffer will check the coding style, whenever a PHP syntax check did
-not result in any errors, if PHP CodeSniffer syntax checker is usable *and*
-registered.
+Now PHP CodeSniffer will check the coding style, but only if PHP CodeSniffer is
+a :term:`registered syntax checker`, and if `php` only emitted errors with
+`warning` level or less, that is, no errors.
