@@ -7,6 +7,8 @@ master (in development)
 
   - `html-tidy` is not enabled in Web Mode anymore [GH-464]
   - `d-dmd` now requires DMD 2.066 or newer [GH-460]
+  - `:next-checkers` now requires the maximum permissible level instead of a
+    custom predicate [GH-472]
 
 - New syntax checkers:
 
