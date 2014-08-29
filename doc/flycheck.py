@@ -36,26 +36,20 @@ from sphinxcontrib.emacs.directives.desc import EmacsLispSymbol
 from sphinxcontrib.emacs.lisp.util import parse_plist, parse_cons_cell
 
 
-class NextChecker(namedtuple('_NextChecker',
-                             'checker warnings_only no_errors')):
+class NextChecker(namedtuple('_NextChecker', 'checker maximum_level')):
 
     @classmethod
     def from_sexp(cls, sexp):
         if isinstance(sexp, Symbol):
-            return cls(checker=sexp.value(), warnings_only=False,
-                       no_errors=False)
+            return cls(checker=sexp.value(), maximum_level=None)
         else:
-            predicate, checker = parse_cons_cell(sexp)
+            level, checker = parse_cons_cell(sexp)
             if not isinstance(checker, Symbol):
                 raise ValueError('Invalid checker: ' + repr(checker))
-            if not isinstance(predicate, Symbol):
-                raise ValueError('Invalid predicate: ' + repr(predicate))
-            predicate = predicate.value()
-            if predicate not in {'no-errors', 'warnings-only'}:
-                raise ValueError('Invalid predicate: ' + repr(predicate))
+            if not isinstance(level, Symbol):
+                raise ValueError('Invalid level: ' + repr(level))
             return cls(checker=checker.value(),
-                       warnings_only=predicate == 'warnings-only',
-                       no_errors=predicate == 'no-errors')
+                       maximum_level=level.value())
 
 
 def parse_next_checkers(properties):
@@ -156,10 +150,9 @@ class FlycheckChecker(EmacsLispSymbol):
                                   classes=['xref', 'el', 'el-flyc-checker'])
             para = nodes.paragraph()
             para += xref
-            if next_checker.warnings_only:
-                para += nodes.Text(', if there are only warnings')
-            if next_checker.no_errors:
-                para += nodes.Text(', if there are no errors')
+            if next_checker.maximum_level:
+                para += nodes.Text(', if there are no errors above level ')
+                para += nodes.literal('', next_checker.maximum_level)
             checker_list += nodes.list_item('', para)
         return chaining
 
