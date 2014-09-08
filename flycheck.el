@@ -3995,7 +3995,7 @@ This function requires the Google This library from URL
           (user-error "More than %s messages at point"
                       flycheck-google-max-messages))
         (dolist (msg messages)
-          (google-string quote-flag msg 'no-confirm)))
+          (google-this-string quote-flag msg 'no-confirm)))
     (user-error "Please install Google This from \
 https://github.com/Bruce-Connor/emacs-google-this")))
 
