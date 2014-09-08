@@ -3987,7 +3987,7 @@ of `google-wrap-in-quotes'.
 This function requires the Google This library from URL
 `https://github.com/Bruce-Connor/emacs-google-this'."
   (interactive "d\nP")
-  (if (fboundp 'google-string)
+  (if (fboundp 'google-this-string)
       (let ((messages (delq nil (mapcar #'flycheck-error-message
                                         (flycheck-overlay-errors-at pos)))))
         (when (and flycheck-google-max-messages
