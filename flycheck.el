@@ -818,7 +818,7 @@ currently listed."
       :style toggle :selected flycheck-mode
       ;; Don't let users toggle the mode if there is no syntax checker for this
       ;; buffer
-      :enable (flycheck-get-checker-for-buffer)]
+      :enable (or flycheck-mode (flycheck-get-checker-for-buffer))]
      ["Check current buffer" flycheck-buffer flycheck-mode]
      ["Clear errors in buffer" flycheck-clear t]
      "---"
