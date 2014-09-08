@@ -4656,7 +4656,6 @@ Why not:
                                                     ruby-rubylint)))
   (flycheck-test-should-syntax-check
    "checkers/ruby-warnings.rb" 'ruby-mode
-   '(1 1 info "Missing utf-8 encoding comment." :checker ruby-rubocop)
    '(1 1 info "Use snake_case for source file names." :checker ruby-rubocop)
    '(3 1 info "Missing top-level class documentation comment."
        :checker ruby-rubocop)
@@ -4685,7 +4684,6 @@ Why not:
         (flycheck-disabled-checkers '(ruby-rubylint)))
     (flycheck-test-should-syntax-check
      "checkers/ruby-warnings.rb" 'ruby-mode
-     '(1 1 info "Missing utf-8 encoding comment." :checker ruby-rubocop)
      '(1 1 info "Use snake_case for source file names." :checker ruby-rubocop)
      '(3 1 info "Missing top-level class documentation comment."
          :checker ruby-rubocop)
