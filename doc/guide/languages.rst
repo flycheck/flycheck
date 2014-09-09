@@ -495,6 +495,12 @@ Racket
 .. flyc-checker:: racket
    :auto:
 
+RPM Spec file
+======
+
+.. flyc-checker:: rpm-spec
+   :auto:
+
 ReStructuredText
 ================
 
