@@ -2417,6 +2417,8 @@ CHECKER will be used, even if it is not contained in
        (list nil)
      (list (read-flycheck-checker "Select checker: " flycheck-last-checker))))
   (when (not (eq checker flycheck-checker))
+    (unless (flycheck-may-use-checker checker)
+      (user-error "Can't use syntax checker %S in this buffer" checker))
     (setq flycheck-checker checker)
     (when flycheck-mode
       (flycheck-buffer))))
