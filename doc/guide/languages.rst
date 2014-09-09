@@ -495,6 +495,12 @@ Racket
 .. flyc-checker:: racket
    :auto:
 
+RPM SPEC
+========
+
+.. flyc-checker:: rpm-rpmlint
+   :auto:
+
 ReStructuredText
 ================
 

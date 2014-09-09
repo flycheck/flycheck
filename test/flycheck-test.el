@@ -4559,6 +4559,13 @@ Why not:
    "checkers/racket-syntax-error.rkt" 'racket-mode
    '(4 2 error "read: expected a `)' to close `('" :checker racket)))
 
+(ert-deftest flycheck-define-checker/rpm-rpmlint ()
+  :tags '(builtin-checker external-tool language-rpm)
+  (skip-unless (flycheck-check-executable 'rpm-rpmlint))
+  (flycheck-test-should-syntax-check
+   "checkers/rpm-warning.spec" 'sh-mode
+   '(1 nil warning "no-%build-section" :checker rpm-rpmlint)))
+
 (ert-deftest flycheck-locate-sphinx-source-directory/not-in-a-sphinx-project ()
   :tags '(builtin-checker language-rst)
   (flycheck-test-with-resource-buffer "checkers/rst.rst"
