@@ -4564,11 +4564,7 @@ Why not:
   (skip-unless (flycheck-check-executable 'rpm-rpmlint))
   (flycheck-test-should-syntax-check
    "checkers/rpm-specfile.spec" 'sh-mode
-   '(1 nil warning "no-%build-section
-The spec file does not contain a %build section.  Even if some packages don't
-directly need it, section markers may be overridden in rpm's configuration to
-provide additional \"under the hood\" functionality, such as injection of
-automatic -debuginfo subpackages.  Add the section, even if empty." :checker rpm-rpmlint)))
+   '(1 nil warning "no-%build-section" :checker rpm-rpmlint)))
 
 (ert-deftest flycheck-locate-sphinx-source-directory/not-in-a-sphinx-project ()
   :tags '(builtin-checker language-rst)

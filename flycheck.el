@@ -5758,15 +5758,12 @@ See URL `http://racket-lang.org/'."
 See URL `http://sourceforge.net/projects/rpmlint/'."
   :command ("rpmlint" "--info" source)
   :error-patterns
-  ((error line-start (file-name) ":" (optional line ":") " E: " (message (regexp "\\(?:.+\n\\)+\n")))
-   (warning line-start (file-name) ":" (optional line ":") " W: " (message (regexp "\\(?:.+\n\\)+\n"))))
+  ((error line-start (file-name) ":" (optional line ":") " E: " (message) line-end)
+   (warning line-start (file-name) ":" (optional line ":") " W: " (message) line-end))
   :error-filter
+  ;; Add fake line numbers if they are missing in the lint output
   (lambda (errors)
     (dolist (err errors)
-      ;; Remove unnecessary spaces in message
-      (setf (flycheck-error-message err)
-            (string-trim (flycheck-error-message err)))
-      ;; Add fake line numbers if they are missing in the lint output
       (when (eq (flycheck-error-line err) nil)
         (setf (flycheck-error-line err) 1
               (flycheck-error-column err) nil)))
