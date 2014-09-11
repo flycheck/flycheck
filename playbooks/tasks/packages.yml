@@ -44,6 +44,8 @@
     # For DMD
     - gcc-multilib
     - xdg-utils
+    # For rpmlint
+    - python-rpm
 - name: Install syntax checker tools
   apt: name={{item}} state=latest install_recommends=false
   with_items:

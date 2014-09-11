@@ -28,3 +28,5 @@
     - include: tasks/gems.yml
     - include: tasks/java.yml
       sudo: True
+    - include: tasks/rpm.yml
+      sudo: True
