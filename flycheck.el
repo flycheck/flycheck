@@ -219,7 +219,7 @@ attention to case differences."
     python-flake8
     python-pylint
     racket
-    rpm-spec
+    rpm-rpmlint
     rst
     rst-sphinx
     ruby-rubocop
@@ -5752,7 +5752,7 @@ See URL `http://racket-lang.org/'."
   ((error line-start (file-name) ":" line ":" column ":" (message) line-end))
   :modes racket-mode)
 
-(flycheck-define-checker rpm-spec
+(flycheck-define-checker rpm-rpmlint
   "A RPM SPEC file syntax checker using rpmlint.
 
 See URL `http://sourceforge.net/projects/rpmlint/'."
@@ -5761,11 +5761,12 @@ See URL `http://sourceforge.net/projects/rpmlint/'."
   ((error line-start (file-name) ":" (optional line ":") " E: " (message (regexp "\\(?:.+\n\\)+\n")))
    (warning line-start (file-name) ":" (optional line ":") " W: " (message (regexp "\\(?:.+\n\\)+\n"))))
   :error-filter
-  ;; Add fake line numbers if they are missing in the lint output
   (lambda (errors)
     (dolist (err errors)
+      ;; Remove unnecessary spaces in message
       (setf (flycheck-error-message err)
             (string-trim (flycheck-error-message err)))
+      ;; Add fake line numbers if they are missing in the lint output
       (when (eq (flycheck-error-line err) nil)
         (setf (flycheck-error-line err) 1
               (flycheck-error-column err) nil)))

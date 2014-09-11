@@ -36,7 +36,6 @@
  (depends-on "rhtml-mode")
  (depends-on "rust-mode")
  (depends-on "sass-mode")
- (depends-on "shell-mode")
  (depends-on "scala-mode2")
  (depends-on "scss-mode")
  (depends-on "slim-mode")

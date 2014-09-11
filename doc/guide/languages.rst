@@ -498,7 +498,7 @@ Racket
 RPM Spec file
 ======
 
-.. flyc-checker:: rpm-spec
+.. flyc-checker:: rpm-rpmlint
    :auto:
 
 ReStructuredText
