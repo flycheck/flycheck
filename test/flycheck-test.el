@@ -4564,7 +4564,12 @@ Why not:
   (skip-unless (flycheck-check-executable 'rpm-rpmlint))
   (flycheck-test-should-syntax-check
    "checkers/rpm-warning.spec" 'sh-mode
-   '(1 nil warning "no-%build-section" :checker rpm-rpmlint)))
+   '(1 nil warning "no-cleaning-of-buildroot %install" :checker rpm-rpmlint)
+   '(1 nil warning "no-cleaning-of-buildroot %clean" :checker rpm-rpmlint)
+   '(1 nil warning "no-buildroot-tag" :checker rpm-rpmlint)
+   '(7 nil error "buildarch-instead-of-exclusivearch-tag x86_64"
+       :checker rpm-rpmlint)
+   '(22 nil warning "macro-in-%changelog %{_bindir}" :checker rpm-rpmlint)))
 
 (ert-deftest flycheck-locate-sphinx-source-directory/not-in-a-sphinx-project ()
   :tags '(builtin-checker language-rst)
