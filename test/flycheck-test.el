@@ -4563,7 +4563,7 @@ Why not:
   :tags '(builtin-checker external-tool language-rpm)
   (skip-unless (flycheck-check-executable 'rpm-rpmlint))
   (flycheck-test-should-syntax-check
-   "checkers/rpm-warning.spec" 'sh-mode
+   "checkers/rpm-warning.spec" '(sh-mode rpm-spec-mode)
    '(1 nil warning "no-cleaning-of-buildroot %install" :checker rpm-rpmlint)
    '(1 nil warning "no-cleaning-of-buildroot %clean" :checker rpm-rpmlint)
    '(1 nil warning "no-buildroot-tag" :checker rpm-rpmlint)

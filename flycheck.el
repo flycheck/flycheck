@@ -5771,8 +5771,10 @@ See URL `http://sourceforge.net/projects/rpmlint/'."
       (unless (flycheck-error-line err)
         (setf (flycheck-error-line err) 1)))
     errors)
-  :modes sh-mode
-  :predicate (lambda () (eq sh-shell 'rpm)))
+  :modes (sh-mode rpm-spec-mode)
+  :predicate (lambda () (or (not (eq major-mode 'sh-mode))
+                            ;; In `sh-mode', we need the proper shell
+                            (eq sh-shell 'rpm))))
 
 (defun flycheck-locate-sphinx-source-directory ()
   "Locate the Sphinx source directory for the current buffer.

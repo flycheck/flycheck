@@ -39,4 +39,5 @@
  (depends-on "scala-mode2")
  (depends-on "scss-mode")
  (depends-on "slim-mode")
- (depends-on "yaml-mode"))
+ (depends-on "yaml-mode")
+ (depends-on "rpm-spec-mode"))
