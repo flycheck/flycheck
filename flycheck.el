@@ -5756,7 +5756,7 @@ See URL `http://racket-lang.org/'."
   "A RPM SPEC file syntax checker using rpmlint.
 
 See URL `http://sourceforge.net/projects/rpmlint/'."
-  :command ("rpmlint" "--info" source)
+  :command ("rpmlint" source)
   :error-patterns
   ((error line-start
           (file-name) ":" (optional line ":") " E: " (message)
