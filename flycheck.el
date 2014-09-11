@@ -5768,9 +5768,8 @@ See URL `http://sourceforge.net/projects/rpmlint/'."
   ;; Add fake line numbers if they are missing in the lint output
   (lambda (errors)
     (dolist (err errors)
-      (when (eq (flycheck-error-line err) nil)
-        (setf (flycheck-error-line err) 1
-              (flycheck-error-column err) nil)))
+      (unless (flycheck-error-line err)
+        (setf (flycheck-error-line err) 1)))
     errors)
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'rpm)))
