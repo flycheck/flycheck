@@ -91,7 +91,6 @@ perform and problems they face.
    contrib/testing
    contrib/docs
    contrib/maintenance
-   credits
 
 Index
 =====
@@ -100,6 +99,12 @@ The index provides a sorted list of all symbols and concepts explained
 throughout Flycheck's documentation:
 
 - :ref:`genindex`
+
+Credits
+=======
+
+.. include:: ../CREDITS.rst
+   :start-line: 4
 
 Licensing
 =========
