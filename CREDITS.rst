@@ -40,6 +40,7 @@ greatly appreciated.
   logo.
 - `Mitch Tishmack`_ added support for Microsoft extensions to the Clang syntax
   checker.
+- `Omair Majid`_ added support for RPM spec files.
 - `Per Nordlöw`_ contributed a syntax checker for Fortran using GFortran, and
   helped to shape an Ada syntax checker with GNAT.
 - `Peter Vasil`_ contributed syntax checkers for XML, Lua and Go (using `go
@@ -99,6 +100,7 @@ somewhat failed attempt at on-the-fly syntax checking.
 .. _Matthias Dahl: https://github.com/BinaryKhaos
 .. _Matthias Güdemann: https://github.com/mgudemann
 .. _Mitch Tishmack: https://github.com/mitchty
+.. _Omair Majid: https://github.com/omajid
 .. _Per Nordlöw: https://github.com/nordlow
 .. _Peter Vasil: https://github.com/ptrv
 .. _Robert Dallas Gray: https://github.com/rdallasgray

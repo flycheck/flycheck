@@ -13,6 +13,7 @@ master (in development)
 - New syntax checkers:
 
   - Coq
+  - RPM spec files with `rpmlint` [GH-480] [GH-481]
 
 - New features:
 
