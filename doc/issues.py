@@ -40,7 +40,7 @@ ISSUE_RE = re.compile(r'\[GH-(?P<id>\d+)\]')
 ISSUE_URL = 'https://github.com/flycheck/flycheck/issues/{id}'
 
 
-ISSUE_DOCUMENTS = ['changes']
+ISSUE_DOCUMENT_RES = ['^changes$', '^news/.*$']
 
 
 class IssueReferences(Transform):
@@ -49,7 +49,7 @@ class IssueReferences(Transform):
 
     def apply(self):
         docname = self.document.settings.env.docname
-        if docname not in ISSUE_DOCUMENTS:
+        if not any(re.search(p, docname) for p in ISSUE_DOCUMENT_RES):
             # Substitute in the change log only
             return
         for node in self.document.traverse(nodes.Text):
@@ -60,6 +60,7 @@ class IssueReferences(Transform):
             text = node.astext()
             new_nodes = []
             pos = 0
+
             for match in ISSUE_RE.finditer(text):
                 if match.start() > pos:
                     leading_text = text[pos:match.start()]

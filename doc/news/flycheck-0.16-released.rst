@@ -29,7 +29,7 @@ Breaking changes
 ================
 
 - The Hdevtools syntax checker was removed from Flycheck into a separate package
-  `flycheck-hdevtools`_ due to various issues (:issue:`275`).
+  `flycheck-hdevtools`_ due to various issues ([GH-275]).
 - Support for coffeelint 0.x is dropped.
 
 .. _flycheck-hdevtools: https://github.com/flycheck/flycheck-hdevtools
@@ -121,8 +121,8 @@ Improved error list
 ===================
 
 This release continues the improvements to the error list started in the last
-release.  The error list is now based on Tabulated List Mode (see :issue:`230`),
-to address a number of issues in the old Compile Mode-based error list
+release.  The error list is now based on Tabulated List Mode (see [GH-230]), to
+address a number of issues in the old Compile Mode-based error list
 (e.g. misleading commands and menu items such as “Recompile”).
 
 The new error list, which you can see in the screenshot above, fixes these

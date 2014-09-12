@@ -113,8 +113,6 @@ Public License.  A copy of the license can be obtained at
 @end quotation
 """.format(release=release, copyright=copyright)}
 
-extlinks = {'issue': ('https://github.com/flycheck/flycheck/issues/%s', '#')}
-
 emacs_lisp_load_path = [os.path.abspath(os.path.join(SOURCE_DIR, os.pardir))]
 
 info_xref = {'ert': 'http://www.gnu.org/software/emacs/manual/html_node/ert/'}
