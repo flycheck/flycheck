@@ -113,8 +113,7 @@ Public License.  A copy of the license can be obtained at
 @end quotation
 """.format(release=release, copyright=copyright)}
 
-extlinks = {'github': ('https://github.com/flycheck/flycheck/%s', None),
-            'issue': ('https://github.com/flycheck/flycheck/issues/%s', '#')}
+extlinks = {'issue': ('https://github.com/flycheck/flycheck/issues/%s', '#')}
 
 emacs_lisp_load_path = [os.path.abspath(os.path.join(SOURCE_DIR, os.pardir))]
 
