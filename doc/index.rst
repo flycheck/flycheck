@@ -93,6 +93,14 @@ perform and problems they face.
    contrib/maintenance
    credits
 
+Index
+=====
+
+The index provides a sorted list of all symbols and concepts explained
+throughout Flycheck's documentation:
+
+- :ref:`genindex`
+
 Licensing
 =========
 
@@ -129,11 +137,3 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode.
 
    gpl
    fdl
-
-Index
-=====
-
-The index provides a sorted list of all symbols and concepts explained
-throughout Flycheck's documentation:
-
-- :ref:`genindex`
