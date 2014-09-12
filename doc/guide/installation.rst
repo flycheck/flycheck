@@ -93,7 +93,9 @@ Use :kbd:`M-x flycheck-mode` to enable Flycheck in the current buffer, and
 :kbd:`M-x global-flycheck-mode` to enable Flycheck for the entire current Emacs
 session.
 
-To permanently enable Flycheck, add the following to your :file:`init.el`::
+To permanently enable Flycheck, add the following to your :file:`init.el`:
+
+.. code-block:: cl
 
     (add-hook 'after-init-hook #'global-flycheck-mode)
 

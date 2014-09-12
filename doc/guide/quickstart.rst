@@ -6,7 +6,9 @@ Enable Flycheck
 ===============
 
 Enable Flycheck globally by adding the following to your :file:`init.el`, and
-restart Emacs::
+restart Emacs:
+
+.. code-block:: cl
 
    (add-hook 'after-init-hook #'global-flycheck-mode)
 
