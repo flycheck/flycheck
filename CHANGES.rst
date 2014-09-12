@@ -13,6 +13,7 @@ master (in development)
 - New syntax checkers:
 
   - Coq
+  - RPM Spec file
 
 - New features:
 
