@@ -1,12 +1,15 @@
-=======================================
- Aug 12, 2014 — Flycheck 0.20 released
-=======================================
+===============
+ Flycheck 0.20
+===============
+
+:date: Aug 12, 2014
+:version: 0.20
 
 Flycheck 0.20 is out, with new syntax checkers, many new options, improvements
 and bug fixes, and some important breaking changes.
 
 This announcement covers the most important changes.  For details, please refer
-to :doc:`../changes`.
+to the :ref:`changelog`.
 
 .. contents:: Table of Contents
    :local:
@@ -143,5 +146,5 @@ The :flyc-checker:`emacs-lisp` checker does not longer choke when
 Get it
 ======
 
-Follow the :doc:`installation instructions <../guide/installation>`.  If you
-already have Flycheck installed, just update it from :kbd:`M-x list-packages`.
+Follow the :doc:`installation instructions <../installation>`.  If you already
+have Flycheck installed, just update it from :kbd:`M-x list-packages`.

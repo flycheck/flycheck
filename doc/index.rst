@@ -51,6 +51,7 @@ languages and syntax checking tools.
    guide/usage
    guide/languages
    guide/glossary
+   guide/releases/index
 
 Developer guide
 ===============
@@ -63,18 +64,6 @@ reference.
 
    dev/extending
    dev/api
-
-News
-====
-
-This part of the documentation has the latest news on Flycheck, the release
-notes, and the complete changelog.
-
-.. toctree::
-   :maxdepth: 1
-
-   news/index
-   changes
 
 Contributor guide
 =================

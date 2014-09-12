@@ -1,6 +1,9 @@
-=======================================
- Nov 15, 2013 – Flycheck 0.15 released
-=======================================
+===============
+ Flycheck 0.15
+===============
+
+:date: Nov 15, 2013
+:version: 0.15
 
 I have the honour and pleasure to announce a new release of Flycheck, the
 modern syntax-checking extension for Emacs.
@@ -14,8 +17,7 @@ modern syntax-checking extension for Emacs.
 
 It is three months since the last release, so this release brings quite a lot of
 changes.  For a complete list of all changes, please read the complete list of
-:ref:`changes <changes>`.  This article will just cover the most important
-changes.
+:ref:`changelog`.  This article will just cover the most important changes.
 
 .. _Zenburn: https://github.com/bbatsov/zenburn-emacs
 .. _Source Code Pro: https://github.com/adobe/source-code-pro

@@ -1,6 +1,9 @@
-=======================================
- Jun 12, 2014 — Flycheck 0.19 released
-=======================================
+===============
+ Flycheck 0.19
+===============
+
+:date: Jun 12, 2014
+:version: 0.19
 
 We are pleased to announce the release of Flycheck 0.19.
 

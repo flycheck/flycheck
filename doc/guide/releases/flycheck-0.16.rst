@@ -1,6 +1,9 @@
-=======================================
- Jan 12, 2014 — Flycheck 0.16 released
-=======================================
+=================
+  Flycheck 0.16
+=================
+
+:date: Jan 12, 2014
+:version: 0.16
 
 Time for a new release of Flycheck, the modern syntax-checking extension for
 Emacs:
@@ -17,7 +20,7 @@ checkers, a brand-new error list, and the ability to override the executables of
 syntax checkers.
 
 Let's go through the list of important changes.  For a detailed list, please
-read the :ref:`changelog <changes>`.
+read the :ref:`changelog`.
 
 .. _Source Code Pro: https://github.com/adobe/source-code-pro
 .. _Solarized Light: https://github.com/bbatsov/solarized-emacs
