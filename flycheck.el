@@ -219,6 +219,7 @@ attention to case differences."
     python-flake8
     python-pylint
     racket
+    rpm-rpmlint
     rst
     rst-sphinx
     ruby-rubocop
@@ -5752,6 +5753,30 @@ See URL `http://racket-lang.org/'."
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ":" (message) line-end))
   :modes racket-mode)
+
+(flycheck-define-checker rpm-rpmlint
+  "A RPM SPEC file syntax checker using rpmlint.
+
+See URL `http://sourceforge.net/projects/rpmlint/'."
+  :command ("rpmlint" source)
+  :error-patterns
+  ((error line-start
+          (file-name) ":" (optional line ":") " E: " (message)
+          line-end)
+   (warning line-start
+            (file-name) ":" (optional line ":") " W: " (message)
+            line-end))
+  :error-filter
+  ;; Add fake line numbers if they are missing in the lint output
+  (lambda (errors)
+    (dolist (err errors)
+      (unless (flycheck-error-line err)
+        (setf (flycheck-error-line err) 1)))
+    errors)
+  :modes (sh-mode rpm-spec-mode)
+  :predicate (lambda () (or (not (eq major-mode 'sh-mode))
+                            ;; In `sh-mode', we need the proper shell
+                            (eq sh-shell 'rpm))))
 
 (defun flycheck-locate-sphinx-source-directory ()
   "Locate the Sphinx source directory for the current buffer.
