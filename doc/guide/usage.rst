@@ -343,7 +343,25 @@ You can also completely customize error processing by hooking into Flycheck:
 If you hover a highlighted error with the mouse, a tooltip with the top-most
 error message will be shown.
 
-Flycheck also displays errors under point after a short delay:
+Ultimately, you can clear all reported errors at once:
+
+.. command:: flycheck-clear
+   :binding: C-c ! C
+
+   Clear all Flycheck errors and warnings in the current buffer.
+
+   You should not normally need this command, because Flycheck checks the buffer
+   periodically anyway.
+
+.. _Solarized: https://github.com/bbatsov/solarized-emacs
+.. _Zenburn: https://github.com/bbatsov/zenburn-emacs
+
+.. _error-messages:
+
+Error messages
+==============
+
+Flycheck also displays error messages under point after a short delay:
 
 .. option:: flycheck-display-errors-delay
    :auto:
@@ -388,8 +406,16 @@ ring or search them on Google:
 
    Requires the `Google This`_ library, which is available on MELPA_.
 
-.. option:: flycheck-google-max-messages
-   :auto:
+   .. option:: flycheck-google-max-messages
+      :auto:
+
+.. _Google This: https://github.com/Bruce-Connor/emacs-google-this
+.. _MELPA: http://melpa.milkbox.net/
+
+.. _error-list:
+
+Error list
+==========
 
 You can also show a list with all errors in the current buffer:
 
@@ -420,22 +446,6 @@ with :face:`flycheck-error-list-highlight-at-point` and
 
 .. face:: flycheck-error-list-highlight
    :auto:
-
-Ultimately, you can clear all reported errors at once:
-
-.. command:: flycheck-clear
-   :binding: C-c ! C
-
-   Clear all Flycheck errors and warnings in the current buffer.
-
-   You should not normally need this command, because Flycheck checks the buffer
-   periodically anyway.
-
-
-.. _Solarized: https://github.com/bbatsov/solarized-emacs
-.. _Zenburn: https://github.com/bbatsov/zenburn-emacs
-.. _Google This: https://github.com/Bruce-Connor/emacs-google-this
-.. _MELPA: http://melpa.milkbox.net/
 
 .. _error-navigation:
 
