@@ -404,6 +404,12 @@ You can also show a list with all errors in the current buffer:
    window, the error list is updated to show the errors of the new buffer or
    window.
 
+Every time the error list refreshes,
+:hook:`flycheck-error-list-after-refresh-hook` is run:
+
+.. hook:: flycheck-error-list-after-refresh-hook
+   :auto:
+
 When you move the point in the current buffer while the error list is visible,
 all errors at point and at the current line are highlighted in the error list
 with :face:`flycheck-error-list-highlight-at-point` and

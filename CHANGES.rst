@@ -20,6 +20,8 @@ master (in development)
   - Add `null-device` symbol for syntax checker commands
   - Add `flycheck-display-error-messages-unless-error-list` for
     `flycheck-error-display-function`
+  - Add `flycheck-error-list-after-refresh-hook` to run after the error list
+    refreshes
 
 - Improvements:
 

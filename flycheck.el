@@ -631,6 +631,17 @@ node `(elisp)Hooks'."
   :risky t
   :package-version '(flycheck . "0.20"))
 
+(defcustom flycheck-error-list-after-refresh-hook nil
+  "Functions to run after the error list was refreshed.
+
+This hook is run whenever the error list is refreshed.
+
+This variable is a normal hook.  See Info node `(elisp)Hooks'."
+  :group 'flycheck
+  :type 'hook
+  :risky t
+  :package-version '(flycheck . "0.21"))
+
 (defface flycheck-error
   '((((supports :underline (:style wave)))
      :underline (:style wave :color "Red1"))
@@ -3677,6 +3688,7 @@ list."
   (-when-let (window (flycheck-get-error-list-window t))
     (with-selected-window window
       (revert-buffer))
+    (run-hooks 'flycheck-error-list-after-refresh-hook)
     (flycheck-error-list-highlight-errors)))
 
 (defun flycheck-error-list-goto-error (&optional pos)
