@@ -519,6 +519,17 @@ enabled.  Changing it will not affect buffers which already have
   :package-version '(flycheck . "0.15")
   :safe #'booleanp)
 
+(defcustom flycheck-navigation-minimum-level 'info
+  "The minimum level of errors to show."
+  :group 'flycheck
+  :type '(radio
+          (const :tag "Informational" info)
+          (const :tag "Warnings" warning)
+          (const :tag "Errors" error)
+          (symbol :tag "User-provided symbol"))
+  :safe #'flycheck-error-level-p
+  :package-version '(flycheck . "0.21"))
+
 (defcustom flycheck-completion-system nil
   "The completion system to use.
 
@@ -3406,6 +3417,16 @@ Return the created overlay."
 
 
 ;;; Error navigation
+(defun flycheck-error-level-interesting-at-pos-p (pos)
+  "Check if error severity at POS passes `flycheck-error-level-interesting-p'."
+  (flycheck-error-level-interesting-p (get-char-property pos 'flycheck-error)))
+
+(defun flycheck-error-level-interesting-p (err)
+  "Check if ERR severity is >= `flycheck-navigation-minimum-level'."
+  (when (flycheck-error-p err)
+    (<= (flycheck-error-level-severity flycheck-navigation-minimum-level)
+        (flycheck-error-level-severity (flycheck-error-level err)))))
+
 (defun flycheck-next-error-pos (n &optional reset)
   "Get the position of the N-th next error.
 
@@ -3425,11 +3446,11 @@ there is none."
             ;; Move beyond from the current error if any
             (setq pos (next-single-char-property-change pos 'flycheck-error)))
           (while (not (or (= pos (point-max))
-                          (get-char-property pos 'flycheck-error)))
+                          (flycheck-error-level-interesting-at-pos-p pos)))
             ;; Scan for the next error
             (setq pos (next-single-char-property-change pos 'flycheck-error)))
           (when (and (= pos (point-max))
-                     (not (get-char-property pos 'flycheck-error)))
+                     (not (flycheck-error-level-interesting-at-pos-p pos)))
             ;; If we reached the end of the buffer, but no error, we didn't find
             ;; any
             (setq pos nil)))
@@ -3440,10 +3461,10 @@ there is none."
         ;; the current one, because `previous-single-char-property-change'
         ;; always moves to the position *of* the change.
         (while (not (or (= pos (point-min))
-                        (get-char-property (1- pos) 'flycheck-error)))
+                        (flycheck-error-level-interesting-at-pos-p (1- pos))))
           (setq pos (previous-single-char-property-change pos 'flycheck-error)))
         (when (and (= pos (point-min))
-                   (not (get-char-property pos 'flycheck-error)))
+                     (not (flycheck-error-level-interesting-at-pos-p pos)))
           ;; We didn't find any error.
           (setq pos nil))
         (when pos
