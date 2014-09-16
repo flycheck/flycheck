@@ -5735,6 +5735,11 @@ See URL `https://pypi.python.org/pypi/flake8'."
                               ".pylintrc"
   :safe #'stringp)
 
+(flycheck-def-option-var flycheck-pylint-enabled-messages-string nil python-pylint
+  "List of enabled pylint messages (strings).")
+(flycheck-def-option-var flycheck-pylint-disabled-messages-string nil python-pylint
+  "List of disabled pylint messages (strings).")
+
 (flycheck-define-checker python-pylint
   "A Python syntax and style checker using Pylint.
 
@@ -5743,6 +5748,10 @@ This syntax checker requires Pylint 1.0 or newer.
 See URL `http://www.pylint.org/'."
   ;; -r n disables the scoring report
   :command ("pylint" "-r" "n"
+            (option "--enable=" flycheck-pylint-enabled-messages-string concat
+                    flycheck-option-comma-separated-list)
+            (option "--disable=" flycheck-pylint-disabled-messages-string concat
+                    flycheck-option-comma-separated-list)
             "--msg-template" "{path}:{line}:{column}:{C}:{msg} ({msg_id})"
             (config-file "--rcfile" flycheck-pylintrc)
             ;; Need `source-inplace' for relative imports (e.g. `from .foo
