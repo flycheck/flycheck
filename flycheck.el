@@ -3689,7 +3689,11 @@ list."
     (with-selected-window window
       (revert-buffer))
     (run-hooks 'flycheck-error-list-after-refresh-hook)
-    (flycheck-error-list-highlight-errors)))
+    (let ((preserve-pos (eq (current-buffer)
+                            (get-buffer flycheck-error-list-buffer))))
+      ;; If the error list is the current buffer, don't recenter when
+      ;; highlighting
+      (flycheck-error-list-highlight-errors preserve-pos))))
 
 (defun flycheck-error-list-goto-error (&optional pos)
   "Go to the location of the error at POS in the error list.
@@ -3711,7 +3715,7 @@ POS defaults to `point'."
           (widen)
           (goto-char pos)))
       ;; Re-highlight the errors
-      (flycheck-error-list-highlight-errors))))
+      (flycheck-error-list-highlight-errors 'preserve-pos))))
 
 (defun flycheck-error-list-next-error-pos (pos &optional n)
   "Get the N'th next error in the error list from POS.
@@ -3758,8 +3762,13 @@ nil, if there is no next error."
   "Error highlight overlays in the error list buffer.")
 (put 'flycheck-error-list-highlight-overlays 'permanent-local t)
 
-(defun flycheck-error-list-highlight-errors ()
-  "Highlight errors in the error list."
+(defun flycheck-error-list-highlight-errors (&optional preserve-pos)
+  "Highlight errors in the error list.
+
+Highlight all errors in the error lists that are at point in the
+source buffer, and on the same line as point.  Then recenter the
+error list to the highlighted error, unless PRESERVE-POS is
+non-nil."
   (when (get-buffer flycheck-error-list-buffer)
     (let ((errors-at-line (flycheck-overlay-errors-in (line-beginning-position)
                                                       (line-end-position)))
@@ -3795,11 +3804,12 @@ nil, if there is no next error."
                   (setq next-error-pos end)))))
           ;; Delete the old overlays
           (mapc #'delete-overlay old-overlays)
-          ;; Move point to the middle error
-          (goto-char (+ min-point (/ (- max-point min-point) 2)))
-          (beginning-of-line)
-          ;; And recenter the error list at this position
-          (flycheck-error-list-recenter-at (point)))))))
+          (unless preserve-pos
+            ;; Move point to the middle error
+            (goto-char (+ min-point (/ (- max-point min-point) 2)))
+            (beginning-of-line)
+            ;; And recenter the error list at this position
+            (flycheck-error-list-recenter-at (point))))))))
 
 (defun flycheck-list-errors ()
   "Show the error list for the current buffer."
