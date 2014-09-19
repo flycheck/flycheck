@@ -5269,8 +5269,8 @@ See URL `https://github.com/kisielk/errcheck'."
   :modes go-mode
   :predicate
   (lambda ()
-    ;; We need a valid $GOPATH, since errcheck works on entire packages, whose
-    ;; names are relative to $GOPATH
+    ;; We need a valid package name, since errcheck only works on entire
+    ;; packages, and can't check individual Go files.
     (and (flycheck-buffer-saved-p) (flycheck-go-package-name))))
 
 (flycheck-define-checker haml
