@@ -4074,28 +4074,28 @@ See URL `https://github.com/flycheck/flycheck/issues/45' and URL
      '(8 nil error "undefined: fmt" :checker go-test))))
 
 (ert-deftest flycheck-go-package-name/no-gopath ()
-    :tags '(language-go)
-    (flycheck-test-with-env '(("GOPATH" . nil))
-      (should-not (flycheck-go-package-name
-                   (flycheck-test-resource-filename
-                    "checkers/go/src/errcheck/errcheck.go")))))
+  :tags '(language-go)
+  (flycheck-test-with-env '(("GOPATH" . nil))
+    (should-not (flycheck-go-package-name
+                 (flycheck-test-resource-filename
+                  "checkers/go/src/errcheck/errcheck.go")))))
 
 (ert-deftest flycheck-go-package-name/no-package-file ()
-    :tags '(language-go)
-    (flycheck-test-with-env
-        `(("GOPATH" . ,(flycheck-test-resource-filename "checkers/go")))
-      (should-not (flycheck-go-package-name
-                   (flycheck-test-resource-filename
-                    "checkers/emacs-lisp-syntax-error.el")))))
+  :tags '(language-go)
+  (flycheck-test-with-env
+      `(("GOPATH" . ,(flycheck-test-resource-filename "checkers/go")))
+    (should-not (flycheck-go-package-name
+                 (flycheck-test-resource-filename
+                  "checkers/emacs-lisp-syntax-error.el")))))
 
 (ert-deftest flycheck-go-package-name/package-file ()
-    :tags '(language-go)
-    (flycheck-test-with-env
-        `(("GOPATH" . ,(flycheck-test-resource-filename "checkers/go")))
-      (should (equal "errcheck"
-                     (flycheck-go-package-name
-                      (flycheck-test-resource-filename
-                       "checkers/go/src/errcheck/errcheck.go"))))))
+  :tags '(language-go)
+  (flycheck-test-with-env
+      `(("GOPATH" . ,(flycheck-test-resource-filename "checkers/go")))
+    (should (equal "errcheck"
+                   (flycheck-go-package-name
+                    (flycheck-test-resource-filename
+                     "checkers/go/src/errcheck/errcheck.go"))))))
 
 (ert-deftest flycheck-define-checker/go-errcheck ()
   :tags '(builtin-checker external-tool language-go)
