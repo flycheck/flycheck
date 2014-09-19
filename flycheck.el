@@ -3721,8 +3721,7 @@ instead.
 
 Get the beginning position of the N'th next error from POS, or
 nil, if there is no next error."
-  (let ((n (or n 1))
-        )
+  (let ((n (or n 1)))
     (if (>= n 0)
         ;; Search forward
         (while (and pos (/= n 0))
