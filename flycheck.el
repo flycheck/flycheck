@@ -5219,24 +5219,59 @@ See URL `http://golang.org/cmd/go'."
                   (string-suffix-p "_test.go" (buffer-file-name))))
   :next-checkers ((warning . go-errcheck)))
 
+(defun flycheck-go-package-name (&optional file-name gopath)
+  "Determine the package name for FILE-NAME and GOPATH.
+
+FILE-NAME defaults to `buffer-file-name'.  GOPATH defaults to
+$GOPATH.
+
+Return the package name for FILE-NAME, or nil if FILE-NAME is not
+part of any package or if GOPATH is nil."
+  (-when-let* ((gopath (or gopath (getenv "GOPATH")))
+               (file-name (or file-name (buffer-file-name))))
+    (let ((gosrc (file-name-as-directory (expand-file-name "src/" gopath)))
+          (file-name (expand-file-name file-name)))
+      (when (string-prefix-p gosrc file-name)
+        ;; The file is part of a package, so determine the package name, as
+        ;; relative file name to the GO source directory
+        (directory-file-name            ; Remove trailing /
+         (file-relative-name (file-name-directory file-name) gosrc))))))
+
 (flycheck-define-checker go-errcheck
   "A Go checker for unchecked errors.
 
 See URL `https://github.com/kisielk/errcheck'."
-  :command ("errcheck" ".")
+  :command ("errcheck" (eval (flycheck-go-package-name)))
   :error-patterns
-  ((warning line-start (file-name) ":" line ":" column (one-or-more "\t") (message) line-end))
+  ((warning line-start
+            (file-name) ":" line ":" column (one-or-more "\t")
+            (message)
+            line-end))
   :error-filter
   (lambda (errors)
-    (let ((errors (flycheck-sanitize-errors errors)))
+    (let ((errors (flycheck-sanitize-errors errors))
+          (gosrc (expand-file-name "src/" (getenv "GOPATH"))))
       (dolist (err errors)
+        ;; File names are relative to the Go source directory, so we need to
+        ;; unexpand and re-expand them
+        (setf (flycheck-error-filename err)
+              (expand-file-name
+               ;; Get the relative name back, since Flycheck has already
+               ;; expanded the name for us
+               (file-relative-name (flycheck-error-filename err))
+               ;; And expand it against the Go source directory
+               gosrc))
         (-when-let (message (flycheck-error-message err))
           ;; Improve the messages reported by errcheck to make them more clear.
           (setf (flycheck-error-message err)
                 (format "Ignored `error` returned from `%s`" message)))))
     errors)
   :modes go-mode
-  :predicate flycheck-buffer-saved-p)
+  :predicate
+  (lambda ()
+    ;; We need a valid $GOPATH, since errcheck works on entire packages, whose
+    ;; names are relative to $GOPATH
+    (and (flycheck-buffer-saved-p) (flycheck-go-package-name))))
 
 (flycheck-define-checker haml
   "A Haml syntax checker using the Haml compiler.
