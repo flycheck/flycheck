@@ -209,6 +209,7 @@ attention to case differences."
     less
     lua
     make
+    ocaml-ocamlc
     perl
     perl-perlcritic
     php
@@ -5562,6 +5563,24 @@ See URL `http://pubs.opengroup.org/onlinepubs/9699919799/utilities/make.html'."
    ;; http://www.openbsd.org/cgi-bin/man.cgi?query=make
    (error line-start (message) " (" (file-name) ":" line ")" line-end))
   :modes (makefile-mode makefile-gmake-mode makefile-bsdmake-mode))
+
+(flycheck-define-checker ocaml-ocamlc
+  "An OCaml syntax checker using the OCaml bytecode compiler.
+
+See URL `http://ocaml.org/'."
+  :command ("ocamlc" "-w" "+a" "-c" source)
+  :error-patterns
+  ((warning line-start
+            "File \"" (file-name) "\", line " line ", characters " column
+            "-" (one-or-more digit) ":\n"
+            "Warning " (one-or-more digit) ": " (message)
+            line-end)
+   (error line-start
+          "File \"" (file-name) "\", line " line ", characters " column
+          "-" (one-or-more digit) ":\n"
+          "Error: " (message)
+          line-end))
+  :modes (tuareg-mode))
 
 (flycheck-define-checker perl
   "A Perl syntax checker using the Perl interpreter.
