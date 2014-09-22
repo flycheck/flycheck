@@ -3046,7 +3046,7 @@ from the node list."
   "Parse an xml string from a region.
 
 Use libxml if Emacs is built with libxml support.  Otherwise fall
-back to `xml-parse-region'.")
+back to `xml-parse-region', via `flycheck-parse-xml-region'.")
 
 (defun flycheck-parse-xml-string (xml)
   "Parse an XML string.
