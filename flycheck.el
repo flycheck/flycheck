@@ -3804,13 +3804,12 @@ non-nil."
                   (setq next-error-pos end)))))
           ;; Delete the old overlays
           (mapc #'delete-overlay old-overlays)
-          (unless preserve-pos
-            (when errors-at-line
-              ;; Move point to the middle error
-              (goto-char (+ min-point (/ (- max-point min-point) 2)))
-              (beginning-of-line)
-              ;; And recenter the error list at this position
-              (flycheck-error-list-recenter-at (point)))))))))
+          (when (and errors-at-line (not preserve-pos))
+            ;; Move point to the middle error
+            (goto-char (+ min-point (/ (- max-point min-point) 2)))
+            (beginning-of-line)
+            ;; And recenter the error list at this position
+            (flycheck-error-list-recenter-at (point))))))))
 
 (defun flycheck-list-errors ()
   "Show the error list for the current buffer."
