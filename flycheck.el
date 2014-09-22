@@ -3804,7 +3804,7 @@ non-nil."
                   (setq next-error-pos end)))))
           ;; Delete the old overlays
           (mapc #'delete-overlay old-overlays)
-          (unless preserve-pos
+          (when (and errors-at-line (not preserve-pos))
             ;; Move point to the middle error
             (goto-char (+ min-point (/ (- max-point min-point) 2)))
             (beginning-of-line)
