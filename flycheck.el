@@ -3821,8 +3821,8 @@ non-nil."
     (with-current-buffer (get-buffer-create flycheck-error-list-buffer)
       (flycheck-error-list-mode)))
   (flycheck-error-list-set-source (current-buffer))
-  ;; Show the error list in a window, and re-select the old window
-  (display-buffer flycheck-error-list-buffer)
+  ;; Show the error list in a window and select it
+  (pop-to-buffer flycheck-error-list-buffer)
   ;; Finally, refresh the error list to show the most recent errors
   (flycheck-error-list-refresh))
 
