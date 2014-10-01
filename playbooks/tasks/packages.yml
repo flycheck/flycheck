@@ -48,7 +48,6 @@
   apt: name={{item}} state=latest install_recommends=false
   with_items:
     - asciidoc                    # asciidoc
-    - cfengine-community          # cfengine
     - chktex                      # tex-chktex
     - cppcheck                    # c/c++-cppcheck
     - coq                         # coq
@@ -71,6 +70,10 @@
     - verilator                   # verilog-verilator
     - xmlstarlet                  # xml-xmlstarlet
     - zsh                         # sh-zsh
+- name: Force-install CFEngine because their repo fails the signature check
+  apt: name={{item}} state=latest install_recommends=false force=yes
+  with_items:
+    - cfengine-community          # cfengine
 - name: Download DMD
   get_url: url=http://downloads.dlang.org/releases/2014/dmd_{{dmd_version}}.0-0_amd64.deb
            dest=/usr/src/dmd_{{dmd_version}}.0-0_amd64.deb
