@@ -18,11 +18,11 @@
   apt_key: url={{item}} state=present
   with_items:
     - http://packages.erlang-solutions.com/debian/erlang_solutions.asc
-    - http://cfengine.com/pub/gpg.key
+    - https://s3.amazonaws.com/cfengine.package-repos/pub/gpg.key
 - name: Update cache after adding PPAs
   apt: update_cache=true
 - name: Install language environments and package managers
-  apt: name={{item}} state=latest install_recommends=false
+  apt: name={{item}} state=latest install_recommends=false force=yes
   with_items:
     # Languages and package managers
     - cpanminus                   # For Perl packages
@@ -31,7 +31,7 @@
     - python-pip
     - erlang                      # For Erlang
 - name: Install additional dependencies
-  apt: name={{item}} state=latest install_recommends=false
+  apt: name={{item}} state=latest install_recommends=false force=yes
   with_items:
     - build-essential
     - unzip
@@ -47,7 +47,7 @@
     # For rpmlint
     - python-rpm
 - name: Install syntax checker tools
-  apt: name={{item}} state=latest install_recommends=false
+  apt: name={{item}} state=latest install_recommends=false force=yes
   with_items:
     - asciidoc                    # asciidoc
     - cfengine-community          # cfengine

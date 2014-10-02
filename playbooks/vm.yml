@@ -26,7 +26,7 @@
         - http://llvm.org/apt/llvm-snapshot.gpg.key
     - include: tasks/packages.yml
     - name: Install additional packages
-      apt: name={{item}} state=latest install_recommends=false
+      apt: name={{item}} state=latest install_recommends=false force=yes
       with_items:
         - clang-3.4
         - ruby1.9.1
@@ -36,7 +36,7 @@
     - name: Make Clang 3.4 the default Clang
       alternatives: name=clang link=/usr/bin/clang path=/usr/bin/clang-3.4
     - name: Install Emacs stable and snapshot
-      apt: name={{item}} state=latest install_recommends=false
+      apt: name={{item}} state=latest install_recommends=false force=yes
       with_items:
         - emacs24-nox
         - emacs-snapshot-nox
