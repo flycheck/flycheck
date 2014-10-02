@@ -20,7 +20,7 @@
     - http://packages.erlang-solutions.com/debian/erlang_solutions.asc
     - https://s3.amazonaws.com/cfengine.package-repos/pub/gpg.key
 - name: Update cache after adding PPAs
-  apt: update_cache=true
+  apt: update_cache=true force=yes
 - name: Install language environments and package managers
   apt: name={{item}} state=latest install_recommends=false force=yes
   with_items:
