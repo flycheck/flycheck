@@ -100,8 +100,9 @@ For syntax checkers, some special guidelines apply in addition to the above:
 - Add a proper docstring to your syntax checker, including this URL.
 - Add unit tests for your syntax checker, or provide example code that triggers
   errors for each error pattern of the syntax checker.
-- Extend `install-travis.sh` to install the required tools in the CI
-  environment, or explain how to install the tool on an Ubuntu 12.04 system.
+- Extend the Ansible playbooks in `playbooks/` to install the required tools in
+  the CI environment and the local testing VM, or explain how to install the
+  tool on an Ubuntu 12.04 system.
 
 .. note::
 
