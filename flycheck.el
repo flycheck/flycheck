@@ -4583,8 +4583,8 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
           ": " (or "fatal error" "error") ": " (message) line-end))
   :error-filter
   (lambda (errors)
-    (flycheck-fold-include-errors
-     (flycheck-sanitize-errors errors) "In file included from"))
+    (flycheck-fold-include-errors (flycheck-sanitize-errors errors)
+                                  "In file included from"))
   :modes (c-mode c++-mode)
   :next-checkers ((warning . c/c++-cppcheck)))
 
