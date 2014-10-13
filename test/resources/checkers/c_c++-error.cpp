@@ -9,4 +9,5 @@ int main(void) {
 #endif
     int *foo = nullptr;
     return 0;
+#error
 }

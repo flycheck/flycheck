@@ -3283,7 +3283,8 @@ of the file will be interrupted because there are too many #ifdef configurations
      "checkers/c_c++-warning.c" 'c-mode
      '(5 10 warning "unused variable 'unused'" :checker c/c++-clang)
      '(7 15 warning "comparison of integers of different signs: 'int' and 'unsigned int'"
-         :checker c/c++-clang))))
+         :checker c/c++-clang)
+     '(8 7 warning "no message" :checker c/c++-clang))))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-warning-customized ()
   :tags '(builtin-checker external-tool language-c)
@@ -3296,7 +3297,8 @@ of the file will be interrupted because there are too many #ifdef configurations
      "checkers/c_c++-warning.c" 'c-mode
      '(3 5 warning "no previous prototype for function 'f'"
          :checker c/c++-clang)
-     '(5 10 warning "unused variable 'unused'" :checker c/c++-clang))))
+     '(5 10 warning "unused variable 'unused'" :checker c/c++-clang)
+     '(8 7 warning "no message" :checker c/c++-clang))))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-fatal-error ()
   :tags '(builtin-checker external-tool language-c)
@@ -3338,7 +3340,9 @@ of the file will be interrupted because there are too many #ifdef configurations
     (flycheck-test-should-syntax-check
      "checkers/c_c++-error.cpp" 'c++-mode
      '(10 16 error "use of undeclared identifier 'nullptr'"
-          :checker c/c++-clang))))
+          :checker c/c++-clang)
+     '(12 2 error "no message" :checker c/c++-clang)
+     )))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-error ()
   :tags '(builtin-checker external-tool language-c++)
@@ -3350,7 +3354,8 @@ of the file will be interrupted because there are too many #ifdef configurations
      '(8 17 error "implicit instantiation of undefined template 'test<false>'"
          :checker c/c++-clang)
      '(10 16 error "use of undeclared identifier 'nullptr'"
-          :checker c/c++-clang))))
+          :checker c/c++-clang)
+     '(12 2 error "no message" :checker c/c++-clang))))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-error-template ()
   :tags '(builtin-checker external-tool language-c++)
@@ -3372,7 +3377,8 @@ of the file will be interrupted because there are too many #ifdef configurations
      "checkers/c_c++-error.cpp" 'c++-mode
      '(3 23 info "template is declared here" :checker c/c++-clang)
      '(8 17 error "implicit instantiation of undefined template 'test<false>'"
-         :checker c/c++-clang))))
+         :checker c/c++-clang)
+     '(12 2 error "no message" :checker c/c++-clang))))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-error-definitions ()
   :tags '(builtin-checker external-tool language-c++)
@@ -3382,7 +3388,8 @@ of the file will be interrupted because there are too many #ifdef configurations
     (flycheck-test-should-syntax-check
      "checkers/c_c++-error.cpp" 'c++-mode
      '(10 16 error "use of undeclared identifier 'nullptr'"
-          :checker c/c++-clang))))
+          :checker c/c++-clang)
+     '(12 2 error "no message" :checker c/c++-clang))))
 
 (ert-deftest flycheck-define-checker/c/c++-clang-ms-extensions-disabled ()
   :tags '(builtin-checker external-tool language-c)
@@ -3457,7 +3464,8 @@ of the file will be interrupted because there are too many #ifdef configurations
      "checkers/c_c++-warning.c" 'c-mode
      '(5 10 warning "unused variable ‘unused’" :checker c/c++-gcc)
      '(7 15 warning "comparison between signed and unsigned integer expressions"
-         :checker c/c++-gcc))))
+         :checker c/c++-gcc)
+     '(8 7 warning "#warning" :checker c/c++-gcc))))
 
 (ert-deftest flycheck-define-checker/c/c++-gcc-warning-customized ()
   :tags '(builtin-checker external-tool language-c)
@@ -3470,7 +3478,8 @@ of the file will be interrupted because there are too many #ifdef configurations
      "checkers/c_c++-warning.c" 'c-mode
      '(3 5 warning "no previous prototype for ‘f’"
          :checker c/c++-gcc)
-     '(5 10 warning "unused variable ‘unused’" :checker c/c++-gcc))))
+     '(5 10 warning "unused variable ‘unused’" :checker c/c++-gcc)
+     '(8 7 warning "#warning" :checker c/c++-gcc))))
 
 (ert-deftest flycheck-define-checker/c/c++-gcc-fatal-error ()
   :tags '(builtin-checker external-tool language-c)
@@ -3515,7 +3524,8 @@ of the file will be interrupted because there are too many #ifdef configurations
      '(10 10 warning "unused variable ‘foo’"
           :checker c/c++-gcc)
      '(10 16 error "‘nullptr’ was not declared in this scope"
-          :checker c/c++-gcc))))
+          :checker c/c++-gcc)
+     '(12 2 error "#error" :checker c/c++-gcc))))
 
 (ert-deftest flycheck-define-checker/c/c++-gcc-error ()
   :tags '(builtin-checker external-tool language-c++)
@@ -3530,7 +3540,8 @@ of the file will be interrupted because there are too many #ifdef configurations
      '(10 10 warning "unused variable ‘foo’"
           :checker c/c++-gcc)
      '(10 16 error "‘nullptr’ was not declared in this scope"
-          :checker c/c++-gcc))))
+          :checker c/c++-gcc)
+     '(12 2 error "#error" :checker c/c++-gcc))))
 
 (ert-deftest flycheck-define-checker/c/c++-gcc-error-template ()
   :tags '(builtin-checker external-tool language-c++)
@@ -3550,8 +3561,8 @@ of the file will be interrupted because there are too many #ifdef configurations
      "checkers/c_c++-error.cpp" 'c++-mode
      '(8 17 error "aggregate ‘test<false> t’ has incomplete type and cannot be defined"
          :checker c/c++-gcc)
-     '(10 10 warning "unused variable ‘foo’"
-          :checker c/c++-gcc))))
+     '(10 10 warning "unused variable ‘foo’" :checker c/c++-gcc)
+     '(12 2 error "#error" :checker c/c++-gcc))))
 
 (ert-deftest flycheck-define-checker/c/c++-gcc-error-definitions ()
   :tags '(builtin-checker external-tool language-c++)
@@ -3565,7 +3576,8 @@ of the file will be interrupted because there are too many #ifdef configurations
      '(10 10 warning "unused variable ‘foo’"
           :checker c/c++-gcc)
      '(10 16 error "‘nullptr’ was not declared in this scope"
-          :checker c/c++-gcc))))
+          :checker c/c++-gcc)
+     '(12 2 error "#error" :checker c/c++-gcc))))
 
 (ert-deftest flycheck-define-checker/c/c++-gcc-error-no-exceptions ()
   :tags '(builtin-checker external-tool language-c++)

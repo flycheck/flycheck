@@ -4451,15 +4451,21 @@ See URL `http://clang.llvm.org/'."
           (message "In file included from") " " (file-name) ":" line ":"
           line-end)
    (info line-start (file-name) ":" line ":" column
-         ": note: " (message) line-end)
+         ": note: " (optional (message)) line-end)
    (warning line-start (file-name) ":" line ":" column
-            ": warning: " (message) line-end)
+            ": warning: " (optional (message)) line-end)
    (error line-start (file-name) ":" line ":" column
-          ": " (or "fatal error" "error") ": " (message) line-end))
+          ": " (or "fatal error" "error") ": " (optional (message)) line-end))
   :error-filter
   (lambda (errors)
-    (flycheck-fold-include-errors
-     (flycheck-sanitize-errors errors) "In file included from"))
+    (let ((errors (flycheck-sanitize-errors errors)))
+      (dolist (err errors)
+        ;; Clang will output empty messages for #error/#warning pragmas without
+        ;; messages.  We fill these empty errors with a dummy message to get
+        ;; them past our error filtering
+        (setf (flycheck-error-message err)
+              (or (flycheck-error-message err) "no message")))
+      (flycheck-fold-include-errors errors "In file included from")))
   :modes (c-mode c++-mode)
   :next-checkers ((warning . c/c++-cppcheck)))
 

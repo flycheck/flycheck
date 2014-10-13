@@ -37,6 +37,7 @@ master (in development)
   - Restore mouse support in the error list [GH-468]
   - `less` now correctly resolves relative paths in `data-uri` [GH-471]
   - `go-errcheck` now properly uses package names as syntax checker arguments
+  - `c/c++-clang` now handles empty error messages [GH-497]
 
 0.20 (Aug 12, 2014)
 -------------------
