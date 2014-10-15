@@ -521,13 +521,16 @@ enabled.  Changing it will not affect buffers which already have
   :safe #'booleanp)
 
 (defcustom flycheck-navigation-minimum-level 'info
-  "The minimum level of errors to show."
+  "The minimum level of errors to navigate.
+
+If set to an error level, only navigate errors whose error level
+is at least as severe as this one.  If nil, navigate all errors."
   :group 'flycheck
-  :type '(radio
-          (const :tag "Informational" info)
-          (const :tag "Warnings" warning)
-          (const :tag "Errors" error)
-          (symbol :tag "User-provided symbol"))
+  :type '(radio (const :tag "All locations" nil)
+                (const :tag "Informational messages" info)
+                (const :tag "Warnings" warning)
+                (const :tag "Errors" error)
+                (symbol :tag "Custom error level"))
   :safe #'flycheck-error-level-p
   :package-version '(flycheck . "0.21"))
 
@@ -3441,8 +3444,10 @@ Return the created overlay."
 (defun flycheck-error-level-interesting-p (err)
   "Check if ERR severity is >= `flycheck-navigation-minimum-level'."
   (when (flycheck-error-p err)
-    (<= (flycheck-error-level-severity flycheck-navigation-minimum-level)
-        (flycheck-error-level-severity (flycheck-error-level err)))))
+    (-if-let (min-level flycheck-navigation-minimum-level)
+        (<= (flycheck-error-level-severity min-level)
+            (flycheck-error-level-severity (flycheck-error-level err)))
+      t)))
 
 (defun flycheck-next-error-pos (n &optional reset)
   "Get the position of the N-th next error.
