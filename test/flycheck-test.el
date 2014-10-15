@@ -4234,9 +4234,9 @@ Why not:
     (flycheck-test-should-syntax-check
      "checkers/javascript-syntax-error.js" '(js-mode js2-mode js3-mode)
      '(3 11 error "Unclosed string." :checker javascript-jshint)
-     '(3 25 error "Unclosed string." :checker javascript-jshint)
-     '(4 1 error "Unclosed string." :checker javascript-jshint)
-     '(4 1 error "Missing semicolon." :checker javascript-jshint))))
+     '(3 25 warning "Unclosed string." :checker javascript-jshint)
+     '(4 1 warning "Unclosed string." :checker javascript-jshint)
+     '(4 1 warning "Missing semicolon." :checker javascript-jshint))))
 
 (ert-deftest flycheck-define-checker/javascript-jshint-error-disabled ()
   :tags '(builtin-checker external-tool language-javascript)
@@ -4250,7 +4250,7 @@ Why not:
   (let ((flycheck-jshintrc "jshintrc"))
     (flycheck-test-should-syntax-check
      "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
-     '(4 9 error "'foo' is defined but never used."
+     '(4 9 warning "'foo' is defined but never used."
          :checker javascript-jshint))))
 
 (ert-deftest flycheck-define-checker/javascript-eslint-error ()
@@ -4268,6 +4268,8 @@ Why not:
         (flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-test-should-syntax-check
      "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
+     '(3 1 warning "Missing \"use strict\" statement. (strict)"
+         :checker javascript-eslint)
      '(4 8 warning "foo is defined but never used (no-unused-vars)"
          :checker javascript-eslint))))
 
