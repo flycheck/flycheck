@@ -520,7 +520,7 @@ enabled.  Changing it will not affect buffers which already have
   :package-version '(flycheck . "0.15")
   :safe #'booleanp)
 
-(defcustom flycheck-navigation-minimum-level 'info
+(defcustom flycheck-navigation-minimum-level nil
   "The minimum level of errors to navigate.
 
 If set to an error level, only navigate errors whose error level
