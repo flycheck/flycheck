@@ -22,6 +22,8 @@ master (in development)
     `flycheck-error-display-function`
   - Add `flycheck-error-list-after-refresh-hook` to run after the error list
     refreshes
+  - Add `flycheck-navigation-minimum-level` to restrict error levels available
+    for navigation [GH-398] [GH-485]
 
 - Improvements:
 
