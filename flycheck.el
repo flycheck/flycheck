@@ -740,12 +740,6 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
   :package-version '(flycheck . "0.15")
   :group 'flycheck-faces)
 
-(defface flycheck-error-list-highlight-at-point
-  '((t :inherit lazy-highlight))
-  "Flycheck face to highlight error at point in the error list."
-  :package-version '(flycheck . "0.15")
-  :group 'flycheck-faces)
-
 (defvar flycheck-command-map
   (let ((map (make-sparse-keymap)))
     (define-key map "c" 'flycheck-buffer)
@@ -3796,27 +3790,21 @@ source buffer, and on the same line as point.  Then recenter the
 error list to the highlighted error, unless PRESERVE-POS is
 non-nil."
   (when (get-buffer flycheck-error-list-buffer)
-    (let ((errors-at-line (flycheck-overlay-errors-in (line-beginning-position)
-                                                      (line-end-position)))
-          (errors-at-point (flycheck-overlay-errors-at (point))))
+    (let ((current-errors (flycheck-overlay-errors-in (line-beginning-position)
+                                                      (line-end-position))))
       (with-current-buffer flycheck-error-list-buffer
         (let ((old-overlays flycheck-error-list-highlight-overlays)
               (min-point (point-max))
               (max-point (point-min)))
           ;; Display the new overlays first, to avoid re-display flickering
           (setq flycheck-error-list-highlight-overlays nil)
-          (when errors-at-line
+          (when current-errors
             (let ((next-error-pos (point-min)))
               (while next-error-pos
                 (let* ((beg next-error-pos)
                        (end (flycheck-error-list-next-error-pos beg))
-                       (err (tabulated-list-get-id beg))
-                       (face (cond
-                              ((member err errors-at-point)
-                               'flycheck-error-list-highlight-at-point)
-                              ((member err errors-at-line)
-                               'flycheck-error-list-highlight))))
-                  (when face
+                       (err (tabulated-list-get-id beg)))
+                  (when (member err current-errors)
                     (setq min-point (min min-point beg)
                           max-point (max max-point beg))
                     (let ((ov (make-overlay beg
@@ -3826,11 +3814,11 @@ non-nil."
                                             (or end (point-max)))))
                       (push ov flycheck-error-list-highlight-overlays)
                       (overlay-put ov 'flycheck-error-highlight-overlay t)
-                      (overlay-put ov 'face face)))
+                      (overlay-put ov 'face 'flycheck-error-list-highlight)))
                   (setq next-error-pos end)))))
           ;; Delete the old overlays
           (mapc #'delete-overlay old-overlays)
-          (when (and (not preserve-pos) errors-at-line)
+          (when (and (not preserve-pos) current-errors)
             ;; Move point to the middle error
             (goto-char (+ min-point (/ (- max-point min-point) 2)))
             (beginning-of-line)

@@ -437,12 +437,8 @@ Every time the error list refreshes,
    :auto:
 
 When you move the point in the current buffer while the error list is visible,
-all errors at point and at the current line are highlighted in the error list
-with :face:`flycheck-error-list-highlight-at-point` and
-:face:`flycheck-error-list-highlight` respectively.
-
-.. face:: flycheck-error-list-highlight-at-point
-   :auto:
+all errors on the current line are highlighted in the error list with
+:face:`flycheck-error-list-highlight`:
 
 .. face:: flycheck-error-list-highlight
    :auto:

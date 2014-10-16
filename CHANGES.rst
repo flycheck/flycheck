@@ -9,6 +9,8 @@ master (in development)
   - `d-dmd` now requires DMD 2.066 or newer [GH-460]
   - `:next-checkers` now requires the maximum permissible level instead of a
     custom predicate [GH-472]
+  - Remove `flycheck-error-list-highlight-at-point` face and related
+    functionality [GH-490]
 
 - New syntax checkers:
 
