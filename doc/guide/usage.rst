@@ -443,6 +443,18 @@ all errors on the current line are highlighted in the error list with
 .. face:: flycheck-error-list-highlight
    :auto:
 
+You can customize the appearance of the line and column numbers and of the
+syntax checker name:
+
+.. face:: flycheck-error-list-line-number
+   :auto:
+
+.. face:: flycheck-error-list-column-number
+   :auto:
+
+.. face:: flycheck-error-list-checker-name
+   :auto:
+
 .. _error-navigation:
 
 Error navigation
