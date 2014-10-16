@@ -734,6 +734,12 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
   :group 'flycheck-faces
   :version '(flycheck . "0.16"))
 
+(defface flycheck-error-list-checker-name
+  '((t :inherit font-lock-type-face))
+  "Face for the syntax checker name in the error list."
+  :group 'flycheck-faces
+  :version '(flycheck . "0.21"))
+
 (defface flycheck-error-list-highlight
   '((t :inherit highlight))
   "Flycheck face to highlight errors in the error list."
@@ -3539,15 +3545,19 @@ the beginning of the buffer."
     map)
   "The keymap of `flycheck-error-list-mode'.")
 
+(defconst flycheck-error-list-format
+  [("Line" 4 flycheck-error-list-entry-< :right-align t)
+   ("Col" 3 nil :right-align t)
+   ("Level" 8 flycheck-error-list-entry-level-<)
+   ("Message" 0 t)
+   (" (Checker)" 8 t)]
+  "Table format for the error list.")
+
 (define-derived-mode flycheck-error-list-mode tabulated-list-mode "Flycheck errors"
   "Major mode for listing Flycheck errors.
 
 \\{flycheck-error-list-mode-map}"
-  (setq tabulated-list-format
-        [("Line" 4 flycheck-error-list-entry-< :right-align t)
-         ("Col" 3 nil :right-align t)
-         ("Level" 8 flycheck-error-list-entry-level-<)
-         ("Message" 0 nil)]
+  (setq tabulated-list-format flycheck-error-list-format
         ;; Sort by location initially
         tabulated-list-sort-key (cons "Line" nil)
         tabulated-list-padding 1
@@ -3619,8 +3629,10 @@ Return a list with the contents of the table cell."
                    column 'flycheck-error-list-column-number)
                   (flycheck-error-list-make-cell
                    (symbol-name (flycheck-error-level error)) level-face)
+                  (flycheck-error-list-make-cell message)
                   (flycheck-error-list-make-cell
-                   (format "%s (%s)" message checker))))))
+                   (format "(%s)" checker)
+                   'flycheck-error-list-checker-name)))))
 
 (defun flycheck-error-list-entries ()
   "Create the entries for the error list."

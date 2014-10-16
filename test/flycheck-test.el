@@ -3333,7 +3333,8 @@ evaluating BODY."
                    [("Line" 4 flycheck-error-list-entry-< :right-align t)
                     ("Col" 3 nil :right-align t)
                     ("Level" 8 flycheck-error-list-entry-level-<)
-                    ("Message" 0 nil)]))
+                    ("Message" 0 t)
+                    (" (Checker)" 8 t)]))
     (should (local-variable-p 'tabulated-list-format))))
 
 (ert-deftest flycheck-error-list-mode/tabulated-list-padding ()
@@ -3355,7 +3356,7 @@ evaluating BODY."
   (with-temp-buffer
     (should-not header-line-format)
     (flycheck-error-list-mode)
-    (should (string= header-line-format " Line Col Level Message "))))
+    (should (string= header-line-format " Line Col Level Message  (Checker) "))))
 
 (ert-deftest flycheck-error-list-source-buffer/is-permanently-local ()
   :tags '(error-list)
@@ -3382,9 +3383,13 @@ evaluating BODY."
                            'type 'flycheck-error-list
                            'face face))))
     (should (equal (aref cells 3)
-                   (list "A foo warning (emacs-lisp-checkdoc)"
+                   (list "A foo warning"
                          'type 'flycheck-error-list
-                         'face 'default)))))
+                         'face 'default)))
+    (should (equal (aref cells 4)
+                   (list "(emacs-lisp-checkdoc)"
+                         'type 'flycheck-error-list
+                         'face 'flycheck-error-list-checker-name)))))
 
 (ert-deftest flycheck-error-list-make-entry/no-column ()
   :tags '(error-list)
@@ -3407,9 +3412,13 @@ evaluating BODY."
                            'type 'flycheck-error-list
                            'face face))))
     (should (equal (aref cells 3)
-                   (list "A foo error (emacs-lisp-checkdoc)"
+                   (list "A foo error"
                          'type 'flycheck-error-list
-                         'face 'default)))))
+                         'face 'default)))
+    (should (equal (aref cells 4)
+                   (list "(emacs-lisp-checkdoc)"
+                         'type 'flycheck-error-list
+                         'face 'flycheck-error-list-checker-name)))))
 
 (ert-deftest flycheck-error-list-make-entry/no-message ()
   :tags '(error-list)
@@ -3431,9 +3440,13 @@ evaluating BODY."
                            'type 'flycheck-error-list
                            'face face))))
     (should (equal (aref cells 3)
-                   (list "Unknown info (coq)"
+                   (list "Unknown info"
                          'type 'flycheck-error-list
-                         'face 'default)))))
+                         'face 'default)))
+    (should (equal (aref cells 4)
+                   (list "(coq)"
+                         'type 'flycheck-error-list
+                         'face 'flycheck-error-list-checker-name)))))
 
 
 ;;; General error display
