@@ -52,8 +52,8 @@ to Flycheck:
 - `Sylvain Benner <https://github.com/syl20bnr>`_ (Elixir and Erlang syntax
   checkers)
 - `Sylvain Rousseau <https://github.com/thisirs>`_ (Bash syntax checkers)
-- `Ted Zlatanov <https://github.com/tzz>`_ (CFEngine syntax checker, error
-  navigation)
+- `Ted Zlatanov <https://github.com/tzz>`_ (CFEngine syntax checker, minimum
+  level for error navigation)
 - `Tom Jakubowski <https://github.com/tomjakubowski>`_ (test support in Rust)
 - `Tomoya Tanjo <https://github.com/tom-tan>`_ (DMD syntax checker)
 - `Victor Deryagin <https://github.com/vderyagin>`_ (Rust syntax checker)
