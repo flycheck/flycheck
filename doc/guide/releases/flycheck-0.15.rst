@@ -77,8 +77,8 @@ errors of the corresponding buffer.
 Furthermore, the error list highlights the errors at point and at the current
 line.  If you move the point to an error location, the error list automatically
 scrolls to the corresponding error, and highlights it with the new
-:face:`flycheck-error-list-highlight-at-point` face.  Additionally, it
-highlights all other errors at the current line with the new
+`flycheck-error-list-highlight-at-point` face.  Additionally, it highlights all
+other errors at the current line with the new
 :face:`flycheck-error-list-highlight` face.
 
 C/C++ support
