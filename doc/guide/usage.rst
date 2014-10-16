@@ -499,6 +499,12 @@ which are not affected by :option:`flycheck-standard-error-navigation`:
    the prefix argument, e.g. :kbd:`M-3 M-x flycheck-first-error` moves to
    the 3rd error from the beginning of the buffer.
 
+These commands consider all errors by default, but you can ignore errors below a
+given level with :option:`flycheck-navigation-minimum-level`:
+
+.. option:: flycheck-navigation-minimum-level
+   :auto:
+
 .. _mode-line:
 
 Mode line
