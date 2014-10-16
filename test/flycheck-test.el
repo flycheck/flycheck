@@ -2825,14 +2825,16 @@ of the file will be interrupted because there are too many #ifdef configurations
 ;;; Error navigation
 
 (defmacro flycheck-test-with-nav-buffer (minimum-level &rest body)
-  (declare (indent 0))
+  "Eval BODY in a temporary buffer for navigation.
+
+Set `flycheck-navigation-minimum-level' to MINIMUM-LEVEL while
+evaluating BODY."
+  (declare (indent 1))
   `(flycheck-test-with-resource-buffer "checkers/emacs-lisp.el"
      (emacs-lisp-mode)
      (flycheck-mode)
      (when ,minimum-level
-       (let ((flycheck-navigation-minimum-level
-              (or ,minimum-level
-                  flycheck-navigation-minimum-level)))
+       (let ((flycheck-navigation-minimum-level ,minimum-level))
          (flycheck-test-buffer-sync)
          (goto-char (point-min))
          ,@body))))
