@@ -3587,12 +3587,12 @@ the beginning of the buffer."
   "Go to the error at BUTTON."
   (flycheck-error-list-goto-error (button-start button)))
 
-(defun flycheck-error-list-make-cell (text &optional face)
+(defsubst flycheck-error-list-make-cell (text &optional face)
   "Make an error list cell with TEXT and FACE."
   (let ((face (or face 'default)))
     (list text 'type 'flycheck-error-list 'face face)))
 
-(defun flycheck-error-list-make-number-cell (number face)
+(defsubst flycheck-error-list-make-number-cell (number face)
   "Make a table cell for a NUMBER with FACE.
 
 Convert NUMBER to string, fontify it with FACE and return the
