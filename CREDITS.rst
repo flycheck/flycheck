@@ -36,7 +36,7 @@ to Flycheck:
 - `Mitch Tishmack <https://github.com/mitchty>`_ (Microsoft extensions in C/C++)
 - `Omair Majid <https://github.com/omajid>`_ (syntax checker for RPM spec)
 - `Per Nordlöw <https://github.com/nordlow>`_ (syntax checkers for Ada and
-  Fortran)
+  Fortran, syntax checker name in error list)
 - `Peter Vasil <https://github.com/ptrv>`_ (Lua and Go build/test syntax
   checkers)
 - `Robert Zaremba <https://github.com/robert-zaremba>`_ (gofmt syntax checker)

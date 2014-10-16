@@ -26,6 +26,9 @@ master (in development)
     refreshes
   - Add `flycheck-navigation-minimum-level` to restrict error levels available
     for navigation [GH-398] [GH-485]
+  - The error list can be sorted by message and syntax checker name now [GH-500]
+  - Add `flycheck-error-list-checker-name` face to customize the appearance of
+    the syntax checker name in the error list [GH-500]
 
 - Improvements:
 
