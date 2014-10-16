@@ -3371,7 +3371,7 @@ Return the created overlay."
     ;; error display and error navigation, even if the highlighting is disabled.
     ;; We erase the highlighting later on in this case
     (pcase-let* ((`(,beg . ,end) (flycheck-error-region-for-mode
-                                  err (or flycheck-highlighting-mode'lines)))
+                                  err (or flycheck-highlighting-mode 'lines)))
                  (overlay (make-overlay beg end))
                  (level (flycheck-error-level err))
                  (category (flycheck-error-level-overlay-category level)))
