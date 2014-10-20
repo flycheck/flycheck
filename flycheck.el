@@ -4627,8 +4627,6 @@ documentation of the `--enable' option for more information,
 including a list of supported checks."
   :type '(repeat :tag "Additional checks"
                  (string :tag "Check name"))
-  ;; Quote this lambda, to allow `describe-variable' to display the lambda
-  ;; properly
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.14"))
 
