@@ -5367,6 +5367,15 @@ Why not:
    '(3 7 error "Double quote array expansions, otherwise they're like $* and break on spaces. [SC2068]"
        :checker sh-shellcheck)))
 
+(ert-deftest flycheck-define-checker/sh-shellcheck-excluded-warning ()
+  :tags '(builtin-checker external-tool language-sh)
+  (skip-unless (flycheck-check-executable 'sh-shellcheck))
+  (let ((flycheck-shellcheck-excluded-warnings '("SC2088")))
+    (flycheck-test-should-syntax-check
+     "checkers/sh-shellcheck.sh" 'sh-mode
+     '(3 7 error "Double quote array expansions, otherwise they're like $* and break on spaces. [SC2068]"
+         :checker sh-shellcheck))))
+
 (ert-deftest flycheck-define-checker/slim ()
   :tags '(builtin-checker external-tool language-slim)
   (skip-unless (flycheck-check-executable 'slim))

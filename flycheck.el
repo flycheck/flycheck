@@ -6260,14 +6260,29 @@ See URL `http://www.zsh.org/'."
   :next-checkers ((warning . sh-shellcheck)))
 
 (defconst flycheck-shellcheck-supported-shells '(bash ksh88 sh zsh)
-  "Shells supported by Shellcheck.")
+  "Shells supported by ShellCheck.")
+
+(flycheck-def-option-var flycheck-shellcheck-excluded-warnings nil sh-shellcheck
+  "A list of excluded warnings for ShellCheck.
+
+The value of this variable is a list of strings, where each
+string is a warning code to be excluded from ShellCheck reports.
+By default, no warnings are excluded."
+  :type '(repeat :tag "Excluded warnings"
+                 (string :tag "Warning code"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.21"))
 
 (flycheck-define-checker sh-shellcheck
   "A shell script syntax and style checker using Shellcheck.
 
 See URL `https://github.com/koalaman/shellcheck/'."
-  :command ("shellcheck" "-f" "gcc"
-            "-s" (eval (symbol-name sh-shell))
+  :command ("shellcheck"
+            ;; Use GCC output format to have the warning code in the messages
+            "--format" "gcc"
+            "--shell" (eval (symbol-name sh-shell))
+            (option "--exclude" flycheck-shellcheck-excluded-warnings list
+                    flycheck-option-comma-separated-list)
             source)
   :modes sh-mode
   :error-patterns

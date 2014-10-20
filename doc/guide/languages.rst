@@ -639,6 +639,11 @@ Shell script languages
 .. flyc-checker:: sh-shellcheck
    :auto:
 
+   .. rubric:: Options
+
+   .. option:: flycheck-shellcheck-excluded-warnings
+      :auto:
+
 .. _POSIX Shell Command Language: http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html
 .. _GNU Bash POSIX Mode: http://www.gnu.org/software/bash/manual/html_node/Bash-POSIX-Mode.html#Bash-POSIX-Mode
 
