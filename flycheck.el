@@ -6266,11 +6266,17 @@ See URL `http://www.zsh.org/'."
   "A shell script syntax and style checker using Shellcheck.
 
 See URL `https://github.com/koalaman/shellcheck/'."
-  :command ("shellcheck" "-f" "checkstyle"
+  :command ("shellcheck" "-f" "gcc"
             "-s" (eval (symbol-name sh-shell))
             source)
   :modes sh-mode
-  :error-parser flycheck-parse-checkstyle
+  :error-patterns
+  ((error line-start
+          (file-name) ":" line ":" column ": error: " (message)
+          line-end)
+   (warning line-start
+            (file-name) ":" line ":" column ": warning: " (message)
+            line-end))
   :predicate (lambda () (memq sh-shell flycheck-shellcheck-supported-shells)))
 
 (flycheck-define-checker slim
