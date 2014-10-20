@@ -5863,15 +5863,43 @@ A shell script syntax and style checker using Shellcheck.
 
 See URL `https://github.com/koalaman/shellcheck/'@footnote{https://github.com/koalaman/shellcheck/}.
 @end format
+
+@subsubheading Options
+
+
+@geindex flycheck-shellcheck-excluded-warnings; Emacs Lisp user option
+@anchor{guide/languages el variable flycheck-shellcheck-excluded-warnings}@anchor{140}
+@deffn {User Option} flycheck@w{-}shellcheck@w{-}excluded@w{-}warnings
+
+@cartouche
+@quotation Variable properties 
+Automatically becomes buffer-local when set.  This variable is safe as a file local variable if its value satisfies the predicate @ref{9b,,flycheck-string-list-p}. 
+@end quotation
+@end cartouche
+
+@format
+A list of excluded warnings for ShellCheck.
+
+The value of this variable is a list of strings, where each
+string is a warning code to be excluded from ShellCheck reports.
+By default, no warnings are excluded.
+
+This variable is an option for the syntax checker @code{`sh-shellcheck'}
+@end format
+
+
+This user option was introduced, or its default value was changed, in version 0.21 of the flycheck package.
+
+@end deffn
 @end deffn
 
 @node Slim,TeX/LaTeX,Shell script languages,Supported languages
-@anchor{guide/languages gnu-bash-posix-mode}@anchor{140}@anchor{guide/languages slim}@anchor{141}
+@anchor{guide/languages gnu-bash-posix-mode}@anchor{141}@anchor{guide/languages slim}@anchor{142}
 @section Slim
 
 
 @geindex slim; Emacs Lisp Flycheck syntax checker
-@anchor{guide/languages el flycheck-checker slim}@anchor{142}
+@anchor{guide/languages el flycheck-checker slim}@anchor{143}
 @deffn {Flycheck Syntax Checker} slim
 
 @format
@@ -5882,7 +5910,7 @@ See URL `http://slim-lang.com'@footnote{http://slim-lang.com}.
 @end deffn
 
 @node TeX/LaTeX,Texinfo,Slim,Supported languages
-@anchor{guide/languages tex-latex}@anchor{143}
+@anchor{guide/languages tex-latex}@anchor{144}
 @section TeX/LaTeX
 
 
@@ -5894,7 +5922,7 @@ LaTeX@footnote{http://www.latex-project.org/}, TeX Live@footnote{http://www.tug.
 
 
 @geindex tex-chktex; Emacs Lisp Flycheck syntax checker
-@anchor{guide/languages el flycheck-checker tex-chktex}@anchor{144}
+@anchor{guide/languages el flycheck-checker tex-chktex}@anchor{145}
 @deffn {Flycheck Syntax Checker} tex@w{-}chktex
 
 @format
@@ -5907,7 +5935,7 @@ See URL `http://www.nongnu.org/chktex/'@footnote{http://www.nongnu.org/chktex/}.
 
 
 @geindex flycheck-chktexrc; Emacs Lisp user option
-@anchor{guide/languages el variable flycheck-chktexrc}@anchor{145}
+@anchor{guide/languages el variable flycheck-chktexrc}@anchor{146}
 @deffn {User Option} flycheck@w{-}chktexrc
 
 @cartouche
@@ -5923,7 +5951,7 @@ Configuration file for @code{`tex-chktex'}
 @end deffn
 
 @geindex tex-lacheck; Emacs Lisp Flycheck syntax checker
-@anchor{guide/languages el flycheck-checker tex-lacheck}@anchor{146}
+@anchor{guide/languages el flycheck-checker tex-lacheck}@anchor{147}
 @deffn {Flycheck Syntax Checker} tex@w{-}lacheck
 
 @format
@@ -5934,12 +5962,12 @@ See URL `http://www.ctan.org/pkg/lacheck'@footnote{http://www.ctan.org/pkg/lache
 @end deffn
 
 @node Texinfo,Verilog,TeX/LaTeX,Supported languages
-@anchor{guide/languages tex-live}@anchor{147}@anchor{guide/languages texinfo}@anchor{148}
+@anchor{guide/languages tex-live}@anchor{148}@anchor{guide/languages texinfo}@anchor{149}
 @section Texinfo
 
 
 @geindex texinfo; Emacs Lisp Flycheck syntax checker
-@anchor{guide/languages el flycheck-checker texinfo}@anchor{149}
+@anchor{guide/languages el flycheck-checker texinfo}@anchor{14a}
 @deffn {Flycheck Syntax Checker} texinfo
 
 @format
@@ -5950,12 +5978,12 @@ See URL `http://www.gnu.org/software/texinfo/'@footnote{http://www.gnu.org/softw
 @end deffn
 
 @node Verilog,XML,Texinfo,Supported languages
-@anchor{guide/languages verilog}@anchor{14a}
+@anchor{guide/languages verilog}@anchor{14b}
 @section Verilog
 
 
 @geindex verilog-verilator; Emacs Lisp Flycheck syntax checker
-@anchor{guide/languages el flycheck-checker verilog-verilator}@anchor{14b}
+@anchor{guide/languages el flycheck-checker verilog-verilator}@anchor{14c}
 @deffn {Flycheck Syntax Checker} verilog@w{-}verilator
 
 @format
@@ -5966,12 +5994,12 @@ See URL `http://www.veripool.org/wiki/verilator'@footnote{http://www.veripool.or
 @end deffn
 
 @node XML,YAML,Verilog,Supported languages
-@anchor{guide/languages xml}@anchor{14c}
+@anchor{guide/languages xml}@anchor{14d}
 @section XML
 
 
 @geindex xml-xmlstarlet; Emacs Lisp Flycheck syntax checker
-@anchor{guide/languages el flycheck-checker xml-xmlstarlet}@anchor{14d}
+@anchor{guide/languages el flycheck-checker xml-xmlstarlet}@anchor{14e}
 @deffn {Flycheck Syntax Checker} xml@w{-}xmlstarlet
 
 @format
@@ -5982,7 +6010,7 @@ See URL `http://xmlstar.sourceforge.net/'@footnote{http://xmlstar.sourceforge.ne
 @end deffn
 
 @geindex xml-xmllint; Emacs Lisp Flycheck syntax checker
-@anchor{guide/languages el flycheck-checker xml-xmllint}@anchor{14e}
+@anchor{guide/languages el flycheck-checker xml-xmllint}@anchor{14f}
 @deffn {Flycheck Syntax Checker} xml@w{-}xmllint
 
 @format
@@ -5994,12 +6022,12 @@ The xmllint is part of libxml2, see URL
 @end deffn
 
 @node YAML,,XML,Supported languages
-@anchor{guide/languages yaml}@anchor{14f}
+@anchor{guide/languages yaml}@anchor{150}
 @section YAML
 
 
 @geindex yaml-jsyaml; Emacs Lisp Flycheck syntax checker
-@anchor{guide/languages el flycheck-checker yaml-jsyaml}@anchor{150}
+@anchor{guide/languages el flycheck-checker yaml-jsyaml}@anchor{151}
 @deffn {Flycheck Syntax Checker} yaml@w{-}jsyaml
 
 @format
@@ -6010,7 +6038,7 @@ See URL `https://github.com/nodeca/js-yaml'@footnote{https://github.com/nodeca/j
 @end deffn
 
 @geindex yaml-ruby; Emacs Lisp Flycheck syntax checker
-@anchor{guide/languages el flycheck-checker yaml-ruby}@anchor{151}
+@anchor{guide/languages el flycheck-checker yaml-ruby}@anchor{152}
 @deffn {Flycheck Syntax Checker} yaml@w{-}ruby
 
 @format
@@ -6024,7 +6052,7 @@ See URL `http://www.ruby-doc.org/stdlib-2.0.0/libdoc/yaml/rdoc/YAML.html'@footno
 @end deffn
 
 @node Glossary,Flycheck releases,Supported languages,Top
-@anchor{guide/glossary glossary}@anchor{152}@anchor{guide/glossary doc}@anchor{153}
+@anchor{guide/glossary glossary}@anchor{153}@anchor{guide/glossary doc}@anchor{154}
 @chapter Glossary
 
 
@@ -6044,7 +6072,7 @@ A symbol which is defined as syntax checker with
 
 A @ref{64,,syntax checker} available for automatic selection, i.e. that is
 contained in @ref{5f,,flycheck-checkers}.
-@anchor{guide/glossary term-disabled-syntax-checker}@anchor{154}
+@anchor{guide/glossary term-disabled-syntax-checker}@anchor{155}
 @geindex disabled syntax checker
 
 @item disabled syntax checker
@@ -6056,7 +6084,7 @@ i.e. that is contained in @ref{60,,flycheck-disabled-checkers}.
 
 @item enabled syntax checker
 
-A @ref{61,,registered syntax checker} which is not a @ref{154,,disabled syntax checker}.
+A @ref{61,,registered syntax checker} which is not a @ref{155,,disabled syntax checker}.
 @anchor{guide/glossary term-suitable-syntax-checker}@anchor{50}
 @geindex suitable syntax checker
 
@@ -6095,7 +6123,7 @@ and @ref{e9,,haskell-hlint}.
 @end table
 
 @node Flycheck releases,Extending Flycheck,Glossary,Top
-@anchor{guide/releases/index flycheck-releases}@anchor{155}@anchor{guide/releases/index doc}@anchor{156}
+@anchor{guide/releases/index flycheck-releases}@anchor{156}@anchor{guide/releases/index doc}@anchor{157}
 @chapter Flycheck releases
 
 
@@ -6109,7 +6137,7 @@ changelog.
 @end menu
 
 @node Release announcements,Changelog,,Flycheck releases
-@anchor{guide/releases/index release-announcements}@anchor{157}
+@anchor{guide/releases/index release-announcements}@anchor{158}
 @section Release announcements
 
 
@@ -6124,7 +6152,7 @@ changelog.
 @end menu
 
 @node Flycheck 0 20,Flycheck 0 19,,Release announcements
-@anchor{guide/releases/flycheck-0 20 flycheck-0-20}@anchor{158}@anchor{guide/releases/flycheck-0 20 doc}@anchor{159}
+@anchor{guide/releases/flycheck-0 20 flycheck-0-20}@anchor{159}@anchor{guide/releases/flycheck-0 20 doc}@anchor{15a}
 @subsection Flycheck 0.20
 
 
@@ -6140,7 +6168,7 @@ Flycheck 0.20 is out, with new syntax checkers, many new options, improvements
 and bug fixes, and some important breaking changes.
 
 This announcement covers the most important changes.  For details, please refer
-to the @ref{15a,,Changelog}.
+to the @ref{15b,,Changelog}.
 
 @menu
 * Breaking changes:: 
@@ -6154,7 +6182,7 @@ to the @ref{15a,,Changelog}.
 @end menu
 
 @node Breaking changes,Language support,,Flycheck 0 20
-@anchor{guide/releases/flycheck-0 20 breaking-changes}@anchor{15b}
+@anchor{guide/releases/flycheck-0 20 breaking-changes}@anchor{15c}
 @subsubsection Breaking changes
 
 
@@ -6178,7 +6206,7 @@ foo flycheck-option-int)} now becomes @code{(option "--foo" foo nil
 flycheck-option-int)}.
 
 @node Language support,Error list improvements,Breaking changes,Flycheck 0 20
-@anchor{guide/releases/flycheck-0 20 language-support}@anchor{15c}
+@anchor{guide/releases/flycheck-0 20 language-support}@anchor{15d}
 @subsubsection Language support
 
 
@@ -6196,7 +6224,7 @@ Flycheck now supports Ada and Fortran with @ref{99,,ada-gnat} and
 @end menu
 
 @node C/C++<2>,Rust<2>,,Language support
-@anchor{guide/releases/flycheck-0 20 c-c}@anchor{15d}
+@anchor{guide/releases/flycheck-0 20 c-c}@anchor{15e}
 @subsubsection C/C++
 
 
@@ -6212,7 +6240,7 @@ Furthermore, temporary files for the Clang syntax checker are now created in the
 system temporary directory.
 
 @node Rust<2>,Scala<2>,C/C++<2>,Language support
-@anchor{guide/releases/flycheck-0 20 rust}@anchor{15e}
+@anchor{guide/releases/flycheck-0 20 rust}@anchor{15f}
 @subsubsection Rust
 
 
@@ -6224,14 +6252,14 @@ unused code, and the latter helps to resolve relative module references.
 Flycheck also parses info messages from Rust now.
 
 @node Scala<2>,Sass/SCSS,Rust<2>,Language support
-@anchor{guide/releases/flycheck-0 20 scala}@anchor{15f}
+@anchor{guide/releases/flycheck-0 20 scala}@anchor{160}
 @subsubsection Scala
 
 
 Flycheck now supports Scalastyle@footnote{http://www.scalastyle.org/} with @ref{134,,scala-scalastyle}.
 
 @node Sass/SCSS,Javascript<2>,Scala<2>,Language support
-@anchor{guide/releases/flycheck-0 20 scalastyle}@anchor{160}@anchor{guide/releases/flycheck-0 20 sass-scss}@anchor{161}
+@anchor{guide/releases/flycheck-0 20 scalastyle}@anchor{161}@anchor{guide/releases/flycheck-0 20 sass-scss}@anchor{162}
 @subsubsection Sass/SCSS
 
 
@@ -6239,7 +6267,7 @@ Flycheck now supports Scalastyle@footnote{http://www.scalastyle.org/} with @ref{
 their cache and do not clutter the source directory anymore.
 
 @node Javascript<2>,Ruby<2>,Sass/SCSS,Language support
-@anchor{guide/releases/flycheck-0 20 javascript}@anchor{162}
+@anchor{guide/releases/flycheck-0 20 javascript}@anchor{163}
 @subsubsection Javascript
 
 
@@ -6248,7 +6276,7 @@ configuration file by itself, which enables configuration cascading.  See
 Configuring ESLint@footnote{http://eslint.org/docs/configuring/} for more information.
 
 @node Ruby<2>,,Javascript<2>,Language support
-@anchor{guide/releases/flycheck-0 20 ruby}@anchor{163}@anchor{guide/releases/flycheck-0 20 configuring-eslint}@anchor{164}
+@anchor{guide/releases/flycheck-0 20 ruby}@anchor{164}@anchor{guide/releases/flycheck-0 20 configuring-eslint}@anchor{165}
 @subsubsection Ruby
 
 
@@ -6256,7 +6284,7 @@ Configuring ESLint@footnote{http://eslint.org/docs/configuring/} for more inform
 @ref{125,,flycheck-rubylintrc}.  This requires ruby-lint 2.0.2 or newer.
 
 @node Error list improvements,User interface improvements,Language support,Flycheck 0 20
-@anchor{guide/releases/flycheck-0 20 error-list-improvements}@anchor{165}
+@anchor{guide/releases/flycheck-0 20 error-list-improvements}@anchor{166}
 @subsubsection Error list improvements
 
 
@@ -6281,7 +6309,7 @@ while navigating.
 @end itemize
 
 @node User interface improvements,Miscellaneous new features,Error list improvements,Flycheck 0 20
-@anchor{guide/releases/flycheck-0 20 user-interface-improvements}@anchor{166}
+@anchor{guide/releases/flycheck-0 20 user-interface-improvements}@anchor{167}
 @subsubsection User interface improvements
 
 
@@ -6302,7 +6330,7 @@ When Flycheck asks for a syntax checker in the minibuffer, it now presents a
 reasonable default.
 
 @node Miscellaneous new features,Miscellaneous fixes,User interface improvements,Flycheck 0 20
-@anchor{guide/releases/flycheck-0 20 miscellaneous-new-features}@anchor{167}
+@anchor{guide/releases/flycheck-0 20 miscellaneous-new-features}@anchor{168}
 @subsubsection Miscellaneous new features
 
 
@@ -6313,7 +6341,7 @@ Error levels defined with @code{flycheck-define-error-level} can now have a nume
 severity used for sorting, with @code{:severity}.
 
 @node Miscellaneous fixes,Get it,Miscellaneous new features,Flycheck 0 20
-@anchor{guide/releases/flycheck-0 20 miscellaneous-fixes}@anchor{168}
+@anchor{guide/releases/flycheck-0 20 miscellaneous-fixes}@anchor{169}
 @subsubsection Miscellaneous fixes
 
 
@@ -6323,7 +6351,7 @@ The @ref{cb,,emacs-lisp} checker does not longer choke when
 @code{package-initialize} signals an error.
 
 @node Get it,,Miscellaneous fixes,Flycheck 0 20
-@anchor{guide/releases/flycheck-0 20 get-it}@anchor{169}
+@anchor{guide/releases/flycheck-0 20 get-it}@anchor{16a}
 @subsubsection Get it
 
 
@@ -6331,7 +6359,7 @@ Follow the @ref{2f,,installation instructions}.  If you already
 have Flycheck installed, just update it from @code{M-x list-packages}.
 
 @node Flycheck 0 19,Flycheck 0 18,Flycheck 0 20,Release announcements
-@anchor{guide/releases/flycheck-0 19 flycheck-0-19}@anchor{16a}@anchor{guide/releases/flycheck-0 19 doc}@anchor{16b}
+@anchor{guide/releases/flycheck-0 19 flycheck-0-19}@anchor{16b}@anchor{guide/releases/flycheck-0 19 doc}@anchor{16c}
 @subsection Flycheck 0.19
 
 
@@ -6356,7 +6384,7 @@ We are pleased to announce the release of Flycheck 0.19.
 @end menu
 
 @node Breaking changes<2>,Languages,,Flycheck 0 19
-@anchor{guide/releases/flycheck-0 19 breaking-changes}@anchor{16c}
+@anchor{guide/releases/flycheck-0 19 breaking-changes}@anchor{16d}
 @subsubsection Breaking changes
 
 
@@ -6364,7 +6392,7 @@ We are pleased to announce the release of Flycheck 0.19.
 breaking changes in the command line interface of Ruby Lint.
 
 @node Languages,New features,Breaking changes<2>,Flycheck 0 19
-@anchor{guide/releases/flycheck-0 19 languages}@anchor{16d}
+@anchor{guide/releases/flycheck-0 19 languages}@anchor{16e}
 @subsubsection Languages
 
 
@@ -6378,7 +6406,7 @@ breaking changes in the command line interface of Ruby Lint.
 @end menu
 
 @node C/C++<3>,Emacs Lisp<2>,,Languages
-@anchor{guide/releases/flycheck-0 19 c-c}@anchor{16e}
+@anchor{guide/releases/flycheck-0 19 c-c}@anchor{16f}
 @subsubsection C/C++
 
 
@@ -6390,7 +6418,7 @@ includes the error messages in the faulty include file in the error message on
 the affected @code{#include} statement.
 
 @node Emacs Lisp<2>,Go<2>,C/C++<3>,Languages
-@anchor{guide/releases/flycheck-0 19 emacs-lisp}@anchor{16f}
+@anchor{guide/releases/flycheck-0 19 emacs-lisp}@anchor{170}
 @subsubsection Emacs Lisp
 
 
@@ -6398,7 +6426,7 @@ Flycheck now removes redundant whitespace in the error messages reported by the
 @ref{cb,,emacs-lisp} syntax checker.
 
 @node Go<2>,Haskell<2>,Emacs Lisp<2>,Languages
-@anchor{guide/releases/flycheck-0 19 go}@anchor{170}
+@anchor{guide/releases/flycheck-0 19 go}@anchor{171}
 @subsubsection Go
 
 
@@ -6409,7 +6437,7 @@ Flycheck does not longer signal errors in Go Mode, when the @code{go} executable
 not available.
 
 @node Haskell<2>,Rust<3>,Go<2>,Languages
-@anchor{guide/releases/flycheck-0 19 haskell}@anchor{171}
+@anchor{guide/releases/flycheck-0 19 haskell}@anchor{172}
 @subsubsection Haskell
 
 
@@ -6417,7 +6445,7 @@ Flycheck now dedents the error messages reported by @ref{e8,,haskell-ghc},
 and properly checks Haskell files without extensions.
 
 @node Rust<3>,,Haskell<2>,Languages
-@anchor{guide/releases/flycheck-0 19 rust}@anchor{172}
+@anchor{guide/releases/flycheck-0 19 rust}@anchor{173}
 @subsubsection Rust
 
 
@@ -6425,7 +6453,7 @@ and properly checks Haskell files without extensions.
 disable syntax checking of test code.
 
 @node New features,Bug fixes,Languages,Flycheck 0 19
-@anchor{guide/releases/flycheck-0 19 new-features}@anchor{173}
+@anchor{guide/releases/flycheck-0 19 new-features}@anchor{174}
 @subsubsection New features
 
 
@@ -6462,7 +6490,7 @@ default prefix.
 @end cartouche
 
 @node Bug fixes,Misc changes,New features,Flycheck 0 19
-@anchor{guide/releases/flycheck-0 19 bug-fixes}@anchor{174}
+@anchor{guide/releases/flycheck-0 19 bug-fixes}@anchor{175}
 @subsubsection Bug fixes
 
 
@@ -6473,7 +6501,7 @@ Also, Flycheck does not long warn if a syntax checker only reports errors for
 other files.
 
 @node Misc changes,Get it<2>,Bug fixes,Flycheck 0 19
-@anchor{guide/releases/flycheck-0 19 misc-changes}@anchor{175}
+@anchor{guide/releases/flycheck-0 19 misc-changes}@anchor{176}
 @subsubsection Misc changes
 
 
@@ -6481,14 +6509,14 @@ Flycheck now has an official logo, and its own mail address.  You can see both
 on the Github profile@footnote{https://github.com/flycheck/} of the Flycheck project.
 
 @node Get it<2>,,Misc changes,Flycheck 0 19
-@anchor{guide/releases/flycheck-0 19 get-it}@anchor{176}@anchor{guide/releases/flycheck-0 19 github-profile}@anchor{177}
+@anchor{guide/releases/flycheck-0 19 get-it}@anchor{177}@anchor{guide/releases/flycheck-0 19 github-profile}@anchor{178}
 @subsubsection Get it
 
 
 See @ref{30,,Installation}.
 
 @node Flycheck 0 18,Flycheck 0 17,Flycheck 0 19,Release announcements
-@anchor{guide/releases/flycheck-0 18 doc}@anchor{178}@anchor{guide/releases/flycheck-0 18 flycheck-0-18}@anchor{179}
+@anchor{guide/releases/flycheck-0 18 doc}@anchor{179}@anchor{guide/releases/flycheck-0 18 flycheck-0-18}@anchor{17a}
 @subsection Flycheck 0.18
 
 
@@ -6514,7 +6542,7 @@ as Flycheck becomes more and more mature, and slowly approaches a 1.0 release.
 @end menu
 
 @node Breaking changes<3>,Syntax checkers<2>,,Flycheck 0 18
-@anchor{guide/releases/flycheck-0 18 breaking-changes}@anchor{17a}
+@anchor{guide/releases/flycheck-0 18 breaking-changes}@anchor{17b}
 @subsubsection Breaking changes
 
 
@@ -6538,7 +6566,7 @@ special writer now, which is not present in previous releases.
 @end itemize
 
 @node Syntax checkers<2>,Bug fixes<2>,Breaking changes<3>,Flycheck 0 18
-@anchor{guide/releases/flycheck-0 18 syntax-checkers}@anchor{17b}
+@anchor{guide/releases/flycheck-0 18 syntax-checkers}@anchor{17c}
 @subsubsection Syntax checkers
 
 
@@ -6572,7 +6600,7 @@ new option @ref{c6,,flycheck-dmd-include-path}.  Likewise, Rust users can use
 @ref{12d,,flycheck-rust-library-path} now.
 
 @node Bug fixes<2>,Get it<3>,Syntax checkers<2>,Flycheck 0 18
-@anchor{guide/releases/flycheck-0 18 shellcheck}@anchor{17c}@anchor{guide/releases/flycheck-0 18 bug-fixes}@anchor{17d}
+@anchor{guide/releases/flycheck-0 18 shellcheck}@anchor{17d}@anchor{guide/releases/flycheck-0 18 bug-fixes}@anchor{17e}
 @subsubsection Bug fixes
 
 
@@ -6603,14 +6631,14 @@ Various error parsing problems were corrected in @ref{a1,,c/c++-clang},
 @end itemize
 
 @node Get it<3>,,Bug fixes<2>,Flycheck 0 18
-@anchor{guide/releases/flycheck-0 18 get-it}@anchor{17e}
+@anchor{guide/releases/flycheck-0 18 get-it}@anchor{17f}
 @subsubsection Get it
 
 
 See @ref{30,,Installation}.
 
 @node Flycheck 0 17,Flycheck 0 16,Flycheck 0 18,Release announcements
-@anchor{guide/releases/flycheck-0 17 flycheck-0-17}@anchor{17f}@anchor{guide/releases/flycheck-0 17 doc}@anchor{180}
+@anchor{guide/releases/flycheck-0 17 flycheck-0-17}@anchor{180}@anchor{guide/releases/flycheck-0 17 doc}@anchor{181}
 @subsection Flycheck 0.17
 
 
@@ -6636,7 +6664,7 @@ last release, there are quite some changes.
 @end menu
 
 @node Breaking changes<4>,New online manual,,Flycheck 0 17
-@anchor{guide/releases/flycheck-0 17 breaking-changes}@anchor{181}
+@anchor{guide/releases/flycheck-0 17 breaking-changes}@anchor{182}
 @subsubsection Breaking changes
 
 
@@ -6655,7 +6683,7 @@ levels.  It returns an alist mapping error levels to the amount of errors of
 that level.
 
 @node New online manual,Syntax checkers<3>,Breaking changes<4>,Flycheck 0 17
-@anchor{guide/releases/flycheck-0 17 new-online-manual}@anchor{182}
+@anchor{guide/releases/flycheck-0 17 new-online-manual}@anchor{183}
 @subsubsection New online manual
 
 
@@ -6693,7 +6721,7 @@ Texinfo.  It's still usable, though, and we hope to overcome the most striking
 shortcomings over the time.
 
 @node Syntax checkers<3>,Extending syntax checkers,New online manual,Flycheck 0 17
-@anchor{guide/releases/flycheck-0 17 syntax-checkers}@anchor{183}@anchor{guide/releases/flycheck-0 17 llvm-documentation}@anchor{184}
+@anchor{guide/releases/flycheck-0 17 syntax-checkers}@anchor{184}@anchor{guide/releases/flycheck-0 17 llvm-documentation}@anchor{185}
 @subsubsection Syntax checkers
 
 
@@ -6709,12 +6737,12 @@ checker for Sphinx documents (@ref{11e,,rst-sphinx}).  The
 project anymore, do avoid false positives from Sphinx-specific markup.
 
 @node Extending syntax checkers,Other bug fixes and improvements,Syntax checkers<3>,Flycheck 0 17
-@anchor{guide/releases/flycheck-0 17 extending-syntax-checkers}@anchor{185}
+@anchor{guide/releases/flycheck-0 17 extending-syntax-checkers}@anchor{186}
 @subsubsection Extending syntax checkers
 
 
 @node Other bug fixes and improvements,,Extending syntax checkers,Flycheck 0 17
-@anchor{guide/releases/flycheck-0 17 other-bug-fixes-and-improvements}@anchor{186}
+@anchor{guide/releases/flycheck-0 17 other-bug-fixes-and-improvements}@anchor{187}
 @subsubsection Other bug fixes and improvements
 
 
@@ -6736,7 +6764,7 @@ buffer after the check finished, to avoid outdated errors ([GH-301]).
 @end itemize
 
 @node Flycheck 0 16,Flycheck 0 15,Flycheck 0 17,Release announcements
-@anchor{guide/releases/flycheck-0 16 flycheck-0-16}@anchor{187}@anchor{guide/releases/flycheck-0 16 doc}@anchor{188}
+@anchor{guide/releases/flycheck-0 16 flycheck-0-16}@anchor{188}@anchor{guide/releases/flycheck-0 16 doc}@anchor{189}
 @subsection Flycheck 0.16
 
 
@@ -6757,7 +6785,7 @@ checkers, a brand-new error list, and the ability to override the executables of
 syntax checkers.
 
 Let's go through the list of important changes.  For a detailed list, please
-read the @ref{15a,,Changelog}.
+read the @ref{15b,,Changelog}.
 
 @menu
 * Breaking changes: Breaking changes<5>. 
@@ -6769,7 +6797,7 @@ read the @ref{15a,,Changelog}.
 @end menu
 
 @node Breaking changes<5>,Syntax checkers<4>,,Flycheck 0 16
-@anchor{guide/releases/flycheck-0 16 breaking-changes}@anchor{189}
+@anchor{guide/releases/flycheck-0 16 breaking-changes}@anchor{18a}
 @subsubsection Breaking changes
 
 
@@ -6785,7 +6813,7 @@ Support for coffeelint 0.x is dropped.
 @end itemize
 
 @node Syntax checkers<4>,New features<2>,Breaking changes<5>,Flycheck 0 16
-@anchor{guide/releases/flycheck-0 16 syntax-checkers}@anchor{18a}@anchor{guide/releases/flycheck-0 16 flycheck-hdevtools}@anchor{18b}
+@anchor{guide/releases/flycheck-0 16 syntax-checkers}@anchor{18b}@anchor{guide/releases/flycheck-0 16 flycheck-hdevtools}@anchor{18c}
 @subsubsection Syntax checkers
 
 
@@ -6797,7 +6825,7 @@ Support for coffeelint 0.x is dropped.
 @end menu
 
 @node New languages and checkers,Better Haskell support,,Syntax checkers<4>
-@anchor{guide/releases/flycheck-0 16 new-languages-and-checkers}@anchor{18c}
+@anchor{guide/releases/flycheck-0 16 new-languages-and-checkers}@anchor{18d}
 @subsubsection New languages and checkers
 
 
@@ -6807,7 +6835,7 @@ new syntax checker for Javascript (eslint@footnote{https://github.com/eslint/esl
 (js-yaml@footnote{https://github.com/visionmedia/js-yaml}).
 
 @node Better Haskell support,Miscellaneous new options,New languages and checkers,Syntax checkers<4>
-@anchor{guide/releases/flycheck-0 16 js-yaml}@anchor{18d}@anchor{guide/releases/flycheck-0 16 better-haskell-support}@anchor{18e}
+@anchor{guide/releases/flycheck-0 16 js-yaml}@anchor{18e}@anchor{guide/releases/flycheck-0 16 better-haskell-support}@anchor{18f}
 @subsubsection Better Haskell support
 
 
@@ -6821,7 +6849,7 @@ all source directories of a Cabal project to the GHC search path, and enables
 the package database of the project's Cabal sandbox.
 
 @node Miscellaneous new options,,Better Haskell support,Syntax checkers<4>
-@anchor{guide/releases/flycheck-0 16 miscellaneous-new-options}@anchor{18f}@anchor{guide/releases/flycheck-0 16 flycheck-haskell}@anchor{190}
+@anchor{guide/releases/flycheck-0 16 miscellaneous-new-options}@anchor{190}@anchor{guide/releases/flycheck-0 16 flycheck-haskell}@anchor{191}
 @subsubsection Miscellaneous new options
 
 
@@ -6843,7 +6871,7 @@ Rubocop can inhibit all style hints via the new
 @end itemize
 
 @node New features<2>,Improved error list,Syntax checkers<4>,Flycheck 0 16
-@anchor{guide/releases/flycheck-0 16 new-features}@anchor{191}
+@anchor{guide/releases/flycheck-0 16 new-features}@anchor{192}
 @subsubsection New features
 
 
@@ -6854,7 +6882,7 @@ Rubocop can inhibit all style hints via the new
 @end menu
 
 @node Syntax checker executables<2>,Disable syntax checkers easily,,New features<2>
-@anchor{guide/releases/flycheck-0 16 syntax-checker-executables}@anchor{192}
+@anchor{guide/releases/flycheck-0 16 syntax-checker-executables}@anchor{193}
 @subsubsection Syntax checker executables
 
 
@@ -6862,7 +6890,7 @@ You can now override the executables of syntax checkers.  See
 @ref{69,,Syntax checker executables} for details.
 
 @node Disable syntax checkers easily,,Syntax checker executables<2>,New features<2>
-@anchor{guide/releases/flycheck-0 16 disable-syntax-checkers-easily}@anchor{193}
+@anchor{guide/releases/flycheck-0 16 disable-syntax-checkers-easily}@anchor{194}
 @subsubsection Disable syntax checkers easily
 
 
@@ -6890,7 +6918,7 @@ flycheck-disabled-checkers RET (emacs-lisp-checkdoc)} in your @code{init.el} to
 disable Checkdoc warnings while editing your @code{init.el}.
 
 @node Improved error list,Get it<4>,New features<2>,Flycheck 0 16
-@anchor{guide/releases/flycheck-0 16 improved-error-list}@anchor{194}
+@anchor{guide/releases/flycheck-0 16 improved-error-list}@anchor{195}
 @subsubsection Improved error list
 
 
@@ -6904,14 +6932,14 @@ issues, and has an improved visual appearance.  The columns are aligned now, and
 the superfluous file name is omitted.
 
 @node Get it<4>,,Improved error list,Flycheck 0 16
-@anchor{guide/releases/flycheck-0 16 get-it}@anchor{195}
+@anchor{guide/releases/flycheck-0 16 get-it}@anchor{196}
 @subsubsection Get it
 
 
 See @ref{30,,Installation}.
 
 @node Flycheck 0 15,,Flycheck 0 16,Release announcements
-@anchor{guide/releases/flycheck-0 15 flycheck-0-15}@anchor{196}@anchor{guide/releases/flycheck-0 15 doc}@anchor{197}
+@anchor{guide/releases/flycheck-0 15 flycheck-0-15}@anchor{197}@anchor{guide/releases/flycheck-0 15 doc}@anchor{198}
 @subsection Flycheck 0.15
 
 
@@ -6929,7 +6957,7 @@ modern syntax-checking extension for Emacs.
 
 It is three months since the last release, so this release brings quite a lot of
 changes.  For a complete list of all changes, please read the complete list of
-@ref{15a,,Changelog}.  This article will just cover the most important changes.
+@ref{15b,,Changelog}.  This article will just cover the most important changes.
 
 @menu
 * Breaking changes: Breaking changes<6>. 
@@ -6944,12 +6972,12 @@ changes.  For a complete list of all changes, please read the complete list of
 @end menu
 
 @node Breaking changes<6>,New syntax checkers,,Flycheck 0 15
-@anchor{guide/releases/flycheck-0 15 breaking-changes}@anchor{198}
+@anchor{guide/releases/flycheck-0 15 breaking-changes}@anchor{199}
 @subsubsection Breaking changes
 
 
 This release introduces three breaking changes.  Two of these are related to the
-@ref{199,,new-error-list}:
+@ref{19a,,new-error-list}:
 
 @cartouche
 @quotation Warning 
@@ -6969,7 +6997,7 @@ you in any way.  I am not aware of any 3rd party extension which still uses
 @code{flycheck-declare-checker}.
 
 @node New syntax checkers,New error list,Breaking changes<6>,Flycheck 0 15
-@anchor{guide/releases/flycheck-0 15 new-syntax-checkers}@anchor{19a}
+@anchor{guide/releases/flycheck-0 15 new-syntax-checkers}@anchor{19b}
 @subsubsection New syntax checkers
 
 
@@ -6983,7 +7011,7 @@ Flycheck now uses the PHP Mess Detector@footnote{http://phpmd.org/} to check for
 CodeSniffer.
 
 @node New error list,C/C++ support,New syntax checkers,Flycheck 0 15
-@anchor{guide/releases/flycheck-0 15 new-error-list}@anchor{199}@anchor{guide/releases/flycheck-0 15 id1}@anchor{19b}
+@anchor{guide/releases/flycheck-0 15 new-error-list}@anchor{19a}@anchor{guide/releases/flycheck-0 15 id1}@anchor{19c}
 @subsubsection New error list
 
 
@@ -7002,7 +7030,7 @@ other errors at the current line with the new
 @ref{86,,flycheck-error-list-highlight} face.
 
 @node C/C++ support,New info level messages,New error list,Flycheck 0 15
-@anchor{guide/releases/flycheck-0 15 c-c-support}@anchor{19c}
+@anchor{guide/releases/flycheck-0 15 c-c-support}@anchor{19d}
 @subsubsection C/C++ support
 
 
@@ -7043,7 +7071,7 @@ Besides, the Clang syntax checker was changed to correctly handle local include
 files, e.g. @code{#include "foo.h"}.
 
 @node New info level messages,Custom error levels,C/C++ support,Flycheck 0 15
-@anchor{guide/releases/flycheck-0 15 new-info-level-messages}@anchor{19d}
+@anchor{guide/releases/flycheck-0 15 new-info-level-messages}@anchor{19e}
 @subsubsection New @code{info} level messages
 
 
@@ -7092,7 +7120,7 @@ The new level is already supported by the popular Solarized@footnote{https://git
 themes.
 
 @node Custom error levels,Other improvements,New info level messages,Flycheck 0 15
-@anchor{guide/releases/flycheck-0 15 custom-error-levels}@anchor{19e}@anchor{guide/releases/flycheck-0 15 id2}@anchor{19f}
+@anchor{guide/releases/flycheck-0 15 custom-error-levels}@anchor{19f}@anchor{guide/releases/flycheck-0 15 id2}@anchor{1a0}
 @subsubsection Custom error levels
 
 
@@ -7115,7 +7143,7 @@ After defining an error level, you can use it the error patterns of a syntax
 checker as usual.
 
 @node Other improvements,Get it<5>,Custom error levels,Flycheck 0 15
-@anchor{guide/releases/flycheck-0 15 other-improvements}@anchor{1a0}
+@anchor{guide/releases/flycheck-0 15 other-improvements}@anchor{1a1}
 @subsubsection Other improvements
 
 
@@ -7154,14 +7182,14 @@ take care to enable @code{libxml} for Emacs.
 @end itemize
 
 @node Get it<5>,,Other improvements,Flycheck 0 15
-@anchor{guide/releases/flycheck-0 15 get-it}@anchor{1a1}
+@anchor{guide/releases/flycheck-0 15 get-it}@anchor{1a2}
 @subsubsection Get it
 
 
 See @ref{30,,Installation}.
 
 @node Changelog,,Release announcements,Flycheck releases
-@anchor{guide/releases/index id1}@anchor{1a2}@anchor{guide/releases/index changelog}@anchor{15a}
+@anchor{guide/releases/index id1}@anchor{1a3}@anchor{guide/releases/index changelog}@anchor{15b}
 @section Changelog
 
 
@@ -7194,7 +7222,7 @@ See @ref{30,,Installation}.
 @end menu
 
 @node master in development,0 20 Aug 12 2014,,Changelog
-@anchor{guide/releases/index master-in-development}@anchor{1a3}
+@anchor{guide/releases/index master-in-development}@anchor{1a4}
 @subsection master (in development)
 
 
@@ -7262,6 +7290,10 @@ The error list can be sorted by message and syntax checker name now [GH-500]
 @item 
 Add @code{flycheck-error-list-checker-name} face to customize the appearance of
 the syntax checker name in the error list [GH-500]
+
+@item 
+Add @code{flycheck-shellcheck-excluded-warnings} to exclude warnings from
+ShellCheck reports [GH-499]
 @end itemize
 
 @item 
@@ -7281,6 +7313,9 @@ Remove Projectile-based config file search [GH-461]
 
 @item 
 Do not change point when navigating in the error list [GH-487]
+
+@item 
+ShellCheck warnings now include the corresponding warning code
 @end itemize
 
 @item 
@@ -7308,7 +7343,7 @@ Restore mouse support in the error list [GH-468]
 @end itemize
 
 @node 0 20 Aug 12 2014,0 19 Jun 12 2014,master in development,Changelog
-@anchor{guide/releases/index aug-12-2014}@anchor{1a4}
+@anchor{guide/releases/index aug-12-2014}@anchor{1a5}
 @subsection 0.20 (Aug 12, 2014)
 
 
@@ -7474,7 +7509,7 @@ Remove dependencies on f.el and s.el
 @end itemize
 
 @node 0 19 Jun 12 2014,0 18 Mar 24 2014,0 20 Aug 12 2014,Changelog
-@anchor{guide/releases/index jun-12-2014}@anchor{1a5}
+@anchor{guide/releases/index jun-12-2014}@anchor{1a6}
 @subsection 0.19 (Jun 12, 2014)
 
 
@@ -7576,7 +7611,7 @@ Do not signal errors in Go Mode, when @code{go} is not available
 @end itemize
 
 @node 0 18 Mar 24 2014,0 17 Feb 1 2014,0 19 Jun 12 2014,Changelog
-@anchor{guide/releases/index mar-24-2014}@anchor{1a6}
+@anchor{guide/releases/index mar-24-2014}@anchor{1a7}
 @subsection 0.18 (Mar 24, 2014)
 
 
@@ -7677,7 +7712,7 @@ Flycheck now handles Clang errors from included files [GH-367]
 @end itemize
 
 @node 0 17 Feb 1 2014,0 16 Jan 11 2014,0 18 Mar 24 2014,Changelog
-@anchor{guide/releases/index feb-1-2014}@anchor{1a7}
+@anchor{guide/releases/index feb-1-2014}@anchor{1a8}
 @subsection 0.17 (Feb 1, 2014)
 
 
@@ -7768,7 +7803,7 @@ avoid unintended side effects [GH-319]
 @end itemize
 
 @node 0 16 Jan 11 2014,0 15 Nov 15 2013,0 17 Feb 1 2014,Changelog
-@anchor{guide/releases/index sphinx}@anchor{1a8}@anchor{guide/releases/index jan-11-2014}@anchor{1a9}
+@anchor{guide/releases/index sphinx}@anchor{1a9}@anchor{guide/releases/index jan-11-2014}@anchor{1aa}
 @subsection 0.16 (Jan 11, 2014)
 
 
@@ -7915,7 +7950,7 @@ Fix parsing of errors in @code{scss} and @code{sass}
 @end itemize
 
 @node 0 15 Nov 15 2013,0 14 1 Aug 16 2013,0 16 Jan 11 2014,Changelog
-@anchor{guide/releases/index nov-15-2013}@anchor{1aa}@anchor{guide/releases/index flycheck-hdevtools}@anchor{1ab}
+@anchor{guide/releases/index nov-15-2013}@anchor{1ab}@anchor{guide/releases/index flycheck-hdevtools}@anchor{1ac}
 @subsection 0.15 (Nov 15, 2013)
 
 
@@ -8097,7 +8132,7 @@ Fix Cppcheck parsing with the built-in Emacs XML parser [GH-263]
 @end itemize
 
 @node 0 14 1 Aug 16 2013,0 14 Aug 15 2013,0 15 Nov 15 2013,Changelog
-@anchor{guide/releases/index grizzl}@anchor{1ac}@anchor{guide/releases/index aug-16-2013}@anchor{1ad}
+@anchor{guide/releases/index grizzl}@anchor{1ad}@anchor{guide/releases/index aug-16-2013}@anchor{1ae}
 @subsection 0.14.1 (Aug 16, 2013)
 
 
@@ -8116,7 +8151,7 @@ Add a missing dependency [GH-194]
 @end itemize
 
 @node 0 14 Aug 15 2013,0 13 Jun 28 2013,0 14 1 Aug 16 2013,Changelog
-@anchor{guide/releases/index aug-15-2013}@anchor{1ae}
+@anchor{guide/releases/index aug-15-2013}@anchor{1af}
 @subsection 0.14 (Aug 15, 2013)
 
 
@@ -8257,7 +8292,7 @@ Correctly parse output of @code{pylint} 1.0 [GH-184]
 @end itemize
 
 @node 0 13 Jun 28 2013,0 12 May 18 2013,0 14 Aug 15 2013,Changelog
-@anchor{guide/releases/index jun-28-2013}@anchor{1af}
+@anchor{guide/releases/index jun-28-2013}@anchor{1b0}
 @subsection 0.13 (Jun 28, 2013)
 
 
@@ -8379,7 +8414,7 @@ Fix version information on Emacs trunk builds
 @end itemize
 
 @node 0 12 May 18 2013,0 11 May 01 2013,0 13 Jun 28 2013,Changelog
-@anchor{guide/releases/index may-18-2013}@anchor{1b0}
+@anchor{guide/releases/index may-18-2013}@anchor{1b1}
 @subsection 0.12 (May 18, 2013)
 
 
@@ -8443,7 +8478,7 @@ Correctly parse syntax errors from JRuby [GH-136]
 @end itemize
 
 @node 0 11 May 01 2013,0 10 Apr 21 2013,0 12 May 18 2013,Changelog
-@anchor{guide/releases/index may-01-2013}@anchor{1b1}
+@anchor{guide/releases/index may-01-2013}@anchor{1b2}
 @subsection 0.11 (May 01, 2013)
 
 
@@ -8511,7 +8546,7 @@ Add missing customization group for syntax checker options
 @end itemize
 
 @node 0 10 Apr 21 2013,0 9 Apr 13 2013,0 11 May 01 2013,Changelog
-@anchor{guide/releases/index apr-21-2013}@anchor{1b2}@anchor{guide/releases/index projectile}@anchor{1b3}
+@anchor{guide/releases/index apr-21-2013}@anchor{1b3}@anchor{guide/releases/index projectile}@anchor{1b4}
 @subsection 0.10 (Apr 21, 2013)
 
 
@@ -8607,7 +8642,7 @@ Use a hopefully more reliable way to parse output of PHP CodeSniffer
 @end itemize
 
 @node 0 9 Apr 13 2013,0 8 Apr 9 2013,0 10 Apr 21 2013,Changelog
-@anchor{guide/releases/index apr-13-2013}@anchor{1b4}@anchor{guide/releases/index google-this}@anchor{1b5}
+@anchor{guide/releases/index apr-13-2013}@anchor{1b5}@anchor{guide/releases/index google-this}@anchor{1b6}
 @subsection 0.9 (Apr 13, 2013)
 
 
@@ -8642,7 +8677,7 @@ Quit the error message window when navigating away from error locations
 @end itemize
 
 @node 0 8 Apr 9 2013,0 7 1 Feb 23 2013,0 9 Apr 13 2013,Changelog
-@anchor{guide/releases/index apr-9-2013}@anchor{1b6}
+@anchor{guide/releases/index apr-9-2013}@anchor{1b7}
 @subsection 0.8 (Apr 9, 2013)
 
 
@@ -8715,7 +8750,7 @@ Improve highlighting to reduce screen flickering [GH-100]
 @end itemize
 
 @node 0 7 1 Feb 23 2013,0 7 Feb 14 2013,0 8 Apr 9 2013,Changelog
-@anchor{guide/releases/index feb-23-2013}@anchor{1b7}
+@anchor{guide/releases/index feb-23-2013}@anchor{1b8}
 @subsection 0.7.1 (Feb 23, 2013)
 
 
@@ -8756,7 +8791,7 @@ Add support for evaluating Lisp forms in syntax checker commands [GH-86]
 @end itemize
 
 @node 0 7 Feb 14 2013,0 6 1 Jan 30 2013,0 7 1 Feb 23 2013,Changelog
-@anchor{guide/releases/index feb-14-2013}@anchor{1b8}
+@anchor{guide/releases/index feb-14-2013}@anchor{1b9}
 @subsection 0.7 (Feb 14, 2013)
 
 
@@ -8813,7 +8848,7 @@ Fix infinite recursion on Windows [GH-81]
 @end itemize
 
 @node 0 6 1 Jan 30 2013,0 6 Jan 29 2013,0 7 Feb 14 2013,Changelog
-@anchor{guide/releases/index jan-30-2013}@anchor{1b9}
+@anchor{guide/releases/index jan-30-2013}@anchor{1ba}
 @subsection 0.6.1 (Jan 30, 2013)
 
 
@@ -8825,7 +8860,7 @@ Fix package dependencies
 @end itemize
 
 @node 0 6 Jan 29 2013,0 5 Dec 28 2012,0 6 1 Jan 30 2013,Changelog
-@anchor{guide/releases/index jan-29-2013}@anchor{1ba}
+@anchor{guide/releases/index jan-29-2013}@anchor{1bb}
 @subsection 0.6 (Jan 29, 2013)
 
 
@@ -8948,7 +8983,7 @@ Add an error parser for Checkstyle-like XML output [GH-38]
 @end itemize
 
 @node 0 5 Dec 28 2012,0 4 Nov 21 2012,0 6 Jan 29 2013,Changelog
-@anchor{guide/releases/index dec-28-2012}@anchor{1bb}
+@anchor{guide/releases/index dec-28-2012}@anchor{1bc}
 @subsection 0.5 (Dec 28, 2012)
 
 
@@ -9024,7 +9059,7 @@ Replace underlying Flymake API with a custom syntax checking implementation
 @end itemize
 
 @node 0 4 Nov 21 2012,0 3 Nov 21 2012,0 5 Dec 28 2012,Changelog
-@anchor{guide/releases/index nov-21-2012}@anchor{1bc}@anchor{guide/releases/index flymake-cursor}@anchor{1bd}
+@anchor{guide/releases/index nov-21-2012}@anchor{1bd}@anchor{guide/releases/index flymake-cursor}@anchor{1be}
 @subsection 0.4 (Nov 21, 2012)
 
 
@@ -9071,7 +9106,7 @@ Fix type error when checking compressed Emacs Lisp [GH-10]
 @end itemize
 
 @node 0 3 Nov 21 2012,0 2 Oct 25 2012,0 4 Nov 21 2012,Changelog
-@anchor{guide/releases/index id2}@anchor{1be}
+@anchor{guide/releases/index id2}@anchor{1bf}
 @subsection 0.3 (Nov 21, 2012)
 
 
@@ -9083,7 +9118,7 @@ Replace @code{flymake-mode} with a custom syntax checking minor mode [GH-4]
 @end itemize
 
 @node 0 2 Oct 25 2012,0 1 Oct 11 2012,0 3 Nov 21 2012,Changelog
-@anchor{guide/releases/index oct-25-2012}@anchor{1bf}
+@anchor{guide/releases/index oct-25-2012}@anchor{1c0}
 @subsection 0.2 (Oct 25, 2012)
 
 
@@ -9112,7 +9147,7 @@ Simplify syntax checker declarations [GH-2]
 @end itemize
 
 @node 0 1 Oct 11 2012,,0 2 Oct 25 2012,Changelog
-@anchor{guide/releases/index oct-11-2012}@anchor{1c0}
+@anchor{guide/releases/index oct-11-2012}@anchor{1c1}
 @subsection 0.1 (Oct 11, 2012)
 
 
@@ -9148,7 +9183,7 @@ Emacs Lisp
 @end itemize
 
 @node Extending Flycheck,Flycheck API,Flycheck releases,Top
-@anchor{dev/extending doc}@anchor{1c1}@anchor{dev/extending extending-flycheck}@anchor{1c2}
+@anchor{dev/extending doc}@anchor{1c2}@anchor{dev/extending extending-flycheck}@anchor{1c3}
 @chapter Extending Flycheck
 
 
@@ -9156,7 +9191,7 @@ This chapter explains how to add new syntax checkers to Flycheck, and
 provides examples for common use cases.
 
 If you define a new syntax checker, @emph{please} contribute it to Flycheck to make
-it available to other users, too.  See @ref{1c3,,Contributing syntax checkers} for
+it available to other users, too.  See @ref{1c4,,Contributing syntax checkers} for
 more information.
 
 @menu
@@ -9170,7 +9205,7 @@ more information.
 @end menu
 
 @node Defining new syntax checkers,Registering new syntax checkers,,Extending Flycheck
-@anchor{dev/extending defining-new-syntax-checkers}@anchor{a}@anchor{dev/extending id1}@anchor{1c4}
+@anchor{dev/extending defining-new-syntax-checkers}@anchor{a}@anchor{dev/extending id1}@anchor{1c5}
 @section Defining new syntax checkers
 
 
@@ -9217,7 +9252,7 @@ be registered in @ref{5f,,`flycheck-checkers'}.
 
      Each ARG is an argument to the executable, either as string,
      or as special symbol or form for
-     @ref{1c5,,`flycheck-substitute-argument'}, which see.
+     @ref{1c6,,`flycheck-substitute-argument'}, which see.
 
 @code{:error-patterns ((LEVEL SEXP ...) ...)}
      An unquoted list of error patterns to parse the output of
@@ -9229,7 +9264,7 @@ be registered in @ref{5f,,`flycheck-checkers'}.
      extract line, column, file name and error message.
 
      See @code{`rx'} for general information about RX, and
-     @ref{1c6,,`flycheck-rx-to-string'} for special RX forms provided by
+     @ref{1c7,,`flycheck-rx-to-string'} for special RX forms provided by
      Flycheck.
 
      All patterns are applied in the order of declaration to the
@@ -9303,7 +9338,7 @@ be registered in @ref{5f,,`flycheck-checkers'}.
 @end deffn
 
 @geindex flycheck-def-config-file-var; Emacs Lisp macro
-@anchor{dev/extending el function flycheck-def-config-file-var}@anchor{1c7}
+@anchor{dev/extending el function flycheck-def-config-file-var}@anchor{1c8}
 @deffn {Macro} flycheck@w{-}def@w{-}config@w{-}file@w{-}var symbol checker &optional  file-name &rest  custom-args
 
 @format
@@ -9322,7 +9357,7 @@ argument to @ref{19,,`flycheck-define-checker'}.
 @end deffn
 
 @geindex flycheck-def-option-var; Emacs Lisp macro
-@anchor{dev/extending el function flycheck-def-option-var}@anchor{1c8}
+@anchor{dev/extending el function flycheck-def-option-var}@anchor{1c9}
 @deffn {Macro} flycheck@w{-}def@w{-}option@w{-}var symbol init-value checker docstring &rest  custom-args
 
 @format
@@ -9341,7 +9376,7 @@ Use this together with the @code{`option'}, @code{`option-list'} and
 @end deffn
 
 @node Registering new syntax checkers,Error levels<2>,Defining new syntax checkers,Extending Flycheck
-@anchor{dev/extending registering-new-syntax-checkers}@anchor{1c9}@anchor{dev/extending id2}@anchor{1ca}
+@anchor{dev/extending registering-new-syntax-checkers}@anchor{1ca}@anchor{dev/extending id2}@anchor{1cb}
 @section Registering new syntax checkers
 
 
@@ -9376,7 +9411,7 @@ user from effectively customizing Flycheck.
 @end cartouche
 
 @node Error levels<2>,Error parsers,Registering new syntax checkers,Extending Flycheck
-@anchor{dev/extending id3}@anchor{1cb}@anchor{dev/extending error-levels}@anchor{1cc}
+@anchor{dev/extending id3}@anchor{1cc}@anchor{dev/extending error-levels}@anchor{1cd}
 @section Error levels
 
 
@@ -9401,17 +9436,17 @@ Informational annotations
 You can define new error levels with @ref{25,,flycheck-define-error-level}.
 
 @node Error parsers,Extending syntax checkers<2>,Error levels<2>,Extending Flycheck
-@anchor{dev/extending error-parsers}@anchor{1cd}@anchor{dev/extending id4}@anchor{1ce}
+@anchor{dev/extending error-parsers}@anchor{1ce}@anchor{dev/extending id4}@anchor{1cf}
 @section Error parsers
 
 
 Syntax checkers may use more sophisticated error parsing by given the
 @code{:error-parser} argument to @ref{19,,flycheck-define-checker}.  See
-@ref{1cf,,Builtin error parsers} for a list of builtin parsers.
+@ref{1d0,,Builtin error parsers} for a list of builtin parsers.
 
 You may also define your own error parsers.  An error parser is any function
 that takes the following three arguments and returns a list of
-@ref{1d0,,flycheck-error} objects (see @ref{78,,Error API} for more information):
+@ref{1d1,,flycheck-error} objects (see @ref{78,,Error API} for more information):
 
 
 @table @asis
@@ -9430,17 +9465,17 @@ A buffer object referring to the buffer that was syntax-checked.
 @end table
 
 Flycheck provides some utility functions to implement your own error parsers.
-See @ref{1d1,,Error parser API} for details.
+See @ref{1d2,,Error parser API} for details.
 
 @node Extending syntax checkers<2>,Examples,Error parsers,Extending Flycheck
-@anchor{dev/extending id5}@anchor{1d2}@anchor{dev/extending extending-syntax-checkers}@anchor{1d3}
+@anchor{dev/extending id5}@anchor{1d3}@anchor{dev/extending extending-syntax-checkers}@anchor{1d4}
 @section Extending syntax checkers
 
 
 There are some means to extend defined syntax checkers:
 
 @geindex flycheck-add-next-checker; Emacs Lisp function
-@anchor{dev/extending el function flycheck-add-next-checker}@anchor{1d4}
+@anchor{dev/extending el function flycheck-add-next-checker}@anchor{1d5}
 @deffn {Function} flycheck@w{-}add@w{-}next@w{-}checker checker next &optional  append
 
 @format
@@ -9464,7 +9499,7 @@ APPEND is non-nil.
 @end deffn
 
 @node Examples,,Extending syntax checkers<2>,Extending Flycheck
-@anchor{dev/extending examples}@anchor{1d5}
+@anchor{dev/extending examples}@anchor{1d6}
 @section Examples
 
 
@@ -9477,7 +9512,7 @@ APPEND is non-nil.
 @end menu
 
 @node Basic syntax checkers,Syntax checkers with predicates,,Examples
-@anchor{dev/extending id6}@anchor{1d6}@anchor{dev/extending basic-syntax-checkers}@anchor{1d7}
+@anchor{dev/extending id6}@anchor{1d7}@anchor{dev/extending basic-syntax-checkers}@anchor{1d8}
 @subsection Basic syntax checkers
 
 
@@ -9512,7 +9547,7 @@ contents of the buffer to check.
 Next we specify how to parse the output of the syntax checker.  PHP CodeSniffer
 provides an option to output errors in an XML format similar to the Java tool
 Checkstyle, so we use the built-in @emph{error parser}
-@ref{1d8,,flycheck-parse-checkstyle} to parse the output.
+@ref{1d9,,flycheck-parse-checkstyle} to parse the output.
 
 Then we enable the syntax checker in PHP editing modes.
 
@@ -9555,7 +9590,7 @@ extract the error information, and an error level.
 Eventually we enable the syntax checker in @code{python-mode}.
 
 @node Syntax checkers with predicates,Configuration files for syntax checkers,Basic syntax checkers,Examples
-@anchor{dev/extending syntax-checkers-with-predicates}@anchor{1d9}
+@anchor{dev/extending syntax-checkers-with-predicates}@anchor{1da}
 @subsection Syntax checkers with predicates
 
 
@@ -9612,7 +9647,7 @@ This syntax checker is now used whenever a file ends with @code{.json}, regardle
 the major mode.
 
 @node Configuration files for syntax checkers,Chaining syntax checkers,Syntax checkers with predicates,Examples
-@anchor{dev/extending configuration-files-for-syntax-checkers}@anchor{1da}
+@anchor{dev/extending configuration-files-for-syntax-checkers}@anchor{1db}
 @subsection Configuration files for syntax checkers
 
 
@@ -9647,7 +9682,7 @@ symbol.  Otherwise the whole element is simply omitted from the command line.
 
 Some Syntax checkers can also be configured using options passed on the command
 line.  Flycheck supports this case, too.  We will use this facility to extend
-the PHP CodeSniffer syntax checker from the @ref{1d7,,Basic syntax checkers} section
+the PHP CodeSniffer syntax checker from the @ref{1d8,,Basic syntax checkers} section
 with support for coding standards:
 
 @example
@@ -9669,11 +9704,11 @@ with support for coding standards:
 The syntax checker is pretty much the same as before, except that a new element
 was added to @code{:command}.  This element passes the value of the new option
 variable @ref{10c,,flycheck-phpcs-standard} to the syntax checker.  This variable
-is declared with the special macro @ref{1c8,,flycheck-def-option-var} at the
+is declared with the special macro @ref{1c9,,flycheck-def-option-var} at the
 beginning.
 
 @node Chaining syntax checkers,,Configuration files for syntax checkers,Examples
-@anchor{dev/extending chaining-syntax-checkers}@anchor{1db}
+@anchor{dev/extending chaining-syntax-checkers}@anchor{1dc}
 @subsection Chaining syntax checkers
 
 
@@ -9706,7 +9741,7 @@ a @ref{61,,registered syntax checker}, and if @code{php} only emitted errors wit
 @code{warning} level or less, that is, no errors.
 
 @node Flycheck API,Contribution guidelines,Extending Flycheck,Top
-@anchor{dev/api doc}@anchor{1dc}@anchor{dev/api flycheck-api}@anchor{1dd}
+@anchor{dev/api doc}@anchor{1dd}@anchor{dev/api flycheck-api}@anchor{1de}
 @chapter Flycheck API
 
 
@@ -9731,7 +9766,7 @@ want to develop Flycheck itself.
 @end menu
 
 @node Status API,Error API,,Flycheck API
-@anchor{dev/api id1}@anchor{1de}@anchor{dev/api status-api}@anchor{1df}
+@anchor{dev/api id1}@anchor{1df}@anchor{dev/api status-api}@anchor{1e0}
 @section Status API
 
 
@@ -9773,7 +9808,7 @@ refresh the mode line.
 @end deffn
 
 @geindex flycheck-report-error; Emacs Lisp function
-@anchor{dev/api el function flycheck-report-error}@anchor{1e0}
+@anchor{dev/api el function flycheck-report-error}@anchor{1e1}
 @deffn {Function} flycheck@w{-}report@w{-}error 
 
 @format
@@ -9813,21 +9848,21 @@ nil.
 @end deffn
 
 @node Error API,Error Analysis,Status API,Flycheck API
-@anchor{dev/api error-api}@anchor{78}@anchor{dev/api id2}@anchor{1e1}
+@anchor{dev/api error-api}@anchor{78}@anchor{dev/api id2}@anchor{1e2}
 @section Error API
 
 
-Flycheck errors are represented by the CL structure @ref{1d0,,flycheck-error}.
+Flycheck errors are represented by the CL structure @ref{1d1,,flycheck-error}.
 See @ref{Structures,,,cl} for more information about CL structures.
 
 @geindex flycheck-error; Emacs Lisp CL struct
-@anchor{dev/api el struct flycheck-error}@anchor{1d0}
+@anchor{dev/api el struct flycheck-error}@anchor{1d1}
 @deffn {CL Struct} flycheck@w{-}error
 
 A Flycheck error with the following slots.  Each of these slots may be @code{nil}.
 
 @geindex flycheck-error-buffer; Emacs Lisp slot
-@anchor{dev/api el function flycheck-error-buffer}@anchor{1e2}
+@anchor{dev/api el function flycheck-error-buffer}@anchor{1e3}
 @deffn {Slot} buffer
 
 The buffer object referring to the buffer this error belongs to.
@@ -9841,28 +9876,28 @@ parser.  Flycheck automatically keeps track of the buffer itself.
 @end deffn
 
 @geindex flycheck-error-checker; Emacs Lisp slot
-@anchor{dev/api el function flycheck-error-checker}@anchor{1e3}
+@anchor{dev/api el function flycheck-error-checker}@anchor{1e4}
 @deffn {Slot} checker
 
 The syntax checker that reported this error.
 @end deffn
 
 @geindex flycheck-error-filename; Emacs Lisp slot
-@anchor{dev/api el function flycheck-error-filename}@anchor{1e4}
+@anchor{dev/api el function flycheck-error-filename}@anchor{1e5}
 @deffn {Slot} filename
 
 A string containing the filename the error refers to.
 @end deffn
 
 @geindex flycheck-error-line; Emacs Lisp slot
-@anchor{dev/api el function flycheck-error-line}@anchor{1e5}
+@anchor{dev/api el function flycheck-error-line}@anchor{1e6}
 @deffn {Slot} line
 
 An integer providing the line the error refers to.
 @end deffn
 
 @geindex flycheck-error-column; Emacs Lisp slot
-@anchor{dev/api el function flycheck-error-column}@anchor{1e6}
+@anchor{dev/api el function flycheck-error-column}@anchor{1e7}
 @deffn {Slot} column
 
 An integer providing the column the error refers to.
@@ -9872,35 +9907,35 @@ the whole line.
 @end deffn
 
 @geindex flycheck-error-message; Emacs Lisp slot
-@anchor{dev/api el function flycheck-error-message}@anchor{1e7}
+@anchor{dev/api el function flycheck-error-message}@anchor{1e8}
 @deffn {Slot} message
 
 The human-readable error message as string.
 @end deffn
 
 @geindex flycheck-error-level; Emacs Lisp slot
-@anchor{dev/api el function flycheck-error-level}@anchor{1e8}
+@anchor{dev/api el function flycheck-error-level}@anchor{1e9}
 @deffn {Slot} level
 
 The error level of the message, as symbol denoting an error level defined
 with @ref{25,,flycheck-define-error-level}.
 @end deffn
 
-There are two constructors to create new @ref{1d0,,flycheck-error} objects:
+There are two constructors to create new @ref{1d1,,flycheck-error} objects:
 
 @geindex flycheck-error-new-at; Emacs Lisp function
-@anchor{dev/api el function flycheck-error-new-at}@anchor{1e9}
+@anchor{dev/api el function flycheck-error-new-at}@anchor{1ea}
 @deffn {Function} flycheck@w{-}error@w{-}new@w{-}at line column &optional  level message &key                checker filename buffer
 
 Create a new Flycheck error at the given @var{line} and @var{column}.
 
-@var{line} and @var{column} refer to the @ref{1e5,,line} and
-@ref{1e6,,column} of the new error.  The optional @var{level} and
-@var{message} arguments fill the @ref{1e8,,level} and cl-slot:@code{message}
+@var{line} and @var{column} refer to the @ref{1e6,,line} and
+@ref{1e7,,column} of the new error.  The optional @var{level} and
+@var{message} arguments fill the @ref{1e9,,level} and cl-slot:@code{message}
 slots respectively.
 
 @var{checker}, @var{filename} and @var{buffer} are keyword arguments,
-for @ref{1e3,,checker}, @ref{1e4,,filename} and @ref{1e2,,buffer}
+for @ref{1e4,,checker}, @ref{1e5,,filename} and @ref{1e3,,buffer}
 respectively.  @var{buffer} defaults to the current buffer, the other two
 default to @code{nil}.
 
@@ -9914,13 +9949,13 @@ specify @strong{all} optional arguments, that is, @strong{both} @var{level}
 @end deffn
 
 @geindex flycheck-error-new; Emacs Lisp function
-@anchor{dev/api el function flycheck-error-new}@anchor{1ea}
+@anchor{dev/api el function flycheck-error-new}@anchor{1eb}
 @deffn {Function} flycheck@w{-}error@w{-}new  &rest attributes
 
-Create a new @ref{1d0,,flycheck-error} with the given @var{attributes}.
+Create a new @ref{1d1,,flycheck-error} with the given @var{attributes}.
 
 @var{attributes} is a property list, where each property specifies the
-value for the corresponding slot of @ref{1d0,,flycheck-error}, for
+value for the corresponding slot of @ref{1d1,,flycheck-error}, for
 instance:
 
 @example
@@ -9931,7 +9966,7 @@ instance:
 The following functions and macros work on errors:
 
 @geindex flycheck-error-with-buffer; Emacs Lisp macro
-@anchor{dev/api el function flycheck-error-with-buffer}@anchor{1eb}
+@anchor{dev/api el function flycheck-error-with-buffer}@anchor{1ec}
 @deffn {Macro} flycheck@w{-}error@w{-}with@w{-}buffer err &rest  forms
 
 @format
@@ -9942,7 +9977,7 @@ If the buffer of ERR is not live, FORMS are not evaluated.
 @end deffn
 
 @geindex flycheck-error-line-region; Emacs Lisp function
-@anchor{dev/api el function flycheck-error-line-region}@anchor{1ec}
+@anchor{dev/api el function flycheck-error-line-region}@anchor{1ed}
 @deffn {Function} flycheck@w{-}error@w{-}line@w{-}region err
 
 @format
@@ -9957,7 +9992,7 @@ end of the line.
 @end deffn
 
 @geindex flycheck-error-column-region; Emacs Lisp function
-@anchor{dev/api el function flycheck-error-column-region}@anchor{1ed}
+@anchor{dev/api el function flycheck-error-column-region}@anchor{1ee}
 @deffn {Function} flycheck@w{-}error@w{-}column@w{-}region err
 
 @format
@@ -9972,7 +10007,7 @@ if ERR has no column.
 @end deffn
 
 @geindex flycheck-error-thing-region; Emacs Lisp function
-@anchor{dev/api el function flycheck-error-thing-region}@anchor{1ee}
+@anchor{dev/api el function flycheck-error-thing-region}@anchor{1ef}
 @deffn {Function} flycheck@w{-}error@w{-}thing@w{-}region thing err
 
 @format
@@ -9989,7 +10024,7 @@ return nil.
 @end deffn
 
 @geindex flycheck-error-pos; Emacs Lisp function
-@anchor{dev/api el function flycheck-error-pos}@anchor{1ef}
+@anchor{dev/api el function flycheck-error-pos}@anchor{1f0}
 @deffn {Function} flycheck@w{-}error@w{-}pos err
 
 @format
@@ -10003,7 +10038,7 @@ non-whitespace character of the error line, if ERR has no error column.
 @end deffn
 
 @geindex flycheck-error-format; Emacs Lisp function
-@anchor{dev/api el function flycheck-error-format}@anchor{1f0}
+@anchor{dev/api el function flycheck-error-format}@anchor{1f1}
 @deffn {Function} flycheck@w{-}error@w{-}format err
 
 @format
@@ -10015,7 +10050,7 @@ _not_ include the file name.
 @end deffn
 
 @geindex flycheck-error-<; Emacs Lisp function
-@anchor{dev/api el function flycheck-error-<}@anchor{1f1}
+@anchor{dev/api el function flycheck-error-<}@anchor{1f2}
 @deffn {Function} flycheck@w{-}error@w{-}< err1 err2
 
 @format
@@ -10026,20 +10061,20 @@ Compare by line numbers and then by column numbers.
 @end deffn
 
 @geindex flycheck-error-level-<; Emacs Lisp function
-@anchor{dev/api el function flycheck-error-level-<}@anchor{1f2}
+@anchor{dev/api el function flycheck-error-level-<}@anchor{1f3}
 @deffn {Function} flycheck@w{-}error@w{-}level@w{-}< err1 err2
 
 @format
 Determine whether ERR1 goes before ERR2 by error level.
 
-Like @ref{1f1,,`flycheck-error-<'}, but compares by error level severity
+Like @ref{1f2,,`flycheck-error-<'}, but compares by error level severity
 first.  Levels of the same severity are compared by name.
 @end format
 @end deffn
 @end deffn
 
 @node Error Analysis,Builtin error parsers,Error API,Flycheck API
-@anchor{dev/api error-analysis}@anchor{1f3}
+@anchor{dev/api error-analysis}@anchor{1f4}
 @section Error Analysis
 
 
@@ -10075,7 +10110,7 @@ level.
 @end deffn
 
 @geindex flycheck-has-errors-p; Emacs Lisp function
-@anchor{dev/api el function flycheck-has-errors-p}@anchor{1f4}
+@anchor{dev/api el function flycheck-has-errors-p}@anchor{1f5}
 @deffn {Function} flycheck@w{-}has@w{-}errors@w{-}p errors level
 
 @format
@@ -10084,7 +10119,7 @@ Determine if there are any ERRORS with LEVEL.
 @end deffn
 
 @geindex flycheck-has-max-errors-p; Emacs Lisp function
-@anchor{dev/api el function flycheck-has-max-errors-p}@anchor{1f5}
+@anchor{dev/api el function flycheck-has-max-errors-p}@anchor{1f6}
 @deffn {Function} flycheck@w{-}has@w{-}max@w{-}errors@w{-}p errors level
 
 @format
@@ -10093,12 +10128,12 @@ Check if there is no error in ERRORS more severe than LEVEL.
 @end deffn
 
 @node Builtin error parsers,Error parser API,Error Analysis,Flycheck API
-@anchor{dev/api id3}@anchor{1f6}@anchor{dev/api builtin-error-parsers}@anchor{1cf}
+@anchor{dev/api id3}@anchor{1f7}@anchor{dev/api builtin-error-parsers}@anchor{1d0}
 @section Builtin error parsers
 
 
 @geindex flycheck-parse-with-patterns; Emacs Lisp function
-@anchor{dev/api el function flycheck-parse-with-patterns}@anchor{1f7}
+@anchor{dev/api el function flycheck-parse-with-patterns}@anchor{1f8}
 @deffn {Function} flycheck@w{-}parse@w{-}with@w{-}patterns output checker _buffer
 
 @format
@@ -10117,7 +10152,7 @@ objects).
 @end deffn
 
 @geindex flycheck-parse-checkstyle; Emacs Lisp function
-@anchor{dev/api el function flycheck-parse-checkstyle}@anchor{1d8}
+@anchor{dev/api el function flycheck-parse-checkstyle}@anchor{1d9}
 @deffn {Function} flycheck@w{-}parse@w{-}checkstyle output _checker _buffer
 
 @format
@@ -10134,14 +10169,14 @@ about Checkstyle.
 @end deffn
 
 @node Error parser API,Error filters,Builtin error parsers,Flycheck API
-@anchor{dev/api error-parser-api}@anchor{1d1}@anchor{dev/api id4}@anchor{1f8}
+@anchor{dev/api error-parser-api}@anchor{1d2}@anchor{dev/api id4}@anchor{1f9}
 @section Error parser API
 
 
 These functions can be used to implement custom error parsers:
 
 @geindex flycheck-parse-xml-string; Emacs Lisp function
-@anchor{dev/api el function flycheck-parse-xml-string}@anchor{1f9}
+@anchor{dev/api el function flycheck-parse-xml-string}@anchor{1fa}
 @deffn {Function} flycheck@w{-}parse@w{-}xml@w{-}string xml
 
 @format
@@ -10156,12 +10191,12 @@ text nodes) or as XML nodes, in the same for as the root node.
 @end deffn
 
 @node Error filters,Syntax checker API,Error parser API,Flycheck API
-@anchor{dev/api error-filters}@anchor{1fa}@anchor{dev/api builtin-error-filters}@anchor{1fb}
+@anchor{dev/api error-filters}@anchor{1fb}@anchor{dev/api builtin-error-filters}@anchor{1fc}
 @section Error filters
 
 
 @geindex flycheck-sanitize-errors; Emacs Lisp function
-@anchor{dev/api el function flycheck-sanitize-errors}@anchor{1fc}
+@anchor{dev/api el function flycheck-sanitize-errors}@anchor{1fd}
 @deffn {Function} flycheck@w{-}sanitize@w{-}errors errors
 
 @format
@@ -10176,7 +10211,7 @@ Returns sanitized ERRORS.
 @end deffn
 
 @geindex flycheck-collapse-error-message-whitespace; Emacs Lisp function
-@anchor{dev/api el function flycheck-collapse-error-message-whitespace}@anchor{1fd}
+@anchor{dev/api el function flycheck-collapse-error-message-whitespace}@anchor{1fe}
 @deffn {Function} flycheck@w{-}collapse@w{-}error@w{-}message@w{-}whitespace errors
 
 @format
@@ -10187,12 +10222,12 @@ Return ERRORS.
 @end deffn
 
 @geindex flycheck-fold-include-errors; Emacs Lisp function
-@anchor{dev/api el function flycheck-fold-include-errors}@anchor{1fe}
+@anchor{dev/api el function flycheck-fold-include-errors}@anchor{1ff}
 @deffn {Function} flycheck@w{-}fold@w{-}include@w{-}errors 
 @end deffn
 
 @node Syntax checker API,Builtin option filters,Error filters,Flycheck API
-@anchor{dev/api syntax-checker-api}@anchor{1ff}@anchor{dev/api id5}@anchor{200}
+@anchor{dev/api syntax-checker-api}@anchor{200}@anchor{dev/api id5}@anchor{201}
 @section Syntax checker API
 
 
@@ -10209,7 +10244,7 @@ A checker is registered if it is contained in
 @end deffn
 
 @geindex flycheck-substitute-argument; Emacs Lisp function
-@anchor{dev/api el function flycheck-substitute-argument}@anchor{1c5}
+@anchor{dev/api el function flycheck-substitute-argument}@anchor{1c6}
 @deffn {Function} flycheck@w{-}substitute@w{-}argument arg checker
 
 @format
@@ -10247,7 +10282,7 @@ STRING
      as primary input to a checker, unless absolutely necessary.
 
      When using this symbol as primary input to the syntax
-     checker, add @ref{201,,`flycheck-buffer-saved-p'} to the @code{`:predicate'}.
+     checker, add @ref{202,,`flycheck-buffer-saved-p'} to the @code{`:predicate'}.
 
 @code{`temporary-directory'}
      Create a unique temporary directory and return its path.
@@ -10270,7 +10305,7 @@ STRING
 
 @code{(config-file OPTION VARIABLE [PREPEND-FN])}
      Search the configuration file bound to VARIABLE with
-     @ref{202,,`flycheck-locate-config-file'} and return a list of arguments
+     @ref{203,,`flycheck-locate-config-file'} and return a list of arguments
      that pass this configuration file to the syntax checker, or
      nil if the configuration file was not found.
 
@@ -10332,7 +10367,7 @@ are substituted within the body of cells!
 @end deffn
 
 @geindex flycheck-locate-config-file; Emacs Lisp function
-@anchor{dev/api el function flycheck-locate-config-file}@anchor{202}
+@anchor{dev/api el function flycheck-locate-config-file}@anchor{203}
 @deffn {Function} flycheck@w{-}locate@w{-}config@w{-}file filename checker
 
 @format
@@ -10360,7 +10395,7 @@ The following PROPERTIES constitute an error level:
      the number, the more severe is this level compared to other
      levels.  Defaults to 0.
 
-     The severity is used by @ref{1f2,,`flycheck-error-level-<'} to
+     The severity is used by @ref{1f3,,`flycheck-error-level-<'} to
      determine the ordering of errors according to their levels.
 
 @code{:overlay-category CATEGORY}
@@ -10392,12 +10427,12 @@ The following PROPERTIES constitute an error level:
 @end deffn
 
 @node Builtin option filters,Builtin syntax checker predicates,Syntax checker API,Flycheck API
-@anchor{dev/api id6}@anchor{203}@anchor{dev/api builtin-option-filters}@anchor{204}
+@anchor{dev/api id6}@anchor{204}@anchor{dev/api builtin-option-filters}@anchor{205}
 @section Builtin option filters
 
 
 @geindex flycheck-option-int; Emacs Lisp function
-@anchor{dev/api el function flycheck-option-int}@anchor{205}
+@anchor{dev/api el function flycheck-option-int}@anchor{206}
 @deffn {Function} flycheck@w{-}option@w{-}int value
 
 @format
@@ -10409,7 +10444,7 @@ a string.
 @end deffn
 
 @geindex flycheck-option-comma-separated-list; Emacs Lisp function
-@anchor{dev/api el function flycheck-option-comma-separated-list}@anchor{206}
+@anchor{dev/api el function flycheck-option-comma-separated-list}@anchor{207}
 @deffn {Function} flycheck@w{-}option@w{-}comma@w{-}separated@w{-}list value &optional  separator filter
 
 @format
@@ -10429,12 +10464,12 @@ SEPARATOR is ignored in this case.
 @end deffn
 
 @node Builtin syntax checker predicates,Utilities,Builtin option filters,Flycheck API
-@anchor{dev/api builtin-syntax-checker-predicates}@anchor{207}
+@anchor{dev/api builtin-syntax-checker-predicates}@anchor{208}
 @section Builtin syntax checker predicates
 
 
 @geindex flycheck-buffer-saved-p; Emacs Lisp function
-@anchor{dev/api el function flycheck-buffer-saved-p}@anchor{201}
+@anchor{dev/api el function flycheck-buffer-saved-p}@anchor{202}
 @deffn {Function} flycheck@w{-}buffer@w{-}saved@w{-}p  &optional buffer
 
 @format
@@ -10449,12 +10484,12 @@ modified, or nil otherwise.
 @end deffn
 
 @node Utilities,,Builtin syntax checker predicates,Flycheck API
-@anchor{dev/api utilities}@anchor{208}
+@anchor{dev/api utilities}@anchor{209}
 @section Utilities
 
 
 @geindex flycheck-rx-to-string; Emacs Lisp function
-@anchor{dev/api el function flycheck-rx-to-string}@anchor{1c6}
+@anchor{dev/api el function flycheck-rx-to-string}@anchor{1c7}
 @deffn {Function} flycheck@w{-}rx@w{-}to@w{-}string form &optional  no-group
 
 @format
@@ -10498,7 +10533,7 @@ Determine if OBJ is a list of symbols.
 @end deffn
 
 @node Contribution guidelines,Testing Flycheck,Flycheck API,Top
-@anchor{contrib/guidelines doc}@anchor{209}@anchor{contrib/guidelines contribution-guidelines}@anchor{20a}
+@anchor{contrib/guidelines doc}@anchor{20a}@anchor{contrib/guidelines contribution-guidelines}@anchor{20b}
 @chapter Contribution guidelines
 
 
@@ -10513,7 +10548,7 @@ guidelines.
 @end menu
 
 @node Reporting issues,Contributing code,,Contribution guidelines
-@anchor{contrib/guidelines id1}@anchor{20b}@anchor{contrib/guidelines reporting-issues}@anchor{91}
+@anchor{contrib/guidelines id1}@anchor{20c}@anchor{contrib/guidelines reporting-issues}@anchor{91}
 @section Reporting issues
 
 
@@ -10538,7 +10573,7 @@ complete sentences.
 @end itemize
 
 @node Contributing code,,Reporting issues,Contribution guidelines
-@anchor{contrib/guidelines id2}@anchor{20c}@anchor{contrib/guidelines contributing-code}@anchor{20d}
+@anchor{contrib/guidelines id2}@anchor{20d}@anchor{contrib/guidelines contributing-code}@anchor{20e}
 @section Contributing code
 
 
@@ -10555,7 +10590,7 @@ welcome, but please respect the following guidelines.
 @end menu
 
 @node General,Code style,,Contributing code
-@anchor{contrib/guidelines general}@anchor{20e}
+@anchor{contrib/guidelines general}@anchor{20f}
 @subsection General
 
 
@@ -10570,7 +10605,7 @@ Provide use cases and rationale for new features.
 @end itemize
 
 @node Code style,Commit messages,General,Contributing code
-@anchor{contrib/guidelines code-style}@anchor{20f}
+@anchor{contrib/guidelines code-style}@anchor{210}
 @subsection Code style
 
 
@@ -10593,7 +10628,7 @@ Flycheck, just make sure that your code has no Flycheck warnings.
 @end itemize
 
 @node Commit messages,Contributing syntax checkers,Code style,Contributing code
-@anchor{contrib/guidelines commit-messages}@anchor{210}
+@anchor{contrib/guidelines commit-messages}@anchor{211}
 @subsection Commit messages
 
 
@@ -10653,7 +10688,7 @@ Git Commit Mode@footnote{https://github.com/magit/git-modes/} and Magit@footnote
 which helps you to comply to these guidelines.
 
 @node Contributing syntax checkers,Pull requests,Commit messages,Contributing code
-@anchor{contrib/guidelines contributing-syntax-checkers}@anchor{1c3}@anchor{contrib/guidelines id3}@anchor{211}
+@anchor{contrib/guidelines contributing-syntax-checkers}@anchor{1c4}@anchor{contrib/guidelines id3}@anchor{212}
 @subsection Contributing syntax checkers
 
 
@@ -10687,7 +10722,7 @@ checkers in Flycheck.
 @end cartouche
 
 @node Pull requests,,Contributing syntax checkers,Contributing code
-@anchor{contrib/guidelines id4}@anchor{212}@anchor{contrib/guidelines pull-requests}@anchor{213}
+@anchor{contrib/guidelines id4}@anchor{213}@anchor{contrib/guidelines pull-requests}@anchor{214}
 @subsection Pull requests
 
 
@@ -10714,7 +10749,7 @@ Pull requests @strong{must} pass all tests on Travis CI before being merged.
 @end cartouche
 
 @node Testing Flycheck,Writing documentation,Contribution guidelines,Top
-@anchor{contrib/testing testing-flycheck}@anchor{214}@anchor{contrib/testing doc}@anchor{215}@anchor{contrib/testing pull-request}@anchor{216}
+@anchor{contrib/testing testing-flycheck}@anchor{215}@anchor{contrib/testing doc}@anchor{216}@anchor{contrib/testing pull-request}@anchor{217}
 @chapter Testing Flycheck
 
 
@@ -10732,7 +10767,7 @@ This document explains how to use this test suite.
 @end menu
 
 @node Test suite layout,Test running,,Testing Flycheck
-@anchor{contrib/testing test-suite-layout}@anchor{217}
+@anchor{contrib/testing test-suite-layout}@anchor{218}
 @section Test suite layout
 
 
@@ -10756,7 +10791,7 @@ ERT selectors from the command line and runs all matching tests.
 @end itemize
 
 @node Test running,Virtual test environment,Test suite layout,Testing Flycheck
-@anchor{contrib/testing test-running}@anchor{218}@anchor{contrib/testing id1}@anchor{219}
+@anchor{contrib/testing test-running}@anchor{219}@anchor{contrib/testing id1}@anchor{21a}
 @section Test running
 
 
@@ -10778,7 +10813,7 @@ $ cabal install hlint shellcheck
 @cartouche
 @quotation Note 
 If you'd like to keep your environment clean, use the
-@ref{21a,,Virtual test environment} instead.
+@ref{21b,,Virtual test environment} instead.
 @end quotation
 @end cartouche
 
@@ -10818,7 +10853,7 @@ Emacs Lisp.
 @end cartouche
 
 @node Virtual test environment,Travis CI,Test running,Testing Flycheck
-@anchor{contrib/testing id2}@anchor{21b}@anchor{contrib/testing virtual-test-environment}@anchor{21a}
+@anchor{contrib/testing id2}@anchor{21c}@anchor{contrib/testing virtual-test-environment}@anchor{21b}
 @section Virtual test environment
 
 
@@ -10886,7 +10921,7 @@ $ vagrant ssh
 @end example
 
 This will give you a bash prompt within the VM, on which you can run the tests
-as explained in @ref{218,,Test running}.
+as explained in @ref{219,,Test running}.
 
 To switch between Emacs versions, pass @code{EMACS} to @code{make test}:
 
@@ -10921,11 +10956,11 @@ The VM is provisioned from Ansible playbooks in the @code{playbooks/} sub-direct
 of the top-level source directory.
 
 @node Travis CI,,Virtual test environment,Testing Flycheck
-@anchor{contrib/testing homebrew}@anchor{21c}@anchor{contrib/testing travis-ci}@anchor{21d}
+@anchor{contrib/testing homebrew}@anchor{21d}@anchor{contrib/testing travis-ci}@anchor{21e}
 @section Travis CI
 
 
-The entire test suite continuously runs on @ref{21d,,Travis CI} after every push, with
+The entire test suite continuously runs on @ref{21e,,Travis CI} after every push, with
 the latest Emacs release and a nightly Emacs snapshot.
 
 Travis CI is configured from @code{.travis.yml} in the top-level source directory,
@@ -10936,13 +10971,13 @@ and uses mostly the same playbooks for provisioning.
 Travis CI is the @strong{reference environment} for Flycheck's test suite.  All
 tests @strong{must pass} on Travis CI.
 
-In case Travis CI diverges from the @ref{21a,,VM},
+In case Travis CI diverges from the @ref{21b,,VM},
 Travis CI is authoritative.
 @end quotation
 @end cartouche
 
 @node Writing documentation,Maintenance tasks,Testing Flycheck,Top
-@anchor{contrib/docs writing-documentation}@anchor{21e}@anchor{contrib/docs doc}@anchor{21f}
+@anchor{contrib/docs writing-documentation}@anchor{21f}@anchor{contrib/docs doc}@anchor{220}
 @chapter Writing documentation
 
 
@@ -10956,7 +10991,7 @@ This document explains how to edit and building the documentation of Flycheck.
 @end menu
 
 @node Build environment setup,Building HTML and Texinfo,,Writing documentation
-@anchor{contrib/docs doc-build-env}@anchor{220}@anchor{contrib/docs build-environment-setup}@anchor{221}
+@anchor{contrib/docs doc-build-env}@anchor{221}@anchor{contrib/docs build-environment-setup}@anchor{222}
 @section Build environment setup
 
 
@@ -10995,12 +11030,12 @@ $ pip install -r doc/requirements.txt
 Now you are set up to build the documentation.
 
 @node Building HTML and Texinfo,Verifying references,Build environment setup,Writing documentation
-@anchor{contrib/docs building-docs}@anchor{222}@anchor{contrib/docs building-html-and-texinfo}@anchor{223}
+@anchor{contrib/docs building-docs}@anchor{223}@anchor{contrib/docs building-html-and-texinfo}@anchor{224}
 @section Building HTML and Texinfo
 
 
 First, switch to the virtual environment you created in the
-@ref{220,,Build environment setup}, and make sure that the requirements are up to date:
+@ref{221,,Build environment setup}, and make sure that the requirements are up to date:
 
 @example
 $ source ~/.virtualenvs/cask/bin/activate
@@ -11026,7 +11061,7 @@ Flycheck packages.
 @end cartouche
 
 @node Verifying references,,Building HTML and Texinfo,Writing documentation
-@anchor{contrib/docs verifying-references}@anchor{224}
+@anchor{contrib/docs verifying-references}@anchor{225}
 @section Verifying references
 
 
@@ -11042,7 +11077,7 @@ $ make linkcheck
 @end example
 
 @node Maintenance tasks,GNU General Public License,Writing documentation,Top
-@anchor{contrib/maintenance maintenance-tasks}@anchor{225}@anchor{contrib/maintenance doc}@anchor{226}
+@anchor{contrib/maintenance maintenance-tasks}@anchor{226}@anchor{contrib/maintenance doc}@anchor{227}
 @chapter Maintenance tasks
 
 
@@ -11056,7 +11091,7 @@ have to perform under specific circumstances.
 @end menu
 
 @node Rebuilding the Texinfo,Rasterized logo files,,Maintenance tasks
-@anchor{contrib/maintenance rebuilding-the-texinfo}@anchor{227}
+@anchor{contrib/maintenance rebuilding-the-texinfo}@anchor{228}
 @section Rebuilding the Texinfo
 
 
@@ -11071,10 +11106,10 @@ documentation.
 @end cartouche
 
 When making changes to the documentation, you need to rebuild the Texinfo
-version with, by following the @ref{222,,instructions to build the documentation}.
+version with, by following the @ref{223,,instructions to build the documentation}.
 
 @node Rasterized logo files,,Rebuilding the Texinfo,Maintenance tasks
-@anchor{contrib/maintenance rasterized-logo-files}@anchor{228}@anchor{contrib/maintenance melpa}@anchor{229}
+@anchor{contrib/maintenance rasterized-logo-files}@anchor{229}@anchor{contrib/maintenance melpa}@anchor{22a}
 @section Rasterized logo files
 
 
@@ -11109,7 +11144,7 @@ You need @strong{convert} from ImageMagick@footnote{http://www.imagemagick.org/}
 properly render the logo.
 
 @node GNU General Public License,GNU Free Documentation License,Maintenance tasks,Top
-@anchor{gpl gnu-general-public-license}@anchor{22a}@anchor{gpl doc}@anchor{22b}@anchor{gpl inkscape}@anchor{22c}
+@anchor{gpl gnu-general-public-license}@anchor{22b}@anchor{gpl doc}@anchor{22c}@anchor{gpl inkscape}@anchor{22d}
 @chapter GNU General Public License
 
 
@@ -11791,7 +11826,7 @@ Public License instead of this License.  But first, please read
 @end example
 
 @node GNU Free Documentation License,Index,GNU General Public License,Top
-@anchor{fdl doc}@anchor{22d}@anchor{fdl gnu-free-documentation-license}@anchor{22e}
+@anchor{fdl doc}@anchor{22e}@anchor{fdl gnu-free-documentation-license}@anchor{22f}
 @chapter GNU Free Documentation License
 
 

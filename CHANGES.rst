@@ -29,6 +29,8 @@ master (in development)
   - The error list can be sorted by message and syntax checker name now [GH-500]
   - Add `flycheck-error-list-checker-name` face to customize the appearance of
     the syntax checker name in the error list [GH-500]
+  - Add `flycheck-shellcheck-excluded-warnings` to exclude warnings from
+    ShellCheck reports [GH-499]
 
 - Improvements:
 
@@ -36,6 +38,7 @@ master (in development)
   - `d-dmd` reports errors with columns now [GH-460]
   - Remove Projectile-based config file search [GH-461]
   - Do not change point when navigating in the error list [GH-487]
+  - ShellCheck warnings now include the corresponding warning code
 
 - Bug fixes:
 
