@@ -4712,6 +4712,14 @@ Why not:
    "checkers/json-jsonlint-error.json" 'text-mode
    '(1 42 error "found: ',' - expected: 'EOF'." :checker json-jsonlint)))
 
+(ert-deftest flycheck-define-checker/julia-lint ()
+  :tags '(builtin-checker external-tool language-julia)
+  (skip-unless (flycheck-check-executable 'julia-lint))
+  (let ((flycheck-test-checker-wait-time 30))
+    (flycheck-test-should-syntax-check
+     "checkers/julia-info.jl" 'julia-mode
+     '(0 nil info "Iteration works for a number but it may be a typo." :checker julia-lint))))
+
 (ert-deftest flycheck-define-checker/less-file-error ()
   :tags '(builtin-checker external-tool language-less)
   (skip-unless (flycheck-check-executable 'less))

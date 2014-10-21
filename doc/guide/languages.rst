@@ -389,6 +389,12 @@ JSON
 .. flyc-checker:: json-jsonlint
    :auto:
 
+Julia
+=====
+
+.. flyc-checker:: julia-lint
+   :auto:
+
 LESS
 ====
 

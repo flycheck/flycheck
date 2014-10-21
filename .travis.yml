@@ -1,4 +1,4 @@
-language: emacs-lisp
+language: generic
 env:
   - EMACS=emacs24
   - EMACS=emacs-snapshot

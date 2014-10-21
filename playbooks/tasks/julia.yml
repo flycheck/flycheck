@@ -1,0 +1,12 @@
+- name: Add Julia PPA
+  apt_repository:
+    repo: 'ppa:staticfloat/juliareleases'
+    update_cache: yes
+  sudo: yes
+
+- name: Install Julia
+  apt: pkg=julia
+  sudo: yes
+
+- name: Install the Lint package
+  shell: "julia -e 'Pkg.add(\"Lint\")'"
