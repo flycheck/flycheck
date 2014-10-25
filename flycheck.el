@@ -1865,6 +1865,20 @@ APPEND is non-nil."
            (append (get checker 'flycheck-next-checkers) (list next)))
     (push next (get checker 'flycheck-next-checkers))))
 
+(defun flycheck-add-mode (checker mode)
+  "Add a new major MODE to CHECKER.
+
+CHECKER and MODE are symbols denoting a syntax checker and a
+major mode respectively.
+
+Add MODE to the `:modes' property of CHECKER, so that CHECKER
+will be used in buffers with MODE."
+  (unless (flycheck-valid-checker-p checker)
+    (error "%s is not a valid syntax checker" checker))
+  (unless (symbolp mode)
+    (error "%s is not a symbol" mode))
+  (push mode (get checker 'flycheck-modes)))
+
 
 ;;; Checker API
 (defun flycheck-valid-checker-p (checker)

@@ -1438,6 +1438,31 @@ check with.  ERRORS is the list of expected errors."
       (should (equal (flycheck-checker-next-checkers 'emacs-lisp)
                      next-checkers)))))
 
+(ert-deftest flycheck-add-mode/no-valid-checker ()
+  :tags '(extending)
+  (let ((err-data (should-error (flycheck-add-mode 'foo 'emacs-lisp-mode))))
+    (should (string= (cadr err-data) "foo is not a valid syntax checker"))))
+
+(ert-deftest flycheck-add-mode/no-valid-mode ()
+  :tags '(extending)
+  (let ((err-data (should-error (flycheck-add-mode 'python-pylint "foo"))))
+    (should (string= (cadr err-data) "foo is not a symbol"))))
+
+(ert-deftest flycheck-add-mode ()
+  :tags '(extending)
+  (let ((modes (flycheck-checker-modes 'python-pylint)))
+    (flycheck-add-mode 'python-pylint 'emacs-lisp-mode)
+    (unwind-protect
+        (progn
+          (should (equal (flycheck-checker-modes 'python-pylint)
+                         (cons 'emacs-lisp-mode modes)))
+          (flycheck-test-with-resource-buffer "automatic-check-dummy.el"
+            (should (flycheck-may-use-checker 'python-pylint))))
+      (put 'python-pylint 'flycheck-modes modes)
+      (should (equal (flycheck-checker-modes 'python-pylint) modes))
+      (flycheck-test-with-resource-buffer "automatic-check-dummy.el"
+        (should-not (flycheck-may-use-checker 'python-pylint))))))
+
 
 ;;; Checker API
 (ert-deftest flycheck-valid-checker-p/not-a-symbol ()

@@ -31,6 +31,7 @@ master (in development)
     the syntax checker name in the error list [GH-500]
   - Add `flycheck-shellcheck-excluded-warnings` to exclude warnings from
     ShellCheck reports [GH-499]
+  - Add `flycheck-add-mode` to add a new major mode to a syntax checker [GH-506]
 
 - Improvements:
 

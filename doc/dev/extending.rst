@@ -109,6 +109,9 @@ There are some means to extend defined syntax checkers:
 .. function:: flycheck-add-next-checker
    :auto:
 
+.. function:: flycheck-add-mode
+   :auto:
+
 Examples
 ========
 
