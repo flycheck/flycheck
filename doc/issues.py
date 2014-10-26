@@ -40,7 +40,7 @@ ISSUE_RE = re.compile(r'\[GH-(?P<id>\d+)\]')
 ISSUE_URL = 'https://github.com/flycheck/flycheck/issues/{id}'
 
 
-ISSUE_DOCUMENT_RES = ['^changes$', '^news/.*$']
+ISSUE_DOCUMENT_RES = ['^guide/releases/.*$']
 
 
 class IssueReferences(Transform):
