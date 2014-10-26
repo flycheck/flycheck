@@ -5410,6 +5410,8 @@ Why not:
    '(2 5 warning "Note that ~ does not expand in quotes. [SC2088]"
        :checker sh-shellcheck)
    '(3 7 error "Double quote array expansions, otherwise they're like $* and break on spaces. [SC2068]"
+       :checker sh-shellcheck)
+   '(4 11 info "Use $(..) instead of deprecated `..` [SC2006]"
        :checker sh-shellcheck)))
 
 (ert-deftest flycheck-define-checker/sh-shellcheck-excluded-warning ()
@@ -5419,6 +5421,8 @@ Why not:
     (flycheck-test-should-syntax-check
      "checkers/sh-shellcheck.sh" 'sh-mode
      '(3 7 error "Double quote array expansions, otherwise they're like $* and break on spaces. [SC2068]"
+         :checker sh-shellcheck)
+     '(4 11 info "Use $(..) instead of deprecated `..` [SC2006]"
          :checker sh-shellcheck))))
 
 (ert-deftest flycheck-define-checker/slim ()

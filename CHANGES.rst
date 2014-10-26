@@ -3,6 +3,10 @@
 master (in development)
 -----------------------
 
+- Bug fixes:
+
+  - Properly parse notes in `sh-shellcheck` [GH-508]
+
 0.21 (Oct 26, 2014)
 -------------------
 

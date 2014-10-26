@@ -6315,7 +6315,10 @@ See URL `https://github.com/koalaman/shellcheck/'."
           line-end)
    (warning line-start
             (file-name) ":" line ":" column ": warning: " (message)
-            line-end))
+            line-end)
+   (info line-start
+         (file-name) ":" line ":" column ": note: " (message)
+         line-end))
   :predicate (lambda () (memq sh-shell flycheck-shellcheck-supported-shells)))
 
 (flycheck-define-checker slim
