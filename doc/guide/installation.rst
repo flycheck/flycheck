@@ -101,4 +101,4 @@ To permanently enable Flycheck, add the following to your :file:`init.el`:
 
 .. _MELPA: http://melpa.org
 .. _MELPA Stable: http://stable.melpa.org
-.. _Marmalade: http://marmalade-repo.org/
+.. _Marmalade: https://marmalade-repo.org/

@@ -47,4 +47,4 @@ You need :program:`convert` from ImageMagick_ and Inkscape_.  Make sure that
 properly render the logo.
 
 .. _ImageMagick: http://www.imagemagick.org/
-.. _Inkscape: http://www.inkscape.org/
+.. _Inkscape: https://www.inkscape.org/

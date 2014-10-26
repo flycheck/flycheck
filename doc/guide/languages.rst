@@ -149,7 +149,7 @@ Chef
 .. flyc-checker:: chef-foodcritic
    :auto:
 
-.. _Chef: http://www.getchef.com/chef/
+.. _Chef: https://www.getchef.com/chef/
 
 Coffeescript
 ============

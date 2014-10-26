@@ -140,7 +140,7 @@ The VM is provisioned from Ansible playbooks in the ``playbooks/`` sub-directory
 of the top-level source directory.
 
 .. _VirtualBox: https://www.virtualbox.org/
-.. _Vagrant: http://www.vagrantup.com/
+.. _Vagrant: https://www.vagrantup.com/
 .. _Ansible: http://www.ansible.com/home
 .. _Homebrew: http://brew.sh/
 

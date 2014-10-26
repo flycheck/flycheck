@@ -50,7 +50,7 @@ new syntax checker for Javascript (eslint_), Ruby (ruby-lint_), and YAML
 
 .. _AsciiDoc: http://asciidoc.org/
 .. _Cfengine: http://cfengine.com/
-.. _Chef: http://www.getchef.com/
+.. _Chef: https://www.getchef.com/
 .. _ERuby: http://www.kuwata-lab.com/erubis/
 .. _Handlebars: http://handlebarsjs.com/
 .. _Racket: http://racket-lang.org/
@@ -58,7 +58,7 @@ new syntax checker for Javascript (eslint_), Ruby (ruby-lint_), and YAML
 .. _Verilog: https://en.wikipedia.org/wiki/Verilog
 .. _eslint: https://github.com/eslint/eslint
 .. _ruby-lint: https://github.com/YorickPeterse/ruby-lint
-.. _js-yaml: https://github.com/visionmedia/js-yaml
+.. _js-yaml: https://github.com/nodeca/js-yaml
 
 Better Haskell support
 ----------------------
