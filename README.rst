@@ -87,8 +87,8 @@ You need GNU Emacs 24 on a Unix system (Linux, OS X, …), and additional
 
 Flycheck does **not** support GNU Emacs 23, other flavors of Emacs, or Windows.
 
-.. _MELPA: http://melpa.milkbox.net
-.. _MELPA Stable: http://melpa-stable.milkbox.net
+.. _MELPA: http://melpa.org
+.. _MELPA Stable: http://stable.melpa.org
 .. _Cask: https://github.com/cask/cask
 .. _Supported Languages: http://flycheck.readthedocs.org/en/latest/guide/languages.html
 

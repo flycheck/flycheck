@@ -20,7 +20,7 @@ When making changes to the documentation, you need to rebuild the Texinfo
 version with, by following the :ref:`instructions to build the documentation
 <building-docs>`.
 
-.. _MELPA: http://melpa.milkbox.net/
+.. _MELPA: http://melpa.org/
 
 Rasterized logo files
 =====================

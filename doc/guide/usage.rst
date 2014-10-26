@@ -410,7 +410,7 @@ ring or search them on Google:
       :auto:
 
 .. _Google This: https://github.com/Bruce-Connor/emacs-google-this
-.. _MELPA: http://melpa.milkbox.net/
+.. _MELPA: http://melpa.org
 
 .. _error-list:
 

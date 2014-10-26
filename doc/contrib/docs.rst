@@ -77,7 +77,7 @@ it.  The Texinfo build goes to ``doc/flycheck.texi``.
    Flycheck packages.
 
 
-   .. _MELPA: http://melpa.milkbox.net/
+   .. _MELPA: http://melpa.org/
 
 Verifying references
 ====================

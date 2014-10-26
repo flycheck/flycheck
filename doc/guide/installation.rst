@@ -70,7 +70,7 @@ repository, add the following code to :file:`init.el`:
 
    (require 'package)
    (add-to-list 'package-archives
-                '("melpa" . "http://melpa.milkbox.net/packages/") t)
+                '("melpa" . "http://melpa.org/packages/") t)
    (package-initialize)
 
 Cask
@@ -99,6 +99,6 @@ To permanently enable Flycheck, add the following to your :file:`init.el`:
 
     (add-hook 'after-init-hook #'global-flycheck-mode)
 
-.. _MELPA: http://melpa.milkbox.net
-.. _MELPA Stable: http://melpa-stable.milkbox.net
+.. _MELPA: http://melpa.org
+.. _MELPA Stable: http://stable.melpa.org
 .. _Marmalade: http://marmalade-repo.org/

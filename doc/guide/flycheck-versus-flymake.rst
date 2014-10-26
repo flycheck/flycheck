@@ -468,6 +468,6 @@ required to have test cases.  The tests are continuously run on `Travis CI`_.
 .. _flymake-cursor: http://www.emacswiki.org/emacs/flymake-cursor.el
 .. _Vagrant: http://www.vagrantup.com/
 .. _Puppet: http://puppetlabs.com/
-.. _MELPA: http://melpa.milkbox.net/
+.. _MELPA: http://melpa.org/
 .. _Github: https://github.com/flycheck/flycheck
 .. _Travis CI: https://travis-ci.org/flycheck/flycheck
