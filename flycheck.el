@@ -4567,6 +4567,15 @@ When non-nil, disable RTTI for syntax checks, via `-fno-rtti'."
   :safe #'booleanp
   :package-version '(flycheck . "0.20"))
 
+(flycheck-def-option-var flycheck-gcc-openmp nil c/c++-gcc
+  "Whether to enable OpenMP in GCC.
+
+When non-nil, enable OpenMP for syntax checkers, via
+`-fopenmp'."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.21"))
+
 (flycheck-def-option-var flycheck-gcc-warnings '("all" "extra") c/c++-gcc
   "A list of additional warnings to enable in GCC.
 
@@ -4597,6 +4606,7 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
             (option "-std=" flycheck-gcc-language-standard concat)
             (option-flag "-fno-exceptions" flycheck-gcc-no-exceptions)
             (option-flag "-fno-rtti" flycheck-gcc-no-rtti)
+            (option-flag "-fopenmp" flycheck-gcc-openmp)
             (option-list "-include" flycheck-gcc-includes)
             (option-list "-W" flycheck-gcc-warnings concat)
             (option-list "-D" flycheck-gcc-definitions concat)

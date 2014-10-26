@@ -32,6 +32,7 @@ master (in development)
   - Add `flycheck-shellcheck-excluded-warnings` to exclude warnings from
     ShellCheck reports [GH-499]
   - Add `flycheck-add-mode` to add a new major mode to a syntax checker [GH-506]
+  - Add `flycheck-gcc-openmp` to enable OpenMP for GCC in C/C++ [GH-507]
 
 - Improvements:
 

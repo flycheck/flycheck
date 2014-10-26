@@ -3999,6 +3999,26 @@ evaluating BODY."
      '(4 56 error "‘dynamic_cast’ not permitted with -fno-rtti"
          :checker c/c++-gcc))))
 
+(ert-deftest flycheck-define-checker/c/c++-openmp-disabled ()
+  :tags '(builtin-checker external-tool language-c)
+  (skip-unless (flycheck-check-executable 'c/c++-gcc))
+  (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck))
+        (flycheck-gcc-language-standard "c99"))
+    (flycheck-test-should-syntax-check
+     "checkers/c_c++-warning-openmp.c" 'c-mode
+     '(3 8 warning "variable ‘a’ set but not used" :checker c/c++-gcc)
+     '(5 nil warning "ignoring #pragma omp parallel" :checker c/c++-gcc))))
+
+(ert-deftest flycheck-define-checker/c/c++-openmp-enabled ()
+  :tags '(builtin-checker external-tool language-c)
+  (skip-unless (flycheck-check-executable 'c/c++-gcc))
+  (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck))
+        (flycheck-gcc-language-standard "c99")
+        (flycheck-gcc-openmp t))
+    (flycheck-test-should-syntax-check
+     "checkers/c_c++-warning-openmp.c" 'c-mode
+     '(3 8 warning "variable ‘a’ set but not used" :checker c/c++-gcc))))
+
 (ert-deftest flycheck-define-checker/c/c++-cppcheck-error ()
   :tags '(builtin-checker external-tool language-c)
   (skip-unless (flycheck-check-executable 'c/c++-cppcheck))
