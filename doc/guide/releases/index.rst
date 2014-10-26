@@ -11,6 +11,7 @@ Release announcements
 .. toctree::
    :maxdepth: 1
 
+   flycheck-0.21
    flycheck-0.20
    flycheck-0.19
    flycheck-0.18
