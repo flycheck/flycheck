@@ -487,13 +487,7 @@ check with.  ERRORS is the list of expected errors."
       (should (or (and (eq parser 'flycheck-parse-with-patterns) patterns)
                   (null patterns))))))
 
-(ert-deftest flycheck-checkers/all-registered-checkers-are-enabled ()
-  :tags '(customization)
-  (dolist (checker flycheck-checkers)
-    (should (flycheck-enabled-checker-p checker)))
-  (should (equal flycheck-checkers (flycheck-enabled-checkers))))
-
-(ert-deftest flycheck-checkers/no-registered-checker-is-enabled ()
+(ert-deftest flycheck-checkers/no-registered-checker-is-disabled ()
   :tags '(customization)
   (dolist (checker flycheck-checkers)
     (should-not (flycheck-disabled-checker-p checker))))
@@ -1508,34 +1502,6 @@ check with.  ERRORS is the list of expected errors."
   (let ((flycheck-disabled-checkers '(emacs-lisp)))
     (should (flycheck-disabled-checker-p 'emacs-lisp))))
 
-(ert-deftest flycheck-enabled-checker-p/enabled-checker ()
-  :tags '(checker-api)
-  (let ((flycheck-checkers '(emacs-lisp)))
-    (should (flycheck-enabled-checker-p 'emacs-lisp))))
-
-(ert-deftest flycheck-enabled-checker-p/unregistered-checker ()
-  :tags '(checker-api)
-  (let ((flycheck-checkers '(emacs-lisp)))
-    (should-not (flycheck-enabled-checker-p 'emacs-lisp-checkdoc))))
-
-(ert-deftest flycheck-enabled-checker-p/disabled-checker ()
-  :tags '(checker-api)
-  (let ((flycheck-checkers '(emacs-lisp))
-        (flycheck-disabled-checkers '(emacs-lisp)))
-    (should-not (flycheck-enabled-checker-p 'emacs-lisp))))
-
-(ert-deftest flycheck-enabled-checkers/all-registered-checkers-are-enabled ()
-  :tags '(checker-api)
-  (let ((flycheck-checkers '(emacs-lisp emacs-lisp-checkdoc)))
-    (should (equal (flycheck-enabled-checkers)
-                   '(emacs-lisp emacs-lisp-checkdoc)))))
-
-(ert-deftest flycheck-enabled-checkers/some-checkers-are-disabled ()
-  :tags '(checker-api)
-  (let ((flycheck-checkers '(emacs-lisp emacs-lisp-checkdoc coffee zsh))
-        (flycheck-disabled-checkers '(emacs-lisp coffee)))
-    (should (equal (flycheck-enabled-checkers) '(emacs-lisp-checkdoc zsh)))))
-
 (defvar flycheck-test-config-var)
 (defvar flycheck-test-option-var)
 
@@ -1751,6 +1717,14 @@ check with.  ERRORS is the list of expected errors."
                        "foo is no valid Flycheck syntax checker.
 Try to reinstall the package defining this syntax checker.\n")))))
 
+(ert-deftest flycheck-may-use-checker/disabled-checker ()
+  :tags '(checker-api)
+  (flycheck-test-with-resource-buffer "checkers/emacs-lisp.el"
+    (emacs-lisp-mode)
+    (flycheck-may-use-checker 'emacs-lisp)
+    (let ((flycheck-disabled-checkers '(emacs-lisp)))
+      (should-not (flycheck-may-use-checker 'emacs-lisp)))))
+
 
 ;;; Configuration file functions
 
@@ -1868,7 +1842,7 @@ Try to reinstall the package defining this syntax checker.\n")))))
                               :type flycheck-test-user-error-type)))
       (should (eq flycheck-checker 'sh-bash))
       (should (string= (cadr err)
-                       "Configured syntax checker sh-bash cannot be used"))
+                       "Selected syntax checker sh-bash cannot be used"))
       (should (string= flycheck-last-status-change 'errored)))))
 
 (ert-deftest flycheck-checker/usable-checker-is-used ()
@@ -1884,19 +1858,20 @@ Try to reinstall the package defining this syntax checker.\n")))))
        '(12 nil warning "First sentence should end with punctuation"
             :checker emacs-lisp-checkdoc)))))
 
-(ert-deftest flycheck-checker/disabled-checker-is-used ()
+(ert-deftest flycheck-checker/disabled-checker-is-not-used ()
   :tags '(selection language-emacs-lisp)
   (flycheck-test-with-resource-buffer "checkers/emacs-lisp.el"
     (emacs-lisp-mode)
     (flycheck-mode)
     (let ((flycheck-disabled-checkers '(emacs-lisp emacs-lisp-checkdoc)))
       (should-not (flycheck-get-checker-for-buffer))
-      (let ((flycheck-checker 'emacs-lisp-checkdoc))
-        (should (eq (flycheck-get-checker-for-buffer) 'emacs-lisp-checkdoc))
-        (flycheck-test-buffer-sync)
-        (flycheck-test-should-errors
-         '(12 nil warning "First sentence should end with punctuation"
-              :checker emacs-lisp-checkdoc))))))
+      (let* ((flycheck-checker 'emacs-lisp)
+             (err (should-error (flycheck-buffer)
+                                :type flycheck-test-user-error-type)))
+        (should (eq flycheck-checker 'emacs-lisp))
+        (should (string= (cadr err)
+                         "Selected syntax checker emacs-lisp cannot be used"))
+        (should (string= flycheck-last-status-change 'errored))))))
 
 (ert-deftest flycheck-checker/unregistered-checker-is-used ()
   :tags '(selection language-emacs-lisp)

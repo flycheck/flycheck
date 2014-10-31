@@ -1934,22 +1934,6 @@ A checker is disabled if it is contained in
 `flycheck-disabled-checkers'."
   (memq checker flycheck-disabled-checkers))
 
-(defun flycheck-enabled-checker-p (checker)
-  "Determine whether CHECKER is an enabled checker.
-
-A syntax checker is enabled, if it is registered and not
-disabled."
-  (and (flycheck-registered-checker-p checker)
-       (not (flycheck-disabled-checker-p checker))))
-
-(defun flycheck-enabled-checkers ()
-  "Get all enabled syntax checkers.
-
-These are all syntax checkers which are registered in
-`flycheck-checkers' and not disabled via
-`flycheck-disabled-checkers'."
-  (-reject #'flycheck-disabled-checker-p flycheck-checkers))
-
 (defun flycheck-checker-executable-variable (checker)
   "Get the executable variable of CHECKER."
   (get checker 'flycheck-executable-var))
@@ -2297,7 +2281,8 @@ otherwise."
   (if (flycheck-valid-checker-p checker)
       (and (flycheck-check-modes checker)
            (flycheck-check-predicate checker)
-           (flycheck-check-executable checker))
+           (flycheck-check-executable checker)
+           (not (flycheck-disabled-checker-p checker)))
     (lwarn 'flycheck :warning "%S is no valid Flycheck syntax checker.
 Try to reinstall the package defining this syntax checker." checker)
     nil))
@@ -2310,7 +2295,7 @@ Try to reinstall the package defining this syntax checker." checker)
         (next-checker (cdr next-checker)))
     (and (or (eq level t)
              (flycheck-has-max-current-errors-p level))
-         (flycheck-enabled-checker-p next-checker)
+         (flycheck-registered-checker-p next-checker)
          (flycheck-may-use-checker next-checker))))
 
 
@@ -2411,7 +2396,7 @@ modified, or nil otherwise."
 Return the checker if it may be used, or nil otherwise."
   ;; We should not use the last checker if it was removed from the list of
   ;; allowed checkers in the meantime
-  (when (and (flycheck-enabled-checker-p flycheck-last-checker)
+  (when (and (flycheck-registered-checker-p flycheck-last-checker)
              (flycheck-may-use-checker flycheck-last-checker))
     flycheck-last-checker))
 
@@ -2422,7 +2407,7 @@ If a checker is found set `flycheck-last-checker' to re-use this
 checker for the next check.
 
 Return the checker if there is any, or nil otherwise."
-  (let ((checkers (flycheck-enabled-checkers)))
+  (let ((checkers flycheck-checkers))
     (while (and checkers (not (flycheck-may-use-checker (car checkers))))
       (setq checkers (cdr checkers)))
     (when checkers
@@ -2436,7 +2421,7 @@ nil otherwise."
   (if flycheck-checker
       (if (flycheck-may-use-checker flycheck-checker)
           flycheck-checker
-        (user-error "Configured syntax checker %s cannot be used"
+        (user-error "Selected syntax checker %s cannot be used"
                     flycheck-checker))
     (or (flycheck-try-last-checker-for-buffer)
         (flycheck-get-new-checker-for-buffer))))

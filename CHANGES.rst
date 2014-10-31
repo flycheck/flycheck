@@ -3,6 +3,11 @@
 master (in development)
 -----------------------
 
+- **Breaking changes**:
+
+  - Never allow use of disabled checkers anymore, even with
+    `flycheck-select-checker`
+
 - Improvements:
 
   - Automatically disable syntax checkers that report too many errors [GH-476]
