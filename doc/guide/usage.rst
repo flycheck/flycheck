@@ -353,6 +353,13 @@ Ultimately, you can clear all reported errors at once:
    You should not normally need this command, because Flycheck checks the buffer
    periodically anyway.
 
+Note that if a syntax checker reports too many errors, Flycheck will discard
+these errors and disable the syntax checker for subsequent syntax checks.  The
+threshold is customizable with :option:`flycheck-checker-error-threshold`:
+
+.. option:: flycheck-checker-error-threshold
+   :auto:
+
 .. _Solarized: https://github.com/bbatsov/solarized-emacs
 .. _Zenburn: https://github.com/bbatsov/zenburn-emacs
 
