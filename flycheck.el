@@ -330,6 +330,24 @@ node `(elisp)Hooks'."
   :type 'hook
   :risky t)
 
+(defcustom flycheck-checker-error-threshold 400
+  "Maximum errors allowed per syntax checker.
+
+The value of this variable is either an integer denoting the
+maximum number of errors per syntax checker and buffer, or nil to
+not limit the errors reported from a syntax checker.
+
+If this variable is a number and a syntax checker reports more
+errors than the value of this variable, its errors are not
+discarded, and not highlighted in the buffer or available in the
+error list.  The affected syntax checker is also disabled for
+future syntax checks of the buffer."
+  :group 'flycheck
+  :type '(choice (const :tag "Do not limit reported errors" nil)
+                 (integer :tag "Maximum number of errors"))
+  :risky t
+  :package-version '(flycheck . "0.22"))
+
 (defcustom flycheck-process-error-functions '(flycheck-add-overlay)
   "Functions to process errors.
 
@@ -4121,12 +4139,12 @@ output: %s\nChecker definition probably flawed."
                     (flycheck-filter-errors
                      (mapcar (lambda (e) (flycheck-fix-error-filename e files))
                              errors) checker)))
-      (setq flycheck-current-errors
-            ;; Keep errors sorted by location
-            (sort (append errors flycheck-current-errors) #'flycheck-error-<))
-      ;; Process all new errors
-      (mapc (apply-partially #'run-hook-with-args-until-success
-                             'flycheck-process-error-functions) errors)
+      (unless (flycheck-disable-excessive-checker checker errors)
+        ;; Remember and process the new errors if allowed
+        (setq flycheck-current-errors
+              (sort (append errors flycheck-current-errors) #'flycheck-error-<))
+        (mapc (apply-partially #'run-hook-with-args-until-success
+                               'flycheck-process-error-functions) errors))
       (flycheck-report-status 'finished)
       (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
         (if next-checker
@@ -4140,6 +4158,23 @@ output: %s\nChecker definition probably flawed."
           ;; were triggered by intermediate automatic check event, to make sure
           ;; that we quickly refine outdated error information
           (flycheck-perform-deferred-syntax-check))))))
+
+(defun flycheck-disable-excessive-checker (checker errors)
+  "Disable CHECKER if it reported excessive ERRORS.
+
+If ERRORS has more items than `flycheck-checker-error-threshold',
+add CHECKER to `flycheck-disabled-checkers', and show a warning.
+
+Return t when CHECKER was disabled, or nil otherwise."
+  (when (and flycheck-checker-error-threshold
+             (> (length errors) flycheck-checker-error-threshold))
+    ;; Disable CHECKER for this buffer (`flycheck-disabled-checkers' is a local
+    ;; variable).
+    (lwarn '(flycheck syntax-checker) :warning
+           "Syntax checker %s reported too many errors (%s) and is disabled."
+           checker (length errors))
+    (push checker flycheck-disabled-checkers)
+    t))
 
 (defun flycheck-handle-signal (process _event)
   "Handle a signal from the syntax checking PROCESS.

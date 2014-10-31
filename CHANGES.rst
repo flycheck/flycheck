@@ -3,6 +3,10 @@
 master (in development)
 -----------------------
 
+- Improvements:
+
+  - Automatically disable syntax checkers that report too many errors [GH-476]
+
 - Bug fixes:
 
   - Properly parse notes in `sh-shellcheck` [GH-508]
