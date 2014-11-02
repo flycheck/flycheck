@@ -11,6 +11,7 @@ master (in development)
 - Improvements:
 
   - Automatically disable syntax checkers that report too many errors [GH-476]
+  - Reduce filesystem access when parsing errors to improve parsing speed
 
 - Bug fixes:
 
