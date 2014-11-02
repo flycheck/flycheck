@@ -1232,8 +1232,8 @@ to a number and return it.  Otherwise return nil."
 
 (defun flycheck-same-files-p (file-a file-b)
   "Determine whether FILE-A and FILE-B refer to the same file."
-  (string= (directory-file-name (file-truename file-a))
-           (directory-file-name (file-truename file-b))))
+  (string= (directory-file-name (expand-file-name file-a))
+           (directory-file-name (expand-file-name file-b))))
 
 (defvar-local flycheck-temporaries nil
   "Temporary files and directories created by Flycheck.")
@@ -2651,20 +2651,20 @@ Return a cons cell `(BEG . END)' where BEG is the first
 non-whitespace character on the line ERR refers to, and END the
 end of the line."
   (flycheck-error-with-buffer err
-    (save-excursion
-      (save-restriction
+    (save-restriction
+      (save-excursion
         (widen)
         (goto-char (point-min))
         (forward-line (- (flycheck-error-line err) 1))
-        (back-to-indentation)
-        (let ((beg (point))
-              (end (line-end-position)))
-          (when (= beg end)
-            ;; The current line is empty, so include the previous line break
-            ;; character(s) to have any region at all
-            (forward-line -1)
-            (setq beg (line-end-position)))
-          (cons beg end))))))
+        ;; We are at the beginning of the line now, so move to the beginning of
+        ;; its indentation, similar to `back-to-indentation'
+        (let ((end (line-end-position)))
+          (skip-syntax-forward " " end)
+          (backward-prefix-chars)
+          ;; If the current line is empty, include the previous line break
+          ;; character(s) to have any region at all.  When called with 0,
+          ;; `line-end-position' gives us the end of the previous line
+          (cons (if (eolp) (line-end-position 0) (point)) end))))))
 
 (defun flycheck-error-column-region (err)
   "Get the error column region of ERR.
@@ -2674,31 +2674,30 @@ ERR is a Flycheck error whose region to get.
 Return a cons cell `(BEG . END)' where BEG is the character
 before the error column, and END the actual error column, or nil
 if ERR has no column."
-  (-when-let (column (flycheck-error-column err))
-    (save-excursion
-      (save-restriction
-        (widen)
-        (let ((line (flycheck-error-line err)))
+  (flycheck-error-with-buffer err
+    (save-restriction
+      (save-excursion
+        (-when-let (column (flycheck-error-column err))
+          (widen)
           (goto-char (point-min))
-          (forward-line (- line 1))
-          (cond
-           ((> line (line-number-at-pos))
-            ;; If the line is beyond the end of the file, return the very last
-            ;; column in the file
-            (cons (- (point-max) 1) (point-max)))
-           ((= (line-beginning-position) (line-end-position))
-            ;; The line is empty, so there is no column to highlight on this
-            ;; line.  Thus, return the last column of the previous line
-            (let ((end (line-beginning-position)))
-              (forward-line -1)
-              (cons (line-end-position) end)))
-           (:else
-            ;; The end is either the column offset of the line, or
-            ;; the end of the line, if the column offset points beyond the end
-            ;; of the line.
-            (let ((end (min (+ (line-beginning-position) column)
-                            (+ (line-end-position) 1))))
-              (cons (- end 1) end)))))))))
+          (forward-line (- (flycheck-error-line err) 1))
+          (let ((line (flycheck-error-line err)))
+            (cond
+             ((eobp)                    ; Line beyond EOF
+              ;; If we are at the end of the file (i.e. the line was beyond the
+              ;; end of the file), use the very last column in the file.
+              (cons (- (point-max) 1) (point-max)))
+             ((eolp)                    ; Empty line
+              ;; If the target line is empty, there's no column to highlight on
+              ;; this line, so return the last column of the previous line.
+              (cons (line-end-position 0) (point)))
+             (t
+              ;; The end is either the column offset of the line, or the end of
+              ;; the line, if the column offset points beyond the end of the
+              ;; line.
+              (let ((end (min (+ (point) column)
+                              (+ (line-end-position) 1))))
+                (cons (- end 1) end))))))))))
 
 (defun flycheck-error-thing-region (thing err)
   "Get the region of THING at the column of ERR.
@@ -2711,11 +2710,12 @@ the THING at the error column, and END the end of the symbol.  If
 ERR has no error column, or if there is no THING at this column,
 return nil."
   (-when-let (column (car (flycheck-error-column-region err)))
-    (save-excursion
-      (save-restriction
-        (widen)
-        (goto-char column)
-        (bounds-of-thing-at-point thing)))))
+    (flycheck-error-with-buffer err
+      (save-excursion
+        (save-restriction
+          (widen)
+          (goto-char column)
+          (bounds-of-thing-at-point thing))))))
 
 (defun flycheck-error-region-for-mode (err mode)
   "Get the region of ERR for the highlighting MODE.
@@ -3383,30 +3383,29 @@ If LEVEL is omitted if the current buffer has any errors at all."
   "Add overlay for ERR.
 
 Return the created overlay."
-  (flycheck-error-with-buffer err
-    ;; We must have a proper error region for the sake of fringe indication,
-    ;; error display and error navigation, even if the highlighting is disabled.
-    ;; We erase the highlighting later on in this case
-    (pcase-let* ((`(,beg . ,end) (flycheck-error-region-for-mode
-                                  err (or flycheck-highlighting-mode 'lines)))
-                 (overlay (make-overlay beg end))
-                 (level (flycheck-error-level err))
-                 (category (flycheck-error-level-overlay-category level)))
-      (unless (flycheck-error-level-p level)
-        (error "Undefined error level: %S" level))
-      (overlay-put overlay 'flycheck-overlay t)
-      (overlay-put overlay 'flycheck-error err)
-      ;; TODO: Consider hooks to re-check if overlay contents change
-      (overlay-put overlay 'category category)
-      (unless flycheck-highlighting-mode
-        ;; Erase the highlighting from the overlay if requested by the user
-        (overlay-put overlay 'face nil))
-      (when flycheck-indication-mode
-        (overlay-put overlay 'before-string
-                     (flycheck-error-level-make-fringe-icon
-                      level flycheck-indication-mode)))
-      (overlay-put overlay 'help-echo (flycheck-error-message err))
-      overlay)))
+  ;; We must have a proper error region for the sake of fringe indication,
+  ;; error display and error navigation, even if the highlighting is disabled.
+  ;; We erase the highlighting later on in this case
+  (pcase-let* ((`(,beg . ,end) (flycheck-error-region-for-mode
+                                err (or flycheck-highlighting-mode 'lines)))
+               (overlay (make-overlay beg end))
+               (level (flycheck-error-level err))
+               (category (flycheck-error-level-overlay-category level)))
+    (unless (flycheck-error-level-p level)
+      (error "Undefined error level: %S" level))
+    (overlay-put overlay 'flycheck-overlay t)
+    (overlay-put overlay 'flycheck-error err)
+    ;; TODO: Consider hooks to re-check if overlay contents change
+    (overlay-put overlay 'category category)
+    (unless flycheck-highlighting-mode
+      ;; Erase the highlighting from the overlay if requested by the user
+      (overlay-put overlay 'face nil))
+    (when flycheck-indication-mode
+      (overlay-put overlay 'before-string
+                   (flycheck-error-level-make-fringe-icon
+                    level flycheck-indication-mode)))
+    (overlay-put overlay 'help-echo (flycheck-error-message err))
+    overlay))
 
 (defun flycheck-filter-overlays (overlays)
   "Get all Flycheck overlays from OVERLAYS."
