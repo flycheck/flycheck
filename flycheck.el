@@ -1214,8 +1214,8 @@ to a number and return it.  Otherwise return nil."
 
 (defun flycheck-same-files-p (file-a file-b)
   "Determine whether FILE-A and FILE-B refer to the same file."
-  (string= (directory-file-name (file-truename file-a))
-           (directory-file-name (file-truename file-b))))
+  (string= (directory-file-name (expand-file-name file-a))
+           (directory-file-name (expand-file-name file-b))))
 
 (defvar-local flycheck-temporaries nil
   "Temporary files and directories created by Flycheck.")
