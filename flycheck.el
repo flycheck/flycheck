@@ -6127,6 +6127,9 @@ See URL `http://www.rust-lang.org'."
             (message) line-end)
    (info line-start (file-name) ":" line ":" column ": "
          (one-or-more digit) ":" (one-or-more digit) " note: "
+         (message) line-end)
+   (info line-start (file-name) ":" line ":" column ": "
+         (one-or-more digit) ":" (one-or-more digit) " help: "
          (message) line-end))
   :modes rust-mode
   :predicate (lambda ()

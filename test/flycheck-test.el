@@ -5219,6 +5219,16 @@ Why not:
    '(4 9 warning "unused variable: `x`, #[warn(unused_variable)] on by default"
        :checker rust)))
 
+(ert-deftest flycheck-define-checker/rust-help ()
+  :tags '(builtin-checker external-tool language-rust)
+  (skip-unless (flycheck-check-executable 'rust))
+  (flycheck-test-should-syntax-check
+   "checkers/rust-help.rs" 'rust-mode
+   '(3 1 error "not all control paths return a value"
+       :checker rust)
+   '(4 8 info "consider removing this semicolon:"
+       :checker rust)))
+
 (ert-deftest flycheck-define-checker/rust-test-crate-type-bin ()
   :tags '(builtin-checker external-tool language-rust)
   (skip-unless (flycheck-check-executable 'rust))
