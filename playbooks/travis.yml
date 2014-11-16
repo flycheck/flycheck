@@ -30,3 +30,4 @@
       sudo: True
     - include: tasks/rpm.yml
       sudo: True
+    - include: tasks/julia.yml
