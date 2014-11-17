@@ -172,8 +172,8 @@ _CHECKER is ignored."
 (defun flycheck-ert-initialize (resource-dir)
   "Initialize a test suite with RESOURCE-DIR.
 
-RESOURCE-DIR is a directory to get resource files from in
-`flycheck-ert-resource-filename'."
+RESOURCE-DIR is the directory, `flycheck-ert-resource-filename'
+should use to lookup resource files."
   (when flycheck-ert--resource-directory
     (error "Test suite already initialized"))
   (let ((tests (ert-select-tests t t)))
@@ -239,7 +239,15 @@ test appropriately.
 NAME is a symbol denoting the local name of the test.  The test
 itself is ultimately named
 `flycheck-define-checker/CHECKER/NAME'.  If CHECKER is a list,
-the first checker in the list is used for naming the test."
+the first checker in the list is used for naming the test.
+
+Optionally, the keyword arguments `:tags' and `:expected-result'
+may be given.  They have the same meaning as in `ert-deftest.',
+and are added to the tags and result expectations set up by this
+macro.
+
+The remaining forms denote the body of the test case, including
+assertions and setup code."
   (declare (indent 3))
   (unless checker
     (error "No syntax checkers specified."))
@@ -273,7 +281,9 @@ the first checker in the list is used for naming the test."
 ;;; Test case results
 
 (defun flycheck-ert-syntax-check-timed-out-p (result)
-  "Whether RESULT denotes a timed-out test."
+  "Whether RESULT denotes a timed-out test.
+
+RESULT is an ERT test result object."
   (and (ert-test-failed-p result)
        (eq (car (ert-test-failed-condition result))
            'flycheck-ert-syntax-check-timed-out)))
@@ -309,7 +319,7 @@ failed, and the test aborted with failure.")
   (setq flycheck-ert-syntax-checker-finished nil))
 
 (defun flycheck-ert-buffer-sync ()
-  "Check the current buffer synchronously."
+  "Like `flycheck-buffer', but synchronously."
   (setq flycheck-ert-syntax-checker-finished nil)
   (should (not (flycheck-running-p)))
   (flycheck-mode)                       ; This will only start a deferred check,
@@ -335,7 +345,9 @@ Raise an assertion error if the buffer is not clear afterwards."
 ;;; Test assertions
 
 (defun flycheck-ert-should-overlay (error)
-  "Test that ERROR has an overlay."
+  "Test that ERROR has a proper overlay in the current buffer.
+
+ERROR is a Flycheck error object."
   (let* ((overlay (-first (lambda (ov) (equal (overlay-get ov 'flycheck-error)
                                               error))
                           (flycheck-overlays-in 0 (+ 1 (buffer-size)))))
@@ -362,15 +374,17 @@ Raise an assertion error if the buffer is not clear afterwards."
 (defun flycheck-ert-should-errors (&rest errors)
   "Test that the current buffers has ERRORS.
 
-Without ERRORS test that there are any errors in the current
-buffer.
+ERRORS is a list of errors expected to be present in the current
+buffer.  Each error is given as a list of arguments to
+`flycheck-error-new-at'.
+
+If ERRORS are omitted, test that there are any errors at all in
+the current buffer.
 
 With ERRORS, test that each error in ERRORS is present in the
 current buffer, and that the number of errors in the current
-buffer is equal to the number of given ERRORS.
-
-Each error in ERRORS is a list as expected by
-`flycheck-ert-should-error'."
+buffer is equal to the number of given ERRORS.  IOW, check that
+the buffer has all ERRORS, and no other errors."
   (if (not errors)
       (should flycheck-current-errors)
     (let ((expected (mapcar (apply-partially #'apply #'flycheck-error-new-at)

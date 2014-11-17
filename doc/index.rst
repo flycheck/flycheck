@@ -64,6 +64,7 @@ reference.
 
    dev/extending
    dev/api
+   dev/test-api
 
 Contributor guide
 =================
