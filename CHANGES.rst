@@ -8,6 +8,10 @@ master (in development)
   - Never allow use of disabled checkers anymore, even with
     `flycheck-select-checker`
 
+- New features:
+
+  - `flycheck-ert.el` library to write unit tests for Flycheck extensions
+
 - Improvements:
 
   - Automatically disable syntax checkers that report too many errors [GH-476]
