@@ -4220,7 +4220,7 @@ Why not:
    "checkers/make.mk" '(makefile-mode makefile-gmake-mode)
    '(2 nil error "*** missing separator.  Stop." :checker make)))
 
-(flycheck-ert-def-checker-test make-pmake make nil
+(flycheck-ert-def-checker-test make make pmake
   (let ((flycheck-make-executable "pmake"))
     (skip-unless (flycheck-check-executable 'make))
     (flycheck-ert-should-syntax-check
