@@ -115,13 +115,14 @@ Use this macro to test functions that create a Help buffer."
 (defmacro flycheck-ert-with-global-mode (&rest body)
   "Execute BODY with Global Flycheck Mode enabled.
 
-After BODY, disable Global Flycheck Mode again."
+After BODY, restore the old state of Global Flycheck Mode."
   (declare (indent 0))
-  `(unwind-protect
-       (progn
-         (global-flycheck-mode 1)
-         ,@body)
-     (global-flycheck-mode -1)))
+  `(let ((old-state global-flycheck-mode))
+     (unwind-protect
+         (progn
+           (global-flycheck-mode 1)
+           ,@body)
+       (global-flycheck-mode old-state))))
 
 (defmacro flycheck-ert-with-env (env &rest body)
   "Add ENV to `process-environment' in BODY.
