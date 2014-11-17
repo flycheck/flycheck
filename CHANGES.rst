@@ -18,6 +18,7 @@ master (in development)
   - Reduce filesystem access when parsing errors to improve parsing speed
   - Add explicit `load-path` inheritance to `flycheck-emacs-lisp-load-path`, via
     new `inherit` value [GH-511]
+  - Parse help messages from `rustc` [GH-517]
 
 - Bug fixes:
 

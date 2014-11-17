@@ -40,6 +40,7 @@ to Flycheck:
 - `Peter Vasil <https://github.com/ptrv>`_ (Lua and Go build/test syntax
   checkers)
 - `Robert Zaremba <https://github.com/robert-zaremba>`_ (gofmt syntax checker)
+- `Sean Gillespie <https://github.com/swgillespie>`_ (help messages in Rust)
 - `Sean Salmon <https://github.com/phatcabbage>`_ (platform-independent
   directory handling)
 - `Sebastian Wiesner <https://github.com/lunaryorn>`_ (primary maintainer)

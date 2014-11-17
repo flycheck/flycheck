@@ -7565,6 +7565,9 @@ Reduce filesystem access when parsing errors to improve parsing speed
 @item 
 Add explicit @code{load-path} inheritance to @code{flycheck-emacs-lisp-load-path}, via
 new @code{inherit} value [GH-511]@footnote{https://github.com/flycheck/flycheck/issues/511}
+
+@item 
+Parse help messages from @code{rustc} [GH-517]@footnote{https://github.com/flycheck/flycheck/issues/517}
 @end itemize
 
 @item 
