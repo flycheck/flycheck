@@ -110,7 +110,7 @@ Test case definitions
 Test case results
 =================
 
-.. function:: flycheck-ert-syntax-check-timed-out
+.. function:: flycheck-ert-syntax-check-timed-out-p
    :auto:
 
 Syntax checking in test cases
