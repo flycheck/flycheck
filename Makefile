@@ -45,7 +45,7 @@ images: doc/images/logo.png doc/images/favicon.ico # To update the image files
 
 # Test targets
 test : $(OBJECTS)
-	$(EMACSBATCH) --script test/run-tests.el '$(ERTSELECTOR)'
+	$(EMACSBATCH) --script test/run.el '$(ERTSELECTOR)'
 
 # Support targets
 deps : $(PKGDIR)

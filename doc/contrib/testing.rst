@@ -19,8 +19,8 @@ contents:
   the utility functions.
 - ``resources/``: Resource files used by the test suite, including example code
   in various programming languages to test syntax checkers.
-- ``run-tests.el``: A simple test runner for non-interactive use, which reads
-  ERT selectors from the command line and runs all matching tests.
+- ``run.el``: A simple test runner for non-interactive use, which reads ERT
+  selectors from the command line and runs all matching tests.
 
 .. _test-running:
 

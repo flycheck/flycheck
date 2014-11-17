@@ -143,7 +143,7 @@ and extension, as in `file-name-base'."
 
 (flycheck-test-def-indent-test "flycheck.el")
 (flycheck-test-def-indent-test "flycheck-ert.el")
-(flycheck-test-def-indent-test "test/run-tests.el")
+(flycheck-test-def-indent-test "test/run.el")
 (flycheck-test-def-indent-test "test/flycheck-test.el")
 
 
@@ -1446,9 +1446,8 @@ Try to reinstall the package defining this syntax checker.\n")))))
     (setq buffer-file-name (expand-file-name "flycheck-test.el"
                                              flycheck-test-directory))
     (should (equal (flycheck-locate-config-file-ancestor-directories
-                    "run-tests.el" 'emacs-lisp)
-                   (expand-file-name "run-tests.el"
-                                     flycheck-test-directory)))))
+                    "run.el" 'emacs-lisp)
+                   (expand-file-name "run.el" flycheck-test-directory)))))
 
 (ert-deftest flycheck-locate-config-file-ancestor-directories/file-on-parent-level ()
   :tags '(configuration)

@@ -1,6 +1,6 @@
 #!/bin/bash
 ":"; exec ${EMACS:-emacs} -Q --script "$0" "${@}" # -*- mode: emacs-lisp; lexical-binding: t; -*-
-;;; run-tests.el --- Flycheck: Test runner
+;;; run.el --- Flycheck: Test runner
 
 ;; Copyright (C) 2014  Sebastian Wiesner <swiesner@lunaryorn.com>
 
@@ -79,4 +79,4 @@ Node `(ert)Test Selectors' for information about test selectors."
 (when (and noninteractive (flycheck-runs-this-script-p))
   (flycheck-run-tests-main))
 
-;;; run-tests.el ends here
+;;; run.el ends here
