@@ -2243,14 +2243,14 @@ Perform substitution in the arguments of CHECKER, but with
 
 Return the command of CHECKER as single string, suitable for
 shell execution."
-  (combine-and-quote-strings
+  (mapconcat #'shell-quote-argument
    (cons (flycheck-checker-executable checker)
          (apply #'append
                 (mapcar (lambda (arg)
                           (if (memq arg '(source source-inplace source-original))
                               (list (or (buffer-file-name) ""))
                             (flycheck-substitute-argument arg checker)))
-                        (flycheck-checker-arguments checker))))))
+                        (flycheck-checker-arguments checker)))) " "))
 
 (defun flycheck-check-modes (checker)
   "Check the allowed modes of CHECKER.
