@@ -8,7 +8,6 @@
        "doc/flycheck.texi")
 
 (development
- (depends-on "ert")                     ; Unit test library
  (depends-on "shut-up")                 ; Silence Emacs
 
  ;; Make optional dependencies available for development
