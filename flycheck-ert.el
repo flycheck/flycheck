@@ -379,29 +379,31 @@ ERRORS is a list of errors expected to be present in the current
 buffer.  Each error is given as a list of arguments to
 `flycheck-error-new-at'.
 
-If ERRORS are omitted, test that there are any errors at all in
+If ERRORS are omitted, test that there are no errors at all in
 the current buffer.
 
 With ERRORS, test that each error in ERRORS is present in the
 current buffer, and that the number of errors in the current
-buffer is equal to the number of given ERRORS.  IOW, check that
-the buffer has all ERRORS, and no other errors."
-  (if (not errors)
-      (should flycheck-current-errors)
-    (let ((expected (mapcar (apply-partially #'apply #'flycheck-error-new-at)
-                            errors)))
-      (should (equal expected flycheck-current-errors))
-      (mapc #'flycheck-ert-should-overlay expected))
-    (should (= (length errors)
-               (length (flycheck-overlays-in (point-min) (point-max)))))))
+buffer is equal to the number of given ERRORS.  In other words,
+check that the buffer has all ERRORS, and no other errors."
+  (let ((expected (mapcar (apply-partially #'apply #'flycheck-error-new-at)
+                          errors)))
+    (should (equal expected flycheck-current-errors))
+    (mapc #'flycheck-ert-should-overlay expected))
+  (should (= (length errors)
+             (length (flycheck-overlays-in (point-min) (point-max))))))
 
 (defun flycheck-ert-should-syntax-check (resource-file modes &rest errors)
   "Test a syntax check in RESOURCE-FILE with MODES.
 
 RESOURCE-FILE is the file to check.  MODES is a single major mode
 symbol or a list thereof, specifying the major modes to syntax
-check with.  ERRORS is the list of expected errors.  If omitted,
-the syntax check must not emit any errors.
+check with.  If more than one major mode is specified, the test
+is run for each mode separately, so if you give three major
+modes, the entire test will run three times.  ERRORS is the list
+of expected errors, as in `flycheck-ert-should-errors'.  If
+omitted, the syntax check must not emit any errors.  The errors
+are cleared after each test.
 
 The syntax checker is selected via standard syntax checker
 selection.  To test a specific checker, you need to set
@@ -430,9 +432,7 @@ resource directory."
                     nil)
                   nil :local)
         (flycheck-ert-buffer-sync)
-        (if errors
-            (apply #'flycheck-ert-should-errors errors)
-          (should-not flycheck-current-errors))
+        (apply #'flycheck-ert-should-errors errors)
         (should (= process-hook-called (length errors))))
       (flycheck-ert-ensure-clear))))
 

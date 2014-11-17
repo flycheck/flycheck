@@ -3879,7 +3879,7 @@ The term \"1\" has type \"nat\" while it is expected to have type
     (flycheck-ert-buffer-sync)
     ;; TODO: Consider whether checkdoc is really useful in buffers without file
     ;; names…
-    (flycheck-ert-should-errors)))
+    (should flycheck-current-errors)))
 
 (flycheck-ert-def-checker-test emacs-lisp emacs-lisp
                                does-not-check-autoloads-buffers
