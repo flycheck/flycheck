@@ -11112,9 +11112,13 @@ _CHECKER is ignored.
 @section Environment information
 
 
-@geindex flycheck-ert-user-error-type; Emacs Lisp variable
+@geindex flycheck-ert-user-error-type; Emacs Lisp constant
 @anchor{dev/test-api el variable flycheck-ert-user-error-type}@anchor{22f}
-@deffn {Variable} flycheck@w{-}ert@w{-}user@w{-}error@w{-}type
+@deffn {Constant} flycheck@w{-}ert@w{-}user@w{-}error@w{-}type
+
+@format
+The @code{`user-error'} type used by Flycheck.
+@end format
 @end deffn
 
 @geindex flycheck-ert-travis-ci-p; Emacs Lisp function
@@ -11188,9 +11192,15 @@ assertions and setup code.
 @section Test case results
 
 
-@geindex flycheck-ert-syntax-check-timed-out; Emacs Lisp function
-@anchor{dev/test-api el function flycheck-ert-syntax-check-timed-out}@anchor{236}
-@deffn {Function} flycheck@w{-}ert@w{-}syntax@w{-}check@w{-}timed@w{-}out 
+@geindex flycheck-ert-syntax-check-timed-out-p; Emacs Lisp function
+@anchor{dev/test-api el function flycheck-ert-syntax-check-timed-out-p}@anchor{236}
+@deffn {Function} flycheck@w{-}ert@w{-}syntax@w{-}check@w{-}timed@w{-}out@w{-}p result
+
+@format
+Whether RESULT denotes a timed-out test.
+
+RESULT is an ERT test result object.
+@end format
 @end deffn
 
 @node Syntax checking in test cases,Test assertions,Test case results,Flycheck ERT API
