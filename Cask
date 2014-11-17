@@ -3,7 +3,7 @@
 
 (package-file "flycheck.el")
 
-(files "flycheck.el"
+(files "flycheck.el" "flycheck-ert.el"
        ;; Cask automatically builds docs for us :)
        "doc/flycheck.texi")
 
