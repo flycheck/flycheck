@@ -5,6 +5,8 @@
 The following people—listed in alphabetical order—contributed substantial code
 to Flycheck:
 
+- `Alain Kalker <https://github.com/ackalker>`_ (fix quoting for
+  `flycheck-compile`)
 - `Atila Neves <https://github.com/atilaneves>`_ (include paths for DMD)
 - `Bozhidar Batsov <https://github.com/bbatsov>`_ (improved Flycheck menu,
   RuboCop syntax checker, improvements to Ruby)

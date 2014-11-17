@@ -7578,6 +7578,9 @@ Bug fixes:
 
 @item 
 Properly parse notes in @code{sh-shellcheck} [GH-508]@footnote{https://github.com/flycheck/flycheck/issues/508}
+
+@item 
+Fix shell quoting in @code{flycheck-compile} [GH-522]@footnote{https://github.com/flycheck/flycheck/issues/522} [GH-523]@footnote{https://github.com/flycheck/flycheck/issues/523}
 @end itemize
 @end itemize
 

@@ -23,6 +23,7 @@ master (in development)
 - Bug fixes:
 
   - Properly parse notes in `sh-shellcheck` [GH-508]
+  - Fix shell quoting in `flycheck-compile` [GH-522] [GH-523]
 
 0.21 (Oct 26, 2014)
 -------------------
