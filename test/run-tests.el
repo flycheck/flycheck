@@ -1,6 +1,6 @@
 #!/bin/bash
 ":"; exec ${EMACS:-emacs} -Q --script "$0" "${@}" # -*- mode: emacs-lisp; lexical-binding: t; -*-
-;;; run.el --- Flycheck: Test runner
+;;; run-tests.el --- Flycheck: Test runner
 
 ;; Copyright (C) 2014  Sebastian Wiesner <swiesner@lunaryorn.com>
 
@@ -69,6 +69,7 @@ Node `(ert)Test Selectors' for information about test selectors."
 
     (message "Running tests on Emacs %s" emacs-version)
     (load (expand-file-name "flycheck" source-directory))
+    (load (expand-file-name "flycheck-testlib" source-directory))
     (load (expand-file-name "flycheck-test"
                             (file-name-directory current-file))))
 
