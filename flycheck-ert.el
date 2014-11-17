@@ -1,9 +1,9 @@
-;;; flycheck-testlib.el --- Flycheck: Unit test library  -*- lexical-binding: t; -*-
+;;; flycheck-ert.el --- Flycheck: ERT extensions  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2014  Sebastian Wiesner
+;; Copyright (C) 2013, 2014  Sebastian Wiesner <swiesner@lunaryorn.com>
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
-;; Keywords:
+;; URL: https://github.com/flycheck/flycheck
 
 ;; This file is not part of GNU Emacs.
 
@@ -38,37 +38,37 @@
 
 (eval-and-compile
   ;; Provide `ert-skip' and friends for Emacs 24.3
-  (defconst flycheck-test-ert-can-skip (fboundp 'ert-skip)
+  (defconst flycheck-ert-ert-can-skip (fboundp 'ert-skip)
     "Whether ERT supports test skipping.")
 
-  (unless flycheck-test-ert-can-skip
+  (unless flycheck-ert-ert-can-skip
     ;; Fake skipping
 
-    (put 'flycheck-test-skipped 'error-message "Test skipped")
-    (put 'flycheck-test-skipped 'error-conditions '(error))
+    (put 'flycheck-ert-skipped 'error-message "Test skipped")
+    (put 'flycheck-ert-skipped 'error-conditions '(error))
 
     (defun ert-skip (data)
-      (signal 'flycheck-test-skipped data))
+      (signal 'flycheck-ert-skipped data))
 
     (defmacro skip-unless (form)
       `(unless (ignore-errors ,form)
-         (signal 'flycheck-test-skipped ',form)))
+         (signal 'flycheck-ert-skipped ',form)))
 
     (defun ert-test-skipped-p (result)
       (and (ert-test-failed-p result)
            (eq (car (ert-test-failed-condition result))
-               'flycheck-test-skipped)))))
+               'flycheck-ert-skipped)))))
 
 
 ;;; Internal variables
 
-(defvar flycheck-test--resource-directory nil
+(defvar flycheck-ert--resource-directory nil
   "The directory to get resources from in this test suite.")
 
 
 ;;; Resource management macros
 
-(defmacro flycheck-test-with-temp-buffer (&rest body)
+(defmacro flycheck-ert-with-temp-buffer (&rest body)
   "Eval BODY within a temporary buffer.
 
 Like `with-temp-buffer', but resets the modification state of the
@@ -84,7 +84,7 @@ it has a backing file and is modified."
        (set-buffer-modified-p nil)
        (set-visited-file-name nil 'no-query))))
 
-(defmacro flycheck-test-with-file-buffer (file-name &rest body)
+(defmacro flycheck-ert-with-file-buffer (file-name &rest body)
   "Create a buffer from FILE-NAME and eval BODY.
 
 BODY is evaluated with `current-buffer' being a buffer with the
@@ -93,7 +93,7 @@ contents FILE-NAME."
   `(let ((file-name ,file-name))
      (unless (file-exists-p file-name)
        (error "%s does not exist" file-name))
-     (flycheck-test-with-temp-buffer
+     (flycheck-ert-with-temp-buffer
        (insert-file-contents file-name 'visit)
        (set-visited-file-name file-name 'no-query)
        (cd (file-name-directory file-name))
@@ -102,7 +102,7 @@ contents FILE-NAME."
        (set-buffer-modified-p nil)
        ,@body)))
 
-(defmacro flycheck-test-with-help-buffer (&rest body)
+(defmacro flycheck-ert-with-help-buffer (&rest body)
   "Execute BODY and kill the help buffer afterwards.
 
 Use this macro to test functions that create a Help buffer."
@@ -112,7 +112,7 @@ Use this macro to test functions that create a Help buffer."
      (when (buffer-live-p (get-buffer (help-buffer)))
        (kill-buffer (help-buffer)))))
 
-(defmacro flycheck-test-with-global-mode (&rest body)
+(defmacro flycheck-ert-with-global-mode (&rest body)
   "Execute BODY with Global Flycheck Mode enabled.
 
 After BODY, disable Global Flycheck Mode again."
@@ -123,7 +123,7 @@ After BODY, disable Global Flycheck Mode again."
          ,@body)
      (global-flycheck-mode -1)))
 
-(defmacro flycheck-test-with-env (env &rest body)
+(defmacro flycheck-ert-with-env (env &rest body)
   "Add ENV to `process-environment' in BODY.
 
 Execute BODY with a `process-environment' with contains all
@@ -140,28 +140,28 @@ with VALUE."
 
 
 ;;; Test resources
-(defun flycheck-test-resource-filename (resource-file)
+(defun flycheck-ert-resource-filename (resource-file)
   "Determine the absolute file name of a RESOURCE-FILE.
 
 Relative file names are expanded against
-`flycheck-test-resources-directory'."
-  (expand-file-name resource-file flycheck-test--resource-directory))
+`flycheck-ert-resources-directory'."
+  (expand-file-name resource-file flycheck-ert--resource-directory))
 
-(defmacro flycheck-test-with-resource-buffer (resource-file &rest body)
+(defmacro flycheck-ert-with-resource-buffer (resource-file &rest body)
   "Create a temp buffer from a RESOURCE-FILE and execute BODY.
 
 The absolute file name of RESOURCE-FILE is determined with
-`flycheck-test-resource-filename'."
+`flycheck-ert-resource-filename'."
   (declare (indent 1))
-  `(flycheck-test-with-file-buffer
-       (flycheck-test-resource-filename ,resource-file)
+  `(flycheck-ert-with-file-buffer
+       (flycheck-ert-resource-filename ,resource-file)
      ,@body))
 
-(defun flycheck-test-locate-config-file (filename _checker)
+(defun flycheck-ert-locate-config-file (filename _checker)
   "Find a configuration FILENAME within unit tests.
 
 _CHECKER is ignored."
-  (let* ((directory (flycheck-test-resource-filename "config-files"))
+  (let* ((directory (flycheck-ert-resource-filename "config-files"))
          (filepath (expand-file-name filename directory)))
     (when (file-exists-p filepath)
       filepath)))
@@ -169,24 +169,24 @@ _CHECKER is ignored."
 
 ;;; Test suite initialization
 
-(defun flycheck-test-initialize (resource-dir)
+(defun flycheck-ert-initialize (resource-dir)
   "Initialize a test suite with RESOURCE-DIR.
 
 RESOURCE-DIR is a directory to get resource files from in
-`flycheck-test-resource-filename'."
-  (when flycheck-test--resource-directory
+`flycheck-ert-resource-filename'."
+  (when flycheck-ert--resource-directory
     (error "Test suite already initialized"))
   (let ((tests (ert-select-tests t t)))
     ;; Select all tests
     (unless tests
-      (error "No tests defined.  Call `flycheck-test-initialize' after defining all tests!"))
+      (error "No tests defined.  Call `flycheck-ert-initialize' after defining all tests!"))
 
-    (setq flycheck-test--resource-directory resource-dir)
+    (setq flycheck-ert--resource-directory resource-dir)
 
     ;; Emacs 24.3 don't support skipped tests, so we add poor man's test
     ;; skipping: We mark skipped tests as expected failures by adjusting the
     ;; expected result of all test cases. Not particularly pretty, but works :)
-    (unless flycheck-test-ert-can-skip
+    (unless flycheck-ert-ert-can-skip
       (dolist (test tests)
         (let ((result (ert-test-expected-result-type test)))
           (setf (ert-test-expected-result-type test)
@@ -195,21 +195,21 @@ RESOURCE-DIR is a directory to get resource files from in
 
 ;;; Environment and version information
 
-(defconst flycheck-test-user-error-type
+(defconst flycheck-ert-user-error-type
   (if (version< emacs-version "24.2")
       'error
     'user-error)
   "The `user-error' type used by Flycheck.")
 
-(defun flycheck-test-travis-ci-p ()
+(defun flycheck-ert-travis-ci-p ()
   "Determine whether we are running on Travis CI."
   (string= (getenv "TRAVIS") "true"))
 
-(defun flycheck-test-check-gpg ()
+(defun flycheck-ert-check-gpg ()
   "Check whether GPG is available."
   (or (epg-check-configuration (epg-configuration)) t))
 
-(defun flycheck-test-extract-version-command (re executable &rest args)
+(defun flycheck-ert-extract-version-command (re executable &rest args)
   "Use RE to extract the version from EXECUTABLE with ARGS.
 
 Run EXECUTABLE with ARGS, catch the output, and apply RE to find
@@ -225,7 +225,7 @@ match."
 
 
 ;;; Test case definitions
-(defmacro flycheck-test-def-checker-test (checker language name
+(defmacro flycheck-ert-def-checker-test (checker language name
                                                   &rest keys-and-body)
   "Define a test case for a syntax CHECKER for LANGUAGE.
 
@@ -262,7 +262,7 @@ the first checker in the list is used for naming the test."
     `(ert-deftest ,full-name ()
        :expected-result
        (list 'or
-             '(satisfies flycheck-test-syntax-check-timed-out-p)
+             '(satisfies flycheck-ert-syntax-check-timed-out-p)
              ,(or (plist-get keys :expected-result) :passed))
        :tags ',tags
        ,@(mapcar (lambda (c) `(skip-unless (flycheck-check-executable ',c)))
@@ -272,57 +272,57 @@ the first checker in the list is used for naming the test."
 
 ;;; Test case results
 
-(defun flycheck-test-syntax-check-timed-out-p (result)
+(defun flycheck-ert-syntax-check-timed-out-p (result)
   "Whether RESULT denotes a timed-out test."
   (and (ert-test-failed-p result)
        (eq (car (ert-test-failed-condition result))
-           'flycheck-test-syntax-check-timed-out)))
+           'flycheck-ert-syntax-check-timed-out)))
 
 
 ;;; Syntax checking in tests
 
-(defvar-local flycheck-test-syntax-checker-finished nil
+(defvar-local flycheck-ert-syntax-checker-finished nil
   "Non-nil if the current checker has finished.")
 
 (add-hook 'flycheck-after-syntax-check-hook
-          (lambda () (setq flycheck-test-syntax-checker-finished t)))
+          (lambda () (setq flycheck-ert-syntax-checker-finished t)))
 
-(defconst flycheck-test-checker-wait-time 10
+(defconst flycheck-ert-checker-wait-time 10
   "Time to wait until a checker is finished in seconds.
 
 After this time has elapsed, the checker is considered to have
 failed, and the test aborted with failure.")
 
-(put 'flycheck-test-syntax-check-timed-out 'error-message
+(put 'flycheck-ert-syntax-check-timed-out 'error-message
      "Syntax check timed out.")
-(put 'flycheck-test-syntax-check-timed-out 'error-conditions '(error))
+(put 'flycheck-ert-syntax-check-timed-out 'error-conditions '(error))
 
-(defun flycheck-test-wait-for-syntax-checker ()
+(defun flycheck-ert-wait-for-syntax-checker ()
   "Wait until the syntax check in the current buffer is finished."
   (let ((starttime (float-time)))
-    (while (and (not flycheck-test-syntax-checker-finished)
-                (< (- (float-time) starttime) flycheck-test-checker-wait-time))
+    (while (and (not flycheck-ert-syntax-checker-finished)
+                (< (- (float-time) starttime) flycheck-ert-checker-wait-time))
       (sleep-for 1))
-    (unless (< (- (float-time) starttime) flycheck-test-checker-wait-time)
+    (unless (< (- (float-time) starttime) flycheck-ert-checker-wait-time)
       (flycheck-stop-checker)
-      (signal 'flycheck-test-syntax-check-timed-out nil)))
-  (setq flycheck-test-syntax-checker-finished nil))
+      (signal 'flycheck-ert-syntax-check-timed-out nil)))
+  (setq flycheck-ert-syntax-checker-finished nil))
 
-(defun flycheck-test-buffer-sync ()
+(defun flycheck-ert-buffer-sync ()
   "Check the current buffer synchronously."
-  (setq flycheck-test-syntax-checker-finished nil)
+  (setq flycheck-ert-syntax-checker-finished nil)
   (should (not (flycheck-running-p)))
   (flycheck-mode)                       ; This will only start a deferred check,
   (flycheck-buffer)                     ; so we need an explicit manual check
   ;; After starting the check, the checker should either be running now, or
   ;; already be finished (if it was fast).
   (should (or flycheck-current-process
-              flycheck-test-syntax-checker-finished))
+              flycheck-ert-syntax-checker-finished))
   ;; Also there should be no deferred check pending anymore
   (should-not (flycheck-deferred-check-p))
-  (flycheck-test-wait-for-syntax-checker))
+  (flycheck-ert-wait-for-syntax-checker))
 
-(defun flycheck-test-ensure-clear ()
+(defun flycheck-ert-ensure-clear ()
   "Clear the current buffer.
 
 Raise an assertion error if the buffer is not clear afterwards."
@@ -334,7 +334,7 @@ Raise an assertion error if the buffer is not clear afterwards."
 
 ;;; Test assertions
 
-(defun flycheck-test-should-overlay (error)
+(defun flycheck-ert-should-overlay (error)
   "Test that ERROR has an overlay."
   (let* ((overlay (-first (lambda (ov) (equal (overlay-get ov 'flycheck-error)
                                               error))
@@ -359,7 +359,7 @@ Raise an assertion error if the buffer is not clear afterwards."
     (should (equal (overlay-get overlay 'flycheck-error) error))
     (should (string= (overlay-get overlay 'help-echo) message))))
 
-(defun flycheck-test-should-errors (&rest errors)
+(defun flycheck-ert-should-errors (&rest errors)
   "Test that the current buffers has ERRORS.
 
 Without ERRORS test that there are any errors in the current
@@ -370,17 +370,17 @@ current buffer, and that the number of errors in the current
 buffer is equal to the number of given ERRORS.
 
 Each error in ERRORS is a list as expected by
-`flycheck-test-should-error'."
+`flycheck-ert-should-error'."
   (if (not errors)
       (should flycheck-current-errors)
     (let ((expected (mapcar (apply-partially #'apply #'flycheck-error-new-at)
                             errors)))
       (should (equal expected flycheck-current-errors))
-      (mapc #'flycheck-test-should-overlay expected))
+      (mapc #'flycheck-ert-should-overlay expected))
     (should (= (length errors)
                (length (flycheck-overlays-in (point-min) (point-max)))))))
 
-(defun flycheck-test-should-syntax-check (resource-file modes &rest errors)
+(defun flycheck-ert-should-syntax-check (resource-file modes &rest errors)
   "Test a syntax check in RESOURCE-FILE with MODES.
 
 RESOURCE-FILE is the file to check.  MODES is a single major mode
@@ -402,11 +402,11 @@ resource directory."
   (dolist (mode modes)
     (unless (fboundp mode)
       (ert-skip (format "%S missing" mode)))
-    (flycheck-test-with-resource-buffer resource-file
+    (flycheck-ert-with-resource-buffer resource-file
       (funcall mode)
       ;; Configure config file locating for unit tests
       (dolist (fn '(flycheck-locate-config-file-absolute-path
-                    flycheck-test-locate-config-file))
+                    flycheck-ert-locate-config-file))
         (add-hook 'flycheck-locate-config-file-functions fn 'append 'local))
       (let ((process-hook-called 0))
         (add-hook 'flycheck-process-error-functions
@@ -414,21 +414,25 @@ resource directory."
                     (setq process-hook-called (1+ process-hook-called))
                     nil)
                   nil :local)
-        (flycheck-test-buffer-sync)
+        (flycheck-ert-buffer-sync)
         (if errors
-            (apply #'flycheck-test-should-errors errors)
+            (apply #'flycheck-ert-should-errors errors)
           (should-not flycheck-current-errors))
         (should (= process-hook-called (length errors))))
-      (flycheck-test-ensure-clear))))
+      (flycheck-ert-ensure-clear))))
 
-(defun flycheck-test-at-nth-error (n)
+(defun flycheck-ert-at-nth-error (n)
+  "Determine whether point is at the N'th Flycheck error.
+
+Return non-nil if the point is at the N'th Flycheck error in the
+current buffer.  Otherwise return nil."
   (let* ((error (nth (1- n) flycheck-current-errors))
          (mode flycheck-highlighting-mode)
          (region (flycheck-error-region-for-mode error mode)))
     (and (member error (flycheck-overlay-errors-at (point)))
          (= (point) (car region)))))
 
-(defun flycheck-test-explain--at-nth-error (n)
+(defun flycheck-ert-explain--at-nth-error (n)
   (let ((errors (flycheck-overlay-errors-at (point))))
     (if (null errors)
         (format "Expected to be at error %s, but no error at point %s"
@@ -437,9 +441,9 @@ resource directory."
         (format "Expected to be at error %s, but point %s is at error %s"
                 n (point) (1+ pos))))))
 
-(put 'flycheck-test-at-nth-error 'ert-explainer
-     'flycheck-test-explain--at-nth-error)
+(put 'flycheck-ert-at-nth-error 'ert-explainer
+     'flycheck-ert-explain--at-nth-error)
 
-(provide 'flycheck-testlib)
+(provide 'flycheck-ert)
 
-;;; flycheck-testlib.el ends here
+;;; flycheck-ert.el ends here

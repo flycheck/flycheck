@@ -69,7 +69,7 @@ Node `(ert)Test Selectors' for information about test selectors."
 
     (message "Running tests on Emacs %s" emacs-version)
     (load (expand-file-name "flycheck" source-directory))
-    (load (expand-file-name "flycheck-testlib" source-directory))
+    (load (expand-file-name "flycheck-ert" source-directory))
     (load (expand-file-name "flycheck-test"
                             (file-name-directory current-file))))
 
