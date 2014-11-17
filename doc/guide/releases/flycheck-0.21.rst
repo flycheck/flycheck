@@ -115,7 +115,7 @@ commands.
 The new function :function:`flycheck-display-error-messages-unless-error-list`
 shows messages of the errors at point in the echo area, but only if the error
 list is *not* visible.  Use this function for
-:option:`flycheck-error-display-function` to make use of this feature.
+:option:`flycheck-display-errors-function` to make use of this feature.
 
 Syntax checker definition and extension
 =======================================
