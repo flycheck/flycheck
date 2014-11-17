@@ -122,26 +122,29 @@ determined."
 
 
 ;;; Code style
-(ert-deftest flycheck-code-style/source-properly-indented ()
-  :tags '(style)
-  (cl-letf ((flycheck (expand-file-name "flycheck.el"
-                                        flycheck-test-source-directory))
-            ((get 'with-demoted-errors 'lisp-indent-function) 1))
-    (flycheck-ert-with-file-buffer flycheck
-      (emacs-lisp-mode)
-      (shut-up
-        (indent-region (point-min) (point-max)))
-      (should-not (buffer-modified-p)))))
+(defmacro flycheck-test-def-indent-test (filename)
+  "Define a test case for the indentation of FILENAME.
 
-(ert-deftest flycheck-code-style/test-suite-properly-indented ()
-  :tags '(style)
-  (let ((flycheck-test (expand-file-name "flycheck-test.el"
-                                         flycheck-test-directory)))
-    (flycheck-ert-with-file-buffer flycheck-test
-      (emacs-lisp-mode)
-      (shut-up
-        (indent-region (point-min) (point-max)))
-      (should-not (buffer-modified-p)))))
+FILENAME is relative to the source directory.  The test case is
+named `flycheck-code-style/FILENAME-BASE/indentation', where
+FILENAME-BASE is FILENAME without leading directory components
+and extension, as in `file-name-base'."
+  (let ((testname (intern (format "flycheck-code-style/%s/indentation"
+                                  (file-name-base filename)))))
+    `(ert-deftest ,testname ()
+       :tags '(style)
+       (flycheck-ert-with-file-buffer
+           (expand-file-name ,filename
+                             flycheck-test-source-directory)
+         (set-auto-mode)
+         (shut-up
+           (indent-region (point-min) (point-max)))
+         (should-not (buffer-modified-p))))))
+
+(flycheck-test-def-indent-test "flycheck.el")
+(flycheck-test-def-indent-test "flycheck-ert.el")
+(flycheck-test-def-indent-test "test/run-tests.el")
+(flycheck-test-def-indent-test "test/flycheck-test.el")
 
 
 ;;; Customization
