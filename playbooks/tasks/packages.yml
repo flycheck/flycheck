@@ -67,7 +67,7 @@
     - php5-cli                    # php
     - pmake                       # make
     - racket                      # racket
-    - rust-0.11                   # rust
+    - rust-nightly                # rust
     - texinfo                     # texinfo
     - tidy                        # html-tidy
     - verilator                   # verilog-verilator
