@@ -8,7 +8,7 @@ This chapter documents the Flycheck ERT API, which is used throughout Flycheck's
 own test suite, and available for use in test suites for your own Flycheck
 extensions.
 
-.. toc:: Contents
+.. contents:: Contents
 
 Loading
 =======
