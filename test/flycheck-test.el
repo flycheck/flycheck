@@ -3556,52 +3556,52 @@ evaluating BODY."
      '(2 18 error "‘struct A’ has no member named ‘bar’"
          :checker c/c++-gcc))))
 
-(flycheck-ert-def-checker-test c/c++-gcc (c c++) error-language-standard ()
-                                :tags '(builtin-checker external-tool language-c++)
-                                (skip-unless (flycheck-check-executable 'c/c++-gcc))
-                                (let ((flycheck-gcc-language-standard "c++11")
-                                      (flycheck-disabled-checkers '(c/c++-clang)))
-                                  (flycheck-ert-should-syntax-check
-                                   "checkers/c_c++-error.cpp" 'c++-mode
-                                   '(8 17 error "aggregate ‘test<false> t’ has incomplete type and cannot be defined"
-                                       :checker c/c++-gcc)
-                                   '(10 10 warning "unused variable ‘foo’" :checker c/c++-gcc)
-                                   '(12 2 error "#error" :checker c/c++-gcc))))
+(flycheck-ert-def-checker-test c/c++-gcc (c c++) error-language-standard
+  :tags '(builtin-checker external-tool language-c++)
+  (skip-unless (flycheck-check-executable 'c/c++-gcc))
+  (let ((flycheck-gcc-language-standard "c++11")
+        (flycheck-disabled-checkers '(c/c++-clang)))
+    (flycheck-ert-should-syntax-check
+     "checkers/c_c++-error.cpp" 'c++-mode
+     '(8 17 error "aggregate ‘test<false> t’ has incomplete type and cannot be defined"
+         :checker c/c++-gcc)
+     '(10 10 warning "unused variable ‘foo’" :checker c/c++-gcc)
+     '(12 2 error "#error" :checker c/c++-gcc))))
 
-(flycheck-ert-def-checker-test c/c++-gcc (c c++) error-definitions ()
-                                :tags '(builtin-checker external-tool language-c++)
-                                (skip-unless (flycheck-check-executable 'c/c++-gcc))
-                                (let ((flycheck-gcc-definitions '("FLYCHECK_LIBRARY"))
-                                      (flycheck-disabled-checkers '(c/c++-clang)))
-                                  (flycheck-ert-should-syntax-check
-                                   "checkers/c_c++-error.cpp" 'c++-mode
-                                   '(10 5 warning "identifier ‘nullptr’ is a keyword in C++11"
-                                        :checker c/c++-gcc)
-                                   '(10 10 warning "unused variable ‘foo’"
-                                        :checker c/c++-gcc)
-                                   '(10 16 error "‘nullptr’ was not declared in this scope"
-                                        :checker c/c++-gcc)
-                                   '(12 2 error "#error" :checker c/c++-gcc))))
+(flycheck-ert-def-checker-test c/c++-gcc (c c++) error-definitions
+  :tags '(builtin-checker external-tool language-c++)
+  (skip-unless (flycheck-check-executable 'c/c++-gcc))
+  (let ((flycheck-gcc-definitions '("FLYCHECK_LIBRARY"))
+        (flycheck-disabled-checkers '(c/c++-clang)))
+    (flycheck-ert-should-syntax-check
+     "checkers/c_c++-error.cpp" 'c++-mode
+     '(10 5 warning "identifier ‘nullptr’ is a keyword in C++11"
+          :checker c/c++-gcc)
+     '(10 10 warning "unused variable ‘foo’"
+          :checker c/c++-gcc)
+     '(10 16 error "‘nullptr’ was not declared in this scope"
+          :checker c/c++-gcc)
+     '(12 2 error "#error" :checker c/c++-gcc))))
 
-(flycheck-ert-def-checker-test c/c++-gcc (c c++) error-no-exceptions ()
-                                :tags '(builtin-checker external-tool language-c++)
-                                (skip-unless (flycheck-check-executable 'c/c++-gcc))
-                                (let ((flycheck-disabled-checkers '(c/c++-clang))
-                                      (flycheck-gcc-no-exceptions t))
-                                  (flycheck-ert-should-syntax-check
-                                   "checkers/c_c++-error-exceptions.cpp" 'c++-mode
-                                   '(1 20 error "exception handling disabled, use -fexceptions to enable"
-                                       :checker c/c++-gcc))))
+(flycheck-ert-def-checker-test c/c++-gcc (c c++) error-no-exceptions
+  :tags '(builtin-checker external-tool language-c++)
+  (skip-unless (flycheck-check-executable 'c/c++-gcc))
+  (let ((flycheck-disabled-checkers '(c/c++-clang))
+        (flycheck-gcc-no-exceptions t))
+    (flycheck-ert-should-syntax-check
+     "checkers/c_c++-error-exceptions.cpp" 'c++-mode
+     '(1 20 error "exception handling disabled, use -fexceptions to enable"
+         :checker c/c++-gcc))))
 
-(flycheck-ert-def-checker-test c/c++-gcc (c c++) error-no-rtti ()
-                                :tags '(builtin-checker external-tool language-c++)
-                                (skip-unless (flycheck-check-executable 'c/c++-gcc))
-                                (let ((flycheck-disabled-checkers '(c/c++-clang))
-                                      (flycheck-gcc-no-rtti t))
-                                  (flycheck-ert-should-syntax-check
-                                   "checkers/c_c++-error-rtti.cpp" 'c++-mode
-                                   '(4 56 error "‘dynamic_cast’ not permitted with -fno-rtti"
-                                       :checker c/c++-gcc))))
+(flycheck-ert-def-checker-test c/c++-gcc (c c++) error-no-rtti
+  :tags '(builtin-checker external-tool language-c++)
+  (skip-unless (flycheck-check-executable 'c/c++-gcc))
+  (let ((flycheck-disabled-checkers '(c/c++-clang))
+        (flycheck-gcc-no-rtti t))
+    (flycheck-ert-should-syntax-check
+     "checkers/c_c++-error-rtti.cpp" 'c++-mode
+     '(4 56 error "‘dynamic_cast’ not permitted with -fno-rtti"
+         :checker c/c++-gcc))))
 
 (flycheck-ert-def-checker-test c/c++-gcc (c c++) openmp-disabled
   (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck))
@@ -3642,7 +3642,7 @@ evaluating BODY."
   (let ((flycheck-cppcheck-checks nil)
         (flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
     (flycheck-ert-should-syntax-check "checkers/c_c++-cppcheck-style.c"
-                                       'c-mode)))
+                                      'c-mode)))
 
 (flycheck-ert-def-checker-test c/c++-cppcheck (c c++) inconclusive
   ;; Cppcheck 1.53 and older do not report inconclusive warnings when using
@@ -3880,7 +3880,7 @@ The term \"1\" has type \"nat\" while it is expected to have type
     (flycheck-ert-should-errors)))
 
 (flycheck-ert-def-checker-test emacs-lisp emacs-lisp
-                                does-not-check-autoloads-buffers
+                               does-not-check-autoloads-buffers
   ;; Regression test ensuring that Emacs Lisp won't check autoload buffers.
   ;; These buffers are temporary buffers created during package installation to
   ;; collect the autoloads of newly installed packages before writing the
@@ -3891,13 +3891,13 @@ The term \"1\" has type \"nat\" while it is expected to have type
     (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
 
 (flycheck-ert-def-checker-test emacs-lisp emacs-lisp
-                                checkdoc-does-not-check-cask-files
+                               checkdoc-does-not-check-cask-files
   (flycheck-ert-with-file-buffer
       (expand-file-name "Cask" flycheck-test-source-directory)
     (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
 
 (flycheck-ert-def-checker-test emacs-lisp emacs-lisp
-                                does-not-check-with-no-byte-compile
+                               does-not-check-with-no-byte-compile
   ;; We need to use a hook here, because `no-byte-compile' seems to be
   ;; explicitly changed when loading Emacs Lisp files
   (let ((disable-byte-comp (lambda () (setq-local no-byte-compile t))))
@@ -4118,7 +4118,7 @@ In an equation for ‘main’: main = BS.putStr \"Hello World\""
      "checkers/Haskell/LanguageExtension.hs" 'haskell-mode)))
 
 (flycheck-ert-def-checker-test (haskell-ghc haskell-hlint) haskell
-                                complete-chain
+                               complete-chain
   (flycheck-ert-should-syntax-check
    "checkers/Haskell/Warnings.hs" 'haskell-mode
    '(6 1 warning "Top-level binding with no type signature: foo :: Integer"
@@ -4400,12 +4400,12 @@ Why not:
    '(22 1 warning "F821 undefined name 'antigravity'"
         :checker python-flake8)))
 
-(flycheck-ert-def-checker-test python-pylint python syntax-error ()
-                                (let ((flycheck-disabled-checkers '(python-flake8))
-                                      (python-indent-guess-indent-offset nil))       ; Silence Python Mode
-                                  (flycheck-ert-should-syntax-check
-                                   "checkers/python-syntax-error.py" 'python-mode
-                                   '(3 nil error "invalid syntax (E0001)" :checker python-pylint))))
+(flycheck-ert-def-checker-test python-pylint python syntax-error
+  (let ((flycheck-disabled-checkers '(python-flake8))
+        (python-indent-guess-indent-offset nil)) ; Silence Python Mode
+    (flycheck-ert-should-syntax-check
+     "checkers/python-syntax-error.py" 'python-mode
+     '(3 nil error "invalid syntax (E0001)" :checker python-pylint))))
 
 (flycheck-ert-def-checker-test python-pylint python nil
   (let ((flycheck-disabled-checkers '(python-flake8)))
