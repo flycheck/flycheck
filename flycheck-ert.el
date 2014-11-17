@@ -226,7 +226,7 @@ match."
 
 ;;; Test case definitions
 (defmacro flycheck-ert-def-checker-test (checker language name
-                                                  &rest keys-and-body)
+                                                 &rest keys-and-body)
   "Define a test case for a syntax CHECKER for LANGUAGE.
 
 CHECKER is a symbol or a list of symbols denoting syntax checkers
