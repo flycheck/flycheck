@@ -4651,6 +4651,14 @@ Why not:
    '(4 9 warning "unused variable: `x`, #[warn(unused_variable)] on by default"
        :checker rust)))
 
+(flycheck-ert-def-checker-test rust rust help
+  (flycheck-ert-should-syntax-check
+   "checkers/rust-help.rs" 'rust-mode
+   '(3 1 error "not all control paths return a value"
+       :checker rust)
+   '(4 8 info "consider removing this semicolon:"
+       :checker rust)))
+
 (flycheck-ert-def-checker-test rust rust test-crate-type-bin
   (let ((flycheck-rust-crate-type "bin")
         (flycheck-rust-check-tests nil))

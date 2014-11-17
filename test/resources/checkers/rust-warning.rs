@@ -1,4 +1,4 @@
-// a warning for an unused variable
+// A warning for an unused variable
 
 fn main() {
     let x = true;
