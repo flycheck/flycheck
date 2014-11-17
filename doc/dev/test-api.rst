@@ -89,7 +89,7 @@ The following functions and macros load resources from the directory given to
 Environment information
 =======================
 
-.. variable:: flycheck-ert-user-error-type
+.. constant:: flycheck-ert-user-error-type
    :auto:
 
 .. function:: flycheck-ert-travis-ci-p
