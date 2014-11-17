@@ -12,15 +12,20 @@ This document explains how to use this test suite.
 Test suite layout
 =================
 
+The library ``flycheck-ert.el`` provides many extensions to ERT, generic ones as
+well as specific utilities for testing Flycheck code and syntax checkers.  You
+may use this library to write test cases for your own Flycheck extensions:  It
+is part of the Flycheck package.
+
 All test code is contained in the ``test/`` sub-directory, which has the following
 contents:
 
-- ``flycheck-test.el``: The actual unit test suite, that is, the test cases and
-  the utility functions.
+- ``flycheck-test.el``: The actual unit test suite, that is, the test cases plus
+  some local utility functions and macros.
 - ``resources/``: Resource files used by the test suite, including example code
   in various programming languages to test syntax checkers.
-- ``run-tests.el``: A simple test runner for non-interactive use, which reads
-  ERT selectors from the command line and runs all matching tests.
+- ``run.el``: A simple test runner for non-interactive use, which reads ERT
+  selectors from the command line and runs all matching tests.
 
 .. _test-running:
 

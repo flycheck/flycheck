@@ -3,12 +3,11 @@
 
 (package-file "flycheck.el")
 
-(files "flycheck.el"
+(files "flycheck.el" "flycheck-ert.el"
        ;; Cask automatically builds docs for us :)
        "doc/flycheck.texi")
 
 (development
- (depends-on "ert")                     ; Unit test library
  (depends-on "shut-up")                 ; Silence Emacs
 
  ;; Make optional dependencies available for development

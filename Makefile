@@ -13,7 +13,7 @@ PKGDIR := $(shell EMACS=$(EMACS) $(CASK) package-directory)
 # Export the used EMACS to recipe environments
 export EMACS
 
-SRCS = flycheck.el
+SRCS = flycheck.el flycheck-ert.el
 OBJECTS = $(SRCS:.el=.elc)
 
 DISTDIR = dist
@@ -45,7 +45,7 @@ images: doc/images/logo.png doc/images/favicon.ico # To update the image files
 
 # Test targets
 test : $(OBJECTS)
-	$(EMACSBATCH) --script test/run-tests.el '$(ERTSELECTOR)'
+	$(EMACSBATCH) --script test/run.el '$(ERTSELECTOR)'
 
 # Support targets
 deps : $(PKGDIR)
@@ -85,8 +85,10 @@ doc/flycheck.texi : $(DOCBUILDDIR)/info/flycheck.texi
 $(DOCBUILDDIR)/info/flycheck.texi :
 	$(SPHINX-BUILD) -b texinfo -d $(DOCTREEDIR) $(SPHINXFLAGS) doc $(DOCBUILDDIR)/info
 
+flycheck-ert.elc: flycheck.elc
+
 %.elc : %.el $(PKGDIR)
-	$(CASK) exec $(EMACSBATCH) -f batch-byte-compile $<
+	$(CASK) exec $(EMACSBATCH) -L . -f batch-byte-compile $<
 
 doc/images/favicon.ico: flycheck.svg
 	$(CONVERT) $< -background white \
