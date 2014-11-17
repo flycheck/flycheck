@@ -2243,6 +2243,9 @@ Perform substitution in the arguments of CHECKER, but with
 
 Return the command of CHECKER as single string, suitable for
 shell execution."
+  ;; Note: Do NOT use `combine-and-quote-strings' here.  Despite it's name it
+  ;; does not properly quote shell arguments, and actually breaks for special
+  ;; characters.  See https://github.com/flycheck/flycheck/pull/522
   (mapconcat #'shell-quote-argument
    (cons (flycheck-checker-executable checker)
          (apply #'append
