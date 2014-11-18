@@ -1524,7 +1524,206 @@ https://github.com/d11wtq/grizzl")))
       checker)))
 
 
-;;; Checker definitions
+;;; Generic checker definitions
+(defconst flycheck-generic-checker-version 1
+  "The internal version of generic syntax checker declarations.
+
+Flycheck will not use syntax checkers whose generic version is
+less than this constant.")
+
+(defun flycheck-validate-next-checker (next &optional strict)
+  "Validate NEXT checker.
+
+With STRICT non-nil, also check whether the syntax checker and
+the error level in NEXT are valid.  Otherwise just check whether
+these are symbols.
+
+Signal an error if NEXT is not a valid entry for
+`:next-checkers'."
+  (when (symbolp next)
+    (setq next (cons t next)))
+  (pcase next
+    (`(,level . ,checker)
+     (if strict
+         (progn
+           (unless (or (eq level t) (flycheck-error-level-p level))
+             (error "%S is not a valid Flycheck error level" level))
+           (unless (flycheck-valid-checker-p checker)
+             (error "%s is not a valid Flycheck syntax checker" checker)))
+       (unless (symbolp level)
+         (error "Error level %S must be a symbol" level))
+       (unless (symbolp checker)
+         (error "Checker %S must be a symbol" checker))))
+    (_ (error "%S must be a symbol or cons cell" next)))
+  t)
+
+(defun flycheck-define-generic-checker (symbol docstring &rest properties)
+  "Define SYMBOL as generic syntax checker.
+
+Any syntax checker defined with this macro is eligible for manual
+syntax checker selection with `flycheck-select-checker'.  To make
+the new syntax checker available for automatic selection, it must
+be registered in `flycheck-checkers'.
+
+DOCSTRING is the documentation of the syntax checker, for
+`flycheck-describe-checker'.  The following PROPERTIES constitute
+a generic syntax checker.  Unless otherwise noted, all properties
+are mandatory.
+
+`:start FUNCTION'
+     A function to start the syntax checker.
+
+     FUNCTION shall take a single argument and return a context
+     object if the checker is started successfully.  Otherwise it
+     shall signal an error.
+
+     The first argument is the syntax checker being started.  The
+     second is a callback function to report state changes to
+     Flycheck.
+
+     The context object returned by FUNCTION is passed to
+     `:interrupt' and `:running-p'.
+
+`:interrupt FUNCTION'
+     A function to interrupt the syntax check.
+
+     FUNCTION is called with the context object returned by the
+     `:start' function and shall try to interrupt the syntax
+     check.  If it fails to do so, it shall signal an error.
+
+     Note that FUNCTION should try very hard to interrupt the
+     check, and should signal an error only as a very last
+     resort.  Uninterruptable syntax checkers might corrupt
+     Flycheck's internal state.
+
+`:running-p FUNCTION'
+     A function to determine whether a syntax check is still
+     running.
+
+     FUNCTION is called with the context object returned by
+     `:running-p' and shall return non-nil if the corresponding
+     syntax check is still running.
+
+`:modes MODES'
+     A major mode symbol or a list thereof, denoting major modes
+     to use this syntax checker in.
+
+     If given this syntax checker is only used in buffers whose
+     `major-mode' is `eq' to any mode in MODES.
+
+     If `:predicate' is also given, the syntax checker will only
+     be used in buffers for which the `:predicate' returns
+     non-nil.
+
+     This property is optional, however at least one of `:modes'
+     or `:predicate' must be given.
+
+`:predicate FUNCTION'
+     A function to determine whether to use the syntax checker in
+     the current buffer.
+
+     FUNCTION is called without arguments and shall return
+     non-nil if this syntax checker shall be used to check the
+     current buffer.  Otherwise it shall return nil.
+
+     If `:modes' is also given, FUNCTION is only called in
+     matching major modes.
+
+     This property is optional, however at least one of `:modes'
+     or `:predicate' must be given.
+
+`:error-filter FUNCTION'
+     A function to filter the errors returned by this checker.
+
+     FUNCTION is called with the list of `flycheck-error' objects
+     returned by the syntax checker and shall return another list
+     of `flycheck-error' objects, which is considered the final
+     result of this syntax checker.
+
+     FUNCTION is free to add, remove or modify errors, whether in
+     place or by copying.
+
+     This property is optional.  If omitted,
+     `flycheck-sanitize-errors' is used as default filter, which
+     see.  To turn of filtering completely, explicitly specify
+     `identity' as error filter.
+
+:next-checkers NEXT-CHECKERS
+     A list denoting syntax checkers to apply after this syntax
+     checker, in what we call \"chaining\" of syntax checkers.
+
+     Each ITEM is a cons cell `(LEVEL . CHECKER)'.  CHECKER is a
+     syntax checker to run after this syntax checker.  LEVEL is
+     an error level.  CHECKER will only be used if there are no
+     current errors of at least LEVEL.  LEVEL may also be t, in
+     which case CHECKER is used regardless of the current errors.
+
+     ITEM may also be a syntax checker symbol, which is
+     equivalent to `(t . ITEM)'.
+
+     Flycheck tries all items in order of declaration, and uses
+     the first whose LEVEL matches and whose CHECKER is
+     registered and can be used for the current buffer.
+
+     This feature is typically used to apply more than one syntax
+     checker to a buffer.  For instance, you might first use a
+     compiler to check a buffer for syntax and type errors, and
+     then run a linting tool that checks for insecure code, or
+     questionable style.
+
+     This property is optional.  If omitted, it defaults to the
+     nil, i.e. no other syntax checkers are applied after this
+     syntax checker.
+
+Signal an error, if any property has an invalid value."
+  (declare (indent 1)
+           (doc-string 2))
+  (let ((start (get properties :start))
+        (interrupt (get properties :interrupt))
+        (running-p (get properties :running-p))
+        (modes (get properties :modes))
+        (predicate (get properties :predicate))
+        (filter (or (get properties :error-filter)
+                    #'flycheck-sanitize-errors))
+        (next-checkers (get properties :next-checkers)))
+
+    (unless (listp modes)
+      (setq modes (list modes)))
+
+    (unless (functionp start)
+      (error ":start %S is not a function" start))
+    (unless (functionp interrupt)
+      (error ":interrupt %S is not a function" interrupt))
+    (unless (functionp running-p)
+      (error ":running-p %S is not a function" running-p))
+    (unless (or modes predicate)
+      (error "Missing :modes or :predicate"))
+    (dolist (mode modes)
+      (unless (symbolp mode)
+        (error "Invalid :modes %s.  %s must be a symbol" modes mode)))
+    (unless (or (null predicate) (functionp predicate))
+      (error ":predicate %S is not a function" predicate))
+    (unless (functionp filter)
+      (error ":error-filter %S is not a function" filter))
+    (dolist (checker next-checkers)
+      (flycheck-validate-next-checker checker))
+
+    (pcase-dolist (`(,prop . ,value)
+                   `((flycheck-start . ,start)
+                     (flycheck-interrupt . ,interrupt)
+                     (flycheck-running-p . ,running-p)
+                     (flycheck-modes . ,modes)
+                     (flycheck-predicate . ,predicate)
+                     (flycheck-error-filter . ,filter)
+                     (flycheck-next-checkers . ,next-checkers)))
+      (put symbol prop value))
+
+    ;; Track the version, to avoid breakage if the internal format changes
+    (put symbol 'flycheck-generic-checker-version
+         flycheck-generic-checker-version)))
+
+
+;;; Process-based checker definitions
 (defun flycheck-command-argument-p (arg)
   "Check whether ARG is a valid command argument."
   (pcase arg
@@ -1557,38 +1756,6 @@ https://github.com/d11wtq/grizzl")))
     (`(eval ,_) t)
     (_ nil)))
 
-(defun flycheck-validate-next-checker (next &optional strict)
-  "Validate NEXT checker.
-
-With STRICT non-nil, also check whether the syntax checker and
-the error level in NEXT are valid.  Otherwise just check whether
-these are symbols.
-
-Signal an error if NEXT is not a valid entry for
-`:next-checkers'."
-  (when (symbolp next)
-    (setq next (cons t next)))
-  (pcase next
-    (`(,level . ,checker)
-     (if strict
-         (progn
-           (unless (or (eq level t) (flycheck-error-level-p level))
-             (error "%S is not a valid Flycheck error level" level))
-           (unless (flycheck-valid-checker-p checker)
-             (error "%s is not a valid Flycheck syntax checker" checker)))
-       (unless (symbolp level)
-         (error "Error level %S must be a symbol" level))
-       (unless (symbolp checker)
-         (error "Checker %S must be a symbol" checker))))
-    (_ (error "%S must be a symbol or cons cell" next)))
-  t)
-
-(defconst flycheck-checker-version 1
-  "The internal version of syntax checker declarations.
-
-Flycheck will not use syntax checkers whose version is less than
-this constant.")
-
 (defun flycheck-verify-checker-properties (symbol)
   "Verify the syntax checker properties of SYMBOL."
   (let ((command (get symbol 'flycheck-command))
@@ -1618,15 +1785,6 @@ this constant.")
       (error ":predicate %S is not a function" predicate))
     (dolist (checker next-checkers)
       (flycheck-validate-next-checker checker))))
-
-(defun flycheck-set-checker-properties (symbol properties)
-  "Set and verify syntax checker PROPERTIES on SYMBOL.
-
-PROPERTIES is an alist of properties to set."
-  (pcase-dolist (`(,prop . ,value) properties)
-    (put symbol prop value))
-  (flycheck-verify-checker-properties symbol)
-  (put symbol 'flycheck-checker-version flycheck-checker-version))
 
 (defmacro flycheck-define-checker (symbol docstring &rest properties)
   "Define SYMBOL as syntax checker with DOCSTRING and PROPERTIES.
