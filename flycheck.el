@@ -3921,7 +3921,9 @@ symbols in the command."
           ;; Track the temporaries created by argument substitution in the
           ;; process itself, to get rid of the global state ASAP.
           (process-put process 'flycheck-temporaries flycheck-temporaries)
-          (setq flycheck-temporaries nil))
+          (setq flycheck-temporaries nil)
+          ;; Return the process
+          process)
       (error
        ;; In case of error, clean up our resources, and report the error back to
        ;; Flycheck
