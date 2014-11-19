@@ -1480,7 +1480,7 @@ Signal an error, if any property has an invalid value."
       (flycheck-validate-next-checker checker))
 
     (let ((real-predicate (lambda ()
-                            (if (flycheck-valid-generic-checker-p symbol)
+                            (if (flycheck-valid-checker-p symbol)
                                 (or (null predicate) (funcall predicate))
                               (lwarn 'flycheck :warning "%S is no valid Flycheck syntax checker.
 Try to reinstall the package defining this syntax checker." symbol)
@@ -3720,7 +3720,7 @@ regular expression, and LEVEL the corresponding level symbol."
        (when process
          ;; No need to explicitly delete the temporary files of the process,
          ;; because deleting runs the sentinel, which will delete them anyway.
-         (process-delete process))
+         (delete-process process))
        (funcall callback :errored (error-message-string err))))))
 
 (defun flycheck-interrupt-command-checker (_checker process)
@@ -3835,7 +3835,7 @@ The variable is defined with `defcustom' in the
 `flycheck-executables' group.  It's also defined to be risky as
 file-local variable, to avoid arbitrary executables being used
 for syntax checking."
-  (let ((executable-var (flycheck-checker-executable-var checker)))
+  (let ((executable-var (flycheck-checker-executable-variable checker)))
     `(progn
        (defcustom ,executable-var nil
          ,(format "The executable of the %s syntax checker.
