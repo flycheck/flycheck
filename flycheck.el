@@ -2296,6 +2296,125 @@ regular expression, and LEVEL the corresponding level symbol."
   "Get the error parser of CHECKER."
   (get checker 'flycheck-error-parser))
 
+(defun flycheck-start-command-checker (checker callback)
+  "Start a command CHECKER with CALLBACK."
+  (let (current-process)
+    (condition-case err
+        (let* ((program (flycheck-checker-executable checker))
+               (args (flycheck-checker-substituted-arguments checker))
+               ;; Use pipes to receive output from the syntax checker.  They are
+               ;; more efficient and more robust than PTYs, which Emacs uses by
+               ;; default, and since we don't need any job control features, we
+               ;; can easily use pipes.
+               (process-connection-type nil))
+          ;; We pass do not associate the process with any buffer, by
+          ;; passing nil for the BUFFER argument of `start-process'.
+          ;; Instead, we just remember the buffer being checked in a
+          ;; process property (see below).  This neatly avoids all
+          ;; side-effects implied by attached a process to a buffer, which
+          ;; may cause conflicts with other packages.
+          ;;
+          ;; See https://github.com/flycheck/flycheck/issues/298 for an
+          ;; example for such a conflict.
+          (setq process (apply 'start-process "flycheck" nil program args))
+          (set-process-filter process 'flycheck-receive-checker-output)
+          (set-process-sentinel process 'flycheck-handle-signal)
+          (set-process-query-on-exit-flag process nil)
+          ;; Remember the syntax checker, the buffer and the callback
+          (process-put process 'flycheck-syntax-checker checker)
+          (process-put process 'flycheck-callback callback)
+          (process-put process 'flycheck-buffer (current-buffer))
+          ;; Track the temporaries created by argument substitution in the
+          ;; process itself, to get rid of the global state ASAP.
+          (process-put process 'flycheck-temporaries flycheck-temporaries)
+          (setq flycheck-temporaries nil))
+      (error
+       ;; In case of error, clean up our resources, and report the error back to
+       ;; Flycheck
+       (flycheck-safe-delete-temporaries)
+       (when process
+         (flycheck-delete-process process))
+       (funcall callback :errored (error-message-string err))))))
+
+(defun flycheck-interrupt-command-checker (_checker process)
+  "Interrupt a _CHECKER PROCESS."
+  (kill-process process))
+
+(defun flycheck-command-checker-running-p (_checker process)
+  "Determine whether a _CHECKER PROCESS is still running."
+  (if (not (memq (process-status process) '(exit process)))
+      t
+    ;; If the process has dead, delete it.  It should already be delete, but
+    ;; just to be on the safe side, let's delete it again
+    (flycheck-delete-process process)
+    nil))
+
+
+;;; Process management for command syntax checkers
+(defun flycheck-delete-process (process)
+  "Delete PROCESS and clear it's resources."
+  (mapc #'flycheck-safe-delete (process-get process 'flycheck-temporaries))
+  (delete-process process))
+
+(defun flycheck-receive-checker-output (process output)
+  "Receive a syntax checking PROCESS OUTPUT."
+  (push output (process-get process 'flycheck-pending-output)))
+
+(defun flycheck-get-output (process)
+  "Get the complete output of PROCESS."
+  (with-demoted-errors "Error while retrieving process output: %S"
+    (let ((pending-output (process-get process 'flycheck-pending-output)))
+      (apply #'concat (nreverse pending-output)))))
+
+(defun flycheck-handle-signal (process _event)
+  "Handle a signal from the syntax checking PROCESS.
+
+_EVENT is ignored."
+  (when (memq (process-status process) '(signal exit))
+    (let ((files (process-get process 'flycheck-temporaries))
+          (buffer (process-get process 'flycheck-buffer))
+          (callback (process-get process 'flycheck-callback)))
+      ;; Delete the temporary files
+      (mapc #'flycheck-safe-delete files)
+      (when (buffer-live-p buffer)
+        (with-current-buffer buffer
+          (condition-case err
+              (pcase (process-status process)
+                (`signal
+                 (funcall callback :interrupted))
+                (`exit
+                 (flycheck-finish-checker-process
+                  (process-get process 'flycheck-checker)
+                  (process-exit-status process)
+                  files
+                  (flycheck-get-output process) callback)))
+            (error
+             (funcall callback :errored (error-message-string err)))))))))
+
+(defun flycheck-finish-checker-process
+    (checker exit-status files output callback)
+  "Finish a checker process from CHECKER with EXIT-STATUS.
+
+FILES is a list of files given as input to the checker.  OUTPUT
+is the output of the syntax checker.  CALLBACK is the status
+callback to use for reporting.
+
+Parse the OUTPUT and report an appropriate error status."
+  (let ((errors (flycheck-parse-output output checker (current-buffer))))
+    (when (and (/= exit-status 0) (not errors))
+      ;; Warn about a suspicious result from the syntax checker.  We do right
+      ;; after parsing the errors, before filtering, because a syntax checker
+      ;; might report errors from other files (e.g. includes) even if there
+      ;; are no errors in the file being checked.
+      (funcall callback :suspicious
+               (format "Checker %S returned non-zero exit code %s, but no errors from \
+output: %s\nChecker definition probably flawed." checker exit-status output)))
+    (funcall callback :finished
+             ;; Fix error file names, by substituting them backwards from the
+             ;; temporaries
+             (mapcar (lambda (e) (flycheck-fix-error-filename e files))
+                     errors))))
+
 
 ;;; Executables of command checkers.
 (defun flycheck-set-checker-executable (checker &optional executable)
@@ -4157,161 +4276,6 @@ This function requires the Google This library from URL
           (google-this-string quote-flag msg 'no-confirm)))
     (user-error "Please install Google This from \
 https://github.com/Bruce-Connor/emacs-google-this")))
-
-
-;;; Checker process management
-(defvar-local flycheck-current-process nil
-  "The current syntax checking process.")
-(put 'flycheck-current-process 'permanent-local t)
-
-(defun flycheck-running-p ()
-  "Determine whether a syntax check is running."
-  (when (and flycheck-current-process
-             (memq (process-status flycheck-current-process) '(exit signal)))
-    (flycheck-delete-process flycheck-current-process)
-    (setq flycheck-current-process nil))
-  (when flycheck-current-process t))
-
-(defun flycheck-delete-process (process)
-  "Delete PROCESS and clear it's resources."
-  (mapc #'flycheck-safe-delete (process-get process 'flycheck-temporaries))
-  (delete-process process))
-
-(defun flycheck-receive-checker-output (process output)
-  "Receive a syntax checking PROCESS OUTPUT."
-  (push output (process-get process 'flycheck-pending-output)))
-
-(defun flycheck-get-output (process)
-  "Get the complete output of PROCESS."
-  (with-demoted-errors "Error while retrieving process output: %S"
-    (let ((pending-output (process-get process 'flycheck-pending-output)))
-      (apply #'concat (nreverse pending-output)))))
-
-(defun flycheck-finish-syntax-check (checker exit-status files output)
-  "Finish a syntax check from CHECKER with EXIT-STATUS.
-
-FILES is a list of files given as input to the checker.  OUTPUT
-is the output of the syntax checker.
-
-Parse the OUTPUT and report an appropriate error status."
-  (let (errors)
-    (condition-case err
-        (setq errors (flycheck-parse-output output checker (current-buffer)))
-      (error
-       (message "Failed to parse errors from checker %S in output: %s\n\
-Error: %s" checker output (error-message-string err))
-       (flycheck-report-error)
-       (setq errors :errored)))
-    (unless (eq errors :errored)
-      (when (and (/= exit-status 0) (not errors))
-        ;; Warn about a suspicious result from the syntax checker.  We do right
-        ;; after parsing the errors, before filtering, because a syntax checker
-        ;; might report errors from other files (e.g. includes) even if there
-        ;; are no errors in the file being checked.
-        (message "Checker %S returned non-zero exit code %s, but no errors from \
-output: %s\nChecker definition probably flawed."
-                 checker exit-status output)
-        (flycheck-report-status 'suspicious))
-      (setq errors (flycheck-relevant-errors
-                    (flycheck-filter-errors
-                     (mapcar (lambda (e) (flycheck-fix-error-filename e files))
-                             errors) checker)))
-      (unless (flycheck-disable-excessive-checker checker errors)
-        ;; Remember and process the new errors if allowed
-        (setq flycheck-current-errors
-              (sort (append errors flycheck-current-errors) #'flycheck-error-<))
-        (mapc (apply-partially #'run-hook-with-args-until-success
-                               'flycheck-process-error-functions) errors))
-      (flycheck-report-status 'finished)
-      (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
-        (if next-checker
-            (flycheck-start-checker next-checker)
-          (flycheck-delete-marked-overlays)
-          (flycheck-error-list-refresh)
-          (run-hooks 'flycheck-after-syntax-check-hook)
-          (when (eq (current-buffer) (window-buffer))
-            (flycheck-display-error-at-point))
-          ;; Immediately try to run any pending deferred syntax check, which
-          ;; were triggered by intermediate automatic check event, to make sure
-          ;; that we quickly refine outdated error information
-          (flycheck-perform-deferred-syntax-check))))))
-
-(defun flycheck-handle-signal (process _event)
-  "Handle a signal from the syntax checking PROCESS.
-
-_EVENT is ignored."
-  (when (memq (process-status process) '(signal exit))
-    (let ((checker (process-get process 'flycheck-checker))
-          (files (process-get process 'flycheck-temporaries))
-          (exit-status (process-exit-status process))
-          (output (flycheck-get-output process))
-          (buffer (process-get process 'flycheck-buffer)))
-      (flycheck-delete-process process)
-      (when (buffer-live-p buffer)
-        (with-current-buffer buffer
-          (setq flycheck-current-process nil)
-          (condition-case err
-              (pcase (process-status process)
-                (`signal
-                 ;; The process was killed, so let's just delete all overlays,
-                 ;; and report a bad state
-                 (flycheck-delete-marked-overlays)
-                 (flycheck-report-status 'interrupted))
-                (`exit
-                 (when flycheck-mode
-                   (flycheck-finish-syntax-check checker exit-status
-                                                 files output))))
-            (error
-             (flycheck-report-error)
-             (signal (car err) (cdr err)))))))))
-
-(defun flycheck-start-checker (checker)
-  "Start a syntax CHECKER."
-  (condition-case err
-      (let* ((program (flycheck-checker-executable checker))
-             (args (flycheck-checker-substituted-arguments checker))
-             ;; Use pipes to receive output from the syntax checker.  They are
-             ;; more efficient and more robust than PTYs, which Emacs uses by
-             ;; default, and since we don't need any job control features, we
-             ;; can easily use pipes.
-             (process-connection-type nil)
-             ;; We pass do not associate the process with any buffer, by passing
-             ;; nil for the BUFFER argument of `start-process'.  Instead, we
-             ;; just remember the buffer being checked in a process property
-             ;; (see below).  This neatly avoids all side-effects implied by
-             ;; attached a process to a buffer, which may cause conflicts with
-             ;; other packages.
-             ;;
-             ;; See https://github.com/flycheck/flycheck/issues/298 for an
-             ;; example for such a conflict.
-             (process (apply 'start-process "flycheck" nil program args)))
-        (setq flycheck-current-process process)
-        (set-process-filter process 'flycheck-receive-checker-output)
-        (set-process-sentinel process 'flycheck-handle-signal)
-        (set-process-query-on-exit-flag process nil)
-        (flycheck-report-status 'running)
-        (process-put process 'flycheck-temporaries flycheck-temporaries)
-        ;; Now that temporary files and directories are attached to the process,
-        ;; we can reset the variables used to collect them
-        (setq flycheck-temporaries nil)
-        ;; Remember the syntax checker and the buffer.
-        (process-put process 'flycheck-checker checker)
-        (process-put process 'flycheck-buffer (current-buffer)))
-    (error
-     (flycheck-report-error)
-     (flycheck-safe-delete-temporaries)
-     (when flycheck-current-process
-       ;; Clear the process if it's already there
-       (flycheck-delete-process flycheck-current-process)
-       (setq flycheck-current-process nil))
-     (signal (car err) (cdr err)))))
-
-(defun flycheck-stop-checker ()
-  "Stop any syntax checker for the current buffer."
-  (when (flycheck-running-p)
-    ;; Killing the current process will force the sentinel, which does the
-    ;; cleanup
-    (kill-process flycheck-current-process)))
 
 
 ;;; Built-in checkers
