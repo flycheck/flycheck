@@ -4550,6 +4550,37 @@ objects)."
      (flycheck-tokenize-output-with-patterns output patterns) patterns)))
 
 
+;;; Convenience definition of command-syntax checkers
+(defmacro flycheck-define-checker (symbol docstring &rest properties)
+  "Define SYMBOL as command syntax checker with DOCSTRING and PROPERTIES.
+
+Like `flycheck-define-command-checker', but PROPERTIES must not
+be quoted.  Also, implicitly define the executable variable for
+SYMBOL with `flycheck-def-executable-var'."
+  (declare (indent 1)
+           (doc-string 2))
+  (let ((command (plist-get properties :command))
+        (parser (plist-get properties :error-parser))
+        (filter (plist-get properties :error-filter))
+        (predicate (plist-get properties :predicate)))
+
+    `(progn
+       (flycheck-def-executable-var ,symbol ,(car command))
+
+       (flycheck-define-command-checker ',symbol
+         ,docstring
+         :command ',command
+         :error-parser ,(when parser
+                          `(function ,parser))
+         :error-patters ',(plist-get properties :error-patterns)
+         :error-filter ,(when filter
+                          `(function ,filter))
+         :modes ',(plist-get properties :modes)
+         :predicate ,(when predicate
+                       `(function ,predicate))
+         :next-checkers ',(plist-get properties :next-checkers)))))
+
+
 ;;; Built-in checkers
 (flycheck-def-option-var flycheck-gnat-include-path nil ada-gnat
   "A list of include directories for GNAT.
