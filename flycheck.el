@@ -2337,6 +2337,1174 @@ variables of Flycheck."
 (add-hook 'kill-emacs-hook #'flycheck-global-teardown)
 
 
+;;; Errors from syntax checks
+(cl-defstruct (flycheck-error
+               (:constructor flycheck-error-new)
+               (:constructor flycheck-error-new-at (line column
+                                                         &optional level message
+                                                         &key checker
+                                                         (filename (buffer-file-name))
+                                                         (buffer (current-buffer)))))
+  "Structure representing an error reported by a syntax checker.
+Slots:
+
+`buffer'
+     The buffer the reported was reported for, as buffer object.
+
+`checker'
+     The syntax checker which reported this error, as symbol.
+
+`filename'
+     The file name the error refers to, as string.
+
+`line'
+     The line number the error refers to, as number.
+
+`column'
+     The column number the error refers to, as number.
+
+`level'
+     The error level, as either `warning' or `error'."
+  buffer checker filename line column message level)
+
+(defmacro flycheck-error-with-buffer (err &rest forms)
+  "Switch to the buffer of ERR and evaluate FORMS.
+
+If the buffer of ERR is not live, FORMS are not evaluated."
+  (declare (indent 1) (debug t))
+  `(when (buffer-live-p (flycheck-error-buffer ,err))
+     (with-current-buffer (flycheck-error-buffer ,err)
+       ,@forms)))
+
+(defun flycheck-error-line-region (err)
+  "Get the line region of ERR.
+
+ERR is a Flycheck error whose region to get.
+
+Return a cons cell `(BEG . END)' where BEG is the first
+non-whitespace character on the line ERR refers to, and END the
+end of the line."
+  (flycheck-error-with-buffer err
+    (save-restriction
+      (save-excursion
+        (widen)
+        (goto-char (point-min))
+        (forward-line (- (flycheck-error-line err) 1))
+        ;; We are at the beginning of the line now, so move to the beginning of
+        ;; its indentation, similar to `back-to-indentation'
+        (let ((end (line-end-position)))
+          (skip-syntax-forward " " end)
+          (backward-prefix-chars)
+          ;; If the current line is empty, include the previous line break
+          ;; character(s) to have any region at all.  When called with 0,
+          ;; `line-end-position' gives us the end of the previous line
+          (cons (if (eolp) (line-end-position 0) (point)) end))))))
+
+(defun flycheck-error-column-region (err)
+  "Get the error column region of ERR.
+
+ERR is a Flycheck error whose region to get.
+
+Return a cons cell `(BEG . END)' where BEG is the character
+before the error column, and END the actual error column, or nil
+if ERR has no column."
+  (flycheck-error-with-buffer err
+    (save-restriction
+      (save-excursion
+        (-when-let (column (flycheck-error-column err))
+          (widen)
+          (goto-char (point-min))
+          (forward-line (- (flycheck-error-line err) 1))
+          (let ((line (flycheck-error-line err)))
+            (cond
+             ((eobp)                    ; Line beyond EOF
+              ;; If we are at the end of the file (i.e. the line was beyond the
+              ;; end of the file), use the very last column in the file.
+              (cons (- (point-max) 1) (point-max)))
+             ((eolp)                    ; Empty line
+              ;; If the target line is empty, there's no column to highlight on
+              ;; this line, so return the last column of the previous line.
+              (cons (line-end-position 0) (point)))
+             (t
+              ;; The end is either the column offset of the line, or the end of
+              ;; the line, if the column offset points beyond the end of the
+              ;; line.
+              (let ((end (min (+ (point) column)
+                              (+ (line-end-position) 1))))
+                (cons (- end 1) end))))))))))
+
+(defun flycheck-error-thing-region (thing err)
+  "Get the region of THING at the column of ERR.
+
+ERR is a Flycheck error whose region to get.  THING is a
+understood by `thing-at-point'.
+
+Return a cons cell `(BEG . END)' where BEG is the beginning of
+the THING at the error column, and END the end of the symbol.  If
+ERR has no error column, or if there is no THING at this column,
+return nil."
+  (-when-let (column (car (flycheck-error-column-region err)))
+    (flycheck-error-with-buffer err
+      (save-excursion
+        (save-restriction
+          (widen)
+          (goto-char column)
+          (bounds-of-thing-at-point thing))))))
+
+(defun flycheck-error-region-for-mode (err mode)
+  "Get the region of ERR for the highlighting MODE.
+
+ERR is a Flycheck error.  MODE may be one of the following symbols:
+
+`columns'
+     Get the column region of ERR, or the line region if ERR
+     has no column.
+
+`symbols'
+     Get the symbol region of ERR, or the result of `columns', if
+     there is no sexp at the error column.
+
+`sexps'
+     Get the sexp region of ERR, or the result of `columns', if
+     there is no sexp at the error column.
+
+`lines'
+     Return the line region.
+
+Otherwise signal an error."
+  (pcase mode
+    (`columns (or (flycheck-error-column-region err)
+                  (flycheck-error-line-region err)))
+    (`symbols (or (flycheck-error-thing-region 'symbol err)
+                  (flycheck-error-region-for-mode err 'columns)))
+    (`sexps (or (flycheck-error-thing-region 'sexp err)
+                (flycheck-error-region-for-mode err 'columns)))
+    (`lines (flycheck-error-line-region err))
+    (_ (error "Invalid mode %S" mode))))
+
+(defun flycheck-error-pos (err)
+  "Get the buffer position of ERR.
+
+ERR is a Flycheck error whose position to get.
+
+The error position is the error column, or the first
+non-whitespace character of the error line, if ERR has no error column."
+  (car (or (flycheck-error-column-region err)
+           (flycheck-error-line-region err))))
+
+(defun flycheck-error-format (err)
+  "Format ERR as human-readable string.
+
+Return a string that represents the given ERR.  This string does
+_not_ include the file name."
+  (let* ((line (flycheck-error-line err))
+         (column (flycheck-error-column err))
+         (level (symbol-name (flycheck-error-level err)))
+         (checker (symbol-name (flycheck-error-checker err)))
+         (message (flycheck-error-message err))
+         (format `(,(number-to-string line) ":"
+                   ,@(when column (list (number-to-string column) ":"))
+                   ,level ": "
+                   ,message " (" ,checker ")")))
+    (apply #'concat format)))
+
+(defun flycheck-error-< (err1 err2)
+  "Determine whether ERR1 goes before ERR2 by location.
+
+Compare by line numbers and then by column numbers."
+  (let ((line1 (flycheck-error-line err1))
+        (line2 (flycheck-error-line err2)))
+    (if (= line1 line2)
+        (let ((col1 (flycheck-error-column err1))
+              (col2 (flycheck-error-column err2)))
+          (and col2
+               ;; Sort errors for the whole line first
+               (or (not col1) (< col1 col2))))
+      (< line1 line2))))
+
+(defun flycheck-error-level-< (err1 err2)
+  "Determine whether ERR1 goes before ERR2 by error level.
+
+Like `flycheck-error-<', but compares by error level severity
+first.  Levels of the same severity are compared by name."
+  (let* ((level1 (flycheck-error-level err1))
+         (level2 (flycheck-error-level err2))
+         (severity1 (flycheck-error-level-severity level1))
+         (severity2 (flycheck-error-level-severity level2)))
+    (cond
+     ((= severity1 severity2)
+      (if (string= level1 level2)
+          (flycheck-error-< err1 err2)
+        (string< level1 level2)))
+     (t (< severity1 severity2)))))
+
+
+;;; Errors in the current buffer
+(defvar-local flycheck-current-errors nil
+  "A list of all errors and warnings in the current buffer.")
+
+(defun flycheck-report-current-errors (errors)
+  "Report ERRORS in the current buffer.
+
+Add ERRORS to `flycheck-current-errors' and process each error
+with `flycheck-process-error-functions'."
+  (setq flycheck-current-errors (sort (append errors flycheck-current-errors)
+                                      #'flycheck-error-<))
+  (mapc (lambda (err)
+          (run-hook-with-args-until-success 'flycheck-process-error-functions
+                                            err))
+        errors))
+
+(defun flycheck-clear-errors ()
+  "Remove all error information from the current buffer."
+  (setq flycheck-current-errors nil)
+  (flycheck-report-status 'not-checked))
+
+(defun flycheck-relevant-error-p (err)
+  "Determine whether ERR is relevant for the current buffer.
+
+Return t if ERR may be shown for the current buffer, or nil
+otherwise."
+  (flycheck-error-with-buffer err
+    (let ((file-name (flycheck-error-filename err))
+          (message (flycheck-error-message err)))
+      (and
+       (or (not file-name) (flycheck-same-files-p file-name (buffer-file-name)))
+       message
+       (not (string-empty-p message))
+       (flycheck-error-line err)))))
+
+(defun flycheck-relevant-errors (errors)
+  "Filter the relevant errors from ERRORS.
+
+Return a list of all errors that are relevant for their
+corresponding buffer."
+  (-filter #'flycheck-relevant-error-p errors))
+
+
+;;; Error levels
+;;;###autoload
+(defun flycheck-define-error-level (level &rest properties)
+  "Define a new error LEVEL with PROPERTIES.
+
+The following PROPERTIES constitute an error level:
+
+`:severity SEVERITY'
+     A number denoting the severity of this level.  The higher
+     the number, the more severe is this level compared to other
+     levels.  Defaults to 0.
+
+     The severity is used by `flycheck-error-level-<' to
+     determine the ordering of errors according to their levels.
+
+`:overlay-category CATEGORY'
+     A symbol denoting the overlay category to use for error
+     highlight overlays for this level.  See Info
+     node `(elisp)Overlay Properties' for more information about
+     overlay categories.
+
+     A category for an error level overlay should at least define
+     the `face' property, for error highlighting.  Other useful
+     properties for error level categories are `priority' to
+     influence the stacking of multiple error level overlays, and
+     `help-echo' to define a default error messages for errors
+     without messages.
+
+`:fringe-bitmap BITMAP'
+     A fringe bitmap symbol denoting the bitmap to use for fringe
+     indicators for this level.  See Info node `(elisp)Fringe
+     Bitmaps' for more information about fringe bitmaps,
+     including a list of built-in fringe bitmaps.
+
+`:fringe-face FACE'
+     A face symbol denoting the face to use for fringe indicators
+     for this level.
+
+`:error-list-face FACE'
+     A face symbol denoting the face to use for messages of this
+     level in the error list.  See `flycheck-list-errors'."
+  (declare (indent 1))
+  (put level 'flycheck-error-level t)
+  (put level 'flycheck-error-severity
+       (or (plist-get properties :severity) 0))
+  (put level 'flycheck-overlay-category
+       (plist-get properties :overlay-category))
+  (put level 'flycheck-fringe-bitmap
+       (plist-get properties :fringe-bitmap))
+  (put level 'flycheck-fringe-face
+       (plist-get properties :fringe-face))
+  (put level 'flycheck-error-list-face
+       (plist-get properties :error-list-face)))
+
+(defun flycheck-error-level-p (level)
+  "Determine whether LEVEL is a Flycheck error level."
+  (get level 'flycheck-error-level))
+
+(defun flycheck-error-level-severity (level)
+  "Get the numeric severity of LEVEL."
+  (or (get level 'flycheck-error-severity) 0))
+
+(defun flycheck-error-level-overlay-category (level)
+  "Get the overlay category for LEVEL."
+  (get level 'flycheck-overlay-category))
+
+(defun flycheck-error-level-fringe-bitmap (level)
+  "Get the fringe bitmap for LEVEL."
+  (get level 'flycheck-fringe-bitmap))
+
+(defun flycheck-error-level-fringe-face (level)
+  "Get the fringe face for LEVEL."
+  (get level 'flycheck-fringe-face))
+
+(defun flycheck-error-level-error-list-face (level)
+  "Get the error list face for LEVEL."
+  (get level 'flycheck-error-list-face))
+
+(defun flycheck-error-level-make-fringe-icon (level side)
+  "Create the fringe icon for LEVEL at SIDE.
+
+Return a propertized string that shows a fringe bitmap according
+to LEVEL and the given fringe SIDE.
+
+LEVEL is a Flycheck error level defined with
+`flycheck-define-error-level', and SIDE is either `left-fringe'
+or `right-fringe'.
+
+Return a propertized string representing the fringe icon,
+intended for use as `before-string' of an overlay to actually
+show the icon."
+  (unless (memq side '(left-fringe right-fringe))
+    (error "Invalid fringe side: %S" side))
+  (propertize "!" 'display
+              (list side
+                    (flycheck-error-level-fringe-bitmap level)
+                    (flycheck-error-level-fringe-face level))))
+
+
+;;; Built-in error levels
+(put 'flycheck-error-overlay 'face 'flycheck-error)
+(put 'flycheck-error-overlay 'priority 110)
+(put 'flycheck-error-overlay 'help-echo "Unknown error.")
+
+(flycheck-define-error-level 'error
+  :severity 100
+  :overlay-category 'flycheck-error-overlay
+  :fringe-bitmap 'exclamation-mark
+  :fringe-face 'flycheck-fringe-error
+  :error-list-face 'flycheck-error-list-error)
+
+(put 'flycheck-warning-overlay 'face 'flycheck-warning)
+(put 'flycheck-warning-overlay 'priority 100)
+(put 'flycheck-warning-overlay 'help-echo "Unknown warning.")
+
+(flycheck-define-error-level 'warning
+  :severity 10
+  :overlay-category 'flycheck-warning-overlay
+  :fringe-bitmap 'question-mark
+  :fringe-face 'flycheck-fringe-warning
+  :error-list-face 'flycheck-error-list-warning)
+
+(put 'flycheck-info-overlay 'face 'flycheck-info)
+(put 'flycheck-info-overlay 'priority 90)
+(put 'flycheck-info-overlay 'help-echo "Unknown info.")
+
+(flycheck-define-error-level 'info
+  :severity -1
+  :overlay-category 'flycheck-info-overlay
+  ;; Not exactly the right indicator, but looks pretty, and I prefer to use
+  ;; built-in bitmaps over diving into the hassle of messing around with custom
+  ;; fringe bitmaps
+  :fringe-bitmap 'empty-line
+  :fringe-face 'flycheck-fringe-info
+  :error-list-face 'flycheck-error-list-info)
+
+
+;;; Error filtering
+(defun flycheck-filter-errors (errors checker)
+  "Filter ERRORS from CHECKER.
+
+Apply the error filter of CHECKER to ERRORs and return the
+result.  If CHECKER has no error filter, fall back to
+`flycheck-sanitize-errors'."
+  (let ((filter (or (flycheck-checker-error-filter checker)
+                    #'flycheck-sanitize-errors)))
+    (funcall filter errors)))
+
+(defun flycheck-sanitize-errors (errors)
+  "Sanitize ERRORS.
+
+Sanitize ERRORS by trimming leading and trailing whitespace in
+all error messages, and by replacing 0 columns and empty error
+messages with nil.
+
+Returns sanitized ERRORS."
+  (dolist (err errors)
+    (flycheck-error-with-buffer err
+      (let ((message (flycheck-error-message err))
+            (column (flycheck-error-column err)))
+        (when message
+          (setq message (string-trim message))
+          (setf (flycheck-error-message err)
+                (if (string-empty-p message) nil message)))
+        (when (eq column 0)
+          (setf (flycheck-error-column err) nil)))))
+  errors)
+
+(defun flycheck-collapse-error-message-whitespace (errors)
+  "Collapse whitespace in all messages of ERRORS.
+
+Return ERRORS."
+  (dolist (err errors)
+    (-when-let (message (flycheck-error-message err))
+      (setf (flycheck-error-message err)
+            (replace-regexp-in-string (rx (one-or-more (any space "\n" "\r")))
+                                      " " message 'fixed-case 'literal))))
+  errors)
+
+(defun flycheck-dedent-error-messages (errors)
+  "Dedent all messages of ERRORS.
+
+For each error in ERRORS, determine the indentation offset from
+the leading whitespace of the first line, and dedent all further
+lines accordingly.
+
+Return ERRORS, with in-place modifications."
+  (dolist (err errors)
+    (-when-let (message (flycheck-error-message err))
+      (with-temp-buffer
+        (insert message)
+        ;; Determine the indentation offset
+        (goto-char (point-min))
+        (back-to-indentation)
+        (let* ((indent-offset (- (point) (point-min))))
+          ;; Now iterate over all lines and dedent each according to
+          ;; `indent-offset'
+          (while (not (eobp))
+            (back-to-indentation)
+            ;; If the current line starts with sufficient whitespace, delete the
+            ;; indendation offset.  Otherwise keep the line intact, as we might
+            ;; loose valuable information
+            (when (>= (- (point) (line-beginning-position)) indent-offset)
+              (delete-char (- indent-offset)))
+            (forward-line 1)))
+        (delete-trailing-whitespace (point-min) (point-max))
+        (setf (flycheck-error-message err)
+              (buffer-substring-no-properties (point-min) (point-max))))))
+  errors)
+
+(defun flycheck-fold-include-errors (errors sentinel-message)
+  "Fold errors from included files.
+
+ERRORS is a list of errors in which to fold errors.
+SENTINEL-MESSAGE is the error message which denotes an error on
+an include.
+
+The function will fold the messages of all subsequent errors in
+the included file into the error on the include.
+
+Returns ERRORS, with folded messages."
+  ;; Fold messages from faulty includes into the errors on the corresponding
+  ;; include lines.  The user still needs to visit the affected include to
+  ;; list and navigate these errors, but they can at least get an idea of
+  ;; what is wrong.
+  (let (including-filename              ; The name of the file including a
+                                        ; faulty include
+        include-error                   ; The error on the include line
+        errors-in-include)              ; All errors in the include, as strings
+    (dolist (err errors)
+      (-when-let* ((message (flycheck-error-message err))
+                   (filename (flycheck-error-filename err)))
+        (cond
+         ((and (string= message sentinel-message)
+               ;; Don't handle faulty includes recursively, we are only
+               ;; interested in “top-level” errors
+               (not including-filename))
+          ;; We are looking at an error denoting a faulty include, so let's
+          ;; remember the error and the name of the include, and initialize
+          ;; our folded error message
+          (setq include-error err
+                including-filename filename
+                errors-in-include (list "Errors in included file:")))
+         ((and include-error (not (string= filename including-filename)))
+          ;; We are looking at an error *inside* the last faulty include, so
+          ;; let's record err, as human-readable string
+          (push (flycheck-error-format err) errors-in-include))
+         (include-error
+          ;; We are looking at an unrelated error, so fold all include
+          ;; errors, if there are any
+          (when (and include-error errors-in-include)
+            (setf (flycheck-error-message include-error)
+                  (string-join (nreverse errors-in-include) "\n")))
+          (setq include-error nil
+                including-filename nil
+                errors-in-include nil)))))
+    ;; If there are still pending errors to be folded, do so now
+    (when (and include-error errors-in-include)
+      (setf (flycheck-error-message include-error)
+            (string-join (nreverse errors-in-include) "\n"))))
+  errors)
+
+
+;;; Error analysis
+(defun flycheck-count-errors (errors)
+  "Count the number of ERRORS, grouped by level..
+
+Return an alist, where each ITEM is a cons cell whose `car' is an
+error level, and whose `cdr' is the number of errors of that
+level."
+  (let (counts-by-level)
+    (dolist (err errors)
+      (let* ((level (flycheck-error-level err))
+             (item (assq level counts-by-level)))
+        (if item
+            (setcdr item (1+ (cdr item)))
+          (push (cons level 1) counts-by-level))))
+    counts-by-level))
+
+(defun flycheck-has-max-errors-p (errors level)
+  "Check if there is no error in ERRORS more severe than LEVEL."
+  (let ((severity (flycheck-error-level-severity level))
+        found)
+    (while (and errors (not found))
+      (setq found (< severity (flycheck-error-level-severity
+                               (flycheck-error-level (pop errors))))))
+    (not found)))
+
+(defun flycheck-has-max-current-errors-p (level)
+  "Check if there is no current error more severe than LEVEL."
+  (flycheck-has-max-errors-p flycheck-current-errors level))
+
+(defun flycheck-has-errors-p (errors level)
+  "Determine if there are any ERRORS with LEVEL."
+  (let (found)
+    (while (and errors (not found))
+      (setq found (eq (flycheck-error-level (pop errors)) level)))
+    found))
+
+(defun flycheck-has-current-errors-p (&optional level)
+  "Determine if the current buffer has errors with LEVEL.
+
+If LEVEL is omitted if the current buffer has any errors at all."
+  (if level
+      (flycheck-has-errors-p flycheck-current-errors level)
+    (and flycheck-current-errors t)))
+
+
+;;; Error overlays in the current buffer
+(defun flycheck-add-overlay (err)
+  "Add overlay for ERR.
+
+Return the created overlay."
+  ;; We must have a proper error region for the sake of fringe indication,
+  ;; error display and error navigation, even if the highlighting is disabled.
+  ;; We erase the highlighting later on in this case
+  (pcase-let* ((`(,beg . ,end) (flycheck-error-region-for-mode
+                                err (or flycheck-highlighting-mode 'lines)))
+               (overlay (make-overlay beg end))
+               (level (flycheck-error-level err))
+               (category (flycheck-error-level-overlay-category level)))
+    (unless (flycheck-error-level-p level)
+      (error "Undefined error level: %S" level))
+    (overlay-put overlay 'flycheck-overlay t)
+    (overlay-put overlay 'flycheck-error err)
+    ;; TODO: Consider hooks to re-check if overlay contents change
+    (overlay-put overlay 'category category)
+    (unless flycheck-highlighting-mode
+      ;; Erase the highlighting from the overlay if requested by the user
+      (overlay-put overlay 'face nil))
+    (when flycheck-indication-mode
+      (overlay-put overlay 'before-string
+                   (flycheck-error-level-make-fringe-icon
+                    level flycheck-indication-mode)))
+    (overlay-put overlay 'help-echo (flycheck-error-message err))
+    overlay))
+
+(defun flycheck-filter-overlays (overlays)
+  "Get all Flycheck overlays from OVERLAYS."
+  (-filter (lambda (o) (overlay-get o 'flycheck-overlay)) overlays))
+
+(defun flycheck-overlays-at (pos)
+  "Get all Flycheck overlays at POS."
+  (flycheck-filter-overlays (overlays-at pos)))
+
+(defun flycheck-overlays-in (beg end)
+  "Get all Flycheck overlays between BEG and END."
+  (flycheck-filter-overlays (overlays-in beg end)))
+
+(defun flycheck-overlay-errors-at (pos)
+  "Return a list of all flycheck errors overlayed at POS."
+  (mapcar (lambda (o) (overlay-get o 'flycheck-error))
+          (flycheck-overlays-at pos)))
+
+(defun flycheck-overlay-errors-in (beg end)
+  "Return a list of all flycheck errors overlayed between BEG and END."
+  (mapcar (lambda (o) (overlay-get o 'flycheck-error))
+          (flycheck-overlays-in beg end)))
+
+(defvar-local flycheck-overlays-to-delete nil
+  "Overlays mark for deletion after all syntax checks completed.")
+(put 'flycheck-overlays-to-delete 'permanent-local t)
+
+(defun flycheck-delete-all-overlays ()
+  "Remove all flycheck overlays in the current buffer."
+  (flycheck-delete-marked-overlays)
+  (save-restriction
+    (widen)
+    (mapc #'delete-overlay (flycheck-overlays-in (point-min) (point-max)))))
+
+(defun flycheck-mark-all-overlays-for-deletion ()
+  "Mark all current overlays for deletion."
+  (setq flycheck-overlays-to-delete
+        (append (flycheck-overlays-in (point-min) (point-max))
+                flycheck-overlays-to-delete)))
+
+(defun flycheck-delete-marked-overlays ()
+  "Delete all overlays marked for deletion."
+  (mapc #'delete-overlay flycheck-overlays-to-delete)
+  (setq flycheck-overlays-to-delete nil))
+
+
+;;; Error navigation in the current buffer
+(defun flycheck-error-level-interesting-at-pos-p (pos)
+  "Check if error severity at POS passes `flycheck-error-level-interesting-p'."
+  (flycheck-error-level-interesting-p (get-char-property pos 'flycheck-error)))
+
+(defun flycheck-error-level-interesting-p (err)
+  "Check if ERR severity is >= `flycheck-navigation-minimum-level'."
+  (when (flycheck-error-p err)
+    (-if-let (min-level flycheck-navigation-minimum-level)
+        (<= (flycheck-error-level-severity min-level)
+            (flycheck-error-level-severity (flycheck-error-level err)))
+      t)))
+
+(defun flycheck-next-error-pos (n &optional reset)
+  "Get the position of the N-th next error.
+
+With negative n, get the position of the (-N)-th previous error
+instead.  With non-nil RESET, search from `point-min', otherwise
+search from the current point.
+
+Return the position of the next or previous error, or nil if
+there is none."
+  (let ((n (or n 1))
+        (pos (if reset (point-min) (point))))
+    (if (>= n 0)
+        ;; Search forwards
+        (while (and pos (> n 0))
+          (setq n (1- n))
+          (when (get-char-property pos 'flycheck-error)
+            ;; Move beyond from the current error if any
+            (setq pos (next-single-char-property-change pos 'flycheck-error)))
+          (while (not (or (= pos (point-max))
+                          (flycheck-error-level-interesting-at-pos-p pos)))
+            ;; Scan for the next error
+            (setq pos (next-single-char-property-change pos 'flycheck-error)))
+          (when (and (= pos (point-max))
+                     (not (flycheck-error-level-interesting-at-pos-p pos)))
+            ;; If we reached the end of the buffer, but no error, we didn't find
+            ;; any
+            (setq pos nil)))
+      ;; Search backwards
+      (while (and pos (< n 0))
+        (setq n (1+ n))
+        ;; Loop until we find an error.  We need to check the position *before*
+        ;; the current one, because `previous-single-char-property-change'
+        ;; always moves to the position *of* the change.
+        (while (not (or (= pos (point-min))
+                        (flycheck-error-level-interesting-at-pos-p (1- pos))))
+          (setq pos (previous-single-char-property-change pos 'flycheck-error)))
+        (when (and (= pos (point-min))
+                   (not (flycheck-error-level-interesting-at-pos-p pos)))
+          ;; We didn't find any error.
+          (setq pos nil))
+        (when pos
+          ;; We found an error, so move to its beginning
+          (setq pos (previous-single-char-property-change pos
+                                                          'flycheck-error)))))
+    pos))
+
+(defun flycheck-next-error-function (n reset)
+  "Visit the N-th error from the current point.
+
+Intended for use with `next-error-function'."
+  (let ((pos (flycheck-next-error-pos n reset)))
+    (if pos
+        (goto-char pos)
+      (user-error "No more Flycheck errors"))))
+
+(defun flycheck-next-error (&optional n reset)
+  "Visit the N-th error from the current point.
+
+If RESET is given and non-nil, re-start from the beginning of the buffer.
+
+N specifies how many errors to move forwards.  If negative, move backwards."
+  (interactive "P")
+  (when (consp n)
+    ;; Universal prefix argument means reset
+    (setq reset t n nil))
+  (flycheck-next-error-function n reset))
+
+(defun flycheck-previous-error (&optional n)
+  "Visit the N-th previous error.
+
+If given, N specifies the number of errors to move backwards.  If
+N is negative, move forwards instead."
+  (interactive "P")
+  (flycheck-next-error (- (or n 1))))
+
+(defun flycheck-first-error (&optional n)
+  "Visit the N-th error from beginning of the buffer.
+
+If given, N specifies the number of errors to move forward from
+the beginning of the buffer."
+  (interactive "P")
+  (flycheck-next-error n 'reset))
+
+
+;;; Listing errors in buffers
+(defconst flycheck-error-list-buffer "*Flycheck errors*"
+  "The name of the buffer to show error lists.")
+
+(defvar flycheck-error-list-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "n") #'flycheck-error-list-next-error)
+    (define-key map (kbd "p") #'flycheck-error-list-previous-error)
+    (define-key map (kbd "RET") #'flycheck-error-list-goto-error)
+    map)
+  "The keymap of `flycheck-error-list-mode'.")
+
+(defconst flycheck-error-list-format
+  [("Line" 4 flycheck-error-list-entry-< :right-align t)
+   ("Col" 3 nil :right-align t)
+   ("Level" 8 flycheck-error-list-entry-level-<)
+   ("Message" 0 t)
+   (" (Checker)" 8 t)]
+  "Table format for the error list.")
+
+(define-derived-mode flycheck-error-list-mode tabulated-list-mode "Flycheck errors"
+  "Major mode for listing Flycheck errors.
+
+\\{flycheck-error-list-mode-map}"
+  (setq tabulated-list-format flycheck-error-list-format
+        ;; Sort by location initially
+        tabulated-list-sort-key (cons "Line" nil)
+        tabulated-list-padding 1
+        tabulated-list-entries #'flycheck-error-list-entries
+        ;; `revert-buffer' updates the mode line for us, so all we need to do is
+        ;; set the corresponding mode line construct.
+        mode-line-buffer-identification flycheck-error-list-mode-line)
+  (tabulated-list-init-header))
+
+(defvar-local flycheck-error-list-source-buffer nil
+  "The current source buffer of the error list.")
+;; Needs to permanently local to preserve the source buffer across buffer
+;; reversions
+(put 'flycheck-error-list-source-buffer 'permanent-local t)
+
+(defun flycheck-error-list-set-source (buffer)
+  "Set BUFFER as the source buffer of the error list."
+  (when (get-buffer flycheck-error-list-buffer)
+    (with-current-buffer flycheck-error-list-buffer
+      ;; Only update the source when required
+      (unless (eq buffer flycheck-error-list-source-buffer)
+        (setq flycheck-error-list-source-buffer buffer)
+        (flycheck-error-list-refresh)))))
+
+(defun flycheck-error-list-update-source ()
+  "Update the source buffer of the error list."
+  (when (not (eq (current-buffer) (get-buffer flycheck-error-list-buffer)))
+    ;; We must not update the source buffer, if the current buffer is the error
+    ;; list itself.
+    (flycheck-error-list-set-source (current-buffer))))
+
+(define-button-type 'flycheck-error-list
+  'action #'flycheck-error-list-button-goto-error
+  'help-echo (purecopy "mouse-2, RET: goto error"))
+
+(defun flycheck-error-list-button-goto-error (button)
+  "Go to the error at BUTTON."
+  (flycheck-error-list-goto-error (button-start button)))
+
+(defsubst flycheck-error-list-make-cell (text &optional face)
+  "Make an error list cell with TEXT and FACE."
+  (let ((face (or face 'default)))
+    (list text 'type 'flycheck-error-list 'face face)))
+
+(defsubst flycheck-error-list-make-number-cell (number face)
+  "Make a table cell for a NUMBER with FACE.
+
+Convert NUMBER to string, fontify it with FACE and return the
+string with attached text properties."
+  (flycheck-error-list-make-cell
+   (if (numberp number) (number-to-string number) "")
+   face))
+
+(defun flycheck-error-list-make-entry (error)
+  "Make a table cell for the given ERROR.
+
+Return a list with the contents of the table cell."
+  (let* ((level (flycheck-error-level error))
+         (level-face (flycheck-error-level-error-list-face level))
+         (line (flycheck-error-line error))
+         (column (flycheck-error-column error))
+         (message (or (flycheck-error-message error)
+                      (format "Unknown %s" (symbol-name level))))
+         (checker (flycheck-error-checker error)))
+    (list error
+          (vector (flycheck-error-list-make-number-cell
+                   line 'flycheck-error-list-line-number)
+                  (flycheck-error-list-make-number-cell
+                   column 'flycheck-error-list-column-number)
+                  (flycheck-error-list-make-cell
+                   (symbol-name (flycheck-error-level error)) level-face)
+                  (flycheck-error-list-make-cell message)
+                  (flycheck-error-list-make-cell
+                   (format "(%s)" checker)
+                   'flycheck-error-list-checker-name)))))
+
+(defun flycheck-error-list-entries ()
+  "Create the entries for the error list."
+  (when (buffer-live-p flycheck-error-list-source-buffer)
+    (let ((errors (buffer-local-value 'flycheck-current-errors
+                                      flycheck-error-list-source-buffer)))
+      (mapcar #'flycheck-error-list-make-entry errors))))
+
+(defun flycheck-error-list-entry-< (entry1 entry2)
+  "Determine whether ENTRY1 is before ENTRY2 by location.
+
+See `flycheck-error-<'."
+  (flycheck-error-< (car entry1) (car entry2)))
+
+(defun flycheck-error-list-entry-level-< (entry1 entry2)
+  "Determine whether ENTRY1 is before ENTRY2 by level.
+
+See `flycheck-error-level-<'."
+  (not (flycheck-error-level-< (car entry1) (car entry2))))
+
+(defvar flycheck-error-list-mode-line-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map [mode-line mouse-1]
+      #'flycheck-error-list-mouse-switch-to-source)
+    map)
+  "Keymap for error list mode line.")
+
+(defun flycheck-error-list-propertized-source-name ()
+  "Get the name of the current source buffer for the mode line.
+
+Propertize the name of the current source buffer for use in the
+mode line indication of `flycheck-error-list-mode'."
+  (let ((name (replace-regexp-in-string
+               (rx "%") "%%"
+               (buffer-name flycheck-error-list-source-buffer)
+               'fixed-case 'literal)))
+    (propertize name 'face 'mode-line-buffer-id
+                'mouse-face 'mode-line-highlight
+                'help-echo "mouse-1: switch to source"
+                'local-map flycheck-error-list-mode-line-map)))
+
+(defun flycheck-error-list-mouse-switch-to-source (event)
+  "Switch to the error list source buffer of the EVENT window."
+  (interactive "e")
+  (save-selected-window
+    (when (eventp event)
+      (select-window (posn-window (event-start event))))
+    (when (buffer-live-p flycheck-error-list-source-buffer)
+      (switch-to-buffer flycheck-error-list-source-buffer))))
+
+(defun flycheck-get-error-list-window-list (&optional all-frames)
+  "Get all windows displaying the error list.
+
+ALL-FRAMES specifies the frames to consider, as in
+`get-buffer-window-list'."
+  (-when-let (buf (get-buffer flycheck-error-list-buffer))
+    (get-buffer-window-list buf nil all-frames)))
+
+(defun flycheck-get-error-list-window (&optional all-frames)
+  "Get a window displaying the error list, or nil if none.
+
+ALL-FRAMES specifies the frames to consider, as in
+`get-buffer-window'."
+  (-when-let (buf (get-buffer flycheck-error-list-buffer))
+    (get-buffer-window buf all-frames)))
+
+(defun flycheck-error-list-recenter-at (pos)
+  "Recenter the error list at POS."
+  (dolist (window (flycheck-get-error-list-window-list t))
+    (with-selected-window window
+      (goto-char pos)
+      (recenter))))
+
+(defun flycheck-error-list-refresh ()
+  "Refresh the current error list.
+
+Add all errors currently reported for the current
+`flycheck-error-list-source-buffer', and recenter the error
+list."
+  (interactive)
+  ;; We only refresh the error list, when it is visible in a window, and we
+  ;; select this window while reverting, because Tabulated List mode attempts to
+  ;; recenter the error at the old location, so it must have the proper window
+  ;; selected.
+  (-when-let (window (flycheck-get-error-list-window t))
+    (with-selected-window window
+      (revert-buffer))
+    (run-hooks 'flycheck-error-list-after-refresh-hook)
+    (let ((preserve-pos (eq (current-buffer)
+                            (get-buffer flycheck-error-list-buffer))))
+      ;; If the error list is the current buffer, don't recenter when
+      ;; highlighting
+      (flycheck-error-list-highlight-errors preserve-pos))))
+
+(defun flycheck-error-list-goto-error (&optional pos)
+  "Go to the location of the error at POS in the error list.
+
+POS defaults to `point'."
+  (interactive)
+  (-when-let* ((error (tabulated-list-get-id pos))
+               (buffer (flycheck-error-buffer error)))
+    (when (buffer-live-p buffer)
+      (if (eq (window-buffer) (get-buffer flycheck-error-list-buffer))
+          ;; When called from within the error list, keep the error list,
+          ;; otherwise replace the current buffer.
+          (pop-to-buffer buffer 'other-window)
+        (switch-to-buffer buffer))
+      (let ((pos (flycheck-error-pos error)))
+        (unless (eq (goto-char pos) (point))
+          ;; If widening gets in the way of moving to the right place, remove it
+          ;; and try again
+          (widen)
+          (goto-char pos)))
+      ;; Re-highlight the errors
+      (flycheck-error-list-highlight-errors 'preserve-pos))))
+
+(defun flycheck-error-list-next-error-pos (pos &optional n)
+  "Get the N'th next error in the error list from POS.
+
+N defaults to 1.  If N is negative, search for the previous error
+instead.
+
+Get the beginning position of the N'th next error from POS, or
+nil, if there is no next error."
+  (let ((n (or n 1)))
+    (if (>= n 0)
+        ;; Search forward
+        (while (and pos (/= n 0))
+          (setq n (1- n))
+          (setq pos (next-single-property-change pos 'tabulated-list-id)))
+      ;; Search backwards
+      (while (/= n 0)
+        (setq n (1+ n))
+        ;; We explicitly give the limit here to explicitly have the minimum
+        ;; point returned, to be able to move to the first error (which starts
+        ;; at `point-min')
+        (setq pos (previous-single-property-change pos 'tabulated-list-id
+                                                   nil (point-min)))))
+    pos))
+
+(defun flycheck-error-list-previous-error (n)
+  "Go to the N'th previous error in the error list."
+  (interactive "P")
+  (flycheck-error-list-next-error (- (or n 1))))
+
+(defun flycheck-error-list-next-error (n)
+  "Go to the N'th next error in the error list."
+  (interactive "P")
+  (let ((pos (flycheck-error-list-next-error-pos (point) n)))
+    (when (and pos (/= pos (point)))
+      (goto-char pos)
+      (save-selected-window
+        ;; Keep the error list selected, so that the user can navigate errors by
+        ;; repeatedly pressing n/p, without having to re-select the error list
+        ;; window.
+        (flycheck-error-list-goto-error)))))
+
+(defvar-local flycheck-error-list-highlight-overlays nil
+  "Error highlight overlays in the error list buffer.")
+(put 'flycheck-error-list-highlight-overlays 'permanent-local t)
+
+(defun flycheck-error-list-highlight-errors (&optional preserve-pos)
+  "Highlight errors in the error list.
+
+Highlight all errors in the error lists that are at point in the
+source buffer, and on the same line as point.  Then recenter the
+error list to the highlighted error, unless PRESERVE-POS is
+non-nil."
+  (when (get-buffer flycheck-error-list-buffer)
+    (let ((current-errors (flycheck-overlay-errors-in (line-beginning-position)
+                                                      (line-end-position))))
+      (with-current-buffer flycheck-error-list-buffer
+        (let ((old-overlays flycheck-error-list-highlight-overlays)
+              (min-point (point-max))
+              (max-point (point-min)))
+          ;; Display the new overlays first, to avoid re-display flickering
+          (setq flycheck-error-list-highlight-overlays nil)
+          (when current-errors
+            (let ((next-error-pos (point-min)))
+              (while next-error-pos
+                (let* ((beg next-error-pos)
+                       (end (flycheck-error-list-next-error-pos beg))
+                       (err (tabulated-list-get-id beg)))
+                  (when (member err current-errors)
+                    (setq min-point (min min-point beg)
+                          max-point (max max-point beg))
+                    (let ((ov (make-overlay beg
+                                            ;; Extend overlay to the beginning of
+                                            ;; the next line, to highlight the
+                                            ;; whole line
+                                            (or end (point-max)))))
+                      (push ov flycheck-error-list-highlight-overlays)
+                      (overlay-put ov 'flycheck-error-highlight-overlay t)
+                      (overlay-put ov 'face 'flycheck-error-list-highlight)))
+                  (setq next-error-pos end)))))
+          ;; Delete the old overlays
+          (mapc #'delete-overlay old-overlays)
+          (when (and (not preserve-pos) current-errors)
+            ;; Move point to the middle error
+            (goto-char (+ min-point (/ (- max-point min-point) 2)))
+            (beginning-of-line)
+            ;; And recenter the error list at this position
+            (flycheck-error-list-recenter-at (point))))))))
+
+(defun flycheck-list-errors ()
+  "Show the error list for the current buffer."
+  (interactive)
+  (unless flycheck-mode
+    (user-error "Flycheck mode not enabled"))
+  ;; Create and initialize the error list
+  (unless (get-buffer flycheck-error-list-buffer)
+    (with-current-buffer (get-buffer-create flycheck-error-list-buffer)
+      (flycheck-error-list-mode)))
+  (flycheck-error-list-set-source (current-buffer))
+  ;; Show the error list in a window, and re-select the old window
+  (display-buffer flycheck-error-list-buffer)
+  ;; Finally, refresh the error list to show the most recent errors
+  (flycheck-error-list-refresh))
+
+(defalias 'list-flycheck-errors 'flycheck-list-errors)
+
+
+;;; Displaying errors in the current buffer
+(defun flycheck-display-errors (errors)
+  "Display ERRORS using `flycheck-display-errors-function'."
+  (when flycheck-display-errors-function
+    (funcall flycheck-display-errors-function errors)))
+
+(defvar-local flycheck-display-error-at-point-timer nil
+  "Timer to automatically show the error at point in minibuffer.")
+
+(defun flycheck-cancel-error-display-error-at-point-timer ()
+  "Cancel the error display timer for the current buffer."
+  (when flycheck-display-error-at-point-timer
+    (cancel-timer flycheck-display-error-at-point-timer)
+    (setq flycheck-display-error-at-point-timer nil)))
+
+(defun flycheck-display-error-at-point ()
+  "Display the all error messages at point in minibuffer."
+  (flycheck-cancel-error-display-error-at-point-timer)
+  (when flycheck-mode
+    (-when-let (errors (flycheck-overlay-errors-at (point)))
+      (flycheck-display-errors errors))))
+
+(defun flycheck-display-error-at-point-soon ()
+  "Display the first error message at point in minibuffer delayed."
+  (flycheck-cancel-error-display-error-at-point-timer)
+  (when (flycheck-overlays-at (point))
+    (setq flycheck-display-error-at-point-timer
+          (run-at-time flycheck-display-errors-delay nil 'flycheck-display-error-at-point))))
+
+
+;;; Functions to display errors
+(defconst flycheck-error-message-buffer "*Flycheck error messages*"
+  "The name of the buffer to show long error messages in.")
+
+(defun flycheck-error-message-buffer ()
+  "Get the buffer object to show long error messages in.
+
+Get the buffer named by variable `flycheck-error-message-buffer',
+or nil if the buffer does not exist."
+  (get-buffer flycheck-error-message-buffer))
+
+(defun flycheck-may-use-echo-area-p ()
+  "Determine whether the echo area may be used.
+
+The echo area may be used if the cursor is not in the echo area,
+and if the echo area is not occupied by minibuffer input."
+  (not (or cursor-in-echo-area (active-minibuffer-window))))
+
+(defun flycheck-display-error-messages (errors)
+  "Display the messages of ERRORS.
+
+Concatenate all non-nil messages of ERRORS separated by empty
+lines, and display them with `display-message-or-buffer', which
+shows the messages either in the echo area or in a separate
+buffer, depending on the number of lines.  See Info
+node `(elisp)Displaying Messages' for more information.
+
+In the latter case, show messages in
+`flycheck-error-message-buffer'."
+  (let ((messages (delq nil (mapcar #'flycheck-error-message errors))))
+    (when (and errors (flycheck-may-use-echo-area-p))
+      (display-message-or-buffer (string-join messages "\n\n")
+                                 flycheck-error-message-buffer))))
+
+(defun flycheck-display-error-messages-unless-error-list (errors)
+  "Show messages of ERRORS unless the error list is visible.
+
+Like `flycheck-display-error-messages', but only if the error
+list (see `flycheck-list-errors') is not visible in any window in
+the current frame."
+  (unless (flycheck-get-error-list-window 'current-frame)
+    (flycheck-display-error-messages errors)))
+
+(defun flycheck-hide-error-buffer ()
+  "Hide the Flycheck error buffer if necessary.
+
+Hide the error buffer if there is no error under point."
+  (-when-let* ((buffer (flycheck-error-message-buffer))
+               (window (get-buffer-window buffer)))
+    (unless (flycheck-overlays-at (point))
+      (quit-window nil window))))
+
+
+;;; Working with error messages
+(defun flycheck-copy-messages-as-kill (pos)
+  "Copy each error message under POS into kill ring.
+
+Each error message under point is copied into the kill ring."
+  (interactive "d")
+  (let ((messages (delq nil (mapcar #'flycheck-error-message
+                                    (flycheck-overlay-errors-at pos)))))
+    (when messages
+      (mapc #'kill-new (reverse messages))
+      (message (string-join messages "\n")))))
+
+(defun flycheck-google-messages (pos &optional quote-flag)
+  "Google each error message at POS.
+
+Issue a separate Google query for each error message at POS.
+Signal an error if there are more messages at POS than
+`flycheck-google-max-messages'.
+
+Enclose the Google query in quotation marks, if
+`google-wrap-in-quotes' is t.  With QUOTE-FLAG, invert the effect
+of `google-wrap-in-quotes'.
+
+This function requires the Google This library from URL
+`https://github.com/Bruce-Connor/emacs-google-this'."
+  (interactive "d\nP")
+  (if (fboundp 'google-this-string)
+      (let ((messages (delq nil (mapcar #'flycheck-error-message
+                                        (flycheck-overlay-errors-at pos)))))
+        (when (and flycheck-google-max-messages
+                   (> (length messages) flycheck-google-max-messages))
+          (user-error "More than %s messages at point"
+                      flycheck-google-max-messages))
+        (dolist (msg messages)
+          (google-this-string quote-flag msg 'no-confirm)))
+    (user-error "Please install Google This from \
+https://github.com/Bruce-Connor/emacs-google-this")))
+
+
 ;;; Syntax checkers using external commands
 (defun flycheck-command-argument-p (arg)
   "Check whether ARG is a valid command argument."
@@ -3183,1174 +4351,6 @@ objects)."
   (let ((patterns (flycheck-checker-error-patterns checker)))
     (flycheck-parse-errors-with-patterns
      (flycheck-tokenize-output-with-patterns output patterns) patterns)))
-
-
-;;; Checker error API
-(cl-defstruct (flycheck-error
-               (:constructor flycheck-error-new)
-               (:constructor flycheck-error-new-at (line column
-                                                         &optional level message
-                                                         &key checker
-                                                         (filename (buffer-file-name))
-                                                         (buffer (current-buffer)))))
-  "Structure representing an error reported by a syntax checker.
-Slots:
-
-`buffer'
-     The buffer the reported was reported for, as buffer object.
-
-`checker'
-     The syntax checker which reported this error, as symbol.
-
-`filename'
-     The file name the error refers to, as string.
-
-`line'
-     The line number the error refers to, as number.
-
-`column'
-     The column number the error refers to, as number.
-
-`level'
-     The error level, as either `warning' or `error'."
-  buffer checker filename line column message level)
-
-(defmacro flycheck-error-with-buffer (err &rest forms)
-  "Switch to the buffer of ERR and evaluate FORMS.
-
-If the buffer of ERR is not live, FORMS are not evaluated."
-  (declare (indent 1) (debug t))
-  `(when (buffer-live-p (flycheck-error-buffer ,err))
-     (with-current-buffer (flycheck-error-buffer ,err)
-       ,@forms)))
-
-(defun flycheck-error-line-region (err)
-  "Get the line region of ERR.
-
-ERR is a Flycheck error whose region to get.
-
-Return a cons cell `(BEG . END)' where BEG is the first
-non-whitespace character on the line ERR refers to, and END the
-end of the line."
-  (flycheck-error-with-buffer err
-    (save-restriction
-      (save-excursion
-        (widen)
-        (goto-char (point-min))
-        (forward-line (- (flycheck-error-line err) 1))
-        ;; We are at the beginning of the line now, so move to the beginning of
-        ;; its indentation, similar to `back-to-indentation'
-        (let ((end (line-end-position)))
-          (skip-syntax-forward " " end)
-          (backward-prefix-chars)
-          ;; If the current line is empty, include the previous line break
-          ;; character(s) to have any region at all.  When called with 0,
-          ;; `line-end-position' gives us the end of the previous line
-          (cons (if (eolp) (line-end-position 0) (point)) end))))))
-
-(defun flycheck-error-column-region (err)
-  "Get the error column region of ERR.
-
-ERR is a Flycheck error whose region to get.
-
-Return a cons cell `(BEG . END)' where BEG is the character
-before the error column, and END the actual error column, or nil
-if ERR has no column."
-  (flycheck-error-with-buffer err
-    (save-restriction
-      (save-excursion
-        (-when-let (column (flycheck-error-column err))
-          (widen)
-          (goto-char (point-min))
-          (forward-line (- (flycheck-error-line err) 1))
-          (let ((line (flycheck-error-line err)))
-            (cond
-             ((eobp)                    ; Line beyond EOF
-              ;; If we are at the end of the file (i.e. the line was beyond the
-              ;; end of the file), use the very last column in the file.
-              (cons (- (point-max) 1) (point-max)))
-             ((eolp)                    ; Empty line
-              ;; If the target line is empty, there's no column to highlight on
-              ;; this line, so return the last column of the previous line.
-              (cons (line-end-position 0) (point)))
-             (t
-              ;; The end is either the column offset of the line, or the end of
-              ;; the line, if the column offset points beyond the end of the
-              ;; line.
-              (let ((end (min (+ (point) column)
-                              (+ (line-end-position) 1))))
-                (cons (- end 1) end))))))))))
-
-(defun flycheck-error-thing-region (thing err)
-  "Get the region of THING at the column of ERR.
-
-ERR is a Flycheck error whose region to get.  THING is a
-understood by `thing-at-point'.
-
-Return a cons cell `(BEG . END)' where BEG is the beginning of
-the THING at the error column, and END the end of the symbol.  If
-ERR has no error column, or if there is no THING at this column,
-return nil."
-  (-when-let (column (car (flycheck-error-column-region err)))
-    (flycheck-error-with-buffer err
-      (save-excursion
-        (save-restriction
-          (widen)
-          (goto-char column)
-          (bounds-of-thing-at-point thing))))))
-
-(defun flycheck-error-region-for-mode (err mode)
-  "Get the region of ERR for the highlighting MODE.
-
-ERR is a Flycheck error.  MODE may be one of the following symbols:
-
-`columns'
-     Get the column region of ERR, or the line region if ERR
-     has no column.
-
-`symbols'
-     Get the symbol region of ERR, or the result of `columns', if
-     there is no sexp at the error column.
-
-`sexps'
-     Get the sexp region of ERR, or the result of `columns', if
-     there is no sexp at the error column.
-
-`lines'
-     Return the line region.
-
-Otherwise signal an error."
-  (pcase mode
-    (`columns (or (flycheck-error-column-region err)
-                  (flycheck-error-line-region err)))
-    (`symbols (or (flycheck-error-thing-region 'symbol err)
-                  (flycheck-error-region-for-mode err 'columns)))
-    (`sexps (or (flycheck-error-thing-region 'sexp err)
-                (flycheck-error-region-for-mode err 'columns)))
-    (`lines (flycheck-error-line-region err))
-    (_ (error "Invalid mode %S" mode))))
-
-(defun flycheck-error-pos (err)
-  "Get the buffer position of ERR.
-
-ERR is a Flycheck error whose position to get.
-
-The error position is the error column, or the first
-non-whitespace character of the error line, if ERR has no error column."
-  (car (or (flycheck-error-column-region err)
-           (flycheck-error-line-region err))))
-
-(defun flycheck-error-format (err)
-  "Format ERR as human-readable string.
-
-Return a string that represents the given ERR.  This string does
-_not_ include the file name."
-  (let* ((line (flycheck-error-line err))
-         (column (flycheck-error-column err))
-         (level (symbol-name (flycheck-error-level err)))
-         (checker (symbol-name (flycheck-error-checker err)))
-         (message (flycheck-error-message err))
-         (format `(,(number-to-string line) ":"
-                   ,@(when column (list (number-to-string column) ":"))
-                   ,level ": "
-                   ,message " (" ,checker ")")))
-    (apply #'concat format)))
-
-(defun flycheck-error-< (err1 err2)
-  "Determine whether ERR1 goes before ERR2 by location.
-
-Compare by line numbers and then by column numbers."
-  (let ((line1 (flycheck-error-line err1))
-        (line2 (flycheck-error-line err2)))
-    (if (= line1 line2)
-        (let ((col1 (flycheck-error-column err1))
-              (col2 (flycheck-error-column err2)))
-          (and col2
-               ;; Sort errors for the whole line first
-               (or (not col1) (< col1 col2))))
-      (< line1 line2))))
-
-(defun flycheck-error-level-< (err1 err2)
-  "Determine whether ERR1 goes before ERR2 by error level.
-
-Like `flycheck-error-<', but compares by error level severity
-first.  Levels of the same severity are compared by name."
-  (let* ((level1 (flycheck-error-level err1))
-         (level2 (flycheck-error-level err2))
-         (severity1 (flycheck-error-level-severity level1))
-         (severity2 (flycheck-error-level-severity level2)))
-    (cond
-     ((= severity1 severity2)
-      (if (string= level1 level2)
-          (flycheck-error-< err1 err2)
-        (string< level1 level2)))
-     (t (< severity1 severity2)))))
-
-
-;;; Error levels
-
-;;;###autoload
-(defun flycheck-define-error-level (level &rest properties)
-  "Define a new error LEVEL with PROPERTIES.
-
-The following PROPERTIES constitute an error level:
-
-`:severity SEVERITY'
-     A number denoting the severity of this level.  The higher
-     the number, the more severe is this level compared to other
-     levels.  Defaults to 0.
-
-     The severity is used by `flycheck-error-level-<' to
-     determine the ordering of errors according to their levels.
-
-`:overlay-category CATEGORY'
-     A symbol denoting the overlay category to use for error
-     highlight overlays for this level.  See Info
-     node `(elisp)Overlay Properties' for more information about
-     overlay categories.
-
-     A category for an error level overlay should at least define
-     the `face' property, for error highlighting.  Other useful
-     properties for error level categories are `priority' to
-     influence the stacking of multiple error level overlays, and
-     `help-echo' to define a default error messages for errors
-     without messages.
-
-`:fringe-bitmap BITMAP'
-     A fringe bitmap symbol denoting the bitmap to use for fringe
-     indicators for this level.  See Info node `(elisp)Fringe
-     Bitmaps' for more information about fringe bitmaps,
-     including a list of built-in fringe bitmaps.
-
-`:fringe-face FACE'
-     A face symbol denoting the face to use for fringe indicators
-     for this level.
-
-`:error-list-face FACE'
-     A face symbol denoting the face to use for messages of this
-     level in the error list.  See `flycheck-list-errors'."
-  (declare (indent 1))
-  (put level 'flycheck-error-level t)
-  (put level 'flycheck-error-severity
-       (or (plist-get properties :severity) 0))
-  (put level 'flycheck-overlay-category
-       (plist-get properties :overlay-category))
-  (put level 'flycheck-fringe-bitmap
-       (plist-get properties :fringe-bitmap))
-  (put level 'flycheck-fringe-face
-       (plist-get properties :fringe-face))
-  (put level 'flycheck-error-list-face
-       (plist-get properties :error-list-face)))
-
-(defun flycheck-error-level-p (level)
-  "Determine whether LEVEL is a Flycheck error level."
-  (get level 'flycheck-error-level))
-
-(defun flycheck-error-level-severity (level)
-  "Get the numeric severity of LEVEL."
-  (or (get level 'flycheck-error-severity) 0))
-
-(defun flycheck-error-level-overlay-category (level)
-  "Get the overlay category for LEVEL."
-  (get level 'flycheck-overlay-category))
-
-(defun flycheck-error-level-fringe-bitmap (level)
-  "Get the fringe bitmap for LEVEL."
-  (get level 'flycheck-fringe-bitmap))
-
-(defun flycheck-error-level-fringe-face (level)
-  "Get the fringe face for LEVEL."
-  (get level 'flycheck-fringe-face))
-
-(defun flycheck-error-level-error-list-face (level)
-  "Get the error list face for LEVEL."
-  (get level 'flycheck-error-list-face))
-
-(defun flycheck-error-level-make-fringe-icon (level side)
-  "Create the fringe icon for LEVEL at SIDE.
-
-Return a propertized string that shows a fringe bitmap according
-to LEVEL and the given fringe SIDE.
-
-LEVEL is a Flycheck error level defined with
-`flycheck-define-error-level', and SIDE is either `left-fringe'
-or `right-fringe'.
-
-Return a propertized string representing the fringe icon,
-intended for use as `before-string' of an overlay to actually
-show the icon."
-  (unless (memq side '(left-fringe right-fringe))
-    (error "Invalid fringe side: %S" side))
-  (propertize "!" 'display
-              (list side
-                    (flycheck-error-level-fringe-bitmap level)
-                    (flycheck-error-level-fringe-face level))))
-
-
-;;; Built-in error levels
-(put 'flycheck-error-overlay 'face 'flycheck-error)
-(put 'flycheck-error-overlay 'priority 110)
-(put 'flycheck-error-overlay 'help-echo "Unknown error.")
-
-(flycheck-define-error-level 'error
-  :severity 100
-  :overlay-category 'flycheck-error-overlay
-  :fringe-bitmap 'exclamation-mark
-  :fringe-face 'flycheck-fringe-error
-  :error-list-face 'flycheck-error-list-error)
-
-(put 'flycheck-warning-overlay 'face 'flycheck-warning)
-(put 'flycheck-warning-overlay 'priority 100)
-(put 'flycheck-warning-overlay 'help-echo "Unknown warning.")
-
-(flycheck-define-error-level 'warning
-  :severity 10
-  :overlay-category 'flycheck-warning-overlay
-  :fringe-bitmap 'question-mark
-  :fringe-face 'flycheck-fringe-warning
-  :error-list-face 'flycheck-error-list-warning)
-
-(put 'flycheck-info-overlay 'face 'flycheck-info)
-(put 'flycheck-info-overlay 'priority 90)
-(put 'flycheck-info-overlay 'help-echo "Unknown info.")
-
-(flycheck-define-error-level 'info
-  :severity -1
-  :overlay-category 'flycheck-info-overlay
-  ;; Not exactly the right indicator, but looks pretty, and I prefer to use
-  ;; built-in bitmaps over diving into the hassle of messing around with custom
-  ;; fringe bitmaps
-  :fringe-bitmap 'empty-line
-  :fringe-face 'flycheck-fringe-info
-  :error-list-face 'flycheck-error-list-info)
-
-
-;;; Error filtering
-
-(defun flycheck-filter-errors (errors checker)
-  "Filter ERRORS from CHECKER.
-
-Apply the error filter of CHECKER to ERRORs and return the
-result.  If CHECKER has no error filter, fall back to
-`flycheck-sanitize-errors'."
-  (let ((filter (or (flycheck-checker-error-filter checker)
-                    #'flycheck-sanitize-errors)))
-    (funcall filter errors)))
-
-(defun flycheck-sanitize-errors (errors)
-  "Sanitize ERRORS.
-
-Sanitize ERRORS by trimming leading and trailing whitespace in
-all error messages, and by replacing 0 columns and empty error
-messages with nil.
-
-Returns sanitized ERRORS."
-  (dolist (err errors)
-    (flycheck-error-with-buffer err
-      (let ((message (flycheck-error-message err))
-            (column (flycheck-error-column err)))
-        (when message
-          (setq message (string-trim message))
-          (setf (flycheck-error-message err)
-                (if (string-empty-p message) nil message)))
-        (when (eq column 0)
-          (setf (flycheck-error-column err) nil)))))
-  errors)
-
-(defun flycheck-collapse-error-message-whitespace (errors)
-  "Collapse whitespace in all messages of ERRORS.
-
-Return ERRORS."
-  (dolist (err errors)
-    (-when-let (message (flycheck-error-message err))
-      (setf (flycheck-error-message err)
-            (replace-regexp-in-string (rx (one-or-more (any space "\n" "\r")))
-                                      " " message 'fixed-case 'literal))))
-  errors)
-
-(defun flycheck-dedent-error-messages (errors)
-  "Dedent all messages of ERRORS.
-
-For each error in ERRORS, determine the indentation offset from
-the leading whitespace of the first line, and dedent all further
-lines accordingly.
-
-Return ERRORS, with in-place modifications."
-  (dolist (err errors)
-    (-when-let (message (flycheck-error-message err))
-      (with-temp-buffer
-        (insert message)
-        ;; Determine the indentation offset
-        (goto-char (point-min))
-        (back-to-indentation)
-        (let* ((indent-offset (- (point) (point-min))))
-          ;; Now iterate over all lines and dedent each according to
-          ;; `indent-offset'
-          (while (not (eobp))
-            (back-to-indentation)
-            ;; If the current line starts with sufficient whitespace, delete the
-            ;; indendation offset.  Otherwise keep the line intact, as we might
-            ;; loose valuable information
-            (when (>= (- (point) (line-beginning-position)) indent-offset)
-              (delete-char (- indent-offset)))
-            (forward-line 1)))
-        (delete-trailing-whitespace (point-min) (point-max))
-        (setf (flycheck-error-message err)
-              (buffer-substring-no-properties (point-min) (point-max))))))
-  errors)
-
-(defun flycheck-fold-include-errors (errors sentinel-message)
-  "Fold errors from included files.
-
-ERRORS is a list of errors in which to fold errors.
-SENTINEL-MESSAGE is the error message which denotes an error on
-an include.
-
-The function will fold the messages of all subsequent errors in
-the included file into the error on the include.
-
-Returns ERRORS, with folded messages."
-  ;; Fold messages from faulty includes into the errors on the corresponding
-  ;; include lines.  The user still needs to visit the affected include to
-  ;; list and navigate these errors, but they can at least get an idea of
-  ;; what is wrong.
-  (let (including-filename              ; The name of the file including a
-                                        ; faulty include
-        include-error                   ; The error on the include line
-        errors-in-include)              ; All errors in the include, as strings
-    (dolist (err errors)
-      (-when-let* ((message (flycheck-error-message err))
-                   (filename (flycheck-error-filename err)))
-        (cond
-         ((and (string= message sentinel-message)
-               ;; Don't handle faulty includes recursively, we are only
-               ;; interested in “top-level” errors
-               (not including-filename))
-          ;; We are looking at an error denoting a faulty include, so let's
-          ;; remember the error and the name of the include, and initialize
-          ;; our folded error message
-          (setq include-error err
-                including-filename filename
-                errors-in-include (list "Errors in included file:")))
-         ((and include-error (not (string= filename including-filename)))
-          ;; We are looking at an error *inside* the last faulty include, so
-          ;; let's record err, as human-readable string
-          (push (flycheck-error-format err) errors-in-include))
-         (include-error
-          ;; We are looking at an unrelated error, so fold all include
-          ;; errors, if there are any
-          (when (and include-error errors-in-include)
-            (setf (flycheck-error-message include-error)
-                  (string-join (nreverse errors-in-include) "\n")))
-          (setq include-error nil
-                including-filename nil
-                errors-in-include nil)))))
-    ;; If there are still pending errors to be folded, do so now
-    (when (and include-error errors-in-include)
-      (setf (flycheck-error-message include-error)
-            (string-join (nreverse errors-in-include) "\n"))))
-  errors)
-
-
-;;; Error analysis
-(defvar-local flycheck-current-errors nil
-  "A list of all errors and warnings in the current buffer.")
-
-(defun flycheck-report-current-errors (errors)
-  "Report ERRORS in the current buffer.
-
-Add ERRORS to `flycheck-current-errors' and process each error
-with `flycheck-process-error-functions'."
-  (setq flycheck-current-errors (sort (append errors flycheck-current-errors)
-                                      #'flycheck-error-<))
-  (mapc (lambda (err)
-          (run-hook-with-args-until-success 'flycheck-process-error-functions
-                                            err))
-        errors))
-
-(defun flycheck-clear-errors ()
-  "Remove all error information from the current buffer."
-  (setq flycheck-current-errors nil)
-  (flycheck-report-status 'not-checked))
-
-(defun flycheck-relevant-error-p (err)
-  "Determine whether ERR is relevant for the current buffer.
-
-Return t if ERR may be shown for the current buffer, or nil
-otherwise."
-  (flycheck-error-with-buffer err
-    (let ((file-name (flycheck-error-filename err))
-          (message (flycheck-error-message err)))
-      (and
-       (or (not file-name) (flycheck-same-files-p file-name (buffer-file-name)))
-       message
-       (not (string-empty-p message))
-       (flycheck-error-line err)))))
-
-(defun flycheck-relevant-errors (errors)
-  "Filter the relevant errors from ERRORS.
-
-Return a list of all errors that are relevant for their
-corresponding buffer."
-  (-filter #'flycheck-relevant-error-p errors))
-
-(defun flycheck-count-errors (errors)
-  "Count the number of ERRORS, grouped by level..
-
-Return an alist, where each ITEM is a cons cell whose `car' is an
-error level, and whose `cdr' is the number of errors of that
-level."
-  (let (counts-by-level)
-    (dolist (err errors)
-      (let* ((level (flycheck-error-level err))
-             (item (assq level counts-by-level)))
-        (if item
-            (setcdr item (1+ (cdr item)))
-          (push (cons level 1) counts-by-level))))
-    counts-by-level))
-
-(defun flycheck-has-max-errors-p (errors level)
-  "Check if there is no error in ERRORS more severe than LEVEL."
-  (let ((severity (flycheck-error-level-severity level))
-        found)
-    (while (and errors (not found))
-      (setq found (< severity (flycheck-error-level-severity
-                               (flycheck-error-level (pop errors))))))
-    (not found)))
-
-(defun flycheck-has-max-current-errors-p (level)
-  "Check if there is no current error more severe than LEVEL."
-  (flycheck-has-max-errors-p flycheck-current-errors level))
-
-(defun flycheck-has-errors-p (errors level)
-  "Determine if there are any ERRORS with LEVEL."
-  (let (found)
-    (while (and errors (not found))
-      (setq found (eq (flycheck-error-level (pop errors)) level)))
-    found))
-
-(defun flycheck-has-current-errors-p (&optional level)
-  "Determine if the current buffer has errors with LEVEL.
-
-If LEVEL is omitted if the current buffer has any errors at all."
-  (if level
-      (flycheck-has-errors-p flycheck-current-errors level)
-    (and flycheck-current-errors t)))
-
-
-;;; Error overlay management
-(defun flycheck-add-overlay (err)
-  "Add overlay for ERR.
-
-Return the created overlay."
-  ;; We must have a proper error region for the sake of fringe indication,
-  ;; error display and error navigation, even if the highlighting is disabled.
-  ;; We erase the highlighting later on in this case
-  (pcase-let* ((`(,beg . ,end) (flycheck-error-region-for-mode
-                                err (or flycheck-highlighting-mode 'lines)))
-               (overlay (make-overlay beg end))
-               (level (flycheck-error-level err))
-               (category (flycheck-error-level-overlay-category level)))
-    (unless (flycheck-error-level-p level)
-      (error "Undefined error level: %S" level))
-    (overlay-put overlay 'flycheck-overlay t)
-    (overlay-put overlay 'flycheck-error err)
-    ;; TODO: Consider hooks to re-check if overlay contents change
-    (overlay-put overlay 'category category)
-    (unless flycheck-highlighting-mode
-      ;; Erase the highlighting from the overlay if requested by the user
-      (overlay-put overlay 'face nil))
-    (when flycheck-indication-mode
-      (overlay-put overlay 'before-string
-                   (flycheck-error-level-make-fringe-icon
-                    level flycheck-indication-mode)))
-    (overlay-put overlay 'help-echo (flycheck-error-message err))
-    overlay))
-
-(defun flycheck-filter-overlays (overlays)
-  "Get all Flycheck overlays from OVERLAYS."
-  (-filter (lambda (o) (overlay-get o 'flycheck-overlay)) overlays))
-
-(defun flycheck-overlays-at (pos)
-  "Get all Flycheck overlays at POS."
-  (flycheck-filter-overlays (overlays-at pos)))
-
-(defun flycheck-overlays-in (beg end)
-  "Get all Flycheck overlays between BEG and END."
-  (flycheck-filter-overlays (overlays-in beg end)))
-
-(defun flycheck-overlay-errors-at (pos)
-  "Return a list of all flycheck errors overlayed at POS."
-  (mapcar (lambda (o) (overlay-get o 'flycheck-error))
-          (flycheck-overlays-at pos)))
-
-(defun flycheck-overlay-errors-in (beg end)
-  "Return a list of all flycheck errors overlayed between BEG and END."
-  (mapcar (lambda (o) (overlay-get o 'flycheck-error))
-          (flycheck-overlays-in beg end)))
-
-(defvar-local flycheck-overlays-to-delete nil
-  "Overlays mark for deletion after all syntax checks completed.")
-(put 'flycheck-overlays-to-delete 'permanent-local t)
-
-(defun flycheck-delete-all-overlays ()
-  "Remove all flycheck overlays in the current buffer."
-  (flycheck-delete-marked-overlays)
-  (save-restriction
-    (widen)
-    (mapc #'delete-overlay (flycheck-overlays-in (point-min) (point-max)))))
-
-(defun flycheck-mark-all-overlays-for-deletion ()
-  "Mark all current overlays for deletion."
-  (setq flycheck-overlays-to-delete
-        (append (flycheck-overlays-in (point-min) (point-max))
-                flycheck-overlays-to-delete)))
-
-(defun flycheck-delete-marked-overlays ()
-  "Delete all overlays marked for deletion."
-  (mapc #'delete-overlay flycheck-overlays-to-delete)
-  (setq flycheck-overlays-to-delete nil))
-
-
-;;; Error navigation
-(defun flycheck-error-level-interesting-at-pos-p (pos)
-  "Check if error severity at POS passes `flycheck-error-level-interesting-p'."
-  (flycheck-error-level-interesting-p (get-char-property pos 'flycheck-error)))
-
-(defun flycheck-error-level-interesting-p (err)
-  "Check if ERR severity is >= `flycheck-navigation-minimum-level'."
-  (when (flycheck-error-p err)
-    (-if-let (min-level flycheck-navigation-minimum-level)
-        (<= (flycheck-error-level-severity min-level)
-            (flycheck-error-level-severity (flycheck-error-level err)))
-      t)))
-
-(defun flycheck-next-error-pos (n &optional reset)
-  "Get the position of the N-th next error.
-
-With negative n, get the position of the (-N)-th previous error
-instead.  With non-nil RESET, search from `point-min', otherwise
-search from the current point.
-
-Return the position of the next or previous error, or nil if
-there is none."
-  (let ((n (or n 1))
-        (pos (if reset (point-min) (point))))
-    (if (>= n 0)
-        ;; Search forwards
-        (while (and pos (> n 0))
-          (setq n (1- n))
-          (when (get-char-property pos 'flycheck-error)
-            ;; Move beyond from the current error if any
-            (setq pos (next-single-char-property-change pos 'flycheck-error)))
-          (while (not (or (= pos (point-max))
-                          (flycheck-error-level-interesting-at-pos-p pos)))
-            ;; Scan for the next error
-            (setq pos (next-single-char-property-change pos 'flycheck-error)))
-          (when (and (= pos (point-max))
-                     (not (flycheck-error-level-interesting-at-pos-p pos)))
-            ;; If we reached the end of the buffer, but no error, we didn't find
-            ;; any
-            (setq pos nil)))
-      ;; Search backwards
-      (while (and pos (< n 0))
-        (setq n (1+ n))
-        ;; Loop until we find an error.  We need to check the position *before*
-        ;; the current one, because `previous-single-char-property-change'
-        ;; always moves to the position *of* the change.
-        (while (not (or (= pos (point-min))
-                        (flycheck-error-level-interesting-at-pos-p (1- pos))))
-          (setq pos (previous-single-char-property-change pos 'flycheck-error)))
-        (when (and (= pos (point-min))
-                   (not (flycheck-error-level-interesting-at-pos-p pos)))
-          ;; We didn't find any error.
-          (setq pos nil))
-        (when pos
-          ;; We found an error, so move to its beginning
-          (setq pos (previous-single-char-property-change pos
-                                                          'flycheck-error)))))
-    pos))
-
-(defun flycheck-next-error-function (n reset)
-  "Visit the N-th error from the current point.
-
-Intended for use with `next-error-function'."
-  (let ((pos (flycheck-next-error-pos n reset)))
-    (if pos
-        (goto-char pos)
-      (user-error "No more Flycheck errors"))))
-
-(defun flycheck-next-error (&optional n reset)
-  "Visit the N-th error from the current point.
-
-If RESET is given and non-nil, re-start from the beginning of the buffer.
-
-N specifies how many errors to move forwards.  If negative, move backwards."
-  (interactive "P")
-  (when (consp n)
-    ;; Universal prefix argument means reset
-    (setq reset t n nil))
-  (flycheck-next-error-function n reset))
-
-(defun flycheck-previous-error (&optional n)
-  "Visit the N-th previous error.
-
-If given, N specifies the number of errors to move backwards.  If
-N is negative, move forwards instead."
-  (interactive "P")
-  (flycheck-next-error (- (or n 1))))
-
-(defun flycheck-first-error (&optional n)
-  "Visit the N-th error from beginning of the buffer.
-
-If given, N specifies the number of errors to move forward from
-the beginning of the buffer."
-  (interactive "P")
-  (flycheck-next-error n 'reset))
-
-
-;;; Error list
-(defconst flycheck-error-list-buffer "*Flycheck errors*"
-  "The name of the buffer to show error lists.")
-
-(defvar flycheck-error-list-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "n") #'flycheck-error-list-next-error)
-    (define-key map (kbd "p") #'flycheck-error-list-previous-error)
-    (define-key map (kbd "RET") #'flycheck-error-list-goto-error)
-    map)
-  "The keymap of `flycheck-error-list-mode'.")
-
-(defconst flycheck-error-list-format
-  [("Line" 4 flycheck-error-list-entry-< :right-align t)
-   ("Col" 3 nil :right-align t)
-   ("Level" 8 flycheck-error-list-entry-level-<)
-   ("Message" 0 t)
-   (" (Checker)" 8 t)]
-  "Table format for the error list.")
-
-(define-derived-mode flycheck-error-list-mode tabulated-list-mode "Flycheck errors"
-  "Major mode for listing Flycheck errors.
-
-\\{flycheck-error-list-mode-map}"
-  (setq tabulated-list-format flycheck-error-list-format
-        ;; Sort by location initially
-        tabulated-list-sort-key (cons "Line" nil)
-        tabulated-list-padding 1
-        tabulated-list-entries #'flycheck-error-list-entries
-        ;; `revert-buffer' updates the mode line for us, so all we need to do is
-        ;; set the corresponding mode line construct.
-        mode-line-buffer-identification flycheck-error-list-mode-line)
-  (tabulated-list-init-header))
-
-(defvar-local flycheck-error-list-source-buffer nil
-  "The current source buffer of the error list.")
-;; Needs to permanently local to preserve the source buffer across buffer
-;; reversions
-(put 'flycheck-error-list-source-buffer 'permanent-local t)
-
-(defun flycheck-error-list-set-source (buffer)
-  "Set BUFFER as the source buffer of the error list."
-  (when (get-buffer flycheck-error-list-buffer)
-    (with-current-buffer flycheck-error-list-buffer
-      ;; Only update the source when required
-      (unless (eq buffer flycheck-error-list-source-buffer)
-        (setq flycheck-error-list-source-buffer buffer)
-        (flycheck-error-list-refresh)))))
-
-(defun flycheck-error-list-update-source ()
-  "Update the source buffer of the error list."
-  (when (not (eq (current-buffer) (get-buffer flycheck-error-list-buffer)))
-    ;; We must not update the source buffer, if the current buffer is the error
-    ;; list itself.
-    (flycheck-error-list-set-source (current-buffer))))
-
-(define-button-type 'flycheck-error-list
-  'action #'flycheck-error-list-button-goto-error
-  'help-echo (purecopy "mouse-2, RET: goto error"))
-
-(defun flycheck-error-list-button-goto-error (button)
-  "Go to the error at BUTTON."
-  (flycheck-error-list-goto-error (button-start button)))
-
-(defsubst flycheck-error-list-make-cell (text &optional face)
-  "Make an error list cell with TEXT and FACE."
-  (let ((face (or face 'default)))
-    (list text 'type 'flycheck-error-list 'face face)))
-
-(defsubst flycheck-error-list-make-number-cell (number face)
-  "Make a table cell for a NUMBER with FACE.
-
-Convert NUMBER to string, fontify it with FACE and return the
-string with attached text properties."
-  (flycheck-error-list-make-cell
-   (if (numberp number) (number-to-string number) "")
-   face))
-
-(defun flycheck-error-list-make-entry (error)
-  "Make a table cell for the given ERROR.
-
-Return a list with the contents of the table cell."
-  (let* ((level (flycheck-error-level error))
-         (level-face (flycheck-error-level-error-list-face level))
-         (line (flycheck-error-line error))
-         (column (flycheck-error-column error))
-         (message (or (flycheck-error-message error)
-                      (format "Unknown %s" (symbol-name level))))
-         (checker (flycheck-error-checker error)))
-    (list error
-          (vector (flycheck-error-list-make-number-cell
-                   line 'flycheck-error-list-line-number)
-                  (flycheck-error-list-make-number-cell
-                   column 'flycheck-error-list-column-number)
-                  (flycheck-error-list-make-cell
-                   (symbol-name (flycheck-error-level error)) level-face)
-                  (flycheck-error-list-make-cell message)
-                  (flycheck-error-list-make-cell
-                   (format "(%s)" checker)
-                   'flycheck-error-list-checker-name)))))
-
-(defun flycheck-error-list-entries ()
-  "Create the entries for the error list."
-  (when (buffer-live-p flycheck-error-list-source-buffer)
-    (let ((errors (buffer-local-value 'flycheck-current-errors
-                                      flycheck-error-list-source-buffer)))
-      (mapcar #'flycheck-error-list-make-entry errors))))
-
-(defun flycheck-error-list-entry-< (entry1 entry2)
-  "Determine whether ENTRY1 is before ENTRY2 by location.
-
-See `flycheck-error-<'."
-  (flycheck-error-< (car entry1) (car entry2)))
-
-(defun flycheck-error-list-entry-level-< (entry1 entry2)
-  "Determine whether ENTRY1 is before ENTRY2 by level.
-
-See `flycheck-error-level-<'."
-  (not (flycheck-error-level-< (car entry1) (car entry2))))
-
-(defvar flycheck-error-list-mode-line-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map [mode-line mouse-1]
-      #'flycheck-error-list-mouse-switch-to-source)
-    map)
-  "Keymap for error list mode line.")
-
-(defun flycheck-error-list-propertized-source-name ()
-  "Get the name of the current source buffer for the mode line.
-
-Propertize the name of the current source buffer for use in the
-mode line indication of `flycheck-error-list-mode'."
-  (let ((name (replace-regexp-in-string
-               (rx "%") "%%"
-               (buffer-name flycheck-error-list-source-buffer)
-               'fixed-case 'literal)))
-    (propertize name 'face 'mode-line-buffer-id
-                'mouse-face 'mode-line-highlight
-                'help-echo "mouse-1: switch to source"
-                'local-map flycheck-error-list-mode-line-map)))
-
-(defun flycheck-error-list-mouse-switch-to-source (event)
-  "Switch to the error list source buffer of the EVENT window."
-  (interactive "e")
-  (save-selected-window
-    (when (eventp event)
-      (select-window (posn-window (event-start event))))
-    (when (buffer-live-p flycheck-error-list-source-buffer)
-      (switch-to-buffer flycheck-error-list-source-buffer))))
-
-(defun flycheck-get-error-list-window-list (&optional all-frames)
-  "Get all windows displaying the error list.
-
-ALL-FRAMES specifies the frames to consider, as in
-`get-buffer-window-list'."
-  (-when-let (buf (get-buffer flycheck-error-list-buffer))
-    (get-buffer-window-list buf nil all-frames)))
-
-(defun flycheck-get-error-list-window (&optional all-frames)
-  "Get a window displaying the error list, or nil if none.
-
-ALL-FRAMES specifies the frames to consider, as in
-`get-buffer-window'."
-  (-when-let (buf (get-buffer flycheck-error-list-buffer))
-    (get-buffer-window buf all-frames)))
-
-(defun flycheck-error-list-recenter-at (pos)
-  "Recenter the error list at POS."
-  (dolist (window (flycheck-get-error-list-window-list t))
-    (with-selected-window window
-      (goto-char pos)
-      (recenter))))
-
-(defun flycheck-error-list-refresh ()
-  "Refresh the current error list.
-
-Add all errors currently reported for the current
-`flycheck-error-list-source-buffer', and recenter the error
-list."
-  (interactive)
-  ;; We only refresh the error list, when it is visible in a window, and we
-  ;; select this window while reverting, because Tabulated List mode attempts to
-  ;; recenter the error at the old location, so it must have the proper window
-  ;; selected.
-  (-when-let (window (flycheck-get-error-list-window t))
-    (with-selected-window window
-      (revert-buffer))
-    (run-hooks 'flycheck-error-list-after-refresh-hook)
-    (let ((preserve-pos (eq (current-buffer)
-                            (get-buffer flycheck-error-list-buffer))))
-      ;; If the error list is the current buffer, don't recenter when
-      ;; highlighting
-      (flycheck-error-list-highlight-errors preserve-pos))))
-
-(defun flycheck-error-list-goto-error (&optional pos)
-  "Go to the location of the error at POS in the error list.
-
-POS defaults to `point'."
-  (interactive)
-  (-when-let* ((error (tabulated-list-get-id pos))
-               (buffer (flycheck-error-buffer error)))
-    (when (buffer-live-p buffer)
-      (if (eq (window-buffer) (get-buffer flycheck-error-list-buffer))
-          ;; When called from within the error list, keep the error list,
-          ;; otherwise replace the current buffer.
-          (pop-to-buffer buffer 'other-window)
-        (switch-to-buffer buffer))
-      (let ((pos (flycheck-error-pos error)))
-        (unless (eq (goto-char pos) (point))
-          ;; If widening gets in the way of moving to the right place, remove it
-          ;; and try again
-          (widen)
-          (goto-char pos)))
-      ;; Re-highlight the errors
-      (flycheck-error-list-highlight-errors 'preserve-pos))))
-
-(defun flycheck-error-list-next-error-pos (pos &optional n)
-  "Get the N'th next error in the error list from POS.
-
-N defaults to 1.  If N is negative, search for the previous error
-instead.
-
-Get the beginning position of the N'th next error from POS, or
-nil, if there is no next error."
-  (let ((n (or n 1)))
-    (if (>= n 0)
-        ;; Search forward
-        (while (and pos (/= n 0))
-          (setq n (1- n))
-          (setq pos (next-single-property-change pos 'tabulated-list-id)))
-      ;; Search backwards
-      (while (/= n 0)
-        (setq n (1+ n))
-        ;; We explicitly give the limit here to explicitly have the minimum
-        ;; point returned, to be able to move to the first error (which starts
-        ;; at `point-min')
-        (setq pos (previous-single-property-change pos 'tabulated-list-id
-                                                   nil (point-min)))))
-    pos))
-
-(defun flycheck-error-list-previous-error (n)
-  "Go to the N'th previous error in the error list."
-  (interactive "P")
-  (flycheck-error-list-next-error (- (or n 1))))
-
-(defun flycheck-error-list-next-error (n)
-  "Go to the N'th next error in the error list."
-  (interactive "P")
-  (let ((pos (flycheck-error-list-next-error-pos (point) n)))
-    (when (and pos (/= pos (point)))
-      (goto-char pos)
-      (save-selected-window
-        ;; Keep the error list selected, so that the user can navigate errors by
-        ;; repeatedly pressing n/p, without having to re-select the error list
-        ;; window.
-        (flycheck-error-list-goto-error)))))
-
-(defvar-local flycheck-error-list-highlight-overlays nil
-  "Error highlight overlays in the error list buffer.")
-(put 'flycheck-error-list-highlight-overlays 'permanent-local t)
-
-(defun flycheck-error-list-highlight-errors (&optional preserve-pos)
-  "Highlight errors in the error list.
-
-Highlight all errors in the error lists that are at point in the
-source buffer, and on the same line as point.  Then recenter the
-error list to the highlighted error, unless PRESERVE-POS is
-non-nil."
-  (when (get-buffer flycheck-error-list-buffer)
-    (let ((current-errors (flycheck-overlay-errors-in (line-beginning-position)
-                                                      (line-end-position))))
-      (with-current-buffer flycheck-error-list-buffer
-        (let ((old-overlays flycheck-error-list-highlight-overlays)
-              (min-point (point-max))
-              (max-point (point-min)))
-          ;; Display the new overlays first, to avoid re-display flickering
-          (setq flycheck-error-list-highlight-overlays nil)
-          (when current-errors
-            (let ((next-error-pos (point-min)))
-              (while next-error-pos
-                (let* ((beg next-error-pos)
-                       (end (flycheck-error-list-next-error-pos beg))
-                       (err (tabulated-list-get-id beg)))
-                  (when (member err current-errors)
-                    (setq min-point (min min-point beg)
-                          max-point (max max-point beg))
-                    (let ((ov (make-overlay beg
-                                            ;; Extend overlay to the beginning of
-                                            ;; the next line, to highlight the
-                                            ;; whole line
-                                            (or end (point-max)))))
-                      (push ov flycheck-error-list-highlight-overlays)
-                      (overlay-put ov 'flycheck-error-highlight-overlay t)
-                      (overlay-put ov 'face 'flycheck-error-list-highlight)))
-                  (setq next-error-pos end)))))
-          ;; Delete the old overlays
-          (mapc #'delete-overlay old-overlays)
-          (when (and (not preserve-pos) current-errors)
-            ;; Move point to the middle error
-            (goto-char (+ min-point (/ (- max-point min-point) 2)))
-            (beginning-of-line)
-            ;; And recenter the error list at this position
-            (flycheck-error-list-recenter-at (point))))))))
-
-(defun flycheck-list-errors ()
-  "Show the error list for the current buffer."
-  (interactive)
-  (unless flycheck-mode
-    (user-error "Flycheck mode not enabled"))
-  ;; Create and initialize the error list
-  (unless (get-buffer flycheck-error-list-buffer)
-    (with-current-buffer (get-buffer-create flycheck-error-list-buffer)
-      (flycheck-error-list-mode)))
-  (flycheck-error-list-set-source (current-buffer))
-  ;; Show the error list in a window, and re-select the old window
-  (display-buffer flycheck-error-list-buffer)
-  ;; Finally, refresh the error list to show the most recent errors
-  (flycheck-error-list-refresh))
-
-(defalias 'list-flycheck-errors 'flycheck-list-errors)
-
-
-;;; General error display
-(defun flycheck-display-errors (errors)
-  "Display ERRORS using `flycheck-display-errors-function'."
-  (when flycheck-display-errors-function
-    (funcall flycheck-display-errors-function errors)))
-
-(defvar-local flycheck-display-error-at-point-timer nil
-  "Timer to automatically show the error at point in minibuffer.")
-
-(defun flycheck-cancel-error-display-error-at-point-timer ()
-  "Cancel the error display timer for the current buffer."
-  (when flycheck-display-error-at-point-timer
-    (cancel-timer flycheck-display-error-at-point-timer)
-    (setq flycheck-display-error-at-point-timer nil)))
-
-(defun flycheck-display-error-at-point ()
-  "Display the all error messages at point in minibuffer."
-  (flycheck-cancel-error-display-error-at-point-timer)
-  (when flycheck-mode
-    (-when-let (errors (flycheck-overlay-errors-at (point)))
-      (flycheck-display-errors errors))))
-
-(defun flycheck-display-error-at-point-soon ()
-  "Display the first error message at point in minibuffer delayed."
-  (flycheck-cancel-error-display-error-at-point-timer)
-  (when (flycheck-overlays-at (point))
-    (setq flycheck-display-error-at-point-timer
-          (run-at-time flycheck-display-errors-delay nil 'flycheck-display-error-at-point))))
-
-
-;;; Error display functions
-(defconst flycheck-error-message-buffer "*Flycheck error messages*"
-  "The name of the buffer to show long error messages in.")
-
-(defun flycheck-error-message-buffer ()
-  "Get the buffer object to show long error messages in.
-
-Get the buffer named by variable `flycheck-error-message-buffer',
-or nil if the buffer does not exist."
-  (get-buffer flycheck-error-message-buffer))
-
-(defun flycheck-may-use-echo-area-p ()
-  "Determine whether the echo area may be used.
-
-The echo area may be used if the cursor is not in the echo area,
-and if the echo area is not occupied by minibuffer input."
-  (not (or cursor-in-echo-area (active-minibuffer-window))))
-
-(defun flycheck-display-error-messages (errors)
-  "Display the messages of ERRORS.
-
-Concatenate all non-nil messages of ERRORS separated by empty
-lines, and display them with `display-message-or-buffer', which
-shows the messages either in the echo area or in a separate
-buffer, depending on the number of lines.  See Info
-node `(elisp)Displaying Messages' for more information.
-
-In the latter case, show messages in
-`flycheck-error-message-buffer'."
-  (let ((messages (delq nil (mapcar #'flycheck-error-message errors))))
-    (when (and errors (flycheck-may-use-echo-area-p))
-      (display-message-or-buffer (string-join messages "\n\n")
-                                 flycheck-error-message-buffer))))
-
-(defun flycheck-display-error-messages-unless-error-list (errors)
-  "Show messages of ERRORS unless the error list is visible.
-
-Like `flycheck-display-error-messages', but only if the error
-list (see `flycheck-list-errors') is not visible in any window in
-the current frame."
-  (unless (flycheck-get-error-list-window 'current-frame)
-    (flycheck-display-error-messages errors)))
-
-(defun flycheck-hide-error-buffer ()
-  "Hide the Flycheck error buffer if necessary.
-
-Hide the error buffer if there is no error under point."
-  (-when-let* ((buffer (flycheck-error-message-buffer))
-               (window (get-buffer-window buffer)))
-    (unless (flycheck-overlays-at (point))
-      (quit-window nil window))))
-
-
-;;; Working with error messages
-(defun flycheck-copy-messages-as-kill (pos)
-  "Copy each error message under POS into kill ring.
-
-Each error message under point is copied into the kill ring."
-  (interactive "d")
-  (let ((messages (delq nil (mapcar #'flycheck-error-message
-                                    (flycheck-overlay-errors-at pos)))))
-    (when messages
-      (mapc #'kill-new (reverse messages))
-      (message (string-join messages "\n")))))
-
-(defun flycheck-google-messages (pos &optional quote-flag)
-  "Google each error message at POS.
-
-Issue a separate Google query for each error message at POS.
-Signal an error if there are more messages at POS than
-`flycheck-google-max-messages'.
-
-Enclose the Google query in quotation marks, if
-`google-wrap-in-quotes' is t.  With QUOTE-FLAG, invert the effect
-of `google-wrap-in-quotes'.
-
-This function requires the Google This library from URL
-`https://github.com/Bruce-Connor/emacs-google-this'."
-  (interactive "d\nP")
-  (if (fboundp 'google-this-string)
-      (let ((messages (delq nil (mapcar #'flycheck-error-message
-                                        (flycheck-overlay-errors-at pos)))))
-        (when (and flycheck-google-max-messages
-                   (> (length messages) flycheck-google-max-messages))
-          (user-error "More than %s messages at point"
-                      flycheck-google-max-messages))
-        (dolist (msg messages)
-          (google-this-string quote-flag msg 'no-confirm)))
-    (user-error "Please install Google This from \
-https://github.com/Bruce-Connor/emacs-google-this")))
 
 
 ;;; Built-in checkers
