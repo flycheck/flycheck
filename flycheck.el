@@ -2064,8 +2064,9 @@ checks."
     (flycheck-report-status 'finished)
     (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
       (if next-checker
-          (flycheck-start-checker
-           next-checker (flycheck-buffer-status-callback checker))
+          (setq flycheck-current-syntax-check
+                (flycheck-start-checker
+                 next-checker (flycheck-buffer-status-callback checker)))
         ;; Delete overlays only after the very last checker has run, to avoid
         ;; flickering on intermediate re-displays
         (flycheck-delete-marked-overlays)
