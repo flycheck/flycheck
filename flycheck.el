@@ -1481,7 +1481,7 @@ Signal an error, if any property has an invalid value."
              symbol predicate))
     (unless (functionp filter)
       (error ":error-filter %S of syntax checker %s is not a function"
-             checker filter))
+             symbol filter))
     (dolist (checker next-checkers)
       (flycheck-validate-next-checker checker))
 
