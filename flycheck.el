@@ -1650,8 +1650,9 @@ Pop up a help buffer with the documentation of CHECKER."
               (when predicate
                 (princ ", and uses a custom predicate")))
             (princ ".")
-            (save-excursion
-              (fill-region-as-paragraph modes-start (point-max))))
+            (with-current-buffer standard-output
+              (save-excursion
+                (fill-region-as-paragraph modes-start (point-max)))))
           (princ "\n")
           ;; Call the custom doc-printer of the checker, if present
           (when doc-printer
@@ -3974,7 +3975,7 @@ symbols in the command."
       (princ (symbol-name (flycheck-checker-executable-variable checker)))
       (princ "'.")
 
-      (with-current-buffer (help-buffer)
+      (with-current-buffer standard-output
         (save-excursion
           (fill-region-as-paragraph doc-start (point-max)))))
     (princ "\n")
