@@ -2066,7 +2066,7 @@ checks."
       (if next-checker
           (setq flycheck-current-syntax-check
                 (flycheck-start-checker
-                 next-checker (flycheck-buffer-status-callback checker)))
+                 next-checker (flycheck-buffer-status-callback next-checker)))
         ;; Delete overlays only after the very last checker has run, to avoid
         ;; flickering on intermediate re-displays
         (flycheck-delete-marked-overlays)
