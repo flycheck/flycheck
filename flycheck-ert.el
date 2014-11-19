@@ -328,7 +328,7 @@ failed, and the test aborted with failure.")
   (flycheck-buffer)                     ; so we need an explicit manual check
   ;; After starting the check, the checker should either be running now, or
   ;; already be finished (if it was fast).
-  (should (or (flycheck-running-p)
+  (should (or flycheck-current-syntax-check
               flycheck-ert-syntax-checker-finished))
   ;; Also there should be no deferred check pending anymore
   (should-not (flycheck-deferred-check-p))
