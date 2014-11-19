@@ -3573,7 +3573,8 @@ Unless otherwise noted, all properties are mandatory.
      EXECUTABLE is a string with the executable of this syntax
      checker.  It can be overridden with the variable
      `flycheck-SYMBOL-executable'.  Note that this variable is
-     NOT implicitly defined by this function.
+     NOT implicitly defined by this function.  Use
+     `flycheck-def-executable-var' to define this variable.
 
      Each ARG is an argument to the executable, either as string,
      or as special symbol or form for
