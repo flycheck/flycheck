@@ -3654,7 +3654,7 @@ In addition to these PROPERTIES, all properties from
            :start #'flycheck-start-command-checker
            :interrupt #'flycheck-interrupt-command-checker
            :running-p #'flycheck-command-checker-running-p
-           :doc-printer #'flycheck-command-print-doc
+           :doc-printer #'flycheck-command-checker-print-doc
            properties)
 
     ;; Pre-compile all errors patterns into strings, so that we don't need to do
@@ -3953,7 +3953,7 @@ symbols in the command."
   "Determine whether a _CHECKER PROCESS is still running."
   (not (memq (process-status process) '(exit process))))
 
-(defun flycheck-command-print-doc (checker)
+(defun flycheck-command-checker-print-doc (checker)
   "Print additional documentation for a command CHECKER."
   (let ((executable (flycheck-checker-default-executable checker))
         (config-file-var (flycheck-checker-config-file-var checker))
