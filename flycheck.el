@@ -1696,6 +1696,25 @@ are mandatory.
      object returned by `:running-p' and shall return non-nil if
      the corresponding syntax check is still running.
 
+`:doc-printer FUNCTION'
+     A function to print additional documentation into the Help
+     buffer of this checker.
+
+     FUNCTION is called when creating the Help buffer for the
+     syntax checker, with the syntax checker as single argument,
+     after printing the name of the syntax checker and its modes
+     and predicate, but before printing DOCSTRING.  It may insert
+     additional documentation into the current buffer.
+
+     The call occurs within `with-help-window'.  Hence
+     `standard-output' points to the current buffer, so you may
+     use `princ' and friends to add content.  Also, the current
+     buffer is put into Help mode afterwards, which automatically
+     turns symbols into references, if possible.
+
+     This property is optional.  If omitted, no additional
+     documentation is printed for this syntax checker.
+
 `:modes MODES'
      A major mode symbol or a list thereof, denoting major modes
      to use this syntax checker in.
@@ -1773,6 +1792,7 @@ Signal an error, if any property has an invalid value."
   (let ((start (get properties :start))
         (interrupt (get properties :interrupt))
         (running-p (get properties :running-p))
+        (doc-printer (get properties :doc-printer))
         (modes (get properties :modes))
         (predicate (get properties :predicate))
         (filter (or (get properties :error-filter)
@@ -1789,6 +1809,8 @@ Signal an error, if any property has an invalid value."
       (error ":interrupt %S is not a function" interrupt))
     (unless (functionp running-p)
       (error ":running-p %S is not a function" running-p))
+    (unless (or (null doc-printer) (functionp doc-printer))
+      (error ":doc-printer %S is not a function" doc-printer))
     (unless (or modes predicate)
       (error "Missing :modes or :predicate"))
     (dolist (mode modes)
@@ -1807,10 +1829,11 @@ Signal an error, if any property has an invalid value."
                               (lwarn 'flycheck :warning "%S is no valid Flycheck syntax checker.
 Try to reinstall the package defining this syntax checker." symbol)
                               nil))))
-      (pcase-dolist (`(,prop                   . ,value)
+      (pcase-dolist (`(,prop . ,value)
                      `((flycheck-start         . ,start)
                        (flycheck-interrupt     . ,interrupt)
                        (flycheck-running-p     . ,running-p)
+                       (flycheck-doc-printer   . ,doc-printer)
                        (flycheck-modes         . ,modes)
                        (flycheck-predicate     . ,real-predicate)
                        (flycheck-error-filter  . ,filter)
@@ -2227,13 +2250,11 @@ Unless otherwise noted, all properties are mandatory.
 
 In addition to these PROPERTIES, all properties from
 `flycheck-define-generic-checker' may be specified, except of
-`:start', `:interrupt' and `:running-p'."
-  (when (plist-get properties :start)
-    (error ":start not allowed for command syntax checkers"))
-  (when (plist-get properties :interrupt)
-    (error ":interrupt not allowed for command syntax checkers"))
-  (when (plist-get properties :running-p)
-    (error ":running-p not allowed for command syntax checkers"))
+`:start', `:interrupt', `:running-p' and `:doc-printer'."
+  (dolist (prop '(:start :interrupt :running-p :doc-printer))
+    (when (plist-get properties prop)
+      (error "%s not allowed in definition of command syntax checker %s"
+             prop checker)))
 
   (let ((command (plist-get properties :command))
         (patterns (plist-get properties :error-patterns))
@@ -2261,6 +2282,7 @@ In addition to these PROPERTIES, all properties from
            :start #'flycheck-start-command-checker
            :interrupt #'flycheck-interrupt-command-checker
            :running-p #'flycheck-command-checker-running-p
+           :doc-printer #'flycheck-command-print-doc
            properties)
 
     (pcase-dolist (`(,prop . ,value)
@@ -2355,6 +2377,37 @@ regular expression, and LEVEL the corresponding level symbol."
 (defun flycheck-command-checker-running-p (_checker process)
   "Determine whether a _CHECKER PROCESS is still running."
   (not (memq (process-status process) '(exit process))))
+
+(defun flycheck-command-print-doc (checker)
+  "Print additional documentation for a command CHECKER."
+  (let ((executable (flycheck-checker-default-executable checker))
+        (config-file-var (flycheck-checker-config-file-var checker))
+        (option-vars (-sort #'string<
+                            (flycheck-checker-option-vars checker))))
+    (princ "\n")
+
+    (let ((doc-start (with-current-buffer standard-output (point-max))))
+      ;; Track the start of our documentation so that we can re-indent it
+      ;; properly
+      (princ "  This syntax checker executes \"")
+      (princ executable)
+      (princ "\"")
+      (when config-file-var
+        (princ ", using a configuration file from `")
+        (princ (symbol-name config-file-var))
+        (princ "'"))
+      (princ ". The executable can be overridden with `")
+      (princ (symbol-name (flycheck-checker-executable-variable checker)))
+      (princ "'.")
+
+      (with-current-buffer (help-buffer)
+        (save-excursion
+          (fill-region-as-paragraph doc-start (point-max)))))
+    (princ "\n")
+    (when option-vars
+      (princ "\n  This syntax checker can be configured with these options:\n\n")
+      (dolist (var option-vars)
+        (princ (format "     * `%s'\n" var))))))
 
 
 ;;; Process management for command syntax checkers
@@ -2790,12 +2843,9 @@ Pop up a help buffer with the documentation of CHECKER."
                      (called-interactively-p 'interactive))
     (save-excursion
       (with-help-window (help-buffer)
-        (let ((executable (flycheck-checker-default-executable checker))
-              (filename (flycheck-checker-file checker))
+        (let ((filename (flycheck-checker-file checker))
               (modes (flycheck-checker-modes checker))
-              (config-file-var (flycheck-checker-config-file-var checker))
-              (option-vars (-sort #'string<
-                                  (flycheck-checker-option-vars checker))))
+              (predicate (flycheck-checker-predicate checker)))
           (princ (format "%s is a Flycheck syntax checker" checker))
           (when filename
             (princ (format " in `%s'" (file-name-nondirectory filename)))
@@ -2804,31 +2854,29 @@ Pop up a help buffer with the documentation of CHECKER."
                 (re-search-backward "`\\([^`']+\\)'" nil t)
                 (help-xref-button 1 'help-flycheck-checker-def checker filename))))
           (princ ".\n\n")
-          (princ (format "  This syntax checker executes \"%s\"" executable))
-          (if config-file-var
-              (princ (format ", using a configuration file from `%s'.\n"
-                             config-file-var))
-            (princ ".\n"))
-          (when modes
-            (princ (format "  It checks syntax in the major mode(s) %s. "
-                           (string-join
-                            (mapcar (apply-partially #'format "`%s'") modes)
-                            ", "))))
-          (with-current-buffer (help-buffer)
+
+          (let ((modes-start (with-current-buffer standard-output (point-max))))
+            ;; Track the start of the modes documentation, to properly re-fill
+            ;; it later
+            (if (not modes)
+                ;; Syntax checkers without modes must have a predicate
+                (princ "  This syntax checker checks syntax if a custom predicate holds")
+              (princ "  This syntax checker checks syntax in the major mode(s) ")
+              (princ (string-join
+                      (mapcar (apply-partially #'format "`%s'") modes)
+                      ", "))
+              (when predicate
+                (princ ", and uses a custom predicate")))
+            (princ ".")
             (save-excursion
-              (goto-char (point-min))
-              (forward-paragraph)
-              (fill-region-as-paragraph (point) (point-max))))
-          (princ "\n\n")
-          (princ (format "  The executable can be overridden with `%s'."
-                         (flycheck-checker-executable-variable checker)))
+              (fill-region-as-paragraph modes-start (point-max))))
           (princ "\n")
-          (when option-vars
-            (princ "\n  This syntax checker can be configured with these options:\n\n")
-            (dolist (var option-vars)
-              (princ (format "     * `%s'\n" var)))))
-        (princ (format "\nDocumentation:\n%s"
-                       (flycheck-checker-documentation checker)))))))
+          ;; Call the custom doc-printer of the checker, if present
+          (when doc-printer
+            (funcall doc-printer checker))
+          ;; Ultimately, print the docstring
+          (princ "\nDocumentation:\n")
+          (princ (flycheck-checker-documentation checker)))))))
 
 
 ;;; Checker error API
