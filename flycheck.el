@@ -3916,7 +3916,7 @@ symbols in the command."
           (set-process-filter process 'flycheck-receive-checker-output)
           (set-process-query-on-exit-flag process nil)
           ;; Remember the syntax checker, the buffer and the callback
-          (process-put process 'flycheck-syntax-checker checker)
+          (process-put process 'flycheck-checker checker)
           (process-put process 'flycheck-callback callback)
           (process-put process 'flycheck-buffer (current-buffer))
           ;; Track the temporaries created by argument substitution in the
