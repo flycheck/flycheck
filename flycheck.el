@@ -1460,22 +1460,28 @@ Signal an error, if any property has an invalid value."
       (setq modes (list modes)))
 
     (unless (functionp start)
-      (error ":start %S is not a function" start))
+      (error ":start %S of syntax checker %s is not a function" symbol start))
     (unless (functionp interrupt)
-      (error ":interrupt %S is not a function" interrupt))
+      (error ":interrupt %S of syntax checker %s is not a function"
+             symbol interrupt))
     (unless (functionp running-p)
-      (error ":running-p %S is not a function" running-p))
+      (error ":running-p %S of syntax checker %s is not a function"
+             symbol running-p))
     (unless (or (null doc-printer) (functionp doc-printer))
-      (error ":doc-printer %S is not a function" doc-printer))
+      (error ":doc-printer %S of syntax checker %s is not a function"
+             symbol doc-printer))
     (unless (or modes predicate)
-      (error "Missing :modes or :predicate"))
+      (error "Missing :modes or :predicate in syntax checker %s" symbol))
     (dolist (mode modes)
       (unless (symbolp mode)
-        (error "Invalid :modes %s.  %s must be a symbol" modes mode)))
+        (error "Invalid :modes %s in syntax checker %s, %s must be a symbol"
+               modes symbol mode)))
     (unless (or (null predicate) (functionp predicate))
-      (error ":predicate %S is not a function" predicate))
+      (error ":predicate %S of syntax checker %s  is not a function"
+             symbol predicate))
     (unless (functionp filter)
-      (error ":error-filter %S is not a function" filter))
+      (error ":error-filter %S of syntax checker %s is not a function"
+             checker filter))
     (dolist (checker next-checkers)
       (flycheck-validate-next-checker checker))
 
@@ -3616,15 +3622,16 @@ In addition to these PROPERTIES, all properties from
         (predicate (plist-get properties :predicate)))
 
     (unless command
-      (error "Missing :command"))
+      (error "Missing :command in syntax checker %s" symbol))
     (unless (stringp (car command))
-      (error "Command executable must be a string: %S" (car command)))
+      (error "Command executable for syntax checker %s must be a string: %S"
+             symbol (car command)))
     (dolist (arg (cdr command))
       (unless (flycheck-command-argument-p arg)
-        (error "Invalid command argument %S" arg)))
+        (error "Invalid command argument %S in syntax checker %s" arg symbol)))
     (when (and (eq parser 'flycheck-parse-with-patterns)
                (not patterns))
-      (error "Missing :error-patterns"))
+      (error "Missing :error-patterns in syntax checker %s" symbol))
 
     (plist-put properties :predicate
                (lambda ()
