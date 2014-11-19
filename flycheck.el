@@ -3930,7 +3930,7 @@ symbols in the command."
          ;; No need to explicitly delete the temporary files of the process,
          ;; because deleting runs the sentinel, which will delete them anyway.
          (delete-process process))
-       (funcall callback :errored (error-message-string err))))))
+       (signal (car err) (cdr err))))))
 
 (defun flycheck-interrupt-command-checker (_checker process)
   "Interrupt a _CHECKER PROCESS."
