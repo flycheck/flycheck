@@ -3668,7 +3668,7 @@ In addition to these PROPERTIES, all properties from
                        (flycheck-error-patterns . ,patterns)))
         (put symbol prop value)))))
 
-(eval-when-compile
+(eval-and-compile
   ;; Make this function available during byte-compilation, since we need it
   ;; at macro expansion of `flycheck-def-executable-var'.
   (defun flycheck-checker-executable-variable (checker)
