@@ -2012,36 +2012,37 @@ discarded."
   (when (buffer-live-p buffer)
     (with-current-buffer buffer
       ;; Ignore the status report if Flycheck Mode has since been disabled
-      (when flycheck-mode
-        (let* ((current-check flycheck-current-syntax-check)
-               (current-checker (flycheck-syntax-check-checker current-check)))
-          (if (eq checker current-checker)
-              (pcase status
-                ((or `errored `interrupted)
-                 ;; Clear the last remnants of the old syntax check
-                 (setq flycheck-current-syntax-check nil)
-                 (flycheck-delete-marked-overlays)
-                 (when (eq status 'errored)
-                   ;; In case of error, show the error message
-                   (message "Error from syntax checker %s: %s"
-                            checker (or data "UNKNOWN!")))
-                 (flycheck-report-status status))
-                (`suspicious
+      (let* ((current-check flycheck-current-syntax-check)
+             (current-checker (flycheck-syntax-check-checker current-check)))
+        (if (eq checker current-checker)
+            (pcase status
+              ((or `errored `interrupted)
+               ;; Clear the last remnants of the old syntax check
+               (setq flycheck-current-syntax-check nil)
+               (flycheck-delete-marked-overlays)
+               (when (eq status 'errored)
+                 ;; In case of error, show the error message
+                 (message "Error from syntax checker %s: %s"
+                          checker (or data "UNKNOWN!")))
+               (flycheck-report-status status))
+              (`suspicious
+               (when flycheck-mode
                  (message "Suspicious state from syntax checker %s: %s"
-                          checker (or data "UNKNOWN!"))
-                 (flycheck-report-status 'suspicious))
-                (`finished
-                 (flycheck-finish-current-syntax-check data))
-                (_
-                 (error "Unknown status %s from syntax checker %s"
-                        status checker)))
-            ;; Warn a status report from any other syntax checker than the
-            ;; current one.  This should NEVER happen and is a sign that
-            ;; something really went wrong, so it deserves a more disruptive
-            ;; warning than just a `message'
-            (lwarn '(flycheck syntax-checker) :warning
-                   "Ignoring status report from syntax checker %s which is not currently used (current: %s)"
-                   checker current-checker)))))))
+                          checker (or data "UNKNOWN!")))
+               (flycheck-report-status 'suspicious))
+              (`finished
+               (when flycheck-mode
+                 (flycheck-finish-current-syntax-check data)))
+              (_
+               (error "Unknown status %s from syntax checker %s"
+                      status checker)))
+          ;; Warn a status report from any other syntax checker than the
+          ;; current one.  This should NEVER happen and is a sign that
+          ;; something really went wrong, so it deserves a more disruptive
+          ;; warning than just a `message'
+          (lwarn '(flycheck syntax-checker) :warning
+                 "Ignoring status report from syntax checker %s which is not currently used (current: %s)"
+                 checker current-checker))))))
 
 (defun flycheck-finish-current-syntax-check (errors)
   "Finish the current syntax-check in the current buffer with ERRORS.
