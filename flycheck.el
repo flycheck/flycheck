@@ -1990,10 +1990,13 @@ Return a `flycheck-syntax-check' representing the syntax check."
         (flycheck-clear-errors)
         (flycheck-mark-all-overlays-for-deletion)
         (condition-case err
-            (let* ((checker (flycheck-get-checker-for-buffer))
+            (let* ((buffer (current-buffer))
+                   (checker (flycheck-get-checker-for-buffer))
+                   ;; Capture the current buffer in a closure, to make sure that
+                   ;; it doesn't change behind our back.
                    (callback (lambda (&rest args)
                                (apply #'flycheck-report-buffer-checker-status
-                                      (current-buffer) checker args))))
+                                      buffer checker args))))
               (if checker
                   (flycheck-start-checker checker callback)
                 (flycheck-clear)
