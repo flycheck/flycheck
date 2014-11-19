@@ -1998,7 +1998,9 @@ Return a `flycheck-syntax-check' representing the syntax check."
                                (apply #'flycheck-report-buffer-checker-status
                                       buffer checker args))))
               (if checker
-                  (flycheck-start-checker checker callback)
+                  (let ((check (flycheck-start-checker checker callback)))
+                    (setq flycheck-current-syntax-check check)
+                    (flycheck-report-status 'running))
                 (flycheck-clear)
                 (flycheck-report-status 'no-checker)))
           (error
