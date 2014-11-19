@@ -3602,6 +3602,8 @@ Unless otherwise noted, all properties are mandatory.
 In addition to these PROPERTIES, all properties from
 `flycheck-define-generic-checker' may be specified, except of
 `:start', `:interrupt', `:running-p' and `:doc-printer'."
+  (declare (indent 1)
+           (doc-string 2))
   (dolist (prop '(:start :interrupt :running-p :doc-printer))
     (when (plist-get properties prop)
       (error "%s not allowed in definition of command syntax checker %s"
