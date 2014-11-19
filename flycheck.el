@@ -4588,7 +4588,7 @@ SYMBOL with `flycheck-def-executable-var'."
          :command ',command
          :error-parser ,(when parser
                           `(function ,parser))
-         :error-patters ',(plist-get properties :error-patterns)
+         :error-patterns ',(plist-get properties :error-patterns)
          :error-filter ,(when filter
                           `(function ,filter))
          :modes ',(plist-get properties :modes)
