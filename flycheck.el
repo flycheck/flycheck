@@ -2099,6 +2099,7 @@ Return t when CHECKER was disabled, or nil otherwise."
 (defun flycheck-clear ()
   "Clear all errors in the current buffer."
   (interactive)
+  (flycheck-reset-status)
   (flycheck-delete-all-overlays)
   (flycheck-clear-errors)
   (flycheck-error-list-refresh)
@@ -2530,6 +2531,10 @@ Clears all Flycheck errors first, runs
   (flycheck-clear)
   (run-hooks 'flycheck-syntax-check-failed-hook)
   (flycheck-report-status 'errored))
+
+(defun flycheck-reset-status ()
+  "Reset the Flycheck status."
+  (setq flycheck-last-status-change 'not-checked))
 
 (defun flycheck-report-status (status)
   "Report Flycheck STATUS.
