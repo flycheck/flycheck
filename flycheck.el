@@ -2317,8 +2317,8 @@ regular expression, and LEVEL the corresponding level symbol."
           ;; See https://github.com/flycheck/flycheck/issues/298 for an
           ;; example for such a conflict.
           (setq process (apply 'start-process "flycheck" nil program args))
-          (set-process-filter process 'flycheck-receive-checker-output)
           (set-process-sentinel process 'flycheck-handle-signal)
+          (set-process-filter process 'flycheck-receive-checker-output)
           (set-process-query-on-exit-flag process nil)
           ;; Remember the syntax checker, the buffer and the callback
           (process-put process 'flycheck-syntax-checker checker)
@@ -2333,29 +2333,21 @@ regular expression, and LEVEL the corresponding level symbol."
        ;; Flycheck
        (flycheck-safe-delete-temporaries)
        (when process
-         (flycheck-delete-process process))
+         ;; No need to explicitly delete the temporary files of the process,
+         ;; because deleting runs the sentinel, which will delete them anyway.
+         (process-delete process))
        (funcall callback :errored (error-message-string err))))))
 
 (defun flycheck-interrupt-command-checker (_checker process)
   "Interrupt a _CHECKER PROCESS."
-  (kill-process process))
+  (delete-process process))
 
 (defun flycheck-command-checker-running-p (_checker process)
   "Determine whether a _CHECKER PROCESS is still running."
-  (if (not (memq (process-status process) '(exit process)))
-      t
-    ;; If the process has dead, delete it.  It should already be delete, but
-    ;; just to be on the safe side, let's delete it again
-    (flycheck-delete-process process)
-    nil))
+  (not (memq (process-status process) '(exit process))))
 
 
 ;;; Process management for command syntax checkers
-(defun flycheck-delete-process (process)
-  "Delete PROCESS and clear it's resources."
-  (mapc #'flycheck-safe-delete (process-get process 'flycheck-temporaries))
-  (delete-process process))
-
 (defun flycheck-receive-checker-output (process output)
   "Receive a syntax checking PROCESS OUTPUT."
   (push output (process-get process 'flycheck-pending-output)))
