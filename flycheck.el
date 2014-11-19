@@ -4112,6 +4112,8 @@ tool, just like `compile' (\\[compile])."
     (user-error "Cannot compile buffers without backing file"))
   (unless (flycheck-may-use-checker checker)
     (user-error "Cannot use syntax checker %S in this buffer" checker))
+  (unless (flycheck-checker-executable checker)
+    (user-error "Cannot run checker %S in compilation buffer" checker))
   (let* ((command (flycheck-checker-shell-command checker))
          (buffer (compilation-start command nil #'flycheck-compile-name)))
     (with-current-buffer buffer
