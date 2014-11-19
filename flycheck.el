@@ -3631,6 +3631,15 @@ In addition to these PROPERTIES, all properties from
                  (and (executable-find (flycheck-checker-executable symbol))
                       (or (not predicate) (funcall predicate)))))
 
+    (plist-put properties :error-patterns
+               ;; Pre-compile all errors patterns into strings, so that we don't
+               ;; need to do that on each error parse
+               (mapcar (lambda (p)
+                         (cons (flycheck-rx-to-string `(and ,@(cdr p))
+                                                      'no-group)
+                               (car p)))
+                       patterns))
+
     (apply #'flycheck-define-generic-checker symbol docstring
            :start #'flycheck-start-command-checker
            :interrupt #'flycheck-interrupt-command-checker
