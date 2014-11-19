@@ -1976,6 +1976,15 @@ Return a `flycheck-syntax-check' representing the syntax check."
   (when (flycheck-running-p)
     (flycheck-interrupt-syntax-check flycheck-current-syntax-check)))
 
+(defun flycheck-buffer-status-callback (checker)
+  "Create a status callback for CHECKER in the current buffer."
+  (let ((buffer (current-buffer)))
+    ;; Capture the current buffer in a closure, to make sure that it doesn't
+    ;; change behind our back.
+    (lambda (&rest args)
+      (apply #'flycheck-report-buffer-checker-status
+             buffer checker args))))
+
 (defun flycheck-buffer ()
   "Check syntax in the current buffer."
   (interactive)
@@ -1990,13 +1999,8 @@ Return a `flycheck-syntax-check' representing the syntax check."
         (flycheck-clear-errors)
         (flycheck-mark-all-overlays-for-deletion)
         (condition-case err
-            (let* ((buffer (current-buffer))
-                   (checker (flycheck-get-checker-for-buffer))
-                   ;; Capture the current buffer in a closure, to make sure that
-                   ;; it doesn't change behind our back.
-                   (callback (lambda (&rest args)
-                               (apply #'flycheck-report-buffer-checker-status
-                                      buffer checker args))))
+            (let* ((checker (flycheck-get-checker-for-buffer))
+                   (callback (flycheck-buffer-status-callback checker)))
               (if checker
                   (let ((check (flycheck-start-checker checker callback)))
                     (setq flycheck-current-syntax-check check)
@@ -2056,7 +2060,7 @@ discarded."
                    ;; In case of error, show the error message
                    (message "Error from syntax checker %s: %s"
                             checker (or data "UNKNOWN!")))
-                 (flycheck-report-status state))
+                 (flycheck-report-status status))
                 (`suspicious
                  (message "Suspicious state from syntax checker %s: %s"
                           checker (or data "UNKNOWN!"))
@@ -2095,7 +2099,8 @@ checks."
     (flycheck-report-status 'finished)
     (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
       (if next-checker
-          (flycheck-start-checker next-checker callback)
+          (flycheck-start-checker
+           next-checker (flycheck-buffer-status-callback checker))
         ;; Delete overlays only after the very last checker has run, to avoid
         ;; flickering on intermediate re-displays
         (flycheck-delete-marked-overlays)
@@ -2298,7 +2303,7 @@ regular expression, and LEVEL the corresponding level symbol."
 
 (defun flycheck-start-command-checker (checker callback)
   "Start a command CHECKER with CALLBACK."
-  (let (current-process)
+  (let (process)
     (condition-case err
         (let* ((program (flycheck-checker-executable checker))
                (args (flycheck-checker-substituted-arguments checker))
