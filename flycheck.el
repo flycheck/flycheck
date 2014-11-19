@@ -2110,78 +2110,6 @@ running checks, and empty all variables used by Flycheck."
   (flycheck-clear-checker))
 
 
-;;; Status reporting for the current buffer
-(defvar-local flycheck-last-status-change 'not-checked
-  "The last status change in the current buffer.")
-
-(defun flycheck-report-error ()
-  "Report a Flycheck error status.
-
-Clears all Flycheck errors first, runs
-`flycheck-syntax-check-failed-hook' and reports the status with
-`flycheck-report-status'."
-  (flycheck-clear)
-  (run-hooks 'flycheck-syntax-check-failed-hook)
-  (flycheck-report-status 'errored))
-
-(defun flycheck-report-status (status)
-  "Report Flycheck STATUS.
-
-STATUS is one of the following symbols:
-
-`not-checked'
-     The current buffer was not checked.
-
-`no-checker'
-     Automatic syntax checker selection did not find a suitable
-     syntax checker.
-
-`running'
-     A syntax check is now running in the current buffer.
-
-`errored'
-     The current syntax check has errored.
-
-`finished'
-     The current syntax check was finished normally.
-
-`interrupted'
-     The current syntax check was interrupted.
-
-`suspicious'
-     The last syntax check had a suspicious result.
-
-Set `flycheck-last-status-change' and call
-`flycheck-status-changed-functions' with STATUS.  Afterwards
-refresh the mode line."
-  (setq flycheck-last-status-change status)
-  (run-hook-with-args 'flycheck-status-changed-functions status)
-  (force-mode-line-update))
-
-
-(defun flycheck-mode-line-status-text (&optional status)
-  "Get a text describing STATUS for use in the mode line.
-
-STATUS defaults to `flycheck-last-status-change' if omitted or
-nil."
-  (let ((text (pcase (or status flycheck-last-status-change)
-                (`not-checked "")
-                (`no-checker "-")
-                (`running "*")
-                (`errored "!")
-                (`finished
-                 (if flycheck-current-errors
-                     (let ((error-counts (flycheck-count-errors
-                                          flycheck-current-errors)))
-                       (format ":%s/%s"
-                               (or (cdr (assq 'error error-counts)) 0)
-                               (or (cdr (assq 'warning error-counts)) 0)))
-                   ""))
-                (`interrupted "-")
-                (`suspicious "?"))))
-    (concat " FlyC" text)))
-
-
 ;;; Automatic syntax checking in a buffer
 (defun flycheck-may-check-automatically (&optional condition)
   "Determine whether the buffer may be checked under CONDITION.
@@ -2580,6 +2508,78 @@ otherwise."
 Return a list of all errors that are relevant for their
 corresponding buffer."
   (-filter #'flycheck-relevant-error-p errors))
+
+
+;;; Status reporting for the current buffer
+(defvar-local flycheck-last-status-change 'not-checked
+  "The last status change in the current buffer.")
+
+(defun flycheck-report-error ()
+  "Report a Flycheck error status.
+
+Clears all Flycheck errors first, runs
+`flycheck-syntax-check-failed-hook' and reports the status with
+`flycheck-report-status'."
+  (flycheck-clear)
+  (run-hooks 'flycheck-syntax-check-failed-hook)
+  (flycheck-report-status 'errored))
+
+(defun flycheck-report-status (status)
+  "Report Flycheck STATUS.
+
+STATUS is one of the following symbols:
+
+`not-checked'
+     The current buffer was not checked.
+
+`no-checker'
+     Automatic syntax checker selection did not find a suitable
+     syntax checker.
+
+`running'
+     A syntax check is now running in the current buffer.
+
+`errored'
+     The current syntax check has errored.
+
+`finished'
+     The current syntax check was finished normally.
+
+`interrupted'
+     The current syntax check was interrupted.
+
+`suspicious'
+     The last syntax check had a suspicious result.
+
+Set `flycheck-last-status-change' and call
+`flycheck-status-changed-functions' with STATUS.  Afterwards
+refresh the mode line."
+  (setq flycheck-last-status-change status)
+  (run-hook-with-args 'flycheck-status-changed-functions status)
+  (force-mode-line-update))
+
+
+(defun flycheck-mode-line-status-text (&optional status)
+  "Get a text describing STATUS for use in the mode line.
+
+STATUS defaults to `flycheck-last-status-change' if omitted or
+nil."
+  (let ((text (pcase (or status flycheck-last-status-change)
+                (`not-checked "")
+                (`no-checker "-")
+                (`running "*")
+                (`errored "!")
+                (`finished
+                 (if flycheck-current-errors
+                     (let ((error-counts (flycheck-count-errors
+                                          flycheck-current-errors)))
+                       (format ":%s/%s"
+                               (or (cdr (assq 'error error-counts)) 0)
+                               (or (cdr (assq 'warning error-counts)) 0)))
+                   ""))
+                (`interrupted "-")
+                (`suspicious "?"))))
+    (concat " FlyC" text)))
 
 
 ;;; Error levels
