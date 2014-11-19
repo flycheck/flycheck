@@ -2269,9 +2269,14 @@ In addition to these PROPERTIES, all properties from
                      (flycheck-error-patterns . ,patterns)))
       (put symbol prop value))))
 
-(defun flycheck-checker-executable-variable (checker)
-  "Get the executable variable of CHECKER."
-  (get checker 'flycheck-executable-var))
+(eval-when-compile
+  ;; Make this function available during byte-compilation, since we need it
+  ;; at macro expansion of `flycheck-def-executable-var'.
+  (defun flycheck-checker-executable-variable (checker)
+    "Get the executable variable of CHECKER.
+
+The executable variable is named `flycheck-CHECKER-executable'."
+    (intern (format "flycheck-%s-executable" checker))))
 
 (defun flycheck-checker-default-executable (checker)
   "Get the default executable of CHECKER."
@@ -2414,6 +2419,32 @@ output: %s\nChecker definition probably flawed." checker exit-status output)))
 
 
 ;;; Executables of command checkers.
+(defmacro flycheck-def-executable-var (checker default-executable)
+  "Define the executable variable for CHECKER.
+
+DEFAULT-EXECUTABLE is the default executable.  It is only used in
+the docstring of the variable.
+
+The variable is defined with `defcustom' in the
+`flycheck-executables' group.  It's also defined to be risky as
+file-local variable, to avoid arbitrary executables being used
+for syntax checking."
+  (let ((executable-var (flycheck-checker-executable-var checker)))
+    `(progn
+       (defcustom ,executable-var nil
+         ,(format "The executable of the %s syntax checker.
+
+Either a string containing the name or the path of the
+executable, or nil to use the default executable from the syntax
+checker declaration.
+
+The default executable is %S." checker default-executable)
+         :type '(choice (const :tag "Default executable" nil)
+                        (string :tag "Name or path"))
+         :group 'flycheck-executables
+         :risky t)
+       (make-variable-buffer-local ',executable-var))))
+
 (defun flycheck-set-checker-executable (checker &optional executable)
   "Set the EXECUTABLE of CHECKER.
 
