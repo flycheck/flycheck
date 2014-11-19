@@ -3912,7 +3912,8 @@ symbols in the command."
           ;;
           ;; See https://github.com/flycheck/flycheck/issues/298 for an
           ;; example for such a conflict.
-          (setq process (apply 'start-process "flycheck" nil program args))
+          (setq process (apply 'start-process (format "flycheck-%s" checker)
+                               nil program args))
           (set-process-sentinel process 'flycheck-handle-signal)
           (set-process-filter process 'flycheck-receive-checker-output)
           (set-process-query-on-exit-flag process nil)
