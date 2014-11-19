@@ -1154,32 +1154,32 @@ and extension, as in `file-name-base'."
 
 (ert-deftest flycheck-valid-checker-p/no-checker-version ()
   :tags '(checker-api)
-  (should-not (get 'foo 'flycheck-checker-version))
+  (should-not (get 'foo 'flycheck-generic-checker-version))
   (should-not (flycheck-valid-checker-p 'foo)))
 
 (ert-deftest flycheck-valid-checker-p/checker-version-too-low ()
   :tags '(checker-api)
-  (cl-letf* ((version (- flycheck-checker-version 1))
-             ((get 'foo 'flycheck-checker-version) version))
-    (should (= (get 'foo 'flycheck-checker-version) version))
+  (cl-letf* ((version (- flycheck-generic-checker-version 1))
+             ((get 'foo 'flycheck-generic-checker-version) version))
+    (should (= (get 'foo 'flycheck-generic-checker-version) version))
     (should-not (flycheck-valid-checker-p 'foo)))
-  (should-not (get 'foo 'flycheck-checker-version)))
+  (should-not (get 'foo 'flycheck-generic-checker-version)))
 
 (ert-deftest flycheck-valid-checker-p/checker-version-too-high ()
   :tags '(checker-api)
-  (cl-letf* ((version (+ flycheck-checker-version 1))
-             ((get 'foo 'flycheck-checker-version) version))
-    (should (= (get 'foo 'flycheck-checker-version) version))
+  (cl-letf* ((version (+ flycheck-generic-checker-version 1))
+             ((get 'foo 'flycheck-generic-checker-version) version))
+    (should (= (get 'foo 'flycheck-generic-checker-version) version))
     (should-not (flycheck-valid-checker-p 'foo)))
-  (should-not (get 'foo 'flycheck-checker-version)))
+  (should-not (get 'foo 'flycheck-generic-checker-version)))
 
 (ert-deftest flycheck-valid-checker-p/checker-version-ok ()
   :tags '(checker-api)
-  (cl-letf* ((version flycheck-checker-version)
-             ((get 'foo 'flycheck-checker-version) version))
-    (should (= (get 'foo 'flycheck-checker-version) version))
+  (cl-letf* ((version flycheck-generic-checker-version)
+             ((get 'foo 'flycheck-generic-checker-version) version))
+    (should (= (get 'foo 'flycheck-generic-checker-version) version))
     (should (flycheck-valid-checker-p 'foo)))
-  (should-not (get 'foo 'flycheck-checker-version)))
+  (should-not (get 'foo 'flycheck-generic-checker-version)))
 
 (ert-deftest flycheck-disabled-checker-p/enabled-checker ()
   :tags '(checker-api)
@@ -1386,13 +1386,6 @@ and extension, as in `file-name-base'."
   (should-error (flycheck-substitute-argument '(foo "bar") 'emacs-lisp))
   (should-error (flycheck-substitute-argument  200 'emacs-lisp)))
 
-(ert-deftest flycheck-check-executable ()
-  :tags '(checker-api)
-  (dolist (checker flycheck-checkers)
-    (if (executable-find (flycheck-checker-executable checker))
-        (should (flycheck-check-executable checker))
-      (should-not (flycheck-check-executable checker)))))
-
 (ert-deftest flycheck-may-use-checker/invalid-checker ()
   :tags '(checker-api)
   (should-not (flycheck-valid-checker-p 'foo))
@@ -1593,8 +1586,8 @@ Try to reinstall the package defining this syntax checker.\n")))))
 
 (ert-deftest flycheck-select-checker/selecting-runs-a-syntax-check ()
   :tags '(selection external-tool language-python)
-  (skip-unless (-all? #'flycheck-check-executable '(python-flake8
-                                                    python-pylint)))
+  (skip-unless (executable-find (flycheck-checker-executable 'python-pylint)))
+  (skip-unless (executable-find (flycheck-checker-executable 'python-flake8)))
   (flycheck-ert-with-resource-buffer "checkers/python/test.py"
     (python-mode)
     (flycheck-mode)
@@ -1641,8 +1634,8 @@ Try to reinstall the package defining this syntax checker.\n")))))
 
 (ert-deftest flycheck-select-checker/unselecting-a-checker-goes-back-to-automatic-selection ()
   :tags '(selection external-tool language-python)
-  (skip-unless (-all? #'flycheck-check-executable '(python-pylint
-                                                    python-flake8)))
+  (skip-unless (executable-find (flycheck-checker-executable 'python-pylint)))
+  (skip-unless (executable-find (flycheck-checker-executable 'python-flake8)))
   (flycheck-ert-with-resource-buffer "checkers/python/test.py"
     (python-mode)
     (flycheck-mode)
@@ -1690,8 +1683,8 @@ Try to reinstall the package defining this syntax checker.\n")))))
 
 (ert-deftest flycheck/selects-checker-automatically/first-enabled-checker ()
   :tags '(selection external-tool language-python)
-  (skip-unless (-all? #'flycheck-check-executable '(python-pylint
-                                                    python-flake8)))
+  (skip-unless (executable-find (flycheck-checker-executable 'python-pylint)))
+  (skip-unless (executable-find (flycheck-checker-executable 'python-flake8)))
   (flycheck-ert-with-resource-buffer "checkers/python/test.py"
     (python-mode)
     (flycheck-mode)
@@ -3559,8 +3552,6 @@ evaluating BODY."
          :checker c/c++-gcc))))
 
 (flycheck-ert-def-checker-test c/c++-gcc (c c++) error-language-standard
-  :tags '(builtin-checker external-tool language-c++)
-  (skip-unless (flycheck-check-executable 'c/c++-gcc))
   (let ((flycheck-gcc-language-standard "c++11")
         (flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-ert-should-syntax-check
@@ -3571,8 +3562,6 @@ evaluating BODY."
      '(12 2 error "#error" :checker c/c++-gcc))))
 
 (flycheck-ert-def-checker-test c/c++-gcc (c c++) error-definitions
-  :tags '(builtin-checker external-tool language-c++)
-  (skip-unless (flycheck-check-executable 'c/c++-gcc))
   (let ((flycheck-gcc-definitions '("FLYCHECK_LIBRARY"))
         (flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-ert-should-syntax-check
@@ -3586,8 +3575,6 @@ evaluating BODY."
      '(12 2 error "#error" :checker c/c++-gcc))))
 
 (flycheck-ert-def-checker-test c/c++-gcc (c c++) error-no-exceptions
-  :tags '(builtin-checker external-tool language-c++)
-  (skip-unless (flycheck-check-executable 'c/c++-gcc))
   (let ((flycheck-disabled-checkers '(c/c++-clang))
         (flycheck-gcc-no-exceptions t))
     (flycheck-ert-should-syntax-check
@@ -3596,8 +3583,6 @@ evaluating BODY."
          :checker c/c++-gcc))))
 
 (flycheck-ert-def-checker-test c/c++-gcc (c c++) error-no-rtti
-  :tags '(builtin-checker external-tool language-c++)
-  (skip-unless (flycheck-check-executable 'c/c++-gcc))
   (let ((flycheck-disabled-checkers '(c/c++-clang))
         (flycheck-gcc-no-rtti t))
     (flycheck-ert-should-syntax-check
@@ -4222,7 +4207,7 @@ Why not:
 
 (flycheck-ert-def-checker-test make make pmake
   (let ((flycheck-make-executable "pmake"))
-    (skip-unless (flycheck-check-executable 'make))
+    (skip-unless (executable-find (flycheck-checker-executable 'make)))
     (flycheck-ert-should-syntax-check
      "checkers/make.mk" 'makefile-bsdmake-mode
      '(2 nil error "Need an operator" :checker make))))
@@ -4439,8 +4424,6 @@ Why not:
           :checker python-pylint))))
 
 (flycheck-ert-def-checker-test python-pylint python disabled-warnings
-  :tags '(builtin-checker external-tool language-python)
-  (skip-unless (flycheck-check-executable 'python-pylint))
   (let ((flycheck-pylintrc "pylintrc")
         (flycheck-disabled-checkers '(python-flake8)))
     (flycheck-ert-should-syntax-check
