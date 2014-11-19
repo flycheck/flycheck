@@ -2254,7 +2254,7 @@ In addition to these PROPERTIES, all properties from
   (dolist (prop '(:start :interrupt :running-p :doc-printer))
     (when (plist-get properties prop)
       (error "%s not allowed in definition of command syntax checker %s"
-             prop checker)))
+             prop symbol)))
 
   (let ((command (plist-get properties :command))
         (patterns (plist-get properties :error-patterns))
@@ -2845,7 +2845,8 @@ Pop up a help buffer with the documentation of CHECKER."
       (with-help-window (help-buffer)
         (let ((filename (flycheck-checker-file checker))
               (modes (flycheck-checker-modes checker))
-              (predicate (flycheck-checker-predicate checker)))
+              (predicate (flycheck-checker-predicate checker))
+              (doc-printer (get checker 'flycheck-doc-printer)))
           (princ (format "%s is a Flycheck syntax checker" checker))
           (when filename
             (princ (format " in `%s'" (file-name-nondirectory filename)))
