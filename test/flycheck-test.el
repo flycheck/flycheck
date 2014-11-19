@@ -1389,15 +1389,7 @@ and extension, as in `file-name-base'."
 (ert-deftest flycheck-may-use-checker/invalid-checker ()
   :tags '(checker-api)
   (should-not (flycheck-valid-checker-p 'foo))
-  (shut-up                              ; Inhibit warning display on terminal
-    (should-not (flycheck-may-use-checker 'foo)))
-  (with-current-buffer "*Warnings*"
-    (save-excursion
-      (goto-char (point-min))
-      (search-forward "Warning (flycheck): ")
-      (should (string= (buffer-substring-no-properties (point) (point-max))
-                       "foo is no valid Flycheck syntax checker.
-Try to reinstall the package defining this syntax checker.\n")))))
+  (should-not (flycheck-may-use-checker 'foo)))
 
 (ert-deftest flycheck-may-use-checker/disabled-checker ()
   :tags '(checker-api)
