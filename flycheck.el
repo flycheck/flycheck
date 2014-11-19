@@ -3681,6 +3681,199 @@ regular expression, and LEVEL the corresponding level symbol."
   "Get the error parser of CHECKER."
   (get checker 'flycheck-error-parser))
 
+(defun flycheck-substitute-argument (arg checker)
+  "Substitute ARG for CHECKER.
+
+Return a list of real arguments for the executable of CHECKER,
+substituted for the symbolic argument ARG.  Single arguments,
+e.g. if ARG is a literal strings, are wrapped in a list.
+
+ARG may be one of the following forms:
+
+STRING
+     Return ARG unchanged.
+
+`source', `source-inplace'
+     Create a temporary file to check and return its path.  With
+     `source-inplace' create the temporary file in the same
+     directory as the original file.  The value of
+     `flycheck-temp-prefix' is used as prefix of the file name.
+
+     With `source', try to retain the non-directory component of
+     the buffer's file name in the temporary file.
+
+     `source' is the preferred way to pass the input file to a
+     syntax checker.  `source-inplace' should only be used if the
+     syntax checker needs other files from the source directory,
+     such as include files in C.
+
+`source-original'
+     Return the path of the actual file to check, or an empty
+     string if the buffer has no file name.
+
+     Note that the contents of the file may not be up to date
+     with the contents of the buffer to check.  Do not use this
+     as primary input to a checker, unless absolutely necessary.
+
+     When using this symbol as primary input to the syntax
+     checker, add `flycheck-buffer-saved-p' to the `:predicate'.
+
+`temporary-directory'
+     Create a unique temporary directory and return its path.
+
+`temporary-file-name'
+     Return a unique temporary filename.  The file is *not*
+     created.
+
+     To ignore the output of syntax checkers, try `null-device'
+     first.
+
+`null-device'
+     Return the value of `null-device', i.e the system null
+     device.
+
+     Use this option to ignore the output of a syntax checker.
+     If the syntax checker cannot handle the null device, or
+     won't write to an existing file, try `temporary-file-name'
+     instead.
+
+`(config-file OPTION VARIABLE [PREPEND-FN])'
+     Search the configuration file bound to VARIABLE with
+     `flycheck-locate-config-file' and return a list of arguments
+     that pass this configuration file to the syntax checker, or
+     nil if the configuration file was not found.
+
+     PREPEND-FN is called with the OPTION and the located
+     configuration file, and should return OPTION prepended
+     before the file, either a string or as list.  If omitted,
+     PREPEND-FN defaults to `list'.
+
+`(option OPTION VARIABLE [PREPEND-FN [FILTER]])'
+     Retrieve the value of VARIABLE and return a list of
+     arguments that pass this value as value for OPTION to the
+     syntax checker.
+
+     PREPEND-FN is called with the OPTION and the value of
+     VARIABLE, and should return OPTION prepended before the
+     file, either a string or as list.  If omitted, PREPEND-FN
+     defaults to `list'.
+
+     FILTER is an optional function to be applied to the value of
+     VARIABLE before prepending.  This function must return nil
+     or a string.  In the former case, return nil.  In the latter
+     case, return a list of arguments as described above.
+
+`(option-list OPTION VARIABLE [PREPEND-FN [FILTER]])'
+     Retrieve the value of VARIABLE, which must be a list,
+     and prepend OPTION before each item in this list, using
+     PREPEND-FN.
+
+     PREPEND-FN is called with the OPTION and each item of the
+     list as second argument, and should return OPTION prepended
+     before the item, either as string or as list.  If omitted,
+     PREPEND-FN defaults to `list'.
+
+     FILTER is an optional function to be applied to each item in
+     the list before prepending OPTION.  It shall return the
+     option value for each item as string, or nil, if the item is
+     to be ignored.
+
+`(option-flag OPTION VARIABLE)'
+     Retrieve the value of VARIABLE and return OPTION, if the
+     value is non-nil.  Otherwise return nil.
+
+`(eval FORM)'
+     Return the result of evaluating FORM in the buffer to be
+     checked.  FORM must either return a string or a list of
+     strings, or nil to indicate that nothing should be
+     substituted for CELL.  For all other return types, signal an
+     error
+
+     _No_ further substitutions are performed, neither in FORM
+     before it is evaluated, nor in the result of evaluating
+     FORM.
+
+In all other cases, signal an error.
+
+Note that substitution is *not* recursive.  No symbols or cells
+are substituted within the body of cells!"
+  (pcase arg
+    ((pred stringp) (list arg))
+    (`source
+     (list (flycheck-save-buffer-to-temp #'flycheck-temp-file-system)))
+    (`source-inplace
+     (list (flycheck-save-buffer-to-temp #'flycheck-temp-file-inplace)))
+    (`source-original (list (or (buffer-file-name) "")))
+    (`temporary-directory (list (flycheck-temp-dir-system)))
+    (`temporary-file-name
+     (let ((directory (flycheck-temp-dir-system)))
+       (list (make-temp-name (expand-file-name "flycheck" directory)))))
+    (`null-device (list null-device))
+    (`(config-file ,option-name ,file-name-var)
+     (-when-let* ((value (symbol-value file-name-var))
+                  (file-name (flycheck-locate-config-file value checker)))
+       (flycheck-prepend-with-option option-name (list file-name))))
+    (`(config-file ,option-name ,file-name-var ,prepend-fn)
+     (-when-let* ((value (symbol-value file-name-var))
+                  (file-name (flycheck-locate-config-file value checker)))
+       (flycheck-prepend-with-option option-name (list file-name) prepend-fn)))
+    (`(option ,option-name ,variable)
+     (-when-let (value (symbol-value variable))
+       (unless (stringp value)
+         (error "Value %S of %S for option %s is not a string"
+                value variable option-name))
+       (flycheck-prepend-with-option option-name (list value))))
+    (`(option ,option-name ,variable ,prepend-fn)
+     (-when-let (value (symbol-value variable))
+       (unless (stringp value)
+         (error "Value %S of %S for option %s is not a string"
+                value variable option-name))
+       (flycheck-prepend-with-option option-name (list value) prepend-fn)))
+    (`(option ,option-name ,variable ,prepend-fn ,filter)
+     (-when-let (value (funcall filter (symbol-value variable)))
+       (unless (stringp value)
+         (error "Value %S of %S (filter: %S) for option %s is not a string"
+                value variable filter option-name))
+       (flycheck-prepend-with-option option-name (list value) prepend-fn)))
+    (`(option-list ,option-name ,variable)
+     (let ((value (symbol-value variable)))
+       (unless (and (listp value) (-all? #'stringp value))
+         (error "Value %S of %S for option %S is not a list of strings"
+                value variable option-name))
+       (flycheck-prepend-with-option option-name value)))
+    (`(option-list ,option-name ,variable ,prepend-fn)
+     (let ((value (symbol-value variable)))
+       (unless (and (listp value) (-all? #'stringp value))
+         (error "Value %S of %S for option %S is not a list of strings"
+                value variable option-name))
+       (flycheck-prepend-with-option option-name value prepend-fn)))
+    (`(option-list ,option-name ,variable ,prepend-fn ,filter)
+     (let ((value (delq nil (mapcar filter (symbol-value variable)))))
+       (unless (and (listp value) (-all? #'stringp value))
+         (error "Value %S of %S for option %S is not a list of strings"
+                value variable option-name))
+       (flycheck-prepend-with-option option-name value prepend-fn)))
+    (`(option-flag ,option-name ,variable)
+     (when (symbol-value variable)
+       (list option-name)))
+    (`(eval ,form)
+     (let ((result (eval form)))
+       (cond
+        ((and (listp result) (-all? #'stringp result)) result)
+        ((stringp result) (list result))
+        (t (error "Invalid result from evaluation of %S: %S" form result)))))
+    (_ (error "Unsupported argument %S" arg))))
+
+(defun flycheck-checker-substituted-arguments (checker)
+  "Get the substituted arguments of a CHECKER.
+
+Substitute each argument of CHECKER using
+`flycheck-substitute-argument'.  This replaces any special
+symbols in the command."
+  (apply #'append
+         (mapcar (lambda (arg) (flycheck-substitute-argument arg checker))
+                 (flycheck-checker-arguments checker))))
+
 (defun flycheck-start-command-checker (checker callback)
   "Start a command CHECKER with CALLBACK."
   (let (process)
