@@ -1070,29 +1070,7 @@ returns t."
   (flycheck-error-list-refresh)
   (flycheck-hide-error-buffer))
 
-(defun flycheck-buffer ()
-  "Check syntax in the current buffer."
-  (interactive)
-  (flycheck-clean-deferred-check)
-  (if flycheck-mode
-      (unless (flycheck-running-p)
-        ;; Clear error list and mark all overlays for deletion.  We do not
-        ;; delete all overlays immediately to avoid excessive re-displays and
-        ;; flickering, if the same errors gets highlighted again after the check
-        ;; completed.
-        (run-hooks 'flycheck-before-syntax-check-hook)
-        (flycheck-clear-errors)
-        (flycheck-mark-all-overlays-for-deletion)
-        (condition-case err
-            (let ((checker (flycheck-get-checker-for-buffer)))
-              (if checker
-                  (flycheck-start-checker checker)
-                (flycheck-clear)
-                (flycheck-report-status 'no-checker)))
-          (error
-           (flycheck-report-error)
-           (signal (car err) (cdr err)))))
-    (user-error "Flycheck mode disabled")))
+
 
 
 ;;; Deferred syntax checking
@@ -1686,7 +1664,7 @@ are mandatory.
 `:start FUNCTION'
      A function to start the syntax checker.
 
-     FUNCTION shall take a single argument and return a context
+     FUNCTION shall take two arguments and return a context
      object if the checker is started successfully.  Otherwise it
      shall signal an error.
 
@@ -1700,9 +1678,10 @@ are mandatory.
 `:interrupt FUNCTION'
      A function to interrupt the syntax check.
 
-     FUNCTION is called with the context object returned by the
-     `:start' function and shall try to interrupt the syntax
-     check.  If it fails to do so, it shall signal an error.
+     FUNCTION is called with the syntax checker and the context
+     object returned by the `:start' function and shall try to
+     interrupt the syntax check.  If it fails to do so, it shall
+     signal an error.
 
      Note that FUNCTION should try very hard to interrupt the
      check, and should signal an error only as a very last
@@ -1713,9 +1692,9 @@ are mandatory.
      A function to determine whether a syntax check is still
      running.
 
-     FUNCTION is called with the context object returned by
-     `:running-p' and shall return non-nil if the corresponding
-     syntax check is still running.
+     FUNCTION is called with the syntax checker and the context
+     object returned by `:running-p' and shall return non-nil if
+     the corresponding syntax check is still running.
 
 `:modes MODES'
      A major mode symbol or a list thereof, denoting major modes
@@ -1903,7 +1882,6 @@ nil otherwise."
 
 
 ;;; Extending generic checkers
-
 (defun flycheck-add-next-checker (checker next &optional append)
   "Add a NEXT checker after CHECKER.
 
@@ -1942,6 +1920,205 @@ will be used in buffers with MODE."
   (unless (symbolp mode)
     (error "%s is not a symbol" mode))
   (push mode (get checker 'flycheck-modes)))
+
+
+;;; Generic syntax checks
+(cl-defstruct (flycheck-syntax-check
+               (:constructor flycheck-syntax-check-new))
+  "Structure for storing syntax check state.
+
+Slots:
+
+`buffer'
+     The buffer being checked
+
+`checker'
+     The syntax checker being used
+
+`context'
+     The context object."
+  buffer checker context)
+
+(defun flycheck-start-checker (checker callback)
+  "Start a syntax CHECKER, with a STATUS CALLBACK.
+
+Return a `flycheck-syntax-check' representing the syntax check."
+  (flycheck-syntax-check-new
+   :buffer (current-buffer)
+   :checker checker
+   :context (funcall (get checker 'flycheck-start) checker callback)))
+
+(defun flycheck-interrupt-syntax-check (syntax-check)
+  "Interrupt a SYNTAX-CHECK."
+  (let ((checker (flycheck-syntax-check-checker syntax-check))
+        (context (flycheck-syntax-check-context syntax-check)))
+    (funcall (get checker 'flycheck-interrupt) checker context)))
+
+(defun flycheck-syntax-check-running-p (syntax-check)
+  "Determine whether SYNTAX-CHECK is still running."
+  (let ((checker (flycheck-syntax-check-checker syntax-check))
+        (context (flycheck-syntax-check-context syntax-check)))
+    (funcall (get checker 'flycheck-running-p) checker context)))
+
+
+;;; Syntax checks in a buffer
+(defvar-local flycheck-current-syntax-check nil
+  "The current syntax check in the this buffer.")
+(put 'flycheck-current-syntax-check 'permanent-local t)
+
+(defun flycheck-running-p ()
+  "Determine whether a syntax check is running in the current buffer."
+  (let ((syntax-check flycheck-current-syntax-check))
+    (and syntax-check (flycheck-syntax-check-running-p syntax-check))))
+
+(defun flycheck-stop ()
+  "Stop any ongoing syntax check in the current buffer."
+  (when (flycheck-running-p)
+    (flycheck-interrupt-syntax-check flycheck-current-syntax-check)))
+
+(defun flycheck-buffer ()
+  "Check syntax in the current buffer."
+  (interactive)
+  (flycheck-clean-deferred-check)
+  (if flycheck-mode
+      (unless (flycheck-running-p)
+        ;; Clear error list and mark all overlays for deletion.  We do not
+        ;; delete all overlays immediately to avoid excessive re-displays and
+        ;; flickering, if the same errors gets highlighted again after the check
+        ;; completed.
+        (run-hooks 'flycheck-before-syntax-check-hook)
+        (flycheck-clear-errors)
+        (flycheck-mark-all-overlays-for-deletion)
+        (condition-case err
+            (let* ((checker (flycheck-get-checker-for-buffer))
+                   (callback (lambda (&rest args)
+                               (apply #'flycheck-report-buffer-checker-status
+                                      (current-buffer) checker args))))
+              (if checker
+                  (flycheck-start-checker checker callback)
+                (flycheck-clear)
+                (flycheck-report-status 'no-checker)))
+          (error
+           (flycheck-report-error)
+           (signal (car err) (cdr err)))))
+    (user-error "Flycheck mode disabled")))
+
+(defun flycheck-report-buffer-checker-status
+    (buffer checker status &optional data)
+  "In BUFFER, report syntax CHECKER STATUS with DATA.
+
+CHECKER is the syntax check reporting the status.  STATUS denotes
+the status of CHECKER, with an optional DATA.  STATUS may be one
+of the following symbols:
+
+`errored'
+     The syntax checker has errored.  DATA is an optional error
+     message.
+
+`interrupted'
+     The syntax checker was interrupted.  DATA is ignored.
+
+`finished'
+     The syntax checker is finished.  DATA is the list of
+     `flycheck-error' objects reported by the syntax check.
+
+`suspicious'
+     The syntax checker encountered a suspicious state, which the
+     user needs to be informed about.  DATA is an optional
+     message.
+
+A syntax checker MUST report `finished' status once, otherwise
+Flycheck gets stuck with the current syntax check.
+
+If CHECKER is not the currently used syntax checker in
+`flycheck-current-syntax-check', the status report is largely
+ignored.  Notably, any errors reported by the checker are
+discarded."
+  ;; Ignore the status report if the corresponding buffer is gone
+  (when (buffer-live-p buffer)
+    (with-current-buffer buffer
+      ;; Ignore the status report if Flycheck Mode has since been disabled
+      (when flycheck-mode
+        (let* ((current-check flycheck-current-syntax-check)
+               (current-checker (flycheck-syntax-check-checker current-check)))
+          (if (eq checker current-checker)
+              (pcase status
+                ((or `errored `interrupted)
+                 ;; Clear the last remnants of the old syntax check
+                 (setq flycheck-current-syntax-check nil)
+                 (flycheck-delete-marked-overlays)
+                 (when (eq status 'errored)
+                   ;; In case of error, show the error message
+                   (message "Error from syntax checker %s: %s"
+                            checker (or data "UNKNOWN!")))
+                 (flycheck-report-status state))
+                (`suspicious
+                 (message "Suspicious state from syntax checker %s: %s"
+                          checker (or data "UNKNOWN!"))
+                 (flycheck-report-status 'suspicious))
+                (`finished
+                 (flycheck-finish-current-syntax-check data))
+                (_
+                 (error "Unknown status %s from syntax checker %s"
+                        status checker)))
+            ;; Warn a status report from any other syntax checker than the
+            ;; current one.  This should NEVER happen and is a sign that
+            ;; something really went wrong, so it deserves a more disruptive
+            ;; warning than just a `message'
+            (lwarn '(flycheck syntax-checker) :warning
+                   "Ignoring status report from syntax checker %s which is not currently used (current: %s)"
+                   checker current-checker)))))))
+
+(defun flycheck-finish-current-syntax-check (errors)
+  "Finish the current syntax-check in the current buffer with ERRORS.
+
+ERRORS is a list of `flycheck-error' objects reported by the
+current syntax check in `flycheck-current-syntax-check'.
+
+Report all ERRORS and potentially start any next syntax checkers.
+
+If the current syntax checker reported excessive errors, it is disabled
+via `flycheck-disable-excessive-checker' for subsequent syntax
+checks."
+  (let* ((syntax-check flycheck-current-syntax-check)
+         (checker (flycheck-syntax-check-checker syntax-check))
+         (errors (flycheck-relevant-errors
+                  (flycheck-filter-errors errors checker))))
+    (unless (flycheck-disable-excessive-checker checker errors)
+      (flycheck-report-current-errors errors))
+    (setq flycheck-current-syntax-check nil)
+    (flycheck-report-status 'finished)
+    (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
+      (if next-checker
+          (flycheck-start-checker next-checker callback)
+        ;; Delete overlays only after the very last checker has run, to avoid
+        ;; flickering on intermediate re-displays
+        (flycheck-delete-marked-overlays)
+        (flycheck-error-list-refresh)
+        (run-hooks 'flycheck-after-syntax-check-hook)
+        (when (eq (current-buffer) (window-buffer))
+          (flycheck-display-error-at-point))
+        ;; Immediately try to run any pending deferred syntax check, which
+        ;; were triggered by intermediate automatic check event, to make sure
+        ;; that we quickly refine outdated error information
+        (flycheck-perform-deferred-syntax-check)))))
+
+(defun flycheck-disable-excessive-checker (checker errors)
+  "Disable CHECKER if it reported excessive ERRORS.
+
+If ERRORS has more items than `flycheck-checker-error-threshold',
+add CHECKER to `flycheck-disabled-checkers', and show a warning.
+
+Return t when CHECKER was disabled, or nil otherwise."
+  (when (and flycheck-checker-error-threshold
+             (> (length errors) flycheck-checker-error-threshold))
+    ;; Disable CHECKER for this buffer (`flycheck-disabled-checkers' is a local
+    ;; variable).
+    (lwarn '(flycheck syntax-checker) :warning
+           "Syntax checker %s reported too many errors (%s) and is disabled."
+           checker (length errors))
+    (push checker flycheck-disabled-checkers)
+    t))
 
 
 ;;; Syntax checkers using external commands
@@ -3207,6 +3384,18 @@ Returns ERRORS, with folded messages."
 (defvar-local flycheck-current-errors nil
   "A list of all errors and warnings in the current buffer.")
 
+(defun flycheck-report-current-errors (errors)
+  "Report ERRORS in the current buffer.
+
+Add ERRORS to `flycheck-current-errors' and process each error
+with `flycheck-process-error-functions'."
+  (setq flycheck-current-errors (sort (append errors flycheck-current-errors)
+                                      #'flycheck-error-<))
+  (mapc (lambda (err)
+          (run-hook-with-args-until-success 'flycheck-process-error-functions
+                                            err))
+        errors))
+
 (defun flycheck-clear-errors ()
   "Remove all error information from the current buffer."
   (setq flycheck-current-errors nil)
@@ -4041,23 +4230,6 @@ output: %s\nChecker definition probably flawed."
           ;; were triggered by intermediate automatic check event, to make sure
           ;; that we quickly refine outdated error information
           (flycheck-perform-deferred-syntax-check))))))
-
-(defun flycheck-disable-excessive-checker (checker errors)
-  "Disable CHECKER if it reported excessive ERRORS.
-
-If ERRORS has more items than `flycheck-checker-error-threshold',
-add CHECKER to `flycheck-disabled-checkers', and show a warning.
-
-Return t when CHECKER was disabled, or nil otherwise."
-  (when (and flycheck-checker-error-threshold
-             (> (length errors) flycheck-checker-error-threshold))
-    ;; Disable CHECKER for this buffer (`flycheck-disabled-checkers' is a local
-    ;; variable).
-    (lwarn '(flycheck syntax-checker) :warning
-           "Syntax checker %s reported too many errors (%s) and is disabled."
-           checker (length errors))
-    (push checker flycheck-disabled-checkers)
-    t))
 
 (defun flycheck-handle-signal (process _event)
   "Handle a signal from the syntax checking PROCESS.
