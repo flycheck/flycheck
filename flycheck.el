@@ -3633,10 +3633,13 @@ In addition to these PROPERTIES, all properties from
                (not patterns))
       (error "Missing :error-patterns in syntax checker %s" symbol))
 
-    (plist-put properties :predicate
-               (lambda ()
-                 (and (executable-find (flycheck-checker-executable symbol))
-                      (or (not predicate) (funcall predicate)))))
+    (setq properties
+          ;; Construct a predicate that checks whether the executable exists, to
+          ;; guard against syntax checker tools which are not installed
+          (plist-put properties :predicate
+                     (lambda ()
+                       (and (executable-find (flycheck-checker-executable symbol))
+                            (or (not predicate) (funcall predicate))))))
 
     (apply #'flycheck-define-generic-checker symbol docstring
            :start #'flycheck-start-command-checker
