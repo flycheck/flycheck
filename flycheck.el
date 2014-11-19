@@ -4000,7 +4000,7 @@ _EVENT is ignored."
           (condition-case err
               (pcase (process-status process)
                 (`signal
-                 (funcall callback :interrupted))
+                 (funcall callback 'interrupted))
                 (`exit
                  (flycheck-finish-checker-process
                   (process-get process 'flycheck-checker)
@@ -4008,7 +4008,7 @@ _EVENT is ignored."
                   files
                   (flycheck-get-output process) callback)))
             (error
-             (funcall callback :errored (error-message-string err)))))))))
+             (funcall callback 'errored (error-message-string err)))))))))
 
 (defun flycheck-finish-checker-process
     (checker exit-status files output callback)
@@ -4025,10 +4025,10 @@ Parse the OUTPUT and report an appropriate error status."
       ;; after parsing the errors, before filtering, because a syntax checker
       ;; might report errors from other files (e.g. includes) even if there
       ;; are no errors in the file being checked.
-      (funcall callback :suspicious
+      (funcall callback 'suspicious
                (format "Checker %S returned non-zero exit code %s, but no errors from \
 output: %s\nChecker definition probably flawed." checker exit-status output)))
-    (funcall callback :finished
+    (funcall callback 'finished
              ;; Fix error file names, by substituting them backwards from the
              ;; temporaries
              (mapcar (lambda (e) (flycheck-fix-error-filename e files))
