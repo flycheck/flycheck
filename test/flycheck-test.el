@@ -1764,7 +1764,7 @@ and extension, as in `file-name-base'."
       (with-current-buffer (help-buffer)
         (goto-char (point-min))
         (re-search-forward
-         "The executable can be overridden with `\\(.+?\\)'.")
+         "The executable can[\n ]+be[\n ]+overridden[\n ]+with[\n ]+`\\(.+?\\)'\\.")
         (let ((var (flycheck-checker-executable-variable checker)))
           (should (string= (match-string 1) (symbol-name var))))))))
 
