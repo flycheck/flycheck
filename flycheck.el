@@ -2063,13 +2063,13 @@ checks."
                   (flycheck-filter-errors errors checker))))
     (unless (flycheck-disable-excessive-checker checker errors)
       (flycheck-report-current-errors errors))
-    (setq flycheck-current-syntax-check nil)
-    (flycheck-report-status 'finished)
     (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
       (if next-checker
           (setq flycheck-current-syntax-check
                 (flycheck-start-checker
                  next-checker (flycheck-buffer-status-callback next-checker)))
+        (setq flycheck-current-syntax-check nil)
+        (flycheck-report-status 'finished)
         ;; Delete overlays only after the very last checker has run, to avoid
         ;; flickering on intermediate re-displays
         (flycheck-delete-marked-overlays)
