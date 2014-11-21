@@ -3952,7 +3952,7 @@ symbols in the command."
 
 (defun flycheck-command-checker-running-p (_checker process)
   "Determine whether a _CHECKER PROCESS is still running."
-  (not (memq (process-status process) '(exit process))))
+  (not (memq (process-status process) '(exit signal))))
 
 (defun flycheck-command-checker-print-doc (checker)
   "Print additional documentation for a command CHECKER."
