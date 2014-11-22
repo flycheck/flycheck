@@ -1984,7 +1984,7 @@ CHECKER will be used, even if it is not contained in
                 (flycheck-clear)
                 (flycheck-report-status 'no-checker)))
           (error
-           (flycheck-report-error)
+           (flycheck-report-failed-syntax-check)
            (signal (car err) (cdr err)))))
     (user-error "Flycheck mode disabled")))
 
@@ -2037,14 +2037,11 @@ discarded."
         (if (eq checker current-checker)
             (pcase status
               ((or `errored `interrupted)
-               ;; Clear the last remnants of the old syntax check
-               (setq flycheck-current-syntax-check nil)
-               (flycheck-delete-marked-overlays)
+               (flycheck-report-failed-syntax-check status)
                (when (eq status 'errored)
                  ;; In case of error, show the error message
                  (message "Error from syntax checker %s: %s"
-                          checker (or data "UNKNOWN!")))
-               (flycheck-report-status status))
+                          checker (or data "UNKNOWN!"))))
               (`suspicious
                (when flycheck-mode
                  (message "Suspicious state from syntax checker %s: %s"
@@ -2122,7 +2119,6 @@ Return t when CHECKER was disabled, or nil otherwise."
 (defun flycheck-clear ()
   "Clear all errors in the current buffer."
   (interactive)
-  (flycheck-reset-status)
   (flycheck-delete-all-overlays)
   (flycheck-clear-errors)
   (flycheck-error-list-refresh)
@@ -2544,19 +2540,18 @@ corresponding buffer."
 (defvar-local flycheck-last-status-change 'not-checked
   "The last status change in the current buffer.")
 
-(defun flycheck-report-error ()
-  "Report a Flycheck error status.
+(defun flycheck-report-failed-syntax-check (&optional status)
+  "Report a failed Flycheck syntax check with STATUS.
 
-Clears all Flycheck errors first, runs
-`flycheck-syntax-check-failed-hook' and reports the status with
-`flycheck-report-status'."
+STATUS is a status symbol for `flycheck-report-status',
+defaulting to `errored'.
+
+Clear Flycheck state, run `flycheck-syntax-check-failed-hook' and
+report an error STATUS."
   (flycheck-clear)
+  (setq flycheck-current-syntax-check nil)
   (run-hooks 'flycheck-syntax-check-failed-hook)
-  (flycheck-report-status 'errored))
-
-(defun flycheck-reset-status ()
-  "Reset the Flycheck status."
-  (setq flycheck-last-status-change 'not-checked))
+  (flycheck-report-status (or status 'errored)))
 
 (defun flycheck-report-status (status)
   "Report Flycheck STATUS.
