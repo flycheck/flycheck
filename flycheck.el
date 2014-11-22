@@ -2010,12 +2010,12 @@ If CHECKER is not the currently used syntax checker in
 `flycheck-current-syntax-check', the status report is largely
 ignored.  Notably, any errors reported by the checker are
 discarded."
-  ;; Ignore the status report if the corresponding buffer is gone
-  (when (buffer-live-p buffer)
+  ;; Ignore the status report if the corresponding buffer is gone, or no current
+  ;; syntax check is being conducted for this buffer
+  (when (and (buffer-live-p buffer) flycheck-current-syntax-check)
     (with-current-buffer buffer
-      ;; Ignore the status report if Flycheck Mode has since been disabled
-      (let* ((current-check flycheck-current-syntax-check)
-             (current-checker (flycheck-syntax-check-checker current-check)))
+      (let* ((current-checker (flycheck-syntax-check-checker
+                               flycheck-current-syntax-check)))
         (if (eq checker current-checker)
             (pcase status
               ((or `errored `interrupted)
@@ -2034,6 +2034,8 @@ discarded."
                (flycheck-report-status 'suspicious))
               (`finished
                (when flycheck-mode
+                 ;; Only report errors from the checker if Flycheck Mode is
+                 ;; still enabled.
                  (flycheck-finish-current-syntax-check data)))
               (_
                (error "Unknown status %s from syntax checker %s"
