@@ -1326,7 +1326,16 @@ are mandatory.
 
      The first argument is the syntax checker being started.  The
      second is a callback function to report state changes to
-     Flycheck.
+     Flycheck.  The callback takes two arguments STATUS DATA,
+     where STATUS is a symbol denoting the syntax checker status
+     and DATA an optional argument with additional data for the
+     status report.  See `flycheck-report-buffer-checker-status'
+     for more information about STATUS and DATA.
+
+     A syntax checker _must_ call CALLBACK at least once with a
+     STATUS that finishes the current syntax checker.  Otherwise
+     Flycheck gets stuck at the current syntax check with this
+     syntax checker.
 
      The context object returned by FUNCTION is passed to
      `:interrupt' and `:running-p'.
@@ -1991,19 +2000,28 @@ of the following symbols:
      The syntax checker has errored.  DATA is an optional error
      message.
 
+     This report finishes the current syntax check.
+
 `interrupted'
      The syntax checker was interrupted.  DATA is ignored.
 
+     This report finishes the current syntax check.
+
 `finished'
-     The syntax checker is finished.  DATA is the list of
-     `flycheck-error' objects reported by the syntax check.
+     The syntax checker has finished with a proper error report
+     for the current buffer.  DATA is the (potentially empty)
+     list of `flycheck-error' objects reported by the syntax
+     check.
+
+     This report finishes the current syntax check.
 
 `suspicious'
      The syntax checker encountered a suspicious state, which the
      user needs to be informed about.  DATA is an optional
      message.
 
-A syntax checker MUST report `finished' status once, otherwise
+A syntax checker _must_ report a status at least once with any
+symbol that finishes the current syntax checker.  Otherwise
 Flycheck gets stuck with the current syntax check.
 
 If CHECKER is not the currently used syntax checker in
