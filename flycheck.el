@@ -3949,11 +3949,11 @@ symbols in the command."
        (signal (car err) (cdr err))))))
 
 (defun flycheck-interrupt-command-checker (_checker process)
-  "Interrupt a _CHECKER PROCESS."
+  "Interrupt a PROCESS."
   (delete-process process))
 
 (defun flycheck-command-checker-running-p (_checker process)
-  "Determine whether a _CHECKER PROCESS is still running."
+  "Determine whether a PROCESS is still running."
   ;; We use a dedicated process property to track whether Flycheck has finished
   ;; processing this syntax check.  We can't just check `process-status',
   ;; because the status of a process might change to `exit' BEFORE its process
