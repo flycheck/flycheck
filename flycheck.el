@@ -3954,7 +3954,16 @@ symbols in the command."
 
 (defun flycheck-command-checker-running-p (_checker process)
   "Determine whether a _CHECKER PROCESS is still running."
-  (not (memq (process-status process) '(exit signal))))
+  ;; We use a dedicated process property to track whether Flycheck has finished
+  ;; processing this syntax check.  We can't just check `process-status',
+  ;; because the status of a process might change to `exit' BEFORE its process
+  ;; sentinel was invoked.  This opens up for a race condition, where Flycheck
+  ;; considers the syntax check as finished, even though its process sentinel
+  ;; wasn't called yet, and thus its status not reported.  Flycheck would start
+  ;; another syntax check in this case, which would then conflict with the
+  ;; status report of the first and lead to reports being reported twice, and
+  ;; other kinds of havoc.  See https://github.com/flycheck/flycheck/issues/495
+  (not (process-get process 'flycheck-finished)))
 
 (defun flycheck-command-checker-print-doc (checker)
   "Print additional documentation for a command CHECKER."
@@ -4004,6 +4013,9 @@ symbols in the command."
 
 _EVENT is ignored."
   (when (memq (process-status process) '(signal exit))
+    ;; Tell `flycheck-command-checker-running-p' that the sentinel of this
+    ;; process was called.
+    (process-put process 'flycheck-finished t)
     (let ((files (process-get process 'flycheck-temporaries))
           (buffer (process-get process 'flycheck-buffer))
           (callback (process-get process 'flycheck-callback)))
