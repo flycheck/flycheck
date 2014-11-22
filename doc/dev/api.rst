@@ -24,6 +24,8 @@ syntax checkers use an Emacs Lisp function to check the current buffer.
 .. function:: flycheck-define-generic-checker
    :auto:
 
+   .. seealso:: :ref:`api-status-callback-protocol`
+
 To make new syntax checkers available for automatic selection you need to
 register them by adding them to :option:`flycheck-checkers`.
 
@@ -38,6 +40,45 @@ syntax checkers:
 
 .. function:: flycheck-add-next-checker
    :auto:
+
+.. _api-status-callback-protocol:
+
+Status callback protocol
+------------------------
+
+The ``callback`` argument to the `:start` function of a syntax checker defined
+with :function:`flycheck-define-generic-checker` is a function taking two
+arguments:
+
+.. function:: status-callback status &optional data
+
+   `status` is one of the following symbols, denoting the status being reported:
+
+   `errored` (*finishing*)
+      The syntax checker has errored.  `data` is an optional error message as
+      string.
+
+   `interrupted` (*finishing*)
+      The syntax checker was interrupted.  `data` is ignored in this case.
+
+   `finished` (*finishing*)
+      The syntax checker has finished to check the buffer and reported some
+      errors.  DATA is the list of :cl-struct:`flycheck-error` objects reported
+      by the syntax check.
+
+   `suspicious`
+      The syntax checker encountered some suspicious state (like a potential
+      fault in the syntax checker definition), which the user needs to be
+      informed about.
+
+   A *finishing* `status` symbol finishes the current syntax check, and allows
+   Flycheck to conduct further syntax checks.  A syntax checker **must** call
+   the callback at least once with a *finishing* `status` symbol.
+
+   .. warning::
+
+      Failure to call the callback will cause Flycheck to get stuck at the
+      current syntax check.
 
 Predicates for syntax checkers
 ------------------------------
