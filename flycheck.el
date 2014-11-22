@@ -2356,23 +2356,22 @@ if ERR has no column."
           (widen)
           (goto-char (point-min))
           (forward-line (- (flycheck-error-line err) 1))
-          (let ((line (flycheck-error-line err)))
-            (cond
-             ((eobp)                    ; Line beyond EOF
-              ;; If we are at the end of the file (i.e. the line was beyond the
-              ;; end of the file), use the very last column in the file.
-              (cons (- (point-max) 1) (point-max)))
-             ((eolp)                    ; Empty line
-              ;; If the target line is empty, there's no column to highlight on
-              ;; this line, so return the last column of the previous line.
-              (cons (line-end-position 0) (point)))
-             (t
-              ;; The end is either the column offset of the line, or the end of
-              ;; the line, if the column offset points beyond the end of the
-              ;; line.
-              (let ((end (min (+ (point) column)
-                              (+ (line-end-position) 1))))
-                (cons (- end 1) end))))))))))
+          (cond
+           ((eobp)                    ; Line beyond EOF
+            ;; If we are at the end of the file (i.e. the line was beyond the
+            ;; end of the file), use the very last column in the file.
+            (cons (- (point-max) 1) (point-max)))
+           ((eolp)                    ; Empty line
+            ;; If the target line is empty, there's no column to highlight on
+            ;; this line, so return the last column of the previous line.
+            (cons (line-end-position 0) (point)))
+           (t
+            ;; The end is either the column offset of the line, or the end of
+            ;; the line, if the column offset points beyond the end of the
+            ;; line.
+            (let ((end (min (+ (point) column)
+                            (+ (line-end-position) 1))))
+              (cons (- end 1) end)))))))))
 
 (defun flycheck-error-thing-region (thing err)
   "Get the region of THING at the column of ERR.
