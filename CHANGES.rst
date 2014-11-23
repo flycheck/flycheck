@@ -24,6 +24,8 @@ master (in development)
 
   - Properly parse notes in `sh-shellcheck` [GH-508]
   - Fix shell quoting in `flycheck-compile` [GH-522] [GH-523]
+  - Fix faulty properties of customize options which broke `customize-changed`
+    and related functions
 
 0.21 (Oct 26, 2014)
 -------------------
