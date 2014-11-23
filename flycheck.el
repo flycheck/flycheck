@@ -744,19 +744,19 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
   '((t :inherit font-lock-keyword-face))
   "Face for line numbers in the error list."
   :group 'flycheck-faces
-  :version '(flycheck . "0.16"))
+  :package-version '(flycheck . "0.16"))
 
 (defface flycheck-error-list-column-number
   '((t :inherit font-lock-doc-face))
   "Face for line numbers in the error list."
   :group 'flycheck-faces
-  :version '(flycheck . "0.16"))
+  :package-version '(flycheck . "0.16"))
 
 (defface flycheck-error-list-checker-name
   '((t :inherit font-lock-type-face))
   "Face for the syntax checker name in the error list."
   :group 'flycheck-faces
-  :version '(flycheck . "0.21"))
+  :package-version '(flycheck . "0.21"))
 
 (defface flycheck-error-list-highlight
   '((t :inherit highlight))
