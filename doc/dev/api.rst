@@ -1,3 +1,5 @@
+.. _flycheck-api:
+
 ==============
  Flycheck API
 ==============
@@ -158,6 +160,8 @@ Flycheck provides some built-in filters for such options:
 .. function:: flycheck-option-comma-separated-list
    :auto:
 
+.. _api-configuration-files:
+
 Configuration files for command syntax checkers
 -----------------------------------------------
 
@@ -190,6 +194,8 @@ error parser:
 .. function:: flycheck-parse-with-patterns
    :auto:
 
+.. _api-error-parsers:
+
 Error parsers
 -------------
 
@@ -200,7 +206,16 @@ standard output formats:
 .. function:: flycheck-parse-checkstyle
    :auto:
 
-You can also write your own error parsers.  The following functions can aid you:
+You can also write your own error parsers.  An error parser is a function with
+the following signature:
+
+.. function:: flycheck-error-parser output checker buffer
+
+   `output` is the output of the command as string.  `checker` is the syntax
+   checker from which the output comes, and `buffer` is the buffer that was
+   checked.
+
+The following functions can aid you in writing custom parsers:
 
 .. function:: flycheck-parse-xml-string
    :auto:

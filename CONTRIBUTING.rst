@@ -14,6 +14,8 @@ guidelines.
 Reporting issues
 ================
 
+Please report issues to the `issue tracker`_.
+
 - Check that the issue has not already been reported.
 - Check that the issue has not already been fixed in the latest code.
 - Be clear and precise (do not prose, but name functions and commands exactly).
