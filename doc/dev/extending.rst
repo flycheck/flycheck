@@ -271,6 +271,8 @@ Flycheck provides a sophisticated logic to find an appropriate configuration
 file.  See :ref:`syntax-checker-configuration-files` and
 :ref:`api-configuration-files` for details.
 
+.. _rubocop: https://github.com/bbatsov/rubocop
+
 Controlling the use of a syntax checker
 ---------------------------------------
 
@@ -281,4 +283,47 @@ Applying more than one syntax checker
 
 .. todo::
 
-.. _rubocop: https://github.com/bbatsov/rubocop
+Read more
+=========
+
+Use arbitrary functions to check buffers
+----------------------------------------
+
+Beyond commands, Flycheck also supports arbitrary functions as syntax checkers
+with :function:`flycheck-define-generic-checker`.
+
+Hooking into Flycheck
+---------------------
+
+Flycheck has a rich hook interface which you can use for your own extensions.
+
+Status changes
+~~~~~~~~~~~~~~
+
+:hook:`flycheck-before-syntax-check-hook` and `flycheck-after-syntax-check-hook`
+run before and after syntax checks, and let you update your Emacs instance
+according to Flycheck's state.  For instance, flycheck-color-mode-line_ uses
+these hooks to colour your mode-line according to the result of the last syntax
+check.  Additionally, :hook:`flycheck-status-changed-functions` runs on every
+single status change of Flycheck, and provides a fine-grained reporting about
+what Flycheck is currently doing.
+
+Error processing
+~~~~~~~~~~~~~~~~
+
+The functions in :hook:`flycheck-process-error-functions` are used to process
+new errors reported by a Flycheck syntax checker.  Add to this hook to get
+informed about each error reported in a Flycheck buffer.  In fact, Flycheck uses
+this hook itself: The standard value :function:`flycheck-add-overlay` is
+responsible for adding error highlighting to the buffer.  As a consequence, you
+can **entirely opt out** from highlighting with a custom hook.
+
+Error display
+~~~~~~~~~~~~~
+
+The function :hook:`flycheck-display-errors-function` is called to display an
+error at point.  The `flycheck-pos-tip`_ extension uses this hook to show errors
+in a GUI popup like conventional IDEs do.
+
+.. _flycheck-color-mode-line: https://github.com/flycheck/flycheck-color-mode-line
+.. _flycheck-pos-tip
