@@ -6331,7 +6331,10 @@ Requires Sphinx 1.2 or newer.  See URL `http://sphinx-doc.org'."
   "Whether to only report code issues in Rubocop.
 
 When non-nil, only report code issues in Rubocop, via `--lint'.
-Otherwise report style issues as well.")
+Otherwise report style issues as well."
+  :safe #'booleanp
+  :type 'boolean
+  :package-version '(flycheck . "0.16"))
 
 (flycheck-define-checker ruby-rubocop
   "A Ruby syntax and style checker using the RuboCop tool.
