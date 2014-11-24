@@ -359,9 +359,6 @@ Flycheck buffer status
 .. function:: flycheck-report-status
    :auto:
 
-.. function:: flycheck-report-error
-   :auto:
-
 .. variable:: flycheck-last-status-change
    :auto:
 
