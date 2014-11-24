@@ -12,6 +12,7 @@ analysis.
 You will also find this document helpful if you want to develop Flycheck itself.
 
 .. contents:: Contents
+   :local:
 
 .. _api-generic-syntax-checkers:
 

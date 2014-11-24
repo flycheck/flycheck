@@ -9,6 +9,7 @@ own test suite, and available for use in test suites for your own Flycheck
 extensions.
 
 .. contents:: Contents
+   :local:
 
 Loading
 =======
