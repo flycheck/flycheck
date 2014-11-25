@@ -336,6 +336,11 @@ See :infonode:`(cl)Structures` for more information about CL structures.
    .. function:: flycheck-error-level-<
       :auto:
 
+Error processing
+----------------
+
+.. function:: flycheck-add-overlay
+
 Error analysis
 --------------
 
@@ -365,6 +370,9 @@ Flycheck provides three built-in error levels:
 You can define new error levels with :function:`flycheck-define-error-level`:
 
 .. function:: flycheck-define-error-level
+   :auto:
+
+.. function:: flycheck-error-level-p
    :auto:
 
 .. _api-flycheck-buffer-status:
