@@ -203,15 +203,17 @@ For instance, the Rubocop_ tool checks Ruby for semantic and stylistic issues.
 Since style is mainly a matter of taste, it has a special linting mode in which
 all stylistic checks are disabled (error patterns omitted for readability):
 
-(flycheck-define-checker ruby-rubocop
-  "A Ruby syntax and style checker using the RuboCop tool.
+.. code-block:: cl
 
-See URL `http://batsov.com/rubocop/'."
-  :command ("rubocop" "--format" "emacs"
-            (option-flag "--lint" flycheck-rubocop-lint-only)
-            source)
-  :error-patterns …
-  :modes (ruby-mode))
+   (flycheck-define-checker ruby-rubocop
+     "A Ruby syntax and style checker using the RuboCop tool.
+
+   See URL `http://batsov.com/rubocop/'."
+     :command ("rubocop" "--format" "emacs"
+               (option-flag "--lint" flycheck-rubocop-lint-only)
+               source)
+     :error-patterns …
+     :modes (ruby-mode))
 
 Note the special `option-flag` argument, which splices the value of the boolean
 Emacs option `flycheck-rubocop-lint-only` into the command: If the variable is
@@ -347,4 +349,4 @@ error at point.  The `flycheck-pos-tip`_ extension uses this hook to show errors
 in a GUI popup like conventional IDEs do.
 
 .. _flycheck-color-mode-line: https://github.com/flycheck/flycheck-color-mode-line
-.. _flycheck-pos-tip
+.. _flycheck-pos-tip: https://github.com/flycheck/flycheck-pos-tip
