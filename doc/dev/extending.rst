@@ -120,7 +120,9 @@ output and write a regular expression to match it.  `M-x shell` comes handy
 here.
 
 However, as you start to debug and refine your patterns, this quickly becomes
-cumbersome.  Flycheck provides an easier way to test a syntax checker:
+cumbersome.  Flycheck provides an easier way to test a syntax checker: Evaluate
+the syntax checker definition with :kbd:`C-M-x` and run
+:command:`flycheck-compile`.
 
 .. command:: flycheck-compile
    :binding: C-c ! C-c
@@ -140,19 +142,22 @@ this case, you need to write a more sophisticated parser yourself.  See
 Trying a new syntax checker
 ---------------------------
 
-After evaluating this definition in Emacs, we can now already use this syntax
-checker by selecting it manually with :command:`flycheck-select-checker`, but we
-need another step for Flycheck to use this syntax checker automatically whenever
-we visit a Javascript file.
+After evaluating a syntax checker definition you can try whether it works for
+normal syntax checks by selecting it manually with :kbd:`C-c ! s`
+(:command:`flycheck-select-checker`).  If anything breaks, you can unselect the
+syntax checker again with :kbd:`C-u C-c ! s` and fix the error without further
+affecting Flycheck.
 
-.. todo::
+Once you have confirmed that your new syntax checker works flawlessly, you can
+make it available for automatic syntax checking by registering it.
 
 .. _registering-new-syntax-checkers:
 
 Registering new syntax checkers
 -------------------------------
 
-We need to add the syntax checkers to :option:`flycheck-checkers`:
+To register a new syntax checker for automatic syntax checking, just add it to
+:option:`flycheck-checkers`:
 
 .. code-block:: cl
 
