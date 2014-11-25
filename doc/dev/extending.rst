@@ -276,7 +276,28 @@ file.  See :ref:`syntax-checker-configuration-files` and
 Controlling the use of a syntax checker
 ---------------------------------------
 
-.. todo::
+If you need more control about when a syntax checker is used for syntax
+checking, you can supply a custom `:predicate` function.  Consider the following
+syntax checker for Zsh scripts in Sh Mode:
+
+.. code-block:: cl
+
+   (flycheck-define-checker sh-zsh
+     "A Zsh syntax checker using the Zsh shell.
+
+   See URL `http://www.zsh.org/'."
+     :command ("zsh" "-n" "-d" "-f" source)
+     :error-patterns
+     ((error line-start (file-name) ":" line ": " (message) line-end))
+     :modes sh-mode
+     :predicate (lambda () (eq sh-shell 'zsh)))
+
+Sh Mode also supports Bash and other shells besides Zsh, so we additionally
+provide a `:predicate` that checks whether the current buffer has the right
+shell.
+
+You can even omit `:modes` and only use a predicate to determine whether a
+syntax checker is applicable for the current buffer.
 
 Applying more than one syntax checker
 -------------------------------------
