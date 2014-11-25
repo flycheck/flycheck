@@ -109,17 +109,48 @@ how to parse its output:
 .. seealso:: :function:`flycheck-substitute-argument`; for a complete list of
              all special arguments
 
+.. _Pylint: http://www.pylint.org/
+
+Finding the right error patterns
+--------------------------------
+
+Finding the right error patterns is the hardest part of a syntax checker
+definition.  For a first version, you just run the tool on a file, look at its
+output and write a regular expression to match it.  `M-x shell` comes handy
+here.
+
+However, as you start to debug and refine your patterns, this quickly becomes
+cumbersome.  Flycheck provides an easier way to test a syntax checker:
+
+.. command:: flycheck-compile
+   :binding: C-c ! C-c
+
+   Run a syntax checker on the current buffer in a fresh Compilation Mode
+   buffer.  Prompt for a syntax checker to run.
+
+This command runs the command like a normal syntax check would do, but instead
+of highlighting errors within the buffer it shows a new buffer in Compilation
+Mode, which contains the entire output of the command and highlights everything
+that matches a pattern.
+
+Sometimes however an output format doesn't lend itself to error patterns.  In
+this case, you need to write a more sophisticated parser yourself.  See
+:ref:`parsing-structured-output-format` for more information.
+
+Trying a new syntax checker
+---------------------------
+
 After evaluating this definition in Emacs, we can now already use this syntax
 checker by selecting it manually with :command:`flycheck-select-checker`, but we
 need another step for Flycheck to use this syntax checker automatically whenever
 we visit a Javascript file.
 
-.. _Pylint: http://www.pylint.org/
+.. todo::
 
 .. _registering-new-syntax-checkers:
 
 Registering new syntax checkers
-===============================
+-------------------------------
 
 We need to add the syntax checkers to :option:`flycheck-checkers`:
 
@@ -163,6 +194,8 @@ whose `:modes` contains the current major mode.
 
 More features
 =============
+
+.. _parsing-structured-output-format:
 
 Parsing structured output format
 --------------------------------
