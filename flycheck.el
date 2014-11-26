@@ -2580,7 +2580,6 @@ refresh the mode line."
   (run-hook-with-args 'flycheck-status-changed-functions status)
   (force-mode-line-update))
 
-
 (defun flycheck-mode-line-status-text (&optional status)
   "Get a text describing STATUS for use in the mode line.
 
