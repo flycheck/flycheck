@@ -2170,18 +2170,24 @@ and extension, as in `file-name-base'."
   (list
    (flycheck-error-new
     :filename "test-javascript/missing-semicolon.js"
+    :checker 'checker
+    :buffer 'buffer
     :line 3
     :column 21
     :level 'error
     :message "Missing semicolon.")
    (flycheck-error-new
     :filename "test-javascript/missing-semicolon.js"
+    :checker 'checker
+    :buffer 'buffer
     :line 3
     :column nil
     :level 'warning
     :message "Implied global 'alert'")
    (flycheck-error-new
     :filename "test-javascript/missing-quote.js"
+    :checker 'checker
+    :buffer 'buffer
     :line nil
     :column nil
     :level 'error
@@ -2191,19 +2197,22 @@ and extension, as in `file-name-base'."
 (ert-deftest flycheck-parse-checkstyle/with-builtin-xml ()
   :tags '(error-parsing)
   (let ((flycheck-xml-parser 'flycheck-parse-xml-region))
-    (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml nil nil)
+    (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml
+                                              'checker 'buffer)
                    flycheck-checkstyle-expected-errors))))
 
 (ert-deftest flycheck-parse-checkstyle/with-libxml2 ()
   :tags '(error-parsing)
   (skip-unless (fboundp 'libxml-parse-xml-region))
   (let ((flycheck-xml-parser 'libxml-parse-xml-region))
-    (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml nil nil)
+    (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml
+                                              'checker 'buffer)
                    flycheck-checkstyle-expected-errors))))
 
 (ert-deftest flycheck-parse-checkstyle/automatic-parser ()
   :tags '(error-parsing)
-  (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml nil nil)
+  (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml
+                                            'checker 'buffer)
                  flycheck-checkstyle-expected-errors)))
 
 (defconst flycheck-cppcheck-xml
@@ -2230,18 +2239,24 @@ of the file will be interrupted because there are too many #ifdef configurations
   (list
    (flycheck-error-new
     :filename "foo"
+    :buffer 'buffer
+    :checker 'checker
     :line 4
     :column nil
     :level 'error
     :message "Null pointer dereference")
    (flycheck-error-new
     :filename "bar"
+    :buffer 'buffer
+    :checker 'checker
     :line 6
     :column nil
     :level 'error
     :message "Null pointer dereference")
    (flycheck-error-new
     :filename "eggs"
+    :buffer 'buffer
+    :checker 'checker
     :line 2
     :column nil
     :level 'warning
@@ -2249,7 +2264,8 @@ of the file will be interrupted because there are too many #ifdef configurations
 
 (ert-deftest flycheck-parse-cppcheck ()
   :tags '(error-parsing)
-  (should (equal (flycheck-parse-cppcheck flycheck-cppcheck-xml nil nil)
+  (should (equal (flycheck-parse-cppcheck flycheck-cppcheck-xml
+                                          'checker 'buffer)
                  flycheck-cppcheck-expected-errors)))
 
 (ert-deftest flycheck-parse-cppcheck/empty-errors-list-with-automatic-parser ()

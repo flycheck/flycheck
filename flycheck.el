@@ -4357,13 +4357,7 @@ OUTPUT is a string with the output from the checker symbol
 CHECKER.  BUFFER is the buffer which was checked.
 
 Return the errors parsed with the error patterns of CHECKER."
-  (let* ((parser (flycheck-checker-error-parser checker))
-         (errors (funcall parser output checker buffer)))
-    (dolist (err errors)
-      ;; Remember the source buffer and checker in the error
-      (setf (flycheck-error-buffer err) buffer)
-      (setf (flycheck-error-checker err) checker))
-    errors))
+  (funcall (flycheck-checker-error-parser checker) output checker buffer))
 
 (defun flycheck-fix-error-filename (err buffer-files)
   "Fix the file name of ERR from BUFFER-FILES.
@@ -4411,90 +4405,79 @@ text nodes) or as XML nodes, in the same for as the root node."
     (insert xml)
     (funcall flycheck-xml-parser (point-min) (point-max))))
 
-(defun flycheck-parse-checkstyle-file-node (node)
-  "Parse a single file NODE in a Checkstyle document.
-
-Return a list of all errors contained in the NODE, or nil if NODE
-is not a file node."
-  (let ((filename (cdr (assq 'name (cadr node))))
-        errors)
-    (dolist (child-node (cddr node))
-      (when (and (listp child-node) (eq (car child-node) 'error))
-        (let* ((attrs (cadr child-node))
-               (line (flycheck-string-to-number-safe
-                      (cdr (assq 'line attrs))))
-               (column (flycheck-string-to-number-safe
-                        (cdr (assq 'column attrs))))
-               (severity (cdr (assq 'severity attrs)))
-               (message (cdr (assq 'message attrs))))
-          (push (flycheck-error-new
-                 :filename filename
-                 :line line
-                 :column (when (and column (> column 0)) column)
-                 :message message
-                 :level (pcase severity
-                          (`"error"   'error)
-                          (`"warning" 'warning)
-                          (`"info"    'info)
-                          ;; Default to error for unknown severity
-                          (_          'error)))
-                errors))))
-    (nreverse errors)))
-
-(defun flycheck-parse-checkstyle (output _checker _buffer)
+(defun flycheck-parse-checkstyle (output checker buffer)
   "Parse Checkstyle errors from OUTPUT.
 
 Parse Checkstyle-like XML output.  Use this error parser for
 checkers that have an option to output errors in this format.
 
-_CHECKER and _BUFFER are ignored.
-
 See URL `http://checkstyle.sourceforge.net/' for information
 about Checkstyle."
-  (let ((root (flycheck-parse-xml-string output)))
-    (when (eq (car root) 'checkstyle)
-      (-mapcat #'flycheck-parse-checkstyle-file-node
-               (-filter (lambda (n) (and (listp n) (eq (car n) 'file)))
-                        (cddr root))))))
+  (pcase (flycheck-parse-xml-string output)
+    (`(checkstyle ,_ . ,file-nodes)
+     (let (errors)
+       (dolist (node file-nodes)
+         (pcase node
+           (`(file ,file-attrs . ,error-nodes)
+            (dolist (node error-nodes)
+              (pcase node
+                (`(error ,error-attrs . ,_)
+                 (let ((filename (cdr (assq 'name file-attrs)))
+                       (line (cdr (assq 'line error-attrs)))
+                       (column (cdr (assq 'column error-attrs)))
+                       (severity (cdr (assq 'severity error-attrs)))
+                       (message (cdr (assq 'message error-attrs))))
+                   (push (flycheck-error-new-at
+                          (flycheck-string-to-number-safe line)
+                          (flycheck-string-to-number-safe column)
+                          (pcase severity
+                            (`"error"   'error)
+                            (`"warning" 'warning)
+                            (`"info"    'info)
+                            ;; Default to error for unknown severity
+                            (_          'error))
+                          message
+                          :checker checker
+                          :buffer buffer
+                          :filename filename)
+                         errors))))))))
+       (nreverse errors)))))
 
-(defun flycheck-parse-cppcheck-error-node (node)
-  "Parse a single error NODE from Cppcheck XML.
-
-Return a list of all Flycheck errors this node represents."
-  (let ((node-attrs (cadr node))
-        errors)
-    (dolist (child-node (cddr node))
-      (when (and (listp child-node) (eq (car child-node) 'location))
-        (let ((child-attrs (cadr child-node)))
-          (push (flycheck-error-new
-                 :filename (cdr (assq 'file child-attrs))
-                 :line (flycheck-string-to-number-safe
-                        (cdr (assq 'line child-attrs)))
-                 :message (cdr (assq 'verbose node-attrs))
-                 :level (if (string= (cdr (assq 'severity node-attrs)) "error")
-                            'error 'warning))
-                errors))))
-    (nreverse errors)))
-
-(defun flycheck-parse-cppcheck (output _checker _buffer)
+(defun flycheck-parse-cppcheck (output checker buffer)
   "Parse Cppcheck errors from OUTPUT.
 
 Parse Cppcheck XML v2 output.
 
-_BUFFER and _ERROR are ignored.
-
 See URL `http://cppcheck.sourceforge.net/' for more information
 about Cppcheck."
-  (let ((root (flycheck-parse-xml-string output)))
-    (when (eq (car root) 'results)
-      (let ((nodes (cddr root)))
-        (while (and nodes
-                    (not (and (listp (car nodes)) (eq (caar nodes) 'errors))))
-          (setq nodes (cdr nodes)))
-        ;; Filter error nodes
-        (-mapcat #'flycheck-parse-cppcheck-error-node
-                 (-filter (lambda (n) (and (listp n) (eq (car n) 'error)))
-                          (car nodes)))))))
+  (pcase (flycheck-parse-xml-string output)
+    (`(results ,_ . ,body)
+     (let (errors)
+       (dolist (node body)
+         (pcase node
+           (`(errors ,_ . ,error-nodes)
+            (dolist (node error-nodes)
+              (pcase node
+                (`(error ,error-attrs . ,loc-nodes)
+                 (dolist (node loc-nodes)
+                   (pcase node
+                     (`(location ,loc-attrs . ,_)
+                      (let ((line (cdr (assq'line loc-attrs)))
+                            (filename (cdr (assq 'file loc-attrs)))
+                            (message (cdr (assq 'verbose error-attrs)))
+                            (severity (cdr (assq 'severity error-attrs))))
+                        (push (flycheck-error-new-at
+                               (flycheck-string-to-number-safe line)
+                               nil
+                               (pcase severity
+                                 (`"error" 'error)
+                                 (_ 'warning))
+                               message
+                               :checker checker
+                               :buffer buffer
+                               :filename filename)
+                              errors)))))))))))
+       (nreverse errors)))))
 
 
 ;;; Error parsing with regular expressions
@@ -4521,8 +4504,8 @@ Return a list of error tokens."
       (setq last-match (match-end 0)))
     (reverse errors)))
 
-(defun flycheck-try-parse-error-with-pattern (err pattern)
-  "Try to parse a single ERR with a PATTERN.
+(defun flycheck-try-parse-error-with-pattern (err pattern checker)
+  "Try to parse a single ERR with a PATTERN for CHECKER.
 
 Return the parsed error if PATTERN matched ERR, or nil
 otherwise."
@@ -4533,15 +4516,16 @@ otherwise."
             (line (match-string 2 err))
             (column (match-string 3 err))
             (message (match-string 4 err)))
-        (flycheck-error-new
-         :filename (unless (string-empty-p filename) filename)
-         :line (flycheck-string-to-number-safe line)
-         :column (flycheck-string-to-number-safe column)
-         :message (unless (string-empty-p message) message)
-         :level level)))))
+        (flycheck-error-new-at
+         (flycheck-string-to-number-safe line)
+         (flycheck-string-to-number-safe column)
+         level
+         (unless (string-empty-p message) message)
+         :checker checker
+         :filename (unless (string-empty-p filename) filename))))))
 
-(defun flycheck-parse-error-with-patterns (err patterns)
-  "Parse a single ERR with error PATTERNS.
+(defun flycheck-parse-error-with-patterns (err patterns checker)
+  "Parse a single ERR with error PATTERNS for CHECKER.
 
 Apply each pattern in PATTERNS to ERR, in the given order, and
 return the first parsed error."
@@ -4551,21 +4535,11 @@ return the first parsed error."
     (while (and patterns
                 (not (setq parsed-error
                            (flycheck-try-parse-error-with-pattern
-                            err (car patterns)))))
+                            err (car patterns) checker))))
       (setq patterns (cdr patterns)))
     parsed-error))
 
-(defun flycheck-parse-errors-with-patterns (errors patterns)
-  "Parse ERRORS with PATTERNS.
-
-ERRORS is a list of strings where each string is an unparsed
-error message, typically from `flycheck-split-output'.  PATTERNS
-is a list of error patterns to parse ERRORS with.
-
-Return a list of parsed errors."
-  (mapcar (lambda (e) (flycheck-parse-error-with-patterns e patterns)) errors))
-
-(defun flycheck-parse-with-patterns (output checker _buffer)
+(defun flycheck-parse-with-patterns (output checker buffer)
   "Parse OUTPUT from CHECKER with error patterns.
 
 Uses the error patterns of CHECKER to tokenize the output and
@@ -4577,9 +4551,11 @@ _BUFFER is ignored.
 
 Return a list of parsed errors and warnings (as `flycheck-error'
 objects)."
-  (let ((patterns (flycheck-checker-error-patterns checker)))
-    (flycheck-parse-errors-with-patterns
-     (flycheck-tokenize-output-with-patterns output patterns) patterns)))
+  (with-current-buffer buffer
+    (let ((patterns (flycheck-checker-error-patterns checker)))
+      (mapcar (lambda (err)
+                (flycheck-parse-error-with-patterns err patterns checker))
+              (flycheck-tokenize-output-with-patterns output patterns)))))
 
 
 ;;; Convenience definition of command-syntax checkers
