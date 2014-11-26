@@ -1338,28 +1338,26 @@ are mandatory.
      syntax checker.
 
      The context object returned by FUNCTION is passed to
-     `:interrupt' and `:running-p'.
+     `:interrupt'.
 
 `:interrupt FUNCTION'
      A function to interrupt the syntax check.
 
      FUNCTION is called with the syntax checker and the context
      object returned by the `:start' function and shall try to
-     interrupt the syntax check.  If it fails to do so, it shall
-     signal an error.
+     interrupt the syntax check.  If it cannot do so, it may
+     either signal an error or silently ignore the attempt to
+     interrupt the syntax checker, depending on the severity of
+     the situation.
 
-     Note that FUNCTION should try very hard to interrupt the
-     check, and should signal an error only as a very last
-     resort.  Uninterruptable syntax checkers might corrupt
-     Flycheck's internal state.
+     If interrupting the syntax check failed, Flycheck will let
+     the syntax check continue, but ignore any status reports.
+     Notably, it won't highlight any errors reported by the
+     syntax check in the buffer.
 
-`:running-p FUNCTION'
-     A function to determine whether a syntax check is still
-     running.
-
-     FUNCTION is called with the syntax checker and the context
-     object returned by `:running-p' and shall return non-nil if
-     the corresponding syntax check is still running.
+     This property is optional.  If omitted, Flycheck won't
+     attempt to interrupt syntax checks wit this syntax checker,
+     and simply ignore their results.
 
 `:doc-printer FUNCTION'
      A function to print additional documentation into the Help
@@ -1456,7 +1454,6 @@ Signal an error, if any property has an invalid value."
            (doc-string 2))
   (let ((start (plist-get properties :start))
         (interrupt (plist-get properties :interrupt))
-        (running-p (plist-get properties :running-p))
         (doc-printer (plist-get properties :doc-printer))
         (modes (plist-get properties :modes))
         (predicate (plist-get properties :predicate))
@@ -1470,12 +1467,9 @@ Signal an error, if any property has an invalid value."
 
     (unless (functionp start)
       (error ":start %S of syntax checker %s is not a function" symbol start))
-    (unless (functionp interrupt)
+    (unless (or (null interrupt) (functionp interrupt))
       (error ":interrupt %S of syntax checker %s is not a function"
              symbol interrupt))
-    (unless (functionp running-p)
-      (error ":running-p %S of syntax checker %s is not a function"
-             symbol running-p))
     (unless (or (null doc-printer) (functionp doc-printer))
       (error ":doc-printer %S of syntax checker %s is not a function"
              symbol doc-printer))
@@ -1503,7 +1497,6 @@ Try to reinstall the package defining this syntax checker." symbol)
       (pcase-dolist (`(,prop . ,value)
                      `((flycheck-start         . ,start)
                        (flycheck-interrupt     . ,interrupt)
-                       (flycheck-running-p     . ,running-p)
                        (flycheck-doc-printer   . ,doc-printer)
                        (flycheck-modes         . ,modes)
                        (flycheck-predicate     . ,real-predicate)
@@ -1752,15 +1745,11 @@ Return a `flycheck-syntax-check' representing the syntax check."
 
 (defun flycheck-interrupt-syntax-check (syntax-check)
   "Interrupt a SYNTAX-CHECK."
-  (let ((checker (flycheck-syntax-check-checker syntax-check))
-        (context (flycheck-syntax-check-context syntax-check)))
-    (funcall (get checker 'flycheck-interrupt) checker context)))
-
-(defun flycheck-syntax-check-running-p (syntax-check)
-  "Determine whether SYNTAX-CHECK is still running."
-  (let ((checker (flycheck-syntax-check-checker syntax-check))
-        (context (flycheck-syntax-check-context syntax-check)))
-    (funcall (get checker 'flycheck-running-p) checker context)))
+  (let* ((checker (flycheck-syntax-check-checker syntax-check))
+         (interrupt-fn (get checker 'flycheck-interrupt))
+         (context (flycheck-syntax-check-context syntax-check)))
+    (when interrupt-fn
+      (funcall interrupt-fn checker context))))
 
 
 ;;; Syntax checking mode
@@ -1944,13 +1933,17 @@ CHECKER will be used, even if it is not contained in
 
 (defun flycheck-running-p ()
   "Determine whether a syntax check is running in the current buffer."
-  (let ((syntax-check flycheck-current-syntax-check))
-    (and syntax-check (flycheck-syntax-check-running-p syntax-check))))
+  (not (null flycheck-current-syntax-check)))
 
 (defun flycheck-stop ()
   "Stop any ongoing syntax check in the current buffer."
   (when (flycheck-running-p)
-    (flycheck-interrupt-syntax-check flycheck-current-syntax-check)))
+    (flycheck-interrupt-syntax-check flycheck-current-syntax-check)
+    ;; Remove the current syntax check, to reset Flycheck into a non-running
+    ;; state, and to make `flycheck-report-buffer-checker-status' ignore any
+    ;; status reports from the current syntax check.
+    (setq flycheck-current-syntax-check nil)
+    (flycheck-report-status 'interrupted)))
 
 (defun flycheck-buffer-status-callback (checker)
   "Create a status callback for CHECKER in the current buffer."
@@ -3631,10 +3624,10 @@ Unless otherwise noted, all properties are mandatory.
 
 In addition to these PROPERTIES, all properties from
 `flycheck-define-generic-checker' may be specified, except of
-`:start', `:interrupt', `:running-p' and `:doc-printer'."
+`:start', `:interrupt', and `:doc-printer'."
   (declare (indent 1)
            (doc-string 2))
-  (dolist (prop '(:start :interrupt :running-p :doc-printer))
+  (dolist (prop '(:start :interrupt :doc-printer))
     (when (plist-get properties prop)
       (error "%s not allowed in definition of command syntax checker %s"
              prop symbol)))
@@ -3668,7 +3661,6 @@ In addition to these PROPERTIES, all properties from
     (apply #'flycheck-define-generic-checker symbol docstring
            :start #'flycheck-start-command-checker
            :interrupt #'flycheck-interrupt-command-checker
-           :running-p #'flycheck-command-checker-running-p
            :doc-printer #'flycheck-command-checker-print-doc
            properties)
 
@@ -3962,20 +3954,8 @@ symbols in the command."
 
 (defun flycheck-interrupt-command-checker (_checker process)
   "Interrupt a PROCESS."
+  ;; Deleting the process always triggers the sentinel, which does the cleanup
   (delete-process process))
-
-(defun flycheck-command-checker-running-p (_checker process)
-  "Determine whether a PROCESS is still running."
-  ;; We use a dedicated process property to track whether Flycheck has finished
-  ;; processing this syntax check.  We can't just check `process-status',
-  ;; because the status of a process might change to `exit' BEFORE its process
-  ;; sentinel was invoked.  This opens up for a race condition, where Flycheck
-  ;; considers the syntax check as finished, even though its process sentinel
-  ;; wasn't called yet, and thus its status not reported.  Flycheck would start
-  ;; another syntax check in this case, which would then conflict with the
-  ;; status report of the first and lead to reports being reported twice, and
-  ;; other kinds of havoc.  See https://github.com/flycheck/flycheck/issues/495
-  (not (process-get process 'flycheck-finished)))
 
 (defun flycheck-command-checker-print-doc (checker)
   "Print additional documentation for a command CHECKER."
@@ -4025,9 +4005,6 @@ symbols in the command."
 
 _EVENT is ignored."
   (when (memq (process-status process) '(signal exit))
-    ;; Tell `flycheck-command-checker-running-p' that the sentinel of this
-    ;; process was called.
-    (process-put process 'flycheck-finished t)
     (let ((files (process-get process 'flycheck-temporaries))
           (buffer (process-get process 'flycheck-buffer))
           (callback (process-get process 'flycheck-callback)))
