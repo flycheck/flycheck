@@ -1,5 +1,5 @@
 #!/bin/bash
-":"; exec ${EMACS:-emacs} -Q --script "$0" "${@}" # -*- mode: emacs-lisp; lexical-binding: t; -*-
+":"; exec ${EMACS:-emacs} -Q --script "$0" -- "${@}" # -*- mode: emacs-lisp; lexical-binding: t; -*-
 ;;; run.el --- Flycheck: Test runner
 
 ;; Copyright (C) 2014  Sebastian Wiesner <swiesner@lunaryorn.com>
