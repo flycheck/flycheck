@@ -579,20 +579,20 @@ and extension, as in `file-name-base'."
       (flycheck-report-status 'running)
       (should (eq was-called 'running)))))
 
-(ert-deftest flycheck-report-error/runs-hook ()
+(ert-deftest flycheck-report-failed-syntax-check/runs-hook ()
   :tags '(status-reporting)
   (flycheck-ert-with-temp-buffer
     (let* ((was-called nil)
            (flycheck-syntax-check-failed-hook
             (list (lambda () (setq was-called t)))))
-      (flycheck-report-error)
+      (flycheck-report-failed-syntax-check)
       (should was-called))))
 
-(ert-deftest flycheck-report-error/clears-errors ()
+(ert-deftest flycheck-report-failed-syntax-check/clears-errors ()
   :tags '(status-reporting)
   (flycheck-ert-with-temp-buffer
     (let ((flycheck-current-errors (list 'foo)))
-      (flycheck-report-error)
+      (flycheck-report-failed-syntax-check)
       (should-not flycheck-current-errors))))
 
 
