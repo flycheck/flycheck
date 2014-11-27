@@ -197,8 +197,8 @@ whose `:modes` contains the current major mode.
 
       (add-to-list 'flycheck-checkers 'my-new-syntax-checker)
 
-More features
-=============
+Advanced syntax checker definitions
+===================================
 
 .. _parsing-structured-output-format:
 
@@ -250,7 +250,7 @@ all stylistic checks are disabled (error patterns omitted for readability):
      :command ("rubocop" "--format" "emacs"
                (option-flag "--lint" flycheck-rubocop-lint-only)
                source)
-     :error-patterns …
+     :error-patterns ...
      :modes (ruby-mode))
 
 Note the special `option-flag` argument, which splices the value of the boolean
@@ -342,10 +342,93 @@ syntax checker is applicable for the current buffer.
 Applying more than one syntax checker
 -------------------------------------
 
-.. todo::
+Frequently, we would like to use multiple syntax checkers in a buffer.  For
+instance, we might want to check the syntax of a script with `sh-zsh` from the
+previous section, and then use Shellcheck_ to check for questionable code such
+as unquoted variable expansions, if there are no syntax errors.  Flycheck
+supports this scenario by *chaining* syntax checkers.
 
-Read more
-=========
+Suppose we defined a syntax checker for Shellcheck called `sh-shellcheck` as
+follows:
+
+.. code-block:: cl
+
+   (flycheck-define-checker sh-shellcheck
+     "A shell script syntax and style checker using Shellcheck.
+
+   See URL `https://github.com/koalaman/shellcheck/'."
+     :command ("shellcheck" "-f" "checkstyle"
+               "-s" (eval (symbol-name sh-shell))
+               source)
+     :modes sh-mode
+     :error-parser flycheck-parse-checkstyle)
+
+.. note::
+
+   Note how we use the special `eval` argument to put the result of an arbitrary
+   Emacs Lisp expression into the command line of `shellcheck`, in order to tell
+   Shellcheck what shell the script is written for.
+
+We can now arrange for this syntax checker to be used after `sh-zsh` with
+:function:`flycheck-add-next-checker`:
+
+.. code-block:: cl
+
+   (flycheck-add-next-checker 'sh-zsh '(warning . sh-shellcheck))
+
+The first item of the cons cell in the second argument is the *maximum error
+level* in the buffer, for which `sh-shellcheck` is still applicable.  With
+`warning` Flycheck will run `sh-shellcheck` after `sh-zsh` if there are
+`warning` or `info` level errors from `sh-zsh`, but not if there are any errors
+with level `error`, such as syntax errors.
+
+Flycheck will only use a chained syntax checker if it is registered in
+:option:`flycheck-checkers`, so we need to :ref:`register our new syntax checker
+<registering-new-syntax-checkers>`:
+
+.. code-block:: cl
+
+   (add-to-list 'flycheck-checkers 'sh-shellcheck 'append)
+
+Note that unlike before we **append** the new syntax checker at the end of
+`flycheck-checkers`.  This ensures that Flycheck does not try `sh-shellcheck`
+*before* `sh-zsh`.
+
+.. warning::
+
+   Make sure to append chained syntax checkers to :option:`flycheck-checkers`.
+
+   Flycheck tries all syntax checkers in this list in **order of appearance**,
+   so if you add your new chained syntax checker at the beginning, it will
+   likely be used right away, before any prior syntax checkers.
+
+You also can specify chained syntax checkers directly in
+:macro:`flycheck-define-checker` with the `:next-checkers` property.  Instead of
+calling :function:`flycheck-add-next-checker`, we could also have added this
+property to the definition of `sh-zsh`:
+
+.. code-block:: cl
+
+   (flycheck-define-checker sh-zsh
+     "A Zsh syntax checker using the Zsh shell.
+
+   See URL `http://www.zsh.org/'."
+     :command ("zsh" "-n" "-d" "-f" source)
+     :error-patterns ...
+     :modes sh-mode
+     :predicate (lambda () (eq sh-shell 'zsh))
+     :next-checkers ((warning . sh-shellcheck)))
+
+.. note::
+
+   If you control the definition of both syntax checkers, this style is
+   **preferable** to :function:`flycheck-add-next-checker`.  Use this function
+   only if you cannot change the definition of the prior syntax checker.
+
+.. _Shellcheck: https://github.com/koalaman/shellcheck/
+
+Other ways to extend Flycheck
+=============================
 
 Use arbitrary functions to check buffers
 ----------------------------------------
