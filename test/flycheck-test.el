@@ -3755,12 +3755,14 @@ The term \"1\" has type \"nat\" while it is expected to have type
 
 (ert-deftest flycheck-d-module-re/matches-module-name ()
   :tags '(language-d)
+  (ert-skip "Skipped pending https://github.com/flycheck/flycheck/issues/531")
   (let ((s "module spam.with.eggs ;"))
     (should (string-match flycheck-d-module-re s))
     (should (string= "spam.with.eggs" (match-string 1 s)))))
 
 (ert-deftest flycheck-d-base-directory/no-module-declaration ()
   :tags '(language-d)
+  (ert-skip "Skipped pending https://github.com/flycheck/flycheck/issues/531")
   (flycheck-ert-with-resource-buffer "checkers/d/src/dmd/no_module.d"
     (should (flycheck-same-files-p
              (flycheck-d-base-directory)
@@ -3768,6 +3770,7 @@ The term \"1\" has type \"nat\" while it is expected to have type
 
 (ert-deftest flycheck-d-base-directory/with-module-declaration ()
   :tags '(language-d)
+  (ert-skip "Skipped pending https://github.com/flycheck/flycheck/issues/531")
   (flycheck-ert-with-resource-buffer "checkers/d/src/dmd/warning.d"
     (should (flycheck-same-files-p
              (flycheck-d-base-directory)
@@ -3775,12 +3778,14 @@ The term \"1\" has type \"nat\" while it is expected to have type
 
 (ert-deftest flycheck-d-base-directory/package-file ()
   :tags '(language-d)
+  (ert-skip "Skipped pending https://github.com/flycheck/flycheck/issues/531")
   (flycheck-ert-with-resource-buffer "checkers/d/src/dmd/package.d"
     (should (flycheck-same-files-p
              (flycheck-d-base-directory)
              (flycheck-ert-resource-filename "checkers/d/src")))))
 
 (flycheck-ert-def-checker-test d-dmd d warning-include-path
+  (ert-skip "Skipped pending https://github.com/flycheck/flycheck/issues/531")
   (let ((flycheck-dmd-include-path '("../../lib")))
     (flycheck-ert-should-syntax-check
      "checkers/d/src/dmd/warning.d" 'd-mode
@@ -3789,6 +3794,7 @@ The term \"1\" has type \"nat\" while it is expected to have type
           :checker d-dmd))))
 
 (flycheck-ert-def-checker-test d-dmd d missing-import
+  (ert-skip "Skipped pending https://github.com/flycheck/flycheck/issues/531")
   (flycheck-ert-should-syntax-check
    "checkers/d/src/dmd/warning.d" 'd-mode
    '(4 8 error "module external_library is in file 'external_library.d' which cannot be read"
