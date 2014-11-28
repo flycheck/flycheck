@@ -10,11 +10,15 @@ master (in development)
   - Error parsers **must** set the `:buffer` and `:checker` slots of
     `flycheck-error` now
   - The internals of syntax checker definitions have changed again.  **All
-    packages depending on Flycheck must be recompiled!**
+    packages depending on Flycheck must be recompiled!** [GH-524]
 
 - New features:
 
   - `flycheck-ert.el` library to write unit tests for Flycheck extensions
+  - Add `flycheck-define-generic-checker` to define syntax checkers over
+    arbitrary Emacs Lisp functions [GH-169] [GH-524]
+  - Add `flycheck-define-command-checker` as non-macro variant of
+    `flycheck-define-checker` [GH-524]
 
 - Improvements:
 
