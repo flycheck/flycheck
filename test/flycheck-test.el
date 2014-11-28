@@ -507,7 +507,7 @@ and extension, as in `file-name-base'."
       (insert "Hello world")
       (sleep-for 0.55)
       (should-not (flycheck-deferred-check-p))
-      (sleep-for 1)
+      (sleep-for 1.1)
       (should (flycheck-deferred-check-p)))))
 
 (ert-deftest flycheck-check-syntax-automatically/new-line-is-disabled ()
