@@ -23,7 +23,7 @@
 ============================================================
 
 .. image:: https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/logo.png
-   :target: http://flycheck.readthedocs.org
+   :target: http://www.flycheck.org
    :align: center
 
 .. default-role:: code
@@ -63,7 +63,7 @@ Features
 - A “doesn't get in your way” guarantee
 - Many `3rd party extensions`_
 
-.. _3rd party extensions: http://flycheck.readthedocs.org/en/latest/guide/introduction.html#rd-party-extensions
+.. _3rd party extensions: http://flycheck.org/en/latest/guide/introduction.html#rd-party-extensions
 
 Installation
 ============
@@ -90,18 +90,18 @@ Flycheck does **not** support GNU Emacs 23, other flavors of Emacs, or Windows.
 .. _MELPA: http://melpa.org
 .. _MELPA Stable: http://stable.melpa.org
 .. _Cask: https://github.com/cask/cask
-.. _Supported Languages: http://flycheck.readthedocs.org/en/latest/guide/languages.html
+.. _Supported Languages: http://www.flycheck.org/en/latest/guide/languages.html
 
 Documentation
 =============
 
-Documentation is available at http://flycheck.readthedocs.org:
+Documentation is available at http://www.flycheck.org:
 
 - `Quick start`_ (tutorial)
 - `User manual`_ (reference information)
 
-.. _Quick start: http://flycheck.readthedocs.org/en/latest/guide/quickstart.html
-.. _User manual: http://flycheck.readthedocs.org/en/latest/guide/usage.html
+.. _Quick start: http://www.flycheck.org/en/latest/guide/quickstart.html
+.. _User manual: http://www.flycheck.org/en/latest/guide/usage.html
 
 Support & Contribution
 ======================
@@ -112,7 +112,7 @@ Support & Contribution
 
 .. _Issue tracker: https://github.com/flycheck/flycheck/issues
 .. _Github: https://github.com/flycheck/flycheck
-.. _Contributor Guide: http://flycheck.readthedocs.org/en/latest/index.html#contributor-guide
+.. _Contributor Guide: http://www.flycheck.org/en/latest/index.html#contributor-guide
 
 Credits
 =======
@@ -121,7 +121,7 @@ Credits
 - Credits_
 
 .. _Contributors: https://github.com/flycheck/flycheck/graphs/contributors
-.. _Credits: http://flycheck.readthedocs.org/en/latest/credits.html
+.. _Credits: http://www.flycheck.org/en/latest/credits.html
 
 License
 =======

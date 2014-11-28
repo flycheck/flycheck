@@ -4,7 +4,7 @@
 ;; Copyright (C) 2013, 2014 Free Software Foundation, Inc.
 ;;
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
-;; URL: https://flycheck.readthedocs.org
+;; URL: https://www.flycheck.org
 ;; Keywords: convenience languages tools
 ;; Version: 0.22-cvs
 ;; Package-Requires: ((dash "2.4.0") (pkg-info "0.4") (cl-lib "0.3") (emacs "24.1"))
