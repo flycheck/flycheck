@@ -1422,7 +1422,7 @@ are mandatory.
      see.  To turn of filtering completely, explicitly specify
      `identity' as error filter.
 
-:next-checkers NEXT-CHECKERS
+`:next-checkers NEXT-CHECKERS'
      A list denoting syntax checkers to apply after this syntax
      checker, in what we call \"chaining\" of syntax checkers.
 
