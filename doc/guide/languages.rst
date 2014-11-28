@@ -18,11 +18,14 @@ There are some 3rd party extensions which add support for more languages:
 
 - flycheck-ledger_ adds a syntax checker for the Ledger_ accounting tool.
 - flycheck-mercury_ adds a syntax checker for the Mercury_ language.
+- flycheck-ocaml_ adds a syntax checker for OCaml, using the Merlin_ tool.
 
 .. _flycheck-ledger: https://github.com/purcell/flycheck-ledger
 .. _Ledger: http://ledger-cli.org/
 .. _flycheck-mercury: https://github.com/flycheck/flycheck-mercury
 .. _Mercury: http://mercurylang.org/
+.. _flycheck-ocaml: https://github.com/flycheck/flycheck-ocaml
+.. _merlin: https://github.com/the-lambda-church/merlin
 
 .. contents:: Supported languages
    :local:
