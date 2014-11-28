@@ -4199,7 +4199,7 @@ Why not:
 (flycheck-ert-def-checker-test less less syntax-error
   (flycheck-ert-should-syntax-check
    "checkers/less-syntax-error.less" 'less-css-mode
-   '(1 13 error "missing closing `}`" :checker less)))
+   '(1 1 error "Unrecognised input" :checker less)))
 
 (flycheck-ert-def-checker-test lua lua nil
   (flycheck-ert-should-syntax-check
@@ -4552,10 +4552,9 @@ Why not:
         :checker ruby-rubocop)
    '(10 5 info "Favor modifier `if` usage when having a single-line body. Another good alternative is the usage of control flow `&&`/`||`."
         :checker ruby-rubocop)
-   '(10 5 info "Never use `then` for multi-line `if`."
-        :checker ruby-rubocop)
    '(10 8 warning "Literal `true` appeared in a condition."
         :checker ruby-rubocop)
+   '(10 13 info "Do not use `then` for multi-line `if`." :checker ruby-rubocop)
    '(11 24 error "undefined instance variable @name" :checker ruby-rubylint)
    '(16 1 error "wrong number of arguments (expected 2..3 but got 0)"
         :checker ruby-rubylint)))
@@ -4574,10 +4573,9 @@ Why not:
          :checker ruby-rubocop)
      '(10 5 info "Use a guard clause instead of wrapping the code inside a conditional expression."
           :checker ruby-rubocop)
-     '(10 5 info "Never use `then` for multi-line `if`."
-          :checker ruby-rubocop)
      '(10 8 warning "Literal `true` appeared in a condition."
-          :checker ruby-rubocop))))
+          :checker ruby-rubocop)
+     '(10 13 info "Do not use `then` for multi-line `if`." :checker ruby-rubocop))))
 
 (flycheck-ert-def-checker-test ruby-rubocop ruby lint-only
   (let ((flycheck-rubocop-lint-only t)
@@ -4636,9 +4634,9 @@ Why not:
 (flycheck-ert-def-checker-test rust rust warning
   (flycheck-ert-should-syntax-check
    "checkers/rust-warning.rs" 'rust-mode
-   '(3 1 warning "code is never used: `main`, #[warn(dead_code)] on by default"
+   '(3 1 warning "function is never used: `main`, #[warn(dead_code)] on by default"
        :checker rust)
-   '(4 9 warning "unused variable: `x`, #[warn(unused_variable)] on by default"
+   '(4 9 warning "unused variable: `x`, #[warn(unused_variables)] on by default"
        :checker rust)))
 
 (flycheck-ert-def-checker-test rust rust help
@@ -4654,16 +4652,16 @@ Why not:
         (flycheck-rust-check-tests nil))
     (flycheck-ert-should-syntax-check
      "checkers/rust-warning.rs" 'rust-mode
-     '(4 9 warning "unused variable: `x`, #[warn(unused_variable)] on by default"
+     '(4 9 warning "unused variable: `x`, #[warn(unused_variables)] on by default"
          :checker rust))))
 
 (flycheck-ert-def-checker-test rust rust info
   (flycheck-ert-should-syntax-check
    "checkers/rust-info.rs" 'rust-mode
-   '(11 9 info "`x` moved here because it has type `NonPOD`, which is moved by default (use `ref` to override)"
+   '(11 9 info "`x` moved here because it has type `NonPOD`, which is moved by default"
         :checker rust)
-   '(12 9 error "use of moved value: `x`"
-        :checker rust)))
+   '(11 9 info "use `ref` to override" :checker rust)
+   '(12 9 error "use of moved value: `x`" :checker rust)))
 
 (flycheck-ert-def-checker-test rust rust library-path
   :expected-result :failed
@@ -4680,7 +4678,7 @@ Why not:
                                    "checkers/rust_crate/main.rs")))
     (flycheck-ert-should-syntax-check
      "checkers/rust_crate/foo.rs" 'rust-mode
-     '(3 9 warning "unused variable: `x`, #[warn(unused_variable)] on by default"
+     '(3 9 warning "unused variable: `x`, #[warn(unused_variables)] on by default"
          :checker rust))))
 
 (flycheck-ert-def-checker-test sass sass nil
