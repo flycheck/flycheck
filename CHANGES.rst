@@ -7,6 +7,10 @@ master (in development)
 
   - Never allow use of disabled checkers anymore, even with
     `flycheck-select-checker`
+  - Error parsers **must** set the `:buffer` and `:checker` slots of
+    `flycheck-error` now
+  - The internals of syntax checker definitions have changed again.  **All
+    packages depending on Flycheck must be recompiled!**
 
 - New features:
 

@@ -854,7 +854,7 @@ currently listed."
   :package-version '(flycheck . "0.20"))
 
 
-;;; Minor mode definition
+;;; Global Flycheck menu
 (defvar flycheck-mode-menu-map
   (easy-menu-create-menu
    "Syntax Checking"
@@ -884,131 +884,10 @@ currently listed."
      ["Read the Flycheck manual" flycheck-info t]))
   "Menu of `flycheck-mode'.")
 
-(defvar flycheck-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map flycheck-keymap-prefix flycheck-command-map)
-    ;; We place the menu under a custom menu key.  Since this menu key is not
-    ;; present in the menu of the global map, no top-level menu entry is added
-    ;; to the global menu bar.  However, it still appears on the mode line
-    ;; lighter.
-    (define-key map [menu-bar flycheck] flycheck-mode-menu-map)
-    map)
-  "Keymap of `flycheck-mode'.")
-
 (easy-menu-add-item nil '("Tools") flycheck-mode-menu-map "Spell Checking")
 
-(defun flycheck-teardown ()
-  "Teardown Flycheck in the current buffer..
-
-Completely clear the whole Flycheck state.  Remove overlays, kill
-running checks, and empty all variables used by Flycheck."
-  (flycheck-safe-delete-temporaries)
-  (flycheck-stop-checker)
-  (flycheck-clean-deferred-check)
-  (flycheck-clear)
-  (flycheck-cancel-error-display-error-at-point-timer)
-  (flycheck-clear-checker))
-
-(defvar-local flycheck-old-next-error-function nil
-  "Remember the old `next-error-function'.")
-
-(defconst flycheck-hooks-alist
-  '(
-    ;; Handle events that may start automatic syntax checks
-    (after-save-hook                  . flycheck-handle-save)
-    (after-change-functions           . flycheck-handle-change)
-    ;; Handle events that may triggered pending deferred checks
-    (window-configuration-change-hook . flycheck-perform-deferred-syntax-check)
-    (post-command-hook                . flycheck-perform-deferred-syntax-check)
-    ;; Teardown Flycheck whenever the buffer state is about to get lost, to
-    ;; clean up temporary files and directories.
-    (kill-buffer-hook                 . flycheck-teardown)
-    (change-major-mode-hook           . flycheck-teardown)
-    (before-revert-hook               . flycheck-teardown)
-    ;; Update the error list if necessary
-    (post-command-hook                . flycheck-error-list-update-source)
-    (post-command-hook                . flycheck-error-list-highlight-errors)
-    ;; Show or hide error popups after commands
-    (post-command-hook                . flycheck-display-error-at-point-soon)
-    (post-command-hook                . flycheck-hide-error-buffer)
-    ;; Immediately show error popups when navigating to an error
-    (next-error-hook                  . flycheck-display-error-at-point))
-  "Hooks which Flycheck needs to hook in.
-
-The `car' of each pair is a hook variable, the `cdr' a function
-to be added or removed from the hook variable if Flycheck mode is
-enabled and disabled respectively.")
-
-;;;###autoload
-(define-minor-mode flycheck-mode
-  "Minor mode for on-the-fly syntax checking.
-
-When called interactively, toggle `flycheck-mode'.  With prefix
-ARG, enable `flycheck-mode' if ARG is positive, otherwise disable
-it.
-
-When called from Lisp, enable `flycheck-mode' if ARG is omitted,
-nil or positive.  If ARG is `toggle', toggle `flycheck-mode'.
-Otherwise behave as if called interactively.
-
-In `flycheck-mode' the buffer is automatically syntax-checked
-using the first suitable syntax checker from `flycheck-checkers'.
-Use `flycheck-select-checker' to select a checker for the current
-buffer manually.
-
-\\{flycheck-mode-map}"
-  :init-value nil
-  :keymap flycheck-mode-map
-  :lighter flycheck-mode-line
-  :group 'flycheck
-  :require 'flycheck
-  :after-hook (flycheck-buffer-automatically 'mode-enabled 'force-deferred)
-  (cond
-   (flycheck-mode
-    (flycheck-clear)
-
-    (pcase-dolist (`(,hook . ,fn) flycheck-hooks-alist)
-      (add-hook hook fn nil 'local))
-
-    (setq flycheck-old-next-error-function (if flycheck-standard-error-navigation
-                                               next-error-function
-                                             :unset))
-    (when flycheck-standard-error-navigation
-      (setq next-error-function #'flycheck-next-error-function)))
-   (t
-    (unless (eq flycheck-old-next-error-function :unset)
-      (setq next-error-function flycheck-old-next-error-function))
-
-    (pcase-dolist (`(,hook . ,fn) flycheck-hooks-alist)
-      (remove-hook hook fn 'local))
-
-    (flycheck-teardown))))
-
-(defun flycheck-global-teardown ()
-  "Teardown Flycheck in all buffers.
-
-Completely clear the whole Flycheck state in all buffers, stop
-all running checks, remove all temporary files, and empty all
-variables of Flycheck."
-  (dolist (buffer (buffer-list))
-    (with-current-buffer buffer
-      (when flycheck-mode
-        (flycheck-teardown)))))
-
-;; Clean up the entire state of Flycheck when Emacs is killed, to get rid of any
-;; pending temporary files.
-(add-hook 'kill-emacs-hook #'flycheck-global-teardown)
-
-(defun flycheck-unload-function ()
-  "Unload function for Flycheck."
-  (global-flycheck-mode -1)
-  (easy-menu-remove-item nil '("Tools") (cadr flycheck-mode-menu-map))
-  (remove-hook 'kill-emacs-hook #'flycheck-global-teardown)
-  (setq find-function-regexp-alist
-        (assq-delete-all 'flycheck-checker find-function-regexp-alist)))
-
 
-;;; Version information
+;;; Version information, manual and loading of Flycheck
 (defun flycheck-version (&optional show-version)
   "Get the Flycheck version as string.
 
@@ -1027,179 +906,19 @@ just return nil."
       (message "Flycheck version: %s" version))
     version))
 
-
-;;; Global syntax checking
-(defun flycheck-may-enable-mode ()
-  "Determine whether Flycheck mode may be enabled.
-
-Flycheck mode is not enabled for
-
-- ephemeral buffers (see `flycheck-ephemeral-buffer-p'),
-- encrypted buffers (see `flycheck-encrypted-buffer-p'),
-- remote files (see `file-remote-p'),
-- or if no suitable syntax checker exists.
-
-Return t if Flycheck mode may be enabled, and nil otherwise."
-  (and (not (flycheck-ephemeral-buffer-p))
-       (not (flycheck-encrypted-buffer-p))
-       (not (and (buffer-file-name) (file-remote-p (buffer-file-name) 'method)))
-       (flycheck-get-checker-for-buffer)))
-
-(defun flycheck-mode-on-safe ()
-  "Enable `flycheck-mode' if it is safe to do so.
-
-`flycheck-mode' is only enabled if `flycheck-may-enable-mode'
-returns t."
-  (when (flycheck-may-enable-mode)
-    (flycheck-mode)))
+(defun flycheck-unload-function ()
+  "Unload function for Flycheck."
+  (global-flycheck-mode -1)
+  (easy-menu-remove-item nil '("Tools") (cadr flycheck-mode-menu-map))
+  (remove-hook 'kill-emacs-hook #'flycheck-global-teardown)
+  (setq find-function-regexp-alist
+        (assq-delete-all 'flycheck-checker find-function-regexp-alist)))
 
 ;;;###autoload
-(define-globalized-minor-mode global-flycheck-mode flycheck-mode
-  flycheck-mode-on-safe
-  :init-value nil
-  :group 'flycheck
-  :require 'flycheck)
-
-
-;;; Manual syntax checking
-(defun flycheck-clear ()
-  "Clear all errors in the current buffer."
+(defun flycheck-info ()
+  "Open the Flycheck manual."
   (interactive)
-  (flycheck-delete-all-overlays)
-  (flycheck-clear-errors)
-  (flycheck-error-list-refresh)
-  (flycheck-hide-error-buffer))
-
-(defun flycheck-buffer ()
-  "Check syntax in the current buffer."
-  (interactive)
-  (flycheck-clean-deferred-check)
-  (if flycheck-mode
-      (unless (flycheck-running-p)
-        ;; Clear error list and mark all overlays for deletion.  We do not
-        ;; delete all overlays immediately to avoid excessive re-displays and
-        ;; flickering, if the same errors gets highlighted again after the check
-        ;; completed.
-        (run-hooks 'flycheck-before-syntax-check-hook)
-        (flycheck-clear-errors)
-        (flycheck-mark-all-overlays-for-deletion)
-        (condition-case err
-            (let ((checker (flycheck-get-checker-for-buffer)))
-              (if checker
-                  (flycheck-start-checker checker)
-                (flycheck-clear)
-                (flycheck-report-status 'no-checker)))
-          (error
-           (flycheck-report-error)
-           (signal (car err) (cdr err)))))
-    (user-error "Flycheck mode disabled")))
-
-
-;;; Deferred syntax checking
-(defvar-local flycheck-deferred-syntax-check nil
-  "If non-nil, a deferred syntax check is pending.")
-
-(defun flycheck-must-defer-check ()
-  "Determine whether the syntax check has to be deferred.
-
-A check has to be deferred if the buffer is not visible, or if the buffer is
-currently being reverted.
-
-Return t if the check is to be deferred, or nil otherwise."
-  (or (not (get-buffer-window))
-      ;; We defer the syntax check if Flycheck is already running, to
-      ;; immediately start a new syntax check after the current one finished,
-      ;; because the result of the current check will most likely be outdated by
-      ;; the time it is finished.
-      (flycheck-running-p)
-      ;; We must defer checks while a buffer is being reverted, to avoid race
-      ;; conditions while the buffer contents are being restored.
-      revert-buffer-in-progress-p))
-
-(defun flycheck-deferred-check-p ()
-  "Determine whether the current buffer has a deferred check.
-
-Return t if so, or nil otherwise."
-  flycheck-deferred-syntax-check)
-
-(defun flycheck-buffer-deferred ()
-  "Defer syntax check for the current buffer."
-  (setq flycheck-deferred-syntax-check t))
-
-(defun flycheck-clean-deferred-check ()
-  "Clean an deferred syntax checking state."
-  (setq flycheck-deferred-syntax-check nil))
-
-(defun flycheck-perform-deferred-syntax-check ()
-  "Perform any deferred syntax checks."
-  (when (flycheck-deferred-check-p)
-    (flycheck-clean-deferred-check)
-    (flycheck-buffer-automatically)))
-
-
-;;; Automatic syntax checking
-(defun flycheck-may-check-automatically (&optional condition)
-  "Determine whether the buffer may be checked under CONDITION.
-
-Read-only buffers may never be checked automatically.
-
-If CONDITION is non-nil, determine whether syntax may checked
-automatically according to
-`flycheck-check-syntax-automatically'."
-  (and (not (or buffer-read-only (flycheck-ephemeral-buffer-p)))
-       (or (not condition)
-           (memq condition flycheck-check-syntax-automatically))))
-
-(defun flycheck-buffer-automatically (&optional condition force-deferred)
-  "Automatically check syntax at CONDITION.
-
-Syntax is not checked if `flycheck-may-check-automatically'
-returns nil for CONDITION.
-
-The syntax check is deferred if FORCE-DEFERRED is non-nil, or if
-`flycheck-must-defer-check' returns t."
-  (when (and flycheck-mode (flycheck-may-check-automatically condition))
-    (if (or force-deferred (flycheck-must-defer-check))
-        (flycheck-buffer-deferred)
-      (with-demoted-errors "Error while checking syntax automatically: %S"
-        (flycheck-buffer)))))
-
-(defvar-local flycheck-idle-change-timer nil
-  "Timer to mark the idle time since the last change.")
-
-(defun flycheck-clear-idle-change-timer ()
-  "Clear the idle change timer."
-  (when flycheck-idle-change-timer
-    (cancel-timer flycheck-idle-change-timer)
-    (setq flycheck-idle-change-timer nil)))
-
-(defun flycheck-handle-change (beg end _len)
-  "Handle a buffer change between BEG and END.
-
-BEG and END mark the beginning and end of the change text.  _LEN
-is ignored.
-
-Start a syntax check if a new line has been inserted into the
-buffer."
-  ;; Save and restore the match data, as recommended in (elisp)Change Hooks
-  (save-match-data
-    (when flycheck-mode
-      ;; The buffer was changed, thus clear the idle timer
-      (flycheck-clear-idle-change-timer)
-      (if (string-match-p (rx "\n") (buffer-substring beg end))
-          (flycheck-buffer-automatically 'new-line 'force-deferred)
-        (setq flycheck-idle-change-timer
-              (run-at-time flycheck-idle-change-delay nil
-                           #'flycheck-handle-idle-change))))))
-
-(defun flycheck-handle-idle-change ()
-  "Handle an expired idle time since the last change."
-  (flycheck-clear-idle-change-timer)
-  (flycheck-buffer-automatically 'idle-change))
-
-(defun flycheck-handle-save ()
-  "Handle a save of the buffer."
-  (flycheck-buffer-automatically 'save))
+  (info "flycheck"))
 
 
 ;;; Utility functions
@@ -1524,38 +1243,40 @@ https://github.com/d11wtq/grizzl")))
       checker)))
 
 
-;;; Checker definitions
-(defun flycheck-command-argument-p (arg)
-  "Check whether ARG is a valid command argument."
-  (pcase arg
-    ((pred stringp) t)
-    ((or `source `source-inplace `source-original) t)
-    ((or `temporary-directory `temporary-file-name) t)
-    (`null-device t)
-    (`(config-file ,option-name ,config-file-var)
-     (and (stringp option-name)
-          (symbolp config-file-var)))
-    (`(config-file ,option-name ,config-file-var ,prepender)
-     (and (stringp option-name)
-          (symbolp config-file-var)
-          (symbolp prepender)))
-    (`(,(or `option `option-list) ,option-name ,option-var)
-     (and (stringp option-name)
-          (symbolp option-var)))
-    (`(,(or `option `option-list) ,option-name ,option-var ,prepender)
-     (and (stringp option-name)
-          (symbolp option-var)
-          (symbolp prepender)))
-    (`(,(or `option `option-list) ,option-name ,option-var ,prepender ,filter)
-     (and (stringp option-name)
-          (symbolp option-var)
-          (symbolp prepender)
-          (symbolp filter)))
-    (`(option-flag ,option-name ,option-var)
-     (and (stringp option-name)
-          (symbolp option-var)))
-    (`(eval ,_) t)
-    (_ nil)))
+;;; Checker API
+(defun flycheck-defined-checkers ()
+  "Find all defined syntax checkers.
+
+The returned list is sorted alphapetically by the symbol name of
+the syntax checkers."
+  (let (defined-checkers)
+    (mapatoms (lambda (symbol)
+                (when (flycheck-valid-checker-p symbol)
+                  (push symbol defined-checkers))))
+    (sort defined-checkers #'string<)))
+
+(defun flycheck-registered-checker-p (checker)
+  "Determine whether CHECKER is registered.
+
+A checker is registered if it is contained in
+`flycheck-checkers'."
+  (and (flycheck-valid-checker-p checker)
+       (memq checker flycheck-checkers)))
+
+(defun flycheck-disabled-checker-p (checker)
+  "Determine whether CHECKER is disabled.
+
+A checker is disabled if it is contained in
+`flycheck-disabled-checkers'."
+  (memq checker flycheck-disabled-checkers))
+
+
+;;; Generic syntax checkers
+(defconst flycheck-generic-checker-version 2
+  "The internal version of generic syntax checker declarations.
+
+Flycheck will not use syntax checkers whose generic version is
+less than this constant.")
 
 (defun flycheck-validate-next-checker (next &optional strict)
   "Validate NEXT checker.
@@ -1583,157 +1304,127 @@ Signal an error if NEXT is not a valid entry for
     (_ (error "%S must be a symbol or cons cell" next)))
   t)
 
-(defconst flycheck-checker-version 1
-  "The internal version of syntax checker declarations.
-
-Flycheck will not use syntax checkers whose version is less than
-this constant.")
-
-(defun flycheck-verify-checker-properties (symbol)
-  "Verify the syntax checker properties of SYMBOL."
-  (let ((command (get symbol 'flycheck-command))
-        (parser (get symbol 'flycheck-error-parser))
-        (patterns (get symbol 'flycheck-error-patterns))
-        (filter (get symbol 'flycheck-error-filter))
-        (modes (get symbol 'flycheck-modes))
-        (predicate (get symbol 'flycheck-predicate))
-        (next-checkers (get symbol 'flycheck-next-checkers)))
-    (when (null command)
-      (error "Missing :command"))
-    (unless (stringp (car command))
-      (error "Invalid command executable %S" (car command)))
-    (unless (-all? 'flycheck-command-argument-p (cdr command))
-      (error "Invalid command arguments %S" command))
-    (when (and (null parser) (null patterns))
-      (error "Missing :error-patterns or :error-parser"))
-    (unless (functionp parser)
-      (error ":error-parser %S is not a function" parser))
-    (unless (functionp filter)
-      (error ":error-filter %S is not a function" filter))
-    (unless (or modes predicate)
-      (error "Missing :modes or :predicate"))
-    (unless (-all? #'symbolp modes)
-      (error "Invalid :modes %s, must be a symbol or a list thereof" modes))
-    (unless (or (null predicate) (functionp predicate))
-      (error ":predicate %S is not a function" predicate))
-    (dolist (checker next-checkers)
-      (flycheck-validate-next-checker checker))))
-
-(defun flycheck-set-checker-properties (symbol properties)
-  "Set and verify syntax checker PROPERTIES on SYMBOL.
-
-PROPERTIES is an alist of properties to set."
-  (pcase-dolist (`(,prop . ,value) properties)
-    (put symbol prop value))
-  (flycheck-verify-checker-properties symbol)
-  (put symbol 'flycheck-checker-version flycheck-checker-version))
-
-(defmacro flycheck-define-checker (symbol docstring &rest properties)
-  "Define SYMBOL as syntax checker with DOCSTRING and PROPERTIES.
-
-DOCSTRING provides documentation for the new syntax checker.  Use
-`flycheck-describe-checker' to view the documentation of a syntax
-checker.
-
-The following PROPERTIES constitute a syntax checker.  `:command'
-is mandatory.  A syntax checker must also have either `:modes' or
-`:predicate', and either `:error-patterns' or `:error-parser'.
-`:next-checkers' is entirely optional.
-
-Signal an error at macro-expansion time if a mandatory property
-is missing or if any property as an invalid value.
+(defun flycheck-define-generic-checker (symbol docstring &rest properties)
+  "Define SYMBOL as generic syntax checker.
 
 Any syntax checker defined with this macro is eligible for manual
 syntax checker selection with `flycheck-select-checker'.  To make
 the new syntax checker available for automatic selection, it must
 be registered in `flycheck-checkers'.
 
-`:command (EXECUTABLE ARG ...)'
-     An unquoted list describing the syntax checker command to
-     execute.
+DOCSTRING is the documentation of the syntax checker, for
+`flycheck-describe-checker'.  The following PROPERTIES constitute
+a generic syntax checker.  Unless otherwise noted, all properties
+are mandatory.
 
-     EXECUTABLE must be a string with the executable of this
+`:start FUNCTION'
+     A function to start the syntax checker.
+
+     FUNCTION shall take two arguments and return a context
+     object if the checker is started successfully.  Otherwise it
+     shall signal an error.
+
+     The first argument is the syntax checker being started.  The
+     second is a callback function to report state changes to
+     Flycheck.  The callback takes two arguments STATUS DATA,
+     where STATUS is a symbol denoting the syntax checker status
+     and DATA an optional argument with additional data for the
+     status report.  See `flycheck-report-buffer-checker-status'
+     for more information about STATUS and DATA.
+
+     A syntax checker _must_ call CALLBACK at least once with a
+     STATUS that finishes the current syntax checker.  Otherwise
+     Flycheck gets stuck at the current syntax check with this
      syntax checker.
 
-     A variable `flycheck-CHECKER-executable' is implicitly
-     defined to allow overriding of the executable.  The variable
-     is customizable and buffer-local.  If this variable is
-     non-nil, Flycheck uses the value of the variable as
-     executable, otherwise it falls back to EXECUTABLE.  In
-     either case, the executable is checked with
-     `executable-find' before use.
+     The context object returned by FUNCTION is passed to
+     `:interrupt'.
 
-     Each ARG is an argument to the executable, either as string,
-     or as special symbol or form for
-     `flycheck-substitute-argument', which see.
+`:interrupt FUNCTION'
+     A function to interrupt the syntax check.
 
-`:error-patterns ((LEVEL SEXP ...) ...)'
-     An unquoted list of error patterns to parse the output of
-     the syntax checker `:command'.
+     FUNCTION is called with the syntax checker and the context
+     object returned by the `:start' function and shall try to
+     interrupt the syntax check.  If it cannot do so, it may
+     either signal an error or silently ignore the attempt to
+     interrupt the syntax checker, depending on the severity of
+     the situation.
 
-     LEVEL is either `error' or `warning' and denotes the
-     severity of errors matched by the pattern.  The LEVEL is
-     followed by one or more RX `SEXP's which parse the error and
-     extract line, column, file name and error message.
+     If interrupting the syntax check failed, Flycheck will let
+     the syntax check continue, but ignore any status reports.
+     Notably, it won't highlight any errors reported by the
+     syntax check in the buffer.
 
-     See `rx' for general information about RX, and
-     `flycheck-rx-to-string' for special RX forms provided by
-     Flycheck.
+     This property is optional.  If omitted, Flycheck won't
+     attempt to interrupt syntax checks wit this syntax checker,
+     and simply ignore their results.
 
-     All patterns are applied in the order of declaration to the
-     whole output of the syntax checker.  Output already matched
-     by a pattern will not be matched by subsequent patterns.  In
-     other words, the first pattern wins.
+`:doc-printer FUNCTION'
+     A function to print additional documentation into the Help
+     buffer of this checker.
 
-`:error-parser FUNCTION'
-`:error-parser (lambda (output checker buffer) BODY ...)'
-     A function to parse errors with, either as unquoted symbol,
-     or `lambda' form.
+     FUNCTION is called when creating the Help buffer for the
+     syntax checker, with the syntax checker as single argument,
+     after printing the name of the syntax checker and its modes
+     and predicate, but before printing DOCSTRING.  It may insert
+     additional documentation into the current buffer.
 
-     The function must accept three arguments OUTPUT CHECKER
-     BUFFER, where OUTPUT is the syntax checker output as string,
-     CHECKER the syntax checker that was used, and BUFFER a
-     buffer object representing the checked buffer.  The function
-     must return a list of `flycheck-error' objects parsed from
-     OUTPUT.
+     The call occurs within `with-help-window'.  Hence
+     `standard-output' points to the current buffer, so you may
+     use `princ' and friends to add content.  Also, the current
+     buffer is put into Help mode afterwards, which automatically
+     turns symbols into references, if possible.
 
-`:error-filter FUNCTION'
-`:error-filter (lambda (errors) BODY ...)'
-     A function to filter or modify errors parsed by
-     `:error-parser' or `:error-patterns'.
+     This property is optional.  If omitted, no additional
+     documentation is printed for this syntax checker.
 
-     The function takes the list of parsed `flycheck-error'
-     objects as sole argument and shall return a list of
-     `flycheck-error' as the result of the syntax checker.  The
-     function is free to add or remove errors, or modify
-     individual errors.  It may modify the list of errors as well
-     as individual errors in place.
+`:modes MODES'
+     A major mode symbol or a list thereof, denoting major modes
+     to use this syntax checker in.
 
-     Syntax checkers will mostly use this feature to fix
-     misplaced error locations, or improve error messages.
+     If given this syntax checker is only used in buffers whose
+     `major-mode' is `eq' to any mode in MODES.
 
-`:modes MODE'
-`:modes (MODE ...)'
-     An unquoted major mode symbol or a list thereof.  If
-     present, the syntax checker is only used if the major mode
-     of the buffer to check is equal (as in `eq') to any given
-     MODE.
+     If `:predicate' is also given, the syntax checker will only
+     be used in buffers for which the `:predicate' returns
+     non-nil.
 
-     If a `:predicate' is present, it is additionally used in
-     each buffer of these MODEs.
+     This property is optional, however at least one of `:modes'
+     or `:predicate' must be given.
 
 `:predicate FUNCTION'
-`:predicate (lambda () BODY ...)'
      A function to determine whether to use the syntax checker in
-     the current buffer, either as unquoted function symbol or
-     `lambda' form.  The syntax checker is only used if this
-     function returns non-nil when called in the buffer to check.
-     If `:modes' is given, the function is only called in
-     matching modes.
+     the current buffer.
 
-`:next-checkers (ITEM ...)'
-     An unquoted list defining the syntax checker to run after
-     this syntax checker.
+     FUNCTION is called without arguments and shall return
+     non-nil if this syntax checker shall be used to check the
+     current buffer.  Otherwise it shall return nil.
+
+     If `:modes' is also given, FUNCTION is only called in
+     matching major modes.
+
+     This property is optional, however at least one of `:modes'
+     or `:predicate' must be given.
+
+`:error-filter FUNCTION'
+     A function to filter the errors returned by this checker.
+
+     FUNCTION is called with the list of `flycheck-error' objects
+     returned by the syntax checker and shall return another list
+     of `flycheck-error' objects, which is considered the final
+     result of this syntax checker.
+
+     FUNCTION is free to add, remove or modify errors, whether in
+     place or by copying.
+
+     This property is optional.  If omitted,
+     `flycheck-sanitize-errors' is used as default filter, which
+     see.  To turn of filtering completely, explicitly specify
+     `identity' as error filter.
+
+:next-checkers NEXT-CHECKERS
+     A list denoting syntax checkers to apply after this syntax
+     checker, in what we call \"chaining\" of syntax checkers.
 
      Each ITEM is a cons cell `(LEVEL . CHECKER)'.  CHECKER is a
      syntax checker to run after this syntax checker.  LEVEL is
@@ -1746,118 +1437,246 @@ be registered in `flycheck-checkers'.
 
      Flycheck tries all items in order of declaration, and uses
      the first whose LEVEL matches and whose CHECKER is
-     registered and can be used for the current buffer."
+     registered and can be used for the current buffer.
+
+     This feature is typically used to apply more than one syntax
+     checker to a buffer.  For instance, you might first use a
+     compiler to check a buffer for syntax and type errors, and
+     then run a linting tool that checks for insecure code, or
+     questionable style.
+
+     This property is optional.  If omitted, it defaults to the
+     nil, i.e. no other syntax checkers are applied after this
+     syntax checker.
+
+Signal an error, if any property has an invalid value."
   (declare (indent 1)
            (doc-string 2))
-  (let ((modes (plist-get properties :modes))
-        (command (plist-get properties :command))
-        (executable-var (intern (format "flycheck-%s-executable" symbol))))
-    `(progn
-       (defcustom ,executable-var nil
-         ,(format "The executable of the %s syntax checker.
+  (let ((start (plist-get properties :start))
+        (interrupt (plist-get properties :interrupt))
+        (doc-printer (plist-get properties :doc-printer))
+        (modes (plist-get properties :modes))
+        (predicate (plist-get properties :predicate))
+        (filter (or (plist-get properties :error-filter)
+                    #'flycheck-sanitize-errors))
+        (next-checkers (plist-get properties :next-checkers))
+        (file (flycheck-current-load-file)))
 
-Either a string containing the name or the path of the
-executable, or nil to use the default executable from the syntax
-checker declaration.
+    (unless (listp modes)
+      (setq modes (list modes)))
 
-The default executable is %S." symbol (car command))
-         :type '(choice (const :tag "Default executable" nil)
-                        (string :tag "Name or path"))
-         :group 'flycheck-executables
-         :risky t)
+    (unless (functionp start)
+      (error ":start %S of syntax checker %s is not a function" symbol start))
+    (unless (or (null interrupt) (functionp interrupt))
+      (error ":interrupt %S of syntax checker %s is not a function"
+             symbol interrupt))
+    (unless (or (null doc-printer) (functionp doc-printer))
+      (error ":doc-printer %S of syntax checker %s is not a function"
+             symbol doc-printer))
+    (unless (or modes predicate)
+      (error "Missing :modes or :predicate in syntax checker %s" symbol))
+    (dolist (mode modes)
+      (unless (symbolp mode)
+        (error "Invalid :modes %s in syntax checker %s, %s must be a symbol"
+               modes symbol mode)))
+    (unless (or (null predicate) (functionp predicate))
+      (error ":predicate %S of syntax checker %s  is not a function"
+             symbol predicate))
+    (unless (functionp filter)
+      (error ":error-filter %S of syntax checker %s is not a function"
+             symbol filter))
+    (dolist (checker next-checkers)
+      (flycheck-validate-next-checker checker))
 
-       (make-variable-buffer-local ',executable-var)
-       (flycheck-set-checker-properties
-        ',symbol
-        (list '(flycheck-documentation . ,docstring)
-              '(flycheck-executable-var . ,executable-var)
-              '(flycheck-command . ,command)
-              (cons 'flycheck-error-parser
-                    #',(or (plist-get properties :error-parser)
-                           'flycheck-parse-with-patterns))
-              '(flycheck-error-patterns
-                .
-                ,(mapcar
-                  (lambda (p)
-                    (cons (flycheck-rx-to-string `(and ,@(cdr p)) 'no-group)
-                          (car p)))
-                  (plist-get properties :error-patterns)))
-              (cons 'flycheck-error-filter
-                    #',(or (plist-get properties :error-filter)
-                           'flycheck-sanitize-errors))
-              '(flycheck-modes . ,(if (and modes (symbolp modes))
-                                      (list modes)
-                                    modes))
-              (cons 'flycheck-predicate #',(plist-get properties :predicate))
-              '(flycheck-next-checkers . ,(plist-get properties :next-checkers))
-              (cons 'flycheck-file (flycheck-current-load-file)))))))
+    (let ((real-predicate (lambda ()
+                            (if (flycheck-valid-checker-p symbol)
+                                (or (null predicate) (funcall predicate))
+                              (lwarn 'flycheck :warning "%S is no valid Flycheck syntax checker.
+Try to reinstall the package defining this syntax checker." symbol)
+                              nil))))
+      (pcase-dolist (`(,prop . ,value)
+                     `((flycheck-start         . ,start)
+                       (flycheck-interrupt     . ,interrupt)
+                       (flycheck-doc-printer   . ,doc-printer)
+                       (flycheck-modes         . ,modes)
+                       (flycheck-predicate     . ,real-predicate)
+                       (flycheck-error-filter  . ,filter)
+                       (flycheck-next-checkers . ,next-checkers)
+                       (flycheck-documentation . ,docstring)
+                       (flycheck-file          . ,file)))
+        (put symbol prop value)))
 
-;;;###autoload
-(defmacro flycheck-def-config-file-var (symbol checker &optional file-name
-                                               &rest custom-args)
-  "Define SYMBOL as config file variable for CHECKER, with default FILE-NAME.
+    ;; Track the version, to avoid breakage if the internal format changes
+    (put symbol 'flycheck-generic-checker-version
+         flycheck-generic-checker-version)))
 
-SYMBOL is declared as customizable, buffer-local variable using
-`defcustom', to provide a configuration file for the given syntax
-CHECKER.  CUSTOM-ARGS are forwarded to `defcustom'.
+(defun flycheck-valid-checker-p (checker)
+  "Check whether a CHECKER is valid.
 
-FILE-NAME is the initial value of the new variable.  If omitted,
-the default value is nil.
-
-Use this together with the `config-file' form in the `:command'
-argument to `flycheck-define-checker'."
-  (declare (indent 3))
-  `(progn
-     (put ',checker 'flycheck-config-file-var ',symbol)
-     (defcustom ,symbol ,file-name
-       ,(format "Configuration file for `%s'.
-
-If set to a string, locate the configuration file using the
-functions from `flycheck-locate-config-file-functions'.  If the
-file is found pass it to the syntax checker as configuration
-file.
-
-If no configuration file is found, or if this variable is set to
-nil, invoke the syntax checker without a configuration file.
-
-Use this variable as file-local variable if you need a specific
-configuration file a buffer." checker)
-       :type '(choice (const :tag "No configuration file" nil)
-                      (string :tag "File name or path"))
-       :group 'flycheck-config-files
-       ,@custom-args)
-     (make-variable-buffer-local ',symbol)))
-
-;;;###autoload
-(defmacro flycheck-def-option-var (symbol init-value checker docstring
-                                          &rest custom-args)
-  "Define SYMBOL as option variable with INIT-VALUE for CHECKER.
-
-SYMBOL is declared as customizable variable, buffer-local
-variable using `defcustom', to provide an option for the given
-syntax CHECKER.  INIT-VALUE is the initial value of the variable,
-and DOCSTRING is its docstring.  CUSTOM-ARGS are forwarded to
-`defcustom'.
-
-Use this together with the `option', `option-list' and
-`option-flag' forms in the `:command' argument to
+A valid checker is a symbol defined as syntax checker with
 `flycheck-define-checker'."
-  (declare (indent 3)
-           (doc-string 4))
-  `(progn
-     (let ((options (flycheck-checker-option-vars ',checker)))
-       (unless (memq ',symbol options)
-         (put ',checker 'flycheck-option-vars (cons ',symbol options))))
-     (defcustom ,symbol ,init-value
-       ,(format "%s
+  (and (symbolp checker)
+       (= (or (get checker 'flycheck-generic-checker-version) 0)
+          flycheck-generic-checker-version)))
 
-This variable is an option for the syntax checker `%s'." docstring checker)
-       :group 'flycheck-options
-       ,@custom-args)
-     (make-variable-buffer-local ',symbol)))
+(defun flycheck-checker-modes (checker)
+  "Get the modes of CHECKER."
+  (get checker 'flycheck-modes))
+
+(defun flycheck-checker-predicate (checker)
+  "Get the predicate function of CHECKER."
+  (get checker 'flycheck-predicate))
+
+(defun flycheck-checker-next-checkers (checker)
+  "Get the next checkers for CHECKER."
+  (get checker 'flycheck-next-checkers))
+
+(defun flycheck-checker-error-filter (checker)
+  "Get the error filter of CHECKER."
+  (get checker 'flycheck-error-filter))
+
+(defun flycheck-checker-documentation (checker)
+  "Get the documentation of CHECKER."
+  (documentation-property checker 'flycheck-documentation))
+
+(defun flycheck-checker-file (checker)
+  "Get the file CHECKER was defined in.
+
+Return nil if the file cannot be determined."
+  (get checker 'flycheck-file))
+
+(defun flycheck-may-use-checker (checker)
+  "Whether a generic CHECKER may be used.
+
+Return non-nil if CHECKER may be used for the current buffer, and
+nil otherwise."
+  (let ((modes (flycheck-checker-modes checker))
+        (predicate (flycheck-checker-predicate checker)))
+    (and (flycheck-valid-checker-p checker)
+         (or (not modes) (memq major-mode modes))
+         (funcall predicate)
+         (not (flycheck-disabled-checker-p checker)))))
+
+(defun flycheck-may-use-next-checker (next-checker)
+  "Determine whether NEXT-CHECKER may be used."
+  (when (symbolp next-checker)
+    (push t next-checker))
+  (let ((level (car next-checker))
+        (next-checker (cdr next-checker)))
+    (and (or (eq level t)
+             (flycheck-has-max-current-errors-p level))
+         (flycheck-registered-checker-p next-checker)
+         (flycheck-may-use-checker next-checker))))
 
 
-;;; Checker extensions
+;;; Help for generic syntax checkers
+(define-button-type 'help-flycheck-checker-def
+  :supertype 'help-xref
+  'help-function 'flycheck-goto-checker-definition
+  'help-echo (purecopy "mouse-2, RET: find Flycheck checker definition"))
+
+(defconst flycheck-find-checker-regexp
+  (rx line-start (zero-or-more (syntax whitespace))
+      "(" symbol-start "flycheck-define-checker" symbol-end
+      (eval (list 'regexp find-function-space-re))
+      symbol-start
+      "%s"
+      symbol-end
+      (or (syntax whitespace) line-end))
+  "Regular expression to find a checker definition.")
+
+(add-to-list 'find-function-regexp-alist
+             '(flycheck-checker . flycheck-find-checker-regexp))
+
+(defun flycheck-goto-checker-definition (checker file)
+  "Go to to the definition of CHECKER in FILE."
+  (let ((location (find-function-search-for-symbol
+                   checker 'flycheck-checker file)))
+    (pop-to-buffer (car location))
+    (if (cdr location)
+        (goto-char (cdr location))
+      (message "Unable to find checker location in file"))))
+
+(defun flycheck-checker-at-point ()
+  "Return the Flycheck checker found at or before point.
+
+Return 0 if there is no checker."
+  (let ((symbol (variable-at-point 'any-symbol)))
+    (if (and (symbolp symbol) (flycheck-valid-checker-p symbol))
+        symbol
+      0)))
+
+(defun flycheck-describe-checker (checker)
+  "Display the documentation of CHECKER.
+
+CHECKER is a checker symbol.
+
+Pop up a help buffer with the documentation of CHECKER."
+  (interactive
+   (let* ((checker (flycheck-checker-at-point))
+          (enable-recursive-minibuffers t)
+          (prompt (if (symbolp checker)
+                      (format "Describe syntax checker (default %s): " checker)
+                    "Describe syntax checker: "))
+          (reply (read-flycheck-checker prompt)))
+     (list (or reply checker))))
+  (if (or (null checker) (not (flycheck-valid-checker-p checker)))
+      (message "You didn't specify a Flycheck syntax checker.")
+    (help-setup-xref (list #'flycheck-describe-checker checker)
+                     (called-interactively-p 'interactive))
+    (save-excursion
+      (with-help-window (help-buffer)
+        (let ((filename (flycheck-checker-file checker))
+              (modes (flycheck-checker-modes checker))
+              (predicate (flycheck-checker-predicate checker))
+              (doc-printer (get checker 'flycheck-doc-printer)))
+          (princ (format "%s is a Flycheck syntax checker" checker))
+          (when filename
+            (princ (format " in `%s'" (file-name-nondirectory filename)))
+            (with-current-buffer standard-output
+              (save-excursion
+                (re-search-backward "`\\([^`']+\\)'" nil t)
+                (help-xref-button 1 'help-flycheck-checker-def checker filename))))
+          (princ ".\n\n")
+
+          (let ((modes-start (with-current-buffer standard-output (point-max))))
+            ;; Track the start of the modes documentation, to properly re-fill
+            ;; it later
+            (if (not modes)
+                ;; Syntax checkers without modes must have a predicate
+                (princ "  This syntax checker checks syntax if a custom predicate holds")
+              (princ "  This syntax checker checks syntax in the major mode(s) ")
+              (princ (string-join
+                      (mapcar (apply-partially #'format "`%s'") modes)
+                      ", "))
+              (when predicate
+                (princ ", and uses a custom predicate")))
+            (princ ".")
+            (with-current-buffer standard-output
+              (save-excursion
+                (fill-region-as-paragraph modes-start (point-max)))))
+          (princ "\n")
+          ;; Call the custom doc-printer of the checker, if present
+          (when doc-printer
+            (funcall doc-printer checker))
+          ;; Ultimately, print the docstring
+          (princ "\nDocumentation:\n")
+          (princ (flycheck-checker-documentation checker)))))))
+
+
+;;; Predicates for generic syntax checkers
+(defun flycheck-buffer-saved-p (&optional buffer)
+  "Determine whether BUFFER is saved to a file.
+
+BUFFER is the buffer to check.  If omitted or nil, use the
+current buffer as BUFFER.
+
+Return non-nil if the BUFFER is backed by a file, and not
+modified, or nil otherwise."
+  (and (buffer-file-name buffer) (not (buffer-modified-p buffer))))
+
+
+;;; Extending generic checkers
 (defun flycheck-add-next-checker (checker next &optional append)
   "Add a NEXT checker after CHECKER.
 
@@ -1898,494 +1717,131 @@ will be used in buffers with MODE."
   (push mode (get checker 'flycheck-modes)))
 
 
-;;; Checker API
-(defun flycheck-valid-checker-p (checker)
-  "Check whether a CHECKER is valid.
-
-A valid checker is a symbol defined as syntax checker with
-`flycheck-define-checker'."
-  (and (symbolp checker)
-       (= (or (get checker 'flycheck-checker-version) 0)
-          flycheck-checker-version)))
-
-(defun flycheck-defined-checkers ()
-  "Find all defined syntax checkers.
-
-The returned list is sorted alphapetically by the symbol name of
-the syntax checkers."
-  (let (defined-checkers)
-    (mapatoms (lambda (symbol)
-                (when (flycheck-valid-checker-p symbol)
-                  (push symbol defined-checkers))))
-    (sort defined-checkers #'string<)))
-
-(defun flycheck-registered-checker-p (checker)
-  "Determine whether CHECKER is registered.
-
-A checker is registered if it is contained in
-`flycheck-checkers'."
-  (and (flycheck-valid-checker-p checker)
-       (memq checker flycheck-checkers)))
-
-(defun flycheck-disabled-checker-p (checker)
-  "Determine whether CHECKER is disabled.
-
-A checker is disabled if it is contained in
-`flycheck-disabled-checkers'."
-  (memq checker flycheck-disabled-checkers))
-
-(defun flycheck-checker-executable-variable (checker)
-  "Get the executable variable of CHECKER."
-  (get checker 'flycheck-executable-var))
-
-(defun flycheck-checker-default-executable (checker)
-  "Get the default executable of CHECKER."
-  (car (get checker 'flycheck-command)))
-
-(defun flycheck-checker-executable (checker)
-  "Get the command executable of CHECKER.
-
-The executable is either the value of the variable
-`flycheck-CHECKER-executable', or the default executable given in
-the syntax checker definition, if the variable is nil."
-  (or (symbol-value (flycheck-checker-executable-variable checker))
-      (flycheck-checker-default-executable checker)))
-
-(defun flycheck-checker-arguments (checker)
-  "Get the command arguments of CHECKER."
-  (cdr (get checker 'flycheck-command)))
-
-(defun flycheck-checker-modes (checker)
-  "Get the modes of CHECKER."
-  (let ((modes (get checker 'flycheck-modes)))
-    (if (and modes (symbolp modes))
-        (list modes)
-      modes)))
-
-(defun flycheck-checker-predicate (checker)
-  "Get the predicate function of CHECKER."
-  (get checker 'flycheck-predicate))
-
-(defun flycheck-checker-next-checkers (checker)
-  "Get the next checkers for CHECKER."
-  (get checker 'flycheck-next-checkers))
-
-(defun flycheck-checker-error-patterns (checker)
-  "Get the error patterns of CHECKER.
-
-Each pattern has the form `(REGEXP . LEVEL)' where REGEXP is the
-regular expression, and LEVEL the corresponding level symbol."
-  (get checker 'flycheck-error-patterns))
-
-(defun flycheck-checker-error-parser (checker)
-  "Get the error parser of CHECKER."
-  (get checker 'flycheck-error-parser))
-
-(defun flycheck-checker-error-filter (checker)
-  "Get the error filter of CHECKER."
-  (get checker 'flycheck-error-filter))
-
-(defun flycheck-checker-pattern-to-error-regexp (pattern)
-  "Convert PATTERN into an error regexp for compile.el.
-
-Return a list representing PATTERN, suitable as element in
-`compilation-error-regexp-alist'."
-  (let* ((regexp (car pattern))
-         (level (cdr pattern))
-         (level-no (pcase level
-                     (`error 2)
-                     (`warning 1))))
-    (list regexp 1 2 3 level-no)))
-
-(defun flycheck-checker-compilation-error-regexp-alist (checker)
-  "Convert error patterns of CHECKER for use with compile.el.
-
-Return an alist of all error patterns of CHECKER, suitable for
-use with `compilation-error-regexp-alist'."
-  (mapcar #'flycheck-checker-pattern-to-error-regexp
-          (flycheck-checker-error-patterns checker)))
-
-(defun flycheck-checker-documentation (checker)
-  "Get the documentation of CHECKER."
-  (documentation-property checker 'flycheck-documentation))
-
-(defun flycheck-checker-file (checker)
-  "Get the file CHECKER was defined in.
-
-Return nil if the file cannot be determined."
-  (get checker 'flycheck-file))
-
-(defun flycheck-checker-config-file-var (checker)
-  "Get the associated configuration file variable of CHECKER.
-
-Return nil if CHECKER has no associated configuration file
-variable."
-  (get checker 'flycheck-config-file-var))
-
-(defun flycheck-checker-option-vars (checker)
-  "Get the associated option variables of CHECKER.
-
-Return a (possibly empty) list of variable symbols."
-  (get checker 'flycheck-option-vars))
-
-(defun flycheck-locate-config-file (filename checker)
-  "Locate the configuration file FILENAME for CHECKER.
-
-Locate the configuration file using
-`flycheck-locate-config-file-functions'.
-
-Return the absolute path of the configuration file, or nil if no
-configuration file was found."
-  (-when-let (filepath (run-hook-with-args-until-success
-                        'flycheck-locate-config-file-functions
-                        filename checker))
-    (when (file-exists-p filepath)
-      filepath)))
-
-(defun flycheck-substitute-argument (arg checker)
-  "Substitute ARG for CHECKER.
-
-Return a list of real arguments for the executable of CHECKER,
-substituted for the symbolic argument ARG.  Single arguments,
-e.g. if ARG is a literal strings, are wrapped in a list.
-
-ARG may be one of the following forms:
-
-STRING
-     Return ARG unchanged.
-
-`source', `source-inplace'
-     Create a temporary file to check and return its path.  With
-     `source-inplace' create the temporary file in the same
-     directory as the original file.  The value of
-     `flycheck-temp-prefix' is used as prefix of the file name.
-
-     With `source', try to retain the non-directory component of
-     the buffer's file name in the temporary file.
-
-     `source' is the preferred way to pass the input file to a
-     syntax checker.  `source-inplace' should only be used if the
-     syntax checker needs other files from the source directory,
-     such as include files in C.
-
-`source-original'
-     Return the path of the actual file to check, or an empty
-     string if the buffer has no file name.
-
-     Note that the contents of the file may not be up to date
-     with the contents of the buffer to check.  Do not use this
-     as primary input to a checker, unless absolutely necessary.
-
-     When using this symbol as primary input to the syntax
-     checker, add `flycheck-buffer-saved-p' to the `:predicate'.
-
-`temporary-directory'
-     Create a unique temporary directory and return its path.
-
-`temporary-file-name'
-     Return a unique temporary filename.  The file is *not*
-     created.
-
-     To ignore the output of syntax checkers, try `null-device'
-     first.
-
-`null-device'
-     Return the value of `null-device', i.e the system null
-     device.
-
-     Use this option to ignore the output of a syntax checker.
-     If the syntax checker cannot handle the null device, or
-     won't write to an existing file, try `temporary-file-name'
-     instead.
-
-`(config-file OPTION VARIABLE [PREPEND-FN])'
-     Search the configuration file bound to VARIABLE with
-     `flycheck-locate-config-file' and return a list of arguments
-     that pass this configuration file to the syntax checker, or
-     nil if the configuration file was not found.
-
-     PREPEND-FN is called with the OPTION and the located
-     configuration file, and should return OPTION prepended
-     before the file, either a string or as list.  If omitted,
-     PREPEND-FN defaults to `list'.
-
-`(option OPTION VARIABLE [PREPEND-FN [FILTER]])'
-     Retrieve the value of VARIABLE and return a list of
-     arguments that pass this value as value for OPTION to the
-     syntax checker.
-
-     PREPEND-FN is called with the OPTION and the value of
-     VARIABLE, and should return OPTION prepended before the
-     file, either a string or as list.  If omitted, PREPEND-FN
-     defaults to `list'.
-
-     FILTER is an optional function to be applied to the value of
-     VARIABLE before prepending.  This function must return nil
-     or a string.  In the former case, return nil.  In the latter
-     case, return a list of arguments as described above.
-
-`(option-list OPTION VARIABLE [PREPEND-FN [FILTER]])'
-     Retrieve the value of VARIABLE, which must be a list,
-     and prepend OPTION before each item in this list, using
-     PREPEND-FN.
-
-     PREPEND-FN is called with the OPTION and each item of the
-     list as second argument, and should return OPTION prepended
-     before the item, either as string or as list.  If omitted,
-     PREPEND-FN defaults to `list'.
-
-     FILTER is an optional function to be applied to each item in
-     the list before prepending OPTION.  It shall return the
-     option value for each item as string, or nil, if the item is
-     to be ignored.
-
-`(option-flag OPTION VARIABLE)'
-     Retrieve the value of VARIABLE and return OPTION, if the
-     value is non-nil.  Otherwise return nil.
-
-`(eval FORM)'
-     Return the result of evaluating FORM in the buffer to be
-     checked.  FORM must either return a string or a list of
-     strings, or nil to indicate that nothing should be
-     substituted for CELL.  For all other return types, signal an
-     error
-
-     _No_ further substitutions are performed, neither in FORM
-     before it is evaluated, nor in the result of evaluating
-     FORM.
-
-In all other cases, signal an error.
-
-Note that substitution is *not* recursive.  No symbols or cells
-are substituted within the body of cells!"
-  (pcase arg
-    ((pred stringp) (list arg))
-    (`source
-     (list (flycheck-save-buffer-to-temp #'flycheck-temp-file-system)))
-    (`source-inplace
-     (list (flycheck-save-buffer-to-temp #'flycheck-temp-file-inplace)))
-    (`source-original (list (or (buffer-file-name) "")))
-    (`temporary-directory (list (flycheck-temp-dir-system)))
-    (`temporary-file-name
-     (let ((directory (flycheck-temp-dir-system)))
-       (list (make-temp-name (expand-file-name "flycheck" directory)))))
-    (`null-device (list null-device))
-    (`(config-file ,option-name ,file-name-var)
-     (-when-let* ((value (symbol-value file-name-var))
-                  (file-name (flycheck-locate-config-file value checker)))
-       (flycheck-prepend-with-option option-name (list file-name))))
-    (`(config-file ,option-name ,file-name-var ,prepend-fn)
-     (-when-let* ((value (symbol-value file-name-var))
-                  (file-name (flycheck-locate-config-file value checker)))
-       (flycheck-prepend-with-option option-name (list file-name) prepend-fn)))
-    (`(option ,option-name ,variable)
-     (-when-let (value (symbol-value variable))
-       (unless (stringp value)
-         (error "Value %S of %S for option %s is not a string"
-                value variable option-name))
-       (flycheck-prepend-with-option option-name (list value))))
-    (`(option ,option-name ,variable ,prepend-fn)
-     (-when-let (value (symbol-value variable))
-       (unless (stringp value)
-         (error "Value %S of %S for option %s is not a string"
-                value variable option-name))
-       (flycheck-prepend-with-option option-name (list value) prepend-fn)))
-    (`(option ,option-name ,variable ,prepend-fn ,filter)
-     (-when-let (value (funcall filter (symbol-value variable)))
-       (unless (stringp value)
-         (error "Value %S of %S (filter: %S) for option %s is not a string"
-                value variable filter option-name))
-       (flycheck-prepend-with-option option-name (list value) prepend-fn)))
-    (`(option-list ,option-name ,variable)
-     (let ((value (symbol-value variable)))
-       (unless (and (listp value) (-all? #'stringp value))
-         (error "Value %S of %S for option %S is not a list of strings"
-                value variable option-name))
-       (flycheck-prepend-with-option option-name value)))
-    (`(option-list ,option-name ,variable ,prepend-fn)
-     (let ((value (symbol-value variable)))
-       (unless (and (listp value) (-all? #'stringp value))
-         (error "Value %S of %S for option %S is not a list of strings"
-                value variable option-name))
-       (flycheck-prepend-with-option option-name value prepend-fn)))
-    (`(option-list ,option-name ,variable ,prepend-fn ,filter)
-     (let ((value (delq nil (mapcar filter (symbol-value variable)))))
-       (unless (and (listp value) (-all? #'stringp value))
-         (error "Value %S of %S for option %S is not a list of strings"
-                value variable option-name))
-       (flycheck-prepend-with-option option-name value prepend-fn)))
-    (`(option-flag ,option-name ,variable)
-     (when (symbol-value variable)
-       (list option-name)))
-    (`(eval ,form)
-     (let ((result (eval form)))
-       (cond
-        ((and (listp result) (-all? #'stringp result)) result)
-        ((stringp result) (list result))
-        (t (error "Invalid result from evaluation of %S: %S" form result)))))
-    (_ (error "Unsupported argument %S" arg))))
-
-(defun flycheck-checker-substituted-arguments (checker)
-  "Get the substituted arguments of a CHECKER.
-
-Substitute each argument of CHECKER using
-`flycheck-substitute-argument'.  This replaces any special
-symbols in the command."
-  (apply #'append
-         (mapcar (lambda (arg) (flycheck-substitute-argument arg checker))
-                 (flycheck-checker-arguments checker))))
-
-(defun flycheck-checker-shell-command (checker)
-  "Get a shell command for CHECKER.
-
-Perform substitution in the arguments of CHECKER, but with
-`flycheck-substitute-shell-argument'.
-
-Return the command of CHECKER as single string, suitable for
-shell execution."
-  ;; Note: Do NOT use `combine-and-quote-strings' here.  Despite it's name it
-  ;; does not properly quote shell arguments, and actually breaks for special
-  ;; characters.  See https://github.com/flycheck/flycheck/pull/522
-  (mapconcat #'shell-quote-argument
-   (cons (flycheck-checker-executable checker)
-         (apply #'append
-                (mapcar (lambda (arg)
-                          (if (memq arg '(source source-inplace source-original))
-                              (list (or (buffer-file-name) ""))
-                            (flycheck-substitute-argument arg checker)))
-                        (flycheck-checker-arguments checker)))) " "))
-
-(defun flycheck-check-modes (checker)
-  "Check the allowed modes of CHECKER.
-
-Check the current `major-mode' against the modes allowed for
-CHECKER.  Return t if the modes match or nil otherwise."
-  (let ((modes (flycheck-checker-modes checker)))
-    (or (not modes) (memq major-mode modes))))
-
-(defun flycheck-check-predicate (checker)
-  "Check the predicate of CHECKER.
-
-Check the predicate of CHECKER.  Return t if CHECKER has no
-predicate function, otherwise return the result of calling the
-predicate function."
-  (let ((predicate (flycheck-checker-predicate checker)))
-    (or (not predicate) (funcall predicate))))
-
-(defun flycheck-check-executable (checker)
-  "Check the executable of the CHECKER."
-  (when (executable-find (flycheck-checker-executable checker)) t))
-
-(defun flycheck-may-use-checker (checker)
-  "Determine whether a CHECKER may be used.
-
-Return t if CHECKER may be used for the current buffer and nil
-otherwise."
-  (if (flycheck-valid-checker-p checker)
-      (and (flycheck-check-modes checker)
-           (flycheck-check-predicate checker)
-           (flycheck-check-executable checker)
-           (not (flycheck-disabled-checker-p checker)))
-    (lwarn 'flycheck :warning "%S is no valid Flycheck syntax checker.
-Try to reinstall the package defining this syntax checker." checker)
-    nil))
-
-(defun flycheck-may-use-next-checker (next-checker)
-  "Determine whether NEXT-CHECKER may be used."
-  (when (symbolp next-checker)
-    (push t next-checker))
-  (let ((level (car next-checker))
-        (next-checker (cdr next-checker)))
-    (and (or (eq level t)
-             (flycheck-has-max-current-errors-p level))
-         (flycheck-registered-checker-p next-checker)
-         (flycheck-may-use-checker next-checker))))
+;;; Generic syntax checks
+(cl-defstruct (flycheck-syntax-check
+               (:constructor flycheck-syntax-check-new))
+  "Structure for storing syntax check state.
+
+Slots:
+
+`buffer'
+     The buffer being checked
+
+`checker'
+     The syntax checker being used
+
+`context'
+     The context object."
+  buffer checker context)
+
+(defun flycheck-start-checker (checker callback)
+  "Start a syntax CHECKER, with a STATUS CALLBACK.
+
+Return a `flycheck-syntax-check' representing the syntax check."
+  (flycheck-syntax-check-new
+   :buffer (current-buffer)
+   :checker checker
+   :context (funcall (get checker 'flycheck-start) checker callback)))
+
+(defun flycheck-interrupt-syntax-check (syntax-check)
+  "Interrupt a SYNTAX-CHECK."
+  (let* ((checker (flycheck-syntax-check-checker syntax-check))
+         (interrupt-fn (get checker 'flycheck-interrupt))
+         (context (flycheck-syntax-check-context syntax-check)))
+    (when interrupt-fn
+      (funcall interrupt-fn checker context))))
 
 
-;;; Configuration file functions
-(defun flycheck-locate-config-file-absolute-path (filepath _checker)
-  "Locate a configuration file by a FILEPATH.
+;;; Syntax checking mode
 
-If FILEPATH is a contains a path separator, expand it against the
-default directory and return it.  Otherwise return nil.
+(defvar flycheck-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map flycheck-keymap-prefix flycheck-command-map)
+    ;; We place the menu under a custom menu key.  Since this menu key is not
+    ;; present in the menu of the global map, no top-level menu entry is added
+    ;; to the global menu bar.  However, it still appears on the mode line
+    ;; lighter.
+    (define-key map [menu-bar flycheck] flycheck-mode-menu-map)
+    map)
+  "Keymap of `flycheck-mode'.")
 
-_CHECKER is ignored."
-  ;; If the path is just a plain file name, skip it.
-  (unless (string= (file-name-nondirectory filepath) filepath)
-    (expand-file-name filepath)))
+(defvar-local flycheck-old-next-error-function nil
+  "Remember the old `next-error-function'.")
 
-(defun flycheck-locate-config-file-ancestor-directories (filename _checker)
-  "Locate a configuration FILENAME in ancestor directories.
+(defconst flycheck-hooks-alist
+  '(
+    ;; Handle events that may start automatic syntax checks
+    (after-save-hook                  . flycheck-handle-save)
+    (after-change-functions           . flycheck-handle-change)
+    ;; Handle events that may triggered pending deferred checks
+    (window-configuration-change-hook . flycheck-perform-deferred-syntax-check)
+    (post-command-hook                . flycheck-perform-deferred-syntax-check)
+    ;; Teardown Flycheck whenever the buffer state is about to get lost, to
+    ;; clean up temporary files and directories.
+    (kill-buffer-hook                 . flycheck-teardown)
+    (change-major-mode-hook           . flycheck-teardown)
+    (before-revert-hook               . flycheck-teardown)
+    ;; Update the error list if necessary
+    (post-command-hook                . flycheck-error-list-update-source)
+    (post-command-hook                . flycheck-error-list-highlight-errors)
+    ;; Show or hide error popups after commands
+    (post-command-hook                . flycheck-display-error-at-point-soon)
+    (post-command-hook                . flycheck-hide-error-buffer)
+    ;; Immediately show error popups when navigating to an error
+    (next-error-hook                  . flycheck-display-error-at-point))
+  "Hooks which Flycheck needs to hook in.
 
-If the current buffer has a file name, search FILENAME in the
-directory of the current buffer and all ancestors thereof (see
-`locate-dominating-file').  If the file is found, return its
-absolute path.  Otherwise return nil.
+The `car' of each pair is a hook variable, the `cdr' a function
+to be added or removed from the hook variable if Flycheck mode is
+enabled and disabled respectively.")
 
-_CHECKER is ignored."
-  (-when-let* ((basefile (buffer-file-name))
-               (directory (locate-dominating-file basefile filename)))
-    (expand-file-name filename directory)))
+;;;###autoload
+(define-minor-mode flycheck-mode
+  "Minor mode for on-the-fly syntax checking.
 
-(defun flycheck-locate-config-file-home (filename _checker)
-  "Locate a configuration FILENAME in the home directory.
+When called interactively, toggle `flycheck-mode'.  With prefix
+ARG, enable `flycheck-mode' if ARG is positive, otherwise disable
+it.
 
-Return the absolute path, if FILENAME exists in the user's home
-directory, or nil otherwise."
-  (let ((path (expand-file-name filename "~")))
-    (when (file-exists-p path)
-      path)))
+When called from Lisp, enable `flycheck-mode' if ARG is omitted,
+nil or positive.  If ARG is `toggle', toggle `flycheck-mode'.
+Otherwise behave as if called interactively.
 
-(mapc (apply-partially #'custom-add-frequent-value
-                       'flycheck-locate-config-file-functions)
-      '(flycheck-locate-config-file-absolute-path
-        flycheck-locate-config-file-ancestor-directories
-        flycheck-locate-config-file-home))
+In `flycheck-mode' the buffer is automatically syntax-checked
+using the first suitable syntax checker from `flycheck-checkers'.
+Use `flycheck-select-checker' to select a checker for the current
+buffer manually.
+
+\\{flycheck-mode-map}"
+  :init-value nil
+  :keymap flycheck-mode-map
+  :lighter flycheck-mode-line
+  :group 'flycheck
+  :require 'flycheck
+  :after-hook (flycheck-buffer-automatically 'mode-enabled 'force-deferred)
+  (cond
+   (flycheck-mode
+    (flycheck-clear)
+
+    (pcase-dolist (`(,hook . ,fn) flycheck-hooks-alist)
+      (add-hook hook fn nil 'local))
+
+    (setq flycheck-old-next-error-function (if flycheck-standard-error-navigation
+                                               next-error-function
+                                             :unset))
+    (when flycheck-standard-error-navigation
+      (setq next-error-function #'flycheck-next-error-function)))
+   (t
+    (unless (eq flycheck-old-next-error-function :unset)
+      (setq next-error-function flycheck-old-next-error-function))
+
+    (pcase-dolist (`(,hook . ,fn) flycheck-hooks-alist)
+      (remove-hook hook fn 'local))
+
+    (flycheck-teardown))))
 
 
-;;; Generic option filters
-(defun flycheck-option-int (value)
-  "Convert an integral option VALUE to a string.
-
-If VALUE is nil, return nil.  Otherwise return VALUE converted to
-a string."
-  (when value
-    (number-to-string value)))
-
-(defun flycheck-option-comma-separated-list (value &optional separator filter)
-  "Convert VALUE into a list separated by SEPARATOR.
-
-SEPARATOR is a string to separate items in VALUE, defaulting to
-\",\".  FILTER is an optional function, which takes a single
-argument and returns either a string or nil.
-
-If VALUE is a list, apply FILTER to each item in VALUE, remove
-all nil items, and return a single string of all remaining items
-separated by SEPARATOR.
-
-Otherwise, apply FILTER to VALUE and return the result.
-SEPARATOR is ignored in this case."
-  (let ((filter (or filter #'identity))
-        (separator (or separator ",")))
-    (if (listp value)
-        (-when-let (value (delq nil (mapcar filter value)))
-          (string-join value separator))
-      (funcall filter value))))
-
-
-;;; Syntax checker predicates
-(defun flycheck-buffer-saved-p (&optional buffer)
-  "Determine whether BUFFER is saved to a file.
-
-BUFFER is the buffer to check.  If omitted or nil, use the
-current buffer as BUFFER.
-
-Return non-nil if the BUFFER is backed by a file, and not
-modified, or nil otherwise."
-  (and (buffer-file-name buffer) (not (buffer-modified-p buffer))))
-
-
-;;; Checker selection
+;;; Syntax checker selection for the current buffer
 (defvar-local flycheck-last-checker nil
   "The last checker used for the current buffer.")
 
@@ -2470,143 +1926,366 @@ CHECKER will be used, even if it is not contained in
       (flycheck-buffer))))
 
 
-;;; Checkers as compile commands
-(defun flycheck-compile-name (_name)
-  "Get a name for a Flycheck compilation buffer.
+;;; Syntax checks for the current buffer
+(defvar-local flycheck-current-syntax-check nil
+  "The current syntax check in the this buffer.")
+(put 'flycheck-current-syntax-check 'permanent-local t)
 
-_NAME is ignored."
-  (format "*Flycheck %s*" (buffer-file-name)))
+(defun flycheck-running-p ()
+  "Determine whether a syntax check is running in the current buffer."
+  (not (null flycheck-current-syntax-check)))
 
-(defun flycheck-compile (checker)
-  "Run CHECKER via `compile'.
+(defun flycheck-stop ()
+  "Stop any ongoing syntax check in the current buffer."
+  (when (flycheck-running-p)
+    (flycheck-interrupt-syntax-check flycheck-current-syntax-check)
+    ;; Remove the current syntax check, to reset Flycheck into a non-running
+    ;; state, and to make `flycheck-report-buffer-checker-status' ignore any
+    ;; status reports from the current syntax check.
+    (setq flycheck-current-syntax-check nil)
+    (flycheck-report-status 'interrupted)))
 
-CHECKER must be a valid syntax checker.  Interactively, prompt
-for a syntax checker to run.
+(defun flycheck-buffer-status-callback (checker)
+  "Create a status callback for CHECKER in the current buffer."
+  (let ((buffer (current-buffer)))
+    ;; Capture the current buffer in a closure, to make sure that it doesn't
+    ;; change behind our back.
+    (lambda (&rest args)
+      (apply #'flycheck-report-buffer-checker-status
+             buffer checker args))))
 
-Instead of highlighting errors in the buffer, this command pops
-up a separate buffer with the entire output of the syntax checker
-tool, just like `compile' (\\[compile])."
-  (interactive
-   (list (read-flycheck-checker "Run syntax checker as compile command: "
-                                (or flycheck-checker flycheck-last-checker))))
-  (unless (flycheck-valid-checker-p checker)
-    (user-error "%S is not a valid syntax checker" checker))
-  (unless (buffer-file-name)
-    (user-error "Cannot compile buffers without backing file"))
-  (unless (flycheck-may-use-checker checker)
-    (user-error "Cannot use syntax checker %S in this buffer" checker))
-  (let* ((command (flycheck-checker-shell-command checker))
-         (buffer (compilation-start command nil #'flycheck-compile-name)))
-    (with-current-buffer buffer
-      (set (make-local-variable 'compilation-error-regexp-alist)
-           (flycheck-checker-compilation-error-regexp-alist checker)))))
-
-
-;;; Documentation
-;;;###autoload
-(defun flycheck-info ()
-  "Open the Flycheck manual."
+(defun flycheck-buffer ()
+  "Check syntax in the current buffer."
   (interactive)
-  (info "flycheck"))
+  (flycheck-clean-deferred-check)
+  (if flycheck-mode
+      (unless (flycheck-running-p)
+        ;; Clear error list and mark all overlays for deletion.  We do not
+        ;; delete all overlays immediately to avoid excessive re-displays and
+        ;; flickering, if the same errors gets highlighted again after the check
+        ;; completed.
+        (run-hooks 'flycheck-before-syntax-check-hook)
+        (flycheck-clear-errors)
+        (flycheck-mark-all-overlays-for-deletion)
+        (condition-case err
+            (let* ((checker (flycheck-get-checker-for-buffer))
+                   (callback (flycheck-buffer-status-callback checker)))
+              (if checker
+                  (let ((check (flycheck-start-checker checker callback)))
+                    (setq flycheck-current-syntax-check check)
+                    (flycheck-report-status 'running))
+                (flycheck-clear)
+                (flycheck-report-status 'no-checker)))
+          (error
+           (flycheck-report-failed-syntax-check)
+           (signal (car err) (cdr err)))))
+    (user-error "Flycheck mode disabled")))
 
-(define-button-type 'help-flycheck-checker-def
-  :supertype 'help-xref
-  'help-function 'flycheck-goto-checker-definition
-  'help-echo (purecopy "mouse-2, RET: find Flycheck checker definition"))
+(defun flycheck-report-buffer-checker-status
+    (buffer checker status &optional data)
+  "In BUFFER, report syntax CHECKER STATUS with DATA.
 
-(defconst flycheck-find-checker-regexp
-  (rx line-start (zero-or-more (syntax whitespace))
-      "(" symbol-start "flycheck-define-checker" symbol-end
-      (eval (list 'regexp find-function-space-re))
-      symbol-start
-      "%s"
-      symbol-end
-      (or (syntax whitespace) line-end))
-  "Regular expression to find a checker definition.")
+CHECKER is the syntax check reporting the status.  STATUS denotes
+the status of CHECKER, with an optional DATA.  STATUS may be one
+of the following symbols:
 
-(add-to-list 'find-function-regexp-alist
-             '(flycheck-checker . flycheck-find-checker-regexp))
+`errored'
+     The syntax checker has errored.  DATA is an optional error
+     message.
 
-(defun flycheck-goto-checker-definition (checker file)
-  "Go to to the definition of CHECKER in FILE."
-  (let ((location (find-function-search-for-symbol
-                   checker 'flycheck-checker file)))
-    (pop-to-buffer (car location))
-    (if (cdr location)
-        (goto-char (cdr location))
-      (message "Unable to find checker location in file"))))
+     This report finishes the current syntax check.
 
-(defun flycheck-checker-at-point ()
-  "Return the Flycheck checker found at or before point.
+`interrupted'
+     The syntax checker was interrupted.  DATA is ignored.
 
-Return 0 if there is no checker."
-  (let ((symbol (variable-at-point 'any-symbol)))
-    (if (and (symbolp symbol) (flycheck-valid-checker-p symbol))
-        symbol
-      0)))
+     This report finishes the current syntax check.
 
-(defun flycheck-describe-checker (checker)
-  "Display the documentation of CHECKER.
+`finished'
+     The syntax checker has finished with a proper error report
+     for the current buffer.  DATA is the (potentially empty)
+     list of `flycheck-error' objects reported by the syntax
+     check.
 
-CHECKER is a checker symbol.
+     This report finishes the current syntax check.
 
-Pop up a help buffer with the documentation of CHECKER."
-  (interactive
-   (let* ((checker (flycheck-checker-at-point))
-          (enable-recursive-minibuffers t)
-          (prompt (if (symbolp checker)
-                      (format "Describe syntax checker (default %s): " checker)
-                    "Describe syntax checker: "))
-          (reply (read-flycheck-checker prompt)))
-     (list (or reply checker))))
-  (if (or (null checker) (not (flycheck-valid-checker-p checker)))
-      (message "You didn't specify a Flycheck syntax checker.")
-    (help-setup-xref (list #'flycheck-describe-checker checker)
-                     (called-interactively-p 'interactive))
-    (save-excursion
-      (with-help-window (help-buffer)
-        (let ((executable (flycheck-checker-default-executable checker))
-              (filename (flycheck-checker-file checker))
-              (modes (flycheck-checker-modes checker))
-              (config-file-var (flycheck-checker-config-file-var checker))
-              (option-vars (-sort #'string<
-                                  (flycheck-checker-option-vars checker))))
-          (princ (format "%s is a Flycheck syntax checker" checker))
-          (when filename
-            (princ (format " in `%s'" (file-name-nondirectory filename)))
-            (with-current-buffer standard-output
-              (save-excursion
-                (re-search-backward "`\\([^`']+\\)'" nil t)
-                (help-xref-button 1 'help-flycheck-checker-def checker filename))))
-          (princ ".\n\n")
-          (princ (format "  This syntax checker executes \"%s\"" executable))
-          (if config-file-var
-              (princ (format ", using a configuration file from `%s'.\n"
-                             config-file-var))
-            (princ ".\n"))
-          (when modes
-            (princ (format "  It checks syntax in the major mode(s) %s. "
-                           (string-join
-                            (mapcar (apply-partially #'format "`%s'") modes)
-                            ", "))))
-          (with-current-buffer (help-buffer)
-            (save-excursion
-              (goto-char (point-min))
-              (forward-paragraph)
-              (fill-region-as-paragraph (point) (point-max))))
-          (princ "\n\n")
-          (princ (format "  The executable can be overridden with `%s'."
-                         (flycheck-checker-executable-variable checker)))
-          (princ "\n")
-          (when option-vars
-            (princ "\n  This syntax checker can be configured with these options:\n\n")
-            (dolist (var option-vars)
-              (princ (format "     * `%s'\n" var)))))
-        (princ (format "\nDocumentation:\n%s"
-                       (flycheck-checker-documentation checker)))))))
+`suspicious'
+     The syntax checker encountered a suspicious state, which the
+     user needs to be informed about.  DATA is an optional
+     message.
+
+A syntax checker _must_ report a status at least once with any
+symbol that finishes the current syntax checker.  Otherwise
+Flycheck gets stuck with the current syntax check.
+
+If CHECKER is not the currently used syntax checker in
+`flycheck-current-syntax-check', the status report is largely
+ignored.  Notably, any errors reported by the checker are
+discarded."
+  ;; Ignore the status report if the corresponding buffer is gone, or no current
+  ;; syntax check is being conducted for this buffer
+  (when (and (buffer-live-p buffer) flycheck-current-syntax-check)
+    (with-current-buffer buffer
+      (let* ((current-checker (flycheck-syntax-check-checker
+                               flycheck-current-syntax-check)))
+        (if (eq checker current-checker)
+            (pcase status
+              ((or `errored `interrupted)
+               (flycheck-report-failed-syntax-check status)
+               (when (eq status 'errored)
+                 ;; In case of error, show the error message
+                 (message "Error from syntax checker %s: %s"
+                          checker (or data "UNKNOWN!"))))
+              (`suspicious
+               (when flycheck-mode
+                 (message "Suspicious state from syntax checker %s: %s"
+                          checker (or data "UNKNOWN!")))
+               (flycheck-report-status 'suspicious))
+              (`finished
+               (when flycheck-mode
+                 ;; Only report errors from the checker if Flycheck Mode is
+                 ;; still enabled.
+                 (flycheck-finish-current-syntax-check data)))
+              (_
+               (error "Unknown status %s from syntax checker %s"
+                      status checker)))
+          ;; Warn a status report from any other syntax checker than the
+          ;; current one.  This should NEVER happen and is a sign that
+          ;; something really went wrong, so it deserves a more disruptive
+          ;; warning than just a `message'
+          (lwarn '(flycheck syntax-checker) :warning
+                 "Ignoring status report from syntax checker %s which is not currently used (current: %s)"
+                 checker current-checker))))))
+
+(defun flycheck-finish-current-syntax-check (errors)
+  "Finish the current syntax-check in the current buffer with ERRORS.
+
+ERRORS is a list of `flycheck-error' objects reported by the
+current syntax check in `flycheck-current-syntax-check'.
+
+Report all ERRORS and potentially start any next syntax checkers.
+
+If the current syntax checker reported excessive errors, it is disabled
+via `flycheck-disable-excessive-checker' for subsequent syntax
+checks."
+  (let* ((syntax-check flycheck-current-syntax-check)
+         (checker (flycheck-syntax-check-checker syntax-check))
+         (errors (flycheck-relevant-errors
+                  (flycheck-filter-errors errors checker))))
+    (unless (flycheck-disable-excessive-checker checker errors)
+      (flycheck-report-current-errors errors))
+    (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
+      (if next-checker
+          (setq flycheck-current-syntax-check
+                (flycheck-start-checker
+                 next-checker (flycheck-buffer-status-callback next-checker)))
+        (setq flycheck-current-syntax-check nil)
+        (flycheck-report-status 'finished)
+        ;; Delete overlays only after the very last checker has run, to avoid
+        ;; flickering on intermediate re-displays
+        (flycheck-delete-marked-overlays)
+        (flycheck-error-list-refresh)
+        (run-hooks 'flycheck-after-syntax-check-hook)
+        (when (eq (current-buffer) (window-buffer))
+          (flycheck-display-error-at-point))
+        ;; Immediately try to run any pending deferred syntax check, which
+        ;; were triggered by intermediate automatic check event, to make sure
+        ;; that we quickly refine outdated error information
+        (flycheck-perform-deferred-syntax-check)))))
+
+(defun flycheck-disable-excessive-checker (checker errors)
+  "Disable CHECKER if it reported excessive ERRORS.
+
+If ERRORS has more items than `flycheck-checker-error-threshold',
+add CHECKER to `flycheck-disabled-checkers', and show a warning.
+
+Return t when CHECKER was disabled, or nil otherwise."
+  (when (and flycheck-checker-error-threshold
+             (> (length errors) flycheck-checker-error-threshold))
+    ;; Disable CHECKER for this buffer (`flycheck-disabled-checkers' is a local
+    ;; variable).
+    (lwarn '(flycheck syntax-checker) :warning
+           "Syntax checker %s reported too many errors (%s) and is disabled."
+           checker (length errors))
+    (push checker flycheck-disabled-checkers)
+    t))
+
+(defun flycheck-clear ()
+  "Clear all errors in the current buffer."
+  (interactive)
+  (flycheck-delete-all-overlays)
+  (flycheck-clear-errors)
+  (flycheck-error-list-refresh)
+  (flycheck-hide-error-buffer))
+
+(defun flycheck-teardown ()
+  "Teardown Flycheck in the current buffer..
+
+Completely clear the whole Flycheck state.  Remove overlays, kill
+running checks, and empty all variables used by Flycheck."
+  (flycheck-safe-delete-temporaries)
+  (flycheck-stop)
+  (flycheck-clean-deferred-check)
+  (flycheck-clear)
+  (flycheck-cancel-error-display-error-at-point-timer)
+  (flycheck-clear-checker))
 
 
-;;; Checker error API
+;;; Automatic syntax checking in a buffer
+(defun flycheck-may-check-automatically (&optional condition)
+  "Determine whether the buffer may be checked under CONDITION.
+
+Read-only buffers may never be checked automatically.
+
+If CONDITION is non-nil, determine whether syntax may checked
+automatically according to
+`flycheck-check-syntax-automatically'."
+  (and (not (or buffer-read-only (flycheck-ephemeral-buffer-p)))
+       (or (not condition)
+           (memq condition flycheck-check-syntax-automatically))))
+
+(defun flycheck-buffer-automatically (&optional condition force-deferred)
+  "Automatically check syntax at CONDITION.
+
+Syntax is not checked if `flycheck-may-check-automatically'
+returns nil for CONDITION.
+
+The syntax check is deferred if FORCE-DEFERRED is non-nil, or if
+`flycheck-must-defer-check' returns t."
+  (when (and flycheck-mode (flycheck-may-check-automatically condition))
+    (if (or force-deferred (flycheck-must-defer-check))
+        (flycheck-buffer-deferred)
+      (with-demoted-errors "Error while checking syntax automatically: %S"
+        (flycheck-buffer)))))
+
+(defvar-local flycheck-idle-change-timer nil
+  "Timer to mark the idle time since the last change.")
+
+(defun flycheck-clear-idle-change-timer ()
+  "Clear the idle change timer."
+  (when flycheck-idle-change-timer
+    (cancel-timer flycheck-idle-change-timer)
+    (setq flycheck-idle-change-timer nil)))
+
+(defun flycheck-handle-change (beg end _len)
+  "Handle a buffer change between BEG and END.
+
+BEG and END mark the beginning and end of the change text.  _LEN
+is ignored.
+
+Start a syntax check if a new line has been inserted into the
+buffer."
+  ;; Save and restore the match data, as recommended in (elisp)Change Hooks
+  (save-match-data
+    (when flycheck-mode
+      ;; The buffer was changed, thus clear the idle timer
+      (flycheck-clear-idle-change-timer)
+      (if (string-match-p (rx "\n") (buffer-substring beg end))
+          (flycheck-buffer-automatically 'new-line 'force-deferred)
+        (setq flycheck-idle-change-timer
+              (run-at-time flycheck-idle-change-delay nil
+                           #'flycheck-handle-idle-change))))))
+
+(defun flycheck-handle-idle-change ()
+  "Handle an expired idle time since the last change."
+  (flycheck-clear-idle-change-timer)
+  (flycheck-buffer-automatically 'idle-change))
+
+(defun flycheck-handle-save ()
+  "Handle a save of the buffer."
+  (flycheck-buffer-automatically 'save))
+
+
+;;; Deferred syntax checking
+(defvar-local flycheck-deferred-syntax-check nil
+  "If non-nil, a deferred syntax check is pending.")
+
+(defun flycheck-must-defer-check ()
+  "Determine whether the syntax check has to be deferred.
+
+A check has to be deferred if the buffer is not visible, or if the buffer is
+currently being reverted.
+
+Return t if the check is to be deferred, or nil otherwise."
+  (or (not (get-buffer-window))
+      ;; We defer the syntax check if Flycheck is already running, to
+      ;; immediately start a new syntax check after the current one finished,
+      ;; because the result of the current check will most likely be outdated by
+      ;; the time it is finished.
+      (flycheck-running-p)
+      ;; We must defer checks while a buffer is being reverted, to avoid race
+      ;; conditions while the buffer contents are being restored.
+      revert-buffer-in-progress-p))
+
+(defun flycheck-deferred-check-p ()
+  "Determine whether the current buffer has a deferred check.
+
+Return t if so, or nil otherwise."
+  flycheck-deferred-syntax-check)
+
+(defun flycheck-buffer-deferred ()
+  "Defer syntax check for the current buffer."
+  (setq flycheck-deferred-syntax-check t))
+
+(defun flycheck-clean-deferred-check ()
+  "Clean an deferred syntax checking state."
+  (setq flycheck-deferred-syntax-check nil))
+
+(defun flycheck-perform-deferred-syntax-check ()
+  "Perform any deferred syntax checks."
+  (when (flycheck-deferred-check-p)
+    (flycheck-clean-deferred-check)
+    (flycheck-buffer-automatically)))
+
+
+;;; Syntax checking in all buffers
+(defun flycheck-may-enable-mode ()
+  "Determine whether Flycheck mode may be enabled.
+
+Flycheck mode is not enabled for
+
+- ephemeral buffers (see `flycheck-ephemeral-buffer-p'),
+- encrypted buffers (see `flycheck-encrypted-buffer-p'),
+- remote files (see `file-remote-p'),
+- or if no suitable syntax checker exists.
+
+Return t if Flycheck mode may be enabled, and nil otherwise."
+  (and (not (flycheck-ephemeral-buffer-p))
+       (not (flycheck-encrypted-buffer-p))
+       (not (and (buffer-file-name) (file-remote-p (buffer-file-name) 'method)))
+       (flycheck-get-checker-for-buffer)))
+
+(defun flycheck-mode-on-safe ()
+  "Enable `flycheck-mode' if it is safe to do so.
+
+`flycheck-mode' is only enabled if `flycheck-may-enable-mode'
+returns t."
+  (when (flycheck-may-enable-mode)
+    (flycheck-mode)))
+
+;;;###autoload
+(define-globalized-minor-mode global-flycheck-mode flycheck-mode
+  flycheck-mode-on-safe
+  :init-value nil
+  :group 'flycheck
+  :require 'flycheck)
+
+(defun flycheck-global-teardown ()
+  "Teardown Flycheck in all buffers.
+
+Completely clear the whole Flycheck state in all buffers, stop
+all running checks, remove all temporary files, and empty all
+variables of Flycheck."
+  (dolist (buffer (buffer-list))
+    (with-current-buffer buffer
+      (when flycheck-mode
+        (flycheck-teardown)))))
+
+;; Clean up the entire state of Flycheck when Emacs is killed, to get rid of any
+;; pending temporary files.
+(add-hook 'kill-emacs-hook #'flycheck-global-teardown)
+
+
+;;; Errors from syntax checks
 (cl-defstruct (flycheck-error
                (:constructor flycheck-error-new)
                (:constructor flycheck-error-new-at (line column
@@ -2684,23 +2363,22 @@ if ERR has no column."
           (widen)
           (goto-char (point-min))
           (forward-line (- (flycheck-error-line err) 1))
-          (let ((line (flycheck-error-line err)))
-            (cond
-             ((eobp)                    ; Line beyond EOF
-              ;; If we are at the end of the file (i.e. the line was beyond the
-              ;; end of the file), use the very last column in the file.
-              (cons (- (point-max) 1) (point-max)))
-             ((eolp)                    ; Empty line
-              ;; If the target line is empty, there's no column to highlight on
-              ;; this line, so return the last column of the previous line.
-              (cons (line-end-position 0) (point)))
-             (t
-              ;; The end is either the column offset of the line, or the end of
-              ;; the line, if the column offset points beyond the end of the
-              ;; line.
-              (let ((end (min (+ (point) column)
-                              (+ (line-end-position) 1))))
-                (cons (- end 1) end))))))))))
+          (cond
+           ((eobp)                    ; Line beyond EOF
+            ;; If we are at the end of the file (i.e. the line was beyond the
+            ;; end of the file), use the very last column in the file.
+            (cons (- (point-max) 1) (point-max)))
+           ((eolp)                    ; Empty line
+            ;; If the target line is empty, there's no column to highlight on
+            ;; this line, so return the last column of the previous line.
+            (cons (line-end-position 0) (point)))
+           (t
+            ;; The end is either the column offset of the line, or the end of
+            ;; the line, if the column offset points beyond the end of the
+            ;; line.
+            (let ((end (min (+ (point) column)
+                            (+ (line-end-position) 1))))
+              (cons (- end 1) end)))))))))
 
 (defun flycheck-error-thing-region (thing err)
   "Get the region of THING at the column of ERR.
@@ -2808,8 +2486,124 @@ first.  Levels of the same severity are compared by name."
      (t (< severity1 severity2)))))
 
 
-;;; Error levels
+;;; Errors in the current buffer
+(defvar-local flycheck-current-errors nil
+  "A list of all errors and warnings in the current buffer.")
 
+(defun flycheck-report-current-errors (errors)
+  "Report ERRORS in the current buffer.
+
+Add ERRORS to `flycheck-current-errors' and process each error
+with `flycheck-process-error-functions'."
+  (setq flycheck-current-errors (sort (append errors flycheck-current-errors)
+                                      #'flycheck-error-<))
+  (mapc (lambda (err)
+          (run-hook-with-args-until-success 'flycheck-process-error-functions
+                                            err))
+        errors))
+
+(defun flycheck-clear-errors ()
+  "Remove all error information from the current buffer."
+  (setq flycheck-current-errors nil)
+  (flycheck-report-status 'not-checked))
+
+(defun flycheck-relevant-error-p (err)
+  "Determine whether ERR is relevant for the current buffer.
+
+Return t if ERR may be shown for the current buffer, or nil
+otherwise."
+  (flycheck-error-with-buffer err
+    (let ((file-name (flycheck-error-filename err))
+          (message (flycheck-error-message err)))
+      (and
+       (or (not file-name) (flycheck-same-files-p file-name (buffer-file-name)))
+       message
+       (not (string-empty-p message))
+       (flycheck-error-line err)))))
+
+(defun flycheck-relevant-errors (errors)
+  "Filter the relevant errors from ERRORS.
+
+Return a list of all errors that are relevant for their
+corresponding buffer."
+  (-filter #'flycheck-relevant-error-p errors))
+
+
+;;; Status reporting for the current buffer
+(defvar-local flycheck-last-status-change 'not-checked
+  "The last status change in the current buffer.")
+
+(defun flycheck-report-failed-syntax-check (&optional status)
+  "Report a failed Flycheck syntax check with STATUS.
+
+STATUS is a status symbol for `flycheck-report-status',
+defaulting to `errored'.
+
+Clear Flycheck state, run `flycheck-syntax-check-failed-hook' and
+report an error STATUS."
+  (flycheck-clear)
+  (setq flycheck-current-syntax-check nil)
+  (run-hooks 'flycheck-syntax-check-failed-hook)
+  (flycheck-report-status (or status 'errored)))
+
+(defun flycheck-report-status (status)
+  "Report Flycheck STATUS.
+
+STATUS is one of the following symbols:
+
+`not-checked'
+     The current buffer was not checked.
+
+`no-checker'
+     Automatic syntax checker selection did not find a suitable
+     syntax checker.
+
+`running'
+     A syntax check is now running in the current buffer.
+
+`errored'
+     The current syntax check has errored.
+
+`finished'
+     The current syntax check was finished normally.
+
+`interrupted'
+     The current syntax check was interrupted.
+
+`suspicious'
+     The last syntax check had a suspicious result.
+
+Set `flycheck-last-status-change' and call
+`flycheck-status-changed-functions' with STATUS.  Afterwards
+refresh the mode line."
+  (setq flycheck-last-status-change status)
+  (run-hook-with-args 'flycheck-status-changed-functions status)
+  (force-mode-line-update))
+
+(defun flycheck-mode-line-status-text (&optional status)
+  "Get a text describing STATUS for use in the mode line.
+
+STATUS defaults to `flycheck-last-status-change' if omitted or
+nil."
+  (let ((text (pcase (or status flycheck-last-status-change)
+                (`not-checked "")
+                (`no-checker "-")
+                (`running "*")
+                (`errored "!")
+                (`finished
+                 (if flycheck-current-errors
+                     (let ((error-counts (flycheck-count-errors
+                                          flycheck-current-errors)))
+                       (format ":%s/%s"
+                               (or (cdr (assq 'error error-counts)) 0)
+                               (or (cdr (assq 'warning error-counts)) 0)))
+                   ""))
+                (`interrupted "-")
+                (`suspicious "?"))))
+    (concat " FlyC" text)))
+
+
+;;; Error levels
 ;;;###autoload
 (defun flycheck-define-error-level (level &rest properties)
   "Define a new error LEVEL with PROPERTIES.
@@ -2946,242 +2740,7 @@ show the icon."
   :error-list-face 'flycheck-error-list-info)
 
 
-;;; General error parsing
-(defun flycheck-parse-output (output checker buffer)
-  "Parse OUTPUT from CHECKER in BUFFER.
-
-OUTPUT is a string with the output from the checker symbol
-CHECKER.  BUFFER is the buffer which was checked.
-
-Return the errors parsed with the error patterns of CHECKER."
-  (let* ((parser (or (flycheck-checker-error-parser checker)
-                     #'flycheck-parse-with-patterns))
-         (errors (funcall parser output checker buffer)))
-    (dolist (err errors)
-      ;; Remember the source buffer and checker in the error
-      (setf (flycheck-error-buffer err) buffer)
-      (setf (flycheck-error-checker err) checker))
-    errors))
-
-(defun flycheck-fix-error-filename (err buffer-files)
-  "Fix the file name of ERR from BUFFER-FILES.
-
-Make the file name of ERR absolute.  If the absolute file name of
-ERR is in BUFFER-FILES, replace it with the return value of the
-function `buffer-file-name'."
-  (flycheck-error-with-buffer err
-    (-when-let (filename (flycheck-error-filename err))
-      (setq filename (expand-file-name filename))
-      (when (-any? (apply-partially #'flycheck-same-files-p filename)
-                   buffer-files)
-        (setq filename (buffer-file-name)))
-      (setf (flycheck-error-filename err) filename)))
-  err)
-
-
-;;; Error parsing with regular expressions
-(defun flycheck-get-regexp (patterns)
-  "Create a single regular expression from PATTERNS."
-  (rx-to-string `(or ,@(mapcar (lambda (p) (list 'regexp (car p))) patterns))
-                'no-group))
-
-(defun flycheck-tokenize-output-with-patterns (output patterns)
-  "Tokenize OUTPUT with PATTERNS.
-
-Split the output into error tokens, using all regular expressions
-from the error PATTERNS.  An error token is simply a string
-containing a single error from OUTPUT.  Such a token can then be
-parsed into a structured error by applying the PATTERNS again,
-see `flycheck-parse-errors-with-patterns'.
-
-Return a list of error tokens."
-  (let ((regexp (flycheck-get-regexp patterns))
-        (last-match 0)
-        errors)
-    (while (string-match regexp output last-match)
-      (push (match-string 0 output) errors)
-      (setq last-match (match-end 0)))
-    (reverse errors)))
-
-(defun flycheck-try-parse-error-with-pattern (err pattern)
-  "Try to parse a single ERR with a PATTERN.
-
-Return the parsed error if PATTERN matched ERR, or nil
-otherwise."
-  (let ((regexp (car pattern))
-        (level (cdr pattern)))
-    (when (string-match regexp err)
-      (let ((filename (match-string 1 err))
-            (line (match-string 2 err))
-            (column (match-string 3 err))
-            (message (match-string 4 err)))
-        (flycheck-error-new
-         :filename (unless (string-empty-p filename) filename)
-         :line (flycheck-string-to-number-safe line)
-         :column (flycheck-string-to-number-safe column)
-         :message (unless (string-empty-p message) message)
-         :level level)))))
-
-(defun flycheck-parse-error-with-patterns (err patterns)
-  "Parse a single ERR with error PATTERNS.
-
-Apply each pattern in PATTERNS to ERR, in the given order, and
-return the first parsed error."
-  ;; Try to parse patterns in the order of declaration to make sure that the
-  ;; first match wins.
-  (let (parsed-error)
-    (while (and patterns
-                (not (setq parsed-error
-                           (flycheck-try-parse-error-with-pattern
-                            err (car patterns)))))
-      (setq patterns (cdr patterns)))
-    parsed-error))
-
-(defun flycheck-parse-errors-with-patterns (errors patterns)
-  "Parse ERRORS with PATTERNS.
-
-ERRORS is a list of strings where each string is an unparsed
-error message, typically from `flycheck-split-output'.  PATTERNS
-is a list of error patterns to parse ERRORS with.
-
-Return a list of parsed errors."
-  (mapcar (lambda (e) (flycheck-parse-error-with-patterns e patterns)) errors))
-
-(defun flycheck-parse-with-patterns (output checker _buffer)
-  "Parse OUTPUT from CHECKER with error patterns.
-
-Uses the error patterns of CHECKER to tokenize the output and
-tries to parse each error token with all patterns, in the order
-of declaration.  Hence an error is never matched twice by two
-different patterns.  The pattern declared first always wins.
-
-_BUFFER is ignored.
-
-Return a list of parsed errors and warnings (as `flycheck-error'
-objects)."
-  (let ((patterns (flycheck-checker-error-patterns checker)))
-    (flycheck-parse-errors-with-patterns
-     (flycheck-tokenize-output-with-patterns output patterns) patterns)))
-
-
-;;; Error parsers
-(defun flycheck-parse-xml-region (beg end)
-  "Parse the xml region between BEG and END.
-
-Wrapper around `xml-parse-region' which transforms the return
-value of this function into one compatible to
-`libxml-parse-xml-region' by simply returning the first element
-from the node list."
-  (car (xml-parse-region beg end)))
-
-(defvar flycheck-xml-parser
-  (if (fboundp 'libxml-parse-xml-region)
-      'libxml-parse-xml-region 'flycheck-parse-xml-region)
-  "Parse an xml string from a region.
-
-Use libxml if Emacs is built with libxml support.  Otherwise fall
-back to `xml-parse-region', via `flycheck-parse-xml-region'.")
-
-(defun flycheck-parse-xml-string (xml)
-  "Parse an XML string.
-
-Return the document tree parsed from XML in the form `(ROOT ATTRS
-BODY...)'.  ROOT is a symbol identifying the name of the root
-element.  ATTRS is an alist of the attributes of the root node.
-BODY is zero or more body elements, either as strings (in case of
-text nodes) or as XML nodes, in the same for as the root node."
-  (with-temp-buffer
-    (insert xml)
-    (funcall flycheck-xml-parser (point-min) (point-max))))
-
-(defun flycheck-parse-checkstyle-file-node (node)
-  "Parse a single file NODE in a Checkstyle document.
-
-Return a list of all errors contained in the NODE, or nil if NODE
-is not a file node."
-  (let ((filename (cdr (assq 'name (cadr node))))
-        errors)
-    (dolist (child-node (cddr node))
-      (when (and (listp child-node) (eq (car child-node) 'error))
-        (let* ((attrs (cadr child-node))
-               (line (flycheck-string-to-number-safe
-                      (cdr (assq 'line attrs))))
-               (column (flycheck-string-to-number-safe
-                        (cdr (assq 'column attrs))))
-               (severity (cdr (assq 'severity attrs)))
-               (message (cdr (assq 'message attrs))))
-          (push (flycheck-error-new
-                 :filename filename
-                 :line line
-                 :column (when (and column (> column 0)) column)
-                 :message message
-                 :level (pcase severity
-                          (`"error"   'error)
-                          (`"warning" 'warning)
-                          (`"info"    'info)
-                          ;; Default to error for unknown severity
-                          (_          'error)))
-                errors))))
-    (nreverse errors)))
-
-(defun flycheck-parse-checkstyle (output _checker _buffer)
-  "Parse Checkstyle errors from OUTPUT.
-
-Parse Checkstyle-like XML output.  Use this error parser for
-checkers that have an option to output errors in this format.
-
-_CHECKER and _BUFFER are ignored.
-
-See URL `http://checkstyle.sourceforge.net/' for information
-about Checkstyle."
-  (let ((root (flycheck-parse-xml-string output)))
-    (when (eq (car root) 'checkstyle)
-      (-mapcat #'flycheck-parse-checkstyle-file-node
-               (-filter (lambda (n) (and (listp n) (eq (car n) 'file)))
-                        (cddr root))))))
-
-(defun flycheck-parse-cppcheck-error-node (node)
-  "Parse a single error NODE from Cppcheck XML.
-
-Return a list of all Flycheck errors this node represents."
-  (let ((node-attrs (cadr node))
-        errors)
-    (dolist (child-node (cddr node))
-      (when (and (listp child-node) (eq (car child-node) 'location))
-        (let ((child-attrs (cadr child-node)))
-          (push (flycheck-error-new
-                 :filename (cdr (assq 'file child-attrs))
-                 :line (flycheck-string-to-number-safe
-                        (cdr (assq 'line child-attrs)))
-                 :message (cdr (assq 'verbose node-attrs))
-                 :level (if (string= (cdr (assq 'severity node-attrs)) "error")
-                            'error 'warning))
-                errors))))
-    (nreverse errors)))
-
-(defun flycheck-parse-cppcheck (output _checker _buffer)
-  "Parse Cppcheck errors from OUTPUT.
-
-Parse Cppcheck XML v2 output.
-
-_BUFFER and _ERROR are ignored.
-
-See URL `http://cppcheck.sourceforge.net/' for more information
-about Cppcheck."
-  (let ((root (flycheck-parse-xml-string output)))
-    (when (eq (car root) 'results)
-      (let ((nodes (cddr root)))
-        (while (and nodes
-                    (not (and (listp (car nodes)) (eq (caar nodes) 'errors))))
-          (setq nodes (cdr nodes)))
-        ;; Filter error nodes
-        (-mapcat #'flycheck-parse-cppcheck-error-node
-                 (-filter (lambda (n) (and (listp n) (eq (car n) 'error)))
-                          (car nodes)))))))
-
-
 ;;; Error filtering
-
 (defun flycheck-filter-errors (errors checker)
   "Filter ERRORS from CHECKER.
 
@@ -3308,35 +2867,6 @@ Returns ERRORS, with folded messages."
 
 
 ;;; Error analysis
-(defvar-local flycheck-current-errors nil
-  "A list of all errors and warnings in the current buffer.")
-
-(defun flycheck-clear-errors ()
-  "Remove all error information from the current buffer."
-  (setq flycheck-current-errors nil)
-  (flycheck-report-status 'not-checked))
-
-(defun flycheck-relevant-error-p (err)
-  "Determine whether ERR is relevant for the current buffer.
-
-Return t if ERR may be shown for the current buffer, or nil
-otherwise."
-  (flycheck-error-with-buffer err
-    (let ((file-name (flycheck-error-filename err))
-          (message (flycheck-error-message err)))
-      (and
-       (or (not file-name) (flycheck-same-files-p file-name (buffer-file-name)))
-       message
-       (not (string-empty-p message))
-       (flycheck-error-line err)))))
-
-(defun flycheck-relevant-errors (errors)
-  "Filter the relevant errors from ERRORS.
-
-Return a list of all errors that are relevant for their
-corresponding buffer."
-  (-filter #'flycheck-relevant-error-p errors))
-
 (defun flycheck-count-errors (errors)
   "Count the number of ERRORS, grouped by level..
 
@@ -3381,7 +2911,7 @@ If LEVEL is omitted if the current buffer has any errors at all."
     (and flycheck-current-errors t)))
 
 
-;;; Error overlay management
+;;; Error overlays in the current buffer
 (defun flycheck-add-overlay (err)
   "Add overlay for ERR.
 
@@ -3455,7 +2985,7 @@ Return the created overlay."
   (setq flycheck-overlays-to-delete nil))
 
 
-;;; Error navigation
+;;; Error navigation in the current buffer
 (defun flycheck-error-level-interesting-at-pos-p (pos)
   "Check if error severity at POS passes `flycheck-error-level-interesting-p'."
   (flycheck-error-level-interesting-p (get-char-property pos 'flycheck-error)))
@@ -3552,7 +3082,7 @@ the beginning of the buffer."
   (flycheck-next-error n 'reset))
 
 
-;;; Error list
+;;; Listing errors in buffers
 (defconst flycheck-error-list-buffer "*Flycheck errors*"
   "The name of the buffer to show error lists.")
 
@@ -3874,80 +3404,7 @@ non-nil."
 (defalias 'list-flycheck-errors 'flycheck-list-errors)
 
 
-;;; Status reporting
-(defvar-local flycheck-last-status-change 'not-checked
-  "The last status change in the current buffer.")
-
-(defun flycheck-report-error ()
-  "Report a Flycheck error status.
-
-Clears all Flycheck errors first, runs
-`flycheck-syntax-check-failed-hook' and reports the status with
-`flycheck-report-status'."
-  (flycheck-clear)
-  (run-hooks 'flycheck-syntax-check-failed-hook)
-  (flycheck-report-status 'errored))
-
-(defun flycheck-report-status (status)
-  "Report Flycheck STATUS.
-
-STATUS is one of the following symbols:
-
-`not-checked'
-     The current buffer was not checked.
-
-`no-checker'
-     Automatic syntax checker selection did not find a suitable
-     syntax checker.
-
-`running'
-     A syntax check is now running in the current buffer.
-
-`errored'
-     The current syntax check has errored.
-
-`finished'
-     The current syntax check was finished normally.
-
-`interrupted'
-     The current syntax check was interrupted.
-
-`suspicious'
-     The last syntax check had a suspicious result.
-
-Set `flycheck-last-status-change' and call
-`flycheck-status-changed-functions' with STATUS.  Afterwards
-refresh the mode line."
-  (setq flycheck-last-status-change status)
-  (run-hook-with-args 'flycheck-status-changed-functions status)
-  (force-mode-line-update))
-
-
-;;; Mode line reporting
-(defun flycheck-mode-line-status-text (&optional status)
-  "Get a text describing STATUS for use in the mode line.
-
-STATUS defaults to `flycheck-last-status-change' if omitted or
-nil."
-  (let ((text (pcase (or status flycheck-last-status-change)
-                (`not-checked "")
-                (`no-checker "-")
-                (`running "*")
-                (`errored "!")
-                (`finished
-                 (if flycheck-current-errors
-                     (let ((error-counts (flycheck-count-errors
-                                          flycheck-current-errors)))
-                       (format ":%s/%s"
-                               (or (cdr (assq 'error error-counts)) 0)
-                               (or (cdr (assq 'warning error-counts)) 0)))
-                   ""))
-                (`interrupted "-")
-                (`suspicious "?"))))
-    (concat " FlyC" text)))
-
-
-;;; General error display
+;;; Displaying errors in the current buffer
 (defun flycheck-display-errors (errors)
   "Display ERRORS using `flycheck-display-errors-function'."
   (when flycheck-display-errors-function
@@ -3977,7 +3434,7 @@ nil."
           (run-at-time flycheck-display-errors-delay nil 'flycheck-display-error-at-point))))
 
 
-;;; Error display functions
+;;; Functions to display errors
 (defconst flycheck-error-message-buffer "*Flycheck error messages*"
   "The name of the buffer to show long error messages in.")
 
@@ -4069,24 +3526,469 @@ This function requires the Google This library from URL
 https://github.com/Bruce-Connor/emacs-google-this")))
 
 
-;;; Checker process management
-(defvar-local flycheck-current-process nil
-  "The current syntax checking process.")
-(put 'flycheck-current-process 'permanent-local t)
+;;; Syntax checkers using external commands
+(defun flycheck-command-argument-p (arg)
+  "Check whether ARG is a valid command argument."
+  (pcase arg
+    ((pred stringp) t)
+    ((or `source `source-inplace `source-original) t)
+    ((or `temporary-directory `temporary-file-name) t)
+    (`null-device t)
+    (`(config-file ,option-name ,config-file-var)
+     (and (stringp option-name)
+          (symbolp config-file-var)))
+    (`(config-file ,option-name ,config-file-var ,prepender)
+     (and (stringp option-name)
+          (symbolp config-file-var)
+          (symbolp prepender)))
+    (`(,(or `option `option-list) ,option-name ,option-var)
+     (and (stringp option-name)
+          (symbolp option-var)))
+    (`(,(or `option `option-list) ,option-name ,option-var ,prepender)
+     (and (stringp option-name)
+          (symbolp option-var)
+          (symbolp prepender)))
+    (`(,(or `option `option-list) ,option-name ,option-var ,prepender ,filter)
+     (and (stringp option-name)
+          (symbolp option-var)
+          (symbolp prepender)
+          (symbolp filter)))
+    (`(option-flag ,option-name ,option-var)
+     (and (stringp option-name)
+          (symbolp option-var)))
+    (`(eval ,_) t)
+    (_ nil)))
 
-(defun flycheck-running-p ()
-  "Determine whether a syntax check is running."
-  (when (and flycheck-current-process
-             (memq (process-status flycheck-current-process) '(exit signal)))
-    (flycheck-delete-process flycheck-current-process)
-    (setq flycheck-current-process nil))
-  (when flycheck-current-process t))
+;;;###autoload
+(defun flycheck-define-command-checker (symbol docstring &rest properties)
+  "Define SYMBOL as syntax checker which runs a command.
 
-(defun flycheck-delete-process (process)
-  "Delete PROCESS and clear it's resources."
-  (mapc #'flycheck-safe-delete (process-get process 'flycheck-temporaries))
+Define SYMBOL as generic syntax checker via
+`flycheck-define-generic-checker', which uses an external command
+to check the buffer.  SYMBOL and DOCSTRING are the same as for
+`flycheck-define-generic-checker'.
+
+The following PROPERTIES constitute a command syntax checker.
+Unless otherwise noted, all properties are mandatory.
+
+`:command COMMAND'
+     The command to run for syntax checking.
+
+     COMMAND is a list of the form `(EXECUTABLE [ARG ...])'.
+
+     EXECUTABLE is a string with the executable of this syntax
+     checker.  It can be overridden with the variable
+     `flycheck-SYMBOL-executable'.  Note that this variable is
+     NOT implicitly defined by this function.  Use
+     `flycheck-def-executable-var' to define this variable.
+
+     Each ARG is an argument to the executable, either as string,
+     or as special symbol or form for
+     `flycheck-substitute-argument', which see.
+
+`:error-patterns PATTERNS'
+     A list of patterns to parse the output of the `:command'.
+
+     Each ITEM in PATTERNS is a list `(LEVEL SEXP ...)', where
+     LEVEL is a Flycheck error level (see
+     `flycheck-define-error-level'), followed by one or more RX
+     `SEXP's which parse an error of that level and extract line,
+     column, file name and the message.
+
+     See `rx' for general information about RX, and
+     `flycheck-rx-to-string' for some special RX forms provided
+     by Flycheck.
+
+     All patterns are applied in the order of declaration to the
+     whole output of the syntax checker.  Output already matched
+     by a pattern will not be matched by subsequent patterns.  In
+     other words, the first pattern wins.
+
+     This property is optional.  If omitted, however, an
+     `:error-parser' is mandatory.
+
+`:error-parser FUNCTION'
+     A function to parse errors with.
+
+     The function shall accept three arguments OUTPUT CHECKER
+     BUFFER.  OUTPUT is the syntax checker output as string,
+     CHECKER the syntax checker that was used, and BUFFER a
+     buffer object representing the checked buffer.  The function
+     must return a list of `flycheck-error' objects parsed from
+     OUTPUT.
+
+     This property is optional.  If omitted, it defaults to
+     `flycheck-parse-with-patterns'.  In this case,
+     `:error-patterns' is mandatory.
+
+In addition to these PROPERTIES, all properties from
+`flycheck-define-generic-checker' may be specified, except of
+`:start', `:interrupt', and `:doc-printer'."
+  (declare (indent 1)
+           (doc-string 2))
+  (dolist (prop '(:start :interrupt :doc-printer))
+    (when (plist-get properties prop)
+      (error "%s not allowed in definition of command syntax checker %s"
+             prop symbol)))
+
+  (let ((command (plist-get properties :command))
+        (patterns (plist-get properties :error-patterns))
+        (parser (or (plist-get properties :error-parser)
+                    #'flycheck-parse-with-patterns))
+        (predicate (plist-get properties :predicate)))
+
+    (unless command
+      (error "Missing :command in syntax checker %s" symbol))
+    (unless (stringp (car command))
+      (error "Command executable for syntax checker %s must be a string: %S"
+             symbol (car command)))
+    (dolist (arg (cdr command))
+      (unless (flycheck-command-argument-p arg)
+        (error "Invalid command argument %S in syntax checker %s" arg symbol)))
+    (when (and (eq parser 'flycheck-parse-with-patterns)
+               (not patterns))
+      (error "Missing :error-patterns in syntax checker %s" symbol))
+
+    (setq properties
+          ;; Construct a predicate that checks whether the executable exists, to
+          ;; guard against syntax checker tools which are not installed
+          (plist-put properties :predicate
+                     (lambda ()
+                       (and (executable-find (flycheck-checker-executable symbol))
+                            (or (not predicate) (funcall predicate))))))
+
+    (apply #'flycheck-define-generic-checker symbol docstring
+           :start #'flycheck-start-command-checker
+           :interrupt #'flycheck-interrupt-command-checker
+           :doc-printer #'flycheck-command-checker-print-doc
+           properties)
+
+    ;; Pre-compile all errors patterns into strings, so that we don't need to do
+    ;; that on each error parse
+    (let ((patterns (mapcar (lambda (p)
+                              (cons (flycheck-rx-to-string `(and ,@(cdr p))
+                                                           'no-group)
+                                    (car p)))
+                            patterns)))
+      (pcase-dolist (`(,prop . ,value)
+                     `((flycheck-command . ,command)
+                       (flycheck-error-parser . ,parser)
+                       (flycheck-error-patterns . ,patterns)))
+        (put symbol prop value)))))
+
+(eval-and-compile
+  ;; Make this function available during byte-compilation, since we need it
+  ;; at macro expansion of `flycheck-def-executable-var'.
+  (defun flycheck-checker-executable-variable (checker)
+    "Get the executable variable of CHECKER.
+
+The executable variable is named `flycheck-CHECKER-executable'."
+    (intern (format "flycheck-%s-executable" checker))))
+
+(defun flycheck-checker-default-executable (checker)
+  "Get the default executable of CHECKER."
+  (car (get checker 'flycheck-command)))
+
+(defun flycheck-checker-executable (checker)
+  "Get the command executable of CHECKER.
+
+The executable is either the value of the variable
+`flycheck-CHECKER-executable', or the default executable given in
+the syntax checker definition, if the variable is nil."
+  (or (symbol-value (flycheck-checker-executable-variable checker))
+      (flycheck-checker-default-executable checker)))
+
+(defun flycheck-checker-arguments (checker)
+  "Get the command arguments of CHECKER."
+  (cdr (get checker 'flycheck-command)))
+
+(defun flycheck-checker-error-patterns (checker)
+  "Get the error patterns of CHECKER.
+
+Each pattern has the form `(REGEXP . LEVEL)' where REGEXP is the
+regular expression, and LEVEL the corresponding level symbol."
+  (get checker 'flycheck-error-patterns))
+
+(defun flycheck-checker-error-parser (checker)
+  "Get the error parser of CHECKER."
+  (get checker 'flycheck-error-parser))
+
+(defun flycheck-substitute-argument (arg checker)
+  "Substitute ARG for CHECKER.
+
+Return a list of real arguments for the executable of CHECKER,
+substituted for the symbolic argument ARG.  Single arguments,
+e.g. if ARG is a literal strings, are wrapped in a list.
+
+ARG may be one of the following forms:
+
+STRING
+     Return ARG unchanged.
+
+`source', `source-inplace'
+     Create a temporary file to check and return its path.  With
+     `source-inplace' create the temporary file in the same
+     directory as the original file.  The value of
+     `flycheck-temp-prefix' is used as prefix of the file name.
+
+     With `source', try to retain the non-directory component of
+     the buffer's file name in the temporary file.
+
+     `source' is the preferred way to pass the input file to a
+     syntax checker.  `source-inplace' should only be used if the
+     syntax checker needs other files from the source directory,
+     such as include files in C.
+
+`source-original'
+     Return the path of the actual file to check, or an empty
+     string if the buffer has no file name.
+
+     Note that the contents of the file may not be up to date
+     with the contents of the buffer to check.  Do not use this
+     as primary input to a checker, unless absolutely necessary.
+
+     When using this symbol as primary input to the syntax
+     checker, add `flycheck-buffer-saved-p' to the `:predicate'.
+
+`temporary-directory'
+     Create a unique temporary directory and return its path.
+
+`temporary-file-name'
+     Return a unique temporary filename.  The file is *not*
+     created.
+
+     To ignore the output of syntax checkers, try `null-device'
+     first.
+
+`null-device'
+     Return the value of `null-device', i.e the system null
+     device.
+
+     Use this option to ignore the output of a syntax checker.
+     If the syntax checker cannot handle the null device, or
+     won't write to an existing file, try `temporary-file-name'
+     instead.
+
+`(config-file OPTION VARIABLE [PREPEND-FN])'
+     Search the configuration file bound to VARIABLE with
+     `flycheck-locate-config-file' and return a list of arguments
+     that pass this configuration file to the syntax checker, or
+     nil if the configuration file was not found.
+
+     PREPEND-FN is called with the OPTION and the located
+     configuration file, and should return OPTION prepended
+     before the file, either a string or as list.  If omitted,
+     PREPEND-FN defaults to `list'.
+
+`(option OPTION VARIABLE [PREPEND-FN [FILTER]])'
+     Retrieve the value of VARIABLE and return a list of
+     arguments that pass this value as value for OPTION to the
+     syntax checker.
+
+     PREPEND-FN is called with the OPTION and the value of
+     VARIABLE, and should return OPTION prepended before the
+     file, either a string or as list.  If omitted, PREPEND-FN
+     defaults to `list'.
+
+     FILTER is an optional function to be applied to the value of
+     VARIABLE before prepending.  This function must return nil
+     or a string.  In the former case, return nil.  In the latter
+     case, return a list of arguments as described above.
+
+`(option-list OPTION VARIABLE [PREPEND-FN [FILTER]])'
+     Retrieve the value of VARIABLE, which must be a list,
+     and prepend OPTION before each item in this list, using
+     PREPEND-FN.
+
+     PREPEND-FN is called with the OPTION and each item of the
+     list as second argument, and should return OPTION prepended
+     before the item, either as string or as list.  If omitted,
+     PREPEND-FN defaults to `list'.
+
+     FILTER is an optional function to be applied to each item in
+     the list before prepending OPTION.  It shall return the
+     option value for each item as string, or nil, if the item is
+     to be ignored.
+
+`(option-flag OPTION VARIABLE)'
+     Retrieve the value of VARIABLE and return OPTION, if the
+     value is non-nil.  Otherwise return nil.
+
+`(eval FORM)'
+     Return the result of evaluating FORM in the buffer to be
+     checked.  FORM must either return a string or a list of
+     strings, or nil to indicate that nothing should be
+     substituted for CELL.  For all other return types, signal an
+     error
+
+     _No_ further substitutions are performed, neither in FORM
+     before it is evaluated, nor in the result of evaluating
+     FORM.
+
+In all other cases, signal an error.
+
+Note that substitution is *not* recursive.  No symbols or cells
+are substituted within the body of cells!"
+  (pcase arg
+    ((pred stringp) (list arg))
+    (`source
+     (list (flycheck-save-buffer-to-temp #'flycheck-temp-file-system)))
+    (`source-inplace
+     (list (flycheck-save-buffer-to-temp #'flycheck-temp-file-inplace)))
+    (`source-original (list (or (buffer-file-name) "")))
+    (`temporary-directory (list (flycheck-temp-dir-system)))
+    (`temporary-file-name
+     (let ((directory (flycheck-temp-dir-system)))
+       (list (make-temp-name (expand-file-name "flycheck" directory)))))
+    (`null-device (list null-device))
+    (`(config-file ,option-name ,file-name-var)
+     (-when-let* ((value (symbol-value file-name-var))
+                  (file-name (flycheck-locate-config-file value checker)))
+       (flycheck-prepend-with-option option-name (list file-name))))
+    (`(config-file ,option-name ,file-name-var ,prepend-fn)
+     (-when-let* ((value (symbol-value file-name-var))
+                  (file-name (flycheck-locate-config-file value checker)))
+       (flycheck-prepend-with-option option-name (list file-name) prepend-fn)))
+    (`(option ,option-name ,variable)
+     (-when-let (value (symbol-value variable))
+       (unless (stringp value)
+         (error "Value %S of %S for option %s is not a string"
+                value variable option-name))
+       (flycheck-prepend-with-option option-name (list value))))
+    (`(option ,option-name ,variable ,prepend-fn)
+     (-when-let (value (symbol-value variable))
+       (unless (stringp value)
+         (error "Value %S of %S for option %s is not a string"
+                value variable option-name))
+       (flycheck-prepend-with-option option-name (list value) prepend-fn)))
+    (`(option ,option-name ,variable ,prepend-fn ,filter)
+     (-when-let (value (funcall filter (symbol-value variable)))
+       (unless (stringp value)
+         (error "Value %S of %S (filter: %S) for option %s is not a string"
+                value variable filter option-name))
+       (flycheck-prepend-with-option option-name (list value) prepend-fn)))
+    (`(option-list ,option-name ,variable)
+     (let ((value (symbol-value variable)))
+       (unless (and (listp value) (-all? #'stringp value))
+         (error "Value %S of %S for option %S is not a list of strings"
+                value variable option-name))
+       (flycheck-prepend-with-option option-name value)))
+    (`(option-list ,option-name ,variable ,prepend-fn)
+     (let ((value (symbol-value variable)))
+       (unless (and (listp value) (-all? #'stringp value))
+         (error "Value %S of %S for option %S is not a list of strings"
+                value variable option-name))
+       (flycheck-prepend-with-option option-name value prepend-fn)))
+    (`(option-list ,option-name ,variable ,prepend-fn ,filter)
+     (let ((value (delq nil (mapcar filter (symbol-value variable)))))
+       (unless (and (listp value) (-all? #'stringp value))
+         (error "Value %S of %S for option %S is not a list of strings"
+                value variable option-name))
+       (flycheck-prepend-with-option option-name value prepend-fn)))
+    (`(option-flag ,option-name ,variable)
+     (when (symbol-value variable)
+       (list option-name)))
+    (`(eval ,form)
+     (let ((result (eval form)))
+       (cond
+        ((and (listp result) (-all? #'stringp result)) result)
+        ((stringp result) (list result))
+        (t (error "Invalid result from evaluation of %S: %S" form result)))))
+    (_ (error "Unsupported argument %S" arg))))
+
+(defun flycheck-checker-substituted-arguments (checker)
+  "Get the substituted arguments of a CHECKER.
+
+Substitute each argument of CHECKER using
+`flycheck-substitute-argument'.  This replaces any special
+symbols in the command."
+  (apply #'append
+         (mapcar (lambda (arg) (flycheck-substitute-argument arg checker))
+                 (flycheck-checker-arguments checker))))
+
+(defun flycheck-start-command-checker (checker callback)
+  "Start a command CHECKER with CALLBACK."
+  (let (process)
+    (condition-case err
+        (let* ((program (flycheck-checker-executable checker))
+               (args (flycheck-checker-substituted-arguments checker))
+               ;; Use pipes to receive output from the syntax checker.  They are
+               ;; more efficient and more robust than PTYs, which Emacs uses by
+               ;; default, and since we don't need any job control features, we
+               ;; can easily use pipes.
+               (process-connection-type nil))
+          ;; We pass do not associate the process with any buffer, by
+          ;; passing nil for the BUFFER argument of `start-process'.
+          ;; Instead, we just remember the buffer being checked in a
+          ;; process property (see below).  This neatly avoids all
+          ;; side-effects implied by attached a process to a buffer, which
+          ;; may cause conflicts with other packages.
+          ;;
+          ;; See https://github.com/flycheck/flycheck/issues/298 for an
+          ;; example for such a conflict.
+          (setq process (apply 'start-process (format "flycheck-%s" checker)
+                               nil program args))
+          (set-process-sentinel process 'flycheck-handle-signal)
+          (set-process-filter process 'flycheck-receive-checker-output)
+          (set-process-query-on-exit-flag process nil)
+          ;; Remember the syntax checker, the buffer and the callback
+          (process-put process 'flycheck-checker checker)
+          (process-put process 'flycheck-callback callback)
+          (process-put process 'flycheck-buffer (current-buffer))
+          ;; Track the temporaries created by argument substitution in the
+          ;; process itself, to get rid of the global state ASAP.
+          (process-put process 'flycheck-temporaries flycheck-temporaries)
+          (setq flycheck-temporaries nil)
+          ;; Return the process
+          process)
+      (error
+       ;; In case of error, clean up our resources, and report the error back to
+       ;; Flycheck
+       (flycheck-safe-delete-temporaries)
+       (when process
+         ;; No need to explicitly delete the temporary files of the process,
+         ;; because deleting runs the sentinel, which will delete them anyway.
+         (delete-process process))
+       (signal (car err) (cdr err))))))
+
+(defun flycheck-interrupt-command-checker (_checker process)
+  "Interrupt a PROCESS."
+  ;; Deleting the process always triggers the sentinel, which does the cleanup
   (delete-process process))
 
+(defun flycheck-command-checker-print-doc (checker)
+  "Print additional documentation for a command CHECKER."
+  (let ((executable (flycheck-checker-default-executable checker))
+        (config-file-var (flycheck-checker-config-file-var checker))
+        (option-vars (-sort #'string<
+                            (flycheck-checker-option-vars checker))))
+    (princ "\n")
+
+    (let ((doc-start (with-current-buffer standard-output (point-max))))
+      ;; Track the start of our documentation so that we can re-indent it
+      ;; properly
+      (princ "  This syntax checker executes \"")
+      (princ executable)
+      (princ "\"")
+      (when config-file-var
+        (princ ", using a configuration file from `")
+        (princ (symbol-name config-file-var))
+        (princ "'"))
+      (princ ". The executable can be overridden with `")
+      (princ (symbol-name (flycheck-checker-executable-variable checker)))
+      (princ "'.")
+
+      (with-current-buffer standard-output
+        (save-excursion
+          (fill-region-as-paragraph doc-start (point-max)))))
+    (princ "\n")
+    (when option-vars
+      (princ "\n  This syntax checker can be configured with these options:\n\n")
+      (dolist (var option-vars)
+        (princ (format "     * `%s'\n" var))))))
+
+
+;;; Process management for command syntax checkers
 (defun flycheck-receive-checker-output (process output)
   "Receive a syntax checking PROCESS OUTPUT."
   (push output (process-get process 'flycheck-pending-output)))
@@ -4097,151 +3999,83 @@ https://github.com/Bruce-Connor/emacs-google-this")))
     (let ((pending-output (process-get process 'flycheck-pending-output)))
       (apply #'concat (nreverse pending-output)))))
 
-(defun flycheck-finish-syntax-check (checker exit-status files output)
-  "Finish a syntax check from CHECKER with EXIT-STATUS.
-
-FILES is a list of files given as input to the checker.  OUTPUT
-is the output of the syntax checker.
-
-Parse the OUTPUT and report an appropriate error status."
-  (let (errors)
-    (condition-case err
-        (setq errors (flycheck-parse-output output checker (current-buffer)))
-      (error
-       (message "Failed to parse errors from checker %S in output: %s\n\
-Error: %s" checker output (error-message-string err))
-       (flycheck-report-error)
-       (setq errors :errored)))
-    (unless (eq errors :errored)
-      (when (and (/= exit-status 0) (not errors))
-        ;; Warn about a suspicious result from the syntax checker.  We do right
-        ;; after parsing the errors, before filtering, because a syntax checker
-        ;; might report errors from other files (e.g. includes) even if there
-        ;; are no errors in the file being checked.
-        (message "Checker %S returned non-zero exit code %s, but no errors from \
-output: %s\nChecker definition probably flawed."
-                 checker exit-status output)
-        (flycheck-report-status 'suspicious))
-      (setq errors (flycheck-relevant-errors
-                    (flycheck-filter-errors
-                     (mapcar (lambda (e) (flycheck-fix-error-filename e files))
-                             errors) checker)))
-      (unless (flycheck-disable-excessive-checker checker errors)
-        ;; Remember and process the new errors if allowed
-        (setq flycheck-current-errors
-              (sort (append errors flycheck-current-errors) #'flycheck-error-<))
-        (mapc (apply-partially #'run-hook-with-args-until-success
-                               'flycheck-process-error-functions) errors))
-      (flycheck-report-status 'finished)
-      (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
-        (if next-checker
-            (flycheck-start-checker next-checker)
-          (flycheck-delete-marked-overlays)
-          (flycheck-error-list-refresh)
-          (run-hooks 'flycheck-after-syntax-check-hook)
-          (when (eq (current-buffer) (window-buffer))
-            (flycheck-display-error-at-point))
-          ;; Immediately try to run any pending deferred syntax check, which
-          ;; were triggered by intermediate automatic check event, to make sure
-          ;; that we quickly refine outdated error information
-          (flycheck-perform-deferred-syntax-check))))))
-
-(defun flycheck-disable-excessive-checker (checker errors)
-  "Disable CHECKER if it reported excessive ERRORS.
-
-If ERRORS has more items than `flycheck-checker-error-threshold',
-add CHECKER to `flycheck-disabled-checkers', and show a warning.
-
-Return t when CHECKER was disabled, or nil otherwise."
-  (when (and flycheck-checker-error-threshold
-             (> (length errors) flycheck-checker-error-threshold))
-    ;; Disable CHECKER for this buffer (`flycheck-disabled-checkers' is a local
-    ;; variable).
-    (lwarn '(flycheck syntax-checker) :warning
-           "Syntax checker %s reported too many errors (%s) and is disabled."
-           checker (length errors))
-    (push checker flycheck-disabled-checkers)
-    t))
-
 (defun flycheck-handle-signal (process _event)
   "Handle a signal from the syntax checking PROCESS.
 
 _EVENT is ignored."
   (when (memq (process-status process) '(signal exit))
-    (let ((checker (process-get process 'flycheck-checker))
-          (files (process-get process 'flycheck-temporaries))
-          (exit-status (process-exit-status process))
-          (output (flycheck-get-output process))
-          (buffer (process-get process 'flycheck-buffer)))
-      (flycheck-delete-process process)
+    (let ((files (process-get process 'flycheck-temporaries))
+          (buffer (process-get process 'flycheck-buffer))
+          (callback (process-get process 'flycheck-callback)))
+      ;; Delete the temporary files
+      (mapc #'flycheck-safe-delete files)
       (when (buffer-live-p buffer)
         (with-current-buffer buffer
-          (setq flycheck-current-process nil)
           (condition-case err
               (pcase (process-status process)
                 (`signal
-                 ;; The process was killed, so let's just delete all overlays,
-                 ;; and report a bad state
-                 (flycheck-delete-marked-overlays)
-                 (flycheck-report-status 'interrupted))
+                 (funcall callback 'interrupted))
                 (`exit
-                 (when flycheck-mode
-                   (flycheck-finish-syntax-check checker exit-status
-                                                 files output))))
+                 (flycheck-finish-checker-process
+                  (process-get process 'flycheck-checker)
+                  (process-exit-status process)
+                  files
+                  (flycheck-get-output process) callback)))
             (error
-             (flycheck-report-error)
-             (signal (car err) (cdr err)))))))))
+             (funcall callback 'errored (error-message-string err)))))))))
 
-(defun flycheck-start-checker (checker)
-  "Start a syntax CHECKER."
-  (condition-case err
-      (let* ((program (flycheck-checker-executable checker))
-             (args (flycheck-checker-substituted-arguments checker))
-             ;; Use pipes to receive output from the syntax checker.  They are
-             ;; more efficient and more robust than PTYs, which Emacs uses by
-             ;; default, and since we don't need any job control features, we
-             ;; can easily use pipes.
-             (process-connection-type nil)
-             ;; We pass do not associate the process with any buffer, by passing
-             ;; nil for the BUFFER argument of `start-process'.  Instead, we
-             ;; just remember the buffer being checked in a process property
-             ;; (see below).  This neatly avoids all side-effects implied by
-             ;; attached a process to a buffer, which may cause conflicts with
-             ;; other packages.
-             ;;
-             ;; See https://github.com/flycheck/flycheck/issues/298 for an
-             ;; example for such a conflict.
-             (process (apply 'start-process "flycheck" nil program args)))
-        (setq flycheck-current-process process)
-        (set-process-filter process 'flycheck-receive-checker-output)
-        (set-process-sentinel process 'flycheck-handle-signal)
-        (set-process-query-on-exit-flag process nil)
-        (flycheck-report-status 'running)
-        (process-put process 'flycheck-temporaries flycheck-temporaries)
-        ;; Now that temporary files and directories are attached to the process,
-        ;; we can reset the variables used to collect them
-        (setq flycheck-temporaries nil)
-        ;; Remember the syntax checker and the buffer.
-        (process-put process 'flycheck-checker checker)
-        (process-put process 'flycheck-buffer (current-buffer)))
-    (error
-     (flycheck-report-error)
-     (flycheck-safe-delete-temporaries)
-     (when flycheck-current-process
-       ;; Clear the process if it's already there
-       (flycheck-delete-process flycheck-current-process)
-       (setq flycheck-current-process nil))
-     (signal (car err) (cdr err)))))
+(defun flycheck-finish-checker-process
+    (checker exit-status files output callback)
+  "Finish a checker process from CHECKER with EXIT-STATUS.
 
-(defun flycheck-stop-checker ()
-  "Stop any syntax checker for the current buffer."
-  (when (flycheck-running-p)
-    ;; Killing the current process will force the sentinel, which does the
-    ;; cleanup
-    (kill-process flycheck-current-process)))
+FILES is a list of files given as input to the checker.  OUTPUT
+is the output of the syntax checker.  CALLBACK is the status
+callback to use for reporting.
+
+Parse the OUTPUT and report an appropriate error status."
+  (let ((errors (flycheck-parse-output output checker (current-buffer))))
+    (when (and (/= exit-status 0) (not errors))
+      ;; Warn about a suspicious result from the syntax checker.  We do right
+      ;; after parsing the errors, before filtering, because a syntax checker
+      ;; might report errors from other files (e.g. includes) even if there
+      ;; are no errors in the file being checked.
+      (funcall callback 'suspicious
+               (format "Checker %S returned non-zero exit code %s, but no errors from \
+output: %s\nChecker definition probably flawed." checker exit-status output)))
+    (funcall callback 'finished
+             ;; Fix error file names, by substituting them backwards from the
+             ;; temporaries
+             (mapcar (lambda (e) (flycheck-fix-error-filename e files))
+                     errors))))
 
 
-;;; Syntax checker executable
+;;; Executables of command checkers.
+(defmacro flycheck-def-executable-var (checker default-executable)
+  "Define the executable variable for CHECKER.
+
+DEFAULT-EXECUTABLE is the default executable.  It is only used in
+the docstring of the variable.
+
+The variable is defined with `defcustom' in the
+`flycheck-executables' group.  It's also defined to be risky as
+file-local variable, to avoid arbitrary executables being used
+for syntax checking."
+  (let ((executable-var (flycheck-checker-executable-variable checker)))
+    `(progn
+       (defcustom ,executable-var nil
+         ,(format "The executable of the %s syntax checker.
+
+Either a string containing the name or the path of the
+executable, or nil to use the default executable from the syntax
+checker declaration.
+
+The default executable is %S." checker default-executable)
+         :type '(choice (const :tag "Default executable" nil)
+                        (string :tag "Name or path"))
+         :group 'flycheck-executables
+         :risky t)
+       (make-variable-buffer-local ',executable-var))))
+
 (defun flycheck-set-checker-executable (checker &optional executable)
   "Set the EXECUTABLE of CHECKER.
 
@@ -4278,6 +4112,481 @@ variable symbol for a syntax checker."
     (set variable executable)))
 (put 'flycheck-set-checker-executable 'interactive-only
      "Set the executable variable directly instead")
+
+
+;;; Configuration files and options for command checkers
+;;;###autoload
+(defmacro flycheck-def-config-file-var (symbol checker &optional file-name
+                                               &rest custom-args)
+  "Define SYMBOL as config file variable for CHECKER, with default FILE-NAME.
+
+SYMBOL is declared as customizable, buffer-local variable using
+`defcustom', to provide a configuration file for the given syntax
+CHECKER.  CUSTOM-ARGS are forwarded to `defcustom'.
+
+FILE-NAME is the initial value of the new variable.  If omitted,
+the default value is nil.
+
+Use this together with the `config-file' form in the `:command'
+argument to `flycheck-define-checker'."
+  (declare (indent 3))
+  `(progn
+     (put ',checker 'flycheck-config-file-var ',symbol)
+     (defcustom ,symbol ,file-name
+       ,(format "Configuration file for `%s'.
+
+If set to a string, locate the configuration file using the
+functions from `flycheck-locate-config-file-functions'.  If the
+file is found pass it to the syntax checker as configuration
+file.
+
+If no configuration file is found, or if this variable is set to
+nil, invoke the syntax checker without a configuration file.
+
+Use this variable as file-local variable if you need a specific
+configuration file a buffer." checker)
+       :type '(choice (const :tag "No configuration file" nil)
+                      (string :tag "File name or path"))
+       :group 'flycheck-config-files
+       ,@custom-args)
+     (make-variable-buffer-local ',symbol)))
+
+(defun flycheck-checker-config-file-var (checker)
+  "Get the associated configuration file variable of CHECKER.
+
+Return nil if CHECKER has no associated configuration file
+variable."
+  (get checker 'flycheck-config-file-var))
+
+(defun flycheck-checker-option-vars (checker)
+  "Get the associated option variables of CHECKER.
+
+Return a (possibly empty) list of variable symbols."
+  (get checker 'flycheck-option-vars))
+
+(defun flycheck-locate-config-file (filename checker)
+  "Locate the configuration file FILENAME for CHECKER.
+
+Locate the configuration file using
+`flycheck-locate-config-file-functions'.
+
+Return the absolute path of the configuration file, or nil if no
+configuration file was found."
+  (-when-let (filepath (run-hook-with-args-until-success
+                        'flycheck-locate-config-file-functions
+                        filename checker))
+    (when (file-exists-p filepath)
+      filepath)))
+
+(defun flycheck-locate-config-file-absolute-path (filepath _checker)
+  "Locate a configuration file by a FILEPATH.
+
+If FILEPATH is a contains a path separator, expand it against the
+default directory and return it.  Otherwise return nil.
+
+_CHECKER is ignored."
+  ;; If the path is just a plain file name, skip it.
+  (unless (string= (file-name-nondirectory filepath) filepath)
+    (expand-file-name filepath)))
+
+(defun flycheck-locate-config-file-ancestor-directories (filename _checker)
+  "Locate a configuration FILENAME in ancestor directories.
+
+If the current buffer has a file name, search FILENAME in the
+directory of the current buffer and all ancestors thereof (see
+`locate-dominating-file').  If the file is found, return its
+absolute path.  Otherwise return nil.
+
+_CHECKER is ignored."
+  (-when-let* ((basefile (buffer-file-name))
+               (directory (locate-dominating-file basefile filename)))
+    (expand-file-name filename directory)))
+
+(defun flycheck-locate-config-file-home (filename _checker)
+  "Locate a configuration FILENAME in the home directory.
+
+Return the absolute path, if FILENAME exists in the user's home
+directory, or nil otherwise."
+  (let ((path (expand-file-name filename "~")))
+    (when (file-exists-p path)
+      path)))
+
+(mapc (apply-partially #'custom-add-frequent-value
+                       'flycheck-locate-config-file-functions)
+      '(flycheck-locate-config-file-absolute-path
+        flycheck-locate-config-file-ancestor-directories
+        flycheck-locate-config-file-home))
+
+;;;###autoload
+(defmacro flycheck-def-option-var (symbol init-value checker docstring
+                                          &rest custom-args)
+  "Define SYMBOL as option variable with INIT-VALUE for CHECKER.
+
+SYMBOL is declared as customizable variable, buffer-local
+variable using `defcustom', to provide an option for the given
+syntax CHECKER.  INIT-VALUE is the initial value of the variable,
+and DOCSTRING is its docstring.  CUSTOM-ARGS are forwarded to
+`defcustom'.
+
+Use this together with the `option', `option-list' and
+`option-flag' forms in the `:command' argument to
+`flycheck-define-checker'."
+  (declare (indent 3)
+           (doc-string 4))
+  `(progn
+     (let ((options (flycheck-checker-option-vars ',checker)))
+       (unless (memq ',symbol options)
+         (put ',checker 'flycheck-option-vars (cons ',symbol options))))
+     (defcustom ,symbol ,init-value
+       ,(format "%s
+
+This variable is an option for the syntax checker `%s'." docstring checker)
+       :group 'flycheck-options
+       ,@custom-args)
+     (make-variable-buffer-local ',symbol)))
+
+(defun flycheck-option-int (value)
+  "Convert an integral option VALUE to a string.
+
+If VALUE is nil, return nil.  Otherwise return VALUE converted to
+a string."
+  (when value
+    (number-to-string value)))
+
+(defun flycheck-option-comma-separated-list (value &optional separator filter)
+  "Convert VALUE into a list separated by SEPARATOR.
+
+SEPARATOR is a string to separate items in VALUE, defaulting to
+\",\".  FILTER is an optional function, which takes a single
+argument and returns either a string or nil.
+
+If VALUE is a list, apply FILTER to each item in VALUE, remove
+all nil items, and return a single string of all remaining items
+separated by SEPARATOR.
+
+Otherwise, apply FILTER to VALUE and return the result.
+SEPARATOR is ignored in this case."
+  (let ((filter (or filter #'identity))
+        (separator (or separator ",")))
+    (if (listp value)
+        (-when-let (value (delq nil (mapcar filter value)))
+          (string-join value separator))
+      (funcall filter value))))
+
+
+;;; Command syntax checkers as compile commands
+(defun flycheck-checker-pattern-to-error-regexp (pattern)
+  "Convert PATTERN into an error regexp for compile.el.
+
+Return a list representing PATTERN, suitable as element in
+`compilation-error-regexp-alist'."
+  (let* ((regexp (car pattern))
+         (level (cdr pattern))
+         (level-no (pcase level
+                     (`error 2)
+                     (`warning 1))))
+    (list regexp 1 2 3 level-no)))
+
+(defun flycheck-checker-compilation-error-regexp-alist (checker)
+  "Convert error patterns of CHECKER for use with compile.el.
+
+Return an alist of all error patterns of CHECKER, suitable for
+use with `compilation-error-regexp-alist'."
+  (mapcar #'flycheck-checker-pattern-to-error-regexp
+          (flycheck-checker-error-patterns checker)))
+
+(defun flycheck-checker-shell-command (checker)
+  "Get a shell command for CHECKER.
+
+Perform substitution in the arguments of CHECKER, but with
+`flycheck-substitute-shell-argument'.
+
+Return the command of CHECKER as single string, suitable for
+shell execution."
+  ;; Note: Do NOT use `combine-and-quote-strings' here.  Despite it's name it
+  ;; does not properly quote shell arguments, and actually breaks for special
+  ;; characters.  See https://github.com/flycheck/flycheck/pull/522
+  (mapconcat
+   #'shell-quote-argument
+   (cons (flycheck-checker-executable checker)
+         (apply #'append
+                (mapcar (lambda (arg)
+                          (if (memq arg '(source source-inplace source-original))
+                              (list (or (buffer-file-name) ""))
+                            (flycheck-substitute-argument arg checker)))
+                        (flycheck-checker-arguments checker)))) " "))
+
+(defun flycheck-compile-name (_name)
+  "Get a name for a Flycheck compilation buffer.
+
+_NAME is ignored."
+  (format "*Flycheck %s*" (buffer-file-name)))
+
+(defun flycheck-compile (checker)
+  "Run CHECKER via `compile'.
+
+CHECKER must be a valid syntax checker.  Interactively, prompt
+for a syntax checker to run.
+
+Instead of highlighting errors in the buffer, this command pops
+up a separate buffer with the entire output of the syntax checker
+tool, just like `compile' (\\[compile])."
+  (interactive
+   (list (read-flycheck-checker "Run syntax checker as compile command: "
+                                (or flycheck-checker flycheck-last-checker))))
+  (unless (flycheck-valid-checker-p checker)
+    (user-error "%S is not a valid syntax checker" checker))
+  (unless (buffer-file-name)
+    (user-error "Cannot compile buffers without backing file"))
+  (unless (flycheck-may-use-checker checker)
+    (user-error "Cannot use syntax checker %S in this buffer" checker))
+  (unless (flycheck-checker-executable checker)
+    (user-error "Cannot run checker %S in compilation buffer" checker))
+  (let* ((command (flycheck-checker-shell-command checker))
+         (buffer (compilation-start command nil #'flycheck-compile-name)))
+    (with-current-buffer buffer
+      (set (make-local-variable 'compilation-error-regexp-alist)
+           (flycheck-checker-compilation-error-regexp-alist checker)))))
+
+
+;;; General error parsing for command checkers
+(defun flycheck-parse-output (output checker buffer)
+  "Parse OUTPUT from CHECKER in BUFFER.
+
+OUTPUT is a string with the output from the checker symbol
+CHECKER.  BUFFER is the buffer which was checked.
+
+Return the errors parsed with the error patterns of CHECKER."
+  (funcall (flycheck-checker-error-parser checker) output checker buffer))
+
+(defun flycheck-fix-error-filename (err buffer-files)
+  "Fix the file name of ERR from BUFFER-FILES.
+
+Make the file name of ERR absolute.  If the absolute file name of
+ERR is in BUFFER-FILES, replace it with the return value of the
+function `buffer-file-name'."
+  (flycheck-error-with-buffer err
+    (-when-let (filename (flycheck-error-filename err))
+      (setq filename (expand-file-name filename))
+      (when (-any? (apply-partially #'flycheck-same-files-p filename)
+                   buffer-files)
+        (setq filename (buffer-file-name)))
+      (setf (flycheck-error-filename err) filename)))
+  err)
+
+
+;;; Error parsers for command syntax checkers
+(defun flycheck-parse-xml-region (beg end)
+  "Parse the xml region between BEG and END.
+
+Wrapper around `xml-parse-region' which transforms the return
+value of this function into one compatible to
+`libxml-parse-xml-region' by simply returning the first element
+from the node list."
+  (car (xml-parse-region beg end)))
+
+(defvar flycheck-xml-parser
+  (if (fboundp 'libxml-parse-xml-region)
+      'libxml-parse-xml-region 'flycheck-parse-xml-region)
+  "Parse an xml string from a region.
+
+Use libxml if Emacs is built with libxml support.  Otherwise fall
+back to `xml-parse-region', via `flycheck-parse-xml-region'.")
+
+(defun flycheck-parse-xml-string (xml)
+  "Parse an XML string.
+
+Return the document tree parsed from XML in the form `(ROOT ATTRS
+BODY...)'.  ROOT is a symbol identifying the name of the root
+element.  ATTRS is an alist of the attributes of the root node.
+BODY is zero or more body elements, either as strings (in case of
+text nodes) or as XML nodes, in the same for as the root node."
+  (with-temp-buffer
+    (insert xml)
+    (funcall flycheck-xml-parser (point-min) (point-max))))
+
+(defun flycheck-parse-checkstyle (output checker buffer)
+  "Parse Checkstyle errors from OUTPUT.
+
+Parse Checkstyle-like XML output.  Use this error parser for
+checkers that have an option to output errors in this format.
+
+See URL `http://checkstyle.sourceforge.net/' for information
+about Checkstyle."
+  (pcase (flycheck-parse-xml-string output)
+    (`(checkstyle ,_ . ,file-nodes)
+     (let (errors)
+       (dolist (node file-nodes)
+         (pcase node
+           (`(file ,file-attrs . ,error-nodes)
+            (dolist (node error-nodes)
+              (pcase node
+                (`(error ,error-attrs . ,_)
+                 (let ((filename (cdr (assq 'name file-attrs)))
+                       (line (cdr (assq 'line error-attrs)))
+                       (column (cdr (assq 'column error-attrs)))
+                       (severity (cdr (assq 'severity error-attrs)))
+                       (message (cdr (assq 'message error-attrs))))
+                   (push (flycheck-error-new-at
+                          (flycheck-string-to-number-safe line)
+                          (flycheck-string-to-number-safe column)
+                          (pcase severity
+                            (`"error"   'error)
+                            (`"warning" 'warning)
+                            (`"info"    'info)
+                            ;; Default to error for unknown severity
+                            (_          'error))
+                          message
+                          :checker checker
+                          :buffer buffer
+                          :filename filename)
+                         errors))))))))
+       (nreverse errors)))))
+
+(defun flycheck-parse-cppcheck (output checker buffer)
+  "Parse Cppcheck errors from OUTPUT.
+
+Parse Cppcheck XML v2 output.
+
+See URL `http://cppcheck.sourceforge.net/' for more information
+about Cppcheck."
+  (pcase (flycheck-parse-xml-string output)
+    (`(results ,_ . ,body)
+     (let (errors)
+       (dolist (node body)
+         (pcase node
+           (`(errors ,_ . ,error-nodes)
+            (dolist (node error-nodes)
+              (pcase node
+                (`(error ,error-attrs . ,loc-nodes)
+                 (dolist (node loc-nodes)
+                   (pcase node
+                     (`(location ,loc-attrs . ,_)
+                      (let ((line (cdr (assq'line loc-attrs)))
+                            (filename (cdr (assq 'file loc-attrs)))
+                            (message (cdr (assq 'verbose error-attrs)))
+                            (severity (cdr (assq 'severity error-attrs))))
+                        (push (flycheck-error-new-at
+                               (flycheck-string-to-number-safe line)
+                               nil
+                               (pcase severity
+                                 (`"error" 'error)
+                                 (_ 'warning))
+                               message
+                               :checker checker
+                               :buffer buffer
+                               :filename filename)
+                              errors)))))))))))
+       (nreverse errors)))))
+
+
+;;; Error parsing with regular expressions
+(defun flycheck-get-regexp (patterns)
+  "Create a single regular expression from PATTERNS."
+  (rx-to-string `(or ,@(mapcar (lambda (p) (list 'regexp (car p))) patterns))
+                'no-group))
+
+(defun flycheck-tokenize-output-with-patterns (output patterns)
+  "Tokenize OUTPUT with PATTERNS.
+
+Split the output into error tokens, using all regular expressions
+from the error PATTERNS.  An error token is simply a string
+containing a single error from OUTPUT.  Such a token can then be
+parsed into a structured error by applying the PATTERNS again,
+see `flycheck-parse-errors-with-patterns'.
+
+Return a list of error tokens."
+  (let ((regexp (flycheck-get-regexp patterns))
+        (last-match 0)
+        errors)
+    (while (string-match regexp output last-match)
+      (push (match-string 0 output) errors)
+      (setq last-match (match-end 0)))
+    (reverse errors)))
+
+(defun flycheck-try-parse-error-with-pattern (err pattern checker)
+  "Try to parse a single ERR with a PATTERN for CHECKER.
+
+Return the parsed error if PATTERN matched ERR, or nil
+otherwise."
+  (let ((regexp (car pattern))
+        (level (cdr pattern)))
+    (when (string-match regexp err)
+      (let ((filename (match-string 1 err))
+            (line (match-string 2 err))
+            (column (match-string 3 err))
+            (message (match-string 4 err)))
+        (flycheck-error-new-at
+         (flycheck-string-to-number-safe line)
+         (flycheck-string-to-number-safe column)
+         level
+         (unless (string-empty-p message) message)
+         :checker checker
+         :filename (unless (string-empty-p filename) filename))))))
+
+(defun flycheck-parse-error-with-patterns (err patterns checker)
+  "Parse a single ERR with error PATTERNS for CHECKER.
+
+Apply each pattern in PATTERNS to ERR, in the given order, and
+return the first parsed error."
+  ;; Try to parse patterns in the order of declaration to make sure that the
+  ;; first match wins.
+  (let (parsed-error)
+    (while (and patterns
+                (not (setq parsed-error
+                           (flycheck-try-parse-error-with-pattern
+                            err (car patterns) checker))))
+      (setq patterns (cdr patterns)))
+    parsed-error))
+
+(defun flycheck-parse-with-patterns (output checker buffer)
+  "Parse OUTPUT from CHECKER with error patterns.
+
+Uses the error patterns of CHECKER to tokenize the output and
+tries to parse each error token with all patterns, in the order
+of declaration.  Hence an error is never matched twice by two
+different patterns.  The pattern declared first always wins.
+
+_BUFFER is ignored.
+
+Return a list of parsed errors and warnings (as `flycheck-error'
+objects)."
+  (with-current-buffer buffer
+    (let ((patterns (flycheck-checker-error-patterns checker)))
+      (mapcar (lambda (err)
+                (flycheck-parse-error-with-patterns err patterns checker))
+              (flycheck-tokenize-output-with-patterns output patterns)))))
+
+
+;;; Convenience definition of command-syntax checkers
+(defmacro flycheck-define-checker (symbol docstring &rest properties)
+  "Define SYMBOL as command syntax checker with DOCSTRING and PROPERTIES.
+
+Like `flycheck-define-command-checker', but PROPERTIES must not
+be quoted.  Also, implicitly define the executable variable for
+SYMBOL with `flycheck-def-executable-var'."
+  (declare (indent 1)
+           (doc-string 2))
+  (let ((command (plist-get properties :command))
+        (parser (plist-get properties :error-parser))
+        (filter (plist-get properties :error-filter))
+        (predicate (plist-get properties :predicate)))
+
+    `(progn
+       (flycheck-def-executable-var ,symbol ,(car command))
+
+       (flycheck-define-command-checker ',symbol
+         ,docstring
+         :command ',command
+         :error-parser ,(when parser
+                          `(function ,parser))
+         :error-patterns ',(plist-get properties :error-patterns)
+         :error-filter ,(when filter
+                          `(function ,filter))
+         :modes ',(plist-get properties :modes)
+         :predicate ,(when predicate
+                       `(function ,predicate))
+         :next-checkers ',(plist-get properties :next-checkers)))))
 
 
 ;;; Built-in checkers
@@ -5975,7 +6284,10 @@ Requires Sphinx 1.2 or newer.  See URL `http://sphinx-doc.org'."
   "Whether to only report code issues in Rubocop.
 
 When non-nil, only report code issues in Rubocop, via `--lint'.
-Otherwise report style issues as well.")
+Otherwise report style issues as well."
+  :safe #'booleanp
+  :type 'boolean
+  :package-version '(flycheck . "0.16"))
 
 (flycheck-define-checker ruby-rubocop
   "A Ruby syntax and style checker using the RuboCop tool.

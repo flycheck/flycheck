@@ -65,8 +65,9 @@ nitpick_ignore =[
     ('el:function', 'integerp'),
     ('el:function', 'booleanp'),
     ('el:option', 'icomplete-mode'),
-    # This is a markup artifact
-    ('el:variable', 'flycheck-CHECKER-executable'),
+    ('el:macro', 'ert-deftest'),
+    # These are markup artifacts
+    ('el:variable', 'flycheck-SYMBOL-executable'),
 ]
 
 linkcheck_ignore = [

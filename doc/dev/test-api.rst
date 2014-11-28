@@ -9,19 +9,7 @@ own test suite, and available for use in test suites for your own Flycheck
 extensions.
 
 .. contents:: Contents
-
-Loading
-=======
-
-The ERT API is provided by the ``flycheck-ert`` library, which is part of the
-Flycheck package.  If the Flycheck package is installed (see
-:ref:`installation`), you can load the ERT API with:
-
-.. code-block:: cl
-
-   (require 'flycheck-ert)
-
-This will also load the ``ert`` and ``flycheck`` libraries.
+   :local:
 
 Compatibility
 =============
@@ -38,18 +26,32 @@ onwards.
    For this feature to work, you **must** call `flycheck-ert-initialize` after
    defining all test cases.
 
-Initialization
-==============
 
-Flycheck ERT adds support for test resources (see :ref:`test-resources`).  For
-this feature, you need to initialize Flycheck ERT with a resource directory by
+Loading and initializing
+========================
+
+The ERT API is provided by the ``flycheck-ert`` library, which is part of the
+Flycheck package.  If the Flycheck package is installed (see
+:ref:`installation`), you can load the ERT API with:
+
+.. code-block:: cl
+
+   (require 'flycheck-ert)
+
+This will also load the ``ert`` and ``flycheck`` libraries.
+
+Flycheck ERT supports test resources (see :ref:`test-resources`).  For this
+feature, you need to initialize Flycheck ERT with a resource directory by
 calling :function:`flycheck-ert-initialize`:
 
 .. function:: flycheck-ert-initialize
    :auto:
 
-Utility macros for buffer handling
-==================================
+Utilities
+=========
+
+Creating temporary buffers
+--------------------------
 
 .. macro:: flycheck-ert-with-temp-buffer
    :auto:
@@ -57,11 +59,11 @@ Utility macros for buffer handling
 .. macro:: flycheck-ert-with-file-buffer
    :auto:
 
+Scoping resource access
+-----------------------
+
 .. macro:: flycheck-ert-with-help-buffer
    :auto:
-
-Utility macros for resource blocks
-==================================
 
 .. macro:: flycheck-ert-with-env
    :auto:
@@ -71,8 +73,8 @@ Utility macros for resource blocks
 
 .. _test-resources:
 
-Test resources
-==============
+Accessing test resources
+------------------------
 
 The following functions and macros load resources from the directory given to
 :function:`flycheck-ert-initialize`.
@@ -86,8 +88,8 @@ The following functions and macros load resources from the directory given to
 .. function:: flycheck-ert-locate-config-file
    :auto:
 
-Environment information
-=======================
+Obtaining information about the environment
+-------------------------------------------
 
 .. constant:: flycheck-ert-user-error-type
    :auto:
@@ -101,20 +103,26 @@ Environment information
 .. function:: flycheck-ert-extract-version-command
    :auto:
 
-Test case definitions
-=====================
+Defining test cases
+===================
+
+In addition to the standard :macro:`ert-deftest` from ERT, this library provides
+macros for specialized test case definitions:
 
 .. macro:: flycheck-ert-def-checker-test
    :auto:
 
-Test case results
-=================
+Checking results of test cases
+------------------------------
+
+Flycheck ERT provides some functions to check the results of test cases, which
+are handy in `:expected-result` forms.
 
 .. function:: flycheck-ert-syntax-check-timed-out-p
    :auto:
 
-Syntax checking in test cases
-=============================
+Invoking syntax checkers in test cases
+--------------------------------------
 
 .. function:: flycheck-ert-buffer-sync
    :auto:
@@ -122,8 +130,8 @@ Syntax checking in test cases
 .. function:: flycheck-ert-ensure-clear
    :auto:
 
-Test assertions
-===============
+Writing assertions
+------------------
 
 .. function:: flycheck-ert-should-overlay
    :auto:

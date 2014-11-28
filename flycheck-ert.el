@@ -32,6 +32,7 @@
 
 (require 'flycheck)
 (require 'ert)
+(require 'macroexp)                     ; For macro utilities
 
 
 ;;; Compatibility
@@ -274,7 +275,8 @@ assertions and setup code."
              '(satisfies flycheck-ert-syntax-check-timed-out-p)
              ,(or (plist-get keys :expected-result) :passed))
        :tags ',tags
-       ,@(mapcar (lambda (c) `(skip-unless (flycheck-check-executable ',c)))
+       ,@(mapcar (lambda (c) `(skip-unless
+                               (executable-find (flycheck-checker-executable ',c))))
                  checkers)
        ,@body)))
 
@@ -315,7 +317,7 @@ failed, and the test aborted with failure.")
                 (< (- (float-time) starttime) flycheck-ert-checker-wait-time))
       (sleep-for 1))
     (unless (< (- (float-time) starttime) flycheck-ert-checker-wait-time)
-      (flycheck-stop-checker)
+      (flycheck-stop)
       (signal 'flycheck-ert-syntax-check-timed-out nil)))
   (setq flycheck-ert-syntax-checker-finished nil))
 
@@ -327,7 +329,7 @@ failed, and the test aborted with failure.")
   (flycheck-buffer)                     ; so we need an explicit manual check
   ;; After starting the check, the checker should either be running now, or
   ;; already be finished (if it was fast).
-  (should (or flycheck-current-process
+  (should (or flycheck-current-syntax-check
               flycheck-ert-syntax-checker-finished))
   ;; Also there should be no deferred check pending anymore
   (should-not (flycheck-deferred-check-p))

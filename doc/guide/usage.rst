@@ -338,7 +338,7 @@ You can also completely customize error processing by hooking into Flycheck:
 
    .. seealso::
 
-      :ref:`error-api`
+      :ref:`api-errors`
 
 If you hover a highlighted error with the mouse, a tooltip with the top-most
 error message will be shown.

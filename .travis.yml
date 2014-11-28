@@ -1,7 +1,8 @@
 language: emacs-lisp
 env:
   - EMACS=emacs24
-  - EMACS=emacs-snapshot
+  # Flycheck must compile cleanly on latest Emacs
+  - EMACS=emacs-snapshot EMACSFLAGS="--eval '(setq byte-compile-error-on-warn t)'"
 before_install:
   # Provision the test environment, and setup a proper PATH
   - sudo add-apt-repository -y ppa:rquillo/ansible
@@ -13,7 +14,7 @@ install:
   # Install our packages
   - make EMACS=$EMACS deps
 script:
-  # Byte-compile the file, and error on warnings
-  - make EMACS=$EMACS EMACSFLAGS="--eval '(setq byte-compile-error-on-warn t)'" compile
+  # Byte-compile the file
+  - make EMACS=$EMACS EMACSFLAGS="${EMACSFLAGS}" compile
   # Run the unit tests
   - make EMACS=$EMACS test

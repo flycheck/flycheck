@@ -4,50 +4,179 @@
 
 .. require:: flycheck
 
-This chapter explains how to add new syntax checkers to Flycheck, and
-provides examples for common use cases.
+This chapter explains how to add new syntax checkers and how to extend built-in
+syntax checkers, by example.  For a detailed reference on the involved types,
+functions and macros, please refer to the :ref:`flycheck-api`.
 
-If you define a new syntax checker, *please* contribute it to Flycheck to make
-it available to other users, too.  See :ref:`contributing-syntax-checkers` for
-more information.
+.. note::
+
+   If you define a new syntax checker or have an extension to a built-in syntax
+   checker, please report it to Flycheck (see :ref:`reporting-issues`), so that
+   we can consider it for inclusion to make it available to all other users of
+   Flycheck.
+
+   If you would like to contribute your extension or your new syntax checker to
+   Flycheck as a patch or pull request, please see :ref:`contributing-code` and
+   :ref:`contributing-syntax-checkers`.
+
+.. contents:: Contents
+   :local:
 
 .. _defining-new-syntax-checkers:
 
 Defining new syntax checkers
 ============================
 
-You define new syntax checkers with :macro:`flycheck-define-checker`:
+Flycheck provides the macro :macro:`flycheck-define-checker` to define a new
+syntax checker.  The following example defines a simple syntax checker for the
+popular Pylint_ tool for Python:
 
-.. macro:: flycheck-define-checker
-   :auto:
+.. code-block:: cl
 
-.. macro:: flycheck-def-config-file-var
-   :auto:
+   (flycheck-define-checker python-pylint
+     "A Python syntax and style checker using Pylint.
 
-.. macro:: flycheck-def-option-var
-   :auto:
+   See URL `http://www.pylint.org/'."
+     :command ("pylint"
+               "--msg-template" "{path}:{line}:{column}:{C}:{msg} ({msg_id})"
+               source)
+     :error-patterns
+     ((error line-start (file-name) ":" line ":" column ":"
+             (or "E" "F") ":" (message) line-end)
+      (warning line-start (file-name) ":" line ":" column ":"
+               (or "W" "R") ":" (message) line-end)
+      (info line-start (file-name) ":" line ":" column ":"
+            "C:" (message) line-end))
+     :modes python-mode)
+
+The first argument to :macro:`flycheck-define-checker` is the *name* of a syntax
+checker, by which we can refer to this particular syntax checker.
+
+Next comes the *docstring*, which should provide a bit of information about the
+syntax checker.  It's a good idea to provide a link to the homepage of the
+syntax checker tool here.  You can view this docstring in Emacs with
+:command:`flycheck-describe-checker` or :kbd:`C-c ! ?`, e.g. :kbd:`C-c ! ?
+texinfo`.
+
+Eventually we specify the *properties* of the new syntax checker.  These
+properties tell Flycheck when to use your new syntax checker, how to run it, and
+how to parse its output:
+
+- The `:command` specifies the command Flycheck should run to check the buffer.
+  It's a simple list containing the executable and its arguments.
+
+  In our example we first the `--msg-template` option to Pylint to configure a
+  comprehensive and parseable output format.
+
+  Then we use the “special” `source` argument to pass the contents of the buffer
+  as input file to `pylint`.  Whenever it sees the `source` argument, Flycheck
+  creates a temporary file, fills it with the current contents of the buffer and
+  passes that file to the syntax checker.  This allows to check the real
+  contents of a buffer even if the buffer is not saved to disk.
+
+- The `:error-patterns` tell Flycheck how to parse the output of the command in
+  order to obtain error locations.  Each pattern has a *level*, followed by `rx`
+  forms which specify a regular expression to find an error in the output of the
+  command.
+
+  Flycheck understands three error levels by default:  `error` is for critical
+  errors that absolutely require the user's attention (e.g. syntax errors),
+  `warning` is for issues that can be ignored, but should not (e.g. unused
+  variables), and `info` is for other messages that provide information about
+  the buffer, but do not immediately require action from the user.
+
+  .. seealso:: :function:`flycheck-define-error-level`; to define custom error
+               levels
+
+  Flycheck provides special `rx` forms to extract the relevant information from
+  each error:
+
+  - The `(file-name)` and `(message)` forms match a sequence of any character
+    save new line as file name and message of the error.  Both optionally accept
+    further `rx` forms, to specify an alternative regular expression to match
+    the file name or the message, for instance to parse multi-line error
+    messages.
+  - The `line` and `column` forms match a sequence of one or more digits as line
+    and column respectively of the error.
+
+  .. seealso:: :function:`flycheck-rx-to-string`; for a list of all special `rx`
+               forms provided by Flycheck and their reference
+
+- The `:modes` property denotes the major modes, in which Flycheck may use this
+  syntax checker.  JSHint checks Javascript, so the `:modes` of our example
+  specifies Emacs' builtin Javascript Mode, and the popular 3rd-party JS2 Mode.
+
+.. seealso:: :function:`flycheck-substitute-argument`; for a complete list of
+             all special arguments
+
+.. _Pylint: http://www.pylint.org/
+
+Finding the right error patterns
+--------------------------------
+
+Finding the right error patterns is the hardest part of a syntax checker
+definition.  For a first version, you just run the tool on a file, look at its
+output and write a regular expression to match it.  `M-x shell` comes handy
+here.
+
+However, as you start to debug and refine your patterns, this quickly becomes
+cumbersome.  Flycheck provides an easier way to test a syntax checker: Evaluate
+the syntax checker definition with :kbd:`C-M-x` and run
+:command:`flycheck-compile`.
+
+.. command:: flycheck-compile
+   :binding: C-c ! C-c
+
+   Run a syntax checker on the current buffer in a fresh Compilation Mode
+   buffer.  Prompt for a syntax checker to run.
+
+This command runs the command like a normal syntax check would do, but instead
+of highlighting errors within the buffer it shows a new buffer in Compilation
+Mode, which contains the entire output of the command and highlights everything
+that matches a pattern.
+
+Sometimes however an output format doesn't lend itself to error patterns.  In
+this case, you need to write a more sophisticated parser yourself.  See
+:ref:`parsing-structured-output-format` for more information.
+
+Trying a new syntax checker
+---------------------------
+
+After evaluating a syntax checker definition you can try whether it works for
+normal syntax checks by selecting it manually with :kbd:`C-c ! s`
+(:command:`flycheck-select-checker`).  If anything breaks, you can unselect the
+syntax checker again with :kbd:`C-u C-c ! s` and fix the error without further
+affecting Flycheck.
+
+Once you have confirmed that your new syntax checker works flawlessly, you can
+make it available for automatic syntax checking by registering it.
 
 .. _registering-new-syntax-checkers:
 
 Registering new syntax checkers
-===============================
+-------------------------------
 
-After a syntax checker was defined, it should be registered for automatic
-selection, by adding it to :option:`flycheck-checkers`, e.g.
+To register a new syntax checker for automatic syntax checking, just add it to
+:option:`flycheck-checkers`:
 
 .. code-block:: cl
 
-   (add-to-list 'flycheck-checkers 'my-new-syntax-checker)
+   (add-to-list 'flycheck-checkers 'flycheck-jshint)
+
+Flycheck will try all syntax checkers in this variable when checking a buffer
+automatically, and check the buffer with the first syntax checker in this list
+whose `:modes` contains the current major mode.
 
 .. note::
 
-   :option:`flycheck-checker` and :command:`flycheck-select-checker` are
-   reserved for **user customization**.  Do **not** use them in Flycheck
-   extensions.
+   Do **not** use :option:`flycheck-checker` and
+   :command:`flycheck-select-checker` to enable your own syntax checker in
+   Flycheck extensions.  They are reserved for **user customization**.
 
    Specifically, please do **not** provide a hook function which selects the
    syntax checker explicitly by assigning to :option:`flycheck-checker` or by
-   calling :function:`flycheck-select-checker`, e.g.
+   calling :function:`flycheck-select-checker`.  In other words, this is
+   **bad**:
 
    .. code-block:: cl
 
@@ -60,151 +189,140 @@ selection, by adding it to :option:`flycheck-checkers`, e.g.
    This circumvents the entire automatic selection of Flycheck, and prevents the
    user from effectively customizing Flycheck.
 
-.. _error-levels:
+   Instead, just register your syntax checker in :option:`flycheck-checkers` and
+   let Flycheck automatically pick the best syntax checker.  In other words,
+   this is **good**:
 
-Error levels
-============
+   .. code-block:: cl
 
-Flycheck provides some built-in error levels:
+      (add-to-list 'flycheck-checkers 'my-new-syntax-checker)
 
-`error`
-   Severe errors which cannot be ignored
-`warning`
-   Potential errors which can be ignored
-`info`
-   Informational annotations
+Advanced syntax checker definitions
+===================================
 
-You can define new error levels with :function:`flycheck-define-error-level`.
+.. _parsing-structured-output-format:
 
-.. _error-parsers:
+Parsing structured output format
+--------------------------------
 
-Error parsers
-=============
-
-Syntax checkers may use more sophisticated error parsing by given the
-`:error-parser` argument to :function:`flycheck-define-checker`.  See
-:ref:`builtin-error-parsers` for a list of builtin parsers.
-
-You may also define your own error parsers.  An error parser is any function
-that takes the following three arguments and returns a list of
-:cl-struct:`flycheck-error` objects (see :ref:`error-api` for more information):
-
-`output`
-   The complete output of the syntax checker as string.
-`checker`
-   A symbol denoting the executed syntax checker.
-`buffer`
-   A buffer object referring to the buffer that was syntax-checked.
-
-Flycheck provides some utility functions to implement your own error parsers.
-See :ref:`error-parser-api` for details.
-
-.. _extending-syntax-checkers:
-
-Extending syntax checkers
-=========================
-
-There are some means to extend defined syntax checkers:
-
-.. function:: flycheck-add-next-checker
-   :auto:
-
-.. function:: flycheck-add-mode
-   :auto:
-
-Examples
-========
-
-.. _basic-syntax-checkers:
-
-Basic syntax checkers
----------------------
-
-As explained in the previous chapter :ref:`defining-new-syntax-checkers`, a
-syntax checker is declared with :macro:`flycheck-define-checker`.
-
-We will use this function to define a syntax checker using the PHP CodeSniffer
-utility for the PHP programming language:
+If your syntax checker tool offers some structured output format as alternative
+to human-readable free text, you can use an `:error-parser` function instead of
+writing an error pattern.  For instance, JSHint_ offers the widely spread
+Checkstyle XML output format which Flycheck supports out of the box:
 
 .. code-block:: cl
 
-   (flycheck-define-checker php-phpcs
-     "A PHP syntax checker using PHP_CodeSniffer.
+   (flycheck-define-checker javascript-jshint
+     "A JavaScript syntax and style checker using jshint.
 
-   See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
-     :command ("phpcs" "--report=checkstyle" source)
+   See URL `http://www.jshint.com'."
+     :command ("jshint" "--checkstyle-reporter" source)
      :error-parser flycheck-parse-checkstyle
-     :modes php-mode)
+     :modes (js-mode js2-mode js3-mode))
 
-   (add-to-list 'flycheck-checkers 'php-phpcs)
+As you can see, there are no patterns in this definition.  Instead Flycheck
+calls the function :function:`flycheck-parse-checkstyle` to parse the output.
+This function parses the XML to extract the errors.  It's built-in into
+Flycheck, so if your tool supports Checkstyle XML, error parsing comes **for
+free** in Flycheck.
 
-First we specify the `:command` to execute.  The first element of the command
-list is the name of the executable, `phpcs` in our case.  This command is
-checked for existence with `executable-find` before using this syntax checker.
-If the command does not exist, the syntax checker is *not* used.
+.. seealso:: :ref:`api-error-parsers`; for more information about error parsers
 
-The executable is following by the arguments, in this case some options and the
-symbol `source`.  This symbol is replaced with the file to check.  This file is
-a temporary file created in the system temporary directory and containing the
-contents of the buffer to check.
+.. _JSHint: http://www.jshint.com/
 
-Next we specify how to parse the output of the syntax checker.  PHP CodeSniffer
-provides an option to output errors in an XML format similar to the Java tool
-Checkstyle, so we use the built-in :dfn:`error parser`
-:function:`flycheck-parse-checkstyle` to parse the output.
+Passing options and configuration files to syntax checkers
+----------------------------------------------------------
 
-Then we enable the syntax checker in PHP editing modes.
+Many linting tools provide a rich set of options to configure their analysis.
+Flycheck makes it to define proper Emacs options and map them to options of
+commands.
 
-Ultimately, we make the new syntax checker available for automatic selection by
-adding it to :option:`flycheck-checkers`.
+For instance, the Rubocop_ tool checks Ruby for semantic and stylistic issues.
+Since style is mainly a matter of taste, it has a special linting mode in which
+all stylistic checks are disabled (error patterns omitted for readability):
 
-If the syntax checker does not provide any sort of structured output format, we
-have to parse the error messages from the textual output.  To do so, we can use
-:dfn:`error patterns`, like in the Pylint syntax checker for the Python
-programming language:
+.. code-block:: cl
+
+   (flycheck-define-checker ruby-rubocop
+     "A Ruby syntax and style checker using the RuboCop tool.
+
+   See URL `http://batsov.com/rubocop/'."
+     :command ("rubocop" "--format" "emacs"
+               (option-flag "--lint" flycheck-rubocop-lint-only)
+               source)
+     :error-patterns ...
+     :modes (ruby-mode))
+
+Note the special `option-flag` argument, which splices the value of the boolean
+Emacs option `flycheck-rubocop-lint-only` into the command: If the variable is
+non-nil, Flycheck adds the `--lint` option to the final command line, other
+Flycheck omits the entire argument.
+
+Flycheck also supports other special `option-` arguments for plain values or
+lists of values.
+
+.. seealso:: flycheck-substitute-argument; for a list of all special `option-`
+             arguments
+
+Flycheck also provides a convenience macro :macro:`flycheck-def-option-var` to
+declare these options:
+
+.. code-block:: cl
+
+   (flycheck-def-option-var flycheck-rubocop-lint-only nil ruby-rubocop
+     "Whether to only report code issues in Rubocop.
+
+   When non-nil, only report code issues in Rubocop, via `--lint'.
+   Otherwise report style issues as well."
+     :safe #'booleanp
+     :type 'boolean)
+
+Essentially, this macro is just a wrapper around the built-in `defcustom`, which
+additionally keeps track of the syntax checker the option belongs to, and adds
+the option to the appropriate custom group.  You can pass arbitrary custom
+keywords to this macro as we did in this example: `:type` marks this option as
+boolean flag, and `:safe` allows the use as file-local variable, if the value is
+boolean.
+
+By a similar mechanism you can also pass paths to configuration files to a
+syntax checker tool.  The aforementioned `Pylint`_ reads a configuration file
+for instance:
 
 .. code-block:: cl
 
    (flycheck-define-checker python-pylint
      "A Python syntax and style checker using Pylint.
 
-   See URL `http://pypi.python.org/pypi/pylint'."
-     :command ("epylint" source-inplace)
-     :error-patterns
-     ((warning line-start (file-name) ":" line
-               ": Warning (W" (zero-or-more not-newline) "): "
-               (message) line-end)
-      (error line-start (file-name) ":" line
-             ": Error (E" (zero-or-more not-newline) "): "
-             (message) line-end)
-      (error line-start (file-name) ":" line ": [F] " (message) line-end))
+   This syntax checker requires Pylint 1.0 or newer.
+
+   See URL `http://www.pylint.org/'."
+     ;; -r n disables the scoring report
+     :command ("pylint" "-r" "n"
+               "--msg-template" "{path}:{line}:{column}:{C}:{msg} ({msg_id})"
+               (config-file "--rcfile" flycheck-pylintrc)
+               source)
+     :error-patterns ...
      :modes python-mode)
 
-Again, there is a `:command`, however we use the `source-inplace` symbol this
-time.  This symbol causes the temporary file to be created in the same directory
-as the original file, making information from the source code tree available to
-the syntax checker.  In case of Pylint, these are the Python packages from the
-source code tree.
+The special `config-file` argument passes a configuration file from
+`flycheck-pylintrc` to `pylint`, if the value of the variable is non-nil.
 
-Next we give the list of `:error-patterns` to parse errors.  These patterns
-extract the error location and the error message from the output of `epylint`.
-An error pattern is a list containing a regular expression with match groups to
-extract the error information, and an error level.
+Flycheck provides a sophisticated logic to find an appropriate configuration
+file.  See :ref:`syntax-checker-configuration-files` and
+:ref:`api-configuration-files` for details.
 
-Eventually we enable the syntax checker in `python-mode`.
+.. _rubocop: https://github.com/bbatsov/rubocop
 
-Syntax checkers with predicates
--------------------------------
+Controlling the use of a syntax checker
+---------------------------------------
 
-In the previous examples the syntax checkers were specific to certain major
-modes.  However, this is not always the case.  For instance, GNU Emacs provides
-a single mode only for shell scripting in various Shell languages.  A syntax
-checker for a specific shell must check whether the edited shell script is
-written for the right shell:
+If you need more control about when a syntax checker is used for syntax
+checking, you can supply a custom `:predicate` function.  Consider the following
+syntax checker for Zsh scripts in Sh Mode:
 
 .. code-block:: cl
 
-   (flycheck-define-checker zsh
+   (flycheck-define-checker sh-zsh
      "A Zsh syntax checker using the Zsh shell.
 
    See URL `http://www.zsh.org/'."
@@ -214,126 +332,142 @@ written for the right shell:
      :modes sh-mode
      :predicate (lambda () (eq sh-shell 'zsh)))
 
-This syntax checker for the Zsh shell is enabled in `sh-mode` as specified by
-`:modes`, however it specifies an additional `:predicate` to determine whether
-the right shell is in use.  Hence this syntax checker is only used if a Zsh
-shell scripting is being edited in `sh-mode`, but not if a Bash or POSIX Shell
-script is being edited.
+Sh Mode also supports Bash and other shells besides Zsh, so we additionally
+provide a `:predicate` that checks whether the current buffer has the right
+shell.
 
-A syntax checker may even go as far as not having `:modes` at all.  For
-instance, there is no special JSON mode, but syntax checking JSON is still
-desirable.  Hence a JSON syntax checker may use the `:predicate` to check the
-file extension:
+You can even omit `:modes` and only use a predicate to determine whether a
+syntax checker is applicable for the current buffer.
 
-.. code-block:: cl
+Applying more than one syntax checker
+-------------------------------------
 
-   (flycheck-define-checker json-jsonlint
-     "A JSON syntax and style checker using jsonlint.
+Frequently, we would like to use multiple syntax checkers in a buffer.  For
+instance, we might want to check the syntax of a script with `sh-zsh` from the
+previous section, and then use Shellcheck_ to check for questionable code such
+as unquoted variable expansions, if there are no syntax errors.  Flycheck
+supports this scenario by *chaining* syntax checkers.
 
-   See URL `https://github.com/zaach/jsonlint'."
-     :command ("jsonlint" "-c" "-q" source)
-     :error-patterns
-     ((error line-start
-             (file-name)
-             ": line " line
-             ", col " column ", "
-             (message) line-end))
-     :predicate
-     (lambda ()
-       (or
-        (eq major-mode 'json-mode)
-        (and buffer-file-name
-             (string= "json" (file-name-extension buffer-file-name))))))
-
-This syntax checker is now used whenever a file ends with `.json`, regardless of
-the major mode.
-
-Configuration files for syntax checkers
----------------------------------------
-
-Some syntax checkers can be configured using configuration files given
-by an option.  Flycheck provides built-in support to handle such
-configuration files:
+Suppose we defined a syntax checker for Shellcheck called `sh-shellcheck` as
+follows:
 
 .. code-block:: cl
 
-   (flycheck-def-config-file-var flycheck-jshintrc javascript-jshint ".jshintrc")
+   (flycheck-define-checker sh-shellcheck
+     "A shell script syntax and style checker using Shellcheck.
 
-   (flycheck-define-checker javascript-jshint
-     "A JavaScript syntax and style checker using jshint.
+   See URL `https://github.com/koalaman/shellcheck/'."
+     :command ("shellcheck" "-f" "checkstyle"
+               "-s" (eval (symbol-name sh-shell))
+               source)
+     :modes sh-mode
+     :error-parser flycheck-parse-checkstyle)
 
-   See URL `http://www.jshint.com'."
-     :command ("jshint" "--checkstyle-reporter"
-               (config-file "--config" flycheck-jshintrc) source)
-     :error-parser flycheck-parse-checkstyle
-     :modes (js-mode js2-mode js3-mode))
+.. note::
 
-As you can see, we define a syntax checker for Javascript, using the `jshint`
-utility.  This utility accepts a configuration file via the `--config` option.
+   Note how we use the special `eval` argument to put the result of an arbitrary
+   Emacs Lisp expression into the command line of `shellcheck`, in order to tell
+   Shellcheck what shell the script is written for.
 
-To use a configuration file with jshint, we first declare the variable
-`flycheck-jshintrc` that provides the name of the file, as explained in
-:ref:`syntax-checker-configuration-files`.
-
-In the `:command` we use a `config-file` form to pass the configuration file to
-the syntax checker.  If the configuration file is found, its path will be passed
-to the syntax checker, using the option specified after the `config-file`
-symbol.  Otherwise the whole element is simply omitted from the command line.
-
-Some Syntax checkers can also be configured using options passed on the command
-line.  Flycheck supports this case, too.  We will use this facility to extend
-the PHP CodeSniffer syntax checker from the :ref:`basic-syntax-checkers` section
-with support for coding standards:
+We can now arrange for this syntax checker to be used after `sh-zsh` with
+:function:`flycheck-add-next-checker`:
 
 .. code-block:: cl
 
-   (flycheck-def-option-var flycheck-phpcs-standard nil phpcs
-     "The coding standard for PHP CodeSniffer."
-     :type '(choice (const :tag "Default standard" nil)
-                    (string :tag "Standard name" nil)))
-   (put 'flycheck-phpcs-standard 'safe-local-variable #'stringp)
+   (flycheck-add-next-checker 'sh-zsh '(warning . sh-shellcheck))
 
-   (flycheck-declare-checker php-phpcs
-     "A PHP syntax checker using PHP_CodeSniffer."
-     :command '("phpcs" "--report=checkstyle"
-                (option "--standard=" flycheck-phpcs-standard concat)
-                source)
-     :error-parser 'flycheck-parse-checkstyle
-     :modes 'php-mode)
+The first item of the cons cell in the second argument is the *maximum error
+level* in the buffer, for which `sh-shellcheck` is still applicable.  With
+`warning` Flycheck will run `sh-shellcheck` after `sh-zsh` if there are
+`warning` or `info` level errors from `sh-zsh`, but not if there are any errors
+with level `error`, such as syntax errors.
 
-The syntax checker is pretty much the same as before, except that a new element
-was added to `:command`.  This element passes the value of the new option
-variable :option:`flycheck-phpcs-standard` to the syntax checker.  This variable
-is declared with the special macro :macro:`flycheck-def-option-var` at the
-beginning.
-
-Chaining syntax checkers
-------------------------
-
-For many languages, more than a single syntax checker is applicable.  For
-instance, Emacs Lisp can be checked for syntactic corrections with the byte code
-compiler, and for adherence to the Emacs Lisp documentation style using
-Checkdoc.  PHP, too, can be syntax checked with the PHP parser, and verified
-against coding styles using PHP CodeSniffer.
-
-To support such cases, syntax checkers can be :term:`chained <chaining>` using
-the `:next-checkers`.  The standard PHP syntax checker uses this to run PHP
-CodeSniffer if there are no syntax errors:
+Flycheck will only use a chained syntax checker if it is registered in
+:option:`flycheck-checkers`, so we need to :ref:`register our new syntax checker
+<registering-new-syntax-checkers>`:
 
 .. code-block:: cl
 
-   (flycheck-define-checker php
-     "A PHP syntax checker using the PHP command line interpreter.
+   (add-to-list 'flycheck-checkers 'sh-shellcheck 'append)
 
-   See URL `http://php.net/manual/en/features.commandline.php'."
-     :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
-               "-d" "log_errors=0" source)
-     :error-patterns
-     ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
-             (message) " in " (file-name) " on line " line line-end))
-     :modes (php-mode php+-mode)
-     :next-checkers ((warning . php-phpcs)))
+Note that unlike before we **append** the new syntax checker at the end of
+`flycheck-checkers`.  This ensures that Flycheck does not try `sh-shellcheck`
+*before* `sh-zsh`.
 
-Now PHP CodeSniffer will check the coding style, but only if PHP CodeSniffer is
-a :term:`registered syntax checker`, and if `php` only emitted errors with
-`warning` level or less, that is, no errors.
+.. warning::
+
+   Make sure to append chained syntax checkers to :option:`flycheck-checkers`.
+
+   Flycheck tries all syntax checkers in this list in **order of appearance**,
+   so if you add your new chained syntax checker at the beginning, it will
+   likely be used right away, before any prior syntax checkers.
+
+You also can specify chained syntax checkers directly in
+:macro:`flycheck-define-checker` with the `:next-checkers` property.  Instead of
+calling :function:`flycheck-add-next-checker`, we could also have added this
+property to the definition of `sh-zsh`:
+
+.. code-block:: cl
+
+   (flycheck-define-checker sh-zsh
+     "A Zsh syntax checker using the Zsh shell.
+
+   See URL `http://www.zsh.org/'."
+     :command ("zsh" "-n" "-d" "-f" source)
+     :error-patterns ...
+     :modes sh-mode
+     :predicate (lambda () (eq sh-shell 'zsh))
+     :next-checkers ((warning . sh-shellcheck)))
+
+.. note::
+
+   If you control the definition of both syntax checkers, this style is
+   **preferable** to :function:`flycheck-add-next-checker`.  Use this function
+   only if you cannot change the definition of the prior syntax checker.
+
+.. _Shellcheck: https://github.com/koalaman/shellcheck/
+
+Other ways to extend Flycheck
+=============================
+
+Use arbitrary functions to check buffers
+----------------------------------------
+
+Beyond commands, Flycheck also supports arbitrary functions as syntax checkers
+with :function:`flycheck-define-generic-checker`.
+
+Hooking into Flycheck
+---------------------
+
+Flycheck has a rich hook interface which you can use for your own extensions.
+
+Status changes
+~~~~~~~~~~~~~~
+
+:hook:`flycheck-before-syntax-check-hook` and `flycheck-after-syntax-check-hook`
+run before and after syntax checks, and let you update your Emacs instance
+according to Flycheck's state.  For instance, flycheck-color-mode-line_ uses
+these hooks to colour your mode-line according to the result of the last syntax
+check.  Additionally, :hook:`flycheck-status-changed-functions` runs on every
+single status change of Flycheck, and provides a fine-grained reporting about
+what Flycheck is currently doing.
+
+Error processing
+~~~~~~~~~~~~~~~~
+
+The functions in :hook:`flycheck-process-error-functions` are used to process
+new errors reported by a Flycheck syntax checker.  Add to this hook to get
+informed about each error reported in a Flycheck buffer.  In fact, Flycheck uses
+this hook itself: The standard value :function:`flycheck-add-overlay` is
+responsible for adding error highlighting to the buffer.  As a consequence, you
+can **entirely opt out** from highlighting with a custom hook.
+
+Error display
+~~~~~~~~~~~~~
+
+The function :hook:`flycheck-display-errors-function` is called to display an
+error at point.  The `flycheck-pos-tip`_ extension uses this hook to show errors
+in a GUI popup like conventional IDEs do.
+
+.. _flycheck-color-mode-line: https://github.com/flycheck/flycheck-color-mode-line
+.. _flycheck-pos-tip: https://github.com/flycheck/flycheck-pos-tip

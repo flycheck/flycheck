@@ -69,7 +69,7 @@ clean-doc:
 	rm -rf $(DOCBUILDDIR)
 
 clean-deps :
-	rm -rf $(PKGDIR)
+	rm -rf .cask/
 
 $(PKGDIR) : Cask
 	$(CASK) install

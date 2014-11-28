@@ -1,36 +1,235 @@
+.. _flycheck-api:
+
 ==============
  Flycheck API
 ==============
 
 .. require:: flycheck
 
-This chapter provides a brief overview over the Flycheck API.
+This chapter defines and documents the public API of Flycheck.  You can use this
+API to define your own syntax checkers, or extend existing syntax checkers, or
+by extending Flycheck in entirely new ways, e.g. to add some sophisticated error
+analysis.
 
-You may use this API to extend Flycheck, e.g. by implementing new error parsers
-or more in-depth error analysis.  You will also find this API helpful if you
-want to develop Flycheck itself.
+You will also find this document helpful if you want to develop Flycheck itself.
 
-.. _status-api:
+.. contents:: Contents
+   :local:
 
-Status API
-==========
+.. _api-generic-syntax-checkers:
 
-.. function:: flycheck-report-status
+Generic syntax checkers
+=======================
+
+Generic syntax checkers are the most basic syntax checkers in Flycheck.  These
+syntax checkers use an Emacs Lisp function to check the current buffer.
+
+.. function:: flycheck-define-generic-checker
    :auto:
 
-.. function:: flycheck-report-error
+   .. seealso:: :ref:`api-status-callback-protocol`
+
+To make new syntax checkers available for automatic selection you need to
+register them by adding them to :option:`flycheck-checkers`.
+
+.. function:: flycheck-registered-checker-p
    :auto:
 
-.. variable:: flycheck-last-status-change
+You can extend generic syntax checkers to add new modes or chain further
+syntax checkers:
+
+.. function:: flycheck-add-mode
    :auto:
 
-.. function:: flycheck-mode-line-status-text
+.. function:: flycheck-add-next-checker
    :auto:
 
-.. _error-api:
+.. _api-status-callback-protocol:
 
-Error API
-=========
+Status callback protocol
+------------------------
+
+The ``callback`` argument to the `:start` function of a syntax checker defined
+with :function:`flycheck-define-generic-checker` is a function taking two
+arguments:
+
+.. function:: status-callback status &optional data
+
+   `status` is one of the following symbols, denoting the status being reported:
+
+   `errored` (*finishing*)
+      The syntax checker has errored.  `data` is an optional error message as
+      string.
+
+   `interrupted` (*finishing*)
+      The syntax checker was interrupted.  `data` is ignored in this case.
+
+   `finished` (*finishing*)
+      The syntax checker has finished to check the buffer and reported some
+      errors.  DATA is the list of :cl-struct:`flycheck-error` objects reported
+      by the syntax check.
+
+   `suspicious`
+      The syntax checker encountered some suspicious state (like a potential
+      fault in the syntax checker definition), which the user needs to be
+      informed about.
+
+   A *finishing* `status` symbol finishes the current syntax check, and allows
+   Flycheck to conduct further syntax checks.  A syntax checker **must** call
+   the callback at least once with a *finishing* `status` symbol.
+
+   .. warning::
+
+      Failure to call the callback will cause Flycheck to get stuck at the
+      current syntax check.
+
+Predicates for syntax checkers
+------------------------------
+
+Flycheck provides some ready-to-use predicates for generic checkers:
+
+.. function:: flycheck-buffer-saved-p
+   :auto:
+
+Error filters
+-------------
+
+Additionally, Flycheck has some built-in error filters for generic checkers:
+
+.. function:: flycheck-sanitize-errors
+   :auto:
+
+.. function:: flycheck-collapse-error-message-whitespace
+   :auto:
+
+.. function:: flycheck-fold-include-errors
+
+.. _api-command-syntax-checkers:
+
+Command syntax checkers
+=======================
+
+Command syntax checkers are a specialised variant of generic syntax checkers
+which use an external command to check the contents of the current buffer.  To
+define a new command syntax checker, use
+:function:`flycheck-define-command-checker`:
+
+.. function:: flycheck-define-command-checker
+   :auto:
+
+Each command checker uses an accompanying variable to override the executable,
+which you can define with :macro:`flycheck-def-executable-var`:
+
+.. macro:: flycheck-def-executable-var
+   :auto:
+
+Since command syntax checkers are by far the most common kind of syntax
+checkers, Flycheck provides a convenience macro :macro:`flycheck-define-checker`
+which wraps up :function:`flycheck-define-command-checker` and
+:macro:`flycheck-def-executable-var` into a single macro, and reduces syntactic
+clutter by allowing unquoted arguments:
+
+.. macro:: flycheck-define-checker
+   :auto:
+
+Command arguments
+-----------------
+
+The arguments passed to the external command of a command syntax checker are
+subject to substitution with :function:`flycheck-substitute-argument`, which
+replaces special symbols and forms with strings for consumption by the external
+command:
+
+.. function:: flycheck-substitute-argument
+   :auto:
+
+Options for command syntax checkers
+-----------------------------------
+
+Command syntax checkers can define options, whose values are substituted into
+the external command.
+
+.. macro:: flycheck-def-option-var
+   :auto:
+
+Flycheck provides some built-in filters for such options:
+
+.. function:: flycheck-option-int
+   :auto:
+
+.. function:: flycheck-option-comma-separated-list
+   :auto:
+
+.. _api-configuration-files:
+
+Configuration files for command syntax checkers
+-----------------------------------------------
+
+Additionally, command syntax checkers can pass configuration files to external
+commands.
+
+.. macro:: flycheck-def-config-file-var
+   :auto:
+
+Flycheck tries to find an appropriate file based on the value of configuration
+file variables, and substitutes the path to that file into the external command.
+
+.. function:: flycheck-locate-config-file
+   :auto:
+
+Error parsing with regular expressions
+--------------------------------------
+
+Normally, command syntax checkers use regular expressions to extract errors from
+the output.  For simplicity and readability, Flycheck uses RX expressions
+instead of standard regular expressions, and provides some custom RX forms for
+frequent patterns, implemented by :function:`flycheck-rx-to-string`:
+
+.. function:: flycheck-rx-to-string
+   :auto:
+
+Internally, error parsing with regular expressions is implemented with a special
+error parser:
+
+.. function:: flycheck-parse-with-patterns
+   :auto:
+
+.. _api-error-parsers:
+
+Error parsers
+-------------
+
+Alternatively, command syntax checkers can use custom functions to parse errors
+from the command output.  Flycheck provides some built-in error parsers for
+standard output formats:
+
+.. function:: flycheck-parse-checkstyle
+   :auto:
+
+You can also write your own error parsers.  An error parser is a function with
+the following signature:
+
+.. function:: flycheck-error-parser output checker buffer
+
+   `output` is the output of the command as string.  `checker` is the syntax
+   checker from which the output comes, and `buffer` is the buffer that was
+   checked.
+
+The following functions can aid you in writing custom parsers:
+
+.. function:: flycheck-parse-xml-string
+   :auto:
+
+.. _api-errors:
+
+Errors
+======
+
+The list of errors in a buffer is stored in the local variable
+:variable:`flycheck-current-errors`:
+
+.. variable:: flycheck-current-errors
+   :auto:
 
 Flycheck errors are represented by the CL structure :cl-struct:`flycheck-error`.
 See :infonode:`(cl)Structures` for more information about CL structures.
@@ -137,14 +336,15 @@ See :infonode:`(cl)Structures` for more information about CL structures.
    .. function:: flycheck-error-level-<
       :auto:
 
-Error Analysis
-==============
+Error processing
+----------------
 
-The following functions and variables may be used to analyze the errors of a
-syntax check.
+.. function:: flycheck-add-overlay
 
-.. variable:: flycheck-current-errors
-   :auto:
+Error analysis
+--------------
+
+Flycheck provides some functions for rudimentary error analysis:
 
 .. function:: flycheck-count-errors
    :auto:
@@ -153,81 +353,46 @@ syntax check.
    :auto:
 
 .. function:: flycheck-has-max-errors-p
-   :auto:
+   :auto
 
-.. _builtin-error-parsers:
+Error levels
+------------
 
-Builtin error parsers
-=====================
+Flycheck provides three built-in error levels:
 
-.. function:: flycheck-parse-with-patterns
-   :auto:
+`error`
+   Severe errors which cannot be ignored
+`warning`
+   Potential errors which can be ignored
+`info`
+   Informational annotations
 
-.. function:: flycheck-parse-checkstyle
-   :auto:
-
-.. _error-parser-api:
-
-Error parser API
-================
-
-These functions can be used to implement custom error parsers:
-
-.. function:: flycheck-parse-xml-string
-   :auto:
-
-.. _builtin-error-filters:
-
-Error filters
-=============
-
-.. function:: flycheck-sanitize-errors
-   :auto:
-
-.. function:: flycheck-collapse-error-message-whitespace
-   :auto:
-
-.. function:: flycheck-fold-include-errors
-
-.. _syntax-checker-api:
-
-Syntax checker API
-==================
-
-.. function:: flycheck-registered-checker-p
-   :auto:
-
-.. function:: flycheck-substitute-argument
-   :auto:
-
-.. function:: flycheck-locate-config-file
-   :auto:
+You can define new error levels with :function:`flycheck-define-error-level`:
 
 .. function:: flycheck-define-error-level
    :auto:
 
-.. _builtin-option-filters:
+.. function:: flycheck-error-level-p
+   :auto:
 
-Builtin option filters
+.. _api-flycheck-buffer-status:
+
+Flycheck buffer status
 ======================
 
-.. function:: flycheck-option-int
+.. function:: flycheck-report-status
    :auto:
 
-.. function:: flycheck-option-comma-separated-list
+.. variable:: flycheck-last-status-change
    :auto:
 
-Builtin syntax checker predicates
-=================================
-
-.. function:: flycheck-buffer-saved-p
+.. function:: flycheck-mode-line-status-text
    :auto:
+
+.. _api-utilities:
 
 Utilities
 =========
-
-.. function:: flycheck-rx-to-string
-   :auto:
 
 .. function:: flycheck-string-list-p
    :auto:

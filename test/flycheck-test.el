@@ -42,7 +42,6 @@
 
 (require 'dash)
 (require 'cl-lib)
-(require 'macroexp)                     ; For macro utilities
 (require 'epa-file)                     ; To test encrypted buffers
 (require 'ert)                          ; Unit test library
 (require 'shut-up)                      ; Silence Emacs and intercept `message'
@@ -133,6 +132,7 @@ and extension, as in `file-name-base'."
                                   (file-name-base filename)))))
     `(ert-deftest ,testname ()
        :tags '(style)
+       (skip-unless (version<= "24.4" emacs-version))
        (flycheck-ert-with-file-buffer
            (expand-file-name ,filename
                              flycheck-test-source-directory)
@@ -508,7 +508,7 @@ and extension, as in `file-name-base'."
       (insert "Hello world")
       (sleep-for 0.55)
       (should-not (flycheck-deferred-check-p))
-      (sleep-for 1)
+      (sleep-for 1.1)
       (should (flycheck-deferred-check-p)))))
 
 (ert-deftest flycheck-check-syntax-automatically/new-line-is-disabled ()
@@ -579,20 +579,20 @@ and extension, as in `file-name-base'."
       (flycheck-report-status 'running)
       (should (eq was-called 'running)))))
 
-(ert-deftest flycheck-report-error/runs-hook ()
+(ert-deftest flycheck-report-failed-syntax-check/runs-hook ()
   :tags '(status-reporting)
   (flycheck-ert-with-temp-buffer
     (let* ((was-called nil)
            (flycheck-syntax-check-failed-hook
             (list (lambda () (setq was-called t)))))
-      (flycheck-report-error)
+      (flycheck-report-failed-syntax-check)
       (should was-called))))
 
-(ert-deftest flycheck-report-error/clears-errors ()
+(ert-deftest flycheck-report-failed-syntax-check/clears-errors ()
   :tags '(status-reporting)
   (flycheck-ert-with-temp-buffer
     (let ((flycheck-current-errors (list 'foo)))
-      (flycheck-report-error)
+      (flycheck-report-failed-syntax-check)
       (should-not flycheck-current-errors))))
 
 
@@ -1154,32 +1154,32 @@ and extension, as in `file-name-base'."
 
 (ert-deftest flycheck-valid-checker-p/no-checker-version ()
   :tags '(checker-api)
-  (should-not (get 'foo 'flycheck-checker-version))
+  (should-not (get 'foo 'flycheck-generic-checker-version))
   (should-not (flycheck-valid-checker-p 'foo)))
 
 (ert-deftest flycheck-valid-checker-p/checker-version-too-low ()
   :tags '(checker-api)
-  (cl-letf* ((version (- flycheck-checker-version 1))
-             ((get 'foo 'flycheck-checker-version) version))
-    (should (= (get 'foo 'flycheck-checker-version) version))
+  (cl-letf* ((version (- flycheck-generic-checker-version 1))
+             ((get 'foo 'flycheck-generic-checker-version) version))
+    (should (= (get 'foo 'flycheck-generic-checker-version) version))
     (should-not (flycheck-valid-checker-p 'foo)))
-  (should-not (get 'foo 'flycheck-checker-version)))
+  (should-not (get 'foo 'flycheck-generic-checker-version)))
 
 (ert-deftest flycheck-valid-checker-p/checker-version-too-high ()
   :tags '(checker-api)
-  (cl-letf* ((version (+ flycheck-checker-version 1))
-             ((get 'foo 'flycheck-checker-version) version))
-    (should (= (get 'foo 'flycheck-checker-version) version))
+  (cl-letf* ((version (+ flycheck-generic-checker-version 1))
+             ((get 'foo 'flycheck-generic-checker-version) version))
+    (should (= (get 'foo 'flycheck-generic-checker-version) version))
     (should-not (flycheck-valid-checker-p 'foo)))
-  (should-not (get 'foo 'flycheck-checker-version)))
+  (should-not (get 'foo 'flycheck-generic-checker-version)))
 
 (ert-deftest flycheck-valid-checker-p/checker-version-ok ()
   :tags '(checker-api)
-  (cl-letf* ((version flycheck-checker-version)
-             ((get 'foo 'flycheck-checker-version) version))
-    (should (= (get 'foo 'flycheck-checker-version) version))
+  (cl-letf* ((version flycheck-generic-checker-version)
+             ((get 'foo 'flycheck-generic-checker-version) version))
+    (should (= (get 'foo 'flycheck-generic-checker-version) version))
     (should (flycheck-valid-checker-p 'foo)))
-  (should-not (get 'foo 'flycheck-checker-version)))
+  (should-not (get 'foo 'flycheck-generic-checker-version)))
 
 (ert-deftest flycheck-disabled-checker-p/enabled-checker ()
   :tags '(checker-api)
@@ -1386,25 +1386,10 @@ and extension, as in `file-name-base'."
   (should-error (flycheck-substitute-argument '(foo "bar") 'emacs-lisp))
   (should-error (flycheck-substitute-argument  200 'emacs-lisp)))
 
-(ert-deftest flycheck-check-executable ()
-  :tags '(checker-api)
-  (dolist (checker flycheck-checkers)
-    (if (executable-find (flycheck-checker-executable checker))
-        (should (flycheck-check-executable checker))
-      (should-not (flycheck-check-executable checker)))))
-
 (ert-deftest flycheck-may-use-checker/invalid-checker ()
   :tags '(checker-api)
   (should-not (flycheck-valid-checker-p 'foo))
-  (shut-up                              ; Inhibit warning display on terminal
-    (should-not (flycheck-may-use-checker 'foo)))
-  (with-current-buffer "*Warnings*"
-    (save-excursion
-      (goto-char (point-min))
-      (search-forward "Warning (flycheck): ")
-      (should (string= (buffer-substring-no-properties (point) (point-max))
-                       "foo is no valid Flycheck syntax checker.
-Try to reinstall the package defining this syntax checker.\n")))))
+  (should-not (flycheck-may-use-checker 'foo)))
 
 (ert-deftest flycheck-may-use-checker/disabled-checker ()
   :tags '(checker-api)
@@ -1593,8 +1578,8 @@ Try to reinstall the package defining this syntax checker.\n")))))
 
 (ert-deftest flycheck-select-checker/selecting-runs-a-syntax-check ()
   :tags '(selection external-tool language-python)
-  (skip-unless (-all? #'flycheck-check-executable '(python-flake8
-                                                    python-pylint)))
+  (skip-unless (executable-find (flycheck-checker-executable 'python-pylint)))
+  (skip-unless (executable-find (flycheck-checker-executable 'python-flake8)))
   (flycheck-ert-with-resource-buffer "checkers/python/test.py"
     (python-mode)
     (flycheck-mode)
@@ -1641,8 +1626,8 @@ Try to reinstall the package defining this syntax checker.\n")))))
 
 (ert-deftest flycheck-select-checker/unselecting-a-checker-goes-back-to-automatic-selection ()
   :tags '(selection external-tool language-python)
-  (skip-unless (-all? #'flycheck-check-executable '(python-pylint
-                                                    python-flake8)))
+  (skip-unless (executable-find (flycheck-checker-executable 'python-pylint)))
+  (skip-unless (executable-find (flycheck-checker-executable 'python-flake8)))
   (flycheck-ert-with-resource-buffer "checkers/python/test.py"
     (python-mode)
     (flycheck-mode)
@@ -1690,8 +1675,8 @@ Try to reinstall the package defining this syntax checker.\n")))))
 
 (ert-deftest flycheck/selects-checker-automatically/first-enabled-checker ()
   :tags '(selection external-tool language-python)
-  (skip-unless (-all? #'flycheck-check-executable '(python-pylint
-                                                    python-flake8)))
+  (skip-unless (executable-find (flycheck-checker-executable 'python-pylint)))
+  (skip-unless (executable-find (flycheck-checker-executable 'python-flake8)))
   (flycheck-ert-with-resource-buffer "checkers/python/test.py"
     (python-mode)
     (flycheck-mode)
@@ -1779,7 +1764,7 @@ Try to reinstall the package defining this syntax checker.\n")))))
       (with-current-buffer (help-buffer)
         (goto-char (point-min))
         (re-search-forward
-         "The executable can be overridden with `\\(.+?\\)'.")
+         "The\\s-+executable\\s-+can\\s-+be\\s-+overridden\\s-+with\\s-+`\\(.+?\\)'\\.")
         (let ((var (flycheck-checker-executable-variable checker)))
           (should (string= (match-string 1) (symbol-name var))))))))
 
@@ -2185,18 +2170,24 @@ Try to reinstall the package defining this syntax checker.\n")))))
   (list
    (flycheck-error-new
     :filename "test-javascript/missing-semicolon.js"
+    :checker 'checker
+    :buffer 'buffer
     :line 3
     :column 21
     :level 'error
     :message "Missing semicolon.")
    (flycheck-error-new
     :filename "test-javascript/missing-semicolon.js"
+    :checker 'checker
+    :buffer 'buffer
     :line 3
     :column nil
     :level 'warning
     :message "Implied global 'alert'")
    (flycheck-error-new
     :filename "test-javascript/missing-quote.js"
+    :checker 'checker
+    :buffer 'buffer
     :line nil
     :column nil
     :level 'error
@@ -2206,19 +2197,22 @@ Try to reinstall the package defining this syntax checker.\n")))))
 (ert-deftest flycheck-parse-checkstyle/with-builtin-xml ()
   :tags '(error-parsing)
   (let ((flycheck-xml-parser 'flycheck-parse-xml-region))
-    (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml nil nil)
+    (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml
+                                              'checker 'buffer)
                    flycheck-checkstyle-expected-errors))))
 
 (ert-deftest flycheck-parse-checkstyle/with-libxml2 ()
   :tags '(error-parsing)
   (skip-unless (fboundp 'libxml-parse-xml-region))
   (let ((flycheck-xml-parser 'libxml-parse-xml-region))
-    (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml nil nil)
+    (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml
+                                              'checker 'buffer)
                    flycheck-checkstyle-expected-errors))))
 
 (ert-deftest flycheck-parse-checkstyle/automatic-parser ()
   :tags '(error-parsing)
-  (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml nil nil)
+  (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml
+                                            'checker 'buffer)
                  flycheck-checkstyle-expected-errors)))
 
 (defconst flycheck-cppcheck-xml
@@ -2245,18 +2239,24 @@ of the file will be interrupted because there are too many #ifdef configurations
   (list
    (flycheck-error-new
     :filename "foo"
+    :buffer 'buffer
+    :checker 'checker
     :line 4
     :column nil
     :level 'error
     :message "Null pointer dereference")
    (flycheck-error-new
     :filename "bar"
+    :buffer 'buffer
+    :checker 'checker
     :line 6
     :column nil
     :level 'error
     :message "Null pointer dereference")
    (flycheck-error-new
     :filename "eggs"
+    :buffer 'buffer
+    :checker 'checker
     :line 2
     :column nil
     :level 'warning
@@ -2264,7 +2264,8 @@ of the file will be interrupted because there are too many #ifdef configurations
 
 (ert-deftest flycheck-parse-cppcheck ()
   :tags '(error-parsing)
-  (should (equal (flycheck-parse-cppcheck flycheck-cppcheck-xml nil nil)
+  (should (equal (flycheck-parse-cppcheck flycheck-cppcheck-xml
+                                          'checker 'buffer)
                  flycheck-cppcheck-expected-errors)))
 
 (ert-deftest flycheck-parse-cppcheck/empty-errors-list-with-automatic-parser ()
@@ -3559,8 +3560,6 @@ evaluating BODY."
          :checker c/c++-gcc))))
 
 (flycheck-ert-def-checker-test c/c++-gcc (c c++) error-language-standard
-  :tags '(builtin-checker external-tool language-c++)
-  (skip-unless (flycheck-check-executable 'c/c++-gcc))
   (let ((flycheck-gcc-language-standard "c++11")
         (flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-ert-should-syntax-check
@@ -3571,8 +3570,6 @@ evaluating BODY."
      '(12 2 error "#error" :checker c/c++-gcc))))
 
 (flycheck-ert-def-checker-test c/c++-gcc (c c++) error-definitions
-  :tags '(builtin-checker external-tool language-c++)
-  (skip-unless (flycheck-check-executable 'c/c++-gcc))
   (let ((flycheck-gcc-definitions '("FLYCHECK_LIBRARY"))
         (flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-ert-should-syntax-check
@@ -3586,8 +3583,6 @@ evaluating BODY."
      '(12 2 error "#error" :checker c/c++-gcc))))
 
 (flycheck-ert-def-checker-test c/c++-gcc (c c++) error-no-exceptions
-  :tags '(builtin-checker external-tool language-c++)
-  (skip-unless (flycheck-check-executable 'c/c++-gcc))
   (let ((flycheck-disabled-checkers '(c/c++-clang))
         (flycheck-gcc-no-exceptions t))
     (flycheck-ert-should-syntax-check
@@ -3596,8 +3591,6 @@ evaluating BODY."
          :checker c/c++-gcc))))
 
 (flycheck-ert-def-checker-test c/c++-gcc (c c++) error-no-rtti
-  :tags '(builtin-checker external-tool language-c++)
-  (skip-unless (flycheck-check-executable 'c/c++-gcc))
   (let ((flycheck-disabled-checkers '(c/c++-clang))
         (flycheck-gcc-no-rtti t))
     (flycheck-ert-should-syntax-check
@@ -3762,12 +3755,14 @@ The term \"1\" has type \"nat\" while it is expected to have type
 
 (ert-deftest flycheck-d-module-re/matches-module-name ()
   :tags '(language-d)
+  (ert-skip "Skipped pending https://github.com/flycheck/flycheck/issues/531")
   (let ((s "module spam.with.eggs ;"))
     (should (string-match flycheck-d-module-re s))
     (should (string= "spam.with.eggs" (match-string 1 s)))))
 
 (ert-deftest flycheck-d-base-directory/no-module-declaration ()
   :tags '(language-d)
+  (ert-skip "Skipped pending https://github.com/flycheck/flycheck/issues/531")
   (flycheck-ert-with-resource-buffer "checkers/d/src/dmd/no_module.d"
     (should (flycheck-same-files-p
              (flycheck-d-base-directory)
@@ -3775,6 +3770,7 @@ The term \"1\" has type \"nat\" while it is expected to have type
 
 (ert-deftest flycheck-d-base-directory/with-module-declaration ()
   :tags '(language-d)
+  (ert-skip "Skipped pending https://github.com/flycheck/flycheck/issues/531")
   (flycheck-ert-with-resource-buffer "checkers/d/src/dmd/warning.d"
     (should (flycheck-same-files-p
              (flycheck-d-base-directory)
@@ -3782,12 +3778,14 @@ The term \"1\" has type \"nat\" while it is expected to have type
 
 (ert-deftest flycheck-d-base-directory/package-file ()
   :tags '(language-d)
+  (ert-skip "Skipped pending https://github.com/flycheck/flycheck/issues/531")
   (flycheck-ert-with-resource-buffer "checkers/d/src/dmd/package.d"
     (should (flycheck-same-files-p
              (flycheck-d-base-directory)
              (flycheck-ert-resource-filename "checkers/d/src")))))
 
 (flycheck-ert-def-checker-test d-dmd d warning-include-path
+  (ert-skip "Skipped pending https://github.com/flycheck/flycheck/issues/531")
   (let ((flycheck-dmd-include-path '("../../lib")))
     (flycheck-ert-should-syntax-check
      "checkers/d/src/dmd/warning.d" 'd-mode
@@ -3796,6 +3794,7 @@ The term \"1\" has type \"nat\" while it is expected to have type
           :checker d-dmd))))
 
 (flycheck-ert-def-checker-test d-dmd d missing-import
+  (ert-skip "Skipped pending https://github.com/flycheck/flycheck/issues/531")
   (flycheck-ert-should-syntax-check
    "checkers/d/src/dmd/warning.d" 'd-mode
    '(4 8 error "module external_library is in file 'external_library.d' which cannot be read"
@@ -3967,7 +3966,7 @@ The term \"1\" has type \"nat\" while it is expected to have type
    '(6 1 error "expected ')', found '}'" :checker go-gofmt)))
 
 (flycheck-ert-def-checker-test (go-build go-golint go-vet) go complete-chain
-  (skip-unless (flycheck-check-predicate 'go-vet))
+  (skip-unless (funcall (flycheck-checker-predicate 'go-vet)))
   (flycheck-ert-with-env
       `(("GOPATH" . ,(flycheck-ert-resource-filename "checkers/go")))
     (flycheck-ert-should-syntax-check
@@ -4207,7 +4206,7 @@ Why not:
 (flycheck-ert-def-checker-test less less syntax-error
   (flycheck-ert-should-syntax-check
    "checkers/less-syntax-error.less" 'less-css-mode
-   '(1 13 error "missing closing `}`" :checker less)))
+   '(1 1 error "Unrecognised input" :checker less)))
 
 (flycheck-ert-def-checker-test lua lua nil
   (flycheck-ert-should-syntax-check
@@ -4222,7 +4221,7 @@ Why not:
 
 (flycheck-ert-def-checker-test make make pmake
   (let ((flycheck-make-executable "pmake"))
-    (skip-unless (flycheck-check-executable 'make))
+    (skip-unless (executable-find (flycheck-checker-executable 'make)))
     (flycheck-ert-should-syntax-check
      "checkers/make.mk" 'makefile-bsdmake-mode
      '(2 nil error "Need an operator" :checker make))))
@@ -4439,8 +4438,6 @@ Why not:
           :checker python-pylint))))
 
 (flycheck-ert-def-checker-test python-pylint python disabled-warnings
-  :tags '(builtin-checker external-tool language-python)
-  (skip-unless (flycheck-check-executable 'python-pylint))
   (let ((flycheck-pylintrc "pylintrc")
         (flycheck-disabled-checkers '(python-flake8)))
     (flycheck-ert-should-syntax-check
@@ -4562,10 +4559,9 @@ Why not:
         :checker ruby-rubocop)
    '(10 5 info "Favor modifier `if` usage when having a single-line body. Another good alternative is the usage of control flow `&&`/`||`."
         :checker ruby-rubocop)
-   '(10 5 info "Never use `then` for multi-line `if`."
-        :checker ruby-rubocop)
    '(10 8 warning "Literal `true` appeared in a condition."
         :checker ruby-rubocop)
+   '(10 13 info "Do not use `then` for multi-line `if`." :checker ruby-rubocop)
    '(11 24 error "undefined instance variable @name" :checker ruby-rubylint)
    '(16 1 error "wrong number of arguments (expected 2..3 but got 0)"
         :checker ruby-rubylint)))
@@ -4584,10 +4580,9 @@ Why not:
          :checker ruby-rubocop)
      '(10 5 info "Use a guard clause instead of wrapping the code inside a conditional expression."
           :checker ruby-rubocop)
-     '(10 5 info "Never use `then` for multi-line `if`."
-          :checker ruby-rubocop)
      '(10 8 warning "Literal `true` appeared in a condition."
-          :checker ruby-rubocop))))
+          :checker ruby-rubocop)
+     '(10 13 info "Do not use `then` for multi-line `if`." :checker ruby-rubocop))))
 
 (flycheck-ert-def-checker-test ruby-rubocop ruby lint-only
   (let ((flycheck-rubocop-lint-only t)
@@ -4646,9 +4641,9 @@ Why not:
 (flycheck-ert-def-checker-test rust rust warning
   (flycheck-ert-should-syntax-check
    "checkers/rust-warning.rs" 'rust-mode
-   '(3 1 warning "code is never used: `main`, #[warn(dead_code)] on by default"
+   '(3 1 warning "function is never used: `main`, #[warn(dead_code)] on by default"
        :checker rust)
-   '(4 9 warning "unused variable: `x`, #[warn(unused_variable)] on by default"
+   '(4 9 warning "unused variable: `x`, #[warn(unused_variables)] on by default"
        :checker rust)))
 
 (flycheck-ert-def-checker-test rust rust help
@@ -4664,16 +4659,16 @@ Why not:
         (flycheck-rust-check-tests nil))
     (flycheck-ert-should-syntax-check
      "checkers/rust-warning.rs" 'rust-mode
-     '(4 9 warning "unused variable: `x`, #[warn(unused_variable)] on by default"
+     '(4 9 warning "unused variable: `x`, #[warn(unused_variables)] on by default"
          :checker rust))))
 
 (flycheck-ert-def-checker-test rust rust info
   (flycheck-ert-should-syntax-check
    "checkers/rust-info.rs" 'rust-mode
-   '(11 9 info "`x` moved here because it has type `NonPOD`, which is moved by default (use `ref` to override)"
+   '(11 9 info "`x` moved here because it has type `NonPOD`, which is moved by default"
         :checker rust)
-   '(12 9 error "use of moved value: `x`"
-        :checker rust)))
+   '(11 9 info "use `ref` to override" :checker rust)
+   '(12 9 error "use of moved value: `x`" :checker rust)))
 
 (flycheck-ert-def-checker-test rust rust library-path
   :expected-result :failed
@@ -4690,7 +4685,7 @@ Why not:
                                    "checkers/rust_crate/main.rs")))
     (flycheck-ert-should-syntax-check
      "checkers/rust_crate/foo.rs" 'rust-mode
-     '(3 9 warning "unused variable: `x`, #[warn(unused_variable)] on by default"
+     '(3 9 warning "unused variable: `x`, #[warn(unused_variables)] on by default"
          :checker rust))))
 
 (flycheck-ert-def-checker-test sass sass nil
