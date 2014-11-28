@@ -18,9 +18,9 @@
                   :target: http://stable.melpa.org/#/flycheck
                   :alt: MELPA Stable Status
 
-============================================================
- Flycheck |license| |docs|  |melpa| |melpa-stable| |travis|
-============================================================
+===========================================================
+ Flycheck |license| |melpa| |melpa-stable| |docs| |travis|
+===========================================================
 
 .. image:: https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/logo.png
    :target: http://www.flycheck.org
