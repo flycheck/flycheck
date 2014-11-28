@@ -3960,7 +3960,7 @@ The term \"1\" has type \"nat\" while it is expected to have type
    '(6 1 error "expected ')', found '}'" :checker go-gofmt)))
 
 (flycheck-ert-def-checker-test (go-build go-golint go-vet) go complete-chain
-  (skip-unless (flycheck-check-predicate 'go-vet))
+  (skip-unless (funcall (flycheck-checker-predicate 'go-vet)))
   (flycheck-ert-with-env
       `(("GOPATH" . ,(flycheck-ert-resource-filename "checkers/go")))
     (flycheck-ert-should-syntax-check
