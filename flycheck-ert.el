@@ -32,6 +32,7 @@
 
 (require 'flycheck)
 (require 'ert)
+(require 'macroexp)                     ; For macro utilities
 
 
 ;;; Compatibility

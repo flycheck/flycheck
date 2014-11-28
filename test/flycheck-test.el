@@ -42,7 +42,6 @@
 
 (require 'dash)
 (require 'cl-lib)
-(require 'macroexp)                     ; For macro utilities
 (require 'epa-file)                     ; To test encrypted buffers
 (require 'ert)                          ; Unit test library
 (require 'shut-up)                      ; Silence Emacs and intercept `message'
