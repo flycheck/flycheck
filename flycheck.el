@@ -1735,7 +1735,7 @@ Slots:
   buffer checker context)
 
 (defun flycheck-start-checker (checker callback)
-  "Start a syntax CHECKER, with a STATUS CALLBACK.
+  "Start a syntax CHECKER, with a status CALLBACK.
 
 Return a `flycheck-syntax-check' representing the syntax check."
   (flycheck-syntax-check-new
