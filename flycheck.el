@@ -1743,7 +1743,7 @@ Return a `flycheck-syntax-check' representing the syntax check."
    :checker checker
    :context (funcall (get checker 'flycheck-start) checker callback)))
 
-(defun flycheck-interrupt-syntax-check (syntax-check)
+(defun flycheck-syntax-check-interrupt (syntax-check)
   "Interrupt a SYNTAX-CHECK."
   (let* ((checker (flycheck-syntax-check-checker syntax-check))
          (interrupt-fn (get checker 'flycheck-interrupt))
@@ -1938,7 +1938,7 @@ CHECKER will be used, even if it is not contained in
 (defun flycheck-stop ()
   "Stop any ongoing syntax check in the current buffer."
   (when (flycheck-running-p)
-    (flycheck-interrupt-syntax-check flycheck-current-syntax-check)
+    (flycheck-syntax-check-interrupt flycheck-current-syntax-check)
     ;; Remove the current syntax check, to reset Flycheck into a non-running
     ;; state, and to make `flycheck-report-buffer-checker-status' ignore any
     ;; status reports from the current syntax check.
