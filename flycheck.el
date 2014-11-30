@@ -1734,14 +1734,11 @@ Slots:
      The context object."
   buffer checker context)
 
-(defun flycheck-start-checker (checker callback)
-  "Start a syntax CHECKER, with a status CALLBACK.
-
-Return a `flycheck-syntax-check' representing the syntax check."
-  (flycheck-syntax-check-new
-   :buffer (current-buffer)
-   :checker checker
-   :context (funcall (get checker 'flycheck-start) checker callback)))
+(defun flycheck-syntax-check-start (syntax-check callback)
+  "Start a SYNTAX-CHECK with CALLBACK."
+  (let ((checker (flycheck-syntax-check-checker syntax-check)))
+    (setf (flycheck-syntax-check-context syntax-check)
+          (funcall (get checker 'flycheck-start) checker callback))))
 
 (defun flycheck-syntax-check-interrupt (syntax-check)
   "Interrupt a SYNTAX-CHECK."
@@ -1931,6 +1928,20 @@ CHECKER will be used, even if it is not contained in
   "The current syntax check in the this buffer.")
 (put 'flycheck-current-syntax-check 'permanent-local t)
 
+(defun flycheck-start-current-syntax-check (checker)
+  "Start a syntax check in the current buffer with CHECKER.
+
+Set `flycheck-current-syntax-check' accordingly."
+  ;; Allocate the current syntax check *before* starting it.  This allows for
+  ;; synchronous checks, which call the status callback immediately in there
+  ;; start function.
+  (setq flycheck-current-syntax-check
+        (flycheck-syntax-check-new :buffer (current-buffer)
+                                   :checker checker
+                                   :context nil))
+  (flycheck-syntax-check-start flycheck-current-syntax-check
+                               (flycheck-buffer-status-callback checker)))
+
 (defun flycheck-running-p ()
   "Determine whether a syntax check is running in the current buffer."
   (not (null flycheck-current-syntax-check)))
@@ -1968,11 +1979,10 @@ CHECKER will be used, even if it is not contained in
         (flycheck-clear-errors)
         (flycheck-mark-all-overlays-for-deletion)
         (condition-case err
-            (let* ((checker (flycheck-get-checker-for-buffer))
-                   (callback (flycheck-buffer-status-callback checker)))
+            (let* ((checker (flycheck-get-checker-for-buffer)))
               (if checker
-                  (let ((check (flycheck-start-checker checker callback)))
-                    (setq flycheck-current-syntax-check check)
+                  (progn
+                    (flycheck-start-current-syntax-check checker)
                     (flycheck-report-status 'running))
                 (flycheck-clear)
                 (flycheck-report-status 'no-checker)))
@@ -2075,9 +2085,7 @@ checks."
       (flycheck-report-current-errors errors))
     (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
       (if next-checker
-          (setq flycheck-current-syntax-check
-                (flycheck-start-checker
-                 next-checker (flycheck-buffer-status-callback next-checker)))
+          (flycheck-start-current-syntax-check next-checker)
         (setq flycheck-current-syntax-check nil)
         (flycheck-report-status 'finished)
         ;; Delete overlays only after the very last checker has run, to avoid
