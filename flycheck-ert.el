@@ -276,7 +276,9 @@ assertions and setup code."
              ,(or (plist-get keys :expected-result) :passed))
        :tags ',tags
        ,@(mapcar (lambda (c) `(skip-unless
-                               (executable-find (flycheck-checker-executable ',c))))
+                               ;; Ignore non-command checkers
+                               (or (not (get ',c 'flycheck-command))
+                                   (executable-find (flycheck-checker-executable ',c)))))
                  checkers)
        ,@body)))
 
