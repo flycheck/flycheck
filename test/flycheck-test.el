@@ -4626,12 +4626,12 @@ Why not:
 (flycheck-ert-def-checker-test rust rust syntax-error
   (flycheck-ert-should-syntax-check
    "checkers/rust-syntax-error.rs" 'rust-mode
-   '(4 5 error "unresolved name `bla`." :checker rust)))
+   '(4 5 error "unresolved name `bla`" :checker rust)))
 
 (flycheck-ert-def-checker-test rust rust test-syntax-error
   (flycheck-ert-should-syntax-check
    "checkers/rust-test-syntax-error.rs" 'rust-mode
-   '(5 5 error "unresolved name `bla`." :checker rust)))
+   '(5 5 error "unresolved name `bla`" :checker rust)))
 
 (flycheck-ert-def-checker-test rust rust test-check-tests-disabled
   (let ((flycheck-rust-check-tests nil))
