@@ -266,15 +266,13 @@ assertions and setup code."
          (keys-and-body (ert--parse-keys-and-body keys-and-body))
          (body (cadr keys-and-body))
          (keys (car keys-and-body))
-         (tags (append '(syntax-checker external-tool)
-                       language-tags
-                       (plist-get keys :tags))))
+         (default-tags '(syntax-checker external-tool)))
     `(ert-deftest ,full-name ()
        :expected-result
        (list 'or
              '(satisfies flycheck-ert-syntax-check-timed-out-p)
              ,(or (plist-get keys :expected-result) :passed))
-       :tags ',tags
+       :tags (append ',default-tags ',language-tags ,(plist-get keys :tags))
        ,@(mapcar (lambda (c) `(skip-unless
                                ;; Ignore non-command checkers
                                (or (not (get ',c 'flycheck-command))
