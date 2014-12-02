@@ -4236,8 +4236,8 @@ Why not:
    '(6 6 error "Glob written as <...> (See page 167 of PBP)"
        :checker perl-perlcritic)))
 
-(flycheck-ert-def-checker-test perl-perlcritic perl verbosity-5
-  (let ((flycheck-perlcritic-verbosity 1))
+(flycheck-ert-def-checker-test perl-perlcritic perl severity-1
+  (let ((flycheck-perlcritic-severity 1))
     (flycheck-ert-should-syntax-check
      "checkers/perl.pl" '(perl-mode cperl-mode)
      '(1 1 warning "No package-scoped \"$VERSION\" variable found (See page 404 of PBP)"

@@ -428,7 +428,7 @@ Perl
 
    .. rubric:: Options
 
-   .. option:: flycheck-perlcritic-verbosity
+   .. option:: flycheck-perlcritic-severity
       :auto:
 
 PHP

@@ -5973,7 +5973,7 @@ See URL `http://www.perl.org'."
   :modes (perl-mode cperl-mode)
   :next-checkers (perl-perlcritic))
 
-(flycheck-def-option-var flycheck-perlcritic-verbosity nil perl-perlcritic
+(flycheck-def-option-var flycheck-perlcritic-severity nil perl-perlcritic
   "The message severity for Perl Critic.
 
 The value of this variable is a severity level as integer, for
@@ -5982,12 +5982,15 @@ the `--severity' option to Perl Critic."
   :safe #'integerp
   :package-version '(flycheck . "0.18"))
 
+(define-obsolete-variable-alias 'flycheck-perlcritic-verbosity
+  'flycheck-perlcritic-severity "0.22")
+
 (flycheck-define-checker perl-perlcritic
   "A Perl syntax checker using Perl::Critic.
 
 See URL `https://metacpan.org/pod/Perl::Critic'."
   :command ("perlcritic" "--no-color" "--verbose" "%f:%l:%c:%s:%m (%e)\n"
-            (option "--severity" flycheck-perlcritic-verbosity nil
+            (option "--severity" flycheck-perlcritic-severity nil
                     flycheck-option-int)
             source)
   :error-patterns

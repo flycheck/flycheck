@@ -12,6 +12,7 @@ master (in development)
   - The internals of syntax checker definitions have changed again.  **All
     packages depending on Flycheck must be recompiled!** [GH-524]
   - `flycheck-error-list-refresh` is not an interactive command anymore
+  - Replace `flycheck-perlcritic-verbosity` with `flycheck-perlcritic-severity`
 
 - New features:
 
