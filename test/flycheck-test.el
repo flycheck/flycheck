@@ -3121,7 +3121,7 @@ evaluating BODY."
     (should (equal (aref cells 3)
                    (list "W1"
                          'type 'flycheck-error-list
-                         'face 'default)))
+                         'face 'flycheck-error-list-id)))
     (should (equal (aref cells 4)
                    (list "A foo warning"
                          'type 'flycheck-error-list
@@ -3154,7 +3154,7 @@ evaluating BODY."
     (should (equal (aref cells 3)
                    (list ""
                          'type 'flycheck-error-list
-                         'face 'default)))
+                         'face 'flycheck-error-list-id)))
     (should (equal (aref cells 4)
                    (list "A foo error"
                          'type 'flycheck-error-list
@@ -3186,7 +3186,7 @@ evaluating BODY."
     (should (equal (aref cells 3)
                    (list ""
                          'type 'flycheck-error-list
-                         'face 'default)))
+                         'face 'flycheck-error-list-id)))
     (should (equal (aref cells 4)
                    (list "Unknown info"
                          'type 'flycheck-error-list

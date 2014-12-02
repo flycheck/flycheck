@@ -741,19 +741,25 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
 
 ;; The base faces for the following two faces are inspired by Compilation Mode
 (defface flycheck-error-list-line-number
-  '((t :inherit font-lock-keyword-face))
+  '((t :inherit font-lock-constant-face))
   "Face for line numbers in the error list."
   :group 'flycheck-faces
   :package-version '(flycheck . "0.16"))
 
 (defface flycheck-error-list-column-number
-  '((t :inherit font-lock-doc-face))
+  '((t :inherit font-lock-constant-face))
   "Face for line numbers in the error list."
   :group 'flycheck-faces
   :package-version '(flycheck . "0.16"))
 
-(defface flycheck-error-list-checker-name
+(defface flycheck-error-list-id
   '((t :inherit font-lock-type-face))
+  "Face for the error ID in the error list."
+  :group 'flycheck-faces
+  :package-version '(flycheck . "0.22"))
+
+(defface flycheck-error-list-checker-name
+  '((t :inherit font-lock-function-name-face))
   "Face for the syntax checker name in the error list."
   :group 'flycheck-faces
   :package-version '(flycheck . "0.21"))
@@ -3230,7 +3236,8 @@ Return a list with the contents of the table cell."
                   (flycheck-error-list-make-cell
                    (symbol-name (flycheck-error-level error)) level-face)
                   (flycheck-error-list-make-cell
-                   (if id (format "%s" id) ""))
+                   (if id (format "%s" id) "")
+                   'flycheck-error-list-id)
                   (flycheck-error-list-make-cell message)
                   (flycheck-error-list-make-cell
                    (format "(%s)" checker)
