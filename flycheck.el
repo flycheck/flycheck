@@ -3511,8 +3511,8 @@ node `(elisp)Displaying Messages' for more information.
 
 In the latter case, show messages in
 `flycheck-error-message-buffer'."
-  (let ((messages (delq nil (mapcar #'flycheck-error-message errors))))
-    (when (and errors (flycheck-may-use-echo-area-p))
+  (when (and errors (flycheck-may-use-echo-area-p))
+    (let ((messages (mapcar #'flycheck-error-format-message-and-id errors)))
       (display-message-or-buffer (string-join messages "\n\n")
                                  flycheck-error-message-buffer))))
 

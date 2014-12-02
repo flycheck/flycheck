@@ -3210,11 +3210,12 @@ evaluating BODY."
 (ert-deftest flycheck-display-error-messages ()
   :tags '(error-display)
   (let ((err (flycheck-error-new-at 10 20 'warning
-                                    "This is a Flycheck error.")))
+                                    "This is a Flycheck error."
+                                    :id "spam")))
     (shut-up
       (flycheck-display-error-messages (list err))
       (should (equal (shut-up-current-output)
-                     (concat (flycheck-error-message err) "\n"))))))
+                     "This is a Flycheck error. [spam]\n")))))
 
 
 ;;; Working with error messages
