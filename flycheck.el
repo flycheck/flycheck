@@ -3092,6 +3092,7 @@ the beginning of the buffer."
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "n") #'flycheck-error-list-next-error)
     (define-key map (kbd "p") #'flycheck-error-list-previous-error)
+    (define-key map (kbd "g") #'flycheck-error-list-check-source)
     (define-key map (kbd "RET") #'flycheck-error-list-goto-error)
     map)
   "The keymap of `flycheck-error-list-mode'.")
@@ -3139,6 +3140,14 @@ the beginning of the buffer."
     ;; We must not update the source buffer, if the current buffer is the error
     ;; list itself.
     (flycheck-error-list-set-source (current-buffer))))
+
+(defun flycheck-error-list-check-source ()
+  "Trigger a syntax check in the source buffer of the error list."
+  (interactive)
+  (let ((buffer (get-buffer flycheck-error-list-source-buffer)))
+    (when (buffer-live-p buffer)
+      (with-current-buffer buffer
+        (flycheck-buffer)))))
 
 (define-button-type 'flycheck-error-list
   'action #'flycheck-error-list-button-goto-error

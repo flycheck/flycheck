@@ -27,6 +27,7 @@ master (in development)
   - Add explicit `load-path` inheritance to `flycheck-emacs-lisp-load-path`, via
     new `inherit` value [GH-511]
   - Parse help messages from `rustc` [GH-517]
+  - `g` in the error list checks the source buffer again [GH-532]
 
 - Bug fixes:
 
