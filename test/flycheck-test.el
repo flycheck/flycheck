@@ -2279,7 +2279,8 @@ of the file will be interrupted because there are too many #ifdef configurations
     :line 4
     :column nil
     :level 'error
-    :message "Null pointer dereference")
+    :message "Null pointer dereference"
+    :id "nullPointer")
    (flycheck-error-new
     :filename "bar"
     :buffer 'buffer
@@ -2287,7 +2288,8 @@ of the file will be interrupted because there are too many #ifdef configurations
     :line 6
     :column nil
     :level 'error
-    :message "Null pointer dereference")
+    :message "Null pointer dereference"
+    :id "nullPointer")
    (flycheck-error-new
     :filename "eggs"
     :buffer 'buffer
@@ -2295,16 +2297,17 @@ of the file will be interrupted because there are too many #ifdef configurations
     :line 2
     :column nil
     :level 'warning
-    :message "The expression \"x\" is of type 'bool' and it is compared against a integer value that is neither 1 nor 0.")))
+    :message "The expression \"x\" is of type 'bool' and it is compared against a integer value that is neither 1 nor 0."
+    :id "comparisonOfBoolWithInt")))
 
 (ert-deftest flycheck-parse-cppcheck ()
-  :tags '(error-parsing)
+  :tags '(error-parsing cppcheck-xml)
   (should (equal (flycheck-parse-cppcheck flycheck-cppcheck-xml
                                           'checker 'buffer)
                  flycheck-cppcheck-expected-errors)))
 
 (ert-deftest flycheck-parse-cppcheck/empty-errors-list-with-automatic-parser ()
-  :tags '(error-parsing)
+  :tags '(error-parsing cppcheck-xml)
   (should-not (flycheck-parse-cppcheck "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <results version=\"2\">
   <cppcheck version=\"1.60.1\"/>
@@ -2313,7 +2316,7 @@ of the file will be interrupted because there are too many #ifdef configurations
 </results>" nil nil)))
 
 (ert-deftest flycheck-parse-cppcheck/empty-errors-list-with-builtin-parser ()
-  :tags '(error-parsing)
+  :tags '(error-parsing cppcheck-xml)
   (let ((flycheck-xml-parser #'flycheck-parse-xml-region))
     (should-not (flycheck-parse-cppcheck "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <results version=\"2\">
@@ -3686,32 +3689,32 @@ evaluating BODY."
      "checkers/c_c++-warning-openmp.c" 'c-mode
      '(3 8 warning "variable ‘a’ set but not used" :checker c/c++-gcc))))
 
-(flycheck-ert-def-checker-test c/c++-cppcheck (c c++) error
-  (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
+(flycheck-ert-def-checker-test c/c++-cppcheck (c c++) nil
+  :tags '(cppcheck-xml)
+  (skip-unless (version< "1.53" (flycheck-test-cppcheck-version)))
+  (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-gcc))
+        (flycheck-cppcheck-inconclusive nil)
+        (flycheck-cppcheck-checks '("style")))
     (flycheck-ert-should-syntax-check
-     "checkers/c_c++-cppcheck-error.c" 'c-mode
-     '(4 nil error "Null pointer dereference" :checker c/c++-cppcheck))))
-
-(flycheck-ert-def-checker-test c/c++-cppcheck (c c++) warning
-  (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-cppcheck-warning.c" 'c-mode
-     '(2 nil warning "The expression \"x\" is of type 'bool' and it is compared against a integer value that is neither 1 nor 0."
-         :checker c/c++-cppcheck))))
-
-(flycheck-ert-def-checker-test c/c++-cppcheck (c c++) style
-  (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-cppcheck-style.c" 'c-mode
-     '(3 nil warning "Unused variable: unused" :checker c/c++-cppcheck))))
+     "checkers/c_c++-cppcheck.cpp" '(c-mode c++-mode)
+     '(5 nil info "Unused variable: unused" :id "unusedVariable"
+         :checker c/c++-cppcheck)
+     '(9 nil error "Division by zero." :id "zerodiv" :checker c/c++-cppcheck)
+     '(14 nil warning "Parameter 'foo' is passed by value. It could be passed as a (const) reference which is usually faster and recommended in C++."
+          :id "passedByValue" :checker c/c++-cppcheck))))
 
 (flycheck-ert-def-checker-test c/c++-cppcheck (c c++) style-suppressed
+  :tags '(cppcheck-xml)
   (let ((flycheck-cppcheck-checks nil)
-        (flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
-    (flycheck-ert-should-syntax-check "checkers/c_c++-cppcheck-style.c"
-                                      'c-mode)))
+        (flycheck-disabled-checkers '(c/c++-clang c/c++-gcc))
+        (dot (when (version< "1.53" (flycheck-test-cppcheck-version)) ".")))
+    (flycheck-ert-should-syntax-check
+     "checkers/c_c++-cppcheck.cpp" '(c-mode c++-mode)
+     `(9 nil error ,(concat "Division by zero" dot) :id "zerodiv"
+         :checker c/c++-cppcheck))))
 
 (flycheck-ert-def-checker-test c/c++-cppcheck (c c++) inconclusive
+  :tags '(cppcheck-xml)
   ;; Cppcheck 1.53 and older do not report inconclusive warnings when using
   ;; XML output.
   (skip-unless (version< "1.53" (flycheck-test-cppcheck-version)))
@@ -3719,29 +3722,26 @@ evaluating BODY."
         (flycheck-cppcheck-inconclusive t)
         (flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
     (flycheck-ert-should-syntax-check
-     "checkers/c_c++-cppcheck-inconclusive.cpp" 'c++-mode
-     '(1 nil warning "Boolean variable 'a' is used in bitwise operation. Did you mean '&&'?"
-         :checker c/c++-cppcheck))))
+     "checkers/c_c++-cppcheck.cpp" '(c-mode c++-mode)
+     '(5 nil info "Unused variable: unused" :id "unusedVariable"
+         :checker c/c++-cppcheck)
+     '(9 nil error "Division by zero." :id "zerodiv" :checker c/c++-cppcheck)
+     '(12 nil info "Boolean variable 'a' is used in bitwise operation. Did you mean '&&'?"
+          :id "bitwiseOnBoolean" :checker c/c++-cppcheck)
+     '(14 nil warning "Parameter 'foo' is passed by value. It could be passed as a (const) reference which is usually faster and recommended in C++."
+          :id "passedByValue" :checker c/c++-cppcheck))))
 
-(flycheck-ert-def-checker-test c/c++-cppcheck (c c++) inconclusive-suppressed
-  ;; Cppcheck 1.53 and older do not report inconclusive warnings when using
-  ;; XML output.
+(flycheck-ert-def-checker-test c/c++-cppcheck (c c++) multiple-checks
+  :tags '(cppcheck-xml)
   (skip-unless (version< "1.53" (flycheck-test-cppcheck-version)))
-  (let ((flycheck-cppcheck-checks '("style"))
+  (let ((flycheck-cppcheck-checks '("performance" "portability"))
         (flycheck-cppcheck-inconclusive nil)
         (flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
     (flycheck-ert-should-syntax-check
-     "checkers/c_c++-cppcheck-inconclusive.cpp" 'c++-mode)))
-
-(flycheck-ert-def-checker-test c/c++-cppcheck (c c++) multiple-checks
-  (let ((flycheck-cppcheck-checks '("performance" "portability"))
-        (flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-cppcheck-multiple-checks.cpp" 'c++-mode
-     '(2 nil warning "Extra qualification 'A::' unnecessary and considered an error by many compilers."
-         :checker c/c++-cppcheck)
-     '(9 nil warning "Prefix ++/-- operators should be preferred for non-primitive types. Pre-increment/decrement can be more efficient than post-increment/decrement. Post-increment/decrement usually involves keeping a copy of the previous value around and adds a little extra code."
-         :checker c/c++-cppcheck))))
+     "checkers/c_c++-cppcheck.cpp" 'c++-mode
+     '(9 nil error "Division by zero." :id "zerodiv" :checker c/c++-cppcheck)
+     '(14 nil warning "Parameter 'foo' is passed by value. It could be passed as a (const) reference which is usually faster and recommended in C++."
+          :id "passedByValue" :checker c/c++-cppcheck))))
 
 (flycheck-ert-def-checker-test cfengine cfengine error
   (skip-unless (fboundp 'cfengine3-mode))

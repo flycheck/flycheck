@@ -4527,24 +4527,27 @@ about Cppcheck."
             (dolist (node error-nodes)
               (pcase node
                 (`(error ,error-attrs . ,loc-nodes)
-                 (dolist (node loc-nodes)
-                   (pcase node
-                     (`(location ,loc-attrs . ,_)
-                      (let ((line (cdr (assq'line loc-attrs)))
-                            (filename (cdr (assq 'file loc-attrs)))
-                            (message (cdr (assq 'verbose error-attrs)))
-                            (severity (cdr (assq 'severity error-attrs))))
-                        (push (flycheck-error-new-at
-                               (flycheck-string-to-number-safe line)
-                               nil
-                               (pcase severity
-                                 (`"error" 'error)
-                                 (_ 'warning))
-                               message
-                               :checker checker
-                               :buffer buffer
-                               :filename filename)
-                              errors)))))))))))
+                 (let ((id (cdr (assq 'id error-attrs)))
+                       (message (cdr (assq 'verbose error-attrs)))
+                       (level (pcase (cdr (assq 'severity error-attrs))
+                                (`"error" 'error)
+                                (`"style" 'info)
+                                (`"information" 'info)
+                                (_ 'warning))))
+                   (dolist (node loc-nodes)
+                     (pcase node
+                       (`(location ,loc-attrs . ,_)
+                        (let ((line (cdr (assq'line loc-attrs)))
+                              (filename (cdr (assq 'file loc-attrs))))
+                          (push (flycheck-error-new-at
+                                 (flycheck-string-to-number-safe line)
+                                 nil
+                                 level message
+                                 :id id
+                                 :checker checker
+                                 :buffer buffer
+                                 :filename filename)
+                                errors))))))))))))
        (nreverse errors)))))
 
 
