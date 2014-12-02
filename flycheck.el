@@ -2444,6 +2444,12 @@ non-whitespace character of the error line, if ERR has no error column."
   (car (or (flycheck-error-column-region err)
            (flycheck-error-line-region err))))
 
+(defun flycheck-error-format-message-and-id (err)
+  "Format the message and id of ERR as human-readable string."
+  (let ((id (flycheck-error-id err))
+        (message (flycheck-error-message err)))
+    (if id (format "%s [%s]" message id) message)))
+
 (defun flycheck-error-format (err)
   "Format ERR as human-readable string.
 
@@ -2453,11 +2459,11 @@ _not_ include the file name."
          (column (flycheck-error-column err))
          (level (symbol-name (flycheck-error-level err)))
          (checker (symbol-name (flycheck-error-checker err)))
-         (message (flycheck-error-message err))
          (format `(,(number-to-string line) ":"
                    ,@(when column (list (number-to-string column) ":"))
                    ,level ": "
-                   ,message " (" ,checker ")")))
+                   ,(flycheck-error-format-message-and-id err)
+                   " (" ,checker ")")))
     (apply #'concat format)))
 
 (defun flycheck-error-< (err1 err2)

@@ -1967,6 +1967,19 @@ and extension, as in `file-name-base'."
     (should (= (flycheck-error-pos (flycheck-error-new-at 4 1)) 19))
     (should (= (flycheck-error-pos (flycheck-error-new-at 4 nil)) 19))))
 
+(ert-deftest flycheck-error-format-message-and-id/no-id ()
+  :tags '(error-api)
+  (should (string= (flycheck-error-format-message-and-id
+                    (flycheck-error-new-at 3 5 'warning "Hello world"))
+                   "Hello world")))
+
+(ert-deftest flycheck-error-format-message-and-id/with-id ()
+  :tags '(error-api)
+  (should (string= (flycheck-error-format-message-and-id
+                    (flycheck-error-new-at 3 5 'warning "Hello world"
+                                           :id "Foo"))
+                   "Hello world [Foo]")))
+
 (ert-deftest flycheck-error-format/level-warning ()
   :tags '(error-api)
   (should (string= (flycheck-error-format
@@ -1995,6 +2008,13 @@ and extension, as in `file-name-base'."
                     (flycheck-error-new-at 14 15 'error "dash\\nbroken"
                                            :checker 'foo))
                    "14:15:error: dash\\nbroken (foo)")))
+
+(ert-deftest flycheck-error-format/with-id ()
+  :tags '(error-api)
+  (should (string= (flycheck-error-format
+                    (flycheck-error-new-at 14 15 'error "A message"
+                                           :id "E001" :checker 'foo))
+                   "14:15:error: A message [E001] (foo)")))
 
 (ert-deftest flycheck-error-</no-column ()
   :tags '(error-api)
