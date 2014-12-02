@@ -3272,7 +3272,6 @@ ALL-FRAMES specifies the frames to consider, as in
 Add all errors currently reported for the current
 `flycheck-error-list-source-buffer', and recenter the error
 list."
-  (interactive)
   ;; We only refresh the error list, when it is visible in a window, and we
   ;; select this window while reverting, because Tabulated List mode attempts to
   ;; recenter the error at the old location, so it must have the proper window
