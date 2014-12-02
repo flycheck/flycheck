@@ -3139,6 +3139,7 @@ the beginning of the buffer."
   [("Line" 4 flycheck-error-list-entry-< :right-align t)
    ("Col" 3 nil :right-align t)
    ("Level" 8 flycheck-error-list-entry-level-<)
+   ("ID" 6 t)
    ("Message" 0 t)
    (" (Checker)" 8 t)]
   "Table format for the error list.")
@@ -3219,6 +3220,7 @@ Return a list with the contents of the table cell."
          (column (flycheck-error-column error))
          (message (or (flycheck-error-message error)
                       (format "Unknown %s" (symbol-name level))))
+         (id (flycheck-error-id error))
          (checker (flycheck-error-checker error)))
     (list error
           (vector (flycheck-error-list-make-number-cell
@@ -3227,6 +3229,8 @@ Return a list with the contents of the table cell."
                    column 'flycheck-error-list-column-number)
                   (flycheck-error-list-make-cell
                    (symbol-name (flycheck-error-level error)) level-face)
+                  (flycheck-error-list-make-cell
+                   (if id (format "%s" id) ""))
                   (flycheck-error-list-make-cell message)
                   (flycheck-error-list-make-cell
                    (format "(%s)" checker)
