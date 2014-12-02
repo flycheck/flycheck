@@ -4252,19 +4252,21 @@ Why not:
          :checker javascript-jshint))))
 
 (flycheck-ert-def-checker-test javascript-eslint javascript error
+  :tags '(checkstyle-xml)
   (let ((flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-ert-should-syntax-check
      "checkers/javascript-syntax-error.js" '(js-mode js2-mode js3-mode)
      '(3 26 error "Unexpected token ILLEGAL" :checker javascript-eslint))))
 
 (flycheck-ert-def-checker-test javascript-eslint javascript warning
+  :tags '(checkstyle-xml)
   (let ((flycheck-eslintrc "eslint.json")
         (flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-ert-should-syntax-check
      "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
-     '(3 1 warning "Missing \"use strict\" statement. (strict)"
+     '(3 1 warning "Missing \"use strict\" statement." :id "strict"
          :checker javascript-eslint)
-     '(4 8 warning "foo is defined but never used (no-unused-vars)"
+     '(4 8 warning "foo is defined but never used" :id "no-unused-vars"
          :checker javascript-eslint))))
 
 (flycheck-ert-def-checker-test javascript-gjslint javascript nil

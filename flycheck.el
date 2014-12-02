@@ -5921,18 +5921,29 @@ for more information about the custom directory."
   "A JavaScript syntax and style checker using eslint.
 
 See URL `https://github.com/eslint/eslint'."
-  :command ("eslint" "--format=compact"
+  :command ("eslint" "--format=checkstyle"
             (config-file "--config" flycheck-eslintrc)
             (option "--rulesdir" flycheck-eslint-rulesdir)
             ;; We need to use source-inplace because eslint looks for
             ;; configuration files in the directory of the file being checked.
             ;; See https://github.com/flycheck/flycheck/issues/447
             source-inplace)
-  :error-patterns
-  ((warning line-start (file-name)
-            ": line " line ", col " column ", Warning - " (message) line-end)
-   (error line-start (file-name)
-          ": line " line ", col " column ", Error - " (message) line-end))
+  :error-parser flycheck-parse-checkstyle
+  :error-filter (lambda (errors)
+                  (mapc (lambda (err)
+                          ;; Parse error ID from the error message
+                          (setf (flycheck-error-message err)
+                                (replace-regexp-in-string
+                                 (rx " ("
+                                     (group (one-or-more (not (any ")"))))
+                                     ")" string-end)
+                                 (lambda (s)
+                                   (setf (flycheck-error-id err)
+                                         (match-string 1 s))
+                                   "")
+                                 (flycheck-error-message err))))
+                        (flycheck-sanitize-errors errors))
+                  errors)
   :modes (js-mode js2-mode js3-mode))
 
 (flycheck-def-config-file-var flycheck-gjslintrc javascript-gjslint ".gjslintrc"
