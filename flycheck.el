@@ -2292,7 +2292,7 @@ variables of Flycheck."
                (:constructor flycheck-error-new)
                (:constructor flycheck-error-new-at (line column
                                                          &optional level message
-                                                         &key checker
+                                                         &key checker id
                                                          (filename (buffer-file-name))
                                                          (buffer (current-buffer)))))
   "Structure representing an error reported by a syntax checker.
@@ -2310,12 +2310,15 @@ Slots:
 `line'
      The line number the error refers to, as number.
 
-`column'
+`column' (optional)
      The column number the error refers to, as number.
 
 `level'
-     The error level, as either `warning' or `error'."
-  buffer checker filename line column message level)
+     The error level, as either `warning' or `error'.
+
+`id' (optional)
+     An ID identifying the kind of error."
+  buffer checker filename line column message level id)
 
 (defmacro flycheck-error-with-buffer (err &rest forms)
   "Switch to the buffer of ERR and evaluate FORMS.

@@ -261,7 +261,7 @@ See :infonode:`(cl)Structures` for more information about CL structures.
 
    .. cl-slot:: column
 
-      An integer providing the column the error refers to.
+      An *optional* integer providing the column the error refers to.
 
       If this attribute is `nil`, Flycheck will assume that the error refers to
       the whole line.
@@ -275,10 +275,17 @@ See :infonode:`(cl)Structures` for more information about CL structures.
       The error level of the message, as symbol denoting an error level defined
       with :function:`flycheck-define-error-level`.
 
+   .. cl-slot:: id
+
+      An *optional* unique identifier for this kind of error.
+
+      This field should identify the kind of an error, not the individual error
+      itself.
+
    There are two constructors to create new :cl-struct:`flycheck-error` objects:
 
    .. function:: flycheck-error-new-at line column &optional level message &key \
-                    checker filename buffer
+                    checker id filename buffer
 
       Create a new Flycheck error at the given :var:`line` and :var:`column`.
 
@@ -287,10 +294,11 @@ See :infonode:`(cl)Structures` for more information about CL structures.
       :var:`message` arguments fill the :cl-slot:`level` and cl-slot:`message`
       slots respectively.
 
-      :var:`checker`, :var:`filename` and :var:`buffer` are keyword arguments,
-      for :cl-slot:`checker`, :cl-slot:`filename` and :cl-slot:`buffer`
-      respectively.  :var:`buffer` defaults to the current buffer, the other two
-      default to `nil`.
+      :var:`checker`, :var:`id`, :var:`filename` and :var:`buffer` are keyword
+      arguments, for :cl-slot:`checker`, :cl-slot:`id`, :cl-slot:`filename` and
+      :cl-slot:`buffer` respectively.  :var:`buffer` defaults to the current
+      buffer and :var:`filename` to the file name of the current buffer.  The
+      other keyword arguments default to `nil`.
 
       .. warning::
 
