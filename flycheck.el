@@ -1117,16 +1117,20 @@ Safely delete all files and directories listed in
   (setq flycheck-temporaries nil))
 
 (eval-and-compile
-  (defun flycheck-rx-message (form)
-    "Translate the `(message)' FORM into a regular expression."
-    (let ((body (or (cdr form) '((one-or-more not-newline)))))
-      (rx-submatch-n `(group-n 4 ,@body))))
-
   (defun flycheck-rx-file-name (form)
     "Translate the `(file-name)' FORM into a regular expression."
     (let ((body (or (cdr form) '((minimal-match
                                   (one-or-more not-newline))))))
       (rx-submatch-n `(group-n 1 ,@body))))
+
+  (defun flycheck-rx-message (form)
+    "Translate the `(message)' FORM into a regular expression."
+    (let ((body (or (cdr form) '((one-or-more not-newline)))))
+      (rx-submatch-n `(group-n 4 ,@body))))
+
+  (defun flycheck-rx-id (form)
+    "Translate the `(id)' FORM into a regular expression."
+    (rx-submatch-n `(group-n 5 ,@(cdr form))))
 
   (defun flycheck-rx-to-string (form &optional no-group)
     "Like `rx-to-string' for FORM, but with special keywords:
@@ -1138,13 +1142,16 @@ Safely delete all files and directories listed in
      matches the column number.
 
 `(file-name SEXP ...)'
-     matches the file name.  SEXP constitutes the body of the message.  If no
-     SEXP is given, use a default body  of `(minimal-match
+     matches the file name.  SEXP describes the file name.  If no
+     SEXP is given, use a default body of `(minimal-match
      (one-or-more not-newline))'.
 
 `(message SEXP ...)'
      matches the message. SEXP constitutes the body of the message.  If no SEXP
      is given, use a default body of `(one-or-more not-newline)'.
+
+`(id SEXP ...)'
+     matches an error ID.  SEXP describes the ID.
 
 NO-GROUP is passed to `rx-to-string'."
     (let ((rx-constituents
@@ -1152,7 +1159,8 @@ NO-GROUP is passed to `rx-to-string'."
             `((line . ,(rx (group-n 2 (one-or-more digit))))
               (column . ,(rx (group-n 3 (one-or-more digit))))
               (file-name flycheck-rx-file-name 0 nil)
-              (message flycheck-rx-message 0 nil))
+              (message flycheck-rx-message 0 nil)
+              (id flycheck-rx-id 0 nil))
             rx-constituents nil)))
       (rx-to-string form no-group))))
 
@@ -4575,12 +4583,14 @@ otherwise."
       (let ((filename (match-string 1 err))
             (line (match-string 2 err))
             (column (match-string 3 err))
-            (message (match-string 4 err)))
+            (message (match-string 4 err))
+            (id (match-string 5 err)))
         (flycheck-error-new-at
          (flycheck-string-to-number-safe line)
          (flycheck-string-to-number-safe column)
          level
          (unless (string-empty-p message) message)
+         :id (unless (string-empty-p id) id)
          :checker checker
          :filename (if (or (null filename) (string-empty-p filename))
                        (buffer-file-name)
