@@ -36,6 +36,7 @@ master (in development)
   - Fix shell quoting in `flycheck-compile` [GH-522] [GH-523]
   - Fix faulty properties of customize options which broke `customize-changed`
     and related functions
+  - Fix use deprecated option in `coffee-coffeelint`
 
 0.21 (Oct 26, 2014)
 -------------------

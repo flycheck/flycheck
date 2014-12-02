@@ -5080,7 +5080,7 @@ See URL `http://www.coffeelint.org/'."
   :command
   ("coffeelint"
    (config-file "--file" flycheck-coffeelintrc)
-   "--checkstyle" source)
+   "--reporter" "checkstyle" source)
   :error-parser flycheck-parse-checkstyle
   :modes coffee-mode)
 
