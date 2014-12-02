@@ -2870,6 +2870,35 @@ Returns ERRORS, with folded messages."
             (string-join (nreverse errors-in-include) "\n"))))
   errors)
 
+(defun flycheck-dequalify-error-ids (errors)
+  "De-qualify error ids in ERRORS.
+
+Remove all qualifications from error ids in ERRORS, by stripping
+all leading dotted components from error IDs.  For instance, if
+the error ID is com.foo.E100, replace it with E100.
+
+This error filter is mainly useful to simplify error IDs obtained
+from parsing Checkstyle XML, which frequently has very verbose
+IDs, that include the name of the tool."
+  (mapc (lambda (err)
+          (let ((id (flycheck-error-id err)))
+            (when id
+              (setf (flycheck-error-id err)
+                    (replace-regexp-in-string
+                     (rx string-start
+                         (group
+                          (optional (zero-or-more not-newline) "."))
+                         (one-or-more (not (any ".")))
+                         string-end)
+                     "" id 'fixedcase 'literal 1)))))
+        errors)
+  errors)
+
+(defun flycheck-remove-error-ids (errors)
+  "Remove all error ids from ERRORS."
+  (mapc (lambda (err) (setf (flycheck-error-id err) nil)) errors)
+  errors)
+
 
 ;;; Error analysis
 (defun flycheck-count-errors (errors)
@@ -4439,7 +4468,8 @@ about Checkstyle."
                        (line (cdr (assq 'line error-attrs)))
                        (column (cdr (assq 'column error-attrs)))
                        (severity (cdr (assq 'severity error-attrs)))
-                       (message (cdr (assq 'message error-attrs))))
+                       (message (cdr (assq 'message error-attrs)))
+                       (source (cdr (assq 'source error-attrs))))
                    (push (flycheck-error-new-at
                           (flycheck-string-to-number-safe line)
                           (flycheck-string-to-number-safe column)
@@ -4450,7 +4480,7 @@ about Checkstyle."
                             ;; Default to error for unknown severity
                             (_          'error))
                           message
-                          :checker checker
+                          :checker checker :id source
                           :buffer buffer
                           :filename filename)
                          errors))))))))
@@ -5085,6 +5115,9 @@ See URL `http://www.coffeelint.org/'."
    (config-file "--file" flycheck-coffeelintrc)
    "--checkstyle" source)
   :error-parser flycheck-parse-checkstyle
+  :error-filter (lambda (errors)
+                  (flycheck-remove-error-ids
+                   (flycheck-sanitize-errors errors)))
   :modes coffee-mode)
 
 (flycheck-define-checker coq
@@ -5126,6 +5159,7 @@ See URL `http://coq.inria.fr/'."
 See URL `https://github.com/CSSLint/csslint'."
   :command ("csslint" "--format=checkstyle-xml" source)
   :error-parser flycheck-parse-checkstyle
+  :error-filter flycheck-dequalify-error-ids
   :modes css-mode)
 
 (defconst flycheck-d-module-re
@@ -5834,6 +5868,7 @@ See URL `http://www.jshint.com'."
             (config-file "--config" flycheck-jshintrc)
             source)
   :error-parser flycheck-parse-checkstyle
+  :error-filter flycheck-dequalify-error-ids
   :modes (js-mode js2-mode js3-mode))
 
 (flycheck-def-option-var flycheck-eslint-rulesdir nil javascript-eslint
@@ -6652,23 +6687,14 @@ By default, no warnings are excluded."
 
 See URL `https://github.com/koalaman/shellcheck/'."
   :command ("shellcheck"
-            ;; Use GCC output format to have the warning code in the messages
-            "--format" "gcc"
+            "--format" "checkstyle"
             "--shell" (eval (symbol-name sh-shell))
             (option "--exclude" flycheck-shellcheck-excluded-warnings list
                     flycheck-option-comma-separated-list)
             source)
   :modes sh-mode
-  :error-patterns
-  ((error line-start
-          (file-name) ":" line ":" column ": error: " (message)
-          line-end)
-   (warning line-start
-            (file-name) ":" line ":" column ": warning: " (message)
-            line-end)
-   (info line-start
-         (file-name) ":" line ":" column ": note: " (message)
-         line-end))
+  :error-parser flycheck-parse-checkstyle
+  :error-filter flycheck-dequalify-error-ids
   :predicate (lambda () (memq sh-shell flycheck-shellcheck-supported-shells)))
 
 (flycheck-define-checker slim

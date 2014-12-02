@@ -2157,11 +2157,11 @@ and extension, as in `file-name-base'."
   "<?xml version=\"1.0\" encoding=\"utf-8\"?>
 <checkstyle version=\"4.3\">
   <file name=\"test-javascript/missing-semicolon.js\">
-    <error line=\"3\" column=\"21\" severity=\"error\" message=\"Missing semicolon.\" source=\"Missing semicolon.\" />
-    <error line=\"3\" severity=\"warning\" message=\"Implied global &apos;alert&apos;\" source=\"jshint.implied-globals\" />
+    <error line=\"3\" column=\"21\" severity=\"error\" message=\"Missing semicolon.\" source=\"Foo3\" />
+    <error line=\"3\" severity=\"warning\" message=\"Implied global &apos;alert&apos;\" source=\"Foo4\" />
   </file>
   <file name=\"test-javascript/missing-quote.js\">
-    <error line=\"undefined\" column=\"undefined\" severity=\"error\" message=\"Cannot read property &apos;id&apos; of undefined\" source=\"\" />
+    <error line=\"undefined\" column=\"undefined\" severity=\"error\" message=\"Cannot read property &apos;id&apos; of undefined\" source=\"Foo1\" />
   </file>
 </checkstyle>"
   "Example Checkstyle output from jshint.")
@@ -2175,7 +2175,8 @@ and extension, as in `file-name-base'."
     :line 3
     :column 21
     :level 'error
-    :message "Missing semicolon.")
+    :message "Missing semicolon."
+    :id "Foo3")
    (flycheck-error-new
     :filename "test-javascript/missing-semicolon.js"
     :checker 'checker
@@ -2183,7 +2184,8 @@ and extension, as in `file-name-base'."
     :line 3
     :column nil
     :level 'warning
-    :message "Implied global 'alert'")
+    :message "Implied global 'alert'"
+    :id "Foo4")
    (flycheck-error-new
     :filename "test-javascript/missing-quote.js"
     :checker 'checker
@@ -2191,18 +2193,19 @@ and extension, as in `file-name-base'."
     :line nil
     :column nil
     :level 'error
-    :message "Cannot read property 'id' of undefined"))
+    :message "Cannot read property 'id' of undefined"
+    :id "Foo1"))
   "Errors to be parsed from `flycheck-checkstyle-xml'.")
 
 (ert-deftest flycheck-parse-checkstyle/with-builtin-xml ()
-  :tags '(error-parsing)
+  :tags '(error-parsing checkstyle-xml)
   (let ((flycheck-xml-parser 'flycheck-parse-xml-region))
     (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml
                                               'checker 'buffer)
                    flycheck-checkstyle-expected-errors))))
 
 (ert-deftest flycheck-parse-checkstyle/with-libxml2 ()
-  :tags '(error-parsing)
+  :tags '(error-parsing checkstyle-xml)
   (skip-unless (fboundp 'libxml-parse-xml-region))
   (let ((flycheck-xml-parser 'libxml-parse-xml-region))
     (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml
@@ -2210,7 +2213,7 @@ and extension, as in `file-name-base'."
                    flycheck-checkstyle-expected-errors))))
 
 (ert-deftest flycheck-parse-checkstyle/automatic-parser ()
-  :tags '(error-parsing)
+  :tags '(error-parsing checkstyle-xml)
   (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml
                                             'checker 'buffer)
                  flycheck-checkstyle-expected-errors)))
@@ -2309,6 +2312,28 @@ of the file will be interrupted because there are too many #ifdef configurations
     (should (equal (flycheck-collapse-error-message-whitespace (list err))
                    (list (flycheck-error-new-at 1 1 'error
                                                 "spam with eggs"))))))
+
+(ert-deftest flycheck-dequalify-error-ids ()
+  :tags '(error-filtering)
+  (let ((errors (list (flycheck-error-new-at 1 2 nil nil :id "foo.bar")
+                      (flycheck-error-new-at 1 2 nil nil :id "Spam.With.Eggs")
+                      (flycheck-error-new-at 1 2 nil nil :id "foobar")
+                      (flycheck-error-new-at 1 2 nil nil :id nil))))
+    (should (equal (flycheck-dequalify-error-ids errors)
+                   (list (flycheck-error-new-at 1 2 nil nil :id "bar")
+                         (flycheck-error-new-at 1 2 nil nil :id "Eggs")
+                         (flycheck-error-new-at 1 2 nil nil :id "foobar")
+                         (flycheck-error-new-at 1 2))))))
+
+(ert-deftest flycheck-remove-error-ids ()
+  :tags '(error-filtering)
+  (let ((errors (list (flycheck-error-new-at 1 2 nil nil :id "Foo.Bar")
+                      (flycheck-error-new-at 1 2 nil nil :id "FooBar")
+                      (flycheck-error-new-at 1 2 nil nil :id nil))))
+    (should (equal (flycheck-remove-error-ids errors)
+                   (list (flycheck-error-new-at 1 2)
+                         (flycheck-error-new-at 1 2)
+                         (flycheck-error-new-at 1 2))))))
 
 
 ;;; Error analysis
@@ -3700,12 +3725,14 @@ evaluating BODY."
    '(4 7 error "missing \", starting" :checker coffee)))
 
 (flycheck-ert-def-checker-test coffee-coffeelint coffee error
+  :tags '(checkstyle-xml)
   (flycheck-ert-should-syntax-check
    "checkers/coffee-coffeelint-error.coffee" 'coffee-mode
    '(4 nil error "Throwing strings is forbidden; context:"
        :checker coffee-coffeelint)))
 
 (flycheck-ert-def-checker-test coffee-coffeelint coffee warning
+  :tags '(checkstyle-xml)
   (let ((flycheck-coffeelintrc "coffeelint.json"))
     (flycheck-ert-should-syntax-check
      "checkers/coffee-coffeelint-error.coffee" 'coffee-mode
@@ -3739,19 +3766,24 @@ The term \"1\" has type \"nat\" while it is expected to have type
 \"bool\"." :checker coq)))
 
 (flycheck-ert-def-checker-test css-csslint css nil
+  :tags '(checkstyle-xml)
   (flycheck-ert-should-syntax-check
    "checkers/css-csslint-warning.css" 'css-mode
    '(3 6 warning "Heading (h1) should not be qualified."
-       :checker css-csslint)))
+       :id "Disallowqualifiedheadings" :checker css-csslint)))
 
 (flycheck-ert-def-checker-test css-csslint css syntax-error
+  :tags '(checkstyle-xml)
   (flycheck-ert-should-syntax-check
    "checkers/css-syntax-error.css" 'css-mode
-   '(4 16 error "Expected LBRACE at line 4, col 16." :checker css-csslint)
-   '(4 16 error "Unexpected token '100%' at line 4, col 16."
+   '(4 16 error "Expected LBRACE at line 4, col 16." :id "ParsingErrors"
        :checker css-csslint)
-   '(4 20 error "Unexpected token ';' at line 4, col 20." :checker css-csslint)
-   '(5 1 error "Unexpected token '}' at line 5, col 1." :checker css-csslint)))
+   '(4 16 error "Unexpected token '100%' at line 4, col 16." :id "ParsingErrors"
+       :checker css-csslint)
+   '(4 20 error "Unexpected token ';' at line 4, col 20." :id "ParsingErrors"
+       :checker css-csslint)
+   '(5 1 error "Unexpected token '}' at line 5, col 1." :id "ParsingErrors"
+       :checker css-csslint)))
 
 (ert-deftest flycheck-d-module-re/matches-module-name ()
   :tags '(language-d)
@@ -4146,26 +4178,30 @@ Why not:
        :checker html-tidy)))
 
 (flycheck-ert-def-checker-test javascript-jshint javascript syntax-error
+  :tags '(checkstyle-xml)
   ;; Silence JS2 and JS3 parsers
   (let ((js2-mode-show-parse-errors nil)
         (js2-mode-show-strict-warnings nil)
         (js3-mode-show-parse-errors nil))
     (flycheck-ert-should-syntax-check
      "checkers/javascript-syntax-error.js" '(js-mode js2-mode js3-mode)
-     '(3 11 error "Unclosed string." :checker javascript-jshint)
-     '(3 25 warning "Unclosed string." :checker javascript-jshint)
-     '(4 1 warning "Unclosed string." :checker javascript-jshint)
-     '(4 1 warning "Missing semicolon." :checker javascript-jshint))))
+     '(3 11 error "Unclosed string." :id "E029" :checker javascript-jshint)
+     '(3 25 warning "Unclosed string." :id "W112" :checker javascript-jshint)
+     '(4 1 warning "Unclosed string." :id "W112" :checker javascript-jshint)
+     '(4 1 warning "Missing semicolon." :id "W033"
+         :checker javascript-jshint))))
 
 (flycheck-ert-def-checker-test javascript-jshint javascript error-disabled
+  :tags '(checkstyle-xml)
   (flycheck-ert-should-syntax-check
    "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)))
 
 (flycheck-ert-def-checker-test javascript-jshint javascript nil
+  :tags '(checkstyle-xml)
   (let ((flycheck-jshintrc "jshintrc"))
     (flycheck-ert-should-syntax-check
      "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
-     '(4 9 warning "'foo' is defined but never used."
+     '(4 9 warning "'foo' is defined but never used." :id "W098"
          :checker javascript-jshint))))
 
 (flycheck-ert-def-checker-test javascript-eslint javascript error
@@ -4778,22 +4814,24 @@ Why not:
    '(5 nil error "parse error near `fi'" :checker sh-zsh)))
 
 (flycheck-ert-def-checker-test sh-shellcheck sh nil
+  :tags '(checkstyle-xml)
   (flycheck-ert-should-syntax-check
    "checkers/sh-shellcheck.sh" 'sh-mode
-   '(2 5 warning "Note that ~ does not expand in quotes. [SC2088]"
+   '(2 5 warning "Note that ~ does not expand in quotes." :id "SC2088"
        :checker sh-shellcheck)
-   '(3 7 error "Double quote array expansions, otherwise they're like $* and break on spaces. [SC2068]"
-       :checker sh-shellcheck)
-   '(4 11 info "Use $(..) instead of deprecated `..` [SC2006]"
+   '(3 7 error "Double quote array expansions, otherwise they're like $* and break on spaces."
+       :id "SC2068" :checker sh-shellcheck)
+   '(4 11 info "Use $(..) instead of deprecated `..`" :id "SC2006"
        :checker sh-shellcheck)))
 
 (flycheck-ert-def-checker-test sh-shellcheck sh excluded-warning
+  :tags '(checkstyle-xml)
   (let ((flycheck-shellcheck-excluded-warnings '("SC2088")))
     (flycheck-ert-should-syntax-check
      "checkers/sh-shellcheck.sh" 'sh-mode
-     '(3 7 error "Double quote array expansions, otherwise they're like $* and break on spaces. [SC2068]"
-         :checker sh-shellcheck)
-     '(4 11 info "Use $(..) instead of deprecated `..` [SC2006]"
+     '(3 7 error "Double quote array expansions, otherwise they're like $* and break on spaces."
+         :id "SC2068" :checker sh-shellcheck)
+     '(4 11 info "Use $(..) instead of deprecated `..`" :id "SC2006"
          :checker sh-shellcheck))))
 
 (flycheck-ert-def-checker-test slim slim nil
