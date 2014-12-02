@@ -4524,7 +4524,9 @@ otherwise."
          level
          (unless (string-empty-p message) message)
          :checker checker
-         :filename (unless (string-empty-p filename) filename))))))
+         :filename (if (or (null filename) (string-empty-p filename))
+                       (buffer-file-name)
+                     filename))))))
 
 (defun flycheck-parse-error-with-patterns (err patterns checker)
   "Parse a single ERR with error PATTERNS for CHECKER.

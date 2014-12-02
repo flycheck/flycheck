@@ -4063,13 +4063,13 @@ The term \"1\" has type \"nat\" while it is expected to have type
   (flycheck-ert-should-syntax-check
    "checkers/haml-error.haml" 'haml-mode
    '(5 nil error "Inconsistent indentation: 3 spaces used for indentation, but the rest of the document was indented using 2 spaces."
-       :checker haml :filename nil)))
+       :checker haml)))
 
 (flycheck-ert-def-checker-test handlebars handlebars nil
   (flycheck-ert-should-syntax-check
    "checkers/handlebars-error.hbs" 'handlebars-mode
    '(2 nil error "Expecting 'ID', 'DATA', got 'INVALID'"
-       :checker handlebars :filename nil)))
+       :checker handlebars)))
 
 (ert-deftest flycheck-haskell-module-re/matches-module-name ()
   :tags '(language-haskell)
@@ -4139,11 +4139,11 @@ Why not:
   (flycheck-ert-should-syntax-check
    "checkers/html-tidy-warning-and-error.html" '(html-mode)
    '(3 1 warning "missing <!DOCTYPE> declaration"
-       :checker html-tidy :filename nil)
+       :checker html-tidy)
    '(8 5 error "<spam> is not recognized!"
-       :checker html-tidy :filename nil)
+       :checker html-tidy)
    '(8 5 warning "discarding unexpected <spam>"
-       :checker html-tidy :filename nil)))
+       :checker html-tidy)))
 
 (flycheck-ert-def-checker-test javascript-jshint javascript syntax-error
   ;; Silence JS2 and JS3 parsers
@@ -4212,7 +4212,7 @@ Why not:
   (flycheck-ert-should-syntax-check
    "checkers/lua-syntax-error.lua" 'lua-mode
    '(5 nil error "unfinished string near '\"oh no'"
-       :checker lua :filename nil)))
+       :checker lua)))
 
 (flycheck-ert-def-checker-test make make nil
   (flycheck-ert-should-syntax-check
@@ -4871,7 +4871,7 @@ Why not:
   (flycheck-ert-should-syntax-check
    "checkers/yaml-syntax-error.yaml" 'yaml-mode
    '(4 5 error "bad indentation of a mapping entry"
-       :checker yaml-jsyaml :filename nil)))
+       :checker yaml-jsyaml)))
 
 (flycheck-ert-def-checker-test yaml-ruby yaml nil
   (let* ((ruby-version (car (process-lines "ruby" "-e" "puts RUBY_VERSION")))
