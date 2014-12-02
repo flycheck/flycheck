@@ -5945,9 +5945,9 @@ See URL `https://developers.google.com/closure/utilities'."
   :command ("gjslint" "--unix_mode"
             (config-file "--flagfile" flycheck-gjslintrc)
             source)
-  :error-patterns ((error line-start
-                          (file-name) ":" line ":" (message)
-                          line-end))
+  :error-patterns ((warning
+                    line-start (file-name) ":" line ":("
+                    (id (one-or-more digit)) ") " (message) line-end))
   :modes (js-mode js2-mode js3-mode))
 
 (flycheck-define-checker json-jsonlint
@@ -6051,19 +6051,22 @@ the `--severity' option to Perl Critic."
   "A Perl syntax checker using Perl::Critic.
 
 See URL `https://metacpan.org/pod/Perl::Critic'."
-  :command ("perlcritic" "--no-color" "--verbose" "%f:%l:%c:%s:%m (%e)\n"
+  :command ("perlcritic" "--no-color" "--verbose" "%f/%l/%c/%s/%p/%m (%e)\n"
             (option "--severity" flycheck-perlcritic-verbosity nil
                     flycheck-option-int)
             source)
   :error-patterns
   ((info line-start
-         (file-name) ":" line ":" column ":" (any "1") ":" (message)
+         (file-name) "/" line "/" column "/" (any "1") "/"
+         (id (one-or-more (not (any "/")))) "/" (message)
          line-end)
    (warning line-start
-            (file-name) ":" line ":" column ":" (any "234") ":" (message)
+            (file-name) "/" line "/" column "/" (any "234") "/"
+            (id (one-or-more (not (any "/")))) "/" (message)
             line-end)
    (error line-start
-          (file-name) ":" line ":" column ":" (any "5") ":" (message)
+          (file-name) "/" line "/" column "/" (any "5") "/"
+          (id (one-or-more (not (any "/")))) "/" (message)
           line-end))
   :modes (cperl-mode perl-mode))
 
@@ -6120,21 +6123,10 @@ or as path to a standard specification."
   "A PHP style checker using PHP_CodeSniffer.
 
 See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
-  :command ("phpcs" "--report=emacs"
+  :command ("phpcs" "--report=checkstyle"
             (option "--standard=" flycheck-phpcs-standard concat)
             source)
-  ;; Though phpcs supports Checkstyle output which we could feed to
-  ;; `flycheck-parse-checkstyle', we are still using error patterns here,
-  ;; because PHP has notoriously unstable output habits.  See URL
-  ;; `https://github.com/flycheck/flycheck/issues/78' and URL
-  ;; `https://github.com/flycheck/flycheck/issues/118'
-  :error-patterns
-  ((error line-start
-          (file-name) ":" line ":" column ": error - " (message)
-          line-end)
-   (warning line-start
-            (file-name) ":" line ":" column ": warning - " (message)
-            line-end))
+  :error-parser flycheck-parse-checkstyle
   :modes (php-mode php+-mode))
 
 (flycheck-define-checker puppet-parser
@@ -6219,19 +6211,21 @@ See URL `https://pypi.python.org/pypi/flake8'."
   :error-patterns
   ((error line-start
           (file-name) ":" line ":" (optional column ":") " "
-          (message "E" (one-or-more digit) (zero-or-more not-newline))
+          (id "E" (one-or-more digit)) " "
+          (message (one-or-more not-newline))
           line-end)
    (warning line-start
             (file-name) ":" line ":" (optional column ":") " "
-            (message (or "F"            ; Pyflakes in Flake8 >= 2.0
-                         "W"            ; Pyflakes in Flake8 < 2.0
-                         "C")           ; McCabe in Flake >= 2.0
-                     (one-or-more digit) (zero-or-more not-newline))
-            line-end)
+            (id  (or "F"                ; Pyflakes in Flake8 >= 2.0
+                     "W"                ; Pyflakes in Flake8 < 2.0
+                     "C")               ; McCabe in Flake >= 2.0
+                 (one-or-more digit)) " "
+                 (message (one-or-more not-newline))
+                 line-end)
    (info line-start
          (file-name) ":" line ":" (optional column ":") " "
-         (message "N"              ; pep8-naming in Flake8 >= 2.0
-                  (one-or-more digit) (zero-or-more not-newline))
+         (id "N" (one-or-more digit)) " " ; pep8-naming in Flake8 >= 2.0
+         (message (one-or-more not-newline))
          line-end)
    ;; Syntax errors in Flake8 < 2.0, in Flake8 >= 2.0 syntax errors are caught
    ;; by the E.* pattern above
@@ -6250,18 +6244,23 @@ This syntax checker requires Pylint 1.0 or newer.
 See URL `http://www.pylint.org/'."
   ;; -r n disables the scoring report
   :command ("pylint" "-r" "n"
-            "--msg-template" "{path}:{line}:{column}:{C}:{msg} ({msg_id})"
+            "--msg-template" "{path}:{line}:{column}:{C}:{msg_id}:{msg}"
             (config-file "--rcfile" flycheck-pylintrc)
             ;; Need `source-inplace' for relative imports (e.g. `from .foo
             ;; import bar'), see https://github.com/flycheck/flycheck/issues/280
             source-inplace)
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ":"
-          (or "E" "F") ":" (message) line-end)
+          (or "E" "F") ":"
+          (id (one-or-more (not (any ":")))) ":"
+          (message) line-end)
    (warning line-start (file-name) ":" line ":" column ":"
-            (or "W" "R") ":" (message) line-end)
+            (or "W" "R") ":"
+            (id (one-or-more (not (any ":")))) ":"
+            (message) line-end)
    (info line-start (file-name) ":" line ":" column ":"
-         "C:" (message) line-end))
+         "C:" (id (one-or-more (not (any ":")))) ":"
+         (message) line-end))
   :modes python-mode)
 
 (flycheck-define-checker racket
@@ -6370,19 +6369,18 @@ Otherwise report style issues as well."
   "A Ruby syntax and style checker using the RuboCop tool.
 
 See URL `http://batsov.com/rubocop/'."
-  :command ("rubocop" "--format" "emacs"
+  :command ("rubocop" "--display-cop-names" "--format" "emacs"
             (config-file "--config" flycheck-rubocoprc)
             (option-flag "--lint" flycheck-rubocop-lint-only)
             source)
   :error-patterns
-  ((info line-start
-         (file-name) ":" line ":" column ": C: " (message)
-         line-end)
-   (warning line-start
-            (file-name) ":" line ":" column ": W: " (message)
+  ((info line-start (file-name) ":" line ":" column ": C: "
+         (optional (id (one-or-more (not (any ":")))) ": ") (message) line-end)
+   (warning line-start (file-name) ":" line ":" column ": W: "
+            (optional (id (one-or-more (not (any ":")))) ": ") (message)
             line-end)
-   (error line-start
-          (file-name) ":" line ":" column ": " (or "E" "F") ": " (message)
+   (error line-start (file-name) ":" line ":" column ": " (or "E" "F") ": "
+          (optional (id (one-or-more (not (any ":")))) ": ") (message)
           line-end))
   :modes (enh-ruby-mode ruby-mode)
   :next-checkers ((warning . ruby-rubylint)))
@@ -6746,7 +6744,8 @@ See URL `http://www.nongnu.org/chktex/'."
   :command ("chktex" (config-file "-l" flycheck-chktexrc) "-v0" "-q" "-I"
             source-inplace)
   :error-patterns
-  ((warning line-start (file-name) ":" line ":" column ":" (message) line-end))
+  ((warning line-start (file-name) ":" line ":" column ":"
+            (id (one-or-more digit)) ":" (message) line-end))
   :modes (latex-mode plain-tex-mode))
 
 (flycheck-define-checker tex-lacheck
