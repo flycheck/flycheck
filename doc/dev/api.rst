@@ -270,11 +270,6 @@ See :infonode:`(cl)Structures` for more information about CL structures.
 
       The buffer object referring to the buffer this error belongs to.
 
-      .. note::
-
-         You do not need to set this attribute when creating errors in an error
-         parser.  Flycheck automatically keeps track of the buffer itself.
-
    .. cl-slot:: checker
 
       The syntax checker that reported this error.
