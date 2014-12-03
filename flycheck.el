@@ -4550,6 +4550,36 @@ about Cppcheck."
                                 errors))))))))))))
        (nreverse errors)))))
 
+(defun flycheck-parse-phpmd (output checker buffer)
+  "Parse phpmd errors from OUTPUT.
+
+See URL `http://phpmd.org/' for more information about phpmd."
+  (pcase (flycheck-parse-xml-string output)
+    (`(pmd ,_ . ,body)
+     (let (errors)
+       (dolist (node body)
+         (pcase node
+           (`(file ,file-attrs . ,violation-nodes)
+            (let ((filename (cdr (assq 'name file-attrs))))
+              (dolist (node violation-nodes)
+                (pcase node
+                  (`(violation ,vio-attrs ,(and message (pred stringp)))
+                   (let ((line (cdr (assq 'beginline vio-attrs)))
+                         (rule (cdr (assq 'rule vio-attrs))))
+                     ;; TODO: Map priority to an error level?
+                     ;; TODO: Respect endline
+                     (push
+                      (flycheck-error-new-at
+                       (flycheck-string-to-number-safe line)
+                       nil
+                       'warning (string-trim message)
+                       :id rule
+                       :checker checker
+                       :buffer buffer
+                       :filename filename)
+                      errors)))))))))
+       (nreverse errors)))))
+
 
 ;;; Error parsing with regular expressions
 (defun flycheck-get-regexp (patterns)
@@ -6114,11 +6144,10 @@ manual at URL `http://phpmd.org/documentation/index.html'."
   "A PHP style checker using PHP Mess Detector.
 
 See URL `http://phpmd.org/'."
-  :command ("phpmd" source "text"
+  :command ("phpmd" source "xml"
             (eval (flycheck-option-comma-separated-list
                    flycheck-phpmd-rulesets)))
-  :error-patterns
-  ((warning line-start(file-name) ":" line (message) line-end))
+  :error-parser flycheck-parse-phpmd
   :modes (php-mode php+-mode)
   :next-checkers (php-phpcs))
 

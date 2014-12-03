@@ -2325,6 +2325,46 @@ of the file will be interrupted because there are too many #ifdef configurations
   </errors>
 </results>" nil nil))))
 
+(defconst flycheck-phpmd-xml
+  "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
+<pmd version=\"1.5.0\" timestamp=\"2014-12-02T18:13:44+00:00\">
+  <file name=\"foo.php\">
+    <violation beginline=\"21\" endline=\"21\" rule=\"UnusedPrivateField\" ruleset=\"Unused Code Rules\" externalInfoUrl=\"http://phpmd.org/rules/unusedcode.html#unusedprivatefield\" priority=\"3\">
+      Avoid unused private fields such as '$FOO'.
+    </violation>
+    <violation beginline=\"24\" endline=\"27\" rule=\"UnusedPrivateMethod\" ruleset=\"Unused Code Rules\" package=\"Flycheck\" externalInfoUrl=\"http://phpmd.org/rules/unusedcode.html#unusedprivatemethod\" class=\"A\" method=\"bar\" priority=\"3\">
+      Avoid unused private methods such as 'bar'.
+    </violation>
+    <violation beginline=\"24\" endline=\"24\" rule=\"UnusedFormalParameter\" ruleset=\"Unused Code Rules\" externalInfoUrl=\"http://phpmd.org/rules/unusedcode.html#unusedformalparameter\" priority=\"3\">
+      Avoid unused parameters such as '$baz'.
+    </violation>
+  </file>
+</pmd>"
+  "Example phpmd output.")
+
+(ert-deftest flycheck-parse-phpmd ()
+  :tags '(error-parsing phpmd-xml)
+  (should (equal (flycheck-parse-phpmd flycheck-phpmd-xml 'foo 'buffer)
+                 (list
+                  (flycheck-error-new-at 21 nil 'warning
+                                         "Avoid unused private fields such as '$FOO'."
+                                         :id "UnusedPrivateField"
+                                         :checker 'foo
+                                         :buffer 'buffer
+                                         :filename "foo.php")
+                  (flycheck-error-new-at 24 nil 'warning
+                                         "Avoid unused private methods such as 'bar'."
+                                         :id "UnusedPrivateMethod"
+                                         :checker 'foo
+                                         :buffer 'buffer
+                                         :filename "foo.php")
+                  (flycheck-error-new-at 24 nil 'warning
+                                         "Avoid unused parameters such as '$baz'."
+                                         :id "UnusedFormalParameter"
+                                         :checker 'foo
+                                         :buffer 'buffer
+                                         :filename "foo.php")))))
+
 
 ;;; Error filters
 
@@ -4351,12 +4391,13 @@ Why not:
    '(8 nil error "syntax error, unexpected ')', expecting '('" :checker php)))
 
 (flycheck-ert-def-checker-test php php nil
+  :tags '(phpmd-xml)
   (flycheck-ert-should-syntax-check
    "checkers/php.php" 'php-mode
    '(19 6 error "Missing class doc comment"
         :id "PEAR.Commenting.ClassComment.Missing" :checker php-phpcs)
    '(21 nil warning "Avoid unused private fields such as '$FOO'."
-        :checker php-phpmd)
+        :id "UnusedPrivateField" :checker php-phpmd)
    '(21 20 error "Private member variable \"FOO\" must be prefixed with an underscore"
         :id "PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore"
         :checker php-phpcs)
@@ -4366,60 +4407,36 @@ Why not:
    '(23 5 error "Missing @return tag in function comment"
         :id "PEAR.Commenting.FunctionComment.MissingReturn" :checker php-phpcs)
    '(24 nil warning "Avoid unused private methods such as 'bar'."
-        :checker php-phpmd)
+        :id "UnusedPrivateMethod" :checker php-phpmd)
    '(24 nil warning "Avoid unused parameters such as '$baz'."
-        :checker php-phpmd)
+        :id "UnusedFormalParameter" :checker php-phpmd)
    '(24 13 error "Private method name \"A::bar\" must be prefixed with an underscore"
         :id "PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore"
         :checker php-phpcs)
    '(26 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
-        :checker php-phpmd)
+        :id "ShortVariable" :checker php-phpmd)
    '(26 nil warning "Avoid unused local variables such as '$i'."
-        :checker php-phpmd)
+        :id "UnusedLocalVariable" :checker php-phpmd)
    '(26 12 error "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\""
         :id "Generic.PHP.LowerCaseConstant.Found" :checker php-phpcs)))
 
 (flycheck-ert-def-checker-test php-phpmd php rulesets
-  (let ((flycheck-phpmd-rulesets (remove "unusedcode" flycheck-phpmd-rulesets)))
+  :tags '(phpmd-xml)
+  (let ((flycheck-phpmd-rulesets (remove "unusedcode" flycheck-phpmd-rulesets))
+        (flycheck-disabled-checkers '(php-phpcs)))
     (flycheck-ert-should-syntax-check
      "checkers/php.php" 'php-mode
-     '(19 6 error "Missing class doc comment"
-          :id "PEAR.Commenting.ClassComment.Missing" :checker php-phpcs)
-     '(21 20 error "Private member variable \"FOO\" must be prefixed with an underscore"
-          :id "PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore"
-          :checker php-phpcs)
-     '(23 5 error "Doc comment for \"$baz\" missing"
-          :id "PEAR.Commenting.FunctionComment.MissingParamTag"
-          :checker php-phpcs)
-     '(23 5 error "Missing @return tag in function comment"
-          :id "PEAR.Commenting.FunctionComment.MissingReturn"
-          :checker php-phpcs)
-     '(24 13 error "Private method name \"A::bar\" must be prefixed with an underscore"
-          :id "PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore"
-          :checker php-phpcs)
      '(26 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
-          :checker php-phpmd)
-     '(26 12 error "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\""
-          :id "Generic.PHP.LowerCaseConstant.Found"
-          :checker php-phpcs))))
+          :id "ShortVariable" :checker php-phpmd))))
 
 (flycheck-ert-def-checker-test php-phpcs php standard
-  (let ((flycheck-phpcs-standard "Zend"))
+  (let ((flycheck-phpcs-standard "Zend")
+        (flycheck-disabled-checkers '(php-phpmd)))
     (flycheck-ert-should-syntax-check
      "checkers/php.php" 'php-mode
-     '(21 nil warning "Avoid unused private fields such as '$FOO'."
-          :checker php-phpmd)
      '(21 20 error "Private member variable \"FOO\" must contain a leading underscore"
           :id "Zend.NamingConventions.ValidVariableName.PrivateNoUnderscore"
           :checker php-phpcs)
-     '(24 nil warning "Avoid unused private methods such as 'bar'."
-          :checker php-phpmd)
-     '(24 nil warning "Avoid unused parameters such as '$baz'."
-          :checker php-phpmd)
-     '(26 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
-          :checker php-phpmd)
-     '(26 nil warning "Avoid unused local variables such as '$i'."
-          :checker php-phpmd)
      '(30 1 error "A closing tag is not permitted at the end of a PHP file"
           :id "Zend.Files.ClosingTag.NotAllowed" :checker php-phpcs))))
 
