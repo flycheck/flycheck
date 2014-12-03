@@ -18,10 +18,10 @@ Features
 - |#flycheck-languages| languages with |#flycheck-checkers| syntax checkers, see
   :ref:`supported-languages`
 - :ref:`Fully automatic, fail-safe, on-the-fly syntax checking in background
-  <syntax-checking>`
+  <checking-buffers>`
 - :ref:`Nice error indication and highlighting <error-reporting>`
 - Optional error list popup
-- :ref:`Many customization options <syntax-checker-configuration>`
+- :ref:`Many customization options <configuring-syntax-checkers>`
 - :ref:`A comprehensive manual <usage>`
 - :ref:`A simple API to define new syntax checkers
   <defining-new-syntax-checkers>`

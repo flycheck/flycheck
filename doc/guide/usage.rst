@@ -4,22 +4,29 @@
  Usage
 =======
 
-.. _flycheck-mode:
+This chapter explains in-depth how to use Flycheck for your daily work.
+
+.. contents:: Contents
+
+.. note::
+
+   All commands in this chapter are documented with their standard key prefix
+   :kbd:`C-c !`.  If you do not like this prefix, you can change it with
+   :option:`flycheck-keymap-prefix`, but take care to remember your custom
+   prefix while reading this chapter.
+
+   .. option:: flycheck-keymap-prefix
+      :auto:
 
 .. require:: flycheck
 
-Flycheck Mode
-=============
+.. _enabling-syntax-checking:
 
-Syntax checking is done in the Flycheck minor mode:
+Enabling syntax checking
+========================
 
-.. command:: flycheck-mode
-
-   Toggle Flycheck Mode for the current buffer.
-
-.. option:: flycheck-mode
-
-   Whether Flycheck Mode is enabled in the current buffer.
+:command:`global-flycheck-mode` enables syntax checking in all buffers whenever
+possible:
 
 .. command:: global-flycheck-mode
 
@@ -37,31 +44,44 @@ Syntax checking is done in the Flycheck minor mode:
       You can still explicitly enable Flycheck Mode in such buffers with
       :command:`flycheck-mode`.  This is **not** recommended though.
 
-.. option:: global-flycheck-mode
+   .. option:: global-flycheck-mode
 
-   Whether Flycheck Mode is enabled globally.
+      Whether Flycheck Mode is enabled globally.
 
-If you like Flycheck Mode, you may want to enable it permanently, either by
-customizing :option:`global-flycheck-mode`, or by adding the following code to
-your :file:`init.el`:
+To permanently enable syntax checking, either customize
+:option:`global-flycheck-mode` with :kbd:`M-x customize-variable RET
+global-flycheck-mode` and select :guilabel:`Save for Future Sessions`, or add
+the following code to your init file:
 
 .. code-block:: cl
 
    (add-hook 'after-init-hook #'global-flycheck-mode)
 
-.. _syntax-checking:
+You can also explicitly enable syntax checking just for the current buffer with
+the local minor mode :command:`flycheck-mode`:
 
-Syntax checking
-===============
+.. command:: flycheck-mode
 
-By default, :ref:`flycheck-mode` checks syntax automatically when
+   Toggle Flycheck Mode for the current buffer.
 
-- the mode is enabled,
-- the file is saved,
+   .. option:: flycheck-mode
+
+      Whether Flycheck Mode is enabled in the current buffer.
+
+.. _checking-buffers:
+
+Checking buffers
+================
+
+When :command:`flycheck-mode` is enabled, Flycheck automatically checks a buffer
+whenever
+
+- the buffer is saved (e.g. :kbd:`C-x C-s`),
 - new lines are inserted,
-- or some short time after the last change to the buffer.
+- or a short time (see :option:`flycheck-idle-change-delay`) after the last
+  change to the buffer.
 
-However, you can customize automatic syntax checking with
+You can customize this behaviour with the option
 :option:`flycheck-check-syntax-automatically`:
 
 .. option:: flycheck-check-syntax-automatically
@@ -70,84 +90,50 @@ However, you can customize automatic syntax checking with
 .. option:: flycheck-idle-change-delay
    :auto:
 
-Regardless of automatic syntax checking you can also check the buffer
-manually:
+You can also always check the current buffer manually:
 
 .. command:: flycheck-buffer
    :binding: C-c ! c
    :auto:
 
-Each syntax check conducts the following steps:
-
-1. Run hooks in :hook:`flycheck-before-syntax-check-hook`
-2. Clear error information from previous syntax checks.
-3. Select a :term:`suitable syntax checker`.  See
-   :ref:`syntax-checker-selection`, for more information on how syntax checkers
-   are selected.
-4. Copy the contents of the buffer to be checked to a temporary file.
-5. Run the syntax checker.
-6. Parse the output of the tool, and report all errors and warnings.  See
-   :ref:`error-reporting`, for more information.
-7. If the buffer can be checked with another syntax checker, continue from step
-   4, but with the next syntax checker.  This is called :term:`chaining` of
-   syntax checkers.
-8. Run hooks in :hook:`flycheck-after-syntax-check-hook`.
-
-Whenever the status of Flycheck changes, Flycheck runs
-:hook:`flycheck-status-changed-functions`:
-
-.. hook:: flycheck-status-changed-functions
-   :auto:
-
-There are also special hooks, which run only for certain status changes:
-
-.. hook:: flycheck-after-syntax-check-hook
-   :auto:
-
-.. hook:: flycheck-before-syntax-check-hook
-   :auto:
-
-There is also a hook run whenever a syntax check fails:
-
-.. hook:: flycheck-syntax-check-failed-hook
-   :auto:
-
 During syntax checks, Flycheck generates some temporary files for syntax checker
-input and output.   Use :option:`flycheck-temp-prefix` to change the prefix of
+input and output.  Use :option:`flycheck-temp-prefix` to change the prefix of
 these temporary files:
 
 .. option:: flycheck-temp-prefix
    :auto:
 
-.. _syntax-checker-selection:
+.. _selecting-syntax-checkers:
 
-Syntax checker selection
-========================
+Selecting syntax checkers
+=========================
 
-By default Flycheck selects a :term:`suitable syntax checker` automatically from
-:option:`flycheck-checkers`, with respect to
-:option:`flycheck-disabled-checkers`:
+Whenever it checks a buffer, Flycheck selects a :term:`suitable syntax checker`
+from :option:`flycheck-checkers`:
 
 .. option:: flycheck-checkers
    :auto:
 
    An item in this list is a :term:`registered syntax checker`.
 
+To disable a :term:`registered syntax checker`, add it to
+:option:`flycheck-disabled-checkers`:
+
 .. option:: flycheck-disabled-checkers
    :auto:
 
-A syntax checker in :option:`flycheck-checkers` and **not** in
+A syntax checker in :option:`flycheck-checkers` that is **not** in
 :option:`flycheck-disabled-checkers` is an :term:`enabled syntax checker`.
 
-Flycheck uses the first enabled and suitable syntax checker for the current
-buffer.  See `Languages and syntax checkers` for a list of all available syntax
-checkers.
+Flycheck starts to check the current buffer with the first enabled and suitable
+syntax checker from :option:`flycheck-checkers`.  See `Languages and syntax
+checkers` for a list of all available syntax checkers.  If there is no enabled
+and suitable checker for the current, Flycheck does not check this buffer.  It
+does **not** signal an error.  Instead a special mode line indicator informs
+about this state.  See :ref:`mode-line-reporting` for details.
 
-If no :term:`suitable syntax checker` is found, the syntax check is *silently*
-omitted.  *No* error is signalled.  Only a special indicator in the mode line
-informs about the omitted syntax check.  See `Mode line` for details.
-
-You can manually select a specific syntax checker for the current buffer, too:
+You can also force Flycheck to use a specific syntax checker for the current
+buffer with :command:`flycheck-select-checker`:
 
 .. command:: flycheck-select-checker
    :binding: C-c ! s
@@ -175,29 +161,32 @@ You can manually select a specific syntax checker for the current buffer, too:
    :noindex:
    :auto:
 
-.. variable:: flycheck-checker
-   :auto:
-
-You can change the completion system used by
-:command:`flycheck-select-checker`:
+You can change the completion system used by :command:`flycheck-select-checker`:
 
 .. option:: flycheck-completion-system
    :auto:
 
-Each syntax checker provides documentation with information about the executable
-the syntax checker uses, in which buffers it will be used for syntax checks, and
-whether it can be configured.  See `Configuration`, for more information about
-syntax checker configuration.
+:command:`flycheck-select-checker` sets the local variable
+:variable:`flycheck-checker` for the current buffer.  You can also set this
+variable explicitly, via :infonode:`(emacs)File Variables` or
+:infonode:`(emacs)Directory Variables`, to enforce a specific syntax checker per
+file or per directory:
+
+.. variable:: flycheck-checker
+   :auto:
+
+Like everything else in Emacs, a syntax checker has online documentation, which
+you can via with :command:`flycheck-describe-checker`:
 
 .. command:: flycheck-describe-checker
    :binding: C-c ! ?
 
    Show the documentation of a syntax checker.
 
-.. _syntax-checker-configuration:
+.. _configuring-syntax-checkers:
 
-Syntax checker configuration
-============================
+Configuring syntax checkers
+===========================
 
 .. _syntax-checker-executables:
 
@@ -292,13 +281,24 @@ If any of these steps succeeds, the subsequent steps are not executed.
 Error reporting
 ===============
 
-Errors and warnings from a syntax checker are
+When a syntax check in the current buffer has finished, Flycheck highlights the
+locations of errors and warnings in the buffer according to
+:option:`flycheck-highlighting-mode`, and indicates these locations in the
+fringe according to :option:`flycheck-indication-mode`.  Additionally it shows
+the number of errors and warnings in the mode line.
 
-- reported in the mode line or in a popup buffer, depending on the length
-  of the error messages,
-- indicated according to :option:`flycheck-indication-mode`,
-- and highlighted in the buffer with the corresponding faces, according to
-  :option:`flycheck-highlighting-mode`
+.. note::
+
+   To avoid flooding the buffer with excessive errors, Flycheck discards errors
+   and warnings and **disables** the corresponding syntax checker subsequently,
+   if the total number of reported errors of any level exceeds
+   :option:`flycheck-checker-error-threshold`:
+
+   .. option:: flycheck-checker-error-threshold
+      :auto:
+
+.. option:: flycheck-highlighting-mode
+   :auto:
 
 .. face:: flycheck-error
           flycheck-warning
@@ -318,7 +318,7 @@ Errors and warnings from a syntax checker are
    that has reasonable Flycheck faces.  The popular Solarized_ and Zenburn_
    themes are known to have good Flycheck faces.
 
-.. option:: flycheck-highlighting-mode
+.. option:: flycheck-indication-mode
    :auto:
 
 .. face:: flycheck-fringe-error
@@ -328,22 +328,39 @@ Errors and warnings from a syntax checker are
    The faces of fringe indicators for errors, warnings and info messages
    respectively.
 
-.. option:: flycheck-indication-mode
+If you hover a highlighted error with the mouse, a tooltip with the top-most
+error message is shown.  Alternatively, you can move the point onto an error
+location to see the error message.  Flycheck displays errors at point after a
+short delay:
+
+.. option:: flycheck-display-errors-delay
    :auto:
 
-You can also completely customize error processing by hooking into Flycheck:
+By default, Flycheck shows the messages and IDs of the errors at point in the
+minibuffer, but this behaviour is entirely customizable via the
+:option:`flycheck-display-errors-function` option:
 
-.. hook:: flycheck-process-error-functions
+.. option:: flycheck-display-errors-function
    :auto:
+
+   Flycheck provides two built-in functions for this option:
+
+   .. function:: flycheck-display-error-messages
+      :auto:
+
+   .. function:: flycheck-display-error-messages-unless-error-list
+      :auto:
+
+      .. seealso:: :ref:`listing-errors`
 
    .. seealso::
 
-      :ref:`api-errors`
+      The `flycheck-pos-tip`_ extension provides a display function to show
+      errors at point in a graphical popup.
 
-If you hover a highlighted error with the mouse, a tooltip with the top-most
-error message will be shown.
+      .. _flycheck-pos-tip: https://github.com/flycheck/flycheck-pos-tip
 
-Ultimately, you can clear all reported errors at once:
+You can clear all errors in the current buffer with :command:`flycheck-clear`:
 
 .. command:: flycheck-clear
    :binding: C-c ! C
@@ -353,82 +370,18 @@ Ultimately, you can clear all reported errors at once:
    You should not normally need this command, because Flycheck checks the buffer
    periodically anyway.
 
-Note that if a syntax checker reports too many errors, Flycheck will discard
-these errors and disable the syntax checker for subsequent syntax checks.  The
-threshold is customizable with :option:`flycheck-checker-error-threshold`:
-
-.. option:: flycheck-checker-error-threshold
-   :auto:
-
 .. _Solarized: https://github.com/bbatsov/solarized-emacs
 .. _Zenburn: https://github.com/bbatsov/zenburn-emacs
 
-.. _error-messages:
+.. _listing-errors:
 
-Error messages
+Listing errors
 ==============
 
-Flycheck also displays error messages under point after a short delay:
+To view all errors in the current buffer, pop up the error list with
+:command:`flycheck-list-errors`:
 
-.. option:: flycheck-display-errors-delay
-   :auto:
-
-The error is displayed via :option:`flycheck-display-errors-function`:
-
-.. option:: flycheck-display-errors-function
-   :auto:
-
-   .. seealso::
-
-      The `flycheck-pos-tip`_ extension provides a display function to show
-      errors at point in a graphical popup.
-
-      .. _flycheck-pos-tip: https://github.com/flycheck/flycheck-pos-tip
-
-The default function displays the error messages in the echo area:
-
-.. function:: flycheck-display-error-messages
-   :auto:
-
-Alternatively, the following error display functions are available:
-
-.. function:: flycheck-display-error-messages-unless-error-list
-   :auto:
-
-You can also work with the errors to copy them into the kill ring or search them
-on Google:
-
-.. command:: flycheck-copy-errors-as-kill
-   :binding: C-c ! C-w
-
-   Copy all Flycheck error messages at the current point into kill ring.
-
-.. command:: flycheck-copy-errors-as-kill
-   :binding: C-c ! C-w
-   :prefix-arg: C-u
-   :noindex:
-
-   Copy all Flycheck error messages **and their ids** at the current point into
-   kill ring.
-
-.. command:: flycheck-copy-errors-as-kill
-   :binding: C-c ! C-w
-   :prefix-arg: M-0
-   :noindex:
-
-   Copy all Flycheck error **ids** at the current point into kill ring.  This
-   command is particularly handy to copy an ID in order to add an inline
-   suppression comment.
-
-.. _error-list:
-
-Error list
-==========
-
-You can also show a list with all errors in the current buffer:
-
-.. command:: flycheck-list-errors
-             list-flycheck-errors
+.. command:: flycheck-list-errors list-flycheck-errors
    :binding: C-c ! l
 
    List all errors in the current buffer in a separate buffer.
@@ -463,31 +416,66 @@ syntax checker name:
 .. face:: flycheck-error-list-checker-name
    :auto:
 
-.. _error-navigation:
+.. _killing-errors:
 
-Error navigation
-================
+Copying (killing) errors
+========================
 
-Flycheck integrates into standard error navigation commands of Emacs.  If **no**
-compilation buffer (including those from :kbd:`M-x compile`, :kbd:`M-x grep`,
-:kbd:`M-x occur`, etc.) is visible, :kbd:`M-g n` (`next-error`) and :kbd:`M-g p`
-(`previous-error`) will navigate between Flycheck warnings and errors in the
-current buffer.  See :infonode:`(emacs)Compilation Mode` for more information
-about these commands.
+Frequently, it's convenient to not only see the error messages, but to also copy
+them into the kill ring:
 
-You can disable this integration by setting
-:option:`flycheck-standard-error-navigation` to nil:
+.. command:: flycheck-copy-errors-as-kill
+   :binding: C-c ! C-w
+
+   Copy all Flycheck error messages at the current point into kill ring.
+
+   Each error message is killed separately, so you can use :kbd:`M-y` to cycle
+   among the killed messages after yanking the first one with :kbd:`C-y`.
+
+.. command:: flycheck-copy-errors-as-kill
+   :binding: C-c ! C-w
+   :prefix-arg: C-u
+   :noindex:
+
+   Copy all Flycheck error messages **and their IDs** at the current point into
+   kill ring.
+
+.. command:: flycheck-copy-errors-as-kill
+   :binding: C-c ! C-w
+   :prefix-arg: M-0
+   :noindex:
+
+   Copy all Flycheck error **IDs** at the current point into kill ring.  This
+   command is particularly handy to copy an ID in order to add an inline
+   suppression comment.
+
+.. _navigating-errors:
+
+Navigating and jumping to errors
+================================
+
+By default, Flycheck integrates into standard error navigation commands of
+Emacs: :kbd:`M-g n` (`next-error`) and :kbd:`M-g p` (`previous-error`) will
+navigate between Flycheck warnings and errors in the current buffer.  See
+:infonode:`(emacs)Compilation Mode` for more information about these commands.
+
+.. note::
+
+   **Visible** compilation buffers (e.g. from :kbd:`M-x compile`, :kbd:`M-x
+   grep`, :kbd:`M-x occur`, etc.) take precedence over Flycheck's error
+   navigation.
+
+If you find this integration annoying and would rather keep :kbd:`M-g n`
+confined to compilation buffers, you may disable it by setting
+:option:`flycheck-standard-error-navigation` to nil and re-enabling
+:command:`flycheck-mode` afterwards:
 
 .. option:: flycheck-standard-error-navigation
    :auto:
 
-Visible compilation buffers take precedence over Flycheck navigation.  If such a
-buffer is visible, :kbd:`M-g n` and :kbd:`M-g p` will ignore Flycheck errors and
-warnings, and navigate errors (or generally results) reported by the compilation
-buffer instead.
-
-To address this issue, Flycheck provides independent error navigation commands,
-which are not affected by :option:`flycheck-standard-error-navigation`:
+Since compilation buffers take precedence, Flycheck provides an independent set
+of navigation commands which always navigate Flycheck errors regardless of
+compilation buffers or :option:`flycheck-standard-error-navigation`:
 
 .. command:: flycheck-next-error
    :binding: C-c ! n
@@ -515,18 +503,22 @@ which are not affected by :option:`flycheck-standard-error-navigation`:
    the prefix argument, e.g. :kbd:`M-3 M-x flycheck-first-error` moves to
    the 3rd error from the beginning of the buffer.
 
-These commands consider all errors by default, but you can ignore errors below a
-given level with :option:`flycheck-navigation-minimum-level`:
+If :option:`flycheck-standard-error-navigation` is `nil`, these commands are the
+only way to navigate Flycheck errors.
+
+By default, Flycheck's error navigation considers all error levels.  You can
+specify a threshold for navigation with
+:option:`flycheck-navigation-minimum-level`:
 
 .. option:: flycheck-navigation-minimum-level
    :auto:
 
-.. _mode-line:
+.. _mode-line-reporting:
 
-Mode line
-=========
+Mode line reporting
+===================
 
-Flycheck indicates its state in the mode line:
+Flycheck always indicates its state in the mode line:
 
 `FlyC`
     There are no errors in the current buffer.
@@ -539,7 +531,7 @@ Flycheck indicates its state in the mode line:
 
 `FlyC-`
     Automatic syntax checker selection did not find a suitable syntax checker.
-    See :ref:`syntax-checker-selection` for more information.
+    See :ref:`selecting-syntax-checkers` for more information.
 
 `FlyC!`
     The syntax check failed.  Inspect the `*Messages*` buffer for details.

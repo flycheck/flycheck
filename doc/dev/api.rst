@@ -16,6 +16,34 @@ You will also find this document helpful if you want to develop Flycheck itself.
 .. contents:: Contents
    :local:
 
+.. _api-syntax-checks:
+
+Syntax checks
+=============
+
+A syntax check performs the following steps:
+
+1. Run hooks in :hook:`flycheck-before-syntax-check-hook`
+2. Clear error information from previous syntax checks.
+3. Select a :term:`suitable syntax checker`.
+4. Copy the contents of the buffer to be checked to a temporary file.
+5. Run the syntax checker.
+6. Parse the output of the tool, and report all errors and warnings, via
+   :hook:`flycheck-process-error-functions`
+7. If the buffer can be checked with another syntax checker, continue from step
+   4, but with the next syntax checker.  This is called :term:`chaining` of
+   syntax checkers.
+8. Run hooks in :hook:`flycheck-after-syntax-check-hook`.
+
+.. hook:: flycheck-after-syntax-check-hook
+   :auto:
+
+.. hook:: flycheck-before-syntax-check-hook
+   :auto:
+
+.. hook:: flycheck-syntax-check-failed-hook
+   :auto:
+
 .. _api-generic-syntax-checkers:
 
 Generic syntax checkers
@@ -347,6 +375,8 @@ See :infonode:`(cl)Structures` for more information about CL structures.
 Error processing
 ----------------
 
+.. hook:: flycheck-process-error-functions
+
 .. function:: flycheck-add-overlay
 
 Error analysis
@@ -387,6 +417,9 @@ You can define new error levels with :function:`flycheck-define-error-level`:
 
 Flycheck buffer status
 ======================
+
+.. hook:: flycheck-status-changed-functions
+   :auto:
 
 .. function:: flycheck-report-status
    :auto:
