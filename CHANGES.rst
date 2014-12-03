@@ -15,6 +15,7 @@ master (in development)
   - Replace `flycheck-perlcritic-verbosity` with `flycheck-perlcritic-severity`
   - Replace `flycheck-copy-messages-as-kill` with `flycheck-copy-errors-as-kill`
     [GH-529]
+  - Remove `flycheck-google-messages` command
 
 - New features:
 

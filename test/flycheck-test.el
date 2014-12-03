@@ -222,10 +222,6 @@ and extension, as in `file-name-base'."
   :tags '(customization)
   (should (equal flycheck-idle-change-delay 0.5)))
 
-(ert-deftest flycheck-google-max-messages/defaults-to-5 ()
-  :tags '(customization)
-  (should (equal flycheck-google-max-messages 5)))
-
 (ert-deftest flycheck-standard-error-navigation/default-to-t ()
   :tags '(customization)
   (should (eq flycheck-standard-error-navigation t)))
@@ -3305,53 +3301,6 @@ evaluating BODY."
       (flycheck-copy-errors-as-kill 10 #'flycheck-error-format-message-and-id)
       (should (equal (-take 2 kill-ring)
                      '("1st message" "2nd message [foo]"))))))
-
-(ert-deftest flycheck-google-messages/error-on-too-many-messages ()
-  :tags '(errors-at-point)
-  (flycheck-ert-with-temp-buffer
-    (insert "A test buffer to copy errors from")
-    (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
-          (errors (list (flycheck-error-new-at 1 nil 'error "1st message")
-                        (flycheck-error-new-at 1 10 'warning "2nd message"))))
-      (mapc #'flycheck-add-overlay errors)
-      (let* ((flycheck-google-max-messages 1)
-             (err (should-error (flycheck-google-messages 10)
-                                :type flycheck-ert-user-error-type)))
-        (should (string= (cadr err) "More than 1 messages at point"))))))
-
-(ert-deftest flycheck-google-messages/searches-google ()
-  :tags '(errors-at-point)
-  (flycheck-ert-with-temp-buffer
-    (insert "A test buffer to copy errors from")
-    (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
-          (errors (list (flycheck-error-new-at 1 nil 'error "1st message")
-                        (flycheck-error-new-at 1 10 'warning "2nd message"))))
-      (mapc #'flycheck-add-overlay errors)
-      (let* (browsed-urls
-             (browse-url-browser-function (lambda (url &optional _)
-                                            (push url browsed-urls))))
-        (flycheck-google-messages 10)
-        ;; Arguments come out backwards because of `push'
-        (should (equal '("https://www.google.com/search?ion=1&q=2nd%20message"
-                         "https://www.google.com/search?ion=1&q=1st%20message")
-                       browsed-urls))))))
-
-(ert-deftest flycheck-google-messages/searches-google-with-quoted-urls ()
-  :tags '(errors-at-point)
-  (flycheck-ert-with-temp-buffer
-    (insert "A test buffer to copy errors from")
-    (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
-          (errors (list (flycheck-error-new-at 1 nil 'error "1st message")
-                        (flycheck-error-new-at 1 10 'warning "2nd message"))))
-      (mapc #'flycheck-add-overlay errors)
-      (let* (browsed-urls
-             (browse-url-browser-function (lambda (url &optional _)
-                                            (push url browsed-urls))))
-        (flycheck-google-messages 10 'quote)
-        ;; Arguments come out backwards because of `push'
-        (should (equal '("https://www.google.com/search?ion=1&q=%222nd%20message%22"
-                         "https://www.google.com/search?ion=1&q=%221st%20message%22")
-                       browsed-urls))))))
 
 
 ;;; Syntax checker executables

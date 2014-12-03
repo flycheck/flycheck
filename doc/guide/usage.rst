@@ -420,22 +420,6 @@ on Google:
    command is particularly handy to copy an ID in order to add an inline
    suppression comment.
 
-.. command:: flycheck-google-messages
-   :binding: C-c ! /
-
-   Google for all Flycheck error messages at the current point.
-
-   If there are more than :option:`flycheck-google-max-messages` errors at
-   point, signal an error, to avoid spamming your browser with Google tabs.
-
-   Requires the `Google This`_ library, which is available on MELPA_.
-
-   .. option:: flycheck-google-max-messages
-      :auto:
-
-.. _Google This: https://github.com/Bruce-Connor/emacs-google-this
-.. _MELPA: http://melpa.org
-
 .. _error-list:
 
 Error list

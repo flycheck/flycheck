@@ -504,21 +504,6 @@ This variable has no effect, if `idle-change' is not contained in
   :package-version '(flycheck . "0.13")
   :safe #'numberp)
 
-(defcustom flycheck-google-max-messages 5
-  "How many messages to google at once.
-
-If set to an integer, `flycheck-google-messages' will signal an
-error if there are more Flycheck messages at point than the value
-of this variable.
-
-If set to nil, `flycheck-google-messages' will always google *all*
-messages at point.  This setting is *not* recommended."
-  :group 'flycheck
-  :type '(choice (const :tag "Always google all messages" nil)
-                 (integer :tag "Maximum messages to google"))
-  :package-version '(flycheck . "0.10")
-  :safe #'numberp)
-
 (defcustom flycheck-standard-error-navigation t
   "Whether to support error navigation with `next-error'.
 
@@ -779,7 +764,6 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
     (define-key map "p" 'flycheck-previous-error)
     (define-key map "l" 'flycheck-list-errors)
     (define-key map (kbd "C-w") 'flycheck-copy-errors-as-kill)
-    (define-key map "/" 'flycheck-google-messages)
     (define-key map "s" 'flycheck-select-checker)
     (define-key map "e" 'flycheck-set-checker-executable)
     (define-key map "?" 'flycheck-describe-checker)
@@ -877,8 +861,6 @@ currently listed."
      ["Show all errors" flycheck-list-errors flycheck-mode]
      "---"
      ["Copy messages at point" flycheck-copy-messages-as-kill
-      (flycheck-overlays-at (point))]
-     ["Google messages at point" flycheck-google-messages
       (flycheck-overlays-at (point))]
      "---"
      ["Select syntax checker" flycheck-select-checker flycheck-mode]
@@ -3578,32 +3560,6 @@ universal prefix arg, and only the id with normal prefix arg."
 
 (define-obsolete-function-alias 'flycheck-copy-messages-as-kill
   'flycheck-copy-errors-as-kill "0.22")
-
-(defun flycheck-google-messages (pos &optional quote-flag)
-  "Google each error message at POS.
-
-Issue a separate Google query for each error message at POS.
-Signal an error if there are more messages at POS than
-`flycheck-google-max-messages'.
-
-Enclose the Google query in quotation marks, if
-`google-wrap-in-quotes' is t.  With QUOTE-FLAG, invert the effect
-of `google-wrap-in-quotes'.
-
-This function requires the Google This library from URL
-`https://github.com/Bruce-Connor/emacs-google-this'."
-  (interactive "d\nP")
-  (if (fboundp 'google-this-string)
-      (let ((messages (delq nil (mapcar #'flycheck-error-message
-                                        (flycheck-overlay-errors-at pos)))))
-        (when (and flycheck-google-max-messages
-                   (> (length messages) flycheck-google-max-messages))
-          (user-error "More than %s messages at point"
-                      flycheck-google-max-messages))
-        (dolist (msg messages)
-          (google-this-string quote-flag msg 'no-confirm)))
-    (user-error "Please install Google This from \
-https://github.com/Bruce-Connor/emacs-google-this")))
 
 
 ;;; Syntax checkers using external commands
