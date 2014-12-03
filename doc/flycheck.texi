@@ -642,7 +642,7 @@ Supported Emacs versions
 
 @item
 
-Part of Emacs
+Built-in
 
 @tab
 
@@ -11137,13 +11137,6 @@ A Flycheck error with the following slots.  Each of these slots may be @code{nil
 @deffn {Slot} buffer
 
 The buffer object referring to the buffer this error belongs to.
-
-@cartouche
-@quotation Note 
-You do not need to set this attribute when creating errors in an error
-parser.  Flycheck automatically keeps track of the buffer itself.
-@end quotation
-@end cartouche
 @end deffn
 
 @geindex flycheck-error-checker; Emacs Lisp slot
