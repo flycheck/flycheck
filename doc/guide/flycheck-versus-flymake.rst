@@ -66,6 +66,8 @@ features you are interested in.
 |                                  |                     |various variables    |
 |                                  |                     |[#]_                 |
 +----------------------------------+---------------------+---------------------+
+|Functions as syntax checkers      |yes                  |**no**               |
++----------------------------------+---------------------+---------------------+
 |Customization of syntax checkers  |yes                  |no                   |
 |                                  |                     |                     |
 |                                  |                     |                     |
@@ -73,6 +75,8 @@ features you are interested in.
 |Error levels                      |Errors, warnings,    |Errors and warnings  |
 |                                  |information, and     |[#]_                 |
 |                                  |custom levels        |                     |
++----------------------------------+---------------------+---------------------+
+|Error identifiers                 |yes                  |no                   |
 +----------------------------------+---------------------+---------------------+
 |Error parsing                     |Regular expressions, |Regular expressions  |
 |                                  |or custom error      |                     |
@@ -221,6 +225,19 @@ Whereas Flycheck's definition of the same checker looks like this:
              (or "." (and ", " (zero-or-more not-newline))) line-end))
      :modes (perl-mode cperl-mode))
 
+Functions as syntax checkers
+----------------------------
+
+**Flymake** cannot check a buffer with a custom Emacs Lisp function.
+
+**Flycheck** provides the :function:`flycheck-define-generic-checker` function
+to define a syntax checker based on an arbitrary Emacs Lisp function.  Flycheck
+supports synchronous as well as asynchronous functions, and provides simple
+callback-based protocol to communicate the status of syntax checks.  This allows
+Flycheck to use persistent background processes for syntax checking.  For
+instance, `flycheck-ocaml`_ uses a running Merlin_ process to check OCaml
+buffers, which is much easier and faster than invoking the OCaml compiler.
+
 Customization of syntax checkers
 --------------------------------
 
@@ -320,6 +337,16 @@ pattern of warning messages customizable as well.
 messages of different levels are part of the syntax checker definition, and thus
 specific to each syntax checker.  Flycheck allows to define new error levels for
 use in custom syntax checkers with :function:`flycheck-define-error-level`.
+
+Error identifiers
+-----------------
+
+**Flymake** does not support unique identifiers for different kinds of errors.
+
+**Flycheck** supports unique identifiers for different kinds of errors, if a
+syntax checker provides these.  The identifiers appear in the error list and in
+error display, and can be copied independently, for instance for use in an
+inline suppression comment, or to search the web for a particular kind of error.
 
 Error parsing
 -------------
@@ -471,3 +498,5 @@ required to have test cases.  The tests are continuously run on `Travis CI`_.
 .. _MELPA: http://melpa.org/
 .. _Github: https://github.com/flycheck/flycheck
 .. _Travis CI: https://travis-ci.org/flycheck/flycheck
+.. _flycheck-ocaml: https://github.com/flycheck/flycheck-ocaml
+.. _Merlin: https://github.com/the-lambda-church/merlin
