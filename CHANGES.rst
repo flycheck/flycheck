@@ -12,6 +12,7 @@ master (in development)
   - The internals of syntax checker definitions have changed again.  **All
     packages depending on Flycheck must be recompiled!** [GH-524]
   - `flycheck-error-list-refresh` is not an interactive command anymore
+  - Replace `flycheck-copy-messages-as-kill` with `flycheck-copy-errors-as-kill`
 
 - New features:
 
@@ -20,6 +21,7 @@ master (in development)
     arbitrary Emacs Lisp functions [GH-169] [GH-524]
   - Add `flycheck-define-command-checker` as non-macro variant of
     `flycheck-define-checker` [GH-524]
+  - `flycheck-copy-errors-as-kill` can put error ids into kill ring now
 
 - Improvements:
 

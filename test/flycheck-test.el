@@ -3287,22 +3287,27 @@ evaluating BODY."
                      "This is a Flycheck error. [spam]\n")))))
 
 
-;;; Working with error messages
+;;; Working with errors
 
-(ert-deftest flycheck-copy-messages-as-kill ()
-  :tags '(error-messages)
+(ert-deftest flycheck-copy-errors-as-kill ()
+  :tags '(errors-at-point)
   (flycheck-ert-with-temp-buffer
     (insert "A test buffer to copy errors from")
     (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
           (errors (list (flycheck-error-new-at 1 nil 'error "1st message")
-                        (flycheck-error-new-at 1 10 'warning "2nd message"))))
+                        (flycheck-error-new-at 1 10 'warning "2nd message"
+                                               :id "foo"))))
       (mapc #'flycheck-add-overlay errors)
-      (let ((flycheck-display-errors-function 'display-function))
-        (flycheck-copy-messages-as-kill 10)))
-    (should (equal (-take 2 kill-ring) '("1st message" "2nd message")))))
+      (flycheck-copy-errors-as-kill 10)
+      (should (equal (-take 2 kill-ring) '("1st message" "2nd message")))
+      (flycheck-copy-errors-as-kill 10 #'flycheck-error-id)
+      (should (equal (-take 1 kill-ring) '("foo")))
+      (flycheck-copy-errors-as-kill 10 #'flycheck-error-format-message-and-id)
+      (should (equal (-take 2 kill-ring)
+                     '("1st message" "2nd message [foo]"))))))
 
 (ert-deftest flycheck-google-messages/error-on-too-many-messages ()
-  :tags '(error-messages)
+  :tags '(errors-at-point)
   (flycheck-ert-with-temp-buffer
     (insert "A test buffer to copy errors from")
     (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
@@ -3315,7 +3320,7 @@ evaluating BODY."
         (should (string= (cadr err) "More than 1 messages at point"))))))
 
 (ert-deftest flycheck-google-messages/searches-google ()
-  :tags '(error-messages)
+  :tags '(errors-at-point)
   (flycheck-ert-with-temp-buffer
     (insert "A test buffer to copy errors from")
     (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
@@ -3332,7 +3337,7 @@ evaluating BODY."
                        browsed-urls))))))
 
 (ert-deftest flycheck-google-messages/searches-google-with-quoted-urls ()
-  :tags '(error-messages)
+  :tags '(errors-at-point)
   (flycheck-ert-with-temp-buffer
     (insert "A test buffer to copy errors from")
     (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing

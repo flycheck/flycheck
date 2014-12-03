@@ -778,7 +778,7 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
     (define-key map "n" 'flycheck-next-error)
     (define-key map "p" 'flycheck-previous-error)
     (define-key map "l" 'flycheck-list-errors)
-    (define-key map (kbd "C-w") 'flycheck-copy-messages-as-kill)
+    (define-key map (kbd "C-w") 'flycheck-copy-errors-as-kill)
     (define-key map "/" 'flycheck-google-messages)
     (define-key map "s" 'flycheck-select-checker)
     (define-key map "e" 'flycheck-set-checker-executable)
@@ -3554,17 +3554,30 @@ Hide the error buffer if there is no error under point."
       (quit-window nil window))))
 
 
-;;; Working with error messages
-(defun flycheck-copy-messages-as-kill (pos)
-  "Copy each error message under POS into kill ring.
+;;; Working with errors
+(defun flycheck-copy-errors-as-kill (pos &optional formatter)
+  "Copy each error at POS into kill ring, using FORMATTER.
 
-Each error message under point is copied into the kill ring."
-  (interactive "d")
-  (let ((messages (delq nil (mapcar #'flycheck-error-message
+FORMATTER is a function to turn an error into a string,
+defaulting to `flycheck-error-message'.
+
+Interactively, use `flycheck-error-format-message-and-id' as
+FORMATTER with universal prefix arg, and `flycheck-error-id' with
+normal prefix arg, i.e. copy the message and the ID with
+universal prefix arg, and only the id with normal prefix arg."
+  (interactive (list (point)
+                     (pcase current-prefix-arg
+                       ((pred not) #'flycheck-error-message)
+                       ((pred consp) #'flycheck-error-format-message-and-id)
+                       (_ #'flycheck-error-id))))
+  (let ((messages (delq nil (mapcar (or formatter #'flycheck-error-message)
                                     (flycheck-overlay-errors-at pos)))))
     (when messages
       (mapc #'kill-new (reverse messages))
       (message (string-join messages "\n")))))
+
+(define-obsolete-function-alias 'flycheck-copy-messages-as-kill
+  'flycheck-copy-errors-as-kill "0.22")
 
 (defun flycheck-google-messages (pos &optional quote-flag)
   "Google each error message at POS.

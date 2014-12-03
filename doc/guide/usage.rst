@@ -395,13 +395,30 @@ Alternatively, the following error display functions are available:
 .. function:: flycheck-display-error-messages-unless-error-list
    :auto:
 
-You can also work with the error messages at point, and copy them into the kill
-ring or search them on Google:
+You can also work with the errors to copy them into the kill ring or search them
+on Google:
 
-.. command:: flycheck-copy-messages-as-kill
+.. command:: flycheck-copy-errors-as-kill
    :binding: C-c ! C-w
 
    Copy all Flycheck error messages at the current point into kill ring.
+
+.. command:: flycheck-copy-errors-as-kill
+   :binding: C-c ! C-w
+   :prefix-arg: C-u
+   :noindex:
+
+   Copy all Flycheck error messages **and their ids** at the current point into
+   kill ring.
+
+.. command:: flycheck-copy-errors-as-kill
+   :binding: C-c ! C-w
+   :prefix-arg: M-0
+   :noindex:
+
+   Copy all Flycheck error **ids** at the current point into kill ring.  This
+   command is particularly handy to copy an ID in order to add an inline
+   suppression comment.
 
 .. command:: flycheck-google-messages
    :binding: C-c ! /
