@@ -13,6 +13,8 @@ master (in development)
     packages depending on Flycheck must be recompiled!** [GH-524]
   - `flycheck-error-list-refresh` is not an interactive command anymore
   - Replace `flycheck-perlcritic-verbosity` with `flycheck-perlcritic-severity`
+  - Replace `flycheck-copy-messages-as-kill` with `flycheck-copy-errors-as-kill`
+    [GH-529]
 
 - New features:
 
@@ -21,6 +23,11 @@ master (in development)
     arbitrary Emacs Lisp functions [GH-169] [GH-524]
   - Add `flycheck-define-command-checker` as non-macro variant of
     `flycheck-define-checker` [GH-524]
+  - Add support for IDs of errors [GH-529]
+  - Add special `id` sexp to parse error ids with `:error-patterns` [GH-529]
+  - Parse error IDs from Checkstyle XML [GH-259]
+  - `flycheck-copy-errors-as-kill` can put error ids into kill ring now [GH-529]
+  - Parse error IDs from many error checks [GH-259]
 
 - Improvements:
 

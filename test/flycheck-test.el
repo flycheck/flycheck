@@ -1586,42 +1586,46 @@ and extension, as in `file-name-base'."
     ;; By default, Flake8 is preferred, so we get errors from Flake8
     (flycheck-ert-buffer-sync)
     (flycheck-ert-should-errors
-     '(5 1 warning "F401 'antigravit' imported but unused" :checker python-flake8)
-     '(7 1 error "E302 expected 2 blank lines, found 1" :checker python-flake8)
-     '(9 9 info "N802 function name should be lowercase" :checker python-flake8)
-     '(12 29 error "E251 unexpected spaces around keyword / parameter equals"
-          :checker python-flake8)
-     '(12 31 error "E251 unexpected spaces around keyword / parameter equals"
-          :checker python-flake8)
-     '(22 1 warning "F821 undefined name 'antigravity'"
+     '(5 1 warning "'antigravit' imported but unused" :id "F401"
+         :checker python-flake8)
+     '(7 1 error "expected 2 blank lines, found 1" :id "E302"
+         :checker python-flake8)
+     '(9 9 info "function name should be lowercase" :id "N802"
+         :checker python-flake8)
+     '(12 29 error "unexpected spaces around keyword / parameter equals"
+          :id "E251" :checker python-flake8)
+     '(12 31 error "unexpected spaces around keyword / parameter equals"
+          :id "E251" :checker python-flake8)
+     '(22 1 warning "undefined name 'antigravity'" :id "F821"
           :checker python-flake8))
     ;; Selecting Pylint should give us its errors
     (flycheck-select-checker 'python-pylint)
     (flycheck-ert-wait-for-syntax-checker)
     (flycheck-ert-should-errors
-     '(1 nil info "Missing module docstring (C0111)" :checker python-pylint)
-     '(4 nil error "Unable to import 'spam' (F0401)" :checker python-pylint)
-     '(5 nil error "No name 'antigravit' in module 'python' (E0611)"
+     '(1 nil info "Missing module docstring" :id "C0111" :checker python-pylint)
+     '(4 nil error "Unable to import 'spam'" :id "F0401" :checker python-pylint)
+     '(5 nil error "No name 'antigravit' in module 'python'" :id "E0611"
          :checker python-pylint)
-     '(5 nil warning "Unused import antigravit (W0611)" :checker python-pylint)
-     '(7 nil info "Missing class docstring (C0111)" :checker python-pylint)
-     '(9 4 info "Invalid method name \"withEggs\" (C0103)"
+     '(5 nil warning "Unused import antigravit" :id "W0611" :checker python-pylint)
+     '(7 nil info "Missing class docstring" :id "C0111" :checker python-pylint)
+     '(9 4 info "Invalid method name \"withEggs\"" :id "C0103"
          :checker python-pylint)
-     '(9 4 info "Missing method docstring (C0111)" :checker python-pylint)
-     '(9 4 warning "Method could be a function (R0201)" :checker python-pylint)
-     '(10 15 warning "Used builtin function 'map' (W0141)"
+     '(9 4 info "Missing method docstring" :id "C0111" :checker python-pylint)
+     '(9 4 warning "Method could be a function" :id "R0201" :checker python-pylint)
+     '(10 15 warning "Used builtin function 'map'" :id "W0141"
           :checker python-pylint)
      '(12 nil info "No space allowed around keyword argument assignment"
+          :id "C0326" :checker python-pylint)
+     '(12 4 info "Missing method docstring" :id "C0111" :checker python-pylint)
+     '(12 4 warning "Method could be a function" :id "R0201"
           :checker python-pylint)
-     '(12 4 info "Missing method docstring (C0111)" :checker python-pylint)
-     '(12 4 warning "Method could be a function (R0201)" :checker python-pylint)
-     '(14 15 error "Module 'sys' has no 'python_version' member (E1101)"
+     '(14 15 error "Module 'sys' has no 'python_version' member" :id "E1101"
           :checker python-pylint)
-     '(15 nil info "Unnecessary parens after u'print' keyword (C0325)"
+     '(15 nil info "Unnecessary parens after u'print' keyword" :id "C0325"
           :checker python-pylint)
-     '(17 nil info "Unnecessary parens after u'print' keyword (C0325)"
+     '(17 nil info "Unnecessary parens after u'print' keyword" :id "C0325"
           :checker python-pylint)
-     '(22 nil error "Undefined variable 'antigravity' (E0602)"
+     '(22 nil error "Undefined variable 'antigravity'" :id "E0602"
           :checker python-pylint))))
 
 (ert-deftest flycheck-select-checker/unselecting-a-checker-goes-back-to-automatic-selection ()
@@ -1635,42 +1639,47 @@ and extension, as in `file-name-base'."
     (should (eq flycheck-checker 'python-pylint))
     (flycheck-ert-wait-for-syntax-checker)
     (flycheck-ert-should-errors
-     '(1 nil info "Missing module docstring (C0111)" :checker python-pylint)
-     '(4 nil error "Unable to import 'spam' (F0401)" :checker python-pylint)
-     '(5 nil error "No name 'antigravit' in module 'python' (E0611)"
+     '(1 nil info "Missing module docstring" :id "C0111" :checker python-pylint)
+     '(4 nil error "Unable to import 'spam'" :id "F0401" :checker python-pylint)
+     '(5 nil error "No name 'antigravit' in module 'python'" :id "E0611"
          :checker python-pylint)
-     '(5 nil warning "Unused import antigravit (W0611)" :checker python-pylint)
-     '(7 nil info "Missing class docstring (C0111)" :checker python-pylint)
-     '(9 4 info "Invalid method name \"withEggs\" (C0103)"
+     '(5 nil warning "Unused import antigravit" :id "W0611"
          :checker python-pylint)
-     '(9 4 info "Missing method docstring (C0111)" :checker python-pylint)
-     '(9 4 warning "Method could be a function (R0201)" :checker python-pylint)
-     '(10 15 warning "Used builtin function 'map' (W0141)"
+     '(7 nil info "Missing class docstring" :id "C0111" :checker python-pylint)
+     '(9 4 info "Invalid method name \"withEggs\"" :id "C0103"
+         :checker python-pylint)
+     '(9 4 info "Missing method docstring" :id "C0111" :checker python-pylint)
+     '(9 4 warning "Method could be a function" :id "R0201" :checker python-pylint)
+     '(10 15 warning "Used builtin function 'map'" :id "W0141"
           :checker python-pylint)
      '(12 nil info "No space allowed around keyword argument assignment"
+          :id "C0326" :checker python-pylint)
+     '(12 4 info "Missing method docstring" :id "C0111" :checker python-pylint)
+     '(12 4 warning "Method could be a function" :id "R0201"
           :checker python-pylint)
-     '(12 4 info "Missing method docstring (C0111)" :checker python-pylint)
-     '(12 4 warning "Method could be a function (R0201)" :checker python-pylint)
-     '(14 15 error "Module 'sys' has no 'python_version' member (E1101)"
+     '(14 15 error "Module 'sys' has no 'python_version' member" :id "E1101"
           :checker python-pylint)
-     '(15 nil info "Unnecessary parens after u'print' keyword (C0325)"
+     '(15 nil info "Unnecessary parens after u'print' keyword" :id "C0325"
           :checker python-pylint)
-     '(17 nil info "Unnecessary parens after u'print' keyword (C0325)"
+     '(17 nil info "Unnecessary parens after u'print' keyword" :id "C0325"
           :checker python-pylint)
-     '(22 nil error "Undefined variable 'antigravity' (E0602)"
+     '(22 nil error "Undefined variable 'antigravity'" :id "E0602"
           :checker python-pylint))
     (flycheck-select-checker nil)
     (should-not flycheck-checker)
     (flycheck-ert-wait-for-syntax-checker)
     (flycheck-ert-should-errors
-     '(5 1 warning "F401 'antigravit' imported but unused" :checker python-flake8)
-     '(7 1 error "E302 expected 2 blank lines, found 1" :checker python-flake8)
-     '(9 9 info "N802 function name should be lowercase" :checker python-flake8)
-     '(12 29 error "E251 unexpected spaces around keyword / parameter equals"
-          :checker python-flake8)
-     '(12 31 error "E251 unexpected spaces around keyword / parameter equals"
-          :checker python-flake8)
-     '(22 1 warning "F821 undefined name 'antigravity'"
+     '(5 1 warning "'antigravit' imported but unused" :id "F401"
+         :checker python-flake8)
+     '(7 1 error "expected 2 blank lines, found 1" :id "E302"
+         :checker python-flake8)
+     '(9 9 info "function name should be lowercase" :id "N802"
+         :checker python-flake8)
+     '(12 29 error "unexpected spaces around keyword / parameter equals"
+          :id "E251" :checker python-flake8)
+     '(12 31 error "unexpected spaces around keyword / parameter equals"
+          :id "E251" :checker python-flake8)
+     '(22 1 warning "undefined name 'antigravity'" :id "F821"
           :checker python-flake8))))
 
 (ert-deftest flycheck/selects-checker-automatically/first-enabled-checker ()
@@ -1684,14 +1693,17 @@ and extension, as in `file-name-base'."
     (should-not flycheck-checker)
     (should (eq flycheck-last-checker 'python-flake8))
     (flycheck-ert-should-errors
-     '(5 1 warning "F401 'antigravit' imported but unused" :checker python-flake8)
-     '(7 1 error "E302 expected 2 blank lines, found 1" :checker python-flake8)
-     '(9 9 info "N802 function name should be lowercase" :checker python-flake8)
-     '(12 29 error "E251 unexpected spaces around keyword / parameter equals"
-          :checker python-flake8)
-     '(12 31 error "E251 unexpected spaces around keyword / parameter equals"
-          :checker python-flake8)
-     '(22 1 warning "F821 undefined name 'antigravity'"
+     '(5 1 warning "'antigravit' imported but unused" :id "F401"
+         :checker python-flake8)
+     '(7 1 error "expected 2 blank lines, found 1" :id "E302"
+         :checker python-flake8)
+     '(9 9 info "function name should be lowercase" :id "N802"
+         :checker python-flake8)
+     '(12 29 error "unexpected spaces around keyword / parameter equals"
+          :id "E251" :checker python-flake8)
+     '(12 31 error "unexpected spaces around keyword / parameter equals"
+          :id "E251" :checker python-flake8)
+     '(22 1 warning "undefined name 'antigravity'" :id "F821"
           :checker python-flake8))))
 
 (ert-deftest flycheck/selects-checker-automatically/no-disabled-checker ()
@@ -1967,6 +1979,19 @@ and extension, as in `file-name-base'."
     (should (= (flycheck-error-pos (flycheck-error-new-at 4 1)) 19))
     (should (= (flycheck-error-pos (flycheck-error-new-at 4 nil)) 19))))
 
+(ert-deftest flycheck-error-format-message-and-id/no-id ()
+  :tags '(error-api)
+  (should (string= (flycheck-error-format-message-and-id
+                    (flycheck-error-new-at 3 5 'warning "Hello world"))
+                   "Hello world")))
+
+(ert-deftest flycheck-error-format-message-and-id/with-id ()
+  :tags '(error-api)
+  (should (string= (flycheck-error-format-message-and-id
+                    (flycheck-error-new-at 3 5 'warning "Hello world"
+                                           :id "Foo"))
+                   "Hello world [Foo]")))
+
 (ert-deftest flycheck-error-format/level-warning ()
   :tags '(error-api)
   (should (string= (flycheck-error-format
@@ -1995,6 +2020,13 @@ and extension, as in `file-name-base'."
                     (flycheck-error-new-at 14 15 'error "dash\\nbroken"
                                            :checker 'foo))
                    "14:15:error: dash\\nbroken (foo)")))
+
+(ert-deftest flycheck-error-format/with-id ()
+  :tags '(error-api)
+  (should (string= (flycheck-error-format
+                    (flycheck-error-new-at 14 15 'error "A message"
+                                           :id "E001" :checker 'foo))
+                   "14:15:error: A message [E001] (foo)")))
 
 (ert-deftest flycheck-error-</no-column ()
   :tags '(error-api)
@@ -2157,11 +2189,11 @@ and extension, as in `file-name-base'."
   "<?xml version=\"1.0\" encoding=\"utf-8\"?>
 <checkstyle version=\"4.3\">
   <file name=\"test-javascript/missing-semicolon.js\">
-    <error line=\"3\" column=\"21\" severity=\"error\" message=\"Missing semicolon.\" source=\"Missing semicolon.\" />
-    <error line=\"3\" severity=\"warning\" message=\"Implied global &apos;alert&apos;\" source=\"jshint.implied-globals\" />
+    <error line=\"3\" column=\"21\" severity=\"error\" message=\"Missing semicolon.\" source=\"Foo3\" />
+    <error line=\"3\" severity=\"warning\" message=\"Implied global &apos;alert&apos;\" source=\"Foo4\" />
   </file>
   <file name=\"test-javascript/missing-quote.js\">
-    <error line=\"undefined\" column=\"undefined\" severity=\"error\" message=\"Cannot read property &apos;id&apos; of undefined\" source=\"\" />
+    <error line=\"undefined\" column=\"undefined\" severity=\"error\" message=\"Cannot read property &apos;id&apos; of undefined\" source=\"Foo1\" />
   </file>
 </checkstyle>"
   "Example Checkstyle output from jshint.")
@@ -2175,7 +2207,8 @@ and extension, as in `file-name-base'."
     :line 3
     :column 21
     :level 'error
-    :message "Missing semicolon.")
+    :message "Missing semicolon."
+    :id "Foo3")
    (flycheck-error-new
     :filename "test-javascript/missing-semicolon.js"
     :checker 'checker
@@ -2183,7 +2216,8 @@ and extension, as in `file-name-base'."
     :line 3
     :column nil
     :level 'warning
-    :message "Implied global 'alert'")
+    :message "Implied global 'alert'"
+    :id "Foo4")
    (flycheck-error-new
     :filename "test-javascript/missing-quote.js"
     :checker 'checker
@@ -2191,18 +2225,19 @@ and extension, as in `file-name-base'."
     :line nil
     :column nil
     :level 'error
-    :message "Cannot read property 'id' of undefined"))
+    :message "Cannot read property 'id' of undefined"
+    :id "Foo1"))
   "Errors to be parsed from `flycheck-checkstyle-xml'.")
 
 (ert-deftest flycheck-parse-checkstyle/with-builtin-xml ()
-  :tags '(error-parsing)
+  :tags '(error-parsing checkstyle-xml)
   (let ((flycheck-xml-parser 'flycheck-parse-xml-region))
     (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml
                                               'checker 'buffer)
                    flycheck-checkstyle-expected-errors))))
 
 (ert-deftest flycheck-parse-checkstyle/with-libxml2 ()
-  :tags '(error-parsing)
+  :tags '(error-parsing checkstyle-xml)
   (skip-unless (fboundp 'libxml-parse-xml-region))
   (let ((flycheck-xml-parser 'libxml-parse-xml-region))
     (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml
@@ -2210,7 +2245,7 @@ and extension, as in `file-name-base'."
                    flycheck-checkstyle-expected-errors))))
 
 (ert-deftest flycheck-parse-checkstyle/automatic-parser ()
-  :tags '(error-parsing)
+  :tags '(error-parsing checkstyle-xml)
   (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml
                                             'checker 'buffer)
                  flycheck-checkstyle-expected-errors)))
@@ -2244,7 +2279,8 @@ of the file will be interrupted because there are too many #ifdef configurations
     :line 4
     :column nil
     :level 'error
-    :message "Null pointer dereference")
+    :message "Null pointer dereference"
+    :id "nullPointer")
    (flycheck-error-new
     :filename "bar"
     :buffer 'buffer
@@ -2252,7 +2288,8 @@ of the file will be interrupted because there are too many #ifdef configurations
     :line 6
     :column nil
     :level 'error
-    :message "Null pointer dereference")
+    :message "Null pointer dereference"
+    :id "nullPointer")
    (flycheck-error-new
     :filename "eggs"
     :buffer 'buffer
@@ -2260,16 +2297,17 @@ of the file will be interrupted because there are too many #ifdef configurations
     :line 2
     :column nil
     :level 'warning
-    :message "The expression \"x\" is of type 'bool' and it is compared against a integer value that is neither 1 nor 0.")))
+    :message "The expression \"x\" is of type 'bool' and it is compared against a integer value that is neither 1 nor 0."
+    :id "comparisonOfBoolWithInt")))
 
 (ert-deftest flycheck-parse-cppcheck ()
-  :tags '(error-parsing)
+  :tags '(error-parsing cppcheck-xml)
   (should (equal (flycheck-parse-cppcheck flycheck-cppcheck-xml
                                           'checker 'buffer)
                  flycheck-cppcheck-expected-errors)))
 
 (ert-deftest flycheck-parse-cppcheck/empty-errors-list-with-automatic-parser ()
-  :tags '(error-parsing)
+  :tags '(error-parsing cppcheck-xml)
   (should-not (flycheck-parse-cppcheck "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <results version=\"2\">
   <cppcheck version=\"1.60.1\"/>
@@ -2278,7 +2316,7 @@ of the file will be interrupted because there are too many #ifdef configurations
 </results>" nil nil)))
 
 (ert-deftest flycheck-parse-cppcheck/empty-errors-list-with-builtin-parser ()
-  :tags '(error-parsing)
+  :tags '(error-parsing cppcheck-xml)
   (let ((flycheck-xml-parser #'flycheck-parse-xml-region))
     (should-not (flycheck-parse-cppcheck "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <results version=\"2\">
@@ -2286,6 +2324,46 @@ of the file will be interrupted because there are too many #ifdef configurations
   <errors>
   </errors>
 </results>" nil nil))))
+
+(defconst flycheck-phpmd-xml
+  "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
+<pmd version=\"1.5.0\" timestamp=\"2014-12-02T18:13:44+00:00\">
+  <file name=\"foo.php\">
+    <violation beginline=\"21\" endline=\"21\" rule=\"UnusedPrivateField\" ruleset=\"Unused Code Rules\" externalInfoUrl=\"http://phpmd.org/rules/unusedcode.html#unusedprivatefield\" priority=\"3\">
+      Avoid unused private fields such as '$FOO'.
+    </violation>
+    <violation beginline=\"24\" endline=\"27\" rule=\"UnusedPrivateMethod\" ruleset=\"Unused Code Rules\" package=\"Flycheck\" externalInfoUrl=\"http://phpmd.org/rules/unusedcode.html#unusedprivatemethod\" class=\"A\" method=\"bar\" priority=\"3\">
+      Avoid unused private methods such as 'bar'.
+    </violation>
+    <violation beginline=\"24\" endline=\"24\" rule=\"UnusedFormalParameter\" ruleset=\"Unused Code Rules\" externalInfoUrl=\"http://phpmd.org/rules/unusedcode.html#unusedformalparameter\" priority=\"3\">
+      Avoid unused parameters such as '$baz'.
+    </violation>
+  </file>
+</pmd>"
+  "Example phpmd output.")
+
+(ert-deftest flycheck-parse-phpmd ()
+  :tags '(error-parsing phpmd-xml)
+  (should (equal (flycheck-parse-phpmd flycheck-phpmd-xml 'foo 'buffer)
+                 (list
+                  (flycheck-error-new-at 21 nil 'warning
+                                         "Avoid unused private fields such as '$FOO'."
+                                         :id "UnusedPrivateField"
+                                         :checker 'foo
+                                         :buffer 'buffer
+                                         :filename "foo.php")
+                  (flycheck-error-new-at 24 nil 'warning
+                                         "Avoid unused private methods such as 'bar'."
+                                         :id "UnusedPrivateMethod"
+                                         :checker 'foo
+                                         :buffer 'buffer
+                                         :filename "foo.php")
+                  (flycheck-error-new-at 24 nil 'warning
+                                         "Avoid unused parameters such as '$baz'."
+                                         :id "UnusedFormalParameter"
+                                         :checker 'foo
+                                         :buffer 'buffer
+                                         :filename "foo.php")))))
 
 
 ;;; Error filters
@@ -2309,6 +2387,28 @@ of the file will be interrupted because there are too many #ifdef configurations
     (should (equal (flycheck-collapse-error-message-whitespace (list err))
                    (list (flycheck-error-new-at 1 1 'error
                                                 "spam with eggs"))))))
+
+(ert-deftest flycheck-dequalify-error-ids ()
+  :tags '(error-filtering)
+  (let ((errors (list (flycheck-error-new-at 1 2 nil nil :id "foo.bar")
+                      (flycheck-error-new-at 1 2 nil nil :id "Spam.With.Eggs")
+                      (flycheck-error-new-at 1 2 nil nil :id "foobar")
+                      (flycheck-error-new-at 1 2 nil nil :id nil))))
+    (should (equal (flycheck-dequalify-error-ids errors)
+                   (list (flycheck-error-new-at 1 2 nil nil :id "bar")
+                         (flycheck-error-new-at 1 2 nil nil :id "Eggs")
+                         (flycheck-error-new-at 1 2 nil nil :id "foobar")
+                         (flycheck-error-new-at 1 2))))))
+
+(ert-deftest flycheck-remove-error-ids ()
+  :tags '(error-filtering)
+  (let ((errors (list (flycheck-error-new-at 1 2 nil nil :id "Foo.Bar")
+                      (flycheck-error-new-at 1 2 nil nil :id "FooBar")
+                      (flycheck-error-new-at 1 2 nil nil :id nil))))
+    (should (equal (flycheck-remove-error-ids errors)
+                   (list (flycheck-error-new-at 1 2)
+                         (flycheck-error-new-at 1 2)
+                         (flycheck-error-new-at 1 2))))))
 
 
 ;;; Error analysis
@@ -3022,6 +3122,7 @@ evaluating BODY."
                    [("Line" 4 flycheck-error-list-entry-< :right-align t)
                     ("Col" 3 nil :right-align t)
                     ("Level" 8 flycheck-error-list-entry-level-<)
+                    ("ID" 6 t)
                     ("Message" 0 t)
                     (" (Checker)" 8 t)]))
     (should (local-variable-p 'tabulated-list-format))))
@@ -3045,7 +3146,7 @@ evaluating BODY."
   (with-temp-buffer
     (should-not header-line-format)
     (flycheck-error-list-mode)
-    (should (string= header-line-format " Line Col Level Message  (Checker) "))))
+    (should (string= header-line-format " Line Col Level ID Message  (Checker) "))))
 
 (ert-deftest flycheck-error-list-source-buffer/is-permanently-local ()
   :tags '(error-list)
@@ -3054,7 +3155,8 @@ evaluating BODY."
 (ert-deftest flycheck-error-list-make-entry/line-and-column ()
   :tags '(error-list)
   (let* ((error (flycheck-error-new-at 10 12 'warning "A foo warning"
-                                       :checker 'emacs-lisp-checkdoc))
+                                       :checker 'emacs-lisp-checkdoc
+                                       :id "W1"))
          (entry (flycheck-error-list-make-entry error))
          (cells (cadr entry)))
     (should (eq (car entry) error))
@@ -3072,10 +3174,14 @@ evaluating BODY."
                            'type 'flycheck-error-list
                            'face face))))
     (should (equal (aref cells 3)
+                   (list "W1"
+                         'type 'flycheck-error-list
+                         'face 'flycheck-error-list-id)))
+    (should (equal (aref cells 4)
                    (list "A foo warning"
                          'type 'flycheck-error-list
                          'face 'default)))
-    (should (equal (aref cells 4)
+    (should (equal (aref cells 5)
                    (list "(emacs-lisp-checkdoc)"
                          'type 'flycheck-error-list
                          'face 'flycheck-error-list-checker-name)))))
@@ -3101,10 +3207,14 @@ evaluating BODY."
                            'type 'flycheck-error-list
                            'face face))))
     (should (equal (aref cells 3)
+                   (list ""
+                         'type 'flycheck-error-list
+                         'face 'flycheck-error-list-id)))
+    (should (equal (aref cells 4)
                    (list "A foo error"
                          'type 'flycheck-error-list
                          'face 'default)))
-    (should (equal (aref cells 4)
+    (should (equal (aref cells 5)
                    (list "(emacs-lisp-checkdoc)"
                          'type 'flycheck-error-list
                          'face 'flycheck-error-list-checker-name)))))
@@ -3129,10 +3239,14 @@ evaluating BODY."
                            'type 'flycheck-error-list
                            'face face))))
     (should (equal (aref cells 3)
+                   (list ""
+                         'type 'flycheck-error-list
+                         'face 'flycheck-error-list-id)))
+    (should (equal (aref cells 4)
                    (list "Unknown info"
                          'type 'flycheck-error-list
                          'face 'default)))
-    (should (equal (aref cells 4)
+    (should (equal (aref cells 5)
                    (list "(coq)"
                          'type 'flycheck-error-list
                          'face 'flycheck-error-list-checker-name)))))
@@ -3165,29 +3279,35 @@ evaluating BODY."
 (ert-deftest flycheck-display-error-messages ()
   :tags '(error-display)
   (let ((err (flycheck-error-new-at 10 20 'warning
-                                    "This is a Flycheck error.")))
+                                    "This is a Flycheck error."
+                                    :id "spam")))
     (shut-up
       (flycheck-display-error-messages (list err))
       (should (equal (shut-up-current-output)
-                     (concat (flycheck-error-message err) "\n"))))))
+                     "This is a Flycheck error. [spam]\n")))))
 
 
-;;; Working with error messages
+;;; Working with errors
 
-(ert-deftest flycheck-copy-messages-as-kill ()
-  :tags '(error-messages)
+(ert-deftest flycheck-copy-errors-as-kill ()
+  :tags '(errors-at-point)
   (flycheck-ert-with-temp-buffer
     (insert "A test buffer to copy errors from")
     (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
           (errors (list (flycheck-error-new-at 1 nil 'error "1st message")
-                        (flycheck-error-new-at 1 10 'warning "2nd message"))))
+                        (flycheck-error-new-at 1 10 'warning "2nd message"
+                                               :id "foo"))))
       (mapc #'flycheck-add-overlay errors)
-      (let ((flycheck-display-errors-function 'display-function))
-        (flycheck-copy-messages-as-kill 10)))
-    (should (equal (-take 2 kill-ring) '("1st message" "2nd message")))))
+      (flycheck-copy-errors-as-kill 10)
+      (should (equal (-take 2 kill-ring) '("1st message" "2nd message")))
+      (flycheck-copy-errors-as-kill 10 #'flycheck-error-id)
+      (should (equal (-take 1 kill-ring) '("foo")))
+      (flycheck-copy-errors-as-kill 10 #'flycheck-error-format-message-and-id)
+      (should (equal (-take 2 kill-ring)
+                     '("1st message" "2nd message [foo]"))))))
 
 (ert-deftest flycheck-google-messages/error-on-too-many-messages ()
-  :tags '(error-messages)
+  :tags '(errors-at-point)
   (flycheck-ert-with-temp-buffer
     (insert "A test buffer to copy errors from")
     (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
@@ -3200,7 +3320,7 @@ evaluating BODY."
         (should (string= (cadr err) "More than 1 messages at point"))))))
 
 (ert-deftest flycheck-google-messages/searches-google ()
-  :tags '(error-messages)
+  :tags '(errors-at-point)
   (flycheck-ert-with-temp-buffer
     (insert "A test buffer to copy errors from")
     (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
@@ -3217,7 +3337,7 @@ evaluating BODY."
                        browsed-urls))))))
 
 (ert-deftest flycheck-google-messages/searches-google-with-quoted-urls ()
-  :tags '(error-messages)
+  :tags '(errors-at-point)
   (flycheck-ert-with-temp-buffer
     (insert "A test buffer to copy errors from")
     (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
@@ -3614,32 +3734,32 @@ evaluating BODY."
      "checkers/c_c++-warning-openmp.c" 'c-mode
      '(3 8 warning "variable ‘a’ set but not used" :checker c/c++-gcc))))
 
-(flycheck-ert-def-checker-test c/c++-cppcheck (c c++) error
-  (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
+(flycheck-ert-def-checker-test c/c++-cppcheck (c c++) nil
+  :tags '(cppcheck-xml)
+  (skip-unless (version< "1.53" (flycheck-test-cppcheck-version)))
+  (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-gcc))
+        (flycheck-cppcheck-inconclusive nil)
+        (flycheck-cppcheck-checks '("style")))
     (flycheck-ert-should-syntax-check
-     "checkers/c_c++-cppcheck-error.c" 'c-mode
-     '(4 nil error "Null pointer dereference" :checker c/c++-cppcheck))))
-
-(flycheck-ert-def-checker-test c/c++-cppcheck (c c++) warning
-  (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-cppcheck-warning.c" 'c-mode
-     '(2 nil warning "The expression \"x\" is of type 'bool' and it is compared against a integer value that is neither 1 nor 0."
-         :checker c/c++-cppcheck))))
-
-(flycheck-ert-def-checker-test c/c++-cppcheck (c c++) style
-  (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-cppcheck-style.c" 'c-mode
-     '(3 nil warning "Unused variable: unused" :checker c/c++-cppcheck))))
+     "checkers/c_c++-cppcheck.cpp" '(c-mode c++-mode)
+     '(5 nil info "Unused variable: unused" :id "unusedVariable"
+         :checker c/c++-cppcheck)
+     '(9 nil error "Division by zero." :id "zerodiv" :checker c/c++-cppcheck)
+     '(14 nil warning "Parameter 'foo' is passed by value. It could be passed as a (const) reference which is usually faster and recommended in C++."
+          :id "passedByValue" :checker c/c++-cppcheck))))
 
 (flycheck-ert-def-checker-test c/c++-cppcheck (c c++) style-suppressed
+  :tags '(cppcheck-xml)
   (let ((flycheck-cppcheck-checks nil)
-        (flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
-    (flycheck-ert-should-syntax-check "checkers/c_c++-cppcheck-style.c"
-                                      'c-mode)))
+        (flycheck-disabled-checkers '(c/c++-clang c/c++-gcc))
+        (dot (when (version< "1.53" (flycheck-test-cppcheck-version)) ".")))
+    (flycheck-ert-should-syntax-check
+     "checkers/c_c++-cppcheck.cpp" '(c-mode c++-mode)
+     `(9 nil error ,(concat "Division by zero" dot) :id "zerodiv"
+         :checker c/c++-cppcheck))))
 
 (flycheck-ert-def-checker-test c/c++-cppcheck (c c++) inconclusive
+  :tags '(cppcheck-xml)
   ;; Cppcheck 1.53 and older do not report inconclusive warnings when using
   ;; XML output.
   (skip-unless (version< "1.53" (flycheck-test-cppcheck-version)))
@@ -3647,29 +3767,26 @@ evaluating BODY."
         (flycheck-cppcheck-inconclusive t)
         (flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
     (flycheck-ert-should-syntax-check
-     "checkers/c_c++-cppcheck-inconclusive.cpp" 'c++-mode
-     '(1 nil warning "Boolean variable 'a' is used in bitwise operation. Did you mean '&&'?"
-         :checker c/c++-cppcheck))))
+     "checkers/c_c++-cppcheck.cpp" '(c-mode c++-mode)
+     '(5 nil info "Unused variable: unused" :id "unusedVariable"
+         :checker c/c++-cppcheck)
+     '(9 nil error "Division by zero." :id "zerodiv" :checker c/c++-cppcheck)
+     '(12 nil info "Boolean variable 'a' is used in bitwise operation. Did you mean '&&'?"
+          :id "bitwiseOnBoolean" :checker c/c++-cppcheck)
+     '(14 nil warning "Parameter 'foo' is passed by value. It could be passed as a (const) reference which is usually faster and recommended in C++."
+          :id "passedByValue" :checker c/c++-cppcheck))))
 
-(flycheck-ert-def-checker-test c/c++-cppcheck (c c++) inconclusive-suppressed
-  ;; Cppcheck 1.53 and older do not report inconclusive warnings when using
-  ;; XML output.
+(flycheck-ert-def-checker-test c/c++-cppcheck (c c++) multiple-checks
+  :tags '(cppcheck-xml)
   (skip-unless (version< "1.53" (flycheck-test-cppcheck-version)))
-  (let ((flycheck-cppcheck-checks '("style"))
+  (let ((flycheck-cppcheck-checks '("performance" "portability"))
         (flycheck-cppcheck-inconclusive nil)
         (flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
     (flycheck-ert-should-syntax-check
-     "checkers/c_c++-cppcheck-inconclusive.cpp" 'c++-mode)))
-
-(flycheck-ert-def-checker-test c/c++-cppcheck (c c++) multiple-checks
-  (let ((flycheck-cppcheck-checks '("performance" "portability"))
-        (flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-cppcheck-multiple-checks.cpp" 'c++-mode
-     '(2 nil warning "Extra qualification 'A::' unnecessary and considered an error by many compilers."
-         :checker c/c++-cppcheck)
-     '(9 nil warning "Prefix ++/-- operators should be preferred for non-primitive types. Pre-increment/decrement can be more efficient than post-increment/decrement. Post-increment/decrement usually involves keeping a copy of the previous value around and adds a little extra code."
-         :checker c/c++-cppcheck))))
+     "checkers/c_c++-cppcheck.cpp" 'c++-mode
+     '(9 nil error "Division by zero." :id "zerodiv" :checker c/c++-cppcheck)
+     '(14 nil warning "Parameter 'foo' is passed by value. It could be passed as a (const) reference which is usually faster and recommended in C++."
+          :id "passedByValue" :checker c/c++-cppcheck))))
 
 (flycheck-ert-def-checker-test cfengine cfengine error
   (skip-unless (fboundp 'cfengine3-mode))
@@ -3700,12 +3817,14 @@ evaluating BODY."
    '(4 7 error "missing \", starting" :checker coffee)))
 
 (flycheck-ert-def-checker-test coffee-coffeelint coffee error
+  :tags '(checkstyle-xml)
   (flycheck-ert-should-syntax-check
    "checkers/coffee-coffeelint-error.coffee" 'coffee-mode
    '(4 nil error "Throwing strings is forbidden; context:"
        :checker coffee-coffeelint)))
 
 (flycheck-ert-def-checker-test coffee-coffeelint coffee warning
+  :tags '(checkstyle-xml)
   (let ((flycheck-coffeelintrc "coffeelint.json"))
     (flycheck-ert-should-syntax-check
      "checkers/coffee-coffeelint-error.coffee" 'coffee-mode
@@ -3739,19 +3858,24 @@ The term \"1\" has type \"nat\" while it is expected to have type
 \"bool\"." :checker coq)))
 
 (flycheck-ert-def-checker-test css-csslint css nil
+  :tags '(checkstyle-xml)
   (flycheck-ert-should-syntax-check
    "checkers/css-csslint-warning.css" 'css-mode
    '(3 6 warning "Heading (h1) should not be qualified."
-       :checker css-csslint)))
+       :id "Disallowqualifiedheadings" :checker css-csslint)))
 
 (flycheck-ert-def-checker-test css-csslint css syntax-error
+  :tags '(checkstyle-xml)
   (flycheck-ert-should-syntax-check
    "checkers/css-syntax-error.css" 'css-mode
-   '(4 16 error "Expected LBRACE at line 4, col 16." :checker css-csslint)
-   '(4 16 error "Unexpected token '100%' at line 4, col 16."
+   '(4 16 error "Expected LBRACE at line 4, col 16." :id "ParsingErrors"
        :checker css-csslint)
-   '(4 20 error "Unexpected token ';' at line 4, col 20." :checker css-csslint)
-   '(5 1 error "Unexpected token '}' at line 5, col 1." :checker css-csslint)))
+   '(4 16 error "Unexpected token '100%' at line 4, col 16." :id "ParsingErrors"
+       :checker css-csslint)
+   '(4 20 error "Unexpected token ';' at line 4, col 20." :id "ParsingErrors"
+       :checker css-csslint)
+   '(5 1 error "Unexpected token '}' at line 5, col 1." :id "ParsingErrors"
+       :checker css-csslint)))
 
 (ert-deftest flycheck-d-module-re/matches-module-name ()
   :tags '(language-d)
@@ -4146,52 +4270,58 @@ Why not:
        :checker html-tidy)))
 
 (flycheck-ert-def-checker-test javascript-jshint javascript syntax-error
+  :tags '(checkstyle-xml)
   ;; Silence JS2 and JS3 parsers
   (let ((js2-mode-show-parse-errors nil)
         (js2-mode-show-strict-warnings nil)
         (js3-mode-show-parse-errors nil))
     (flycheck-ert-should-syntax-check
      "checkers/javascript-syntax-error.js" '(js-mode js2-mode js3-mode)
-     '(3 11 error "Unclosed string." :checker javascript-jshint)
-     '(3 25 warning "Unclosed string." :checker javascript-jshint)
-     '(4 1 warning "Unclosed string." :checker javascript-jshint)
-     '(4 1 warning "Missing semicolon." :checker javascript-jshint))))
+     '(3 11 error "Unclosed string." :id "E029" :checker javascript-jshint)
+     '(3 25 warning "Unclosed string." :id "W112" :checker javascript-jshint)
+     '(4 1 warning "Unclosed string." :id "W112" :checker javascript-jshint)
+     '(4 1 warning "Missing semicolon." :id "W033"
+         :checker javascript-jshint))))
 
 (flycheck-ert-def-checker-test javascript-jshint javascript error-disabled
+  :tags '(checkstyle-xml)
   (flycheck-ert-should-syntax-check
    "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)))
 
 (flycheck-ert-def-checker-test javascript-jshint javascript nil
+  :tags '(checkstyle-xml)
   (let ((flycheck-jshintrc "jshintrc"))
     (flycheck-ert-should-syntax-check
      "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
-     '(4 9 warning "'foo' is defined but never used."
+     '(4 9 warning "'foo' is defined but never used." :id "W098"
          :checker javascript-jshint))))
 
 (flycheck-ert-def-checker-test javascript-eslint javascript error
+  :tags '(checkstyle-xml)
   (let ((flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-ert-should-syntax-check
      "checkers/javascript-syntax-error.js" '(js-mode js2-mode js3-mode)
      '(3 26 error "Unexpected token ILLEGAL" :checker javascript-eslint))))
 
 (flycheck-ert-def-checker-test javascript-eslint javascript warning
+  :tags '(checkstyle-xml)
   (let ((flycheck-eslintrc "eslint.json")
         (flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-ert-should-syntax-check
      "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
-     '(3 1 warning "Missing \"use strict\" statement. (strict)"
+     '(3 1 warning "Missing \"use strict\" statement." :id "strict"
          :checker javascript-eslint)
-     '(4 8 warning "foo is defined but never used (no-unused-vars)"
+     '(4 8 warning "foo is defined but never used" :id "no-unused-vars"
          :checker javascript-eslint))))
 
 (flycheck-ert-def-checker-test javascript-gjslint javascript nil
   (let ((flycheck-disabled-checkers '(javascript-jshint javascript-eslint)))
     (flycheck-ert-should-syntax-check
      "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
-     '(4 nil error "(0131) Single-quoted string preferred over double-quoted string."
-         :checker javascript-gjslint)
-     '(4 nil error "(0001) Extra space before \"]\""
-         :checker javascript-gjslint))))
+     '(4 nil warning "Single-quoted string preferred over double-quoted string."
+         :id "0131" :checker javascript-gjslint)
+     '(4 nil warning "Extra space before \"]\""
+         :id "0001" :checker javascript-gjslint))))
 
 (flycheck-ert-def-checker-test json-jsonlint json nil
   (flycheck-ert-should-syntax-check
@@ -4234,25 +4364,30 @@ Why not:
    '(6 nil error "BEGIN not safe after errors--compilation aborted"
        :checker perl)
    '(6 6 error "Glob written as <...> (See page 167 of PBP)"
-       :checker perl-perlcritic)))
+       :id "BuiltinFunctions::RequireGlobFunction" :checker perl-perlcritic)))
 
 (flycheck-ert-def-checker-test perl-perlcritic perl severity-1
   (let ((flycheck-perlcritic-severity 1))
     (flycheck-ert-should-syntax-check
      "checkers/perl.pl" '(perl-mode cperl-mode)
      '(1 1 warning "No package-scoped \"$VERSION\" variable found (See page 404 of PBP)"
+         :id "Modules::RequireVersionVar"
          :checker perl-perlcritic)
      '(1 1 info "Package \"perl\" does not start with a upper case letter (See pages 45,46 of PBP)"
+         :id "NamingConventions::Capitalization"
          :checker perl-perlcritic)
      '(6 nil error "Global symbol \"$x\" requires explicit package name"
          :checker perl)
      '(6 nil error "BEGIN not safe after errors--compilation aborted"
          :checker perl)
      '(6 6 error "Glob written as <...> (See page 167 of PBP)"
+         :id "BuiltinFunctions::RequireGlobFunction"
          :checker perl-perlcritic)
      '(8 1 info "Builtin function called with parentheses (See page 13 of PBP)"
+         :id "CodeLayout::ProhibitParensWithBuiltins"
          :checker perl-perlcritic)
      '(10 1 warning "\"die\" used instead of \"croak\" (See page 283 of PBP)"
+          :id "ErrorHandling::RequireCarping"
           :checker perl-perlcritic))))
 
 (flycheck-ert-def-checker-test php php syntax-error
@@ -4261,62 +4396,54 @@ Why not:
    '(8 nil error "syntax error, unexpected ')', expecting '('" :checker php)))
 
 (flycheck-ert-def-checker-test php php nil
+  :tags '(phpmd-xml)
   (flycheck-ert-should-syntax-check
    "checkers/php.php" 'php-mode
-   '(19 6 error "Missing class doc comment" :checker php-phpcs)
+   '(19 6 error "Missing class doc comment"
+        :id "PEAR.Commenting.ClassComment.Missing" :checker php-phpcs)
    '(21 nil warning "Avoid unused private fields such as '$FOO'."
-        :checker php-phpmd)
+        :id "UnusedPrivateField" :checker php-phpmd)
    '(21 20 error "Private member variable \"FOO\" must be prefixed with an underscore"
+        :id "PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore"
         :checker php-phpcs)
-   '(23 5 error "Doc comment for \"$baz\" missing" :checker php-phpcs)
-   '(23 5 error "Missing @return tag in function comment" :checker php-phpcs)
+   '(23 5 error "Doc comment for \"$baz\" missing"
+        :id "PEAR.Commenting.FunctionComment.MissingParamTag"
+        :checker php-phpcs)
+   '(23 5 error "Missing @return tag in function comment"
+        :id "PEAR.Commenting.FunctionComment.MissingReturn" :checker php-phpcs)
    '(24 nil warning "Avoid unused private methods such as 'bar'."
-        :checker php-phpmd)
+        :id "UnusedPrivateMethod" :checker php-phpmd)
    '(24 nil warning "Avoid unused parameters such as '$baz'."
-        :checker php-phpmd)
+        :id "UnusedFormalParameter" :checker php-phpmd)
    '(24 13 error "Private method name \"A::bar\" must be prefixed with an underscore"
+        :id "PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore"
         :checker php-phpcs)
    '(26 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
-        :checker php-phpmd)
+        :id "ShortVariable" :checker php-phpmd)
    '(26 nil warning "Avoid unused local variables such as '$i'."
-        :checker php-phpmd)
+        :id "UnusedLocalVariable" :checker php-phpmd)
    '(26 12 error "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\""
-        :checker php-phpcs)))
+        :id "Generic.PHP.LowerCaseConstant.Found" :checker php-phpcs)))
 
 (flycheck-ert-def-checker-test php-phpmd php rulesets
-  (let ((flycheck-phpmd-rulesets (remove "unusedcode" flycheck-phpmd-rulesets)))
+  :tags '(phpmd-xml)
+  (let ((flycheck-phpmd-rulesets (remove "unusedcode" flycheck-phpmd-rulesets))
+        (flycheck-disabled-checkers '(php-phpcs)))
     (flycheck-ert-should-syntax-check
      "checkers/php.php" 'php-mode
-     '(19 6 error "Missing class doc comment" :checker php-phpcs)
-     '(21 20 error "Private member variable \"FOO\" must be prefixed with an underscore"
-          :checker php-phpcs)
-     '(23 5 error "Doc comment for \"$baz\" missing" :checker php-phpcs)
-     '(23 5 error "Missing @return tag in function comment" :checker php-phpcs)
-     '(24 13 error "Private method name \"A::bar\" must be prefixed with an underscore"
-          :checker php-phpcs)
      '(26 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
-          :checker php-phpmd)
-     '(26 12 error "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\""
-          :checker php-phpcs))))
+          :id "ShortVariable" :checker php-phpmd))))
 
 (flycheck-ert-def-checker-test php-phpcs php standard
-  (let ((flycheck-phpcs-standard "Zend"))
+  (let ((flycheck-phpcs-standard "Zend")
+        (flycheck-disabled-checkers '(php-phpmd)))
     (flycheck-ert-should-syntax-check
      "checkers/php.php" 'php-mode
-     '(21 nil warning "Avoid unused private fields such as '$FOO'."
-          :checker php-phpmd)
      '(21 20 error "Private member variable \"FOO\" must contain a leading underscore"
+          :id "Zend.NamingConventions.ValidVariableName.PrivateNoUnderscore"
           :checker php-phpcs)
-     '(24 nil warning "Avoid unused private methods such as 'bar'."
-          :checker php-phpmd)
-     '(24 nil warning "Avoid unused parameters such as '$baz'."
-          :checker php-phpmd)
-     '(26 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
-          :checker php-phpmd)
-     '(26 nil warning "Avoid unused local variables such as '$i'."
-          :checker php-phpmd)
      '(30 1 error "A closing tag is not permitted at the end of a PHP file"
-          :checker php-phpcs))))
+          :id "Zend.Files.ClosingTag.NotAllowed" :checker php-phpcs))))
 
 (flycheck-ert-def-checker-test puppet-parser puppet singleline-syntax-error
   (flycheck-ert-should-syntax-check
@@ -4342,63 +4469,72 @@ Why not:
   (let ((python-indent-guess-indent-offset nil))       ; Silence Python Mode!
     (flycheck-ert-should-syntax-check
      "checkers/python-syntax-error.py" 'python-mode
-     '(3 13 error "E901 SyntaxError: invalid syntax" :checker python-flake8))))
+     '(3 13 error "SyntaxError: invalid syntax" :id "E901"
+         :checker python-flake8))))
 
 (flycheck-ert-def-checker-test python-flake8 python warning-ignored
   (let ((flycheck-flake8rc "flake8rc"))
     (flycheck-ert-should-syntax-check
      "checkers/python/test.py" 'python-mode
-     '(7 1 error "E302 expected 2 blank lines, found 1" :checker python-flake8)
-     '(9 9 info "N802 function name should be lowercase"
+     '(7 1 error "expected 2 blank lines, found 1" :id "E302"
          :checker python-flake8)
-     '(22 1 warning "F821 undefined name 'antigravity'"
+     '(9 9 info "function name should be lowercase" :id "N802"
+         :checker python-flake8)
+     '(22 1 warning "undefined name 'antigravity'" :id "F821"
           :checker python-flake8))))
 
 (flycheck-ert-def-checker-test python-flake8 python maximum-complexity
   (let ((flycheck-flake8-maximum-complexity 4))
     (flycheck-ert-should-syntax-check
      "checkers/python/test.py" 'python-mode
-     '(5 1 warning "F401 'antigravit' imported but unused"
+     '(5 1 warning "'antigravit' imported but unused" :id "F401"
          :checker python-flake8)
-     '(7 1 error "E302 expected 2 blank lines, found 1" :checker python-flake8)
-     '(9 9 info "N802 function name should be lowercase" :checker python-flake8)
-     '(12 1 warning "C901 'Spam.with_ham' is too complex (4)"
+     '(7 1 error "expected 2 blank lines, found 1" :id "E302"
+         :checker python-flake8)
+     '(9 9 info "function name should be lowercase" :id "N802"
+         :checker python-flake8)
+     '(12 1 warning "'Spam.with_ham' is too complex (4)" :id "C901"
           :checker python-flake8)
-     '(12 29 error "E251 unexpected spaces around keyword / parameter equals"
-          :checker python-flake8)
-     '(12 31 error "E251 unexpected spaces around keyword / parameter equals"
-          :checker python-flake8)
-     '(22 1 warning "F821 undefined name 'antigravity'"
+     '(12 29 error "unexpected spaces around keyword / parameter equals"
+          :id "E251" :checker python-flake8)
+     '(12 31 error "unexpected spaces around keyword / parameter equals"
+          :id "E251" :checker python-flake8)
+     '(22 1 warning "undefined name 'antigravity'" :id "F821"
           :checker python-flake8))))
 
 (flycheck-ert-def-checker-test python-flake8 python error-maximum-line-length
   (let ((flycheck-flake8-maximum-line-length 45))
     (flycheck-ert-should-syntax-check
      "checkers/python/test.py" 'python-mode
-     '(5 1 warning "F401 'antigravit' imported but unused"
+     '(5 1 warning "'antigravit' imported but unused" :id "F401"
          :checker python-flake8)
-     '(7 1 error "E302 expected 2 blank lines, found 1" :checker python-flake8)
-     '(9 9 info "N802 function name should be lowercase" :checker python-flake8)
-     '(10 46 error "E501 line too long (46 > 45 characters)"
+     '(7 1 error "expected 2 blank lines, found 1" :id "E302"
+         :checker python-flake8)
+     '(9 9 info "function name should be lowercase" :id "N802"
+         :checker python-flake8)
+     '(10 46 error "line too long (46 > 45 characters)" :id "E501"
           :checker python-flake8)
-     '(12 29 error "E251 unexpected spaces around keyword / parameter equals"
-          :checker python-flake8)
-     '(12 31 error "E251 unexpected spaces around keyword / parameter equals"
-          :checker python-flake8)
-     '(22 1 warning "F821 undefined name 'antigravity'"
+     '(12 29 error "unexpected spaces around keyword / parameter equals"
+          :id "E251" :checker python-flake8)
+     '(12 31 error "unexpected spaces around keyword / parameter equals"
+          :id "E251" :checker python-flake8)
+     '(22 1 warning "undefined name 'antigravity'" :id "F821"
           :checker python-flake8))))
 
 (flycheck-ert-def-checker-test python-flake8 python nil
   (flycheck-ert-should-syntax-check
    "checkers/python/test.py" 'python-mode
-   '(5 1 warning "F401 'antigravit' imported but unused" :checker python-flake8)
-   '(7 1 error "E302 expected 2 blank lines, found 1" :checker python-flake8)
-   '(9 9 info "N802 function name should be lowercase" :checker python-flake8)
-   '(12 29 error "E251 unexpected spaces around keyword / parameter equals"
-        :checker python-flake8)
-   '(12 31 error "E251 unexpected spaces around keyword / parameter equals"
-        :checker python-flake8)
-   '(22 1 warning "F821 undefined name 'antigravity'"
+   '(5 1 warning "'antigravit' imported but unused" :id "F401"
+       :checker python-flake8)
+   '(7 1 error "expected 2 blank lines, found 1" :id "E302"
+       :checker python-flake8)
+   '(9 9 info "function name should be lowercase" :id "N802"
+       :checker python-flake8)
+   '(12 29 error "unexpected spaces around keyword / parameter equals"
+        :id "E251" :checker python-flake8)
+   '(12 31 error "unexpected spaces around keyword / parameter equals"
+        :id "E251" :checker python-flake8)
+   '(22 1 warning "undefined name 'antigravity'" :id "F821"
         :checker python-flake8)))
 
 (flycheck-ert-def-checker-test python-pylint python syntax-error
@@ -4406,35 +4542,38 @@ Why not:
         (python-indent-guess-indent-offset nil)) ; Silence Python Mode
     (flycheck-ert-should-syntax-check
      "checkers/python-syntax-error.py" 'python-mode
-     '(3 nil error "invalid syntax (E0001)" :checker python-pylint))))
+     '(3 nil error "invalid syntax" :id "E0001" :checker python-pylint))))
 
 (flycheck-ert-def-checker-test python-pylint python nil
   (let ((flycheck-disabled-checkers '(python-flake8)))
     (flycheck-ert-should-syntax-check
      "checkers/python/test.py" 'python-mode
-     '(1 nil info "Missing module docstring (C0111)" :checker python-pylint)
-     '(4 nil error "Unable to import 'spam' (F0401)" :checker python-pylint)
-     '(5 nil error "No name 'antigravit' in module 'python' (E0611)"
+     '(1 nil info "Missing module docstring" :id "C0111" :checker python-pylint)
+     '(4 nil error "Unable to import 'spam'" :id "F0401" :checker python-pylint)
+     '(5 nil error "No name 'antigravit' in module 'python'" :id "E0611"
          :checker python-pylint)
-     '(5 nil warning "Unused import antigravit (W0611)" :checker python-pylint)
-     '(7 nil info "Missing class docstring (C0111)" :checker python-pylint)
-     '(9 4 info "Invalid method name \"withEggs\" (C0103)"
+     '(5 nil warning "Unused import antigravit" :id "W0611"
          :checker python-pylint)
-     '(9 4 info "Missing method docstring (C0111)" :checker python-pylint)
-     '(9 4 warning "Method could be a function (R0201)" :checker python-pylint)
-     '(10 15 warning "Used builtin function 'map' (W0141)"
+     '(7 nil info "Missing class docstring" :id "C0111" :checker python-pylint)
+     '(9 4 info "Invalid method name \"withEggs\"" :id "C0103"
+         :checker python-pylint)
+     '(9 4 info "Missing method docstring" :id "C0111" :checker python-pylint)
+     '(9 4 warning "Method could be a function" :id "R0201"
+         :checker python-pylint)
+     '(10 15 warning "Used builtin function 'map'" :id "W0141"
           :checker python-pylint)
      '(12 nil info "No space allowed around keyword argument assignment"
+          :id "C0326" :checker python-pylint)
+     '(12 4 info "Missing method docstring" :id "C0111" :checker python-pylint)
+     '(12 4 warning "Method could be a function" :id "R0201"
           :checker python-pylint)
-     '(12 4 info "Missing method docstring (C0111)" :checker python-pylint)
-     '(12 4 warning "Method could be a function (R0201)" :checker python-pylint)
-     '(14 15 error "Module 'sys' has no 'python_version' member (E1101)"
+     '(14 15 error "Module 'sys' has no 'python_version' member" :id "E1101"
           :checker python-pylint)
-     '(15 nil info "Unnecessary parens after u'print' keyword (C0325)"
+     '(15 nil info "Unnecessary parens after u'print' keyword" :id "C0325"
           :checker python-pylint)
-     '(17 nil info "Unnecessary parens after u'print' keyword (C0325)"
+     '(17 nil info "Unnecessary parens after u'print' keyword" :id "C0325"
           :checker python-pylint)
-     '(22 nil error "Undefined variable 'antigravity' (E0602)"
+     '(22 nil error "Undefined variable 'antigravity'" :id "E0602"
           :checker python-pylint))))
 
 (flycheck-ert-def-checker-test python-pylint python disabled-warnings
@@ -4442,15 +4581,16 @@ Why not:
         (flycheck-disabled-checkers '(python-flake8)))
     (flycheck-ert-should-syntax-check
      "checkers/python/test.py" 'python-mode
-     '(4 nil error "Unable to import 'spam' (F0401)" :checker python-pylint)
-     '(5 nil error "No name 'antigravit' in module 'python' (E0611)"
+     '(4 nil error "Unable to import 'spam'" :id "F0401" :checker python-pylint)
+     '(5 nil error "No name 'antigravit' in module 'python'" :id "E0611"
          :checker python-pylint)
-     '(5 nil warning "Unused import antigravit (W0611)" :checker python-pylint)
-     '(10 15 warning "Used builtin function 'map' (W0141)"
+     '(5 nil warning "Unused import antigravit" :id "W0611"
+         :checker python-pylint)
+     '(10 15 warning "Used builtin function 'map'" :id "W0141"
           :checker python-pylint)
-     '(14 15 error "Module 'sys' has no 'python_version' member (E1101)"
+     '(14 15 error "Module 'sys' has no 'python_version' member" :id "E1101"
           :checker python-pylint)
-     '(22 nil error "Undefined variable 'antigravity' (E0602)"
+     '(22 nil error "Undefined variable 'antigravity'" :id "E0602"
           :checker python-pylint))))
 
 (flycheck-ert-def-checker-test racket racket nil
@@ -4546,22 +4686,24 @@ Why not:
 (flycheck-ert-def-checker-test (ruby-rubocop ruby-rubylint) ruby with-rubylint
   (flycheck-ert-should-syntax-check
    "checkers/ruby-warnings.rb" 'ruby-mode
-   '(1 1 info "Use snake_case for source file names." :checker ruby-rubocop)
-   '(3 1 info "Missing top-level class documentation comment."
+   '(1 1 info "Use snake_case for source file names." :id "Style/FileName"
        :checker ruby-rubocop)
+   '(3 1 info "Missing top-level class documentation comment."
+       :id "Style/Documentation" :checker ruby-rubocop)
    '(5 5 warning "unused local variable arr" :checker ruby-rubylint)
    '(5 5 warning "Useless assignment to variable - `arr`."
-       :checker ruby-rubocop)
+       :id "Lint/UselessAssignment" :checker ruby-rubocop)
    '(6 10 info "Prefer single-quoted strings when you don't need string interpolation or special symbols."
-       :checker ruby-rubocop)
+       :id "Style/StringLiterals" :checker ruby-rubocop)
    '(10 5 info "the use of then/do is not needed here" :checker ruby-rubylint)
    '(10 5 info "Use a guard clause instead of wrapping the code inside a conditional expression."
-        :checker ruby-rubocop)
+        :id "Style/GuardClause":checker ruby-rubocop)
    '(10 5 info "Favor modifier `if` usage when having a single-line body. Another good alternative is the usage of control flow `&&`/`||`."
-        :checker ruby-rubocop)
+        :id "Style/IfUnlessModifier" :checker ruby-rubocop)
    '(10 8 warning "Literal `true` appeared in a condition."
-        :checker ruby-rubocop)
-   '(10 13 info "Do not use `then` for multi-line `if`." :checker ruby-rubocop)
+        :id "Lint/LiteralInCondition" :checker ruby-rubocop)
+   '(10 13 info "Do not use `then` for multi-line `if`."
+        :id "Style/MultilineIfThen" :checker ruby-rubocop)
    '(11 24 error "undefined instance variable @name" :checker ruby-rubylint)
    '(16 1 error "wrong number of arguments (expected 2..3 but got 0)"
         :checker ruby-rubylint)))
@@ -4571,18 +4713,20 @@ Why not:
         (flycheck-disabled-checkers '(ruby-rubylint)))
     (flycheck-ert-should-syntax-check
      "checkers/ruby-warnings.rb" 'ruby-mode
-     '(1 1 info "Use snake_case for source file names." :checker ruby-rubocop)
+     '(1 1 info "Use snake_case for source file names."
+         :id "Style/FileName" :checker ruby-rubocop)
      '(3 1 info "Missing top-level class documentation comment."
-         :checker ruby-rubocop)
+         :id "Style/Documentation" :checker ruby-rubocop)
      '(5 5 warning "Useless assignment to variable - `arr`."
-         :checker ruby-rubocop)
+         :id "Lint/UselessAssignment" :checker ruby-rubocop)
      '(6 10 info "Prefer single-quoted strings when you don't need string interpolation or special symbols."
-         :checker ruby-rubocop)
+         :id "Style/StringLiterals" :checker ruby-rubocop)
      '(10 5 info "Use a guard clause instead of wrapping the code inside a conditional expression."
-          :checker ruby-rubocop)
+          :id "Style/GuardClause" :checker ruby-rubocop)
      '(10 8 warning "Literal `true` appeared in a condition."
-          :checker ruby-rubocop)
-     '(10 13 info "Do not use `then` for multi-line `if`." :checker ruby-rubocop))))
+          :id "Lint/LiteralInCondition" :checker ruby-rubocop)
+     '(10 13 info "Do not use `then` for multi-line `if`."
+          :id "Style/MultilineIfThen" :checker ruby-rubocop))))
 
 (flycheck-ert-def-checker-test ruby-rubocop ruby lint-only
   (let ((flycheck-rubocop-lint-only t)
@@ -4590,9 +4734,9 @@ Why not:
     (flycheck-ert-should-syntax-check
      "checkers/ruby-warnings.rb" 'ruby-mode
      '(5 5 warning "Useless assignment to variable - `arr`."
-         :checker ruby-rubocop)
+         :id "Lint/UselessAssignment" :checker ruby-rubocop)
      '(10 8 warning "Literal `true` appeared in a condition."
-          :checker ruby-rubocop))))
+          :id "Lint/LiteralInCondition" :checker ruby-rubocop))))
 
 (flycheck-ert-def-checker-test ruby-rubylint ruby errors-only
   (skip-unless (version<= "2.0.2" (flycheck-test-rubylint-version)))
@@ -4778,22 +4922,24 @@ Why not:
    '(5 nil error "parse error near `fi'" :checker sh-zsh)))
 
 (flycheck-ert-def-checker-test sh-shellcheck sh nil
+  :tags '(checkstyle-xml)
   (flycheck-ert-should-syntax-check
    "checkers/sh-shellcheck.sh" 'sh-mode
-   '(2 5 warning "Note that ~ does not expand in quotes. [SC2088]"
+   '(2 5 warning "Note that ~ does not expand in quotes." :id "SC2088"
        :checker sh-shellcheck)
-   '(3 7 error "Double quote array expansions, otherwise they're like $* and break on spaces. [SC2068]"
-       :checker sh-shellcheck)
-   '(4 11 info "Use $(..) instead of deprecated `..` [SC2006]"
+   '(3 7 error "Double quote array expansions, otherwise they're like $* and break on spaces."
+       :id "SC2068" :checker sh-shellcheck)
+   '(4 11 info "Use $(..) instead of deprecated `..`" :id "SC2006"
        :checker sh-shellcheck)))
 
 (flycheck-ert-def-checker-test sh-shellcheck sh excluded-warning
+  :tags '(checkstyle-xml)
   (let ((flycheck-shellcheck-excluded-warnings '("SC2088")))
     (flycheck-ert-should-syntax-check
      "checkers/sh-shellcheck.sh" 'sh-mode
-     '(3 7 error "Double quote array expansions, otherwise they're like $* and break on spaces. [SC2068]"
-         :checker sh-shellcheck)
-     '(4 11 info "Use $(..) instead of deprecated `..` [SC2006]"
+     '(3 7 error "Double quote array expansions, otherwise they're like $* and break on spaces."
+         :id "SC2068" :checker sh-shellcheck)
+     '(4 11 info "Use $(..) instead of deprecated `..`" :id "SC2006"
          :checker sh-shellcheck))))
 
 (flycheck-ert-def-checker-test slim slim nil
@@ -4807,8 +4953,8 @@ Why not:
 (flycheck-ert-def-checker-test tex-chktex (tex latex) nil
   (flycheck-ert-should-syntax-check
    "checkers/tex-warning.tex" 'latex-mode
-   '(5 28 warning "13:Intersentence spacing (`\\@') should perhaps be used."
-       :checker tex-chktex)))
+   '(5 28 warning "Intersentence spacing (`\\@') should perhaps be used."
+       :id "13" :checker tex-chktex)))
 
 (flycheck-ert-def-checker-test tex-lacheck (tex latex) nil
   (let ((flycheck-disabled-checkers '(tex-chktex)))
