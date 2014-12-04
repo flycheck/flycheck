@@ -1266,6 +1266,28 @@ A checker is disabled if it is contained in
 `flycheck-disabled-checkers'."
   (memq checker flycheck-disabled-checkers))
 
+(defun flycheck-possibly-suitable-checkers ()
+  "Find possibly suitable checkers for the current buffer.
+
+Return a list of all syntax checkers which could possibly be
+suitable for the current buffer, if any problems in their setup
+were fixed.
+
+Currently this function collects all registered syntax checkers
+whose `:modes' contain the current major mode or which do not
+have any `:modes', but a `:predicate' that returns non-nil for
+the current buffer."
+  (let (checkers)
+    (dolist (checker flycheck-checkers)
+      (let ((modes (flycheck-checker-modes checker))
+            (predicate (flycheck-checker-predicate checker)))
+        (when (or (memq major-mode modes)
+                  (and (not modes)
+                       (functionp predicate)
+                       (funcall predicate)))
+          (push checker checkers))))
+    (nreverse checkers)))
+
 
 ;;; Generic syntax checkers
 (defconst flycheck-generic-checker-version 2
@@ -1571,6 +1593,11 @@ nil otherwise."
   'help-function 'flycheck-goto-checker-definition
   'help-echo (purecopy "mouse-2, RET: find Flycheck checker definition"))
 
+(define-button-type 'help-flycheck-checker-doc
+  :supertype 'help-xref
+  'help-function #'flycheck-describe-checker
+  'help-echo "mouse-2, RET: describe Flycheck checker")
+
 (defconst flycheck-find-checker-regexp
   (rx line-start (zero-or-more (syntax whitespace))
       "(" symbol-start "flycheck-define-checker" symbol-end
@@ -1658,6 +1685,53 @@ Pop up a help buffer with the documentation of CHECKER."
           ;; Ultimately, print the docstring
           (princ "\nDocumentation:\n")
           (princ (flycheck-checker-documentation checker)))))))
+
+(defun flycheck-verify-setup ()
+  "Check whether Flycheck can be used in this buffer.
+
+Display a new buffer listing all syntax checkers that could be
+applicable in the current buffer.  For each syntax checkers,
+possible problems are shown."
+  (interactive)
+  (when (and (buffer-file-name) (buffer-modified-p))
+    ;; Save the buffer
+    (save-buffer))
+
+  (let ((buffer (current-buffer))
+        (checkers (flycheck-possibly-suitable-checkers)))
+
+    ;; Now print all applicable checkers
+    (with-help-window (get-buffer-create " *Flycheck checkers*")
+      (with-current-buffer standard-output
+        (princ "Syntax checkers for buffer ")
+        (insert (propertize (buffer-name buffer) 'face 'bold))
+        (princ " in ")
+        (let ((mode (buffer-local-value 'major-mode buffer)))
+          (insert-button (symbol-name mode)
+                         'type 'help-function
+                         'help-args (list mode)))
+        (princ ":\n\n")
+        (dolist (checker checkers)
+          (princ "  ")
+          (insert-button (symbol-name checker)
+                         'type 'help-flycheck-checker-doc
+                         'help-args (list checker))
+          (princ "\n")
+          (let ((predicate (flycheck-checker-predicate checker)))
+            (when predicate
+              (princ "    - predicate: ")
+              (let* ((result (with-current-buffer buffer
+                               (funcall (flycheck-checker-predicate checker))))
+                     (face (if result 'success 'error)))
+                (princ result)
+                (save-excursion
+                  (re-search-backward (rx "predicate: "
+                                          (group (one-or-more anything))
+                                          point))
+                  (add-text-properties (match-beginning 1)
+                                       (match-end 1)
+                                       (list 'face (list 'bold face)))))))
+          (princ "\n\n"))))))
 
 
 ;;; Predicates for generic syntax checkers
