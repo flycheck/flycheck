@@ -4726,7 +4726,7 @@ Uses the GNAT compiler from GCC.  See URL
             ": warning: " (message) line-end)
    (error line-start (file-name) ":" line ":" column ;no specific error prefix in Ada
           ": " (message) line-end))
-  :modes (ada-mode))
+  :modes ada-mode)
 
 (flycheck-define-checker asciidoc
   "A AsciiDoc syntax checker using the AsciiDoc compiler.
@@ -6732,9 +6732,9 @@ See URL `https://github.com/koalaman/shellcheck/'."
             (option "--exclude" flycheck-shellcheck-excluded-warnings list
                     flycheck-option-comma-separated-list)
             source)
-  :modes sh-mode
   :error-parser flycheck-parse-checkstyle
   :error-filter flycheck-dequalify-error-ids
+  :modes sh-mode
   :predicate (lambda () (memq sh-shell flycheck-shellcheck-supported-shells)))
 
 (flycheck-define-checker slim
@@ -6798,7 +6798,7 @@ See URL `http://www.veripool.org/wiki/verilator'."
             (file-name) ":" line ": " (message) line-end)
    (error line-start "%Error: " (file-name) ":"
           line ": " (message) line-end))
-  :modes (verilog-mode))
+  :modes verilog-mode)
 
 (flycheck-define-checker xml-xmlstarlet
   "A XML syntax checker and validator using the xmlstarlet utility.
