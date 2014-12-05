@@ -24,7 +24,7 @@
 
 .. |logo| image:: https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/logo.png
           :target: http://www.flycheck.org
-          :align: Flycheck logo
+          :alt: Flycheck logo
 
 ===================
  |logo| — Flycheck
