@@ -18,13 +18,19 @@
                   :target: http://stable.melpa.org/#/flycheck
                   :alt: MELPA Stable Status
 
-===========================================================
- Flycheck |license| |melpa| |melpa-stable| |docs| |travis|
-===========================================================
+.. |waffle| image:: https://badge.waffle.io/flycheck/flycheck.svg?label=ready&title=Ready
+            :target: https://waffle.io/flycheck/flycheck
+            :alt: Ready issues
+
+==========
+ Flycheck
+==========
 
 .. image:: https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/logo.png
    :target: http://www.flycheck.org
    :align: center
+
+|license| |melpa| |melpa-stable| |docs| |travis| |waffle|
 
 .. default-role:: code
 
@@ -106,11 +112,12 @@ Documentation is available at http://www.flycheck.org:
 Support & Contribution
 ======================
 
-- `Issue tracker`_
+- `Issue tracker`_ and `Waffle Board`_
 - Github_
 - `Contributor Guide`_
 
 .. _Issue tracker: https://github.com/flycheck/flycheck/issues
+.. _Waffle Board: https://waffle.io/flycheck/flycheck
 .. _Github: https://github.com/flycheck/flycheck
 .. _Contributor Guide: http://www.flycheck.org/en/latest/index.html#contributor-guide
 
