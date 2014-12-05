@@ -22,13 +22,13 @@
             :target: https://waffle.io/flycheck/flycheck
             :alt: Ready issues
 
-==========
- Flycheck
-==========
+.. |logo| image:: https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/logo.png
+          :target: http://www.flycheck.org
+          :align: Flycheck logo
 
-.. image:: https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/logo.png
-   :target: http://www.flycheck.org
-   :align: center
+===================
+ |logo| — Flycheck
+===================
 
 |license| |melpa| |melpa-stable| |docs| |travis| |waffle|
 
