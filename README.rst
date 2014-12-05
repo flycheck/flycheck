@@ -26,9 +26,9 @@
           :target: http://www.flycheck.org
           :alt: Flycheck logo
 
-===================
- |logo| — Flycheck
-===================
+=================
+ |logo| Flycheck
+=================
 
 |license| |melpa| |melpa-stable| |docs| |travis| |waffle|
 
