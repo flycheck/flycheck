@@ -30,7 +30,7 @@
  |logo| Flycheck
 =================
 
-|license| |melpa| |melpa-stable| |docs| |travis| |waffle|
+|license| |melpa| |melpa-stable| |waffle| |docs| |travis|
 
 .. default-role:: code
 
