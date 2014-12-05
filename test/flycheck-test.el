@@ -4191,6 +4191,12 @@ In an equation for ‘main’: main = BS.putStr \"Hello World\""
     (flycheck-ert-should-syntax-check
      "checkers/Haskell/LanguageExtension.hs" 'haskell-mode)))
 
+(flycheck-ert-def-checker-test (haskell-ghc haskell-hlint) haskell literate
+  (flycheck-ert-should-syntax-check
+   "checkers/Haskell/Literate.lhs" 'literate-haskell-mode
+   '(6 1 warning "Top-level binding with no type signature: foo :: forall t. t"
+       :checker haskell-ghc)))
+
 (flycheck-ert-def-checker-test (haskell-ghc haskell-hlint) haskell
                                complete-chain
   (flycheck-ert-should-syntax-check

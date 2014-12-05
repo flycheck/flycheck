@@ -5822,7 +5822,11 @@ See URL `http://www.haskell.org/ghc/'."
             ;; Force GHC to treat the file as Haskell file, even if it doesn't
             ;; have an extension.  Otherwise GHC would fail on files without an
             ;; extension
-            "-x" "hs" source)
+            "-x" (eval
+                  (pcase major-mode
+                    (`haskell-mode "hs")
+                    (`literate-haskell-mode "lhs")))
+            source)
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ":"
             (or " " "\n    ") "Warning:" (optional "\n")
@@ -5844,7 +5848,7 @@ See URL `http://www.haskell.org/ghc/'."
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-dedent-error-messages errors)))
-  :modes haskell-mode
+  :modes (haskell-mode literate-haskell-mode)
   :next-checkers ((warning . haskell-hlint)))
 
 (flycheck-define-checker haskell-hlint
@@ -5865,7 +5869,7 @@ See URL `https://github.com/ndmitchell/hlint'."
           (message (one-or-more not-newline)
                    (one-or-more "\n" (one-or-more not-newline)))
           line-end))
-  :modes haskell-mode)
+  :modes (haskell-mode literate-haskell-mode))
 
 (flycheck-def-config-file-var flycheck-tidyrc html-tidy ".tidyrc"
   :safe #'stringp)
