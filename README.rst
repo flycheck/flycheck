@@ -26,15 +26,15 @@
           :target: http://www.flycheck.org
           :alt: Flycheck logo
 
-=================
- |logo| Flycheck
-=================
+========
+ |logo|
+========
 
 |license| |melpa| |melpa-stable| |waffle| |docs| |travis|
 
 .. default-role:: code
 
-Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs 24,
+**Flycheck** is a modern on-the-fly syntax checking extension for GNU Emacs 24,
 intended as replacement for the older Flymake extension which is part of GNU
 Emacs.
 
