@@ -16,7 +16,8 @@ to Flycheck:
   checkers)
 - `Doug MacEachern <https://github.com/dougm>`_ (Go errcheck syntax checker)
 - `Fanael Linithien <https://github.com/Fanael>`_ (GCC syntax checker, exception
-  support for C/C++, inconclusive checks for cppcheck, bug fixes)
+  support for C/C++, inconclusive checks for cppcheck, literal Haskell
+  support, bug fixes)
 - `Gereon Frey <https://github.com/gfrey>`_ (fixes to temporary file handling in
   Go and to the Go tests)
 - `Gulshan Singh <https://github.com/gsingh93>`_ (customizable Rust crate type)

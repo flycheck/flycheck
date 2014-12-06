@@ -38,6 +38,7 @@ master (in development)
     new `inherit` value [GH-511]
   - Parse help messages from `rustc` [GH-517]
   - `g` in the error list checks the source buffer again [GH-532]
+  - `haskell-ghc` supports literate Haskell now [GH-535]
 
 - Bug fixes:
 
