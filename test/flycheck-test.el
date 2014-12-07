@@ -4382,21 +4382,31 @@ Why not:
    '(8 nil error "syntax error, unexpected ')', expecting '('" :checker php)))
 
 (flycheck-ert-def-checker-test php php nil
-  :tags '(phpmd-xml)
+  :tags '(phpmd-xml checkstyle-xml)
   (flycheck-ert-should-syntax-check
    "checkers/php.php" 'php-mode
-   '(19 6 error "Missing class doc comment"
+   '(19 1 error "Missing class doc comment"
         :id "PEAR.Commenting.ClassComment.Missing" :checker php-phpcs)
    '(21 nil warning "Avoid unused private fields such as '$FOO'."
         :id "UnusedPrivateField" :checker php-phpmd)
    '(21 20 error "Private member variable \"FOO\" must be prefixed with an underscore"
         :id "PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore"
         :checker php-phpcs)
-   '(23 5 error "Doc comment for \"$baz\" missing"
+   '(23 5 error "The open comment tag must be the only content on the line"
+        :id "Generic.Commenting.DocComment.ContentAfterOpen"
+        :checker php-phpcs)
+   '(23 5 error "Doc comment for parameter \"$baz\" missing"
         :id "PEAR.Commenting.FunctionComment.MissingParamTag"
         :checker php-phpcs)
-   '(23 5 error "Missing @return tag in function comment"
-        :id "PEAR.Commenting.FunctionComment.MissingReturn" :checker php-phpcs)
+   '(23 9 error "Doc comment short description must be on the first line"
+        :id "Generic.Commenting.DocComment.SpacingBeforeShort"
+        :checker php-phpcs)
+   '(23 29 error "The close comment tag must be the only content on the line"
+        :id "Generic.Commenting.DocComment.ContentBeforeClose"
+        :checker php-phpcs)
+   '(23 29 error "Missing @return tag in function comment"
+        :id "PEAR.Commenting.FunctionComment.MissingReturn"
+        :checker php-phpcs)
    '(24 nil warning "Avoid unused private methods such as 'bar'."
         :id "UnusedPrivateMethod" :checker php-phpmd)
    '(24 nil warning "Avoid unused parameters such as '$baz'."
@@ -4421,6 +4431,7 @@ Why not:
           :id "ShortVariable" :checker php-phpmd))))
 
 (flycheck-ert-def-checker-test php-phpcs php standard
+  :tags '(checkstyle-xml)
   (let ((flycheck-phpcs-standard "Zend")
         (flycheck-disabled-checkers '(php-phpmd)))
     (flycheck-ert-should-syntax-check
