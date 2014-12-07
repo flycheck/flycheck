@@ -2376,6 +2376,28 @@ of the file will be interrupted because there are too many #ifdef configurations
     (should (equal (flycheck-sanitize-errors (list err))
                    (list (flycheck-error-new-at 1 nil 'error "foo"))))))
 
+(ert-deftest flycheck-increment-error-columns/ignores-nil ()
+  :tags '(error-filtering)
+  (let ((errors (list (flycheck-error-new-at 4 nil nil nil))))
+    (should (equal (flycheck-increment-error-columns errors)
+                   (list (flycheck-error-new-at 4 nil nil nil))))))
+
+(ert-deftest flycheck-increment-error-columns/default-offset ()
+  :tags '(error-filtering)
+  (let ((errors (list (flycheck-error-new-at 4 6 nil nil)
+                      (flycheck-error-new-at 7 9 nil nil))))
+    (should (equal (flycheck-increment-error-columns errors)
+                   (list (flycheck-error-new-at 4 7 nil nil)
+                         (flycheck-error-new-at 7 10 nil nil))))))
+
+(ert-deftest flycheck-increment-error-columns/custom-offset ()
+  :tags '(error-filtering)
+  (let ((errors (list (flycheck-error-new-at 4 6 nil nil)
+                      (flycheck-error-new-at 7 9 nil nil))))
+    (should (equal (flycheck-increment-error-columns errors 10)
+                   (list (flycheck-error-new-at 4 16 nil nil)
+                         (flycheck-error-new-at 7 19 nil nil))))))
+
 (ert-deftest flycheck-collapse-error-message-whitespace ()
   :tags '(error-filtering)
   (let ((err (flycheck-error-new-at 1 1 'error

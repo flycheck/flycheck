@@ -2778,6 +2778,16 @@ Returns sanitized ERRORS."
           (setf (flycheck-error-column err) nil)))))
   errors)
 
+(defun flycheck-increment-error-columns (errors &optional offset)
+  "Increment all columns of ERRORS by OFFSET."
+  (mapc (lambda (err)
+          (let ((column (flycheck-error-column err)))
+            (when column
+              (setf (flycheck-error-column err)
+                    (+ column (or offset 1))))))
+        errors)
+  errors)
+
 (defun flycheck-collapse-error-message-whitespace (errors)
   "Collapse whitespace in all messages of ERRORS.
 
@@ -5168,18 +5178,11 @@ See URL `http://coq.inria.fr/'."
   :error-filter
   (lambda (errors)
     (dolist (err errors)
-      ;; Coq uses zero-based indexing for columns, so we need to fix column
-      ;; indexes.  Also, delete trailing whitespace from all lines in the error
-      ;; message
-      (let ((column (flycheck-error-column err))
-            (message (flycheck-error-message err)))
-        (setf (flycheck-error-column err) (1+ column))
-        (with-temp-buffer
-          (insert message)
-          (delete-trailing-whitespace)
-          (setf (flycheck-error-message err)
-                (buffer-substring-no-properties (point-min) (point-max))))))
-    (flycheck-sanitize-errors errors))
+      (setf (flycheck-error-message err)
+            (replace-regexp-in-string (rx (1+ (syntax whitespace)) line-end)
+                                      "" (flycheck-error-message err)
+                                      'fixedcase 'literal)))
+    (flycheck-increment-error-columns errors))
   :modes coq-mode)
 
 (flycheck-define-checker css-csslint

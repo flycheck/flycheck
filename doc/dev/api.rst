@@ -127,6 +127,9 @@ Additionally, Flycheck has some built-in error filters for generic checkers:
 .. function:: flycheck-sanitize-errors
    :auto:
 
+.. function:: flycheck-increment-error-columns
+   :auto:
+
 .. function:: flycheck-collapse-error-message-whitespace
    :auto:
 
