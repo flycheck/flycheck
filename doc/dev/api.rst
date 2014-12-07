@@ -133,7 +133,17 @@ Additionally, Flycheck has some built-in error filters for generic checkers:
 .. function:: flycheck-collapse-error-message-whitespace
    :auto:
 
+.. function:: flycheck-dedent-error-messages
+   :auto:
+
 .. function:: flycheck-fold-include-errors
+   :auto:
+
+.. function:: flycheck-dequalify-error-ids
+   :auto:
+
+.. function:: flycheck-remove-error-ids
+   :auto:
 
 .. _api-command-syntax-checkers:
 
