@@ -1328,6 +1328,10 @@ are mandatory.
      status report.  See `flycheck-report-buffer-checker-status'
      for more information about STATUS and DATA.
 
+     FUNCTION may be synchronous or asynchronous, i.e. it may
+     call the given callback either immediately, or at some later
+     point (e.g. from a process sentinel).
+
      A syntax checker _must_ call CALLBACK at least once with a
      STATUS that finishes the current syntax checker.  Otherwise
      Flycheck gets stuck at the current syntax check with this
