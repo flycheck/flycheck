@@ -2309,6 +2309,15 @@ Slots:
 `column' (optional)
      The column number the error refers to, as number.
 
+     For compatibility with external tools and unlike Emacs
+     itself (e.g. in Compile Mode) Flycheck uses _1-based_
+     columns: The first character on a line is column 1.
+
+     Occasionally some tools try to proactively adapt to Emacs
+     and emit 0-based columns automatically.  In these cases, the
+     columns must be adjusted for Flycheck, see
+     `flycheck-increment-error-columns'.
+
 `level'
      The error level, as either `warning' or `error'.
 

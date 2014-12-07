@@ -302,6 +302,18 @@ See :infonode:`(cl)Structures` for more information about CL structures.
       If this attribute is `nil`, Flycheck will assume that the error refers to
       the whole line.
 
+      .. warning::
+
+         For compatibility with external programs and **unlike** Emacs itself
+         (e.g. in Compile Mode), Flycheck uses 1-based columns, not 0-based: The
+         first character on a line is column 1.
+
+         This is the format used by most external programs, but occasionally a
+         program tries to proactively adapt to Emacs' convention, and outputs
+         0-based columns.  In this case, you need to adapt the column numbers
+         for Flycheck, via :function:`flycheck-increment-error-columns` as
+         `:error-filter`.
+
    .. cl-slot:: message
 
       The human-readable error message as string.
