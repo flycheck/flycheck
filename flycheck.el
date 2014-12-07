@@ -2309,6 +2309,15 @@ Slots:
 `column' (optional)
      The column number the error refers to, as number.
 
+     For compatibility with external tools and unlike Emacs
+     itself (e.g. in Compile Mode) Flycheck uses _1-based_
+     columns: The first character on a line is column 1.
+
+     Occasionally some tools try to proactively adapt to Emacs
+     and emit 0-based columns automatically.  In these cases, the
+     columns must be adjusted for Flycheck, see
+     `flycheck-increment-error-columns'.
+
 `level'
      The error level, as either `warning' or `error'.
 
@@ -2776,6 +2785,19 @@ Returns sanitized ERRORS."
                 (if (string-empty-p message) nil message)))
         (when (eq column 0)
           (setf (flycheck-error-column err) nil)))))
+  errors)
+
+(defun flycheck-increment-error-columns (errors &optional offset)
+  "Increment all columns of ERRORS by OFFSET.
+
+Use this as `:error-filter' if a syntax checker outputs 0-based
+columns."
+  (mapc (lambda (err)
+          (let ((column (flycheck-error-column err)))
+            (when column
+              (setf (flycheck-error-column err)
+                    (+ column (or offset 1))))))
+        errors)
   errors)
 
 (defun flycheck-collapse-error-message-whitespace (errors)
@@ -5168,18 +5190,11 @@ See URL `http://coq.inria.fr/'."
   :error-filter
   (lambda (errors)
     (dolist (err errors)
-      ;; Coq uses zero-based indexing for columns, so we need to fix column
-      ;; indexes.  Also, delete trailing whitespace from all lines in the error
-      ;; message
-      (let ((column (flycheck-error-column err))
-            (message (flycheck-error-message err)))
-        (setf (flycheck-error-column err) (1+ column))
-        (with-temp-buffer
-          (insert message)
-          (delete-trailing-whitespace)
-          (setf (flycheck-error-message err)
-                (buffer-substring-no-properties (point-min) (point-max))))))
-    (flycheck-sanitize-errors errors))
+      (setf (flycheck-error-message err)
+            (replace-regexp-in-string (rx (1+ (syntax whitespace)) line-end)
+                                      "" (flycheck-error-message err)
+                                      'fixedcase 'literal)))
+    (flycheck-increment-error-columns errors))
   :modes coq-mode)
 
 (flycheck-define-checker css-csslint
@@ -6268,6 +6283,9 @@ See URL `http://www.pylint.org/'."
             ;; Need `source-inplace' for relative imports (e.g. `from .foo
             ;; import bar'), see https://github.com/flycheck/flycheck/issues/280
             source-inplace)
+  :error-filter
+  (lambda (errors)
+    (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ":"
           (or "E" "F") ":"
