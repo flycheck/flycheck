@@ -44,6 +44,19 @@
        (message "Unbalanced parenthesis in selector %S at %s"
                 selector (1+ (current-column)))))))
 
+(defun flycheck-transform-selector (selector)
+  "Transform SELECTOR to implement some custom selectors.
+
+This function adds the following custom selectors:
+
+`(language FOO)' -> `(tag language-FOO')"
+  (pcase selector
+    (`(language ,(and language (pred symbolp)))
+     (list 'tag (intern (concat "language-" (symbol-name language)))))
+    (`(,group . ,body)
+     (cons group (mapcar #'flycheck-transform-selector body)))
+    (simple simple)))
+
 (defun flycheck-run-tests-batch-and-exit ()
   "Run test cases matching tags in `argv' and exit.
 
@@ -69,7 +82,7 @@ Node `(ert)Test Selectors' for information about test selectors."
                          (error
                           (flycheck-run-check-selector selector)
                           (kill-emacs 1))))))
-    (ert-run-tests-batch-and-exit selector)))
+    (ert-run-tests-batch-and-exit (flycheck-transform-selector selector))))
 
 (defun flycheck-runs-this-script-p ()
   "Whether this file is executed as script."
