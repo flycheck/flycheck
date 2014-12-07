@@ -1,9 +1,12 @@
 - name: Download rpmlint
   get_url: url=http://sourceforge.net/projects/rpmlint/files/rpmlint-{{rpmlint_version}}.tar.xz/download
            dest=/usr/src/rpmlint-{{rpmlint_version}}.tar.xz
+  ignore_errors: True
 - name: Extract rpmlint
   unarchive: src=/usr/src/rpmlint-{{rpmlint_version}}.tar.xz
              copy=no dest=/usr/src/
              creates=/usr/src/rpmlint-{{rpmlint_version}}/Makefile
+  ignore_errors: True
 - name: Install rpmlint
   command: make install chdir=/usr/src/rpmlint-{{rpmlint_version}}/
+  ignore_errors: True
