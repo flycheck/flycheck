@@ -4182,6 +4182,15 @@ The term \"1\" has type \"nat\" while it is expected to have type
    "checkers/Haskell/SyntaxError.hs" 'haskell-mode
    '(3 1 error "parse error on input ‘module’" :checker haskell-ghc)))
 
+(flycheck-ert-def-checker-test haskell-ghc haskell type-error
+  (flycheck-ert-should-syntax-check
+   "checkers/Haskell/Error.hs" 'haskell-mode
+   '(4 16 error "Couldn't match type ‘Bool’ with ‘[Char]’
+Expected type: String
+  Actual type: Bool
+In the first argument of ‘putStrLn’, namely ‘True’
+In the expression: putStrLn True" :checker haskell-ghc)))
+
 (flycheck-ert-def-checker-test haskell-ghc haskell no-user-package-database
   :expected-result :failed
   (error "Not implemented!"))
