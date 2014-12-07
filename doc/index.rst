@@ -15,15 +15,14 @@ It uses various syntax checking and linting tools to automatically check the
 contents of buffers while you type, and reports warnings and errors directly in
 the buffer, or in an optional error list:
 
-.. figure:: /images/screenshot.png
+.. figure:: /images/screencast.gif
    :align: center
-   :width: 731
-   :height: 519
-   :scale: 75%
+   :width: 722
+   :height: 328
 
-   Flycheck in an Emacs Lisp buffer, with error highlights, indicators, and the
-   error list.  The color theme is `Solarized Light`_, together with the `Source
-   Code Pro`_ font.
+   Flycheck in a Haskell buffer, with in-buffer highlights, fringe indicators,
+   and the error list.  The color theme is `Solarized Light`_, together with the
+   `Source Code Pro`_ font.
 
 .. contents:: Table of Contents
    :local:
