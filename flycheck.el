@@ -2779,7 +2779,10 @@ Returns sanitized ERRORS."
   errors)
 
 (defun flycheck-increment-error-columns (errors &optional offset)
-  "Increment all columns of ERRORS by OFFSET."
+  "Increment all columns of ERRORS by OFFSET.
+
+Use this as `:error-filter' if a syntax checker outputs 0-based
+columns."
   (mapc (lambda (err)
           (let ((column (flycheck-error-column err)))
             (when column
