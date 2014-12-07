@@ -7575,6 +7575,9 @@ Parse help messages from @code{rustc} [GH-517]@footnote{https://github.com/flych
 
 @item 
 @code{g} in the error list checks the source buffer again [GH-532]@footnote{https://github.com/flycheck/flycheck/issues/532}
+
+@item 
+@code{haskell-ghc} supports literate Haskell now [GH-535]@footnote{https://github.com/flycheck/flycheck/issues/535}
 @end itemize
 
 @item 
@@ -7595,6 +7598,9 @@ and related functions
 
 @item 
 Fix use deprecated option in @code{coffee-coffeelint}
+
+@item 
+Fix error columns of @code{python-pylint} [GH-536]@footnote{https://github.com/flycheck/flycheck/issues/536}
 @end itemize
 @end itemize
 
@@ -10602,8 +10608,20 @@ Returns sanitized ERRORS.
 @end format
 @end deffn
 
+@geindex flycheck-increment-error-columns; Emacs Lisp function
+@anchor{dev/api el function flycheck-increment-error-columns}@anchor{206}
+@deffn {Function} flycheck@w{-}increment@w{-}error@w{-}columns errors &optional  offset
+
+@format
+Increment all columns of ERRORS by OFFSET.
+
+Use this as @code{`:error-filter'} if a syntax checker outputs 0-based
+columns.
+@end format
+@end deffn
+
 @geindex flycheck-collapse-error-message-whitespace; Emacs Lisp function
-@anchor{dev/api el function flycheck-collapse-error-message-whitespace}@anchor{206}
+@anchor{dev/api el function flycheck-collapse-error-message-whitespace}@anchor{207}
 @deffn {Function} flycheck@w{-}collapse@w{-}error@w{-}message@w{-}whitespace errors
 
 @format
@@ -10613,23 +10631,77 @@ Return ERRORS.
 @end format
 @end deffn
 
+@geindex flycheck-dedent-error-messages; Emacs Lisp function
+@anchor{dev/api el function flycheck-dedent-error-messages}@anchor{208}
+@deffn {Function} flycheck@w{-}dedent@w{-}error@w{-}messages errors
+
+@format
+Dedent all messages of ERRORS.
+
+For each error in ERRORS, determine the indentation offset from
+the leading whitespace of the first line, and dedent all further
+lines accordingly.
+
+Return ERRORS, with in-place modifications.
+@end format
+@end deffn
+
 @geindex flycheck-fold-include-errors; Emacs Lisp function
-@anchor{dev/api el function flycheck-fold-include-errors}@anchor{207}
-@deffn {Function} flycheck@w{-}fold@w{-}include@w{-}errors 
+@anchor{dev/api el function flycheck-fold-include-errors}@anchor{209}
+@deffn {Function} flycheck@w{-}fold@w{-}include@w{-}errors errors sentinel-message
+
+@format
+Fold errors from included files.
+
+ERRORS is a list of errors in which to fold errors.
+SENTINEL-MESSAGE is the error message which denotes an error on
+an include.
+
+The function will fold the messages of all subsequent errors in
+the included file into the error on the include.
+
+Returns ERRORS, with folded messages.
+@end format
+@end deffn
+
+@geindex flycheck-dequalify-error-ids; Emacs Lisp function
+@anchor{dev/api el function flycheck-dequalify-error-ids}@anchor{20a}
+@deffn {Function} flycheck@w{-}dequalify@w{-}error@w{-}ids errors
+
+@format
+De-qualify error ids in ERRORS.
+
+Remove all qualifications from error ids in ERRORS, by stripping
+all leading dotted components from error IDs.  For instance, if
+the error ID is com.foo.E100, replace it with E100.
+
+This error filter is mainly useful to simplify error IDs obtained
+from parsing Checkstyle XML, which frequently has very verbose
+IDs, that include the name of the tool.
+@end format
+@end deffn
+
+@geindex flycheck-remove-error-ids; Emacs Lisp function
+@anchor{dev/api el function flycheck-remove-error-ids}@anchor{20b}
+@deffn {Function} flycheck@w{-}remove@w{-}error@w{-}ids errors
+
+@format
+Remove all error ids from ERRORS.
+@end format
 @end deffn
 
 @node Command syntax checkers,Errors,Generic syntax checkers,Flycheck API
-@anchor{dev/api api-command-syntax-checkers}@anchor{208}@anchor{dev/api command-syntax-checkers}@anchor{209}
+@anchor{dev/api api-command-syntax-checkers}@anchor{20c}@anchor{dev/api command-syntax-checkers}@anchor{20d}
 @section Command syntax checkers
 
 
 Command syntax checkers are a specialised variant of generic syntax checkers
 which use an external command to check the contents of the current buffer.  To
 define a new command syntax checker, use
-@ref{20a,,flycheck-define-command-checker}:
+@ref{20e,,flycheck-define-command-checker}:
 
 @geindex flycheck-define-command-checker; Emacs Lisp function
-@anchor{dev/api el function flycheck-define-command-checker}@anchor{20a}
+@anchor{dev/api el function flycheck-define-command-checker}@anchor{20e}
 @deffn {Function} flycheck@w{-}define@w{-}command@w{-}checker symbol docstring &rest  properties
 
 @format
@@ -10652,7 +10724,7 @@ Unless otherwise noted, all properties are mandatory.
      checker.  It can be overridden with the variable
      @code{`flycheck-SYMBOL-executable'}.  Note that this variable is
      NOT implicitly defined by this function.  Use
-     @ref{20b,,`flycheck-def-executable-var'} to define this variable.
+     @ref{20f,,`flycheck-def-executable-var'} to define this variable.
 
      Each ARG is an argument to the executable, either as string,
      or as special symbol or form for
@@ -10690,7 +10762,7 @@ Unless otherwise noted, all properties are mandatory.
      OUTPUT.
 
      This property is optional.  If omitted, it defaults to
-     @ref{20c,,`flycheck-parse-with-patterns'}.  In this case,
+     @ref{210,,`flycheck-parse-with-patterns'}.  In this case,
      @code{`:error-patterns'} is mandatory.
 
 In addition to these PROPERTIES, all properties from
@@ -10700,10 +10772,10 @@ In addition to these PROPERTIES, all properties from
 @end deffn
 
 Each command checker uses an accompanying variable to override the executable,
-which you can define with @ref{20b,,flycheck-def-executable-var}:
+which you can define with @ref{20f,,flycheck-def-executable-var}:
 
 @geindex flycheck-def-executable-var; Emacs Lisp macro
-@anchor{dev/api el function flycheck-def-executable-var}@anchor{20b}
+@anchor{dev/api el function flycheck-def-executable-var}@anchor{20f}
 @deffn {Macro} flycheck@w{-}def@w{-}executable@w{-}var checker default-executable
 
 @format
@@ -10721,8 +10793,8 @@ for syntax checking.
 
 Since command syntax checkers are by far the most common kind of syntax
 checkers, Flycheck provides a convenience macro @ref{19,,flycheck-define-checker}
-which wraps up @ref{20a,,flycheck-define-command-checker} and
-@ref{20b,,flycheck-def-executable-var} into a single macro, and reduces syntactic
+which wraps up @ref{20e,,flycheck-define-command-checker} and
+@ref{20f,,flycheck-def-executable-var} into a single macro, and reduces syntactic
 clutter by allowing unquoted arguments:
 
 @geindex flycheck-define-checker; Emacs Lisp macro
@@ -10732,9 +10804,9 @@ clutter by allowing unquoted arguments:
 @format
 Define SYMBOL as command syntax checker with DOCSTRING and PROPERTIES.
 
-Like @ref{20a,,`flycheck-define-command-checker'}, but PROPERTIES must not
+Like @ref{20e,,`flycheck-define-command-checker'}, but PROPERTIES must not
 be quoted.  Also, implicitly define the executable variable for
-SYMBOL with @ref{20b,,`flycheck-def-executable-var'}.
+SYMBOL with @ref{20f,,`flycheck-def-executable-var'}.
 @end format
 @end deffn
 
@@ -10748,7 +10820,7 @@ SYMBOL with @ref{20b,,`flycheck-def-executable-var'}.
 @end menu
 
 @node Command arguments,Options for command syntax checkers,,Command syntax checkers
-@anchor{dev/api command-arguments}@anchor{20d}
+@anchor{dev/api command-arguments}@anchor{211}
 @subsection Command arguments
 
 
@@ -10819,7 +10891,7 @@ STRING
 
 @code{(config-file OPTION VARIABLE [PREPEND-FN])}
      Search the configuration file bound to VARIABLE with
-     @ref{20e,,`flycheck-locate-config-file'} and return a list of arguments
+     @ref{212,,`flycheck-locate-config-file'} and return a list of arguments
      that pass this configuration file to the syntax checker, or
      nil if the configuration file was not found.
 
@@ -10881,7 +10953,7 @@ are substituted within the body of cells!
 @end deffn
 
 @node Options for command syntax checkers,Configuration files for command syntax checkers,Command arguments,Command syntax checkers
-@anchor{dev/api options-for-command-syntax-checkers}@anchor{20f}
+@anchor{dev/api options-for-command-syntax-checkers}@anchor{213}
 @subsection Options for command syntax checkers
 
 
@@ -10910,7 +10982,7 @@ Use this together with the @code{`option'}, @code{`option-list'} and
 Flycheck provides some built-in filters for such options:
 
 @geindex flycheck-option-int; Emacs Lisp function
-@anchor{dev/api el function flycheck-option-int}@anchor{210}
+@anchor{dev/api el function flycheck-option-int}@anchor{214}
 @deffn {Function} flycheck@w{-}option@w{-}int value
 
 @format
@@ -10922,7 +10994,7 @@ a string.
 @end deffn
 
 @geindex flycheck-option-comma-separated-list; Emacs Lisp function
-@anchor{dev/api el function flycheck-option-comma-separated-list}@anchor{211}
+@anchor{dev/api el function flycheck-option-comma-separated-list}@anchor{215}
 @deffn {Function} flycheck@w{-}option@w{-}comma@w{-}separated@w{-}list value &optional  separator filter
 
 @format
@@ -10942,7 +11014,7 @@ SEPARATOR is ignored in this case.
 @end deffn
 
 @node Configuration files for command syntax checkers,Error parsing with regular expressions,Options for command syntax checkers,Command syntax checkers
-@anchor{dev/api configuration-files-for-command-syntax-checkers}@anchor{212}@anchor{dev/api api-configuration-files}@anchor{1e6}
+@anchor{dev/api configuration-files-for-command-syntax-checkers}@anchor{216}@anchor{dev/api api-configuration-files}@anchor{1e6}
 @subsection Configuration files for command syntax checkers
 
 
@@ -10950,7 +11022,7 @@ Additionally, command syntax checkers can pass configuration files to external
 commands.
 
 @geindex flycheck-def-config-file-var; Emacs Lisp macro
-@anchor{dev/api el function flycheck-def-config-file-var}@anchor{213}
+@anchor{dev/api el function flycheck-def-config-file-var}@anchor{217}
 @deffn {Macro} flycheck@w{-}def@w{-}config@w{-}file@w{-}var symbol checker &optional  file-name &rest  custom-args
 
 @format
@@ -10972,7 +11044,7 @@ Flycheck tries to find an appropriate file based on the value of configuration
 file variables, and substitutes the path to that file into the external command.
 
 @geindex flycheck-locate-config-file; Emacs Lisp function
-@anchor{dev/api el function flycheck-locate-config-file}@anchor{20e}
+@anchor{dev/api el function flycheck-locate-config-file}@anchor{212}
 @deffn {Function} flycheck@w{-}locate@w{-}config@w{-}file filename checker
 
 @format
@@ -10987,7 +11059,7 @@ configuration file was found.
 @end deffn
 
 @node Error parsing with regular expressions,Error parsers,Configuration files for command syntax checkers,Command syntax checkers
-@anchor{dev/api error-parsing-with-regular-expressions}@anchor{214}
+@anchor{dev/api error-parsing-with-regular-expressions}@anchor{218}
 @subsection Error parsing with regular expressions
 
 
@@ -11029,7 +11101,7 @@ Internally, error parsing with regular expressions is implemented with a special
 error parser:
 
 @geindex flycheck-parse-with-patterns; Emacs Lisp function
-@anchor{dev/api el function flycheck-parse-with-patterns}@anchor{20c}
+@anchor{dev/api el function flycheck-parse-with-patterns}@anchor{210}
 @deffn {Function} flycheck@w{-}parse@w{-}with@w{-}patterns output checker buffer
 
 @format
@@ -11048,7 +11120,7 @@ objects).
 @end deffn
 
 @node Error parsers,,Error parsing with regular expressions,Command syntax checkers
-@anchor{dev/api error-parsers}@anchor{215}@anchor{dev/api api-error-parsers}@anchor{1e2}
+@anchor{dev/api error-parsers}@anchor{219}@anchor{dev/api api-error-parsers}@anchor{1e2}
 @subsection Error parsers
 
 
@@ -11075,7 +11147,7 @@ You can also write your own error parsers.  An error parser is a function with
 the following signature:
 
 @geindex flycheck-error-parser; Emacs Lisp function
-@anchor{dev/api el function flycheck-error-parser}@anchor{216}
+@anchor{dev/api el function flycheck-error-parser}@anchor{21a}
 @deffn {Function} flycheck@w{-}error@w{-}parser output checker buffer
 
 @code{output} is the output of the command as string.  @code{checker} is the syntax
@@ -11086,7 +11158,7 @@ checked.
 The following functions can aid you in writing custom parsers:
 
 @geindex flycheck-parse-xml-string; Emacs Lisp function
-@anchor{dev/api el function flycheck-parse-xml-string}@anchor{217}
+@anchor{dev/api el function flycheck-parse-xml-string}@anchor{21b}
 @deffn {Function} flycheck@w{-}parse@w{-}xml@w{-}string xml
 
 @format
@@ -11101,7 +11173,7 @@ text nodes) or as XML nodes, in the same for as the root node.
 @end deffn
 
 @node Errors,Flycheck buffer status,Command syntax checkers,Flycheck API
-@anchor{dev/api errors}@anchor{218}@anchor{dev/api api-errors}@anchor{219}
+@anchor{dev/api errors}@anchor{21c}@anchor{dev/api api-errors}@anchor{21d}
 @section Errors
 
 
@@ -11133,52 +11205,66 @@ See @ref{Structures,,,cl} for more information about CL structures.
 A Flycheck error with the following slots.  Each of these slots may be @code{nil}.
 
 @geindex flycheck-error-buffer; Emacs Lisp slot
-@anchor{dev/api el function flycheck-error-buffer}@anchor{21a}
+@anchor{dev/api el function flycheck-error-buffer}@anchor{21e}
 @deffn {Slot} buffer
 
 The buffer object referring to the buffer this error belongs to.
 @end deffn
 
 @geindex flycheck-error-checker; Emacs Lisp slot
-@anchor{dev/api el function flycheck-error-checker}@anchor{21b}
+@anchor{dev/api el function flycheck-error-checker}@anchor{21f}
 @deffn {Slot} checker
 
 The syntax checker that reported this error.
 @end deffn
 
 @geindex flycheck-error-filename; Emacs Lisp slot
-@anchor{dev/api el function flycheck-error-filename}@anchor{21c}
+@anchor{dev/api el function flycheck-error-filename}@anchor{220}
 @deffn {Slot} filename
 
 A string containing the filename the error refers to.
 @end deffn
 
 @geindex flycheck-error-line; Emacs Lisp slot
-@anchor{dev/api el function flycheck-error-line}@anchor{21d}
+@anchor{dev/api el function flycheck-error-line}@anchor{221}
 @deffn {Slot} line
 
 An integer providing the line the error refers to.
 @end deffn
 
 @geindex flycheck-error-column; Emacs Lisp slot
-@anchor{dev/api el function flycheck-error-column}@anchor{21e}
+@anchor{dev/api el function flycheck-error-column}@anchor{222}
 @deffn {Slot} column
 
 An @emph{optional} integer providing the column the error refers to.
 
 If this attribute is @code{nil}, Flycheck will assume that the error refers to
 the whole line.
+
+@cartouche
+@quotation Warning 
+For compatibility with external programs and @strong{unlike} Emacs itself
+(e.g. in Compile Mode), Flycheck uses 1-based columns, not 0-based: The
+first character on a line is column 1.
+
+This is the format used by most external programs, but occasionally a
+program tries to proactively adapt to Emacs' convention, and outputs
+0-based columns.  In this case, you need to adapt the column numbers
+for Flycheck, via @ref{206,,flycheck-increment-error-columns} as
+@code{:error-filter}.
+@end quotation
+@end cartouche
 @end deffn
 
 @geindex flycheck-error-message; Emacs Lisp slot
-@anchor{dev/api el function flycheck-error-message}@anchor{21f}
+@anchor{dev/api el function flycheck-error-message}@anchor{223}
 @deffn {Slot} message
 
 The human-readable error message as string.
 @end deffn
 
 @geindex flycheck-error-level; Emacs Lisp slot
-@anchor{dev/api el function flycheck-error-level}@anchor{220}
+@anchor{dev/api el function flycheck-error-level}@anchor{224}
 @deffn {Slot} level
 
 The error level of the message, as symbol denoting an error level defined
@@ -11186,7 +11272,7 @@ with @ref{27,,flycheck-define-error-level}.
 @end deffn
 
 @geindex flycheck-error-id; Emacs Lisp slot
-@anchor{dev/api el function flycheck-error-id}@anchor{221}
+@anchor{dev/api el function flycheck-error-id}@anchor{225}
 @deffn {Slot} id
 
 An @emph{optional} unique identifier for this kind of error.
@@ -11198,19 +11284,19 @@ itself.
 There are two constructors to create new @ref{202,,flycheck-error} objects:
 
 @geindex flycheck-error-new-at; Emacs Lisp function
-@anchor{dev/api el function flycheck-error-new-at}@anchor{222}
+@anchor{dev/api el function flycheck-error-new-at}@anchor{226}
 @deffn {Function} flycheck@w{-}error@w{-}new@w{-}at line column &optional  level message &key                checker id filename buffer
 
 Create a new Flycheck error at the given @var{line} and @var{column}.
 
-@var{line} and @var{column} refer to the @ref{21d,,line} and
-@ref{21e,,column} of the new error.  The optional @var{level} and
-@var{message} arguments fill the @ref{220,,level} and cl-slot:@code{message}
+@var{line} and @var{column} refer to the @ref{221,,line} and
+@ref{222,,column} of the new error.  The optional @var{level} and
+@var{message} arguments fill the @ref{224,,level} and cl-slot:@code{message}
 slots respectively.
 
 @var{checker}, @var{id}, @var{filename} and @var{buffer} are keyword
-arguments, for @ref{21b,,checker}, @ref{221,,id}, @ref{21c,,filename} and
-@ref{21a,,buffer} respectively.  @var{buffer} defaults to the current
+arguments, for @ref{21f,,checker}, @ref{225,,id}, @ref{220,,filename} and
+@ref{21e,,buffer} respectively.  @var{buffer} defaults to the current
 buffer and @var{filename} to the file name of the current buffer.  The
 other keyword arguments default to @code{nil}.
 
@@ -11224,7 +11310,7 @@ specify @strong{all} optional arguments, that is, @strong{both} @var{level}
 @end deffn
 
 @geindex flycheck-error-new; Emacs Lisp function
-@anchor{dev/api el function flycheck-error-new}@anchor{223}
+@anchor{dev/api el function flycheck-error-new}@anchor{227}
 @deffn {Function} flycheck@w{-}error@w{-}new  &rest attributes
 
 Create a new @ref{202,,flycheck-error} with the given @var{attributes}.
@@ -11241,7 +11327,7 @@ instance:
 The following functions and macros work on errors:
 
 @geindex flycheck-error-with-buffer; Emacs Lisp macro
-@anchor{dev/api el function flycheck-error-with-buffer}@anchor{224}
+@anchor{dev/api el function flycheck-error-with-buffer}@anchor{228}
 @deffn {Macro} flycheck@w{-}error@w{-}with@w{-}buffer err &rest  forms
 
 @format
@@ -11252,7 +11338,7 @@ If the buffer of ERR is not live, FORMS are not evaluated.
 @end deffn
 
 @geindex flycheck-error-line-region; Emacs Lisp function
-@anchor{dev/api el function flycheck-error-line-region}@anchor{225}
+@anchor{dev/api el function flycheck-error-line-region}@anchor{229}
 @deffn {Function} flycheck@w{-}error@w{-}line@w{-}region err
 
 @format
@@ -11267,7 +11353,7 @@ end of the line.
 @end deffn
 
 @geindex flycheck-error-column-region; Emacs Lisp function
-@anchor{dev/api el function flycheck-error-column-region}@anchor{226}
+@anchor{dev/api el function flycheck-error-column-region}@anchor{22a}
 @deffn {Function} flycheck@w{-}error@w{-}column@w{-}region err
 
 @format
@@ -11282,7 +11368,7 @@ if ERR has no column.
 @end deffn
 
 @geindex flycheck-error-thing-region; Emacs Lisp function
-@anchor{dev/api el function flycheck-error-thing-region}@anchor{227}
+@anchor{dev/api el function flycheck-error-thing-region}@anchor{22b}
 @deffn {Function} flycheck@w{-}error@w{-}thing@w{-}region thing err
 
 @format
@@ -11299,7 +11385,7 @@ return nil.
 @end deffn
 
 @geindex flycheck-error-pos; Emacs Lisp function
-@anchor{dev/api el function flycheck-error-pos}@anchor{228}
+@anchor{dev/api el function flycheck-error-pos}@anchor{22c}
 @deffn {Function} flycheck@w{-}error@w{-}pos err
 
 @format
@@ -11313,7 +11399,7 @@ non-whitespace character of the error line, if ERR has no error column.
 @end deffn
 
 @geindex flycheck-error-format; Emacs Lisp function
-@anchor{dev/api el function flycheck-error-format}@anchor{229}
+@anchor{dev/api el function flycheck-error-format}@anchor{22d}
 @deffn {Function} flycheck@w{-}error@w{-}format err
 
 @format
@@ -11325,7 +11411,7 @@ _not_ include the file name.
 @end deffn
 
 @geindex flycheck-error-<; Emacs Lisp function
-@anchor{dev/api el function flycheck-error-<}@anchor{22a}
+@anchor{dev/api el function flycheck-error-<}@anchor{22e}
 @deffn {Function} flycheck@w{-}error@w{-}< err1 err2
 
 @format
@@ -11336,13 +11422,13 @@ Compare by line numbers and then by column numbers.
 @end deffn
 
 @geindex flycheck-error-level-<; Emacs Lisp function
-@anchor{dev/api el function flycheck-error-level-<}@anchor{22b}
+@anchor{dev/api el function flycheck-error-level-<}@anchor{22f}
 @deffn {Function} flycheck@w{-}error@w{-}level@w{-}< err1 err2
 
 @format
 Determine whether ERR1 goes before ERR2 by error level.
 
-Like @ref{22a,,`flycheck-error-<'}, but compares by error level severity
+Like @ref{22e,,`flycheck-error-<'}, but compares by error level severity
 first.  Levels of the same severity are compared by name.
 @end format
 @end deffn
@@ -11356,7 +11442,7 @@ first.  Levels of the same severity are compared by name.
 @end menu
 
 @node Error processing<2>,Error analysis,,Errors
-@anchor{dev/api error-processing}@anchor{22c}
+@anchor{dev/api error-processing}@anchor{230}
 @subsection Error processing
 
 
@@ -11371,7 +11457,7 @@ first.  Levels of the same severity are compared by name.
 @end deffn
 
 @node Error analysis,Error levels<2>,Error processing<2>,Errors
-@anchor{dev/api error-analysis}@anchor{22d}
+@anchor{dev/api error-analysis}@anchor{231}
 @subsection Error analysis
 
 
@@ -11391,7 +11477,7 @@ level.
 @end deffn
 
 @geindex flycheck-has-errors-p; Emacs Lisp function
-@anchor{dev/api el function flycheck-has-errors-p}@anchor{22e}
+@anchor{dev/api el function flycheck-has-errors-p}@anchor{232}
 @deffn {Function} flycheck@w{-}has@w{-}errors@w{-}p errors level
 
 @format
@@ -11401,14 +11487,14 @@ Determine if there are any ERRORS with LEVEL.
 
 @geindex flycheck-has-max-errors-p; Emacs Lisp function
 @geindex ;auto; Emacs Lisp function
-@anchor{dev/api el function flycheck-has-max-errors-p}@anchor{22f}
+@anchor{dev/api el function flycheck-has-max-errors-p}@anchor{233}
 @deffn {Function} flycheck@w{-}has@w{-}max@w{-}errors@w{-}p 
-@anchor{dev/api el function auto}@anchor{230}
+@anchor{dev/api el function auto}@anchor{234}
 @deffnx {Function} :auto 
 @end deffn
 
 @node Error levels<2>,,Error analysis,Errors
-@anchor{dev/api error-levels}@anchor{231}
+@anchor{dev/api error-levels}@anchor{235}
 @subsection Error levels
 
 
@@ -11446,7 +11532,7 @@ The following PROPERTIES constitute an error level:
      the number, the more severe is this level compared to other
      levels.  Defaults to 0.
 
-     The severity is used by @ref{22b,,`flycheck-error-level-<'} to
+     The severity is used by @ref{22f,,`flycheck-error-level-<'} to
      determine the ordering of errors according to their levels.
 
 @code{:overlay-category CATEGORY}
@@ -11487,7 +11573,7 @@ Determine whether LEVEL is a Flycheck error level.
 @end deffn
 
 @node Flycheck buffer status,Utilities,Errors,Flycheck API
-@anchor{dev/api api-flycheck-buffer-status}@anchor{232}@anchor{dev/api flycheck-buffer-status}@anchor{233}
+@anchor{dev/api api-flycheck-buffer-status}@anchor{236}@anchor{dev/api flycheck-buffer-status}@anchor{237}
 @section Flycheck buffer status
 
 
@@ -11506,7 +11592,7 @@ Functions to run if the Flycheck status changed.
 
 This hook is run whenever the status of Flycheck changes.  Each
 hook function takes the status symbol as sinlge argument, as
-given to @ref{234,,`flycheck-report-status'}, which see.
+given to @ref{238,,`flycheck-report-status'}, which see.
 
 This variable is a abnormal hook.  See Info
 node @ref{Hooks,,,elisp}.
@@ -11518,7 +11604,7 @@ This hook was introduced, or its default value was changed, in version 0.20 of t
 @end deffn
 
 @geindex flycheck-report-status; Emacs Lisp function
-@anchor{dev/api el function flycheck-report-status}@anchor{234}
+@anchor{dev/api el function flycheck-report-status}@anchor{238}
 @deffn {Function} flycheck@w{-}report@w{-}status status
 
 @format
@@ -11582,7 +11668,7 @@ nil.
 @end deffn
 
 @node Utilities,,Flycheck buffer status,Flycheck API
-@anchor{dev/api utilities}@anchor{235}@anchor{dev/api api-utilities}@anchor{236}
+@anchor{dev/api utilities}@anchor{239}@anchor{dev/api api-utilities}@anchor{23a}
 @section Utilities
 
 
@@ -11605,7 +11691,7 @@ Determine if OBJ is a list of symbols.
 @end deffn
 
 @node Flycheck ERT API,Contribution guidelines,Flycheck API,Top
-@anchor{dev/test-api flycheck-ert-api}@anchor{237}@anchor{dev/test-api doc}@anchor{238}
+@anchor{dev/test-api flycheck-ert-api}@anchor{23b}@anchor{dev/test-api doc}@anchor{23c}
 @chapter Flycheck ERT API
 
 
@@ -11622,7 +11708,7 @@ extensions.
 @end menu
 
 @node Compatibility,Loading and initializing,,Flycheck ERT API
-@anchor{dev/test-api compatibility}@anchor{239}
+@anchor{dev/test-api compatibility}@anchor{23d}
 @section Compatibility
 
 
@@ -11643,7 +11729,7 @@ defining all test cases.
 @end cartouche
 
 @node Loading and initializing,Utilities<2>,Compatibility,Flycheck ERT API
-@anchor{dev/test-api loading-and-initializing}@anchor{23a}
+@anchor{dev/test-api loading-and-initializing}@anchor{23e}
 @section Loading and initializing
 
 
@@ -11657,24 +11743,24 @@ Flycheck package.  If the Flycheck package is installed (see
 
 This will also load the @code{ert} and @code{flycheck} libraries.
 
-Flycheck ERT supports test resources (see @ref{23b,,Accessing test resources}).  For this
+Flycheck ERT supports test resources (see @ref{23f,,Accessing test resources}).  For this
 feature, you need to initialize Flycheck ERT with a resource directory by
-calling @ref{23c,,flycheck-ert-initialize}:
+calling @ref{240,,flycheck-ert-initialize}:
 
 @geindex flycheck-ert-initialize; Emacs Lisp function
-@anchor{dev/test-api el function flycheck-ert-initialize}@anchor{23c}
+@anchor{dev/test-api el function flycheck-ert-initialize}@anchor{240}
 @deffn {Function} flycheck@w{-}ert@w{-}initialize resource-dir
 
 @format
 Initialize a test suite with RESOURCE-DIR.
 
-RESOURCE-DIR is the directory, @ref{23d,,`flycheck-ert-resource-filename'}
+RESOURCE-DIR is the directory, @ref{241,,`flycheck-ert-resource-filename'}
 should use to lookup resource files.
 @end format
 @end deffn
 
 @node Utilities<2>,Defining test cases,Loading and initializing,Flycheck ERT API
-@anchor{dev/test-api utilities}@anchor{23e}
+@anchor{dev/test-api utilities}@anchor{242}
 @section Utilities
 
 
@@ -11687,12 +11773,12 @@ should use to lookup resource files.
 @end menu
 
 @node Creating temporary buffers,Scoping resource access,,Utilities<2>
-@anchor{dev/test-api creating-temporary-buffers}@anchor{23f}
+@anchor{dev/test-api creating-temporary-buffers}@anchor{243}
 @subsection Creating temporary buffers
 
 
 @geindex flycheck-ert-with-temp-buffer; Emacs Lisp macro
-@anchor{dev/test-api el function flycheck-ert-with-temp-buffer}@anchor{240}
+@anchor{dev/test-api el function flycheck-ert-with-temp-buffer}@anchor{244}
 @deffn {Macro} flycheck@w{-}ert@w{-}with@w{-}temp@w{-}buffer  &rest body
 
 @format
@@ -11705,7 +11791,7 @@ it has a backing file and is modified.
 @end deffn
 
 @geindex flycheck-ert-with-file-buffer; Emacs Lisp macro
-@anchor{dev/test-api el function flycheck-ert-with-file-buffer}@anchor{241}
+@anchor{dev/test-api el function flycheck-ert-with-file-buffer}@anchor{245}
 @deffn {Macro} flycheck@w{-}ert@w{-}with@w{-}file@w{-}buffer file-name &rest  body
 
 @format
@@ -11717,12 +11803,12 @@ contents FILE-NAME.
 @end deffn
 
 @node Scoping resource access,Accessing test resources,Creating temporary buffers,Utilities<2>
-@anchor{dev/test-api scoping-resource-access}@anchor{242}
+@anchor{dev/test-api scoping-resource-access}@anchor{246}
 @subsection Scoping resource access
 
 
 @geindex flycheck-ert-with-help-buffer; Emacs Lisp macro
-@anchor{dev/test-api el function flycheck-ert-with-help-buffer}@anchor{243}
+@anchor{dev/test-api el function flycheck-ert-with-help-buffer}@anchor{247}
 @deffn {Macro} flycheck@w{-}ert@w{-}with@w{-}help@w{-}buffer  &rest body
 
 @format
@@ -11733,7 +11819,7 @@ Use this macro to test functions that create a Help buffer.
 @end deffn
 
 @geindex flycheck-ert-with-env; Emacs Lisp macro
-@anchor{dev/test-api el function flycheck-ert-with-env}@anchor{244}
+@anchor{dev/test-api el function flycheck-ert-with-env}@anchor{248}
 @deffn {Macro} flycheck@w{-}ert@w{-}with@w{-}env env &rest  body
 
 @format
@@ -11749,7 +11835,7 @@ with VALUE.
 @end deffn
 
 @geindex flycheck-ert-with-global-mode; Emacs Lisp macro
-@anchor{dev/test-api el function flycheck-ert-with-global-mode}@anchor{245}
+@anchor{dev/test-api el function flycheck-ert-with-global-mode}@anchor{249}
 @deffn {Macro} flycheck@w{-}ert@w{-}with@w{-}global@w{-}mode  &rest body
 
 @format
@@ -11760,15 +11846,15 @@ After BODY, restore the old state of Global Flycheck Mode.
 @end deffn
 
 @node Accessing test resources,Obtaining information about the environment,Scoping resource access,Utilities<2>
-@anchor{dev/test-api test-resources}@anchor{23b}@anchor{dev/test-api accessing-test-resources}@anchor{246}
+@anchor{dev/test-api test-resources}@anchor{23f}@anchor{dev/test-api accessing-test-resources}@anchor{24a}
 @subsection Accessing test resources
 
 
 The following functions and macros load resources from the directory given to
-@ref{23c,,flycheck-ert-initialize}.
+@ref{240,,flycheck-ert-initialize}.
 
 @geindex flycheck-ert-resource-filename; Emacs Lisp function
-@anchor{dev/test-api el function flycheck-ert-resource-filename}@anchor{23d}
+@anchor{dev/test-api el function flycheck-ert-resource-filename}@anchor{241}
 @deffn {Function} flycheck@w{-}ert@w{-}resource@w{-}filename resource-file
 
 @format
@@ -11780,19 +11866,19 @@ Relative file names are expanded against
 @end deffn
 
 @geindex flycheck-ert-with-resource-buffer; Emacs Lisp macro
-@anchor{dev/test-api el function flycheck-ert-with-resource-buffer}@anchor{247}
+@anchor{dev/test-api el function flycheck-ert-with-resource-buffer}@anchor{24b}
 @deffn {Macro} flycheck@w{-}ert@w{-}with@w{-}resource@w{-}buffer resource-file &rest  body
 
 @format
 Create a temp buffer from a RESOURCE-FILE and execute BODY.
 
 The absolute file name of RESOURCE-FILE is determined with
-@ref{23d,,`flycheck-ert-resource-filename'}.
+@ref{241,,`flycheck-ert-resource-filename'}.
 @end format
 @end deffn
 
 @geindex flycheck-ert-locate-config-file; Emacs Lisp function
-@anchor{dev/test-api el function flycheck-ert-locate-config-file}@anchor{248}
+@anchor{dev/test-api el function flycheck-ert-locate-config-file}@anchor{24c}
 @deffn {Function} flycheck@w{-}ert@w{-}locate@w{-}config@w{-}file filename _checker
 
 @format
@@ -11803,12 +11889,12 @@ _CHECKER is ignored.
 @end deffn
 
 @node Obtaining information about the environment,,Accessing test resources,Utilities<2>
-@anchor{dev/test-api obtaining-information-about-the-environment}@anchor{249}
+@anchor{dev/test-api obtaining-information-about-the-environment}@anchor{24d}
 @subsection Obtaining information about the environment
 
 
 @geindex flycheck-ert-user-error-type; Emacs Lisp constant
-@anchor{dev/test-api el variable flycheck-ert-user-error-type}@anchor{24a}
+@anchor{dev/test-api el variable flycheck-ert-user-error-type}@anchor{24e}
 @deffn {Constant} flycheck@w{-}ert@w{-}user@w{-}error@w{-}type
 
 @format
@@ -11817,7 +11903,7 @@ The @code{`user-error'} type used by Flycheck.
 @end deffn
 
 @geindex flycheck-ert-travis-ci-p; Emacs Lisp function
-@anchor{dev/test-api el function flycheck-ert-travis-ci-p}@anchor{24b}
+@anchor{dev/test-api el function flycheck-ert-travis-ci-p}@anchor{24f}
 @deffn {Function} flycheck@w{-}ert@w{-}travis@w{-}ci@w{-}p 
 
 @format
@@ -11826,7 +11912,7 @@ Determine whether we are running on Travis CI.
 @end deffn
 
 @geindex flycheck-ert-check-gpg; Emacs Lisp function
-@anchor{dev/test-api el function flycheck-ert-check-gpg}@anchor{24c}
+@anchor{dev/test-api el function flycheck-ert-check-gpg}@anchor{250}
 @deffn {Function} flycheck@w{-}ert@w{-}check@w{-}gpg 
 
 @format
@@ -11835,7 +11921,7 @@ Check whether GPG is available.
 @end deffn
 
 @geindex flycheck-ert-extract-version-command; Emacs Lisp function
-@anchor{dev/test-api el function flycheck-ert-extract-version-command}@anchor{24d}
+@anchor{dev/test-api el function flycheck-ert-extract-version-command}@anchor{251}
 @deffn {Function} flycheck@w{-}ert@w{-}extract@w{-}version@w{-}command re executable &rest  args
 
 @format
@@ -11849,7 +11935,7 @@ match.
 @end deffn
 
 @node Defining test cases,,Utilities<2>,Flycheck ERT API
-@anchor{dev/test-api defining-test-cases}@anchor{24e}
+@anchor{dev/test-api defining-test-cases}@anchor{252}
 @section Defining test cases
 
 
@@ -11857,7 +11943,7 @@ In addition to the standard @code{ert-deftest} from ERT, this library provides
 macros for specialized test case definitions:
 
 @geindex flycheck-ert-def-checker-test; Emacs Lisp macro
-@anchor{dev/test-api el function flycheck-ert-def-checker-test}@anchor{24f}
+@anchor{dev/test-api el function flycheck-ert-def-checker-test}@anchor{253}
 @deffn {Macro} flycheck@w{-}ert@w{-}def@w{-}checker@w{-}test checker language name &rest  keys-and-body
 
 @format
@@ -11893,7 +11979,7 @@ assertions and setup code.
 @end menu
 
 @node Checking results of test cases,Invoking syntax checkers in test cases,,Defining test cases
-@anchor{dev/test-api checking-results-of-test-cases}@anchor{250}
+@anchor{dev/test-api checking-results-of-test-cases}@anchor{254}
 @subsection Checking results of test cases
 
 
@@ -11901,7 +11987,7 @@ Flycheck ERT provides some functions to check the results of test cases, which
 are handy in @code{:expected-result} forms.
 
 @geindex flycheck-ert-syntax-check-timed-out-p; Emacs Lisp function
-@anchor{dev/test-api el function flycheck-ert-syntax-check-timed-out-p}@anchor{251}
+@anchor{dev/test-api el function flycheck-ert-syntax-check-timed-out-p}@anchor{255}
 @deffn {Function} flycheck@w{-}ert@w{-}syntax@w{-}check@w{-}timed@w{-}out@w{-}p result
 
 @format
@@ -11912,12 +11998,12 @@ RESULT is an ERT test result object.
 @end deffn
 
 @node Invoking syntax checkers in test cases,Writing assertions,Checking results of test cases,Defining test cases
-@anchor{dev/test-api invoking-syntax-checkers-in-test-cases}@anchor{252}
+@anchor{dev/test-api invoking-syntax-checkers-in-test-cases}@anchor{256}
 @subsection Invoking syntax checkers in test cases
 
 
 @geindex flycheck-ert-buffer-sync; Emacs Lisp function
-@anchor{dev/test-api el function flycheck-ert-buffer-sync}@anchor{253}
+@anchor{dev/test-api el function flycheck-ert-buffer-sync}@anchor{257}
 @deffn {Function} flycheck@w{-}ert@w{-}buffer@w{-}sync 
 
 @format
@@ -11926,7 +12012,7 @@ Like @ref{46,,`flycheck-buffer'}, but synchronously.
 @end deffn
 
 @geindex flycheck-ert-ensure-clear; Emacs Lisp function
-@anchor{dev/test-api el function flycheck-ert-ensure-clear}@anchor{254}
+@anchor{dev/test-api el function flycheck-ert-ensure-clear}@anchor{258}
 @deffn {Function} flycheck@w{-}ert@w{-}ensure@w{-}clear 
 
 @format
@@ -11937,12 +12023,12 @@ Raise an assertion error if the buffer is not clear afterwards.
 @end deffn
 
 @node Writing assertions,,Invoking syntax checkers in test cases,Defining test cases
-@anchor{dev/test-api writing-assertions}@anchor{255}
+@anchor{dev/test-api writing-assertions}@anchor{259}
 @subsection Writing assertions
 
 
 @geindex flycheck-ert-should-overlay; Emacs Lisp function
-@anchor{dev/test-api el function flycheck-ert-should-overlay}@anchor{256}
+@anchor{dev/test-api el function flycheck-ert-should-overlay}@anchor{25a}
 @deffn {Function} flycheck@w{-}ert@w{-}should@w{-}overlay error
 
 @format
@@ -11953,7 +12039,7 @@ ERROR is a Flycheck error object.
 @end deffn
 
 @geindex flycheck-ert-should-errors; Emacs Lisp function
-@anchor{dev/test-api el function flycheck-ert-should-errors}@anchor{257}
+@anchor{dev/test-api el function flycheck-ert-should-errors}@anchor{25b}
 @deffn {Function} flycheck@w{-}ert@w{-}should@w{-}errors  &rest errors
 
 @format
@@ -11961,7 +12047,7 @@ Test that the current buffers has ERRORS.
 
 ERRORS is a list of errors expected to be present in the current
 buffer.  Each error is given as a list of arguments to
-@ref{222,,`flycheck-error-new-at'}.
+@ref{226,,`flycheck-error-new-at'}.
 
 If ERRORS are omitted, test that there are no errors at all in
 the current buffer.
@@ -11974,7 +12060,7 @@ check that the buffer has all ERRORS, and no other errors.
 @end deffn
 
 @geindex flycheck-ert-should-syntax-check; Emacs Lisp function
-@anchor{dev/test-api el function flycheck-ert-should-syntax-check}@anchor{258}
+@anchor{dev/test-api el function flycheck-ert-should-syntax-check}@anchor{25c}
 @deffn {Function} flycheck@w{-}ert@w{-}should@w{-}syntax@w{-}check resource-file modes &rest  errors
 
 @format
@@ -11985,7 +12071,7 @@ symbol or a list thereof, specifying the major modes to syntax
 check with.  If more than one major mode is specified, the test
 is run for each mode separately, so if you give three major
 modes, the entire test will run three times.  ERRORS is the list
-of expected errors, as in @ref{257,,`flycheck-ert-should-errors'}.  If
+of expected errors, as in @ref{25b,,`flycheck-ert-should-errors'}.  If
 omitted, the syntax check must not emit any errors.  The errors
 are cleared after each test.
 
@@ -12002,7 +12088,7 @@ resource directory.
 @end deffn
 
 @geindex flycheck-ert-at-nth-error; Emacs Lisp function
-@anchor{dev/test-api el function flycheck-ert-at-nth-error}@anchor{259}
+@anchor{dev/test-api el function flycheck-ert-at-nth-error}@anchor{25d}
 @deffn {Function} flycheck@w{-}ert@w{-}at@w{-}nth@w{-}error n
 
 @format
@@ -12014,7 +12100,7 @@ current buffer.  Otherwise return nil.
 @end deffn
 
 @node Contribution guidelines,Testing Flycheck,Flycheck ERT API,Top
-@anchor{contrib/guidelines doc}@anchor{25a}@anchor{contrib/guidelines contribution-guidelines}@anchor{25b}
+@anchor{contrib/guidelines doc}@anchor{25e}@anchor{contrib/guidelines contribution-guidelines}@anchor{25f}
 @chapter Contribution guidelines
 
 
@@ -12029,7 +12115,7 @@ guidelines.
 @end menu
 
 @node Reporting issues,Contributing code,,Contribution guidelines
-@anchor{contrib/guidelines id1}@anchor{25c}@anchor{contrib/guidelines reporting-issues}@anchor{8b}
+@anchor{contrib/guidelines id1}@anchor{260}@anchor{contrib/guidelines reporting-issues}@anchor{8b}
 @section Reporting issues
 
 
@@ -12056,7 +12142,7 @@ complete sentences.
 @end itemize
 
 @node Contributing code,,Reporting issues,Contribution guidelines
-@anchor{contrib/guidelines id2}@anchor{25d}@anchor{contrib/guidelines contributing-code}@anchor{1d4}
+@anchor{contrib/guidelines id2}@anchor{261}@anchor{contrib/guidelines contributing-code}@anchor{1d4}
 @section Contributing code
 
 
@@ -12073,7 +12159,7 @@ welcome, but please respect the following guidelines.
 @end menu
 
 @node General,Code style,,Contributing code
-@anchor{contrib/guidelines general}@anchor{25e}
+@anchor{contrib/guidelines general}@anchor{262}
 @subsection General
 
 
@@ -12088,7 +12174,7 @@ Provide use cases and rationale for new features.
 @end itemize
 
 @node Code style,Commit messages,General,Contributing code
-@anchor{contrib/guidelines code-style}@anchor{25f}
+@anchor{contrib/guidelines code-style}@anchor{263}
 @subsection Code style
 
 
@@ -12111,7 +12197,7 @@ Flycheck, just make sure that your code has no Flycheck warnings.
 @end itemize
 
 @node Commit messages,Contributing syntax checkers,Code style,Contributing code
-@anchor{contrib/guidelines commit-messages}@anchor{260}
+@anchor{contrib/guidelines commit-messages}@anchor{264}
 @subsection Commit messages
 
 
@@ -12171,7 +12257,7 @@ Git Commit Mode@footnote{https://github.com/magit/git-modes/} and Magit@footnote
 which helps you to comply to these guidelines.
 
 @node Contributing syntax checkers,Pull requests,Commit messages,Contributing code
-@anchor{contrib/guidelines contributing-syntax-checkers}@anchor{1d5}@anchor{contrib/guidelines id3}@anchor{261}
+@anchor{contrib/guidelines contributing-syntax-checkers}@anchor{1d5}@anchor{contrib/guidelines id3}@anchor{265}
 @subsection Contributing syntax checkers
 
 
@@ -12205,7 +12291,7 @@ checkers in Flycheck.
 @end cartouche
 
 @node Pull requests,,Contributing syntax checkers,Contributing code
-@anchor{contrib/guidelines id4}@anchor{262}@anchor{contrib/guidelines pull-requests}@anchor{263}
+@anchor{contrib/guidelines id4}@anchor{266}@anchor{contrib/guidelines pull-requests}@anchor{267}
 @subsection Pull requests
 
 
@@ -12232,7 +12318,7 @@ Pull requests @strong{must} pass all tests on Travis CI before being merged.
 @end cartouche
 
 @node Testing Flycheck,Writing documentation,Contribution guidelines,Top
-@anchor{contrib/testing testing-flycheck}@anchor{264}@anchor{contrib/testing doc}@anchor{265}@anchor{contrib/testing pull-request}@anchor{266}
+@anchor{contrib/testing testing-flycheck}@anchor{268}@anchor{contrib/testing doc}@anchor{269}@anchor{contrib/testing pull-request}@anchor{26a}
 @chapter Testing Flycheck
 
 
@@ -12250,7 +12336,7 @@ This document explains how to use this test suite.
 @end menu
 
 @node Test suite layout,Test running,,Testing Flycheck
-@anchor{contrib/testing test-suite-layout}@anchor{267}
+@anchor{contrib/testing test-suite-layout}@anchor{26b}
 @section Test suite layout
 
 
@@ -12279,7 +12365,7 @@ selectors from the command line and runs all matching tests.
 @end itemize
 
 @node Test running,Virtual test environment,Test suite layout,Testing Flycheck
-@anchor{contrib/testing test-running}@anchor{268}@anchor{contrib/testing id1}@anchor{269}
+@anchor{contrib/testing test-running}@anchor{26c}@anchor{contrib/testing id1}@anchor{26d}
 @section Test running
 
 
@@ -12301,7 +12387,7 @@ $ cabal install hlint shellcheck
 @cartouche
 @quotation Note 
 If you'd like to keep your environment clean, use the
-@ref{26a,,Virtual test environment} instead.
+@ref{26e,,Virtual test environment} instead.
 @end quotation
 @end cartouche
 
@@ -12341,7 +12427,7 @@ Emacs Lisp.
 @end cartouche
 
 @node Virtual test environment,Travis CI,Test running,Testing Flycheck
-@anchor{contrib/testing id2}@anchor{26b}@anchor{contrib/testing virtual-test-environment}@anchor{26a}
+@anchor{contrib/testing id2}@anchor{26f}@anchor{contrib/testing virtual-test-environment}@anchor{26e}
 @section Virtual test environment
 
 
@@ -12409,7 +12495,7 @@ $ vagrant ssh
 @end example
 
 This will give you a bash prompt within the VM, on which you can run the tests
-as explained in @ref{268,,Test running}.
+as explained in @ref{26c,,Test running}.
 
 To switch between Emacs versions, pass @code{EMACS} to @code{make test}:
 
@@ -12444,11 +12530,11 @@ The VM is provisioned from Ansible playbooks in the @code{playbooks/} sub-direct
 of the top-level source directory.
 
 @node Travis CI,,Virtual test environment,Testing Flycheck
-@anchor{contrib/testing homebrew}@anchor{26c}@anchor{contrib/testing travis-ci}@anchor{26d}
+@anchor{contrib/testing homebrew}@anchor{270}@anchor{contrib/testing travis-ci}@anchor{271}
 @section Travis CI
 
 
-The entire test suite continuously runs on @ref{26d,,Travis CI} after every push, with
+The entire test suite continuously runs on @ref{271,,Travis CI} after every push, with
 the latest Emacs release and a nightly Emacs snapshot.
 
 Travis CI is configured from @code{.travis.yml} in the top-level source directory,
@@ -12459,13 +12545,13 @@ and uses mostly the same playbooks for provisioning.
 Travis CI is the @strong{reference environment} for Flycheck's test suite.  All
 tests @strong{must pass} on Travis CI.
 
-In case Travis CI diverges from the @ref{26a,,VM},
+In case Travis CI diverges from the @ref{26e,,VM},
 Travis CI is authoritative.
 @end quotation
 @end cartouche
 
 @node Writing documentation,Maintenance tasks,Testing Flycheck,Top
-@anchor{contrib/docs writing-documentation}@anchor{26e}@anchor{contrib/docs doc}@anchor{26f}
+@anchor{contrib/docs writing-documentation}@anchor{272}@anchor{contrib/docs doc}@anchor{273}
 @chapter Writing documentation
 
 
@@ -12479,7 +12565,7 @@ This document explains how to edit and building the documentation of Flycheck.
 @end menu
 
 @node Build environment setup,Building HTML and Texinfo,,Writing documentation
-@anchor{contrib/docs doc-build-env}@anchor{270}@anchor{contrib/docs build-environment-setup}@anchor{271}
+@anchor{contrib/docs doc-build-env}@anchor{274}@anchor{contrib/docs build-environment-setup}@anchor{275}
 @section Build environment setup
 
 
@@ -12518,12 +12604,12 @@ $ pip install -r doc/requirements.txt
 Now you are set up to build the documentation.
 
 @node Building HTML and Texinfo,Verifying references,Build environment setup,Writing documentation
-@anchor{contrib/docs building-docs}@anchor{272}@anchor{contrib/docs building-html-and-texinfo}@anchor{273}
+@anchor{contrib/docs building-docs}@anchor{276}@anchor{contrib/docs building-html-and-texinfo}@anchor{277}
 @section Building HTML and Texinfo
 
 
 First, switch to the virtual environment you created in the
-@ref{270,,Build environment setup}, and make sure that the requirements are up to date:
+@ref{274,,Build environment setup}, and make sure that the requirements are up to date:
 
 @example
 $ source ~/.virtualenvs/cask/bin/activate
@@ -12549,7 +12635,7 @@ Flycheck packages.
 @end cartouche
 
 @node Verifying references,,Building HTML and Texinfo,Writing documentation
-@anchor{contrib/docs verifying-references}@anchor{274}
+@anchor{contrib/docs verifying-references}@anchor{278}
 @section Verifying references
 
 
@@ -12565,7 +12651,7 @@ $ make linkcheck
 @end example
 
 @node Maintenance tasks,GNU General Public License,Writing documentation,Top
-@anchor{contrib/maintenance maintenance-tasks}@anchor{275}@anchor{contrib/maintenance doc}@anchor{276}
+@anchor{contrib/maintenance maintenance-tasks}@anchor{279}@anchor{contrib/maintenance doc}@anchor{27a}
 @chapter Maintenance tasks
 
 
@@ -12579,7 +12665,7 @@ have to perform under specific circumstances.
 @end menu
 
 @node Rebuilding the Texinfo,Rasterized logo files,,Maintenance tasks
-@anchor{contrib/maintenance rebuilding-the-texinfo}@anchor{277}
+@anchor{contrib/maintenance rebuilding-the-texinfo}@anchor{27b}
 @section Rebuilding the Texinfo
 
 
@@ -12594,10 +12680,10 @@ documentation.
 @end cartouche
 
 When making changes to the documentation, you need to rebuild the Texinfo
-version with, by following the @ref{272,,instructions to build the documentation}.
+version with, by following the @ref{276,,instructions to build the documentation}.
 
 @node Rasterized logo files,,Rebuilding the Texinfo,Maintenance tasks
-@anchor{contrib/maintenance rasterized-logo-files}@anchor{278}@anchor{contrib/maintenance melpa}@anchor{279}
+@anchor{contrib/maintenance rasterized-logo-files}@anchor{27c}@anchor{contrib/maintenance melpa}@anchor{27d}
 @section Rasterized logo files
 
 
@@ -12632,7 +12718,7 @@ You need @strong{convert} from ImageMagick@footnote{http://www.imagemagick.org/}
 properly render the logo.
 
 @node GNU General Public License,GNU Free Documentation License,Maintenance tasks,Top
-@anchor{gpl gnu-general-public-license}@anchor{27a}@anchor{gpl doc}@anchor{27b}@anchor{gpl inkscape}@anchor{27c}
+@anchor{gpl gnu-general-public-license}@anchor{27e}@anchor{gpl doc}@anchor{27f}@anchor{gpl inkscape}@anchor{280}
 @chapter GNU General Public License
 
 
@@ -13314,7 +13400,7 @@ Public License instead of this License.  But first, please read
 @end example
 
 @node GNU Free Documentation License,Index,GNU General Public License,Top
-@anchor{fdl doc}@anchor{27d}@anchor{fdl gnu-free-documentation-license}@anchor{27e}
+@anchor{fdl doc}@anchor{281}@anchor{fdl gnu-free-documentation-license}@anchor{282}
 @chapter GNU Free Documentation License
 
 
