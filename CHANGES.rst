@@ -47,6 +47,7 @@ master (in development)
   - Fix faulty properties of customize options which broke `customize-changed`
     and related functions
   - Fix use deprecated option in `coffee-coffeelint`
+  - Fix error columns of `python-pylint` [GH-536]
 
 0.21 (Oct 26, 2014)
 -------------------
