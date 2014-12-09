@@ -1844,25 +1844,37 @@ and extension, as in `file-name-base'."
 (ert-deftest flycheck--manual/all-options-are-documented ()
   :tags '(documentation)
   (flycheck-ert-with-file-buffer
-      (expand-file-name "doc/guide/languages.rst"
-                        flycheck-test-source-directory)
-    (dolist (checker flycheck-checkers)
-      (-when-let (vars (-sort #'string< (flycheck-checker-option-vars checker)))
-        (re-search-forward (concat (rx line-start ".. flyc-checker::"
-                                       (one-or-more space))
-                                   (regexp-quote (symbol-name checker))))
-        (re-search-forward (rx line-start "   .. rubric:: Options" line-end))
-        (dolist (var vars)
-          ;; Move across empty lines
-          (while (progn
-                   (forward-line 1)
-                   (looking-at (rx line-start (zero-or-more space) line-end))))
-          (should (looking-at (rx line-start "   .. option:: "
-                                  (group (one-or-more not-newline))
-                                  line-end)))
-          (should (string= (match-string 1) (symbol-name var)))
-          (forward-line 1)
-          (should (looking-at (rx line-start (= 6 " ") ":auto:" line-end))))))))
+   (expand-file-name "doc/guide/languages.rst"
+                     flycheck-test-source-directory)
+   (dolist (checker flycheck-checkers)
+     (-when-let (vars (-sort #'string< (flycheck-checker-option-vars checker)))
+       (let ((original-vars vars)
+             (present-vars nil)
+             (done nil))
+         (re-search-forward (concat (rx line-start ".. flyc-checker::"
+                                        (one-or-more space))
+                                    (regexp-quote (symbol-name checker))))
+         (re-search-forward (rx line-start "   .. rubric:: Options" line-end))
+
+         (while (and (not done) vars)
+           ;; Move across empty lines
+           (while (progn
+                    (forward-line 1)
+                    (looking-at (rx line-start (zero-or-more space) line-end))))
+           (if (looking-at (rx line-start "   .. option:: "
+                               (group (one-or-more not-newline))
+                               line-end))
+               (let ((option-name (intern (match-string 1))))
+                 (setq vars (delete option-name vars))
+                 (setq present-vars (cons option-name present-vars))
+                 (forward-line 1)
+                                        ; Require auto documentation
+                 (should (looking-at (rx line-start (= 6 " ") ":auto:" line-end))))
+             (setq done t)))
+                                        ; Check if all options were documented
+         (should (eq nil vars))
+                                        ; Check if all option are documented in alphabetical order
+         (should (equal original-vars (reverse present-vars))))))))
 
 (ert-deftest flycheck--manual/all-config-file-vars-are-documented ()
   :tags '(documentation)
