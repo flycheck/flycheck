@@ -1573,7 +1573,7 @@ nil otherwise."
 (define-button-type 'help-flycheck-checker-def
   :supertype 'help-xref
   'help-function 'flycheck-goto-checker-definition
-  'help-echo (purecopy "mouse-2, RET: find Flycheck checker definition"))
+  'help-echo "mouse-2, RET: find Flycheck checker definition")
 
 (defconst flycheck-find-checker-regexp
   (rx line-start (zero-or-more (syntax whitespace))
@@ -3212,7 +3212,7 @@ the beginning of the buffer."
 
 (define-button-type 'flycheck-error-list
   'action #'flycheck-error-list-button-goto-error
-  'help-echo (purecopy "mouse-2, RET: goto error"))
+  'help-echo "mouse-2, RET: goto error")
 
 (defun flycheck-error-list-button-goto-error (button)
   "Go to the error at BUTTON."
