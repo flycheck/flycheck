@@ -1572,7 +1572,7 @@ nil otherwise."
 ;;; Help for generic syntax checkers
 (define-button-type 'help-flycheck-checker-def
   :supertype 'help-xref
-  'help-function 'flycheck-goto-checker-definition
+  'help-function #'flycheck-goto-checker-definition
   'help-echo "mouse-2, RET: find Flycheck checker definition")
 
 (defconst flycheck-find-checker-regexp
