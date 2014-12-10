@@ -1396,6 +1396,21 @@ are mandatory.
      This property is optional.  If omitted, no additional
      documentation is printed for this syntax checker.
 
+:verifier FUNCTION
+     A function to verify the checker for the current buffer.
+
+     FUNCTION is called with the syntax checker as single
+     argument, and shall return a list of
+     `flycheck-verification-result' objects indicating whether
+     the syntax checker could be used in the current buffer, and
+     highlighting potential setup problems.
+
+     This property is optional.  If omitted, no additional
+     verification occurs for this syntax checker.  It is however
+     absolutely recommended that you add a verifier for your
+     syntax checker, because it will help users to spot potential
+     setup problems.
+
 `:modes MODES'
      A major mode symbol or a list thereof, denoting major modes
      to use this syntax checker in.
@@ -1475,6 +1490,7 @@ Signal an error, if any property has an invalid value."
         (doc-printer (plist-get properties :doc-printer))
         (modes (plist-get properties :modes))
         (predicate (plist-get properties :predicate))
+        (verifier (plist-get properties :verifier))
         (filter (or (plist-get properties :error-filter)
                     #'flycheck-sanitize-errors))
         (next-checkers (plist-get properties :next-checkers))
@@ -1491,6 +1507,9 @@ Signal an error, if any property has an invalid value."
     (unless (or (null doc-printer) (functionp doc-printer))
       (error ":doc-printer %S of syntax checker %s is not a function"
              symbol doc-printer))
+    (unless (or (null verifier) (functionp verifier))
+      (error ":verifier %S of syntax checker %S is not a function"
+             symbol verifier))
     (unless (or modes predicate)
       (error "Missing :modes or :predicate in syntax checker %s" symbol))
     (dolist (mode modes)
@@ -1518,6 +1537,7 @@ Try to reinstall the package defining this syntax checker." symbol)
                        (flycheck-doc-printer   . ,doc-printer)
                        (flycheck-modes         . ,modes)
                        (flycheck-predicate     . ,real-predicate)
+                       (flycheck-verifier      . ,verifier)
                        (flycheck-error-filter  . ,filter)
                        (flycheck-next-checkers . ,next-checkers)
                        (flycheck-documentation . ,docstring)
@@ -1706,7 +1726,8 @@ Slots:
 
 Return a list of `flycheck-verification-result' objects."
   (let (results
-        (predicate (flycheck-checker-predicate checker)))
+        (predicate (flycheck-checker-predicate checker))
+        (verifier (get checker 'flycheck-verifier)))
     (when predicate
       (let ((result (funcall predicate)))
         (push (flycheck-verification-result-new
@@ -1714,7 +1735,8 @@ Return a list of `flycheck-verification-result' objects."
                :message (prin1-to-string (not (null result)))
                :face (if result 'success '(bold warning)))
               results)))
-    (nreverse results)))
+    (append (nreverse results)
+            (and verifier (funcall verifier checker)))))
 
 (define-button-type 'help-flycheck-checker-doc
   :supertype 'help-xref
@@ -1767,8 +1789,9 @@ possible problems are shown."
               (princ (make-string (- message-column (current-column)) ?\ ))
               (let ((message (flycheck-verification-result-message result))
                     (face (flycheck-verification-result-face result)))
-                (insert (propertize message 'face face)))))
-          (princ "\n\n"))))))
+                (insert (propertize message 'face face)))
+              (princ "\n")))
+          (princ "\n"))))))
 
 
 ;;; Predicates for generic syntax checkers
