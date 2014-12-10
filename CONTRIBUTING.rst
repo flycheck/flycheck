@@ -18,6 +18,7 @@ Please report issues to the `issue tracker`_.
 
 - Check that the issue has not already been reported.
 - Check that the issue has not already been fixed in the latest code.
+- Check that your setup is fine with `M-x flycheck-verify-setup`.
 - Be clear and precise (do not prose, but name functions and commands exactly).
 - Include the version of Flycheck as shown by `M-x flycheck-version`.
 - Open an issue with a clear title and description in grammatically correct,

@@ -96,6 +96,14 @@ You can also always check the current buffer manually:
    :binding: C-c ! c
    :auto:
 
+.. note::
+
+   If syntax checking does not work, check your setup:
+
+   .. command:: flycheck-verify-setup
+      :binding: C-c ! v
+      :auto:
+
 During syntax checks, Flycheck generates some temporary files for syntax checker
 input and output.  Use :option:`flycheck-temp-prefix` to change the prefix of
 these temporary files:

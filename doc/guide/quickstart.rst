@@ -41,11 +41,14 @@ your needs, and read :ref:`how to use these options <syntax-checker-options>`.
 Check syntax in a buffer
 ========================
 
-Flycheck will now check syntax using these tools, when you visit a buffer in any
-of these languages.  Syntax checking happens **automatically** when you save the
-buffer or make any changes.  Flycheck highlights errors and warnings in the
-buffer, indicates them in the fringe, and reports their numbers in the mode
-line.
+Run `M-x flycheck-verify-setup` in a buffer to check whether Flycheck is
+correctly setup to check the buffer.
+
+If everything is fine Flycheck will now check syntax using these tools, when you
+visit a buffer in any of these languages.  Syntax checking happens
+**automatically** when you save the buffer or make any changes.  Flycheck
+highlights errors and warnings in the buffer, indicates them in the fringe, and
+reports their numbers in the mode line.
 
 You can also manually check a buffer with :kbd:`C-c ! c`
 (:function:`flycheck-buffer`).
