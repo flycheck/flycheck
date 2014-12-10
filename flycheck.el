@@ -1382,7 +1382,7 @@ are mandatory.
      attempt to interrupt syntax checks wit this syntax checker,
      and simply ignore their results.
 
-`:doc-printer FUNCTION'
+`:print-doc FUNCTION'
      A function to print additional documentation into the Help
      buffer of this checker.
 
@@ -1492,7 +1492,7 @@ Signal an error, if any property has an invalid value."
            (doc-string 2))
   (let ((start (plist-get properties :start))
         (interrupt (plist-get properties :interrupt))
-        (doc-printer (plist-get properties :doc-printer))
+        (print-doc (plist-get properties :print-doc))
         (modes (plist-get properties :modes))
         (predicate (plist-get properties :predicate))
         (verify (plist-get properties :verify))
@@ -1509,9 +1509,9 @@ Signal an error, if any property has an invalid value."
     (unless (or (null interrupt) (functionp interrupt))
       (error ":interrupt %S of syntax checker %s is not a function"
              symbol interrupt))
-    (unless (or (null doc-printer) (functionp doc-printer))
-      (error ":doc-printer %S of syntax checker %s is not a function"
-             symbol doc-printer))
+    (unless (or (null print-doc) (functionp print-doc))
+      (error ":print-doc %S of syntax checker %s is not a function"
+             symbol print-doc))
     (unless (or (null verify) (functionp verify))
       (error ":verify %S of syntax checker %S is not a function"
              symbol verify))
@@ -1539,7 +1539,7 @@ Try to reinstall the package defining this syntax checker." symbol)
       (pcase-dolist (`(,prop . ,value)
                      `((flycheck-start         . ,start)
                        (flycheck-interrupt     . ,interrupt)
-                       (flycheck-doc-printer   . ,doc-printer)
+                       (flycheck-print-doc     . ,print-doc)
                        (flycheck-modes         . ,modes)
                        (flycheck-predicate     . ,real-predicate)
                        (flycheck-verify        . ,verify)
@@ -1672,7 +1672,7 @@ Pop up a help buffer with the documentation of CHECKER."
         (let ((filename (flycheck-checker-file checker))
               (modes (flycheck-checker-modes checker))
               (predicate (flycheck-checker-predicate checker))
-              (doc-printer (get checker 'flycheck-doc-printer)))
+              (print-doc (get checker 'flycheck-print-doc)))
           (princ (format "%s is a Flycheck syntax checker" checker))
           (when filename
             (princ (format " in `%s'" (file-name-nondirectory filename)))
@@ -1699,9 +1699,9 @@ Pop up a help buffer with the documentation of CHECKER."
               (save-excursion
                 (fill-region-as-paragraph modes-start (point-max)))))
           (princ "\n")
-          ;; Call the custom doc-printer of the checker, if present
-          (when doc-printer
-            (funcall doc-printer checker))
+          ;; Call the custom print-doc function of the checker, if present
+          (when print-doc
+            (funcall print-doc checker))
           ;; Ultimately, print the docstring
           (princ "\nDocumentation:\n")
           (princ (flycheck-checker-documentation checker)))))))
@@ -3839,13 +3839,13 @@ Unless otherwise noted, all properties are mandatory.
 
 In addition to these PROPERTIES, all properties from
 `flycheck-define-generic-checker' may be specified, except of
-`:start', `:interrupt', and `:doc-printer'.  You may specify a
+`:start', `:interrupt', and `:print-doc'.  You may specify a
 custom `:verify' function, but you should take care to call
 `flycheck-verify-command-checker' in a custom `:verify'
 function."
   (declare (indent 1)
            (doc-string 2))
-  (dolist (prop '(:start :interrupt :doc-printer))
+  (dolist (prop '(:start :interrupt :print-doc))
     (when (plist-get properties prop)
       (error "%s not allowed in definition of command syntax checker %s"
              prop symbol)))
@@ -3879,7 +3879,7 @@ function."
     (apply #'flycheck-define-generic-checker symbol docstring
            :start #'flycheck-start-command-checker
            :interrupt #'flycheck-interrupt-command-checker
-           :doc-printer #'flycheck-command-checker-print-doc
+           :print-doc #'flycheck-command-checker-print-doc
            :verify #'flycheck-verify-command-checker
            properties)
 
