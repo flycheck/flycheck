@@ -3815,7 +3815,9 @@ Unless otherwise noted, all properties are mandatory.
 
 In addition to these PROPERTIES, all properties from
 `flycheck-define-generic-checker' may be specified, except of
-`:start', `:interrupt', and `:doc-printer'."
+`:start', `:interrupt', and `:doc-printer'.  You may specify a
+custom `:verifier', but you should take care to call
+`flycheck-verify-command-checker' in a custom verifier."
   (declare (indent 1)
            (doc-string 2))
   (dolist (prop '(:start :interrupt :doc-printer))
@@ -3853,6 +3855,7 @@ In addition to these PROPERTIES, all properties from
            :start #'flycheck-start-command-checker
            :interrupt #'flycheck-interrupt-command-checker
            :doc-printer #'flycheck-command-checker-print-doc
+           :verifier #'flycheck-verify-command-checker
            properties)
 
     ;; Pre-compile all errors patterns into strings, so that we don't need to do
@@ -4178,6 +4181,18 @@ symbols in the command."
       (princ "\n  This syntax checker can be configured with these options:\n\n")
       (dolist (var option-vars)
         (princ (format "     * `%s'\n" var))))))
+
+(defun flycheck-verify-command-checker (checker)
+  "Verify a command CHECKER in the current buffer.
+
+Return a list of `flycheck-verification-result' objects for
+CHECKER."
+  (let ((executable (executable-find (flycheck-checker-executable checker))))
+    (list
+     (flycheck-verification-result-new
+      :label "executable"
+      :message (if executable (format "Found at %s" executable) "Not found")
+      :face (if executable 'success '(bold error))))))
 
 
 ;;; Process management for command syntax checkers
