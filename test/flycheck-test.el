@@ -1835,56 +1835,61 @@ and extension, as in `file-name-base'."
   (flycheck-ert-with-file-buffer
       (expand-file-name "doc/guide/languages.rst"
                         flycheck-test-source-directory)
-    (dolist (checker flycheck-checkers)
-      (re-search-forward (rx ".. flyc-checker:: "
-                             (group (one-or-more not-newline))
-                             line-end))
-      (should (string= (symbol-name checker) (match-string 1))))))
+    (let (documented-checkers)
+      (while (re-search-forward (rx line-start ".. flyc-checker:: "
+                                    (group (1+ not-newline))
+                                    "\n   :auto:" line-end)
+                                nil 'noerror)
+        (push (intern (match-string 1)) documented-checkers))
+      (should (equal flycheck-checkers (nreverse documented-checkers))))))
 
 (ert-deftest flycheck--manual/all-options-are-documented ()
   :tags '(documentation)
   (flycheck-ert-with-file-buffer
       (expand-file-name "doc/guide/languages.rst"
                         flycheck-test-source-directory)
-    (dolist (checker flycheck-checkers)
-      (-when-let (vars (-sort #'string< (flycheck-checker-option-vars checker)))
-        (re-search-forward (concat (rx line-start ".. flyc-checker::"
-                                       (one-or-more space))
-                                   (regexp-quote (symbol-name checker))))
-        (re-search-forward (rx line-start "   .. rubric:: Options" line-end))
-        (dolist (var vars)
-          ;; Move across empty lines
-          (while (progn
-                   (forward-line 1)
-                   (looking-at (rx line-start (zero-or-more space) line-end))))
-          (should (looking-at (rx line-start "   .. option:: "
-                                  (group (one-or-more not-newline))
-                                  line-end)))
-          (should (string= (match-string 1) (symbol-name var)))
-          (forward-line 1)
-          (should (looking-at (rx line-start (= 6 " ") ":auto:" line-end))))))))
+    (while (re-search-forward (rx line-start ".. flyc-checker::" (1+ space)
+                                  (group (1+ not-newline))
+                                  line-end)
+                              nil 'noerror)
+      (let* ((checker (intern (match-string 1)))
+             (bound (save-excursion
+                      (search-forward ".. flyc-checker::" nil 'noerror)))
+             documented-vars)
+        (when (search-forward ".. rubric:: Options" bound 'noerror)
+          (while (and (re-search-forward (rx line-start "   .. "
+                                             (group (1+ (not (any ":"))))
+                                             "::" (1+ space)
+                                             (group (1+ not-newline))
+                                             (group (optional "\n      :auto:"))
+                                             line-end)
+                                         bound 'noerror)
+                      (equal (match-string 1) "option")
+                      (not (string-empty-p (match-string 3))))
+            (push (intern (match-string 2)) documented-vars)))
+        (should (equal (-sort #'string< (flycheck-checker-option-vars checker))
+                       (nreverse documented-vars)))))))
 
 (ert-deftest flycheck--manual/all-config-file-vars-are-documented ()
   :tags '(documentation)
   (flycheck-ert-with-file-buffer
       (expand-file-name "doc/guide/languages.rst" flycheck-test-source-directory)
-    (dolist (checker flycheck-checkers)
-      (-when-let (config-file-var (flycheck-checker-config-file-var checker))
-        (re-search-forward (concat (rx line-start ".. flyc-checker::"
-                                       (one-or-more space))
-                                   (regexp-quote (symbol-name checker))))
-        (re-search-forward (rx line-start
-                               "   .. rubric:: Configuration file"
-                               line-end))
-        (while (progn
-                 (forward-line 1)
-                 (looking-at (rx line-start (zero-or-more space) line-end))))
-        (should (looking-at (rx line-start "   .. option:: "
-                                (group (one-or-more not-newline))
-                                line-end)))
-        (should (string= (match-string 1) (symbol-name config-file-var)))
-        (forward-line 1)
-        (should (looking-at (rx line-start (= 6 " ") ":auto:" line-end)))))))
+    (while (re-search-forward (rx line-start ".. flyc-checker::" (1+ space)
+                                  (group (1+ not-newline)) line-end)
+                              nil 'noerror)
+      (let* ((checker (intern (match-string 1)))
+             (bound (save-excursion
+                      (search-forward ".. flyc-checker::" nil 'noerror)))
+             documented-var)
+        (when (search-forward ".. rubric:: Configuration file" bound 'noerror)
+          (re-search-forward (rx "   .. option:: "
+                                 (group (1+ not-newline))
+                                 "\n      :auto:"
+                                 line-end)
+                             bound 'noerror)
+          (setq documented-var (intern (match-string 1))))
+        (should (equal (flycheck-checker-config-file-var checker)
+                       documented-var))))))
 
 
 ;;; Checker error API
