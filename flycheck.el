@@ -1791,7 +1791,23 @@ possible problems are shown."
                     (face (flycheck-verification-result-face result)))
                 (insert (propertize message 'face face)))
               (princ "\n")))
-          (princ "\n"))))))
+          (princ "\n"))
+        (princ "Flycheck Mode is ")
+        (let ((enabled (buffer-local-value 'flycheck-mode buffer)))
+          (insert (propertize (if enabled "enabled" "disabled")
+                              'face (if enabled 'success '(warning bold)))))
+        (princ ".\n")
+
+        (let ((unregistered-checkers (-difference (flycheck-defined-checkers)
+                                                  flycheck-checkers)))
+          (when unregistered-checkers
+            (insert (propertize "\nThe following syntax checkers are not registered:\n\n"
+                                'face '(bold warning)))
+            (dolist (checker unregistered-checkers)
+              (princ "  - ")
+              (princ checker)
+              (princ "\n"))
+            (princ "\nTry adding these syntax checkers to `flycheck-checkers'.")))))))
 
 
 ;;; Predicates for generic syntax checkers
