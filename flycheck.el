@@ -769,6 +769,7 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
     (define-key map "?" 'flycheck-describe-checker)
     (define-key map "i" 'flycheck-info)
     (define-key map "V" 'flycheck-version)
+    (define-key map "v" 'flycheck-verify-setup)
     map)
   "Keymap of Flycheck interactive commands.")
 
