@@ -1396,7 +1396,7 @@ are mandatory.
      This property is optional.  If omitted, no additional
      documentation is printed for this syntax checker.
 
-:verifier FUNCTION
+:verify FUNCTION
      A function to verify the checker for the current buffer.
 
      FUNCTION is called with the syntax checker as single
@@ -1407,9 +1407,9 @@ are mandatory.
 
      This property is optional.  If omitted, no additional
      verification occurs for this syntax checker.  It is however
-     absolutely recommended that you add a verifier for your
-     syntax checker, because it will help users to spot potential
-     setup problems.
+     absolutely recommended that you add a `:verify' function to
+     your syntax checker, because it will help users to spot
+     potential setup problems.
 
 `:modes MODES'
      A major mode symbol or a list thereof, denoting major modes
@@ -1490,7 +1490,7 @@ Signal an error, if any property has an invalid value."
         (doc-printer (plist-get properties :doc-printer))
         (modes (plist-get properties :modes))
         (predicate (plist-get properties :predicate))
-        (verifier (plist-get properties :verifier))
+        (verify (plist-get properties :verify))
         (filter (or (plist-get properties :error-filter)
                     #'flycheck-sanitize-errors))
         (next-checkers (plist-get properties :next-checkers))
@@ -1507,9 +1507,9 @@ Signal an error, if any property has an invalid value."
     (unless (or (null doc-printer) (functionp doc-printer))
       (error ":doc-printer %S of syntax checker %s is not a function"
              symbol doc-printer))
-    (unless (or (null verifier) (functionp verifier))
-      (error ":verifier %S of syntax checker %S is not a function"
-             symbol verifier))
+    (unless (or (null verify) (functionp verify))
+      (error ":verify %S of syntax checker %S is not a function"
+             symbol verify))
     (unless (or modes predicate)
       (error "Missing :modes or :predicate in syntax checker %s" symbol))
     (dolist (mode modes)
@@ -1537,7 +1537,7 @@ Try to reinstall the package defining this syntax checker." symbol)
                        (flycheck-doc-printer   . ,doc-printer)
                        (flycheck-modes         . ,modes)
                        (flycheck-predicate     . ,real-predicate)
-                       (flycheck-verifier      . ,verifier)
+                       (flycheck-verify        . ,verify)
                        (flycheck-error-filter  . ,filter)
                        (flycheck-next-checkers . ,next-checkers)
                        (flycheck-documentation . ,docstring)
@@ -1727,7 +1727,7 @@ Slots:
 Return a list of `flycheck-verification-result' objects."
   (let (results
         (predicate (flycheck-checker-predicate checker))
-        (verifier (get checker 'flycheck-verifier)))
+        (verify (get checker 'flycheck-verify)))
     (when predicate
       (let ((result (funcall predicate)))
         (push (flycheck-verification-result-new
@@ -1736,7 +1736,7 @@ Return a list of `flycheck-verification-result' objects."
                :face (if result 'success '(bold warning)))
               results)))
     (append (nreverse results)
-            (and verifier (funcall verifier checker)))))
+            (and verify (funcall verify checker)))))
 
 (define-button-type 'help-flycheck-checker-doc
   :supertype 'help-xref
@@ -3816,8 +3816,9 @@ Unless otherwise noted, all properties are mandatory.
 In addition to these PROPERTIES, all properties from
 `flycheck-define-generic-checker' may be specified, except of
 `:start', `:interrupt', and `:doc-printer'.  You may specify a
-custom `:verifier', but you should take care to call
-`flycheck-verify-command-checker' in a custom verifier."
+custom `:verify' function, but you should take care to call
+`flycheck-verify-command-checker' in a custom `:verify'
+function."
   (declare (indent 1)
            (doc-string 2))
   (dolist (prop '(:start :interrupt :doc-printer))
@@ -3855,7 +3856,7 @@ custom `:verifier', but you should take care to call
            :start #'flycheck-start-command-checker
            :interrupt #'flycheck-interrupt-command-checker
            :doc-printer #'flycheck-command-checker-print-doc
-           :verifier #'flycheck-verify-command-checker
+           :verify #'flycheck-verify-command-checker
            properties)
 
     ;; Pre-compile all errors patterns into strings, so that we don't need to do
