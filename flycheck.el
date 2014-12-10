@@ -1768,6 +1768,9 @@ possible problems are shown."
                          'type 'help-function
                          'help-args (list mode)))
         (princ ":\n\n")
+        (unless checkers
+          (insert (propertize "There are no syntax checkers for this buffer!\n\n"
+                              'face '(bold error))))
         (dolist (checker checkers)
           (princ "  ")
           (insert-button (symbol-name checker)
