@@ -10378,7 +10378,7 @@ are mandatory.
      attempt to interrupt syntax checks wit this syntax checker,
      and simply ignore their results.
 
-@code{:doc-printer FUNCTION}
+@code{:print-doc FUNCTION}
      A function to print additional documentation into the Help
      buffer of this checker.
 
@@ -10813,7 +10813,7 @@ Unless otherwise noted, all properties are mandatory.
 
 In addition to these PROPERTIES, all properties from
 @ref{1b,,`flycheck-define-generic-checker'} may be specified, except of
-@code{`:start'}, @code{`:interrupt'}, and @code{`:doc-printer'}.  You may specify a
+@code{`:start'}, @code{`:interrupt'}, and @code{`:print-doc'}.  You may specify a
 custom @code{`:verify'} function, but you should take care to call
 @code{`flycheck-verify-command-checker'} in a custom @code{`:verify'}
 function.
