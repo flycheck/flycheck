@@ -10,20 +10,32 @@ Prerequisites
 Emacs
 -----
 
-Flycheck supports Emacs 24 on Unix systems.  It is tested with Emacs 24.3, and
-Emacs snapshot builds.  It should work with GNU Emacs 24.1 and 24.2 as well, but
-it is not tested against these versions.  If it does not work with these
-versions, please report an issue.
+Flycheck supports Emacs 24.  It is tested with Emacs 24.3, and Emacs snapshot
+builds.  It should work with GNU Emacs 24.1 and 24.2 as well, but it is not
+tested against these versions.  If it does not work with these versions, please
+report an issue.
 
 .. warning::
 
-   Flycheck does not support Windows, but tries to be compatible with it.  You
-   may try to use Flycheck on Windows.  It should mostly work, but expect
-   problems and issues.  Pull requests which improve Windows compatibility are
-   welcome.
-
    Flycheck also does not support GNU Emacs 23 and other flavors of Emacs
-   (e.g. XEmacs, Aquamacs, etc.).  Don't try, it will *not* work.
+   (e.g. XEmacs, Aquamacs, etc.).  Don't try, it will **not** work.
+
+Operating system
+----------------
+
+Flycheck supports any Unix-like operating system.  It is extensively tested on
+Linux and OS X.
+
+.. warning::
+
+   Flycheck tries to maintain compatibility with Windows, and generally works
+   well on Windows.  Pull requests which fix or improve Windows compatibility
+   are **very** welcome.
+
+   However, Flycheck does **not** explicitly support Windows.  If there are any
+   issues or problems with Windows, **you are on your own**.  We can neither
+   answer questions about Windows support, nor can we fix Windows-specific
+   issues.
 
 Syntax checking tools
 ---------------------

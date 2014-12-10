@@ -71,6 +71,12 @@ Features
 Installation
 ============
 
+Flycheck needs GNU Emacs 24 on a Unix system, and additionally **external**
+syntax checking programs for the languages you use.  Flycheck does not
+officially support Windows, but tries to maintain Windows compatibility and
+should generally work fine on Windows, too.  See Prerequisites_ and `Supported
+Languages`_ for more information.
+
 Install Flycheck from MELPA_ or `MELPA Stable`_ with::
 
    M-x package-install RET flycheck
@@ -84,16 +90,14 @@ In your Cask_ file:
 
    (depends-on "flycheck")
 
-You need GNU Emacs 24 on a Unix system (Linux, OS X, …), and additional
-**external** programs for the languages you use.  See Installation_ and
-`Supported languages`_ for more information.
-
-Flycheck does **not** support GNU Emacs 23, other flavors of Emacs, or Windows.
+See `Package Installation`_ for more information.
 
 .. _MELPA: http://melpa.org
 .. _MELPA Stable: http://stable.melpa.org
 .. _Cask: https://github.com/cask/cask
+.. _Prerequisites: http://www.flycheck.org/en/latest/guide/installation.html#prerequisites
 .. _Supported Languages: http://www.flycheck.org/en/latest/guide/languages.html
+.. _Package installation: http://www.flycheck.org/en/latest/guide/installation.html#package-installation
 
 Documentation
 =============
