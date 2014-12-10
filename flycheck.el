@@ -1593,11 +1593,6 @@ nil otherwise."
   'help-function 'flycheck-goto-checker-definition
   'help-echo (purecopy "mouse-2, RET: find Flycheck checker definition"))
 
-(define-button-type 'help-flycheck-checker-doc
-  :supertype 'help-xref
-  'help-function #'flycheck-describe-checker
-  'help-echo "mouse-2, RET: describe Flycheck checker")
-
 (defconst flycheck-find-checker-regexp
   (rx line-start (zero-or-more (syntax whitespace))
       "(" symbol-start "flycheck-define-checker" symbol-end
@@ -1686,6 +1681,46 @@ Pop up a help buffer with the documentation of CHECKER."
           (princ "\nDocumentation:\n")
           (princ (flycheck-checker-documentation checker)))))))
 
+
+;;; Syntax checker verification
+(cl-defstruct (flycheck-verification-result
+               (:constructor flycheck-verification-result-new))
+  "Structure for storing a single verification result.
+
+Slots:
+
+`label'
+     A label for this result, as string
+
+`message'
+     A message for this result, as string
+
+`face'
+     The face to use for the `message'.
+
+     You can either use a face symbol, or a list of face symbols."
+  label message face)
+
+(defun flycheck-verify-generic-checker (checker)
+  "Verify a generic CHECKER in the current buffer.
+
+Return a list of `flycheck-verification-result' objects."
+  (let (results
+        (predicate (flycheck-checker-predicate checker)))
+    (when predicate
+      (let ((result (funcall predicate)))
+        (push (flycheck-verification-result-new
+               :label "predicate"
+               :message (prin1-to-string (not (null result)))
+               :face (if result 'success '(bold warning)))
+              results)))
+    (nreverse results)))
+
+(define-button-type 'help-flycheck-checker-doc
+  :supertype 'help-xref
+  'help-function #'flycheck-describe-checker
+  'help-echo "mouse-2, RET: describe Flycheck checker")
+
 (defun flycheck-verify-setup ()
   "Check whether Flycheck can be used in this buffer.
 
@@ -1717,20 +1752,22 @@ possible problems are shown."
                          'type 'help-flycheck-checker-doc
                          'help-args (list checker))
           (princ "\n")
-          (let ((predicate (flycheck-checker-predicate checker)))
-            (when predicate
-              (princ "    - predicate: ")
-              (let* ((result (with-current-buffer buffer
-                               (funcall (flycheck-checker-predicate checker))))
-                     (face (if result 'success 'error)))
-                (princ result)
-                (save-excursion
-                  (re-search-backward (rx "predicate: "
-                                          (group (one-or-more anything))
-                                          point))
-                  (add-text-properties (match-beginning 1)
-                                       (match-end 1)
-                                       (list 'face (list 'bold face)))))))
+          (let* ((results (with-current-buffer buffer
+                            (flycheck-verify-generic-checker checker)))
+                 (label-length
+                  (-max (mapcar
+                         (lambda (res)
+                           (length (flycheck-verification-result-label res)))
+                         results)))
+                 (message-column (+ 8 label-length)))
+            (dolist (result results)
+              (princ "    - ")
+              (princ (flycheck-verification-result-label result))
+              (princ ": ")
+              (princ (make-string (- message-column (current-column)) ?\ ))
+              (let ((message (flycheck-verification-result-message result))
+                    (face (flycheck-verification-result-face result)))
+                (insert (propertize message 'face face)))))
           (princ "\n\n"))))))
 
 
