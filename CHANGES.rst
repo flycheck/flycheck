@@ -29,6 +29,7 @@ master (in development)
   - Parse error IDs from Checkstyle XML [GH-259]
   - `flycheck-copy-errors-as-kill` can put error ids into kill ring now [GH-529]
   - Parse error IDs from many error checks [GH-259]
+  - Verify Flycheck setup in a buffer with `flycheck-verify-setup` [GH-338]
 
 - Improvements:
 
