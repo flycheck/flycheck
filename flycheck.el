@@ -6481,9 +6481,14 @@ See URL `http://www.pylint.org/'."
 See URL `https://docs.python.org/3.4/library/py_compile.html'."
   :command ("python" "-m" "py_compile" source)
   :error-patterns
+  ;; Python 2.7
   ((error line-start "  File \"" (file-name) "\", line " line "\n"
           (= 2 (zero-or-more not-newline) "\n")
-          "SyntaxError: " (message)))
+          "SyntaxError: " (message) line-end)
+   ;; 2.6
+   (error line-start "SyntaxError: ('" (message (one-or-more (not (any "'"))))
+          "', ('" (file-name (one-or-more (not (any "'")))) "', "
+          line ", " column ", " (one-or-more not-newline) line-end))
   :modes python-mode)
 
 (flycheck-define-checker racket

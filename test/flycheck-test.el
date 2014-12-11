@@ -4595,11 +4595,30 @@ Why not:
      '(22 1 error "Undefined variable 'antigravity'" :id "E0602"
           :checker python-pylint))))
 
-(flycheck-ert-def-checker-test python-pycompile python nil
-  (let ((flycheck-disabled-checkers '(python-flake8 python-pylint)))
+(flycheck-ert-def-checker-test python-pycompile python python26
+  (skip-unless (executable-find "python2.6"))
+  (let ((flycheck-disabled-checkers '(python-flake8 python-pylint))
+        (flycheck-python-pycompile-executable "python2.6")
+        ;; Silence Python Mode
+        (python-indent-guess-indent-offset nil))
     (flycheck-ert-should-syntax-check
      "checkers/python-syntax-error.py" 'python-mode
-     '(3 nil error "invalid syntax" :checker python-pycompile))))
+     '(3 12 error "invalid syntax" :checker python-pycompile))))
+
+(flycheck-ert-def-checker-test python-pycompile python python27
+  (skip-unless (executable-find "python2.7"))
+  (let ((flycheck-disabled-checkers '(python-flake8 python-pylint))
+        (flycheck-python-pycompile-executable "python2.7")
+        (python-version (flycheck-ert-extract-version-command
+                         (rx line-start
+                             "Python " (group (1+ not-newline))
+                             line-end)
+                         "python2.7" "--version"))
+        (python-indent-guess-indent-offset nil))
+    (flycheck-ert-should-syntax-check
+     "checkers/python-syntax-error.py" 'python-mode
+     `(3 ,(if (version< python-version "2.7.6") 12 nil)
+         error "invalid syntax" :checker python-pycompile))))
 
 (flycheck-ert-def-checker-test python-pycompile python has-no-warnings
   (let ((flycheck-disabled-checkers '(python-flake8 python-pylint)))
