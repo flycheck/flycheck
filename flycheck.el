@@ -6373,6 +6373,19 @@ See URL `http://puppet-lint.com/'."
   ;; the buffer is actually linked to a file, and if it is not modified.
   :predicate flycheck-buffer-saved-p)
 
+(flycheck-define-checker python-pycompile
+  "A Python syntax and style checker using Python's builtin py_compile module."
+  :command ("python"
+            "-m" "py_compile"
+            source)
+  :error-patterns
+  ((error line-start "  File \"" (file-name) "\", line " line "\n"
+          (= 2 (zero-or-more not-newline) "\n")
+          "SyntaxError: " (message)))
+  :modes python-mode
+  :next-checkers ((warning . python-flake8)
+                  (warning . python-pylint)))
+
 (flycheck-def-config-file-var flycheck-flake8rc python-flake8 ".flake8rc"
   :safe #'stringp)
 
