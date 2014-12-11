@@ -6484,9 +6484,7 @@ See URL `https://docs.python.org/3.4/library/py_compile.html'."
   ((error line-start "  File \"" (file-name) "\", line " line "\n"
           (= 2 (zero-or-more not-newline) "\n")
           "SyntaxError: " (message)))
-  :modes python-mode
-  :next-checkers ((warning . python-flake8)
-                  (warning . python-pylint)))
+  :modes python-mode)
 
 (flycheck-define-checker racket
   "A Racket syntax checker using the Racket compiler.
