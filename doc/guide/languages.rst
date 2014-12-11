@@ -489,6 +489,9 @@ Python
    .. option:: flycheck-pylintrc
       :auto:
 
+.. flyc-checker:: python-pycompile
+   :auto:
+
 .. seealso::
 
    flycheck-pyflakes_ adds a Python syntax checker using Pyflakes.
