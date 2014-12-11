@@ -4595,6 +4595,17 @@ Why not:
      '(22 1 error "Undefined variable 'antigravity'" :id "E0602"
           :checker python-pylint))))
 
+(flycheck-ert-def-checker-test python-pycompile python nil
+  (let ((flycheck-disabled-checkers '(python-flake8 python-pylint)))
+    (flycheck-ert-should-syntax-check
+     "checkers/python-syntax-error.py" 'python-mode
+     '(3 nil error "invalid syntax" :checker python-pycompile))))
+
+(flycheck-ert-def-checker-test python-pycompile python has-no-warnings
+  (let ((flycheck-disabled-checkers '(python-flake8 python-pylint)))
+    (flycheck-ert-should-syntax-check
+     "checkers/python/test.py" 'python-mode)))
+
 (flycheck-ert-def-checker-test racket racket nil
   (flycheck-ert-should-syntax-check
    "checkers/racket-syntax-error.rkt" 'racket-mode
