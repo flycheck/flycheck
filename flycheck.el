@@ -218,6 +218,7 @@ attention to case differences."
     puppet-lint
     python-flake8
     python-pylint
+    python-pycompile
     racket
     rpm-rpmlint
     rst
@@ -6472,6 +6473,22 @@ See URL `http://www.pylint.org/'."
    (info line-start (file-name) ":" line ":" column ":"
          "C:" (id (one-or-more (not (any ":")))) ":"
          (message) line-end))
+  :modes python-mode)
+
+(flycheck-define-checker python-pycompile
+  "A Python syntax checker using Python's builtin compiler.
+
+See URL `https://docs.python.org/3.4/library/py_compile.html'."
+  :command ("python" "-m" "py_compile" source)
+  :error-patterns
+  ;; Python 2.7
+  ((error line-start "  File \"" (file-name) "\", line " line "\n"
+          (= 2 (zero-or-more not-newline) "\n")
+          "SyntaxError: " (message) line-end)
+   ;; 2.6
+   (error line-start "SyntaxError: ('" (message (one-or-more (not (any "'"))))
+          "', ('" (file-name (one-or-more (not (any "'")))) "', "
+          line ", " column ", " (one-or-more not-newline) line-end))
   :modes python-mode)
 
 (flycheck-define-checker racket

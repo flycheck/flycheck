@@ -17,6 +17,10 @@ master (in development)
     [GH-529]
   - Remove `flycheck-google-messages` command
 
+- New syntax checkers:
+
+  - Python with `py_compile` [GH-484]
+
 - New features:
 
   - `flycheck-ert.el` library to write unit tests for Flycheck extensions
