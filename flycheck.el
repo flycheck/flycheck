@@ -6008,9 +6008,6 @@ See URL `http://www.haskell.org/ghc/'."
                    (flycheck-module-root-directory
                     (flycheck-find-in-buffer flycheck-haskell-module-re))))
             (option-list "-X" flycheck-ghc-language-extensions concat)
-            ;; Force GHC to treat the file as Haskell file, even if it doesn't
-            ;; have an extension.  Otherwise GHC would fail on files without an
-            ;; extension
             "-x" (eval
                   (pcase major-mode
                     (`haskell-mode "hs")
