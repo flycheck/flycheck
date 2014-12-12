@@ -53,6 +53,8 @@ master (in development)
     and related functions
   - Fix use deprecated option in `coffee-coffeelint`
   - Fix error columns of `python-pylint` and `tex-chktex` [GH-536]
+  - Correctly compute error level of errors on included files in `c/c++-clang`
+    and `c/c++-gcc` [GH-451]
 
 0.21 (Oct 26, 2014)
 -------------------
