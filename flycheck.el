@@ -4455,11 +4455,10 @@ directory, or nil otherwise."
                                           &rest custom-args)
   "Define SYMBOL as option variable with INIT-VALUE for CHECKER.
 
-SYMBOL is declared as customizable variable, buffer-local
-variable using `defcustom', to provide an option for the given
-syntax CHECKER.  INIT-VALUE is the initial value of the variable,
-and DOCSTRING is its docstring.  CUSTOM-ARGS are forwarded to
-`defcustom'.
+SYMBOL is declared as customizable, buffer-local variable using
+`defcustom', to provide an option for the given syntax CHECKER.
+INIT-VALUE is the initial value of the variable, and DOCSTRING is
+its docstring.  CUSTOM-ARGS are forwarded to `defcustom'.
 
 Use this together with the `option', `option-list' and
 `option-flag' forms in the `:command' argument to
