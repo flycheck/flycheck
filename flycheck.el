@@ -6974,6 +6974,9 @@ See URL `http://www.nongnu.org/chktex/'."
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ":"
             (id (one-or-more digit)) ":" (message) line-end))
+  :error-filter
+  (lambda (errors)
+    (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
   :modes (latex-mode plain-tex-mode))
 
 (flycheck-define-checker tex-lacheck
