@@ -4881,6 +4881,9 @@ SYMBOL with `flycheck-def-executable-var'."
 
 
 ;;; Built-in checkers
+(flycheck-def-args-var flycheck-gnat-args ada-gnat
+  :package-version '(flycheck . "0.20"))
+
 (flycheck-def-option-var flycheck-gnat-include-path nil ada-gnat
   "A list of include directories for GNAT.
 
@@ -4931,6 +4934,7 @@ Uses the GNAT compiler from GCC.  See URL
             (option-list "-gnat" flycheck-gnat-warnings concat)
             (option-list "-I" flycheck-gnat-include-path concat)
             (option "-gnat" flycheck-gnat-language-standard concat)
+            (eval flycheck-gnat-args)
             source)
   :error-patterns
   ((error line-start
@@ -4956,6 +4960,9 @@ See URL `http://www.methods.co.nz/asciidoc'."
    (warning line-start "asciidoc: " (or "WARNING" "DEPRECATED") ": " (file-name)
             ": Line " line ": " (message) line-end))
   :modes adoc-mode)
+
+(flycheck-def-args-var flycheck-clang-args c/c++-clang
+  :package-version '(flycheck . "0.22"))
 
 (flycheck-def-option-var flycheck-clang-blocks nil c/c++-clang
   "Enable blocks in Clang.
@@ -5103,6 +5110,7 @@ See URL `http://clang.llvm.org/'."
             (option-list "-W" flycheck-clang-warnings concat)
             (option-list "-D" flycheck-clang-definitions concat)
             (option-list "-I" flycheck-clang-include-path)
+            (eval flycheck-clang-args)
             "-x" (eval
                   (pcase major-mode
                     (`c++-mode "c++")
@@ -5130,6 +5138,9 @@ See URL `http://clang.llvm.org/'."
       (flycheck-fold-include-errors errors "In file included from")))
   :modes (c-mode c++-mode)
   :next-checkers ((warning . c/c++-cppcheck)))
+
+(flycheck-def-args-var flycheck-gcc-args c/c++-gcc
+  :package-version '(flycheck . "0.22"))
 
 (flycheck-def-option-var flycheck-gcc-definitions nil c/c++-gcc
   "Additional preprocessor definitions for GCC.
@@ -5233,6 +5244,7 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
             (option-list "-W" flycheck-gcc-warnings concat)
             (option-list "-D" flycheck-gcc-definitions concat)
             (option-list "-I" flycheck-gcc-include-path)
+            (eval flycheck-gcc-args)
             "-x" (eval
                   (pcase major-mode
                     (`c++-mode "c++")
@@ -5703,6 +5715,9 @@ See URL `http://www.kuwata-lab.com/erubis/'."
   ((error line-start  (file-name) ":" line ": " (message) line-end))
   :modes (html-erb-mode rhtml-mode))
 
+(flycheck-def-args-var flycheck-gfortran-args fortran-gfortran
+  :package-version '(flycheck . "0.22"))
+
 (flycheck-def-option-var flycheck-gfortran-include-path nil fortran-gfortran
   "A list of include directories for GCC Fortran.
 
@@ -5780,6 +5795,7 @@ Uses GCC's Fortran compiler gfortran.  See URL
                     flycheck-option-gfortran-layout)
             (option-list "-W" flycheck-gfortran-warnings concat)
             (option-list "-I" flycheck-gfortran-include-path concat)
+            (eval flycheck-gfortran-args)
             source)
   :error-patterns
   ((error line-start (file-name) ":" line "." column ":\n"
@@ -5974,6 +5990,9 @@ See URL `http://handlebarsjs.com/'."
       (group (one-or-more (not (any space "\n")))))
   "Regular expression for a Haskell module name.")
 
+(flycheck-def-args-var flycheck-ghc-args haskell-ghc
+  :package-version '(flycheck . "0.22"))
+
 (flycheck-def-option-var flycheck-ghc-no-user-package-database nil haskell-ghc
   "Whether to disable the user package database in GHC.
 
@@ -6029,6 +6048,7 @@ See URL `http://www.haskell.org/ghc/'."
                    (flycheck-module-root-directory
                     (flycheck-find-in-buffer flycheck-haskell-module-re))))
             (option-list "-X" flycheck-ghc-language-extensions concat)
+            (eval flycheck-ghc-args)
             ;; Force GHC to treat the file as Haskell file, even if it doesn't
             ;; have an extension.  Otherwise GHC would fail on files without an
             ;; extension
