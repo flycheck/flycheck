@@ -3046,58 +3046,6 @@ included file."
                   (format "In include %s" faulty-include-filename))))))
     errors))
 
-(defun flycheck-fold-include-errors (errors sentinel-message)
-  "Fold errors from included files.
-
-ERRORS is a list of errors in which to fold errors.
-SENTINEL-MESSAGE is the error message which denotes an error on
-an include.
-
-The function will fold the messages of all subsequent errors in
-the included file into the error on the include.
-
-Returns ERRORS, with folded messages."
-  ;; Fold messages from faulty includes into the errors on the corresponding
-  ;; include lines.  The user still needs to visit the affected include to
-  ;; list and navigate these errors, but they can at least get an idea of
-  ;; what is wrong.
-  (let (including-filename              ; The name of the file including a
-                                        ; faulty include
-        include-error                   ; The error on the include line
-        errors-in-include)              ; All errors in the include, as strings
-    (dolist (err errors)
-      (-when-let* ((message (flycheck-error-message err))
-                   (filename (flycheck-error-filename err)))
-        (cond
-         ((and (string= message sentinel-message)
-               ;; Don't handle faulty includes recursively, we are only
-               ;; interested in “top-level” errors
-               (not including-filename))
-          ;; We are looking at an error denoting a faulty include, so let's
-          ;; remember the error and the name of the include, and initialize
-          ;; our folded error message
-          (setq include-error err
-                including-filename filename
-                errors-in-include (list "Errors in included file:")))
-         ((and include-error (not (string= filename including-filename)))
-          ;; We are looking at an error *inside* the last faulty include, so
-          ;; let's record err, as human-readable string
-          (push (flycheck-error-format err) errors-in-include))
-         (include-error
-          ;; We are looking at an unrelated error, so fold all include
-          ;; errors, if there are any
-          (when (and include-error errors-in-include)
-            (setf (flycheck-error-message include-error)
-                  (string-join (nreverse errors-in-include) "\n")))
-          (setq include-error nil
-                including-filename nil
-                errors-in-include nil)))))
-    ;; If there are still pending errors to be folded, do so now
-    (when (and include-error errors-in-include)
-      (setf (flycheck-error-message include-error)
-            (string-join (nreverse errors-in-include) "\n"))))
-  errors)
-
 (defun flycheck-dequalify-error-ids (errors)
   "De-qualify error ids in ERRORS.
 

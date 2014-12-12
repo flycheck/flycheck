@@ -139,9 +139,6 @@ Additionally, Flycheck has some built-in error filters for generic checkers:
 .. function:: flycheck-fold-include-levels
    :auto:
 
-.. function:: flycheck-fold-include-errors
-   :auto:
-
 .. function:: flycheck-dequalify-error-ids
    :auto:
 
