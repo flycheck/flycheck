@@ -4506,6 +4506,26 @@ SEPARATOR is ignored in this case."
           (string-join value separator))
       (funcall filter value))))
 
+(defmacro flycheck-def-args-var (symbol checker &rest custom-args)
+  "Define SYMBOL as argument variable for CHECKER.
+
+SYMBOL is declared as customizable, risky and buffer-local
+variable using `defcustom' to provide an option for arbitrary
+arguments for the given syntax CHECKER.  CUSTOM-ARGS is forwarded
+to `defcustom'.
+
+Use the `eval' form to splice this variable into the
+`:command'."
+  (declare (indent 2))
+  `(flycheck-def-option-var ,symbol nil ,checker
+     ,(format "A list of additional arguments for `%s'.
+
+The value of this variable is a list of strings with additional
+command line arguments." checker)
+     :risky t
+     :type '(repeat (string :tag "Argument"))
+     ,@custom-args))
+
 
 ;;; Command syntax checkers as compile commands
 (defun flycheck-checker-pattern-to-error-regexp (pattern)
