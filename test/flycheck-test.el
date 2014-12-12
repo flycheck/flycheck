@@ -4985,7 +4985,7 @@ Why not:
 (flycheck-ert-def-checker-test tex-chktex (tex latex) nil
   (flycheck-ert-should-syntax-check
    "checkers/tex-warning.tex" 'latex-mode
-   '(5 28 warning "Intersentence spacing (`\\@') should perhaps be used."
+   '(5 29 warning "Intersentence spacing (`\\@') should perhaps be used."
        :id "13" :checker tex-chktex)))
 
 (flycheck-ert-def-checker-test tex-lacheck (tex latex) nil
