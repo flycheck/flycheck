@@ -3001,57 +3001,50 @@ Return ERRORS, with in-place modifications."
               (buffer-substring-no-properties (point-min) (point-max))))))
   errors)
 
-(defun flycheck-fold-include-errors (errors sentinel-message)
-  "Fold errors from included files.
+(defun flycheck-fold-include-levels (errors sentinel-message)
+  "Fold levels of ERRORS from included files.
 
-ERRORS is a list of errors in which to fold errors.
-SENTINEL-MESSAGE is the error message which denotes an error on
-an include.
-
-The function will fold the messages of all subsequent errors in
-the included file into the error on the include.
-
-Returns ERRORS, with folded messages."
-  ;; Fold messages from faulty includes into the errors on the corresponding
-  ;; include lines.  The user still needs to visit the affected include to
-  ;; list and navigate these errors, but they can at least get an idea of
-  ;; what is wrong.
-  (let (including-filename              ; The name of the file including a
-                                        ; faulty include
-        include-error                   ; The error on the include line
-        errors-in-include)              ; All errors in the include, as strings
-    (dolist (err errors)
-      (-when-let* ((message (flycheck-error-message err))
-                   (filename (flycheck-error-filename err)))
-        (cond
-         ((and (string= message sentinel-message)
-               ;; Don't handle faulty includes recursively, we are only
-               ;; interested in “top-level” errors
-               (not including-filename))
-          ;; We are looking at an error denoting a faulty include, so let's
-          ;; remember the error and the name of the include, and initialize
-          ;; our folded error message
-          (setq include-error err
-                including-filename filename
-                errors-in-include (list "Errors in included file:")))
-         ((and include-error (not (string= filename including-filename)))
-          ;; We are looking at an error *inside* the last faulty include, so
-          ;; let's record err, as human-readable string
-          (push (flycheck-error-format err) errors-in-include))
-         (include-error
-          ;; We are looking at an unrelated error, so fold all include
-          ;; errors, if there are any
-          (when (and include-error errors-in-include)
-            (setf (flycheck-error-message include-error)
-                  (string-join (nreverse errors-in-include) "\n")))
-          (setq include-error nil
-                including-filename nil
-                errors-in-include nil)))))
-    ;; If there are still pending errors to be folded, do so now
-    (when (and include-error errors-in-include)
-      (setf (flycheck-error-message include-error)
-            (string-join (nreverse errors-in-include) "\n"))))
-  errors)
+ERRORS is a list of `flycheck-error' objects.  SENTINEL-MESSAGE
+is a regular expression matched against the error message to
+determine whether the errror denotes errors from an included
+file.  Alternatively, it is a function that is given an error and
+shall return non-nil, if the error denotes errors from an
+included file."
+  (unless (or (stringp sentinel-message) (functionp sentinel-message))
+    (error "Sentinel must be string or function: %S" sentinel-message))
+  (let ((sentinel (if (functionp sentinel-message)
+                      sentinel-message
+                    (lambda (err)
+                      (string-match-p sentinel-message
+                                      (flycheck-error-message err)))))
+        (remaining-errors errors))
+    (while remaining-errors
+      (let* ((current-error (pop remaining-errors)))
+        (when (funcall sentinel current-error)
+          ;; We found an error denoting errors in the included file, so process
+          ;; all subsequent errors until an error has the current file name
+          ;; again, and find the most severe error level
+          (let ((current-filename (flycheck-error-filename current-error))
+                (current-level nil)
+                (faulty-include-filename (flycheck-error-filename
+                                          (car remaining-errors))))
+            (while (and remaining-errors
+                        (not (string= (flycheck-error-filename
+                                       (car remaining-errors))
+                                      current-filename)))
+              (let* ((error-in-include (pop remaining-errors))
+                     (in-include-level (flycheck-error-level error-in-include)))
+                (unless (funcall sentinel error-in-include)
+                  ;; Ignore nested "included file" errors, we are only
+                  ;; interested in real errors because these define our level
+                  (when (or (not current-level)
+                            (> (flycheck-error-level-severity in-include-level)
+                               (flycheck-error-level-severity current-level)))
+                    (setq current-level in-include-level)))))
+            (setf (flycheck-error-level current-error) current-level
+                  (flycheck-error-message current-error)
+                  (format "In include %s" faulty-include-filename))))))
+    errors))
 
 (defun flycheck-dequalify-error-ids (errors)
   "De-qualify error ids in ERRORS.
@@ -5106,7 +5099,7 @@ See URL `http://clang.llvm.org/'."
         ;; them past our error filtering
         (setf (flycheck-error-message err)
               (or (flycheck-error-message err) "no message")))
-      (flycheck-fold-include-errors errors "In file included from")))
+      (flycheck-fold-include-levels errors "In file included from")))
   :modes (c-mode c++-mode)
   :next-checkers ((warning . c/c++-cppcheck)))
 
@@ -5234,7 +5227,7 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
           ": " (or "fatal error" "error") ": " (message) line-end))
   :error-filter
   (lambda (errors)
-    (flycheck-fold-include-errors (flycheck-sanitize-errors errors)
+    (flycheck-fold-include-levels (flycheck-sanitize-errors errors)
                                   "In file included from"))
   :modes (c-mode c++-mode)
   :next-checkers ((warning . c/c++-cppcheck)))

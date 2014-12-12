@@ -3463,14 +3463,12 @@ evaluating BODY."
 
 (flycheck-ert-def-checker-test c/c++-clang (c c++) included-file-error
   (let ((flycheck-clang-include-path '("./c_c++-include"))
-        (flycheck-disabled-checkers '(c/c++-gcc)))
+        (flycheck-disabled-checkers '(c/c++-gcc))
+        (include-file (flycheck-ert-resource-filename
+                       "checkers/c_c++-warning.c")))
     (flycheck-ert-should-syntax-check
      "checkers/c_c++-included-file-error.cpp" 'c++-mode
-     '(3 nil error "Errors in included file:
-2:3:error: unknown type name 'this_is_bad' (c/c++-clang)
-3:1:error: expected member name or ';' after declaration specifiers (c/c++-clang)
-3:2:error: expected ';' after class (c/c++-clang)
-1:1:error: anonymous structs and classes must be class members (c/c++-clang)"
+     `(3 nil warning ,(format "In include %s" include-file)
          :checker c/c++-clang))))
 
 (flycheck-ert-def-checker-test c/c++-clang (c c++) includes
@@ -3611,13 +3609,12 @@ evaluating BODY."
 
 (flycheck-ert-def-checker-test c/c++-gcc (c c++) included-file-error
   (let ((flycheck-gcc-include-path '("./c_c++-include"))
-        (flycheck-disabled-checkers '(c/c++-clang)))
+        (flycheck-disabled-checkers '(c/c++-clang))
+        (include-file (flycheck-ert-resource-filename
+                       "checkers/c_c++-warning.c")))
     (flycheck-ert-should-syntax-check
      "checkers/c_c++-included-file-error.cpp" 'c++-mode
-     '(3 nil error "Errors in included file:
-2:3:error: ‘this_is_bad’ does not name a type (c/c++-gcc)
-3:1:error: expected ‘;’ after class definition (c/c++-gcc)
-3:1:error: abstract declarator ‘<anonymous class>’ used as declaration (c/c++-gcc)"
+     `(3 nil warning ,(format "In include %s" include-file)
          :checker c/c++-gcc))))
 
 (flycheck-ert-def-checker-test c/c++-gcc (c c++) includes
