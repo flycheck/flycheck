@@ -1,3 +1,3 @@
 class test {};
 
-#include <c_c++-bad-header.h>
+#include "c_c++-warning.c"
