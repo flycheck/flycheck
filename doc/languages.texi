@@ -99,6 +99,12 @@ Whether to disable RTTI in Clang/GCC, via @option{-fno-rtti}.
 The name of the standard library to use for Clang, as string.
 @flycoption flycheck-gcc-openmp
 Whether to enable OpenMP in GCC.
+@flycoption flycheck-clang-pedantic
+@flycoption flycheck-gcc-pedantic
+Whether to warn about language extensions in Clang/GCC.
+@flycoption flycheck-clang-pedantic-errors
+@flycoption flycheck-gcc-pedantic-errors
+Whether to error on language extensions in Clang/GCC.
 @flycoption flycheck-clang-warnings
 @flycoptionx flycheck-gcc-warnings
 A list of additional warnings to enable in Clang.  Each item is the name
