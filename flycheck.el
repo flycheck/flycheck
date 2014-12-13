@@ -4980,6 +4980,26 @@ pass the language standard via the `-std' option."
   :safe #'stringp
   :package-version '(flycheck . "0.15"))
 
+(flycheck-def-option-var flycheck-clang-pedantic nil c/c++-clang
+  "Whether to throw warn on language exceptions in Clang.
+
+For ISO C, follows the version specified by any -std option used.
+When non-nil, disable non-ISO extensions to C/C++ via
+`-pedantic'."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.22"))
+
+(flycheck-def-option-var flycheck-clang-pedantic-errors nil c/c++-clang
+  "Whether to throw error on language exceptions in Clang.
+
+For ISO C, follows the version specified by any -std option used.
+When non-nil, disable non-ISO extensions to C/C++ via
+`-pedantic-errors'."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.22"))
+
 (flycheck-def-option-var flycheck-clang-ms-extensions nil c/c++-clang
   "Whether to enable Microsoft extensions to C/C++ in Clang.
 
@@ -5066,6 +5086,8 @@ See URL `http://clang.llvm.org/'."
                                         ; warning group
             "-iquote" (eval (flycheck-c/c++-quoted-include-directory))
             (option "-std=" flycheck-clang-language-standard concat)
+            (option-flag "-pedantic" flycheck-clang-pedantic)
+            (option-flag "-pedantic-errors" flycheck-clang-pedantic-errors)
             (option "-stdlib=" flycheck-clang-standard-library concat)
             (option-flag "-fms-extensions" flycheck-clang-ms-extensions)
             (option-flag "-fno-exceptions" flycheck-clang-no-exceptions)
@@ -5144,6 +5166,26 @@ pass the language standard via the `-std' option."
   :safe #'stringp
   :package-version '(flycheck . "0.20"))
 
+(flycheck-def-option-var flycheck-gcc-pedantic nil c/c++-clang
+  "Whether to throw warn on language exceptions in GCC.
+
+For ISO C, follows the version specified by any -std option used.
+When non-nil, disable non-ISO extensions to C/C++ via
+`-pedantic'."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.22"))
+
+(flycheck-def-option-var flycheck-gcc-pedantic-errors nil c/c++-clang
+  "Whether to throw error language exceptions in GCC.
+
+For ISO C, follows the version specified by any -std option used.
+When non-nil, disable non-ISO extensions to C/C++ via
+`-pedantic-errors'."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.22"))
+
 (flycheck-def-option-var flycheck-gcc-no-exceptions nil c/c++-gcc
   "Whether to disable exceptions in GCC.
 
@@ -5198,6 +5240,8 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
                                         ; warning group
             "-iquote" (eval (flycheck-c/c++-quoted-include-directory))
             (option "-std=" flycheck-gcc-language-standard concat)
+            (option-flag "-pedantic" flycheck-gcc-pedantic)
+            (option-flag "-pedantic-errors" flycheck-gcc-pedantic-errors)
             (option-flag "-fno-exceptions" flycheck-gcc-no-exceptions)
             (option-flag "-fno-rtti" flycheck-gcc-no-rtti)
             (option-flag "-fopenmp" flycheck-gcc-openmp)
