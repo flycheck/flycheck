@@ -1369,10 +1369,14 @@ are mandatory.
 
      FUNCTION is called with the syntax checker and the context
      object returned by the `:start' function and shall try to
-     interrupt the syntax check.  If it cannot do so, it may
-     either signal an error or silently ignore the attempt to
-     interrupt the syntax checker, depending on the severity of
-     the situation.
+     interrupt the syntax check.  The context may be nil, if the
+     syntax check is interrupted before actually started.
+     FUNCTION should handle this situation.
+
+     If it cannot interrupt the syntax check, it may either
+     signal an error or silently ignore the attempt to interrupt
+     the syntax checker, depending on the severity of the
+     situation.
 
      If interrupting the syntax check failed, Flycheck will let
      the syntax check continue, but ignore any status reports.
