@@ -6467,9 +6467,11 @@ See URL `https://pypi.python.org/pypi/flake8'."
                  line-end)
    (info line-start
          (file-name) ":" line ":" (optional column ":") " "
-         (id "N" (one-or-more digit)) " " ; pep8-naming in Flake8 >= 2.0
-         (message (one-or-more not-newline))
-         line-end)
+         (id (or "N"                ; pep8-naming in Flake8 >= 2.0
+                 "H")               ; hacking in Flake8
+             (one-or-more digit)) " "
+             (message (one-or-more not-newline))
+             line-end)
    ;; Syntax errors in Flake8 < 2.0, in Flake8 >= 2.0 syntax errors are caught
    ;; by the E.* pattern above
    (error line-start (file-name) ":" line ":" (message) line-end))
