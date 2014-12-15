@@ -20,7 +20,6 @@
 # SOFTWARE.
 
 
-import re
 from collections import namedtuple
 
 from sexpdata import Symbol
@@ -85,6 +84,16 @@ This variable is an option for the syntax checker `{1}'""".format(
     doc, checker.name)
 
 
+def flycheck_def_args_var(interpreter, context, function,
+                          name, checker, *rest):
+    docstring = """A list of additional arguments for {checker}.
+
+The value of this variable is a list of strings with additional
+command line arguments.""".format(checker=checker)
+    return flycheck_def_option_var(interpreter, context, function, name,
+                                   Symbol('nil'), checker, docstring, *rest)
+
+
 def flycheck_def_config_file_var(interpreter, context, function,
                                  name, checker, filename, *rest):
     interpreter.defvar(context, 'defcustom', name, filename, '', *rest)
@@ -100,6 +109,8 @@ register_interpreter_function('flycheck-define-checker',
                               flycheck_define_checker)
 register_interpreter_function('flycheck-def-option-var',
                               flycheck_def_option_var)
+register_interpreter_function('flycheck-def-args-var',
+                              flycheck_def_args_var)
 register_interpreter_function('flycheck-def-config-file-var',
                               flycheck_def_config_file_var)
 
