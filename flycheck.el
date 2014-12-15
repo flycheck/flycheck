@@ -4168,7 +4168,8 @@ symbols in the command."
 (defun flycheck-interrupt-command-checker (_checker process)
   "Interrupt a PROCESS."
   ;; Deleting the process always triggers the sentinel, which does the cleanup
-  (delete-process process))
+  (when process
+    (delete-process process)))
 
 (defun flycheck-command-checker-print-doc (checker)
   "Print additional documentation for a command CHECKER."
