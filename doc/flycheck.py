@@ -20,7 +20,6 @@
 # SOFTWARE.
 
 
-import re
 from collections import namedtuple
 
 from sexpdata import Symbol
