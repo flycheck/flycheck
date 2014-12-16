@@ -7,7 +7,7 @@
 ;; URL: https://www.flycheck.org
 ;; Keywords: convenience languages tools
 ;; Version: 0.22-cvs1
-;; Package-Requires: ((dash "2.4.0") (pkg-info "0.4") (cl-lib "0.3") (emacs "24.1"))
+;; Package-Requires: ((dash "2.4.0") (pkg-info "0.4") (let-alist "1.0.1") (cl-lib "0.3") (emacs "24.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -38,6 +38,7 @@
 ;;; Code:
 
 (eval-when-compile
+  (require 'let-alist)      ; `let-alist'
   (require 'cl-lib)         ; `cl-defstruct'
   (require 'compile)        ; Compile Mode integration
   (require 'package)        ; Tell Emacs about package-user-dir
@@ -2771,11 +2772,8 @@ nil."
                 (`errored "!")
                 (`finished
                  (if flycheck-current-errors
-                     (let ((error-counts (flycheck-count-errors
-                                          flycheck-current-errors)))
-                       (format ":%s/%s"
-                               (or (cdr (assq 'error error-counts)) 0)
-                               (or (cdr (assq 'warning error-counts)) 0)))
+                     (let-alist (flycheck-count-errors flycheck-current-errors)
+                       (format ":%s/%s" (or .error 0) (or .warning 0)))
                    ""))
                 (`interrupted "-")
                 (`suspicious "?"))))
@@ -4672,25 +4670,20 @@ about Checkstyle."
             (dolist (node error-nodes)
               (pcase node
                 (`(error ,error-attrs . ,_)
-                 (let ((filename (cdr (assq 'name file-attrs)))
-                       (line (cdr (assq 'line error-attrs)))
-                       (column (cdr (assq 'column error-attrs)))
-                       (severity (cdr (assq 'severity error-attrs)))
-                       (message (cdr (assq 'message error-attrs)))
-                       (source (cdr (assq 'source error-attrs))))
+                 (let-alist error-attrs
                    (push (flycheck-error-new-at
-                          (flycheck-string-to-number-safe line)
-                          (flycheck-string-to-number-safe column)
-                          (pcase severity
+                          (flycheck-string-to-number-safe .line)
+                          (flycheck-string-to-number-safe .column)
+                          (pcase .severity
                             (`"error"   'error)
                             (`"warning" 'warning)
                             (`"info"    'info)
-                            ;; Default to error for unknown severity
+                            ;; Default to error for unknown .severity
                             (_          'error))
-                          message
-                          :checker checker :id source
+                          .message
+                          :checker checker :id .source
                           :buffer buffer
-                          :filename filename)
+                          :filename (cdr (assq 'name file-attrs)))
                          errors))))))))
        (nreverse errors)))))
 
@@ -4720,16 +4713,15 @@ about Cppcheck."
                    (dolist (node loc-nodes)
                      (pcase node
                        (`(location ,loc-attrs . ,_)
-                        (let ((line (cdr (assq'line loc-attrs)))
-                              (filename (cdr (assq 'file loc-attrs))))
+                        (let-alist loc-attrs
                           (push (flycheck-error-new-at
-                                 (flycheck-string-to-number-safe line)
+                                 (flycheck-string-to-number-safe .line)
                                  nil
                                  level message
                                  :id id
                                  :checker checker
                                  :buffer buffer
-                                 :filename filename)
+                                 :filename .file)
                                 errors))))))))))))
        (nreverse errors)))))
 
@@ -4747,16 +4739,15 @@ See URL `http://phpmd.org/' for more information about phpmd."
               (dolist (node violation-nodes)
                 (pcase node
                   (`(violation ,vio-attrs ,(and message (pred stringp)))
-                   (let ((line (cdr (assq 'beginline vio-attrs)))
-                         (rule (cdr (assq 'rule vio-attrs))))
+                   (let-alist vio-attrs
                      ;; TODO: Map priority to an error level?
                      ;; TODO: Respect endline
                      (push
                       (flycheck-error-new-at
-                       (flycheck-string-to-number-safe line)
+                       (flycheck-string-to-number-safe .beginline)
                        nil
                        'warning (string-trim message)
-                       :id rule
+                       :id .rule
                        :checker checker
                        :buffer buffer
                        :filename filename)
