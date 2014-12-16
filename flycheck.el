@@ -6441,9 +6441,8 @@ of 79 characters if there is no configuration with this setting."
 (flycheck-define-checker python-flake8
   "A Python syntax and style checker using Flake8.
 
-For best error reporting, use Flake8 2.0 or newer.
-
-See URL `https://pypi.python.org/pypi/flake8'."
+Requires Flake8 2.0 or newer. See URL
+`https://pypi.python.org/pypi/flake8'."
   :command ("flake8"
             (config-file "--config" flycheck-flake8rc)
             (option "--max-complexity" flycheck-flake8-maximum-complexity nil
@@ -6452,27 +6451,11 @@ See URL `https://pypi.python.org/pypi/flake8'."
                     flycheck-option-int)
             source)
   :error-patterns
-  ((error line-start
-          (file-name) ":" line ":" (optional column ":") " "
-          (id "E" (one-or-more digit)) " "
-          (message (one-or-more not-newline))
-          line-end)
-   (warning line-start
+  ((warning line-start
             (file-name) ":" line ":" (optional column ":") " "
-            (id  (or "F"                ; Pyflakes in Flake8 >= 2.0
-                     "W"                ; Pyflakes in Flake8 < 2.0
-                     "C")               ; McCabe in Flake >= 2.0
-                 (one-or-more digit)) " "
-                 (message (one-or-more not-newline))
-                 line-end)
-   (info line-start
-         (file-name) ":" line ":" (optional column ":") " "
-         (id "N" (one-or-more digit)) " " ; pep8-naming in Flake8 >= 2.0
-         (message (one-or-more not-newline))
-         line-end)
-   ;; Syntax errors in Flake8 < 2.0, in Flake8 >= 2.0 syntax errors are caught
-   ;; by the E.* pattern above
-   (error line-start (file-name) ":" line ":" (message) line-end))
+            (id (one-or-more (any alpha)) (one-or-more digit)) " "
+            (message (one-or-more not-newline))
+            line-end))
   :modes python-mode)
 
 (flycheck-def-config-file-var flycheck-pylintrc python-pylint
