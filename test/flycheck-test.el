@@ -1584,13 +1584,13 @@ and extension, as in `file-name-base'."
     (flycheck-ert-should-errors
      '(5 1 warning "'antigravit' imported but unused" :id "F401"
          :checker python-flake8)
-     '(7 1 error "expected 2 blank lines, found 1" :id "E302"
+     '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
          :checker python-flake8)
-     '(9 9 info "function name should be lowercase" :id "N802"
+     '(9 9 warning "function name should be lowercase" :id "N802"
          :checker python-flake8)
-     '(12 29 error "unexpected spaces around keyword / parameter equals"
+     '(12 29 warning "unexpected spaces around keyword / parameter equals"
           :id "E251" :checker python-flake8)
-     '(12 31 error "unexpected spaces around keyword / parameter equals"
+     '(12 31 warning "unexpected spaces around keyword / parameter equals"
           :id "E251" :checker python-flake8)
      '(22 1 warning "undefined name 'antigravity'" :id "F821"
           :checker python-flake8))
@@ -1667,13 +1667,13 @@ and extension, as in `file-name-base'."
     (flycheck-ert-should-errors
      '(5 1 warning "'antigravit' imported but unused" :id "F401"
          :checker python-flake8)
-     '(7 1 error "expected 2 blank lines, found 1" :id "E302"
+     '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
          :checker python-flake8)
-     '(9 9 info "function name should be lowercase" :id "N802"
+     '(9 9 warning "function name should be lowercase" :id "N802"
          :checker python-flake8)
-     '(12 29 error "unexpected spaces around keyword / parameter equals"
+     '(12 29 warning "unexpected spaces around keyword / parameter equals"
           :id "E251" :checker python-flake8)
-     '(12 31 error "unexpected spaces around keyword / parameter equals"
+     '(12 31 warning "unexpected spaces around keyword / parameter equals"
           :id "E251" :checker python-flake8)
      '(22 1 warning "undefined name 'antigravity'" :id "F821"
           :checker python-flake8))))
@@ -1691,13 +1691,13 @@ and extension, as in `file-name-base'."
     (flycheck-ert-should-errors
      '(5 1 warning "'antigravit' imported but unused" :id "F401"
          :checker python-flake8)
-     '(7 1 error "expected 2 blank lines, found 1" :id "E302"
+     '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
          :checker python-flake8)
-     '(9 9 info "function name should be lowercase" :id "N802"
+     '(9 9 warning "function name should be lowercase" :id "N802"
          :checker python-flake8)
-     '(12 29 error "unexpected spaces around keyword / parameter equals"
+     '(12 29 warning "unexpected spaces around keyword / parameter equals"
           :id "E251" :checker python-flake8)
-     '(12 31 error "unexpected spaces around keyword / parameter equals"
+     '(12 31 warning "unexpected spaces around keyword / parameter equals"
           :id "E251" :checker python-flake8)
      '(22 1 warning "undefined name 'antigravity'" :id "F821"
           :checker python-flake8))))
@@ -4468,16 +4468,16 @@ Why not:
   (let ((python-indent-guess-indent-offset nil))       ; Silence Python Mode!
     (flycheck-ert-should-syntax-check
      "checkers/python-syntax-error.py" 'python-mode
-     '(3 13 error "SyntaxError: invalid syntax" :id "E901"
+     '(3 13 warning "SyntaxError: invalid syntax" :id "E901"
          :checker python-flake8))))
 
 (flycheck-ert-def-checker-test python-flake8 python warning-ignored
   (let ((flycheck-flake8rc "flake8rc"))
     (flycheck-ert-should-syntax-check
      "checkers/python/test.py" 'python-mode
-     '(7 1 error "expected 2 blank lines, found 1" :id "E302"
+     '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
          :checker python-flake8)
-     '(9 9 info "function name should be lowercase" :id "N802"
+     '(9 9 warning "function name should be lowercase" :id "N802"
          :checker python-flake8)
      '(22 1 warning "undefined name 'antigravity'" :id "F821"
           :checker python-flake8))))
@@ -4488,15 +4488,15 @@ Why not:
      "checkers/python/test.py" 'python-mode
      '(5 1 warning "'antigravit' imported but unused" :id "F401"
          :checker python-flake8)
-     '(7 1 error "expected 2 blank lines, found 1" :id "E302"
+     '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
          :checker python-flake8)
-     '(9 9 info "function name should be lowercase" :id "N802"
+     '(9 9 warning "function name should be lowercase" :id "N802"
          :checker python-flake8)
      '(12 1 warning "'Spam.with_ham' is too complex (4)" :id "C901"
           :checker python-flake8)
-     '(12 29 error "unexpected spaces around keyword / parameter equals"
+     '(12 29 warning "unexpected spaces around keyword / parameter equals"
           :id "E251" :checker python-flake8)
-     '(12 31 error "unexpected spaces around keyword / parameter equals"
+     '(12 31 warning "unexpected spaces around keyword / parameter equals"
           :id "E251" :checker python-flake8)
      '(22 1 warning "undefined name 'antigravity'" :id "F821"
           :checker python-flake8))))
@@ -4507,15 +4507,15 @@ Why not:
      "checkers/python/test.py" 'python-mode
      '(5 1 warning "'antigravit' imported but unused" :id "F401"
          :checker python-flake8)
-     '(7 1 error "expected 2 blank lines, found 1" :id "E302"
+     '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
          :checker python-flake8)
-     '(9 9 info "function name should be lowercase" :id "N802"
+     '(9 9 warning "function name should be lowercase" :id "N802"
          :checker python-flake8)
-     '(10 46 error "line too long (46 > 45 characters)" :id "E501"
+     '(10 46 warning "line too long (46 > 45 characters)" :id "E501"
           :checker python-flake8)
-     '(12 29 error "unexpected spaces around keyword / parameter equals"
+     '(12 29 warning "unexpected spaces around keyword / parameter equals"
           :id "E251" :checker python-flake8)
-     '(12 31 error "unexpected spaces around keyword / parameter equals"
+     '(12 31 warning "unexpected spaces around keyword / parameter equals"
           :id "E251" :checker python-flake8)
      '(22 1 warning "undefined name 'antigravity'" :id "F821"
           :checker python-flake8))))
@@ -4525,13 +4525,13 @@ Why not:
    "checkers/python/test.py" 'python-mode
    '(5 1 warning "'antigravit' imported but unused" :id "F401"
        :checker python-flake8)
-   '(7 1 error "expected 2 blank lines, found 1" :id "E302"
+   '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
        :checker python-flake8)
-   '(9 9 info "function name should be lowercase" :id "N802"
+   '(9 9 warning "function name should be lowercase" :id "N802"
        :checker python-flake8)
-   '(12 29 error "unexpected spaces around keyword / parameter equals"
+   '(12 29 warning "unexpected spaces around keyword / parameter equals"
         :id "E251" :checker python-flake8)
-   '(12 31 error "unexpected spaces around keyword / parameter equals"
+   '(12 31 warning "unexpected spaces around keyword / parameter equals"
         :id "E251" :checker python-flake8)
    '(22 1 warning "undefined name 'antigravity'" :id "F821"
         :checker python-flake8)))

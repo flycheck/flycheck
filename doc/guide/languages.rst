@@ -491,6 +491,9 @@ Python
    .. option:: flycheck-flake8-maximum-line-length
       :auto:
 
+   .. option:: flycheck-flake8-error-filter
+      :auto:
+
    .. rubric:: Configuration file
 
    .. option:: flycheck-flake8rc
