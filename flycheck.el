@@ -6438,6 +6438,14 @@ of 79 characters if there is no configuration with this setting."
                  (integer :tag "Maximum line length in characters"))
   :safe #'integerp)
 
+(flycheck-def-option-var flycheck-flake8-error-filter nil python-flake8
+  "Error filter function for `python-flake8' checker.
+
+May be used to change warning level based on flake8 error code."
+  :type 'function
+  :risky t
+  :package-version '(flycheck . "0.22"))
+
 (flycheck-define-checker python-flake8
   "A Python syntax and style checker using Flake8.
 
@@ -6451,28 +6459,16 @@ See URL `https://pypi.python.org/pypi/flake8'."
             (option "--max-line-length" flycheck-flake8-maximum-line-length nil
                     flycheck-option-int)
             source)
+  :error-filter
+  (lambda (errors)
+    (let ((filter (or flycheck-flake8-error-filter #'identity)))
+      (funcall filter (flycheck-sanitize-errors errors))))
   :error-patterns
-  ((error line-start
-          (file-name) ":" line ":" (optional column ":") " "
-          (id "E" (one-or-more digit)) " "
-          (message (one-or-more not-newline))
-          line-end)
-   (warning line-start
-            (file-name) ":" line ":" (optional column ":") " "
-            (id  (or "F"                ; Pyflakes in Flake8 >= 2.0
-                     "W"                ; Pyflakes in Flake8 < 2.0
-                     "C")               ; McCabe in Flake >= 2.0
-                 (one-or-more digit)) " "
-                 (message (one-or-more not-newline))
-                 line-end)
-   (info line-start
-         (file-name) ":" line ":" (optional column ":") " "
-         (id "N" (one-or-more digit)) " " ; pep8-naming in Flake8 >= 2.0
-         (message (one-or-more not-newline))
-         line-end)
-   ;; Syntax errors in Flake8 < 2.0, in Flake8 >= 2.0 syntax errors are caught
-   ;; by the E.* pattern above
-   (error line-start (file-name) ":" line ":" (message) line-end))
+  ((warning line-start
+            (file-name) ":" line ":"
+            (optional column ":") ; Flake8 >= 2.0
+            space (id (one-or-more alnum))
+            (message) line-end))
   :modes python-mode)
 
 (flycheck-def-config-file-var flycheck-pylintrc python-pylint
