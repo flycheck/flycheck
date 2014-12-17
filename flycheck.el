@@ -4999,6 +4999,7 @@ pass the language standard via the `-std' option."
                  (string :tag "Language standard"))
   :safe #'stringp
   :package-version '(flycheck . "0.15"))
+(make-variable-buffer-local 'flycheck-clang-language-standard)
 
 (flycheck-def-option-var flycheck-clang-ms-extensions nil c/c++-clang
   "Whether to enable Microsoft extensions to C/C++ in Clang.
@@ -5167,6 +5168,7 @@ pass the language standard via the `-std' option."
                  (string :tag "Language standard"))
   :safe #'stringp
   :package-version '(flycheck . "0.20"))
+(make-variable-buffer-local 'flycheck-gcc-language-standard)
 
 (flycheck-def-option-var flycheck-gcc-no-exceptions nil c/c++-gcc
   "Whether to disable exceptions in GCC.
@@ -6752,6 +6754,7 @@ if it is not modified, i.e. after it has been saved."
   :type 'string
   :package-version '(flycheck . "0.20")
   :safe #'stringp)
+(make-variable-buffer-local 'flycheck-rust-crate-root)
 
 (flycheck-def-option-var flycheck-rust-crate-type "lib" rust
   "The type of the Rust Crate to check.
@@ -6761,6 +6764,7 @@ for the `--crate-type' flag."
   :type 'string
   :safe #'stringp
   :package-version '("flycheck" . "0.20"))
+(make-variable-buffer-local 'flycheck-rust-crate-type)
 
 (flycheck-def-option-var flycheck-rust-library-path nil rust
   "A list of library directories for Rust.
