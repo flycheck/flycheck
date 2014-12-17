@@ -80,7 +80,7 @@ def flycheck_def_option_var(interpreter, context, function,
     doc = symbol.properties['variable-documentation']
     symbol.properties['variable-documentation'] = """{0}
 
-This variable is an option for the syntax checker `{1}'""".format(
+This variable is an option for the syntax checker `{1}'.""".format(
     doc, checker.name)
 
 
@@ -101,7 +101,7 @@ def flycheck_def_config_file_var(interpreter, context, function,
     checker = interpreter.env.intern(checker)
     checker.properties['flycheck-config-file'] = symbol
     symbol.properties['buffer-local'] = True
-    doc = "Configuration file for `{0}'".format(checker.name)
+    doc = "Configuration file for `{0}'.".format(checker.name)
     symbol.properties['variable-documentation'] = doc
 
 
