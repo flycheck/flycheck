@@ -4302,8 +4302,7 @@ The default executable is %S." checker default-executable)
          :type '(choice (const :tag "Default executable" nil)
                         (string :tag "Name or path"))
          :group 'flycheck-executables
-         :risky t)
-       (make-variable-buffer-local ',executable-var))))
+         :risky t))))
 
 (defun flycheck-set-checker-executable (checker &optional executable)
   "Set the EXECUTABLE of CHECKER.
@@ -4349,9 +4348,9 @@ variable symbol for a syntax checker."
                                                &rest custom-args)
   "Define SYMBOL as config file variable for CHECKER, with default FILE-NAME.
 
-SYMBOL is declared as customizable, buffer-local variable using
-`defcustom', to provide a configuration file for the given syntax
-CHECKER.  CUSTOM-ARGS are forwarded to `defcustom'.
+SYMBOL is declared as customizable variable using `defcustom', to
+provide a configuration file for the given syntax CHECKER.
+CUSTOM-ARGS are forwarded to `defcustom'.
 
 FILE-NAME is the initial value of the new variable.  If omitted,
 the default value is nil.
@@ -4377,8 +4376,7 @@ configuration file a buffer." checker)
        :type '(choice (const :tag "No configuration file" nil)
                       (string :tag "File name or path"))
        :group 'flycheck-config-files
-       ,@custom-args)
-     (make-variable-buffer-local ',symbol)))
+       ,@custom-args)))
 
 (defun flycheck-checker-config-file-var (checker)
   "Get the associated configuration file variable of CHECKER.
@@ -4451,10 +4449,10 @@ directory, or nil otherwise."
                                           &rest custom-args)
   "Define SYMBOL as option variable with INIT-VALUE for CHECKER.
 
-SYMBOL is declared as customizable, buffer-local variable using
-`defcustom', to provide an option for the given syntax CHECKER.
-INIT-VALUE is the initial value of the variable, and DOCSTRING is
-its docstring.  CUSTOM-ARGS are forwarded to `defcustom'.
+SYMBOL is declared as customizable variable using `defcustom', to
+provide an option for the given syntax CHECKER.  INIT-VALUE is
+the initial value of the variable, and DOCSTRING is its
+docstring.  CUSTOM-ARGS are forwarded to `defcustom'.
 
 Use this together with the `option', `option-list' and
 `option-flag' forms in the `:command' argument to
@@ -4470,8 +4468,7 @@ Use this together with the `option', `option-list' and
 
 This variable is an option for the syntax checker `%s'." docstring checker)
        :group 'flycheck-options
-       ,@custom-args)
-     (make-variable-buffer-local ',symbol)))
+       ,@custom-args)))
 
 (defun flycheck-option-int (value)
   "Convert an integral option VALUE to a string.
