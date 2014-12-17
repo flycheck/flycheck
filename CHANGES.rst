@@ -35,6 +35,8 @@ master (in development)
   - Parse error IDs from many error checks [GH-259]
   - Verify Flycheck setup in a buffer with `flycheck-verify-setup` [GH-338]
   - Add options for arbitrary arguments to some syntax checkers [GH-542]
+  - Add `flycheck-flake8-error-level-alist` to customize error levels from
+    flake8 [GH-454]
 
 - Improvements:
 
