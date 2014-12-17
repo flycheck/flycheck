@@ -4305,7 +4305,7 @@ The default executable is %S." checker default-executable)
          :risky t))))
 
 (defun flycheck-set-checker-executable (checker &optional executable)
-  "Set the EXECUTABLE of CHECKER.
+  "Set the EXECUTABLE of CHECKER in the current buffer.
 
 CHECKER is a syntax checker symbol.  EXECUTABLE is a string with
 the name of a executable or the path to an executable file, which
@@ -4337,7 +4337,7 @@ variable symbol for a syntax checker."
   (when (and executable (not (executable-find executable)))
     (user-error "%s is no executable" executable))
   (let ((variable (flycheck-checker-executable-variable checker)))
-    (set variable executable)))
+    (set (make-local-variable variable) executable)))
 (put 'flycheck-set-checker-executable 'interactive-only
      "Set the executable variable directly instead")
 

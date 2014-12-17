@@ -3353,7 +3353,9 @@ evaluating BODY."
     (let ((file-name (flycheck-ert-resource-filename "bin/dummy-emacs")))
       (should (file-exists-p file-name))
       (should (file-executable-p file-name))
+      (should-not (local-variable-p 'flycheck-emacs-lisp-executable))
       (flycheck-set-checker-executable 'emacs-lisp file-name)
+      (should (local-variable-p 'flycheck-emacs-lisp-executable))
       (should (string= flycheck-emacs-lisp-executable file-name))))
   ;; The global value should remain unaffected
   (should-not flycheck-emacs-lisp-executable))
@@ -3362,19 +3364,21 @@ evaluating BODY."
   :tags '(executables)
   (flycheck-ert-with-temp-buffer
     (let ((file-name (flycheck-ert-resource-filename "bin/dummy-emacs")))
-      (setq flycheck-emacs-lisp-executable file-name)
+      (setq-local flycheck-emacs-lisp-executable file-name)
       (should (string= flycheck-emacs-lisp-executable file-name))
       (flycheck-set-checker-executable 'emacs-lisp)
-      (should-not flycheck-emacs-lisp-executable))))
+      (should-not flycheck-emacs-lisp-executable)
+      (should (local-variable-p 'flycheck-emacs-lisp-executable)))))
 
 (ert-deftest flycheck-set-checker-executable/executable-is-nil ()
   :tags '(executables)
   (flycheck-ert-with-temp-buffer
     (let ((file-name (flycheck-ert-resource-filename "bin/dummy-emacs")))
-      (setq flycheck-emacs-lisp-executable file-name)
+      (setq-local flycheck-emacs-lisp-executable file-name)
       (should (string= flycheck-emacs-lisp-executable file-name))
       (flycheck-set-checker-executable 'emacs-lisp nil)
-      (should-not flycheck-emacs-lisp-executable))))
+      (should-not flycheck-emacs-lisp-executable)
+      (should (local-variable-p 'flycheck-emacs-lisp-executable)))))
 
 (ert-deftest flycheck-set-checker-executable/non-existing-file ()
   :tags '(executables)
