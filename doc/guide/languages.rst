@@ -485,6 +485,9 @@ Python
 
    .. rubric:: Options
 
+   .. option:: flycheck-flake8-error-level-alist
+      :auto:
+
    .. option:: flycheck-flake8-maximum-complexity
       :auto:
 

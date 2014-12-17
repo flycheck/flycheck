@@ -1585,15 +1585,15 @@ and extension, as in `file-name-base'."
     (flycheck-ert-should-errors
      '(5 1 warning "'antigravit' imported but unused" :id "F401"
          :checker python-flake8)
-     '(7 1 error "expected 2 blank lines, found 1" :id "E302"
+     '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
          :checker python-flake8)
-     '(9 9 info "function name should be lowercase" :id "N802"
-         :checker python-flake8)
-     '(12 29 error "unexpected spaces around keyword / parameter equals"
+     '(9 9 info "function name should be lowercase"
+         :checker python-flake8 :id "N802")
+     '(12 29 warning "unexpected spaces around keyword / parameter equals"
           :id "E251" :checker python-flake8)
-     '(12 31 error "unexpected spaces around keyword / parameter equals"
+     '(12 31 warning "unexpected spaces around keyword / parameter equals"
           :id "E251" :checker python-flake8)
-     '(22 1 warning "undefined name 'antigravity'" :id "F821"
+     '(22 1 error "undefined name 'antigravity'" :id "F821"
           :checker python-flake8))
     ;; Selecting Pylint should give us its errors
     (flycheck-select-checker 'python-pylint)
@@ -1669,15 +1669,15 @@ and extension, as in `file-name-base'."
     (flycheck-ert-should-errors
      '(5 1 warning "'antigravit' imported but unused" :id "F401"
          :checker python-flake8)
-     '(7 1 error "expected 2 blank lines, found 1" :id "E302"
+     '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
          :checker python-flake8)
-     '(9 9 info "function name should be lowercase" :id "N802"
-         :checker python-flake8)
-     '(12 29 error "unexpected spaces around keyword / parameter equals"
+     '(9 9 info "function name should be lowercase"
+         :checker python-flake8 :id "N802")
+     '(12 29 warning "unexpected spaces around keyword / parameter equals"
           :id "E251" :checker python-flake8)
-     '(12 31 error "unexpected spaces around keyword / parameter equals"
+     '(12 31 warning "unexpected spaces around keyword / parameter equals"
           :id "E251" :checker python-flake8)
-     '(22 1 warning "undefined name 'antigravity'" :id "F821"
+     '(22 1 error "undefined name 'antigravity'" :id "F821"
           :checker python-flake8))))
 
 (ert-deftest flycheck/selects-checker-automatically/first-enabled-checker ()
@@ -1693,15 +1693,15 @@ and extension, as in `file-name-base'."
     (flycheck-ert-should-errors
      '(5 1 warning "'antigravit' imported but unused" :id "F401"
          :checker python-flake8)
-     '(7 1 error "expected 2 blank lines, found 1" :id "E302"
+     '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
          :checker python-flake8)
-     '(9 9 info "function name should be lowercase" :id "N802"
-         :checker python-flake8)
-     '(12 29 error "unexpected spaces around keyword / parameter equals"
+     '(9 9 info "function name should be lowercase"
+         :checker python-flake8 :id "N802")
+     '(12 29 warning "unexpected spaces around keyword / parameter equals"
           :id "E251" :checker python-flake8)
-     '(12 31 error "unexpected spaces around keyword / parameter equals"
+     '(12 31 warning "unexpected spaces around keyword / parameter equals"
           :id "E251" :checker python-flake8)
-     '(22 1 warning "undefined name 'antigravity'" :id "F821"
+     '(22 1 error "undefined name 'antigravity'" :id "F821"
           :checker python-flake8))))
 
 (ert-deftest flycheck/selects-checker-automatically/no-disabled-checker ()
@@ -4477,30 +4477,30 @@ Why not:
   (let ((flycheck-flake8rc "flake8rc"))
     (flycheck-ert-should-syntax-check
      "checkers/python/test.py" 'python-mode
-     '(7 1 error "expected 2 blank lines, found 1" :id "E302"
+     '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
          :checker python-flake8)
-     '(9 9 info "function name should be lowercase" :id "N802"
-         :checker python-flake8)
-     '(22 1 warning "undefined name 'antigravity'" :id "F821"
+     '(9 9 info "function name should be lowercase"
+         :checker python-flake8 :id "N802")
+     '(22 1 error "undefined name 'antigravity'" :id "F821"
           :checker python-flake8))))
 
 (flycheck-ert-def-checker-test python-flake8 python maximum-complexity
-  (let ((flycheck-flake8-maximum-complexity 4))
+  (let ((flycheck-flake8-maximum-complexity 2))
     (flycheck-ert-should-syntax-check
      "checkers/python/test.py" 'python-mode
      '(5 1 warning "'antigravit' imported but unused" :id "F401"
          :checker python-flake8)
-     '(7 1 error "expected 2 blank lines, found 1" :id "E302"
+     '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
          :checker python-flake8)
-     '(9 9 info "function name should be lowercase" :id "N802"
-         :checker python-flake8)
-     '(12 1 warning "'Spam.with_ham' is too complex (4)" :id "C901"
+     '(9 9 info "function name should be lowercase"
+         :checker python-flake8 :id "N802")
+     '(12 1 warning "'Spam.with_ham' is too complex (3)" :id "C901"
           :checker python-flake8)
-     '(12 29 error "unexpected spaces around keyword / parameter equals"
+     '(12 29 warning "unexpected spaces around keyword / parameter equals"
           :id "E251" :checker python-flake8)
-     '(12 31 error "unexpected spaces around keyword / parameter equals"
+     '(12 31 warning "unexpected spaces around keyword / parameter equals"
           :id "E251" :checker python-flake8)
-     '(22 1 warning "undefined name 'antigravity'" :id "F821"
+     '(22 1 error "undefined name 'antigravity'" :id "F821"
           :checker python-flake8))))
 
 (flycheck-ert-def-checker-test python-flake8 python error-maximum-line-length
@@ -4509,17 +4509,17 @@ Why not:
      "checkers/python/test.py" 'python-mode
      '(5 1 warning "'antigravit' imported but unused" :id "F401"
          :checker python-flake8)
-     '(7 1 error "expected 2 blank lines, found 1" :id "E302"
+     '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
          :checker python-flake8)
-     '(9 9 info "function name should be lowercase" :id "N802"
-         :checker python-flake8)
-     '(10 46 error "line too long (46 > 45 characters)" :id "E501"
+     '(9 9 info "function name should be lowercase"
+         :checker python-flake8 :id "N802")
+     '(10 46 warning "line too long (46 > 45 characters)" :id "E501"
           :checker python-flake8)
-     '(12 29 error "unexpected spaces around keyword / parameter equals"
+     '(12 29 warning "unexpected spaces around keyword / parameter equals"
           :id "E251" :checker python-flake8)
-     '(12 31 error "unexpected spaces around keyword / parameter equals"
+     '(12 31 warning "unexpected spaces around keyword / parameter equals"
           :id "E251" :checker python-flake8)
-     '(22 1 warning "undefined name 'antigravity'" :id "F821"
+     '(22 1 error "undefined name 'antigravity'" :id "F821"
           :checker python-flake8))))
 
 (flycheck-ert-def-checker-test python-flake8 python nil
@@ -4527,15 +4527,15 @@ Why not:
    "checkers/python/test.py" 'python-mode
    '(5 1 warning "'antigravit' imported but unused" :id "F401"
        :checker python-flake8)
-   '(7 1 error "expected 2 blank lines, found 1" :id "E302"
+   '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
        :checker python-flake8)
-   '(9 9 info "function name should be lowercase" :id "N802"
-       :checker python-flake8)
-   '(12 29 error "unexpected spaces around keyword / parameter equals"
+   '(9 9 info "function name should be lowercase"
+       :checker python-flake8 :id "N802")
+   '(12 29 warning "unexpected spaces around keyword / parameter equals"
         :id "E251" :checker python-flake8)
-   '(12 31 error "unexpected spaces around keyword / parameter equals"
+   '(12 31 warning "unexpected spaces around keyword / parameter equals"
         :id "E251" :checker python-flake8)
-   '(22 1 warning "undefined name 'antigravity'" :id "F821"
+   '(22 1 error "undefined name 'antigravity'" :id "F821"
         :checker python-flake8)))
 
 (flycheck-ert-def-checker-test python-pylint python syntax-error
