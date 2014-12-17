@@ -1515,7 +1515,7 @@ and extension, as in `file-name-base'."
       (should (string= flycheck-last-status-change 'errored)))))
 
 (ert-deftest flycheck-checker/usable-checker-is-used ()
-  :tags '(selection language-emacs-lisp)
+  :tags '(selection language-emacs-lisp checker-emacs-lisp-checkdoc)
   (flycheck-ert-with-resource-buffer "checkers/emacs-lisp.el"
     (emacs-lisp-mode)
     (flycheck-mode)
@@ -1543,7 +1543,7 @@ and extension, as in `file-name-base'."
         (should (string= flycheck-last-status-change 'errored))))))
 
 (ert-deftest flycheck-checker/unregistered-checker-is-used ()
-  :tags '(selection language-emacs-lisp)
+  :tags '(selection language-emacs-lisp checker-emacs-lisp-checkdoc)
   (flycheck-ert-with-resource-buffer "checkers/emacs-lisp.el"
     (emacs-lisp-mode)
     (flycheck-mode)
@@ -1573,7 +1573,8 @@ and extension, as in `file-name-base'."
     (should-not flycheck-checker)))
 
 (ert-deftest flycheck-select-checker/selecting-runs-a-syntax-check ()
-  :tags '(selection external-tool language-python)
+  :tags '(selection external-tool language-python
+                    checker-python-pylint checker-python-flake8)
   (skip-unless (executable-find (flycheck-checker-executable 'python-pylint)))
   (skip-unless (executable-find (flycheck-checker-executable 'python-flake8)))
   (flycheck-ert-with-resource-buffer "checkers/python/test.py"
@@ -1625,7 +1626,8 @@ and extension, as in `file-name-base'."
           :checker python-pylint))))
 
 (ert-deftest flycheck-select-checker/unselecting-a-checker-goes-back-to-automatic-selection ()
-  :tags '(selection external-tool language-python)
+  :tags '(selection external-tool language-python
+                    checker-python-pylint checker-python-flake8)
   (skip-unless (executable-find (flycheck-checker-executable 'python-pylint)))
   (skip-unless (executable-find (flycheck-checker-executable 'python-flake8)))
   (flycheck-ert-with-resource-buffer "checkers/python/test.py"
@@ -1679,7 +1681,7 @@ and extension, as in `file-name-base'."
           :checker python-flake8))))
 
 (ert-deftest flycheck/selects-checker-automatically/first-enabled-checker ()
-  :tags '(selection external-tool language-python)
+  :tags '(selection external-tool language-python checker-python-flake8)
   (skip-unless (executable-find (flycheck-checker-executable 'python-pylint)))
   (skip-unless (executable-find (flycheck-checker-executable 'python-flake8)))
   (flycheck-ert-with-resource-buffer "checkers/python/test.py"
@@ -1703,7 +1705,7 @@ and extension, as in `file-name-base'."
           :checker python-flake8))))
 
 (ert-deftest flycheck/selects-checker-automatically/no-disabled-checker ()
-  :tags '(selection language-emacs-lisp)
+  :tags '(selection language-emacs-lisp checker-emacs-lisp-checkdoc)
   (flycheck-ert-with-resource-buffer "checkers/emacs-lisp.el"
     (let ((flycheck-disabled-checkers '(emacs-lisp)))
       (flycheck-ert-buffer-sync)
@@ -2607,7 +2609,7 @@ of the file will be interrupted because there are too many #ifdef configurations
         (should (eq side 'right-fringe))))))
 
 (ert-deftest flycheck-add-overlay/right-position-in-narrowed-buffer ()
-  :tags '(overlay language-emacs-lisp)
+  :tags '(overlay language-emacs-lisp checker-emacs-lisp)
   "Test that all overlays are added at the right positions with narrowing in place."
   (flycheck-ert-with-resource-buffer "narrowing.el"
     (emacs-lisp-mode)
@@ -3333,7 +3335,7 @@ evaluating BODY."
 ;;; Syntax checker executables
 
 (ert-deftest flycheck-overridden-executable ()
-  :tags '(executables language-emacs-lisp)
+  :tags '(executables language-emacs-lisp checker-emacs-lisp)
   (let ((flycheck-emacs-lisp-executable (flycheck-ert-resource-filename
                                          "bin/dummy-emacs")))
     (flycheck-ert-should-syntax-check

@@ -260,6 +260,8 @@ assertions and setup code."
          (languages (if (symbolp language) (list language) language))
          (language-tags (mapcar (lambda (l) (intern (format "language-%s" l)))
                                 languages))
+         (checker-tags (mapcar (lambda (c) (intern (format "checker-%s" c)))
+                               checkers))
          (local-name (or name 'default))
          (full-name (intern (format "flycheck-define-checker/%s/%s"
                                     checker local-name)))
@@ -272,7 +274,8 @@ assertions and setup code."
        (list 'or
              '(satisfies flycheck-ert-syntax-check-timed-out-p)
              ,(or (plist-get keys :expected-result) :passed))
-       :tags (append ',default-tags ',language-tags ,(plist-get keys :tags))
+       :tags (append ',(append default-tags language-tags checker-tags)
+                     ,(plist-get keys :tags))
        ,@(mapcar (lambda (c) `(skip-unless
                                ;; Ignore non-command checkers
                                (or (not (get ',c 'flycheck-command))
