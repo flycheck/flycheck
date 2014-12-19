@@ -5787,9 +5787,11 @@ Uses GCC's Fortran compiler gfortran.  See URL
             source)
   :error-patterns
   ((error line-start (file-name) ":" line "." column ":\n"
+          (zero-or-more (one-or-more blank) "Included at " (file-name) ":" line ":\n")
           (= 3 (zero-or-more not-newline) "\n")
           (or "Error" "Fatal Error") ": " (message) line-end)
    (warning line-start (file-name) ":" line "." column ":\n"
+          (zero-or-more (one-or-more blank) "Included at " (file-name) ":" line ":\n")
             (= 3 (zero-or-more not-newline) "\n")
             "Warning: " (message) line-end))
   :modes (fortran-mode f90-mode))
