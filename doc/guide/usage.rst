@@ -7,6 +7,7 @@
 This chapter explains in-depth how to use Flycheck for your daily work.
 
 .. contents:: Contents
+   :local:
 
 .. note::
 
