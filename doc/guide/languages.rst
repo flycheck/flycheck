@@ -38,6 +38,9 @@ Ada
 
    .. rubric:: Options
 
+   .. option:: flycheck-gnat-args
+      :auto:
+
    .. option:: flycheck-gnat-include-path
       :auto:
 
@@ -60,6 +63,9 @@ C/C++
    :auto:
 
    .. rubric:: Options
+
+   .. option:: flycheck-clang-args
+      :auto:
 
    .. option:: flycheck-clang-blocks
       :auto:
@@ -101,6 +107,9 @@ C/C++
    :auto:
 
    .. rubric:: Options
+
+   .. option:: flycheck-gcc-args
+      :auto:
 
    .. option:: flycheck-gcc-definitions
       :auto:
@@ -270,6 +279,9 @@ Fortran
 
    .. rubric:: Options
 
+   .. option:: flycheck-gfortran-args
+      :auto:
+
    .. option:: flycheck-gfortran-include-path
       :auto:
 
@@ -325,6 +337,9 @@ Haskell
    :auto:
 
    .. rubric:: Options
+
+   .. option:: flycheck-ghc-args
+      :auto:
 
    .. option:: flycheck-ghc-language-extensions
       :auto:
@@ -481,6 +496,9 @@ Python
    :auto:
 
    .. rubric:: Options
+
+   .. option:: flycheck-flake8-error-level-alist
+      :auto:
 
    .. option:: flycheck-flake8-maximum-complexity
       :auto:

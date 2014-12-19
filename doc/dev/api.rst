@@ -193,6 +193,9 @@ the external command.
 .. macro:: flycheck-def-option-var
    :auto:
 
+.. macro:: flycheck-def-args-var
+   :auto:
+
 Flycheck provides some built-in filters for such options:
 
 .. function:: flycheck-option-int

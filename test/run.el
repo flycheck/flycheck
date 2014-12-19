@@ -49,10 +49,13 @@
 
 This function adds the following custom selectors:
 
-`(language FOO)' -> `(tag language-FOO')"
+`(language FOO)' -> `(tag language-FOO)'
+`(checker FOO)'  -> `(tag checker-FOO)'"
   (pcase selector
     (`(language ,(and language (pred symbolp)))
      (list 'tag (intern (concat "language-" (symbol-name language)))))
+    (`(checker ,(and checker (pred symbolp)))
+     (list 'tag (intern (concat "checker-" (symbol-name checker)))))
     (`(,group . ,body)
      (cons group (mapcar #'flycheck-transform-selector body)))
     (simple simple)))
