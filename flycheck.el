@@ -4302,11 +4302,10 @@ The default executable is %S." checker default-executable)
          :type '(choice (const :tag "Default executable" nil)
                         (string :tag "Name or path"))
          :group 'flycheck-executables
-         :risky t)
-       (make-variable-buffer-local ',executable-var))))
+         :risky t))))
 
 (defun flycheck-set-checker-executable (checker &optional executable)
-  "Set the EXECUTABLE of CHECKER.
+  "Set the EXECUTABLE of CHECKER in the current buffer.
 
 CHECKER is a syntax checker symbol.  EXECUTABLE is a string with
 the name of a executable or the path to an executable file, which
@@ -4338,7 +4337,7 @@ variable symbol for a syntax checker."
   (when (and executable (not (executable-find executable)))
     (user-error "%s is no executable" executable))
   (let ((variable (flycheck-checker-executable-variable checker)))
-    (set variable executable)))
+    (set (make-local-variable variable) executable)))
 (put 'flycheck-set-checker-executable 'interactive-only
      "Set the executable variable directly instead")
 
@@ -4349,9 +4348,9 @@ variable symbol for a syntax checker."
                                                &rest custom-args)
   "Define SYMBOL as config file variable for CHECKER, with default FILE-NAME.
 
-SYMBOL is declared as customizable, buffer-local variable using
-`defcustom', to provide a configuration file for the given syntax
-CHECKER.  CUSTOM-ARGS are forwarded to `defcustom'.
+SYMBOL is declared as customizable variable using `defcustom', to
+provide a configuration file for the given syntax CHECKER.
+CUSTOM-ARGS are forwarded to `defcustom'.
 
 FILE-NAME is the initial value of the new variable.  If omitted,
 the default value is nil.
@@ -4377,8 +4376,7 @@ configuration file a buffer." checker)
        :type '(choice (const :tag "No configuration file" nil)
                       (string :tag "File name or path"))
        :group 'flycheck-config-files
-       ,@custom-args)
-     (make-variable-buffer-local ',symbol)))
+       ,@custom-args)))
 
 (defun flycheck-checker-config-file-var (checker)
   "Get the associated configuration file variable of CHECKER.
@@ -4451,10 +4449,10 @@ directory, or nil otherwise."
                                           &rest custom-args)
   "Define SYMBOL as option variable with INIT-VALUE for CHECKER.
 
-SYMBOL is declared as customizable, buffer-local variable using
-`defcustom', to provide an option for the given syntax CHECKER.
-INIT-VALUE is the initial value of the variable, and DOCSTRING is
-its docstring.  CUSTOM-ARGS are forwarded to `defcustom'.
+SYMBOL is declared as customizable variable using `defcustom', to
+provide an option for the given syntax CHECKER.  INIT-VALUE is
+the initial value of the variable, and DOCSTRING is its
+docstring.  CUSTOM-ARGS are forwarded to `defcustom'.
 
 Use this together with the `option', `option-list' and
 `option-flag' forms in the `:command' argument to
@@ -4470,8 +4468,7 @@ Use this together with the `option', `option-list' and
 
 This variable is an option for the syntax checker `%s'." docstring checker)
        :group 'flycheck-options
-       ,@custom-args)
-     (make-variable-buffer-local ',symbol)))
+       ,@custom-args)))
 
 (defun flycheck-option-int (value)
   "Convert an integral option VALUE to a string.
@@ -5002,6 +4999,7 @@ pass the language standard via the `-std' option."
                  (string :tag "Language standard"))
   :safe #'stringp
   :package-version '(flycheck . "0.15"))
+(make-variable-buffer-local 'flycheck-clang-language-standard)
 
 (flycheck-def-option-var flycheck-clang-ms-extensions nil c/c++-clang
   "Whether to enable Microsoft extensions to C/C++ in Clang.
@@ -5170,6 +5168,7 @@ pass the language standard via the `-std' option."
                  (string :tag "Language standard"))
   :safe #'stringp
   :package-version '(flycheck . "0.20"))
+(make-variable-buffer-local 'flycheck-gcc-language-standard)
 
 (flycheck-def-option-var flycheck-gcc-no-exceptions nil c/c++-gcc
   "Whether to disable exceptions in GCC.
@@ -6755,6 +6754,7 @@ if it is not modified, i.e. after it has been saved."
   :type 'string
   :package-version '(flycheck . "0.20")
   :safe #'stringp)
+(make-variable-buffer-local 'flycheck-rust-crate-root)
 
 (flycheck-def-option-var flycheck-rust-crate-type "lib" rust
   "The type of the Rust Crate to check.
@@ -6764,6 +6764,7 @@ for the `--crate-type' flag."
   :type 'string
   :safe #'stringp
   :package-version '("flycheck" . "0.20"))
+(make-variable-buffer-local 'flycheck-rust-crate-type)
 
 (flycheck-def-option-var flycheck-rust-library-path nil rust
   "A list of library directories for Rust.

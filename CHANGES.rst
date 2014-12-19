@@ -16,6 +16,7 @@ master (in development)
   - Replace `flycheck-copy-messages-as-kill` with `flycheck-copy-errors-as-kill`
     [GH-529]
   - Remove `flycheck-google-messages` command
+  - Options and config file variables are not buffer-local anymore [GH-546]
 
 - New syntax checkers:
 
