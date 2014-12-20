@@ -142,9 +142,14 @@ C/C++
 
 .. seealso::
 
+   `flycheck-irony`_ adds an alternative syntax checker for C, C++ and Objective
+   C which uses `Irony Mode`_ server to check buffers.
+
    The flycheck-google-cpplint_ extension adds a syntax checker using Google's
    C++ style checker.
 
+.. _flycheck-irony: https://github.com/Sarcasm/flycheck-irony
+.. _Irony Mode: https://github.com/Sarcasm/irony-mode
 .. _flycheck-google-cpplint: https://github.com/flycheck/flycheck-google-cpplint
 
 CFEngine

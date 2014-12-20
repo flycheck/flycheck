@@ -45,6 +45,8 @@ The following extensions provide additional cool features for Flycheck:
   packages.
 - flycheck-hdevtools_ adds a Flycheck syntax checker for Haskell based on
   hdevtools_.
+- flycheck-irony_ adds a Flycheck syntax checker for C, C++ and Objective C
+  using `Irony Mode`_.
 - flycheck-ledger_ adds a syntax checker for the Ledger_ accounting tool.
 - flycheck-mercury_ adds a Flycheck syntax checker for the `Mercury Language`_.
 - flycheck-ocaml_ adds a syntax checker for OCaml.
@@ -61,6 +63,8 @@ The following extensions provide additional cool features for Flycheck:
 .. _flycheck-haskell: https://github.com/flycheck/flycheck-haskell
 .. _flycheck-hdevtools: https://github.com/flycheck/flycheck-hdevtools
 .. _hdevtools: https://github.com/bitc/hdevtools/
+.. _flycheck-irony: https://github.com/Sarcasm/flycheck-irony
+.. _Irony Mode: https://github.com/Sarcasm/irony-mode
 .. _flycheck-ledger: https://github.com/purcell/flycheck-ledger
 .. _Ledger: http://ledger-cli.org/
 .. _flycheck-mercury: https://github.com/flycheck/flycheck-mercury
