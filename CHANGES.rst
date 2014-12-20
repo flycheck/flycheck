@@ -33,7 +33,7 @@ master (in development)
   - Add special `id` sexp to parse error ids with `:error-patterns` [GH-529]
   - Parse error IDs from Checkstyle XML [GH-259]
   - `flycheck-copy-errors-as-kill` can put error ids into kill ring now [GH-529]
-  - Parse error IDs from many error checks [GH-259]
+  - Parse error IDs from many error checkers [GH-259]
   - Verify Flycheck setup in a buffer with `flycheck-verify-setup` [GH-338]
   - Add options for arbitrary arguments to some syntax checkers [GH-542]
   - Add `flycheck-flake8-error-level-alist` to customize error levels from
