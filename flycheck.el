@@ -2234,7 +2234,8 @@ checks."
   (let* ((syntax-check flycheck-current-syntax-check)
          (checker (flycheck-syntax-check-checker syntax-check))
          (errors (flycheck-relevant-errors
-                  (flycheck-filter-errors errors checker))))
+                  (flycheck-filter-errors
+                   (flycheck-assert-error-list-p errors) checker))))
     (unless (flycheck-disable-excessive-checker checker errors)
       (flycheck-report-current-errors errors))
     (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
@@ -2664,6 +2665,19 @@ first.  Levels of the same severity are compared by name."
           (flycheck-error-< err1 err2)
         (string< level1 level2)))
      (t (< severity1 severity2)))))
+
+(defun flycheck-assert-error-list-p (errors)
+  "Assert that all items in ERRORS are of `flycheck-error' type.
+
+Signal an error if any item in ERRORS is not a `flycheck-error'
+object, as by `flycheck-error-p'.  Otherwise return ERRORS
+again."
+  (unless (listp errors)
+    (signal 'wrong-type-argument (list 'listp errors)))
+  (dolist (err errors)
+    (unless (flycheck-error-p err)
+      (signal 'wrong-type-argument (list 'flycheck-error-p err))))
+  errors)
 
 
 ;;; Errors in the current buffer

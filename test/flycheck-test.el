@@ -2081,6 +2081,38 @@ and extension, as in `file-name-base'."
   (should-not (flycheck-error-level-< (flycheck-error-new-at 8 nil 'info)
                                       (flycheck-error-new-at 7 nil 'info))))
 
+(ert-deftest flycheck-assert-error-list-p/all-flycheck-errors ()
+  :tags '(error-api)
+  (let ((errors (list (flycheck-error-new-at 8 10 nil 'info)
+                      (flycheck-error-new-at 9 11 nil 'info))))
+    (should (eq (flycheck-assert-error-list-p errors) errors))))
+
+(ert-deftest flycheck-assert-error-list-p/no-list ()
+  :tags '(error-api)
+  (let ((data (should-error (flycheck-assert-error-list-p 'foo)
+                            :type 'wrong-type-argument)))
+    (should (equal (error-message-string data)
+                   "Wrong type argument: listp, foo"))))
+
+(ert-deftest flycheck-assert-error-list-p/nil-in-list ()
+  :tags '(error-api)
+  (let* ((errors (list (flycheck-error-new-at 8 10 nil 'info)
+                       nil))
+         (data (should-error (flycheck-assert-error-list-p errors)
+                             :type 'wrong-type-argument)))
+    (should (equal (error-message-string data)
+                   "Wrong type argument: flycheck-error-p, nil"))))
+
+(ert-deftest flycheck-assert-error-list-p/wrong-type-in-list ()
+  :tags '(error-api)
+  (let* ((errors (list (flycheck-error-new-at 8 10 nil 'info)
+                       "foo"))
+         (data (should-error (flycheck-assert-error-list-p errors)
+                             :type 'wrong-type-argument)))
+    (should (equal (error-message-string data)
+                   "Wrong type argument: flycheck-error-p, \"foo\""))))
+
+
 
 ;;; Error levels
 
