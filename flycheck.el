@@ -1461,10 +1461,8 @@ are mandatory.
      FUNCTION is free to add, remove or modify errors, whether in
      place or by copying.
 
-     This property is optional.  If omitted,
-     `flycheck-sanitize-errors' is used as default filter, which
-     see.  To turn of filtering completely, explicitly specify
-     `identity' as error filter.
+     This property is optional.  The default filter is
+     `identity'.
 
 `:next-checkers NEXT-CHECKERS'
      A list denoting syntax checkers to apply after this syntax
@@ -1502,8 +1500,7 @@ Signal an error, if any property has an invalid value."
         (modes (plist-get properties :modes))
         (predicate (plist-get properties :predicate))
         (verify (plist-get properties :verify))
-        (filter (or (plist-get properties :error-filter)
-                    #'flycheck-sanitize-errors))
+        (filter (or (plist-get properties :error-filter) #'identity))
         (next-checkers (plist-get properties :next-checkers))
         (file (flycheck-current-load-file)))
 
@@ -3794,8 +3791,11 @@ Define SYMBOL as generic syntax checker via
 to check the buffer.  SYMBOL and DOCSTRING are the same as for
 `flycheck-define-generic-checker'.
 
-The following PROPERTIES constitute a command syntax checker.
-Unless otherwise noted, all properties are mandatory.
+In addition to the properties understood by
+`flycheck-define-generic-checker', the following PROPERTIES
+constitute a command syntax checker.  Unless otherwise noted, all
+properties are mandatory.  Note that the default `:error-filter'
+of command checkers is `flycheck-sanitize-errors'.
 
 `:command COMMAND'
      The command to run for syntax checking.
@@ -3847,10 +3847,9 @@ Unless otherwise noted, all properties are mandatory.
      `flycheck-parse-with-patterns'.  In this case,
      `:error-patterns' is mandatory.
 
-In addition to these PROPERTIES, all properties from
-`flycheck-define-generic-checker' may be specified, except of
-`:start', `:interrupt', and `:print-doc'.  You may specify a
-custom `:verify' function, but you should take care to call
+Note that you may not give `:start', `:interrupt', and
+`:print-doc' for a command checker.  You can give a custom
+`:verify' function, but you should take care to call
 `flycheck-verify-command-checker' in a custom `:verify'
 function."
   (declare (indent 1)
@@ -3859,6 +3858,11 @@ function."
     (when (plist-get properties prop)
       (error "%s not allowed in definition of command syntax checker %s"
              prop symbol)))
+
+  (unless (plist-get properties :error-filter)
+    ;; Default to `flycheck-sanitize-errors' as error filter
+    (setq properties (plist-put properties :error-filter
+                                #'flycheck-sanitize-errors)))
 
   (let ((command (plist-get properties :command))
         (patterns (plist-get properties :error-patterns))
