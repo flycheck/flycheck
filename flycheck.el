@@ -4872,14 +4872,14 @@ SYMBOL with `flycheck-def-executable-var'."
        (flycheck-define-command-checker ',symbol
          ,docstring
          :command ',command
-         :error-parser ,(when parser
-                          `(function ,parser))
+         ,@(when parser
+             `(:error-parser #',parser))
          :error-patterns ',(plist-get properties :error-patterns)
-         :error-filter ,(when filter
-                          `(function ,filter))
+         ,@(when filter
+             `(:error-filter #',filter))
          :modes ',(plist-get properties :modes)
-         :predicate ,(when predicate
-                       `(function ,predicate))
+         ,@(when predicate
+             `(:predicate #',predicate))
          :next-checkers ',(plist-get properties :next-checkers)))))
 
 
