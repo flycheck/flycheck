@@ -4667,6 +4667,16 @@ Why not:
    "checkers/r-lint-info.R" 'R-mode
    '(1 nil info "needs space around `=`" :checker r-lint)))
 
+(ert-deftest flycheck-define-checker/r-lintr ()
+  :tags '(builtin-checker external-tool language-R)
+  (skip-unless (flycheck-check-executable 'R))
+  (flycheck-test-should-syntax-check
+   "checkers/r-lintr.R" 'R-mode
+   '(1 28 info "Opening curly braces should never go on their own line and should always be followed by a new line."
+       :checker r-lintr)
+   '(4 6 warning "Do not use absolute paths." :checker r-lintr)
+   '(7 5 error "unexpected end of input" :checker r-lintr)))
+
 (ert-deftest flycheck-define-checker/r-svtools ()
   :tags '(builtin-checker external-tool language-R)
   (skip-unless (flycheck-check-executable 'R))

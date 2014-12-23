@@ -221,6 +221,7 @@ attention to case differences."
     python-pylint
     python-pycompile
     r-lint
+    r-lintr
     r-svtools
     racket
     rpm-rpmlint
@@ -6574,7 +6575,26 @@ See URL `http://cran.r-project.org/web/packages/lint/'."
          ": found on lines " line (optional (one-or-more ", " line))
          line-end))
   :modes ess-mode
-  :next-checkers (r-svtools))
+  :next-checkers (r-lintr))
+
+(flycheck-define-checker r-lintr
+  "An R style and syntax checker using the lintr package.
+
+See URL `http://cran.r-project.org/web/packages/lintr/'."
+  :command ("R" "--slave" "--restore" "--no-save" "-e"
+            (eval (concat
+                   "library(lintr);"
+                   "try(lint(commandArgs(TRUE), default_linters))"))
+            "--args" source)
+  :error-patterns
+  ((info line-start (file-name) ":" line ":" column ": style: " (message)
+         line-end)
+   (warning line-start (file-name) ":" line ":" column ": warning: " (message)
+            line-end)
+   (error line-start (file-name) ":" line ":" column ": error: " (message)
+          line-end))
+  :modes ess-mode
+  :next-checkers ((warning . r-svtools)))
 
 (flycheck-define-checker r-svtools
   "An R syntax checker using the svTools package.
