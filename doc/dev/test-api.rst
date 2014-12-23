@@ -1,3 +1,5 @@
+.. _flycheck-ert:
+
 ==================
  Flycheck ERT API
 ==================
