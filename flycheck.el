@@ -863,7 +863,7 @@ currently listed."
      ["Go to previous error" flycheck-previous-error flycheck-mode]
      ["Show all errors" flycheck-list-errors flycheck-mode]
      "---"
-     ["Copy messages at point" flycheck-copy-messages-as-kill
+     ["Copy messages at point" flycheck-copy-errors-as-kill
       (flycheck-overlays-at (point))]
      "---"
      ["Select syntax checker" flycheck-select-checker flycheck-mode]
