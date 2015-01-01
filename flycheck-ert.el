@@ -1,6 +1,6 @@
 ;;; flycheck-ert.el --- Flycheck: ERT extensions  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2013, 2014  Sebastian Wiesner <swiesner@lunaryorn.com>
+;; Copyright (C) 2013-2015  Sebastian Wiesner <swiesner@lunaryorn.com>
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
 ;; URL: https://github.com/flycheck/flycheck

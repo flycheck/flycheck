@@ -1,6 +1,6 @@
 ;;; flycheck.el --- Modern on-the-fly syntax checking for GNU Emacs -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2012, 2013, 2014 Sebastian Wiesner <swiesner@lunaryorn.com>
+;; Copyright (c) 2012-2015 Sebastian Wiesner <swiesner@lunaryorn.com>
 ;; Copyright (C) 2013, 2014 Free Software Foundation, Inc.
 ;;
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
@@ -2269,9 +2269,14 @@ Return t when CHECKER was disabled, or nil otherwise."
     (push checker flycheck-disabled-checkers)
     t))
 
-(defun flycheck-clear ()
-  "Clear all errors in the current buffer."
-  (interactive)
+(defun flycheck-clear (&optional shall-interrupt)
+  "Clear all errors in the current buffer.
+
+With prefix arg or SHALL-INTERRUPT non-nil, also interrupt the
+current syntax check."
+  (interactive "P")
+  (when shall-interrupt
+    (flycheck-stop))
   (flycheck-delete-all-overlays)
   (flycheck-clear-errors)
   (flycheck-error-list-refresh)

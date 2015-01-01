@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2014 Sebastian Wiesner <swiesner@lunaryorn.com>
+# Copyright (c) 2014-2015 Sebastian Wiesner <swiesner@lunaryorn.com>
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -50,7 +50,7 @@ def flycheck_version():
     raise ValueError('Failed to extract the version')
 
 project = u'Flycheck'
-copyright = u'2014, Sebastian Wiesner'
+copyright = u'2014-2015 Sebastian Wiesner'
 release = flycheck_version()
 version = release.split('-')[0]
 

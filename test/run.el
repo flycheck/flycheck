@@ -2,7 +2,7 @@
 ":"; exec ${EMACS:-emacs} -Q --script "$0" -- "${@}" # -*- mode: emacs-lisp; lexical-binding: t; -*-
 ;;; run.el --- Flycheck: Test runner
 
-;; Copyright (C) 2014  Sebastian Wiesner <swiesner@lunaryorn.com>
+;; Copyright (C) 2014-2015  Sebastian Wiesner <swiesner@lunaryorn.com>
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
 

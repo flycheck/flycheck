@@ -1,6 +1,6 @@
 ;;; flycheck-test.el --- Flycheck: Unit test suite   -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2013, 2014  Sebastian Wiesner
+;; Copyright (C) 2013-2015  Sebastian Wiesner
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
 ;; URL: https://github.com/flycheck/flycheck
