@@ -6,7 +6,7 @@
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
 ;; URL: https://www.flycheck.org
 ;; Keywords: convenience languages tools
-;; Version: 0.22-cvs1
+;; Version: 0.23-cvs
 ;; Package-Requires: ((dash "2.4.0") (pkg-info "0.4") (let-alist "1.0.1") (cl-lib "0.3") (emacs "24.1"))
 
 ;; This file is not part of GNU Emacs.
@@ -863,7 +863,7 @@ currently listed."
      ["Go to previous error" flycheck-previous-error flycheck-mode]
      ["Show all errors" flycheck-list-errors flycheck-mode]
      "---"
-     ["Copy messages at point" flycheck-copy-messages-as-kill
+     ["Copy messages at point" flycheck-copy-errors-as-kill
       (flycheck-overlays-at (point))]
      "---"
      ["Select syntax checker" flycheck-select-checker flycheck-mode]
@@ -1461,10 +1461,8 @@ are mandatory.
      FUNCTION is free to add, remove or modify errors, whether in
      place or by copying.
 
-     This property is optional.  If omitted,
-     `flycheck-sanitize-errors' is used as default filter, which
-     see.  To turn of filtering completely, explicitly specify
-     `identity' as error filter.
+     This property is optional.  The default filter is
+     `identity'.
 
 `:next-checkers NEXT-CHECKERS'
      A list denoting syntax checkers to apply after this syntax
@@ -1502,8 +1500,7 @@ Signal an error, if any property has an invalid value."
         (modes (plist-get properties :modes))
         (predicate (plist-get properties :predicate))
         (verify (plist-get properties :verify))
-        (filter (or (plist-get properties :error-filter)
-                    #'flycheck-sanitize-errors))
+        (filter (or (plist-get properties :error-filter) #'identity))
         (next-checkers (plist-get properties :next-checkers))
         (file (flycheck-current-load-file)))
 
@@ -2234,7 +2231,8 @@ checks."
   (let* ((syntax-check flycheck-current-syntax-check)
          (checker (flycheck-syntax-check-checker syntax-check))
          (errors (flycheck-relevant-errors
-                  (flycheck-filter-errors errors checker))))
+                  (flycheck-filter-errors
+                   (flycheck-assert-error-list-p errors) checker))))
     (unless (flycheck-disable-excessive-checker checker errors)
       (flycheck-report-current-errors errors))
     (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
@@ -2664,6 +2662,19 @@ first.  Levels of the same severity are compared by name."
           (flycheck-error-< err1 err2)
         (string< level1 level2)))
      (t (< severity1 severity2)))))
+
+(defun flycheck-assert-error-list-p (errors)
+  "Assert that all items in ERRORS are of `flycheck-error' type.
+
+Signal an error if any item in ERRORS is not a `flycheck-error'
+object, as by `flycheck-error-p'.  Otherwise return ERRORS
+again."
+  (unless (listp errors)
+    (signal 'wrong-type-argument (list 'listp errors)))
+  (dolist (err errors)
+    (unless (flycheck-error-p err)
+      (signal 'wrong-type-argument (list 'flycheck-error-p err))))
+  errors)
 
 
 ;;; Errors in the current buffer
@@ -3780,8 +3791,11 @@ Define SYMBOL as generic syntax checker via
 to check the buffer.  SYMBOL and DOCSTRING are the same as for
 `flycheck-define-generic-checker'.
 
-The following PROPERTIES constitute a command syntax checker.
-Unless otherwise noted, all properties are mandatory.
+In addition to the properties understood by
+`flycheck-define-generic-checker', the following PROPERTIES
+constitute a command syntax checker.  Unless otherwise noted, all
+properties are mandatory.  Note that the default `:error-filter'
+of command checkers is `flycheck-sanitize-errors'.
 
 `:command COMMAND'
      The command to run for syntax checking.
@@ -3833,10 +3847,9 @@ Unless otherwise noted, all properties are mandatory.
      `flycheck-parse-with-patterns'.  In this case,
      `:error-patterns' is mandatory.
 
-In addition to these PROPERTIES, all properties from
-`flycheck-define-generic-checker' may be specified, except of
-`:start', `:interrupt', and `:print-doc'.  You may specify a
-custom `:verify' function, but you should take care to call
+Note that you may not give `:start', `:interrupt', and
+`:print-doc' for a command checker.  You can give a custom
+`:verify' function, but you should take care to call
 `flycheck-verify-command-checker' in a custom `:verify'
 function."
   (declare (indent 1)
@@ -3845,6 +3858,11 @@ function."
     (when (plist-get properties prop)
       (error "%s not allowed in definition of command syntax checker %s"
              prop symbol)))
+
+  (unless (plist-get properties :error-filter)
+    ;; Default to `flycheck-sanitize-errors' as error filter
+    (setq properties (plist-put properties :error-filter
+                                #'flycheck-sanitize-errors)))
 
   (let ((command (plist-get properties :command))
         (patterns (plist-get properties :error-patterns))
@@ -4302,11 +4320,10 @@ The default executable is %S." checker default-executable)
          :type '(choice (const :tag "Default executable" nil)
                         (string :tag "Name or path"))
          :group 'flycheck-executables
-         :risky t)
-       (make-variable-buffer-local ',executable-var))))
+         :risky t))))
 
 (defun flycheck-set-checker-executable (checker &optional executable)
-  "Set the EXECUTABLE of CHECKER.
+  "Set the EXECUTABLE of CHECKER in the current buffer.
 
 CHECKER is a syntax checker symbol.  EXECUTABLE is a string with
 the name of a executable or the path to an executable file, which
@@ -4338,7 +4355,7 @@ variable symbol for a syntax checker."
   (when (and executable (not (executable-find executable)))
     (user-error "%s is no executable" executable))
   (let ((variable (flycheck-checker-executable-variable checker)))
-    (set variable executable)))
+    (set (make-local-variable variable) executable)))
 (put 'flycheck-set-checker-executable 'interactive-only
      "Set the executable variable directly instead")
 
@@ -4349,9 +4366,9 @@ variable symbol for a syntax checker."
                                                &rest custom-args)
   "Define SYMBOL as config file variable for CHECKER, with default FILE-NAME.
 
-SYMBOL is declared as customizable, buffer-local variable using
-`defcustom', to provide a configuration file for the given syntax
-CHECKER.  CUSTOM-ARGS are forwarded to `defcustom'.
+SYMBOL is declared as customizable variable using `defcustom', to
+provide a configuration file for the given syntax CHECKER.
+CUSTOM-ARGS are forwarded to `defcustom'.
 
 FILE-NAME is the initial value of the new variable.  If omitted,
 the default value is nil.
@@ -4377,8 +4394,7 @@ configuration file a buffer." checker)
        :type '(choice (const :tag "No configuration file" nil)
                       (string :tag "File name or path"))
        :group 'flycheck-config-files
-       ,@custom-args)
-     (make-variable-buffer-local ',symbol)))
+       ,@custom-args)))
 
 (defun flycheck-checker-config-file-var (checker)
   "Get the associated configuration file variable of CHECKER.
@@ -4451,10 +4467,10 @@ directory, or nil otherwise."
                                           &rest custom-args)
   "Define SYMBOL as option variable with INIT-VALUE for CHECKER.
 
-SYMBOL is declared as customizable, buffer-local variable using
-`defcustom', to provide an option for the given syntax CHECKER.
-INIT-VALUE is the initial value of the variable, and DOCSTRING is
-its docstring.  CUSTOM-ARGS are forwarded to `defcustom'.
+SYMBOL is declared as customizable variable using `defcustom', to
+provide an option for the given syntax CHECKER.  INIT-VALUE is
+the initial value of the variable, and DOCSTRING is its
+docstring.  CUSTOM-ARGS are forwarded to `defcustom'.
 
 Use this together with the `option', `option-list' and
 `option-flag' forms in the `:command' argument to
@@ -4470,8 +4486,7 @@ Use this together with the `option', `option-list' and
 
 This variable is an option for the syntax checker `%s'." docstring checker)
        :group 'flycheck-options
-       ,@custom-args)
-     (make-variable-buffer-local ',symbol)))
+       ,@custom-args)))
 
 (defun flycheck-option-int (value)
   "Convert an integral option VALUE to a string.
@@ -4857,14 +4872,14 @@ SYMBOL with `flycheck-def-executable-var'."
        (flycheck-define-command-checker ',symbol
          ,docstring
          :command ',command
-         :error-parser ,(when parser
-                          `(function ,parser))
+         ,@(when parser
+             `(:error-parser #',parser))
          :error-patterns ',(plist-get properties :error-patterns)
-         :error-filter ,(when filter
-                          `(function ,filter))
+         ,@(when filter
+             `(:error-filter #',filter))
          :modes ',(plist-get properties :modes)
-         :predicate ,(when predicate
-                       `(function ,predicate))
+         ,@(when predicate
+             `(:predicate #',predicate))
          :next-checkers ',(plist-get properties :next-checkers)))))
 
 
@@ -5002,6 +5017,7 @@ pass the language standard via the `-std' option."
                  (string :tag "Language standard"))
   :safe #'stringp
   :package-version '(flycheck . "0.15"))
+(make-variable-buffer-local 'flycheck-clang-language-standard)
 
 (flycheck-def-option-var flycheck-clang-pedantic nil c/c++-clang
   "Whether to throw warn on language exceptions in Clang.
@@ -5192,6 +5208,7 @@ pass the language standard via the `-std' option."
                  (string :tag "Language standard"))
   :safe #'stringp
   :package-version '(flycheck . "0.20"))
+(make-variable-buffer-local 'flycheck-gcc-language-standard)
 
 (flycheck-def-option-var flycheck-gcc-pedantic nil c/c++-clang
   "Whether to throw warn on language exceptions in GCC.
@@ -6799,6 +6816,7 @@ if it is not modified, i.e. after it has been saved."
   :type 'string
   :package-version '(flycheck . "0.20")
   :safe #'stringp)
+(make-variable-buffer-local 'flycheck-rust-crate-root)
 
 (flycheck-def-option-var flycheck-rust-crate-type "lib" rust
   "The type of the Rust Crate to check.
@@ -6808,6 +6826,7 @@ for the `--crate-type' flag."
   :type 'string
   :safe #'stringp
   :package-version '("flycheck" . "0.20"))
+(make-variable-buffer-local 'flycheck-rust-crate-type)
 
 (flycheck-def-option-var flycheck-rust-library-path nil rust
   "A list of library directories for Rust.

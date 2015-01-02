@@ -74,8 +74,6 @@ def flycheck_def_option_var(interpreter, context, function,
     symbol = interpreter.env.intern(name)
     checker = interpreter.env.intern(checker)
     checker.properties.setdefault('flycheck-options', set()).add(symbol)
-    # Our variables are always buffer-local
-    symbol.properties['buffer-local'] = True
     # Add the checker to the documentation
     doc = symbol.properties['variable-documentation']
     symbol.properties['variable-documentation'] = """{0}
@@ -100,7 +98,6 @@ def flycheck_def_config_file_var(interpreter, context, function,
     symbol = interpreter.env.intern(name)
     checker = interpreter.env.intern(checker)
     checker.properties['flycheck-config-file'] = symbol
-    symbol.properties['buffer-local'] = True
     doc = "Configuration file for `{0}'.".format(checker.name)
     symbol.properties['variable-documentation'] = doc
 
