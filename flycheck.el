@@ -5027,7 +5027,7 @@ When non-nil, disable non-ISO extensions to C/C++ via
 `-pedantic'."
   :type 'boolean
   :safe #'booleanp
-  :package-version '(flycheck . "0.22"))
+  :package-version '(flycheck . "0.23"))
 
 (flycheck-def-option-var flycheck-clang-pedantic-errors nil c/c++-clang
   "Whether to throw error on language exceptions in Clang.
@@ -5037,7 +5037,7 @@ When non-nil, disable non-ISO extensions to C/C++ via
 `-pedantic-errors'."
   :type 'boolean
   :safe #'booleanp
-  :package-version '(flycheck . "0.22"))
+  :package-version '(flycheck . "0.23"))
 
 (flycheck-def-option-var flycheck-clang-ms-extensions nil c/c++-clang
   "Whether to enable Microsoft extensions to C/C++ in Clang.
@@ -5218,7 +5218,7 @@ When non-nil, disable non-ISO extensions to C/C++ via
 `-pedantic'."
   :type 'boolean
   :safe #'booleanp
-  :package-version '(flycheck . "0.22"))
+  :package-version '(flycheck . "0.23"))
 
 (flycheck-def-option-var flycheck-gcc-pedantic-errors nil c/c++-clang
   "Whether to throw error language exceptions in GCC.
@@ -5228,7 +5228,7 @@ When non-nil, disable non-ISO extensions to C/C++ via
 `-pedantic-errors'."
   :type 'boolean
   :safe #'booleanp
-  :package-version '(flycheck . "0.22"))
+  :package-version '(flycheck . "0.23"))
 
 (flycheck-def-option-var flycheck-gcc-no-exceptions nil c/c++-gcc
   "Whether to disable exceptions in GCC.
