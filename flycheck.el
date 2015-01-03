@@ -5339,6 +5339,10 @@ See URL `http://cfengine.com/'."
   "A Chef cookbooks syntax checker using Foodcritic.
 
 See URL `http://acrmp.github.io/foodcritic/'."
+  ;; Use `source-inplace' to allow resource discovery with relative paths.
+  ;; foodcritic interprets these as relative to the source file, so we need to
+  ;; stay within the source tree.  See
+  ;; https://github.com/flycheck/flycheck/pull/556
   :command ("foodcritic" source-inplace)
   :error-patterns
   ((error line-start (message) ": " (file-name) ":" line line-end))
