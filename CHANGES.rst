@@ -3,6 +3,10 @@
 master (in development)
 -----------------------
 
+- Improvements:
+
+  - `chef-foodcritic` handles relative paths correctly now [GH-556]
+
 0.22 (Dec 23, 2014)
 -------------------
 

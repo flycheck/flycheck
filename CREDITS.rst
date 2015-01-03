@@ -40,6 +40,7 @@ to Flycheck:
 - `Omair Majid <https://github.com/omajid>`_ (syntax checker for RPM spec)
 - `Per Nordlöw <https://github.com/nordlow>`_ (syntax checkers for Ada, Fortran
   and Python, syntax checker name in error list)
+- `Peter Eisentraut <https://github.com/petere>`_ (improvements to foodcritic)
 - `Peter Vasil <https://github.com/ptrv>`_ (Lua and Go build/test syntax
   checkers)
 - `Robert Zaremba <https://github.com/robert-zaremba>`_ (gofmt syntax checker)
