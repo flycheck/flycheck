@@ -1897,6 +1897,10 @@ You can also always check the current buffer manually:
 
 @format
 Check syntax in the current buffer.
+
+The syntax checker used for the syntax check is cached in
+@code{`flycheck-last-checker'} and re-used for the next check, if
+possible.
 @end format
 @end deffn
 
@@ -7952,6 +7956,17 @@ Improvements:
 
 @item 
 @code{chef-foodcritic} handles relative paths correctly now [GH-556]@footnote{https://github.com/flycheck/flycheck/issues/556}
+@end itemize
+
+@item 
+Bug fixes:
+
+
+@itemize -
+
+@item 
+Cache last used syntax checker only when actually checking the buffer
+[GH-559]@footnote{https://github.com/flycheck/flycheck/issues/559}
 @end itemize
 @end itemize
 
