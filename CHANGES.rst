@@ -7,6 +7,11 @@ master (in development)
 
   - `chef-foodcritic` handles relative paths correctly now [GH-556]
 
+- Bug fixes:
+
+  - Cache last used syntax checker only when actually checking the buffer
+    [GH-559]
+
 0.22 (Dec 23, 2014)
 -------------------
 

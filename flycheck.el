@@ -2023,8 +2023,7 @@ Return the checker if there is any, or nil otherwise."
   (let ((checkers flycheck-checkers))
     (while (and checkers (not (flycheck-may-use-checker (car checkers))))
       (setq checkers (cdr checkers)))
-    (when checkers
-      (setq flycheck-last-checker (car checkers)))))
+    (car checkers)))
 
 (defun flycheck-get-checker-for-buffer ()
   "Find the checker for the current buffer.
@@ -2137,6 +2136,9 @@ Set `flycheck-current-syntax-check' accordingly."
             (let* ((checker (flycheck-get-checker-for-buffer)))
               (if checker
                   (progn
+                    ;; Remember the last syntax checker to speed up checker
+                    ;; selection
+                    (setq flycheck-last-checker checker)
                     (flycheck-start-current-syntax-check checker)
                     (flycheck-report-status 'running))
                 (flycheck-clear)
