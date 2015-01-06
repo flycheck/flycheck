@@ -11,6 +11,8 @@ master (in development)
 
   - Cache last used syntax checker only when actually checking the buffer
     [GH-559]
+  - Fix void variable error when trying to use `flycheck-compile` with a
+    non-command checker [GH-563]
 
 0.22 (Dec 23, 2014)
 -------------------

@@ -3939,8 +3939,9 @@ The executable variable is named `flycheck-CHECKER-executable'."
 The executable is either the value of the variable
 `flycheck-CHECKER-executable', or the default executable given in
 the syntax checker definition, if the variable is nil."
-  (or (symbol-value (flycheck-checker-executable-variable checker))
-      (flycheck-checker-default-executable checker)))
+  (let ((var (flycheck-checker-executable-variable checker)))
+    (or (and (boundp var) (symbol-value var))
+        (flycheck-checker-default-executable checker))))
 
 (defun flycheck-checker-arguments (checker)
   "Get the command arguments of CHECKER."
@@ -4614,7 +4615,7 @@ tool, just like `compile' (\\[compile])."
   (unless (flycheck-may-use-checker checker)
     (user-error "Cannot use syntax checker %S in this buffer" checker))
   (unless (flycheck-checker-executable checker)
-    (user-error "Cannot run checker %S in compilation buffer" checker))
+    (user-error "Cannot run checker %S as shell command" checker))
   (let* ((command (flycheck-checker-shell-command checker))
          (buffer (compilation-start command nil #'flycheck-compile-name)))
     (with-current-buffer buffer
