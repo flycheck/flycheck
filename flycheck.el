@@ -2094,7 +2094,6 @@ Set `flycheck-current-syntax-check' accordingly."
   ;; Allocate the current syntax check *before* starting it.  This allows for
   ;; synchronous checks, which call the status callback immediately in there
   ;; start function.
-
   (let* ((check (flycheck-syntax-check-new :buffer (current-buffer)
                                            :checker checker
                                            :context nil))
