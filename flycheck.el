@@ -2074,7 +2074,10 @@ CHECKER will be used, even if it is not contained in
   (when (not (eq checker flycheck-checker))
     (unless (or (not checker) (flycheck-may-use-checker checker))
       (user-error "Can't use syntax checker %S in this buffer" checker))
-    (setq flycheck-checker checker)
+    (setq flycheck-checker checker
+          ;; Clear cached checker to make sure that automatic selection restarts
+          ;; if necessary
+          flycheck-last-checker nil)
     (when flycheck-mode
       (flycheck-buffer))))
 
