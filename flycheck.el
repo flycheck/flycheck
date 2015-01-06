@@ -1207,16 +1207,24 @@ FILE-NAME is nil, return `default-directory'."
 (defvar read-flycheck-checker-history nil
   "`completing-read' history of `read-flycheck-checker'.")
 
-(defun read-flycheck-checker (prompt &optional default)
+(defun read-flycheck-checker (prompt &optional default property)
   "Read a flycheck checker from minibuffer with PROMPT and DEFAULT.
 
-Return the checker as symbol, or default, if no checker was
+PROMPT is a string to show in the minibuffer as prompt.  It
+should end with a single space.  DEFAULT is a symbol denoting the
+default checker to use, if the user did not select any checker.
+PROPERTY is a symbol denoting a syntax checker property.  If
+non-nil, only complete syntax checkers which have a non-nil value
+for PROPERTY.
+
+Return the checker as symbol, or DEFAULT if no checker was
 chosen.  If DEFAULT is nil and no checker was chosen, signal a
-`user-error', if the underlying completion system does not
-provide a default on its own."
+`user-error' if the underlying completion system does not provide
+a default on its own."
   (when (and default (not (flycheck-valid-checker-p default)))
     (error "%S is no valid Flycheck checker" default))
-  (let* ((candidates (mapcar #'symbol-name (flycheck-defined-checkers)))
+  (let* ((candidates (mapcar #'symbol-name
+                             (flycheck-defined-checkers property)))
          (default (and default (symbol-name default)))
          (input (pcase flycheck-completion-system
                   (`ido (ido-completing-read prompt candidates nil
@@ -1243,14 +1251,18 @@ https://github.com/d11wtq/grizzl")))
 
 
 ;;; Checker API
-(defun flycheck-defined-checkers ()
-  "Find all defined syntax checkers.
+(defun flycheck-defined-checkers (&optional property)
+  "Find all defined syntax checkers, optionally with PROPERTY.
+
+PROPERTY is a symbol.  If given, only return syntax checkers with
+a non-nil value for PROPERTY.
 
 The returned list is sorted alphapetically by the symbol name of
 the syntax checkers."
   (let (defined-checkers)
     (mapatoms (lambda (symbol)
-                (when (flycheck-valid-checker-p symbol)
+                (when (and (flycheck-valid-checker-p symbol)
+                           (or (null property) (get symbol property)))
                   (push symbol defined-checkers))))
     (sort defined-checkers #'string<)))
 
@@ -4606,8 +4618,10 @@ Instead of highlighting errors in the buffer, this command pops
 up a separate buffer with the entire output of the syntax checker
 tool, just like `compile' (\\[compile])."
   (interactive
-   (list (read-flycheck-checker "Run syntax checker as compile command: "
-                                (or flycheck-checker flycheck-last-checker))))
+   (let ((default (or flycheck-checker flycheck-last-checker)))
+     (list (read-flycheck-checker "Run syntax checker as compile command: "
+                                  (when (get default 'flycheck-command) default)
+                                  'flycheck-command))))
   (unless (flycheck-valid-checker-p checker)
     (user-error "%S is not a valid syntax checker" checker))
   (unless (buffer-file-name)
