@@ -2016,9 +2016,6 @@ Return the checker if it may be used, or nil otherwise."
 (defun flycheck-get-new-checker-for-buffer ()
   "Find a new checker for the current buffer.
 
-If a checker is found set `flycheck-last-checker' to re-use this
-checker for the next check.
-
 Return the checker if there is any, or nil otherwise."
   (let ((checkers flycheck-checkers))
     (while (and checkers (not (flycheck-may-use-checker (car checkers))))
@@ -2122,7 +2119,11 @@ Set `flycheck-current-syntax-check' accordingly."
            syntax-check args)))
 
 (defun flycheck-buffer ()
-  "Check syntax in the current buffer."
+  "Check syntax in the current buffer.
+
+The syntax checker used for the syntax check is cached in
+`flycheck-last-checker' and re-used for the next check, if
+possible."
   (interactive)
   (flycheck-clean-deferred-check)
   (if flycheck-mode
