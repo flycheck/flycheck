@@ -1242,7 +1242,7 @@ https://github.com/d11wtq/grizzl")))
                                       default)))))
     (when (string-empty-p input)
       (unless default
-        (user-error "No syntax checker entered"))
+        (user-error "No syntax checker selected"))
       (setq input default))
     (let ((checker (intern input)))
       (unless (flycheck-valid-checker-p checker)
