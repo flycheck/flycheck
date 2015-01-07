@@ -1,0 +1,10 @@
+- name: Add key for R repository
+  apt_key: keyserver=keyserver.ubuntu.com id='E084DAB9'
+- name: Add R repository
+  apt_repository: repo='deb http://cran.rstudio.com/bin/linux/ubuntu precise/'
+                  state=present
+- name: Install R
+  apt: name={{item}} state=latest install_recommends=false
+  with_items:
+    - r-base
+    - r-base-dev

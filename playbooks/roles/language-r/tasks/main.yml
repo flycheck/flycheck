@@ -1,0 +1,5 @@
+- name: Install lintr
+  command: "R --slave --restore --no-save -e 'install.packages(\"lintr\", repos=\"{{cran_mirror}}\")'"
+  sudo: true
+  tags:
+    - cran

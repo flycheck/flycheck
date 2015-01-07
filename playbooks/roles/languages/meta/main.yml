@@ -54,6 +54,8 @@ dependencies:
     tags: language-puppet
   - role: language-python
     tags: language-python
+  - role: language-r
+    tags: language-r
   - role: language-racket
     tags: language-racket
   - role: language-rpm
