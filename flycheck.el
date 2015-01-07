@@ -6591,7 +6591,7 @@ See URL `https://docs.python.org/3.4/library/py_compile.html'."
 (flycheck-define-checker r-lintr
   "An R style and syntax checker using the lintr package.
 
-See URL `http://cran.r-project.org/web/packages/lintr/'."
+See URL `https://github.com/jimhester/lintr'."
   :command ("R" "--slave" "--restore" "--no-save" "-e"
             (eval (concat
                    "library(lintr);"
