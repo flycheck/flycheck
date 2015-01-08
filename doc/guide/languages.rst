@@ -527,6 +527,11 @@ R
 .. flyc-checker:: r-lintr
    :auto:
 
+   .. rubric:: Options
+
+   .. option:: flycheck-lintr-linters
+      :auto:
+
 Racket
 ======
 

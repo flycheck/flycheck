@@ -6588,6 +6588,15 @@ See URL `https://docs.python.org/3.4/library/py_compile.html'."
           line ", " column ", " (one-or-more not-newline) line-end))
   :modes python-mode)
 
+(flycheck-def-option-var flycheck-lintr-linters "default_linters" r-lintr
+  "Linters to use with lintr.
+
+The value of this variable is a string containing an R
+expression, which selects linters for lintr."
+  :type 'string
+  :risky t
+  :package-version '(flycheck . "0.23"))
+
 (flycheck-define-checker r-lintr
   "An R style and syntax checker using the lintr package.
 
@@ -6595,7 +6604,7 @@ See URL `https://github.com/jimhester/lintr'."
   :command ("R" "--slave" "--restore" "--no-save" "-e"
             (eval (concat
                    "library(lintr);"
-                   "try(lint(commandArgs(TRUE), default_linters))"))
+                   "try(lint(commandArgs(TRUE), " flycheck-lintr-linters "))"))
             "--args" source)
   :error-patterns
   ((info line-start (file-name) ":" line ":" column ": style: " (message)

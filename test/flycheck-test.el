@@ -4671,6 +4671,16 @@ Why not:
    '(4 6 warning "Do not use absolute paths." :checker r-lintr)
    '(7 5 error "unexpected end of input" :checker r-lintr)))
 
+(flycheck-ert-def-checker-test r-lintr r line-length
+  (let ((flycheck-lintr-linters "with_defaults(line_length_linter(40))"))
+    (flycheck-ert-should-syntax-check
+     "checkers/r-lintr.R" 'R-mode
+     '(1 1 info "lines should not be more than 40 characters." :checker r-lintr)
+     '(1 28 info "Opening curly braces should never go on their own line and should always be followed by a new line."
+         :checker r-lintr)
+     '(4 6 warning "Do not use absolute paths." :checker r-lintr)
+     '(7 5 error "unexpected end of input" :checker r-lintr))))
+
 (flycheck-ert-def-checker-test racket racket nil
   (flycheck-ert-should-syntax-check
    "checkers/racket-syntax-error.rkt" 'racket-mode
