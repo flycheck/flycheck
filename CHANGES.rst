@@ -13,6 +13,7 @@ master (in development)
     [GH-559]
   - Fix void variable error when trying to use `flycheck-compile` with a
     non-command checker [GH-563]
+  - Fix faulty mode line reporting [GH-564]
 
 0.22 (Dec 23, 2014)
 -------------------

@@ -2108,6 +2108,7 @@ Set `flycheck-current-syntax-check' accordingly."
                                            :context nil))
          (callback (flycheck-buffer-status-callback check)))
     (setq flycheck-current-syntax-check check)
+    (flycheck-report-status 'running)
     (flycheck-syntax-check-start check callback)))
 
 (defun flycheck-running-p ()
@@ -2154,8 +2155,7 @@ possible."
                     ;; Remember the last syntax checker to speed up checker
                     ;; selection
                     (setq flycheck-last-checker checker)
-                    (flycheck-start-current-syntax-check checker)
-                    (flycheck-report-status 'running))
+                    (flycheck-start-current-syntax-check checker))
                 (flycheck-clear)
                 (flycheck-report-status 'no-checker)))
           (error
