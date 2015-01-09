@@ -44,14 +44,14 @@
   (require 'package)        ; Tell Emacs about package-user-dir
   (require 'sh-script)      ; `sh-shell' for sh checker predicates
   (require 'jka-compr)      ; For JKA workarounds in `flycheck-temp-file-system'
+  (require 'pcase)          ; `pcase-dolist' (`pcase' itself is autoloaded)
   )
 
 (require 'dash)
 
 (require 'subr-x nil 'no-error)  ; Additional utilities, Emacs 24.4 and upwards
-(require 'pcase)                 ; Pattern matching for Emacs Lisp
 (require 'tabulated-list)        ; To list errors
-(require 'easymenu)             ; Flycheck Mode menu definition
+(require 'easymenu)              ; Flycheck Mode menu definition
 (require 'rx)                    ; Regexp fanciness in `flycheck-define-checker'
 (require 'help-mode)             ; `define-button-type'
 (require 'find-func)             ; `find-function-regexp-alist'
