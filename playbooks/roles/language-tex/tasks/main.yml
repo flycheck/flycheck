@@ -1,0 +1,6 @@
+- name: Install chktex and lacheck
+  apt: name={{item}} state=latest install_recommends=false
+  with_items:
+    - chktex
+    - lacheck
+  sudo: true

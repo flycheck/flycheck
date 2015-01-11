@@ -1,0 +1,9 @@
+- name: Add LLVM repo key
+  apt_key: url='http://llvm.org/apt/llvm-snapshot.gpg.key' state=present
+- name: Add LLVM repository
+  apt_repository: repo='deb http://llvm.org/apt/precise/ llvm-toolchain-precise-{{clang_version}} main'
+                  state=present
+- name: Install Clang
+  apt: name=clang-{{clang_version}} state=latest install_recommends=false
+- name: Set default clang
+  alternatives: name=clang link=/usr/bin/clang path=/usr/bin/clang-{{clang_version}}

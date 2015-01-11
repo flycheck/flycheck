@@ -1,0 +1,3 @@
+- name: Install HTML Tidy
+  apt: name=tidy state=latest install_recommends=false
+  sudo: true

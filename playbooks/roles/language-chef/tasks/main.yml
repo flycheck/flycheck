@@ -1,0 +1,5 @@
+- name: Install foodcritic
+  gem: name=foodcritic user_install=no state=latest
+       executable={{ruby_gem_executable}}
+  tags:
+    - gem

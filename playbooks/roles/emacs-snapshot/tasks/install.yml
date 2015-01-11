@@ -1,0 +1,6 @@
+- name: Add PPA for Emacs snapshot
+  apt_repository: repo='ppa:ubuntu-elisp/ppa' state=present
+- name: Install Emacs snapshot
+  apt: name=emacs-snapshot-nox state=latest install_recommends=false force=yes
+- name: Use Emacs snapshot as default Emacs
+  alternatives: name=emacs link=/usr/bin/emacs path=/usr/bin/emacs-snapshot

@@ -1,0 +1,4 @@
+- name: Add nodejs repo
+  apt_repository: repo='ppa:chris-lea/node.js' state=present
+- name: Install nodejs
+  apt: name='nodejs' state=latest install_recommends=false

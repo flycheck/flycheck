@@ -1,0 +1,5 @@
+- name: Install python-rpm
+  apt: name='python-rpm' state=latest install_recommends=false
+  sudo: true
+- include: rpmlint.yml
+  sudo: true

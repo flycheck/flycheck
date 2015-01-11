@@ -1,0 +1,6 @@
+- name: Install Python 2.7
+  apt: name='python2.7' state=latest install_recommends=false
+- name: Install pip
+  apt: name='python-pip' state=latest install_recommends=false
+  tags:
+    - pip

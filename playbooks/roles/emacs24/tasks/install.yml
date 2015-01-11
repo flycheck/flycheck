@@ -1,0 +1,4 @@
+- name: Add PPA for Emacs stable
+  apt_repository: repo='ppa:cassou/emacs' state=present
+- name: Install Emacs stable
+  apt: name=emacs24-nox state=latest install_recommends=false force=yes

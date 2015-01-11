@@ -1,0 +1,6 @@
+- name: Install XML tools
+  apt: name={{item}} state=latest install_recommends=false
+  with_items:
+    - libxml2-utils             # For xmllint
+    - xmlstarlet
+  sudo: true

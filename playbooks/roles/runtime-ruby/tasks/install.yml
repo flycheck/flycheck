@@ -1,0 +1,7 @@
+- name: Install Ruby 1.9
+  apt: name={{item}} state=latest install_recommends=false
+  with_items:
+    - ruby1.9.1
+    - ruby1.9.1-dev
+- name: Set gem executable fact
+  set_fact: ruby_gem_executable='gem1.9.1'

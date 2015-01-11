@@ -1,0 +1,4 @@
+---
+dependencies:
+  - {role: runtime-go}
+  - {role: base-vcs}

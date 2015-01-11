@@ -1,0 +1,8 @@
+- name: Add Erlang repository key
+  apt_key: url='http://packages.erlang-solutions.com/debian/erlang_solutions.asc'
+           state=present
+- name: Add Erlang repository
+  apt_repository: repo='deb http://packages.erlang-solutions.com/debian precise contrib'
+                  state=present
+- name: Install Erlang
+  apt: name=erlang state=latest install_recommends=false

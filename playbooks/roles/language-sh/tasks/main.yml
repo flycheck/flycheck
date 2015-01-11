@@ -1,0 +1,6 @@
+- name: Install Zsh and Dash
+  apt: name={{item}} state=latest install_recommends=false
+  with_items:
+    - dash
+    - zsh
+  sudo: true

@@ -1,0 +1,7 @@
+- name: Add Haskell PPA
+  apt_repository: repo='ppa:hvr/ghc' state=present
+- name: Install GHC
+  apt: name='ghc-{{ghc_version}}' state=latest install_recommends=false
+- name: Put Haskell into $PATH
+  copy: dest=/etc/profile.d/ghc.sh mode=0644 owner=root group=root
+        content="export PATH=/opt/ghc/{{ghc_version}}/bin:$PATH\n"

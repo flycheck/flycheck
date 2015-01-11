@@ -1,0 +1,3 @@
+- name: Install cppcheck
+  apt: name=cppcheck state=latest install_recommends=false
+  sudo: true

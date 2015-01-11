@@ -1,0 +1,7 @@
+- include: install.yml
+  when: not ruby_preinstalled
+  sudo: true
+- include: jruby.yml
+  sudo: true
+  tags:
+    - java

@@ -1,0 +1,5 @@
+- name: Install Erubis
+  gem: name=erubis user_install=no state=latest
+       gem_executable={{gem_executable|default{'gem')}}}
+  tags:
+    - gem

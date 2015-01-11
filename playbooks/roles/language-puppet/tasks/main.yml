@@ -1,0 +1,8 @@
+- name: Install Puppet and Puppetlint
+  gem: name={{item}} user_install=no state=latest
+       executable={{ruby_gem_executable}}
+  with_items:
+    - puppet
+    - puppet-lint
+  tags:
+    - gem

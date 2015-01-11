@@ -1,0 +1,4 @@
+- include: install.yml
+  sudo: true
+  tags:
+    - java
