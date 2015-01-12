@@ -9,7 +9,8 @@ before_install:
   - sudo apt-get update -y -q
   - sudo apt-get install -y ansible
   - ansible-playbook -i playbooks/travis_inventory -v playbooks/site.yml
-  - export PATH="/opt/ghc/7.8.3/bin:${GOPATH}/bin:${HOME}/.local/bin:${HOME}/.cabal/bin:$PATH"
+  - source /etc/profile
+  - export PATH="${GOPATH}/bin:${HOME}/.local/bin:${HOME}/.cabal/bin:$PATH"
 install:
   # Install our packages
   - make EMACS=$EMACS deps
