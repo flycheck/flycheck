@@ -1,3 +1,4 @@
 ---
 dependencies:
-  - { role: runtime-r }
+  - role: runtime-r
+    tags: cran
