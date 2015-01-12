@@ -4,3 +4,9 @@
     - dash
     - zsh
   sudo: true
+- name: Install ShellCheck
+  command: 'cabal install --global ShellCheck'
+  sudo: true
+  ignore_errors: true
+  tags:
+    - cabal
