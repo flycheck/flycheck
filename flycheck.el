@@ -5335,6 +5335,20 @@ See URL `http://cfengine.com/'."
           ": error: " (message) line-end))
   :modes (cfengine-mode cfengine3-mode))
 
+(flycheck-def-option-var flycheck-foodcritic-tags nil chef-foodcritic
+  "A list of tags to check against or exclude (`~').
+
+The value of this variable is a list of strings where each string
+is a tag expression describing Foodcritic rules to enable or
+disable (prefixed by `~').  The strings are passed to
+`foodcritic' via the `--tags' option.
+
+Refer to the Foodcritic documentation at URL
+`https://acrmp.github.io/foodcritic/' for more information."
+  :type '(repeat :tag "Tags" (string :tag "Tag expression"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.23"))
+
 (flycheck-define-checker chef-foodcritic
   "A Chef cookbooks syntax checker using Foodcritic.
 
@@ -5343,7 +5357,9 @@ See URL `http://acrmp.github.io/foodcritic/'."
   ;; foodcritic interprets these as relative to the source file, so we need to
   ;; stay within the source tree.  See
   ;; https://github.com/flycheck/flycheck/pull/556
-  :command ("foodcritic" source-inplace)
+  :command ("foodcritic"
+            (option-list "--tags" flycheck-foodcritic-tags)
+            source-inplace)
   :error-patterns
   ((error line-start (message) ": " (file-name) ":" line line-end))
   :modes (enh-ruby-mode ruby-mode)

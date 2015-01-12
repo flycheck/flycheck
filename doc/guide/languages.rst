@@ -166,6 +166,9 @@ Chef
 .. flyc-checker:: chef-foodcritic
    :auto:
 
+   .. option:: flycheck-foodcritic-tags
+      :auto:
+
 .. _Chef: https://www.getchef.com/chef/
 
 Coffeescript
