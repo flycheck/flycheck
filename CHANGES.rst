@@ -3,6 +3,10 @@
 master (in development)
 -----------------------
 
+- New syntax checkers:
+
+  - R with `lintr` [GH-512]
+
 - Improvements:
 
   - `chef-foodcritic` handles relative paths correctly now [GH-556]
