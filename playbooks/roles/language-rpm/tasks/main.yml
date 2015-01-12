@@ -3,3 +3,4 @@
   sudo: true
 - include: rpmlint.yml
   sudo: true
+  ignore_errors: true
