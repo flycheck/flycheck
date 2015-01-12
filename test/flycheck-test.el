@@ -4660,6 +4660,35 @@ Why not:
     (flycheck-ert-should-syntax-check
      "checkers/python/test.py" 'python-mode)))
 
+(ert-deftest flycheck-define-checker/r-lint ()
+  :tags '(builtin-checker external-tool language-R)
+  (skip-unless (flycheck-check-executable 'R))
+  (flycheck-test-should-syntax-check
+   "checkers/r-lint-info.R" 'R-mode
+   '(1 nil info "needs space around `=`" :checker r-lint)))
+
+(ert-deftest flycheck-define-checker/r-lintr ()
+  :tags '(builtin-checker external-tool language-R)
+  (skip-unless (flycheck-check-executable 'R))
+  (flycheck-test-should-syntax-check
+   "checkers/r-lintr.R" 'R-mode
+   '(1 28 info "Opening curly braces should never go on their own line and should always be followed by a new line."
+       :checker r-lintr)
+   '(4 6 warning "Do not use absolute paths." :checker r-lintr)
+   '(7 5 error "unexpected end of input" :checker r-lintr)))
+
+(ert-deftest flycheck-define-checker/r-svtools ()
+  :tags '(builtin-checker external-tool language-R)
+  (skip-unless (flycheck-check-executable 'R))
+  (flycheck-test-should-syntax-check
+   "checkers/r-svtools-warning.R" 'R-mode
+   '(2 1 warning "local variable ‘inverse’ assigned but may not be used"
+       :checker r-svtools))
+  (flycheck-test-should-syntax-check
+   "checkers/r-svtools-error.R" 'R-mode
+   '(1 1 warning "unexpected ')'"
+       :checker r-svtools)))
+
 (flycheck-ert-def-checker-test racket racket nil
   (flycheck-ert-should-syntax-check
    "checkers/racket-syntax-error.rkt" 'racket-mode

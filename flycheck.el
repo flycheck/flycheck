@@ -220,6 +220,9 @@ attention to case differences."
     python-flake8
     python-pylint
     python-pycompile
+    r-lint
+    r-lintr
+    r-svtools
     racket
     rpm-rpmlint
     rst
@@ -6586,6 +6589,56 @@ See URL `https://docs.python.org/3.4/library/py_compile.html'."
           "', ('" (file-name (one-or-more (not (any "'")))) "', "
           line ", " column ", " (one-or-more not-newline) line-end))
   :modes python-mode)
+
+(flycheck-define-checker r-lint
+  "An R style checker using the lint package.
+
+See URL `http://cran.r-project.org/web/packages/lint/'."
+  :command ("R" "--slave" "--restore" "--no-save" "-e"
+            (eval (concat
+                   "library(lint);"
+                   "try(lint(commandArgs(TRUE), lint.style))"))
+            "--args" source)
+  :error-patterns
+  ((info line-start "Lint: " (minimal-match (message))
+         ": found on lines " line (optional (one-or-more ", " line))
+         line-end))
+  :modes ess-mode
+  :next-checkers (r-lintr))
+
+(flycheck-define-checker r-lintr
+  "An R style and syntax checker using the lintr package.
+
+See URL `http://cran.r-project.org/web/packages/lintr/'."
+  :command ("R" "--slave" "--restore" "--no-save" "-e"
+            (eval (concat
+                   "library(lintr);"
+                   "try(lint(commandArgs(TRUE), default_linters))"))
+            "--args" source)
+  :error-patterns
+  ((info line-start (file-name) ":" line ":" column ": style: " (message)
+         line-end)
+   (warning line-start (file-name) ":" line ":" column ": warning: " (message)
+            line-end)
+   (error line-start (file-name) ":" line ":" column ": error: " (message)
+          line-end))
+  :modes ess-mode
+  :next-checkers ((warning . r-svtools)))
+
+(flycheck-define-checker r-svtools
+  "An R syntax checker using the svTools package.
+
+See URL `http://cran.r-project.org/web/packages/svTools/'."
+  :command ("R" "--slave" "--restore" "--no-save" "-e"
+            (eval (concat
+                   "library(svTools);"
+                   "try(lint(commandArgs(TRUE), "
+                   "type = \"flat\", sep = \":\"))"))
+            "--args" source)
+  :error-patterns
+  ((warning "warning:" line ":" column ":" (message) line-end)
+   (error "error:" line ":" column ":" (message) line-end))
+  :modes ess-mode)
 
 (flycheck-define-checker racket
   "A Racket syntax checker using the Racket compiler.
