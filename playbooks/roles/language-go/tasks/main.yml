@@ -1,7 +1,7 @@
 - name: Install Go Packages
   command: "{{go_executable}} get -u '{{item}}'"
   with_items:
-    - code.google.com/p/go.tools/cmd/vet # go-vet
+    - golang.org/x/tools/cmd/vet         # go-vet
     - github.com/golang/lint/golint      # go-golint
     - github.com/kisielk/errcheck        # go-errcheck
   environment: go_env
