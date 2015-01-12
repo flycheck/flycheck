@@ -6588,6 +6588,16 @@ See URL `https://docs.python.org/3.4/library/py_compile.html'."
           line ", " column ", " (one-or-more not-newline) line-end))
   :modes python-mode)
 
+(flycheck-def-option-var flycheck-lintr-caching t r-lintr
+  "Whether to enable caching in lintr.
+
+By default, lintr caches all expressions in a file and re-checks
+only those that have changed.  Setting this option to nil
+disables caching in case there are problems."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.23"))
+
 (flycheck-def-option-var flycheck-lintr-linters "default_linters" r-lintr
   "Linters to use with lintr.
 
@@ -6604,7 +6614,10 @@ See URL `https://github.com/jimhester/lintr'."
   :command ("R" "--slave" "--restore" "--no-save" "-e"
             (eval (concat
                    "library(lintr);"
-                   "try(lint(commandArgs(TRUE), " flycheck-lintr-linters "))"))
+                   "try(lint(commandArgs(TRUE)"
+                   ", cache=" (if flycheck-lintr-caching "TRUE" "FALSE")
+                   ", " flycheck-lintr-linters
+                   "))"))
             "--args" source)
   :error-patterns
   ((info line-start (file-name) ":" line ":" column ": style: " (message)

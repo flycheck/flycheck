@@ -529,6 +529,9 @@ R
 
    .. rubric:: Options
 
+   .. option:: flycheck-lintr-caching
+      :auto:
+
    .. option:: flycheck-lintr-linters
       :auto:
 
