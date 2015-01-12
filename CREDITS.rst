@@ -12,8 +12,8 @@ to Flycheck:
   RuboCop syntax checker, improvements to Ruby)
 - `capdevc <https://github.com/capdevc>`_ (enabled warnings in Rust)
 - `Damon Haley <https://github.com/dhaley>`_ (PHPCS syntax checker)
-- `David Holm <https://github.com/dholm>`_ (Clang, Cppcheck and Verilator syntax
-  checkers)
+- `David Holm <https://github.com/dholm>`_ (Clang, Cppcheck, lintr and Verilator
+  syntax checkers)
 - `Doug MacEachern <https://github.com/dougm>`_ (Go errcheck syntax checker)
 - `Fanael Linithien <https://github.com/Fanael>`_ (GCC syntax checker, exception
   support for C/C++, inconclusive checks for cppcheck, literate Haskell
@@ -21,6 +21,7 @@ to Flycheck:
 - `Gereon Frey <https://github.com/gfrey>`_ (fixes to temporary file handling in
   Go and to the Go tests)
 - `Gulshan Singh <https://github.com/gsingh93>`_ (customizable Rust crate type)
+- `Jim Hester <https://github.com/jimhester>`_ (lintr syntax checker)
 - `Jimmy Yuen Ho Wong <https://github.com/wyuenho>`_ (HTML tidy and JSHint
   syntax checkers, bug fixes to faces)
 - `Krzysztof Witkowski <https://github.com/kwitek>`_ (`eval` support)

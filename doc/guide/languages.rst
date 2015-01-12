@@ -521,6 +521,20 @@ Python
 
 .. _flycheck-pyflakes: https://github.com/Wilfred/flycheck-pyflakes
 
+R
+=
+
+.. flyc-checker:: r-lintr
+   :auto:
+
+   .. rubric:: Options
+
+   .. option:: flycheck-lintr-caching
+      :auto:
+
+   .. option:: flycheck-lintr-linters
+      :auto:
+
 Racket
 ======
 

@@ -220,6 +220,7 @@ attention to case differences."
     python-flake8
     python-pylint
     python-pycompile
+    r-lintr
     racket
     rpm-rpmlint
     rst
@@ -6586,6 +6587,46 @@ See URL `https://docs.python.org/3.4/library/py_compile.html'."
           "', ('" (file-name (one-or-more (not (any "'")))) "', "
           line ", " column ", " (one-or-more not-newline) line-end))
   :modes python-mode)
+
+(flycheck-def-option-var flycheck-lintr-caching t r-lintr
+  "Whether to enable caching in lintr.
+
+By default, lintr caches all expressions in a file and re-checks
+only those that have changed.  Setting this option to nil
+disables caching in case there are problems."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.23"))
+
+(flycheck-def-option-var flycheck-lintr-linters "default_linters" r-lintr
+  "Linters to use with lintr.
+
+The value of this variable is a string containing an R
+expression, which selects linters for lintr."
+  :type 'string
+  :risky t
+  :package-version '(flycheck . "0.23"))
+
+(flycheck-define-checker r-lintr
+  "An R style and syntax checker using the lintr package.
+
+See URL `https://github.com/jimhester/lintr'."
+  :command ("R" "--slave" "--restore" "--no-save" "-e"
+            (eval (concat
+                   "library(lintr);"
+                   "try(lint(commandArgs(TRUE)"
+                   ", cache=" (if flycheck-lintr-caching "TRUE" "FALSE")
+                   ", " flycheck-lintr-linters
+                   "))"))
+            "--args" source)
+  :error-patterns
+  ((info line-start (file-name) ":" line ":" column ": style: " (message)
+         line-end)
+   (warning line-start (file-name) ":" line ":" column ": warning: " (message)
+            line-end)
+   (error line-start (file-name) ":" line ":" column ": error: " (message)
+          line-end))
+  :modes ess-mode)
 
 (flycheck-define-checker racket
   "A Racket syntax checker using the Racket compiler.
