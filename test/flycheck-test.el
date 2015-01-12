@@ -4145,7 +4145,7 @@ The term \"1\" has type \"nat\" while it is expected to have type
 
 (flycheck-ert-def-checker-test go-build go missing-package
   (let* ((go-root (or (getenv "GOROOT") "/usr/local/go"))
-         (go-root-pkg (concat go-root "/src/pkg")))
+         (go-root-pkg (concat go-root "/src")))
     (flycheck-ert-with-env '(("GOPATH" . nil))
       (flycheck-ert-should-syntax-check
        "checkers/go/src/b1/main.go" 'go-mode
