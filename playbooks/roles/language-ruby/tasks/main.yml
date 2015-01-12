@@ -1,0 +1,8 @@
+- name: Install Ruby linters
+  gem: name={{item}} user_install=no state=latest
+       executable={{ruby_gem_executable}}
+  with_items:
+    - rubocop
+    - ruby-lint
+  tags:
+    - gem

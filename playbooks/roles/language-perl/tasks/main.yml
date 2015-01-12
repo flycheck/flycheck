@@ -1,0 +1,5 @@
+- name: Install Perl::Critic
+  cpanm: name='Perl::Critic' notest=true mirror={{perl_cpan_mirror}}
+  sudo: true
+  tags:
+    - cpan

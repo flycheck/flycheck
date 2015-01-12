@@ -1,0 +1,4 @@
+---
+dependencies:
+  - { role: base }
+  - { role: runtime-gcc, gcc_version: '4.8' }

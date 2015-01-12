@@ -1,0 +1,6 @@
+- name: Install Perl and cpanminus
+  apt: name={{item}} state=latest install_recommends=false
+  with_items:
+    - perl
+    - cpanminus
+  sudo: true

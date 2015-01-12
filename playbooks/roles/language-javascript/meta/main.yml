@@ -1,0 +1,4 @@
+---
+dependencies:
+  - { role: runtime-python }
+  - { role: runtime-nodejs }

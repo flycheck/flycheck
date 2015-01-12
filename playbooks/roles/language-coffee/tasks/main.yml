@@ -1,0 +1,7 @@
+- name: Install Coffee and Coffeelint
+  npm: name={{item}} global=yes state=latest
+  with_items:
+    - coffee-script
+    - coffeelint
+  tags:
+    - npm

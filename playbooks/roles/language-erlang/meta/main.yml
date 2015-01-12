@@ -1,0 +1,3 @@
+---
+dependencies:
+  - { role: runtime-erlang }

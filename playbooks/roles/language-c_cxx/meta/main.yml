@@ -1,0 +1,4 @@
+---
+dependencies:
+  - { role: runtime-gcc, version: 4.8 }
+  - { role: runtime-clang, version: 3.4 }

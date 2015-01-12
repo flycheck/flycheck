@@ -1,0 +1,17 @@
+- name: Discover channels
+  pearchannel: name='{{item}}'
+  with_items:
+    - pear.phpmd.org
+    - pear.pdepend.org
+  sudo: true
+  tags:
+    - pear
+- name: Install PEAR packages
+  command: pear install '{{item}}'
+  with_items:
+    - PHP_CodeSniffer
+    - phpmd/PHP_PMD
+  ignore_errors: True
+  sudo: true
+  tags:
+    - pear

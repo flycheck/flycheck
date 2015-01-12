@@ -1,0 +1,4 @@
+- name: Install JRE
+  apt: name='openjdk-7-jre' state=latest install_recommends=false
+  sudo: true
+  when: not java_preinstalled

@@ -1,0 +1,3 @@
+- name: Install gnat
+  apt: name=gnat state=latest install_recommends=false
+  sudo: true

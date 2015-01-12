@@ -1,5 +1,5 @@
 // A help message from rustc
 
-fn test() -> int {
-    32i;
+fn test() -> i64 {
+    32_i64;
 }

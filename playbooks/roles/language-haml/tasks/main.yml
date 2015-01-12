@@ -1,0 +1,5 @@
+- name: Install Haml
+  gem: name=haml user_install=no state=latest
+       executable={{ruby_gem_executable}}
+  tags:
+    - gem

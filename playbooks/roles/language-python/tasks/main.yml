@@ -1,0 +1,8 @@
+- name: Install Python linters
+  pip: name={{item}} extra_args={{python_pip_extra_args}} state=latest
+  with_items:
+    - flake8
+    - pep8-naming
+    - pylint
+  tags:
+    - pip

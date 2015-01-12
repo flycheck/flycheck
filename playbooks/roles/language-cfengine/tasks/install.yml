@@ -1,0 +1,8 @@
+- name: Add CFEngine repository key
+  apt_key: url='https://s3.amazonaws.com/cfengine.package-repos/pub/gpg.key'
+           state=present
+- name: Add CFEngine repository
+  apt_repository: repo='deb http://cfengine.com/pub/apt/packages stable main'
+                  state=present
+- name: Install CFEngine
+  apt: name=cfengine-community state=latest install_recommends=false

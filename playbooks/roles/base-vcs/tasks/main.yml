@@ -1,0 +1,6 @@
+- name: Install VCS tools
+  apt: name={{item}} state=latest install_recommends=false
+  sudo: true
+  with_items:
+    - git-core
+    - mercurial

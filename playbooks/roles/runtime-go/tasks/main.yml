@@ -1,0 +1,3 @@
+- include: install.yml
+  when: not go_preinstalled
+  sudo: true

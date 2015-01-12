@@ -1,0 +1,9 @@
+- name: Download Scala
+  get_url: url=http://downloads.typesafe.com/scala/{{scala_version}}/scala-{{scala_version}}.tgz
+           dest=/usr/src/scala-{{scala_version}}.tar.gz
+- name: Extract Scala
+  unarchive: src=/usr/src/scala-{{scala_version}}.tar.gz copy=no dest=/opt/
+             creates=/opt/scala-{{scala_version}}/bin/scalac
+- name: Link Scala into PATH
+  file: src=/opt/scala-{{scala_version}}/bin/scalac dest=/usr/local/bin/scalac
+        state=link

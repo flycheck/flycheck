@@ -1,0 +1,4 @@
+- name: Configure locale
+  copy: dest='/etc/default/locale' mode=0644 owner=root group=root
+        content='LC_ALL=en_US.utf8\nLANG=en_US.utf8\n'
+  sudo: true

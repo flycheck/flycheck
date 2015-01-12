@@ -1,0 +1,6 @@
+- name: Install make tools
+  apt: name={{item}} state=latest install_recommends=false
+  with_items:
+    - make
+    - pmake
+  sudo: true

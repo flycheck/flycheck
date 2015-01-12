@@ -1,0 +1,8 @@
+- name: Add PHP PPA
+  apt_repository: repo='ppa:ondrej/php5' state=present
+- name: Install PHP5
+  apt: name='php5-cli' state=latest install_recommends=false
+- name: Install Pear
+  apt: name='php-pear' state=latest install_recommends=false
+  tags:
+    - pear

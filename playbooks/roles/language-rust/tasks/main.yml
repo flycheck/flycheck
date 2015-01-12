@@ -1,0 +1,6 @@
+- name: Add Rust repository
+  apt_repository: repo='ppa:hansjorg/rust' state=present
+  sudo: true
+- name: Install Rust
+  apt: name='rust-nightly' state=latest install_recommends=false
+  sudo: true

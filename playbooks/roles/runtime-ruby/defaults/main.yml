@@ -1,0 +1,4 @@
+---
+ruby_preinstalled: false
+ruby_gem_executable: 'gem'
+jruby_version: '1.7.13'

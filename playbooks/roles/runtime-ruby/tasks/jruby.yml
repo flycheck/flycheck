@@ -1,0 +1,9 @@
+- name: Download JRuby
+  get_url: url=http://jruby.org.s3.amazonaws.com/downloads/{{jruby_version}}/jruby-bin-{{jruby_version}}.tar.gz
+           dest=/usr/src/jruby-{{jruby_version}}.tar.gz
+- name: Extract JRuby
+  unarchive: src=/usr/src/jruby-{{jruby_version}}.tar.gz copy=no dest=/opt/
+             creates=/opt/jruby-{{jruby_version}}/bin/jruby
+- name: Link JRuby into PATH
+  file: src=/opt/jruby-{{jruby_version}}/bin/jruby dest=/usr/local/bin/jruby
+        state=link

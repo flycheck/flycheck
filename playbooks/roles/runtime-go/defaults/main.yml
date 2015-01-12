@@ -1,0 +1,6 @@
+---
+go_version: '1.4'
+go_executable: 'go'
+go_env:
+  GOPATH: /usr/local/lib/go
+go_preinstalled: false

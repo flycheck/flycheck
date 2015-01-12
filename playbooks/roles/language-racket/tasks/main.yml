@@ -1,0 +1,6 @@
+- name: Add Racket repository
+  apt_repository: repo='ppa:plt/racket' state=present
+  sudo: true
+- name: Install Racket
+  apt: name='racket' state=latest install_recommends=false
+  sudo: true

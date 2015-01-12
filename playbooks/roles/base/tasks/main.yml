@@ -1,0 +1,7 @@
+- name: Base packages
+  apt: name={{item}} state=latest install_recommends=false force=yes
+  with_items:
+    - build-essential
+    - unzip
+    - python-apt
+  sudo: true

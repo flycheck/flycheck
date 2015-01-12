@@ -1,0 +1,3 @@
+- name: Install Coq
+  apt: name=coq state=latest install_recommends=false
+  sudo: true

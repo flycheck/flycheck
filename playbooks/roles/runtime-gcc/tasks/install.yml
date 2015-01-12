@@ -1,0 +1,10 @@
+- name: Add Ubuntu toolchain repo
+  apt_repository: repo='ppa:ubuntu-toolchain-r/test' state=present
+- name: Install GCC
+  apt: name='g++-{{gcc_version}}' state=latest install_recommends=false
+- name: Set default GCC
+  alternatives : name={{item}} link=/usr/bin/{{item}}
+                 path=/usr/bin/{{item}}-{{gcc_version}}
+  with_items:
+    - gcc
+    - g++
