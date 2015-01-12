@@ -10,7 +10,7 @@ before_install:
   - sudo apt-get install -y ansible
   - ansible-playbook -i playbooks/travis_inventory -v playbooks/site.yml
   - source /etc/profile
-  - export PATH="${GOPATH}/bin:${HOME}/.local/bin:${HOME}/.cabal/bin:$PATH"
+  - export PATH="${GOPATH}/bin:${HOME}/.local/bin:$PATH"
 install:
   # Install our packages
   - make EMACS=$EMACS deps
