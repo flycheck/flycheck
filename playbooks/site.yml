@@ -4,10 +4,14 @@
   sudo: true
   roles:
     - base-locale
-    - {role: base-login, home: /home/vagrant/}
-    - emacs24
-    - emacs-snapshot
-    - cask
+    - role: base-login
+      home: /home/vagrant/
+    - role: emacs24
+      tags: emacs
+    - role: emacs-snapshot
+      tags: emacs
+    - role: cask
+      tags: emacs
     - languages
 
 - name: Setup testing environment on Travis CI
@@ -25,7 +29,12 @@
     # Install pip packages as user
     python_pip_extra_args: '--user'
   roles:
-    - {role: emacs24, when: "lookup('env', 'EMACS') == 'emacs24'"}
-    - {role: emacs-snapshot, when: "lookup('env', 'EMACS') == 'emacs-snapshot'"}
-    - cask
+    - role: emacs24
+      when: "lookup('env', 'EMACS') == 'emacs24'"
+      tags: emacs
+    - role: emacs-snapshot
+      when: "lookup('env', 'EMACS') == 'emacs-snapshot'"
+      tags: emacs
+    - role: cask
+      tags: emacs
     - languages
