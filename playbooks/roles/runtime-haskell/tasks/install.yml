@@ -15,3 +15,5 @@
     - hsc2hs
     - runghc
     - runhaskell
+- include: cabal.yml
+  tags: cabal
