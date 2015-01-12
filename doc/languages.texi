@@ -135,7 +135,14 @@ yield more false positives than normal checks.
 @itemize
 @item
 @flyc{chef-foodcritic} (style check with
-@uref{http://acrmp.github.io/foodcritic/,foodcritic})
+@uref{http://acrmp.github.io/foodcritic/,foodcritic}), with the
+following option:
+
+@table @asis
+@flycoption flycheck-foodcritic-tags
+A list of tags to select for Foodcritic.
+@end table
+
 @end itemize
 
 @flyclanguage{Coffeescript}
