@@ -4862,7 +4862,7 @@ Why not:
    "checkers/rust-help.rs" 'rust-mode
    '(3 1 error "not all control paths return a value"
        :checker rust)
-   '(4 8 info "consider removing this semicolon:"
+   '(4 11 info "consider removing this semicolon:"
        :checker rust)))
 
 (flycheck-ert-def-checker-test rust rust test-crate-type-bin
