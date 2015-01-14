@@ -170,7 +170,24 @@ buffer with :command:`flycheck-select-checker`:
    :noindex:
    :auto:
 
-You can change the completion system used by :command:`flycheck-select-checker`:
+You may disable specific syntax checkers to prevent them from being used in the
+current buffer:
+
+.. command:: flycheck-disable-checker
+   :binding: C-c ! x
+
+   Disable a syntax checker in the current buffer by adding it to the
+   buffer-local value of :option:`flycheck-disabled-checkers`.
+
+.. command:: flycheck-disable-checker
+   :prefix-arg: C-u
+   :binding: C-c ! s
+   :noindex:
+
+   Re-enable a syntax checker in the current buffer by removing it from the
+   buffer-local value of :option:`flycheck-disabled-checkers`.
+
+You can change the completion system used by these commands:
 
 .. option:: flycheck-completion-system
    :auto:

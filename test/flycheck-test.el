@@ -1718,6 +1718,23 @@ and extension, as in `file-name-base'."
        '(12 nil warning "First sentence should end with punctuation"
             :checker emacs-lisp-checkdoc)))))
 
+(ert-deftest flycheck-disable-checker/disables-checker ()
+  :tags '(selection)
+  (flycheck-ert-with-temp-buffer
+   (flycheck-disable-checker 'emacs-lisp)
+   (should (equal '(emacs-lisp) flycheck-disabled-checkers))
+   (should-not (default-value 'flycheck-disabled-checkers))
+   ;; Disabling a disabled checker should be a no-op
+   (flycheck-disable-checker 'emacs-lisp)
+   (should (equal '(emacs-lisp) flycheck-disabled-checkers))))
+
+(ert-deftest flycheck-disable-checker/enables-checker ()
+  :tags '(selection)
+  (flycheck-ert-with-temp-buffer
+   (setq flycheck-disabled-checkers '(emacs-lisp python-pylint))
+   (flycheck-disable-checker 'emacs-lisp 'enable)
+   (should (equal '(python-pylint) flycheck-disabled-checkers))))
+
 
 ;;; Documentation
 

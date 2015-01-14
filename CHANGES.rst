@@ -7,6 +7,11 @@ master (in development)
 
   - R with `lintr` [GH-512]
 
+- New features:
+
+  - Add `flycheck-disable-checker` to disable a syntax checker in the current
+    buffer
+
 - Improvements:
 
   - `chef-foodcritic` handles relative paths correctly now [GH-556]

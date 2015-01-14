@@ -773,6 +773,7 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
     (define-key map "i"         #'flycheck-info)
     (define-key map "V"         #'flycheck-version)
     (define-key map "v"         #'flycheck-verify-setup)
+    (define-key map "x"         #'flycheck-disable-checker)
     map)
   "Keymap of Flycheck interactive commands.")
 
@@ -868,6 +869,7 @@ currently listed."
       (flycheck-overlays-at (point))]
      "---"
      ["Select syntax checker" flycheck-select-checker flycheck-mode]
+     ["Disable syntax checker" flycheck-disable-checker flycheck-mode]
      ["Set executable of syntax checker" flycheck-set-checker-executable
       flycheck-mode]
      "---"
@@ -1208,7 +1210,7 @@ FILE-NAME is nil, return `default-directory'."
 (defvar read-flycheck-checker-history nil
   "`completing-read' history of `read-flycheck-checker'.")
 
-(defun read-flycheck-checker (prompt &optional default property)
+(defun read-flycheck-checker (prompt &optional default property candidates)
   "Read a flycheck checker from minibuffer with PROMPT and DEFAULT.
 
 PROMPT is a string to show in the minibuffer as prompt.  It
@@ -1216,7 +1218,9 @@ should end with a single space.  DEFAULT is a symbol denoting the
 default checker to use, if the user did not select any checker.
 PROPERTY is a symbol denoting a syntax checker property.  If
 non-nil, only complete syntax checkers which have a non-nil value
-for PROPERTY.
+for PROPERTY.  CANDIDATES is an optional list of all syntax
+checkers available for completion, defaulting to all defined
+checkers.  If given, PROPERTY is ignored.
 
 Return the checker as symbol, or DEFAULT if no checker was
 chosen.  If DEFAULT is nil and no checker was chosen, signal a
@@ -1225,7 +1229,8 @@ a default on its own."
   (when (and default (not (flycheck-valid-checker-p default)))
     (error "%S is no valid Flycheck checker" default))
   (let* ((candidates (mapcar #'symbol-name
-                             (flycheck-defined-checkers property)))
+                             (or candidates
+                                 (flycheck-defined-checkers property))))
          (default (and default (symbol-name default)))
          (input (pcase flycheck-completion-system
                   (`ido (ido-completing-read prompt candidates nil
@@ -2090,6 +2095,34 @@ CHECKER will be used, even if it is not contained in
           flycheck-last-checker nil)
     (when flycheck-mode
       (flycheck-buffer))))
+
+(defun flycheck-disable-checker (checker &optional enable)
+  "Interactively disable CHECKER for the current buffer.
+
+Interactively, prompt for a syntax checker to disable, and add
+the syntax checker to the buffer-local value of
+`flycheck-disabled-checkers'.  With prefix arg, prompt for a
+disabled syntax checker and re-enable it by removing it from the
+buffer-local value of `flycheck-disabled-checkers'."
+  (interactive
+   (let* ((enable current-prefix-arg)
+          (candidates (if enable flycheck-disabled-checkers flycheck-checkers))
+          (prompt (if enable "Enable syntax checker: "
+                    "Disable syntax checker: ")))
+     (when (and enable (not candidates))
+       (user-error "No syntax checkers disabled in this buffer"))
+     (list (read-flycheck-checker prompt nil nil candidates) enable)))
+  (unless checker
+    (user-error "No syntax checker given"))
+  (if enable
+      ;; We must use `remq' instead of `delq', because we must _not_ modify the
+      ;; list.  Otherwise we could potentially modify the global default value,
+      ;; in case the list is the global default.
+      (setq flycheck-disabled-checkers (remq checker flycheck-disabled-checkers))
+    (unless (memq checker flycheck-disabled-checkers)
+      (push checker flycheck-disabled-checkers))))
+(put 'flycheck-disable-checker 'interactive-only
+     "Directly set `flycheck-disabled-checkers' instead")
 
 
 ;;; Syntax checks for the current buffer
