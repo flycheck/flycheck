@@ -2466,13 +2466,12 @@ Flycheck mode is not enabled for
 - or if no suitable syntax checker exists.
 
 Return t if Flycheck mode may be enabled, and nil otherwise."
-  (and (not (or (derived-mode-p 'special-mode)
-                (derived-mode-p 'comint-mode)
-                (flycheck-ephemeral-buffer-p)
-                (flycheck-encrypted-buffer-p)
-                (and (buffer-file-name)
-                     (file-remote-p (buffer-file-name) 'method))))
-       (flycheck-get-checker-for-buffer)))
+  (not (or (derived-mode-p 'special-mode)
+           (derived-mode-p 'comint-mode)
+           (flycheck-ephemeral-buffer-p)
+           (flycheck-encrypted-buffer-p)
+           (and (buffer-file-name)
+                (file-remote-p (buffer-file-name) 'method)))))
 
 (defun flycheck-mode-on-safe ()
   "Enable `flycheck-mode' if it is safe to do so.
