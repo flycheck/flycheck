@@ -6550,7 +6550,7 @@ This syntax checker requires Pylint 1.0 or newer.
 See URL `http://www.pylint.org/'."
   ;; -r n disables the scoring report
   :command ("pylint" "-r" "n"
-            "--msg-template" "{path}:{line}:{column}:{C}:{msg_id}:{msg}"
+            "--msg-template" "{path}:{line}:{column}:{C}:{msg_id}:({symbol}) {msg}"
             (config-file "--rcfile" flycheck-pylintrc)
             ;; Need `source-inplace' for relative imports (e.g. `from .foo
             ;; import bar'), see https://github.com/flycheck/flycheck/issues/280
