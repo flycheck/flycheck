@@ -1602,30 +1602,30 @@ and extension, as in `file-name-base'."
     (flycheck-select-checker 'python-pylint)
     (flycheck-ert-wait-for-syntax-checker)
     (flycheck-ert-should-errors
-     '(1 1 info "Missing module docstring" :id "C0111" :checker python-pylint)
-     '(4 1 error "Unable to import 'spam'" :id "F0401" :checker python-pylint)
-     '(5 1 error "No name 'antigravit' in module 'python'" :id "E0611"
+     '(1 1 info "Missing module docstring (missing-docstring)" :id "C0111" :checker python-pylint)
+     '(4 1 error "Unable to import 'spam' (import-error)" :id "F0401" :checker python-pylint)
+     '(5 1 error "No name 'antigravit' in module 'python' (no-name-in-module)" :id "E0611"
          :checker python-pylint)
-     '(5 1 warning "Unused import antigravit" :id "W0611" :checker python-pylint)
-     '(7 1 info "Missing class docstring" :id "C0111" :checker python-pylint)
-     '(9 5 info "Invalid method name \"withEggs\"" :id "C0103"
+     '(5 1 warning "Unused import antigravit (unused-import)" :id "W0611" :checker python-pylint)
+     '(7 1 info "Missing class docstring (missing-docstring)" :id "C0111" :checker python-pylint)
+     '(9 5 info "Invalid method name \"withEggs\" (invalid-name)" :id "C0103"
          :checker python-pylint)
-     '(9 5 info "Missing method docstring" :id "C0111" :checker python-pylint)
-     '(9 5 warning "Method could be a function" :id "R0201" :checker python-pylint)
-     '(10 16 warning "Used builtin function 'map'" :id "W0141"
+     '(9 5 info "Missing method docstring (missing-docstring)" :id "C0111" :checker python-pylint)
+     '(9 5 warning "Method could be a function (no-self-use)" :id "R0201" :checker python-pylint)
+     '(10 16 warning "Used builtin function 'map' (bad-builtin)" :id "W0141"
           :checker python-pylint)
-     '(12 1 info "No space allowed around keyword argument assignment"
+     '(12 1 info "No space allowed around keyword argument assignment (bad-whitespace)"
           :id "C0326" :checker python-pylint)
-     '(12 5 info "Missing method docstring" :id "C0111" :checker python-pylint)
-     '(12 5 warning "Method could be a function" :id "R0201"
+     '(12 5 info "Missing method docstring (missing-docstring)" :id "C0111" :checker python-pylint)
+     '(12 5 warning "Method could be a function (no-self-use)" :id "R0201"
           :checker python-pylint)
-     '(14 16 error "Module 'sys' has no 'python_version' member" :id "E1101"
+     '(14 16 error "Module 'sys' has no 'python_version' member (no-member)" :id "E1101"
           :checker python-pylint)
-     '(15 1 info "Unnecessary parens after u'print' keyword" :id "C0325"
+     '(15 1 info "Unnecessary parens after u'print' keyword (superfluous-parens)" :id "C0325"
           :checker python-pylint)
-     '(17 1 info "Unnecessary parens after u'print' keyword" :id "C0325"
+     '(17 1 info "Unnecessary parens after u'print' keyword (superfluous-parens)" :id "C0325"
           :checker python-pylint)
-     '(22 1 error "Undefined variable 'antigravity'" :id "E0602"
+     '(22 1 error "Undefined variable 'antigravity' (undefined-variable)" :id "E0602"
           :checker python-pylint))))
 
 (ert-deftest flycheck-select-checker/unselecting-a-checker-goes-back-to-automatic-selection ()
@@ -1640,37 +1640,37 @@ and extension, as in `file-name-base'."
     (should (eq flycheck-checker 'python-pylint))
     (flycheck-ert-wait-for-syntax-checker)
     (flycheck-ert-should-errors
-     '(1 1 info "Missing module docstring" :id "C0111" :checker python-pylint)
-     '(4 1 error "Unable to import 'spam'" :id "F0401" :checker python-pylint)
-     '(5 1 error "No name 'antigravit' in module 'python'" :id "E0611"
+     '(1 1 info "Missing module docstring (missing-docstring)" :id "C0111" :checker python-pylint)
+     '(4 1 error "Unable to import 'spam' (import-error)" :id "F0401" :checker python-pylint)
+     '(5 1 error "No name 'antigravit' in module 'python' (no-name-in-module)" :id "E0611"
          :checker python-pylint)
-     '(5 1 warning "Unused import antigravit" :id "W0611"
+     '(5 1 warning "Unused import antigravit (unused-import)" :id "W0611"
          :checker python-pylint)
-     '(7 1 info "Missing class docstring" :id "C0111" :checker python-pylint)
+     '(7 1 info "Missing class docstring (missing-docstring)" :id "C0111" :checker python-pylint)
      '(9 5 info "Invalid method name \"withEggs\"" :id "C0103"
          :checker python-pylint)
-     '(9 5 info "Missing method docstring" :id "C0111" :checker python-pylint)
-     '(9 5 warning "Method could be a function" :id "R0201" :checker python-pylint)
-     '(10 16 warning "Used builtin function 'map'" :id "W0141"
+     '(9 5 info "Missing method docstring (missing-docstring)" :id "C0111" :checker python-pylint)
+     '(9 5 warning "Method could be a function (no-self-use)" :id "R0201" :checker python-pylint)
+     '(10 16 warning "Used builtin function 'map' (bad-builtin)" :id "W0141"
           :checker python-pylint)
-     '(12 1 info "No space allowed around keyword argument assignment"
+     '(12 1 info "No space allowed around keyword argument assignment (bad-whitespace)"
           :id "C0326" :checker python-pylint)
-     '(12 5 info "Missing method docstring" :id "C0111" :checker python-pylint)
-     '(12 5 warning "Method could be a function" :id "R0201"
+     '(12 5 info "Missing method docstring (missing-docstring)" :id "C0111" :checker python-pylint)
+     '(12 5 warning "Method could be a function (no-self-use)" :id "R0201"
           :checker python-pylint)
-     '(14 16 error "Module 'sys' has no 'python_version' member" :id "E1101"
+     '(14 16 error "Module 'sys' has no 'python_version' member (no-member)" :id "E1101"
           :checker python-pylint)
-     '(15 1 info "Unnecessary parens after u'print' keyword" :id "C0325"
+     '(15 1 info "Unnecessary parens after u'print' keyword (superfluous-parens)" :id "C0325"
           :checker python-pylint)
-     '(17 1 info "Unnecessary parens after u'print' keyword" :id "C0325"
+     '(17 1 info "Unnecessary parens after u'print' keyword (superfluous-parens)" :id "C0325"
           :checker python-pylint)
-     '(22 1 error "Undefined variable 'antigravity'" :id "E0602"
+     '(22 1 error "Undefined variable 'antigravity' (undefined-variable)" :id "E0602"
           :checker python-pylint))
     (flycheck-select-checker nil)
     (should-not flycheck-checker)
     (flycheck-ert-wait-for-syntax-checker)
     (flycheck-ert-should-errors
-     '(5 1 warning "'antigravit' imported but unused" :id "F401"
+     '(5 1 warning "'antigravit' imported but unused " :id "F401"
          :checker python-flake8)
      '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
          :checker python-flake8)
@@ -4582,38 +4582,38 @@ Why not:
         (python-indent-guess-indent-offset nil)) ; Silence Python Mode
     (flycheck-ert-should-syntax-check
      "checkers/python-syntax-error.py" 'python-mode
-     '(3 1 error "invalid syntax" :id "E0001" :checker python-pylint))))
+     '(3 1 error "invalid syntax (syntax-error)" :id "E0001" :checker python-pylint))))
 
 (flycheck-ert-def-checker-test python-pylint python nil
   (let ((flycheck-disabled-checkers '(python-flake8)))
     (flycheck-ert-should-syntax-check
      "checkers/python/test.py" 'python-mode
-     '(1 1 info "Missing module docstring" :id "C0111" :checker python-pylint)
-     '(4 1 error "Unable to import 'spam'" :id "F0401" :checker python-pylint)
-     '(5 1 error "No name 'antigravit' in module 'python'" :id "E0611"
+     '(1 1 info "Missing module docstring (missing-docstring)" :id "C0111" :checker python-pylint)
+     '(4 1 error "Unable to import 'spam' (import-error)" :id "F0401" :checker python-pylint)
+     '(5 1 error "No name 'antigravit' in module 'python' (no-name-in-module)" :id "E0611"
          :checker python-pylint)
-     '(5 1 warning "Unused import antigravit" :id "W0611"
+     '(5 1 warning "Unused import antigravit (unused-import)" :id "W0611"
          :checker python-pylint)
-     '(7 1 info "Missing class docstring" :id "C0111" :checker python-pylint)
-     '(9 5 info "Invalid method name \"withEggs\"" :id "C0103"
+     '(7 1 info "Missing class docstring (missing-docstring)" :id "C0111" :checker python-pylint)
+     '(9 5 info "Invalid method name \"withEggs\" (invalid-name)" :id "C0103"
          :checker python-pylint)
-     '(9 5 info "Missing method docstring" :id "C0111" :checker python-pylint)
-     '(9 5 warning "Method could be a function" :id "R0201"
+     '(9 5 info "Missing method docstring (missing-docstring)" :id "C0111" :checker python-pylint)
+     '(9 5 warning "Method could be a function (no-self-use)" :id "R0201"
          :checker python-pylint)
-     '(10 16 warning "Used builtin function 'map'" :id "W0141"
+     '(10 16 warning "Used builtin function 'map' (bad-builtin)" :id "W0141"
           :checker python-pylint)
-     '(12 1 info "No space allowed around keyword argument assignment"
+     '(12 1 info "No space allowed around keyword argument assignment (bad-whitespace)"
           :id "C0326" :checker python-pylint)
-     '(12 5 info "Missing method docstring" :id "C0111" :checker python-pylint)
-     '(12 5 warning "Method could be a function" :id "R0201"
+     '(12 5 info "Missing method docstring (missing-docstring)" :id "C0111" :checker python-pylint)
+     '(12 5 warning "Method could be a function (no-self-use)" :id "R0201"
           :checker python-pylint)
-     '(14 16 error "Module 'sys' has no 'python_version' member" :id "E1101"
+     '(14 16 error "Module 'sys' has no 'python_version' member (no-member)" :id "E1101"
           :checker python-pylint)
-     '(15 1 info "Unnecessary parens after u'print' keyword" :id "C0325"
+     '(15 1 info "Unnecessary parens after u'print' keyword (superfluous-parens)" :id "C0325"
           :checker python-pylint)
-     '(17 1 info "Unnecessary parens after u'print' keyword" :id "C0325"
+     '(17 1 info "Unnecessary parens after u'print' keyword (superfluous-parens)" :id "C0325"
           :checker python-pylint)
-     '(22 1 error "Undefined variable 'antigravity'" :id "E0602"
+     '(22 1 error "Undefined variable 'antigravity' (undefined-variable)" :id "E0602"
           :checker python-pylint))))
 
 (flycheck-ert-def-checker-test python-pylint python disabled-warnings
@@ -4621,16 +4621,16 @@ Why not:
         (flycheck-disabled-checkers '(python-flake8)))
     (flycheck-ert-should-syntax-check
      "checkers/python/test.py" 'python-mode
-     '(4 1 error "Unable to import 'spam'" :id "F0401" :checker python-pylint)
-     '(5 1 error "No name 'antigravit' in module 'python'" :id "E0611"
+     '(4 1 error "Unable to import 'spam' (import-error)" :id "F0401" :checker python-pylint)
+     '(5 1 error "No name 'antigravit' in module 'python' (no-name-in-module)" :id "E0611"
          :checker python-pylint)
-     '(5 1 warning "Unused import antigravit" :id "W0611"
+     '(5 1 warning "Unused import antigravit (unused-import)" :id "W0611"
          :checker python-pylint)
-     '(10 16 warning "Used builtin function 'map'" :id "W0141"
+     '(10 16 warning "Used builtin function 'map' (bad-builtin)" :id "W0141"
           :checker python-pylint)
-     '(14 16 error "Module 'sys' has no 'python_version' member" :id "E1101"
+     '(14 16 error "Module 'sys' has no 'python_version' member (no-member)" :id "E1101"
           :checker python-pylint)
-     '(22 1 error "Undefined variable 'antigravity'" :id "E0602"
+     '(22 1 error "Undefined variable 'antigravity' (undefined-variable)" :id "E0602"
           :checker python-pylint))))
 
 (flycheck-ert-def-checker-test python-pycompile python python26
