@@ -334,14 +334,12 @@ and extension, as in `file-name-base'."
       (should (flycheck-get-checker-for-buffer))
       (should-not (flycheck-may-enable-mode)))))
 
-(ert-deftest flycheck-may-enable-mode/not-if-no-checker-is-found ()
+(ert-deftest flycheck-may-enable-mode/not-in-special-mode ()
   :tags '(global-mode)
   (flycheck-ert-with-temp-buffer
     (setq buffer-file-name "foo")
     (rename-buffer "foo")
-    (text-mode)
-    (should-not (string-prefix-p " " (buffer-name)))
-    (should-not (flycheck-get-checker-for-buffer))
+    (special-mode)
     (should-not (flycheck-may-enable-mode))))
 
 (ert-deftest flycheck-may-enable-mode/checker-found ()
@@ -374,12 +372,11 @@ and extension, as in `file-name-base'."
         (emacs-lisp-mode)
         (should-not flycheck-mode)))))
 
-(ert-deftest global-flycheck-mode/does-not-enable-if-no-checker-is-found ()
+(ert-deftest global-flycheck-mode/does-not-enable-in-special-mode ()
   :tags '(global-mode)
   (flycheck-ert-with-global-mode
     (flycheck-ert-with-temp-buffer
-      (rename-buffer "foo")
-      (text-mode)
+      (special-mode)
       (should-not flycheck-mode))))
 
 (ert-deftest global-flycheck-mode/checker-found ()

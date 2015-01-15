@@ -2459,16 +2459,19 @@ Return t if so, or nil otherwise."
 
 Flycheck mode is not enabled for
 
+- buffers in a `special-mode' or `comint-mode'
 - ephemeral buffers (see `flycheck-ephemeral-buffer-p'),
 - encrypted buffers (see `flycheck-encrypted-buffer-p'),
 - remote files (see `file-remote-p'),
 - or if no suitable syntax checker exists.
 
 Return t if Flycheck mode may be enabled, and nil otherwise."
-  (and (not (flycheck-ephemeral-buffer-p))
-       (not (flycheck-encrypted-buffer-p))
-       (not (and (buffer-file-name) (file-remote-p (buffer-file-name) 'method)))
-       (flycheck-get-checker-for-buffer)))
+  (not (or (derived-mode-p 'special-mode)
+           (derived-mode-p 'comint-mode)
+           (flycheck-ephemeral-buffer-p)
+           (flycheck-encrypted-buffer-p)
+           (and (buffer-file-name)
+                (file-remote-p (buffer-file-name) 'method)))))
 
 (defun flycheck-mode-on-safe ()
   "Enable `flycheck-mode' if it is safe to do so.
