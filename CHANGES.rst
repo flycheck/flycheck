@@ -15,6 +15,8 @@ master (in development)
 - Improvements:
 
   - `chef-foodcritic` handles relative paths correctly now [GH-556]
+  - Global Flycheck Mode enables Flycheck Mode even if there is no syntax
+    checker for the buffer yet [GH-568]
 
 - Bug fixes:
 
