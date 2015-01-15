@@ -1670,7 +1670,7 @@ and extension, as in `file-name-base'."
     (should-not flycheck-checker)
     (flycheck-ert-wait-for-syntax-checker)
     (flycheck-ert-should-errors
-     '(5 1 warning "'antigravit' imported but unused " :id "F401"
+     '(5 1 warning "'antigravit' imported but unused" :id "F401"
          :checker python-flake8)
      '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
          :checker python-flake8)
@@ -4590,8 +4590,6 @@ Why not:
      "checkers/python/test.py" 'python-mode
      '(1 1 info "Missing module docstring (missing-docstring)" :id "C0111" :checker python-pylint)
      '(4 1 error "Unable to import 'spam' (import-error)" :id "F0401" :checker python-pylint)
-     '(5 1 error "No name 'antigravit' in module 'python' (no-name-in-module)" :id "E0611"
-         :checker python-pylint)
      '(5 1 warning "Unused import antigravit (unused-import)" :id "W0611"
          :checker python-pylint)
      '(7 1 info "Missing class docstring (missing-docstring)" :id "C0111" :checker python-pylint)
@@ -4602,7 +4600,7 @@ Why not:
          :checker python-pylint)
      '(10 16 warning "Used builtin function 'map' (bad-builtin)" :id "W0141"
           :checker python-pylint)
-     '(12 1 info "No space allowed around keyword argument assignment (bad-whitespace)"
+     '(12 1 info "No space allowed around keyword argument assignment"
           :id "C0326" :checker python-pylint)
      '(12 5 info "Missing method docstring (missing-docstring)" :id "C0111" :checker python-pylint)
      '(12 5 warning "Method could be a function (no-self-use)" :id "R0201"
@@ -4622,8 +4620,6 @@ Why not:
     (flycheck-ert-should-syntax-check
      "checkers/python/test.py" 'python-mode
      '(4 1 error "Unable to import 'spam' (import-error)" :id "F0401" :checker python-pylint)
-     '(5 1 error "No name 'antigravit' in module 'python' (no-name-in-module)" :id "E0611"
-         :checker python-pylint)
      '(5 1 warning "Unused import antigravit (unused-import)" :id "W0611"
          :checker python-pylint)
      '(10 16 warning "Used builtin function 'map' (bad-builtin)" :id "W0141"
