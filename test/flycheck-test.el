@@ -4590,6 +4590,8 @@ Why not:
      "checkers/python/test.py" 'python-mode
      '(1 1 info "Missing module docstring (missing-docstring)" :id "C0111" :checker python-pylint)
      '(4 1 error "Unable to import 'spam' (import-error)" :id "F0401" :checker python-pylint)
+     '(5 1 error "No name 'antigravit' in module 'python' (no-name-in-module)" :id "E0611"
+         :checker python-pylint)
      '(5 1 warning "Unused import antigravit (unused-import)" :id "W0611"
          :checker python-pylint)
      '(7 1 info "Missing class docstring (missing-docstring)" :id "C0111" :checker python-pylint)
@@ -4620,6 +4622,8 @@ Why not:
     (flycheck-ert-should-syntax-check
      "checkers/python/test.py" 'python-mode
      '(4 1 error "Unable to import 'spam' (import-error)" :id "F0401" :checker python-pylint)
+     '(5 1 error "No name 'antigravit' in module 'python' (no-name-in-module)" :id "E0611"
+         :checker python-pylint)
      '(5 1 warning "Unused import antigravit (unused-import)" :id "W0611"
          :checker python-pylint)
      '(10 16 warning "Used builtin function 'map' (bad-builtin)" :id "W0141"
