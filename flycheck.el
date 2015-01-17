@@ -848,6 +848,28 @@ currently listed."
   :risky t
   :package-version '(flycheck . "0.20"))
 
+(defcustom flycheck-global-modes t
+  "Modes for which `flycheck-mode' is turned on by `global-flycheck-mode'.
+
+If t, Flycheck Mode is turned on for all major modes.  If a list,
+Flycheck Mode is turned on for all `major-mode' symbols in that
+list.  If the `car' of the list is `not', Flycheck Mode is turned
+on for all `major-mode' symbols _not_ in that list.  If nil,
+Flycheck Mode is never turned on by `global-flycheck-mode'.
+
+Note that Flycheck is never turned on for modes whose
+`mode-class' property is `special' (see Info node `(elisp)Major
+Mode Conventions'), regardless of the value of this option."
+  :group 'flycheck
+  :type '(choice (const :tag "none" nil)
+                 (const :tag "all" t)
+                 (set :menu-tag "mode specific" :tag "modes"
+                      :value (not)
+                      (const :tag "Except" not)
+                      (repeat :inline t (symbol :tag "mode"))))
+  :risky t
+  :package-version '(flycheck . "0.23"))
+
 
 ;;; Global Flycheck menu
 (defvar flycheck-mode-menu-map
@@ -2463,15 +2485,22 @@ Flycheck mode is not enabled for
 - major modes whose `mode-class' property is `special',
 - ephemeral buffers (see `flycheck-ephemeral-buffer-p'),
 - encrypted buffers (see `flycheck-encrypted-buffer-p'),
-- and remote files (see `file-remote-p').
+- remote files (see `file-remote-p'),
+- and major modes excluded by `flycheck-global-modes'.
 
-Return t if Flycheck mode may be enabled, and nil otherwise."
-  (not (or (minibufferp)
-           (eq (get major-mode 'mode-class) 'special)
-           (flycheck-ephemeral-buffer-p)
-           (flycheck-encrypted-buffer-p)
-           (and (buffer-file-name)
-                (file-remote-p (buffer-file-name) 'method)))))
+Return non-nil if Flycheck mode may be enabled, and nil
+otherwise."
+  (and (pcase flycheck-global-modes
+         ;; Whether `major-mode' is disallowed by `flycheck-global-modes'
+         (`t t)
+         (`(not . ,modes) (not (memq major-mode modes)))
+         (modes (memq major-mode modes)))
+       (not (or (minibufferp)
+                (eq (get major-mode 'mode-class) 'special)
+                (flycheck-ephemeral-buffer-p)
+                (flycheck-encrypted-buffer-p)
+                (and (buffer-file-name)
+                     (file-remote-p (buffer-file-name) 'method))))))
 
 (defun flycheck-mode-on-safe ()
   "Enable `flycheck-mode' if it is safe to do so.

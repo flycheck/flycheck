@@ -11,6 +11,8 @@ master (in development)
 
   - Add `flycheck-disable-checker` to disable a syntax checker in the current
     buffer
+  - Add `flycheck-global-modes` to control in which modes `global-flycheck-mode`
+    turns on `flycheck-mode`
 
 - Improvements:
 

@@ -350,6 +350,34 @@ and extension, as in `file-name-base'."
     (compilation-mode)
     (should-not (flycheck-may-enable-mode))))
 
+(ert-deftest flycheck-may-enable-mode/all-modes-disabled ()
+  :tags '(global-mode)
+  (let ((flycheck-global-modes nil))
+    (flycheck-ert-with-temp-buffer
+      (setq buffer-file-name "foo")
+      (rename-buffer "foo")
+      (emacs-lisp-mode)
+      (should-not (flycheck-may-enable-mode)))))
+
+
+(ert-deftest flycheck-may-enable-mode/some-modes-disabled ()
+  :tags '(global-mode)
+  (let ((flycheck-global-modes '(not emacs-lisp-mode)))
+    (flycheck-ert-with-temp-buffer
+      (setq buffer-file-name "foo")
+      (rename-buffer "foo")
+      (emacs-lisp-mode)
+      (should-not (flycheck-may-enable-mode)))))
+
+(ert-deftest flycheck-may-enable-mode/some-modes-enabled ()
+  :tags '(global-mode)
+  (let ((flycheck-global-modes '(emacs-lisp-mode)))
+    (flycheck-ert-with-temp-buffer
+      (setq buffer-file-name "foo")
+      (rename-buffer "foo")
+      (emacs-lisp-mode)
+      (should (flycheck-may-enable-mode)))))
+
 (ert-deftest flycheck-may-enable-mode/checker-found ()
   :tags '(global-mode)
   (flycheck-ert-with-temp-buffer
