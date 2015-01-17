@@ -342,6 +342,14 @@ and extension, as in `file-name-base'."
     (special-mode)
     (should-not (flycheck-may-enable-mode))))
 
+(ert-deftest flycheck-may-enable-mode/not-in-compilation-mode ()
+  :tags '(global-mode)
+  (flycheck-ert-with-temp-buffer
+    (setq buffer-file-name "foo")
+    (rename-buffer "foo")
+    (compilation-mode)
+    (should-not (flycheck-may-enable-mode))))
+
 (ert-deftest flycheck-may-enable-mode/checker-found ()
   :tags '(global-mode)
   (flycheck-ert-with-temp-buffer

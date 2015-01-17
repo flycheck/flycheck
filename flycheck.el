@@ -2459,15 +2459,14 @@ Return t if so, or nil otherwise."
 
 Flycheck mode is not enabled for
 
-- buffers in a `special-mode' or `comint-mode'
+- major modes whose `mode-class' property is `special',
 - ephemeral buffers (see `flycheck-ephemeral-buffer-p'),
 - encrypted buffers (see `flycheck-encrypted-buffer-p'),
 - remote files (see `file-remote-p'),
 - or if no suitable syntax checker exists.
 
 Return t if Flycheck mode may be enabled, and nil otherwise."
-  (not (or (derived-mode-p 'special-mode)
-           (derived-mode-p 'comint-mode)
+  (not (or (eq (get major-mode 'mode-class) 'special)
            (flycheck-ephemeral-buffer-p)
            (flycheck-encrypted-buffer-p)
            (and (buffer-file-name)
