@@ -2463,8 +2463,7 @@ Flycheck mode is not enabled for
 - major modes whose `mode-class' property is `special',
 - ephemeral buffers (see `flycheck-ephemeral-buffer-p'),
 - encrypted buffers (see `flycheck-encrypted-buffer-p'),
-- remote files (see `file-remote-p'),
-- or if no suitable syntax checker exists.
+- and remote files (see `file-remote-p').
 
 Return t if Flycheck mode may be enabled, and nil otherwise."
   (not (or (minibufferp)
