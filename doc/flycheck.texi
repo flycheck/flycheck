@@ -118,6 +118,8 @@ Fully automatic, fail-safe, on-the-fly syntax checking in buffers
 @item
 In-buffer error highlighting, with fringe indicators
 @item
+Error navigation
+@item
 Auto-updating error list
 @item
 Many customisation options
