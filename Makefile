@@ -5,8 +5,6 @@ ERTSELECTOR = t
 SPHINX-BUILD = sphinx-build
 SPHINXFLAGS =
 CONVERT = convert
-INSTALL-INFO = install-info
-INSTALL = install
 VERSION := $(shell EMACS=$(EMACS) $(CASK) version)
 PKGDIR := $(shell EMACS=$(EMACS) $(CASK) package-directory)
 
@@ -18,7 +16,6 @@ OBJECTS = $(SRCS:.el=.elc)
 
 DISTDIR = dist
 BUILDDIR = build
-DOCBUILDDIR = $(BUILDDIR)/doc
 DOCTREEDIR = $(DOCBUILDDIR)/doctrees
 
 EMACSBATCH = $(EMACS) -Q --batch $(EMACSFLAGS)
@@ -36,10 +33,10 @@ dist :
 
 doc : html texinfo
 
-html :
-	$(SPHINX-BUILD) -b html -d $(DOCTREEDIR) $(SPHINXFLAGS) doc $(DOCBUILDDIR)/html
+texinfo: doc/flycheck.info
 
-texinfo : doc/flycheck.texi
+html :
+	$(MAKEINFO) --html -o $(BUILDDIR)/html doc/flycheck.texi
 
 images: doc/images/logo.png doc/images/favicon.ico # To update the image files
 
@@ -49,12 +46,6 @@ test : $(OBJECTS)
 
 # Support targets
 deps : $(PKGDIR)
-
-linkcheck :
-	$(SPHINX-BUILD) -b linkcheck -d $(DOCTREEDIR) $(SPHINXFLAGS) doc $(DOCBUILDDIR)/linkcheck
-
-pseudoxml :
-	$(SPHINX-BUILD) -b pseudoxml -d $(DOCTREEDIR) $(SPHINXFLAGS) doc $(DOCBUILDDIR)/pseudoxml
 
 # Cleanup targets
 clean : clean-elc clean-dist clean-deps clean-doc
@@ -66,7 +57,7 @@ clean-dist :
 	rm -rf $(DISTDIR)
 
 clean-doc:
-	rm -rf $(DOCBUILDDIR)
+	rm -rf doc/flycheck.info doc/dir
 
 clean-deps :
 	rm -rf .cask/
@@ -74,16 +65,6 @@ clean-deps :
 $(PKGDIR) : Cask
 	$(CASK) install
 	touch $(PKGDIR)
-
-doc/flycheck.texi : $(DOCBUILDDIR)/info/flycheck.texi
-	cp -f $< $@
-
-# Sphinx has its own sophisticated dependency tracking, so we mark this rule as
-# phony to always let Sphinx attempt to rebuild it.  If its up to date that's a
-# noop anyway.
-.PHONY : $(DOCBUILDDIR)/info/flycheck.texi
-$(DOCBUILDDIR)/info/flycheck.texi :
-	$(SPHINX-BUILD) -b texinfo -d $(DOCTREEDIR) $(SPHINXFLAGS) doc $(DOCBUILDDIR)/info
 
 flycheck-ert.elc: flycheck.elc
 
