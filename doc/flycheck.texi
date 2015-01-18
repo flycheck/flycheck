@@ -1,0 +1,642 @@
+\input texinfo   @c -*-texinfo-*-
+@c %**start of header
+@setfilename flycheck.info
+@settitle Flycheck
+@documentencoding UTF-8
+@c %**end of header
+
+@c Macros
+
+@macro flyc{checker}
+@code{\checker\}
+@end macro
+
+@macro flyccmd{key,command}
+@kindex \key\
+@findex \command\
+@item @kbd{\key\}
+@itemx @kbd{M-x \command\}
+@end macro
+
+@macro flyccmdp{prefix,key,command}
+@kindex \prefix\ \key\
+@item @kbd{\prefix\ \key\}
+@itemx @kbd{\prefix\ M-x \command\}
+@end macro
+
+@c Index setup
+
+@syncodeindex vr fn
+@syncodeindex tp fn
+
+@copying
+Modern on-the-fly syntax checking for GNU Emacs 24, intended as
+replacement for Flymake.
+
+Copyright @copyright{} 2014–2015  Sebastian Wiesner
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+A copy of the license is included in the section entitled ``GNU
+Free Documentation License''.
+
+A copy of the license is also available from the Free Software
+Foundation Web site at @url{http://www.gnu.org/licenses/fdl.html}.
+
+Alternatively, you may copy, distribute and/or modify this documentation
+under the terms of the Creative Commons Attribution-ShareAlike 4.0
+International Public License. A copy of the license can be obtained at
+@url{https://creativecommons.org/licenses/by-sa/4.0/legalcode}.
+@end quotation
+@end copying
+
+@dircategory Emacs
+@direntry
+* Flycheck (flycheck). Modern on-the-fly syntax checking
+@end direntry
+
+@titlepage
+@title Flycheck
+@subtitle Modern on-the-fly syntax checking for GNU Emacs
+@subtitle Version 0.23
+@author Sebastian Wiesner @email{swiesner@@lunaryorn.com}
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@ifnottex
+@node Top, Introduction, (dir), (dir)
+@top Flycheck
+
+@insertcopying
+@end ifnottex
+
+@menu
+* Introduction::                An introduction to Flycheck
+* Usage::                       Detailed user guide
+* Supported languages::         A list of supported languages
+* Extensions::                  3rd party extensions to Flycheck
+* GNU Free Documentation License::  How to copy this manual
+* Main Index::                  Index of Flycheck concepts
+* Key Index::                   Index of all keybindings
+* Function and Variable Index::  Index of commands, options and types
+@end menu
+
+@node Introduction, Usage, Top, Top
+@comment  node-name,  next,  previous,  up
+@chapter Introduction
+
+Flycheck provides modern on-the-fly syntax checking extension for GNU
+Emacs 24, intended as replacement for the older Flymake
+extension which is part of GNU Emacs.
+
+It uses various linting tools to automatically check the contents of
+buffers while you are typing, and reports warnings and errors directly
+in the buffer or in an optional error list.
+
+@menu
+* Features::                    What Flycheck has to offer
+* Installation::                Install Flycheck
+* Quickstart::                  A intro to using Flycheck
+@end menu
+
+@node Features, Installation, Introduction, Introduction
+@comment  node-name,  next,  previous,  up
+@section Features
+
+@cindex features
+
+@itemize @bullet
+@item
+Over 40 languages with more than 70 checkers.  @ref{Supported languages}
+@item
+Fully automatic, fail-safe, on-the-fly syntax checking in buffers
+@item
+In-buffer error highlighting, with fringe indicators
+@item
+Auto-updating error list
+@item
+Many customisation options
+@item
+A comprehensive manual
+@item
+A simple API to add support for new languages and tools
+@item
+A “doesn't get in your way guarantee”
+@item
+
+@end itemize
+
+@node Installation, Quickstart, Features, Introduction
+@comment  node-name,  next,  previous,  up
+@section Installation
+
+@subsection Prerequisites
+
+@cindex prerequisites
+@cindex operating system
+
+Flycheck needs GNU Emacs 24.  Older releases of GNU Emacs or other
+flavours of Emacs (e.g. XEmacs, Aquamacs, etc.) are @emph{not}
+supported.
+
+Flycheck works best on Unix-like operating systems.  It is extensively
+tested on Linux and OS X.
+
+@strong{Warning:} Flycheck tries to maintain compatibility with Windows
+as well, and generally works well on Windows. Pull requests which fix or
+improve Windows compatibility are **very** welcome.  However, Flycheck
+does not explicitly support Windows.  If there are issues or problems on
+Windows, **you are on your own**.  The Flycheck developers cannot answer
+questions about Windows, or fix Windows-specific issues.
+
+@subsection Syntax checking tools
+
+Flycheck does @emph{not} check buffers itself.  It relies on
+@emph{external} programs to check buffers, which need to be installed
+separately.  @xref{Supported languages}, for a list of required programs
+for each language supported by Flycheck.
+
+Most of these programs are available in the package repositories of
+Linux distributions, or with the standard package managers of specific
+programming languages (e.g. Rubygems, NPM, Cabal, etc.)
+
+@subsection Installation
+
+@cindex installation
+
+Install Flycheck via Emacs' built-in package manager, from the
+@uref{http://stable.melpa.org, MELPA Stable} repository:
+
+@example
+M-x package-install RET flycheck
+@end example
+
+Alternatively, you may use the @uref{http://melpa.org, MELPA}
+repository, which hosts the most recent development version.  Note that
+these repositories are not included in GNU Emacs by default.
+
+You need to enable them explicitly, by adding the following to your init
+file:
+
+@lisp
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.org/packages/") t)
+(package-initialize)
+@end lisp
+
+@strong{Warning:} Flycheck is available from
+@uref{https://marmalade-repo.org/, Marmalade}, but due to frequent
+outages of this repository we recommend against it.
+
+@subsection Cask
+
+@cindex cask
+
+If you use @uref{https://github.com/cask/cask, Cask} to manage your
+packages, add the following to your @file{Cask} file:
+
+@lisp
+(source gnu)
+(source melpa-stable)
+
+(depends-on "flycheck")
+@end lisp
+
+@node Quickstart,  , Installation, Introduction
+@comment  node-name,  next,  previous,  up
+@section Quickstart
+@subsection Install and enable Flycheck
+
+To get started with Flycheck, enable it by adding the following to your
+init file (see @code{user-init-file}):
+
+@lisp
+(add-hook 'after-init-hook #'global-flycheck-mode)
+@end lisp
+
+@subsection Install syntax checker tools
+
+Next you need to install syntax checking tools for the major modes you
+are using.  For instance, for Python you may want to install
+@uref{http://pylint.org, Pylint}:
+
+@example
+$ pip install pylint
+@end example
+
+For Ruby, you might want to use
+@uref{https://github.com/bbatsov/rubocop, Rubocop} and
+@uref{https://github.com/YorickPeterse/ruby-lint, ruby-lint}:
+
+@example
+$ gem install rubocop ruby-lint
+@end example
+
+@xref{Supported languages}, for a complete list of all languages that
+Flycheck supports.
+
+@subsection Check syntax in a buffer
+
+Now switch to a Python or Ruby Mode buffer and run @kbd{M-x
+flycheck-verify-setup} to check whether Flycheck is correctly setup.
+
+If everything is fine Flycheck will now check syntax using these tools,
+when you visit a buffer in any of these languages.  Syntax checking
+happens @emph{automatically} when you save the buffer or make any
+changes.  Flycheck highlights errors and warnings in the buffer,
+indicates them in the fringe, and reports their numbers in the mode
+line.
+
+You can also manually check a buffer with @kbd{C-c ! c}
+(@command{flycheck-buffer}).
+
+@subsection Navigate and list errors
+
+Use @kbd{C-c ! n} (@command{flycheck-next-error}) and @kbd{C-c ! p}
+(@command{flycheck-previous-error}) to navigate between error locations.
+If you keep the point at an error location, Flycheck will show the error
+message in the echo area after a short delay.  You can also hover error
+locations with the mouse and see the error message in a tooltip.
+
+To get an overview of all errors and warnings in the current buffer,
+type @kbd{C-c ! l} (@command{flycheck-list-errors}) to pop up a list of all
+errors in your current buffer.  The error list updates automatically
+when you fix errors or introduce new ones, or when you switch to another
+buffer.
+
+@subsection More features
+
+All Flycheck commands are available in the Emacs menu at @samp{Syntax
+checking} in the @samp{Tools} menu.
+
+@ifnotinfo
+@image{images/flycheck-menu.png}
+@end ifnotinfo
+
+The same menu is also available by clicking on the mode line lighter of
+Flycheck.
+
+@ifnotinfo
+@image{images/flycheck-mode-line-menu.png}
+@end ifnotinfo
+
+@node Usage, Supported languages, Introduction, Top
+@comment  node-name,  next,  previous,  up
+@chapter Usage
+
+This chapter explains the usage of Flycheck in-depth.
+
+@vindex flycheck-keymap-prefix
+
+@strong{Note:} All commands in this chapter are documented with their
+default key prefix @kbd{C-c !}.  You can customise this prefix with
+@option{flycheck-keymap-prefix}, but remember your custom prefix while
+reading this chapter.
+
+@menu
+* Checking buffers::            How buffers are checked
+* Syntax checkers::             Tools used to check a buffer
+* Reporting results::           How results of checks are reported
+@end menu
+
+@node Checking buffers, Syntax checkers, Usage, Usage
+@comment  node-name,  next,  previous,  up
+@section Checking buffers
+
+@cindex flycheck mode
+@vindex flycheck-mode
+@vindex global-flycheck-mode
+@vindex flycheck-global-modes
+
+The minor mode @option{flycheck-mode} enables syntax checking in a
+single buffer.  @option{global-flycheck-mode} automatically enables
+@option{flycheck-mode} all buffers whenever possible.  You can exclude
+specific major modes from @option{global-flycheck-mode} with
+@option{flycheck-global-modes}.
+
+@strong{Note:} @option{global-flycheck-mode} does not enable
+@option{flycheck-mode} for remote or encrypted files.  The former is flaky
+and might be very slow, and the latter would leak confidential data to
+temporary directories.  You may still check syntax in these buffers by
+manually enabling @code{flycheck-mode} with @kbd{M-x flycheck-mode}.
+However, this is @emph{not} recommended for said reasons.
+
+To enable syntax checking permanently, either customise
+@option{global-flycheck-mode} with @kbd{M-x customize-variable RET
+global-flycheck-mode}, or add the following code to your init file:
+
+@lisp
+(add-hook 'after-init-hook #'global-flycheck-mode)
+@end lisp
+
+When @option{flycheck-mode} is enabled, Flycheck automatically checks a
+buffer whenever
+
+@itemize @bullet
+@item
+the buffer is saved,
+@item
+new lines are inserted,
+@item
+@vindex flycheck-idle-change-delay
+or a short time (customisable with @option{flycheck-idle-change-delay})
+after you stopped to make changes to the buffer.
+@end itemize
+
+You can customise this behaviour by changing
+@option{flycheck-check-syntax-automatically}:
+
+@defopt flycheck-check-syntax-automatically
+A list of events that trigger a new syntax check in the current buffer.
+
+For instance, with the following code in your init file Flycheck will
+only check the buffer when it is saved, but never while you are making
+changes to the buffer:
+
+@example
+(setq flycheck-check-syntax-automatically '(mode-enabled save))
+@end example
+@end defopt
+
+In addition to automatic syntax checking you can always check the
+current buffer manually:
+
+@table @asis
+@flyccmd{C-c ! c, flycheck-buffer}
+Check syntax in the current buffer.
+@end table
+
+@noindent @strong{Note:} If syntax checking does not work, please check your
+setup:
+
+@table @asis
+@flyccmd{C-c ! v, flycheck-verify-setup}
+Popup a buffer with information about the Flycheck setup for the current
+buffer.
+
+Lists the syntax checkers available for the current buffer, together
+with potential problems in their setup.
+@end table
+
+@vindex flycheck-temp-prefix
+
+During syntax checks Flycheck creates temporary files to feed to
+contents of the current buffer to external programs.  You can change the
+prefix used for the names of these temporary files with
+@option{flycheck-temp-prefix}.
+
+@node Syntax checkers, Reporting results, Checking buffers, Usage
+@comment  node-name,  next,  previous,  up
+@section Syntax checkers
+
+@cindex syntax checker
+@cindex syntax checker selection, automatic
+@cindex automatic syntax checker selection
+
+Flycheck does not check buffers by itself, but relies on external
+@emph{syntax checkers}.  When checking a buffer Flycheck automatically
+selects the best syntax checker from @option{flycheck-checkers}:
+
+@defopt flycheck-checkers
+A list of all syntax checkers available for syntax checking.
+
+A syntax checker in this list is a @emph{registered} syntax checker.
+@end defopt
+
+@cindex chaining of syntax checkers
+
+Flycheck may apply further syntax checkers to the current buffer, if the
+selected syntax checker @emph{chains} to other syntax checkers.  For
+instance, the @flyc{emacs-lisp} syntax checker, which checks Emacs Lisp
+with Emacs' byte compiler, @emph{chains} to the
+@flyc{emacs-lisp-checkdoc} syntax checker, which checks Emacs Lisp for
+violations of documentation conventions, @ref{Documentation
+Tips,,,elisp}.  In Emacs Lisp buffers, Flycheck will first use
+@flyc{emacs-lisp}, and then @flyc{emacs-lisp-checkdoc}.
+
+Flycheck ignores chained checkers which are not contained in
+@option{flycheck-checkers}.
+
+Like everything else in GNU Emacs, syntax checkers have online
+documentation as well.  If you are interested what major modes a
+particular syntax checker in @code{flycheck-checkers} supports, or what
+tool it uses, type @key{C-c ! ?}:
+
+@table @asis
+@flyccmd{C-c ! ?, flycheck-describe-checker}
+Prompt for a syntax checker and show its documentation.
+
+The documentation includes the name of the program or service used by
+the syntax checker, a list of major modes in which the checker will be
+used, and a list of its options.
+@end table
+
+@cindex syntax checker selection, manual
+@cindex manual syntax checker selection
+
+Instead of letting Flycheck select a syntax checker automatically you
+can also explicitly tell Flycheck which checker to use for the current
+buffer, by manually selecting a specific syntax checker:
+
+@table @asis
+@flyccmd{C-c ! s, flycheck-select-checker}
+Prompt for a syntax checker and select this syntax checker for the
+current buffer.
+
+@flyccmdp{C-u, C-c ! s, flycheck-select-checker}
+Remove any manual syntax checker selection for the current buffer, and
+let Flycheck automatically select a syntax checker from
+@option{flycheck-checkers} again.
+@end table
+
+You can also select a syntax checker via the variable
+@code{flycheck-checker}.  In fact, @command{flycheck-select-checker}
+just sets this variable accordingly:
+
+@defvar flycheck-checker
+A syntax checker to use for the current buffer.
+
+If nil (the default), Flycheck will automatically select the best
+checker from @option{flycheck-checkers}.
+
+If set to a syntax checker, Flycheck will use this syntax checker for
+the current buffer, and never automatically select any other.  Flycheck
+still runs chained checkers, though.
+
+If the syntax checker selected by this variable does not work in the
+current buffer, Flycheck signals an error.
+
+You can set this variable locally.  For instance, if your Python project
+mandates @uref{http://flake8.readthedocs.org/en/2.2.3/,Flake8} as a
+syntax checker, you can tell Flycheck to only use the corresponding
+checker @flyc{python-flake8} in Python files of your project by setting
+@code{flycheck-checker} as a directory-local variable in the top-level
+directory of your project with @kbd{M-x add-dir-local-variable RET
+python-mode RET flycheck-checker RET python-flake8}.  @xref{Directory
+Variables, , ,emacs}, for more information about directory variables.
+@end defvar
+
+Occasionally you may want to disable specific syntax checkers
+completely, so that they can never be used at all, neither via automatic
+nor via manual selection:
+
+@table @asis
+@flyccmd{C-c ! x, flycheck-disable-checker}
+Prompt for a syntax checker to disable in the current buffer.
+
+@flyccmdp{C-u, C-c ! x, flycheck-disable-checker}
+Prompt for a syntax checker to re-enable in the current buffer.
+@end table
+
+This is particularly useful if you want to disable syntax checkers that
+are chained after others.  For instance, if you do not care for
+documentation conventions of Emacs Lisp you may not need for the
+@flyc{emacs-lisp-checkdoc} checker, so you can disable it for the
+current buffer with @key{M-x flycheck-disable-checker RET
+emacs-lisp-checkdoc}.
+
+@command{flycheck-disable-checker} acutally sets the buffer-local value
+of the @option{flycheck-disabled-checkers} option:
+
+@defopt flycheck-disabled-checkers
+A list of disabled syntax checkers.  Flycheck will @emph{never} use
+disabled syntax checkers to check a buffer.
+
+You can customise this variable with @key{M-x customize-variable RET
+flycheck-disabled-checkers} or set its default value in your init file
+to permanently disable specific checkers.  For instance, to permanently
+disable Clang for all C/C++ buffers:
+
+@lisp
+(setq-default flycheck-disabled-checkers '(c/c++-clang))
+@end lisp
+
+You can also disable checkers via local variables.  For instance, to
+disable @flyc{emacs-lisp-checkdoc} for your entire project, add it to
+@option{flycheck-disabled-checkers} in the @file{.dir-locals.el} file of
+your project:
+
+@lisp
+((emacs-lisp-mode (flycheck-disabled-checkers emacs-lisp-checkdoc)))
+@end lisp
+
+@xref{Directory Variables,,,emacs}, for more information about directory
+variables.
+@end defopt
+
+@node Reporting results,  , Syntax checkers, Usage
+@comment  node-name,  next,  previous,  up
+@section Reporting results of syntax checking
+
+When a syntax check in the current buffer has finished, Flycheck reports
+the results of the syntax checkers used by the check in the current
+buffer:
+
+@itemize @bullet
+@item
+It highlights errors and warnings reported by a syntax checking in the
+buffer according to @option{flycheck-highlighting-mode},
+@item
+and indicates these locations in the fringe according to
+@option{flycheck-indication-mode}.
+@end itemize
+
+@defopt flycheck-highlighting-mode
+How Flycheck highlights errors and warnings in the buffer:
+
+@table @code
+@item columns
+Highlight the column of the error, if the error has a column, otherwise
+behave as @code{lines}.
+@item symbols
+Highlight the symbol at the error column, if any, otherwise behave like
+@code{columns}.  This is default
+@item sexps
+Highlight the expression at the error column, if any, otherwise behave
+like @code{columns}.  @strong{Warning:} @code{sexps} can be @emph{very}
+slow in some major modes, notably the built-in @code{python-mode}.
+@item nil
+Do not highlight errors at all.
+@end table
+
+@vindex flycheck-error
+@vindex flycheck-warning
+@vindex flycheck-info
+
+Flycheck uses the @option{flycheck-error},
+@option{flycheck-warning} and @option{flycheck-info} faces to highlight
+errors, warnings and info messages respectively.
+@end defopt
+
+@defopt flycheck-indication-mode
+How Flycheck indicates errors and warnings:
+
+@table @code
+@item left-fringe
+@itemx right-fringe
+Indicate errors in the left or right fringe respectively.
+@xref{Fringes, , ,emacs}, for more information about fringes.
+
+Flycheck uses the @option{flycheck-fringe-error},
+@option{flycheck-fringe-warning}, and @option{flycheck-fringe-info}
+faces for the indicators for the corresponding error levels.
+@item nil
+Do not indicate errors and warnings.
+@end table
+@end defopt
+
+@vindex flycheck-checker-error-threshold
+
+To avoid flooding a buffer with excessive reports, Flycheck discards any
+reports and @emph{disables} the corresponding syntax checker
+subsequently, if the total number of reported errors of any level
+exceeds the value of @option{flycheck-checker-error-threshold}.
+
+@node Supported languages, Extensions, Usage, Top
+@comment  node-name,  next,  previous,  up
+@appendix Supported languages
+
+@node Extensions, GNU Free Documentation License, Supported languages, Top
+@comment  node-name,  next,  previous,  up
+@appendix 3rd party extensions
+
+The following 3rd party extensions add support for more languages or
+provide additional cool features for Flycheck:
+
+@node GNU Free Documentation License, Main Index, Extensions, Top
+@appendix GNU Free Documentation License
+
+@include fdl-1.3.texi
+
+@node Main Index, Key Index, GNU Free Documentation License, Top
+@comment  node-name,  next,  previous,  up
+@unnumbered Main Index
+
+@printindex cp
+
+@node Key Index, Function and Variable Index, Main Index, Top
+@comment  node-name,  next,  previous,  up
+@unnumbered Key Index
+
+@printindex ky
+
+@node Function and Variable Index,  , Key Index, Top
+@comment  node-name,  next,  previous,  up
+@unnumbered Function and variable index
+
+@printindex fn
+
+@bye
+
+@c Local Variables:
+@c mode: texinfo
+@c TeX-master: t
+@c End:
+
+@c flycheck.texi ends here
