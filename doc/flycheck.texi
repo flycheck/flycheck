@@ -91,12 +91,14 @@ International Public License. A copy of the license can be obtained at
 @chapter Introduction
 
 Flycheck provides modern on-the-fly syntax checking extension for GNU
-Emacs 24, intended as replacement for the older Flymake
-extension which is part of GNU Emacs.
+Emacs 24, intended as replacement for the older Flymake extension which
+is part of GNU Emacs.
 
-It uses various linting tools to automatically check the contents of
-buffers while you are typing, and reports warnings and errors directly
-in the buffer or in an optional error list.
+Flycheck runs various linting tools and services to automatically check
+the contents of buffers while you are typing, and reports warnings and
+errors directly in the buffer, in the mode line and in an optional error
+list.  You can navigate errors and warnings in the current buffer, show
+the corresponding messages, and copy errors to the kill ring.
 
 @menu
 * Features::                    What Flycheck has to offer
