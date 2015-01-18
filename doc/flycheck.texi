@@ -30,8 +30,7 @@
 @syncodeindex tp fn
 
 @copying
-Modern on-the-fly syntax checking for GNU Emacs 24, intended as
-replacement for Flymake.
+Modern on-the-fly syntax checking for GNU Emacs 24.
 
 Copyright @copyright{} 2014–2015  Sebastian Wiesner
 
