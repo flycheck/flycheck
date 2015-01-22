@@ -347,16 +347,27 @@ the buffer is saved,
 @item
 new lines are inserted,
 @item
-@vindex flycheck-idle-change-delay
-or a short time (customisable with @option{flycheck-idle-change-delay})
-after you stopped to make changes to the buffer.
+or a short time after you stopped to make changes to the buffer.
 @end itemize
 
 You can customise this behaviour by changing
 @option{flycheck-check-syntax-automatically}:
 
 @defopt flycheck-check-syntax-automatically
-A list of events that trigger a new syntax check in the current buffer.
+A list of events that trigger a new syntax check in the current buffer:
+
+@table @code
+@item save
+Check the buffer immediately after it was saved.
+@item idle-change
+@vindex flycheck-idle-change-delay
+Check the buffer a short time after the last change to the buffer.  The
+delay is customisable with @option{flycheck-idle-change-delay}.
+@item new-line
+Check the buffer immediately after a new line was inserted.
+@item mode-enabled
+Check the buffer immediately after Flycheck Mode was enabled.
+@end table
 
 For instance, with the following code in your init file Flycheck will
 only check the buffer when it is saved, but never while you are making
