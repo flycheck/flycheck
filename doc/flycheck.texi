@@ -82,6 +82,8 @@ Flymake package which is built into Emacs.
 
 @menu
 * Introduction::                An introduction to Flycheck
+* Installation::                How to install Flycheck
+* Quickstart::                  A quick Flycheck tutorial
 * Usage::                       Detailed user guide
 * Supported languages::         A list of supported languages
 * Extensions::                  3rd party extensions to Flycheck
@@ -91,7 +93,7 @@ Flymake package which is built into Emacs.
 * Function and Variable Index::  Index of commands, options and types
 @end menu
 
-@node Introduction, Usage, Top, Top
+@node Introduction, Installation, Top, Top
 @comment  node-name,  next,  previous,  up
 @chapter Introduction
 
@@ -104,16 +106,6 @@ the contents of buffers while you are typing, and reports warnings and
 errors directly in the buffer, in the mode line and in an optional error
 list.  You can navigate errors and warnings in the current buffer, show
 the corresponding messages, and copy errors to the kill ring.
-
-@menu
-* Features::                    What Flycheck has to offer
-* Installation::                Install Flycheck
-* Quickstart::                  A intro to using Flycheck
-@end menu
-
-@node Features, Installation, Introduction, Introduction
-@comment  node-name,  next,  previous,  up
-@section Features
 
 @cindex features
 
@@ -136,15 +128,13 @@ A comprehensive manual
 A simple API to add support for new languages and tools
 @item
 A “doesn't get in your way guarantee”
-@item
-
 @end itemize
 
-@node Installation, Quickstart, Features, Introduction
+@node Installation, Quickstart, Introduction, Top
 @comment  node-name,  next,  previous,  up
-@section Installation
+@chapter Installation
 
-@subsection Prerequisites
+@section Prerequisites
 
 @cindex prerequisites
 @cindex operating system
@@ -163,7 +153,7 @@ does not explicitly support Windows.  If there are issues or problems on
 Windows, **you are on your own**.  The Flycheck developers cannot answer
 questions about Windows, or fix Windows-specific issues.
 
-@subsection Syntax checking tools
+@section Syntax checking tools
 
 Flycheck does @emph{not} check buffers itself.  It relies on
 @emph{external} programs to check buffers, which need to be installed
@@ -174,7 +164,7 @@ Most of these programs are available in the package repositories of
 Linux distributions, or with the standard package managers of specific
 programming languages (e.g. Rubygems, NPM, Cabal, etc.)
 
-@subsection Installation
+@section Installation
 
 @cindex installation
 
@@ -203,7 +193,7 @@ file:
 @uref{https://marmalade-repo.org/, Marmalade}, but due to frequent
 outages of this repository we recommend against it.
 
-@subsection Cask
+@section Cask
 
 @cindex cask
 
@@ -217,10 +207,10 @@ packages, add the following to your @file{Cask} file:
 (depends-on "flycheck")
 @end lisp
 
-@node Quickstart,  , Installation, Introduction
+@node Quickstart, Usage, Installation, Top
 @comment  node-name,  next,  previous,  up
-@section Quickstart
-@subsection Install and enable Flycheck
+@chapter Quickstart
+@section Install and enable Flycheck
 
 To get started with Flycheck, enable it by adding the following to your
 init file (see @code{user-init-file}):
@@ -229,7 +219,7 @@ init file (see @code{user-init-file}):
 (add-hook 'after-init-hook #'global-flycheck-mode)
 @end lisp
 
-@subsection Install syntax checker tools
+@section Install syntax checker tools
 
 Next you need to install syntax checking tools for the major modes you
 are using.  For instance, for Python you may want to install
@@ -250,7 +240,7 @@ $ gem install rubocop ruby-lint
 @xref{Supported languages}, for a complete list of all languages that
 Flycheck supports.
 
-@subsection Check syntax in a buffer
+@section Check syntax in a buffer
 
 Now switch to a Python or Ruby Mode buffer and run @kbd{M-x
 flycheck-verify-setup} to check whether Flycheck is correctly setup.
@@ -265,7 +255,7 @@ line.
 You can also manually check a buffer with @kbd{C-c ! c}
 (@command{flycheck-buffer}).
 
-@subsection Navigate and list errors
+@section Navigate and list errors
 
 Use @kbd{C-c ! n} (@command{flycheck-next-error}) and @kbd{C-c ! p}
 (@command{flycheck-previous-error}) to navigate between error locations.
@@ -279,7 +269,7 @@ errors in your current buffer.  The error list updates automatically
 when you fix errors or introduce new ones, or when you switch to another
 buffer.
 
-@subsection More features
+@section More features
 
 All Flycheck commands are available in the Emacs menu at @samp{Syntax
 checking} in the @samp{Tools} menu.
@@ -295,7 +285,7 @@ Flycheck.
 @image{images/flycheck-mode-line-menu.png}
 @end ifnotinfo
 
-@node Usage, Supported languages, Introduction, Top
+@node Usage, Supported languages, Quickstart, Top
 @comment  node-name,  next,  previous,  up
 @chapter Usage
 
