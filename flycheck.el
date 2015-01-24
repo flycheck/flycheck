@@ -1637,10 +1637,10 @@ Return nil if the file cannot be determined."
 Return non-nil if CHECKER may be used for the current buffer, and
 nil otherwise."
   (let ((modes (flycheck-checker-modes checker))
-        (predicate (flycheck-checker-predicate checker)))
+        (the-predicate (flycheck-checker-predicate checker)))
     (and (flycheck-valid-checker-p checker)
          (or (not modes) (memq major-mode modes))
-         (funcall predicate)
+         (funcall the-predicate)
          (not (flycheck-disabled-checker-p checker)))))
 
 (defun flycheck-may-use-next-checker (next-checker)
