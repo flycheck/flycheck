@@ -275,14 +275,14 @@ All Flycheck commands are available in the Emacs menu at @samp{Syntax
 checking} in the @samp{Tools} menu.
 
 @ifnotinfo
-@image{images/flycheck-menu.png}
+@image{images/flycheck-menu}
 @end ifnotinfo
 
 The same menu is also available by clicking on the mode line lighter of
 Flycheck.
 
 @ifnotinfo
-@image{images/flycheck-mode-line-menu.png}
+@image{images/flycheck-mode-line-menu}
 @end ifnotinfo
 
 @node Usage, Supported languages, Quickstart, Top
