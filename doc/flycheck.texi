@@ -304,9 +304,9 @@ reading this chapter.
 * Syntax checkers::             Tools used to check a buffer
 * Reporting results::           How results of checks are reported
 * Navigating errors::           How to navigate to Flycheck errors
-* Displaying errors::
-* Killing errors::
-* Listing errors::
+* Displaying errors::           How to display error messages
+* Killing errors::              How to put error messages into the kill ring
+* Listing errors::              How to show a list of all errors
 @end menu
 
 @node Checking buffers, Syntax checkers, Usage, Usage
