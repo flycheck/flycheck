@@ -85,6 +85,7 @@ Flymake package which is built into Emacs.
 * Installation::                How to install Flycheck
 * Quickstart::                  A quick Flycheck tutorial
 * Usage::                       Detailed user guide
+* Flycheck API::                API documentation
 * Supported languages::         A list of supported languages
 * Extensions::                  3rd party extensions to Flycheck
 * GNU Free Documentation License::  How to copy this manual
@@ -285,7 +286,7 @@ Flycheck.
 @image{images/flycheck-mode-line-menu}
 @end ifnotinfo
 
-@node Usage, Supported languages, Quickstart, Top
+@node Usage, Flycheck API, Quickstart, Top
 @comment  node-name,  next,  previous,  up
 @chapter Usage
 
@@ -685,7 +686,23 @@ least as severe as this one.  If nil, navigate to all errors.
 @node Displaying errors, Killing errors, Navigating errors, Usage
 @comment  node-name,  next,  previous,  up
 @section Displaying errors
-@node Supported languages, Extensions, Usage, Top
+@node Flycheck API, Supported languages, Usage, Top
+@comment  node-name,  next,  previous,  up
+@chapter Flycheck API
+
+TODO
+
+@menu
+* Errors::      Error objects
+@end menu
+
+@node Errors,  , Flycheck API, Flycheck API
+@comment  node-name,  next,  previous,  up
+@section Errors
+
+TODO
+
+@node Supported languages, Extensions, Flycheck API, Top
 @comment  node-name,  next,  previous,  up
 @appendix Supported languages
 
