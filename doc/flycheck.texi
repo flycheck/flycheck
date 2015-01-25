@@ -81,8 +81,13 @@ International Public License. A copy of the license can be obtained at
 Flycheck is a modern GNU Emacs package that provides on-the-fly syntax
 checking for buffers.  It is intended as replacement for the older
 Flymake package which is built into Emacs.
-@xref{Top,,Overview,flymake}, for more information about Flymake.
-@xref{Introduction}, for more information about Flycheck.
+
+@xref{Introduction}, for more information about Flycheck.  For
+installations instructions and a quick tutorial, @pxref {Installation}
+and @ref{Quickstart} respectively.  @xref{Usage}, for a detailed user
+guide.
+
+For more information about Flymake, @pxref{Top,,Overview,flymake}.
 
 @menu
 * Introduction::                An introduction to Flycheck
