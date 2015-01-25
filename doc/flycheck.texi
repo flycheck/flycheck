@@ -746,7 +746,52 @@ Copy the IDs of the errors at point.
 @comment  node-name,  next,  previous,  up
 @section Listing errors
 
-TODO
+To get an overview of all errors in the current buffer you can popup an
+error list:
+
+@table @asis
+@findex list-flycheck-errors
+@flyccmd{C-c ! l,flycheck-list-errors}
+@itemx @kbd{M-x list-flycheck-errors}
+List all errors in the current buffer.
+
+@vindex flycheck-error-list-after-refresh-hook
+
+The error list automatically refreshes itself after a syntax check.  It
+also follows the current buffer and window, and automatically updates to
+show the errors of the new buffer if you switch to another buffer or
+window.  After each refresh the hook
+@code{flycheck-error-list-after-refresh-hook}.
+@end table
+
+In the error list window the following keybindings are available:
+
+@table @kbd
+@item n
+Move to the next error.
+@item p
+Move to the previous error.
+@item q
+Hide the error list window.
+@item RET
+Jump to the location of the error at point.
+@item g
+Refresh the error list, by triggering a new syntax check in the
+associated buffer.
+@item S
+Sort the error list by the column at point.  Press repeatedly to inverse
+the sorting order.
+
+For instance, you can sort errors by their level by moving the point
+onto the text of the @samp{Level} column, and then pressing @kbd{S}.
+You can achieve the same effect by clicking on the column header.
+@end table
+
+@vindex flycheck-error-list-highlight
+
+When you move the point in the current buffer while the error list is
+visible, all errors on the current line are highlighted in the error
+list with the @option{flycheck-error-list-highlight} face.
 
 @node Flycheck API, Supported languages, Usage, Top
 @comment  node-name,  next,  previous,  up
