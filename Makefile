@@ -16,11 +16,10 @@ OBJECTS = $(SRCS:.el=.elc)
 
 DISTDIR = dist
 BUILDDIR = build
-DOCTREEDIR = $(DOCBUILDDIR)/doctrees
 
 EMACSBATCH = $(EMACS) -Q --batch $(EMACSFLAGS)
 
-.PHONY: compile dist doc html texinfo images \
+.PHONY: compile dist texinfo images \
 	clean clean-elc clean-dist clean-doc clean-deps \
 	test \
 	deps linkcheck
@@ -31,12 +30,7 @@ compile : $(OBJECTS)
 dist :
 	$(CASK) package
 
-doc : html texinfo
-
 texinfo: doc/flycheck.info
-
-html :
-	$(MAKEINFO) --html -o $(BUILDDIR)/html doc/flycheck.texi
 
 images: doc/images/logo.png doc/images/favicon.ico # To update the image files
 
