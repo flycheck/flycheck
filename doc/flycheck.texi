@@ -686,6 +686,36 @@ least as severe as this one.  If nil, navigate to all errors.
 @node Displaying errors, Killing errors, Navigating errors, Usage
 @comment  node-name,  next,  previous,  up
 @section Displaying errors
+
+If the point is on a Flycheck error, Flycheck will display the message
+and ID of the error at point in the echo area after a short delay.
+
+@defopt flycheck-display-errors-delay
+The number of seconds to wait before displaying the error at point.
+Floating point numbers can express fractions of seconds.
+@end defopt
+
+You can set @option{flycheck-display-errors-function} to change how
+Flycheck displays error, and what information it displays:
+
+@defopt flycheck-display-errors-function
+A function to display errors.  The function is called with a list of
+Flycheck error objects to display.  @xref{Errors}, for more information
+about these objects.
+@end defopt
+
+Flycheck provides some built-in display functions:
+
+@node Killing errors, Listing errors, Displaying errors, Usage
+@comment  node-name,  next,  previous,  up
+@section Killing errors
+
+@node Listing errors,  , Killing errors, Usage
+@comment  node-name,  next,  previous,  up
+@section Listing errors
+
+TODO
+
 @node Flycheck API, Supported languages, Usage, Top
 @comment  node-name,  next,  previous,  up
 @chapter Flycheck API
