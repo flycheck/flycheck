@@ -191,6 +191,7 @@ alternative syntax checker for @code{haskell-ghc} using
 @flyclanguage{HTML}
 
 @itemize
+@item
 @flyc{html-tidy} (@uref{https://github.com/w3c/tidy-html5,Tidy HTML5})
 @end itemize
 
@@ -354,6 +355,7 @@ Flycheck according to the current
 @flyclanguage{Sass/SCSS}
 
 @itemize
+@item
 @flyc{sass} or @flyc{scss} (using the
 @uref{http://sass-lang.com/,standard Sass processor}, for Sass or SCSS
 files respectively)
