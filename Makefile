@@ -60,6 +60,8 @@ $(PKGDIR) : Cask
 	$(CASK) install
 	touch $(PKGDIR)
 
+doc/flycheck.info: doc/flycheck.texi doc/languages.texi doc/fdl-1.3.texi
+
 flycheck-ert.elc: flycheck.elc
 
 %.elc : %.el $(PKGDIR)

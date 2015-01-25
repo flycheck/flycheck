@@ -1,0 +1,451 @@
+@macro flyclanguage{language}
+@unnumberedsec \language\
+@anchor{language-\language\}
+@cindex Language, \language\
+@cindex \language\ language
+@end macro
+
+@flyclanguage Ada
+
+@itemize
+@item
+@flyc{ada-gnat}
+(@uref{https://gcc.gnu.org/onlinedocs/gnat_ugn_unw/,GNAT})
+@end itemize
+
+@flyclanguage AsciiDoc
+
+@itemize
+@item
+@flyc{asciidoc}: @uref{http://www.methods.co.nz/asciidoc,AsciiDoc}
+@end itemize
+
+@flyclanguage{C/C++}
+
+@enumerate
+@item
+@flyc{c/c++-clang} (syntax and type check with
+@uref{http://clang.llvm.org/,Clang}) or @flyc{c/c++-gcc}
+(syntax and type check with @uref{https://gcc.gnu.org/, GCC})
+
+@item
+@flyc{c/c++-cppcheck} (style and error check with
+@uref{http://cppcheck.sourceforge.net/,cppcheck})
+@end enumerate
+
+@flyclanguage{CFEngine}
+
+@itemize
+@item
+@flyc{cfengine} (@uref{http://cfengine.com/,CFEngine})
+@end itemize
+
+@flyclanguage{Chef}
+
+@itemize
+@item
+@flyc{chef-foodcritic} (style check with
+@uref{http://acrmp.github.io/foodcritic/,foodcritic})
+@end itemize
+
+@flyclanguage{Coffeescript}
+
+@enumerate
+@item
+@flyc{coffee} (syntax check with @uref{http://coffeescript.org/,coffee})
+@item
+@flyc{coffee-coffeelint} (code style check with
+@uref{http://www.coffeelint.org/,coffeelint})
+@end enumerate
+
+@flyclanguage{Coq}
+
+@itemize
+@item
+@flyc{coq} (@uref{http://coq.inria.fr/,Coq})
+@end itemize
+
+@flyclanguage{CSS}
+
+@itemize
+@item
+@flyc{css-csslint} (style and error check with
+@uref{https://github.com/CSSLint/csslint,CSSLint})
+@end itemize
+
+@flyclanguage{D}
+
+@itemize
+@item
+@flyc{d-dmd} (@uref{http://dlang.org/,DMD})
+@end itemize
+
+@smallindentedblock
+The extension @ghref{flycheck/flycheck-d-unittest,flycheck-d-unittest}
+adds a syntax checker which runs D unittests on the fly and reports the
+results.
+@end smallindentedblock
+
+@flyclanguage{Elixir}
+
+@itemize
+@item
+@flyc{elixir} (@uref{http://elixir-lang.org/,Elixir interpreter})
+@end itemize
+
+@flyclanguage{Emacs Lisp}
+
+@enumerate
+@item
+@flyc{emacs-lisp} (syntax check with the built-in Emacs byte compiler)
+@item
+@flyc{emacs-lisp-checkdoc} (code and documentation check with
+@code{checkdoc})
+@end enumerate
+
+@smallindentedblock
+The extension @ghref{purcell/flycheck-package,flycheck-package} adds a
+syntax checker which checks for violations of Emacs Lisp packaging
+conventions.
+@end smallindentedblock
+
+@flyclanguage{Erlang}
+
+@itemize
+@item
+@flyc{erlang} (@uref{http://www.erlang.org/,Erlang})
+@end itemize
+
+@flyclanguage{ERuby}
+
+@itemize
+@item
+@flyc{eruby-erubis}
+(@uref{http://www.kuwata-lab.com/erubis/,@command{erubis}})
+@end itemize
+
+@flyclanguage{Fortran}
+
+@enumerate
+@item
+@flyc{fortran-gfortran}
+(@uref{https://gcc.gnu.org/onlinedocs/gfortran/,GFortran})
+@end enumerate
+
+@flyclanguage{Go}
+
+@enumerate
+@item
+@flyc{go-gofmt} (syntax check with
+@uref{http://golang.org/cmd/gofmt/,gofmt})
+@item
+@flyc{go-lint} (coding style with
+@uref{https://github.com/golang/lint,Golint})
+@item
+@flyc{go-vet} (check for suspicious code with
+@uref{http://godoc.org/golang.org/x/tools/cmd/vet, @command{go tool
+vet}})
+@item
+@flyc{go-build} or @flyc{go-test} (syntax and type check with
+@uref{http://golang.org/cmd/go, Go}, for source and tests
+respectively)
+@item
+@flyc{go-errcheck} (check for unhandled error returns with
+@uref{https://github.com/kisielk/errcheck, errcheck})
+@end enumerate
+
+@flyclanguage{Haml}
+
+@itemize
+@item
+@flyc{haml} (@uref{http://haml.info/,Haml})
+@end itemize
+
+@flyclanguage{Handlebars}
+
+@itemize
+@item
+@flyc{handlebars} (@uref{http://handlebarsjs.com/,Handlebars})
+@end itemize
+
+@flyclanguage{Haskell}
+
+@enumerate
+@item
+@flyc{haskell-ghc} (syntax and type checker with
+@uref{http://www.haskell.org/ghc/,GHC})
+@item
+@flyc{haskell-hlint} (style checker with
+@uref{https://github.com/ndmitchell/hlint,hlint})
+@end enumerate
+
+@smallindentedblock
+The extension @ghref{flycheck/flycheck-haskell,flycheck-haskell}
+configures Flycheck from the current Cabal project, and adds support for
+Cabal sandboxes.  The extension
+@ghref{flycheck/flycheck-hdevtools,flycheck-hdevtools} adds an
+alternative syntax checker for @code{haskell-ghc} using
+@uref{https://github.com/bitc/hdevtools/,hdevtools}.
+@end smallindentedblock
+
+@flyclanguage{HTML}
+
+@itemize
+@flyc{html-tidy} (@uref{https://github.com/w3c/tidy-html5,Tidy HTML5})
+@end itemize
+
+@flyclanguage{Javascript}
+
+@itemize
+@item
+@flyc{javascript-jshint} (@uref{http://jshint.com/,JSHint}), or
+@item
+@flyc{javascript-eslint} (@uref{http://eslint.org/,ESLint}), or
+@item
+@flyc{javascript-gjslint}
+(@uref{https://developers.google.com/closure/utilities,Closure Linter})
+@end itemize
+
+@flyclanguage{JSON}
+
+@itemize
+@item
+@flyc{json-jsonlint} (@uref{https://github.com/zaach/jsonlint,jsonlint})
+@end itemize
+
+@flyclanguage{Less}
+
+@itemize
+@item
+@flyc{less} (@uref{http://lesscss.org/,less})
+@end itemize
+
+@flyclanguage{Lua}
+
+@itemize
+@item
+@flyc{lua} (@uref{http://www.lua.org/,Lua compiler})
+@end itemize
+
+@flyclanguage{Perl}
+
+@enumerate
+@item
+@flyc{perl} (syntax check with the @uref{http://www.perl.org/,Perl
+interpreter})
+@item
+@flyc{perl-perlcritic} (style and code check with
+@uref{https://metacpan.org/pod/Perl::Critic, Perl::Critic})
+@end enumerate
+
+@flyclanguage{PHP}
+
+@enumerate
+@item
+@flyc{php} (syntax check with
+@uref{https://metacpan.org/pod/Perl::Critic,PHP CLI})
+@item
+@flyc{php-phpmd} (code check with @uref{http://phpmd.org/,PHP Mess
+Detector})
+@item
+@flyc{php-phpcs} (style check with
+@uref{http://pear.php.net/package/PHP_CodeSniffer/, PHP CodeSniffer})
+@end enumerate
+
+@flyclanguage{Puppet}
+
+@itemize
+@item
+@flyc{puppet} (syntax check with @uref{http://puppetlabs.com/, Puppet})
+@item
+@flyc{puppet-lint} (style check with @uref{http://puppet-lint.com/,
+Puppet Lint})
+@end itemize
+
+@flyclanguage{Python}
+
+@itemize
+@item
+@flyc{python-flake8} (syntax and style checking with
+@uref{https://pypi.python.org/pypi/flake8,flake8}), or
+@item
+@flyc{python-pylint} (syntax and style checking with
+@uref{http://pylint.org/,Pylint}), or
+@item
+@flyc{python-pycompile} (syntax checking with Python's
+@uref{https://docs.python.org/3.4/library/py_compile.html,built-in byte
+compiler}, as last resort)
+@end itemize
+
+@smallindentedblock
+The extension @ghref{Wilfred/flycheck-pyflakes,flycheck-pyflakes} adds a
+syntax checker using
+@uref{https://pypi.python.org/pypi/pyflakes,Pyflakes}.
+@end smallindentedblock
+
+@flyclanguage{R}
+
+@itemize
+@item
+@flyc{r-lintr} (syntax and style check with
+@uref{jimhester/lintr,lintr})
+@end itemize
+
+@flyclanguage{Racket}
+
+@itemize
+@item
+@flyc{racket} (@uref{http://racket-lang.org/,Racket})
+@end itemize
+
+@flyclanguage{RPM Spec}
+
+@itemize
+@item
+@flyc{rpm-rpmlint}
+(@uref{http://sourceforge.net/projects/rpmlint/,rpmlint})
+@end itemize
+
+@flyclanguage{reStructuredText}
+
+@itemize
+@item
+@flyc{rst} (using @uref{http://docutils.sourceforge.net/,docutils}, for
+plain reStructuredFiles files), or
+@flyc{rst-sphin} (using @uref{http://sphinx-doc.org/,Sphinx}, for Sphinx
+documentation files)
+@end itemize
+
+@flyclanguage{Ruby}
+
+@enumerate
+@item
+@flyc{ruby-rubocop} (syntax and style check using
+@uref{http://batsov.com/rubocop/,RuboCop})
+@item
+@flyc{ruby-rubylint} (syntax and style check using
+@uref{http://code.yorickpeterse.com/ruby-lint/latest/,ruby-lint})
+@end enumerate
+
+If none of the above is available, Flycheck will fall back to one of the
+following checkers for very basic checking:
+
+@itemize
+@item
+@flyc{ruby} (using the @uref{https://www.ruby-lang.org/,standard Ruby
+interpreter}),
+@item
+@flyc{ruby-jruby} (using @uref{http://jruby.org/,JRuby})
+@end itemize
+
+@flyclanguage{Rust}
+
+@itemize
+@item
+@flyc{rust} (using the @uref{http://www.rust-lang.org/,Rust compiler})
+@end itemize
+
+@smallindentedblock
+The @ghref{flycheck/flycheck-rust,flycheck-rust} extension configures
+Flycheck according to the current
+@uref{http://doc.crates.io/guide.html,Cargo} project.
+@end smallindentedblock
+
+@flyclanguage{Sass/SCSS}
+
+@itemize
+@flyc{sass} or @flyc{scss} (using the
+@uref{http://sass-lang.com/,standard Sass processor}, for Sass or SCSS
+files respectively)
+@end itemize
+
+@flyclanguage{Scala}
+
+@enumerate
+@item
+@uref{scala} (syntax and type check using the
+@uref{http://www.scala-lang.org/,Scala compiler})
+@item
+@uref{scala-scalastyle} (style check using
+@uref{http://www.scalastyle.org/,Scalastyle})
+@end enumerate
+
+@flyclanguage{Shell scripting languages}
+
+@enumerate
+@item
+Syntax check with one of the following checkers, depending on the shell
+used for the current Sh Mode buffer,
+@itemize
+@item
+@flyc{sh-bash} (for @uref{http://www.gnu.org/software/bash/,Bash})
+@item
+@flyc{sh-posix-dash} or @flyc{sh-posix-bash} (for POSIX shell scripts,
+using @uref{http://gondor.apana.org.au/~herbert/dash/,Dash} or
+@uref{http://www.gnu.org/software/bash/,Bash} respectively)
+@item
+@flyc{sh-zsh} (for @uref{http://www.zsh.org/,Zsh})
+@end itemize
+@item
+@flyc{sh-shellcheck} (code and style check using
+@uref{https://github.com/koalaman/shellcheck/,ShellCheck})
+@end enumerate
+
+@flyclanguage{Slim}
+
+@itemize
+@item
+@flyc{slim} (using @uref{http://slim-lang.com/,Slim})
+@end itemize
+
+@flyclanguage{TeX/LaTeX}
+
+@itemize
+@item
+@flyc{tex-chktex} (style check using
+@uref{http://www.nongnu.org/chktex/,ChkTeX}), or
+@item
+@flyc{tex-lacheck} (style check using
+@uref{http://www.ctan.org/pkg/lacheck,Lacheck})
+@end itemize
+
+@flyclanguage{Texinfo}
+
+@itemize
+@item
+@flyc{texinfo} (using
+@uref{http://www.gnu.org/software/texinfo/,makeinfo})
+@end itemize
+
+@flyclanguage{Verilog}
+
+@itemize
+@item
+@flyc{verilog-verilator} (using
+@uref{http://www.veripool.org/wiki/verilator,Verilator})
+@end itemize
+
+@flyclanguage{XML}
+
+@itemize
+@item
+@flyc{xml-xmlstarlet} (using @uref{http://xmlstar.sourceforge.net,XMLStarlet}),
+or
+@item
+@flyc{xml-xmllint} (using @uref{http://www.xmlsoft.org/,xmllint})
+@end itemize
+
+@flyclanguage{YAML}
+
+@itemize
+@item
+@flyc{yaml-jsyaml} (using
+@uref{https://github.com/nodeca/js-yaml,js-yaml}), or
+@item
+@flyc{yaml-ruby} (using Ruby's YAML parser)
+@end itemize
+
+@c Local Variables:
+@c mode: texinfo
+@c TeX-master: "flycheck"
+@c End:
