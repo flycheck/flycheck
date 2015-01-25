@@ -724,6 +724,24 @@ which shows error messages in a graphical popup.
 @comment  node-name,  next,  previous,  up
 @section Killing errors
 
+You can also put error messages into the kill ring:
+
+@table @asis
+@flyccmd{C-c ! C-w, flycheck-copy-errors-as-kill}
+Copy all Flycheck error messages at point into the kill ring.
+
+Each error message is killed @emph{separately}, so @kbd{C-y}
+(@code{yank}) only yanks a single error message.  You can use @kbd{M-y}
+(@code{yank-pop}) to cycle between the killed messages after yanking the
+first one.
+
+@flyccmdp{C-u, C-c ! C-w, flycheck-copy-errors-as-kill}
+Copy all Flycheck error messages at point, including their IDs.
+
+@flyccmdp{M-0, C-c ! C-w, flycheck-copy-errors-as-kill}
+Copy the IDs of the errors at point.
+@end table
+
 @node Listing errors,  , Killing errors, Usage
 @comment  node-name,  next,  previous,  up
 @section Listing errors
