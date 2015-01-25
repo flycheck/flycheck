@@ -706,6 +706,20 @@ about these objects.
 
 Flycheck provides some built-in display functions:
 
+@defun flycheck-display-error-messages
+Show error messages and IDs in the echo area.
+@end defun
+
+@defun flycheck-display-error-messages-unless-error-list
+Like @code{flycheck-display-error-messages}, but does not show anything
+if the error list is visible.  @xref{Listing errors}, for more
+information about the error list.
+@end defun
+
+The @uref{https://github.com/flycheck/flycheck-pos-tip,
+flycheck-pos-tip} extension provides an alternative display function,
+which shows error messages in a graphical popup.
+
 @node Killing errors, Listing errors, Displaying errors, Usage
 @comment  node-name,  next,  previous,  up
 @section Killing errors
