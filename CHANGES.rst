@@ -3,6 +3,10 @@
 master (in development)
 -----------------------
 
+- **Breaking changes**:
+
+  - Remove `make` syntax checker due to various issues [GH-572] [GH-573]
+
 - New syntax checkers:
 
   - R with `lintr` [GH-512]

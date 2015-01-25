@@ -44,8 +44,6 @@ dependencies:
     tags: language-less
   - role: language-lua
     tags: language-lua
-  - role: language-make
-    tags: language-make
   - role: language-perl
     tags: language-perl
   - role: language-php

@@ -4423,18 +4423,6 @@ Why not:
    '(5 nil error "unfinished string near '\"oh no'"
        :checker lua)))
 
-(flycheck-ert-def-checker-test make make nil
-  (flycheck-ert-should-syntax-check
-   "checkers/make.mk" '(makefile-mode makefile-gmake-mode)
-   '(2 nil error "*** missing separator.  Stop." :checker make)))
-
-(flycheck-ert-def-checker-test make make pmake
-  (let ((flycheck-make-executable "pmake"))
-    (skip-unless (executable-find (flycheck-checker-executable 'make)))
-    (flycheck-ert-should-syntax-check
-     "checkers/make.mk" 'makefile-bsdmake-mode
-     '(2 nil error "Need an operator" :checker make))))
-
 (flycheck-ert-def-checker-test perl perl nil
   (flycheck-ert-should-syntax-check
    "checkers/perl.pl" '(perl-mode cperl-mode)

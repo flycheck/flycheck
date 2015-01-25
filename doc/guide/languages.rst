@@ -424,19 +424,6 @@ Lua
 .. flyc-checker:: lua
    :auto:
 
-Make
-====
-
-.. flyc-checker:: make
-   :auto:
-
-   .. seealso:: `GNU Make`_, `NetBSD Make`_, `FreeBSD Make`_, `OpenBSD Make`_
-
-.. _GNU Make: http://www.gnu.org/software/make/
-.. _NetBSD Make: http://netbsd.gw.com/cgi-bin/man-cgi?make++NetBSD-current
-.. _FreeBSD Make: http://www.freebsd.org/cgi/man.cgi?query=make&sektion=1
-.. _OpenBSD Make: http://www.openbsd.org/cgi-bin/man.cgi?query=make
-
 Perl
 ====
 
