@@ -72,7 +72,7 @@ International Public License. A copy of the license can be obtained at
 @end titlepage
 
 @ifnottex
-@node Top, Introduction, , (dir)
+@node Top
 @top Flycheck
 
 @insertcopying
@@ -102,8 +102,7 @@ For more information about Flymake, @pxref{Top,,Overview,flymake}.
 * Function and Variable Index::  Index of commands, options and types
 @end menu
 
-@node Introduction, Installation, Top, Top
-@comment  node-name,  next,  previous,  up
+@node Introduction
 @chapter Introduction
 
 Flycheck provides modern on-the-fly syntax checking extension for GNU
@@ -139,8 +138,7 @@ A simple API to add support for new languages and tools
 A “doesn't get in your way guarantee”
 @end itemize
 
-@node Installation, Quickstart, Introduction, Top
-@comment  node-name,  next,  previous,  up
+@node Installation
 @chapter Installation
 
 @section Prerequisites
@@ -216,8 +214,7 @@ packages, add the following to your @file{Cask} file:
 (depends-on "flycheck")
 @end lisp
 
-@node Quickstart, Usage, Installation, Top
-@comment  node-name,  next,  previous,  up
+@node Quickstart
 @chapter Quickstart
 @section Install and enable Flycheck
 
@@ -293,8 +290,7 @@ Flycheck.
 @image{images/flycheck-mode-line-menu}
 @end ifnotinfo
 
-@node Usage, Flycheck API, Quickstart, Top
-@comment  node-name,  next,  previous,  up
+@node Usage
 @chapter Usage
 
 This chapter explains the usage of Flycheck in-depth.
@@ -316,8 +312,7 @@ reading this chapter.
 * Listing errors::              How to show a list of all errors
 @end menu
 
-@node Checking buffers, Syntax checkers, Usage, Usage
-@comment  node-name,  next,  previous,  up
+@node Checking buffers
 @section Checking buffers
 
 @cindex flycheck mode
@@ -413,8 +408,7 @@ contents of the current buffer to external programs.  You can change the
 prefix used for the names of these temporary files with
 @option{flycheck-temp-prefix}.
 
-@node Syntax checkers, Reporting results, Checking buffers, Usage
-@comment  node-name,  next,  previous,  up
+@node Syntax checkers
 @section Syntax checkers
 
 @cindex syntax checker
@@ -557,8 +551,7 @@ variables.
 You can change the completion system used by the commands of this
 section with @option{flycheck-completion-system}.
 
-@node Reporting results, Navigating errors, Syntax checkers, Usage
-@comment  node-name,  next,  previous,  up
+@node Reporting results
 @section Reporting results of syntax checking
 
 When a syntax check in the current buffer has finished, Flycheck reports
@@ -629,8 +622,7 @@ exceeds the value of @option{flycheck-checker-error-threshold}.
 
 You can explicitly clear with the @code{flycheck-clear} command.
 
-@node Navigating errors, Displaying errors, Reporting results, Usage
-@comment  node-name,  next,  previous,  up
+@node Navigating errors
 @section Navigating errors
 
 @vindex flycheck-standard-error-navigation
@@ -690,8 +682,7 @@ If set to an error level, only navigate to errors whose level is as
 least as severe as this one.  If nil, navigate to all errors.
 @end defopt
 
-@node Displaying errors, Killing errors, Navigating errors, Usage
-@comment  node-name,  next,  previous,  up
+@node Displaying errors
 @section Displaying errors
 
 If the point is on a Flycheck error, Flycheck will display the message
@@ -727,8 +718,7 @@ The @ghref{flycheck/flycheck-pos-tip, flycheck-pos-tip} extension
 provides an alternative display function, which shows error messages in
 a graphical popup.
 
-@node Killing errors, Listing errors, Displaying errors, Usage
-@comment  node-name,  next,  previous,  up
+@node Killing errors
 @section Killing errors
 
 You can also put error messages into the kill ring:
@@ -749,8 +739,7 @@ Copy all Flycheck error messages at point, including their IDs.
 Copy the IDs of the errors at point.
 @end table
 
-@node Listing errors,  , Killing errors, Usage
-@comment  node-name,  next,  previous,  up
+@node Listing errors
 @section Listing errors
 
 To get an overview of all errors in the current buffer you can popup an
@@ -800,8 +789,7 @@ When you move the point in the current buffer while the error list is
 visible, all errors on the current line are highlighted in the error
 list with the @option{flycheck-error-list-highlight} face.
 
-@node Flycheck API, Supported languages, Usage, Top
-@comment  node-name,  next,  previous,  up
+@node Flycheck API
 @chapter Flycheck API
 
 TODO
@@ -810,14 +798,12 @@ TODO
 * Errors::      Error objects
 @end menu
 
-@node Errors,  , Flycheck API, Flycheck API
-@comment  node-name,  next,  previous,  up
+@node Errors
 @section Errors
 
 TODO
 
-@node Supported languages, GNU Free Documentation License, Flycheck API, Top
-@comment  node-name,  next,  previous,  up
+@node Supported languages
 @appendix Supported languages
 
 This chapter lists the languages supported by Flycheck.  Some 3rd party
@@ -847,25 +833,22 @@ more information about a syntax checker.
 
 @include languages.texi
 
-@node GNU Free Documentation License, Main Index, Supported languages, Top
+@node GNU Free Documentation License
 @appendix GNU Free Documentation License
 
 @include fdl-1.3.texi
 
-@node Main Index, Key Index, GNU Free Documentation License, Top
-@comment  node-name,  next,  previous,  up
+@node Main Index
 @unnumbered Main Index
 
 @printindex cp
 
-@node Key Index, Function and Variable Index, Main Index, Top
-@comment  node-name,  next,  previous,  up
+@node Key Index
 @unnumbered Key Index
 
 @printindex ky
 
-@node Function and Variable Index,  , Key Index, Top
-@comment  node-name,  next,  previous,  up
+@node Function and Variable Index
 @unnumbered Function and variable index
 
 @printindex fn
