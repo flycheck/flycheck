@@ -257,18 +257,18 @@ indicates them in the fringe, and reports their numbers in the mode
 line.
 
 You can also manually check a buffer with @kbd{C-c ! c}
-(@command{flycheck-buffer}).
+(@code{flycheck-buffer}).
 
 @section Navigate and list errors
 
-Use @kbd{C-c ! n} (@command{flycheck-next-error}) and @kbd{C-c ! p}
-(@command{flycheck-previous-error}) to navigate between error locations.
+Use @kbd{C-c ! n} (@code{flycheck-next-error}) and @kbd{C-c ! p}
+(@code{flycheck-previous-error}) to navigate between error locations.
 If you keep the point at an error location, Flycheck will show the error
 message in the echo area after a short delay.  You can also hover error
 locations with the mouse and see the error message in a tooltip.
 
 To get an overview of all errors and warnings in the current buffer,
-type @kbd{C-c ! l} (@command{flycheck-list-errors}) to pop up a list of all
+type @kbd{C-c ! l} (@code{flycheck-list-errors}) to pop up a list of all
 errors in your current buffer.  The error list updates automatically
 when you fix errors or introduce new ones, or when you switch to another
 buffer.
@@ -474,7 +474,7 @@ let Flycheck automatically select a syntax checker from
 @end table
 
 You can also select a syntax checker via the variable
-@code{flycheck-checker}.  In fact, @command{flycheck-select-checker}
+@code{flycheck-checker}.  In fact, @code{flycheck-select-checker}
 just sets this variable accordingly:
 
 @defvar flycheck-checker
@@ -519,7 +519,7 @@ documentation conventions of Emacs Lisp you may not need for the
 current buffer with @key{M-x flycheck-disable-checker RET
 emacs-lisp-checkdoc}.
 
-@command{flycheck-disable-checker} acutally sets the buffer-local value
+@code{flycheck-disable-checker} acutally sets the buffer-local value
 of the @option{flycheck-disabled-checkers} option:
 
 @defopt flycheck-disabled-checkers
@@ -623,7 +623,7 @@ exceeds the value of @option{flycheck-checker-error-threshold}.
 
 @findex flycheck-clear
 
-You can explicitly clear with the @command{flycheck-clear} command.
+You can explicitly clear with the @code{flycheck-clear} command.
 
 @node Navigating errors, Displaying errors, Reporting results, Usage
 @comment  node-name,  next,  previous,  up
@@ -632,12 +632,12 @@ You can explicitly clear with the @command{flycheck-clear} command.
 @vindex flycheck-standard-error-navigation
 
 By default, Flycheck integrates into standard error navigation commands
-of Emacs: @kbd{M-g n} (@command{next-error}) and @kbd{M-g p}
-(@command{previous-error}) will navigate between Flycheck warnings and
+of Emacs: @kbd{M-g n} (@code{next-error}) and @kbd{M-g p}
+(@code{previous-error}) will navigate between Flycheck warnings and
 errors in the current buffer.  @xref{Compilation Mode,,,emacs}, for more
 information about these commands.  You can disable this integration by
 setting @option{flycheck-standard-error-navigation} to nil, and
-re-enabling @command{flycheck-mode} afterwards.
+re-enabling @code{flycheck-mode} afterwards.
 
 @strong{Note:} With standard error navigation @emph{visible} compilation
 buffers (e.g. from M-x compile, M-x grep, M-x occur, etc.)  take
