@@ -68,7 +68,7 @@ International Public License. A copy of the license can be obtained at
 @end titlepage
 
 @ifnottex
-@node Top, Introduction, (dir), (dir)
+@node Top, Introduction, , (dir)
 @top Flycheck
 
 @insertcopying
