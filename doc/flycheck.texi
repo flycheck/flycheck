@@ -310,6 +310,7 @@ reading this chapter.
 * Displaying errors::           How to display error messages
 * Killing errors::              How to put error messages into the kill ring
 * Listing errors::              How to show a list of all errors
+* Configuring checkers::        How to configure syntax checkers
 @end menu
 
 @node Checking buffers
@@ -788,6 +789,62 @@ You can achieve the same effect by clicking on the column header.
 When you move the point in the current buffer while the error list is
 visible, all errors on the current line are highlighted in the error
 list with the @option{flycheck-error-list-highlight} face.
+
+@node Configuring checkers
+@section Configuring syntax checkers
+
+Flycheck provides different options to configure syntax checkers.
+
+@subsection Syntax checker executables
+
+@cindex syntax checker executables
+@cindex executables of syntax checkers
+
+For each syntax checker, there is a buffer-local, customizable variable
+@code{flycheck-@var{checker}-executable}, where @var{checker} is the
+name of the syntax checker.
+
+The value of this variable is either nil, or a string.  In the former
+case, Flycheck uses the default executable from the syntax checker
+definition when executing the syntax checker.  In the latter case, it
+uses the value of the variable as executable.
+
+Use these variables to override the executable from the definition per
+buffer.  For instance, you could use a different Emacs version with the
+@flyc{emacs-lisp} or @flyc{emacs-lisp-checkdoc}.
+
+You can either set these variables directly in your init file, or change
+them interactively:
+
+@table @asis
+@flyccmd{C-c ! e, flycheck-set-checker-executable}
+Set the executable of a syntax checker in the current buffer.
+
+Prompt for a syntax checker and an executable file, and set the
+executable variable of the syntax checker.
+@flyccmdp{C-u,C-c ! e, flycheck-set-checker-executable}
+Reset the executable of a syntax checker in the current buffer.
+
+Prompt for a syntax checker and reset its executable to the default.
+@end table
+
+@subsection Syntax checker options
+
+@cindex syntax checker options
+@cindex options of syntax checkers
+
+Some syntax checkers can be configured via options.  Use the command
+@code{flycheck-describe-checker} to see what options a syntax checker
+provides.  Type @kbd{M-x customize-group RET flycheck-options} to get a
+list of all available options.
+
+Options are mainly intended to be set per file or per project via file
+or directory variables.  @xref{File Variables,,,emacs}, and
+@ref{Directory Variables,,,emacs} respectively, for more information.
+
+@subsection Syntax checker configuration files
+
+TODO
 
 @node Flycheck API
 @chapter Flycheck API
