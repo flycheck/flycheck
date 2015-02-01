@@ -96,6 +96,7 @@ For more information about Flymake, @pxref{Top,,Overview,flymake}.
 * Usage::                       Detailed user guide
 * Flycheck API::                API documentation
 * Supported languages::         A list of supported languages
+* Issues::                      How to report issues in Flycheck
 * GNU Free Documentation License::  How to copy this manual
 * Main Index::                  Index of Flycheck concepts
 * Key Index::                   Index of all keybindings
@@ -311,6 +312,7 @@ reading this chapter.
 * Displaying errors::           How to display error messages
 * Killing errors::              How to put error messages into the kill ring
 * Listing errors::              How to show a list of all errors
+* Mode line display::           How to interpret Flycheck's mode line
 * Configuring checkers::        How to configure syntax checkers
 @end menu
 
@@ -791,6 +793,40 @@ When you move the point in the current buffer while the error list is
 visible, all errors on the current line are highlighted in the error
 list with the @code{flycheck-error-list-highlight} face.
 
+@node Mode line display
+@section Mode line display
+
+Flycheck always indicates its current state in the mode line, with one
+of the following strings:
+
+@table @samp
+@item FlyC
+There are no errors in the current buffer.
+@item FlyC*
+Flycheck currently checks the current buffer.
+@item FlyC:3/5
+There are three errors and five warnings in the current buffer.
+@item FlyC-
+Flycheck did not find any syntax checker for the current buffer.  Try
+@kbd{C-c ! v} (@code{flycheck-verify-setup}) to find out why.
+@item FlyC!
+The syntax check failed.  Inspect the @samp{*Messages*} buffer for more
+information about the failure.
+@item FlyC?
+The syntax check had a dubious result.  The definition of the syntax
+checker may be flawed.  Inspect the @samp{*Messages*} buffer for
+details.
+@end table
+
+This indicator should @strong{never} appear for built-in syntax
+checkers.  If it does, please consider reporting an issue to the
+Flycheck developers.  @xref{Issues}, for more information.
+
+The 3rd party extension
+@ghref{flycheck/flycheck-color-mode-line,flycheck-color-mode-line}
+automatically changes the background colour of the mode line according
+to the results of the last syntax check.
+
 @node Configuring checkers
 @section Configuring syntax checkers
 
@@ -990,6 +1026,11 @@ buffer.  Use @kbd{C-c ! ?} (@code{flycheck-describe-checker}) to obtain
 more information about a syntax checker.
 
 @include languages.texi
+
+@node Issues
+@appendix Issues
+
+TODO
 
 @node GNU Free Documentation License
 @appendix GNU Free Documentation License
