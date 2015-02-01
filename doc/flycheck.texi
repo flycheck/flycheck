@@ -155,10 +155,11 @@ tested on Linux and OS X.
 
 @strong{Warning:} Flycheck tries to maintain compatibility with Windows
 as well, and generally works well on Windows. Pull requests which fix or
-improve Windows compatibility are **very** welcome.  However, Flycheck
-does not explicitly support Windows.  If there are issues or problems on
-Windows, **you are on your own**.  The Flycheck developers cannot answer
-questions about Windows, or fix Windows-specific issues.
+improve Windows compatibility are @emph{very} welcome.  However,
+Flycheck does not explicitly support Windows.  If there are issues or
+problems on Windows, @emph{you are on your own}.  The Flycheck
+developers cannot answer questions about Windows, or fix
+Windows-specific issues.
 
 @section Syntax checking tools
 
