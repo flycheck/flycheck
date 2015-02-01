@@ -1,3 +1,5 @@
+- name: Update APT caches if older than three days
+  apt: update_cache=true cache_valid_time=259200
 - name: Base packages
   apt: name={{item}} state=latest install_recommends=false force=yes
   with_items:
