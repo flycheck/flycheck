@@ -1170,13 +1170,9 @@ and extension, as in `file-name-base'."
     (unwind-protect
         (progn
           (should (equal (flycheck-checker-modes 'python-pylint)
-                         (cons 'emacs-lisp-mode modes)))
-          (flycheck-ert-with-resource-buffer "automatic-check-dummy.el"
-            (should (flycheck-may-use-checker 'python-pylint))))
+                         (cons 'emacs-lisp-mode modes))))
       (put 'python-pylint 'flycheck-modes modes)
-      (should (equal (flycheck-checker-modes 'python-pylint) modes))
-      (flycheck-ert-with-resource-buffer "automatic-check-dummy.el"
-        (should-not (flycheck-may-use-checker 'python-pylint))))))
+      (should (equal (flycheck-checker-modes 'python-pylint) modes)))))
 
 
 ;;; Checker API
