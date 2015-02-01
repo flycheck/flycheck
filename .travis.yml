@@ -22,3 +22,5 @@ script:
   - make EMACS=$EMACS EMACSFLAGS="${EMACSFLAGS}" compile
   # Run the unit tests
   - make EMACS=$EMACS ERTSELECTOR="${ERTSELECTOR}" test
+matrix:
+  fast_finish: true
