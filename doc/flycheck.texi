@@ -300,7 +300,7 @@ This chapter explains the usage of Flycheck in-depth.
 
 @strong{Note:} All commands in this chapter are documented with their
 default key prefix @kbd{C-c !}.  You can customise this prefix with
-@option{flycheck-keymap-prefix}, but remember your custom prefix while
+@code{flycheck-keymap-prefix}, but remember your custom prefix while
 reading this chapter.
 
 @menu
@@ -322,28 +322,28 @@ reading this chapter.
 @vindex global-flycheck-mode
 @vindex flycheck-global-modes
 
-The minor mode @option{flycheck-mode} enables syntax checking in a
-single buffer.  @option{global-flycheck-mode} automatically enables
-@option{flycheck-mode} all buffers whenever possible.  You can exclude
-specific major modes from @option{global-flycheck-mode} with
-@option{flycheck-global-modes}.
+The minor mode @code{flycheck-mode} enables syntax checking in a single
+buffer.  @code{global-flycheck-mode} automatically enables
+@code{flycheck-mode} all buffers whenever possible.  You can exclude
+specific major modes from @code{global-flycheck-mode} with
+@code{flycheck-global-modes}.
 
-@strong{Note:} @option{global-flycheck-mode} does not enable
-@option{flycheck-mode} for remote or encrypted files.  The former is flaky
+@strong{Note:} @code{global-flycheck-mode} does not enable
+@code{flycheck-mode} for remote or encrypted files.  The former is flaky
 and might be very slow, and the latter would leak confidential data to
 temporary directories.  You may still check syntax in these buffers by
 manually enabling @code{flycheck-mode} with @kbd{M-x flycheck-mode}.
 However, this is @emph{not} recommended for said reasons.
 
 To enable syntax checking permanently, either customise
-@option{global-flycheck-mode} with @kbd{M-x customize-variable RET
+@code{global-flycheck-mode} with @kbd{M-x customize-variable RET
 global-flycheck-mode}, or add the following code to your init file:
 
 @lisp
 (add-hook 'after-init-hook #'global-flycheck-mode)
 @end lisp
 
-When @option{flycheck-mode} is enabled, Flycheck automatically checks a
+When @code{flycheck-mode} is enabled, Flycheck automatically checks a
 buffer whenever
 
 @itemize @bullet
@@ -356,7 +356,7 @@ or a short time after you stopped to make changes to the buffer.
 @end itemize
 
 You can customise this behaviour by changing
-@option{flycheck-check-syntax-automatically}:
+@code{flycheck-check-syntax-automatically}:
 
 @defopt flycheck-check-syntax-automatically
 A list of events that trigger a new syntax check in the current buffer:
@@ -367,7 +367,7 @@ Check the buffer immediately after it was saved.
 @item idle-change
 @vindex flycheck-idle-change-delay
 Check the buffer a short time after the last change to the buffer.  The
-delay is customisable with @option{flycheck-idle-change-delay}.
+delay is customisable with @code{flycheck-idle-change-delay}.
 @item new-line
 Check the buffer immediately after a new line was inserted.
 @item mode-enabled
@@ -408,7 +408,7 @@ with potential problems in their setup.
 During syntax checks Flycheck creates temporary files to feed to
 contents of the current buffer to external programs.  You can change the
 prefix used for the names of these temporary files with
-@option{flycheck-temp-prefix}.
+@code{flycheck-temp-prefix}.
 
 @node Syntax checkers
 @section Syntax checkers
@@ -419,7 +419,7 @@ prefix used for the names of these temporary files with
 
 Flycheck does not check buffers by itself, but relies on external
 @emph{syntax checkers}.  When checking a buffer Flycheck automatically
-selects the best syntax checker from @option{flycheck-checkers}:
+selects the best syntax checker from @code{flycheck-checkers}:
 
 @defopt flycheck-checkers
 A list of all syntax checkers available for syntax checking.
@@ -439,7 +439,7 @@ Tips,,,elisp}.  In Emacs Lisp buffers, Flycheck will first use
 @flyc{emacs-lisp}, and then @flyc{emacs-lisp-checkdoc}.
 
 Flycheck ignores chained checkers which are not contained in
-@option{flycheck-checkers}.
+@code{flycheck-checkers}.
 
 Like everything else in GNU Emacs, syntax checkers have online
 documentation as well.  If you are interested what major modes a
@@ -467,10 +467,10 @@ buffer, by manually selecting a specific syntax checker:
 Prompt for a syntax checker and select this syntax checker for the
 current buffer.
 
-@flyccmdp{C-u, C-c ! s, flycheck-select-checker}
-Remove any manual syntax checker selection for the current buffer, and
-let Flycheck automatically select a syntax checker from
-@option{flycheck-checkers} again.
+@flyccmdp{C-u, C-c ! s, flycheck-select-checker} Remove any manual
+syntax checker selection for the current buffer, and let Flycheck
+automatically select a syntax checker from @code{flycheck-checkers}
+again.
 @end table
 
 You can also select a syntax checker via the variable
@@ -481,7 +481,7 @@ just sets this variable accordingly:
 A syntax checker to use for the current buffer.
 
 If nil (the default), Flycheck will automatically select the best
-checker from @option{flycheck-checkers}.
+checker from @code{flycheck-checkers}.
 
 If set to a syntax checker, Flycheck will use this syntax checker for
 the current buffer, and never automatically select any other.  Flycheck
@@ -519,8 +519,8 @@ documentation conventions of Emacs Lisp you may not need for the
 current buffer with @key{M-x flycheck-disable-checker RET
 emacs-lisp-checkdoc}.
 
-@code{flycheck-disable-checker} acutally sets the buffer-local value
-of the @option{flycheck-disabled-checkers} option:
+@code{flycheck-disable-checker} acutally sets the buffer-local value of
+the @code{flycheck-disabled-checkers} option:
 
 @defopt flycheck-disabled-checkers
 A list of disabled syntax checkers.  Flycheck will @emph{never} use
@@ -537,7 +537,7 @@ disable Clang for all C/C++ buffers:
 
 You can also disable checkers via local variables.  For instance, to
 disable @flyc{emacs-lisp-checkdoc} for your entire project, add it to
-@option{flycheck-disabled-checkers} in the @file{.dir-locals.el} file of
+@code{flycheck-disabled-checkers} in the @file{.dir-locals.el} file of
 your project:
 
 @lisp
@@ -551,7 +551,7 @@ variables.
 @vindex flycheck-completion-system
 
 You can change the completion system used by the commands of this
-section with @option{flycheck-completion-system}.
+section with @code{flycheck-completion-system}.
 
 @node Reporting results
 @section Reporting results of syntax checking
@@ -563,10 +563,10 @@ buffer:
 @itemize @bullet
 @item
 It highlights errors and warnings reported by a syntax checking in the
-buffer according to @option{flycheck-highlighting-mode},
+buffer according to @code{flycheck-highlighting-mode},
 @item
 and indicates these locations in the fringe according to
-@option{flycheck-indication-mode}.
+@code{flycheck-indication-mode}.
 @end itemize
 
 @defopt flycheck-highlighting-mode
@@ -591,9 +591,9 @@ Do not highlight errors at all.
 @vindex flycheck-warning
 @vindex flycheck-info
 
-Flycheck uses the @option{flycheck-error},
-@option{flycheck-warning} and @option{flycheck-info} faces to highlight
-errors, warnings and info messages respectively.
+Flycheck uses the @code{flycheck-error}, @code{flycheck-warning} and
+@code{flycheck-info} faces to highlight errors, warnings and info
+messages respectively.
 @end defopt
 
 @defopt flycheck-indication-mode
@@ -605,9 +605,9 @@ How Flycheck indicates errors and warnings:
 Indicate errors in the left or right fringe respectively.
 @xref{Fringes, , ,emacs}, for more information about fringes.
 
-Flycheck uses the @option{flycheck-fringe-error},
-@option{flycheck-fringe-warning}, and @option{flycheck-fringe-info}
-faces for the indicators for the corresponding error levels.
+Flycheck uses the @code{flycheck-fringe-error},
+@code{flycheck-fringe-warning}, and @code{flycheck-fringe-info} faces
+for the indicators for the corresponding error levels.
 @item nil
 Do not indicate errors and warnings.
 @end table
@@ -618,7 +618,7 @@ Do not indicate errors and warnings.
 To avoid flooding a buffer with excessive reports, Flycheck discards any
 reports and @emph{disables} the corresponding syntax checker
 subsequently, if the total number of reported errors of any level
-exceeds the value of @option{flycheck-checker-error-threshold}.
+exceeds the value of @code{flycheck-checker-error-threshold}.
 
 @findex flycheck-clear
 
@@ -634,7 +634,7 @@ of Emacs: @kbd{M-g n} (@code{next-error}) and @kbd{M-g p}
 (@code{previous-error}) will navigate between Flycheck warnings and
 errors in the current buffer.  @xref{Compilation Mode,,,emacs}, for more
 information about these commands.  You can disable this integration by
-setting @option{flycheck-standard-error-navigation} to nil, and
+setting @code{flycheck-standard-error-navigation} to nil, and
 re-enabling @code{flycheck-mode} afterwards.
 
 @strong{Note:} With standard error navigation @emph{visible} compilation
@@ -644,7 +644,7 @@ precedence over Flycheck errors.
 Flycheck provides an independent set of navigation commands which will
 always navigate Flycheck errors in the current buffer, regardless of
 visible compilation buffers and
-@option{flycheck-standard-error-navigation}:
+@code{flycheck-standard-error-navigation}:
 
 @table @asis
 @flyccmd{C-c ! n, flycheck-next-error}
@@ -674,7 +674,7 @@ argument, move to the last error instead.
 @end table
 
 By default, these commands consider all errors in the current buffer.
-With @option{flycheck-navigation-minimum-level} you can restrict them to
+With @code{flycheck-navigation-minimum-level} you can restrict them to
 errors above certain levels:
 
 @defopt flycheck-navigation-minimum-level
@@ -695,7 +695,7 @@ The number of seconds to wait before displaying the error at point.
 Floating point numbers can express fractions of seconds.
 @end defopt
 
-You can set @option{flycheck-display-errors-function} to change how
+You can set @code{flycheck-display-errors-function} to change how
 Flycheck displays error, and what information it displays:
 
 @defopt flycheck-display-errors-function
@@ -789,7 +789,7 @@ You can achieve the same effect by clicking on the column header.
 
 When you move the point in the current buffer while the error list is
 visible, all errors on the current line are highlighted in the error
-list with the @option{flycheck-error-list-highlight} face.
+list with the @code{flycheck-error-list-highlight} face.
 
 @node Configuring checkers
 @section Configuring syntax checkers
@@ -817,7 +817,7 @@ Flycheck runs for syntax checkers.
 @cindex options of syntax checkers
 
 Man syntax checkers can be configured via individual options.  For
-instance, the @option{flycheck-flake8-maximum-line-length} tells the
+instance, the @code{flycheck-flake8-maximum-line-length} tells the
 @flyc{python-flake8} syntax checker about the maximum number of
 characters allowed on a line.  Use the command
 @code{flycheck-describe-checker} to see what options a syntax checker
@@ -855,7 +855,7 @@ configuration file, with the following procedure:
 @enumerate
 @item
 If the value contains a directory separator, expand the path against the
-@option{default-directory} of the current buffer.
+@code{default-directory} of the current buffer.
 @item
 If the buffer has a file name, search the buffer's directory and any
 ancestor directories up to the root directory for the configuration
@@ -887,7 +887,7 @@ could then contain project-wide style settings for your Python code.
 
 You can change the default procedure for locating configuration files by
 adding or replacing functions in
-@option{flycheck-locate-config-file-functions}:
+@code{flycheck-locate-config-file-functions}:
 
 @defopt flycheck-locate-config-file-functions
 Functions to locate configuration files.
