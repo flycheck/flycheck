@@ -12,7 +12,8 @@
       tags: emacs
     - role: cask
       tags: emacs
-    - languages
+    - role: languages
+      tags: languages
 
 - name: Setup testing environment on Travis CI
   hosts: travisci
@@ -37,4 +38,5 @@
       tags: emacs
     - role: cask
       tags: emacs
-    - languages
+    - role: languages
+      tags: languages
