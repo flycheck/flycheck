@@ -794,25 +794,143 @@ list with the @option{flycheck-error-list-highlight} face.
 @node Configuring checkers
 @section Configuring syntax checkers
 
-Flycheck provides different options to configure syntax checkers.
+Flycheck provides a rich interface to configure syntax checkers.  There
+are three different kinds of options for syntax checkers:
+
+@itemize @bullet
+@item
+@emph{Syntax checker options} which directly change specific settings of
+syntax checkers,
+@item
+@emph{syntax checker configuration files} which point syntax checkers to
+configuration files which can comprehensively configure a syntax
+checker, and
+@item
+@emph{syntax checker executables} which change the executables that
+Flycheck runs for syntax checkers.
+@end itemize
+
+@subsection Syntax checker options
+
+@anchor{Syntax checker options}
+@cindex syntax checker options
+@cindex options of syntax checkers
+
+Man syntax checkers can be configured via individual options.  For
+instance, the @option{flycheck-flake8-maximum-line-length} tells the
+@flyc{python-flake8} syntax checker about the maximum number of
+characters allowed on a line.  Use the command
+@code{flycheck-describe-checker} to see what options a syntax checker
+provides.  Type @kbd{M-x customize-group RET flycheck-options} to get a
+list of all available options.
+
+Options are mainly intended to be set per file or per project via file
+or directory variables.  @xref{File Variables,,,emacs}, and
+@ref{Directory Variables,,,emacs} respectively, for more information.
+
+For instance, if you the following file variables section at the end of
+a Python file, the @flyc{python-flake8} syntax checker will warn about
+lines longer than 100 characters, rather than the default limit of 80
+characters:
+
+@example
+# Local Variables:
+# flycheck-flake8-maximum-line-length: 100
+# End:
+@end example
+
+@subsection Syntax checker configuration files
+
+Some syntax checkers also read configuration files.  These syntax
+checkers have an associated @emph{configuration file variable} which
+specifies the path to the configuration file.  All configuration file
+variables are customisable via @kbd{M-x customize-group RET
+flycheck-config-files}.
+
+If the value of a configuration file variable is nil, Flycheck will not
+use any configuration file for the corresponding syntax checker.  If it
+is a string, however, Flycheck tries to locate an appropriate
+configuration file, with the following procedure:
+
+@enumerate
+@item
+If the value contains a directory separator, expand the path against the
+@option{default-directory} of the current buffer.
+@item
+If the buffer has a file name, search the buffer's directory and any
+ancestor directories up to the root directory for the configuration
+file.
+@item
+Eventually try to find the configuration file in the user's home
+directory.
+@end enumerate
+
+If any of these steps returns an existing file, this file is given to
+the syntax checker.  For instance, assume you edit the file
+@file{foo/bar/hello.py} in the following project layout:
+
+@example
+.
+├── .pylintrc
+├── README.rst
+├── foo
+│   ├── __init__.py
+│   └── bar
+│       ├── __init__.py
+│       ├── hello.py
+└── setup.py
+@end example
+
+When using the @flyc{python-pylint} syntax checker, Flycheck would find
+the file @file{.pylintrc} and pass it to @command{pylint}.  This file
+could then contain project-wide style settings for your Python code.
+
+You can change the default procedure for locating configuration files by
+adding or replacing functions in
+@option{flycheck-locate-config-file-functions}:
+
+@defopt flycheck-locate-config-file-functions
+Functions to locate configuration files.
+
+Each function accepts two arguments @var{value} and @var{checker}.
+@var{value} is the value of the configuration file variable, and
+@var{checker} is the syntax checker to locate a configuration file for.
+The function shall either return a string with the absolute path to an
+existing configuration file, or nil if it could not locate the file.
+
+Flycheck calls the functions in order of appearance, until the first
+function returns nil.  If all functions return nil, no configuration
+file is given to the syntax checker.
+@end defopt
+
+@strong{Note:} The formats of configuration files are specific to each
+syntax checker.  Please consult the documentation of the corresponding
+checker tool for information about the configuration file format
+understood by the tool.
+
+Like syntax checker options (@pxref{Syntax checker options}) you can
+set these variables with file or directory variables.  @xref{File
+Variables,,,emacs}, and @ref{Directory Variables,,,emacs} respectively,
+for more information.
 
 @subsection Syntax checker executables
 
+@anchor{Syntax checker executables}
 @cindex syntax checker executables
 @cindex executables of syntax checkers
 
-For each syntax checker, there is a buffer-local, customizable variable
-@code{flycheck-@var{checker}-executable}, where @var{checker} is the
-name of the syntax checker.
+Occasionally, you need to point Flycheck to a different executable when
+running a syntax checker.  For instance, you might want to use
+@command{gcc-4.9} to check your C code, or use @command{pylint} from a
+specific virtualenv.
 
-The value of this variable is either nil, or a string.  In the former
-case, Flycheck uses the default executable from the syntax checker
-definition when executing the syntax checker.  In the latter case, it
-uses the value of the variable as executable.
-
-Use these variables to override the executable from the definition per
-buffer.  For instance, you could use a different Emacs version with the
-@flyc{emacs-lisp} or @flyc{emacs-lisp-checkdoc}.
+For these situations, each syntax checker has a buffer-local,
+customizable variable named @code{flycheck-@var{checker}-executable},
+where @var{checker} is the name of the syntax checker.  The value of
+this variable is either nil, or a string.  In the former case, Flycheck
+uses the default executable from the syntax checker definition when
+executing the syntax checker.  In the latter case, it uses the value of
+the variable as executable.
 
 You can either set these variables directly in your init file, or change
 them interactively:
@@ -828,24 +946,6 @@ Reset the executable of a syntax checker in the current buffer.
 
 Prompt for a syntax checker and reset its executable to the default.
 @end table
-
-@subsection Syntax checker options
-
-@cindex syntax checker options
-@cindex options of syntax checkers
-
-Some syntax checkers can be configured via options.  Use the command
-@code{flycheck-describe-checker} to see what options a syntax checker
-provides.  Type @kbd{M-x customize-group RET flycheck-options} to get a
-list of all available options.
-
-Options are mainly intended to be set per file or per project via file
-or directory variables.  @xref{File Variables,,,emacs}, and
-@ref{Directory Variables,,,emacs} respectively, for more information.
-
-@subsection Syntax checker configuration files
-
-TODO
 
 @node Flycheck API
 @chapter Flycheck API
