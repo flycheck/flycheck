@@ -93,7 +93,8 @@ For more information about Flymake, @pxref{Top,,Overview,flymake}.
 * Introduction::                An introduction to Flycheck
 * Installation::                How to install Flycheck
 * Quickstart::                  A quick Flycheck tutorial
-* Usage::                       Detailed user guide
+* Usage::                       How to use Flycheck
+* Extending::                   How to extend Flycheck
 * Flycheck API::                API documentation
 * Supported languages::         A list of supported languages
 * Issues::                      How to report issues in Flycheck
@@ -982,6 +983,11 @@ Reset the executable of a syntax checker in the current buffer.
 
 Prompt for a syntax checker and reset its executable to the default.
 @end table
+
+@node Extending
+@chapter Extending
+
+TODO
 
 @node Flycheck API
 @chapter Flycheck API
