@@ -10,14 +10,8 @@ before_install:
   - sudo apt-get install -y ansible
   # Skip Cabal and Cran packages on Travis CI, because they take too much time
   # to build
-  - ansible-playbook -i playbooks/travis_inventory --skip-tags=cabal,cran -v playbooks/site.yml
+  - ansible-playbook -i playbooks/travis_inventory --tags language-texinfo --skip-tags=cabal,cran -v playbooks/site.yml
   - source /etc/profile
   - export PATH="${GOPATH}/bin:${HOME}/.local/bin:$PATH"
-install:
-  # Install our packages
-  - make EMACS=$EMACS deps
 script:
-  # Byte-compile the file
-  - make EMACS=$EMACS EMACSFLAGS="${EMACSFLAGS}" compile
-  # Run the unit tests
-  - make EMACS=$EMACS test
+  - make texinfo
