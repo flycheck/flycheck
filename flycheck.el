@@ -2125,6 +2125,7 @@ the syntax checker to the buffer-local value of
 `flycheck-disabled-checkers'.  With prefix arg, prompt for a
 disabled syntax checker and re-enable it by removing it from the
 buffer-local value of `flycheck-disabled-checkers'."
+  (declare (interactive-only "Directly set `flycheck-disabled-checkers' instead"))
   (interactive
    (let* ((enable current-prefix-arg)
           (candidates (if enable flycheck-disabled-checkers flycheck-checkers))
@@ -2142,8 +2143,6 @@ buffer-local value of `flycheck-disabled-checkers'."
       (setq flycheck-disabled-checkers (remq checker flycheck-disabled-checkers))
     (unless (memq checker flycheck-disabled-checkers)
       (push checker flycheck-disabled-checkers))))
-(put 'flycheck-disable-checker 'interactive-only
-     "Directly set `flycheck-disabled-checkers' instead")
 
 
 ;;; Syntax checks for the current buffer
@@ -4432,6 +4431,7 @@ This command is intended for interactive use only.  In Lisp, just
 `let'-bind the corresponding variable, or set it directly.  Use
 `flycheck-checker-executable-variable' to obtain the executable
 variable symbol for a syntax checker."
+  (declare (interactive-only "Set the executable variable directly instead"))
   (interactive
    (let* ((checker (read-flycheck-checker "Syntax checker: "))
           (default-executable (flycheck-checker-default-executable checker))
@@ -4444,8 +4444,6 @@ variable symbol for a syntax checker."
     (user-error "%s is no executable" executable))
   (let ((variable (flycheck-checker-executable-variable checker)))
     (set (make-local-variable variable) executable)))
-(put 'flycheck-set-checker-executable 'interactive-only
-     "Set the executable variable directly instead")
 
 
 ;;; Configuration files and options for command checkers
