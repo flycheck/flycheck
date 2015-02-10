@@ -185,6 +185,8 @@ option:
 @table @asis
 @flycoption flycheck-dmd-include-path
 A list of include directories for DMD.
+@flycoption flycheck-dmd-flags
+A list of flags for DMD.
 @end table
 
 @end itemize
