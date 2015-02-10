@@ -205,6 +205,9 @@ D
    .. option:: flycheck-dmd-include-path
       :auto:
 
+   .. option:: flycheck-dmd-string-import-path
+      :auto:
+
 .. seealso::
 
    The flycheck-d-unittest_ extension adds a syntax checker that runs D unit
