@@ -121,7 +121,7 @@ the corresponding messages, and copy errors to the kill ring.
 
 @itemize @bullet
 @item
-Over 40 languages with more than 70 checkers.  @ref{Supported languages}
+Over 40 languages with more than 70 checkers.  @xref{Supported languages}.
 @item
 Fully automatic, fail-safe, on-the-fly syntax checking in buffers
 @item
