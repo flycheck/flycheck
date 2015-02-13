@@ -914,7 +914,7 @@ the syntax checker.  For instance, assume you edit the file
 │   ├── __init__.py
 │   └── bar
 │       ├── __init__.py
-│       ├── hello.py
+│       └── hello.py
 └── setup.py
 @end example
 
