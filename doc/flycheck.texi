@@ -94,7 +94,8 @@ For more information about Flymake, @pxref{Top,,Overview,flymake}.
 * Installation::                How to install Flycheck
 * Quickstart::                  A quick Flycheck tutorial
 * Usage::                       How to use Flycheck
-* Extending::                   How to extend Flycheck
+* Syntax checker definitions::  How to add new syntax checkers to Flycheck
+* Flycheck extensions::         How to extend Flycheck
 * Flycheck API::                API documentation
 * Supported languages::         A list of supported languages
 * Issues::                      How to report issues in Flycheck
@@ -984,24 +985,390 @@ Reset the executable of a syntax checker in the current buffer.
 Prompt for a syntax checker and reset its executable to the default.
 @end table
 
-@node Extending
-@chapter Extending
+@node Syntax checker definitions
+@chapter Syntax checker definitions
+
+This chapter explains how to add new syntax checkers and how to extend
+built-in syntax checkers, by example.  @xref{Flycheck API}, for a
+detailed reference on the involved types, functions and macros.
+
+If you define a new syntax checker or have an extension to a built-in
+syntax checker, please report it to Flycheck (@pxref{Issues}), so that
+we can consider it for inclusion to make it available to all other users
+of Flycheck.
+
+@menu
+* Defining syntax checkers::    How to define new syntax checkers
+* Finding error patterns::      How to find error patterns for a checker
+* Trying new checkers::         How to try a new syntax checker
+* Registering new checkers::    How to register for automatic selection
+* Parsing structured output::   How to parse structured output like XML
+* Passing configuration to checkers::  How to make syntax checkers configurable
+* Controlling use of checkers:: How to control when checkers are used
+* Applying multiple checkers::  How to use more than one checker per buffer
+* Checking with functions::     How to check with Lisp functions
+@end menu
+
+@node Defining syntax checkers
+@section Defining syntax checkers
+
+Flycheck provides the macro @code{flycheck-define-checker} to define a
+new syntax checker.  The following example defines a simple syntax
+checker for the popular @uref{http://www.pylint.org/, Pylint} tool for
+Python:
+
+@lisp
+(flycheck-define-checker python-pylint
+  "A Python syntax and style checker using Pylint.
+
+See URL `http://www.pylint.org/'."
+  :command ("pylint"
+            "--msg-template" "@{path@}:@{line@}:@{column@}:@{C@}:@{msg@} (@{msg_id@})"
+            source)
+  :error-patterns
+  ((error line-start (file-name) ":" line ":" column ":"
+          (or "E" "F") ":" (message) line-end)
+   (warning line-start (file-name) ":" line ":" column ":"
+            (or "W" "R") ":" (message) line-end)
+   (info line-start (file-name) ":" line ":" column ":"
+         "C:" (message) line-end))
+  :modes python-mode)
+@end lisp
+
+The first argument to @code{flycheck-define-checker} is the @emph{name}
+of a syntax checker, by which we can refer to this particular syntax
+checker.
+
+Next comes the @emph{docstring}, which should provide a bit of
+information about the syntax checker.  It's a good idea to provide a
+link to the homepage of the syntax checker tool here.  You can view this
+docstring in Emacs with @code{flycheck-describe-checker} at
+@kbd{C-c ! ?}, e.g. @kbd{C-c ! ? python-pylint}.
+
+Eventually we specify the @emph{properties} of the new syntax checker.
+These properties tell Flycheck when to use your new syntax checker, how
+to run it, and how to parse its output:
+
+@itemize @bullet
+@item
+The @code{:command} specifies the command Flycheck should run to check
+the buffer.  It's a simple list containing the executable and its
+arguments.
+
+In our example we first the @option{--msg-template} option to
+@command{pylint} to configure a comprehensive and parseable output
+format.
+
+Then we use the “special” @code{source} argument to pass the contents of
+the buffer as input file to @command{pylint}.  Whenever it sees the
+@code{source} argument, Flycheck creates a temporary file, fills it with
+the current contents of the buffer and passes that file to the syntax
+checker.  This allows to check the real contents of a buffer even if the
+buffer is not saved to disk.
+
+Refer to the function @code{flycheck-substitute-argument} for a complete
+list of all special symbols.
+
+@item
+The @code{:error-patterns} tell Flycheck how to parse the output of the
+command in order to obtain error locations.  Each pattern has a
+@emph{level}, followed by @code{rx} forms which specify a regular
+expression to find an error in the output of the command.
+
+Flycheck understands three error levels by default: @code{error} is for
+critical errors that absolutely require the user's attention
+(e.g. syntax errors), @code{warning} is for issues that can be ignored,
+but should not (e.g. unused variables), and @code{info} is for other
+messages that provide information about the buffer, but do not
+immediately require action from the user.
+@code{flycheck-define-error-level} lets you define custom error levels.
+
+Flycheck provides special @code{rx} forms to extract the relevant
+information from each error:
+
+@itemize @bullet
+@item
+The @code{(file-name)} and @code{(message)} forms match a sequence of
+any character save new line as file name and message of the error.  Both
+optionally accept further @code{rx} forms, to specify an alternative
+regular expression to match the file name or the message, for instance
+to parse multi-line error messages.
+@item
+The @code{line} and @code{column} forms match a sequence of one or more
+digits as line and column respectively of the error.
+@end itemize
+
+Refer to the function @code{flycheck-rx-to-string} for a complete list
+of supported forms.
+
+@item
+The @code{:modes} property denotes the major modes, in which Flycheck
+may use this syntax checker.  @command{pylint} checks Javascript, so the
+@code{:modes} of our example specify @code{python-mode}.
+
+@end itemize
+
+@node Finding error patterns
+@section Finding the right error patterns
+
+Finding the right error patterns is the hardest part of a syntax checker
+definition.  For a first version, you just run the tool on a file, look
+at its output and write a regular expression to match it.  @kbd{M-x
+shell} comes handy here.
+
+However, as you start to debug and refine your patterns, this quickly
+becomes cumbersome.  Flycheck provides an easier way to test a syntax
+checker: Evaluate the syntax checker definition with @kbd{C-M-x} and run
+@code{flycheck-compile}.
+
+@table @asis
+@flyccmd{C-c ! C-c, flycheck-compile}
+Run a syntax checker on the current buffer in a fresh Compilation Mode
+buffer.  Prompt for a syntax checker to run.
+@end table
+
+This command runs the command like a normal syntax check would do, but
+instead of highlighting errors within the buffer it shows a new buffer
+in Compilation Mode, which contains the entire output of the command and
+highlights everything that matches a pattern.
+
+Sometimes however an output format doesn't lend itself to error
+patterns.  In this case, you need to write a more sophisticated parser
+yourself.  @xref{Parsing structured output}, for more information.
+
+@node Trying new checkers
+@section Trying a new syntax checker
+
+After evaluating a syntax checker definition you can try whether it
+works for normal syntax checks by selecting it manually with @kbd{C-c !
+s} or @kbd{M-x flycheck-select-checker}.  If anything breaks, you can
+unselect the syntax checker again with @kbd{C-u C-c ! s} and fix the
+error without further affecting Flycheck.
+
+Once you have confirmed that your new syntax checker works flawlessly,
+you can make it available for automatic syntax checking by registering
+it.
+
+@node Registering new checkers
+@section Registering new syntax checkers
+
+To register a new syntax checker for automatic syntax checking, just add
+it to @code{flycheck-checkers}:
+
+@lisp
+(add-to-list 'flycheck-checkers 'python-pylint)
+@end lisp
+
+Flycheck will try all syntax checkers in this variable when checking a
+buffer automatically, and check the buffer with the first syntax checker
+in this list whose @code{:modes} contains the current major mode.
+
+@strong{Note}: Do @emph{not} use @code{flycheck-checker} and
+@code{flycheck-select-checker} to enable your own syntax checker in
+Flycheck extensions.  They are reserved for @emph{user customization}.
+
+Specifically, please do @emph{not} provide a hook function which selects
+the syntax checker explicitly by assigning to @code{flycheck-checker} or
+by calling @code{flycheck-select-checker}.  In other words, this is
+@strong{bad}:
+
+@lisp
+(defun enable-my-new-syntax-checker ()
+  (setq flycheck-checker 'my-new-syntax-checker)
+  (flycheck-buffer))
+
+(add-hook 'my-major-mode-hook #'enable-my-new-syntax-checker)
+@end lisp
+
+This circumvents the entire automatic selection of Flycheck, and prevents the
+user from effectively customizing Flycheck.
+
+Instead, just register your syntax checker in
+:option:`flycheck-checkers` and let Flycheck automatically pick the best
+syntax checker.  In other words, this is @strong{good}:
+
+@lisp
+(add-to-list 'flycheck-checkers 'my-new-syntax-checker)
+@end lisp
+
+@node Parsing structured output
+@section Parsing structured output
+
+If your syntax checker tool offers some structured output format as
+alternative to human-readable free text, you can use an
+@code{:error-parser} function instead of writing an error pattern.  For
+instance, @uref{http://www.jshint.com/, JSHint} offers the widely spread
+Checkstyle XML output format which Flycheck supports out of the box:
+
+@lisp
+(flycheck-define-checker javascript-jshint
+  "A JavaScript syntax and style checker using jshint.
+
+See URL `http://www.jshint.com'."
+  :command ("jshint" "--checkstyle-reporter" source)
+  :error-parser flycheck-parse-checkstyle
+  :modes (js-mode js2-mode js3-mode))
+@end lisp
+
+As you can see, there are no patterns in this definition.  Instead
+Flycheck calls the function @code{flycheck-parse-checkstyle} to parse
+the output.  This function parses the XML to extract the errors.  It's
+built-in into Flycheck, so if your tool supports Checkstyle XML, error
+parsing comes @emph{for free} in Flycheck.  @xref{Error parsers},
+for more information about error parsers.
+
+@node Passing configuration to checkers
+@section Passing options and configuration files to syntax checkers
+
+Many linting tools provide a rich set of options to configure their
+analysis.  Flycheck makes it to define proper Emacs options and map them
+to options of commands.
+
+For instance, the @uref{https://github.com/bbatsov/rubocop, Rubocop}
+tool checks Ruby for semantic and stylistic issues.  Since style is
+mainly a matter of taste, it has a special linting mode in which all
+stylistic checks are disabled (error patterns omitted for readability):
+
+@lisp
+(flycheck-define-checker ruby-rubocop
+  "A Ruby syntax and style checker using the RuboCop tool.
+
+See URL `http://batsov.com/rubocop/'."
+  :command ("rubocop" "--format" "emacs"
+            (option-flag "--lint" flycheck-rubocop-lint-only)
+            source)
+  :error-patterns ...
+  :modes (ruby-mode))
+@end lisp
+
+Note the special @code{option-flag} argument, which splices the value of
+the boolean Emacs option @code{flycheck-rubocop-lint-only} into the
+command: If the variable is non-nil, Flycheck adds the @option{--lint}
+option to the final command line, other Flycheck omits the entire
+argument.
+
+Flycheck also supports other special @code{option-} arguments for plain
+values or lists of values.  @xref{Argument Substitution}, for a list of
+all special arguments.
+
+Flycheck also provides a convenience macro
+@code{flycheck-def-option-var} to declare these options:
+
+@lisp
+(flycheck-def-option-var flycheck-rubocop-lint-only nil ruby-rubocop
+  "Whether to only report code issues in Rubocop.
+
+When non-nil, only report code issues in Rubocop, via `--lint'.
+Otherwise report style issues as well."
+  :safe #'booleanp
+  :type 'boolean)
+@end lisp
+
+Essentially, this macro is just a wrapper around the built-in
+@code{defcustom}, which additionally keeps track of the syntax checker
+the option belongs to, and adds the option to the appropriate custom
+group.  You can pass arbitrary custom keywords to this macro as we did
+in this example: @code{:type} marks this option as boolean flag, and
+@code{:safe} allows the use as file-local variable, if the value is
+boolean.  @xref{Configuring checkers}, for more information about syntax
+checker configuration, and @ref{Checker configuration}, for the
+corresponding API reference.
+
+By a similar mechanism you can also pass paths to configuration files to
+a syntax checker tool.  The aforementioned
+@uref{http://www.pylint.org/,Pylint} reads a configuration file for
+instance:
+
+@lisp
+(flycheck-define-checker python-pylint
+  "A Python syntax and style checker using Pylint.
+
+This syntax checker requires Pylint 1.0 or newer.
+
+See URL `http://www.pylint.org/'."
+  ;; -r n disables the scoring report
+  :command ("pylint" "-r" "n"
+            "--msg-template" "@{path@}:@{line@}:@{column@}:@{C@}:@{msg@} (@{msg_id@})"
+            (config-file "--rcfile" flycheck-pylintrc)
+            source)
+  :error-patterns ...
+  :modes python-mode)
+@end lisp
+
+The special @code{config-file} argument passes a configuration file from
+@code{flycheck-pylintrc} to @command{pylint}, if the value of the
+variable is non-nil.
+
+Flycheck provides a sophisticated logic to find an appropriate
+configuration file.  @xref{Configuring checkers}, for more information
+about syntax checker configuration, and @ref{Checker configuration}, for
+the corresponding API reference.
+
+@node Controlling use of checkers
+@section Controlling the use of a syntax checker
+
+If you need more control about when a syntax checker is used for syntax
+checking, you can supply a custom @code{:predicate} function.  Consider
+the following syntax checker for Zsh scripts in Sh Mode:
+
+@lisp
+(flycheck-define-checker sh-zsh
+  "A Zsh syntax checker using the Zsh shell.
+
+See URL `http://www.zsh.org/'."
+  :command ("zsh" "-n" "-d" "-f" source)
+  :error-patterns
+  ((error line-start (file-name) ":" line ": " (message) line-end))
+  :modes sh-mode
+  :predicate (lambda () (eq sh-shell 'zsh)))
+@end lisp
+
+Sh Mode also supports Bash and other shells besides Zsh, so we
+additionally provide a @code{:predicate} that checks whether the current
+buffer has the right shell.
+
+You can even omit @code{:modes} and only use a predicate to determine
+whether a syntax checker is applicable for the current buffer.
+
+@node Applying multiple checkers
+@section Applying multiple syntax checkers
+
+@node Checking with functions
+@section Checking with functions instead of programs
+
+@node Flycheck extensions
+@chapter Flycheck extensions
 
 TODO
 
 @node Flycheck API
 @chapter Flycheck API
 
-TODO
+@menu
+* Command syntax checkers::     Syntax checkers with external commands
+* Errors::                      Error representation in Flycheck
+@end menu
+
+@node Command syntax checkers
+@section Command syntax checkers
 
 @menu
-* Errors::      Error objects
+* Argument Substitution::       Argument substitution in syntax checker commands
+* Checker configuration::       Configuration for command checkers
+* Error parsers::               Parsing structured output formats
 @end menu
+
+@node Argument Substitution
+@subsection Argument substitution
+
+@node Checker configuration
+@subsection Configuration options and files
+
+@node Error parsers
+@subsection Error parsers
 
 @node Errors
 @section Errors
-
-TODO
 
 @node Supported languages
 @appendix Supported languages
