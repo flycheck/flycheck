@@ -1180,12 +1180,12 @@ by calling @code{flycheck-select-checker}.  In other words, this is
 (add-hook 'my-major-mode-hook #'enable-my-new-syntax-checker)
 @end lisp
 
-This circumvents the entire automatic selection of Flycheck, and prevents the
-user from effectively customizing Flycheck.
+This circumvents the entire automatic selection of Flycheck, and
+prevents the user from effectively customizing Flycheck.
 
-Instead, just register your syntax checker in
-:option:`flycheck-checkers` and let Flycheck automatically pick the best
-syntax checker.  In other words, this is @strong{good}:
+Instead, just register your syntax checker in @code{flycheck-checkers}
+and let Flycheck automatically pick the best syntax checker.  In other
+words, this is @strong{good}:
 
 @lisp
 (add-to-list 'flycheck-checkers 'my-new-syntax-checker)
@@ -1332,6 +1332,84 @@ whether a syntax checker is applicable for the current buffer.
 
 @node Applying multiple checkers
 @section Applying multiple syntax checkers
+
+Frequently, we would like to use multiple syntax checkers in a buffer.
+For instance, we might want to check the syntax of a script with
+@code{sh-zsh} from the previous section, and then use
+@uref{https://github.com/koalaman/shellcheck/, Shellcheck} to check for
+questionable code such as unquoted variable expansions, if there are no
+syntax errors.  Flycheck supports this scenario by @emph{chaining}
+syntax checkers.
+
+Suppose we defined a syntax checker for Shellcheck called
+@sc{sh-shellcheck} as follows:
+
+@lisp
+(flycheck-define-checker sh-shellcheck
+  "A shell script syntax and style checker using Shellcheck.
+
+See URL `https://github.com/koalaman/shellcheck/'."
+  :command ("shellcheck" "-f" "checkstyle"
+            "-s" (eval (symbol-name sh-shell))
+            source)
+  :modes sh-mode
+  :error-parser flycheck-parse-checkstyle)
+@end lisp
+
+Note how we use the special @code{eval} argument to put the result of an
+arbitrary Emacs Lisp expression into the command line of
+@command{shellcheck}, in order to tell Shellcheck what shell the script
+is written for.
+
+We can now arrange for this syntax checker to be used after
+@code{sh-zsh} with @code{flycheck-add-next-checker}:
+
+@lisp
+(flycheck-add-next-checker 'sh-zsh '(warning . sh-shellcheck))
+@end lisp
+
+The first item of the cons cell in the second argument is the
+@emph{maximum error level} in the buffer, for which @code{sh-shellcheck}
+is still applicable.  With @code{warning} Flycheck will run
+@code{sh-shellcheck} after @code{sh-zsh} if there are @code{warning} or
+@code{info} level errors from @code{sh-zsh}, but not if there are any
+errors with level @code{error}, such as syntax errors.
+
+Flycheck will only use a chained syntax checker if it is registered in
+@code{flycheck-checkers}, so we need to register our new syntax checker
+(@pxref{Registering new checkers}):
+
+@lisp
+(add-to-list 'flycheck-checkers 'sh-shellcheck 'append)
+@end lisp
+
+Note that unlike before we @emph{append} the new syntax checker at the
+end of @code{flycheck-checkers}.  This ensures that Flycheck does not
+try @code{sh-shellcheck} @emph{before} @code{sh-zsh}.  Flycheck tries
+all syntax checkers in this list in @emph{order of appearance}, so if
+you add your new chained syntax checker at the beginning, it will likely
+be used right away, before any prior syntax checkers.
+
+You also can specify chained syntax checkers directly in
+@code{flycheck-define-checker} with the @code{:next-checkers} property.
+Instead of calling @code{flycheck-add-next-checker}, we could also have
+added this property to the definition of @code{sh-zsh}:
+
+@lisp
+(flycheck-define-checker sh-zsh
+  "A Zsh syntax checker using the Zsh shell.
+
+See URL `http://www.zsh.org/'."
+  :command ("zsh" "-n" "-d" "-f" source)
+  :error-patterns ...
+  :modes sh-mode
+  :predicate (lambda () (eq sh-shell 'zsh))
+  :next-checkers ((warning . sh-shellcheck)))
+@end lisp
+
+If you control the definition of both syntax checkers, this style is
+@emph{preferable} to @code{flycheck-add-next-checker}.  Use the latter
+only if you cannot change the definition of the prior syntax checker.
 
 @node Checking with functions
 @section Checking with functions instead of programs
