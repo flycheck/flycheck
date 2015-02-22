@@ -1006,7 +1006,6 @@ of Flycheck.
 * Passing configuration to checkers::  How to make syntax checkers configurable
 * Controlling use of checkers:: How to control when checkers are used
 * Applying multiple checkers::  How to use more than one checker per buffer
-* Checking with functions::     How to check with Lisp functions
 @end menu
 
 @node Defining syntax checkers
