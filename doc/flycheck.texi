@@ -95,7 +95,7 @@ For more information about Flymake, @pxref{Top,,Overview,flymake}.
 * Quickstart::                  A quick Flycheck tutorial
 * Usage::                       How to use Flycheck
 * Syntax checker definitions::  How to add new syntax checkers to Flycheck
-* Flycheck extensions::         How to extend Flycheck
+* Flycheck hooks::              How to hook into Flycheckx
 * Flycheck API::                API documentation
 * Supported languages::         A list of supported languages
 * Issues::                      How to report issues in Flycheck
@@ -1411,13 +1411,40 @@ If you control the definition of both syntax checkers, this style is
 @emph{preferable} to @code{flycheck-add-next-checker}.  Use the latter
 only if you cannot change the definition of the prior syntax checker.
 
-@node Checking with functions
-@section Checking with functions instead of programs
+@node Flycheck hooks
+@chapter Flycheck hooks
 
-@node Flycheck extensions
-@chapter Flycheck extensions
+This chapter gives you a brief overview over Flycheck's rich hook
+interface, which you can use for your own extensions.
 
-TODO
+@section Status changes
+
+:hook:@code{flycheck-before-syntax-check-hook} and
+@code{flycheck-after-syntax-check-hook} run before and after syntax
+checks, and let you update your Emacs instance according to Flycheck's
+state.  For instance, @ghref{flycheck/flycheck-color-mode-line,
+flycheck-color-mode-line} uses these hooks to colour your mode-line
+according to the result of the last syntax check.  Additionally,
+@code{flycheck-status-changed-functions} runs on every single status
+change of Flycheck, and provides a fine-grained reporting about what
+Flycheck is currently doing.
+
+@section Error processing
+
+The functions in @code{flycheck-process-error-functions} are used to
+process new errors reported by a Flycheck syntax checker.  Add to this
+hook to get informed about each error reported in a Flycheck buffer.  In
+fact, Flycheck uses this hook itself: The standard value
+@code{flycheck-add-overlay} is responsible for adding error highlighting
+to the buffer.  As a consequence, you can @emph{entirely opt out} from
+highlighting with a custom hook.
+
+@section Error display
+
+The function @code{flycheck-display-errors-function} is called to
+display an error at point.  The @ghref{flycheck/flycheck-pos-tip,
+flycheck-pos-tip} extension uses this hook to show errors in a GUI popup
+like conventional IDEs do.
 
 @node Flycheck API
 @chapter Flycheck API
