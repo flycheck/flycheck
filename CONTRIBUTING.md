@@ -1,20 +1,17 @@
-=========================
- Contribution guidelines
-=========================
-
-.. default-role:: code
+Contribution guidelines
+=======================
 
 If you discovered bugs and issues, have ideas for improvements or new features,
-or want to contribute a new syntax checker, please report to the `issue
-tracker`_ the repository and send a pull request, but respect the following
-guidelines.
+or want to contribute a new syntax checker, please report to the
+[issue tracker][] the repository and send a pull request, but respect the
+following guidelines.
 
-.. _reporting-issues:
+[issue tracker]: https://github.com/flycheck/flycheck/issues
 
 Reporting issues
 ================
 
-Please report issues to the `issue tracker`_.
+Please report issues to the [issue tracker][].
 
 - Check that the issue has not already been reported.
 - Check that the issue has not already been fixed in the latest code.
@@ -23,8 +20,6 @@ Please report issues to the `issue tracker`_.
 - Include the version of Flycheck as shown by `M-x flycheck-version`.
 - Open an issue with a clear title and description in grammatically correct,
   complete sentences.
-
-.. _contributing-code:
 
 Contributing code
 =================
@@ -51,7 +46,7 @@ Code style
 Commit messages
 ---------------
 
-Write commit messages according to `Tim Pope's guidelines`_. In short:
+Write commit messages according to [Tim Pope's guidelines][]. In short:
 
 - Start with a capitalized, short (50 characters or less) summary, followed by a
   blank line.
@@ -61,10 +56,10 @@ Write commit messages according to `Tim Pope's guidelines`_. In short:
   “fixes bug”.
 - Separate paragraphs by blank lines.
 - Do *not* use special markup (e.g. Markdown).  Commit messages are plain text.
-  You may use ``*emphasis*`` or ``_underline_`` though, following conventions
+  You may use `*emphasis*` or `_underline_` though, following conventions
   established on mailing lists.
 
-This is a model commit message::
+This is a model commit message:
 
     Capitalized, short (50 chars or less) summary
 
@@ -88,10 +83,12 @@ This is a model commit message::
 
     - Use a hanging indent
 
-`Git Commit Mode`_ and Magit_ provide a major mode for Git commit messages,
+[Git Commit Mode][] and [Magit][] provide a major mode for Git commit messages,
 which helps you to comply to these guidelines.
 
-.. _contributing-syntax-checkers:
+[Tim Pope's guidelines]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
+[_Git Commit Mode]: https://github.com/magit/git-modes/
+[_Magit]: https://github.com/magit/magit/
 
 Contributing syntax checkers
 ----------------------------
@@ -107,12 +104,8 @@ For syntax checkers, some special guidelines apply in addition to the above:
   the CI environment and the local testing VM, or explain how to install the
   tool on an Ubuntu 12.04 system.
 
-.. note::
-
-   Unit tests that can run on Travis CI are **mandatory** for all syntax
-   checkers in Flycheck.
-
-.. _pull requests:
+Unit tests that can run on Travis CI are **mandatory** for all syntax checkers
+in Flycheck.
 
 Pull requests
 -------------
@@ -121,15 +114,9 @@ Pull requests
 - Do **not** open new pull requests, when asked to improve your patch.  Instead,
   amend your commits with `git rebase -i`, and then update the pull request with
   `git push --force`
-- Open a `pull request`_ that relates to but one subject with a clear title and
+- Open a [pull request][] that relates to but one subject with a clear title and
   description in grammatically correct, complete sentences.
 
-.. note::
+Pull requests **must** pass all tests on Travis CI before being merged.
 
-   Pull requests **must** pass all tests on Travis CI before being merged.
-
-.. _issue tracker: https://github.com/flycheck/flycheck/issues
-.. _Tim Pope's guidelines: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
-.. _Git Commit Mode: https://github.com/magit/git-modes/
-.. _Magit: https://github.com/magit/magit/
-.. _pull request: https://help.github.com/articles/using-pull-requests
+[pull request]: https://help.github.com/articles/using-pull-requests
