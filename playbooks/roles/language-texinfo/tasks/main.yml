@@ -2,7 +2,7 @@
   command: makeinfo --version
   ignore_errors: true
   register: texinfo_current_version
-  changed_when: 'texinfo_current_version.stdout.splitlines() | first != "makeinfo (GNU texinfo) 5.2"'
+  changed_when: 'texinfo_current_version | failed or texinfo_current_version.stdout.splitlines() | first != "makeinfo (GNU texinfo) 5.2"'
 - name: Download Texinfo
   get_url:
     url: "http://ftp.gnu.org/gnu/texinfo/texinfo-{{texinfo_version}}.tar.gz"
