@@ -1506,7 +1506,30 @@ more information about a syntax checker.
 @node Issues
 @appendix Issues
 
-TODO
+Please report any bugs or issues to the
+@ghref{flycheck/flycheck/issues,issue tracker}.  If you report a bug,
+please include the following information to help us identify and fix the
+culprit:
+
+@itemize @bullet
+@item
+The output of @kbd{M-x flycheck-verify-setup} in affected buffers
+@item
+The version of Emacs, as reported by @kbd{M-x emacs-version}
+@item
+The version of Flycheck, as reported by @kbd{M-x flycheck-version}
+@item
+A complete and precise description of the issue, including a description
+of the expected @emph{and} the observed behaviour.
+@end itemize
+
+Please also tell us your ideas for improvements or new features.
+
+Patches are @emph{very} welcome as well.  If you have code to
+contribute, please do not hesitate to open a pull request.  We would
+like to ask you to obey a few
+@ghref{flycheck/flycheck/blob/master/CONTRIBUTING.md, Guidelines},
+though.
 
 @node GNU Free Documentation License
 @appendix GNU Free Documentation License
