@@ -208,7 +208,7 @@ outages of this repository we recommend against it.
 
 @cindex cask
 
-If you use @uref{https://github.com/cask/cask, Cask} to manage your
+If you use @ghref{cask/cask, Cask} to manage your
 packages, add the following to your @file{Cask} file:
 
 @lisp
@@ -1224,10 +1224,10 @@ Many linting tools provide a rich set of options to configure their
 analysis.  Flycheck makes it to define proper Emacs options and map them
 to options of commands.
 
-For instance, the @uref{https://github.com/bbatsov/rubocop, Rubocop}
-tool checks Ruby for semantic and stylistic issues.  Since style is
-mainly a matter of taste, it has a special linting mode in which all
-stylistic checks are disabled (error patterns omitted for readability):
+For instance, the @uref{bbatsov/rubocop, Rubocop} tool checks Ruby for
+semantic and stylistic issues.  Since style is mainly a matter of taste,
+it has a special linting mode in which all stylistic checks are disabled
+(error patterns omitted for readability):
 
 @lisp
 (flycheck-define-checker ruby-rubocop
@@ -1336,10 +1336,9 @@ whether a syntax checker is applicable for the current buffer.
 Frequently, we would like to use multiple syntax checkers in a buffer.
 For instance, we might want to check the syntax of a script with
 @code{sh-zsh} from the previous section, and then use
-@uref{https://github.com/koalaman/shellcheck/, Shellcheck} to check for
-questionable code such as unquoted variable expansions, if there are no
-syntax errors.  Flycheck supports this scenario by @emph{chaining}
-syntax checkers.
+@uref{koalaman/shellcheck/, Shellcheck} to check for questionable code
+such as unquoted variable expansions, if there are no syntax errors.
+Flycheck supports this scenario by @emph{chaining} syntax checkers.
 
 Suppose we defined a syntax checker for Shellcheck called
 @sc{sh-shellcheck} as follows:
@@ -1491,7 +1490,7 @@ for the @uref{http://mercurylang.org/,Mercury} programming language.
 @item
 @ghref{flycheck/flycheck-ocaml,flycheck-ocaml} adds a syntax checker for
 the OCaml programming language, using the
-@uref{https://github.com/the-lambda-church/merlin, Merlin} tool.
+@ghref{the-lambda-church/merlin, Merlin} tool.
 @end itemize
 
 Each language has one or more syntax checkers, whose names follow a
