@@ -5062,21 +5062,31 @@ Why not:
     (flycheck-ert-should-syntax-check
      "checkers/scala-scalastyle-style-warning.scala" 'scala-mode)))
 
+(flycheck-ert-def-checker-test scss-lint scss nil
+  (let ((flycheck-disabled-checkers '(scss)))
+    (flycheck-ert-should-syntax-check
+     "checkers/scss-error.scss" 'scss-mode
+     '(3 nil error "Syntax Error: Invalid CSS after \"...    c olor: red\": expected \"{\", was \";\""
+         :checker scss-lint))))
+
 (flycheck-ert-def-checker-test scss scss nil
-  (flycheck-ert-should-syntax-check
-   "checkers/scss-error.scss" 'scss-mode
-   '(3 nil error "Invalid CSS after \"...    c olor: red\": expected \"{\", was \";\""
-       :checker scss)))
+  (let ((flycheck-disabled-checkers '(scss-lint)))
+    (flycheck-ert-should-syntax-check
+     "checkers/scss-error.scss" 'scss-mode
+     '(3 nil error "Invalid CSS after \"...    c olor: red\": expected \"{\", was \";\""
+         :checker scss))))
 
 (flycheck-ert-def-checker-test scss scss import-error
-  (flycheck-ert-should-syntax-check
-   "checkers/scss-compass.scss" 'scss-mode
-   `(2 nil error ,(format "File to import not found or unreadable: compass/css3.
+  (let ((flycheck-disabled-checkers '(scss-lint)))
+    (flycheck-ert-should-syntax-check
+     "checkers/scss-compass.scss" 'scss-mode
+     `(2 nil error ,(format "File to import not found or unreadable: compass/css3.
        Load path: %s" (flycheck-ert-resource-filename "checkers"))
-       :checker scss)))
+         :checker scss))))
 
 (flycheck-ert-def-checker-test scss scss compass
-  (let ((flycheck-scss-compass t))
+  (let ((flycheck-disabled-checkers '(scss-lint))
+        (flycheck-scss-compass t))
     (flycheck-ert-should-syntax-check
      "checkers/scss-compass.scss" 'scss-mode)))
 

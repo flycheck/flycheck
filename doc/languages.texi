@@ -692,6 +692,9 @@ If these options are not set, @flyc{scala-scalastyle} will not be used.
 
 @itemize
 @item
+@flyc{scss-lint} (using @uref{https://github.com/brigade/scss-lint,
+SCSS-Lint}), or
+@item
 @flyc{scss} (using the @uref{http://sass-lang.com/,standard SCSS
 processor}, with the following option:
 

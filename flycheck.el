@@ -233,6 +233,7 @@ attention to case differences."
     sass
     scala
     scala-scalastyle
+    scss-lint
     scss
     sh-bash
     sh-posix-dash
@@ -7152,6 +7153,16 @@ See URL `http://www.scalastyle.org'."
                   (file-exists-p flycheck-scalastyle-jar)
                   (file-exists-p (flycheck-locate-config-file
                                   flycheck-scalastylerc 'scala-scalastyle)))))
+
+(flycheck-define-checker scss-lint
+  "A SCSS syntax checker using SCSS-Lint.
+
+See URL `https://github.com/causes/scss-lint'."
+  :command ("scss-lint" "--formatter" "default" source)
+  :error-patterns
+  ((error line-start (file-name) ":" line "[E]" (message) line-end)
+   (warning line-start (file-name) ":" line "[W]" (message) line-end))
+  :modes scss-mode)
 
 (flycheck-def-option-var flycheck-scss-compass nil scss
   "Whether to enable the Compass CSS framework.
