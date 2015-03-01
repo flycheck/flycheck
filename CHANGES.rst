@@ -10,6 +10,7 @@ master (in development)
 - New syntax checkers:
 
   - R with `lintr` [GH-512]
+  - SCSS with `scss-lint` [GH-598]
 
 - New features:
 

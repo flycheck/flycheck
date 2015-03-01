@@ -650,6 +650,9 @@ Scss
    .. option:: flycheck-scss-compass
       :auto:
 
+.. flyc-checker:: scss-lint
+   :auto:
+
 Shell script languages
 ======================
 

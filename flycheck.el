@@ -233,6 +233,7 @@ attention to case differences."
     scala
     scala-scalastyle
     scss
+    scss-lint
     sh-bash
     sh-posix-dash
     sh-posix-bash
@@ -7050,6 +7051,16 @@ See URL `http://sass-lang.com'."
           (optional "\r") "\n" (one-or-more " ") "on line " line " of " (file-name)
           line-end))
   :modes scss-mode)
+
+(flycheck-define-checker scss-lint
+  "A SCSS syntax checker using SCSS-Lint.
+
+See URL `https://github.com/causes/scss-lint'."
+  :command ("scss-lint" "--formatter" "default" source)
+  :error-patterns
+  ((error line-start (file-name) ":" line "[E]" (message) line-end)
+   (warning line-start (file-name) ":" line "[W]" (message) line-end))
+   :modes scss-mode)
 
 (flycheck-define-checker sh-bash
   "A Bash syntax checker using the Bash shell.
