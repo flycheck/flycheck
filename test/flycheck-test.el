@@ -527,6 +527,7 @@ and extension, as in `file-name-base'."
     (let ((flycheck-check-syntax-automatically '(idle-change)))
       (flycheck-mode)
       (insert "Hello world")
+      (should-not (flycheck-deferred-check-p))
       (sleep-for 0.55)
       (should (flycheck-deferred-check-p)))))
 
