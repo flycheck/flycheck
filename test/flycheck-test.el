@@ -584,6 +584,7 @@ and extension, as in `file-name-base'."
 (ert-deftest flycheck-buffer-automatically/does-not-check-with-disabled-mode ()
   :tags '(automatic)
   (flycheck-ert-with-temp-buffer
+    (rename-buffer "foo")
     (should-not flycheck-mode)
     (should-not (flycheck-deferred-check-p))
     (flycheck-buffer-automatically)
