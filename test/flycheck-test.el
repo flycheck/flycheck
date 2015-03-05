@@ -310,10 +310,13 @@ and extension, as in `file-name-base'."
 
 ;;; Global syntax checking
 
-(ert-deftest flycheck-may-enable-mode/not-in-ephemeral-buffers ()
+(ert-deftest flycheck-may-enable-mode/not-in-temporary-buffers ()
   :tags '(global-mode)
   (flycheck-ert-with-temp-buffer
-    (should-not (flycheck-may-enable-mode)))
+    (should-not (flycheck-may-enable-mode))))
+
+(ert-deftest flycheck-may-enable-mode/not-in-ephemeral-buffers ()
+  :tags '(global-mode)
   (flycheck-ert-with-temp-buffer
     (setq buffer-file-name "foo")
     (emacs-lisp-mode)
@@ -358,7 +361,6 @@ and extension, as in `file-name-base'."
       (rename-buffer "foo")
       (emacs-lisp-mode)
       (should-not (flycheck-may-enable-mode)))))
-
 
 (ert-deftest flycheck-may-enable-mode/some-modes-disabled ()
   :tags '(global-mode)
