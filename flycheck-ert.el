@@ -123,7 +123,7 @@ After BODY, restore the old state of Global Flycheck Mode."
          (progn
            (global-flycheck-mode 1)
            ,@body)
-       (global-flycheck-mode old-state))))
+       (global-flycheck-mode (if old-state 1 -1)))))
 
 (defmacro flycheck-ert-with-env (env &rest body)
   "Add ENV to `process-environment' in BODY.

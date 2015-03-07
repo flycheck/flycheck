@@ -11,7 +11,7 @@
     - role: emacs-snapshot
       tags: emacs
     - role: cask
-      tags: emacs
+      tags: [emacs, emacs24, emacs-snapshot]
     - role: languages
       tags: languages
 
@@ -31,12 +31,10 @@
     python_pip_extra_args: '--user'
   roles:
     - role: emacs24
-      when: "lookup('env', 'EMACS') == 'emacs24'"
-      tags: emacs
+      tags: [emacs, emacs24]
     - role: emacs-snapshot
-      when: "lookup('env', 'EMACS') == 'emacs-snapshot'"
-      tags: emacs
+      tags: [emacs, emacs-snapshot]
     - role: cask
-      tags: emacs
+      tags: [emacs, emacs24, emacs-snapshot]
     - role: languages
       tags: languages

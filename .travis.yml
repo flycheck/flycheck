@@ -1,17 +1,20 @@
 language: emacs-lisp
 env:
-  - EMACS=emacs24
-  # Flycheck must compile cleanly on latest Emacs
-  - EMACS=emacs-snapshot EMACSFLAGS="--eval '(setq byte-compile-error-on-warn t)'"
+  # Run all basic unit tests on both Emacs versions
+  - TRAVIS_BUILD=unit EMACS=emacs24
+  - TRAVIS_BUILD=unit EMACS=emacs-snapshot
+  # Run integration tests on Emacs snapshot only.  That should be sufficient to
+  # catch most bugs
+  - TRAVIS_BUILD=integration EMACS=emacs-snapshot
 before_install:
-  # Provision the test environment
-  - sudo add-apt-repository -y ppa:rquillo/ansible
-  - sudo apt-get update -y -q
-  - sudo apt-get install -y ansible
-  # Skip Cabal and Cran packages on Travis CI, because they take too much time
-  # to build
-  - ansible-playbook -i playbooks/travis_inventory --tags language-texinfo --skip-tags=cabal,cran -v playbooks/site.yml
+  - make -f travis.mk before_install
   - source /etc/profile
   - export PATH="${GOPATH}/bin:${HOME}/.local/bin:$PATH"
+install:
+  - make -f travis.mk install
 script:
-  - make texinfo
+  - make -f travis.mk script
+matrix:
+  # Fast fail if any job fails.  We don't need to run all integration tests, if
+  # the unit tests fail already.
+  fast_finish: true
