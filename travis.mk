@@ -15,8 +15,8 @@ PLAYBOOK = playbooks/site.yml
 ANSIBLE_SKIP_TAGS=cabal,cran
 
 # Tags for different Travis builds
-ANSIBLE_TAGS_unit=emacs
-ANSIBLE_TAGS_integration=emacs,languages
+ANSIBLE_TAGS_unit=$(EMACS)
+ANSIBLE_TAGS_integration=$(EMACS),languages
 ANSIBLE_TAGS=$(ANSIBLE_TAGS_$(TRAVIS_BUILD))
 
 ERTSELECTOR_unit=(not (tag external-tool))
