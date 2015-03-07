@@ -4,8 +4,8 @@ ifeq ($(origin TRAVIS_BUILD), undefined)
 $(error "TRAVIS_BUILD not set")
 endif
 
-ifeq ($(findstring $(TRAVIS_BUILD), unit integration),)
-$(error "Unsupported TRAVIS_BUILD=$(TRAVIS_BUILD), must be either unit or integration")
+ifeq ($(findstring $(TRAVIS_BUILD), unit integration manual),)
+$(error "Unsupported TRAVIS_BUILD=$(TRAVIS_BUILD), must be either unit, integration or manual")
 endif
 
 INVENTORY = playbooks/travis_inventory
@@ -17,6 +17,7 @@ ANSIBLE_SKIP_TAGS=cabal,cran
 # Tags for different Travis builds
 ANSIBLE_TAGS_unit=$(EMACS)
 ANSIBLE_TAGS_integration=$(EMACS),languages
+ANSIBLE_TAGS_manual=language-texinfo
 ANSIBLE_TAGS=$(ANSIBLE_TAGS_$(TRAVIS_BUILD))
 
 ERTSELECTOR_unit=(not (tag external-tool))
@@ -28,13 +29,20 @@ EMACSFLAGS_unit=--eval '(setq byte-compile-error-on-warn t)'
 endif
 EMACSFLAGS=$(EMACSFLAGS_$(TRAVIS_BUILD))
 
+ifneq ($(TRAVIS_TAG),)
+MANUAL_VERSION=--version $(TRAVIS_TAG)
+endif
+
 ifeq ($(origin EMACS), undefined)
 $(error "No $$EMACS in environment!")
 endif
 export EMACS
 
-.PHONY: install_ansible provision deps compile test\
-	before_install install script
+.PHONY: install_ansible provision deps compile test texinfo deploy_manual \
+	before_install \
+	install install_unit install_integration install_manual \
+	script script_unit script_integration script_manual \
+	after_success after_success_unit after_success_integration after_success_manual
 
 # SUPPORT TARGETS
 install_ansible:
@@ -54,9 +62,43 @@ compile:
 test: compile
 	make EMACS=$(EMACS) ERTSELECTOR="$(ERTSELECTOR)" test
 
+texinfo:
+	makeinfo --version
+	make texinfo
+
+deploy_manual:
+ifneq ($(TRAVIS_SECURE_ENV_VARS),true)
+	$(error "Secure environment variables not available!")
+endif
+	git clone https://github.com/flycheck/flycheck.github.com.git docs/_deploy
+	docs/_deploy/_scripts/update-manual.py $(MANUAL_VERSION)
+
 # TARGETS FOR TRAVIS PHASES
 before_install: provision
 
-install: deps
+install_unit install_integration: deps
 
-script: test
+install_manual:
+
+install: install_$(TRAVIS_BUILD)
+
+script_unit script_integration: deps
+
+script_manual: texinfo
+
+script: script_$(TRAVIS_BUILD)
+
+after_success_unit after_success_integration:
+
+# Only deploy on master or for tags
+ifeq ($(TRAVIS_BRANCH),master)
+after_success_manual: deploy_manual
+else
+ifneq ($(TRAVIS_TAG),)
+after_success_manual: deploy_manual
+else
+after_success_manual:
+endif
+endif
+
+after_success: after_success_$(TRAVIS_BUILD)
