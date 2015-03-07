@@ -3878,7 +3878,7 @@ evaluating BODY."
 (flycheck-ert-def-checker-test coffee coffee syntax-error
   (flycheck-ert-should-syntax-check
    "checkers/coffee-syntax-error.coffee" 'coffee-mode
-   '(4 7 error "missing \", starting" :checker coffee)))
+   '(4 7 error "missing \"" :checker coffee)))
 
 (flycheck-ert-def-checker-test coffee-coffeelint coffee error
   :tags '(checkstyle-xml)
@@ -4009,7 +4009,7 @@ The term \"1\" has type \"nat\" while it is expected to have type
                   (file-error (cdr err))))
          (msg (format "Cannot open load file: %sdummy-package"
                       (if (= (length parts) 2) ""
-                        "no such file or directory, "))))
+                        "No such file or directory, "))))
     (flycheck-ert-should-syntax-check
      "checkers/emacs-lisp.el" 'emacs-lisp-mode
      '(12 nil warning "First sentence should end with punctuation"
@@ -4256,7 +4256,7 @@ The term \"1\" has type \"nat\" while it is expected to have type
 (flycheck-ert-def-checker-test handlebars handlebars nil
   (flycheck-ert-should-syntax-check
    "checkers/handlebars-error.hbs" 'handlebars-mode
-   '(2 nil error "Expecting 'ID', 'DATA', got 'INVALID'"
+   '(2 nil error "Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'DATA', got 'INVALID'"
        :checker handlebars)))
 
 (ert-deftest flycheck-haskell-module-re/matches-module-name ()
@@ -4408,9 +4408,15 @@ Why not:
    '(1 42 error "found: ',' - expected: 'EOF'." :checker json-jsonlint)))
 
 (flycheck-ert-def-checker-test less less file-error
-  (flycheck-ert-should-syntax-check
-   "checkers/less-file-error.less" 'less-css-mode
-   '(3 1 error "'no-such-file.less' wasn't found" :checker less)))
+  (let* ((candidates (list (flycheck-ert-resource-filename "checkers/no-such-file.less")
+                           (flycheck-ert-resource-filename "checkers/no-such-file.less")
+                           "no-such-file.less"))
+         (message (string-join candidates ",")))
+    (flycheck-ert-should-syntax-check
+     "checkers/less-file-error.less" 'less-css-mode
+     `(3 1 error ,(concat "'no-such-file.less' wasn't found. Tried - "
+                          message)
+         :checker less))))
 
 (flycheck-ert-def-checker-test less less syntax-error
   (flycheck-ert-should-syntax-check
@@ -4923,7 +4929,7 @@ Why not:
 (flycheck-ert-def-checker-test rust rust help
   (flycheck-ert-should-syntax-check
    "checkers/rust-help.rs" 'rust-mode
-   '(3 1 error "not all control paths return a value"
+   '(3 1 error "not all control paths return a value [E0269]"
        :checker rust)
    '(4 11 info "consider removing this semicolon:"
        :checker rust)))
@@ -4941,7 +4947,7 @@ Why not:
    "checkers/rust-info.rs" 'rust-mode
    '(11 9 info "`x` moved here because it has type `NonPOD`, which is moved by default"
         :checker rust)
-   '(11 9 info "use `ref` to override" :checker rust)
+   '(11 10 info "use `ref` to override" :checker rust)
    '(12 9 error "use of moved value: `x`" :checker rust)))
 
 (flycheck-ert-def-checker-test rust rust library-path
