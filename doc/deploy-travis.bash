@@ -41,9 +41,11 @@ check_environment "$TRAVIS_BRANCH" "texinfo" "not the master branch"
 
 echo "Publishing manual..."
 
-chmod 600 deploy
+# Decrypt and load the deployment key
+openssl aes-256-cbc -K "${encrypted_923a5f7c915e_key}" -iv "${encrypted_923a5f7c915e_iv}" -in doc/deploy.enc -out doc/deploy -d
+chmod 600 doc/deploy
 eval $(ssh-agent -s)
-ssh-add deploy
+ssh-add doc/deploy
 
 # Git setup
 export GIT_COMMITTER_EMAIL='travis@travis-ci.org'
@@ -58,6 +60,9 @@ cd doc/_deploy
 git add --force --all .
 git commit -m "Update manual from flycheck/flycheck@${TRAVIS_COMMIT}"
 git push --force --quiet origin master
+cd ../..
 
 eval $(ssh-agent -k)
 echo "Published manual!"
+
+rm doc/deploy
