@@ -67,11 +67,7 @@ texinfo:
 	make texinfo
 
 deploy_manual:
-ifneq ($(TRAVIS_SECURE_ENV_VARS),true)
-	$(error "Secure environment variables not available!")
-endif
-	git clone https://github.com/flycheck/flycheck.github.com.git docs/_deploy
-	docs/_deploy/_scripts/update-manual.py $(MANUAL_VERSION)
+	bash doc/deploy-travis.bash
 
 # TARGETS FOR TRAVIS PHASES
 before_install: provision
@@ -90,16 +86,6 @@ script: script_$(TRAVIS_BUILD)
 
 after_success_unit after_success_integration:
 
-# Only deploy on master or for tags
-# TODO: Really use master here
-ifeq ($(TRAVIS_BRANCH),texinfo)
 after_success_manual: deploy_manual
-else
-ifneq ($(TRAVIS_TAG),)
-after_success_manual: deploy_manual
-else
-after_success_manual:
-endif
-endif
 
 after_success: after_success_$(TRAVIS_BUILD)
