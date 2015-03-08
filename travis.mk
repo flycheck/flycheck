@@ -91,7 +91,8 @@ script: script_$(TRAVIS_BUILD)
 after_success_unit after_success_integration:
 
 # Only deploy on master or for tags
-ifeq ($(TRAVIS_BRANCH),master)
+# TODO: Really use master here
+ifeq ($(TRAVIS_BRANCH),texinfo)
 after_success_manual: deploy_manual
 else
 ifneq ($(TRAVIS_TAG),)
