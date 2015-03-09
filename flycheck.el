@@ -5538,6 +5538,17 @@ Relative paths are relative to the file being checked."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.18"))
 
+(flycheck-def-option-var flycheck-dmd-string-import-path nil d-dmd
+  "A list of string import directories for dmd.
+
+The value of this variable is a list of strings, where each
+string is a directory to add to the string import path of dmd.
+Relative paths are relative to the file being checked."
+  :type '(repeat (directory :tag "String import directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.23"))
+
+
 (flycheck-define-checker d-dmd
   "A D syntax checker using the DMD compiler.
 
@@ -5549,6 +5560,7 @@ Requires DMD 2.066 or newer.  See URL `http://dlang.org/'."
             "-wi" ; Compilation will continue even if there are warnings
             (eval (concat "-I" (flycheck-d-base-directory)))
             (option-list "-I" flycheck-dmd-include-path concat)
+            (option-list "-J" flycheck-dmd-string-import-path concat)
             source)
   :error-patterns
   ((error line-start
