@@ -139,7 +139,7 @@ conventions.
 @flyc{go-gofmt} (syntax check with
 @uref{http://golang.org/cmd/gofmt/,gofmt})
 @item
-@flyc{go-lint} (coding style with
+@flyc{go-golint} (coding style with
 @uref{https://github.com/golang/lint,Golint})
 @item
 @flyc{go-vet} (check for suspicious code with
@@ -257,7 +257,7 @@ Detector})
 
 @itemize
 @item
-@flyc{puppet} (syntax check with @uref{http://puppetlabs.com/, Puppet})
+@flyc{puppet-parser} (syntax check with @uref{http://puppetlabs.com/, Puppet})
 @item
 @flyc{puppet-lint} (style check with @uref{http://puppet-lint.com/,
 Puppet Lint})
@@ -313,7 +313,7 @@ syntax checker using
 @item
 @flyc{rst} (using @uref{http://docutils.sourceforge.net/,docutils}, for
 plain reStructuredFiles files), or
-@flyc{rst-sphin} (using @uref{http://sphinx-doc.org/,Sphinx}, for Sphinx
+@flyc{rst-sphinx} (using @uref{http://sphinx-doc.org/,Sphinx}, for Sphinx
 documentation files)
 @end itemize
 
@@ -352,25 +352,33 @@ Flycheck according to the current
 @uref{http://doc.crates.io/guide.html,Cargo} project.
 @end smallindentedblock
 
-@flyclanguage{Sass/SCSS}
+@flyclanguage{Sass}
 
 @itemize
 @item
-@flyc{sass} or @flyc{scss} (using the
-@uref{http://sass-lang.com/,standard Sass processor}, for Sass or SCSS
-files respectively)
+@flyc{sass} (using the @uref{http://sass-lang.com/,standard Sass
+processor})
 @end itemize
 
 @flyclanguage{Scala}
 
 @enumerate
 @item
-@uref{scala} (syntax and type check using the
+@flyc{scala} (syntax and type check using the
 @uref{http://www.scala-lang.org/,Scala compiler})
 @item
-@uref{scala-scalastyle} (style check using
+@flyc{scala-scalastyle} (style check using
 @uref{http://www.scalastyle.org/,Scalastyle})
 @end enumerate
+
+@flyclanguage{SCSS}
+
+@itemize
+@item
+@flyc{scss} (using the @uref{http://sass-lang.com/,standard SCSS
+processor}
+@end itemize
+
 
 @flyclanguage{Shell scripting languages}
 
