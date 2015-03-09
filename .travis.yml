@@ -1,8 +1,8 @@
 language: emacs-lisp
 env:
   # Run all basic unit tests on both Emacs versions
-  # - TRAVIS_BUILD=unit EMACS=emacs24
-  # - TRAVIS_BUILD=unit EMACS=emacs-snapshot
+  - TRAVIS_BUILD=unit EMACS=emacs24
+  - TRAVIS_BUILD=unit EMACS=emacs-snapshot
   # Run integration tests on Emacs snapshot only.  That should be sufficient to
   # catch most bugs
   # - TRAVIS_BUILD=integration EMACS=emacs-snapshot
