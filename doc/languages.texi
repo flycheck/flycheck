@@ -17,7 +17,7 @@
 
 @itemize
 @item
-@flyc{asciidoc}: @uref{http://www.methods.co.nz/asciidoc,AsciiDoc}
+@flyc{asciidoc} (@uref{http://www.methods.co.nz/asciidoc,AsciiDoc})
 @end itemize
 
 @flyclanguage{C/C++}
