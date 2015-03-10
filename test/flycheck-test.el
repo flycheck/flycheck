@@ -4219,6 +4219,13 @@ Why not:
     (flycheck-test-should-syntax-check
      "checkers/sass-compass.sass" 'sass-mode)))
 
+(ert-deftest flycheck-define-checker/sass-import-path ()
+  :tags '(builtin-checker external-tool language-sass)
+  (skip-unless (flycheck-check-executable 'sass))
+  (let ((flycheck-sass-import-paths '("checkers/sass/")))
+    (flycheck-test-should-syntax-check
+     "checkers/sass-with-import.sass" 'sass-mode)))
+
 (ert-deftest flycheck-define-checker/scala ()
   :tags '(builtin-checker external-tool language-scala)
   :expected-result '(or (satisfies flycheck-test-failed-on-travis-ci-p)

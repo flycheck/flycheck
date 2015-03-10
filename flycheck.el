@@ -4861,12 +4861,23 @@ When non-nil, enable the Compass CSS framework, via `--compass'."
   :safe #'booleanp
   :package-version '(flycheck . "0.16"))
 
+(flycheck-def-option-var flycheck-sass-import-paths nil sass
+  "A list of import directories for Sass.
+
+The value of this variable is a list of strings, where each
+string is a directory to add to the import path of Sass.  Relative
+paths are relative to the file being checked."
+  :type '(repeat (directory :tag "Import directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.18"))
+
 (flycheck-define-checker sass
   "A Sass syntax checker using the Sass compiler.
 
 See URL `http://sass-lang.com'."
   :command ("sass"
             (option-flag "--compass" flycheck-sass-compass)
+            (option-list "-I" flycheck-sass-import-paths)
             "-c" source)
   :error-patterns
   ((error line-start "Syntax error on line " line ": " (message))
