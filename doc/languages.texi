@@ -5,12 +5,37 @@
 @cindex \language\ language
 @end macro
 
+@macro flycoption{option}
+@item @code{\option\}
+@vindex \option\
+@end macro
+
+@macro flycoptionx{option}
+@itemx @code{\option\}
+@vindex \option\
+@end macro
+
 @flyclanguage Ada
 
 @itemize
 @item
 @flyc{ada-gnat}
-(@uref{https://gcc.gnu.org/onlinedocs/gnat_ugn_unw/,GNAT})
+(@uref{https://gcc.gnu.org/onlinedocs/gnat_ugn_unw/,GNAT}), with the
+following options:
+
+@table @asis
+@flycoption flycheck-gnat-args
+A list of additional arguments to GNAT.
+@flycoption flycheck-gnat-include-path
+A list of include directories for GNAT.  Relative paths are relative to
+the file being checked.
+@flycoption flycheck-gnat-language-standard
+The language standard to use in GNAT, as string.
+@flycoption flycheck-gnat-warnings
+A list of additional warnings to enable in GNAT.  Each item is the name
+of a warning category to enable.
+@end table
+
 @end itemize
 
 @flyclanguage AsciiDoc
@@ -25,13 +50,65 @@
 @enumerate
 @item
 @flyc{c/c++-clang} (syntax and type check with
-@uref{http://clang.llvm.org/,Clang}) or @flyc{c/c++-gcc}
-(syntax and type check with @uref{https://gcc.gnu.org/, GCC})
-
+@uref{http://clang.llvm.org/,Clang}) or @flyc{c/c++-gcc} (syntax and
+type check with @uref{https://gcc.gnu.org/, GCC}), and
 @item
 @flyc{c/c++-cppcheck} (style and error check with
-@uref{http://cppcheck.sourceforge.net/,cppcheck})
+@uref{http://cppcheck.sourceforge.net/,cppcheck}).
 @end enumerate
+
+@flyc{c/c++-clang} and @flyc{c/c++-gcc} provide the following options:
+
+@table @asis
+@flycoption flycheck-clang-args
+@flycoptionx flycheck-gcc-args
+A list of additional arguments for Clang/GCC.
+@flycoption flycheck-clang-blocks
+Whether to enable blocks in Clang.
+@flycoption flycheck-clang-definitions
+@flycoptionx flycheck-gcc-definitions
+A list of additional preprocessor definitions for Clang/GCC.
+@flycoption flycheck-clang-include-path
+@flycoptionx flycheck-gcc-include-path
+A list of include directories for Clang/GCC, relative to the file being
+checked.
+@flycoption flycheck-clang-includes
+@flycoptionx flycheck-gcc-includes
+A list of additional include files for Clang/GCC, relative to the file
+being checked.
+@flycoption flycheck-clang-language-standard
+@flycoptionx flycheck-gcc-language-standard
+The language standard to use in Clang/GCC, as string, via the
+@option{-std} option.
+@flycoption flycheck-clang-ms-extensions
+Whether to enable Microsoft extensions to C/C++ in Clang.
+@flycoption flycheck-clang-no-exceptions
+@flycoption flycheck-gcc-no-exceptions
+Whether to disable exceptions in Clang/GCC.
+@flycoption flycheck-clang-no-rtti
+@flycoptionx flycheck-gcc-no-rtti
+Whether to disable RTTI in Clang/GCC, via @option{-fno-rtti}.
+@flycoption flycheck-clang-standard-library
+The name of the standard library to use for Clang, as string.
+@flycoption flycheck-gcc-openmp
+Whether to enable OpenMP in GCC.
+@flycoption flycheck-clang-warnings
+@flycoptionx flycheck-gcc-warnings
+A list of additional warnings to enable in Clang.  Each item is the name
+of a warning or warning category for @option{-W}.
+@end table
+
+@noindent
+@flyc{c/c++-cppcheck} provides the following options:
+
+@table @asis
+@flycoption flycheck-cppcheck-checks
+A list of enabled checks for cppcheck.  Each item is the name of a
+check for the @option{--enable} option.
+@flycoption flycheck-cppcheck-inconclusive
+Whether to enable inconclusive checks in cppcheck.  These checks may
+yield more false positives than normal checks.
+@end table
 
 @flyclanguage{CFEngine}
 
@@ -77,7 +154,13 @@
 
 @itemize
 @item
-@flyc{d-dmd} (@uref{http://dlang.org/,DMD})
+@flyc{d-dmd} (@uref{http://dlang.org/,DMD}), with the following options:
+
+@table @asis
+@flycoption flycheck-dmd-include-path
+A list of include directories for DMD.
+@end table
+
 @end itemize
 
 @smallindentedblock
@@ -109,6 +192,25 @@ syntax checker which checks for violations of Emacs Lisp packaging
 conventions.
 @end smallindentedblock
 
+The @flyc{emacs-lisp} checker provides the following options
+
+@table @asis
+@flycoption flycheck-emacs-lisp-load-path
+The load path to use while checking Emacs Lisp files, as list of
+strings.  Relative directories are expanded against the
+@code{default-directory} of the buffer being checked.
+
+@flycoption flycheck-emacs-lisp-initialize-packages
+Whether to initialize Emacs' package manager with
+@code{package-initialize} before checking the buffer.  If set to
+@code{auto} (the default), only initialize the package managers for
+files in under @code{user-emacs-directory}.
+
+@flycoption flycheck-emacs-lisp-package-user-dir
+The package directory for the Emacs Lisp checker, as string.  Has no
+effect if @code{flycheck-emacs-lisp-initialize-packages} is nil.
+@end table
+
 @flyclanguage{Erlang}
 
 @itemize
@@ -129,7 +231,30 @@ conventions.
 @enumerate
 @item
 @flyc{fortran-gfortran}
-(@uref{https://gcc.gnu.org/onlinedocs/gfortran/,GFortran})
+(@uref{https://gcc.gnu.org/onlinedocs/gfortran/,GFortran}), with the
+following options:
+
+@table @asis
+@flycoption flycheck-gfortran-args
+A list of additional arguments to GFortran.
+
+@flycoption flycheck-gfortran-include-path
+A list of include directories for GFortran.  Relative paths are relative
+to the file being checked.
+
+@flycoption flycheck-gfortran-language-standard
+The language standard to use with GFortran, for the @option{-std}
+option.
+
+@flycoption flycheck-gfortran-layout
+The source code layout to use with GFortran.  Set to @code{free} or
+@code{fixed} for free or fixed layout respectively, or nil (the default)
+to let GFortran automatically determine the layout.
+
+@flycoption flycheck-gfortran-warnings
+A list of warnings enabled for GFortran, via the @option{-W} option.
+@end table
+
 @end enumerate
 
 @flyclanguage{Go}
@@ -154,6 +279,14 @@ respectively)
 @uref{https://github.com/kisielk/errcheck, errcheck})
 @end enumerate
 
+@flyc{go-vet} provides the following option:
+
+@table @asis
+@flycoption flycheck-go-vet-print-functions
+A list of print-like functions for go vet.  Go vet will check these
+functions for format string problems.
+@end table
+
 @flyclanguage{Haml}
 
 @itemize
@@ -173,7 +306,8 @@ respectively)
 @enumerate
 @item
 @flyc{haskell-ghc} (syntax and type checker with
-@uref{http://www.haskell.org/ghc/,GHC})
+@uref{http://www.haskell.org/ghc/,GHC}), and
+
 @item
 @flyc{haskell-hlint} (style checker with
 @uref{https://github.com/ndmitchell/hlint,hlint})
@@ -188,6 +322,27 @@ alternative syntax checker for @code{haskell-ghc} using
 @uref{https://github.com/bitc/hdevtools/,hdevtools}.
 @end smallindentedblock
 
+The @flyc{haskell-ghc} checker provides the following options:
+
+@table @asis
+@flycoption flycheck-ghc-args
+A list of additional arguments for GHC.
+
+@flycoption flycheck-ghc-no-user-package-database
+Whether to disable the user package database in GHC.
+
+@flycoption flycheck-ghc-package-databases
+A list of additional package databases for GHC.  Each item points to a
+directory containing a package directory, for the @option{-package-db}
+option.
+
+@flycoption flycheck-ghc-search-path
+A list of module directories for GHC, via the @option{-i} option.
+
+@flycoption flycheck-ghc-language-extensions
+A list of language extensions for GHC, via @option{-X}.
+@end table
+
 @flyclanguage{HTML}
 
 @itemize
@@ -199,13 +354,20 @@ alternative syntax checker for @code{haskell-ghc} using
 
 @itemize
 @item
-@flyc{javascript-jshint} (@uref{http://jshint.com/,JSHint}), or
+@flyc{javascript-jshint} (@uref{http://jshint.com/,JSHint})
 @item
-@flyc{javascript-eslint} (@uref{http://eslint.org/,ESLint}), or
+Or @flyc{javascript-eslint} (@uref{http://eslint.org/,ESLint})
 @item
-@flyc{javascript-gjslint}
+Or @flyc{javascript-gjslint}
 (@uref{https://developers.google.com/closure/utilities,Closure Linter})
 @end itemize
+
+The @flyc{javascript-eslint} checker provides the following options:
+
+@table @asis
+@flycoption flycheck-eslint-rulesdir
+A directory with custom rules for ESLint.
+@end table
 
 @flyclanguage{JSON}
 
@@ -239,6 +401,14 @@ interpreter})
 @uref{https://metacpan.org/pod/Perl::Critic, Perl::Critic})
 @end enumerate
 
+The @flyc{perl-perlcritic} checker provides the following option:
+
+@table @asis
+@flycoption flycheck-perlcritic-severity
+The severity level for Perl::Critic, as integer for the
+@option{--severity} option of Perl::Critic.
+@end table
+
 @flyclanguage{PHP}
 
 @enumerate
@@ -252,6 +422,19 @@ Detector})
 @flyc{php-phpcs} (style check with
 @uref{http://pear.php.net/package/PHP_CodeSniffer/, PHP CodeSniffer})
 @end enumerate
+
+These checkers provide the following options:
+
+@table @asis
+@flycoption flycheck-phpmd-rulesets
+A list of rule sets for PHP Mess Detector as strings.  Each item is
+either the name of a default rule set, or the path to a custom rule set
+file.
+
+@flycoption flycheck-phpcs-standard
+The coding standard for PHP CodeSniffer, either as name of a built-in
+standard, or as path to a standard specification.
+@end table
 
 @flyclanguage{Puppet}
 
@@ -284,12 +467,36 @@ syntax checker using
 @uref{https://pypi.python.org/pypi/pyflakes,Pyflakes}.
 @end smallindentedblock
 
+@flyc{python-flake8} provides the following options:
+
+@table @asis
+@flycoption flycheck-flake8-error-level-alist
+An alist mapping Flake8 error IDs to Flycheck error levels.
+
+@flycoption flycheck-flake8-maximum-complexity
+The maximum McCabe complexity of methods allowed by Flake8.
+
+@flycoption flycheck-flake8-maximum-line-length
+The maximum length of lines for Flake8.
+@end table
+
 @flyclanguage{R}
 
 @itemize
 @item
 @flyc{r-lintr} (syntax and style check with
-@uref{jimhester/lintr,lintr})
+@uref{jimhester/lintr,lintr}), with the following options:
+
+@table @asis
+@flycoption flycheck-lintr-caching
+Whether to enable caching in lintr.  On by default.  Only disable it if
+caching causes real problems.
+
+@flycoption flycheck-lintr-linters
+Linters to use with lintr, as a string containing an R expression which
+selects the linters to use.
+@end table
+
 @end itemize
 
 @flyclanguage{Racket}
@@ -317,6 +524,13 @@ plain reStructuredFiles files), or
 documentation files)
 @end itemize
 
+@flyc{rst-sphinx} provides the following option:
+
+@table @asis
+@flycoption flycheck-sphinx-warn-on-missing-references
+Whether to emit warnings for all missing references in Sphinx.
+@end table
+
 @flyclanguage{Ruby}
 
 @enumerate
@@ -327,6 +541,14 @@ documentation files)
 @flyc{ruby-rubylint} (syntax and style check using
 @uref{http://code.yorickpeterse.com/ruby-lint/latest/,ruby-lint})
 @end enumerate
+
+These checkers provide the following options
+
+@table @asis
+@flycoption flycheck-rubocop-lint-only
+Whether to suppress warnings about style issues in Rubocop, via the
+@option{--lint} option.
+@end table
 
 If none of the above is available, Flycheck will fall back to one of the
 following checkers for very basic checking:
@@ -343,7 +565,26 @@ interpreter}),
 
 @itemize
 @item
-@flyc{rust} (using the @uref{http://www.rust-lang.org/,Rust compiler})
+@flyc{rust} (using the @uref{http://www.rust-lang.org/,Rust compiler}),
+with the following options:
+
+@table @asis
+@flycoption flycheck-rust-check-tests
+Whether to check test code in Rust.
+
+@flycoption flycheck-rust-crate-root
+A path to the crate root for the current buffer, or nil if the current
+buffer is a crate by itself.
+
+@flycoption flycheck-rust-crate-type
+The type of the crate to check, as string for the @option{--crate-type}
+option.
+
+@flycoption flycheck-rust-library-path
+A list of library directories for Rust.  Relative paths are relative to
+the buffer being checked.
+@end table
+
 @end itemize
 
 @smallindentedblock
@@ -357,7 +598,14 @@ Flycheck according to the current
 @itemize
 @item
 @flyc{sass} (using the @uref{http://sass-lang.com/,standard Sass
-processor})
+processor}), with the following option:
+
+@table @asis
+@flycoption flycheck-sass-compass
+Whether to enable the Compass CSS framework in SASS, via
+@option{--compass}.
+@end table
+
 @end itemize
 
 @flyclanguage{Scala}
@@ -371,14 +619,29 @@ processor})
 @uref{http://www.scalastyle.org/,Scalastyle})
 @end enumerate
 
+The @flyc{scala-scalastyle} syntax checker needs the following options:
+
+@table @asis
+@flycoption flycheck-scalastyle-jar
+The path to the main JAR file of Scalastyle.
+@end table
+
+If these options are not set, @flyc{scala-scalastyle} will not be used.
+
 @flyclanguage{SCSS}
 
 @itemize
 @item
 @flyc{scss} (using the @uref{http://sass-lang.com/,standard SCSS
-processor}
-@end itemize
+processor}, with the following option:
 
+@table @asis
+@flycoption flycheck-scss-compass
+Whether to enable the Compass CSS framework in SCSS, via
+@option{--compass}.
+@end table
+
+@end itemize
 
 @flyclanguage{Shell scripting languages}
 
@@ -400,6 +663,13 @@ using @uref{http://gondor.apana.org.au/~herbert/dash/,Dash} or
 @flyc{sh-shellcheck} (code and style check using
 @uref{https://github.com/koalaman/shellcheck/,ShellCheck})
 @end enumerate
+
+@flyc{sh-shellcheck} provides the following option:
+
+@table @asis
+@flycoption flycheck-shellcheck-excluded-warnings
+A list of excluded warnings for ShellCheck.
+@end table
 
 @flyclanguage{Slim}
 

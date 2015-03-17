@@ -5931,7 +5931,7 @@ See URL `https://github.com/golang/lint'."
                   go-build go-test go-errcheck))
 
 (flycheck-def-option-var flycheck-go-vet-print-functions nil go-vet
-  "A comma-separated list of print-like functions for `go tool vet'.
+  "A list of print-like functions for `go tool vet'.
 
 Go vet will check these functions for format string problems and
 issues, such as a mismatch between the number of formats used,
