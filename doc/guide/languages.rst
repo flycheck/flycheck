@@ -82,6 +82,12 @@ C/C++
    .. option:: flycheck-clang-language-standard
       :auto:
 
+   .. option:: flycheck-clang-pedantic
+      :auto:
+
+   .. option:: flycheck-clang-pedantic-errors
+      :auto:
+
    .. option:: flycheck-clang-ms-extensions
       :auto:
 
@@ -115,6 +121,12 @@ C/C++
       :auto:
 
    .. option:: flycheck-gcc-language-standard
+      :auto:
+
+   .. option:: flycheck-gcc-pedantic
+      :auto:
+
+   .. option:: flycheck-gcc-pedantic-errors
       :auto:
 
    .. option:: flycheck-gcc-no-exceptions
