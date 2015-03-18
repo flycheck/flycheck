@@ -1,0 +1,10 @@
+- name: Download luacheck
+  get_url: url=https://github.com/mpeterv/luacheck/archive/{{luacheck_version}}.zip
+           dest=/usr/src/luacheck-{{luacheck_version}}.zip
+- name: Extract luacheck
+  unarchive: src=/usr/src/luacheck-{{luacheck_version}}.zip copy=no
+             dest=/opt
+- name: Install luacheck
+  command: /usr/bin/lua /opt/luacheck-{{luacheck_version}}/install.lua /usr/local
+  args:
+    chdir: /opt/luacheck-{{luacheck_version}}

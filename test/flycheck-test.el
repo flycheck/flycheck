@@ -4418,11 +4418,35 @@ Why not:
    "checkers/less-syntax-error.less" 'less-css-mode
    '(1 1 error "Unrecognised input" :checker less)))
 
-(flycheck-ert-def-checker-test lua lua nil
+(flycheck-ert-def-checker-test luacheck lua syntax-error
   (flycheck-ert-should-syntax-check
    "checkers/lua-syntax-error.lua" 'lua-mode
-   '(5 nil error "unfinished string near '\"oh no'"
-       :checker lua)))
+   '(5 7 error "unfinished string"
+       :checker luacheck)))
+
+(flycheck-ert-def-checker-test luacheck lua warnings
+  (flycheck-ert-should-syntax-check
+   "checkers/lua-warnings.lua" 'lua-mode
+   '(1 1 warning "setting non-standard global variable 'global_var'"
+       :id "W111" :checker luacheck)
+   '(3 16 warning "unused function 'test'"
+       :id "W211" :checker luacheck)
+   '(3 21 warning "unused argument 'arg'"
+       :id "W212" :checker luacheck)
+   '(4 11 warning "variable 'var2' is never set"
+       :id "W221" :checker luacheck)))
+
+(flycheck-ert-def-checker-test luacheck lua no-warnings
+  (let ((flycheck-luacheckrc "luacheckrc"))
+    (flycheck-ert-should-syntax-check
+     "checkers/lua-warnings.lua" 'lua-mode)))
+
+(flycheck-ert-def-checker-test lua lua nil
+  (let ((flycheck-disabled-checkers '(luacheck)))
+    (flycheck-ert-should-syntax-check
+     "checkers/lua-syntax-error.lua" 'lua-mode
+     '(5 nil error "unfinished string near '\"oh no'"
+         :checker lua))))
 
 (flycheck-ert-def-checker-test perl perl nil
   (flycheck-ert-should-syntax-check

@@ -9,6 +9,7 @@ master (in development)
 - New syntax checkers:
 
   - R with `lintr` [GH-512]
+  - Lua with `luacheck` [GH-591] [GH-609]
 
 - New features:
 
