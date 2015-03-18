@@ -6082,7 +6082,16 @@ See URL `http://handlebarsjs.com/'."
           "Error: Parse error on line " line ":" (optional "\r") "\n"
           (zero-or-more not-newline) "\n" (zero-or-more not-newline) "\n"
           (message) line-end))
-  :modes (handlebars-mode handlebars-sgml-mode))
+  :modes (handlebars-mode handlebars-sgml-mode web-mode)
+  :predicate (lambda ()
+               (if (eq major-mode 'web-mode)
+                   (and (boundp 'web-mode-engine-file-regexps)
+                        ;; check if this is a handlebars file since
+                        ;; web-mode does not store the non-canonical
+                        ;; engine name
+                        (string-match-p (cdr (assoc-string "handlebars" web-mode-engine-file-regexps))
+                                        (buffer-file-name)))
+                 t)))
 
 (defconst flycheck-haskell-module-re
   (rx line-start (zero-or-more (or "\n" (any space)))
