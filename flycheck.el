@@ -3743,10 +3743,13 @@ non-nil."
 
 (defun flycheck-display-error-at-point ()
   "Display the all error messages at point in minibuffer."
-  (flycheck-cancel-error-display-error-at-point-timer)
-  (when flycheck-mode
-    (-when-let (errors (flycheck-overlay-errors-at (point)))
-      (flycheck-display-errors errors))))
+  ;; This function runs from a timer, so we must take care to not ignore any
+  ;; errors
+  (with-demoted-errors "Flycheck error display error: %s"
+    (flycheck-cancel-error-display-error-at-point-timer)
+    (when flycheck-mode
+      (-when-let (errors (flycheck-overlay-errors-at (point)))
+        (flycheck-display-errors errors)))))
 
 (defun flycheck-display-error-at-point-soon ()
   "Display the first error message at point in minibuffer delayed."
