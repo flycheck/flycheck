@@ -5033,6 +5033,13 @@ Why not:
     (flycheck-ert-should-syntax-check
      "checkers/scss-compass.scss" 'scss-mode)))
 
+(flycheck-ert-def-checker-test scss-lint scss nil
+  (let ((flycheck-disabled-checkers '(scss)))
+    (flycheck-ert-should-syntax-check
+     "checkers/scss-error.scss" 'scss-mode
+     '(3 nil error "Syntax Error: Invalid CSS after \"...    c olor: red\": expected \"{\", was \";\""
+         :checker scss-lint))))
+
 (flycheck-ert-def-checker-test sh-bash (sh sh-bash) nil
   (flycheck-ert-should-syntax-check
    "checkers/sh-bash-syntax-error.bash" 'sh-mode
