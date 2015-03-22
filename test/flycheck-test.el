@@ -1922,26 +1922,21 @@ and extension, as in `file-name-base'."
 
 (ert-deftest flycheck--manual/all-config-file-vars-are-documented ()
   :tags '(documentation)
-  :expected-result :failed
-  (error "Configuration files are not documented yet")
-  (flycheck-ert-with-file-buffer
-      (expand-file-name "doc/guide/languages.rst" flycheck-test-source-directory)
-    (while (re-search-forward (rx line-start ".. flyc-checker::" (1+ space)
-                                  (group (1+ not-newline)) line-end)
-                              nil 'noerror)
-      (let* ((checker (intern (match-string 1)))
-             (bound (save-excursion
-                      (search-forward ".. flyc-checker::" nil 'noerror)))
-             documented-var)
-        (when (search-forward ".. rubric:: Configuration file" bound 'noerror)
-          (re-search-forward (rx "   .. option:: "
-                                 (group (1+ not-newline))
-                                 "\n      :auto:"
-                                 line-end)
-                             bound 'noerror)
-          (setq documented-var (intern (match-string 1))))
-        (should (equal (flycheck-checker-config-file-var checker)
-                       documented-var))))))
+  (let ((config-file-vars (sort (delq nil
+                                      (mapcar #'flycheck-checker-config-file-var
+                                              flycheck-checkers))
+                                #'string<))
+        documented-config-files)
+    (flycheck-ert-with-file-buffer
+        (expand-file-name "doc/languages.texi" flycheck-test-source-directory)
+      (while (re-search-forward (rx line-start "@flycconfigfile{"
+                                    (group (1+ (not (any "," "}")))) ",")
+                                nil 'noerror)
+        (push (match-string 1) documented-config-files)))
+    (setq documented-config-files (sort documented-config-files #'string<))
+    (dolist (config-file documented-config-files)
+      (let ((expected (pop config-file-vars)))
+        (should (equal (intern config-file) expected))))))
 
 
 ;;; Checker error API

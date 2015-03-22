@@ -15,6 +15,13 @@
 @vindex \option\
 @end macro
 
+@macro flycconfigfile{option, tool}
+@item @code{\option\}
+@vindex \option\
+Configuration file for \tool\.  @xref{Syntax checker
+configuration files}, for more information about configuration files.
+@end macro
+
 @flyclanguage Ada
 
 @itemize
@@ -132,7 +139,13 @@ yield more false positives than normal checks.
 @flyc{coffee} (syntax check with @uref{http://coffeescript.org/,coffee})
 @item
 @flyc{coffee-coffeelint} (code style check with
-@uref{http://www.coffeelint.org/,coffeelint})
+@uref{http://www.coffeelint.org/,coffeelint}), with the following
+option:
+
+@table @asis
+@flycconfigfile{flycheck-coffeelintrc,coffeelint}
+@end table
+
 @end enumerate
 
 @flyclanguage{Coq}
@@ -347,7 +360,13 @@ A list of language extensions for GHC, via @option{-X}.
 
 @itemize
 @item
-@flyc{html-tidy} (@uref{https://github.com/w3c/tidy-html5,Tidy HTML5})
+@flyc{html-tidy} (@uref{https://github.com/w3c/tidy-html5,Tidy HTML5}),
+with the following option:
+
+@table @asis
+@flycconfigfile{flycheck-tidyrc,Tidy}
+@end table
+
 @end itemize
 
 @flyclanguage{Javascript}
@@ -362,11 +381,20 @@ Or @flyc{javascript-gjslint}
 (@uref{https://developers.google.com/closure/utilities,Closure Linter})
 @end itemize
 
-The @flyc{javascript-eslint} checker provides the following options:
+The @flyc{javascript-eslint} checker provides the following option:
 
 @table @asis
 @flycoption flycheck-eslint-rulesdir
 A directory with custom rules for ESLint.
+@flycconfigfile{flycheck-eslintrc,ESLint}
+@end table
+
+@flyc{javascript-jshint} and @flyc{javascript-gjslint} read
+configuration files:
+
+@table @asis
+@flycconfigfile{flycheck-jshintrc,JSHint}
+@flycconfigfile{flycheck-gjslintrc,Closure Linter}
 @end table
 
 @flyclanguage{JSON}
@@ -478,6 +506,14 @@ The maximum McCabe complexity of methods allowed by Flake8.
 
 @flycoption flycheck-flake8-maximum-line-length
 The maximum length of lines for Flake8.
+
+@flycconfigfile{flycheck-flake8rc,Flake8}
+@end table
+
+@flyc{python-pylint} reads a configuration file:
+
+@table @asis
+@flycconfigfile{flycheck-pylintrc,Pylint}
 @end table
 
 @flyclanguage{R}
@@ -548,6 +584,8 @@ These checkers provide the following options
 @flycoption flycheck-rubocop-lint-only
 Whether to suppress warnings about style issues in Rubocop, via the
 @option{--lint} option.
+@flycconfigfile{flycheck-rubocoprc,Rubocop}
+@flycconfigfile{flycheck-rubylintrc,ruby-lint}
 @end table
 
 If none of the above is available, Flycheck will fall back to one of the
@@ -624,6 +662,7 @@ The @flyc{scala-scalastyle} syntax checker needs the following options:
 @table @asis
 @flycoption flycheck-scalastyle-jar
 The path to the main JAR file of Scalastyle.
+@flycconfigfile{flycheck-scalastylerc,Scalastyle}
 @end table
 
 If these options are not set, @flyc{scala-scalastyle} will not be used.
@@ -688,6 +727,12 @@ A list of excluded warnings for ShellCheck.
 @flyc{tex-lacheck} (style check using
 @uref{http://www.ctan.org/pkg/lacheck,Lacheck})
 @end itemize
+
+@flyc{tex-chktex} provides the following option:
+
+@table @asis
+@flycconfigfile{flycheck-chktexrc,ChkTeX}
+@end table
 
 @flyclanguage{Texinfo}
 
