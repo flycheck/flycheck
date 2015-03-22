@@ -879,6 +879,10 @@ characters:
 
 @subsection Syntax checker configuration files
 
+@anchor{Syntax checker configuration files}
+@cindex syntax checker configuration files
+@cindex configuration files of syntax checkers
+
 Some syntax checkers also read configuration files.  These syntax
 checkers have an associated @emph{configuration file variable} which
 specifies the path to the configuration file.  All configuration file
@@ -1269,8 +1273,8 @@ the option belongs to, and adds the option to the appropriate custom
 group.  You can pass arbitrary custom keywords to this macro as we did
 in this example: @code{:type} marks this option as boolean flag, and
 @code{:safe} allows the use as file-local variable, if the value is
-boolean.  @xref{Configuring checkers}, for more information about syntax
-checker configuration, and @ref{Checker configuration}, for the
+boolean.  @xref{Syntax checker options}, for more information about
+syntax checker configuration, and @ref{Checker configuration}, for the
 corresponding API reference.
 
 By a similar mechanism you can also pass paths to configuration files to
@@ -1299,9 +1303,9 @@ The special @code{config-file} argument passes a configuration file from
 variable is non-nil.
 
 Flycheck provides a sophisticated logic to find an appropriate
-configuration file.  @xref{Configuring checkers}, for more information
-about syntax checker configuration, and @ref{Checker configuration}, for
-the corresponding API reference.
+configuration file.  @xref{Syntax checker configuration files}, for more
+information about syntax checker configuration, and @ref{Checker
+configuration}, for the corresponding API reference.
 
 @node Controlling use of checkers
 @section Controlling the use of a syntax checker
