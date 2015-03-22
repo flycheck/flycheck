@@ -36,8 +36,7 @@ fi
 check_environment "$TRAVIS_REPO_SLUG" "flycheck/flycheck" "not our repo"
 check_environment "$TRAVIS_PULL_REQUEST" "false" "pull request"
 check_environment "$TRAVIS_SECURE_ENV_VARS" "true" "secure variables missing"
-# FIXME: Switch to master after merging
-check_environment "$TRAVIS_BRANCH" "texinfo" "not the master branch"
+check_environment "$TRAVIS_BRANCH" "master" "not the master branch"
 
 echo "Publishing manual..."
 
