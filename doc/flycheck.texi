@@ -1451,6 +1451,8 @@ like conventional IDEs do.
 @node Flycheck API
 @chapter Flycheck API
 
+TODO: The API documentation still needs to be written.
+
 @menu
 * Command syntax checkers::     Syntax checkers with external commands
 * Errors::                      Error representation in Flycheck
