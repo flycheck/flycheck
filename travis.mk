@@ -78,7 +78,7 @@ install_manual:
 
 install: install_$(TRAVIS_BUILD)
 
-script_unit script_integration: deps
+script_unit script_integration: test
 
 script_manual: texinfo
 
