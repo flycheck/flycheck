@@ -29,6 +29,7 @@ master (in development)
   - Fix void variable error when trying to use `flycheck-compile` with a
     non-command checker [GH-563]
   - Fix faulty mode line reporting [GH-564]
+  - Automatically initialize packages when checking `user-init-file`
 
 0.22 (Dec 23, 2014)
 ===================
