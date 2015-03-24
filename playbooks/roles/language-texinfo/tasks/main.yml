@@ -1,3 +1,29 @@
-- name: Install Texinfo
-  apt: name='texinfo' state=latest install_recommends=false
+- name: Get current Texinfo version
+  command: makeinfo --version
+  ignore_errors: true
+  register: texinfo_current_version
+  changed_when: 'texinfo_current_version | failed or texinfo_current_version.stdout.splitlines() | first != "makeinfo (GNU texinfo) 5.2"'
+- name: Download Texinfo
+  get_url:
+    url: "http://ftp.gnu.org/gnu/texinfo/texinfo-{{texinfo_version}}.tar.gz"
+    dest: "/usr/src/texinfo-{{texinfo_version}}.tar.gz"
   sudo: true
+  when: texinfo_current_version.changed
+- name: Extract Texinfo
+  unarchive:
+    src: "/usr/src/texinfo-{{texinfo_version}}.tar.gz"
+    copy: no
+    dest: /usr/src/
+    creates: "/usr/src/texinfo-{{texinfo_version}}"
+  sudo: true
+  when: texinfo_current_version.changed
+- name: Build and install Texinfo
+  command: "{{item}}"
+  args:
+    chdir: "/usr/src/texinfo-{{texinfo_version}}"
+    creates: /usr/local/bin/makeinfo
+  with_items:
+    - ./configure
+    - make install
+  sudo: true
+  when: texinfo_current_version.changed

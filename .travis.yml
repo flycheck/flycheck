@@ -6,6 +6,9 @@ env:
   # Run integration tests on Emacs snapshot only.  That should be sufficient to
   # catch most bugs
   - TRAVIS_BUILD=integration EMACS=emacs-snapshot
+  # Build the manual.  We need to set EMACS, because it's required by the
+  # makefile
+  - TRAVIS_BUILD=manual EMACS=emacs
 before_install:
   - make -f travis.mk before_install
   - source /etc/profile
@@ -14,6 +17,8 @@ install:
   - make -f travis.mk install
 script:
   - make -f travis.mk script
+after_success:
+  - make -f travis.mk after_success
 matrix:
   # Fast fail if any job fails.  We don't need to run all integration tests, if
   # the unit tests fail already.
