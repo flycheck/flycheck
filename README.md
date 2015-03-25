@@ -83,8 +83,8 @@ Documentation is available at http://www.flycheck.org:
 - [Quick start][] (tutorial)
 - [User manual][] (reference information)
 
-[Quick start]: http://localhost:4000/manual/latest/Quickstart.html#Quickstart
-[User manual]: http://localhost:4000/manual/latest/Usage.html#Usage
+[Quick start]: http://www.flycheck.org/manual/latest/Quickstart.html#Quickstart
+[User manual]: http://www.flycheck.org/manual/latest/Usage.html#Usage
 
 Support & Contribution
 ======================
