@@ -1,7 +1,5 @@
-.. default-role:: code
-
 master (in development)
------------------------
+=======================
 
 - **Breaking changes**:
 
@@ -33,7 +31,7 @@ master (in development)
   - Fix faulty mode line reporting [GH-564]
 
 0.22 (Dec 23, 2014)
--------------------
+===================
 
 - **Breaking changes**:
 
@@ -93,7 +91,7 @@ master (in development)
     and `c/c++-gcc` [GH-451]
 
 0.21 (Oct 26, 2014)
--------------------
+===================
 
 - **Breaking changes**:
 
@@ -144,16 +142,16 @@ master (in development)
   - `c/c++-clang` now handles empty error messages [GH-497]
 
 0.20 (Aug 12, 2014)
--------------------
+===================
 
 - **Breaking changes**:
 
   - The internal names of syntax checker properties changed.  **All packages
     depending on Flycheck must be recompiled!**
   - `flycheck-substitute-argument` always returns a list now
-  - The special meaning of a trailing ``=`` in `(option …)` and `(config-file
-    …)` is removed.  Both arguments must now explicitly specify `concat` to
-    prepend the option as string.
+  - The special meaning of a trailing `=` in `(option …)` and `(config-file …)`
+    is removed.  Both arguments must now explicitly specify `concat` to prepend
+    the option as string.
 
 - New syntax checkers:
 
@@ -214,7 +212,7 @@ master (in development)
   - Remove dependencies on f.el and s.el
 
 0.19 (Jun 12, 2014)
--------------------
+===================
 
 - Flycheck now has an official logo [GH-331]
 
@@ -259,7 +257,7 @@ master (in development)
   - Do not signal errors in Go Mode, when `go` is not available
 
 0.18 (Mar 24, 2014)
--------------------
+===================
 
 - **Breaking changes**:
 
@@ -300,10 +298,10 @@ master (in development)
   - Flycheck now handles Clang errors from included files [GH-367]
 
 0.17 (Feb 1, 2014)
-------------------
+==================
 
-- The manual was ported to Sphinx_ and is now located at
-  http://flycheck.readthedocs.org [GH-274]
+- The manual was ported to [Sphinx](http://sphinx-doc.org) and is now located at
+  <http://flycheck.readthedocs.org> [GH-274]
 
 - **Breaking changes**:
 
@@ -339,17 +337,15 @@ master (in development)
   - Do not visit the file to check in `emacs-lisp` and `emacs-lisp-checkdoc` to
     avoid unintended side effects [GH-319]
 
-.. _Sphinx: http://sphinx-doc.org
-
 0.16 (Jan 11, 2014)
--------------------
+===================
 
 - **Breaking changes**:
 
   - Argument substitution is no longer performed on syntax checker executables.
     The executable must be a string.
   - Split out `haskell-hdevtools` into a separate package.  See
-    flycheck-hdevtools_ [GH-275]
+    [flycheck-hdevtools][] [GH-275]
   - Drop support for coffeelint 0.x
   - The error list is reimplemented on top of Tabulated List Mode.  This greatly
     changes the appearance and behaviour of the error list [GH-230]
@@ -402,13 +398,13 @@ master (in development)
   - Make relative imports work with `python-pylint` [GH-280]
   - Fix parsing of errors in `scss` and `sass`
 
-.. _flycheck-hdevtools: https://github.com/flycheck/flycheck-hdevtools
+[flycheck-hdevtools]: https://github.com/flycheck/flycheck-hdevtools
 
 0.15 (Nov 15, 2013)
--------------------
+===================
 
-- Flycheck has a new home at https://github.com/flycheck/flycheck,
-  the online manual moved to http://flycheck.github.io.
+- Flycheck has a new home at <https://github.com/flycheck/flycheck>, the online
+  manual moved to <http://flycheck.github.io>.
 
 - **Breaking changes**:
 
@@ -429,8 +425,8 @@ master (in development)
 
 - New features:
 
-  - Support IDO or Grizzl_ as completion systems for `flycheck-select-checker`
-    at `C-c ! s`
+  - Support IDO or [Grizzl][] as completion systems for
+    `flycheck-select-checker` at `C-c ! s`
   - Disable standard error navigation with `flycheck-standard-error-navigation`
     [GH-202]
   - Add `flycheck-clang-language-standard` to choose the language standard for
@@ -483,17 +479,17 @@ master (in development)
     [GH-259]
   - Fix Cppcheck parsing with the built-in Emacs XML parser [GH-263]
 
-.. _grizzl: https://github.com/d11wtq/grizzl
+[grizzl]: https://github.com/d11wtq/grizzl
 
 0.14.1 (Aug 16, 2013)
----------------------
+=====================
 
 - Bug fixes:
 
   - Add a missing dependency [GH-194]
 
 0.14 (Aug 15, 2013)
--------------------
+===================
 
 - **Breaking changes**:
 
@@ -550,7 +546,7 @@ master (in development)
   - Correctly parse output of `pylint` 1.0 [GH-184]
 
 0.13 (Jun 28, 2013)
--------------------
+===================
 
 - **Breaking changes**:
 
@@ -602,7 +598,7 @@ master (in development)
   - Fix version information on Emacs trunk builds
 
 0.12 (May 18, 2013)
--------------------
+===================
 
 - New syntax checkers:
 
@@ -628,7 +624,7 @@ master (in development)
   - Correctly parse syntax errors from JRuby [GH-136]
 
 0.11 (May 01, 2013)
--------------------
+===================
 
 - New syntax checkers:
 
@@ -642,7 +638,7 @@ master (in development)
     `flycheck-check-syntax-automatically` [GH-128]
   - Customizable configuration file search, via
     `flycheck-locate-config-file-functions` [GH-133]
-  - Find configuration files in Projectile_ projects
+  - Find configuration files in [Projectile][] projects
   - Add `flycheck-before-syntax-check-hook` and
     `flycheck-syntax-check-failed-hook`
 
@@ -655,10 +651,10 @@ master (in development)
 
   - Add missing customization group for syntax checker options
 
-.. _Projectile: https://github.com/bbatsov/projectile
+[Projectile]: https://github.com/bbatsov/projectile
 
 0.10 (Apr 21, 2013)
--------------------
+===================
 
 - Flycheck uses `cl-lib` now.  This library is built-in as of GNU Emacs 24.3.
   For earlier releases of GNU Emacs 24 an additional compatibility library will
@@ -680,7 +676,7 @@ master (in development)
   - Add `flycheck-copy-messages-as-kill`, mapped to `C-c ! C-w`, to copy all
     error messages under point into kill ring
   - Add `flycheck-google-messages`, mapped to `C-c ! /`, to google for error
-    messages under point.  Needs the `Google This`_ library
+    messages under point.  Needs the [Google This][] library
   - Syntax checkers can redirect output to a temporary directory now using the
     `temporary-directory` argument symbol
 
@@ -698,10 +694,10 @@ master (in development)
   - Use a hopefully more reliable way to parse output of PHP CodeSniffer
     [GH-118]
 
-.. _google This: https://github.com/Bruce-Connor/emacs-google-this
+[Google This]: https://github.com/Bruce-Connor/emacs-google-this
 
 0.9 (Apr 13, 2013)
-------------------
+==================
 
 - New syntax checkers:
 
@@ -714,7 +710,7 @@ master (in development)
   - Quit the error message window when navigating away from error locations
 
 0.8 (Apr 9, 2013)
------------------
+=================
 
 - New syntax checkers:
 
@@ -743,7 +739,7 @@ master (in development)
   - Improve highlighting to reduce screen flickering [GH-100]
 
 0.7.1 (Feb 23, 2013)
---------------------
+====================
 
 - Bug fixes:
 
@@ -758,7 +754,7 @@ master (in development)
   - Add support for evaluating Lisp forms in syntax checker commands [GH-86]
 
 0.7 (Feb 14, 2013)
-------------------
+==================
 
 - New features:
 
@@ -779,12 +775,12 @@ master (in development)
   - Fix infinite recursion on Windows [GH-81]
 
 0.6.1 (Jan 30, 2013)
---------------------
+====================
 
 - Fix package dependencies
 
 0.6 (Jan 29, 2013)
-------------------
+==================
 
 - New syntax checkers:
 
@@ -831,7 +827,7 @@ master (in development)
   - Add an error parser for Checkstyle-like XML output [GH-38]
 
 0.5 (Dec 28, 2012)
-------------------
+==================
 
 - New syntax checkers:
 
@@ -844,8 +840,8 @@ master (in development)
 
   - Support manual buffer-local selection of syntax checker [GH-25]
   - Add customizable error indicators [GH-28]
-  - Echo error messages at point without 3rd-party libraries like flymake-cursor
-    [GH-27]
+  - Echo error messages at point without 3rd-party libraries like
+    [flymake-cursor][] [GH-27]
 
 - Improvements:
 
@@ -860,9 +856,9 @@ master (in development)
   - Replace underlying Flymake API with a custom syntax checking implementation
     [GH-15]
 
-.. _flymake-cursor: http://www.emacswiki.org/emacs/FlymakeCursor
+[flymake-cursor]: http://www.emacswiki.org/emacs/FlymakeCursor
 
-0.4 (Nov 21, 2012)
+0.4 (Nov 21, t2012)
 ------------------
 
 - Rename the project to Flycheck [GH-5]
@@ -879,14 +875,13 @@ master (in development)
 
   - Fix type error when checking compressed Emacs Lisp [GH-10]
 
-
 0.3 (Nov 21, 2012)
-------------------
+==================
 
 - Replace `flymake-mode` with a custom syntax checking minor mode [GH-4]
 
 0.2 (Oct 25, 2012)
-------------------
+==================
 
 - New syntax checkers:
 
@@ -897,7 +892,7 @@ master (in development)
   - Simplify syntax checker declarations [GH-2]
 
 0.1 (Oct 11, 2012)
-------------------
+==================
 
 Initial release as flymake-checkers
 
