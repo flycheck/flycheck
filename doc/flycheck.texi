@@ -58,7 +58,7 @@ International Public License. A copy of the license can be obtained at
 
 @dircategory Emacs
 @direntry
-* Flycheck (flycheck). Modern on-the-fly syntax checking
+* Flycheck: (flycheck). Modern on-the-fly syntax checking
 @end direntry
 
 @titlepage
