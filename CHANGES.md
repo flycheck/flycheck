@@ -3,6 +3,7 @@ master (in development)
 
 - **Breaking changes**:
 
+  - New manual in native Texinfo format, to achieve higher quality Info manuals
   - Remove `make` syntax checker due to various issues [GH-572] [GH-573]
 
 - New syntax checkers:
