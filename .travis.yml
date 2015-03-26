@@ -5,7 +5,7 @@ env:
   - TRAVIS_BUILD=unit EMACS=emacs-snapshot
   # Run integration tests on Emacs snapshot only.  That should be sufficient to
   # catch most bugs
-  - TRAVIS_BUILD=integration EMACS=emacs-snapshot
+  - TRAVIS_BUILD=integration EMACS=emacs-snapshot GOPATH=$HOME/go
   # Build the manual.  We need to set EMACS, because it's required by the
   # makefile
   - TRAVIS_BUILD=manual EMACS=emacs
