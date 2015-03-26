@@ -4168,7 +4168,8 @@ The term \"1\" has type \"nat\" while it is expected to have type
      '(25 9 warning "if block ends with a return statement, so drop this else and outdent its block"
           :checker go-golint))))
 
-(flycheck-ert-def-checker-test (go-vet go-build go-golint) go print-functions
+(flycheck-ert-def-checker-test go-vet go print-functions
+  (funcall (flycheck-checker-predicate 'go-vet))
   (let ((flycheck-go-vet-print-functions '("Warn:0" "Warnf:1"))
         (flycheck-disabled-checkers '(go-golint go-build go-errcheck)))
     (flycheck-ert-with-env
