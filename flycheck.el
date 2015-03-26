@@ -2151,9 +2151,13 @@ buffer-local value of `flycheck-disabled-checkers'."
       ;; We must use `remq' instead of `delq', because we must _not_ modify the
       ;; list.  Otherwise we could potentially modify the global default value,
       ;; in case the list is the global default.
-      (setq flycheck-disabled-checkers (remq checker flycheck-disabled-checkers))
+      (when (memq checker flycheck-disabled-checkers)
+        (setq flycheck-disabled-checkers
+              (remq checker flycheck-disabled-checkers))
+        (flycheck-buffer))
     (unless (memq checker flycheck-disabled-checkers)
-      (push checker flycheck-disabled-checkers))))
+      (push checker flycheck-disabled-checkers)
+      (flycheck-buffer))))
 
 
 ;;; Syntax checks for the current buffer
