@@ -5671,8 +5671,13 @@ initialize packages."
   (let ((shall-initialize
          (if (eq value 'auto)
              (or (flycheck-in-user-emacs-directory-p (buffer-file-name))
-                 (flycheck-same-files-p (buffer-file-name)
-                                        user-init-file))
+                 ;; `user-init-file' is nil in non-interactive sessions.  Now,
+                 ;; no user would possibly use Flycheck in a non-interactive
+                 ;; session, but our unit tests run non-interactively, so we
+                 ;; have to handle this case anyway
+                 (and user-init-file
+                      (flycheck-same-files-p (buffer-file-name)
+                                             user-init-file)))
            value)))
     (when shall-initialize
       ;; If packages shall be initialized, return the corresponding form,
