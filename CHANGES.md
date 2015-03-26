@@ -31,6 +31,7 @@ master (in development)
     non-command checker [GH-563]
   - Fix faulty mode line reporting [GH-564]
   - Automatically initialize packages when checking `user-init-file`
+  - Properly initialize hook variables [GH-593]
 
 0.22 (Dec 23, 2014)
 ===================
