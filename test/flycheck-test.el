@@ -1754,6 +1754,7 @@ and extension, as in `file-name-base'."
 (ert-deftest flycheck-disable-checker/disables-checker ()
   :tags '(selection)
   (flycheck-ert-with-temp-buffer
+    (flycheck-mode)
     (flycheck-disable-checker 'emacs-lisp)
     (should (equal '(emacs-lisp) flycheck-disabled-checkers))
     (should-not (default-value 'flycheck-disabled-checkers))
@@ -1764,6 +1765,7 @@ and extension, as in `file-name-base'."
 (ert-deftest flycheck-disable-checker/enables-checker ()
   :tags '(selection)
   (flycheck-ert-with-temp-buffer
+    (flycheck-mode)
     (setq flycheck-disabled-checkers '(emacs-lisp python-pylint))
     (flycheck-disable-checker 'emacs-lisp 'enable)
     (should (equal '(python-pylint) flycheck-disabled-checkers))))
