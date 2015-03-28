@@ -223,11 +223,14 @@ packages, add the following to your @file{Cask} file:
 @section Install and enable Flycheck
 
 To get started with Flycheck, enable it by adding the following to your
-init file (see @code{user-init-file}):
+init file:
 
 @lisp
 (add-hook 'after-init-hook #'global-flycheck-mode)
 @end lisp
+
+If you don't know where your init file is take a look at the value of
+the variable @code{user-init-file} with @kbd{C-h v user-init-file}.
 
 @section Install syntax checker tools
 

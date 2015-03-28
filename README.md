@@ -66,14 +66,21 @@ In your [Cask][] file:
 
     (depends-on "flycheck")
 
-See [Installation][] for more information.
+Then add the following to your init file:
+
+    (add-hook 'after-init-hook #'global-flycheck-mode)
+
+If you don’t know where your init file is, look at the value of the variable
+`user-init-file` with `C-h v user-init-file`.
+
+See [Installation][] and [Quick start][] for more information.
 
 [MELPA]: http://melpa.org
 [MELPA Stable]: http://stable.melpa.org
 [Cask]: https://github.com/cask/cask
 [Supported Languages]: http://www.flycheck.org/manual/latest/Supported-languages.html#Supported-languages
 [Installation]: http://www.flycheck.org/manual/latest/Installation.html#Installation
-
+[Quick start]: http://www.flycheck.org/manual/latest/Quickstart.html#Quickstart
 
 Documentation
 =============
@@ -83,7 +90,6 @@ Documentation is available at http://www.flycheck.org:
 - [Quick start][] (tutorial)
 - [User manual][] (reference information)
 
-[Quick start]: http://www.flycheck.org/manual/latest/Quickstart.html#Quickstart
 [User manual]: http://www.flycheck.org/manual/latest/Usage.html#Usage
 
 Support & Contribution
