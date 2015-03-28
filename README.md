@@ -96,7 +96,7 @@ Support & Contribution
 [Issue tracker]: https://github.com/flycheck/flycheck/issues
 [Waffle Board]: https://waffle.io/flycheck/flycheck
 [Github]: https://github.com/flycheck/flycheck
-[Contributor guidelines]: https://github.com/flycheck/flycheck/blob/master/CONTRIBUTING.md
+[Contribution guidelines]: https://github.com/flycheck/flycheck/blob/master/CONTRIBUTING.md
 
 Credits
 =======
