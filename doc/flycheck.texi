@@ -342,9 +342,8 @@ temporary directories.  You may still check syntax in these buffers by
 manually enabling @code{flycheck-mode} with @kbd{M-x flycheck-mode}.
 However, this is @emph{not} recommended for said reasons.
 
-To enable syntax checking permanently, either customise
-@code{global-flycheck-mode} with @kbd{M-x customize-variable RET
-global-flycheck-mode}, or add the following code to your init file:
+Add the following code to your init file to enable syntax checking
+permanently:
 
 @lisp
 (add-hook 'after-init-hook #'global-flycheck-mode)

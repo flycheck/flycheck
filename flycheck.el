@@ -2021,8 +2021,6 @@ buffer manually.
   :init-value nil
   :keymap flycheck-mode-map
   :lighter flycheck-mode-line
-  :group 'flycheck
-  :require 'flycheck
   :after-hook (flycheck-buffer-automatically 'mode-enabled 'force-deferred)
   (cond
    (flycheck-mode
@@ -2528,8 +2526,13 @@ returns t."
 (define-globalized-minor-mode global-flycheck-mode flycheck-mode
   flycheck-mode-on-safe
   :init-value nil
-  :group 'flycheck
-  :require 'flycheck)
+  ;; Do not expose Global Flycheck Mode on customize interface, because the
+  ;; interaction between package.el and customize is currently broken.  See
+  ;; https://github.com/flycheck/flycheck/issues/595
+
+  ;; :require 'flycheck :group
+  ;; 'flycheck
+  )
 
 (defun flycheck-global-teardown ()
   "Teardown Flycheck in all buffers.
