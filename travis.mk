@@ -47,7 +47,7 @@ export EMACS
 # SUPPORT TARGETS
 install_ansible:
 	sudo add-apt-repository -y ppa:rquillo/ansible
-	sudo apt-get update -y -q
+	sudo apt-get update -y -q -m
 	sudo apt-get install -y ansible
 
 provision: install_ansible
