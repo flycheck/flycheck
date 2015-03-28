@@ -715,6 +715,37 @@ and extension, as in `file-name-base'."
   :tags '(utility)
   (should (flycheck-symbol-list-p '())))
 
+(ert-deftest flycheck-same-files-p/same-files ()
+  :tags '(utility)
+  (let ((default-directory flycheck-test-source-directory))
+    (should (flycheck-same-files-p "flycheck.el" "flycheck.el"))))
+
+(ert-deftest flycheck-same-files-p/different-files ()
+  :tags '(utility)
+  (let ((default-directory flycheck-test-source-directory))
+    (should-not (flycheck-same-files-p "flycheck.el" "Makefile"))))
+
+(ert-deftest flycheck-same-files-p/file-in-non-existing-directory ()
+  :tags '(utility)
+  (let ((default-directory flycheck-test-source-directory))
+    (should-not (flycheck-same-files-p "flycheck.el" "foobar/flycheck.el"))))
+
+(ert-deftest flycheck-same-files-p/non-existing-files ()
+  :tags '(utility)
+  (let ((default-directory flycheck-test-source-directory))
+    (should (flycheck-same-files-p "foobar/foobar" "foobar/foobar"))))
+
+(ert-deftest flycheck-same-files-p/across-symlinks ()
+  :tags '(utility)
+  (skip-unless (fboundp #'make-symbolic-link))
+  (let ((directory (make-temp-file "flycheck-test-same-files-p-" 'directory)))
+    (unwind-protect
+        (let ((link (expand-file-name "foobar.el" directory))
+              (flycheck (expand-file-name "flycheck.el" flycheck-test-source-directory)))
+          (make-symbolic-link flycheck link)
+          (should (flycheck-same-files-p flycheck link)))
+      (delete-directory directory 'recursive))))
+
 (ert-deftest flycheck-temp-dir-system ()
   :tags '(utility)
   (let ((dirname (flycheck-temp-dir-system)))

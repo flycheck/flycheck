@@ -34,6 +34,7 @@ master (in development)
   - Fix faulty mode line reporting [GH-564]
   - Automatically initialize packages when checking `user-init-file`
   - Properly initialize hook variables [GH-593]
+  - Fix handling of file names with symbolic links for some checkers [GH-561]
 
 0.22 (Dec 23, 2014)
 ===================
