@@ -81,16 +81,6 @@
 
 
 ;;; Environment information
-(defun flycheck-test-texinfo-version ()
-  "Determine the version of Texinfo.
-
-Return the version as string, or nil, if the texinfo version
-could not be determined."
-  (flycheck-ert-extract-version-command
-   (rx "makeinfo (GNU texinfo) "
-       (group (one-or-more (any digit)) "." (one-or-more (any digit))))
-   "makeinfo" "--version"))
-
 (defun flycheck-test-cppcheck-version ()
   "Determine the version of Cppcheck.
 
@@ -5096,18 +5086,7 @@ Why not:
      '(7 nil warning "possible unwanted space at \"{\""
          :checker tex-lacheck))))
 
-(flycheck-ert-def-checker-test texinfo texinfo errors-only
-  ;; Before Texinfo 5, makeinfo only prints errors
-  (skip-unless (version< (flycheck-test-texinfo-version) "5"))
-  (flycheck-ert-should-syntax-check
-   "checkers/texinfo.texi" 'texinfo-mode
-   '(7 nil error "Unknown command `bold'." :checker texinfo)
-   '(7 nil error "Misplaced {." :checker texinfo)
-   '(7 nil error "Misplaced }." :checker texinfo)))
-
-(flycheck-ert-def-checker-test texinfo texinfo errors-and-warnings
-  ;; Before Texinfo 5, makeinfo does not output any warnings
-  (skip-unless (version<= "5" (flycheck-test-texinfo-version)))
+(flycheck-ert-def-checker-test texinfo texinfo nil
   (flycheck-ert-should-syntax-check
    "checkers/texinfo.texi" 'texinfo-mode
    '(   3 nil warning "@settitle missing argument" :checker texinfo)
