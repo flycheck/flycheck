@@ -89,12 +89,11 @@ Documentation is available at http://www.flycheck.org:
 Support & Contribution
 ======================
 
-- [Issue tracker][] and [Waffle Board][]
+- [Issue tracker][]
 - [Github][]
 - [Contribution guidelines][]
 
 [Issue tracker]: https://github.com/flycheck/flycheck/issues
-[Waffle Board]: https://waffle.io/flycheck/flycheck
 [Github]: https://github.com/flycheck/flycheck
 [Contribution guidelines]: https://github.com/flycheck/flycheck/blob/master/CONTRIBUTING.md
 
