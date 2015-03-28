@@ -56,6 +56,14 @@ This function adds the following custom selectors:
      (list 'tag (intern (concat "language-" (symbol-name language)))))
     (`(checker ,(and checker (pred symbolp)))
      (list 'tag (intern (concat "checker-" (symbol-name checker)))))
+    (`(new-checker-for ,(and language (pred symbolp)))
+     ;; For a new checker for a language we need to run the documentation and
+     ;; style tests, and all tests for the corresponding language, in order to
+     ;; make sure that all chaining still works, and that the order of checkers
+     ;; is still correct.
+     (flycheck-transform-selector `(or (tag documentation)
+                                       (tag style)
+                                       (language ,language))))
     (`(,group . ,body)
      (cons group (mapcar #'flycheck-transform-selector body)))
     (simple simple)))

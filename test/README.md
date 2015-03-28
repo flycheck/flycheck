@@ -67,6 +67,8 @@ suite defines a couple of additional selectors:
 
 - `(language LANGUAGE)` matches all tests for the given programming `LANGUAGE`.
 - `(checker CHECKER)` matches all tests for the given syntax `CHECKER`.
+- `(new-checker-for LANGUAGE)` matches all tests that need to be run if a new
+  checker for `LANGUAGE` was added.
 
 You can also use a different Emacs to run the tests with:
 
