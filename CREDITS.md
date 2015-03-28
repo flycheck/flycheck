@@ -40,7 +40,8 @@ substantial code to Flycheck:
 - [Per Nordlöw](https://github.com/nordlow) (syntax checkers for Ada, Fortran
   and Python, syntax checker name in error list)
 - [Peter Eisentraut](https://github.com/petere) (improvements to foodcritic)
-- [Peter Vasil](https://github.com/ptrv) (Lua and Go build/test syntax checkers)
+- [Peter Vasil](https://github.com/ptrv) (Lua, Luacheck and Go build/test
+  syntax checkers)
 - [Robert Zaremba](https://github.com/robert-zaremba) (gofmt syntax checker)
 - [Sean Gillespie](https://github.com/swgillespie) (help messages in Rust)
 - [Sean Salmon](https://github.com/phatcabbage) (platform-independent directory

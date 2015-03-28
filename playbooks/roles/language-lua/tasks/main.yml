@@ -1,3 +1,5 @@
 - name: Install Lua
   apt: name='lua5.2' state=latest install_recommends=false
   sudo: true
+- include: luacheck.yml
+  sudo: true

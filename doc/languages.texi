@@ -415,6 +415,14 @@ configuration files:
 
 @itemize
 @item
+@flyc{luacheck} (@uref{https://github.com/mpeterv/luacheck,Luacheck})
+with the following option:
+
+@table @asis
+@flycconfigfile{flycheck-luacheckrc,Luacheck}
+@end table
+
+@item
 @flyc{lua} (@uref{http://www.lua.org/,Lua compiler})
 @end itemize
 

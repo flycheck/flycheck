@@ -208,6 +208,7 @@ attention to case differences."
     javascript-gjslint
     json-jsonlint
     less
+    luacheck
     lua
     perl
     perl-perlcritic
@@ -6355,6 +6356,28 @@ See URL `http://lesscss.org'."
           ", column " column ":"
           line-end))
   :modes less-css-mode)
+
+(flycheck-def-config-file-var flycheck-luacheckrc luacheck ".luacheckrc"
+  :safe #'stringp
+  :package-version '(flycheck . "0.23"))
+
+(flycheck-define-checker luacheck
+  "A Lua syntax checker using luacheck.
+
+See URL `https://github.com/mpeterv/luacheck'."
+  :command ("luacheck"
+            (config-file "--config" flycheck-luacheckrc)
+            "--formatter" "plain"
+            "--codes"                   ; Show warning codes
+            "--no-color"
+            source)
+  :error-patterns
+  ((warning line-start (file-name)
+            ":" line ":" column ": (" (id (and "W" (one-or-more digit)))
+            ") " (message) line-end)
+   (error line-start (file-name)
+          ":" line ":" column ":" (message) line-end))
+  :modes lua-mode)
 
 (flycheck-define-checker lua
   "A Lua syntax checker using the Lua compiler.
