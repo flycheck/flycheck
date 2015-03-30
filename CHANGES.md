@@ -5,6 +5,8 @@ master (in development)
 
   - New manual in native Texinfo format, to achieve higher quality Info manuals
   - Remove `make` syntax checker due to various issues [GH-572] [GH-573]
+  - Remove `zsh` support from `sh-shellcheck`, since Shellcheck does not support
+    Zsh anymore
 
 - New syntax checkers:
 

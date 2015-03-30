@@ -7155,7 +7155,7 @@ See URL `http://www.zsh.org/'."
   :predicate (lambda () (eq sh-shell 'zsh))
   :next-checkers ((warning . sh-shellcheck)))
 
-(defconst flycheck-shellcheck-supported-shells '(bash ksh88 sh zsh)
+(defconst flycheck-shellcheck-supported-shells '(bash ksh88 sh)
   "Shells supported by ShellCheck.")
 
 (flycheck-def-option-var flycheck-shellcheck-excluded-warnings nil sh-shellcheck
