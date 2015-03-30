@@ -4271,7 +4271,7 @@ The term \"1\" has type \"nat\" while it is expected to have type
 
 (flycheck-ert-def-checker-test handlebars handlebars nil
   (flycheck-ert-should-syntax-check
-   "checkers/handlebars-error.hbs" 'handlebars-mode
+   "checkers/handlebars-error.hbs" '(handlebars-mode web-mode)
    '(2 nil error "Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'DATA', got 'INVALID'"
        :checker handlebars)))
 
