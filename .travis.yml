@@ -1,4 +1,5 @@
 language: emacs-lisp
+sudo: required
 env:
   # Run all basic unit tests on both Emacs versions
   - TRAVIS_BUILD=unit EMACS=emacs24
