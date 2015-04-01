@@ -13,6 +13,7 @@ substantial code to Flycheck:
 - [David Holm](https://github.com/dholm) (Clang, Cppcheck, lintr and Verilator
   syntax checkers)
 - [Doug MacEachern](https://github.com/dougm) (Go errcheck syntax checker)
+- [Erik Hetzner](https://github.com/egh) (handlebars)
 - [Fanael Linithien](https://github.com/Fanael) (GCC syntax checker, exception
   support for C/C++, inconclusive checks for cppcheck, literate Haskell support,
   bug fixes)

@@ -26,6 +26,7 @@ master (in development)
   - Global Flycheck Mode enables Flycheck Mode even if there is no syntax
     checker for the buffer yet [GH-568]
   - Remove `global-flycheck-mode` from customization interface [GH-595]
+  - `handlebars` now supports Web Mode [GH-605]
 
 - Bug fixes:
 
