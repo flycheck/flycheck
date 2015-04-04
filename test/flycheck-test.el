@@ -4957,10 +4957,8 @@ Why not:
   (flycheck-ert-should-syntax-check
    "checkers/rust-multiple-error.rs" 'rust-mode
    '(7 9 error "mismatched types:
- expected `u8`,
-    found `i8`
-(expected u8,
-    found i8)" :checker rust :id "E0308")))
+ expected `u8`,\n    found `i8`
+(expected u8,\n    found i8)" :checker rust :id "E0308")))
 
 (flycheck-ert-def-checker-test rust rust test-check-tests-disabled
   (let ((flycheck-rust-check-tests nil))
