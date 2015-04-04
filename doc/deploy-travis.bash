@@ -27,6 +27,11 @@ check_environment() {
     fi
 }
 
+eval_ssh_agent() {
+  # shellcheck disable=SC2046
+  eval $(ssh-agent "${@}")
+}
+
 if [[ -n $TRAVIS_TAG ]]; then
   MANUAL_VERSION="--version ${TRAVIS_TAG}"
 else
@@ -41,9 +46,10 @@ check_environment "$TRAVIS_BRANCH" "master" "not the master branch"
 echo "Publishing manual..."
 
 # Decrypt and load the deployment key
+# shellcheck disable=SC2154
 openssl aes-256-cbc -K "${encrypted_923a5f7c915e_key}" -iv "${encrypted_923a5f7c915e_iv}" -in doc/deploy.enc -out doc/deploy -d
 chmod 600 doc/deploy
-eval $(ssh-agent -s)
+eval_ssh_agent -s
 ssh-add doc/deploy
 
 # Git setup
@@ -61,7 +67,8 @@ git commit -m "Update manual from flycheck/flycheck@$(git rev-parse --short "${T
 git push --force --quiet origin master
 cd ../..
 
-eval $(ssh-agent -k)
+# shellcheck disable=SC2046
+eval_ssh_agent -k
 echo "Published manual!"
 
 rm doc/deploy
