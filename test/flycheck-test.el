@@ -4953,6 +4953,15 @@ Why not:
    "checkers/rust-test-syntax-error.rs" 'rust-mode
    '(5 5 error "unresolved name `bla`" :checker rust)))
 
+(flycheck-ert-def-checker-test rust rust multiline-error
+  (flycheck-ert-should-syntax-check
+   "checkers/rust-multiple-error.rs" 'rust-mode
+   '(7 9 error "mismatched types:
+ expected `u8`,
+    found `i8`
+(expected u8,
+    found i8)" :checker rust :id "E0308")))
+
 (flycheck-ert-def-checker-test rust rust test-check-tests-disabled
   (let ((flycheck-rust-check-tests nil))
     (flycheck-ert-should-syntax-check
@@ -4969,8 +4978,8 @@ Why not:
 (flycheck-ert-def-checker-test rust rust help
   (flycheck-ert-should-syntax-check
    "checkers/rust-help.rs" 'rust-mode
-   '(3 1 error "not all control paths return a value [E0269]"
-       :checker rust)
+   '(3 1 error "not all control paths return a value"
+       :checker rust :id "E0269")
    '(4 11 info "consider removing this semicolon:"
        :checker rust)))
 

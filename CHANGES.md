@@ -27,6 +27,7 @@ master (in development)
     checker for the buffer yet [GH-568]
   - Remove `global-flycheck-mode` from customization interface [GH-595]
   - `handlebars` now supports Web Mode [GH-605]
+  - Extract error IDs from `rustc`
 
 - Bug fixes:
 
@@ -38,6 +39,7 @@ master (in development)
   - Automatically initialize packages when checking `user-init-file`
   - Properly initialize hook variables [GH-593]
   - Fix handling of file names with symbolic links for some checkers [GH-561]
+  - Parse multiline type errors from `rustc` [GH-592]
 
 0.22 (Dec 23, 2014)
 ===================

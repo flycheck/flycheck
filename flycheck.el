@@ -6989,7 +6989,12 @@ See URL `http://www.rust-lang.org'."
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ": "
           (one-or-more digit) ":" (one-or-more digit) " error: "
-          (message) line-end)
+          (or
+           ;; Multiline errors
+           (and (message (minimal-match (one-or-more anything)))
+                " [" (id "E" (one-or-more digit)) "]")
+           (message))
+          line-end)
    (warning line-start (file-name) ":" line ":" column ": "
             (one-or-more digit) ":" (one-or-more digit) " warning: "
             (message) line-end)
