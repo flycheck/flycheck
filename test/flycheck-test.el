@@ -1774,11 +1774,13 @@ and extension, as in `file-name-base'."
   :tags '(selection)
   (flycheck-ert-with-temp-buffer
     (flycheck-mode)
-    (flycheck-disable-checker 'emacs-lisp)
+    (with-no-warnings
+      (flycheck-disable-checker 'emacs-lisp))
     (should (equal '(emacs-lisp) flycheck-disabled-checkers))
     (should-not (default-value 'flycheck-disabled-checkers))
     ;; Disabling a disabled checker should be a no-op
-    (flycheck-disable-checker 'emacs-lisp)
+    (with-no-warnings
+      (flycheck-disable-checker 'emacs-lisp))
     (should (equal '(emacs-lisp) flycheck-disabled-checkers))))
 
 (ert-deftest flycheck-disable-checker/enables-checker ()
@@ -1786,7 +1788,8 @@ and extension, as in `file-name-base'."
   (flycheck-ert-with-temp-buffer
     (flycheck-mode)
     (setq flycheck-disabled-checkers '(emacs-lisp python-pylint))
-    (flycheck-disable-checker 'emacs-lisp 'enable)
+    (with-no-warnings
+      (flycheck-disable-checker 'emacs-lisp 'enable))
     (should (equal '(python-pylint) flycheck-disabled-checkers))))
 
 
@@ -3452,7 +3455,8 @@ evaluating BODY."
       (should (file-exists-p file-name))
       (should (file-executable-p file-name))
       (should-not (local-variable-p 'flycheck-emacs-lisp-executable))
-      (flycheck-set-checker-executable 'emacs-lisp file-name)
+      (with-no-warnings
+        (flycheck-set-checker-executable 'emacs-lisp file-name))
       (should (local-variable-p 'flycheck-emacs-lisp-executable))
       (should (string= flycheck-emacs-lisp-executable file-name))))
   ;; The global value should remain unaffected
@@ -3464,7 +3468,8 @@ evaluating BODY."
     (let ((file-name (flycheck-ert-resource-filename "bin/dummy-emacs")))
       (setq-local flycheck-emacs-lisp-executable file-name)
       (should (string= flycheck-emacs-lisp-executable file-name))
-      (flycheck-set-checker-executable 'emacs-lisp)
+      (with-no-warnings
+        (flycheck-set-checker-executable 'emacs-lisp))
       (should-not flycheck-emacs-lisp-executable)
       (should (local-variable-p 'flycheck-emacs-lisp-executable)))))
 
@@ -3474,7 +3479,8 @@ evaluating BODY."
     (let ((file-name (flycheck-ert-resource-filename "bin/dummy-emacs")))
       (setq-local flycheck-emacs-lisp-executable file-name)
       (should (string= flycheck-emacs-lisp-executable file-name))
-      (flycheck-set-checker-executable 'emacs-lisp nil)
+      (with-no-warnings
+        (flycheck-set-checker-executable 'emacs-lisp nil))
       (should-not flycheck-emacs-lisp-executable)
       (should (local-variable-p 'flycheck-emacs-lisp-executable)))))
 
