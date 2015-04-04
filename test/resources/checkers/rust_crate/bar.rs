@@ -1,1 +1,1 @@
-pub static BAR: int = 42;
+pub static BAR: u32 = 42;
