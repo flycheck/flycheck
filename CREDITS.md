@@ -50,6 +50,8 @@ substantial code to Flycheck:
 - [Sebastian Wiesner](https://github.com/lunaryorn) (primary maintainer)
 - [Syohei Yoshida](https://github.com/syohex) (customizable error display delay)
 - [steckerhalter](https://github.com/steckerhalter) (PHPCS syntax checker)
+- [Stephen Lewis](https://github.com/stephenjlewis) (pedantic flags for Clang
+  and GCC)
 - [Steve Purcell](https://github.com/purcell) (various bug fixes, syntax
   checkers for HAML, csslint, jslint, SASS, SCSS, jsonlint, LESS, GHC, hdevtools
   and hlint)

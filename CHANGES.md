@@ -19,6 +19,7 @@ master (in development)
     buffer
   - Add `flycheck-global-modes` to control in which modes `global-flycheck-mode`
     turns on `flycheck-mode`
+  - Add `pedantic` and `pedantic-errors` options to Clang and GCC [GH-543]
 
 - Improvements:
 
