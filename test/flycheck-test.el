@@ -5112,7 +5112,9 @@ Why not:
        :checker sh-shellcheck)
    '(3 7 error "Double quote array expansions, otherwise they're like $* and break on spaces."
        :id "SC2068" :checker sh-shellcheck)
-   '(4 11 info "Use $(..) instead of deprecated `..`" :id "SC2006"
+   '(4 8 warning "Declare and assign separately to avoid masking return values."
+       :id "SC2155" :checker sh-shellcheck)
+   '(4 11 info "Use $(..) instead of legacy `..`." :id "SC2006"
        :checker sh-shellcheck)))
 
 (flycheck-ert-def-checker-test sh-shellcheck sh excluded-warning
@@ -5122,7 +5124,9 @@ Why not:
      "checkers/sh-shellcheck.sh" 'sh-mode
      '(3 7 error "Double quote array expansions, otherwise they're like $* and break on spaces."
          :id "SC2068" :checker sh-shellcheck)
-     '(4 11 info "Use $(..) instead of deprecated `..`" :id "SC2006"
+     '(4 8 warning "Declare and assign separately to avoid masking return values."
+         :id "SC2155" :checker sh-shellcheck)
+     '(4 11 info "Use $(..) instead of legacy `..`." :id "SC2006"
          :checker sh-shellcheck))))
 
 (flycheck-ert-def-checker-test slim slim nil
