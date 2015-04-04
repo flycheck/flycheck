@@ -1746,7 +1746,6 @@ and extension, as in `file-name-base'."
     (flycheck-mode)
     (flycheck-ert-buffer-sync)
     (should-not flycheck-checker)
-    (should (eq flycheck-last-checker 'python-flake8))
     (flycheck-ert-should-errors
      '(5 1 warning "'antigravit' imported but unused" :id "F401"
          :checker python-flake8)
@@ -1767,7 +1766,6 @@ and extension, as in `file-name-base'."
     (let ((flycheck-disabled-checkers '(emacs-lisp)))
       (flycheck-ert-buffer-sync)
       (should-not flycheck-checker)
-      (should (eq flycheck-last-checker 'emacs-lisp-checkdoc))
       (flycheck-ert-should-errors
        '(12 nil warning "First sentence should end with punctuation"
             :checker emacs-lisp-checkdoc)))))

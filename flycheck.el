@@ -2056,31 +2056,11 @@ buffer manually.
 (defvar-local flycheck-last-checker nil
   "The last checker used for the current buffer.")
 
-(defun flycheck-clear-checker ()
-  "Clear configured and remembered checkers in the current buffer."
-  (setq flycheck-last-checker nil))
-
-(defun flycheck-try-last-checker-for-buffer ()
-  "Try the last checker for the current buffer.
-
-Return the checker if it may be used, or nil otherwise."
-  ;; We should not use the last checker if it was removed from the list of
-  ;; allowed checkers in the meantime
-  (when (and (flycheck-registered-checker-p flycheck-last-checker)
-             (flycheck-may-use-checker flycheck-last-checker))
-    flycheck-last-checker))
-
-(defun flycheck-get-new-checker-for-buffer ()
-  "Find a new checker for the current buffer.
-
-Return the checker if there is any, or nil otherwise."
-  (let ((checkers flycheck-checkers))
-    (while (and checkers (not (flycheck-may-use-checker (car checkers))))
-      (setq checkers (cdr checkers)))
-    (car checkers)))
-
 (defun flycheck-get-checker-for-buffer ()
   "Find the checker for the current buffer.
+
+Use the selected checker for the current buffer, if any,
+otherwise search for the best checker from `flycheck-checkers'.
 
 Return checker if there is a checker for the current buffer, or
 nil otherwise."
@@ -2089,8 +2069,10 @@ nil otherwise."
           flycheck-checker
         (user-error "Selected syntax checker %s cannot be used"
                     flycheck-checker))
-    (or (flycheck-try-last-checker-for-buffer)
-        (flycheck-get-new-checker-for-buffer))))
+    (let ((checkers flycheck-checkers))
+      (while (and checkers (not (flycheck-may-use-checker (car checkers))))
+        (setq checkers (cdr checkers)))
+      (car checkers))))
 
 (defun flycheck-get-next-checker-for-buffer (checker)
   "Get the checker to run after CHECKER for the current buffer."
@@ -2124,14 +2106,12 @@ CHECKER will be used, even if it is not contained in
   (interactive
    (if current-prefix-arg
        (list nil)
-     (list (read-flycheck-checker "Select checker: " flycheck-last-checker))))
+     (list (read-flycheck-checker "Select checker: "
+                                  (flycheck-get-checker-for-buffer)))))
   (when (not (eq checker flycheck-checker))
     (unless (or (not checker) (flycheck-may-use-checker checker))
       (user-error "Can't use syntax checker %S in this buffer" checker))
-    (setq flycheck-checker checker
-          ;; Clear cached checker to make sure that automatic selection restarts
-          ;; if necessary
-          flycheck-last-checker nil)
+    (setq flycheck-checker checker)
     (when flycheck-mode
       (flycheck-buffer))))
 
@@ -2208,11 +2188,10 @@ Set `flycheck-current-syntax-check' accordingly."
            syntax-check args)))
 
 (defun flycheck-buffer ()
-  "Check syntax in the current buffer.
+  "Start checking syntax in the current buffer.
 
-The syntax checker used for the syntax check is cached in
-`flycheck-last-checker' and re-used for the next check, if
-possible."
+Get a syntax checker for the current buffer with
+`flycheck-get-checker-for-buffer', and start it."
   (interactive)
   (flycheck-clean-deferred-check)
   (if flycheck-mode
@@ -2227,11 +2206,7 @@ possible."
         (condition-case err
             (let* ((checker (flycheck-get-checker-for-buffer)))
               (if checker
-                  (progn
-                    ;; Remember the last syntax checker to speed up checker
-                    ;; selection
-                    (setq flycheck-last-checker checker)
-                    (flycheck-start-current-syntax-check checker))
+                  (flycheck-start-current-syntax-check checker)
                 (flycheck-clear)
                 (flycheck-report-status 'no-checker)))
           (error
@@ -2384,8 +2359,7 @@ running checks, and empty all variables used by Flycheck."
   (flycheck-stop)
   (flycheck-clean-deferred-check)
   (flycheck-clear)
-  (flycheck-cancel-error-display-error-at-point-timer)
-  (flycheck-clear-checker))
+  (flycheck-cancel-error-display-error-at-point-timer))
 
 
 ;;; Automatic syntax checking in a buffer
@@ -4711,7 +4685,7 @@ Instead of highlighting errors in the buffer, this command pops
 up a separate buffer with the entire output of the syntax checker
 tool, just like `compile' (\\[compile])."
   (interactive
-   (let ((default (or flycheck-checker flycheck-last-checker)))
+   (let ((default (flycheck-get-checker-for-buffer)))
      (list (read-flycheck-checker "Run syntax checker as compile command: "
                                   (when (get default 'flycheck-command) default)
                                   'flycheck-command))))
