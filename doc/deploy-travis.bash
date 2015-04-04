@@ -57,7 +57,7 @@ doc/_deploy/_scripts/update-manual.py ${MANUAL_VERSION} doc/flycheck.texi
 
 cd doc/_deploy
 git add --force --all .
-git commit -m "Update manual from flycheck/flycheck@${TRAVIS_COMMIT}"
+git commit -m "Update manual from flycheck/flycheck@$(git rev-parse --short "${TRAVIS_COMMIT}")"
 git push --force --quiet origin master
 cd ../..
 
