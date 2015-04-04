@@ -7,6 +7,7 @@ master (in development)
   - Remove `make` syntax checker due to various issues [GH-572] [GH-573]
   - Remove `zsh` support from `sh-shellcheck`, since Shellcheck does not support
     Zsh anymore
+  - Remove `global-flycheck-mode` from customization interface [GH-595]
 
 - New syntax checkers:
 
@@ -27,7 +28,6 @@ master (in development)
   - `chef-foodcritic` handles relative paths correctly now [GH-556]
   - Global Flycheck Mode enables Flycheck Mode even if there is no syntax
     checker for the buffer yet [GH-568]
-  - Remove `global-flycheck-mode` from customization interface [GH-595]
   - `handlebars` now supports Web Mode [GH-605]
   - Extract error IDs from `rustc`
   - Don’t cache last syntax checker in buffer anymore
