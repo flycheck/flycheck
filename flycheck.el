@@ -1658,9 +1658,9 @@ nil otherwise."
   (let ((modes (flycheck-checker-modes checker))
         (predicate (flycheck-checker-predicate checker)))
     (and (flycheck-valid-checker-p checker)
+         (not (flycheck-disabled-checker-p checker))
          (or (not modes) (memq major-mode modes))
-         (funcall predicate)
-         (not (flycheck-disabled-checker-p checker)))))
+         (funcall predicate))))
 
 (defun flycheck-may-use-next-checker (next-checker)
   "Determine whether NEXT-CHECKER may be used."
