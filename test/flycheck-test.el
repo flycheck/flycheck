@@ -2484,6 +2484,12 @@ of the file will be interrupted because there are too many #ifdef configurations
     (should (equal (flycheck-sanitize-errors (list err))
                    (list (flycheck-error-new-at 1 nil 'error "foo"))))))
 
+(ert-deftest flycheck-sanitize-errors/empty-error-id ()
+  :tags '(error-filtering)
+  (let ((err (flycheck-error-new-at 1 1 'error "foo" :id "")))
+    (should (equal (flycheck-sanitize-errors (list err))
+                   (list (flycheck-error-new-at 1 1 'error "foo"))))))
+
 (ert-deftest flycheck-increment-error-columns/ignores-nil ()
   :tags '(error-filtering)
   (let ((errors (list (flycheck-error-new-at 4 nil nil nil))))
@@ -5078,21 +5084,40 @@ Why not:
     (flycheck-ert-should-syntax-check
      "checkers/scala-scalastyle-style-warning.scala" 'scala-mode)))
 
+(flycheck-ert-def-checker-test scss-lint scss nil
+  (let ((flycheck-scss-lintrc "scss-lint.yml"))
+    (flycheck-ert-should-syntax-check
+     "checkers/scss-lint-error.scss" 'scss-mode
+     '(1 1 error "Avoid using id selectors"
+         :checker scss-lint :id "IdSelector")
+     '(3 16 warning "Color `red` should be written in hexadecimal form as `#ff0000`"
+         :checker scss-lint :id "ColorKeyword"))))
+
+(flycheck-ert-def-checker-test scss-lint scss syntax-error
+  (let ((flycheck-disabled-checkers '(scss)))
+    (flycheck-ert-should-syntax-check
+     "checkers/scss-error.scss" 'scss-mode
+     '(3 1 error "Syntax Error: Invalid CSS after \"...    c olor: red\": expected \"{\", was \";\""
+         :checker scss-lint))))
+
 (flycheck-ert-def-checker-test scss scss nil
-  (flycheck-ert-should-syntax-check
-   "checkers/scss-error.scss" 'scss-mode
-   '(3 nil error "Invalid CSS after \"...    c olor: red\": expected \"{\", was \";\""
-       :checker scss)))
+  (let ((flycheck-disabled-checkers '(scss-lint)))
+    (flycheck-ert-should-syntax-check
+     "checkers/scss-error.scss" 'scss-mode
+     '(3 nil error "Invalid CSS after \"...    c olor: red\": expected \"{\", was \";\""
+         :checker scss))))
 
 (flycheck-ert-def-checker-test scss scss import-error
-  (flycheck-ert-should-syntax-check
-   "checkers/scss-compass.scss" 'scss-mode
-   `(2 nil error ,(format "File to import not found or unreadable: compass/css3.
+  (let ((flycheck-disabled-checkers '(scss-lint)))
+    (flycheck-ert-should-syntax-check
+     "checkers/scss-compass.scss" 'scss-mode
+     `(2 nil error ,(format "File to import not found or unreadable: compass/css3.
        Load path: %s" (flycheck-ert-resource-filename "checkers"))
-       :checker scss)))
+         :checker scss))))
 
 (flycheck-ert-def-checker-test scss scss compass
-  (let ((flycheck-scss-compass t))
+  (let ((flycheck-disabled-checkers '(scss-lint))
+        (flycheck-scss-compass t))
     (flycheck-ert-should-syntax-check
      "checkers/scss-compass.scss" 'scss-mode)))
 

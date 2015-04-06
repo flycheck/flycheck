@@ -233,6 +233,7 @@ attention to case differences."
     sass
     scala
     scala-scalastyle
+    scss-lint
     scss
     sh-bash
     sh-posix-dash
@@ -3037,11 +3038,14 @@ Returns sanitized ERRORS."
   (dolist (err errors)
     (flycheck-error-with-buffer err
       (let ((message (flycheck-error-message err))
-            (column (flycheck-error-column err)))
+            (column (flycheck-error-column err))
+            (id (flycheck-error-id err)))
         (when message
           (setq message (string-trim message))
           (setf (flycheck-error-message err)
                 (if (string-empty-p message) nil message)))
+        (when (and id (string-empty-p id))
+          (setf (flycheck-error-id err) nil))
         (when (eq column 0)
           (setf (flycheck-error-column err) nil)))))
   errors)
@@ -7126,6 +7130,44 @@ See URL `http://www.scalastyle.org'."
                   (file-exists-p flycheck-scalastyle-jar)
                   (file-exists-p (flycheck-locate-config-file
                                   flycheck-scalastylerc 'scala-scalastyle)))))
+
+(defconst flycheck-scss-lint-checkstyle-re
+  (rx "cannot load such file" (1+ not-newline) "scss_lint_reporter_checkstyle")
+  "Regular expression to parse missing checkstyle error.")
+
+(defun flycheck-parse-scss-lint (output checker buffer)
+  "Parse SCSS-Lint OUTPUT from CHECKER and BUFFER.
+
+Like `flycheck-parse-checkstyle', but catches errors about
+missing checkstyle reporter from SCSS-Lint."
+  (if (string-match-p flycheck-scss-lint-checkstyle-re output)
+      (list (flycheck-error-new-at
+             1 nil 'error "Checkstyle reporter for SCSS-Lint missing.
+Please run gem install scss_lint_reporter_checkstyle"
+             :checker checker
+             :buffer buffer
+             :filename (buffer-file-name buffer)))
+    (flycheck-parse-checkstyle output checker buffer)))
+
+(flycheck-def-config-file-var flycheck-scss-lintrc scss-lint ".scss-lint.yml"
+  :safe #'stringp)
+
+(flycheck-define-checker scss-lint
+  "A SCSS syntax checker using SCSS-Lint.
+
+See URL `https://github.com/brigade/scss-lint'."
+  :command ("scss-lint"
+            "--require=scss_lint_reporter_checkstyle"
+            "--format=Checkstyle"
+            (config-file "--config" flycheck-scss-lintrc)
+            source)
+  ;; We cannot directly parse Checkstyle XML, since for some mysterious reason
+  ;; SCSS-Lint doesn't have a built-in Checkstyle reporter, and instead ships it
+  ;; as an addon which might not be installed.  We use a custom error parser to
+  ;; check whether the addon is missing and turn that into a special kind of
+  ;; Flycheck error.
+  :error-parser flycheck-parse-scss-lint
+  :modes scss-mode)
 
 (flycheck-def-option-var flycheck-scss-compass nil scss
   "Whether to enable the Compass CSS framework.
