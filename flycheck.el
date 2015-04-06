@@ -3064,11 +3064,14 @@ Returns sanitized ERRORS."
   (dolist (err errors)
     (flycheck-error-with-buffer err
       (let ((message (flycheck-error-message err))
-            (column (flycheck-error-column err)))
+            (column (flycheck-error-column err))
+            (id (flycheck-error-id err)))
         (when message
           (setq message (string-trim message))
           (setf (flycheck-error-message err)
                 (if (string-empty-p message) nil message)))
+        (when (and id (string-empty-p id))
+          (setf (flycheck-error-id err) nil))
         (when (eq column 0)
           (setf (flycheck-error-column err) nil)))))
   errors)

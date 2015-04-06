@@ -2483,6 +2483,12 @@ of the file will be interrupted because there are too many #ifdef configurations
     (should (equal (flycheck-sanitize-errors (list err))
                    (list (flycheck-error-new-at 1 nil 'error "foo"))))))
 
+(ert-deftest flycheck-sanitize-errors/empty-error-id ()
+  :tags '(error-filtering)
+  (let ((err (flycheck-error-new-at 1 1 'error "foo" :id "")))
+    (should (equal (flycheck-sanitize-errors (list err))
+                   (list (flycheck-error-new-at 1 1 'error "foo"))))))
+
 (ert-deftest flycheck-increment-error-columns/ignores-nil ()
   :tags '(error-filtering)
   (let ((errors (list (flycheck-error-new-at 4 nil nil nil))))
