@@ -1,0 +1,8 @@
+---
+linters:
+  ColorVariable:
+    enabled: false
+  IdSelector:
+    severity: error
+  Indentation:
+    enabled: false

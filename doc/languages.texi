@@ -696,15 +696,17 @@ If these options are not set, @flyc{scala-scalastyle} will not be used.
 SCSS-Lint}), or
 @item
 @flyc{scss} (using the @uref{http://sass-lang.com/,standard SCSS
-processor}, with the following option:
+processor}
+@end itemize
+
+These syntax checkers provide the following options:
 
 @table @asis
 @flycoption flycheck-scss-compass
 Whether to enable the Compass CSS framework in SCSS, via
 @option{--compass}.
+@flycconfigfile{flycheck-scss-lintrc,SCSS-Lint}
 @end table
-
-@end itemize
 
 @flyclanguage{Shell scripting languages}
 
