@@ -12,6 +12,7 @@ master (in development)
 
   - R with `lintr` [GH-512]
   - Lua with `luacheck` [GH-591] [GH-609]
+  - SCSS with `scss-lint` [GH-582] [GH-598]
 
 - New features:
 

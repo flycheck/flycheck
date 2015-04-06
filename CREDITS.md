@@ -20,6 +20,7 @@ substantial code to Flycheck:
 - [Gereon Frey](https://github.com/gfrey) (fixes to temporary file handling in
   Go and to the Go tests)
 - [Gulshan Singh](https://github.com/gsingh93) (customizable Rust crate type)
+- [Iain Beeston](https://github.com/iainbeeston) (SCSS-Lint syntax checker)
 - [Jim Hester](https://github.com/jimhester) (lintr syntax checker)
 - [Jimmy Yuen Ho Wong](https://github.com/wyuenho) (HTML tidy and JSHint syntax
   checkers, bug fixes to faces)
