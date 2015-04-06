@@ -32,16 +32,16 @@ eval_ssh_agent() {
   eval $(ssh-agent "${@}")
 }
 
+check_environment "$TRAVIS_REPO_SLUG" "flycheck/flycheck" "not our repo"
+check_environment "$TRAVIS_PULL_REQUEST" "false" "pull request"
+check_environment "$TRAVIS_SECURE_ENV_VARS" "true" "secure variables missing"
+
 if [[ -n $TRAVIS_TAG ]]; then
   MANUAL_VERSION="--version ${TRAVIS_TAG}"
 else
   MANUAL_VERSION=""
+  check_environment "$TRAVIS_BRANCH" "master" "not the master branch"
 fi
-
-check_environment "$TRAVIS_REPO_SLUG" "flycheck/flycheck" "not our repo"
-check_environment "$TRAVIS_PULL_REQUEST" "false" "pull request"
-check_environment "$TRAVIS_SECURE_ENV_VARS" "true" "secure variables missing"
-check_environment "$TRAVIS_BRANCH" "master" "not the master branch"
 
 echo "Publishing manual..."
 
