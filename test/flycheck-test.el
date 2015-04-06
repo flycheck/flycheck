@@ -5068,6 +5068,18 @@ Why not:
     (flycheck-ert-should-syntax-check
      "checkers/scala-scalastyle-style-warning.scala" 'scala-mode)))
 
+(flycheck-ert-def-checker-test scss-lint scss nil
+  (flycheck-ert-should-syntax-check
+   "checkers/scss-lint-error.scss" 'scss-mode
+   '(1 1 warning "Avoid using id selectors"
+       :checker scss-lint :id "IdSelector")
+   '(2 1 warning "Line should be indented 2 spaces, but was indented 4 spaces"
+       :checker scss-lint :id "Indentation")
+   '(3 16 warning "Color literals like `red` should only be used in variable declarations; they should be referred to via variable everywhere else."
+       :checker scss-lint :id "ColorVariable")
+   '(3 16 warning "Color `red` should be written in hexadecimal form as `#ff0000`"
+       :checker scss-lint :id "ColorKeyword")))
+
 (flycheck-ert-def-checker-test scss-lint scss syntax-error
   (let ((flycheck-disabled-checkers '(scss)))
     (flycheck-ert-should-syntax-check
