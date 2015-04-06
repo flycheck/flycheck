@@ -696,7 +696,7 @@ If these options are not set, @flyc{scala-scalastyle} will not be used.
 SCSS-Lint}), or
 @item
 @flyc{scss} (using the @uref{http://sass-lang.com/,standard SCSS
-processor}
+processor})
 @end itemize
 
 These syntax checkers provide the following options:
