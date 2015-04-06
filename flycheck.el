@@ -7150,7 +7150,8 @@ Please run gem install scss_lint_reporter_checkstyle"
     (flycheck-parse-checkstyle output checker buffer)))
 
 (flycheck-def-config-file-var flycheck-scss-lintrc scss-lint ".scss-lint.yml"
-  :safe #'stringp)
+  :safe #'stringp
+  :package-version '(flycheck . "0.23"))
 
 (flycheck-define-checker scss-lint
   "A SCSS syntax checker using SCSS-Lint.
