@@ -3,5 +3,6 @@
        executable={{ruby_gem_executable}}
   with_items:
     - scss-lint
+    - scss_lint_reporter_checkstyle
   tags:
     - gem

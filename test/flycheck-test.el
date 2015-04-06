@@ -5062,11 +5062,11 @@ Why not:
     (flycheck-ert-should-syntax-check
      "checkers/scala-scalastyle-style-warning.scala" 'scala-mode)))
 
-(flycheck-ert-def-checker-test scss-lint scss nil
+(flycheck-ert-def-checker-test scss-lint scss syntax-error
   (let ((flycheck-disabled-checkers '(scss)))
     (flycheck-ert-should-syntax-check
      "checkers/scss-error.scss" 'scss-mode
-     '(3 nil error "Syntax Error: Invalid CSS after \"...    c olor: red\": expected \"{\", was \";\""
+     '(3 1 error "Syntax Error: Invalid CSS after \"...    c olor: red\": expected \"{\", was \";\""
          :checker scss-lint))))
 
 (flycheck-ert-def-checker-test scss scss nil
