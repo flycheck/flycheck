@@ -83,7 +83,7 @@ checking for buffers.  It is intended as replacement for the older
 Flymake package which is built into Emacs.
 
 @xref{Introduction}, for more information about Flycheck.  For
-installations instructions and a quick tutorial, @pxref {Installation}
+installations instructions and a quick tutorial, @pxref{Installation}
 and @ref{Quickstart} respectively.  @xref{Usage}, for a detailed user
 guide.
 
