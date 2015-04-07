@@ -87,6 +87,13 @@ installations instructions and a quick tutorial, @pxref{Installation}
 and @ref{Quickstart} respectively.  @xref{Usage}, for a detailed user
 guide.
 
+@ifnotinfo
+@noindent
+@strong{With Flycheck installed you can read this manual inside Emacs
+with @key{M-x flycheck-info}}.  This opens Emacs' built-in Info reader.
+@xref{Getting Started,,,info}, to see how to use this reader.
+@end ifnotinfo
+
 @menu
 * Introduction::                An introduction to Flycheck
 * Installation::                How to install Flycheck
