@@ -100,7 +100,7 @@ with @key{M-x flycheck-info}}.  This opens Emacs' built-in Info reader.
 * Quickstart::                  A quick Flycheck tutorial
 * Usage::                       How to use Flycheck
 * Syntax checker definitions::  How to add new syntax checkers to Flycheck
-* Flycheck hooks::              How to hook into Flycheckx
+* Flycheck hooks::              How to hook into Flycheck
 * Flycheck API::                API documentation
 * Supported languages::         A list of supported languages
 * Issues::                      How to report issues in Flycheck
