@@ -87,8 +87,6 @@ installations instructions and a quick tutorial, @pxref{Installation}
 and @ref{Quickstart} respectively.  @xref{Usage}, for a detailed user
 guide.
 
-For more information about Flymake, @pxref{Top,,Overview,flymake}.
-
 @menu
 * Introduction::                An introduction to Flycheck
 * Installation::                How to install Flycheck
