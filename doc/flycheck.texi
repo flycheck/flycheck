@@ -1428,7 +1428,7 @@ interface, which you can use for your own extensions.
 
 @section Status changes
 
-:hook:@code{flycheck-before-syntax-check-hook} and
+@code{flycheck-before-syntax-check-hook} and
 @code{flycheck-after-syntax-check-hook} run before and after syntax
 checks, and let you update your Emacs instance according to Flycheck's
 state.  For instance, @ghref{flycheck/flycheck-color-mode-line,
