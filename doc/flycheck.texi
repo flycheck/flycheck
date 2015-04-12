@@ -64,7 +64,6 @@ International Public License. A copy of the license can be obtained at
 @titlepage
 @title Flycheck
 @subtitle Modern on-the-fly syntax checking for GNU Emacs
-@subtitle Version 0.23
 @author Sebastian Wiesner @email{swiesner@@lunaryorn.com}
 @page
 @vskip 0pt plus 1filll
