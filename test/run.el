@@ -95,6 +95,11 @@ Node `(ert)Test Selectors' for information about test selectors."
                           (kill-emacs 1))))))
     (ert-run-tests-batch-and-exit (flycheck-transform-selector selector))))
 
+(defun flycheck-setup-coverage-reporting ()
+  "Setup test coverage reporting using undercover.el."
+  (when (fboundp 'undercover)
+    (undercover "flycheck.el")))
+
 (defun flycheck-runs-this-script-p ()
   "Whether this file is executed as script."
   t)
@@ -107,6 +112,9 @@ Node `(ert)Test Selectors' for information about test selectors."
          (pkg-rel-dir (format ".cask/%s/elpa" emacs-version)))
     (setq package-user-dir (expand-file-name pkg-rel-dir source-directory))
     (package-initialize)
+
+    (when (require 'undercover nil 'no-error)
+      (flycheck-setup-coverage-reporting))
 
     (message "Running tests on Emacs %s, built at %s"
              emacs-version (format-time-string "%F" emacs-build-time))

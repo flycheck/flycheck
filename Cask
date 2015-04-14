@@ -8,6 +8,7 @@
        "doc/flycheck.texi")
 
 (development
+ (depends-on "undercover")              ; Measure test coverage
  (depends-on "shut-up")                 ; Silence Emacs
 
  ;; Make optional dependencies available for development
