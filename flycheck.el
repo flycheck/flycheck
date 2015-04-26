@@ -5643,7 +5643,7 @@ See URL `http://elixir-lang.org/'."
   :modes elixir-mode
   :predicate
   (lambda ()
-    (not (string-match "\.exs$" buffer-file-name))))
+    (not (string-equal "exs" (file-name-extension buffer-file-name)))))
 
 (defconst flycheck-this-emacs-executable
   (concat invocation-directory invocation-name)
