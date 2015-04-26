@@ -5640,7 +5640,10 @@ See URL `http://elixir-lang.org/'."
    (warning line-start (file-name) ":" line ": warning:" (message) line-end)
    ;; Warnings from older Elixir versions
    (warning line-start (file-name) ":" line ": " (message) line-end))
-  :modes elixir-mode)
+  :modes elixir-mode
+  :predicate
+  (lambda ()
+    (not (string-equal "exs" (file-name-extension buffer-file-name)))))
 
 (defconst flycheck-this-emacs-executable
   (concat invocation-directory invocation-name)
