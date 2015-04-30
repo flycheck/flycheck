@@ -6681,7 +6681,7 @@ Requires Flake8 2.0 or newer. See URL
             (id (one-or-more (any alpha)) (one-or-more digit)) " "
             (message (one-or-more not-newline))
             line-end))
-  :modes python-mode)
+  :modes (python-mode django-mode))
 
 (flycheck-def-config-file-var flycheck-pylintrc python-pylint
                               ".pylintrc"
@@ -6715,7 +6715,7 @@ See URL `http://www.pylint.org/'."
    (info line-start (file-name) ":" line ":" column ":"
          "C:" (id (one-or-more (not (any ":")))) ":"
          (message) line-end))
-  :modes python-mode)
+  :modes (python-mode django-mode))
 
 (flycheck-define-checker python-pycompile
   "A Python syntax checker using Python's builtin compiler.
@@ -6731,7 +6731,7 @@ See URL `https://docs.python.org/3.4/library/py_compile.html'."
    (error line-start "SyntaxError: ('" (message (one-or-more (not (any "'"))))
           "', ('" (file-name (one-or-more (not (any "'")))) "', "
           line ", " column ", " (one-or-more not-newline) line-end))
-  :modes python-mode)
+  :modes (python-mode django-mode))
 
 (flycheck-def-option-var flycheck-lintr-caching t r-lintr
   "Whether to enable caching in lintr.
