@@ -11,9 +11,6 @@
  (depends-on "undercover")              ; Measure test coverage
  (depends-on "shut-up")                 ; Silence Emacs
 
- ;; Make optional dependencies available for development
- (depends-on "google-this")             ; Search for messages
-
  ;; Various modes for use in the unit tests
  (depends-on "adoc-mode")
  (depends-on "coffee-mode")
