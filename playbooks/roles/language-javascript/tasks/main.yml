@@ -11,3 +11,7 @@
     - http://closure-linter.googlecode.com/files/closure_linter-latest.tar.gz
   tags:
     - pip
+- name: Install JSCS
+  npm: name=jscs global=yes state=latest
+  tags:
+    - npm

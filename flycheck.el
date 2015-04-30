@@ -55,6 +55,7 @@
 (require 'rx)                    ; Regexp fanciness in `flycheck-define-checker'
 (require 'help-mode)             ; `define-button-type'
 (require 'find-func)             ; `find-function-regexp-alist'
+(require 'json)                  ; `json-read-file'
 
 ;; Tell the byte compiler about autoloaded functions from packages
 (declare-function pkg-info-version-info "pkg-info" (package))
@@ -206,6 +207,7 @@ attention to case differences."
     javascript-jshint
     javascript-eslint
     javascript-gjslint
+    javascript-jscs
     json-jsonlint
     less
     luacheck
@@ -6309,7 +6311,8 @@ See URL `http://www.jshint.com'."
             source)
   :error-parser flycheck-parse-checkstyle
   :error-filter flycheck-dequalify-error-ids
-  :modes (js-mode js2-mode js3-mode))
+  :modes (js-mode js2-mode js3-mode)
+  :next-checkers ((warning . javascript-jscs)))
 
 (flycheck-def-option-var flycheck-eslint-rulesdir nil javascript-eslint
   "The directory of custom rules for ESLint.
@@ -6357,7 +6360,8 @@ See URL `https://github.com/eslint/eslint'."
                                  (flycheck-error-message err))))
                         (flycheck-sanitize-errors errors))
                   errors)
-  :modes (js-mode js2-mode js3-mode))
+  :modes (js-mode js2-mode js3-mode)
+  :next-checkers ((warning . javascript-jscs)))
 
 (flycheck-def-config-file-var flycheck-gjslintrc javascript-gjslint ".gjslintrc"
   :safe #'stringp)
@@ -6372,6 +6376,33 @@ See URL `https://developers.google.com/closure/utilities'."
   :error-patterns ((warning
                     line-start (file-name) ":" line ":("
                     (id (one-or-more digit)) ") " (message) line-end))
+  :modes (js-mode js2-mode js3-mode)
+  :next-checkers ((warning . javascript-jscs)))
+
+(defun flycheck-parse-jscs (output checker buffer)
+  "Parse JSCS OUTPUT from CHECKER and BUFFER.
+
+Like `flycheck-parse-checkstyle', but catches errors about
+no configuration found and prevents to be reported as a suspicious error."
+  (if (string-match-p (rx string-start "No configuration found") output)
+      (list (flycheck-error-new-at 1 nil 'warning nil))
+    (flycheck-parse-checkstyle output checker buffer)))
+
+(flycheck-def-config-file-var flycheck-jscsrc javascript-jscs ".jscsrc"
+  :safe #'stringp
+  :package-version '(flycheck . "0.24"))
+
+(flycheck-define-checker javascript-jscs
+  "A code style linter using JSCS.
+
+See URL `http://www.jscs.info'."
+  :command ("jscs" "--reporter=checkstyle"
+            (config-file "--config" flycheck-jscsrc)
+            source)
+  :error-parser flycheck-parse-jscs
+  :error-filter (lambda (errors)
+                  (flycheck-remove-error-ids
+                   (flycheck-sanitize-errors errors)))
   :modes (js-mode js2-mode js3-mode))
 
 (flycheck-define-checker json-jsonlint
