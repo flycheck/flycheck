@@ -38,6 +38,7 @@ substantial code to Flycheck:
 - [Matthias Dahl](https://github.com/BinaryKhaos) (performance improvements in
   temporary file handling)
 - [Mitch Tishmack](https://github.com/mitchty) (Microsoft extensions in C/C++)
+- [Moritz Bunkus](https://github.com/mbunkus) (Include path for Perl)
 - [Omair Majid](https://github.com/omajid) (syntax checker for RPM spec)
 - [Per Nordlöw](https://github.com/nordlow) (syntax checkers for Ada, Fortran
   and Python, syntax checker name in error list)

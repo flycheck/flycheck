@@ -1,6 +1,11 @@
 master (in development)
 =======================
 
+- New features:
+
+  - Add `flycheck-perl-include-path` to set include directories for Perl
+    [GH-621]
+
 0.23 (Apr 6, 2015)
 ==================
 
