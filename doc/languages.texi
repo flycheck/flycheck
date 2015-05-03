@@ -450,16 +450,12 @@ interpreter})
 @uref{https://metacpan.org/pod/Perl::Critic, Perl::Critic})
 @end enumerate
 
-The @flyc{perl} checker provides the following options:
+These syntax checkers checker provide the following options:
 
 @table @asis
 @flycoption flycheck-perl-include-path
-A list of include directories, relative to the file being checked.
-@end table
-
-The @flyc{perl-perlcritic} checker provides the following option:
-
-@table @asis
+A list of include directories for Perl, relative to the file being
+checked.
 @flycoption flycheck-perlcritic-severity
 The severity level for Perl::Critic, as integer for the
 @option{--severity} option of Perl::Critic.
