@@ -6,6 +6,10 @@ master (in development)
   - Add `flycheck-perl-include-path` to set include directories for Perl
     [GH-621]
 
+- Improvements:
+
+  - Updated `scss-lint` install task to install scss_lint rather than scss-lint [GH-641]
+
 0.23 (Apr 6, 2015)
 ==================
 
