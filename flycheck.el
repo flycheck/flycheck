@@ -55,7 +55,6 @@
 (require 'rx)                    ; Regexp fanciness in `flycheck-define-checker'
 (require 'help-mode)             ; `define-button-type'
 (require 'find-func)             ; `find-function-regexp-alist'
-(require 'json)                  ; `json-read-file'
 
 ;; Tell the byte compiler about autoloaded functions from packages
 (declare-function pkg-info-version-info "pkg-info" (package))
