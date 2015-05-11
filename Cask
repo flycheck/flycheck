@@ -16,7 +16,6 @@
  (depends-on "coffee-mode")
  (depends-on "cperl-mode")
  (depends-on "d-mode")
- (depends-on "elixir-mode")
  (depends-on "erlang")
  (depends-on "ess")
  (depends-on "go-mode")

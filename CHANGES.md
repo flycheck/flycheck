@@ -1,6 +1,10 @@
 master (in development)
 =======================
 
+- **Breaking changes**:
+
+  - Remove Elixir syntax checker due to code execution [GH-630]
+
 - New features:
 
   - Add `flycheck-perl-include-path` to set include directories for Perl

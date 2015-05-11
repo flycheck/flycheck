@@ -195,13 +195,6 @@ adds a syntax checker which runs D unittests on the fly and reports the
 results.
 @end smallindentedblock
 
-@flyclanguage{Elixir}
-
-@itemize
-@item
-@flyc{elixir} (@uref{http://elixir-lang.org/,Elixir interpreter})
-@end itemize
-
 @flyclanguage{Emacs Lisp}
 
 @enumerate

@@ -186,7 +186,6 @@ attention to case differences."
     coq
     css-csslint
     d-dmd
-    elixir
     emacs-lisp
     emacs-lisp-checkdoc
     erlang
@@ -5622,25 +5621,6 @@ Requires DMD 2.066 or newer.  See URL `http://dlang.org/'."
    (warning line-start (file-name) "(" line "," column "): "
             (or "Warning" "Deprecation") ": " (message) line-end))
   :modes d-mode)
-
-(flycheck-define-checker elixir
-  "An Elixir syntax checker using the Elixir interpreter.
-
-See URL `http://elixir-lang.org/'."
-  :command ("elixirc"
-            "-o" temporary-directory    ; Move compiler output out of the way
-            "--ignore-module-conflict"  ; Prevent tedious module redefinition
-                                        ; warning.
-            source)
-  :error-patterns
-  ;; Elixir compiler errors
-  ((error line-start "** (" (zero-or-more not-newline) ") "
-          (file-name) ":" line ": " (message) line-end)
-   ;; Warnings from Elixir >= 0.12.4
-   (warning line-start (file-name) ":" line ": warning:" (message) line-end)
-   ;; Warnings from older Elixir versions
-   (warning line-start (file-name) ":" line ": " (message) line-end))
-  :modes elixir-mode)
 
 (defconst flycheck-this-emacs-executable
   (concat invocation-directory invocation-name)

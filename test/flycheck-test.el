@@ -4025,17 +4025,6 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
    '(4 8 error "module external_library is in file 'external_library.d' which cannot be read"
        :checker d-dmd)))
 
-(flycheck-ert-def-checker-test elixir elixir error
-  (flycheck-ert-should-syntax-check
-   "checkers/elixir-error.ex" 'elixir-mode
-   '(5 nil error "function puts/1 undefined" :checker elixir)))
-
-(flycheck-ert-def-checker-test elixir elixir warnings
-  (flycheck-ert-should-syntax-check
-   "checkers/elixir-warnings.ex" 'elixir-mode
-   '(7 nil warning "this clause cannot match because a previous clause at line 4 always matches"
-       :checker elixir)))
-
 (flycheck-ert-def-checker-test emacs-lisp emacs-lisp nil
   ;; Determine how the Emacs message for load file errors looks like: In Emacs
   ;; Snapshot, the message has three parts because the underlying file error is
