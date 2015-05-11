@@ -35,6 +35,7 @@ substantial code to Flycheck:
   syntax checkers)
 - [Marcin Antczak](https://github.com/marcinant) (error highlighting in error
   list)
+- [Marcus Majewski](https://github.com/hekto) (error columns in ESLint)
 - [Matthias Dahl](https://github.com/BinaryKhaos) (performance improvements in
   temporary file handling)
 - [Mitch Tishmack](https://github.com/mitchty) (Microsoft extensions in C/C++)

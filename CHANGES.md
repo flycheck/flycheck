@@ -6,6 +6,10 @@ master (in development)
   - Add `flycheck-perl-include-path` to set include directories for Perl
     [GH-621]
 
+- Bug fixes:
+
+  - Fix offset of column numbers in ESLint [GH-640]
+
 0.23 (Apr 6, 2015)
 ==================
 
