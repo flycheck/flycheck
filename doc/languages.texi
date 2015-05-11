@@ -377,6 +377,8 @@ with the following option:
 
 @flyclanguage{Javascript}
 
+@enumerate
+@item
 @itemize
 @item
 @flyc{javascript-jshint} (@uref{http://jshint.com/,JSHint})
@@ -386,6 +388,9 @@ Or @flyc{javascript-eslint} (@uref{http://eslint.org/,ESLint})
 Or @flyc{javascript-gjslint}
 (@uref{https://developers.google.com/closure/utilities,Closure Linter})
 @end itemize
+@item
+@flyc{javascript-jscs} (@uref{http://jscs.info/,JSCS})
+@end enumerate
 
 The @flyc{javascript-eslint} checker provides the following option:
 
@@ -395,12 +400,13 @@ A directory with custom rules for ESLint.
 @flycconfigfile{flycheck-eslintrc,ESLint}
 @end table
 
-@flyc{javascript-jshint} and @flyc{javascript-gjslint} read
-configuration files:
+@flyc{javascript-jshint}, @flyc{javascript-gjslint} and @flyc{javascript-jscs}
+read configuration files:
 
 @table @asis
 @flycconfigfile{flycheck-jshintrc,JSHint}
 @flycconfigfile{flycheck-gjslintrc,Closure Linter}
+@flycconfigfile{flycheck-jscsrc,JSCS}
 @end table
 
 @flyclanguage{JSON}
