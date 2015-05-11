@@ -6362,8 +6362,9 @@ See URL `https://developers.google.com/closure/utilities'."
 (defun flycheck-parse-jscs (output checker buffer)
   "Parse JSCS OUTPUT from CHECKER and BUFFER.
 
-Like `flycheck-parse-checkstyle', but catches errors about
-no configuration found and prevents to be reported as a suspicious error."
+Like `flycheck-parse-checkstyle', but catches errors about no
+configuration found and prevents to be reported as a suspicious
+error."
   (if (string-match-p (rx string-start "No configuration found") output)
       (list (flycheck-error-new-at 1 nil 'warning nil))
     (flycheck-parse-checkstyle output checker buffer)))
