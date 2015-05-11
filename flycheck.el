@@ -6739,6 +6739,9 @@ See URL `https://docs.python.org/3.4/library/py_compile.html'."
   ((error line-start "  File \"" (file-name) "\", line " line "\n"
           (= 2 (zero-or-more not-newline) "\n")
           "SyntaxError: " (message) line-end)
+   (error line-start "Sorry: IndentationError: "
+          (message) "(" (file-name) ", line " line ")"
+          line-end)
    ;; 2.6
    (error line-start "SyntaxError: ('" (message (one-or-more (not (any "'"))))
           "', ('" (file-name (one-or-more (not (any "'")))) "', "

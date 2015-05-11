@@ -9,6 +9,7 @@ master (in development)
 - Bug fixes:
 
   - Fix offset of column numbers in ESLint [GH-640]
+  - Properly parse indentation errors from Python 2.7 [GH-635]
 
 0.23 (Apr 6, 2015)
 ==================
