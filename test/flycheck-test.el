@@ -4452,7 +4452,9 @@ Why not:
   (let ((flycheck-disabled-checkers
          '(javascript-jshint javascript-eslint javascript-gjslint)))
     (flycheck-ert-should-syntax-check
-     "checkers/javascript-style.js" '(js-mode js2-mode js3-mode))))
+     "checkers/javascript-style.js" '(js-mode js2-mode js3-mode)
+     '(1 nil warning "No JSCS configuration found.  Set `flycheck-jscsrc' for JSCS"
+         :checker javascript-jscs))))
 
 (flycheck-ert-def-checker-test (javascript-jshint javascript-jscs)
     javascript complete-chain

@@ -6365,7 +6365,11 @@ Like `flycheck-parse-checkstyle', but catches errors about no
 configuration found and prevents to be reported as a suspicious
 error."
   (if (string-match-p (rx string-start "No configuration found") output)
-      (list (flycheck-error-new-at 1 nil 'warning nil))
+      (let ((message "No JSCS configuration found.  Set `flycheck-jscsrc' for JSCS"))
+        (list (flycheck-error-new-at 1 nil 'warning message
+                                     :checker checker
+                                     :buffer buffer
+                                     :filename (buffer-file-name buffer))))
     (flycheck-parse-checkstyle output checker buffer)))
 
 (flycheck-def-config-file-var flycheck-jscsrc javascript-jscs ".jscsrc"
