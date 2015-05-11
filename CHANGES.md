@@ -18,6 +18,7 @@ master (in development)
 
   - Fix offset of column numbers in ESLint [GH-640]
   - Properly parse indentation errors from Python 2.7 [GH-635]
+  - Don’t choke if `default-directory` does not exist [GH-625]
 
 0.23 (Apr 6, 2015)
 ==================
