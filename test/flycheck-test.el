@@ -4394,11 +4394,16 @@ Why not:
         (js3-mode-show-parse-errors nil))
     (flycheck-ert-should-syntax-check
      "checkers/javascript-syntax-error.js" '(js-mode js2-mode js3-mode)
-     '(3 11 error "Unclosed string." :id "E029" :checker javascript-jshint)
-     '(3 25 warning "Unclosed string." :id "W112" :checker javascript-jshint)
-     '(4 1 warning "Unclosed string." :id "W112" :checker javascript-jshint)
-     '(4 1 warning "Missing semicolon." :id "W033"
-         :checker javascript-jshint))))
+     '(3 4 error "Unmatched '('." :id "E019" :checker javascript-jshint)
+     '(3 25 error "Expected an identifier and instead saw ')'." :id "E030"
+         :checker javascript-jshint)
+     '(4 1 error "Unexpected early end of program." :id "E006"
+         :checker javascript-jshint)
+     '(4 1 error "Expected an identifier and instead saw '(end)'." :id "E030"
+         :checker javascript-jshint)
+     '(4 1 warning "Expected an assignment or function call and instead saw an expression."
+         :id "W030" :checker javascript-jshint)
+     '(4 1 warning "Missing semicolon."  :id "W033" :checker javascript-jshint))))
 
 (flycheck-ert-def-checker-test javascript-jshint javascript error-disabled
   :tags '(checkstyle-xml)
