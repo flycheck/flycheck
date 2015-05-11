@@ -144,7 +144,7 @@ attention to case differences."
   "Modern on-the-fly syntax checking for GNU Emacs."
   :prefix "flycheck-"
   :group 'tools
-  :link '(url-link :tag "Online manual" "http://flycheck.readthedocs.org")
+  :link '(url-link :tag "Website" "http://www.flycheck.org")
   :link '(url-link :tag "Github" "https://github.com/flycheck/flycheck")
   :link '(custom-manual "(flycheck)Top")
   :link '(info-link "(flycheck)Usage"))
