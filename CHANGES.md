@@ -5,6 +5,10 @@ master (in development)
 
   - Remove Elixir syntax checker due to code execution [GH-630]
 
+- New syntax checkers:
+
+  - Javascript with `jscs` [GH-634]
+
 - New features:
 
   - Add `flycheck-perl-include-path` to set include directories for Perl
