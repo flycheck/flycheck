@@ -31,11 +31,11 @@ substantial code to Flycheck:
 - [Magnar Sveen](https://github.com/magnars) (customizable idle change delay)
 - [Malyshev Artem](https://github.com/proofit404) (customizable keymap prefix)
 - [Marian Schubert](https://github.com/maio) (Perl syntax checker)
-- [Mark Hellewell](https://github.com/markhellewell) (Puppet and puppetlint
-  syntax checkers)
 - [Marcin Antczak](https://github.com/marcinant) (error highlighting in error
   list)
 - [Marcus Majewski](https://github.com/hekto) (error columns in ESLint)
+- [Mark Hellewell](https://github.com/markhellewell) (Puppet and puppetlint
+  syntax checkers)  
 - [Matthias Dahl](https://github.com/BinaryKhaos) (performance improvements in
   temporary file handling)
 - [Mitch Tishmack](https://github.com/mitchty) (Microsoft extensions in C/C++)
