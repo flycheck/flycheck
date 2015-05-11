@@ -4418,7 +4418,7 @@ Why not:
   (let ((flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-ert-should-syntax-check
      "checkers/javascript-syntax-error.js" '(js-mode js2-mode js3-mode)
-     '(3 26 error "Unexpected token ILLEGAL" :checker javascript-eslint))))
+     '(3 26 error "Unexpected token )" :checker javascript-eslint))))
 
 (flycheck-ert-def-checker-test javascript-eslint javascript warning
   :tags '(checkstyle-xml)
@@ -4426,9 +4426,9 @@ Why not:
         (flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-ert-should-syntax-check
      "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
-     '(3 1 warning "Missing \"use strict\" statement." :id "strict"
+     '(3 2 warning "Missing \"use strict\" statement." :id "strict"
          :checker javascript-eslint)
-     '(4 8 warning "foo is defined but never used" :id "no-unused-vars"
+     '(4 9 warning "foo is defined but never used" :id "no-unused-vars"
          :checker javascript-eslint))))
 
 (flycheck-ert-def-checker-test javascript-gjslint javascript nil

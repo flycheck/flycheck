@@ -1,3 +1,3 @@
-/** A missing semicolon */
+/** A bad if */
 
-var foo = "Hello world);
+if ( /* nothing here */ ) // comment
