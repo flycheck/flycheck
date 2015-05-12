@@ -8,7 +8,6 @@
        "doc/flycheck.texi")
 
 (development
- (depends-on "undercover")              ; Measure test coverage
  (depends-on "shut-up")                 ; Silence Emacs
 
  ;; Various modes for use in the unit tests
