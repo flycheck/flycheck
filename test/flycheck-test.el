@@ -4476,11 +4476,11 @@ Why not:
         (flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-ert-should-syntax-check
      "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
-     '(3 1 warning "Missing \"use strict\" statement." :id "strict"
+     '(3 2 warning "Missing \"use strict\" statement." :id "strict"
          :checker javascript-eslint)
      '(4 3 error "Expected indentation of 2 characters"
          :checker javascript-jscs)
-     '(4 8 warning "foo is defined but never used" :id "no-unused-vars"
+     '(4 9 warning "foo is defined but never used" :id "no-unused-vars"
          :checker javascript-eslint))))
 
 (flycheck-ert-def-checker-test (javascript-gjslint javascript-jscs)
