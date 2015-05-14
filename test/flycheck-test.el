@@ -4283,7 +4283,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 (flycheck-ert-def-checker-test handlebars handlebars nil
   (flycheck-ert-should-syntax-check
    "checkers/handlebars-error.hbs" '(handlebars-mode web-mode)
-   '(2 nil error "Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'DATA', got 'INVALID'"
+   '(2 nil error "Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'UNDEFINED', 'NULL', 'DATA', got 'INVALID'"
        :checker handlebars)))
 
 (ert-deftest flycheck-haskell-module-re/matches-module-name ()
