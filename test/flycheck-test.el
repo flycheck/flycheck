@@ -4311,14 +4311,6 @@ Expected type: String
 In the first argument of ‘putStrLn’, namely ‘True’
 In the expression: putStrLn True" :checker haskell-ghc)))
 
-(flycheck-ert-def-checker-test haskell-ghc haskell no-user-package-database
-  :expected-result :failed
-  (error "Not implemented!"))
-
-(flycheck-ert-def-checker-test haskell-ghc haskell package-databases
-  :expected-result :failed
-  (error "Not implemented!"))
-
 (flycheck-ert-def-checker-test haskell-ghc haskell search-path
   (let* ((lib-dir (flycheck-ert-resource-filename "checkers/Haskell/lib"))
          (flycheck-ghc-search-path (list lib-dir)))
@@ -5074,11 +5066,6 @@ Why not:
         :checker rust)
    '(11 10 info "use `ref` to override" :checker rust)
    '(12 9 error "use of moved value: `x`" :checker rust)))
-
-(flycheck-ert-def-checker-test rust rust library-path
-  :expected-result :failed
-  ;; TODO: How can we test this without adding binary libraries to our repo?
-  (error "Not implemented!"))
 
 (flycheck-ert-def-checker-test rust rust crate-root-not-set
   (flycheck-ert-should-syntax-check
