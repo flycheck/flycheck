@@ -4651,14 +4651,13 @@ Why not:
 (flycheck-ert-def-checker-test puppet-parser puppet singleline-syntax-error
   (flycheck-ert-should-syntax-check
    "checkers/puppet-parser-singleline.pp" 'puppet-mode
-   '(3 nil error "Syntax error at ','; expected '}'" :checker puppet-parser)))
+   '(3 9 error "Syntax error at '>'" :checker puppet-parser)))
 
 (flycheck-ert-def-checker-test puppet-parser puppet multiline-syntax-error
   (flycheck-ert-should-syntax-check
    "checkers/puppet-parser-multiline.pp" 'puppet-mode
-   '(8 nil error "Unclosed quote after '' in 'something
-}
-'" :checker puppet-parser)))
+   '(8 13 error "Unclosed quote after \"'\" followed by 'somet...'"
+       :checker puppet-parser)))
 
 (flycheck-ert-def-checker-test puppet-lint puppet nil
   (flycheck-ert-should-syntax-check

@@ -6589,7 +6589,17 @@ See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
 See URL `http://puppetlabs.com/'."
   :command ("puppet" "parser" "validate" "--color=false" source)
   :error-patterns
-  ((error line-start
+  (
+   ;; Patterns for Puppet 4
+   (error line-start "Error: Could not parse for environment "
+          (one-or-more word) ":"
+          (message) " at " (file-name) ":" line ":" column line-end)
+   (error line-start "Error: Could not parse for environment "
+          (one-or-more word) ":"
+          (message) " in file " (file-name) " at line " line ":" column
+          line-end)
+   ;; Errors from Puppet < 4
+   (error line-start
           ;; Skip over the path of the Puppet executable
           (minimal-match (zero-or-more not-newline))
           ": Could not parse for environment " (one-or-more word)
