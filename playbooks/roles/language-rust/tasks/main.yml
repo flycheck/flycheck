@@ -1,6 +1,11 @@
 - name: Add Rust repository
   apt_repository: repo='ppa:hansjorg/rust' state=present
   sudo: true
-- name: Install Rust
-  apt: name='rust-nightly' state=latest install_recommends=false
+- name: Remove Rust Nightly
+  apt: name='rust-nightly' state=absent purge=yes
   sudo: true
+- name: Install Rust 1.0 beta
+  apt: name='rust-1.0.0-beta' state=latest install_recommends=false
+  sudo: true
+- name: Use Rust 1.0 as default
+  alternatives: name=rustc path='/usr/lib/rust/rust-1.0.0-beta/bin/rustc'
