@@ -21,7 +21,7 @@ The color theme in this screencast is [Solarized Light][], with the the
 [Source Code Pro][] font.
 
 [Solarized Light]: https://github.com/bbatsov/solarized-emacs
-[Source Code Pro]: https://github.com/adobe/source-code-pro
+[Source Code Pro]: https://github.com/adobe-fonts/source-code-pro
 [COPYING]: https://github.com/flycheck/flycheck/blob/master/COPYING
 [manual]: http://www.flycheck.org/manual/latest/index.html
 
