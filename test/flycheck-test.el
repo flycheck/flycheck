@@ -5064,7 +5064,7 @@ Why not:
    "checkers/rust-info.rs" 'rust-mode
    '(11 9 info "`x` moved here because it has type `NonPOD`, which is moved by default"
         :checker rust)
-   '(11 10 info "use `ref` to override" :checker rust)
+   '(11 9 info "use `ref` to override" :checker rust)
    '(12 9 error "use of moved value: `x`" :checker rust)))
 
 (flycheck-ert-def-checker-test rust rust crate-root-not-set

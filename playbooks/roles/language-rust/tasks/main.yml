@@ -4,8 +4,12 @@
 - name: Remove Rust Nightly
   apt: name='rust-nightly' state=absent purge=yes
   sudo: true
-- name: Install Rust 1.0 beta
-  apt: name='rust-1.0.0-beta' state=latest install_recommends=false
+- name: Remove Rust 1.0 beta
+  apt: name='rust-1.0.0-beta' state=absent purge=yes
   sudo: true
-- name: Use Rust 1.0 as default
-  alternatives: name=rustc path='/usr/lib/rust/rust-1.0.0-beta/bin/rustc'
+- name: Install Rust stable
+  apt: name='rust-stable' state=latest install_recommends=false
+  sudo: true
+- name: Use Rust stable as default
+  alternatives: name=rustc path='/usr/lib/rust/rust-stable/bin/rustc'
+  sudo: true
