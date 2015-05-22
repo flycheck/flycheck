@@ -390,6 +390,9 @@ Or @flyc{javascript-gjslint}
 @end itemize
 @item
 @flyc{javascript-jscs} (@uref{http://jscs.info/,JSCS})
+@item
+@flyc{javascript-standard}
+(@uref{https://github.com/feross/standard,JS Standard Style})
 @end enumerate
 
 The @flyc{javascript-eslint} checker provides the following option:

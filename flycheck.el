@@ -206,6 +206,7 @@ attention to case differences."
     javascript-eslint
     javascript-gjslint
     javascript-jscs
+    javascript-standard
     json-jsonlint
     less
     luacheck
@@ -6388,6 +6389,14 @@ See URL `http://www.jscs.info'."
   :error-filter (lambda (errors)
                   (flycheck-remove-error-ids
                    (flycheck-sanitize-errors errors)))
+  :modes (js-mode js2-mode js3-mode))
+
+(flycheck-define-checker javascript-standard
+  "A code style linter for the JavaScript Standard Style.
+
+See URL `https://github.com/feross/standard'."
+  :command ("standard" source)
+  :error-patterns ((error line-start "  " (file-name) ":" line ":" column ":" (message) line-end))
   :modes (js-mode js2-mode js3-mode))
 
 (flycheck-define-checker json-jsonlint
