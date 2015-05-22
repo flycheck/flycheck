@@ -6396,7 +6396,10 @@ See URL `http://www.jscs.info'."
 
 See URL `https://github.com/feross/standard'."
   :command ("standard" source)
-  :error-patterns ((error line-start "  " (file-name) ":" line ":" column ":" (message) line-end))
+  :error-patterns
+  ((error line-start
+          "  " (file-name) ":" line ":" column ":" (message)
+          line-end))
   :modes (js-mode js2-mode js3-mode))
 
 (flycheck-define-checker json-jsonlint
