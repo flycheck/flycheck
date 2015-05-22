@@ -7,7 +7,7 @@ master (in development)
 
 - New syntax checkers:
 
-  - Javascript with `jscs` [GH-634]
+  - Javascript with `jscs` [GH-634] and `standard` [GH-644]
 
 - New features:
 

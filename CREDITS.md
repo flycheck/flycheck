@@ -26,6 +26,7 @@ substantial code to Flycheck:
   checkers, bug fixes to faces)
 - [Krzysztof Witkowski](https://github.com/kwitek) (eval support)
 - [Lee Adams](https://github.com/leeaustinadams) (scalastyle syntax checker)
+- [Lorenzo Villani](https://github.com/lvillani) (`standard` syntax checker)
 - [Łukasz Jędrzejewski](https://github.com/jedrz) (bug fixes for chktex syntax
   checker and error navigation)
 - [Magnar Sveen](https://github.com/magnars) (customizable idle change delay)
