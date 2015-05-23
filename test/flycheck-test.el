@@ -4506,6 +4506,20 @@ Why not:
      '(5 5 error "Extra semicolon."
          :checker javascript-standard))))
 
+(flycheck-ert-def-checker-test javascript-standard javascript semistandard
+  (let ((flycheck-checker 'javascript-standard)
+        (flycheck-javascript-standard-executable "semistandard"))
+    (flycheck-ert-should-syntax-check
+     "checkers/javascript-style.js" '(js-mode js2-mode js3-mode)
+     '(3 9 error "Missing space before function parentheses."
+         :checker javascript-standard)
+     '(4 2 error "Expected indentation of 2 characters."
+         :checker javascript-standard)
+     '(4 5 error "foo is defined but never used"
+         :checker javascript-standard)
+     '(4 12 error "Strings must use singlequote."
+         :checker javascript-standard))))
+
 (flycheck-ert-def-checker-test json-jsonlint json nil
   (flycheck-ert-should-syntax-check
    "checkers/json-jsonlint-error.json" 'text-mode

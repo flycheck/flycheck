@@ -392,7 +392,8 @@ Or @flyc{javascript-gjslint}
 @flyc{javascript-jscs} (@uref{http://jscs.info/,JSCS})
 @item
 @flyc{javascript-standard}
-(@uref{https://github.com/feross/standard,JS Standard Style})
+(@uref{https://github.com/feross/standard,Standard} or
+@uref{https://github.com/Flet/semistandard,Semistandard})
 @end enumerate
 
 The @flyc{javascript-eslint} checker provides the following option:
