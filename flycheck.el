@@ -6284,7 +6284,7 @@ See URL `https://github.com/w3c/tidy-html5'."
   :safe #'stringp)
 
 (flycheck-define-checker javascript-jshint
-  "A JavaScript syntax and style checker using jshint.
+  "A Javascript syntax and style checker using jshint.
 
 See URL `http://www.jshint.com'."
   :command ("jshint" "--checkstyle-reporter"
@@ -6315,7 +6315,7 @@ for more information about the custom directory."
   :package-version '(flycheck . "0.20"))
 
 (flycheck-define-checker javascript-eslint
-  "A JavaScript syntax and style checker using eslint.
+  "A Javascript syntax and style checker using eslint.
 
 See URL `https://github.com/eslint/eslint'."
   :command ("eslint" "--format=checkstyle"
@@ -6348,7 +6348,7 @@ See URL `https://github.com/eslint/eslint'."
   :safe #'stringp)
 
 (flycheck-define-checker javascript-gjslint
-  "A JavaScript syntax and style checker using Closure Linter.
+  "A Javascript syntax and style checker using Closure Linter.
 
 See URL `https://developers.google.com/closure/utilities'."
   :command ("gjslint" "--unix_mode"
@@ -6379,7 +6379,7 @@ error."
   :package-version '(flycheck . "0.24"))
 
 (flycheck-define-checker javascript-jscs
-  "A code style linter using JSCS.
+  "A Javascript style checker using JSCS.
 
 See URL `http://www.jscs.info'."
   :command ("jscs" "--reporter=checkstyle"
