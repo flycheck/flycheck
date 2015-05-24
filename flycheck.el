@@ -7067,6 +7067,19 @@ Relative paths are relative to the file being checked."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.18"))
 
+(flycheck-def-option-var flycheck-rust-extern nil rust
+  "A list of external libraries (crates) for Rust.
+
+The value of this variable is a list of strings, where each
+string specifies where an external Rust library is located, for
+the `--extern' flag, in the form of `NAME=PATH'.
+
+Run `cargo build --verbose' to determine the necessary values."
+  :type '(repeat (directory :tag "External libraries"))
+  :safe #'flycheck-string-list-p
+  :package-version '("flycheck" . "0.24"))
+(make-variable-buffer-local 'flycheck-rust-extern)
+
 (flycheck-define-checker rust
   "A Rust syntax checker using Rust compiler.
 
@@ -7077,6 +7090,7 @@ See URL `http://www.rust-lang.org'."
             (option "--crate-type" flycheck-rust-crate-type)
             (option-flag "--test" flycheck-rust-check-tests)
             (option-list "-L" flycheck-rust-library-path concat)
+            (option-list "--extern" flycheck-rust-extern)
             (eval (or flycheck-rust-crate-root
                       (flycheck-substitute-argument 'source-inplace 'rust))))
   :error-patterns
