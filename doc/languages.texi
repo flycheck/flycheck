@@ -634,6 +634,8 @@ interpreter}),
 with the following options:
 
 @table @asis
+@flycoption flycheck-rust-args
+A list of additional arguments for the Rust compiler @command{rustc}.
 @flycoption flycheck-rust-check-tests
 Whether to check test code in Rust.
 
