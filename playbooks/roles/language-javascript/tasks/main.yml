@@ -4,6 +4,7 @@
     - jshint
     - eslint
     - standard
+    - semistandard
   tags:
     - npm
 - name: Install Closure linter

@@ -6392,9 +6392,14 @@ See URL `http://www.jscs.info'."
   :modes (js-mode js2-mode js3-mode))
 
 (flycheck-define-checker javascript-standard
-  "A code style linter for the JavaScript Standard Style.
+  "A Javascript code and style checker for the (Semi-)Standard Style.
 
-See URL `https://github.com/feross/standard'."
+This checker works with `standard' and `semistandard', defaulting
+to the former.  To use it with the latter, set
+`flycheck-javascript-standard-executable' to `semistandard'.
+
+See URL `https://github.com/feross/standard' and URL
+`https://github.com/Flet/semistandard'."
   :command ("standard" source)
   :error-patterns
   ((error line-start
