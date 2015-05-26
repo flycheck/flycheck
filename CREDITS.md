@@ -12,6 +12,8 @@ substantial code to Flycheck:
 - [Damon Haley](https://github.com/dhaley) (PHPCS syntax checker)
 - [David Holm](https://github.com/dholm) (Clang, Cppcheck, lintr and Verilator
   syntax checkers)
+- [Derek Harland](https://github.com/donkopotamus) (improved Crate support for
+  Rust)
 - [Doug MacEachern](https://github.com/dougm) (Go errcheck syntax checker)
 - [Erik Hetzner](https://github.com/egh) (handlebars)
 - [Fanael Linithien](https://github.com/Fanael) (GCC syntax checker, exception
@@ -36,7 +38,7 @@ substantial code to Flycheck:
   list)
 - [Marcus Majewski](https://github.com/hekto) (error columns in ESLint)
 - [Mark Hellewell](https://github.com/markhellewell) (Puppet and puppetlint
-  syntax checkers)  
+  syntax checkers)
 - [Matthias Dahl](https://github.com/BinaryKhaos) (performance improvements in
   temporary file handling)
 - [Mitch Tishmack](https://github.com/mitchty) (Microsoft extensions in C/C++)
@@ -49,6 +51,7 @@ substantial code to Flycheck:
 - [Peter Vasil](https://github.com/ptrv) (Lua, Luacheck and Go build/test
   syntax checkers)
 - [Robert Zaremba](https://github.com/robert-zaremba) (gofmt syntax checker)
+- [Robert Dallas Gray](https://github.com/rdallasgray) (configurable error display)
 - [Sean Gillespie](https://github.com/swgillespie) (help messages in Rust)
 - [Sean Salmon](https://github.com/phatcabbage) (platform-independent directory
   handling)
@@ -105,4 +108,3 @@ and projects:
   fruitful discussions and his important ideas about the shape and design of
   Flycheck, and his indispensible and dedicated work on MELPA, which drives the
   continuous distribution of Flycheck to its users.
-
