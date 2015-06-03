@@ -55,7 +55,7 @@ for more information.
 Flycheck does not officially support Windows, but tries to maintain Windows
 compatibility and should generally work fine on Windows, too.
 
-Install Flycheck from [MELPA][] or [MELPA Stable] with:
+Install Flycheck from [MELPA][] or [MELPA Stable][] with:
 
     M-x package-install RET flycheck
 
