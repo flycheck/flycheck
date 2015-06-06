@@ -1630,135 +1630,39 @@ and extension, as in `file-name-base'."
     (should-not flycheck-checker)))
 
 (ert-deftest flycheck-select-checker/selecting-runs-a-syntax-check ()
-  :tags '(selection external-tool language-python
-                    checker-python-pylint checker-python-flake8)
-  (skip-unless (executable-find (flycheck-checker-executable 'python-pylint)))
-  (skip-unless (executable-find (flycheck-checker-executable 'python-flake8)))
-  (flycheck-ert-with-resource-buffer "checkers/python/test.py"
-    (python-mode)
+  :tags '(selection language-emacs-lisp
+                    checker-emacs-lisp checker-emacs-lisp-checkdoc)
+  (flycheck-ert-with-resource-buffer "checkers/emacs-lisp.el"
+    (emacs-lisp-mode)
     (flycheck-mode)
-    ;; By default, Flake8 is preferred, so we get errors from Flake8
+    ;; By default we should get both, because emacs-lisp chains to checkdoc
     (flycheck-ert-buffer-sync)
-    (flycheck-ert-should-errors
-     '(5 1 warning "'antigravit' imported but unused" :id "F401"
-         :checker python-flake8)
-     '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
-         :checker python-flake8)
-     '(9 9 info "function name should be lowercase"
-         :checker python-flake8 :id "N802")
-     '(12 29 warning "unexpected spaces around keyword / parameter equals"
-          :id "E251" :checker python-flake8)
-     '(12 31 warning "unexpected spaces around keyword / parameter equals"
-          :id "E251" :checker python-flake8)
-     '(22 1 error "undefined name 'antigravity'" :id "F821"
-          :checker python-flake8))
-    ;; Selecting Pylint should give us its errors
-    (flycheck-select-checker 'python-pylint)
+    (dolist (err flycheck-current-errors)
+      (should (memq (flycheck-error-checker err)
+                    '(emacs-lisp emacs-lisp-checkdoc))))
+    ;; We select checkdoc, and should now only have checkdoc errors
+    (flycheck-select-checker 'emacs-lisp-checkdoc)
     (flycheck-ert-wait-for-syntax-checker)
-    (flycheck-ert-should-errors
-     '(1 1 info "Missing module docstring" :id "C0111" :checker python-pylint)
-     '(4 1 error "Unable to import 'spam'" :id "F0401" :checker python-pylint)
-     '(5 1 error "No name 'antigravit' in module 'python'" :id "E0611"
-         :checker python-pylint)
-     '(5 1 warning "Unused import antigravit" :id "W0611" :checker python-pylint)
-     '(7 1 info "Missing class docstring" :id "C0111" :checker python-pylint)
-     '(9 5 info "Invalid method name \"withEggs\"" :id "C0103"
-         :checker python-pylint)
-     '(9 5 info "Missing method docstring" :id "C0111" :checker python-pylint)
-     '(9 5 warning "Method could be a function" :id "R0201" :checker python-pylint)
-     '(10 16 warning "Used builtin function 'map'" :id "W0141"
-          :checker python-pylint)
-     '(12 1 info "No space allowed around keyword argument assignment"
-          :id "C0326" :checker python-pylint)
-     '(12 5 info "Missing method docstring" :id "C0111" :checker python-pylint)
-     '(12 5 warning "Method could be a function" :id "R0201"
-          :checker python-pylint)
-     '(14 16 error "Module 'sys' has no 'python_version' member" :id "E1101"
-          :checker python-pylint)
-     '(15 1 info "Unnecessary parens after u'print' keyword" :id "C0325"
-          :checker python-pylint)
-     '(17 1 info "Unnecessary parens after u'print' keyword" :id "C0325"
-          :checker python-pylint)
-     '(22 1 error "Undefined variable 'antigravity'" :id "E0602"
-          :checker python-pylint))))
+    (dolist (err flycheck-current-errors)
+      (should (eq (flycheck-error-checker err) 'emacs-lisp-checkdoc)))))
 
 (ert-deftest flycheck-select-checker/unselecting-a-checker-goes-back-to-automatic-selection ()
-  :tags '(selection external-tool language-python
-                    checker-python-pylint checker-python-flake8)
-  (skip-unless (executable-find (flycheck-checker-executable 'python-pylint)))
-  (skip-unless (executable-find (flycheck-checker-executable 'python-flake8)))
+  :tags '(selection language-emacs-lisp
+                    checker-emacs-lisp checker-emacs-lisp-checkdoc)
   (flycheck-ert-with-resource-buffer "checkers/python/test.py"
-    (python-mode)
+    (emacs-lisp-mode)
     (flycheck-mode)
-    (flycheck-select-checker 'python-pylint)
-    (should (eq flycheck-checker 'python-pylint))
+    (flycheck-select-checker 'emacs-lisp-checkdoc)
+    (should (eq flycheck-checker 'emacs-lisp-checkdoc))
     (flycheck-ert-wait-for-syntax-checker)
-    (flycheck-ert-should-errors
-     '(1 1 info "Missing module docstring" :id "C0111" :checker python-pylint)
-     '(4 1 error "Unable to import 'spam'" :id "F0401" :checker python-pylint)
-     '(5 1 error "No name 'antigravit' in module 'python'" :id "E0611"
-         :checker python-pylint)
-     '(5 1 warning "Unused import antigravit" :id "W0611"
-         :checker python-pylint)
-     '(7 1 info "Missing class docstring" :id "C0111" :checker python-pylint)
-     '(9 5 info "Invalid method name \"withEggs\"" :id "C0103"
-         :checker python-pylint)
-     '(9 5 info "Missing method docstring" :id "C0111" :checker python-pylint)
-     '(9 5 warning "Method could be a function" :id "R0201" :checker python-pylint)
-     '(10 16 warning "Used builtin function 'map'" :id "W0141"
-          :checker python-pylint)
-     '(12 1 info "No space allowed around keyword argument assignment"
-          :id "C0326" :checker python-pylint)
-     '(12 5 info "Missing method docstring" :id "C0111" :checker python-pylint)
-     '(12 5 warning "Method could be a function" :id "R0201"
-          :checker python-pylint)
-     '(14 16 error "Module 'sys' has no 'python_version' member" :id "E1101"
-          :checker python-pylint)
-     '(15 1 info "Unnecessary parens after u'print' keyword" :id "C0325"
-          :checker python-pylint)
-     '(17 1 info "Unnecessary parens after u'print' keyword" :id "C0325"
-          :checker python-pylint)
-     '(22 1 error "Undefined variable 'antigravity'" :id "E0602"
-          :checker python-pylint))
+    (dolist (err flycheck-current-errors)
+      (should (eq (flycheck-error-checker err) 'emacs-lisp-checkdoc)))
     (flycheck-select-checker nil)
     (should-not flycheck-checker)
     (flycheck-ert-wait-for-syntax-checker)
-    (flycheck-ert-should-errors
-     '(5 1 warning "'antigravit' imported but unused" :id "F401"
-         :checker python-flake8)
-     '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
-         :checker python-flake8)
-     '(9 9 info "function name should be lowercase"
-         :checker python-flake8 :id "N802")
-     '(12 29 warning "unexpected spaces around keyword / parameter equals"
-          :id "E251" :checker python-flake8)
-     '(12 31 warning "unexpected spaces around keyword / parameter equals"
-          :id "E251" :checker python-flake8)
-     '(22 1 error "undefined name 'antigravity'" :id "F821"
-          :checker python-flake8))))
-
-(ert-deftest flycheck/selects-checker-automatically/first-enabled-checker ()
-  :tags '(selection external-tool language-python checker-python-flake8)
-  (skip-unless (executable-find (flycheck-checker-executable 'python-pylint)))
-  (skip-unless (executable-find (flycheck-checker-executable 'python-flake8)))
-  (flycheck-ert-with-resource-buffer "checkers/python/test.py"
-    (python-mode)
-    (flycheck-mode)
-    (flycheck-ert-buffer-sync)
-    (should-not flycheck-checker)
-    (flycheck-ert-should-errors
-     '(5 1 warning "'antigravit' imported but unused" :id "F401"
-         :checker python-flake8)
-     '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
-         :checker python-flake8)
-     '(9 9 info "function name should be lowercase"
-         :checker python-flake8 :id "N802")
-     '(12 29 warning "unexpected spaces around keyword / parameter equals"
-          :id "E251" :checker python-flake8)
-     '(12 31 warning "unexpected spaces around keyword / parameter equals"
-          :id "E251" :checker python-flake8)
-     '(22 1 error "undefined name 'antigravity'" :id "F821"
-          :checker python-flake8))))
+    (dolist (err flycheck-current-errors)
+      (should (memq (flycheck-error-checker err)
+                    '(emacs-lisp emacs-lisp-checkdoc))))))
 
 (ert-deftest flycheck/selects-checker-automatically/no-disabled-checker ()
   :tags '(selection language-emacs-lisp checker-emacs-lisp-checkdoc)
