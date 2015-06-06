@@ -5821,7 +5821,10 @@ See Info Node `(elisp)Byte Compilation'."
         (with-demoted-errors "Error in checkdoc: %S"
           (checkdoc-current-buffer t)
           (with-current-buffer checkdoc-diagnostic-buffer
-            (princ (buffer-substring-no-properties (point-min) (point-max)))
+            (when (version< emacs-version "25")
+              ;; In Emacs 25, checkdoc apparently prints everything to stdout in
+              ;; non-interactive sessions
+              (princ (buffer-substring-no-properties (point-min) (point-max))))
             (kill-buffer)))))))
 
 (flycheck-define-checker emacs-lisp-checkdoc

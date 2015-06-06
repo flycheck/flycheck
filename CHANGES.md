@@ -21,6 +21,7 @@ master (in development)
   - Properly parse indentation errors from Python 2.7 [GH-635]
   - Don’t choke if `default-directory` does not exist [GH-625]
   - Fix error parsing for Puppet 4
+  - Fix duplicate checkdoc errors on Emacs 25
 
 0.23 (Apr 6, 2015)
 ==================
