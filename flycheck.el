@@ -5819,13 +5819,14 @@ See Info Node `(elisp)Byte Compilation'."
         ;; back-substutition work
         (setq default-directory process-default-directory)
         (with-demoted-errors "Error in checkdoc: %S"
-          (checkdoc-current-buffer t)
-          (with-current-buffer checkdoc-diagnostic-buffer
-            (when (version< emacs-version "25")
-              ;; In Emacs 25, checkdoc apparently prints everything to stdout in
-              ;; non-interactive sessions
-              (princ (buffer-substring-no-properties (point-min) (point-max))))
-            (kill-buffer)))))))
+          ;; If we have `checkdoc-file' (in Emacs 25) use it, otherwise fall
+          ;; back to printing the result buffer of checkdoc.
+          (if (fboundp 'checkdoc-file)
+              (checkdoc-file source)
+            (checkdoc-current-buffer t)
+            (with-current-buffer checkdoc-diagnostic-buffer
+              (princ (buffer-substring-no-properties (point-min) (point-max)))
+              (kill-buffer))))))))
 
 (flycheck-define-checker emacs-lisp-checkdoc
   "An Emacs Lisp style checker using CheckDoc.
