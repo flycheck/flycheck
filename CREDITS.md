@@ -11,7 +11,7 @@ substantial code to Flycheck:
 - [Atila Neves](https://github.com/atilaneves) (include paths for DMD)
 - [Bozhidar Batsov](https://github.com/bbatsov) (improved Flycheck menu, RuboCop
   syntax checker, improvements to Ruby)
-- [capdevc](https://github.com/capdevc) (enabled warnings in Rust)
+- [Cristian Capdevila](https://github.com/capdevc) (enabled warnings in Rust)
 - [Damon Haley](https://github.com/dhaley) (PHPCS syntax checker)
 - [David Holm](https://github.com/dholm) (Clang, Cppcheck, lintr and Verilator
   syntax checkers)
