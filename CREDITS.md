@@ -94,7 +94,7 @@ and projects:
 
 - [Bozhidar Batsov](https://github.com/bbatsov) for his valuable feedback and
   his constant support and endorsement of Flycheck from the very
-  beginning. Notably, he added Flycheck to his popular
+  beginning. Notably he added Flycheck to his popular
   [Prelude](https://github.com/bbatsov/prelude) project at a very early stage
   and thus brought Flycheck to many new users.
 - [Magnar Sveen](https://github.com/magnars) for his
