@@ -34,7 +34,7 @@ The color theme in this screencast is [Solarized Light][], with the the
 Features
 --------
 
-- Supports over 30 programming and markup languages with more than 60 different
+- Supports over 30 programming and markup languages with more than 70 different
   syntax checking tools
 - Fully automatic, fail-safe, on-the-fly syntax checking in background
 - Nice error indication and highlighting
