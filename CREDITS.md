@@ -79,6 +79,9 @@ substantial code to Flycheck:
   js-yaml, ruby-lint, Handlebars, Foodcritic, AsciiDoc, Racket, ESLint, erubis,
   POSIX Make, Golint and go vet)
 
+For a complete list of all code contributors see the [Contributor Graph][] or
+`git shortlog --summary`.
+
 The following people significantly contributed to Flycheck in other ways:
 
 - [Matthias Güdemann](https://github.com/mgudemann) (initial version of the
@@ -110,3 +113,5 @@ and projects:
   fruitful discussions and his important ideas about the shape and design of
   Flycheck, and his indispensible and dedicated work on MELPA, which drives the
   continuous distribution of Flycheck to its users.
+
+[Contributor Graph]: https://github.com/flycheck/flycheck/graphs/contributors
