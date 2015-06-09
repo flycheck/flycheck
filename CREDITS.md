@@ -79,12 +79,12 @@ substantial code to Flycheck:
   js-yaml, ruby-lint, Handlebars, Foodcritic, AsciiDoc, Racket, ESLint, erubis,
   POSIX Make, Golint and go vet)
 
-The following people greatly supported Flycheck in other ways:
+The following people significantly contributed to Flycheck in other ways:
 
-- [Simon Carter](https://github.com/bbbscarter) (valuable testing and feedback
-  of automatic syntax checking)
 - [Matthias Güdemann](https://github.com/mgudemann) (initial version of the
   Flycheck logo, valuable feedback for the final version)
+- [Simon Carter](https://github.com/bbbscarter) (valuable testing and feedback
+  of automatic syntax checking)
 
 The Flycheck developers would also like to thank the following people
 and projects:
