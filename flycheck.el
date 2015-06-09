@@ -1,9 +1,10 @@
 ;;; flycheck.el --- Modern on-the-fly syntax checking -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2012-2015 Sebastian Wiesner <swiesner@lunaryorn.com>
+;; Copyright (c) 2012-2015 Sebastian Wiesner and Flycheck contributors
 ;; Copyright (C) 2013, 2014 Free Software Foundation, Inc.
 ;;
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
+;; Maintainer: Sebastian Wiesner <swiesner@lunaryorn.com>
 ;; URL: https://www.flycheck.org
 ;; Keywords: convenience languages tools
 ;; Version: 0.24-cvs

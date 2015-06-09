@@ -1,8 +1,10 @@
 ;;; init.el --- Flycheck: Init file for testing      -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2015  Sebastian Wiesner <swiesner@lunaryorn.com>
+;; Copyright (C) 2015 Sebastian Wiesner and Flycheck contributors
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
+;; Maintainer: Sebastian Wiesner <swiesner@lunaryorn.com>
+;; URL: https://www.flycheck.org
 
 ;; This file is not part of GNU Emacs.
 
