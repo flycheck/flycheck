@@ -1,6 +1,9 @@
 Credits
 =======
 
+Flycheck is written and maintained by
+[Sebastian Wiesner](https://github.com/lunaryorn) (primary maintainer).
+
 The following people—listed in alphabetical order—contributed
 substantial code to Flycheck:
 
@@ -55,7 +58,6 @@ substantial code to Flycheck:
 - [Sean Gillespie](https://github.com/swgillespie) (help messages in Rust)
 - [Sean Salmon](https://github.com/phatcabbage) (platform-independent directory
   handling)
-- [Sebastian Wiesner](https://github.com/lunaryorn) (primary maintainer)
 - [Syohei Yoshida](https://github.com/syohex) (customizable error display delay)
 - [steckerhalter](https://github.com/steckerhalter) (PHPCS syntax checker)
 - [Stephen Lewis](https://github.com/stephenjlewis) (pedantic flags for Clang
