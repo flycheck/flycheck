@@ -54,15 +54,30 @@ of a warning category to enable.
 
 @flyclanguage{C/C++}
 
+Flycheck offers a number of different checkers for C/C++. One of the
+complications with these languages is the compilation environment can
+have a significant effect on the final code. The
+@flyc{c/c++-clang-check} checker offers perhaps the most automatic
+solution. The other checkers allow you to configure include paths and
+other compilation environment settings by way of customisation variables. 
+
 @enumerate
 @item
+@flyc{c/c++-clang-check} (syntax and semantic checking with
+@uref{http://clang.llvm.org/ClangCheck.html,clang-check})
+@item
 @flyc{c/c++-clang} (syntax and type check with
-@uref{http://clang.llvm.org/,Clang}) or @flyc{c/c++-gcc} (syntax and
-type check with @uref{https://gcc.gnu.org/, GCC}), and
+@uref{http://clang.llvm.org/,Clang})
+@item
+@flyc{c/c++-gcc} (syntax and type check with @uref{https://gcc.gnu.org/, GCC})
 @item
 @flyc{c/c++-cppcheck} (style and error check with
 @uref{http://cppcheck.sourceforge.net/,cppcheck}).
 @end enumerate
+
+@flyc{c/c++-clang-check} requires the creating of a
+@uref{http://clang.llvm.org/docs/JSONCompilationDatabase.html,compilation
+database}.
 
 @flyc{c/c++-clang} and @flyc{c/c++-gcc} provide the following options:
 
