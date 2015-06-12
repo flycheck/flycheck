@@ -5634,6 +5634,16 @@ Relative paths are relative to the file being checked."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.18"))
 
+(flycheck-def-option-var flycheck-dmd-flags nil d-dmd
+  "A list of compiler flags for dmd.
+
+The value of this variable is a list of strings, where each
+string is a compiler flag to add when calling dmd.
+Relative paths are relative to the file being checked."
+  :type '(repeat (string :tag "Compiler flag"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.24"))
+
 (flycheck-define-checker d-dmd
   "A D syntax checker using the DMD compiler.
 
@@ -5645,6 +5655,7 @@ Requires DMD 2.066 or newer.  See URL `http://dlang.org/'."
             "-wi" ; Compilation will continue even if there are warnings
             (eval (concat "-I" (flycheck-d-base-directory)))
             (option-list "-I" flycheck-dmd-include-path concat)
+            (eval flycheck-dmd-flags)
             source)
   :error-patterns
   ((error line-start
