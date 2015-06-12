@@ -8,7 +8,8 @@ The following people—listed in alphabetical order—contributed
 substantial code to Flycheck:
 
 - [Alain Kalker](https://github.com/ackalker) (fix quoting for flycheck-compile)
-- [Atila Neves](https://github.com/atilaneves) (include paths for DMD)
+- [Atila Neves](https://github.com/atilaneves) (include paths and arguments for
+  DMD)
 - [Bozhidar Batsov](https://github.com/bbatsov) (improved Flycheck menu, RuboCop
   syntax checker, improvements to Ruby)
 - [Cristian Capdevila](https://github.com/capdevc) (enabled warnings in Rust)

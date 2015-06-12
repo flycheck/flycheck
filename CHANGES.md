@@ -14,6 +14,7 @@ master (in development)
   - Add `flycheck-perl-include-path` to set include directories for Perl
     [GH-621]
   - Add `flycheck-rust-args` to pass additional arguments to `rustc`
+  - Add `flycheck-dmd-args` to pass additional arguments to `dmd` [GH-655]
 
 - Bug fixes:
 
