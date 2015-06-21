@@ -5887,7 +5887,7 @@ The checker runs `checkdoc-current-buffer'."
           flycheck-this-emacs-executable))
 
 (flycheck-def-option-var flycheck-erlang-include-path nil erlang
-  "Whether to error on language extensions in Erlang.
+  "A list of include directories for Erlang.
 
 The value of this variable is a list of strings, where each
 string is a directory to add to the include path of erlc.
