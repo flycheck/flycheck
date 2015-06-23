@@ -4672,7 +4672,8 @@ Return a list representing PATTERN, suitable as element in
          (level (cdr pattern))
          (level-no (pcase level
                      (`error 2)
-                     (`warning 1))))
+                     (`warning 1)
+                     (`info 0))))
     (list regexp 1 2 3 level-no)))
 
 (defun flycheck-checker-compilation-error-regexp-alist (checker)
