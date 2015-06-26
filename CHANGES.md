@@ -23,6 +23,7 @@ master (in development)
   - Don’t choke if `default-directory` does not exist [GH-625]
   - Fix error parsing for Puppet 4
   - Fix duplicate checkdoc errors on Emacs 25
+  - Fix level of `info` messages in `flycheck-compile` [GH-669]
 
 0.23 (Apr 6, 2015)
 ==================
