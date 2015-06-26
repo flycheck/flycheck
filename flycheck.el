@@ -3993,7 +3993,15 @@ function."
         (patterns (plist-get properties :error-patterns))
         (parser (or (plist-get properties :error-parser)
                     #'flycheck-parse-with-patterns))
-        (predicate (plist-get properties :predicate)))
+        (predicate (plist-get properties :predicate))
+        (start-function (or (plist-get properties :start-function)
+                            #'flycheck-start-command-checker))
+        (interrupt-function (or (plist-get properties :interrupt-function)
+                                #'flycheck-interrupt-command-checker))
+        (print-doc-function (or (plist-get properties :print-doc-function)
+                                #'flycheck-command-checker-print-doc))
+        (verify-function (or (plist-get properties :verify-function)
+                             #'flycheck-verify-command-checker)))
 
     (unless command
       (error "Missing :command in syntax checker %s" symbol))
@@ -4016,10 +4024,10 @@ function."
                             (or (not predicate) (funcall predicate))))))
 
     (apply #'flycheck-define-generic-checker symbol docstring
-           :start #'flycheck-start-command-checker
-           :interrupt #'flycheck-interrupt-command-checker
-           :print-doc #'flycheck-command-checker-print-doc
-           :verify #'flycheck-verify-command-checker
+           :start start-function
+           :interrupt interrupt-function
+           :print-doc print-doc-function
+           :verify verify-function
            properties)
 
     ;; Pre-compile all errors patterns into strings, so that we don't need to do
@@ -4266,7 +4274,7 @@ symbols in the command."
          (mapcar (lambda (arg) (flycheck-substitute-argument arg checker))
                  (flycheck-checker-arguments checker))))
 
-(defun flycheck-start-command-checker (checker callback)
+(defun flycheck-start-command-checker (checker callback &optional via-stdin)
   "Start a command CHECKER with CALLBACK."
   (let (process)
     (condition-case err
@@ -4288,6 +4296,9 @@ symbols in the command."
           ;; example for such a conflict.
           (setq process (apply 'start-process (format "flycheck-%s" checker)
                                nil program args))
+          (when (and via-stdin (process-live-p process))
+            (process-send-region process (point-min) (point-max))
+            (process-send-eof process))
           (set-process-sentinel process 'flycheck-handle-signal)
           (set-process-filter process 'flycheck-receive-checker-output)
           (set-process-query-on-exit-flag process nil)
@@ -4310,6 +4321,10 @@ symbols in the command."
          ;; because deleting runs the sentinel, which will delete them anyway.
          (delete-process process))
        (signal (car err) (cdr err))))))
+
+(defun flycheck-start-stdin-command-checker (checker callback)
+  "Start a process and feed the buffer to the process via stdin."
+  (flycheck-start-command-checker checker callback t))
 
 (defun flycheck-interrupt-command-checker (_checker process)
   "Interrupt a PROCESS."
@@ -4992,7 +5007,11 @@ SYMBOL with `flycheck-def-executable-var'."
   (let ((command (plist-get properties :command))
         (parser (plist-get properties :error-parser))
         (filter (plist-get properties :error-filter))
-        (predicate (plist-get properties :predicate)))
+        (predicate (plist-get properties :predicate))
+        (start-function (plist-get properties :start-function))
+        (interrupt-function (plist-get properties :interrupt-function))
+        (print-doc-function (plist-get properties :print-doc-function))
+        (verify-function (plist-get properties :verify-function)))
 
     `(progn
        (flycheck-def-executable-var ,symbol ,(car command))
@@ -5008,6 +5027,14 @@ SYMBOL with `flycheck-def-executable-var'."
          :modes ',(plist-get properties :modes)
          ,@(when predicate
              `(:predicate #',predicate))
+         ,@(when start-function
+             `(:start-function #',start-function))
+         ,@(when interrupt-function
+             `(:interrupt-function #',interrupt-function))
+         ,@(when print-doc-function
+             `(:print-doc-function #',print-doc-function))
+         ,@(when verify-function
+             `(:verify-function #',verify-function))
          :next-checkers ',(plist-get properties :next-checkers)))))
 
 
@@ -6373,10 +6400,8 @@ See URL `https://github.com/eslint/eslint'."
   :command ("eslint" "--format=checkstyle"
             (config-file "--config" flycheck-eslintrc)
             (option "--rulesdir" flycheck-eslint-rulesdir)
-            ;; We need to use source-inplace because eslint looks for
-            ;; configuration files in the directory of the file being checked.
-            ;; See https://github.com/flycheck/flycheck/issues/447
-            source-inplace)
+            "--stdin" "--stdin-filename" source-original
+            )
   :error-parser flycheck-parse-checkstyle
   :error-filter (lambda (errors)
                   (mapc (lambda (err)
@@ -6393,7 +6418,8 @@ See URL `https://github.com/eslint/eslint'."
                                  (flycheck-error-message err))))
                         (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
                   errors)
-  :modes (js-mode js2-mode js3-mode)
+
+  :start-function flycheck-start-stdin-command-checker
   :next-checkers ((warning . javascript-jscs)))
 
 (flycheck-def-config-file-var flycheck-gjslintrc javascript-gjslint ".gjslintrc"
