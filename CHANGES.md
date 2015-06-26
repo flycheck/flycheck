@@ -15,6 +15,8 @@ master (in development)
     [GH-621]
   - Add `flycheck-rust-args` to pass additional arguments to `rustc`
   - Add `flycheck-dmd-args` to pass additional arguments to `dmd` [GH-655]
+  - Add `flycheck-erlang-include-path` to set include directories for Erlang
+    [GH-668]
 
 - Bug fixes:
 

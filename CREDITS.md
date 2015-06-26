@@ -79,6 +79,7 @@ substantial code to Flycheck:
 - [Yasuyuki Oka](https://github.com/yasuyk) (syntax checkers for phpmd, Slim,
   js-yaml, ruby-lint, Handlebars, Foodcritic, AsciiDoc, Racket, ESLint, erubis,
   POSIX Make, Golint and go vet)
+- [Zhuo Yuan](https://github.com/yzprofile) (include directories for Erlang)
 
 For a complete list of all code contributors see the [Contributor Graph][] or
 `git shortlog --summary`.
