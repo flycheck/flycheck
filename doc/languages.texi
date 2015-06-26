@@ -237,6 +237,12 @@ effect if @code{flycheck-emacs-lisp-initialize-packages} is nil.
 @itemize
 @item
 @flyc{erlang} (@uref{http://www.erlang.org/,Erlang})
+
+@table @asis
+@flycoption flycheck-erlang-include-path
+A list of include directories for Erlang.
+@end table
+
 @end itemize
 
 @flyclanguage{ERuby}
