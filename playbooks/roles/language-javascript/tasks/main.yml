@@ -3,6 +3,9 @@
   with_items:
     - jshint
     - eslint
+    - jscs
+    - standard
+    - semistandard
   tags:
     - npm
 - name: Install Closure linter

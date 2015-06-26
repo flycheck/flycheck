@@ -185,6 +185,8 @@ option:
 @table @asis
 @flycoption flycheck-dmd-include-path
 A list of include directories for DMD.
+@flycoption flycheck-dmd-args
+A list of additional arguments for DMD.
 @end table
 
 @end itemize
@@ -194,13 +196,6 @@ The extension @ghref{flycheck/flycheck-d-unittest,flycheck-d-unittest}
 adds a syntax checker which runs D unittests on the fly and reports the
 results.
 @end smallindentedblock
-
-@flyclanguage{Elixir}
-
-@itemize
-@item
-@flyc{elixir} (@uref{http://elixir-lang.org/,Elixir interpreter})
-@end itemize
 
 @flyclanguage{Emacs Lisp}
 
@@ -384,6 +379,8 @@ with the following option:
 
 @flyclanguage{Javascript}
 
+@enumerate
+@item
 @itemize
 @item
 @flyc{javascript-jshint} (@uref{http://jshint.com/,JSHint})
@@ -393,6 +390,13 @@ Or @flyc{javascript-eslint} (@uref{http://eslint.org/,ESLint})
 Or @flyc{javascript-gjslint}
 (@uref{https://developers.google.com/closure/utilities,Closure Linter})
 @end itemize
+@item
+@flyc{javascript-jscs} (@uref{http://jscs.info/,JSCS})
+@item
+@flyc{javascript-standard}
+(@uref{https://github.com/feross/standard,Standard} or
+@uref{https://github.com/Flet/semistandard,Semistandard})
+@end enumerate
 
 The @flyc{javascript-eslint} checker provides the following option:
 
@@ -402,12 +406,13 @@ A directory with custom rules for ESLint.
 @flycconfigfile{flycheck-eslintrc,ESLint}
 @end table
 
-@flyc{javascript-jshint} and @flyc{javascript-gjslint} read
-configuration files:
+@flyc{javascript-jshint}, @flyc{javascript-gjslint} and @flyc{javascript-jscs}
+read configuration files:
 
 @table @asis
 @flycconfigfile{flycheck-jshintrc,JSHint}
 @flycconfigfile{flycheck-gjslintrc,Closure Linter}
+@flycconfigfile{flycheck-jscsrc,JSCS}
 @end table
 
 @flyclanguage{JSON}
@@ -450,9 +455,12 @@ interpreter})
 @uref{https://metacpan.org/pod/Perl::Critic, Perl::Critic})
 @end enumerate
 
-The @flyc{perl-perlcritic} checker provides the following option:
+These syntax checkers checker provide the following options:
 
 @table @asis
+@flycoption flycheck-perl-include-path
+A list of include directories for Perl, relative to the file being
+checked.
 @flycoption flycheck-perlcritic-severity
 The severity level for Perl::Critic, as integer for the
 @option{--severity} option of Perl::Critic.
@@ -628,6 +636,8 @@ interpreter}),
 with the following options:
 
 @table @asis
+@flycoption flycheck-rust-args
+A list of additional arguments for the Rust compiler @command{rustc}.
 @flycoption flycheck-rust-check-tests
 Whether to check test code in Rust.
 

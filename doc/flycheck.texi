@@ -64,7 +64,6 @@ International Public License. A copy of the license can be obtained at
 @titlepage
 @title Flycheck
 @subtitle Modern on-the-fly syntax checking for GNU Emacs
-@subtitle Version 0.23
 @author Sebastian Wiesner @email{swiesner@@lunaryorn.com}
 @page
 @vskip 0pt plus 1filll
@@ -1428,7 +1427,7 @@ interface, which you can use for your own extensions.
 
 @section Status changes
 
-:hook:@code{flycheck-before-syntax-check-hook} and
+@code{flycheck-before-syntax-check-hook} and
 @code{flycheck-after-syntax-check-hook} run before and after syntax
 checks, and let you update your Emacs instance according to Flycheck's
 state.  For instance, @ghref{flycheck/flycheck-color-mode-line,

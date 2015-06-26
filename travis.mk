@@ -5,24 +5,10 @@ $(error "TRAVIS_BUILD not set")
 endif
 
 ifeq ($(findstring $(TRAVIS_BUILD), unit integration manual),)
-$(error "Unsupported TRAVIS_BUILD=$(TRAVIS_BUILD), must be either unit, integration or manual")
+$(error "Unsupported TRAVIS_BUILD=$(TRAVIS_BUILD), must be either unit or manual")
 endif
 
-INVENTORY = playbooks/travis_inventory
-PLAYBOOK = playbooks/site.yml
-
-# Skip Cabal and CRAN packages on Travis CI, because they take ages to build
-ANSIBLE_SKIP_TAGS=cabal,cran
-
-# Tags for different Travis builds
-ANSIBLE_TAGS_unit=$(EMACS)
-ANSIBLE_TAGS_integration=$(EMACS),languages
-ANSIBLE_TAGS_manual=language-texinfo
-ANSIBLE_TAGS=$(ANSIBLE_TAGS_$(TRAVIS_BUILD))
-
-ERTSELECTOR_unit=(not (tag external-tool))
-ERTSELECTOR_integration=(tag external-tool)
-ERTSELECTOR=$(ERTSELECTOR_$(TRAVIS_BUILD))
+ERTSELECTOR=(not (tag external-tool))
 
 ifeq ($(EMACS),emacs-snapshot)
 EMACSFLAGS_unit=--eval '(setq byte-compile-error-on-warn t)'
@@ -38,20 +24,27 @@ $(error "No $$EMACS in environment!")
 endif
 export EMACS
 
-.PHONY: install_ansible provision deps compile test texinfo deploy_manual \
-	before_install \
-	install install_unit install_integration install_manual \
-	script script_unit script_integration script_manual \
-	after_success after_success_unit after_success_integration after_success_manual
+.PHONY:  deps compile test texinfo deploy_manual \
+	before_install before_install_unit before_install_emacs \
+	install install_unit install_manual \
+	script script_unit script_manual \
+	after_success after_success_unit after_success_manual
 
 # SUPPORT TARGETS
-install_ansible:
-	sudo add-apt-repository -y ppa:rquillo/ansible
-	sudo apt-get update -y -q -m
-	sudo apt-get install -y ansible
+install_emacs:
+	sudo add-apt-repository -yy 'ppa:cassou/emacs'
+	sudo add-apt-repository -yy 'ppa:ubuntu-elisp/ppa'
+	sudo apt-get update
+	sudo apt-get install -y $(EMACS)-nox
 
-provision: install_ansible
-	ansible-playbook -i $(INVENTORY) --tags=$(ANSIBLE_TAGS) --skip-tags=$(ANSIBLE_SKIP_TAGS) -v $(PLAYBOOK)
+install_cask: install_emacs
+	curl -fsSL https://raw.githubusercontent.com/cask/cask/master/go | python
+
+install_texinfo:
+	curl -o '/tmp/texinfo-5.2.tar.gz' 'http://ftp.gnu.org/gnu/texinfo/texinfo-5.2.tar.gz'
+	tar xzf '/tmp/texinfo-5.2.tar.gz' -C /tmp
+	cd '/tmp/texinfo-5.2' && ./configure
+	sudo make -C '/tmp/texinfo-5.2' install
 
 deps:
 	make EMACS=$(EMACS) deps
@@ -70,21 +63,25 @@ deploy_manual:
 	bash doc/deploy-travis.bash
 
 # TARGETS FOR TRAVIS PHASES
-before_install: provision
+before_install_unit: install_cask
 
-install_unit install_integration: deps
+before_install_manual: install_texinfo
+
+before_install: before_install_$(TRAVIS_BUILD)
+
+install_unit: deps
 
 install_manual:
 
 install: install_$(TRAVIS_BUILD)
 
-script_unit script_integration: test
+script_unit: test
 
 script_manual: texinfo
 
 script: script_$(TRAVIS_BUILD)
 
-after_success_unit after_success_integration:
+after_success_unit:
 
 after_success_manual: deploy_manual
 

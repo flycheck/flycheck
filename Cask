@@ -10,15 +10,11 @@
 (development
  (depends-on "shut-up")                 ; Silence Emacs
 
- ;; Make optional dependencies available for development
- (depends-on "google-this")             ; Search for messages
-
  ;; Various modes for use in the unit tests
  (depends-on "adoc-mode")
  (depends-on "coffee-mode")
  (depends-on "cperl-mode")
  (depends-on "d-mode")
- (depends-on "elixir-mode")
  (depends-on "erlang")
  (depends-on "ess")
  (depends-on "go-mode")

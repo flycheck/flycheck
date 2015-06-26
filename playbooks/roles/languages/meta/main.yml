@@ -20,8 +20,6 @@ dependencies:
     tags: language-css
   - role: language-d
     tags: language-d
-  - role: language-elixir
-    tags: language-elixir
   - role: language-erlang
     tags: language-erlang
   - role: language-fortran

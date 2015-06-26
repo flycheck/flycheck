@@ -21,7 +21,7 @@ The color theme in this screencast is [Solarized Light][], with the the
 [Source Code Pro][] font.
 
 [Solarized Light]: https://github.com/bbatsov/solarized-emacs
-[Source Code Pro]: https://github.com/adobe/source-code-pro
+[Source Code Pro]: https://github.com/adobe-fonts/source-code-pro
 [COPYING]: https://github.com/flycheck/flycheck/blob/master/COPYING
 [manual]: http://www.flycheck.org/manual/latest/index.html
 
@@ -34,7 +34,7 @@ The color theme in this screencast is [Solarized Light][], with the the
 Features
 --------
 
-- Supports over 30 programming and markup languages with more than 60 different
+- Supports over 30 programming and markup languages with more than 70 different
   syntax checking tools
 - Fully automatic, fail-safe, on-the-fly syntax checking in background
 - Nice error indication and highlighting
@@ -55,7 +55,7 @@ for more information.
 Flycheck does not officially support Windows, but tries to maintain Windows
 compatibility and should generally work fine on Windows, too.
 
-Install Flycheck from [MELPA][] or [MELPA Stable] with:
+Install Flycheck from [MELPA][] or [MELPA Stable][] with:
 
     M-x package-install RET flycheck
 

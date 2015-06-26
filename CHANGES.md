@@ -1,6 +1,29 @@
 master (in development)
 =======================
 
+- **Breaking changes**:
+
+  - Remove Elixir syntax checker due to code execution [GH-630]
+
+- New syntax checkers:
+
+  - Javascript with `jscs` [GH-634] and `standard` [GH-644]
+
+- New features:
+
+  - Add `flycheck-perl-include-path` to set include directories for Perl
+    [GH-621]
+  - Add `flycheck-rust-args` to pass additional arguments to `rustc`
+  - Add `flycheck-dmd-args` to pass additional arguments to `dmd` [GH-655]
+
+- Bug fixes:
+
+  - Fix offset of column numbers in ESLint [GH-640]
+  - Properly parse indentation errors from Python 2.7 [GH-635]
+  - Don’t choke if `default-directory` does not exist [GH-625]
+  - Fix error parsing for Puppet 4
+  - Fix duplicate checkdoc errors on Emacs 25
+
 0.23 (Apr 6, 2015)
 ==================
 

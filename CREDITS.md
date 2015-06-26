@@ -1,17 +1,23 @@
 Credits
 =======
 
+Flycheck is written and maintained by
+[Sebastian Wiesner](https://github.com/lunaryorn) (primary maintainer).
+
 The following people—listed in alphabetical order—contributed
 substantial code to Flycheck:
 
 - [Alain Kalker](https://github.com/ackalker) (fix quoting for flycheck-compile)
-- [Atila Neves](https://github.com/atilaneves) (include paths for DMD)
+- [Atila Neves](https://github.com/atilaneves) (include paths and arguments for
+  DMD)
 - [Bozhidar Batsov](https://github.com/bbatsov) (improved Flycheck menu, RuboCop
   syntax checker, improvements to Ruby)
-- [capdevc](https://github.com/capdevc) (enabled warnings in Rust)
+- [Cristian Capdevila](https://github.com/capdevc) (enabled warnings in Rust)
 - [Damon Haley](https://github.com/dhaley) (PHPCS syntax checker)
 - [David Holm](https://github.com/dholm) (Clang, Cppcheck, lintr and Verilator
   syntax checkers)
+- [Derek Harland](https://github.com/donkopotamus) (improved Crate support for
+  Rust)
 - [Doug MacEachern](https://github.com/dougm) (Go errcheck syntax checker)
 - [Erik Hetzner](https://github.com/egh) (handlebars)
 - [Fanael Linithien](https://github.com/Fanael) (GCC syntax checker, exception
@@ -26,29 +32,33 @@ substantial code to Flycheck:
   checkers, bug fixes to faces)
 - [Krzysztof Witkowski](https://github.com/kwitek) (eval support)
 - [Lee Adams](https://github.com/leeaustinadams) (scalastyle syntax checker)
+- [Lorenzo Villani](https://github.com/lvillani) (`standard` syntax checker)
 - [Łukasz Jędrzejewski](https://github.com/jedrz) (bug fixes for chktex syntax
   checker and error navigation)
 - [Magnar Sveen](https://github.com/magnars) (customizable idle change delay)
 - [Malyshev Artem](https://github.com/proofit404) (customizable keymap prefix)
 - [Marian Schubert](https://github.com/maio) (Perl syntax checker)
-- [Mark Hellewell](https://github.com/markhellewell) (Puppet and puppetlint
-  syntax checkers)
 - [Marcin Antczak](https://github.com/marcinant) (error highlighting in error
   list)
+- [Marcus Majewski](https://github.com/hekto) (error columns in ESLint)
+- [Mark Hellewell](https://github.com/markhellewell) (Puppet and puppetlint
+  syntax checkers)
 - [Matthias Dahl](https://github.com/BinaryKhaos) (performance improvements in
   temporary file handling)
 - [Mitch Tishmack](https://github.com/mitchty) (Microsoft extensions in C/C++)
+- [Moritz Bunkus](https://github.com/mbunkus) (Include path for Perl)
 - [Omair Majid](https://github.com/omajid) (syntax checker for RPM spec)
+- [papaeye](https://github.com/papaeye) (JSCS syntax checker)
 - [Per Nordlöw](https://github.com/nordlow) (syntax checkers for Ada, Fortran
   and Python, syntax checker name in error list)
 - [Peter Eisentraut](https://github.com/petere) (improvements to foodcritic)
 - [Peter Vasil](https://github.com/ptrv) (Lua, Luacheck and Go build/test
   syntax checkers)
 - [Robert Zaremba](https://github.com/robert-zaremba) (gofmt syntax checker)
+- [Robert Dallas Gray](https://github.com/rdallasgray) (configurable error display)
 - [Sean Gillespie](https://github.com/swgillespie) (help messages in Rust)
 - [Sean Salmon](https://github.com/phatcabbage) (platform-independent directory
   handling)
-- [Sebastian Wiesner](https://github.com/lunaryorn) (primary maintainer)
 - [Syohei Yoshida](https://github.com/syohex) (customizable error display delay)
 - [steckerhalter](https://github.com/steckerhalter) (PHPCS syntax checker)
 - [Stephen Lewis](https://github.com/stephenjlewis) (pedantic flags for Clang
@@ -70,19 +80,22 @@ substantial code to Flycheck:
   js-yaml, ruby-lint, Handlebars, Foodcritic, AsciiDoc, Racket, ESLint, erubis,
   POSIX Make, Golint and go vet)
 
-The following people greatly supported Flycheck in other ways:
+For a complete list of all code contributors see the [Contributor Graph][] or
+`git shortlog --summary`.
 
-- [Simon Carter](https://github.com/bbbscarter) (valuable testing and feedback
-  of automatic syntax checking)
+The following people significantly contributed to Flycheck in other ways:
+
 - [Matthias Güdemann](https://github.com/mgudemann) (initial version of the
   Flycheck logo, valuable feedback for the final version)
+- [Simon Carter](https://github.com/bbbscarter) (valuable testing and feedback
+  of automatic syntax checking)
 
 The Flycheck developers would also like to thank the following people
 and projects:
 
 - [Bozhidar Batsov](https://github.com/bbatsov) for his valuable feedback and
   his constant support and endorsement of Flycheck from the very
-  beginning. Notably, he added Flycheck to his popular
+  beginning. Notably he added Flycheck to his popular
   [Prelude](https://github.com/bbatsov/prelude) project at a very early stage
   and thus brought Flycheck to many new users.
 - [Magnar Sveen](https://github.com/magnars) for his
@@ -102,3 +115,4 @@ and projects:
   Flycheck, and his indispensible and dedicated work on MELPA, which drives the
   continuous distribution of Flycheck to its users.
 
+[Contributor Graph]: https://github.com/flycheck/flycheck/graphs/contributors
