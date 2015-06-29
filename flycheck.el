@@ -3937,6 +3937,15 @@ of command checkers is `flycheck-sanitize-errors'.
      or as special symbol or form for
      `flycheck-substitute-argument', which see.
 
+`:standard-input BOOLEAN'
+     Whether or not to pass the buffer to COMMAND via standard input
+
+     When true, the current buffer's contents shall be sent
+     to the process via standard input.
+
+     This property is optional.  If omitted, it defaults to
+     false.
+
 `:error-patterns PATTERNS'
      A list of patterns to parse the output of the `:command'.
 
@@ -3993,7 +4002,8 @@ function."
         (patterns (plist-get properties :error-patterns))
         (parser (or (plist-get properties :error-parser)
                     #'flycheck-parse-with-patterns))
-        (predicate (plist-get properties :predicate)))
+        (predicate (plist-get properties :predicate))
+        (via-standard-input (plist-get properties :standard-input)))
 
     (unless command
       (error "Missing :command in syntax checker %s" symbol))
@@ -4016,7 +4026,8 @@ function."
                             (or (not predicate) (funcall predicate))))))
 
     (apply #'flycheck-define-generic-checker symbol docstring
-           :start #'flycheck-start-command-checker
+           :start (lambda (checker callback)
+                    (flycheck-start-command-checker checker callback via-standard-input))
            :interrupt #'flycheck-interrupt-command-checker
            :print-doc #'flycheck-command-checker-print-doc
            :verify #'flycheck-verify-command-checker
@@ -4266,7 +4277,7 @@ symbols in the command."
          (mapcar (lambda (arg) (flycheck-substitute-argument arg checker))
                  (flycheck-checker-arguments checker))))
 
-(defun flycheck-start-command-checker (checker callback)
+(defun flycheck-start-command-checker (checker callback via-stdin)
   "Start a command CHECKER with CALLBACK."
   (let (process)
     (condition-case err
@@ -4288,6 +4299,9 @@ symbols in the command."
           ;; example for such a conflict.
           (setq process (apply 'start-process (format "flycheck-%s" checker)
                                nil program args))
+          (when (and via-stdin (process-live-p process))
+            (process-send-region process (point-min) (point-max))
+            (process-send-eof    process))
           (set-process-sentinel process 'flycheck-handle-signal)
           (set-process-filter process 'flycheck-receive-checker-output)
           (set-process-query-on-exit-flag process nil)
@@ -4992,7 +5006,8 @@ SYMBOL with `flycheck-def-executable-var'."
   (let ((command (plist-get properties :command))
         (parser (plist-get properties :error-parser))
         (filter (plist-get properties :error-filter))
-        (predicate (plist-get properties :predicate)))
+        (predicate (plist-get properties :predicate))
+        (standard-input (plist-get properties :standard-input)))
 
     `(progn
        (flycheck-def-executable-var ,symbol ,(car command))
@@ -5008,6 +5023,8 @@ SYMBOL with `flycheck-def-executable-var'."
          :modes ',(plist-get properties :modes)
          ,@(when predicate
              `(:predicate #',predicate))
+         ,@(when standard-input
+             `(:standard-input #',standard-input))
          :next-checkers ',(plist-get properties :next-checkers)))))
 
 
@@ -6373,10 +6390,7 @@ See URL `https://github.com/eslint/eslint'."
   :command ("eslint" "--format=checkstyle"
             (config-file "--config" flycheck-eslintrc)
             (option "--rulesdir" flycheck-eslint-rulesdir)
-            ;; We need to use source-inplace because eslint looks for
-            ;; configuration files in the directory of the file being checked.
-            ;; See https://github.com/flycheck/flycheck/issues/447
-            source-inplace)
+            "--stdin" "--stdin-filename" source-original)
   :error-parser flycheck-parse-checkstyle
   :error-filter (lambda (errors)
                   (mapc (lambda (err)
@@ -6393,6 +6407,7 @@ See URL `https://github.com/eslint/eslint'."
                                  (flycheck-error-message err))))
                         (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
                   errors)
+  :standard-input t
   :modes (js-mode js2-mode js3-mode)
   :next-checkers ((warning . javascript-jscs)))
 
