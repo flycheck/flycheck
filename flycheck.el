@@ -4003,7 +4003,7 @@ function."
         (parser (or (plist-get properties :error-parser)
                     #'flycheck-parse-with-patterns))
         (predicate (plist-get properties :predicate))
-        (via-standard-input (plist-get properties :standard-input)))
+        (standard-input (plist-get properties :standard-input)))
 
     (unless command
       (error "Missing :command in syntax checker %s" symbol))
@@ -4026,8 +4026,7 @@ function."
                             (or (not predicate) (funcall predicate))))))
 
     (apply #'flycheck-define-generic-checker symbol docstring
-           :start (lambda (checker callback)
-                    (flycheck-start-command-checker checker callback via-standard-input))
+           :start #'flycheck-start-command-checker
            :interrupt #'flycheck-interrupt-command-checker
            :print-doc #'flycheck-command-checker-print-doc
            :verify #'flycheck-verify-command-checker
@@ -4042,6 +4041,7 @@ function."
                             patterns)))
       (pcase-dolist (`(,prop . ,value)
                      `((flycheck-command . ,command)
+                       (flycheck-standard-input . ,standard-input)
                        (flycheck-error-parser . ,parser)
                        (flycheck-error-patterns . ,patterns)))
         (put symbol prop value)))))
@@ -4058,6 +4058,11 @@ The executable variable is named `flycheck-CHECKER-executable'."
 (defun flycheck-checker-default-executable (checker)
   "Get the default executable of CHECKER."
   (car (get checker 'flycheck-command)))
+
+(defun flycheck-checker-standard-input-p (checker)
+  "Get the standard input flag of CHECKER."
+  ;; coerce to a boolean
+  (not (not (get checker 'flycheck-standard-input))))
 
 (defun flycheck-checker-executable (checker)
   "Get the command executable of CHECKER.
@@ -4277,7 +4282,7 @@ symbols in the command."
          (mapcar (lambda (arg) (flycheck-substitute-argument arg checker))
                  (flycheck-checker-arguments checker))))
 
-(defun flycheck-start-command-checker (checker callback via-stdin)
+(defun flycheck-start-command-checker (checker callback)
   "Start a command CHECKER with CALLBACK."
   (let (process)
     (condition-case err
@@ -4299,7 +4304,8 @@ symbols in the command."
           ;; example for such a conflict.
           (setq process (apply 'start-process (format "flycheck-%s" checker)
                                nil program args))
-          (when (and via-stdin (process-live-p process))
+          (when (and (flycheck-checker-standard-input-p checker)
+                     (process-live-p process))
             (process-send-region process (point-min) (point-max))
             (process-send-eof    process))
           (set-process-sentinel process 'flycheck-handle-signal)
