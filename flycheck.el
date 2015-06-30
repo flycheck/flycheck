@@ -4306,8 +4306,10 @@ symbols in the command."
                                nil program args))
           (when (and (flycheck-checker-standard-input-p checker)
                      (process-live-p process))
-            (process-send-region process (point-min) (point-max))
-            (process-send-eof    process))
+            (save-restriction
+              (widen)
+              (process-send-region process (point-min) (point-max))
+              (process-send-eof    process)))
           (set-process-sentinel process 'flycheck-handle-signal)
           (set-process-filter process 'flycheck-receive-checker-output)
           (set-process-query-on-exit-flag process nil)
