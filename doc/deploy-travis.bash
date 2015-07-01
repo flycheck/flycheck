@@ -37,9 +37,9 @@ check_environment "$TRAVIS_PULL_REQUEST" "false" "pull request"
 check_environment "$TRAVIS_SECURE_ENV_VARS" "true" "secure variables missing"
 
 if [[ -n $TRAVIS_TAG ]]; then
-  MANUAL_VERSION="--version ${TRAVIS_TAG}"
+  MANUAL_VERSION="${TRAVIS_TAG}"
 else
-  MANUAL_VERSION=""
+  MANUAL_VERSION="latest"
   check_environment "$TRAVIS_BRANCH" "master" "not the master branch"
 fi
 
@@ -51,6 +51,7 @@ openssl aes-256-cbc -K "${encrypted_923a5f7c915e_key}" -iv "${encrypted_923a5f7c
 chmod 600 doc/deploy
 eval_ssh_agent -s
 ssh-add doc/deploy
+rm doc/deploy
 
 # Git setup
 export GIT_COMMITTER_EMAIL='travis@travis-ci.org'
@@ -59,9 +60,9 @@ export GIT_AUTHOR_EMAIL='travis@travis-ci.org'
 export GIT_AUTHOR_NAME='Travis CI'
 
 git clone --quiet --branch=master "git@github.com:flycheck/flycheck.github.io.git" doc/_deploy
-doc/_deploy/_scripts/update-manual.py ${MANUAL_VERSION} doc/flycheck.texi
 
 cd doc/_deploy
+rake "manual:update[../..,${MANUAL_VERSION}]"
 git add --force --all .
 git commit -m "Update manual from flycheck/flycheck@$(git rev-parse --short "${TRAVIS_COMMIT}")"
 git push --force --quiet origin master
@@ -70,5 +71,3 @@ cd ../..
 # shellcheck disable=SC2046
 eval_ssh_agent -k
 echo "Published manual!"
-
-rm doc/deploy
