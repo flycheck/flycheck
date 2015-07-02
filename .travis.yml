@@ -14,8 +14,6 @@ install:
   - make -f travis.mk install
 script:
   - make -f travis.mk script
-after_success:
-  - make -f travis.mk after_success
 matrix:
   # Fast fail if any job fails.  We don't need to run all integration tests, if
   # the unit tests fail already.

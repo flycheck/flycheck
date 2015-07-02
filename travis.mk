@@ -27,8 +27,7 @@ export EMACS
 .PHONY:  deps compile test texinfo deploy_manual \
 	before_install before_install_unit before_install_emacs \
 	install install_unit install_manual \
-	script script_unit script_manual \
-	after_success after_success_unit after_success_manual
+	script script_unit script_manual
 
 # SUPPORT TARGETS
 install_emacs:
@@ -59,7 +58,7 @@ texinfo:
 	makeinfo --version
 	make texinfo
 
-deploy_manual:
+deploy_manual: texinfo
 	bash doc/deploy-travis.bash
 
 # TARGETS FOR TRAVIS PHASES
@@ -77,12 +76,6 @@ install: install_$(TRAVIS_BUILD)
 
 script_unit: test
 
-script_manual: texinfo
+script_manual: deploy_manual
 
 script: script_$(TRAVIS_BUILD)
-
-after_success_unit:
-
-after_success_manual: deploy_manual
-
-after_success: after_success_$(TRAVIS_BUILD)
