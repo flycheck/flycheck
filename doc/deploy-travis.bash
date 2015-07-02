@@ -62,7 +62,7 @@ export GIT_AUTHOR_NAME='Travis CI'
 git clone --quiet --branch=master "git@github.com:flycheck/flycheck.github.io.git" doc/_deploy
 
 cd doc/_deploy
-rake "manual:update[../..,${MANUAL_VERSION}]"
+rake "manual:update[../..,${MANUAL_VERSION}]" 'docs:update[../..]'
 git add --force --all .
 git commit -m "Update manual from flycheck/flycheck@$(git rev-parse --short "${TRAVIS_COMMIT}")"
 git push --force --quiet origin master
