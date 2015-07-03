@@ -90,8 +90,9 @@ versions and all syntax checkers supported by Flycheck.
 Travis CI
 =========
 
-The entire test suite continuously runs on [Travis CI][] after every push, with
-the latest Emacs release and a nightly Emacs snapshot.
+The basic test suite—without all syntax checker tests—continuously runs on
+[Travis CI][] after every push, with the latest Emacs release and a nightly
+Emacs snapshot.
 
 Travis CI is configured from `.travis.yml` in the top-level source directory,
 and uses mostly the same playbooks for provisioning.
