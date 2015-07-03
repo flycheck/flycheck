@@ -1,4 +1,0 @@
----
-dependencies:
-  # SCSS is just a variant of SASS
-  - { role: language-sass }

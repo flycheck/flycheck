@@ -1,4 +1,0 @@
----
-dependencies:
-  - role: runtime-r
-    tags: cran

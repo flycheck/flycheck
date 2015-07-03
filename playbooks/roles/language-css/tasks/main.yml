@@ -1,4 +1,0 @@
-- name: Install csslint
-  npm: name=csslint global=yes state=latest
-  tags:
-    - npm

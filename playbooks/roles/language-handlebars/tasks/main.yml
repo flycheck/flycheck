@@ -1,4 +1,0 @@
-- name: Install handlebars
-  npm: name='handlebars' global=yes state=latest
-  tags:
-    - npm

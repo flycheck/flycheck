@@ -82,84 +82,10 @@ $ make EMACS=emacs-snapshot test
 Virtual test environment
 ------------------------
 
-Flycheck provides a virtual machine based on [VirtualBox][] and [Vagrant][]
-which a complete environment to run the entire test suite.  If you need to run
-the test suite frequently, it is recommended that you use this environment.
+Flycheck provides a [virtual machine][flycheck-vm] which contains all Emacs
+versions and all syntax checkers supported by Flycheck.
 
-The virtual machine contains
-
-- The latest stable Emacs release
-- A nightly build of Emacs trunk
-- `make` and [Cask][]
-- All syntax checkers supported by Flycheck
-
-To use this VM, first install the following tools on your system:
-
-- [VirtualBox][]
-- [Vagrant][]
-- [Ansible][]
-
-On Linux, these packages are typically available from the package manager of
-your distribution.  On OS X, use the binaries provided for Vagrant and
-VirtualBox, and install Ansible from [Homebrew][] with `brew install ansible`.
-
-To start the VM run the following command in the root directory of Flycheck:
-
-```console
-$ vagrant up
-```
-
-If run the first time, this command will download, setup and provision the
-virtual machine.  This includes downloading and compiling a lot of packages.
-Depending on your network connection, disk speed and CPU power, this can take a
-lot of time.
-
-After the VM is started, you can connect to it:
-
-```console
-$ vagrant ssh
-```
-
-This will give you a bash prompt on the virtual machine, on which you can run
-the tests as explained in the [previous section](#test-running).
-
-To switch between Emacs versions, pass `EMACS` to `make test`:
-
-```console
-$ make EMACS=emacs24 test
-$ make EMACS=emacs-snapshot test
-```
-
-The latter is the default.
-
-When finished, you can shutdown the VM with:
-
-```console
-$ vagrant halt
-```
-
-Occasionally you should provision the test environment again, to update to the
-latest Emacs nightly build, and to follow updates of syntax checker tools.  To
-do so, use the `--provision` flag when starting the VM:
-
-```console
-$ vagrant up --provision
-```
-
-You can also provision a running machine with::
-
-```console
-$ vagrant provision
-```
-
-The VM is provisioned from Ansible playbooks in the `playbooks/` sub-directory
-of the top-level source directory.
-
-[VirtualBox]: https://www.virtualbox.org/
-[Vagrant]: https://www.vagrantup.com/
-[Ansible]: http://www.ansible.com/home
-[Homebrew]: http://brew.sh/
-
+[flycheck-vm]: https://github.com/flycheck/flycheck-vm
 
 Travis CI
 =========

@@ -1,3 +1,0 @@
-- name: Automatically change to /flycheck directory on login
-  lineinfile: dest="{{home}}/.bashrc" state=present
-              line="cd /flycheck" insertafter=EOF

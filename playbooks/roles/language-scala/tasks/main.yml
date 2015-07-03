@@ -1,4 +1,0 @@
-- include: scalastyle.yml
-  sudo: true
-  tags:
-    - java

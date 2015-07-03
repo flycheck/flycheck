@@ -1,7 +1,0 @@
-- name: Install gfortran
-  apt: name="gfortran-{{gcc_version}}" state=latest install_recommends=false
-  sudo: true
-- name: Set default gfortran
-  alternatives: name=gfortran link=/usr/local/bin/gfortran
-                path=/usr/bin/gfortran-{{gcc_version}}
-  sudo: true

@@ -1,8 +1,0 @@
-- name: Install SCSS lint
-  gem: name={{item}} user_install=no state=latest
-       executable={{ruby_gem_executable}}
-  with_items:
-    - scss_lint
-    - scss_lint_reporter_checkstyle
-  tags:
-    - gem

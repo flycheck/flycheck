@@ -1,4 +1,0 @@
-- name: Install js-yaml
-  npm: name='js-yaml' global=yes state=latest
-  tags:
-    - npm

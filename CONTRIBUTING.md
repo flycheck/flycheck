@@ -102,13 +102,14 @@ For syntax checkers, some special guidelines apply in addition to the above:
   errors for each error pattern of the syntax checker.
 - Make sure that your new syntax checker passes all required tests, with
   `test/run.el (new-checker-for LANGUAGE)`, where `LANGUAGE` is the programming
-  language the checker is for
-- Extend the Ansible playbooks in `playbooks/` to install the required tools in
-  the CI environment and the local testing VM, or explain how to install the
-  tool on an Ubuntu 12.04 system.
+  language the checker is for.
+- Ideally, extend the [Flycheck testing VM][] with recipes to install the new
+  syntax checker.
 
 Unit tests that can run on Travis CI are **mandatory** for all syntax checkers
 in Flycheck.
+
+[Flycheck testing VM]: https://github.com/flycheck/flycheck-vm
 
 Pull requests
 -------------

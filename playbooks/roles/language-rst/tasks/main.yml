@@ -1,7 +1,0 @@
-- name: Install docutils and Sphinx
-  pip: name={{item}} extra_args={{python_pip_extra_args}} state=latest
-  with_items:
-    - docutils
-    - sphinx
-  tags:
-    - pip

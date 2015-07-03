@@ -1,3 +1,0 @@
-- name: Install Verilator
-  apt: name='verilator' state=latest install_recommends=false
-  sudo: true

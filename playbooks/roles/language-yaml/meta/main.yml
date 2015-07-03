@@ -1,4 +1,0 @@
----
-dependencies:
-  - { role: runtime-ruby }      # For Ruby-based YAML checking
-  - { role: runtime-nodejs }

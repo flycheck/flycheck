@@ -1,3 +1,0 @@
-- name: Install asciidoc
-  apt: name=asciidoc state=latest install_recommends=false
-  sudo: true

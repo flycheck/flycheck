@@ -1,4 +1,0 @@
-- name: Install less
-  npm: name=less global=yes state=latest
-  tags:
-    - npm

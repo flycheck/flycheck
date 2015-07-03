@@ -1,3 +1,0 @@
-- name: Install HLint
-  apt: name=hlint state=latest install_recommends=false
-  sudo: true
