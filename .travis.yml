@@ -18,3 +18,9 @@ matrix:
   # Fast fail if any job fails.  We don't need to run all integration tests, if
   # the unit tests fail already.
   fast_finish: true
+allow_failures:
+  # Allow snapshot builds to fail, because emacs upstream sometimes break, and
+  # the ubuntu-elisp PPA is only semi-alive, and does not regularly build
+  # anymore.
+  env:
+    - TRAVIS_BUILD=unit EMACS=emacs-snapshot
