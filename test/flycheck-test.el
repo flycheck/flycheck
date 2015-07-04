@@ -4280,16 +4280,11 @@ Why not:
         (js3-mode-show-parse-errors nil))
     (flycheck-ert-should-syntax-check
      "checkers/javascript-syntax-error.js" '(js-mode js2-mode js3-mode)
-     '(3 4 error "Unmatched '('." :id "E019" :checker javascript-jshint)
-     '(3 25 error "Expected an identifier and instead saw ')'." :id "E030"
-         :checker javascript-jshint)
-     '(4 1 error "Unexpected early end of program." :id "E006"
-         :checker javascript-jshint)
-     '(4 1 error "Expected an identifier and instead saw '(end)'." :id "E030"
-         :checker javascript-jshint)
-     '(4 1 warning "Expected an assignment or function call and instead saw an expression."
-         :id "W030" :checker javascript-jshint)
-     '(4 1 warning "Missing semicolon."  :id "W033" :checker javascript-jshint))))
+     '(3 4 error "Unmatched '('." :checker javascript-jshint :id "E019")
+     '(3 25 error "Expected an identifier and instead saw ')'."
+         :checker javascript-jshint :id "E030")
+     '(4 nil error "Unrecoverable syntax error. (100% scanned)."
+         :checker javascript-jshint :id "E041"))))
 
 (flycheck-ert-def-checker-test javascript-jshint javascript error-disabled
   :tags '(checkstyle-xml)
@@ -5025,8 +5020,7 @@ Why not:
 (flycheck-ert-def-checker-test sass sass import-error
   (flycheck-ert-should-syntax-check
    "checkers/sass-compass.sass" 'sass-mode
-   `(2 nil error ,(format "File to import not found or unreadable: compass/css3.
-       Load path: %s" (flycheck-ert-resource-filename "checkers"))
+   `(2 nil error "File to import not found or unreadable: compass/css3."
        :checker sass)))
 
 (flycheck-ert-def-checker-test sass sass compass
@@ -5090,8 +5084,7 @@ Why not:
   (let ((flycheck-disabled-checkers '(scss-lint)))
     (flycheck-ert-should-syntax-check
      "checkers/scss-compass.scss" 'scss-mode
-     `(2 nil error ,(format "File to import not found or unreadable: compass/css3.
-       Load path: %s" (flycheck-ert-resource-filename "checkers"))
+     `(2 nil error "File to import not found or unreadable: compass/css3."
          :checker scss))))
 
 (flycheck-ert-def-checker-test scss scss compass
@@ -5185,7 +5178,7 @@ Why not:
 (flycheck-ert-def-checker-test verilog-verilator verilog error
   (flycheck-ert-should-syntax-check
    "checkers/verilog_verilator_error.v" 'verilog-mode
-   '(4 nil error "syntax error, unexpected ')'"
+   '(4 nil error "Unsupported: $fopen with multichannel descriptor.  Add ,\"w\" as second argument to open a file descriptor."
        :checker verilog-verilator)))
 
 (flycheck-ert-def-checker-test verilog-verilator verilog warning
