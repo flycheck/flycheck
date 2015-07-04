@@ -22,5 +22,4 @@ matrix:
   # the ubuntu-elisp PPA is only semi-alive, and does not regularly build
   # anymore.
   allow_failures:
-    env:
-      - TRAVIS_BUILD=unit EMACS=emacs-snapshot
+    - env: TRAVIS_BUILD=unit EMACS=emacs-snapshot
