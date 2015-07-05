@@ -6083,7 +6083,15 @@ See URL `http://golang.org/cmd/go/' and URL
   :next-checkers (go-build
                   go-test
                   ;; Fall back if `go build' or `go test' can be used
-                  go-errcheck))
+                  go-errcheck)
+  :verify-fn (lambda (_)
+               (let ((have-vet (member "vet" (ignore-errors
+                                               (process-lines go "tool")))))
+                 (list
+                  (flycheck-verification-result-new
+                   :label "go tool vet"
+                   :message (if have-vet "present" "missing")
+                   :face (if have-vet 'success '(bold error)))))))
 
 (flycheck-define-checker go-build
   "A Go syntax and type checker using the `go build' command.
@@ -7252,7 +7260,38 @@ See URL `http://www.scalastyle.org'."
   (lambda () (and flycheck-scalastyle-jar flycheck-scalastylerc
                   (file-exists-p flycheck-scalastyle-jar)
                   (file-exists-p (flycheck-locate-config-file
-                                  flycheck-scalastylerc 'scala-scalastyle)))))
+                                  flycheck-scalastylerc 'scala-scalastyle))))
+  :verify (lambda (checker)
+            (list
+             (flycheck-verification-result-new
+              :label "JAR file"
+              :message (cond
+                        ((not flycheck-scalastyle-jar)
+                         "`flycheck-scalastyle-jar' not set")
+                        ((not (file-exists-p flycheck-scalastyle-jar))
+                         (format "file %s does not exist"
+                                 flycheck-scalastyle-jar))
+                        (t "present"))
+              :face (cond
+                     ((not flycheck-scalastyle-jar) '(bold warning))
+                     ((not (file-exists-p flycheck-scalastyle-jar))
+                      '(bold error))
+                     (t 'success)))
+             (flycheck-verification-result-new
+              :label "Configuration file"
+              :message (cond
+                        ((not flycheck-scalastylerc)
+                         "`flycheck-scalastyletrc' not set")
+                        ((not (flycheck-locate-config-file flycheck-scalastylerc
+                                                           checker))
+                         (format "file %s not found" flycheck-scalastylerc))
+                        (t "found"))
+              :face (cond
+                     ((not flycheck-scalastylerc) '(bold warning))
+                     ((not (flycheck-locate-config-file flycheck-scalastylerc
+                                                        checker))
+                      '(bold error))
+                     (t 'success))))))
 
 (defconst flycheck-scss-lint-checkstyle-re
   (rx "cannot load such file" (1+ not-newline) "scss_lint_reporter_checkstyle")
@@ -7291,7 +7330,24 @@ See URL `https://github.com/brigade/scss-lint'."
   ;; check whether the addon is missing and turn that into a special kind of
   ;; Flycheck error.
   :error-parser flycheck-parse-scss-lint
-  :modes scss-mode)
+  :modes scss-mode
+  :verify (lambda (_)
+            (with-temp-buffer
+              (call-process "scss-lint" nil t nil
+                            "--require=scss_lint_reporter_checkstyle")
+              (goto-char (point-min))
+              (let ((reporter-missing (re-search-forward
+                                               flycheck-scss-lint-checkstyle-re
+                                               nil 'no-error)))
+                (list
+                 (flycheck-verification-result-new
+                  :label "Checkstyle reporter"
+                  :message (if reporter-missing
+                               "scss_lint_reporter_checkstyle missing"
+                             "present")
+                  :face (if reporter-missing
+                            '(bold error)
+                          'success)))))))
 
 (flycheck-def-option-var flycheck-scss-compass nil scss
   "Whether to enable the Compass CSS framework.
@@ -7399,7 +7455,15 @@ See URL `https://github.com/koalaman/shellcheck/'."
   :error-parser flycheck-parse-checkstyle
   :error-filter flycheck-dequalify-error-ids
   :modes sh-mode
-  :predicate (lambda () (memq sh-shell flycheck-shellcheck-supported-shells)))
+  :predicate (lambda () (memq sh-shell flycheck-shellcheck-supported-shells))
+  :verify (lambda (_)
+            (let ((supports-shell (memq sh-shell
+                                        flycheck-shellcheck-supported-shells)))
+              (list
+               (flycheck-verification-result-new
+                :label (format "Shell %s supported" sh-shell)
+                :message (if supports-shell "yes" "no")
+                :face (if supports-shell 'success '(bold warning)))))))
 
 (flycheck-define-checker slim
   "A Slim syntax checker using the Slim compiler.
