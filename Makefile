@@ -2,8 +2,6 @@ EMACS = emacs
 EMACSFLAGS =
 CASK = cask
 ERTSELECTOR = t
-SPHINX-BUILD = sphinx-build
-SPHINXFLAGS =
 CONVERT = convert
 VERSION := $(shell EMACS=$(EMACS) $(CASK) version)
 PKGDIR := $(shell EMACS=$(EMACS) $(CASK) package-directory)
@@ -19,10 +17,10 @@ BUILDDIR = build
 
 EMACSBATCH = $(EMACS) -Q --batch $(EMACSFLAGS)
 
-.PHONY: compile dist texinfo images \
-	clean clean-elc clean-dist clean-doc clean-deps \
-	test \
-	deps linkcheck
+.PHONY: deps compile dist texinfo images \
+	clean clean-elc clean-doc \
+	clobber clobber-dist clobber-deps \
+	test
 
 # Build targets
 compile : $(OBJECTS)
@@ -32,7 +30,7 @@ dist :
 
 texinfo: doc/flycheck.info
 
-images: doc/images/logo.png doc/images/favicon.ico # To update the image files
+images: doc/images/logo.png
 
 # Test targets
 test : $(OBJECTS)
@@ -42,18 +40,19 @@ test : $(OBJECTS)
 deps : $(PKGDIR)
 
 # Cleanup targets
-clean : clean-elc clean-dist clean-deps clean-doc
+clean : clean-elc clean-doc
+clobber: clobber-dist clobber-deps
 
 clean-elc :
 	rm -rf $(OBJECTS)
 
-clean-dist :
-	rm -rf $(DISTDIR)
-
 clean-doc:
 	rm -rf doc/flycheck.info doc/dir
 
-clean-deps :
+clobber-dist :
+	rm -rf $(DISTDIR)
+
+clobber-deps :
 	rm -rf .cask/
 
 $(PKGDIR) : Cask
@@ -66,16 +65,6 @@ flycheck-ert.elc: flycheck.elc
 
 %.elc : %.el $(PKGDIR)
 	$(CASK) exec $(EMACSBATCH) -L . -f batch-byte-compile $<
-
-doc/images/favicon.ico: flycheck.svg
-	$(CONVERT) $< -background white \
-		\( -clone 0 -resize 16x16 \) \
-		\( -clone 0 -resize 32x32 \) \
-		\( -clone 0 -resize 48x48 \) \
-		\( -clone 0 -resize 64x64 \) \
-		\( -clone 0 -resize 96x96 \) \
-		\( -clone 0 -resize 196x196 \) \
-		-delete 0 -alpha off -colors 256 $@
 
 doc/images/logo.png: flycheck.svg
 	$(CONVERT) $< -trim -background white \
