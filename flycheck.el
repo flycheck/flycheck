@@ -5855,6 +5855,10 @@ See Info Node `(elisp)Byte Compilation'."
     (let ((source (car command-line-args-left))
           ;; Remember the default directory of the process
           (process-default-directory default-directory))
+      ;; Note that we deliberately use our custom approach even despite of
+      ;; `checkdoc-file' which was added to Emacs 25.1.  While it's conceptually
+      ;; the better thing, it's implementation has too many flaws to be of use
+      ;; for us.
       (with-temp-buffer
         (insert-file-contents source 'visit)
         (setq buffer-file-name source)
@@ -5862,14 +5866,10 @@ See Info Node `(elisp)Byte Compilation'."
         ;; back-substutition work
         (setq default-directory process-default-directory)
         (with-demoted-errors "Error in checkdoc: %S"
-          ;; If we have `checkdoc-file' (in Emacs 25) use it, otherwise fall
-          ;; back to printing the result buffer of checkdoc.
-          (if (fboundp 'checkdoc-file)
-              (checkdoc-file source)
-            (checkdoc-current-buffer t)
-            (with-current-buffer checkdoc-diagnostic-buffer
-              (princ (buffer-substring-no-properties (point-min) (point-max)))
-              (kill-buffer))))))))
+          (checkdoc-current-buffer t)
+          (with-current-buffer checkdoc-diagnostic-buffer
+            (princ (buffer-substring-no-properties (point-min) (point-max)))
+            (kill-buffer)))))))
 
 (flycheck-define-checker emacs-lisp-checkdoc
   "An Emacs Lisp style checker using CheckDoc.
