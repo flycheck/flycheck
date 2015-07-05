@@ -27,7 +27,8 @@ compile : $(OBJECTS)
 
 check :
 	$(EMACSBATCH) --eval '(setq checkdoc-arguments-in-order-flag nil)' \
-		--eval '(checkdoc-file "flycheck.el")'
+		-l test/flycheck-checkdoc.el \
+		-f flycheck-checkdoc-batch-and-exit -- $(SRCS)
 
 dist :
 	$(CASK) package
