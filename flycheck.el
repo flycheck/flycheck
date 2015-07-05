@@ -4399,7 +4399,7 @@ _EVENT is ignored."
                   (process-exit-status process)
                   files
                   (flycheck-get-output process) callback)))
-            (error
+            ((debug error)
              (funcall callback 'errored (error-message-string err)))))))))
 
 (defun flycheck-finish-checker-process
