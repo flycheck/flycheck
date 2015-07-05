@@ -24,7 +24,7 @@ $(error "No $$EMACS in environment!")
 endif
 export EMACS
 
-.PHONY:  deps compile test texinfo deploy_manual \
+.PHONY: deps compile check test texinfo deploy_manual \
 	before_install before_install_unit before_install_emacs \
 	install install_unit install_manual \
 	script script_unit script_manual
@@ -48,8 +48,8 @@ install_texinfo:
 deps:
 	make EMACS=$(EMACS) deps
 
-compile:
-	make EMACS=$(EMACS) EMACSFLAGS="$(EMACSFLAGS)" compile
+compile check:
+	make EMACS=$(EMACS) EMACSFLAGS="$(EMACSFLAGS)" "$@"
 
 test: compile
 	make EMACS=$(EMACS) ERTSELECTOR="$(ERTSELECTOR)" test
@@ -74,7 +74,7 @@ install_manual:
 
 install: install_$(TRAVIS_BUILD)
 
-script_unit: test
+script_unit: check test
 
 script_manual: deploy_manual
 
