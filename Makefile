@@ -17,13 +17,17 @@ BUILDDIR = build
 
 EMACSBATCH = $(EMACS) -Q --batch $(EMACSFLAGS)
 
-.PHONY: deps compile dist texinfo images \
+.PHONY: deps compile check dist texinfo images \
 	clean clean-elc clean-doc \
 	clobber clobber-dist clobber-deps \
 	test
 
 # Build targets
 compile : $(OBJECTS)
+
+check :
+	$(EMACSBATCH) --eval '(setq checkdoc-arguments-in-order-flag nil)' \
+		--eval '(checkdoc-file "flycheck.el")'
 
 dist :
 	$(CASK) package
