@@ -3974,9 +3974,8 @@ of command checkers is `flycheck-sanitize-errors'.
 
 Note that you may not give `:start', `:interrupt', and
 `:print-doc' for a command checker.  You can give a custom
-`:verify' function, but you should take care to call
-`flycheck-verify-command-checker' in a custom `:verify'
-function."
+`:verify' function, though, whose results will be appended to the
+default `:verify' function of command checkers."
   (declare (indent 1)
            (doc-string 2))
   (dolist (prop '(:start :interrupt :print-doc))
@@ -3988,6 +3987,13 @@ function."
     ;; Default to `flycheck-sanitize-errors' as error filter
     (setq properties (plist-put properties :error-filter
                                 #'flycheck-sanitize-errors)))
+  (let ((verify-fn (plist-get properties :verify)))
+    (setq properties
+          (plist-put properties :verify
+                     (lambda (checker)
+                       (append (flycheck-verify-command-checker checker)
+                               (and verify-fn
+                                    (funcall verify-fn checker)))))))
 
   (let ((command (plist-get properties :command))
         (patterns (plist-get properties :error-patterns))
@@ -4019,7 +4025,6 @@ function."
            :start #'flycheck-start-command-checker
            :interrupt #'flycheck-interrupt-command-checker
            :print-doc #'flycheck-command-checker-print-doc
-           :verify #'flycheck-verify-command-checker
            properties)
 
     ;; Pre-compile all errors patterns into strings, so that we don't need to do
@@ -4992,7 +4997,8 @@ SYMBOL with `flycheck-def-executable-var'."
   (let ((command (plist-get properties :command))
         (parser (plist-get properties :error-parser))
         (filter (plist-get properties :error-filter))
-        (predicate (plist-get properties :predicate)))
+        (predicate (plist-get properties :predicate))
+        (verify-fn (plist-get properties :verify)))
 
     `(progn
        (flycheck-def-executable-var ,symbol ,(car command))
@@ -5008,7 +5014,10 @@ SYMBOL with `flycheck-def-executable-var'."
          :modes ',(plist-get properties :modes)
          ,@(when predicate
              `(:predicate #',predicate))
-         :next-checkers ',(plist-get properties :next-checkers)))))
+         :next-checkers ',(plist-get properties :next-checkers)
+         ,@(when verify-fn
+             `(:verify #',verify-fn))
+         :verify ))))
 
 
 ;;; Built-in checkers

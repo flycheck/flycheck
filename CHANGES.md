@@ -26,6 +26,7 @@ master (in development)
   - Fix error parsing for Puppet 4
   - Fix duplicate checkdoc errors on Emacs 25
   - Fix level of `info` messages in `flycheck-compile` [GH-669]
+  - Allow custom `:verify` functions for command checkers [GH-672]
 
 0.23 (Apr 6, 2015)
 ==================
