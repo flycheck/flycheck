@@ -2938,17 +2938,17 @@ The following PROPERTIES constitute an error level:
      A face symbol denoting the face to use for messages of this
      level in the error list.  See `flycheck-list-errors'."
   (declare (indent 1))
-  (put level 'flycheck-error-level t)
-  (put level 'flycheck-error-severity
-       (or (plist-get properties :severity) 0))
-  (put level 'flycheck-overlay-category
-       (plist-get properties :overlay-category))
-  (put level 'flycheck-fringe-bitmap
-       (plist-get properties :fringe-bitmap))
-  (put level 'flycheck-fringe-face
-       (plist-get properties :fringe-face))
-  (put level 'flycheck-error-list-face
-       (plist-get properties :error-list-face)))
+  (setf (get level 'flycheck-error-level) t)
+  (setf (get level 'flycheck-error-severity)
+        (or (plist-get properties :severity) 0))
+  (setf (get level 'flycheck-overlay-category)
+        (plist-get properties :overlay-category))
+  (setf (get level 'flycheck-fringe-bitmap)
+        (plist-get properties :fringe-bitmap))
+  (setf (get level 'flycheck-fringe-face)
+        (plist-get properties :fringe-face))
+  (setf (get level 'flycheck-error-list-face)
+        (plist-get properties :error-list-face)))
 
 (defun flycheck-error-level-p (level)
   "Determine whether LEVEL is a Flycheck error level."
@@ -2996,9 +2996,9 @@ show the icon."
 
 
 ;;; Built-in error levels
-(put 'flycheck-error-overlay 'face 'flycheck-error)
-(put 'flycheck-error-overlay 'priority 110)
-(put 'flycheck-error-overlay 'help-echo "Unknown error.")
+(setf (get 'flycheck-error-overlay 'face) 'flycheck-error)
+(setf (get 'flycheck-error-overlay 'priority) 110)
+(setf (get 'flycheck-error-overlay 'help-echo) "Unknown error.")
 
 (flycheck-define-error-level 'error
   :severity 100
@@ -3007,9 +3007,9 @@ show the icon."
   :fringe-face 'flycheck-fringe-error
   :error-list-face 'flycheck-error-list-error)
 
-(put 'flycheck-warning-overlay 'face 'flycheck-warning)
-(put 'flycheck-warning-overlay 'priority 100)
-(put 'flycheck-warning-overlay 'help-echo "Unknown warning.")
+(setf (get 'flycheck-warning-overlay 'face) 'flycheck-warning)
+(setf (get 'flycheck-warning-overlay 'priority) 100)
+(setf (get 'flycheck-warning-overlay 'help-echo) "Unknown warning.")
 
 (flycheck-define-error-level 'warning
   :severity 10
@@ -3018,9 +3018,9 @@ show the icon."
   :fringe-face 'flycheck-fringe-warning
   :error-list-face 'flycheck-error-list-warning)
 
-(put 'flycheck-info-overlay 'face 'flycheck-info)
-(put 'flycheck-info-overlay 'priority 90)
-(put 'flycheck-info-overlay 'help-echo "Unknown info.")
+(setf (get 'flycheck-info-overlay 'face) 'flycheck-info)
+(setf (get 'flycheck-info-overlay 'priority) 90)
+(setf (get 'flycheck-info-overlay 'help-echo) "Unknown info.")
 
 (flycheck-define-error-level 'info
   :severity -1
@@ -3209,7 +3209,7 @@ level."
       (let* ((level (flycheck-error-level err))
              (item (assq level counts-by-level)))
         (if item
-            (setcdr item (1+ (cdr item)))
+            (cl-incf (cdr item))
           (push (cons level 1) counts-by-level))))
     counts-by-level))
 
@@ -3257,18 +3257,18 @@ Return the created overlay."
                (category (flycheck-error-level-overlay-category level)))
     (unless (flycheck-error-level-p level)
       (error "Undefined error level: %S" level))
-    (overlay-put overlay 'flycheck-overlay t)
-    (overlay-put overlay 'flycheck-error err)
+    (setf (overlay-get overlay 'flycheck-overlay) t)
+    (setf (overlay-get overlay 'flycheck-error) err)
     ;; TODO: Consider hooks to re-check if overlay contents change
-    (overlay-put overlay 'category category)
+    (setf (overlay-get overlay 'category) category)
     (unless flycheck-highlighting-mode
       ;; Erase the highlighting from the overlay if requested by the user
-      (overlay-put overlay 'face nil))
+      (setf (overlay-get overlay 'face) nil))
     (when flycheck-indication-mode
-      (overlay-put overlay 'before-string
-                   (flycheck-error-level-make-fringe-icon
-                    level flycheck-indication-mode)))
-    (overlay-put overlay 'help-echo (flycheck-error-message err))
+      (setf (overlay-get overlay 'before-string)
+            (flycheck-error-level-make-fringe-icon
+             level flycheck-indication-mode)))
+    (setf (overlay-get overlay 'help-echo) (flycheck-error-message err))
     overlay))
 
 (defun flycheck-filter-overlays (overlays)
@@ -3718,8 +3718,10 @@ non-nil."
                                             ;; whole line
                                             (or end (point-max)))))
                       (push ov flycheck-error-list-highlight-overlays)
-                      (overlay-put ov 'flycheck-error-highlight-overlay t)
-                      (overlay-put ov 'face 'flycheck-error-list-highlight)))
+                      (setf (overlay-get ov 'flycheck-error-highlight-overlay)
+                            t)
+                      (setf (overlay-get ov 'face)
+                            'flycheck-error-list-highlight)))
                   (setq next-error-pos end)))))
           ;; Delete the old overlays
           (mapc #'delete-overlay old-overlays)
@@ -4268,8 +4270,8 @@ symbols in the command."
           ;; example for such a conflict.
           (setq process (apply 'start-process (format "flycheck-%s" checker)
                                nil program args))
-          (set-process-sentinel process 'flycheck-handle-signal)
-          (set-process-filter process 'flycheck-receive-checker-output)
+          (setf (process-sentinel process) #'flycheck-handle-signal)
+          (setf (process-filter process) #'flycheck-receive-checker-output)
           (set-process-query-on-exit-flag process nil)
           ;; Remember the syntax checker, the buffer and the callback
           (process-put process 'flycheck-checker checker)

@@ -46,8 +46,8 @@
   (unless flycheck-ert-ert-can-skip
     ;; Fake skipping
 
-    (put 'flycheck-ert-skipped 'error-message "Test skipped")
-    (put 'flycheck-ert-skipped 'error-conditions '(error))
+    (setf (get 'flycheck-ert-skipped 'error-message) "Test skipped")
+    (setf (get 'flycheck-ert-skipped 'error-conditions) '(error))
 
     (defun ert-skip (data)
       (signal 'flycheck-ert-skipped data))
@@ -279,7 +279,7 @@ assertions and setup code."
                      ,(plist-get keys :tags))
        ,@(mapcar (lambda (c) `(skip-unless
                                ;; Ignore non-command checkers
-                               (or (not (get ',c 'flycheck-command))
+                               (or (not (flycheck-checker-get ',c 'command))
                                    (executable-find (flycheck-checker-executable ',c)))))
                  checkers)
        ,@body)))
