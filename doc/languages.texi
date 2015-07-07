@@ -337,7 +337,24 @@ functions for format string problems.
 
 @item
 @flyc{haskell-hlint} (style checker with
-@uref{https://github.com/ndmitchell/hlint,hlint})
+@uref{https://github.com/ndmitchell/hlint,hlint}), with the
+following options:
+
+@table @asis
+@flycoption flycheck-hlint-language-extensions
+Extensions list.
+
+@flycoption flycheck-hlint-ignore-rules
+Ignore rules list.
+
+@flycoption flycheck-hlint-hint-packages
+Hint packages to include.
+@end table
+
+@table @asis
+@flycconfigfile{flycheck-hlintrc,hlint}
+@end table
+
 @end enumerate
 
 @smallindentedblock

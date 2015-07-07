@@ -6275,11 +6275,58 @@ See URL `http://www.haskell.org/ghc/'."
   :modes (haskell-mode literate-haskell-mode)
   :next-checkers ((warning . haskell-hlint)))
 
+(flycheck-def-config-file-var flycheck-hlintrc haskell-hlint "HLint.hs"
+  :safe #'stringp)
+
+(flycheck-def-option-var flycheck-hlint-language-extensions
+    nil haskell-hlint
+  "Extensions list to enable for hlint.
+
+The value of this variable is a list of strings, where each
+string is a name of extension to enable in hlint. (i.e. \"QuasiQuotes\")
+
+Refer to http://community.haskell.org/~ndm/darcs/hlint/hlint.htm for
+more information."
+  :type '(repeat :tag "Extensions" (string :tag "Extension"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.24"))
+
+(flycheck-def-option-var flycheck-hlint-ignore-rules
+    nil haskell-hlint
+  "Ignore rules list for hlint checks.
+
+The value of this variable is a list of strings, where each
+string is an ignore rule. (i.e. \"Use fmap\")
+
+Refer to http://community.haskell.org/~ndm/darcs/hlint/hlint.htm for
+more information."
+  :type '(repeat :tag "Ignore rules" (string :tag "Ignore rule"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.24"))
+
+(flycheck-def-option-var flycheck-hlint-hint-packages
+    nil haskell-hlint
+  "Hint packages to include for hlint checks.
+
+The value of this variable is a list of strings, where each
+string is a default hint package. (i.e. (\"Generalise\" \"Default\" \"Dollar\"))
+
+Refer to http://community.haskell.org/~ndm/darcs/hlint/hlint.htm for
+more information."
+  :type '(repeat :tag "Hint packages" (string :tag "Hint package"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.24"))
+
 (flycheck-define-checker haskell-hlint
   "A Haskell style checker using hlint.
 
 See URL `https://github.com/ndmitchell/hlint'."
-  :command ("hlint" source-inplace)
+  :command ("hlint"
+            (option-list "-X" flycheck-hlint-language-extensions concat)
+            (option-list "-i=" flycheck-hlint-ignore-rules concat)
+            (option-list "-h" flycheck-hlint-hint-packages concat)
+            (config-file "-h" flycheck-hlintrc)
+            source-inplace)
   :error-patterns
   ((warning line-start
             (file-name) ":" line ":" column
