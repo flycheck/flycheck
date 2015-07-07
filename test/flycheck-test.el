@@ -182,7 +182,7 @@ and extension, as in `file-name-base'."
 (ert-deftest flycheck-locate-config-file-functions/default ()
   :tags '(customization)
   (should (equal flycheck-locate-config-file-functions
-                 '(flycheck-locate-config-file-absolute-path
+                 '(flycheck-locate-config-file-by-path
                    flycheck-locate-config-file-ancestor-directories
                    flycheck-locate-config-file-home))))
 
@@ -1474,20 +1474,26 @@ and extension, as in `file-name-base'."
 
 ;;; Configuration file functions
 
-(ert-deftest flycheck-locate-config-file-absolute-path/just-a-base-name ()
+(ert-deftest flycheck-locate-config-file-by-path/just-a-base-name ()
   :tags '(configuration)
   (flycheck-ert-with-temp-buffer
     (cd flycheck-test-directory)
-    (should-not (flycheck-locate-config-file-absolute-path "flycheck-test.el"
-                                                           'emacs-lisp))))
+    (should-not (flycheck-locate-config-file-by-path "flycheck-test.el"
+                                                     'emacs-lisp))))
 
-(ert-deftest flycheck-locate-config-file-absolute-path/with-path ()
+(ert-deftest flycheck-locate-config-file-by-path/with-path ()
   :tags '(configuration)
   (flycheck-ert-with-temp-buffer
     (cd flycheck-test-directory)
-    (should (equal (flycheck-locate-config-file-absolute-path "../Makefile"
-                                                              'emacs-lisp)
+    (should (equal (flycheck-locate-config-file-by-path "../Makefile"
+                                                        'emacs-lisp)
                    (expand-file-name "../Makefile" flycheck-test-directory)))))
+
+(ert-deftest flycheck-locate-config-file-by-path/non-existing-file ()
+  :tags '(configuration)
+  (flycheck-ert-with-temp-buffer
+   (cd flycheck-test-directory)
+   (should-not (flycheck-locate-config-file-by-path "../foobar" 'emacs-lisp))))
 
 (ert-deftest flycheck-locate-config-file-ancestor-directories/not-existing-file ()
   :tags '(configuration)
