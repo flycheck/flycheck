@@ -21,6 +21,7 @@
  (depends-on "haml-mode")
  (depends-on "handlebars-mode")
  (depends-on "haskell-mode")
+ (depends-on "jade-mode")
  (depends-on "js2-mode")
  (depends-on "js3-mode")
  (depends-on "less-css-mode")
