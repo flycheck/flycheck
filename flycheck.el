@@ -7222,8 +7222,8 @@ See URL `http://www.scalastyle.org'."
   ;; missing
   (lambda () (and flycheck-scalastyle-jar flycheck-scalastylerc
                   (file-exists-p flycheck-scalastyle-jar)
-                  (file-exists-p (flycheck-locate-config-file
-                                  flycheck-scalastylerc 'scala-scalastyle))))
+                  (flycheck-locate-config-file flycheck-scalastylerc
+                                               'scala-scalastyle)))
   :verify (lambda (checker)
             (list
              (flycheck-verification-result-new

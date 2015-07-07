@@ -27,6 +27,7 @@ master (in development)
   - Fix duplicate checkdoc errors on Emacs 25
   - Fix level of `info` messages in `flycheck-compile` [GH-669]
   - Allow custom `:verify` functions for command checkers [GH-672]
+  - Fix error when `flycheck-scalastylerc` was set to a non-existing file
 
 0.23 (Apr 6, 2015)
 ==================
