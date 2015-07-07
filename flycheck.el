@@ -905,7 +905,7 @@ Mode Conventions'), regardless of the value of this option."
 ;; we don't initialize the hook variables right away.  We append our own
 ;; functions, because a user likely expects that their functions come first,
 ;; even if the added them before Flycheck was loaded.
-(dolist (hook (list #'flycheck-locate-config-file-absolute-path
+(dolist (hook (list #'flycheck-locate-config-file-by-path
                     #'flycheck-locate-config-file-ancestor-directories
                     #'flycheck-locate-config-file-home))
   (add-hook 'flycheck-locate-config-file-functions hook 'append))
@@ -4517,16 +4517,18 @@ configuration file was found."
     (when (file-exists-p filepath)
       filepath)))
 
-(defun flycheck-locate-config-file-absolute-path (filepath _checker)
+(defun flycheck-locate-config-file-by-path (filepath _checker)
   "Locate a configuration file by a FILEPATH.
 
 If FILEPATH is a contains a path separator, expand it against the
-default directory and return it.  Otherwise return nil.
+default directory and return it if it points to an existing file.
+Otherwise return nil.
 
 _CHECKER is ignored."
   ;; If the path is just a plain file name, skip it.
   (unless (string= (file-name-nondirectory filepath) filepath)
-    (expand-file-name filepath)))
+    (let ((file-name (expand-file-name filepath)))
+      (and (file-exists-p file-name) file-name))))
 
 (defun flycheck-locate-config-file-ancestor-directories (filename _checker)
   "Locate a configuration FILENAME in ancestor directories.
@@ -4552,7 +4554,7 @@ directory, or nil otherwise."
 
 (mapc (apply-partially #'custom-add-frequent-value
                        'flycheck-locate-config-file-functions)
-      '(flycheck-locate-config-file-absolute-path
+      '(flycheck-locate-config-file-by-path
         flycheck-locate-config-file-ancestor-directories
         flycheck-locate-config-file-home))
 
