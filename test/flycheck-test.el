@@ -5059,14 +5059,14 @@ Why not:
         (flycheck-scalastyle-jar "/opt/scalastyle/scalastyle-batch.jar"))
     (flycheck-ert-should-syntax-check
      "checkers/scala-scalastyle-style-error.scala" 'scala-mode
-     '(6 4 error "Don't use println" :checker scala-scalastyle))))
+     '(6 5 error "Don't use println" :checker scala-scalastyle))))
 
 (flycheck-ert-def-checker-test scala-scalastyle scala warning
   (let ((flycheck-scalastylerc "scalastyle.xml")
         (flycheck-scalastyle-jar "/opt/scalastyle/scalastyle-batch.jar"))
     (flycheck-ert-should-syntax-check
      "checkers/scala-scalastyle-style-warning.scala" 'scala-mode
-     '(5 8 warning "Redundant braces after class definition"
+     '(5 9 warning "Redundant braces after class definition"
          :checker scala-scalastyle))))
 
 (flycheck-ert-def-checker-test scala-scalastyle scala inhibited-without-jar

@@ -7218,6 +7218,9 @@ See URL `http://www.scalastyle.org'."
           (message) " line=" line (optional " column=" column) line-end)
    (warning line-start "warning file=" (file-name) " message="
             (message) " line=" line (optional " column=" column) line-end))
+  :error-filter (lambda (errors)
+                  (flycheck-sanitize-errors
+                   (flycheck-increment-error-columns errors)))
   :modes scala-mode
   :predicate
   ;; Inhibit this syntax checker if the JAR or the configuration are unset or

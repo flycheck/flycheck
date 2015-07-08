@@ -28,6 +28,7 @@ master (in development)
   - Fix level of `info` messages in `flycheck-compile` [GH-669]
   - Allow custom `:verify` functions for command checkers [GH-672]
   - Fix error when `flycheck-scalastylerc` was set to a non-existing file
+  - Fix error column offsets in `scala-scalastyle`
 
 0.23 (Apr 6, 2015)
 ==================
