@@ -138,6 +138,7 @@ and extension, as in `file-name-base'."
 (flycheck-test-def-indent-test "flycheck.el")
 (flycheck-test-def-indent-test "flycheck-ert.el")
 (flycheck-test-def-indent-test "test/run.el")
+(flycheck-test-def-indent-test "test/flycheck-checkdoc.el")
 (flycheck-test-def-indent-test "test/flycheck-test.el")
 
 (defmacro flycheck-test-def-untabified-test (filename)
@@ -162,6 +163,7 @@ and extension, as in `file-name-base'."
 (flycheck-test-def-untabified-test "flycheck.el")
 (flycheck-test-def-untabified-test "flycheck-ert.el")
 (flycheck-test-def-untabified-test "test/run.el")
+(flycheck-test-def-untabified-test "test/flycheck-checkdoc.el")
 (flycheck-test-def-untabified-test "test/flycheck-test.el")
 
 
