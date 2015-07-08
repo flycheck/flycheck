@@ -140,6 +140,30 @@ and extension, as in `file-name-base'."
 (flycheck-test-def-indent-test "test/run.el")
 (flycheck-test-def-indent-test "test/flycheck-test.el")
 
+(defmacro flycheck-test-def-untabified-test (filename)
+  "Define a test case for the absence of tabs in FILENAME.
+
+FILENAME is relative to the source directory.  The test case is
+named `flycheck-code-style/FILENAME-BASE/indentation', where
+FILENAME-BASE is FILENAME without leading directory components
+and extension, as in `file-name-base'."
+  (let ((testname (intern (format "flycheck-code-style/%s/untabified"
+                                  (file-name-base filename)))))
+    `(ert-deftest ,testname ()
+       :tags '(style)
+       (flycheck-ert-with-file-buffer
+           (expand-file-name ,filename
+                             flycheck-test-source-directory)
+         (set-auto-mode)
+         (shut-up
+           (untabify (point-min) (point-max)))
+         (should-not (buffer-modified-p))))))
+
+(flycheck-test-def-untabified-test "flycheck.el")
+(flycheck-test-def-untabified-test "flycheck-ert.el")
+(flycheck-test-def-untabified-test "test/run.el")
+(flycheck-test-def-untabified-test "test/flycheck-test.el")
+
 
 ;;; Manual
 (ert-deftest flycheck--manual/all-checkers-are-documented ()
