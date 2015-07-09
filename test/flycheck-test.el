@@ -5138,26 +5138,26 @@ Why not:
   :tags '(checkstyle-xml)
   (flycheck-ert-should-syntax-check
    "checkers/sh-shellcheck.sh" 'sh-mode
-   '(2 5 warning "Note that ~ does not expand in quotes." :id "SC2088"
-       :checker sh-shellcheck)
-   '(3 7 error "Double quote array expansions, otherwise they're like $* and break on spaces."
-       :id "SC2068" :checker sh-shellcheck)
+   '(2 5 warning "Tilde does not expand in quotes. Use $HOME."
+       :checker sh-shellcheck :id "SC2088")
+   '(3 7 error "Double quote array expansions to avoid re-splitting elements."
+       :checker sh-shellcheck :id "SC2068")
    '(4 8 warning "Declare and assign separately to avoid masking return values."
-       :id "SC2155" :checker sh-shellcheck)
-   '(4 11 info "Use $(..) instead of legacy `..`." :id "SC2006"
-       :checker sh-shellcheck)))
+       :checker sh-shellcheck :id "SC2155")
+   '(4 11 info "Use $(..) instead of legacy `..`."
+       :checker sh-shellcheck :id "SC2006")))
 
 (flycheck-ert-def-checker-test sh-shellcheck sh excluded-warning
   :tags '(checkstyle-xml)
   (let ((flycheck-shellcheck-excluded-warnings '("SC2088")))
     (flycheck-ert-should-syntax-check
      "checkers/sh-shellcheck.sh" 'sh-mode
-     '(3 7 error "Double quote array expansions, otherwise they're like $* and break on spaces."
-         :id "SC2068" :checker sh-shellcheck)
+     '(3 7 error "Double quote array expansions to avoid re-splitting elements."
+         :checker sh-shellcheck :id "SC2068")
      '(4 8 warning "Declare and assign separately to avoid masking return values."
-         :id "SC2155" :checker sh-shellcheck)
-     '(4 11 info "Use $(..) instead of legacy `..`." :id "SC2006"
-         :checker sh-shellcheck))))
+         :checker sh-shellcheck :id "SC2155")
+     '(4 11 info "Use $(..) instead of legacy `..`."
+         :checker sh-shellcheck :id "SC2006"))))
 
 (flycheck-ert-def-checker-test slim slim nil
   (let* ((slim-version (cadr (split-string (car (process-lines "slimrb" "-v")))))
