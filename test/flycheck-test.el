@@ -3179,8 +3179,8 @@ evaluating BODY."
 (ert-deftest flycheck-locate-config-file-by-path/non-existing-file ()
   :tags '(configuration)
   (flycheck-ert-with-temp-buffer
-   (cd flycheck-test-directory)
-   (should-not (flycheck-locate-config-file-by-path "../foobar" 'emacs-lisp))))
+    (cd flycheck-test-directory)
+    (should-not (flycheck-locate-config-file-by-path "../foobar" 'emacs-lisp))))
 
 (ert-deftest flycheck-locate-config-file-ancestor-directories/not-existing-file ()
   :tags '(configuration)
