@@ -5702,13 +5702,15 @@ is used."
     'auto emacs-lisp
   "Whether to initialize packages in the Emacs Lisp syntax checker.
 
-To initialize packages, call `package-initialize' before
-byte-compiling the file to check.
-
 When nil, never initialize packages.  When `auto', initialize
 packages only when checking `user-init-file' or files from
 `user-emacs-directory'.  For any other non-nil value, always
-initialize packages."
+initialize packages.
+
+When initializing packages is enabled the `emacs-lisp' syntax
+checker calls `package-initialize' before byte-compiling the file
+to be checked.  It also sets `package-user-dir' according to
+`flycheck-emacs-lisp-package-user-dir'."
   :type '(choice (const :tag "Do not initialize packages" nil)
                  (const :tag "Initialize packages for configuration only" auto)
                  (const :tag "Always initialize packages" t))
@@ -5742,8 +5744,9 @@ initialize packages."
 (flycheck-def-option-var flycheck-emacs-lisp-package-user-dir nil emacs-lisp
   "Package directory for the Emacs Lisp syntax checker.
 
-When set to a string, set `package-user-dir' to the value of this
-variable before initializing packages.
+If set to a string set `package-user-dir' to the value of this
+variable before initializing packages. If set to nil just inherit
+the value of `package-user-dir' from the running Emacs session.
 
 This variable has no effect, if
 `flycheck-emacs-lisp-initialize-packages' is nil."
