@@ -6866,7 +6866,10 @@ See URL `https://github.com/jimhester/lintr'."
             line-end)
    (error line-start (file-name) ":" line ":" column ": error: " (message)
           line-end))
-  :modes ess-mode)
+  :modes ess-mode
+  ;; Don't check ESS files which do not contain R
+  :predicate (lambda () (and (bound-and-true-p ess-language)
+                             (equal ess-language "S"))))
 
 (flycheck-define-checker racket
   "A Racket syntax checker using the Racket compiler.

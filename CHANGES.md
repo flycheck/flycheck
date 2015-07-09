@@ -29,6 +29,7 @@ master (in development)
   - Allow custom `:verify` functions for command checkers [GH-672]
   - Fix error when `flycheck-scalastylerc` was set to a non-existing file
   - Fix error column offsets in `scala-scalastyle`
+  - Do not use `r-lintr` in non-R buffers [GH-607]
 
 0.23 (Apr 6, 2015)
 ==================
