@@ -7518,11 +7518,23 @@ See URL `http://www.gnu.org/software/texinfo/'."
           (message) line-end))
   :modes texinfo-mode)
 
+(flycheck-def-option-var flycheck-verilator-include-path nil verilog-verilator
+  "A list of include directories for Verilator.
+
+The value of this variable is a list of strings, where each
+string is a directory to add to the include path of Verilator.
+Relative paths are relative to the file being checked."
+  :type '(repeat (directory :tag "Include directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.24"))
+
 (flycheck-define-checker verilog-verilator
   "A Verilog syntax checker using the Verilator Verilog HDL simulator.
 
 See URL `http://www.veripool.org/wiki/verilator'."
-  :command ("verilator" "--lint-only" "-Wall" source)
+  :command ("verilator" "--lint-only" "-Wall"
+            (option-list "-I" flycheck-verilator-include-path concat)
+            source)
   :error-patterns
   ((warning line-start "%Warning-" (zero-or-more not-newline) ": "
             (file-name) ":" line ": " (message) line-end)
