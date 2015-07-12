@@ -18,6 +18,10 @@ master (in development)
   - Add `flycheck-erlang-include-path` to set include directories for Erlang
     [GH-668]
 
+- Improvements:
+
+  - Show chained checkers in Help buffers for syntax checkers [GH-571]
+
 - Bug fixes:
 
   - Fix offset of column numbers in ESLint [GH-640]

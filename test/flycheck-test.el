@@ -1068,6 +1068,34 @@ and extension, as in `file-name-base'."
               (should (string= (match-string 1) (symbol-name checker))))
           (kill-buffer))))))
 
+(ert-deftest flycheck-describe-checker/help-shows-next-checkers ()
+  :tags '(documentation)
+  (dolist (checker (flycheck-defined-checkers))
+    (let ((next-checkers (flycheck-checker-get checker 'next-checkers))
+          (regexp "It\\s-+runs\\s-+the\\s-+following\\s-+checkers\\s-+afterwards:\n"))
+      (flycheck-ert-with-help-buffer
+        (shut-up (flycheck-describe-checker checker))
+        (with-current-buffer (help-buffer)
+          (goto-char (point-min))
+          (if (not next-checkers)
+              (should-not (re-search-forward regexp nil 'no-error))
+            (re-search-forward regexp)
+            (goto-char (match-end 0))
+            (dolist (next-checker next-checkers)
+              (forward-line 1)
+              (should (looking-at "^     \\* `\\([^']+\\)'\\(?: (maximum level `\\([^']+\\)')\\)?$"))
+              (pcase next-checker
+                (`(,level . ,checker)
+                 (should (equal checker (intern-soft (match-string 1))))
+                 (should (equal level (intern-soft (match-string 2)))))
+                ((pred symbolp)
+                 (should (equal next-checker (intern-soft (match-string 1))))
+                 (should-not (match-string 2)))))
+            ;; After the list of options there should be a blank line to
+            ;; separate the variable list from the actual docstring
+            (forward-line 1)
+            (should (looking-at "^$"))))))))
+
 (ert-deftest flycheck-describe-checker/help-shows-executable-name ()
   :tags '(documentation)
   (dolist (checker (flycheck-defined-checkers))
@@ -1122,7 +1150,7 @@ and extension, as in `file-name-base'."
           (goto-char (point-min))
           (if (not option-vars)
               ;; If there are no variables, we should not see a list of them
-              (should-not (re-search-forward regexp nil :no-error))
+              (should-not (re-search-forward regexp nil 'no-error))
             ;; Find the beginning of the option var listing
             (re-search-forward regexp)
             (goto-char (match-end 0))

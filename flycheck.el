@@ -1751,7 +1751,8 @@ Pop up a help buffer with the documentation of CHECKER."
         (let ((filename (flycheck-checker-get checker 'file))
               (modes (flycheck-checker-get checker 'modes))
               (predicate (flycheck-checker-get checker 'predicate))
-              (print-doc (flycheck-checker-get checker 'print-doc)))
+              (print-doc (flycheck-checker-get checker 'print-doc))
+              (next-checkers (flycheck-checker-get checker 'next-checkers)))
           (princ (format "%s is a Flycheck syntax checker" checker))
           (when filename
             (princ (format " in `%s'" (file-name-nondirectory filename)))
@@ -1774,10 +1775,32 @@ Pop up a help buffer with the documentation of CHECKER."
               (when predicate
                 (princ ", and uses a custom predicate")))
             (princ ".")
+            (when next-checkers
+              (princ "  It runs the following checkers afterwards:"))
             (with-current-buffer standard-output
               (save-excursion
-                (fill-region-as-paragraph modes-start (point-max)))))
-          (princ "\n")
+                (fill-region-as-paragraph modes-start (point-max))))
+            (princ "\n")
+
+            ;; Print the list of next checkers
+            (when next-checkers
+              (princ "\n")
+              (let ((beg-checker-list (with-current-buffer standard-output
+                                        (point))))
+                (dolist (next-checker next-checkers)
+                  (if (symbolp next-checker)
+                      (princ (format "     * `%s'\n" next-checker))
+                    (princ (format "     * `%s' (maximum level `%s')\n"
+                                   (cdr next-checker) (car next-checker)))))
+                ;;
+                (with-current-buffer standard-output
+                  (save-excursion
+                    (while (re-search-backward "`\\([^`']+\\)'"
+                                               beg-checker-list t)
+                      (when (flycheck-valid-checker-p
+                             (intern-soft (match-string 1)))
+                        (help-xref-button 1 'help-flycheck-checker-def checker
+                                          filename))))))))
           ;; Call the custom print-doc function of the checker, if present
           (when print-doc
             (funcall print-doc checker))
