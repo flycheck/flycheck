@@ -54,6 +54,7 @@ substantial code to Flycheck:
 - [Peter Eisentraut](https://github.com/petere) (improvements to foodcritic)
 - [Peter Vasil](https://github.com/ptrv) (Lua, Luacheck and Go build/test
   syntax checkers)
+- [Robert O'Connor](https://github.com/robbyoconnor) (Jade)
 - [Robert Zaremba](https://github.com/robert-zaremba) (gofmt syntax checker)
 - [Robert Dallas Gray](https://github.com/rdallasgray) (configurable error display)
 - [Sean Gillespie](https://github.com/swgillespie) (help messages in Rust)

@@ -8,6 +8,7 @@ master (in development)
 - New syntax checkers:
 
   - Javascript with `jscs` [GH-634] and `standard` [GH-644]
+  - Jade [GH-686]
 
 - New features:
 
