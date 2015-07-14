@@ -121,6 +121,9 @@ check for the @option{--enable} option.
 @flycoption flycheck-cppcheck-inconclusive
 Whether to enable inconclusive checks in cppcheck.  These checks may
 yield more false positives than normal checks.
+@flycoption flycheck-cppcheck-include-path
+A list of include directories for cppcheck.  Relative paths are relative to
+the file being checked.
 @end table
 
 @flyclanguage{CFEngine}
