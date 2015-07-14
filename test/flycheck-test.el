@@ -4333,6 +4333,11 @@ Why not:
    '(8 5 warning "discarding unexpected <spam>"
        :checker html-tidy)))
 
+(flycheck-ert-def-checker-test jade jade nil
+   (flycheck-ert-should-syntax-check
+     "checkers/jade-error.jade" 'jade-mode
+     '(2 nil error "unexpected token \"indent\"" :checker jade)))
+
 (flycheck-ert-def-checker-test javascript-jshint javascript syntax-error
   :tags '(checkstyle-xml)
   ;; Silence JS2 and JS3 parsers

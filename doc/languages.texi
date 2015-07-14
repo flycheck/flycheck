@@ -383,6 +383,13 @@ with the following option:
 
 @end itemize
 
+@flyclanguage{Jade}
+
+@itemize
+@item
+@flyc{jade} (using @uref{http://jade-lang.com/,Jade})
+@end itemize
+
 @flyclanguage{Javascript}
 
 @enumerate
