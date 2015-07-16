@@ -276,6 +276,7 @@ attention to case differences."
     sh-zsh
     sh-shellcheck
     slim
+    sql-sqlint
     tex-chktex
     tex-lacheck
     texinfo
@@ -7493,6 +7494,26 @@ See URL `http://slim-lang.com'."
           (file-name) ", Line " line (optional ", Column " column)
           line-end))
   :modes slim-mode)
+
+(flycheck-define-checker sql-sqlint
+  "A SQL syntax checker using the sqlint tool.
+
+See URL `https://github.com/purcell/sqlint'."
+  :command ("sqlint" source)
+  :error-patterns
+  ((warning line-start (file-name) ":" line ":" column ":WARNING "
+            (message (one-or-more not-newline)
+                     (zero-or-more "\n"
+                                   (one-or-more "  ")
+                                   (one-or-more not-newline)))
+            line-end)
+   (error line-start (file-name) ":" line ":" column ":ERROR "
+          (message (one-or-more not-newline)
+                   (zero-or-more "\n"
+                                 (one-or-more "  ")
+                                 (one-or-more not-newline)))
+          line-end))
+  :modes (sql-mode))
 
 (flycheck-def-config-file-var flycheck-chktexrc tex-chktex ".chktexrc"
   :safe #'stringp)
