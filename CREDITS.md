@@ -65,8 +65,8 @@ substantial code to Flycheck:
 - [Stephen Lewis](https://github.com/stephenjlewis) (pedantic flags for Clang
   and GCC)
 - [Steve Purcell](https://github.com/purcell) (various bug fixes, syntax
-  checkers for HAML, csslint, jslint, SASS, SCSS, jsonlint, LESS, GHC, hdevtools
-  and hlint)
+  checkers for HAML, csslint, jslint, SASS, SCSS, SQL, jsonlint, LESS, GHC,
+  hdevtools and hlint)
 - [Sylvain Benner](https://github.com/syl20bnr) (Elixir and Erlang syntax
   checkers)
 - [Sylvain Rousseau](https://github.com/thisirs) (Bash syntax checkers)
