@@ -766,6 +766,13 @@ A list of excluded warnings for ShellCheck.
 @flyc{slim} (using @uref{http://slim-lang.com/,Slim})
 @end itemize
 
+@flyclanguage{SQL}
+
+@itemize
+@item
+@flyc{sql-sqlint} (using @uref{https://github.com/purcell/sqlint,Sqlint})
+@end itemize
+
 @flyclanguage{TeX/LaTeX}
 
 @itemize

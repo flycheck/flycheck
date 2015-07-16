@@ -5200,6 +5200,12 @@ Why not:
      "checkers/slim-error.slim" 'slim-mode
      `(2 ,column error "Unexpected indentation" :checker slim))))
 
+(flycheck-ert-def-checker-test sqllint sql nil
+  (flycheck-ert-should-syntax-check
+   "checkers/sql-syntax-error.sql" 'sql-mode
+   `(1 15 error "unterminated quoted string at or near \"';\n  \""
+       :checker sql-sqlint)))
+
 (flycheck-ert-def-checker-test tex-chktex (tex latex) nil
   (flycheck-ert-should-syntax-check
    "checkers/tex-warning.tex" 'latex-mode
