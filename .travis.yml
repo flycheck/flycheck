@@ -1,14 +1,12 @@
 language: emacs-lisp
-sudo: required
+sudo: false
 env:
   # Run all unit tests on both Emacs versions
-  - TRAVIS_BUILD=unit EMACS=emacs24
-  - TRAVIS_BUILD=unit EMACS=emacs-snapshot
-  # Build the manual.  We need to set EMACS, because it's required by the
-  # makefile
-  - TRAVIS_BUILD=manual EMACS=emacs
+  - TRAVIS_BUILD=unit EMACS_VERSION=24
+  - TRAVIS_BUILD=unit EMACS_VERSION=snapshot
+  - TRAVIS_BUILD=manual EMACS_VERSION=snapshot
 before_install:
-  - export PATH="$HOME/.cask/bin:$PATH"
+  - export PATH="$HOME/.cask/bin:$HOME/bin:$PATH"
   - make -f travis.mk before_install
 install:
   - make -f travis.mk install
@@ -18,8 +16,3 @@ matrix:
   # Fast fail if any job fails.  We don't need to run all integration tests, if
   # the unit tests fail already.
   fast_finish: true
-  # Allow snapshot builds to fail, because emacs upstream sometimes break, and
-  # the ubuntu-elisp PPA is only semi-alive, and does not regularly build
-  # anymore.
-  allow_failures:
-    - env: TRAVIS_BUILD=unit EMACS=emacs-snapshot

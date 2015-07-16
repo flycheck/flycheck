@@ -19,40 +19,53 @@ ifneq ($(TRAVIS_TAG),)
 MANUAL_VERSION=--version $(TRAVIS_TAG)
 endif
 
-ifeq ($(origin EMACS), undefined)
-$(error "No $$EMACS in environment!")
+EMACSBUILDFLAGS = --with-x-toolkit=no --without-x --without-all
+
+ifeq ($(origin EMACS_VERSION), undefined)
+$(error "No $$EMACS_VERSION in environment!")
 endif
+EMACS="emacs-$(EMACS_VERSION)"
 export EMACS
 
-.PHONY: deps compile check test texinfo deploy_manual \
-	before_install before_install_unit before_install_emacs \
+.PHONY: checkout_emacs24 checkout_emacs_snapshot install_emacs \
+	install_cask install_texinfo \
+	deps compile check test texinfo deploy_manual \
+	before_install before_install_unit before_install_manual \
 	install install_unit install_manual \
 	script script_unit script_manual
 
 # SUPPORT TARGETS
-install_emacs:
-	sudo add-apt-repository -yy 'ppa:cassou/emacs'
-	sudo add-apt-repository -yy 'ppa:ubuntu-elisp/ppa'
-	sudo apt-get update
-	sudo apt-get install -y $(EMACS)-nox
+checkout_emacs-24:
+	curl -o '/tmp/emacs-24.5.tar.xz' 'https://ftp.gnu.org/gnu/emacs/emacs-24.5.tar.xz'
+	tar xJf '/tmp/emacs-24.5.tar.xz' -C /tmp
+	mv /tmp/emacs-24.5 /tmp/emacs
+
+checkout_emacs-snapshot:
+	git clone --depth=1 'http://git.sv.gnu.org/r/emacs.git' /tmp/emacs
+	cd /tmp/emacs && ./autogen.sh
+
+# Build a small Emacs executable without anything for tests
+install_emacs: checkout_emacs-$(EMACS_VERSION)
+	cd '/tmp/emacs' && ./configure $(EMACSBUILDFLAGS) --prefix="$(HOME)"
+	make -j2 -C '/tmp/emacs' install
 
 install_cask: install_emacs
-	curl -fsSL https://raw.githubusercontent.com/cask/cask/master/go | python
+	git clone https://github.com/cask/cask.git "$(HOME)/.cask"
 
 install_texinfo:
 	curl -o '/tmp/texinfo-5.2.tar.gz' 'http://ftp.gnu.org/gnu/texinfo/texinfo-5.2.tar.gz'
 	tar xzf '/tmp/texinfo-5.2.tar.gz' -C /tmp
-	cd '/tmp/texinfo-5.2' && ./configure
-	sudo make -C '/tmp/texinfo-5.2' install
+	cd '/tmp/texinfo-5.2' && ./configure --prefix="$(HOME)"
+	make -C '/tmp/texinfo-5.2' install
 
 deps:
-	make EMACS=$(EMACS) deps
+	make deps
 
 compile check:
-	make EMACS=$(EMACS) EMACSFLAGS="$(EMACSFLAGS)" "$@"
+	make EMACSFLAGS="$(EMACSFLAGS)" "$@"
 
 test: compile
-	make EMACS=$(EMACS) ERTSELECTOR="$(ERTSELECTOR)" test
+	make ERTSELECTOR="$(ERTSELECTOR)" test
 
 texinfo:
 	makeinfo --version
