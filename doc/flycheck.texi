@@ -1139,7 +1139,10 @@ buffer.  Prompt for a syntax checker to run.
 This command runs the command like a normal syntax check would do, but
 instead of highlighting errors within the buffer it shows a new buffer
 in Compilation Mode, which contains the entire output of the command and
-highlights everything that matches a pattern.
+highlights everything that matches a pattern.  You can then refine the
+error pattern, and iterate through this process until the error pattern
+is complete.  @kbd{M-x re-builder} can help you to quickly develop
+patterns for the current output.
 
 Sometimes however an output format doesn't lend itself to error
 patterns.  In this case, you need to write a more sophisticated parser
