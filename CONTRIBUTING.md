@@ -87,8 +87,8 @@ This is a model commit message:
 which helps you to comply to these guidelines.
 
 [Tim Pope's guidelines]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
-[_Git Commit Mode]: https://github.com/magit/git-modes/
-[_Magit]: https://github.com/magit/magit/
+[Git Commit Mode]: https://github.com/magit/git-modes/
+[Magit]: https://github.com/magit/magit/
 
 Contributing syntax checkers
 ----------------------------
