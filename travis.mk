@@ -27,25 +27,31 @@ endif
 EMACS="emacs-$(EMACS_VERSION)"
 export EMACS
 
-.PHONY: checkout_emacs24 checkout_emacs_snapshot install_emacs \
+.PHONY: download_emacs24 checkout_emacs_trunk install_emacs \
 	install_cask install_texinfo \
 	deps compile check test texinfo deploy_manual \
 	before_install before_install_unit before_install_manual \
 	install install_unit install_manual \
 	script script_unit script_manual
 
-# SUPPORT TARGETS
-checkout_emacs-24:
-	curl -o '/tmp/emacs-24.5.tar.xz' 'https://ftp.gnu.org/gnu/emacs/emacs-24.5.tar.xz'
-	tar xJf '/tmp/emacs-24.5.tar.xz' -C /tmp
-	mv /tmp/emacs-24.5 /tmp/emacs
+ifeq ($(EMACS_VERSION),trunk)
+GETEMACS = checkout_emacs_trunk
+else
+GETEMACS = download_emacs24
+endif
 
-checkout_emacs-snapshot:
+# SUPPORT TARGETS
+download_emacs24:
+	curl -o "/tmp/emacs-$(EMACS_VERSION).tar.xz" "https://ftp.gnu.org/gnu/emacs/emacs-$(EMACS_VERSION).tar.xz"
+	tar xJf "/tmp/emacs-$(EMACS_VERSION).tar.xz" -C /tmp
+	mv /tmp/emacs-$(EMACS_VERSION) /tmp/emacs
+
+checkout_emacs_trunk:
 	git clone --depth=1 'http://git.sv.gnu.org/r/emacs.git' /tmp/emacs
 	cd /tmp/emacs && ./autogen.sh
 
 # Build a small Emacs executable without anything for tests
-install_emacs: checkout_emacs-$(EMACS_VERSION)
+install_emacs: $(GETEMACS)
 	cd '/tmp/emacs' && ./configure $(EMACSBUILDFLAGS) --prefix="$(HOME)"
 	make -j2 -C '/tmp/emacs' install
 

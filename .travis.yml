@@ -1,10 +1,11 @@
 language: emacs-lisp
 sudo: false
 env:
-  # Run all unit tests on both Emacs versions
-  - TRAVIS_BUILD=unit EMACS_VERSION=24
-  - TRAVIS_BUILD=unit EMACS_VERSION=snapshot
-  - TRAVIS_BUILD=manual EMACS_VERSION=snapshot
+  # Run unit tests against oldest supported stable, latest stable, and trunk
+  - TRAVIS_BUILD=unit EMACS_VERSION=24.1
+  - TRAVIS_BUILD=unit EMACS_VERSION=24.5
+  - TRAVIS_BUILD=unit EMACS_VERSION=trunk
+  - TRAVIS_BUILD=manual EMACS_VERSION=trunk
 before_install:
   - export PATH="$HOME/.cask/bin:$HOME/bin:$PATH"
   - make -f travis.mk before_install
