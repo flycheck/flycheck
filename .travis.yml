@@ -2,7 +2,7 @@ language: emacs-lisp
 sudo: false
 env:
   # Run unit tests against oldest supported stable, latest stable, and trunk
-  - TRAVIS_BUILD=unit EMACS_VERSION=24.1
+  - TRAVIS_BUILD=unit EMACS_VERSION=24.3
   - TRAVIS_BUILD=unit EMACS_VERSION=24.5
   - TRAVIS_BUILD=unit EMACS_VERSION=trunk
   - TRAVIS_BUILD=manual EMACS_VERSION=trunk

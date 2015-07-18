@@ -8,7 +8,7 @@
 ;; URL: https://www.flycheck.org
 ;; Keywords: convenience, languages, tools
 ;; Version: 0.24-cvs
-;; Package-Requires: ((dash "2.4.0") (pkg-info "0.4") (let-alist "1.0.1") (cl-lib "0.3") (emacs "24.1"))
+;; Package-Requires: ((dash "2.4.0") (pkg-info "0.4") (let-alist "1.0.1") (cl-lib "0.3") (emacs "24.3"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -95,36 +95,6 @@
 
 ;;; Compatibility
 (eval-and-compile
-  ;; `defvar-local' Emacs 24.2 and below
-  (unless (fboundp 'defvar-local)
-    (defmacro defvar-local (var val &optional docstring)
-      "Define VAR as a buffer-local variable with default value VAL.
-Like `defvar' but additionally marks the variable as being automatically
-buffer-local wherever it is set."
-      (declare (debug defvar) (doc-string 3))
-      `(progn
-         (defvar ,var ,val ,docstring)
-         (make-variable-buffer-local ',var))))
-
-  (unless (fboundp 'setq-local)
-    ;; `setq-local' for Emacs 24.2 and below
-    (defmacro setq-local (var val)
-      "Set variable VAR to value VAL in current buffer."
-      `(set (make-local-variable ',var) ,val)))
-
-  (unless (fboundp 'user-error)
-    ;; `user-error' for Emacs 24.2 and below
-    (defalias 'user-error 'error)
-
-    (add-to-list 'debug-ignored-errors
-                 (rx string-start "No more Flycheck errors" string-end))
-    (add-to-list 'debug-ignored-errors
-                 (rx string-start "Flycheck mode disabled" string-end))
-    (add-to-list 'debug-ignored-errors
-                 (rx string-start "Configured syntax checker "
-                     symbol-start (one-or-more not-newline) symbol-end
-                     " cannot be used" string-end)))
-
   (unless (fboundp 'string-suffix-p)
     ;; `string-suffix-p' for Emacs 24.3 and below
     (defun string-suffix-p (suffix string  &optional ignore-case)
@@ -161,15 +131,6 @@ attention to case differences."
     (defsubst string-empty-p (string)
       "Check whether STRING is empty."
       (string= string ""))))
-
-(when (and (not (get 'exclamation-mark 'fringe))
-           (fboundp 'define-fringe-bitmap))
-  ;; Provide `exclamation-mark' bitmap for Emacs 24.2 and below.  We also check,
-  ;; whether `define-fringe-bitmap' is defined, because this function is not
-  ;; available if Emacs is built without GUI support.  See
-  ;; https://github.com/flycheck/flycheck/issues/57
-  (define-fringe-bitmap 'exclamation-mark
-    [24 60 60 24 24 0 0 24 24] nil nil 'center))
 
 
 ;;; Customization
