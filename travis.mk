@@ -42,8 +42,8 @@ endif
 
 # SUPPORT TARGETS
 download_emacs24:
-	curl -o "/tmp/emacs-$(EMACS_VERSION).tar.xz" "https://ftp.gnu.org/gnu/emacs/emacs-$(EMACS_VERSION).tar.xz"
-	tar xJf "/tmp/emacs-$(EMACS_VERSION).tar.xz" -C /tmp
+	curl -o "/tmp/emacs-$(EMACS_VERSION).tar.gz" "https://ftp.gnu.org/gnu/emacs/emacs-$(EMACS_VERSION).tar.gz"
+	tar xzf "/tmp/emacs-$(EMACS_VERSION).tar.gz" -C /tmp
 	mv /tmp/emacs-$(EMACS_VERSION) /tmp/emacs
 
 checkout_emacs_trunk:
