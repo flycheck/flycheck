@@ -529,7 +529,7 @@ documentation conventions of Emacs Lisp you may not need for the
 current buffer with @key{M-x flycheck-disable-checker RET
 emacs-lisp-checkdoc}.
 
-@code{flycheck-disable-checker} acutally sets the buffer-local value of
+@code{flycheck-disable-checker} actually sets the buffer-local value of
 the @code{flycheck-disabled-checkers} option:
 
 @defopt flycheck-disabled-checkers
