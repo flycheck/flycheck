@@ -807,6 +807,7 @@ A list of excluded warnings for ShellCheck.
 @item
 @flyc{verilog-verilator} (using
 @uref{http://www.veripool.org/wiki/verilator,Verilator})
+@end itemize
 
 @flyc{verilog-verilator} provides the following options:
 
@@ -815,8 +816,6 @@ A list of excluded warnings for ShellCheck.
 A list of include directories for Verilator.  Relative paths are relative to
 the file being checked.
 @end table
-
-@end itemize
 
 @flyclanguage{XML}
 
