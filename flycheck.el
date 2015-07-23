@@ -5442,6 +5442,16 @@ This will have no effect when using Cppcheck 1.53 and older."
   :safe #'booleanp
   :package-version '(flycheck . "0.19"))
 
+(flycheck-def-option-var flycheck-cppcheck-include-path nil c/c++-cppcheck
+  "A list of include directories for cppcheck.
+
+The value of this variable is a list of strings, where each
+string is a directory to add to the include path of cppcheck.
+Relative paths are relative to the file being checked."
+  :type '(repeat (directory :tag "Include directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.24"))
+
 (flycheck-define-checker c/c++-cppcheck
   "A C/C++ checker using cppcheck.
 
@@ -5450,6 +5460,7 @@ See URL `http://cppcheck.sourceforge.net/'."
             (option "--enable=" flycheck-cppcheck-checks concat
                     flycheck-option-comma-separated-list)
             (option-flag "--inconclusive" flycheck-cppcheck-inconclusive)
+            (option-list "-I" flycheck-cppcheck-include-path)
             source)
   :error-parser flycheck-parse-cppcheck
   :modes (c-mode c++-mode))
