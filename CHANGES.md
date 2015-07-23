@@ -20,6 +20,10 @@ master (in development)
   - Add `flycheck-dmd-args` to pass additional arguments to `dmd` [GH-655]
   - Add `flycheck-erlang-include-path` to set include directories for Erlang
     [GH-668]
+  - Add `flycheck-verilator-include-path` to set include directories for
+    Verilator [GH-684]
+  - Add `flycheck-cppcheck-include-path` to set include directories for cppcheck
+    [GH-687]
 
 - Improvements:
 

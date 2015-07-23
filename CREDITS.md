@@ -8,6 +8,7 @@ The following people—listed in alphabetical order—contributed
 substantial code to Flycheck:
 
 - [Alain Kalker](https://github.com/ackalker) (fix quoting for flycheck-compile)
+- [Alex Reed][https://github.com/acr4](include paths for Verilator and Cppcheck)
 - [Atila Neves](https://github.com/atilaneves) (include paths and arguments for
   DMD)
 - [Bozhidar Batsov](https://github.com/bbatsov) (improved Flycheck menu, RuboCop
