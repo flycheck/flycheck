@@ -5867,7 +5867,7 @@ Relative paths are relative to the file being checked."
   "A list of library directories for Erlang.
 
 The value of this variable is a list of strings, where each
-string is a directory to add to the include path of erlc.
+string is a directory to add to the library path of erlc.
 Relative paths are relative to the file being checked."
   :type '(repeat (directory :tag "Library directory"))
   :safe #'flycheck-string-list-p
