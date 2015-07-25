@@ -521,19 +521,42 @@ enabled.  Changing it will not affect buffers which already have
   :package-version '(flycheck . "0.15")
   :safe #'booleanp)
 
+(define-widget 'flycheck-minimum-level 'lazy
+  "A radio-type choice of minimum error levels.
+
+See `flycheck-navigation-minimum-level' and
+`flycheck-error-list-minimum-level'."
+  :type '(radio (const :tag "All locations" nil)
+                (const :tag "Informational messages" info)
+                (const :tag "Warnings" warning)
+                (const :tag "Errors" error)
+                (symbol :tag "Custom error level")))
+
 (defcustom flycheck-navigation-minimum-level nil
   "The minimum level of errors to navigate.
 
 If set to an error level, only navigate errors whose error level
 is at least as severe as this one.  If nil, navigate all errors."
   :group 'flycheck
-  :type '(radio (const :tag "All locations" nil)
-                (const :tag "Informational messages" info)
-                (const :tag "Warnings" warning)
-                (const :tag "Errors" error)
-                (symbol :tag "Custom error level"))
+  :type 'flycheck-minimum-level
   :safe #'flycheck-error-level-p
   :package-version '(flycheck . "0.21"))
+
+(defcustom flycheck-error-list-minimum-level nil
+  "The minimum level of errors to display in the error list.
+
+If set to an error level, only displays errors whose error level
+is at least as severe as this one in the error list.  If nil,
+display all errors.
+
+This is the default level, used when the error list is opened.
+You can temporarily change the level using
+\\[flycheck-error-list-set-filter], or reset it to this value
+using \\[flycheck-error-list-reset-filter]."
+  :group 'flycheck
+  :type 'flycheck-minimum-level
+  :safe #'flycheck-error-level-p
+  :package-version '(flycheck . "0.24"))
 
 (defcustom flycheck-completion-system nil
   "The completion system to use.
@@ -826,7 +849,8 @@ Set this variable to nil to disable the mode line completely."
 (defcustom flycheck-error-list-mode-line
   `(,(propertized-buffer-identification "%12b")
     " for buffer "
-    (:eval (flycheck-error-list-propertized-source-name)))
+    (:eval (flycheck-error-list-propertized-source-name))
+    (:eval (flycheck-error-list-mode-line-filter-indicator)))
   "Mode line construct for Flycheck error list.
 
 The value of this variable is a mode line template as in
@@ -1254,6 +1278,7 @@ FILE-NAME is nil, return `default-directory'."
 
 Show PROMPT and read one of CANDIDATES, defaulting to DEFAULT.
 HISTORY is passed to `ido-completing-read' or `completing-read'."
+  ;; TODO: Could use a small cleanup
   (pcase flycheck-completion-system
     (`ido (ido-completing-read prompt candidates nil
                                'require-match nil
@@ -1302,6 +1327,18 @@ a default on its own."
       (unless (flycheck-valid-checker-p checker)
         (error "%S is no Flycheck syntax checker" checker))
       checker)))
+
+(defun read-flycheck-error-level (prompt)
+  "Reads an error level from the user.
+
+Only offers level for which errors currently exist, in addition
+to the default levels."
+  (let* ((levels (mapcar #'flycheck-error-level
+                         (flycheck-error-list-current-errors)))
+         (levels-with-defaults (append '(info warning error) levels))
+         (uniq-levels (-uniq levels-with-defaults))
+         (level (flycheck-completing-read prompt uniq-levels nil)))
+    (and (stringp level) (intern level))))
 
 
 ;;; Checker API
@@ -3418,6 +3455,8 @@ the beginning of the buffer."
 
 (defvar flycheck-error-list-mode-map
   (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "f") #'flycheck-error-list-set-filter)
+    (define-key map (kbd "F") #'flycheck-error-list-reset-filter)
     (define-key map (kbd "n") #'flycheck-error-list-next-error)
     (define-key map (kbd "p") #'flycheck-error-list-previous-error)
     (define-key map (kbd "g") #'flycheck-error-list-check-source)
@@ -3527,12 +3566,17 @@ Return a list with the contents of the table cell."
                    (format "(%s)" checker)
                    'flycheck-error-list-checker-name)))))
 
+(defun flycheck-error-list-current-errors ()
+  "Read the list of errors in `flycheck-error-list-source-buffer'."
+  (when (buffer-live-p flycheck-error-list-source-buffer)
+    (buffer-local-value 'flycheck-current-errors
+                        flycheck-error-list-source-buffer)))
+
 (defun flycheck-error-list-entries ()
   "Create the entries for the error list."
-  (when (buffer-live-p flycheck-error-list-source-buffer)
-    (let ((errors (buffer-local-value 'flycheck-current-errors
-                                      flycheck-error-list-source-buffer)))
-      (mapcar #'flycheck-error-list-make-entry errors))))
+  (-when-let* ((errors (flycheck-error-list-current-errors))
+               (filtered (flycheck-error-list-apply-filter errors)))
+    (mapcar #'flycheck-error-list-make-entry filtered)))
 
 (defun flycheck-error-list-entry-< (entry1 entry2)
   "Determine whether ENTRY1 is before ENTRY2 by location.
@@ -3618,6 +3662,44 @@ list."
       ;; If the error list is the current buffer, don't recenter when
       ;; highlighting
       (flycheck-error-list-highlight-errors preserve-pos))))
+
+(defun flycheck-error-list-mode-line-filter-indicator ()
+  "Create a string representing the current error list filter."
+  (if flycheck-error-list-minimum-level
+      (format " [>= %s]" (symbol-name flycheck-error-list-minimum-level))
+    ""))
+
+(defun flycheck-error-list-set-filter (level)
+  "Restrict the error list to errors at level LEVEL or higher.
+
+If LEVEL is nil, reset to the default level."
+  (interactive
+   (list (read-flycheck-error-level
+          "Minimum error level (errors at lower levels will be hidden): ")))
+  (when (and level (not (flycheck-error-level-p level)))
+    (user-error "Invalid level: %s" level))
+  (-when-let (buf (get-buffer flycheck-error-list-buffer))
+    (with-current-buffer buf
+      (if level
+          (setq-local flycheck-error-list-minimum-level level)
+        (kill-local-variable 'flycheck-error-list-minimum-level)))
+    (flycheck-error-list-refresh)
+    (flycheck-error-list-recenter-at (point-min))))
+
+(defun flycheck-error-list-reset-filter ()
+  "Remove filters and show all errors in the error list."
+  (interactive)
+  (flycheck-error-list-set-filter nil))
+
+(defun flycheck-error-list-apply-filter (errors)
+  "Filter ERRORS according to `flycheck-error-list-minimum-level'."
+  (-if-let* ((min-level flycheck-error-list-minimum-level)
+             (min-severity (flycheck-error-level-severity min-level)))
+      (-filter (lambda (err) (>= (flycheck-error-level-severity
+                                  (flycheck-error-level err))
+                                 min-severity))
+               errors)
+    errors))
 
 (defun flycheck-error-list-goto-error (&optional pos)
   "Go to the location of the error at POS in the error list.
@@ -3741,6 +3823,8 @@ non-nil."
     (with-current-buffer (get-buffer-create flycheck-error-list-buffer)
       (flycheck-error-list-mode)))
   (flycheck-error-list-set-source (current-buffer))
+  ;; Reset the error filter
+  (flycheck-error-list-reset-filter)
   ;; Show the error list in a window, and re-select the old window
   (display-buffer flycheck-error-list-buffer)
   ;; Finally, refresh the error list to show the most recent errors
