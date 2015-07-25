@@ -1249,6 +1249,26 @@ FILE-NAME is nil, return `default-directory'."
 (defvar read-flycheck-checker-history nil
   "`completing-read' history of `read-flycheck-checker'.")
 
+(defun flycheck-completing-read (prompt candidates default &optional history)
+  "Read a value from the minibuffer using `flycheck-completion-system`.
+
+Show PROMPT and read one of CANDIDATES, defaulting to DEFAULT.
+HISTORY is passed to `ido-completing-read' or `completing-read'."
+  (pcase flycheck-completion-system
+    (`ido (ido-completing-read prompt candidates nil
+                               'require-match nil
+                               history
+                               default))
+    (`grizzl (if (and (fboundp 'grizzl-make-index)
+                      (fboundp 'grizzl-completing-read))
+                 (grizzl-completing-read
+                  prompt (grizzl-make-index candidates))
+               (user-error "Please install Grizzl from \
+https://github.com/d11wtq/grizzl")))
+    (_ (completing-read prompt candidates nil 'require-match
+                        nil history
+                        default))))
+
 (defun read-flycheck-checker (prompt &optional default property candidates)
   "Read a flycheck checker from minibuffer with PROMPT and DEFAULT.
 
@@ -1271,20 +1291,9 @@ a default on its own."
                              (or candidates
                                  (flycheck-defined-checkers property))))
          (default (and default (symbol-name default)))
-         (input (pcase flycheck-completion-system
-                  (`ido (ido-completing-read prompt candidates nil
-                                             'require-match nil
-                                             'read-flycheck-checker-history
-                                             default))
-                  (`grizzl (if (and (fboundp 'grizzl-make-index)
-                                    (fboundp 'grizzl-completing-read))
-                               (grizzl-completing-read
-                                prompt (grizzl-make-index candidates))
-                             (user-error "Please install Grizzl from \
-https://github.com/d11wtq/grizzl")))
-                  (_ (completing-read prompt candidates nil 'require-match
-                                      nil 'read-flycheck-checker-history
-                                      default)))))
+         (input (flycheck-completing-read
+                 prompt candidates default
+                 'read-flycheck-checker-history)))
     (when (string-empty-p input)
       (unless default
         (user-error "No syntax checker selected"))
