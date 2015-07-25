@@ -2901,6 +2901,16 @@ The following PROPERTIES constitute an error level:
      The severity is used by `flycheck-error-level-<' to
      determine the ordering of errors according to their levels.
 
+`:compilation-level LEVEL
+
+     A number indicating the broad class of messages that errors
+     at this level belong to: one of 0 (info), 1 (warning), or
+     2 or nil (error). Defaults to nil.
+
+     This is used by `flycheck-checker-pattern-to-error-regexp'
+     to map error levels into `compilation-mode''s hierarchy and
+     to get proper highlighting of errors in `compilation-mode'.
+
 `:overlay-category CATEGORY'
      A symbol denoting the overlay category to use for error
      highlight overlays for this level.  See Info
@@ -2931,6 +2941,8 @@ The following PROPERTIES constitute an error level:
   (setf (get level 'flycheck-error-level) t)
   (setf (get level 'flycheck-error-severity)
         (or (plist-get properties :severity) 0))
+  (setf (get level 'flycheck-compilation-level)
+        (plist-get properties :compilation-level))
   (setf (get level 'flycheck-overlay-category)
         (plist-get properties :overlay-category))
   (setf (get level 'flycheck-fringe-bitmap)
@@ -2947,6 +2959,10 @@ The following PROPERTIES constitute an error level:
 (defun flycheck-error-level-severity (level)
   "Get the numeric severity of LEVEL."
   (or (get level 'flycheck-error-severity) 0))
+
+(defun flycheck-error-level-compilation-level (level)
+  "Get the compilation level for LEVEL."
+  (get level 'flycheck-compilation-level))
 
 (defun flycheck-error-level-overlay-category (level)
   "Get the overlay category for LEVEL."
@@ -2992,6 +3008,7 @@ show the icon."
 
 (flycheck-define-error-level 'error
   :severity 100
+  :compilation-level 2
   :overlay-category 'flycheck-error-overlay
   :fringe-bitmap 'exclamation-mark
   :fringe-face 'flycheck-fringe-error
@@ -3003,6 +3020,7 @@ show the icon."
 
 (flycheck-define-error-level 'warning
   :severity 10
+  :compilation-level 1
   :overlay-category 'flycheck-warning-overlay
   :fringe-bitmap 'question-mark
   :fringe-face 'flycheck-fringe-warning
@@ -3014,6 +3032,7 @@ show the icon."
 
 (flycheck-define-error-level 'info
   :severity -1
+  :compilation-level 0
   :overlay-category 'flycheck-info-overlay
   ;; Not exactly the right indicator, but looks pretty, and I prefer to use
   ;; built-in bitmaps over diving into the hassle of messing around with custom
@@ -4631,10 +4650,7 @@ Return a list representing PATTERN, suitable as element in
 `compilation-error-regexp-alist'."
   (let* ((regexp (car pattern))
          (level (cdr pattern))
-         (level-no (pcase level
-                     (`error 2)
-                     (`warning 1)
-                     (`info 0))))
+         (level-no (flycheck-error-level-compilation-level level)))
     (list regexp 1 2 3 level-no)))
 
 (defun flycheck-checker-compilation-error-regexp-alist (checker)
