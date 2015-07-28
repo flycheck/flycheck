@@ -18,8 +18,8 @@ master (in development)
     [GH-621]
   - Add `flycheck-rust-args` to pass additional arguments to `rustc`
   - Add `flycheck-dmd-args` to pass additional arguments to `dmd` [GH-655]
-  - Add `flycheck-erlang-include-path` to set include directories for Erlang
-    [GH-668]
+  - Add `flycheck-erlang-include-path` [GH-668] and
+    `flycheck-erlang-library-path` [GH-696] for Erlang
   - Add `flycheck-verilator-include-path` to set include directories for
     Verilator [GH-684]
   - Add `flycheck-cppcheck-include-path` to set include directories for cppcheck
@@ -42,6 +42,7 @@ master (in development)
   - Fix error when `flycheck-scalastylerc` was set to a non-existing file
   - Fix error column offsets in `scala-scalastyle`
   - Do not use `r-lintr` in non-R buffers [GH-607]
+  - Enforce output format of `flake8` [GH-704]
 
 0.23 (Apr 6, 2015)
 ==================
