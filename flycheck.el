@@ -1817,6 +1817,32 @@ Return a list of `flycheck-verification-result' objects."
   'help-function #'flycheck-describe-checker
   'help-echo "mouse-2, RET: describe Flycheck checker")
 
+(defun flycheck--verify-princ-checker (checker buffer)
+  "Print verification result of CHECKER for BUFFER."
+  (princ "  ")
+  (insert-button (symbol-name checker)
+                 'type 'help-flycheck-checker-doc
+                 'help-args (list checker))
+  (princ "\n")
+  (let* ((results (with-current-buffer buffer
+                    (flycheck-verify-generic-checker checker)))
+         (label-length
+          (-max (mapcar
+                 (lambda (res)
+                   (length (flycheck-verification-result-label res)))
+                 results)))
+         (message-column (+ 8 label-length)))
+    (dolist (result results)
+      (princ "    - ")
+      (princ (flycheck-verification-result-label result))
+      (princ ": ")
+      (princ (make-string (- message-column (current-column)) ?\ ))
+      (let ((message (flycheck-verification-result-message result))
+            (face (flycheck-verification-result-face result)))
+        (insert (propertize message 'face face)))
+      (princ "\n")))
+  (princ "\n"))
+
 (defun flycheck-verify-setup ()
   "Check whether Flycheck can be used in this buffer.
 
@@ -1846,29 +1872,7 @@ possible problems are shown."
           (insert (propertize "There are no syntax checkers for this buffer!\n\n"
                               'face '(bold error))))
         (dolist (checker checkers)
-          (princ "  ")
-          (insert-button (symbol-name checker)
-                         'type 'help-flycheck-checker-doc
-                         'help-args (list checker))
-          (princ "\n")
-          (let* ((results (with-current-buffer buffer
-                            (flycheck-verify-generic-checker checker)))
-                 (label-length
-                  (-max (mapcar
-                         (lambda (res)
-                           (length (flycheck-verification-result-label res)))
-                         results)))
-                 (message-column (+ 8 label-length)))
-            (dolist (result results)
-              (princ "    - ")
-              (princ (flycheck-verification-result-label result))
-              (princ ": ")
-              (princ (make-string (- message-column (current-column)) ?\ ))
-              (let ((message (flycheck-verification-result-message result))
-                    (face (flycheck-verification-result-face result)))
-                (insert (propertize message 'face face)))
-              (princ "\n")))
-          (princ "\n"))
+          (flycheck--verify-princ-checker checker buffer))
         (princ "Flycheck Mode is ")
         (let ((enabled (buffer-local-value 'flycheck-mode buffer)))
           (insert (propertize (if enabled "enabled" "disabled")
