@@ -6790,6 +6790,7 @@ Update the error level of ERR according to
 Requires Flake8 2.0 or newer. See URL
 `https://pypi.python.org/pypi/flake8'."
   :command ("flake8"
+            "--format=default"
             (config-file "--config" flycheck-flake8rc)
             (option "--max-complexity" flycheck-flake8-maximum-complexity nil
                     flycheck-option-int)
