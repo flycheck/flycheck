@@ -28,6 +28,7 @@ master (in development)
 - Improvements:
 
   - Show chained checkers in Help buffers for syntax checkers [GH-571]
+  - Map custom error levels to compilation mode levels [GH-700]
 
 - Bug fixes:
 
