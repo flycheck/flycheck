@@ -1817,30 +1817,48 @@ Return a list of `flycheck-verification-result' objects."
   'help-function #'flycheck-describe-checker
   'help-echo "mouse-2, RET: describe Flycheck checker")
 
-(defun flycheck--verify-princ-checker (checker buffer)
-  "Print verification result of CHECKER for BUFFER."
+(defun flycheck--verify-princ-checker (checker buffer &optional with-mm)
+  "Print verification result of CHECKER for BUFFER.
+
+When WITH-MM is given and non-nil, also include the major mode
+into the verification results."
   (princ "  ")
   (insert-button (symbol-name checker)
                  'type 'help-flycheck-checker-doc
                  'help-args (list checker))
   (princ "\n")
-  (let* ((results (with-current-buffer buffer
-                    (flycheck-verify-generic-checker checker)))
-         (label-length
-          (-max (mapcar
-                 (lambda (res)
-                   (length (flycheck-verification-result-label res)))
-                 results)))
-         (message-column (+ 8 label-length)))
-    (dolist (result results)
-      (princ "    - ")
-      (princ (flycheck-verification-result-label result))
-      (princ ": ")
-      (princ (make-string (- message-column (current-column)) ?\ ))
-      (let ((message (flycheck-verification-result-message result))
-            (face (flycheck-verification-result-face result)))
-        (insert (propertize message 'face face)))
-      (princ "\n")))
+  (let ((results (with-current-buffer buffer
+                   (flycheck-verify-generic-checker checker))))
+    (when with-mm
+      (with-current-buffer buffer
+        (let* ((modes (flycheck-checker-get checker 'modes))
+               (mm-supported (memq major-mode modes))
+               (message-and-face
+                (cond
+                 ((not modes) '("No restriction" . success))
+                 (mm-supported (cons (format "`%s' supported" major-mode)
+                                     'success))
+                 (t (cons (format "`%s' not supported" major-mode) 'error)))))
+          (push (flycheck-verification-result-new
+                 :label "major mode"
+                 :message (car message-and-face)
+                 :face (cdr message-and-face))
+                results))))
+    (let* ((label-length
+            (-max (mapcar
+                   (lambda (res)
+                     (length (flycheck-verification-result-label res)))
+                   results)))
+           (message-column (+ 8 label-length)))
+      (dolist (result results)
+        (princ "    - ")
+        (princ (flycheck-verification-result-label result))
+        (princ ": ")
+        (princ (make-string (- message-column (current-column)) ?\ ))
+        (let ((message (flycheck-verification-result-message result))
+              (face (flycheck-verification-result-face result)))
+          (insert (propertize message 'face face)))
+        (princ "\n"))))
   (princ "\n"))
 
 (defun flycheck-verify-setup ()
@@ -1878,6 +1896,12 @@ possible problems are shown."
           (insert (propertize (if enabled "enabled" "disabled")
                               'face (if enabled 'success '(warning bold)))))
         (princ ".\n")
+
+        (-when-let (selected-checker (buffer-local-value 'flycheck-checker buffer))
+          (princ "\n")
+          (insert (propertize "The following checker is explicitly selected for this buffer:\n\n"
+                              'face 'bold))
+          (flycheck--verify-princ-checker selected-checker buffer 'with-mm))
 
         (let ((unregistered-checkers (-difference (flycheck-defined-checkers)
                                                   flycheck-checkers)))

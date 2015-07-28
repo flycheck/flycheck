@@ -32,6 +32,7 @@ master (in development)
 
   - Show chained checkers in Help buffers for syntax checkers [GH-571]
   - Map custom error levels to compilation mode levels [GH-700]
+  - `flycheck-verify-checker` now includes the manually selected checker if any
 
 - Bug fixes:
 
