@@ -24,6 +24,9 @@ master (in development)
     Verilator [GH-684]
   - Add `flycheck-cppcheck-include-path` to set include directories for cppcheck
     [GH-687]
+  - Add support for Hlint configuration file [GH-682]
+  - Add Hlint options for ignore rules, language extensions and hint packages
+    [GH-682]
 
 - Improvements:
 
