@@ -1634,17 +1634,35 @@ A valid checker is a symbol defined as syntax checker with
        (= (or (get checker 'flycheck-generic-checker-version) 0)
           flycheck-generic-checker-version)))
 
-(defun flycheck-may-use-checker (checker)
+(defun flycheck-may-use-checker (checker &optional quiet-mode)
   "Whether a generic CHECKER may be used.
 
 Return non-nil if CHECKER may be used for the current buffer, and
-nil otherwise."
+nil otherwise.  Prints a message about CHECKER's suitability
+unless QUIET-MODE is non-nil."
   (let ((modes (flycheck-checker-get checker 'modes))
-        (predicate (flycheck-checker-get checker 'predicate)))
-    (and (flycheck-valid-checker-p checker)
-         (not (flycheck-disabled-checker-p checker))
-         (or (not modes) (memq major-mode modes))
-         (funcall predicate))))
+        (predicate (flycheck-checker-get checker 'predicate))
+        (executable (flycheck-checker-executable checker)))
+    (cl-flet
+        ((qmsg (message-string &rest args)
+               (unless (or noninteractive quiet-mode)
+                 (apply #'message message-string args)) nil))
+      (cond
+       ((not (flycheck-valid-checker-p checker))
+        (qmsg "%s is not a valid checker." checker))
+       ((flycheck-disabled-checker-p checker)
+        (qmsg "Checker %s is disabled." checker))
+       ((not modes)
+        (qmsg "No modes are associated with checker %s." checker))
+       ((not (memq major-mode modes))
+        (qmsg "Checker %s can handle %s, but this buffer is using %s."
+              checker modes major-mode))
+       ((not (executable-find executable))
+        (qmsg "Checker %s needs to run '%s', which is not on `exec-path'."
+              checker executable))
+       ((not (funcall predicate))
+        (qmsg "Calling :predicate of checker %s returned nil." checker))
+       (t t)))))
 
 (defun flycheck-may-use-next-checker (next-checker)
   "Determine whether NEXT-CHECKER may be used."
@@ -2104,10 +2122,9 @@ nil otherwise."
           flycheck-checker
         (user-error "Selected syntax checker %s cannot be used"
                     flycheck-checker))
-    (let ((checkers flycheck-checkers))
-      (while (and checkers (not (flycheck-may-use-checker (car checkers))))
-        (setq checkers (cdr checkers)))
-      (car checkers))))
+    (car (cl-remove-if-not
+          (lambda (c) (flycheck-may-use-checker c 'quiet))
+          flycheck-checkers))))
 
 (defun flycheck-get-next-checker-for-buffer (checker)
   "Get the checker to run after CHECKER for the current buffer."
@@ -4043,8 +4060,7 @@ default `:verify' function of command checkers."
           ;; guard against syntax checker tools which are not installed
           (plist-put properties :predicate
                      (lambda ()
-                       (and (executable-find (flycheck-checker-executable symbol))
-                            (or (not predicate) (funcall predicate))))))
+                       (or (not predicate) (funcall predicate)))))
 
     (apply #'flycheck-define-generic-checker symbol docstring
            :start #'flycheck-start-command-checker
