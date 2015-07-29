@@ -78,7 +78,7 @@ substantial code to Flycheck:
 - [Tom Jakubowski](https://github.com/tomjakubowski) (test support in Rust)
 - [Tomoya Tanjo](https://github.com/tom-tan) (DMD syntax checker)
 - [Victor Deryagin](https://github.com/vderyagin) (Rust syntax checker)
-- [vlatkoB](https://github.com/vlatkoB) (options for hlint)
+- [Vlatko Basic](https://github.com/vlatkoB) (options for hlint)
 - [Yannick Roehlly](https://github.com/yannick1974) (PEP8 naming support in
   Python)
 - [Yasuyuki Oka](https://github.com/yasuyk) (syntax checkers for phpmd, Slim,
