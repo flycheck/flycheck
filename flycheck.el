@@ -6287,11 +6287,24 @@ pragma.  Each extension is enabled via `-X'."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.19"))
 
+(defvar flycheck-haskell-ghc-cache-directory nil
+  "The cache directory for `ghc' output.")
+
+(defun flycheck-haskell-ghc-cache-location ()
+  "Get the cache location for `ghc' output.
+
+If no cache directory exists yet, create one and return it.
+Otherwise return the previously used cache directory."
+  (setq flycheck-haskell-ghc-cache-directory
+        (or flycheck-haskell-ghc-cache-directory
+            (make-temp-file "flycheck-haskell-ghc-cache" 'directory))))
+
 (flycheck-define-checker haskell-ghc
   "A Haskell syntax and type checker using ghc.
 
 See URL `http://www.haskell.org/ghc/'."
-  :command ("ghc" "-Wall" "-fno-code"
+  :command ("ghc" "-Wall" "-no-link"
+            "-outputdir" (eval (flycheck-haskell-ghc-cache-location))
             (option-flag "-no-user-package-db"
                          flycheck-ghc-no-user-package-database)
             (option-list "-package-db" flycheck-ghc-package-databases)
