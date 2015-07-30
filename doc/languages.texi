@@ -419,11 +419,11 @@ with the following option:
 @item
 @itemize
 @item
-@flyc{javascript-jshint} (@uref{http://jshint.com/,JSHint})
+@flyc{javascript-jshint} (@uref{http://jshint.com/,JSHint}),
 @item
-Or @flyc{javascript-eslint} (@uref{http://eslint.org/,ESLint})
+or @flyc{javascript-eslint} (@uref{http://eslint.org/,ESLint}),
 @item
-Or @flyc{javascript-gjslint}
+or @flyc{javascript-gjslint}
 (@uref{https://developers.google.com/closure/utilities,Closure Linter})
 @end itemize
 @item
