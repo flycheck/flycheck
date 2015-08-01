@@ -5,6 +5,7 @@
 [![MELPA version](http://melpa.org/packages/flycheck-badge.svg)](http://melpa.org/#/flycheck)
 [![Manual](https://img.shields.io/badge/manual-latest-green.svg)][manual]
 [![Waffle Board](https://img.shields.io/badge/Board-ready-75AED9.svg)](https://waffle.io/flycheck/flycheck)
+[![Buy A Drink](https://img.shields.io/badge/Paypal-Buy%20a%20Drink-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=BYNRV4RY2WG7L)
 
 **Flycheck** is a modern on-the-fly syntax checking extension for GNU Emacs 24,
 intended as replacement for the older Flymake extension which is part of GNU
