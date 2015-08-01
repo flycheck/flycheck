@@ -1,11 +1,11 @@
 # [![Flycheck Logo](https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/logo.png)](http://www.flycheck.org)
 
-[![License GPL 3][badge-gpl3]][COPYING]
-[![MELPA stable version][badge-melpa-stable]](http://stable.melpa.org/#/flycheck)
-[![MELPA version][badge-melpa]](http://melpa.org/#/flycheck)
-[![Manual][badge-manual]][manual]
+[![License GPL 3](https://img.shields.io/badge/license-GPL_3-blue.svg)][COPYING]
+[![MELPA stable version](http://stable.melpa.org/packages/flycheck-badge.svg)](http://stable.melpa.org/#/flycheck)
+[![MELPA version](http://melpa.org/packages/flycheck-badge.svg)](http://melpa.org/#/flycheck)
+[![Manual](https://img.shields.io/badge/manual-latest-green.svg)][manual]
 [![Stories in Ready](https://badge.waffle.io/flycheck/flycheck.svg?label=ready&title=Ready)](http://waffle.io/flycheck/flycheck)
-[![Build status][badge-travis]](https://travis-ci.org/flycheck/flycheck)
+[![Build status](https://travis-ci.org/flycheck/flycheck.svg?branch=master)](https://travis-ci.org/flycheck/flycheck)
 
 **Flycheck** is a modern on-the-fly syntax checking extension for GNU Emacs 24,
 intended as replacement for the older Flymake extension which is part of GNU
@@ -25,12 +25,6 @@ The color theme in this screencast is [Solarized Light][], with the the
 [Source Code Pro]: https://github.com/adobe-fonts/source-code-pro
 [COPYING]: https://github.com/flycheck/flycheck/blob/master/COPYING
 [manual]: http://www.flycheck.org/manual/latest/index.html
-
-[badge-gpl3]: https://img.shields.io/badge/license-GPL_3-blue.svg
-[badge-melpa-stable]: http://stable.melpa.org/packages/flycheck-badge.svg
-[badge-melpa]: http://melpa.org/packages/flycheck-badge.svg
-[badge-manual]: https://img.shields.io/badge/manual-latest-green.svg
-[badge-travis]: https://travis-ci.org/flycheck/flycheck.svg?branch=master
 
 Features
 --------
