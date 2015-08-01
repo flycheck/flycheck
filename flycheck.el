@@ -6765,10 +6765,10 @@ See URL `http://puppetlabs.com/'."
   (
    ;; Patterns for Puppet 4
    (error line-start "Error: Could not parse for environment "
-          (one-or-more word) ":"
+          (one-or-more (in "a-z" "0-9" "_")) ":"
           (message) " at " (file-name) ":" line ":" column line-end)
    (error line-start "Error: Could not parse for environment "
-          (one-or-more word) ":"
+          (one-or-more (in "a-z" "0-9" "_")) ":"
           (message) " in file " (file-name) " at line " line ":" column
           line-end)
    ;; Errors from Puppet < 4
