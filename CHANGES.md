@@ -49,6 +49,7 @@ master (in development)
   - Enforce output format of `flake8` [GH-704]
   - Parse error ids from luacheck 0.11
   - Fix patterns for Puppet environment names [GH-694]
+  - Properly locate configuration files from jshint and jscs [GH-703]
 
 0.23 (Apr 6, 2015)
 ==================

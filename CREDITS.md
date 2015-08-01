@@ -51,7 +51,8 @@ substantial code to Flycheck:
 - [Mitch Tishmack](https://github.com/mitchty) (Microsoft extensions in C/C++)
 - [Moritz Bunkus](https://github.com/mbunkus) (Include path for Perl)
 - [Omair Majid](https://github.com/omajid) (syntax checker for RPM spec)
-- [papaeye](https://github.com/papaeye) (JSCS syntax checker)
+- [papaeye](https://github.com/papaeye) (JSCS syntax checker, bug fixes for
+  Javascript checkers)
 - [Per Nordlöw](https://github.com/nordlow) (syntax checkers for Ada, Fortran
   and Python, syntax checker name in error list)
 - [Peter Eisentraut](https://github.com/petere) (improvements to foodcritic)
