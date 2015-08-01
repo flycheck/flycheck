@@ -4,7 +4,6 @@
 [![MELPA stable version](http://stable.melpa.org/packages/flycheck-badge.svg)](http://stable.melpa.org/#/flycheck)
 [![MELPA version](http://melpa.org/packages/flycheck-badge.svg)](http://melpa.org/#/flycheck)
 [![Manual](https://img.shields.io/badge/manual-latest-green.svg)][manual]
-[![Build status](https://travis-ci.org/flycheck/flycheck.svg?branch=master)](https://travis-ci.org/flycheck/flycheck)
 [![Waffle Board](https://img.shields.io/badge/Board-ready-75AED9.svg)](https://waffle.io/flycheck/flycheck)
 
 **Flycheck** is a modern on-the-fly syntax checking extension for GNU Emacs 24,
