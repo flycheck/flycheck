@@ -47,6 +47,7 @@ master (in development)
   - Fix error column offsets in `scala-scalastyle`
   - Do not use `r-lintr` in non-R buffers [GH-607]
   - Enforce output format of `flake8` [GH-704]
+  - Parse error ids from luacheck 0.11
 
 0.23 (Apr 6, 2015)
 ==================

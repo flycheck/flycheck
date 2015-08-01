@@ -4510,8 +4510,7 @@ Why not:
 (flycheck-ert-def-checker-test luacheck lua syntax-error
   (flycheck-ert-should-syntax-check
    "checkers/lua-syntax-error.lua" 'lua-mode
-   '(5 7 error "unfinished string"
-       :checker luacheck)))
+   '(5 7 error "unfinished string" :id "E011" :checker luacheck)))
 
 (flycheck-ert-def-checker-test luacheck lua warnings
   (flycheck-ert-should-syntax-check

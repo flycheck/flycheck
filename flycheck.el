@@ -6618,10 +6618,15 @@ See URL `https://github.com/mpeterv/luacheck'."
             source)
   :error-patterns
   ((warning line-start (file-name)
-            ":" line ":" column ": (" (id (and "W" (one-or-more digit)))
-            ") " (message) line-end)
+            ":" line ":" column
+            ": (" (id "W" (one-or-more digit)) ") "
+            (message) line-end)
    (error line-start (file-name)
-          ":" line ":" column ":" (message) line-end))
+          ":" line ":" column ":"
+          ;; `luacheck' before 0.11.0 did not output codes for errors, hence
+          ;; the ID is optional here
+          (optional " (" (id "E" (one-or-more digit)) ") ")
+          (message) line-end))
   :modes lua-mode)
 
 (flycheck-define-checker lua
