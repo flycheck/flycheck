@@ -48,6 +48,7 @@ master (in development)
   - Do not use `r-lintr` in non-R buffers [GH-607]
   - Enforce output format of `flake8` [GH-704]
   - Parse error ids from luacheck 0.11
+  - Fix patterns for Puppet environment names [GH-694]
 
 0.23 (Apr 6, 2015)
 ==================
