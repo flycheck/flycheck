@@ -1,0 +1,4 @@
+{
+    "validateIndentation": 2,
+    "excludeFiles": ["ignored/*.js"]
+}

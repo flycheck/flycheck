@@ -6445,7 +6445,7 @@ See URL `http://jade-lang.com'."
 See URL `http://www.jshint.com'."
   :command ("jshint" "--checkstyle-reporter"
             (config-file "--config" flycheck-jshintrc)
-            source)
+            source-inplace)
   :error-parser flycheck-parse-checkstyle
   :error-filter flycheck-dequalify-error-ids
   :modes (js-mode js2-mode js3-mode)
@@ -6540,7 +6540,7 @@ error."
 See URL `http://www.jscs.info'."
   :command ("jscs" "--reporter=checkstyle"
             (config-file "--config" flycheck-jscsrc)
-            source)
+            source-inplace)
   :error-parser flycheck-parse-jscs
   :error-filter (lambda (errors)
                   (flycheck-remove-error-ids
