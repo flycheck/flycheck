@@ -36,6 +36,8 @@ master (in development)
     [GH-705]
   - `flycheck-select-checker` now shows a verification buffer if the selected
     checker cannot be used [GH-705]
+  - Add `flycheck-verify-checker` to check whether a specific syntax checker can
+    be used in a buffer [GH-705]
 
 - Bug fixes:
 
