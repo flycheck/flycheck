@@ -1861,6 +1861,45 @@ into the verification results."
         (princ "\n"))))
   (princ "\n"))
 
+(defun flycheck--verify-print-header (desc buffer)
+  "Print a title with DESC in the current buffer."
+  (princ desc)
+  (insert (propertize (buffer-name buffer) 'face 'bold))
+  (princ " in ")
+  (let ((mode (buffer-local-value 'major-mode buffer)))
+    (insert-button (symbol-name mode)
+                   'type 'help-function
+                   'help-args (list mode)))
+  (princ ":\n\n"))
+
+(defun flycheck-verify-checker (checker)
+  "Check whether a CHECKER can be used in this buffer.
+
+Show a buffer listing possible problems that prevent CHECKER from
+being used for the current buffer.
+
+Note: Do not use this function to check whether a syntax checker
+is applicable from Emacs Lisp code.  Use
+`flycheck-may-use-checker' instead."
+  (interactive (list (read-flycheck-checker "Checker to verify: ")))
+  (unless (flycheck-valid-checker-p checker)
+    (user-error "%s is not a syntax checker"))
+
+  ;; Save the buffer to make sure that all predicates are good
+  (when (and (buffer-file-name) (buffer-modified-p))
+    (save-buffer))
+
+  (let ((buffer (current-buffer)))
+    (with-help-window (get-buffer-create " *Flycheck checker*")
+      (with-current-buffer standard-output
+        (flycheck--verify-print-header "Syntax checker in buffer " buffer)
+        (flycheck--verify-princ-checker checker buffer 'with-mm)
+        (if (with-current-buffer buffer (flycheck-may-use-checker checker))
+            (insert (propertize "Flycheck can use this syntax checker for this buffer."
+                                'face 'success))
+          (insert (propertize "Flycheck cannot use this syntax checker for this buffer."
+                              'face 'error)))))))
+
 (defun flycheck-verify-setup ()
   "Check whether Flycheck can be used in this buffer.
 
@@ -1878,14 +1917,7 @@ possible problems are shown."
     ;; Now print all applicable checkers
     (with-help-window (get-buffer-create " *Flycheck checkers*")
       (with-current-buffer standard-output
-        (princ "Syntax checkers for buffer ")
-        (insert (propertize (buffer-name buffer) 'face 'bold))
-        (princ " in ")
-        (let ((mode (buffer-local-value 'major-mode buffer)))
-          (insert-button (symbol-name mode)
-                         'type 'help-function
-                         'help-args (list mode)))
-        (princ ":\n\n")
+        (flycheck--verify-print-header "Syntax checkers for buffer " buffer)
         (unless checkers
           (insert (propertize "There are no syntax checkers for this buffer!\n\n"
                               'face '(bold error))))
@@ -2145,6 +2177,7 @@ CHECKER will be used, even if it is not contained in
                                   (flycheck-get-checker-for-buffer)))))
   (when (not (eq checker flycheck-checker))
     (unless (or (not checker) (flycheck-may-use-checker checker))
+      (flycheck-verify-checker checker)
       (user-error "Can't use syntax checker %S in this buffer" checker))
     (setq flycheck-checker checker)
     (when flycheck-mode
