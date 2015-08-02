@@ -19,7 +19,7 @@ ifneq ($(TRAVIS_TAG),)
 MANUAL_VERSION=--version $(TRAVIS_TAG)
 endif
 
-EMACSBUILDFLAGS = --with-x-toolkit=no --without-x --without-all
+EMACSBUILDFLAGS = --with-x-toolkit=no --without-x --without-all --with-xml2
 
 ifeq ($(origin EMACS_VERSION), undefined)
 $(error "No $$EMACS_VERSION in environment!")
