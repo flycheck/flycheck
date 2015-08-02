@@ -2134,8 +2134,8 @@ nil otherwise."
   (if flycheck-checker
       (if (flycheck-may-use-checker flycheck-checker)
           flycheck-checker
-        (user-error "Selected syntax checker %s cannot be used"
-                    flycheck-checker))
+        (error "Flycheck cannot use %s in this buffer, type M-x flycheck-verify-setup for more details"
+               flycheck-checker))
     (let ((checkers flycheck-checkers))
       (while (and checkers (not (flycheck-may-use-checker (car checkers))))
         (setq checkers (cdr checkers)))
