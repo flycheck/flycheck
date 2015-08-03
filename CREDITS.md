@@ -116,7 +116,7 @@ and projects:
   the author's life back when he was using Vim, and served as
   inspiration for Flycheck and many of its syntax checkers.
 - Pavel Kobyakov for his work on GNU Flymake, which is a great work on
-  its own, despite its flaws and weaknesses
+  its own, despite its flaws and weaknesses.
 - [Steve Purcell](https://github.com/purcell) for his valuable feedback, the
   fruitful discussions and his important ideas about the shape and design of
   Flycheck, and his indispensible and dedicated work on MELPA, which drives the
