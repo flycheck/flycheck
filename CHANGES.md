@@ -11,6 +11,7 @@ master (in development)
   - Javascript with `jscs` [GH-634] and `standard` [GH-644]
   - Jade [GH-686]
   - SQL with `sqllint` [GH-691]
+  - Groovy [GH-715]
 
 - New features:
 

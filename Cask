@@ -18,6 +18,7 @@
  (depends-on "erlang")
  (depends-on "ess")
  (depends-on "go-mode")
+ (depends-on "groovy-mode")
  (depends-on "haml-mode")
  (depends-on "handlebars-mode")
  (depends-on "haskell-mode")
