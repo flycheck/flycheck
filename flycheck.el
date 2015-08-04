@@ -7101,6 +7101,16 @@ Requires Flake8 2.0 or newer. See URL
                               ".pylintrc"
   :safe #'stringp)
 
+(flycheck-def-option-var flycheck-pylint-use-symbolic-id t python-pylint
+  "Whether to use pylint message symbols or message codes.
+
+A pylint message has both an opaque identifying code (such as `F0401') and a
+more meaningful symbolic code (such as `import-error').  This option governs
+which should be used and reported to the user."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.24"))
+
 (flycheck-define-checker python-pylint
   "A Python syntax and style checker using Pylint.
 
@@ -7109,7 +7119,10 @@ This syntax checker requires Pylint 1.0 or newer.
 See URL `http://www.pylint.org/'."
   ;; -r n disables the scoring report
   :command ("pylint" "-r" "n"
-            "--msg-template" "{path}:{line}:{column}:{C}:{msg_id}:{msg}"
+            "--msg-template"
+            (eval (if flycheck-pylint-use-symbolic-id
+                      "{path}:{line}:{column}:{C}:{symbol}:{msg}"
+                    "{path}:{line}:{column}:{C}:{msg_id}:{msg}"))
             (config-file "--rcfile" flycheck-pylintrc)
             ;; Need `source-inplace' for relative imports (e.g. `from .foo
             ;; import bar'), see https://github.com/flycheck/flycheck/issues/280
