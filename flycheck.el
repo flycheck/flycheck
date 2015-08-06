@@ -4775,8 +4775,8 @@ tool, just like `compile' (\\[compile])."
   (let* ((command (flycheck-checker-shell-command checker))
          (buffer (compilation-start command nil #'flycheck-compile-name)))
     (with-current-buffer buffer
-      (set (make-local-variable 'compilation-error-regexp-alist)
-           (flycheck-checker-compilation-error-regexp-alist checker)))))
+      (setq-local compilation-error-regexp-alist
+                  (flycheck-checker-compilation-error-regexp-alist checker)))))
 
 
 ;;; General error parsing for command checkers
