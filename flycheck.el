@@ -3746,7 +3746,7 @@ list."
 (defun flycheck-error-list-mode-line-filter-indicator ()
   "Create a string representing the current error list filter."
   (if flycheck-error-list-minimum-level
-      (format " [>= %s]" (symbol-name flycheck-error-list-minimum-level))
+      (format " [>= %s]" flycheck-error-list-minimum-level)
     ""))
 
 (defun flycheck-error-list-set-filter (level)
