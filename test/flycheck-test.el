@@ -2957,6 +2957,35 @@ evaluating BODY."
                          'type 'flycheck-error-list
                          'face 'flycheck-error-list-checker-name)))))
 
+(ert-deftest flycheck-error-list-mode-line-filter-indicator/no-filter ()
+  :tags '(error-list)
+  (let ((flycheck-error-list-minimum-level nil))
+    (should (string= (flycheck-error-list-mode-line-filter-indicator) ""))))
+
+(ert-deftest flycheck-error-list-mode-line-filter-indicator/with-filter ()
+  :tags '(error-list)
+  (let ((flycheck-error-list-minimum-level 'error))
+    (should (string= (flycheck-error-list-mode-line-filter-indicator)
+                     " [>= error]"))))
+
+(ert-deftest flycheck-error-list-reset-filter/kills-local-variable ()
+  :tags '(error-list)
+  (with-temp-buffer
+    (setq-local flycheck-error-list-minimum-level 'error)
+    (should (local-variable-p 'flycheck-error-list-minimum-level))
+    (flycheck-error-list-reset-filter)
+    (should-not (local-variable-p 'flycheck-error-list-minimum-level))))
+
+(ert-deftest flycheck-error-list-apply-filter/filters-lower-levels ()
+  :tags '(error-list)
+  (let ((flycheck-error-list-minimum-level 'warning)
+        (errors (list (flycheck-error-new-at 10 10 'error)
+                      (flycheck-error-new-at 20 20 'warning)
+                      (flycheck-error-new-at 30 30 'info))))
+    (should (equal (flycheck-error-list-apply-filter errors)
+                   (list (flycheck-error-new-at 10 10 'error)
+                         (flycheck-error-new-at 20 20 'warning))))))
+
 
 ;;; Displaying errors in buffers
 (ert-deftest flycheck-display-errors/no-display-function-set ()
