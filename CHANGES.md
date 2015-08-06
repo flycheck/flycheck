@@ -14,6 +14,9 @@ master (in development)
 
 - New features:
 
+  - The error list can now be filtered by error level by pressing <kbd>f</kbd>
+  - Add `flycheck-error-list-minimum-level` to restrict error levels displayed
+    in the error list [GH-698] [GH-701]
   - Add `flycheck-perl-include-path` to set include directories for Perl
     [GH-621]
   - Add `flycheck-rust-args` to pass additional arguments to `rustc`

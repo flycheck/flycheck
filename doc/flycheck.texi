@@ -779,6 +779,11 @@ In the error list window the following keybindings are available:
 Move to the next error.
 @item p
 Move to the previous error.
+@item f
+Filter the list, showing only errors whose level is above a threshold of
+your choice.
+@item F
+Remove all filters.
 @item q
 Hide the error list window.
 @item RET
@@ -794,6 +799,18 @@ For instance, you can sort errors by their level by moving the point
 onto the text of the @samp{Level} column, and then pressing @kbd{S}.
 You can achieve the same effect by clicking on the column header.
 @end table
+
+By default, the error list shows all errors in the current buffer.  In
+addition to filtering manually, you can restrict it to errors
+above certain levels with @code{flycheck-error-list-minimum-level}:
+
+@defopt flycheck-error-list-minimum-level
+The minimum level of errors to display in the error list.
+
+If set to an error level, only displays errors whose error level
+is at least as severe as this one in the error list.  If nil,
+display all errors.
+@end defopt
 
 @vindex flycheck-error-list-highlight
 
