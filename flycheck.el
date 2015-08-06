@@ -3752,7 +3752,7 @@ list."
 (defun flycheck-error-list-set-filter (level)
   "Restrict the error list to errors at level LEVEL or higher.
 
-If LEVEL is nil, reset to the default level."
+LEVEL is either an error level symbol, or nil, to remove the filter."
   (interactive
    (list (read-flycheck-error-level
           "Minimum error level (errors at lower levels will be hidden): ")))
@@ -3760,16 +3760,14 @@ If LEVEL is nil, reset to the default level."
     (user-error "Invalid level: %s" level))
   (-when-let (buf (get-buffer flycheck-error-list-buffer))
     (with-current-buffer buf
-      (if level
-          (setq-local flycheck-error-list-minimum-level level)
-        (kill-local-variable 'flycheck-error-list-minimum-level)))
+      (setq-local flycheck-error-list-minimum-level level))
     (flycheck-error-list-refresh)
     (flycheck-error-list-recenter-at (point-min))))
 
 (defun flycheck-error-list-reset-filter ()
   "Remove filters and show all errors in the error list."
   (interactive)
-  (flycheck-error-list-set-filter nil))
+  (kill-local-variable 'flycheck-error-list-minimum-level))
 
 (defun flycheck-error-list-apply-filter (errors)
   "Filter ERRORS according to `flycheck-error-list-minimum-level'."
