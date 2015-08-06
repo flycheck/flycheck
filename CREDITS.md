@@ -14,7 +14,8 @@ substantial code to Flycheck:
   DMD)
 - [Bozhidar Batsov](https://github.com/bbatsov) (improved Flycheck menu, RuboCop
   syntax checker, improvements to Ruby)
-- [Clément Pit--Claudel](https://github.com/cpitclaudel) (custom error levels)
+- [Clément Pit--Claudel](https://github.com/cpitclaudel) (custom error levels,
+  error level filtering in the error list)
 - [Cristian Capdevila](https://github.com/capdevc) (enabled warnings in Rust)
 - [Damon Haley](https://github.com/dhaley) (PHPCS syntax checker)
 - [David Holm](https://github.com/dholm) (Clang, Cppcheck, lintr and Verilator
