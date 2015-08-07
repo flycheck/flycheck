@@ -4246,6 +4246,14 @@ of command checkers is `flycheck-sanitize-errors'.
      `flycheck-parse-with-patterns'.  In this case,
      `:error-patterns' is mandatory.
 
+`:standard-input t'
+     Whether to send the buffer contents on standard input.
+
+     If this property is given and has a non-nil value, send the
+     contents of the buffer on standard input.
+
+     Defaults to nil.
+
 Note that you may not give `:start', `:interrupt', and
 `:print-doc' for a command checker.  You can give a custom
 `:verify' function, though, whose results will be appended to the
@@ -4273,7 +4281,8 @@ default `:verify' function of command checkers."
         (patterns (plist-get properties :error-patterns))
         (parser (or (plist-get properties :error-parser)
                     #'flycheck-parse-with-patterns))
-        (predicate (plist-get properties :predicate)))
+        (predicate (plist-get properties :predicate))
+        (standard-input (plist-get properties :standard-input)))
 
     (unless command
       (error "Missing :command in syntax checker %s" symbol))
@@ -4312,7 +4321,8 @@ default `:verify' function of command checkers."
       (pcase-dolist (`(,prop . ,value)
                      `((command . ,command)
                        (error-parser . ,parser)
-                       (error-patterns . ,patterns)))
+                       (error-patterns . ,patterns)
+                       (standard-input . ,standard-input)))
         (setf (flycheck-checker-get symbol prop) value)))))
 
 (eval-and-compile
@@ -4570,6 +4580,12 @@ symbols in the command."
           ;; process itself, to get rid of the global state ASAP.
           (process-put process 'flycheck-temporaries flycheck-temporaries)
           (setq flycheck-temporaries nil)
+          ;; Send the buffer to the process on standard input, if enabled
+          (when (flycheck-checker-get checker 'standard-input)
+            (save-restriction
+              (widen)
+              (process-send-region process (point-min) (point-max))
+              (process-send-eof process)))
           ;; Return the process
           process)
       (error
@@ -5269,7 +5285,8 @@ SYMBOL with `flycheck-def-executable-var'."
              `(:predicate #',predicate))
          :next-checkers ',(plist-get properties :next-checkers)
          ,@(when verify-fn
-             `(:verify #',verify-fn))))))
+             `(:verify #',verify-fn))
+         :standard-input ',(plist-get properties :standard-input)))))
 
 
 ;;; Built-in checkers
