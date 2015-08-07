@@ -5498,7 +5498,7 @@ When non-nil, enable OpenMP for syntax checkers, via
   :safe #'booleanp
   :package-version '(flycheck . "0.21"))
 
-(flycheck-def-option-var flycheck-gcc-pedantic nil c/c++-clang
+(flycheck-def-option-var flycheck-gcc-pedantic nil c/c++-gcc
   "Whether to warn about language extensions in GCC.
 
 For ISO C, follows the version specified by any -std option used.
@@ -5508,7 +5508,7 @@ When non-nil, disable non-ISO extensions to C/C++ via
   :safe #'booleanp
   :package-version '(flycheck . "0.23"))
 
-(flycheck-def-option-var flycheck-gcc-pedantic-errors nil c/c++-clang
+(flycheck-def-option-var flycheck-gcc-pedantic-errors nil c/c++-gcc
   "Whether to error on language extensions in GCC.
 
 For ISO C, follows the version specified by any -std option used.
