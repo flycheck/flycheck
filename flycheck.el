@@ -5141,8 +5141,7 @@ SYMBOL with `flycheck-def-executable-var'."
              `(:predicate #',predicate))
          :next-checkers ',(plist-get properties :next-checkers)
          ,@(when verify-fn
-             `(:verify #',verify-fn))
-         :verify ))))
+             `(:verify #',verify-fn))))))
 
 
 ;;; Built-in checkers
