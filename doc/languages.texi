@@ -320,6 +320,14 @@ A list of print-like functions for go vet.  Go vet will check these
 functions for format string problems.
 @end table
 
+@flyclanguage{Groovy}
+
+@itemize
+@item
+@flyc{groovy} (syntax check using groovy compiler API (@uref{http://www.groovy-lang.org/}))
+
+@end itemize
+
 @flyclanguage{Haml}
 
 @itemize

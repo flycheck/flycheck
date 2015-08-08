@@ -191,6 +191,7 @@ attention to case differences."
     go-build
     go-test
     go-errcheck
+    groovy
     haml
     handlebars
     haskell-ghc
@@ -6330,6 +6331,30 @@ See URL `https://github.com/kisielk/errcheck'."
     ;; We need a valid package name, since errcheck only works on entire
     ;; packages, and can't check individual Go files.
     (and (flycheck-buffer-saved-p) (flycheck-go-package-name))))
+
+(flycheck-define-checker groovy
+  "A groovy syntax checker using groovy compiler API.
+
+See `http://www.groovy-lang.org/mailing-lists.html#nabble-td365810'
+and `http://docs.groovy-lang.org/latest/html/gapi/org/codehaus/groovy/control/CompilationUnit.html#compile%28int%29'."
+
+  :command ("groovy" "-e"
+            "import org.codehaus.groovy.control.*
+
+file = new File(args[0])
+unit = new CompilationUnit()
+unit.addSource(file)
+
+try {
+    unit.compile(Phases.CONVERSION)
+} catch (MultipleCompilationErrorsException e) {
+    e.errorCollector.write(new PrintWriter(System.out, true), null)
+}
+"
+            source)
+  :error-patterns
+  ((error line-start (file-name) ": " line ":" (message) " @ line " line ", column " column "." line-end))
+  :modes groovy-mode)
 
 (flycheck-define-checker haml
   "A Haml syntax checker using the Haml compiler.
