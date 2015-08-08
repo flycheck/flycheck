@@ -5050,7 +5050,9 @@ Why not:
    "checkers/rust-multiple-error.rs" 'rust-mode
    '(7 9 error "mismatched types:
  expected `u8`,\n    found `i8`
-(expected u8,\n    found i8)" :checker rust :id "E0308")))
+(expected u8,\n    found i8)" :checker rust :id "E0308")
+   '(7 9 info "run `rustc --explain E0308` to see a detailed explanation"
+     :checker rust)))
 
 (flycheck-ert-def-checker-test rust rust test-check-tests-disabled
   (let ((flycheck-rust-check-tests nil))
@@ -5087,7 +5089,7 @@ Why not:
    '(11 9 info "`x` moved here because it has type `NonPOD`, which is moved by default"
         :checker rust)
    '(11 9 info "use `ref` to override" :checker rust)
-   '(12 9 error "use of moved value: `x`" :checker rust)))
+   '(12 9 error "use of moved value: `x`" :checker rust :id "E0382")))
 
 (flycheck-ert-def-checker-test rust rust crate-root-not-set
   (flycheck-ert-should-syntax-check
