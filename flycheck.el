@@ -6353,7 +6353,8 @@ try {
 "
             source)
   :error-patterns
-  ((error line-start (file-name) ": " line ":" (message) " @ line " line ", column " column "." line-end))
+  ((error line-start (file-name) ": " line ":" (message)
+          " @ line " line ", column " column "." line-end))
   :modes groovy-mode)
 
 (flycheck-define-checker haml
