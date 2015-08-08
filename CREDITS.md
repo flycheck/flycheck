@@ -49,6 +49,7 @@ substantial code to Flycheck:
   syntax checkers)
 - [Matthias Dahl](https://github.com/BinaryKhaos) (performance improvements in
   temporary file handling)
+- [Miro Bezjak](https://github.com/mbezjak) (Groovy)
 - [Mitch Tishmack](https://github.com/mitchty) (Microsoft extensions in C/C++)
 - [Moritz Bunkus](https://github.com/mbunkus) (Include path for Perl)
 - [Omair Majid](https://github.com/omajid) (syntax checker for RPM spec)
