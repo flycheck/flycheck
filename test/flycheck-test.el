@@ -4409,7 +4409,7 @@ Why not:
         (flycheck-disabled-checkers '(javascript-jshint javascript-jscs)))
     (flycheck-ert-should-syntax-check
      "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
-     '(3 2 warning "Missing \"use strict\" statement." :id "strict"
+     '(3 2 warning "Use the function form of \"use strict\"." :id "strict"
          :checker javascript-eslint)
      '(4 9 warning "foo is defined but never used" :id "no-unused-vars"
          :checker javascript-eslint))))

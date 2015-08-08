@@ -6619,7 +6619,7 @@ See URL `https://github.com/eslint/eslint'."
                                          (match-string 1 s))
                                    "")
                                  (flycheck-error-message err))))
-                        (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
+                        (flycheck-sanitize-errors errors))
                   errors)
   :modes (js-mode js2-mode js3-mode)
   :next-checkers ((warning . javascript-jscs)))
