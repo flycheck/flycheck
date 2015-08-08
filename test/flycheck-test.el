@@ -4470,7 +4470,7 @@ Why not:
         (flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-ert-should-syntax-check
      "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
-     '(3 2 warning "Missing \"use strict\" statement." :id "strict"
+     '(3 2 warning "Use the function form of \"use strict\"." :id "strict"
          :checker javascript-eslint)
      '(4 3 error "Expected indentation of 2 characters"
          :checker javascript-jscs)
@@ -4495,17 +4495,17 @@ Why not:
   (let ((flycheck-checker 'javascript-standard))
     (flycheck-ert-should-syntax-check
      "checkers/javascript-style.js" '(js-mode js2-mode js3-mode)
-     '(3 9 error "Missing space before function parentheses."
+     '(3 10 error "Missing space before function parentheses."
          :checker javascript-standard)
-     '(4 2 error "Expected indentation of 2 characters."
+     '(4 2 error "Expected indentation of 2 characters but found 0."
          :checker javascript-standard)
-     '(4 5 error "foo is defined but never used"
+     '(4 6 error "foo is defined but never used"
          :checker javascript-standard)
-     '(4 12 error "Strings must use singlequote."
+     '(4 13 error "Strings must use singlequote."
          :checker javascript-standard)
-     '(4 27 error "Extra semicolon."
+     '(4 28 error "Extra semicolon."
          :checker javascript-standard)
-     '(5 5 error "Extra semicolon."
+     '(5 6 error "Extra semicolon."
          :checker javascript-standard))))
 
 (flycheck-ert-def-checker-test javascript-standard javascript semistandard
@@ -4513,13 +4513,13 @@ Why not:
         (flycheck-javascript-standard-executable "semistandard"))
     (flycheck-ert-should-syntax-check
      "checkers/javascript-style.js" '(js-mode js2-mode js3-mode)
-     '(3 9 error "Missing space before function parentheses."
+     '(3 10 error "Missing space before function parentheses."
          :checker javascript-standard)
-     '(4 2 error "Expected indentation of 2 characters."
+     '(4 2 error "Expected indentation of 2 characters but found 0."
          :checker javascript-standard)
-     '(4 5 error "foo is defined but never used"
+     '(4 6 error "foo is defined but never used"
          :checker javascript-standard)
-     '(4 12 error "Strings must use singlequote."
+     '(4 13 error "Strings must use singlequote."
          :checker javascript-standard))))
 
 (flycheck-ert-def-checker-test json-jsonlint json nil
