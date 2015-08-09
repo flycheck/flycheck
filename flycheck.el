@@ -6335,9 +6335,7 @@ See URL `https://github.com/kisielk/errcheck'."
 (flycheck-define-checker groovy
   "A groovy syntax checker using groovy compiler API.
 
-See `http://www.groovy-lang.org/mailing-lists.html#nabble-td365810'
-and `http://docs.groovy-lang.org/latest/html/gapi/org/codehaus/groovy/control/CompilationUnit.html#compile%28int%29'."
-
+See URL `http://www.groovy-lang.org'."
   :command ("groovy" "-e"
             "import org.codehaus.groovy.control.*
 
