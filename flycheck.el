@@ -194,6 +194,7 @@ attention to case differences."
     groovy
     haml
     handlebars
+    haskell-stack-ghc
     haskell-ghc
     haskell-hlint
     html-tidy
@@ -6425,7 +6426,7 @@ is added to the GHC search path via `-i'."
   :package-version '(flycheck . "0.16"))
 
 (flycheck-def-option-var flycheck-ghc-language-extensions nil haskell-ghc
-  "Language extensions for GHC.
+  "Language extensions for GHC and Stack.
 
 The value of this variable is a list of strings, where each
 string is a Haskell language extension, as in the LANGUAGE
@@ -6433,6 +6434,47 @@ pragma.  Each extension is enabled via `-X'."
   :type '(repeat (string :tag "Language extension"))
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.19"))
+
+(flycheck-define-checker haskell-stack-ghc
+  "A Haskell syntax and type checker using `stack ghc'.
+
+See URL `https://github.com/commercialhaskell/stack'."
+  :command ("stack" "ghc" "--" "-Wall" "-fno-code"
+            (option-list "-X" flycheck-ghc-language-extensions concat)
+            (option-list "-i" flycheck-ghc-search-path concat)
+            (eval (concat
+                   "-i"
+                   (flycheck-module-root-directory
+                    (flycheck-find-in-buffer flycheck-haskell-module-re))))
+            (eval flycheck-ghc-args)
+            "-x" (eval
+                  (pcase major-mode
+                    (`haskell-mode "hs")
+                    (`literate-haskell-mode "lhs")))
+            source)
+  :error-patterns
+  ((warning line-start (file-name) ":" line ":" column ":"
+            (or " " "\n    ") "Warning:" (optional "\n")
+            (message
+             (one-or-more " ") (one-or-more not-newline)
+             (zero-or-more "\n"
+                           (one-or-more " ")
+                           (one-or-more not-newline)))
+            line-end)
+   (error line-start (file-name) ":" line ":" column ":"
+          (or (message (one-or-more not-newline))
+              (and "\n"
+                   (message
+                    (one-or-more " ") (one-or-more not-newline)
+                    (zero-or-more "\n"
+                                  (one-or-more " ")
+                                  (one-or-more not-newline)))))
+          line-end))
+  :error-filter
+  (lambda (errors)
+    (flycheck-sanitize-errors (flycheck-dedent-error-messages errors)))
+  :modes (haskell-mode literate-haskell-mode)
+  :next-checkers ((warning . haskell-hlint)))
 
 (flycheck-define-checker haskell-ghc
   "A Haskell syntax and type checker using ghc.

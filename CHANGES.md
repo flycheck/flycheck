@@ -12,6 +12,7 @@ master (in development)
   - Jade [GH-686]
   - SQL with `sqllint` [GH-691]
   - Groovy [GH-716]
+  - Haskell with `stack ghc` [GH-711]
 
 - New features:
 
