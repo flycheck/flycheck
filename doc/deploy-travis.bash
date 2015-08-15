@@ -21,7 +21,7 @@ check_environment() {
     local expected="$2"
     local message="$3"
 
-    if [[ $actual != $expected ]]; then
+    if [[ $actual != "$expected" ]]; then
       echo "DEPLOYMENT SKIPPED (${message})"
       exit 0
     fi
