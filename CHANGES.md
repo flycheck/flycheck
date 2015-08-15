@@ -1,5 +1,5 @@
-master (in development)
-=======================
+0.24 (Aug 15, 2015)
+===================
 
 - **Breaking changes**:
 
