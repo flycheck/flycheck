@@ -2,7 +2,6 @@
 
 [![License GPL 3](https://img.shields.io/badge/license-GPL_3-blue.svg)][COPYING]
 [![MELPA stable version](http://stable.melpa.org/packages/flycheck-badge.svg)](http://stable.melpa.org/#/flycheck)
-[![MELPA version](http://melpa.org/packages/flycheck-badge.svg)](http://melpa.org/#/flycheck)
 [![Manual](https://img.shields.io/badge/manual-latest-green.svg)][manual]
 [![Join the chat at https://gitter.im/flycheck/flycheck](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/flycheck/flycheck?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Waffle Board](https://img.shields.io/badge/Board-ready-75AED9.svg)](https://waffle.io/flycheck/flycheck)
