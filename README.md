@@ -1,5 +1,7 @@
 # [![Flycheck Logo](https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/logo.png)](http://www.flycheck.org)
 
+[![Join the chat at https://gitter.im/flycheck/flycheck](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/flycheck/flycheck?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![License GPL 3](https://img.shields.io/badge/license-GPL_3-blue.svg)][COPYING]
 [![MELPA stable version](http://stable.melpa.org/packages/flycheck-badge.svg)](http://stable.melpa.org/#/flycheck)
 [![MELPA version](http://melpa.org/packages/flycheck-badge.svg)](http://melpa.org/#/flycheck)
