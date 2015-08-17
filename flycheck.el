@@ -7716,7 +7716,7 @@ See URL `http://www.gnu.org/software/bash/'."
   "A Zsh syntax checker using the Zsh shell.
 
 See URL `http://www.zsh.org/'."
-  :command ("zsh" "-n" "-d" "-f" source)
+  :command ("zsh" "--no-exec" "--no-globalrcs" "--no-rcs" source)
   :error-patterns
   ((error line-start (file-name) ":" line ": " (message) line-end))
   :modes sh-mode
