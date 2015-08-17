@@ -5553,16 +5553,18 @@ See URL `http://clang.llvm.org/'."
                   (pcase major-mode
                     (`c++-mode "c++")
                     (`c-mode "c")))
-            source)
+            ;; Read from standard input
+            "-")
+  :standard-input t
   :error-patterns
   ((error line-start
-          (message "In file included from") " " (file-name) ":" line ":"
-          line-end)
-   (info line-start (file-name) ":" line ":" column
+          (message "In file included from") " " (or "<stdin>" (file-name))
+          ":" line ":" line-end)
+   (info line-start (or "<stdin>" (file-name)) ":" line ":" column
          ": note: " (optional (message)) line-end)
-   (warning line-start (file-name) ":" line ":" column
+   (warning line-start (or "<stdin>" (file-name)) ":" line ":" column
             ": warning: " (optional (message)) line-end)
-   (error line-start (file-name) ":" line ":" column
+   (error line-start (or "<stdin>" (file-name)) ":" line ":" column
           ": " (or "fatal error" "error") ": " (optional (message)) line-end))
   :error-filter
   (lambda (errors)
