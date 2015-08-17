@@ -1918,6 +1918,19 @@ and extension, as in `file-name-base'."
     (should (equal (error-message-string data)
                    "Wrong type argument: flycheck-error-p, \"foo\""))))
 
+
+;;; Errors in the current buffer
+
+(ert-deftest flycheck-expand-error-file-names ()
+  :tags '(errors)
+  (flycheck-ert-with-resource-buffer "global-mode-dummy.el"
+    (let* ((absolute-fn (flycheck-ert-resource-filename "substitute-dummy"))
+           (errors (list (flycheck-error-new :filename "foo")
+                         (flycheck-error-new :filename absolute-fn))))
+      (should (equal (mapcar #'flycheck-error-filename
+                             (flycheck-expand-error-file-names errors))
+                     (list (flycheck-ert-resource-filename "foo")
+                           absolute-fn))))))
 
 
 ;;; Status reporting for the current buffer

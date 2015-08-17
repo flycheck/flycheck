@@ -2415,8 +2415,9 @@ checks."
   (let* ((syntax-check flycheck-current-syntax-check)
          (checker (flycheck-syntax-check-checker syntax-check))
          (errors (flycheck-relevant-errors
-                  (flycheck-filter-errors
-                   (flycheck-assert-error-list-p errors) checker))))
+                  (flycheck-expand-error-file-names
+                   (flycheck-filter-errors
+                    (flycheck-assert-error-list-p errors) checker)))))
     (unless (flycheck-disable-excessive-checker checker errors)
       (flycheck-report-current-errors errors))
     (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
@@ -2901,6 +2902,14 @@ with `flycheck-process-error-functions'."
   "Remove all error information from the current buffer."
   (setq flycheck-current-errors nil)
   (flycheck-report-status 'not-checked))
+
+(defun flycheck-expand-error-file-names (errors)
+  "Expand all relative file names in ERRORS."
+  (mapc (lambda (err)
+          (-when-let (filename (flycheck-error-filename err))
+            (setf (flycheck-error-filename err) (expand-file-name filename))))
+        errors)
+  errors)
 
 (defun flycheck-relevant-error-p (err)
   "Determine whether ERR is relevant for the current buffer.
@@ -4890,11 +4899,10 @@ ERR is in BUFFER-FILES, replace it with the return value of the
 function `buffer-file-name'."
   (flycheck-error-with-buffer err
     (-when-let (filename (flycheck-error-filename err))
-      (setq filename (expand-file-name filename))
-      (when (-any? (apply-partially #'flycheck-same-files-p filename)
+      (when (-any? (apply-partially #'flycheck-same-files-p
+                                    (expand-file-name filename))
                    buffer-files)
-        (setq filename (buffer-file-name)))
-      (setf (flycheck-error-filename err) filename)))
+        (setf (flycheck-error-filename err) (buffer-file-name)))))
   err)
 
 
