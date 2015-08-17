@@ -50,11 +50,12 @@ for more information.
 Flycheck does not officially support Windows, but tries to maintain Windows
 compatibility and should generally work fine on Windows, too.
 
-Install Flycheck from [MELPA][] or [MELPA Stable][] with:
+Install Flycheck from [MELPA](http://melpa.org) or
+[MELPA Stable](http://stable.melpa.org) with:
 
     M-x package-install RET flycheck
 
-In your [Cask][] file:
+In your [Cask](https://github.com/cask/cask) file:
 
     (source gnu)
     (source melpa)
@@ -70,9 +71,6 @@ If you don’t know where your init file is, look at the value of the variable
 
 See [Installation][] and [Quick start][] for more information.
 
-[MELPA]: http://melpa.org
-[MELPA Stable]: http://stable.melpa.org
-[Cask]: https://github.com/cask/cask
 [Supported Languages]: http://www.flycheck.org/manual/latest/Supported-languages.html#Supported-languages
 [Installation]: http://www.flycheck.org/manual/latest/Installation.html#Installation
 [Quick start]: http://www.flycheck.org/manual/latest/Quickstart.html#Quickstart
@@ -83,9 +81,8 @@ Documentation
 Documentation is available at http://www.flycheck.org:
 
 - [Quick start][] (tutorial)
-- [User manual][] (reference information)
-
-[User manual]: http://www.flycheck.org/manual/latest/Usage.html#Usage
+- [User manual](http://www.flycheck.org/manual/latest/Usage.html#Usage)
+  (reference information)
 
 Support & Contribution
 ======================
@@ -99,11 +96,8 @@ Support & Contribution
 Credits
 =======
 
-- [Contributors][]
-- [Credits][]
-
-[Contributors]: https://github.com/flycheck/flycheck/graphs/contributors
-[Credits]: https://github.com/flycheck/flycheck/blob/master/CREDITS.md
+- [Contributors](https://github.com/flycheck/flycheck/graphs/contributors)
+- [Credits](https://github.com/flycheck/flycheck/blob/master/CREDITS.md)
 
 License
 =======
