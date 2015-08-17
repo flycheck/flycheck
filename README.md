@@ -3,9 +3,9 @@
 [![License GPL 3](https://img.shields.io/badge/license-GPL_3-blue.svg)][COPYING]
 [![MELPA stable version](http://stable.melpa.org/packages/flycheck-badge.svg)](http://stable.melpa.org/#/flycheck)
 [![Manual](https://img.shields.io/badge/manual-latest-green.svg)][manual]
-[![Join the chat at https://gitter.im/flycheck/flycheck](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/flycheck/flycheck?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Waffle Board](https://img.shields.io/badge/Board-ready-75AED9.svg)](https://waffle.io/flycheck/flycheck)
 [![Buy A Drink](https://img.shields.io/badge/Paypal-Buy%20a%20Drink-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=BYNRV4RY2WG7L)
+[![Waffle Board](https://img.shields.io/badge/Board-ready-75AED9.svg)](https://waffle.io/flycheck/flycheck)
+[![Join the chat at https://gitter.im/flycheck/flycheck](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/flycheck/flycheck?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 **Flycheck** is a modern on-the-fly syntax checking extension for GNU Emacs 24,
 intended as replacement for the older Flymake extension which is part of GNU
