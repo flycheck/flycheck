@@ -7864,11 +7864,14 @@ See URL `http://sass-lang.com'."
   "A Bash syntax checker using the Bash shell.
 
 See URL `http://www.gnu.org/software/bash/'."
-  :command ("bash" "--norc" "-n" "--" source)
-  :error-patterns ((error line-start
-                          (file-name) ":" (one-or-more (not (any digit)))
-                          line (zero-or-more " ") ":" (zero-or-more " ")
-                          (message) line-end))
+  :command ("bash" "--norc" "-n")
+  :standard-input t
+  :error-patterns
+  ((error line-start
+          (one-or-more (not (any ":"))) ; Bash executable path
+          ":" (one-or-more (not (any digit)))
+          line (zero-or-more " ") ":" (zero-or-more " ")
+          (message) line-end))
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'bash))
   :next-checkers ((warning . sh-shellcheck)))
@@ -7877,9 +7880,12 @@ See URL `http://www.gnu.org/software/bash/'."
   "A POSIX Shell syntax checker using the Dash shell.
 
 See URL `http://gondor.apana.org.au/~herbert/dash/'."
-  :command ("dash" "-n" source)
+  :command ("dash" "-n")
+  :standard-input t
   :error-patterns
-  ((error line-start (file-name) ": " line ": " (backref 1) ": " (message)))
+  ((error line-start
+          (one-or-more (not (any ":"))) ; Dash executable path
+          ": " line ": " (backref 1) ": " (message)))
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'sh))
   :next-checkers ((warning . sh-shellcheck)))
@@ -7888,10 +7894,12 @@ See URL `http://gondor.apana.org.au/~herbert/dash/'."
   "A POSIX Shell syntax checker using the Bash shell.
 
 See URL `http://www.gnu.org/software/bash/'."
-  :command ("bash" "--posix" "--norc" "-n" "--" source)
+  :command ("bash" "--posix" "--norc" "-n")
+  :standard-input t
   :error-patterns
   ((error line-start
-          (file-name) ":" (one-or-more (not (any digit)))
+          (one-or-more (not (any ":"))) ; Bash executable path
+          ":" (one-or-more (not (any digit)))
           line (zero-or-more " ") ":" (zero-or-more " ")
           (message) line-end))
   :modes sh-mode
@@ -7902,6 +7910,8 @@ See URL `http://www.gnu.org/software/bash/'."
   "A Zsh syntax checker using the Zsh shell.
 
 See URL `http://www.zsh.org/'."
+  ;; We can't use standard input for Zsh, because Zsh doesn't include error
+  ;; positions when reading from standard input :(
   :command ("zsh" "--no-exec" "--no-globalrcs" "--no-rcs" source)
   :error-patterns
   ((error line-start (file-name) ":" line ": " (message) line-end))
