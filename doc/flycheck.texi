@@ -706,7 +706,7 @@ Floating point numbers can express fractions of seconds.
 @end defopt
 
 You can set @code{flycheck-display-errors-function} to change how
-Flycheck displays error, and what information it displays:
+Flycheck displays errors, and what information it displays:
 
 @defopt flycheck-display-errors-function
 A function to display errors.  The function is called with a list of
@@ -729,6 +729,19 @@ information about the error list.
 The @ghref{flycheck/flycheck-pos-tip, flycheck-pos-tip} extension
 provides an alternative display function, which shows error messages in
 a graphical popup.
+
+In addition to this display mechanism, Flycheck adds a tooltip to each
+error.  Its contents are computed by @code{flycheck-help-echo-function}:
+
+@defopt flycheck-help-echo-function
+A function to compute the contents of the error tooltips.  The function
+is called with the list of errors to display as single argument.  It
+should return a string, which is displayed when the user hovers over an
+error.
+@end defopt
+
+The default is @code{flycheck-make-help-echo}, which displays contents
+similar to those produced by @code{flycheck-display-error-messages}.
 
 @node Killing errors
 @section Killing errors
