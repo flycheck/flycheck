@@ -6312,7 +6312,7 @@ See URL `https://github.com/kisielk/errcheck'."
   :command ("errcheck" (eval (flycheck-go-package-name)))
   :error-patterns
   ((warning line-start
-            (file-name) ":" line ":" column (one-or-more "\t")
+            (file-name) ":" line ":" column (or (one-or-more "\t") ": ")
             (message)
             line-end))
   :error-filter
