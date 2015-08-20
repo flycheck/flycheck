@@ -3691,10 +3691,33 @@ Return a list with the contents of the table cell."
                   (flycheck-error-list-make-cell
                    (if id (format "%s" id) "")
                    'flycheck-error-list-id)
-                  (flycheck-error-list-make-cell message)
+                  (flycheck-error-list-make-cell
+                   (flycheck-flush-multiline-message message))
                   (flycheck-error-list-make-cell
                    (format "(%s)" checker)
                    'flycheck-error-list-checker-name)))))
+
+(defun flycheck-compute-message-column-offset ()
+  "Compute the amount of space to use in `flycheck-flush-multiline-message'."
+  (let* ((widths (mapcar (lambda (fmt)
+                           (pcase-let* ((`(,name ,width _ ,props) fmt)
+                                        (padding (plist-get props :pad-right)))
+                             (cons name (+ width (or padding 1)))))
+                         tabulated-list-format))
+         (before-msg (-take-while (lambda (fmt)
+                                    (not (string= (car fmt) "Message")))
+                                  widths)))
+    (apply #'+ tabulated-list-padding (mapcar #'cdr before-msg))))
+
+(defun flycheck-flush-multiline-message (msg)
+  "Prepare error message MSG for display in the error list.
+
+Prepend all lines of MSG except the first with enough space to
+ensure that they line up properly once the message is displayed."
+  (let* ((msg-offset (flycheck-compute-message-column-offset))
+         (spc (propertize " " 'display `(space . (:width ,msg-offset))))
+         (rep (concat "\\1" spc "\\2")))
+    (replace-regexp-in-string "\\([\r\n]+\\)\\(.\\)" rep msg)))
 
 (defun flycheck-error-list-current-errors ()
   "Read the list of errors in `flycheck-error-list-source-buffer'."
