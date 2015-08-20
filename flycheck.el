@@ -2995,10 +2995,10 @@ nil."
                 (`running "*")
                 (`errored "!")
                 (`finished
-                 (if flycheck-current-errors
-                     (let-alist (flycheck-count-errors flycheck-current-errors)
-                       (format ":%s/%s" (or .error 0) (or .warning 0)))
-                   ""))
+                 (let-alist (flycheck-count-errors flycheck-current-errors)
+                   (if (or .error .warning)
+                       (format ":%s/%s" (or .error 0) (or .warning 0))
+                     "")))
                 (`interrupted "-")
                 (`suspicious "?"))))
     (concat " FlyC" text)))
