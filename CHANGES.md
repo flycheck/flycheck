@@ -1,6 +1,10 @@
 master (in development)
 =======================
 
+- Improvements:
+
+  - Improve mode line display for buffers with only info messages [GH-733]
+
 0.24 (Aug 15, 2015)
 ===================
 
