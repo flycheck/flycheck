@@ -547,7 +547,7 @@ is at least as severe as this one.  If nil, navigate all errors."
 (defcustom flycheck-error-list-minimum-level nil
   "The minimum level of errors to display in the error list.
 
-If set to an error level, only displays errors whose error level
+If set to an error level, only display errors whose error level
 is at least as severe as this one in the error list.  If nil,
 display all errors.
 
