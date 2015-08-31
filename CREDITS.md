@@ -66,13 +66,6 @@ substantial code to Flycheck:
 For a complete list of all code contributors see the [Contributor Graph][] or
 `git shortlog --summary`.
 
-The following people significantly contributed to Flycheck in other ways:
-
-- [Matthias Güdemann](https://github.com/mgudemann) (initial version of the
-  Flycheck logo, valuable feedback for the final version)
-- [Simon Carter](https://github.com/bbbscarter) (valuable testing and feedback
-  of automatic syntax checking)
-
 The Flycheck developers would also like to thank the following people
 and projects:
 
@@ -91,8 +84,12 @@ and projects:
   [Syntastic](https://github.com/scrooloose/syntastic), which saved
   the author's life back when he was using Vim, and served as
   inspiration for Flycheck and many of its syntax checkers.
+- [Matthias Güdemann](https://github.com/mgudemann), for his invaluable work on
+  Flycheck’s logo.
 - Pavel Kobyakov for his work on GNU Flymake, which is a great work on
   its own, despite its flaws and weaknesses.
+- [Simon Carter](https://github.com/bbbscarter), for his patient in-depth
+  testing of automatic syntax checking, and his very constructive feedback.
 - [Steve Purcell](https://github.com/purcell) for his valuable feedback, the
   fruitful discussions and his important ideas about the shape and design of
   Flycheck, and his indispensible and dedicated work on MELPA, which drives the
