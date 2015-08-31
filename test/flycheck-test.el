@@ -2185,19 +2185,6 @@ and extension, as in `file-name-base'."
   :tags '(overlay)
   (should (eq (get 'flycheck-error-overlay 'face) 'flycheck-error)))
 
-(ert-deftest flycheck-info-overlay/default-help-echo ()
-  :tags '(overlay)
-  (should (string= (get 'flycheck-info-overlay 'help-echo) "Unknown info.")))
-
-(ert-deftest flycheck-warning-overlay/default-help-echo ()
-  :tags '(overlay)
-  (should (string= (get 'flycheck-warning-overlay 'help-echo)
-                   "Unknown warning.")))
-
-(ert-deftest flycheck-error-overlay/default-help-echo ()
-  :tags '(overlay)
-  (should (string= (get 'flycheck-error-overlay 'help-echo) "Unknown error.")))
-
 (ert-deftest flycheck-add-overlay/undefined-error-level ()
   :tags '(overlay)
   (let ((err (should-error (flycheck-add-overlay
@@ -2235,7 +2222,7 @@ and extension, as in `file-name-base'."
   (flycheck-ert-with-temp-buffer
     (let ((overlay (flycheck-add-overlay
                     (flycheck-error-new-at 1 1 'info "A bar message"))))
-      (should (string= (overlay-get overlay 'help-echo) "A bar message")))))
+      (should (eq (overlay-get overlay 'help-echo) #'flycheck-help-echo)))))
 
 (ert-deftest flycheck-add-overlay/has-flycheck-overlay-property ()
   :tags '(overlay)
@@ -2345,6 +2332,47 @@ and extension, as in `file-name-base'."
           :checker emacs-lisp-checkdoc)
      '(15 1 warning "`message' called with 0 args to fill 1 format field(s)"
           :checker emacs-lisp))))
+
+(ert-deftest flycheck-add-overlay/help-echo-is-error-message ()
+  :tags '(overlay)
+  "Check for default help at point."
+  (flycheck-ert-with-temp-buffer
+    (insert " ")
+    (goto-char 1)
+    (let ((overlay (flycheck-add-overlay
+                    (flycheck-error-new-at 1 1 'info "A bar message"))))
+      (should (string= (help-at-pt-string) "A bar message")))))
+
+(ert-deftest flycheck-add-overlay/can-suppress-help-echo ()
+  :tags '(overlay)
+  "Check that setting help-echo function to nil removes help echoes."
+  (flycheck-ert-with-temp-buffer
+    (insert " ")
+    (goto-char 1)
+    (let ((flycheck-help-echo-function nil)
+          (overlay (flycheck-add-overlay
+                    (flycheck-error-new-at 1 1 'info "info"))))
+      (should (string= (help-at-pt-string) nil)))))
+
+(ert-deftest flycheck-add-overlay/help-echo-for-nil-message-is-default ()
+  :tags '(overlay)
+  "Check that null error messages are replaced by 'Unkown [level]'."
+  (flycheck-ert-with-temp-buffer
+    (insert " ")
+    (goto-char 1)
+    (let ((overlay (flycheck-add-overlay (flycheck-error-new-at 1 1 'info))))
+      (should (string= (help-at-pt-string) "Unknown info")))))
+
+(ert-deftest flycheck-add-overlay/help-echo-stacks-errors ()
+  :tags '(overlay)
+  "Check that help-echo messages contain all error messages at point."
+  (flycheck-ert-with-temp-buffer
+    (insert " ")
+    (goto-char 1)
+    (flycheck-add-overlay (flycheck-error-new-at 1 1 'info "info"))
+    (flycheck-add-overlay (flycheck-error-new-at 1 1 'warning "warning"))
+    (flycheck-add-overlay (flycheck-error-new-at 1 1 'error "error"))
+    (should (string= (help-at-pt-string) "info\n\nwarning\n\nerror"))))
 
 
 ;;; Error navigation in the current buffer
