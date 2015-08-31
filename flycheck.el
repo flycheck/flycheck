@@ -5736,7 +5736,7 @@ See URL `http://coq.inria.fr/'."
   ((error line-start "File \"" (file-name) "\", line " line
           ;; TODO: Parse the end column, once Flycheck supports that
           ", characters " column "-" (one-or-more digit) ":\n"
-          (or "Syntax error: " "Error: ")
+          (or "Syntax error:" "Error:")
           ;; Most Coq error messages span multiple lines, and end with a dot.
           ;; There are simple one-line messages, too, though.
           (message (or (and (one-or-more (or not-newline "\n")) ".")
@@ -5744,7 +5744,7 @@ See URL `http://coq.inria.fr/'."
           line-end))
   :error-filter
   (lambda (errors)
-    (dolist (err errors)
+    (dolist (err (flycheck-sanitize-errors errors))
       (setf (flycheck-error-message err)
             (replace-regexp-in-string (rx (1+ (syntax whitespace)) line-end)
                                       "" (flycheck-error-message err)
