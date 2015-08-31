@@ -59,10 +59,10 @@ install_cask: install_emacs
 	git clone https://github.com/cask/cask.git "$(HOME)/.cask"
 
 install_texinfo:
-	curl -o '/tmp/texinfo-5.2.tar.gz' 'http://ftp.gnu.org/gnu/texinfo/texinfo-5.2.tar.gz'
-	tar xzf '/tmp/texinfo-5.2.tar.gz' -C /tmp
-	cd '/tmp/texinfo-5.2' && ./configure --prefix="$(HOME)"
-	make -C '/tmp/texinfo-5.2' install
+	curl -o '/tmp/texinfo-6.0.tar.gz' 'http://ftp.gnu.org/gnu/texinfo/texinfo-6.0.tar.gz'
+	tar xzf '/tmp/texinfo-6.0.tar.gz' -C /tmp
+	cd '/tmp/texinfo-6.0' && ./configure --prefix="$(HOME)"
+	make -C '/tmp/texinfo-6.0' install
 
 deps:
 	make deps
