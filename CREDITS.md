@@ -7,87 +7,61 @@ Flycheck is written and maintained by
 The following people—listed in alphabetical order—contributed
 substantial code to Flycheck:
 
-- [Alain Kalker](https://github.com/ackalker) (fix quoting for flycheck-compile)
-- [Alex Reed](https://github.com/acr4) (include paths for Verilator and
-  Cppcheck)
-- [Atila Neves](https://github.com/atilaneves) (include paths and arguments for
-  DMD)
-- [Bozhidar Batsov](https://github.com/bbatsov) (improved Flycheck menu, RuboCop
-  syntax checker, improvements to Ruby)
-- [Clément Pit--Claudel](https://github.com/cpitclaudel) (custom error levels,
-  error level filtering in the error list, improvements to mode line reporting)
-- [Cristian Capdevila](https://github.com/capdevc) (enabled warnings in Rust)
-- [Damon Haley](https://github.com/dhaley) (PHPCS syntax checker)
-- [David Holm](https://github.com/dholm) (Clang, Cppcheck, lintr and Verilator
-  syntax checkers)
-- [Derek Harland](https://github.com/donkopotamus) (improved Crate support for
-  Rust)
-- [Doug MacEachern](https://github.com/dougm) (Go errcheck syntax checker)
-- [Erik Hetzner](https://github.com/egh) (handlebars)
-- [Fanael Linithien](https://github.com/Fanael) (GCC syntax checker, exception
-  support for C/C++, inconclusive checks for cppcheck, literate Haskell support,
-  bug fixes)
-- [Gereon Frey](https://github.com/gfrey) (fixes to temporary file handling in
-  Go and to the Go tests)
-- [Gulshan Singh](https://github.com/gsingh93) (customizable Rust crate type)
-- [Iain Beeston](https://github.com/iainbeeston) (SCSS-Lint syntax checker)
-- [Jim Hester](https://github.com/jimhester) (lintr syntax checker)
-- [Jimmy Yuen Ho Wong](https://github.com/wyuenho) (HTML tidy and JSHint syntax
-  checkers, bug fixes to faces)
-- [Krzysztof Witkowski](https://github.com/kwitek) (eval support)
-- [Lee Adams](https://github.com/leeaustinadams) (scalastyle syntax checker)
-- [Lorenzo Villani](https://github.com/lvillani) (`standard` syntax checker)
-- [Łukasz Jędrzejewski](https://github.com/jedrz) (bug fixes for chktex syntax
-  checker and error navigation)
-- [Magnar Sveen](https://github.com/magnars) (customizable idle change delay)
-- [Malyshev Artem](https://github.com/proofit404) (customizable keymap prefix)
-- [Marian Schubert](https://github.com/maio) (Perl syntax checker)
-- [Marcin Antczak](https://github.com/marcinant) (error highlighting in error
-  list)
-- [Marcus Majewski](https://github.com/hekto) (error columns in ESLint)
-- [Mark Hellewell](https://github.com/markhellewell) (Puppet and puppetlint
-  syntax checkers)
-- [Matthias Dahl](https://github.com/BinaryKhaos) (performance improvements in
-  temporary file handling)
-- [Miro Bezjak](https://github.com/mbezjak) (Groovy)
-- [Mitch Tishmack](https://github.com/mitchty) (Microsoft extensions in C/C++)
-- [Moritz Bunkus](https://github.com/mbunkus) (Include path for Perl)
-- [Omair Majid](https://github.com/omajid) (syntax checker for RPM spec)
-- [papaeye](https://github.com/papaeye) (JSCS syntax checker, bug fixes for
-  Javascript checkers)
-- [Per Nordlöw](https://github.com/nordlow) (syntax checkers for Ada, Fortran
-  and Python, syntax checker name in error list)
-- [Peter Eisentraut](https://github.com/petere) (improvements to foodcritic)
-- [Peter Vasil](https://github.com/ptrv) (Lua, Luacheck and Go build/test
-  syntax checkers)
-- [Robert O'Connor](https://github.com/robbyoconnor) (Jade)
-- [Robert Zaremba](https://github.com/robert-zaremba) (gofmt syntax checker)
-- [Robert Dallas Gray](https://github.com/rdallasgray) (configurable error display)
-- [Sean Gillespie](https://github.com/swgillespie) (help messages in Rust)
-- [Sean Salmon](https://github.com/phatcabbage) (platform-independent directory
-  handling)
-- [Syohei Yoshida](https://github.com/syohex) (customizable error display delay)
-- [steckerhalter](https://github.com/steckerhalter) (PHPCS syntax checker)
-- [Stephen Lewis](https://github.com/stephenjlewis) (pedantic flags for Clang
-  and GCC)
-- [Steve Purcell](https://github.com/purcell) (various bug fixes, syntax
-  checkers for HAML, csslint, jslint, SASS, SCSS, SQL, jsonlint, LESS, GHC,
-  hdevtools and hlint)
-- [Sylvain Benner](https://github.com/syl20bnr) (Elixir and Erlang syntax
-  checkers)
-- [Sylvain Rousseau](https://github.com/thisirs) (Bash syntax checkers)
-- [Ted Zlatanov](https://github.com/tzz) (CFEngine syntax checker, minimum level
-  for error navigation)
-- [Tom Jakubowski](https://github.com/tomjakubowski) (test support in Rust)
-- [Tomoya Tanjo](https://github.com/tom-tan) (DMD syntax checker)
-- [Victor Deryagin](https://github.com/vderyagin) (Rust syntax checker)
-- [Vlatko Basic](https://github.com/vlatkoB) (options for hlint)
-- [Yannick Roehlly](https://github.com/yannick1974) (PEP8 naming support in
-  Python)
-- [Yasuyuki Oka](https://github.com/yasuyk) (syntax checkers for phpmd, Slim,
-  js-yaml, ruby-lint, Handlebars, Foodcritic, AsciiDoc, Racket, ESLint, erubis,
-  POSIX Make, Golint and go vet)
-- [Zhuo Yuan](https://github.com/yzprofile) (options for Erlang)
+- [Alain Kalker](https://github.com/ackalker)
+- [Alex Reed](https://github.com/acr4)
+- [Atila Neves](https://github.com/atilaneves)
+- [Bozhidar Batsov](https://github.com/bbatsov)
+- [Clément Pit--Claudel](https://github.com/cpitclaudel)
+- [Cristian Capdevila](https://github.com/capdevc)
+- [Damon Haley](https://github.com/dhaley)
+- [David Holm](https://github.com/dholm)
+- [Derek Harland](https://github.com/donkopotamus)
+- [Doug MacEachern](https://github.com/dougm)
+- [Erik Hetzner](https://github.com/egh)
+- [Fanael Linithien](https://github.com/Fanael)
+- [Gereon Frey](https://github.com/gfrey)
+- [Gulshan Singh](https://github.com/gsingh93)
+- [Iain Beeston](https://github.com/iainbeeston)
+- [Jim Hester](https://github.com/jimhester)
+- [Jimmy Yuen Ho Wong](https://github.com/wyuenho)
+- [Krzysztof Witkowski](https://github.com/kwitek)
+- [Lee Adams](https://github.com/leeaustinadams)
+- [Lorenzo Villani](https://github.com/lvillani)
+- [Łukasz Jędrzejewski](https://github.com/jedrz)
+- [Magnar Sveen](https://github.com/magnars)
+- [Malyshev Artem](https://github.com/proofit404)
+- [Marian Schubert](https://github.com/maio)
+- [Marcin Antczak](https://github.com/marcinant)
+- [Marcus Majewski](https://github.com/hekto)
+- [Mark Hellewell](https://github.com/markhellewell)
+- [Matthias Dahl](https://github.com/BinaryKhaos)
+- [Miro Bezjak](https://github.com/mbezjak)
+- [Mitch Tishmack](https://github.com/mitchty)
+- [Moritz Bunkus](https://github.com/mbunkus)
+- [Omair Majid](https://github.com/omajid)
+- [papaeye](https://github.com/papaeye)
+- [Per Nordlöw](https://github.com/nordlow)
+- [Peter Eisentraut](https://github.com/petere)
+- [Peter Vasil](https://github.com/ptrv)
+- [Robert O'Connor](https://github.com/robbyoconnor)
+- [Robert Zaremba](https://github.com/robert-zaremba)
+- [Robert Dallas Gray](https://github.com/rdallasgray)
+- [Sean Gillespie](https://github.com/swgillespie)
+- [Sean Salmon](https://github.com/phatcabbage)
+- [Syohei Yoshida](https://github.com/syohex)
+- [steckerhalter](https://github.com/steckerhalter)
+- [Stephen Lewis](https://github.com/stephenjlewis)
+- [Steve Purcell](https://github.com/purcell)
+- [Sylvain Benner](https://github.com/syl20bnr)
+- [Sylvain Rousseau](https://github.com/thisirs)
+- [Ted Zlatanov](https://github.com/tzz)
+- [Tom Jakubowski](https://github.com/tomjakubowski)
+- [Tomoya Tanjo](https://github.com/tom-tan)
+- [Victor Deryagin](https://github.com/vderyagin)
+- [Vlatko Basic](https://github.com/vlatkoB)
+- [Yannick Roehlly](https://github.com/yannick1974)
+- [Yasuyuki Oka](https://github.com/yasuyk)
+- [Zhuo Yuan](https://github.com/yzprofile)
 
 For a complete list of all code contributors see the [Contributor Graph][] or
 `git shortlog --summary`.
