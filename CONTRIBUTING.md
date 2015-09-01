@@ -83,11 +83,11 @@ This is a model commit message:
 
     - Use a hanging indent
 
-[Git Commit Mode][] and [Magit][] provide a major mode for Git commit messages,
-which helps you to comply to these guidelines.
+[Git Commit][] and [Magit][] provide Emacs mode for Git commit messages, which
+helps you to comply to these guidelines.
 
 [Tim Pope's guidelines]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
-[Git Commit Mode]: https://github.com/magit/git-modes/
+[Git Commit]: https://github.com/magit/magit/
 [Magit]: https://github.com/magit/magit/
 
 Contributing syntax checkers
