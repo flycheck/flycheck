@@ -9,6 +9,7 @@ master (in development)
 - Improvements:
 
   - Improve mode line display for buffers with only info messages [GH-733]
+  - Improve indentation of multi-line error messages in error list [GH-731]
   - Merge messages of all errors under cursor for Help Echo [GH-730]
 
 - Bug fixes:
