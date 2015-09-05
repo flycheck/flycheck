@@ -375,10 +375,7 @@ ERROR is a Flycheck error object."
                                       (overlay-get overlay 'before-string))
                    fringe-icon))
     (should (eq (overlay-get overlay 'category) category))
-    (should (equal (overlay-get overlay 'flycheck-error) error))
-    (save-excursion
-      (goto-char (overlay-start overlay))
-      (should (string= (help-at-pt-string) message)))))
+    (should (equal (overlay-get overlay 'flycheck-error) error))))
 
 (defun flycheck-ert-should-errors (&rest errors)
   "Test that the current buffers has ERRORS.
