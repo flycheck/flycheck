@@ -37,6 +37,7 @@ substantial code to Flycheck:
 - [Mario Rodas](https://github.com/marsam)
 - [Mark Karpov](https://github.com/mrkkrp)
 - [Mark Hellewell](https://github.com/markhellewell)
+- [Matthew Curry](https://github.com/strawhatguy)
 - [Matthias Dahl](https://github.com/BinaryKhaos)
 - [Miro Bezjak](https://github.com/mbezjak)
 - [Mitch Tishmack](https://github.com/mitchty)
