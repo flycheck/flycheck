@@ -4532,12 +4532,6 @@ Why not:
      '(4 9 warning "'foo' is defined but never used." :id "W098"
          :checker javascript-jshint))))
 
-(flycheck-ert-def-checker-test javascript-jshint javascript ignored
-  :tags '(checkstyle-xml)
-  (let ((flycheck-disabled-checkers '(javascript-jscs)))
-    (flycheck-ert-should-syntax-check
-     "checkers/javascript/ignored/warnings.js" '(js-mode js2-mode js3-mode))))
-
 (flycheck-ert-def-checker-test javascript-eslint javascript error
   :tags '(checkstyle-xml)
   (let ((flycheck-disabled-checkers '(javascript-jshint)))
@@ -4584,13 +4578,6 @@ Why not:
      "checkers/javascript-style.js" '(js-mode js2-mode js3-mode)
      '(1 nil warning "No JSCS configuration found.  Set `flycheck-jscsrc' for JSCS"
          :checker javascript-jscs))))
-
-(flycheck-ert-def-checker-test javascript-jscs javascript ignored
-  :tags '(checkstyle-xml)
-  (let ((flycheck-disabled-checkers
-         '(javascript-jshint javascript-eslint javascript-gjslint)))
-    (flycheck-ert-should-syntax-check
-     "checkers/javascript/ignored/style.js" '(js-mode js2-mode js3-mode))))
 
 (flycheck-ert-def-checker-test (javascript-jshint javascript-jscs)
     javascript complete-chain
