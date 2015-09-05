@@ -3994,14 +3994,15 @@ The term \"1\" has type \"nat\" while it is expected to have type
 (flycheck-ert-def-checker-test coq coq error
   (flycheck-ert-should-syntax-check
    "checkers/coq-error-2.v" 'coq-mode
-   '(4 58 error "In environment
+   '(4 10 error "In environment
 A : Set
 P : A -> Prop
 Q : A -> Prop
 R : A -> A -> Prop
 The term \"(fun (R : A -> A -> Prop) (a b : A) => R b a) R\" has type
  \"A -> A -> Prop\" while it is expected to have type
- \"(forall a b : A, R a b) -> forall a b : A, R b a\".")))
+ \"(forall a b : A, R a b) -> forall a b : A, R b a\"."
+       :checker coq)))
 
 (flycheck-ert-def-checker-test css-csslint css nil
   :tags '(checkstyle-xml)
