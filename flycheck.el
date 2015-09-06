@@ -6508,7 +6508,7 @@ pragma.  Each extension is enabled via `-X'."
 (defvar flycheck-haskell-ghc-cache-directory nil
   "The cache directory for `ghc' output.")
 
-(defun flycheck-haskell-ghc-cache-location ()
+(defun flycheck-haskell-ghc-cache-directory ()
   "Get the cache location for `ghc' output.
 
 If no cache directory exists yet, create one and return it.
@@ -6563,7 +6563,7 @@ See URL `https://github.com/commercialhaskell/stack'."
 
 See URL `http://www.haskell.org/ghc/'."
   :command ("ghc" "-Wall" "-no-link"
-            "-outputdir" (eval (flycheck-haskell-ghc-cache-location))
+            "-outputdir" (eval (flycheck-haskell-ghc-cache-directory))
             (option-flag "-no-user-package-db"
                          flycheck-ghc-no-user-package-database)
             (option-list "-package-db" flycheck-ghc-package-databases)
