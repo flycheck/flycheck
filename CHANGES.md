@@ -14,6 +14,8 @@ master (in development)
   - Improve mode line display for buffers with only info messages [GH-733]
   - Merge messages of all errors under cursor for Help Echo [GH-730]
   - Align multi-line messages in error list [GH-732] [GH-731]
+  - Cache GHC output for faster syntax checking and better template haskell
+    support [GH-708]
 
 - Bug fixes:
 
