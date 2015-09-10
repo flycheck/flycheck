@@ -7,8 +7,6 @@
 
 # [![Flycheck Logo](https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/logo.png)](http://www.flycheck.org)
 
-[![Join the chat at https://gitter.im/flycheck/flycheck](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/flycheck/flycheck?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 **Flycheck** is a modern on-the-fly syntax checking extension for GNU Emacs 24,
 intended as replacement for the older Flymake extension which is part of GNU
 Emacs.
