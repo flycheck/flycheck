@@ -5,6 +5,7 @@
 ;;
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
 ;; Maintainer: Sebastian Wiesner <swiesner@lunaryorn.com>
+;;             Clément Pit--Claudel <clement.pitclaudel@live.com>
 ;; URL: https://www.flycheck.org
 ;; Keywords: convenience, languages, tools
 ;; Version: 0.25-cvs
