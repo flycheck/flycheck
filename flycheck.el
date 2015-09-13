@@ -221,8 +221,8 @@ attention to case differences."
     r-lintr
     racket
     rpm-rpmlint
-    rst
     rst-sphinx
+    rst
     ruby-rubocop
     ruby-rubylint
     ruby
@@ -7336,10 +7336,7 @@ See URL `http://docutils.sourceforge.net/'."
           (file-name) ":" line
           ": (" (or "ERROR/3" "SEVERE/4") ") "
           (message) line-end))
-  :modes rst-mode
-  ;; Don't use the generic ReST checker in Sphinx projects, because it'll
-  ;; produce a lot of false positives.
-  :predicate (lambda () (not (flycheck-locate-sphinx-source-directory))))
+  :modes rst-mode)
 
 (flycheck-def-option-var flycheck-sphinx-warn-on-missing-references t rst-sphinx
   "Whether to warn about missing references in Sphinx.
