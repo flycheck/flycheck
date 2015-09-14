@@ -639,10 +639,10 @@ selects the linters to use.
 
 @itemize
 @item
-@flyc{rst} (using @uref{http://docutils.sourceforge.net/,docutils}, for
-plain reStructuredFiles files), or
 @flyc{rst-sphinx} (using @uref{http://sphinx-doc.org/,Sphinx}, for Sphinx
-documentation files)
+documentation files), or
+@flyc{rst} (using @uref{http://docutils.sourceforge.net/,docutils}, for
+plain reStructuredFiles files)
 @end itemize
 
 @flyc{rst-sphinx} provides the following option:
