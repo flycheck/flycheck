@@ -5054,11 +5054,6 @@ Why not:
    '(21 nil error "Unknown target name: \"cool\"." :checker rst)
    '(26 nil error "Unexpected section title." :checker rst)))
 
-(flycheck-ert-def-checker-test rst rst not-in-a-sphinx-project
-  (flycheck-ert-with-resource-buffer "checkers/rst-sphinx/index.rst"
-    (rst-mode)
-    (should-not (flycheck-may-use-checker 'rst))))
-
 (flycheck-ert-def-checker-test rst-sphinx rst nil
   (flycheck-ert-should-syntax-check
    "checkers/rst-sphinx/index.rst" 'rst-mode
