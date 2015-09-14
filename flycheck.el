@@ -7971,7 +7971,8 @@ See URL `https://github.com/nodeca/js-yaml'."
   :command ("js-yaml" source)
   :error-patterns
   ((error line-start
-          "JS-YAML: " (message) " at line " line ", column " column ":"
+          (or "JS-YAML" "YAMLException") ": "
+          (message) " at line " line ", column " column ":"
           line-end))
   :modes yaml-mode)
 
