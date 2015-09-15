@@ -418,6 +418,23 @@ If set to nil, do not show error tooltips."
   :package-version '(flycheck . "0.25")
   :risky t)
 
+(defcustom flycheck-command-wrapper-function #'identity
+  "Function to modify checker commands before execution.
+
+The value of this option is a function which is given a list
+containing the full command of a syntax checker after
+substitution through `flycheck-substitute-argument' but before
+execution.  The function may return a new command for Flycheck to
+execute.
+
+The default value is `identity' which does not change the
+command.  You may provide your own function to run Flycheck
+commands through `bundle exec', `nix-shell' or similar wrappers."
+  :group 'flycheck
+  :type '(choice (const :tag "Do not modify commands" identity)
+                 (function :tag "Modify command with a custom function"))
+  :risky t)
+
 (defcustom flycheck-indication-mode 'left-fringe
   "The indication mode for Flycheck errors and warnings.
 
@@ -4507,6 +4524,8 @@ symbols in the command."
     (condition-case err
         (let* ((program (flycheck-checker-executable checker))
                (args (flycheck-checker-substituted-arguments checker))
+               (command (funcall flycheck-command-wrapper-function
+                                 (cons program args)))
                ;; Use pipes to receive output from the syntax checker.  They are
                ;; more efficient and more robust than PTYs, which Emacs uses by
                ;; default, and since we don't need any job control features, we
@@ -4522,7 +4541,7 @@ symbols in the command."
           ;; See https://github.com/flycheck/flycheck/issues/298 for an
           ;; example for such a conflict.
           (setq process (apply 'start-process (format "flycheck-%s" checker)
-                               nil program args))
+                               nil command))
           (setf (process-sentinel process) #'flycheck-handle-signal)
           (setf (process-filter process) #'flycheck-receive-checker-output)
           (set-process-query-on-exit-flag process nil)
