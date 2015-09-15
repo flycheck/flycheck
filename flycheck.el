@@ -417,6 +417,30 @@ If set to nil, do not show error tooltips."
   :package-version '(flycheck . "0.25")
   :risky t)
 
+(defcustom flycheck-command-wrapper-function
+  'cons
+  "Wraps checker commands and its arguments before it gets executed.
+
+The function is usefull to wrap a checker command, if the checker
+is only available in sandbox-like enviroments.  The default value
+does not modify the command or arguments.  In NixOS, checkers are
+usually only available in a project environement that can be
+accessed with the `nix-shell' command. An example for a
+`flycheck-command-wrapper-function' with `nix-shell' would be
+
+    (defun nixos-command-wrapper-function (cmd args)
+      (list \"nix-shell\" \"--command\"
+            (mapconcat 'identity (cons cmd args) \" \"))
+
+`nix-shell' expects a single argument after the `--command' flag,
+therefor the example function concatenates the checker command
+and its arguments with spaces as separators."
+  :group 'flycheck
+  :type '(choice (const :tag "Does not modify the command and arguments"
+                        cons)
+                 (function :tag "Custom command wrapper function"))
+  :risky t)
+
 (defcustom flycheck-indication-mode 'left-fringe
   "The indication mode for Flycheck errors and warnings.
 
@@ -4489,6 +4513,9 @@ symbols in the command."
     (condition-case err
         (let* ((program (flycheck-checker-executable checker))
                (args (flycheck-checker-substituted-arguments checker))
+               (command (funcall flycheck-command-wrapper-function
+                                 program
+                                 args))
                ;; Use pipes to receive output from the syntax checker.  They are
                ;; more efficient and more robust than PTYs, which Emacs uses by
                ;; default, and since we don't need any job control features, we
@@ -4504,7 +4531,7 @@ symbols in the command."
           ;; See https://github.com/flycheck/flycheck/issues/298 for an
           ;; example for such a conflict.
           (setq process (apply 'start-process (format "flycheck-%s" checker)
-                               nil program args))
+                               nil command))
           (setf (process-sentinel process) #'flycheck-handle-signal)
           (setf (process-filter process) #'flycheck-receive-checker-output)
           (set-process-query-on-exit-flag process nil)
