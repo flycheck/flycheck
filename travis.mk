@@ -53,7 +53,7 @@ checkout_emacs_trunk:
 # Build a small Emacs executable without anything for tests
 install_emacs: $(GETEMACS)
 	cd '/tmp/emacs' && ./configure $(EMACSBUILDFLAGS) --prefix="$(HOME)"
-	make -j2 -C '/tmp/emacs' install
+	make -j2 -C '/tmp/emacs' V=0 install
 
 install_cask: install_emacs
 	git clone https://github.com/cask/cask.git "$(HOME)/.cask"
