@@ -19,7 +19,10 @@ ifneq ($(TRAVIS_TAG),)
 MANUAL_VERSION=--version $(TRAVIS_TAG)
 endif
 
-EMACSBUILDFLAGS = --enable-silent-rules --with-x-toolkit=no --without-x --without-all --with-xml2
+# Build with as few features as possible to cut build times, but keep XML2 for
+# our XML-parser tests
+EMACSBUILDFLAGS = --quiet --enable-silent-rules \
+	--with-x-toolkit=no --without-x --without-all --with-xml2
 
 ifeq ($(origin EMACS_VERSION), undefined)
 $(error "No $$EMACS_VERSION in environment!")
