@@ -418,7 +418,7 @@ If set to nil, do not show error tooltips."
   :risky t)
 
 (defcustom flycheck-command-wrapper-function
-  'cons
+  (lambda (cmd args) (cons cmd args))
   "Wraps checker commands and its arguments before it gets executed.
 
 The function is usefull to wrap a checker command, if the checker
