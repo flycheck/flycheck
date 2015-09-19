@@ -35,22 +35,20 @@
 
 (setq load-prefer-newer t)              ; Don't load outdated bytecode
 
-(defvar temporary-package-directory
-  (make-temp-file "flycheck-package-dir-" 'directory))
-(add-hook 'kill-emacs-hook
-          (lambda ()
-            (delete-directory temporary-package-directory 'recursive)))
-
-(setq package-user-dir temporary-package-directory
+(setq package-user-dir (expand-file-name "init-elpa"
+                                         (file-name-directory load-file-name))
       package-check-signature nil)
 (add-to-list 'package-archives '("MELPA" . "http://melpa.org/packages/"))
 
 (package-initialize)
-(package-refresh-contents)
-(package-install 'flycheck)             ; Install to bring dependencies in
 
-(let* ((source-dir (locate-dominating-file load-file-name "flycheck.el")))
-  (load (expand-file-name "flycheck.el" source-dir)))
+(let* ((source-dir (locate-dominating-file load-file-name "flycheck.el"))
+       (flycheck-el (expand-file-name "flycheck.el" source-dir)))
+  ;; Install Flycheck to bring its dependencies in
+  (unless (package-installed-p 'flycheck)
+    (package-refresh-contents)
+    (package-install-file flycheck-el))
+  (load flycheck-el))
 
 (require 'flycheck)
 (global-flycheck-mode)
