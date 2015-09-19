@@ -86,6 +86,17 @@ With prefix arg, hide the cursor, otherwise keep it."
   (scroll-bar-mode -1)
   (setq-default truncate-lines t)
   (when hide-cursor
-    (setq-default cursor-type nil)))
+    (setq-default cursor-type nil))
+
+  (set-frame-font "Source Code Pro-13")
+  (set-frame-size (selected-frame) 750 560 'pixelwise)
+  ;; Tuck the error list to the bottom side window at a fixed height
+  (add-to-list 'display-buffer-alist
+               `(,(rx bos "*Flycheck errors*")
+                 (display-buffer-reuse-window
+                  display-buffer-in-side-window)
+                 (side            . bottom)
+                 (reusable-frames . visible)
+                 (window-height   . 0.33))))
 
 ;;; init.el ends here
