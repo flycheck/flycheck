@@ -55,4 +55,28 @@
 (require 'flycheck)
 (global-flycheck-mode)
 
+;; Some little convenience, to this Emacs session at least half way bearable
+(require 'ido)
+(ido-mode t)
+(setq ido-enable-flex-matching t)
+
+;; Get rid of all the silly UI clutter of a default Emacs session and opt out of
+;; all the stupid startup and license messages
+(tool-bar-mode -1)
+(blink-cursor-mode -1)
+(setq ring-bell-function #'ignore
+      inhibit-startup-screen t
+      initial-scratch-message "")
+(fset 'yes-or-no-p #'y-or-n-p)
+(fset 'display-startup-echo-area-message #'ignore)
+
+
+;; Improve OS X key behaviour
+(when (eq system-type 'darwin)
+  (setq mac-option-modifier 'meta       ; Option is simply the natural Meta
+        mac-command-modifier 'meta      ; But command is a lot easier to hit
+        mac-right-command-modifier 'left
+        mac-right-option-modifier 'none ; Keep right option for accented input
+        mac-function-modifier 'hyper))
+
 ;;; init.el ends here
