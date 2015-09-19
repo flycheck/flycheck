@@ -38,7 +38,7 @@
 (setq package-user-dir (expand-file-name "init-elpa"
                                          (file-name-directory load-file-name))
       package-check-signature nil)
-(add-to-list 'package-archives '("MELPA" . "http://melpa.org/packages/"))
+(add-to-list 'package-archives '("MELPA" . "https://stable.melpa.org/packages/"))
 
 (package-initialize)
 
