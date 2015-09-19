@@ -68,7 +68,6 @@
 (fset 'yes-or-no-p #'y-or-n-p)
 (fset 'display-startup-echo-area-message #'ignore)
 
-
 ;; Improve OS X key behaviour
 (when (eq system-type 'darwin)
   (setq mac-option-modifier 'meta       ; Option is simply the natural Meta
@@ -76,5 +75,17 @@
         mac-right-command-modifier 'left
         mac-right-option-modifier 'none ; Keep right option for accented input
         mac-function-modifier 'hyper))
+
+(defun flycheck-prepare-screenshot (&optional hide-cursor)
+  "Prepare this Emacs session to make a nice screenshot.
+
+With prefix arg, hide the cursor, otherwise keep it."
+  (interactive "P")
+  ;; Reduce UI and disable cursor
+  (menu-bar-mode -1)
+  (scroll-bar-mode -1)
+  (setq-default truncate-lines t)
+  (when hide-cursor
+    (setq-default cursor-type nil)))
 
 ;;; init.el ends here
