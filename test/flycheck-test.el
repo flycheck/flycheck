@@ -2344,7 +2344,7 @@ and extension, as in `file-name-base'."
                      "‘message’ called with 0 args to fill 1 format field(s)")
          :checker emacs-lisp)
      `(11 8 warning ,(flycheck-test-fix-quotes
-                     "‘message’ called with 0 args to fill 1 format field(s)")
+                      "‘message’ called with 0 args to fill 1 format field(s)")
           :checker emacs-lisp)
      '(12 nil warning "First sentence should end with punctuation"
           :checker emacs-lisp-checkdoc)
