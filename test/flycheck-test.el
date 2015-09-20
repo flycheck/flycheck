@@ -2082,7 +2082,7 @@ and extension, as in `file-name-base'."
 
 (ert-deftest flycheck-error-level-info ()
   :tags '(error-level)
-  (should (= (flycheck-error-level-severity 'info) -1))
+  (should (= (flycheck-error-level-severity 'info) -10))
   (should (eq (flycheck-error-level-fringe-bitmap 'info) 'empty-line))
   (should (eq (flycheck-error-level-fringe-face 'info)
               'flycheck-fringe-info))

@@ -3163,7 +3163,7 @@ show the icon."
 (setf (get 'flycheck-info-overlay 'priority) 90)
 
 (flycheck-define-error-level 'info
-  :severity -1
+  :severity -10
   :compilation-level 0
   :overlay-category 'flycheck-info-overlay
   ;; Not exactly the right indicator, but looks pretty, and I prefer to use
