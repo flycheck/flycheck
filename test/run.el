@@ -31,8 +31,6 @@
 
 ;;; Code:
 
-(require 'thingatpt)                    ; For `read-from-whole-string'
-
 (defun flycheck-run-check-selector (selector)
   "Check SELECTOR if it fails loading."
   (with-temp-buffer
@@ -70,6 +68,13 @@ This function adds the following custom selectors:
      (cons group (mapcar #'flycheck-transform-selector body)))
     (simple simple)))
 
+(defun flycheck-read-whole-string (str)
+  "Read from whole STR."
+  (pcase-let ((`(,obj . ,index) (read-from-string str)))
+    (if (/= index (length str))
+        (error "Can't read whole string")
+      obj)))
+
 (defun flycheck-run-tests-batch-and-exit ()
   "Run test cases matching tags in `argv' and exit.
 
@@ -93,7 +98,7 @@ Node `(ert)Test Selectors' for information about test selectors."
                    (message "Warning: Empty test selector, defaulting to t")
                    t)
                   (t (condition-case nil
-                         (read-from-whole-string selector)
+                         (flycheck-read-whole-string selector)
                        (error
                         (flycheck-run-check-selector selector)
                         (kill-emacs 1)))))))
