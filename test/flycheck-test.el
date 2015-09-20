@@ -114,6 +114,21 @@ determined."
    "coqtop" "-v"))
 
 
+;;; Checkdoc quoting
+
+;; Emacs 24 uses good old Emacs ASCII quotes, but Emacs 25 has curly quotes.
+;; Here we work around these differences.
+
+(defconst flycheck-test-curly-quotes (version<= "25" emacs-version)
+  "Whether Emacs uses curly quotes.")
+
+(defun flycheck-test-fix-quotes (msg)
+  "Substitute curly quotes in MSG for older Emacs versions."
+  (if flycheck-test-curly-quotes msg
+    (replace-regexp-in-string (rx "‘" (group (1+ (not (any "’")))) "’")
+                              "`\\1'" msg 'fixedcase)))
+
+
 ;;; Code style
 (defmacro flycheck-test-def-indent-test (filename)
   "Define a test case for the indentation of FILENAME.
@@ -2325,13 +2340,16 @@ and extension, as in `file-name-base'."
     (widen)
     (should (= (length (flycheck-overlays-in (point-min) (point-max))) 4))
     (flycheck-ert-should-errors
-     '(9 1 warning "`message' called with 0 args to fill 1 format field(s)"
+     `(9 1 warning ,(flycheck-test-fix-quotes
+                     "‘message’ called with 0 args to fill 1 format field(s)")
          :checker emacs-lisp)
-     '(11 8 warning "`message' called with 0 args to fill 1 format field(s)"
+     `(11 8 warning ,(flycheck-test-fix-quotes
+                     "‘message’ called with 0 args to fill 1 format field(s)")
           :checker emacs-lisp)
      '(12 nil warning "First sentence should end with punctuation"
           :checker emacs-lisp-checkdoc)
-     '(15 1 warning "`message' called with 0 args to fill 1 format field(s)"
+     `(15 1 warning ,(flycheck-test-fix-quotes
+                      "‘message’ called with 0 args to fill 1 format field(s)")
           :checker emacs-lisp))))
 
 (ert-deftest flycheck-add-overlay/help-echo-is-error-message ()
@@ -4112,7 +4130,8 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
           :checker emacs-lisp-checkdoc)
      '(18 6 warning "message called with 0 arguments, but requires 1+"
           :checker emacs-lisp)
-     '(23 1 warning "the function `dummy-package-foo' might not be defined at runtime."
+     `(23 1 warning ,(flycheck-test-fix-quotes
+                      "the function ‘dummy-package-foo’ might not be defined at runtime.")
           :checker emacs-lisp))))
 
 (flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
@@ -4135,7 +4154,8 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
         :checker emacs-lisp-checkdoc)
    '(16 6 warning "message called with 0 arguments, but requires 1+"
         :checker emacs-lisp)
-   '(21 1 warning "the function `dummy-package-foo' is not known to be defined."
+   `(21 1 warning ,(flycheck-test-fix-quotes
+                    "the function ‘dummy-package-foo’ is not known to be defined.")
         :checker emacs-lisp)))
 
 (flycheck-ert-def-checker-test emacs-lisp emacs-lisp sytnax-error
