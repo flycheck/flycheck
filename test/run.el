@@ -85,16 +85,18 @@ Node `(ert)Test Selectors' for information about test selectors."
       ;; from trying to parse them.
       (message "WARNING: Unused trailing arguments: %S" argv)
       (setq argv nil))
-    (setq selector (cond
-                    ((not selector) t)
-                    ((= (length selector) 0)
-                     (message "Warning: Empty test selector, defaulting to t")
-                     t)
-                    (t (condition-case nil
-                           (read-from-whole-string selector)
-                         (error
-                          (flycheck-run-check-selector selector)
-                          (kill-emacs 1))))))
+    (setq selector
+          `(and "flycheck-"
+                ,(cond
+                  ((not selector) t)
+                  ((= (length selector) 0)
+                   (message "Warning: Empty test selector, defaulting to t")
+                   t)
+                  (t (condition-case nil
+                         (read-from-whole-string selector)
+                       (error
+                        (flycheck-run-check-selector selector)
+                        (kill-emacs 1)))))))
     (ert-run-tests-batch-and-exit (flycheck-transform-selector selector))))
 
 (defun flycheck-setup-coverage-reporting ()
