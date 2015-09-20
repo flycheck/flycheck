@@ -3080,7 +3080,7 @@ The following PROPERTIES constitute an error level:
         (plist-get properties :compilation-level))
   (setf (get level 'flycheck-overlay-category)
         (plist-get properties :overlay-category))
-  (setf (get level 'flycheck-fringe-bitmap)
+  (setf (get level 'flycheck-fringe-bitmap-double-arrow)
         (plist-get properties :fringe-bitmap))
   (setf (get level 'flycheck-fringe-face)
         (plist-get properties :fringe-face))
@@ -3105,7 +3105,7 @@ The following PROPERTIES constitute an error level:
 
 (defun flycheck-error-level-fringe-bitmap (level)
   "Get the fringe bitmap for LEVEL."
-  (get level 'flycheck-fringe-bitmap))
+  (get level 'flycheck-fringe-bitmap-double-arrow))
 
 (defun flycheck-error-level-fringe-face (level)
   "Get the fringe face for LEVEL."
@@ -3137,6 +3137,26 @@ show the icon."
 
 
 ;;; Built-in error levels
+(when (fboundp 'define-fringe-bitmap)
+  (define-fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
+    (vector #b00000000
+            #b00000000
+            #b00000000
+            #b00000000
+            #b00000000
+            #b10011000
+            #b01101100
+            #b00110110
+            #b00011011
+            #b00110110
+            #b01101100
+            #b10011000
+            #b00000000
+            #b00000000
+            #b00000000
+            #b00000000
+            #b00000000)))
+
 (setf (get 'flycheck-error-overlay 'face) 'flycheck-error)
 (setf (get 'flycheck-error-overlay 'priority) 110)
 
@@ -3144,7 +3164,7 @@ show the icon."
   :severity 100
   :compilation-level 2
   :overlay-category 'flycheck-error-overlay
-  :fringe-bitmap 'exclamation-mark
+  :fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
   :fringe-face 'flycheck-fringe-error
   :error-list-face 'flycheck-error-list-error)
 
@@ -3155,7 +3175,7 @@ show the icon."
   :severity 10
   :compilation-level 1
   :overlay-category 'flycheck-warning-overlay
-  :fringe-bitmap 'question-mark
+  :fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
   :fringe-face 'flycheck-fringe-warning
   :error-list-face 'flycheck-error-list-warning)
 
@@ -3166,10 +3186,7 @@ show the icon."
   :severity -10
   :compilation-level 0
   :overlay-category 'flycheck-info-overlay
-  ;; Not exactly the right indicator, but looks pretty, and I prefer to use
-  ;; built-in bitmaps over diving into the hassle of messing around with custom
-  ;; fringe bitmaps
-  :fringe-bitmap 'empty-line
+  :fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
   :fringe-face 'flycheck-fringe-info
   :error-list-face 'flycheck-error-list-info)
 

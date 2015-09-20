@@ -17,6 +17,7 @@ master (in development)
   - Cache GHC output for faster syntax checking and better template haskell
     support [GH-708]
   - Fall back to `rst` if `rst-sphinx` is disabled [GH-745] [GH-746]
+  - New uniform fringe indicators [GH-750]
 
 - Bug fixes:
 
