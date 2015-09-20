@@ -6808,11 +6808,21 @@ error."
   :safe #'stringp
   :package-version '(flycheck . "0.24"))
 
+(flycheck-def-option-var flycheck-jscs-esprima nil javascript-jscs
+  "Path to a custom Esprima version, for `--esprima'.
+
+The value of this variable is either a path to a custom Esprima
+version, or nil to use the standard Esprima version."
+  :type '(choice (const :tag "Standard Esprima version" nil)
+                 (directory :tag "Path to custom Esprima version"))
+  :package-version '(flycheck . "0.25"))
+
 (flycheck-define-checker javascript-jscs
   "A Javascript style checker using JSCS.
 
 See URL `http://www.jscs.info'."
   :command ("jscs" "--reporter=checkstyle"
+            (option "--esprima" flycheck-jscs-esprima)
             (config-file "--config" flycheck-jscsrc)
             source)
   :error-parser flycheck-parse-jscs

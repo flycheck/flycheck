@@ -449,18 +449,20 @@ or @flyc{javascript-gjslint}
 @uref{https://github.com/Flet/semistandard,Semistandard})
 @end enumerate
 
-The @flyc{javascript-eslint} checker provides the following option:
+These syntax checkers provide the following options:
+checker provides the following option:
 
 @table @asis
 @flycoption flycheck-eslint-rulesdir
-A directory with custom rules for ESLint.
-@flycconfigfile{flycheck-eslintrc,ESLint}
+A directory with custom rules for  @flyc{javascript-eslint}.
+@flycoption flycheck-jscs-esprima
+A directory with a custom Esprima version for @flyc{javascript-jscs}.
 @end table
 
-@flyc{javascript-jshint}, @flyc{javascript-gjslint} and @flyc{javascript-jscs}
-read configuration files:
+They also read the following configuration files:
 
 @table @asis
+@flycconfigfile{flycheck-eslintrc,ESLint}
 @flycconfigfile{flycheck-jshintrc,JSHint}
 @flycconfigfile{flycheck-gjslintrc,Closure Linter}
 @flycconfigfile{flycheck-jscsrc,JSCS}

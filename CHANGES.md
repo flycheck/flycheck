@@ -8,6 +8,8 @@ master (in development)
   - Use symbolic error IDs in Pylint [GH-714]
   - Add `flycheck-pylint-use-symbolic-id` to disable symbolic IDs for Pylint
     [GH-714]
+  - Add `flycheck-jscs-esprima` to use a custom Esprima version with JSCS
+    [GH-739]
 
 - Improvements:
 
