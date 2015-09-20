@@ -1326,14 +1326,14 @@ and extension, as in `file-name-base'."
               :checker emacs-lisp-checkdoc))))))
 
 (ert-deftest flycheck-select-checker/selecting-sets-the-syntax-checker ()
-  :tags '(selection)
+  :tags '(selection checker-emacs-lisp-checkdoc)
   (flycheck-ert-with-temp-buffer
     (emacs-lisp-mode)
     (flycheck-select-checker 'emacs-lisp-checkdoc)
     (should (eq flycheck-checker 'emacs-lisp-checkdoc))))
 
 (ert-deftest flycheck-select-checker/unselecting-unsets-the-syntax-checker ()
-  :tags '(selection)
+  :tags '(selection checker-emacs-lisp-checkdoc)
   (flycheck-ert-with-temp-buffer
     (emacs-lisp-mode)
     (flycheck-select-checker 'emacs-lisp-checkdoc)
@@ -2307,7 +2307,8 @@ and extension, as in `file-name-base'."
         (should (eq side 'right-fringe))))))
 
 (ert-deftest flycheck-add-overlay/right-position-in-narrowed-buffer ()
-  :tags '(overlay language-emacs-lisp checker-emacs-lisp)
+  :tags '(overlay language-emacs-lisp
+                  checker-emacs-lisp checker-emacs-lisp-checkdoc)
   "Test that all overlays are added at the right positions with narrowing in place."
   (flycheck-ert-with-resource-buffer "narrowing.el"
     (emacs-lisp-mode)
@@ -3198,7 +3199,8 @@ evaluating BODY."
 ;;; Executables of command checkers
 
 (ert-deftest flycheck-overridden-executable ()
-  :tags '(executables language-emacs-lisp checker-emacs-lisp)
+  :tags '(executables language-emacs-lisp
+                      checker-emacs-lisp checker-emacs-lisp-checkdoc)
   (let ((flycheck-emacs-lisp-executable (flycheck-ert-resource-filename
                                          "bin/dummy-emacs")))
     (flycheck-ert-should-syntax-check
@@ -4083,7 +4085,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
    '(4 8 error "module external_library is in file 'external_library.d' which cannot be read"
        :checker d-dmd)))
 
-(flycheck-ert-def-checker-test emacs-lisp emacs-lisp nil
+(flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp nil
   ;; Determine how the Emacs message for load file errors looks like: In Emacs
   ;; Snapshot, the message has three parts because the underlying file error is
   ;; contained in the message.  In stable release the file error itself is
@@ -4100,7 +4102,8 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
           :checker emacs-lisp-checkdoc)
      `(15 1 error ,msg :checker emacs-lisp))))
 
-(flycheck-ert-def-checker-test emacs-lisp emacs-lisp load-path
+(flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
+                               load-path
   (let ((flycheck-emacs-lisp-load-path (list (flycheck-ert-resource-filename
                                               "dummy-elpa/dummy-package-0.1"))))
     (flycheck-ert-should-syntax-check
@@ -4112,7 +4115,8 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
      '(23 1 warning "the function `dummy-package-foo' might not be defined at runtime."
           :checker emacs-lisp))))
 
-(flycheck-ert-def-checker-test emacs-lisp emacs-lisp initialize-packages
+(flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
+                               initialize-packages
   (let ((flycheck-emacs-lisp-initialize-packages t)
         (flycheck-emacs-lisp-package-user-dir (flycheck-ert-resource-filename
                                                "dummy-elpa")))
@@ -4123,7 +4127,8 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
      '(18 6 warning "message called with 0 arguments, but requires 1+"
           :checker emacs-lisp))))
 
-(flycheck-ert-def-checker-test emacs-lisp emacs-lisp checks-compressed-file
+(flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
+                               checks-compressed-file
   (flycheck-ert-should-syntax-check
    "checkers/emacs-lisp.el.gz" 'emacs-lisp-mode
    '(12 nil warning "First sentence should end with punctuation"
@@ -4139,7 +4144,8 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
      "checkers/emacs-lisp-syntax-error.el" 'emacs-lisp-mode
      '(3 1 error "End of file during parsing" :checker emacs-lisp))))
 
-(flycheck-ert-def-checker-test emacs-lisp emacs-lisp without-file-name
+(flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
+                               without-file-name
   ;; Regression test for checkdoc in buffers without file names. See
   ;; https://github.com/flycheck/flycheck/issues/73 and
   ;; https://github.com/bbatsov/prelude/issues/259
@@ -4152,7 +4158,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
     ;; names…
     (should flycheck-current-errors)))
 
-(flycheck-ert-def-checker-test emacs-lisp emacs-lisp
+(flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
                                does-not-check-autoloads-buffers
   ;; Regression test ensuring that Emacs Lisp won't check autoload buffers.
   ;; These buffers are temporary buffers created during package installation to
@@ -4163,13 +4169,13 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
     (should-not (flycheck-may-use-checker 'emacs-lisp))
     (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
 
-(flycheck-ert-def-checker-test emacs-lisp emacs-lisp
+(flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
                                checkdoc-does-not-check-cask-files
   (flycheck-ert-with-file-buffer
       (expand-file-name "Cask" flycheck-test-source-directory)
     (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
 
-(flycheck-ert-def-checker-test emacs-lisp emacs-lisp
+(flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
                                does-not-check-with-no-byte-compile
   ;; We need to use a hook here, because `no-byte-compile' seems to be
   ;; explicitly changed when loading Emacs Lisp files
