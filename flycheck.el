@@ -435,6 +435,22 @@ commands through `bundle exec', `nix-shell' or similar wrappers."
                  (function :tag "Modify command with a custom function"))
   :risky t)
 
+(defcustom flycheck-executable-find #'executable-find
+  "Function to search for executables.
+
+The value of this option is a function which is given the name or
+path of an executable and shall return the full path to the
+executable, or nil if the executable does not exit.
+
+The default is the standard `executable-find' function which
+searches `exec-path'.  You can customize this option to search
+for checkers in other environments such as bundle or NixOS
+sandboxes."
+  :group 'flycheck
+  :type '(choice (const :tag "Search executables in `exec-path'" executable-find)
+                 (function :tag "Search executables with a custom function"))
+  :risky t)
+
 (defcustom flycheck-indication-mode 'left-fringe
   "The indication mode for Flycheck errors and warnings.
 
@@ -4276,7 +4292,8 @@ default `:verify' function of command checkers."
           ;; guard against syntax checker tools which are not installed
           (plist-put properties :predicate
                      (lambda ()
-                       (and (executable-find (flycheck-checker-executable symbol))
+                       (and (funcall flycheck-executable-find
+                                     (flycheck-checker-executable symbol))
                             (or (not predicate) (funcall predicate))))))
 
     (apply #'flycheck-define-generic-checker symbol docstring
@@ -4607,7 +4624,8 @@ symbols in the command."
 
 Return a list of `flycheck-verification-result' objects for
 CHECKER."
-  (let ((executable (executable-find (flycheck-checker-executable checker))))
+  (let ((executable (funcall flycheck-executable-find
+                             (flycheck-checker-executable checker))))
     (list
      (flycheck-verification-result-new
       :label "executable"
@@ -4731,9 +4749,9 @@ variable symbol for a syntax checker."
           (executable (if current-prefix-arg
                           nil
                         (read-file-name "Executable: " nil default-executable
-                                        nil nil #'executable-find))))
+                                        nil nil flycheck-executable-find))))
      (list checker executable)))
-  (when (and executable (not (executable-find executable)))
+  (when (and executable (not (funcall flycheck-executable-find executable)))
     (user-error "%s is no executable" executable))
   (let ((variable (flycheck-checker-executable-variable checker)))
     (set (make-local-variable variable) executable)))
