@@ -12,17 +12,11 @@ intended as replacement for the older Flymake extension which is part of GNU
 Emacs.
 
 It uses various syntax checking and linting tools to check the contents of
-buffers, and reports warnings and errors directly in the buffer, or in an
-optional error list.  The following screenshow shows Flycheck at work in a
-Haskell buffer, using GHC and Hlint for syntax checking:
+buffers, and reports warnings and errors directly in the buffer or in an
+optional error list:
 
-![](https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/screencast.gif)
+![](https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/flycheck-annotated.png)
 
-The color theme in this screencast is [Solarized Light][], with the the
-[Source Code Pro][] font.
-
-[Solarized Light]: https://github.com/bbatsov/solarized-emacs
-[Source Code Pro]: https://github.com/adobe-fonts/source-code-pro
 [COPYING]: https://github.com/flycheck/flycheck/blob/master/COPYING
 [manual]: http://www.flycheck.org/manual/latest/index.html
 
