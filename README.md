@@ -81,6 +81,7 @@ Documentation is available at http://www.flycheck.org:
 Support & Contribution
 ======================
 
+- [Stack Exchange](https://emacs.stackexchange.com/questions/tagged/flycheck)
 - [Issue Tracker](https://github.com/flycheck/flycheck/issues)
 - [Waffle Board](http://waffle.io/flycheck/flycheck)
 - [Github](https://github.com/flycheck/flycheck)
