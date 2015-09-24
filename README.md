@@ -81,8 +81,7 @@ Documentation is available at http://www.flycheck.org:
 Support & Contribution
 ======================
 
-- [Gitter chat](https://gitter.im/flycheck/flycheck) and
-  [Issue Tracker](https://github.com/flycheck/flycheck/issues)
+- [Issue Tracker](https://github.com/flycheck/flycheck/issues)
 - [Waffle Board](http://waffle.io/flycheck/flycheck)
 - [Github](https://github.com/flycheck/flycheck)
 - [Contribution guidelines](https://github.com/flycheck/flycheck/blob/master/CONTRIBUTING.md)
