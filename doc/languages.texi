@@ -522,7 +522,7 @@ The severity level for Perl::Critic, as integer for the
 @enumerate
 @item
 @flyc{php} (syntax check with
-@uref{https://metacpan.org/pod/Perl::Critic,PHP CLI})
+@uref{http://php.net/manual/en/features.commandline.php,PHP CLI})
 @item
 @flyc{php-phpmd} (code check with @uref{http://phpmd.org/,PHP Mess
 Detector})
