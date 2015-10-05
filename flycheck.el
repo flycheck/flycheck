@@ -7306,6 +7306,9 @@ See URL `http://racket-lang.org/'."
   :command ("racket" "-f" source-inplace)
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ":" (message) line-end))
+  :error-filter (lambda (errors)
+                  (flycheck-sanitize-errors
+                   (flycheck-increment-error-columns errors)))
   :modes racket-mode)
 
 (flycheck-define-checker rpm-rpmlint
