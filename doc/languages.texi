@@ -471,6 +471,9 @@ read configuration files:
 @itemize
 @item
 @flyc{json-jsonlint} (@uref{https://github.com/zaach/jsonlint,jsonlint})
+@item
+or @flyc{json-python-json}
+(@uref{https://docs.python.org/3.5/library/json.html,Python json.tool module})
 @end itemize
 
 @flyclanguage{Less}

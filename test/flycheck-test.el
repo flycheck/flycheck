@@ -4705,8 +4705,14 @@ Why not:
 
 (flycheck-ert-def-checker-test json-jsonlint json nil
   (flycheck-ert-should-syntax-check
-   "checkers/json-jsonlint-error.json" 'text-mode
-   '(1 42 error "found: ',' - expected: 'EOF'." :checker json-jsonlint)))
+   "checkers/json-error.json" 'text-mode
+   '(1 43 error "found: ',' - expected: 'EOF'." :checker json-jsonlint)))
+
+(flycheck-ert-def-checker-test json-python-json json nil
+  (let ((flycheck-disabled-checkers '(json-jsonlint)))
+    (flycheck-ert-should-syntax-check
+     "checkers/json-error.json" 'text-mode
+     '(1 44 error "Extra data" :checker json-python-json))))
 
 (flycheck-ert-def-checker-test less less file-error
   (let* ((candidates (list (flycheck-ert-resource-filename "checkers/no-such-file.less")

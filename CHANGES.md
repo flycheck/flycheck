@@ -1,6 +1,10 @@
 master (in development)
 =======================
 
+- New syntax checkers:
+
+  - JSON with Python’s built-in `json` module [GH-758]
+
 - New features:
 
   - Add `flycheck-help-echo-function` to customize the Help Echo of Flycheck
