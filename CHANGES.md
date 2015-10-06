@@ -22,6 +22,7 @@ master (in development)
 - Bug fixes:
 
   - Fix error patterns of `coq` [GH-742]
+  - Support GFortran 5 [GH-751]
 
 0.24 (Aug 15, 2015)
 ===================

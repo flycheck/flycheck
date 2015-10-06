@@ -49,6 +49,7 @@ substantial code to Flycheck:
 - [Robert Dallas Gray](https://github.com/rdallasgray)
 - [Sean Gillespie](https://github.com/swgillespie)
 - [Sean Salmon](https://github.com/phatcabbage)
+- [Sebastian Beyer](https://github.com/sebastianbeyer)
 - [Syohei Yoshida](https://github.com/syohex)
 - [steckerhalter](https://github.com/steckerhalter)
 - [Stephen Lewis](https://github.com/stephenjlewis)
