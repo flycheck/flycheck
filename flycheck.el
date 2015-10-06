@@ -6248,11 +6248,12 @@ Uses GCC's Fortran compiler gfortran.  See URL
             (eval flycheck-gfortran-args)
             source)
   :error-patterns
-  ((error line-start (file-name) ":" line "." column ":\n"
-          (= 3 (zero-or-more not-newline) "\n")
-          (or "Error" "Fatal Error") ": " (message) line-end)
-   (warning line-start (file-name) ":" line "." column ":\n"
-            (= 3 (zero-or-more not-newline) "\n")
+  ((error line-start (file-name) ":" line (or ":" ".") column (or ": " ":\n")
+          (or (= 3 (zero-or-more not-newline) "\n") "")
+          (or "Error" "Fatal Error") ": "
+          (message) line-end)
+   (warning line-start (file-name) ":" line (or ":" ".") column (or ": " ":\n")
+            (or (= 3 (zero-or-more not-newline) "\n") "")
             "Warning: " (message) line-end))
   :modes (fortran-mode f90-mode))
 
