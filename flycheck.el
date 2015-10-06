@@ -206,6 +206,7 @@ attention to case differences."
     javascript-jscs
     javascript-standard
     json-jsonlint
+    json-python-json
     less
     luacheck
     lua
@@ -6865,6 +6866,26 @@ See URL `https://github.com/zaach/jsonlint'."
           ": line " line
           ", col " column ", "
           (message) line-end))
+  :predicate
+  (lambda ()
+    (or
+     (eq major-mode 'json-mode)
+     (and (buffer-file-name)
+          (string= (file-name-extension (buffer-file-name)) "json")))))
+
+(flycheck-define-checker json-python-json
+  "A JSON syntax checker using Python json.tool module.
+
+See URL `https://docs.python.org/3.5/library/json.html#command-line-interface'."
+  :command ("python" "-m" "json.tool" source
+            ;; Send the pretty-printed output to the null device
+            null-device)
+  :error-patterns
+  ((error line-start
+          (message) ": line " line " column " column
+          ;; Ignore the rest of the line which shows the char position.
+          (one-or-more not-newline)
+          line-end))
   :predicate
   (lambda ()
     (or
