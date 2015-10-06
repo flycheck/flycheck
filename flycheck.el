@@ -6253,7 +6253,8 @@ Uses GCC's Fortran compiler gfortran.  See URL
           (or "Error" "Fatal Error") ": " (message) line-end)
    (warning line-start (file-name) ":" line "." column ":\n"
             (= 3 (zero-or-more not-newline) "\n")
-            "Warning: " (message) line-end))
+            "Warning: " (message) line-end)
+   (error line-start "Error: " (message) " in '" (file-name) "'\n")
   :modes (fortran-mode f90-mode))
 
 (flycheck-define-checker go-gofmt
