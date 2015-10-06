@@ -4238,6 +4238,20 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
        :checker fortran-gfortran)
    '(3 1 error "Unclassifiable statement at (1)" :checker fortran-gfortran)))
 
+(flycheck-ert-def-checker-test fortran-gfortran fortran gfortran-5-error
+  (let ((flycheck-fortran-gfortran-executable "gfortran-5"))
+    (flycheck-ert-should-syntax-check
+     "checkers/fortran-error.f" '(fortran-mode f90-mode)
+     '(1 1 error "Non-numeric character in statement label at (1)"
+         :checker fortran-gfortran)
+     '(1 1 error "Unclassifiable statement at (1)" :checker fortran-gfortran)
+     '(2 1 error "Non-numeric character in statement label at (1)"
+         :checker fortran-gfortran)
+     '(2 1 error "Unclassifiable statement at (1)" :checker fortran-gfortran)
+     '(3 1 error "Non-numeric character in statement label at (1)"
+         :checker fortran-gfortran)
+     '(3 1 error "Unclassifiable statement at (1)" :checker fortran-gfortran))))
+
 (flycheck-ert-def-checker-test fortran-gfortran fortran free-form-error
   (let ((flycheck-gfortran-layout 'free))
     (flycheck-ert-should-syntax-check
@@ -4251,6 +4265,15 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
    '(1 20 warning "Unused dummy argument 'p' at (1)" :checker fortran-gfortran)
    '(18 9 warning "Same actual argument associated with INTENT(IN) argument 'a' and INTENT(OUT) argument 'b' at (1)"
         :checker fortran-gfortran)))
+
+(flycheck-ert-def-checker-test fortran-gfortran fortran gfortran-5-warning
+  (let ((flycheck-fortran-gfortran-executable "gfortran-5"))
+    (flycheck-ert-should-syntax-check
+     "checkers/fortran-warning.f90" '(fortran-mode f90-mode)
+     '(1 20 warning "Unused dummy argument ‘p’ at (1)"
+         :checker fortran-gfortran)
+     '(18 9 warning "Same actual argument associated with INTENT(IN) argument ‘a’ and INTENT(OUT) argument ‘b’ at (1)"
+          :checker fortran-gfortran))))
 
 (flycheck-ert-def-checker-test fortran-gfortran fortran specific-warnings
   (let ((flycheck-gfortran-warnings '("unused-dummy-argument")))
