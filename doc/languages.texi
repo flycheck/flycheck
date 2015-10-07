@@ -315,6 +315,14 @@ respectively)
 @flyc{go-vet} provides the following option:
 
 @table @asis
+@flycoption flycheck-go-build-install-deps
+Install dependencies of the target package being built. Installing
+dependencies can dramatically speed up builds that have slow
+building dependent packages.
+
+@flycoption flycheck-go-build-tags
+Tags are a list of build tags to consider satisified during a build.
+
 @flycoption flycheck-go-vet-print-functions
 A list of print-like functions for go vet.  Go vet will check these
 functions for format string problems.
