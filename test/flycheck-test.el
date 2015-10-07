@@ -4685,6 +4685,11 @@ Why not:
    "checkers/json-jsonlint-error.json" 'text-mode
    '(1 42 error "found: ',' - expected: 'EOF'." :checker json-jsonlint)))
 
+(flycheck-ert-def-checker-test json-python-json json nil
+  (flycheck-ert-should-syntax-check
+   "checkers/json-python-json-error.json" 'text-mode
+   '(1 58 error "Expecting property name enclosed in double quotes" :checker json-python-json)))
+
 (flycheck-ert-def-checker-test less less file-error
   (let* ((candidates (list (flycheck-ert-resource-filename "checkers/no-such-file.less")
                            (flycheck-ert-resource-filename "checkers/no-such-file.less")
