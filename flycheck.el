@@ -6681,14 +6681,12 @@ See URL `https://github.com/ndmitchell/hlint'."
   ((warning line-start
             (file-name) ":" line ":" column
             ": Warning: "
-            (message (one-or-more not-newline)
-                     (one-or-more "\n" (one-or-more not-newline)))
+            (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
             line-end)
    (error line-start
           (file-name) ":" line ":" column
           ": Error: "
-          (message (one-or-more not-newline)
-                   (one-or-more "\n" (one-or-more not-newline)))
+          (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
           line-end))
   :modes (haskell-mode literate-haskell-mode))
 
