@@ -583,6 +583,8 @@ and indicates these locations in the fringe according to
 How Flycheck highlights errors and warnings in the buffer:
 
 @table @code
+@item lines
+Highlight the whole line, ignoring any column information.
 @item columns
 Highlight the column of the error, if the error has a column, otherwise
 behave as @code{lines}.
