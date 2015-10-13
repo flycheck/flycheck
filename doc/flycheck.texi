@@ -595,6 +595,8 @@ Highlight the symbol at the error column, if any, otherwise behave like
 Highlight the expression at the error column, if any, otherwise behave
 like @code{columns}.  @strong{Warning:} @code{sexps} can be @emph{very}
 slow in some major modes, notably the built-in @code{python-mode}.
+@item lines
+Highlight the whole line.
 @item nil
 Do not highlight errors at all.
 @end table
