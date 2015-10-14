@@ -4706,7 +4706,7 @@ Why not:
 (flycheck-ert-def-checker-test json-jsonlint json nil
   (flycheck-ert-should-syntax-check
    "checkers/json-error.json" 'text-mode
-   '(1 43 error "found: ',' - expected: 'EOF'." :checker json-jsonlint)))
+   '(1 44 error "found: ',' - expected: 'EOF'." :checker json-jsonlint)))
 
 (flycheck-ert-def-checker-test json-python-json json nil
   (let ((flycheck-disabled-checkers '(json-jsonlint)))

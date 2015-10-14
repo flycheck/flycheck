@@ -28,6 +28,7 @@ master (in development)
   - Fix error patterns of `coq` [GH-742]
   - Support GFortran 5 [GH-751]
   - Fix stack overflow when parsing hlint errors [GH-760]
+  - Fix error columns of jsonlint
 
 0.24 (Aug 15, 2015)
 ===================

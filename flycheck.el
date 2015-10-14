@@ -6865,6 +6865,9 @@ See URL `https://github.com/zaach/jsonlint'."
           ": line " line
           ", col " column ", "
           (message) line-end))
+  :error-filter
+  (lambda (errors)
+    (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
   :predicate
   (lambda ()
     (or
