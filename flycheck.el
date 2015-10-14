@@ -3430,7 +3430,7 @@ Return the created overlay."
     (setf (overlay-get overlay 'help-echo) #'flycheck-help-echo)
     overlay))
 
-(defun flycheck-help-echo (window object pos)
+(defun flycheck-help-echo (_window object pos)
   "Construct a tooltip message.
 
 Most of the actual work is done by calling
