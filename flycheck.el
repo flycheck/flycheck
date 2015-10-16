@@ -418,7 +418,7 @@ If set to nil, do not show error tooltips."
   :risky t)
 
 (defcustom flycheck-command-wrapper-function
-  (lambda (cmd args) (cons cmd args))
+  #'identity
   "Wraps checker commands and its arguments before it gets executed.
 
 The function is usefull to wrap a checker command, if the checker
@@ -428,16 +428,16 @@ usually only available in a project environement that can be
 accessed with the `nix-shell' command. An example for a
 `flycheck-command-wrapper-function' with `nix-shell' would be
 
-    (defun nixos-command-wrapper-function (cmd args)
+    (defun nixos-command-wrapper-function (command)
       (list \"nix-shell\" \"--run\"
-            (mapconcat 'identity (cons cmd args) \" \"))
+            (mapconcat 'identity command \" \"))
 
 `nix-shell' expects a single argument after the `--command' flag,
 therefor the example function concatenates the checker command
 and its arguments with spaces as separators."
   :group 'flycheck
   :type '(choice (const :tag "Does not modify the command and arguments"
-                        cons)
+                        identity)
                  (function :tag "Custom command wrapper function"))
   :risky t)
 
@@ -4530,8 +4530,8 @@ symbols in the command."
         (let* ((program (flycheck-checker-executable checker))
                (args (flycheck-checker-substituted-arguments checker))
                (command (funcall flycheck-command-wrapper-function
-                                 program
-                                 args))
+                                 (cons program
+                                       args)))
                ;; Use pipes to receive output from the syntax checker.  They are
                ;; more efficient and more robust than PTYs, which Emacs uses by
                ;; default, and since we don't need any job control features, we
