@@ -423,18 +423,10 @@ If set to nil, do not show error tooltips."
 
 The function is usefull to wrap a checker command, if the checker
 is only available in sandbox-like enviroments.  The default value
-does not modify the command or arguments.  In NixOS, checkers are
-usually only available in a project environement that can be
-accessed with the `nix-shell' command. An example for a
-`flycheck-command-wrapper-function' with `nix-shell' would be
+does not modify the command or arguments.
 
-    (defun nixos-command-wrapper-function (command)
-      (list \"nix-shell\" \"--run\"
-            (mapconcat 'identity command \" \"))
-
-`nix-shell' expects a single argument after the `--command' flag,
-therefor the example function concatenates the checker command
-and its arguments with spaces as separators."
+This function can be customized to run checkers in environments like
+cabal, bundle exec or NixOS sandboxes."
   :group 'flycheck
   :type '(choice (const :tag "Does not modify the command and arguments"
                         identity)
@@ -449,7 +441,8 @@ in `exec-path' for the executable. If the executable is present,
 `flycheck-executable-find' should return an absolute path to the
 executable, otherwise `nil'.
 
-This function can be customized to search for executables in sandboxes."
+This function can be customized to search for checkers in environments
+like cabal, bundle exec or NixOS sandboxes."
   :group 'flycheck
   :type '(choice (const :tag "Searches for an executable in `exec-path'"
                         executable-find)
