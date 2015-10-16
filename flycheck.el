@@ -4731,7 +4731,7 @@ variable symbol for a syntax checker."
           (executable (if current-prefix-arg
                           nil
                         (read-file-name "Executable: " nil default-executable
-                                        nil nil #'flycheck-executable-find))))
+                                        nil nil flycheck-executable-find))))
      (list checker executable)))
   (when (and executable (not (funcall flycheck-executable-find executable)))
     (user-error "%s is no executable" executable))
