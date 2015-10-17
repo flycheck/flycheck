@@ -51,6 +51,7 @@ substantial code to Flycheck:
 - [Sebastian Beyer](https://github.com/sebastianbeyer)
 - [Stephen Lewis](https://github.com/stephenjlewis)
 - [Steve Purcell](https://github.com/purcell)
+- [Sven Keidel](https://github.com/svenkeidel)
 - [Sylvain Benner](https://github.com/syl20bnr)
 - [Sylvain Rousseau](https://github.com/thisirs)
 - [Syohei Yoshida](https://github.com/syohex)
