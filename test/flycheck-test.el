@@ -996,6 +996,15 @@ and extension, as in `file-name-base'."
     (let ((flycheck-disabled-checkers '(emacs-lisp)))
       (should-not (flycheck-may-use-checker 'emacs-lisp)))))
 
+(ert-deftest flycheck-may-use-checker/checks-executable ()
+  :tags '(checker-api)
+  (flycheck-ert-with-resource-buffer "checkers/emacs-lisp.el"
+    (emacs-lisp-mode)
+    (let* ((was-called nil)
+           (flycheck-executable-find (lambda (e) (setq was-called t))))
+      (should (flycheck-may-use-checker 'emacs-lisp))
+      (should was-called))))
+
 
 ;;; Generic syntax checkers
 (ert-deftest flycheck-checker-get/gets-a-property ()
@@ -3214,6 +3223,19 @@ evaluating BODY."
 (ert-deftest flycheck-command-argument-p/unknown-argument-cell ()
   :tags '(definition)
   (should-not (flycheck-command-argument-p '(foo bar))))
+
+(ert-deftest flycheck-start-command-checker/wraps-command ()
+  :tags '(command-checker)
+  (let* ((was-called 0)
+         (flycheck-command-wrapper-function (lambda (cmd)
+                                              (cl-incf was-called)
+                                              (cons "echo" cmd))))
+    ;; Since we just `echo' the command, there should be zero errors
+    (flycheck-ert-should-syntax-check
+     "checkers/emacs-lisp.el" 'emacs-lisp-mode)
+
+    ;; Called once for `emacs-lisp', and a second time for checkdoc
+    (should (equal was-called 2))))
 
 
 ;;; Executables of command checkers
