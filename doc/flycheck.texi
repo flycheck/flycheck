@@ -1472,6 +1472,16 @@ according to the result of the last syntax check.  Additionally,
 change of Flycheck, and provides a fine-grained reporting about what
 Flycheck is currently doing.
 
+@section Executables and commands
+
+Flycheck uses the function given by the option
+@code{flycheck-executable-find} to search for executables, and passes
+all syntax checker commands through
+@code{flycheck-command-wrapper-function} before running them.  These
+features let you adapt Flycheck to search executables and run commands
+in sandboxed environments such as @code{bundle exec} or
+@code{nix-shell}.
+
 @section Error processing
 
 The functions in @code{flycheck-process-error-functions} are used to
