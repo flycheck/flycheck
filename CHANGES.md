@@ -16,6 +16,8 @@ master (in development)
     before execution [GH-629] [GH-752]
   - Add `flycheck-executable-find` to customise how Flycheck searches
     executables [GH-752]
+  - Add `flycheck-hlint-args` to pass additional arguments to hlint [GH-713]
+    [GH-762]
 
 - Improvements:
 

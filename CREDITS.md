@@ -34,6 +34,7 @@ substantial code to Flycheck:
 - [Marcus Majewski](https://github.com/hekto)
 - [Marian Schubert](https://github.com/maio)
 - [Mario Rodas](https://github.com/marsam)
+- [Mark Karpov](https://github.com/mrkkrp)
 - [Mark Hellewell](https://github.com/markhellewell)
 - [Matthias Dahl](https://github.com/BinaryKhaos)
 - [Miro Bezjak](https://github.com/mbezjak)
