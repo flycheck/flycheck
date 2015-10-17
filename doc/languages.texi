@@ -362,6 +362,9 @@ and @flyc{haskell-hlint} (style checker with
 following options:
 
 @table @asis
+@flycoption flycheck-hlint-args
+A list of additional arguments for Hlint.
+
 @flycoption flycheck-hlint-language-extensions
 Extensions list.
 

@@ -6666,6 +6666,9 @@ See URL `http://www.haskell.org/ghc/'."
 (flycheck-def-config-file-var flycheck-hlintrc haskell-hlint "HLint.hs"
   :safe #'stringp)
 
+(flycheck-def-args-var flycheck-hlint-args haskell-hlint
+  :package-version '(flycheck . "0.25"))
+
 (flycheck-def-option-var flycheck-hlint-language-extensions
     nil haskell-hlint
   "Extensions list to enable for hlint.
@@ -6714,6 +6717,7 @@ See URL `https://github.com/ndmitchell/hlint'."
             (option-list "-i=" flycheck-hlint-ignore-rules concat)
             (option-list "-h" flycheck-hlint-hint-packages concat)
             (config-file "-h" flycheck-hlintrc)
+            (eval flycheck-hlint-args)
             source-inplace)
   :error-patterns
   ((warning line-start
