@@ -23,6 +23,7 @@ endif
 # our XML-parser tests
 EMACSBUILDFLAGS = --quiet --enable-silent-rules \
 	--with-x-toolkit=no --without-x --without-all --with-xml2
+EMACSBUILDVARS = CFLAGS='' CXXFLAGS=''
 
 ifeq ($(origin EMACS_VERSION), undefined)
 $(error "No $$EMACS_VERSION in environment!")
@@ -55,7 +56,7 @@ checkout_emacs_trunk:
 
 # Build a small Emacs executable without anything for tests
 install_emacs: $(GETEMACS)
-	cd '/tmp/emacs' && ./configure $(EMACSBUILDFLAGS) --prefix="$(HOME)"
+	cd '/tmp/emacs' && ./configure $(EMACSBUILDFLAGS) --prefix="$(HOME)" $(EMACSBUILDVARS)
 	make -j2 -C '/tmp/emacs' V=0 install
 
 install_cask: install_emacs
