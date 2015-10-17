@@ -12,6 +12,10 @@ master (in development)
   - Use symbolic error IDs in Pylint [GH-714]
   - Add `flycheck-pylint-use-symbolic-id` to disable symbolic IDs for Pylint
     [GH-714]
+  - Add `flycheck-command-wrapper-function` to wrap syntax checker commands
+    before execution [GH-629] [GH-752]
+  - Add `flycheck-executable-find` to customise how Flycheck searches
+    executables [GH-752]
 
 - Improvements:
 
