@@ -6368,14 +6368,30 @@ See URL `http://golang.org/cmd/go/' and URL
                    :message (if have-vet "present" "missing")
                    :face (if have-vet 'success '(bold error)))))))
 
+(flycheck-def-option-var flycheck-go-build-install-deps nil go-build
+  "Instruct go build to install dependencies `go build -i'."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.24"))
+
+(flycheck-def-option-var flycheck-go-build-tags nil go-build
+  "Instruct go build to apply build sentinels `go build -tags 'dev debug'."
+  :type '(repeat (string :tag "Tag"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.24"))
+
 (flycheck-define-checker go-build
   "A Go syntax and type checker using the `go build' command.
 
 See URL `http://golang.org/cmd/go'."
-  ;; We need to use `temporary-file-name' instead of `null-device', because Go
-  ;; can't write to the null device.  It's “too magic”.  See
-  ;; https://code.google.com/p/go/issues/detail?id=4851 for details.
-  :command ("go" "build" "-o" temporary-file-name)
+  ;; We need to use `temporary-file-name' instead of `null-device',
+  ;; because Go can't write to the null device.
+  ;; See https://github.com/golang/go/issues/4851
+  :command ("go" "build"
+            (option-flag "-i" flycheck-go-build-install-deps)
+            ;; multiple tags are listed as "dev debug ..."
+            (option-list "-tags=" flycheck-go-build-tags concat)
+            "-o" temporary-file-name)
   :error-patterns
   ((error line-start (file-name) ":" line ":"
           (optional column ":") " "
