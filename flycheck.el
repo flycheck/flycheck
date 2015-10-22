@@ -6375,7 +6375,7 @@ If non-nil automatically install dependencies with `go build'
 while syntax checking."
   :type 'boolean
   :safe #'booleanp
-  :package-version '(flycheck . "0.24"))
+  :package-version '(flycheck . "0.25"))
 
 (flycheck-def-option-var flycheck-go-build-tags nil go-build
   "A list of tags for `go build'.
@@ -6383,7 +6383,7 @@ while syntax checking."
 Each item is a string with a tag to be given to `go build'."
   :type '(repeat (string :tag "Tag"))
   :safe #'flycheck-string-list-p
-  :package-version '(flycheck . "0.24"))
+  :package-version '(flycheck . "0.25"))
 
 (flycheck-define-checker go-build
   "A Go syntax and type checker using the `go build' command.
