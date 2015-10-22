@@ -7690,15 +7690,6 @@ See URL `http://www.scala-lang.org/'."
   :safe #'stringp
   :package-version '(flycheck . "0.20"))
 
-(flycheck-def-option-var flycheck-scalastyle-jar nil scala-scalastyle
-  "The path to the main JAR file of Scalastyle.
-
-If this option is nil, or points to a non-existing file,
-`scala-scalastyle' can not be used."
-  :type '(file :must-match t)
-  :safe #'stringp
-  :package-version '(flycheck . "0.20"))
-
 (flycheck-define-checker scala-scalastyle
   "A Scala style checker using scalastyle.
 
