@@ -5362,24 +5362,17 @@ Why not:
    '(3 nil error "identifier expected but '{' found." :checker scala)))
 
 (flycheck-ert-def-checker-test scala-scalastyle scala error
-  (let ((flycheck-scalastylerc "scalastyle.xml")
-        (flycheck-scalastyle-jar "/opt/scalastyle/scalastyle-batch.jar"))
+  (let ((flycheck-scalastylerc "scalastyle.xml"))
     (flycheck-ert-should-syntax-check
      "checkers/scala-scalastyle-style-error.scala" 'scala-mode
      '(6 5 error "Don't use println" :checker scala-scalastyle))))
 
 (flycheck-ert-def-checker-test scala-scalastyle scala warning
-  (let ((flycheck-scalastylerc "scalastyle.xml")
-        (flycheck-scalastyle-jar "/opt/scalastyle/scalastyle-batch.jar"))
+  (let ((flycheck-scalastylerc "scalastyle.xml"))
     (flycheck-ert-should-syntax-check
      "checkers/scala-scalastyle-style-warning.scala" 'scala-mode
      '(5 9 warning "Redundant braces after class definition"
          :checker scala-scalastyle))))
-
-(flycheck-ert-def-checker-test scala-scalastyle scala inhibited-without-jar
-  (let ((flycheck-scalastylerc "scalastyle.xml"))
-    (flycheck-ert-should-syntax-check
-     "checkers/scala-scalastyle-style-warning.scala" 'scala-mode)))
 
 (flycheck-ert-def-checker-test scss-lint scss nil
   (let ((flycheck-scss-lintrc "scss-lint.yml"))

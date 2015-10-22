@@ -1,6 +1,11 @@
 master (in development)
 =======================
 
+- **Breaking changes**:
+
+  - `scala-scalastyle` now expects a `scalastyle` executable in `exec-path`
+    [GH-763]
+
 - New syntax checkers:
 
   - JSON with Python’s built-in `json` module [GH-758]

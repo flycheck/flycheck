@@ -750,15 +750,14 @@ Whether to enable the Compass CSS framework in SASS, via
 @uref{http://www.scalastyle.org/,Scalastyle})
 @end enumerate
 
-The @flyc{scala-scalastyle} syntax checker needs the following options:
+The @flyc{scala-scalastyle} syntax checker needs the following option:
 
 @table @asis
-@flycoption flycheck-scalastyle-jar
-The path to the main JAR file of Scalastyle.
 @flycconfigfile{flycheck-scalastylerc,Scalastyle}
 @end table
 
-If these options are not set, @flyc{scala-scalastyle} will not be used.
+If this option is not set, or if the configuration file was not found
+@flyc{scala-scalastyle} will not be used.
 
 @flyclanguage{SCSS}
 

@@ -7707,8 +7707,7 @@ Note that this syntax checker is not used if
 point to non-existing files.
 
 See URL `http://www.scalastyle.org'."
-  :command ("java"
-            (option "-jar" flycheck-scalastyle-jar)
+  :command ("scalastyle"
             (config-file "-c" flycheck-scalastylerc)
             source)
   :error-patterns
@@ -7723,26 +7722,11 @@ See URL `http://www.scalastyle.org'."
   :predicate
   ;; Inhibit this syntax checker if the JAR or the configuration are unset or
   ;; missing
-  (lambda () (and flycheck-scalastyle-jar flycheck-scalastylerc
-                  (file-exists-p flycheck-scalastyle-jar)
+  (lambda () (and flycheck-scalastylerc
                   (flycheck-locate-config-file flycheck-scalastylerc
                                                'scala-scalastyle)))
   :verify (lambda (checker)
             (list
-             (flycheck-verification-result-new
-              :label "JAR file"
-              :message (cond
-                        ((not flycheck-scalastyle-jar)
-                         "`flycheck-scalastyle-jar' not set")
-                        ((not (file-exists-p flycheck-scalastyle-jar))
-                         (format "file %s does not exist"
-                                 flycheck-scalastyle-jar))
-                        (t "present"))
-              :face (cond
-                     ((not flycheck-scalastyle-jar) '(bold warning))
-                     ((not (file-exists-p flycheck-scalastyle-jar))
-                      '(bold error))
-                     (t 'success)))
              (flycheck-verification-result-new
               :label "Configuration file"
               :message (cond
