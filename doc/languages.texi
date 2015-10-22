@@ -612,7 +612,7 @@ On by default.
 @itemize
 @item
 @flyc{r-lintr} (syntax and style check with
-@uref{jimhester/lintr,lintr}), with the following options:
+@ghref{jimhester/lintr,lintr}), with the following options:
 
 @table @asis
 @flycoption flycheck-lintr-caching

@@ -1268,7 +1268,7 @@ Many linting tools provide a rich set of options to configure their
 analysis.  Flycheck makes it to define proper Emacs options and map them
 to options of commands.
 
-For instance, the @uref{bbatsov/rubocop, Rubocop} tool checks Ruby for
+For instance, the @ghref{bbatsov/rubocop, Rubocop} tool checks Ruby for
 semantic and stylistic issues.  Since style is mainly a matter of taste,
 it has a special linting mode in which all stylistic checks are disabled
 (error patterns omitted for readability):
@@ -1380,7 +1380,7 @@ whether a syntax checker is applicable for the current buffer.
 Frequently, we would like to use multiple syntax checkers in a buffer.
 For instance, we might want to check the syntax of a script with
 @code{sh-zsh} from the previous section, and then use
-@uref{koalaman/shellcheck/, Shellcheck} to check for questionable code
+@ghref{koalaman/shellcheck/, Shellcheck} to check for questionable code
 such as unquoted variable expansions, if there are no syntax errors.
 Flycheck supports this scenario by @emph{chaining} syntax checkers.
 
