@@ -4386,17 +4386,6 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
                  (flycheck-ert-resource-filename
                   "checkers/emacs-lisp-syntax-error.el")))))
 
-(flycheck-ert-def-checker-test go-build go build-tags
-  (let* ((go-root (or (getenv "GOROOT") "/usr/local/go"))
-         (go-root-pkg (concat go-root "/src"))
-         (flycheck-go-build-tags '("dev")))
-    (flycheck-ert-with-env '(("GOPATH" . nil))
-      (flycheck-ert-should-syntax-check
-       "checkers/go/src/tags/main.go" 'go-mode
-       `(4 2 error ,(format "it ran)"
-                            go-root-pkg)
-           :checker go-build)))))
-
 (ert-deftest flycheck-go-package-name/package-file ()
   :tags '(language-go)
   (flycheck-ert-with-env
