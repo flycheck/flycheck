@@ -5169,7 +5169,8 @@ Why not:
   (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-rubylint)))
     (flycheck-ert-should-syntax-check
      "checkers/ruby-syntax-error.rb" 'ruby-mode
-     '(5 nil error "syntax error, unexpected tCONSTANT, expecting $end"
+     '(4 nil warning "assigned but unused variable - days" :checker ruby)
+     '(5 nil error "syntax error, unexpected tCONSTANT, expecting end-of-input"
          :checker ruby))))
 
 (flycheck-ert-def-checker-test ruby-jruby ruby syntax-error

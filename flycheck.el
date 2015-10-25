@@ -7518,7 +7518,10 @@ See URL `http://batsov.com/rubocop/'."
   :command ("rubocop" "--display-cop-names" "--format" "emacs"
             (config-file "--config" flycheck-rubocoprc)
             (option-flag "--lint" flycheck-rubocop-lint-only)
-            source)
+            ;; Rubocop takes the original file name as argument when reading
+            ;; from standard input
+            "--stdin" source-original)
+  :standard-input t
   :error-patterns
   ((info line-start (file-name) ":" line ":" column ": C: "
          (optional (id (one-or-more (not (any ":")))) ": ") (message) line-end)
@@ -7545,6 +7548,7 @@ ruby-lint 2.0.2 or newer is required.  See URL
   :command ("ruby-lint" "--presenter=syntastic"
             (config-file "--config" flycheck-rubylintrc)
             source)
+  ;; Ruby Lint can't read from standard input
   :error-patterns
   ((info line-start
          (file-name) ":I:" line ":" column ": " (message) line-end)
@@ -7566,16 +7570,14 @@ implementations.
 Please consider using `ruby-rubocop' or `ruby-rubylint' instead.
 
 See URL `https://www.ruby-lang.org/'."
-  :command ("ruby" "-w" "-c" source)
+  :command ("ruby" "-w" "-c")
+  :standard-input t
   :error-patterns
   ;; These patterns support output from JRuby, too, to deal with RVM or Rbenv
-  ((error line-start
-          "SyntaxError in " (file-name) ":" line ": " (message)
-          line-end)
-   (warning line-start
-            (file-name) ":" line ":" (optional column ":")
+  ((error line-start "SyntaxError in -:" line ": " (message) line-end)
+   (warning line-start "-:" line ":" (optional column ":")
             " warning: " (message) line-end)
-   (error line-start (file-name) ":" line ": " (message) line-end))
+   (error line-start "-:" line ": " (message) line-end))
   :modes (enh-ruby-mode ruby-mode)
   :next-checkers ((warning . ruby-rubylint)))
 
@@ -7588,13 +7590,12 @@ versions of JRuby.
 Please consider using `ruby-rubocop' or `ruby-rubylint' instead.
 
 See URL `http://jruby.org/'."
-  :command ("jruby" "-w" "-c" source)
+  :command ("jruby" "-w" "-c")
+  :standard-input t
   :error-patterns
-  ((error line-start
-          "SyntaxError in " (file-name) ":" line ": " (message)
-          line-end)
-   (warning line-start (file-name) ":" line " warning: " (message) line-end)
-   (error line-start (file-name) ":" line ": " (message) line-end))
+  ((error line-start "SyntaxError in -:" line ": " (message) line-end)
+   (warning line-start "-:" line " warning: " (message) line-end)
+   (error line-start  "-:" line ": " (message) line-end))
   :modes (enh-ruby-mode ruby-mode)
   :next-checkers ((warning . ruby-rubylint)))
 
