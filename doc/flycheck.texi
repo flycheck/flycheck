@@ -1059,21 +1059,26 @@ checker for the popular @uref{http://www.pylint.org/, Pylint} tool for
 Python:
 
 @lisp
-(flycheck-define-checker python-pylint
-  "A Python syntax and style checker using Pylint.
+(flycheck-define-checker ruby-rubocop
+  "A Ruby syntax and style checker using the RuboCop tool.
 
-See URL `http://www.pylint.org/'."
-  :command ("pylint"
-            "--msg-template" "@{path@}:@{line@}:@{column@}:@{C@}:@{msg@} (@{msg_id@})"
-            source)
+See URL `http://batsov.com/rubocop/'."
+  :command ("rubocop" "--display-cop-names" "--format" "emacs"
+            (config-file "--config" flycheck-rubocoprc)
+            (option-flag "--lint" flycheck-rubocop-lint-only)
+            "--stdin" source-original)
+  :standard-input t
   :error-patterns
-  ((error line-start (file-name) ":" line ":" column ":"
-          (or "E" "F") ":" (message) line-end)
-   (warning line-start (file-name) ":" line ":" column ":"
-            (or "W" "R") ":" (message) line-end)
-   (info line-start (file-name) ":" line ":" column ":"
-         "C:" (message) line-end))
-  :modes python-mode)
+  ((info line-start (file-name) ":" line ":" column ": C: "
+         (optional (id (one-or-more (not (any ":")))) ": ") (message) line-end)
+   (warning line-start (file-name) ":" line ":" column ": W: "
+            (optional (id (one-or-more (not (any ":")))) ": ") (message)
+            line-end)
+   (error line-start (file-name) ":" line ":" column ": " (or "E" "F") ": "
+          (optional (id (one-or-more (not (any ":")))) ": ") (message)
+          line-end))
+  :modes (enh-ruby-mode ruby-mode)
+  :next-checkers ((warning . ruby-rubylint)))
 @end lisp
 
 The first argument to @code{flycheck-define-checker} is the @emph{name}
@@ -1084,7 +1089,7 @@ Next comes the @emph{docstring}, which should provide a bit of
 information about the syntax checker.  It's a good idea to provide a
 link to the homepage of the syntax checker tool here.  You can view this
 docstring in Emacs with @code{flycheck-describe-checker} at
-@kbd{C-c ! ?}, e.g. @kbd{C-c ! ? python-pylint}.
+@kbd{C-c ! ?}, e.g. @kbd{C-c ! ? ruby-rubocop}.
 
 Eventually we specify the @emph{properties} of the new syntax checker.
 These properties tell Flycheck when to use your new syntax checker, how
@@ -1096,19 +1101,32 @@ The @code{:command} specifies the command Flycheck should run to check
 the buffer.  It's a simple list containing the executable and its
 arguments.
 
-In our example we first the @option{--msg-template} option to
-@command{pylint} to configure a comprehensive and parseable output
-format.
+In the example above we pass a couple of arguments to @command{rubocop}
+to configure its output format.  Next come two options:  The special
+@code{config-file} cell takes the name of a configuration file from the
+given variable, searches it and passes the path—if found—to the syntax
+checker.  The @code{option-flag} cell passes the given argument to the
+syntax checker if the given variable is non-nil.
 
-Then we use the “special” @code{source} argument to pass the contents of
-the buffer as input file to @command{pylint}.  Whenever it sees the
-@code{source} argument, Flycheck creates a temporary file, fills it with
-the current contents of the buffer and passes that file to the syntax
-checker.  This allows to check the real contents of a buffer even if the
-buffer is not saved to disk.
+At last we specify @code{--stdin} to make Rubocop read source code
+from standard input.  The special @code{source-original} symbol gives
+the name of the file being checked to Rubocop; Rubocop uses this name in
+its error output.
 
-Refer to the function @code{flycheck-substitute-argument} for a complete
-list of all special symbols.
+For a complete list of all special symbols refer to the function
+@code{flycheck-substitute-argument}.
+
+@item
+@code{:standard-input t} makes Flycheck send the contents of the buffer
+via standard input.  This is the preferred way to pass buffer contents
+to syntax checkers.
+
+For syntax checkers that can't read from standard input Flycheck
+provides the special @code{source} and @code{source-inplace} argument
+symbols for the @code{:command} property.  These argument symbols create
+temporary files in the system temp directory or beneath the original
+file respectively and give pass them to the syntax checker upon
+invocation.
 
 @item
 The @code{:error-patterns} tell Flycheck how to parse the output of the
