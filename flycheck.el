@@ -2468,7 +2468,7 @@ checks."
   (let* ((syntax-check flycheck-current-syntax-check)
          (checker (flycheck-syntax-check-checker syntax-check))
          (errors (flycheck-relevant-errors
-                  (flycheck-expand-error-file-names
+                  (flycheck-fill-and-expand-error-file-names
                    (flycheck-filter-errors
                     (flycheck-assert-error-list-p errors) checker)))))
     (unless (flycheck-disable-excessive-checker checker errors)
@@ -2956,11 +2956,20 @@ with `flycheck-process-error-functions'."
   (setq flycheck-current-errors nil)
   (flycheck-report-status 'not-checked))
 
-(defun flycheck-expand-error-file-names (errors)
-  "Expand all relative file names in ERRORS."
+(defun flycheck-fill-and-expand-error-file-names (errors)
+  "Fill and expand file names in ERRORS.
+
+Expand all file names of ERRORS against the `default-directory'
+of the current buffer.  If the file name of an error is nil fill
+in the result of function `buffer-file-name' in the current
+buffer.
+
+Return ERRORS, modified in-place."
   (mapc (lambda (err)
-          (-when-let (filename (flycheck-error-filename err))
-            (setf (flycheck-error-filename err) (expand-file-name filename))))
+          (setf (flycheck-error-filename err)
+                (-if-let (filename (flycheck-error-filename err))
+                    (expand-file-name filename)
+                  (buffer-file-name))))
         errors)
   errors)
 
@@ -3257,6 +3266,20 @@ Returns sanitized ERRORS."
           (setf (flycheck-error-id err) nil))
         (when (eq column 0)
           (setf (flycheck-error-column err) nil)))))
+  errors)
+
+(defun flycheck-remove-error-file-names (file-name errors)
+  "Remove matching FILE-NAME from ERRORS.
+
+Use as `:error-filter' for syntax checkers that output faulty
+filenames.  Flycheck will later fill in the buffer file name.
+
+Return ERRORS."
+  (mapc (lambda (err)
+          (when (and (flycheck-error-filename err)
+                     (string= (flycheck-error-filename err) file-name))
+            (setf (flycheck-error-filename err) nil)))
+        errors)
   errors)
 
 (defun flycheck-increment-error-columns (errors &optional offset)
@@ -6822,10 +6845,15 @@ See URL `http://jade-lang.com'."
 
 See URL `http://www.jshint.com'."
   :command ("jshint" "--checkstyle-reporter"
+            "--filename" source-original
             (config-file "--config" flycheck-jshintrc)
-            source)
+            "-")
+  :standard-input t
   :error-parser flycheck-parse-checkstyle
-  :error-filter flycheck-dequalify-error-ids
+  :error-filter
+  (lambda (errors)
+    (flycheck-remove-error-file-names
+     "stdin" (flycheck-dequalify-error-ids errors)))
   :modes (js-mode js2-mode js3-mode)
   :next-checkers ((warning . javascript-jscs)))
 
@@ -6855,10 +6883,8 @@ See URL `https://github.com/eslint/eslint'."
   :command ("eslint" "--format=checkstyle"
             (config-file "--config" flycheck-eslintrc)
             (option "--rulesdir" flycheck-eslint-rulesdir)
-            ;; We need to use source-inplace because eslint looks for
-            ;; configuration files in the directory of the file being checked.
-            ;; See https://github.com/flycheck/flycheck/issues/447
-            source-inplace)
+            "--stdin" "--stdin-filename" source-original)
+  :standard-input t
   :error-parser flycheck-parse-checkstyle
   :error-filter (lambda (errors)
                   (mapc (lambda (err)
@@ -6918,11 +6944,13 @@ error."
 See URL `http://www.jscs.info'."
   :command ("jscs" "--reporter=checkstyle"
             (config-file "--config" flycheck-jscsrc)
-            source)
+            "-")
+  :standard-input t
   :error-parser flycheck-parse-jscs
   :error-filter (lambda (errors)
                   (flycheck-remove-error-ids
-                   (flycheck-sanitize-errors errors)))
+                   (flycheck-sanitize-errors
+                    (flycheck-remove-error-file-names "input" errors))))
   :modes (js-mode js2-mode js3-mode))
 
 (flycheck-define-checker javascript-standard
@@ -6934,11 +6962,10 @@ to the former.  To use it with the latter, set
 
 See URL `https://github.com/feross/standard' and URL
 `https://github.com/Flet/semistandard'."
-  :command ("standard" source)
+  :command ("standard" "--stdin")
+  :standard-input t
   :error-patterns
-  ((error line-start
-          "  " (file-name) ":" line ":" column ":" (message)
-          line-end))
+  ((error line-start "  <text>:" line ":" column ":" (message) line-end))
   :modes (js-mode js2-mode js3-mode))
 
 (flycheck-define-checker json-jsonlint

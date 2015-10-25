@@ -2122,6 +2122,18 @@ and extension, as in `file-name-base'."
     (should (equal (flycheck-sanitize-errors (list err))
                    (list (flycheck-error-new-at 1 1 'error "foo"))))))
 
+(ert-deftest flycheck-remove-error-file-names ()
+  :tags '(error-filtering)
+  (let ((errors (list
+                 (flycheck-error-new-at 1 1 'error "foo" :filename "hello")
+                 (flycheck-error-new-at 2 2 'warning "bar" :filename "world")
+                 (flycheck-error-new-at 3 3 'info "spam"))))
+    (should (equal (flycheck-remove-error-file-names "world" errors)
+                   (list
+                    (flycheck-error-new-at 1 1 'error "foo" :filename "hello")
+                    (flycheck-error-new-at 2 2 'warning "bar")
+                    (flycheck-error-new-at 3 3 'info "spam"))))))
+
 (ert-deftest flycheck-increment-error-columns/ignores-nil ()
   :tags '(error-filtering)
   (let ((errors (list (flycheck-error-new-at 4 nil nil nil))))
@@ -4611,7 +4623,7 @@ Why not:
   (let ((flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-ert-should-syntax-check
      "checkers/javascript-syntax-error.js" '(js-mode js2-mode js3-mode)
-     '(3 26 error "Unexpected token )" :checker javascript-eslint))))
+     '(3 26 error "Parsing error: Unexpected token )" :checker javascript-eslint))))
 
 (flycheck-ert-def-checker-test javascript-eslint javascript warning
   :tags '(checkstyle-xml)
