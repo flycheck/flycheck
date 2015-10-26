@@ -7972,13 +7972,13 @@ See URL `https://github.com/purcell/sqlint'."
   :command ("sqlint")
   :standard-input t
   :error-patterns
-  ((warning line-start (file-name) ":" line ":" column ":WARNING "
+  ((warning line-start "stdin:" line ":" column ":WARNING "
             (message (one-or-more not-newline)
                      (zero-or-more "\n"
                                    (one-or-more "  ")
                                    (one-or-more not-newline)))
             line-end)
-   (error line-start (file-name) ":" line ":" column ":ERROR "
+   (error line-start "stdin:" line ":" column ":ERROR "
           (message (one-or-more not-newline)
                    (zero-or-more "\n"
                                  (one-or-more "  ")
