@@ -6787,7 +6787,8 @@ See URL `https://github.com/ndmitchell/hlint'."
   "A HTML syntax and style checker using Tidy.
 
 See URL `https://github.com/w3c/tidy-html5'."
-  :command ("tidy" (config-file "-config" flycheck-tidyrc) "-e" "-q" source)
+  :command ("tidy" (config-file "-config" flycheck-tidyrc) "-e" "-q")
+  :standard-input t
   :error-patterns
   ((error line-start
           "line " line
