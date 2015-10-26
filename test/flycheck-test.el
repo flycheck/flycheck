@@ -4335,11 +4335,11 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
      '(4 2 warning "should not use dot imports" :checker go-golint)
      '(7 1 warning "exported function Warn should have comment or be unexported"
          :checker go-golint)
-     '(8 nil error "undefined: fmt" :checker go-build)
+     '(8 nil error "undefined: fmt in fmt.Printf" :checker go-build)
      '(11 1 warning "exported function Warnf should have comment or be unexported"
           :checker go-golint)
-     '(12 nil error "undefined: fmt" :checker go-build)
-     '(17 nil error "undefined: fmt" :checker go-build)
+     '(12 nil error "undefined: fmt in fmt.Printf" :checker go-build)
+     '(17 nil error "undefined: fmt in fmt.Printf" :checker go-build)
      '(17 nil warning "arg 1 for printf verb %s of wrong type: untyped int"
           :checker go-vet)
      '(19 nil error "cannot use 1 (type int) as type string in argument to Warnf"
@@ -4384,7 +4384,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
       `(("GOPATH" . ,(flycheck-ert-resource-filename "checkers/go")))
     (flycheck-ert-should-syntax-check
      "checkers/go/src/test/test-error_test.go" 'go-mode
-     '(8 nil error "undefined: fmt" :checker go-test))))
+     '(8 nil error "undefined: fmt in fmt.Println" :checker go-test))))
 
 (ert-deftest flycheck-go-package-name/no-gopath ()
   :tags '(language-go)
