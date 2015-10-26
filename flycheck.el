@@ -6556,7 +6556,8 @@ try {
   "A Haml syntax checker using the Haml compiler.
 
 See URL `http://haml.info'."
-  :command ("haml" "-c" source)
+  :command ("haml" "-c" "--stdin")
+  :standard-input t
   :error-patterns
   ((error line-start "Syntax error on line " line ": " (message) line-end))
   :modes haml-mode)
