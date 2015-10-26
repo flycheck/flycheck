@@ -7091,11 +7091,11 @@ Relative paths are relative to the file being checked."
 
 See URL `http://www.perl.org'."
   :command ("perl" "-w" "-c"
-            (option-list "-I" flycheck-perl-include-path)
-            source)
+            (option-list "-I" flycheck-perl-include-path))
+  :standard-input t
   :error-patterns
   ((error line-start (minimal-match (message))
-          " at " (file-name) " line " line
+          " at - line " line
           (or "." (and ", " (zero-or-more not-newline))) line-end))
   :modes (perl-mode cperl-mode)
   :next-checkers (perl-perlcritic))
