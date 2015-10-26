@@ -7972,9 +7972,13 @@ See URL `https://github.com/koalaman/shellcheck/'."
             "--shell" (eval (symbol-name sh-shell))
             (option "--exclude" flycheck-shellcheck-excluded-warnings list
                     flycheck-option-comma-separated-list)
-            source)
+            "-")
+  :standard-input t
   :error-parser flycheck-parse-checkstyle
-  :error-filter flycheck-dequalify-error-ids
+  :error-filter
+  (lambda (errors)
+    (flycheck-remove-error-file-names
+     "-" (flycheck-dequalify-error-ids errors)))
   :modes sh-mode
   :predicate (lambda () (memq sh-shell flycheck-shellcheck-supported-shells))
   :verify (lambda (_)
