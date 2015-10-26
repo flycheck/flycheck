@@ -7944,7 +7944,8 @@ See URL `https://github.com/koalaman/shellcheck/'."
             "--shell" (eval (symbol-name sh-shell))
             (option "--exclude" flycheck-shellcheck-excluded-warnings list
                     flycheck-option-comma-separated-list)
-            source)
+            "-")
+  :standard-input t
   :error-parser flycheck-parse-checkstyle
   :error-filter flycheck-dequalify-error-ids
   :modes sh-mode
