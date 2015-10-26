@@ -7969,7 +7969,8 @@ See URL `http://slim-lang.com'."
   "A SQL syntax checker using the sqlint tool.
 
 See URL `https://github.com/purcell/sqlint'."
-  :command ("sqlint" source)
+  :command ("sqlint")
+  :standard-input t
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ":WARNING "
             (message (one-or-more not-newline)
