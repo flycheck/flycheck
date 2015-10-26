@@ -7065,15 +7065,13 @@ See URL `https://github.com/mpeterv/luacheck'."
   "A Lua syntax checker using the Lua compiler.
 
 See URL `http://www.lua.org/'."
-  :command ("luac" "-p" source)
+  :command ("luac" "-p" "-")
+  :standard-input t
   :error-patterns
   ((error line-start
-          ;; Skip the name of the luac executable.  We also skip the file name,
-          ;; because luac is stupid enough as to abbreviate file names in its
-          ;; output, which for obvious reasons breaks our file name
-          ;; detection. See https://github.com/flycheck/flycheck/issues/251
+          ;; Skip the name of the luac executable.
           (minimal-match (zero-or-more not-newline))
-          ":" line ": " (message) line-end))
+          ": stdin:" line ": " (message) line-end))
   :modes lua-mode)
 
 (flycheck-def-option-var flycheck-perl-include-path nil perl
