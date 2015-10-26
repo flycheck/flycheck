@@ -5842,7 +5842,8 @@ See URL `http://acrmp.github.io/foodcritic/'."
 
 See URL `http://coffeescript.org/'."
   ;; --print suppresses generation of compiled .js files
-  :command ("coffee" "--compile" "--print" source)
+  :command ("coffee" "--compile" "--print" "--stdio")
+  :standard-input t
   :error-patterns
   ((error line-start (file-name) ":" line ":" column
           ": error: " (message) line-end))
