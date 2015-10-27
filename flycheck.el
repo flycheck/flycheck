@@ -7541,6 +7541,8 @@ Otherwise report style issues as well."
 (flycheck-define-checker ruby-rubocop
   "A Ruby syntax and style checker using the RuboCop tool.
 
+You need at least RuboCop 0.34 for this syntax checker.
+
 See URL `http://batsov.com/rubocop/'."
   :command ("rubocop" "--display-cop-names" "--format" "emacs"
             (config-file "--config" flycheck-rubocoprc)
