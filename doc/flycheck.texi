@@ -204,10 +204,6 @@ file:
 (package-initialize)
 @end lisp
 
-@strong{Warning:} Flycheck is available from
-@uref{https://marmalade-repo.org/, Marmalade}, but due to frequent
-outages of this repository we recommend against it.
-
 @section Cask
 
 @cindex cask
