@@ -7685,7 +7685,11 @@ Relative paths are relative to the file being checked."
 This syntax checker needs Cargo with rustc subcommand."
   :command ("cargo" "rustc"
             (eval (if (string= flycheck-rust-crate-type "lib") "--lib" nil))
-            "--" "-Z" "no-trans")
+            "--" "-Z" "no-trans"
+            (option-flag "--test" flycheck-rust-check-tests)
+            (option-list "-L" flycheck-rust-library-path concat)
+            (eval flycheck-rust-args)
+            )
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ": "
           (one-or-more digit) ":" (one-or-more digit) " error: "
