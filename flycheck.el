@@ -7703,7 +7703,11 @@ This syntax checker needs Cargo with rustc subcommand."
          (message) line-end))
   :modes rust-mode
   :predicate (lambda ()
-               (or (not flycheck-rust-crate-root) (flycheck-buffer-saved-p))))
+               (let ((parent-dir (file-name-directory
+                                  (directory-file-name
+                                   (expand-file-name default-directory)))))
+                 ;; Cargo.toml
+                 (locate-dominating-file parent-dir "Cargo.toml"))))
 
 (flycheck-define-checker rust
   "A Rust syntax checker using Rust compiler.
