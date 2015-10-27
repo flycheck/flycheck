@@ -701,7 +701,12 @@ interpreter}),
 @itemize
 @item
 @flyc{rust-cargo} (using the @uref{https://crates.io/,Cargo,
-Rust package manager}), with the following options:
+Rust package manager})
+
+@item
+@flyc{rust} (using the @uref{http://www.rust-lang.org/,Rust compiler})
+
+These checkers provide the following options
 
 @table @asis
 @flycoption flycheck-rust-args
@@ -713,43 +718,20 @@ Whether to check test code in Rust. This translates to @option{--test}
 flag of @command{rustc}, not to @command{cargo build --test NAME}!
 
 @flycoption flycheck-rust-crate-root
-Unused by this checker.
+A path to the crate root for the current buffer, or nil if the current
+buffer is a crate by itself. Used only by @flyc{rust} checker.
 
 @flycoption flycheck-rust-crate-type
 The type of the crate to check, as string for the
-@option{--crate-type} option. This is compatible with usual rust
-checker (using @command{rustc} directly). Translates to either
-@option{--lib} in @command{cargo build} if it's a library, or to
-nothing if not.
+@option{--crate-type} option. In @flyc{rust-cargo}, translates to
+either @option{--lib} in @command{cargo build} if it's a library, or
+to nothing if not.
 
 @flycoption flycheck-rust-library-path
 A list of additional library directories for Rust. Relative paths are
 relative to the buffer being checked. Note you won't normally need
-that as Cargo should figure all this out itself.
-@end table
-
-@item
-@flyc{rust} (using the @uref{http://www.rust-lang.org/,Rust compiler}),
-with the following options:
-
-@table @asis
-@flycoption flycheck-rust-args
-A list of additional arguments for the Rust compiler @command{rustc}.
-
-@flycoption flycheck-rust-check-tests
-Whether to check test code in Rust.
-
-@flycoption flycheck-rust-crate-root
-A path to the crate root for the current buffer, or nil if the current
-buffer is a crate by itself.
-
-@flycoption flycheck-rust-crate-type
-The type of the crate to check, as string for the @option{--crate-type}
-option.
-
-@flycoption flycheck-rust-library-path
-A list of library directories for Rust.  Relative paths are relative to
-the buffer being checked.
+this with @flyc{rust-cargo} checker as Cargo should figure all this
+out itself.
 @end table
 
 @end itemize
