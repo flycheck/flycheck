@@ -712,6 +712,9 @@ They will be passed through to @command{rustc} verbatim.
 Whether to check test code in Rust. This translates to @option{--test}
 flag of @command{rustc}, not to @command{cargo build --test NAME}!
 
+@flycoption flycheck-rust-crate-root
+Unused by this checker.
+
 @flycoption flycheck-rust-crate-type
 The type of the crate to check, as string for the
 @option{--crate-type} option. This is compatible with usual rust
