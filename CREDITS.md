@@ -40,6 +40,7 @@ substantial code to Flycheck:
 - [Mark Hellewell](https://github.com/markhellewell)
 - [Matthew Curry](https://github.com/strawhatguy)
 - [Matthias Dahl](https://github.com/BinaryKhaos)
+- [Michael Pankov](https://github.com/mkpankov)
 - [Miro Bezjak](https://github.com/mbezjak)
 - [Mitch Tishmack](https://github.com/mitchty)
 - [Moritz Bunkus](https://github.com/mbunkus)

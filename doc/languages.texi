@@ -700,26 +700,31 @@ interpreter}),
 
 @itemize
 @item
-@flyc{rust} (using the @uref{http://www.rust-lang.org/,Rust compiler}),
-with the following options:
+@flyc{rust-cargo} (using the @uref{https://crates.io/,Cargo}), or
+
+@item
+@flyc{rust} (using the @uref{http://www.rust-lang.org/,Rust compiler})
+
+These checkers provide the following options:
 
 @table @asis
 @flycoption flycheck-rust-args
 A list of additional arguments for the Rust compiler @command{rustc}.
+
 @flycoption flycheck-rust-check-tests
 Whether to check test code in Rust.
 
 @flycoption flycheck-rust-crate-root
 A path to the crate root for the current buffer, or nil if the current
-buffer is a crate by itself.
+buffer is a crate by itself.  @flyc{rust-cargo} ignores this option, as
+the crate root comes from Cargo.
 
 @flycoption flycheck-rust-crate-type
-The type of the crate to check, as string for the @option{--crate-type}
-option.
-
+The type of the crate to check, as string for the
+@option{--crate-type} option.
 @flycoption flycheck-rust-library-path
-A list of library directories for Rust.  Relative paths are relative to
-the buffer being checked.
+A list of additional library directories for Rust. Relative paths are
+relative to the buffer being checked.
 @end table
 
 @end itemize

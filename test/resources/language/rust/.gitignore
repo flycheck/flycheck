@@ -1,0 +1,3 @@
+# Ignore Cargo stuff
+*.lock
+/target/

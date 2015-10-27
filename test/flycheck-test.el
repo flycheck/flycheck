@@ -4665,48 +4665,63 @@ Why not:
      '(16 nil warning "Useless use of == in void context."
           :checker ruby-jruby))))
 
+(flycheck-ert-def-checker-test rust-cargo rust warning
+  (let ((flycheck-rust-crate-type "bin"))
+    (flycheck-ert-should-syntax-check
+    "language/rust/src/warnings.rs" 'rust-mode
+    '(3 1 warning "function is never used: `main`, #[warn(dead_code)] on by default"
+        :checker rust-cargo)
+    '(4 9 warning "unused variable: `x`, #[warn(unused_variables)] on by default"
+        :checker rust-cargo))))
+
 (flycheck-ert-def-checker-test rust rust syntax-error
-  (flycheck-ert-should-syntax-check
-   "language/rust/src/syntax-error.rs" 'rust-mode
-   '(4 5 error "unresolved name `bla`" :checker rust :id "E0425")
-   '(4 5 info "run `rustc --explain E0425` to see a detailed explanation"
-       :checker rust)))
+  (let ((flycheck-disabled-checkers '(rust-cargo)))
+    (flycheck-ert-should-syntax-check
+     "language/rust/src/syntax-error.rs" 'rust-mode
+     '(4 5 error "unresolved name `bla`" :checker rust :id "E0425")
+     '(4 5 info "run `rustc --explain E0425` to see a detailed explanation"
+         :checker rust))))
 
 (flycheck-ert-def-checker-test rust rust multiline-error
-  (flycheck-ert-should-syntax-check
-   "language/rust/src/multiline-error.rs" 'rust-mode
-   '(7 9 error "mismatched types:
+  (let ((flycheck-disabled-checkers '(rust-cargo)))
+    (flycheck-ert-should-syntax-check
+     "language/rust/src/multiline-error.rs" 'rust-mode
+     '(7 9 error "mismatched types:
  expected `u8`,\n    found `i8`
 (expected u8,\n    found i8)" :checker rust :id "E0308")
-   '(7 9 info "run `rustc --explain E0308` to see a detailed explanation"
-     :checker rust)))
+     '(7 9 info "run `rustc --explain E0308` to see a detailed explanation"
+        :checker rust))))
 
 (flycheck-ert-def-checker-test rust rust warning
-  (flycheck-ert-should-syntax-check
-   "language/rust/src/warnings.rs" 'rust-mode
-   '(4 9 warning "unused variable: `x`, #[warn(unused_variables)] on by default"
-       :checker rust)))
+  (let ((flycheck-disabled-checkers '(rust-cargo)))
+    (flycheck-ert-should-syntax-check
+     "language/rust/src/warnings.rs" 'rust-mode
+     '(4 9 warning "unused variable: `x`, #[warn(unused_variables)] on by default"
+         :checker rust))))
 
 (flycheck-ert-def-checker-test rust rust note-and-help
-  (flycheck-ert-should-syntax-check
-   "language/rust/src/note-and-help.rs" 'rust-mode
-   '(11 9 info "`x` moved here because it has type `NonPOD`, which is moved by default"
-       :checker rust)
-   '(11 9 info "if you would like to borrow the value instead, use a `ref` binding as shown:"
-        :checker rust)
-   '(12 9 error "use of moved value: `x`" :checker rust :id "E0382")
-   '(12 9 info "run `rustc --explain E0382` to see a detailed explanation"
-        :checker rust)))
+  (let ((flycheck-disabled-checkers '(rust-cargo)))
+    (flycheck-ert-should-syntax-check
+     "language/rust/src/note-and-help.rs" 'rust-mode
+     '(11 9 info "`x` moved here because it has type `NonPOD`, which is moved by default"
+          :checker rust)
+     '(11 9 info "if you would like to borrow the value instead, use a `ref` binding as shown:"
+          :checker rust)
+     '(12 9 error "use of moved value: `x`" :checker rust :id "E0382")
+     '(12 9 info "run `rustc --explain E0382` to see a detailed explanation"
+          :checker rust))))
 
 (flycheck-ert-def-checker-test rust rust crate-root-not-set
-  (flycheck-ert-should-syntax-check
-   "language/rust/src/importing.rs" 'rust-mode
-   '(1 5 error "unresolved import `super::imported`" :checker rust :id "E0432")
-   '(1 5 info "run `rustc --explain E0432` to see a detailed explanation"
-       :checker rust)))
+  (let ((flycheck-disabled-checkers '(rust-cargo)))
+    (flycheck-ert-should-syntax-check
+     "language/rust/src/importing.rs" 'rust-mode
+     '(1 5 error "unresolved import `super::imported`" :checker rust :id "E0432")
+     '(1 5 info "run `rustc --explain E0432` to see a detailed explanation"
+         :checker rust))))
 
 (flycheck-ert-def-checker-test rust rust crate-root
-  (let ((flycheck-rust-crate-root (flycheck-ert-resource-filename
+  (let ((flycheck-disabled-checkers '(rust-cargo))
+        (flycheck-rust-crate-root (flycheck-ert-resource-filename
                                    "language/rust/src/main.rs")))
     (flycheck-ert-should-syntax-check
      "language/rust/src/importing.rs" 'rust-mode
