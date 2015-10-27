@@ -229,6 +229,7 @@ attention to case differences."
     ruby-rubylint
     ruby
     ruby-jruby
+    rust-cargo
     rust
     sass
     scala
@@ -7677,6 +7678,32 @@ Relative paths are relative to the file being checked."
   :type '(repeat (directory :tag "Library directory"))
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.18"))
+
+(flycheck-define-checker rust-cargo
+  "A Rust syntax checker using Cargo.
+
+This syntax checker needs Cargo with rustc subcommand."
+  :command ("cargo" "rustc"
+            (eval (if (string= flycheck-rust-crate-type "lib") "--lib" nil))
+            "--" "-Z" "no-trans")
+  :error-patterns
+  ((error line-start (file-name) ":" line ":" column ": "
+          (one-or-more digit) ":" (one-or-more digit) " error: "
+          (or
+           ;; Multiline errors
+           (and (message (minimal-match (one-or-more anything)))
+                " [" (id "E" (one-or-more digit)) "]")
+           (message))
+          line-end)
+   (warning line-start (file-name) ":" line ":" column ": "
+            (one-or-more digit) ":" (one-or-more digit) " warning: "
+            (message) line-end)
+   (info line-start (file-name) ":" line ":" column ": "
+         (one-or-more digit) ":" (one-or-more digit) " " (or "note" "help") ": "
+         (message) line-end))
+  :modes rust-mode
+  :predicate (lambda ()
+               (or (not flycheck-rust-crate-root) (flycheck-buffer-saved-p))))
 
 (flycheck-define-checker rust
   "A Rust syntax checker using Rust compiler.
