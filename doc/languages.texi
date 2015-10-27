@@ -707,6 +707,7 @@ Rust package manager}), with the following options:
 @flycoption flycheck-rust-args
 A list of additional arguments for the Rust compiler @command{rustc}.
 They will be passed through to @command{rustc} verbatim.
+
 @flycoption flycheck-rust-check-tests
 Whether to check test code in Rust. This translates to @option{--test}
 flag of @command{rustc}, not to @command{cargo build --test NAME}!
@@ -731,6 +732,7 @@ with the following options:
 @table @asis
 @flycoption flycheck-rust-args
 A list of additional arguments for the Rust compiler @command{rustc}.
+
 @flycoption flycheck-rust-check-tests
 Whether to check test code in Rust.
 
