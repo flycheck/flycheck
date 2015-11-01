@@ -6790,7 +6790,8 @@ See URL `https://github.com/ndmitchell/hlint'."
             (option-list "-h" flycheck-hlint-hint-packages concat)
             (config-file "-h" flycheck-hlintrc)
             (eval flycheck-hlint-args)
-            source-inplace)
+            "-")
+  :standard-input t
   :error-patterns
   ((warning line-start
             (file-name) ":" line ":" column
