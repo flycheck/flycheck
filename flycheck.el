@@ -6831,14 +6831,15 @@ See URL `https://github.com/w3c/tidy-html5'."
   "A Jade syntax checker using the Jade compiler.
 
 See URL `http://jade-lang.com'."
-  :command ("jade" source)
+  :command ("jade")
+  :standard-input t
   :error-patterns
   ;; The pattern is based on the pattern in
   ;; https://github.com/tardyp/SublimeLinter-jade/blob/master/linter.py#L23;
   ;; tweaked slightly to:
   ;; Error: (\S+):(\d+).*\r?\n(?:.*\|.*\n)+.*\n(.*)
   ((error line-start
-          "Error: " (file-name) ":" line (zero-or-more not-newline) "\n"
+          "Error: Jade:" line (zero-or-more not-newline) "\n"
           (one-or-more (and (zero-or-more not-newline) "|"
                             (zero-or-more not-newline) "\n"))
           (zero-or-more not-newline) "\n" (message) line-end))
