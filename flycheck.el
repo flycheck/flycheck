@@ -6976,6 +6976,8 @@ See URL `https://github.com/feross/standard' and URL
   "A JSON syntax and style checker using jsonlint.
 
 See URL `https://github.com/zaach/jsonlint'."
+  ;; We can't use standard input for jsonlint, because it doesn't output errors
+  ;; anymore when using -c -q with standard input :/
   :command ("jsonlint" "-c" "-q" source)
   :error-patterns
   ((error line-start
