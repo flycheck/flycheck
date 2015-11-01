@@ -6570,7 +6570,8 @@ See URL `http://haml.info'."
   "A Handlebars syntax checker using the Handlebars compiler.
 
 See URL `http://handlebarsjs.com/'."
-  :command ("handlebars" source)
+  :command ("handlebars" "-i-")
+  :standard-input t
   :error-patterns
   ((error line-start
           "Error: Parse error on line " line ":" (optional "\r") "\n"
