@@ -5886,11 +5886,13 @@ See URL `http://www.coffeelint.org/'."
   :command
   ("coffeelint"
    (config-file "--file" flycheck-coffeelintrc)
-   "--reporter" "checkstyle" source)
+   "--stdin" "--reporter" "checkstyle")
+  :standard-input t
   :error-parser flycheck-parse-checkstyle
   :error-filter (lambda (errors)
-                  (flycheck-remove-error-ids
-                   (flycheck-sanitize-errors errors)))
+                  (flycheck-remove-error-file-names
+                   "stdin" (flycheck-remove-error-ids
+                            (flycheck-sanitize-errors errors))))
   :modes coffee-mode)
 
 (flycheck-define-checker coq
