@@ -27,6 +27,7 @@ master (in development)
     and automatically install dependencies with `go build` [GH-674]
   - Add :standard-input property to syntax checkers to read source from standard
     input [GH-673] [GH-728]
+  - Add support for JSX modes to some Javascript checkers [GH-778]
 
 - Improvements:
 

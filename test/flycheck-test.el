@@ -4592,6 +4592,14 @@ Why not:
    "checkers/jade-error.jade" 'jade-mode
    '(2 nil error "unexpected token \"indent\"" :checker jade)))
 
+(defconst flycheck-test-javascript-modes '(js-mode
+                                           js2-mode
+                                           js3-mode
+                                           js2-jsx-mode))
+
+(when (version<= "25" emacs-version)
+  (add-to-list 'flycheck-test-javascript-modes 'js-jsx-mode))
+
 (flycheck-ert-def-checker-test javascript-jshint javascript syntax-error
   :tags '(checkstyle-xml)
   ;; Silence JS2 and JS3 parsers
@@ -4625,7 +4633,7 @@ Why not:
   :tags '(checkstyle-xml)
   (let ((flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-ert-should-syntax-check
-     "checkers/javascript-syntax-error.js" '(js-mode js2-mode js3-mode)
+     "checkers/javascript-syntax-error.js" flycheck-test-javascript-modes
      '(3 26 error "Parsing error: Unexpected token )" :checker javascript-eslint))))
 
 (flycheck-ert-def-checker-test javascript-eslint javascript warning
@@ -4633,7 +4641,7 @@ Why not:
   (let ((flycheck-eslintrc "eslint.json")
         (flycheck-disabled-checkers '(javascript-jshint javascript-jscs)))
     (flycheck-ert-should-syntax-check
-     "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
+     "checkers/javascript-warnings.js" flycheck-test-javascript-modes
      '(3 2 warning "Use the function form of \"use strict\"." :id "strict"
          :checker javascript-eslint)
      '(4 9 warning "\"foo\" is defined but never used" :id "no-unused-vars"
@@ -4655,7 +4663,7 @@ Why not:
         (flycheck-disabled-checkers
          '(javascript-jshint javascript-eslint javascript-gjslint)))
     (flycheck-ert-should-syntax-check
-     "checkers/javascript-style.js" '(js-mode js2-mode js3-mode)
+     "checkers/javascript-style.js" flycheck-test-javascript-modes
      '(4 3 error "Expected indentation of 2 characters"
          :checker javascript-jscs))))
 
@@ -4664,7 +4672,7 @@ Why not:
   (let ((flycheck-disabled-checkers
          '(javascript-jshint javascript-eslint javascript-gjslint)))
     (flycheck-ert-should-syntax-check
-     "checkers/javascript-style.js" '(js-mode js2-mode js3-mode)
+     "checkers/javascript-style.js" flycheck-test-javascript-modes
      '(1 nil warning "No JSCS configuration found.  Set `flycheck-jscsrc' for JSCS"
          :checker javascript-jscs))))
 
@@ -4687,7 +4695,7 @@ Why not:
         (flycheck-jscsrc "jscsrc")
         (flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-ert-should-syntax-check
-     "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
+     "checkers/javascript-warnings.js" flycheck-test-javascript-modes
      '(3 2 warning "Use the function form of \"use strict\"." :id "strict"
          :checker javascript-eslint)
      '(4 3 error "Expected indentation of 2 characters"
@@ -4712,7 +4720,7 @@ Why not:
 (flycheck-ert-def-checker-test javascript-standard javascript error
   (let ((flycheck-checker 'javascript-standard))
     (flycheck-ert-should-syntax-check
-     "checkers/javascript-style.js" '(js-mode js2-mode js3-mode)
+     "checkers/javascript-style.js" flycheck-test-javascript-modes
      '(3 10 error "Missing space before function parentheses."
          :checker javascript-standard)
      '(4 2 error "Expected indentation of 2 space characters but found 0."
@@ -4730,7 +4738,7 @@ Why not:
   (let ((flycheck-checker 'javascript-standard)
         (flycheck-javascript-standard-executable "semistandard"))
     (flycheck-ert-should-syntax-check
-     "checkers/javascript-style.js" '(js-mode js2-mode js3-mode)
+     "checkers/javascript-style.js" flycheck-test-javascript-modes
      '(3 10 error "Missing space before function parentheses."
          :checker javascript-standard)
      '(4 2 error "Expected indentation of 2 space characters but found 0."

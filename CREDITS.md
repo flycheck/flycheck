@@ -24,6 +24,7 @@ substantial code to Flycheck:
 - [Gereon Frey](https://github.com/gfrey)
 - [Gulshan Singh](https://github.com/gsingh93)
 - [Iain Beeston](https://github.com/iainbeeston)
+- [Jackson Ray Hamilton](https://github.com/jacksonrayhamilton)
 - [Jim Hester](https://github.com/jimhester)
 - [Jimmy Yuen Ho Wong](https://github.com/wyuenho)
 - [Krzysztof Witkowski](https://github.com/kwitek)
