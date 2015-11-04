@@ -7119,21 +7119,21 @@ the `--severity' option to Perl Critic."
   "A Perl syntax checker using Perl::Critic.
 
 See URL `https://metacpan.org/pod/Perl::Critic'."
-  :command ("perlcritic" "--no-color" "--verbose" "%f/%l/%c/%s/%p/%m (%e)\n"
+  :command ("perlcritic" "--no-color" "--verbose" "%l/%c/%s/%p/%m (%e)\n"
             (option "--severity" flycheck-perlcritic-severity nil
-                    flycheck-option-int)
-            source)
+                    flycheck-option-int))
+  :standard-input t
   :error-patterns
   ((info line-start
-         (file-name) "/" line "/" column "/" (any "1") "/"
+         line "/" column "/" (any "1") "/"
          (id (one-or-more (not (any "/")))) "/" (message)
          line-end)
    (warning line-start
-            (file-name) "/" line "/" column "/" (any "234") "/"
+            line "/" column "/" (any "234") "/"
             (id (one-or-more (not (any "/")))) "/" (message)
             line-end)
    (error line-start
-          (file-name) "/" line "/" column "/" (any "5") "/"
+          line "/" column "/" (any "5") "/"
           (id (one-or-more (not (any "/")))) "/" (message)
           line-end))
   :modes (cperl-mode perl-mode))
