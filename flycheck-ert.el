@@ -359,7 +359,6 @@ ERROR is a Flycheck error object."
                                               error))
                           (flycheck-overlays-in 0 (+ 1 (buffer-size)))))
          (region (flycheck-error-region-for-mode error 'symbols))
-         (message (flycheck-error-message error))
          (level (flycheck-error-level error))
          (category (flycheck-error-level-overlay-category level))
          (face (get category 'face))
