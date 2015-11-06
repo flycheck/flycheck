@@ -6861,7 +6861,7 @@ See URL `http://www.jshint.com'."
   (lambda (errors)
     (flycheck-remove-error-file-names
      "stdin" (flycheck-dequalify-error-ids errors)))
-  :modes (js-mode js2-mode js3-mode)
+  :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode)
   :next-checkers ((warning . javascript-jscs)))
 
 (flycheck-def-option-var flycheck-eslint-rulesdir nil javascript-eslint
@@ -6924,7 +6924,7 @@ See URL `https://developers.google.com/closure/utilities'."
   :error-patterns ((warning
                     line-start (file-name) ":" line ":("
                     (id (one-or-more digit)) ") " (message) line-end))
-  :modes (js-mode js2-mode js3-mode)
+  :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode)
   :next-checkers ((warning . javascript-jscs)))
 
 (defun flycheck-parse-jscs (output checker buffer)
