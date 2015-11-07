@@ -4,11 +4,16 @@ env:
   # Run unit tests against oldest supported stable, latest stable, and trunk
   - TRAVIS_BUILD=unit EMACS_VERSION=24.3
   - TRAVIS_BUILD=unit EMACS_VERSION=24.5
-  - TRAVIS_BUILD=unit EMACS_VERSION=trunk
-  - TRAVIS_BUILD=manual EMACS_VERSION=trunk
+  - TRAVIS_BUILD=unit EMACS_VERSION=snapshot
+  - TRAVIS_BUILD=manual
 before_install:
-  - export PATH="$HOME/.cask/bin:$HOME/bin:$PATH"
-  - make -f travis.mk before_install
+  - export PATH="$HOME/bin:$PATH"
+  - wget 'https://raw.githubusercontent.com/flycheck/emacs-travis/master/emacs-travis.mk'
+  - if [[ $TRAVIS_BUILD == unit ]]; then make -f emacs-travis.mk install_emacs; fi
+  - if [[ $TRAVIS_BUILD == unit ]]; then make -f emacs-travis.mk install_cask; fi
+  - if [[ $TRAVIS_BUILD == manual ]]; then make -f emacs-travis.mk install_texinfo; fi
+  - if [[ $TRAVIS_BUILD == unit ]]; then emacs --version; fi
+  - if [[ $TRAVIS_BUILD == manual ]]; then texi2any --version; fi
 install:
   - make -f travis.mk install
 script:
