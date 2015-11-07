@@ -2,22 +2,30 @@ language: emacs-lisp
 sudo: false
 env:
   # Run unit tests against oldest supported stable, latest stable, and trunk
-  - TRAVIS_BUILD=unit EMACS_VERSION=24.3
-  - TRAVIS_BUILD=unit EMACS_VERSION=24.5
-  - TRAVIS_BUILD=unit EMACS_VERSION=snapshot
-  - TRAVIS_BUILD=manual
+  - EMACS_VERSION=24.3
+  - EMACS_VERSION=24.5 BUILD_MANUAL=yes
+  - EMACS_VERSION=snapshot EMACSFLAGS='--eval "(setq byte-compile-error-on-warn t)"'
 before_install:
   - export PATH="$HOME/bin:$PATH"
   - wget 'https://raw.githubusercontent.com/flycheck/emacs-travis/master/emacs-travis.mk'
-  - if [[ $TRAVIS_BUILD == unit ]]; then make -f emacs-travis.mk install_emacs; fi
-  - if [[ $TRAVIS_BUILD == unit ]]; then make -f emacs-travis.mk install_cask; fi
-  - if [[ $TRAVIS_BUILD == manual ]]; then make -f emacs-travis.mk install_texinfo; fi
-  - if [[ $TRAVIS_BUILD == unit ]]; then emacs --version; fi
-  - if [[ $TRAVIS_BUILD == manual ]]; then texi2any --version; fi
+  - make -f emacs-travis.mk install_emacs
+  - make -f emacs-travis.mk install_cask
+  - emacs --version
+  # Install Texinfo when building the manual
+  - if [[ $BUILD_MANUAL == yes ]]; then make -f emacs-travis.mk install_texinfo; fi
+  - if [[ $BUILD_MANUAL == yes ]]; then texi2any --version; fi
 install:
-  - make -f travis.mk install
+  - make deps
 script:
-  - make -f travis.mk script
+  # Checkdoc and compilation
+  - make check
+  - make EMACSFLAGS="${EMACSFLAGS}" compile
+  # Unit tests
+  - make ERTSELECTOR="(not (tag external-tool))" test
+  # Build the manual
+  - if [[ $BUILD_MANUAL == yes ]]; then make texinfo; fi
+after_success:
+  - if [[ $BUILD_MANUAL == yes ]]; then bash doc/deploy-travis.bash; fi
 matrix:
   # Fast fail if any job fails.  We don't need to run all integration tests, if
   # the unit tests fail already.
