@@ -3360,17 +3360,23 @@ included file."
     (while remaining-errors
       (let* ((current-error (pop remaining-errors)))
         (when (funcall sentinel current-error)
-          ;; We found an error denoting errors in the included file, so process
-          ;; all subsequent errors until an error has the current file name
-          ;; again, and find the most severe error level
+          ;; We found an error denoting errors in the included file:
+          ;; 1. process all subsequent errors until faulty include file is found
+          ;; 2. process again all subsequent errors until an error has the
+          ;;    current file name again
+          ;; 3. find the most severe error level
           (let ((current-filename (flycheck-error-filename current-error))
                 (current-level nil)
-                (faulty-include-filename (flycheck-error-filename
-                                          (car remaining-errors))))
-            (while (and remaining-errors
-                        (not (string= (flycheck-error-filename
-                                       (car remaining-errors))
-                                      current-filename)))
+                (faulty-include-filename nil)
+                (filename nil)
+                (done (null remaining-errors)))
+
+            (while (not done)
+              (setq filename (flycheck-error-filename (car remaining-errors)))
+              (unless faulty-include-filename
+                (unless (string= filename current-filename)
+                  (setq faulty-include-filename filename)))
+
               (let* ((error-in-include (pop remaining-errors))
                      (in-include-level (flycheck-error-level error-in-include)))
                 (unless (funcall sentinel error-in-include)
@@ -3379,7 +3385,12 @@ included file."
                   (when (or (not current-level)
                             (> (flycheck-error-level-severity in-include-level)
                                (flycheck-error-level-severity current-level)))
-                    (setq current-level in-include-level)))))
+                    (setq current-level in-include-level))))
+
+              (setq done (or (null remaining-errors)
+                             (and faulty-include-filename
+                                  (string= filename current-filename)))))
+
             (setf (flycheck-error-level current-error) current-level
                   (flycheck-error-message current-error)
                   (format "In include %s" faulty-include-filename))))))

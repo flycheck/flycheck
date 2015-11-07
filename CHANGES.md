@@ -5,6 +5,10 @@ master (in development)
 
   - Map error IDs from flake8-pep257 to Flycheck error levels
 
+- Bug fixes:
+
+  - Fix folding of C/C++ errors from included files [GH-783]
+
 0.25.1 (Nov 16, 2015)
 =====================
 

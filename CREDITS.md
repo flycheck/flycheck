@@ -65,6 +65,7 @@ substantial code to Flycheck:
 - [Tomoya Tanjo](https://github.com/tom-tan)
 - [Victor Deryagin](https://github.com/vderyagin)
 - [Vlatko Basic](https://github.com/vlatkoB)
+- [William Xu](https://github.com/xwl)
 - [Yannick Roehlly](https://github.com/yannick1974)
 - [Yasuyuki Oka](https://github.com/yasuyk)
 - [Zhuo Yuan](https://github.com/yzprofile)
