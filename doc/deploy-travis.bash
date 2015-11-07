@@ -54,10 +54,10 @@ ssh-add doc/deploy
 rm doc/deploy
 
 # Git setup
-export GIT_COMMITTER_EMAIL='travis@travis-ci.org'
-export GIT_COMMITTER_NAME='Travis CI'
-export GIT_AUTHOR_EMAIL='travis@travis-ci.org'
-export GIT_AUTHOR_NAME='Travis CI'
+export GIT_COMMITTER_EMAIL='travis@flycheck.org'
+export GIT_COMMITTER_NAME='Flycheck Travis CI'
+export GIT_AUTHOR_EMAIL='travis@flycheck.org'
+export GIT_AUTHOR_NAME='Flycheck Travis CI'
 
 git clone --quiet --branch=master "git@github.com:flycheck/flycheck.github.io.git" doc/_deploy
 
