@@ -81,39 +81,6 @@
                     flycheck-test-source-directory))
 
 
-;;; Environment information
-(defun flycheck-test-cppcheck-version ()
-  "Determine the version of Cppcheck.
-
-Return the version as string, or nil, if the Cppcheck version
-could not be determined."
-  (flycheck-ert-extract-version-command
-   (rx "Cppcheck "
-       (group (one-or-more (any digit)) "." (one-or-more (any digit)))
-       (zero-or-more any))
-   "cppcheck" "--version"))
-
-(defun flycheck-test-rubylint-version ()
-  "Determine the version of rubylint.
-
-Return the version as string, or nil, if the rubylint version
-could not be determined."
-  (flycheck-ert-extract-version-command
-   (rx "ruby-lint v" (group (one-or-more (any digit))
-                            (one-or-more "." (one-or-more (any digit)))) " on")
-   "ruby-lint" "--version"))
-
-(defun flycheck-test-coq-version ()
-  "Determine the version of Coq.
-
-Return the version as string, or nil if the version could not be
-determined."
-  (flycheck-ert-extract-version-command
-   (rx "The Coq Proof Assistant, version "
-       (group (one-or-more (any digit)) "." (one-or-more (any digit))))
-   "coqtop" "-v"))
-
-
 ;;; Checkdoc quoting
 
 ;; Emacs 24 uses good old Emacs ASCII quotes, but Emacs 25 has curly quotes.
@@ -3929,7 +3896,6 @@ of the file will be interrupted because there are too many #ifdef configurations
 
 (flycheck-ert-def-checker-test c/c++-cppcheck (c c++) nil
   :tags '(cppcheck-xml)
-  (skip-unless (version< "1.53" (flycheck-test-cppcheck-version)))
   (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-gcc))
         (flycheck-cppcheck-inconclusive nil)
         (flycheck-cppcheck-checks '("style")))
@@ -3944,18 +3910,14 @@ of the file will be interrupted because there are too many #ifdef configurations
 (flycheck-ert-def-checker-test c/c++-cppcheck (c c++) style-suppressed
   :tags '(cppcheck-xml)
   (let ((flycheck-cppcheck-checks nil)
-        (flycheck-disabled-checkers '(c/c++-clang c/c++-gcc))
-        (dot (when (version< "1.53" (flycheck-test-cppcheck-version)) ".")))
+        (flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
     (flycheck-ert-should-syntax-check
      "checkers/c_c++-cppcheck.cpp" '(c-mode c++-mode)
-     `(9 nil error ,(concat "Division by zero" dot) :id "zerodiv"
+     `(9 nil error "Division by zero." :id "zerodiv"
          :checker c/c++-cppcheck))))
 
 (flycheck-ert-def-checker-test c/c++-cppcheck (c c++) inconclusive
   :tags '(cppcheck-xml)
-  ;; Cppcheck 1.53 and older do not report inconclusive warnings when using
-  ;; XML output.
-  (skip-unless (version< "1.53" (flycheck-test-cppcheck-version)))
   (let ((flycheck-cppcheck-checks '("style"))
         (flycheck-cppcheck-inconclusive t)
         (flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
@@ -3971,7 +3933,6 @@ of the file will be interrupted because there are too many #ifdef configurations
 
 (flycheck-ert-def-checker-test c/c++-cppcheck (c c++) multiple-checks
   :tags '(cppcheck-xml)
-  (skip-unless (version< "1.53" (flycheck-test-cppcheck-version)))
   (let ((flycheck-cppcheck-checks '("performance" "portability"))
         (flycheck-cppcheck-inconclusive nil)
         (flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
@@ -4025,13 +3986,8 @@ of the file will be interrupted because there are too many #ifdef configurations
          :checker coffee-coffeelint))))
 
 (flycheck-ert-def-checker-test coq coq simple-syntax-error
-  (let* ((version (flycheck-test-coq-version))
-         (msg (if (version< "8.3" version)
-                  "Lexer: Undefined token"
-                "Undefined token.")))
-    (flycheck-ert-should-syntax-check
-     "checkers/coq-syntax-error-simple.v" 'coq-mode
-     `(3 18 error ,msg :checker coq))))
+  (flycheck-ert-should-syntax-check
+   "checkers/coq-syntax-error-simple.v" 'coq-mode))
 
 (flycheck-ert-def-checker-test coq coq syntax-error
   (flycheck-ert-should-syntax-check
@@ -5262,7 +5218,6 @@ Why not:
           :id "Lint/LiteralInCondition" :checker ruby-rubocop))))
 
 (flycheck-ert-def-checker-test ruby-rubylint ruby errors-only
-  (skip-unless (version<= "2.0.2" (flycheck-test-rubylint-version)))
   (let ((flycheck-disabled-checkers '(ruby-rubocop))
         (flycheck-rubylintrc "rubylint.yml"))
     (flycheck-ert-should-syntax-check
