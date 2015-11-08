@@ -26,7 +26,3 @@ script:
   - if [[ $BUILD_MANUAL == yes ]]; then make texinfo; fi
 after_success:
   - if [[ $BUILD_MANUAL == yes ]]; then bash doc/deploy-travis.bash; fi
-matrix:
-  # Fast fail if any job fails.  We don't need to run all integration tests, if
-  # the unit tests fail already.
-  fast_finish: true
