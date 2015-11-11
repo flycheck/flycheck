@@ -7193,9 +7193,13 @@ or as path to a standard specification."
 
 See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
   :command ("phpcs" "--report=checkstyle"
-            (option "--standard=" flycheck-phpcs-standard concat)
-            source)
+            (option "--standard=" flycheck-phpcs-standard concat))
+  :standard-input t
   :error-parser flycheck-parse-checkstyle
+  :error-filter
+  (lambda (errors)
+    (flycheck-sanitize-errors
+     (flycheck-remove-error-file-names "STDIN" errors)))
   :modes (php-mode php+-mode))
 
 (flycheck-define-checker puppet-parser
