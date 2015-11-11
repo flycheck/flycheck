@@ -1380,7 +1380,7 @@ a default on its own."
       (setq input default))
     (let ((checker (intern input)))
       (unless (flycheck-valid-checker-p checker)
-        (error "%S is no Flycheck syntax checker" checker))
+        (error "%S is not a valid Flycheck syntax checker" checker))
       checker)))
 
 (defun read-flycheck-error-level (prompt)
