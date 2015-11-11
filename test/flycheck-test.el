@@ -3729,19 +3729,15 @@ of the file will be interrupted because there are too many #ifdef configurations
      '(4 nil warning "Throwing strings is forbidden; context:"
          :checker coffee-coffeelint))))
 
-(flycheck-ert-def-checker-test coq coq simple-syntax-error
-  (flycheck-ert-should-syntax-check
-   "checkers/coq-syntax-error-simple.v" 'coq-mode))
-
 (flycheck-ert-def-checker-test coq coq syntax-error
   (flycheck-ert-should-syntax-check
-   "checkers/coq-syntax-error.v" 'coq-mode
+   "language/coq/syntax-error.v" 'coq-mode
    '(6 12 error "'end' expected after [branches] (in [match_constr])."
        :checker coq)))
 
 (flycheck-ert-def-checker-test coq coq error
   (flycheck-ert-should-syntax-check
-   "checkers/coq-error.v" 'coq-mode
+   "language/coq/error.v" 'coq-mode
    '(7 21 error "In environment
 evenb : nat -> bool
 n : nat
@@ -3749,19 +3745,6 @@ n0 : nat
 n' : nat
 The term \"1\" has type \"nat\" while it is expected to have type
 \"bool\"." :checker coq)))
-
-(flycheck-ert-def-checker-test coq coq error
-  (flycheck-ert-should-syntax-check
-   "checkers/coq-error-2.v" 'coq-mode
-   '(4 10 error "In environment
-A : Set
-P : A -> Prop
-Q : A -> Prop
-R : A -> A -> Prop
-The term \"(fun (R : A -> A -> Prop) (a b : A) => R b a) R\" has type
- \"A -> A -> Prop\" while it is expected to have type
- \"(forall a b : A, R a b) -> forall a b : A, R b a\"."
-       :checker coq)))
 
 (flycheck-ert-def-checker-test css-csslint css nil
   :tags '(checkstyle-xml)
