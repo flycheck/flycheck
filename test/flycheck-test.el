@@ -3811,7 +3811,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (let ((flycheck-dmd-include-path '("../../lib")))
     (flycheck-ert-should-syntax-check
-     "checkers/d/src/dmd/warning.d" 'd-mode
+     "language/d/src/dmd/warning.d" 'd-mode
      '(9 5 warning "statement is not reachable" :checker d-dmd)
      '(20 17 warning "function dmd.warning.bar is deprecated"
           :checker d-dmd))))
@@ -3821,7 +3821,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
     (ert-skip "Skipped because CC Mode is broken on 24.3.
 See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (flycheck-ert-should-syntax-check
-   "checkers/d/src/dmd/warning.d" 'd-mode
+   "language/d/src/dmd/warning.d" 'd-mode
    '(4 8 error "module external_library is in file 'external_library.d' which cannot be read"
        :checker d-dmd)))
 
