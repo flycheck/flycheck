@@ -7206,17 +7206,14 @@ See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
   "A Puppet DSL syntax checker using puppet's own parser.
 
 See URL `http://puppetlabs.com/'."
-  :command ("puppet" "parser" "validate" "--color=false" source)
+  :command ("puppet" "parser" "validate" "--color=false")
+  :standard-input t
   :error-patterns
   (
    ;; Patterns for Puppet 4
    (error line-start "Error: Could not parse for environment "
           (one-or-more (in "a-z" "0-9" "_")) ":"
-          (message) " at " (file-name) ":" line ":" column line-end)
-   (error line-start "Error: Could not parse for environment "
-          (one-or-more (in "a-z" "0-9" "_")) ":"
-          (message) " in file " (file-name) " at line " line ":" column
-          line-end)
+          (message) " at line " line ":" column line-end)
    ;; Errors from Puppet < 4
    (error line-start
           ;; Skip over the path of the Puppet executable
