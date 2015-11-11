@@ -3689,13 +3689,13 @@ of the file will be interrupted because there are too many #ifdef configurations
 (flycheck-ert-def-checker-test cfengine cfengine error
   (skip-unless (fboundp 'cfengine3-mode))
   (flycheck-ert-should-syntax-check
-   "checkers/cfengine-error.cf" 'cfengine3-mode
+   "language/cfengine/error.cf" 'cfengine3-mode
    '(8 20 error "Unknown promise type 'nosuchpromisetype'" :checker cfengine)))
 
 (flycheck-ert-def-checker-test cfengine cfengine warning
   (skip-unless (fboundp 'cfengine3-mode))
   (flycheck-ert-should-syntax-check
-   "checkers/cfengine-warning.cf" 'cfengine3-mode
+   "language/cfengine/warning.cf" 'cfengine3-mode
    '(3 34 warning "Removed constraint 'host_licenses_paid' in promise type 'common' [-Wremoved]"
        :checker cfengine)))
 
