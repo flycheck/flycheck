@@ -1355,7 +1355,7 @@ and extension, as in `file-name-base'."
 (ert-deftest flycheck-select-checker/unselecting-a-checker-goes-back-to-automatic-selection ()
   :tags '(selection language-emacs-lisp
                     checker-emacs-lisp checker-emacs-lisp-checkdoc)
-  (flycheck-ert-with-resource-buffer "checkers/python/test.py"
+  (flycheck-ert-with-resource-buffer "language/emacs-lisp/warnings.el"
     (emacs-lisp-mode)
     (flycheck-mode)
     (flycheck-select-checker 'emacs-lisp-checkdoc)
