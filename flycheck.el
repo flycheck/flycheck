@@ -7498,11 +7498,13 @@ part of a Sphinx project."
 See URL `http://docutils.sourceforge.net/'."
   ;; We need to use source-inplace to properly resolve relative paths in
   ;; include:: directives
-  :command ("rst2pseudoxml.py" "--report=2" "--halt=5" source-inplace)
+  :command ("rst2pseudoxml.py" "--report=2" "--halt=5"
+            ;; Read from standard input and throw output away
+            "-" null-device)
+  :standard-input t
   :error-patterns
-  ((warning line-start (file-name) ":" line ": (WARNING/2) " (message) line-end)
-   (error line-start
-          (file-name) ":" line
+  ((warning line-start "<stdin>:" line ": (WARNING/2) " (message) line-end)
+   (error line-start "<stdin>:" line
           ": (" (or "ERROR/3" "SEVERE/4") ") "
           (message) line-end))
   :modes rst-mode)
