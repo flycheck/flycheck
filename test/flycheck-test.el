@@ -4039,13 +4039,13 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 
 (flycheck-ert-def-checker-test haml haml nil
   (flycheck-ert-should-syntax-check
-   "checkers/haml-error.haml" 'haml-mode
+   "language/haml.haml" 'haml-mode
    '(5 nil error "Inconsistent indentation: 3 spaces used for indentation, but the rest of the document was indented using 2 spaces."
        :checker haml)))
 
 (flycheck-ert-def-checker-test handlebars handlebars nil
   (flycheck-ert-should-syntax-check
-   "checkers/handlebars-error.hbs" '(handlebars-mode web-mode)
+   "language/handlebars.hbs" '(handlebars-mode web-mode)
    '(2 nil error "Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'UNDEFINED', 'NULL', 'DATA', got 'INVALID'"
        :checker handlebars)))
 
@@ -4190,7 +4190,7 @@ Why not:
 
 (flycheck-ert-def-checker-test html-tidy html nil
   (flycheck-ert-should-syntax-check
-   "checkers/html-tidy-warning-and-error.html" '(html-mode)
+   "language/html.html" '(html-mode)
    '(3 1 warning "missing <!DOCTYPE> declaration"
        :checker html-tidy)
    '(8 5 error "<spam> is not recognized!"
@@ -4200,7 +4200,7 @@ Why not:
 
 (flycheck-ert-def-checker-test jade jade nil
   (flycheck-ert-should-syntax-check
-   "checkers/jade-error.jade" 'jade-mode
+   "language/jade.jade" 'jade-mode
    '(2 nil error "unexpected token \"indent\"" :checker jade)))
 
 (defconst flycheck-test-javascript-modes '(js-mode
