@@ -4030,9 +4030,11 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
          :checker go-errcheck))))
 
 (flycheck-ert-def-checker-test groovy groovy syntax-error
-  (require 'cl) ; workaround https://github.com/Groovy-Emacs-Modes/groovy-emacs-modes/issues/11
+  ;; Work around
+  ;; https://github.com/Groovy-Emacs-Modes/groovy-emacs-modes/issues/11
+  (require 'cl)
   (flycheck-ert-should-syntax-check
-   "checkers/groovy_error.groovy" 'groovy-mode
+   "language/groovy.groovy" 'groovy-mode
    '(2 14 error "unexpected token: {" :checker groovy)))
 
 (flycheck-ert-def-checker-test haml haml nil
