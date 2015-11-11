@@ -4173,25 +4173,19 @@ Why not:
         (js2-mode-show-strict-warnings nil)
         (js3-mode-show-parse-errors nil))
     (flycheck-ert-should-syntax-check
-     "checkers/javascript-syntax-error.js" '(js-mode js2-mode js3-mode)
+     "language/javascript/syntax-error.js" '(js-mode js2-mode js3-mode)
      '(3 4 error "Unmatched '('." :checker javascript-jshint :id "E019")
      '(3 25 error "Expected an identifier and instead saw ')'."
          :checker javascript-jshint :id "E030")
      '(4 nil error "Unrecoverable syntax error. (100% scanned)."
          :checker javascript-jshint :id "E041"))))
 
-(flycheck-ert-def-checker-test javascript-jshint javascript error-disabled
-  :tags '(checkstyle-xml)
-  (let ((flycheck-disabled-checkers '(javascript-jscs)))
-    (flycheck-ert-should-syntax-check
-     "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode))))
-
 (flycheck-ert-def-checker-test javascript-jshint javascript nil
   :tags '(checkstyle-xml)
   (let ((flycheck-jshintrc "jshintrc")
         (flycheck-disabled-checkers '(javascript-jscs)))
     (flycheck-ert-should-syntax-check
-     "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
+     "language/javascript/warnings.js" '(js-mode js2-mode js3-mode)
      '(4 9 warning "'foo' is defined but never used." :id "W098"
          :checker javascript-jshint))))
 
@@ -4199,7 +4193,7 @@ Why not:
   :tags '(checkstyle-xml)
   (let ((flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-ert-should-syntax-check
-     "checkers/javascript-syntax-error.js" flycheck-test-javascript-modes
+     "language/javascript/syntax-error.js" flycheck-test-javascript-modes
      '(3 26 error "Parsing error: Unexpected token )" :checker javascript-eslint))))
 
 (flycheck-ert-def-checker-test javascript-eslint javascript warning
@@ -4207,7 +4201,7 @@ Why not:
   (let ((flycheck-eslintrc "eslint.json")
         (flycheck-disabled-checkers '(javascript-jshint javascript-jscs)))
     (flycheck-ert-should-syntax-check
-     "checkers/javascript-warnings.js" flycheck-test-javascript-modes
+     "language/javascript/warnings.js" flycheck-test-javascript-modes
      '(3 2 warning "Use the function form of \"use strict\"." :id "strict"
          :checker javascript-eslint)
      '(4 9 warning "\"foo\" is defined but never used" :id "no-unused-vars"
@@ -4217,7 +4211,7 @@ Why not:
   (let ((flycheck-disabled-checkers
          '(javascript-jshint javascript-eslint javascript-jscs)))
     (flycheck-ert-should-syntax-check
-     "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
+     "language/javascript/warnings.js" '(js-mode js2-mode js3-mode)
      '(4 nil warning "Single-quoted string preferred over double-quoted string."
          :id "0131" :checker javascript-gjslint)
      '(4 nil warning "Extra space before \"]\""
@@ -4229,7 +4223,7 @@ Why not:
         (flycheck-disabled-checkers
          '(javascript-jshint javascript-eslint javascript-gjslint)))
     (flycheck-ert-should-syntax-check
-     "checkers/javascript-style.js" flycheck-test-javascript-modes
+     "language/javascript/style.js" flycheck-test-javascript-modes
      '(4 3 error "Expected indentation of 2 characters"
          :checker javascript-jscs))))
 
@@ -4238,7 +4232,7 @@ Why not:
   (let ((flycheck-disabled-checkers
          '(javascript-jshint javascript-eslint javascript-gjslint)))
     (flycheck-ert-should-syntax-check
-     "checkers/javascript-style.js" flycheck-test-javascript-modes
+     "language/javascript/style.js" flycheck-test-javascript-modes
      '(1 nil warning "No JSCS configuration found.  Set `flycheck-jscsrc' for JSCS"
          :checker javascript-jscs))))
 
@@ -4248,7 +4242,7 @@ Why not:
   (let ((flycheck-jshintrc "jshintrc")
         (flycheck-jscsrc "jscsrc"))
     (flycheck-ert-should-syntax-check
-     "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
+     "language/javascript/warnings.js" '(js-mode js2-mode js3-mode)
      '(4 3 error "Expected indentation of 2 characters"
          :checker javascript-jscs)
      '(4 9 warning "'foo' is defined but never used." :id "W098"
@@ -4261,7 +4255,7 @@ Why not:
         (flycheck-jscsrc "jscsrc")
         (flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-ert-should-syntax-check
-     "checkers/javascript-warnings.js" flycheck-test-javascript-modes
+     "language/javascript/warnings.js" flycheck-test-javascript-modes
      '(3 2 warning "Use the function form of \"use strict\"." :id "strict"
          :checker javascript-eslint)
      '(4 3 error "Expected indentation of 2 characters"
@@ -4275,7 +4269,7 @@ Why not:
   (let ((flycheck-jscsrc "jscsrc")
         (flycheck-disabled-checkers '(javascript-jshint javascript-eslint)))
     (flycheck-ert-should-syntax-check
-     "checkers/javascript-warnings.js" '(js-mode js2-mode js3-mode)
+     "language/javascript/warnings.js" '(js-mode js2-mode js3-mode)
      '(4 nil warning "Single-quoted string preferred over double-quoted string."
          :id "0131" :checker javascript-gjslint)
      '(4 nil warning "Extra space before \"]\""
@@ -4286,7 +4280,7 @@ Why not:
 (flycheck-ert-def-checker-test javascript-standard javascript error
   (let ((flycheck-checker 'javascript-standard))
     (flycheck-ert-should-syntax-check
-     "checkers/javascript-style.js" flycheck-test-javascript-modes
+     "language/javascript/style.js" flycheck-test-javascript-modes
      '(3 10 error "Missing space before function parentheses."
          :checker javascript-standard)
      '(4 2 error "Expected indentation of 2 space characters but found 0."
@@ -4304,7 +4298,7 @@ Why not:
   (let ((flycheck-checker 'javascript-standard)
         (flycheck-javascript-standard-executable "semistandard"))
     (flycheck-ert-should-syntax-check
-     "checkers/javascript-style.js" flycheck-test-javascript-modes
+     "language/javascript/style.js" flycheck-test-javascript-modes
      '(3 10 error "Missing space before function parentheses."
          :checker javascript-standard)
      '(4 2 error "Expected indentation of 2 space characters but found 0."
