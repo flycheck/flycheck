@@ -4337,12 +4337,12 @@ Why not:
 
 (flycheck-ert-def-checker-test luacheck lua syntax-error
   (flycheck-ert-should-syntax-check
-   "checkers/lua-syntax-error.lua" 'lua-mode
+   "language/lua/syntax-error.lua" 'lua-mode
    '(5 7 error "unfinished string" :id "E011" :checker luacheck)))
 
 (flycheck-ert-def-checker-test luacheck lua warnings
   (flycheck-ert-should-syntax-check
-   "checkers/lua-warnings.lua" 'lua-mode
+   "language/lua/warnings.lua" 'lua-mode
    '(1 1 warning "setting non-standard global variable 'global_var'"
        :id "W111" :checker luacheck)
    '(3 16 warning "unused function 'test'"
@@ -4355,12 +4355,12 @@ Why not:
 (flycheck-ert-def-checker-test luacheck lua no-warnings
   (let ((flycheck-luacheckrc "luacheckrc"))
     (flycheck-ert-should-syntax-check
-     "checkers/lua-warnings.lua" 'lua-mode)))
+     "language/lua/warnings.lua" 'lua-mode)))
 
 (flycheck-ert-def-checker-test lua lua nil
   (let ((flycheck-disabled-checkers '(luacheck)))
     (flycheck-ert-should-syntax-check
-     "checkers/lua-syntax-error.lua" 'lua-mode
+     "language/lua/syntax-error.lua" 'lua-mode
      '(5 nil error "unfinished string near '\"oh no'"
          :checker lua))))
 
