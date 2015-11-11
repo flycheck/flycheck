@@ -3946,16 +3946,16 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 
 (flycheck-ert-def-checker-test go-gofmt go syntax-error
   (flycheck-ert-should-syntax-check
-   "checkers/go/src/syntax/syntax-error.go" 'go-mode
+   "language/go/src/syntax/syntax-error.go" 'go-mode
    '(5 9 error "expected '(', found 'IDENT' ta" :checker go-gofmt)
    '(6 1 error "expected ')', found '}'" :checker go-gofmt)))
 
 (flycheck-ert-def-checker-test (go-build go-golint go-vet) go complete-chain
   (skip-unless (funcall (flycheck-checker-get 'go-vet 'predicate)))
   (flycheck-ert-with-env
-      `(("GOPATH" . ,(flycheck-ert-resource-filename "checkers/go")))
+      `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
     (flycheck-ert-should-syntax-check
-     "checkers/go/src/warnings.go" 'go-mode
+     "language/go/src/warnings.go" 'go-mode
      '(4 nil error "imported and not used: \"fmt\"" :checker go-build)
      '(4 2 warning "should not use dot imports" :checker go-golint)
      '(7 1 warning "exported function Warn should have comment or be unexported"
@@ -3973,33 +3973,17 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
      '(25 9 warning "if block ends with a return statement, so drop this else and outdent its block"
           :checker go-golint))))
 
-(flycheck-ert-def-checker-test go-vet go print-functions
-  (funcall (flycheck-checker-get 'go-vet 'predicate))
-  (let ((flycheck-go-vet-print-functions '("Warn:0" "Warnf:1"))
-        (flycheck-disabled-checkers '(go-golint go-build go-errcheck)))
-    (flycheck-ert-with-env
-        `(("GOPATH" . ,(flycheck-ert-resource-filename "checkers/go")))
-      (flycheck-ert-should-syntax-check
-       "checkers/go/src/warnings.go" 'go-mode
-       '(17 nil warning "arg 1 for printf verb %s of wrong type: untyped int"
-            :checker go-vet)
-       '(18 nil warning "possible formatting directive in Warn call"
-            :checker go-vet)
-       '(19 nil warning "constant 1 not a string in call to Warnf"
-            :checker go-vet)
-       '(23 nil warning "unreachable code" :checker go-vet)))))
-
 (flycheck-ert-def-checker-test go-build go handles-packages
   (flycheck-ert-with-env
-      `(("GOPATH" . ,(flycheck-ert-resource-filename "checkers/go")))
-    (flycheck-ert-should-syntax-check "checkers/go/src/b1/main.go" 'go-mode)))
+      `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
+    (flycheck-ert-should-syntax-check "language/go/src/b1/main.go" 'go-mode)))
 
 (flycheck-ert-def-checker-test go-build go missing-package
   (let* ((go-root (or (getenv "GOROOT") "/usr/local/go"))
          (go-root-pkg (concat go-root "/src")))
     (flycheck-ert-with-env '(("GOPATH" . nil))
       (flycheck-ert-should-syntax-check
-       "checkers/go/src/b1/main.go" 'go-mode
+       "language/go/src/b1/main.go" 'go-mode
        `(4 2 error ,(format "cannot find package \"b2\" in any of:\n\t%s/b2 (from $GOROOT)\n\t($GOPATH not set)"
                             go-root-pkg)
            :checker go-build)))))
@@ -4008,7 +3992,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (flycheck-ert-with-env
       `(("GOPATH" . ,(flycheck-ert-resource-filename "checkers/go")))
     (flycheck-ert-should-syntax-check
-     "checkers/go/src/test/test-error_test.go" 'go-mode
+     "language/go/src/test/test-error_test.go" 'go-mode
      '(8 nil error "undefined: fmt in fmt.Println" :checker go-test))))
 
 (ert-deftest flycheck-go-package-name/no-gopath ()
@@ -4016,30 +4000,30 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (flycheck-ert-with-env '(("GOPATH" . nil))
     (should-not (flycheck-go-package-name
                  (flycheck-ert-resource-filename
-                  "checkers/go/src/errcheck/errcheck.go")))))
+                  "language/go/src/errcheck/errcheck.go")))))
 
 (ert-deftest flycheck-go-package-name/no-package-file ()
   :tags '(language-go)
   (flycheck-ert-with-env
-      `(("GOPATH" . ,(flycheck-ert-resource-filename "checkers/go")))
+      `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
     (should-not (flycheck-go-package-name
                  (flycheck-ert-resource-filename
-                  "checkers/emacs-lisp-syntax-error.el")))))
+                  "language/emacs-lisp-syntax-error.el")))))
 
 (ert-deftest flycheck-go-package-name/package-file ()
   :tags '(language-go)
   (flycheck-ert-with-env
-      `(("GOPATH" . ,(flycheck-ert-resource-filename "checkers/go")))
+      `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
     (should (equal "errcheck"
                    (flycheck-go-package-name
                     (flycheck-ert-resource-filename
-                     "checkers/go/src/errcheck/errcheck.go"))))))
+                     "language/go/src/errcheck/errcheck.go"))))))
 
 (flycheck-ert-def-checker-test go-errcheck go nil
   (flycheck-ert-with-env
-      `(("GOPATH" . ,(flycheck-ert-resource-filename "checkers/go")))
+      `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
     (flycheck-ert-should-syntax-check
-     "checkers/go/src/errcheck/errcheck.go" 'go-mode
+     "language/go/src/errcheck/errcheck.go" 'go-mode
      '(7 9 warning "Ignored `error` returned from `f.Close()`"
          :checker go-errcheck)
      '(9 9 warning "Ignored `error` returned from `os.Stat(\"enoent\")`"
