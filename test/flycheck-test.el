@@ -4061,112 +4061,66 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
                               "-- | module Foo.Bar where")))
 
 (flycheck-ert-def-checker-test haskell-stack-ghc haskell syntax-error
-  (flycheck-ert-should-syntax-check
-   "checkers/Haskell/SyntaxError.hs" 'haskell-mode
-   '(3 1 error "parse error on input ‘module’" :checker haskell-stack-ghc)))
+  (let ((flycheck-disabled-checkers '(haskell-ghc)))
+    (flycheck-ert-should-syntax-check
+     "language/haskell/SyntaxError.hs" 'haskell-mode
+     '(3 1 error "parse error on input ‘module’" :checker haskell-stack-ghc))))
 
 (flycheck-ert-def-checker-test haskell-stack-ghc haskell type-error
-  (flycheck-ert-should-syntax-check
-   "checkers/Haskell/Error.hs" 'haskell-mode
-   '(4 16 error "Couldn't match type ‘Bool’ with ‘[Char]’
+  (let ((flycheck-disabled-checkers '(haskell-ghc)))
+    (flycheck-ert-should-syntax-check
+     "language/haskell/Error.hs" 'haskell-mode
+     '(4 16 error "Couldn't match type ‘Bool’ with ‘[Char]’
 Expected type: String
   Actual type: Bool
 In the first argument of ‘putStrLn’, namely ‘True’
-In the expression: putStrLn True" :checker haskell-stack-ghc)))
-
-(flycheck-ert-def-checker-test haskell-stack-ghc haskell search-path
-  (let* ((lib-dir (flycheck-ert-resource-filename "checkers/Haskell/lib"))
-         (flycheck-ghc-search-path (list lib-dir)))
-    (flycheck-ert-should-syntax-check
-     "checkers/Haskell/SearchPath.hs" 'haskell-mode
-     '(5 1 warning "Top-level binding with no type signature: helloYou :: IO ()"
-         :checker haskell-stack-ghc))))
-
-(flycheck-ert-def-checker-test haskell-stack-ghc haskell
-                               missing-language-extension
-  (flycheck-ert-should-syntax-check
-   "checkers/Haskell/LanguageExtension.hs" 'haskell-mode
-   '(4 18 error "Couldn't match expected type ‘BS.ByteString’
-            with actual type ‘[Char]’
-In the first argument of ‘BS.putStr’, namely ‘\"Hello World\"’
-In the expression: BS.putStr \"Hello World\"
-In an equation for ‘main’: main = BS.putStr \"Hello World\""
-       :checker haskell-stack-ghc)))
-
-(flycheck-ert-def-checker-test haskell-stack-ghc haskell language-extensions
-  (let ((flycheck-ghc-language-extensions '("OverloadedStrings")))
-    (flycheck-ert-should-syntax-check
-     "checkers/Haskell/LanguageExtension.hs" 'haskell-mode)))
+In the expression: putStrLn True" :checker haskell-stack-ghc))))
 
 (flycheck-ert-def-checker-test (haskell-stack-ghc haskell-hlint) haskell literate
-  (flycheck-ert-should-syntax-check
-   "checkers/Haskell/Literate.lhs" 'literate-haskell-mode
-   '(6 1 warning "Top-level binding with no type signature: foo :: forall t. t"
-       :checker haskell-stack-ghc)))
+  (let ((flycheck-disabled-checkers '(haskell-ghc)))
+    (flycheck-ert-should-syntax-check
+     "language/haskell/Literate.lhs" 'literate-haskell-mode
+     '(6 1 warning "Top-level binding with no type signature: foo :: forall t. t"
+         :checker haskell-stack-ghc))))
 
 (flycheck-ert-def-checker-test (haskell-stack-ghc haskell-hlint) haskell
                                complete-chain
-  (flycheck-ert-should-syntax-check
-   "checkers/Haskell/Warnings.hs" 'haskell-mode
-   '(6 1 warning "Top-level binding with no type signature: foo :: Integer"
-       :checker haskell-stack-ghc)
-   '(9 1 error "Eta reduce
+  (let ((flycheck-disabled-checkers '(haskell-ghc)))
+    (flycheck-ert-should-syntax-check
+     "language/haskell/Warnings.hs" 'haskell-mode
+     '(4 1 error "Eta reduce
 Found:
   spam eggs = map lines eggs
 Why not:
   spam = map lines" :checker haskell-hlint)
-   '(12 8 warning "Redundant bracket
+     '(4 1 warning "Top-level binding with no type signature:
+  spam :: [String] -> [[String]]" :checker haskell-stack-ghc)
+     '(7 8 warning "Redundant bracket
 Found:
-  (putStrLn bar)
+  (putStrLn \"hello world\")
 Why not:
-  putStrLn bar" :checker haskell-hlint)))
+  putStrLn \"hello world\"" :checker haskell-hlint))))
 
 (flycheck-ert-def-checker-test haskell-ghc haskell syntax-error
   (let ((flycheck-disabled-checkers '(haskell-stack-ghc)))
     (flycheck-ert-should-syntax-check
-     "checkers/Haskell/SyntaxError.hs" 'haskell-mode
+     "language/haskell/SyntaxError.hs" 'haskell-mode
      '(3 1 error "parse error on input ‘module’" :checker haskell-ghc))))
 
 (flycheck-ert-def-checker-test haskell-ghc haskell type-error
   (let ((flycheck-disabled-checkers '(haskell-stack-ghc)))
     (flycheck-ert-should-syntax-check
-     "checkers/Haskell/Error.hs" 'haskell-mode
+     "language/haskell/Error.hs" 'haskell-mode
      '(4 16 error "Couldn't match type ‘Bool’ with ‘[Char]’
 Expected type: String
   Actual type: Bool
 In the first argument of ‘putStrLn’, namely ‘True’
 In the expression: putStrLn True" :checker haskell-ghc))))
 
-(flycheck-ert-def-checker-test haskell-ghc haskell search-path
-  (let* ((lib-dir (flycheck-ert-resource-filename "checkers/Haskell/lib"))
-         (flycheck-ghc-search-path (list lib-dir))
-         (flycheck-disabled-checkers '(haskell-stack-ghc)))
-    (flycheck-ert-should-syntax-check
-     "checkers/Haskell/SearchPath.hs" 'haskell-mode
-     '(5 1 warning "Top-level binding with no type signature: helloYou :: IO ()"
-         :checker haskell-ghc))))
-
-(flycheck-ert-def-checker-test haskell-ghc haskell missing-language-extension
-  (let ((flycheck-disabled-checkers '(haskell-stack-ghc)))
-    (flycheck-ert-should-syntax-check
-     "checkers/Haskell/LanguageExtension.hs" 'haskell-mode
-     '(4 18 error "Couldn't match expected type ‘BS.ByteString’
-            with actual type ‘[Char]’
-In the first argument of ‘BS.putStr’, namely ‘\"Hello World\"’
-In the expression: BS.putStr \"Hello World\"
-In an equation for ‘main’: main = BS.putStr \"Hello World\""
-         :checker haskell-ghc))))
-
-(flycheck-ert-def-checker-test haskell-ghc haskell language-extensions
-  (let ((flycheck-ghc-language-extensions '("OverloadedStrings"))
-        (flycheck-disabled-checkers '(haskell-stack-ghc)))
-    (flycheck-ert-should-syntax-check
-     "checkers/Haskell/LanguageExtension.hs" 'haskell-mode)))
-
 (flycheck-ert-def-checker-test (haskell-ghc haskell-hlint) haskell literate
   (let ((flycheck-disabled-checkers '(haskell-stack-ghc)))
     (flycheck-ert-should-syntax-check
-     "checkers/Haskell/Literate.lhs" 'literate-haskell-mode
+     "language/haskell/Literate.lhs" 'literate-haskell-mode
      '(6 1 warning "Top-level binding with no type signature: foo :: forall t. t"
          :checker haskell-ghc))))
 
@@ -4174,19 +4128,20 @@ In an equation for ‘main’: main = BS.putStr \"Hello World\""
                                complete-chain
   (let ((flycheck-disabled-checkers '(haskell-stack-ghc)))
     (flycheck-ert-should-syntax-check
-     "checkers/Haskell/Warnings.hs" 'haskell-mode
-     '(6 1 warning "Top-level binding with no type signature: foo :: Integer"
-         :checker haskell-ghc)
-     '(9 1 error "Eta reduce
+     "language/haskell/Warnings.hs" 'haskell-mode
+     '(4 1 error "Eta reduce
 Found:
   spam eggs = map lines eggs
 Why not:
   spam = map lines" :checker haskell-hlint)
-     '(12 8 warning "Redundant bracket
+     '(4 1 warning "Top-level binding with no type signature:
+  spam :: [String] -> [[String]]"
+         :checker haskell-ghc)
+     '(7 8 warning "Redundant bracket
 Found:
-  (putStrLn bar)
+  (putStrLn \"hello world\")
 Why not:
-  putStrLn bar" :checker haskell-hlint))))
+  putStrLn \"hello world\"" :checker haskell-hlint))))
 
 (flycheck-ert-def-checker-test html-tidy html nil
   (flycheck-ert-should-syntax-check
