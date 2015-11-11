@@ -3913,7 +3913,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 
 (flycheck-ert-def-checker-test eruby-erubis eruby nil
   (flycheck-ert-should-syntax-check
-   "checkers/eruby-error.erb" '(html-erb-mode rhtml-mode)
+   "language/eruby.erb" '(html-erb-mode rhtml-mode)
    '(5 nil error "syntax error, unexpected keyword_end" :checker eruby-erubis)))
 
 (flycheck-ert-def-checker-test fortran-gfortran fortran error
