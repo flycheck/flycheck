@@ -38,6 +38,7 @@ master (in development)
     support [GH-708]
   - Fall back to `rst` if `rst-sphinx` is disabled [GH-745] [GH-746]
   - New uniform fringe indicators [GH-750]
+  - Demote AsciiDoc deprecation warnings to `info` level
 
 - Bug fixes:
 

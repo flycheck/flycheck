@@ -5398,8 +5398,11 @@ See URL `http://www.methods.co.nz/asciidoc'."
           "asciidoc: ERROR: <stdin>: Line " line ": " (message)
           line-end)
    (warning line-start
-            "asciidoc: " (or "WARNING" "DEPRECATED") ": <stdin>: Line " line ": "
-            (message) line-end))
+            "asciidoc: WARNING: <stdin>: Line " line ": " (message)
+            line-end)
+   (info line-start
+         "asciidoc: DEPRECATED: <stdin>: Line " line ": " (message)
+         line-end))
   :modes adoc-mode)
 
 (flycheck-def-args-var flycheck-clang-args c/c++-clang
