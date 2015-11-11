@@ -3603,7 +3603,7 @@ of the file will be interrupted because there are too many #ifdef configurations
 
 (flycheck-ert-def-checker-test asciidoc asciidoc nil
   (flycheck-ert-should-syntax-check
-   "checkers/asciidoc.adoc" 'adoc-mode
+   "language/asciidoc.adoc" 'adoc-mode
    '(1 nil warning "missing style: [paradef-default]: paragraph" :checker asciidoc)
    '(3 nil warning "old tables syntax" :checker asciidoc)
    '(11 nil error "[tabledef-default] illegal width=%60%" :checker asciidoc)))
