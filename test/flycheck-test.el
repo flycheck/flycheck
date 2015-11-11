@@ -646,7 +646,8 @@ and extension, as in `file-name-base'."
 (ert-deftest flycheck-in-user-emacs-directory-p/no-child-of-user-emacs-directory ()
   :tags '(utility)
   (should-not (flycheck-in-user-emacs-directory-p
-               (flycheck-ert-resource-filename "checkers/emacs-lisp.el"))))
+               (flycheck-ert-resource-filename
+                "language/emacs-lisp/warnings.el"))))
 
 (ert-deftest flycheck-in-user-emacs-directory-p/direct-child-of-user-emacs-directory ()
   :tags '(utility)
@@ -658,7 +659,8 @@ and extension, as in `file-name-base'."
   :tags '(utility)
   (let ((user-emacs-directory flycheck-test-directory))
     (should (flycheck-in-user-emacs-directory-p
-             (flycheck-ert-resource-filename "checkers/emacs-lisp.el")))))
+             (flycheck-ert-resource-filename
+              "language/emacs-lisp/warnings.el")))))
 
 (ert-deftest flycheck-safe-delete/recursive-removal ()
   :tags '(utility)
@@ -683,32 +685,34 @@ and extension, as in `file-name-base'."
 (ert-deftest flycheck-module-root-directory/no-module-name ()
   :tags '(utility)
   (let ((default-directory flycheck-test-resources-directory)
-        (file-name (flycheck-ert-resource-filename "checkers/emacs-lisp.el")))
-    (should (string= (flycheck-ert-resource-filename "checkers/")
+        (file-name (flycheck-ert-resource-filename
+                    "language/emacs-lisp/warnings.el")))
+    (should (string= (flycheck-ert-resource-filename "language/emacs-lisp/")
                      (flycheck-module-root-directory nil file-name)))))
 
 (ert-deftest flycheck-module-root-directory/module-name-as-string ()
   :tags '(utility)
   (let ((default-directory flycheck-test-resources-directory)
-        (file-name (flycheck-ert-resource-filename "checkers/emacs-lisp.el")))
+        (file-name (flycheck-ert-resource-filename "language/emacs-lisp/warnings.el")))
     (should (string= flycheck-test-resources-directory
-                     (flycheck-module-root-directory "checkers.emacs-lisp"
+                     (flycheck-module-root-directory "language.emacs-lisp.warnings"
                                                      file-name)))))
 
 (ert-deftest flycheck-module-root-directory/module-name-as-list ()
   :tags '(utility)
   (let ((default-directory flycheck-test-resources-directory)
-        (file-name (flycheck-ert-resource-filename "checkers/emacs-lisp.el")))
+        (file-name (flycheck-ert-resource-filename "language/emacs-lisp/warnings.el")))
     (should (string= flycheck-test-resources-directory
-                     (flycheck-module-root-directory '("checkers" "emacs-lisp")
+                     (flycheck-module-root-directory '("language" "emacs-lisp"
+                                                       "warnings")
                                                      file-name)))))
 
 (ert-deftest flycheck-module-root-directory/mismatching-module-name ()
   :tags '(utility)
   (let ((default-directory flycheck-test-resources-directory)
-        (file-name (flycheck-ert-resource-filename "checkers/emacs-lisp.el")))
-    (should (string= (flycheck-ert-resource-filename "checkers/")
-                     (flycheck-module-root-directory '("foo" "emacs-lisp")
+        (file-name (flycheck-ert-resource-filename "language/emacs-lisp/warnings.el")))
+    (should (string= (flycheck-ert-resource-filename "language/emacs-lisp/")
+                     (flycheck-module-root-directory '("foo" "warnings")
                                                      file-name)))))
 
 ;;; Checker API
@@ -957,7 +961,7 @@ and extension, as in `file-name-base'."
 
 (ert-deftest flycheck-may-use-checker/disabled-checker ()
   :tags '(checker-api)
-  (flycheck-ert-with-resource-buffer "checkers/emacs-lisp.el"
+  (flycheck-ert-with-resource-buffer "language/emacs-lisp/warnings.el"
     (emacs-lisp-mode)
     (flycheck-may-use-checker 'emacs-lisp)
     (let ((flycheck-disabled-checkers '(emacs-lisp)))
@@ -965,7 +969,7 @@ and extension, as in `file-name-base'."
 
 (ert-deftest flycheck-may-use-checker/checks-executable ()
   :tags '(checker-api)
-  (flycheck-ert-with-resource-buffer "checkers/emacs-lisp.el"
+  (flycheck-ert-with-resource-buffer "language/emacs-lisp/warnings.el"
     (emacs-lisp-mode)
     (let* ((was-called nil)
            (flycheck-executable-find (lambda (e) (setq was-called t))))
@@ -1253,7 +1257,7 @@ and extension, as in `file-name-base'."
 
 (ert-deftest flycheck-mode/clears-errors-after-revert ()
   :tags '(minor-mode language-emacs-lisp)
-  (flycheck-ert-with-resource-buffer "checkers/emacs-lisp.el"
+  (flycheck-ert-with-resource-buffer "language/emacs-lisp/warnings.el"
     (emacs-lisp-mode)
     (goto-char (point-min))
     (insert "foo-bar")
@@ -1278,7 +1282,7 @@ and extension, as in `file-name-base'."
 
 (ert-deftest flycheck-checker/usable-checker-is-used ()
   :tags '(selection language-emacs-lisp checker-emacs-lisp-checkdoc)
-  (flycheck-ert-with-resource-buffer "checkers/emacs-lisp.el"
+  (flycheck-ert-with-resource-buffer "language/emacs-lisp/warnings.el"
     (emacs-lisp-mode)
     (flycheck-mode)
     (should (eq (flycheck-get-checker-for-buffer) 'emacs-lisp))
@@ -1291,7 +1295,7 @@ and extension, as in `file-name-base'."
 
 (ert-deftest flycheck-checker/disabled-checker-is-not-used ()
   :tags '(selection language-emacs-lisp)
-  (flycheck-ert-with-resource-buffer "checkers/emacs-lisp.el"
+  (flycheck-ert-with-resource-buffer "language/emacs-lisp/warnings.el"
     (emacs-lisp-mode)
     (flycheck-mode)
     (let ((flycheck-disabled-checkers '(emacs-lisp emacs-lisp-checkdoc)))
@@ -1303,7 +1307,7 @@ and extension, as in `file-name-base'."
 
 (ert-deftest flycheck-checker/unregistered-checker-is-used ()
   :tags '(selection language-emacs-lisp checker-emacs-lisp-checkdoc)
-  (flycheck-ert-with-resource-buffer "checkers/emacs-lisp.el"
+  (flycheck-ert-with-resource-buffer "language/emacs-lisp/warnings.el"
     (emacs-lisp-mode)
     (flycheck-mode)
     (should (eq (flycheck-get-checker-for-buffer) 'emacs-lisp))
@@ -1334,7 +1338,7 @@ and extension, as in `file-name-base'."
 (ert-deftest flycheck-select-checker/selecting-runs-a-syntax-check ()
   :tags '(selection language-emacs-lisp
                     checker-emacs-lisp checker-emacs-lisp-checkdoc)
-  (flycheck-ert-with-resource-buffer "checkers/emacs-lisp.el"
+  (flycheck-ert-with-resource-buffer "language/emacs-lisp/warnings.el"
     (emacs-lisp-mode)
     (flycheck-mode)
     ;; By default we should get both, because emacs-lisp chains to checkdoc
@@ -1368,7 +1372,7 @@ and extension, as in `file-name-base'."
 
 (ert-deftest flycheck/selects-checker-automatically/no-disabled-checker ()
   :tags '(selection language-emacs-lisp checker-emacs-lisp-checkdoc)
-  (flycheck-ert-with-resource-buffer "checkers/emacs-lisp.el"
+  (flycheck-ert-with-resource-buffer "language/emacs-lisp/warnings.el"
     (let ((flycheck-disabled-checkers '(emacs-lisp)))
       (flycheck-ert-buffer-sync)
       (should-not flycheck-checker)
@@ -2394,7 +2398,7 @@ and extension, as in `file-name-base'."
 Set `flycheck-navigation-minimum-level' to MINIMUM-LEVEL while
 evaluating BODY."
   (declare (indent 1))
-  `(flycheck-ert-with-resource-buffer "checkers/emacs-lisp.el"
+  `(flycheck-ert-with-resource-buffer "language/emacs-lisp/errors-and-warnings.el"
      (emacs-lisp-mode)
      (flycheck-mode)
      (when ,minimum-level
@@ -3214,7 +3218,7 @@ evaluating BODY."
                                               (cons "echo" cmd))))
     ;; Since we just `echo' the command, there should be zero errors
     (flycheck-ert-should-syntax-check
-     "checkers/emacs-lisp.el" 'emacs-lisp-mode)
+     "language/emacs-lisp/warnings.el" 'emacs-lisp-mode)
 
     ;; Called once for `emacs-lisp', and a second time for checkdoc
     (should (equal was-called 2))))
@@ -3228,7 +3232,7 @@ evaluating BODY."
   (let ((flycheck-emacs-lisp-executable (flycheck-ert-resource-filename
                                          "bin/dummy-emacs")))
     (flycheck-ert-should-syntax-check
-     "checkers/emacs-lisp.el" 'emacs-lisp-mode
+     "language/emacs-lisp/warnings.el" 'emacs-lisp-mode
      '(12 nil warning "First sentence should end with punctuation"
           :checker emacs-lisp-checkdoc)
      '(17 4 error "t is not true!" :checker emacs-lisp)
@@ -3283,7 +3287,7 @@ evaluating BODY."
 
 (ert-deftest flycheck-set-checker-executable/file-not-executable ()
   :tags '(executables)
-  (let ((file-name (flycheck-ert-resource-filename "checkers/emacs-lisp.el")))
+  (let ((file-name (flycheck-ert-resource-filename "language/emacs-lisp/warnings.el")))
     (should (file-exists-p file-name))
     (should-not (file-executable-p file-name))
     (let ((err (should-error (flycheck-set-checker-executable
@@ -3780,30 +3784,30 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (unless (version<= "24.4" emacs-version)
     (ert-skip "Skipped because CC Mode is broken on 24.3.
 See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
-  (flycheck-ert-with-resource-buffer "checkers/d/src/dmd/no_module.d"
+  (flycheck-ert-with-resource-buffer "language/d/src/dmd/no_module.d"
     (should (flycheck-same-files-p
              (flycheck-d-base-directory)
-             (flycheck-ert-resource-filename "checkers/d/src/dmd")))))
+             (flycheck-ert-resource-filename "language/d/src/dmd")))))
 
 (ert-deftest flycheck-d-base-directory/with-module-declaration ()
   :tags '(language-d)
   (unless (version<= "24.4" emacs-version)
     (ert-skip "Skipped because CC Mode is broken on 24.3.
 See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
-  (flycheck-ert-with-resource-buffer "checkers/d/src/dmd/warning.d"
+  (flycheck-ert-with-resource-buffer "language/d/src/dmd/warning.d"
     (should (flycheck-same-files-p
              (flycheck-d-base-directory)
-             (flycheck-ert-resource-filename "checkers/d/src")))))
+             (flycheck-ert-resource-filename "language/d/src")))))
 
 (ert-deftest flycheck-d-base-directory/package-file ()
   :tags '(language-d)
   (unless (version<= "24.4" emacs-version)
     (ert-skip "Skipped because CC Mode is broken on 24.3.
 See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
-  (flycheck-ert-with-resource-buffer "checkers/d/src/dmd/package.d"
+  (flycheck-ert-with-resource-buffer "language/d/src/dmd/package.d"
     (should (flycheck-same-files-p
              (flycheck-d-base-directory)
-             (flycheck-ert-resource-filename "checkers/d/src")))))
+             (flycheck-ert-resource-filename "language/d/src")))))
 
 (flycheck-ert-def-checker-test d-dmd d warning-include-path
   (unless (version<= "24.4" emacs-version)
@@ -3826,52 +3830,19 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
        :checker d-dmd)))
 
 (flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp nil
-  ;; Determine how the Emacs message for load file errors looks like: In Emacs
-  ;; Snapshot, the message has three parts because the underlying file error is
-  ;; contained in the message.  In stable release the file error itself is
-  ;; missing and the message has only two parts.
-  (let* ((parts (condition-case err
-                    (require 'does-not-exist)
-                  (file-error (cdr err))))
-         (msg (format "Cannot open load file: %sdummy-package"
-                      (if (= (length parts) 2) ""
-                        "No such file or directory, "))))
-    (flycheck-ert-should-syntax-check
-     "checkers/emacs-lisp.el" 'emacs-lisp-mode
-     '(12 nil warning "First sentence should end with punctuation"
-          :checker emacs-lisp-checkdoc)
-     `(15 1 error ,msg :checker emacs-lisp))))
-
-(flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
-                               load-path
-  (let ((flycheck-emacs-lisp-load-path (list (flycheck-ert-resource-filename
-                                              "dummy-elpa/dummy-package-0.1"))))
-    (flycheck-ert-should-syntax-check
-     "checkers/emacs-lisp.el" 'emacs-lisp-mode
-     '(12 nil warning "First sentence should end with punctuation"
-          :checker emacs-lisp-checkdoc)
-     '(18 6 warning "message called with 0 arguments, but requires 1+"
-          :checker emacs-lisp)
-     `(23 1 warning ,(flycheck-test-fix-quotes
-                      "the function ‘dummy-package-foo’ might not be defined at runtime.")
-          :checker emacs-lisp))))
-
-(flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
-                               initialize-packages
-  (let ((flycheck-emacs-lisp-initialize-packages t)
-        (flycheck-emacs-lisp-package-user-dir (flycheck-ert-resource-filename
-                                               "dummy-elpa")))
-    (flycheck-ert-should-syntax-check
-     "checkers/emacs-lisp.el" 'emacs-lisp-mode
-     '(12 nil warning "First sentence should end with punctuation"
-          :checker emacs-lisp-checkdoc)
-     '(18 6 warning "message called with 0 arguments, but requires 1+"
-          :checker emacs-lisp))))
+  (flycheck-ert-should-syntax-check
+   "language/emacs-lisp/warnings.el" 'emacs-lisp-mode
+   '(12 nil warning "First sentence should end with punctuation"
+        :checker emacs-lisp-checkdoc)
+   '(16 6 warning "message called with 0 arguments, but requires 1+"
+        :checker emacs-lisp)
+   '(21 1 warning "the function `dummy-package-foo' is not known to be defined."
+        :checker emacs-lisp )))
 
 (flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
                                checks-compressed-file
   (flycheck-ert-should-syntax-check
-   "checkers/emacs-lisp.el.gz" 'emacs-lisp-mode
+   "language/emacs-lisp/compressed.el.gz" 'emacs-lisp-mode
    '(12 nil warning "First sentence should end with punctuation"
         :checker emacs-lisp-checkdoc)
    '(16 6 warning "message called with 0 arguments, but requires 1+"
@@ -3883,7 +3854,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 (flycheck-ert-def-checker-test emacs-lisp emacs-lisp sytnax-error
   (let ((flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
     (flycheck-ert-should-syntax-check
-     "checkers/emacs-lisp-syntax-error.el" 'emacs-lisp-mode
+     "language/emacs-lisp/syntax-error.el" 'emacs-lisp-mode
      '(3 1 error "End of file during parsing" :checker emacs-lisp))))
 
 (flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
@@ -3891,7 +3862,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   ;; Regression test for checkdoc in buffers without file names. See
   ;; https://github.com/flycheck/flycheck/issues/73 and
   ;; https://github.com/bbatsov/prelude/issues/259
-  (flycheck-ert-with-resource-buffer "checkers/emacs-lisp.el"
+  (flycheck-ert-with-resource-buffer "language/emacs-lisp/warnings.el"
     (set-visited-file-name nil 'no-query)
     (emacs-lisp-mode)
     (should-not (buffer-file-name))
@@ -3925,7 +3896,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
     (add-hook 'emacs-lisp-mode-hook disable-byte-comp)
     (unwind-protect
         (flycheck-ert-should-syntax-check
-         "checkers/emacs-lisp.el" 'emacs-lisp-mode
+         "language/emacs-lisp/warnings.el" 'emacs-lisp-mode
          '(12 nil warning "First sentence should end with punctuation"
               :checker emacs-lisp-checkdoc))
       (remove-hook 'emacs-lisp-mode-hook disable-byte-comp))))

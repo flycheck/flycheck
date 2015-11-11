@@ -1,4 +1,4 @@
-;;; emacs-lisp.el -- Trigger Emacs Lisp warnings -*- lexical-binding: t; -*-
+;;; warnings.el -- Trigger Emacs Lisp warnings -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 
@@ -12,11 +12,9 @@
   "Does nothing really useful"
   (dummy-package-foo))
 
-(require 'dummy-package)
-
 (if t
     (message)
   (message "Hello foo"))
 
-(provide 'emacs-lisp)
-;;; emacs-lisp.el ends here
+(provide 'warnings)
+;;; warnings.el ends here
