@@ -4419,20 +4419,14 @@ Why not:
    '(26 12 error "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\""
         :id "Generic.PHP.LowerCaseConstant.Found" :checker php-phpcs)))
 
-(flycheck-ert-def-checker-test puppet-parser puppet singleline-syntax-error
+(flycheck-ert-def-checker-test puppet-parser puppet parser-error
   (flycheck-ert-should-syntax-check
-   "checkers/puppet-parser-singleline.pp" 'puppet-mode
+   "language/puppet/parser-error.pp" 'puppet-mode
    '(3 9 error "Syntax error at '>'" :checker puppet-parser)))
-
-(flycheck-ert-def-checker-test puppet-parser puppet multiline-syntax-error
-  (flycheck-ert-should-syntax-check
-   "checkers/puppet-parser-multiline.pp" 'puppet-mode
-   '(8 13 error "Unclosed quote after \"'\" followed by 'somet...'"
-       :checker puppet-parser)))
 
 (flycheck-ert-def-checker-test puppet-lint puppet nil
   (flycheck-ert-should-syntax-check
-   "checkers/puppet-lint.pp" 'puppet-mode
+   "language/puppet/warnings.pp" 'puppet-mode
    '(2 nil error "foo::bar not in autoload module layout (autoloader_layout)"
        :checker puppet-lint)
    '(3 nil warning "case statement without a default case (case_without_default)"
