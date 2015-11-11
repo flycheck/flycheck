@@ -5391,15 +5391,15 @@ Uses the GNAT compiler from GCC.  See URL
   "A AsciiDoc syntax checker using the AsciiDoc compiler.
 
 See URL `http://www.methods.co.nz/asciidoc'."
-  ;; We don't use standard input for asciidoc because when reading from standard
-  ;; input it always dumps the entire document contents to standard input in
-  ;; case of errors, which can spoil parsing
-  :command ("asciidoc" source)
+  :command ("asciidoc" "-o" null-device "-")
+  :standard-input t
   :error-patterns
-  ((error line-start "asciidoc: ERROR: " (file-name)
-          ": Line " line ": " (message) line-end)
-   (warning line-start "asciidoc: " (or "WARNING" "DEPRECATED") ": " (file-name)
-            ": Line " line ": " (message) line-end))
+  ((error line-start
+          "asciidoc: ERROR: <stdin>: Line " line ": " (message)
+          line-end)
+   (warning line-start
+            "asciidoc: " (or "WARNING" "DEPRECATED") ": <stdin>: Line " line ": "
+            (message) line-end))
   :modes adoc-mode)
 
 (flycheck-def-args-var flycheck-clang-args c/c++-clang
