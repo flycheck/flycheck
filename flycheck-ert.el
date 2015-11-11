@@ -160,15 +160,6 @@ The absolute file name of RESOURCE-FILE is determined with
        (flycheck-ert-resource-filename ,resource-file)
      ,@body))
 
-(defun flycheck-ert-locate-config-file (filename _checker)
-  "Find a configuration FILENAME within unit tests.
-
-_CHECKER is ignored."
-  (let* ((directory (flycheck-ert-resource-filename "config-files"))
-         (filepath (expand-file-name filename directory)))
-    (when (file-exists-p filepath)
-      filepath)))
-
 
 ;;; Test suite initialization
 
@@ -426,9 +417,6 @@ resource directory."
     (flycheck-ert-with-resource-buffer resource-file
       (funcall mode)
       ;; Configure config file locating for unit tests
-      (dolist (fn '(flycheck-locate-config-file-by-path
-                    flycheck-ert-locate-config-file))
-        (add-hook 'flycheck-locate-config-file-functions fn 'append 'local))
       (let ((process-hook-called 0))
         (add-hook 'flycheck-process-error-functions
                   (lambda (_err)

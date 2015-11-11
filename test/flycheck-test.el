@@ -3903,12 +3903,12 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 
 (flycheck-ert-def-checker-test erlang erlang error
   (flycheck-ert-should-syntax-check
-   "checkers/erlang-error.erl" 'erlang-mode
+   "language/erlang/error.erl" 'erlang-mode
    '(7 nil error "head mismatch" :checker erlang)))
 
 (flycheck-ert-def-checker-test erlang erlang warning
   (flycheck-ert-should-syntax-check
-   "checkers/erlang-warning.erl" 'erlang-mode
+   "language/erlang/warning.erl" 'erlang-mode
    '(6 nil warning "wrong number of arguments in format call" :checker erlang)))
 
 (flycheck-ert-def-checker-test eruby-erubis eruby nil
