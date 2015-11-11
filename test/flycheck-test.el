@@ -4364,39 +4364,15 @@ Why not:
      '(5 nil error "unfinished string near '\"oh no'"
          :checker lua))))
 
-(flycheck-ert-def-checker-test perl perl nil
+(flycheck-ert-def-checker-test (perl perl-perlcritic) perl nil
   (flycheck-ert-should-syntax-check
-   "checkers/perl.pl" '(perl-mode cperl-mode)
+   "language/perl.pl" '(perl-mode cperl-mode)
    '(6 nil error "Global symbol \"$x\" requires explicit package name"
        :checker perl)
    '(6 nil error "BEGIN not safe after errors--compilation aborted"
        :checker perl)
    '(6 6 error "Glob written as <...> (See page 167 of PBP)"
        :id "BuiltinFunctions::RequireGlobFunction" :checker perl-perlcritic)))
-
-(flycheck-ert-def-checker-test perl-perlcritic perl severity-1
-  (let ((flycheck-perlcritic-severity 1))
-    (flycheck-ert-should-syntax-check
-     "checkers/perl.pl" '(perl-mode cperl-mode)
-     '(1 1 warning "No package-scoped \"$VERSION\" variable found (See page 404 of PBP)"
-         :id "Modules::RequireVersionVar"
-         :checker perl-perlcritic)
-     '(1 1 info "Package \"perl\" does not start with a upper case letter (See pages 45,46 of PBP)"
-         :id "NamingConventions::Capitalization"
-         :checker perl-perlcritic)
-     '(6 nil error "Global symbol \"$x\" requires explicit package name"
-         :checker perl)
-     '(6 nil error "BEGIN not safe after errors--compilation aborted"
-         :checker perl)
-     '(6 6 error "Glob written as <...> (See page 167 of PBP)"
-         :id "BuiltinFunctions::RequireGlobFunction"
-         :checker perl-perlcritic)
-     '(8 1 info "Builtin function called with parentheses (See page 13 of PBP)"
-         :id "CodeLayout::ProhibitParensWithBuiltins"
-         :checker perl-perlcritic)
-     '(10 1 warning "\"die\" used instead of \"croak\" (See page 283 of PBP)"
-          :id "ErrorHandling::RequireCarping"
-          :checker perl-perlcritic))))
 
 (flycheck-ert-def-checker-test php php syntax-error
   (flycheck-ert-should-syntax-check
