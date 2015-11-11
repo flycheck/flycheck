@@ -3591,21 +3591,15 @@ of the file will be interrupted because there are too many #ifdef configurations
 
 (flycheck-ert-def-checker-test ada-gnat ada syntax-error
   (flycheck-ert-should-syntax-check
-   "checkers/ada/syntaxerror.adb" 'ada-mode
+   "language/ada/syntaxerror.adb" 'ada-mode
    '(7  32 error "missing \";\"" :checker ada-gnat)
    '(8 5 error "misspelling of \"SYNTAXERROR\"" :checker ada-gnat)))
 
 (flycheck-ert-def-checker-test ada-gnat ada warnings
   (flycheck-ert-should-syntax-check
-   "checkers/ada/hello.adb" 'ada-mode
+   "language/ada/hello.adb" 'ada-mode
    '(   6 4 warning "variable \"Name\" is not referenced" :checker ada-gnat)
    '(8  11 warning "unrecognized pragma \"Foo\"" :checker ada-gnat)))
-
-(flycheck-ert-def-checker-test ada-gnat ada disable-warnings
-  (let ((flycheck-gnat-warnings nil))
-    (flycheck-ert-should-syntax-check
-     "checkers/ada/hello.adb" 'ada-mode
-     '(8  11 warning "unrecognized pragma \"Foo\"" :checker ada-gnat))))
 
 (flycheck-ert-def-checker-test asciidoc asciidoc nil
   (flycheck-ert-should-syntax-check
