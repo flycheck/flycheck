@@ -3608,285 +3608,73 @@ of the file will be interrupted because there are too many #ifdef configurations
    '(3 nil warning "old tables syntax" :checker asciidoc)
    '(11 nil error "[tabledef-default] illegal width=%60%" :checker asciidoc)))
 
-(flycheck-ert-def-checker-test c/c++-clang (c c++) warning
-  (let ((flycheck-disabled-checkers '(c/c++-gcc c/c++-cppcheck)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-warning.c" 'c-mode
-     '(5 10 warning "unused variable 'unused'" :checker c/c++-clang)
-     '(7 15 warning "comparison of integers of different signs: 'int' and 'unsigned int'"
-         :checker c/c++-clang)
-     '(8 7 warning "no message" :checker c/c++-clang))))
-
-(flycheck-ert-def-checker-test c/c++-clang (c c++) warning-customized
-  ;; Disable conversion checks by removing -Wextra, but additionally warn about
-  ;; missing prototypes, which isn't included in -Wextra
-  (let ((flycheck-clang-warnings '("all" "missing-prototypes"))
-        (flycheck-disabled-checkers '(c/c++-gcc c/c++-cppcheck)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-warning.c" 'c-mode
-     '(3 5 warning "no previous prototype for function 'f'"
-         :checker c/c++-clang)
-     '(5 10 warning "unused variable 'unused'" :checker c/c++-clang)
-     '(8 7 warning "no message" :checker c/c++-clang))))
-
-(flycheck-ert-def-checker-test c/c++-clang (c c++) fatal-error
-  (let ((flycheck-disabled-checkers '(c/c++-gcc)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-fatal-error.c" 'c-mode
-     '(2 10 error "'c_c++-library-header.h' file not found"
-         :checker c/c++-clang))))
-
-(flycheck-ert-def-checker-test c/c++-clang (c c++) include-path
-  (let ((flycheck-clang-include-path '("./c_c++-include"))
-        (flycheck-disabled-checkers '(c/c++-gcc)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-fatal-error.c" 'c-mode)))
-
-(flycheck-ert-def-checker-test c/c++-clang (c c++) included-file-error
-  (let ((flycheck-clang-include-path '("./c_c++-include"))
-        (flycheck-disabled-checkers '(c/c++-gcc))
-        (include-file (flycheck-ert-resource-filename
-                       "checkers/c_c++-warning.c")))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-included-file-error.cpp" 'c++-mode
-     `(3 nil warning ,(format "In include %s" include-file)
-         :checker c/c++-clang))))
-
-(flycheck-ert-def-checker-test c/c++-clang (c c++) includes
-  (let  ((flycheck-clang-includes (list (flycheck-ert-resource-filename
-                                         "checkers/c_c++-include/c_c++-library-header.h")))
-         (flycheck-disabled-checkers '(c/c++-gcc)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-error.cpp" 'c++-mode
-     '(10 16 error "use of undeclared identifier 'nullptr'"
-          :checker c/c++-clang)
-     '(12 2 error "no message" :checker c/c++-clang))))
-
 (flycheck-ert-def-checker-test c/c++-clang (c c++) error
   (let ((flycheck-disabled-checkers '(c/c++-gcc)))
     (flycheck-ert-should-syntax-check
-     "checkers/c_c++-error.cpp" 'c++-mode
-     '(3 23 info "template is declared here" :checker c/c++-clang)
-     '(8 17 error "implicit instantiation of undefined template 'test<false>'"
-         :checker c/c++-clang)
-     '(10 16 error "use of undeclared identifier 'nullptr'"
-          :checker c/c++-clang)
-     '(12 2 error "no message" :checker c/c++-clang))))
-
-(flycheck-ert-def-checker-test c/c++-clang (c c++) error-template
-  (let ((flycheck-disabled-checkers '(c/c++-gcc)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-error-template.cpp" 'c++-mode
+     "language/c_c++/error.cpp" 'c++-mode
      '(2 20 error "no member named 'bar' in 'A'"
          :checker c/c++-clang)
      '(6 19 info "in instantiation of function template specialization 'foo<A>' requested here"
          :checker c/c++-clang))))
 
-(flycheck-ert-def-checker-test c/c++-clang (c c++) error-language-standard
-  (let ((flycheck-clang-language-standard "c++11")
-        (flycheck-disabled-checkers '(c/c++-gcc)))
+(flycheck-ert-def-checker-test c/c++-clang (c c++) fatal-error
+  (let ((flycheck-disabled-checkers '(c/c++-gcc)))
     (flycheck-ert-should-syntax-check
-     "checkers/c_c++-error.cpp" 'c++-mode
-     '(3 23 info "template is declared here" :checker c/c++-clang)
-     '(8 17 error "implicit instantiation of undefined template 'test<false>'"
+     "language/c_c++/includes.c" 'c-mode
+     '(2 10 error "'library.h' file not found"
+         :checker c/c++-clang))))
+
+(flycheck-ert-def-checker-test c/c++-clang (c c++) warnings
+  (let ((flycheck-disabled-checkers '(c/c++-gcc c/c++-cppcheck)))
+    (flycheck-ert-should-syntax-check
+     "language/c_c++/warning.c" 'c-mode
+     '(5 10 warning "unused variable 'unused'" :checker c/c++-clang)
+     '(7 15 warning "comparison of integers of different signs: 'int' and 'unsigned int'"
          :checker c/c++-clang)
-     '(12 2 error "no message" :checker c/c++-clang))))
+     '(8 7 warning "no message" :checker c/c++-clang))))
 
-(flycheck-ert-def-checker-test c/c++-clang (c c++) error-definitions
-  (let ((flycheck-clang-definitions '("FLYCHECK_LIBRARY"))
-        (flycheck-disabled-checkers '(c/c++-gcc)))
+(flycheck-ert-def-checker-test c/c++-clang (c c++) included-file-error
+  (let ((flycheck-clang-include-path '("./include"))
+        (flycheck-disabled-checkers '(c/c++-gcc))
+        (include-file (flycheck-ert-resource-filename
+                       "language/c_c++/warning.c")))
     (flycheck-ert-should-syntax-check
-     "checkers/c_c++-error.cpp" 'c++-mode
-     '(10 16 error "use of undeclared identifier 'nullptr'"
-          :checker c/c++-clang)
-     '(12 2 error "no message" :checker c/c++-clang))))
-
-(flycheck-ert-def-checker-test c/c++-clang (c c++) ms-extensions-disabled
-  ;; A sanity check for the following c/c++-clang-ms-extensions-enabled test
-  ;; case
-  (flycheck-ert-should-syntax-check
-   "checkers/c_c++-ms-extensions.c" 'c-mode
-   '(7 5 warning "declaration does not declare anything" :checker c/c++-clang)
-   '(14 24 error "field designator 'a' does not refer to any field in type 'outer_s'"
-        :checker c/c++-clang)))
-
-(flycheck-ert-def-checker-test c/c++-clang (c c++) ms-extensions-enabled
-  (let ((flycheck-clang-ms-extensions t))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-ms-extensions.c" 'c-mode
-     '(7 5 warning "anonymous structs are a Microsoft extension"
+     "language/c_c++/in-included-file.cpp" 'c++-mode
+     `(3 nil warning ,(format "In include %s" include-file)
          :checker c/c++-clang))))
 
-(flycheck-ert-def-checker-test c/c++-clang (c c++) error-no-exceptions
-  (let ((flycheck-disabled-checkers '(c/c++-gcc))
-        (flycheck-clang-no-exceptions t))
+(flycheck-ert-def-checker-test c/c++-gcc (c c++) error
+  (let ((flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-ert-should-syntax-check
-     "checkers/c_c++-error-exceptions.cpp" 'c++-mode
-     '(1 14 error "cannot use 'throw' with exceptions disabled"
-         :checker c/c++-clang))))
+     "language/c_c++/error.cpp" 'c++-mode
+     '(2 18 error "‘struct A’ has no member named ‘bar’"
+         :checker c/c++-gcc))))
 
-(flycheck-ert-def-checker-test c/c++-clang (c c++) error-no-rtti
-  (let ((flycheck-clang-no-rtti t)
-        (flycheck-disabled-checkers '(c/c++-gcc)))
+(flycheck-ert-def-checker-test c/c++-gcc (c c++) fatal-error
+  (let ((flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-ert-should-syntax-check
-     "checkers/c_c++-error-rtti.cpp" 'c++-mode
-     '(4 32 error "cannot use dynamic_cast with -fno-rtti"
-         :checker c/c++-clang))))
-
-(flycheck-ert-def-checker-test c/c++-clang (c c++) block-error
-  ;; On Travis CI and OS X, -fblocks seems to be default for Clang, so this test
-  ;; won't pass
-  :expected-result '(or (satisfies (lambda (result)
-                                     (and (or (eq system-type 'darwin)
-                                              (flycheck-ert-travis-ci-p))
-                                          (ert-test-failed-p result))))
-                        :passed)
-  (flycheck-ert-should-syntax-check
-   "checkers/c_c++-clang-blocks.c" 'c-mode
-   '(3 15 error "blocks support disabled - compile with -fblocks or pick a deployment target that supports them"
-       :checker c/c++-clang)
-   '(7 20 error "blocks support disabled - compile with -fblocks or pick a deployment target that supports them"
-       :checker c/c++-clang)))
-
-(flycheck-ert-def-checker-test c/c++-clang (c c++) blocks
-  (let ((flycheck-clang-blocks t))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-clang-blocks.c" 'c-mode
-     '(7 16 warning "unused variable 'p'" :checker c/c++-clang))))
+     "language/c_c++/includes.c" 'c-mode
+     '(2 21 error "library.h: No such file or directory"
+         :checker c/c++-gcc))))
 
 (flycheck-ert-def-checker-test c/c++-gcc (c c++) warning
   (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck)))
     (flycheck-ert-should-syntax-check
-     "checkers/c_c++-warning.c" 'c-mode
+     "language/c_c++/warning.c" 'c-mode
      '(5 10 warning "unused variable ‘unused’" :checker c/c++-gcc)
      '(7 15 warning "comparison between signed and unsigned integer expressions"
          :checker c/c++-gcc)
      '(8 7 warning "#warning" :checker c/c++-gcc))))
 
-(flycheck-ert-def-checker-test c/c++-gcc (c c++) warning-customized
-  ;; Disable conversion checks by removing -Wextra, but additionally warn about
-  ;; missing prototypes, which isn't included in -Wextra
-  (let ((flycheck-gcc-warnings '("all" "missing-prototypes"))
-        (flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-warning.c" 'c-mode
-     '(3 5 warning "no previous prototype for ‘f’"
-         :checker c/c++-gcc)
-     '(5 10 warning "unused variable ‘unused’" :checker c/c++-gcc)
-     '(8 7 warning "#warning" :checker c/c++-gcc))))
-
-(flycheck-ert-def-checker-test c/c++-gcc (c c++) fatal-error
-  (let ((flycheck-disabled-checkers '(c/c++-clang)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-fatal-error.c" 'c-mode
-     '(2 34 error "c_c++-library-header.h: No such file or directory"
-         :checker c/c++-gcc))))
-
-(flycheck-ert-def-checker-test c/c++-gcc (c c++) include-path
-  (let ((flycheck-gcc-include-path '("./c_c++-include"))
-        (flycheck-disabled-checkers '(c/c++-clang)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-fatal-error.c" 'c-mode)))
-
 (flycheck-ert-def-checker-test c/c++-gcc (c c++) included-file-error
-  (let ((flycheck-gcc-include-path '("./c_c++-include"))
+  (let ((flycheck-gcc-include-path '("./include"))
         (flycheck-disabled-checkers '(c/c++-clang))
         (include-file (flycheck-ert-resource-filename
-                       "checkers/c_c++-warning.c")))
+                       "language/c_c++/warning.c")))
     (flycheck-ert-should-syntax-check
-     "checkers/c_c++-included-file-error.cpp" 'c++-mode
+     "language/c_c++/in-included-file.cpp" 'c++-mode
      `(3 nil warning ,(format "In include %s" include-file)
          :checker c/c++-gcc))))
-
-(flycheck-ert-def-checker-test c/c++-gcc (c c++) includes
-  (let  ((flycheck-gcc-includes (list (flycheck-ert-resource-filename
-                                       "checkers/c_c++-include/c_c++-library-header.h")))
-         (flycheck-disabled-checkers '(c/c++-clang)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-error.cpp" 'c++-mode
-     '(10 5 warning "identifier ‘nullptr’ is a keyword in C++11"
-          :checker c/c++-gcc)
-     '(10 10 warning "unused variable ‘foo’"
-          :checker c/c++-gcc)
-     '(10 16 error "‘nullptr’ was not declared in this scope"
-          :checker c/c++-gcc)
-     '(12 2 error "#error" :checker c/c++-gcc))))
-
-(flycheck-ert-def-checker-test c/c++-gcc (c c++) error
-  (let ((flycheck-disabled-checkers '(c/c++-clang)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-error.cpp" 'c++-mode
-     '(8 17 error "aggregate ‘test<false> t’ has incomplete type and cannot be defined"
-         :checker c/c++-gcc)
-     '(10 5 warning "identifier ‘nullptr’ is a keyword in C++11"
-          :checker c/c++-gcc)
-     '(10 10 warning "unused variable ‘foo’"
-          :checker c/c++-gcc)
-     '(10 16 error "‘nullptr’ was not declared in this scope"
-          :checker c/c++-gcc)
-     '(12 2 error "#error" :checker c/c++-gcc))))
-
-(flycheck-ert-def-checker-test c/c++-gcc (c c++) error-template
-  (let ((flycheck-disabled-checkers '(c/c++-clang)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-error-template.cpp" 'c++-mode
-     '(2 18 error "‘struct A’ has no member named ‘bar’"
-         :checker c/c++-gcc))))
-
-(flycheck-ert-def-checker-test c/c++-gcc (c c++) error-language-standard
-  (let ((flycheck-gcc-language-standard "c++11")
-        (flycheck-disabled-checkers '(c/c++-clang)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-error.cpp" 'c++-mode
-     '(8 17 error "aggregate ‘test<false> t’ has incomplete type and cannot be defined"
-         :checker c/c++-gcc)
-     '(10 10 warning "unused variable ‘foo’" :checker c/c++-gcc)
-     '(12 2 error "#error" :checker c/c++-gcc))))
-
-(flycheck-ert-def-checker-test c/c++-gcc (c c++) error-definitions
-  (let ((flycheck-gcc-definitions '("FLYCHECK_LIBRARY"))
-        (flycheck-disabled-checkers '(c/c++-clang)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-error.cpp" 'c++-mode
-     '(10 5 warning "identifier ‘nullptr’ is a keyword in C++11"
-          :checker c/c++-gcc)
-     '(10 10 warning "unused variable ‘foo’"
-          :checker c/c++-gcc)
-     '(10 16 error "‘nullptr’ was not declared in this scope"
-          :checker c/c++-gcc)
-     '(12 2 error "#error" :checker c/c++-gcc))))
-
-(flycheck-ert-def-checker-test c/c++-gcc (c c++) error-no-exceptions
-  (let ((flycheck-disabled-checkers '(c/c++-clang))
-        (flycheck-gcc-no-exceptions t))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-error-exceptions.cpp" 'c++-mode
-     '(1 20 error "exception handling disabled, use -fexceptions to enable"
-         :checker c/c++-gcc))))
-
-(flycheck-ert-def-checker-test c/c++-gcc (c c++) error-no-rtti
-  (let ((flycheck-disabled-checkers '(c/c++-clang))
-        (flycheck-gcc-no-rtti t))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-error-rtti.cpp" 'c++-mode
-     '(4 56 error "‘dynamic_cast’ not permitted with -fno-rtti"
-         :checker c/c++-gcc))))
-
-(flycheck-ert-def-checker-test c/c++-gcc (c c++) openmp-disabled
-  (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck))
-        (flycheck-gcc-language-standard "c99"))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-warning-openmp.c" 'c-mode
-     '(3 8 warning "variable ‘a’ set but not used" :checker c/c++-gcc)
-     '(5 nil warning "ignoring #pragma omp parallel" :checker c/c++-gcc))))
-
-(flycheck-ert-def-checker-test c/c++-gcc (c c++) openmp-enabled
-  (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck))
-        (flycheck-gcc-language-standard "c99")
-        (flycheck-gcc-openmp t))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-warning-openmp.c" 'c-mode
-     '(3 8 warning "variable ‘a’ set but not used" :checker c/c++-gcc))))
 
 (flycheck-ert-def-checker-test c/c++-cppcheck (c c++) nil
   :tags '(cppcheck-xml)
@@ -3894,44 +3682,9 @@ of the file will be interrupted because there are too many #ifdef configurations
         (flycheck-cppcheck-inconclusive nil)
         (flycheck-cppcheck-checks '("style")))
     (flycheck-ert-should-syntax-check
-     "checkers/c_c++-cppcheck.cpp" '(c-mode c++-mode)
+     "language/c_c++/style.cpp" '(c-mode c++-mode)
      '(5 nil info "Unused variable: unused" :id "unusedVariable"
          :checker c/c++-cppcheck)
-     '(9 nil error "Division by zero." :id "zerodiv" :checker c/c++-cppcheck)
-     '(14 nil warning "Parameter 'foo' is passed by value. It could be passed as a (const) reference which is usually faster and recommended in C++."
-          :id "passedByValue" :checker c/c++-cppcheck))))
-
-(flycheck-ert-def-checker-test c/c++-cppcheck (c c++) style-suppressed
-  :tags '(cppcheck-xml)
-  (let ((flycheck-cppcheck-checks nil)
-        (flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-cppcheck.cpp" '(c-mode c++-mode)
-     `(9 nil error "Division by zero." :id "zerodiv"
-         :checker c/c++-cppcheck))))
-
-(flycheck-ert-def-checker-test c/c++-cppcheck (c c++) inconclusive
-  :tags '(cppcheck-xml)
-  (let ((flycheck-cppcheck-checks '("style"))
-        (flycheck-cppcheck-inconclusive t)
-        (flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-cppcheck.cpp" '(c-mode c++-mode)
-     '(5 nil info "Unused variable: unused" :id "unusedVariable"
-         :checker c/c++-cppcheck)
-     '(9 nil error "Division by zero." :id "zerodiv" :checker c/c++-cppcheck)
-     '(12 nil info "Boolean variable 'a' is used in bitwise operation. Did you mean '&&'?"
-          :id "bitwiseOnBoolean" :checker c/c++-cppcheck)
-     '(14 nil warning "Parameter 'foo' is passed by value. It could be passed as a (const) reference which is usually faster and recommended in C++."
-          :id "passedByValue" :checker c/c++-cppcheck))))
-
-(flycheck-ert-def-checker-test c/c++-cppcheck (c c++) multiple-checks
-  :tags '(cppcheck-xml)
-  (let ((flycheck-cppcheck-checks '("performance" "portability"))
-        (flycheck-cppcheck-inconclusive nil)
-        (flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
-    (flycheck-ert-should-syntax-check
-     "checkers/c_c++-cppcheck.cpp" 'c++-mode
      '(9 nil error "Division by zero." :id "zerodiv" :checker c/c++-cppcheck)
      '(14 nil warning "Parameter 'foo' is passed by value. It could be passed as a (const) reference which is usually faster and recommended in C++."
           :id "passedByValue" :checker c/c++-cppcheck))))
