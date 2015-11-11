@@ -3701,7 +3701,7 @@ of the file will be interrupted because there are too many #ifdef configurations
 
 (flycheck-ert-def-checker-test chef-foodcritic chef nil
   (flycheck-ert-should-syntax-check
-   "checkers/chef-foodcritic/recipes/chef-foodcritic-error.rb" 'ruby-mode
+   "language/chef/recipes/error.rb" 'ruby-mode
    '(3 nil error "FC002: Avoid string interpolation where not required"
        :checker chef-foodcritic)
    '(8 nil error "FC003: Check whether you are running with chef server before using server-specific features"
