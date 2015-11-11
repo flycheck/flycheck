@@ -3668,13 +3668,10 @@ of the file will be interrupted because there are too many #ifdef configurations
 
 (flycheck-ert-def-checker-test c/c++-gcc (c c++) included-file-error
   (let ((flycheck-gcc-include-path '("./include"))
-        (flycheck-disabled-checkers '(c/c++-clang))
-        (include-file (flycheck-ert-resource-filename
-                       "language/c_c++/warning.c")))
+        (flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-ert-should-syntax-check
      "language/c_c++/in-included-file.cpp" 'c++-mode
-     `(3 nil warning ,(format "In include %s" include-file)
-         :checker c/c++-gcc))))
+     `(3 nil warning "In include warning.c" :checker c/c++-gcc))))
 
 (flycheck-ert-def-checker-test c/c++-cppcheck (c c++) nil
   :tags '(cppcheck-xml)
