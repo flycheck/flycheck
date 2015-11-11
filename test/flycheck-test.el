@@ -4554,7 +4554,7 @@ Why not:
 
 (flycheck-ert-def-checker-test racket racket nil
   (flycheck-ert-should-syntax-check
-   "checkers/racket-syntax-error.rkt" 'racket-mode
+   "language/racket.rkt" 'racket-mode
    '(4 3 error "read: expected a `)' to close `('" :checker racket)))
 
 (flycheck-ert-def-checker-test rpm-rpmlint rpm nil
