@@ -3711,21 +3711,21 @@ of the file will be interrupted because there are too many #ifdef configurations
 
 (flycheck-ert-def-checker-test coffee coffee syntax-error
   (flycheck-ert-should-syntax-check
-   "checkers/coffee-syntax-error.coffee" 'coffee-mode
+   "language/coffee/syntax-error.coffee" 'coffee-mode
    '(4 7 error "missing \"" :checker coffee)))
 
 (flycheck-ert-def-checker-test coffee-coffeelint coffee error
   :tags '(checkstyle-xml)
   (flycheck-ert-should-syntax-check
-   "checkers/coffee-coffeelint-error.coffee" 'coffee-mode
+   "language/coffee/error.coffee" 'coffee-mode
    '(4 nil error "Throwing strings is forbidden; context:"
        :checker coffee-coffeelint)))
 
 (flycheck-ert-def-checker-test coffee-coffeelint coffee warning
   :tags '(checkstyle-xml)
-  (let ((flycheck-coffeelintrc "coffeelint.json"))
+  (let ((flycheck-coffeelintrc "lint.json"))
     (flycheck-ert-should-syntax-check
-     "checkers/coffee-coffeelint-error.coffee" 'coffee-mode
+     "language/coffee/error.coffee" 'coffee-mode
      '(4 nil warning "Throwing strings is forbidden; context:"
          :checker coffee-coffeelint))))
 
