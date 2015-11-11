@@ -4435,62 +4435,13 @@ Why not:
 (flycheck-ert-def-checker-test python-flake8 python syntax-error
   (let ((python-indent-guess-indent-offset nil))       ; Silence Python Mode!
     (flycheck-ert-should-syntax-check
-     "checkers/python-syntax-error.py" 'python-mode
+     "language/python/syntax-error.py" 'python-mode
      '(3 13 error "SyntaxError: invalid syntax" :id "E901"
          :checker python-flake8))))
 
-(flycheck-ert-def-checker-test python-flake8 python warning-ignored
-  (let ((flycheck-flake8rc "flake8rc"))
-    (flycheck-ert-should-syntax-check
-     "checkers/python/test.py" 'python-mode
-     '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
-         :checker python-flake8)
-     '(9 9 info "function name should be lowercase"
-         :checker python-flake8 :id "N802")
-     '(22 1 error "undefined name 'antigravity'" :id "F821"
-          :checker python-flake8))))
-
-(flycheck-ert-def-checker-test python-flake8 python maximum-complexity
-  (let ((flycheck-flake8-maximum-complexity 2))
-    (flycheck-ert-should-syntax-check
-     "checkers/python/test.py" 'python-mode
-     '(5 1 warning "'antigravit' imported but unused" :id "F401"
-         :checker python-flake8)
-     '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
-         :checker python-flake8)
-     '(9 9 info "function name should be lowercase"
-         :checker python-flake8 :id "N802")
-     '(12 1 warning "'Spam.with_ham' is too complex (3)" :id "C901"
-          :checker python-flake8)
-     '(12 29 warning "unexpected spaces around keyword / parameter equals"
-          :id "E251" :checker python-flake8)
-     '(12 31 warning "unexpected spaces around keyword / parameter equals"
-          :id "E251" :checker python-flake8)
-     '(22 1 error "undefined name 'antigravity'" :id "F821"
-          :checker python-flake8))))
-
-(flycheck-ert-def-checker-test python-flake8 python error-maximum-line-length
-  (let ((flycheck-flake8-maximum-line-length 45))
-    (flycheck-ert-should-syntax-check
-     "checkers/python/test.py" 'python-mode
-     '(5 1 warning "'antigravit' imported but unused" :id "F401"
-         :checker python-flake8)
-     '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
-         :checker python-flake8)
-     '(9 9 info "function name should be lowercase"
-         :checker python-flake8 :id "N802")
-     '(10 46 warning "line too long (46 > 45 characters)" :id "E501"
-          :checker python-flake8)
-     '(12 29 warning "unexpected spaces around keyword / parameter equals"
-          :id "E251" :checker python-flake8)
-     '(12 31 warning "unexpected spaces around keyword / parameter equals"
-          :id "E251" :checker python-flake8)
-     '(22 1 error "undefined name 'antigravity'" :id "F821"
-          :checker python-flake8))))
-
 (flycheck-ert-def-checker-test python-flake8 python nil
   (flycheck-ert-should-syntax-check
-   "checkers/python/test.py" 'python-mode
+   "language/python/test.py" 'python-mode
    '(5 1 warning "'antigravit' imported but unused" :id "F401"
        :checker python-flake8)
    '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
@@ -4508,13 +4459,13 @@ Why not:
   (let ((flycheck-disabled-checkers '(python-flake8))
         (python-indent-guess-indent-offset nil)) ; Silence Python Mode
     (flycheck-ert-should-syntax-check
-     "checkers/python-syntax-error.py" 'python-mode
+     "language/python/syntax-error.py" 'python-mode
      '(3 1 error "invalid syntax" :id "syntax-error" :checker python-pylint))))
 
 (flycheck-ert-def-checker-test python-pylint python nil
   (let ((flycheck-disabled-checkers '(python-flake8)))
     (flycheck-ert-should-syntax-check
-     "checkers/python/test.py" 'python-mode
+     "language/python/test.py" 'python-mode
      '(1 1 info "Missing module docstring" :id "missing-docstring" :checker python-pylint)
      '(4 1 error "Unable to import 'spam'" :id "import-error" :checker python-pylint)
      '(5 1 error "No name 'antigravit' in module 'python'" :id "no-name-in-module"
@@ -4543,28 +4494,11 @@ Why not:
      '(22 1 error "Undefined variable 'antigravity'" :id "undefined-variable"
           :checker python-pylint))))
 
-(flycheck-ert-def-checker-test python-pylint python disabled-warnings
-  (let ((flycheck-pylintrc "pylintrc")
-        (flycheck-disabled-checkers '(python-flake8)))
-    (flycheck-ert-should-syntax-check
-     "checkers/python/test.py" 'python-mode
-     '(4 1 error "Unable to import 'spam'" :id "import-error" :checker python-pylint)
-     '(5 1 error "No name 'antigravit' in module 'python'" :id "no-name-in-module"
-         :checker python-pylint)
-     '(5 1 warning "Unused import antigravit" :id "unused-import"
-         :checker python-pylint)
-     '(10 16 warning "Used builtin function 'map'" :id "bad-builtin"
-          :checker python-pylint)
-     '(14 16 error "Module 'sys' has no 'python_version' member" :id "no-member"
-          :checker python-pylint)
-     '(22 1 error "Undefined variable 'antigravity'" :id "undefined-variable"
-          :checker python-pylint))))
-
 (flycheck-ert-def-checker-test python-pylint python no-symbolic-id
   (let ((flycheck-disabled-checkers '(python-flake8))
         (flycheck-pylint-use-symbolic-id nil))
     (flycheck-ert-should-syntax-check
-     "checkers/python/test.py" 'python-mode
+     "language/python/test.py" 'python-mode
      '(1 1 info "Missing module docstring" :id "C0111" :checker python-pylint)
      '(4 1 error "Unable to import 'spam'" :id "F0401" :checker python-pylint)
      '(5 1 error "No name 'antigravit' in module 'python'" :id "E0611"
@@ -4599,13 +4533,13 @@ Why not:
         (flycheck-python-pycompile-executable "python2")
         (python-indent-guess-indent-offset nil))
     (flycheck-ert-should-syntax-check
-     "checkers/python-syntax-error.py" 'python-mode
+     "language/python/syntax-error.py" 'python-mode
      `(3 nil error "invalid syntax" :checker python-pycompile))))
 
 (flycheck-ert-def-checker-test python-pycompile python has-no-warnings
   (let ((flycheck-disabled-checkers '(python-flake8 python-pylint)))
     (flycheck-ert-should-syntax-check
-     "checkers/python/test.py" 'python-mode)))
+     "language/python/test.py" 'python-mode)))
 
 (flycheck-ert-def-checker-test r-lintr r nil
   ;; Disable caching in lintr tests to make sure that the file is re-checked
