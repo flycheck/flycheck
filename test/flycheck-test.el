@@ -4376,13 +4376,13 @@ Why not:
 
 (flycheck-ert-def-checker-test php php syntax-error
   (flycheck-ert-should-syntax-check
-   "checkers/php-syntax-error.php" 'php-mode
+   "language/php/syntax-error.php" 'php-mode
    '(8 nil error "syntax error, unexpected ')', expecting '('" :checker php)))
 
-(flycheck-ert-def-checker-test php php nil
+(flycheck-ert-def-checker-test (php php-phpcs php-phpmd) php nil
   :tags '(phpmd-xml checkstyle-xml)
   (flycheck-ert-should-syntax-check
-   "checkers/php.php" 'php-mode
+   "language/php/warnings.php" 'php-mode
    '(19 1 error "Missing class doc comment"
         :id "PEAR.Commenting.ClassComment.Missing" :checker php-phpcs)
    '(21 nil warning "Avoid unused private fields such as '$FOO'."
@@ -4418,27 +4418,6 @@ Why not:
         :id "UnusedLocalVariable" :checker php-phpmd)
    '(26 12 error "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\""
         :id "Generic.PHP.LowerCaseConstant.Found" :checker php-phpcs)))
-
-(flycheck-ert-def-checker-test php-phpmd php rulesets
-  :tags '(phpmd-xml)
-  (let ((flycheck-phpmd-rulesets (remove "unusedcode" flycheck-phpmd-rulesets))
-        (flycheck-disabled-checkers '(php-phpcs)))
-    (flycheck-ert-should-syntax-check
-     "checkers/php.php" 'php-mode
-     '(26 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
-          :id "ShortVariable" :checker php-phpmd))))
-
-(flycheck-ert-def-checker-test php-phpcs php standard
-  :tags '(checkstyle-xml)
-  (let ((flycheck-phpcs-standard "Zend")
-        (flycheck-disabled-checkers '(php-phpmd)))
-    (flycheck-ert-should-syntax-check
-     "checkers/php.php" 'php-mode
-     '(21 20 error "Private member variable \"FOO\" must contain a leading underscore"
-          :id "Zend.NamingConventions.ValidVariableName.PrivateNoUnderscore"
-          :checker php-phpcs)
-     '(30 1 error "A closing tag is not permitted at the end of a PHP file"
-          :id "Zend.Files.ClosingTag.NotAllowed" :checker php-phpcs))))
 
 (flycheck-ert-def-checker-test puppet-parser puppet singleline-syntax-error
   (flycheck-ert-should-syntax-check
