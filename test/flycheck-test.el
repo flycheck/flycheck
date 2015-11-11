@@ -3749,14 +3749,14 @@ The term \"1\" has type \"nat\" while it is expected to have type
 (flycheck-ert-def-checker-test css-csslint css nil
   :tags '(checkstyle-xml)
   (flycheck-ert-should-syntax-check
-   "checkers/css-csslint-warning.css" 'css-mode
+   "language/css/warning.css" 'css-mode
    '(3 6 warning "Heading (h1) should not be qualified."
        :id "Disallowqualifiedheadings" :checker css-csslint)))
 
 (flycheck-ert-def-checker-test css-csslint css syntax-error
   :tags '(checkstyle-xml)
   (flycheck-ert-should-syntax-check
-   "checkers/css-syntax-error.css" 'css-mode
+   "language/css/syntax-error.css" 'css-mode
    '(4 16 error "Expected LBRACE at line 4, col 16." :id "ParsingErrors"
        :checker css-csslint)
    '(4 16 error "Unexpected token '100%' at line 4, col 16." :id "ParsingErrors"
