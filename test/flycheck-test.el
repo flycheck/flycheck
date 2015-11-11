@@ -4569,18 +4569,18 @@ Why not:
 
 (ert-deftest flycheck-locate-sphinx-source-directory/not-in-a-sphinx-project ()
   :tags '(language-rst)
-  (flycheck-ert-with-resource-buffer "checkers/rst.rst"
+  (flycheck-ert-with-resource-buffer "language/rst/errors.rst"
     (should-not (flycheck-locate-sphinx-source-directory))))
 
 (ert-deftest flycheck-locate-sphinx-source-directory/in-a-sphinx-project ()
   :tags '(language-rst)
-  (flycheck-ert-with-resource-buffer "checkers/rst-sphinx/index.rst"
+  (flycheck-ert-with-resource-buffer "language/rst/sphinx/index.rst"
     (should (string= (flycheck-locate-sphinx-source-directory)
-                     (flycheck-ert-resource-filename "checkers/rst-sphinx/")))))
+                     (flycheck-ert-resource-filename "language/rst/sphinx/")))))
 
 (flycheck-ert-def-checker-test rst rst nil
   (flycheck-ert-should-syntax-check
-   "checkers/rst.rst" 'rst-mode
+   "language/rst/errors.rst" 'rst-mode
    '(8 nil warning "Title underline too short." :checker rst)
    '(14 nil error "Unexpected section title." :checker rst)
    '(16 nil error "Unknown target name: \"restructuredtext\"." :checker rst)
@@ -4590,21 +4590,14 @@ Why not:
 
 (flycheck-ert-def-checker-test rst-sphinx rst nil
   (flycheck-ert-should-syntax-check
-   "checkers/rst-sphinx/index.rst" 'rst-mode
+   "language/rst/sphinx/index.rst" 'rst-mode
    '(2 nil warning "Title underline too short." :checker rst-sphinx)
    '(9 nil error "Unknown target name: \"cool\"." :checker rst-sphinx)
    '(9 nil warning "u'envvar' reference target not found: FOO"
        :checker rst-sphinx)))
 
-(flycheck-ert-def-checker-test rst-sphinx rst no-reference-warnings
-  (let ((flycheck-sphinx-warn-on-missing-references nil))
-    (flycheck-ert-should-syntax-check
-     "checkers/rst-sphinx/index.rst" 'rst-mode
-     '(2 nil warning "Title underline too short." :checker rst-sphinx)
-     '(9 nil error "Unknown target name: \"cool\"." :checker rst-sphinx))))
-
 (flycheck-ert-def-checker-test rst-sphinx rst not-outside-of-a-sphinx-project
-  (flycheck-ert-with-resource-buffer "checkers/rst.rst"
+  (flycheck-ert-with-resource-buffer "language/rst/errors.rst"
     (rst-mode)
     (should-not (flycheck-may-use-checker 'rst-sphinx))))
 
