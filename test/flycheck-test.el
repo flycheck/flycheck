@@ -4559,7 +4559,7 @@ Why not:
 
 (flycheck-ert-def-checker-test rpm-rpmlint rpm nil
   (flycheck-ert-should-syntax-check
-   "checkers/rpm-warning.spec" '(sh-mode rpm-spec-mode)
+   "language/rpm.spec" '(sh-mode rpm-spec-mode)
    '(1 nil warning "no-cleaning-of-buildroot %install" :checker rpm-rpmlint)
    '(1 nil warning "no-cleaning-of-buildroot %clean" :checker rpm-rpmlint)
    '(1 nil warning "no-buildroot-tag" :checker rpm-rpmlint)
