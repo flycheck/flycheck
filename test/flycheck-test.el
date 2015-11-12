@@ -4667,55 +4667,29 @@ Why not:
 
 (flycheck-ert-def-checker-test rust rust syntax-error
   (flycheck-ert-should-syntax-check
-   "checkers/rust-syntax-error.rs" 'rust-mode
+   "language/rust/src/syntax-error.rs" 'rust-mode
    '(4 5 error "unresolved name `bla`" :checker rust)))
-
-(flycheck-ert-def-checker-test rust rust test-syntax-error
-  (flycheck-ert-should-syntax-check
-   "checkers/rust-test-syntax-error.rs" 'rust-mode
-   '(5 5 error "unresolved name `bla`" :checker rust)))
 
 (flycheck-ert-def-checker-test rust rust multiline-error
   (flycheck-ert-should-syntax-check
-   "checkers/rust-multiple-error.rs" 'rust-mode
+   "language/rust/src/multiline-error.rs" 'rust-mode
    '(7 9 error "mismatched types:
  expected `u8`,\n    found `i8`
 (expected u8,\n    found i8)" :checker rust :id "E0308")
    '(7 9 info "run `rustc --explain E0308` to see a detailed explanation"
      :checker rust)))
 
-(flycheck-ert-def-checker-test rust rust test-check-tests-disabled
-  (let ((flycheck-rust-check-tests nil))
-    (flycheck-ert-should-syntax-check
-     "checkers/rust-test-syntax-error.rs" 'rust-mode)))
-
 (flycheck-ert-def-checker-test rust rust warning
   (flycheck-ert-should-syntax-check
-   "checkers/rust-warning.rs" 'rust-mode
+   "language/rust/src/warnings.rs" 'rust-mode
    '(3 1 warning "function is never used: `main`, #[warn(dead_code)] on by default"
        :checker rust)
    '(4 9 warning "unused variable: `x`, #[warn(unused_variables)] on by default"
        :checker rust)))
 
-(flycheck-ert-def-checker-test rust rust help
+(flycheck-ert-def-checker-test rust rust note-and-help
   (flycheck-ert-should-syntax-check
-   "checkers/rust-help.rs" 'rust-mode
-   '(3 1 error "not all control paths return a value"
-       :checker rust :id "E0269")
-   '(4 11 info "consider removing this semicolon:"
-       :checker rust)))
-
-(flycheck-ert-def-checker-test rust rust test-crate-type-bin
-  (let ((flycheck-rust-crate-type "bin")
-        (flycheck-rust-check-tests nil))
-    (flycheck-ert-should-syntax-check
-     "checkers/rust-warning.rs" 'rust-mode
-     '(4 9 warning "unused variable: `x`, #[warn(unused_variables)] on by default"
-         :checker rust))))
-
-(flycheck-ert-def-checker-test rust rust info
-  (flycheck-ert-should-syntax-check
-   "checkers/rust-info.rs" 'rust-mode
+   "language/rust/src/note-and-help.rs" 'rust-mode
    '(11 9 info "`x` moved here because it has type `NonPOD`, which is moved by default"
         :checker rust)
    '(11 9 info "use `ref` to override" :checker rust)
@@ -4723,14 +4697,14 @@ Why not:
 
 (flycheck-ert-def-checker-test rust rust crate-root-not-set
   (flycheck-ert-should-syntax-check
-   "checkers/rust_crate/foo.rs" 'rust-mode
-   '(1 5 error "unresolved import `super::bar`" :checker rust)))
+   "language/rust/src/importing.rs" 'rust-mode
+   '(1 5 error "unresolved import `super::imported`" :checker rust)))
 
 (flycheck-ert-def-checker-test rust rust crate-root
   (let ((flycheck-rust-crate-root (flycheck-ert-resource-filename
-                                   "checkers/rust_crate/main.rs")))
+                                   "language/rust/src/main.rs")))
     (flycheck-ert-should-syntax-check
-     "checkers/rust_crate/foo.rs" 'rust-mode
+     "language/rust/src/importing.rs" 'rust-mode
      '(3 9 warning "unused variable: `x`, #[warn(unused_variables)] on by default"
          :checker rust))))
 
