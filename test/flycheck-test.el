@@ -4669,11 +4669,11 @@ Why not:
 (flycheck-ert-def-checker-test rust-cargo rust warning
   (let ((flycheck-rust-crate-type "bin"))
     (flycheck-ert-should-syntax-check
-    "language/rust/src/warnings.rs" 'rust-mode
-    '(3 1 warning "function is never used: `main`, #[warn(dead_code)] on by default"
-        :checker rust-cargo)
-    '(4 9 warning "unused variable: `x`, #[warn(unused_variables)] on by default"
-        :checker rust-cargo))))
+     "language/rust/src/warnings.rs" 'rust-mode
+     '(3 1 warning "function is never used: `main`, #[warn(dead_code)] on by default"
+         :checker rust-cargo)
+     '(4 9 warning "unused variable: `x`, #[warn(unused_variables)] on by default"
+         :checker rust-cargo))))
 
 (flycheck-ert-def-checker-test rust rust syntax-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
