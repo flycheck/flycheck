@@ -2164,8 +2164,16 @@ Slots:
     ;; Update the error list if necessary
     (post-command-hook . flycheck-error-list-update-source)
     (post-command-hook . flycheck-error-list-highlight-errors)
-    ;; Show or hide error popups after commands
+    ;; Display errors.  Show errors at point after commands (like movements) and
+    ;; when Emacs gets focus.  Cancel the display timer when Emacs looses focus
+    ;; (as there's no need to display errors if the user can't see them), and
+    ;; hide the error buffer (for large error messages) if necessary.  Note that
+    ;; the focus hooks only work on Emacs 24.4 and upwards, but since undefined
+    ;; hooks are perfectly ok we don't need a version guard here.  They'll just
+    ;; not work silently.
     (post-command-hook . flycheck-display-error-at-point-soon)
+    (focus-in-hook     . flycheck-display-error-at-point-soon)
+    (focus-out-hook    . flycheck-cancel-error-display-error-at-point-timer)
     (post-command-hook . flycheck-hide-error-buffer)
     ;; Immediately show error popups when navigating to an error
     (next-error-hook . flycheck-display-error-at-point))
