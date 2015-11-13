@@ -108,7 +108,7 @@ and extension, as in `file-name-base'."
                                   (file-name-base filename)))))
     `(ert-deftest ,testname ()
        :tags '(style)
-       (skip-unless (version<= "24.4" emacs-version))
+       (skip-unless (version<= "24.5" emacs-version))
        (flycheck-ert-with-file-buffer
            (expand-file-name ,filename
                              flycheck-test-source-directory)
