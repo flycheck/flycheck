@@ -169,10 +169,11 @@ and extension, as in `file-name-base'."
 
 (ert-deftest flycheck--manual/all-options-are-documented ()
   :tags '(documentation)
-  (let ((options (sort (apply #'append
-                              (mapcar (lambda (c)
-                                        (flycheck-checker-get c 'option-vars))
-                                      flycheck-checkers))
+  (let ((options (sort (-uniq
+                        (apply #'append
+                               (mapcar (lambda (c)
+                                         (flycheck-checker-get c 'option-vars))
+                                       flycheck-checkers)))
                        #'string<))
         (filename (expand-file-name "doc/languages.texi"
                                     flycheck-test-source-directory))

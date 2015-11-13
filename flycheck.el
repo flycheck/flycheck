@@ -4805,6 +4805,15 @@ variable symbol for a syntax checker."
 
 
 ;;; Configuration files and options for command checkers
+(defun flycheck-register-config-file-var (var checkers)
+  "Register VAR as config file var for CHECKERS.
+
+CHECKERS is a single syntax checker or a list thereof."
+  (when (symbolp checkers)
+    (setq checkers (list checkers)))
+  (dolist (checker checkers)
+    (setf (flycheck-checker-get checker 'config-file-var) var)))
+
 ;;;###autoload
 (defmacro flycheck-def-config-file-var (symbol checker &optional file-name
                                                &rest custom-args)
@@ -4819,9 +4828,10 @@ the default value is nil.
 
 Use this together with the `config-file' form in the `:command'
 argument to `flycheck-define-checker'."
+  ;; FIXME: We should allow multiple config files per checker as well as
+  ;; multiple checkers per config file
   (declare (indent 3))
   `(progn
-     (put ',checker 'flycheck-config-file-var ',symbol)
      (defcustom ,symbol ,file-name
        ,(format "Configuration file for `%s'.
 
@@ -4838,7 +4848,8 @@ configuration file a buffer." checker)
        :type '(choice (const :tag "No configuration file" nil)
                       (string :tag "File name or path"))
        :group 'flycheck-config-files
-       ,@custom-args)))
+       ,@custom-args)
+     (flycheck-register-config-file-var ',symbol ',checker)))
 
 (defun flycheck-locate-config-file (filename checker)
   "Locate the configuration file FILENAME for CHECKER.
@@ -4895,15 +4906,27 @@ directory, or nil otherwise."
         flycheck-locate-config-file-ancestor-directories
         flycheck-locate-config-file-home))
 
+(defun flycheck-register-option-var (var checkers)
+  "Register an option VAR with CHECKERS.
+
+VAR is an option symbol, and CHECKERS a syntax checker symbol or
+a list thereof.  Register VAR with all CHECKERS so that it
+appears in the help output."
+  (when (symbolp checkers)
+    (setq checkers (list checkers)))
+  (dolist (checker checkers)
+    (cl-pushnew var (flycheck-checker-get checker 'option-vars))))
+
 ;;;###autoload
-(defmacro flycheck-def-option-var (symbol init-value checker docstring
+(defmacro flycheck-def-option-var (symbol init-value checkers docstring
                                           &rest custom-args)
   "Define SYMBOL as option variable with INIT-VALUE for CHECKER.
 
 SYMBOL is declared as customizable variable using `defcustom', to
-provide an option for the given syntax CHECKER.  INIT-VALUE is
-the initial value of the variable, and DOCSTRING is its
-docstring.  CUSTOM-ARGS are forwarded to `defcustom'.
+provide an option for the given syntax CHECKERS (a checker or a
+list of checkers).  INIT-VALUE is the initial value of the
+variable, and DOCSTRING is its docstring.  CUSTOM-ARGS are
+forwarded to `defcustom'.
 
 Use this together with the `option', `option-list' and
 `option-flag' forms in the `:command' argument to
@@ -4911,15 +4934,18 @@ Use this together with the `option', `option-list' and
   (declare (indent 3)
            (doc-string 4))
   `(progn
-     (let ((options (flycheck-checker-get ',checker 'option-vars)))
-       (unless (memq ',symbol options)
-         (put ',checker 'flycheck-option-vars (cons ',symbol options))))
      (defcustom ,symbol ,init-value
-       ,(format "%s
+       ,(concat docstring "
 
-This variable is an option for the syntax checker `%s'." docstring checker)
+This variable is an option for the following syntax checkers:
+
+"
+                (mapconcat (lambda (c) (format "  - `%s'" c))
+                           (if (symbolp checkers) (list checkers) checkers)
+                           "\n"))
        :group 'flycheck-options
-       ,@custom-args)))
+       ,@custom-args)
+     (flycheck-register-option-var ',symbol ',checkers)))
 
 (defun flycheck-option-int (value)
   "Convert an integral option VALUE to a string.
@@ -4949,22 +4975,22 @@ SEPARATOR is ignored in this case."
           (string-join value separator))
       (funcall filter value))))
 
-(defmacro flycheck-def-args-var (symbol checker &rest custom-args)
-  "Define SYMBOL as argument variable for CHECKER.
+(defmacro flycheck-def-args-var (symbol checkers &rest custom-args)
+  "Define SYMBOL as argument variable for CHECKERS.
 
 SYMBOL is declared as customizable, risky and buffer-local
 variable using `defcustom' to provide an option for arbitrary
-arguments for the given syntax CHECKER.  CUSTOM-ARGS is forwarded
-to `defcustom'.
+arguments for the given syntax CHECKERS (either a single checker
+or a list of checkers).  CUSTOM-ARGS is forwarded to `defcustom'.
 
 Use the `eval' form to splice this variable into the
 `:command'."
   (declare (indent 2))
-  `(flycheck-def-option-var ,symbol nil ,checker
-     ,(format "A list of additional arguments for `%s'.
+  `(flycheck-def-option-var ,symbol nil ,checkers
+     "A list of additional command line arguments.
 
 The value of this variable is a list of strings with additional
-command line arguments." checker)
+command line arguments."
      :risky t
      :type '(repeat (string :tag "Argument"))
      ,@custom-args))
@@ -6610,7 +6636,7 @@ See URL `http://handlebarsjs.com/'."
       (group (one-or-more (not (any space "\n")))))
   "Regular expression for a Haskell module name.")
 
-(flycheck-def-args-var flycheck-ghc-args haskell-ghc
+(flycheck-def-args-var flycheck-ghc-args (haskell-stack-ghc haskell-ghc)
   :package-version '(flycheck . "0.22"))
 
 (flycheck-def-option-var flycheck-ghc-no-user-package-database nil haskell-ghc
@@ -6632,7 +6658,8 @@ database is given to GHC via `-package-db'."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.16"))
 
-(flycheck-def-option-var flycheck-ghc-search-path nil haskell-ghc
+(flycheck-def-option-var flycheck-ghc-search-path nil
+                         (haskell-stack-ghc haskell-ghc)
   "Module search path for GHC.
 
 The value of this variable is a list of strings, where each
@@ -6642,7 +6669,8 @@ is added to the GHC search path via `-i'."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.16"))
 
-(flycheck-def-option-var flycheck-ghc-language-extensions nil haskell-ghc
+(flycheck-def-option-var flycheck-ghc-language-extensions nil
+                         (haskell-stack-ghc haskell-ghc)
   "Language extensions for GHC and Stack.
 
 The value of this variable is a list of strings, where each
@@ -7652,10 +7680,10 @@ See URL `http://jruby.org/'."
   :modes (enh-ruby-mode ruby-mode)
   :next-checkers ((warning . ruby-rubylint)))
 
-(flycheck-def-args-var flycheck-rust-args rust
+(flycheck-def-args-var flycheck-rust-args (rust-cargo rust)
   :package-version '(flycheck . "0.24"))
 
-(flycheck-def-option-var flycheck-rust-check-tests t rust
+(flycheck-def-option-var flycheck-rust-check-tests t (rust-cargo rust)
   "Whether to check test code in Rust.
 
 When non-nil, `rustc' is passed the `--test' flag, which will
@@ -7682,7 +7710,7 @@ if it is not modified, i.e. after it has been saved."
   :safe #'stringp)
 (make-variable-buffer-local 'flycheck-rust-crate-root)
 
-(flycheck-def-option-var flycheck-rust-crate-type "lib" rust
+(flycheck-def-option-var flycheck-rust-crate-type "lib" (rust-cargo rust)
   "The type of the Rust Crate to check.
 
 The value of this variable is a string denoting the crate type,
@@ -7692,7 +7720,7 @@ for the `--crate-type' flag."
   :package-version '("flycheck" . "0.20"))
 (make-variable-buffer-local 'flycheck-rust-crate-type)
 
-(flycheck-def-option-var flycheck-rust-library-path nil rust
+(flycheck-def-option-var flycheck-rust-library-path nil (rust-cargo rust)
   "A list of library directories for Rust.
 
 The value of this variable is a list of strings, where each
