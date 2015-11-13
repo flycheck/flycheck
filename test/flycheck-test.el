@@ -4668,7 +4668,9 @@ Why not:
 (flycheck-ert-def-checker-test rust rust syntax-error
   (flycheck-ert-should-syntax-check
    "language/rust/src/syntax-error.rs" 'rust-mode
-   '(4 5 error "unresolved name `bla`" :checker rust)))
+   '(4 5 error "unresolved name `bla`" :checker rust :id "E0425")
+   '(4 5 info "run `rustc --explain E0425` to see a detailed explanation"
+       :checker rust)))
 
 (flycheck-ert-def-checker-test rust rust multiline-error
   (flycheck-ert-should-syntax-check
@@ -4682,8 +4684,6 @@ Why not:
 (flycheck-ert-def-checker-test rust rust warning
   (flycheck-ert-should-syntax-check
    "language/rust/src/warnings.rs" 'rust-mode
-   '(3 1 warning "function is never used: `main`, #[warn(dead_code)] on by default"
-       :checker rust)
    '(4 9 warning "unused variable: `x`, #[warn(unused_variables)] on by default"
        :checker rust)))
 
@@ -4691,14 +4691,19 @@ Why not:
   (flycheck-ert-should-syntax-check
    "language/rust/src/note-and-help.rs" 'rust-mode
    '(11 9 info "`x` moved here because it has type `NonPOD`, which is moved by default"
+       :checker rust)
+   '(11 9 info "if you would like to borrow the value instead, use a `ref` binding as shown:"
         :checker rust)
-   '(11 9 info "use `ref` to override" :checker rust)
-   '(12 9 error "use of moved value: `x`" :checker rust :id "E0382")))
+   '(12 9 error "use of moved value: `x`" :checker rust :id "E0382")
+   '(12 9 info "run `rustc --explain E0382` to see a detailed explanation"
+        :checker rust)))
 
 (flycheck-ert-def-checker-test rust rust crate-root-not-set
   (flycheck-ert-should-syntax-check
    "language/rust/src/importing.rs" 'rust-mode
-   '(1 5 error "unresolved import `super::imported`" :checker rust)))
+   '(1 5 error "unresolved import `super::imported`" :checker rust :id "E0432")
+   '(1 5 info "run `rustc --explain E0432` to see a detailed explanation"
+       :checker rust)))
 
 (flycheck-ert-def-checker-test rust rust crate-root
   (let ((flycheck-rust-crate-root (flycheck-ert-resource-filename
