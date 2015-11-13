@@ -2151,24 +2151,24 @@ Slots:
 (defconst flycheck-hooks-alist
   '(
     ;; Handle events that may start automatic syntax checks
-    (after-save-hook                  . flycheck-handle-save)
-    (after-change-functions           . flycheck-handle-change)
+    (after-save-hook        . flycheck-handle-save)
+    (after-change-functions . flycheck-handle-change)
     ;; Handle events that may triggered pending deferred checks
     (window-configuration-change-hook . flycheck-perform-deferred-syntax-check)
     (post-command-hook                . flycheck-perform-deferred-syntax-check)
     ;; Teardown Flycheck whenever the buffer state is about to get lost, to
     ;; clean up temporary files and directories.
-    (kill-buffer-hook                 . flycheck-teardown)
-    (change-major-mode-hook           . flycheck-teardown)
-    (before-revert-hook               . flycheck-teardown)
+    (kill-buffer-hook       . flycheck-teardown)
+    (change-major-mode-hook . flycheck-teardown)
+    (before-revert-hook     . flycheck-teardown)
     ;; Update the error list if necessary
-    (post-command-hook                . flycheck-error-list-update-source)
-    (post-command-hook                . flycheck-error-list-highlight-errors)
+    (post-command-hook . flycheck-error-list-update-source)
+    (post-command-hook . flycheck-error-list-highlight-errors)
     ;; Show or hide error popups after commands
-    (post-command-hook                . flycheck-display-error-at-point-soon)
-    (post-command-hook                . flycheck-hide-error-buffer)
+    (post-command-hook . flycheck-display-error-at-point-soon)
+    (post-command-hook . flycheck-hide-error-buffer)
     ;; Immediately show error popups when navigating to an error
-    (next-error-hook                  . flycheck-display-error-at-point))
+    (next-error-hook . flycheck-display-error-at-point))
   "Hooks which Flycheck needs to hook in.
 
 The `car' of each pair is a hook variable, the `cdr' a function
