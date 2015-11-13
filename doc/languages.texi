@@ -691,7 +691,7 @@ following checkers for very basic checking:
 @itemize
 @item
 @flyc{ruby} (using the @uref{https://www.ruby-lang.org/,standard Ruby
-interpreter}),
+interpreter}), or
 @item
 @flyc{ruby-jruby} (using @uref{http://jruby.org/,JRuby})
 @end itemize
