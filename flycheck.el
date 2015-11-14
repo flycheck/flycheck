@@ -69,7 +69,6 @@
 
 (eval-when-compile
   (require 'let-alist)      ; `let-alist'
-  (require 'cl-lib)         ; `cl-defstruct'
   (require 'compile)        ; Compile Mode integration
   (require 'jka-compr)      ; For JKA workarounds in `flycheck-temp-file-system'
   (require 'pcase)          ; `pcase-dolist' (`pcase' itself is autoloaded)
@@ -78,6 +77,7 @@
 (require 'dash)
 
 (require 'subr-x nil 'no-error)  ; Additional utilities, Emacs 24.4 and upwards
+(require 'cl-lib)                ; `cl-defstruct' and CL utilities
 (require 'tabulated-list)        ; To list errors
 (require 'easymenu)              ; Flycheck Mode menu definition
 (require 'rx)                    ; Regexp fanciness in `flycheck-define-checker'
