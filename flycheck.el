@@ -7974,14 +7974,14 @@ See URL `http://sass-lang.com'."
           " of standard input"
           line-end)
    (warning line-start
-          "WARNING: "
-          (message (one-or-more not-newline)
-                   (zero-or-more "\n"
-                                 (one-or-more " ")
-                                 (one-or-more not-newline)))
-          (optional "\r") "\n" (one-or-more " ") "on line " line
-          " of an unknown file"
-          line-end))
+            "WARNING: "
+            (message (one-or-more not-newline)
+                     (zero-or-more "\n"
+                                   (one-or-more " ")
+                                   (one-or-more not-newline)))
+            (optional "\r") "\n" (one-or-more " ") "on line " line
+            " of an unknown file"
+            line-end))
   :modes scss-mode)
 
 (flycheck-define-checker sh-bash
