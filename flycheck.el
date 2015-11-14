@@ -7822,19 +7822,20 @@ See URL `http://sass-lang.com'."
   :command ("sass"
             "--cache-location" (eval (flycheck-sass-scss-cache-location))
             (option-flag "--compass" flycheck-sass-compass)
-            "-c" source)
+            "--check" "--stdin")
+  :standard-input t
   :error-patterns
   ((error line-start "Syntax error on line " line ": " (message))
-   (warning line-start "WARNING on line " line " of " (file-name)
-            ":" (optional "\r") "\n" (message) line-end)
    (error line-start
           (or "Syntax error: " "Error: ")
           (message (one-or-more not-newline)
                    (zero-or-more "\n"
                                  (one-or-more " ")
                                  (one-or-more not-newline)))
-          (optional "\r") "\n        on line " line " of " (file-name)
-          line-end))
+          (optional "\r") "\n        on line " line " of standard input"
+          line-end)
+   (warning line-start "WARNING on line " line " of standard input"
+            ":" (optional "\r") "\n" (message) line-end))
   :modes sass-mode)
 
 (flycheck-define-checker scala
