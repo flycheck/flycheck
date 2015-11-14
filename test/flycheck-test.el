@@ -3808,7 +3808,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
         :checker emacs-lisp-checkdoc)
    '(16 6 warning "message called with 0 arguments, but requires 1+"
         :checker emacs-lisp)
-   '(21 1 warning "the function `dummy-package-foo' is not known to be defined."
+   `(21 1 warning ,(flycheck-test-fix-quotes "the function ‘dummy-package-foo’ is not known to be defined.")
         :checker emacs-lisp )))
 
 (flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
