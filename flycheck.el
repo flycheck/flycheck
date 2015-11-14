@@ -8138,10 +8138,14 @@ See URL `https://github.com/purcell/sqlint'."
   "A TeX and LaTeX syntax and style checker using chktex.
 
 See URL `http://www.nongnu.org/chktex/'."
-  :command ("chktex" (config-file "-l" flycheck-chktexrc) "-v0" "-q" "-I"
-            source-inplace)
+  :command ("chktex"
+            (config-file "--localrc" flycheck-chktexrc)
+            ;; Compact error messages, and no version information, and execute
+            ;; \input statements
+            "--verbosity=0" "--quiet" "--inputfiles")
+  :standard-input t
   :error-patterns
-  ((warning line-start (file-name) ":" line ":" column ":"
+  ((warning line-start "stdin:" line ":" column ":"
             (id (one-or-more digit)) ":" (message) line-end))
   :error-filter
   (lambda (errors)
