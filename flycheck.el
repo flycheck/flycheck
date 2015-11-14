@@ -202,6 +202,7 @@ attention to case differences."
     jade
     javascript-jshint
     javascript-eslint
+    javascript-flow
     javascript-gjslint
     javascript-jscs
     javascript-standard
@@ -7014,6 +7015,23 @@ See URL `https://github.com/feross/standard' and URL
   :error-patterns
   ((error line-start "  <text>:" line ":" column ":" (message) line-end))
   :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode))
+
+(flycheck-define-checker javascript-flow
+    "A JavaScript syntax and style checker using Flow.
+
+See URL `http://flowtype.org/'."
+    :command ("flow" source-original)
+    :error-patterns
+    ((error line-start
+	    (file-name)
+	    ":"
+	    line
+	    ":"
+	    (minimal-match (one-or-more not-newline))
+	    ": "
+	    (message (minimal-match (and (one-or-more anything) "\n")))
+	    line-end))
+    :modes (js-mode js2-mode js3-mode))
 
 (flycheck-define-checker json-jsonlint
   "A JSON syntax and style checker using jsonlint.
