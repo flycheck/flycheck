@@ -4736,24 +4736,20 @@ Why not:
        :checker sass)))
 
 (flycheck-ert-def-checker-test scala scala nil
-  :expected-result '(or (satisfies (lambda (result)
-                                     (and (flycheck-ert-travis-ci-p)
-                                          (ert-test-failed-p result))))
-                        :passed)
   (flycheck-ert-should-syntax-check
-   "checkers/scala-syntax-error.scala" 'scala-mode
+   "language/scala/syntax-error.scala" 'scala-mode
    '(3 nil error "identifier expected but '{' found." :checker scala)))
 
 (flycheck-ert-def-checker-test scala-scalastyle scala error
   (let ((flycheck-scalastylerc "scalastyle.xml"))
     (flycheck-ert-should-syntax-check
-     "checkers/scala-scalastyle-style-error.scala" 'scala-mode
+     "language/scala/style-error.scala" 'scala-mode
      '(6 5 error "Don't use println" :checker scala-scalastyle))))
 
 (flycheck-ert-def-checker-test scala-scalastyle scala warning
   (let ((flycheck-scalastylerc "scalastyle.xml"))
     (flycheck-ert-should-syntax-check
-     "checkers/scala-scalastyle-style-warning.scala" 'scala-mode
+     "language/scala/style-warning.scala" 'scala-mode
      '(5 9 warning "Redundant braces after class definition"
          :checker scala-scalastyle))))
 
