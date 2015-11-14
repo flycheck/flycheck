@@ -2247,21 +2247,14 @@ nil otherwise."
           flycheck-checker
         (error "Flycheck cannot use %s in this buffer, type M-x flycheck-verify-setup for more details"
                flycheck-checker))
-    (let ((checkers flycheck-checkers))
-      (while (and checkers (not (flycheck-may-use-checker (car checkers))))
-        (setq checkers (cdr checkers)))
-      (car checkers))))
+    (seq-find #'flycheck-may-use-checker flycheck-checkers)))
 
 (defun flycheck-get-next-checker-for-buffer (checker)
   "Get the checker to run after CHECKER for the current buffer."
-  (let ((next-checkers (flycheck-checker-get checker 'next-checkers)))
-    (while (and next-checkers
-                (not (flycheck-may-use-next-checker (car next-checkers))))
-      (setq next-checkers (cdr next-checkers)))
-    (when next-checkers
-      (if (symbolp (car next-checkers))
-          (car next-checkers)
-        (cdar next-checkers)))))
+  (let ((next (seq-find #'flycheck-may-use-next-checker
+                        (flycheck-checker-get checker 'next-checkers))))
+    (when next
+      (if (symbolp next) next (cdr next)))))
 
 (defun flycheck-select-checker (checker)
   "Select CHECKER for the current buffer.
@@ -3440,12 +3433,11 @@ level."
 
 (defun flycheck-has-max-errors-p (errors level)
   "Check if there is no error in ERRORS more severe than LEVEL."
-  (let ((severity (flycheck-error-level-severity level))
-        found)
-    (while (and errors (not found))
-      (setq found (< severity (flycheck-error-level-severity
-                               (flycheck-error-level (pop errors))))))
-    (not found)))
+  (let ((severity (flycheck-error-level-severity level)))
+    (seq-every-p (lambda (e) (<= (flycheck-error-level-severity
+                                  (flycheck-error-level e))
+                                 severity))
+                 errors)))
 
 (defun flycheck-has-max-current-errors-p (level)
   "Check if there is no current error more severe than LEVEL."
@@ -3453,10 +3445,7 @@ level."
 
 (defun flycheck-has-errors-p (errors level)
   "Determine if there are any ERRORS with LEVEL."
-  (let (found)
-    (while (and errors (not found))
-      (setq found (eq (flycheck-error-level (pop errors)) level)))
-    found))
+  (seq-some (lambda (e) (eq (flycheck-error-level e) level)) errors))
 
 (defun flycheck-has-current-errors-p (&optional level)
   "Determine if the current buffer has errors with LEVEL.
