@@ -4731,9 +4731,14 @@ Why not:
 
 (flycheck-ert-def-checker-test sass sass nil
   (flycheck-ert-should-syntax-check
-   "language/sass.sass" 'sass-mode
+   "language/sass/error.sass" 'sass-mode
    '(5 nil error "Inconsistent indentation: 3 spaces were used for indentation, but the rest of the document was indented using 2 spaces."
        :checker sass)))
+
+(flycheck-ert-def-checker-test sass sass warning
+  (flycheck-ert-should-syntax-check
+   "language/sass/warning.sass" 'sass-mode
+   '(2 nil warning "this is deprecated" :checker sass)))
 
 (flycheck-ert-def-checker-test scala scala nil
   (flycheck-ert-should-syntax-check
@@ -4774,6 +4779,12 @@ Why not:
      "language/scss/error.scss" 'scss-mode
      '(3 nil error "Invalid CSS after \"...    c olor: red\": expected \"{\", was \";\""
          :checker scss))))
+
+(flycheck-ert-def-checker-test scss scss warning
+  (let ((flycheck-disabled-checkers '(scss-lint)))
+    (flycheck-ert-should-syntax-check
+     "language/scss/warning.scss" 'scss-mode
+     '(2 nil warning ".container is deprecated" :checker scss))))
 
 (flycheck-ert-def-checker-test sh-bash (sh sh-bash) nil
   (flycheck-ert-should-syntax-check

@@ -7825,17 +7825,24 @@ See URL `http://sass-lang.com'."
             "--check" "--stdin")
   :standard-input t
   :error-patterns
-  ((error line-start "Syntax error on line " line ": " (message))
-   (error line-start
+  ((error line-start
           (or "Syntax error: " "Error: ")
           (message (one-or-more not-newline)
                    (zero-or-more "\n"
                                  (one-or-more " ")
                                  (one-or-more not-newline)))
-          (optional "\r") "\n        on line " line " of standard input"
+          (optional "\r") "\n" (one-or-more " ") "on line " line
+          " of standard input"
           line-end)
-   (warning line-start "WARNING on line " line " of standard input"
-            ":" (optional "\r") "\n" (message) line-end))
+   (warning line-start
+            "WARNING: "
+            (message (one-or-more not-newline)
+                     (zero-or-more "\n"
+                                   (one-or-more " ")
+                                   (one-or-more not-newline)))
+            (optional "\r") "\n" (one-or-more " ") "on line " line
+            " of " (one-or-more not-newline)
+            line-end))
   :modes sass-mode)
 
 (flycheck-define-checker scala
@@ -7970,8 +7977,7 @@ See URL `http://sass-lang.com'."
             "--check" "--stdin")
   :standard-input t
   :error-patterns
-  ((error line-start "Syntax error on line " line ": " (message))
-   (error line-start
+  ((error line-start
           (or "Syntax error: " "Error: ")
           (message (one-or-more not-newline)
                    (zero-or-more "\n"
@@ -7980,8 +7986,15 @@ See URL `http://sass-lang.com'."
           (optional "\r") "\n" (one-or-more " ") "on line " line
           " of standard input"
           line-end)
-   (warning line-start "WARNING on line " line " of standard input"
-            ":" (optional "\r") "\n" (message) line-end))
+   (warning line-start
+          "WARNING: "
+          (message (one-or-more not-newline)
+                   (zero-or-more "\n"
+                                 (one-or-more " ")
+                                 (one-or-more not-newline)))
+          (optional "\r") "\n" (one-or-more " ") "on line " line
+          " of an unknown file"
+          line-end))
   :modes scss-mode)
 
 (flycheck-define-checker sh-bash
