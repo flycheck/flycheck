@@ -4788,32 +4788,32 @@ Why not:
 
 (flycheck-ert-def-checker-test sh-bash (sh sh-bash) nil
   (flycheck-ert-should-syntax-check
-   "checkers/sh-bash-syntax-error.bash" 'sh-mode
+   "language/sh/bash-syntax-error.bash" 'sh-mode
    '(5 nil error "syntax error near unexpected token `fi'" :checker sh-bash)
    '(5 nil error "`fi'" :checker sh-bash)))
 
 (flycheck-ert-def-checker-test sh-posix-dash (sh sh-posix) nil
   (flycheck-ert-should-syntax-check
-   "checkers/sh-posix-syntax-error.sh" 'sh-mode
+   "language/sh/posix-syntax-error.sh" 'sh-mode
    '(3 nil error "Syntax error: \"(\" unexpected" :checker sh-posix-dash)))
 
 (flycheck-ert-def-checker-test sh-posix-bash (sh sh-posix) nil
   (let ((flycheck-disabled-checkers '(sh-posix-dash)))
     (flycheck-ert-should-syntax-check
-     "checkers/sh-posix-syntax-error.sh" 'sh-mode
+     "language/sh/posix-syntax-error.sh" 'sh-mode
      '(3 nil error "syntax error near unexpected token `('"
          :checker sh-posix-bash)
      '(3 nil error "`cat <(echo blah)'" :checker sh-posix-bash))))
 
 (flycheck-ert-def-checker-test sh-zsh (sh sh-zsh) nil
   (flycheck-ert-should-syntax-check
-   "checkers/sh-zsh-syntax-error.zsh" 'sh-mode
+   "language/sh/zsh-syntax-error.zsh" 'sh-mode
    '(5 nil error "parse error near `fi'" :checker sh-zsh)))
 
 (flycheck-ert-def-checker-test sh-shellcheck sh nil
   :tags '(checkstyle-xml)
   (flycheck-ert-should-syntax-check
-   "checkers/sh-shellcheck.sh" 'sh-mode
+   "language/sh/shellcheck.sh" 'sh-mode
    '(2 5 warning "Tilde does not expand in quotes. Use $HOME."
        :checker sh-shellcheck :id "SC2088")
    '(3 7 error "Double quote array expansions to avoid re-splitting elements."
@@ -4822,18 +4822,6 @@ Why not:
        :checker sh-shellcheck :id "SC2155")
    '(4 11 info "Use $(..) instead of legacy `..`."
        :checker sh-shellcheck :id "SC2006")))
-
-(flycheck-ert-def-checker-test sh-shellcheck sh excluded-warning
-  :tags '(checkstyle-xml)
-  (let ((flycheck-shellcheck-excluded-warnings '("SC2088")))
-    (flycheck-ert-should-syntax-check
-     "checkers/sh-shellcheck.sh" 'sh-mode
-     '(3 7 error "Double quote array expansions to avoid re-splitting elements."
-         :checker sh-shellcheck :id "SC2068")
-     '(4 8 warning "Declare and assign separately to avoid masking return values."
-         :checker sh-shellcheck :id "SC2155")
-     '(4 11 info "Use $(..) instead of legacy `..`."
-         :checker sh-shellcheck :id "SC2006"))))
 
 (flycheck-ert-def-checker-test slim slim nil
   (let* ((slim-version (cadr (split-string (car (process-lines "slimrb" "-v")))))
