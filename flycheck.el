@@ -5033,7 +5033,8 @@ shell execution."
                               (flycheck-checker-arguments checker))))
          (command (mapconcat
                    #'shell-quote-argument
-                   (cons (flycheck-checker-executable checker) args)
+                   (funcall flycheck-command-wrapper-function
+                            (cons (flycheck-checker-executable checker) args))
                    " ")))
     (if (flycheck-checker-get checker 'standard-input)
         ;; If the syntax checker expects the source from standard input add an
