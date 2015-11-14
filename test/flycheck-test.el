@@ -4824,12 +4824,9 @@ Why not:
        :checker sh-shellcheck :id "SC2006")))
 
 (flycheck-ert-def-checker-test slim slim nil
-  (let* ((slim-version (cadr (split-string (car (process-lines "slimrb" "-v")))))
-         ;; Old Slim compilers do not report column information
-         (column (if (version<= "1.3.1" slim-version) 1 nil)))
-    (flycheck-ert-should-syntax-check
-     "checkers/slim-error.slim" 'slim-mode
-     `(2 ,column error "Unexpected indentation" :checker slim))))
+  (flycheck-ert-should-syntax-check
+   "language/slim.slim" 'slim-mode
+   `(2 1 error "Unexpected indentation" :checker slim)))
 
 (flycheck-ert-def-checker-test sqllint sql nil
   (flycheck-ert-should-syntax-check

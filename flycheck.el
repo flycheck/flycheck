@@ -8101,11 +8101,12 @@ See URL `https://github.com/koalaman/shellcheck/'."
   "A Slim syntax checker using the Slim compiler.
 
 See URL `http://slim-lang.com'."
-  :command ("slimrb" "-c" source)
+  :command ("slimrb" "--compile")
+  :standard-input t
   :error-patterns
   ((error line-start
           "Slim::Parser::SyntaxError:" (message) (optional "\r") "\n  "
-          (file-name) ", Line " line (optional ", Column " column)
+          "STDIN, Line " line (optional ", Column " column)
           line-end))
   :modes slim-mode)
 
