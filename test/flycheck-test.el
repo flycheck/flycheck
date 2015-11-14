@@ -4830,7 +4830,7 @@ Why not:
 
 (flycheck-ert-def-checker-test sqllint sql nil
   (flycheck-ert-should-syntax-check
-   "checkers/sql-syntax-error.sql" 'sql-mode
+   "language/sql.sql" 'sql-mode
    `(1 15 error "unterminated quoted string at or near \"';\n  \" (scan.l:1087)"
        :checker sql-sqlint)))
 
