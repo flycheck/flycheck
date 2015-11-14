@@ -160,6 +160,8 @@ supported.
 Flycheck works best on Unix-like operating systems.  It is extensively
 tested on Linux and OS X.
 
+@cindex Windows
+
 @anchor{windows-support}@strong{Warning:} Flycheck tries to maintain
 compatibility with Windows as well, and generally works well on
 Windows. Pull requests which fix or improve Windows compatibility are
