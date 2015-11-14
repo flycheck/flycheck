@@ -4873,14 +4873,14 @@ Why not:
 
 (flycheck-ert-def-checker-test xml-xmlstarlet xml nil
   (flycheck-ert-should-syntax-check
-   "checkers/xml-syntax-error.xml" 'nxml-mode
+   "language/xml.xml" 'nxml-mode
    '(4 10 error "Opening and ending tag mismatch: spam line 3 and with"
        :checker xml-xmlstarlet)))
 
 (flycheck-ert-def-checker-test xml-xmllint xml nil
   (let ((flycheck-disabled-checkers '(xml-xmlstarlet)))
     (flycheck-ert-should-syntax-check
-     "checkers/xml-syntax-error.xml" 'nxml-mode
+     "language/xml.xml" 'nxml-mode
      '(4 nil error "parser error : Opening and ending tag mismatch: spam line 3 and with"
          :checker xml-xmllint)
      '(5 nil error "parser error : Extra content at the end of the document"

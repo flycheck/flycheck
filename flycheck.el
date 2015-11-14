@@ -8206,9 +8206,12 @@ See URL `http://www.veripool.org/wiki/verilator'."
   "A XML syntax checker and validator using the xmlstarlet utility.
 
 See URL `http://xmlstar.sourceforge.net/'."
-  :command ("xmlstarlet" "val" "-e" "-q" source)
+  ;; Validate standard input with verbose error messages, and do not dump
+  ;; contents to standard output
+  :command ("xmlstarlet" "val" "--err" "--quiet" "-")
+  :standard-input t
   :error-patterns
-  ((error line-start (file-name) ":" line "." column ": " (message) line-end))
+  ((error line-start "-:" line "." column ": " (message) line-end))
   :modes (xml-mode nxml-mode))
 
 (flycheck-define-checker xml-xmllint
@@ -8216,9 +8219,10 @@ See URL `http://xmlstar.sourceforge.net/'."
 
 The xmllint is part of libxml2, see URL
 `http://www.xmlsoft.org/'."
-  :command ("xmllint" "--noout" source)
+  :command ("xmllint" "--noout" "-")
+  :standard-input t
   :error-patterns
-  ((error line-start (file-name) ":" line ": " (message) line-end))
+  ((error line-start "-:" line ": " (message) line-end))
   :modes (xml-mode nxml-mode))
 
 (flycheck-define-checker yaml-jsyaml
