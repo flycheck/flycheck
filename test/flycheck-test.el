@@ -4861,13 +4861,13 @@ Why not:
 
 (flycheck-ert-def-checker-test verilog-verilator verilog error
   (flycheck-ert-should-syntax-check
-   "checkers/verilog_verilator_error.v" 'verilog-mode
+   "language/verilog/verilator_error.v" 'verilog-mode
    '(4 nil error "Unsupported: $fopen with multichannel descriptor.  Add ,\"w\" as second argument to open a file descriptor."
        :checker verilog-verilator)))
 
 (flycheck-ert-def-checker-test verilog-verilator verilog warning
   (flycheck-ert-should-syntax-check
-   "checkers/verilog_verilator_warning.v" 'verilog-mode
+   "language/verilog/verilator_warning.v" 'verilog-mode
    '(2 nil warning "Signal is not driven, nor used: val"
        :checker verilog-verilator)))
 
