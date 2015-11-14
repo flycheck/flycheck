@@ -9,7 +9,7 @@
 ;; URL: https://www.flycheck.org
 ;; Keywords: convenience, languages, tools
 ;; Version: 0.25-cvs
-;; Package-Requires: ((dash "2.4.0") (pkg-info "0.4") (let-alist "1.0.1") (cl-lib "0.3") (emacs "24.3"))
+;; Package-Requires: ((dash "2.4.0") (pkg-info "0.4") (let-alist "1.0.1") (cl-lib "0.3") (seq "1.11") (emacs "24.3"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -76,6 +76,7 @@
 
 (require 'dash)
 
+(require 'seq)                   ; Sequence functions
 (require 'subr-x nil 'no-error)  ; Additional utilities, Emacs 24.4 and upwards
 (require 'cl-lib)                ; `cl-defstruct' and CL utilities
 (require 'tabulated-list)        ; To list errors
@@ -1049,11 +1050,11 @@ to a number and return it.  Otherwise return nil."
 
 (defun flycheck-string-list-p (obj)
   "Determine if OBJ is a list of strings."
-  (and (listp obj) (-all? #'stringp obj)))
+  (and (listp obj) (seq-every-p #'stringp obj)))
 
 (defun flycheck-symbol-list-p (obj)
   "Determine if OBJ is a list of symbols."
-  (and (listp obj) (-all? #'symbolp obj)))
+  (and (listp obj) (seq-every-p #'symbolp obj)))
 
 (defun flycheck-same-files-p (file-a file-b)
   "Determine whether FILE-A and FILE-B refer to the same file."
@@ -1163,7 +1164,7 @@ spliced into the resulting list."
          (lambda (item)
            (let ((result (funcall prepend-fn option item)))
              (cond
-              ((and (listp result) (-all? #'stringp result)) result)
+              ((and (listp result) (seq-every-p #'stringp result)) result)
               ((stringp result) (list result))
               (t (error "Invalid result type for option: %S" result)))))))
     (apply #'append (mapcar prepend items))))
@@ -1393,7 +1394,7 @@ to the default levels."
   (let* ((levels (mapcar #'flycheck-error-level
                          (flycheck-error-list-current-errors)))
          (levels-with-defaults (append '(info warning error) levels))
-         (uniq-levels (-uniq levels-with-defaults))
+         (uniq-levels (seq-uniq levels-with-defaults))
          (level (flycheck-completing-read prompt uniq-levels nil)))
     (and (stringp level) (intern level))))
 
@@ -1947,10 +1948,10 @@ into the verification results."
                  :face (cdr message-and-face))
                 results))))
     (let* ((label-length
-            (-max (mapcar
-                   (lambda (res)
-                     (length (flycheck-verification-result-label res)))
-                   results)))
+            (seq-max (mapcar
+                      (lambda (res)
+                        (length (flycheck-verification-result-label res)))
+                      results)))
            (message-column (+ 8 label-length)))
       (dolist (result results)
         (princ "    - ")
@@ -2037,8 +2038,8 @@ possible problems are shown."
                               'face 'bold))
           (flycheck--verify-princ-checker selected-checker buffer 'with-mm))
 
-        (let ((unregistered-checkers (-difference (flycheck-defined-checkers)
-                                                  flycheck-checkers)))
+        (let ((unregistered-checkers (seq-difference (flycheck-defined-checkers)
+                                                     flycheck-checkers)))
           (when unregistered-checkers
             (insert (propertize "\nThe following syntax checkers are not registered:\n\n"
                                 'face '(bold warning)))
@@ -3001,7 +3002,7 @@ otherwise."
 
 Return a list of all errors that are relevant for their
 corresponding buffer."
-  (-filter #'flycheck-relevant-error-p errors))
+  (seq-filter #'flycheck-relevant-error-p errors))
 
 
 ;;; Status reporting for the current buffer
@@ -3523,7 +3524,7 @@ overlays."
 
 (defun flycheck-filter-overlays (overlays)
   "Get all Flycheck overlays from OVERLAYS."
-  (-filter (lambda (o) (overlay-get o 'flycheck-overlay)) overlays))
+  (seq-filter (lambda (o) (overlay-get o 'flycheck-overlay)) overlays))
 
 (defun flycheck-overlays-at (pos)
   "Get all Flycheck overlays at POS."
@@ -3788,9 +3789,9 @@ Return a list with the contents of the table cell."
                                         (padding (plist-get props :pad-right)))
                              (cons name (+ width (or padding 1)))))
                          tabulated-list-format))
-         (before-msg (-take-while (lambda (fmt)
-                                    (not (string= (car fmt) "Message")))
-                                  widths)))
+         (before-msg (seq-take-while (lambda (fmt)
+                                       (not (string= (car fmt) "Message")))
+                                     widths)))
     (apply #'+ tabulated-list-padding (mapcar #'cdr before-msg))))
 
 (defun flycheck-flush-multiline-message (msg)
@@ -3930,10 +3931,10 @@ LEVEL is either an error level symbol, or nil, to remove the filter."
   "Filter ERRORS according to `flycheck-error-list-minimum-level'."
   (-if-let* ((min-level flycheck-error-list-minimum-level)
              (min-severity (flycheck-error-level-severity min-level)))
-      (-filter (lambda (err) (>= (flycheck-error-level-severity
-                                  (flycheck-error-level err))
-                                 min-severity))
-               errors)
+      (seq-filter (lambda (err) (>= (flycheck-error-level-severity
+                                     (flycheck-error-level err))
+                                    min-severity))
+                  errors)
     errors))
 
 (defun flycheck-error-list-goto-error (&optional pos)
@@ -4540,19 +4541,19 @@ are substituted within the body of cells!"
        (flycheck-prepend-with-option option-name (list value) prepend-fn)))
     (`(option-list ,option-name ,variable)
      (let ((value (symbol-value variable)))
-       (unless (and (listp value) (-all? #'stringp value))
+       (unless (and (listp value) (seq-every-p #'stringp value))
          (error "Value %S of %S for option %S is not a list of strings"
                 value variable option-name))
        (flycheck-prepend-with-option option-name value)))
     (`(option-list ,option-name ,variable ,prepend-fn)
      (let ((value (symbol-value variable)))
-       (unless (and (listp value) (-all? #'stringp value))
+       (unless (and (listp value) (seq-every-p #'stringp value))
          (error "Value %S of %S for option %S is not a list of strings"
                 value variable option-name))
        (flycheck-prepend-with-option option-name value prepend-fn)))
     (`(option-list ,option-name ,variable ,prepend-fn ,filter)
      (let ((value (delq nil (mapcar filter (symbol-value variable)))))
-       (unless (and (listp value) (-all? #'stringp value))
+       (unless (and (listp value) (seq-every-p #'stringp value))
          (error "Value %S of %S for option %S is not a list of strings"
                 value variable option-name))
        (flycheck-prepend-with-option option-name value prepend-fn)))
@@ -4562,7 +4563,7 @@ are substituted within the body of cells!"
     (`(eval ,form)
      (let ((result (eval form)))
        (cond
-        ((and (listp result) (-all? #'stringp result)) result)
+        ((and (listp result) (seq-every-p #'stringp result)) result)
         ((stringp result) (list result))
         (t (error "Invalid result from evaluation of %S: %S" form result)))))
     (_ (error "Unsupported argument %S" arg))))
@@ -4640,8 +4641,8 @@ symbols in the command."
   "Print additional documentation for a command CHECKER."
   (let ((executable (flycheck-checker-default-executable checker))
         (config-file-var (flycheck-checker-get checker 'config-file-var))
-        (option-vars (-sort #'string<
-                            (flycheck-checker-get checker 'option-vars))))
+        (option-vars (seq-sort #'string<
+                               (flycheck-checker-get checker 'option-vars))))
     (princ "\n")
 
     (let ((doc-start (with-current-buffer standard-output (point-max))))
@@ -5098,9 +5099,9 @@ ERR is in BUFFER-FILES, replace it with the return value of the
 function `buffer-file-name'."
   (flycheck-error-with-buffer err
     (-when-let (filename (flycheck-error-filename err))
-      (when (-any? (apply-partially #'flycheck-same-files-p
-                                    (expand-file-name filename))
-                   buffer-files)
+      (when (seq-some (apply-partially #'flycheck-same-files-p
+                                       (expand-file-name filename))
+                      buffer-files)
         (setf (flycheck-error-filename err) (buffer-file-name)))))
   err)
 
