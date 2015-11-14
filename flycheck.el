@@ -8229,7 +8229,8 @@ The xmllint is part of libxml2, see URL
   "A YAML syntax checker using JS-YAML.
 
 See URL `https://github.com/nodeca/js-yaml'."
-  :command ("js-yaml" source)
+  :command ("js-yaml")
+  :standard-input t
   :error-patterns
   ((error line-start
           (or "JS-YAML" "YAMLException") ": "

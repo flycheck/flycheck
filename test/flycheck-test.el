@@ -4888,7 +4888,7 @@ Why not:
 
 (flycheck-ert-def-checker-test yaml-jsyaml yaml nil
   (flycheck-ert-should-syntax-check
-   "checkers/yaml-syntax-error.yaml" 'yaml-mode
+   "language/yaml.yaml" 'yaml-mode
    '(4 5 error "bad indentation of a mapping entry"
        :checker yaml-jsyaml)))
 
@@ -4912,7 +4912,7 @@ Why not:
                 :checker yaml-ruby)))))
     (let ((flycheck-disabled-checkers '(yaml-jsyaml)))
       (flycheck-ert-should-syntax-check
-       "checkers/yaml-syntax-error.yaml" 'yaml-mode expected-error))))
+       "language/yaml.yaml" 'yaml-mode expected-error))))
 
 (flycheck-ert-initialize flycheck-test-resources-directory)
 
