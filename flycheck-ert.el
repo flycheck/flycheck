@@ -188,34 +188,9 @@ should use to lookup resource files."
 
 
 ;;; Environment and version information
-
-(defconst flycheck-ert-user-error-type
-  (if (version< emacs-version "24.2")
-      'error
-    'user-error)
-  "The `user-error' type used by Flycheck.")
-
-(defun flycheck-ert-travis-ci-p ()
-  "Determine whether we are running on Travis CI."
-  (string= (getenv "TRAVIS") "true"))
-
 (defun flycheck-ert-check-gpg ()
   "Check whether GPG is available."
   (or (epg-check-configuration (epg-configuration)) t))
-
-(defun flycheck-ert-extract-version-command (re executable &rest args)
-  "Use RE to extract the version from EXECUTABLE with ARGS.
-
-Run EXECUTABLE with ARGS, catch the output, and apply RE to find
-the version number.  Return the text captured by the first group
-in RE, or nil, if EXECUTABLE is missing, or if RE failed to
-match."
-  (-when-let (executable (executable-find executable))
-    (with-temp-buffer
-      (apply #'call-process executable nil t nil args)
-      (goto-char (point-min))
-      (when (re-search-forward re nil 'no-error)
-        (match-string 1)))))
 
 
 ;;; Test case definitions

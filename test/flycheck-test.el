@@ -2425,15 +2425,13 @@ evaluating BODY."
   :tags '(navigation)
   (flycheck-test-with-nav-buffer nil
     (goto-char (point-max))
-    (let ((err (should-error (flycheck-next-error)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-next-error) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-next-error/errors-when-moving-too-far ()
   :tags '(navigation)
   (flycheck-test-with-nav-buffer nil
-    (let ((err (should-error (flycheck-next-error 4)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-next-error 4) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-next-error/navigate-by-two-errors ()
@@ -2464,15 +2462,13 @@ evaluating BODY."
     (goto-char (point-min))
     (flycheck-next-error)
     (should (flycheck-ert-at-nth-error 1))
-    (let ((err (should-error (flycheck-next-error)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-next-error) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-previous-error/errors-before-first-error ()
   :tags '(navigation)
   (flycheck-test-with-nav-buffer nil
-    (let ((err (should-error (flycheck-previous-error)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-previous-error) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-previous-error/goes-to-last-error ()
@@ -2499,8 +2495,7 @@ evaluating BODY."
   :tags '(navigation)
   (flycheck-test-with-nav-buffer nil
     (goto-char (point-max))
-    (let ((err (should-error (flycheck-previous-error 4)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-previous-error 4) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-first-error/goes-to-first-error ()
@@ -2535,38 +2530,33 @@ evaluating BODY."
   :tags '(navigation)
   (flycheck-test-with-nav-buffer 'error
     (flycheck-next-error)
-    (let ((err (should-error (flycheck-next-error)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-next-error) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-next-error/over-errors/errors-beyond-last-error ()
   :tags '(navigation)
   (flycheck-test-with-nav-buffer 'error
     (goto-char (point-max))
-    (let ((err (should-error (flycheck-next-error)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-next-error) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-next-error/over-errors/errors-when-moving-too-far ()
   :tags '(navigation)
   (flycheck-test-with-nav-buffer 'error
-    (let ((err (should-error (flycheck-next-error 4)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-next-error 4) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-next-error/over-errors/navigate-by-two-errors ()
   :tags '(navigation)
   (flycheck-test-with-nav-buffer 'error
-    (let ((err (should-error (flycheck-next-error 2)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-next-error 2) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-next-error/over-errors/navigate-back-by-two-errors ()
   :tags '(navigation)
   (flycheck-test-with-nav-buffer 'error
     (goto-char (point-max))
-    (let ((err (should-error (flycheck-next-error -2)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-next-error -2) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-next-error/over-errors/reset-navigates-to-first-error ()
@@ -2582,15 +2572,13 @@ evaluating BODY."
     (re-search-forward "(defun .*")
     (narrow-to-defun)
     (goto-char (point-min))
-    (let ((err (should-error (flycheck-next-error)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-next-error) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-previous-error/over-errors/errors-before-first-error ()
   :tags '(navigation)
   (flycheck-test-with-nav-buffer 'error
-    (let ((err (should-error (flycheck-previous-error)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-previous-error) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-previous-error/over-errors/goes-to-last-error ()
@@ -2604,23 +2592,20 @@ evaluating BODY."
   :tags '(navigation)
   (flycheck-test-with-nav-buffer 'error
     (goto-char (point-max))
-    (let ((err (should-error (flycheck-previous-error -2)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-previous-error -2) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-previous-error/over-errors/navigate-back-by-two-errors ()
   :tags '(navigation)
   (flycheck-test-with-nav-buffer 'error
-    (let ((err (should-error (flycheck-previous-error -2)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-previous-error -2) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-previous-error/over-errors/errors-when-moving-too-far ()
   :tags '(navigation)
   (flycheck-test-with-nav-buffer 'error
     (goto-char (point-max))
-    (let ((err (should-error (flycheck-previous-error 4)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-previous-error 4) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-first-error/over-errors/goes-to-first-error ()
@@ -2642,8 +2627,7 @@ evaluating BODY."
   :tags '(navigation)
   (flycheck-test-with-nav-buffer 'error
     (goto-char (point-max))
-    (let ((err (should-error (flycheck-first-error 2)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-first-error 2) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-next-error/over-warnings/goes-to-first-error ()
@@ -2663,22 +2647,19 @@ evaluating BODY."
   :tags '(navigation)
   (flycheck-test-with-nav-buffer 'warning
     (goto-char (point-max))
-    (let ((err (should-error (flycheck-next-error)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-next-error) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-next-error/over-warnings/errors-when-moving-too-far ()
   :tags '(navigation)
   (flycheck-test-with-nav-buffer 'warning
-    (let ((err (should-error (flycheck-next-error 4)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-next-error 4) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-next-error/over-warnings/navigate-by-two-errors ()
   :tags '(navigation)
   (flycheck-test-with-nav-buffer 'warning
-    (let ((err (should-error (flycheck-next-error 4)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-next-error 4) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-next-error/over-warnings/navigate-back-by-two-errors ()
@@ -2703,15 +2684,13 @@ evaluating BODY."
     (goto-char (point-min))
     (flycheck-next-error)
     (should (flycheck-ert-at-nth-error 1))
-    (let ((err (should-error (flycheck-next-error)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-next-error) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-previous-error/over-warnings/errors-before-first-error ()
   :tags '(navigation)
   (flycheck-test-with-nav-buffer 'warning
-    (let ((err (should-error (flycheck-previous-error)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-previous-error) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-previous-error/over-warnings/goes-to-last-error ()
@@ -2738,8 +2717,7 @@ evaluating BODY."
   :tags '(navigation)
   (flycheck-test-with-nav-buffer 'warning
     (goto-char (point-max))
-    (let ((err (should-error (flycheck-previous-error 4)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-previous-error 4) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-first-error/over-warnings/goes-to-first-error ()
@@ -2781,15 +2759,13 @@ evaluating BODY."
   :tags '(navigation)
   (flycheck-test-with-nav-buffer 'info
     (goto-char (point-max))
-    (let ((err (should-error (flycheck-next-error)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-next-error) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-next-error/over-informational/errors-when-moving-too-far ()
   :tags '(navigation)
   (flycheck-test-with-nav-buffer 'info
-    (let ((err (should-error (flycheck-next-error 4)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-next-error 4) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-next-error/over-informational/navigate-by-two-errors ()
@@ -2820,15 +2796,13 @@ evaluating BODY."
     (goto-char (point-min))
     (flycheck-next-error)
     (should (flycheck-ert-at-nth-error 1))
-    (let ((err (should-error (flycheck-next-error)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-next-error) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-previous-error/over-informational/errors-before-first-error ()
   :tags '(navigation)
   (flycheck-test-with-nav-buffer 'info
-    (let ((err (should-error (flycheck-previous-error)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-previous-error) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-previous-error/over-informational/goes-to-last-error ()
@@ -2855,8 +2829,7 @@ evaluating BODY."
   :tags '(navigation)
   (flycheck-test-with-nav-buffer 'info
     (goto-char (point-max))
-    (let ((err (should-error (flycheck-previous-error 4)
-                             :type flycheck-ert-user-error-type)))
+    (let ((err (should-error (flycheck-previous-error 4) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
 (ert-deftest flycheck-first-error/over-informational/goes-to-first-error ()
@@ -3282,8 +3255,7 @@ evaluating BODY."
   (let ((file-name (flycheck-ert-resource-filename "no-such-file")))
     (should-not (file-exists-p file-name))
     (let ((err (should-error (flycheck-set-checker-executable
-                              'emacs-lisp file-name)
-                             :type flycheck-ert-user-error-type)))
+                              'emacs-lisp file-name) :type 'user-error)))
       (should (string= (cadr err) (format "%s is no executable" file-name))))))
 
 (ert-deftest flycheck-set-checker-executable/file-not-executable ()
@@ -3292,8 +3264,7 @@ evaluating BODY."
     (should (file-exists-p file-name))
     (should-not (file-executable-p file-name))
     (let ((err (should-error (flycheck-set-checker-executable
-                              'emacs-lisp file-name)
-                             :type flycheck-ert-user-error-type)))
+                              'emacs-lisp file-name) :type 'user-error)))
       (should (string= (cadr err) (format "%s is no executable" file-name))))))
 
 
