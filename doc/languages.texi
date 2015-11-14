@@ -632,13 +632,6 @@ selects the linters to use.
 
 @end itemize
 
-@flyclanguage{Racket}
-
-@itemize
-@item
-@flyc{racket} (@uref{http://racket-lang.org/,Racket})
-@end itemize
-
 @flyclanguage{RPM Spec}
 
 @itemize
