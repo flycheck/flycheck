@@ -27,7 +27,7 @@ master (in development)
     executables [GH-752]
   - Add `flycheck-hlint-args` to pass additional arguments to hlint [GH-713]
     [GH-762]
-  - Add `flycheck-go-build-tags` and `flycheck-go-install-depds` to specify tags
+  - Add `flycheck-go-build-tags` and `flycheck-go-install-deps` to specify tags
     and automatically install dependencies with `go build` [GH-674]
   - Add :standard-input property to syntax checkers to read source from standard
     input [GH-673] [GH-728]
