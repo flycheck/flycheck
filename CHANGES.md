@@ -5,6 +5,8 @@ master (in development)
 
   - `scala-scalastyle` now expects a `scalastyle` executable in `exec-path`
     [GH-763]
+  - Drop support for legacy Ruby YAML implementations prior to Ruby 1.9.3 in
+    `ruby-yaml`
 
 - New syntax checkers:
 

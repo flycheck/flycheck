@@ -8252,12 +8252,7 @@ See URL `http://www.ruby-doc.org/stdlib-2.0.0/libdoc/yaml/rdoc/YAML.html'."
  end")
   :standard-input t
   :error-patterns
-  (;; Syck (Ruby <= 1.9.2, unmaintained)
-   (error line-start
-          "stdin:syntax error on line " line ", col " column ": `" (message) "'"
-          line-end)
-   ;; Psych (Ruby >= 1.9.3)
-   (error line-start "stdin:" (zero-or-more not-newline) ":" (message)
+  ((error line-start "stdin:" (zero-or-more not-newline) ":" (message)
           "at line " line " column " column  line-end))
   :modes yaml-mode)
 

@@ -4893,26 +4893,11 @@ Why not:
        :checker yaml-jsyaml)))
 
 (flycheck-ert-def-checker-test yaml-ruby yaml nil
-  (let* ((ruby-version (car (process-lines "ruby" "-e" "puts RUBY_VERSION")))
-         (psych-version (when (version<= "1.9.3" ruby-version)
-                          (car (process-lines "ruby" "-rpsych"
-                                              "-e" "puts Psych::VERSION"))))
-         (expected-error
-          (cond
-           ;; Syck parser in Ruby 1.9.2 and lower
-           ((version< ruby-version "1.9.3")
-            '(3 5 error "a1: bar" :checker yaml-ruby))
-           ;; Psych parser in Ruby 1.9.3 and up.  The Psych errors apparently
-           ;; vary between different versions, so we have to adapt.  Ruby, you
-           ;; suck.
-           ((version< psych-version "1.2.2")
-            '(3 4 error "couldn't parse YAML" :checker yaml-ruby))
-           (:else
-            '(4 5 error "mapping values are not allowed in this context"
-                :checker yaml-ruby)))))
-    (let ((flycheck-disabled-checkers '(yaml-jsyaml)))
-      (flycheck-ert-should-syntax-check
-       "language/yaml.yaml" 'yaml-mode expected-error))))
+  (let ((flycheck-disabled-checkers '(yaml-jsyaml)))
+    (flycheck-ert-should-syntax-check
+     "language/yaml.yaml" 'yaml-mode
+     '(4 5 error "mapping values are not allowed in this context"
+         :checker yaml-ruby))))
 
 (flycheck-ert-initialize flycheck-test-resources-directory)
 
