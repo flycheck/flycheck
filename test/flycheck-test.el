@@ -4731,20 +4731,9 @@ Why not:
 
 (flycheck-ert-def-checker-test sass sass nil
   (flycheck-ert-should-syntax-check
-   "checkers/sass-error.sass" 'sass-mode
+   "language/sass.sass" 'sass-mode
    '(5 nil error "Inconsistent indentation: 3 spaces were used for indentation, but the rest of the document was indented using 2 spaces."
        :checker sass)))
-
-(flycheck-ert-def-checker-test sass sass import-error
-  (flycheck-ert-should-syntax-check
-   "checkers/sass-compass.sass" 'sass-mode
-   `(2 nil error "File to import not found or unreadable: compass/css3."
-       :checker sass)))
-
-(flycheck-ert-def-checker-test sass sass compass
-  (let ((flycheck-sass-compass t))
-    (flycheck-ert-should-syntax-check
-     "checkers/sass-compass.sass" 'sass-mode)))
 
 (flycheck-ert-def-checker-test scala scala nil
   :expected-result '(or (satisfies (lambda (result)
