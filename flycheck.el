@@ -433,6 +433,7 @@ commands through `bundle exec', `nix-shell' or similar wrappers."
   :group 'flycheck
   :type '(choice (const :tag "Do not modify commands" identity)
                  (function :tag "Modify command with a custom function"))
+  :package-version '(flycheck . "0.25")
   :risky t)
 
 (defcustom flycheck-executable-find #'executable-find
@@ -449,6 +450,7 @@ sandboxes."
   :group 'flycheck
   :type '(choice (const :tag "Search executables in `exec-path'" executable-find)
                  (function :tag "Search executables with a custom function"))
+  :package-version '(flycheck . "0.25")
   :risky t)
 
 (defcustom flycheck-indication-mode 'left-fringe
@@ -7390,7 +7392,7 @@ more meaningful symbolic code (such as `import-error').  This option governs
 which should be used and reported to the user."
   :type 'boolean
   :safe #'booleanp
-  :package-version '(flycheck . "0.24"))
+  :package-version '(flycheck . "0.25"))
 
 (flycheck-define-checker python-pylint
   "A Python syntax and style checker using Pylint.
