@@ -8167,14 +8167,15 @@ See URL `http://www.ctan.org/pkg/lacheck'."
   "A Texinfo syntax checker using makeinfo.
 
 See URL `http://www.gnu.org/software/texinfo/'."
-  :command ("makeinfo" "-o" null-device source-inplace)
+  :command ("makeinfo" "-o" null-device "-")
+  :standard-input t
   :error-patterns
-  ((warning line-start (file-name) ":"
-            line (optional ":" column) ": "
-            "warning: " (message) line-end)
-   (error line-start (file-name) ":"
-          line (optional ":" column) ": "
-          (message) line-end))
+  ((warning line-start
+            "-:" line (optional ":" column) ": " "warning: " (message)
+            line-end)
+   (error line-start
+          "-:" line (optional ":" column) ": " (message)
+          line-end))
   :modes texinfo-mode)
 
 (flycheck-def-option-var flycheck-verilator-include-path nil verilog-verilator

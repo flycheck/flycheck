@@ -4851,8 +4851,8 @@ Why not:
 
 (flycheck-ert-def-checker-test texinfo texinfo nil
   (flycheck-ert-should-syntax-check
-   "checkers/texinfo.texi" 'texinfo-mode
-   '(   3 nil warning "@settitle missing argument" :checker texinfo)
+   "language/texinfo.texi" 'texinfo-mode
+   '(3 nil warning "@settitle missing argument" :checker texinfo)
    '(7 nil error "unknown command `bold'" :checker texinfo)
    '(7 nil error "misplaced {" :checker texinfo)
    '(7 nil error "misplaced }" :checker texinfo)
