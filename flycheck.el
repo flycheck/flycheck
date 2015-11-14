@@ -221,7 +221,6 @@ attention to case differences."
     python-pylint
     python-pycompile
     r-lintr
-    racket
     rpm-rpmlint
     rst-sphinx
     rst
@@ -7485,18 +7484,6 @@ See URL `https://github.com/jimhester/lintr'."
   :modes ess-mode
   ;; Don't check ESS files which do not contain R
   :predicate (lambda () (equal ess-language "S")))
-
-(flycheck-define-checker racket
-  "A Racket syntax checker using the Racket compiler.
-
-See URL `http://racket-lang.org/'."
-  :command ("racket" "-f" source-inplace)
-  :error-patterns
-  ((error line-start (file-name) ":" line ":" column ":" (message) line-end))
-  :error-filter (lambda (errors)
-                  (flycheck-sanitize-errors
-                   (flycheck-increment-error-columns errors)))
-  :modes racket-mode)
 
 (flycheck-define-checker rpm-rpmlint
   "A RPM SPEC file syntax checker using rpmlint.

@@ -7,6 +7,7 @@ master (in development)
     [GH-763]
   - Drop support for legacy Ruby YAML implementations prior to Ruby 1.9.3 in
     `ruby-yaml`
+  - Remove racket syntax checker due to possible code execution [GH-786]
 
 - New syntax checkers:
 
