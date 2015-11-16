@@ -101,5 +101,7 @@ and projects:
   fruitful discussions and his important ideas about the shape and design of
   Flycheck, and his indispensible and dedicated work on MELPA, which drives the
   continuous distribution of Flycheck to its users.
+- [Sylvain Benner](https://github.com/syl20bnr) for the awesomeness that is
+  Spacemacs.
 
 [Contributor Graph]: https://github.com/flycheck/flycheck/graphs/contributors
