@@ -1,6 +1,11 @@
 master (in development)
 =======================
 
+0.25.1 (Nov 16, 2015)
+=====================
+
+- Fix undefined function call in `emacs-lisp` syntax checker [GH-791]
+
 0.25 (Nov 14, 2015)
 ===================
 
