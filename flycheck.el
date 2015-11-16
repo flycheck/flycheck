@@ -6052,8 +6052,8 @@ Requires DMD 2.066 or newer.  See URL `http://dlang.org/'."
                temp-file))))
       (unwind-protect
           (byte-compile-file (car command-line-args-left))
-        (seq-do (lambda (f) (ignore-errors (delete-file f)))
-                flycheck-byte-compiled-files)))))
+        (mapc (lambda (f) (ignore-errors (delete-file f)))
+              flycheck-byte-compiled-files)))))
 
 (flycheck-def-option-var flycheck-emacs-lisp-load-path nil emacs-lisp
   "Load path to use in the Emacs Lisp syntax checker.
