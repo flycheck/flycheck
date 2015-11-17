@@ -7282,7 +7282,8 @@ See URL `http://puppet-lint.com/'."
     '(("^E9.*$"  . error)               ; Syntax errors from pep8
       ("^F82.*$" . error)               ; undefined variables from pyflakes
       ("^F83.*$" . error)               ; Duplicate arguments from flake8
-      ("^N.*$"   . info)                ; Naming issues from naming
+      ("^D.*$"   . info)                ; Docstring issues from flake8-pep257
+      ("^N.*$"   . info)                ; Naming issues from pep8-naming
       )
     python-flake8
   "An alist mapping flake8 error IDs to Flycheck error levels.
@@ -7296,12 +7297,14 @@ against the error ID.  If it matches the ID, the level of the
 corresponding error is set to LEVEL.  An error that is not
 matched by any PATTERN defaults to warning level.
 
-This option exists because flake8 categorises errors by the
-underlying tool that produced them (e.g. F for pyflakes messages,
-E for pep8 messages, etc.).  These categorisations do not map
-directly to Flycheck error levels.  Hence, this option exists to
-allow for a custom mapping.  The default value handles all of the
-built-in tools of flake8, and naming errors from pep8-naming."
+The default value of this option matches errors from flake8
+itself and from the following flake8 plugins:
+
+- pep8-naming
+- flake8-pep257
+
+You may add your own mappings to this option in order to support
+further flake8 plugins."
   :type '(repeat (cons (regexp :tag "Error ID pattern")
                        (symbol :tag "Error level")))
   :package-version '(flycheck . "0.22"))

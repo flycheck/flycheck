@@ -1,6 +1,10 @@
 master (in development)
 =======================
 
+- Improvements:
+
+  - Map error IDs from flake8-pep257 to Flycheck error levels
+
 0.25.1 (Nov 16, 2015)
 =====================
 
