@@ -632,6 +632,13 @@ selects the linters to use.
 
 @end itemize
 
+@flyclanguage{Scribble}
+
+@itemize
+@item
+@flyc{scribble} (@uref{http://docs.racket-lang.org/scribble/,Scribble})
+@end itemize
+
 @flyclanguage{RPM Spec}
 
 @itemize
