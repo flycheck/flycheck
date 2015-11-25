@@ -4358,8 +4358,14 @@ default `:verify' function of command checkers."
         (parser (or (plist-get properties :error-parser)
                     #'flycheck-parse-with-patterns))
         (predicate (plist-get properties :predicate))
-        (standard-input (plist-get properties :standard-input)))
-
+        (standard-input (plist-get properties :standard-input))
+        (environment (plist-get properties :environment))
+        (cwd       (when (plist-get properties :cwd) (file-truename (car (plist-get properties :cwd))))))
+    ;; FIXME add more to the environment checker and to the cwd checker
+    ;; (unless (stringp (car cwd)) 
+    ;;   (error "Current working directory must be a string"))
+    ;; (unless (listp environment)
+    ;;   (error "Environment needs to be a list of strings (\"var=value\")"))
     (unless command
       (error "Missing :command in syntax checker %s" symbol))
     (unless (stringp (car command))
@@ -4397,7 +4403,9 @@ default `:verify' function of command checkers."
                      `((command . ,command)
                        (error-parser . ,parser)
                        (error-patterns . ,patterns)
-                       (standard-input . ,standard-input)))
+                       (standard-input . ,standard-input)
+                       (environment . ,environment)
+                       (cwd         . ,cwd)))
         (setf (flycheck-checker-get symbol prop) value)))))
 
 (eval-and-compile
@@ -4684,6 +4692,8 @@ and rely on Emacs' own buffering and chunking."
                (args (flycheck-checker-substituted-arguments checker))
                (command (funcall flycheck-command-wrapper-function
                                  (cons program args)))
+               (process-environment (append (flycheck-checker-get checker 'environment) process-environment))
+               (default-directory (or (flycheck-checker-get checker 'cwd) default-directory))
                ;; Use pipes to receive output from the syntax checker.  They are
                ;; more efficient and more robust than PTYs, which Emacs uses by
                ;; default, and since we don't need any job control features, we
@@ -5174,7 +5184,9 @@ tool, just like `compile' (\\[compile])."
     (user-error "Cannot use syntax checker %S in this buffer" checker))
   (unless (flycheck-checker-executable checker)
     (user-error "Cannot run checker %S as shell command" checker))
-  (let* ((command (flycheck-checker-shell-command checker))
+  (let* ((compilation-environment (flycheck-checker-get checker 'environment))
+         (default-directory (or (flycheck-checker-get checker 'cwd) default-directory))
+         (command (flycheck-checker-shell-command checker))
          (buffer (compilation-start command nil #'flycheck-compile-name)))
     (with-current-buffer buffer
       (setq-local compilation-error-regexp-alist
@@ -5465,7 +5477,9 @@ SYMBOL with `flycheck-def-executable-var'."
         (parser (plist-get properties :error-parser))
         (filter (plist-get properties :error-filter))
         (predicate (plist-get properties :predicate))
-        (verify-fn (plist-get properties :verify)))
+        (verify-fn (plist-get properties :verify))
+        (environment (plist-get properties :environment))
+        (cwd (plist-get properties :cwd)))
 
     `(progn
        (flycheck-def-executable-var ,symbol ,(car command))
@@ -5484,7 +5498,11 @@ SYMBOL with `flycheck-def-executable-var'."
          :next-checkers ',(plist-get properties :next-checkers)
          ,@(when verify-fn
              `(:verify #',verify-fn))
-         :standard-input ',(plist-get properties :standard-input)))))
+         :standard-input ',(plist-get properties :standard-input)
+         ,@(when environment
+             `(:environment #',environment))
+         ,@(when cwd
+             `(:cwd #',cwd))))))
 
 
 ;;; Built-in checkers
