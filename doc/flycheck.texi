@@ -1053,8 +1053,8 @@ of Flycheck.
 
 Flycheck provides the macro @code{flycheck-define-checker} to define a
 new syntax checker.  The following example defines a simple syntax
-checker for the popular @uref{http://www.pylint.org/, Pylint} tool for
-Python:
+checker for the popular @uref{http://batsov.com/rubocop/, Rubocop} tool for
+Ruby:
 
 @lisp
 (flycheck-define-checker ruby-rubocop
