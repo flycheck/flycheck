@@ -29,6 +29,7 @@
  (depends-on "lua-mode")
  (depends-on "mmm-mode")
  (depends-on "php-mode")
+ (depends-on "processing-mode")
  (depends-on "puppet-mode")
  (depends-on "rhtml-mode")
  (depends-on "rpm-spec-mode")

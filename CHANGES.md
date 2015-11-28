@@ -1,6 +1,10 @@
 master (in development)
 =======================
 
+- New syntax checkers:
+
+  - Processing [GH-793] [GH-812]
+
 - Improvements:
 
   - Map error IDs from flake8-pep257 to Flycheck error levels
