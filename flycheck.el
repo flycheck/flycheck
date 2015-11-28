@@ -7940,17 +7940,21 @@ See URL `https://github.com/brigade/scss-lint'."
   ;; Flycheck error.
   :error-parser flycheck-parse-scss-lint
   :modes scss-mode
-  :verify (lambda (_)
-            (with-temp-buffer
-              (call-process "scss-lint" nil t nil
-                            "--require=scss_lint_reporter_checkstyle")
-              (goto-char (point-min))
-              (let ((reporter-missing (re-search-forward
-                                       flycheck-scss-lint-checkstyle-re
-                                       nil 'no-error)))
+  :verify (lambda (checker)
+            (let* ((executable (flycheck-find-checker-executable checker))
+                   (reporter-missing
+                    (and executable
+                         (with-temp-buffer
+                           (call-process executable nil t nil
+                                         "--require=scss_lint_reporter_checkstyle")
+                           (goto-char (point-min))
+                           (re-search-forward
+                            flycheck-scss-lint-checkstyle-re
+                            nil 'no-error)))))
+              (when executable
                 (list
                  (flycheck-verification-result-new
-                  :label "Checkstyle reporter"
+                  :label "checkstyle reporter"
                   :message (if reporter-missing
                                "scss_lint_reporter_checkstyle missing"
                              "present")

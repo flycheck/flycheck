@@ -8,6 +8,7 @@ master (in development)
 - Bug fixes:
 
   - Fix folding of C/C++ errors from included files [GH-783]
+  - Fix verification of SCSS-Lint checkstyle reporter
 
 0.25.1 (Nov 16, 2015)
 =====================
