@@ -216,6 +216,7 @@ attention to case differences."
     php
     php-phpmd
     php-phpcs
+    processing
     puppet-parser
     puppet-lint
     python-flake8
@@ -7243,6 +7244,20 @@ See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "STDIN" errors)))
   :modes (php-mode php+-mode))
+
+(flycheck-define-checker processing
+  "Processing command line tool.
+
+See https://github.com/processing/processing/wiki/Command-Line"
+  :command ("processing-java"
+            "--force"
+            (eval (concat "--sketch=" (file-name-directory (buffer-file-name))))
+            (eval (concat "--output=" (flycheck-temp-dir-system)))
+            "--build")
+  :error-patterns
+  ((error line-start (file-name) ":" line ":" column
+          (* (or digit ":")) (message) line-end))
+  :modes processing-mode)
 
 (flycheck-define-checker puppet-parser
   "A Puppet DSL syntax checker using puppet's own parser.
