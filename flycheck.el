@@ -4334,8 +4334,7 @@ default `:verify' function of command checkers."
           ;; guard against syntax checker tools which are not installed
           (plist-put properties :predicate
                      (lambda ()
-                       (and (funcall flycheck-executable-find
-                                     (flycheck-checker-executable symbol))
+                       (and (flycheck-find-checker-executable symbol)
                             (or (not predicate) (funcall predicate))))))
 
     (apply #'flycheck-define-generic-checker symbol docstring
@@ -4380,6 +4379,13 @@ the syntax checker definition, if the variable is nil."
   (let ((var (flycheck-checker-executable-variable checker)))
     (or (and (boundp var) (symbol-value var))
         (flycheck-checker-default-executable checker))))
+
+(defun flycheck-find-checker-executable (checker)
+  "Get the full path of the executbale of CHECKER.
+
+Return the full absolute path to the executable of CHECKER, or
+nil if the executable does not exist."
+  (funcall flycheck-executable-find (flycheck-checker-executable checker)))
 
 (defun flycheck-checker-arguments (checker)
   "Get the command arguments of CHECKER."
@@ -4582,7 +4588,7 @@ symbols in the command."
   "Start a command CHECKER with CALLBACK."
   (let (process)
     (condition-case err
-        (let* ((program (flycheck-checker-executable checker))
+        (let* ((program (flycheck-find-checker-executable checker))
                (args (flycheck-checker-substituted-arguments checker))
                (command (funcall flycheck-command-wrapper-function
                                  (cons program args)))
@@ -4673,8 +4679,7 @@ symbols in the command."
 
 Return a list of `flycheck-verification-result' objects for
 CHECKER."
-  (let ((executable (funcall flycheck-executable-find
-                             (flycheck-checker-executable checker))))
+  (let ((executable (flycheck-find-checker-executable checker)))
     (list
      (flycheck-verification-result-new
       :label "executable"
