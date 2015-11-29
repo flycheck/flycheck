@@ -426,7 +426,7 @@ and extension, as in `file-name-base'."
 (ert-deftest flycheck-same-files-p/different-files ()
   :tags '(utility)
   (let ((default-directory flycheck-test-source-directory))
-    (should-not (flycheck-same-files-p "flycheck.el" "Makefile"))))
+    (should-not (flycheck-same-files-p "flycheck.el" "Rakefile"))))
 
 (ert-deftest flycheck-same-files-p/file-in-non-existing-directory ()
   :tags '(utility)
@@ -3302,9 +3302,9 @@ evaluating BODY."
   :tags '(configuration)
   (flycheck-ert-with-temp-buffer
     (cd flycheck-test-directory)
-    (should (equal (flycheck-locate-config-file-by-path "../Makefile"
+    (should (equal (flycheck-locate-config-file-by-path "../Rakefile"
                                                         'emacs-lisp)
-                   (expand-file-name "../Makefile" flycheck-test-directory)))))
+                   (expand-file-name "../Rakefile" flycheck-test-directory)))))
 
 (ert-deftest flycheck-locate-config-file-by-path/non-existing-file ()
   :tags '(configuration)
@@ -3335,8 +3335,8 @@ evaluating BODY."
     (setq buffer-file-name (expand-file-name "flycheck-test.el"
                                              flycheck-test-directory))
     (should (equal (flycheck-locate-config-file-ancestor-directories
-                    "Makefile" 'emacs-lisp)
-                   (expand-file-name "../Makefile"
+                    "Rakefile" 'emacs-lisp)
+                   (expand-file-name "../Rakefile"
                                      flycheck-test-directory)))))
 
 (ert-deftest flycheck-locate-config-file/not-existing-file ()
@@ -3347,7 +3347,7 @@ evaluating BODY."
 (ert-deftest flycheck-locate-config-file/existing-file-in-parent-directory ()
   :tags '(configuration)
   (flycheck-ert-with-env (list (cons "HOME" flycheck-test-directory))
-    (should-not (flycheck-locate-config-file-home "Makefile" 'emacs-lisp))))
+    (should-not (flycheck-locate-config-file-home "Rakefile" 'emacs-lisp))))
 
 (ert-deftest flycheck-locate-config-file/existing-file-in-home-directory ()
   :tags '(configuration)

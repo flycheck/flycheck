@@ -4,7 +4,7 @@ env:
   # Run unit tests against oldest supported stable, latest stable, and trunk
   - EMACS_VERSION=24.3
   - EMACS_VERSION=24.5 BUILD_MANUAL=yes
-  - EMACS_VERSION=snapshot EMACSFLAGS='--eval "(setq byte-compile-error-on-warn t)"'
+  - EMACS_VERSION=snapshot COMPILEFLAGS='error-on-warn'
 before_install:
   - export PATH="$HOME/bin:$PATH"
   - wget 'https://raw.githubusercontent.com/flycheck/emacs-travis/master/emacs-travis.mk'
@@ -15,14 +15,14 @@ before_install:
   - if [[ $BUILD_MANUAL == yes ]]; then make -f emacs-travis.mk install_texinfo; fi
   - if [[ $BUILD_MANUAL == yes ]]; then texi2any --version; fi
 install:
-  - make deps
+  - rake init:deps
 script:
   # Checkdoc and compilation
-  - make check
-  - make EMACSFLAGS="${EMACSFLAGS}" compile
+  - rake verify:all
+  - rake 'compile:all[$COMPILEARGS]'
   # Unit tests
-  - make ERTSELECTOR="(not (tag external-tool))" test
+  - rake "test:unit[(not (tag external-tool))]"
   # Build the manual
-  - if [[ $BUILD_MANUAL == yes ]]; then make texinfo; fi
+  - if [[ $BUILD_MANUAL == yes ]]; then rake doc:manual; fi
 after_success:
   - if [[ $BUILD_MANUAL == yes ]]; then bash doc/deploy-travis.bash; fi
