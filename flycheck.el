@@ -7927,12 +7927,15 @@ Please run gem install scss_lint_reporter_checkstyle"
 (flycheck-define-checker scss-lint
   "A SCSS syntax checker using SCSS-Lint.
 
+Needs SCSS-Lint 0.43.2 or newer.
+
 See URL `https://github.com/brigade/scss-lint'."
   :command ("scss-lint"
             "--require=scss_lint_reporter_checkstyle"
             "--format=Checkstyle"
             (config-file "--config" flycheck-scss-lintrc)
-            source)
+            "--stdin-file-path" source-original "-")
+  :standard-input t
   ;; We cannot directly parse Checkstyle XML, since for some mysterious reason
   ;; SCSS-Lint doesn't have a built-in Checkstyle reporter, and instead ships it
   ;; as an addon which might not be installed.  We use a custom error parser to
