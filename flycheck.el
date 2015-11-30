@@ -72,6 +72,7 @@
   (require 'compile)        ; Compile Mode integration
   (require 'jka-compr)      ; For JKA workarounds in `flycheck-temp-file-system'
   (require 'pcase)          ; `pcase-dolist' (`pcase' itself is autoloaded)
+  (require 'cl)             ; `cl-member-if-not'
   )
 
 (require 'dash)
@@ -4318,11 +4319,12 @@ default `:verify' function of command checkers."
         (standard-input (plist-get properties :standard-input))
         (environment (plist-get properties :environment))
         (cwd       (when (plist-get properties :cwd) (file-truename (car (plist-get properties :cwd))))))
-    ;; FIXME add more to the environment checker and to the cwd checker
+    ;; FIXME add more to the cwd checker
     ;; (unless (stringp (car cwd)) 
     ;;   (error "Current working directory must be a string"))
-    ;; (unless (listp environment)
-    ;;   (error "Environment needs to be a list of strings (\"var=value\")"))
+    ;; the environement variables need to be either emtpy or a list of strings
+    (unless (or (not environment) (and (listp environment) (not (member-if-not #'stringp environment))))
+       (error "Environment variables in syntax checker %s needs to be a list of strings (\"var=value\")" symbol))
     (unless command
       (error "Missing :command in syntax checker %s" symbol))
     (unless (stringp (car command))
