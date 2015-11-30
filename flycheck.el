@@ -4257,6 +4257,18 @@ universal prefix arg, and only the id with normal prefix arg."
     (`(eval ,_) t)
     (_ nil)))
 
+(defun flycheck-cwd-wrapper (checker)
+  "is trying to work out the working directory from which the checker command 
+will be called. The default is the `default-directory' of the buffer from 
+which flycheck is calling the checker.
+:cwd can be a list that contains a fixed path string or a function that will
+return a path. The function needs to return an absolut path not a relative path."   
+  (let ((cwd (flycheck-checker-get checker 'cwd)))
+    (or (and (functionp cwd) (funcall cwd)) 
+        (and (listp cwd) (stringp (car cwd)) (file-truename (car cwd)))
+        default-directory)))
+  
+
 ;;;###autoload
 (defun flycheck-define-command-checker (symbol docstring &rest properties)
   "Define SYMBOL as syntax checker to run a command.
@@ -4360,7 +4372,7 @@ default `:verify' function of command checkers."
         (predicate (plist-get properties :predicate))
         (standard-input (plist-get properties :standard-input))
         (environment (plist-get properties :environment))
-        (cwd       (when (plist-get properties :cwd) (file-truename (car (plist-get properties :cwd))))))
+        (cwd       (plist-get properties :cwd)))
     ;; FIXME add more to the cwd checker
     ;; (unless (stringp (car cwd)) 
     ;;   (error "Current working directory must be a string"))
@@ -4694,7 +4706,7 @@ and rely on Emacs' own buffering and chunking."
                (command (funcall flycheck-command-wrapper-function
                                  (cons program args)))
                (process-environment (append (flycheck-checker-get checker 'environment) process-environment))
-               (default-directory (or (flycheck-checker-get checker 'cwd) default-directory))
+               (default-directory  (flycheck-cwd-wrapper checker))
                ;; Use pipes to receive output from the syntax checker.  They are
                ;; more efficient and more robust than PTYs, which Emacs uses by
                ;; default, and since we don't need any job control features, we
@@ -5186,7 +5198,7 @@ tool, just like `compile' (\\[compile])."
   (unless (flycheck-checker-executable checker)
     (user-error "Cannot run checker %S as shell command" checker))
   (let* ((compilation-environment (flycheck-checker-get checker 'environment))
-         (default-directory (or (flycheck-checker-get checker 'cwd) default-directory))
+         (default-directory (flycheck-cwd-wrapper checker))
          (command (flycheck-checker-shell-command checker))
          (buffer (compilation-start command nil #'flycheck-compile-name)))
     (with-current-buffer buffer
