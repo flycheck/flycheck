@@ -4215,16 +4215,18 @@ universal prefix arg, and only the id with normal prefix arg."
     (_ nil)))
 
 (defun flycheck-cwd-wrapper (checker)
-  "is trying to work out the working directory from which the checker command 
-will be called. The default is the `default-directory' of the buffer from 
-which flycheck is calling the checker.
+  "Function returning apropriate current working directory.
+
+Work out the working directory from which the CHECKER command
+will be called.  The default is the `default-directory' of the source-buffer
+from which flycheck is calling the checker.
 :cwd can be a list that contains a fixed path string or a function that will
-return a path. The function needs to return an absolut path not a relative path."   
+return a path.  The function needs to return an absolut path not a relative path."
   (let ((cwd (flycheck-checker-get checker 'cwd)))
-    (or (and (functionp cwd) (funcall cwd)) 
+    (or (and (functionp cwd) (funcall cwd))
         (and (listp cwd) (stringp (car cwd)) (file-truename (car cwd)))
         default-directory)))
-  
+
 
 ;;;###autoload
 (defun flycheck-define-command-checker (symbol docstring &rest properties)
@@ -4328,14 +4330,10 @@ default `:verify' function of command checkers."
                     #'flycheck-parse-with-patterns))
         (predicate (plist-get properties :predicate))
         (standard-input (plist-get properties :standard-input))
-        (environment (plist-get properties :environment))
         (cwd       (plist-get properties :cwd)))
     ;; FIXME add more to the cwd checker
-    ;; (unless (stringp (car cwd)) 
+    ;; (unless (stringp (car cwd))
     ;;   (error "Current working directory must be a string"))
-    ;; the environement variables need to be either emtpy or a list of strings
-    (unless (or (not environment) (and (listp environment) (not (cl-member-if-not #'stringp environment))))
-       (error "Environment variables in syntax checker %s needs to be a list of strings (\"var=value\")" symbol))
     (unless command
       (error "Missing :command in syntax checker %s" symbol))
     (unless (stringp (car command))
@@ -4374,7 +4372,6 @@ default `:verify' function of command checkers."
                        (error-parser . ,parser)
                        (error-patterns . ,patterns)
                        (standard-input . ,standard-input)
-                       (environment . ,environment)
                        (cwd         . ,cwd)))
         (setf (flycheck-checker-get symbol prop) value)))))
 
@@ -4613,7 +4610,6 @@ symbols in the command."
                (args (flycheck-checker-substituted-arguments checker))
                (command (funcall flycheck-command-wrapper-function
                                  (cons program args)))
-               (process-environment (append (flycheck-checker-get checker 'environment) process-environment))
                (default-directory  (flycheck-cwd-wrapper checker))
                ;; Use pipes to receive output from the syntax checker.  They are
                ;; more efficient and more robust than PTYs, which Emacs uses by
@@ -5102,8 +5098,7 @@ tool, just like `compile' (\\[compile])."
     (user-error "Cannot use syntax checker %S in this buffer" checker))
   (unless (flycheck-checker-executable checker)
     (user-error "Cannot run checker %S as shell command" checker))
-  (let* ((compilation-environment (flycheck-checker-get checker 'environment))
-         (default-directory (flycheck-cwd-wrapper checker))
+  (let* ((default-directory (flycheck-cwd-wrapper checker))
          (command (flycheck-checker-shell-command checker))
          (buffer (compilation-start command nil #'flycheck-compile-name)))
     (with-current-buffer buffer
@@ -5364,7 +5359,6 @@ SYMBOL with `flycheck-def-executable-var'."
         (filter (plist-get properties :error-filter))
         (predicate (plist-get properties :predicate))
         (verify-fn (plist-get properties :verify))
-        (environment (plist-get properties :environment))
         (cwd (plist-get properties :cwd)))
 
     `(progn
@@ -5385,8 +5379,6 @@ SYMBOL with `flycheck-def-executable-var'."
          ,@(when verify-fn
              `(:verify #',verify-fn))
          :standard-input ',(plist-get properties :standard-input)
-         ,@(when environment
-             `(:environment #',environment))
          ,@(when cwd
              `(:cwd #',cwd))))))
 
