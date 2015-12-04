@@ -4545,6 +4545,11 @@ Why not:
      '(4 6 warning "Do not use absolute paths." :checker r-lintr)
      '(7 5 error "unexpected end of input" :checker r-lintr))))
 
+(flycheck-ert-def-checker-test scribble scribble nil
+  (flycheck-ert-should-syntax-check
+   "language/scribble.scrbl" 'scribble-mode
+   '(5 1 error "unbound-identifier: unbound identifier in module" :checker scribble)))
+
 (flycheck-ert-def-checker-test rpm-rpmlint rpm nil
   (flycheck-ert-should-syntax-check
    "language/rpm.spec" '(sh-mode rpm-spec-mode)
