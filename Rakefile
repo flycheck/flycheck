@@ -39,6 +39,10 @@ file 'doc/flycheck.info' => DOC_SOURCES do |t|
   sh 'texi2any', '-o', t.name, t.prerequisites.first
 end
 
+file 'doc/flycheck.html' => DOC_SOURCES do |t|
+  sh 'texi2any', '--html', '--no-split', '-o', t.name, t.prerequisites.first
+end
+
 rule '.elc', [:build_flags] => ['.el'] do |t, args|
   batch_args = ['-L', '.']
   if args.to_a.include? 'error-on-warn'
@@ -113,11 +117,14 @@ namespace :doc do
   CLEAN << 'doc/flycheck.info'
   CLEAN << 'doc/dir'
 
-  desc 'Build texinfo manual'
+  desc 'Build Texinfo manual'
   task texinfo: ['doc/flycheck.info']
 
+  desc 'Build HTML manual'
+  task html: ['doc/flycheck.html']
+
   desc 'Build all documentation'
-  task all: [:texinfo]
+  task all: [:texinfo, :html]
 end
 
 namespace :dist do
