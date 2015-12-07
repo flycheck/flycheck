@@ -7792,7 +7792,7 @@ See URL `http://www.rust-lang.org'."
          (message) line-end))
   :modes rust-mode
   :predicate (lambda ()
-               (or (not flycheck-rust-crate-root) (flycheck-buffer-saved-p))))
+               (and (not flycheck-rust-crate-root) (flycheck-buffer-saved-p))))
 
 (defvar flycheck-sass-scss-cache-directory nil
   "The cache directory for `sass' and `scss'.")

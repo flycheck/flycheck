@@ -4707,15 +4707,6 @@ Why not:
      '(1 5 info "run `rustc --explain E0432` to see a detailed explanation"
          :checker rust))))
 
-(flycheck-ert-def-checker-test rust rust crate-root
-  (let ((flycheck-disabled-checkers '(rust-cargo))
-        (flycheck-rust-crate-root (flycheck-ert-resource-filename
-                                   "language/rust/src/main.rs")))
-    (flycheck-ert-should-syntax-check
-     "language/rust/src/importing.rs" 'rust-mode
-     '(3 9 warning "unused variable: `x`, #[warn(unused_variables)] on by default"
-         :checker rust))))
-
 (flycheck-ert-def-checker-test sass sass nil
   (flycheck-ert-should-syntax-check
    "language/sass/error.sass" 'sass-mode
