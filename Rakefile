@@ -40,7 +40,18 @@ file 'doc/flycheck.info' => DOC_SOURCES do |t|
 end
 
 file 'doc/flycheck.html' => DOC_SOURCES do |t|
-  sh 'texi2any', '--html', '--no-split', '-o', t.name, t.prerequisites.first
+  customizations = {
+    'TOP_NODE_UP_URL' => 'http://www.flycheck.org',
+    # Suggest that we use HTML 5.  We don't do actually, but we want the browse
+    # to think that we do
+    'DOCTYPE' => '<!DOCTYPE html>'
+  }
+  cmd = ['texi2any', '--html', '--no-split']
+  cmd += customizations
+        .map { |var, value| ['--set-customization-variable', "#{var}=#{value}"] }
+        .flatten
+  cmd << '-o' << t.name << t.prerequisites.first
+  sh(*cmd)
 end
 
 rule '.elc', [:build_flags] => ['.el'] do |t, args|
@@ -109,12 +120,20 @@ namespace :test do
     sh(*emacs_batch('--script', 'test/run.el', *test_args))
   end
 
+  desc 'Test HTML manual for broken links'
+  task htmlproof: ['doc/flycheck.html'] do |t|
+    cmd = ['htmlproof', '--disable-external']
+    cmd += t.prerequisites
+    sh(*cmd)
+  end
+
   desc 'Run all tests'
-  task all: [:unit]
+  task all: [:unit, :htmlproof]
 end
 
 namespace :doc do
   CLEAN << 'doc/flycheck.info'
+  CLEAN << 'doc/flycheck.html'
   CLEAN << 'doc/dir'
 
   desc 'Build Texinfo manual'

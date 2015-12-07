@@ -23,6 +23,6 @@ script:
   # Unit tests
   - rake "test:unit[(not (tag external-tool))]"
   # Build the manual
-  - if [[ $BUILD_MANUAL == yes ]]; then rake doc:texinfo; fi
+  - if [[ $BUILD_MANUAL == yes ]]; then rake doc:texinfo test:htmlproof; fi
 after_success:
   - if [[ $BUILD_MANUAL == yes ]]; then bash doc/deploy-travis.bash; fi
