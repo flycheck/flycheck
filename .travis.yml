@@ -11,9 +11,10 @@ before_install:
   - make -f emacs-travis.mk install_emacs
   - make -f emacs-travis.mk install_cask
   - emacs --version
-  # Install Texinfo when building the manual
+  # Install Texinfo and htmlproof when building the manual
   - if [[ $BUILD_MANUAL == yes ]]; then make -f emacs-travis.mk install_texinfo; fi
   - if [[ $BUILD_MANUAL == yes ]]; then texi2any --version; fi
+  - if [[ $BUILD_MANUAL == yes ]]; gem install htmlproof; htmlproof --version; fi
 install:
   - rake init:deps
 script:
