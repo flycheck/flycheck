@@ -88,7 +88,6 @@ namespace :generate do
   task generate: [:logo]
 end
 
-
 namespace :compile do
   CLEAN.add(OBJECTS)
 
@@ -103,7 +102,7 @@ namespace :test do
   desc 'Run unit test suite'
   task :unit, [:selector] => OBJECTS do |_, args|
     test_args = args.selector ? [args.selector] : []
-    sh *emacs_batch('--script', 'test/run.el', *test_args)
+    sh(*emacs_batch('--script', 'test/run.el', *test_args))
   end
 
   desc 'Run all tests'
