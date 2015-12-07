@@ -115,10 +115,10 @@ namespace :doc do
   CLEAN << 'doc/dir'
 
   desc 'Build texinfo manual'
-  task manual: ['doc/flycheck.info']
+  task texinfo: ['doc/flycheck.info']
 
   desc 'Build all documentation'
-  task all: [:manual]
+  task all: [:texinfo]
 end
 
 namespace :dist do
