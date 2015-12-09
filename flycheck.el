@@ -2718,7 +2718,7 @@ variables of Flycheck."
 Slots:
 
 `buffer'
-     The buffer the reported was reported for, as buffer object.
+     The buffer that the error was reported for, as buffer object.
 
 `checker'
      The syntax checker which reported this error, as symbol.
@@ -4627,6 +4627,7 @@ symbols in the command."
           ;; example for such a conflict.
           (setq process (apply 'start-process (format "flycheck-%s" checker)
                                nil command))
+          ;; why is this using setf and not set-process-sentinal ??
           (setf (process-sentinel process) #'flycheck-handle-signal)
           (setf (process-filter process) #'flycheck-receive-checker-output)
           (set-process-query-on-exit-flag process nil)
@@ -4634,6 +4635,7 @@ symbols in the command."
           (process-put process 'flycheck-checker checker)
           (process-put process 'flycheck-callback callback)
           (process-put process 'flycheck-buffer (current-buffer))
+          (process-put process 'flycheck-cwd  default-directory)
           ;; Track the temporaries created by argument substitution in the
           ;; process itself, to get rid of the global state ASAP.
           (process-put process 'flycheck-temporaries flycheck-temporaries)
@@ -4724,7 +4726,8 @@ _EVENT is ignored."
   (when (memq (process-status process) '(signal exit))
     (let ((files (process-get process 'flycheck-temporaries))
           (buffer (process-get process 'flycheck-buffer))
-          (callback (process-get process 'flycheck-callback)))
+          (callback (process-get process 'flycheck-callback))
+          (cwd (process-get process 'flycheck-cwd)))
       ;; Delete the temporary files
       (seq-do #'flycheck-safe-delete files)
       (when (buffer-live-p buffer)
@@ -4738,12 +4741,12 @@ _EVENT is ignored."
                   (process-get process 'flycheck-checker)
                   (process-exit-status process)
                   files
-                  (flycheck-get-output process) callback)))
+                  (flycheck-get-output process) callback cwd)))
             ((debug error)
              (funcall callback 'errored (error-message-string err)))))))))
 
 (defun flycheck-finish-checker-process
-    (checker exit-status files output callback)
+    (checker exit-status files output callback cwd)
   "Finish a checker process from CHECKER with EXIT-STATUS.
 
 FILES is a list of files given as input to the checker.  OUTPUT
@@ -4763,7 +4766,7 @@ output: %s\nChecker definition probably flawed." checker exit-status output)))
     (funcall callback 'finished
              ;; Fix error file names, by substituting them backwards from the
              ;; temporaries
-             (seq-map (lambda (e) (flycheck-fix-error-filename e files))
+             (seq-map (lambda (e) (flycheck-fix-error-filename e files cwd))
                       errors))))
 
 
@@ -5107,7 +5110,7 @@ tool, just like `compile' (\\[compile])."
 
 
 ;;; General error parsing for command checkers
-(defun flycheck-parse-output (output checker buffer)
+(defun flycheck-parse-output (output checker buffer) 
   "Parse OUTPUT from CHECKER in BUFFER.
 
 OUTPUT is a string with the output from the checker symbol
@@ -5116,7 +5119,7 @@ CHECKER.  BUFFER is the buffer which was checked.
 Return the errors parsed with the error patterns of CHECKER."
   (funcall (flycheck-checker-get checker 'error-parser) output checker buffer))
 
-(defun flycheck-fix-error-filename (err buffer-files)
+(defun flycheck-fix-error-filename (err buffer-files cwd)
   "Fix the file name of ERR from BUFFER-FILES.
 
 Make the file name of ERR absolute.  If the absolute file name of
@@ -5125,7 +5128,7 @@ function `buffer-file-name'."
   (flycheck-error-with-buffer err
     (-when-let (filename (flycheck-error-filename err))
       (when (seq-some (apply-partially #'flycheck-same-files-p
-                                       (expand-file-name filename))
+                                       (expand-file-name filename cwd))
                       buffer-files)
         (setf (flycheck-error-filename err) (buffer-file-name)))))
   err)
