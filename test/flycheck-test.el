@@ -4412,6 +4412,12 @@ Why not:
    '(26 12 error "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\""
         :id "Generic.PHP.LowerCaseConstant.Found" :checker php-phpcs)))
 
+(flycheck-ert-def-checker-test processing processing syntax-error
+  (flycheck-ert-should-syntax-check
+   "language/processing/syntax_error/syntax_error.pde" 'processing-mode
+   '(4 2 error "Syntax error, maybe a missing semicolon?"
+       :checker processing)))
+
 (flycheck-ert-def-checker-test puppet-parser puppet parser-error
   (flycheck-ert-should-syntax-check
    "language/puppet/parser-error.pp" 'puppet-mode
