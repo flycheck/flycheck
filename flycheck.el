@@ -4135,7 +4135,7 @@ In the latter case, show messages in
   (when (and errors (flycheck-may-use-echo-area-p))
     (let ((messages (seq-map #'flycheck-error-format-message-and-id errors)))
       (display-message-or-buffer (string-join messages "\n\n")
-                                 flycheck-error-message-buffer))))
+                                 flycheck-error-message-buffer t))))
 
 (defun flycheck-display-error-messages-unless-error-list (errors)
   "Show messages of ERRORS unless the error list is visible.
