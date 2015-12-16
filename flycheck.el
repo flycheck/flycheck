@@ -4153,7 +4153,10 @@ Hide the error buffer if there is no error under point."
   (-when-let* ((buffer (flycheck-error-message-buffer))
                (window (get-buffer-window buffer)))
     (unless (flycheck-overlays-at (point))
-      (quit-window nil window))))
+      ;; save-selected-window prevents `quit-window' from changing the current
+      ;; buffer (see https://github.com/flycheck/flycheck/issues/648).
+      (save-selected-window
+        (quit-window nil window)))))
 
 
 ;;; Working with errors
