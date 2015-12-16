@@ -14,6 +14,7 @@ master (in development)
   - Fix folding of C/C++ errors from included files [GH-783]
   - Fix verification of SCSS-Lint checkstyle reporter
   - Don’t fall back to `rust` if `rust-cargo` should be used [GH-817]
+  - Don’t change current buffer when closing the error message buffer [GH-648]
 
 0.25.1 (Nov 16, 2015)
 =====================
