@@ -17,6 +17,8 @@ now for questions and discussions about development. [GH-820]
 
   * Add `flycheck-puppet-lint-rc` to customise the location of the puppetlint
     configuration file [GH-846]
+  * Add `flycheck-puppet-lint-disabled-checks` to disable specific checks of
+    puppetlint [GH-824]
 
 * Improvements:
 

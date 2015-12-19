@@ -554,6 +554,8 @@ command-line tool})
 @flyc{puppet-lint} provides the following options:
 @table @asis
 @flycconfigfile{flycheck-puppet-lint-rc,puppet-lint}
+@flycoption flycheck-puppet-lint-disabled-checks
+A list of Puppet Lint checks to disable.
 @end table
 
 @flyclanguage{Python}

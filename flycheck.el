@@ -7306,6 +7306,22 @@ See URL `http://puppetlabs.com/'."
 (flycheck-def-config-file-var flycheck-puppet-lint-rc puppet-lint ".puppet-lint.rc"
   :safe #'stringp)
 
+(flycheck-def-option-var flycheck-puppet-lint-disabled-checks nil puppet-lint
+  "Disabled checkers for `puppet-lint'.
+
+The value of this variable is a list of strings, where each
+string is the name of a check to disable (e.g. \"80chars\" or
+\"double_quoted_strings\").
+
+See URL `http://puppet-lint.com/checks/' for a list of all checks
+and their names."
+  :type '(repeat (string :tag "Check Name"))
+  :package-version '(flycheck . "0.25"))
+
+(defun flycheck-puppet-lint-disabled-arg-name (check)
+  "Create an argument to disable a puppetlint CHECK."
+  (concat "--no-" check "-check"))
+
 (flycheck-define-checker puppet-lint
   "A Puppet DSL style checker using puppet-lint.
 
@@ -7318,6 +7334,8 @@ See URL `http://puppet-lint.com/'."
   :command ("puppet-lint"
             (config-file "--config" flycheck-puppet-lint-rc)
             "--log-format" "%{path}:%{linenumber}:%{kind}: %{message} (%{check})"
+            (option-list "" flycheck-puppet-lint-disabled-checks concat
+                         flycheck-puppet-lint-disabled-arg-name)
             source-original)
   :error-patterns
   ((warning line-start (file-name) ":" line ":warning: " (message) line-end)
