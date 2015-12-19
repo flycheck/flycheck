@@ -7293,6 +7293,16 @@ See URL `http://puppetlabs.com/'."
   :modes puppet-mode
   :next-checkers ((warning . puppet-lint)))
 
+(flycheck-def-option-var flycheck-puppet-lint-disabled-checks nil puppet-lint
+  "List of disabled checks for puppet-lint.
+
+For example: `80chars' or `double_quoted_strings'"
+  :type '(repeat (string :tag "Check Name"))
+  :package-version '(flycheck . "0.25"))
+
+(defun flycheck-puppet-lint-disabled-arg-name (check-name)
+  (concat "--no-" check-name "-check"))
+
 (flycheck-define-checker puppet-lint
   "A Puppet DSL style checker using puppet-lint.
 
@@ -7304,6 +7314,7 @@ See URL `http://puppet-lint.com/'."
   ;; temporary file will cause an error.
   :command ("puppet-lint"
             "--log-format" "%{path}:%{linenumber}:%{kind}: %{message} (%{check})"
+            (option-list "" flycheck-puppet-lint-disabled-checks concat flycheck-puppet-lint-disabled-arg-name)
             source-original)
   :error-patterns
   ((warning line-start (file-name) ":" line ":warning: " (message) line-end)
