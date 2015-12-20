@@ -28,6 +28,8 @@ now for questions and discussions about development. [GH-820]
     Flycheck
   * Add `flycheck-perlcriticrc` to set a configuration file for Perl::Critic
     [GH-851]
+  * Add `flycheck-jshint-extract-javascript` to extract Javascript from HTML
+    [GH-825]
 
 * Improvements:
 

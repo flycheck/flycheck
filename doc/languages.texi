@@ -440,18 +440,14 @@ or @flyc{javascript-gjslint}
 @uref{https://github.com/Flet/semistandard,Semistandard})
 @end enumerate
 
-The @flyc{javascript-eslint} checker provides the following option:
+These checkers provide the following option:
 
 @table @asis
 @flycoption flycheck-eslint-rulesdir
 A directory with custom rules for ESLint.
+@flycoption flycheck-jshint-extract-javascript
+Whether to extract Javascript from HTML before linting with JSHint.
 @flycconfigfile{flycheck-eslintrc,ESLint}
-@end table
-
-@flyc{javascript-jshint}, @flyc{javascript-gjslint} and @flyc{javascript-jscs}
-read configuration files:
-
-@table @asis
 @flycconfigfile{flycheck-jshintrc,JSHint}
 @flycconfigfile{flycheck-gjslintrc,Closure Linter}
 @flycconfigfile{flycheck-jscsrc,JSCS}

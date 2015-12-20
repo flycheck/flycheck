@@ -6991,6 +6991,25 @@ See URL `http://jade-lang.com'."
 (flycheck-def-config-file-var flycheck-jshintrc javascript-jshint ".jshintrc"
   :safe #'stringp)
 
+(flycheck-def-option-var flycheck-jshint-extract-javascript nil
+                         javascript-jshint
+  "Whether jshint should extract Javascript from HTML.
+
+If nil no extract rule is given to jshint.  If `auto' only
+extract Javascript if a HTML file is detected.  If `always' or
+`never' extract Javascript always or never respectively.
+
+Refer to the jshint manual at the URL
+`http://jshint.com/docs/cli/#flags' for more information."
+  :type
+  '(choice (const :tag "No extraction rule" nil)
+           (const :tag "Try to extract Javascript when detecting HTML files"
+                  auto)
+           (const :tag "Always try to extract Javascript" always)
+           (const :tag "Never try to extract Javascript" never))
+  :safe #'symbolp
+  :package-version '(flycheck . "0.26"))
+
 (flycheck-define-checker javascript-jshint
   "A Javascript syntax and style checker using jshint.
 
@@ -6998,6 +7017,8 @@ See URL `http://www.jshint.com'."
   :command ("jshint" "--checkstyle-reporter"
             "--filename" source-original
             (config-file "--config" flycheck-jshintrc)
+            (option "--extract" flycheck-jshint-extract-javascript
+                    concat symbol-name)
             "-")
   :standard-input t
   :error-parser flycheck-parse-checkstyle
