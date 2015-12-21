@@ -1987,7 +1987,7 @@ is applicable from Emacs Lisp code.  Use
 `flycheck-may-use-checker' instead."
   (interactive (list (read-flycheck-checker "Checker to verify: ")))
   (unless (flycheck-valid-checker-p checker)
-    (user-error "%s is not a syntax checker"))
+    (user-error "%s is not a syntax checker" checker))
 
   ;; Save the buffer to make sure that all predicates are good
   (when (and (buffer-file-name) (buffer-modified-p))
