@@ -67,7 +67,7 @@
     (it "has a local header line"
       (flycheck/with-error-list-buffer
         (expect header-line-format
-                :to-equal " Line Col Level ID Message  (Checker) ")
+                :to-equal " Line Col Level ID Message (Checker) ")
         (expect 'header-line-format :to-be-local))))
 
   (describe "Columns"
@@ -95,12 +95,7 @@
     (it "has the error message in the 5th column"
       (flycheck/with-error-list-buffer
         (expect (aref tabulated-list-format 4)
-                :to-equal '("Message" 0 t))))
-
-    (it "has the syntax checker in the 6th column"
-      (flycheck/with-error-list-buffer
-        (expect (aref tabulated-list-format 5)
-                :to-equal '(" (Checker)" 8 t)))))
+                :to-equal '("Message (Checker)" 0 t)))))
 
   (describe "Entry"
     (let* ((warning (flycheck-error-new-at 10 12 'warning "A foo warning"
@@ -145,26 +140,22 @@
                       'type 'flycheck-error-list
                       'face 'flycheck-error-list-id)))
 
-      (it "has the error message in the 5th cell"
-        (expect (aref cells 4) :to-equal
-                (list "A foo warning"
-                      'type 'flycheck-error-list
-                      'face 'default)))
+      (let ((checker-name (propertize "emacs-lisp-checkdoc"
+                                      'face 'flycheck-error-list-checker-name)))
+        (it "has the error message in the 5th cell"
+          (let* ((message (format "A foo warning (%s)" checker-name)))
+            (add-face-text-property 0 (length message) 'default t message)
+            (expect (aref cells 4) :to-equal
+                    (list message 'type 'flycheck-error-list))))
 
-      (it "has a default message in the 5th cell if there is no message"
-        (cl-letf* (((flycheck-error-message warning) nil)
-                   (entry (flycheck-error-list-make-entry warning))
-                   (cells (cadr entry)))
-          (expect (aref cells 4) :to-equal
-                  (list "Unknown warning"
-                        'type 'flycheck-error-list
-                        'face 'default))))
-
-      (it "has the syntax checker in the 6th cell"
-        (expect (aref cells 5) :to-equal
-                (list "(emacs-lisp-checkdoc)"
-                      'type 'flycheck-error-list
-                      'face 'flycheck-error-list-checker-name)))))
+        (it "has a default message in the 5th cell if there is no message"
+          (cl-letf* (((flycheck-error-message warning) nil)
+                     (entry (flycheck-error-list-make-entry warning))
+                     (cells (cadr entry))
+                     (message (format "Unknown warning (%s)" checker-name)))
+            (add-face-text-property 0 (length message) 'default t message)
+            (expect (aref cells 4) :to-equal
+                    (list message 'type 'flycheck-error-list)))))))
 
   (describe "Filter"
     (it "kills the filter variable when resetting the filter"

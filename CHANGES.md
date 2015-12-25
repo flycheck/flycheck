@@ -26,6 +26,8 @@ now for questions and discussions about development. [GH-820]
 
   * Map error IDs from flake8-pep257 to Flycheck error levels
   * Explicitly display errors at point with `C-c ! h` [GH-834]
+  * Merge message and checker columns in the error list to remove redundant
+    ellipsis [GH-828]
 
 * Bug fixes:
 
