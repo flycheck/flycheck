@@ -56,7 +56,7 @@ export GIT_AUTHOR_NAME='Flycheck Travis CI'
 git clone --quiet --branch=master "git@github.com:flycheck/flycheck.github.io.git" doc/_deploy
 
 cd doc/_deploy
-rake "build:manual[../..,${MANUAL_VERSION}]" 'build:documents[../..]'
+rake "build:manual[../..,latest]" 'build:documents[../..]'
 git add --force --all .
 git status
 if ! git diff --quiet HEAD; then
