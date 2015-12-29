@@ -72,10 +72,13 @@ before submitting pull requests.  When making larger changes to Flycheck
 or implementing new features we recommend that you first open a separate issue
 to discuss you intended changes.
 
+All contributors are expected to follow our [Code of Conduct][coc].
+
 [sx]: https://emacs.stackexchange.com/questions/tagged/flycheck
 [Issue Tracker]: https://github.com/flycheck/flycheck/issues
 [contrib]: https://github.com/flycheck/flycheck/blob/master/CONTRIBUTING.md
 [Waffle Board]: http://waffle.io/flycheck/flycheck
+[coc]: https://github.com/flycheck/flycheck/blob/master/CONDUCT.md
 
 License
 =======
