@@ -6502,7 +6502,11 @@ See URL `http://golang.org/cmd/go'."
             (option-flag "-i" flycheck-go-build-install-deps)
             ;; multiple tags are listed as "dev debug ..."
             (option-list "-tags=" flycheck-go-build-tags concat)
-            "-o" temporary-file-name)
+            "-o" temporary-file-name
+            ;; Only compile current file, go-build failed if if current
+            ;; directory contains any C file.
+            ;; See https://github.com/dominikh/go-mode.el/issues/19
+            source)
   :error-patterns
   ((error line-start (file-name) ":" line ":"
           (optional column ":") " "
