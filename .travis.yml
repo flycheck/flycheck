@@ -26,4 +26,4 @@ script:
   # Build the manual
   - if [[ $BUILD_MANUAL == yes ]]; then rake doc:texinfo test:htmlproof; fi
 after_success:
-  - if [[ $BUILD_MANUAL == yes ]]; then bash doc/deploy-travis.bash; fi
+  - if [[ $BUILD_MANUAL == yes ]]; then bash admin/deploy-manual-from-travis.bash; fi
