@@ -5,28 +5,7 @@
 @documentencoding UTF-8
 @c %**end of header
 
-@c Macros
-
-@macro flyc{checker}
-@code{\checker\}
-@end macro
-
-@macro ghref{user-and-url,text}
-@uref{https://github.com/\user-and-url\,\text\}
-@end macro
-
-@macro flyccmd{key,command}
-@kindex \key\
-@findex \command\
-@item @kbd{\key\}
-@itemx @kbd{M-x \command\}
-@end macro
-
-@macro flyccmdp{prefix,key,command}
-@kindex \prefix\ \key\
-@item @kbd{\prefix\ \key\}
-@itemx @kbd{\prefix\ M-x \command\}
-@end macro
+@include macros.texi
 
 @c Index setup
 

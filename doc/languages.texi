@@ -1,26 +1,4 @@
-@macro flyclanguage{language}
-@unnumberedsec \language\
-@anchor{language-\language\}
-@cindex Language, \language\
-@cindex \language\ language
-@end macro
-
-@macro flycoption{option}
-@item @code{\option\}
-@vindex \option\
-@end macro
-
-@macro flycoptionx{option}
-@itemx @code{\option\}
-@vindex \option\
-@end macro
-
-@macro flycconfigfile{option, tool}
-@item @code{\option\}
-@vindex \option\
-Configuration file for \tool\.  @xref{Syntax checker
-configuration files}, for more information about configuration files.
-@end macro
+@include macros.texi
 
 @flyclanguage Ada
 
