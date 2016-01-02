@@ -697,16 +697,24 @@ least as severe as this one.  If nil, navigate to all errors.
 @node Displaying errors
 @section Displaying errors
 
-If the point is on a Flycheck error, Flycheck will display the message
-and ID of the error at point in the echo area after a short delay.
+When the point moves to an error location Flycheck automatically
+displays the error at point after a short delay:
 
 @defopt flycheck-display-errors-delay
 The number of seconds to wait before displaying the error at point.
 Floating point numbers can express fractions of seconds.
 @end defopt
 
-You can set @code{flycheck-display-errors-function} to change how
-Flycheck displays errors, and what information it displays:
+You can also display errors at point explicitly with @kbd{C-c ! h}:
+
+@table @asis
+@flyccmd{C-c ! h, flycheck-display-error-at-point}
+Show the error(s) at point.
+@end table
+
+By default Flycheck shows the error message and the error ID in the echo
+area, but you can customise how Flycheck displays errors with
+@code{flycheck-display-errors-function}:
 
 @defopt flycheck-display-errors-function
 A function to display errors.  The function is called with a list of
@@ -714,6 +722,8 @@ Flycheck error objects to display.  @xref{Errors}, for more information
 about these objects.
 @end defopt
 
+@cindex error display function
+@cindex functions for error display
 Flycheck provides some built-in display functions:
 
 @defun flycheck-display-error-messages
@@ -726,22 +736,27 @@ if the error list is visible.  @xref{Listing errors}, for more
 information about the error list.
 @end defun
 
-The @ghref{flycheck/flycheck-pos-tip, flycheck-pos-tip} extension
-provides an alternative display function, which shows error messages in
-a graphical popup.
+Alternatively the @ghref{flycheck/flycheck-pos-tip, flycheck-pos-tip}
+extension provides an display function which shows error messages in a
+graphical popup.
 
+@cindex error tooltip
+@findex display-local-help
+@kindex C-h .
 In addition to this display mechanism, Flycheck adds a tooltip to each
-error.  Its contents are computed by @code{flycheck-help-echo-function}:
+error which appears when you hover the error location with the mouse
+pointer.  You can force Emacs to show the contents of the tooltip in the
+echo area with @kbd{C-h .} (@code{display-local-help}).
+
+The contents of this tooltip are created with
+@code{flycheck-help-echo-function}:
 
 @defopt flycheck-help-echo-function
-A function to compute the contents of the error tooltips.  The function
-is called with the list of errors to display as single argument.  It
-should return a string, which is displayed when the user hovers over an
-error.
-@end defopt
+A function to compute the contents of the error tooltips.
 
-The default is @code{flycheck-make-help-echo}, which displays contents
-similar to those produced by @code{flycheck-display-error-messages}.
+By default Flycheck adds the error message and the error ID of all
+errors at point to the tooltip contents.
+@end defopt
 
 @node Killing errors
 @section Killing errors
