@@ -27,3 +27,10 @@ script:
   - if [[ $BUILD_MANUAL == yes ]]; then rake doc:texinfo test:htmlproof; fi
 after_success:
   - if [[ $BUILD_MANUAL == yes ]]; then bash admin/deploy-manual-from-travis.bash; fi
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/efdc5fd9433efa7c6b80
+    on_success: change
+    on_failure: always
+    on_start: never

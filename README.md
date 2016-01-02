@@ -2,6 +2,7 @@
 [![MELPA stable version](http://stable.melpa.org/packages/flycheck-badge.svg)](http://stable.melpa.org/#/flycheck)
 [![MELPA version](http://melpa.org/packages/flycheck-badge.svg)](http://melpa.org/#/flycheck)
 [![Manual](https://img.shields.io/badge/manual-latest-green.svg)][manual]
+[![Join the chat](https://badges.gitter.im/flycheck/flycheck.svg)](https://gitter.im/flycheck/flycheck)
 
 # [![Flycheck Logo](https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/logo.png)](http://www.flycheck.org)
 
@@ -58,8 +59,9 @@ through Flycheck’s setup and major features.
 Support & Contribution
 ======================
 
-Please ask questions about Flycheck on [Stack Exchange][sx].  We try to answer
-all questions as fast and as precise as possible.
+Please ask questions about Flycheck on [Stack Exchange][sx] or in our
+[Gitter chat][gitter].  We try to answer all questions as fast and as precise as
+possible.
 
 To report problems or bugs, please use our [issue tracker][].  Our
 [contribution guidelines][contrib] help you to create good bug reports; please
@@ -67,13 +69,15 @@ take a look.
 
 We welcome patches and pull requests that fix bugs or provide new features.
 Please read our [Contribution guidelines][contrib] for help and guidelines
-before submitting pull requests.  When making larger changes to Flycheck
-or implementing new features we recommend that you first open a separate issue
-to discuss you intended changes.
+before submitting pull requests.  When making larger changes to Flycheck or
+implementing new features we recommend that you first open a separate issue or
+ask in our [Gitter channel][gitter] to discuss you intended changes.
 
-All contributors are expected to follow our [Code of Conduct][coc].
+All contributors and all participants in our communication channels are expected
+to follow our [Code of Conduct][coc].
 
 [sx]: https://emacs.stackexchange.com/questions/tagged/flycheck
+[gitter]: https://gitter.im/flycheck/flycheck
 [Issue Tracker]: https://github.com/flycheck/flycheck/issues
 [contrib]: https://github.com/flycheck/flycheck/blob/master/CONTRIBUTING.md
 [Waffle Board]: http://waffle.io/flycheck/flycheck
