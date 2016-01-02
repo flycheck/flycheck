@@ -1,6 +1,6 @@
 @include macros.texi
 
-@flyclanguage Ada
+@flyclanguage{Ada}
 
 @itemize
 @item
@@ -23,7 +23,7 @@ of a warning category to enable.
 
 @end itemize
 
-@flyclanguage AsciiDoc
+@flyclanguage{AsciiDoc}
 
 @itemize
 @item
@@ -534,7 +534,7 @@ The coding standard for PHP CodeSniffer, either as name of a built-in
 standard, or as path to a standard specification.
 @end table
 
-@flyclanguage Processing
+@flyclanguage{Processing}
 
 @itemize
 @item
