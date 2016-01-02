@@ -1,44 +1,33 @@
-# [![Flycheck Logo](https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/logo.png)](http://www.flycheck.org)
-
 [![License GPL 3](https://img.shields.io/badge/license-GPL_3-blue.svg)][COPYING]
 [![MELPA stable version](http://stable.melpa.org/packages/flycheck-badge.svg)](http://stable.melpa.org/#/flycheck)
 [![MELPA version](http://melpa.org/packages/flycheck-badge.svg)](http://melpa.org/#/flycheck)
 [![Manual](https://img.shields.io/badge/manual-latest-green.svg)][manual]
 [![Waffle Board](https://img.shields.io/badge/Board-ready-75AED9.svg)](https://waffle.io/flycheck/flycheck)
-[![Buy A Drink](https://img.shields.io/badge/Paypal-Buy%20a%20Drink-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=BYNRV4RY2WG7L)
+
+# [![Flycheck Logo](https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/logo.png)](http://www.flycheck.org)
+
+[![Join the chat at https://gitter.im/flycheck/flycheck](https://badges.gitter.im/flycheck/flycheck.svg)](https://gitter.im/flycheck/flycheck?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 **Flycheck** is a modern on-the-fly syntax checking extension for GNU Emacs 24,
 intended as replacement for the older Flymake extension which is part of GNU
 Emacs.
 
 It uses various syntax checking and linting tools to check the contents of
-buffers, and reports warnings and errors directly in the buffer, or in an
-optional error list.  The following screenshow shows Flycheck at work in a
-Haskell buffer, using GHC and Hlint for syntax checking:
+buffers, and reports warnings and errors directly in the buffer or in an
+optional error list (see [Flycheck manual][manual] for more information):
 
-![](https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/screencast.gif)
+![](https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/flycheck-annotated.png)
 
-The color theme in this screencast is [Solarized Light][], with the the
-[Source Code Pro][] font.
+Out of the box Flycheck supports over 40 different programming languages with
+more than 80 different syntax checking tools, and comes with a simple interface
+to define new syntax checkers.
 
-[Solarized Light]: https://github.com/bbatsov/solarized-emacs
-[Source Code Pro]: https://github.com/adobe-fonts/source-code-pro
+Many [3rd party extensions](http://flycheck.org/extensions.html) provide
+new syntax checkers and other features like alternative error displays or mode
+line indicators.
+
 [COPYING]: https://github.com/flycheck/flycheck/blob/master/COPYING
 [manual]: http://www.flycheck.org/manual/latest/index.html
-
-Features
---------
-
-- Supports over 30 programming and markup languages with more than 70 different
-  syntax checking tools
-- Fully automatic, fail-safe, on-the-fly syntax checking in background
-- Nice error indication and highlighting
-- Optional error list popup
-- Many customization options
-- A [comprehensive manual][manual]
-- A simple interface to define new syntax checkers
-- A “doesn't get in your way” guarantee
-- Many [3rd party extensions](http://flycheck.org/extensions.html)
 
 Installation
 ------------
@@ -50,16 +39,10 @@ for more information.
 Flycheck does not officially support Windows, but tries to maintain Windows
 compatibility and should generally work fine on Windows, too.
 
-Install Flycheck from [MELPA][] or [MELPA Stable][] with:
+Install Flycheck from [MELPA](http://melpa.org) (development snapshots) or
+[MELPA Stable](http://stable.melpa.org) (releases) with:
 
     M-x package-install RET flycheck
-
-In your [Cask][] file:
-
-    (source gnu)
-    (source melpa)
-
-    (depends-on "flycheck")
 
 Then add the following to your init file:
 
@@ -68,45 +51,36 @@ Then add the following to your init file:
 If you don’t know where your init file is, look at the value of the variable
 `user-init-file` with `C-h v user-init-file`.
 
-See [Installation][] and [Quick start][] for more information.
+See [Installation][] for more information, and [Quick start][] for a quick tour
+through Flycheck’s setup and major features.
 
-[MELPA]: http://melpa.org
-[MELPA Stable]: http://stable.melpa.org
-[Cask]: https://github.com/cask/cask
 [Supported Languages]: http://www.flycheck.org/manual/latest/Supported-languages.html#Supported-languages
 [Installation]: http://www.flycheck.org/manual/latest/Installation.html#Installation
 [Quick start]: http://www.flycheck.org/manual/latest/Quickstart.html#Quickstart
 
-Documentation
-=============
-
-Documentation is available at http://www.flycheck.org:
-
-- [Quick start][] (tutorial)
-- [User manual][] (reference information)
-
-[User manual]: http://www.flycheck.org/manual/latest/Usage.html#Usage
-
 Support & Contribution
 ======================
 
-- [Waffle Board][] and [Issue tracker][]
-- [Github][]
-- [Contribution guidelines][]
+Please ask questions about Flycheck on [Stack Exchange][sx].  We try to answer
+all questions as fast and as precise as possible.
 
+To report problems or bugs, please use our [issue tracker][].  Our
+[contribution guidelines][contrib] help you to create good bug reports; please
+take a look.
+
+We welcome patches and pull requests that fix bugs or provide new features.
+Please read our [Contribution guidelines][contrib] for help and guidelines
+before submitting pull requests.  When making larger changes to Flycheck
+or implementing new features we recommend that you first open a separate issue
+to discuss you intended changes.
+
+All contributors are expected to follow our [Code of Conduct][coc].
+
+[sx]: https://emacs.stackexchange.com/questions/tagged/flycheck
+[Issue Tracker]: https://github.com/flycheck/flycheck/issues
+[contrib]: https://github.com/flycheck/flycheck/blob/master/CONTRIBUTING.md
 [Waffle Board]: http://waffle.io/flycheck/flycheck
-[Issue tracker]: https://github.com/flycheck/flycheck/issues
-[Github]: https://github.com/flycheck/flycheck
-[Contribution guidelines]: https://github.com/flycheck/flycheck/blob/master/CONTRIBUTING.md
-
-Credits
-=======
-
-- [Contributors][]
-- [Credits][]
-
-[Contributors]: https://github.com/flycheck/flycheck/graphs/contributors
-[Credits]: https://github.com/flycheck/flycheck/blob/master/CREDITS.md
+[coc]: https://github.com/flycheck/flycheck/blob/master/CONDUCT.md
 
 License
 =======
