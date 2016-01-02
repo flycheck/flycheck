@@ -12,15 +12,13 @@ Emacs.
 
 It uses various syntax checking and linting tools to check the contents of
 buffers, and reports warnings and errors directly in the buffer or in an
-optional error list:
+optional error list (see [Flycheck manual][manual] for more information):
 
 ![](https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/flycheck-annotated.png)
 
-Take a look at the [comprehensive manual][manual] for more information.
-
-Out of the box it supports over 40 different programming languages with more
-than 80 different syntax checking tools, and comes with a simple interface to
-define new syntax checkers.
+Out of the box Flycheck supports over 40 different programming languages with
+more than 80 different syntax checking tools, and comes with a simple interface
+to define new syntax checkers.
 
 Many [3rd party extensions](http://flycheck.org/extensions.html) provide
 new syntax checkers and other features like alternative error displays or mode
