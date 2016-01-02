@@ -8,6 +8,7 @@ master (in development)
 - Improvements:
 
   - Map error IDs from flake8-pep257 to Flycheck error levels
+  - Explicitly display errors at point with `C-c ! h` [GH-834]
 
 - Bug fixes:
 

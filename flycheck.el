@@ -847,6 +847,8 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
     (define-key map "s"         #'flycheck-select-checker)
     (define-key map "e"         #'flycheck-set-checker-executable)
     (define-key map "?"         #'flycheck-describe-checker)
+    (define-key map "h"         #'flycheck-display-error-at-point)
+    (define-key map "H"         #'display-local-help)
     (define-key map "i"         #'flycheck-info)
     (define-key map "V"         #'flycheck-version)
     (define-key map "v"         #'flycheck-verify-setup)
@@ -4087,6 +4089,7 @@ non-nil."
 
 (defun flycheck-display-error-at-point ()
   "Display the all error messages at point in minibuffer."
+  (interactive)
   ;; This function runs from a timer, so we must take care to not ignore any
   ;; errors
   (with-demoted-errors "Flycheck error display error: %s"
