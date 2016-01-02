@@ -50,7 +50,7 @@ substantial code to Flycheck:
 - [Sean Gillespie](https://github.com/swgillespie)
 - [Sean Salmon](https://github.com/phatcabbage)
 - [Sebastian Beyer](https://github.com/sebastianbeyer)
-- [Sebastian Wiesner](https://github.com/lunaryorn) (founder, lead, maintainer)
+- [Sebastian Wiesner](https://github.com/lunaryorn) (founder, head maintainer)
 - [Stephen Lewis](https://github.com/stephenjlewis)
 - [Steve Purcell](https://github.com/purcell)
 - [Sven Keidel](https://github.com/svenkeidel)
