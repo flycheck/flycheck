@@ -81,7 +81,7 @@ with @key{M-x flycheck-info}}.  This opens Emacs' built-in Info reader.
 * Flycheck hooks::              How to hook into Flycheck
 * Flycheck API::                API documentation
 * Supported languages::         A list of supported languages
-* Issues::                      How to report issues in Flycheck
+* Getting Help::                How to obtain help about Flycheck
 * GNU Free Documentation License::  How to copy this manual
 * Main Index::                  Index of Flycheck concepts
 * Key Index::                   Index of all keybindings
@@ -1570,33 +1570,29 @@ more information about a syntax checker.
 
 @include languages.texi
 
-@node Issues
-@appendix Issues
+@node Getting Help
+@appendix Getting Help
 
-Please report any bugs or issues to the
-@ghref{flycheck/flycheck/issues,issue tracker}.  If you report a bug,
-please include the following information to help us identify and fix the
-culprit:
+Please ask questions about Flycheck on
+@uref{https://emacs.stackexchange.com/questions/tagged/flycheck,Stack
+Exchange} or in our @uref{https://gitter.im/flycheck/flycheck,Gitter
+channel}.  We try to answer all questions as fast and as precise as
+possible.
 
-@itemize @bullet
-@item
-The output of @kbd{M-x flycheck-verify-setup} in affected buffers
-@item
-The version of Emacs, as reported by @kbd{M-x emacs-version}
-@item
-The version of Flycheck, as reported by @kbd{M-x flycheck-version}
-@item
-A complete and precise description of the issue, including a description
-of the expected @emph{and} the observed behaviour.
-@end itemize
+To report problems or bugs, please use our
+@ghref{flycheck/flycheck/issues,issue tracker}.  Our
+@ghref{flycheck/flycheck/blob/master/CONTRIBUTING.md, Contribution
+Guidelines} help you to create good bug reports; please take a look.
 
-Please also tell us your ideas for improvements or new features.
+We welcome patches and pull requests that fix bugs or provide new
+features.  Please read our Contribution Guidelines for help and
+guidelines before submitting pull requests.  When making larger changes
+to Flycheck or implementing new features we recommend that you first
+open a separate issue or ask in our Gitter channel to discuss
+you intended changes.
 
-Patches are @emph{very} welcome as well.  If you have code to
-contribute, please do not hesitate to open a pull request.  We would
-like to ask you to obey a few
-@ghref{flycheck/flycheck/blob/master/CONTRIBUTING.md, Guidelines},
-though.
+Please follow our @uref{http://www.flycheck.org/conduct.html} in all our
+communication channels.
 
 @node GNU Free Documentation License
 @appendix GNU Free Documentation License
