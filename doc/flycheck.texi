@@ -1573,11 +1573,16 @@ more information about a syntax checker.
 @node Getting Help
 @appendix Getting Help
 
+@section Asking questions
+
 Please ask questions about Flycheck on
 @uref{https://emacs.stackexchange.com/questions/tagged/flycheck,Stack
 Exchange} or in our @uref{https://gitter.im/flycheck/flycheck,Gitter
 channel}.  We try to answer all questions as fast and as precise as
 possible.
+
+@section Reporting issues
+@anchor{Issues}
 
 To report problems or bugs, please use our
 @ghref{flycheck/flycheck/issues,issue tracker}.  Our
