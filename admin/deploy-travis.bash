@@ -39,13 +39,15 @@ check_environment "$TRAVIS_BRANCH" "master" "not the master branch"
 
 echo "Publishing manual..."
 
+mkdir "build/"
+
 # Decrypt and load the deployment key
 # shellcheck disable=SC2154
-openssl aes-256-cbc -K "${encrypted_923a5f7c915e_key}" -iv "${encrypted_923a5f7c915e_iv}" -in doc/deploy.enc -out doc/deploy -d
-chmod 600 doc/deploy
+openssl aes-256-cbc -K "${encrypted_923a5f7c915e_key}" -iv "${encrypted_923a5f7c915e_iv}" -in admin/deploy.enc -out build/deploy -d
+chmod 600 build/deploy
 eval_ssh_agent -s
-ssh-add doc/deploy
-rm doc/deploy
+ssh-add build/deploy
+rm build/deploy
 
 # Git setup
 export GIT_COMMITTER_EMAIL='travis@flycheck.org'
@@ -53,9 +55,9 @@ export GIT_COMMITTER_NAME='Flycheck Travis CI'
 export GIT_AUTHOR_EMAIL='travis@flycheck.org'
 export GIT_AUTHOR_NAME='Flycheck Travis CI'
 
-git clone --quiet --branch=master "git@github.com:flycheck/flycheck.github.io.git" doc/_deploy
+git clone --quiet --branch=master "git@github.com:flycheck/flycheck.github.io.git" build/_deploy
 
-cd doc/_deploy
+cd build/_deploy
 rake "build:manual[../..,latest]" 'build:documents[../..]'
 git add --force --all .
 git status
