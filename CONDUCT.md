@@ -77,5 +77,5 @@ intent and forgive as long as you earn their trust.
 
 Adapted from the [Rust Code of Conduct](https://www.rust-lang.org/conduct.html).
 
-Copyright (c) 2015 Sebastian Wiesner and Flycheck contributors
+Copyright (c) 2015 Sebastian Wiesner and Flycheck contributors <br />
 Copyright (c) 2014 The Rust Project Developers
