@@ -1,6 +1,8 @@
-# The Flycheck Code of Conduct
+The Flycheck Code of Conduct
+============================
 
-## Conduct
+Conduct
+-------
 
 **Contact**: [Any moderator][moderators]
 
@@ -34,7 +36,8 @@
 
 [moderators]: http://www.flycheck.org/people.html#moderators
 
-## Moderation
+Moderation
+----------
 
 These are the policies for upholding our community's standards of conduct in our
 communication channels, most notably in Flycheck’s Github organisation.
