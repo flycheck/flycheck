@@ -5,7 +5,8 @@ sudo: false
 rvm:
   - 2.3.0
 cache:
-  bundler
+  directories:
+    - vendor/bundle
 env:
   global:
     # Speeds up installation of nokogiri
@@ -26,7 +27,7 @@ before_install:
   - if [[ $BUILD_MANUAL == yes ]]; then texi2any --version; fi
   - if [[ $BUILD_MANUAL == yes ]]; then gem install html-proofer && htmlproof --version; fi
 install:
-  - bundle install
+  - bundle install --deployment --jobs=3 --retry=3
   - rake init:all
 script:
   # Linting and compilation
