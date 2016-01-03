@@ -27,7 +27,7 @@ before_install:
   - if [[ $BUILD_MANUAL == yes ]]; then texi2any --version; fi
   - if [[ $BUILD_MANUAL == yes ]]; then gem install html-proofer && htmlproof --version; fi
 install:
-  - bundle install --deployment --jobs=3 --retry=3
+  - bundle install --jobs=3 --retry=3 --path vendor/bundle
   - rake init:all
 script:
   # Linting and compilation
