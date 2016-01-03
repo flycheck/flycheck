@@ -78,8 +78,13 @@ namespace :init do
     sh 'cask', 'update'
   end
 
+  desc 'Install admin dependencies'
+  task :admindeps do
+    sh 'bundle', 'install', '--path', 'admin/gems'
+  end
+
   desc 'Initialise the project'
-  task all: [:deps]
+  task all: [:deps, :admindeps]
 end
 
 namespace :verify do
@@ -122,7 +127,7 @@ namespace :test do
 
   desc 'Test HTML manual for broken links'
   task htmlproof: ['doc/flycheck.html'] do |t|
-    cmd = ['htmlproof', '--disable-external']
+    cmd = ['bundle', 'exec', 'htmlproof', '--disable-external']
     cmd += t.prerequisites
     sh(*cmd)
   end

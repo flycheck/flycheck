@@ -16,9 +16,9 @@ before_install:
   - if [[ $BUILD_MANUAL == yes ]]; then texi2any --version; fi
   - if [[ $BUILD_MANUAL == yes ]]; then gem install html-proofer && htmlproof --version; fi
 install:
-  - rake init:deps
+  - rake init:all
 script:
-  # Checkdoc and compilation
+  # Linting and compilation
   - rake verify:all
   - rake 'compile:all[$COMPILEARGS]'
   # Unit tests

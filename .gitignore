@@ -3,14 +3,13 @@
 # Packages installed for development
 /.cask/
 
-# Build files
-/build/
+# Gems installed for administrative tasks
+/.bundle/
+/admin/gems/
+/Gemfile.lock
 
 # Generated distribution packages
 /dist/
-
-# Vagrant cache
-/.vagrant
 
 # Directory local variables
 .dir-locals.el
