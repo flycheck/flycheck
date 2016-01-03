@@ -22,6 +22,8 @@ rescue LoadError
   exit 1
 end
 
+require_relative 'admin/lib/flycheck/travis'
+
 require 'rake'
 require 'rake/clean'
 
@@ -40,7 +42,7 @@ DOC_SOURCES.add('doc/*.texi')
 
 MARKDOWN_SOURCES = FileList['*.md']
 
-RUBY_SOURCES = FileList['Rakefile']
+RUBY_SOURCES = FileList['Rakefile', 'admin/lib/*.rb']
 
 # File tasks and rules
 file 'doc/images/logo.png' => ['flycheck.svg'] do |t|
@@ -192,4 +194,12 @@ namespace :dist do
 
   desc 'Build all distributions'
   task all: [:package]
+end
+
+namespace :deploy do
+  if Flycheck::Travis.travis_ci?
+    task :manual do
+      Flycheck::Travis.deploy_manual
+    end
+  end
 end

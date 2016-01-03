@@ -38,7 +38,7 @@ script:
   # Build the manual
   - if [[ $BUILD_MANUAL == yes ]]; then rake doc:info test:html; fi
 after_success:
-  - if [[ $BUILD_MANUAL == yes ]]; then bash admin/deploy-manual-from-travis.bash; fi
+  - if [[ $BUILD_MANUAL == yes ]]; then rake deploy:manual; fi
 notifications:
   webhooks:
     urls:
