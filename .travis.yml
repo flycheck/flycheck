@@ -1,4 +1,6 @@
-language: emacs-lisp
+# We should have emacs-lisp but that triggers a warning, so use what Travis uses
+# anyway if you specify an invalid language.
+language: ruby
 sudo: false
 env:
   global:

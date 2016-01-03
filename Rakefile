@@ -90,12 +90,9 @@ namespace :init do
 end
 
 namespace :verify do
-  desc 'Verify Emacs Lisp sources'
-  task :elisp do
-    sh(*emacs_batch('--eval', '(setq checkdoc-arguments-in-order-flag nil)',
-                    '-l', 'test/flycheck-checkdoc.el',
-                    '-f', 'flycheck-checkdoc-batch-and-exit',
-                    *SOURCES))
+  desc 'Verify Travis configuration'
+  task :travis do
+    sh('bundle', 'exec', 'travis', 'lint')
   end
 
   desc 'Verify Markdown documents'
@@ -105,8 +102,16 @@ namespace :verify do
        *MARKDOWN_SOURCES)
   end
 
+  desc 'Verify Emacs Lisp sources'
+  task :elisp do
+    sh(*emacs_batch('--eval', '(setq checkdoc-arguments-in-order-flag nil)',
+                    '-l', 'test/flycheck-checkdoc.el',
+                    '-f', 'flycheck-checkdoc-batch-and-exit',
+                    *SOURCES))
+  end
+
   task 'Verify all source files'
-  task all: [:elisp, :markdown]
+  task all: [:travis, :markdown, :elisp]
 end
 
 namespace :generate do
