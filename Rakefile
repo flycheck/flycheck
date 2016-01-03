@@ -26,6 +26,8 @@ OBJECTS = SOURCES.ext('.elc')
 DOC_SOURCES = FileList['doc/flycheck.texi']
 DOC_SOURCES.add('doc/*.texi')
 
+MARKDOWN_SOURCES = FileList['*.md']
+
 # File tasks and rules
 file 'doc/images/logo.png' => ['flycheck.svg'] do |t|
   sh 'convert', t.prerequisites.first,
@@ -94,6 +96,13 @@ namespace :verify do
                     '-l', 'test/flycheck-checkdoc.el',
                     '-f', 'flycheck-checkdoc-batch-and-exit',
                     *SOURCES))
+  end
+
+  desc 'Verify Markdown documents'
+  task :markdown do
+    sh('bundle', 'exec', 'mdl',
+       '--style', 'admin/markdown_style',
+       *MARKDOWN_SOURCES)
   end
 
   task 'Verify all source files'

@@ -4,7 +4,7 @@
 [![Manual](https://img.shields.io/badge/manual-latest-green.svg)][manual]
 [![Join the chat](https://badges.gitter.im/flycheck/flycheck.svg)](https://gitter.im/flycheck/flycheck)
 
-# [![Flycheck Logo](https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/logo.png)](http://www.flycheck.org)
+# [![Flycheck][logo]](http://www.flycheck.org) #
 
 **Flycheck** is a modern on-the-fly syntax checking extension for GNU Emacs 24,
 intended as replacement for the older Flymake extension which is part of GNU
@@ -26,9 +26,9 @@ line indicators.
 
 [COPYING]: https://github.com/flycheck/flycheck/blob/master/COPYING
 [manual]: http://www.flycheck.org/manual/latest/index.html
+[logo]: https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/logo.png
 
-Installation
-------------
+## Installation ##
 
 Flycheck needs GNU Emacs 24 on a Unix system, and additionally **external**
 syntax checking programs for the languages you use.  See [Supported Languages][]
@@ -56,8 +56,7 @@ through Flycheck’s setup and major features.
 [Installation]: http://www.flycheck.org/manual/latest/Installation.html#Installation
 [Quick start]: http://www.flycheck.org/manual/latest/Quickstart.html#Quickstart
 
-Support & Contribution
-======================
+## Support & Contribution ##
 
 Please ask questions about Flycheck on [Stack Exchange][sx] or in our
 [Gitter chat][gitter].  We try to answer all questions as fast and as precise as
@@ -83,8 +82,7 @@ to follow our [Code of Conduct][coc].
 [Waffle Board]: http://waffle.io/flycheck/flycheck
 [coc]: https://github.com/flycheck/flycheck/blob/master/CONDUCT.md
 
-License
-=======
+## License ##
 
 Flycheck is free software: you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
