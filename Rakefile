@@ -106,7 +106,7 @@ namespace :verify do
   end
 
   task 'Verify all source files'
-  task all: [:elisp]
+  task all: [:elisp, :markdown]
 end
 
 namespace :generate do
