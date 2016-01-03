@@ -25,6 +25,9 @@ end
 require 'rake'
 require 'rake/clean'
 
+require 'rubocop/rake_task'
+require 'html/proofer'
+
 def emacs_batch(*args)
   [ENV['EMACS'] || 'emacs', '-Q', '--batch'] + args
 end
@@ -110,8 +113,8 @@ namespace :verify do
   end
 
   desc 'Verify Ruby sources'
-  task :ruby do
-    sh('bundle', 'exec', 'rubocop', *RUBY_SOURCES)
+  RuboCop::RakeTask.new(:ruby) do |task|
+    task.patterns = RUBY_SOURCES
   end
 
   desc 'Verify Emacs Lisp sources'
@@ -153,9 +156,11 @@ namespace :test do
 
   desc 'Test HTML manual for broken links'
   task html: ['doc/flycheck.html'] do |t|
-    cmd = ['bundle', 'exec', 'htmlproof', '--disable-external']
-    cmd += t.prerequisites
-    sh(*cmd)
+    HTML::Proofer
+      .new(t.prerequisites.first,
+           disable_external: true,
+           checks_to_ignore: ['ScriptCheck'])
+      .run
   end
 
   desc 'Run all tests'
