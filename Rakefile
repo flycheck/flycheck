@@ -88,8 +88,8 @@ namespace :init do
 end
 
 namespace :verify do
-  desc 'Run checkdoc on all sources'
-  task :checkdoc do
+  desc 'Verify Emacs Lisp sources'
+  task :elisp do
     sh(*emacs_batch('--eval', '(setq checkdoc-arguments-in-order-flag nil)',
                     '-l', 'test/flycheck-checkdoc.el',
                     '-f', 'flycheck-checkdoc-batch-and-exit',
@@ -97,7 +97,7 @@ namespace :verify do
   end
 
   task 'Verify all source files'
-  task all: [:checkdoc]
+  task all: [:elisp]
 end
 
 namespace :generate do
@@ -126,14 +126,14 @@ namespace :test do
   end
 
   desc 'Test HTML manual for broken links'
-  task htmlproof: ['doc/flycheck.html'] do |t|
+  task html: ['doc/flycheck.html'] do |t|
     cmd = ['bundle', 'exec', 'htmlproof', '--disable-external']
     cmd += t.prerequisites
     sh(*cmd)
   end
 
   desc 'Run all tests'
-  task all: [:unit, :htmlproof]
+  task all: [:unit, :html]
 end
 
 namespace :doc do
@@ -141,14 +141,14 @@ namespace :doc do
   CLEAN << 'doc/flycheck.html'
   CLEAN << 'doc/dir'
 
-  desc 'Build Texinfo manual'
-  task texinfo: ['doc/flycheck.info']
+  desc 'Build Info manual'
+  task info: ['doc/flycheck.info']
 
   desc 'Build HTML manual'
   task html: ['doc/flycheck.html']
 
   desc 'Build all documentation'
-  task all: [:texinfo, :html]
+  task all: [:info, :html]
 end
 
 namespace :dist do
