@@ -28,7 +28,7 @@ script:
   # Unit tests
   - rake "test:unit[(not (tag external-tool))]"
   # Build the manual
-  - if [[ $BUILD_MANUAL == yes ]]; then rake doc:texinfo test:html; fi
+  - if [[ $BUILD_MANUAL == yes ]]; then rake doc:info test:html; fi
 after_success:
   - if [[ $BUILD_MANUAL == yes ]]; then bash admin/deploy-manual-from-travis.bash; fi
 notifications:
