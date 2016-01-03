@@ -28,6 +28,8 @@ DOC_SOURCES.add('doc/*.texi')
 
 MARKDOWN_SOURCES = FileList['*.md']
 
+RUBY_SOURCES = FileList['Rakefile']
+
 # File tasks and rules
 file 'doc/images/logo.png' => ['flycheck.svg'] do |t|
   sh 'convert', t.prerequisites.first,
@@ -49,9 +51,10 @@ file 'doc/flycheck.html' => DOC_SOURCES do |t|
     'DOCTYPE' => '<!DOCTYPE html>'
   }
   cmd = ['texi2any', '--html', '--no-split']
-  cmd += customizations
-        .map { |var, value| ['--set-customization-variable', "#{var}=#{value}"] }
-        .flatten
+  cmd += customizations.map do |var, value|
+    ['--set-customization-variable', "#{var}=#{value}"]
+  end.flatten
+
   cmd << '-o' << t.name << t.prerequisites.first
   sh(*cmd)
 end
@@ -102,6 +105,11 @@ namespace :verify do
        *MARKDOWN_SOURCES)
   end
 
+  desc 'Verify Ruby sources'
+  task :ruby do
+    sh('bundle', 'exec', 'rubocop', *RUBY_SOURCES)
+  end
+
   desc 'Verify Emacs Lisp sources'
   task :elisp do
     sh(*emacs_batch('--eval', '(setq checkdoc-arguments-in-order-flag nil)',
@@ -111,7 +119,7 @@ namespace :verify do
   end
 
   task 'Verify all source files'
-  task all: [:travis, :markdown, :elisp]
+  task all: [:travis, :markdown, :ruby, :elisp]
 end
 
 namespace :generate do
