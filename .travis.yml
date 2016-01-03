@@ -2,6 +2,8 @@
 # anyway if you specify an invalid language.
 language: ruby
 sudo: false
+rvm:
+  - 2.3.0
 env:
   global:
     # Speeds up installation of nokogiri
