@@ -92,7 +92,7 @@ end
 namespace :verify do
   desc 'Verify Travis configuration'
   task :travis do
-    sh('bundle', 'exec', 'travis', 'lint')
+    sh('bundle', 'exec', 'travis', 'lint', '--exit-code', '--no-interactive')
   end
 
   desc 'Verify Markdown documents'
