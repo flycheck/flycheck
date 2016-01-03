@@ -1,10 +1,14 @@
 language: emacs-lisp
 sudo: false
 env:
-  # Run unit tests against oldest supported stable, latest stable, and trunk
-  - EMACS_VERSION=24.3
-  - EMACS_VERSION=24.5 BUILD_MANUAL=yes
-  - EMACS_VERSION=snapshot COMPILEFLAGS='error-on-warn'
+  global:
+    # Speeds up installation of nokogiri
+    - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+  matrix:
+    # Run unit tests against oldest supported stable, latest stable, and trunk
+    - EMACS_VERSION=24.3
+    - EMACS_VERSION=24.5 BUILD_MANUAL=yes
+    - EMACS_VERSION=snapshot COMPILEFLAGS='error-on-warn'
 before_install:
   - export PATH="$HOME/bin:$PATH"
   - wget 'https://raw.githubusercontent.com/flycheck/emacs-travis/master/emacs-travis.mk'
