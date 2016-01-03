@@ -3,9 +3,8 @@
 # Packages installed for development
 /.cask/
 
-# Gems installed for administrative tasks
+# Bundler configuration and lock file
 /.bundle/
-/admin/gems/
 /Gemfile.lock
 
 # Generated distribution packages

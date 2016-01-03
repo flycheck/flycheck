@@ -13,6 +13,15 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
+begin
+  require 'bundler'
+  require 'bundler/setup'
+rescue LoadError
+  puts '\e[31mFailed to load bundler\e[0m'
+  puts '\e[33mPlease run `gem install bundler` and `bundle install`.\e[0m'
+  exit 1
+end
+
 require 'rake'
 require 'rake/clean'
 
@@ -83,13 +92,8 @@ namespace :init do
     sh 'cask', 'update'
   end
 
-  desc 'Install admin dependencies'
-  task :admindeps do
-    sh 'bundle', 'install', '--path', 'admin/gems'
-  end
-
   desc 'Initialise the project'
-  task all: [:deps, :admindeps]
+  task all: [:deps]
 end
 
 namespace :verify do
