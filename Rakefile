@@ -1,4 +1,4 @@
-# Copyright (c) 2012-2015 Sebastian Wiesner and Flycheck contributors
+# Copyright (c) 2012-2016 Sebastian Wiesner and Flycheck contributors
 
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
