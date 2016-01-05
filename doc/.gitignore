@@ -1,6 +1,3 @@
-# Ignore the private deployment key
-/deploy
-
 # Ignore generated manuals
 /*.info
 /*.html

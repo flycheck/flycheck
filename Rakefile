@@ -1,4 +1,4 @@
-# Copyright (c) 2012-2015 Sebastian Wiesner and Flycheck contributors
+# Copyright (c) 2012-2016 Sebastian Wiesner and Flycheck contributors
 
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -13,8 +13,20 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
+begin
+  require 'bundler'
+  require 'bundler/setup'
+rescue LoadError
+  puts '\e[31mFailed to load bundler\e[0m'
+  puts '\e[33mPlease run `gem install bundler` and `bundle install`.\e[0m'
+  exit 1
+end
+
 require 'rake'
 require 'rake/clean'
+
+require 'rubocop/rake_task'
+require 'html/proofer'
 
 def emacs_batch(*args)
   [ENV['EMACS'] || 'emacs', '-Q', '--batch'] + args
@@ -25,6 +37,10 @@ OBJECTS = SOURCES.ext('.elc')
 
 DOC_SOURCES = FileList['doc/flycheck.texi']
 DOC_SOURCES.add('doc/*.texi')
+
+MARKDOWN_SOURCES = FileList['*.md']
+
+RUBY_SOURCES = FileList['Rakefile']
 
 # File tasks and rules
 file 'doc/images/logo.png' => ['flycheck.svg'] do |t|
@@ -47,9 +63,10 @@ file 'doc/flycheck.html' => DOC_SOURCES do |t|
     'DOCTYPE' => '<!DOCTYPE html>'
   }
   cmd = ['texi2any', '--html', '--no-split']
-  cmd += customizations
-        .map { |var, value| ['--set-customization-variable', "#{var}=#{value}"] }
-        .flatten
+  cmd += customizations.map do |var, value|
+    ['--set-customization-variable', "#{var}=#{value}"]
+  end.flatten
+
   cmd << '-o' << t.name << t.prerequisites.first
   sh(*cmd)
 end
@@ -83,8 +100,25 @@ namespace :init do
 end
 
 namespace :verify do
-  desc 'Run checkdoc on all sources'
-  task :checkdoc do
+  desc 'Verify Travis configuration'
+  task :travis do
+    sh('bundle', 'exec', 'travis', 'lint', '--exit-code', '--no-interactive')
+  end
+
+  desc 'Verify Markdown documents'
+  task :markdown do
+    sh('bundle', 'exec', 'mdl',
+       '--style', 'admin/markdown_style',
+       *MARKDOWN_SOURCES)
+  end
+
+  desc 'Verify Ruby sources'
+  RuboCop::RakeTask.new(:ruby) do |task|
+    task.patterns = RUBY_SOURCES
+  end
+
+  desc 'Verify Emacs Lisp sources'
+  task :elisp do
     sh(*emacs_batch('--eval', '(setq checkdoc-arguments-in-order-flag nil)',
                     '-l', 'test/flycheck-checkdoc.el',
                     '-f', 'flycheck-checkdoc-batch-and-exit',
@@ -92,7 +126,7 @@ namespace :verify do
   end
 
   task 'Verify all source files'
-  task all: [:checkdoc]
+  task all: [:travis, :markdown, :ruby, :elisp]
 end
 
 namespace :generate do
@@ -121,14 +155,16 @@ namespace :test do
   end
 
   desc 'Test HTML manual for broken links'
-  task htmlproof: ['doc/flycheck.html'] do |t|
-    cmd = ['htmlproof', '--disable-external']
-    cmd += t.prerequisites
-    sh(*cmd)
+  task html: ['doc/flycheck.html'] do |t|
+    HTML::Proofer
+      .new(t.prerequisites.first,
+           disable_external: true,
+           checks_to_ignore: ['ScriptCheck'])
+      .run
   end
 
   desc 'Run all tests'
-  task all: [:unit, :htmlproof]
+  task all: [:unit, :html]
 end
 
 namespace :doc do
@@ -136,14 +172,14 @@ namespace :doc do
   CLEAN << 'doc/flycheck.html'
   CLEAN << 'doc/dir'
 
-  desc 'Build Texinfo manual'
-  task texinfo: ['doc/flycheck.info']
+  desc 'Build Info manual'
+  task info: ['doc/flycheck.info']
 
   desc 'Build HTML manual'
   task html: ['doc/flycheck.html']
 
   desc 'Build all documentation'
-  task all: [:texinfo, :html]
+  task all: [:info, :html]
 end
 
 namespace :dist do

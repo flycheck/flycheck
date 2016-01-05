@@ -5,28 +5,7 @@
 @documentencoding UTF-8
 @c %**end of header
 
-@c Macros
-
-@macro flyc{checker}
-@code{\checker\}
-@end macro
-
-@macro ghref{user-and-url,text}
-@uref{https://github.com/\user-and-url\,\text\}
-@end macro
-
-@macro flyccmd{key,command}
-@kindex \key\
-@findex \command\
-@item @kbd{\key\}
-@itemx @kbd{M-x \command\}
-@end macro
-
-@macro flyccmdp{prefix,key,command}
-@kindex \prefix\ \key\
-@item @kbd{\prefix\ \key\}
-@itemx @kbd{\prefix\ M-x \command\}
-@end macro
+@include macros.texi
 
 @c Index setup
 
@@ -36,7 +15,7 @@
 @copying
 Modern on-the-fly syntax checking for GNU Emacs 24.
 
-Copyright @copyright{} 2014–2015  Sebastian Wiesner
+Copyright @copyright{} 2014-2016 Sebastian Wiesner
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -102,7 +81,7 @@ with @key{M-x flycheck-info}}.  This opens Emacs' built-in Info reader.
 * Flycheck hooks::              How to hook into Flycheck
 * Flycheck API::                API documentation
 * Supported languages::         A list of supported languages
-* Issues::                      How to report issues in Flycheck
+* Getting Help::                How to obtain help about Flycheck
 * GNU Free Documentation License::  How to copy this manual
 * Main Index::                  Index of Flycheck concepts
 * Key Index::                   Index of all keybindings
@@ -165,8 +144,8 @@ tested on Linux and OS X.
 @anchor{windows-support}@strong{Warning:} Flycheck tries to maintain
 compatibility with Windows as well, and generally works well on
 Windows. Pull requests which fix or improve Windows compatibility are
-@emph{very} welcome.  However, Flycheck does not explicitly support
-Windows.  If there are issues or problems on Windows, @emph{you are on
+@emph{very} welcome.  However, @b{Flycheck does not explicitly support
+Windows}.  If there are issues or problems on Windows, @emph{you are on
 your own}.  The Flycheck developers cannot answer questions about
 Windows, or fix Windows-specific issues.
 
@@ -697,16 +676,24 @@ least as severe as this one.  If nil, navigate to all errors.
 @node Displaying errors
 @section Displaying errors
 
-If the point is on a Flycheck error, Flycheck will display the message
-and ID of the error at point in the echo area after a short delay.
+When the point moves to an error location Flycheck automatically
+displays the error at point after a short delay:
 
 @defopt flycheck-display-errors-delay
 The number of seconds to wait before displaying the error at point.
 Floating point numbers can express fractions of seconds.
 @end defopt
 
-You can set @code{flycheck-display-errors-function} to change how
-Flycheck displays errors, and what information it displays:
+You can also display errors at point explicitly with @kbd{C-c ! h}:
+
+@table @asis
+@flyccmd{C-c ! h, flycheck-display-error-at-point}
+Show the error(s) at point.
+@end table
+
+By default Flycheck shows the error message and the error ID in the echo
+area, but you can customise how Flycheck displays errors with
+@code{flycheck-display-errors-function}:
 
 @defopt flycheck-display-errors-function
 A function to display errors.  The function is called with a list of
@@ -714,6 +701,8 @@ Flycheck error objects to display.  @xref{Errors}, for more information
 about these objects.
 @end defopt
 
+@cindex error display function
+@cindex functions for error display
 Flycheck provides some built-in display functions:
 
 @defun flycheck-display-error-messages
@@ -726,22 +715,27 @@ if the error list is visible.  @xref{Listing errors}, for more
 information about the error list.
 @end defun
 
-The @ghref{flycheck/flycheck-pos-tip, flycheck-pos-tip} extension
-provides an alternative display function, which shows error messages in
-a graphical popup.
+Alternatively the @ghref{flycheck/flycheck-pos-tip, flycheck-pos-tip}
+extension provides an display function which shows error messages in a
+graphical popup.
 
+@cindex error tooltip
+@findex display-local-help
+@kindex C-h .
 In addition to this display mechanism, Flycheck adds a tooltip to each
-error.  Its contents are computed by @code{flycheck-help-echo-function}:
+error which appears when you hover the error location with the mouse
+pointer.  You can force Emacs to show the contents of the tooltip in the
+echo area with @kbd{C-h .} (@code{display-local-help}).
+
+The contents of this tooltip are created with
+@code{flycheck-help-echo-function}:
 
 @defopt flycheck-help-echo-function
-A function to compute the contents of the error tooltips.  The function
-is called with the list of errors to display as single argument.  It
-should return a string, which is displayed when the user hovers over an
-error.
-@end defopt
+A function to compute the contents of the error tooltips.
 
-The default is @code{flycheck-make-help-echo}, which displays contents
-similar to those produced by @code{flycheck-display-error-messages}.
+By default Flycheck adds the error message and the error ID of all
+errors at point to the tooltip contents.
+@end defopt
 
 @node Killing errors
 @section Killing errors
@@ -1576,33 +1570,34 @@ more information about a syntax checker.
 
 @include languages.texi
 
-@node Issues
-@appendix Issues
+@node Getting Help
+@appendix Getting Help
 
-Please report any bugs or issues to the
-@ghref{flycheck/flycheck/issues,issue tracker}.  If you report a bug,
-please include the following information to help us identify and fix the
-culprit:
+@section Asking questions
 
-@itemize @bullet
-@item
-The output of @kbd{M-x flycheck-verify-setup} in affected buffers
-@item
-The version of Emacs, as reported by @kbd{M-x emacs-version}
-@item
-The version of Flycheck, as reported by @kbd{M-x flycheck-version}
-@item
-A complete and precise description of the issue, including a description
-of the expected @emph{and} the observed behaviour.
-@end itemize
+Please ask questions about Flycheck on
+@uref{https://emacs.stackexchange.com/questions/tagged/flycheck,Stack
+Exchange} or in our @uref{https://gitter.im/flycheck/flycheck,Gitter
+channel}.  We try to answer all questions as fast and as precise as
+possible.
 
-Please also tell us your ideas for improvements or new features.
+@section Reporting issues
+@anchor{Issues}
 
-Patches are @emph{very} welcome as well.  If you have code to
-contribute, please do not hesitate to open a pull request.  We would
-like to ask you to obey a few
-@ghref{flycheck/flycheck/blob/master/CONTRIBUTING.md, Guidelines},
-though.
+To report problems or bugs, please use our
+@ghref{flycheck/flycheck/issues,issue tracker}.  Our
+@ghref{flycheck/flycheck/blob/master/CONTRIBUTING.md, Contribution
+Guidelines} help you to create good bug reports; please take a look.
+
+We welcome patches and pull requests that fix bugs or provide new
+features.  Please read our Contribution Guidelines for help and
+guidelines before submitting pull requests.  When making larger changes
+to Flycheck or implementing new features we recommend that you first
+open a separate issue or ask in our Gitter channel to discuss
+you intended changes.
+
+Please follow our @uref{http://www.flycheck.org/conduct.html} in all our
+communication channels.
 
 @node GNU Free Documentation License
 @appendix GNU Free Documentation License
