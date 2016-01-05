@@ -4170,7 +4170,7 @@ Why not:
      '(3 4 error "Unmatched '('." :checker javascript-jshint :id "E019")
      '(3 25 error "Expected an identifier and instead saw ')'."
          :checker javascript-jshint :id "E030")
-     '(4 nil error "Unrecoverable syntax error. (100% scanned)."
+     '(4 1 error "Unrecoverable syntax error. (100% scanned)."
          :checker javascript-jshint :id "E041"))))
 
 (flycheck-ert-def-checker-test javascript-jshint javascript nil
@@ -4477,8 +4477,8 @@ Why not:
      '(9 5 info "Missing method docstring" :id "missing-docstring" :checker python-pylint)
      '(9 5 warning "Method could be a function" :id "no-self-use"
          :checker python-pylint)
-     '(10 16 warning "Used builtin function 'map'" :id "bad-builtin"
-          :checker python-pylint)
+     '(10 16 warning "Used builtin function 'map'. Using a list comprehension can be clearer."
+          :id "bad-builtin" :checker python-pylint)
      '(12 1 info "No space allowed around keyword argument assignment"
           :id "bad-whitespace" :checker python-pylint)
      '(12 5 info "Missing method docstring" :id "missing-docstring" :checker python-pylint)
@@ -4499,7 +4499,7 @@ Why not:
     (flycheck-ert-should-syntax-check
      "language/python/test.py" 'python-mode
      '(1 1 info "Missing module docstring" :id "C0111" :checker python-pylint)
-     '(4 1 error "Unable to import 'spam'" :id "F0401" :checker python-pylint)
+     '(4 1 error "Unable to import 'spam'" :id "E0401" :checker python-pylint)
      '(5 1 error "No name 'antigravit' in module 'python'" :id "E0611"
          :checker python-pylint)
      '(5 1 warning "Unused import antigravit" :id "W0611"
@@ -4510,8 +4510,8 @@ Why not:
      '(9 5 info "Missing method docstring" :id "C0111" :checker python-pylint)
      '(9 5 warning "Method could be a function" :id "R0201"
          :checker python-pylint)
-     '(10 16 warning "Used builtin function 'map'" :id "W0141"
-          :checker python-pylint)
+     '(10 16 warning "Used builtin function 'map'. Using a list comprehension can be clearer."
+          :id "W0141" :checker python-pylint)
      '(12 1 info "No space allowed around keyword argument assignment"
           :id "C0326" :checker python-pylint)
      '(12 5 info "Missing method docstring" :id "C0111" :checker python-pylint)
