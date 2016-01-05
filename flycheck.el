@@ -6224,6 +6224,9 @@ See Info Node `(elisp)Byte Compilation'."
 (defconst flycheck-emacs-lisp-checkdoc-form
   (flycheck-prepare-emacs-lisp-form
     (require 'checkdoc)
+    ;; elisp-mode provides the elisp syntax table
+    (unless (require 'elisp-mode nil t)
+      (require 'lisp-mode))
 
     (let ((source (car command-line-args-left))
           ;; Remember the default directory of the process
@@ -6239,7 +6242,10 @@ See Info Node `(elisp)Byte Compilation'."
         ;; back-substutition work
         (setq default-directory process-default-directory)
         (with-demoted-errors "Error in checkdoc: %S"
-          (checkdoc-current-buffer t)
+          ;; Checkdoc needs the right syntax table
+          ;; See https://github.com/flycheck/flycheck/issues/833
+          (with-syntax-table emacs-lisp-mode-syntax-table
+            (checkdoc-current-buffer t))
           (with-current-buffer checkdoc-diagnostic-buffer
             (princ (buffer-substring-no-properties (point-min) (point-max)))
             (kill-buffer)))))))
