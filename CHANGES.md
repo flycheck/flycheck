@@ -25,6 +25,7 @@ now for questions and discussions about development. [GH-820]
   * Don’t fall back to `rust` if `rust-cargo` should be used [GH-817]
   * Don’t change current buffer when closing the error message buffer [GH-648]
   * Never display error message buffer in current window [GH-822]
+  * Work around a caching issue in Rubocop [GH-844]
 
 ## 0.25.1 (Nov 16, 2015) ##
 
