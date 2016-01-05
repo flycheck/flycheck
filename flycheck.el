@@ -6223,6 +6223,9 @@ See Info Node `(elisp)Byte Compilation'."
 
 (defconst flycheck-emacs-lisp-checkdoc-form
   (flycheck-prepare-emacs-lisp-form
+    (unless (require 'elisp-mode nil 'no-error)
+      ;; TODO: Fallback for Emacs 24, remove when dropping support for 24
+      (require 'lisp-mode))
     (require 'checkdoc)
 
     (let ((source (car command-line-args-left))
@@ -6239,7 +6242,10 @@ See Info Node `(elisp)Byte Compilation'."
         ;; back-substutition work
         (setq default-directory process-default-directory)
         (with-demoted-errors "Error in checkdoc: %S"
-          (checkdoc-current-buffer t)
+          ;; Checkdoc needs the Emacs Lisp syntax table to parse sexps
+          ;; correctly, see https://github.com/flycheck/flycheck/issues/833
+          (with-syntax-table emacs-lisp-mode-syntax-table
+            (checkdoc-current-buffer t))
           (with-current-buffer checkdoc-diagnostic-buffer
             (princ (buffer-substring-no-properties (point-min) (point-max)))
             (kill-buffer)))))))
