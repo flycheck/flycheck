@@ -98,7 +98,7 @@
 ;;; Compatibility
 (eval-and-compile
   (unless (fboundp 'string-suffix-p)
-    ;; `string-suffix-p' for Emacs 24.3 and below
+    ;; TODO: Remove when dropping support for Emacs 24.3 and earlier
     (defun string-suffix-p (suffix string  &optional ignore-case)
       "Return non-nil if SUFFIX is a suffix of STRING.
 If IGNORE-CASE is non-nil, the comparison is done without paying
@@ -108,6 +108,7 @@ attention to case differences."
              (eq t (compare-strings suffix nil nil
                                     string start-pos nil ignore-case))))))
 
+  ;; TODO: Remove when dropping support for Emacs 24.3 and earlier
   (unless (featurep 'subr-x)
     ;; `subr-x' function for Emacs 24.3 and below
     (defsubst string-join (strings &optional separator)
