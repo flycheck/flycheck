@@ -122,7 +122,7 @@ namespace :verify do
   desc 'Verify Emacs Lisp sources'
   task :elisp do
     sh(*emacs_batch('--eval', '(setq checkdoc-arguments-in-order-flag nil)',
-                    '-l', 'test/flycheck-checkdoc.el',
+                    '-l', 'test/run-checkdoc.el',
                     '-f', 'flycheck-checkdoc-batch-and-exit',
                     *SOURCES))
   end
