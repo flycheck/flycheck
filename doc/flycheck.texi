@@ -141,13 +141,12 @@ tested on Linux and OS X.
 
 @cindex Windows
 
-@anchor{windows-support}@strong{Warning:} Flycheck tries to maintain
-compatibility with Windows as well, and generally works well on
-Windows. Pull requests which fix or improve Windows compatibility are
-@emph{very} welcome.  However, @b{Flycheck does not explicitly support
-Windows}.  If there are issues or problems on Windows, @emph{you are on
-your own}.  The Flycheck developers cannot answer questions about
-Windows, or fix Windows-specific issues.
+@anchor{windows-support}@b{Flycheck does not explicitly support
+Windows}, but tries to maintain Windows compatibility and should
+generally work fine on Windows, too.  However, we can neither answer
+questions about Windows nor fix bugs that only occur on Windows without
+the help of active Windows users.  Please watch out for
+@ghref{flycheck/flycheck/labels/B-Windows%20only, known Windows issues}!
 
 @section Syntax checking tools
 

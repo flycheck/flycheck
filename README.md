@@ -34,8 +34,11 @@ Flycheck needs GNU Emacs 24 on a Unix system, and additionally **external**
 syntax checking programs for the languages you use.  See [Supported Languages][]
 for more information.
 
-Flycheck does not officially support Windows, but tries to maintain Windows
-compatibility and should generally work fine on Windows, too.
+**Flycheck does not officially support Windows**, but tries to maintain Windows
+compatibility and should generally work fine on Windows, too.  However, we can
+neither answer questions about Windows nor fix bugs that only occur on Windows
+without the help of active Windows users.  Please watch out for
+[known Windows issues][windows]!
 
 Install Flycheck from [MELPA](http://melpa.org) (development snapshots) or
 [MELPA Stable](http://stable.melpa.org) (releases) with:
@@ -55,6 +58,7 @@ through Flycheck’s setup and major features.
 [Supported Languages]: http://www.flycheck.org/manual/latest/Supported-languages.html#Supported-languages
 [Installation]: http://www.flycheck.org/manual/latest/Installation.html#Installation
 [Quick start]: http://www.flycheck.org/manual/latest/Quickstart.html#Quickstart
+[windows]: https://github.com/flycheck/flycheck/labels/B-Windows%20only
 
 ## Support & Contribution ##
 
