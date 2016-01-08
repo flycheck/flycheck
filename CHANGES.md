@@ -13,6 +13,11 @@ now for questions and discussions about development. [GH-820]
 
   * Processing [GH-793] [GH-812]
 
+* New features:
+
+  * Add `flycheck-puppet-lint-rc` to customise the location of the puppetlint
+    configuration file [GH-846]
+
 * Improvements:
 
   * Map error IDs from flake8-pep257 to Flycheck error levels

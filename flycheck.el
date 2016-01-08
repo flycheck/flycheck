@@ -7303,6 +7303,9 @@ See URL `http://puppetlabs.com/'."
   :modes puppet-mode
   :next-checkers ((warning . puppet-lint)))
 
+(flycheck-def-config-file-var flycheck-puppet-lint-rc puppet-lint ".puppet-lint.rc"
+  :safe #'stringp)
+
 (flycheck-define-checker puppet-lint
   "A Puppet DSL style checker using puppet-lint.
 
@@ -7313,6 +7316,7 @@ See URL `http://puppet-lint.com/'."
   ;; required to be in a file foo/bar.pp.  Any other place, such as a Flycheck
   ;; temporary file will cause an error.
   :command ("puppet-lint"
+            (config-file "--config" flycheck-puppet-lint-rc)
             "--log-format" "%{path}:%{linenumber}:%{kind}: %{message} (%{check})"
             source-original)
   :error-patterns
