@@ -146,7 +146,7 @@ and extension, as in `file-name-base'."
 (flycheck-test-def-untabified-test "flycheck-ert.el")
 (flycheck-test-def-untabified-test "test/run.el")
 (flycheck-test-def-untabified-test "test/flycheck-test.el")
-(flycheck-test-def-untabified-test "test/run-checkdoc.el")
+(flycheck-test-def-untabified-test "admin/run-checkdoc.el")
 
 
 ;;; Manual
