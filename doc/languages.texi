@@ -548,8 +548,11 @@ command-line tool})
 @item
 @flyc{puppet-parser} (syntax check with @uref{http://puppetlabs.com/, Puppet})
 @item
-@flyc{puppet-lint} (style check with @uref{http://puppet-lint.com/,
-Puppet Lint})
+@flyc{puppet-lint} (style check with @uref{http://puppet-lint.com/, Puppet Lint}),
+with the following option:
+@table @asis
+@flycconfigfile{flycheck-puppet-lint-rc,puppet-lint}
+@end table
 @end itemize
 
 @flyclanguage{Python}
