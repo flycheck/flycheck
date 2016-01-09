@@ -1542,21 +1542,9 @@ TODO: The API documentation still needs to be written.
 @node Supported languages
 @appendix Supported languages
 
-This chapter lists the languages supported by Flycheck.  Some 3rd party
-extensions add support for more languages:
-
-@itemize @bullet
-@item
-@ghref{flycheck-ledger,flycheck-ledger} adds a syntax checker for files
-of the @uref{http://ledger-cli.org/,Ledger} accounting tool.
-@item
-@ghref{flycheck/flycheck-mercury,flycheck-mercury} adds a syntax checker
-for the @uref{http://mercurylang.org/,Mercury} programming language.
-@item
-@ghref{flycheck/flycheck-ocaml,flycheck-ocaml} adds a syntax checker for
-the OCaml programming language, using the
-@ghref{the-lambda-church/merlin, Merlin} tool.
-@end itemize
+This chapter lists the languages supported by Flycheck.  3rd party
+extensions may provide for more languages; please take a look at our
+@flycref{extensions.html,list of extensions} for more information.
 
 Each language has one or more syntax checkers, whose names follow a
 convention of @samp{@var{language}-@var{tool}} where @var{language} is
