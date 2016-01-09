@@ -41,39 +41,48 @@
               (cl-pushnew match matches))))
         matches))
 
-    (it "should document all syntax checkers"
-      (let ((checkers (flycheck/collect-languages
-                       (rx "@flyc{" (group (1+ (not (any "}")))) "}"))))
-        (expect (seq-difference checkers flycheck-checkers)
-                :not :to-be-truthy)
-        (expect (seq-difference flycheck-checkers checkers)
-                :not :to-be-truthy)))
 
-    (it "should document all options"
-      (let ((documented-options (flycheck/collect-languages
-                                 (rx line-start "@flycoption"
-                                     (opt "x") (1+ space)
-                                     (group (1+ not-newline)) line-end)))
-            (all-options (seq-mapcat (lambda (c)
-                                       (flycheck-checker-get c 'option-vars))
-                                     flycheck-checkers)))
-        (expect (seq-difference documented-options all-options)
-                :not :to-be-truthy)
-        (expect (seq-difference all-options documented-options)
+    (let ((checkers (flycheck/collect-languages
+                     (rx "@flyc{" (group (1+ (not (any "}")))) "}"))))
+
+      (it "should document all syntax checkers"
+          (expect (seq-difference flycheck-checkers checkers)
+                  :to-equal nil))
+
+      (it "should not document syntax checkers that don't exist"
+          (expect (seq-difference checkers flycheck-checkers)
+                  :to-equal nil)))
+
+    (let ((documented-options (flycheck/collect-languages
+                               (rx line-start "@flycoption"
+                                   (opt "x") (1+ space)
+                                   (group (1+ not-newline)) line-end)))
+          (all-options (seq-mapcat (lambda (c)
+                                     (flycheck-checker-get c 'option-vars))
+                                   flycheck-checkers)))
+
+      (it "should document all options"
+          (expect (seq-difference all-options documented-options)
+                  :to-equal nil))
+
+      (it "should not document options that don't exist"
+          (expect (seq-difference documented-options all-options)
+                  :to-equal nil))))
+
+  (let ((documented-file-vars (flycheck/collect-languages
+                               (rx line-start "@flycconfigfile{"
+                                   (group (1+ (not (any "," "}")))) ",")))
+        (all-file-vars (delq nil
+                             (seq-map (lambda (c)
+                                        (flycheck-checker-get
+                                         c 'config-file-var))
+                                      flycheck-checkers))))
+    (it "should document all configuration file variables"
+        (expect (seq-difference all-file-vars documented-file-vars)
+                :to-equal nil))
+
+    (it "should not document configuration file variables that don't exist"
+        (expect (seq-difference documented-file-vars all-file-vars)
                 :not :to-be-truthy))))
-
-  (it "should document all configuration file variables"
-    (let ((documented-file-vars (flycheck/collect-languages
-                                 (rx line-start "@flycconfigfile{"
-                                     (group (1+ (not (any "," "}")))) ",")))
-          (all-file-vars (delq nil
-                               (seq-map (lambda (c)
-                                          (flycheck-checker-get
-                                           c 'config-file-var))
-                                        flycheck-checkers))))
-      (expect (seq-difference documented-file-vars all-file-vars)
-              :not :to-be-truthy)
-      (expect (seq-difference all-file-vars documented-file-vars)
-              :not :to-be-truthy))))
 
 ;;; test-manual.el ends here
