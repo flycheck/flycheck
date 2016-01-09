@@ -6683,7 +6683,7 @@ database is given to GHC via `-package-db'."
 
 (flycheck-def-option-var flycheck-ghc-search-path nil
                          (haskell-stack-ghc haskell-ghc)
-  "Module search path for GHC.
+  "Module search path for (Stack) GHC.
 
 The value of this variable is a list of strings, where each
 string is a directory containing Haskell modules.  Each directory
@@ -6694,7 +6694,7 @@ is added to the GHC search path via `-i'."
 
 (flycheck-def-option-var flycheck-ghc-language-extensions nil
                          (haskell-stack-ghc haskell-ghc)
-  "Language extensions for GHC and Stack.
+  "Language extensions for (Stack) GHC.
 
 The value of this variable is a list of strings, where each
 string is a Haskell language extension, as in the LANGUAGE
