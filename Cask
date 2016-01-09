@@ -8,6 +8,7 @@
        "doc/flycheck.texi")
 
 (development
+ (depends-on "buttercup")               ; BDD test framework for Emacs
  (depends-on "shut-up")                 ; Silence Emacs
 
  ;; Various modes for use in the unit tests

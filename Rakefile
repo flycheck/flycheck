@@ -150,6 +150,13 @@ namespace :compile do
 end
 
 namespace :test do
+  desc 'Run specs'
+  task :specs, [:pattern] => OBJECTS do |_, args|
+    command = ['cask', 'exec', 'buttercup', '-L', '.', '-L', 'test/lib']
+    command += ['--pattern', args.pattern] if args.pattern
+    sh(*command)
+  end
+
   desc 'Run unit test suite'
   task :unit, [:selector] => OBJECTS do |_, args|
     test_args = args.selector ? [args.selector] : []
@@ -166,7 +173,7 @@ namespace :test do
   end
 
   desc 'Run all tests'
-  task all: [:unit, :html]
+  task all: [:specs, :unit, :html]
 end
 
 namespace :doc do

@@ -149,67 +149,6 @@ and extension, as in `file-name-base'."
 (flycheck-test-def-untabified-test "admin/run-checkdoc.el")
 
 
-;;; Manual
-(ert-deftest flycheck--manual/all-checkers-are-documented ()
-  :tags '(documentation)
-  (flycheck-ert-with-file-buffer
-      (expand-file-name "doc/languages.texi"
-                        flycheck-test-source-directory)
-    (let ((expected-checkers flycheck-checkers)
-          documented-checkers)
-      (while (re-search-forward (rx "@flyc{" (group (1+ (not (any "}")))) "}")
-                                nil 'noerror)
-        (let ((checker (intern (match-string 1))))
-          (unless (memq checker documented-checkers)
-            (push checker documented-checkers))))
-      (setq documented-checkers (nreverse documented-checkers))
-      (dolist (checker documented-checkers)
-        (let ((expected (pop expected-checkers)))
-          (should (equal checker expected)))))))
-
-(ert-deftest flycheck--manual/all-options-are-documented ()
-  :tags '(documentation)
-  (let ((options (sort (-uniq
-                        (apply #'append
-                               (mapcar (lambda (c)
-                                         (flycheck-checker-get c 'option-vars))
-                                       flycheck-checkers)))
-                       #'string<))
-        (filename (expand-file-name "doc/languages.texi"
-                                    flycheck-test-source-directory))
-        documented-options)
-    (flycheck-ert-with-file-buffer filename
-      (while (re-search-forward (rx line-start "@flycoption" (opt "x") (1+ space)
-                                    (group (1+ not-newline)) line-end)
-                                nil 'no-error)
-        (push (match-string 1) documented-options)))
-    (setq documented-options (sort documented-options #'string<))
-    (dolist (option documented-options)
-      (let ((expected (pop options)))
-        (should (equal (intern option) expected))))))
-
-(ert-deftest flycheck--manual/all-config-file-vars-are-documented ()
-  :tags '(documentation)
-  (let ((config-file-vars (sort
-                           (delq
-                            nil
-                            (mapcar (lambda (c)
-                                      (flycheck-checker-get c 'config-file-var))
-                                    flycheck-checkers))
-                           #'string<))
-        documented-config-files)
-    (flycheck-ert-with-file-buffer
-        (expand-file-name "doc/languages.texi" flycheck-test-source-directory)
-      (while (re-search-forward (rx line-start "@flycconfigfile{"
-                                    (group (1+ (not (any "," "}")))) ",")
-                                nil 'noerror)
-        (push (match-string 1) documented-config-files)))
-    (setq documented-config-files (sort documented-config-files #'string<))
-    (dolist (config-file documented-config-files)
-      (let ((expected (pop config-file-vars)))
-        (should (equal (intern config-file) expected))))))
-
-
 ;;; Customization
 (ert-deftest flycheck-checkers/there-are-registered-checkers ()
   :tags '(customization)
