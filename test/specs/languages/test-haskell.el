@@ -48,7 +48,6 @@
               1 "Spam.With.Eggs"))
 
     (it "extracts a module name with exports right after the name"
-      (signal 'buttercup-pending "EXPECTED TO FAIL")
       (expect flycheck-haskell-module-re
               :to-match-with-group "module Hello.World(hello) where"
               1 "Hello.World"))))

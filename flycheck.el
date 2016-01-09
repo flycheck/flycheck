@@ -6672,7 +6672,7 @@ See URL `http://handlebarsjs.com/'."
 (defconst flycheck-haskell-module-re
   (rx line-start (zero-or-more (or "\n" (any space)))
       "module" (one-or-more (or "\n" (any space)))
-      (group (one-or-more (not (any space "\n")))))
+      (group (one-or-more (not (any space "(" "\n")))))
   "Regular expression for a Haskell module name.")
 
 (flycheck-def-args-var flycheck-ghc-args (haskell-stack-ghc haskell-ghc)

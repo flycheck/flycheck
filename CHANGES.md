@@ -38,6 +38,8 @@ now for questions and discussions about development. [GH-820]
   * Never display error message buffer in current window [GH-822]
   * Work around a caching issue in Rubocop [GH-844]
   * Fix checkdoc failure with some Emacs Lisp syntax [GH-833] [GH-845]
+  * Correctly parse Haskell module name with exports right after the module name
+    [GH-848]
 
 [buttercup]: https://github.com/jorgenschaefer/emacs-buttercup
 
