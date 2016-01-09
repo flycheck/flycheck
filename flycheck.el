@@ -6815,10 +6815,8 @@ See URL `http://www.haskell.org/ghc/'."
   "Extensions list to enable for hlint.
 
 The value of this variable is a list of strings, where each
-string is a name of extension to enable in hlint. (i.e. \"QuasiQuotes\")
-
-Refer to http://community.haskell.org/~ndm/darcs/hlint/hlint.htm for
-more information."
+string is a name of extension to enable in
+hlint (e.g. \"QuasiQuotes\")."
   :type '(repeat :tag "Extensions" (string :tag "Extension"))
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.24"))
@@ -6828,10 +6826,7 @@ more information."
   "Ignore rules list for hlint checks.
 
 The value of this variable is a list of strings, where each
-string is an ignore rule. (i.e. \"Use fmap\")
-
-Refer to http://community.haskell.org/~ndm/darcs/hlint/hlint.htm for
-more information."
+string is an ignore rule (e.g. \"Use fmap\")."
   :type '(repeat :tag "Ignore rules" (string :tag "Ignore rule"))
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.24"))
@@ -6841,10 +6836,8 @@ more information."
   "Hint packages to include for hlint checks.
 
 The value of this variable is a list of strings, where each
-string is a default hint package. (i.e. (\"Generalise\" \"Default\" \"Dollar\"))
-
-Refer to http://community.haskell.org/~ndm/darcs/hlint/hlint.htm for
-more information."
+string is a default hint package (e.g. (\"Generalise\"
+\"Default\" \"Dollar\"))."
   :type '(repeat :tag "Hint packages" (string :tag "Hint package"))
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.24"))
