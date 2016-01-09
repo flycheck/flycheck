@@ -1,4 +1,4 @@
-;;; test-documentation.el --- Flycheck: Specs for documentation  -*- lexical-binding: t; -*-
+;;; test-manual.el --- Flycheck: Specs for documentation  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013-2016 Sebastian Wiesner and Flycheck contributors
 
@@ -76,4 +76,4 @@
       (expect (seq-difference all-file-vars documented-file-vars)
               :not :to-be-truthy))))
 
-;;; test-documentation.el ends here
+;;; test-manual.el ends here
