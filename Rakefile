@@ -132,7 +132,7 @@ namespace :verify do
 end
 
 namespace :generate do
-  desc 'Generate the log'
+  desc 'Generate the logo'
   task logo: 'doc/images/logo.png'
 
   desc 'Generate all sources'
