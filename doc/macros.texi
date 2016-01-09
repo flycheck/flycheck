@@ -5,6 +5,10 @@
 @uref{https://github.com/\url\,\text\}
 @end macro
 
+@macro flycref{page,text}
+@uref{http://www.flycheck.org/\page\,\text\}
+@end macro
+
 @c Mention a syntax CHECKER
 @macro flyc{checker}
 @code{\checker\}

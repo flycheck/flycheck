@@ -1595,7 +1595,9 @@ to Flycheck or implementing new features we recommend that you first
 open a separate issue or ask in our Gitter channel to discuss
 you intended changes.
 
-Please follow our @uref{http://www.flycheck.org/conduct.html} in all our
+@section Conduct
+
+Please follow our @flycref{conduct.html,Code of Conduct} in all our
 communication channels.
 
 @node GNU Free Documentation License
