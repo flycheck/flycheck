@@ -1553,7 +1553,8 @@ of the checker tool.
 
 The syntax checkers are listed in the order they are applied to a
 buffer.  Use @kbd{C-c ! ?} (@code{flycheck-describe-checker}) to obtain
-more information about a syntax checker.
+more information about a syntax checker, and @kbd{C-h v}
+(@code{describe-variable}) to read the complete docstring of any option.
 
 @include languages.texi
 
