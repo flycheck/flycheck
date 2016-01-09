@@ -7303,7 +7303,8 @@ See URL `http://puppetlabs.com/'."
   :modes puppet-mode
   :next-checkers ((warning . puppet-lint)))
 
-(flycheck-def-config-file-var flycheck-puppet-lint-rc puppet-lint ".puppet-lint.rc"
+(flycheck-def-config-file-var flycheck-puppet-lint-rc puppet-lint
+                              ".puppet-lint.rc"
   :safe #'stringp)
 
 (flycheck-def-option-var flycheck-puppet-lint-disabled-checks nil puppet-lint
@@ -7333,7 +7334,8 @@ See URL `http://puppet-lint.com/'."
   ;; temporary file will cause an error.
   :command ("puppet-lint"
             (config-file "--config" flycheck-puppet-lint-rc)
-            "--log-format" "%{path}:%{linenumber}:%{kind}: %{message} (%{check})"
+            "--log-format"
+            "%{path}:%{linenumber}:%{kind}: %{message} (%{check})"
             (option-list "" flycheck-puppet-lint-disabled-checks concat
                          flycheck-puppet-lint-disabled-arg-name)
             source-original)

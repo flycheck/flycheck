@@ -546,9 +546,11 @@ command-line tool})
 
 @itemize
 @item
-@flyc{puppet-parser} (syntax check with @uref{http://puppetlabs.com/, Puppet})
+@flyc{puppet-parser} (syntax check with @uref{http://puppetlabs.com/,
+Puppet})
 @item
-@flyc{puppet-lint} (style check with @uref{http://puppet-lint.com/, Puppet Lint})
+@flyc{puppet-lint} (style check with @uref{http://puppet-lint.com/,
+Puppet Lint})
 @end itemize
 
 @flyc{puppet-lint} provides the following options:
