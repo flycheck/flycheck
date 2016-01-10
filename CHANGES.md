@@ -19,6 +19,8 @@ now for questions and discussions about development. [GH-820]
     configuration file [GH-846]
   * Add `flycheck-puppet-lint-disabled-checks` to disable specific checks of
     puppetlint [GH-824]
+  * New library `flycheck-buttercup` to support writing [Buttercup][] specs for
+    Flycheck
 
 * Improvements:
 
@@ -34,6 +36,8 @@ now for questions and discussions about development. [GH-820]
   * Never display error message buffer in current window [GH-822]
   * Work around a caching issue in Rubocop [GH-844]
   * Fix checkdoc failure with some Emacs Lisp syntax [GH-833] [GH-845]
+
+[buttercup]: https://github.com/jorgenschaefer/emacs-buttercup
 
 ## 0.25.1 (Nov 16, 2015) ##
 

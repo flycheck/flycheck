@@ -25,8 +25,7 @@
 
 ;;; Code:
 
-(require 'flycheck)
-(require 'buttercup)
+(require 'flycheck-buttercup)
 (require 'cl-lib)
 (require 'seq)
 

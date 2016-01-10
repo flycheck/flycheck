@@ -34,7 +34,7 @@ def emacs_batch(*args)
   [ENV['EMACS'] || 'emacs', '-Q', '--batch'] + args
 end
 
-SOURCES = FileList['flycheck.el', 'flycheck-ert.el']
+SOURCES = FileList['flycheck.el', 'flycheck-ert.el', 'flycheck-buttercup.el']
 OBJECTS = SOURCES.ext('.elc')
 
 DOC_SOURCES = FileList['doc/flycheck.texi']
@@ -168,7 +168,7 @@ end
 namespace :test do
   desc 'Run specs'
   task :specs, [:pattern] => OBJECTS do |_, args|
-    command = ['cask', 'exec', 'buttercup', '-L', '.', '-L', 'test/lib']
+    command = ['cask', 'exec', 'buttercup', '-L', '.']
     command += ['--pattern', args.pattern] if args.pattern
     sh(*command)
   end
