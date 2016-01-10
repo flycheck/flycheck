@@ -50,8 +50,10 @@
 
 (buttercup-define-matcher :to-be-local (symbol)
   (if (local-variable-p symbol)
-      (cons t (format "Expected %S not to be a local variable, but it is" symbol))
-    (cons nil (format "Expected %S to be a local variable, but it is not" symbol))))
+      (cons t (format "Expected %S not to be a local variable, but it is"
+                      symbol))
+    (cons nil (format "Expected %S to be a local variable, but it is not"
+                      symbol))))
 
 (buttercup-define-matcher :to-be-empty-string (s)
   (if (equal s "")
