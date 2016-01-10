@@ -28,22 +28,41 @@
 
 (describe "Manual"
   (let* ((source-dir (locate-dominating-file default-directory "Cask"))
-         (languages (expand-file-name "doc/languages.texi" source-dir)))
+         (languages (expand-file-name "doc/languages.texi" source-dir))
+         (list-of-languages (expand-file-name "doc/languages-list.texi"
+                                              source-dir)))
 
-    (defun flycheck/collect-languages (pattern)
-      "Collect all PATTERN matches from the list of languages."
+    (defun flycheck/collect-matches-from-file (pattern filename)
+      "Collect all PATTERN matches from FILENAME."
       (let ((matches))
         (with-temp-buffer
-          (insert-file-contents languages)
+          (insert-file-contents filename)
           (goto-char (point-min))
           (while (re-search-forward pattern nil 'noerror)
             (let ((match (intern (match-string 1))))
               (cl-pushnew match matches))))
         matches))
 
+    (let ((all-languages (flycheck/collect-matches-from-file
+                          (rx "@flyclanguage{"
+                              (group (1+ (not (any "}")))) "}")
+                          languages))
+          (listed-languages (flycheck/collect-matches-from-file
+                             (rx "@item @ref{"
+                                 (group (1+ (not (any "}")))) "}")
+                             list-of-languages)))
 
-    (let ((checkers (flycheck/collect-languages
-                     (rx "@flyc{" (group (1+ (not (any "}")))) "}"))))
+      (it "should list all languages"
+        (expect (seq-difference all-languages listed-languages)
+                :to-equal nil))
+
+      (it "should not list unknown languages"
+        (expect (seq-difference listed-languages all-languages)
+                :to-equal nil)))
+
+    (let ((checkers (flycheck/collect-matches-from-file
+                     (rx "@flyc{" (group (1+ (not (any "}")))) "}")
+                     languages)))
 
       (it "should document all syntax checkers"
         (expect (seq-difference flycheck-checkers checkers)
@@ -53,10 +72,11 @@
         (expect (seq-difference checkers flycheck-checkers)
                 :to-equal nil)))
 
-    (let ((documented-options (flycheck/collect-languages
+    (let ((documented-options (flycheck/collect-matches-from-file
                                (rx line-start "@flycoption"
                                    (opt "x") (1+ space)
-                                   (group (1+ not-newline)) line-end)))
+                                   (group (1+ not-newline)) line-end)
+                               languages))
           (all-options (seq-mapcat (lambda (c)
                                      (flycheck-checker-get c 'option-vars))
                                    flycheck-checkers)))
@@ -67,22 +87,23 @@
 
       (it "should not document options that don't exist"
         (expect (seq-difference documented-options all-options)
-                :to-equal nil))))
+                :to-equal nil)))
 
-  (let ((documented-file-vars (flycheck/collect-languages
-                               (rx line-start "@flycconfigfile{"
-                                   (group (1+ (not (any "," "}")))) ",")))
-        (all-file-vars (delq nil
-                             (seq-map (lambda (c)
-                                        (flycheck-checker-get
-                                         c 'config-file-var))
-                                      flycheck-checkers))))
-    (it "should document all configuration file variables"
-      (expect (seq-difference all-file-vars documented-file-vars)
-              :to-equal nil))
+    (let ((documented-file-vars (flycheck/collect-matches-from-file
+                                 (rx line-start "@flycconfigfile{"
+                                     (group (1+ (not (any "," "}")))) ",")
+                                 languages))
+          (all-file-vars (delq nil
+                               (seq-map (lambda (c)
+                                          (flycheck-checker-get
+                                           c 'config-file-var))
+                                        flycheck-checkers))))
+      (it "should document all configuration file variables"
+        (expect (seq-difference all-file-vars documented-file-vars)
+                :to-equal nil))
 
-    (it "should not document configuration file variables that don't exist"
+      (it "should not document configuration file variables that don't exist"
         (expect (seq-difference documented-file-vars all-file-vars)
-                :not :to-be-truthy))))
+                :not :to-be-truthy)))))
 
 ;;; test-manual.el ends here

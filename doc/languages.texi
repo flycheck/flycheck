@@ -1,5 +1,9 @@
 @include macros.texi
 
+Flycheck supports the following languages:
+
+@include languages-list.texi
+
 @flyclanguage{Ada}
 
 @itemize

@@ -32,8 +32,8 @@
 @end macro
 
 @macro flyclanguage{language}
+@anchor{\language\}
 @unnumberedsec \language\
-@anchor{language-\language\}
 @cindex Language, \language\
 @cindex \language\ language
 @end macro
