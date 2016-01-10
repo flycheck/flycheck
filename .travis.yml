@@ -33,6 +33,8 @@ script:
   # Linting and compilation
   - rake verify:all
   - rake 'compile:all[$COMPILEARGS]'
+  # Spec tests
+  - rake "test:specs"
   # Unit tests
   - rake "test:unit[(not (tag external-tool))]"
   # Build the manual
