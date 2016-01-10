@@ -46,7 +46,15 @@
              errors "\n"))
 
 
-;;; Custom matchers
+;;; Data matchers
+
+(buttercup-define-matcher :to-be-empty-string (s)
+  (if (equal s "")
+      (cons t (format "Expected %S not be an empty string" s))
+    (cons nil (format "Expected %S to be an empty string" s))))
+
+
+;;; Emacs feature matchers
 
 (buttercup-define-matcher :to-be-local (symbol)
   (if (local-variable-p symbol)
@@ -55,10 +63,8 @@
     (cons nil (format "Expected %S to be a local variable, but it is not"
                       symbol))))
 
-(buttercup-define-matcher :to-be-empty-string (s)
-  (if (equal s "")
-      (cons t (format "Expected %S not be an empty string" s))
-    (cons nil (format "Expected %S to be an empty string" s))))
+
+;;; Flycheck matchers
 
 (buttercup-define-matcher :to-be-equal-flycheck-errors (a b)
   (let ((a-formatted (flycheck-buttercup-format-error-list a))
