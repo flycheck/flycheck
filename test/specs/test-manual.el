@@ -46,12 +46,12 @@
                      (rx "@flyc{" (group (1+ (not (any "}")))) "}"))))
 
       (it "should document all syntax checkers"
-          (expect (seq-difference flycheck-checkers checkers)
-                  :to-equal nil))
+        (expect (seq-difference flycheck-checkers checkers)
+                :to-equal nil))
 
       (it "should not document syntax checkers that don't exist"
-          (expect (seq-difference checkers flycheck-checkers)
-                  :to-equal nil)))
+        (expect (seq-difference checkers flycheck-checkers)
+                :to-equal nil)))
 
     (let ((documented-options (flycheck/collect-languages
                                (rx line-start "@flycoption"
@@ -62,12 +62,12 @@
                                    flycheck-checkers)))
 
       (it "should document all options"
-          (expect (seq-difference all-options documented-options)
-                  :to-equal nil))
+        (expect (seq-difference all-options documented-options)
+                :to-equal nil))
 
       (it "should not document options that don't exist"
-          (expect (seq-difference documented-options all-options)
-                  :to-equal nil))))
+        (expect (seq-difference documented-options all-options)
+                :to-equal nil))))
 
   (let ((documented-file-vars (flycheck/collect-languages
                                (rx line-start "@flycconfigfile{"
@@ -78,8 +78,8 @@
                                          c 'config-file-var))
                                       flycheck-checkers))))
     (it "should document all configuration file variables"
-        (expect (seq-difference all-file-vars documented-file-vars)
-                :to-equal nil))
+      (expect (seq-difference all-file-vars documented-file-vars)
+              :to-equal nil))
 
     (it "should not document configuration file variables that don't exist"
         (expect (seq-difference documented-file-vars all-file-vars)
