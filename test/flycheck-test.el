@@ -3810,17 +3810,6 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
    '(2 nil error "Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'UNDEFINED', 'NULL', 'DATA', got 'INVALID'"
        :checker handlebars)))
 
-(ert-deftest flycheck-haskell-module-re/matches-module-name ()
-  :tags '(language-haskell)
-  (let ((s "module Foo.Bar where"))
-    (should (string-match flycheck-haskell-module-re s))
-    (should (string= "Foo.Bar" (match-string 1 s)))))
-
-(ert-deftest flycheck-haskell-module-re/ignores-commented-code ()
-  :tags '(language-haskell)
-  (should-not (string-match-p flycheck-haskell-module-re
-                              "-- | module Foo.Bar where")))
-
 (flycheck-ert-def-checker-test haskell-stack-ghc haskell syntax-error
   (let ((flycheck-disabled-checkers '(haskell-ghc)))
     (flycheck-ert-should-syntax-check

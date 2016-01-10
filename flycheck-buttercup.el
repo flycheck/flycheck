@@ -53,6 +53,19 @@
       (cons t (format "Expected %S not be an empty string" s))
     (cons nil (format "Expected %S to be an empty string" s))))
 
+(buttercup-define-matcher :to-match-with-group (re s index match)
+  (let* ((matches? (string-match re s))
+         (result (and matches? (match-string index s))))
+    (if (and matches? (equal result match))
+        (cons t (format "Expected %S not to match %S with %S in group %s"
+                        re s match index))
+
+      (cons nil (format "Expected %S to match %S with %S in group %s, %s"
+                        re s match index
+                        (if matches?
+                            (format "but got %S" result)
+                          "but did not match"))))))
+
 
 ;;; Emacs feature matchers
 
