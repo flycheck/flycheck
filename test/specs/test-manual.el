@@ -30,22 +30,22 @@
 (require 'cl-lib)
 (require 'seq)
 
+(defun flycheck/collect-matches-from-file (pattern filename)
+  "Collect all instances matching PATTERN from FILENAME."
+  (let ((matches))
+    (with-temp-buffer
+      (insert-file-contents filename)
+      (goto-char (point-min))
+      (while (re-search-forward pattern nil 'noerror)
+        (let ((match (intern (match-string 1))))
+          (cl-pushnew match matches))))
+    matches))
+
 (describe "Manual"
   (let* ((source-dir (locate-dominating-file default-directory "Cask"))
          (languages (expand-file-name "doc/languages.texi" source-dir))
          (list-of-languages (expand-file-name "doc/languages-list.texi"
                                               source-dir)))
-
-    (defun flycheck/collect-matches-from-file (pattern filename)
-      "Collect all PATTERN matches from FILENAME."
-      (let ((matches))
-        (with-temp-buffer
-          (insert-file-contents filename)
-          (goto-char (point-min))
-          (while (re-search-forward pattern nil 'noerror)
-            (let ((match (intern (match-string 1))))
-              (cl-pushnew match matches))))
-        matches))
 
     (describe "List of languages"
       (let ((all-languages (flycheck/collect-matches-from-file
