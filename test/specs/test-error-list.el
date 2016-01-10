@@ -143,8 +143,9 @@
       (let ((checker-name (propertize "emacs-lisp-checkdoc"
                                       'face 'flycheck-error-list-checker-name)))
         (it "has the error message in the 5th cell"
-          (let* ((message (format "A foo warning (%s)" checker-name)))
-            (add-face-text-property 0 (length message) 'default t message)
+          (let* ((message (format (propertize "A foo warning (%s)"
+                                              'face 'default)
+                                  checker-name)))
             (expect (aref cells 4) :to-equal
                     (list message 'type 'flycheck-error-list))))
 
@@ -152,8 +153,9 @@
           (cl-letf* (((flycheck-error-message warning) nil)
                      (entry (flycheck-error-list-make-entry warning))
                      (cells (cadr entry))
-                     (message (format "Unknown warning (%s)" checker-name)))
-            (add-face-text-property 0 (length message) 'default t message)
+                     (message (format (propertize "Unknown warning (%s)"
+                                                  'face 'default)
+                                      checker-name)))
             (expect (aref cells 4) :to-equal
                     (list message 'type 'flycheck-error-list)))))))
 
