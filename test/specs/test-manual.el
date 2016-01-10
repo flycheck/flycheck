@@ -43,67 +43,71 @@
               (cl-pushnew match matches))))
         matches))
 
-    (let ((all-languages (flycheck/collect-matches-from-file
-                          (rx "@flyclanguage{"
-                              (group (1+ (not (any "}")))) "}")
-                          languages))
-          (listed-languages (flycheck/collect-matches-from-file
-                             (rx "@item @ref{"
-                                 (group (1+ (not (any "}")))) "}")
-                             list-of-languages)))
+    (describe "List of languages"
+      (let ((all-languages (flycheck/collect-matches-from-file
+                            (rx "@flyclanguage{"
+                                (group (1+ (not (any "}")))) "}")
+                            languages))
+            (listed-languages (flycheck/collect-matches-from-file
+                               (rx "@item @ref{"
+                                   (group (1+ (not (any "}")))) "}")
+                               list-of-languages)))
 
-      (it "should list all languages"
-        (expect (seq-difference all-languages listed-languages)
-                :to-equal nil))
+        (it "should list all languages"
+          (expect (seq-difference all-languages listed-languages)
+                  :to-equal nil))
 
-      (it "should not list unknown languages"
-        (expect (seq-difference listed-languages all-languages)
-                :to-equal nil)))
+        (it "should not list unknown languages"
+          (expect (seq-difference listed-languages all-languages)
+                  :to-equal nil))))
 
-    (let ((checkers (flycheck/collect-matches-from-file
-                     (rx "@flyc{" (group (1+ (not (any "}")))) "}")
-                     languages)))
+    (describe "Syntax checkers"
+      (let ((checkers (flycheck/collect-matches-from-file
+                       (rx "@flyc{" (group (1+ (not (any "}")))) "}")
+                       languages)))
 
-      (it "should document all syntax checkers"
-        (expect (seq-difference flycheck-checkers checkers)
-                :to-equal nil))
+        (it "should document all syntax checkers"
+          (expect (seq-difference flycheck-checkers checkers)
+                  :to-equal nil))
 
-      (it "should not document syntax checkers that don't exist"
-        (expect (seq-difference checkers flycheck-checkers)
-                :to-equal nil)))
+        (it "should not document syntax checkers that don't exist"
+          (expect (seq-difference checkers flycheck-checkers)
+                  :to-equal nil)))
 
-    (let ((documented-options (flycheck/collect-matches-from-file
-                               (rx line-start "@flycoption"
-                                   (opt "x") (1+ space)
-                                   (group (1+ not-newline)) line-end)
-                               languages))
-          (all-options (seq-mapcat (lambda (c)
-                                     (flycheck-checker-get c 'option-vars))
-                                   flycheck-checkers)))
+      (describe "Options"
+        (let ((documented-options (flycheck/collect-matches-from-file
+                                   (rx line-start "@flycoption"
+                                       (opt "x") (1+ space)
+                                       (group (1+ not-newline)) line-end)
+                                   languages))
+              (all-options (seq-mapcat (lambda (c)
+                                         (flycheck-checker-get c 'option-vars))
+                                       flycheck-checkers)))
 
-      (it "should document all options"
-        (expect (seq-difference all-options documented-options)
-                :to-equal nil))
+          (it "should document all options"
+            (expect (seq-difference all-options documented-options)
+                    :to-equal nil))
 
-      (it "should not document options that don't exist"
-        (expect (seq-difference documented-options all-options)
-                :to-equal nil)))
+          (it "should not document options that don't exist"
+            (expect (seq-difference documented-options all-options)
+                    :to-equal nil))))
 
-    (let ((documented-file-vars (flycheck/collect-matches-from-file
-                                 (rx line-start "@flycconfigfile{"
-                                     (group (1+ (not (any "," "}")))) ",")
-                                 languages))
-          (all-file-vars (delq nil
-                               (seq-map (lambda (c)
-                                          (flycheck-checker-get
-                                           c 'config-file-var))
-                                        flycheck-checkers))))
-      (it "should document all configuration file variables"
-        (expect (seq-difference all-file-vars documented-file-vars)
-                :to-equal nil))
+      (describe "Configuration files"
+        (let ((documented-file-vars (flycheck/collect-matches-from-file
+                                     (rx line-start "@flycconfigfile{"
+                                         (group (1+ (not (any "," "}")))) ",")
+                                     languages))
+              (all-file-vars (delq nil
+                                   (seq-map (lambda (c)
+                                              (flycheck-checker-get
+                                               c 'config-file-var))
+                                            flycheck-checkers))))
+          (it "should document all configuration file variables"
+            (expect (seq-difference all-file-vars documented-file-vars)
+                    :to-equal nil))
 
-      (it "should not document configuration file variables that don't exist"
-        (expect (seq-difference documented-file-vars all-file-vars)
-                :not :to-be-truthy)))))
+          (it "should not document configuration file variables that don't exist"
+            (expect (seq-difference documented-file-vars all-file-vars)
+                    :to-equal nil)))))))
 
 ;;; test-manual.el ends here
