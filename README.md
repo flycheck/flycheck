@@ -3,6 +3,7 @@
 [![MELPA version](http://melpa.org/packages/flycheck-badge.svg)](http://melpa.org/#/flycheck)
 [![Manual](https://img.shields.io/badge/manual-latest-green.svg)][manual]
 [![Join the chat](https://badges.gitter.im/flycheck/flycheck.svg)](https://gitter.im/flycheck/flycheck)
+[![Build Status](https://travis-ci.org/flycheck/flycheck.svg?branch=master)](https://travis-ci.org/flycheck/flycheck)
 
 # [![Flycheck][logo]](http://www.flycheck.org) #
 
