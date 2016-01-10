@@ -57,11 +57,11 @@
                                    (group (1+ (not (any "}")))) "}")
                                list-of-languages)))
 
-        (it "should list all languages"
+        (it "lists all languages"
           (expect (seq-difference all-languages listed-languages)
                   :to-equal nil))
 
-        (it "should not list unknown languages"
+        (it "doesn't list unknown languages"
           (expect (seq-difference listed-languages all-languages)
                   :to-equal nil))))
 
@@ -70,11 +70,11 @@
                        (rx "@flyc{" (group (1+ (not (any "}")))) "}")
                        languages)))
 
-        (it "should document all syntax checkers"
+        (it "documents all syntax checkers"
           (expect (seq-difference flycheck-checkers checkers)
                   :to-equal nil))
 
-        (it "should not document syntax checkers that don't exist"
+        (it "doesn't document syntax checkers that don't exist"
           (expect (seq-difference checkers flycheck-checkers)
                   :to-equal nil)))
 
@@ -88,11 +88,11 @@
                                          (flycheck-checker-get c 'option-vars))
                                        flycheck-checkers)))
 
-          (it "should document all options"
+          (it "documents all syntax checker options"
             (expect (seq-difference all-options documented-options)
                     :to-equal nil))
 
-          (it "should not document options that don't exist"
+          (it "doesn't document syntax checker options that don't exist"
             (expect (seq-difference documented-options all-options)
                     :to-equal nil))))
 
@@ -106,11 +106,11 @@
                                               (flycheck-checker-get
                                                c 'config-file-var))
                                             flycheck-checkers))))
-          (it "should document all configuration file variables"
+          (it "documents all syntax checker configuration files"
             (expect (seq-difference all-file-vars documented-file-vars)
                     :to-equal nil))
 
-          (it "should not document configuration file variables that don't exist"
+          (it "it doesn't document configuration files that don't exist"
             (expect (seq-difference documented-file-vars all-file-vars)
                     :to-equal nil)))))))
 
