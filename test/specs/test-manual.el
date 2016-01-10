@@ -1,4 +1,4 @@
-;;; test-manual.el --- Flycheck: Specs for documentation  -*- lexical-binding: t; -*-
+;;; test-manual.el --- Flycheck Specs: Manual -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013-2016 Sebastian Wiesner and Flycheck contributors
 
@@ -18,6 +18,10 @@
 
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary
+
+;; Specs for our Texinfo manual.
 
 ;;; Code:
 
