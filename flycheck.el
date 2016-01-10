@@ -3771,12 +3771,11 @@ string with attached text properties."
 
 MESSAGE and CHECKER are displayed in a single column to allow the
 message to stretch arbitrarily far."
-  (let* ((checker-name (propertize (symbol-name checker)
-                                   'face 'flycheck-error-list-checker-name))
-         (text (format "%s (%s)" (flycheck-flush-multiline-message message)
-                       checker-name)))
-    (add-face-text-property 0 (length text) 'default t text)
-    text))
+  (let ((checker-name (propertize (symbol-name checker)
+                                  'face 'flycheck-error-list-checker-name)))
+    (format (propertize "%s (%s)" 'face 'default)
+            (flycheck-flush-multiline-message message)
+            checker-name)))
 
 (defun flycheck-error-list-make-entry (error)
   "Make a table cell for the given ERROR.
