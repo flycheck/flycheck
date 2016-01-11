@@ -7181,9 +7181,6 @@ the `--severity' option to Perl Critic."
   :safe #'integerp
   :package-version '(flycheck . "0.18"))
 
-(define-obsolete-variable-alias 'flycheck-perlcritic-verbosity
-  'flycheck-perlcritic-severity "0.22")
-
 (flycheck-define-checker perl-perlcritic
   "A Perl syntax checker using Perl::Critic.
 

@@ -12,6 +12,7 @@ now for questions and discussions about development. [GH-820]
 * **Breaking changes**:
 
   * Remove `flycheck-copy-messages-as-kill`, obsolete since Flycheck 0.22
+  * Remove `flycheck-perlcritic-verbosity`, obsolete since Flycheck 0.22
 
 * New syntax checkers:
 
