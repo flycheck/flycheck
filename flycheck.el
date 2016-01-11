@@ -4202,9 +4202,6 @@ universal prefix arg, and only the id with normal prefix arg."
       (seq-do #'kill-new (reverse messages))
       (message (string-join messages "\n")))))
 
-(define-obsolete-function-alias 'flycheck-copy-messages-as-kill
-  'flycheck-copy-errors-as-kill "0.22")
-
 
 ;;; Syntax checkers using external commands
 (defun flycheck-command-argument-p (arg)

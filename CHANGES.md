@@ -9,6 +9,10 @@ guidelines for the Flycheck community. [GH-819]
 Flycheck also provides a [Gitter channel](https://gitter.im/flycheck/flycheck)
 now for questions and discussions about development. [GH-820]
 
+* **Breaking changes**:
+
+  * Remove `flycheck-copy-messages-as-kill`, obsolete since Flycheck 0.22
+
 * New syntax checkers:
 
   * Processing [GH-793] [GH-812]
