@@ -506,6 +506,7 @@ These syntax checkers checker provide the following options:
 @flycoption flycheck-perl-include-path
 A list of include directories for Perl, relative to the file being
 checked.
+@flycconfigfile{flycheck-perlcriticrc,perl-perlcritic}
 @flycoption flycheck-perlcritic-severity
 The severity level for Perl::Critic, as integer for the
 @option{--severity} option of Perl::Critic.
