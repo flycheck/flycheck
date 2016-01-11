@@ -48,7 +48,9 @@ Install Flycheck from [MELPA](http://melpa.org) (development snapshots) or
 
 Then add the following to your init file:
 
-    (add-hook 'after-init-hook #'global-flycheck-mode)
+```lisp
+(add-hook 'after-init-hook #'global-flycheck-mode)
+```
 
 If you don’t know where your init file is, look at the value of the variable
 `user-init-file` with `C-h v user-init-file`.
