@@ -4606,6 +4606,55 @@ symbols in the command."
          (seq-map (lambda (arg) (flycheck-substitute-argument arg checker))
                   (flycheck-checker-arguments checker))))
 
+(defun flycheck--process-send-buffer-contents-chunked (process)
+  "Send contents of current buffer to PROCESS in small batches.
+
+Send the entire buffer to the standard input of PROCESS in chunks
+of 4096 characters.  Chunking is done in Emacs Lisp, hence this
+function is probably far less efficient than
+`send-process-region'.  Use only when required."
+  (let ((from (point-min)))
+    (while (< from (point-max))
+      (let ((to (min (+ from 4096) (point-max))))
+        (process-send-region process from to)
+        (setq from to)))))
+
+(defvar flycheck-chunked-process-input
+  ;; Chunk process output on Windows to work around
+  ;; https://github.com/flycheck/flycheck/issues/794 and
+  ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=22344.  The presence of
+  ;; `w32-pipe-buffer-size' denotes an Emacs version (> Emacs 25.1 )where pipe
+  ;; writes on Windows are fixed.
+  ;;
+  ;; TODO: Remove option and chunking when dropping Emacs 24 support, see
+  ;; https://github.com/flycheck/flycheck/issues/856
+  (and (eq system-type 'windows-nt) (not (boundp 'w32-pipe-buffer-size)))
+  "If non-nil send process input in small chunks.
+
+If this variable is non-nil `flycheck-process-send-buffer' sends
+buffer contents in small chunks.
+
+Defaults to nil, except on Windows to work around Emacs bug
+#22344.")
+
+(defun flycheck-process-send-buffer (process)
+  "Send all contents of current buffer to PROCESS.
+
+Sends all contents of the current buffer to the standard input of
+PROCESS, and terminates standard input with EOF.
+
+If `flycheck-chunked-process-input' is non-nil, send buffer
+contents in chunks via
+`flycheck--process-send-buffer-contents-chunked', which see.
+Otherwise use `process-send-region' to send all contents at once
+and rely on Emacs' own buffering and chunking."
+  (save-restriction
+    (widen)
+    (if flycheck-chunked-process-input
+        (flycheck--process-send-buffer-contents-chunked process)
+      (process-send-region process (point-min) (point-max))))
+  (process-send-eof process))
+
 (defun flycheck-start-command-checker (checker callback)
   "Start a command CHECKER with CALLBACK."
   (let (process)
@@ -4643,10 +4692,7 @@ symbols in the command."
           (setq flycheck-temporaries nil)
           ;; Send the buffer to the process on standard input, if enabled
           (when (flycheck-checker-get checker 'standard-input)
-            (save-restriction
-              (widen)
-              (process-send-region process (point-min) (point-max))
-              (process-send-eof process)))
+            (flycheck-process-send-buffer process))
           ;; Return the process
           process)
       (error

@@ -47,6 +47,8 @@ now for questions and discussions about development. [GH-820]
   * Fix checkdoc failure with some Emacs Lisp syntax [GH-833] [GH-845]
   * Correctly parse Haskell module name with exports right after the module name
     [GH-848]
+  * Don’t hang when sending buffers to node.js processes on Windows [GH-794]
+    [GH-850]
 
 [buttercup]: https://github.com/jorgenschaefer/emacs-buttercup
 
