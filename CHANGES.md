@@ -26,6 +26,8 @@ now for questions and discussions about development. [GH-820]
     puppetlint [GH-824]
   * New library `flycheck-buttercup` to support writing [Buttercup][] specs for
     Flycheck
+  * Add `flycheck-perlcriticrc` to set a configuration file for Perl::Critic
+    [GH-851]
 
 * Improvements:
 

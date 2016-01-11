@@ -7181,11 +7181,17 @@ the `--severity' option to Perl Critic."
   :safe #'integerp
   :package-version '(flycheck . "0.18"))
 
+(flycheck-def-config-file-var flycheck-perlcriticrc perl-perlcritic
+                              ".perlcriticrc"
+  :safe #'stringp
+  :package-version '(flycheck . "0.26"))
+
 (flycheck-define-checker perl-perlcritic
   "A Perl syntax checker using Perl::Critic.
 
 See URL `https://metacpan.org/pod/Perl::Critic'."
   :command ("perlcritic" "--no-color" "--verbose" "%f/%l/%c/%s/%p/%m (%e)\n"
+            (config-file "--profile" flycheck-perlcriticrc)
             (option "--severity" flycheck-perlcritic-severity nil
                     flycheck-option-int))
   :standard-input t
