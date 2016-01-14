@@ -15,12 +15,13 @@
 
 begin
   require 'bundler'
-  require 'bundler/setup'
 rescue LoadError
   puts "\e[31mFailed to load bundler\e[0m"
   puts "\e[33mPlease run `gem install bundler` and `bundle install`.\e[0m"
   exit 1
 end
+
+require 'bundler/setup'
 
 require_relative 'admin/lib/flycheck/travis'
 
