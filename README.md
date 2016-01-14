@@ -11,15 +11,17 @@
 intended as replacement for the older Flymake extension which is part of GNU
 Emacs.
 
-It uses various syntax checking and linting tools to check the contents of
-buffers, and reports warnings and errors directly in the buffer or in an
-optional error list (see [Flycheck manual][manual] for more information):
+It uses various syntax checking and linting tools to
+[automatically check the contents of buffers][checking] while you type, and
+reports warnings and errors directly in the buffer or in an optional error list
+(see [Flycheck manual][manual] for more information):
 
 ![](https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/flycheck-annotated.png)
 
-Out of the box Flycheck supports over 40 different programming languages with
-more than 80 different syntax checking tools, and comes with a simple interface
-to define new syntax checkers.
+Out of the box Flycheck supports over
+[40 different programming languages][languages] with more than 80 different
+syntax checking tools, and comes with a [simple interface][definitions] to
+define new syntax checkers.
 
 Many [3rd party extensions](http://flycheck.org/extensions.html) provide
 new syntax checkers and other features like alternative error displays or mode
@@ -28,40 +30,37 @@ line indicators.
 [COPYING]: https://github.com/flycheck/flycheck/blob/master/COPYING
 [manual]: http://www.flycheck.org/manual/latest/index.html
 [logo]: https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/logo.png
+[checking]: http://www.flycheck.org/manual/latest/Checking-buffers.html#Checking-buffers
+[languages]: http://www.flycheck.org/manual/latest/Supported-languages.html#Supported-languages
+[definitions]: http://flycheck.org/manual/latest/Defining-syntax-checkers.html#Defining-syntax-checkers
 
-## Installation ##
+## Quickstart ##
 
-Flycheck needs GNU Emacs 24 on a Unix system, and additionally **external**
-syntax checking programs for the languages you use.  See [Supported Languages][]
-for more information.
+Flycheck needs GNU Emacs 24.1 or newer, and works best on Unix systems.
+**Windows users**, please be aware that Flycheck does not support Windows
+officially, although it should mostly work fine on Windows.  See
+[Windows support][] and watch out for [known Windows issues][windows issues]!
 
-**Flycheck does not officially support Windows**, but tries to maintain Windows
-compatibility and should generally work fine on Windows, too.  However, we can
-neither answer questions about Windows nor fix bugs that only occur on Windows
-without the help of active Windows users.  Please watch out for
-[known Windows issues][windows]!
-
-Install Flycheck from [MELPA](http://melpa.org) (development snapshots) or
-[MELPA Stable](http://stable.melpa.org) (releases) with:
-
-    M-x package-install RET flycheck
-
-Then add the following to your init file:
+Install some [syntax checker tools][languages] and type the following in your
+`*scratch*` buffer and run `M-x eval-buffer`:
 
 ```lisp
-(add-hook 'after-init-hook #'global-flycheck-mode)
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "http://stable.melpa.org/packages/") t)
+(package-initialize)
+
+(package-install 'flycheck)
+
+(global-flycheck-mode)
 ```
 
-If you don’t know where your init file is, look at the value of the variable
-`user-init-file` with `C-h v user-init-file`.
+For a more gentle introduction read the [Installation][] instructions and go
+through [Quickstart][] guide.
 
-See [Installation][] for more information, and [Quick start][] for a quick tour
-through Flycheck’s setup and major features.
-
-[Supported Languages]: http://www.flycheck.org/manual/latest/Supported-languages.html#Supported-languages
 [Installation]: http://www.flycheck.org/manual/latest/Installation.html#Installation
 [Quick start]: http://www.flycheck.org/manual/latest/Quickstart.html#Quickstart
-[windows]: https://github.com/flycheck/flycheck/labels/B-Windows%20only
+[windows issues]: https://github.com/flycheck/flycheck/labels/B-Windows%20only
 
 ## Support & Contribution ##
 
