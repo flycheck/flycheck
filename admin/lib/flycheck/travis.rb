@@ -65,7 +65,8 @@ module Flycheck
           # Install required gems for the website repo
           Subprocess.check_call(['bundle', 'install', '--jobs=3', '--retry=3',
                                  '--path', bundle_path.to_s])
-          Subprocess.check_call(['rake', "build:manual[#{source_dir},latest]",
+          Subprocess.check_call(['bundle', 'exec',
+                                 'rake', "build:manual[#{source_dir},latest]",
                                  "build:documents[#{source_dir}]"])
         end
       end
