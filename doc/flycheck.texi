@@ -184,19 +184,8 @@ file:
 (package-initialize)
 @end lisp
 
-@section Cask
-
-@cindex cask
-
-If you use @ghref{cask/cask, Cask} to manage your
-packages, add the following to your @file{Cask} file:
-
-@lisp
-(source gnu)
-(source melpa-stable)
-
-(depends-on "flycheck")
-@end lisp
+If you don't know where your init file is take a look at the value of
+the variable @code{user-init-file} with @kbd{C-h v user-init-file}.
 
 @node Quickstart
 @chapter Quickstart
