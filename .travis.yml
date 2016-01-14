@@ -29,19 +29,19 @@ before_install:
   - if [[ $BUILD_MANUAL == yes ]]; then gem install html-proofer && htmlproof --version; fi
 install:
   - bundle install --jobs=3 --retry=3 --path vendor/bundle
-  - rake init:all
+  - bundle exec rake init:all
 script:
   # Linting and compilation
-  - rake verify:all
-  - rake 'compile:all[$COMPILEARGS]'
+  - bundle exec rake verify:all
+  - bundle exec rake 'compile:all[$COMPILEARGS]'
   # Spec tests
-  - rake "test:specs"
+  - bundle exec rake "test:specs"
   # Unit tests
-  - rake "test:unit[(not (tag external-tool))]"
+  - bundle exec rake "test:unit[(not (tag external-tool))]"
   # Build the manual
-  - if [[ $BUILD_MANUAL == yes ]]; then rake doc:info test:html; fi
+  - if [[ $BUILD_MANUAL == yes ]]; then bundle exec rake doc:info test:html; fi
 after_success:
-  - if [[ $BUILD_MANUAL == yes ]]; then rake deploy:manual; fi
+  - if [[ $BUILD_MANUAL == yes ]]; then bundle exec rake deploy:manual; fi
 notifications:
   webhooks:
     urls:
