@@ -59,7 +59,7 @@ For a more gentle introduction read the [Installation][] instructions and go
 through [Quickstart][] guide.
 
 [Installation]: http://www.flycheck.org/manual/latest/Installation.html#Installation
-[Quick start]: http://www.flycheck.org/manual/latest/Quickstart.html#Quickstart
+[Quickstart]: http://www.flycheck.org/manual/latest/Quickstart.html#Quickstart
 [windows issues]: https://github.com/flycheck/flycheck/labels/B-Windows%20only
 
 ## Support & Contribution ##
