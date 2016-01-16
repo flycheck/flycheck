@@ -6814,7 +6814,13 @@ See URL `https://github.com/commercialhaskell/stack'."
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-dedent-error-messages errors)))
   :modes (haskell-mode literate-haskell-mode)
-  :next-checkers ((warning . haskell-hlint)))
+  :next-checkers ((warning . haskell-hlint))
+  :predicate (lambda ()
+               (let ((fs (mapcar (lambda (f)
+					(and f (locate-dominating-file (buffer-file-name) f)))
+				  (list "stack.yml" "stack.yaml" (getenv "STACK_YAML")))))
+                 (eval (append '(or) fs)))))
+
 
 (flycheck-define-checker haskell-ghc
   "A Haskell syntax and type checker using ghc.
