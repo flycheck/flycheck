@@ -244,3 +244,6 @@ namespace :deploy do
     end
   end
 end
+
+# Top-level targets
+task check: ['verify:all', 'compile:all', 'test:fast']
