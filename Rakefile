@@ -203,6 +203,9 @@ namespace :test do
       .run
   end
 
+  desc 'Run all fast tests (specs, unit and documentation)'
+  task fast: [:specs, :unit, :doc]
+
   desc 'Run all tests'
   task all: [:specs, :unit, :doc, :integration]
 end
