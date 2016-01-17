@@ -32,9 +32,7 @@ require 'rake/clean'
 require 'rubocop/rake_task'
 require 'html/proofer'
 
-def emacs_batch(*args)
-  [ENV['EMACS'] || 'emacs', '-Q', '--batch'] + args
-end
+include Flycheck::Util
 
 SOURCES = FileList['flycheck.el', 'flycheck-ert.el', 'flycheck-buttercup.el']
 OBJECTS = SOURCES.ext('.elc')
@@ -130,13 +128,7 @@ namespace :verify do
 
   desc 'Verify Emacs Lisp sources'
   task :elisp do
-    # Check style
     Flycheck::Lint.check_files(ALL_SOURCES.to_a)
-    # Run checkdoc
-    sh(*emacs_batch('--eval', '(setq checkdoc-arguments-in-order-flag nil)',
-                    '-l', 'admin/run-checkdoc.el',
-                    '-f', 'flycheck-checkdoc-batch-and-exit',
-                    *SOURCES))
   end
 
   task 'Verify all source files'

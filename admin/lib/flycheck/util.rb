@@ -16,6 +16,11 @@
 module Flycheck
   # Utilities
   module Util
+    # Create a command array to run +args+ with Emacs batch.
+    def emacs_batch(*args)
+      [ENV['EMACS'] || 'emacs', '-Q', '--batch'] + args
+    end
+
     # Ensure that an environment +variable+ has an expected +value+.  Otherwise
     # +fail+ with the given +message+
     def self.check_environment(variable, value, message)
