@@ -23,7 +23,7 @@ require_relative 'util'
 
 module Flycheck
   # Provides utilities for Travis CI
-  class Travis
+  module Travis
     REPO_PATH = 'flycheck/flycheck.github.io'
 
     def self.travis_ci?
@@ -116,30 +116,36 @@ EOF
       end
     end
 
+    def self.do_deploy_manual(directory)
+      puts 'Clone website repository'
+      repo = clone_and_configure_repo(directory)
+      puts 'Build manual'
+      build_manual(repo)
+
+      puts 'Add changes if any'
+      if add_changes(repo)
+        key = Pathname.new(directory) / 'deploy'
+        puts 'Decrypt deployment key'
+        decrypt_deployment_key('admin/deploy.enc', key)
+        puts 'Setup Github SSH authentication'
+        configure_ssh_for_github(key)
+        puts 'Commit changes to manual'
+        commit_changes(repo)
+        puts 'Push changes'
+        push_changes(repo)
+      else
+        puts 'DEPLOYMENT SKIPPED (no changed)'
+      end
+    end
+
     def self.deploy_manual
       check_environment
 
       Dir.mktmpdir do |dir|
-        puts 'Clone website repository'
-        repo = clone_and_configure_repo(dir)
-        puts 'Build manual'
-        build_manual(repo)
-
-        puts 'Add changes if any'
-        if add_changes(repo)
-          key = Pathname.new(dir) / 'deploy'
-          puts 'Decrypt deployment key'
-          decrypt_deployment_key('admin/deploy.enc', key)
-          puts 'Setup Github SSH authentication'
-          configure_ssh_for_github(key)
-          puts 'Commit changes to manual'
-          commit_changes(repo)
-          puts 'Push changes'
-          push_changes(repo)
-        else
-          puts 'DEPLOYMENT SKIPPED (no changed)'
-        end
+        do_deploy_manual(dir)
       end
+    rescue Flycheck::UnexpectedEnvironmentError => e
+      puts e.message
     end
   end
 end

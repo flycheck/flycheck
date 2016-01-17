@@ -14,6 +14,10 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module Flycheck
+  # An unexpected environment
+  class UnexpectedEnvironmentError < StandardError
+  end
+
   # Utilities
   module Util
     # Create a command array to run +args+ with Emacs batch.
@@ -24,7 +28,7 @@ module Flycheck
     # Ensure that an environment +variable+ has an expected +value+.  Otherwise
     # +fail+ with the given +message+
     def self.check_environment(variable, value, message)
-      fail message unless ENV[variable] == value
+      fail UnexpectedEnvironmentError, message unless ENV[variable] == value
     end
 
     # Run a block with a safe 0077 umask
