@@ -43,7 +43,7 @@ DOC_SOURCES.add('doc/*.texi')
 
 MARKDOWN_SOURCES = FileList['*.md']
 
-RUBY_SOURCES = FileList['Rakefile', 'admin/lib/*.rb']
+RUBY_SOURCES = FileList['Rakefile', 'admin/lib/**/*.rb']
 
 # File tasks and rules
 file 'doc/images/logo.png' => ['flycheck.svg'] do |t|
