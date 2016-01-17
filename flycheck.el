@@ -6817,14 +6817,15 @@ See URL `https://github.com/commercialhaskell/stack'."
   :next-checkers ((warning . haskell-hlint))
   :predicate
   (lambda ()
-    (let ((fns (list "stack.yml" "stack.yaml" (getenv "STACK_YAML")))
-          (bfn (buffer-file-name)))
-      (and bfn (locate-dominating-file
-                bfn (lambda (dir)
-                      (cl-some (lambda (f)
-                                 (and f (file-exists-p
-                                         (expand-file-name f dir))))
-                               fns)))))))
+    (let ((file-names (list "stack.yml" "stack.yaml" (getenv "STACK_YAML")))
+          (buf-file-name (buffer-file-name)))
+      (and buf-file-name
+           (locate-dominating-file
+            buf-file-name (lambda (dir)
+                            (seq-some (lambda (file)
+                                        (and file (file-exists-p
+                                                   (expand-file-name file dir))))
+                                      file-names)))))))
 
 (flycheck-define-checker haskell-ghc
   "A Haskell syntax and type checker using ghc.
