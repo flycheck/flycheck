@@ -180,7 +180,8 @@ namespace :test do
   desc 'Run unit test suite'
   task :unit, [:selector] => OBJECTS do |_, args|
     test_args = args.selector ? [args.selector] : []
-    sh(*emacs_batch('--script', 'test/run.el', *test_args))
+    sh(*emacs_batch('--load', 'test/run.el', '-f', 'flycheck-run-tests-main',
+                    *test_args))
   end
 
   desc 'Test HTML manual for broken links'
