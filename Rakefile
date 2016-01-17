@@ -179,9 +179,19 @@ namespace :test do
 
   desc 'Run unit test suite'
   task :unit, [:selector] => OBJECTS do |_, args|
-    test_args = args.selector ? [args.selector] : []
+    selector = '(not (tag external-tool))'
+    selector = "(and #{selector} #{args.selector})" if args.selector
     sh(*emacs_batch('--load', 'test/run.el', '-f', 'flycheck-run-tests-main',
-                    *test_args))
+                    selector))
+  end
+
+  desc 'Run integration tests'
+  task :integration, [:selector] => OBJECTS do |_, args|
+    selector = '(tag external-tool)'
+    selector = "(and #{selector} #{args.selector})" if args.selector
+    sh(*emacs_batch('--load', 'test/run.el',
+                    '-f', 'flycheck-run-tests-main',
+                    selector))
   end
 
   desc 'Test HTML manual for broken links'
@@ -194,7 +204,7 @@ namespace :test do
   end
 
   desc 'Run all tests'
-  task all: [:specs, :unit, :doc]
+  task all: [:specs, :unit, :doc, :integration]
 end
 
 namespace :doc do
