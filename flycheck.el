@@ -1391,7 +1391,7 @@ a default on its own."
       checker)))
 
 (defun read-flycheck-error-level (prompt)
-  "Reads an error level from the user.
+  "Read an error level from the user with PROMPT.
 
 Only offers level for which errors currently exist, in addition
 to the default levels."
@@ -1969,7 +1969,14 @@ into the verification results."
   (princ "\n"))
 
 (defun flycheck--verify-print-header (desc buffer)
-  "Print a title with DESC in the current buffer."
+  "Print a title with DESC for BUFFER in the current buffer.
+
+DESC is an arbitrary string containing a description, and BUFFER
+is the buffer being verified.  The name and the major mode mode
+of BUFFER are printed.
+
+DESC and information about BUFFER are printed in the current
+buffer."
   (princ desc)
   (insert (propertize (buffer-name buffer) 'face 'bold))
   (princ " in ")
@@ -2068,7 +2075,7 @@ modified, or nil otherwise."
 
 ;;; Extending generic checkers
 (defun flycheck-add-next-checker (checker next &optional append)
-  "Add a NEXT checker after CHECKER.
+  "After CHECKER add a NEXT checker.
 
 CHECKER is a syntax checker symbol, to which to add NEXT checker.
 
@@ -2093,7 +2100,7 @@ APPEND is non-nil."
     (push next (flycheck-checker-get checker 'next-checkers))))
 
 (defun flycheck-add-mode (checker mode)
-  "Add a new major MODE to CHECKER.
+  "To CHECKER add a new major MODE.
 
 CHECKER and MODE are symbols denoting a syntax checker and a
 major mode respectively.
@@ -2296,8 +2303,10 @@ CHECKER will be used, even if it is not contained in
 
 Interactively, prompt for a syntax checker to disable, and add
 the syntax checker to the buffer-local value of
-`flycheck-disabled-checkers'.  With prefix arg, prompt for a
-disabled syntax checker and re-enable it by removing it from the
+`flycheck-disabled-checkers'.
+
+With non-nil ENABLE or with prefix arg, prompt for a disabled
+syntax checker and re-enable it by removing it from the
 buffer-local value of `flycheck-disabled-checkers'."
   (declare (interactive-only "Directly set `flycheck-disabled-checkers' instead"))
   (interactive
@@ -2641,7 +2650,7 @@ Return t if so, or nil otherwise."
   (setq flycheck-deferred-syntax-check nil))
 
 (defun flycheck-perform-deferred-syntax-check ()
-  "Perform any deferred syntax checks."
+  "Perform the deferred syntax check."
   (when (flycheck-deferred-check-p)
     (flycheck-clean-deferred-check)
     (flycheck-buffer-automatically)))
@@ -2902,7 +2911,7 @@ omit it."
     (apply #'concat format)))
 
 (defun flycheck-error-< (err1 err2)
-  "Determine whether ERR1 goes before ERR2 by location.
+  "Determine whether ERR1 is less than ERR2 by location.
 
 Compare by line numbers and then by column numbers."
   (let ((line1 (flycheck-error-line err1))
@@ -2916,7 +2925,7 @@ Compare by line numbers and then by column numbers."
       (< line1 line2))))
 
 (defun flycheck-error-level-< (err1 err2)
-  "Determine whether ERR1 goes before ERR2 by error level.
+  "Determine whether ERR1 is less than ERR2 by error level.
 
 Like `flycheck-error-<', but compares by error level severity
 first.  Levels of the same severity are compared by name."
@@ -3590,7 +3599,7 @@ overlays."
 (defun flycheck-next-error-pos (n &optional reset)
   "Get the position of the N-th next error.
 
-With negative n, get the position of the (-N)-th previous error
+With negative N, get the position of the (-N)-th previous error
 instead.  With non-nil RESET, search from `point-min', otherwise
 search from the current point.
 
@@ -3636,6 +3645,11 @@ there is none."
 (defun flycheck-next-error-function (n reset)
   "Visit the N-th error from the current point.
 
+N is the number of errors to advance by, where a negative N
+advances backwards.  With non-nil RESET, advance from the
+beginning of the buffer, otherwise advance from the current
+position.
+
 Intended for use with `next-error-function'."
   (let ((pos (flycheck-next-error-pos n reset)))
     (if pos
@@ -3645,9 +3659,10 @@ Intended for use with `next-error-function'."
 (defun flycheck-next-error (&optional n reset)
   "Visit the N-th error from the current point.
 
-If RESET is given and non-nil, re-start from the beginning of the buffer.
-
-N specifies how many errors to move forwards.  If negative, move backwards."
+N is the number of errors to advance by, where a negative N
+advances backwards.  With non-nil RESET, advance from the
+beginning of the buffer, otherwise advance from the current
+position."
   (interactive "P")
   (when (consp n)
     ;; Universal prefix argument means reset
@@ -3657,8 +3672,8 @@ N specifies how many errors to move forwards.  If negative, move backwards."
 (defun flycheck-previous-error (&optional n)
   "Visit the N-th previous error.
 
-If given, N specifies the number of errors to move backwards.  If
-N is negative, move forwards instead."
+If given, N specifies the number of errors to move backwards by.
+If N is negative, move forwards instead."
   (interactive "P")
   (flycheck-next-error (- (or n 1))))
 
@@ -3980,7 +3995,7 @@ POS defaults to `point'."
       (flycheck-error-list-highlight-errors 'preserve-pos))))
 
 (defun flycheck-error-list-next-error-pos (pos &optional n)
-  "Get the N'th next error in the error list from POS.
+  "Starting from POS get the N'th next error in the error list.
 
 N defaults to 1.  If N is negative, search for the previous error
 instead.
@@ -4238,7 +4253,7 @@ universal prefix arg, and only the id with normal prefix arg."
 
 ;;;###autoload
 (defun flycheck-define-command-checker (symbol docstring &rest properties)
-  "Define SYMBOL as syntax checker which runs a command.
+  "Define SYMBOL as syntax checker to run a command.
 
 Define SYMBOL as generic syntax checker via
 `flycheck-define-generic-checker', which uses an external command
@@ -4843,7 +4858,7 @@ The default executable is %S." checker default-executable)
          :risky t))))
 
 (defun flycheck-set-checker-executable (checker &optional executable)
-  "Set the EXECUTABLE of CHECKER in the current buffer.
+  "Set the executable of CHECKER in the current buffer.
 
 CHECKER is a syntax checker symbol.  EXECUTABLE is a string with
 the name of a executable or the path to an executable file, which
@@ -5215,6 +5230,9 @@ text nodes) or as XML nodes, in the same for as the root node."
 Parse Checkstyle-like XML output.  Use this error parser for
 checkers that have an option to output errors in this format.
 
+CHECKER and BUFFER denoted the CHECKER that returned OUTPUT and
+the BUFFER that was checked respectively.
+
 See URL `http://checkstyle.sourceforge.net/' for information
 about Checkstyle."
   (pcase (flycheck-parse-xml-string output)
@@ -5247,6 +5265,9 @@ about Checkstyle."
   "Parse Cppcheck errors from OUTPUT.
 
 Parse Cppcheck XML v2 output.
+
+CHECKER and BUFFER denoted the CHECKER that returned OUTPUT and
+the BUFFER that was checked respectively.
 
 See URL `http://cppcheck.sourceforge.net/' for more information
 about Cppcheck."
@@ -5283,6 +5304,9 @@ about Cppcheck."
 
 (defun flycheck-parse-phpmd (output checker buffer)
   "Parse phpmd errors from OUTPUT.
+
+CHECKER and BUFFER denoted the CHECKER that returned OUTPUT and
+the BUFFER that was checked respectively.
 
 See URL `http://phpmd.org/' for more information about phpmd."
   (pcase (flycheck-parse-xml-string output)
@@ -5656,7 +5680,7 @@ the directory of the file being compiled.  However, since
 Flycheck uses temporary copies for syntax checking, it needs to
 explicitly determine the directory for quoted includes.
 
-This function determines the directory by looking at
+This function determines the directory by looking at function
 `buffer-file-name', or if that is nil, at `default-directory'."
   (-if-let (fn (buffer-file-name))
       (file-name-directory fn)
@@ -6605,8 +6629,8 @@ See URL `http://golang.org/cmd/go'."
 (defun flycheck-go-package-name (&optional file-name gopath)
   "Determine the package name for FILE-NAME and GOPATH.
 
-FILE-NAME defaults to `buffer-file-name'.  GOPATH defaults to
-$GOPATH.
+FILE-NAME defaults to function `buffer-file-name'.  GOPATH
+defaults to $GOPATH.
 
 Return the package name for FILE-NAME, or nil if FILE-NAME is not
 part of any package or if GOPATH is nil."

@@ -2329,7 +2329,7 @@ and extension, as in `file-name-base'."
 
 ;;; Error navigation in the current buffer
 (defmacro flycheck-test-with-nav-buffer (minimum-level &rest body)
-  "Eval BODY in a temporary buffer for navigation.
+  "With MINIMUM-LEVEL, eval BODY in a temporary buffer for navigation.
 
 Set `flycheck-navigation-minimum-level' to MINIMUM-LEVEL while
 evaluating BODY."

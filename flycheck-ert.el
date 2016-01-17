@@ -215,8 +215,8 @@ may be given.  They have the same meaning as in `ert-deftest.',
 and are added to the tags and result expectations set up by this
 macro.
 
-The remaining forms denote the body of the test case, including
-assertions and setup code."
+The remaining forms KEYS-AND-BODY denote the body of the test
+case, including assertions and setup code."
   (declare (indent 3))
   (unless checker
     (error "No syntax checkers specified"))
@@ -415,7 +415,7 @@ current buffer.  Otherwise return nil."
          (= (point) (car region)))))
 
 (defun flycheck-ert-explain--at-nth-error (n)
-  "Explain a failed at-nth-error predicate."
+  "Explain a failed at-nth-error predicate at N."
   (let ((errors (flycheck-overlay-errors-at (point))))
     (if (null errors)
         (format "Expected to be at error %s, but no error at point %s"
