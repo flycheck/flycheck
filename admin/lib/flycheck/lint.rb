@@ -20,22 +20,29 @@ module Flycheck
   module Lint
     # Represents an error detected in a file
     class Error
-      def initialize(filename, line, column, message)
+      attr_reader :filename
+      attr_reader :line
+      attr_reader :kind
+      attr_reader :column
+      attr_reader :message
+
+      def initialize(filename, kind, line, column, message)
         @filename = filename
+        @kind = kind
         @line = line
         @column = column
         @message = message
       end
 
-      def self.from_line(line, column, message)
-        Error.new(line.filename, line.number, column, message)
+      def self.from_line(kind, line, column, message)
+        Error.new(line.filename, kind, line.number, column, message)
       end
 
       def to_s
         if @column
-          "#{@filename}:#{@line}:#{@column}: #{@message}"
+          "#{@filename}:#{@kind}:#{@line}:#{@column}: #{@message}"
         else
-          "#{@filename}:#{@line}: #{@message}"
+          "#{@filename}:#{@kind}:#{@line}: #{@message}"
         end
       end
     end
@@ -91,10 +98,21 @@ module Flycheck
       end
     end
 
+    def self.whitelisted?(error)
+      # Filter "Argument should appear in docstring" errors for arguments that
+      # are marked as unused by a leading underscore.  On Emacs 25 checkdoc
+      # ignores these arguments, but Emacs 24 complains, hence let's filter
+      # these faulty complaints.
+      # TODO: Remove when dropping Emacs 24 support
+      error.kind == :checkdoc &&
+        /^Argument `_[^']+' should appear/ =~ error.message
+    end
+
     def self.check_files(files)
       errors = files
                .lazy
                .flat_map { |f| LintedFile.new(f).each_error.lazy }
+               .reject { |e| whitelisted? e }
                .force
       errors.each do |error|
         puts error
@@ -108,7 +126,8 @@ module Flycheck
       def self.check_trailing_whitespace(file)
         file.each do |line|
           trailing = /[\t ]+\n$/.match(line.text)
-          yield Error.from_line(line, trailing.begin(0) + 1,
+          yield Error.from_line(:space, line,
+                                trailing.begin(0) + 1,
                                 'trailing whitespace') if trailing
         end
       end
@@ -116,7 +135,8 @@ module Flycheck
       def self.check_tab_indentation(file)
         file.each do |line|
           tabs = /\t/.match(line.text)
-          yield Error.from_line(line, tabs.begin(0) + 1, 'Tab found') if tabs
+          yield Error.from_line(:space, line,
+                                tabs.begin(0) + 1, 'Tab found') if tabs
         end
       end
 
@@ -127,7 +147,7 @@ module Flycheck
         output = Subprocess.check_output(Flycheck::Util.emacs_batch(*command))
         output.each_line do |line|
           match = /^([^:]+):(\d+): (.+)$/.match(line)
-          yield Error.new(match[1], match[2], nil, match[3]) if match
+          yield Error.new(match[1], :checkdoc, match[2], nil, match[3]) if match
         end
       end
     end
