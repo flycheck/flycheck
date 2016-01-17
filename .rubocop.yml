@@ -1,0 +1,10 @@
+# Relax length and complexity requirements for methods
+Metrics/MethodLength:
+  Max: 25
+Metrics/AbcSize:
+  Max: 20
+
+# Disable mutable constant checks, as they are buggy in 0.36.0.
+# TODO: Re-enable in the next rubocop release
+Style/MutableConstant:
+  Enabled: false

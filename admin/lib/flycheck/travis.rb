@@ -116,7 +116,6 @@ EOF
       end
     end
 
-    # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
     def self.deploy_manual
       check_environment
 

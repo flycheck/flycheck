@@ -118,6 +118,7 @@ namespace :verify do
   desc 'Verify Ruby sources'
   RuboCop::RakeTask.new(:ruby) do |task|
     task.patterns = RUBY_SOURCES
+    task.options = ['--config', '.rubocop.yml']
   end
 
   desc 'Verify Emacs Lisp sources'
