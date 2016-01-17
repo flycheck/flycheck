@@ -38,7 +38,7 @@ script:
   # Unit tests
   - bundle exec rake "test:unit[(not (tag external-tool))]"
   # Build the manual
-  - if [[ $BUILD_MANUAL == yes ]]; then bundle exec rake doc:info test:html deploy:manual; fi
+  - if [[ $BUILD_MANUAL == yes ]]; then bundle exec rake doc:info test:doc deploy:manual; fi
 notifications:
   webhooks:
     urls:

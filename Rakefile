@@ -185,7 +185,7 @@ namespace :test do
   end
 
   desc 'Test HTML manual for broken links'
-  task html: ['doc/flycheck.html'] do |t|
+  task doc: ['doc/flycheck.html'] do |t|
     HTML::Proofer
       .new(t.prerequisites.first,
            disable_external: true,
@@ -194,7 +194,7 @@ namespace :test do
   end
 
   desc 'Run all tests'
-  task all: [:specs, :unit, :html]
+  task all: [:specs, :unit, :doc]
 end
 
 namespace :doc do
