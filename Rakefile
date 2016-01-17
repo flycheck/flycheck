@@ -24,6 +24,7 @@ end
 require 'bundler/setup'
 
 require_relative 'admin/lib/flycheck/travis'
+require_relative 'admin/lib/flycheck/lint'
 
 require 'rake'
 require 'rake/clean'
@@ -37,6 +38,12 @@ end
 
 SOURCES = FileList['flycheck.el', 'flycheck-ert.el', 'flycheck-buttercup.el']
 OBJECTS = SOURCES.ext('.elc')
+
+ALL_SOURCES = FileList.new(SOURCES) do |f|
+  f.include('admin/*.el')
+  f.include('test/*.el')
+  f.include('test/specs/**/*.el')
+end
 
 DOC_SOURCES = FileList['doc/flycheck.texi']
 DOC_SOURCES.add('doc/*.texi')
@@ -123,6 +130,9 @@ namespace :verify do
 
   desc 'Verify Emacs Lisp sources'
   task :elisp do
+    # Check style
+    Flycheck::Lint.check_files(ALL_SOURCES.to_a)
+    # Run checkdoc
     sh(*emacs_batch('--eval', '(setq checkdoc-arguments-in-order-flag nil)',
                     '-l', 'admin/run-checkdoc.el',
                     '-f', 'flycheck-checkdoc-batch-and-exit',
