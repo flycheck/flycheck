@@ -54,7 +54,7 @@ module Flycheck
     end
 
     def self.any_change?(status)
-      status.added || status.deleted || status.changed
+      !(status.added.empty? && status.deleted.empty? && status.changed.empty?)
     end
 
     def self.build_manual(repo)
