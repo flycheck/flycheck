@@ -172,7 +172,7 @@ end
 namespace :test do
   desc 'Run specs'
   task :specs, [:pattern] => OBJECTS do |_, args|
-    command = ['cask', 'exec', 'buttercup', '-L', '.']
+    command = ['cask', 'exec', 'buttercup', '-L', '.', 'test/specs']
     command += ['--pattern', args.pattern] if args.pattern
     sh(*command)
   end
