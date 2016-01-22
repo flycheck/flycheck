@@ -170,27 +170,22 @@ namespace :compile do
 end
 
 namespace :test do
-  desc 'Run specs'
-  task :specs, [:pattern] => OBJECTS do |_, args|
-    command = ['cask', 'exec', 'buttercup', '-L', '.', 'test/specs']
-    command += ['--pattern', args.pattern] if args.pattern
-    sh(*command)
+  def spec_task(name, directory)
+    task name, [:pattern] => OBJECTS do |_, args|
+      command = ['cask', 'exec', 'buttercup', '-L', '.', directory]
+      command += ['--pattern', args.pattern] if args.pattern
+      sh(*command)
+    end
   end
+
+  desc 'Run specs'
+  spec_task :specs, 'test/specs'
 
   desc 'Run unit test suite'
   task :unit, [:selector] => OBJECTS do |_, args|
     selector = '(not (tag external-tool))'
     selector = "(and #{selector} #{args.selector})" if args.selector
     sh(*emacs_batch('--load', 'test/run.el', '-f', 'flycheck-run-tests-main',
-                    selector))
-  end
-
-  desc 'Run integration tests'
-  task :integration, [:selector] => OBJECTS do |_, args|
-    selector = '(tag external-tool)'
-    selector = "(and #{selector} #{args.selector})" if args.selector
-    sh(*emacs_batch('--load', 'test/run.el',
-                    '-f', 'flycheck-run-tests-main',
                     selector))
   end
 
@@ -203,11 +198,28 @@ namespace :test do
       .run
   end
 
+  namespace :integration do
+    desc 'Run integration specs'
+    spec_task :specs, 'test/integration'
+
+    desc 'Run integration tests'
+    task :ert, [:selector] => OBJECTS + ['test:integration:specs'] do |_, args|
+      selector = '(tag external-tool)'
+      selector = "(and #{selector} #{args.selector})" if args.selector
+      sh(*emacs_batch('--load', 'test/run.el',
+                      '-f', 'flycheck-run-tests-main',
+                      selector))
+    end
+
+    desc 'Run all integration tests'
+    task all: [:specs, :ert]
+  end
+
   desc 'Run all fast tests (specs, unit and documentation)'
   task fast: [:specs, :unit, :doc]
 
   desc 'Run all tests'
-  task all: [:specs, :unit, :doc, :integration]
+  task all: [:specs, :unit, :doc, 'integration:all']
 end
 
 namespace :doc do
