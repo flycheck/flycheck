@@ -1141,9 +1141,10 @@ Refer to the function @code{flycheck-rx-to-string} for a complete list
 of supported forms.
 
 @item
-The @code{:modes} property denotes the major modes, in which Flycheck
-may use this syntax checker.  @command{pylint} checks Javascript, so the
-@code{:modes} of our example specify @code{python-mode}.
+The @code{:modes} property denotes the major modes in which Flycheck
+may use this syntax checker.  @command{rubocop} checks Ruby code, so the
+@code{:modes} of our example specify @code{ruby-mode} and
+@code{enh-ruby-mode}.
 
 @end itemize
 
