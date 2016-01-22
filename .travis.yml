@@ -36,7 +36,7 @@ script:
   # Run all unit tests
   - bundle exec rake "test:unit:all"
   # Build the manual
-  - if [[ $BUILD_MANUAL == yes ]]; then bundle exec rake doc:info test:integration:doc deploy:manual; fi
+  - if [[ $BUILD_MANUAL == yes ]]; then bundle exec rake doc:info test:integration:doc deploy:travis:manual; fi
 notifications:
   webhooks:
     urls:

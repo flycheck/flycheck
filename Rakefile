@@ -254,7 +254,8 @@ namespace :dist do
 end
 
 namespace :deploy do
-  if Flycheck::Travis.travis_ci?
+  # Deployment tasks to be run from Travis CI
+  namespace :travis do
     task :manual do
       Flycheck::Travis.deploy_manual
     end
