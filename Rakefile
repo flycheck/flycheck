@@ -178,24 +178,19 @@ namespace :test do
     end
   end
 
-  desc 'Run specs'
-  spec_task :specs, 'test/specs'
+  namespace :unit do
+    desc 'Run unit specs'
+    spec_task :specs, 'test/specs'
 
-  desc 'Run unit test suite'
-  task :unit, [:selector] => OBJECTS do |_, args|
-    selector = '(not (tag external-tool))'
-    selector = "(and #{selector} #{args.selector})" if args.selector
-    sh(*emacs_batch('--load', 'test/run.el', '-f', 'flycheck-run-tests-main',
-                    selector))
-  end
+    desc 'Run ERT unit tests'
+    task :ert, [:selector] => OBJECTS do |_, args|
+      selector = '(not (tag external-tool))'
+      selector = "(and #{selector} #{args.selector})" if args.selector
+      sh(*emacs_batch('--load', 'test/run.el', '-f', 'flycheck-run-tests-main',
+                      selector))
+    end
 
-  desc 'Test HTML manual for broken links'
-  task doc: ['doc/flycheck.html'] do |t|
-    HTML::Proofer
-      .new(t.prerequisites.first,
-           disable_external: true,
-           checks_to_ignore: ['ScriptCheck'])
-      .run
+    task all: [:specs, :ert]
   end
 
   namespace :integration do
@@ -211,15 +206,24 @@ namespace :test do
                       selector))
     end
 
+    desc 'Test HTML manual for broken links'
+    task doc: ['doc/flycheck.html'] do |t|
+      HTML::Proofer
+        .new(t.prerequisites.first,
+             disable_external: true,
+             checks_to_ignore: ['ScriptCheck'])
+        .run
+    end
+
     desc 'Run all integration tests'
-    task all: [:specs, :ert]
+    task all: [:specs, :ert, :doc]
   end
 
-  desc 'Run all fast tests (specs, unit and documentation)'
-  task fast: [:specs, :unit, :doc]
+  desc 'Run all buttercup specs (unit and integration)'
+  task :specs, [:pattern] => ['unit:specs', 'integration:specs']
 
   desc 'Run all tests'
-  task all: [:specs, :unit, :doc, 'integration:all']
+  task all: ['unit:all', 'integration:all']
 end
 
 namespace :doc do
@@ -258,4 +262,4 @@ namespace :deploy do
 end
 
 # Top-level targets
-task check: ['verify:all', 'compile:all', 'test:fast']
+task check: ['verify:all', 'compile:all', 'test:unit:all']

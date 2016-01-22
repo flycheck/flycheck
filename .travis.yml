@@ -33,12 +33,10 @@ script:
   # Linting and compilation
   - bundle exec rake verify:all
   - bundle exec rake 'compile:all[$COMPILEARGS]'
-  # Spec tests
-  - bundle exec rake "test:specs"
-  # Unit tests
-  - bundle exec rake "test:unit"
+  # Run all unit tests
+  - bundle exec rake "test:unit:all"
   # Build the manual
-  - if [[ $BUILD_MANUAL == yes ]]; then bundle exec rake doc:info test:doc deploy:manual; fi
+  - if [[ $BUILD_MANUAL == yes ]]; then bundle exec rake doc:info test:integration:doc deploy:manual; fi
 notifications:
   webhooks:
     urls:
