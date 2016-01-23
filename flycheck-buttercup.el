@@ -40,6 +40,29 @@
 (require 'flycheck)
 (require 'seq)
 
+
+;;; Misc helpers
+(defun flycheck-buttercup-encrypt-string-to-file (string passphrase filename)
+  "Encrypt STRING with PASSPHRASE and write to FILENAME.
+
+This function is ABSOLUTELY INSECURE, use only and exclusively for testing."
+  ;; Encrypt string via GPG, passing it on standard input.  Enforce a pipe for
+  ;; communication with `process-connection-type nil', otherwise gpg tries to
+  ;; read beyond EOF and never finishes.
+  (let* ((process-connection-type nil)
+         (gpg (start-process "flycheck-buttercup-gpg" nil
+                             "gpg" "--batch" "--no-tty" "-c" "--passphrase"
+                             passphrase "-o" filename "-")))
+    (process-send-string gpg string)
+    (process-send-eof gpg)
+    ;; Wait until GPG exists
+    (while (process-live-p gpg)
+      (accept-process-output)
+      (sleep-for 0.1))))
+
+
+;;; Buttercup helpers
+
 (defun flycheck-buttercup-format-error-list (errors)
   "Format ERRORS into a human-readable string."
   (mapconcat (lambda (e) (flycheck-error-format e 'with-file-name))
