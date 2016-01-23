@@ -270,3 +270,5 @@ namespace :check do
   desc 'Check Flycheck fast (verify, compile, unit tests only)'
   task fast: ['verify:all', 'compile:all', 'test:unit:all']
 end
+
+task default: ['check:fast']
