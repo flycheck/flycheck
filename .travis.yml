@@ -15,28 +15,29 @@ env:
   matrix:
     # Run unit tests against oldest supported stable, latest stable, and trunk
     - EMACS_VERSION=24.3
-    - EMACS_VERSION=24.5 BUILD_MANUAL=yes
+    - EMACS_VERSION=24.5
     - EMACS_VERSION=snapshot COMPILEFLAGS='error-on-warn'
+    # A special job to build the manual
+    - BUILD_MANUAL=yes
 before_install:
   - export PATH="$HOME/bin:$PATH"
   - wget 'https://raw.githubusercontent.com/flycheck/emacs-travis/master/emacs-travis.mk'
-  - make -f emacs-travis.mk install_emacs
-  - make -f emacs-travis.mk install_cask
-  - emacs --version
+  - if [[ -n $EMACS_VERSION ]]; then make -f emacs-travis.mk install_emacs; fi
+  - if [[ -n $EMACS_VERSION ]]; then make -f emacs-travis.mk install_cask; fi
+  - if [[ -n $EMACS_VERSION ]]; then emacs --version; fi
   # Install Texinfo and htmlproof when building the manual
   - if [[ $BUILD_MANUAL == yes ]]; then make -f emacs-travis.mk install_texinfo; fi
   - if [[ $BUILD_MANUAL == yes ]]; then texi2any --version; fi
 install:
   - bundle install --jobs=3 --retry=3 --path vendor/bundle
-  - bundle exec rake init:all
+  - if [[ -n $EMACS_VERSION ]]; then bundle exec rake init:all; fi
 script:
-  # Linting and compilation
-  - bundle exec rake verify:all
-  - bundle exec rake 'compile:all[$COMPILEARGS]'
-  # Run all unit tests
-  - bundle exec rake "test:unit:all"
-  # Build the manual
-  - if [[ $BUILD_MANUAL == yes ]]; then bundle exec rake doc:info test:integration:doc deploy:travis:manual; fi
+  # Lint, compile, test
+  - if [[ -n $EMACS_VERSION ]]; then bundle exec rake verify:all compile:all[$COMPILEARGS]; fi
+  - if [[ -n $EMACS_VERSION ]]; then bundle exec rake test:unit:all; fi
+  # Build and deploy the manual
+  - if [[ $BUILD_MANUAL == yes ]]; then bundle exec rake doc:info test:integration:doc; fi
+  - if [[ $BUILD_MANUAL == yes ]]; then bundle exec rake deploy:travis:manual; fi
 notifications:
   webhooks:
     urls:
