@@ -26,7 +26,6 @@
 ;;; Code:
 
 (require 'flycheck-buttercup)
-(require 'epa-file)                     ; To test encrypted buffers
 
 (describe "Global Flycheck Mode"
 
@@ -85,31 +84,12 @@
         (expect (flycheck-may-enable-mode) :not :to-be-truthy)))
 
     (it "does not enable Flycheck in encrypted buffers"
-      (unless (ignore-errors
-                (or (epg-check-configuration (epg-configuration)) t))
-        (signal 'buttercup-pending "SKIPPED, gpg not installed"))
-      (let* ((filename (expand-file-name
-                        (concat (make-temp-name "flycheck-encrypted-file")
-                                ".txt.gpg")
-                        temporary-file-directory))
-             (passphrase "foo")
-             ;; Teach EPA about the passphrase for our file to decrypt without
-             ;; any user interaction
-             (epa-file-cache-passphrase-for-symmetric-encryption t)
-             (epa-file-passphrase-alist (list (cons (file-truename filename)
-                                                    passphrase))))
-        (unwind-protect
-            (with-temp-buffer
-              (flycheck-buttercup-encrypt-string-to-file
-               "Hello world" passphrase filename)
-              (rename-buffer "foo")
-              (let ((inhibit-message t))
-                ;; Silence "Decrypting ..." messages to keep buttercup output
-                ;; clean
-                (insert-file-contents filename 'visit))
-              (emacs-lisp-mode)
-              (expect (flycheck-may-enable-mode) :not :to-be-truthy))
-          (ignore-errors (delete-file filename)))))
+      (spy-on 'flycheck-encrypted-buffer-p :and-return-value t)
+      (with-temp-buffer
+        (rename-buffer "foo")
+        (emacs-lisp-mode)
+        (expect (flycheck-may-enable-mode) :not :to-be-truthy)
+        (expect 'flycheck-encrypted-buffer-p :to-have-been-called)))
 
     (it "does not enable Flycheck in compilation mode"
       (with-temp-buffer
