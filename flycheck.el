@@ -1229,24 +1229,23 @@ Safely delete all files and directories listed in
   (seq-do #'flycheck-safe-delete flycheck-temporaries)
   (setq flycheck-temporaries nil))
 
-(eval-and-compile
-  (defun flycheck-rx-file-name (form)
-    "Translate the `(file-name)' FORM into a regular expression."
-    (let ((body (or (cdr form) '((minimal-match
-                                  (one-or-more not-newline))))))
-      (rx-submatch-n `(group-n 1 ,@body))))
+(defun flycheck-rx-file-name (form)
+  "Translate the `(file-name)' FORM into a regular expression."
+  (let ((body (or (cdr form) '((minimal-match
+                                (one-or-more not-newline))))))
+    (rx-submatch-n `(group-n 1 ,@body))))
 
-  (defun flycheck-rx-message (form)
-    "Translate the `(message)' FORM into a regular expression."
-    (let ((body (or (cdr form) '((one-or-more not-newline)))))
-      (rx-submatch-n `(group-n 4 ,@body))))
+(defun flycheck-rx-message (form)
+  "Translate the `(message)' FORM into a regular expression."
+  (let ((body (or (cdr form) '((one-or-more not-newline)))))
+    (rx-submatch-n `(group-n 4 ,@body))))
 
-  (defun flycheck-rx-id (form)
-    "Translate the `(id)' FORM into a regular expression."
-    (rx-submatch-n `(group-n 5 ,@(cdr form))))
+(defun flycheck-rx-id (form)
+  "Translate the `(id)' FORM into a regular expression."
+  (rx-submatch-n `(group-n 5 ,@(cdr form))))
 
-  (defun flycheck-rx-to-string (form &optional no-group)
-    "Like `rx-to-string' for FORM, but with special keywords:
+(defun flycheck-rx-to-string (form &optional no-group)
+  "Like `rx-to-string' for FORM, but with special keywords:
 
 `line'
      matches the line number.
@@ -1269,15 +1268,15 @@ Safely delete all files and directories listed in
 NO-GROUP is passed to `rx-to-string'.
 
 See `rx' for a complete list of all built-in `rx' forms."
-    (let ((rx-constituents
-           (append
-            `((line . ,(rx (group-n 2 (one-or-more digit))))
-              (column . ,(rx (group-n 3 (one-or-more digit))))
-              (file-name flycheck-rx-file-name 0 nil)
-              (message flycheck-rx-message 0 nil)
-              (id flycheck-rx-id 0 nil))
-            rx-constituents nil)))
-      (rx-to-string form no-group))))
+  (let ((rx-constituents
+         (append
+          `((line . ,(rx (group-n 2 (one-or-more digit))))
+            (column . ,(rx (group-n 3 (one-or-more digit))))
+            (file-name flycheck-rx-file-name 0 nil)
+            (message flycheck-rx-message 0 nil)
+            (id flycheck-rx-id 0 nil))
+          rx-constituents nil)))
+    (rx-to-string form no-group)))
 
 (defun flycheck-current-load-file ()
   "Get the source file currently being loaded.
