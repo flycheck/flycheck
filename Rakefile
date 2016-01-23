@@ -263,4 +263,10 @@ namespace :deploy do
 end
 
 # Top-level targets
-task check: ['verify:all', 'compile:all', 'test:unit:all']
+desc 'Check Flycheck (verify, compile, test)'
+task check: ['verify:all', 'compile:all', 'test:all']
+
+namespace :check do
+  desc 'Check Flycheck fast (verify, compile, unit tests only)'
+  task fast: ['verify:all', 'compile:all', 'test:unit:all']
+end
