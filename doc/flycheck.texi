@@ -1172,8 +1172,21 @@ instead of highlighting errors within the buffer it shows a new buffer
 in Compilation Mode, which contains the entire output of the command and
 highlights everything that matches a pattern.  You can then refine the
 error pattern, and iterate through this process until the error pattern
-is complete.  @kbd{M-x re-builder} can help you to quickly develop
-patterns for the current output.
+is complete.
+
+@indentedblock
+The @code{re-builder} tool can help you to quickly develop patterns for
+the current output.  It lets you interactively develop a regular
+expression while continously matching the current expression against the
+buffer contents.  Start @code{re-builder} with @kbd{M-x re-builder}, and
+switch to the @code{rx} syntax with @kbd{C-c TAB}.  Then type your
+@code{rx} expression into the small window at the bottom, and observe
+how the matching parts of the buffer are highlighted.
+
+Note that @code{re-builder} does @emph{not} support the special Flycheck
+@code{rx} forms available in @code{:error-patterns}.  As such, you
+cannot directly type a Flycheck expression into @code{re-builder}.
+@end indentedblock
 
 Sometimes however an output format doesn't lend itself to error
 patterns.  In this case, you need to write a more sophisticated parser
