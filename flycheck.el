@@ -1259,8 +1259,9 @@ Safely delete all files and directories listed in
      (one-or-more not-newline))'.
 
 `(message SEXP ...)'
-     matches the message. SEXP constitutes the body of the message.  If no SEXP
-     is given, use a default body of `(one-or-more not-newline)'.
+     matches the message.  SEXP constitutes the body of the
+     message.  If no SEXP is given, use a default body
+     of `(one-or-more not-newline)'.
 
 `(id SEXP ...)'
      matches an error ID.  SEXP describes the ID.
