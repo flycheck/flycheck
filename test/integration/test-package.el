@@ -89,11 +89,10 @@ version."
       (expect entries :to-contain "flycheck.info")
       (expect entries :to-contain "dir"))
 
-    ;; Pending https://github.com/milkypostman/melpa/issues/3480#issuecomment-173926709
-    (xit "contains flycheck-buttercup"
+    (it "contains flycheck-buttercup"
       (expect entries :to-contain "flycheck-buttercup.el"))
 
-    (xit "contains flycheck-ert"
+    (it "contains flycheck-ert"
       (expect entries :to-contain "flycheck-ert.el"))))
 
 ;;; test-package.el ends here
