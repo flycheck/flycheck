@@ -1137,8 +1137,9 @@ The @code{line} and @code{column} forms match a sequence of one or more
 digits as line and column respectively of the error.
 @end itemize
 
-Refer to the function @code{flycheck-rx-to-string} for a complete list
-of supported forms.
+See the docstring of the function @code{rx}, for a list of all standard
+@code{rx} forms, and the docstring of the function
+@code{flycheck-rx-to-string} for a list of all special Flycheck forms.
 
 @item
 The @code{:modes} property denotes the major modes in which Flycheck may

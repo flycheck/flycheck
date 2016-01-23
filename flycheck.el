@@ -1266,7 +1266,9 @@ Safely delete all files and directories listed in
 `(id SEXP ...)'
      matches an error ID.  SEXP describes the ID.
 
-NO-GROUP is passed to `rx-to-string'."
+NO-GROUP is passed to `rx-to-string'.
+
+See `rx' for a complete list of all built-in `rx' forms."
     (let ((rx-constituents
            (append
             `((line . ,(rx (group-n 2 (one-or-more digit))))
