@@ -53,10 +53,6 @@ module Flycheck
       repo
     end
 
-    def self.any_change?(status)
-      !(status.added.empty? && status.deleted.empty? && status.changed.empty?)
-    end
-
     def self.build_manual(repo)
       source_dir = Pathname.new(Dir.pwd).expand_path
       bundle_path = source_dir / 'vendor' / 'bundle'
@@ -72,12 +68,6 @@ module Flycheck
       end
     end
 
-    def self.add_changes(repo)
-      has_changed = any_change? repo.status
-      repo.add('.', all: true) if has_changed
-      has_changed
-    end
-
     def self.configure_ssh_for_github(key)
       ssh_directory = Pathname.new(Dir.home) / '.ssh'
       ssh_directory.mkpath
@@ -90,10 +80,17 @@ Host github.com
 EOF
     end
 
-    def self.commit_changes(repo)
+    def self.try_commit_changes(repo)
+      repo.add('.', all: true)
       revision = ENV['TRAVIS_COMMIT'][0..7]
       message = "Update from flycheck/flycheck@#{revision}"
-      repo.commit(message)
+      begin
+        repo.commit(message)
+        true
+      rescue Git::GitExecuteError => e
+        raise unless /^nothing to commit, working directory clean$/ =~ e.message
+        false
+      end
     end
 
     def self.push_changes(repo)
@@ -122,19 +119,17 @@ EOF
       puts 'Build manual'
       build_manual(repo)
 
-      puts 'Add changes if any'
-      if add_changes(repo)
+      puts 'Try to commit changes'
+      if try_commit_changes(repo)
         key = Pathname.new(directory) / 'deploy'
         puts 'Decrypt deployment key'
         decrypt_deployment_key('admin/deploy.enc', key)
         puts 'Setup Github SSH authentication'
         configure_ssh_for_github(key)
-        puts 'Commit changes to manual'
-        commit_changes(repo)
         puts 'Push changes'
         push_changes(repo)
       else
-        puts 'DEPLOYMENT SKIPPED (no changed)'
+        puts 'DEPLOYMENT SKIPPED (no changes)'
       end
     end
 
