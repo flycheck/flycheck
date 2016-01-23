@@ -1220,7 +1220,8 @@ Flycheck will try all syntax checkers in this variable when checking a
 buffer automatically, and check the buffer with the first syntax checker
 in this list whose @code{:modes} contains the current major mode.
 
-@strong{Note}: Do @emph{not} use @code{flycheck-checker} and
+@indentedblock
+Do @emph{not} use @code{flycheck-checker} and
 @code{flycheck-select-checker} to enable your own syntax checker in
 Flycheck extensions.  They are reserved for @emph{user customization}.
 
@@ -1247,6 +1248,7 @@ words, this is @strong{good}:
 @lisp
 (add-to-list 'flycheck-checkers 'my-new-syntax-checker)
 @end lisp
+@end indentedblock
 
 @node Parsing structured output
 @section Parsing structured output
