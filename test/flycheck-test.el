@@ -516,26 +516,6 @@ and extension, as in `file-name-base'."
     (rename-buffer "foo")
     (should-not (flycheck-ephemeral-buffer-p))))
 
-(ert-deftest flycheck-encrypted-buffer-p/unencrypted-temporary-buffer ()
-  :tags '(utility)
-  (flycheck-ert-with-temp-buffer
-    (should-not (flycheck-encrypted-buffer-p))))
-
-(ert-deftest flycheck-encrypted-buffer-p/unencrypted-file-buffer ()
-  :tags '(utility)
-  (flycheck-ert-with-resource-buffer "global-mode-dummy.el"
-    (should-not (flycheck-encrypted-buffer-p))))
-
-(ert-deftest flycheck-encrypted-buffer-p/encrypted-file-buffer ()
-  :tags '(utility external-tool)
-  (skip-unless (flycheck-ert-check-gpg))
-  (let* ((filename (flycheck-ert-resource-filename "encrypted-file.el.gpg"))
-         ;; Tell EPA about our passphrase
-         (epa-file-cache-passphrase-for-symmetric-encryption t)
-         (epa-file-passphrase-alist (list (cons filename "foo"))))
-    (flycheck-ert-with-resource-buffer filename
-      (should (flycheck-encrypted-buffer-p)))))
-
 (ert-deftest flycheck-autoloads-file-p/ephemeral-buffer ()
   :tags '(utility)
   (flycheck-ert-with-temp-buffer
