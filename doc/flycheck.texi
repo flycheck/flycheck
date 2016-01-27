@@ -1280,8 +1280,8 @@ for more information about error parsers.
 @section Passing options and configuration files to syntax checkers
 
 Many linting tools provide a rich set of options to configure their
-analysis.  Flycheck makes it to define proper Emacs options and map them
-to options of commands.
+analysis.  Flycheck makes it easy to define proper Emacs options and map
+them to options of commands.
 
 For instance, the @ghref{bbatsov/rubocop, Rubocop} tool checks Ruby for
 semantic and stylistic issues.  Since style is mainly a matter of taste,
@@ -1303,7 +1303,7 @@ See URL `http://batsov.com/rubocop/'."
 Note the special @code{option-flag} argument, which splices the value of
 the boolean Emacs option @code{flycheck-rubocop-lint-only} into the
 command: If the variable is non-nil, Flycheck adds the @option{--lint}
-option to the final command line, other Flycheck omits the entire
+option to the final command line, otherwise Flycheck omits the entire
 argument.
 
 Flycheck also supports other special @code{option-} arguments for plain
