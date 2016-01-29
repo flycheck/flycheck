@@ -30,6 +30,8 @@ now for questions and discussions about development. [GH-820]
     [GH-851]
   * Add `flycheck-jshint-extract-javascript` to extract Javascript from HTML
     [GH-825]
+  * Add `flycheck-cppcheck-language-standard` to set the language standard for
+    cppcheck [GH-862]
 
 * Improvements:
 

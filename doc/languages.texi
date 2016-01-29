@@ -106,6 +106,8 @@ yield more false positives than normal checks.
 @flycoption flycheck-cppcheck-include-path
 A list of include directories for cppcheck.  Relative paths are relative to
 the file being checked.
+@flycoption flycheck-cppcheck-language-standard
+The C or C++ language standard to use with cppcheck via @option{--std=}.
 @end table
 
 @flyclanguage{CFEngine}
