@@ -6597,6 +6597,9 @@ See URL `http://golang.org/cmd/go'."
             (option-flag "-i" flycheck-go-build-install-deps)
             ;; multiple tags are listed as "dev debug ..."
             (option-list "-tags=" flycheck-go-build-tags concat)
+            ;; TODO: Use `null-device' instead.  Go 1.6 can write to /dev/null
+            ;; (and NUL on Windows) now, see
+            ;; https://github.com/flycheck/flycheck/issues/838.
             "-o" temporary-file-name)
   :error-patterns
   ((error line-start (file-name) ":" line ":"
