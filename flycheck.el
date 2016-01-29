@@ -5917,6 +5917,18 @@ including a list of supported checks."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.14"))
 
+(flycheck-def-option-var flycheck-cppcheck-language-standard nil c/c++-cppcheck
+  "The language standard to use in cppcheck.
+
+The value of this variable is either a string denoting a language
+standard, or nil, to use the default standard.  When non-nil,
+pass the language standard via the `-std' option."
+  :type '(choice (const :tag "Default standard" nil)
+                 (string :tag "Language standard"))
+  :safe #'stringp
+  :package-version '(flycheck . "0.26"))
+(make-variable-buffer-local 'flycheck-cppcheck-language-standard)
+
 (flycheck-def-option-var flycheck-cppcheck-inconclusive nil c/c++-cppcheck
   "Whether to enable Cppcheck inconclusive checks.
 
@@ -5947,6 +5959,7 @@ See URL `http://cppcheck.sourceforge.net/'."
                     flycheck-option-comma-separated-list)
             (option-flag "--inconclusive" flycheck-cppcheck-inconclusive)
             (option-list "-I" flycheck-cppcheck-include-path)
+            (option "--std=" flycheck-cppcheck-language-standard concat)
             source)
   :error-parser flycheck-parse-cppcheck
   :modes (c-mode c++-mode))
