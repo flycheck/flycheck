@@ -80,7 +80,46 @@ rule '.elc', [:build_flags] => ['.el'] do |t, args|
   sh 'cask', 'exec', *emacs_batch(*batch_args)
 end
 
+# Force rake to preserve the description of tasks
+Rake::TaskManager.record_task_metadata = true
+
 # Tasks
+task :help do
+  tasks = Rake.application.tasks.select { |t| t.comment }
+  width = tasks.map { |t| t.name_with_args.length }.max || 10
+
+  task_list = tasks.map do |t|
+    "- #{t.name_with_args.ljust(width)} - #{t.comment}"
+  end.join("\n")
+
+  puts <<EOF
+# Flycheck rake
+
+    rake <task>
+
+Rake helps you automate various tasks in Flycheck.
+
+The default task will run all source verifications, compile Emacs Lisp and run
+all unit tests.  It's also available as `rake check:fast`.  `rake check` will
+also run all integration tests which can be very very slow and emit false
+positives or spurious errors.
+
+# Task namespaces
+
+The tasks are grouped in namespaces:
+
+- `verify`: Verify source code before building or compiling
+- `compile`: Build Flycheck (i.e. compile to bytecode)
+- `test:unit`: Run unit tests for Flycheck
+- `test:integration`: Run integration tests for Flycheck
+- `deploy`: Deployment tasks
+
+# Task list
+
+#{task_list}
+EOF
+end
+
 namespace :init do
   CLOBBER << '.cask/'
 
