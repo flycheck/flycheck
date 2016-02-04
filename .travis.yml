@@ -6,7 +6,6 @@ rvm:
   - 2.3.0
 cache:
   directories:
-    - vendor/bundle
     - .cask/
 env:
   global:
@@ -28,6 +27,10 @@ before_install:
   # Install Texinfo and htmlproof when building the manual
   - if [[ $BUILD_MANUAL == yes ]]; then make -f emacs-travis.mk install_texinfo; fi
   - if [[ $BUILD_MANUAL == yes ]]; then texi2any --version; fi
+  # Install helper tools
+  - gem install travis rubocop mdl
+  # Install tools for doc deployment
+  - if [[ $BUILD_MANUAL == yes ]]; then gem install git html-proofer; fi
 install:
   - bundle install --jobs=3 --retry=3 --path vendor/bundle
   - if [[ -n $EMACS_VERSION ]]; then bundle exec rake init:all; fi

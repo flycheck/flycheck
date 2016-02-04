@@ -13,24 +13,11 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-begin
-  require 'bundler'
-rescue LoadError
-  puts "\e[31mFailed to load bundler\e[0m"
-  puts "\e[33mPlease run `gem install bundler` and `bundle install`.\e[0m"
-  exit 1
-end
-
-require 'bundler/setup'
-
-require_relative 'admin/lib/flycheck/travis'
+require_relative 'admin/lib/flycheck/util'
 require_relative 'admin/lib/flycheck/lint'
 
 require 'rake'
 require 'rake/clean'
-
-require 'rubocop/rake_task'
-require 'html/proofer'
 
 include Flycheck::Util
 
@@ -97,6 +84,26 @@ end
 namespace :init do
   CLOBBER << '.cask/'
 
+  desc 'List all necessary tools'
+  task :tools do
+    puts <<EOF
+Install the following additional tools to enable all tasks of this Rakefile.
+
+verify:
+
+* Rubocop <https://github.com/bbatsov/rubocop>
+* markdownlint <https://github.com/mivok/markdownlint>
+
+doc:
+
+* Texinfo
+
+test:integration:
+
+* html-proofer <https://github.com/gjtorikian/html-proofer>
+EOF
+  end
+
   desc 'Install all dependencies'
   task :deps do
     sh 'cask', 'install'
@@ -110,20 +117,17 @@ end
 namespace :verify do
   desc 'Verify Travis configuration'
   task :travis do
-    sh('bundle', 'exec', 'travis', 'lint', '--exit-code', '--no-interactive')
+    sh('travis', 'lint', '--exit-code', '--no-interactive')
   end
 
   desc 'Verify Markdown documents'
   task :markdown do
-    sh('bundle', 'exec', 'mdl',
-       '--style', 'admin/markdown_style',
-       *MARKDOWN_SOURCES)
+    sh('mdl', '--style', 'admin/markdown_style', *MARKDOWN_SOURCES)
   end
 
   desc 'Verify Ruby sources'
-  RuboCop::RakeTask.new(:ruby) do |task|
-    task.patterns = RUBY_SOURCES
-    task.options = ['--config', '.rubocop.yml']
+  task :ruby do
+    sh('rubocop', '--config', '.rubocop.yml', *RUBY_SOURCES)
   end
 
   desc 'Verify Emacs Lisp sources'
@@ -208,11 +212,8 @@ namespace :test do
 
     desc 'Test HTML manual for broken links'
     task doc: ['doc/flycheck.html'] do |t|
-      HTML::Proofer
-        .new(t.prerequisites.first,
-             disable_external: true,
-             checks_to_ignore: ['ScriptCheck'])
-        .run
+      sh('htmlproof', '--disable-external', '--checks-to-ignore=ScriptCheck',
+         *t.prerequisites)
     end
 
     desc 'Run all integration tests'
@@ -257,6 +258,7 @@ namespace :deploy do
   # Deployment tasks to be run from Travis CI
   namespace :travis do
     task :manual do
+      require_relative 'admin/lib/flycheck/travis'
       Flycheck::Travis.deploy_manual
     end
   end

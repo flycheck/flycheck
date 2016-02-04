@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-require 'subprocess'
-
 module Flycheck
   # Provides linting for Emacs Lisp
   module Lint
@@ -144,10 +142,12 @@ module Flycheck
         command = ['-l', 'admin/run-checkdoc.el',
                    '-f', 'flycheck-checkdoc-batch-and-exit',
                    file.filename]
-        output = Subprocess.check_output(Flycheck::Util.emacs_batch(*command))
-        output.each_line do |line|
-          match = /^([^:]+):(\d+): (.+)$/.match(line)
-          yield Error.new(match[1], :checkdoc, match[2], nil, match[3]) if match
+        IO.popen(Flycheck::Util.emacs_batch(*command)) do |source|
+          source.each_line do |line|
+            match = /^([^:]+):(\d+): (.+)$/.match(line)
+            yield Error.new(match[1], :checkdoc,
+                            match[2], nil, match[3]) if match
+          end
         end
       end
     end
