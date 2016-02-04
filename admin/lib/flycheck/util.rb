@@ -28,7 +28,7 @@ module Flycheck
     # Ensure that an environment +variable+ has an expected +value+.  Otherwise
     # +fail+ with the given +message+
     def self.check_environment(variable, value, message)
-      fail UnexpectedEnvironmentError, message unless ENV[variable] == value
+      raise UnexpectedEnvironmentError, message unless ENV[variable] == value
     end
 
     # Run a block with a safe 0077 umask

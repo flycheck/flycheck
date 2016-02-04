@@ -24,7 +24,7 @@ require_relative 'util'
 module Flycheck
   # Provides utilities for Travis CI
   module Travis
-    REPO_PATH = 'flycheck/flycheck.github.io'
+    REPO_PATH = 'flycheck/flycheck.github.io'.freeze
 
     def self.travis_ci?
       ENV['CI'] == 'true' && ENV['TRAVIS'] == 'true'

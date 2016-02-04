@@ -117,7 +117,7 @@ module Flycheck
       errors.each do |error|
         puts error
       end
-      fail 'Style errors' if errors.any?
+      raise 'Style errors' if errors.any?
       puts "#{files.length} files linted, no style errors detected"
     end
 
