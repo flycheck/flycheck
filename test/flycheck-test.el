@@ -3802,8 +3802,7 @@ Why not:
      '(1 44 error "Extra data" :checker json-python-json))))
 
 (flycheck-ert-def-checker-test less less file-error
-  (let* ((candidates (list (flycheck-ert-resource-filename "language/less/no-such-file.less")
-                           (flycheck-ert-resource-filename "language/less/no-such-file.less")
+  (let* ((candidates (list "no-such-file.less"
                            "no-such-file.less"))
          (message (string-join candidates ",")))
     (flycheck-ert-should-syntax-check

@@ -7203,16 +7203,12 @@ At least version 1.4 of lessc is required.
 
 See URL `http://lesscss.org'."
   :command ("lessc" "--lint" "--no-color"
-            ;; We need `source-inplace' to resolve relative `data-uri' paths,
-            ;; see https://github.com/flycheck/flycheck/issues/471
-            source-inplace)
+            "-")
+  :standard-input t
   :error-patterns
   ((error line-start (one-or-more word) ":"
           (message)
-          " in "
-          (file-name)
-
-          " on line " line
+          " in - on line " line
           ", column " column ":"
           line-end))
   :modes less-css-mode)
