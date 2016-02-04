@@ -1911,7 +1911,7 @@ and extension, as in `file-name-base'."
                                              :filename "foo.cpp"))))
     (should
      (equal (flycheck-fold-include-levels errors "In file included from")
-            (list (flycheck-error-new-at 1 0 'error "In include foo.h"
+            (list (flycheck-error-new-at 1 0 'error "In include foo.h: b is not a member of hi"
                                          :filename "foo.cpp")
                   (flycheck-error-new-at 6 11 'error "b is not a member of hi"
                                          :filename "foo.cpp")
