@@ -87,26 +87,6 @@ Rake::TaskManager.record_task_metadata = true
 namespace :init do
   CLOBBER << '.cask/'
 
-  desc 'List all necessary tools'
-  task :tools do
-    puts <<EOF
-Install the following additional tools to enable all tasks of this Rakefile.
-
-verify:
-
-* Rubocop <https://github.com/bbatsov/rubocop>
-* markdownlint <https://github.com/mivok/markdownlint>
-
-doc:
-
-* Texinfo
-
-test:integration:
-
-* html-proofer <https://github.com/gjtorikian/html-proofer>
-EOF
-  end
-
   desc 'Install all dependencies'
   task :deps do
     sh 'cask', 'install'
@@ -294,15 +274,15 @@ task :help do
 
 Rake helps you automate various tasks in Flycheck.
 
-# Task namespaces
+# Required tools
 
-The tasks are grouped in namespaces:
+Emacs and Cask (http://cask.readthedocs.org/).  Optionally, also:
 
-- `verify`: Verify source code before building or compiling
-- `compile`: Build Flycheck (i.e. compile to bytecode)
-- `test:unit`: Run unit tests for Flycheck
-- `test:integration`: Run integration tests for Flycheck
-- `deploy`: Deployment tasks
+- Rubocop (https://github.com/bbatsov/rubocop)
+- Markdownlint (https://github.com/mivok/markdownlint)
+- Travis Client (https://github.com/travis-ci/travis.rb)
+- Texinfo (https://www.gnu.org/software/texinfo/)
+- HTML::Proofer (https://github.com/gjtorikian/html-proofer)
 
 # Task list
 
