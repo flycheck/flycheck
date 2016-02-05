@@ -274,6 +274,9 @@ task check: ['verify:all', 'compile:all', 'test:all']
 namespace :check do
   desc 'Check Flycheck fast (verify, compile, unit tests only)'
   task fast: ['verify:all', 'compile:all', 'test:unit:all']
+
+  desc 'Check documentation (generate and test)'
+  task doc: ['doc:info', 'test:integration:doc']
 end
 
 task :help do
