@@ -39,7 +39,7 @@ Code style
 - Generally, use the same coding style and spacing.
 - Do not use tabs for indentation.
 - Add docstrings for every declaration.
-- Make sure your code compiles without warnings with `make compile`, and has no
+- Make sure your code compiles without warnings with `rake compile`, and has no
   checkdoc issues with `M-x checkdoc-buffer` or `C-c ? d`.  If you are using
   Flycheck, just make sure that your code has no Flycheck warnings.
 
