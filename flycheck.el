@@ -7014,7 +7014,7 @@ Refer to the jshint manual at the URL
   "A Javascript syntax and style checker using jshint.
 
 See URL `http://www.jshint.com'."
-  :command ("jshint" "--checkstyle-reporter"
+  :command ("jshint" "--reporter=checkstyle"
             "--filename" source-original
             (config-file "--config" flycheck-jshintrc)
             (option "--extract" flycheck-jshint-extract-javascript
