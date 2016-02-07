@@ -523,11 +523,6 @@ your project:
 variables.
 @end defopt
 
-@vindex flycheck-completion-system
-
-You can change the completion system used by the commands of this
-section with @code{flycheck-completion-system}.
-
 @node Reporting results
 @section Reporting results of syntax checking
 

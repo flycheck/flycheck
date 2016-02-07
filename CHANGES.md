@@ -13,6 +13,8 @@ now for questions and discussions about development. [GH-820]
 
   * Remove `flycheck-copy-messages-as-kill`, obsolete since Flycheck 0.22
   * Remove `flycheck-perlcritic-verbosity`, obsolete since Flycheck 0.22
+  * Replace `flycheck-completion-system` with
+    `flycheck-completing-read-function` [GH-870]
 
 * New syntax checkers:
 

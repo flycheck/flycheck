@@ -202,10 +202,6 @@ and extension, as in `file-name-base'."
   :tags '(customization)
   (should (eq flycheck-standard-error-navigation t)))
 
-(ert-deftest flycheck-completion-system/defaults-to-nil ()
-  :tags '(customization)
-  (should (eq flycheck-completion-system nil)))
-
 (ert-deftest flycheck-CHECKER-executable/is-special-variable ()
   :tags '(customization)
   (dolist (checker flycheck-checkers)

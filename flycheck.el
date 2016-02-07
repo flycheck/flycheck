@@ -618,37 +618,17 @@ using \\[flycheck-error-list-reset-filter]."
   :safe #'flycheck-error-level-p
   :package-version '(flycheck . "0.24"))
 
-(defcustom flycheck-completion-system nil
-  "The completion system to use.
+(defcustom flycheck-completing-read-function #'completing-read
+  "Function to read from minibuffer with completion.
 
-`ido'
-     Use IDO.
-
-     IDO is a built-in alternative completion system, without
-     good flex matching and a powerful UI.  You may want to
-     install flx-ido (see URL `https://github.com/lewang/flx') to
-     improve the flex matching in IDO.
-
-`grizzl'
-     Use Grizzl.
-
-     Grizzl is an alternative completion system with powerful
-     flex matching, but a very limited UI.  See URL
-     `https://github.com/d11wtq/grizzl'.
-
-nil
-     Use the standard unfancy `completing-read'.
-
-     `completing-read' has a very simple and primitive UI, and
-     does not offer flex matching.  This is the default setting,
-     though, to match Emacs' defaults.  With this system, you may
-     want enable option `icomplete-mode' to improve the display
-     of completion candidates at least."
+The function must be compatible to the built-in `completing-read'
+function."
   :group 'flycheck
-  :type '(choice (const :tag "IDO" ido)
-                 (const :tag "Grizzl" grizzl)
-                 (const :tag "Completing read" nil))
-  :package-version '(flycheck . "0.17"))
+  :type '(choice (const :tag "Default" completing-read)
+                 (const :tag "IDO" ido-completing-read)
+                 (function :tag "Custom function"))
+  :risky t
+  :package-version '(flycheck . "0.26"))
 
 (defcustom flycheck-temp-prefix "flycheck"
   "Prefix for temporary files created by Flycheck."
@@ -1338,25 +1318,15 @@ FILE-NAME is nil, return `default-directory'."
   "`completing-read' history of `read-flycheck-checker'.")
 
 (defun flycheck-completing-read (prompt candidates default &optional history)
-  "Read a value from the minibuffer using `flycheck-completion-system`.
+  "Read a value from the minibuffer.
+
+Use `flycheck-completing-read-function' to read input from the
+minibuffer with completion.
 
 Show PROMPT and read one of CANDIDATES, defaulting to DEFAULT.
-HISTORY is passed to `ido-completing-read' or `completing-read'."
-  ;; TODO: Could use a small cleanup
-  (pcase flycheck-completion-system
-    (`ido (ido-completing-read prompt candidates nil
-                               'require-match nil
-                               history
-                               default))
-    (`grizzl (if (and (fboundp 'grizzl-make-index)
-                      (fboundp 'grizzl-completing-read))
-                 (grizzl-completing-read
-                  prompt (grizzl-make-index candidates))
-               (user-error "Please install Grizzl from \
-https://github.com/d11wtq/grizzl")))
-    (_ (completing-read prompt candidates nil 'require-match
-                        nil history
-                        default))))
+HISTORY is passed to `flycheck-completing-read-function'."
+  (funcall flycheck-completing-read-function
+           prompt candidates nil 'require-match nil history default))
 
 (defun read-flycheck-checker (prompt &optional default property candidates)
   "Read a flycheck checker from minibuffer with PROMPT and DEFAULT.
