@@ -48,3 +48,10 @@ notifications:
     on_success: change
     on_failure: always
     on_start: never
+matrix:
+  # Finish the build even if any build with allowed failures are still running
+  fast_finish: true
+  allow_failures:
+    # Allow the snapshot build to fail, because Emacs snapshot sometimes fails
+    # to build
+    - env: EMACS_VERSION=snapshot COMPILEFLAGS='error-on-warn'
