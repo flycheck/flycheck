@@ -1935,6 +1935,8 @@ into the verification results."
   (insert-button (symbol-name checker)
                  'type 'help-flycheck-checker-doc
                  'help-args (list checker))
+  (when (with-current-buffer buffer (flycheck-disabled-checker-p checker))
+    (insert (propertize " (disabled)" 'face '(bold error))))
   (princ "\n")
   (let ((results (with-current-buffer buffer
                    (flycheck-verify-generic-checker checker))))
@@ -1988,6 +1990,24 @@ buffer."
                    'help-args (list mode)))
   (princ ":\n\n"))
 
+(defun flycheck--verify-print-footer (buffer)
+  "Print a footer for BUFFER in the current buffer.
+
+BUFFER is the buffer being verified."
+  (princ "Flycheck Mode is ")
+  (let ((enabled (buffer-local-value 'flycheck-mode buffer)))
+    (insert (propertize (if enabled "enabled" "disabled")
+                        'face (if enabled 'success '(warning bold)))))
+  (princ
+   (with-current-buffer buffer
+     ;; Use key binding state in the verified buffer to print the help.
+     (substitute-command-keys
+      ".  Use \\[universal-argument] \\[flycheck-disable-checker] to enable disabled checkers.")))
+  (save-excursion
+    (let ((end (point)))
+      (backward-paragraph)
+      (fill-region-as-paragraph (point) end))))
+
 (defun flycheck-verify-checker (checker)
   "Check whether a CHECKER can be used in this buffer.
 
@@ -2011,10 +2031,12 @@ is applicable from Emacs Lisp code.  Use
         (flycheck--verify-print-header "Syntax checker in buffer " buffer)
         (flycheck--verify-princ-checker checker buffer 'with-mm)
         (if (with-current-buffer buffer (flycheck-may-use-checker checker))
-            (insert (propertize "Flycheck can use this syntax checker for this buffer."
+            (insert (propertize "Flycheck can use this syntax checker for this buffer.\n"
                                 'face 'success))
-          (insert (propertize "Flycheck cannot use this syntax checker for this buffer."
-                              'face 'error)))))))
+          (insert (propertize "Flycheck cannot use this syntax checker for this buffer.\n"
+                              'face 'error)))
+        (insert "\n")
+        (flycheck--verify-print-footer buffer)))))
 
 (defun flycheck-verify-setup ()
   "Check whether Flycheck can be used in this buffer.
@@ -2039,14 +2061,8 @@ possible problems are shown."
                               'face '(bold error))))
         (dolist (checker checkers)
           (flycheck--verify-princ-checker checker buffer))
-        (princ "Flycheck Mode is ")
-        (let ((enabled (buffer-local-value 'flycheck-mode buffer)))
-          (insert (propertize (if enabled "enabled" "disabled")
-                              'face (if enabled 'success '(warning bold)))))
-        (princ ".\n")
 
         (-when-let (selected-checker (buffer-local-value 'flycheck-checker buffer))
-          (princ "\n")
           (insert (propertize "The following checker is explicitly selected for this buffer:\n\n"
                               'face 'bold))
           (flycheck--verify-princ-checker selected-checker buffer 'with-mm))
@@ -2060,7 +2076,9 @@ possible problems are shown."
               (princ "  - ")
               (princ checker)
               (princ "\n"))
-            (princ "\nTry adding these syntax checkers to `flycheck-checkers'.")))))))
+            (princ "\nTry adding these syntax checkers to `flycheck-checkers'.\n")))
+
+        (flycheck--verify-print-footer buffer)))))
 
 
 ;;; Predicates for generic syntax checkers
