@@ -90,13 +90,13 @@
     (it "skips over intermittent errors"
       ;; See https://github.com/flycheck/flycheck/pull/783
       (let ((errors (list (flycheck-error-new-at 1 0 'error "In file included from"
-                                             :filename "foo.cpp")
-                      (flycheck-error-new-at 6 11 'error "b is not a member of hi"
-                                             :filename "foo.cpp")
-                      (flycheck-error-new-at 5 20 'note "in definition of macro CHECK"
-                                             :filename "foo.h")
-                      (flycheck-error-new-at 8 5 'error "xx was not declared in this scope"
-                                             :filename "foo.cpp"))))
+                                                 :filename "foo.cpp")
+                          (flycheck-error-new-at 6 11 'error "b is not a member of hi"
+                                                 :filename "foo.cpp")
+                          (flycheck-error-new-at 5 20 'note "in definition of macro CHECK"
+                                                 :filename "foo.h")
+                          (flycheck-error-new-at 8 5 'error "xx was not declared in this scope"
+                                                 :filename "foo.cpp"))))
     (expect
      (flycheck-fold-include-levels errors "In file included from")
      :to-be-equal-flycheck-errors
