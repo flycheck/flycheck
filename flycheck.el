@@ -5032,8 +5032,14 @@ This variable is an option for the following syntax checkers:
 
 If VALUE is nil, return nil.  Otherwise return VALUE converted to
 a string."
-  (when value
-    (number-to-string value)))
+  (and value (number-to-string value)))
+
+(defun flycheck-option-symbol (value)
+  "Convert a symbol option VALUE to string.
+
+If VALUE is nil return nil.  Otherwise return VALUE converted to
+a string."
+  (and value (symbol-name value)))
 
 (defun flycheck-option-comma-separated-list (value &optional separator filter)
   "Convert VALUE into a list separated by SEPARATOR.
@@ -7018,8 +7024,8 @@ See URL `http://www.jshint.com'."
   :command ("jshint" "--reporter=checkstyle"
             "--filename" source-original
             (config-file "--config" flycheck-jshintrc)
-            (option "--extract" flycheck-jshint-extract-javascript
-                    concat symbol-name)
+            (option "--extract=" flycheck-jshint-extract-javascript
+                    concat flycheck-option-symbol)
             "-")
   :standard-input t
   :error-parser flycheck-parse-checkstyle
