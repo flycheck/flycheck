@@ -7667,7 +7667,7 @@ See URL `https://github.com/jimhester/lintr'."
   "Racket syntax checker.
 
 See URL `https://racket-lang.org/'."
-  :command ("raco" "expand" source-original)
+  :command ("raco" "expand" source-inplace)
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
