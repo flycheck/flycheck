@@ -32,6 +32,7 @@
  (depends-on "php-mode")
  (depends-on "processing-mode")
  (depends-on "puppet-mode")
+ (depends-on "racket-mode")
  (depends-on "rhtml-mode")
  (depends-on "rpm-spec-mode")
  (depends-on "rust-mode")
