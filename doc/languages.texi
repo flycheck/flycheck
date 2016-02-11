@@ -629,6 +629,14 @@ selects the linters to use.
 
 @end itemize
 
+@flyclanguage{Racket}
+
+@itemize
+@item
+@flyc{racket} (syntax checker with @code{raco expand}, requires the
+@code{compiler-lib} package)
+@end itemize
+
 @flyclanguage{RPM Spec}
 
 @itemize

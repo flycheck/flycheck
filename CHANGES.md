@@ -21,6 +21,7 @@ now for questions and discussions about development. [GH-820]
 * New syntax checkers:
 
   * Processing [GH-793] [GH-812]
+  * Racket [GH-799] [GH-873]
 
 * New features:
 

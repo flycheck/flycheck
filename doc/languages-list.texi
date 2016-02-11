@@ -30,6 +30,7 @@
 @item @ref{Puppet}
 @item @ref{Python}
 @item @ref{R}
+@item @ref{Racket}
 @item @ref{RPM Spec}
 @item @ref{reStructuredText}
 @item @ref{Ruby}
