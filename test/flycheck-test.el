@@ -4035,6 +4035,11 @@ Why not:
      '(4 6 warning "Do not use absolute paths." :checker r-lintr)
      '(7 5 error "unexpected end of input" :checker r-lintr))))
 
+(flycheck-ert-def-checker-test racket racket nil
+                               (flycheck-ert-should-syntax-check
+                                "language/racket.rkt" 'racket-mode
+                                '(4 3 error "read: expected a `)' to close `('" :checker racket)))
+
 (flycheck-ert-def-checker-test rpm-rpmlint rpm nil
   (flycheck-ert-should-syntax-check
    "language/rpm.spec" '(sh-mode rpm-spec-mode)
