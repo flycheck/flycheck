@@ -61,6 +61,7 @@ through [Quickstart][] guide.
 [Installation]: http://www.flycheck.org/manual/latest/Installation.html#Installation
 [Quickstart]: http://www.flycheck.org/manual/latest/Quickstart.html#Quickstart
 [windows issues]: https://github.com/flycheck/flycheck/labels/B-Windows%20only
+[windows support]: http://www.flycheck.org/manual/latest/Installation.html#index-Windows
 
 ## Support & Contribution ##
 
