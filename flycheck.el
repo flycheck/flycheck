@@ -6949,7 +6949,12 @@ See URL `https://github.com/ndmitchell/hlint'."
             (eval flycheck-hlint-args)
             source-inplace)
   :error-patterns
-  ((warning line-start
+  ((info line-start
+         (file-name) ":" line ":" column
+         ": Suggestion: "
+         (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
+         line-end)
+   (warning line-start
             (file-name) ":" line ":" column
             ": Warning: "
             (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
