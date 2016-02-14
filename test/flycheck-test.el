@@ -3566,14 +3566,14 @@ In the expression: putStrLn True" :checker haskell-stack-ghc))))
   (let ((flycheck-disabled-checkers '(haskell-ghc)))
     (flycheck-ert-should-syntax-check
      "language/haskell/Warnings.hs" 'haskell-mode
-     '(4 1 error "Eta reduce
+     '(4 1 warning "Eta reduce
 Found:
   spam eggs = map lines eggs
 Why not:
   spam = map lines" :checker haskell-hlint)
      '(4 1 warning "Top-level binding with no type signature:
   spam :: [String] -> [[String]]" :checker haskell-stack-ghc)
-     '(7 8 warning "Redundant bracket
+     '(7 8 info "Redundant bracket
 Found:
   (putStrLn \"hello world\")
 Why not:
@@ -3607,7 +3607,7 @@ In the expression: putStrLn True" :checker haskell-ghc))))
   (let ((flycheck-disabled-checkers '(haskell-stack-ghc)))
     (flycheck-ert-should-syntax-check
      "language/haskell/Warnings.hs" 'haskell-mode
-     '(4 1 error "Eta reduce
+     '(4 1 warning "Eta reduce
 Found:
   spam eggs = map lines eggs
 Why not:
@@ -3615,7 +3615,7 @@ Why not:
      '(4 1 warning "Top-level binding with no type signature:
   spam :: [String] -> [[String]]"
          :checker haskell-ghc)
-     '(7 8 warning "Redundant bracket
+     '(7 8 info "Redundant bracket
 Found:
   (putStrLn \"hello world\")
 Why not:
