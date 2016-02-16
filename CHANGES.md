@@ -1030,7 +1030,7 @@ now for questions and discussions about development. [GH-820]
 
 [flymake-cursor]: http://www.emacswiki.org/emacs/FlymakeCursor
 
-## 0.4 (Nov 21, t2012) ##
+## 0.4 (Nov 21, 2012) ##
 
 * Rename the project to Flycheck [GH-5]
 * New syntax checkers
