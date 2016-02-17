@@ -7678,7 +7678,7 @@ See URL `https://racket-lang.org/'."
   :predicate (lambda ()
 	       (let ((raco (flycheck-checker-executable 'racket)))
 		 (-any (apply-partially 'string-match "compiler-lib")
-		       (ignore-errors (process-lines raco "pkg" "show" "--all")))))
+		       (ignore-errors (process-lines raco "pkg" "show" "compiler-lib" "--all")))))
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
