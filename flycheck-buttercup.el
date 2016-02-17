@@ -41,6 +41,19 @@
 (require 'seq)
 
 
+;;; Test assumptions
+(defmacro assume (condition &optional message)
+  "Assume CONDITIION for the current spec.
+
+Assume that CONDITION evaluates to non-nil in the current spec.
+If it evaluates to nil skip the current spec with MESSAGE.  If
+MESSAGE is omitted or nil show the condition form instead."
+  (let ((message (format "!! CANCELLED !! %s"
+                         (or message (format "(not %S)" condition)))))
+    `(unless ,condition
+       (signal 'buttercup-pending ,message))))
+
+
 ;;; Buttercup helpers
 
 (defun flycheck-buttercup-format-error-list (errors)

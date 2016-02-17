@@ -71,8 +71,7 @@ This function is ABSOLUTELY INSECURE, use only and exclusively for testing."
           (ignore-errors (delete-file file-name)))))
 
     (it "recognizes an encrypted buffer"
-      (unless (flycheck/gpg-available-p)
-        (signal 'buttercup-pending "SKIPPED, gpg not installed"))
+      (assume (flycheck/gpg-available-p) "gpg not installed")
 
       ;; Create a temporary file name.  Do NOT use `make-temp-file' here,
       ;; because that hangs with the extension `.gpg'.

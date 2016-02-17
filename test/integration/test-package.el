@@ -72,12 +72,8 @@ version."
                                   (process-lines "tar" "-tf" filename)))))))
 
     (before-each
-      (unless version
-        (signal 'buttercup-pending
-                "SKIPPED, Flycheck MELPA version not found"))
-      (unless entries
-        (signal 'buttercup-pending
-                "SKIPPED, could not download and parse Flycheck package")))
+      (assume version "Flycheck MELPA version not found")
+      (assume entries "Could not download and parse Flycheck package"))
 
     (after-all
       (ignore-errors (delete-directory directory 'recursive)))
