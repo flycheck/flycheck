@@ -888,6 +888,18 @@ Set this variable to nil to disable the mode line completely."
   :risky t
   :package-version '(flycheck . "0.20"))
 
+(defcustom flycheck-mode-line-prefix "FlyC"
+  "Base mode line lighter for Flycheck.
+
+This will have an effect only with the default
+`flycheck-mode-line'.
+
+If you've customized `flycheck-mode-line' then the customized
+function must be updated to use this variable."
+  :group 'flycheck
+  :type 'string
+  :package-version '(flycheck . "0.26"))
+
 (defcustom flycheck-error-list-mode-line
   `(,(propertized-buffer-identification "%12b")
     " for buffer "
@@ -3072,7 +3084,7 @@ nil."
                      "")))
                 (`interrupted "-")
                 (`suspicious "?"))))
-    (concat " FlyC" text)))
+    (concat " " flycheck-mode-line-prefix text)))
 
 
 ;;; Error levels

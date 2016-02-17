@@ -1745,6 +1745,15 @@ and extension, as in `file-name-base'."
            (list (flycheck-error-new-at 1 1 'info "info"))))
       (should (string= (flycheck-mode-line-status-text 'finished) " FlyC")))))
 
+(ert-deftest flycheck-mode-line/customize-lighter ()
+  :tags '(status-reporting)
+  (flycheck-ert-with-temp-buffer
+    (let ((flycheck-mode-line-prefix "FFFLLLYYYCCCHHHEEECCCKKK")
+          (flycheck-current-errors
+           (list (flycheck-error-new-at 1 1 'info "info"))))
+      (should (string= (flycheck-mode-line-status-text 'finished)
+                       " FFFLLLYYYCCCHHHEEECCCKKK")))))
+
 
 ;;; Error levels
 ;; A level for the following unit tests
