@@ -7663,11 +7663,22 @@ See URL `https://github.com/jimhester/lintr'."
   ;; Don't check ESS files which do not contain R
   :predicate (lambda () (equal ess-language "S")))
 
+(defun lines-contain (needle line)
+  (let ((line (car lines)))
+    (cond
+     ((not line) f)
+     ((string-match needle line) t)
+     (lines-contain (cdr lines)))))
+
 (flycheck-define-checker racket
   "Racket syntax checker.
 
 See URL `https://racket-lang.org/'."
   :command ("raco" "expand" source-inplace)
+  :predicate (lambda ()
+	       (let ((raco (flycheck-checker-executable 'racket)))
+		 (-any (apply-partially 'string-match "compiler-lib")
+		       (ignore-errors (process-lines raco "pkg" "show" "--all")))))
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
