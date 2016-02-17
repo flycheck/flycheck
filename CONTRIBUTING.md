@@ -89,7 +89,6 @@ Additionally the build system requires [Cask][], the Emacs Lisp dependency
 manager.
 
 The build system is defined in `Rakefile`, with additional code in `admin/`.
-
 Run `rake help` for a quick help about the Build System.
 
 [rake]: https://github.com/ruby/rake
