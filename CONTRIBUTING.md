@@ -9,8 +9,8 @@ We hope that this document helps you to contribute.  If you have questions,
 please ask on our [issue tracker][] or in our [Gitter chatroom][gitter].
 
 For a gentle start please take a look at all the things we
-[need your help with][S-needs your love] and watch out for
-[E-beginner friendly][] tasks.
+[need your help with][S-needs your love] and look for
+tasks labelled "[E-beginner friendly][]".
 
 Please note that all contributors are expected to follow our
 [Code of Conduct][coc].
@@ -34,11 +34,11 @@ absolutely optional.  We definitely don’t mind duplicates, please report
 liberally.
 
 To open an issue simply fill out the [issue form][].  To help us fix the issue,
-include as much information as possible.  In doubt, better include too much than
+include as much information as possible.  If in doubt, better include too much than
 too little.  Here’s a list of facts that are important:
 
 * What you did, and what you expected to happen instead
-* Whether and how you could [reproduce the issue in emacs -Q][emacsQ]
+* Whether and how you were able to [reproduce the issue in emacs -Q][emacsQ]
 * Your Flycheck setup from `M-x flycheck-verify-setup`
 * Your operating system
 * Your Emacs version from `M-x emacs-version`
@@ -81,7 +81,7 @@ more.  It’s a good little helper when working on Flycheck, allowing you to
 verify and test your changes before submitting them.
 
 Our build system uses [Rake][] which is part of [Ruby][] and included in all
-Ruby installations.  Any Ruby 2.x version will suffice.  On OS X Rake is
+Ruby installations.  Any Ruby 2.x version will suffice.  On OS X, Rake is
 preinstalled, on Linux systems it’s easy to install through the package manager,
 e.g. `sudo apt-get install rake` on Ubuntu.
 
@@ -229,7 +229,7 @@ has six columns which correspond to `S-` labels on Github:
   appear in the backlog, but in this column we actively seek to remove the
   blockers and move the issue to *Ready*.
 * *Community* (`S-needs your love` label) issues are those that we will not work
-  on ourselves.  These issues need pull requests for the community to be
+  on ourselves.  These issues need pull requests from the community to be
   solved.  Look at this column to find spots to contribute to.
 * Eventually issues move into *Done* when they are closed.
 
