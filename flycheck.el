@@ -7668,10 +7668,13 @@ See URL `https://github.com/jimhester/lintr'."
 
 See URL `https://racket-lang.org/'."
   :command ("raco" "expand" source-inplace)
-  :predicate (lambda ()
-	       (let ((raco (flycheck-checker-executable 'racket)))
-		 (-any (apply-partially 'string-match "compiler-lib")
-		       (ignore-errors (process-lines raco "pkg" "show" "compiler-lib" "--all")))))
+  :predicate
+  (lambda ()
+    (let ((raco (flycheck-checker-executable 'racket)))
+      (with-temp-buffer
+        (call-process raco nil t nil "expand")
+        (goto-char (point-min))
+        (not (looking-at-p (rx bol (1+ not-newline) "Unrecognized command: expand" eol))))))
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
