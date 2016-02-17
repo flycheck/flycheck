@@ -34,6 +34,8 @@ now for questions and discussions about development. [GH-820]
     [GH-825]
   * Add `flycheck-cppcheck-language-standard` to set the language standard for
     cppcheck [GH-862]
+  * Add `flycheck-mode-line-prefix` to customise the prefix of Flycheck’s mode
+    line lighter [GH-879] [GH-880]
 
 * Improvements:
 
