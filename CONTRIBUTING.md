@@ -9,8 +9,8 @@ We hope that this document helps you to contribute.  If you have questions,
 please ask on our [issue tracker][] or in our [Gitter chatroom][gitter].
 
 For a gentle start please take a look at all the things we
-[need your help with][S-needs your love] and watch out for `E-beginner friendly`
-tasks.
+[need your help with][S-needs your love] and watch out for
+[E-beginner friendly][] tasks.
 
 Please note that all contributors are expected to follow our
 [Code of Conduct][coc].
@@ -18,6 +18,7 @@ Please note that all contributors are expected to follow our
 [issue tracker]: https://github.com/flycheck/flycheck/issues
 [gitter]: https://gitter.im/flycheck/flycheck
 [S-needs your love]: https://github.com/flycheck/flycheck/issues?q=is%3Aissue+is%3Aopen+label%3A%22S-needs+your+love%22
+[E-beginner friendly]: https://github.com/flycheck/flycheck/labels/E-beginner%20friendly
 [coc]: http://www.flycheck.org/conduct.html
 
 ## Bug reports ##
