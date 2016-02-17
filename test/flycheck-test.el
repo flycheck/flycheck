@@ -1730,30 +1730,6 @@ and extension, as in `file-name-base'."
       (flycheck-report-failed-syntax-check)
       (should-not flycheck-current-errors))))
 
-(ert-deftest flycheck-mode-line/mentions-errors ()
-  :tags '(status-reporting)
-  (flycheck-ert-with-temp-buffer
-    (let ((flycheck-current-errors
-           (list (flycheck-error-new-at 1 1 'info "info")
-                 (flycheck-error-new-at 1 1 'error "error"))))
-      (should (string= (flycheck-mode-line-status-text 'finished) " FlyC:1/0")))))
-
-(ert-deftest flycheck-mode-line/ignores-info ()
-  :tags '(status-reporting)
-  (flycheck-ert-with-temp-buffer
-    (let ((flycheck-current-errors
-           (list (flycheck-error-new-at 1 1 'info "info"))))
-      (should (string= (flycheck-mode-line-status-text 'finished) " FlyC")))))
-
-(ert-deftest flycheck-mode-line/customize-lighter ()
-  :tags '(status-reporting)
-  (flycheck-ert-with-temp-buffer
-    (let ((flycheck-mode-line-prefix "FFFLLLYYYCCCHHHEEECCCKKK")
-          (flycheck-current-errors
-           (list (flycheck-error-new-at 1 1 'info "info"))))
-      (should (string= (flycheck-mode-line-status-text 'finished)
-                       " FFFLLLYYYCCCHHHEEECCCKKK")))))
-
 
 ;;; Error levels
 ;; A level for the following unit tests
