@@ -185,7 +185,7 @@ namespace :test do
     spec_task :specs, 'test/integration'
 
     desc 'Run integration tests'
-    task :ert, [:selector] => OBJECTS + ['test:integration:specs'] do |_, args|
+    task :ert, [:selector] => OBJECTS do |_, args|
       selector = '(tag external-tool)'
       selector = "(and #{selector} #{args.selector})" if args.selector
       sh(*emacs_batch('--load', 'test/run.el',
