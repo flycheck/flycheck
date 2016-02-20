@@ -16,13 +16,14 @@
 require 'rake'
 require 'pathname'
 require 'git'
-require 'subprocess'
 
 require_relative 'util'
 
 module Flycheck
   # Provides utilities for Travis CI
   module Travis
+    include Rake::DSL
+
     REPO_PATH = 'flycheck/flycheck.github.io'.freeze
 
     def self.travis_ci?
@@ -56,10 +57,10 @@ module Flycheck
       source_dir = Pathname.new(Dir.pwd).expand_path
       repo.chdir do
         # Install required gems for the website repo
-        Subprocess.check_call(['bundle', 'install', '--jobs=3', '--retry=3'])
-        Subprocess.check_call(['bundle', 'exec',
-                               'rake', "build:manual[#{source_dir},latest]",
-                               "build:documents[#{source_dir}]"])
+        sh 'bundle', 'install', '--jobs=3', '--retry=3'
+        sh 'bundle', 'exec', 'rake',
+           "build:manual[#{source_dir},latest]",
+           "build:documents[#{source_dir}]"
       end
     end
 
@@ -98,10 +99,9 @@ EOF
         # Decrypt the deployment key
         key = ENV['encrypted_923a5f7c915e_key']
         iv = ENV['encrypted_923a5f7c915e_iv']
-        openssl = ['openssl', 'aes-256-cbc',
-                   '-K', key, '-iv', iv,
-                   '-in', source.to_s, '-out', target.to_s, '-d']
-        Subprocess.check_call(openssl)
+        sh 'openssl', 'aes-256-cbc',
+           '-K', key, '-iv', iv,
+           '-in', source.to_s, '-out', target.to_s, '-d'
         # Just to be on the safe side, explicitly restrict the permissions of
         # the decrypted key
         File.chmod(0700, target)
