@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
+require 'bundler'
 require 'rake'
 require 'pathname'
 require 'git'
@@ -58,11 +59,16 @@ module Flycheck
     def build_manual(repo)
       source_dir = Pathname.new(Dir.pwd).expand_path
       repo.chdir do
-        # Install required gems for the website repo
-        sh 'bundle', 'install', '--jobs=3', '--retry=3'
-        sh 'bundle', 'exec', 'rake',
-           "build:manual[#{source_dir},latest]",
-           "build:documents[#{source_dir}]"
+        # Clean bundler environment on Travis CI even though we don't use
+        # bundler.  But Travis does and that'd interfere with our use of bundler
+        # here
+        Bundler.with_clean_env do
+          # Install required gems for the website repo
+          sh 'bundle', 'install', '--jobs=3', '--retry=3'
+          sh 'bundle', 'exec', 'rake',
+             "build:manual[#{source_dir},latest]",
+             "build:documents[#{source_dir}]"
+        end
       end
     end
 
