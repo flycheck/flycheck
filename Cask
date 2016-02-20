@@ -26,6 +26,7 @@
  (depends-on "jade-mode")
  (depends-on "js2-mode")
  (depends-on "js3-mode")
+ (depends-on "json-mode")
  (depends-on "less-css-mode")
  (depends-on "lua-mode")
  (depends-on "mmm-mode")

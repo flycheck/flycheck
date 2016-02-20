@@ -7180,12 +7180,7 @@ See URL `https://github.com/zaach/jsonlint'."
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
-  :predicate
-  (lambda ()
-    (or
-     (eq major-mode 'json-mode)
-     (and (buffer-file-name)
-          (string= (file-name-extension (buffer-file-name)) "json")))))
+  :modes json-mode)
 
 (flycheck-define-checker json-python-json
   "A JSON syntax checker using Python json.tool module.
@@ -7200,12 +7195,7 @@ See URL `https://docs.python.org/3.5/library/json.html#command-line-interface'."
           ;; Ignore the rest of the line which shows the char position.
           (one-or-more not-newline)
           line-end))
-  :predicate
-  (lambda ()
-    (or
-     (eq major-mode 'json-mode)
-     (and (buffer-file-name)
-          (string= (file-name-extension (buffer-file-name)) "json")))))
+  :modes json-mode)
 
 (flycheck-define-checker less
   "A LESS syntax checker using lessc.

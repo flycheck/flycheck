@@ -3773,13 +3773,13 @@ Why not:
 
 (flycheck-ert-def-checker-test json-jsonlint json nil
   (flycheck-ert-should-syntax-check
-   "language/json.json" 'text-mode
+   "language/json.json" 'json-mode
    '(1 44 error "found: ',' - expected: 'EOF'." :checker json-jsonlint)))
 
 (flycheck-ert-def-checker-test json-python-json json nil
   (let ((flycheck-disabled-checkers '(json-jsonlint)))
     (flycheck-ert-should-syntax-check
-     "language/json.json" 'text-mode
+     "language/json.json" 'json-mode
      '(1 44 error "Extra data" :checker json-python-json))))
 
 (flycheck-ert-def-checker-test less less file-error

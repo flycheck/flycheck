@@ -15,6 +15,8 @@ now for questions and discussions about development. [GH-820]
   * Remove `flycheck-perlcritic-verbosity`, obsolete since Flycheck 0.22
   * Replace `flycheck-completion-system` with
     `flycheck-completing-read-function` [GH-870]
+  * JSON syntax checkers now require `json-mode` and do not check in Javascript
+    Mode anymore
 
 * New syntax checkers:
 
