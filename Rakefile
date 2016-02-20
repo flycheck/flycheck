@@ -264,7 +264,7 @@ namespace :check do
   desc 'Check documentation (generate and test)'
   task doc: ['doc:info'] do
     task('test:unit:specs').invoke('^Manual')
-    task('test:integration:doc').invoke()
+    task('test:integration:doc').invoke
   end
 end
 
