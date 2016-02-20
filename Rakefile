@@ -248,9 +248,6 @@ namespace :deploy do
 end
 
 # Top-level targets
-desc 'Check Flycheck (verify, compile, test)'
-task check: ['verify:all', 'compile:all', 'test:all']
-
 namespace :check do
   desc 'Check Flycheck for a given LANGUAGE'
   task :language, [:language] => 'verify:elisp' do |_, args|
@@ -260,6 +257,9 @@ namespace :check do
 
   desc 'Check Flycheck fast (verify, compile, unit tests only)'
   task fast: ['verify:all', 'compile:all', 'test:unit:all']
+
+  desc 'Check Flycheck (verify, compile, test)'
+  task all: ['verify:all', 'compile:all', 'test:all']
 
   desc 'Check documentation (generate and test)'
   task doc: ['doc:info', 'test:integration:doc']
