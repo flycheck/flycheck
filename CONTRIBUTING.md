@@ -123,6 +123,10 @@ Some common targets are:
 
 * `rake init`: Initialise the project, by installing Emacs Lisp dependencies
   locally.
+* `rake check:language[LANGUAGE]` runs all tests for the given `LANGUAGE`,
+  e.g. `rake check:language[javascript]`.  Maintainers will use this task when
+  testing pull requests that make changes to Flycheck’s support for a language,
+  such as adding a new pull request.
 * `rake check:fast` verifies all sources, byte-compiles Flycheck, and runs all
   unit tests.  You need the corresponding tools from the previous section.  This
   task runs on Travis CI on all contributions so it’s a good idea to run this
@@ -145,8 +149,7 @@ Please make your pull requests against the `master` branch.
 
 Use `rake check:fast` to test your pull request locally.  When making changes to
 syntax checkers of a specific language, it’s also a good idea to run `'rake
-test:integration:ert[language-$LANGUAGE]'` to test all syntax checkers for the
-given `$LANGUAGE`.
+check:language[LANGUAGE]'` to run all tests for the given `LANGUAGE`.
 
 All pull requests are reviewed by a [maintainer][maintainers].  Feel free to
 mention individual developers (e.g. @lunaryorn) to request a review from a

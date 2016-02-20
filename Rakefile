@@ -252,6 +252,12 @@ desc 'Check Flycheck (verify, compile, test)'
 task check: ['verify:all', 'compile:all', 'test:all']
 
 namespace :check do
+  desc 'Check Flycheck for a given LANGUAGE'
+  task :language, [:language] => 'verify:elisp' do |_, args|
+    task('test:integration:ert').invoke("(language #{args.language})")
+    task('test:unit:specs').invoke('^Manual')
+  end
+
   desc 'Check Flycheck fast (verify, compile, unit tests only)'
   task fast: ['verify:all', 'compile:all', 'test:unit:all']
 
