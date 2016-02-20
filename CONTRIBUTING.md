@@ -152,8 +152,8 @@ syntax checkers of a specific language, it’s also a good idea to run `'rake
 check:language[LANGUAGE]'` to run all tests for the given `LANGUAGE`.
 
 All pull requests are reviewed by a [maintainer][maintainers].  Feel free to
-mention individual developers (e.g. @lunaryorn) to request a review from a
-specific person, or @flycheck/maintainers if you have general questions or if
+mention individual developers (e.g. `@lunaryorn`) to request a review from a
+specific person, or `@flycheck/maintainers` if you have general questions or if
 your pull request was waiting for review too long.
 
 Additionally, all pull requests go through automated tests on
