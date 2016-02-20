@@ -1,4 +1,4 @@
-[![License GPL 3](https://img.shields.io/badge/license-GPL_3-blue.svg)][COPYING]
+[![License GPL 3](https://img.shields.io/github/license/flycheck/flycheck.svg)][COPYING]
 [![Join the chat](https://badges.gitter.im/flycheck/flycheck.svg)](https://gitter.im/flycheck/flycheck)
 [![Manual](https://img.shields.io/badge/manual-latest-green.svg)][manual]
 [![MELPA stable version](http://stable.melpa.org/packages/flycheck-badge.svg)](http://stable.melpa.org/#/flycheck)
