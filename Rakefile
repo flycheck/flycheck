@@ -118,7 +118,7 @@ namespace :verify do
     Flycheck::Lint.check_files(ALL_SOURCES.to_a)
   end
 
-  task 'Verify all source files'
+  desc 'Verify all source files'
   task all: [:travis, :markdown, :ruby, :elisp]
 end
 
@@ -177,6 +177,7 @@ namespace :test do
                       selector))
     end
 
+    desc 'Run all unit tests'
     task all: [:specs, :ert]
   end
 
