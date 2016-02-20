@@ -125,15 +125,6 @@ module Flycheck
     module Lints
       module_function
 
-      def check_trailing_whitespace(file)
-        file.each do |line|
-          trailing = /[\t ]+\n$/.match(line.text)
-          yield Error.from_line(:space, line,
-                                trailing.begin(0) + 1,
-                                'trailing whitespace') if trailing
-        end
-      end
-
       def check_tab_indentation(file)
         file.each do |line|
           tabs = /\t/.match(line.text)
