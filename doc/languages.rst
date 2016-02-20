@@ -238,6 +238,18 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _CSSLint: https://github.com/CSSLint/csslint
 
+   .. syntax-checker:: css-stylelint
+
+      Syntax-check and lint CSS with stylelint_.
+
+      .. _stylelint: https://stylelint.io
+
+      .. syntax-checker-config-file:: flycheck-stylelintrc
+
+      .. defcustom:: flycheck-stylelint-quiet
+
+         Whether to run stylelint in quiet mode via ``--quiet``.
+
 .. supported-language:: D
 
    .. syntax-checker:: d-dmd
@@ -641,6 +653,18 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          This syntax checker requires lessc 1.4 or newer.
 
+   .. syntax-checker:: less-stylelint
+
+      Syntax-check and lint Less with stylelint_.
+
+      .. _stylelint: https://stylelint.io
+
+      .. syntax-checker-config-file:: flycheck-stylelintrc
+
+      .. defcustom:: flycheck-stylelint-quiet
+
+         Whether to run stylelint in quiet mode via ``--quiet``.
+
 .. supported-language:: Lua
 
    Flycheck checks Lua with `lua-luacheck`, falling back to `lua`.
@@ -995,8 +1019,8 @@ to view the docstring of the syntax checker.  Likewise, you may use
 .. supported-language:: Sass/SCSS
 
    Flycheck checks SASS with `sass/scss-sass-lint`, falling back to `sass`, and
-   SCSS with  `scss-lint`, falling back to `sass/scss-sass-lint` first and then
-   `scss` if neither is available.
+   SCSS with  `scss-lint` or `scss-stylelint` falling back to
+   `sass/scss-sass-lint` first and then `scss` if neither is available.
 
    .. syntax-checker:: scss-lint
 
@@ -1017,6 +1041,18 @@ to view the docstring of the syntax checker.  Likewise, you may use
       .. _SASS-Lint: https://github.com/sasstools/sass-lint
 
       .. syntax-checker-config-file:: flycheck-sass-lintrc
+
+   .. syntax-checker:: scss-stylelint
+
+      Syntax-check and lint SCSS with stylelint_.
+
+      .. _stylelint: https://stylelint.io
+
+      .. syntax-checker-config-file:: flycheck-stylelintrc
+
+      .. defcustom:: flycheck-stylelint-quiet
+
+         Whether to run stylelint in quiet mode via ``--quiet``.
 
    .. syntax-checker:: sass
                        scss
