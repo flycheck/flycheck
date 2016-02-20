@@ -16,6 +16,8 @@
 module Flycheck
   # Provides linting for Emacs Lisp
   module Lint
+    module_function
+
     # Represents an error detected in a file
     class Error
       attr_reader :filename
@@ -96,7 +98,7 @@ module Flycheck
       end
     end
 
-    def self.whitelisted?(error)
+    def whitelisted?(error)
       # Filter "Argument should appear in docstring" errors for arguments that
       # are marked as unused by a leading underscore.  On Emacs 25 checkdoc
       # ignores these arguments, but Emacs 24 complains, hence let's filter
@@ -106,7 +108,7 @@ module Flycheck
         /^Argument `_[^']+' should appear/ =~ error.message
     end
 
-    def self.check_files(files)
+    def check_files(files)
       errors = files
                .lazy
                .flat_map { |f| LintedFile.new(f).each_error.lazy }
@@ -121,7 +123,9 @@ module Flycheck
 
     # Holds all lints
     module Lints
-      def self.check_trailing_whitespace(file)
+      module_function
+
+      def check_trailing_whitespace(file)
         file.each do |line|
           trailing = /[\t ]+\n$/.match(line.text)
           yield Error.from_line(:space, line,
@@ -130,7 +134,7 @@ module Flycheck
         end
       end
 
-      def self.check_tab_indentation(file)
+      def check_tab_indentation(file)
         file.each do |line|
           tabs = /\t/.match(line.text)
           yield Error.from_line(:space, line,
@@ -138,7 +142,7 @@ module Flycheck
         end
       end
 
-      def self.check_doc(file)
+      def check_doc(file)
         command = ['-l', 'admin/run-checkdoc.el',
                    '-f', 'flycheck-checkdoc-batch-and-exit',
                    file.filename]

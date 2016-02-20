@@ -20,6 +20,8 @@ module Flycheck
 
   # Utilities
   module Util
+    module_function
+
     # Create a command array to run +args+ with Emacs batch.
     def emacs_batch(*args)
       [ENV['EMACS'] || 'emacs', '-Q', '--batch'] + args
@@ -27,12 +29,12 @@ module Flycheck
 
     # Ensure that an environment +variable+ has an expected +value+.  Otherwise
     # +fail+ with the given +message+
-    def self.check_environment(variable, value, message)
+    def check_environment(variable, value, message)
       raise UnexpectedEnvironmentError, message unless ENV[variable] == value
     end
 
     # Run a block with a safe 0077 umask
-    def self.with_safe_umask
+    def with_safe_umask
       old_umask = File.umask
       begin
         File.umask(0077)
