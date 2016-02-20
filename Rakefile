@@ -262,7 +262,10 @@ namespace :check do
   task all: ['verify:all', 'compile:all', 'test:all']
 
   desc 'Check documentation (generate and test)'
-  task doc: ['doc:info', 'test:integration:doc']
+  task doc: ['doc:info'] do
+    task('test:unit:specs').invoke('^Manual')
+    task('test:integration:doc').invoke()
+  end
 end
 
 task :help do
