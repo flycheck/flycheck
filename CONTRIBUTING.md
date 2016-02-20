@@ -164,7 +164,6 @@ cherry-pick or merge your changes and close the pull request.
 [pull-requests]: https://help.github.com/articles/using-pull-requests/
 [travis-prs]: https://travis-ci.org/flycheck/flycheck/pull_requests
 [maintainers]: http://www.flycheck.org/people.html#maintainers
-[bundler]: http://bundler.io/
 
 ### Commit guidelines ###
 
