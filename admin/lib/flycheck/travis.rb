@@ -22,7 +22,7 @@ require_relative 'util'
 module Flycheck
   # Provides utilities for Travis CI
   module Travis
-    include Rake::DSL
+    extend ::Rake::FileUtilsExt
 
     REPO_PATH = 'flycheck/flycheck.github.io'.freeze
 
