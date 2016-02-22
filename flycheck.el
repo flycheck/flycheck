@@ -8063,22 +8063,22 @@ See URL `http://www.scalastyle.org'."
                   (flycheck-locate-config-file flycheck-scalastylerc
                                                'scala-scalastyle)))
   :verify (lambda (checker)
-            (list
-             (flycheck-verification-result-new
-              :label "Configuration file"
-              :message (cond
-                        ((not flycheck-scalastylerc)
-                         "`flycheck-scalastyletrc' not set")
-                        ((not (flycheck-locate-config-file flycheck-scalastylerc
-                                                           checker))
-                         (format "file %s not found" flycheck-scalastylerc))
-                        (t "found"))
-              :face (cond
-                     ((not flycheck-scalastylerc) '(bold warning))
-                     ((not (flycheck-locate-config-file flycheck-scalastylerc
-                                                        checker))
-                      '(bold error))
-                     (t 'success))))))
+            (let ((config-file (and flycheck-scalastylerc
+                                    (flycheck-locate-config-file
+                                     flycheck-scalastylerc checker))))
+              (list
+               (flycheck-verification-result-new
+                :label "Configuration file"
+                :message (cond
+                          ((not flycheck-scalastylerc)
+                           "`flycheck-scalastyletrc' not set")
+                          ((not config-file)
+                           (format "file %s not found" flycheck-scalastylerc))
+                          (t (format "found at %s" config-file)))
+                :face (cond
+                       ((not flycheck-scalastylerc) '(bold warning))
+                       ((not config-file) '(bold error))
+                       (t 'success)))))))
 
 (defconst flycheck-scss-lint-checkstyle-re
   (rx "cannot load such file" (1+ not-newline) "scss_lint_reporter_checkstyle")
