@@ -2666,6 +2666,7 @@ Return t if so, or nil otherwise."
 Flycheck mode is not enabled for
 
 - the minibuffer,
+- `fundamental-mode'
 - major modes whose `mode-class' property is `special',
 - ephemeral buffers (see `flycheck-ephemeral-buffer-p'),
 - encrypted buffers (see `flycheck-encrypted-buffer-p'),
@@ -2680,6 +2681,7 @@ otherwise."
          (`(not . ,modes) (not (memq major-mode modes)))
          (modes (memq major-mode modes)))
        (not (or (minibufferp)
+                (eq major-mode 'fundamental-mode)
                 (eq (get major-mode 'mode-class) 'special)
                 (flycheck-ephemeral-buffer-p)
                 (flycheck-encrypted-buffer-p)

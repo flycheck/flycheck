@@ -75,12 +75,19 @@
     (it "does not enable Flycheck in ephemeral buffers"
       (with-temp-buffer
         (rename-buffer " foo")
+        (emacs-lisp-mode)
         (expect (flycheck-may-enable-mode) :not :to-be-truthy)))
 
     (it "does not enable Flycheck in special modes"
       (with-temp-buffer
         (rename-buffer "foo")
         (special-mode)
+        (expect (flycheck-may-enable-mode) :not :to-be-truthy)))
+
+    (it "does not enable Flycheck in fundamental-mode"
+      (with-temp-buffer
+        (rename-buffer "foo")
+        (fundamental-mode)
         (expect (flycheck-may-enable-mode) :not :to-be-truthy)))
 
     (it "does not enable Flycheck in encrypted buffers"

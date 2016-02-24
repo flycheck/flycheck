@@ -47,6 +47,7 @@ now for questions and discussions about development. [GH-820]
   * Merge message and checker columns in the error list to remove redundant
     ellipsis [GH-828]
   * Indicate disabled checkers in verification buffers [GH-749]
+  * Do not enable Flycheck Mode in `fundamental-mode` buffers [GH-883]
 
 * Bug fixes:
 
