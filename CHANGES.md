@@ -17,6 +17,7 @@ now for questions and discussions about development. [GH-820]
     `flycheck-completing-read-function` [GH-870]
   * JSON syntax checkers now require `json-mode` and do not check in Javascript
     Mode anymore
+  * Prefer eslint over jshint for Javascript
 
 * New syntax checkers:
 

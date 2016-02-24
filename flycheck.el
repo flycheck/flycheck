@@ -202,8 +202,8 @@ attention to case differences."
     haskell-hlint
     html-tidy
     jade
-    javascript-jshint
     javascript-eslint
+    javascript-jshint
     javascript-gjslint
     javascript-jscs
     javascript-standard
