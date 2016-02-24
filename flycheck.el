@@ -2561,11 +2561,6 @@ If CONDITION is non-nil, determine whether syntax may checked
 automatically according to
 `flycheck-check-syntax-automatically'."
   (and (not (or buffer-read-only (flycheck-ephemeral-buffer-p)))
-       ;; Don't even try to check `default-directory' if it's remote, to prevent
-       ;; expensive checks if Flycheck Mode gets enabled in a Tramp-backed
-       ;; buffer.  As a consequence, remote files are _never_ checked.
-       ;; See https://github.com/flycheck/flycheck/issues/883 for background
-       (not (file-remote-p default-directory))
        (file-exists-p default-directory)
        (or (not condition)
            (memq condition flycheck-check-syntax-automatically))))
