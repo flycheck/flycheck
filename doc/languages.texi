@@ -671,6 +671,9 @@ Whether to emit warnings for all missing references in Sphinx.
 @item
 @flyc{ruby-rubylint} (syntax and style check using
 @uref{http://code.yorickpeterse.com/ruby-lint/latest/,ruby-lint})
+@item
+@flyc{ruby-reek} (code smell detection using
+@uref{https://github.com/troessner/reek,Reek})
 @end enumerate
 
 These checkers provide the following options
@@ -681,6 +684,7 @@ Whether to suppress warnings about style issues in Rubocop, via the
 @option{--lint} option.
 @flycconfigfile{flycheck-rubocoprc,Rubocop}
 @flycconfigfile{flycheck-rubylintrc,ruby-lint}
+@flycconfigfile{flycheck-reekrc,Reek}
 @end table
 
 If none of the above is available, Flycheck will fall back to one of the
