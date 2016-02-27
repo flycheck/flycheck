@@ -7889,13 +7889,10 @@ See URL `http://jruby.org/'."
   :safe #'stringp)
 
 (flycheck-define-checker ruby-reek
-  "A Ruby smeel checker using reek
+  "A Ruby smell checker using reek
 
 See URL `https://github.com/troessner/reek'."
-  :command ("reek" "--format=xml"
-            (config-file "--config" flycheck-reekrc)
-            source-original)
-  :standard-input t
+  :command ("reek" "--format=xml" source)
   :error-parser flycheck-parse-checkstyle
   :modes (enh-ruby-mode ruby-mode)
   :next-checkers ((info . ruby-rubocop)))
