@@ -108,6 +108,11 @@ Node `(ert)Test Selectors' for information about test selectors."
   (let* ((load-prefer-newer t)
          (source-directory (locate-dominating-file flycheck-runner-file "Cask"))
          (pkg-rel-dir (format ".cask/%s/elpa" emacs-version)))
+
+    ;; standardise on the C locale so we can be sure that none of
+    ;; gcc, ghc and gfortran will output smartquotes
+    (setenv "LC_ALL" "C")
+
     (setq package-user-dir (expand-file-name pkg-rel-dir source-directory))
     (package-initialize)
 
