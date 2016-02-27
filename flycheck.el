@@ -6639,9 +6639,11 @@ See URL `http://golang.org/cmd/go'."
   "A Go syntax and type checker using the `go test' command.
 
 See URL `http://golang.org/cmd/go'."
-  ;; This command builds the test executable and leaves it in the current
-  ;; directory.  Unfortunately 'go test -c' does not have the '-o' option.
-  :command ("go" "test" "-c")
+  ;; This command builds the test executable and writes it to
+  ;; `temporary-file-name'.
+  ;; TODO: Switch to `null-device'` when < Go 1.6 support is removed.
+  ;; See: https://github.com/flycheck/flycheck/issues/838
+  :command ("go" "test" "-c" "-o" temporary-file-name)
   :error-patterns
   ((error line-start (file-name) ":" line ": "
           (message (one-or-more not-newline)

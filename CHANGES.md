@@ -49,6 +49,7 @@ now for questions and discussions about development. [GH-820]
     ellipsis [GH-828]
   * Indicate disabled checkers in verification buffers [GH-749]
   * Do not enable Flycheck Mode in `fundamental-mode` buffers [GH-883]
+  * Write `go test` output to a temporary files [GH-887]
 
 * Bug fixes:
 
