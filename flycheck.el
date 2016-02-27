@@ -7892,7 +7892,9 @@ See URL `http://jruby.org/'."
   "A Ruby smell checker using reek
 
 See URL `https://github.com/troessner/reek'."
-  :command ("reek" "--format=xml" source)
+  :command ("reek" "--format=xml"
+            (config-file "--config" flycheck-reekrc)
+            source)
   :error-parser flycheck-parse-checkstyle
   :modes (enh-ruby-mode ruby-mode)
   :next-checkers ((info . ruby-rubocop)))
