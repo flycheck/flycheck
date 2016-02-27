@@ -108,6 +108,12 @@ Node `(ert)Test Selectors' for information about test selectors."
   (let* ((load-prefer-newer t)
          (source-directory (locate-dominating-file flycheck-runner-file "Cask"))
          (pkg-rel-dir (format ".cask/%s/elpa" emacs-version)))
+
+    ;; clear GPG agent environment variables so that EPG doesn't
+    ;; prompt for any passphrases during the test suite run
+    (setenv "GPG_TTY" "")
+    (setenv "GPG_AGENT_INFO" "")
+
     (setq package-user-dir (expand-file-name pkg-rel-dir source-directory))
     (package-initialize)
 
