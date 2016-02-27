@@ -96,4 +96,8 @@ to be equal to
 %s" a-formatted b-formatted)))))
 
 (provide 'flycheck-buttercup)
+
+;; Local Variables:
+;; no-byte-compile: t
+;; End:
 ;;; flycheck-buttercup.el ends here
