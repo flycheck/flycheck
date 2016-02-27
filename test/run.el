@@ -120,7 +120,8 @@ Node `(ert)Test Selectors' for information about test selectors."
       (load (expand-file-name "flycheck-test"
                               (file-name-directory flycheck-runner-file)))))
 
-  (let ((debug-on-error t))
+  (let ((debug-on-error t)
+        (epg-gpg-home-directory "/tmp"))
     (flycheck-run-tests-batch-and-exit)))
 
 ;;; run.el ends here
