@@ -97,7 +97,12 @@ to be equal to
 
 (provide 'flycheck-buttercup)
 
+;; Disable byte compilation for this library, to prevent package.el choking on a
+;; missing `buttercup' library.  See
+;; https://github.com/flycheck/flycheck/issues/860
+
 ;; Local Variables:
 ;; no-byte-compile: t
 ;; End:
+
 ;;; flycheck-buttercup.el ends here
