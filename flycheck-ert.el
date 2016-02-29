@@ -187,12 +187,6 @@ should use to lookup resource files."
                 `(or ,result (satisfies ert-test-skipped-p))))))))
 
 
-;;; Environment and version information
-(defun flycheck-ert-check-gpg ()
-  "Check whether GPG is available."
-  (or (epg-check-configuration (epg-configuration)) t))
-
-
 ;;; Test case definitions
 (defmacro flycheck-ert-def-checker-test (checker language name
                                                  &rest keys-and-body)
