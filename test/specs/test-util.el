@@ -56,48 +56,60 @@ This function is ABSOLUTELY INSECURE, use only and exclusively for testing."
 (describe "Utilities"
 
   (describe "flycheck-encrypted-buffer-p"
+    (let ((gpg-tty (getenv "GPG_TTY"))
+          (gpg-agent-info (getenv "GPG_AGENT_INFO")))
 
-    (it "considers a temporary buffer as unencrypted"
-      (with-temp-buffer
-        (expect (flycheck-encrypted-buffer-p) :not :to-be-truthy)))
+      (before-each
+        ;; Clear GPG Agent information from environment to prevent gpg from
+        ;; hanging, see https://github.com/flycheck/flycheck/pull/890
+        (mapc #'setenv '("GPG_TTY" "GPG_AGENT_INFO")))
 
-    (it "considers a file buffer as unencrypted"
-      (let ((file-name (make-temp-file "flycheck-file")))
-        (unwind-protect
-            (with-temp-buffer
-              (insert-file-contents file-name 'visit)
-              (set-visited-file-name file-name 'no-query)
-              (expect (flycheck-encrypted-buffer-p) :not :to-be-truthy))
-          (ignore-errors (delete-file file-name)))))
+      (after-each
+        ;; Restore GPG Agent information
+        (setenv "GPG_TTY" gpg-tty)
+        (setenv "GPG_AGENT_INFO" gpg-tty))
 
-    (it "recognizes an encrypted buffer"
-      (assume (flycheck/gpg-available-p) "gpg not installed")
+      (it "considers a temporary buffer as unencrypted"
+        (with-temp-buffer
+          (expect (flycheck-encrypted-buffer-p) :not :to-be-truthy)))
 
-      ;; Create a temporary file name.  Do NOT use `make-temp-file' here,
-      ;; because that hangs with the extension `.gpg'.
-      (let* ((file-name (expand-file-name
-                         (concat (make-temp-name "flycheck-encrypted-file")
-                                 ".txt.gpg")
-                         temporary-file-directory))
-             (passphrase "spam with eggs")
-             ;; Teach EPA about the passphrase for our file to decrypt without
-             ;; any user interaction.  `epa-file-passphrase-alist' stores
-             ;; canonical file names, hence we pass the temporary file name
-             ;; through `file-truename' to remove any symlinks in the path.
-             (epa-file-cache-passphrase-for-symmetric-encryption t)
-             (epa-file-passphrase-alist (list (cons (file-truename file-name)
-                                                    passphrase))))
-        (unwind-protect
-            (with-temp-buffer
-              (flycheck/encrypt-string-to-file "Hello world"
-                                               passphrase file-name)
-              (let ((inhibit-message t))
-                ;; Silence "Decrypting ..." messages to keep buttercup output
-                ;; clean
-                (insert-file-contents file-name 'visit))
-              (set-visited-file-name file-name 'no-query)
+      (it "considers a file buffer as unencrypted"
+        (let ((file-name (make-temp-file "flycheck-file")))
+          (unwind-protect
+              (with-temp-buffer
+                (insert-file-contents file-name 'visit)
+                (set-visited-file-name file-name 'no-query)
+                (expect (flycheck-encrypted-buffer-p) :not :to-be-truthy)
+                (ignore-errors (delete-file file-name))))))
 
-              (expect (flycheck-encrypted-buffer-p) :to-be-truthy))
-          (ignore-errors (delete-file file-name)))))))
+      (it "recognizes an encrypted buffer"
+        (assume (flycheck/gpg-available-p) "gpg not installed")
+
+        ;; Create a temporary file name.  Do NOT use `make-temp-file' here,
+        ;; because that hangs with the extension `.gpg'.
+        (let* ((file-name (expand-file-name
+                           (concat (make-temp-name "flycheck-encrypted-file")
+                                   ".txt.gpg")
+                           temporary-file-directory))
+               (passphrase "spam with eggs")
+               ;; Teach EPA about the passphrase for our file to decrypt without
+               ;; any user interaction.  `epa-file-passphrase-alist' stores
+               ;; canonical file names, hence we pass the temporary file name
+               ;; through `file-truename' to remove any symlinks in the path.
+               (epa-file-cache-passphrase-for-symmetric-encryption t)
+               (epa-file-passphrase-alist (list (cons (file-truename file-name)
+                                                      passphrase))))
+          (unwind-protect
+              (with-temp-buffer
+                (flycheck/encrypt-string-to-file "Hello world"
+                                                 passphrase file-name)
+                (let ((inhibit-message t))
+                  ;; Silence "Decrypting ..." messages to keep buttercup output
+                  ;; clean
+                  (insert-file-contents file-name 'visit))
+                (set-visited-file-name file-name 'no-query)
+
+                (expect (flycheck-encrypted-buffer-p) :to-be-truthy))
+            (ignore-errors (delete-file file-name))))))))
 
 ;;; test-util.el ends here
