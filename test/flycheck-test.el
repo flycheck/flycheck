@@ -3307,9 +3307,9 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
         :checker emacs-lisp )))
 
 (flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
-                               right-syntax-table
+                               uses-right-major-mode
   (flycheck-ert-should-syntax-check
-   "language/emacs-lisp/checkdoc-syntax-table-regression.el" 'emacs-lisp-mode
+   "language/emacs-lisp/checkdoc-elisp-mode-regression.el" 'emacs-lisp-mode
    '(11 nil warning "All variables and subroutines might as well have a documentation string"
         :checker emacs-lisp-checkdoc)))
 

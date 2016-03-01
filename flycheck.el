@@ -6341,7 +6341,7 @@ See Info Node `(elisp)Byte Compilation'."
           (process-default-directory default-directory))
       ;; Note that we deliberately use our custom approach even despite of
       ;; `checkdoc-file' which was added to Emacs 25.1.  While it's conceptually
-      ;; the better thing, it's implementation has too many flaws to be of use
+      ;; the better thing, its implementation has too many flaws to be of use
       ;; for us.
       (with-temp-buffer
         (insert-file-contents source 'visit)
@@ -6350,10 +6350,12 @@ See Info Node `(elisp)Byte Compilation'."
         ;; back-substutition work
         (setq default-directory process-default-directory)
         (with-demoted-errors "Error in checkdoc: %S"
-          ;; Checkdoc needs the Emacs Lisp syntax table to parse sexps
-          ;; correctly, see https://github.com/flycheck/flycheck/issues/833
-          (with-syntax-table emacs-lisp-mode-syntax-table
-            (checkdoc-current-buffer t))
+          ;; Checkdoc needs the Emacs Lisp syntax table and comment syntax to
+          ;; parse sexps and identify docstrings correctly; see
+          ;; https://github.com/flycheck/flycheck/issues/833
+          (delay-mode-hooks (emacs-lisp-mode))
+          (setq delayed-mode-hooks nil)
+          (checkdoc-current-buffer t)
           (with-current-buffer checkdoc-diagnostic-buffer
             (princ (buffer-substring-no-properties (point-min) (point-max)))
             (kill-buffer)))))))

@@ -59,7 +59,7 @@ now for questions and discussions about development. [GH-820]
   * Don’t change current buffer when closing the error message buffer [GH-648]
   * Never display error message buffer in current window [GH-822]
   * Work around a caching issue in Rubocop [GH-844]
-  * Fix checkdoc failure with some Emacs Lisp syntax [GH-833] [GH-845]
+  * Fix checkdoc failure with some Emacs Lisp syntax [GH-833] [GH-845] [GH-898]
   * Correctly parse Haskell module name with exports right after the module name
     [GH-848]
   * Don’t hang when sending buffers to node.js processes on Windows [GH-794]
