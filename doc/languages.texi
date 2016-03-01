@@ -308,6 +308,10 @@ A list of tags for @code{go build}.
 @flycoption flycheck-go-vet-print-functions
 A list of print-like functions for go vet.  Go vet will check these
 functions for format string problems.
+
+@flycoption flycheck-go-vet-shadow
+Whether to check for shadowed variables in go vet, in Go 1.6 or newer.
+
 @end table
 
 @flyclanguage{Groovy}

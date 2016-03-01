@@ -40,6 +40,8 @@ now for questions and discussions about development. [GH-820]
     cppcheck [GH-862]
   * Add `flycheck-mode-line-prefix` to customise the prefix of Flycheck’s mode
     line lighter [GH-879] [GH-880]
+  * Add `flycheck-go-vet-shadow` to check for shadowed variables with `go vet`
+    [GH-765] [GH-897]
 
 * Improvements:
 
