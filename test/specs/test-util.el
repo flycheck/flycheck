@@ -26,6 +26,7 @@
 ;;; Code:
 
 (require 'flycheck-buttercup)
+(require 'epg-config)                   ; For GPG configuration
 (require 'epa-file)                     ; To test encrypted buffers
 
 (defun flycheck/encrypt-string-to-file (string passphrase filename)
@@ -57,9 +58,15 @@ This function is ABSOLUTELY INSECURE, use only and exclusively for testing."
 
   (describe "flycheck-encrypted-buffer-p"
     (let ((gpg-tty (getenv "GPG_TTY"))
-          (gpg-agent-info (getenv "GPG_AGENT_INFO")))
+          (gpg-agent-info (getenv "GPG_AGENT_INFO"))
+          (old-home-dir epg-gpg-home-directory)
+          temp-home-dir)
 
       (before-each
+        ;; Use a temporary directory as home directory for GPG, see
+        ;; https://github.com/flycheck/flycheck/pull/891
+        (setq temp-home-dir (make-temp-file "flycheck-epg-gpg-home" 'dir-flag))
+        (setq epg-gpg-home-directory temp-home-dir)
         ;; Clear GPG Agent information from environment to prevent gpg from
         ;; hanging, see https://github.com/flycheck/flycheck/pull/890
         (mapc #'setenv '("GPG_TTY" "GPG_AGENT_INFO")))
@@ -67,7 +74,11 @@ This function is ABSOLUTELY INSECURE, use only and exclusively for testing."
       (after-each
         ;; Restore GPG Agent information
         (setenv "GPG_TTY" gpg-tty)
-        (setenv "GPG_AGENT_INFO" gpg-agent-info))
+        (setenv "GPG_AGENT_INFO" gpg-agent-info)
+
+        ;; Delete our custom gpg home directory, and restore the old default
+        (ignore-errors (delete-directory temp-home-dir 'recursive))
+        (setq epg-gpg-home-directory old-home-dir))
 
       (it "considers a temporary buffer as unencrypted"
         (with-temp-buffer
