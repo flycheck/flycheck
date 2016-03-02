@@ -67,7 +67,7 @@ This function is ABSOLUTELY INSECURE, use only and exclusively for testing."
       (after-each
         ;; Restore GPG Agent information
         (setenv "GPG_TTY" gpg-tty)
-        (setenv "GPG_AGENT_INFO" gpg-tty))
+        (setenv "GPG_AGENT_INFO" gpg-agent-info))
 
       (it "considers a temporary buffer as unencrypted"
         (with-temp-buffer
