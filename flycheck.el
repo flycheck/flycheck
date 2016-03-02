@@ -8071,8 +8071,7 @@ See URL `http://www.scala-lang.org/'."
   "A Scala style checker using scalastyle.
 
 Note that this syntax checker is not used if
-`flycheck-scalastyle-jar' or `flycheck-scalastylerc' are nil or
-point to non-existing files.
+`flycheck-scalastylerc' is nil or refers to a non-existing file.
 
 See URL `http://www.scalastyle.org'."
   :command ("scalastyle"
