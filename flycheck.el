@@ -6564,14 +6564,29 @@ take an io.Writer as their first argument, like Fprintf,
                  (string :tag "function"))
   :safe #'flycheck-string-list-p)
 
+(flycheck-def-option-var flycheck-go-vet-shadow nil go-vet
+  "Whether to enable `go tool vet' check for shadowed variables.
+
+When nil, do not check for shadowed variables.  When `strict'
+enable shadow check and be strict about shadowing; can be
+noisy.  When any other non-nil value enable shadow check.
+
+This option requires Go 1.6 or newer."
+  :type '(choice (const :tag "Disable" nil)
+                 (const :tag "Enable" t)
+                 (const :tag "Enable and be strict about shadowing" strict)))
+
 (flycheck-define-checker go-vet
   "A Go syntax checker using the `go tool vet' command.
 
 See URL `http://golang.org/cmd/go/' and URL
 `http://godoc.org/golang.org/x/tools/cmd/vet'."
   :command ("go" "tool" "vet"
+            "-all"
             (option "-printfuncs=" flycheck-go-vet-print-functions concat
                     flycheck-option-comma-separated-list)
+            (option-flag "-shadow" flycheck-go-vet-shadow)
+            (eval (when (eq flycheck-go-vet-shadow 'strict) "-shadowstrict"))
             source)
   :error-patterns
   ((warning line-start (file-name) ":" line ": " (message) line-end))
