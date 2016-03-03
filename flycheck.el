@@ -7889,7 +7889,7 @@ See URL `http://jruby.org/'."
   :safe #'stringp)
 
 (flycheck-define-checker ruby-reek
-  "A Ruby smell checker using reek
+  "A Ruby smell checker using reek.
 
 See URL `https://github.com/troessner/reek'."
   :command ("reek" "--format=xml"
