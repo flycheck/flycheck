@@ -1,0 +1,4 @@
+# Documentation
+Sphinx>=1.3
+# Markdown support for Sphinx
+recommonmark
