@@ -7690,6 +7690,15 @@ See URL `https://github.com/jimhester/lintr'."
   ;; Don't check ESS files which do not contain R
   :predicate (lambda () (equal ess-language "S")))
 
+(defun flycheck-racket-has-expand-p (raco)
+  "Whether a RACO executable provides the `expand' command."
+  (with-temp-buffer
+    (call-process raco nil t nil "expand")
+    (goto-char (point-min))
+    (not (looking-at-p (rx bol (1+ not-newline)
+                           "Unrecognized command: expand"
+                           eol)))))
+
 (flycheck-define-checker racket
   "A Racket syntax checker with `raco expand'.
 
@@ -7700,13 +7709,16 @@ See URL `https://racket-lang.org/'."
   :command ("raco" "expand" source-inplace)
   :predicate
   (lambda ()
-    (let ((raco (flycheck-checker-executable 'racket)))
-      (with-temp-buffer
-        (call-process raco nil t nil "expand")
-        (goto-char (point-min))
-        (not (looking-at-p (rx bol (1+ not-newline)
-                               "Unrecognized command: expand"
-                               eol))))))
+    (flycheck-racket-has-expand-p (flycheck-checker-executable 'racket)))
+  :verify
+  (lambda (checker)
+    (let ((has-expand (flycheck-racket-has-expand-p
+                       (flycheck-checker-executable checker))))
+      (list
+       (flycheck-verification-result-new
+        :label "compiler-lib package"
+        :message (if has-expand "present" "missing")
+        :face (if has-expand 'success '(bold error))))))
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
