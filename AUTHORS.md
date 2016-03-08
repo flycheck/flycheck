@@ -45,6 +45,7 @@ substantial code to Flycheck:
 * [Moritz Bunkus](https://github.com/mbunkus)
 * [Omair Majid](https://github.com/omajid)
 * [Per Nordlöw](https://github.com/nordlow)
+* [Philipp Stephani](https://github.com/phst)
 * [Peter Eisentraut](https://github.com/petere)
 * [Peter Vasil](https://github.com/ptrv)
 * [Robert Dallas Gray](https://github.com/rdallasgray)

@@ -69,6 +69,8 @@ now for questions and discussions about development. [GH-820]
   * Parse suggestions from `hlint` [GH-874]
   * Go errcheck handles multiple `$GOPATH` entries correctly now [GH-580]
     [GH-906]
+  * Properly handle Go build failing in a directory with multiple packages
+    [GH-676] [GH-904]
 
 [buttercup]: https://github.com/jorgenschaefer/emacs-buttercup
 
