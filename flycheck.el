@@ -6644,7 +6644,24 @@ See URL `http://golang.org/cmd/go'."
           (optional column ":") " "
           (message (one-or-more not-newline)
                    (zero-or-more "\n\t" (one-or-more not-newline)))
-          line-end))
+          line-end)
+   ;; Catch error message about multiple packages in a directory, which doesn't
+   ;; follow the standard error message format.
+   (info line-start
+         (message "can't load package: package "
+                  (one-or-more (not (any ?: ?\n)))
+                  ": found packages "
+                  (one-or-more not-newline))
+         line-end))
+  :error-filter
+  (lambda (errors)
+    (dolist (error errors)
+      (unless (flycheck-error-line error)
+        ;; Flycheck ignores errors without line numbers, but the error
+        ;; message about multiple packages in a directory doesn't come with a
+        ;; line number, so inject a fake one.
+        (setf (flycheck-error-line error) 1)))
+    errors)
   :modes go-mode
   :predicate (lambda ()
                (and (flycheck-buffer-saved-p)

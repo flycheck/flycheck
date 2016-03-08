@@ -3462,6 +3462,18 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
                             go-root-pkg)
            :checker go-build)))))
 
+(flycheck-ert-def-checker-test go-build go directory-with-two-packages
+  (flycheck-ert-with-env
+      `(("GOPATH" . ,(flycheck-ert-resource-filename "checkers/go")))
+    (flycheck-ert-should-syntax-check
+     "checkers/go/src/multipkg/a.go" 'go-mode
+     `(1 nil info
+         ,(concat "can't load package: package multipkg: "
+                  "found packages a (a.go) and b (b.go) in "
+                  (flycheck-ert-resource-filename
+                   "checkers/go/src/multipkg"))
+         :checker go-build))))
+
 (flycheck-ert-def-checker-test go-test go nil
   (flycheck-ert-with-env
       `(("GOPATH" . ,(flycheck-ert-resource-filename "checkers/go")))
