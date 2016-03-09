@@ -1,0 +1,61 @@
+@ifcommandnotdefined flyc
+
+@c Reference a github URL with TEXT
+@macro ghref{url,text}
+@uref{https://github.com/\url\,\text\}
+@end macro
+
+@macro flycref{page,text}
+@uref{http://www.flycheck.org/\page\,\text\}
+@end macro
+
+@c Mention a syntax CHECKER
+@macro flyc{checker}
+@code{\checker\}
+@end macro
+
+@c Document a Flycheck COMMAND with a KEY binding.  Use only in @table
+@c @asis
+@macro flyccmd{key,command}
+@kindex \key\
+@findex \command\
+@item @kbd{\key\}
+@itemx @kbd{M-x \command\}
+@end macro
+
+@c Document a Flycheck COMMAND with a KEY binding and a PREFIX key.  Use
+@c only in @table @asis
+@macro flyccmdp{prefix,key,command}
+@kindex \prefix\ \key\
+@item @kbd{\prefix\ \key\}
+@itemx @kbd{\prefix\ M-x \command\}
+@end macro
+
+@macro flyclanguage{language}
+@anchor{\language\}
+@unnumberedsec \language\
+@cindex Language, \language\
+@cindex \language\ language
+@end macro
+
+@c Document a Flycheck OPTION.  Use only in a @table @asis
+@macro flycoption{option}
+@item @code{\option\}
+@vindex \option\
+@end macro
+
+@c Like flycoption, but with @itemx instead.  Use only in a @table @asis
+@macro flycoptionx{option}
+@itemx @code{\option\}
+@vindex \option\
+@end macro
+
+@c Document a Flycheck configuration file in OPTION for TOOL.  Use only
+@c in a @table @asis
+@macro flycconfigfile{option, tool}
+@item @code{\option\}
+@vindex \option\
+Configuration file for \tool\.  @xref{Syntax checker
+configuration files}, for more information about configuration files.
+@end macro
+@end ifcommandnotdefined

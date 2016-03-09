@@ -1,8 +1,6 @@
-#!/bin/bash
-":"; exec ${EMACS:-emacs} -Q --script "$0" -- "${@}" # -*- mode: emacs-lisp; lexical-binding: t; -*-
-;;; run.el --- Flycheck: Test runner
+;;; run.el --- Flycheck: Test runner    -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2014-2015 Sebastian Wiesner and Flycheck contributors
+;; Copyright (C) 2014-2016 Sebastian Wiesner and Flycheck contributors
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
 ;; Maintainer: Sebastian Wiesner <swiesner@lunaryorn.com>
@@ -26,8 +24,6 @@
 ;;; Commentary:
 
 ;; Flycheck test runner.
-;;
-;; See URL `http://stackoverflow.com/a/6259330/355252' for the shebang.
 
 ;;; Code:
 
@@ -104,20 +100,13 @@ Node `(ert)Test Selectors' for information about test selectors."
                         (kill-emacs 1)))))))
     (ert-run-tests-batch-and-exit (flycheck-transform-selector selector))))
 
-(defun flycheck-setup-coverage-reporting ()
-  "Setup test coverage reporting using undercover.el."
-  (when (fboundp 'undercover)
-    (undercover "flycheck.el")))
-
-(defun flycheck-runs-this-script-p ()
-  "Whether this file is executed as script."
-  t)
+(defvar flycheck-runner-file
+  (if load-in-progress load-file-name (buffer-file-name)))
 
 (defun flycheck-run-tests-main ()
   "Main entry point of the test runner."
   (let* ((load-prefer-newer t)
-         (current-file (if load-in-progress load-file-name (buffer-file-name)))
-         (source-directory (locate-dominating-file current-file "Cask"))
+         (source-directory (locate-dominating-file flycheck-runner-file "Cask"))
          (pkg-rel-dir (format ".cask/%s/elpa" emacs-version)))
     (setq package-user-dir (expand-file-name pkg-rel-dir source-directory))
     (package-initialize)
@@ -129,12 +118,9 @@ Node `(ert)Test Selectors' for information about test selectors."
       (load (expand-file-name "flycheck" source-directory))
       (load (expand-file-name "flycheck-ert" source-directory))
       (load (expand-file-name "flycheck-test"
-                              (file-name-directory current-file)))))
+                              (file-name-directory flycheck-runner-file)))))
 
   (let ((debug-on-error t))
     (flycheck-run-tests-batch-and-exit)))
-
-(when (and noninteractive (flycheck-runs-this-script-p))
-  (flycheck-run-tests-main))
 
 ;;; run.el ends here

@@ -1,28 +1,10 @@
-@macro flyclanguage{language}
-@unnumberedsec \language\
-@anchor{language-\language\}
-@cindex Language, \language\
-@cindex \language\ language
-@end macro
+@include macros.texi
 
-@macro flycoption{option}
-@item @code{\option\}
-@vindex \option\
-@end macro
+Flycheck supports the following languages:
 
-@macro flycoptionx{option}
-@itemx @code{\option\}
-@vindex \option\
-@end macro
+@include languages-list.texi
 
-@macro flycconfigfile{option, tool}
-@item @code{\option\}
-@vindex \option\
-Configuration file for \tool\.  @xref{Syntax checker
-configuration files}, for more information about configuration files.
-@end macro
-
-@flyclanguage Ada
+@flyclanguage{Ada}
 
 @itemize
 @item
@@ -45,7 +27,7 @@ of a warning category to enable.
 
 @end itemize
 
-@flyclanguage AsciiDoc
+@flyclanguage{AsciiDoc}
 
 @itemize
 @item
@@ -124,6 +106,8 @@ yield more false positives than normal checks.
 @flycoption flycheck-cppcheck-include-path
 A list of include directories for cppcheck.  Relative paths are relative to
 the file being checked.
+@flycoption flycheck-cppcheck-language-standard
+The C or C++ language standard to use with cppcheck via @option{--std=}.
 @end table
 
 @flyclanguage{CFEngine}
@@ -324,6 +308,10 @@ A list of tags for @code{go build}.
 @flycoption flycheck-go-vet-print-functions
 A list of print-like functions for go vet.  Go vet will check these
 functions for format string problems.
+
+@flycoption flycheck-go-vet-shadow
+Whether to check for shadowed variables in go vet, in Go 1.6 or newer.
+
 @end table
 
 @flyclanguage{Groovy}
@@ -458,18 +446,14 @@ or @flyc{javascript-gjslint}
 @uref{https://github.com/Flet/semistandard,Semistandard})
 @end enumerate
 
-The @flyc{javascript-eslint} checker provides the following option:
+These checkers provide the following option:
 
 @table @asis
 @flycoption flycheck-eslint-rulesdir
 A directory with custom rules for ESLint.
+@flycoption flycheck-jshint-extract-javascript
+Whether to extract Javascript from HTML before linting with JSHint.
 @flycconfigfile{flycheck-eslintrc,ESLint}
-@end table
-
-@flyc{javascript-jshint}, @flyc{javascript-gjslint} and @flyc{javascript-jscs}
-read configuration files:
-
-@table @asis
 @flycconfigfile{flycheck-jshintrc,JSHint}
 @flycconfigfile{flycheck-gjslintrc,Closure Linter}
 @flycconfigfile{flycheck-jscsrc,JSCS}
@@ -524,6 +508,7 @@ These syntax checkers checker provide the following options:
 @flycoption flycheck-perl-include-path
 A list of include directories for Perl, relative to the file being
 checked.
+@flycconfigfile{flycheck-perlcriticrc,Perl::Critic}
 @flycoption flycheck-perlcritic-severity
 The severity level for Perl::Critic, as integer for the
 @option{--severity} option of Perl::Critic.
@@ -556,15 +541,31 @@ The coding standard for PHP CodeSniffer, either as name of a built-in
 standard, or as path to a standard specification.
 @end table
 
+@flyclanguage{Processing}
+
+@itemize
+@item
+@flyc{processing} (using the @uref{https://processing.org/,Processing
+command-line tool})
+@end itemize
+
 @flyclanguage{Puppet}
 
 @itemize
 @item
-@flyc{puppet-parser} (syntax check with @uref{http://puppetlabs.com/, Puppet})
+@flyc{puppet-parser} (syntax check with @uref{http://puppetlabs.com/,
+Puppet})
 @item
 @flyc{puppet-lint} (style check with @uref{http://puppet-lint.com/,
 Puppet Lint})
 @end itemize
+
+@flyc{puppet-lint} provides the following options:
+@table @asis
+@flycconfigfile{flycheck-puppet-lint-rc,puppet-lint}
+@flycoption flycheck-puppet-lint-disabled-checks
+A list of Puppet Lint checks to disable.
+@end table
 
 @flyclanguage{Python}
 
@@ -630,6 +631,14 @@ Linters to use with lintr, as a string containing an R expression which
 selects the linters to use.
 @end table
 
+@end itemize
+
+@flyclanguage{Racket}
+
+@itemize
+@item
+@flyc{racket} (syntax checker with @code{raco expand}, requires the
+@code{compiler-lib} package)
 @end itemize
 
 @flyclanguage{RPM Spec}

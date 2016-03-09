@@ -1,29 +1,56 @@
-language: emacs-lisp
+# We should have emacs-lisp but that triggers a warning, so use what Travis uses
+# anyway if you specify an invalid language.
+language: ruby
 sudo: false
+rvm:
+  - 2.3.0
+cache:
+  directories:
+    - .cask/
 env:
-  # Run unit tests against oldest supported stable, latest stable, and trunk
-  - EMACS_VERSION=24.3
-  - EMACS_VERSION=24.5 BUILD_MANUAL=yes
-  - EMACS_VERSION=snapshot COMPILEFLAGS='error-on-warn'
+  global:
+    # Speeds up installation of nokogiri
+    - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+  matrix:
+    # Run unit tests against oldest supported stable, latest stable, and trunk
+    - EMACS_VERSION=24.3
+    - EMACS_VERSION=24.5
+    - EMACS_VERSION=snapshot COMPILEFLAGS='error-on-warn'
+    # A special job to build the manual
+    - BUILD_MANUAL=yes
 before_install:
   - export PATH="$HOME/bin:$PATH"
   - wget 'https://raw.githubusercontent.com/flycheck/emacs-travis/master/emacs-travis.mk'
-  - make -f emacs-travis.mk install_emacs
-  - make -f emacs-travis.mk install_cask
-  - emacs --version
+  - if [[ -n $EMACS_VERSION ]]; then make -f emacs-travis.mk install_emacs; fi
+  - if [[ -n $EMACS_VERSION ]]; then make -f emacs-travis.mk install_cask; fi
+  - if [[ -n $EMACS_VERSION ]]; then emacs --version; fi
   # Install Texinfo and htmlproof when building the manual
   - if [[ $BUILD_MANUAL == yes ]]; then make -f emacs-travis.mk install_texinfo; fi
   - if [[ $BUILD_MANUAL == yes ]]; then texi2any --version; fi
-  - if [[ $BUILD_MANUAL == yes ]]; then gem install html-proofer && htmlproof --version; fi
+  # Install helper tools
+  - gem install travis rubocop mdl
+  # Install tools for doc deployment
+  - if [[ $BUILD_MANUAL == yes ]]; then gem install git html-proofer; fi
 install:
-  - rake init:deps
+  - if [[ -n $EMACS_VERSION ]]; then rake init:all; fi
 script:
-  # Checkdoc and compilation
-  - rake verify:all
-  - rake 'compile:all[$COMPILEARGS]'
-  # Unit tests
-  - rake "test:unit[(not (tag external-tool))]"
-  # Build the manual
-  - if [[ $BUILD_MANUAL == yes ]]; then rake doc:texinfo test:htmlproof; fi
-after_success:
-  - if [[ $BUILD_MANUAL == yes ]]; then bash doc/deploy-travis.bash; fi
+  # Lint, compile, test
+  - if [[ -n $EMACS_VERSION ]]; then rake verify:all compile:all[$COMPILEARGS]; fi
+  - if [[ -n $EMACS_VERSION ]]; then rake test:unit:all; fi
+  # Build and deploy the manual
+  - if [[ $BUILD_MANUAL == yes ]]; then rake doc:info test:integration:doc; fi
+  - if [[ $BUILD_MANUAL == yes ]]; then rake deploy:travis:manual; fi
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/efdc5fd9433efa7c6b80
+    on_success: change
+    on_failure: always
+    on_start: never
+matrix:
+  # Finish the build even if any build with allowed failures are still running
+  fast_finish: true
+  allow_failures:
+    # Allow the snapshot build to fail, because Emacs snapshot sometimes fails
+    # to build
+    - env: EMACS_VERSION=snapshot COMPILEFLAGS='error-on-warn'

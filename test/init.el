@@ -1,6 +1,6 @@
 ;;; init.el --- Flycheck: Init file for testing      -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2015 Sebastian Wiesner and Flycheck contributors
+;; Copyright (C) 2015-2016 Sebastian Wiesner and Flycheck contributors
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
 ;; Maintainer: Sebastian Wiesner <swiesner@lunaryorn.com>
@@ -23,8 +23,8 @@
 
 ;;; Commentary:
 
-;; Use with emacs -Q -l test/init.el to start a clean session with only Flycheck
-;; present.
+;; Use with `emacs -Q -l test/init.el' to start a clean session with only
+;; Flycheck present.
 ;;
 ;; Installs all dependencies of Flycheck to a temporary package directory, and
 ;; loads Flycheck.
@@ -77,9 +77,10 @@
         mac-function-modifier 'hyper))
 
 (defun flycheck-prepare-screenshot (&optional hide-cursor)
-  "Prepare this Emacs session to make a nice screenshot.
+  "Prepare this Emacs session for a screenshot.
 
-With prefix arg, hide the cursor, otherwise keep it."
+If HIDE-CURSOR is non-nil, or with prefix arg, hide the cursor,
+otherwise keep it."
   (interactive "P")
   ;; Reduce UI and disable cursor
   (menu-bar-mode -1)

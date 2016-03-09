@@ -1,6 +1,6 @@
 ;;; flycheck-test.el --- Flycheck: Unit test suite   -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2013-2015 Sebastian Wiesner and Flycheck contributors
+;; Copyright (C) 2013-2016 Sebastian Wiesner and Flycheck contributors
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
 ;; Maintainer: Sebastian Wiesner <swiesner@lunaryorn.com>
@@ -120,94 +120,8 @@ and extension, as in `file-name-base'."
 (flycheck-test-def-indent-test "flycheck.el")
 (flycheck-test-def-indent-test "flycheck-ert.el")
 (flycheck-test-def-indent-test "test/run.el")
-(flycheck-test-def-indent-test "test/flycheck-checkdoc.el")
 (flycheck-test-def-indent-test "test/flycheck-test.el")
-
-(defmacro flycheck-test-def-untabified-test (filename)
-  "Define a test case for the absence of tabs in FILENAME.
-
-FILENAME is relative to the source directory.  The test case is
-named `flycheck-code-style/FILENAME-BASE/indentation', where
-FILENAME-BASE is FILENAME without leading directory components
-and extension, as in `file-name-base'."
-  (let ((testname (intern (format "flycheck-code-style/%s/untabified"
-                                  (file-name-base filename)))))
-    `(ert-deftest ,testname ()
-       :tags '(style)
-       (flycheck-ert-with-file-buffer
-           (expand-file-name ,filename
-                             flycheck-test-source-directory)
-         (set-auto-mode)
-         (shut-up
-           (untabify (point-min) (point-max)))
-         (should-not (buffer-modified-p))))))
-
-(flycheck-test-def-untabified-test "flycheck.el")
-(flycheck-test-def-untabified-test "flycheck-ert.el")
-(flycheck-test-def-untabified-test "test/run.el")
-(flycheck-test-def-untabified-test "test/flycheck-checkdoc.el")
-(flycheck-test-def-untabified-test "test/flycheck-test.el")
-
-
-;;; Manual
-(ert-deftest flycheck--manual/all-checkers-are-documented ()
-  :tags '(documentation)
-  (flycheck-ert-with-file-buffer
-      (expand-file-name "doc/languages.texi"
-                        flycheck-test-source-directory)
-    (let ((expected-checkers flycheck-checkers)
-          documented-checkers)
-      (while (re-search-forward (rx "@flyc{" (group (1+ (not (any "}")))) "}")
-                                nil 'noerror)
-        (let ((checker (intern (match-string 1))))
-          (unless (memq checker documented-checkers)
-            (push checker documented-checkers))))
-      (setq documented-checkers (nreverse documented-checkers))
-      (dolist (checker documented-checkers)
-        (let ((expected (pop expected-checkers)))
-          (should (equal checker expected)))))))
-
-(ert-deftest flycheck--manual/all-options-are-documented ()
-  :tags '(documentation)
-  (let ((options (sort (-uniq
-                        (apply #'append
-                               (mapcar (lambda (c)
-                                         (flycheck-checker-get c 'option-vars))
-                                       flycheck-checkers)))
-                       #'string<))
-        (filename (expand-file-name "doc/languages.texi"
-                                    flycheck-test-source-directory))
-        documented-options)
-    (flycheck-ert-with-file-buffer filename
-      (while (re-search-forward (rx line-start "@flycoption" (opt "x") (1+ space)
-                                    (group (1+ not-newline)) line-end)
-                                nil 'no-error)
-        (push (match-string 1) documented-options)))
-    (setq documented-options (sort documented-options #'string<))
-    (dolist (option documented-options)
-      (let ((expected (pop options)))
-        (should (equal (intern option) expected))))))
-
-(ert-deftest flycheck--manual/all-config-file-vars-are-documented ()
-  :tags '(documentation)
-  (let ((config-file-vars (sort
-                           (delq
-                            nil
-                            (mapcar (lambda (c)
-                                      (flycheck-checker-get c 'config-file-var))
-                                    flycheck-checkers))
-                           #'string<))
-        documented-config-files)
-    (flycheck-ert-with-file-buffer
-        (expand-file-name "doc/languages.texi" flycheck-test-source-directory)
-      (while (re-search-forward (rx line-start "@flycconfigfile{"
-                                    (group (1+ (not (any "," "}")))) ",")
-                                nil 'noerror)
-        (push (match-string 1) documented-config-files)))
-    (setq documented-config-files (sort documented-config-files #'string<))
-    (dolist (config-file documented-config-files)
-      (let ((expected (pop config-file-vars)))
-        (should (equal (intern config-file) expected))))))
+(flycheck-test-def-indent-test "admin/run-checkdoc.el")
 
 
 ;;; Customization
@@ -287,10 +201,6 @@ and extension, as in `file-name-base'."
 (ert-deftest flycheck-standard-error-navigation/default-to-t ()
   :tags '(customization)
   (should (eq flycheck-standard-error-navigation t)))
-
-(ert-deftest flycheck-completion-system/defaults-to-nil ()
-  :tags '(customization)
-  (should (eq flycheck-completion-system nil)))
 
 (ert-deftest flycheck-CHECKER-executable/is-special-variable ()
   :tags '(customization)
@@ -601,26 +511,6 @@ and extension, as in `file-name-base'."
   (flycheck-ert-with-temp-buffer
     (rename-buffer "foo")
     (should-not (flycheck-ephemeral-buffer-p))))
-
-(ert-deftest flycheck-encrypted-buffer-p/unencrypted-temporary-buffer ()
-  :tags '(utility)
-  (flycheck-ert-with-temp-buffer
-    (should-not (flycheck-encrypted-buffer-p))))
-
-(ert-deftest flycheck-encrypted-buffer-p/unencrypted-file-buffer ()
-  :tags '(utility)
-  (flycheck-ert-with-resource-buffer "global-mode-dummy.el"
-    (should-not (flycheck-encrypted-buffer-p))))
-
-(ert-deftest flycheck-encrypted-buffer-p/encrypted-file-buffer ()
-  :tags '(utility external-tool)
-  (skip-unless (flycheck-ert-check-gpg))
-  (let* ((filename (flycheck-ert-resource-filename "encrypted-file.el.gpg"))
-         ;; Tell EPA about our passphrase
-         (epa-file-cache-passphrase-for-symmetric-encryption t)
-         (epa-file-passphrase-alist (list (cons filename "foo"))))
-    (flycheck-ert-with-resource-buffer filename
-      (should (flycheck-encrypted-buffer-p)))))
 
 (ert-deftest flycheck-autoloads-file-p/ephemeral-buffer ()
   :tags '(utility)
@@ -1579,124 +1469,6 @@ and extension, as in `file-name-base'."
     (should-not (flycheck-deferred-check-p))))
 
 
-;;; Syntax checking in all buffers
-(ert-deftest flycheck-may-enable-mode/not-in-temporary-buffers ()
-  :tags '(global-mode)
-  (flycheck-ert-with-temp-buffer
-    (should-not (flycheck-may-enable-mode))))
-
-(ert-deftest flycheck-may-enable-mode/not-in-ephemeral-buffers ()
-  :tags '(global-mode)
-  (flycheck-ert-with-temp-buffer
-    (setq buffer-file-name "foo")
-    (emacs-lisp-mode)
-    (should (flycheck-get-checker-for-buffer))
-    (rename-buffer " foo")
-    (should (string= (buffer-name) " foo"))
-    (should-not (flycheck-may-enable-mode))))
-
-(ert-deftest flycheck-may-enable-mode/not-in-encrypted-files ()
-  :tags '(global-mode external-tool)
-  (skip-unless (flycheck-ert-check-gpg))
-  (let* ((filename (flycheck-ert-resource-filename "encrypted-file.el.gpg"))
-         ;; Tell EPA about our passphrase
-         (epa-file-cache-passphrase-for-symmetric-encryption t)
-         (epa-file-passphrase-alist (list (cons filename "foo"))))
-    (flycheck-ert-with-resource-buffer filename
-      (emacs-lisp-mode)
-      (should (flycheck-get-checker-for-buffer))
-      (should-not (flycheck-may-enable-mode)))))
-
-(ert-deftest flycheck-may-enable-mode/not-in-special-mode ()
-  :tags '(global-mode)
-  (flycheck-ert-with-temp-buffer
-    (setq buffer-file-name "foo")
-    (rename-buffer "foo")
-    (special-mode)
-    (should-not (flycheck-may-enable-mode))))
-
-(ert-deftest flycheck-may-enable-mode/not-in-compilation-mode ()
-  :tags '(global-mode)
-  (flycheck-ert-with-temp-buffer
-    (setq buffer-file-name "foo")
-    (rename-buffer "foo")
-    (compilation-mode)
-    (should-not (flycheck-may-enable-mode))))
-
-(ert-deftest flycheck-may-enable-mode/all-modes-disabled ()
-  :tags '(global-mode)
-  (let ((flycheck-global-modes nil))
-    (flycheck-ert-with-temp-buffer
-      (setq buffer-file-name "foo")
-      (rename-buffer "foo")
-      (emacs-lisp-mode)
-      (should-not (flycheck-may-enable-mode)))))
-
-(ert-deftest flycheck-may-enable-mode/some-modes-disabled ()
-  :tags '(global-mode)
-  (let ((flycheck-global-modes '(not emacs-lisp-mode)))
-    (flycheck-ert-with-temp-buffer
-      (setq buffer-file-name "foo")
-      (rename-buffer "foo")
-      (emacs-lisp-mode)
-      (should-not (flycheck-may-enable-mode)))))
-
-(ert-deftest flycheck-may-enable-mode/some-modes-enabled ()
-  :tags '(global-mode)
-  (let ((flycheck-global-modes '(emacs-lisp-mode)))
-    (flycheck-ert-with-temp-buffer
-      (setq buffer-file-name "foo")
-      (rename-buffer "foo")
-      (emacs-lisp-mode)
-      (should (flycheck-may-enable-mode)))))
-
-(ert-deftest flycheck-may-enable-mode/checker-found ()
-  :tags '(global-mode)
-  (flycheck-ert-with-temp-buffer
-    (setq buffer-file-name "foo")
-    (rename-buffer "foo")
-    (emacs-lisp-mode)
-    (should (flycheck-get-checker-for-buffer))
-    (should (flycheck-may-enable-mode))))
-
-(ert-deftest global-flycheck-mode/does-not-enable-in-ephemeral-buffers ()
-  :tags '(global-mode)
-  (flycheck-ert-with-global-mode
-    (flycheck-ert-with-temp-buffer
-      (setq buffer-file-name "foo")
-      (rename-buffer " foo")
-      (emacs-lisp-mode)
-      (should-not flycheck-mode))))
-
-(ert-deftest global-flycheck-mode/does-not-enable-in-encrypted-file ()
-  :tags '(global-mode external-tool)
-  (skip-unless (flycheck-ert-check-gpg))
-  (let* ((filename (flycheck-ert-resource-filename "encrypted-file.el.gpg"))
-         ;; Tell EPA about our passphrase
-         (epa-file-cache-passphrase-for-symmetric-encryption t)
-         (epa-file-passphrase-alist (list (cons filename "foo"))))
-    (flycheck-ert-with-global-mode
-      (flycheck-ert-with-resource-buffer filename
-        (emacs-lisp-mode)
-        (should-not flycheck-mode)))))
-
-(ert-deftest global-flycheck-mode/does-not-enable-in-special-mode ()
-  :tags '(global-mode)
-  (flycheck-ert-with-global-mode
-    (flycheck-ert-with-temp-buffer
-      (special-mode)
-      (should-not flycheck-mode))))
-
-(ert-deftest global-flycheck-mode/checker-found ()
-  :tags '(global-mode)
-  (flycheck-ert-with-global-mode
-    (flycheck-ert-with-temp-buffer
-      (setq buffer-file-name "foo")
-      (rename-buffer "foo")
-      (emacs-lisp-mode)
-      (should flycheck-mode))))
-
-
 ;;; Errors from syntax checks
 (ert-deftest flycheck-error-line-region ()
   :tags '(error-api)
@@ -1958,21 +1730,6 @@ and extension, as in `file-name-base'."
       (flycheck-report-failed-syntax-check)
       (should-not flycheck-current-errors))))
 
-(ert-deftest flycheck-mode-line/mentions-errors ()
-  :tags '(status-reporting)
-  (flycheck-ert-with-temp-buffer
-    (let ((flycheck-current-errors
-           (list (flycheck-error-new-at 1 1 'info "info")
-                 (flycheck-error-new-at 1 1 'error "error"))))
-      (should (string= (flycheck-mode-line-status-text 'finished) " FlyC:1/0")))))
-
-(ert-deftest flycheck-mode-line/ignores-info ()
-  :tags '(status-reporting)
-  (flycheck-ert-with-temp-buffer
-    (let ((flycheck-current-errors
-           (list (flycheck-error-new-at 1 1 'info "info"))))
-      (should (string= (flycheck-mode-line-status-text 'finished) " FlyC")))))
-
 
 ;;; Error levels
 ;; A level for the following unit tests
@@ -2076,111 +1833,6 @@ and extension, as in `file-name-base'."
               'flycheck-info-overlay))
   (should (eq (flycheck-error-level-error-list-face 'info)
               'flycheck-error-list-info)))
-
-
-;;; Error filtering
-(ert-deftest flycheck-sanitize-errors/trailing-whitespace ()
-  :tags '(error-filtering)
-  (let ((err (flycheck-error-new-at 1 1 'error " foo ")))
-    (should (equal (flycheck-sanitize-errors (list err))
-                   (list (flycheck-error-new-at 1 1 'error "foo"))))))
-
-(ert-deftest flycheck-sanitize-errors/zero-column ()
-  :tags '(error-filtering)
-  (let ((err (flycheck-error-new-at 1 0 'error "foo")))
-    (should (equal (flycheck-sanitize-errors (list err))
-                   (list (flycheck-error-new-at 1 nil 'error "foo"))))))
-
-(ert-deftest flycheck-sanitize-errors/empty-error-id ()
-  :tags '(error-filtering)
-  (let ((err (flycheck-error-new-at 1 1 'error "foo" :id "")))
-    (should (equal (flycheck-sanitize-errors (list err))
-                   (list (flycheck-error-new-at 1 1 'error "foo"))))))
-
-(ert-deftest flycheck-remove-error-file-names ()
-  :tags '(error-filtering)
-  (let ((errors (list
-                 (flycheck-error-new-at 1 1 'error "foo" :filename "hello")
-                 (flycheck-error-new-at 2 2 'warning "bar" :filename "world")
-                 (flycheck-error-new-at 3 3 'info "spam"))))
-    (should (equal (flycheck-remove-error-file-names "world" errors)
-                   (list
-                    (flycheck-error-new-at 1 1 'error "foo" :filename "hello")
-                    (flycheck-error-new-at 2 2 'warning "bar")
-                    (flycheck-error-new-at 3 3 'info "spam"))))))
-
-(ert-deftest flycheck-increment-error-columns/ignores-nil ()
-  :tags '(error-filtering)
-  (let ((errors (list (flycheck-error-new-at 4 nil nil nil))))
-    (should (equal (flycheck-increment-error-columns errors)
-                   (list (flycheck-error-new-at 4 nil nil nil))))))
-
-(ert-deftest flycheck-increment-error-columns/default-offset ()
-  :tags '(error-filtering)
-  (let ((errors (list (flycheck-error-new-at 4 6 nil nil)
-                      (flycheck-error-new-at 7 9 nil nil))))
-    (should (equal (flycheck-increment-error-columns errors)
-                   (list (flycheck-error-new-at 4 7 nil nil)
-                         (flycheck-error-new-at 7 10 nil nil))))))
-
-(ert-deftest flycheck-fold-include-levels/jumps-over-errors ()
-  :tags '(error-filtering)
-  (let ((errors (list (flycheck-error-new-at 1 0 'error "In file included from"
-                                             :filename "foo.cpp")
-                      (flycheck-error-new-at 6 11 'error "b is not a member of hi"
-                                             :filename "foo.cpp")
-                      (flycheck-error-new-at 5 20 'note "in definition of macro CHECK"
-                                             :filename "foo.h")
-                      (flycheck-error-new-at 8 5 'error "xx was not declared in this scope"
-                                             :filename "foo.cpp"))))
-    (should
-     (equal (flycheck-fold-include-levels errors "In file included from")
-            (list (flycheck-error-new-at 1 0 'error "In include foo.h"
-                                         :filename "foo.cpp")
-                  (flycheck-error-new-at 6 11 'error "b is not a member of hi"
-                                         :filename "foo.cpp")
-                  (flycheck-error-new-at 5 20 'note "in definition of macro CHECK"
-                                         :filename "foo.h")
-                  (flycheck-error-new-at 8 5 'error "xx was not declared in this scope"
-                                         :filename "foo.cpp"))))))
-
-(ert-deftest flycheck-increment-error-columns/custom-offset ()
-  :tags '(error-filtering)
-  (let ((errors (list (flycheck-error-new-at 4 6 nil nil)
-                      (flycheck-error-new-at 7 9 nil nil))))
-    (should (equal (flycheck-increment-error-columns errors 10)
-                   (list (flycheck-error-new-at 4 16 nil nil)
-                         (flycheck-error-new-at 7 19 nil nil))))))
-
-(ert-deftest flycheck-collapse-error-message-whitespace ()
-  :tags '(error-filtering)
-  (let ((err (flycheck-error-new-at 1 1 'error
-                                    "spam  \nwith\t   eggs")))
-    (should (equal (flycheck-collapse-error-message-whitespace (list err))
-                   (list (flycheck-error-new-at 1 1 'error
-                                                "spam with eggs"))))))
-
-(ert-deftest flycheck-dequalify-error-ids ()
-  :tags '(error-filtering)
-  (let ((errors (list (flycheck-error-new-at 1 2 nil nil :id "foo.bar")
-                      (flycheck-error-new-at 1 2 nil nil :id "Spam.With.Eggs")
-                      (flycheck-error-new-at 1 2 nil nil :id "foobar")
-                      (flycheck-error-new-at 1 2 nil nil :id nil))))
-    (should (equal (flycheck-dequalify-error-ids errors)
-                   (list (flycheck-error-new-at 1 2 nil nil :id "bar")
-                         (flycheck-error-new-at 1 2 nil nil :id "Eggs")
-                         (flycheck-error-new-at 1 2 nil nil :id "foobar")
-                         (flycheck-error-new-at 1 2))))))
-
-(ert-deftest flycheck-remove-error-ids ()
-  :tags '(error-filtering)
-  (let ((errors (list (flycheck-error-new-at 1 2 nil nil :id "Foo.Bar")
-                      (flycheck-error-new-at 1 2 nil nil :id "FooBar")
-                      (flycheck-error-new-at 1 2 nil nil :id nil))))
-    (should (equal (flycheck-remove-error-ids errors)
-                   (list (flycheck-error-new-at 1 2)
-                         (flycheck-error-new-at 1 2)
-                         (flycheck-error-new-at 1 2))))))
 
 
 ;;; Error analysis
@@ -2415,7 +2067,7 @@ and extension, as in `file-name-base'."
 
 ;;; Error navigation in the current buffer
 (defmacro flycheck-test-with-nav-buffer (minimum-level &rest body)
-  "Eval BODY in a temporary buffer for navigation.
+  "With MINIMUM-LEVEL, eval BODY in a temporary buffer for navigation.
 
 Set `flycheck-navigation-minimum-level' to MINIMUM-LEVEL while
 evaluating BODY."
@@ -2874,184 +2526,6 @@ evaluating BODY."
     (goto-char (point-max))
     (flycheck-first-error 2)
     (should (flycheck-ert-at-nth-error 2))))
-
-
-;;; Listing errors in buffers
-(ert-deftest flycheck-error-list-buffer/name ()
-  :tags '(error-list)
-  (should (string= flycheck-error-list-buffer "*Flycheck errors*")))
-
-(ert-deftest flycheck-error-list-mode/derived-from-tabulated-list-mode ()
-  :tags '(error-list)
-  (with-temp-buffer
-    (flycheck-error-list-mode)
-    (derived-mode-p 'tabulated-list)))
-
-(ert-deftest flycheck-error-list-mode/tabulated-list-format ()
-  :tags '(error-list)
-  (with-temp-buffer
-    (flycheck-error-list-mode)
-    (should (equal tabulated-list-format
-                   [("Line" 4 flycheck-error-list-entry-< :right-align t)
-                    ("Col" 3 nil :right-align t)
-                    ("Level" 8 flycheck-error-list-entry-level-<)
-                    ("ID" 6 t)
-                    ("Message" 0 t)
-                    (" (Checker)" 8 t)]))
-    (should (local-variable-p 'tabulated-list-format))))
-
-(ert-deftest flycheck-error-list-mode/tabulated-list-padding ()
-  :tags '(error-list)
-  (with-temp-buffer
-    (flycheck-error-list-mode)
-    (should (equal tabulated-list-padding 1))
-    (should (local-variable-p 'tabulated-list-padding))))
-
-(ert-deftest flycheck-error-list-mode/tabulated-list-entries ()
-  :tags '(error-list)
-  (with-temp-buffer
-    (flycheck-error-list-mode)
-    (should (eq tabulated-list-entries 'flycheck-error-list-entries))
-    (should (local-variable-p 'tabulated-list-entries))))
-
-(ert-deftest flycheck-error-list-mode/initializes-header ()
-  :tags '(error-list)
-  (with-temp-buffer
-    (should-not header-line-format)
-    (flycheck-error-list-mode)
-    (should (string= header-line-format " Line Col Level ID Message  (Checker) "))))
-
-(ert-deftest flycheck-error-list-source-buffer/is-permanently-local ()
-  :tags '(error-list)
-  (should (get 'flycheck-error-list-source-buffer 'permanent-local)))
-
-(ert-deftest flycheck-error-list-make-entry/line-and-column ()
-  :tags '(error-list)
-  (let* ((error (flycheck-error-new-at 10 12 'warning "A foo warning"
-                                       :checker 'emacs-lisp-checkdoc
-                                       :id "W1"))
-         (entry (flycheck-error-list-make-entry error))
-         (cells (cadr entry)))
-    (should (eq (car entry) error))
-    (should (equal (aref cells 0)
-                   (list "10"
-                         'type 'flycheck-error-list
-                         'face 'flycheck-error-list-line-number)))
-    (should (equal (aref cells 1)
-                   (list "12"
-                         'type 'flycheck-error-list
-                         'face 'flycheck-error-list-column-number)))
-    (let ((face (flycheck-error-level-error-list-face 'warning)))
-      (should (equal (aref cells 2)
-                     (list "warning"
-                           'type 'flycheck-error-list
-                           'face face))))
-    (should (equal (aref cells 3)
-                   (list "W1"
-                         'type 'flycheck-error-list
-                         'face 'flycheck-error-list-id)))
-    (should (equal (aref cells 4)
-                   (list "A foo warning"
-                         'type 'flycheck-error-list
-                         'face 'default)))
-    (should (equal (aref cells 5)
-                   (list "(emacs-lisp-checkdoc)"
-                         'type 'flycheck-error-list
-                         'face 'flycheck-error-list-checker-name)))))
-
-(ert-deftest flycheck-error-list-make-entry/no-column ()
-  :tags '(error-list)
-  (let* ((error (flycheck-error-new-at 10 nil 'error "A foo error"
-                                       :checker 'emacs-lisp-checkdoc))
-         (entry (flycheck-error-list-make-entry error))
-         (cells (cadr entry)))
-    (should (eq (car entry) error))
-    (should (equal (aref cells 0)
-                   (list "10"
-                         'type 'flycheck-error-list
-                         'face 'flycheck-error-list-line-number)))
-    (should (equal (aref cells 1)
-                   (list ""
-                         'type 'flycheck-error-list
-                         'face 'flycheck-error-list-column-number)))
-    (let ((face (flycheck-error-level-error-list-face 'error)))
-      (should (equal (aref cells 2)
-                     (list "error"
-                           'type 'flycheck-error-list
-                           'face face))))
-    (should (equal (aref cells 3)
-                   (list ""
-                         'type 'flycheck-error-list
-                         'face 'flycheck-error-list-id)))
-    (should (equal (aref cells 4)
-                   (list "A foo error"
-                         'type 'flycheck-error-list
-                         'face 'default)))
-    (should (equal (aref cells 5)
-                   (list "(emacs-lisp-checkdoc)"
-                         'type 'flycheck-error-list
-                         'face 'flycheck-error-list-checker-name)))))
-
-(ert-deftest flycheck-error-list-make-entry/no-message ()
-  :tags '(error-list)
-  (let* ((error (flycheck-error-new-at 10 nil 'info nil :checker 'coq))
-         (entry (flycheck-error-list-make-entry error))
-         (cells (cadr entry)))
-    (should (eq (car entry) error))
-    (should (equal (aref cells 0)
-                   (list "10"
-                         'type 'flycheck-error-list
-                         'face 'flycheck-error-list-line-number)))
-    (should (equal (aref cells 1)
-                   (list ""
-                         'type 'flycheck-error-list
-                         'face 'flycheck-error-list-column-number)))
-    (let ((face (flycheck-error-level-error-list-face 'info)))
-      (should (equal (aref cells 2)
-                     (list "info"
-                           'type 'flycheck-error-list
-                           'face face))))
-    (should (equal (aref cells 3)
-                   (list ""
-                         'type 'flycheck-error-list
-                         'face 'flycheck-error-list-id)))
-    (should (equal (aref cells 4)
-                   (list "Unknown info"
-                         'type 'flycheck-error-list
-                         'face 'default)))
-    (should (equal (aref cells 5)
-                   (list "(coq)"
-                         'type 'flycheck-error-list
-                         'face 'flycheck-error-list-checker-name)))))
-
-(ert-deftest flycheck-error-list-mode-line-filter-indicator/no-filter ()
-  :tags '(error-list)
-  (let ((flycheck-error-list-minimum-level nil))
-    (should (string= (flycheck-error-list-mode-line-filter-indicator) ""))))
-
-(ert-deftest flycheck-error-list-mode-line-filter-indicator/with-filter ()
-  :tags '(error-list)
-  (let ((flycheck-error-list-minimum-level 'error))
-    (should (string= (flycheck-error-list-mode-line-filter-indicator)
-                     " [>= error]"))))
-
-(ert-deftest flycheck-error-list-reset-filter/kills-local-variable ()
-  :tags '(error-list)
-  (with-temp-buffer
-    (setq-local flycheck-error-list-minimum-level 'error)
-    (should (local-variable-p 'flycheck-error-list-minimum-level))
-    (flycheck-error-list-reset-filter)
-    (should-not (local-variable-p 'flycheck-error-list-minimum-level))))
-
-(ert-deftest flycheck-error-list-apply-filter/filters-lower-levels ()
-  :tags '(error-list)
-  (let ((flycheck-error-list-minimum-level 'warning)
-        (errors (list (flycheck-error-new-at 10 10 'error)
-                      (flycheck-error-new-at 20 20 'warning)
-                      (flycheck-error-new-at 30 30 'info))))
-    (should (equal (flycheck-error-list-apply-filter errors)
-                   (list (flycheck-error-new-at 10 10 'error)
-                         (flycheck-error-new-at 20 20 'warning))))))
 
 
 ;;; Displaying errors in buffers
@@ -3833,6 +3307,13 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
         :checker emacs-lisp )))
 
 (flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
+                               uses-right-major-mode
+  (flycheck-ert-should-syntax-check
+   "language/emacs-lisp/checkdoc-elisp-mode-regression.el" 'emacs-lisp-mode
+   '(11 nil warning "All variables and subroutines might as well have a documentation string"
+        :checker emacs-lisp-checkdoc)))
+
+(flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
                                checks-compressed-file
   (flycheck-ert-should-syntax-check
    "language/emacs-lisp/compressed.el.gz" 'emacs-lisp-mode
@@ -3844,7 +3325,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
                     "the function ‘dummy-package-foo’ is not known to be defined.")
         :checker emacs-lisp)))
 
-(flycheck-ert-def-checker-test emacs-lisp emacs-lisp sytnax-error
+(flycheck-ert-def-checker-test emacs-lisp emacs-lisp syntax-error
   (let ((flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
     (flycheck-ert-should-syntax-check
      "language/emacs-lisp/syntax-error.el" 'emacs-lisp-mode
@@ -4042,24 +3523,15 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
    '(2 nil error "Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'UNDEFINED', 'NULL', 'DATA', got 'INVALID'"
        :checker handlebars)))
 
-(ert-deftest flycheck-haskell-module-re/matches-module-name ()
-  :tags '(language-haskell)
-  (let ((s "module Foo.Bar where"))
-    (should (string-match flycheck-haskell-module-re s))
-    (should (string= "Foo.Bar" (match-string 1 s)))))
-
-(ert-deftest flycheck-haskell-module-re/ignores-commented-code ()
-  :tags '(language-haskell)
-  (should-not (string-match-p flycheck-haskell-module-re
-                              "-- | module Foo.Bar where")))
-
 (flycheck-ert-def-checker-test haskell-stack-ghc haskell syntax-error
+  (skip-unless (file-exists-p (getenv "HOME")))
   (let ((flycheck-disabled-checkers '(haskell-ghc)))
     (flycheck-ert-should-syntax-check
      "language/haskell/SyntaxError.hs" 'haskell-mode
      '(3 1 error "parse error on input ‘module’" :checker haskell-stack-ghc))))
 
 (flycheck-ert-def-checker-test haskell-stack-ghc haskell type-error
+  (skip-unless (file-exists-p (getenv "HOME")))
   (let ((flycheck-disabled-checkers '(haskell-ghc)))
     (flycheck-ert-should-syntax-check
      "language/haskell/Error.hs" 'haskell-mode
@@ -4070,6 +3542,7 @@ In the first argument of ‘putStrLn’, namely ‘True’
 In the expression: putStrLn True" :checker haskell-stack-ghc))))
 
 (flycheck-ert-def-checker-test (haskell-stack-ghc haskell-hlint) haskell literate
+  (skip-unless (file-exists-p (getenv "HOME")))
   (let ((flycheck-disabled-checkers '(haskell-ghc)))
     (flycheck-ert-should-syntax-check
      "language/haskell/Literate.lhs" 'literate-haskell-mode
@@ -4078,17 +3551,18 @@ In the expression: putStrLn True" :checker haskell-stack-ghc))))
 
 (flycheck-ert-def-checker-test (haskell-stack-ghc haskell-hlint) haskell
                                complete-chain
+  (skip-unless (file-exists-p (getenv "HOME")))
   (let ((flycheck-disabled-checkers '(haskell-ghc)))
     (flycheck-ert-should-syntax-check
      "language/haskell/Warnings.hs" 'haskell-mode
-     '(4 1 error "Eta reduce
+     '(4 1 warning "Eta reduce
 Found:
   spam eggs = map lines eggs
 Why not:
   spam = map lines" :checker haskell-hlint)
      '(4 1 warning "Top-level binding with no type signature:
   spam :: [String] -> [[String]]" :checker haskell-stack-ghc)
-     '(7 8 warning "Redundant bracket
+     '(7 8 info "Redundant bracket
 Found:
   (putStrLn \"hello world\")
 Why not:
@@ -4122,7 +3596,7 @@ In the expression: putStrLn True" :checker haskell-ghc))))
   (let ((flycheck-disabled-checkers '(haskell-stack-ghc)))
     (flycheck-ert-should-syntax-check
      "language/haskell/Warnings.hs" 'haskell-mode
-     '(4 1 error "Eta reduce
+     '(4 1 warning "Eta reduce
 Found:
   spam eggs = map lines eggs
 Why not:
@@ -4130,7 +3604,7 @@ Why not:
      '(4 1 warning "Top-level binding with no type signature:
   spam :: [String] -> [[String]]"
          :checker haskell-ghc)
-     '(7 8 warning "Redundant bracket
+     '(7 8 info "Redundant bracket
 Found:
   (putStrLn \"hello world\")
 Why not:
@@ -4170,7 +3644,7 @@ Why not:
      '(3 4 error "Unmatched '('." :checker javascript-jshint :id "E019")
      '(3 25 error "Expected an identifier and instead saw ')'."
          :checker javascript-jshint :id "E030")
-     '(4 nil error "Unrecoverable syntax error. (100% scanned)."
+     '(4 1 error "Unrecoverable syntax error. (100% scanned)."
          :checker javascript-jshint :id "E041"))))
 
 (flycheck-ert-def-checker-test javascript-jshint javascript nil
@@ -4303,18 +3777,17 @@ Why not:
 
 (flycheck-ert-def-checker-test json-jsonlint json nil
   (flycheck-ert-should-syntax-check
-   "language/json.json" 'text-mode
+   "language/json.json" 'json-mode
    '(1 44 error "found: ',' - expected: 'EOF'." :checker json-jsonlint)))
 
 (flycheck-ert-def-checker-test json-python-json json nil
   (let ((flycheck-disabled-checkers '(json-jsonlint)))
     (flycheck-ert-should-syntax-check
-     "language/json.json" 'text-mode
+     "language/json.json" 'json-mode
      '(1 44 error "Extra data" :checker json-python-json))))
 
 (flycheck-ert-def-checker-test less less file-error
-  (let* ((candidates (list (flycheck-ert-resource-filename "language/less/no-such-file.less")
-                           (flycheck-ert-resource-filename "language/less/no-such-file.less")
+  (let* ((candidates (list "no-such-file.less"
                            "no-such-file.less"))
          (message (string-join candidates ",")))
     (flycheck-ert-should-syntax-check
@@ -4412,6 +3885,12 @@ Why not:
    '(26 12 error "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\""
         :id "Generic.PHP.LowerCaseConstant.Found" :checker php-phpcs)))
 
+(flycheck-ert-def-checker-test processing processing syntax-error
+  (flycheck-ert-should-syntax-check
+   "language/processing/syntax_error/syntax_error.pde" 'processing-mode
+   '(4 2 error "Syntax error, maybe a missing semicolon?"
+       :checker processing)))
+
 (flycheck-ert-def-checker-test puppet-parser puppet parser-error
   (flycheck-ert-should-syntax-check
    "language/puppet/parser-error.pp" 'puppet-mode
@@ -4471,8 +3950,8 @@ Why not:
      '(9 5 info "Missing method docstring" :id "missing-docstring" :checker python-pylint)
      '(9 5 warning "Method could be a function" :id "no-self-use"
          :checker python-pylint)
-     '(10 16 warning "Used builtin function 'map'" :id "bad-builtin"
-          :checker python-pylint)
+     '(10 16 warning "Used builtin function 'map'. Using a list comprehension can be clearer."
+          :id "bad-builtin" :checker python-pylint)
      '(12 1 info "No space allowed around keyword argument assignment"
           :id "bad-whitespace" :checker python-pylint)
      '(12 5 info "Missing method docstring" :id "missing-docstring" :checker python-pylint)
@@ -4493,7 +3972,7 @@ Why not:
     (flycheck-ert-should-syntax-check
      "language/python/test.py" 'python-mode
      '(1 1 info "Missing module docstring" :id "C0111" :checker python-pylint)
-     '(4 1 error "Unable to import 'spam'" :id "F0401" :checker python-pylint)
+     '(4 1 error "Unable to import 'spam'" :id "E0401" :checker python-pylint)
      '(5 1 error "No name 'antigravit' in module 'python'" :id "E0611"
          :checker python-pylint)
      '(5 1 warning "Unused import antigravit" :id "W0611"
@@ -4504,8 +3983,8 @@ Why not:
      '(9 5 info "Missing method docstring" :id "C0111" :checker python-pylint)
      '(9 5 warning "Method could be a function" :id "R0201"
          :checker python-pylint)
-     '(10 16 warning "Used builtin function 'map'" :id "W0141"
-          :checker python-pylint)
+     '(10 16 warning "Used builtin function 'map'. Using a list comprehension can be clearer."
+          :id "W0141" :checker python-pylint)
      '(12 1 info "No space allowed around keyword argument assignment"
           :id "C0326" :checker python-pylint)
      '(12 5 info "Missing method docstring" :id "C0111" :checker python-pylint)
@@ -4544,6 +4023,12 @@ Why not:
          :checker r-lintr)
      '(4 6 warning "Do not use absolute paths." :checker r-lintr)
      '(7 5 error "unexpected end of input" :checker r-lintr))))
+
+(flycheck-ert-def-checker-test racket racket nil
+  (skip-unless (funcall (flycheck-checker-get 'racket 'predicate)))
+  (flycheck-ert-should-syntax-check
+   "language/racket.rkt" 'racket-mode
+   '(4 3 error "read: expected a `)' to close `('" :checker racket)))
 
 (flycheck-ert-def-checker-test rpm-rpmlint rpm nil
   (flycheck-ert-should-syntax-check
@@ -4705,15 +4190,6 @@ Why not:
      "language/rust/src/importing.rs" 'rust-mode
      '(1 5 error "unresolved import `super::imported`" :checker rust :id "E0432")
      '(1 5 info "run `rustc --explain E0432` to see a detailed explanation"
-         :checker rust))))
-
-(flycheck-ert-def-checker-test rust rust crate-root
-  (let ((flycheck-disabled-checkers '(rust-cargo))
-        (flycheck-rust-crate-root (flycheck-ert-resource-filename
-                                   "language/rust/src/main.rs")))
-    (flycheck-ert-should-syntax-check
-     "language/rust/src/importing.rs" 'rust-mode
-     '(3 9 warning "unused variable: `x`, #[warn(unused_variables)] on by default"
          :checker rust))))
 
 (flycheck-ert-def-checker-test sass sass nil

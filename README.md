@@ -1,99 +1,94 @@
-[![License GPL 3](https://img.shields.io/badge/license-GPL_3-blue.svg)][COPYING]
+[![License GPL 3](https://img.shields.io/github/license/flycheck/flycheck.svg)][COPYING]
+[![Join the chat](https://img.shields.io/gitter/room/flycheck/flycheck.svg)](https://gitter.im/flycheck/flycheck)
 [![MELPA stable version](http://stable.melpa.org/packages/flycheck-badge.svg)](http://stable.melpa.org/#/flycheck)
 [![MELPA version](http://melpa.org/packages/flycheck-badge.svg)](http://melpa.org/#/flycheck)
-[![Manual](https://img.shields.io/badge/manual-latest-green.svg)][manual]
-[![Waffle Board](https://img.shields.io/badge/Board-ready-75AED9.svg)](https://waffle.io/flycheck/flycheck)
+[![Build Status](https://img.shields.io/travis/flycheck/flycheck/master.svg)](https://travis-ci.org/flycheck/flycheck)
 
-# [![Flycheck Logo](https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/logo.png)](http://www.flycheck.org)
+# [![Flycheck][logo]](http://www.flycheck.org) #
 
 **Flycheck** is a modern on-the-fly syntax checking extension for GNU Emacs 24,
 intended as replacement for the older Flymake extension which is part of GNU
 Emacs.
 
-It uses various syntax checking and linting tools to check the contents of
-buffers, and reports warnings and errors directly in the buffer or in an
-optional error list:
+It uses various syntax checking and linting tools to
+[automatically check the contents of buffers][checking] while you type, and
+reports warnings and errors directly in the buffer or in an optional error list
+(see [Flycheck manual][manual] for more information):
 
 ![](https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/flycheck-annotated.png)
 
+Out of the box Flycheck supports over
+[40 different programming languages][languages] with more than 80 different
+syntax checking tools, and comes with a [simple interface][definitions] to
+define new syntax checkers.
+
+Many [3rd party extensions](http://flycheck.org/extensions.html) provide
+new syntax checkers and other features like alternative error displays or mode
+line indicators.
+
 [COPYING]: https://github.com/flycheck/flycheck/blob/master/COPYING
 [manual]: http://www.flycheck.org/manual/latest/index.html
+[logo]: https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/logo.png
+[checking]: http://www.flycheck.org/manual/latest/Checking-buffers.html#Checking-buffers
+[languages]: http://www.flycheck.org/manual/latest/Supported-languages.html#Supported-languages
+[definitions]: http://flycheck.org/manual/latest/Defining-syntax-checkers.html#Defining-syntax-checkers
 
-Features
---------
+## Quickstart ##
 
-- Supports over 30 programming and markup languages with more than 70 different
-  syntax checking tools
-- Fully automatic, fail-safe, on-the-fly syntax checking in background
-- Nice error indication and highlighting
-- Optional error list popup
-- Many customization options
-- A [comprehensive manual][manual]
-- A simple interface to define new syntax checkers
-- A “doesn't get in your way” guarantee
-- Many [3rd party extensions](http://flycheck.org/extensions.html)
+Flycheck needs GNU Emacs 24.1 or newer, and works best on Unix systems.
+**Windows users**, please be aware that Flycheck does not support Windows
+officially, although it should mostly work fine on Windows.  See
+[Windows support][] and watch out for [known Windows issues][windows issues]!
 
-Installation
-------------
+Install some [syntax checker tools][languages] and type the following in your
+`*scratch*` buffer and run `M-x eval-buffer`:
 
-Flycheck needs GNU Emacs 24 on a Unix system, and additionally **external**
-syntax checking programs for the languages you use.  See [Supported Languages][]
-for more information.
+```lisp
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "http://stable.melpa.org/packages/") t)
+(package-initialize)
 
-Flycheck does not officially support Windows, but tries to maintain Windows
-compatibility and should generally work fine on Windows, too.
+(package-install 'flycheck)
 
-Install Flycheck from [MELPA](http://melpa.org) or
-[MELPA Stable](http://stable.melpa.org) with:
+(global-flycheck-mode)
+```
 
-    M-x package-install RET flycheck
+For a more gentle introduction read the [Installation][] instructions and go
+through [Quickstart][] guide.
 
-In your [Cask](https://github.com/cask/cask) file:
-
-    (source gnu)
-    (source melpa)
-
-    (depends-on "flycheck")
-
-Then add the following to your init file:
-
-    (add-hook 'after-init-hook #'global-flycheck-mode)
-
-If you don’t know where your init file is, look at the value of the variable
-`user-init-file` with `C-h v user-init-file`.
-
-See [Installation][] and [Quick start][] for more information.
-
-[Supported Languages]: http://www.flycheck.org/manual/latest/Supported-languages.html#Supported-languages
 [Installation]: http://www.flycheck.org/manual/latest/Installation.html#Installation
-[Quick start]: http://www.flycheck.org/manual/latest/Quickstart.html#Quickstart
+[Quickstart]: http://www.flycheck.org/manual/latest/Quickstart.html#Quickstart
+[windows issues]: https://github.com/flycheck/flycheck/labels/B-Windows%20only
+[windows support]: http://www.flycheck.org/manual/latest/Installation.html#index-Windows
 
-Documentation
-=============
+## Support & Contribution ##
 
-Documentation is available at http://www.flycheck.org:
+Please ask questions about Flycheck on [Stack Exchange][sx] or in our
+[Gitter chat][gitter].  We try to answer all questions as fast and as precise as
+possible.
 
-- [Quick start][] (tutorial)
-- [User manual](http://www.flycheck.org/manual/latest/Usage.html#Usage)
-  (reference information)
+To report problems or bugs, please use our [issue tracker][].  Our
+[contribution guidelines][contrib] help you to create good bug reports; please
+take a look.
 
-Support & Contribution
-======================
+We welcome patches and pull requests that fix bugs or provide new features.
+Please read our [Contribution guidelines][contrib] for help and guidelines
+before submitting pull requests.  When making larger changes to Flycheck or
+implementing new features we recommend that you first open a separate issue or
+ask in our [Gitter channel][gitter] to discuss you intended changes.
 
-- [Stack Exchange](https://emacs.stackexchange.com/questions/tagged/flycheck)
-- [Issue Tracker](https://github.com/flycheck/flycheck/issues)
-- [Waffle Board](http://waffle.io/flycheck/flycheck)
-- [Github](https://github.com/flycheck/flycheck)
-- [Contribution guidelines](https://github.com/flycheck/flycheck/blob/master/CONTRIBUTING.md)
+All contributors and all participants in our communication channels are expected
+to follow our [Code of Conduct][coc].
 
-Credits
-=======
+[sx]: https://emacs.stackexchange.com/questions/tagged/flycheck
+[gitter]: https://gitter.im/flycheck/flycheck
+[Issue Tracker]: https://github.com/flycheck/flycheck/issues
+[contrib]: https://github.com/flycheck/flycheck/blob/master/CONTRIBUTING.md
+[Waffle Board]: http://waffle.io/flycheck/flycheck
+[coc]: https://github.com/flycheck/flycheck/blob/master/CONDUCT.md
 
-- [Contributors](https://github.com/flycheck/flycheck/graphs/contributors)
-- [Credits](https://github.com/flycheck/flycheck/blob/master/CREDITS.md)
-
-License
-=======
+## License ##
 
 Flycheck is free software: you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software

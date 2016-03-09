@@ -1,6 +1,6 @@
-;;; flycheck-checkdoc.el --- Flycheck: Checkdoc linter -*- lexical-binding: t; -*-
+;;; run-checkdoc.el --- Flycheck: Run checkdoc on Flycheck -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2015  Sebastian Wiesner
+;; Copyright (C) 2015-2016  Sebastian Wiesner
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
 ;; Maintainer: Sebastian Wiesner <swiesner@lunaryorn.com>
@@ -52,5 +52,4 @@
   (mapc #'flycheck-checkdoc-file-batch command-line-args-left)
   (kill-emacs 0))
 
-(provide 'flycheck-checkdoc)
-;;; flycheck-checkdoc.el ends here
+;;; run-checkdoc.el ends here
