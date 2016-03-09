@@ -5393,7 +5393,7 @@ SYMBOL with `flycheck-def-executable-var'."
              `(:verify #',verify-fn))
          :standard-input ',(plist-get properties :standard-input)
          ,@(when cwd
-             `(:default-directory #',cwd))))))
+             `(:default-directory ,cwd))))))
 
 
 ;;; Built-in checkers
