@@ -6695,7 +6695,7 @@ part of any package or if GOPATH is nil."
 Requires an errcheck version from commit 8515d34 (made on August 28 2015) or newer.
 
 See URL `https://github.com/kisielk/errcheck'."
-  :command ("errcheck" "-abspath" (eval (flycheck-go-package-name)))
+  :command ("errcheck" "-abspath" ".")
   :error-patterns
   ((warning line-start
             (file-name) ":" line ":" column (or (one-or-more "\t") ": ")
@@ -6716,7 +6716,7 @@ See URL `https://github.com/kisielk/errcheck'."
   (lambda ()
     ;; We need a valid package name, since errcheck only works on entire
     ;; packages, and can't check individual Go files.
-    (and (flycheck-buffer-saved-p) (flycheck-go-package-name))))
+    (and (flycheck-buffer-saved-p))))
 
 (flycheck-define-checker groovy
   "A groovy syntax checker using groovy compiler API.
