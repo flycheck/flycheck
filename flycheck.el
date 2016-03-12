@@ -193,6 +193,7 @@ attention to case differences."
     go-build
     go-test
     go-errcheck
+    go-unconvert
     groovy
     haml
     handlebars
@@ -6543,7 +6544,8 @@ See URL `https://golang.org/cmd/gofmt/'."
                   (warning . go-vet)
                   ;; Fall back, if go-vet doesn't exist
                   (warning . go-build) (warning . go-test)
-                  (warning . go-errcheck)))
+                  (warning . go-errcheck)
+                  (warning . go-unconvert)))
 
 (flycheck-define-checker go-golint
   "A Go style checker using Golint.
@@ -6555,7 +6557,7 @@ See URL `https://github.com/golang/lint'."
   :modes go-mode
   :next-checkers (go-vet
                   ;; Fall back, if go-vet doesn't exist
-                  go-build go-test go-errcheck))
+                  go-build go-test go-errcheck go-unconvert))
 
 (flycheck-def-option-var flycheck-go-vet-print-functions nil go-vet
   "A list of print-like functions for `go tool vet'.
@@ -6607,7 +6609,8 @@ See URL `https://golang.org/cmd/go/' and URL
   :next-checkers (go-build
                   go-test
                   ;; Fall back if `go build' or `go test' can be used
-                  go-errcheck)
+                  go-errcheck
+                  go-unconvert)
   :verify (lambda (_)
             (let* ((go (flycheck-checker-executable 'go-vet))
                    (have-vet (member "vet" (ignore-errors
@@ -6677,7 +6680,8 @@ See URL `https://golang.org/cmd/go'."
   :predicate (lambda ()
                (and (flycheck-buffer-saved-p)
                     (not (string-suffix-p "_test.go" (buffer-file-name)))))
-  :next-checkers ((warning . go-errcheck)))
+  :next-checkers ((warning . go-errcheck)
+                  (warning . go-unconvert)))
 
 (flycheck-define-checker go-test
   "A Go syntax and type checker using the `go test' command.
@@ -6697,7 +6701,8 @@ See URL `http://golang.org/cmd/go'."
   :predicate
   (lambda () (and (flycheck-buffer-saved-p)
                   (string-suffix-p "_test.go" (buffer-file-name))))
-  :next-checkers ((warning . go-errcheck)))
+  :next-checkers ((warning . go-errcheck)
+                  (warning . go-unconvert)))
 
 (flycheck-define-checker go-errcheck
   "A Go checker for unchecked errors.
@@ -6722,11 +6727,18 @@ See URL `https://github.com/kisielk/errcheck'."
                 (format "Ignored `error` returned from `%s`" message)))))
     errors)
   :modes go-mode
-  :predicate
-  (lambda ()
-    ;; We need a valid package name, since errcheck only works on entire
-    ;; packages, and can't check individual Go files.
-    (and (flycheck-buffer-saved-p))))
+  :predicate (lambda () (flycheck-buffer-saved-p))
+  :next-checkers ((warning . go-unconvert)))
+
+(flycheck-define-checker go-unconvert
+  "A Go checker looking for unnecessary type conversions.
+
+See URL `https://github.com/mdempsky/unconvert'."
+  :command ("unconvert" ".")
+  :error-patterns
+  ((warning line-start (file-name) ":" line ":" column ": " (message) line-end))
+  :modes go-mode
+  :predicate (lambda () (flycheck-buffer-saved-p)))
 
 (flycheck-define-checker groovy
   "A groovy syntax checker using groovy compiler API.

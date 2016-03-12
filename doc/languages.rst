@@ -341,6 +341,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
    3. `go-vet`
    4. `go-build` or `go-test`
    5. `go-errcheck`
+   6. `go-unconvert`
 
    .. syntax-checker:: go-gofmt
 
@@ -387,6 +388,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
       Check for unhandled error returns in Go with errcheck_.
 
       .. _errcheck: https://github.com/kisielk/errcheck
+
+   .. syntax-checker:: go-unconvert
+
+      Check for unnecessary type conversions with unconvert_.
+
+      .. _unconvert: https://github.com/mdempsky/unconvert
 
 .. supported-language:: Groovy
 

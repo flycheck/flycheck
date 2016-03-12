@@ -1,6 +1,10 @@
 27-cvs (in development)
 =======================
 
+- New syntax checkers:
+
+  - Go with ``go-unconvert`` [GH-905]
+
 26 (Apr 27, 2016)
 =================
 
