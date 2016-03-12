@@ -3491,6 +3491,15 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
      '(9 9 warning "Ignored `error` returned from `os.Stat(\"enoent\")`"
          :checker go-errcheck))))
 
+(flycheck-ert-def-checker-test go-unconvert go nil
+  :tags '(language-go external-tool)
+  (flycheck-ert-with-env
+      `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
+    (flycheck-ert-should-syntax-check
+     "language/go/unconvert/unconvert.go" 'go-mode
+     '(7 17 warning "unnecessary conversion"
+         :checker go-unconvert))))
+
 (flycheck-ert-def-checker-test groovy groovy syntax-error
   ;; Work around
   ;; https://github.com/Groovy-Emacs-Modes/groovy-emacs-modes/issues/11

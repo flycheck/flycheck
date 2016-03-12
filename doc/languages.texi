@@ -294,6 +294,8 @@ respectively)
 @item
 @flyc{go-errcheck} (check for unhandled error returns with
 @uref{https://github.com/kisielk/errcheck, errcheck})
+@flyc{go-unconvert} (check for unnecessary type conversions with
+@uref{https://github.com/mdempsky/unconvert, unconvert})
 @end enumerate
 
 @flyc{go-vet} provides the following option:
