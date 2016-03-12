@@ -6692,8 +6692,10 @@ part of any package or if GOPATH is nil."
 (flycheck-define-checker go-errcheck
   "A Go checker for unchecked errors.
 
+Requires an errcheck version from commit 8515d34 (made on August 28 2015) or newer.
+
 See URL `https://github.com/kisielk/errcheck'."
-  :command ("errcheck" (eval (flycheck-go-package-name)))
+  :command ("errcheck" "-abspath" (eval (flycheck-go-package-name)))
   :error-patterns
   ((warning line-start
             (file-name) ":" line ":" column (or (one-or-more "\t") ": ")
@@ -6704,15 +6706,6 @@ See URL `https://github.com/kisielk/errcheck'."
     (let ((errors (flycheck-sanitize-errors errors))
           (gosrc (expand-file-name "src/" (getenv "GOPATH"))))
       (dolist (err errors)
-        ;; File names are relative to the Go source directory, so we need to
-        ;; unexpand and re-expand them
-        (setf (flycheck-error-filename err)
-              (expand-file-name
-               ;; Get the relative name back, since Flycheck has already
-               ;; expanded the name for us
-               (file-relative-name (flycheck-error-filename err))
-               ;; And expand it against the Go source directory
-               gosrc))
         (-when-let (message (flycheck-error-message err))
           ;; Improve the messages reported by errcheck to make them more clear.
           (setf (flycheck-error-message err)
