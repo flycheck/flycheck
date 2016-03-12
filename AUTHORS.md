@@ -14,6 +14,7 @@ substantial code to Flycheck:
 * [David Holm](https://github.com/dholm)
 * [Derek Chen-Becker](https://github.com/dchenbecker)
 * [Derek Harland](https://github.com/donkopotamus)
+* [Dominik Honnef](https://github.com/dominikh)
 * [Doug MacEachern](https://github.com/dougm)
 * [Drew Wells](https://github.com/drewwells)
 * [Erik Hetzner](https://github.com/egh)

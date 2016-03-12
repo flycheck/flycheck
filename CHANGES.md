@@ -67,6 +67,8 @@ now for questions and discussions about development. [GH-820]
   * Don’t hang when sending buffers to node.js processes on Windows [GH-794]
     [GH-850]
   * Parse suggestions from `hlint` [GH-874]
+  * Go errcheck handles multiple `$GOPATH` entries correctly now [GH-580]
+    [GH-906]
 
 [buttercup]: https://github.com/jorgenschaefer/emacs-buttercup
 
