@@ -3469,30 +3469,6 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
      "language/go/src/test/test-error_test.go" 'go-mode
      '(8 nil error "undefined: fmt in fmt.Println" :checker go-test))))
 
-(ert-deftest flycheck-go-package-name/no-gopath ()
-  :tags '(language-go)
-  (flycheck-ert-with-env '(("GOPATH" . nil))
-    (should-not (flycheck-go-package-name
-                 (flycheck-ert-resource-filename
-                  "language/go/src/errcheck/errcheck.go")))))
-
-(ert-deftest flycheck-go-package-name/no-package-file ()
-  :tags '(language-go)
-  (flycheck-ert-with-env
-      `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
-    (should-not (flycheck-go-package-name
-                 (flycheck-ert-resource-filename
-                  "language/emacs-lisp-syntax-error.el")))))
-
-(ert-deftest flycheck-go-package-name/package-file ()
-  :tags '(language-go)
-  (flycheck-ert-with-env
-      `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
-    (should (equal "errcheck"
-                   (flycheck-go-package-name
-                    (flycheck-ert-resource-filename
-                     "language/go/src/errcheck/errcheck.go"))))))
-
 (flycheck-ert-def-checker-test go-errcheck go nil
   (flycheck-ert-with-env
       `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
