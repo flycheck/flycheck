@@ -71,6 +71,7 @@ now for questions and discussions about development. [GH-820]
     [GH-906]
   * Properly handle Go build failing in a directory with multiple packages
     [GH-676] [GH-904]
+  * Make cppcheck recognise C++ header files [GH-909]
 
 [buttercup]: https://github.com/jorgenschaefer/emacs-buttercup
 

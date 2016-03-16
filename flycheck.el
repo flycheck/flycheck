@@ -5969,6 +5969,10 @@ See URL `http://cppcheck.sourceforge.net/'."
             (option-flag "--inconclusive" flycheck-cppcheck-inconclusive)
             (option-list "-I" flycheck-cppcheck-include-path)
             (option "--std=" flycheck-cppcheck-language-standard concat)
+            "-x" (eval
+                  (pcase major-mode
+                    (`c++-mode "c++")
+                    (`c-mode "c")))
             source)
   :error-parser flycheck-parse-cppcheck
   :modes (c-mode c++-mode))
