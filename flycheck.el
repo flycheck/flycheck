@@ -6686,8 +6686,7 @@ See URL `https://github.com/kisielk/errcheck'."
             line-end))
   :error-filter
   (lambda (errors)
-    (let ((errors (flycheck-sanitize-errors errors))
-          (gosrc (expand-file-name "src/" (getenv "GOPATH"))))
+    (let ((errors (flycheck-sanitize-errors errors)))
       (dolist (err errors)
         (-when-let (message (flycheck-error-message err))
           ;; Improve the messages reported by errcheck to make them more clear.
