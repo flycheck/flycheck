@@ -1,4 +1,5 @@
 # Documentation
 Sphinx>=1.3
+sphinx-autobuild
 # Markdown support for Sphinx
 recommonmark
