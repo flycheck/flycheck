@@ -7663,6 +7663,16 @@ expression, which selects linters for lintr."
   :risky t
   :package-version '(flycheck . "0.23"))
 
+(defun flycheck-r-has-lintr (R)
+  "Whether R has installed the `lintr' library."
+  (with-temp-buffer
+    (let ((process-environment (append '("LC_ALL=C") process-environment)))
+      (call-process R nil t nil
+                    "--slave" "--restore" "--no-save" "-e"
+                    "library('lintr')")
+      (goto-char (point-min))
+      (not (re-search-forward "there is no package called 'lintr'" nil 'no-error)))))
+
 (flycheck-define-checker r-lintr
   "An R style and syntax checker using the lintr package.
 
@@ -7684,7 +7694,16 @@ See URL `https://github.com/jimhester/lintr'."
           line-end))
   :modes ess-mode
   ;; Don't check ESS files which do not contain R
-  :predicate (lambda () (equal ess-language "S")))
+  :predicate (lambda () (and (equal ess-language "S")
+                        (flycheck-r-has-lintr (flycheck-checker-executable 'r-lintr))))
+  :verify (lambda (checker)
+            (let ((has-lintr (flycheck-r-has-lintr
+                              (flycheck-checker-executable checker))))
+              (list
+               (flycheck-verification-result-new
+                :label "lintr library"
+                :message (if has-lintr "present" "missing")
+                :face (if has-lintr 'success '(bold error)))))))
 
 (defun flycheck-racket-has-expand-p (raco)
   "Whether a RACO executable provides the `expand' command."
