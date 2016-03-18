@@ -19,6 +19,7 @@ from pathlib import Path
 
 # Require Sphinx 1.0
 needs_sphinx = '1.0'
+extensions = ['sphinx.ext.extlinks']
 
 # Project metadata
 project = 'Flycheck'
@@ -55,3 +56,7 @@ html_theme = 'alabaster'
 # TODO: Pick logo and favicon
 #html_logo = None
 #html_favicon = None
+
+extlinks = {
+    'gh': ('https://github.com/%s', '')
+}
