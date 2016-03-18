@@ -4004,6 +4004,7 @@ Why not:
 (flycheck-ert-def-checker-test r-lintr r nil
   ;; Disable caching in lintr tests to make sure that the file is re-checked
   ;; every time
+  (skip-unless (flycheck-r-has-lintr (flycheck-checker-executable 'r-lintr)))
   (let ((flycheck-lintr-caching nil))
     (flycheck-ert-should-syntax-check
      "language/r.R" 'R-mode

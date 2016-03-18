@@ -52,6 +52,7 @@ now for questions and discussions about development. [GH-820]
   * Indicate disabled checkers in verification buffers [GH-749]
   * Do not enable Flycheck Mode in `fundamental-mode` buffers [GH-883]
   * Write `go test` output to a temporary files [GH-887]
+  * Check whether `lintr` is acutally installed [GH-911]
 
 * Bug fixes:
 
