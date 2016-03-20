@@ -58,5 +58,6 @@ html_theme = 'alabaster'
 #html_favicon = None
 
 extlinks = {
-    'gh': ('https://github.com/%s', '')
+    'gh': ('https://github.com/%s', ''),
+    'flyc': ('https://github.com/flycheck/%s', '')
 }
