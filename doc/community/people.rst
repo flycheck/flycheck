@@ -34,7 +34,7 @@ channels.
 
 .. note::
 
-   If you’d like to help out with moderation, please conduct a maintainer.
+   If you’d like to help out with moderation, please contact a maintainer.
 
 Acknowledgements
 ================
