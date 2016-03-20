@@ -53,9 +53,8 @@ pygments_style = 'sphinx'
 
 # HTML settings
 html_theme = 'alabaster'
-# TODO: Pick logo and favicon
-#html_logo = None
-#html_favicon = None
+html_logo = 'images/logo.png'
+html_favicon = 'images/favicon.png'
 
 extlinks = {
     'gh': ('https://github.com/%s', ''),
