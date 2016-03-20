@@ -51,6 +51,8 @@ include a Info manual in Flycheck’s MELPA packages.
     Flycheck’s mode line lighter [GH-879] [GH-880]
   - Add ``flycheck-go-vet-shadow`` to check for shadowed variables
     with ``go vet`` [GH-765] [GH-897]
+  - Add ``flycheck-ghc-stack-use-nix`` to enable Nix support for Stack GHC
+    [GH-913]
 
 - Improvements:
 

@@ -428,6 +428,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          Whether to disable the user package database (only for `haskell-ghc`).
 
+      .. option:: flycheck-ghc-stack-use-nix
+
+         Whether to enable Nix support for Stack (only for `haskell-stack-ghc`).
+
       .. option:: flycheck-ghc-package-databases
 
          A list of additional package databases for GHC (only for
