@@ -1,5 +1,6 @@
-Flycheck — Syntax checking for GNU Emacs
-========================================
+==========================================
+ Flycheck — Syntax checking for GNU Emacs
+==========================================
 
 **Flycheck** is a modern on-the-fly syntax checking extension for GNU Emacs,
 intended as replacement for the older Flymake extension which is part of GNU
@@ -20,7 +21,7 @@ Many :doc:`3rd party extensions <extensions>` provide new syntax checkers and
 other features like alternative error displays or mode line indicators.
 
 Very quick start
-----------------
+================
 
 Flycheck needs GNU Emacs 24.1 or newer, and works best on Unix systems.
 **Windows users**, please be aware that Flycheck does not support Windows
@@ -48,18 +49,27 @@ For a more gentle introduction read the :ref:`Installation
 
 .. _`known windows issues`: https://github.com/flycheck/flycheck/labels/B-Windows%20only
 
-Contents
---------
+The User Guide
+==============
+
+The User Guide provides installation and usage help for Flycheck.  It starts
+with installation instructions and a quick start tutorial and then focuses on an
+in-depth references of all parts of Flycheck.
+
+The Community Guide
+===================
+
+The Community Guide provides information about Flycheck’s ecosystem and
+community.
 
 .. toctree::
    :maxdepth: 2
 
+   community/conduct
+   community/extensions
+   community/people
 
+The Contributor Guide
+=====================
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+The Contributor Guide explains how to contribute to Flycheck.
