@@ -1,3 +1,5 @@
+.. _flycheck-conduct:
+
 ==============================
  The Flycheck Code of Conduct
 ==============================

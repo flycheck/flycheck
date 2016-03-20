@@ -17,8 +17,9 @@ Out of the box Flycheck supports over :ref:`40 different programming languages
 comes with a :ref:`simple interface <flycheck-definitions>` to define new syntax
 checkers.
 
-Many :doc:`3rd party extensions <extensions>` provide new syntax checkers and
-other features like alternative error displays or mode line indicators.
+Many :doc:`3rd party extensions <community/extensions>` provide new syntax
+checkers and other features like alternative error displays or mode line
+indicators.
 
 Very quick start
 ================
@@ -63,10 +64,11 @@ The Community Guide provides information about Flycheck’s ecosystem and
 community.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    community/conduct
    community/extensions
+   community/support
    community/people
 
 The Contributor Guide
