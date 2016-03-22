@@ -226,6 +226,7 @@ attention to case differences."
     r-lintr
     racket
     rpm-rpmlint
+    markdown-mdl
     rst-sphinx
     rst
     ruby-rubocop
@@ -7784,6 +7785,56 @@ See URL `https://sourceforge.net/projects/rpmlint/'."
   :predicate (lambda () (or (not (eq major-mode 'sh-mode))
                             ;; In `sh-mode', we need the proper shell
                             (eq sh-shell 'rpm))))
+
+(flycheck-def-option-var flycheck-markdown-mdl-rules nil markdown-mdl
+  "Enabled rules for mdl.
+
+The value of this variable is a list of strings, where each
+string is the name of an rule to limit.  By default, all the
+rules are enabled.
+
+See the mdl configuration documentation at URL
+`https://github.com/mivok/markdownlint/blob/master/docs/configuration.md'."
+  :type '(repeat :tag "Enabled rules"
+                 (string :tag "rule name"))
+  :safe #'flycheck-string-list-p)
+
+(flycheck-def-option-var flycheck-markdown-mdl-tags nil markdown-mdl
+  "Enabled tag rules for mdl.
+
+The value of this variable is a list of strings, where each
+string is the name of an rule to limit.  By default, all the tag
+rules are enabled.
+
+See the mdl configuration documentation at URL
+`https://github.com/mivok/markdownlint/blob/master/docs/configuration.md'."
+  :type '(repeat :tag "Enabled tags"
+                 (string :tag "tag name"))
+  :safe #'flycheck-string-list-p)
+
+(flycheck-def-config-file-var flycheck-markdown-mdl-style markdown-mdl nil
+  :safe #'stringp)
+
+(flycheck-define-checker markdown-mdl
+  "Markdown checker using mdl.
+
+See URL `https://github.com/mivok/markdownlint'."
+  :command ("mdl"
+            (config-file "--style" flycheck-markdown-mdl-style)
+            (option "--tags=" flycheck-markdown-mdl-rules concat
+                    flycheck-option-comma-separated-list)
+            (option "--rules=" flycheck-markdown-mdl-rules concat
+                    flycheck-option-comma-separated-list))
+  :standard-input t
+  :error-patterns
+  ((error line-start
+          (file-name) ":" line ": " (id (one-or-more alnum)) " " (message)
+          line-end))
+  :error-filter
+  (lambda (errors)
+    (flycheck-sanitize-errors
+     (flycheck-remove-error-file-names "(stdin)" errors)))
+  :modes (markdown-mode gfm-mode))
 
 (defun flycheck-locate-sphinx-source-directory ()
   "Locate the Sphinx source directory for the current buffer.
