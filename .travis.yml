@@ -38,7 +38,7 @@ script:
   - if [[ -n $EMACS_VERSION ]]; then rake verify:all compile:all[$COMPILEARGS]; fi
   - if [[ -n $EMACS_VERSION ]]; then rake test:unit:all; fi
   # Build and deploy the manual
-  - if [[ $BUILD_MANUAL == yes ]]; then rake doc:info test:integration:doc; fi
+  - if [[ $BUILD_MANUAL == yes ]]; then rake doc:info; fi
   - if [[ $BUILD_MANUAL == yes ]]; then rake deploy:travis:manual; fi
 notifications:
   webhooks:

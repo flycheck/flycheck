@@ -194,12 +194,6 @@ namespace :test do
                       selector))
     end
 
-    desc 'Test HTML manual for broken links'
-    task doc: ['doc/flycheck.html'] do |t|
-      sh('htmlproof', '--disable-external', '--checks-to-ignore=ScriptCheck',
-         *t.prerequisites)
-    end
-
     desc 'Run all integration tests'
     task all: [:specs, :ert, :doc]
   end
@@ -265,7 +259,6 @@ namespace :check do
   desc 'Check documentation (generate and test)'
   task doc: ['doc:info'] do
     task('test:unit:specs').invoke('^Manual')
-    task('test:integration:doc').invoke
   end
 end
 
@@ -292,7 +285,6 @@ Emacs and Cask (http://cask.readthedocs.org/).  Optionally, also:
 - Markdownlint (https://github.com/mivok/markdownlint)
 - Travis Client (https://github.com/travis-ci/travis.rb)
 - Texinfo (https://www.gnu.org/software/texinfo/)
-- HTML::Proofer (https://github.com/gjtorikian/html-proofer)
 
 # Task list
 
