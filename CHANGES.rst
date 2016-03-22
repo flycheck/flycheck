@@ -4,6 +4,7 @@
 - New syntax checkers:
 
   - Go with ``go-unconvert`` [GH-905]
+  - Markdown with ``mdl`` [GH-839] [GH-916]
 
 26 (Apr 27, 2016)
 =================

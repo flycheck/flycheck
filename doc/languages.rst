@@ -583,6 +583,22 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with the `Lua compiler <http://www.lua.org/>`_.
 
+.. supported-language:: Markdown
+
+   .. syntax-checker:: markdown-mdl
+
+      Check Markdown with `markdownlint <https://github.com/mivok/markdownlint/>`_.
+
+      .. option:: flycheck-markdown-mdl-rules
+
+         A list of enabled rules.
+
+      .. option:: flycheck-markdown-mdl-tags
+
+         A list of enabled rule tags.
+
+      .. syntax-checker-config-file:: flycheck-markdown-mdl-style
+
 .. supported-language:: Perl
 
    Flycheck checks Perl with `perl` and `perl-perlcritic`.

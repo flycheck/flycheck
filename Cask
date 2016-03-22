@@ -29,6 +29,7 @@
  (depends-on "json-mode")
  (depends-on "less-css-mode")
  (depends-on "lua-mode")
+ (depends-on "markdown-mode")
  (depends-on "mmm-mode")
  (depends-on "php-mode")
  (depends-on "processing-mode")
