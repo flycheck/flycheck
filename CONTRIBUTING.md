@@ -121,7 +121,7 @@ rubocop mdl` if you intend to work on Flycheck over a longer time.
 
 Some common targets are:
 
-* `rake init`: Initialise the project, by installing Emacs Lisp dependencies
+* `rake init:all`: Initialise the project, by installing Emacs Lisp dependencies
   locally.
 * `rake check:language[LANGUAGE]` runs all tests for the given `LANGUAGE`,
   e.g. `rake check:language[javascript]`.  Maintainers will use this task when
