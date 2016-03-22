@@ -107,7 +107,7 @@ The build system makes use of additional tools for some tasks:
 * `test:integration:html`: [html-proofer][]
 
 We recommend that you install all tools for `verify:*` with `gem install travis
-rubocop markdownlint` if you intend to work on Flycheck over a longer time.
+rubocop mdl` if you intend to work on Flycheck over a longer time.
 
 [Rubocop]: https://github.com/bbatsov/rubocop
 [markdownlint]: https://github.com/mivok/markdownlint
