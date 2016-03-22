@@ -1,10 +1,10 @@
+# [![Flycheck][logo]](http://www.flycheck.org) #
+
 [![License GPL 3](https://img.shields.io/github/license/flycheck/flycheck.svg)][COPYING]
 [![Join the chat](https://img.shields.io/gitter/room/flycheck/flycheck.svg)](https://gitter.im/flycheck/flycheck)
 [![MELPA stable version](http://stable.melpa.org/packages/flycheck-badge.svg)](http://stable.melpa.org/#/flycheck)
 [![MELPA version](http://melpa.org/packages/flycheck-badge.svg)](http://melpa.org/#/flycheck)
 [![Build Status](https://img.shields.io/travis/flycheck/flycheck/master.svg)](https://travis-ci.org/flycheck/flycheck)
-
-# [![Flycheck][logo]](http://www.flycheck.org) #
 
 **Flycheck** is a modern on-the-fly syntax checking extension for GNU Emacs 24,
 intended as replacement for the older Flymake extension which is part of GNU
