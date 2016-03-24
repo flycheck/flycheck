@@ -7394,7 +7394,10 @@ See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
   (lambda (errors)
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "STDIN" errors)))
-  :modes (php-mode php+-mode))
+  :modes (php-mode php+-mode)
+  ;; phpcs seems to choke on empty standard input, hence skip phpcs if the
+  ;; buffer is empty, see https://github.com/flycheck/flycheck/issues/907
+  :predicate (lambda () (> (buffer-size) 0)))
 
 (flycheck-define-checker processing
   "Processing command line tool.
