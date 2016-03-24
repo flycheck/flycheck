@@ -43,6 +43,12 @@ help:
 	@echo "Available tools:"
 	@echo "  $(SPHINXBUILD): $(if $(HAVE_SPHINXBUILD),yes,no)"
 	@echo "  $(SPHINXAUTOBUILD): $(if $(HAVE_SPHINXAUTOBUILD),yes,no)"
+	@echo ""
+	@echo "Run make init to install the missing tools"
+
+.PHONY: init
+init:
+	pip install -r requirements.txt
 
 .PHONY: clean
 clean:
