@@ -232,6 +232,7 @@ attention to case differences."
     ruby-rubylint
     ruby
     ruby-jruby
+    ruby-reek
     rust-cargo
     rust
     sass
@@ -7934,6 +7935,20 @@ See URL `http://jruby.org/'."
    (error line-start  "-:" line ": " (message) line-end))
   :modes (enh-ruby-mode ruby-mode)
   :next-checkers ((warning . ruby-rubylint)))
+
+(flycheck-def-config-file-var flycheck-reekrc ruby-reek "config.reek"
+  :safe #'stringp)
+
+(flycheck-define-checker ruby-reek
+  "A Ruby smell checker using reek.
+
+See URL `https://github.com/troessner/reek'."
+  :command ("reek" "--format=xml"
+            (config-file "--config" flycheck-reekrc)
+            source)
+  :error-parser flycheck-parse-checkstyle
+  :modes (enh-ruby-mode ruby-mode)
+  :next-checkers ((info . ruby-rubocop)))
 
 (flycheck-def-args-var flycheck-rust-args (rust-cargo rust)
   :package-version '(flycheck . "0.24"))

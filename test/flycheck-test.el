@@ -4127,6 +4127,19 @@ Why not:
      '(16 nil warning "Useless use of == in void context."
           :checker ruby-jruby))))
 
+(flycheck-ert-def-checker-test ruby-reek ruby warning
+  (let  ((flycheck-disabled-checkers '(ruby-rubocop)))
+    (flycheck-ert-should-syntax-check
+     "language/ruby/smell-warnings.rb" 'ruby-mode
+     '(1 nil warning "has no descriptive comment"
+         :id "IrresponsibleModule" :checker ruby-reek)
+     '(2 nil warning "doesn't depend on instance state (maybe move it to another class?)"
+         :id "UtilityFunction" :checker ruby-reek)
+     '(3 nil warning "calls object.save 2 times"
+         :id "DuplicateMethodCall" :checker ruby-reek)
+     '(4 nil warning "calls object.save 2 times"
+         :id "DuplicateMethodCall" :checker ruby-reek))))
+
 (flycheck-ert-def-checker-test rust-cargo rust warning
   (let ((flycheck-rust-crate-type "bin"))
     (flycheck-ert-should-syntax-check
