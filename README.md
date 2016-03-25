@@ -104,11 +104,11 @@ this program.  If not, see <http://www.gnu.org/licenses/>.
 
 See [COPYING][] for details.
 
-The Flycheck documenation is free documentation: you can copy, distribute and/or
-modify it under the terms of the GNU Free Documentation License, Version 1.3 or
-any later version published by the Free Software Foundation; with no Invariant
-Sections, no Front-Cover Texts, and no Back-Cover Texts.  A copy of the license
-is available at <https://github.com/flycheck/flycheck/blob/master/doc/fdl.txt>.
+The Flycheck documentation is free documentation: you can copy, distribute
+and/or modify it under the terms of the GNU Free Documentation License, Version
+1.3 or any later version published by the Free Software Foundation; with no
+Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.  A copy of
+the license is available at <http://www.gnu.org/licenses/fdl.html>.
 
 Alternatively, you may copy, distribute and/or modify the Flycheck documentation
 under the terms of the Creative Commons Attribution-ShareAlike 4.0 International
