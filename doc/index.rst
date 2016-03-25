@@ -88,6 +88,12 @@ The Contributor Guide explains how to contribute to Flycheck.
    contributor/contributing
    contributor/maintaining
 
+Indices and Tables
+==================
+
+* :ref:`genindex`
+* :ref:`search`
+
 Licensing
 =========
 
