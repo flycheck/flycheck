@@ -16,11 +16,13 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
+import sys
 from pathlib import Path
 
-# Require Sphinx 1.0
-needs_sphinx = '1.0'
-extensions = ['sphinx.ext.extlinks', 'sphinx.ext.todo']
+sys.path.append(str(Path(__file__).parent))
+
+needs_sphinx = '1.3'
+extensions = ['sphinx.ext.extlinks', 'sphinx.ext.todo', 'elisp']
 
 # Project metadata
 project = 'Flycheck'
@@ -48,6 +50,7 @@ master_doc = 'index'
 exclude_patterns = ['_build']
 # TODO: Choose a default role
 #default_role = None
+primary_domain = 'el'
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
