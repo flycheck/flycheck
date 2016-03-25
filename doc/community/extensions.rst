@@ -19,7 +19,7 @@ User interface
 
 * :flyc:`flycheck-color-mode-line` (*official*) colors the mode line according
   to the Flycheck status.
-* :gh:`flycheck-pos-tip` (*official*) shows Flycheck error messages in a
+* :flyc:`flycheck-pos-tip` (*official*) shows Flycheck error messages in a
   graphical popup.
 * :gh:`liblit/flycheck-status-emoji` adds cute emoji (e.g. 😱 for errors) to
   Flycheck’s mode line status.
@@ -27,13 +27,12 @@ User interface
 Language integration
 ====================
 
-* :gh:`flycheck/flycheck-cask` (*official*) makes Flycheck use Cask packages for
-  Emacs Lisp syntax checking in Cask_ projects.
-* :gh:`flycheck/flycheck-rust` (*official*)
-  configures Flycheck according to the Cargo settings and layouts of the current
-  Rust project.
-* :gh:`flycheck/flycheck-haskell` (*official*)
-  configures Flycheck from the Cabal settings and sandbox in Haskell projects.
+* :flyc:`flycheck-cask` (*official*) makes Flycheck use Cask packages for Emacs
+  Lisp syntax checking in Cask_ projects.
+* :flyc:`flycheck-rust` (*official*) configures Flycheck according to the Cargo
+  settings and layouts of the current Rust project.
+* :flyc:`flycheck-haskell` (*official*) configures Flycheck from the Cabal
+  settings and sandbox in Haskell projects.
 
 .. _Cask: https://github.com/cask/cask
 
