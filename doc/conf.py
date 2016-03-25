@@ -81,7 +81,7 @@ html_static_path = ['_static']
 html_favicon = '_static/favicon.png'
 
 # Ignore localhost when checking links
-linkcheck_ignore = [r'http://localhost:\d+/']
+linkcheck_ignore = [r'http://localhost:\d+/?']
 
 extlinks = {
     'gh': ('https://github.com/%s', ''),
