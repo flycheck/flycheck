@@ -71,10 +71,10 @@ class EmacsLispVariable(EmacsLispSymbol):
                     line=self.lineno)
             symbol['variable'] = Cell(self.objtype, self.env.docname)
 
-        index_text = '{name} (Emacs Lisp {label})'.format(
-            name=name, label=self.objtype_label.lower())
+        index_text = '{name}; {label}'.format(
+             name=name, label=self.objtype_label)
         self.indexnode['entries'].append(
-            ('single', index_text, target_name, ''))
+            ('pair', index_text, target_name, ''))
 
 
 class EmacsLispDomain(Domain):
