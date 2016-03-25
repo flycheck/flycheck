@@ -55,8 +55,30 @@ pygments_style = 'sphinx'
 
 # HTML settings
 html_theme = 'alabaster'
-html_logo = 'images/logo.png'
-html_favicon = 'images/favicon.png'
+html_theme_options = {
+    'logo': 'logo.png',
+    'logo_name': False,
+    'description': 'Syntax checking for GNU Emacs',
+    'github_user': 'flycheck',
+    'github_repo': 'flycheck',
+    'github_banner': True,
+}
+html_sidebars = {
+    'index': [
+        'about.html',
+        'localtoc.html',
+        'relations.html',
+        'searchbox.html',
+    ],
+    '**': [
+        'about.html',
+        'navigation.html',
+        'relations.html',
+        'searchbox.html',
+    ]
+}
+html_static_path = ['_static']
+html_favicon = 'favicon.png'
 
 extlinks = {
     'gh': ('https://github.com/%s', ''),
