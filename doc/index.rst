@@ -57,6 +57,12 @@ The User Guide provides installation and usage help for Flycheck.  It starts
 with installation instructions and a quick start tutorial and then focuses on an
 in-depth references of all parts of Flycheck.
 
+We are currently in the process of converting the old Texinfo manual to Sphinx.
+Meanwhile you can read a simple HTML version of the old manual at
+:download:`flycheck.html <legacy/flycheck.html>`.
+
+.. todo:: Port the Texinfo manual
+
 The Community Guide
 ===================
 
