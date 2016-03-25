@@ -1,3 +1,5 @@
+.. _flycheck-extensions:
+
 =====================================
  Recommended packages and extensions
 =====================================
