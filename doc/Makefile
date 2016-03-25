@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
+PIP = pip3
 SPHINXOPTS =
 SPHINXBUILD = sphinx-build
 SPHINXAUTOBUILD = sphinx-autobuild
@@ -25,9 +26,10 @@ ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(SPHINXOPTS) .
 
 HAVE_SPHINXBUILD := $(shell command -v $(SPHINXBUILD))
 ifndef HAVE_SPHINXBUILD
-$(warning "$(SPHINXBUILD) is not available.  Run make help.")
+$(warning "$(SPHINXBUILD) is not available.  Please run make help.")
 endif
 HAVE_SPHINXAUTOBUILD := $(shell command -v $(SPHINXAUTOBUILD))
+HAVE_PIP := $(shell command -v $(PIP))
 
 .PHONY: help
 help:
@@ -44,10 +46,24 @@ help:
 	@echo "  $(SPHINXBUILD): $(if $(HAVE_SPHINXBUILD),yes,no)"
 	@echo "  $(SPHINXAUTOBUILD): $(if $(HAVE_SPHINXAUTOBUILD),yes,no)"
 	@echo ""
-	@echo "Run make init to install the missing tools"
+	@echo "You need Python 3.4 or newer to install Sphinx for Flycheck."
+	@echo ""
+	@echo "Run make init to install all missing tools.  It is recommended"
+	@echo "that you use virtualenv (https://virtualenv.pypa.io/en/latest/)"
+	@echo "to avoid a global installation of Python packages.  make init"
+	@echo "will warn you if you do not."
 
 .PHONY: init
 init:
+ifndef HAVE_PIP
+	$(error "$(PIP) not available.  Please run make help.")
+endif
+ifndef VIRTUAL_ENV
+	$(warning "No virtualenv active.  Installing Sphinx globally is not recommended.")
+ifndef FORCE
+	$(error "Aborted.  Run make FORCE=1 init to override or make help.")
+endif
+endif
 	pip install -r requirements.txt
 
 .PHONY: clean
