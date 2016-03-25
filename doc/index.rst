@@ -116,6 +116,11 @@ under the terms of the Creative Commons Attribution-ShareAlike 4.0 International
 Public License. A copy of the license can be obtained at
 https://creativecommons.org/licenses/by-sa/4.0/legalcode.
 
+Permission is granted to copy, distribute and/or modify the Flycheck logo under
+the terms of the Creative Commons Attribution-ShareAlike 4.0 International
+Public License.  A copy of the license can be obtained at
+https://creativecommons.org/licenses/by-sa/4.0/legalcode.
+
 .. FIXME: Remove when the old manual is ported completed
 
 TODO
