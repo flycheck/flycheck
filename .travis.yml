@@ -35,7 +35,7 @@ script:
   - if [[ -n $EMACS_VERSION ]]; then rake verify:all compile:all[$COMPILEARGS]; fi
   - if [[ -n $EMACS_VERSION ]]; then rake test:unit:all; fi
   # Build and deploy the manual
-  - if [[ $BUILD_MANUAL == yes ]]; then make -C doc html; fi
+  - if [[ $BUILD_MANUAL == yes ]]; then make -C doc SPHINXOPTS=-n html; fi
   - if [[ $BUILD_MANUAL == yes ]]; then make -C doc linkcheck; fi
 notifications:
   webhooks:
