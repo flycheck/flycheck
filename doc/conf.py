@@ -21,7 +21,7 @@ from pathlib import Path
 
 # Require Sphinx 1.0
 needs_sphinx = '1.0'
-extensions = ['sphinx.ext.extlinks']
+extensions = ['sphinx.ext.extlinks', 'sphinx.ext.todo']
 
 # Project metadata
 project = 'Flycheck'
@@ -87,3 +87,7 @@ extlinks = {
     'gh': ('https://github.com/%s', ''),
     'flyc': ('https://github.com/flycheck/%s', '')
 }
+
+# While still have work to do :)
+# FIXME: Remove when the old Texinfo manual is completed ported
+todo_include_todos = True
