@@ -106,8 +106,7 @@ Optional tools
 
 The build system makes use of additional tools for some tasks:
 
-- ``generate:logo``: `Inkscape <https://inkscape.org/>`__ and `ImageMagick
-   <http://www.imagemagick.org/>`__
+- ``generate:logo``: `Inkscape <https://inkscape.org/>`__ and `ImageMagick <http://www.imagemagick.org/>`__
 - ``verify:travis``: `Travis Client <https://github.com/travis-ci/travis.rb>`__
 - ``verify:ruby``: `Rubocop <https://github.com/bbatsov/rubocop>`__
 - ``verify:markdown``: `markdownlint <https://github.com/mivok/markdownlint>`__
@@ -195,7 +194,7 @@ reStructuredText_ and built with Sphinx_.  The source of the manual resides in
 the ``doc/`` directory.
 
 Documentation pull requests work in the same way as other pull requests.  To
-find documentation issues sort by the `A-documentation `_ label.
+find documentation issues sort by the `A-documentation`_ label.
 
 To preview the documentation run ``rake doc:info`` to generate the Info
 manual in ``doc/flycheck.info`` and type
@@ -257,7 +256,7 @@ Answer questions in our `Gitter channel`_ or on StackExchange_.
 Participate in Flycheck discussions in other Emacs communities and help
 users with troubles.
 
-Write :ref:`extensions to Flycheck <flycheck-extensions>`_.
+Write :ref:`extensions for Flycheck <flycheck-extensions>`.
 
 .. _Gitter channel: https://gitter.im/flycheck/flycheck
 .. _StackExchange: https://emacs.stackexchange.com/questions/tagged/flycheck
