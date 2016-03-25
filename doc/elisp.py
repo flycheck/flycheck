@@ -119,8 +119,8 @@ class EmacsLispDomain(Domain):
 
     def clear_doc(self, docname):
         for symbol in self.data['obarray'].values():
-            for cell in symbol.keys():
-                if docname == cell.docname:
+            for cell in list(symbol.keys()):
+                if docname == symbol[cell].docname:
                     del symbol[cell]
 
     def resolve_xref(self, env, fromdocname, builder,
