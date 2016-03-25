@@ -189,21 +189,37 @@ you to comply to these guidelines.
 Writing documentation
 =====================
 
-Documentation improvements are very welcome.  Flycheck’s manual is written in
+Documentation improvements are very welcome.  Flycheck’s manual is written in
 reStructuredText_ and built with Sphinx_.  The source of the manual resides in
 the ``doc/`` directory.
+
+You need Python 3.4 or newer to install Sphinx_ for Flycheck’s documentation.
+On OS X it is recommended that you use Homebrew_ to install the latest Python
+version with ``brew install python3``.  On Linux you should be able to obtain
+Python 3.4 from the package manager of your distribution.
+
+With Python 3 installed change into the ``doc/`` directory and run ``make init``
+to install Sphinx and related tools required for Flycheck’s documentation.  We
+recommend that you use virtualenv_ to avoid a global installation of Python
+modules.  ``make init`` will warn you if you do not.
+
+When editing documentation run ``make html-auto`` to view the results of your
+edits.  This target runs a local webserver at <http://localhost:8000> which
+serves the HTML documentation and watches the documentation sources for changes
+to rebuild automatically.  When you finished your edits it is a good idea to run
+``make linkcheck`` to verify all links in the documentation.  Note that this
+target can take a while especially when run on a clean build.
+
+Run ``make help`` to see a list of all available Make targets for the
+documentation.
 
 Documentation pull requests work in the same way as other pull requests.  To
 find documentation issues sort by the `A-documentation`_ label.
 
-To preview the documentation run ``rake doc:info`` to generate the Info
-manual in ``doc/flycheck.info`` and type
-``C-u C-h i /path/to/flycheck/doc/flycheck.info`` in Emacs.
-Alternatively you may use ``rake doc:html`` to generate a single-page
-HTML file in ``doc/flycheck.html`` which you can view in your browser.
-
 .. _ReStructuredText: http://docutils.sourceforge.net/rst.html
 .. _Sphinx: http://www.sphinx-doc.org
+.. _Homebrew: http://brew.sh
+.. _virtualenv: https://virtualenv.pypa.io/en/latest/
 .. _A-documentation: https://github.com/flycheck/flycheck/labels/A-documentation
 
 Issue management
