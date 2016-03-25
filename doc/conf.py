@@ -33,7 +33,7 @@ def read_version():
     """Extract version number from ``flycheck.el`` and return it as string."""
     version_pattern = re.compile(r'Version:\s+(\d.+)$')
     flycheck_el = Path(__file__).parent.parent.joinpath('flycheck.el')
-    for line in flycheck_el.open():
+    for line in flycheck_el.open(encoding='utf-8'):
         match = version_pattern.search(line)
         if match:
             return match.group(1)
