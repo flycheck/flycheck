@@ -42,8 +42,8 @@
 
 (describe "Manual"
   (let* ((source-dir (locate-dominating-file default-directory "Cask"))
-         (languages (expand-file-name "doc/languages.texi" source-dir))
-         (list-of-languages (expand-file-name "doc/languages-list.texi"
+         (languages (expand-file-name "doc/legacy/languages.texi" source-dir))
+         (list-of-languages (expand-file-name "doc/legacy/languages-list.texi"
                                               source-dir)))
 
     (describe "List of languages"
