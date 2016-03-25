@@ -45,7 +45,7 @@ than too little. Here’s a list of facts that are important:
 * Your Emacs version from ``M-x emacs-version``
 * Your Flycheck version from ``M-x flycheck-version``
 
-.. _search existing issues: https://github.com/flycheck/flycheck/issues?utf8=✓&q=is%3Aissue
+.. _search existing issues: https://github.com/flycheck/flycheck/issues?q=is%3Aissue
 .. _issue form: https://github.com/flycheck/flycheck/issues/new
 .. _reproduce the issue in emacs -Q: http://www.lunaryorn.com/2015/11/29/reproduce-bugs-in-emacs-Q.html
 
