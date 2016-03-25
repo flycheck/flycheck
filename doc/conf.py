@@ -78,7 +78,7 @@ html_sidebars = {
     ]
 }
 html_static_path = ['_static']
-html_favicon = 'favicon.png'
+html_favicon = '_static/favicon.png'
 
 extlinks = {
     'gh': ('https://github.com/%s', ''),
