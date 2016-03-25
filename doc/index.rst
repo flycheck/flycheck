@@ -79,7 +79,8 @@ The Contributor Guide explains how to contribute to Flycheck.
 .. toctree::
    :maxdepth: 2
 
-   contributor/contributing.rst
+   contributor/contributing
+   contributor/maintaining
 
 Licensing
 =========
