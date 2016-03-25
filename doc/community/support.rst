@@ -8,7 +8,7 @@ chat`_.  We try to answer all questions as fast and as precise as possible.
 To report bugs and problems please please use our :flyc:`issue tracker
 <flycheck/issues>`.  You can follow the progress of your issues on our `Waffle
 board`_.  Please note that we have a special policy for :ref:`Windows-only
-issues <flycheck-windows-issues`.
+issues <flycheck-windows-issues>`.
 
 Please follow our :ref:`Code of Conduct <flycheck-conduct>` in all these places.
 
