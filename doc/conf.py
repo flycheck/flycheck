@@ -18,6 +18,10 @@
 import re
 import sys
 from pathlib import Path
+from docutils import nodes
+from docutils.parsers.rst import Directive, directives
+from sphinx import addnodes
+from sphinx.util.nodes import set_source_info, process_index_entry
 
 sys.path.append(str(Path(__file__).parent))
 
@@ -95,5 +99,49 @@ extlinks = {
 todo_include_todos = True
 
 
+class SupportedLanguage(Directive):
+
+    required_arguments = 1
+    final_argument_whitespace = True
+    has_content = True
+    option_spec = {
+        'index_as': directives.unchanged
+    }
+
+    def run(self):
+        language = self.arguments[0]
+
+        indexed_languages = self.options.get('index_as') or language
+        index_specs = ['pair: {}; language'.format(l)
+                       for l in indexed_languages.splitlines()]
+
+        name = nodes.fully_normalize_name(language)
+        target = 'language-{}'.format(name)
+        targetnode = nodes.target('', '', ids=[target])
+        self.state.document.note_explicit_target(targetnode)
+
+        indexnode = addnodes.index()
+        indexnode['entries'] = []
+        indexnode['inline'] = False
+        set_source_info(self, indexnode)
+        for spec in index_specs:
+            indexnode['entries'].extend(process_index_entry(spec, target))
+
+        sectionnode = nodes.section()
+        sectionnode['names'].append(name)
+
+        title, messages = self.state.inline_text(language, self.lineno)
+        titlenode = nodes.title(language, '', *title)
+
+        sectionnode += titlenode
+        sectionnode += messages
+        self.state.document.note_implicit_target(sectionnode, sectionnode)
+
+        self.state.nested_parse(self.content, 0, sectionnode)
+
+        return [indexnode, targetnode, sectionnode]
+
+
 def setup(app):
     app.add_object_type('syntax-checker', 'checker', 'pair: %s; Syntax checker')
+    app.add_directive('supported-language', SupportedLanguage)
