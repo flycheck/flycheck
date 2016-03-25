@@ -93,3 +93,7 @@ extlinks = {
 # While still have work to do :)
 # FIXME: Remove when the old Texinfo manual is completed ported
 todo_include_todos = True
+
+
+def setup(app):
+    app.add_object_type('syntax-checker', 'checker', 'pair: %s; Syntax checker')
