@@ -204,9 +204,9 @@ recommend that you use virtualenv_ to avoid a global installation of Python
 modules.  ``make init`` will warn you if you do not.
 
 When editing documentation run ``make html-auto`` to view the results of your
-edits.  This target runs a local webserver at <http://localhost:8000> which
-serves the HTML documentation and watches the documentation sources for changes
-to rebuild automatically.  When you finished your edits it is a good idea to run
+edits.  This target runs a local webserver at http://localhost:8000 which serves
+the HTML documentation and watches the documentation sources for changes to
+rebuild automatically.  When you finished your edits it is a good idea to run
 ``make linkcheck`` to verify all links in the documentation.  Note that this
 target can take a while especially when run on a clean build.
 

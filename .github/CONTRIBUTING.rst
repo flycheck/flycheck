@@ -10,4 +10,4 @@ Flycheck’s documentation provides a comprehensive Contributor Guide which show
 how you can contribute to Flycheck and helps you through all stages of the
 contribution process.
 
-Please read it at <http://www.flycheck.org/contributor/contributing.rst>.
+Please read it at http://www.flycheck.org/contributor/contributing.html.
