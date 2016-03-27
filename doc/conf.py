@@ -51,6 +51,11 @@ version = '.'.join(release.split('.')[:2])
 source_suffix = '.rst'
 master_doc = 'index'
 
+rst_prolog = """\
+.. role:: elisp(code)
+   :language: elisp
+"""
+
 # Build settings
 exclude_patterns = ['_build']
 default_role = 'any'
