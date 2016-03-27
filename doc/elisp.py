@@ -146,7 +146,11 @@ class EmacsLispDomain(Domain):
                 if node is not None]
 
     def get_objects(self):
-        return []
+        for name, symbol in self.data['obarray'].items():
+            for cellname, cell in symbol.items():
+                yield (name, name, cell.objtype, cell.docname,
+                       make_target(cellname, name),
+                       self.object_types[cell.objtype].attrs['searchprio'])
 
 
 def setup(app):
