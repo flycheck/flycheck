@@ -28,7 +28,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check ADA syntax and types with `GNAT`_.
 
-      .. _GNAT: https://gcc.gnu.org/onlinedocs/gnat_ugn_unw/
+      .. _GNAT: http://libre.adacore.com/tools/gnat-gpl-edition
 
       .. option:: flycheck-gnat-args
 
@@ -208,7 +208,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: coq
 
-      Check and proof with the standard `Coq <http://coq.inria.fr/>`_ compiler.
+      Check and proof with the standard `Coq <https://coq.inria.fr/>`_ compiler.
 
 .. supported-language:: CSS
 
@@ -336,7 +336,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: go-gofmt
 
-      Check Go syntax with `gofmt <http://golang.org/cmd/gofmt/>`_.
+      Check Go syntax with `gofmt <https://golang.org/cmd/gofmt/>`_.
 
    .. syntax-checker:: go-golint
 
@@ -355,13 +355,13 @@ to view the docstring of the syntax checker.  Likewise, you may use
          Whether to check for shadowed variables, in Go 1.6 or newer.
 
 
-      .. _vet: http://godoc.org/golang.org/x/tools/cmd/vet
+      .. _vet: https://godoc.org/golang.org/x/tools/cmd/vet
 
    .. syntax-checker:: go-build
 
       Check syntax and type with the `Go compiler`_.
 
-      .. _Go compiler: http://golang.org/cmd/go
+      .. _Go compiler: https://golang.org/cmd/go
 
       .. option:: flycheck-go-build-install-deps
 
@@ -417,7 +417,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
       Check syntax and type GHC_.  In Stack_ projects invoke GHC through Stack
       to bring package dependencies from Stack in.
 
-      .. _GHC: http://www.haskell.org/ghc/
+      .. _GHC: https://www.haskell.org/ghc/
       .. _Stack: https://github.com/commercialhaskell/stack
 
       .. option:: flycheck-ghc-args
@@ -470,7 +470,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check HTML syntax and style with `Tidy HTML5`_.
 
-      .. _Tidy HTML5: https://github.com/w3c/tidy-html5
+      .. _Tidy HTML5: https://github.com/htacg/tidy-html5
 
       .. syntax-checker-config-file:: flycheck-tidyrc
 
@@ -568,7 +568,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: perl
 
-      Check syntax with the `Perl <http://www.perl.org/>`_ interpreter.
+      Check syntax with the `Perl <https://www.perl.org/>`_ interpreter.
 
       .. option:: flycheck-perl-include-path
 
@@ -598,7 +598,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: php-phpmd
 
-      Lint with `PHP Mess Detector <http://phpmd.org/>`_.
+      Lint with `PHP Mess Detector <https://phpmd.org/>`_.
 
       .. option:: flycheck-phpmd-rulesets
 
@@ -628,7 +628,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: puppet-parser
 
-      Check syntax with the `Puppet <http://puppetlabs.com/>`_ compiler.
+      Check syntax with the `Puppet <https://puppetlabs.com/>`_ compiler.
 
    .. syntax-checker:: puppet-lint
 
@@ -670,7 +670,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: python-pylint
 
-      Check syntax and lint with `Pylint <http://pylint.org/>`_.
+      Check syntax and lint with `Pylint <https://pylint.org/>`_.
 
       .. option:: flycheck-pylint-use-symbolic-id
 
@@ -711,7 +711,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: rpm-rpmlint
 
-      Lint with `rpmlint <http://sourceforge.net/projects/rpmlint/>`_.
+      Lint with `rpmlint <https://sourceforge.net/projects/rpmlint/>`_.
 
 .. supported-language:: reStructuredText
 
@@ -769,7 +769,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
    Flycheck checks Rust_ with `rust-cargo` in Cargo projects, or `rust`
    otherwise.
 
-   .. _Rust: http://www.rust-lang.org/
+   .. _Rust: https://www.rust-lang.org/
 
    .. syntax-checker:: rust-cargo
                        rust

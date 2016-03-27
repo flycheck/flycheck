@@ -5506,7 +5506,7 @@ more information about GNAT warnings."
   "An Ada syntax checker using GNAT.
 
 Uses the GNAT compiler from GCC.  See URL
-`https://gcc.gnu.org/onlinedocs/gnat_ugn_unw/'."
+`http://libre.adacore.com/tools/gnat-gpl-edition/'."
   :command ("gnatmake"
             "-c"                        ; Just compile, don't bind
             "-f"                        ; Force re-compilation
@@ -5980,7 +5980,7 @@ See URL `http://cppcheck.sourceforge.net/'."
 (flycheck-define-checker cfengine
   "A CFEngine syntax checker using cf-promises.
 
-See URL `http://cfengine.com/'."
+See URL `https://cfengine.com/'."
   :command ("cf-promises" "-Wall" "-f"
             ;; We must stay in the same directory to resolve @include
             source-inplace)
@@ -6005,7 +6005,7 @@ with `~'."
 (flycheck-define-checker chef-foodcritic
   "A Chef cookbooks syntax checker using Foodcritic.
 
-See URL `http://acrmp.github.io/foodcritic/'."
+See URL `http://www.foodcritic.io'."
   ;; Use `source-inplace' to allow resource discovery with relative paths.
   ;; foodcritic interprets these as relative to the source file, so we need to
   ;; stay within the source tree.  See
@@ -6067,7 +6067,7 @@ See URL `http://www.coffeelint.org/'."
 (flycheck-define-checker coq
   "A Coq syntax checker using the Coq compiler.
 
-See URL `http://coq.inria.fr/'."
+See URL `https://coq.inria.fr/'."
   ;; We use coqtop in batch mode, because coqc is picky about file names.
   :command ("coqtop" "-batch" "-load-vernac-source" source)
   :error-patterns
@@ -6526,7 +6526,7 @@ Uses GCC's Fortran compiler gfortran.  See URL
 (flycheck-define-checker go-gofmt
   "A Go syntax and style checker using the gofmt utility.
 
-See URL `http://golang.org/cmd/gofmt/'."
+See URL `https://golang.org/cmd/gofmt/'."
   :command ("gofmt")
   :standard-input t
   :error-patterns
@@ -6583,8 +6583,8 @@ This option requires Go 1.6 or newer."
 (flycheck-define-checker go-vet
   "A Go syntax checker using the `go tool vet' command.
 
-See URL `http://golang.org/cmd/go/' and URL
-`http://godoc.org/golang.org/x/tools/cmd/vet'."
+See URL `https://golang.org/cmd/go/' and URL
+`https://godoc.org/golang.org/x/tools/cmd/vet'."
   :command ("go" "tool" "vet" "-all"
             (option "-printfuncs=" flycheck-go-vet-print-functions concat
                     flycheck-option-comma-separated-list)
@@ -6631,7 +6631,7 @@ Each item is a string with a tag to be given to `go build'."
 (flycheck-define-checker go-build
   "A Go syntax and type checker using the `go build' command.
 
-See URL `http://golang.org/cmd/go'."
+See URL `https://golang.org/cmd/go'."
   ;; We need to use `temporary-file-name' instead of `null-device',
   ;; because Go can't write to the null device.
   ;; See https://github.com/golang/go/issues/4851
@@ -6884,7 +6884,7 @@ See URL `https://github.com/commercialhaskell/stack'."
 (flycheck-define-checker haskell-ghc
   "A Haskell syntax and type checker using ghc.
 
-See URL `http://www.haskell.org/ghc/'."
+See URL `https://www.haskell.org/ghc/'."
   :command ("ghc" "-Wall" "-no-link"
             "-outputdir" (eval (flycheck-haskell-ghc-cache-directory))
             (option-flag "-no-user-package-db"
@@ -7001,7 +7001,7 @@ See URL `https://github.com/ndmitchell/hlint'."
 (flycheck-define-checker html-tidy
   "A HTML syntax and style checker using Tidy.
 
-See URL `https://github.com/w3c/tidy-html5'."
+See URL `https://github.com/htacg/tidy-html5'."
   :command ("tidy" (config-file "-config" flycheck-tidyrc) "-e" "-q")
   :standard-input t
   :error-patterns
@@ -7284,7 +7284,7 @@ Relative paths are relative to the file being checked."
 (flycheck-define-checker perl
   "A Perl syntax checker using the Perl interpreter.
 
-See URL `http://www.perl.org'."
+See URL `https://www.perl.org'."
   :command ("perl" "-w" "-c"
             (option-list "-I" flycheck-perl-include-path))
   :standard-input t
@@ -7355,7 +7355,7 @@ See URL `http://php.net/manual/en/features.commandline.php'."
 Set default rule sets and custom rule set files.
 
 See section \"Using multiple rule sets\" in the PHP Mess Detector
-manual at URL `http://phpmd.org/documentation/index.html'."
+manual at URL `https://phpmd.org/documentation/index.html'."
   :type '(repeat :tag "rule sets"
                  (string :tag "A filename or rule set"))
   :safe #'flycheck-string-list-p)
@@ -7363,7 +7363,7 @@ manual at URL `http://phpmd.org/documentation/index.html'."
 (flycheck-define-checker php-phpmd
   "A PHP style checker using PHP Mess Detector.
 
-See URL `http://phpmd.org/'."
+See URL `https://phpmd.org/'."
   :command ("phpmd" source "xml"
             (eval (flycheck-option-comma-separated-list
                    flycheck-phpmd-rulesets)))
@@ -7419,7 +7419,7 @@ See https://github.com/processing/processing/wiki/Command-Line"
 (flycheck-define-checker puppet-parser
   "A Puppet DSL syntax checker using puppet's own parser.
 
-See URL `http://puppetlabs.com/'."
+See URL `https://puppetlabs.com/'."
   :command ("puppet" "parser" "validate" "--color=false")
   :standard-input t
   :error-patterns
@@ -7559,7 +7559,7 @@ Update the error level of ERR according to
   "A Python syntax and style checker using Flake8.
 
 Requires Flake8 2.0 or newer. See URL
-`https://pypi.python.org/pypi/flake8'."
+`https://flake8.readthedocs.org/'."
   :command ("flake8"
             "--format=default"
             (config-file "--config" flycheck-flake8rc)
@@ -7600,7 +7600,7 @@ which should be used and reported to the user."
 
 This syntax checker requires Pylint 1.0 or newer.
 
-See URL `http://www.pylint.org/'."
+See URL `https://www.pylint.org/'."
   ;; -r n disables the scoring report
   :command ("pylint" "-r" "n"
             "--msg-template"
@@ -7750,7 +7750,7 @@ See URL `https://racket-lang.org/'."
 (flycheck-define-checker rpm-rpmlint
   "A RPM SPEC file syntax checker using rpmlint.
 
-See URL `http://sourceforge.net/projects/rpmlint/'."
+See URL `https://sourceforge.net/projects/rpmlint/'."
   :command ("rpmlint" source)
   :error-patterns
   ((error line-start
@@ -8023,7 +8023,7 @@ This syntax checker needs Cargo with rustc subcommand."
 
 This syntax checker needs Rust 1.0.0 alpha or newer.
 
-See URL `http://www.rust-lang.org'."
+See URL `https://www.rust-lang.org'."
   :command ("rustc" "-Z" "no-trans"
             (option "--crate-type" flycheck-rust-crate-type)
             (option-flag "--test" flycheck-rust-check-tests)
