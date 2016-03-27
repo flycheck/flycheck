@@ -27,8 +27,10 @@ from sphinx.directives import ObjectDescription
 def make_target(prefix, name):
     return 'el-{prefix}-{name}'.format(prefix=prefix, name=name)
 
+
 class Cell(namedtuple('Cell', 'objtype docname')):
     pass
+
 
 class EmacsLispSymbol(ObjectDescription):
     pass
@@ -85,15 +87,15 @@ class EmacsLispDomain(Domain):
 
     object_types = {
         # Types for user-facing options and commands
-        'command': ObjType('command', 'command'),
-        'option': ObjType('option', 'option'),
-        'face': ObjType('face', 'face'),
+        'command': ObjType('command', 'command', cell='command'),
+        'option': ObjType('option', 'option', cell='variable'),
+        'face': ObjType('face', 'face', cell='face'),
         # Object types for code
-        'function': ObjType('function', 'function'),
-        'macro': ObjType('macro', 'macro'),
-        'variable': ObjType('variable', 'variable'),
-        'constant': ObjType('constant', 'constant'),
-        'hook': ObjType('hook', 'hook'),
+        'function': ObjType('function', 'function', cell='function'),
+        'macro': ObjType('macro', 'macro', cell='function'),
+        'variable': ObjType('variable', 'variable', cell='variable'),
+        'constant': ObjType('constant', 'constant', cell='variable'),
+        'hook': ObjType('hook', 'hook', cell='variable'),
     }
     directives = {
         'option': EmacsLispVariable,
@@ -124,12 +126,24 @@ class EmacsLispDomain(Domain):
                     del symbol[cell]
 
     def resolve_xref(self, env, fromdocname, builder,
-                     typ, target, node, contnode):
-        pass
+                     objtype, target, node, contnode):
+        cell = self.object_types[objtype].attrs['cell']
+        symbol = self.data['obarray'].get(target, {})
+        if cell not in symbol:
+            return None
+
+        todocname = symbol[cell].docname
+        return make_refnode(builder, fromdocname, todocname,
+                            make_target(cell, target), contnode, target)
 
     def resolve_any_xref(self, env, fromdocname, builder,
                          target, node, contnode):
-        pass
+        cells = ['command', 'function', 'variable', 'face']
+        nodes = ((cell, self.resolve_xref(env, fromdocname, builder,
+                                          cell, target, node, contnode))
+                 for cell in cells)
+        return [('el:{}'.format(cell), node) for (cell, node) in nodes
+                if node is not None]
 
     def get_objects(self):
         return []
