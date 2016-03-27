@@ -27,7 +27,12 @@ from sphinx.util.nodes import set_source_info, process_index_entry
 sys.path.append(str(Path(__file__).parent))
 
 needs_sphinx = '1.3'
-extensions = ['sphinx.ext.extlinks', 'sphinx.ext.todo', 'elisp']
+extensions = [
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.extlinks',
+    'sphinx.ext.todo',
+    'elisp'
+]
 
 # Project metadata
 project = 'Flycheck'
@@ -93,6 +98,11 @@ html_favicon = '_static/favicon.png'
 
 # Ignore localhost when checking links
 linkcheck_ignore = [r'http://localhost:\d+/?']
+
+# Cross-reference remote Sphinx sites
+intersphinx_mapping = {
+   'python': ('https://docs.python.org/3.5', None)
+}
 
 extlinks = {
     'gh': ('https://github.com/%s', ''),
