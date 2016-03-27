@@ -19,6 +19,7 @@ import re
 import sys
 from pathlib import Path
 from docutils import nodes
+from docutils.statemachine import ViewList
 from docutils.parsers.rst import Directive, directives
 from sphinx import addnodes
 from sphinx.util.nodes import set_source_info, process_index_entry
@@ -141,6 +142,31 @@ class SupportedLanguage(Directive):
         return [indexnode, targetnode, sectionnode]
 
 
+class SyntaxCheckerConfigurationFile(Directive):
+
+    required_arguments = 1
+    final_argument_whitespace = True
+
+    def run(self):
+        option = self.arguments[0]
+
+        wrapper = nodes.paragraph()
+        docname = self.state.document.settings.env.docname
+        template = ViewList("""\
+.. index:: single: Configuration file; {0}
+
+.. el:option:: {0}
+
+   Configuration file for this syntax checker.  See
+   :ref:`flycheck-config-files`.
+""".format(option).splitlines(), docname)
+        self.state.nested_parse(template, self.content_offset, wrapper)
+
+        return wrapper.children.copy()
+
+
 def setup(app):
     app.add_object_type('syntax-checker', 'checker', 'pair: %s; Syntax checker')
     app.add_directive('supported-language', SupportedLanguage)
+    app.add_directive('syntax-checker-config-file',
+                      SyntaxCheckerConfigurationFile)
