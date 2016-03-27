@@ -137,7 +137,7 @@ class SupportedLanguage(Directive):
         sectionnode += messages
         self.state.document.note_implicit_target(sectionnode, sectionnode)
 
-        self.state.nested_parse(self.content, 0, sectionnode)
+        self.state.nested_parse(self.content, self.content_offset, sectionnode)
 
         return [indexnode, targetnode, sectionnode]
 
