@@ -91,8 +91,14 @@ The Contributor Guide explains how to contribute to Flycheck.
 Indices and Tables
 ==================
 
+* :ref:`flycheck-languages`
 * :ref:`genindex`
 * :ref:`search`
+
+.. toctree::
+   :hidden:
+
+   languages
 
 Licensing
 =========
