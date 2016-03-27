@@ -52,8 +52,7 @@ master_doc = 'index'
 
 # Build settings
 exclude_patterns = ['_build']
-# TODO: Choose a default role
-#default_role = None
+default_role = 'any'
 primary_domain = 'el'
 
 # The name of the Pygments (syntax highlighting) style to use.
