@@ -1,6 +1,6 @@
-=========
- Support
-=========
+==============
+ Getting help
+==============
 
 Please ask questions about Flycheck on `Stack Exchange`_ or in our `Gitter
 chat`_.  We try to answer all questions as fast and as precise as possible.
