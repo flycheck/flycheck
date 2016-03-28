@@ -17,6 +17,7 @@
 
 import re
 import sys
+import os
 from pathlib import Path
 from docutils import nodes
 from docutils.statemachine import ViewList
@@ -25,6 +26,8 @@ from sphinx import addnodes
 from sphinx.util.nodes import set_source_info, process_index_entry
 
 sys.path.append(str(Path(__file__).parent))
+
+ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'
 
 needs_sphinx = '1.3'
 extensions = [
@@ -78,6 +81,9 @@ html_theme_options = {
     'github_user': 'flycheck',
     'github_repo': 'flycheck',
     'github_banner': True,
+    # Google Analytics ID for our documentation.  On ReadTheDocs it's set via
+    # the Admin interface so we'll skip it here.
+    'analytics_id': 'UA-71100672-2' if not ON_RTD else None,
 }
 html_sidebars = {
     '**': [
