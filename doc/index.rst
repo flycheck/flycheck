@@ -64,6 +64,14 @@ Meanwhile you can read a simple HTML version of the old manual at
 
 .. todo:: Port the Texinfo manual
 
+The Developer Guide
+===================
+
+The Developer Guide shows how to write syntax checkers for Flycheck and how to
+extend Flycheck.
+
+.. todo:: Port the extending section from the Texinfo manual
+
 The Community Guide
 ===================
 
