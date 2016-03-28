@@ -80,12 +80,6 @@ html_theme_options = {
     'github_banner': True,
 }
 html_sidebars = {
-    'index': [
-        'about.html',
-        'localtoc.html',
-        'relations.html',
-        'searchbox.html',
-    ],
     '**': [
         'about.html',
         'navigation.html',
