@@ -64,3 +64,4 @@ Additional languages and syntax checkers
 .. _Ledger: http://ledger-cli.org/
 .. _Mercury language: http://mercurylang.org/
 .. _Cadence IES/irun: http://www.cadence.com/products/fv/enterprise_simulator/pages/default.aspx
+.. _Pyflakes: https://github.com/pyflakes/pyflakes

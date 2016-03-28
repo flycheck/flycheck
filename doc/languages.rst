@@ -648,7 +648,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
    .. seealso::
 
       The extension :gh:`flycheck-pyflakes <Wilfred/flycheck-pyflakes>` adds a
-      syntax checker using `Pyflakes <https://pypi.python.org/pypi/pyflakes>`_.
+      syntax checker using `Pyflakes <https://github.com/pyflakes/pyflakes>`_.
 
    .. syntax-checker:: python-flake8
 
