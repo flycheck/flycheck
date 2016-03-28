@@ -97,17 +97,17 @@
                                                  :filename "foo.h")
                           (flycheck-error-new-at 8 5 'error "xx was not declared in this scope"
                                                  :filename "foo.cpp"))))
-    (expect
-     (flycheck-fold-include-levels errors "In file included from")
-     :to-be-equal-flycheck-errors
-     (list (flycheck-error-new-at 1 0 'error "In include foo.h"
-                                  :filename "foo.cpp")
-           (flycheck-error-new-at 6 11 'error "b is not a member of hi"
-                                  :filename "foo.cpp")
-           (flycheck-error-new-at 5 20 'note "in definition of macro CHECK"
-                                  :filename "foo.h")
-           (flycheck-error-new-at 8 5 'error "xx was not declared in this scope"
-                                  :filename "foo.cpp"))))))
+        (expect
+         (flycheck-fold-include-levels errors "In file included from")
+         :to-be-equal-flycheck-errors
+         (list (flycheck-error-new-at 1 0 'error "In include foo.h"
+                                      :filename "foo.cpp")
+               (flycheck-error-new-at 6 11 'error "b is not a member of hi"
+                                      :filename "foo.cpp")
+               (flycheck-error-new-at 5 20 'note "in definition of macro CHECK"
+                                      :filename "foo.h")
+               (flycheck-error-new-at 8 5 'error "xx was not declared in this scope"
+                                      :filename "foo.cpp"))))))
 
   (describe "flycheck-collapse-error-message-whitespace"
     (it "collapses all whitespace in error messages"
