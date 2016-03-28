@@ -24,7 +24,7 @@ indicators.
 Try out
 =======
 
-Flycheck needs GNU Emacs 24.1 or newer, and works best on Unix systems.
+Flycheck needs GNU Emacs 24.3 or newer, and works best on Unix systems.
 **Windows users**, please be aware that Flycheck does not support Windows
 officially, although it should mostly work fine on Windows.  See :ref:`Windows
 support <flycheck-windows-support>` and watch out for `known Windows
