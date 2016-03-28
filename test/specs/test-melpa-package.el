@@ -51,27 +51,32 @@ version."
 (describe "MELPA package"
   (let* ((directory (make-temp-file "flycheck-test-package" 'directory))
          (filename (expand-file-name "flycheck.tar" directory))
+         (travis-p (getenv "TRAVIS"))
          version
          entries)
 
     (before-all
-      (with-demoted-errors "Failed to obtain Flycheck package: %S"
-        (setq version (flycheck/get-melpa-version))
+      (unless travis-p
+        (with-demoted-errors "Failed to obtain Flycheck package: %S"
+          (setq version (flycheck/get-melpa-version))
 
-        (when version
-          (let* ((name (format "flycheck-%s" version))
-                 (url (format "http://melpa.org/packages/%s.tar" name)))
-            (with-timeout (5)
-              (url-copy-file url filename)))
+          (when version
+            (let* ((name (format "flycheck-%s" version))
+                   (url (format "http://melpa.org/packages/%s.tar" name)))
+              (with-timeout (5)
+                (url-copy-file url filename)))
 
-          (when (file-exists-p filename)
-            (setq entries (seq-map (lambda (entry)
-                                     (replace-regexp-in-string
-                                      (rx bos (1+ (not (any "/"))) "/")
-                                      "" entry))
-                                  (process-lines "tar" "-tf" filename)))))))
+            (when (file-exists-p filename)
+              (setq entries (seq-map (lambda (entry)
+                                       (replace-regexp-in-string
+                                        (rx bos (1+ (not (any "/"))) "/")
+                                        "" entry))
+                                     (process-lines "tar" "-tf" filename))))))))
 
     (before-each
+      (assume (not travis-p)
+              (concat "Don't test package on Travis CI. "
+                      "Let's not spoil MELPA download stats."))
       (assume version "Flycheck MELPA version not found")
       (assume entries "Could not download and parse Flycheck package"))
 
