@@ -81,10 +81,6 @@ version."
     (it "contains flycheck"
       (expect entries :to-contain "flycheck.el"))
 
-    (it "contains flycheck info manual"
-      (expect entries :to-contain "flycheck.info")
-      (expect entries :to-contain "dir"))
-
     (it "contains flycheck-buttercup"
       (expect entries :to-contain "flycheck-buttercup.el"))
 
