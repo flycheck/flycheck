@@ -7,8 +7,14 @@ the moderation guidelines for the Flycheck community. [GH-819]
 Flycheck also provides a `Gitter channel`_ now for questions and discussions
 about development. [GH-820]
 
+The native Texinfo manual is again replaced with a Sphinx_ based documentation.
+We hope that this change makes the manual easier to edit and to maintain and
+more welcoming for new contributors.  The downside is that we can not longer
+include a Info manual in Flycheck’s MELPA packages.
+
 .. _Code of Conduct: http://www.flycheck.org/en/latest/community/conduct.html
 .. _Gitter channel: https://gitter.im/flycheck/flycheck
+.. _Sphinx: http://sphinx-doc.org
 
 - **Breaking changes**:
 
@@ -561,8 +567,6 @@ about development. [GH-820]
     [GH-298]
   - Do not visit the file to check in ``emacs-lisp`` and
     ``emacs-lisp-checkdoc`` to avoid unintended side effects [GH-319]
-
-.. _Sphinx: http://sphinx-doc.org
 
 0.16 (Jan 11, 2014)
 -------------------
