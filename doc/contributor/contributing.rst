@@ -89,7 +89,9 @@ Run ``make help`` to see a list of all available targets.  Some common ones are:
 - ``make init`` initialises the project by installing local Emacs Lisp
   dependencies.
 - ``make compile`` compiles Flycheck and its libraries to byte code.
-- ``make specs`` runs all Buttercup_ specs for Flycheck.
+- ``make specs`` runs all Buttercup_ specs for Flycheck.  Set :makevar:`PATTERN`
+  to run only specs matching a specific regular expression, e.g. ``make
+  PATTERN='^Mode Line' specs`` to run only tests for the mode line.
 - ``make test`` runs all ERT unit tests for Flycheck.  We are phasing ERT out in
   favour of Buttercup; no new ERT unit tests will be added and this target will
   eventually be removed.
