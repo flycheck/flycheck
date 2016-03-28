@@ -21,6 +21,7 @@ import os
 from pathlib import Path
 from docutils import nodes
 from docutils.statemachine import ViewList
+from docutils.transforms import Transform
 from docutils.parsers.rst import Directive, directives
 from sphinx import addnodes
 from sphinx.util.nodes import set_source_info, process_index_entry
@@ -181,8 +182,56 @@ class SyntaxCheckerConfigurationFile(Directive):
         return wrapper.children.copy()
 
 
+class IssueReferences(Transform):
+
+    ISSUE_PATTERN = re.compile(r'\[GH-(\d+)\]')
+    ISSUE_URL_TEMPLATE = 'https://github.com/flycheck/flycheck/issues/{}'
+
+    default_priority = 999
+
+    def apply(self):
+        docname = self.document.settings.env.docname
+        if docname != 'changes':
+            # Only transform issue references in changelo
+            return
+
+        for node in self.document.traverse(nodes.Text):
+            parent = node.parent
+            new_nodes = []
+            last_issue_ref_end = 0
+            text = str(node)
+            for match in self.ISSUE_PATTERN.finditer(text):
+                # Extract the text between the last issue reference and the
+                # current issue reference and put it into a new text node
+                head = text[last_issue_ref_end:match.start()]
+                if head:
+                    new_nodes.append(nodes.Text(head))
+                # Adjust the position of the last issue reference in the
+                # text
+                last_issue_ref_end = match.end()
+                # Extract the issue text and the issue numer
+                issuetext = match.group(0)
+                issue_id = match.group(1)
+                # Turn the issue into a proper reference
+                refnode = nodes.reference()
+                refnode['refuri'] = self.ISSUE_URL_TEMPLATE.format(issue_id)
+                refnode.append(nodes.inline(
+                    issuetext, issuetext, classes=['xref', 'issue']))
+                new_nodes.append(refnode)
+
+            # No issue references were found, move on to the next node
+            if not new_nodes:
+                continue
+            # Extract the remaining text after the last issue reference
+            tail = text[last_issue_ref_end:]
+            if tail:
+                new_nodes.append(nodes.Text(tail))
+            parent.replace(node, new_nodes)
+
+
 def setup(app):
     app.add_object_type('syntax-checker', 'checker', 'pair: %s; Syntax checker')
     app.add_directive('supported-language', SupportedLanguage)
     app.add_directive('syntax-checker-config-file',
                       SyntaxCheckerConfigurationFile)
+    app.add_transform(IssueReferences)
