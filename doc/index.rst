@@ -21,8 +21,8 @@ Many :ref:`3rd party extensions <flycheck-extensions>` provide new syntax
 checkers and other features like alternative error displays or mode line
 indicators.
 
-Very quick start
-================
+Try out
+=======
 
 Flycheck needs GNU Emacs 24.1 or newer, and works best on Unix systems.
 **Windows users**, please be aware that Flycheck does not support Windows
@@ -30,8 +30,9 @@ officially, although it should mostly work fine on Windows.  See :ref:`Windows
 support <flycheck-windows-support>` and watch out for `known Windows
 issues`_!
 
-Install some :ref:`syntax checker tools <flycheck-languages>` and type the
-following in your ``*scratch*`` buffer and run ``M-x eval-buffer``:
+To try Flycheck in your Emacs session install some :ref:`syntax checker tools
+<flycheck-languages>` and type the following in your ``*scratch*`` buffer and
+run ``M-x eval-buffer``:
 
 .. code-block:: cl
 
@@ -44,9 +45,9 @@ following in your ``*scratch*`` buffer and run ``M-x eval-buffer``:
 
    (global-flycheck-mode)
 
-For a more gentle introduction read the :ref:`Installation
-<flycheck-installation>` instructions and go through :ref:`Quickstart
-<flycheck-quickstart>` guide.
+For a permanent installation of Flycheck follow the :ref:`Installation
+<flycheck-installation>` instructions.  For a gentle introduction into Flycheck
+features go through :ref:`Quickstart <flycheck-quickstart>` guide.
 
 .. _`known windows issues`: https://github.com/flycheck/flycheck/labels/B-Windows%20only
 
