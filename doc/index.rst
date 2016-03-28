@@ -70,7 +70,6 @@ The Community Guide provides information about Flycheck’s ecosystem and
 community.
 
 .. toctree::
-   :maxdepth: 1
 
    community/conduct
    community/extensions
@@ -83,7 +82,6 @@ The Contributor Guide
 The Contributor Guide explains how to contribute to Flycheck.
 
 .. toctree::
-   :maxdepth: 2
 
    contributor/contributing
    contributor/maintaining
