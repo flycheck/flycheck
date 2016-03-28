@@ -1,0 +1,6 @@
+# Sphinx
+Sphinx>=1.3
+# Automatically build documentation on changes
+sphinx-autobuild
+# Syntax highlighting
+Pygments>=2.1

@@ -1,8 +1,18 @@
-# The Flycheck Code of Conduct #
+.. _flycheck-conduct:
 
-## Conduct ##
+==============================
+ The Flycheck Code of Conduct
+==============================
 
-**Contact**: [Any moderator][moderators]
+Our Code of Conduct defines the social norms and policies within
+Flycheck’s community.  Whenever you interact with Flycheck or Flycheck
+developers, whether in our official channels or privately, you’re expected to
+follow this Code of Conduct.
+
+Conduct
+=======
+
+**Contact**: :ref:`Any moderator <flycheck-moderators>`
 
 * We are committed to providing a friendly, safe and welcoming environment for
   all, regardless of level of experience, gender, gender identity and
@@ -21,22 +31,22 @@
   want to experiment with, make a fork and see how it works.
 * We will exclude you from interaction if you insult, demean or harass
   anyone. That is not welcome behaviour. We interpret the term "harassment" as
-  including the definition in the
-  [Citizen Code of Conduct](http://citizencodeofconduct.org/); if you have any
+  including the definition in the `Citizen Code of Conduct`_; if you have any
   lack of clarity about what might be included in that concept, please read
   their definition. In particular, we don't tolerate behavior that excludes
   people in socially marginalized groups.
 * Private harassment is also unacceptable. No matter who you are, if you feel
   you have been or are being harassed or made uncomfortable by a community
-  member, please contact one of the [Moderators][] immediately. Whether you're a
-  regular contributor or a newcomer, we care about making this community a safe
-  place for you and we've got your back.
+  member, please contact a :ref:`moderator <flycheck-moderators>`
+  immediately. Whether you're a regular contributor or a newcomer, we care about
+  making this community a safe place for you and we've got your back.
 * Likewise any spamming, trolling, flaming, baiting or other attention-stealing
   behaviour is not welcome.
 
-[moderators]: http://www.flycheck.org/people.html#moderators
+.. _Citizen Code of Conduct: http://citizencodeofconduct.org/
 
-## Moderation ##
+Moderation
+==========
 
 These are the policies for upholding our community's standards of conduct in our
 communication channels, most notably in Flycheck’s Github organisation and in
@@ -78,7 +88,9 @@ intent and forgive as long as you earn their trust.
 
 ---
 
-Adapted from the [Rust Code of Conduct](https://www.rust-lang.org/conduct.html).
+Adapted from the `Rust Code of Conduct`_.
 
-Copyright (c) 2015 Sebastian Wiesner and Flycheck contributors <br />
-Copyright (c) 2014 The Rust Project Developers
+| Copyright (c) 2015 Sebastian Wiesner and Flycheck contributors
+| Copyright (c) 2014 The Rust Project Developers
+
+.. _Rust Code of Conduct: https://www.rust-lang.org/conduct.html

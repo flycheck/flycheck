@@ -1,4 +1,4 @@
-;;; test-manual.el --- Flycheck Specs: Manual -*- lexical-binding: t; -*-
+;;; test-documentation.el --- Flycheck Specs: Documentation -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013-2016 Sebastian Wiesner and Flycheck contributors
 
@@ -21,15 +21,16 @@
 
 ;;; Commentary:
 
-;; Specs for our Texinfo manual.
+;; Specs for our documentation
 
 ;;; Code:
 
 (require 'flycheck-buttercup)
 (require 'cl-lib)
 (require 'seq)
+(require 'dash)
 
-(defun flycheck/collect-matches-from-file (pattern filename)
+(defun flycheck/collect-matches (pattern filename)
   "Collect all instances matching PATTERN from FILENAME."
   (let ((matches))
     (with-temp-buffer
@@ -37,37 +38,26 @@
       (goto-char (point-min))
       (while (re-search-forward pattern nil 'noerror)
         (let ((match (intern (match-string 1))))
-          (cl-pushnew match matches))))
+          (cl-pushnew match matches))
+        (-when-let (match (match-string 2))
+          (cl-pushnew (intern match) matches))))
     matches))
 
-(describe "Manual"
+(defconst flycheck/checker-re
+  (rx bol "   .. syntax-checker:: " (group (1+ nonl)) "\n"
+      (? "                       " (group (1+ nonl)) eol)))
+
+(defconst flycheck/option-re
+  (rx bol "      .. option:: " (group (1+ nonl)) "\n"
+      (? "                  " (group (1+ nonl)) eol)))
+
+(describe "Documentation"
   (let* ((source-dir (locate-dominating-file default-directory "Cask"))
-         (languages (expand-file-name "doc/languages.texi" source-dir))
-         (list-of-languages (expand-file-name "doc/languages-list.texi"
-                                              source-dir)))
-
-    (describe "List of languages"
-      (let ((all-languages (flycheck/collect-matches-from-file
-                            (rx "@flyclanguage{"
-                                (group (1+ (not (any "}")))) "}")
-                            languages))
-            (listed-languages (flycheck/collect-matches-from-file
-                               (rx "@item @ref{"
-                                   (group (1+ (not (any "}")))) "}")
-                               list-of-languages)))
-
-        (it "lists all languages"
-          (expect (seq-difference all-languages listed-languages)
-                  :to-equal nil))
-
-        (it "doesn't list unknown languages"
-          (expect (seq-difference listed-languages all-languages)
-                  :to-equal nil))))
+         (languages (expand-file-name "doc/languages.rst" source-dir)))
 
     (describe "Syntax checkers"
-      (let ((checkers (flycheck/collect-matches-from-file
-                       (rx "@flyc{" (group (1+ (not (any "}")))) "}")
-                       languages)))
+      (let ((checkers (flycheck/collect-matches flycheck/checker-re
+                                                languages)))
 
         (it "documents all syntax checkers"
           (expect (seq-difference flycheck-checkers checkers)
@@ -78,11 +68,8 @@
                   :to-equal nil)))
 
       (describe "Options"
-        (let ((documented-options (flycheck/collect-matches-from-file
-                                   (rx line-start "@flycoption"
-                                       (opt "x") (1+ space)
-                                       (group (1+ not-newline)) line-end)
-                                   languages))
+        (let ((documented-options (flycheck/collect-matches flycheck/option-re
+                                                            languages))
               (all-options (seq-mapcat (lambda (c)
                                          (flycheck-checker-get c 'option-vars))
                                        flycheck-checkers)))
@@ -96,9 +83,9 @@
                     :to-equal nil))))
 
       (describe "Configuration files"
-        (let ((documented-file-vars (flycheck/collect-matches-from-file
-                                     (rx line-start "@flycconfigfile{"
-                                         (group (1+ (not (any "," "}")))) ",")
+        (let ((documented-file-vars (flycheck/collect-matches
+                                     (rx ".. syntax-checker-config-file:: "
+                                         (group (1+ nonl)) eol)
                                      languages))
               (all-file-vars (delq nil
                                    (seq-map (lambda (c)
@@ -113,4 +100,4 @@
             (expect (seq-difference documented-file-vars all-file-vars)
                     :to-equal nil)))))))
 
-;;; test-manual.el ends here
+;;; test-documentation.el ends here

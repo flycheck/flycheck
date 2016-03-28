@@ -1,12 +1,12 @@
-# We should have emacs-lisp but that triggers a warning, so use what Travis uses
-# anyway if you specify an invalid language.
-language: ruby
+# Use Python 3.5 for our tooling
+language: python
+python:
+  - "3.5"
 sudo: false
-rvm:
-  - 2.3.0
 cache:
-  directories:
-    - .cask/
+  - pip
+  - directories:
+      - .cask/
 env:
   global:
     # Speeds up installation of nokogiri
@@ -24,13 +24,10 @@ before_install:
   - if [[ -n $EMACS_VERSION ]]; then make -f emacs-travis.mk install_emacs; fi
   - if [[ -n $EMACS_VERSION ]]; then make -f emacs-travis.mk install_cask; fi
   - if [[ -n $EMACS_VERSION ]]; then emacs --version; fi
-  # Install Texinfo and htmlproof when building the manual
-  - if [[ $BUILD_MANUAL == yes ]]; then make -f emacs-travis.mk install_texinfo; fi
-  - if [[ $BUILD_MANUAL == yes ]]; then texi2any --version; fi
   # Install helper tools
-  - gem install travis rubocop mdl
-  # Install tools for doc deployment
-  - if [[ $BUILD_MANUAL == yes ]]; then gem install git html-proofer; fi
+  - if [[ -n $EMACS_VERSION ]]; then gem install travis rubocop mdl; fi
+  # Install requirements of documentation
+  - if [[ $BUILD_MANUAL == yes ]]; then pip install -r doc/requirements.txt; fi
 install:
   - if [[ -n $EMACS_VERSION ]]; then rake init:all; fi
 script:
@@ -38,8 +35,8 @@ script:
   - if [[ -n $EMACS_VERSION ]]; then rake verify:all compile:all[$COMPILEARGS]; fi
   - if [[ -n $EMACS_VERSION ]]; then rake test:unit:all; fi
   # Build and deploy the manual
-  - if [[ $BUILD_MANUAL == yes ]]; then rake doc:info; fi
-  - if [[ $BUILD_MANUAL == yes ]]; then rake deploy:travis:manual; fi
+  - if [[ $BUILD_MANUAL == yes ]]; then make -C doc SPHINXOPTS=-n html; fi
+  - if [[ $BUILD_MANUAL == yes ]]; then make -C doc linkcheck; fi
 notifications:
   webhooks:
     urls:
