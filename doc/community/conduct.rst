@@ -1,8 +1,8 @@
 .. _flycheck-conduct:
 
-==============================
- The Flycheck Code of Conduct
-==============================
+==========================
+ Flycheck Code of Conduct
+==========================
 
 Our Code of Conduct defines the social norms and policies within
 Flycheck’s community.  Whenever you interact with Flycheck or Flycheck
