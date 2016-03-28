@@ -42,7 +42,7 @@ help:
 	@echo "To build the documentation you need $(SPHINXBUILD)."
 	@echo "For *-auto targets you also need $(SPHINXAUTOBUILD)."
 	@echo ""
-	@echo "Available tools:"
+	@echo "Available programs:"
 	@echo "  $(SPHINXBUILD): $(if $(HAVE_SPHINXBUILD),yes,no)"
 	@echo "  $(SPHINXAUTOBUILD): $(if $(HAVE_SPHINXAUTOBUILD),yes,no)"
 	@echo ""

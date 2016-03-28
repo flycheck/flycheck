@@ -15,7 +15,7 @@ env:
     # Run unit tests against oldest supported stable, latest stable, and trunk
     - EMACS_VERSION=24.3
     - EMACS_VERSION=24.5
-    - EMACS_VERSION=snapshot COMPILEFLAGS='error-on-warn'
+    - EMACS_VERSION=snapshot
     # A special job to build the manual
     - BUILD_MANUAL=yes
 before_install:
@@ -24,16 +24,15 @@ before_install:
   - if [[ -n $EMACS_VERSION ]]; then make -f emacs-travis.mk install_emacs; fi
   - if [[ -n $EMACS_VERSION ]]; then make -f emacs-travis.mk install_cask; fi
   - if [[ -n $EMACS_VERSION ]]; then emacs --version; fi
-  # Install helper tools
-  - if [[ -n $EMACS_VERSION ]]; then gem install rubocop mdl; fi
   # Install requirements of documentation
   - if [[ $BUILD_MANUAL == yes ]]; then pip install -r doc/requirements.txt; fi
 install:
-  - if [[ -n $EMACS_VERSION ]]; then rake init:all; fi
+  - if [[ -n $EMACS_VERSION ]]; then make init; fi
 script:
   # Lint, compile, test
-  - if [[ -n $EMACS_VERSION ]]; then rake verify:all compile:all[$COMPILEARGS]; fi
-  - if [[ -n $EMACS_VERSION ]]; then rake test:unit:all; fi
+  - if [[ -n $EMACS_VERSION ]]; then make compile; fi
+  - if [[ -n $EMACS_VERSION ]]; then make unit; fi
+  - if [[ -n $EMACS_VERSION ]]; then make specs; fi
   # Build and deploy the manual
   - if [[ $BUILD_MANUAL == yes ]]; then make -C doc SPHINXOPTS=-n html; fi
   - if [[ $BUILD_MANUAL == yes ]]; then make -C doc linkcheck; fi
@@ -50,4 +49,4 @@ matrix:
   allow_failures:
     # Allow the snapshot build to fail, because Emacs snapshot sometimes fails
     # to build
-    - env: EMACS_VERSION=snapshot COMPILEFLAGS='error-on-warn'
+    - env: EMACS_VERSION=snapshot

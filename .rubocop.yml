@@ -1,7 +1,0 @@
-# Relax length and complexity requirements for methods
-Metrics/MethodLength:
-  Max: 25
-Metrics/ModuleLength:
-  Max: 150
-Metrics/AbcSize:
-  Max: 20

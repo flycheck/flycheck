@@ -82,54 +82,23 @@ the community.
 The Build system
 ================
 
-While Emacs Lisp per se doesn’t need to be compiled, Flycheck’s build system
-provides many tasks to verify sources, run tests, generate documentation and
-more. It’s a good little helper when working on Flycheck, allowing you to verify
-and test your changes before submitting them.
+Flycheck provides a :file:`Makefile` with some convenient targets to compile and
+test Flycheck.  The Makefile requires Cask_, the Emacs Lisp dependency manager.
+Run ``make help`` to see a list of all available targets.  Some common ones are:
 
-Our build system uses Rake_ which is part of Ruby_ and included in all Ruby
-installations. Any Ruby 2.x version will suffice. On OS X, Rake is preinstalled,
-on Linux systems it’s easy to install through the package manager, e.g. ``sudo
-apt-get install rake`` on Ubuntu.
+- ``make init`` initialises the project by installing local Emacs Lisp
+  dependencies.
+- ``make compile`` compiles Flycheck and its libraries to byte code.
+- ``make specs`` runs all Buttercup_ specs for Flycheck.
+- ``make test`` runs all ERT unit tests for Flycheck.  We are phasing ERT out in
+  favour of Buttercup; no new ERT unit tests will be added and this target will
+  eventually be removed.
+- ``make integ`` runs all integration tests for Flycheck syntax checkers.  These
+  tests are very dependent on the checker programs and their versions; expect
+  failures when running this target.
 
-Additionally the build system requires Cask_, the Emacs Lisp dependency manager.
-
-The build system is defined in ``Rakefile``, with additional code in
-``admin/``. Run ``rake help`` for a quick help about the Build System.
-
-.. _Rake: https://github.com/ruby/rake
-.. _Ruby: https://www.ruby-lang.org/
 .. _Cask: http://cask.readthedocs.org/
-
-Optional tools
---------------
-
-The build system makes use of additional tools for some tasks:
-
-- ``generate:logo``: `Inkscape <https://inkscape.org/>`__ and `ImageMagick <http://www.imagemagick.org/>`__
-- ``verify:travis``: `Travis Client <https://github.com/travis-ci/travis.rb>`__
-- ``verify:ruby``: `Rubocop <https://github.com/bbatsov/rubocop>`__
-- ``verify:markdown``: `markdownlint <https://github.com/mivok/markdownlint>`__
-
-We recommend that you install all tools for ``verify:*`` with ``gem install
-travis rubocop mdl`` if you intend to work on Flycheck over a longer time.
-
-Useful tasks
-------------
-
-Some common targets are:
-
--  ``rake init``: Initialise the project, by installing Emacs Lisp
-   dependencies locally.
--  ``rake check:language[LANGUAGE]`` runs all tests for the given
-   ``LANGUAGE``, e.g. ``rake check:language[JavaScript]``. Maintainers
-   will use this task when testing pull requests that make changes to
-   Flycheck’s support for a language, such as adding a new pull request.
--  ``rake check:fast`` verifies all sources, byte-compiles Flycheck, and
-   runs all unit tests. You need the corresponding tools from the
-   previous section. This task runs on Travis CI on all contributions so
-   it’s a good idea to run this task before submitting your
-   contributions, albeit not a requirement, as Travis CI runs it anyway.
+.. _Buttercup: https://github.com/jorgenschaefer/emacs-buttercup
 
 Pull requests
 =============
@@ -141,10 +110,11 @@ Flycheck. Github provides great documentation about `Pull Requests`_.
 
 Please make your pull requests against the ``master`` branch.
 
-Use ``rake check:fast`` to test your pull request locally. When making
-changes to syntax checkers of a specific language, it’s also a good idea
-to run ``'rake check:language[LANGUAGE]'`` to run all tests for the
-given ``LANGUAGE``.
+Use ``make specs test`` to test your pull request locally. When making changes
+to syntax checkers of a specific language, it’s also a good idea to run ``make
+integ`` and check whether the tests for the particular language still work.  You
+may safely ignore failures for other languages; a successful ``make integ`` is
+by no means mandatory for pull requests!
 
 All pull requests are reviewed by a :ref:`maintainer <flycheck-maintainers>`.
 Feel free to mention individual developers (e.g. ``@lunaryorn``) to request a

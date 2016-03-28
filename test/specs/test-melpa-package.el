@@ -1,4 +1,4 @@
-;;; test-package.el --- Flycheck Specs: Package      -*- lexical-binding: t; -*-
+;;; test-melpa-package.el --- Flycheck Specs: MELPA Package -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013-2016 Sebastian Wiesner and Flycheck contributors
 
@@ -21,7 +21,7 @@
 
 ;;; Commentary:
 
-;; Specs for Flycheck packaging, notably MELPA.
+;; Specs for Flycheck MELPA packaging.
 
 ;;; Code:
 
@@ -91,4 +91,4 @@ version."
     (it "contains flycheck-ert"
       (expect entries :to-contain "flycheck-ert.el"))))
 
-;;; test-package.el ends here
+;;; test-melpa-package.el ends here
