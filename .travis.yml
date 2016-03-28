@@ -25,7 +25,7 @@ before_install:
   - if [[ -n $EMACS_VERSION ]]; then make -f emacs-travis.mk install_cask; fi
   - if [[ -n $EMACS_VERSION ]]; then emacs --version; fi
   # Install helper tools
-  - if [[ -n $EMACS_VERSION ]]; then gem install travis rubocop mdl; fi
+  - if [[ -n $EMACS_VERSION ]]; then gem install rubocop mdl; fi
   # Install requirements of documentation
   - if [[ $BUILD_MANUAL == yes ]]; then pip install -r doc/requirements.txt; fi
 install:

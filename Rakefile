@@ -78,11 +78,6 @@ namespace :init do
 end
 
 namespace :verify do
-  desc 'Verify Travis configuration'
-  task :travis do
-    sh('travis', 'lint', '--exit-code', '--no-interactive')
-  end
-
   desc 'Verify Markdown documents'
   task :markdown do
     sh('mdl', '--style', 'admin/markdown_style', *MARKDOWN_SOURCES)
@@ -99,7 +94,7 @@ namespace :verify do
   end
 
   desc 'Verify all source files'
-  task all: [:travis, :markdown, :ruby, :elisp]
+  task all: [:markdown, :ruby, :elisp]
 end
 
 namespace :generate do
@@ -219,7 +214,6 @@ Emacs and Cask (http://cask.readthedocs.org/).  Optionally, also:
 
 - Rubocop (https://github.com/bbatsov/rubocop)
 - Markdownlint (https://github.com/mivok/markdownlint)
-- Travis Client (https://github.com/travis-ci/travis.rb)
 
 # Task list
 
