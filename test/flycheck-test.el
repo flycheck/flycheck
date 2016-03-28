@@ -121,7 +121,6 @@ and extension, as in `file-name-base'."
 (flycheck-test-def-indent-test "flycheck-ert.el")
 (flycheck-test-def-indent-test "test/run.el")
 (flycheck-test-def-indent-test "test/flycheck-test.el")
-(flycheck-test-def-indent-test "admin/run-checkdoc.el")
 
 
 ;;; Customization
