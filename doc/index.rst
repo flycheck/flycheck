@@ -99,6 +99,7 @@ Indices and Tables
 ==================
 
 * :ref:`flycheck-languages`
+* :doc:`changes`
 * :ref:`genindex`
 * :ref:`search`
 
@@ -106,6 +107,7 @@ Indices and Tables
    :hidden:
 
    languages
+   changes
 
 .. todo:: Add changelog
 
