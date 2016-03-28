@@ -57,11 +57,33 @@
 
 (describe "Code style"
   (dolist (source (flycheck/find-all-elisp-files))
-    (describe (format "File: %s" (file-relative-name source))
+    (describe (format "File %s" (file-relative-name source))
       (it "has proper documentation format"
         (assume (version<= "25" emacs-version)
                 "Our documentation style matches Emacs 25 only")
         (expect (flycheck/checkstyle source)
-                :to-equal "")))))
+                :to-equal ""))
+
+      ;; Don't test the test init file because loading it has it has
+      ;; side-effects, and we need to load files in order to figure out their
+      ;; indentation rules.
+      (unless (equal (file-relative-name source) "test/init.el")
+        (it "is properly indented"
+          (assume (version<= "25" emacs-version)
+                  "Our indentation targets Emacs 25 only")
+          (with-temp-buffer
+            (insert-file-contents source)
+            (set-buffer-modified-p nil)
+            ;; Enable `emacs-lisp-mode' to bring indentation rules and syntax
+            ;; table in, but ignore all mode hooks
+            (delay-mode-hooks (emacs-lisp-mode))
+            (setq delayed-mode-hooks nil)
+            ;; Load the library to make local definitions available
+            (load source 'noerror 'nomessage 'nosuffix)
+            ;; Now re-indent.  If it's modified afters, indentation wasn't
+            ;; right.
+            (let ((inhibit-message t))  ; `indent-region' is chatty, silence it
+              (indent-region (point-min) (point-max)))
+            (expect (buffer-modified-p) :not :to-be-truthy)))))))
 
 ;;; test-code-style.el ends here

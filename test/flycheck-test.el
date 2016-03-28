@@ -96,33 +96,6 @@
                               "`\\1'" msg 'fixedcase)))
 
 
-;;; Code style
-(defmacro flycheck-test-def-indent-test (filename)
-  "Define a test case for the indentation of FILENAME.
-
-FILENAME is relative to the source directory.  The test case is
-named `flycheck-code-style/FILENAME-BASE/indentation', where
-FILENAME-BASE is FILENAME without leading directory components
-and extension, as in `file-name-base'."
-  (let ((testname (intern (format "flycheck-code-style/%s/indentation"
-                                  (file-name-base filename)))))
-    `(ert-deftest ,testname ()
-       :tags '(style)
-       (skip-unless (version<= "24.5" emacs-version))
-       (flycheck-ert-with-file-buffer
-           (expand-file-name ,filename
-                             flycheck-test-source-directory)
-         (set-auto-mode)
-         (shut-up
-           (indent-region (point-min) (point-max)))
-         (should-not (buffer-modified-p))))))
-
-(flycheck-test-def-indent-test "flycheck.el")
-(flycheck-test-def-indent-test "flycheck-ert.el")
-(flycheck-test-def-indent-test "test/run.el")
-(flycheck-test-def-indent-test "test/flycheck-test.el")
-
-
 ;;; Customization
 (ert-deftest flycheck-checkers/there-are-registered-checkers ()
   :tags '(customization)
