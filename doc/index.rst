@@ -100,6 +100,8 @@ Indices and Tables
 
    languages
 
+.. todo:: Add changelog
+
 Licensing
 =========
 
