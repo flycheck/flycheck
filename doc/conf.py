@@ -81,6 +81,7 @@ html_theme_options = {
     'github_user': 'flycheck',
     'github_repo': 'flycheck',
     'github_banner': True,
+    'travis_button': True,
     # Google Analytics ID for our documentation.  On ReadTheDocs it's set via
     # the Admin interface so we'll skip it here.
     'analytics_id': 'UA-71100672-2' if not ON_RTD else None,
