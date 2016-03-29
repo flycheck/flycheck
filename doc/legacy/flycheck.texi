@@ -124,69 +124,6 @@ A simple API to add support for new languages and tools
 A “doesn't get in your way guarantee”
 @end itemize
 
-@node Installation
-@chapter Installation
-
-@section Prerequisites
-
-@cindex prerequisites
-@cindex operating system
-
-Flycheck needs GNU Emacs 24.  Older releases of GNU Emacs or other
-flavours of Emacs (e.g. XEmacs, Aquamacs, etc.) are @emph{not}
-supported.
-
-Flycheck works best on Unix-like operating systems.  It is extensively
-tested on Linux and OS X.
-
-@cindex Windows
-
-@anchor{windows-support}@b{Flycheck does not explicitly support
-Windows}, but tries to maintain Windows compatibility and should
-generally work fine on Windows, too.  However, we can neither answer
-questions about Windows nor fix bugs that only occur on Windows without
-the help of active Windows users.  Please watch out for
-@ghref{flycheck/flycheck/labels/B-Windows%20only, known Windows issues}!
-
-@section Syntax checking tools
-
-Flycheck does @emph{not} check buffers itself.  It relies on
-@emph{external} programs to check buffers, which need to be installed
-separately.  @xref{Supported languages}, for a list of required programs
-for each language supported by Flycheck.
-
-Most of these programs are available in the package repositories of
-Linux distributions, or with the standard package managers of specific
-programming languages (e.g. Rubygems, NPM, Cabal, etc.)
-
-@section Installation
-
-@cindex installation
-
-Install Flycheck via Emacs' built-in package manager, from the
-@uref{http://stable.melpa.org, MELPA Stable} repository:
-
-@example
-M-x package-install RET flycheck
-@end example
-
-Alternatively, you may use the @uref{http://melpa.org, MELPA}
-repository, which hosts the most recent development version.  Note that
-these repositories are not included in GNU Emacs by default.
-
-You need to enable them explicitly, by adding the following to your init
-file:
-
-@lisp
-(require 'package)
-(add-to-list 'package-archives
-             '("melpa" . "http://melpa.org/packages/") t)
-(package-initialize)
-@end lisp
-
-If you don't know where your init file is take a look at the value of
-the variable @code{user-init-file} with @kbd{C-h v user-init-file}.
-
 @node Quickstart
 @chapter Quickstart
 @section Install and enable Flycheck

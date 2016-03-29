@@ -64,6 +64,10 @@ Meanwhile you can read a simple HTML version of the old manual at
 
 .. todo:: Port the Texinfo manual
 
+.. toctree::
+
+   user/installation
+
 The Developer Guide
 ===================
 
