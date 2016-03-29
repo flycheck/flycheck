@@ -43,9 +43,9 @@ Additional languages and syntax checkers
   :program:`checkbashisms` which is part of `Debian devscripts`_ and checks for
   common Bash constructs in POSIX shell scripts.
 * :gh:`clojure-emacs/squiggly-clojure` provides syntax checking for Clojure.
-* :gh:`flycheck/flycheck-d-unittest` (*official*) adds a Flycheck checker to run
-  unit tests for D programs on the fly.
-* :gh:`flycheck/flycheck-google-cpplint` (*official*) adds a syntax checker for
+* :flyc:`flycheck-d-unittest` (*official*) adds a Flycheck checker to run unit
+  tests for D programs on the fly.
+* :flyc:`flycheck-google-cpplint` (*official*) adds a syntax checker for
   Google's C++ style checker.
 * :gh:`cmarqu/flycheck-hdl-irun` adds a syntax checker for hardware description
   languages (HDLs) supported by `Cadence IES/irun`_.
@@ -55,7 +55,7 @@ Additional languages and syntax checkers
   tool.
 * :flyc:`flycheck-mercury` (*official*) adds a Flycheck syntax checker for the
   `Mercury language`_.
-* :gh:`flycheck/flycheck-ocaml` (*official*) adds a syntax checker for OCaml.
+* :flyc:`flycheck-ocaml` (*official*) adds a syntax checker for OCaml.
 * :gh:`purcell/flycheck-package` checks emacs lisp package source code for
   common problems.
 * :gh:`Wilfred/flycheck-pyflakes` adds a Python syntax checker using Pyflakes.
