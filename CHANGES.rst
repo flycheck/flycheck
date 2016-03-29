@@ -710,7 +710,7 @@ include a Info manual in Flycheck’s MELPA packages.
     [GH-259]
   - Fix Cppcheck parsing with the built-in Emacs XML parser [GH-263]
 
-.. _Grizzl: https://github.com/d11wtq/grizzl
+.. _Grizzl: https://github.com/grizzl/grizzl
 
 0.14.1 (Aug 16, 2013)
 ---------------------
@@ -926,7 +926,7 @@ include a Info manual in Flycheck’s MELPA packages.
   -  Use a hopefully more reliable way to parse output of PHP
      CodeSniffer [GH-118]
 
-.. _Google This: https://github.com/Bruce-Connor/emacs-google-this
+.. _Google This: https://github.com/Malabarba/emacs-google-this
 
 0.9 (Apr 13, 2013)
 ------------------
@@ -1088,7 +1088,7 @@ include a Info manual in Flycheck’s MELPA packages.
   - Replace underlying Flymake API with a custom syntax checking implementation
     [GH-15]
 
-.. _flymake-cursor: http://www.emacswiki.org/emacs/FlymakeCursor
+.. _flymake-cursor: https://www.emacswiki.org/emacs/FlymakeCursor
 
 0.4 (Nov 21, 2012)
 ------------------
