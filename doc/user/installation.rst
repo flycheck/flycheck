@@ -81,7 +81,7 @@ missing packages from package archive when Emacs starts.
 
 Add the following form to your init file to setup Flycheck with `use-package`:
 
-.. code-block::
+.. code-block:: elisp
 
    (use-package flycheck
      :ensure t
