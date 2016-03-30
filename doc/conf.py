@@ -96,7 +96,7 @@ html_sidebars = {
     ]
 }
 html_static_path = ['_static']
-html_favicon = '_static/favicon.png'
+html_favicon = '_static/favicon.ico'
 
 # Ignore localhost when checking links
 linkcheck_ignore = [r'http://localhost:\d+/?']
