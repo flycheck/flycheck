@@ -62,9 +62,9 @@ your :term:`init file`:
                  '("melpa" . "https://melpa.org/packages/") t)
    (package-initialize)
 
-This adds MELPA; for MELPA Stable replace `https://melpa.org` with
-`https://stable.melpa.org`.  If you do not know where your init file is inspect
-the value of `user-init-file` with :kbd:`C-h v user-init-file`.
+This adds MELPA; for MELPA Stable replace ``https://melpa.org`` with
+``https://stable.melpa.org``.  If you do not know where your init file is
+inspect the value of `user-init-file` with :kbd:`C-h v user-init-file`.
 
 Once the repository is set up you can install Flycheck from Emacs' package menu
 at :kbd:`M-x list-packages`, or directly with :kbd:`M-x package-install RET
