@@ -28,13 +28,13 @@ PATTERN = .*
 EMACSBATCH = $(CASK) exec $(EMACS) -Q --batch -L . $(EMACSOPTS)
 
 # Program availability
-HAVE_CASK := $(shell command -v $(CASK))
+HAVE_CASK := $(shell sh -c "command -v $(CASK)")
 ifndef HAVE_CASK
 $(warning "$(CASK) is not available.  Please run make help")
 endif
-HAVE_INKSCAPE := $(shell command -v $(INKSCAPE))
-HAVE_CONVERT := $(shell command -v $(CONVERT))
-HAVE_OPTIPNG := $(shell command -v $(OPTIPNG))
+HAVE_INKSCAPE := $(shell sh -c "command -v $(INKSCAPE)")
+HAVE_CONVERT := $(shell sh -c "command -v $(CONVERT)")
+HAVE_OPTIPNG := $(shell sh -c "command -v $(OPTIPNG)")
 
 # Export Emacs to goals, mainly for CASK
 CASK_EMACS = $(EMACS)

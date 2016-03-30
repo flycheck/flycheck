@@ -24,12 +24,12 @@ ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(SPHINXOPTS) .
 
 .DEFAULT_GOAL := help
 
-HAVE_SPHINXBUILD := $(shell command -v $(SPHINXBUILD))
+HAVE_SPHINXBUILD := $(shell sh -c "command -v $(SPHINXBUILD)")
 ifndef HAVE_SPHINXBUILD
 $(warning "$(SPHINXBUILD) is not available.  Please run make help.")
 endif
-HAVE_SPHINXAUTOBUILD := $(shell command -v $(SPHINXAUTOBUILD))
-HAVE_PIP := $(shell command -v $(PIP))
+HAVE_SPHINXAUTOBUILD := $(shell sh -c "command -v $(SPHINXAUTOBUILD)")
+HAVE_PIP := $(shell sh -c "command -v $(PIP)")
 
 .PHONY: help
 help:
