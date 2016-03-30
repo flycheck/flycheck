@@ -1,8 +1,8 @@
 .. _flycheck-extensions:
 
-=====================================
- Recommended packages and extensions
-=====================================
+========================
+ Recommended extensions
+========================
 
 The Emacs community has produced a number of extensions to Flycheck.  This page
 lists all that we know of and can safely recommend to our users.  *Official*
