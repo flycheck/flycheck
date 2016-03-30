@@ -7,9 +7,8 @@
 Prerequisites
 =============
 
-Flycheck needs GNU Emacs 24.  Older releases of GNU Emacs or other
-flavours of Emacs (e.g. XEmacs, Aquamacs, etc.) are @emph{not}
-supported.
+Flycheck needs GNU Emacs 24.  Older releases of GNU Emacs or other flavours of
+Emacs (e.g. XEmacs, Aquamacs, etc.) are *not* supported.
 
 Flycheck works best on Unix-like operating systems.  It is extensively
 tested on Linux and OS X.
