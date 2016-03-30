@@ -67,6 +67,7 @@ Meanwhile you can read a simple HTML version of the old manual at
 .. toctree::
 
    user/installation
+   user/quickstart
 
 The Developer Guide
 ===================
