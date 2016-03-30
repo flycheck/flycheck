@@ -53,7 +53,7 @@ releases use MELPA Stable instead.
 
 Unfortunately neither of these repositories are available in Emacs by default.
 You must explicitly add them to `package-archives`, by adding the following to
-your init file:
+your :term:`init file`:
 
 .. code-block:: elisp
 
