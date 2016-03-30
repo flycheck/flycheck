@@ -127,29 +127,27 @@ Flycheck is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-See :doc:`license/gpl` for a copy of the GNU General Public License.
+See :ref:`flycheck-gpl` for a copy of the GNU General Public License.
 
 Permission is granted to copy, distribute and/or modify the Flycheck
 documentation under the terms of the GNU Free Documentation License, Version 1.3
 or any later version published by the Free Software Foundation; with no
 Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.  See
-:doc:`license/fdl` for a copy of the GNU Free Documentation License.
+:ref:`flycheck-fdl` for a copy of the GNU Free Documentation License.
 
 Alternatively, you may copy, distribute and/or modify the Flycheck documentation
 under the terms of the Creative Commons Attribution-ShareAlike 4.0 International
-Public License.  See :doc:`license/cc-by-sa` for a copy of the license.
+Public License.  See :ref:`flycheck-cc-by-sa` for a copy of the license.
 
 Permission is granted to copy, distribute and/or modify the Flycheck logo under
 the terms of the Creative Commons Attribution-ShareAlike 4.0 International
-Public License.  See :doc:`license/cc-by-sa` for a copy of the license.
+Public License.  See :ref:`flycheck-cc-by-sa` for a copy of the license.
 
 .. toctree::
    :hidden:
-   :maxdepth: 1
+   :maxdepth: 2
 
-   license/gpl
-   license/fdl
-   license/cc-by-sa
+   licenses
 
 .. FIXME: Remove when the old manual is ported completed
 
