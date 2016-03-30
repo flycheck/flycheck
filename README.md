@@ -28,7 +28,7 @@ line indicators.
 
 [COPYING]: https://github.com/flycheck/flycheck/blob/master/COPYING
 [manual]: http://www.flycheck.org/manual/latest/index.html
-[logo]: https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/logo.png
+[logo]: https://raw.githubusercontent.com/flycheck/flycheck/master/doc/_static/logo.png
 [checking]: http://www.flycheck.org/manual/latest/Checking-buffers.html#Checking-buffers
 [languages]: http://www.flycheck.org/manual/latest/Supported-languages.html#Supported-languages
 [definitions]: http://flycheck.org/manual/latest/Defining-syntax-checkers.html#Defining-syntax-checkers
