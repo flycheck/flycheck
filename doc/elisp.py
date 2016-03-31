@@ -55,7 +55,8 @@ class EmacsLispSymbol(ObjectDescription):
     within the domain data.
 
     Deriving classes must have a ``cell`` attribute which refers to the cell
-    the documentation goes in.
+    the documentation goes in, and a ``label`` attribute which provides a
+    human-readable name for what is documented, used in the index entry.
 
     """
 
@@ -78,7 +79,7 @@ class EmacsLispSymbol(ObjectDescription):
             symbol[self.cell] = Cell(self.objtype, self.env.docname)
 
         index_text = '{name}; {label}'.format(
-             name=name, label=self.objtype_label)
+             name=name, label=self.label)
         self.indexnode['entries'].append(
             ('pair', index_text, target_name, ''))
 
@@ -99,7 +100,7 @@ class EmacsLispVariable(EmacsLispSymbol):
     }
 
     @property
-    def objtype_label(self):
+    def label(self):
         """The label for the documented object type."""
         return self.label_for_objtype[self.objtype]
 
@@ -113,7 +114,7 @@ class EmacsLispVariable(EmacsLispSymbol):
         ``signature``.
 
         """
-        label = self.objtype_label + ' '
+        label = self.label + ' '
         signode += addnodes.desc_annotation(label, label)
         signode += addnodes.desc_name(signature, signature)
         return signature
