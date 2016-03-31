@@ -61,7 +61,7 @@ tooltip.
 Press :kbd:`C-c ! l` to pop up a list of all errors in the current buffer.  This
 list automatically updates itself when you fix errors or introduce new ones, and
 follows the currently selected buffer.  If the error list is selected you can
-type `n` and `p` to move up and down between errors and jump to their
+type :kbd:`n` and :kbd:`p` to move up and down between errors and jump to their
 corresponding location in the buffer.
 
 More features
