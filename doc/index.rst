@@ -116,8 +116,6 @@ Indices and Tables
    glossary
    changes
 
-.. todo:: Add changelog
-
 Licensing
 =========
 
