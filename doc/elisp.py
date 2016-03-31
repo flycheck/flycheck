@@ -33,11 +33,33 @@ class Cell(namedtuple('Cell', 'objtype docname')):
 
 
 class EmacsLispSymbol(ObjectDescription):
-    pass
+    def add_target_and_index(self, name, sig, signode):
+        target_name = make_target(self.cell, name)
+        if target_name not in self.state.document.ids:
+            signode['names'].append(target_name)
+            signode['ids'].append(target_name)
+            signode['first'] = (not self.names)
+            self.state.document.note_explicit_target(signode)
+
+            obarray = self.env.domaindata['el']['obarray']
+            symbol = obarray.setdefault(name, {})
+            if self.cell in symbol:
+                self.state_machine.reporter.warning(
+                    'duplicate description of %s %s, ' % (self.objtype, name) +
+                    'other instance in ' +
+                    self.env.doc2path(symbol[self.cell].docname),
+                    line=self.lineno)
+            symbol[self.cell] = Cell(self.objtype, self.env.docname)
+
+        index_text = '{name}; {label}'.format(
+             name=name, label=self.objtype_label)
+        self.indexnode['entries'].append(
+            ('pair', index_text, target_name, ''))
 
 
 class EmacsLispVariable(EmacsLispSymbol):
 
+    cell = 'variable'
     label_for_objtype = {
         'option': 'User option',
         'hook': 'Hook',
@@ -52,31 +74,8 @@ class EmacsLispVariable(EmacsLispSymbol):
     def handle_signature(self, signature, signode):
         label = self.objtype_label + ' '
         signode += addnodes.desc_annotation(label, label)
-        signode += addnodes.desc_addname(signature, signature)
+        signode += addnodes.desc_name(signature, signature)
         return signature
-
-    def add_target_and_index(self, name, sig, signode):
-        target_name = make_target('variable', name)
-        if target_name not in self.state.document.ids:
-            signode['names'].append(target_name)
-            signode['ids'].append(target_name)
-            signode['first'] = (not self.names)
-            self.state.document.note_explicit_target(signode)
-
-            obarray = self.env.domaindata['el']['obarray']
-            symbol = obarray.setdefault(name, {})
-            if 'variable' in symbol:
-                self.state_machine.reporter.warning(
-                    'duplicate description of %s %s, ' % (self.objtype, name) +
-                    'other instance in ' +
-                    self.env.doc2path(symbol['variable'].docname),
-                    line=self.lineno)
-            symbol['variable'] = Cell(self.objtype, self.env.docname)
-
-        index_text = '{name}; {label}'.format(
-             name=name, label=self.objtype_label)
-        self.indexnode['entries'].append(
-            ('pair', index_text, target_name, ''))
 
 
 class EmacsLispDomain(Domain):
