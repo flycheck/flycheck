@@ -25,12 +25,15 @@ Now you need to install syntax checking programs for the languages you'd like to
 use Flycheck with.  The :ref:`list of supported languages <flycheck-languages>`
 tells you which languages Flycheck supports and what programs it uses.
 
-For instance, you can install Pylint_ for Python and eslint_ for Javascript:
+For instance, you can install Pylint_ for Python and ESLint_ for Javascript:
 
 .. code-block:: shell
 
    $ pip install pylint
    $ npm install eslint
+
+.. _Pylint: https://pylint.org
+.. _ESLint: http://eslint.org
 
 Check syntax in a buffer
 ========================
