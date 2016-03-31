@@ -24,15 +24,41 @@ from sphinx.util.nodes import make_refnode
 from sphinx.directives import ObjectDescription
 
 
-def make_target(prefix, name):
-    return 'el-{prefix}-{name}'.format(prefix=prefix, name=name)
+def make_target(cell, name):
+    """Create a target name from ``cell`` and ``name``.
+
+    ``cell`` is the name of a symbol cell, and ``name`` is a symbol name, both
+    as strings.
+
+    The target names are used as cross-reference targets for Sphinx.
+
+    """
+    return 'el-{cell}-{name}'.format(cell=cell, name=name)
 
 
 class Cell(namedtuple('Cell', 'objtype docname')):
+    """A cell in a symbol.
+
+    A cell holds the object type and the document name of the description for
+    the cell.
+
+    Cell objects are used within symbol entries in the domain data.
+
+    """
     pass
 
 
 class EmacsLispSymbol(ObjectDescription):
+    """An abstract base class for directives documenting symbols.
+
+    Provide target and index generation and registration of documented symbols
+    within the domain data.
+
+    Deriving classes must have a ``cell`` attribute which refers to the cell
+    the documentation goes in.
+
+    """
+
     def add_target_and_index(self, name, sig, signode):
         target_name = make_target(self.cell, name)
         if target_name not in self.state.document.ids:
@@ -58,6 +84,11 @@ class EmacsLispSymbol(ObjectDescription):
 
 
 class EmacsLispVariable(EmacsLispSymbol):
+    """A directive to document the variable cell of symbols.
+
+    Provides support for user options, hooks, variables and constants.
+
+    """
 
     cell = 'variable'
     label_for_objtype = {
@@ -69,9 +100,19 @@ class EmacsLispVariable(EmacsLispSymbol):
 
     @property
     def objtype_label(self):
+        """The label for the documented object type."""
         return self.label_for_objtype[self.objtype]
 
     def handle_signature(self, signature, signode):
+        """Create nodes in ``signode`` for the ``signature``.
+
+        ``signode`` is a docutils node to which to add the nodes, and
+        ``signature`` is the symbol name.
+
+        Add the object type label before the symbol name and return
+        ``signature``.
+
+        """
         label = self.objtype_label + ' '
         signode += addnodes.desc_annotation(label, label)
         signode += addnodes.desc_name(signature, signature)
@@ -119,6 +160,7 @@ class EmacsLispDomain(Domain):
     }
 
     def clear_doc(self, docname):
+        """Clear all cells documented ``docname``."""
         for symbol in self.data['obarray'].values():
             for cell in list(symbol.keys()):
                 if docname == symbol[cell].docname:
@@ -126,6 +168,7 @@ class EmacsLispDomain(Domain):
 
     def resolve_xref(self, env, fromdocname, builder,
                      objtype, target, node, contnode):
+        """Resolve a cross reference to ``target``."""
         cell = self.object_types[objtype].attrs['cell']
         symbol = self.data['obarray'].get(target, {})
         if cell not in symbol:
@@ -137,6 +180,7 @@ class EmacsLispDomain(Domain):
 
     def resolve_any_xref(self, env, fromdocname, builder,
                          target, node, contnode):
+        """Return all possible cross references for ``target``."""
         cells = ['command', 'function', 'variable', 'face']
         nodes = ((cell, self.resolve_xref(env, fromdocname, builder,
                                           cell, target, node, contnode))
@@ -145,6 +189,7 @@ class EmacsLispDomain(Domain):
                 if node is not None]
 
     def get_objects(self):
+        """Get all documented symbols for use in the search index."""
         for name, symbol in self.data['obarray'].items():
             for cellname, cell in symbol.items():
                 yield (name, name, cell.objtype, cell.docname,
