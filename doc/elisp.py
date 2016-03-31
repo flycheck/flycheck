@@ -62,7 +62,7 @@ class EmacsLispVariable(EmacsLispSymbol):
     cell = 'variable'
     label_for_objtype = {
         'option': 'User option',
-        'hook': 'Hook',
+        'constant': 'Constant',
         'variable': 'Variable',
         'hook': 'Hook'
     }
