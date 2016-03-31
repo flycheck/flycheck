@@ -87,7 +87,7 @@ community.
 
    community/conduct
    community/extensions
-   community/getting-help
+   community/get-help
    community/people
 
 The Contributor Guide
