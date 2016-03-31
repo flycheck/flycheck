@@ -4,11 +4,15 @@
  Quickstart
 ============
 
+This page gives a quick introduction into Flycheck and an overview of its most
+important features.  Before you start here please make sure that Flycheck is
+:ref:`installed <flycheck-installation>`.
+
 Enable Flycheck
 ===============
 
-After :ref:`installing <flycheck-installation>` Flycheck add the following code
-to your :term:`init file` to permanently enable syntax checking with Flycheck:
+Now add the following code to your :term:`init file` to permanently enable
+syntax checking with Flycheck:
 
 .. code-block:: elisp
 
