@@ -385,6 +385,8 @@ resource directory."
       (ert-skip (format "%S missing" mode)))
     (flycheck-ert-with-resource-buffer resource-file
       (funcall mode)
+      ;; Load file-local variables, because some tests depend on them
+      (hack-local-variables)
       ;; Configure config file locating for unit tests
       (let ((process-hook-called 0))
         (add-hook 'flycheck-process-error-functions

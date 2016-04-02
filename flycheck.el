@@ -6368,11 +6368,33 @@ See Info Node `(elisp)Byte Compilation'."
             (princ (buffer-substring-no-properties (point-min) (point-max)))
             (kill-buffer)))))))
 
+(defconst flycheck-emacs-lisp-checkdoc-variables
+  '(checkdoc-symbol-words
+    checkdoc-arguments-in-order-flag
+    checkdoc-force-history-flag
+    checkdoc-permit-comma-termination-flag
+    checkdoc-force-docstrings-flag
+    checkdoc-package-keywords-flag
+    checkdoc-spellcheck-documentation-flag
+    checkdoc-verb-check-experimental-flag
+    checkdoc-max-keyref-before-warn)
+  "Variables inherited by the checkdoc subprocess.")
+
+(defun flycheck-emacs-lisp-checkdoc-variables-form ()
+  "Make a sexp to pass relevant variables to a checkdoc subprocess.
+
+Variables are taken from `flycheck-emacs-lisp-checkdoc-variables'."
+  `(progn
+     ,@(seq-map (lambda (opt) `(setq-default ,opt ,(symbol-value opt)))
+                (seq-filter #'boundp flycheck-emacs-lisp-checkdoc-variables))))
+
 (flycheck-define-checker emacs-lisp-checkdoc
   "An Emacs Lisp style checker using CheckDoc.
 
 The checker runs `checkdoc-current-buffer'."
   :command ("emacs" (eval flycheck-emacs-args)
+            "--eval" (eval (flycheck-sexp-to-string
+                            (flycheck-emacs-lisp-checkdoc-variables-form)))
             "--eval" (eval flycheck-emacs-lisp-checkdoc-form)
             "--" source)
   :error-patterns
