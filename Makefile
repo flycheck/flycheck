@@ -65,7 +65,7 @@ ifndef HAVE_INKSCAPE
 	$(error "$(INKSCAPE) not available.  Please run make help.")
 endif
 ifndef HAVE_OPTIPNG
-	$(error "$(INKSCAPE) not available.  Please run make help.")
+	$(error "$(OPTIPNG) not available.  Please run make help.")
 endif
 	$(CONVERT) $< -trim -background white -bordercolor white \
 		-border 5 $@
