@@ -10,6 +10,10 @@
   - Go with ``go-unconvert`` [GH-905]
   - Markdown with ``mdl`` [GH-839] [GH-916]
 
+- Improvements:
+
+  - Pass checkdoc settings from Emacs to `emacs-lisp-checkdoc` [GH-741] [GH-937]
+
 - Bug fixes:
 
   - Fix parsing of syntax errors in triple-quoted strings for
