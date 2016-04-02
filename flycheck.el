@@ -6790,6 +6790,14 @@ See URL `http://handlebarsjs.com/'."
 (flycheck-def-args-var flycheck-ghc-args (haskell-stack-ghc haskell-ghc)
   :package-version '(flycheck . "0.22"))
 
+(flycheck-def-option-var flycheck-ghc-stack-use-nix nil haskell-ghc
+  "Whether to enable nix support in stack.
+
+When non-nil, stack will append '--nix' flag to any call."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.25.1"))
+
 (flycheck-def-option-var flycheck-ghc-no-user-package-database nil haskell-ghc
   "Whether to disable the user package database in GHC.
 
@@ -6847,7 +6855,9 @@ Otherwise return the previously used cache directory."
   "A Haskell syntax and type checker using `stack ghc'.
 
 See URL `https://github.com/commercialhaskell/stack'."
-  :command ("stack" "ghc" "--" "-Wall" "-no-link"
+  :command ("stack"
+            (option-flag "--nix" flycheck-ghc-stack-use-nix)
+            "ghc" "--" "-Wall" "-no-link"
             "-outputdir" (eval (flycheck-haskell-ghc-cache-directory))
             (option-list "-X" flycheck-ghc-language-extensions concat)
             (option-list "-i" flycheck-ghc-search-path concat)
