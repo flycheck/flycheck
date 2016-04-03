@@ -8,7 +8,7 @@
 ;;             Clément Pit--Claudel <clement.pitclaudel@live.com>
 ;; URL: https://www.flycheck.org
 ;; Keywords: convenience, languages, tools
-;; Version: 0.26-cvs
+;; Version: 26-cvs
 ;; Package-Requires: ((dash "2.12.1") (pkg-info "0.4") (let-alist "1.0.4") (seq "1.11") (emacs "24.3"))
 
 ;; This file is not part of GNU Emacs.
@@ -630,7 +630,7 @@ function."
                  (const :tag "IDO" ido-completing-read)
                  (function :tag "Custom function"))
   :risky t
-  :package-version '(flycheck . "0.26"))
+  :package-version '(flycheck . "26"))
 
 (defcustom flycheck-temp-prefix "flycheck"
   "Prefix for temporary files created by Flycheck."
@@ -900,7 +900,7 @@ If you've customized `flycheck-mode-line' then the customized
 function must be updated to use this variable."
   :group 'flycheck
   :type 'string
-  :package-version '(flycheck . "0.26"))
+  :package-version '(flycheck . "26"))
 
 (defcustom flycheck-error-list-mode-line
   `(,(propertized-buffer-identification "%12b")
@@ -5939,7 +5939,7 @@ pass the language standard via the `-std' option."
   :type '(choice (const :tag "Default standard" nil)
                  (string :tag "Language standard"))
   :safe #'stringp
-  :package-version '(flycheck . "0.26"))
+  :package-version '(flycheck . "26"))
 (make-variable-buffer-local 'flycheck-cppcheck-language-standard)
 
 (flycheck-def-option-var flycheck-cppcheck-inconclusive nil c/c++-cppcheck
@@ -6796,7 +6796,7 @@ See URL `http://handlebarsjs.com/'."
 When non-nil, stack will append '--nix' flag to any call."
   :type 'boolean
   :safe #'booleanp
-  :package-version '(flycheck . "0.26"))
+  :package-version '(flycheck . "26"))
 
 (flycheck-def-option-var flycheck-ghc-no-user-package-database nil haskell-ghc
   "Whether to disable the user package database in GHC.
@@ -7063,7 +7063,7 @@ Refer to the jshint manual at the URL
            (const :tag "Always try to extract Javascript" always)
            (const :tag "Never try to extract Javascript" never))
   :safe #'symbolp
-  :package-version '(flycheck . "0.26"))
+  :package-version '(flycheck . "26"))
 
 (flycheck-define-checker javascript-jshint
   "A Javascript syntax and style checker using jshint.
@@ -7321,7 +7321,7 @@ the `--severity' option to Perl Critic."
 (flycheck-def-config-file-var flycheck-perlcriticrc perl-perlcritic
                               ".perlcriticrc"
   :safe #'stringp
-  :package-version '(flycheck . "0.26"))
+  :package-version '(flycheck . "26"))
 
 (flycheck-define-checker perl-perlcritic
   "A Perl syntax checker using Perl::Critic.
@@ -7455,7 +7455,7 @@ See URL `https://puppetlabs.com/'."
 (flycheck-def-config-file-var flycheck-puppet-lint-rc puppet-lint
                               ".puppet-lint.rc"
   :safe #'stringp
-  :package-version '(flycheck . "0.26"))
+  :package-version '(flycheck . "26"))
 
 (flycheck-def-option-var flycheck-puppet-lint-disabled-checks nil puppet-lint
   "Disabled checkers for `puppet-lint'.
@@ -7467,7 +7467,7 @@ string is the name of a check to disable (e.g. \"80chars\" or
 See URL `http://puppet-lint.com/checks/' for a list of all checks
 and their names."
   :type '(repeat (string :tag "Check Name"))
-  :package-version '(flycheck . "0.26"))
+  :package-version '(flycheck . "26"))
 
 (defun flycheck-puppet-lint-disabled-arg-name (check)
   "Create an argument to disable a puppetlint CHECK."

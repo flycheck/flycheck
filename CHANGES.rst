@@ -1,5 +1,5 @@
-master (in development)
------------------------
+26 (in development)
+-------------------
 
 Flycheck now has a `Code of Conduct`_ which defines the acceptable behaviour and
 the moderation guidelines for the Flycheck community. [GH-819]
@@ -11,6 +11,9 @@ The native Texinfo manual is again replaced with a Sphinx_ based documentation.
 We hope that this change makes the manual easier to edit and to maintain and
 more welcoming for new contributors.  The downside is that we can not longer
 include a Info manual in Flycheck’s MELPA packages.
+
+From this release onward Flycheck will use a single continuously increasing
+version number.  Breaking changes may occur at any point.
 
 .. _Code of Conduct: http://www.flycheck.org/en/latest/community/conduct.html
 .. _Gitter channel: https://gitter.im/flycheck/flycheck
