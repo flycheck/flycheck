@@ -75,6 +75,7 @@
   )
 
 (require 'dash)
+(require 'json)
 
 (require 'seq)                   ; Sequence functions
 (require 'subr-x nil 'no-error)  ; Additional utilities, Emacs 24.4 and upwards
@@ -218,6 +219,7 @@ attention to case differences."
     php-phpmd
     php-phpcs
     processing
+    proselint
     puppet-parser
     puppet-lint
     python-flake8
@@ -7840,6 +7842,39 @@ Requires Sphinx 1.2 or newer.  See URL `http://sphinx-doc.org'."
   :modes rst-mode
   :predicate (lambda () (and (flycheck-buffer-saved-p)
                              (flycheck-locate-sphinx-source-directory))))
+
+(defun flycheck-proselint-parse-errors (output checker buffer)
+  "Parse proselint json output errors from OUTPUT.
+
+CHECKER and BUFFER denoted the CHECKER that returned OUTPUT and
+the BUFFER that was checked respectively.
+
+See URL `http://proselint.com/' for more information about proselint."
+  (let-alist (json-read-from-string output)
+    (mapcar (lambda (err)
+              (let-alist err
+                (flycheck-error-new-at
+                 .line
+                 .column
+                 (pcase .severity
+                   (`"suggestion" 'info)
+                   (`"warning"    'warning)
+                   (`"error"      'error)
+                   ;; Default to error
+                   (_             'error))
+                 .message
+                 :id .check
+                 :buffer buffer
+                 :checker checker)))
+            .data.errors)))
+
+(flycheck-define-checker proselint
+  "Flycheck checker using Proselint.
+
+See URL `http://proselint.com/'."
+  :command ("proselint" "--json" source)
+  :error-parser flycheck-proselint-parse-errors
+  :modes (text-mode markdown-mode))
 
 (flycheck-def-config-file-var flycheck-rubocoprc ruby-rubocop ".rubocop.yml"
   :safe #'stringp)

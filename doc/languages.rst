@@ -922,6 +922,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check SQL syntax with `Sqlint <https://github.com/purcell/sqlint>`_.
 
+.. supported-language:: Text
+
+   .. syntax-checker:: proselint
+
+      Check text prose with `Proselint <http://proselint.com/>`_.
+
 .. supported-language:: TeX/LaTeX
 
    Flycheck checks TeX and LaTeX with either `tex-chktex` or `tex-lacheck`.
