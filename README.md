@@ -57,8 +57,8 @@ Install some [syntax checker tools][languages] and type the following in your
 For a more gentle introduction read the [Installation][] instructions and go
 through [Quickstart][] guide.
 
-[Installation]: http://www.flycheck.org/manual/latest/Installation.html#Installation
-[Quickstart]: http://www.flycheck.org/manual/latest/Quickstart.html#Quickstart
+[Installation]: http://www.flycheck.org/en/latest/user/installation.html
+[Quickstart]: http://www.flycheck.org/en/latest/user/quickstart.html
 [windows issues]: https://github.com/flycheck/flycheck/labels/B-Windows%20only
 [windows support]: http://www.flycheck.org/manual/latest/Installation.html#index-Windows
 
