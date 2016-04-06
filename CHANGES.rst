@@ -1,5 +1,5 @@
 26-cvs (in development)
------------------------
+=======================
 
 Flycheck now has a `Code of Conduct`_ which defines the acceptable behaviour and
 the moderation guidelines for the Flycheck community. [GH-819]
