@@ -22,16 +22,16 @@ Out of the box Flycheck supports over
 syntax checking tools, and comes with a [simple interface][definitions] to
 define new syntax checkers.
 
-Many [3rd party extensions](http://flycheck.org/extensions.html) provide
-new syntax checkers and other features like alternative error displays or mode
-line indicators.
+Many [3rd party extensions][extensions] provide new syntax checkers and other
+features like alternative error displays or mode line indicators.
 
 [COPYING]: https://github.com/flycheck/flycheck/blob/master/COPYING
-[manual]: http://www.flycheck.org/manual/latest/index.html
+[manual]: http://www.flycheck.org/en/latest/index.html#the-user-guide
 [logo]: https://raw.githubusercontent.com/flycheck/flycheck/master/doc/_static/logo.png
-[checking]: http://www.flycheck.org/manual/latest/Checking-buffers.html#Checking-buffers
-[languages]: http://www.flycheck.org/manual/latest/Supported-languages.html#Supported-languages
-[definitions]: http://flycheck.org/manual/latest/Defining-syntax-checkers.html#Defining-syntax-checkers
+[checking]: http://www.flycheck.org/en/latest/_downloads/flycheck.html#Checking-buffers
+[languages]:http://www.flycheck.org/en/latest/languages.html
+[definitions]: http://www.flycheck.org/en/latest/_downloads/flycheck.html#Defining-syntax-checkers
+[extensions]: http://www.flycheck.org/en/latest/community/extensions.html
 
 ## Quickstart ##
 
@@ -60,7 +60,7 @@ through [Quickstart][] guide.
 [Installation]: http://www.flycheck.org/en/latest/user/installation.html
 [Quickstart]: http://www.flycheck.org/en/latest/user/quickstart.html
 [windows issues]: https://github.com/flycheck/flycheck/labels/B-Windows%20only
-[windows support]: http://www.flycheck.org/manual/latest/Installation.html#index-Windows
+[windows support]: http://www.flycheck.org/en/latest/user/installation.html#windows-support
 
 ## Support & Contribution ##
 
@@ -69,12 +69,12 @@ Please ask questions about Flycheck on [Stack Exchange][sx] or in our
 possible.
 
 To report problems or bugs, please use our [issue tracker][].  Our
-[contribution guidelines][contrib] help you to create good bug reports; please
-take a look.
+[Contributor’s Guide][contrib] helps you to create good bug reports; please take
+a look.
 
 We welcome patches and pull requests that fix bugs or provide new features.
-Please read our [Contribution guidelines][contrib] for help and guidelines
-before submitting pull requests.  When making larger changes to Flycheck or
+Please read our [Contributor’s Guide][contrib] for help and guidance before
+submitting pull requests.  When making larger changes to Flycheck or
 implementing new features we recommend that you first open a separate issue or
 ask in our [Gitter channel][gitter] to discuss you intended changes.
 
@@ -84,9 +84,9 @@ to follow our [Code of Conduct][coc].
 [sx]: https://emacs.stackexchange.com/questions/tagged/flycheck
 [gitter]: https://gitter.im/flycheck/flycheck
 [Issue Tracker]: https://github.com/flycheck/flycheck/issues
-[contrib]: https://github.com/flycheck/flycheck/blob/master/CONTRIBUTING.md
+[contrib]: http://www.flycheck.org/en/latest/contributor/contributing.html
 [Waffle Board]: http://waffle.io/flycheck/flycheck
-[coc]: https://github.com/flycheck/flycheck/blob/master/CONDUCT.md
+[coc]: http://www.flycheck.org/en/latest/community/conduct.html
 
 ## License ##
 
