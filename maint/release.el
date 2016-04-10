@@ -139,7 +139,8 @@ the tested commit and PASSED is non-nil when the build passed."
   (flycheck/git-or-fail "git" "tag" "--sign"
                         "-m" (format "Flycheck %s" version)
                         version)
-  (flycheck/git-or-fail "push" "origin" "master"))
+  (flycheck/git-or-fail "push" "origin" "master")
+  (flycheck/git-or-fail "push" "--tags" "origin"))
 
 (defun flycheck/commit-and-push-master ()
   "Commit and push the new snapshot version for master."
