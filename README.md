@@ -22,7 +22,7 @@ Out of the box Flycheck supports over
 syntax checking tools, and comes with a [simple interface][definitions] to
 define new syntax checkers.
 
-Many [3rd party extensions](http://flycheck.org/extensions.html) provide
+Many [3rd party extensions](http://www.flycheck.org/en/latest/community/extensions.html) provide
 new syntax checkers and other features like alternative error displays or mode
 line indicators.
 
