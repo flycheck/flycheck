@@ -19,18 +19,18 @@ reports warnings and errors directly in the buffer or in an optional error list
 
 Out of the box Flycheck supports over
 [40 different programming languages][languages] with more than 80 different
-syntax checking tools, and comes with a [simple interface][definitions] to
+syntax checking tools, and comes with a simple interface to
 define new syntax checkers.
 
-Many [3rd party extensions](http://flycheck.org/extensions.html) provide
+Many [3rd party extensions](http://www.flycheck.org/en/latest/community/extensions.html) provide
 new syntax checkers and other features like alternative error displays or mode
 line indicators.
 
 [COPYING]: https://github.com/flycheck/flycheck/blob/master/COPYING
-[manual]: http://www.flycheck.org/manual/latest/index.html
+[manual]: http://www.flycheck.org/en/latest/
 [logo]: https://raw.githubusercontent.com/flycheck/flycheck/master/doc/_static/logo.png
-[checking]: http://www.flycheck.org/manual/latest/Checking-buffers.html#Checking-buffers
-[languages]: http://www.flycheck.org/manual/latest/Supported-languages.html#Supported-languages
+[checking]: http://www.flycheck.org/en/latest/user/quickstart.html#check-syntax-in-a-buffer
+[languages]: http://www.flycheck.org/en/latest/languages.html
 [definitions]: http://flycheck.org/manual/latest/Defining-syntax-checkers.html#Defining-syntax-checkers
 
 ## Quickstart ##
@@ -60,7 +60,7 @@ through [Quickstart][] guide.
 [Installation]: http://www.flycheck.org/en/latest/user/installation.html
 [Quickstart]: http://www.flycheck.org/en/latest/user/quickstart.html
 [windows issues]: https://github.com/flycheck/flycheck/labels/B-Windows%20only
-[windows support]: http://www.flycheck.org/manual/latest/Installation.html#index-Windows
+[windows support]: http://www.flycheck.org/en/latest/user/installation.html#windows-support
 
 ## Support & Contribution ##
 
@@ -84,9 +84,9 @@ to follow our [Code of Conduct][coc].
 [sx]: https://emacs.stackexchange.com/questions/tagged/flycheck
 [gitter]: https://gitter.im/flycheck/flycheck
 [Issue Tracker]: https://github.com/flycheck/flycheck/issues
-[contrib]: https://github.com/flycheck/flycheck/blob/master/CONTRIBUTING.md
+[contrib]: https://github.com/flycheck/flycheck/blob/master/doc/contributor/contributing.rst
 [Waffle Board]: http://waffle.io/flycheck/flycheck
-[coc]: https://github.com/flycheck/flycheck/blob/master/CONDUCT.md
+[coc]: https://github.com/flycheck/flycheck/blob/master/doc/community/conduct.rst
 
 ## License ##
 
