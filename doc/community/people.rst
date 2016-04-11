@@ -12,7 +12,7 @@ Teams
 Maintainers
 -----------
 
-* **Sebastian Wiesner** (:gh:`lunaryorn`, head maintainer)
+* **Sebastian Wiesner** (:gh:`lunaryorn`, head maintainer, GPG key ``5C42FE98``)
 * Clément Pit--Claudel (:gh:`cpitclaudel`, maintainer)
 
 We maintain Flycheck and all official extensions within the `Flycheck
