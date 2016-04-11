@@ -30,6 +30,7 @@ version number.  Breaking changes may occur at any point.
   - JSON syntax checkers now require ``json-mode`` and do not check in
     Javascript Mode anymore
   - Prefer eslint over jshint for Javascript
+  - Obsolete ``flycheck-info`` in favour of the new ``flycheck-manual`` command
 
 - New syntax checkers:
 

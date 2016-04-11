@@ -832,7 +832,7 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
     (define-key map "?"         #'flycheck-describe-checker)
     (define-key map "h"         #'flycheck-display-error-at-point)
     (define-key map "H"         #'display-local-help)
-    (define-key map "i"         #'flycheck-info)
+    (define-key map "i"         #'flycheck-manual)
     (define-key map "V"         #'flycheck-version)
     (define-key map "v"         #'flycheck-verify-setup)
     (define-key map "x"         #'flycheck-disable-checker)
@@ -1023,10 +1023,13 @@ just return nil."
         (assq-delete-all 'flycheck-checker find-function-regexp-alist)))
 
 ;;;###autoload
-(defun flycheck-info ()
+(defun flycheck-manual ()
   "Open the Flycheck manual."
   (interactive)
-  (info "flycheck"))
+  (browse-url "http://www.flycheck.org"))
+
+(define-obsolete-function-alias 'flycheck-info
+  'flycheck-manual "26" "Open the Flycheck manual.")
 
 
 ;;; Utility functions
