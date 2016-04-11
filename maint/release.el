@@ -236,7 +236,7 @@ Please fix the error, push, wait for the Travis CI build and try again"))))
         (flycheck/set-version new-snapshot)
         (flycheck/add-snapshot-to-changelog new-snapshot)
         (flycheck/commit-and-push-master)
-        (message "Flycheck %s out now; please announce to the public!
+        (message "Flycheck %s out now; please announce in the flycheck/flycheck Gitter channel!
 Next version is %s" new-version new-snapshot)))))
 
 (defun flycheck/make-release-batch ()

@@ -52,5 +52,7 @@ pushes it to Github.  Note that the tag is *signed*; you must configure Git for
 the first time.  After pushing the new release to Github, the script bumps the
 version number again, to the next snapshot, and commits the changes again.
 
-When the script has completed, please announce the new release wherever you
-want.  We do not currently have an official place for release announcements.
+When the script has completed, please announce the new release in the public
+Gitter_ channel, and wherever else you see fit.
+
+.. _Gitter: https://gitter.im/flycheck/flycheck
