@@ -30,7 +30,7 @@ factual mistake or lack of information.  Please suggest improvements.
 
 .. _Flymake fork: https://github.com/illusori/emacs-flymake
 .. _flymake-easy: https://github.com/purcell/flymake-easy
-.. _flymake-cursor: http://www.emacswiki.org/emacs/flymake-cursor.el
+.. _flymake-cursor: https://www.emacswiki.org/emacs/flymake-cursor.el
 .. _edit this page: https://github.com/flycheck/flycheck/edit/master/doc/user/flycheck-versus-flymake.rst
 
 Overview
@@ -170,7 +170,7 @@ languages in the popular ELPA archive MELPA_.
 checkers, most of them contributed by the community.  Notably, Flycheck does
 *not* support Java and Makefiles.
 
-.. _Flymake page: http://www.emacswiki.org/emacs/FlyMake
+.. _Flymake page: https://www.emacswiki.org/emacs/FlyMake
 .. _MELPA: http://melpa.org/
 
 Definition of new syntax checkers
