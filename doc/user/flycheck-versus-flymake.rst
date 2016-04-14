@@ -183,8 +183,6 @@ to add the error patterns to `flymake-err-line-patterns`.  As such, defining a
 syntax checker is difficult for users who are not familiar with Emacs Lisp.
 flymake-easy_ provides an easier way to define new syntax checkers, though.
 
-.. todo:: Fix "contributed" link for new labels
-
 **Flycheck** provides a single function `flycheck-define-checker` to define a
 new syntax checker.  This function uses a declarative syntax which is easy to
 understand even for users unfamiliar with Emacs Lisp.  In fact most syntax
