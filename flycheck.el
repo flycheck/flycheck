@@ -6609,14 +6609,15 @@ See URL `https://golang.org/cmd/go/' and URL
                   go-test
                   ;; Fall back if `go build' or `go test' can be used
                   go-errcheck)
-  :verify-fn (lambda (_)
-               (let ((have-vet (member "vet" (ignore-errors
-                                               (process-lines go "tool")))))
-                 (list
-                  (flycheck-verification-result-new
-                   :label "go tool vet"
-                   :message (if have-vet "present" "missing")
-                   :face (if have-vet 'success '(bold error)))))))
+  :verify (lambda (_)
+            (let* ((go (flycheck-checker-executable 'go-vet))
+                   (have-vet (member "vet" (ignore-errors
+                                             (process-lines go "tool")))))
+              (list
+               (flycheck-verification-result-new
+                :label "go tool vet"
+                :message (if have-vet "present" "missing")
+                :face (if have-vet 'success '(bold error)))))))
 
 (flycheck-def-option-var flycheck-go-build-install-deps nil go-build
   "Whether to install dependencies in `go build'.
