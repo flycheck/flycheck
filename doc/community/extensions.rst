@@ -33,7 +33,7 @@ Language integration
   settings and layouts of the current Rust project.
 * :flyc:`flycheck-haskell` (*official*) configures Flycheck from the Cabal
   settings and sandbox in Haskell projects.
-* :flyc:`Wilfred/flycheck-pkg-config` configures Flycheck to use settings from
+* :gh:`Wilfred/flycheck-pkg-config` configures Flycheck to use settings from
   `pkg-config`_ when checking C/C++.
 
 .. _Cask: https://github.com/cask/cask
