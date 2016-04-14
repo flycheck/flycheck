@@ -6591,7 +6591,7 @@ This option requires Go 1.6 or newer."
   "A Go syntax checker using the `go tool vet' command.
 
 See URL `https://golang.org/cmd/go/' and URL
-`https://godoc.org/golang.org/x/tools/cmd/vet'."
+`https://golang.org/cmd/vet/'."
   :command ("go" "tool" "vet" "-all"
             (option "-printfuncs=" flycheck-go-vet-print-functions concat
                     flycheck-option-comma-separated-list)

@@ -354,8 +354,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          Whether to check for shadowed variables, in Go 1.6 or newer.
 
-
-      .. _vet: https://godoc.org/golang.org/x/tools/cmd/vet
+      .. _vet: https://golang.org/cmd/vet/
 
    .. syntax-checker:: go-build
 
