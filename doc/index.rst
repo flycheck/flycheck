@@ -4,7 +4,7 @@
 
 **Flycheck** is a modern on-the-fly syntax checking extension for GNU Emacs,
 intended as replacement for the older Flymake extension which is part of GNU
-Emacs.
+Emacs.  For a detailed comparison to Flymake see :ref:`flycheck-versus-flymake`.
 
 It uses various syntax checking and linting tools to :ref:`automatically check
 the contents of buffers <flycheck-checking>` while you type, and reports
@@ -68,6 +68,7 @@ Meanwhile you can read a simple HTML version of the old manual at
 
    user/installation
    user/quickstart
+   user/flycheck-versus-flymake
 
 The Developer Guide
 ===================
