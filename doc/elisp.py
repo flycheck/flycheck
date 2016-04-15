@@ -48,6 +48,38 @@ class Cell(namedtuple('Cell', 'objtype docname')):
     pass
 
 
+class KeySequence(namedtuple('KeySequence', 'keys')):
+    """A key sequence."""
+
+    PREFIX_KEYS = {'C-u'}
+    PREFIX_KEYS.update('M-{}'.format(n) for n in range(10))
+
+    @classmethod
+    def fromstring(cls, s):
+        return cls(s.split())
+
+    @property
+    def command_name(self):
+        """The command name in this key sequence.
+
+        Return ``None`` for key sequences that are no command invocations with
+        ``M-x``.
+
+        """
+        try:
+            return self.keys[self.keys.index('M-x')+1]
+        except ValueError:
+            return None
+
+    @property
+    def has_prefix(self):
+        """Whether this key sequence has a prefix."""
+        return self.keys[0] in self.PREFIX_KEYS
+
+    def __str__(self):
+        return ' '.join(self.keys)
+
+
 class EmacsLispSymbol(ObjectDescription):
     """An abstract base class for directives documenting symbols.
 
@@ -63,7 +95,7 @@ class EmacsLispSymbol(ObjectDescription):
     def add_target_and_index(self, name, sig, signode):
         target_name = make_target(self.cell, name)
         if target_name not in self.state.document.ids:
-            signode['names'].append(target_name)
+            signode['names'].append(name)
             signode['ids'].append(target_name)
             signode['first'] = (not self.names)
             self.state.document.note_explicit_target(signode)
@@ -80,8 +112,7 @@ class EmacsLispSymbol(ObjectDescription):
 
         index_text = '{name}; {label}'.format(
              name=name, label=self.label)
-        self.indexnode['entries'].append(
-            ('pair', index_text, target_name, ''))
+        self.indexnode['entries'].append(('pair', index_text, target_name, ''))
 
 
 class EmacsLispVariable(EmacsLispSymbol):
@@ -120,6 +151,72 @@ class EmacsLispVariable(EmacsLispSymbol):
         return signature
 
 
+class EmacsLispCommand(ObjectDescription):
+    """A directive to document interactive commands via their bindings."""
+
+    label = 'Interactive command'
+
+    def handle_signature(self, signature, signode):
+        """Create nodes to ``signode`` for ``signature``.
+
+        ``signode`` is a docutils node to which to add the nodes, and
+        ``signature`` is the symbol name.
+        """
+        key_sequence = KeySequence.fromstring(signature)
+        signode += addnodes.desc_name(signature, str(key_sequence))
+        return str(key_sequence)
+
+    def _add_command_target_and_index(self, name, sig, signode):
+        target_name = make_target('function', name)
+        if target_name not in self.state.document.ids:
+            signode['names'].append(name)
+            signode['ids'].append(target_name)
+            self.state.document.note_explicit_target(signode)
+
+            obarray = self.env.domaindata['el']['obarray']
+            symbol = obarray.setdefault(name, {})
+            if 'function' in symbol:
+                self.state_machine.reporter.warning(
+                    'duplicate description of %s %s, ' % (self.objtype, name) +
+                    'other instance in ' +
+                    self.env.doc2path(symbol['function'].docname),
+                    line=self.lineno)
+            symbol['function'] = Cell(self.objtype, self.env.docname)
+
+        index_text = '{name}; {label}'.format(name=name, label=self.label)
+        self.indexnode['entries'].append(('pair', index_text, target_name, ''))
+
+    def _add_binding_target_and_index(self, binding, sig, signode):
+        reftarget = make_target('binding', binding)
+
+        if reftarget not in self.state.document.ids:
+            signode['names'].append(reftarget)
+            signode['ids'].append(reftarget)
+            signode['first'] = (not self.names)
+            self.state.document.note_explicit_target(signode)
+
+            keymap = self.env.domaindata['el']['keymap']
+            if binding in keymap:
+                self.state_machine.reporter.warning(
+                    'duplicate description of binding %s, ' % binding +
+                    'other instance in ' +
+                    self.env.doc2path(keymap[binding]),
+                    line=self.lineno)
+            keymap[binding] = self.env.docname
+
+        index_text = '{name}; key binding'.format(name=binding)
+        self.indexnode['entries'].append(('pair', index_text, reftarget, ''))
+
+    def add_target_and_index(self, name, sig, signode):
+        # If unprefixed M-x command index as function and not as key binding
+        sequence = KeySequence.fromstring(name)
+        if sequence.command_name and not sequence.has_prefix:
+            self._add_command_target_and_index(sequence.command_name,
+                                               sig, signode)
+        else:
+            self._add_binding_target_and_index(name, sig, signode)
+
+
 class EmacsLispDomain(Domain):
     """A domain to document Emacs Lisp code."""
 
@@ -127,7 +224,9 @@ class EmacsLispDomain(Domain):
     label = 'Emacs Lisp'
 
     object_types = {
+        # TODO: Set search prio for object types
         # Types for user-facing options and commands
+        'binding': ObjType('binding', 'binding'),
         'command': ObjType('command', 'command', cell='command'),
         'option': ObjType('option', 'option', cell='variable'),
         'face': ObjType('face', 'face', cell='face'),
@@ -139,25 +238,27 @@ class EmacsLispDomain(Domain):
         'hook': ObjType('hook', 'hook', cell='variable'),
     }
     directives = {
+        'command': EmacsLispCommand,
         'option': EmacsLispVariable,
         'variable': EmacsLispVariable,
         'constant': EmacsLispVariable,
         'hook': EmacsLispVariable
     }
     roles = {
-        'function': XRefRole(),
-        'macro': XRefRole(),
-        'command': XRefRole(),
         'variable': XRefRole(),
         'constant': XRefRole(),
         'option': XRefRole(),
         'hook': XRefRole(),
-        'face': XRefRole(),
     }
 
-    data_version = 0
+    data_version = 1
     initial_data = {
-       'obarray': {}
+        # Our domain data attempts to somewhat mirror the semantics of Emacs
+        # Lisp, so we have an obarray which holds symbols which in turn have
+        # function, variable, face, etc. cells, and a keymap which holds the
+        # documentation for key bindings.
+        'obarray': {},
+        'keymap': {}
     }
 
     def clear_doc(self, docname):
@@ -166,27 +267,36 @@ class EmacsLispDomain(Domain):
             for cell in list(symbol.keys()):
                 if docname == symbol[cell].docname:
                     del symbol[cell]
+        for binding in list(self.data['keymap']):
+            if self.data['keymap'][binding] == docname:
+                del self.data['keymap'][binding]
 
     def resolve_xref(self, env, fromdocname, builder,
                      objtype, target, node, contnode):
         """Resolve a cross reference to ``target``."""
-        cell = self.object_types[objtype].attrs['cell']
-        symbol = self.data['obarray'].get(target, {})
-        if cell not in symbol:
-            return None
+        if objtype == 'binding':
+            todocname = self.data['keymap'].get(target)
+            if not todocname:
+                return None
+            reftarget = make_target('binding', target)
+        else:
+            cell = self.object_types[objtype].attrs['cell']
+            symbol = self.data['obarray'].get(target, {})
+            if cell not in symbol:
+                return None
+            reftarget = make_target(cell, target)
+            todocname = symbol[cell].docname
 
-        todocname = symbol[cell].docname
         return make_refnode(builder, fromdocname, todocname,
-                            make_target(cell, target), contnode, target)
+                            reftarget, contnode, target)
 
     def resolve_any_xref(self, env, fromdocname, builder,
                          target, node, contnode):
         """Return all possible cross references for ``target``."""
-        cells = ['command', 'function', 'variable', 'face']
-        nodes = ((cell, self.resolve_xref(env, fromdocname, builder,
-                                          cell, target, node, contnode))
-                 for cell in cells)
-        return [('el:{}'.format(cell), node) for (cell, node) in nodes
+        nodes = ((objtype, self.resolve_xref(env, fromdocname, builder,
+                                             objtype, target, node, contnode))
+                 for objtype in ['binding', 'function', 'variable', 'face'])
+        return [('el:{}'.format(objtype), node) for (objtype, node) in nodes
                 if node is not None]
 
     def get_objects(self):
