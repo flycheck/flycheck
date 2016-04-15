@@ -36,6 +36,15 @@ def make_target(cell, name):
     return 'el-{cell}-{name}'.format(cell=cell, name=name)
 
 
+def to_mode_name(symbol_name):
+    """Convert ``symbol_name`` to a mode name.
+
+    Split at ``-`` and titlecase each part.
+
+    """
+    return ' '.join(p.title() for p in symbol_name.split('-'))
+
+
 class Cell(namedtuple('Cell', 'objtype docname')):
     """A cell in a symbol.
 
@@ -92,11 +101,16 @@ class EmacsLispSymbol(ObjectDescription):
 
     """
 
-    def add_target_and_index(self, name, sig, signode):
-        target_name = make_target(self.cell, name)
-        if target_name not in self.state.document.ids:
+    def _add_index(self, name, target):
+        index_text = '{name}; {label}'.format(
+             name=name, label=self.label)
+        self.indexnode['entries'].append(('pair', index_text, target, ''))
+
+    def _add_target(self, name, sig, signode):
+        target = make_target(self.cell, name)
+        if target not in self.state.document.ids:
             signode['names'].append(name)
-            signode['ids'].append(target_name)
+            signode['ids'].append(target)
             signode['first'] = (not self.names)
             self.state.document.note_explicit_target(signode)
 
@@ -110,9 +124,11 @@ class EmacsLispSymbol(ObjectDescription):
                     line=self.lineno)
             symbol[self.cell] = Cell(self.objtype, self.env.docname)
 
-        index_text = '{name}; {label}'.format(
-             name=name, label=self.label)
-        self.indexnode['entries'].append(('pair', index_text, target_name, ''))
+        return target
+
+    def add_target_and_index(self, name, sig, signode):
+        target = self._add_target(name, sig, signode)
+        self._add_index(name, target)
 
 
 class EmacsLispVariable(EmacsLispSymbol):
@@ -149,6 +165,29 @@ class EmacsLispVariable(EmacsLispSymbol):
         signode += addnodes.desc_annotation(label, label)
         signode += addnodes.desc_name(signature, signature)
         return signature
+
+
+class EmacsLispMinorMode(EmacsLispSymbol):
+    cell = 'function'
+    label = 'Minor Mode'
+
+    def handle_signature(self, signature, signode):
+        """Create nodes in ``signode`` for the ``signature``.
+
+        ``signode`` is a docutils node to which to add the nodes, and
+        ``signature`` is the symbol name.
+
+        Add the object type label before the symbol name and return
+        ``signature``.
+
+        """
+        label = self.label + ' '
+        signode += addnodes.desc_annotation(label, label)
+        signode += addnodes.desc_name(signature, to_mode_name(signature))
+        return signature
+
+    def _add_index(self, name, target):
+        return super()._add_index(to_mode_name(name), target)
 
 
 class EmacsLispCommand(ObjectDescription):
@@ -217,6 +256,24 @@ class EmacsLispCommand(ObjectDescription):
             self._add_binding_target_and_index(name, sig, signode)
 
 
+class XRefModeRole(XRefRole):
+    """A role to cross-reference a minor mode.
+
+    Like a normal cross-reference role but appends ``-mode`` to the reference
+    target and title-cases the symbol name like Emacs does when referring to
+    modes.
+
+    """
+
+    fix_parens = False
+    lowercase = False
+
+    def process_link(self, env, refnode, has_explicit_title, title, target):
+        refnode['reftype'] = 'minor-mode'
+        target = target + '-mode'
+        return (title if has_explicit_title else to_mode_name(target), target)
+
+
 class EmacsLispDomain(Domain):
     """A domain to document Emacs Lisp code."""
 
@@ -226,6 +283,7 @@ class EmacsLispDomain(Domain):
     object_types = {
         # TODO: Set search prio for object types
         # Types for user-facing options and commands
+        'minor-mode': ObjType('minor-mode', 'function', 'mode', cell='function'),
         'binding': ObjType('binding', 'binding'),
         'command': ObjType('command', 'command', cell='command'),
         'option': ObjType('option', 'option', cell='variable'),
@@ -238,6 +296,7 @@ class EmacsLispDomain(Domain):
         'hook': ObjType('hook', 'hook', cell='variable'),
     }
     directives = {
+        'minor-mode': EmacsLispMinorMode,
         'command': EmacsLispCommand,
         'option': EmacsLispVariable,
         'variable': EmacsLispVariable,
@@ -245,6 +304,9 @@ class EmacsLispDomain(Domain):
         'hook': EmacsLispVariable
     }
     roles = {
+        # TODO: Use a custom role that title-cases the mode name like Emacs
+        # does.
+        'mode': XRefModeRole(),
         'variable': XRefRole(),
         'constant': XRefRole(),
         'option': XRefRole(),
@@ -280,7 +342,7 @@ class EmacsLispDomain(Domain):
                 return None
             reftarget = make_target('binding', target)
         else:
-            cell = self.object_types[objtype].attrs['cell']
+            cell =  self.object_types[objtype].attrs['cell']
             symbol = self.data['obarray'].get(target, {})
             if cell not in symbol:
                 return None
