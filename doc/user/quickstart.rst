@@ -40,7 +40,7 @@ Check syntax in a buffer
 
 Now you are ready to use Flycheck in a Python or Javascript buffer.  Visit a
 Python or Javascript file and check whether your Flycheck setup is complete with
-@kbd{M-x flycheck-verify-setup}.
+`C-c ! v`.
 
 If everything is green Flycheck will now start to check the buffer on the fly
 while you are editing.  Whenever you make a mistake that the eslint or Pylint
@@ -52,14 +52,13 @@ number of errors and warnings in the buffer in the mode line.
 Navigate and list errors
 ========================
 
-With :kbd:`C-c ! n` and :kbd:`C-c ! p` you can now jump back and forth between
-erroneous places.  If you keep on such a place for a little while Flycheck will
-show the corresponding error message in the each area.  Likewise, if you hover
-such a place with the mouse cursor Flycheck will show the error message in a
-tooltip.
+With `C-c ! n` and `C-c ! p` you can now jump back and forth between erroneous
+places.  If you keep on such a place for a little while Flycheck will show the
+corresponding error message in the each area.  Likewise, if you hover such a
+place with the mouse cursor Flycheck will show the error message in a tooltip.
 
-Press :kbd:`C-c ! l` to pop up a list of all errors in the current buffer.  This
-list automatically updates itself when you fix errors or introduce new ones, and
+Press `C-c ! l` to pop up a list of all errors in the current buffer.  This list
+automatically updates itself when you fix errors or introduce new ones, and
 follows the currently selected buffer.  If the error list is selected you can
 type :kbd:`n` and :kbd:`p` to move up and down between errors and jump to their
 corresponding location in the buffer.
