@@ -71,8 +71,9 @@ features you are interested in.
 +-----------------------+-----------------------+-----------------------+
 |Supported languages    |>40                    |~5 [#]_                |
 +-----------------------+-----------------------+-----------------------+
-|Checking remote files  |unknown                |partly?                |
-|via Tramp              |                       |                       |
+|Checking remote files  |said to work, but not  |partly?                |
+|via Tramp              |officially supported   |                       |
+|                       |[#]_                   |                       |
 +-----------------------+-----------------------+-----------------------+
 |Definition of new      |Single declarative     |Function definition and|
 |syntax checkers        |function/macro         |various variables [#]_ |
@@ -480,6 +481,10 @@ required to have test cases.  A subset of the est suite is continuously run on
        ELPA archive MELPA provides many packages which add more languages to
        Flymake.  There is also a `Flymake fork`_, which supports more languages
        out of the box, among other fixes and improvements.
+
+.. [#] See for instance `this comment`_.
+
+       .. _this comment: https://github.com/flycheck/flycheck/issues/883#issuecomment-188248824
 
 .. [#] `flymake-easy`_ provides a function to define a new syntax checker, which
        sets all required variables at once.
