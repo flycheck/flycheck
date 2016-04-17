@@ -12,6 +12,10 @@ extensions are maintained by the :ref:`Flycheck maintainers
 If you do know extensions not in this list, or would like to see your own
 extension here, please feel free to `add it`_.
 
+We would like to thank all people who created and contributed to Flycheck
+extensions for their awesome work.  Without your help and support Flycheck would
+not be what it is today.
+
 .. _add it: https://github.com/flycheck/flycheck/edit/master/doc/community/extensions.rst
 
 User interface
