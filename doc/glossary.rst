@@ -20,3 +20,8 @@ reference`_, but we reproduce them here for convenience.
       your Emacs session inspect the value of the variable `user-init-file` with
       :kbd:`C-h v user-init-file`.  You can visit it directly with :kbd:`M-:
       (find-file user-init-file)`.
+
+   registered syntax checker
+
+      A syntax checker in `flycheck-checkers`.  Flycheck will only use these
+      syntax checkers when checking buffers automatically.
