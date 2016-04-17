@@ -4,3 +4,5 @@ Sphinx>=1.3
 sphinx-autobuild
 # Syntax highlighting
 Pygments>=2.1
+# Network access
+requests>=2.9

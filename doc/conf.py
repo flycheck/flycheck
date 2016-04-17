@@ -35,7 +35,10 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.extlinks',
     'sphinx.ext.todo',
-    'elisp'
+    # Domain for Emacs Lisp
+    'elisp',
+    # Cross-references to info nodes
+    'info'
 ]
 
 # Project metadata
