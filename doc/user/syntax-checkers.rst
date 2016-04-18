@@ -124,7 +124,7 @@ type `C-u C-c ! s`:
    Remove any selected syntax checker and let Flycheck again :ref:`select a
    syntax checker automatically <flycheck-automatic-selection>`.
 
-.. _flycheck-disabled-checkers:
+.. _flycheck-disable-checkers:
 
 Disabled syntax checkers
 ========================
