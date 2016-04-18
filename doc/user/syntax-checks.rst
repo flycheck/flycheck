@@ -1,3 +1,5 @@
+.. _flycheck-syntax-checks:
+
 ==========================
  Syntax checks in buffers
 ==========================

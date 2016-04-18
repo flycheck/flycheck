@@ -7,8 +7,9 @@ intended as replacement for the older Flymake extension which is part of GNU
 Emacs.  For a detailed comparison to Flymake see :ref:`flycheck-versus-flymake`.
 
 It uses various syntax checking and linting tools to :ref:`automatically check
-the contents of buffers <flycheck-checking>` while you type, and reports
-warnings and errors directly in the buffer, or in an optional error list:
+the contents of buffers <flycheck-syntax-checks>` while you type, and reports
+warnings and errors directly in the buffer, or in an optional :ref:`error list
+<flycheck-error-list>`:
 
 .. image:: images/flycheck-annotated.png
 
