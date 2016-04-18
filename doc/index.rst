@@ -69,6 +69,7 @@ Meanwhile you can read a simple HTML version of the old manual at
    user/installation
    user/quickstart
    user/syntax-checks
+   user/syntax-checkers
    user/flycheck-versus-flymake
 
 The Developer Guide
