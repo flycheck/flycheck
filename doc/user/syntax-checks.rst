@@ -76,8 +76,10 @@ possible.
          buffers which are typically intended for non-interactive display rather
          than editing.
 
-      .. seealso:: :infonode:`(elisp)Major Mode Conventions` for more
-                   information about special modes.
+      .. seealso::
+
+         :infonode:`(elisp)Major Mode Conventions`
+            Information about major modes, and modes marked as special.
 
 .. option:: flycheck-check-syntax-automatically
 
@@ -135,8 +137,10 @@ the contents of the current buffer and return a list of errors in the buffer,
 together with metadata that tells Flycheck how to run the program, how to pass
 buffer contents to it, and how to extract errors.
 
-.. seealso:: :ref:`flycheck-languages`, for a complete list of all syntax
-             checkers included in Flycheck.
+.. seealso::
+
+   :ref:`flycheck-languages`
+      A complete list of all syntax checkers included in Flycheck
 
 Like everything else in Emacs syntax checkers have online documentation which
 you can access with `C-c ! ?`:

@@ -234,8 +234,9 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. seealso::
 
-      The extension :flyc:`flycheck-d-unittest` adds a syntax checker which runs
-      D unittests on the fly and reports the results.
+      :flyc:`flycheck-d-unittest`
+         Flycheck extension which provides a syntax checker to run D unittests
+         on the fly and report the results with Flycheck.
 
 .. supported-language:: Emacs Lisp
 
@@ -269,8 +270,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. seealso::
 
-      The extension :gh:`purcell/flycheck-package` adds a syntax checker which
-      checks for violations of Emacs Lisp packaging conventions.
+      :gh:`purcell/flycheck-package`
+         Flycheck extension which adds a syntax checker to check for violation
+         of Emacs Lisp library headers and packaging conventions.
+
+      :infonode:`(elisp)Library Headers`
+         Information about library headers for Emacs Lisp files.
 
 .. supported-language:: Erlang
 
@@ -297,7 +302,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: fortran-gfortran
 
-      Check Fortran syntax and type with GFortran_
+      Check Fortran syntax and type with GFortran_.
 
       .. _GFortran: https://gcc.gnu.org/onlinedocs/gfortran/
 
@@ -405,10 +410,13 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. seealso::
 
-      * The extension :flyc:`flycheck-haskell` configures Flycheck from the
-        current Cabal project, and adds support for Cabal sandboxes.
-      * The extension :flyc:`flycheck-hdevtools` adds an alternative syntax
-        checker using `hdevtools <https://github.com/bitc/hdevtools/>`_.
+      :flyc:`flycheck-haskell`
+         Flycheck extension to configure Flycheck's Haskell checkers from the
+         metadata, with support for Cabal sandboxes.
+
+      :flyc:`flycheck-hdevtools`
+         Flycheck extension which adds an alternative syntax checker for GHC
+         using `hdevtools <https://github.com/bitc/hdevtools/>`_.
 
    .. syntax-checker:: haskell-stack-ghc
                        haskell-ghc
@@ -650,12 +658,13 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. seealso::
 
-      The extension :gh:`flycheck-pyflakes <Wilfred/flycheck-pyflakes>` adds a
-      syntax checker using `Pyflakes <https://github.com/pyflakes/pyflakes>`_.
+      :gh:`flycheck-pyflakes <Wilfred/flycheck-pyflakes>`
+         Flycheck extension which adds a syntax checker using `Pyflakes
+         <https://github.com/pyflakes/pyflakes>`_.
 
    .. syntax-checker:: python-flake8
 
-      Check syntax and lint with `flake8 <https://flake8.readthedocs.org/>`_).
+      Check syntax and lint with `flake8 <https://flake8.readthedocs.org/>`_.
 
       .. option:: flycheck-flake8-error-level-alist
 
@@ -785,8 +794,9 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. seealso::
 
-         The :flyc:`flycheck-rust` extension configures Flycheck according to
-         the current Cargo project.
+         :flyc:`flycheck-rust`
+            Flycheck extension to configure Rust syntax checkers according to
+            the current Cargo_ project.
 
       .. option:: flycheck-rust-args
 

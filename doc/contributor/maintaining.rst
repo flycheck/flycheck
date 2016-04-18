@@ -17,8 +17,9 @@ provides a good guide to `sign commits`_.
 
 .. seealso::
 
-   For more information about signing commits and tags take a look at the
-   section `Signing Your Work`_ in the Git manual.
+   `Signing Your Work`_
+      For more information about signing commits and tags take a look at the
+      section in the Git manual.
 
 .. _Signing Your Work: https://git-scm.com/book/uz/v2/Git-Tools-Signing-Your-Work
 .. _generate a key: https://help.github.com/articles/generating-a-gpg-key/
