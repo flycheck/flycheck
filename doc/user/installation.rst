@@ -4,6 +4,9 @@
  Installation
 ==============
 
+This document gives you detailed instructions and information about installing
+Flycheck.
+
 Prerequisites
 =============
 

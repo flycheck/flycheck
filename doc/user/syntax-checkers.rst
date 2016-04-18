@@ -2,6 +2,8 @@
  Syntax checkers
 =================
 
+This document explains how Flycheck selects external tools to check a buffer.
+
 Flycheck does not check buffers on its own.  Instead it delegates this task to
 external *syntax checkers* which are external programs or services that receive
 the contents of the current buffer and return a list of errors in the buffer,

@@ -2,15 +2,17 @@
  Syntax checks in buffers
 ==========================
 
-Flycheck provides two Emacs minor modes for automatic syntax checking:
-:mode:`flycheck` to enable syntax checking in the current buffer, and
-:mode:`global-flycheck` to enable syntax checking in all buffers whenever
-possible.
+This document explains how and when Flycheck checks buffers.
 
 .. _flycheck-minor-modes:
 
 Minor modes
 ===========
+
+Flycheck provides two Emacs minor modes for automatic syntax checking:
+:mode:`flycheck` to enable syntax checking in the current buffer, and
+:mode:`global-flycheck` to enable syntax checking in all buffers whenever
+possible.
 
 .. minor-mode:: flycheck-mode
 
