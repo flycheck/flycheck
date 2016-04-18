@@ -229,10 +229,10 @@ a specific syntax checker for a project.  For instance, Flycheck usually prefers
 `javascript-jshint` instead you can tell Flycheck to use `javascript-jshint` for
 all Javascript buffers of your project with the following command in the
 top-level directory of your project: :kbd:`M-x add-dir-local-variable RET
-flycheck-checker RET javascript-jshint`.  A new buffer pops up that shows the
-newly created entry in the directory variables.  Save this buffer and kill it.
-From now on Flycheck will check all Javascript files of this project with
-JSHint.
+js-mode RET flycheck-checker RET javascript-jshint`.  A new buffer pops up that
+shows the newly created entry in the directory variables.  Save this buffer and
+kill it.  From now on Flycheck will check all Javascript files of this project
+with JSHint.
 
 .. seealso::
 
