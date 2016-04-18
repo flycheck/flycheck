@@ -63,8 +63,8 @@ Additional languages and syntax checkers
 * :flyc:`flycheck-mercury` (*official*) adds a Flycheck syntax checker for the
   `Mercury language`_.
 * :flyc:`flycheck-ocaml` (*official*) adds a syntax checker for OCaml.
-* :gh:`purcell/flycheck-package` checks emacs lisp package source code for
-  common problems.
+* :gh:`purcell/flycheck-package` checks Emacs Lisp packages for common problems
+  with package metadata.
 * :gh:`Wilfred/flycheck-pyflakes` adds a Python syntax checker using Pyflakes.
 
 .. _Debian devscripts: https://anonscm.debian.org/cgit/collab-maint/devscripts.git
