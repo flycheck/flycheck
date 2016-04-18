@@ -256,7 +256,59 @@ type `C-u C-c ! s`:
 Disabled syntax checkers
 ------------------------
 
-.. todo:: Document disabled syntax checker
+Even if you :ref:`select a checker manually <flycheck-manual-selection>`
+Flycheck may still use a syntax checker that you’d not like to use.  To
+completely opt out from a specific syntax checker disable it:
+
+.. command:: C-c ! x
+             M-x flycheck-disable-checker
+
+   Prompt for a syntax checker to disable in the current buffer.
+
+For instance if you do not care for documentation conventions of Emacs Lisp you
+can opt out from `emacs-lisp-checkdoc` which checks your code against these
+conventions with :kbd:`C-c ! x emacs-lisp-checkdoc`.  After the next check all
+checkdoc warnings will be gone from the buffer.
+
+Internally this command changes the buffer-local `flycheck-disabled-checkers`:
+
+.. option:: flycheck-disabled-checkers
+
+   A list of disabled syntax checkers.  Flycheck will *never* use disabled
+   syntax checkers to check a buffer.
+
+   This option is buffer-local.  You can customise this variable with :kbd:`M-x
+   customize-variable RET flycheck-disabled-checkers` or set the default value
+   in your :term:`init file` to permanently disable specific syntax checkers.
+   For instance:
+
+   .. code-block:: elisp
+
+      (setq-default flycheck-disabled-checkers '(c/c++-clang))
+
+   will permanently disable `c/c++-clang` in all buffers.
+
+You can also disable syntax checkers per project with directory local variables.
+For instance type :kbd:`M-x add-dir-local-variable RET emacs-lisp-mode RET
+flycheck-disabled-checkers RET emacs-lisp-checkdoc` in your :term:`user emacs
+directory` to disable `emacs-lisp-checkdoc` for all Emacs Lisp files in your
+personal configuration.
+
+.. seealso::
+
+   :infonode:`(emacs)Locals`
+      General information about local variables.
+
+   :infonode:`(emacs)Directory Variables`
+      Information about directory variables.
+
+To enable a disabled checker again, remove it from `flycheck-disabled-checkers`
+or use `C-u C-c ! x`:
+
+.. command:: C-u C-c ! x
+             C-u M-x flycheck-disable-checker
+
+   Prompt for a disabled syntax checker to enable again in the current buffer.
 
 Customisation of syntax checkers
 --------------------------------
