@@ -155,6 +155,8 @@ you can access with `C-c ! ?`:
    major modes the checker supports and a list of all options for this syntax
    checker.
 
+.. _flycheck-automatic-selection:
+
 Automatic syntax checker selection
 ----------------------------------
 
@@ -179,6 +181,8 @@ checks Emacs Lisp with Emacs' own byte compiler.  This syntax checker asks for
 `emacs-lisp-checkdoc` to run next, which checks for stylistic issues in Emacs
 Lisp docstrings.  Thus Flycheck will first run the byte compiler and then
 checkdoc in an Emacs Lisp buffer.
+
+.. _flycheck-manual-selection:
 
 Manual syntax checker selection
 -------------------------------
@@ -206,8 +210,9 @@ Under the hood `C-c ! s` sets `flycheck-checker`:
 
    The name of a syntax checker to use for the current buffer.
 
-   If ``nil`` (the default) let Flycheck automatically select the best syntax
-   checker from `flycheck-checkers`.
+   If ``nil`` (the default) let Flycheck :ref:`automatically select
+   <flycheck-automatic-selection>` the best syntax checker from
+   `flycheck-checkers`.
 
    If set to a syntax checker Flycheck will use this syntax checker as the first
    one in the current buffer, and run subsequent syntax checkers just as if it
@@ -235,8 +240,10 @@ type `C-u C-c ! s`:
 .. command:: C-u C-c ! s
              C-u M-x flycheck-select-checker
 
-   Remove any selected syntax checker and let Flycheck again select a syntax
-   checker automatically.
+   Remove any selected syntax checker and let Flycheck again :ref:`select a
+   syntax checker automatically <flycheck-automatic-selection>`.
+
+.. _flycheck-disabled-checkers:
 
 Disabled syntax checkers
 ------------------------
