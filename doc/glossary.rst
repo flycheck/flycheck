@@ -13,15 +13,28 @@ reference`_, but we reproduce them here for convenience.
 
    init file
    user init file
+      Your main Emacs configuration file.  It’s typically located in your
+      :term:`user-emacs-directory` at :file:`$HOME/.emacs.d/init.el`.  Emacs
+      also looks at :file:`$HOME/.emacs`, but this location is not recommended
+      anymore.  To find out the actual path to your init file of your Emacs
+      session inspect the value of the variable `user-init-file` with :kbd:`C-h
+      v user-init-file`.  You can visit it directly with :kbd:`M-: (find-file
+      user-init-file)`.
 
-      Your main Emacs configuration file.  It’s typically located in
-      :file:`$HOME/.emacs` (old style) or :file:`$HOME/.emacs.d/init.el` (new
-      style, recommended).  To find out the actual path to your init file of
-      your Emacs session inspect the value of the variable `user-init-file` with
-      :kbd:`C-h v user-init-file`.  You can visit it directly with :kbd:`M-:
-      (find-file user-init-file)`.
+      .. seealso::
+
+         :infonode:`(emacs)Init File`
+            More information about the init file.
+
+         :infonode:`(elisp)Init File`
+            Programming interface for the init file.
+
+   user emacs directory
+      The directory for all Emacs related files of the current user, at
+      :file:`~/.emacs.d/`.  Many Emacs packages create data files in this
+      directory, and it holds the recommended location for the :term:`init file`
+      at :file:`~/.emacs.d/init.el`.
 
    registered syntax checker
-
       A syntax checker in `flycheck-checkers`.  Flycheck will only use these
       syntax checkers when checking buffers automatically.
