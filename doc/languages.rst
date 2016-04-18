@@ -266,9 +266,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: emacs-lisp-checkdoc
 
-      Check docstrings with ``checkdoc``.
+      Check Emacs Lisp documentation conventions with ``checkdoc``.
 
    .. seealso::
+
+      :infonode:`(elisp)Documentation Tips`
+         Information about documentation conventions for Emacs Lisp.
 
       :gh:`purcell/flycheck-package`
          Flycheck extension which adds a syntax checker to check for violation
