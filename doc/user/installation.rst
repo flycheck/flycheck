@@ -41,6 +41,8 @@ package managers such as Rubygems, NPM, Cabal, etc.
 
 .. _Homebrew: http://brew.sh
 
+.. _flycheck-package-installation:
+
 Package installation
 ====================
 
@@ -89,6 +91,29 @@ Add the following form to your init file to setup Flycheck with `use-package`:
 
 Then press :kbd:`C-M-x` with point somewhere in this form to install and enable
 Flycheck for the current Emacs session.
+
+.. _flycheck-alternative-installation-methods:
+
+Alternative installation methods
+================================
+
+Some users prefer to install Flycheck via other methods such as el-get, Git
+submodules, etc.
+
+We do **not** support any of these methods, and advise against any alternative
+installation method.  We do not consider it a bug if Flycheck works when
+installed as above but not with a different installation method.
+
+.. warning::
+
+   If you install Flycheck in any way other than :ref:`our official packages
+   <flycheck-package-installation>` you do so **at your own risk**.
+
+Please beware of breakage and understand that while we do not actively work
+against alternative installation methods we will not make compromises to support
+alternative installation methods.  We will close issues reported for alternative
+installation if we fail to reproduce them with a proper installation of
+Flycheck.
 
 .. _MELPA: https://melpa.org
 .. _MELPA Stable: https://stable.melpa.org
