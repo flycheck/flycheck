@@ -89,7 +89,6 @@
 ;; Declare a bunch of dynamic variables that we need from other modes
 (defvar sh-shell)                       ; For shell script checker predicates
 (defvar ess-language)                   ; For r-lintr predicate
-(defvar package-user-dir)               ; For emacs-lisp option filters
 
 ;; Tell the byte compiler about autoloaded functions from packages
 (declare-function pkg-info-version-info "pkg-info" (package))
@@ -6281,7 +6280,7 @@ This variable has no effect, if
 (defun flycheck-option-emacs-lisp-package-user-dir (value)
   "Option VALUE filter for `flycheck-emacs-lisp-package-user-dir'."
   ;; Inherit the package directory from our Emacs session
-  (let ((value (or value package-user-dir)))
+  (let ((value (or value (bound-and-true-p package-user-dir))))
     (when value
       (flycheck-sexp-to-string `(setq package-user-dir ,value)))))
 
