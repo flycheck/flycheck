@@ -642,7 +642,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: puppet-parser
 
-      Check syntax with the `Puppet <https://puppetlabs.com/>`_ compiler.
+      Check syntax with the `Puppet <https://puppet.com/>`_ compiler.
 
    .. syntax-checker:: puppet-lint
 

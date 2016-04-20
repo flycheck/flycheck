@@ -7436,7 +7436,7 @@ See https://github.com/processing/processing/wiki/Command-Line"
 (flycheck-define-checker puppet-parser
   "A Puppet DSL syntax checker using puppet's own parser.
 
-See URL `https://puppetlabs.com/'."
+See URL `https://puppet.com/'."
   :command ("puppet" "parser" "validate" "--color=false")
   :standard-input t
   :error-patterns
