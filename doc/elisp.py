@@ -101,6 +101,47 @@ class EmacsLispSymbol(ObjectDescription):
 
     """
 
+    cell_for_objtype = {
+        'option': 'variable',
+        'constant': 'variable',
+        'variable': 'variable',
+        'hook': 'variable',
+        'face': 'face'
+    }
+
+    label_for_objtype = {
+        'option': 'User option',
+        'constant': 'Constant',
+        'variable': 'Variable',
+        'hook': 'Hook',
+        'face': 'Face'
+    }
+
+    @property
+    def cell(self):
+        """The cell in which to store symbol metadata."""
+        return self.cell_for_objtype[self.objtype]
+
+    @property
+    def label(self):
+        """The label for the documented object type."""
+        return self.label_for_objtype[self.objtype]
+
+    def handle_signature(self, signature, signode):
+        """Create nodes in ``signode`` for the ``signature``.
+
+        ``signode`` is a docutils node to which to add the nodes, and
+        ``signature`` is the symbol name.
+
+        Add the object type label before the symbol name and return
+        ``signature``.
+
+        """
+        label = self.label + ' '
+        signode += addnodes.desc_annotation(label, label)
+        signode += addnodes.desc_name(signature, signature)
+        return signature
+
     def _add_index(self, name, target):
         index_text = '{name}; {label}'.format(
              name=name, label=self.label)
@@ -129,42 +170,6 @@ class EmacsLispSymbol(ObjectDescription):
     def add_target_and_index(self, name, sig, signode):
         target = self._add_target(name, sig, signode)
         self._add_index(name, target)
-
-
-class EmacsLispVariable(EmacsLispSymbol):
-    """A directive to document the variable cell of symbols.
-
-    Provides support for user options, hooks, variables and constants.
-
-    """
-
-    cell = 'variable'
-    label_for_objtype = {
-        'option': 'User option',
-        'constant': 'Constant',
-        'variable': 'Variable',
-        'hook': 'Hook'
-    }
-
-    @property
-    def label(self):
-        """The label for the documented object type."""
-        return self.label_for_objtype[self.objtype]
-
-    def handle_signature(self, signature, signode):
-        """Create nodes in ``signode`` for the ``signature``.
-
-        ``signode`` is a docutils node to which to add the nodes, and
-        ``signature`` is the symbol name.
-
-        Add the object type label before the symbol name and return
-        ``signature``.
-
-        """
-        label = self.label + ' '
-        signode += addnodes.desc_annotation(label, label)
-        signode += addnodes.desc_name(signature, signature)
-        return signature
 
 
 class EmacsLispMinorMode(EmacsLispSymbol):
@@ -283,7 +288,8 @@ class EmacsLispDomain(Domain):
     object_types = {
         # TODO: Set search prio for object types
         # Types for user-facing options and commands
-        'minor-mode': ObjType('minor-mode', 'function', 'mode', cell='function'),
+        'minor-mode': ObjType('minor-mode', 'function', 'mode',
+                              cell='function'),
         'binding': ObjType('binding', 'binding'),
         'command': ObjType('command', 'command', cell='command'),
         'option': ObjType('option', 'option', cell='variable'),
@@ -298,19 +304,19 @@ class EmacsLispDomain(Domain):
     directives = {
         'minor-mode': EmacsLispMinorMode,
         'command': EmacsLispCommand,
-        'option': EmacsLispVariable,
-        'variable': EmacsLispVariable,
-        'constant': EmacsLispVariable,
-        'hook': EmacsLispVariable
+        'option': EmacsLispSymbol,
+        'variable': EmacsLispSymbol,
+        'constant': EmacsLispSymbol,
+        'hook': EmacsLispSymbol,
+        'face': EmacsLispSymbol
     }
     roles = {
-        # TODO: Use a custom role that title-cases the mode name like Emacs
-        # does.
         'mode': XRefModeRole(),
         'variable': XRefRole(),
         'constant': XRefRole(),
         'option': XRefRole(),
         'hook': XRefRole(),
+        'face': XRefRole()
     }
 
     data_version = 1
@@ -342,7 +348,7 @@ class EmacsLispDomain(Domain):
                 return None
             reftarget = make_target('binding', target)
         else:
-            cell =  self.object_types[objtype].attrs['cell']
+            cell = self.object_types[objtype].attrs['cell']
             symbol = self.data['obarray'].get(target, {})
             if cell not in symbol:
                 return None
