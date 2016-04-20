@@ -14,7 +14,7 @@ reference`_, but we reproduce them here for convenience.
    init file
    user init file
       Your main Emacs configuration file.  It’s typically located in your
-      :term:`user-emacs-directory` at :file:`$HOME/.emacs.d/init.el`.  Emacs
+      :term:`user emacs directory` at :file:`$HOME/.emacs.d/init.el`.  Emacs
       also looks at :file:`$HOME/.emacs`, but this location is not recommended
       anymore.  To find out the actual path to your init file of your Emacs
       session inspect the value of the variable `user-init-file` with :kbd:`C-h
