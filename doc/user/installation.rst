@@ -81,7 +81,7 @@ README the article `My Emacs configuration with use-package`_ has more
 information about use-package.  Specifically it allows to automatically install
 missing packages from package archive when Emacs starts.
 
-Add the following form to your init file to setup Flycheck with `use-package`:
+Add the following form to your init file to setup Flycheck with `use-package`_:
 
 .. code-block:: elisp
 
