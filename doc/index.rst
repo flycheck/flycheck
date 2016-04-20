@@ -71,6 +71,7 @@ Meanwhile you can read a simple HTML version of the old manual at
    user/quickstart
    user/syntax-checks
    user/syntax-checkers
+   user/error-reports
    user/flycheck-versus-flymake
 
 The Developer Guide
