@@ -18,7 +18,7 @@ possible.
 
 .. minor-mode:: flycheck-mode
 
-   Enable :ref:`automatic syntax checking <flycheck-automatic-checks` in the
+   Enable :ref:`automatic syntax checking <flycheck-automatic-checks>` in the
    current buffer.
 
 .. minor-mode:: global-flycheck-mode
