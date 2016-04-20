@@ -84,6 +84,7 @@
 (require 'rx)                    ; Regexp fanciness in `flycheck-define-checker'
 (require 'help-mode)             ; `define-button-type'
 (require 'find-func)             ; `find-function-regexp-alist'
+(require 'json)                  ; `flycheck-parse-tslint'
 
 
 ;; Declare a bunch of dynamic variables that we need from other modes
@@ -248,6 +249,7 @@ attention to case differences."
     tex-chktex
     tex-lacheck
     texinfo
+    typescript-tslint
     verilog-verilator
     xml-xmlstarlet
     xml-xmllint
@@ -5351,6 +5353,29 @@ See URL `http://phpmd.org/' for more information about phpmd."
                       errors)))))))))
        (nreverse errors)))))
 
+(defun flycheck-parse-tslint (output checker buffer)
+  "Parse TSLint errors from JSON OUTPUT.
+
+CHECKER and BUFFER denoted the CHECKER that returned OUTPUT and
+the BUFFER that was checked respectively.
+
+See URL `https://palantir.github.io/tslint/' for more information
+about TSLint."
+  (let ((json-array-type 'list))
+    (let ((errors)
+          (tslint-json-output (json-read-from-string output)))
+      (dolist (emessage tslint-json-output)
+        (let-alist emessage
+          (push (flycheck-error-new-at
+                 (+ 1 .startPosition.line)
+                 (+ 1 .startPosition.character)
+                 'warning .failure
+                 :id .ruleName
+                 :checker checker
+                 :buffer buffer
+                 :filename .name) errors)))
+    (nreverse errors))))
+
 
 ;;; Error parsing with regular expressions
 (defun flycheck-get-regexp (patterns)
@@ -8455,6 +8480,43 @@ See URL `http://www.gnu.org/software/texinfo/'."
           "-:" line (optional ":" column) ": " (message)
           line-end))
   :modes texinfo-mode)
+
+(flycheck-def-config-file-var flycheck-typescript-tslint-config
+    typescript-tslint "tslint.json"
+  :safe #'stringp
+  :package-version '(flycheck . "27"))
+
+(flycheck-def-option-var flycheck-typescript-tslint-rulesdir nil typescript-tslint
+  "The directory of custom rules for TSLint.
+
+The value of this variable is either a string containing the path
+to a directory with custom rules, or nil, to not give any custom
+rules to TSLint.
+
+Refer to the TSLint manual at URL
+`http://palantir.github.io/tslint/usage/cli/'
+for more information about the custom directory."
+  :type '(choice (const :tag "No custom rules directory" nil)
+                 (directory :tag "Custom rules directory"))
+  :safe #'stringp
+  :package-version '(flycheck . "27"))
+
+(flycheck-define-checker typescript-tslint
+  "TypeScript syntax and style checker using TSLint.
+
+Note that this syntax checker is not used if
+`flycheck-typescript-tslint-config' is nil or refers to a
+non-existing file.
+
+See URL
+`https://github.com/palantir/tslint'."
+  :command ("tslint"
+            "--format" "json"
+            (config-file "--config" flycheck-typescript-tslint-config)
+            (option "--rules-dir" flycheck-typescript-tslint-rulesdir)
+            source)
+  :error-parser flycheck-parse-tslint
+  :modes (typescript-mode))
 
 (flycheck-def-option-var flycheck-verilator-include-path nil verilog-verilator
   "A list of include directories for Verilator.

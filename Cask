@@ -41,6 +41,7 @@
  (depends-on "scala-mode2")
  (depends-on "scss-mode")
  (depends-on "slim-mode")
+ (depends-on "typescript-mode")
  (depends-on "web-mode")
  (depends-on "yaml-mode")
  )

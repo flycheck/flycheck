@@ -4283,6 +4283,16 @@ Why not:
    '(9 nil warning "printindex before document beginning: @printindex cp"
        :checker texinfo)))
 
+(flycheck-ert-def-checker-test typescript-tslint typescript nil
+  (flycheck-ert-should-syntax-check
+   "language/typescript/sample.ts" 'typescript-mode
+   '(1 10 warning "unused variable: 'invalidAlignment'"
+       :checker typescript-tslint :id "no-unused-variable")
+   '(2 7 warning "unused variable: 'a'"
+       :checker typescript-tslint :id "no-unused-variable")
+   '(3 15 warning "missing semicolon"
+       :checker typescript-tslint :id "semicolon")))
+
 (flycheck-ert-def-checker-test verilog-verilator verilog error
   (flycheck-ert-should-syntax-check
    "language/verilog/verilator_error.v" 'verilog-mode
