@@ -219,7 +219,6 @@ Please fix the error, push, wait for the Travis CI build and try again"))))
 (defun flycheck/make-release ()
   "Create and publish a Flycheck release."
   (flycheck/check-releasable)
-  (error "YAY")
   (let* ((current-version (flycheck/current-version))
          (new-version (flycheck/next-version current-version)))
     (unless (flycheck/snapshot-version-p current-version)
