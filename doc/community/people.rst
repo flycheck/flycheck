@@ -140,6 +140,7 @@ to Flycheck:
 * Robert Dallas Gray (:gh:`rdallasgray`)
 * Robert O'Connor (:gh:`robbyoconnor`)
 * Robert Zaremba (:gh:`robert-zaremba`)
+* Saša Jovanić (:gh:`Simplify`)
 * Sean Gillespie (:gh:`swgillespie`)
 * Sean Salmon (:gh:`phatcabbage`)
 * Sebastian Beyer (:gh:`sebastianbeyer`)

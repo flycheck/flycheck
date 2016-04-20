@@ -9,6 +9,7 @@
 
   - Go with ``go-unconvert`` [GH-905]
   - Markdown with ``mdl`` [GH-839] [GH-916]
+  - TypeScript with ``tslint`` [GH-947] [GH-949]
 
 - Improvements:
 
