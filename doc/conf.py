@@ -76,6 +76,18 @@ primary_domain = 'el'
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
+# Warn about all undefined references, but exclude references to built-in
+# symbols which we don't document here.
+# TODO: Resolve built-in symbols to the Emacs Lisp references?
+nitpicky = True
+nitpick_ignore = [
+    ('any', 'default-directory'),
+    ('any', 'package-initialize'),
+    ('any', 'package-archives'),
+    ('any', 'user-init-file'),
+    ('any', 'user-emacs-directory'),
+]
+
 # HTML settings
 html_theme = 'alabaster'
 html_theme_options = {
