@@ -27,6 +27,25 @@ provides a good guide to `sign commits`_.
 .. _add your key: https://help.github.com/articles/adding-a-new-gpg-key-to-your-github-account/
 .. _sign commits: https://help.github.com/articles/signing-commits-using-gpg/
 
+.. _flycheck-maintenance-scripts:
+
+Maintenance scripts
+===================
+
+Administrative processes are tedious and time-consuming, so we try to automate
+as much as possible.  The :file:`maint/` directory contains many scripts for
+this purpose.  ``make -C maint/ help`` provides an overview over all
+administrative tasks.
+
+Most of these scripts require Python 3.5 and additional Python libraries.  On OS
+X it is recommended that you use Homebrew_ to install the latest Python version
+with ``brew install python3``.  On Linux you should be able to obtain Python 3.5
+from the package manager of your distribution.
+
+To install all required libraries run ``make -C maint init``.  We recommend that
+you use virtualenv_ to avoid a global installation of Python modules.  ``make
+init`` will warn you if you do not.
+
 Versioning and releases
 =======================
 
@@ -63,7 +82,7 @@ If all is good a new release is a simple as
 
    $ make -C maint release
 
-This runs the release script in :file:`maint/release.el`.  If any of the above
+This runs the release script in :file:`maint/release.py`.  If any of the above
 requirements isn't met the release script will signal an error and abort.
 
 The release script bumps the version number, commits and tags a new release, and

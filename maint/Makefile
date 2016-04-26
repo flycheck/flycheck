@@ -13,12 +13,37 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-EMACS = emacs
-EMACSOPTS =
+PYTHON = python3
+PIP = pip3
+HAVE_PIP := $(shell sh -c "command -v $(PIP)")
 
-# Internal use
-EMACSBATCH = $(EMACS) -Q --batch -L .. $(EMACSOPTS)
+.DEFAULT_GOAL := help
+
+.PHONY: init
+init:
+ifndef HAVE_PIP
+	$(error "$(PIP) not available.  Please run make help.")
+endif
+ifndef VIRTUAL_ENV
+	$(warning "No virtualenv active.  Installing globally is not recommended.")
+ifndef FORCE
+	$(error "Aborted.  Run make FORCE=1 init to override or make help.")
+endif
+endif
+	pip install -r requirements.txt
+
+.PHONY: help
+help:
+	@echo "Available targets:"
+	@echo "  release: Make a Flycheck release"
+	@echo ""
+	@echo "You need Python 3.5 for all maintenance scripts"
+	@echo ""
+	@echo "Run make init to install required libraries.  It is recommended"
+	@echo "that you use virtualenv (https://virtualenv.pypa.io/en/latest/)"
+	@echo "to avoid a global installation of Python packages.  make init"
+	@echo "will warn you if you do not."
 
 .PHONY: release
 release:
-	@$(EMACSBATCH) -l release.el -f flycheck/make-release-batch
+	@./release.py

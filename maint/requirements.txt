@@ -1,0 +1,4 @@
+# Network access
+requests>=2.9
+# Git operations
+GitPython>=2.0
