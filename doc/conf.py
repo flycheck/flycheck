@@ -49,12 +49,28 @@ author = 'Sebastian Wiesner'
 
 def read_version():
     """Extract version number from ``flycheck.el`` and return it as string."""
-    version_pattern = re.compile(r'Version:\s+(\d.+)$')
-    flycheck_el = Path(__file__).parent.parent.joinpath('flycheck.el')
-    for line in flycheck_el.open(encoding='utf-8'):
-        match = version_pattern.search(line)
-        if match:
-            return match.group(1)
+    version_pattern = re.compile(r'^;;\s*Version:\s+(\d.+)$', re.MULTILINE)
+    flycheck = Path(__file__).resolve().parent.parent.joinpath('flycheck.el')
+    match = version_pattern.search(flycheck.read_text())
+    if match:
+        return match.group(1)
+    else:
+        raise ValueError('Failed to parse Flycheck version from '
+                         'Version: of flycheck.el')
+
+
+def read_minimum_emacs_version():
+    """Extract minimum Emacs version from ``flycheck.el``."""
+    version_pattern = re.compile(
+        r'^;; Package-Requires:.*\(emacs\s*"([^"]+)"\).*$', re.MULTILINE)
+    flycheck = Path(__file__).resolve().parent.parent.joinpath('flycheck.el')
+    match = version_pattern.search(flycheck.read_text())
+    if match:
+        return match.group(1)
+    else:
+        raise ValueError('Vailed to parse minimum Emacs version from '
+                         'Package-Requires of flycheck.el!')
+
 
 release = read_version()
 version = '.'.join(release.split('.')[:2])
@@ -66,7 +82,9 @@ master_doc = 'index'
 rst_prolog = """\
 .. role:: elisp(code)
    :language: elisp
-"""
+
+.. |min-emacs| replace:: {emacs_version}
+""".format(emacs_version=read_minimum_emacs_version())
 
 # Build settings
 exclude_patterns = ['_build']

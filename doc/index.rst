@@ -25,11 +25,10 @@ indicators.
 Try out
 =======
 
-Flycheck needs GNU Emacs 24.3 or newer, and works best on Unix systems.
+Flycheck needs GNU Emacs |min-emacs| or newer, and works best on Unix systems.
 **Windows users**, please be aware that Flycheck does not support Windows
 officially, although it should mostly work fine on Windows.  See :ref:`Windows
-support <flycheck-windows-support>` and watch out for `known Windows
-issues`_!
+support <flycheck-windows-support>` and watch out for `known Windows issues`_!
 
 To try Flycheck in your Emacs session install some :ref:`syntax checker tools
 <flycheck-languages>` and type the following in your ``*scratch*`` buffer and
