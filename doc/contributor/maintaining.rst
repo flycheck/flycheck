@@ -46,6 +46,9 @@ To install all required libraries run ``make -C maint init``.  We recommend that
 you use virtualenv_ to avoid a global installation of Python modules.  ``make
 init`` will warn you if you do not.
 
+.. _Homebrew: http://brew.sh
+.. _virtualenv: https://virtualenv.pypa.io/en/latest/
+
 Versioning and releases
 =======================
 
