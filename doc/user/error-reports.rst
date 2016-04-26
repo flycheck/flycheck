@@ -5,8 +5,6 @@
 This document explains how Flycheck shows results of syntax checks in the
 current buffer.
 
-.. todo:: Mention error levels
-
 When a syntax check in the current buffer has finished Flycheck reports the
 results of the check in the current buffer in two ways:
 
