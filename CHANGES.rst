@@ -67,7 +67,7 @@ version number.  Breaking changes may occur at any point.
   - Indicate disabled checkers in verification buffers [GH-749]
   - Do not enable Flycheck Mode in ``fundamental-mode`` buffers [GH-883]
   - Write ``go test`` output to a temporary files [GH-887]
-  - Check whether ``lintr`` is acutally installed [GH-911]
+  - Check whether ``lintr`` is actually installed [GH-911]
 
 - Bug fixes:
 
