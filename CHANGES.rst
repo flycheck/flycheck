@@ -1,5 +1,5 @@
-26-cvs (in development)
-=======================
+26 (Apr 27, 2016)
+=================
 
 Flycheck now has a `Code of Conduct`_ which defines the acceptable behaviour and
 the moderation guidelines for the Flycheck community. [GH-819]
