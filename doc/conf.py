@@ -51,7 +51,7 @@ def read_version():
     """Extract version number from ``flycheck.el`` and return it as string."""
     version_pattern = re.compile(r'^;;\s*Version:\s+(\d.+)$', re.MULTILINE)
     flycheck = Path(__file__).resolve().parent.parent.joinpath('flycheck.el')
-    with flycheck.open() as source:
+    with flycheck.open(encoding='utf-8') as source:
         match = version_pattern.search(source.read())
         if match:
             return match.group(1)
@@ -65,7 +65,7 @@ def read_minimum_emacs_version():
     version_pattern = re.compile(
         r'^;; Package-Requires:.*\(emacs\s*"([^"]+)"\).*$', re.MULTILINE)
     flycheck = Path(__file__).resolve().parent.parent.joinpath('flycheck.el')
-    with flycheck.open() as source:
+    with flycheck.open(encoding='utf-8') as source:
         match = version_pattern.search(source.read())
         if match:
             return match.group(1)
