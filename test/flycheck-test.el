@@ -3173,12 +3173,14 @@ of the file will be interrupted because there are too many #ifdef configurations
          :checker coffee-coffeelint))))
 
 (flycheck-ert-def-checker-test coq coq syntax-error
+  (skip-unless (load "coq" 'noerror 'nomessage))
   (flycheck-ert-should-syntax-check
    "language/coq/syntax-error.v" 'coq-mode
    '(6 12 error "'end' expected after [branches] (in [match_constr])."
        :checker coq)))
 
 (flycheck-ert-def-checker-test coq coq error
+  (skip-unless (load "coq" 'noerror 'nomessage))
   (flycheck-ert-should-syntax-check
    "language/coq/error.v" 'coq-mode
    '(7 21 error "In environment
