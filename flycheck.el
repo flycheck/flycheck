@@ -7666,7 +7666,7 @@ See URL `https://docs.python.org/3.4/library/py_compile.html'."
   :error-patterns
   ;; Python 2.7
   ((error line-start "  File \"" (file-name) "\", line " line "\n"
-          (= 2 (zero-or-more not-newline) "\n")
+          (>= 2 (zero-or-more not-newline) "\n")
           "SyntaxError: " (message) line-end)
    (error line-start "Sorry: IndentationError: "
           (message) "(" (file-name) ", line " line ")"

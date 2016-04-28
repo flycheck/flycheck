@@ -6,6 +6,11 @@
   - Go with ``go-unconvert`` [GH-905]
   - Markdown with ``mdl`` [GH-839] [GH-916]
 
+- Bug fixes:
+
+  - Fix parsing of syntax errors in triple-quoted strings for
+    ``python-pycompile`` [GH-948]
+
 26 (Apr 27, 2016)
 =================
 
