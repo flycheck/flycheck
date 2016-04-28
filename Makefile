@@ -97,7 +97,7 @@ unit: compile
 	$(EMACSBATCH) --load test/run.el -f flycheck-run-tests-main \
 		'(not (tag external-tool))'
 
-.PHONY: int
+.PHONY: integ
 integ: compile
 	$(EMACSBATCH) --load test/run.el -f flycheck-run-tests-main \
 		'(tag external-tool)'
