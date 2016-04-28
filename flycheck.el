@@ -7802,33 +7802,38 @@ See URL `https://sourceforge.net/projects/rpmlint/'."
                             (eq sh-shell 'rpm))))
 
 (flycheck-def-option-var flycheck-markdown-mdl-rules nil markdown-mdl
-  "Enabled rules for mdl.
+  "Rules to enable for mdl.
 
-The value of this variable is a list of strings, where each
-string is the name of an rule to limit.  By default, all the
-rules are enabled.
+The value of this variable is a list of strings each of which is
+the name of a rule to enable.
 
-See the mdl configuration documentation at URL
+By default all rules are enabled.
+
+See URL
 `https://github.com/mivok/markdownlint/blob/master/docs/configuration.md'."
   :type '(repeat :tag "Enabled rules"
                  (string :tag "rule name"))
-  :safe #'flycheck-string-list-p)
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "27"))
 
 (flycheck-def-option-var flycheck-markdown-mdl-tags nil markdown-mdl
-  "Enabled tag rules for mdl.
+  "Rule tags to enable for mdl.
 
-The value of this variable is a list of strings, where each
-string is the name of an rule to limit.  By default, all the tag
-rules are enabled.
+The value of this variable is a list of strings each of which is
+the name of a rule tag.  Only rules with these tags are enabled.
 
-See the mdl configuration documentation at URL
+By default all rules are enabled.
+
+See URL
 `https://github.com/mivok/markdownlint/blob/master/docs/configuration.md'."
   :type '(repeat :tag "Enabled tags"
                  (string :tag "tag name"))
-  :safe #'flycheck-string-list-p)
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "27"))
 
 (flycheck-def-config-file-var flycheck-markdown-mdl-style markdown-mdl nil
-  :safe #'stringp)
+  :safe #'stringp
+  :package-version '(flycheck . "27"))
 
 (flycheck-define-checker markdown-mdl
   "Markdown checker using mdl.
