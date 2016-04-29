@@ -2,10 +2,20 @@
  Maintainer’s Guide
 ====================
 
+Git workflow
+============
+
+.. _flycheck-pull-requests:
+
+Pull request
+------------
+
+.. todo::
+
 .. _flycheck-git-signatures:
 
 Signatures for commits and tags
-===============================
+-------------------------------
 
 We sign all release tags as part of our :ref:`flycheck-release-process`.  Thus
 you need a GPG key pair for Git.  Github provides a great guide which helps you
