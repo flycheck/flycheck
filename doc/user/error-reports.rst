@@ -82,20 +82,22 @@ Fringe icons
 
 .. option:: flycheck-indication-mode
 
-   .. todo::
+   .. todo:: Document indication mode
 
 .. face:: flycheck-fringe-error
           flycheck-fringe-warning
           flycheck-fringe-info
 
+   .. todo:: Document fringe faces
+
 Error thresholds
 ================
 
-.. todo::
+.. todo:: Document error threshold behaviour
 
 .. option:: flycheck-checker-error-threshold
 
-   .. todo::
+   .. todo:: Document error threshold
 
 Clear results
 =============
@@ -103,4 +105,4 @@ Clear results
 .. command:: C-c ! C
              M-x flycheck-clear
 
-   .. todo::
+   .. todo:: Document clearing

@@ -10,7 +10,7 @@ Git workflow
 Pull request
 ------------
 
-.. todo::
+.. todo:: Explain how to review and merge pull requests
 
 .. _flycheck-git-signatures:
 
