@@ -97,7 +97,10 @@ Run ``make help`` to see a list of all available targets.  Some common ones are:
   eventually be removed.
 - ``make integ`` runs all integration tests for Flycheck syntax checkers.  These
   tests are very dependent on the checker programs and their versions; expect
-  failures when running this target.
+  failures when running this target.  Set :makevar:`SELECTOR` to run only tests
+  matching a specific ERT selector, e.g. ``make SELECTOR='(language haskell)'
+  integ`` to run only integration tests for Haskell.  ``make LANGUAGE=haskell
+  integ`` is a shortcut for this.
 
 .. _Cask: http://cask.readthedocs.org/
 .. _Buttercup: https://github.com/jorgenschaefer/emacs-buttercup
@@ -113,10 +116,10 @@ Flycheck. Github provides great documentation about `Pull Requests`_.
 Please make your pull requests against the ``master`` branch.
 
 Use ``make specs test`` to test your pull request locally. When making changes
-to syntax checkers of a specific language, it’s also a good idea to run ``make
-integ`` and check whether the tests for the particular language still work.  You
-may safely ignore failures for other languages; a successful ``make integ`` is
-by no means mandatory for pull requests!
+to syntax checkers of a specific language, it’s also a good idea to run
+:samp:`make LANGUAGE={language} integ` and check whether the tests for the
+particular language still work.  A successful ``make integ`` is by no means
+mandatory for pull requests, though, we will test your changes, too.
 
 All pull requests are reviewed by a :ref:`maintainer <flycheck-maintainers>`.
 Feel free to mention individual developers (e.g. ``@lunaryorn``) to request a

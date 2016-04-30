@@ -23,6 +23,10 @@ OPTIPNG = optipng
 # Program options
 EMACSOPTS =
 PATTERN = .*
+LANGUAGE =
+ifdef LANGUAGE
+SELECTOR = (language $(LANGUAGE))
+endif
 
 # Internal variables
 EMACSBATCH = $(CASK) exec $(EMACS) -Q --batch -L . $(EMACSOPTS)
@@ -95,12 +99,12 @@ specs: compile
 .PHONY: unit
 unit: compile
 	$(EMACSBATCH) --load test/run.el -f flycheck-run-tests-main \
-		'(not (tag external-tool))'
+		'(and (not (tag external-tool)) $(SELECTOR))'
 
 .PHONY: integ
 integ: compile
 	$(EMACSBATCH) --load test/run.el -f flycheck-run-tests-main \
-		'(tag external-tool)'
+		'(and (tag external-tool) $(SELECTOR))'
 
 .PHONY: images
 images: $(IMGS)
