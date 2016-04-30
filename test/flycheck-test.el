@@ -3287,6 +3287,11 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
    '(11 nil warning "All variables and subroutines might as well have a documentation string"
         :checker emacs-lisp-checkdoc)))
 
+(flycheck-ert-def-checker-test (emacs-lisp-checkdoc) emacs-lisp
+                               inherits-checkdoc-variables
+  (flycheck-ert-should-syntax-check
+   "language/emacs-lisp/local-checkdoc-variables.el" 'emacs-lisp-mode))
+
 (flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
                                checks-compressed-file
   (flycheck-ert-should-syntax-check
