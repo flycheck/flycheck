@@ -3289,6 +3289,9 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 
 (flycheck-ert-def-checker-test (emacs-lisp-checkdoc) emacs-lisp
                                inherits-checkdoc-variables
+  ;; This test doesn't run on 24.3 and earlier because the corresponding
+  ;; checkdoc variables were only introduced in 24.4.
+  (skip-unless (version<= "24.4" emacs-version))
   (flycheck-ert-should-syntax-check
    "language/emacs-lisp/local-checkdoc-variables.el" 'emacs-lisp-mode))
 
