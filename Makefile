@@ -134,4 +134,4 @@ help:
 	@echo '  $(CASK): $(if $(HAVE_CASK),yes,no)'
 	@echo ''
 	@echo 'You need $(CASK) to develop Flycheck.'
-	@echo 'See http://cask.readthedocs.org/ for more information.'
+	@echo 'See http://cask.readthedocs.io/ for more information.'

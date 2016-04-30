@@ -7596,7 +7596,7 @@ Update the error level of ERR according to
   "A Python syntax and style checker using Flake8.
 
 Requires Flake8 2.0 or newer. See URL
-`https://flake8.readthedocs.org/'."
+`https://flake8.readthedocs.io/'."
   :command ("flake8"
             "--format=default"
             (config-file "--config" flycheck-flake8rc)

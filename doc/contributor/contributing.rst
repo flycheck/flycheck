@@ -102,7 +102,7 @@ Run ``make help`` to see a list of all available targets.  Some common ones are:
   integ`` to run only integration tests for Haskell.  ``make LANGUAGE=haskell
   integ`` is a shortcut for this.
 
-.. _Cask: http://cask.readthedocs.org/
+.. _Cask: http://cask.readthedocs.io/
 .. _Buttercup: https://github.com/jorgenschaefer/emacs-buttercup
 
 Pull requests

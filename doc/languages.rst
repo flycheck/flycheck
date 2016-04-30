@@ -648,7 +648,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Needs PHP Code Sniffer 2.6 or newer.
 
-      .. _PHP Code Sniffer: https://github.com/squizlabs/PHP_CodeSniffer
+      .. _PHP Code Sniffer: http://pear.php.net/package/PHP_CodeSniffer
 
       .. option:: flycheck-phpcs-standard
 
@@ -692,7 +692,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: python-flake8
 
-      Check syntax and lint with `flake8 <https://flake8.readthedocs.org/>`_.
+      Check syntax and lint with `flake8 <https://flake8.readthedocs.io/>`_.
 
       .. option:: flycheck-flake8-error-level-alist
 
