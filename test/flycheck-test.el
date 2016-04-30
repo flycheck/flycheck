@@ -3814,14 +3814,14 @@ Why not:
 (flycheck-ert-def-checker-test php php syntax-error
   (flycheck-ert-should-syntax-check
    "language/php/syntax-error.php" 'php-mode
-   '(8 nil error "syntax error, unexpected ')', expecting '('" :checker php)))
+   '(8 nil error "syntax error, unexpected ')', expecting '['" :checker php)))
 
 (flycheck-ert-def-checker-test (php php-phpcs php-phpmd) php nil
   :tags '(phpmd-xml checkstyle-xml)
   (flycheck-ert-should-syntax-check
    "language/php/warnings.php" 'php-mode
-   '(19 1 error "Missing class doc comment"
-        :id "PEAR.Commenting.ClassComment.Missing" :checker php-phpcs)
+   '(1 1 error "Missing file doc comment"
+       :id "PEAR.Commenting.FileComment.Missing" :checker php-phpcs)
    '(21 nil warning "Avoid unused private fields such as '$FOO'."
         :id "UnusedPrivateField" :checker php-phpmd)
    '(21 20 error "Private member variable \"FOO\" must be prefixed with an underscore"
