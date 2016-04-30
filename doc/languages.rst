@@ -644,9 +644,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: php-phpcs
 
-      Check style with `PHP CodeSniffer`_.
+      Check style with `PHP Code Sniffer`_.
 
-      .. _PHP CodeSniffer: https://github.com/squizlabs/PHP_CodeSniffer
+      Needs PHP Code Sniffer 2.6 or newer.
+
+      .. _PHP Code Sniffer: https://github.com/squizlabs/PHP_CodeSniffer
 
       .. option:: flycheck-phpcs-standard
 

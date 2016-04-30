@@ -7413,11 +7413,18 @@ or as path to a standard specification."
   :safe #'stringp)
 
 (flycheck-define-checker php-phpcs
-  "A PHP style checker using PHP_CodeSniffer.
+  "A PHP style checker using PHP Code Sniffer.
+
+Needs PHP Code Sniffer 2.6 or newer.
 
 See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
   :command ("phpcs" "--report=checkstyle"
-            (option "--standard=" flycheck-phpcs-standard concat))
+            (option "--standard=" flycheck-phpcs-standard concat)
+            ;; Pass original file name to phpcs.  We need to concat explicitly
+            ;; here, because phpcs really insists to get option and argument as
+            ;; a single command line argument :|
+            (eval (when (buffer-file-name)
+                    (concat "--stdin-path=" (buffer-file-name)))))
   :standard-input t
   :error-parser flycheck-parse-checkstyle
   :error-filter

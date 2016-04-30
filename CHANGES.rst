@@ -1,6 +1,10 @@
 27-cvs (in development)
 =======================
 
+- **Breaking changes**
+
+  - Require PHP Code Sniffer 2.6 or newer for ``php-phpcs`` [GH-921]
+
 - New syntax checkers:
 
   - Go with ``go-unconvert`` [GH-905]
@@ -10,6 +14,8 @@
 
   - Fix parsing of syntax errors in triple-quoted strings for
     ``python-pycompile`` [GH-948]
+  - Correctly handle rules based on the current file name in ``php-phpcs``
+    [GH-921]
 
 26 (Apr 27, 2016)
 =================
