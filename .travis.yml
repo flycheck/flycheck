@@ -33,6 +33,8 @@ script:
   - if [[ -n $EMACS_VERSION ]]; then make compile; fi
   - if [[ -n $EMACS_VERSION ]]; then make unit; fi
   - if [[ -n $EMACS_VERSION ]]; then make specs; fi
+  # Run those integration tests that we can safely run on Travis CI
+  - if [[ -n $EMACS_VERSION ]]; then make LANGUAGE=emacs-lisp integ; fi
   # Build and deploy the manual
   - if [[ $BUILD_MANUAL == yes ]]; then make -C doc SPHINXOPTS=-n html; fi
 notifications:
