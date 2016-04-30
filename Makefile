@@ -111,20 +111,20 @@ images: $(IMGS)
 
 .PHONY: help
 help:
-	@echo "Run 'make init' first to install and update all local dependencies."
-	@echo ""
-	@echo "Available targets:"
-	@echo "  init:    Initialise the project.  RUN FIRST!"
-	@echo "  compile: Byte-compile Emacs Lisp sources"
-	@echo "  specs:   Run all buttercup specs for Flycheck"
-	@echo "  unit:    Run all ERT unit tests for Flycheck (legacy)"
-	@echo "  integ:   Run all integration tests for Flycheck"
-	@echo "  images:  Generate PNG images from SVG sources"
-	@echo "  clean:   Clean compiled files"
-	@echo "  purge:   Clean everything"
-	@echo ""
-	@echo "Available programs:"
-	@echo "  $(CASK): $(if $(HAVE_CASK),yes,no)"
-	@echo ""
-	@echo "You need $(CASK) to develop Flycheck."
-	@echo "See http://cask.readthedocs.org/ for more information."
+	@echo 'Run `make init` first to install and update all local dependencies.'
+	@echo ''
+	@echo 'Available targets:'
+	@echo '  init:    Initialise the project.  RUN FIRST!'
+	@echo '  compile: Byte-compile Emacs Lisp sources'
+	@echo '  specs:   Run all buttercup specs for Flycheck'
+	@echo '  unit:    Run all ERT unit tests for Flycheck (legacy)'
+	@echo '  integ:   Run all integration tests for Flycheck'
+	@echo '  images:  Generate PNG images from SVG sources'
+	@echo '  clean:   Clean compiled files'
+	@echo '  purge:   Clean everything'
+	@echo ''
+	@echo 'Available programs:'
+	@echo '  $(CASK): $(if $(HAVE_CASK),yes,no)'
+	@echo ''
+	@echo 'You need $(CASK) to develop Flycheck.'
+	@echo 'See http://cask.readthedocs.org/ for more information.'

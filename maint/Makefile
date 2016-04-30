@@ -34,15 +34,15 @@ endif
 
 .PHONY: help
 help:
-	@echo "Available targets:"
-	@echo "  release: Make a Flycheck release"
-	@echo ""
-	@echo "You need Python 3.5 for all maintenance scripts"
-	@echo ""
-	@echo "Run make init to install required libraries.  It is recommended"
-	@echo "that you use virtualenv (https://virtualenv.pypa.io/en/latest/)"
-	@echo "to avoid a global installation of Python packages.  make init"
-	@echo "will warn you if you do not."
+	@echo 'Available targets:'
+	@echo '  release: Make a Flycheck release'
+	@echo ''
+	@echo 'You need Python 3.5 for all maintenance scripts'
+	@echo ''
+	@echo 'Run make init to install required libraries.  It is recommended'
+	@echo 'that you use virtualenv (https://virtualenv.pypa.io/en/latest/)'
+	@echo 'to avoid a global installation of Python packages.  make init'
+	@echo 'will warn you if you do not.'
 
 .PHONY: release
 release:

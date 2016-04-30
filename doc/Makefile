@@ -33,25 +33,25 @@ HAVE_PIP := $(shell sh -c "command -v $(PIP)")
 
 .PHONY: help
 help:
-	@echo "Available targets:"
-	@echo "  html: Build HTML documentation to $(BUILDDIR)/html"
-	@echo "  html-auto: Like html, but automatically rebuild on changes"
-	@echo "  linkcheck: Check all links and references"
-	@echo "  clean: Remove generated documentation"
-	@echo ""
-	@echo "To build the documentation you need $(SPHINXBUILD)."
-	@echo "For *-auto targets you also need $(SPHINXAUTOBUILD)."
-	@echo ""
-	@echo "Available programs:"
-	@echo "  $(SPHINXBUILD): $(if $(HAVE_SPHINXBUILD),yes,no)"
-	@echo "  $(SPHINXAUTOBUILD): $(if $(HAVE_SPHINXAUTOBUILD),yes,no)"
-	@echo ""
-	@echo "You need Python 3.4 or newer to install Sphinx for Flycheck."
-	@echo ""
-	@echo "Run make init to install all missing tools.  It is recommended"
-	@echo "that you use virtualenv (https://virtualenv.pypa.io/en/latest/)"
-	@echo "to avoid a global installation of Python packages.  make init"
-	@echo "will warn you if you do not."
+	@echo 'Available targets:'
+	@echo '  html:      Build HTML documentation to $(BUILDDIR)/html'
+	@echo '  html-auto: Like html, but automatically rebuild on changes'
+	@echo '  linkcheck: Check all links and references'
+	@echo '  clean:     Remove generated documentation'
+	@echo ''
+	@echo 'To build the documentation you need $(SPHINXBUILD).'
+	@echo 'For *-auto targets you also need $(SPHINXAUTOBUILD).'
+	@echo ''
+	@echo 'Available programs:'
+	@echo '  $(SPHINXBUILD): $(if $(HAVE_SPHINXBUILD),yes,no)'
+	@echo '  $(SPHINXAUTOBUILD): $(if $(HAVE_SPHINXAUTOBUILD),yes,no)'
+	@echo ''
+	@echo 'You need Python 3.4 or newer to install Sphinx for Flycheck.'
+	@echo ''
+	@echo 'Run make init to install all missing tools.  It is recommended'
+	@echo 'that you use virtualenv (https://virtualenv.pypa.io/en/latest/)'
+	@echo 'to avoid a global installation of Python packages.  make init'
+	@echo 'will warn you if you do not.'
 
 .PHONY: init
 init:
