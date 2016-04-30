@@ -6,7 +6,7 @@
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
 ;; Maintainer: Sebastian Wiesner <swiesner@lunaryorn.com>
 ;;             Clément Pit--Claudel <clement.pitclaudel@live.com>
-;; URL: https://www.flycheck.org
+;; URL: http://www.flycheck.org
 ;; Keywords: convenience, languages, tools
 ;; Version: 27-cvs
 ;; Package-Requires: ((dash "2.12.1") (pkg-info "0.4") (let-alist "1.0.4") (seq "1.11") (emacs "24.3"))
