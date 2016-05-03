@@ -1430,24 +1430,6 @@ A checker is disabled if it is contained in
 `flycheck-disabled-checkers'."
   (memq checker flycheck-disabled-checkers))
 
-(defun flycheck-possibly-suitable-checkers ()
-  "Find possibly suitable checkers for the current buffer.
-
-Return a list of all syntax checkers which could possibly be
-suitable for the current buffer, if any problems in their setup
-were fixed.
-
-Currently this function collects all registered syntax checkers
-whose `:modes' contain the current major mode or which do not
-have any `:modes', but a `:predicate' that returns non-nil for
-the current buffer."
-  (let (checkers)
-    (dolist (checker flycheck-checkers)
-      (let ((modes (flycheck-checker-get checker 'modes)))
-        (when (memq major-mode modes)
-          (push checker checkers))))
-    (nreverse checkers)))
-
 
 ;;; Generic syntax checkers
 (defconst flycheck-generic-checker-version 2
@@ -1728,17 +1710,22 @@ A valid checker is a symbol defined as syntax checker with
        (= (or (get checker 'flycheck-generic-checker-version) 0)
           flycheck-generic-checker-version)))
 
+(defun flycheck-checker-supports-major-mode-p (checker)
+  "Whether a generic CHECKER supports the current `major-mode'.
+
+Return non-nil if CHECKER may be used in the current
+`major-mode', and nil otherwise."
+  (memq major-mode (flycheck-checker-get checker 'modes)))
+
 (defun flycheck-may-use-checker (checker)
   "Whether a generic CHECKER may be used.
 
 Return non-nil if CHECKER may be used for the current buffer, and
 nil otherwise."
-  (let ((modes (flycheck-checker-get checker 'modes))
-        (predicate (flycheck-checker-get checker 'predicate)))
-    (and (flycheck-valid-checker-p checker)
-         (not (flycheck-disabled-checker-p checker))
-         (memq major-mode modes)
-         (funcall predicate))))
+  (and (flycheck-valid-checker-p checker)
+       (not (flycheck-disabled-checker-p checker))
+       (flycheck-checker-supports-major-mode-p checker)
+       (funcall  (flycheck-checker-get checker 'predicate))))
 
 (defun flycheck-may-use-next-checker (next-checker)
   "Determine whether NEXT-CHECKER may be used."
@@ -1923,8 +1910,7 @@ into the verification results."
                    (flycheck-verify-generic-checker checker))))
     (when with-mm
       (with-current-buffer buffer
-        (let* ((modes (flycheck-checker-get checker 'modes))
-               (mm-supported (memq major-mode modes))
+        (let* ((mm-supported (flycheck-checker-supports-major-mode-p checker))
                (message-and-face
                 (if mm-supported
                     (cons (format "`%s' supported" major-mode) 'success)
@@ -2029,7 +2015,8 @@ possible problems are shown."
     (save-buffer))
 
   (let ((buffer (current-buffer))
-        (checkers (flycheck-possibly-suitable-checkers)))
+        (checkers (seq-filter #'flycheck-checker-supports-major-mode-p
+                              flycheck-checkers)))
 
     ;; Now print all applicable checkers
     (with-help-window (get-buffer-create " *Flycheck checkers*")
