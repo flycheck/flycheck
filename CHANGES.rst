@@ -7,6 +7,7 @@
   - Remove ``--config`` option in ``lua-luacheck`` in favour of ``luacheck``'s
     own ``.luacheckrc`` detection. Therefore ``flycheck-luacheckrc`` is
     no longer used [GH-1057]
+  - ``:modes`` is now mandatory for syntax checker definitions [GH-1071]
 
 - New syntax checkers:
 
