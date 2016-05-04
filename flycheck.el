@@ -2253,9 +2253,6 @@ buffer manually.
 
 
 ;;; Syntax checker selection for the current buffer
-(defvar-local flycheck-last-checker nil
-  "The last checker used for the current buffer.")
-
 (defun flycheck-get-checker-for-buffer ()
   "Find the checker for the current buffer.
 
