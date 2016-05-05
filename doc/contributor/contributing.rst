@@ -206,20 +206,24 @@ columns which correspond to ``S-`` labels on Github:
 - The *Backlog* (no ``S`` label) holds all incoming issues. Pull requests
   waiting for review sit here, as well as bugs that were reported or stories and
   tasks that are not ready to work on yet.
+- *Community* (``S-needs your love`` label) issues are those that we will not
+  work on ourselves. These issues need pull requests from the community to be
+  solved. Look at this column to find spots to contribute to.
+- *Blocked* (``S-blocked`` label) issues are waiting for something, like a
+  change in an upstream project or a feedback from another developer. A \ ``B-``
+  label may provide additional clue why the issue is blocked. Blocked issues may
+  also appear in the backlog, but in this column we actively seek to remove the
+  blockers and move the issue to *Ready*.
 - In *Ready* (``S-ready`` label) we keep issues that we are ready to work
   on. This includes bugs which we can reproduce and fix, and pull requests that
   were reviewed and are ready to be merged now. Look at this column to see
   what’s coming next to Flycheck.
 - When we start to work on an issue it moves into *In Progress* (``S-in
   progress`` label).
-- *Blocked* (``S-blocked`` label) issues are waiting for something, like a
-  change in an upstream project or a feedback from another developer. A \ ``B-``
-  label may provide additional clue why the issue is blocked. Blocked issues may
-  also appear in the backlog, but in this column we actively seek to remove the
-  blockers and move the issue to *Ready*.
-- *Community* (``S-needs your love`` label) issues are those that we will not
-  work on ourselves. These issues need pull requests from the community to be
-  solved. Look at this column to find spots to contribute to.
+- Open pull requests, whether from contributors or core developers, start in the
+  ``S-to review`` column for review by maintainers.  Once review is complete we
+  will either merge the pull request and thus move it to *Done*, or move the
+  issue back to ``S-in progress`` if the pull request still needs work.
 - Eventually issues move into *Done* when they are closed.
 
 In addition to these columns which reflect the basic issue workflow we
