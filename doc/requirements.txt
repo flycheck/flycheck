@@ -2,6 +2,8 @@
 Sphinx>=1.3
 # Automatically build documentation on changes
 sphinx-autobuild
+# Sphinx theme
+alabaster>=0.7.8
 # Syntax highlighting
 Pygments>=2.1
 # Network access
