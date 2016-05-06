@@ -6,7 +6,11 @@
 
 The Emacs community has produced a number of extensions to Flycheck.  This page
 lists all that we know of and can safely recommend to our users.  *Official*
-extensions are maintained by the :ref:`Flycheck maintainers
+extensions are (co-)maintained by the :ref:`Flycheck maintainers
+<flycheck-maintainers>` who will take care to update official extensions in case
+of breaking changes in Flycheck and work to provide extra API for extensions if
+needed.  If you'd like to make your extension an *official* one and move it into
+the `Flycheck Github organisation`_ please contact a :ref:`maintainer
 <flycheck-maintainers>`.
 
 If you do know extensions not in this list, or would like to see your own
@@ -17,6 +21,7 @@ extensions for their awesome work.  Without your help and support Flycheck would
 not be what it is today.
 
 .. _add it: https://github.com/flycheck/flycheck/edit/master/doc/community/extensions.rst
+.. _Flycheck Github organisation: https://github.com/flycheck
 
 User interface
 ==============
