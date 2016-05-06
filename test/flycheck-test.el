@@ -3473,6 +3473,14 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
      '(9 9 warning "Ignored `error` returned from `os.Stat(\"enoent\")`"
          :checker go-errcheck))))
 
+(flycheck-ert-def-checker-test go-errcheck go nil
+  (flycheck-ert-with-env
+      `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
+    (flycheck-ert-should-syntax-check
+     "language/go/src/errcheck/errcheck2.go" 'go-mode
+     '(4 6 error "undeclared name: x"
+         :checker go-errcheck))))
+
 (flycheck-ert-def-checker-test go-unconvert go nil
   :tags '(language-go external-tool)
   (flycheck-ert-with-env
