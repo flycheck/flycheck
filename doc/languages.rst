@@ -981,6 +981,25 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _Texinfo: http://www.gnu.org/software/texinfo/
 
+.. supported-language:: TypeScript
+
+   .. syntax-checker:: typescript-tslint
+
+      Check syntax and style with `TSLint <https://github.com/palantir/tslint>`_.
+
+      .. syntax-checker-config-file:: flycheck-typescript-tslint-config
+
+      .. important::
+
+         A configuration file is mandatory for this syntax checker.  If
+         `flycheck-typescript-tslint-config` is not set or the configuration
+         file not found this syntax checker will not be applied.
+
+      .. option:: flycheck-typescript-tslint-rulesdir
+
+         Additional rules directory, for user created rules. For more details please
+         see `TSLint CLI usage <http://palantir.github.io/tslint/usage/cli/>`_.
+
 .. supported-language:: Verilog
 
    .. syntax-checker:: verilog-verilator
