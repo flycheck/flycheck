@@ -6738,7 +6738,7 @@ See URL `https://github.com/kisielk/errcheck'."
           (message)
           line-end)
    (warning line-start
-            (file-name) ":" line ":" column (one-or-more "\t")
+            (file-name) ":" line ":" column "\t"
             (message)
             line-end))
   :error-filter
