@@ -1438,6 +1438,17 @@ A checker is disabled if it is contained in
 Flycheck will not use syntax checkers whose generic version is
 less than this constant.")
 
+(defconst flycheck-checker-kinds '(syntax type lint style test)
+  "Supported kinds of syntax checkers.
+
+Entries are in order of priority.
+
+- `syntax': Syntax checkers
+- `type': Type checkers
+- `lint': Linters
+- `style': Code style checkers
+- `test': Test runners.")
+
 (defsubst flycheck--checker-property-name (property)
   "Return the SYMBOL property for checker PROPERTY."
   (intern (concat "flycheck-" (symbol-name property))))
@@ -1716,6 +1727,18 @@ A valid checker is a symbol defined as syntax checker with
 Return non-nil if CHECKER may be used in the current
 `major-mode', and nil otherwise."
   (memq major-mode (flycheck-checker-get checker 'modes)))
+
+(defun flycheck-checker-kind-lessp (checker1 checker2)
+  "Whether kind of CHECKER1 is less than kind of CHECKER2.
+
+In this case less than means that CHECKER1 should run before
+CHECKER2.
+
+Return non-nil if that is the case, and nil otherwise."
+  (< (seq-position flycheck-checker-kinds
+                   (flycheck-checker-get checker1 'kind) #'eq)
+     (seq-position flycheck-checker-kinds
+                   (flycheck-checker-get checker2 'kind) #'eq)))
 
 (defun flycheck-may-use-checker (checker)
   "Whether a generic CHECKER may be used.
@@ -2227,7 +2250,7 @@ buffer manually.
     (flycheck-teardown))))
 
 
-;;; Syntax checker selection for the current buffer
+;;; Legacy syntax checker selection for the current buffer
 (defun flycheck-get-checker-for-buffer ()
   "Find the checker for the current buffer.
 
@@ -2313,6 +2336,57 @@ buffer-local value of `flycheck-disabled-checkers'."
     (unless (memq checker flycheck-disabled-checkers)
       (push checker flycheck-disabled-checkers)
       (flycheck-buffer))))
+
+
+;;; Syntax checker chain selection
+(defun flycheck--collect-checker-unless-evicted (collected checker)
+  "Add CHECKER to COLLECTED unless it's evicted.
+
+COLLECTED is a pair `(ACCEPTED . EVICTED)' where ACCEPTED is a
+list of already collected checkers and EVICTED a list of already
+evicted checkers.
+
+If CHECKER is contained in EVICTED, or if CHECKER conflicts with
+any checker in ACCEPTED, return COLLECTED and ignore CHECKER.
+
+Otherwise return a new pair where the first item is ACCEPTED with
+CHECKER added to the front, and EVICTED is EVICTED plus all
+conflicting checkers of CHECKER."
+  (pcase-let ((conflicts (flycheck-checker-get checker 'conflicts-with))
+              (`(,accepted . ,evicted) collected))
+    (cond
+     ;; Skip the checker if it's already evicted,…
+     ((memq checker evicted) collected)
+     ;; …or if it conflicts with any collected checker
+     ((seq-intersection accepted conflicts #'eq) collected)
+     ;; Otherwise collect the checker and track its evictions
+     (t (cons (cons checker accepted) (append conflicts evicted))))))
+
+(defun flycheck-evict-checkers (checkers)
+  "Evict all conflicting syntax checkers from CHECKERS.
+
+Conflict resolution happens from front to back: Always accept the
+`car' of CHECKERS and then evict any checkers that conflict with
+any syntax checker already accepted, in either direction.
+
+Return CHECKERS but with all conflicting checkers removed."
+  (pcase-let ((`(,checkers . ,_)
+               (seq-reduce #'flycheck--collect-checker-unless-evicted
+                           checkers nil)))
+    ;; The above reduction collects in reverse order, let's rectify that.
+    (nreverse checkers)))
+
+(defun flycheck-get-syntax-checker-chain-for-buffer ()
+  "Get the complete syntax checker chain for the current buffer.
+
+Return a list of all syntax checkers to apply on the current
+checker in order."
+  ;; Luckily `seq-sort' calls out to `sort' internally which is stable, thus
+  ;; sorting by.
+  (pcase-let ((candidates (seq-sort #'flycheck-checker-kind-lessp
+                                    (seq-filter #'flycheck-may-use-checker
+                                                flycheck-checkers))))
+    (flycheck-evict-checkers candidates)))
 
 
 ;;; Syntax checks for the current buffer
