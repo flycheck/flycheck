@@ -38,7 +38,8 @@ This function is ABSOLUTELY INSECURE, use only and exclusively for testing."
   ;; read beyond EOF and never finishes.
   (let* ((process-connection-type nil)
          (gpg (start-process "flycheck-buttercup-gpg" nil
-                             "gpg" "--batch" "--no-tty" "-c" "--passphrase"
+                             epg-gpg-program "--batch" "--no-tty"
+                             "-c" "--passphrase"
                              passphrase "-o" filename "-")))
     (process-send-string gpg string)
     (process-send-eof gpg)
