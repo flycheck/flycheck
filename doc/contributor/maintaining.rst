@@ -86,6 +86,25 @@ provides a good guide to `sign commits`_.
 .. _add your key: https://help.github.com/articles/adding-a-new-gpg-key-to-your-github-account/
 .. _sign commits: https://help.github.com/articles/signing-commits-using-gpg/
 
+Tooling and Services
+====================
+
+In addition to Github_ where we host code and do code reviews we use a bit of
+extra tooling and some 3rd party services for Flycheck:
+
+* ReadTheDocs_ hosts http://www.flycheck.org and automatically rebuilds it on
+  every change.  It works mostly automatically and requires little
+  configuration.
+* `Travis CI`_ runs our tests after every push and for every pull request.
+  It's configured through ``.travis.yml``.
+
+All :ref:`maintainers <flycheck-maintainers>` have administrative access to
+these services so in case of an issue just contact them.
+
+.. _Github: https://github.com/flycheck
+.. _ReadTheDocs: https://readthedocs.org/projects/flycheck/
+.. _Travis CI: https://travis-ci.org/flycheck/flycheck
+
 .. _flycheck-maintenance-scripts:
 
 Maintenance scripts
