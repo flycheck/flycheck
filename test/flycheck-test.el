@@ -4145,8 +4145,7 @@ Why not:
     (flycheck-ert-should-syntax-check
      "language/rust/src/multiline-error.rs" 'rust-mode
      '(7 9 error "mismatched types:
- expected `u8`,\n    found `i8`
-(expected u8,\n    found i8)" :checker rust :id "E0308")
+ expected `u8`,\n    found `i8`" :checker rust :id "E0308")
      '(7 9 info "run `rustc --explain E0308` to see a detailed explanation"
         :checker rust))))
 
