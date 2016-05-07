@@ -5,10 +5,59 @@
 Git workflow
 ============
 
+Our Git workflow is simple:
+
+* The ``master`` branch is always shippable.
+* Every feature and every non-trivial change goes through a pull request.
+
+GitHub calls this the “GitHub Flow” and has a very nice `visual guide`_ for this
+model.
+
+.. _visual guide: https://guides.github.com/introduction/flow/
+
+.. _flycheck-branch-rules:
+
+Branch rules
+------------
+
+Our workflow implies a couple of rules about which branches to push code to:
+
+* Please do not commit directly to ``master`` unless it’s a trivial change,
+  a safe refactoring, a small bug or spelling fix, etc.  If in doubt please use
+  a separate branch and open a `pull request`_.
+* Please commit new features, larger changes and refactorings and updates to
+  documentation to separate branches and open a pull request for review and
+  discussion.
+
+.. important::
+
+   When creating a new branch please use a *descriptive name* to communicate the
+   purpose of the branch to other developers and maintainers.  ``fix-bug-42`` is
+   not a great name, but ``42-fix-void-function-error-in-error-list`` is.
+
+   If your branch addresses a specific Github issue please name your branch
+   :samp:`{issue}-{description}`, where ``issue`` is the number of the Github
+   issue *without* any prefix and ``description`` is the description of the
+   branch.  This convention helps us to link branches to issues and has the
+   added bonus of automatically moving issues into "In progress" on our `Waffle
+   board`_.
+
+We do not enforce these rules to give you the freedom to ignore them when need
+be, like in the case of a very urgent but non-trivial bug fix.  But please do
+try to follow these rules most of the time as they help us to maintain a high
+code quality in ``master``.
+
+For :ref:`maintainers <flycheck-maintainers>` these rules are relaxed: They may
+commit to any branch at any time.  Nonetheless we also recommend that
+maintainers open pull requests for discussion.
+
+.. _pull request: https://help.github.com/articles/using-pull-requests/
+.. _waffle board: https://waffle.io/flycheck/flycheck
+
 .. _flycheck-pull-requests:
 
-Pull request
-------------
+Pull requests
+-------------
 
 .. todo:: Explain how to review and merge pull requests
 
