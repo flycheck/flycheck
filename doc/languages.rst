@@ -846,6 +846,13 @@ to view the docstring of the syntax checker.  Likewise, you may use
          The type of the crate to check, as string for the ``--crate-type``
          option.
 
+      .. option:: flycheck-rust-binary-name
+
+         The name of the binary to pass to ``cargo rustc --bin``, as a string.
+
+         Only required when `flycheck-rust-crate-type` is ``bin`` and the crate
+         has multiple targets.
+
       .. option:: flycheck-rust-library-path
 
          A list of additional library directories. Relative paths are relative

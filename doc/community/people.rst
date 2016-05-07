@@ -122,6 +122,7 @@ to Flycheck:
 * Drew Wells (:gh:`drewwells`)
 * Erik Hetzner (:gh:`egh`)
 * Fanael Linithien (:gh:`Fanael`)
+* :gh:`fmdkd`
 * Gereon Frey (:gh:`gfrey`)
 * Gulshan Singh (:gh:`gsingh93`)
 * Iain Beeston (:gh:`iainbeeston`)

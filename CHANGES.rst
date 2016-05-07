@@ -1,6 +1,10 @@
 28-cvs (in development)
 =======================
 
+- New features:
+
+  - Add option to set binary name for ``rust-cargo`` [GH-958]
+
 27 (May 08, 2016)
 =================
 
