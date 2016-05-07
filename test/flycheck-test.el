@@ -4124,7 +4124,8 @@ Why not:
           :checker ruby-jruby))))
 
 (flycheck-ert-def-checker-test rust-cargo rust warning
-  (let ((flycheck-rust-crate-type "bin"))
+  (let ((flycheck-rust-crate-type "bin")
+        (flycheck-rust-binary-name "flycheck"))
     (flycheck-ert-should-syntax-check
      "language/rust/src/warnings.rs" 'rust-mode
      '(3 1 warning "function is never used: `main`, #[warn(dead_code)] on by default"
