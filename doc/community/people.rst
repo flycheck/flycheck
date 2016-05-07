@@ -55,6 +55,20 @@ Go
 
 Mention with ``@flycheck/go``.
 
+Javascript
+~~~~~~~~~~
+
+* Saša Jovanić (:gh:`Simplify`)
+
+Mention with ``@flycheck/javascript``.
+
+TypeScript
+~~~~~~~~~~
+
+* Saša Jovanić (:gh:`Simplify`)
+
+Mention with ``@flycheck/typescript``.
+
 Acknowledgements
 ================
 
