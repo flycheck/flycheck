@@ -176,7 +176,14 @@ pushes it to Github.
     After pushing the new release to Github, the script bumps the version number
     again, to the next snapshot, and commits the changes again.
 
-When the script has completed, please announce the new release in the public
-Gitter_ channel, and wherever else you see fit.
+Once the script is completed please
 
+1. Edit the `release information`_ on Github and add a short summary about the
+   release.  Don’t forget to add a link to the complete changelog and upload the
+   package TAR file.
+2. Enable the new release on the ReadTheDocs `versions dashboard`_.
+3. Announce the new release in our Gitter_ channel and wherever else you see fit.
+
+.. _release information: https://github.com/flycheck/flycheck/releases
+.. _versions dashboard: https://readthedocs.org/dashboard/flycheck/versions/
 .. _Gitter: https://gitter.im/flycheck/flycheck
