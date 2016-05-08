@@ -185,7 +185,8 @@ def main():
             next_version, next_snapshot))
         print("""
 * add information about the release to https://github.com/flycheck/flycheck/releases/edit/{0}
-* upload `dist/flycheck-{0}.tar, and
+* upload `dist/flycheck-{0}.tar,
+* enable version {0} on https://readthedocs.org/dashboard/flycheck/versions/, and
 * announce the release in the flycheck/flycheck Gitter channel
 """.format(next_version))
 
