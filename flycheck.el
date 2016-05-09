@@ -5970,6 +5970,19 @@ non-nil, pass the standards via one or more `--std=' options."
   :package-version '(flycheck . "27"))
 (make-variable-buffer-local 'flycheck-cppcheck-standards)
 
+(flycheck-def-option-var flycheck-cppcheck-suppressions nil c/c++-cppcheck
+  "The suppressions to use in cppcheck.
+
+The value of  this variable is either a list  of strings denoting
+the suppressions  to use,  or nil, to  pass nothing  to cppcheck.
+When   non-nil,   pass  the   suppressions   via   one  or   more
+`--suppress=' options."
+  :type '(choice (const :tag "Default" nil)
+                 (repeat :tag "Additional suppressions"
+                         (string :tag "Suppression")))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "27"))
+
 (flycheck-def-option-var flycheck-cppcheck-inconclusive nil c/c++-cppcheck
   "Whether to enable Cppcheck inconclusive checks.
 
@@ -6001,6 +6014,7 @@ See URL `http://cppcheck.sourceforge.net/'."
             (option-flag "--inconclusive" flycheck-cppcheck-inconclusive)
             (option-list "-I" flycheck-cppcheck-include-path)
             (option-list "--std=" flycheck-cppcheck-standards concat)
+            (option-list "--suppress=" flycheck-cppcheck-suppressions concat)
             "-x" (eval
                   (pcase major-mode
                     (`c++-mode "c++")
