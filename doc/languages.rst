@@ -169,9 +169,9 @@ to view the docstring of the syntax checker.  Likewise, you may use
          A list of include directories.  Relative paths are relative to the file
          being checked.
 
-      .. option:: flycheck-cppcheck-language-standard
+      .. option:: flycheck-cppcheck-standards
 
-         The C or C++ language standard to use via ``--std=``.
+         The C, C++ and/or POSIX standards to use via one or more ``--std=``.
 
 .. supported-language:: CFEngine
 
