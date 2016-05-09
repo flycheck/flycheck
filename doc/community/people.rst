@@ -131,6 +131,7 @@ to Flycheck:
 * Erik Hetzner (:gh:`egh`)
 * Fanael Linithien (:gh:`Fanael`)
 * :gh:`fmdkdd`
+* Fred Morcos (:gh:`fredmorcos`)
 * Gereon Frey (:gh:`gfrey`)
 * Gulshan Singh (:gh:`gsingh93`)
 * Iain Beeston (:gh:`iainbeeston`)
