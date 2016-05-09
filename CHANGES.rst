@@ -13,6 +13,8 @@
   - Add option to set binary name for ``rust-cargo`` [GH-958]
   - Add ``flycheck-cppcheck-standards`` to pass multiple code standards to
     cppcheck [GH-960]
+  - Add ``flycheck-cppcheck-suppressions`` to suppress warnings for cppcheck
+    [GH-960]
 
 27 (May 08, 2016)
 =================

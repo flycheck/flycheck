@@ -174,6 +174,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
          The C, C++ and/or POSIX standards to use via one or more ``--std=``
          arguments.
 
+      .. option:: flycheck-cppcheck-suppressions
+
+         The cppcheck suppressions list to use via one or more ``--suppress=``
+         arguments.
+
 .. supported-language:: CFEngine
 
    .. syntax-checker:: cfengine
