@@ -62,6 +62,14 @@ Javascript
 
 Mention with ``@flycheck/javascript``.
 
+Rust
+~~~~
+
+* :gh:`fmdkd`
+* Michael Pankov (:gh:`mkpankov`)
+
+Mention with ``@flycheck/rust``.
+
 TypeScript
 ~~~~~~~~~~
 
