@@ -5,8 +5,9 @@
 ========================
 
 The Emacs community has produced a number of extensions to Flycheck.  This page
-lists all that we know of and can safely recommend to our users.  *Official*
-extensions are (co-)maintained by the :ref:`Flycheck maintainers
+lists all that we know of and can safely recommend to our users.
+
+*Official* extensions are (co-)maintained by the :ref:`Flycheck maintainers
 <flycheck-maintainers>` who will take care to update official extensions in case
 of breaking changes in Flycheck and work to provide extra API for extensions if
 needed.  If you'd like to make your extension an *official* one and move it into
