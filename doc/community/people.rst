@@ -65,7 +65,7 @@ Mention with ``@flycheck/javascript``.
 Rust
 ~~~~
 
-* :gh:`fmdkd`
+* :gh:`fmdkdd`
 * Michael Pankov (:gh:`mkpankov`)
 
 Mention with ``@flycheck/rust``.
@@ -130,7 +130,7 @@ to Flycheck:
 * Drew Wells (:gh:`drewwells`)
 * Erik Hetzner (:gh:`egh`)
 * Fanael Linithien (:gh:`Fanael`)
-* :gh:`fmdkd`
+* :gh:`fmdkdd`
 * Gereon Frey (:gh:`gfrey`)
 * Gulshan Singh (:gh:`gsingh93`)
 * Iain Beeston (:gh:`iainbeeston`)
