@@ -8124,6 +8124,7 @@ This variable is used only when `flycheck-rust-crate-type' is
   :type 'string
   :safe #'stringp
   :package-version '("flycheck" . "0.28"))
+(make-variable-buffer-local 'flycheck-rust-binary-name)
 
 (flycheck-def-option-var flycheck-rust-library-path nil (rust-cargo rust)
   "A list of library directories for Rust.
