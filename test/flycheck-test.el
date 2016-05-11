@@ -2983,46 +2983,6 @@ of the file will be interrupted because there are too many #ifdef configurations
   </errors>
 </results>" nil nil))))
 
-(defconst flycheck-phpmd-xml
-  "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
-<pmd version=\"1.5.0\" timestamp=\"2014-12-02T18:13:44+00:00\">
-  <file name=\"foo.php\">
-    <violation beginline=\"21\" endline=\"21\" rule=\"UnusedPrivateField\" ruleset=\"Unused Code Rules\" externalInfoUrl=\"http://phpmd.org/rules/unusedcode.html#unusedprivatefield\" priority=\"3\">
-      Avoid unused private fields such as '$FOO'.
-    </violation>
-    <violation beginline=\"24\" endline=\"27\" rule=\"UnusedPrivateMethod\" ruleset=\"Unused Code Rules\" package=\"Flycheck\" externalInfoUrl=\"http://phpmd.org/rules/unusedcode.html#unusedprivatemethod\" class=\"A\" method=\"bar\" priority=\"3\">
-      Avoid unused private methods such as 'bar'.
-    </violation>
-    <violation beginline=\"24\" endline=\"24\" rule=\"UnusedFormalParameter\" ruleset=\"Unused Code Rules\" externalInfoUrl=\"http://phpmd.org/rules/unusedcode.html#unusedformalparameter\" priority=\"3\">
-      Avoid unused parameters such as '$baz'.
-    </violation>
-  </file>
-</pmd>"
-  "Example phpmd output.")
-
-(ert-deftest flycheck-parse-phpmd ()
-  :tags '(error-parsing phpmd-xml)
-  (should (equal (flycheck-parse-phpmd flycheck-phpmd-xml 'foo 'buffer)
-                 (list
-                  (flycheck-error-new-at 21 nil 'warning
-                                         "Avoid unused private fields such as '$FOO'."
-                                         :id "UnusedPrivateField"
-                                         :checker 'foo
-                                         :buffer 'buffer
-                                         :filename "foo.php")
-                  (flycheck-error-new-at 24 nil 'warning
-                                         "Avoid unused private methods such as 'bar'."
-                                         :id "UnusedPrivateMethod"
-                                         :checker 'foo
-                                         :buffer 'buffer
-                                         :filename "foo.php")
-                  (flycheck-error-new-at 24 nil 'warning
-                                         "Avoid unused parameters such as '$baz'."
-                                         :id "UnusedFormalParameter"
-                                         :checker 'foo
-                                         :buffer 'buffer
-                                         :filename "foo.php")))))
-
 
 ;;; Built-in checkers
 
