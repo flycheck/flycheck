@@ -8123,7 +8123,7 @@ This variable is used only when `flycheck-rust-crate-type' is
 `bin', and is only useful for crates with multiple targets."
   :type 'string
   :safe #'stringp
-  :package-version '("flycheck" . "0.27"))
+  :package-version '("flycheck" . "0.28"))
 
 (flycheck-def-option-var flycheck-rust-library-path nil (rust-cargo rust)
   "A list of library directories for Rust.
