@@ -8109,7 +8109,7 @@ The value of this variable is a string denoting the crate type,
 for the `--crate-type' flag."
   :type 'string
   :safe #'stringp
-  :package-version '("flycheck" . "0.20"))
+  :package-version '(flycheck . "0.20"))
 (make-variable-buffer-local 'flycheck-rust-crate-type)
 
 (flycheck-def-option-var flycheck-rust-binary-name nil rust-cargo
@@ -8123,7 +8123,7 @@ This variable is used only when `flycheck-rust-crate-type' is
 `bin', and is only useful for crates with multiple targets."
   :type 'string
   :safe #'stringp
-  :package-version '("flycheck" . "0.28"))
+  :package-version '(flycheck . "28"))
 (make-variable-buffer-local 'flycheck-rust-binary-name)
 
 (flycheck-def-option-var flycheck-rust-library-path nil (rust-cargo rust)
