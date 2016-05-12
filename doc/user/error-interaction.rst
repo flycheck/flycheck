@@ -88,7 +88,51 @@ errors with low levels:
 Display errors
 ==============
 
-.. todo:: Document error display
+Whenever you move point to an error location Flycheck automatically displays all
+Flycheck errors at point after a short delay which you can customise:
+
+.. option:: flycheck-display-errors-delay
+
+   The number of seconds to wait before displaying the error at point. Floating
+   point numbers can express fractions of seconds.
+
+By default Flycheck shows the error messages in the minibuffer or in a separate
+buffer if the minibuffer is too small to hold the whole error message but this
+behaviour is entirely customisable:
+
+.. option:: flycheck-display-errors-function
+
+   A function to display errors.
+
+   The function is given the list of Flycheck errors to display as sole argument
+   and shall display these errors to the user in some way.
+
+Flycheck provides two built-in functions for this option:
+
+.. function:: flycheck-display-error-messages
+              flycheck-display-error-messages-unless-error-list
+
+   Show error messages and IDs in the echo area or in a separate buffer if the
+   echo area is too small (using `display-message-or-buffer` which see).  The
+   latter only displays errors when the :ref:`error list <flycheck-error-list>`
+   is not visible.
+
+.. seealso::
+
+   :flyc:`flycheck-pos-tip`
+      A Flycheck extension to display errors in a GUI popup.
+
+Additionally Flycheck shows errors in a GUI tooltip whenever you hover an error
+location with the mouse pointer.  By default the tooltip contains the messages
+and IDs of all errors under the pointer, but the contents are customisable:
+
+.. option:: flycheck-help-echo-function
+
+   A function to create the contents of the tooltip.
+
+   The function is given a list of Flycheck errors to display as sole argument
+   and shall return a single string to use as the contents of the tooltip.
+
 
 Kill errors
 ===========
