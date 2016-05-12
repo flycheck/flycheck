@@ -1,6 +1,6 @@
-==================================
- Interaction with Flycheck errors
-==================================
+=========================
+ Interaction with errors
+=========================
 
 There are a couple of things that you can do with Flycheck errors in a buffer:
 
