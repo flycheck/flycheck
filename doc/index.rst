@@ -71,7 +71,7 @@ Meanwhile you can read a simple HTML version of the old manual at
    user/syntax-checks
    user/syntax-checkers
    user/error-reports
-   user/error-navigation
+   user/error-interaction
    user/flycheck-versus-flymake
 
 The Developer Guide

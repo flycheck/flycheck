@@ -1,11 +1,18 @@
-==================
- Error navigation
-==================
+==================================
+ Interaction with Flycheck errors
+==================================
 
-This document shows you how to navigate Flycheck errors in a buffer.
+There are a couple of things that you can do with Flycheck errors in a buffer:
 
-Standard navigation commands
-============================
+* You can navigate to errors, and go to the next or previous error.
+* You can display errors to read their error messages.
+* You can put error messages and IDs into the kill ring.
+
+This section documents the corresponding commands and their customisation
+options.
+
+Navigate errors
+===============
 
 By default Flycheck hooks into Emacs’ standard error navigation on :kbd:`M-g n`
 (`next-error`) and :kbd:`M-g p` (`previous-error`).  When :mode:`flycheck` is
@@ -34,9 +41,6 @@ and can be very confusing at times so you can disable this integration:
       When changing the value you must disable :mode:`flycheck` and enable it
       again for the change to take effect in any buffers where :mode:`flycheck`
       is enabled.
-
-Special navigation commands
-===========================
 
 Flycheck provides an independent set of navigation commands which will always
 navigate Flycheck errors in the current buffer, regardless of visible
@@ -71,7 +75,7 @@ compilation buffers and `flycheck-standard-error-navigation`:
    error from the beginning of the buffer.  With negative prefix argument move
    to the last error instead.
 
-By default these commands jump to all errors but you can choose to skip over
+By default error navigation jumps to all errors but you can choose to skip over
 errors with low levels:
 
 .. option:: flycheck-navigation-minimum-level
@@ -80,3 +84,13 @@ errors with low levels:
 
    If set to an error level only navigate to errors whose level is as least as
    severe as this one. If ``nil`` navigate to all errors.
+
+Display errors
+==============
+
+.. todo:: Document error display
+
+Kill errors
+===========
+
+.. todo:: Document kill ring commands
