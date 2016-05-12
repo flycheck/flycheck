@@ -2843,71 +2843,6 @@ evaluating BODY."
 
 ;;; Error parsers for command syntax checkers
 
-(defconst flycheck-checkstyle-xml
-  "<?xml version=\"1.0\" encoding=\"utf-8\"?>
-<checkstyle version=\"4.3\">
-  <file name=\"test-javascript/missing-semicolon.js\">
-    <error line=\"3\" column=\"21\" severity=\"error\" message=\"Missing semicolon.\" source=\"Foo3\" />
-    <error line=\"3\" severity=\"warning\" message=\"Implied global &apos;alert&apos;\" source=\"Foo4\" />
-  </file>
-  <file name=\"test-javascript/missing-quote.js\">
-    <error line=\"undefined\" column=\"undefined\" severity=\"error\" message=\"Cannot read property &apos;id&apos; of undefined\" source=\"Foo1\" />
-  </file>
-</checkstyle>"
-  "Example Checkstyle output from jshint.")
-
-(defconst flycheck-checkstyle-expected-errors
-  (list
-   (flycheck-error-new
-    :filename "test-javascript/missing-semicolon.js"
-    :checker 'checker
-    :buffer 'buffer
-    :line 3
-    :column 21
-    :level 'error
-    :message "Missing semicolon."
-    :id "Foo3")
-   (flycheck-error-new
-    :filename "test-javascript/missing-semicolon.js"
-    :checker 'checker
-    :buffer 'buffer
-    :line 3
-    :column nil
-    :level 'warning
-    :message "Implied global 'alert'"
-    :id "Foo4")
-   (flycheck-error-new
-    :filename "test-javascript/missing-quote.js"
-    :checker 'checker
-    :buffer 'buffer
-    :line nil
-    :column nil
-    :level 'error
-    :message "Cannot read property 'id' of undefined"
-    :id "Foo1"))
-  "Errors to be parsed from `flycheck-checkstyle-xml'.")
-
-(ert-deftest flycheck-parse-checkstyle/with-builtin-xml ()
-  :tags '(error-parsing checkstyle-xml)
-  (let ((flycheck-xml-parser 'flycheck-parse-xml-region))
-    (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml
-                                              'checker 'buffer)
-                   flycheck-checkstyle-expected-errors))))
-
-(ert-deftest flycheck-parse-checkstyle/with-libxml2 ()
-  :tags '(error-parsing checkstyle-xml)
-  (skip-unless (fboundp 'libxml-parse-xml-region))
-  (let ((flycheck-xml-parser 'libxml-parse-xml-region))
-    (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml
-                                              'checker 'buffer)
-                   flycheck-checkstyle-expected-errors))))
-
-(ert-deftest flycheck-parse-checkstyle/automatic-parser ()
-  :tags '(error-parsing checkstyle-xml)
-  (should (equal (flycheck-parse-checkstyle flycheck-checkstyle-xml
-                                            'checker 'buffer)
-                 flycheck-checkstyle-expected-errors)))
-
 (defconst flycheck-cppcheck-xml
   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <results version=\"2\">
