@@ -130,8 +130,13 @@ def update_htmlxref(app):
     if not isinstance(getattr(app.env, 'info_htmlxref', None), HTMLXRefDB):
         app.info('fetching Texinfo htmlxref database from {0}... '.format(
             HTMLXRefDB.XREF_URL))
-        app.env.info_htmlxref = HTMLXRefDB.parse(
-            requests.get(HTMLXRefDB.XREF_URL).text)
+        try:
+            app.env.info_htmlxref = HTMLXRefDB.parse(
+                requests.get(HTMLXRefDB.XREF_URL).text)
+        except requests.exceptions.ConnectionError as error:
+            app.warn('Failed to load xref DB.  '
+                     'Info references will not be resolved')
+            app.env.info_htmlxref = None
 
 
 def resolve_info_references(app, _env, refnode, contnode):
@@ -159,16 +164,20 @@ def resolve_info_references(app, _env, refnode, contnode):
     node = match.group('node')
 
     xrefdb = app.env.info_htmlxref
-    uri = xrefdb.resolve(manual, node)
-    if not uri:
-        message = 'Cannot resolve info manual {0}'.format(manual)
-        app.env.warn(refnode.source, message, refnode.line)
-        return contnode
+    if xrefdb:
+        uri = xrefdb.resolve(manual, node)
+        if not uri:
+            message = 'Cannot resolve info manual {0}'.format(manual)
+            app.env.warn(refnode.source, message, refnode.line)
+            return contnode
+        else:
+            reference = nodes.reference('', '', internal=False,
+                                        refuri=uri, reftitle=target)
+            reference += contnode
+            return reference
     else:
-        reference = nodes.reference('', '', internal=False,
-                                    refuri=uri, reftitle=target)
-        reference += contnode
-        return reference
+        # Without an xref DB we're unable to resolve any info references
+        return None
 
 
 def setup(app):
