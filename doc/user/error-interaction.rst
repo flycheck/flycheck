@@ -31,7 +31,7 @@ errors; navigation should just work out of the box.
 The exact behaviour of these error navigation features is very context-dependent
 and can be very confusing at times so you can disable this integration:
 
-.. option:: flycheck-standard-error-navigation
+.. defcustom:: flycheck-standard-error-navigation
 
    Whether to integrate Flycheck errors into Emacs’ standard error navigation.
    Defaults to ``t``, set to ``nil`` to disable.
@@ -46,8 +46,8 @@ Flycheck provides an independent set of navigation commands which will always
 navigate Flycheck errors in the current buffer, regardless of visible
 compilation buffers and `flycheck-standard-error-navigation`:
 
-.. command:: C-c ! n
-             M-x flycheck-next-error
+.. define-key:: C-c ! n
+                M-x flycheck-next-error
 
    Jump to the next error.
 
@@ -56,8 +56,8 @@ compilation buffers and `flycheck-standard-error-navigation`:
    current point.  With negative prefix argument move to previous errors
    instead.  Signal an error if there are no more Flycheck errors.
 
-.. command:: C-c ! p
-             M-x flycheck-previous-error
+.. define-key:: C-c ! p
+                M-x flycheck-previous-error
 
    Jump to the previous Flycheck error.
 
@@ -66,7 +66,7 @@ compilation buffers and `flycheck-standard-error-navigation`:
    the current point.  With negative prefix argument move to next errors
    instead.  Signal an error if there are no more Flycheck errors.
 
-.. command:: M-x flycheck-first-error
+.. define-key:: M-x flycheck-first-error
 
    Jump to the first Flycheck error.
 
@@ -78,7 +78,7 @@ compilation buffers and `flycheck-standard-error-navigation`:
 By default error navigation jumps to all errors but you can choose to skip over
 errors with low levels:
 
-.. option:: flycheck-navigation-minimum-level
+.. defcustom:: flycheck-navigation-minimum-level
 
    The minimum levels of errors to consider for navigation.
 
@@ -91,7 +91,7 @@ Display errors
 Whenever you move point to an error location Flycheck automatically displays all
 Flycheck errors at point after a short delay which you can customise:
 
-.. option:: flycheck-display-errors-delay
+.. defcustom:: flycheck-display-errors-delay
 
    The number of seconds to wait before displaying the error at point. Floating
    point numbers can express fractions of seconds.
@@ -100,7 +100,7 @@ By default Flycheck shows the error messages in the minibuffer or in a separate
 buffer if the minibuffer is too small to hold the whole error message but this
 behaviour is entirely customisable:
 
-.. option:: flycheck-display-errors-function
+.. defcustom:: flycheck-display-errors-function
 
    A function to display errors.
 
@@ -109,13 +109,18 @@ behaviour is entirely customisable:
 
 Flycheck provides two built-in functions for this option:
 
-.. function:: flycheck-display-error-messages
-              flycheck-display-error-messages-unless-error-list
+.. defun:: flycheck-display-error-messages errors
+           flycheck-display-error-messages-unless-error-list errors
 
    Show error messages and IDs in the echo area or in a separate buffer if the
    echo area is too small (using `display-message-or-buffer` which see).  The
    latter only displays errors when the :ref:`error list <flycheck-error-list>`
-   is not visible.
+   is not visible.  To enable it add the following to your :term:`init file`:
+
+   .. code-block:: elisp
+
+      (setq flycheck-display-errors-function
+            #'flycheck-display-error-messages-unless-error-list)
 
 .. seealso::
 
@@ -126,7 +131,7 @@ Additionally Flycheck shows errors in a GUI tooltip whenever you hover an error
 location with the mouse pointer.  By default the tooltip contains the messages
 and IDs of all errors under the pointer, but the contents are customisable:
 
-.. option:: flycheck-help-echo-function
+.. defcustom:: flycheck-help-echo-function
 
    A function to create the contents of the tooltip.
 

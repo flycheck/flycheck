@@ -18,8 +18,8 @@ buffer contents to it, and how to extract errors.
 Like everything else in Emacs syntax checkers have online documentation which
 you can access with `C-c ! ?`:
 
-.. command:: C-c ! ?
-             M-x flycheck-describe-checker
+.. define-key:: C-c ! ?
+                M-x flycheck-describe-checker
 
    Prompt for the name of a syntax checker and pop up a Help buffer with its
    documentation.
@@ -36,7 +36,7 @@ Automatic syntax checker selection
 Normally Flycheck automatically selects the best syntax checkers for the current
 buffer from `flycheck-checkers` whenever it needs to check the buffer:
 
-.. option:: flycheck-checkers
+.. defcustom:: flycheck-checkers
 
    A list of all syntax checkers available for syntax checking.
 
@@ -63,8 +63,8 @@ Manual syntax checker selection
 Alternatively you can tell Flycheck explicitly which syntax checker to start
 with in the current buffer:
 
-.. command:: C-c ! s
-             M-x flycheck-select-checker
+.. define-key:: C-c ! s
+                M-x flycheck-select-checker
 
    Prompt for a syntax checker and use this syntax checker as the first syntax
    checker for the current buffer.
@@ -79,7 +79,7 @@ automatically.  It will automatically run further syntax checkers from
 
 Under the hood `C-c ! s` sets `flycheck-checker`:
 
-.. variable:: flycheck-checker
+.. defvar:: flycheck-checker
 
    The name of a syntax checker to use for the current buffer.
 
@@ -118,8 +118,8 @@ with JSHint.
 To go back to automatic selection either set `flycheck-checker` to ``nil`` or
 type `C-u C-c ! s`:
 
-.. command:: C-u C-c ! s
-             C-u M-x flycheck-select-checker
+.. define-key:: C-u C-c ! s
+                C-u M-x flycheck-select-checker
 
    Remove any selected syntax checker and let Flycheck again :ref:`select a
    syntax checker automatically <flycheck-automatic-selection>`.
@@ -133,8 +133,8 @@ Even if you :ref:`select a checker manually <flycheck-manual-selection>`
 Flycheck may still use a syntax checker that you’d not like to use.  To
 completely opt out from a specific syntax checker disable it:
 
-.. command:: C-c ! x
-             M-x flycheck-disable-checker
+.. define-key:: C-c ! x
+                M-x flycheck-disable-checker
 
    Prompt for a syntax checker to disable in the current buffer.
 
@@ -145,7 +145,7 @@ checkdoc warnings will be gone from the buffer.
 
 Internally this command changes the buffer-local `flycheck-disabled-checkers`:
 
-.. option:: flycheck-disabled-checkers
+.. defcustom:: flycheck-disabled-checkers
 
    A list of disabled syntax checkers.  Flycheck will *never* use disabled
    syntax checkers to check a buffer.
@@ -178,7 +178,7 @@ personal configuration.
 To enable a disabled checker again, remove it from `flycheck-disabled-checkers`
 or use `C-u C-c ! x`:
 
-.. command:: C-u C-c ! x
-             C-u M-x flycheck-disable-checker
+.. define-key:: C-u C-c ! x
+                C-u M-x flycheck-disable-checker
 
    Prompt for a disabled syntax checker to enable again in the current buffer.

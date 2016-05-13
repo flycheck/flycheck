@@ -45,7 +45,7 @@ possible.
    You can exclude specific major modes from syntax checking with
    `flycheck-global-modes`:
 
-   .. option:: flycheck-global-modes
+   .. defcustom:: flycheck-global-modes
 
       Major modes for which :mode:`global-flycheck` turns on :mode:`flycheck`:
 
@@ -88,7 +88,7 @@ By default :mode:`flycheck` automatically checks a buffer whenever
 
 You can customise this behaviour with `flycheck-check-syntax-automatically`:
 
-.. option:: flycheck-check-syntax-automatically
+.. defcustom:: flycheck-check-syntax-automatically
 
    A list of events which trigger a syntax check in the current buffer:
 
@@ -102,7 +102,7 @@ You can customise this behaviour with `flycheck-check-syntax-automatically`:
       Check the buffer a short time after the last change.  The delay is
       customisable with `flycheck-idle-change-delay`:
 
-      .. option:: flycheck-idle-change-delay
+      .. defcustom:: flycheck-idle-change-delay
 
          Seconds to wait after the last change to the buffer before starting a
          syntax check.
@@ -124,8 +124,8 @@ Manual checks
 
 You can also start a syntax check explicitly with `C-c ! c`:
 
-.. command:: C-c ! c
-             M-x flycheck-buffer
+.. define-key:: C-c ! c
+                M-x flycheck-buffer
 
    Check syntax in the current buffer.
 
@@ -134,8 +134,8 @@ Debugging
 
 To make sure that syntax checking works correctly verify your setup:
 
-.. command:: C-c ! v
-             M-x flycheck-verify-setup
+.. define-key:: C-c ! v
+                M-x flycheck-verify-setup
 
    Show a buffer with information about your :mode:`flycheck` setup for the
    current buffer.

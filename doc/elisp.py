@@ -34,7 +34,7 @@ def make_target(cell, name):
     The target names are used as cross-reference targets for Sphinx.
 
     """
-    return 'el-{cell}-{name}'.format(cell=cell, name=name)
+    return '{cell}-{name}'.format(cell=cell, name=name)
 
 
 def to_mode_name(symbol_name):
@@ -103,19 +103,10 @@ class EmacsLispSymbol(ObjectDescription):
     """
 
     cell_for_objtype = {
-        'option': 'variable',
-        'constant': 'variable',
-        'variable': 'variable',
-        'hook': 'variable',
-        'face': 'face'
-    }
-
-    label_for_objtype = {
-        'option': 'User option',
-        'constant': 'Constant',
-        'variable': 'Variable',
-        'hook': 'Hook',
-        'face': 'Face'
+        'defcustom': 'variable',
+        'defconst': 'variable',
+        'defvar': 'variable',
+        'defface': 'face'
     }
 
     @property
@@ -126,7 +117,7 @@ class EmacsLispSymbol(ObjectDescription):
     @property
     def label(self):
         """The label for the documented object type."""
-        return self.label_for_objtype[self.objtype]
+        return self.objtype
 
     def handle_signature(self, signature, signode):
         """Create nodes in ``signode`` for the ``signature``.
@@ -200,23 +191,14 @@ class EmacsLispFunction(EmacsLispSymbol):
     """A directive to document Emacs Lisp functions."""
 
     cell_for_objtype = {
-        'function': 'function',
-        'macro': 'function'
-    }
-
-    label_for_objtype = {
-        'function': 'Function',
-        'macro': 'Macro'
+        'defun': 'function',
+        'defmacro': 'function'
     }
 
     def handle_signature(self, signature, signode):
         function_name, *args = ws_re.split(signature)
         label = self.label + ' '
         signode += addnodes.desc_annotation(label, label)
-        # function = addnodes.desc_parameterlist()
-        # function.child_text_separator = ' '
-        # signode += function
-
         signode += addnodes.desc_name(function_name, function_name)
         for arg in args:
             is_keyword = arg.startswith('&')
@@ -228,7 +210,7 @@ class EmacsLispFunction(EmacsLispSymbol):
         return function_name
 
 
-class EmacsLispCommand(ObjectDescription):
+class EmacsLispKey(ObjectDescription):
     """A directive to document interactive commands via their bindings."""
 
     label = 'Interactive command'
@@ -264,7 +246,7 @@ class EmacsLispCommand(ObjectDescription):
         self.indexnode['entries'].append(('pair', index_text, target_name, ''))
 
     def _add_binding_target_and_index(self, binding, sig, signode):
-        reftarget = make_target('binding', binding)
+        reftarget = make_target('key', binding)
 
         if reftarget not in self.state.document.ids:
             signode['names'].append(reftarget)
@@ -323,37 +305,33 @@ class EmacsLispDomain(Domain):
         # Types for user-facing options and commands
         'minor-mode': ObjType('minor-mode', 'function', 'mode',
                               cell='function'),
-        'binding': ObjType('binding', 'binding'),
-        'command': ObjType('command', 'command', cell='command'),
-        'option': ObjType('option', 'option', cell='variable'),
-        'face': ObjType('face', 'face', cell='face'),
+        'define-key': ObjType('key binding', cell='interactive'),
+        'defcustom': ObjType('defcustom', 'defcustom', cell='variable'),
+        'defface': ObjType('defface', 'defface', cell='face'),
         # Object types for code
-        'function': ObjType('function', 'function', cell='function'),
-        'macro': ObjType('macro', 'macro', cell='function'),
-        'variable': ObjType('variable', 'variable', cell='variable'),
-        'constant': ObjType('constant', 'constant', cell='variable'),
-        'hook': ObjType('hook', 'hook', cell='variable'),
+        'defun': ObjType('defun', 'defun', cell='function'),
+        'defmacro': ObjType('defmacro', 'defmacro', cell='function'),
+        'defvar': ObjType('defvar', 'defvar', cell='variable'),
+        'defconst': ObjType('defconst', 'defconst', cell='variable')
     }
     directives = {
         'minor-mode': EmacsLispMinorMode,
-        'command': EmacsLispCommand,
-        'option': EmacsLispSymbol,
-        'variable': EmacsLispSymbol,
-        'constant': EmacsLispSymbol,
-        'hook': EmacsLispSymbol,
-        'face': EmacsLispSymbol,
-        'function': EmacsLispFunction,
-        'macro': EmacsLispFunction
+        'define-key': EmacsLispKey,
+        'defcustom': EmacsLispSymbol,
+        'defvar': EmacsLispSymbol,
+        'defconst': EmacsLispSymbol,
+        'defface': EmacsLispSymbol,
+        'defun': EmacsLispFunction,
+        'defmacro': EmacsLispFunction
     }
     roles = {
         'mode': XRefModeRole(),
-        'variable': XRefRole(),
-        'constant': XRefRole(),
-        'option': XRefRole(),
-        'hook': XRefRole(),
-        'face': XRefRole(),
-        'function': XRefRole(),
-        'macro': XRefRole()
+        'defvar': XRefRole(),
+        'defconst': XRefRole(),
+        'defcustom': XRefRole(),
+        'defface': XRefRole(),
+        'defun': XRefRole(),
+        'defmacro': XRefRole()
     }
 
     data_version = 1
@@ -379,11 +357,11 @@ class EmacsLispDomain(Domain):
     def resolve_xref(self, env, fromdocname, builder,
                      objtype, target, node, contnode):
         """Resolve a cross reference to ``target``."""
-        if objtype == 'binding':
+        if objtype == 'key':
             todocname = self.data['keymap'].get(target)
             if not todocname:
                 return None
-            reftarget = make_target('binding', target)
+            reftarget = make_target('define-key', target)
         else:
             cell = self.object_types[objtype].attrs['cell']
             symbol = self.data['obarray'].get(target, {})
@@ -400,7 +378,7 @@ class EmacsLispDomain(Domain):
         """Return all possible cross references for ``target``."""
         nodes = ((objtype, self.resolve_xref(env, fromdocname, builder,
                                              objtype, target, node, contnode))
-                 for objtype in ['binding', 'function', 'variable', 'face'])
+                 for objtype in ['define-key', 'defun', 'defvar', 'defface'])
         return [('el:{}'.format(objtype), node) for (objtype, node) in nodes
                 if node is not None]
 

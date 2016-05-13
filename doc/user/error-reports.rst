@@ -38,7 +38,7 @@ Error highlights
 Flycheck highlights errors directly in the buffer according to
 `flycheck-highlighting-mode`:
 
-.. option:: flycheck-highlighting-mode
+.. defcustom:: flycheck-highlighting-mode
 
    How Flycheck highlights errors and warnings in the buffer:
 
@@ -70,9 +70,9 @@ Flycheck highlights errors directly in the buffer according to
 
 The highlights use the following faces depending on the error level:
 
-.. face:: flycheck-error
-          flycheck-warning
-          flycheck-info
+.. defface:: flycheck-error
+             flycheck-warning
+             flycheck-info
 
    The highlighting face for ``error``, ``warning`` and ``info`` levels
    respectively.
@@ -83,7 +83,7 @@ Fringe icons
 In GUI frames Flycheck also adds icons to the fringe—the left or right border of
 an Emacs window—to help you identify erroneous lines quickly:
 
-.. option:: flycheck-indication-mode
+.. defcustom:: flycheck-indication-mode
 
    How Flycheck indicates errors and warnings in the buffer fringes:
 
@@ -93,9 +93,9 @@ an Emacs window—to help you identify erroneous lines quickly:
    ``nil``
       Do not indicate errors and warnings in the fringe.
 
-.. face:: flycheck-fringe-error
-          flycheck-fringe-warning
-          flycheck-fringe-info
+.. defface:: flycheck-fringe-error
+             flycheck-fringe-warning
+             flycheck-fringe-info
 
    The icon faces for ``error``, ``warning`` and ``info`` levels respectively.
 
@@ -107,7 +107,7 @@ appearance and slowing down Emacs, Flycheck takes precautions against syntax
 checkers that report a large number of errors exceeding
 `flycheck-checker-error-threshold`:
 
-.. option:: flycheck-checker-error-threshold
+.. defcustom:: flycheck-checker-error-threshold
 
    The maximum number of errors a syntax checker is allowed to report.
 
@@ -122,14 +122,14 @@ Clear results
 You can explicitly remove all highlighting and indication and all error
 information from a buffer:
 
-.. command:: C-c ! C
-             M-x flycheck-clear
+.. define-key:: C-c ! C
+                M-x flycheck-clear
 
    Clear all reported errors, all highlighting and all indication icons from the
    current buffer.
 
-.. command:: C-u C-c ! C
-             C-u M-x flycheck-clear
+.. define-key:: C-u C-c ! C
+                C-u M-x flycheck-clear
 
    Like `C-c ! C` but also interrupt any syntax check currently running.  Use
    this command if you think that Flycheck is stuck.
