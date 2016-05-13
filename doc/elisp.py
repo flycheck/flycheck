@@ -18,6 +18,7 @@
 
 from collections import namedtuple
 from sphinx import addnodes
+from sphinx.util import ws_re
 from sphinx.roles import XRefRole
 from sphinx.domains import Domain, ObjType
 from sphinx.util.nodes import make_refnode
@@ -195,6 +196,38 @@ class EmacsLispMinorMode(EmacsLispSymbol):
         return super()._add_index(to_mode_name(name), target)
 
 
+class EmacsLispFunction(EmacsLispSymbol):
+    """A directive to document Emacs Lisp functions."""
+
+    cell_for_objtype = {
+        'function': 'function',
+        'macro': 'function'
+    }
+
+    label_for_objtype = {
+        'function': 'Function',
+        'macro': 'Macro'
+    }
+
+    def handle_signature(self, signature, signode):
+        function_name, *args = ws_re.split(signature)
+        label = self.label + ' '
+        signode += addnodes.desc_annotation(label, label)
+        # function = addnodes.desc_parameterlist()
+        # function.child_text_separator = ' '
+        # signode += function
+
+        signode += addnodes.desc_name(function_name, function_name)
+        for arg in args:
+            is_keyword = arg.startswith('&')
+            node = (addnodes.desc_annotation
+                    if is_keyword
+                    else addnodes.desc_addname)
+            signode += node(' ' + arg, ' ' + arg)
+
+        return function_name
+
+
 class EmacsLispCommand(ObjectDescription):
     """A directive to document interactive commands via their bindings."""
 
@@ -308,7 +341,9 @@ class EmacsLispDomain(Domain):
         'variable': EmacsLispSymbol,
         'constant': EmacsLispSymbol,
         'hook': EmacsLispSymbol,
-        'face': EmacsLispSymbol
+        'face': EmacsLispSymbol,
+        'function': EmacsLispFunction,
+        'macro': EmacsLispFunction
     }
     roles = {
         'mode': XRefModeRole(),
@@ -316,7 +351,9 @@ class EmacsLispDomain(Domain):
         'constant': XRefRole(),
         'option': XRefRole(),
         'hook': XRefRole(),
-        'face': XRefRole()
+        'face': XRefRole(),
+        'function': XRefRole(),
+        'macro': XRefRole()
     }
 
     data_version = 1
