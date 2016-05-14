@@ -889,150 +889,6 @@
   (should (flycheck-validate-next-checker '(warning . emacs-lisp) 'strict)))
 
 
-;;; Help for generic checkers
-(ert-deftest flycheck-describe-checker/pops-up-help-buffer ()
-  :tags '(documentation)
-  (dolist (checker (flycheck-defined-checkers))
-    (flycheck-ert-with-help-buffer
-      (shut-up (flycheck-describe-checker checker))
-      (should (buffer-live-p (get-buffer (help-buffer))))
-      (should (get-buffer-window (help-buffer)))
-      (with-current-buffer (help-buffer)
-        (goto-char (point-min))
-        (re-search-forward (rx symbol-start (group (one-or-more not-newline))
-                               symbol-end " is a Flycheck syntax checker"))
-        (should (= (match-beginning 0) 1))
-        (should (string= (match-string 1) (symbol-name checker)))))))
-
-(ert-deftest flycheck-describe-checker/can-navigate-to-source ()
-  :tags '(documentation)
-  (dolist (checker (flycheck-defined-checkers))
-    (flycheck-ert-with-help-buffer
-      (shut-up (flycheck-describe-checker checker))
-      (with-current-buffer (help-buffer)
-        (goto-char (point-min))
-        (re-search-forward
-         (rx "`" (minimal-match (zero-or-more not-newline)) "'"))
-        (should (string= (match-string 0) "`flycheck.el'"))
-        (push-button (+ 2 (match-beginning 0)))
-        (unwind-protect
-            (progn
-              (should (string= (buffer-name) "flycheck.el"))
-              (should (looking-at
-                       (rx line-start "("
-                           symbol-start "flycheck-define-checker" symbol-end " "
-                           symbol-start (group (one-or-more not-newline)) symbol-end
-                           line-end)))
-              (should (string= (match-string 1) (symbol-name checker))))
-          (kill-buffer))))))
-
-(ert-deftest flycheck-describe-checker/help-shows-next-checkers ()
-  :tags '(documentation)
-  (dolist (checker (flycheck-defined-checkers))
-    (let ((next-checkers (flycheck-checker-get checker 'next-checkers))
-          (regexp "It\\s-+runs\\s-+the\\s-+following\\s-+checkers\\s-+afterwards:\n"))
-      (flycheck-ert-with-help-buffer
-        (shut-up (flycheck-describe-checker checker))
-        (with-current-buffer (help-buffer)
-          (goto-char (point-min))
-          (if (not next-checkers)
-              (should-not (re-search-forward regexp nil 'no-error))
-            (re-search-forward regexp)
-            (goto-char (match-end 0))
-            (dolist (next-checker next-checkers)
-              (forward-line 1)
-              (should (looking-at "^     \\* `\\([^']+\\)'\\(?: (maximum level `\\([^']+\\)')\\)?$"))
-              (pcase next-checker
-                (`(,level . ,checker)
-                 (should (equal checker (intern-soft (match-string 1))))
-                 (should (equal level (intern-soft (match-string 2)))))
-                ((pred symbolp)
-                 (should (equal next-checker (intern-soft (match-string 1))))
-                 (should-not (match-string 2)))))
-            ;; After the list of options there should be a blank line to
-            ;; separate the variable list from the actual docstring
-            (forward-line 1)
-            (should (looking-at "^$"))))))))
-
-(ert-deftest flycheck-describe-checker/help-shows-executable-name ()
-  :tags '(documentation)
-  (dolist (checker (flycheck-defined-checkers))
-    (flycheck-ert-with-help-buffer
-      (shut-up (flycheck-describe-checker checker))
-      (with-current-buffer (help-buffer)
-        (goto-char (point-min))
-        (re-search-forward
-         "This\\s-+syntax\\s-+checker\\s-+executes\\s-+\"\\(.+?\\)\"\\(?:\\.\\|,\\)")
-        (should (string= (match-string 1)
-                         (flycheck-checker-default-executable checker)))))))
-
-(ert-deftest flycheck-describe-checker/help-shows-executable-variable ()
-  :tags '(documentation)
-  (dolist (checker (flycheck-defined-checkers))
-    (flycheck-ert-with-help-buffer
-      (shut-up (flycheck-describe-checker checker))
-      (with-current-buffer (help-buffer)
-        (goto-char (point-min))
-        (re-search-forward
-         "The\\s-+executable\\s-+can\\s-+be\\s-+overridden\\s-+with\\s-+`\\(.+?\\)'\\.")
-        (let ((var (flycheck-checker-executable-variable checker)))
-          (should (string= (match-string 1) (symbol-name var))))))))
-
-(ert-deftest flycheck-describe-checker/help-shows-config-file-var ()
-  :tags '(documentation)
-  (dolist (checker (flycheck-defined-checkers))
-    (flycheck-ert-with-help-buffer
-      (shut-up (flycheck-describe-checker checker))
-      (with-current-buffer (help-buffer)
-        (let ((config-file-var (flycheck-checker-get checker 'config-file-var)))
-          (if (not config-file-var)
-              (should-not (string-match-p
-                           (rx "configuration file")
-                           (buffer-substring (point-min) (point-max))))
-            (goto-char (point-min))
-            (re-search-forward
-             ", using\\s-+a\\s-+configuration\\s-+file\\s-+from\\s-+`\\(.+?\\)'\\.")
-            (should (equal (match-string 1) (symbol-name config-file-var)))))))))
-
-(ert-deftest flycheck-describe-checker/help-shows-option-vars ()
-  :tags '(documentation)
-  (dolist (checker (flycheck-defined-checkers))
-    (flycheck-ert-with-help-buffer
-      (shut-up (flycheck-describe-checker checker))
-      (with-current-buffer (help-buffer)
-        (let ((option-vars (-sort #'string<
-                                  (flycheck-checker-get checker 'option-vars)))
-              ;; The regular expression to find the beginning of the option
-              ;; variable list
-              (regexp "This\\s-+syntax\\s-+checker\\s-+can\\s-+be\\s-+configured\\s-+with\\s-+these\\s-+options:\n"))
-          (goto-char (point-min))
-          (if (not option-vars)
-              ;; If there are no variables, we should not see a list of them
-              (should-not (re-search-forward regexp nil 'no-error))
-            ;; Find the beginning of the option var listing
-            (re-search-forward regexp)
-            (goto-char (match-end 0))
-            ;; Test that each variable is properly listed
-            (dolist (var option-vars)
-              (forward-line 1)
-              (should (looking-at "^     \\* `\\(.+?\\)'$"))
-              (should (equal (match-string 1) (symbol-name var))))
-            ;; After the list of options there should be a blank line to
-            ;; separate the variable list from the actual docstring
-            (forward-line 1)
-            (should (looking-at "^$"))))))))
-
-(ert-deftest flycheck-describe-checker/help-shows-checker-docstring ()
-  :tags '(documentation)
-  (dolist (checker (flycheck-defined-checkers))
-    (flycheck-ert-with-help-buffer
-      (shut-up (flycheck-describe-checker checker))
-      (with-current-buffer (help-buffer)
-        (should (string-match-p
-                 (regexp-quote (flycheck-checker-get checker 'documentation))
-                 (buffer-substring (point-min) (point-max))))))))
-
-
 ;;; Checker extensions
 (ert-deftest flycheck-add-next-checker/no-valid-checker ()
   :tags '(extending)
@@ -1127,7 +983,8 @@
     (flycheck-mode)
     (flycheck-ert-buffer-sync)
     (should flycheck-current-errors)
-    (revert-buffer 'ignore-auto 'no-confirm)
+    (let ((hack-local-variables-hook))
+      (revert-buffer 'ignore-auto 'no-confirm))
     (should-not flycheck-current-errors)
     (should-not (flycheck-deferred-check-p))))
 

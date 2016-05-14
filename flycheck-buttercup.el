@@ -72,12 +72,48 @@
 
 ;;; Emacs feature matchers
 
+(buttercup-define-matcher :to-be-live (buffer)
+  (let ((buffer (get-buffer buffer)))
+    (if (buffer-live-p buffer)
+        (cons t (format "Expected %S not to be a live buffer, but it is"
+                        buffer))
+      (cons nil (format "Expected %S to be a live buffer, but it is not"
+                        buffer)))))
+
+(buttercup-define-matcher :to-be-visible (buffer)
+  (let ((buffer (get-buffer buffer)))
+    (cond
+     ((and buffer (get-buffer-window buffer))
+      (cons t (format "Expected %S not to be a visible buffer, but it is"
+                      buffer)))
+     ((not (bufferp buffer))
+      (cons nil
+            (format "Expected %S to be a visible buffer, but it is not a buffer"
+                    buffer)))
+     (t (cons
+         nil
+         (format "Expected %S to be a visible buffer, but it is not visible"
+                 buffer))))))
+
 (buttercup-define-matcher :to-be-local (symbol)
   (if (local-variable-p symbol)
       (cons t (format "Expected %S not to be a local variable, but it is"
                       symbol))
     (cons nil (format "Expected %S to be a local variable, but it is not"
                       symbol))))
+
+(buttercup-define-matcher :to-contain-match (buffer re)
+  (if (not (get-buffer buffer))
+      (cons nil (format "Expected %S to contain a match of %s, \
+but is not a buffer" buffer re))
+    (with-current-buffer buffer
+      (save-excursion
+        (goto-char (point-min))
+        (if (re-search-forward re nil 'noerror)
+            (cons t (format "Expected %S to contain a match \
+for %s, but it did not" buffer re))
+          (cons nil (format "Expected %S not to contain a match for \
+%s but it did not." buffer re)))))))
 
 
 ;;; Flycheck matchers
