@@ -386,7 +386,10 @@ resource directory."
     (flycheck-ert-with-resource-buffer resource-file
       (funcall mode)
       ;; Load safe file-local variables because some tests depend on them
-      (let ((enable-local-variables :safe))
+      (let ((enable-local-variables :safe)
+            ;; Disable all hooks at this place, to prevent 3rd party packages
+            ;; from interferring
+            (hack-local-variables-hook))
         (hack-local-variables))
       ;; Configure config file locating for unit tests
       (let ((process-hook-called 0))
