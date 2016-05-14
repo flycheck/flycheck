@@ -27,8 +27,9 @@
 
 (require 'flycheck-buttercup)
 
-(defconst flycheck/typescript-lint-json
-  "[{\"endPosition\":{\"character\":25,\"line\":0,\"position\":25},
+(describe "Language TypeScript"
+  (describe "The TSLint error parser"
+    (let ((json "[{\"endPosition\":{\"character\":25,\"line\":0,\"position\":25},
   \"failure\":\"unused variable: 'invalidAlignment'\",
   \"name\":\"sample.ts\",
   \"ruleName\":\"no-unused-variable\",
@@ -37,27 +38,22 @@
   \"failure\":\"missing semicolon\",
   \"name\":\"sample.ts\",
   \"ruleName\":\"semicolon\",
-  \"startPosition\":{\"character\":14,\"line\":2,\"position\":76}}]")
-
-(describe "Language TypeScript"
-  (describe "TSLint checker"
-    (it "parses TSLint JSON output"
-      (expect (flycheck-parse-tslint flycheck/typescript-lint-json
-                                     'checker
-                                     'buffer)
-              :to-be-equal-flycheck-errors
-              (list
-               (flycheck-error-new-at 1 10 'warning
-                                      "unused variable: 'invalidAlignment'"
-                                      :id "no-unused-variable"
-                                      :checker 'checker
-                                      :buffer 'buffer
-                                      :filename "sample.ts")
-               (flycheck-error-new-at 3 15 'warning
-                                      "missing semicolon"
-                                      :id "semicolon"
-                                      :checker 'checker
-                                      :buffer 'buffer
-                                      :filename "sample.ts"))))))
+  \"startPosition\":{\"character\":14,\"line\":2,\"position\":76}}]"))
+      (it "parses TSLint JSON output"
+        (expect (flycheck-parse-tslint json 'checker 'buffer)
+                :to-be-equal-flycheck-errors
+                (list
+                 (flycheck-error-new-at 1 10 'warning
+                                        "unused variable: 'invalidAlignment'"
+                                        :id "no-unused-variable"
+                                        :checker 'checker
+                                        :buffer 'buffer
+                                        :filename "sample.ts")
+                 (flycheck-error-new-at 3 15 'warning
+                                        "missing semicolon"
+                                        :id "semicolon"
+                                        :checker 'checker
+                                        :buffer 'buffer
+                                        :filename "sample.ts")))))))
 
 ;;; test-typescript.el ends here
