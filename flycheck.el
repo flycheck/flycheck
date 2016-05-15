@@ -93,7 +93,7 @@
 (eval-and-compile
   (unless (fboundp 'string-suffix-p)
     ;; TODO: Remove when dropping support for Emacs 24.3 and earlier
-    (defun string-suffix-p (suffix string  &optional ignore-case)
+    (defun string-suffix-p (suffix string &optional ignore-case)
       "Return non-nil if SUFFIX is a suffix of STRING.
 If IGNORE-CASE is non-nil, the comparison is done without paying
 attention to case differences."
@@ -2129,10 +2129,10 @@ will be used in buffers with MODE."
 Slots:
 
 `buffer'
-     The buffer being checked
+     The buffer being checked.
 
 `checker'
-     The syntax checker being used
+     The syntax checker being used.
 
 `context'
      The context object."
@@ -4280,7 +4280,8 @@ The :default-directory must be a function that will return an absolute path."
                               default-directory)))
     (unless (file-exists-p default-directory)
       (error "Syntax Checker %S has defined non existant :default-directory %s"
-             checker default-directory))
+             checker
+             default-directory))
     default-directory))
 
 ;;;###autoload
@@ -4394,7 +4395,7 @@ default `:verify' function of command checkers."
                     #'flycheck-parse-with-patterns))
         (predicate (plist-get properties :predicate))
         (standard-input (plist-get properties :standard-input))
-        (cwd       (plist-get properties :default-directory)))
+        (cwd (plist-get properties :default-directory)))
     (unless command
       (error "Missing :command in syntax checker %s" symbol))
     (unless (stringp (car command))
@@ -4720,7 +4721,7 @@ and rely on Emacs' own buffering and chunking."
                (args (flycheck-checker-substituted-arguments checker))
                (command (funcall flycheck-command-wrapper-function
                                  (cons program args)))
-               (default-directory  (flycheck-default-directory-wrapper checker))
+               (default-directory (flycheck-default-directory-wrapper checker))
                ;; Use pipes to receive output from the syntax checker.  They are
                ;; more efficient and more robust than PTYs, which Emacs uses by
                ;; default, and since we don't need any job control features, we
@@ -4744,19 +4745,19 @@ and rely on Emacs' own buffering and chunking."
           (process-put process 'flycheck-checker checker)
           (process-put process 'flycheck-callback callback)
           (process-put process 'flycheck-buffer (current-buffer))
-          (process-put process 'flycheck-default-directory  default-directory)
+          (process-put process 'flycheck-default-directory default-directory)
           ;; Track the temporaries created by argument substitution in the
           ;; process itself, to get rid of the global state ASAP.
           (process-put process 'flycheck-temporaries flycheck-temporaries)
           (setq flycheck-temporaries nil)
-          ;; Send the buffer to the process on standard input, if enabled
+          ;; Send the buffer to the process on standard input, if enabled.
           (when (flycheck-checker-get checker 'standard-input)
             (flycheck-process-send-buffer process))
-          ;; Return the process
+          ;; Return the process.
           process)
       (error
        ;; In case of error, clean up our resources, and report the error back to
-       ;; Flycheck
+       ;; Flycheck.
        (flycheck-safe-delete-temporaries)
        (when process
          ;; No need to explicitly delete the temporary files of the process,
@@ -4859,7 +4860,9 @@ FILES is a list of files given as input to the checker.  OUTPUT
 is the output of the syntax checker.  CALLBACK is the status
 callback to use for reporting.
 
-Parse the OUTPUT and report an appropriate error status."
+Parse the OUTPUT and report an appropriate error status.
+
+Resolve all errors in OUTPUT using CWD as worknig directory."
   (let ((errors (flycheck-parse-output output checker (current-buffer))))
     (when (and (/= exit-status 0) (not errors))
       ;; Warn about a suspicious result from the syntax checker.  We do right
@@ -4871,7 +4874,7 @@ Parse the OUTPUT and report an appropriate error status."
 output: %s\nChecker definition probably flawed." checker exit-status output)))
     (funcall callback 'finished
              ;; Fix error file names, by substituting them backwards from the
-             ;; temporaries
+             ;; temporaries.
              (seq-map (lambda (e) (flycheck-fix-error-filename e files cwd))
                       errors))))
 
@@ -5233,6 +5236,8 @@ Return the errors parsed with the error patterns of CHECKER."
 
 (defun flycheck-fix-error-filename (err buffer-files cwd)
   "Fix the file name of ERR from BUFFER-FILES.
+
+Resolves error file names relative to CWD directory.
 
 Make the file name of ERR absolute.  If the absolute file name of
 ERR is in BUFFER-FILES, replace it with the return value of the
@@ -6534,7 +6539,7 @@ See URL `http://www.erlang.org/'."
 See URL `http://www.kuwata-lab.com/erubis/'."
   :command ("erubis" "-z" source)
   :error-patterns
-  ((error line-start  (file-name) ":" line ": " (message) line-end))
+  ((error line-start (file-name) ":" line ": " (message) line-end))
   :modes (html-erb-mode rhtml-mode))
 
 (flycheck-def-args-var flycheck-gfortran-args fortran-gfortran
@@ -6586,7 +6591,7 @@ In any other case, an error is signaled.")
     (`fixed "fixed-form")
     (_ (error "Invalid value for flycheck-gfortran-layout: %S" value))))
 
-(flycheck-def-option-var flycheck-gfortran-warnings  '("all" "extra")
+(flycheck-def-option-var flycheck-gfortran-warnings '("all" "extra")
                          fortran-gfortran
   "A list of warnings for GCC Fortran.
 
@@ -7569,7 +7574,7 @@ See URL `https://puppet.com/'."
           (minimal-match (zero-or-more not-newline))
           ": Could not parse for environment " (one-or-more word)
           ": " (message (minimal-match (zero-or-more anything)))
-          " at "  (file-name "/" (zero-or-more not-newline)) ":" line line-end))
+          " at " (file-name "/" (zero-or-more not-newline)) ":" line line-end))
   :modes puppet-mode
   :next-checkers ((warning . puppet-lint)))
 
@@ -8762,7 +8767,7 @@ See URL `http://www.ruby-doc.org/stdlib-2.0.0/libdoc/yaml/rdoc/YAML.html'."
   :standard-input t
   :error-patterns
   ((error line-start "stdin:" (zero-or-more not-newline) ":" (message)
-          "at line " line " column " column  line-end))
+          "at line " line " column " column line-end))
   :modes yaml-mode)
 
 (provide 'flycheck)
