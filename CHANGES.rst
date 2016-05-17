@@ -1,6 +1,10 @@
 30-cvs (in development)
 =======================
 
+- New syntax checkers:
+
+  - Elixir with ``dogma`` [GH-969]
+
 29 (Aug 28, 2016)
 =================
 

@@ -161,6 +161,7 @@ to Flycheck:
 * Jackson Ray Hamilton (:gh:`jacksonrayhamilton`)
 * Jim Hester (:gh:`jimhester`)
 * Jimmy Yuen Ho Wong (:gh:`wyuenho`)
+* Kári Tristan Helgason (:gh:`kthelgason`)
 * Krzysztof Witkowski (:gh:`kwitek`)
 * Lee Adams (:gh:`leeaustinadams`)
 * Lorenzo Villani (:gh:`lvillani`)
