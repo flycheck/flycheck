@@ -39,7 +39,7 @@
  (depends-on "rpm-spec-mode")
  (depends-on "rust-mode")
  (depends-on "sass-mode")
- (depends-on "scala-mode2")
+ (depends-on "scala-mode")
  (depends-on "scss-mode")
  (depends-on "slim-mode")
  (depends-on "typescript-mode")
