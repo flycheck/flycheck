@@ -1854,7 +1854,8 @@ Pop up a help buffer with the documentation of CHECKER."
             (modes (flycheck-checker-get checker 'modes))
             (predicate (flycheck-checker-get checker 'predicate))
             (print-doc (flycheck-checker-get checker 'print-doc))
-            (next-checkers (flycheck-checker-get checker 'next-checkers)))
+            (next-checkers (flycheck-checker-get checker 'next-checkers))
+            (conflicts-with (flycheck-checker-get checker 'conflicts-with)))
         (princ (format "%s is a Flycheck syntax checker" checker))
         (when filename
           (princ (format " in `%s'" (file-name-nondirectory filename)))
@@ -1867,13 +1868,20 @@ Pop up a help buffer with the documentation of CHECKER."
         (let ((modes-start (with-current-buffer standard-output (point-max))))
           ;; Track the start of the modes documentation, to properly re-fill
           ;; it later
-          (princ "  This syntax checker checks syntax in the major mode(s) ")
+          (princ (format "  This `%s' checker checks syntax in the major mode(s) "
+                         (flycheck-checker-get checker 'kind)))
           (princ (string-join
                   (seq-map (apply-partially #'format "`%s'") modes)
                   ", "))
           (when predicate
             (princ ", and uses a custom predicate"))
           (princ ".")
+          (when conflicts-with
+            (princ "  It conflicts with ")
+            (princ (string-join
+                    (seq-map (apply-partially #'format "`%s'") conflicts-with)
+                    ", "))
+            (princ "."))
           (when next-checkers
             (princ "  It runs the following checkers afterwards:"))
           (with-current-buffer standard-output
