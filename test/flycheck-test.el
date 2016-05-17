@@ -4042,7 +4042,7 @@ Why not:
      '(7 9 error "mismatched types:
  expected `u8`,\n    found `i8`" :checker rust :id "E0308")
      '(7 9 info "run `rustc --explain E0308` to see a detailed explanation"
-        :checker rust))))
+         :checker rust))))
 
 (flycheck-ert-def-checker-test rust rust warning
   (let ((flycheck-disabled-checkers '(rust-cargo)))
