@@ -1,6 +1,11 @@
 28-cvs (in development)
 =======================
 
+- **Breaking changes**:
+
+  - Rename ``luacheck`` to ``lua-luacheck`` to comply with our naming
+    conventions
+
 - New features:
 
   - Add option to set binary name for ``rust-cargo`` [GH-958]

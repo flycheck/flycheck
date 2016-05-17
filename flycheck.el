@@ -211,7 +211,7 @@ attention to case differences."
     json-jsonlint
     json-python-json
     less
-    luacheck
+    lua-luacheck
     lua
     perl
     perl-perlcritic
@@ -7306,11 +7306,11 @@ See URL `http://lesscss.org'."
           line-end))
   :modes less-css-mode)
 
-(flycheck-def-config-file-var flycheck-luacheckrc luacheck ".luacheckrc"
+(flycheck-def-config-file-var flycheck-luacheckrc lua-luacheck ".luacheckrc"
   :safe #'stringp
   :package-version '(flycheck . "0.23"))
 
-(flycheck-define-checker luacheck
+(flycheck-define-checker lua-luacheck
   "A Lua syntax checker using luacheck.
 
 See URL `https://github.com/mpeterv/luacheck'."

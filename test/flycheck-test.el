@@ -3692,13 +3692,13 @@ Why not:
    '(4 11 warning "variable 'var2' is never set"
        :id "W221" :checker luacheck)))
 
-(flycheck-ert-def-checker-test luacheck lua no-warnings
+(flycheck-ert-def-checker-test lua-luacheck lua no-warnings
   (let ((flycheck-luacheckrc "luacheckrc"))
     (flycheck-ert-should-syntax-check
      "language/lua/warnings.lua" 'lua-mode)))
 
 (flycheck-ert-def-checker-test lua lua nil
-  (let ((flycheck-disabled-checkers '(luacheck)))
+  (let ((flycheck-disabled-checkers '(lua-luacheck)))
     (flycheck-ert-should-syntax-check
      "language/lua/syntax-error.lua" 'lua-mode
      '(5 nil error "unfinished string near '\"oh no'"

@@ -569,9 +569,9 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Lua
 
-   Flycheck checks Lua with `luacheck`, falling back to `lua`.
+   Flycheck checks Lua with `lua-luacheck`, falling back to `lua`.
 
-   .. syntax-checker:: luacheck
+   .. syntax-checker:: lua-luacheck
 
       Check syntax and lint with Luacheck_.
 
