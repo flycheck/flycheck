@@ -746,6 +746,12 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
   :group 'flycheck-faces
   :package-version '(flycheck . "0.16"))
 
+(defface flycheck-error-list-buffer-name
+  '((t :inherit buffer-menu-buffer))
+  "Face for buffer names in the error list."
+  :group 'flycheck-faces
+  :package-version '(flycheck . "0.16"))
+
 (defface flycheck-error-list-column-number
   '((t :inherit font-lock-doc-face))
   "Face for line numbers in the error list."
@@ -2919,6 +2925,7 @@ Return the created overlay."
   ;; We must have a proper error region for the sake of fringe indication,
   ;; error display and error navigation, even if the highlighting is disabled.
   ;; We erase the highlighting later on in this case
+  (when (eq (flycheck-error-buffer err) (current-buffer))
   (pcase-let* ((`(,beg . ,end) (flycheck-error-region-for-mode
                                 err (or flycheck-highlighting-mode 'lines)))
                (overlay (make-overlay beg end))
@@ -2939,6 +2946,7 @@ Return the created overlay."
                     level flycheck-indication-mode)))
     (overlay-put overlay 'help-echo (flycheck-error-message err))
     overlay))
+  )
 
 (defun flycheck-filter-overlays (overlays)
   "Get all Flycheck overlays from OVERLAYS."
@@ -3094,19 +3102,25 @@ the beginning of the buffer."
     map)
   "The keymap of `flycheck-error-list-mode'.")
 
-(defconst flycheck-error-list-format
-  [("Line" 4 flycheck-error-list-entry-< :right-align t)
-   ("Col" 3 nil :right-align t)
-   ("Level" 8 flycheck-error-list-entry-level-<)
-   ("Message" 0 t)
-   (" (Checker)" 8 t)]
-  "Table format for the error list.")
+(defun flycheck-error-list-format (&optional buffers-p)
+  "Table format for the error list.
+
+If we're displaying buffer names, then BUFFERS-P should be true."
+  (vconcat
+   (if buffers-p
+       [("Buffer" 6)]
+     [])
+   [("Line" 4 flycheck-error-list-entry-< :right-align t)
+    ("Col" 3 nil :right-align t)
+    ("Level" 8 flycheck-error-list-entry-level-<)
+    ("Message" 0 t)
+    (" (Checker)" 8 t)]))
 
 (define-derived-mode flycheck-error-list-mode tabulated-list-mode "Flycheck errors"
   "Major mode for listing Flycheck errors.
 
 \\{flycheck-error-list-mode-map}"
-  (setq tabulated-list-format flycheck-error-list-format
+  (setq tabulated-list-format (flycheck-error-list-format)
         ;; Sort by location initially
         tabulated-list-sort-key (cons "Line" nil)
         tabulated-list-padding 1
@@ -3114,6 +3128,12 @@ the beginning of the buffer."
         ;; `revert-buffer' updates the mode line for us, so all we need to do is
         ;; set the corresponding mode line construct.
         mode-line-buffer-identification flycheck-error-list-mode-line)
+  (tabulated-list-init-header))
+
+(defun flycheck-retabulate (buffers-p)
+  "To be run in the messages buffer: retabulate with (possibly)
+  new column configuration. BUFFERS-P to display buffer names."
+  (setq tabulated-list-format (flycheck-error-list-format buffers-p))
   (tabulated-list-init-header))
 
 (defvar-local flycheck-error-list-source-buffer nil
@@ -3166,12 +3186,20 @@ string with attached text properties."
 Return a list with the contents of the table cell."
   (let* ((level (flycheck-error-level error))
          (level-face (flycheck-error-level-error-list-face level))
+         (error-buffer (flycheck-error-buffer error))
          (line (flycheck-error-line error))
          (column (flycheck-error-column error))
          (message (or (flycheck-error-message error)
                       (format "Unknown %s" (symbol-name level))))
          (checker (flycheck-error-checker error)))
     (list error
+          (vconcat
+           (if (not (eq error-buffer flycheck-error-list-source-buffer))
+               (vector
+                (flycheck-error-list-make-cell
+                 (format "%s" error-buffer)
+                 'flycheck-error-list-buffer-name))
+             (vector))
           (vector (flycheck-error-list-make-number-cell
                    line 'flycheck-error-list-line-number)
                   (flycheck-error-list-make-number-cell
@@ -3182,12 +3210,18 @@ Return a list with the contents of the table cell."
                   (flycheck-error-list-make-cell
                    (format "(%s)" checker)
                    'flycheck-error-list-checker-name)))))
+            )
 
 (defun flycheck-error-list-entries ()
   "Create the entries for the error list."
   (when (buffer-live-p flycheck-error-list-source-buffer)
     (let ((errors (buffer-local-value 'flycheck-current-errors
                                       flycheck-error-list-source-buffer)))
+      (flycheck-retabulate
+       (cl-remove-if (lambda (error)
+                       (eq (flycheck-error-buffer error)
+                           flycheck-error-list-source-buffer))
+                     errors))
       (mapcar #'flycheck-error-list-make-entry errors))))
 
 (defun flycheck-error-list-entry-< (entry1 entry2)
