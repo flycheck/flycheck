@@ -504,6 +504,16 @@ This variable has no effect, if `idle-change' is not contained in
   :package-version '(flycheck . "0.13")
   :safe #'numberp)
 
+(defcustom flycheck-show-buffer-name-in-errors nil
+  "Show buffer name in the errors list.
+
+When you change this, close your Flycheck errors buffer. When it
+opens next time, the columsn in the error list will be updated."
+  :group 'flycheck
+  :type 'boolean
+  :package-version '(flycheck . "0.22")
+  :safe #'booleanp)
+
 (defcustom flycheck-google-max-messages 5
   "How many messages to google at once.
 
@@ -745,6 +755,12 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
   "Face for line numbers in the error list."
   :group 'flycheck-faces
   :package-version '(flycheck . "0.16"))
+
+(defface flycheck-error-list-buffer-name
+  '((t :inherit buffer-menu-buffer))
+  "Face for buffer names in the error list."
+  :group 'flycheck-faces
+  :package-version '(flycheck . "0.22"))
 
 (defface flycheck-error-list-column-number
   '((t :inherit font-lock-doc-face))
@@ -2919,26 +2935,27 @@ Return the created overlay."
   ;; We must have a proper error region for the sake of fringe indication,
   ;; error display and error navigation, even if the highlighting is disabled.
   ;; We erase the highlighting later on in this case
-  (pcase-let* ((`(,beg . ,end) (flycheck-error-region-for-mode
-                                err (or flycheck-highlighting-mode 'lines)))
-               (overlay (make-overlay beg end))
-               (level (flycheck-error-level err))
-               (category (flycheck-error-level-overlay-category level)))
-    (unless (flycheck-error-level-p level)
-      (error "Undefined error level: %S" level))
-    (overlay-put overlay 'flycheck-overlay t)
-    (overlay-put overlay 'flycheck-error err)
-    ;; TODO: Consider hooks to re-check if overlay contents change
-    (overlay-put overlay 'category category)
-    (unless flycheck-highlighting-mode
-      ;; Erase the highlighting from the overlay if requested by the user
-      (overlay-put overlay 'face nil))
-    (when flycheck-indication-mode
-      (overlay-put overlay 'before-string
-                   (flycheck-error-level-make-fringe-icon
-                    level flycheck-indication-mode)))
-    (overlay-put overlay 'help-echo (flycheck-error-message err))
-    overlay))
+  (when (eq (flycheck-error-buffer err) (current-buffer))
+    (pcase-let* ((`(,beg . ,end) (flycheck-error-region-for-mode
+                                  err (or flycheck-highlighting-mode 'lines)))
+                 (overlay (make-overlay beg end))
+                 (level (flycheck-error-level err))
+                 (category (flycheck-error-level-overlay-category level)))
+      (unless (flycheck-error-level-p level)
+        (error "Undefined error level: %S" level))
+      (overlay-put overlay 'flycheck-overlay t)
+      (overlay-put overlay 'flycheck-error err)
+      ;; TODO: Consider hooks to re-check if overlay contents change
+      (overlay-put overlay 'category category)
+      (unless flycheck-highlighting-mode
+        ;; Erase the highlighting from the overlay if requested by the user
+        (overlay-put overlay 'face nil))
+      (when flycheck-indication-mode
+        (overlay-put overlay 'before-string
+                     (flycheck-error-level-make-fringe-icon
+                      level flycheck-indication-mode)))
+      (overlay-put overlay 'help-echo (flycheck-error-message err))
+      overlay)))
 
 (defun flycheck-filter-overlays (overlays)
   "Get all Flycheck overlays from OVERLAYS."
@@ -3051,7 +3068,17 @@ Intended for use with `next-error-function'."
   (let ((pos (flycheck-next-error-pos n reset)))
     (if pos
         (goto-char pos)
-      (user-error "No more Flycheck errors"))))
+      (let ((result (cl-remove-if
+                     (lambda (err)
+                       (eq (current-buffer)
+                           (flycheck-error-buffer err)))
+                     flycheck-current-errors)))
+        (if result
+            (let ((error (car result)))
+              (message "Jumping to error in other buffer %s" (flycheck-error-buffer error))
+              (flycheck-jump-to-error error)
+              (flycheck-buffer))
+          (user-error "No more Flycheck errors"))))))
 
 (defun flycheck-next-error (&optional n reset)
   "Visit the N-th error from the current point.
@@ -3094,19 +3121,23 @@ the beginning of the buffer."
     map)
   "The keymap of `flycheck-error-list-mode'.")
 
-(defconst flycheck-error-list-format
-  [("Line" 4 flycheck-error-list-entry-< :right-align t)
-   ("Col" 3 nil :right-align t)
-   ("Level" 8 flycheck-error-list-entry-level-<)
-   ("Message" 0 t)
-   (" (Checker)" 8 t)]
-  "Table format for the error list.")
+(defun flycheck-error-list-format ()
+  "Table format for the error list."
+  (vconcat
+   (if flycheck-show-buffer-name-in-errors
+       [("Buffer" 6)]
+     [])
+   [("Line" 4 flycheck-error-list-entry-< :right-align t)
+    ("Col" 3 nil :right-align t)
+    ("Level" 8 flycheck-error-list-entry-level-<)
+    ("Message" 0 t)
+    (" (Checker)" 8 t)]))
 
 (define-derived-mode flycheck-error-list-mode tabulated-list-mode "Flycheck errors"
   "Major mode for listing Flycheck errors.
 
 \\{flycheck-error-list-mode-map}"
-  (setq tabulated-list-format flycheck-error-list-format
+  (setq tabulated-list-format (flycheck-error-list-format)
         ;; Sort by location initially
         tabulated-list-sort-key (cons "Line" nil)
         tabulated-list-padding 1
@@ -3166,22 +3197,30 @@ string with attached text properties."
 Return a list with the contents of the table cell."
   (let* ((level (flycheck-error-level error))
          (level-face (flycheck-error-level-error-list-face level))
+         (error-buffer (flycheck-error-buffer error))
          (line (flycheck-error-line error))
          (column (flycheck-error-column error))
          (message (or (flycheck-error-message error)
                       (format "Unknown %s" (symbol-name level))))
          (checker (flycheck-error-checker error)))
     (list error
-          (vector (flycheck-error-list-make-number-cell
-                   line 'flycheck-error-list-line-number)
-                  (flycheck-error-list-make-number-cell
-                   column 'flycheck-error-list-column-number)
-                  (flycheck-error-list-make-cell
-                   (symbol-name (flycheck-error-level error)) level-face)
-                  (flycheck-error-list-make-cell message)
-                  (flycheck-error-list-make-cell
-                   (format "(%s)" checker)
-                   'flycheck-error-list-checker-name)))))
+          (vconcat
+           (if flycheck-show-buffer-name-in-errors
+               (vector
+                (flycheck-error-list-make-cell
+                 (format "%s" error-buffer)
+                 'flycheck-error-list-buffer-name))
+             (vector))
+           (vector (flycheck-error-list-make-number-cell
+                    line 'flycheck-error-list-line-number)
+                   (flycheck-error-list-make-number-cell
+                    column 'flycheck-error-list-column-number)
+                   (flycheck-error-list-make-cell
+                    (symbol-name (flycheck-error-level error)) level-face)
+                   (flycheck-error-list-make-cell message)
+                   (flycheck-error-list-make-cell
+                    (format "(%s)" checker)
+                    'flycheck-error-list-checker-name))))))
 
 (defun flycheck-error-list-entries ()
   "Create the entries for the error list."
@@ -3281,8 +3320,12 @@ list."
 
 POS defaults to `point'."
   (interactive)
-  (-when-let* ((error (tabulated-list-get-id pos))
-               (buffer (flycheck-error-buffer error)))
+  (-when-let* ((error (tabulated-list-get-id pos)))
+    (flycheck-jump-to-error error)))
+
+(defun flycheck-jump-to-error (error)
+  "Go to the location of the error."
+  (let ((buffer (flycheck-error-buffer error)))
     (when (buffer-live-p buffer)
       (if (eq (window-buffer) (get-buffer flycheck-error-list-buffer))
           ;; When called from within the error list, keep the error list,
