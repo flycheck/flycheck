@@ -996,12 +996,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-typescript-tslint-config
 
-      .. important::
-
-         A configuration file is mandatory for this syntax checker.  If
-         `flycheck-typescript-tslint-config` is not set or the configuration
-         file not found this syntax checker will not be used.
-
       .. option:: flycheck-typescript-tslint-rulesdir
 
          Additional rules directory, for user created rules.
