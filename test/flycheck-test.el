@@ -2841,84 +2841,6 @@ evaluating BODY."
                  "10,20")))
 
 
-;;; Error parsers for command syntax checkers
-
-(defconst flycheck-cppcheck-xml
-  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<results version=\"2\">
-  <cppcheck version=\"1.52\"/>
-  <errors>
-  <error id=\"toomanyconfigs\" severity=\"information\" msg=\"Too many #ifdef configurations - cppcheck only checks 12 configurations. Use --force to check all configurations. For more details, use --enable=information.\" verbose=\"The checking \
-of the file will be interrupted because there are too many #ifdef configurations. Checking of all #ifdef configurations can be forced by --force command line option or from GUI preferences. However that may increase the checking time. For\
- more details, use --enable=information.\">
-  </error>
-  <error id=\"nullPointer\" severity=\"error\" msg=\"Null pointer dereference\" verbose=\"Null pointer dereference\">
-  <location file=\"foo\" line=\"4\"/>
-  <location file=\"bar\" line=\"6\"/>
-  </error>
-  <error id=\"comparisonOfBoolWithInt\" severity=\"warning\" msg=\"Comparison of a boolean with integer that is neither 1 nor 0\" verbose=\"The expression &quot;x&quot; is of type 'bool' and it is compared against a integer value that is neither 1 nor 0.\">
-    <location file=\"eggs\" line=\"2\"/>
-  </error>
-  </errors>
-</results>"
-  "Example cppcheck output.")
-
-(defconst flycheck-cppcheck-expected-errors
-  (list
-   (flycheck-error-new
-    :filename "foo"
-    :buffer 'buffer
-    :checker 'checker
-    :line 4
-    :column nil
-    :level 'error
-    :message "Null pointer dereference"
-    :id "nullPointer")
-   (flycheck-error-new
-    :filename "bar"
-    :buffer 'buffer
-    :checker 'checker
-    :line 6
-    :column nil
-    :level 'error
-    :message "Null pointer dereference"
-    :id "nullPointer")
-   (flycheck-error-new
-    :filename "eggs"
-    :buffer 'buffer
-    :checker 'checker
-    :line 2
-    :column nil
-    :level 'warning
-    :message "The expression \"x\" is of type 'bool' and it is compared against a integer value that is neither 1 nor 0."
-    :id "comparisonOfBoolWithInt")))
-
-(ert-deftest flycheck-parse-cppcheck ()
-  :tags '(error-parsing cppcheck-xml)
-  (should (equal (flycheck-parse-cppcheck flycheck-cppcheck-xml
-                                          'checker 'buffer)
-                 flycheck-cppcheck-expected-errors)))
-
-(ert-deftest flycheck-parse-cppcheck/empty-errors-list-with-automatic-parser ()
-  :tags '(error-parsing cppcheck-xml)
-  (should-not (flycheck-parse-cppcheck "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<results version=\"2\">
-  <cppcheck version=\"1.60.1\"/>
-  <errors>
-  </errors>
-</results>" nil nil)))
-
-(ert-deftest flycheck-parse-cppcheck/empty-errors-list-with-builtin-parser ()
-  :tags '(error-parsing cppcheck-xml)
-  (let ((flycheck-xml-parser #'flycheck-parse-xml-region))
-    (should-not (flycheck-parse-cppcheck "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<results version=\"2\">
-  <cppcheck version=\"1.60.1\"/>
-  <errors>
-  </errors>
-</results>" nil nil))))
-
-
 ;;; Built-in checkers
 
 ;; Tell the byte compiler about the variables we'll use
