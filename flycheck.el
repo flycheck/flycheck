@@ -2743,7 +2743,7 @@ variables of Flycheck."
 Slots:
 
 `buffer'
-     The buffer the reported was reported for, as buffer object.
+     The buffer that the error was reported for, as buffer object.
 
 `checker'
      The syntax checker which reported this error, as symbol.
@@ -4263,6 +4263,25 @@ universal prefix arg, and only the id with normal prefix arg."
     (`(eval ,_) t)
     (_ nil)))
 
+(defun flycheck-default-directory-wrapper (checker)
+  "Function returning apropriate current working directory.
+
+Work out the working directory from which the CHECKER command
+will be called.  The default is the `default-directory' of the source-buffer
+from which flycheck is calling the checker.
+:default-directory can be a string that contains a fixed directory path or a function
+that will return a path.  The function needs to return an absolut path not a
+relative path."
+  (let* ((cwd (flycheck-checker-get checker 'default-directory))
+         (default-directory (or (and (functionp cwd) (funcall cwd))
+                                (and (stringp cwd) (file-truename cwd))
+                                default-directory))
+         )
+    (unless (file-exists-p default-directory)
+      (error "Syntax Checker %S has defined non existant :default-directory %s"
+             checker default-directory))
+    default-directory))
+
 ;;;###autoload
 (defun flycheck-define-command-checker (symbol docstring &rest properties)
   "Define SYMBOL as syntax checker to run a command.
@@ -4336,6 +4355,15 @@ of command checkers is `flycheck-sanitize-errors'.
 
      Defaults to nil.
 
+`:default-directory PATH-or-FUNCTION'
+     The value of `default-directory' from where the checker is called.
+
+     Either a directory path or a function that returns a directory
+     path.
+
+     This property is optional.  If omitted, it defaults to
+     `default-directory' of the buffer that calls the syntax checker.
+
 Note that you may not give `:start', `:interrupt', and
 `:print-doc' for a command checker.  You can give a custom
 `:verify' function, though, whose results will be appended to the
@@ -4364,8 +4392,8 @@ default `:verify' function of command checkers."
         (parser (or (plist-get properties :error-parser)
                     #'flycheck-parse-with-patterns))
         (predicate (plist-get properties :predicate))
-        (standard-input (plist-get properties :standard-input)))
-
+        (standard-input (plist-get properties :standard-input))
+        (cwd       (plist-get properties :default-directory)))
     (unless command
       (error "Missing :command in syntax checker %s" symbol))
     (unless (stringp (car command))
@@ -4403,7 +4431,8 @@ default `:verify' function of command checkers."
                      `((command . ,command)
                        (error-parser . ,parser)
                        (error-patterns . ,patterns)
-                       (standard-input . ,standard-input)))
+                       (standard-input . ,standard-input)
+                       (default-directory . ,cwd)))
         (setf (flycheck-checker-get symbol prop) value)))))
 
 (eval-and-compile
@@ -4690,6 +4719,7 @@ and rely on Emacs' own buffering and chunking."
                (args (flycheck-checker-substituted-arguments checker))
                (command (funcall flycheck-command-wrapper-function
                                  (cons program args)))
+               (default-directory  (flycheck-default-directory-wrapper checker))
                ;; Use pipes to receive output from the syntax checker.  They are
                ;; more efficient and more robust than PTYs, which Emacs uses by
                ;; default, and since we don't need any job control features, we
@@ -4713,6 +4743,7 @@ and rely on Emacs' own buffering and chunking."
           (process-put process 'flycheck-checker checker)
           (process-put process 'flycheck-callback callback)
           (process-put process 'flycheck-buffer (current-buffer))
+          (process-put process 'flycheck-default-directory  default-directory)
           ;; Track the temporaries created by argument substitution in the
           ;; process itself, to get rid of the global state ASAP.
           (process-put process 'flycheck-temporaries flycheck-temporaries)
@@ -4800,7 +4831,8 @@ _EVENT is ignored."
   (when (memq (process-status process) '(signal exit))
     (let ((files (process-get process 'flycheck-temporaries))
           (buffer (process-get process 'flycheck-buffer))
-          (callback (process-get process 'flycheck-callback)))
+          (callback (process-get process 'flycheck-callback))
+          (cwd (process-get process 'flycheck-default-directory)))
       ;; Delete the temporary files
       (seq-do #'flycheck-safe-delete files)
       (when (buffer-live-p buffer)
@@ -4814,12 +4846,12 @@ _EVENT is ignored."
                   (process-get process 'flycheck-checker)
                   (process-exit-status process)
                   files
-                  (flycheck-get-output process) callback)))
+                  (flycheck-get-output process) callback cwd)))
             ((debug error)
              (funcall callback 'errored (error-message-string err)))))))))
 
 (defun flycheck-finish-checker-process
-    (checker exit-status files output callback)
+    (checker exit-status files output callback cwd)
   "Finish a checker process from CHECKER with EXIT-STATUS.
 
 FILES is a list of files given as input to the checker.  OUTPUT
@@ -4839,7 +4871,7 @@ output: %s\nChecker definition probably flawed." checker exit-status output)))
     (funcall callback 'finished
              ;; Fix error file names, by substituting them backwards from the
              ;; temporaries
-             (seq-map (lambda (e) (flycheck-fix-error-filename e files))
+             (seq-map (lambda (e) (flycheck-fix-error-filename e files cwd))
                       errors))))
 
 
@@ -5180,7 +5212,8 @@ tool, just like `compile' (\\[compile])."
     (user-error "Cannot use syntax checker %S in this buffer" checker))
   (unless (flycheck-checker-executable checker)
     (user-error "Cannot run checker %S as shell command" checker))
-  (let* ((command (flycheck-checker-shell-command checker))
+  (let* ((default-directory (flycheck-default-directory-wrapper checker))
+         (command (flycheck-checker-shell-command checker))
          (buffer (compilation-start command nil #'flycheck-compile-name)))
     (with-current-buffer buffer
       (setq-local compilation-error-regexp-alist
@@ -5197,7 +5230,7 @@ CHECKER.  BUFFER is the buffer which was checked.
 Return the errors parsed with the error patterns of CHECKER."
   (funcall (flycheck-checker-get checker 'error-parser) output checker buffer))
 
-(defun flycheck-fix-error-filename (err buffer-files)
+(defun flycheck-fix-error-filename (err buffer-files cwd)
   "Fix the file name of ERR from BUFFER-FILES.
 
 Make the file name of ERR absolute.  If the absolute file name of
@@ -5206,7 +5239,7 @@ function `buffer-file-name'."
   (flycheck-error-with-buffer err
     (-when-let (filename (flycheck-error-filename err))
       (when (seq-some (apply-partially #'flycheck-same-files-p
-                                       (expand-file-name filename))
+                                       (expand-file-name filename cwd))
                       buffer-files)
         (setf (flycheck-error-filename err) (buffer-file-name)))))
   err)
@@ -5472,7 +5505,8 @@ SYMBOL with `flycheck-def-executable-var'."
         (parser (plist-get properties :error-parser))
         (filter (plist-get properties :error-filter))
         (predicate (plist-get properties :predicate))
-        (verify-fn (plist-get properties :verify)))
+        (verify-fn (plist-get properties :verify))
+        (cwd (plist-get properties :default-directory)))
 
     `(progn
        (flycheck-def-executable-var ,symbol ,(car command))
@@ -5491,7 +5525,9 @@ SYMBOL with `flycheck-def-executable-var'."
          :next-checkers ',(plist-get properties :next-checkers)
          ,@(when verify-fn
              `(:verify #',verify-fn))
-         :standard-input ',(plist-get properties :standard-input)))))
+         :standard-input ',(plist-get properties :standard-input)
+         ,@(when cwd
+             `(:default-directory ,cwd))))))
 
 
 ;;; Built-in checkers
