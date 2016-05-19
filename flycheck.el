@@ -5957,17 +5957,31 @@ including a list of supported checks."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.14"))
 
-(flycheck-def-option-var flycheck-cppcheck-language-standard nil c/c++-cppcheck
-  "The language standard to use in cppcheck.
+(flycheck-def-option-var flycheck-cppcheck-standards nil c/c++-cppcheck
+  "The standards to use in cppcheck.
 
-The value of this variable is either a string denoting a language
-standard, or nil, to use the default standard.  When non-nil,
-pass the language standard via the `-std' option."
-  :type '(choice (const :tag "Default standard" nil)
-                 (string :tag "Language standard"))
-  :safe #'stringp
-  :package-version '(flycheck . "26"))
-(make-variable-buffer-local 'flycheck-cppcheck-language-standard)
+The value of  this variable is either a list  of strings denoting
+the standards to use, or nil,  to pass nothing to cppcheck.  When
+non-nil, pass the standards via one or more `--std=' options."
+  :type '(choice (const :tag "Default" nil)
+                 (repeat :tag "Custom standards"
+                         (string :tag "Standard name")))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "27"))
+(make-variable-buffer-local 'flycheck-cppcheck-standards)
+
+(flycheck-def-option-var flycheck-cppcheck-suppressions nil c/c++-cppcheck
+  "The suppressions to use in cppcheck.
+
+The value of  this variable is either a list  of strings denoting
+the suppressions  to use,  or nil, to  pass nothing  to cppcheck.
+When   non-nil,   pass  the   suppressions   via   one  or   more
+`--suppress=' options."
+  :type '(choice (const :tag "Default" nil)
+                 (repeat :tag "Additional suppressions"
+                         (string :tag "Suppression")))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "27"))
 
 (flycheck-def-option-var flycheck-cppcheck-inconclusive nil c/c++-cppcheck
   "Whether to enable Cppcheck inconclusive checks.
@@ -5999,7 +6013,8 @@ See URL `http://cppcheck.sourceforge.net/'."
                     flycheck-option-comma-separated-list)
             (option-flag "--inconclusive" flycheck-cppcheck-inconclusive)
             (option-list "-I" flycheck-cppcheck-include-path)
-            (option "--std=" flycheck-cppcheck-language-standard concat)
+            (option-list "--std=" flycheck-cppcheck-standards concat)
+            (option-list "--suppress=" flycheck-cppcheck-suppressions concat)
             "-x" (eval
                   (pcase major-mode
                     (`c++-mode "c++")
