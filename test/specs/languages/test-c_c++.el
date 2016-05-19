@@ -103,4 +103,4 @@ against a integer value that is neither 1 nor 0.\">
                                            'checker 'buffer)
                   :to-be-equal-flycheck-errors nil))))))
 
-;;; test-cpp.el ends here
+;;; test-c_c++.el ends here
