@@ -33,6 +33,8 @@
   "Run `checkstyle' on FILE-NAME and return the results."
   (with-temp-buffer
     (insert-file-contents file-name 'visit)
+    (delay-mode-hooks (emacs-lisp-mode))
+    (setq delay-mode-hooks nil)
     (with-demoted-errors "Error in checkdoc: %S"
       (checkdoc-current-buffer t)
       (with-current-buffer checkdoc-diagnostic-buffer
