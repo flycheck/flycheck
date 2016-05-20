@@ -461,7 +461,7 @@ Unit tests
 
 **Flycheck** has unit tests for all built-in syntax checkers, and for large
 parts of the underlying machinery and API.  Contributed syntax checkers are
-required to have test cases.  A subset of the est suite is continuously run on
+required to have test cases.  A subset of the test suite is continuously run on
 `Travis CI`_.
 
 .. _Travis CI: https://travis-ci.org/flycheck/flycheck
