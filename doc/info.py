@@ -184,3 +184,4 @@ def setup(app):
     app.add_role('infonode', InfoNodeXRefRole())
     app.connect(str('builder-inited'), update_htmlxref)
     app.connect(str('missing-reference'), resolve_info_references)
+    return {'version': '0.1', "parallel_read_safe": True}

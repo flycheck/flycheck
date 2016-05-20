@@ -15,7 +15,7 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 PIP = pip3
-SPHINXOPTS =
+SPHINXOPTS = -j4
 SPHINXBUILD = sphinx-build
 SPHINXAUTOBUILD = sphinx-autobuild
 BUILDDIR = _build
