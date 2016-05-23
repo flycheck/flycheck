@@ -9,13 +9,6 @@ GNU General Public License 3
 
 .. literalinclude:: ../COPYING
 
-.. _flycheck-fdl:
-
-GNU Free Documentation License
-==============================
-
-.. literalinclude:: COPYING.fdl
-
 .. _flycheck-cc-by-sa:
 
 Creative Commons Attribution-ShareAlike 4.0 International
