@@ -7827,7 +7827,11 @@ See URL `https://racket-lang.org/'."
   :command ("raco" "expand" source-inplace)
   :predicate
   (lambda ()
-    (flycheck-racket-has-expand-p (flycheck-checker-executable 'racket)))
+    (and (or (eq major-mode 'racket-mode)
+             (and (eq major-mode 'scheme-mode)
+                  (boundp 'geiser-impl--implementation)
+                  (eq geiser-impl--implementation 'racket)))
+         (flycheck-racket-has-expand-p (flycheck-checker-executable 'racket))))
   :verify
   (lambda (checker)
     (let ((has-expand (flycheck-racket-has-expand-p
@@ -7842,7 +7846,7 @@ See URL `https://racket-lang.org/'."
     (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ":" (message) line-end))
-  :modes racket-mode)
+  :modes (racket-mode scheme-mode))
 
 (flycheck-define-checker rpm-rpmlint
   "A RPM SPEC file syntax checker using rpmlint.
