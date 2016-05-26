@@ -16,6 +16,10 @@
   - Add ``flycheck-cppcheck-suppressions`` to suppress warnings for cppcheck
     [GH-960]
 
+- Improvements:
+
+  - Check Racket syntax in Geiser Mode [GH-979]
+
 27 (May 08, 2016)
 =================
 

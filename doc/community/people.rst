@@ -127,6 +127,7 @@ to Flycheck:
 * Damon Haley (:gh:`dhaley`)
 * David Caldwell (:gh:`caldwell`)
 * David Holm (:gh:`dholm`)
+* Deokhwan Kim (:gh:`dkim`)
 * Derek Chen-Becker (:gh:`dchenbecker`)
 * Derek Harland (:gh:`donkopotamus`)
 * Dominik Honnef (:gh:`dominikh`)
