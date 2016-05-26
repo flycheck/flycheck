@@ -55,6 +55,13 @@ Go
 
 Mention with ``@flycheck/go``.
 
+Haskell
+~~~~~~~
+
+* Sergey Vinokurov (:gh:`sergv`)
+
+Mention with ``@flycheck/haskell``.
+
 Javascript
 ~~~~~~~~~~
 
