@@ -378,10 +378,9 @@ class EmacsLispDomain(Domain):
         """Return all possible cross references for ``target``."""
         nodes = ((objtype, self.resolve_xref(env, fromdocname, builder,
                                              objtype, target, node, contnode))
-                 for objtype in ['define-key', 'defun', 'defvar', 'defface'])
+                 for objtype in ['key', 'defun', 'defvar', 'defface'])
         return [('el:{}'.format(objtype), node) for (objtype, node) in nodes
                 if node is not None]
-
 
     @staticmethod
     def merge_warn_duplicate(objname, our_docname, their_docname):
