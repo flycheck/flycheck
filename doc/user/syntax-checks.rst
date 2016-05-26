@@ -1,15 +1,8 @@
 .. _flycheck-syntax-checks:
 
-==========================
- Syntax checks in buffers
-==========================
-
-This document explains how and when Flycheck checks buffers.
-
-.. _flycheck-minor-modes:
-
-Minor modes
-===========
+===============
+ Check buffers
+===============
 
 Flycheck provides two Emacs minor modes for automatic syntax checking:
 :mode:`flycheck` to enable syntax checking in the current buffer, and
@@ -76,8 +69,8 @@ possible.
 
 .. _flycheck-automatic-checks:
 
-Automatic syntax checks
-=======================
+Check automatically
+===================
 
 By default :mode:`flycheck` automatically checks a buffer whenever
 
@@ -119,8 +112,8 @@ You can customise this behaviour with `flycheck-check-syntax-automatically`:
 
 .. _flycheck-manual-checks:
 
-Manual checks
-=============
+Check manually
+==============
 
 You can also start a syntax check explicitly with `C-c ! c`:
 
@@ -129,8 +122,8 @@ You can also start a syntax check explicitly with `C-c ! c`:
 
    Check syntax in the current buffer.
 
-Debugging
-=========
+Debug syntax checking
+=====================
 
 To make sure that syntax checking works correctly verify your setup:
 

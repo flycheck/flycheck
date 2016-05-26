@@ -2,8 +2,6 @@
  Syntax checkers
 =================
 
-This document explains how Flycheck selects external tools to check a buffer.
-
 Flycheck does not check buffers on its own.  Instead it delegates this task to
 external *syntax checkers* which are external programs or services that receive
 the contents of the current buffer and return a list of errors in the buffer,
@@ -30,8 +28,8 @@ you can access with `C-c ! ?`:
 
 .. _flycheck-automatic-selection:
 
-Automatic syntax checker selection
-==================================
+Select syntax checkers automatically
+====================================
 
 Normally Flycheck automatically selects the best syntax checkers for the current
 buffer from `flycheck-checkers` whenever it needs to check the buffer:
@@ -57,7 +55,7 @@ checkdoc in an Emacs Lisp buffer.
 
 .. _flycheck-manual-selection:
 
-Manual syntax checker selection
+Select syntax checkers manually
 ===============================
 
 Alternatively you can tell Flycheck explicitly which syntax checker to start
@@ -126,8 +124,8 @@ type `C-u C-c ! s`:
 
 .. _flycheck-disable-checkers:
 
-Disabled syntax checkers
-========================
+Disable syntax checkers
+=======================
 
 Even if you :ref:`select a checker manually <flycheck-manual-selection>`
 Flycheck may still use a syntax checker that you’d not like to use.  To
