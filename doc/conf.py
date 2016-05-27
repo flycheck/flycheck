@@ -116,6 +116,7 @@ html_theme_options = {
     'description': 'Syntax checking for GNU Emacs',
     'github_user': 'flycheck',
     'github_repo': 'flycheck',
+    'github_type': 'star',
     'github_banner': True,
     'travis_button': True,
     # Google Analytics ID for our documentation.  On ReadTheDocs it's set via
