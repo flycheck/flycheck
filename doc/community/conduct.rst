@@ -4,10 +4,10 @@
  Flycheck Code of Conduct
 ==========================
 
-Our Code of Conduct defines the social norms and policies within
-Flycheck’s community.  Whenever you interact with Flycheck or Flycheck
-developers, whether in our official channels or privately, you’re expected to
-follow this Code of Conduct.
+Our Code of Conduct defines the social norms and policies within Flycheck’s
+community.  Whenever you interact with Flycheck or Flycheck developers, whether
+in our official channels or privately, you’re expected to follow this Code of
+Conduct.
 
 Conduct
 =======
