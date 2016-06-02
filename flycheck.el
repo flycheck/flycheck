@@ -7827,9 +7827,10 @@ See URL `https://racket-lang.org/'."
   :command ("raco" "expand" source-inplace)
   :predicate
   (lambda ()
-    (and (or (eq major-mode 'racket-mode)
-             (and (eq major-mode 'scheme-mode)
-                  (boundp 'geiser-impl--implementation)
+    (and (or (not (eq major-mode 'scheme-mode))
+             ;; In `scheme-mode' we must check the current Scheme implementation
+             ;; being used
+             (and (boundp 'geiser-impl--implementation)
                   (eq geiser-impl--implementation 'racket)))
          (flycheck-racket-has-expand-p (flycheck-checker-executable 'racket))))
   :verify
