@@ -53,6 +53,10 @@
 (require 'flycheck)
 (global-flycheck-mode)
 
+(list 'an-info-here
+      'a-warning-here
+      'an-error-here)
+
 ;; Some little convenience, to this Emacs session at least half way bearable
 (require 'ido)
 (ido-mode t)
@@ -75,6 +79,24 @@
         mac-right-command-modifier 'left
         mac-right-option-modifier 'none ; Keep right option for accented input
         mac-function-modifier 'hyper))
+
+(flycheck-define-generic-checker 'demo
+  "A demo syntax checker."
+  :start (lambda (checker callback)
+           (funcall callback 'finished
+                    (save-excursion
+                      (goto-char (point-min))
+                      (search-forward "an-info-here")
+                      (list (flycheck-error-new-at (line-number-at-pos)
+                                                   10 'info "An info here"
+                                                   :checker checker)
+                            (flycheck-error-new-at (+ 1 (line-number-at-pos))
+                                                   10 'warning "A warning here"
+                                                   :checker checker)
+                            (flycheck-error-new-at (+ 2 (line-number-at-pos))
+                                                   10 'error "A error here"
+                                                   :checker checker)))))
+  :modes 'emacs-lisp-mode)
 
 (defun flycheck-prepare-screenshot (&optional hide-cursor)
   "Prepare this Emacs session for a screenshot.
