@@ -20,6 +20,10 @@
 
   - Check Racket syntax in Geiser Mode [GH-979]
 
+- Bug fixes
+
+  - Do not signal errors when tslint reports no output [GH-981]
+
 27 (May 08, 2016)
 =================
 
