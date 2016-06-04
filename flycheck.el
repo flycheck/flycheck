@@ -5360,22 +5360,20 @@ the BUFFER that was checked respectively.
 
 See URL `https://palantir.github.io/tslint/' for more information
 about TSLint."
-  (let* ((json-array-type 'list)
-         (tslint-json-output (and (not (string-empty-p output))
-                                  (json-read-from-string output)))
-         errors)
-    (dolist (emessage tslint-json-output)
-      (let-alist emessage
-        (push (flycheck-error-new-at
-               (+ 1 .startPosition.line)
-               (+ 1 .startPosition.character)
-               'warning .failure
-               :id .ruleName
-               :checker checker
-               :buffer buffer
-               :filename .name)
-              errors)))
-    (nreverse errors)))
+  (let ((json-array-type 'list))
+    (seq-map (lambda (message)
+               (let-alist message
+                 (flycheck-error-new-at
+                  (+ 1 .startPosition.line)
+                  (+ 1 .startPosition.character)
+                  'warning .failure
+                  :id .ruleName
+                  :checker checker
+                  :buffer buffer
+                  :filename .name)))
+             ;; Don't try to parse empty output as JSON
+             (and (not (string-empty-p output))
+                  (json-read-from-string output)))))
 
 
 ;;; Error parsing with regular expressions
