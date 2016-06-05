@@ -361,7 +361,7 @@ class EmacsLispDomain(Domain):
             todocname = self.data['keymap'].get(target)
             if not todocname:
                 return None
-            reftarget = make_target('define-key', target)
+            reftarget = make_target('key', target)
         else:
             cell = self.object_types[objtype].attrs['cell']
             symbol = self.data['obarray'].get(target, {})
