@@ -18,9 +18,12 @@ PIP = pip3
 SPHINXOPTS = -j4
 SPHINXBUILD = sphinx-build
 SPHINXAUTOBUILD = sphinx-autobuild
+OPTIPNG = optipng
 BUILDDIR = _build
 
-ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(SPHINXOPTS) .
+ALLSPHINXOPTS = -d $(BUILDDIR)/doctrees $(SPHINXOPTS) .
+
+IMAGES = images/*.png
 
 .DEFAULT_GOAL := help
 
@@ -34,10 +37,11 @@ HAVE_PIP := $(shell sh -c "command -v $(PIP)")
 .PHONY: help
 help:
 	@echo 'Available targets:'
-	@echo '  html:      Build HTML documentation to $(BUILDDIR)/html'
-	@echo '  html-auto: Like html, but automatically rebuild on changes'
-	@echo '  linkcheck: Check all links and references'
-	@echo '  clean:     Remove generated documentation'
+	@echo '  html:            Build HTML documentation to $(BUILDDIR)/html'
+	@echo '  html-auto:       Like html, but automatically rebuild on changes'
+	@echo '  linkcheck:       Check all links and references'
+	@echo '  clean:           Remove generated documentation'
+	@echo '  optimise-images: Optimise all images in the documentation'
 	@echo ''
 	@echo 'To build the documentation you need $(SPHINXBUILD).'
 	@echo 'For *-auto targets you also need $(SPHINXAUTOBUILD).'
@@ -92,3 +96,7 @@ linkcheck:
 	@echo
 	@echo "Link check complete; look for any errors in the above output " \
 	      "or in $(BUILDDIR)/linkcheck/output.txt."
+
+.PHONY: optimise-images
+optimise-images:
+	$(OPTIPNG) $(filter %.png,$(IMAGES))
