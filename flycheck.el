@@ -1104,12 +1104,10 @@ is added to `flycheck-temporaries'.
 Add the path of the file to `flycheck-temporaries'.
 
 Return the path of the file."
-  (let (tempfile)
-    (if filename
-        (let ((directory (flycheck-temp-dir-system)))
-          (setq tempfile (expand-file-name (file-name-nondirectory filename)
-                                           directory)))
-      (setq tempfile (make-temp-file flycheck-temp-prefix)))
+  (let ((tempfile (if filename
+                      (expand-file-name (file-name-nondirectory filename)
+                                        (flycheck-temp-dir-system))
+                    (make-temp-file flycheck-temp-prefix))))
     (push tempfile flycheck-temporaries)
     tempfile))
 
