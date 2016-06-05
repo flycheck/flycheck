@@ -23,6 +23,7 @@
 - Bug fixes
 
   - Do not signal errors when tslint reports no output [GH-981]
+  - Do not generate invalid temporary filenames on Windows [GH-983]
 
 27 (May 08, 2016)
 =================
