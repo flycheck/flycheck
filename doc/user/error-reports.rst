@@ -10,11 +10,15 @@ results of the check in the current buffer in two ways:
 * Indicate errors, warnings, etc. in the fringe according to
   `flycheck-indication-mode`.
 
+Additionally Flycheck indicates its current state and the number of errors and
+warnings in the mode line.
+
 The following screenshot illustrates how this looks like in the default Emacs
 color theme.  It shows an info, a warning and an error annotation, from top to
-bottom.  Please also note the fringe indicators on the left side.
+bottom.  Please also note the fringe indicators on the left side and the
+emphasized mode line indicator in the bottom right corner:
 
-.. figure:: /images/flycheck-highlights.png
+.. image:: /images/flycheck-error-reports.png
    :alt: Flycheck showing info, warning and error annotations
    :align: center
 
@@ -137,6 +141,54 @@ redefine the error levels with `flycheck-define-error-level`.
              flycheck-fringe-info
 
    The icon faces for ``error``, ``warning`` and ``info`` levels respectively.
+
+Mode line
+=========
+
+Like all minor modes Flycheck also has a mode line indicator.  You can see it in
+the bottom right corner of the above screenshot.  By default the indicator shows
+Flycheck’s current state via one of the following texts:
+
++-------------+----------------------------------------------------------------+
+|``FlyC*``    |Flycheck is checking the buffer currently.                      |
++-------------+----------------------------------------------------------------+
+|``FlyC``     |There are no errors or warnings in the current buffer.          |
++-------------+----------------------------------------------------------------+
+|``FlyC:3/5`` |There are three errors and five warnings in the current buffer. |
++-------------+----------------------------------------------------------------+
+|``FlyC-``    |Flycheck did not find a syntax checker for the current buffer.  |
+|             |Take a look at the :ref:`list of supported languages            |
+|             |<flycheck-languages>` and type `C-c ! v` to see what checkers   |
+|             |are available for the current buffer.                           |
++-------------+----------------------------------------------------------------+
+|``FlyC!``    |The last syntax check failed.  Inspect the ``*Messages*`` buffer|
+|             |look for error messages, and consider :ref:`reporting a bug     |
+|             |<flycheck-bug-reports>`.                                        |
++-------------+----------------------------------------------------------------+
+|``FlyC?``    |The last syntax check had a dubious result.  The definition of a|
+|             |syntax checker may have a bug.  Inspect the ``*Messages*``      |
+|             |buffer and consider :ref:`reporting a bug                       |
+|             |<flycheck-bug-reports>`.                                        |
++-------------+----------------------------------------------------------------+
+
+You can entirely customise the mode line indicator with `flycheck-mode-line`:
+
+.. option:: flycheck-mode-line
+
+   A “mode line construct” for Flycheck’s mode line indicator.
+
+.. seealso::
+
+   :infonode:`(elisp)Mode Line Data`
+      Documentation of mode line constructs.
+   flycheck-status-emoji_
+      A Flycheck extension which puts emojis into Flycheck's mode line
+      indicator.
+   :flyc:`flycheck-color-mode-line`
+      A Flycheck extension which colours the entire mode line according to
+      Flycheck's status.
+
+.. _flycheck-status-emoji: https://github.com/liblit/flycheck-status-emoji
 
 Error thresholds
 ================

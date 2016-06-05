@@ -21,6 +21,8 @@ Conduct <flycheck-conduct>`.
 .. _need your help with: https://github.com/flycheck/flycheck/issues?q=is%3Aissue+is%3Aopen+label%3A%22S-needs+your+love%22
 .. _beginner-friendly tasks: https://github.com/flycheck/flycheck/labels/E-beginner%20friendly
 
+.. _flycheck-bug-reports:
+
 Bug reports
 ===========
 
