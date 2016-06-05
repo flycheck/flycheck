@@ -53,8 +53,8 @@ Additional languages and syntax checkers
 ========================================
 
 * :gh:`Gnouc/flycheck-checkbashisms` adds a shell script syntax checker using
-  :program:`checkbashisms` which is part of `Debian devscripts`_ and checks for
-  common Bash constructs in POSIX shell scripts.
+  ``checkbashisms`` which is part of `Debian devscripts`_ and checks for common
+  Bash constructs in POSIX shell scripts.
 * :gh:`clojure-emacs/squiggly-clojure` provides syntax checking for Clojure.
 * :flyc:`flycheck-d-unittest` (*official*) adds a Flycheck checker to run unit
   tests for D programs on the fly.
