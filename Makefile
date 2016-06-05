@@ -126,7 +126,7 @@ help:
 	@echo 'Available make variables:'
 	@echo '  PATTERN:  A regular expression matching spec names to run with `specs`'
 	@echo '  SELECTOR: An ERT selector expression for `unit` and `integ`'
-	@echo '  LANGUAGE: The name of a language for `integ`.  Overrides `ERTSELECTOR`'
+	@echo '  LANGUAGE: The name of a language for `integ`.  Overrides `SELECTOR`'
 	@echo '  EMCSOPTS: Additional options to pass to `emacs`'
 	@echo '  EMACS:    The path or name of the Emacs to use for tests and compilation'
 	@echo ''
