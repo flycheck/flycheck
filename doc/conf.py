@@ -92,6 +92,7 @@ rst_prolog = """\
 exclude_patterns = ['_build']
 default_role = 'any'
 primary_domain = 'el'
+templates_path = ['_templates']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
