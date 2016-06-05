@@ -6955,7 +6955,7 @@ See URL `https://github.com/commercialhaskell/stack'."
                            (one-or-more " ")
                            (one-or-more not-newline)))
             line-end)
-   (error line-start (file-name) ":" line ":" column ":"
+   (error line-start (file-name) ":" line ":" column ":" (optional " error:")
           (or (message (one-or-more not-newline))
               (and "\n"
                    (message
@@ -7002,7 +7002,7 @@ See URL `https://www.haskell.org/ghc/'."
                            (one-or-more " ")
                            (one-or-more not-newline)))
             line-end)
-   (error line-start (file-name) ":" line ":" column ":"
+   (error line-start (file-name) ":" line ":" column ":" (optional " error:")
           (or (message (one-or-more not-newline))
               (and "\n"
                    (message
