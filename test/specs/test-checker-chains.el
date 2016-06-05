@@ -35,6 +35,8 @@
   (setf (flycheck-checker-get 'chain-lint-1 'kind) 'lint)
   (setf (flycheck-checker-get 'chain-style-1 'kind) 'style)
   (setf (flycheck-checker-get 'chain-style-2 'kind) 'style)
+  (setf (flycheck-checker-get 'chain-style-1 'maximum-level) 'warning)
+  (setf (flycheck-checker-get 'chain-style-2 'maximum-level) 'info)
 
   (before-each
     ;; Assume that we can use all syntax checkers
@@ -90,6 +92,24 @@
                '(chain-lint-1))
               (flycheck-checkers '(chain-syntax-1 chain-lint-1 chain-style-1)))
       (expect (flycheck-get-syntax-checker-chain-for-buffer)
-              :to-equal '(chain-lint-1 chain-style-1)))))
+              :to-equal '(chain-lint-1 chain-style-1))))
+
+  (describe "Maximum level"
+    (let ((checkers '(chain-syntax-1 chain-style-1 chain-style-2)))
+      (it "ignores maximum-level if no level is given"
+        (expect (flycheck-filter-chain-by-error-level checkers nil)
+                :to-equal checkers))
+
+      (it "ignores syntax checkers whose :maximum-level is less severe"
+        (expect (flycheck-filter-chain-by-error-level checkers 'error)
+                :to-equal '(chain-syntax-1)))
+
+      (it "does not ignore syntax checkers whose :maximum-level is more severe"
+        (expect (flycheck-filter-chain-by-error-level checkers 'warning)
+                :to-equal '(chain-syntax-1 chain-style-1)))
+
+      (it "does not ignore any syntax checkers if the level is not severe"
+        (expect (flycheck-filter-chain-by-error-level checkers 'info)
+                :to-equal checkers)))))
 
 ;;; test-checker-chains.el ends here

@@ -1615,6 +1615,15 @@ are mandatory.
 
      This property is optional.
 
+`:maximum-level LEVEL'
+     The maximum error LEVEL (by severity) in the current buffer
+     at which this syntax checker will still run.
+
+     If there are any errors with a level more severe than LEVEL
+     Flycheck will not apply this syntax checker.
+
+     This property is optional.
+
 `:conflicts-with CHECKERS'
      A single syntax checker or a list of syntax checkers
      this syntax checker conflicts with.
@@ -1675,6 +1684,7 @@ Signal an error, if any property has an invalid value."
         (print-doc (plist-get properties :print-doc))
         (modes (plist-get properties :modes))
         (predicate (plist-get properties :predicate))
+        (maximum-level (plist-get properties :maximum-level))
         (conflicts-with (plist-get properties :conflicts-with))
         (verify (plist-get properties :verify))
         (filter (or (plist-get properties :error-filter) #'identity))
@@ -1731,6 +1741,7 @@ Try to reinstall the package defining this syntax checker." symbol)
                        (print-doc      . ,print-doc)
                        (modes          . ,modes)
                        (predicate      . ,real-predicate)
+                       (maximum-level  . ,maximum-level)
                        (conficts-with  . ,conflicts-with)
                        (verify         . ,verify)
                        (error-filter   . ,filter)
@@ -2431,6 +2442,21 @@ checker in order."
                                                 flycheck-checkers))))
     (flycheck-evict-checkers candidates)))
 
+(defun flycheck-filter-chain-by-error-level (checkers level)
+  "Filter syntax CHECKERS by error LEVEL.
+
+Reject all syntax checkers whose `:maximum-level' is less severe
+than LEVEL.  If LEVEL is nil return CHECKERS unchanged."
+  (if level
+      (seq-filter (lambda (checker)
+                    (let ((max-level (flycheck-checker-get checker
+                                                           'maximum-level)))
+                      (or (not max-level)
+                          (<= (flycheck-error-level-severity level)
+                              (flycheck-error-level-severity max-level)))))
+                  checkers)
+    checkers))
+
 
 ;;; Syntax checks for the current buffer
 (defvar-local flycheck-current-syntax-check nil
@@ -2588,28 +2614,34 @@ disabled via `flycheck-disable-excessive-checker' for subsequent
 syntax checks."
   (let* ((syntax-check flycheck-current-syntax-check)
          (checker (flycheck-syntax-check-current-checker syntax-check))
-         (next-checkers (flycheck-syntax-check-remaining-checkers syntax-check))
          (errors (flycheck-relevant-errors
                   (flycheck-fill-and-expand-error-file-names
                    (flycheck-filter-errors
                     (flycheck-assert-error-list-p errors) checker)))))
     (unless (flycheck-disable-excessive-checker checker errors)
       (flycheck-report-current-errors errors))
-    (if next-checkers
-        (flycheck-start-current-syntax-check next-checkers)
-      (setq flycheck-current-syntax-check nil)
-      (flycheck-report-status 'finished)
-      ;; Delete overlays only after the very last checker has run, to avoid
-      ;; flickering on intermediate re-displays
-      (flycheck-delete-marked-overlays)
-      (flycheck-error-list-refresh)
-      (run-hooks 'flycheck-after-syntax-check-hook)
-      (when (eq (current-buffer) (window-buffer))
-        (flycheck-display-error-at-point))
-      ;; Immediately try to run any pending deferred syntax check, which
-      ;; were triggered by intermediate automatic check event, to make sure
-      ;; that we quickly refine outdated error information
-      (flycheck-perform-deferred-syntax-check))))
+    ;; Drop all syntax checkers whose `maximum-level' is less severe than the
+    ;; most severe error in the current buffer.
+    (let* ((max-error (flycheck-most-severe-current-error))
+           (next-checkers (flycheck-filter-chain-by-error-level
+                           (flycheck-syntax-check-remaining-checkers
+                            syntax-check)
+                           (and max-error (flycheck-error-level max-error)))))
+      (if next-checkers
+          (flycheck-start-current-syntax-check next-checkers)
+        (setq flycheck-current-syntax-check nil)
+        (flycheck-report-status 'finished)
+        ;; Delete overlays only after the very last checker has run, to avoid
+        ;; flickering on intermediate re-displays
+        (flycheck-delete-marked-overlays)
+        (flycheck-error-list-refresh)
+        (run-hooks 'flycheck-after-syntax-check-hook)
+        (when (eq (current-buffer) (window-buffer))
+          (flycheck-display-error-at-point))
+        ;; Immediately try to run any pending deferred syntax check, which were
+        ;; triggered by intermediate automatic check event, to make sure that we
+        ;; quickly refine outdated error information
+        (flycheck-perform-deferred-syntax-check)))))
 
 (defun flycheck-disable-excessive-checker (checker errors)
   "Disable CHECKER if it reported excessive ERRORS.
@@ -3081,6 +3113,15 @@ with `flycheck-process-error-functions'."
   "Remove all error information from the current buffer."
   (setq flycheck-current-errors nil)
   (flycheck-report-status 'not-checked))
+
+(defun flycheck-most-severe-current-error ()
+  "Get the most severe error in the current buffer.
+
+Return the error with the most severe level or nil if there are
+no errors in the current buffer."
+  ;; FIXME: Invert the condition!
+  (and flycheck-current-errors
+       (-max-by #'flycheck-error-level-< flycheck-current-errors)))
 
 (defun flycheck-fill-and-expand-error-file-names (errors)
   "Fill and expand file names in ERRORS.
@@ -5568,6 +5609,7 @@ SYMBOL with `flycheck-def-executable-var'."
         (parser (plist-get properties :error-parser))
         (filter (plist-get properties :error-filter))
         (predicate (plist-get properties :predicate))
+        (maximum-level (plist-get properties :maximum-level))
         (conflicts-with (plist-get properties :conflicts-with))
         (verify-fn (plist-get properties :verify)))
 
@@ -5586,6 +5628,8 @@ SYMBOL with `flycheck-def-executable-var'."
          :modes ',(plist-get properties :modes)
          ,@(when predicate
              `(:predicate #',predicate))
+         ,@(when maximum-level
+             `(:maximum-level ',maximum-level))
          ,@(when conflicts-with
              `(:conflicts-with ',conflicts-with))
          :next-checkers ',(plist-get properties :next-checkers)
