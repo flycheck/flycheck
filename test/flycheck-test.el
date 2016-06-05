@@ -2796,7 +2796,13 @@ evaluating BODY."
         (flycheck-cppcheck-inconclusive nil)
         (flycheck-cppcheck-checks '("style")))
     (flycheck-ert-should-syntax-check
-     "language/c_c++/style.cpp" '(c-mode c++-mode)
+     "language/c_c++/style.cpp" 'c-mode
+     '(5 nil info "Unused variable: unused" :id "unusedVariable"
+         :checker c/c++-cppcheck)
+     '(9 nil error "Division by zero." :id "zerodiv" :checker c/c++-cppcheck))
+
+    (flycheck-ert-should-syntax-check
+     "language/c_c++/style.cpp" 'c++-mode
      '(5 nil info "Unused variable: unused" :id "unusedVariable"
          :checker c/c++-cppcheck)
      '(9 nil error "Division by zero." :id "zerodiv" :checker c/c++-cppcheck)
