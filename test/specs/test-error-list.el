@@ -67,7 +67,7 @@
     (it "has a local header line"
       (flycheck/with-error-list-buffer
         (expect header-line-format
-                :to-equal " Line Col Level ID Message (Checker) ")
+                :to-equal "  Line Col Level ID Message (Checker) ")
         (expect 'header-line-format :to-be-local))))
 
   (describe "Columns"
@@ -75,7 +75,7 @@
       (flycheck/with-error-list-buffer
         (expect (aref tabulated-list-format 0)
                 :to-equal
-                '("Line" 4 flycheck-error-list-entry-< :right-align t))))
+                '("Line" 5 flycheck-error-list-entry-< :right-align t))))
 
     (it "has the column number in the 2nd column"
       (flycheck/with-error-list-buffer

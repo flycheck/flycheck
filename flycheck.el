@@ -3714,7 +3714,7 @@ the beginning of the buffer."
   "The keymap of `flycheck-error-list-mode'.")
 
 (defconst flycheck-error-list-format
-  [("Line" 4 flycheck-error-list-entry-< :right-align t)
+  [("Line" 5 flycheck-error-list-entry-< :right-align t)
    ("Col" 3 nil :right-align t)
    ("Level" 8 flycheck-error-list-entry-level-<)
    ("ID" 6 t)
