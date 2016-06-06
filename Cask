@@ -18,6 +18,7 @@
  (depends-on "d-mode")
  (depends-on "erlang")
  (depends-on "ess")
+ (depends-on "geiser")
  (depends-on "go-mode")
  (depends-on "groovy-mode")
  (depends-on "haml-mode")

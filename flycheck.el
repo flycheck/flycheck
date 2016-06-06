@@ -233,6 +233,7 @@ attention to case differences."
     sass
     scala
     scala-scalastyle
+    scheme-chicken
     scss-lint
     scss
     sh-bash
@@ -8426,6 +8427,32 @@ See URL `http://www.scalastyle.org'."
                        ((not flycheck-scalastylerc) '(bold warning))
                        ((not config-file) '(bold error))
                        (t 'success)))))))
+
+(flycheck-define-checker scheme-chicken
+  "A CHICKEN Scheme syntax checker using the CHICKEN compiler `csc'.
+
+See URL `http://call-cc.org/'."
+  :command ("csc" "-analyze-only" "-local" source)
+  :predicate
+  (lambda ()
+    ;; In `scheme-mode' we must check the current Scheme implementation
+    ;; being used
+    (and (boundp 'geiser-impl--implementation)
+         (eq geiser-impl--implementation 'chicken)))
+  :error-patterns
+  ((info line-start
+         "Note: " (zero-or-more not-newline) ":\n"
+         (one-or-more (any space)) "(" (file-name) ":" line ") " (message)
+         line-end)
+   (warning line-start
+            "Warning: " (zero-or-more not-newline) ":\n"
+            (one-or-more (any space)) "(" (file-name) ":" line ") " (message)
+            line-end)
+   (error line-start
+          "Error: " (zero-or-more not-newline) ":\n"
+          (one-or-more (any space)) "(" (file-name) ":" line ") " (message)
+          line-end))
+  :modes (scheme-mode geiser-mode))
 
 (defconst flycheck-scss-lint-checkstyle-re
   (rx "cannot load such file" (1+ not-newline) "scss_lint_reporter_checkstyle")

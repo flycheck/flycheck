@@ -3888,6 +3888,19 @@ Why not:
      '(5 9 warning "Redundant braces after class definition"
          :checker scala-scalastyle))))
 
+(flycheck-ert-def-checker-test scheme-chicken scheme nil
+  (let ((setup-geiser
+         (lambda ()
+           (setq-local geiser-scheme-implementation 'chicken)
+           (geiser-mode))))
+    (add-hook 'scheme-mode-hook setup-geiser)
+    (unwind-protect
+        (flycheck-ert-should-syntax-check
+         "language/chicken.scm" 'geiser-mode
+         '(2 nil warning "in procedure call to `g1', expected a value of type `(procedure (* *) *)' but was given a value of type `number'"
+             :checker scheme-chicken))
+      (remove-hook 'scheme-mode-hook setup-geiser))))
+
 (flycheck-ert-def-checker-test scss-lint scss nil
   (let ((flycheck-scss-lintrc "scss-lint.yml"))
     (flycheck-ert-should-syntax-check

@@ -4,6 +4,7 @@
 - New syntax checkers:
 
   - Slim with ``slim-lint`` [GH-1013]
+  - CHICKEN Scheme with ``csc`` [GH-987]
 
 - New features:
 

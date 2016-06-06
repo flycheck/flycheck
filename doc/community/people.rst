@@ -159,6 +159,7 @@ to Flycheck:
 * Lorenzo Villani (:gh:`lvillani`)
 * Magnar Sveen (:gh:`magnars`)
 * Malyshev Artem (:gh:`proofit404`)
+* Manuel Uberti (:gh:`manuel-uberti`)
 * Marcin Antczak (:gh:`marcinant`)
 * Marcus Majewski (:gh:`hekto`)
 * Marian Schubert (:gh:`maio`)
