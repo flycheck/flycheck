@@ -3852,7 +3852,7 @@ Why not:
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/src/importing.rs" 'rust-mode
-     '(1 5 error "unresolved import `super::imported`" :checker rust :id "E0432")
+     '(1 5 error "unresolved import `super::imported`. There are too many initial `super`s." :checker rust :id "E0432")
      '(1 5 info "run `rustc --explain E0432` to see a detailed explanation"
          :checker rust))))
 
