@@ -39,6 +39,7 @@ This function is ABSOLUTELY INSECURE, use only and exclusively for testing."
   (let* ((process-connection-type nil)
          (gpg (start-process "flycheck-buttercup-gpg" nil
                              epg-gpg-program "--batch" "--no-tty"
+                             "--homedir" epg-gpg-home-directory
                              "-c" "--passphrase"
                              passphrase "-o" filename "-")))
     (process-send-string gpg string)
