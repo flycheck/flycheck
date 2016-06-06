@@ -4276,14 +4276,15 @@ universal prefix arg, and only the id with normal prefix arg."
 Work out the working directory from which the CHECKER command
 will be called.  The default is the `default-directory' of the source-buffer
 from which flycheck is calling the checker.
-:default-directory can be a string that contains a fixed directory path or a function
-that will return a path.  The function needs to return an absolut path not a
-relative path."
+The :default-directory must be a function that will return an absolute path."
   (let* ((cwd (flycheck-checker-get checker 'default-directory))
-         (default-directory (or (and (functionp cwd) (funcall cwd))
-                                (and (stringp cwd) (file-truename cwd))
-                                default-directory))
-         )
+         (default-directory (if cwd
+                                (if (functionp cwd)
+                                    (funcall cwd)
+                                  (error "Syntax Checker %S has defined :default-directory which is not a function: %s"
+                                         checker
+                                         default-directory))
+                              default-directory)))
     (unless (file-exists-p default-directory)
       (error "Syntax Checker %S has defined non existant :default-directory %s"
              checker default-directory))
