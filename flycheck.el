@@ -2135,12 +2135,18 @@ Slots:
      The syntax checker being used
 
 `context'
-     The context object."
-  buffer checker context)
+     The context object.
+
+`default-directory'
+     Working directory of the checker process.
+"
+  buffer checker context default-directory)
 
 (defun flycheck-syntax-check-start (syntax-check callback)
   "Start a SYNTAX-CHECK with CALLBACK."
-  (let ((checker (flycheck-syntax-check-checker syntax-check)))
+  (let ((checker (flycheck-syntax-check-checker syntax-check))
+        (default-directory
+          (flycheck-syntax-check-default-directory syntax-check)))
     (setf (flycheck-syntax-check-context syntax-check)
           (funcall (flycheck-checker-get checker 'start) checker callback))))
 
@@ -2348,9 +2354,12 @@ Set `flycheck-current-syntax-check' accordingly."
   ;; Allocate the current syntax check *before* starting it.  This allows for
   ;; synchronous checks, which call the status callback immediately in there
   ;; start function.
-  (let* ((check (flycheck-syntax-check-new :buffer (current-buffer)
-                                           :checker checker
-                                           :context nil))
+  (let* ((check
+          (flycheck-syntax-check-new
+           :buffer (current-buffer)
+           :checker checker
+           :context nil
+           :default-directory (flycheck-default-directory-wrapper checker)))
          (callback (flycheck-buffer-status-callback check)))
     (setq flycheck-current-syntax-check check)
     (flycheck-report-status 'running)
@@ -2469,12 +2478,14 @@ discarded."
              (when flycheck-mode
                ;; Only report errors from the checker if Flycheck Mode is
                ;; still enabled.
-               (flycheck-finish-current-syntax-check data)))
+               (flycheck-finish-current-syntax-check
+                data
+                (flycheck-syntax-check-default-directory syntax-check))))
             (_
              (error "Unknown status %s from syntax checker %s"
                     status checker))))))))
 
-(defun flycheck-finish-current-syntax-check (errors)
+(defun flycheck-finish-current-syntax-check (errors cwd)
   "Finish the current syntax-check in the current buffer with ERRORS.
 
 ERRORS is a list of `flycheck-error' objects reported by the
@@ -2484,13 +2495,16 @@ Report all ERRORS and potentially start any next syntax checkers.
 
 If the current syntax checker reported excessive errors, it is disabled
 via `flycheck-disable-excessive-checker' for subsequent syntax
-checks."
+checks.
+
+Relative file names in ERRORS will be expanded relative to CWD directory."
   (let* ((syntax-check flycheck-current-syntax-check)
          (checker (flycheck-syntax-check-checker syntax-check))
          (errors (flycheck-relevant-errors
                   (flycheck-fill-and-expand-error-file-names
                    (flycheck-filter-errors
-                    (flycheck-assert-error-list-p errors) checker)))))
+                    (flycheck-assert-error-list-p errors) checker)
+                   cwd))))
     (unless (flycheck-disable-excessive-checker checker errors)
       (flycheck-report-current-errors errors))
     (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
@@ -2981,19 +2995,18 @@ with `flycheck-process-error-functions'."
   (setq flycheck-current-errors nil)
   (flycheck-report-status 'not-checked))
 
-(defun flycheck-fill-and-expand-error-file-names (errors)
+(defun flycheck-fill-and-expand-error-file-names (errors cwd)
   "Fill and expand file names in ERRORS.
 
-Expand all file names of ERRORS against the `default-directory'
-of the current buffer.  If the file name of an error is nil fill
-in the result of function `buffer-file-name' in the current
-buffer.
+Expand all file names of ERRORS against the CWD directory.
+If the file name of an error is nil fill in the result of
+function `buffer-file-name' in the current buffer.
 
 Return ERRORS, modified in-place."
   (seq-do (lambda (err)
             (setf (flycheck-error-filename err)
                   (-if-let (filename (flycheck-error-filename err))
-                      (expand-file-name filename)
+                      (expand-file-name filename cwd)
                     (buffer-file-name))))
           errors)
   errors)
@@ -4713,7 +4726,6 @@ and rely on Emacs' own buffering and chunking."
                (args (flycheck-checker-substituted-arguments checker))
                (command (funcall flycheck-command-wrapper-function
                                  (cons program args)))
-               (default-directory  (flycheck-default-directory-wrapper checker))
                ;; Use pipes to receive output from the syntax checker.  They are
                ;; more efficient and more robust than PTYs, which Emacs uses by
                ;; default, and since we don't need any job control features, we
