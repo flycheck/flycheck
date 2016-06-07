@@ -27,6 +27,8 @@ not be what it is today.
 User interface
 ==============
 
+These extensions change Flycheck’s user interface:
+
 * :flyc:`flycheck-color-mode-line` (*official*) colors the mode line according
   to the Flycheck status.
 * :flyc:`flycheck-pos-tip` (*official*) shows Flycheck error messages in a
@@ -34,49 +36,109 @@ User interface
 * :gh:`liblit/flycheck-status-emoji` adds cute emoji (e.g. 😱 for errors) to
   Flycheck’s mode line status.
 
-Language integration
-====================
+Language support
+================
+
+These extensions add support for new languages, or improve support for built-in
+languages.  They are grouped by the corresponding language so you can jump
+directly to the languages that interest you:
+
+.. contents:: Languages
+   :local:
+
+Cadence
+-------
+
+* :gh:`cmarqu/flycheck-hdl-irun` adds a syntax checker for hardware description
+  languages supported by `Cadence IES/irun`_.
+
+.. _Cadence IES/irun: http://www.cadence.com/products/fv/enterprise_simulator/pages/default.aspx
+
+Clojure
+-------
+
+* :gh:`clojure-emacs/squiggly-clojure` adds syntax checking for Clojure.
+
+C/C++/Objective C
+-----------------
+
+* :gh:`Wilfred/flycheck-pkg-config` configures Flycheck to use settings from
+  `pkg-config`_ when checking C/C++.
+* :flyc:`flycheck-google-cpplint` (*official*) adds a syntax checker for
+  Google's C++ style checker.
+* :gh:`Sarcasm/flycheck-irony` adds a Flycheck syntax checker for C, C++ and
+  Objective C using :gh:`Irony Mode <Sarcasm/irony-mode>`.
+
+.. _pkg-config: https://www.freedesktop.org/wiki/Software/pkg-config/
+
+D
+-
+
+* :flyc:`flycheck-d-unittest` (*official*) adds a Flycheck checker to run unit
+  tests for D programs on the fly.
+
+Elixir
+------
+
+* :gh:`tomekowal/flycheck-mix` adds an Elixir syntax checker using the ``mix``
+  build tool.
+
+Emacs Lisp
+----------
 
 * :flyc:`flycheck-cask` (*official*) makes Flycheck use Cask packages for Emacs
   Lisp syntax checking in Cask_ projects.
-* :flyc:`flycheck-rust` (*official*) configures Flycheck according to the Cargo
-  settings and layouts of the current Rust project.
-* :flyc:`flycheck-haskell` (*official*) configures Flycheck from the Cabal
-  settings and sandbox in Haskell projects.
-* :gh:`Wilfred/flycheck-pkg-config` configures Flycheck to use settings from
-  `pkg-config`_ when checking C/C++.
+* :gh:`purcell/flycheck-package` checks Emacs Lisp packages for common problems
+  with package metadata.
 
 .. _Cask: https://github.com/cask/cask
-.. _pkg-config: https://www.freedesktop.org/wiki/Software/pkg-config/
 
-Additional languages and syntax checkers
-========================================
+Haskell
+-------
+
+* :flyc:`flycheck-haskell` (*official*) configures Flycheck from the Cabal
+  settings and sandbox in Haskell projects.
+
+Ledger
+------
+
+* :gh:`purcell/flycheck-ledger` adds a syntax checker for the Ledger_ accounting
+  tool.
+
+.. _Ledger: http://ledger-cli.org/
+
+Mercury
+-------
+
+* :flyc:`flycheck-mercury` (*official*) adds a syntax checker for the Mercury_
+  language.
+
+.. _Mercury: http://mercurylang.org/
+
+OCaml
+-----
+
+* :flyc:`flycheck-ocaml` (*official*) adds a syntax checker for OCaml using the
+  :gh:`Merlin <the-lambda-church/merlin>` backend.
+
+Python
+------
+
+* :gh:`Wilfred/flycheck-pyflakes` adds a Python syntax checker using Pyflakes.
+
+.. _Pyflakes: https://github.com/pyflakes/pyflakes
+
+Rust
+----
+
+* :flyc:`flycheck-rust` (*official*) configures Flycheck according to the Cargo
+  settings and layouts of the current Rust project.
+
+Shell scripts
+-------------
 
 * :gh:`Gnouc/flycheck-checkbashisms` adds a shell script syntax checker using
   ``checkbashisms`` which is part of `Debian devscripts`_ and checks for common
   Bash constructs in POSIX shell scripts.
-* :gh:`clojure-emacs/squiggly-clojure` provides syntax checking for Clojure.
-* :flyc:`flycheck-d-unittest` (*official*) adds a Flycheck checker to run unit
-  tests for D programs on the fly.
-* :flyc:`flycheck-google-cpplint` (*official*) adds a syntax checker for
-  Google's C++ style checker.
-* :gh:`cmarqu/flycheck-hdl-irun` adds a syntax checker for hardware description
-  languages (HDLs) supported by `Cadence IES/irun`_.
-* :gh:`Sarcasm/flycheck-irony` adds a Flycheck syntax checker for C, C++ and
-  Objective C using :gh:`Irony Mode <Sarcasm/irony-mode>`.
-* :gh:`purcell/flycheck-ledger` adds a syntax checker for the Ledger_ accounting
-  tool.
-* :flyc:`flycheck-mercury` (*official*) adds a Flycheck syntax checker for the
-  `Mercury language`_.
-* :flyc:`flycheck-ocaml` (*official*) adds a syntax checker for OCaml.
-* :gh:`purcell/flycheck-package` checks Emacs Lisp packages for common problems
-  with package metadata.
-* :gh:`Wilfred/flycheck-pyflakes` adds a Python syntax checker using Pyflakes.
-* :gh:`tomekowal/flycheck-mix` adds an Elixir syntax checker using its ``mix``
-  build tool.
 
 .. _Debian devscripts: https://anonscm.debian.org/cgit/collab-maint/devscripts.git
-.. _Ledger: http://ledger-cli.org/
-.. _Mercury language: http://mercurylang.org/
-.. _Cadence IES/irun: http://www.cadence.com/products/fv/enterprise_simulator/pages/default.aspx
-.. _Pyflakes: https://github.com/pyflakes/pyflakes
