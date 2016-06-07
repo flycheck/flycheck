@@ -72,6 +72,7 @@ Additional languages and syntax checkers
 * :gh:`purcell/flycheck-package` checks Emacs Lisp packages for common problems
   with package metadata.
 * :gh:`Wilfred/flycheck-pyflakes` adds a Python syntax checker using Pyflakes.
+* :gh:`tomekowal/flycheck-mix` adds Elixir syntax checker using mix build tool
 
 .. _Debian devscripts: https://anonscm.debian.org/cgit/collab-maint/devscripts.git
 .. _Ledger: http://ledger-cli.org/
