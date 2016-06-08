@@ -5510,8 +5510,7 @@ SYMBOL with `flycheck-def-executable-var'."
         (parser (plist-get properties :error-parser))
         (filter (plist-get properties :error-filter))
         (predicate (plist-get properties :predicate))
-        (verify-fn (plist-get properties :verify))
-        (cwd (plist-get properties :default-directory)))
+        (verify-fn (plist-get properties :verify)))
 
     `(progn
        (flycheck-def-executable-var ,symbol ,(car command))
@@ -5530,9 +5529,7 @@ SYMBOL with `flycheck-def-executable-var'."
          :next-checkers ',(plist-get properties :next-checkers)
          ,@(when verify-fn
              `(:verify #',verify-fn))
-         :standard-input ',(plist-get properties :standard-input)
-         ,@(when cwd
-             `(:default-directory ,cwd))))))
+         :standard-input ',(plist-get properties :standard-input)))))
 
 
 ;;; Built-in checkers
