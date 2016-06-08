@@ -2135,18 +2135,12 @@ Slots:
      The syntax checker being used
 
 `context'
-     The context object.
-
-`default-directory'
-     Working directory of the checker process.
-"
-  buffer checker context default-directory)
+     The context object."
+  buffer checker context)
 
 (defun flycheck-syntax-check-start (syntax-check callback)
   "Start a SYNTAX-CHECK with CALLBACK."
-  (let ((checker (flycheck-syntax-check-checker syntax-check))
-        (default-directory
-          (flycheck-syntax-check-default-directory syntax-check)))
+  (let ((checker (flycheck-syntax-check-checker syntax-check)))
     (setf (flycheck-syntax-check-context syntax-check)
           (funcall (flycheck-checker-get checker 'start) checker callback))))
 
@@ -2354,12 +2348,9 @@ Set `flycheck-current-syntax-check' accordingly."
   ;; Allocate the current syntax check *before* starting it.  This allows for
   ;; synchronous checks, which call the status callback immediately in there
   ;; start function.
-  (let* ((check
-          (flycheck-syntax-check-new
-           :buffer (current-buffer)
-           :checker checker
-           :context nil
-           :default-directory (flycheck-default-directory-wrapper checker)))
+  (let* ((check (flycheck-syntax-check-new :buffer (current-buffer)
+                                           :checker checker
+                                           :context nil))
          (callback (flycheck-buffer-status-callback check)))
     (setq flycheck-current-syntax-check check)
     (flycheck-report-status 'running)
@@ -2480,7 +2471,9 @@ discarded."
                ;; still enabled.
                (flycheck-finish-current-syntax-check
                 data
-                (flycheck-syntax-check-default-directory syntax-check))))
+                (process-get
+                 (flycheck-syntax-check-context syntax-check)
+                 'flycheck-default-directory))))
             (_
              (error "Unknown status %s from syntax checker %s"
                     status checker))))))))
@@ -4727,6 +4720,7 @@ and rely on Emacs' own buffering and chunking."
                (args (flycheck-checker-substituted-arguments checker))
                (command (funcall flycheck-command-wrapper-function
                                  (cons program args)))
+               (default-directory  (flycheck-default-directory-wrapper checker))
                ;; Use pipes to receive output from the syntax checker.  They are
                ;; more efficient and more robust than PTYs, which Emacs uses by
                ;; default, and since we don't need any job control features, we
