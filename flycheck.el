@@ -5639,14 +5639,14 @@ When non-nil, enable Microsoft extensions to C/C++ via
   :package-version '(flycheck . "0.16"))
 
 (flycheck-def-option-var flycheck-clang-ms-compatibility-version nil c/c++-clang
-  "The Microsoft compatibility version to use with clang
+  "The Microsoft compatibility version to use with Clang.
 
 When non-nil, enable Microsoft compatibility to C/C++ via
 `-fms-compatibility-version'."
   :type '(choice (const :tag "No compatibility version" nil)
                  (string :tag "Compatibility version"))
   :safe #'stringp
-  :package-version '(flycheck . "0.29"))
+  :package-version '(flycheck . "29"))
 
 (flycheck-def-option-var flycheck-clang-no-exceptions nil c/c++-clang
   "Whether to disable exceptions in Clang.
