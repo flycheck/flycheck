@@ -5638,6 +5638,16 @@ When non-nil, enable Microsoft extensions to C/C++ via
   :safe #'booleanp
   :package-version '(flycheck . "0.16"))
 
+(flycheck-def-option-var flycheck-clang-ms-compatibility-version nil c/c++-clang
+  "The Microsoft compatibility version to use with Clang.
+
+When non-nil, enable Microsoft compatibility to C/C++ via
+`-fms-compatibility-version'."
+  :type '(choice (const :tag "No compatibility version" nil)
+                 (string :tag "Compatibility version"))
+  :safe #'stringp
+  :package-version '(flycheck . "29"))
+
 (flycheck-def-option-var flycheck-clang-no-exceptions nil c/c++-clang
   "Whether to disable exceptions in Clang.
 
@@ -5739,6 +5749,7 @@ See URL `http://clang.llvm.org/'."
             (option-flag "-pedantic-errors" flycheck-clang-pedantic-errors)
             (option "-stdlib=" flycheck-clang-standard-library concat)
             (option-flag "-fms-extensions" flycheck-clang-ms-extensions)
+            (option "-fms-compatibility-version=" flycheck-clang-ms-compatibility-version concat)
             (option-flag "-fno-exceptions" flycheck-clang-no-exceptions)
             (option-flag "-fno-rtti" flycheck-clang-no-rtti)
             (option-flag "-fblocks" flycheck-clang-blocks)

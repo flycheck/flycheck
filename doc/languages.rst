@@ -109,6 +109,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          Whether to enable Microsoft extensions to C/C++ in `c/c++-clang`.
 
+      .. option:: flycheck-clang-ms-compatibility-version
+
+         The Microsoft compatibility version to use with Clang.
+
       .. option:: flycheck-clang-no-exceptions
                   flycheck-gcc-no-exceptions
 
