@@ -2950,6 +2950,19 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
    '(4 8 error "module external_library is in file 'external_library.d' which cannot be read"
        :checker d-dmd)))
 
+(flycheck-ert-def-checker-test d-dmd d continuation-line
+  (unless (version<= "24.4" emacs-version)
+    (ert-skip "Skipped because CC Mode is broken on 24.3.
+See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
+  (flycheck-ert-should-syntax-check
+   "language/d/src/dmd/continuation.d" 'd-mode
+   '(5 12 error "undefined identifier 'invalid'"
+       :checker d-dmd)
+   '(10 12 error "template instance continuation.T!() error instantiating"
+       :checker d-dmd)
+   '(13 1 info "instantiated from here: U!()"
+       :checker d-dmd)))
+
 (flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp nil
   (flycheck-ert-should-syntax-check
    "language/emacs-lisp/warnings.el" 'emacs-lisp-mode
