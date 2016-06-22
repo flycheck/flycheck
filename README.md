@@ -34,7 +34,7 @@ features like alternative error displays or mode line indicators.
 [definitions]: http://www.flycheck.org/en/latest/_downloads/flycheck.html#Defining-syntax-checkers
 [extensions]: http://www.flycheck.org/en/latest/community/extensions.html
 
-## Quickstart ##
+## Try out ##
 
 Flycheck needs GNU Emacs 24.3 or newer, and works best on Unix systems.
 **Windows users**, please be aware that Flycheck does not support Windows
@@ -49,6 +49,7 @@ Install some [syntax checker tools][languages] and type the following in your
 (add-to-list 'package-archives
              '("melpa" . "http://stable.melpa.org/packages/") t)
 (package-initialize)
+(package-refresh-contents)
 
 (package-install 'flycheck)
 
