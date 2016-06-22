@@ -41,7 +41,7 @@ run ``M-x eval-buffer``:
                 '("melpa" . "http://stable.melpa.org/packages/") t)
    (package-initialize)
    (package-refresh-contents)
-   
+
    (package-install 'flycheck)
 
    (global-flycheck-mode)
