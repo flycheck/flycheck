@@ -3563,10 +3563,18 @@ Why not:
    '(4 2 error "Syntax error, maybe a missing semicolon?"
        :checker processing)))
 
-(flycheck-ert-def-checker-test puppet-parser puppet parser-error
+; the puppet 4 and 3 tests are mutually exclusive due to one having column and the other not
+(flycheck-ert-def-checker-test puppet-parser puppet parser-error-puppet-4
+  (skip-unless (version<= "4" (shell-command-to-string "printf %s \"$(puppet --version)\"")))
   (flycheck-ert-should-syntax-check
    "language/puppet/parser-error.pp" 'puppet-mode
    '(3 9 error "Syntax error at '>'" :checker puppet-parser)))
+
+(flycheck-ert-def-checker-test puppet-parser puppet parser-error-puppet-3
+  (skip-unless (version<= (shell-command-to-string "printf %s \"$(puppet --version)\"") "4"))
+  (flycheck-ert-should-syntax-check
+   "language/puppet/parser-error2.pp" 'puppet-mode
+   '(4 nil error "Syntax error at 'helloagain'; expected '}'" :checker puppet-parser)))
 
 (flycheck-ert-def-checker-test puppet-lint puppet nil
   (flycheck-ert-should-syntax-check
