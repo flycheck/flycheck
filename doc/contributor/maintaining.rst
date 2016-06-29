@@ -58,13 +58,6 @@ Our workflow implies a couple of rules about which branches to push code to:
    purpose of the branch to other developers and maintainers.  ``fix-bug-42`` is
    not a great name, but ``42-fix-void-function-error-in-error-list`` is.
 
-   If your branch addresses a specific Github issue please name your branch
-   :samp:`{issue}-{description}`, where ``issue`` is the number of the Github
-   issue *without* any prefix and ``description`` is the description of the
-   branch.  This convention helps us to link branches to issues and has the
-   added bonus of automatically moving issues into "In progress" on our `Waffle
-   board`_.
-
 We do not enforce these rules to give you the freedom to ignore them when need
 be, like in the case of a very urgent but non-trivial bug fix.  But please do
 try to follow these rules most of the time as they help us to maintain a high
@@ -75,7 +68,6 @@ commit to any branch at any time.  Nonetheless we also recommend that
 maintainers open pull requests for discussion.
 
 .. _pull request: https://help.github.com/articles/using-pull-requests/
-.. _waffle board: https://waffle.io/flycheck/flycheck
 
 .. _flycheck-pull-requests:
 
