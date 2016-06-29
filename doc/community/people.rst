@@ -16,9 +16,10 @@ Maintainers
 * Clément Pit--Claudel (:gh:`cpitclaudel`, maintainer)
 
 We maintain Flycheck and all official extensions within the `Flycheck
-organisation`_, and set the direction and scope Flycheck.  We also accept or
-decline pull requests and feature proposals, implement changes and fix bugs in
-Flycheck.
+organisation`_, and set the direction and scope Flycheck.  We own the Github
+organisation, administer all our repositories, and accept or decline pull
+requests and feature proposals.  Occasionally we also implement changes and fix
+bugs in Flycheck ourselves.
 
 Our GPG keys are used to sign commits on Github and to sign release tags for
 Flycheck.
