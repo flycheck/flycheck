@@ -44,6 +44,8 @@ Mention with ``@flycheck/moderators``.
 
    If you’d like to help out with moderation, please contact a maintainer.
 
+.. _flycheck-language-teams:
+
 Language teams
 --------------
 

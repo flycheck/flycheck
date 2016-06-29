@@ -2,6 +2,29 @@
  Maintainer’s Guide
 ====================
 
+Issue triage
+============
+
+Please label incoming tickets accordingly according to these rules:
+
+- Add the “bug” label to things that you think **must be fixed urgently**.
+  Please don’t use this label for bugs that do not severely impede Flycheck’s
+  functionality.
+- Add the “needs review” label to new bugs and pull requests that need to be
+  reviewed.
+- Add the “beginner friendly” label to really easy things.  If you add this
+  label please also add a comment that outlines a possible solution.
+- Add “blocked” to bugs that need further comment or help from the reporter, and
+  to pull requests that need to be improved.
+- Add “windows only” for bugs that appear to only affect Windows operating
+  systems.
+
+**If you’d like to review a bug or pull request please assign the corresponding
+ticket to you.**
+
+In issues for specific languages that Flycheck support please mention the
+corresponding :ref:`language team <flycheck-language-teams>` if one exists.
+
 Git workflow
 ============
 
