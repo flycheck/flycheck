@@ -4,7 +4,6 @@
 [![Join the chat](https://img.shields.io/gitter/room/flycheck/flycheck.svg)](https://gitter.im/flycheck/flycheck)
 [![MELPA stable version](http://stable.melpa.org/packages/flycheck-badge.svg)](http://stable.melpa.org/#/flycheck)
 [![MELPA version](http://melpa.org/packages/flycheck-badge.svg)](http://melpa.org/#/flycheck)
-[![In progress issues](https://img.shields.io/waffle/label/flycheck/flycheck/S-in%20progress.svg?maxAge=2592000)](https://waffle.io/flycheck/flycheck)
 [![Build Status](https://img.shields.io/travis/flycheck/flycheck/master.svg)](https://travis-ci.org/flycheck/flycheck)
 
 **Flycheck** is a modern on-the-fly syntax checking extension for GNU Emacs 24,
@@ -87,7 +86,6 @@ to follow our [Code of Conduct][coc].
 [gitter]: https://gitter.im/flycheck/flycheck
 [Issue Tracker]: https://github.com/flycheck/flycheck/issues
 [contrib]: http://www.flycheck.org/en/latest/contributor/contributing.html
-[Waffle Board]: http://waffle.io/flycheck/flycheck
 [coc]: http://www.flycheck.org/en/latest/community/conduct.html
 
 ## License ##
