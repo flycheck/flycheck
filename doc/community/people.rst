@@ -177,6 +177,7 @@ to Flycheck:
 * Sean Salmon (:gh:`phatcabbage`)
 * Sebastian Beyer (:gh:`sebastianbeyer`)
 * Sebastian Wiesner (:gh:`lunaryorn`, founder, head maintainer)
+* Sergey Vinokurov (:gh:`sergv`)
 * Stephen Lewis (:gh:`stephenjlewis`)
 * Steve Purcell (:gh:`purcell`)
 * Sven Keidel (:gh:`svenkeidel`)
