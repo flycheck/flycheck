@@ -2764,7 +2764,7 @@ evaluating BODY."
   (let ((flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-ert-should-syntax-check
      "language/c_c++/error.cpp" 'c++-mode
-     '(2 18 error "‘struct A’ has no member named ‘bar’"
+     '(2 18 error "'struct A' has no member named 'bar'"
          :checker c/c++-gcc))))
 
 (flycheck-ert-def-checker-test c/c++-gcc (c c++) fatal-error
@@ -2778,7 +2778,7 @@ evaluating BODY."
   (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck)))
     (flycheck-ert-should-syntax-check
      "language/c_c++/warning.c" 'c-mode
-     '(5 10 warning "unused variable ‘unused’" :checker c/c++-gcc)
+     '(5 10 warning "unused variable 'unused'" :checker c/c++-gcc)
      '(7 15 warning "comparison between signed and unsigned integer expressions"
          :checker c/c++-gcc)
      '(8 7 warning "#warning" :checker c/c++-gcc))))
@@ -3088,9 +3088,9 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 (flycheck-ert-def-checker-test fortran-gfortran fortran warning
   (flycheck-ert-should-syntax-check
    "language/fortran/warning.f90" '(fortran-mode f90-mode)
-   '(1 20 warning "Unused dummy argument ‘p’ at (1)"
+   '(1 20 warning "Unused dummy argument 'p' at (1)"
        :checker fortran-gfortran)
-   '(18 9 warning "Same actual argument associated with INTENT(IN) argument ‘a’ and INTENT(OUT) argument ‘b’ at (1)"
+   '(18 9 warning "Same actual argument associated with INTENT(IN) argument 'a' and INTENT(OUT) argument 'b' at (1)"
         :checker fortran-gfortran)))
 
 (flycheck-ert-def-checker-test go-gofmt go syntax-error
@@ -3200,17 +3200,17 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (let ((flycheck-disabled-checkers '(haskell-ghc)))
     (flycheck-ert-should-syntax-check
      "language/haskell/SyntaxError.hs" 'haskell-mode
-     '(3 1 error "parse error on input ‘module’" :checker haskell-stack-ghc))))
+     '(3 1 error "parse error on input `module'" :checker haskell-stack-ghc))))
 
 (flycheck-ert-def-checker-test haskell-stack-ghc haskell type-error
   (skip-unless (file-exists-p (getenv "HOME")))
   (let ((flycheck-disabled-checkers '(haskell-ghc)))
     (flycheck-ert-should-syntax-check
      "language/haskell/Error.hs" 'haskell-mode
-     '(4 16 error "Couldn't match type ‘Bool’ with ‘[Char]’
+     '(4 16 error "Couldn't match type `Bool' with `[Char]'
 Expected type: String
   Actual type: Bool
-In the first argument of ‘putStrLn’, namely ‘True’
+In the first argument of `putStrLn', namely `True'
 In the expression: putStrLn True" :checker haskell-stack-ghc))))
 
 (flycheck-ert-def-checker-test (haskell-stack-ghc haskell-hlint) haskell literate
@@ -3244,16 +3244,16 @@ Why not:
   (let ((flycheck-disabled-checkers '(haskell-stack-ghc)))
     (flycheck-ert-should-syntax-check
      "language/haskell/SyntaxError.hs" 'haskell-mode
-     '(3 1 error "parse error on input ‘module’" :checker haskell-ghc))))
+     '(3 1 error "parse error on input `module'" :checker haskell-ghc))))
 
 (flycheck-ert-def-checker-test haskell-ghc haskell type-error
   (let ((flycheck-disabled-checkers '(haskell-stack-ghc)))
     (flycheck-ert-should-syntax-check
      "language/haskell/Error.hs" 'haskell-mode
-     '(4 16 error "Couldn't match type ‘Bool’ with ‘[Char]’
+     '(4 16 error "Couldn't match type `Bool' with `[Char]'
 Expected type: String
   Actual type: Bool
-In the first argument of ‘putStrLn’, namely ‘True’
+In the first argument of `putStrLn', namely `True'
 In the expression: putStrLn True" :checker haskell-ghc))))
 
 (flycheck-ert-def-checker-test (haskell-ghc haskell-hlint) haskell literate
