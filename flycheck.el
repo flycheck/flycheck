@@ -4263,25 +4263,26 @@ universal prefix arg, and only the id with normal prefix arg."
     (`(eval ,_) t)
     (_ nil)))
 
-(defun flycheck-default-directory-wrapper (checker)
-  "Function returning apropriate current working directory.
+(defun flycheck-compute-default-directory (checker)
+  "Get the default working directory for CHECKER.
 
-Work out the working directory from which the CHECKER command
-will be called.  The default is the `default-directory' of the source-buffer
-from which flycheck is calling the checker.
-The :default-directory must be a function that will return an absolute path."
+Compute the working directory from which the checker command
+will be called.  The default is the `default-directory' of the
+source-buffer from which flycheck is calling the checker.
+The :default-directory must be a function that will return an
+absolute path."
   (let* ((cwd (flycheck-checker-get checker 'default-directory))
          (default-directory (if cwd
                                 (if (functionp cwd)
                                     (funcall cwd)
-                                  (error "Syntax Checker %S has defined :default-directory which is not a function: %s"
-                                         checker
-                                         default-directory))
+                                  (error ":default-directory %s of syntax checker %S is not a function"
+                                         default-directory
+                                         checker))
                               default-directory)))
     (unless (file-exists-p default-directory)
-      (error "Syntax Checker %S has defined non existant :default-directory %s"
-             checker
-             default-directory))
+      (error ":default-directory %s of syntax checker %S does not exist"
+             default-directory
+             checker))
     default-directory))
 
 ;;;###autoload
@@ -4721,7 +4722,7 @@ and rely on Emacs' own buffering and chunking."
                (args (flycheck-checker-substituted-arguments checker))
                (command (funcall flycheck-command-wrapper-function
                                  (cons program args)))
-               (default-directory (flycheck-default-directory-wrapper checker))
+               (default-directory (flycheck-compute-default-directory checker))
                ;; Use pipes to receive output from the syntax checker.  They are
                ;; more efficient and more robust than PTYs, which Emacs uses by
                ;; default, and since we don't need any job control features, we
@@ -5216,7 +5217,7 @@ tool, just like `compile' (\\[compile])."
     (user-error "Cannot use syntax checker %S in this buffer" checker))
   (unless (flycheck-checker-executable checker)
     (user-error "Cannot run checker %S as shell command" checker))
-  (let* ((default-directory (flycheck-default-directory-wrapper checker))
+  (let* ((default-directory (flycheck-compute-default-directory checker))
          (command (flycheck-checker-shell-command checker))
          (buffer (compilation-start command nil #'flycheck-compile-name)))
     (with-current-buffer buffer
