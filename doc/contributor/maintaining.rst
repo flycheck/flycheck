@@ -45,27 +45,19 @@ Branch rules
 
 Our workflow implies a couple of rules about which branches to push code to:
 
-* Please do not commit directly to ``master`` unless it’s a trivial change,
-  a safe refactoring, a small bug or spelling fix, etc.  If in doubt please use
-  a separate branch and open a `pull request`_.
 * Please commit new features, larger changes and refactorings and updates to
   documentation to separate branches and open a pull request for review and
   discussion.
+* The ``master`` branch is protected.  Only :ref:`maintainers
+  <flycheck-maintainers>` can push directly to it.  Everyone else needs to open
+  a pull request.  Github requires maintainer approval and passing Travis CI
+  tests before a pull request can be merged to master.
 
 .. important::
 
    When creating a new branch please use a *descriptive name* to communicate the
    purpose of the branch to other developers and maintainers.  ``fix-bug-42`` is
    not a great name, but ``42-fix-void-function-error-in-error-list`` is.
-
-We do not enforce these rules to give you the freedom to ignore them when need
-be, like in the case of a very urgent but non-trivial bug fix.  But please do
-try to follow these rules most of the time as they help us to maintain a high
-code quality in ``master``.
-
-For :ref:`maintainers <flycheck-maintainers>` these rules are relaxed: They may
-commit to any branch at any time.  Nonetheless we also recommend that
-maintainers open pull requests for discussion.
 
 .. _pull request: https://help.github.com/articles/using-pull-requests/
 
@@ -74,7 +66,26 @@ maintainers open pull requests for discussion.
 Pull requests
 -------------
 
-.. todo:: Explain how to review and merge pull requests
+All pull requests need approval of a maintainer.  As a maintainer add a comment
+beginning with ``LGTM`` to state your approval which will automatically allow
+merging of the pull request.
+
+Review guidelines
+~~~~~~~~~~~~~~~~~
+
+.. todo:: Write pull request review guidelines
+
+Merge guidelines
+~~~~~~~~~~~~~~~~
+
+If a pull request was approved you may directly merge it.  For smaller pull
+requests please “Squash and Merge” to keep a linear history, otherwise merge
+normally.  What constitutes a "small" pull request is at your discretion.  Apply
+common sense :)
+
+You may also add the author of the pull request to the "Core developers" team to
+give them commit access to the Flycheck repository and ask them merge the pull
+request themselves.  That's a good way to gain new contributors.
 
 .. _flycheck-git-signatures:
 
@@ -112,6 +123,8 @@ extra tooling and some 3rd party services for Flycheck:
   configuration.
 * `Travis CI`_ runs our tests after every push and for every pull request.
   It's configured through ``.travis.yml``.
+* LGTM_ handles the pull request approval process through ``LGTM`` comments.
+  It's configured through ``.lgtm``.
 
 All :ref:`maintainers <flycheck-maintainers>` have administrative access to
 these services so in case of an issue just contact them.
@@ -119,6 +132,7 @@ these services so in case of an issue just contact them.
 .. _Github: https://github.com/flycheck
 .. _ReadTheDocs: https://readthedocs.org/projects/flycheck/
 .. _Travis CI: https://travis-ci.org/flycheck/flycheck
+.. _LGTM: https://lgtm.co/
 
 .. _flycheck-maintenance-scripts:
 

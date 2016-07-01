@@ -122,10 +122,12 @@ Feel free to mention individual developers (e.g. ``@lunaryorn``) to request a
 review from a specific person, or ``@flycheck/maintainers`` if you have general
 questions or if your pull request was waiting for review too long.
 
-Additionally, all pull requests go through automated tests on `Travis CI`_ which
-check code style, run unit tests, etc. After the pull request was reviewed and
-if all tests passed a maintainer will eventually cherry-pick or merge your
-changes and close the pull request.
+Additionally all pull requests go through automated tests on `Travis CI`_ which
+check code style, run unit tests, etc.
+
+After the pull request was reviewed and if all tests passed maintainers will
+leave a ``LGTM`` comment at which point the pull request is ready for being
+merged.
 
 .. _Travis CI: https://travis-ci.org/flycheck/flycheck/pull_requests
 
