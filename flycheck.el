@@ -1657,6 +1657,18 @@ are mandatory.
      nil, i.e. no other syntax checkers are applied after this
      syntax checker.
 
+`:default-directory FUNCTION'
+     The value of `default-directory' when invoking `:start'.
+
+     FUNCTION is a function taking the syntax checker as sole
+     argument.  It shall return the absolute path to an existing
+     directory to use as `default-directory' for `:start' or
+     nil to fall back to the `default-directory' of the current
+     buffer.
+
+     This property is optional.  If omitted invoke `:start'
+     from the `default-directory' of the buffer being checked.
+
 Signal an error, if any property has an invalid value."
   (declare (indent 1)
            (doc-string 2))
@@ -1668,7 +1680,8 @@ Signal an error, if any property has an invalid value."
         (verify (plist-get properties :verify))
         (filter (or (plist-get properties :error-filter) #'identity))
         (next-checkers (plist-get properties :next-checkers))
-        (file (flycheck-current-load-file)))
+        (file (flycheck-current-load-file))
+        (directory (plist-get properties :default-directory)))
 
     (unless (listp modes)
       (setq modes (list modes)))
@@ -1706,16 +1719,17 @@ Signal an error, if any property has an invalid value."
 Try to reinstall the package defining this syntax checker." symbol)
                               nil))))
       (pcase-dolist (`(,prop . ,value)
-                     `((start         . ,start)
-                       (interrupt     . ,interrupt)
-                       (print-doc     . ,print-doc)
-                       (modes         . ,modes)
-                       (predicate     . ,real-predicate)
-                       (verify        . ,verify)
-                       (error-filter  . ,filter)
-                       (next-checkers . ,next-checkers)
-                       (documentation . ,docstring)
-                       (file          . ,file)))
+                     `((start             . ,start)
+                       (interrupt         . ,interrupt)
+                       (print-doc         . ,print-doc)
+                       (modes             . ,modes)
+                       (predicate         . ,real-predicate)
+                       (verify            . ,verify)
+                       (error-filter      . ,filter)
+                       (next-checkers     . ,next-checkers)
+                       (documentation     . ,docstring)
+                       (file              . ,file)
+                       (default-directory . ,directory)))
         (setf (flycheck-checker-get symbol prop) value)))
 
     ;; Track the version, to avoid breakage if the internal format changes
@@ -2135,12 +2149,16 @@ Slots:
      The syntax checker being used.
 
 `context'
-     The context object."
-  buffer checker context)
+     The context object.
+
+`default-directory'
+     Working directory for the syntax checker."
+  buffer checker context default-directory)
 
 (defun flycheck-syntax-check-start (syntax-check callback)
   "Start a SYNTAX-CHECK with CALLBACK."
-  (let ((checker (flycheck-syntax-check-checker syntax-check)))
+  (let ((checker (flycheck-syntax-check-checker syntax-check))
+        (default-directory (flycheck-syntax-check-default-directory syntax-check)))
     (setf (flycheck-syntax-check-context syntax-check)
           (funcall (flycheck-checker-get checker 'start) checker callback))))
 
@@ -2348,9 +2366,11 @@ Set `flycheck-current-syntax-check' accordingly."
   ;; Allocate the current syntax check *before* starting it.  This allows for
   ;; synchronous checks, which call the status callback immediately in there
   ;; start function.
-  (let* ((check (flycheck-syntax-check-new :buffer (current-buffer)
-                                           :checker checker
-                                           :context nil))
+  (let* ((check (flycheck-syntax-check-new
+                 :buffer (current-buffer)
+                 :checker checker
+                 :context nil
+                 :default-directory (flycheck-compute-default-directory checker)))
          (callback (flycheck-buffer-status-callback check)))
     (setq flycheck-current-syntax-check check)
     (flycheck-report-status 'running)
@@ -2471,9 +2491,7 @@ discarded."
                ;; still enabled.
                (flycheck-finish-current-syntax-check
                 data
-                (process-get
-                 (flycheck-syntax-check-context syntax-check)
-                 'flycheck-default-directory))))
+                (flycheck-syntax-check-default-directory syntax-check))))
             (_
              (error "Unknown status %s from syntax checker %s"
                     status checker))))))))
@@ -4315,18 +4333,6 @@ of command checkers is `flycheck-sanitize-errors'.
      or as special symbol or form for
      `flycheck-substitute-argument', which see.
 
-`:default-directory FUNCTION'
-     The value of `default-directory' when invoking `:command'.
-
-     FUNCTION is a function taking the syntax checker as sole
-     argument.  It shall return the absolute path to an existing
-     directory to use as `default-directory' for `:command' or
-     nil to fall back to the `default-directory' of the current
-     buffer.
-
-     This property is optional.  If omitted invoke `:command'
-     from the `default-directory' of the buffer being checked.
-
 `:error-patterns PATTERNS'
      A list of patterns to parse the output of the `:command'.
 
@@ -4398,8 +4404,7 @@ default `:verify' function of command checkers."
         (parser (or (plist-get properties :error-parser)
                     #'flycheck-parse-with-patterns))
         (predicate (plist-get properties :predicate))
-        (standard-input (plist-get properties :standard-input))
-        (cwd (plist-get properties :default-directory)))
+        (standard-input (plist-get properties :standard-input)))
     (unless command
       (error "Missing :command in syntax checker %s" symbol))
     (unless (stringp (car command))
@@ -4434,11 +4439,10 @@ default `:verify' function of command checkers."
                                      (car p)))
                              patterns)))
       (pcase-dolist (`(,prop . ,value)
-                     `((command . ,command)
-                       (error-parser . ,parser)
+                     `((command        . ,command)
+                       (error-parser   . ,parser)
                        (error-patterns . ,patterns)
-                       (standard-input . ,standard-input)
-                       (default-directory . ,cwd)))
+                       (standard-input . ,standard-input)))
         (setf (flycheck-checker-get symbol prop) value)))))
 
 (eval-and-compile
@@ -4725,7 +4729,6 @@ and rely on Emacs' own buffering and chunking."
                (args (flycheck-checker-substituted-arguments checker))
                (command (funcall flycheck-command-wrapper-function
                                  (cons program args)))
-               (default-directory (flycheck-compute-default-directory checker))
                ;; Use pipes to receive output from the syntax checker.  They are
                ;; more efficient and more robust than PTYs, which Emacs uses by
                ;; default, and since we don't need any job control features, we
@@ -4749,6 +4752,7 @@ and rely on Emacs' own buffering and chunking."
           (process-put process 'flycheck-checker checker)
           (process-put process 'flycheck-callback callback)
           (process-put process 'flycheck-buffer (current-buffer))
+          ;; The default directory is bound in the `flycheck-syntax-check-start' function.
           (process-put process 'flycheck-default-directory default-directory)
           ;; Track the temporaries created by argument substitution in the
           ;; process itself, to get rid of the global state ASAP.
@@ -5533,7 +5537,8 @@ SYMBOL with `flycheck-def-executable-var'."
          :next-checkers ',(plist-get properties :next-checkers)
          ,@(when verify-fn
              `(:verify #',verify-fn))
-         :standard-input ',(plist-get properties :standard-input)))))
+         :standard-input ',(plist-get properties :standard-input)
+         :default-directory ',(plist-get properties :default-directory)))))
 
 
 ;;; Built-in checkers
