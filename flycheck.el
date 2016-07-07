@@ -93,7 +93,7 @@
 (eval-and-compile
   (unless (fboundp 'string-suffix-p)
     ;; TODO: Remove when dropping support for Emacs 24.3 and earlier
-    (defun string-suffix-p (suffix string  &optional ignore-case)
+    (defun string-suffix-p (suffix string &optional ignore-case)
       "Return non-nil if SUFFIX is a suffix of STRING.
 If IGNORE-CASE is non-nil, the comparison is done without paying
 attention to case differences."
@@ -2129,10 +2129,10 @@ will be used in buffers with MODE."
 Slots:
 
 `buffer'
-     The buffer being checked
+     The buffer being checked.
 
 `checker'
-     The syntax checker being used
+     The syntax checker being used.
 
 `context'
      The context object."
@@ -2469,12 +2469,16 @@ discarded."
              (when flycheck-mode
                ;; Only report errors from the checker if Flycheck Mode is
                ;; still enabled.
-               (flycheck-finish-current-syntax-check data)))
+               (flycheck-finish-current-syntax-check
+                data
+                (process-get
+                 (flycheck-syntax-check-context syntax-check)
+                 'flycheck-default-directory))))
             (_
              (error "Unknown status %s from syntax checker %s"
                     status checker))))))))
 
-(defun flycheck-finish-current-syntax-check (errors)
+(defun flycheck-finish-current-syntax-check (errors cwd)
   "Finish the current syntax-check in the current buffer with ERRORS.
 
 ERRORS is a list of `flycheck-error' objects reported by the
@@ -2484,13 +2488,16 @@ Report all ERRORS and potentially start any next syntax checkers.
 
 If the current syntax checker reported excessive errors, it is disabled
 via `flycheck-disable-excessive-checker' for subsequent syntax
-checks."
+checks.
+
+Relative file names in ERRORS will be expanded relative to CWD directory."
   (let* ((syntax-check flycheck-current-syntax-check)
          (checker (flycheck-syntax-check-checker syntax-check))
          (errors (flycheck-relevant-errors
                   (flycheck-fill-and-expand-error-file-names
                    (flycheck-filter-errors
-                    (flycheck-assert-error-list-p errors) checker)))))
+                    (flycheck-assert-error-list-p errors) checker)
+                   cwd))))
     (unless (flycheck-disable-excessive-checker checker errors)
       (flycheck-report-current-errors errors))
     (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
@@ -2737,7 +2744,7 @@ variables of Flycheck."
 Slots:
 
 `buffer'
-     The buffer the reported was reported for, as buffer object.
+     The buffer that the error was reported for, as buffer object.
 
 `checker'
      The syntax checker which reported this error, as symbol.
@@ -2981,19 +2988,18 @@ with `flycheck-process-error-functions'."
   (setq flycheck-current-errors nil)
   (flycheck-report-status 'not-checked))
 
-(defun flycheck-fill-and-expand-error-file-names (errors)
+(defun flycheck-fill-and-expand-error-file-names (errors cwd)
   "Fill and expand file names in ERRORS.
 
-Expand all file names of ERRORS against the `default-directory'
-of the current buffer.  If the file name of an error is nil fill
-in the result of function `buffer-file-name' in the current
-buffer.
+Expand all file names of ERRORS against the CWD directory.
+If the file name of an error is nil fill in the result of
+function `buffer-file-name' in the current buffer.
 
 Return ERRORS, modified in-place."
   (seq-do (lambda (err)
             (setf (flycheck-error-filename err)
                   (-if-let (filename (flycheck-error-filename err))
-                      (expand-file-name filename)
+                      (expand-file-name filename cwd)
                     (buffer-file-name))))
           errors)
   errors)
@@ -4257,6 +4263,28 @@ universal prefix arg, and only the id with normal prefix arg."
     (`(eval ,_) t)
     (_ nil)))
 
+(defun flycheck-compute-default-directory (checker)
+  "Get the default working directory for CHECKER.
+
+Compute the working directory from which the checker command
+will be called.  The default is the `default-directory' of the
+source-buffer from which flycheck is calling the checker.
+The :default-directory must be a function that will return an
+absolute path."
+  (let* ((cwd (flycheck-checker-get checker 'default-directory))
+         (default-directory (if cwd
+                                (if (functionp cwd)
+                                    (funcall cwd)
+                                  (error ":default-directory %s of syntax checker %S is not a function"
+                                         default-directory
+                                         checker))
+                              default-directory)))
+    (unless (file-exists-p default-directory)
+      (error ":default-directory %s of syntax checker %S does not exist"
+             default-directory
+             checker))
+    default-directory))
+
 ;;;###autoload
 (defun flycheck-define-command-checker (symbol docstring &rest properties)
   "Define SYMBOL as syntax checker to run a command.
@@ -4330,6 +4358,15 @@ of command checkers is `flycheck-sanitize-errors'.
 
      Defaults to nil.
 
+`:default-directory PATH-or-FUNCTION'
+     The value of `default-directory' from where the checker is called.
+
+     Either a directory path or a function that returns a directory
+     path.
+
+     This property is optional.  If omitted, it defaults to
+     `default-directory' of the buffer that calls the syntax checker.
+
 Note that you may not give `:start', `:interrupt', and
 `:print-doc' for a command checker.  You can give a custom
 `:verify' function, though, whose results will be appended to the
@@ -4358,8 +4395,8 @@ default `:verify' function of command checkers."
         (parser (or (plist-get properties :error-parser)
                     #'flycheck-parse-with-patterns))
         (predicate (plist-get properties :predicate))
-        (standard-input (plist-get properties :standard-input)))
-
+        (standard-input (plist-get properties :standard-input))
+        (cwd (plist-get properties :default-directory)))
     (unless command
       (error "Missing :command in syntax checker %s" symbol))
     (unless (stringp (car command))
@@ -4397,7 +4434,8 @@ default `:verify' function of command checkers."
                      `((command . ,command)
                        (error-parser . ,parser)
                        (error-patterns . ,patterns)
-                       (standard-input . ,standard-input)))
+                       (standard-input . ,standard-input)
+                       (default-directory . ,cwd)))
         (setf (flycheck-checker-get symbol prop) value)))))
 
 (eval-and-compile
@@ -4684,6 +4722,7 @@ and rely on Emacs' own buffering and chunking."
                (args (flycheck-checker-substituted-arguments checker))
                (command (funcall flycheck-command-wrapper-function
                                  (cons program args)))
+               (default-directory (flycheck-compute-default-directory checker))
                ;; Use pipes to receive output from the syntax checker.  They are
                ;; more efficient and more robust than PTYs, which Emacs uses by
                ;; default, and since we don't need any job control features, we
@@ -4707,18 +4746,19 @@ and rely on Emacs' own buffering and chunking."
           (process-put process 'flycheck-checker checker)
           (process-put process 'flycheck-callback callback)
           (process-put process 'flycheck-buffer (current-buffer))
+          (process-put process 'flycheck-default-directory default-directory)
           ;; Track the temporaries created by argument substitution in the
           ;; process itself, to get rid of the global state ASAP.
           (process-put process 'flycheck-temporaries flycheck-temporaries)
           (setq flycheck-temporaries nil)
-          ;; Send the buffer to the process on standard input, if enabled
+          ;; Send the buffer to the process on standard input, if enabled.
           (when (flycheck-checker-get checker 'standard-input)
             (flycheck-process-send-buffer process))
-          ;; Return the process
+          ;; Return the process.
           process)
       (error
        ;; In case of error, clean up our resources, and report the error back to
-       ;; Flycheck
+       ;; Flycheck.
        (flycheck-safe-delete-temporaries)
        (when process
          ;; No need to explicitly delete the temporary files of the process,
@@ -4794,7 +4834,8 @@ _EVENT is ignored."
   (when (memq (process-status process) '(signal exit))
     (let ((files (process-get process 'flycheck-temporaries))
           (buffer (process-get process 'flycheck-buffer))
-          (callback (process-get process 'flycheck-callback)))
+          (callback (process-get process 'flycheck-callback))
+          (cwd (process-get process 'flycheck-default-directory)))
       ;; Delete the temporary files
       (seq-do #'flycheck-safe-delete files)
       (when (buffer-live-p buffer)
@@ -4808,19 +4849,21 @@ _EVENT is ignored."
                   (process-get process 'flycheck-checker)
                   (process-exit-status process)
                   files
-                  (flycheck-get-output process) callback)))
+                  (flycheck-get-output process) callback cwd)))
             ((debug error)
              (funcall callback 'errored (error-message-string err)))))))))
 
 (defun flycheck-finish-checker-process
-    (checker exit-status files output callback)
+    (checker exit-status files output callback cwd)
   "Finish a checker process from CHECKER with EXIT-STATUS.
 
 FILES is a list of files given as input to the checker.  OUTPUT
 is the output of the syntax checker.  CALLBACK is the status
 callback to use for reporting.
 
-Parse the OUTPUT and report an appropriate error status."
+Parse the OUTPUT and report an appropriate error status.
+
+Resolve all errors in OUTPUT using CWD as worknig directory."
   (let ((errors (flycheck-parse-output output checker (current-buffer))))
     (when (and (/= exit-status 0) (not errors))
       ;; Warn about a suspicious result from the syntax checker.  We do right
@@ -4832,8 +4875,8 @@ Parse the OUTPUT and report an appropriate error status."
 output: %s\nChecker definition probably flawed." checker exit-status output)))
     (funcall callback 'finished
              ;; Fix error file names, by substituting them backwards from the
-             ;; temporaries
-             (seq-map (lambda (e) (flycheck-fix-error-filename e files))
+             ;; temporaries.
+             (seq-map (lambda (e) (flycheck-fix-error-filename e files cwd))
                       errors))))
 
 
@@ -5174,7 +5217,8 @@ tool, just like `compile' (\\[compile])."
     (user-error "Cannot use syntax checker %S in this buffer" checker))
   (unless (flycheck-checker-executable checker)
     (user-error "Cannot run checker %S as shell command" checker))
-  (let* ((command (flycheck-checker-shell-command checker))
+  (let* ((default-directory (flycheck-compute-default-directory checker))
+         (command (flycheck-checker-shell-command checker))
          (buffer (compilation-start command nil #'flycheck-compile-name)))
     (with-current-buffer buffer
       (setq-local compilation-error-regexp-alist
@@ -5191,8 +5235,10 @@ CHECKER.  BUFFER is the buffer which was checked.
 Return the errors parsed with the error patterns of CHECKER."
   (funcall (flycheck-checker-get checker 'error-parser) output checker buffer))
 
-(defun flycheck-fix-error-filename (err buffer-files)
+(defun flycheck-fix-error-filename (err buffer-files cwd)
   "Fix the file name of ERR from BUFFER-FILES.
+
+Resolves error file names relative to CWD directory.
 
 Make the file name of ERR absolute.  If the absolute file name of
 ERR is in BUFFER-FILES, replace it with the return value of the
@@ -5200,7 +5246,7 @@ function `buffer-file-name'."
   (flycheck-error-with-buffer err
     (-when-let (filename (flycheck-error-filename err))
       (when (seq-some (apply-partially #'flycheck-same-files-p
-                                       (expand-file-name filename))
+                                       (expand-file-name filename cwd))
                       buffer-files)
         (setf (flycheck-error-filename err) (buffer-file-name)))))
   err)
@@ -6491,7 +6537,7 @@ See URL `http://www.erlang.org/'."
 See URL `http://www.kuwata-lab.com/erubis/'."
   :command ("erubis" "-z" source)
   :error-patterns
-  ((error line-start  (file-name) ":" line ": " (message) line-end))
+  ((error line-start (file-name) ":" line ": " (message) line-end))
   :modes (html-erb-mode rhtml-mode))
 
 (flycheck-def-args-var flycheck-gfortran-args fortran-gfortran
@@ -6543,7 +6589,7 @@ In any other case, an error is signaled.")
     (`fixed "fixed-form")
     (_ (error "Invalid value for flycheck-gfortran-layout: %S" value))))
 
-(flycheck-def-option-var flycheck-gfortran-warnings  '("all" "extra")
+(flycheck-def-option-var flycheck-gfortran-warnings '("all" "extra")
                          fortran-gfortran
   "A list of warnings for GCC Fortran.
 
@@ -7526,7 +7572,7 @@ See URL `https://puppet.com/'."
           (minimal-match (zero-or-more not-newline))
           ": Could not parse for environment " (one-or-more word)
           ": " (message (minimal-match (zero-or-more anything)))
-          " at "  (file-name "/" (zero-or-more not-newline)) ":" line line-end))
+          " at " (file-name "/" (zero-or-more not-newline)) ":" line line-end))
   :modes puppet-mode
   :next-checkers ((warning . puppet-lint)))
 
@@ -8719,7 +8765,7 @@ See URL `http://www.ruby-doc.org/stdlib-2.0.0/libdoc/yaml/rdoc/YAML.html'."
   :standard-input t
   :error-patterns
   ((error line-start "stdin:" (zero-or-more not-newline) ":" (message)
-          "at line " line " column " column  line-end))
+          "at line " line " column " column line-end))
   :modes yaml-mode)
 
 (provide 'flycheck)

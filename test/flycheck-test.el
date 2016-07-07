@@ -1522,12 +1522,17 @@
   :tags '(errors)
   (flycheck-ert-with-resource-buffer "global-mode-dummy.el"
     (let* ((absolute-fn (flycheck-ert-resource-filename "substitute-dummy"))
+           (cwd (file-name-directory absolute-fn))
+           (relative-fn (file-name-nondirectory absolute-fn))
            (errors (list (flycheck-error-new :filename "foo")
                          (flycheck-error-new :filename absolute-fn)
+                         (flycheck-error-new :filename relative-fn)
                          (flycheck-error-new :filename nil))))
       (should (equal (mapcar #'flycheck-error-filename
-                             (flycheck-fill-and-expand-error-file-names errors))
+                             (flycheck-fill-and-expand-error-file-names errors
+                                                                        cwd))
                      (list (flycheck-ert-resource-filename "foo")
+                           absolute-fn
                            absolute-fn
                            (flycheck-ert-resource-filename
                             "global-mode-dummy.el")))))))
