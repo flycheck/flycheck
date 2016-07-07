@@ -15,7 +15,7 @@ with`_ and look for `beginner-friendly tasks`_.
 
 Please note that all contributors are expected to follow our :ref:`Code of
 Conduct <flycheck-conduct>`.
->
+
 .. _issue tracker: https://github.com/flycheck/flycheck/issues
 .. _Gitter chatroom: https://gitter.im/flycheck/flycheck
 .. _need your help with: https://github.com/flycheck/flycheck/issues?q=is%3Aopen+is%3Aissue+no%3Aassignee
