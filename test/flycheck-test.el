@@ -2799,13 +2799,17 @@ evaluating BODY."
      "language/c_c++/style.cpp" 'c-mode
      '(5 nil info "Unused variable: unused" :id "unusedVariable"
          :checker c/c++-cppcheck)
-     '(9 nil error "Division by zero." :id "zerodiv" :checker c/c++-cppcheck))
+     '(9 nil error "Division by zero." :id "zerodiv" :checker c/c++-cppcheck)
+     '(12 nil info "Suspicious expression. Boolean result is used in bitwise operation. The operator '!' and the comparison operators have higher precedence than bitwise operators. It is recommended that the expression is clarified with parentheses."
+          :id "clarifyCondition" :checker c/c++-cppcheck))
 
     (flycheck-ert-should-syntax-check
      "language/c_c++/style.cpp" 'c++-mode
      '(5 nil info "Unused variable: unused" :id "unusedVariable"
          :checker c/c++-cppcheck)
      '(9 nil error "Division by zero." :id "zerodiv" :checker c/c++-cppcheck)
+     '(12 nil info "Suspicious expression. Boolean result is used in bitwise operation. The operator '!' and the comparison operators have higher precedence than bitwise operators. It is recommended that the expression is clarified with parentheses."
+          :id "clarifyCondition" :checker c/c++-cppcheck)
      '(14 nil warning "Parameter 'foo' is passed by value. It could be passed as a (const) reference which is usually faster and recommended in C++."
           :id "passedByValue" :checker c/c++-cppcheck))))
 
