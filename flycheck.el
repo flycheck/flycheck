@@ -4266,24 +4266,24 @@ universal prefix arg, and only the id with normal prefix arg."
 (defun flycheck-compute-default-directory (checker)
   "Get the default working directory for CHECKER.
 
-Compute the working directory from which the checker command
-will be called.  The default is the `default-directory' of the
-source-buffer from which flycheck is calling the checker.
-The :default-directory must be a function that will return an
-absolute path."
-  (let* ((cwd (flycheck-checker-get checker 'default-directory))
-         (default-directory (if cwd
-                                (if (functionp cwd)
-                                    (funcall cwd)
-                                  (error ":default-directory %s of syntax checker %S is not a function"
-                                         default-directory
-                                         checker))
-                              default-directory)))
-    (unless (file-exists-p default-directory)
+Compute the value of `default-directory' for the invocation of
+the syntax checker command, by calling the function in the
+`default-directory' property of CHECKER, with CHECKER as sole
+argument, and returning its value.  Signal an error if the
+function returns a non-existing working directory.
+
+If the property is undefined or if the function returns nil
+return the `default-directory' of the current buffer."
+  (let* ((def-directory-fn (flycheck-checker-get checker 'default-directory))
+         (directory (or (and def-directory-fn
+                             (funcall def-directory-fn checker))
+                        ;; Default to the `default-directory' of the current
+                        ;; buffer
+                        default-directory)))
+    (unless (file-exists-p directory)
       (error ":default-directory %s of syntax checker %S does not exist"
-             default-directory
-             checker))
-    default-directory))
+             directory checker))
+    directory))
 
 ;;;###autoload
 (defun flycheck-define-command-checker (symbol docstring &rest properties)
@@ -4314,6 +4314,18 @@ of command checkers is `flycheck-sanitize-errors'.
      Each ARG is an argument to the executable, either as string,
      or as special symbol or form for
      `flycheck-substitute-argument', which see.
+
+`:default-directory FUNCTION'
+     The value of `default-directory' when invoking `:command'.
+
+     FUNCTION is a function taking the syntax checker as sole
+     argument.  It shall return the absolute path to an existing
+     directory to use as `default-directory' for `:command' or
+     nil to fall back to the `default-directory' of the current
+     buffer.
+
+     This property is optional.  If omitted invoke `:command'
+     from the `default-directory' of the buffer being checked.
 
 `:error-patterns PATTERNS'
      A list of patterns to parse the output of the `:command'.
@@ -4357,15 +4369,6 @@ of command checkers is `flycheck-sanitize-errors'.
      contents of the buffer on standard input.
 
      Defaults to nil.
-
-`:default-directory PATH-or-FUNCTION'
-     The value of `default-directory' from where the checker is called.
-
-     Either a directory path or a function that returns a directory
-     path.
-
-     This property is optional.  If omitted, it defaults to
-     `default-directory' of the buffer that calls the syntax checker.
 
 Note that you may not give `:start', `:interrupt', and
 `:print-doc' for a command checker.  You can give a custom
