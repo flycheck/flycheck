@@ -6993,9 +6993,7 @@ contains a cabal file."
       (when (executable-find "stack")
         (let* ((stack-output
                 (process-lines "stack" "path" "--project-root"))
-               (stack-dir
-                (when stack-output
-                  (car stack-output))))
+               (stack-dir (car stack-output)))
           (when (and stack-dir
                      (file-directory-p stack-dir))
             stack-dir)))))
