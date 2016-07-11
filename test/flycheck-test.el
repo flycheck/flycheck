@@ -2950,9 +2950,9 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
    '(5 12 error "undefined identifier 'invalid'"
        :checker d-dmd)
    '(10 12 error "template instance continuation.T!() error instantiating"
-       :checker d-dmd)
+        :checker d-dmd)
    '(13 1 info "instantiated from here: U!()"
-       :checker d-dmd)))
+        :checker d-dmd)))
 
 (flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp nil
   (flycheck-ert-should-syntax-check

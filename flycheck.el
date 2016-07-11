@@ -6243,7 +6243,7 @@ Requires DMD 2.066 or newer.  See URL `http://dlang.org/'."
    (warning line-start (file-name) "(" line "," column "): "
             (or "Warning" "Deprecation") ": " (message) line-end)
    (info line-start (file-name) "(" line "," column "): "
-            (one-or-more " ") (message) line-end))
+         (one-or-more " ") (message) line-end))
   :modes d-mode)
 
 (defconst flycheck-this-emacs-executable
