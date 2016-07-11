@@ -6977,16 +6977,15 @@ Otherwise return the previously used cache directory."
             (make-temp-file "flycheck-haskell-ghc-cache" 'directory))))
 
 (defun flycheck-haskell--find-default-directory (checker)
-  "Come up with a sutable default directory for Haskell to run
-checker in.
+  "Come up with a suitable default directory for Haskell to run CHECKER in.
 
 In case of `haskell-stack-ghc' checker it is directory with
-stack.yaml file. If there's no stack.yaml file in any parent
+stack.yaml file.  If there's no stack.yaml file in any parent
 directory, it will be the directory that \"stack path --project-root\"
-command returs.
+command returns.
 
 For all other checkers, it is the closest parent directory that
-contains cabal file."
+contains a cabal file."
   (pcase checker
     (`haskell-stack-ghc
      (or
@@ -7001,19 +7000,14 @@ contains cabal file."
                      (file-directory-p stack-dir))
             stack-dir)))))
     (_
-     (if (fboundp 'haskell-cabal-find-file)
-         (let ((cabal-file (haskell-cabal-find-file)))
-           (when cabal-file
-             (file-name-directory cabal-file)))
-       (locate-dominating-file (file-name-directory (buffer-file-name))
-                               (lambda (dir)
-                                 (not
-                                  (null
-                                   (directory-files dir
-                                                    nil ;; full
-                                                    ".+\\.cabal\\'"
-                                                    t ;; nosort
-                                                    )))))))))
+     (locate-dominating-file
+      (file-name-directory (buffer-file-name))
+      (lambda (dir)
+        (directory-files dir
+                         nil ;; use full paths
+                         ".+\\.cabal\\'"
+                         t ;; do not sort result
+                         ))))))
 
 (flycheck-define-checker haskell-stack-ghc
   "A Haskell syntax and type checker using `stack ghc'.
