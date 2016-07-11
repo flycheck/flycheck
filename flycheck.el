@@ -1657,7 +1657,7 @@ are mandatory.
      nil, i.e. no other syntax checkers are applied after this
      syntax checker.
 
-`:default-directory FUNCTION'
+`:working-directory FUNCTION'
      The value of `default-directory' when invoking `:start'.
 
      FUNCTION is a function taking the syntax checker as sole
@@ -1681,7 +1681,7 @@ Signal an error, if any property has an invalid value."
         (filter (or (plist-get properties :error-filter) #'identity))
         (next-checkers (plist-get properties :next-checkers))
         (file (flycheck-current-load-file))
-        (directory (plist-get properties :default-directory)))
+        (working-directory (plist-get properties :working-directory)))
 
     (unless (listp modes)
       (setq modes (list modes)))
@@ -1729,7 +1729,7 @@ Try to reinstall the package defining this syntax checker." symbol)
                        (next-checkers     . ,next-checkers)
                        (documentation     . ,docstring)
                        (file              . ,file)
-                       (default-directory . ,directory)))
+                       (working-directory . ,working-directory)))
         (setf (flycheck-checker-get symbol prop) value)))
 
     ;; Track the version, to avoid breakage if the internal format changes
@@ -2151,14 +2151,15 @@ Slots:
 `context'
      The context object.
 
-`default-directory'
-     Working directory for the syntax checker."
-  buffer checker context default-directory)
+`working-directory'
+     Working directory for the syntax checker. Serve as a value for
+     `default-directory' for a checker."
+  buffer checker context working-directory)
 
 (defun flycheck-syntax-check-start (syntax-check callback)
   "Start a SYNTAX-CHECK with CALLBACK."
   (let ((checker (flycheck-syntax-check-checker syntax-check))
-        (default-directory (flycheck-syntax-check-default-directory syntax-check)))
+        (default-directory (flycheck-syntax-check-working-directory syntax-check)))
     (setf (flycheck-syntax-check-context syntax-check)
           (funcall (flycheck-checker-get checker 'start) checker callback))))
 
@@ -2370,7 +2371,7 @@ Set `flycheck-current-syntax-check' accordingly."
                  :buffer (current-buffer)
                  :checker checker
                  :context nil
-                 :default-directory (flycheck-compute-default-directory checker)))
+                 :working-directory (flycheck-compute-working-directory checker)))
          (callback (flycheck-buffer-status-callback check)))
     (setq flycheck-current-syntax-check check)
     (flycheck-report-status 'running)
@@ -2491,7 +2492,7 @@ discarded."
                ;; still enabled.
                (flycheck-finish-current-syntax-check
                 data
-                (flycheck-syntax-check-default-directory syntax-check))))
+                (flycheck-syntax-check-working-directory syntax-check))))
             (_
              (error "Unknown status %s from syntax checker %s"
                     status checker))))))))
@@ -4281,25 +4282,25 @@ universal prefix arg, and only the id with normal prefix arg."
     (`(eval ,_) t)
     (_ nil)))
 
-(defun flycheck-compute-default-directory (checker)
+(defun flycheck-compute-working-directory (checker)
   "Get the default working directory for CHECKER.
 
 Compute the value of `default-directory' for the invocation of
 the syntax checker command, by calling the function in the
-`default-directory' property of CHECKER, with CHECKER as sole
+`working-directory' property of CHECKER, with CHECKER as sole
 argument, and returning its value.  Signal an error if the
 function returns a non-existing working directory.
 
 If the property is undefined or if the function returns nil
 return the `default-directory' of the current buffer."
-  (let* ((def-directory-fn (flycheck-checker-get checker 'default-directory))
+  (let* ((def-directory-fn (flycheck-checker-get checker 'working-directory))
          (directory (or (and def-directory-fn
                              (funcall def-directory-fn checker))
                         ;; Default to the `default-directory' of the current
                         ;; buffer
                         default-directory)))
     (unless (file-exists-p directory)
-      (error ":default-directory %s of syntax checker %S does not exist"
+      (error ":working-directory %s of syntax checker %S does not exist"
              directory checker))
     directory))
 
@@ -4753,7 +4754,7 @@ and rely on Emacs' own buffering and chunking."
           (process-put process 'flycheck-callback callback)
           (process-put process 'flycheck-buffer (current-buffer))
           ;; The default directory is bound in the `flycheck-syntax-check-start' function.
-          (process-put process 'flycheck-default-directory default-directory)
+          (process-put process 'flycheck-working-directory default-directory)
           ;; Track the temporaries created by argument substitution in the
           ;; process itself, to get rid of the global state ASAP.
           (process-put process 'flycheck-temporaries flycheck-temporaries)
@@ -4842,7 +4843,7 @@ _EVENT is ignored."
     (let ((files (process-get process 'flycheck-temporaries))
           (buffer (process-get process 'flycheck-buffer))
           (callback (process-get process 'flycheck-callback))
-          (cwd (process-get process 'flycheck-default-directory)))
+          (cwd (process-get process 'flycheck-working-directory)))
       ;; Delete the temporary files
       (seq-do #'flycheck-safe-delete files)
       (when (buffer-live-p buffer)
@@ -4870,7 +4871,7 @@ callback to use for reporting.
 
 Parse the OUTPUT and report an appropriate error status.
 
-Resolve all errors in OUTPUT using CWD as worknig directory."
+Resolve all errors in OUTPUT using CWD as working directory."
   (let ((errors (flycheck-parse-output output checker (current-buffer))))
     (when (and (/= exit-status 0) (not errors))
       ;; Warn about a suspicious result from the syntax checker.  We do right
@@ -5224,7 +5225,7 @@ tool, just like `compile' (\\[compile])."
     (user-error "Cannot use syntax checker %S in this buffer" checker))
   (unless (flycheck-checker-executable checker)
     (user-error "Cannot run checker %S as shell command" checker))
-  (let* ((default-directory (flycheck-compute-default-directory checker))
+  (let* ((default-directory (flycheck-compute-working-directory checker))
          (command (flycheck-checker-shell-command checker))
          (buffer (compilation-start command nil #'flycheck-compile-name)))
     (with-current-buffer buffer
@@ -5538,7 +5539,7 @@ SYMBOL with `flycheck-def-executable-var'."
          ,@(when verify-fn
              `(:verify #',verify-fn))
          :standard-input ',(plist-get properties :standard-input)
-         :default-directory ',(plist-get properties :default-directory)))))
+         :working-directory ',(plist-get properties :working-directory)))))
 
 
 ;;; Built-in checkers
