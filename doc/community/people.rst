@@ -13,15 +13,15 @@ Maintainers
 -----------
 
 * **Sebastian Wiesner** (:gh:`lunaryorn`, head maintainer, GPG key ``5C42FE98``)
-* Clément Pit--Claudel (:gh:`cpitclaudel`, maintainer)
+* **Clément Pit--Claudel** (:gh:`cpitclaudel`, head maintainer)
 
 We maintain Flycheck and all official extensions within the `Flycheck
-organisation`_, and set the direction and scope Flycheck.  We own the Github
-organisation, administer all our repositories, and accept or decline pull
-requests and feature proposals.  Occasionally we also implement changes and fix
-bugs in Flycheck ourselves.
+organisation`_, and set the direction and scope Flycheck.  We review and accept
+pull requests and feature proposals and fix bugs in Flycheck
 
-Our GPG keys are used to sign commits on Github and to sign release tags for
+Emphasized users are lead maintainers.  Lead maintainers are formal owners of
+the `Flycheck Organisation`_, administrate all repositories, may promote new
+maintainers and make Flycheck releases.  Their GPG keys sign release tags for
 Flycheck.
 
 Mention with ``@flycheck/maintainers``.
