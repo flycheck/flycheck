@@ -4,11 +4,12 @@
 - New features:
 
   - Add ``:working-directory`` option to ``flycheck-define-command-checker``
-    [GH-973]
+    [GH-973] [GH-1012]
 
 - Improvements:
 
-  - Add default directory for ``haskell-stack-ghc`` and ``haskell-ghc`` checkers [GH-1007]
+  - Add default directory for ``haskell-stack-ghc`` and ``haskell-ghc`` checkers
+    [GH-1007]
 
 
 28 (Jun 05, 2016)
