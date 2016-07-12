@@ -3,7 +3,7 @@
 
 - New features:
 
-  - Add ``:default-directory`` option to ``flycheck-define-command-checker``
+  - Add ``:working-directory`` option to ``flycheck-define-command-checker``
     [GH-973]
 
 28 (Jun 05, 2016)
