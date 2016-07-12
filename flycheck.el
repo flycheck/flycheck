@@ -6732,8 +6732,8 @@ See URL `https://golang.org/cmd/go/' and URL
                 :message (if have-vet "present" "missing")
                 :face (if have-vet 'success '(bold error)))))))
 
-(flycheck-def-option-var flycheck-go-build-install-deps nil go-build
-  "Whether to install dependencies in `go build'.
+(flycheck-def-option-var flycheck-go-build-install-deps nil (go-build go-test)
+  "Whether to install dependencies in `go build' and `go test'.
 
 If non-nil automatically install dependencies with `go build'
 while syntax checking."
@@ -6802,7 +6802,9 @@ See URL `http://golang.org/cmd/go'."
   ;; `temporary-file-name'.
   ;; TODO: Switch to `null-device'` when < Go 1.6 support is removed.
   ;; See: https://github.com/flycheck/flycheck/issues/838
-  :command ("go" "test" "-c" "-o" temporary-file-name)
+  :command ("go" "test"
+            (option-flag "-i" flycheck-go-build-install-deps)
+            "-c" "-o" temporary-file-name)
   :error-patterns
   ((error line-start (file-name) ":" line ": "
           (message (one-or-more not-newline)
