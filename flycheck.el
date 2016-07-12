@@ -6977,6 +6977,37 @@ Otherwise return the previously used cache directory."
         (or flycheck-haskell-ghc-cache-directory
             (make-temp-file "flycheck-haskell-ghc-cache" 'directory))))
 
+(defun flycheck-haskell--find-default-directory (checker)
+  "Come up with a suitable default directory for Haskell to run CHECKER in.
+
+In case of `haskell-stack-ghc' checker it is directory with
+stack.yaml file.  If there's no stack.yaml file in any parent
+directory, it will be the directory that \"stack path --project-root\"
+command returns.
+
+For all other checkers, it is the closest parent directory that
+contains a cabal file."
+  (pcase checker
+    (`haskell-stack-ghc
+     (or
+      (locate-dominating-file (buffer-file-name) "stack.yaml")
+      (when (executable-find "stack")
+        (let* ((stack-output
+                (process-lines "stack" "path" "--project-root"))
+               (stack-dir (car stack-output)))
+          (when (and stack-dir
+                     (file-directory-p stack-dir))
+            stack-dir)))))
+    (_
+     (locate-dominating-file
+      (file-name-directory (buffer-file-name))
+      (lambda (dir)
+        (directory-files dir
+                         nil ;; use full paths
+                         ".+\\.cabal\\'"
+                         t ;; do not sort result
+                         ))))))
+
 (flycheck-define-checker haskell-stack-ghc
   "A Haskell syntax and type checker using `stack ghc'.
 
@@ -7019,7 +7050,8 @@ See URL `https://github.com/commercialhaskell/stack'."
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-dedent-error-messages errors)))
   :modes (haskell-mode literate-haskell-mode)
-  :next-checkers ((warning . haskell-hlint)))
+  :next-checkers ((warning . haskell-hlint))
+  :default-directory flycheck-haskell--find-default-directory)
 
 (flycheck-define-checker haskell-ghc
   "A Haskell syntax and type checker using ghc.
@@ -7066,7 +7098,8 @@ See URL `https://www.haskell.org/ghc/'."
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-dedent-error-messages errors)))
   :modes (haskell-mode literate-haskell-mode)
-  :next-checkers ((warning . haskell-hlint)))
+  :next-checkers ((warning . haskell-hlint))
+  :default-directory flycheck-haskell--find-default-directory)
 
 (flycheck-def-config-file-var flycheck-hlintrc haskell-hlint "HLint.hs"
   :safe #'stringp)
