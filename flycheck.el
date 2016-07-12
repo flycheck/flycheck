@@ -7051,7 +7051,7 @@ See URL `https://github.com/commercialhaskell/stack'."
     (flycheck-sanitize-errors (flycheck-dedent-error-messages errors)))
   :modes (haskell-mode literate-haskell-mode)
   :next-checkers ((warning . haskell-hlint))
-  :default-directory flycheck-haskell--find-default-directory)
+  :working-directory flycheck-haskell--find-default-directory)
 
 (flycheck-define-checker haskell-ghc
   "A Haskell syntax and type checker using ghc.
@@ -7099,7 +7099,7 @@ See URL `https://www.haskell.org/ghc/'."
     (flycheck-sanitize-errors (flycheck-dedent-error-messages errors)))
   :modes (haskell-mode literate-haskell-mode)
   :next-checkers ((warning . haskell-hlint))
-  :default-directory flycheck-haskell--find-default-directory)
+  :working-directory flycheck-haskell--find-default-directory)
 
 (flycheck-def-config-file-var flycheck-hlintrc haskell-hlint "HLint.hs"
   :safe #'stringp)
