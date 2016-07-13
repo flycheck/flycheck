@@ -972,6 +972,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check Slim using the `Slim <http://slim-lang.com/>`_ compiler.
 
+   .. syntax-checker:: slim-lint
+
+      Check Slim best practices using the `slim-lint <https://github.com/sds/slim-lint>`_ linter.
+
 .. supported-language:: SQL
 
    .. syntax-checker:: sql-sqlint
