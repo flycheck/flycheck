@@ -241,6 +241,7 @@ attention to case differences."
     sh-zsh
     sh-shellcheck
     slim
+    slim-lint
     sql-sqlint
     tex-chktex
     tex-lacheck
@@ -8628,6 +8629,15 @@ See URL `http://slim-lang.com'."
           "Slim::Parser::SyntaxError:" (message) (optional "\r") "\n  "
           "STDIN, Line " line (optional ", Column " column)
           line-end))
+  :modes slim-mode
+  :next-checkers ((warning . slim-lint)))
+
+(flycheck-define-checker slim-lint
+  "A Slim linter.
+
+See URL `https://github.com/sds/slim-lint'."
+  :command ("slim-lint" "--reporter=checkstyle" source)
+  :error-parser flycheck-parse-checkstyle
   :modes slim-mode)
 
 (flycheck-define-checker sql-sqlint
