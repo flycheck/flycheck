@@ -974,7 +974,8 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: slim-lint
 
-      Check Slim best practices using the `slim-lint <https://github.com/sds/slim-lint>`_ linter.
+      Check Slim best practices using the `slim-lint
+      <https://github.com/sds/slim-lint>`_ linter.
 
 .. supported-language:: SQL
 

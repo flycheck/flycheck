@@ -8,6 +8,10 @@
   - ``flycheck-go-build-install-deps`` turns on dependency installation for ``go test``
     as well as ``go build`` [GH-1003]
 
+- New syntax checkers:
+
+  - Slim with ``slim-lint`` [GH-1013]
+
 - Improvements:
 
   - Add default directory for ``haskell-stack-ghc`` and ``haskell-ghc`` checkers
