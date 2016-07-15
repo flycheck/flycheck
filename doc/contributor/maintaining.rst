@@ -226,3 +226,21 @@ Once the script is completed please
 .. _versions dashboard: https://readthedocs.org/dashboard/flycheck/versions/
 .. _Gitter: https://gitter.im/flycheck/flycheck
 .. _emacs_flycheck: https://twitter.com/emacs_flycheck
+
+New maintainers
+===============
+
+To propose a new maintainer open a pull request that adds the user to
+``MAINTAINERS`` and ``doc/community/people.rst``.  The pull request is subject
+to the :ref:`same rules <flycheck-pull-requests>` as all other pull requests.
+Notably it goes through the same approval process.
+
+Once merged please also
+
+- add the new maintainer to the ``Maintainers`` team of the Github
+  organisation.  This does not award additional privileges, it's just to support
+  ``@flycheck/maintainers`` mentions for the sake of convenience,
+- invite the new maintainer to the internal `Maintainers channel`_ on Gitter,
+- and announce the new maintainer on Flycheck's Twitter account.
+
+.. _Maintainers channel: https://gitter.im/flycheck/maintainers
