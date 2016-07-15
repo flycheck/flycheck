@@ -48,10 +48,10 @@ Our workflow implies a couple of rules about which branches to push code to:
 * Please commit new features, larger changes and refactorings and updates to
   documentation to separate branches and open a pull request for review and
   discussion.
-* The ``master`` branch is protected.  Only :ref:`maintainers
-  <flycheck-maintainers>` can push directly to it.  Everyone else needs to open
-  a pull request.  Github requires maintainer approval and passing Travis CI
-  tests before a pull request can be merged to master.
+* The ``master`` branch is protected.  Only :ref:`owners <flycheck-maintainers>`
+  can push directly to it.  Everyone else needs to open a pull request.  Github
+  requires maintainer approval and passing Travis CI tests before a pull request
+  can be merged to master.
 
 .. important::
 

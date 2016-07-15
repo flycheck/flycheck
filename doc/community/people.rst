@@ -12,16 +12,16 @@ Teams
 Maintainers
 -----------
 
-* **Sebastian Wiesner** (:gh:`lunaryorn`, head maintainer, GPG key ``5C42FE98``)
-* **Clément Pit--Claudel** (:gh:`cpitclaudel`, head maintainer)
+* **Sebastian Wiesner** (:gh:`lunaryorn`, owner, GPG key ``5C42FE98``)
+* **Clément Pit--Claudel** (:gh:`cpitclaudel`, owner)
 
 We maintain Flycheck and all official extensions within the `Flycheck
 organisation`_, and set the direction and scope Flycheck.  We review and accept
 pull requests and feature proposals and fix bugs in Flycheck
 
-Emphasized users are lead maintainers.  Lead maintainers are formal owners of
-the `Flycheck Organisation`_, administrate all repositories, may promote new
-maintainers and make Flycheck releases.  Their GPG keys sign release tags for
+Emphasized users are also owners of the `Flycheck Organisation`_, and thus have
+administrative privileges for all repositories in Flycheck.  Notably only owners
+can currently make Flycheck releases, and their GPG keys sign release tags for
 Flycheck.
 
 Mention with ``@flycheck/maintainers``.
@@ -125,7 +125,7 @@ to Flycheck:
 * Alex Reed (:gh:`acr4`)
 * Atila Neves (:gh:`atilaneves`)
 * Bozhidar Batsov (:gh:`bbatsov`)
-* Clément Pit--Claudel (:gh:`cpitclaudel`, maintainer)
+* Clément Pit--Claudel (:gh:`cpitclaudel`, maintainer, owner)
 * Cristian Capdevila (:gh:`capdevc`)
 * Damon Haley (:gh:`dhaley`)
 * David Caldwell (:gh:`caldwell`)
@@ -176,7 +176,7 @@ to Flycheck:
 * Sean Gillespie (:gh:`swgillespie`)
 * Sean Salmon (:gh:`phatcabbage`)
 * Sebastian Beyer (:gh:`sebastianbeyer`)
-* Sebastian Wiesner (:gh:`lunaryorn`, founder, head maintainer)
+* Sebastian Wiesner (:gh:`lunaryorn`, founder, maintainer, owner)
 * Sergey Vinokurov (:gh:`sergv`)
 * Stephen Lewis (:gh:`stephenjlewis`)
 * Steve Purcell (:gh:`purcell`)
