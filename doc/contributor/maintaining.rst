@@ -124,7 +124,8 @@ extra tooling and some 3rd party services for Flycheck:
 * `Travis CI`_ runs our tests after every push and for every pull request.
   It's configured through ``.travis.yml``.
 * LGTM_ handles the pull request approval process through ``LGTM`` comments.
-  It's configured through ``.lgtm``.
+  It's configured through ``.lgtm``, the list of maintainers that may approve
+  pull requests is in the ``MAINTAINERS`` file.
 
 All :ref:`maintainers <flycheck-maintainers>` have administrative access to
 these services so in case of an issue just contact them.
