@@ -3855,7 +3855,7 @@ Return a list with the contents of the table cell."
           (vector (flycheck-error-list-make-cell
                    (if filename
                        (file-name-nondirectory filename)
-                     "-")
+                     "")
                    'flycheck-error-list-filename)
                   (flycheck-error-list-make-number-cell
                    line 'flycheck-error-list-line-number)
