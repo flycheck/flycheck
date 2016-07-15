@@ -117,6 +117,19 @@ to syntax checkers of a specific language, it’s also a good idea to run
 particular language still work.  A successful ``make integ`` is by no means
 mandatory for pull requests, though, we will test your changes, too.
 
+.. important::
+
+   To contribute to Flycheck you must sign our CLA_ (Contributor License
+   Agreement).  The CLA Assistant bot will automatically ask you to do this when
+   you open a pull request, and let's you sign the CLA through your Github
+   account.
+
+   We require this process mostly to make you aware of the licensing
+   implications of contributing to Flycheck and to obtain your explicit approval
+   of our licenses for your contribution.
+
+   .. _CLA: https://gist.github.com/lunaryorn/c9c0d656fe7e704da2f734779242ec99
+
 All pull requests are reviewed by a :ref:`maintainer <flycheck-maintainers>`.
 Feel free to mention individual developers (e.g. ``@lunaryorn``) to request a
 review from a specific person, or ``@flycheck/maintainers`` if you have general
