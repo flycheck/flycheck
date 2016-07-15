@@ -1,16 +1,16 @@
 29-cvs (in development)
 =======================
 
+- New syntax checkers:
+
+  - Slim with ``slim-lint`` [GH-1013]
+
 - New features:
 
   - Add ``:working-directory`` option to ``flycheck-define-command-checker``
     [GH-973] [GH-1012]
   - ``flycheck-go-build-install-deps`` turns on dependency installation for ``go test``
     as well as ``go build`` [GH-1003]
-
-- New syntax checkers:
-
-  - Slim with ``slim-lint`` [GH-1013]
 
 - Improvements:
 
