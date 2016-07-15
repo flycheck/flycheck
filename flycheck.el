@@ -4033,7 +4033,7 @@ POS defaults to `point'."
     (flycheck-jump-to-error error)))
 
 (defun flycheck-jump-to-error (error)
-  "Go to the location of the error."
+  "Go to the location of ERROR."
   (let ((buffer (flycheck-error-buffer error))
         (filename (flycheck-error-filename error)))
     (cond
