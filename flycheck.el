@@ -6826,18 +6826,23 @@ or newer.
 See URL `https://github.com/kisielk/errcheck'."
   :command ("errcheck" "-abspath" ".")
   :error-patterns
-  ((warning line-start
-            (file-name) ":" line ":" column (or (one-or-more "\t") ": ")
+  ((error line-start
+          (file-name) ":" line ":" column ": "
+          (message)
+          line-end)
+   (warning line-start
+            (file-name) ":" line ":" column "\t"
             (message)
             line-end))
   :error-filter
   (lambda (errors)
     (let ((errors (flycheck-sanitize-errors errors)))
       (dolist (err errors)
-        (-when-let (message (flycheck-error-message err))
-          ;; Improve the messages reported by errcheck to make them more clear.
-          (setf (flycheck-error-message err)
-                (format "Ignored `error` returned from `%s`" message)))))
+        (when (eq (flycheck-error-level err) 'warning)
+          (-when-let (message (flycheck-error-message err))
+            ;; Improve the messages reported by errcheck to make them more clear.
+            (setf (flycheck-error-message err)
+                  (format "Ignored `error` returned from `%s`" message))))))
     errors)
   :modes go-mode
   :predicate (lambda () (flycheck-buffer-saved-p))
