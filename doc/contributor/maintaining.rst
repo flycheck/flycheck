@@ -66,9 +66,12 @@ Our workflow implies a couple of rules about which branches to push code to:
 Pull requests
 -------------
 
-All pull requests need approval of a maintainer.  As a maintainer add a comment
-beginning with ``LGTM`` to state your approval which will automatically allow
-merging of the pull request.
+**All pull requests require approval of a maintainer**.
+
+To state your approval as a maintainer add a comment that contains ``LGTM``.
+The LGTM.co will look for these comments and unlock the pull request once enough
+maintainers approved it.  We require approvals from multiple maintainers, see
+``.lgtm`` for the exact amount of approvals required to accept a pull request.
 
 Review guidelines
 ~~~~~~~~~~~~~~~~~
