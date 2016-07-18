@@ -137,7 +137,8 @@ class EmacsLispSymbol(ObjectDescription):
     def _add_index(self, name, target):
         index_text = '{name}; {label}'.format(
              name=name, label=self.label)
-        self.indexnode['entries'].append(('pair', index_text, target, ''))
+        self.indexnode['entries'].append(
+            ('pair', index_text, target, '', None))
 
     def _add_target(self, name, sig, signode):
         target = make_target(self.cell, name)
@@ -243,7 +244,8 @@ class EmacsLispKey(ObjectDescription):
             symbol['function'] = Cell(self.objtype, self.env.docname)
 
         index_text = '{name}; {label}'.format(name=name, label=self.label)
-        self.indexnode['entries'].append(('pair', index_text, target_name, ''))
+        self.indexnode['entries'].append(
+            ('pair', index_text, target_name, '', None))
 
     def _add_binding_target_and_index(self, binding, sig, signode):
         reftarget = make_target('key', binding)
@@ -264,7 +266,8 @@ class EmacsLispKey(ObjectDescription):
             keymap[binding] = self.env.docname
 
         index_text = '{name}; key binding'.format(name=binding)
-        self.indexnode['entries'].append(('pair', index_text, reftarget, ''))
+        self.indexnode['entries'].append(
+            ('pair', index_text, reftarget, '', None))
 
     def add_target_and_index(self, name, sig, signode):
         # If unprefixed M-x command index as function and not as key binding

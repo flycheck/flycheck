@@ -1,5 +1,5 @@
 # Sphinx
-Sphinx>=1.3
+Sphinx>=1.4
 # Automatically build documentation on changes
 sphinx-autobuild
 # Sphinx theme
