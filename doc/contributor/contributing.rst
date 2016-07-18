@@ -206,7 +206,7 @@ find documentation issues sort by the `documentation`_ label.
 .. _Sphinx: http://www.sphinx-doc.org
 .. _Homebrew: http://brew.sh
 .. _virtualenv: https://virtualenv.pypa.io/en/latest/
-.. _A-documentation: https://github.com/flycheck/flycheck/labels/documentation
+.. _documentation: https://github.com/flycheck/flycheck/labels/documentation
 
 Issue management
 ================
