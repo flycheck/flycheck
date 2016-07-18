@@ -21,7 +21,14 @@ SPHINXAUTOBUILD = sphinx-autobuild
 OPTIPNG = optipng
 BUILDDIR = _build
 
+# Whether to build offline HTML that loads no external resources, for use in 3rd
+# party packages, see https://github.com/flycheck/flycheck/issues/999
+OFFLINE =
+
 ALLSPHINXOPTS = -d $(BUILDDIR)/doctrees $(SPHINXOPTS) .
+ifdef OFFLINE
+ALLSPHINXOPTS += -Dflycheck_offline_html=1
+endif
 
 IMAGES = images/*.png
 
@@ -45,6 +52,9 @@ help:
 	@echo ''
 	@echo 'To build the documentation you need $(SPHINXBUILD).'
 	@echo 'For *-auto targets you also need $(SPHINXAUTOBUILD).'
+	@echo ''
+	@echo 'Available make variables:'
+	@echo '  OFFLINE:  If set build HTML that loads no external resources'
 	@echo ''
 	@echo 'Available programs:'
 	@echo '  $(SPHINXBUILD): $(if $(HAVE_SPHINXBUILD),yes,no)'
