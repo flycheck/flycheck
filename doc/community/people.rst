@@ -143,6 +143,7 @@ to Flycheck:
 * Gereon Frey (:gh:`gfrey`)
 * Gulshan Singh (:gh:`gsingh93`)
 * Iain Beeston (:gh:`iainbeeston`)
+* Ibrahim Awwal (:gh:`ibrahima`)
 * Jackson Ray Hamilton (:gh:`jacksonrayhamilton`)
 * Jim Hester (:gh:`jimhester`)
 * Jimmy Yuen Ho Wong (:gh:`wyuenho`)
