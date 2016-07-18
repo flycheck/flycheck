@@ -51,6 +51,13 @@ Language teams
 
 These teams provide support for particular languages in Flycheck.
 
+Elixir
+~~~~~~
+
+* Kári Tristan Helgason (:gh:`kthelgason`)
+
+Mention with ``@flycheck/elixir``.
+
 Go
 ~~
 
