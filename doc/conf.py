@@ -266,9 +266,28 @@ class IssueReferences(Transform):
             parent.replace(node, new_nodes)
 
 
+def build_offline_html(app):
+    from sphinx.builders.html import StandaloneHTMLBuilder
+    if app.config.flycheck_offline_html and isinstance(app.builder, StandaloneHTMLBuilder):
+        app.info('Building offline documentation without external resources!')
+        app.builder.theme_options['github_banner'] = 'false'
+        app.builder.theme_options['github_button'] = 'false'
+        app.builder.theme_options['analytics_id'] = None
+
+
+def add_offline_to_context(app, _pagename, _templatename, context, _doctree):
+    # Expose offline setting in HTML context
+    context['flycheck_offline_html'] = app.config.flycheck_offline_html
+
+
 def setup(app):
     app.add_object_type('syntax-checker', 'checker', 'pair: %s; Syntax checker')
     app.add_directive('supported-language', SupportedLanguage)
     app.add_directive('syntax-checker-config-file',
                       SyntaxCheckerConfigurationFile)
     app.add_transform(IssueReferences)
+    # Build offline HTML that loads no external resources, for use in 3rd party
+    # packages, see https://github.com/flycheck/flycheck/issues/999
+    app.add_config_value('flycheck_offline_html', False, 'html')
+    app.connect('builder-inited', build_offline_html)
+    app.connect('html-page-context', add_offline_to_context)
