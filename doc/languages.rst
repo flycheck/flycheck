@@ -908,6 +908,20 @@ to view the docstring of the syntax checker.  Likewise, you may use
          `flycheck-scalastylerc` is not set or the configuration file not found
          this syntax checker will not be applied.
 
+.. supported-language:: Scheme
+
+   Flycheck checks CHICKEN Scheme files with ``csc``.
+
+   .. syntax-checker:: scheme-chicken
+
+      Check syntax with ``csc``, the `CHICKEN Scheme <http://call-cc.org/>`_
+      compiler.
+
+   .. important::
+
+      `Geiser <http://www.nongnu.org/geiser/>` must be installed and active
+      for this checker to work.
+
 .. supported-language:: SCSS
 
    Flycheck checks SCSS with `scss-lint`, falling back to `scss`.
