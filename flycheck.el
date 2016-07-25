@@ -8467,7 +8467,7 @@ See URL `http://call-cc.org/'."
          (eq geiser-impl--implementation 'chicken)))
   :verify
   (lambda (_checker)
-    (let ((geiser-impl (bound-and-true-p 'geiser-impl--implementation)))
+    (let ((geiser-impl (bound-and-true-p geiser-impl--implementation)))
       (list
        (flycheck-verification-result-new
         :label "Geiser Implementation"
