@@ -8471,7 +8471,7 @@ See URL `http://call-cc.org/'."
        (flycheck-verification-result-new
         :label "Geiser Implementation"
         :message (cond
-                  ((eq geiser-impl 'chicken) "Racket")
+                  ((eq geiser-impl 'chicken) "Chicken Scheme")
                   (geiser-impl (format "Other: %s" geiser-impl))
                   (t "Geiser not active"))
         :face (cond
