@@ -7905,14 +7905,16 @@ See URL `https://github.com/jimhester/lintr'."
                 :message (if has-lintr "present" "missing")
                 :face (if has-lintr 'success '(bold error)))))))
 
-(defun flycheck-racket-has-expand-p (raco)
-  "Whether a RACO executable provides the `expand' command."
-  (with-temp-buffer
-    (call-process raco nil t nil "expand")
-    (goto-char (point-min))
-    (not (looking-at-p (rx bol (1+ not-newline)
-                           "Unrecognized command: expand"
-                           eol)))))
+(defun flycheck-racket-has-expand-p (checker)
+  "Whether the executable of CHECKER provides the `expand' command."
+  (let ((raco (flycheck-find-checker-executable checker)))
+    (when raco
+      (with-temp-buffer
+        (call-process raco nil t nil "expand")
+        (goto-char (point-min))
+        (not (looking-at-p (rx bol (1+ not-newline)
+                               "Unrecognized command: expand"
+                               eol)))))))
 
 (flycheck-define-checker racket
   "A Racket syntax checker with `raco expand'.
@@ -7929,11 +7931,10 @@ See URL `https://racket-lang.org/'."
              ;; being used
              (and (boundp 'geiser-impl--implementation)
                   (eq geiser-impl--implementation 'racket)))
-         (flycheck-racket-has-expand-p (flycheck-checker-executable 'racket))))
+         (flycheck-racket-has-expand-p 'racket)))
   :verify
   (lambda (checker)
-    (let ((has-expand (flycheck-racket-has-expand-p
-                       (flycheck-checker-executable checker)))
+    (let ((has-expand (flycheck-racket-has-expand-p checker))
           (in-scheme-mode (eq major-mode 'scheme-mode))
           (geiser-impl (bound-and-true-p geiser-impl--implementation)))
       (list
