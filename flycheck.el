@@ -7933,12 +7933,24 @@ See URL `https://racket-lang.org/'."
   :verify
   (lambda (checker)
     (let ((has-expand (flycheck-racket-has-expand-p
-                       (flycheck-checker-executable checker))))
+                       (flycheck-checker-executable checker)))
+          (in-scheme-mode (eq major-mode 'scheme-mode))
+          (geiser-impl (bound-and-true-p geiser-impl--implementation)))
       (list
        (flycheck-verification-result-new
         :label "compiler-lib package"
         :message (if has-expand "present" "missing")
-        :face (if has-expand 'success '(bold error))))))
+        :face (if has-expand 'success '(bold error)))
+       (flycheck-verification-result-new
+        :label "Geiser Implementation"
+        :message (cond
+                  ((not in-scheme-mode) "Using Racket Mode")
+                  ((eq geiser-impl 'racket) "Racket")
+                  (geiser-impl (format "Other: %s" geiser-impl))
+                  (t "Geiser not active"))
+        :face (cond
+               ((or (not in-scheme-mode) (eq geiser-impl 'racket)) 'success)
+               (t '(bold error)))))))
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
@@ -8433,12 +8445,6 @@ See URL `http://www.scalastyle.org'."
 
 See URL `http://call-cc.org/'."
   :command ("csc" "-analyze-only" "-local" source)
-  :predicate
-  (lambda ()
-    ;; In `scheme-mode' we must check the current Scheme implementation
-    ;; being used
-    (and (boundp 'geiser-impl--implementation)
-         (eq geiser-impl--implementation 'chicken)))
   :error-patterns
   ((info line-start
          "Note: " (zero-or-more not-newline) ":\n"
@@ -8452,6 +8458,25 @@ See URL `http://call-cc.org/'."
           "Error: " (zero-or-more not-newline) ":\n"
           (one-or-more (any space)) "(" (file-name) ":" line ") " (message)
           line-end))
+  :predicate
+  (lambda ()
+    ;; In `scheme-mode' we must check the current Scheme implementation
+    ;; being used
+    (and (boundp 'geiser-impl--implementation)
+         (eq geiser-impl--implementation 'chicken)))
+  :verify
+  (lambda (_checker)
+    (let ((geiser-impl (bound-and-true-p 'geiser-impl--implementation)))
+      (list
+       (flycheck-verification-result-new
+        :label "Geiser Implementation"
+        :message (cond
+                  ((eq geiser-impl 'chicken) "Racket")
+                  (geiser-impl (format "Other: %s" geiser-impl))
+                  (t "Geiser not active"))
+        :face (cond
+               ((eq geiser-impl 'chicken) 'success)
+               (t '(bold error)))))))
   :modes (scheme-mode geiser-mode))
 
 (defconst flycheck-scss-lint-checkstyle-re
