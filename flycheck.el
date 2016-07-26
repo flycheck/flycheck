@@ -377,6 +377,29 @@ node `(elisp)Hooks'."
   :package-version '(flycheck . "0.13")
   :risky t)
 
+(defcustom flycheck-fix-error-functions nil
+  "Functions to attempt to fix errors.
+
+Each function in this hook must accept a single argument: A
+Flycheck error to fix.  The function should, if applicable,
+attempt to fix the error, or else return nil if it cannot.
+
+All functions in this hook are called in order of appearance,
+until a function returns non-nil.  Thus, a function in this hook
+may return nil, to allow for further processing of the error, or
+any non-nil value, to indicate that the error was fully fixed
+and inhibit any further processing.
+
+Note that these functions should only ever be called
+interactively; Flycheck will not attempt to fix errors unsolicited.
+
+This variable is an abnormal hook.  See Info
+node `(elisp)Hooks'."
+  :group 'flycheck
+  :type 'hook
+  :package-version '(flycheck . "0.29")
+  :risky t)
+
 (defcustom flycheck-display-errors-delay 0.9
   "Delay in seconds before displaying errors at point.
 
@@ -4170,7 +4193,14 @@ non-nil."
     (setq flycheck-display-error-at-point-timer
           (run-at-time flycheck-display-errors-delay nil 'flycheck-display-error-at-point))))
 
-
+(defun flycheck-try-fix-error-at-point ()
+  "Attempt to fix error at point using the list of fixer functions."
+  (interactive)
+  (let ((err (car-safe (flycheck-overlay-errors-at (point)))))
+    (if err
+        (run-hook-with-args-until-success 'flycheck-fix-error-functions err)
+      (message "No errors at point to fix!"))))
+
 ;;; Functions to display errors
 (defconst flycheck-error-message-buffer "*Flycheck error messages*"
   "The name of the buffer to show long error messages in.")
