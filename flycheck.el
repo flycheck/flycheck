@@ -8478,7 +8478,7 @@ See URL `http://call-cc.org/'."
         :face (cond
                ((eq geiser-impl 'chicken) 'success)
                (t '(bold error)))))))
-  :modes (scheme-mode geiser-mode))
+  :modes scheme-mode)
 
 (defconst flycheck-scss-lint-checkstyle-re
   (rx "cannot load such file" (1+ not-newline) "scss_lint_reporter_checkstyle")
