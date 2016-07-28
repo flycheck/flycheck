@@ -1,6 +1,11 @@
 29-cvs (in development)
 =======================
 
+- **Breaking changes**
+
+  - Change ``flycheck-eslint-rulesdir`` (string) to
+    ``flycheck-eslint-rules-directories`` (list of strings) [GH-1016]
+
 - New syntax checkers:
 
   - Slim with ``slim-lint`` [GH-1013]
