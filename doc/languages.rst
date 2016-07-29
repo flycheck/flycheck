@@ -524,9 +524,9 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax and lint with `ESLint <http://eslint.org/>`_.
 
-      .. option:: flycheck-eslint-rulesdir
+      .. option:: flycheck-eslint-rules-directories
 
-         A directory with custom rules.
+         A list of directories with custom rules.
 
       .. syntax-checker-config-file:: flycheck-eslintrc
 

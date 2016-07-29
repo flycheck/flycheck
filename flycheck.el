@@ -7257,20 +7257,18 @@ See URL `http://www.jshint.com'."
   :modes (js-mode js2-mode js3-mode)
   :next-checkers ((warning . javascript-jscs)))
 
-(flycheck-def-option-var flycheck-eslint-rulesdir nil javascript-eslint
-  "The directory of custom rules for ESLint.
+(flycheck-def-option-var flycheck-eslint-rules-directories nil javascript-eslint
+  "A list of directories with custom rules for ESLint.
 
-The value of this variable is either a string containing the path
-to a directory with custom rules, or nil, to not give any custom
-rules to ESLint.
+The value of this variable is a list of strings, where each
+string is a directory with custom rules for ESLint.
 
 Refer to the ESLint manual at URL
 `https://github.com/eslint/eslint/tree/master/docs/command-line-interface#--rulesdir'
-for more information about the custom directory."
-  :type '(choice (const :tag "No custom rules directory" nil)
-                 (directory :tag "Custom rules directory"))
-  :safe #'stringp
-  :package-version '(flycheck . "0.16"))
+for more information about the custom directories."
+  :type '(repeat (directory :tag "Custom rules directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "29"))
 
 (flycheck-def-config-file-var flycheck-eslintrc javascript-eslint nil
   :safe #'stringp
@@ -7282,7 +7280,7 @@ for more information about the custom directory."
 See URL `https://github.com/eslint/eslint'."
   :command ("eslint" "--format=checkstyle"
             (config-file "--config" flycheck-eslintrc)
-            (option "--rulesdir" flycheck-eslint-rulesdir)
+            (option-list "--rulesdir" flycheck-eslint-rules-directories)
             "--stdin" "--stdin-filename" source-original)
   :standard-input t
   :error-parser flycheck-parse-checkstyle
