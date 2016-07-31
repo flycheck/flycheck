@@ -6839,7 +6839,7 @@ See URL `https://github.com/kisielk/errcheck'."
   :command ("errcheck" "-abspath" ".")
   :error-patterns
   ((warning line-start
-            (file-name) ":" line ":" column (or (one-or-more "\t") ": ")
+            (file-name) ":" line ":" column (or (one-or-more "\t") ": " ":\t")
             (message)
             line-end))
   :error-filter
