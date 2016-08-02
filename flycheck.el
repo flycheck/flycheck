@@ -2009,7 +2009,13 @@ BUFFER is the buffer being verified."
   (save-excursion
     (let ((end (point)))
       (backward-paragraph)
-      (fill-region-as-paragraph (point) end))))
+      (fill-region-as-paragraph (point) end)))
+
+  (princ "\n\n--------------------\n\n")
+  (princ (format "Flycheck version: %s\n" (flycheck-version)))
+  (princ (format "Emacs version:    %s\n" emacs-version))
+  (princ (format "System:           %s\n" system-configuration))
+  (princ (format "Window system:    %S\n" window-system)))
 
 (defun flycheck-verify-checker (checker)
   "Check whether a CHECKER can be used in this buffer.
