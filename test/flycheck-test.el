@@ -3827,10 +3827,11 @@ Why not:
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/src/multiline-error.rs" 'rust-mode
-     '(7 9 error "mismatched types:
- expected `u8`,\n    found `i8`" :checker rust :id "E0308")
+     '(7 9 error "mismatched types" :checker rust :id "E0308")
      '(7 9 info "run `rustc --explain E0308` to see a detailed explanation"
-         :checker rust))))
+         :checker rust)
+     '(7 9 info "expected type `u8`" :checker rust)
+     '(7 9 info "found type `i8`" :checker rust))))
 
 (flycheck-ert-def-checker-test rust rust warning
   (let ((flycheck-disabled-checkers '(rust-cargo)))
@@ -3843,12 +3844,11 @@ Why not:
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/src/note-and-help.rs" 'rust-mode
-     '(11 9 info "`x` moved here because it has type `NonPOD`, which is moved by default"
-          :checker rust)
-     '(11 9 info "if you would like to borrow the value instead, use a `ref` binding as shown:"
-          :checker rust)
+     '(11 9 info "value moved here" :checker rust)
      '(12 9 error "use of moved value: `x`" :checker rust :id "E0382")
      '(12 9 info "run `rustc --explain E0382` to see a detailed explanation"
+          :checker rust)
+     '(12 9 info "move occurs because `x` has type `NonPOD`, which does not implement the `Copy` trait"
           :checker rust))))
 
 (flycheck-ert-def-checker-test rust rust crate-root-not-set
