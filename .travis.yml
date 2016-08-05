@@ -12,8 +12,7 @@ env:
     # Speeds up installation of nokogiri
     - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
   matrix:
-    # Run unit tests against oldest supported stable, latest stable, and trunk
-    - EMACS_VERSION=24.3
+    - EMACS_VERSION=24.4
     - EMACS_VERSION=24.5
     - EMACS_VERSION=snapshot
     # A special job to build the manual
