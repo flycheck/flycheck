@@ -2751,7 +2751,7 @@ evaluating BODY."
   (let ((flycheck-disabled-checkers '(c/c++-clang)))
     (flycheck-ert-should-syntax-check
      "language/c_c++/error.cpp" 'c++-mode
-     '(2 18 error "'struct A' has no member named 'bar'"
+     '(2 20 error "'struct A' has no member named 'bar'"
          :checker c/c++-gcc))))
 
 (flycheck-ert-def-checker-test c/c++-gcc (c c++) fatal-error
