@@ -1,4 +1,4 @@
-;;; compile.el --- Flycheck byte compiler            -*- lexical-binding: t; -*-
+;;; flycheck-compile.el --- Flycheck byte compiler            -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2016  Sebastian Wiesner and Flycheck contributors
 
@@ -73,4 +73,4 @@ Specifically set `byte-compile-error-on-warn' to t on Emacs 25."
           (kill-emacs 1)))))
   (kill-emacs 0))
 
-;;; compile.el ends here
+;;; flycheck-compile.el ends here
