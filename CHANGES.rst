@@ -25,6 +25,8 @@
     [GH-1007]
   - ``rust`` and ``rust-cargo`` checkers now support the new error format of
     rust 1.12 [GH-1016]
+  - `flycheck-verify-checker` and `flycheck-verify-setup` now include
+    information about configuration files of syntax checkers [GH-1021] [GH-1038]
 
 28 (Jun 05, 2016)
 =================
