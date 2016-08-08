@@ -73,7 +73,7 @@ The LGTM.co will look for these comments and unlock the pull request once enough
 maintainers approved it.  We require approvals from multiple maintainers, see
 ``.lgtm`` for the exact amount of approvals required to accept a pull request.
 
-.. important::  Early approval
+.. important::
 
    LGTM.co does not require repeated approval after changes to the pull
    request.  Hence you can “approve early”, i.e. approve before the pull request
