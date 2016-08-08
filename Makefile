@@ -59,7 +59,7 @@ flycheck-ert.elc: flycheck.elc
 flycheck-buttercup.elc: flycheck.elc
 
 $(OBJS): %.elc: %.el
-	$(EMACSBATCH) -l maint/compile.el -f flycheck/batch-byte-compile $<
+	$(EMACSBATCH) -l maint/flycheck-compile.el -f flycheck/batch-byte-compile $<
 
 doc/_static/logo.png: flycheck.svg
 ifndef HAVE_CONVERT
