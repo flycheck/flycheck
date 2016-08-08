@@ -5264,14 +5264,16 @@ function `buffer-file-name'."
       (when (seq-some (apply-partially #'flycheck-same-files-p
                                        (expand-file-name filename cwd))
                       buffer-files)
-        (-when-let (new-filename (buffer-file-name))
-          (setf (flycheck-error-filename err) new-filename
-                (flycheck-error-message err) (replace-regexp-in-string
-                                              (regexp-quote filename)
-                                              new-filename
-                                              (flycheck-error-message err)
-                                              'fixed-case
-                                              'literal))))))
+        (let ((new-filename (buffer-file-name)))
+          (setf (flycheck-error-filename err) new-filename)
+          (when new-filename
+            (setf (flycheck-error-message err)
+                  (replace-regexp-in-string
+                   (regexp-quote filename)
+                   new-filename
+                   (flycheck-error-message err)
+                   'fixed-case
+                   'literal)))))))
   err)
 
 
