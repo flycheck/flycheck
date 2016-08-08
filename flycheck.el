@@ -7627,6 +7627,10 @@ See URL `https://puppet.com/'."
           (one-or-more (in "a-z" "0-9" "_")) ":"
           (message) " at line " line ":" column line-end)
    ;; Errors from Puppet < 4
+   (error line-start "Error: Could not parse for environment "
+          (one-or-more (in "a-z" "0-9" "_")) ":"
+          (message (minimal-match (one-or-more anything)))
+          " at line " line line-end)
    (error line-start
           ;; Skip over the path of the Puppet executable
           (minimal-match (zero-or-more not-newline))
