@@ -79,6 +79,13 @@ Javascript
 
 Mention with ``@flycheck/javascript``.
 
+Puppet
+~~~~~~
+
+* Romanos Skiadas (:gh:`rski`)
+
+Mention with ``@flycheck/puppet``.
+
 Rust
 ~~~~
 
