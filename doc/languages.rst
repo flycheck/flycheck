@@ -68,6 +68,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check C/C++ for syntax and type errors with Clang_ or GCC_ respectively.
 
+      .. note::
+
+         `c/c++-gcc` requires GCC 4.8 or newer.
+
       .. _Clang: http://clang.llvm.org/
       .. _GCC: https://gcc.gnu.org/
 
@@ -164,6 +168,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
          Whether to enable inconclusive checks.  These checks may yield more
          false positives than normal checks.
 
+         .. note::
+
+            This option requires cppcheck 1.54 or newer.
+
       .. option:: flycheck-cppcheck-include-path
 
          A list of include directories.  Relative paths are relative to the file
@@ -229,6 +237,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
    .. syntax-checker:: d-dmd
 
       Check syntax and types with (`DMD <http://dlang.org/>`_).
+
+      .. note::
+
+         This syntax checker requires DMD 2.066 or newer.
 
       .. option:: flycheck-dmd-include-path
 
@@ -398,6 +410,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
    .. syntax-checker:: go-errcheck
 
       Check for unhandled error returns in Go with errcheck_.
+
+      .. note::
+
+         This syntax checker requires errcheck build from commit 8515d34 (Aug
+         28th, 2015) or newer.
 
       .. _errcheck: https://github.com/kisielk/errcheck
 
@@ -579,6 +596,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with the `Less <http://lesscss.org/>`_ compiler.
 
+      .. note::
+
+         This syntax checker requires lessc 1.4 or newer.
+
 .. supported-language:: Lua
 
    Flycheck checks Lua with `lua-luacheck`, falling back to `lua`.
@@ -658,7 +679,9 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check style with `PHP Code Sniffer`_.
 
-      Needs PHP Code Sniffer 2.6 or newer.
+      .. note::
+
+         This syntax checker requires PHP Code Sniffer 2.6 or newer.
 
       .. _PHP Code Sniffer: http://pear.php.net/package/PHP_CodeSniffer
 
@@ -706,6 +729,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax and lint with `flake8 <https://flake8.readthedocs.io/>`_.
 
+      .. note::
+
+         This syntax checker requires flake8 2.0 or newer.
+
       .. option:: flycheck-flake8-error-level-alist
 
          An alist mapping Flake8 error IDs to Flycheck error levels.
@@ -723,6 +750,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
    .. syntax-checker:: python-pylint
 
       Check syntax and lint with `Pylint <https://pylint.org/>`_.
+
+      .. note::
+
+         This syntax checker requires Pylint 1.0 or newer.
 
       .. option:: flycheck-pylint-use-symbolic-id
 
@@ -757,6 +788,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with `raco expand`_ from the ``compiler-lib`` package.
 
+      .. note::
+
+         This syntax checker needs the ``compiler-lib`` package.
+
       .. _raco expand: http://docs.racket-lang.org/raco/expand.html
 
 .. supported-language:: RPM Spec
@@ -776,6 +811,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check documents with Sphinx_.
 
+      .. note::
+
+         This syntax checker requires Sphinx 1.2 or newer.
+
       .. option:: flycheck-sphinx-warn-on-missing-references
 
          Whether to emit warnings for all missing references.
@@ -793,6 +832,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax and lint with `RuboCop <http://batsov.com/rubocop/>`_.
 
+      .. note::
+
+         This syntax checker requires Rubocop 0.34 or newer.
+
       .. option:: flycheck-rubocop-lint-only
 
          Whether to suppress warnings about style issues, via the ``--lint``
@@ -803,6 +846,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
    .. syntax-checker:: ruby-rubylint
 
       Check syntax and lint with ruby-lint_.
+
+      .. note::
+
+         This syntax checker requires ruby-lint 2.0.2 or newer.
 
       .. _ruby-lint: http://code.yorickpeterse.com/ruby-lint/latest/
 
@@ -829,6 +876,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
       Check syntax and types with the Rust_ compiler.  In a Cargo_ project the
       compiler is invoked through ``cargo rustc`` to take Cargo dependencies
       into account.
+
+      .. note::
+
+         These syntax checkers require Rust 1.0 or newer.
 
       .. _Cargo: http://doc.crates.io/index.html
 
@@ -929,6 +980,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
    .. syntax-checker:: scss-lint
 
       Check syntax and lint with SCSS-Lint_.
+
+      .. note::
+
+         This syntax checker requires SCSS-Lint 0.43.2 or newer.
 
       .. _SCSS-Lint: https://github.com/brigade/scss-lint
 
