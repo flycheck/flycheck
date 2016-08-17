@@ -6777,18 +6777,12 @@ Each item is a string with a tag to be given to `go build'."
 (flycheck-define-checker go-build
   "A Go syntax and type checker using the `go build' command.
 
-See URL `https://golang.org/cmd/go'."
-  ;; We need to use `temporary-file-name' instead of `null-device',
-  ;; because Go can't write to the null device.
-  ;; See https://github.com/golang/go/issues/4851
+Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
   :command ("go" "build"
             (option-flag "-i" flycheck-go-build-install-deps)
             ;; multiple tags are listed as "dev debug ..."
             (option-list "-tags=" flycheck-go-build-tags concat)
-            ;; TODO: Use `null-device' instead.  Go 1.6 can write to /dev/null
-            ;; (and NUL on Windows) now, see
-            ;; https://github.com/flycheck/flycheck/issues/838.
-            "-o" temporary-file-name)
+            "-o" null-device)
   :error-patterns
   ((error line-start (file-name) ":" line ":"
           (optional column ":") " "
@@ -6822,14 +6816,10 @@ See URL `https://golang.org/cmd/go'."
 (flycheck-define-checker go-test
   "A Go syntax and type checker using the `go test' command.
 
-See URL `http://golang.org/cmd/go'."
-  ;; This command builds the test executable and writes it to
-  ;; `temporary-file-name'.
-  ;; TODO: Switch to `null-device'` when < Go 1.6 support is removed.
-  ;; See: https://github.com/flycheck/flycheck/issues/838
+Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
   :command ("go" "test"
             (option-flag "-i" flycheck-go-build-install-deps)
-            "-c" "-o" temporary-file-name)
+            "-c" "-o" null-device)
   :error-patterns
   ((error line-start (file-name) ":" line ": "
           (message (one-or-more not-newline)
