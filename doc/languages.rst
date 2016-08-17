@@ -970,8 +970,8 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. important::
 
-      `Geiser <http://www.nongnu.org/geiser/>` must be installed and active
-      for this checker to work.
+      `Geiser <http://www.nongnu.org/geiser/>`_ must be installed and active for
+      this checker to work.
 
 .. supported-language:: SCSS
 
