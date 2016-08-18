@@ -87,6 +87,7 @@ clean:
 	$(MAKE) -C doc clean
 
 .PHONY: purge
+purge:
 	$(GIT) clean -xfd
 
 .PHONY: compile
