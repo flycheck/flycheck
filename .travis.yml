@@ -35,7 +35,9 @@ before_install:
 install:
   - if [[ -n $EMACS_VERSION ]]; then make init; fi
 script:
-  # Lint, compile, test
+  # Check formatting on Emacs 25 (our formatting rules dont’ work on Emacs 24).
+  - if [[ $EMACS_VERSION == "25.1-rc2" ]]; then make check; fi
+  # Compile and test
   - if [[ -n $EMACS_VERSION ]]; then make compile; fi
   - if [[ -n $EMACS_VERSION ]]; then make unit; fi
   - if [[ -n $EMACS_VERSION ]]; then make specs; fi
