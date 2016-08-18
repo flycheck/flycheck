@@ -81,7 +81,7 @@
             (setq delayed-mode-hooks nil)
             ;; Load the library to make local definitions available
             (load source 'noerror 'nomessage 'nosuffix)
-            ;; Now re-indent.  If it's modified afters, indentation wasn't
+            ;; Now re-indent.  If it's modified afterwards indentation wasn't
             ;; right.
             (let ((inhibit-message t))  ; `indent-region' is chatty, silence it
               (indent-region (point-min) (point-max)))

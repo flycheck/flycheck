@@ -31,7 +31,7 @@
 (require 'bytecomp)
 
 (unless noninteractive
-  (error "This file is not to be used interactively"))
+  (error "This file must not be used interactively"))
 
 (defun flycheck/batch-byte-compile ()
   "Like `batch-byte-compile', but set additional flags.
