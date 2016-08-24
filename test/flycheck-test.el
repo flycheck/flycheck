@@ -3495,7 +3495,7 @@ Why not:
 (flycheck-ert-def-checker-test (perl perl-perlcritic) perl nil
   (flycheck-ert-should-syntax-check
    "language/perl.pl" '(perl-mode cperl-mode)
-   '(6 nil error "Global symbol \"$x\" requires explicit package name (did you forget to declare \"my $x\"?"
+   '(6 nil error "Global symbol \"$x\" requires explicit package name (did you forget to declare \"my $x\"?)"
        :checker perl)
    '(6 nil error "BEGIN not safe after errors--compilation aborted"
        :checker perl)
