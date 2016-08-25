@@ -387,6 +387,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax and type with the `Go compiler`_.
 
+      .. note::
+
+         This syntax checker requires Go 1.6 or newer.
+
       .. _Go compiler: https://golang.org/cmd/go
 
       .. option:: flycheck-go-build-install-deps
@@ -401,6 +405,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
    .. syntax-checker:: go-test
 
       Check syntax and types of Go tests with the `Go compiler`_.
+
+      .. note::
+
+         This syntax checker requires Go 1.6 or newer.
 
       .. option:: flycheck-go-build-install-deps
          :noindex:
