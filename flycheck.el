@@ -7679,7 +7679,7 @@ See URL `http://puppet-lint.com/'."
   :command ("puppet-lint"
             (config-file "--config" flycheck-puppet-lint-rc)
             "--log-format"
-            "%{path}:%{linenumber}:%{kind}: %{message} (%{check})"
+            "%{path}:%{line}:%{kind}: %{message} (%{check})"
             (option-list "" flycheck-puppet-lint-disabled-checks concat
                          flycheck-puppet-lint-disabled-arg-name)
             source-original)
