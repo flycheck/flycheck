@@ -4828,12 +4828,20 @@ and rely on Emacs' own buffering and chunking."
 
 Return a list of `flycheck-verification-result' objects for
 CHECKER."
-  (let ((executable (flycheck-find-checker-executable checker)))
-    (list
-     (flycheck-verification-result-new
-      :label "executable"
-      :message (if executable (format "Found at %s" executable) "Not found")
-      :face (if executable 'success '(bold error))))))
+  (let ((executable (flycheck-find-checker-executable checker))
+        (config-file-var (flycheck-checker-get checker 'config-file-var)))
+    `(
+      ,(flycheck-verification-result-new
+        :label "executable"
+        :message (if executable (format "Found at %s" executable) "Not found")
+        :face (if executable 'success '(bold error)))
+      ,@(when config-file-var
+          (let* ((value (symbol-value config-file-var))
+                 (path (and value (flycheck-locate-config-file value checker))))
+            (list (flycheck-verification-result-new
+                   :label "configuration file"
+                   :message (if path (format "Found at %S" path) "Not found")
+                   :face (if path 'success 'warning))))))))
 
 
 ;;; Process management for command syntax checkers
