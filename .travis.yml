@@ -3,6 +3,12 @@ language: python
 python:
   - "3.5"
 sudo: false
+matrix:
+  # Don’t wait for jobs that are allowed to fail
+  fast_finish: true
+  # Allow snapshot to fail
+  allow_failures:
+    - env: EMACS_VERSION=snapshot
 cache:
   - pip
   - directories:
