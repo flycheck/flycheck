@@ -29,12 +29,18 @@ SELECTOR = (language $(LANGUAGE))
 endif
 
 # Internal variables
-EMACSBATCH = $(CASK) exec $(EMACS) -Q --batch -L . $(EMACSOPTS)
+EMACSBATCH = $(EMACS) -Q --batch -L . $(EMACSOPTS)
+RUNEMACS =
 
 # Program availability
+ifdef CASK
+RUNEMACS = $(CASK) exec $(EMACSBATCH)
 HAVE_CASK := $(shell sh -c "command -v $(CASK)")
 ifndef HAVE_CASK
 $(warning "$(CASK) is not available.  Please run make help")
+endif
+else
+RUNEMACS = $(EMACSBATCH)
 endif
 HAVE_INKSCAPE := $(shell sh -c "command -v $(INKSCAPE)")
 HAVE_CONVERT := $(shell sh -c "command -v $(CONVERT)")
@@ -59,7 +65,7 @@ flycheck-ert.elc: flycheck.elc
 flycheck-buttercup.elc: flycheck.elc
 
 $(OBJS): %.elc: %.el
-	$(EMACSBATCH) -l maint/flycheck-compile.el -f flycheck/batch-byte-compile $<
+	$(RUNEMACS) -l maint/flycheck-compile.el -f flycheck/batch-byte-compile $<
 
 doc/_static/logo.png: flycheck.svg
 ifndef HAVE_CONVERT
@@ -99,12 +105,12 @@ specs: compile
 
 .PHONY: unit
 unit: compile
-	$(EMACSBATCH) --load test/run.el -f flycheck-run-tests-main \
+	$(RUNEMACS) --load test/run.el -f flycheck-run-tests-main \
 		'(and (not (tag external-tool)) $(SELECTOR))'
 
 .PHONY: integ
 integ: compile
-	$(EMACSBATCH) --load test/run.el -f flycheck-run-tests-main \
+	$(RUNEMACS) --load test/run.el -f flycheck-run-tests-main \
 		'(and (tag external-tool) $(SELECTOR))'
 
 .PHONY: images
