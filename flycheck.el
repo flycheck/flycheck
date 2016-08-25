@@ -5444,6 +5444,107 @@ about TSLint."
              (and (not (string-empty-p output))
                   (json-read-from-string output)))))
 
+(defun flycheck-parse-rust (output checker buffer)
+  "Parse rust errors from OUTPUT and return a list of `flycheck-error'.
+
+CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
+the BUFFER that was checked respectively.
+
+The expected format for OUTPUT is a mix of plain text lines and
+JSON lines.  This function ignores the plain text lines and
+parses only JSON lines.  Each JSON line is expected to be a JSON
+object that corresponds to a diagnostic from the compiler.  The
+expected diagnostic format is described there:
+
+https://github.com/rust-lang/rust/blob/master/src/libsyntax/json.rs#L67-L139"
+  (let* ((json-array-type 'list)
+         (json-false nil)
+         ;; Skip the plain text lines in OUTPUT, keep the JSON lines.
+         (json-lines (seq-filter (lambda (line)
+                                   (string-match-p "^{" line))
+                                 (split-string output "\n")))
+         ;; Each JSON line is a JSON object.
+         (diagnostics (seq-map #'json-read-from-string json-lines))
+         (errors))
+    ;; The diagnostic format is described in the link above.  The gist of it is
+    ;; that each diagnostic can have several causes in the source text; these
+    ;; causes are represented by spans.  The diagnostic has a message and a
+    ;; level (error, warning), while the spans have a filename, line, column,
+    ;; and an optional label.  The primary span points to the root cause of the
+    ;; error in the source text, while non-primary spans point to related
+    ;; causes.  In addition, each diagnostic can also have children diagnostics
+    ;; that are used to provide additional information through their message
+    ;; field, but do not seem to contain any spans (yet).
+    ;;
+    ;; We first iterate over diagnostics and their spans to turn every span into
+    ;; a flycheck error object, that we collect into the `errors' list.
+    (dolist (diagnostic diagnostics)
+      (let ((error-message)
+            (error-level)
+            (error-code)
+            (primary-filename)
+            (primary-line)
+            (primary-column)
+            (spans)
+            (children))
+
+        ;; Nested `let-alist' cause compilation warnings, hence we `setq' all
+        ;; these values here first to avoid nesting.
+        (let-alist diagnostic
+          (setq error-message .message
+                error-level (pcase .level
+                              (`"error" 'error)
+                              (`"warning" 'warning)
+                              (_ 'error))
+                ;; The 'code' field of the diagnostic contains the actual error
+                ;; code and an optional explanation that we ignore
+                error-code .code.code
+                spans .spans
+                children .children))
+
+        (dolist (span spans)
+          (let-alist span
+            ;; Children lack any filename/line/column information, so we use
+            ;; those from the primary span
+            (when .is_primary
+              (setq primary-filename .file_name
+                    primary-line .line_start
+                    primary-column .column_start))
+            (push
+             (flycheck-error-new-at
+              .line_start
+              .column_start
+              ;; Non-primary spans are used for notes
+              (if .is_primary error-level 'info)
+              (if .is_primary
+                  ;; Primary spans may have labels with additional information
+                  (concat error-message (when .label
+                                          (format " (%s)" .label)))
+                .label)
+              :id error-code
+              :checker checker
+              :buffer buffer
+              :filename .file_name)
+             errors)))
+
+        ;; Then we turn children messages into flycheck errors pointing to the
+        ;; location of the primary span.  According to the format, children
+        ;; may contain spans, but they do not seem to use them in practice.
+        (dolist (child children)
+          (let-alist child
+            (push
+             (flycheck-error-new-at
+              primary-line
+              primary-column
+              'info
+              .message
+              :id error-code
+              :checker checker
+              :buffer buffer
+              :filename primary-filename)
+             errors)))))
+    (nreverse errors)))
+
 
 ;;; Error parsing with regular expressions
 (defun flycheck-get-regexp (patterns)
@@ -8276,7 +8377,7 @@ Relative paths are relative to the file being checked."
 (flycheck-define-checker rust-cargo
   "A Rust syntax checker using Cargo.
 
-This syntax checker needs Rust 1.0 or newer, and Cargo with the
+This syntax checker needs Rust 1.7 or newer, and Cargo with the
 rustc command.  See URL `https://www.rust-lang.org'."
   :command ("cargo" "rustc"
             (eval (cond
@@ -8284,24 +8385,15 @@ rustc command.  See URL `https://www.rust-lang.org'."
                    (flycheck-rust-binary-name
                     (list "--bin" flycheck-rust-binary-name))))
             "--" "-Z" "no-trans"
+            ;; Passing the "unstable-options" flag may raise an error in the
+            ;; future.  For the moment, we need it to access JSON output in all
+            ;; rust versions >= 1.7.
+            "-Z" "unstable-options"
+            "--error-format=json"
             (option-flag "--test" flycheck-rust-check-tests)
             (option-list "-L" flycheck-rust-library-path concat)
             (eval flycheck-rust-args))
-  :error-patterns
-  ((error line-start (file-name) ":" line ":" column ": "
-          (one-or-more digit) ":" (one-or-more digit) " error: "
-          (or
-           ;; Multiline errors
-           (and (message (minimal-match (one-or-more anything)))
-                " [" (id "E" (one-or-more digit)) "]")
-           (message))
-          line-end)
-   (warning line-start (file-name) ":" line ":" column ": "
-            (one-or-more digit) ":" (one-or-more digit) " warning: "
-            (message) line-end)
-   (info line-start (file-name) ":" line ":" column ": "
-         (one-or-more digit) ":" (one-or-more digit) " " (or "note" "help") ": "
-         (message) line-end))
+  :error-parser flycheck-parse-rust
   :modes rust-mode
   :predicate (lambda ()
                ;; Since we build the entire project with cargo rustc we require
@@ -8313,30 +8405,21 @@ rustc command.  See URL `https://www.rust-lang.org'."
 (flycheck-define-checker rust
   "A Rust syntax checker using Rust compiler.
 
-This syntax checker needs Rust 1.0 or newer.  See URL
+This syntax checker needs Rust 1.7 or newer.  See URL
 `https://www.rust-lang.org'."
   :command ("rustc" "-Z" "no-trans"
             (option "--crate-type" flycheck-rust-crate-type)
+            ;; Passing the "unstable-options" flag may raise an error in the
+            ;; future.  For the moment, we need it to access JSON output in all
+            ;; rust versions >= 1.7.
+            "-Z" "unstable-options"
+            "--error-format=json"
             (option-flag "--test" flycheck-rust-check-tests)
             (option-list "-L" flycheck-rust-library-path concat)
             (eval flycheck-rust-args)
             (eval (or flycheck-rust-crate-root
                       (flycheck-substitute-argument 'source-inplace 'rust))))
-  :error-patterns
-  ((error line-start (file-name) ":" line ":" column ": "
-          (one-or-more digit) ":" (one-or-more digit) " error: "
-          (or
-           ;; Multiline errors
-           (and (message (minimal-match (one-or-more anything)))
-                " [" (id "E" (one-or-more digit)) "]")
-           (message))
-          line-end)
-   (warning line-start (file-name) ":" line ":" column ": "
-            (one-or-more digit) ":" (one-or-more digit) " warning: "
-            (message) line-end)
-   (info line-start (file-name) ":" line ":" column ": "
-         (one-or-more digit) ":" (one-or-more digit) " " (or "note" "help") ": "
-         (message) line-end))
+  :error-parser flycheck-parse-rust
   :modes rust-mode
   :predicate (lambda ()
                (and (not flycheck-rust-crate-root) (flycheck-buffer-saved-p))))

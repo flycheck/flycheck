@@ -3835,19 +3835,15 @@ Why not:
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/src/syntax-error.rs" 'rust-mode
-     '(4 5 error "unresolved name `bla`" :checker rust :id "E0425")
-     '(4 5 info "run `rustc --explain E0425` to see a detailed explanation"
-         :checker rust))))
+     '(4 5 error "unresolved name `bla`" :checker rust :id "E0425"))))
 
 (flycheck-ert-def-checker-test rust rust multiline-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/src/multiline-error.rs" 'rust-mode
-     '(7 9 error "mismatched types" :checker rust :id "E0308")
-     '(7 9 info "run `rustc --explain E0308` to see a detailed explanation"
-         :checker rust)
-     '(7 9 info "expected type `u8`" :checker rust)
-     '(7 9 info "found type `i8`" :checker rust))))
+     '(7 9 error "mismatched types (expected u8, found i8)" :checker rust :id "E0308")
+     '(7 9 info "expected type `u8`" :checker rust :id "E0308")
+     '(7 9 info "found type `i8`" :checker rust :id "E0308"))))
 
 (flycheck-ert-def-checker-test rust rust warning
   (let ((flycheck-disabled-checkers '(rust-cargo)))
@@ -3860,20 +3856,15 @@ Why not:
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/src/note-and-help.rs" 'rust-mode
-     '(11 9 info "value moved here" :checker rust)
-     '(12 9 error "use of moved value: `x`" :checker rust :id "E0382")
-     '(12 9 info "run `rustc --explain E0382` to see a detailed explanation"
-          :checker rust)
-     '(12 9 info "move occurs because `x` has type `NonPOD`, which does not implement the `Copy` trait"
-          :checker rust))))
+     '(11 9 info "value moved here" :checker rust :id "E0382")
+     '(12 9 error "use of moved value: `x` (value used here after move)" :checker rust :id "E0382")
+     '(12 9 info "move occurs because `x` has type `NonPOD`, which does not implement the `Copy` trait" :checker rust :id "E0382"))))
 
 (flycheck-ert-def-checker-test rust rust crate-root-not-set
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/src/importing.rs" 'rust-mode
-     '(1 5 error "unresolved import `super::imported`. There are too many initial `super`s." :checker rust :id "E0432")
-     '(1 5 info "run `rustc --explain E0432` to see a detailed explanation"
-         :checker rust))))
+     '(1 5 error "unresolved import `super::imported`. There are too many initial `super`s." :checker rust :id "E0432"))))
 
 (flycheck-ert-def-checker-test sass sass nil
   (flycheck-ert-should-syntax-check

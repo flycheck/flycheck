@@ -5,6 +5,7 @@
 
   - Change ``flycheck-eslint-rulesdir`` (string) to
     ``flycheck-eslint-rules-directories`` (list of strings) [GH-1016]
+  - Require rust 1.7 or newer for ``rust`` and ``rust-cargo`` [GH-1036]
 
 - New syntax checkers:
 
@@ -22,7 +23,8 @@
 
   - Add default directory for ``haskell-stack-ghc`` and ``haskell-ghc`` checkers
     [GH-1007]
-
+  - ``rust`` and ``rust-cargo`` checkers now support the new error format of
+    rust 1.12 [GH-1016]
 
 28 (Jun 05, 2016)
 =================
