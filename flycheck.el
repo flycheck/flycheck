@@ -1714,12 +1714,16 @@ Signal an error, if any property has an invalid value."
     (dolist (checker next-checkers)
       (flycheck-validate-next-checker checker))
 
-    (let ((real-predicate (lambda ()
-                            (if (flycheck-valid-checker-p symbol)
-                                (or (null predicate) (funcall predicate))
-                              (lwarn 'flycheck :warning "%S is no valid Flycheck syntax checker.
+    (let ((real-predicate
+           (lambda ()
+             (if (flycheck-valid-checker-p symbol)
+                 (or (null predicate)
+                     (let ((default-directory
+                             (flycheck-compute-working-directory symbol)))
+                       (funcall predicate)))
+               (lwarn 'flycheck :warning "%S is no valid Flycheck syntax checker.
 Try to reinstall the package defining this syntax checker." symbol)
-                              nil))))
+               nil))))
       (pcase-dolist (`(,prop . ,value)
                      `((start             . ,start)
                        (interrupt         . ,interrupt)
