@@ -5,9 +5,8 @@
 =========================
 
 This article provides information about Flycheck compares to the *built-in*
-Flymake mode.  It does not consider the improved `Flymake fork`_ or third-party
-extensions such as flymake-easy_ or flymake-cursor_, but references them at
-appropriate places.
+Flymake mode.  It does not consider third-party extensions such as flymake-easy_
+or flymake-cursor_, but references them at appropriate places.
 
 We aim for this comparison to be neutral and complete, but do not provide any
 guarantee for completeness or correctness of the following information.
@@ -15,7 +14,7 @@ Moreover, we consider Flycheck superior to Flymake in all aspects.  As such, you
 may find this page biased towards Flycheck.  Please excuse this as well as any
 factual mistake or lack of information.  Please suggest improvements.
 
-.. note::
+.. important::
 
    This comparison was written around the time Emacs 24.5 was released, and only
    updated infrequently since then.  Flycheck has changed and hopefully improved
@@ -28,7 +27,6 @@ factual mistake or lack of information.  Please suggest improvements.
    Please report any incorrectness and any inconsistency you find, and feel free
    to `edit this page`_ and improve it.
 
-.. _Flymake fork: https://github.com/illusori/emacs-flymake
 .. _flymake-easy: https://github.com/purcell/flymake-easy
 .. _flymake-cursor: https://www.emacswiki.org/emacs/flymake-cursor.el
 .. _edit this page: https://github.com/flycheck/flycheck/edit/master/doc/user/flycheck-versus-flymake.rst
@@ -38,9 +36,9 @@ Overview
 
 This table intends to give an overview about the differences and similarities
 between Flycheck and the default install of Flymake. It is not a direct
-comparision to third-party extensions such as flymake-easy_, flymake-cursor_, or
-forks of Flymake. For a more comprehensive look compared to those extensions,
-please read the details in the main article and the footnotes.
+comparison to third-party extensions like flymake-easy_ or flymake-cursor_. For
+a more comprehensive look compared to those extensions, please read the details
+in the main article and the footnotes.
 
 Please do **not** use this table alone to make your personal judgment.  Read the
 detailed review in the following sections, too, at least with regards to the
@@ -81,7 +79,7 @@ features you are interested in.
 |Functions as syntax    |yes                    |**no** [#]_            |
 |checkers               |                       |                       |
 +-----------------------+-----------------------+-----------------------+
-|Error levels           |errors, warnings,      |errors, warnings [#]_  |
+|Error levels           |errors, warnings,      |errors, warnings       |
 |                       |informational, custom  |                       |
 |                       |levels                 |                       |
 +-----------------------+-----------------------+-----------------------+
@@ -105,7 +103,7 @@ features you are interested in.
 +-----------------------+-----------------------+-----------------------+
 |List of all errors     |yes                    |**no**                 |
 +-----------------------+-----------------------+-----------------------+
-|Resource consumption   |low                    |**high** [#]_          |
+|Resource consumption   |low                    |**high**               |
 +-----------------------+-----------------------+-----------------------+
 |Unit tests             |all syntax checkers,   |**none?**              |
 |                       |large parts of         |                       |
@@ -162,10 +160,9 @@ Syntax checkers
 ---------------
 
 **Flymake** supports Java, Makefiles, Perl, PHP, TeX/LaTeX and XML.  Notably, it
-does *not* support Emacs Lisp.  A third-party `Flymake fork`_ supports more
-languages, though.  Furthermore there are many recipes for other languages on
-the `Flymake page`_ in the EmacsWiki and many extension packages for other
-languages in the popular ELPA archive MELPA_.
+does *not* support Emacs Lisp.  However, there are many recipes for other
+languages on the `Flymake page`_ in the EmacsWiki and many extension packages
+for other languages in the popular ELPA archive MELPA_.
 
 **Flycheck** provides support for over 40 languages with over 70 syntax
 checkers, most of them contributed by the community.  Notably, Flycheck does
@@ -341,9 +338,6 @@ messages is *hard-coded* in Emacs 24.3, and only became customizable in upcoming
 Emacs 24.4.  The patterns to parse messages are kept separate from the actual
 syntax checker.
 
-The third-party `Flymake fork`_ also supports info messages, and makes the pattern
-of warning messages customizable as well.
-
 **Flycheck** supports error, warning and info messages.  The patterns to parse
 messages of different levels are part of the syntax checker definition, and thus
 specific to each syntax checker.  Flycheck allows to define new error levels for
@@ -427,9 +421,6 @@ concurrent syntax checks.  As such, Flymake starts many concurrent syntax
 checks when many buffers are changed at the same time (e.g. after a VCS revert),
 which is known to freeze Emacs temporarily.
 
-The third-party `Flymake fork`_ limits the number of concurrent syntax checks.
-It does not take care to check visible buffers first, though.
-
 **Flycheck** does not conduct syntax checks in buffers which are not visible in
 any window.  Instead it defers syntax checks in such buffers until after the
 buffer is visible again.  Hence, Flycheck does only start as many concurrent
@@ -442,10 +433,6 @@ Checking for changes
 for changes in each buffer.  These timers run even if the corresponding buffers
 do not change.  This is known to cause considerable CPU load with many open
 buffers.
-
-The third-party `Flymake fork`_ uses a single global timer to check for changes.
-This greatly reduces the CPU load, but still consumes some marginal CPU, even if
-Emacs is idle and not in use currently.
 
 **Flycheck** does not use timers at all to check for changes.  Instead it
 registers a handler for Emacs' built-in ``after-change-functions`` hook which is
@@ -479,8 +466,7 @@ required to have test cases.  A subset of the test suite is continuously run on
 .. [#] However, the `Flymake page`_ in the EmacsWiki provides recipes for many
        other languages, although of varying quality.  Furthermore, the popular
        ELPA archive MELPA provides many packages which add more languages to
-       Flymake.  There is also a `Flymake fork`_, which supports more languages
-       out of the box, among other fixes and improvements.
+       Flymake.
 
 .. [#] See for instance `this comment`_.
 
@@ -489,13 +475,8 @@ required to have test cases.  A subset of the test suite is continuously run on
 .. [#] `flymake-easy`_ provides a function to define a new syntax checker, which
        sets all required variables at once.
 
-.. [#] The `Flymake fork`_ adds support for info messages.
-
 .. [#] `flymake-easy`_ **overrides** internal functions of Flymake to add
        support for multiline error messages.
 
 .. [#] The 3rd party library `flymake-cursor`_ shows Flymake error messages at
        point in the echo area.
-
-.. [#] The third-party `Flymake fork`_ mostly fixes the performance and resource
-       consumption issues in Flymake.
