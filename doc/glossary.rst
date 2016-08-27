@@ -39,6 +39,18 @@ reference`_, but we reproduce them here for convenience.
       A syntax checker in `flycheck-checkers`.  Flycheck will only use these
       syntax checkers when checking buffers automatically.
 
+   stage
+      The stage denotes when a syntax checker will run.  Flycheck has a couple
+      of stages, see `flycheck-checker-stages`.  Each syntax checker has an
+      associated stage.  For instance compilers will typically sit in the
+      ``syntax`` stage, whereas semantic linters belong into the ``lint`` stage.
+
+   syntax checker chain
+      The exact sequence of syntax checkers that Flycheck runs for a single
+      syntax check.  Flycheck computes chains from syntax checkers that support
+      the current buffer, ordering them by their stages and throwing out
+      conflicting syntax checkers across all stages.
+
    verification buffer
       A buffer shown by `M-x flycheck-verify-setup`.  This buffer contains
       information about the Flycheck setup for the current buffer.

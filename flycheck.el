@@ -1455,6 +1455,21 @@ A checker is disabled if it is contained in
 Flycheck will not use syntax checkers whose generic version is
 less than this constant.")
 
+(defconst flycheck-checker-stages '(syntax type lint style test)
+  "Supported stages for syntax checkers.
+
+A stage denotes at which point Flycheck will run a syntax
+checkers.  The following stages are supported:
+
+1. `syntax': Syntax checkers
+2. `type': Type checkers
+3. `lint': Linters
+4. `style': Code style checkers
+5. `test': Test runners.
+
+Flycheck runs these stages in the given order, starting with
+`syntax' and running one stage after another until `test'.")
+
 (defsubst flycheck--checker-property-name (property)
   "Return the SYMBOL property for checker PROPERTY."
   (intern (concat "flycheck-" (symbol-name property))))
@@ -1801,6 +1816,17 @@ A valid checker is a symbol defined as syntax checker with
   (and (symbolp checker)
        (= (or (get checker 'flycheck-generic-checker-version) 0)
           flycheck-generic-checker-version)))
+
+(defun flycheck-checker-stage-before-p (checker1 checker2)
+  "Whether the stage of CHECKER1 comes before that of CHECKER2.
+
+In other words whether CHECKER1 should run before CHECKER2.
+
+Return non-nil if that's the case, nil otherwise."
+  (< (seq-position flycheck-checker-stages
+                   (flycheck-checker-get checker1 'stage) #'eq)
+     (seq-position flycheck-checker-stages
+                   (flycheck-checker-get checker2 'stage) #'eq)))
 
 (defun flycheck-checker-supports-major-mode-p (checker &optional mode)
   "Whether CHECKER supports the given major MODE.
@@ -2373,7 +2399,7 @@ buffer manually.
     (flycheck-teardown))))
 
 
-;;; Syntax checker selection for the current buffer
+;;; Legacy syntax checker selection for the current buffer
 (defun flycheck-get-checker-for-buffer ()
   "Find the checker for the current buffer.
 
@@ -2459,6 +2485,59 @@ buffer-local value of `flycheck-disabled-checkers'."
     (unless (memq checker flycheck-disabled-checkers)
       (push checker flycheck-disabled-checkers)
       (flycheck-buffer))))
+
+
+;;; Syntax checker chain selection
+(defun flycheck--collect-checker-unless-evicted (collected checker)
+  "In COLLECTED Collect CHECKER unless it's evicted.
+
+COLLECTED is a pair `(ACCEPTED . EVICTED)' where ACCEPTED is a
+list of already collected checkers and EVICTED a list of already
+evicted checkers.
+
+If CHECKER is contained in EVICTED, or if CHECKER conflicts with
+any checker in ACCEPTED, return COLLECTED and ignore CHECKER.
+
+Otherwise return a new pair where the first item is ACCEPTED with
+CHECKER added to the front, and EVICTED is EVICTED plus all
+conflicting checkers of CHECKER."
+  (pcase-let ((conflicts (flycheck-checker-get checker 'conflicts-with))
+              (`(,accepted . ,evicted) collected))
+    (cond
+     ;; Skip the checker if it's already evicted,…
+     ((memq checker evicted) collected)
+     ;; …or if it conflicts with any collected checker
+     ((seq-intersection accepted conflicts #'eq) collected)
+     ;; Otherwise collect the checker and track its evictions
+     (t (cons (cons checker accepted) (append conflicts evicted))))))
+
+(defun flycheck-evict-checkers (checkers)
+  "Evict all conflicting syntax checkers from CHECKERS.
+
+Conflict resolution happens from front to back: Always accept the
+`car' of CHECKERS and then evict any checkers that conflict with
+any syntax checker already accepted, in either direction.
+
+Return CHECKERS but with all conflicting checkers removed."
+  (pcase-let ((`(,checkers . ,_)
+               (seq-reduce #'flycheck--collect-checker-unless-evicted
+                           checkers nil)))
+    ;; The above reduction collects in reverse order, let's rectify that.
+    (nreverse checkers)))
+
+(defun flycheck-get-syntax-checker-chain-for-buffer ()
+  "Get the complete syntax checker chain for the current buffer.
+
+Return a list of all syntax checkers to apply on the current
+checker in order of their stages, i.e. in the order in which the
+syntax checkers should finally run."
+  ;; Luckily `seq-sort' calls out to `sort' internally which is stable, thus
+  ;; sorting by stages preserves the order of `flycheck-checkers' for checkers
+  ;; within the same stage.
+  (pcase-let ((candidates (seq-sort #'flycheck-checker-stage-before-p
+                                    (seq-filter #'flycheck-may-use-checker
+                                                flycheck-checkers))))
+    (flycheck-evict-checkers candidates)))
 
 
 ;;; Syntax checks for the current buffer
