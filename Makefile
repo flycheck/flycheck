@@ -104,8 +104,12 @@ format:
 check-format:
 	$(RUNEMACS) -l maint/flycheck-format.el -f flycheck/batch-check-format
 
+.PHONY: checkdoc
+checkdoc:
+	$(RUNEMACS) -l maint/flycheck-checkdoc.el -f flycheck/batch-checkdoc
+
 .PHONY: check
-check: check-format
+check: check-format checkdoc
 
 .PHONY: compile
 compile: $(OBJS)
@@ -133,7 +137,7 @@ help:
 	@echo ''
 	@echo 'Available targets:'
 	@echo '  init:    Initialise the project.  RUN FIRST!'
-	@echo '  check:   Check all Emacs Lisp sources'
+	@echo '  check:   Check all Emacs Lisp sources (needs Emacs 25)'
 	@echo '  compile: Byte-compile Emacs Lisp sources'
 	@echo '  format:  Format all Emacs Lisp sources'
 	@echo '  specs:   Run all buttercup specs for Flycheck'
