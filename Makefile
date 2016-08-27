@@ -104,8 +104,12 @@ format:
 check-format:
 	$(RUNEMACS) -l maint/flycheck-format.el -f flycheck/batch-check-format
 
+.PHONY: checkdoc
+checkdoc:
+	$(RUNEMACS) -l maint/flycheck-checkdoc.el -f flycheck/batch-checkdoc
+
 .PHONY: check
-check: check-format
+check: check-format checkdoc
 
 .PHONY: compile
 compile: $(OBJS)
