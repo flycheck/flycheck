@@ -7446,7 +7446,7 @@ See URL `https://github.com/mpeterv/luacheck'."
             "-")
   :standard-input t
   :error-patterns
-  ((warning line-start 
+  ((warning line-start
             (optional (file-name))
             ":" line ":" column
             ": (" (id "W" (one-or-more digit)) ") "
