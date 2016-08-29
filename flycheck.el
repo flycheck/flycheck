@@ -7447,12 +7447,12 @@ See URL `https://github.com/mpeterv/luacheck'."
   :standard-input t
   :error-patterns
   ((warning line-start 
-            (minimal-match (zero-or-more not-newline))
+            (optional (file-name))
             ":" line ":" column
             ": (" (id "W" (one-or-more digit)) ") "
             (message) line-end)
-   (error line-start 
-          (minimal-match (zero-or-more not-newline))
+   (error line-start
+          (optional (file-name))
           ":" line ":" column ":"
           ;; `luacheck' before 0.11.0 did not output codes for errors, hence
           ;; the ID is optional here
