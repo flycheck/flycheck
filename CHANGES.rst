@@ -1,6 +1,10 @@
 30-cvs (in development)
 =======================
 
+- **Breaking changes**
+
+  - Flycheck now requires flake8 3.0 or newer
+
 - New syntax checkers:
 
   - Elixir with ``dogma`` [GH-969]
