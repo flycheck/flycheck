@@ -105,14 +105,16 @@ def finalise_relase_in_changelog(path, version, date):
     if not lines[0].endswith(' (in development)'):
         raise ValueError('Failed to find snapshot header in {}'.format(path))
     new_header = '{} ({})'.format(version, date.strftime('%b %d, %Y'))
+    header_underline = '=' * len(new_header)
     path.write_text(
-        '\n'.join([new_header, '='*len(new_header)] + lines[2:]) + '\n')
+        '\n'.join([new_header, header_underline] + lines[2:]) + '\n')
 
 
 def add_snapshot_to_changelog(path, version):
     header = '{} (in development)'.format(version)
     contents = path.read_text()
-    path.write_text('{}\n{}\n\n{}'.format(header, '='*len(header), contents))
+    underline = '=' * len(header)
+    path.write_text('{}\n{}\n\n{}'.format(header, underline, contents))
 
 
 def commit_and_push_release(repo, version):
@@ -188,7 +190,7 @@ def main():
 * upload `dist/flycheck-{0}.tar,
 * enable version {0} on https://readthedocs.org/dashboard/flycheck/versions/, and
 * announce the release in the flycheck/flycheck Gitter channel and the @emacs_flycheck Twitter account.
-""".format(next_version))
+""".format(next_version))       # noqa: E501
 
     except CannotReleaseError as error:
         sys.exit(str(error))

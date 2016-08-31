@@ -140,7 +140,7 @@ linkcheck_ignore = [r'http://localhost:\d+/?']
 
 # Cross-reference remote Sphinx sites
 intersphinx_mapping = {
-   'python': ('https://docs.python.org/3.5', None)
+    'python': ('https://docs.python.org/3.5', None)
 }
 
 extlinks = {
@@ -268,7 +268,8 @@ class IssueReferences(Transform):
 
 def build_offline_html(app):
     from sphinx.builders.html import StandaloneHTMLBuilder
-    if app.config.flycheck_offline_html and isinstance(app.builder, StandaloneHTMLBuilder):
+    build_standalone = isinstance(app.builder, StandaloneHTMLBuilder)
+    if app.config.flycheck_offline_html and build_standalone:
         app.info('Building offline documentation without external resources!')
         app.builder.theme_options['github_banner'] = 'false'
         app.builder.theme_options['github_button'] = 'false'
@@ -281,7 +282,8 @@ def add_offline_to_context(app, _pagename, _templatename, context, _doctree):
 
 
 def setup(app):
-    app.add_object_type('syntax-checker', 'checker', 'pair: %s; Syntax checker')
+    app.add_object_type('syntax-checker', 'checker',
+                        'pair: %s; Syntax checker')
     app.add_directive('supported-language', SupportedLanguage)
     app.add_directive('syntax-checker-config-file',
                       SyntaxCheckerConfigurationFile)

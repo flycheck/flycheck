@@ -70,7 +70,9 @@ def expand_node_name(node):
     Return a pair ``(filename, anchor)``, where ``filename`` is the base-name
     of the corresponding file, sans extension, and ``anchor`` the HTML anchor.
 
-    See http://www.gnu.org/software/texinfo/manual/texinfo/html_node/HTML-Xref-Node-Name-Expansion.html.
+    See
+    http://www.gnu.org/software/texinfo/manual/texinfo/html_node/HTML-Xref-Node-Name-Expansion.html.
+
     """
     if node == 'Top':
         return ('index', 'Top')
@@ -108,7 +110,8 @@ class HTMLXRefDB(object):
                     url = Template(match.group('substurl')).substitute(
                         substitutions)
                     substitutions[match.group('substname')] = url
-                elif match.group('manname') and match.group('mantype') == 'node':
+                elif (match.group('manname') and
+                      match.group('mantype') == 'node'):
                     url = Template(match.group('manurl')).substitute(
                         substitutions)
                     manuals[match.group('manname')] = url
@@ -184,4 +187,4 @@ def setup(app):
     app.add_role('infonode', InfoNodeXRefRole())
     app.connect(str('builder-inited'), update_htmlxref)
     app.connect(str('missing-reference'), resolve_info_references)
-    return {'version': '0.1', "parallel_read_safe": True}
+    return {'version': '0.1', 'parallel_read_safe': True}

@@ -55,6 +55,7 @@ class Cell(namedtuple('Cell', 'objtype docname')):
     Cell objects are used within symbol entries in the domain data.
 
     """
+
     pass
 
 
@@ -77,7 +78,7 @@ class KeySequence(namedtuple('KeySequence', 'keys')):
 
         """
         try:
-            return self.keys[self.keys.index('M-x')+1]
+            return self.keys[self.keys.index('M-x') + 1]
         except ValueError:
             return None
 
@@ -136,7 +137,7 @@ class EmacsLispSymbol(ObjectDescription):
 
     def _add_index(self, name, target):
         index_text = '{name}; {label}'.format(
-             name=name, label=self.label)
+            name=name, label=self.label)
         self.indexnode['entries'].append(
             ('pair', index_text, target, '', None))
 
@@ -429,4 +430,4 @@ class EmacsLispDomain(Domain):
 
 def setup(app):
     app.add_domain(EmacsLispDomain)
-    return {'version': '0.1', "parallel_read_safe": True}
+    return {'version': '0.1', 'parallel_read_safe': True}
