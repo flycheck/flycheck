@@ -3586,13 +3586,13 @@ Why not:
   (let ((python-indent-guess-indent-offset nil))       ; Silence Python Mode!
     (flycheck-ert-should-syntax-check
      "language/python/syntax-error.py" 'python-mode
-     '(3 13 error "SyntaxError: invalid syntax" :id "E901"
+     '(3 13 error "SyntaxError: invalid syntax" :id "E999"
          :checker python-flake8))))
 
 (flycheck-ert-def-checker-test python-flake8 python nil
   (flycheck-ert-should-syntax-check
    "language/python/test.py" 'python-mode
-   '(5 1 warning "'antigravit' imported but unused" :id "F401"
+   '(5 1 warning "'.antigravit' imported but unused" :id "F401"
        :checker python-flake8)
    '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
        :checker python-flake8)
