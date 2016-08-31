@@ -745,7 +745,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. note::
 
-         This syntax checker requires flake8 2.0 or newer.
+         This syntax checker requires flake8 3.0 or newer.
 
       .. option:: flycheck-flake8-error-level-alist
 
