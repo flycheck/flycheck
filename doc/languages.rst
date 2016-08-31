@@ -256,6 +256,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
          Flycheck extension which provides a syntax checker to run D unittests
          on the fly and report the results with Flycheck.
 
+.. supported-language:: Elixir
+
+   .. syntax-checker:: elixir-dogma
+
+      Check syntax and code style with `Dogma <https://github.com/lpil/dogma>`_.
+
 .. supported-language:: Emacs Lisp
 
    Flycheck checks Emacs Lisp with `emacs-lisp` and then with

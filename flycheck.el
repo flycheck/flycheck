@@ -177,6 +177,7 @@ attention to case differences."
     coq
     css-csslint
     d-dmd
+    elixir-dogma
     emacs-lisp
     emacs-lisp-checkdoc
     erlang
@@ -6375,6 +6376,63 @@ Requires DMD 2.066 or newer.  See URL `http://dlang.org/'."
    (info line-start (file-name) "(" line "," column "): "
          (one-or-more " ") (message) line-end))
   :modes d-mode)
+
+(defun flycheck-elixir--find-default-directory (_checker)
+  "Come up with a suitable default directory to run CHECKER in.
+
+This will either be the directory that contains `mix.exs' or,
+if no such file is found in the directory hierarchy, the directory
+of the current file."
+  (or
+   (locate-dominating-file (buffer-file-name) "mix.exs")
+   default-directory))
+
+(defun flycheck-elixir--parse-dogma-json (output checker buffer)
+  "Parse Dogma errors from JSON OUTPUT.
+
+CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
+the BUFFER that was checked respectively.
+
+See URL `https://github.com/lpil/dogma' for more information
+about dogma."
+  (let* ((json-object-type 'alist)
+         (json-array-type  'list)
+         (dogma-json-output
+          (car (cdr (assq 'files (json-read-from-string output)))))
+         (dogma-errors-list (cdr (assq 'errors dogma-json-output)))
+         (dogma-filename (cdr (assq 'path dogma-json-output)))
+         errors)
+    (dolist (emessage dogma-errors-list)
+      (let-alist emessage
+        (push (flycheck-error-new-at
+               .line
+               1
+               'error .message
+               :id .rule
+               :checker checker
+               :buffer buffer
+               :filename dogma-filename)
+              errors)))
+    (nreverse errors)))
+
+(defun flycheck-elixir--check-for-dogma ()
+  "Check if the `dogma' subcommand is available.
+
+Check by parsing the output of `mix help'.
+Used as a predicate for enabling the checker."
+  (let ((mix (flycheck-checker-executable 'elixir-dogma)))
+    (seq-find (lambda (l) (string-match-p "dogma" l))
+              (ignore-errors (process-lines mix)))))
+
+(flycheck-define-checker elixir-dogma
+  "An Elixir syntax checker using the Dogma analysis tool.
+
+See URL `https://github.com/lpil/dogma/'."
+  :command ("mix" "dogma" "--format=json" source)
+  :error-parser flycheck-elixir--parse-dogma-json
+  :working-directory flycheck-elixir--find-default-directory
+  :predicate flycheck-elixir--check-for-dogma
+  :modes elixir-mode)
 
 (defconst flycheck-this-emacs-executable
   (concat invocation-directory invocation-name)
