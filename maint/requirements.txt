@@ -2,3 +2,10 @@
 requests>=2.9
 # Git operations
 GitPython>=2.0
+
+# Linting for our Python code
+flake8>=3.0
+pep8>=1.7
+pep8-naming>=0.4
+flake8-quotes>=0.8
+flake8_docstrings>=1.0

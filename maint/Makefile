@@ -14,6 +14,7 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 PYTHON = python3
+FLAKE8 = flake8
 PIP = pip3
 HAVE_PIP := $(shell sh -c "command -v $(PIP)")
 
@@ -35,6 +36,8 @@ endif
 .PHONY: help
 help:
 	@echo 'Available targets:'
+	@echo '  init:    Install dependencies of maintenace scripts'
+	@echo '  check:   Check maintenance scripts'
 	@echo '  release: Make a Flycheck release'
 	@echo ''
 	@echo 'You need Python 3.5 for all maintenance scripts'
@@ -47,3 +50,10 @@ help:
 .PHONY: release
 release:
 	@./release.py
+
+.PHONY: lint
+lint:
+	$(FLAKE8) ..
+
+.PHONY: check
+check: lint
