@@ -385,31 +385,29 @@ class EmacsLispDomain(Domain):
         return [('el:{}'.format(objtype), node) for (objtype, node) in nodes
                 if node is not None]
 
-    @staticmethod
-    def merge_warn_duplicate(objname, our_docname, their_docname):
-        MERGE_DUP_MSG = "Duplicate declaration: '{}' also defined in '{}'.\n"
-        msg = MERGE_DUP_MSG.format(objname, our_docname)
-        self.env.warn(their_docname, msg)
+    def merge_warn_duplicate(self, objname, our_docname, their_docname):
+        self.env.warn(
+            their_docname,
+            "Duplicate declaration: '{}' also defined in '{}'.\n".format(
+                objname, their_docname))
 
-    @staticmethod
-    def merge_keymapdata(docnames, our_keymap, their_keymap):
+    def merge_keymapdata(self, docnames, our_keymap, their_keymap):
         for key, docname in their_keymap.items():
             if docname in docnames:
                 if key in our_keymap:
                     our_docname = our_keymap[key]
-                    self.merge_warn_duplicate(our_docname, objname, docname)
+                    self.merge_warn_duplicate(key, our_docname, docname)
                 else:
                     our_keymap[key] = docname
 
-    @staticmethod
-    def merge_obarraydata(docnames, our_obarray, their_obarray):
+    def merge_obarraydata(self, docnames, our_obarray, their_obarray):
         for objname, their_cells in their_obarray.items():
             our_cells = our_obarray.setdefault(objname, dict())
             for cellname, their_cell in their_cells.items():
                 if their_cell.docname in docnames:
                     our_cell = our_cells.get(cellname)
                     if our_cell:
-                        self.merge_warn_duplicate(docname, objname,
+                        self.merge_warn_duplicate(objname, our_cell.docname,
                                                   their_cell.docname)
                     else:
                         our_cells[cellname] = their_cell
