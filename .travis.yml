@@ -14,9 +14,6 @@ cache:
   - directories:
       - .cask/
 env:
-  global:
-    # Speeds up installation of nokogiri
-    - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
   matrix:
     - EMACS_VERSION=24.4
     - EMACS_VERSION=24.5
