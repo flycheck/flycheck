@@ -79,6 +79,13 @@ Javascript
 
 Mention with ``@flycheck/javascript``.
 
+Lua
+~~~
+
+* Gordon Gao (:gh:`ghprince`)
+
+Mention with ``@flycheck/lua``.
+
 Puppet
 ~~~~~~
 
