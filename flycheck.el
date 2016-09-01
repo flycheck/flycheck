@@ -6385,7 +6385,9 @@ This will either be the directory that contains `mix.exs' or,
 if no such file is found in the directory hierarchy, the directory
 of the current file."
   (or
-   (locate-dominating-file (buffer-file-name) "mix.exs")
+   (and
+    buffer-file-name
+    (locate-dominating-file buffer-file-name "mix.exs"))
    default-directory))
 
 (defun flycheck-elixir--parse-dogma-json (output checker buffer)
