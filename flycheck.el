@@ -3869,9 +3869,10 @@ Return a list with the contents of the table cell."
                                          (padding (plist-get props :pad-right)))
                               (cons name (+ width (or padding 1)))))
                           tabulated-list-format))
-         (before-msg (seq-take-while (lambda (fmt)
-                                       (not (string= (car fmt) "Message")))
-                                     widths)))
+         (before-msg (seq-take-while
+                      (lambda (fmt)
+                        (not (string-match-p "^Message" (car fmt))))
+                      widths)))
     (apply #'+ tabulated-list-padding (seq-map #'cdr before-msg))))
 
 (defun flycheck-flush-multiline-message (msg)
