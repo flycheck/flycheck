@@ -7590,16 +7590,11 @@ See URL `http://lesscss.org'."
           line-end))
   :modes less-css-mode)
 
-(flycheck-def-config-file-var flycheck-luacheckrc lua-luacheck ".luacheckrc"
-  :safe #'stringp
-  :package-version '(flycheck . "0.23"))
-
 (flycheck-define-checker lua-luacheck
   "A Lua syntax checker using luacheck.
 
 See URL `https://github.com/mpeterv/luacheck'."
   :command ("luacheck"
-            (config-file "--config" flycheck-luacheckrc)
             "--formatter" "plain"
             "--codes"                   ; Show warning codes
             "--no-color"

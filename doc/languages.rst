@@ -624,8 +624,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _Luacheck: https://github.com/mpeterv/luacheck
 
-      .. syntax-checker-config-file:: flycheck-luacheckrc
-
    .. syntax-checker:: lua
 
       Check syntax with the `Lua compiler <http://www.lua.org/>`_.

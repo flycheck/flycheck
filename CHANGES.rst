@@ -4,6 +4,9 @@
 - **Breaking changes**
 
   - Flycheck now requires flake8 3.0 or newer
+  - Remove ``--config`` option in ``lua-luacheck`` in favour of ``luacheck``'s
+    own ``.luacheckrc`` detection. Therefore ``flycheck-luacheckrc`` is
+    no longer used [GH-1057]
 
 - New syntax checkers:
 
