@@ -3875,12 +3875,15 @@ Return a list with the contents of the table cell."
 (defun flycheck-flush-multiline-message (msg)
   "Prepare error message MSG for display in the error list.
 
-Prepend all lines of MSG except the first with enough space to
-ensure that they line up properly once the message is displayed."
+Strip trailing blanks and prepend all lines of MSG except the
+first with enough space to ensure that they line up properly once
+the message is displayed."
   (let* ((msg-offset (flycheck-compute-message-column-offset))
-         (spc (propertize " " 'display `(space . (:width ,msg-offset))))
-         (rep (concat "\\1" spc "\\2")))
-    (replace-regexp-in-string "\\([\r\n]+\\)\\(.\\)" rep msg)))
+         (spc (propertize " " 'display `(space . (:width ,msg-offset)))))
+    (replace-regexp-in-string
+     "[\r\n]+" (concat "\\&" spc)
+     (replace-regexp-in-string
+      "[\n\t ]+\\'" "" msg))))
 
 (defun flycheck-error-list-current-errors ()
   "Read the list of errors in `flycheck-error-list-source-buffer'."
