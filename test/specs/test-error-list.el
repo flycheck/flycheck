@@ -48,6 +48,11 @@
     (flycheck/with-error-list-buffer
       (expect (derived-mode-p 'tabulated-list-mode) :to-be-truthy)))
 
+  (describe "Functions"
+    (it "strip trailing blanks in error messages"
+      (expect (flycheck-flush-multiline-message "Test\n\t   \n")
+              :to-equal "Test")))
+
   (describe "Format"
     (it "sets the error list format locally"
       (flycheck/with-error-list-buffer
