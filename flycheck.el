@@ -3864,16 +3864,13 @@ Return a list with the contents of the table cell."
 
 (defun flycheck-compute-message-column-offset ()
   "Compute the amount of space to use in `flycheck-flush-multiline-message'."
-  (let* ((widths (seq-map (lambda (fmt)
-                            (pcase-let* ((`(,name ,width _ ,props) fmt)
-                                         (padding (plist-get props :pad-right)))
-                              (cons name (+ width (or padding 1)))))
-                          tabulated-list-format))
-         (before-msg (seq-take-while
-                      (lambda (fmt)
-                        (not (string-match-p "^Message" (car fmt))))
-                      widths)))
-    (apply #'+ tabulated-list-padding (seq-map #'cdr before-msg))))
+  (seq-reduce
+   (lambda (offset fmt)
+     (pcase-let* ((`(,_ ,width ,_ . ,props) fmt)
+                  (padding (or (plist-get props :pad-right) 1)))
+       (+ offset width padding)))
+   (seq-subseq tabulated-list-format 0 -1)
+   tabulated-list-padding))
 
 (defun flycheck-flush-multiline-message (msg)
   "Prepare error message MSG for display in the error list.
