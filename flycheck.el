@@ -7599,14 +7599,19 @@ See URL `https://github.com/mpeterv/luacheck'."
             "--formatter" "plain"
             "--codes"                   ; Show warning codes
             "--no-color"
+            "--filename" source-original
             ;; Read from standard input
             "-")
   :standard-input t
   :error-patterns
-  ((warning line-start "stdin:" line ":" column
+  ((warning line-start
+            (optional (file-name))
+            ":" line ":" column
             ": (" (id "W" (one-or-more digit)) ") "
             (message) line-end)
-   (error line-start "stdin:" line ":" column ":"
+   (error line-start
+          (optional (file-name))
+          ":" line ":" column ":"
           ;; `luacheck' before 0.11.0 did not output codes for errors, hence
           ;; the ID is optional here
           (optional " (" (id "E" (one-or-more digit)) ") ")
