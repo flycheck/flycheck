@@ -155,6 +155,7 @@ to Flycheck:
 * :gh:`fmdkdd`
 * Fred Morcos (:gh:`fredmorcos`)
 * Gereon Frey (:gh:`gfrey`)
+* Gordon Gao (:gh:`ghprince`)
 * Gulshan Singh (:gh:`gsingh93`)
 * Iain Beeston (:gh:`iainbeeston`)
 * Ibrahim Awwal (:gh:`ibrahima`)
