@@ -3869,7 +3869,7 @@ Return a list with the contents of the table cell."
      (pcase-let* ((`(,_ ,width ,_ . ,props) fmt)
                   (padding (or (plist-get props :pad-right) 1)))
        (+ offset width padding)))
-   (seq-subseq tabulated-list-format 0 -1)
+   (seq-subseq flycheck-error-list-format 0 -1)
    tabulated-list-padding))
 
 (defun flycheck-flush-multiline-message (msg)
