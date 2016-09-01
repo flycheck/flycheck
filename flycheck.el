@@ -3754,6 +3754,19 @@ the beginning of the buffer."
    ("Message (Checker)" 0 t)]
   "Table format for the error list.")
 
+(defconst flycheck-error-list-padding 1
+  "Padding used in error list.")
+
+(defconst flycheck--error-list-msg-offset
+  (seq-reduce
+   (lambda (offset fmt)
+     (pcase-let* ((`(,_ ,width ,_ . ,props) fmt)
+                  (padding (or (plist-get props :pad-right) 1)))
+       (+ offset width padding)))
+   (seq-subseq flycheck-error-list-format 0 -1)
+   flycheck-error-list-padding)
+  "Amount of space to use in `flycheck-flush-multiline-message'.")
+
 (define-derived-mode flycheck-error-list-mode tabulated-list-mode "Flycheck errors"
   "Major mode for listing Flycheck errors.
 
@@ -3761,7 +3774,7 @@ the beginning of the buffer."
   (setq tabulated-list-format flycheck-error-list-format
         ;; Sort by location initially
         tabulated-list-sort-key (cons "Line" nil)
-        tabulated-list-padding 1
+        tabulated-list-padding flycheck-error-list-padding
         tabulated-list-entries #'flycheck-error-list-entries
         ;; `revert-buffer' updates the mode line for us, so all we need to do is
         ;; set the corresponding mode line construct.
@@ -3862,23 +3875,13 @@ Return a list with the contents of the table cell."
                   (flycheck-error-list-make-cell
                    (flycheck-error-list-make-last-column message checker))))))
 
-(defun flycheck-compute-message-column-offset ()
-  "Compute the amount of space to use in `flycheck-flush-multiline-message'."
-  (seq-reduce
-   (lambda (offset fmt)
-     (pcase-let* ((`(,_ ,width ,_ . ,props) fmt)
-                  (padding (or (plist-get props :pad-right) 1)))
-       (+ offset width padding)))
-   (seq-subseq flycheck-error-list-format 0 -1)
-   tabulated-list-padding))
-
 (defun flycheck-flush-multiline-message (msg)
   "Prepare error message MSG for display in the error list.
 
 Prepend all lines of MSG except the first with enough space to
 ensure that they line up properly once the message is displayed."
-  (let* ((msg-offset (flycheck-compute-message-column-offset))
-         (spc (propertize " " 'display `(space . (:width ,msg-offset))))
+  (let* ((spc-spec `(space . (:width ,flycheck--error-list-msg-offset)))
+         (spc (propertize " " 'display spc-spec))
          (rep (concat "\\1" spc "\\2")))
     (replace-regexp-in-string "\\([\r\n]+\\)\\(.\\)" rep msg)))
 
