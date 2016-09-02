@@ -143,6 +143,7 @@ Contributors
 The following people—listed in alphabetical order—contributed substantial code
 to Flycheck:
 
+* Aaron Jensen (:gh:`aaronjensen`)
 * Alain Kalker (:gh:`ackalker`)
 * Alex Reed (:gh:`acr4`)
 * Atila Neves (:gh:`atilaneves`)

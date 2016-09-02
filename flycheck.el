@@ -6417,13 +6417,13 @@ about dogma."
     (nreverse errors)))
 
 (defun flycheck-elixir--check-for-dogma ()
-  "Check if the `dogma' subcommand is available.
+  "Check if `dogma' is installed.
 
-Check by parsing the output of `mix help'.
+Check by looking for deps/dogma in this directory or a parent to
+handle umbrella apps.
 Used as a predicate for enabling the checker."
-  (let ((mix (flycheck-checker-executable 'elixir-dogma)))
-    (seq-find (lambda (l) (string-match-p "dogma" l))
-              (ignore-errors (process-lines mix)))))
+  (and buffer-file-name
+       (locate-dominating-file buffer-file-name "deps/dogma")))
 
 (flycheck-define-checker elixir-dogma
   "An Elixir syntax checker using the Dogma analysis tool.
