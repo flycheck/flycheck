@@ -231,11 +231,12 @@ attention to case differences."
     ruby-jruby
     rust-cargo
     rust
-    sass
     scala
     scala-scalastyle
     scheme-chicken
     scss-lint
+    sass/scss-sass-lint
+    sass
     scss
     sh-bash
     sh-posix-dash
@@ -8541,6 +8542,24 @@ See URL `http://sass-lang.com'."
             " of " (one-or-more not-newline)
             line-end))
   :modes sass-mode)
+
+(flycheck-def-config-file-var flycheck-sass-lintrc sass/scss-sass-lint ".sass-lint.yml"
+  :safe #'stringp
+  :package-version '(flycheck . "30"))
+
+(flycheck-define-checker sass/scss-sass-lint
+  "A SASS/SCSS syntax checker using sass-Lint.
+
+See URL `https://github.com/sasstools/sass-lint'."
+  :command ("sass-lint"
+            "--verbose"
+            "--no-exit"
+            "--format" "Checkstyle"
+            (config-file "--config" flycheck-sass-lintrc)
+            source)
+  :standard-input nil
+  :error-parser flycheck-parse-checkstyle
+  :modes (sass-mode scss-mode))
 
 (flycheck-define-checker scala
   "A Scala syntax checker using the Scala compiler.
