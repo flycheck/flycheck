@@ -1440,9 +1440,8 @@ have any `:modes', but a `:predicate' that returns non-nil for
 the current buffer."
   (let (checkers)
     (dolist (checker flycheck-checkers)
-      (let ((modes (flycheck-checker-get checker 'modes)))
-        (when (memq major-mode modes)
-          (push checker checkers))))
+      (when (flycheck-checker-supports-major-mode-p checker major-mode)
+        (push checker checkers)))
     (nreverse checkers)))
 
 
@@ -1743,16 +1742,25 @@ A valid checker is a symbol defined as syntax checker with
        (= (or (get checker 'flycheck-generic-checker-version) 0)
           flycheck-generic-checker-version)))
 
+(defun flycheck-checker-supports-major-mode-p (checker mode)
+  "Whether CHECKER supports the given major MODE.
+
+CHECKER is a syntax checker symbol and MODE a major mode symbol.
+Look at the `modes' property of CHECKER to determine whether
+CHECKER supports buffers in the given major MODE.
+
+Return non-nil if CHECKER supports MODE and nil otherwise."
+  (memq mode (flycheck-checker-get checker 'modes)))
+
 (defun flycheck-may-use-checker (checker)
   "Whether a generic CHECKER may be used.
 
 Return non-nil if CHECKER may be used for the current buffer, and
 nil otherwise."
-  (let ((modes (flycheck-checker-get checker 'modes))
-        (predicate (flycheck-checker-get checker 'predicate)))
+  (let ((predicate (flycheck-checker-get checker 'predicate)))
     (and (flycheck-valid-checker-p checker)
          (not (flycheck-disabled-checker-p checker))
-         (memq major-mode modes)
+         (flycheck-checker-supports-major-mode-p checker major-mode)
          (funcall predicate))))
 
 (defun flycheck-may-use-next-checker (next-checker)
@@ -1938,12 +1946,10 @@ into the verification results."
                    (flycheck-verify-generic-checker checker))))
     (when with-mm
       (with-current-buffer buffer
-        (let* ((modes (flycheck-checker-get checker 'modes))
-               (mm-supported (memq major-mode modes))
-               (message-and-face
-                (if mm-supported
-                    (cons (format "`%s' supported" major-mode) 'success)
-                  (cons (format "`%s' not supported" major-mode) 'error))))
+        (let ((message-and-face
+               (if (flycheck-checker-supports-major-mode-p checker major-mode)
+                   (cons (format "`%s' supported" major-mode) 'success)
+                 (cons (format "`%s' not supported" major-mode) 'error))))
           (push (flycheck-verification-result-new
                  :label "major mode"
                  :message (car message-and-face)
