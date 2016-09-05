@@ -173,7 +173,7 @@ Flycheck’s current state via one of the following texts:
 
 You can entirely customise the mode line indicator with `flycheck-mode-line`:
 
-.. option:: flycheck-mode-line
+.. defcustom:: flycheck-mode-line
 
    A “mode line construct” for Flycheck’s mode line indicator.
 

@@ -209,7 +209,7 @@ class SyntaxCheckerConfigurationFile(Directive):
         template = ViewList("""\
 .. index:: single: Configuration file; {0}
 
-.. el:option:: {0}
+.. el:defcustom:: {0}
 
    Configuration file for this syntax checker.  See
    :ref:`flycheck-config-files`.

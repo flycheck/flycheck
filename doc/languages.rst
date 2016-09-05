@@ -30,20 +30,20 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _GNAT: http://libre.adacore.com/tools/gnat-gpl-edition
 
-      .. option:: flycheck-gnat-args
+      .. defcustom:: flycheck-gnat-args
 
          A list of additional options.
 
-      .. option:: flycheck-gnat-include-path
+      .. defcustom:: flycheck-gnat-include-path
 
          A list of include directories.  Relative paths are relative to the path
          of the buffer being checked.
 
-      .. option:: flycheck-gnat-language-standard
+      .. defcustom:: flycheck-gnat-language-standard
 
          The language standard to use as string.
 
-      .. option:: flycheck-gnat-warnings
+      .. defcustom:: flycheck-gnat-warnings
 
          A list of additional warnings to enable.  Each item is the name of a
          warning category to enable.
@@ -75,77 +75,77 @@ to view the docstring of the syntax checker.  Likewise, you may use
       .. _Clang: http://clang.llvm.org/
       .. _GCC: https://gcc.gnu.org/
 
-      .. option:: flycheck-clang-args
+      .. defcustom:: flycheck-clang-args
                   flycheck-gcc-args
 
          A list of additional arguments for `c/c++-clang` and `c/c++-gcc`
          respectively.
 
-      .. option:: flycheck-clang-blocks
+      .. defcustom:: flycheck-clang-blocks
 
          Whether to enable blocks in `c/c++-clang`.
 
-      .. option:: flycheck-clang-definitions
-                  flycheck-gcc-definitions
+      .. defcustom:: flycheck-clang-definitions
+                     flycheck-gcc-definitions
 
          A list of additional preprocessor definitions for `c/c++-clang` and
          `c/c++-gcc` respectively.
 
-      .. option:: flycheck-clang-include-path
-                  flycheck-gcc-include-path
+      .. defcustom:: flycheck-clang-include-path
+                     flycheck-gcc-include-path
 
          A list of include directories for `c/c++-clang` and `c/c++-gcc`
          respectively, relative to the file being checked.
 
-      .. option:: flycheck-clang-includes
-                  flycheck-gcc-includes
+      .. defcustom:: flycheck-clang-includes
+                     flycheck-gcc-includes
 
          A list of additional include files for `c/c++-clang` and `c/c++-gcc`
          respectively, relative to the file being checked.
 
-      .. option:: flycheck-clang-language-standard
-                  flycheck-gcc-language-standard
+      .. defcustom:: flycheck-clang-language-standard
+                     flycheck-gcc-language-standard
 
          The language standard to use in `c/c++-clang` and `c/c++-gcc`
          respectively as string, via the ``-std`` option.
 
-      .. option:: flycheck-clang-ms-extensions
+      .. defcustom:: flycheck-clang-ms-extensions
 
          Whether to enable Microsoft extensions to C/C++ in `c/c++-clang`.
 
-      .. option:: flycheck-clang-no-exceptions
-                  flycheck-gcc-no-exceptions
+      .. defcustom:: flycheck-clang-no-exceptions
+                     flycheck-gcc-no-exceptions
 
          Whether to disable exceptions in `c/c++-clang` and
          `c/c++-gcc` respectively.
 
-      .. option:: flycheck-clang-no-rtti
-                  flycheck-gcc-no-rtti
+      .. defcustom:: flycheck-clang-no-rtti
+                     flycheck-gcc-no-rtti
 
          Whether to disable RTTI in `c/c++-clang` and `c/c++-gcc` respectively,
          via ``-fno-rtti``.
 
-      .. option:: flycheck-clang-standard-library
+      .. defcustom:: flycheck-clang-standard-library
 
          The name of the standard library to use for `c/c++-clang`, as string.
 
-      .. option:: flycheck-gcc-openmp
+      .. defcustom:: flycheck-gcc-openmp
 
          Whether to enable OpenMP in `c/c++-gcc`.
 
-      .. option:: flycheck-clang-pedantic
+      .. defcustom:: flycheck-clang-pedantic
                   flycheck-gcc-pedantic
 
          Whether to warn about language extensions in `c/c++-clang` and
          `c/c++-gcc` respectively.
 
-      .. option:: flycheck-clang-pedantic-errors
+      .. defcustom:: flycheck-clang-pedantic-errors
                   flycheck-gcc-pedantic-errors
 
          Whether to error on language extensions in `c/c++-clang` and
          `c/c++-gcc` respectively.
 
-      .. option:: flycheck-clang-warnings
+      .. defcustom:: flycheck-clang-warnings
                   flycheck-gcc-warnings
 
          A list of additional warnings to enable in `c/c++-clang` and
@@ -158,12 +158,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _cppcheck: http://cppcheck.sourceforge.net/
 
-      .. option:: flycheck-cppcheck-checks
+      .. defcustom:: flycheck-cppcheck-checks
 
          A list of enabled checks.  Each item is the name of a check for the
          ``--enable`` option.
 
-      .. option:: flycheck-cppcheck-inconclusive
+      .. defcustom:: flycheck-cppcheck-inconclusive
 
          Whether to enable inconclusive checks.  These checks may yield more
          false positives than normal checks.
@@ -172,17 +172,17 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
             This option requires cppcheck 1.54 or newer.
 
-      .. option:: flycheck-cppcheck-include-path
+      .. defcustom:: flycheck-cppcheck-include-path
 
          A list of include directories.  Relative paths are relative to the file
          being checked.
 
-      .. option:: flycheck-cppcheck-standards
+      .. defcustom:: flycheck-cppcheck-standards
 
          The C, C++ and/or POSIX standards to use via one or more ``--std=``
          arguments.
 
-      .. option:: flycheck-cppcheck-suppressions
+      .. defcustom:: flycheck-cppcheck-suppressions
 
          The cppcheck suppressions list to use via one or more ``--suppress=``
          arguments.
@@ -199,7 +199,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check style in Chef recipes with `foodcritic <http://www.foodcritic.io>`_.
 
-      .. option:: flycheck-foodcritic-tags
+      .. defcustom:: flycheck-foodcritic-tags
 
          A list of tags to select.
 
@@ -242,11 +242,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          This syntax checker requires DMD 2.066 or newer.
 
-      .. option:: flycheck-dmd-include-path
+      .. defcustom:: flycheck-dmd-include-path
 
          A list of include directories.
 
-      .. option:: flycheck-dmd-args
+      .. defcustom:: flycheck-dmd-args
 
          A list of additional arguments.
 
@@ -271,19 +271,19 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with the built-in byte compiler.
 
-      .. option:: flycheck-emacs-lisp-load-path
+      .. defcustom:: flycheck-emacs-lisp-load-path
 
          The load path as list of strings.  Relative directories are expanded
          against the `default-directory` of the buffer being checked.
 
-      .. option:: flycheck-emacs-lisp-initialize-packages
+      .. defcustom:: flycheck-emacs-lisp-initialize-packages
 
          Whether to initialize Emacs' package manager with `package-initialize`
          before checking the buffer.  If set to :elisp:`auto` (the default),
          only initialize the package managers when checking files under
          `user-emacs-directory`.
 
-      .. option:: flycheck-emacs-lisp-package-user-dir
+      .. defcustom:: flycheck-emacs-lisp-package-user-dir
 
          The package directory as string.  Has no effect if
          `flycheck-emacs-lisp-initialize-packages` is nil.
@@ -311,11 +311,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
       Check Erlang with the standard `Erlang <http://www.erlang.org/>`_
       compiler.
 
-      .. option:: flycheck-erlang-include-path
+      .. defcustom:: flycheck-erlang-include-path
 
          A list of include directories.
 
-      .. option:: flycheck-erlang-library-path
+      .. defcustom:: flycheck-erlang-library-path
 
          A list of library directories.
 
@@ -333,26 +333,26 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _GFortran: https://gcc.gnu.org/onlinedocs/gfortran/
 
-      .. option:: flycheck-gfortran-args
+      .. defcustom:: flycheck-gfortran-args
 
          A list of additional arguments.
 
-      .. option:: flycheck-gfortran-include-path
+      .. defcustom:: flycheck-gfortran-include-path
 
          A list of include directories.  Relative paths are relative to the file
          being checked.
 
-      .. option:: flycheck-gfortran-language-standard
+      .. defcustom:: flycheck-gfortran-language-standard
 
          The language standard to use via the ``-std`` option.
 
-      .. option:: flycheck-gfortran-layout
+      .. defcustom:: flycheck-gfortran-layout
 
          The source code layout to use.  Set to :elisp:`free` or :elisp:`fixed`
          for free or fixed layout respectively, or nil (the default) to let
          GFortran automatically determine the layout.
 
-      .. option:: flycheck-gfortran-warnings
+      .. defcustom:: flycheck-gfortran-warnings
 
          A list of warnings enabled via the ``-W`` option.
 
@@ -379,11 +379,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check Go for suspicious code with vet_.
 
-      .. option:: flycheck-go-vet-print-functions
+      .. defcustom:: flycheck-go-vet-print-functions
 
          A list of print-like functions to check calls for format string problems.
 
-      .. option:: flycheck-go-vet-shadow
+      .. defcustom:: flycheck-go-vet-shadow
 
          Whether to check for shadowed variables, in Go 1.6 or newer.
 
@@ -399,12 +399,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _Go compiler: https://golang.org/cmd/go
 
-      .. option:: flycheck-go-build-install-deps
+      .. defcustom:: flycheck-go-build-install-deps
 
          Whether to install dependencies while checking with `go-build` or
          `go-test`
 
-      .. option:: flycheck-go-build-tags
+      .. defcustom:: flycheck-go-build-tags
 
          A list of build tags.
 
@@ -416,7 +416,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          This syntax checker requires Go 1.6 or newer.
 
-      .. option:: flycheck-go-build-install-deps
+      .. defcustom:: flycheck-go-build-install-deps
          :noindex:
 
          See `flycheck-go-build-install-deps`.
@@ -480,29 +480,29 @@ to view the docstring of the syntax checker.  Likewise, you may use
       .. _GHC: https://www.haskell.org/ghc/
       .. _Stack: https://github.com/commercialhaskell/stack
 
-      .. option:: flycheck-ghc-args
+      .. defcustom:: flycheck-ghc-args
 
          A list of additional arguments.
 
-      .. option:: flycheck-ghc-no-user-package-database
+      .. defcustom:: flycheck-ghc-no-user-package-database
 
          Whether to disable the user package database (only for `haskell-ghc`).
 
-      .. option:: flycheck-ghc-stack-use-nix
+      .. defcustom:: flycheck-ghc-stack-use-nix
 
          Whether to enable Nix support for Stack (only for `haskell-stack-ghc`).
 
-      .. option:: flycheck-ghc-package-databases
+      .. defcustom:: flycheck-ghc-package-databases
 
          A list of additional package databases for GHC (only for
          `haskell-ghc`).  Each item points to a directory containing a package
          directory, via ``-package-db``.
 
-      .. option:: flycheck-ghc-search-path
+      .. defcustom:: flycheck-ghc-search-path
 
          A list of module directories, via ``-i``.
 
-      .. option:: flycheck-ghc-language-extensions
+      .. defcustom:: flycheck-ghc-language-extensions
 
          A list of language extensions, via ``-X``.
 
@@ -510,19 +510,19 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Lint with `hlint <https://github.com/ndmitchell/hlint>`_.
 
-      .. option:: flycheck-hlint-args
+      .. defcustom:: flycheck-hlint-args
 
          A list of additional arguments.
 
-      .. option:: flycheck-hlint-language-extensions
+      .. defcustom:: flycheck-hlint-language-extensions
 
          A list of language extensions to enable.
 
-      .. option:: flycheck-hlint-ignore-rules
+      .. defcustom:: flycheck-hlint-ignore-rules
 
          A list of rules to ignore.
 
-      .. option:: flycheck-hlint-hint-packages
+      .. defcustom:: flycheck-hlint-hint-packages
 
          A list of additional hint packages to include.
 
@@ -555,7 +555,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax and lint with `ESLint <http://eslint.org/>`_.
 
-      .. option:: flycheck-eslint-rules-directories
+      .. defcustom:: flycheck-eslint-rules-directories
 
          A list of directories with custom rules.
 
@@ -565,7 +565,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax and lint with `JSHint <http://jshint.com/>`_.
 
-      .. option:: flycheck-jshint-extract-javascript
+      .. defcustom:: flycheck-jshint-extract-javascript
 
          Whether to extract Javascript from HTML before linting.
 
@@ -634,11 +634,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check Markdown with `markdownlint <https://github.com/mivok/markdownlint/>`_.
 
-      .. option:: flycheck-markdown-mdl-rules
+      .. defcustom:: flycheck-markdown-mdl-rules
 
          A list of enabled rules.
 
-      .. option:: flycheck-markdown-mdl-tags
+      .. defcustom:: flycheck-markdown-mdl-tags
 
          A list of enabled rule tags.
 
@@ -652,7 +652,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with the `Perl <https://www.perl.org/>`_ interpreter.
 
-      .. option:: flycheck-perl-include-path
+      .. defcustom:: flycheck-perl-include-path
 
          A list of include directories, relative to the file being checked.
 
@@ -662,7 +662,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _Perl::Critic: https://metacpan.org/pod/Perl::Critic
 
-      .. option:: flycheck-perlcritic-severity
+      .. defcustom:: flycheck-perlcritic-severity
 
          The severity level as integer for the ``--severity``.
 
@@ -682,7 +682,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Lint with `PHP Mess Detector <https://phpmd.org/>`_.
 
-      .. option:: flycheck-phpmd-rulesets
+      .. defcustom:: flycheck-phpmd-rulesets
 
          A list of rule sets.  Each item is either the name of a default rule
          set, or the path to a custom rule set file.
@@ -697,7 +697,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _PHP Code Sniffer: http://pear.php.net/package/PHP_CodeSniffer
 
-      .. option:: flycheck-phpcs-standard
+      .. defcustom:: flycheck-phpcs-standard
 
          The coding standard, either as name of a built-in standard, or as path
          to a standard specification.
@@ -720,7 +720,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Link with `Puppet Lint <http://puppet-lint.com/>`_.
 
-      .. option:: flycheck-puppet-lint-disabled-checks
+      .. defcustom:: flycheck-puppet-lint-disabled-checks
 
          A list of checks to disable.
 
@@ -745,15 +745,15 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          This syntax checker requires flake8 3.0 or newer.
 
-      .. option:: flycheck-flake8-error-level-alist
+      .. defcustom:: flycheck-flake8-error-level-alist
 
          An alist mapping Flake8 error IDs to Flycheck error levels.
 
-      .. option:: flycheck-flake8-maximum-complexity
+      .. defcustom:: flycheck-flake8-maximum-complexity
 
          The maximum McCabe complexity allowed for methods.
 
-      .. option:: flycheck-flake8-maximum-line-length
+      .. defcustom:: flycheck-flake8-maximum-line-length
 
          The maximum length of lines.
 
@@ -767,7 +767,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          This syntax checker requires Pylint 1.0 or newer.
 
-      .. option:: flycheck-pylint-use-symbolic-id
+      .. defcustom:: flycheck-pylint-use-symbolic-id
 
          Whether to report symbolic (e.g. ``no-name-in-module``) or numeric
          (e.g. ``E0611``) message identifiers.
@@ -784,12 +784,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax and lint with `lintr <https://github.com/jimhester/lintr>`_.
 
-      .. option:: flycheck-lintr-caching
+      .. defcustom:: flycheck-lintr-caching
 
          Whether to enable caching in lintr.  On by default; it is not
          recommended to disable caching unless it causes actual problems.
 
-      .. option:: flycheck-lintr-linters
+      .. defcustom:: flycheck-lintr-linters
 
          Linters to use as a string with an R expression which selects the
          linters to use.
@@ -827,7 +827,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          This syntax checker requires Sphinx 1.2 or newer.
 
-      .. option:: flycheck-sphinx-warn-on-missing-references
+      .. defcustom:: flycheck-sphinx-warn-on-missing-references
 
          Whether to emit warnings for all missing references.
 
@@ -848,7 +848,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          This syntax checker requires Rubocop 0.34 or newer.
 
-      .. option:: flycheck-rubocop-lint-only
+      .. defcustom:: flycheck-rubocop-lint-only
 
          Whether to suppress warnings about style issues, via the ``--lint``
          option.
@@ -901,34 +901,34 @@ to view the docstring of the syntax checker.  Likewise, you may use
             Flycheck extension to configure Rust syntax checkers according to
             the current Cargo_ project.
 
-      .. option:: flycheck-rust-args
+      .. defcustom:: flycheck-rust-args
 
          A list of additional arguments.
 
-      .. option:: flycheck-rust-check-tests
+      .. defcustom:: flycheck-rust-check-tests
 
          Whether to check test code in Rust.
 
-      .. option:: flycheck-rust-crate-root
+      .. defcustom:: flycheck-rust-crate-root
 
          A path to the crate root for the current buffer, or nil if the current
          buffer is a crate by itself.
 
          `rust-cargo` ignores this option as the crate root is given by Cargo.
 
-      .. option:: flycheck-rust-crate-type
+      .. defcustom:: flycheck-rust-crate-type
 
          The type of the crate to check, as string for the ``--crate-type``
          option.
 
-      .. option:: flycheck-rust-binary-name
+      .. defcustom:: flycheck-rust-binary-name
 
          The name of the binary to pass to ``cargo rustc --bin``, as a string.
 
          Only required when `flycheck-rust-crate-type` is ``bin`` and the crate
          has multiple targets.
 
-      .. option:: flycheck-rust-library-path
+      .. defcustom:: flycheck-rust-library-path
 
          A list of additional library directories. Relative paths are relative
          to the buffer being checked.
@@ -939,7 +939,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with the `Sass <http://sass-lang.com/>`_ compiler.
 
-      .. option:: flycheck-sass-compass
+      .. defcustom:: flycheck-sass-compass
 
          Whether to enable the Compass CSS framework via ``--compass``.
 
@@ -1005,7 +1005,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with the `SCSS compiler <http://sass-lang.com/>`_.
 
-      .. option:: flycheck-scss-compass
+      .. defcustom:: flycheck-scss-compass
 
          Whether to enable the Compass CSS framework with ``--compass``.
 
@@ -1043,7 +1043,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _ShellCheck: https://github.com/koalaman/shellcheck/
 
-      .. option:: flycheck-shellcheck-excluded-warnings
+      .. defcustom:: flycheck-shellcheck-excluded-warnings
 
          A list of excluded warnings.
 
@@ -1094,7 +1094,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-typescript-tslint-config
 
-      .. option:: flycheck-typescript-tslint-rulesdir
+      .. defcustom:: flycheck-typescript-tslint-rulesdir
 
          Additional rules directory, for user created rules.
 
@@ -1104,7 +1104,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with `Verilator <http://www.veripool.org/wiki/verilator>`_.
 
-      .. option:: flycheck-verilator-include-path
+      .. defcustom:: flycheck-verilator-include-path
 
          A list of include directories.  Relative paths are relative to the file
          being checked.
