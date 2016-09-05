@@ -47,9 +47,9 @@
   (rx bol "   .. syntax-checker:: " (group (1+ nonl)) "\n"
       (? "                       " (group (1+ nonl)) eol)))
 
-(defconst flycheck/option-re
-  (rx bol "      .. option:: " (group (1+ nonl)) "\n"
-      (? "                  " (group (1+ nonl)) eol)))
+(defconst flycheck/defcustom-re
+  (rx bol "      .. defcustom:: " (group (1+ nonl)) "\n"
+      (? "                     " (group (1+ nonl)) eol)))
 
 (describe "Documentation"
   (let* ((source-dir (locate-dominating-file default-directory "Cask"))
@@ -68,7 +68,7 @@
                   :to-equal nil)))
 
       (describe "Options"
-        (let ((documented-options (flycheck/collect-matches flycheck/option-re
+        (let ((documented-options (flycheck/collect-matches flycheck/defcustom-re
                                                             languages))
               (all-options (seq-mapcat (lambda (c)
                                          (flycheck-checker-get c 'option-vars))

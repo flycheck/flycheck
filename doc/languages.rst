@@ -76,7 +76,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
       .. _GCC: https://gcc.gnu.org/
 
       .. defcustom:: flycheck-clang-args
-                  flycheck-gcc-args
+                     flycheck-gcc-args
 
          A list of additional arguments for `c/c++-clang` and `c/c++-gcc`
          respectively.
@@ -134,19 +134,19 @@ to view the docstring of the syntax checker.  Likewise, you may use
          Whether to enable OpenMP in `c/c++-gcc`.
 
       .. defcustom:: flycheck-clang-pedantic
-                  flycheck-gcc-pedantic
+                     flycheck-gcc-pedantic
 
          Whether to warn about language extensions in `c/c++-clang` and
          `c/c++-gcc` respectively.
 
       .. defcustom:: flycheck-clang-pedantic-errors
-                  flycheck-gcc-pedantic-errors
+                     flycheck-gcc-pedantic-errors
 
          Whether to error on language extensions in `c/c++-clang` and
          `c/c++-gcc` respectively.
 
       .. defcustom:: flycheck-clang-warnings
-                  flycheck-gcc-warnings
+                     flycheck-gcc-warnings
 
          A list of additional warnings to enable in `c/c++-clang` and
          `c/c++-gcc` respectively.  Each item is the name of a warning or
