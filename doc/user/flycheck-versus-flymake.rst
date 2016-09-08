@@ -334,9 +334,9 @@ Error levels
 ~~~~~~~~~~~~
 
 **Flymake** supports error and warning messages.  The pattern of warning
-messages is *hard-coded* in Emacs 24.3, and only became customizable in upcoming
-Emacs 24.4.  The patterns to parse messages are kept separate from the actual
-syntax checker.
+messages is *hard-coded* in Emacs 24.3, and only became customizable in Emacs
+24.4.  The patterns to parse messages are kept separate from the actual syntax
+checker.
 
 **Flycheck** supports error, warning and info messages.  The patterns to parse
 messages of different levels are part of the syntax checker definition, and thus
