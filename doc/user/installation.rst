@@ -92,24 +92,35 @@ Add the following form to your init file to setup Flycheck with `use-package`_:
 Then press :kbd:`C-M-x` with point somewhere in this form to install and enable
 Flycheck for the current Emacs session.
 
-.. _flycheck-alternative-installation-methods:
+.. _flycheck-distribution-packages:
 
-Alternative installation methods
-================================
+Distribution packages
+---------------------
 
-Some users prefer to install Flycheck via other methods such as el-get, Git
-submodules, etc.
+Alternatively some distributions provide binary packages of Flycheck.  We
+officially support the following distributions:
 
-We do **not** support any of these methods, and advise against any alternative
-installation method.  We do not consider it a bug if Flycheck works when
-installed as above but not with a different installation method.
+* Debian 9 and newer: ``apt-get install elpa-flycheck flycheck-doc`` (the latter
+  for our manual).  The `Debian Emacs addon team`_ provides these packages.
+
+.. _Debian Emacs addon team: https://pkg-emacsen.alioth.debian.org/
+
+.. _flycheck-legacy-installation-methods:
+
+Legacy installation methods
+===========================
+
+Some users prefer to install Flycheck with legacy methods such as el-get, Git
+submodules, etc that were common before Emacs included a package manager.  There
+are also many 3rd party packages provided by various package managers.  We do
+neither support nor endorse any of these:
 
 .. warning::
 
    If you install Flycheck in any way other than :ref:`our official packages
    <flycheck-package-installation>` you do so **at your own risk**.
 
-Please beware of breakage and understand that while we do not actively work
+Please beware of breakage, and understand that while we do not actively work
 against alternative installation methods we will not make compromises to support
 alternative installation methods.  We will close issues reported for alternative
 installation if we fail to reproduce them with a proper installation of
