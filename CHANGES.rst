@@ -12,6 +12,11 @@
 
   - Elixir with ``dogma`` [GH-969]
 
+- New features:
+
+  - Add ``flycheck-cargo-rustc-args`` to pass multiple arguments to cargo rustc
+    subcommand [GH-1079]
+
 29 (Aug 28, 2016)
 =================
 

@@ -8380,6 +8380,9 @@ See URL `http://jruby.org/'."
   :modes (enh-ruby-mode ruby-mode)
   :next-checkers ((warning . ruby-rubylint)))
 
+(flycheck-def-args-var flycheck-cargo-rustc-args (rust-cargo)
+  :package-version '(flycheck . "30"))
+
 (flycheck-def-args-var flycheck-rust-args (rust-cargo rust)
   :package-version '(flycheck . "0.24"))
 
@@ -8454,6 +8457,7 @@ rustc command.  See URL `https://www.rust-lang.org'."
                    ((string= flycheck-rust-crate-type "lib") "--lib")
                    (flycheck-rust-binary-name
                     (list "--bin" flycheck-rust-binary-name))))
+            (eval flycheck-cargo-rustc-args)
             "--" "-Z" "no-trans"
             ;; Passing the "unstable-options" flag may raise an error in the
             ;; future.  For the moment, we need it to access JSON output in all
