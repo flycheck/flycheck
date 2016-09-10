@@ -903,7 +903,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. defcustom:: flycheck-rust-args
 
-         A list of additional arguments.
+         A list of additional arguments that are passed to rustc.
+
+      .. defcustom:: flycheck-cargo-rustc-args
+
+         A list of additional arguments passed to the cargo rustc subcommand
 
       .. defcustom:: flycheck-rust-check-tests
 
