@@ -729,7 +729,8 @@ to view the docstring of the syntax checker.  Likewise, you may use
 .. supported-language:: Python
 
    Flycheck checks Python with `python-flake8` or `python-pylint`, and falls
-   back to `python-pycompile` if neither of those is available.
+   back to `python-pycompile` if neither of those is available.  A `python-mypy`
+   type-checker is also available.
 
    .. seealso::
 
@@ -777,6 +778,20 @@ to view the docstring of the syntax checker.  Likewise, you may use
    .. syntax-checker:: python-pycompile
 
       Check syntax with Python's byte compiler (see :py:mod:`py_compile`).
+
+   .. syntax-checker:: python-mypy
+
+      Type-check using `mypy <http://www.mypy-lang.org/>`_.
+
+      .. defcustom:: flycheck-python-mypy-use-python-2
+
+         Whether to use `mypy`\'s Python 2 support.
+
+      .. defcustom:: flycheck-python-mypy-silent-imports
+
+         Whether to disable type-checking of imported modules.
+
+      .. syntax-checker-config-file:: flycheck-pylintrc
 
 .. supported-language:: R
 

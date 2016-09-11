@@ -11,6 +11,7 @@
 - New syntax checkers:
 
   - Elixir with ``dogma`` [GH-969]
+  - Python with ``mypy`` [GH-1080]
 
 - New features:
 
