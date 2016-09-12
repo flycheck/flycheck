@@ -12,7 +12,8 @@ Teams
 Maintainers
 -----------
 
-* **Sebastian Wiesner** (:gh:`lunaryorn`, owner, GPG key ``5C42FE98``)
+* **Sebastian Wiesner** (:gh:`lunaryorn`, owner, GPG key ``C4EC41E35C42FE98``,
+  `keybase <https://keybase.io/lunaryorn>`_)
 * **Clément Pit--Claudel** (:gh:`cpitclaudel`, owner)
 
 We maintain Flycheck and all official extensions within the `Flycheck
