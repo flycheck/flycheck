@@ -180,3 +180,33 @@ or use `C-u C-c ! x`:
                 C-u M-x flycheck-disable-checker
 
    Prompt for a disabled syntax checker to enable again in the current buffer.
+
+.. _flycheck-checker-executables:
+
+Change syntax checker executables
+=================================
+
+Flycheck normally tries to run syntax checker tools by their standard name from
+`exec-path`.  Sometimes, though, you need to use a different version of a tool,
+or probably don't even have a tool available globally—this frequently occurs in
+Javascript project where dependencies including linter tools are typically
+installed into a local ``node_modules`` directory:
+
+.. define-key:: C-c ! e
+                M-x flycheck-set-checker-executable
+
+   Prompt for a syntax checker and an executable file and make Flycheck use the
+   executable file for the syntax checker in the current buffer.
+
+   Internally this command sets a variable named
+   :samp:`flycheck-{checker}-executable` where :samp:`{checker}` is the name of
+   the syntax checker entered on the prompt, e.g. `c/c++-clang`.
+
+   Flycheck defines these :term:`executable options` for every syntax checker
+   that runs an external command.  You can change these variables with directory
+   variables or set them in custom Emacs Lisp code such as mode hooks.
+
+   .. seealso::
+
+      :infonode:`(emacs)Directory Variables`
+         Information about directory variables.

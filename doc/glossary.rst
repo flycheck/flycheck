@@ -38,3 +38,12 @@ reference`_, but we reproduce them here for convenience.
    registered syntax checker
       A syntax checker in `flycheck-checkers`.  Flycheck will only use these
       syntax checkers when checking buffers automatically.
+
+   executable option
+   executable options
+     Options to override the executables of syntax checkers that run external
+     commands.  They are named :samp:`flycheck-{checker}-executable`,
+     e.g. ``flycheck-c/c++-clang-executable`` for `c/c++-clang`.
+
+     Flycheck implicit defines these options for all syntax checkers defined
+     with `flycheck-define-checker`.
