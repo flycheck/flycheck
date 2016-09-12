@@ -11,6 +11,7 @@
 - New syntax checkers:
 
   - Elixir with ``dogma`` [GH-969]
+  - sass and scss with ``sass-lint`` [GH-1070]
 
 - New features:
 
