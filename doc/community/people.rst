@@ -109,6 +109,18 @@ TypeScript
 
 Mention with ``@flycheck/typescript``.
 
+Packagers
+=========
+
+We would like to thank all people who package Flycheck on behalf of
+distributions and support our development efforts with their feedback, their
+patches and their testing:
+
+* Sean Whitton (:gh:`spwhitton`) and the `Debian Emacs addon team`_ (Debian
+  packages)
+
+.. _Debian Emacs addon team: https://pkg-emacsen.alioth.debian.org/
+
 Acknowledgements
 ================
 
