@@ -180,8 +180,11 @@ init`` will warn you if you do not.
 Versioning and releases
 =======================
 
-We use a single continuously increasing version number for Flycheck.  Breaking
-changes may occur at any point.
+We use a single continuously increasing version number for Flycheck.
+
+.. important::
+
+   Breaking changes may occur **at any point**.
 
 Please feel free to make a release whenever you think it’s appropriate.
 It’s generally a good idea to release when
