@@ -152,10 +152,3 @@ Public License.  See :ref:`flycheck-cc-by-sa` for a copy of the license.
    :maxdepth: 2
 
    licenses
-
-.. FIXME: Remove when the old manual is ported completed
-
-TODO
-====
-
-.. todolist::
