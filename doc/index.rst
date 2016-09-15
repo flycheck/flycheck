@@ -63,11 +63,6 @@ We are currently in the process of converting the old Texinfo manual to Sphinx.
 Meanwhile you can read a simple HTML version of the old manual at
 :download:`flycheck.html <legacy/flycheck.html>`.
 
-.. todo:: Port the old manual
-
-   Meanwhile see :download:`flycheck.html <legacy/flycheck.html>` for a simple
-   HTML version of the old manual.
-
 .. toctree::
 
    user/installation
