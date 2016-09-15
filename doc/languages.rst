@@ -538,12 +538,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-tidyrc
 
-.. supported-language:: Jade
-
-   .. syntax-checker:: jade
-
-      Check syntax using the `Jade <http://jade-lang.com/>`_ compiler.
-
 .. supported-language:: Javascript
 
    Flycheck checks Javascript with one of `javascript-eslint`,
@@ -707,6 +701,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
    .. syntax-checker:: processing
 
       Check syntax using the `Processing <https://processing.org/>`_ compiler.
+
+.. supported-language:: Pug
+
+   .. syntax-checker:: pug
+
+      Check syntax using the `Pug <http://www.pugjs.org>`_ compiler.
 
 .. supported-language:: Puppet
 

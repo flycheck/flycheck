@@ -8,11 +8,13 @@
     own ``.luacheckrc`` detection. Therefore ``flycheck-luacheckrc`` is
     no longer used [GH-1057]
   - ``:modes`` is now mandatory for syntax checker definitions [GH-1071]
+  - Remove jade checker [GH-951] [GH-1084]
 
 - New syntax checkers:
 
   - Elixir with ``dogma`` [GH-969]
   - sass and scss with ``sass-lint`` [GH-1070]
+  - Pug [GH-951] [GH-1084]
 
 - New features:
 
