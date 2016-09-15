@@ -937,25 +937,42 @@ to view the docstring of the syntax checker.  Likewise, you may use
          A list of additional library directories. Relative paths are relative
          to the buffer being checked.
 
-.. supported-language:: Sass
+.. supported-language:: Sass/SCSS
 
-   Flycheck checks SASS with `sass/scss-sass-lint`, falling back to `sass`.
+   Flycheck checks SASS with `sass/scss-sass-lint`, falling back to `sass`, and
+   SCSS with  `scss-lint`, falling back to `sass/scss-sass-lint` first and then
+   `scss` if neither is available.
+
+   .. syntax-checker:: scss-lint
+
+      Syntax-check and lint SCSS with SCSS-Lint_.
+
+      .. note::
+
+         This syntax checker requires SCSS-Lint 0.43.2 or newer.
+
+      .. _SCSS-Lint: https://github.com/brigade/scss-lint
+
+      .. syntax-checker-config-file:: flycheck-scss-lintrc
 
    .. syntax-checker:: sass/scss-sass-lint
 
-      Check ``sass`` and ``scss`` syntax and lint with SASS-Lint_.
+      Syntax-check and lint Sass/SCSS with SASS-Lint_.
 
       .. _SASS-Lint: https://github.com/sasstools/sass-lint
 
       .. syntax-checker-config-file:: flycheck-sass-lintrc
 
    .. syntax-checker:: sass
+                       scss
 
-      Check syntax with the `Sass <http://sass-lang.com/>`_ compiler.
+      Check SASS and SCSS respectively with the `SCSS compiler
+      <http://sass-lang.com/>`_.
 
       .. defcustom:: flycheck-sass-compass
+                     flycheck-scss-compass
 
-         Whether to enable the Compass CSS framework via ``--compass``.
+         Whether to enable the Compass CSS framework with ``--compass``.
 
 .. supported-language:: Scala
 
@@ -998,39 +1015,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       `Geiser <http://www.nongnu.org/geiser/>`_ must be installed and active for
       this checker to work.
-
-.. supported-language:: SCSS
-
-   Flycheck checks SCSS with `scss-lint`, falling back to `sass/scss-sass-lint` first and
-   `scss` if neither is available.
-
-   .. syntax-checker:: scss-lint
-
-      Check syntax and lint with SCSS-Lint_.
-
-      .. note::
-
-         This syntax checker requires SCSS-Lint 0.43.2 or newer.
-
-      .. _SCSS-Lint: https://github.com/brigade/scss-lint
-
-      .. syntax-checker-config-file:: flycheck-scss-lintrc
-
-   .. syntax-checker:: sass/scss-sass-lint
-
-      Check ``sass`` and ``scss`` syntax and lint with SASS-Lint_.
-
-      .. _SASS-Lint: https://github.com/sasstools/sass-lint
-
-      .. syntax-checker-config-file:: flycheck-sass-lintrc
-
-   .. syntax-checker:: scss
-
-      Check syntax with the `SCSS compiler <http://sass-lang.com/>`_.
-
-      .. defcustom:: flycheck-scss-compass
-
-         Whether to enable the Compass CSS framework with ``--compass``.
 
 .. supported-language:: Shell scripting languages
 
