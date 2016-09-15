@@ -482,7 +482,7 @@
 
 (ert-deftest flycheck-autoloads-file-p/autoloads-with-backing-file ()
   :tags '(utility)
-  (flycheck-ert-with-file-buffer (locate-library "dash-autoloads")
+  (flycheck-ert-with-file-buffer (locate-library "shut-up-autoloads")
     (should (flycheck-autoloads-file-p))))
 
 (ert-deftest flycheck-autoloads-file-p/a-plain-file ()
@@ -3017,7 +3017,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   ;; collect the autoloads of newly installed packages before writing the
   ;; autoloads file.  See `https://github.com/flycheck/flycheck/issues/45' and
   ;; `https://github.com/bbatsov/prelude/issues/253' for details.
-  (flycheck-ert-with-file-buffer (locate-library "dash-autoloads")
+  (flycheck-ert-with-file-buffer (locate-library "shut-up-autoloads")
     (should-not (flycheck-may-use-checker 'emacs-lisp))
     (should-not (flycheck-may-use-checker 'emacs-lisp-checkdoc))))
 
