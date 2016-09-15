@@ -181,6 +181,57 @@ or use `C-u C-c ! x`:
 
    Prompt for a disabled syntax checker to enable again in the current buffer.
 
+.. _flycheck-checker-options:
+
+Configure syntax checkers
+=========================
+
+Many syntax checkers provide command line flags to change their behaviour.
+Flycheck wraps important flags as regular Emacs user options.
+
+The :ref:`list of supported languages <flycheck-languages>` includes all options
+for each syntax checker.  You can change these options in the Customize
+interface under :menuselection:`programming --> tools --> flycheck -->
+flycheck-options`, however we recommend to use Directory Variables to configure
+syntax checkers per project.
+
+.. seealso::
+
+   :infonode:`(emacs)Directory Variables`
+      Information about directory variables.
+
+.. _flycheck-checker-config-files:
+
+Configuration files
+-------------------
+
+Some syntax checkers can additionally read configuration from files.  Flycheck
+can find configuration files of syntax checkers and use them when invoking the
+syntax checker program:
+
+.. defhook:: flycheck-local-config-file-functions
+
+   Functions to call to find a configuration file for a syntax checker.  Each
+   function gets the name of a configuration file and shall return the absolute
+   path to a file if one exists.  The default value leads to the following
+   steps:
+
+   1. If the name is an absolute path, use it.
+   2. If the name exists in any ancestor directory, use the nearest one.
+   3. If the name exists in :envvar:`$HOME`, use it.
+
+Flycheck takes the names of configuration files from user options defined for
+syntax checkers that support configuration files.  Like above the :ref:`list of
+languages <flycheck-languages>` also lists all supported configuration file
+options.  You can alse change these in Customize, under
+:menuselection:`programming --> tools --> flycheck --> flycheck-config-files`,
+but again we recommend to use Directory Variables.
+
+We also recommend to prefer configuration files over options as you can usually
+commit the configuration files to your source control repository to share them
+with other contributors so that all contributors can use the same configuration
+for syntax checking and linting.
+
 .. _flycheck-checker-executables:
 
 Change syntax checker executables

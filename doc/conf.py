@@ -212,7 +212,7 @@ class SyntaxCheckerConfigurationFile(Directive):
 .. el:defcustom:: {0}
 
    Configuration file for this syntax checker.  See
-   :ref:`flycheck-config-files`.
+   :ref:`flycheck-checker-config-files`.
 """.format(option).splitlines(), docname)
         self.state.nested_parse(template, self.content_offset, wrapper)
 
