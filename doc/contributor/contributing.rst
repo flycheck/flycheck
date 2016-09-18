@@ -1,3 +1,5 @@
+.. _flycheck-contributors-guide:
+
 =====================
  Contributor’s Guide
 =====================
@@ -113,8 +115,8 @@ Flycheck. Github provides great documentation about `Pull Requests`_.
 
 Please make your pull requests against the ``master`` branch.
 
-Use ``make specs test`` to test your pull request locally. When making changes
-to syntax checkers of a specific language, it’s also a good idea to run
+Use ``make check specs unit`` to test your pull request locally. When making
+changes to syntax checkers of a specific language, it’s also a good idea to run
 :samp:`make LANGUAGE={language} integ` and check whether the tests for the
 particular language still work.  A successful ``make integ`` is by no means
 mandatory for pull requests, though, we will test your changes, too.
@@ -135,7 +137,9 @@ mandatory for pull requests, though, we will test your changes, too.
 All pull requests are reviewed by a :ref:`maintainer <flycheck-maintainers>`.
 Feel free to mention individual developers (e.g. ``@lunaryorn``) to request a
 review from a specific person, or ``@flycheck/maintainers`` if you have general
-questions or if your pull request was waiting for review too long.
+questions or if your pull request was waiting for review too long.  Take a look
+at our :ref:`flycheck-style-guide` to see what we look for and how we expect
+code to look like.
 
 Additionally all pull requests go through automated tests on `Travis CI`_ which
 check code style, run unit tests, etc.
