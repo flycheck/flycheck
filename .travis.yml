@@ -17,7 +17,7 @@ env:
   matrix:
     - EMACS_VERSION=24.4
     - EMACS_VERSION=24.5
-    - EMACS_VERSION=25.1-rc2
+    - EMACS_VERSION=25.1
     - EMACS_VERSION=snapshot
     # A special job to build the manual
     - BUILD_MANUAL=yes
