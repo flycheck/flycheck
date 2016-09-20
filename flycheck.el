@@ -1618,6 +1618,26 @@ are mandatory.
 
      This property is optional.
 
+`:enabled FUNCTION'
+     A function to determine whether to use the syntax checker in
+     the current buffer.
+
+     This function behaves as `:predicate', except that it's only
+     called the first time a syntax checker is to be used in a buffer.
+
+     If the function returns a non-nil value the checker is put in a
+     whitelist in `flycheck-enabled-checkers' to prevent further
+     invocations of `:enabled'. Otherwise it is disabled via
+     `flycheck-disabled-checkers' to prevent any further use of it.
+
+     FUNCTION is called with CHECKER argument and shall return
+     non-nil if this syntax checker shall be used to check the
+     current buffer.  Otherwise it shall return nil.
+
+     FUNCTION is only called in matching major modes.
+
+     This property is optional.
+
 `:error-filter FUNCTION'
      A function to filter the errors returned by this checker.
 
@@ -1680,6 +1700,7 @@ Signal an error, if any property has an invalid value."
         (modes (plist-get properties :modes))
         (predicate (plist-get properties :predicate))
         (verify (plist-get properties :verify))
+        (enabled (plist-get properties :enabled))
         (filter (or (plist-get properties :error-filter) #'identity))
         (next-checkers (plist-get properties :next-checkers))
         (file (flycheck-current-load-file))
@@ -1699,6 +1720,9 @@ Signal an error, if any property has an invalid value."
     (unless (or (null verify) (functionp verify))
       (error ":verify %S of syntax checker %S is not a function"
              verify symbol))
+    (unless (or (null enabled) (functionp enabled))
+      (error ":enabled %S of syntax checker %S is not a function"
+             enabled symbol))
     (unless modes
       (error "Missing :modes in syntax checker %s" symbol))
     (dolist (mode modes)
@@ -1731,6 +1755,7 @@ Try to reinstall the package defining this syntax checker." symbol)
                        (modes             . ,modes)
                        (predicate         . ,real-predicate)
                        (verify            . ,verify)
+                       (enabled           . ,enabled)
                        (error-filter      . ,filter)
                        (next-checkers     . ,next-checkers)
                        (documentation     . ,docstring)
@@ -1761,6 +1786,27 @@ CHECKER supports buffers in the given major MODE.
 Return non-nil if CHECKER supports MODE and nil otherwise."
   (memq mode (flycheck-checker-get checker 'modes)))
 
+(defvar-local flycheck-enabled-checkers nil
+  "Syntax checkers included in automatic selection.
+
+A list of Flycheck syntax checkers included in automatic
+selection for current buffer.")
+
+(defun flycheck-may-enable-checker (checker)
+  "Whether a generic CHECKER may be enabled for current buffer.
+
+Return non-nil if CHECKER may be used for the current buffer, and
+nil otherwise."
+  (let* ((enabled (flycheck-checker-get checker 'enabled))
+         (shall-enable (and (not (flycheck-disabled-checker-p checker))
+                            (or (memq checker flycheck-enabled-checkers)
+                                (null enabled)
+                                (funcall enabled checker)))))
+    (if shall-enable
+        (cl-pushnew checker flycheck-enabled-checkers)
+      (cl-pushnew checker flycheck-disabled-checkers))
+      shall-enable))
+
 (defun flycheck-may-use-checker (checker)
   "Whether a generic CHECKER may be used.
 
@@ -1768,8 +1814,8 @@ Return non-nil if CHECKER may be used for the current buffer, and
 nil otherwise."
   (let ((predicate (flycheck-checker-get checker 'predicate)))
     (and (flycheck-valid-checker-p checker)
-         (not (flycheck-disabled-checker-p checker))
          (flycheck-checker-supports-major-mode-p checker major-mode)
+         (flycheck-may-enable-checker checker)
          (funcall predicate))))
 
 (defun flycheck-may-use-next-checker (next-checker)
@@ -5653,6 +5699,7 @@ SYMBOL with `flycheck-def-executable-var'."
         (parser (plist-get properties :error-parser))
         (filter (plist-get properties :error-filter))
         (predicate (plist-get properties :predicate))
+        (enabled-fn (plist-get properties :enabled))
         (verify-fn (plist-get properties :verify)))
 
     `(progn
@@ -5670,6 +5717,8 @@ SYMBOL with `flycheck-def-executable-var'."
          ,@(when predicate
              `(:predicate #',predicate))
          :next-checkers ',(plist-get properties :next-checkers)
+         ,@(when enabled-fn
+             `(:enabled #',enabled-fn))
          ,@(when verify-fn
              `(:verify #',verify-fn))
          :standard-input ',(plist-get properties :standard-input)
