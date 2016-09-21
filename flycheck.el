@@ -7561,7 +7561,9 @@ See URL `https://docs.python.org/3.5/library/json.html#command-line-interface'."
           ;; Ignore the rest of the line which shows the char position.
           (one-or-more not-newline)
           line-end))
-  :modes json-mode)
+  :modes json-mode
+  ;; The JSON parser chokes if the buffer is empty and has no JSON inside
+  :predicate (lambda () (not (flycheck-buffer-empty-p))))
 
 (flycheck-define-checker less
   "A LESS syntax checker using lessc.
