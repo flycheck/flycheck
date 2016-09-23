@@ -52,6 +52,8 @@ features go through :ref:`Quickstart <flycheck-quickstart>` guide.
 
 .. _`known windows issues`: https://github.com/flycheck/flycheck/labels/B-Windows%20only
 
+.. _flycheck-user-guide:
+
 The User Guide
 ==============
 
@@ -107,6 +109,7 @@ The Contributor Guide explains how to contribute to Flycheck.
 .. toctree::
 
    contributor/contributing
+   contributor/style-guide
    contributor/maintaining
 
 Indices and Tables

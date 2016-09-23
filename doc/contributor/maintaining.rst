@@ -1,3 +1,5 @@
+.. _flycheck-maintainers-guide:
+
 ====================
  Maintainer’s Guide
 ====================
@@ -66,6 +68,10 @@ Our workflow implies a couple of rules about which branches to push code to:
 Pull requests
 -------------
 
+Please review pull requests according to our :ref:`style guide
+<flycheck-style-guide>`, and consider whether you personally think that the
+change is a good addition to Flycheck.
+
 **All pull requests require approval of a maintainer**.
 
 To state your approval as a maintainer add a comment that contains ``LGTM``.
@@ -85,11 +91,6 @@ maintainers approved it.  We require approvals from multiple maintainers, see
    **contributor**.  In this case they’ll be able to directly merge their own
    pull request after making changes to it which decreases the turn-around time
    for pull requests.
-
-Review guidelines
-~~~~~~~~~~~~~~~~~
-
-.. todo:: Write pull request review guidelines
 
 Merge guidelines
 ~~~~~~~~~~~~~~~~
