@@ -3820,16 +3820,21 @@ the beginning of the buffer."
   "Go to the error at BUTTON."
   (flycheck-error-list-goto-error (button-start button)))
 
-(defsubst flycheck-error-list-make-cell (text &optional face)
+(defsubst flycheck-error-list-make-cell (text &optional face help-echo)
   "Make an error list cell with TEXT and FACE.
 
 If FACE is nil don't set a FACE on TEXT.  If TEXT already has
 face properties, do not specify a FACE.  Note though, that if
 TEXT gets truncated it will not inherit any previous face
 properties.  If you expect TEXT to be truncated in the error
-list, do specify a FACE explicitly!"
+list, do specify a FACE explicitly!
+
+If HELP-ECHO is non-nil, set a help-echo property on TEXT, with
+value HELP-ECHO.  This is convenient if you expect TEXT to be
+truncated."
   (append (list text 'type 'flycheck-error-list)
-          (and face (list 'face face))))
+          (and face (list 'face face))
+          (and help-echo (list 'help-echo help-echo))))
 
 (defsubst flycheck-error-list-make-number-cell (number face)
   "Make a table cell for a NUMBER with FACE.
@@ -3862,7 +3867,9 @@ Return a list with the contents of the table cell."
          (message (or (flycheck-error-message error)
                       (format "Unknown %s" (symbol-name level))))
          (id (flycheck-error-id error))
-         (checker (flycheck-error-checker error)))
+         (id-str (if id (format "%s" id) ""))
+         (checker (flycheck-error-checker error))
+         (msg-and-checker (flycheck-error-list-make-last-column message checker)))
     (list error
           (vector (flycheck-error-list-make-number-cell
                    line 'flycheck-error-list-line-number)
@@ -3871,10 +3878,9 @@ Return a list with the contents of the table cell."
                   (flycheck-error-list-make-cell
                    (symbol-name (flycheck-error-level error)) level-face)
                   (flycheck-error-list-make-cell
-                   (if id (format "%s" id) "")
-                   'flycheck-error-list-id)
+                   id-str 'flycheck-error-list-id id-str)
                   (flycheck-error-list-make-cell
-                   (flycheck-error-list-make-last-column message checker))))))
+                   msg-and-checker nil msg-and-checker)))))
 
 (defun flycheck-flush-multiline-message (msg)
   "Prepare error message MSG for display in the error list.
