@@ -47,26 +47,33 @@ Package installation
 ====================
 
 We recommend to install Flycheck with Emacs' built-in package manager.  Flycheck
-is available in the popular MELPA_ archive which provides up to date snapshots
-of Flycheck's development state.  The sibling repository `MELPA Stable`_ serves
-tagged releases of Flycheck instead.  We advise to use MELPA if you are fine
-with weekly or even daily updates.  If you would prefer longer time between
-releases use MELPA Stable instead.
+is available in the popular `MELPA Stable`_ archive which provides packages for
+Flycheck releases.  We recommend to read through the :doc:`changelog <changes>`
+before every upgrade to check for any breaking changes that might affect you.
 
-Unfortunately neither of these repositories are available in Emacs by default.
-You must explicitly add them to `package-archives`, by adding the following to
-your :term:`init file`:
+.. note::
+
+   The sibling repository `MELPA Stable`_ serves up to date snapshots of
+   Flycheck's development state.  If you prefer to follow the most recent
+   changes use MELPA instead, but be aware that we make breaking changes anytime
+   without prior announcement.
+
+Unfortunately the MELPA repositories are not available in Emacs by default.  You
+must explicitly add them to `package-archives` with the following code in your
+:term:`init file`:
 
 .. code-block:: elisp
 
    (require 'package)
+
    (add-to-list 'package-archives
-                 '("melpa" . "https://melpa.org/packages/") t)
+                '("MELPA Stable" . "https://stable.melpa.org/packages/") t)
    (package-initialize)
 
-This adds MELPA; for MELPA Stable replace ``https://melpa.org`` with
-``https://stable.melpa.org``.  If you do not know where your init file is
-inspect the value of `user-init-file` with :kbd:`C-h v user-init-file`.
+This adds MELPA Stable; for MELPA replace ``https://stable.melpa.org`` with
+``https://melpa.org`` and change the name accordingly.  If you do not know where
+your init file is inspect the value of `user-init-file` with :kbd:`C-h v
+user-init-file`.
 
 Once the repository is set up you can install Flycheck from Emacs' package menu
 at :kbd:`M-x list-packages`, or directly with :kbd:`M-x package-install RET

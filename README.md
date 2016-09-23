@@ -3,7 +3,6 @@
 [![License GPL 3](https://img.shields.io/github/license/flycheck/flycheck.svg)][COPYING]
 [![Join the chat](https://img.shields.io/gitter/room/flycheck/flycheck.svg)](https://gitter.im/flycheck/flycheck)
 [![MELPA stable version](http://stable.melpa.org/packages/flycheck-badge.svg)](http://stable.melpa.org/#/flycheck)
-[![MELPA version](http://melpa.org/packages/flycheck-badge.svg)](http://melpa.org/#/flycheck)
 [![Build Status](https://img.shields.io/travis/flycheck/flycheck/master.svg)](https://travis-ci.org/flycheck/flycheck)
 
 **Flycheck** is a modern on-the-fly syntax checking extension for GNU Emacs 24,
@@ -60,7 +59,7 @@ through [Quickstart][] guide.
 
 [Installation]: http://www.flycheck.org/en/latest/user/installation.html
 [Quickstart]: http://www.flycheck.org/en/latest/user/quickstart.html
-[windows issues]: https://github.com/flycheck/flycheck/labels/B-Windows%20only
+[windows issues]: https://github.com/flycheck/flycheck/labels/windows%20only
 [windows support]: http://www.flycheck.org/en/latest/user/installation.html#windows-support
 
 ## Support & Contribution ##

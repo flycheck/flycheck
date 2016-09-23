@@ -38,7 +38,7 @@ run ``M-x eval-buffer``:
 
    (require 'package)
    (add-to-list 'package-archives
-                '("melpa" . "http://stable.melpa.org/packages/") t)
+                '("MELPA Stable" . "http://stable.melpa.org/packages/") t)
    (package-initialize)
    (package-refresh-contents)
 
