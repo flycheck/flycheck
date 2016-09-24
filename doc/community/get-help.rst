@@ -1,3 +1,5 @@
+.. _flycheck-get-help:
+
 ==========
  Get help
 ==========

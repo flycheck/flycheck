@@ -39,7 +39,14 @@ Many of these programs are available in the package repositories of Linux
 distributions or in Homebrew_ for macOS.  Others can be installed with standard
 package managers such as Rubygems, NPM, Cabal, etc.
 
+.. important::
+
+   For a GUI Emacs on MacOS we recommend to install and configure
+   exec-path-from-shell_ to make Emacs use the proper ``$PATH`` and avoid a
+   :ref:`common setup issue on MacOS <flycheck-macos-exec-path-from-shell>`.
+
 .. _Homebrew: http://brew.sh
+.. _exec-path-from-shell: https://github.com/purcell/exec-path-from-shell
 
 .. _flycheck-package-installation:
 
