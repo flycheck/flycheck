@@ -33,6 +33,11 @@
 
 (require 'package)
 
+(defconst flycheck/init-file (if load-in-progress
+                                 load-file-name
+                               buffer-file-name)
+  "The path of this file.")
+
 (defun flycheck/init ()
   "Initialize a minimal Flycheck session.
 
@@ -46,16 +51,16 @@ session.
 
 Define a `demo' checker which can be used to demonstrate Flycheck
 in this file."
-  (setq load-prefer-newer t)              ; Don't load outdated bytecode
+  (setq load-prefer-newer t)            ; Don't load outdated bytecode
 
-  (setq package-user-dir (expand-file-name "init-elpa"
-                                           (file-name-directory load-file-name))
+  (setq package-user-dir (expand-file-name "init-elpa" (file-name-directory
+                                                        flycheck/init-file))
         package-check-signature nil)
   (add-to-list 'package-archives '("MELPA" . "https://stable.melpa.org/packages/"))
 
   (package-initialize)
 
-  (let* ((source-dir (locate-dominating-file load-file-name "flycheck.el"))
+  (let* ((source-dir (locate-dominating-file flycheck/init-file "flycheck.el"))
          (flycheck-el (expand-file-name "flycheck.el" source-dir)))
     ;; Install Flycheck to bring its dependencies in
     (unless (package-installed-p 'flycheck)
@@ -89,8 +94,8 @@ in this file."
 
   ;; Improve OS X key behaviour
   (when (eq system-type 'darwin)
-    (setq mac-option-modifier 'meta       ; Option is simply the natural Meta
-          mac-command-modifier 'meta      ; But command is a lot easier to hit
+    (setq mac-option-modifier 'meta     ; Option is simply the natural Meta
+          mac-command-modifier 'meta    ; But command is a lot easier to hit
           mac-right-command-modifier 'left
           mac-right-option-modifier 'none ; Keep right option for accented input
           mac-function-modifier 'hyper))
