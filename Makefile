@@ -46,6 +46,9 @@ HAVE_INKSCAPE := $(shell sh -c "command -v $(INKSCAPE)")
 HAVE_CONVERT := $(shell sh -c "command -v $(CONVERT)")
 HAVE_OPTIPNG := $(shell sh -c "command -v $(OPTIPNG)")
 
+RUNTEST = $(RUNEMACS) --load test/flycheck-test --load test/run.el \
+	-f flycheck-run-tests-main
+
 # Export Emacs to goals, mainly for CASK
 CASK_EMACS = $(EMACS)
 export EMACS
@@ -58,6 +61,7 @@ export CASK_EMACS
 SRCS = flycheck.el flycheck-buttercup.el flycheck-ert.el
 OBJS = $(SRCS:.el=.elc)
 IMGS = doc/_static/logo.png
+TEST_SRCS = flycheck.el flycheck-ert.el test/flycheck-test.el
 
 # File rules
 flycheck-ert.elc: flycheck.elc
@@ -120,13 +124,11 @@ specs: compile
 
 .PHONY: unit
 unit: compile
-	$(RUNEMACS) --load test/run.el -f flycheck-run-tests-main \
-		'(and (not (tag external-tool)) $(SELECTOR))'
+	$(RUNTEST) '(and (not (tag external-tool)) $(SELECTOR))'
 
 .PHONY: integ
 integ: compile
-	$(RUNEMACS) --load test/run.el -f flycheck-run-tests-main \
-		'(and (tag external-tool) $(SELECTOR))'
+	$(RUNTEST) '(and (tag external-tool) $(SELECTOR))'
 
 .PHONY: images
 images: $(IMGS)
