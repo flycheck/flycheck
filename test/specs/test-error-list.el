@@ -138,7 +138,8 @@
         (expect (aref cells 3) :to-equal
                 (list "W1"
                       'type 'flycheck-error-list
-                      'face 'flycheck-error-list-id)))
+                      'face 'flycheck-error-list-id
+                      'help-echo "W1")))
 
       (let ((checker-name (propertize "emacs-lisp-checkdoc"
                                       'face 'flycheck-error-list-checker-name)))
@@ -147,7 +148,8 @@
                                               'face 'default)
                                   checker-name)))
             (expect (aref cells 4) :to-equal
-                    (list message 'type 'flycheck-error-list))))
+                    (list message 'type 'flycheck-error-list
+                          'help-echo message))))
 
         (it "has a default message in the 5th cell if there is no message"
           (cl-letf* (((flycheck-error-message warning) nil)
@@ -157,7 +159,8 @@
                                                   'face 'default)
                                       checker-name)))
             (expect (aref cells 4) :to-equal
-                    (list message 'type 'flycheck-error-list)))))))
+                    (list message 'type 'flycheck-error-list
+                          'help-echo message)))))))
 
   (describe "Filter"
     (it "kills the filter variable when resetting the filter"
