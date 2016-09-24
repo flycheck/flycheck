@@ -186,7 +186,7 @@ reStructuredText_ and built with Sphinx_.  The source of the manual resides in
 the ``doc/`` directory.
 
 You need Python 3.4 or newer to install Sphinx_ for Flycheck’s documentation.
-On OS X it is recommended that you use Homebrew_ to install the latest Python
+On macOS it is recommended that you use Homebrew_ to install the latest Python
 version with ``brew install python3``.  On Linux you should be able to obtain
 Python 3.4 from the package manager of your distribution.
 

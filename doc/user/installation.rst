@@ -11,7 +11,7 @@ Prerequisites
 =============
 
 Flycheck needs GNU Emacs |min-emacs| and works best on Unix-like systems like
-Linux or OS X.  It does not support older releases of GNU Emacs or other
+Linux or macOS.  It does not support older releases of GNU Emacs or other
 flavours of Emacs (e.g. XEmacs, Aquamacs, etc.).
 
 .. _flycheck-windows-support:
@@ -36,7 +36,7 @@ at the :ref:`list of supported languages <flycheck-languages>` to find out what
 tools are required for a particular language.
 
 Many of these programs are available in the package repositories of Linux
-distributions or in Homebrew_ for OS X.  Others can be installed with standard
+distributions or in Homebrew_ for macOS.  Others can be installed with standard
 package managers such as Rubygems, NPM, Cabal, etc.
 
 .. _Homebrew: http://brew.sh
