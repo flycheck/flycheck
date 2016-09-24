@@ -9,6 +9,8 @@
     no longer used [GH-1057]
   - ``:modes`` is now mandatory for syntax checker definitions [GH-1071]
   - Remove jade checker [GH-951] [GH-1084]
+  - Remove ``javascript-eslintrc`` and instead rely on eslint's own configuration file
+    search [GH-1085]
 
 - New syntax checkers:
 
@@ -21,6 +23,10 @@
   - Add ``flycheck-cargo-rustc-args`` to pass multiple arguments to cargo rustc
     subcommand [GH-1079]
   - Add ``:enabled`` property to ``flycheck-define-checker`` [GH-1089]
+
+- Improvements:
+
+  - Do not use ``javascript-eslint`` if eslint cannot find a valid configuration [GH-1085]
 
 29 (Aug 28, 2016)
 =================

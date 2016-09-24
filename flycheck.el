@@ -7489,16 +7489,11 @@ for more information about the custom directories."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "29"))
 
-(flycheck-def-config-file-var flycheck-eslintrc javascript-eslint nil
-  :safe #'stringp
-  :package-version '(flycheck . "0.20"))
-
 (flycheck-define-checker javascript-eslint
   "A Javascript syntax and style checker using eslint.
 
 See URL `https://github.com/eslint/eslint'."
   :command ("eslint" "--format=checkstyle"
-            (config-file "--config" flycheck-eslintrc)
             (option-list "--rulesdir" flycheck-eslint-rules-directories)
             "--stdin" "--stdin-filename" source-original)
   :standard-input t
@@ -7518,6 +7513,12 @@ See URL `https://github.com/eslint/eslint'."
                                    (flycheck-error-message err))))
                           (flycheck-sanitize-errors errors))
                   errors)
+  :enabled (lambda (checker)
+             (let* ((default-directory (flycheck-compute-working-directory checker))
+                    (executable (flycheck-find-checker-executable checker))
+                    (exitcode (call-process executable nil nil nil
+                                            "--print-config" ".")))
+               (eq exitcode 0)))
   :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode)
   :next-checkers ((warning . javascript-jscs)))
 
