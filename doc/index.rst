@@ -88,6 +88,8 @@ extend Flycheck.
    Meanwhile see :download:`flycheck.html <legacy/flycheck.html>` for a simple
    HTML version of the old manual.
 
+.. _flycheck-community-guide:
+
 The Community Guide
 ===================
 
@@ -100,6 +102,8 @@ community.
    community/extensions
    community/get-help
    community/people
+
+.. _flycheck-contributor-guide:
 
 The Contributor Guide
 =====================
