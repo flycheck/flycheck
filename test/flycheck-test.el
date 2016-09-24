@@ -75,10 +75,6 @@
   (file-name-directory (directory-file-name flycheck-test-directory))
   "The source directory.")
 
-(defconst flycheck-test-package-directory
-  (expand-file-name (format ".cask/%s/elpa/" emacs-version)
-                    flycheck-test-source-directory))
-
 
 ;;; Customization
 (ert-deftest flycheck-checkers/there-are-registered-checkers ()
