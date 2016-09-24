@@ -3321,17 +3321,16 @@ Why not:
   (let ((flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-ert-should-syntax-check
      "language/javascript/syntax-error.js" flycheck-test-javascript-modes
-     '(3 26 error "Parsing error: Unexpected token )" :checker javascript-eslint))))
+     '(3 25 error "Parsing error: Unexpected token )" :checker javascript-eslint))))
 
 (flycheck-ert-def-checker-test javascript-eslint javascript warning
   :tags '(checkstyle-xml)
-  (let ((flycheck-eslintrc "eslint.json")
-        (flycheck-disabled-checkers '(javascript-jshint javascript-jscs)))
+  (let ((flycheck-disabled-checkers '(javascript-jshint javascript-jscs)))
     (flycheck-ert-should-syntax-check
      "language/javascript/warnings.js" flycheck-test-javascript-modes
-     '(3 2 warning "Use the function form of \"use strict\"." :id "strict"
+     '(3 2 warning "Use the function form of 'use strict'." :id "strict"
          :checker javascript-eslint)
-     '(4 9 warning "\"foo\" is defined but never used" :id "no-unused-vars"
+     '(4 9 warning "'foo' is defined but never used." :id "no-unused-vars"
          :checker javascript-eslint))))
 
 (flycheck-ert-def-checker-test javascript-gjslint javascript nil

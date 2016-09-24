@@ -549,11 +549,14 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax and lint with `ESLint <http://eslint.org/>`_.
 
+      .. note::
+
+         Flycheck does not use this syntax checker if eslint cannot find a valid
+         configuration file.
+
       .. defcustom:: flycheck-eslint-rules-directories
 
          A list of directories with custom rules.
-
-      .. syntax-checker-config-file:: flycheck-eslintrc
 
    .. syntax-checker:: javascript-jshint
 
