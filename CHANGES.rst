@@ -20,6 +20,7 @@
 
   - Add ``flycheck-cargo-rustc-args`` to pass multiple arguments to cargo rustc
     subcommand [GH-1079]
+  - Add ``:enabled`` property to ``flycheck-define-checker`` [GH-1089]
 
 29 (Aug 28, 2016)
 =================

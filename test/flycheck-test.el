@@ -823,6 +823,13 @@
       (should (flycheck-may-use-checker 'emacs-lisp))
       (should was-called))))
 
+(ert-deftest flycheck-may-enable-checker/emacs-lisp ()
+  :tags '(checker-api)
+  (flycheck-ert-with-resource-buffer "language/emacs-lisp/warnings.el"
+    (emacs-lisp-mode)
+    (should (flycheck-may-enable-checker 'emacs-lisp))
+    (should (equal '(emacs-lisp) flycheck-enabled-checkers))))
+
 
 ;;; Generic syntax checkers
 (ert-deftest flycheck-checker-get/gets-a-property ()
