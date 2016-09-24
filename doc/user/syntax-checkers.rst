@@ -218,7 +218,7 @@ syntax checker program:
 
    1. If the name is an absolute path, use it.
    2. If the name exists in any ancestor directory, use the nearest one.
-   3. If the name exists in :envvar:`$HOME`, use it.
+   3. If the name exists in ``$HOME``, use it.
 
    This option is an abnormal hook, see :infonode:`(elisp)Hooks`.
 
