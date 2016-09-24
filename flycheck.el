@@ -1627,7 +1627,7 @@ are mandatory.
 
      If the function returns a non-nil value the checker is put in a
      whitelist in `flycheck-enabled-checkers' to prevent further
-     invocations of `:enabled'. Otherwise it is disabled via
+     invocations of `:enabled'.  Otherwise it is disabled via
      `flycheck-disabled-checkers' to prevent any further use of it.
 
      FUNCTION is called with CHECKER argument and shall return
@@ -1805,7 +1805,7 @@ nil otherwise."
     (if shall-enable
         (cl-pushnew checker flycheck-enabled-checkers)
       (cl-pushnew checker flycheck-disabled-checkers))
-      shall-enable))
+    shall-enable))
 
 (defun flycheck-may-use-checker (checker)
   "Whether a generic CHECKER may be used.
