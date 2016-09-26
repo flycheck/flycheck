@@ -3793,12 +3793,22 @@ the beginning of the buffer."
     map)
   "The keymap of `flycheck-error-list-mode'.")
 
+(defun flycheck-error-list-make-last-column (message checker)
+  "Compute contents of the last error list cell.
+
+MESSAGE and CHECKER are displayed in a single column to allow the
+message to stretch arbitrarily far."
+  (let ((checker-name (propertize (symbol-name checker)
+                                  'face 'flycheck-error-list-checker-name)))
+    (format (propertize "%s (%s)" 'face 'default)
+            message checker-name)))
+
 (defconst flycheck-error-list-format
-  [("Line" 5 flycheck-error-list-entry-< :right-align t)
-   ("Col" 3 nil :right-align t)
-   ("Level" 8 flycheck-error-list-entry-level-<)
-   ("ID" 6 t)
-   ("Message (Checker)" 0 t)]
+  `[("Line" 5 flycheck-error-list-entry-< :right-align t)
+    ("Col" 3 nil :right-align t)
+    ("Level" 8 flycheck-error-list-entry-level-<)
+    ("ID" 6 t)
+    (,(flycheck-error-list-make-last-column "Message" 'Checker) 0 t)]
   "Table format for the error list.")
 
 (defconst flycheck-error-list-padding 1
@@ -3891,17 +3901,6 @@ string with attached text properties."
    (if (numberp number) (number-to-string number) "")
    face))
 
-(defun flycheck-error-list-make-last-column (message checker)
-  "Compute contents of the last error list cell.
-
-MESSAGE and CHECKER are displayed in a single column to allow the
-message to stretch arbitrarily far."
-  (let ((checker-name (propertize (symbol-name checker)
-                                  'face 'flycheck-error-list-checker-name)))
-    (format (propertize "%s (%s)" 'face 'default)
-            (flycheck-flush-multiline-message message)
-            checker-name)))
-
 (defun flycheck-error-list-make-entry (error)
   "Make a table cell for the given ERROR.
 
@@ -3912,10 +3911,11 @@ Return a list with the contents of the table cell."
          (column (flycheck-error-column error))
          (message (or (flycheck-error-message error)
                       (format "Unknown %s" (symbol-name level))))
+         (flushed-msg (flycheck-flush-multiline-message message))
          (id (flycheck-error-id error))
          (id-str (if id (format "%s" id) ""))
          (checker (flycheck-error-checker error))
-         (msg-and-checker (flycheck-error-list-make-last-column message checker)))
+         (msg-and-checker (flycheck-error-list-make-last-column flushed-msg checker)))
     (list error
           (vector (flycheck-error-list-make-number-cell
                    line 'flycheck-error-list-line-number)
