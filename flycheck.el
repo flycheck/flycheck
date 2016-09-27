@@ -8687,6 +8687,46 @@ See URL `http://puppet-lint.com/'."
   ;; the buffer is actually linked to a file, and if it is not modified.
   :predicate flycheck-buffer-saved-p)
 
+(defun flycheck-python-find-module (checker module)
+  "Check if a Python MODULE is available.
+CHECKER's executable is assumed to be a Python REPL."
+  (-when-let* ((py (flycheck-find-checker-executable checker))
+               (script (concat "import sys; sys.path.pop(0);"
+                               (format "import %s; print(%s.__file__)"
+                                       module module))))
+    (with-temp-buffer
+      (and (eq (ignore-errors (call-process py nil t nil "-c" script)) 0)
+           (string-trim (buffer-string))))))
+
+(defun flycheck-python-needs-module-p (checker)
+  "Determines whether CHECKER needs to be invoked through Python.
+Previous versions of Flycheck called pylint and flake8 directly;
+this check ensures that we don't break existing code."
+  (not (string-match-p (rx (or "pylint" "flake8")
+                           (or "-script.pyw" ".exe" ".bat" "")
+                           eos)
+                       (flycheck-checker-executable checker))))
+
+(defun flycheck-python-verify-module (checker module)
+  "Verify that a Python MODULE is available.
+Return nil if CHECKER's executable is not a Python REPL.  This
+function's is suitable for a checker's :verify."
+  (when (flycheck-python-needs-module-p checker)
+    (let ((mod-path (flycheck-python-find-module checker module)))
+      (list (flycheck-verification-result-new
+             :label (format "`%s' module" module)
+             :message (if mod-path (format "Found at %S" mod-path) "Missing")
+             :face (if mod-path 'success '(bold error)))))))
+
+(defun flycheck-python-module-args (checker module-name)
+  "Compute arguments to pass to CHECKER's executable to run MODULE-NAME.
+Return nil if CHECKER's executable is not a Python REPL.
+Otherwise, return a list starting with -c (-m is not enough
+because it adds the current directory to Python's path)."
+  (when (flycheck-python-needs-module-p checker)
+    `("-c" ,(concat "import sys,runpy;sys.path.pop(0);"
+                    (format "runpy.run_module(%S)" module-name)))))
+
 (flycheck-def-config-file-var flycheck-flake8rc python-flake8 ".flake8rc"
   :safe #'stringp)
 
@@ -8764,7 +8804,10 @@ Update the error level of ERR according to
 
 Requires Flake8 3.0 or newer. See URL
 `https://flake8.readthedocs.io/'."
-  :command ("flake8"
+  ;; Not calling flake8 directly makes it easier to switch between different
+  ;; Python versions; see https://github.com/flycheck/flycheck/issues/1055.
+  :command ("python"
+            (eval (flycheck-python-module-args 'python-flake8 "flake8"))
             "--format=default"
             (config-file "--config" flycheck-flake8rc)
             (option "--max-complexity" flycheck-flake8-maximum-complexity nil
@@ -8782,10 +8825,13 @@ Requires Flake8 3.0 or newer. See URL
             (id (one-or-more (any alpha)) (one-or-more digit)) " "
             (message (one-or-more not-newline))
             line-end))
+  :enabled (lambda ()
+             (or (not (flycheck-python-needs-module-p 'python-flake8))
+                 (flycheck-python-find-module 'python-flake8 "flake8")))
+  :verify (lambda (_) (flycheck-python-verify-module 'python-flake8 "flake8"))
   :modes python-mode)
 
-(flycheck-def-config-file-var flycheck-pylintrc python-pylint
-                              ".pylintrc"
+(flycheck-def-config-file-var flycheck-pylintrc python-pylint ".pylintrc"
   :safe #'stringp)
 
 (flycheck-def-option-var flycheck-pylint-use-symbolic-id t python-pylint
@@ -8805,7 +8851,11 @@ This syntax checker requires Pylint 1.0 or newer.
 
 See URL `https://www.pylint.org/'."
   ;; -r n disables the scoring report
-  :command ("pylint" "-r" "n"
+  ;; Not calling pylint directly makes it easier to switch between different
+  ;; Python versions; see https://github.com/flycheck/flycheck/issues/1055.
+  :command ("python"
+            (eval (flycheck-python-module-args 'python-pylint "pylint"))
+            "-r" "n"
             "--output-format" "text"
             "--msg-template"
             (eval (if flycheck-pylint-use-symbolic-id
@@ -8830,6 +8880,10 @@ See URL `https://www.pylint.org/'."
    (info line-start (file-name) ":" line ":" column ":"
          "C:" (id (one-or-more (not (any ":")))) ":"
          (message) line-end))
+  :enabled (lambda ()
+             (or (not (flycheck-python-needs-module-p 'python-pylint))
+                 (flycheck-python-find-module 'python-pylint "pylint")))
+  :verify (lambda (_) (flycheck-python-verify-module 'python-pylint "pylint"))
   :modes python-mode)
 
 (flycheck-define-checker python-pycompile
