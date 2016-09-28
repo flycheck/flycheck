@@ -7501,27 +7501,29 @@ See URL `https://github.com/eslint/eslint'."
             "--stdin" "--stdin-filename" source-original)
   :standard-input t
   :error-parser flycheck-parse-checkstyle
-  :error-filter (lambda (errors)
-                  (seq-do (lambda (err)
-                            ;; Parse error ID from the error message
-                            (setf (flycheck-error-message err)
-                                  (replace-regexp-in-string
-                                   (rx " ("
-                                       (group (one-or-more (not (any ")"))))
-                                       ")" string-end)
-                                   (lambda (s)
-                                     (setf (flycheck-error-id err)
-                                           (match-string 1 s))
-                                     "")
-                                   (flycheck-error-message err))))
-                          (flycheck-sanitize-errors errors))
-                  errors)
-  :enabled (lambda (checker)
-             (let* ((default-directory (flycheck-compute-working-directory checker))
-                    (executable (flycheck-find-checker-executable checker))
-                    (exitcode (call-process executable nil nil nil
-                                            "--print-config" ".")))
-               (eq exitcode 0)))
+  :error-filter
+  (lambda (errors)
+    (seq-do (lambda (err)
+              ;; Parse error ID from the error message
+              (setf (flycheck-error-message err)
+                    (replace-regexp-in-string
+                     (rx " ("
+                         (group (one-or-more (not (any ")"))))
+                         ")" string-end)
+                     (lambda (s)
+                       (setf (flycheck-error-id err)
+                             (match-string 1 s))
+                       "")
+                     (flycheck-error-message err))))
+            (flycheck-sanitize-errors errors))
+    errors)
+  :enabled
+  (lambda (checker)
+    (let* ((default-directory (flycheck-compute-working-directory checker))
+           (executable (flycheck-find-checker-executable checker))
+           (exitcode (call-process executable nil nil nil
+                                   "--print-config" ".")))
+      (eq exitcode 0)))
   :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode)
   :next-checkers ((warning . javascript-jscs)))
 
