@@ -26,7 +26,10 @@
 
 - Improvements:
 
-  - Do not use ``javascript-eslint`` if eslint cannot find a valid configuration [GH-1085]
+  - Do not use ``javascript-eslint`` if eslint cannot find a valid configuration
+    [GH-1085]
+  - Automatically disable syntax checkers which are not installed instead of
+    checking executable before each syntax check [GH-1116]
 
 29 (Aug 28, 2016)
 =================

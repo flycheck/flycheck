@@ -1614,6 +1614,10 @@ are mandatory.
      non-nil if this syntax checker shall be used to check the
      current buffer.  Otherwise it shall return nil.
 
+     If this checker has a `:working-directory' FUNCTION is
+     called with `default-directory' bound to the checker's
+     working directory.
+
      FUNCTION is only called in matching major modes.
 
      This property is optional.
@@ -1622,17 +1626,22 @@ are mandatory.
      A function to determine whether to use the syntax checker in
      the current buffer.
 
-     This function behaves as `:predicate', except that it's only
+     This property behaves as `:predicate', except that it's only
      called the first time a syntax checker is to be used in a buffer.
 
-     If the function returns a non-nil value the checker is put in a
-     whitelist in `flycheck-enabled-checkers' to prevent further
-     invocations of `:enabled'.  Otherwise it is disabled via
-     `flycheck-disabled-checkers' to prevent any further use of it.
-
-     FUNCTION is called with CHECKER argument and shall return
+     FUNCTION is called without arguments and shall return
      non-nil if this syntax checker shall be used to check the
      current buffer.  Otherwise it shall return nil.
+
+     If FUNCTION returns a non-nil value the checker is put in a
+     whitelist in `flycheck-enabled-checkers' to prevent further
+     invocations of `:enabled'.  Otherwise it is disabled via
+     `flycheck-disabled-checkers' to prevent any further use of
+     it.
+
+     If this checker has a `:working-directory' FUNCTION is
+     called with `default-directory' bound to the checker's
+     working directory.
 
      FUNCTION is only called in matching major modes.
 
@@ -1742,12 +1751,20 @@ Signal an error, if any property has an invalid value."
            (lambda ()
              (if (flycheck-valid-checker-p symbol)
                  (or (null predicate)
+                     ;; Run predicate in the checker's default directory
                      (let ((default-directory
                              (flycheck-compute-working-directory symbol)))
                        (funcall predicate)))
                (lwarn 'flycheck :warning "%S is no valid Flycheck syntax checker.
 Try to reinstall the package defining this syntax checker." symbol)
-               nil))))
+               nil)))
+          (real-enabled
+           (lambda ()
+             (or (null enabled)
+                 ;; Run enabled in the checker's default directory
+                 (let ((default-directory
+                         (flycheck-compute-working-directory symbol)))
+                   (funcall enabled))))))
       (pcase-dolist (`(,prop . ,value)
                      `((start             . ,start)
                        (interrupt         . ,interrupt)
@@ -1755,7 +1772,7 @@ Try to reinstall the package defining this syntax checker." symbol)
                        (modes             . ,modes)
                        (predicate         . ,real-predicate)
                        (verify            . ,verify)
-                       (enabled           . ,enabled)
+                       (enabled           . ,real-enabled)
                        (error-filter      . ,filter)
                        (next-checkers     . ,next-checkers)
                        (documentation     . ,docstring)
@@ -1801,7 +1818,7 @@ nil otherwise."
          (shall-enable (and (not (flycheck-disabled-checker-p checker))
                             (or (memq checker flycheck-enabled-checkers)
                                 (null enabled)
-                                (funcall enabled checker)))))
+                                (funcall enabled)))))
     (if shall-enable
         (cl-pushnew checker flycheck-enabled-checkers)
       (cl-pushnew checker flycheck-disabled-checkers))
@@ -4474,7 +4491,7 @@ default `:verify' function of command checkers."
         (patterns (plist-get properties :error-patterns))
         (parser (or (plist-get properties :error-parser)
                     #'flycheck-parse-with-patterns))
-        (predicate (plist-get properties :predicate))
+        (enabled (plist-get properties :enabled))
         (standard-input (plist-get properties :standard-input)))
     (unless command
       (error "Missing :command in syntax checker %s" symbol))
@@ -4489,12 +4506,12 @@ default `:verify' function of command checkers."
       (error "Missing :error-patterns in syntax checker %s" symbol))
 
     (setq properties
-          ;; Construct a predicate that checks whether the executable exists, to
-          ;; guard against syntax checker tools which are not installed
-          (plist-put properties :predicate
+          ;; Automatically disable command checkers if the executable does not
+          ;; exist.
+          (plist-put properties :enabled
                      (lambda ()
                        (and (flycheck-find-checker-executable symbol)
-                            (or (not predicate) (funcall predicate))))))
+                            (or (not enabled) (funcall enabled))))))
 
     (apply #'flycheck-define-generic-checker symbol docstring
            :start #'flycheck-start-command-checker
@@ -7516,9 +7533,8 @@ See URL `https://github.com/eslint/eslint'."
             (flycheck-sanitize-errors errors))
     errors)
   :enabled
-  (lambda (checker)
-    (let* ((default-directory (flycheck-compute-working-directory checker))
-           (executable (flycheck-find-checker-executable checker))
+  (lambda ()
+    (let* ((executable (flycheck-find-checker-executable 'javascript-eslint))
            (exitcode (call-process executable nil nil nil
                                    "--print-config" ".")))
       (eq exitcode 0)))

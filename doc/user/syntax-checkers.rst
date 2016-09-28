@@ -47,6 +47,18 @@ so, runs the next syntax checker, and so on, until there is no more syntax
 checker for the current buffer.  This process repeats whenever Flycheck needs to
 check the buffer according to `flycheck-check-syntax-automatically`.
 
+.. important::
+
+   Under some circumstances—for instance if the syntax checker is not installed—
+   Flycheck automatically :ref:`disables syntax checkers
+   <flycheck-disable-checkers>` in the current buffer and will thus not even
+   consider them in any future checks in the current buffer.
+
+   In the `verification buffer <C-c ! v>` these syntax checkers are marked as
+   “disabled” just as if you had disabled them manually with `C-c ! x`, and
+   likewise you can re-enable automatically disabled syntax checkers with `C-u
+   C-c ! x`.
+
 For instance, the first syntax checker for Emacs Lisp is `emacs-lisp` which
 checks Emacs Lisp with Emacs' own byte compiler.  This syntax checker asks for
 `emacs-lisp-checkdoc` to run next, which checks for stylistic issues in Emacs

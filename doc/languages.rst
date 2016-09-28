@@ -551,8 +551,9 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. note::
 
-         Flycheck does not use this syntax checker if eslint cannot find a valid
-         configuration file.
+         Flycheck automatically :ref:`disables <flycheck-disable-checkers>`
+         this syntax checker if eslint cannot find a valid configuration file
+         for the current buffer.
 
       .. defcustom:: flycheck-eslint-rules-directories
 
