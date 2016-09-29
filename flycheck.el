@@ -1748,23 +1748,23 @@ Signal an error, if any property has an invalid value."
       (flycheck-validate-next-checker checker))
 
     (let ((real-predicate
-           (lambda ()
-             (if (flycheck-valid-checker-p symbol)
-                 (or (null predicate)
-                     ;; Run predicate in the checker's default directory
-                     (let ((default-directory
-                             (flycheck-compute-working-directory symbol)))
-                       (funcall predicate)))
-               (lwarn 'flycheck :warning "%S is no valid Flycheck syntax checker.
-Try to reinstall the package defining this syntax checker." symbol)
-               nil)))
+           (and predicate
+                (lambda ()
+                  ;; Run predicate in the checker's default directory
+                  (let ((default-directory
+                          (flycheck-compute-working-directory symbol)))
+                    (funcall predicate)))))
           (real-enabled
            (lambda ()
-             (or (null enabled)
-                 ;; Run enabled in the checker's default directory
-                 (let ((default-directory
-                         (flycheck-compute-working-directory symbol)))
-                   (funcall enabled))))))
+             (if (flycheck-valid-checker-p symbol)
+                 (or (null enabled)
+                     ;; Run enabled in the checker's default directory
+                     (let ((default-directory
+                             (flycheck-compute-working-directory symbol)))
+                       (funcall enabled)))
+               (lwarn 'flycheck :warning "%S is no valid Flycheck syntax checker.
+Try to reinstall the package defining this syntax checker." symbol)
+               nil))))
       (pcase-dolist (`(,prop . ,value)
                      `((start             . ,start)
                        (interrupt         . ,interrupt)
@@ -1833,7 +1833,7 @@ nil otherwise."
     (and (flycheck-valid-checker-p checker)
          (flycheck-checker-supports-major-mode-p checker major-mode)
          (flycheck-may-enable-checker checker)
-         (funcall predicate))))
+         (or (null predicate) (funcall predicate)))))
 
 (defun flycheck-may-use-next-checker (next-checker)
   "Determine whether NEXT-CHECKER may be used."
