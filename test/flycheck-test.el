@@ -3903,18 +3903,32 @@ Why not:
      '(5 9 warning "Redundant braces after class definition"
          :checker scala-scalastyle))))
 
+(defvar geiser-impl--implementation)
+
+(defun flycheck/chicken-mode ()
+  "Enable Scheme and Geiser mode for Chicken scheme."
+  (interactive)
+  (scheme-mode)
+  (setq-local geiser-impl--implementation 'chicken)
+  (geiser-mode))
+
 (flycheck-ert-def-checker-test scheme-chicken scheme nil
-  (let ((setup-geiser
-         (lambda ()
-           (setq-local geiser-scheme-implementation 'chicken)
-           (geiser-mode))))
-    (add-hook 'scheme-mode-hook setup-geiser)
-    (unwind-protect
-        (flycheck-ert-should-syntax-check
-         "language/chicken.scm" 'geiser-mode
-         '(2 nil warning "in procedure call to `g1', expected a value of type `(procedure (* *) *)' but was given a value of type `number'"
-             :checker scheme-chicken))
-      (remove-hook 'scheme-mode-hook setup-geiser))))
+  (flycheck-ert-should-syntax-check
+   "language/chicken/error.scm" 'flycheck/chicken-mode
+   '(2 nil warning "in procedure call to `g1', expected a value of type `(procedure (* *) *)' but was given a value of type `number'"
+       :checker scheme-chicken)))
+
+(flycheck-ert-def-checker-test scheme-chicken scheme syntax-error
+  (flycheck-ert-should-syntax-check
+   "language/chicken/syntax-error.scm" 'flycheck/chicken-mode
+   '(1 nil error "not enough arguments\n\n\t(define)\n\n\tExpansion history:\n\n\t<syntax>\t  (##core#begin (define))\n\t<syntax>\t  (define)\t<--"
+       :checker scheme-chicken)))
+
+(flycheck-ert-def-checker-test scheme-chicken scheme syntax-read-error
+  (flycheck-ert-should-syntax-check
+   "language/chicken/syntax-read-error.scm" 'flycheck/chicken-mode
+   '(1 nil error "invalid sharp-sign read syntax: #\\n"
+       :checker scheme-chicken)))
 
 (flycheck-ert-def-checker-test scss-lint scss nil
   (let ((flycheck-scss-lintrc "scss-lint.yml"))

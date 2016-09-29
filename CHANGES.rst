@@ -30,6 +30,7 @@
     [GH-1085]
   - Automatically disable syntax checkers which are not installed instead of
     checking executable before each syntax check [GH-1116]
+  - Add patterns for syntax errors to ``scheme-chicken`` [GH-1123]
 
 29 (Aug 28, 2016)
 =================
