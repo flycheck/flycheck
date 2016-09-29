@@ -1986,7 +1986,15 @@ Slots:
 Return a list of `flycheck-verification-result' objects."
   (let (results
         (predicate (flycheck-checker-get checker 'predicate))
+        (enabled (flycheck-checker-get checker 'enabled))
         (verify (flycheck-checker-get checker 'verify)))
+    (when enabled
+      (let ((result (funcall enabled)))
+        (push (flycheck-verification-result-new
+               :label "may enable"
+               :message (if result "yes" "Automatically disabled!")
+               :face (if result 'success '(bold warning)))
+              results)))
     (when predicate
       (let ((result (funcall predicate)))
         (push (flycheck-verification-result-new
