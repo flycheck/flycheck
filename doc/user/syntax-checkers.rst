@@ -257,8 +257,7 @@ or probably don't even have a tool available globally—this frequently occurs i
 Javascript project where dependencies including linter tools are typically
 installed into a local ``node_modules`` directory:
 
-.. define-key:: C-c ! e
-                M-x flycheck-set-checker-executable
+.. define-key:: M-x flycheck-set-checker-executable
 
    Prompt for a syntax checker and an executable file and make Flycheck use the
    executable file for the syntax checker in the current buffer.

@@ -137,7 +137,7 @@
       (it "has the error ID in the 4th cell"
         (expect (aref cells 3) :to-equal
                 (list "W1"
-                      'type 'flycheck-error-list
+                      'type 'flycheck-error-list-explain-error
                       'face 'flycheck-error-list-id
                       'help-echo "W1")))
 

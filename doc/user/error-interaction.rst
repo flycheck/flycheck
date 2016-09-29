@@ -138,6 +138,18 @@ and IDs of all errors under the pointer, but the contents are customisable:
    The function is given a list of Flycheck errors to display as sole argument
    and shall return a single string to use as the contents of the tooltip.
 
+Explain errors
+==============
+
+Flycheck also has the ability to display explanations for errors, provided the
+error checker is capable of producing these explanations.  Currently, only the
+`rust` and `rust-cargo` checkers produce explanations.
+
+.. define-key:: C-c ! e
+                M-x flycheck-explain-error-at-point
+
+   Display an explanation for the first explainable error at point.
+
 
 Kill errors
 ===========

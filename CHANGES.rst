@@ -22,6 +22,11 @@
 
   - Add ``flycheck-cargo-rustc-args`` to pass multiple arguments to cargo rustc
     subcommand [GH-1079]
+  - Add ``:error-explainer`` to ``flycheck-define-checker`` and
+    ``flycheck-explain-error-at-point`` to display explanations of errors
+    [GH-1122]
+  - Add an error explainer to the ``rust`` and ``rust-cargo`` checkers using
+    ``rustc --explain`` [GH-1122]
   - Add ``:enabled`` property to ``flycheck-define-checker`` [GH-1089]
 
 - Improvements:
