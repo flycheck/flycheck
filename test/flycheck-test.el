@@ -3545,6 +3545,12 @@ Why not:
    '(4 2 error "Syntax error, maybe a missing semicolon?"
        :checker processing)))
 
+(flycheck-ert-def-checker-test protobuf-protoc protobuf syntax-error
+  (flycheck-ert-should-syntax-check
+   "language/protobuf.proto" 'protobuf-mode
+   '(2 23 error "Missing field number."
+       :checker protobuf-protoc)))
+
 (flycheck-ert-def-checker-test pug pug syntax-error
   (flycheck-ert-should-syntax-check
    "language/pug/pug.pug" 'pug-mode

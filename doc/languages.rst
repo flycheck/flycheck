@@ -706,6 +706,14 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax using the `Processing <https://processing.org/>`_ compiler.
 
+.. supported-language:: Protobuf
+
+   .. syntax-checker:: protobuf-protoc
+
+      Check syntax using the protoc_ compiler.
+
+      .. _protoc: https://developers.google.com/protocol-buffers/
+
 .. supported-language:: Pug
 
    .. syntax-checker:: pug
