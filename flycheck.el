@@ -8747,6 +8747,15 @@ See URL `http://call-cc.org/'."
             "Warning: " (zero-or-more not-newline) ":\n"
             (one-or-more (any space)) "(" (file-name) ":" line ") " (message)
             line-end)
+   (error line-start "Error: (line " line ") " (message) line-end)
+   (error line-start "Syntax error: (" (file-name) ":" line ")"
+          (zero-or-more not-newline) " - "
+          (message (one-or-more not-newline)
+                   (zero-or-more "\n"
+                                 (zero-or-more space)
+                                 (zero-or-more not-newline))
+                   (one-or-more space) "<--")
+          line-end)
    (error line-start
           "Error: " (zero-or-more not-newline) ":\n"
           (one-or-more (any space)) "(" (file-name) ":" line ") " (message)
