@@ -20,7 +20,7 @@ Conduct <flycheck-conduct>`.
 
 .. _issue tracker: https://github.com/flycheck/flycheck/issues
 .. _Gitter chatroom: https://gitter.im/flycheck/flycheck
-.. _need your help with: https://github.com/flycheck/flycheck/issues?q=is%3Aopen+is%3Aissue+no%3Aassignee
+.. _need your help with: https://github.com/flycheck/flycheck/issues?q=is%3Aissue+is%3Aopen+label%3A%22needs+help%22
 .. _beginner-friendly tasks: https://github.com/flycheck/flycheck/labels/beginner%20friendly
 
 .. _flycheck-bug-reports:

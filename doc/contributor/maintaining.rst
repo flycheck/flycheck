@@ -18,6 +18,9 @@ Please label incoming tickets accordingly according to these rules:
   label please also add a comment that outlines a possible solution.
 - Add “blocked” to bugs that need further comment or help from the reporter, and
   to pull requests that need to be improved.
+- Add “needs help” to anything that no contributor will work on, to mark the
+  issue as available for external contributors and inform users that we will not
+  work on the issue.
 - Add “windows only” for bugs that appear to only affect Windows operating
   systems.
 
