@@ -9,3 +9,6 @@ pep8>=1.7
 pep8-naming>=0.4
 flake8-quotes>=0.8
 flake8_docstrings>=1.0
+# pydocstyle 1.1.0 breaks flake8_docstrings currently, see
+# https://gitlab.com/pycqa/flake8-docstrings/issues/16
+pydocstyle<1.1.0
