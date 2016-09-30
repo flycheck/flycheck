@@ -1986,7 +1986,15 @@ Slots:
 Return a list of `flycheck-verification-result' objects."
   (let (results
         (predicate (flycheck-checker-get checker 'predicate))
+        (enabled (flycheck-checker-get checker 'enabled))
         (verify (flycheck-checker-get checker 'verify)))
+    (when enabled
+      (let ((result (funcall enabled)))
+        (push (flycheck-verification-result-new
+               :label "may enable"
+               :message (if result "yes" "Automatically disabled!")
+               :face (if result 'success '(bold warning)))
+              results)))
     (when predicate
       (let ((result (funcall predicate)))
         (push (flycheck-verification-result-new
@@ -7507,6 +7515,13 @@ for more information about the custom directories."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "29"))
 
+(defun flycheck-eslint-config-exists-p ()
+  "Whether there is an eslint config for the current buffer."
+  (let* ((executable (flycheck-find-checker-executable 'javascript-eslint))
+         (exitcode (and executable (call-process executable nil nil nil
+                                                 "--print-config" "."))))
+    (eq exitcode 0)))
+
 (flycheck-define-checker javascript-eslint
   "A Javascript syntax and style checker using eslint.
 
@@ -7532,14 +7547,19 @@ See URL `https://github.com/eslint/eslint'."
                      (flycheck-error-message err))))
             (flycheck-sanitize-errors errors))
     errors)
-  :enabled
-  (lambda ()
-    (let* ((executable (flycheck-find-checker-executable 'javascript-eslint))
-           (exitcode (call-process executable nil nil nil
-                                   "--print-config" ".")))
-      (eq exitcode 0)))
+  :enabled (lambda () (flycheck-eslint-config-exists-p))
   :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode)
-  :next-checkers ((warning . javascript-jscs)))
+  :next-checkers ((warning . javascript-jscs))
+  :verify
+  (lambda (_)
+    (let* ((default-directory
+             (flycheck-compute-working-directory 'javascript-eslint))
+           (have-config (flycheck-eslint-config-exists-p)))
+      (list
+       (flycheck-verification-result-new
+        :label "config file"
+        :message (if have-config "found" "missing")
+        :face (if have-config 'success '(bold error)))))))
 
 (flycheck-def-config-file-var flycheck-gjslintrc javascript-gjslint ".gjslintrc"
   :safe #'stringp)
