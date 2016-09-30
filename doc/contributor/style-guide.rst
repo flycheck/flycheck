@@ -116,3 +116,31 @@ Documentation
   * Document changes to our build system and tooling in the :ref:`contributor’s
     guide <flycheck-contributors-guide>` or the :ref:`maintainer’s guide
     <flycheck-maintainers-guide>`.
+
+Commit messages
+===============
+
+This model commit message illustrates our style::
+
+   Fix a foo bug
+
+   The first line is the summary, 50 characters or less.  Write in the
+   imperative and in present tense: “Fix bug”, not “fixed bug” or “fixes
+   bug”.  Explain the intend of the change not the actual contents which the
+   diff already provides
+
+   After the summary more paragraphs with detailed explanations may follow,
+   wrapped at 72 characters.  Separate multiple paragraphs by blank lines.
+
+   You may use simple formatting like *emphasis* or _underline_, but keep
+   it to a minimum.  Commit messages are not in Markdown :)
+
+   Commit messages may reference issues by number, like this: See GH-42.
+   Please use `GH-` to prefix issue numbers.  You may also close issues
+   like this: Fixes GH-42 and closes GH-42.
+
+`Git Commit`_ and Magit_ provide Emacs mode for Git commit messages, which helps
+you to comply to these guidelines.
+
+.. _Git Commit: https://github.com/magit/magit/
+.. _Magit: https://github.com/magit/magit/

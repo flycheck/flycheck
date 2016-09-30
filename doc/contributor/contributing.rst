@@ -137,9 +137,15 @@ mandatory for pull requests, though, we will test your changes, too.
 All pull requests are reviewed by a :ref:`maintainer <flycheck-maintainers>`.
 Feel free to mention individual developers (e.g. ``@lunaryorn``) to request a
 review from a specific person, or ``@flycheck/maintainers`` if you have general
-questions or if your pull request was waiting for review too long.  Take a look
-at our :ref:`flycheck-style-guide` to see what we look for and how we expect
-code to look like.
+questions or if your pull request was waiting for review too long.
+
+.. important::
+
+   We have a comprehensive :ref:`flycheck-style-guide` that explains what
+   features we will accept, how our code should look likewise, what tests we
+   require, how commit messages should look like, and so on.
+
+   Take a look at it to see what we look for in a code review.
 
 Additionally all pull requests go through automated tests on `Travis CI`_ which
 check code style, run unit tests, etc.
@@ -149,34 +155,6 @@ leave a ``LGTM`` comment at which point the pull request is ready for being
 merged.
 
 .. _Travis CI: https://travis-ci.org/flycheck/flycheck/pull_requests
-
-Commit guidelines
------------------
-
-The art of writing good commit messages is a wide subject. This model commit
-message illustrates our style::
-
-   Fix a foo bug
-
-   The first line is the summary, 50 characters or less.  Write in the
-   imperative and in present tense: “Fix bug”, not “fixed bug” or “fixes
-   bug”.
-
-   After the summary more paragraphs with detailed explanations may follow,
-   wrapped at 72 characters.  Separate multiple paragraphs by blank lines.
-
-   You may use simple formatting like *emphasis* or _underline_, but keep
-   it to a minimum.  Commit messages are not in Markdown :)
-
-   Commit messages may reference issues by number, like this: See GH-42.
-   Please use `GH-` to prefix issue numbers.  You may also close issues
-   like this: Fixes GH-42 and closes GH-42.
-
-`Git Commit`_ and Magit_ provide Emacs mode for Git commit messages, which helps
-you to comply to these guidelines.
-
-.. _Git Commit: https://github.com/magit/magit/
-.. _Magit: https://github.com/magit/magit/
 
 Writing documentation
 =====================
