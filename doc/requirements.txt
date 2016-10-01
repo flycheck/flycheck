@@ -1,5 +1,6 @@
 # Sphinx
-Sphinx>=1.4
+# 1.4.7 is broken, see https://github.com/sphinx-doc/sphinx/issues/2996
+Sphinx>=1.4,!=1.4.7
 # Automatically build documentation on changes
 sphinx-autobuild
 # Sphinx theme
