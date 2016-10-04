@@ -3845,13 +3845,11 @@ Why not:
      "language/rust/src/syntax-error.rs" 'rust-mode
      '(4 5 error "unresolved name `bla`" :checker rust :id "E0425"))))
 
-(flycheck-ert-def-checker-test rust rust multiline-error
+(flycheck-ert-def-checker-test rust rust type-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/src/multiline-error.rs" 'rust-mode
-     '(7 9 error "mismatched types (expected u8, found i8)" :checker rust :id "E0308")
-     '(7 9 info "expected type `u8`" :checker rust :id "E0308")
-     '(7 9 info "found type `i8`" :checker rust :id "E0308"))))
+     '(7 9 error "mismatched types (expected u8, found i8)" :checker rust :id "E0308"))))
 
 (flycheck-ert-def-checker-test rust rust warning
   (let ((flycheck-disabled-checkers '(rust-cargo)))
@@ -3873,6 +3871,12 @@ Why not:
     (flycheck-ert-should-syntax-check
      "language/rust/src/importing.rs" 'rust-mode
      '(1 5 error "unresolved import `super::imported`. There are too many initial `super`s." :checker rust :id "E0432"))))
+
+(flycheck-ert-def-checker-test rust rust macro-error
+  (let ((flycheck-disabled-checkers '(rust-cargo)))
+    (flycheck-ert-should-syntax-check
+     "language/rust/src/macro-error.rs" 'rust-mode
+     '(2 3 info "invalid reference to argument `0` (no arguments given)" :checker rust))))
 
 (flycheck-ert-def-checker-test sass sass nil
   (flycheck-ert-should-syntax-check

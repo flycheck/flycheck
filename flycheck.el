@@ -5534,6 +5534,23 @@ about TSLint."
              (and (not (string-empty-p output))
                   (json-read-from-string output)))))
 
+(defun flycheck-parse-rust-collect-spans (span)
+  "Return a list of spans contained in a SPAN object."
+  (let ((spans))
+    (let-alist span
+      ;; With macro expansion errors, some spans will point to phony file names
+      ;; to indicate an error inside the std rust lib.  We skip these spans as
+      ;; they won't appear in flycheck anyway.
+      (unless (string= .file_name "<std macros>")
+        (push span spans))
+
+      ;; Macro expansion errors will have a span in the 'expansion' field, so we
+      ;; recursively collect it.
+      (if .expansion.span
+          (append (flycheck-parse-rust-collect-spans .expansion.span)
+                  spans)
+        spans))))
+
 (defun flycheck-parse-rust (output checker buffer)
   "Parse rust errors from OUTPUT and return a list of `flycheck-error'.
 
@@ -5562,12 +5579,15 @@ https://github.com/rust-lang/rust/blob/master/src/libsyntax/json.rs#L67-L139"
     ;; level (error, warning), while the spans have a filename, line, column,
     ;; and an optional label.  The primary span points to the root cause of the
     ;; error in the source text, while non-primary spans point to related
-    ;; causes.  In addition, each diagnostic can also have children diagnostics
-    ;; that are used to provide additional information through their message
-    ;; field, but do not seem to contain any spans (yet).
+    ;; causes.  Spans may have an 'expansion' field for macro expansion errors;
+    ;; these expansion fields will contain another span (and so on).  In
+    ;; addition, each diagnostic can also have children diagnostics that are
+    ;; used to provide additional information through their message field, but
+    ;; do not seem to contain any spans (yet).
     ;;
-    ;; We first iterate over diagnostics and their spans to turn every span into
-    ;; a flycheck error object, that we collect into the `errors' list.
+    ;; We first iterate over diagnostics, get all their spans and turn every
+    ;; span into a flycheck error object, that we collect into the `errors'
+    ;; list.
     (dolist (diagnostic diagnostics)
       (let ((error-message)
             (error-level)
@@ -5589,9 +5609,11 @@ https://github.com/rust-lang/rust/blob/master/src/libsyntax/json.rs#L67-L139"
                 ;; The 'code' field of the diagnostic contains the actual error
                 ;; code and an optional explanation that we ignore
                 error-code .code.code
-                spans .spans
+                ;; Collect all spans recursively
+                spans (seq-mapcat #'flycheck-parse-rust-collect-spans .spans)
                 children .children))
 
+        ;; Turn each span into a flycheck error
         (dolist (span spans)
           (let-alist span
             ;; Children lack any filename/line/column information, so we use
@@ -5610,7 +5632,9 @@ https://github.com/rust-lang/rust/blob/master/src/libsyntax/json.rs#L67-L139"
                   ;; Primary spans may have labels with additional information
                   (concat error-message (when .label
                                           (format " (%s)" .label)))
-                .label)
+                ;; If the label is empty, fallback on the error message,
+                ;; otherwise we won't be able to display anything
+                (or .label error-message))
               :id error-code
               :checker checker
               :buffer buffer
