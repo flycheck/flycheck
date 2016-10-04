@@ -51,7 +51,7 @@ than too little. Here’s a list of facts that are important:
 
 .. _search existing issues: https://github.com/flycheck/flycheck/issues?q=is%3Aissue
 .. _issue form: https://github.com/flycheck/flycheck/issues/new
-.. _reproduce the issue in emacs -Q: http://www.lunaryorn.com/2015/11/29/reproduce-bugs-in-emacs-Q.html
+.. _reproduce the issue in emacs -Q: http://www.lunaryorn.com/posts/reproduce-bugs-in-emacs-Q.html
 
 .. _flycheck-windows-issues:
 
