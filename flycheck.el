@@ -64,7 +64,7 @@
 (eval-when-compile
   (require 'let-alist)      ; `let-alist'
   (require 'compile)        ; Compile Mode integration
-  (require 'jka-compr)      ; For JKA workarounds in `flycheck-temp-file-system'
+  (require 'jka-compr)      ; To inhibit compression of temp files
   (require 'pcase)          ; `pcase-dolist' (`pcase' itself is autoloaded)
   )
 
