@@ -11,6 +11,7 @@
   - Remove jade checker [GH-951] [GH-1084]
   - Remove ``javascript-eslintrc`` and instead rely on eslint's own configuration file
     search [GH-1085]
+  - ``C-c ! e`` explains errors now [GH-1122]
 
 - New syntax checkers:
 
