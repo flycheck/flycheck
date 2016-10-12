@@ -121,17 +121,3 @@ You can also start a syntax check explicitly with `C-c ! c`:
                 M-x flycheck-buffer
 
    Check syntax in the current buffer.
-
-Debug syntax checking
-=====================
-
-To make sure that syntax checking works correctly verify your setup:
-
-.. define-key:: C-c ! v
-                M-x flycheck-verify-setup
-
-   Show a buffer with information about your :mode:`flycheck` setup for the
-   current buffer.
-
-   Lists all syntax checkers available for the current buffer, and potential
-   issues with their setup.

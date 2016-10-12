@@ -46,9 +46,24 @@ run ``M-x eval-buffer``:
 
    (global-flycheck-mode)
 
+*On MacOS* also add the following to :ref:`fix your $PATH environment variable
+<flycheck-macos-exec-path-from-shell>`:
+
+.. code-block:: cl
+
+   (package-install 'exec-path-from-shell)
+   (exec-path-from-shell-initialize)
+
 For a permanent installation of Flycheck follow the :ref:`Installation
 <flycheck-installation>` instructions.  For a gentle introduction into Flycheck
 features go through :ref:`Quickstart <flycheck-quickstart>` guide.
+
+.. important::
+
+   If Flycheck fails to run properly or gives you any error messages please take
+   a look at the :ref:`troubleshooting section <flycheck-troubleshooting>` which
+   covers some common setup issues and helps you debug and fix problems with
+   Flycheck.
 
 .. _`known windows issues`: https://github.com/flycheck/flycheck/labels/B-Windows%20only
 
@@ -69,6 +84,7 @@ Meanwhile you can read a simple HTML version of the old manual at
 
    user/installation
    user/quickstart
+   user/troubleshooting
    user/syntax-checks
    user/syntax-checkers
    user/error-reports

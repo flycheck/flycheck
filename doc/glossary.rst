@@ -39,6 +39,10 @@ reference`_, but we reproduce them here for convenience.
       A syntax checker in `flycheck-checkers`.  Flycheck will only use these
       syntax checkers when checking buffers automatically.
 
+   verification buffer
+      A buffer shown by `M-x flycheck-verify-buffer`.  This buffer contains
+      information about the Flycheck setup for the current buffer.
+
    executable option
    executable options
      Options to override the executables of syntax checkers that run external
