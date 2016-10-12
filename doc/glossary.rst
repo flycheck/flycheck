@@ -40,7 +40,7 @@ reference`_, but we reproduce them here for convenience.
       syntax checkers when checking buffers automatically.
 
    verification buffer
-      A buffer shown by `M-x flycheck-verify-buffer`.  This buffer contains
+      A buffer shown by `M-x flycheck-verify-setup`.  This buffer contains
       information about the Flycheck setup for the current buffer.
 
    executable option
