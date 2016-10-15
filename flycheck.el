@@ -247,6 +247,7 @@ attention to case differences."
     slim
     slim-lint
     sql-sqlint
+    systemd-analyze
     tex-chktex
     tex-lacheck
     texinfo
@@ -9159,6 +9160,15 @@ See URL `https://github.com/purcell/sqlint'."
                                  (one-or-more not-newline)))
           line-end))
   :modes (sql-mode))
+
+(flycheck-define-checker systemd-analyze
+  "A systemd unit checker using systemd-analyze(1).
+
+See URL `https://www.freedesktop.org/software/systemd/man/systemd-analyze.html'."
+  :command ("systemd-analyze" "verify" source-original)
+  :error-patterns
+  ((error line-start "[" (file-name) ":" line "] " (message) line-end))
+  :modes (systemd-mode))
 
 (flycheck-def-config-file-var flycheck-chktexrc tex-chktex ".chktexrc"
   :safe #'stringp)

@@ -4,6 +4,7 @@
 - New syntax checkers:
 
   - Protobuf with ``protoc`` [GH-1125]
+  - systemd-analyze with ``systemd-analyze`` [GH-1135]
 
 30 (Oct 12, 2016)
 =================
