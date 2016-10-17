@@ -213,6 +213,7 @@ attention to case differences."
     php-phpmd
     php-phpcs
     processing
+    protobuf-protoc
     pug
     puppet-parser
     puppet-lint
@@ -7972,6 +7973,26 @@ See https://github.com/processing/processing/wiki/Command-Line"
           (zero-or-more (or digit ":")) (message) line-end))
   :modes processing-mode
   ;; This syntax checker needs a file name
+  :predicate (lambda () (buffer-file-name)))
+
+(flycheck-define-checker protobuf-protoc
+  "A protobuf syntax checker using the protoc compiler.
+
+See URL `https://developers.google.com/protocol-buffers/'."
+  :command ("protoc" "--error_format" "gcc"
+            (eval (concat "--java_out=" (flycheck-temp-dir-system)))
+            ;; Add the file directory of protobuf path to resolve import directives
+            (eval (concat "--proto_path=" (file-name-directory (buffer-file-name))))
+            source-inplace)
+  :error-patterns
+  ((info line-start (file-name) ":" line ":" column
+         ": note: " (message) line-end)
+   (error line-start (file-name) ":" line ":" column
+          ": " (message) line-end)
+   (error line-start
+          (message "In file included from") " " (file-name) ":" line ":"
+          column ":" line-end))
+  :modes protobuf-mode
   :predicate (lambda () (buffer-file-name)))
 
 (flycheck-define-checker pug

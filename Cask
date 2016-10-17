@@ -32,6 +32,7 @@
  (depends-on "mmm-mode")
  (depends-on "php-mode")
  (depends-on "processing-mode")
+ (depends-on "protobuf-mode")
  (depends-on "pug-mode")
  (depends-on "puppet-mode")
  (depends-on "racket-mode")

@@ -1,6 +1,10 @@
 31-cvs (in development)
 =======================
 
+- New syntax checkers:
+
+  - Protobuf with ``protoc`` [GH-1125]
+
 30 (Oct 12, 2016)
 =================
 
