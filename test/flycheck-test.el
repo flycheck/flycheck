@@ -4016,6 +4016,16 @@ Why not:
    `(1 15 error "unterminated quoted string at or near \"';\n  \" (scan.l:1087)"
        :checker sql-sqlint)))
 
+(flycheck-ert-def-checker-test systemd-analyze systemd nil
+  (flycheck-ert-should-syntax-check
+   "language/systemd-analyze-test.service" 'systemd-mode
+   '(3 nil error "Invalid URL, ignoring: foo://bar"
+       :checker systemd-analyze)
+   '(6 nil error "Unknown lvalue 'ExecSmart' in section 'Service'"
+       :checker systemd-analyze)
+   '(8 nil error "Unknown section 'Dog'. Ignoring."
+       :checker systemd-analyze)))
+
 (flycheck-ert-def-checker-test tex-chktex (tex latex) nil
   (flycheck-ert-should-syntax-check
    "language/tex.tex" 'latex-mode

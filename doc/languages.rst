@@ -1083,6 +1083,14 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check SQL syntax with `Sqlint <https://github.com/purcell/sqlint>`_.
 
+.. supported-language:: systemd Unit Configuration
+
+   .. syntax-checker:: systemd-analyze
+
+      Check systemd unit configuration file syntax with `systemd-analyze`_.
+
+      .. _systemd-analyze: https://www.freedesktop.org/software/systemd/man/systemd-analyze.html
+
 .. supported-language:: TeX/LaTeX
 
    Flycheck checks TeX and LaTeX with either `tex-chktex` or `tex-lacheck`.

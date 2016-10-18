@@ -1,0 +1,8 @@
+[Unit]
+Description=Test file for flycheck systemd-analyze checker
+Documentation=foo://bar
+
+[Service]
+ExecSmart=
+
+[Dog]
