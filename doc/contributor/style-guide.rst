@@ -117,8 +117,26 @@ Documentation
     guide <flycheck-contributors-guide>` or the :ref:`maintainer’s guide
     <flycheck-maintainers-guide>`.
 
-Commit messages
-===============
+Commits
+=======
+
+* Make each commit self-contained.
+
+* Squash trivial fixes into previous commits so that no commit in and by itself
+  violates this style guide.
+
+* Write commit messages that adhere to the style illustrated below.
+
+* In doubt prefer long messages over short messages.  Take the time to write a
+  good message that explains the intention of the change and illustrates
+  noteworthy aspects of the implementation.
+
+* If the commit fixes a bug try to reproduce a brief description of the bug in
+  the message and make sure to mention the corresponding GitHub issue
+  (e.g. ``Fixes GH-42``).
+
+Commit message style
+--------------------
 
 This model commit message illustrates our style::
 
@@ -142,5 +160,12 @@ This model commit message illustrates our style::
 `Git Commit`_ and Magit_ provide Emacs mode for Git commit messages, which helps
 you to comply to these guidelines.
 
+.. seealso::
+
+   `A Note About Git Commit Messages`_
+      Further information about good commit messages, including some motivation
+      for our rules for commit messages.
+
 .. _Git Commit: https://github.com/magit/magit/
 .. _Magit: https://github.com/magit/magit/
+.. _A Note About Git Commit Messages: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
