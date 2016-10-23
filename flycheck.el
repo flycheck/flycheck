@@ -2607,7 +2607,7 @@ discarded."
              (error "Unknown status %s from syntax checker %s"
                     status checker))))))))
 
-(defun flycheck-finish-current-syntax-check (errors cwd)
+(defun flycheck-finish-current-syntax-check (errors working-dir)
   "Finish the current syntax-check in the current buffer with ERRORS.
 
 ERRORS is a list of `flycheck-error' objects reported by the
@@ -2622,7 +2622,7 @@ syntax checks.
 Relative file names in ERRORS will be expanded relative to
 WORKING-DIR."
   (let* ((syntax-check flycheck-current-syntax-check)
-         (checker (flycheck-syntax-check-current-checker syntax-check))
+         (checker (flycheck-syntax-check-checker syntax-check))
          (errors (flycheck-relevant-errors
                   (flycheck-fill-and-expand-error-file-names
                    (flycheck-filter-errors
