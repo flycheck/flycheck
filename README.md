@@ -5,6 +5,8 @@
 [![MELPA stable version](http://stable.melpa.org/packages/flycheck-badge.svg)](http://stable.melpa.org/#/flycheck)
 [![Build Status](https://img.shields.io/travis/flycheck/flycheck/master.svg)](https://travis-ci.org/flycheck/flycheck)
 
+<http://www.flycheck.org>
+
 Modern on-the-fly syntax checking extension for GNU Emacs.  [Try it][]!
 
 ![](https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/flycheck-annotated.png)
