@@ -2615,18 +2615,19 @@ current syntax check in `flycheck-current-syntax-check'.
 
 Report all ERRORS and potentially start any next syntax checkers.
 
-If the current syntax checker reported excessive errors, it is disabled
-via `flycheck-disable-excessive-checker' for subsequent syntax
-checks.
+If the current syntax checker reported excessive errors, it is
+disabled via `flycheck-disable-excessive-checker' for subsequent
+syntax checks.
 
-Relative file names in ERRORS will be expanded relative to CWD directory."
+Relative file names in ERRORS will be expanded relative to
+WORKING-DIR."
   (let* ((syntax-check flycheck-current-syntax-check)
-         (checker (flycheck-syntax-check-checker syntax-check))
+         (checker (flycheck-syntax-check-current-checker syntax-check))
          (errors (flycheck-relevant-errors
                   (flycheck-fill-and-expand-error-file-names
                    (flycheck-filter-errors
                     (flycheck-assert-error-list-p errors) checker)
-                   cwd))))
+                   working-dir))))
     (unless (flycheck-disable-excessive-checker checker errors)
       (flycheck-report-current-errors errors))
     (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
@@ -3117,18 +3118,18 @@ with `flycheck-process-error-functions'."
   (setq flycheck-current-errors nil)
   (flycheck-report-status 'not-checked))
 
-(defun flycheck-fill-and-expand-error-file-names (errors cwd)
-  "Fill and expand file names in ERRORS.
+(defun flycheck-fill-and-expand-error-file-names (errors directory)
+  "Fill and expand file names in ERRORS relative to DIRECTORY.
 
-Expand all file names of ERRORS against the CWD directory.
-If the file name of an error is nil fill in the result of
-function `buffer-file-name' in the current buffer.
+Expand all file names of ERRORS against DIRECTORY.  If the file
+name of an error is nil fill in the result of function
+`buffer-file-name' in the current buffer.
 
 Return ERRORS, modified in-place."
   (seq-do (lambda (err)
             (setf (flycheck-error-filename err)
                   (-if-let (filename (flycheck-error-filename err))
-                      (expand-file-name filename cwd)
+                      (expand-file-name filename directory)
                     (buffer-file-name))))
           errors)
   errors)
