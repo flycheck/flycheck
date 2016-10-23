@@ -143,8 +143,8 @@ All pull requests go through a two-stage review process:
 * :ref:`All contributors <flycheck-language-teams>`—language teams in
   particular—check the technical implementation of a pull request through `pull
   request reviews`_, and either approve it or request changes.  We currently
-  require at least one approval and no requested changes
-.
+  require at least one approval and no requested changes.
+
 .. important::
 
    We have a comprehensive :ref:`flycheck-style-guide` that explains what
