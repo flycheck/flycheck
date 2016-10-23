@@ -2334,8 +2334,11 @@ Slots:
 `buffer'
      The buffer being checked.
 
-`checker'
+`current-checker'
      The syntax checker being used.
+
+`remaining-checkers'
+     Syntax checkers to run after `current-checker'.
 
 `context'
      The context object.
@@ -2343,18 +2346,18 @@ Slots:
 `working-directory'
      Working directory for the syntax checker. Serve as a value for
      `default-directory' for a checker."
-  buffer checker context working-directory)
+  buffer current-checker remaining-checkers context working-directory)
 
 (defun flycheck-syntax-check-start (syntax-check callback)
   "Start a SYNTAX-CHECK with CALLBACK."
-  (let ((checker (flycheck-syntax-check-checker syntax-check))
+  (let ((checker (flycheck-syntax-check-current-checker syntax-check))
         (default-directory (flycheck-syntax-check-working-directory syntax-check)))
     (setf (flycheck-syntax-check-context syntax-check)
           (funcall (flycheck-checker-get checker 'start) checker callback))))
 
 (defun flycheck-syntax-check-interrupt (syntax-check)
   "Interrupt a SYNTAX-CHECK."
-  (let* ((checker (flycheck-syntax-check-checker syntax-check))
+  (let* ((checker (flycheck-syntax-check-current-checker syntax-check))
          (interrupt-fn (flycheck-checker-get checker 'interrupt))
          (context (flycheck-syntax-check-context syntax-check)))
     (when interrupt-fn
@@ -2602,18 +2605,25 @@ syntax checkers should finally run."
   "The current syntax check in the this buffer.")
 (put 'flycheck-current-syntax-check 'permanent-local t)
 
-(defun flycheck-start-current-syntax-check (checker)
-  "Start a syntax check in the current buffer with CHECKER.
+(defun flycheck-start-current-syntax-check (checkers)
+  "Start a syntax check in the current buffer with CHECKERS.
+
+CHECKERS is a list of syntax checkers.  Start with the `car' of
+CHECKERS and save the `cdr' to run later.
 
 Set `flycheck-current-syntax-check' accordingly."
   ;; Allocate the current syntax check *before* starting it.  This allows for
   ;; synchronous checks, which call the status callback immediately in their
   ;; start function.
-  (let* ((check (flycheck-syntax-check-new
+  (let* ((current (car checkers))
+         (remaining (cdr checkers))
+         (working-dir (flycheck-compute-working-directory current))
+         (check (flycheck-syntax-check-new
                  :buffer (current-buffer)
-                 :checker checker
+                 :current-checker current
+                 :remaining-checkers remaining
                  :context nil
-                 :working-directory (flycheck-compute-working-directory checker)))
+                 :working-directory working-dir))
          (callback (flycheck-buffer-status-callback check)))
     (setq flycheck-current-syntax-check check)
     (flycheck-report-status 'running)
@@ -2656,9 +2666,9 @@ Get a syntax checker for the current buffer with
         (flycheck-clear-errors)
         (flycheck-mark-all-overlays-for-deletion)
         (condition-case err
-            (let* ((checker (flycheck-get-checker-for-buffer)))
-              (if checker
-                  (flycheck-start-current-syntax-check checker)
+            (let ((checkers (flycheck-get-syntax-checker-chain-for-buffer)))
+              (if checkers
+                  (flycheck-start-current-syntax-check checkers)
                 (flycheck-clear)
                 (flycheck-report-status 'no-checker)))
           (error
@@ -2715,7 +2725,7 @@ discarded."
                (eq syntax-check
                    (buffer-local-value 'flycheck-current-syntax-check buffer)))
       (with-current-buffer buffer
-        (let ((checker (flycheck-syntax-check-checker syntax-check)))
+        (let ((checker (flycheck-syntax-check-current-checker syntax-check)))
           (pcase status
             ((or `errored `interrupted)
              (flycheck-report-failed-syntax-check status)
@@ -2745,7 +2755,8 @@ discarded."
 ERRORS is a list of `flycheck-error' objects reported by the
 current syntax check in `flycheck-current-syntax-check'.
 
-Report all ERRORS and potentially start any next syntax checkers.
+Report all ERRORS and potentially start any remaining syntax
+checkers.
 
 If the current syntax checker reported excessive errors, it is
 disabled via `flycheck-disable-excessive-checker' for subsequent
@@ -2754,7 +2765,8 @@ syntax checks.
 Relative file names in ERRORS will be expanded relative to
 WORKING-DIR."
   (let* ((syntax-check flycheck-current-syntax-check)
-         (checker (flycheck-syntax-check-checker syntax-check))
+         (checker (flycheck-syntax-check-current-checker syntax-check))
+         (next-checkers (flycheck-syntax-check-remaining-checkers syntax-check))
          (errors (flycheck-relevant-errors
                   (flycheck-fill-and-expand-error-file-names
                    (flycheck-filter-errors
@@ -2762,22 +2774,21 @@ WORKING-DIR."
                    working-dir))))
     (unless (flycheck-disable-excessive-checker checker errors)
       (flycheck-report-current-errors errors))
-    (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
-      (if next-checker
-          (flycheck-start-current-syntax-check next-checker)
-        (setq flycheck-current-syntax-check nil)
-        (flycheck-report-status 'finished)
-        ;; Delete overlays only after the very last checker has run, to avoid
-        ;; flickering on intermediate re-displays
-        (flycheck-delete-marked-overlays)
-        (flycheck-error-list-refresh)
-        (run-hooks 'flycheck-after-syntax-check-hook)
-        (when (eq (current-buffer) (window-buffer))
-          (flycheck-display-error-at-point))
-        ;; Immediately try to run any pending deferred syntax check, which
-        ;; were triggered by intermediate automatic check event, to make sure
-        ;; that we quickly refine outdated error information
-        (flycheck-perform-deferred-syntax-check)))))
+    (if next-checkers
+        (flycheck-start-current-syntax-check next-checkers)
+      (setq flycheck-current-syntax-check nil)
+      (flycheck-report-status 'finished)
+      ;; Delete overlays only after the very last checker has run, to avoid
+      ;; flickering on intermediate re-displays
+      (flycheck-delete-marked-overlays)
+      (flycheck-error-list-refresh)
+      (run-hooks 'flycheck-after-syntax-check-hook)
+      (when (eq (current-buffer) (window-buffer))
+        (flycheck-display-error-at-point))
+      ;; Immediately try to run any pending deferred syntax check, which
+      ;; were triggered by intermediate automatic check event, to make sure
+      ;; that we quickly refine outdated error information
+      (flycheck-perform-deferred-syntax-check))))
 
 (defun flycheck-disable-excessive-checker (checker errors)
   "Disable CHECKER if it reported excessive ERRORS.
