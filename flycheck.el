@@ -259,9 +259,8 @@ attention to case differences."
   "Syntax checkers available for automatic selection.
 
 A list of Flycheck syntax checkers to choose from when syntax
-checking a buffer.  Flycheck will automatically select a suitable
-syntax checker from this list, unless `flycheck-checker' is set,
-either directly or with `flycheck-select-checker'.
+checking a buffer.  Flycheck will automatically select suitable
+syntax checkers from this list.
 
 You should not need to change this variable normally.  In order
 to disable syntax checkers, please use
@@ -282,9 +281,6 @@ selection.  Flycheck will never automatically select a syntax
 checker in this list, regardless of the value of
 `flycheck-checkers'.
 
-However, syntax checkers in this list are still available for
-manual selection with `flycheck-select-checker'.
-
 Use this variable to disable syntax checkers, instead of removing
 the syntax checkers from `flycheck-checkers'.  You may also use
 this option as a file or directory local variable to disable
@@ -295,29 +291,6 @@ respectively."
   :package-version '(flycheck . "0.16")
   :safe #'flycheck-symbol-list-p)
 (make-variable-buffer-local 'flycheck-disabled-checkers)
-
-(defvar-local flycheck-checker nil
-  "Syntax checker to use for the current buffer.
-
-If unset or nil, automatically select a suitable syntax checker
-from `flycheck-checkers' on every syntax check.
-
-If set to a syntax checker only use this syntax checker and never
-select one from `flycheck-checkers' automatically.  The syntax
-checker is used regardless of whether it is contained in
-`flycheck-checkers' or `flycheck-disabled-checkers'.  If the
-syntax checker is unusable in the current buffer an error is
-signaled.
-
-A syntax checker assigned to this variable must be defined with
-`flycheck-define-checker'.
-
-Use the command `flycheck-select-checker' to select a syntax
-checker for the current buffer, or set this variable as file
-local variable to always use a specific syntax checker for a
-file.  See Info Node `(emacs)Specifying File Variables' for more
-information about file variables.")
-(put 'flycheck-checker 'safe-local-variable 'flycheck-registered-checker-p)
 
 (defcustom flycheck-locate-config-file-functions nil
   "Functions to locate syntax checker configuration files.
@@ -836,7 +809,6 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
     (define-key map "p"         #'flycheck-previous-error)
     (define-key map "l"         #'flycheck-list-errors)
     (define-key map (kbd "C-w") #'flycheck-copy-errors-as-kill)
-    (define-key map "s"         #'flycheck-select-checker)
     (define-key map "?"         #'flycheck-describe-checker)
     (define-key map "h"         #'flycheck-display-error-at-point)
     (define-key map "e"         #'flycheck-explain-error-at-point)
@@ -994,7 +966,6 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
       (flycheck-overlays-at (point))]
      ["Explain error at point" flycheck-explain-error-at-point]
      "---"
-     ["Select syntax checker" flycheck-select-checker flycheck-mode]
      ["Disable syntax checker" flycheck-disable-checker flycheck-mode]
      ["Set executable of syntax checker" flycheck-set-checker-executable
       flycheck-mode]
@@ -1510,10 +1481,8 @@ Signal an error if NEXT is not a valid entry for
 (defun flycheck-define-generic-checker (symbol docstring &rest properties)
   "Define SYMBOL as generic syntax checker.
 
-Any syntax checker defined with this macro is eligible for manual
-syntax checker selection with `flycheck-select-checker'.  To make
-the new syntax checker available for automatic selection, it must
-be registered in `flycheck-checkers'.
+To make Flycheck use the new syntax checker add it to
+`flycheck-checkers'.
 
 DOCSTRING is the documentation of the syntax checker, for
 `flycheck-describe-checker'.  The following PROPERTIES constitute
@@ -1968,7 +1937,7 @@ Pop up a help buffer with the documentation of CHECKER."
   (interactive
    (let* ((enable-recursive-minibuffers t)
           (default (or (flycheck-checker-at-point)
-                       (ignore-errors (flycheck-get-checker-for-buffer))))
+                       (car (flycheck-get-syntax-checker-chain-for-buffer))))
           (prompt (if default
                       (format "Describe syntax checker (default %s): " default)
                     "Describe syntax checker: ")))
@@ -2428,9 +2397,7 @@ nil or positive.  If ARG is `toggle', toggle `flycheck-mode'.
 Otherwise behave as if called interactively.
 
 In `flycheck-mode' the buffer is automatically syntax-checked
-using the first suitable syntax checker from `flycheck-checkers'.
-Use `flycheck-select-checker' to select a checker for the current
-buffer manually.
+with suitable syntax checkers from `flycheck-checkers'.
 
 \\{flycheck-mode-map}"
   :init-value nil
@@ -2460,58 +2427,12 @@ buffer manually.
 
 
 ;;; Legacy syntax checker selection for the current buffer
-(defun flycheck-get-checker-for-buffer ()
-  "Find the checker for the current buffer.
-
-Use the selected checker for the current buffer, if any,
-otherwise search for the best checker from `flycheck-checkers'.
-
-Return checker if there is a checker for the current buffer, or
-nil otherwise."
-  (if flycheck-checker
-      (if (flycheck-may-use-checker flycheck-checker)
-          flycheck-checker
-        (error "Flycheck cannot use %s in this buffer, type M-x flycheck-verify-setup for more details"
-               flycheck-checker))
-    (seq-find #'flycheck-may-use-checker flycheck-checkers)))
-
 (defun flycheck-get-next-checker-for-buffer (checker)
   "Get the checker to run after CHECKER for the current buffer."
   (let ((next (seq-find #'flycheck-may-use-next-checker
                         (flycheck-checker-get checker 'next-checkers))))
     (when next
       (if (symbolp next) next (cdr next)))))
-
-(defun flycheck-select-checker (checker)
-  "Select CHECKER for the current buffer.
-
-CHECKER is a syntax checker symbol (see `flycheck-checkers') or
-nil.  In the former case, use CHECKER for the current buffer,
-otherwise deselect the current syntax checker (if any) and use
-automatic checker selection via `flycheck-checkers'.
-
-If called interactively prompt for CHECKER.  With prefix arg
-deselect the current syntax checker and enable automatic
-selection again.
-
-Set `flycheck-checker' to CHECKER and automatically start a new
-syntax check if the syntax checker changed.
-
-CHECKER will be used, even if it is not contained in
-`flycheck-checkers', or if it is disabled via
-`flycheck-disabled-checkers'."
-  (interactive
-   (if current-prefix-arg
-       (list nil)
-     (list (read-flycheck-checker "Select checker: "
-                                  (flycheck-get-checker-for-buffer)))))
-  (when (not (eq checker flycheck-checker))
-    (unless (or (not checker) (flycheck-may-use-checker checker))
-      (flycheck-verify-checker checker)
-      (user-error "Can't use syntax checker %S in this buffer" checker))
-    (setq flycheck-checker checker)
-    (when flycheck-mode
-      (flycheck-buffer))))
 
 (defun flycheck-disable-checker (checker &optional enable)
   "Interactively disable CHECKER for the current buffer.
@@ -2652,8 +2573,9 @@ Set `flycheck-current-syntax-check' accordingly."
 (defun flycheck-buffer ()
   "Start checking syntax in the current buffer.
 
-Get a syntax checker for the current buffer with
-`flycheck-get-checker-for-buffer', and start it."
+Get the syntax checker chain for the current buffer with
+`flycheck-get-syntax-checker-chain-for-buffer' and start with the
+first syntax checker."
   (interactive)
   (flycheck-clean-deferred-check)
   (if flycheck-mode
@@ -5550,7 +5472,7 @@ Instead of highlighting errors in the buffer, this command pops
 up a separate buffer with the entire output of the syntax checker
 tool, just like `compile' (\\[compile])."
   (interactive
-   (let ((default (flycheck-get-checker-for-buffer)))
+   (let ((default (car (flycheck-get-syntax-checker-chain-for-buffer))))
      (list (read-flycheck-checker "Run syntax checker as compile command: "
                                   (when (flycheck-checker-get default 'command)
                                     default)
