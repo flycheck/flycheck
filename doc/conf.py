@@ -282,9 +282,28 @@ def add_offline_to_context(app, _pagename, _templatename, context, _doctree):
     context['flycheck_offline_html'] = app.config.flycheck_offline_html
 
 
+def parse_syntax_checker(env, sig, signode):
+    parts = sig.split(' ')
+    if len(parts) == 1:
+        raise ValueError(
+            'Missing stage in signature: {!r}. '
+            'Syntax: <stage> <syntax-checker-symbol>'.format(sig))
+    elif len(parts) > 2:
+        raise ValueError(
+            'Unknown parts {!r} in signature: {!r}. '
+            'Syntax: <stage> <syntax-checker-symbol>'.format(parts[2:], sig))
+    else:
+        stage, symbol = parts
+        signode += addnodes.desc_type(stage, stage.title())
+        signode += addnodes.desc_annotation(' checker ', ' checker ')
+        signode += addnodes.desc_name(symbol, symbol)
+        return symbol
+
+
 def setup(app):
     app.add_object_type('syntax-checker', 'checker',
-                        'pair: %s; Syntax checker')
+                        'pair: %s; Syntax checker',
+                        parse_node=parse_syntax_checker)
     app.add_directive('supported-language', SupportedLanguage)
     app.add_directive('syntax-checker-config-file',
                       SyntaxCheckerConfigurationFile)

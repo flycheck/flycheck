@@ -24,7 +24,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Ada
 
-   .. syntax-checker:: ada-gnat
+   .. syntax-checker:: syntax ada-gnat
 
       Check ADA syntax and types with `GNAT`_.
 
@@ -50,13 +50,13 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: AsciiDoc
 
-   .. syntax-checker:: asciidoctor
+   .. syntax-checker:: syntax asciidoctor
 
       Check AsciiDoc with the default Asciidoctor_ backend.
 
       .. _Asciidoctor: http://asciidoctor.org
 
-   .. syntax-checker:: asciidoc
+   .. syntax-checker:: syntax asciidoc
 
       Check AsciiDoc_ with the standard AsciiDoc processor.
 
@@ -69,8 +69,8 @@ to view the docstring of the syntax checker.  Likewise, you may use
    Flycheck checks C and C++ with either `c/c++-clang` or `c/c++-gcc`, and then
    with `c/c++-cppcheck`.
 
-   .. syntax-checker:: c/c++-clang
-                       c/c++-gcc
+   .. syntax-checker:: syntax c/c++-clang
+                       syntax c/c++-gcc
 
       Check C/C++ for syntax and type errors with Clang_ or GCC_ respectively.
 
@@ -158,7 +158,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
          `c/c++-gcc` respectively.  Each item is the name of a warning or
          warning category for ``-W``.
 
-   .. syntax-checker:: c/c++-cppcheck
+   .. syntax-checker:: lint c/c++-cppcheck
 
       Check C/C++ for semantic and stylistic issues with cppcheck_.
 
@@ -195,13 +195,13 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: CFEngine
 
-   .. syntax-checker:: cfengine
+   .. syntax-checker:: syntax cfengine
 
       Check syntax with `CFEngine <https://cfengine.com/>`_.
 
 .. supported-language:: Chef
 
-   .. syntax-checker:: chef-foodcritic
+   .. syntax-checker:: syntax chef-foodcritic
 
       Check style in Chef recipes with `foodcritic <http://www.foodcritic.io>`_.
 
@@ -214,11 +214,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
    Flycheck checks Coffeescript syntax with `coffee` and then lints with
    `coffee-coffeelint`.
 
-   .. syntax-checker:: coffee
+   .. syntax-checker:: syntax coffee
 
       Check syntax with the `Coffeescript <http://coffeescript.org/>`_ compiler.
 
-   .. syntax-checker:: coffee-coffeelint
+   .. syntax-checker:: lint coffee-coffeelint
 
       Lint with `Coffeelint <http://www.coffeelint.org/>`_.
 
@@ -226,19 +226,19 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Coq
 
-   .. syntax-checker:: coq
+   .. syntax-checker:: syntax coq
 
       Check and proof with the standard `Coq <https://coq.inria.fr/>`_ compiler.
 
 .. supported-language:: CSS
 
-   .. syntax-checker:: css-csslint
+   .. syntax-checker:: syntax css-csslint
 
       Check syntax and style with `CSSLint`_.
 
       .. _CSSLint: https://github.com/CSSLint/csslint
 
-   .. syntax-checker:: css-stylelint
+   .. syntax-checker:: syntax css-stylelint
 
       Syntax-check and lint CSS with stylelint_.
 
@@ -252,7 +252,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: D
 
-   .. syntax-checker:: d-dmd
+   .. syntax-checker:: syntax d-dmd
 
       Check syntax and types with (`DMD <http://dlang.org/>`_).
 
@@ -276,7 +276,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Dockerfile
 
-   .. syntax-checker:: dockerfile-hadolint
+   .. syntax-checker:: syntax dockerfile-hadolint
 
       Check syntax and code style with hadolint_
 
@@ -284,7 +284,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Elixir
 
-   .. syntax-checker:: elixir-dogma
+   .. syntax-checker:: syntax elixir-dogma
 
       Check syntax and code style with `Dogma <https://github.com/lpil/dogma>`_.
 
@@ -293,7 +293,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
    Flycheck checks Emacs Lisp with `emacs-lisp` and then with
    `emacs-lisp-checkdoc`.
 
-   .. syntax-checker:: emacs-lisp
+   .. syntax-checker:: syntax emacs-lisp
 
       Check syntax with the built-in byte compiler.
 
@@ -314,7 +314,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
          The package directory as string.  Has no effect if
          `flycheck-emacs-lisp-initialize-packages` is nil.
 
-   .. syntax-checker:: emacs-lisp-checkdoc
+   .. syntax-checker:: style emacs-lisp-checkdoc
 
       Check Emacs Lisp documentation conventions with ``checkdoc``.
 
@@ -332,7 +332,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Erlang
 
-   .. syntax-checker:: erlang
+   .. syntax-checker:: syntax erlang
 
       Check Erlang with the standard `Erlang <http://www.erlang.org/>`_
       compiler.
@@ -347,13 +347,13 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: ERuby
 
-   .. syntax-checker:: eruby-erubis
+   .. syntax-checker:: syntax eruby-erubis
 
       Check ERuby with `erubis <http://www.kuwata-lab.com/erubis/>`_.
 
 .. supported-language:: Fortran
 
-   .. syntax-checker:: fortran-gfortran
+   .. syntax-checker:: syntax fortran-gfortran
 
       Check Fortran syntax and type with GFortran_.
 
@@ -387,21 +387,18 @@ to view the docstring of the syntax checker.  Likewise, you may use
    Flycheck checks Go with the following checkers:
 
    1. `go-gofmt`
-   2. `go-golint`
-   3. `go-vet`
-   4. `go-build` or `go-test`
-   5. `go-errcheck`
-   6. `go-unconvert`
+   2. `go-build` or `go-test`, depending on the type of file
+   3. `go-golint`, `go-vet`, `go-errcheck` and `go-unconvert`
 
-   .. syntax-checker:: go-gofmt
+   .. syntax-checker:: syntax go-gofmt
 
       Check Go syntax with `gofmt <https://golang.org/cmd/gofmt/>`_.
 
-   .. syntax-checker:: go-golint
+   .. syntax-checker:: lint go-golint
 
       Check Go code style with `Golint <https://github.com/golang/lint>`_.
 
-   .. syntax-checker:: go-vet
+   .. syntax-checker:: lint go-vet
 
       Check Go for suspicious code with vet_.
 
@@ -419,7 +416,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _vet: https://golang.org/cmd/vet/
 
-   .. syntax-checker:: go-build
+   .. syntax-checker:: type go-build
 
       Check syntax and type with the `Go compiler`_.
 
@@ -439,7 +436,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          See `flycheck-go-build-tags`
 
-   .. syntax-checker:: go-test
+   .. syntax-checker:: type go-test
 
       Check syntax and types of Go tests with the `Go compiler`_.
 
@@ -457,7 +454,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          See `flycheck-go-build-tags`
 
-   .. syntax-checker:: go-errcheck
+   .. syntax-checker:: lint go-errcheck
 
       Check for unhandled error returns in Go with errcheck_.
 
@@ -473,7 +470,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          See `flycheck-go-build-tags`
 
-   .. syntax-checker:: go-unconvert
+   .. syntax-checker:: style go-unconvert
 
       Check for unnecessary type conversions with unconvert_.
 
@@ -481,19 +478,19 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Groovy
 
-   .. syntax-checker:: groovy
+   .. syntax-checker:: syntax groovy
 
       Check syntax using the `Groovy <http://www.groovy-lang.org/>`_ compiler.
 
 .. supported-language:: Haml
 
-   .. syntax-checker:: haml
+   .. syntax-checker:: syntax haml
 
       Check syntax with the `Haml <http://haml.info/>`_ compiler.
 
 .. supported-language:: Handlebars
 
-   .. syntax-checker:: handlebars
+   .. syntax-checker:: syntax handlebars
 
       Check syntax with the `Handlebars <http://handlebarsjs.com/>`_ compiler.
 
@@ -512,8 +509,8 @@ to view the docstring of the syntax checker.  Likewise, you may use
          Flycheck extension which adds an alternative syntax checker for GHC
          using `hdevtools <https://github.com/bitc/hdevtools/>`_.
 
-   .. syntax-checker:: haskell-stack-ghc
-                       haskell-ghc
+   .. syntax-checker:: syntax haskell-stack-ghc
+                       syntax haskell-ghc
 
       Check syntax and type GHC_.  In Stack_ projects invoke GHC through Stack
       to bring package dependencies from Stack in.
@@ -547,7 +544,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          A list of language extensions, via ``-X``.
 
-   .. syntax-checker:: haskell-hlint
+   .. syntax-checker:: lint haskell-hlint
 
       Lint with `hlint <https://github.com/ndmitchell/hlint>`_.
 
@@ -571,7 +568,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: HTML
 
-   .. syntax-checker:: html-tidy
+   .. syntax-checker:: syntax html-tidy
 
       Check HTML syntax and style with `Tidy HTML5`_.
 
@@ -586,7 +583,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    Alternatively `javascript-standard` is used instead all of the former ones.
 
-   .. syntax-checker:: javascript-eslint
+   .. syntax-checker:: syntax javascript-eslint
 
       Check syntax and lint with `ESLint <http://eslint.org/>`_.
 
@@ -600,7 +597,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          A list of directories with custom rules.
 
-   .. syntax-checker:: javascript-jshint
+   .. syntax-checker:: syntax javascript-jshint
 
       Check syntax and lint with `JSHint <http://jshint.com/>`_.
 
@@ -610,7 +607,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-jshintrc
 
-   .. syntax-checker:: javascript-gjslint
+   .. syntax-checker:: syntax javascript-gjslint
 
       Lint with `Closure Linter`_.
 
@@ -618,13 +615,13 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-gjslintrc
 
-   .. syntax-checker:: javascript-jscs
+   .. syntax-checker:: style javascript-jscs
 
       Check code style with `JSCS <http://jscs.info/>`_.
 
       .. syntax-checker-config-file:: flycheck-jscsrc
 
-   .. syntax-checker:: javascript-standard
+   .. syntax-checker:: syntax javascript-standard
 
       Check syntax and code style with Standard_ or Semistandard_.
 
@@ -635,17 +632,17 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    Flycheck checks JSON with `json-jsonlint` or `json-python-json`.
 
-   .. syntax-checker:: json-jsonlint
+   .. syntax-checker:: syntax json-jsonlint
 
       Check JSON with `jsonlint <https://github.com/zaach/jsonlint>`_.
 
-   .. syntax-checker:: json-python-json
+   .. syntax-checker:: syntax json-python-json
 
       Check JSON with Python's built-in :py:mod:`json` module.
 
 .. supported-language:: Less
 
-   .. syntax-checker:: less
+   .. syntax-checker:: syntax less
 
       Check syntax with the `Less <http://lesscss.org/>`_ compiler.
 
@@ -653,7 +650,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          This syntax checker requires lessc 1.4 or newer.
 
-   .. syntax-checker:: less-stylelint
+   .. syntax-checker:: syntax less-stylelint
 
       Syntax-check and lint Less with stylelint_.
 
@@ -669,7 +666,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    Flycheck checks Lua with `lua-luacheck`, falling back to `lua`.
 
-   .. syntax-checker:: lua-luacheck
+   .. syntax-checker:: syntax lua-luacheck
 
       Check syntax and lint with Luacheck_.
 
@@ -681,13 +678,13 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _Luacheck: https://github.com/mpeterv/luacheck
 
-   .. syntax-checker:: lua
+   .. syntax-checker:: syntax lua
 
       Check syntax with the `Lua compiler <http://www.lua.org/>`_.
 
 .. supported-language:: Markdown
 
-   .. syntax-checker:: markdown-mdl
+   .. syntax-checker:: lint markdown-mdl
 
       Check Markdown with `markdownlint <https://github.com/mivok/markdownlint/>`_.
 
@@ -705,7 +702,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    Flycheck checks Perl with `perl` and `perl-perlcritic`.
 
-   .. syntax-checker:: perl
+   .. syntax-checker:: syntax perl
 
       Check syntax with the `Perl <https://www.perl.org/>`_ interpreter.
 
@@ -713,7 +710,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          A list of include directories, relative to the file being checked.
 
-   .. syntax-checker:: perl-perlcritic
+   .. syntax-checker:: lint perl-perlcritic
 
       Lint and check style with `Perl::Critic`_.
 
@@ -729,13 +726,13 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    Flycheck checks PHP with `php`, `php-phpmd` and `php-phpcs`.
 
-   .. syntax-checker:: php
+   .. syntax-checker:: syntax php
 
       Check syntax with `PHP CLI`_
 
       .. _PHP CLI: http://php.net/manual/en/features.commandline.php
 
-   .. syntax-checker:: php-phpmd
+   .. syntax-checker:: lint php-phpmd
 
       Lint with `PHP Mess Detector <https://phpmd.org/>`_.
 
@@ -744,7 +741,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
          A list of rule sets.  Each item is either the name of a default rule
          set, or the path to a custom rule set file.
 
-   .. syntax-checker:: php-phpcs
+   .. syntax-checker:: style php-phpcs
 
       Check style with `PHP Code Sniffer`_.
 
@@ -761,13 +758,13 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Processing
 
-   .. syntax-checker:: processing
+   .. syntax-checker:: syntax processing
 
       Check syntax using the `Processing <https://processing.org/>`_ compiler.
 
 .. supported-language:: Protobuf
 
-   .. syntax-checker:: protobuf-protoc
+   .. syntax-checker:: syntax protobuf-protoc
 
       Check syntax using the protoc_ compiler.
 
@@ -775,7 +772,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Pug
 
-   .. syntax-checker:: pug
+   .. syntax-checker:: syntax pug
 
       Check syntax using the `Pug <https://www.pugjs.org>`_ compiler.
 
@@ -783,11 +780,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    Flycheck checks Puppet with `puppet-parser` and lints with `puppet-lint`.
 
-   .. syntax-checker:: puppet-parser
+   .. syntax-checker:: syntax puppet-parser
 
       Check syntax with the `Puppet <https://puppet.com/>`_ compiler.
 
-   .. syntax-checker:: puppet-lint
+   .. syntax-checker:: lint puppet-lint
 
       Link with `Puppet Lint <http://puppet-lint.com/>`_.
 
@@ -808,7 +805,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
          Flycheck extension which adds a syntax checker using `Pyflakes
          <https://github.com/PyCQA/pyflakes>`_.
 
-   .. syntax-checker:: python-flake8
+   .. syntax-checker:: syntax python-flake8
 
       Check syntax and lint with `flake8 <https://flake8.readthedocs.io/>`_.
 
@@ -830,7 +827,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-flake8rc
 
-   .. syntax-checker:: python-pylint
+   .. syntax-checker:: syntax python-pylint
 
       Check syntax and lint with `Pylint <https://pylint.org/>`_.
 
@@ -845,13 +842,13 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-pylintrc
 
-   .. syntax-checker:: python-pycompile
+   .. syntax-checker:: syntax python-pycompile
 
       Check syntax with Python's byte compiler (see :py:mod:`py_compile`).
 
 .. supported-language:: R
 
-   .. syntax-checker:: r-lintr
+   .. syntax-checker:: syntax r-lintr
 
       Check syntax and lint with `lintr <https://github.com/jimhester/lintr>`_.
 
@@ -867,7 +864,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Racket
 
-   .. syntax-checker:: racket
+   .. syntax-checker:: syntax racket
 
       Check syntax with `raco expand`_ from the ``compiler-lib`` package.
 
@@ -879,7 +876,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: RPM Spec
 
-   .. syntax-checker:: rpm-rpmlint
+   .. syntax-checker:: syntax rpm-rpmlint
 
       Lint with `rpmlint <https://sourceforge.net/projects/rpmlint/>`_.
 
@@ -890,7 +887,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. _Sphinx: http://sphinx-doc.org/
 
-   .. syntax-checker:: rst-sphinx
+   .. syntax-checker:: syntax rst-sphinx
 
       Check documents with Sphinx_.
 
@@ -902,7 +899,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          Whether to emit warnings for all missing references.
 
-   .. syntax-checker:: rst
+   .. syntax-checker:: syntax rst
 
       Check documents with `docutils <http://docutils.sourceforge.net/>`_.
 
@@ -911,7 +908,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
    Flycheck checks Ruby with `ruby-rubocop` and `ruby-rubylint`, falling back to
    `ruby` or `ruby-jruby` for basic syntax checking if those are not available.
 
-   .. syntax-checker:: ruby-rubocop
+   .. syntax-checker:: syntax ruby-rubocop
 
       Check syntax and lint with `RuboCop <http://batsov.com/rubocop/>`_.
 
@@ -926,7 +923,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-rubocoprc
 
-   .. syntax-checker:: ruby-rubylint
+   .. syntax-checker:: lint ruby-rubylint
 
       Check syntax and lint with ruby-lint_.
 
@@ -938,11 +935,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-rubylintrc
 
-   .. syntax-checker:: ruby
+   .. syntax-checker:: syntax ruby
 
       Check syntax with the `Ruby <https://www.ruby-lang.org/>`_ interpreter.
 
-   .. syntax-checker:: ruby-jruby
+   .. syntax-checker:: syntax ruby-jruby
 
       Check syntax with the `JRuby <http://jruby.org/>`_ interpreter.
 
@@ -953,8 +950,8 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. _Rust: https://www.rust-lang.org/
 
-   .. syntax-checker:: rust-cargo
-                       rust
+   .. syntax-checker:: syntax rust-cargo
+                       syntax rust
 
       Check syntax and types with the Rust_ compiler.  In a Cargo_ project the
       compiler is invoked through ``cargo rustc`` to take Cargo dependencies
@@ -1022,7 +1019,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
    SCSS with  `scss-lint` or `scss-stylelint` falling back to
    `sass/scss-sass-lint` first and then `scss` if neither is available.
 
-   .. syntax-checker:: scss-lint
+   .. syntax-checker:: syntax scss-lint
 
       Syntax-check and lint SCSS with SCSS-Lint_.
 
@@ -1034,7 +1031,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-scss-lintrc
 
-   .. syntax-checker:: sass/scss-sass-lint
+   .. syntax-checker:: syntax sass/scss-sass-lint
 
       Syntax-check and lint Sass/SCSS with SASS-Lint_.
 
@@ -1042,7 +1039,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-sass-lintrc
 
-   .. syntax-checker:: scss-stylelint
+   .. syntax-checker:: syntax scss-stylelint
 
       Syntax-check and lint SCSS with stylelint_.
 
@@ -1054,8 +1051,8 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          Whether to run stylelint in quiet mode via ``--quiet``.
 
-   .. syntax-checker:: sass
-                       scss
+   .. syntax-checker:: syntax sass
+                       syntax scss
 
       Check SASS and SCSS respectively with the `SCSS compiler
       <http://sass-lang.com/>`_.
@@ -1069,7 +1066,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    Flycheck checks Scala with `scala` and `scala-scalastyle`.
 
-   .. syntax-checker:: scala
+   .. syntax-checker:: syntax scala
 
       Check syntax and types with the `Scala <http://www.scala-lang.org/>`_
       compiler.
@@ -1081,7 +1078,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          .. _Ensime: http://ensime.org/
 
-   .. syntax-checker:: scala-scalastyle
+   .. syntax-checker:: style scala-scalastyle
 
       Check style with `Scalastyle <http://www.scalastyle.org/>`_.
 
@@ -1097,7 +1094,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    Flycheck checks CHICKEN Scheme files with ``csc``.
 
-   .. syntax-checker:: scheme-chicken
+   .. syntax-checker:: syntax scheme-chicken
 
       Check syntax with ``csc``, the `CHICKEN Scheme <http://call-cc.org/>`_
       compiler.
@@ -1115,27 +1112,27 @@ to view the docstring of the syntax checker.  Likewise, you may use
    * POSIX shell (i.e. :file:`/bin/sh`) with `sh-posix-dash` or `sh-posix-bash`
    * Zsh with `sh-zsh`
 
-   .. syntax-checker:: sh-bash
+   .. syntax-checker:: syntax sh-bash
 
       Check Bash_ syntax.
 
       .. _Bash: http://www.gnu.org/software/bash/
 
-   .. syntax-checker:: sh-posix-dash
+   .. syntax-checker:: syntax sh-posix-dash
 
       Check POSIX shell syntax with Dash_.
 
       .. _Dash: http://gondor.apana.org.au/~herbert/dash/
 
-   .. syntax-checker:: sh-posix-bash
+   .. syntax-checker:: syntax sh-posix-bash
 
       Check POSIX shell syntax with Bash_.
 
-   .. syntax-checker:: sh-zsh
+   .. syntax-checker:: syntax sh-zsh
 
       Check `Zsh <http://www.zsh.org/>`_ syntax.
 
-   .. syntax-checker:: sh-shellcheck
+   .. syntax-checker:: lint sh-shellcheck
 
       Lint Bash and POSIX shell with ShellCheck_.
 
@@ -1147,24 +1144,24 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Slim
 
-   .. syntax-checker:: slim
+   .. syntax-checker:: syntax slim
 
       Check Slim using the `Slim <http://slim-lang.com/>`_ compiler.
 
-   .. syntax-checker:: slim-lint
+   .. syntax-checker:: lint slim-lint
 
       Check Slim best practices using the `slim-lint
       <https://github.com/sds/slim-lint>`_ linter.
 
 .. supported-language:: SQL
 
-   .. syntax-checker:: sql-sqlint
+   .. syntax-checker:: syntax sql-sqlint
 
       Check SQL syntax with `Sqlint <https://github.com/purcell/sqlint>`_.
 
 .. supported-language:: systemd Unit Configuration
 
-   .. syntax-checker:: systemd-analyze
+   .. syntax-checker:: syntax systemd-analyze
 
       Check systemd unit configuration file syntax with `systemd-analyze`_.
 
@@ -1174,19 +1171,19 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    Flycheck checks TeX and LaTeX with either `tex-chktex` or `tex-lacheck`.
 
-   .. syntax-checker:: tex-chktex
+   .. syntax-checker:: lint tex-chktex
 
       Check style with `ChkTeX <http://www.nongnu.org/chktex/>`_.
 
       .. syntax-checker-config-file:: flycheck-chktexrc
 
-   .. syntax-checker:: tex-lacheck
+   .. syntax-checker:: lint tex-lacheck
 
       Check style with `Lacheck <http://www.ctan.org/pkg/lacheck>`_.
 
 .. supported-language:: Texinfo
 
-   .. syntax-checker:: texinfo
+   .. syntax-checker:: syntax texinfo
 
       Check syntax with :program:`makeinfo` from Texinfo_.
 
@@ -1194,7 +1191,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: TypeScript
 
-   .. syntax-checker:: typescript-tslint
+   .. syntax-checker:: syntax typescript-tslint
 
       Check syntax and style with `TSLint <https://github.com/palantir/tslint>`_.
 
@@ -1210,7 +1207,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Verilog
 
-   .. syntax-checker:: verilog-verilator
+   .. syntax-checker:: syntax verilog-verilator
 
       Check syntax with `Verilator <https://www.veripool.org/wiki/verilator>`_.
 
@@ -1223,11 +1220,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    Flycheck checks XML with `xml-xmlstarlet` or `xml-xmllint`.
 
-   .. syntax-checker:: xml-xmlstarlet
+   .. syntax-checker:: syntax xml-xmlstarlet
 
       Check syntax with `XMLStarlet <http://xmlstar.sourceforge.net>`_.
 
-   .. syntax-checker:: xml-xmllint
+   .. syntax-checker:: syntax xml-xmllint
 
       Check syntax with :program:`xmllint` from Libxml2_.
 
@@ -1237,10 +1234,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    Flycheck checks YAML with `yaml-jsyaml` or `yaml-ruby`.
 
-   .. syntax-checker:: yaml-jsyaml
+   .. syntax-checker:: syntax yaml-jsyaml
 
       Check syntax with `js-yaml <https://github.com/nodeca/js-yaml>`_.
 
-   .. syntax-checker:: yaml-ruby
+   .. syntax-checker:: syntax yaml-ruby
 
       Check syntax with Ruby's YAML parser.
