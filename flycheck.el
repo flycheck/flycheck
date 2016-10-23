@@ -1924,6 +1924,11 @@ nil otherwise."
   'help-function #'flycheck-goto-checker-definition
   'help-echo "mouse-2, RET: find Flycheck checker definition")
 
+(define-button-type 'help-flycheck-describe-checker
+  :supertype 'help-xref
+  'help-function #'flycheck-describe-checker
+  'help-echo "mouse-2, RET: describe Flycheck checker")
+
 (defconst flycheck-find-checker-regexp
   (rx line-start (zero-or-more (syntax whitespace))
       "(" symbol-start "flycheck-define-checker" symbol-end
@@ -1979,7 +1984,7 @@ Pop up a help buffer with the documentation of CHECKER."
             (predicate (flycheck-checker-get checker 'predicate))
             (print-doc (flycheck-checker-get checker 'print-doc))
             (next-checkers (flycheck-checker-get checker 'next-checkers)))
-        (princ (format "%s is a Flycheck syntax checker" checker))
+        (princ (format "%s is a Flycheck checker" checker))
         (when filename
           (princ (format " in `%s'" (file-name-nondirectory filename)))
           (with-current-buffer standard-output
@@ -1991,13 +1996,32 @@ Pop up a help buffer with the documentation of CHECKER."
         (let ((modes-start (with-current-buffer standard-output (point-max))))
           ;; Track the start of the modes documentation, to properly re-fill
           ;; it later
-          (princ "  This syntax checker checks syntax in the major mode(s) ")
+          (princ (format
+                  "  This stage `%s' checker checks syntax in the major mode(s) "
+                  (flycheck-checker-get checker 'stage)))
           (princ (string-join
                   (seq-map (apply-partially #'format "`%s'") modes)
                   ", "))
           (when predicate
             (princ ", and uses a custom predicate"))
           (princ ".")
+          (-when-let (conflicts-with (flycheck-checker-get checker
+                                                           'conflicts-with))
+            (princ "  It conflicts with ")
+            (let ((beg (with-current-buffer standard-output (point))))
+              (princ (string-join
+                      (seq-map (apply-partially #'format "`%s'") conflicts-with)
+                      ", "))
+              (princ ".")
+              ;; Turn all conflicting checkers into buttons that describe the
+              ;; checker
+              (with-current-buffer standard-output
+                (save-excursion
+                  (while (re-search-backward "`\\([^`']+\\)'" beg t)
+                    (let ((checker (intern-soft (match-string 1))))
+                      (when (flycheck-valid-checker-p checker)
+                        (help-xref-button 1 'help-flycheck-describe-checker
+                                          checker))))))))
           (when next-checkers
             (princ "  It runs the following checkers afterwards:"))
           (with-current-buffer standard-output
