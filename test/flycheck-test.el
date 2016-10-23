@@ -815,7 +815,7 @@
   (flycheck-ert-with-resource-buffer "language/emacs-lisp/warnings.el"
     (emacs-lisp-mode)
     (let* ((was-called nil)
-           (flycheck-executable-find (lambda (e) (setq was-called t))))
+           (flycheck-executable-find (lambda (_) (setq was-called t))))
       (should (flycheck-may-use-checker 'emacs-lisp))
       (should was-called))))
 
@@ -1847,9 +1847,8 @@
   (flycheck-ert-with-temp-buffer
     (insert " ")
     (goto-char 1)
-    (let ((overlay (flycheck-add-overlay
-                    (flycheck-error-new-at 1 1 'info "A bar message"))))
-      (should (string= (help-at-pt-string) "A bar message")))))
+    (flycheck-add-overlay (flycheck-error-new-at 1 1 'info "A bar message"))
+    (should (string= (help-at-pt-string) "A bar message"))))
 
 (ert-deftest flycheck-add-overlay/can-suppress-help-echo ()
   :tags '(overlay)
@@ -1857,9 +1856,8 @@
   (flycheck-ert-with-temp-buffer
     (insert " ")
     (goto-char 1)
-    (let ((flycheck-help-echo-function nil)
-          (overlay (flycheck-add-overlay
-                    (flycheck-error-new-at 1 1 'info "info"))))
+    (flycheck-add-overlay (flycheck-error-new-at 1 1 'info "info"))
+    (let ((flycheck-help-echo-function nil))
       (should (string= (help-at-pt-string) nil)))))
 
 (ert-deftest flycheck-add-overlay/help-echo-for-nil-message-is-default ()
@@ -1868,8 +1866,8 @@
   (flycheck-ert-with-temp-buffer
     (insert " ")
     (goto-char 1)
-    (let ((overlay (flycheck-add-overlay (flycheck-error-new-at 1 1 'info))))
-      (should (string= (help-at-pt-string) "Unknown info")))))
+    (flycheck-add-overlay (flycheck-error-new-at 1 1 'info))
+    (should (string= (help-at-pt-string) "Unknown info"))))
 
 (ert-deftest flycheck-add-overlay/help-echo-stacks-errors ()
   :tags '(overlay)
@@ -3377,8 +3375,7 @@ Why not:
 (flycheck-ert-def-checker-test (javascript-eslint javascript-jscs)
     javascript complete-chain
   :tags '(checkstyle-xml)
-  (let ((flycheck-eslintrc "eslint.json")
-        (flycheck-jscsrc "jscsrc")
+  (let ((flycheck-jscsrc "jscsrc")
         (flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-ert-should-syntax-check
      "language/javascript/warnings.js" flycheck-test-javascript-modes
