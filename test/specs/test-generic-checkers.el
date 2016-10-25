@@ -30,6 +30,12 @@
 
 (describe "Generic syntax checkers"
   (describe "Major mode"
+    (it "supports the current major mode"
+      (cl-letf (((flycheck-checker-get 'foo 'modes) '(bar-mode foo-mode))
+                (major-mode 'bar-mode))
+        (expect (flycheck-checker-supports-major-mode-p 'foo)
+                :to-be-truthy)))
+
     (it "supports a major mode"
       (cl-letf (((flycheck-checker-get 'foo 'modes) '(bar-mode foo-mode)))
         (expect (flycheck-checker-supports-major-mode-p 'foo 'foo-mode)

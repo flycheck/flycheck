@@ -982,9 +982,7 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
       :enable (or flycheck-mode
                   ;; Don't let users toggle the mode if there is no syntax
                   ;; checker for this buffer
-                  (seq-find (lambda (c)
-                              (flycheck-checker-supports-major-mode-p
-                               c major-mode))
+                  (seq-find #'flycheck-checker-supports-major-mode-p
                             flycheck-checkers))]
      ["Check current buffer" flycheck-buffer flycheck-mode]
      ["Clear errors in buffer" flycheck-clear t]
@@ -1805,15 +1803,18 @@ A valid checker is a symbol defined as syntax checker with
        (= (or (get checker 'flycheck-generic-checker-version) 0)
           flycheck-generic-checker-version)))
 
-(defun flycheck-checker-supports-major-mode-p (checker mode)
+(defun flycheck-checker-supports-major-mode-p (checker &optional mode)
   "Whether CHECKER supports the given major MODE.
 
 CHECKER is a syntax checker symbol and MODE a major mode symbol.
 Look at the `modes' property of CHECKER to determine whether
 CHECKER supports buffers in the given major MODE.
 
+MODE defaults to the value of `major-mode' if omitted or nil.
+
 Return non-nil if CHECKER supports MODE and nil otherwise."
-  (memq mode (flycheck-checker-get checker 'modes)))
+  (let ((mode (or mode major-mode)))
+    (memq mode (flycheck-checker-get checker 'modes))))
 
 (defvar-local flycheck-enabled-checkers nil
   "Syntax checkers included in automatic selection.
@@ -1843,7 +1844,7 @@ Return non-nil if CHECKER may be used for the current buffer, and
 nil otherwise."
   (let ((predicate (flycheck-checker-get checker 'predicate)))
     (and (flycheck-valid-checker-p checker)
-         (flycheck-checker-supports-major-mode-p checker major-mode)
+         (flycheck-checker-supports-major-mode-p checker)
          (flycheck-may-enable-checker checker)
          (or (null predicate) (funcall predicate)))))
 
@@ -2039,7 +2040,7 @@ into the verification results."
     (when with-mm
       (with-current-buffer buffer
         (let ((message-and-face
-               (if (flycheck-checker-supports-major-mode-p checker major-mode)
+               (if (flycheck-checker-supports-major-mode-p checker)
                    (cons (format "`%s' supported" major-mode) 'success)
                  (cons (format "`%s' not supported" major-mode) 'error))))
           (push (flycheck-verification-result-new
