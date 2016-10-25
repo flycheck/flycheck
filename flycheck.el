@@ -7360,13 +7360,11 @@ contains a cabal file."
     (`haskell-stack-ghc
      (or
       (locate-dominating-file (buffer-file-name) "stack.yaml")
-      (when (executable-find "stack")
-        (let* ((stack-output
-                (process-lines "stack" "path" "--project-root"))
-               (stack-dir (car stack-output)))
-          (when (and stack-dir
-                     (file-directory-p stack-dir))
-            stack-dir)))))
+      (-when-let* ((stack (funcall flycheck-executable-find "stack"))
+                   (output (ignore-errors
+                             (process-lines stack "path" "--project-root")))
+                   (stack-dir (car output)))
+        (and (file-directory-p stack-dir) stack-dir))))
     (_
      (locate-dominating-file
       (file-name-directory (buffer-file-name))
