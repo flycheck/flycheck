@@ -982,7 +982,9 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
       :enable (or flycheck-mode
                   ;; Don't let users toggle the mode if there is no syntax
                   ;; checker for this buffer
-                  (seq-find #'flycheck-checker-supports-major-mode-p
+                  (seq-find (lambda (c)
+                              (flycheck-checker-supports-major-mode-p
+                               c major-mode))
                             flycheck-checkers))]
      ["Check current buffer" flycheck-buffer flycheck-mode]
      ["Clear errors in buffer" flycheck-clear t]
