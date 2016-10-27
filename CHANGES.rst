@@ -6,6 +6,11 @@
   - Protobuf with ``protoc`` [GH-1125]
   - systemd-analyze with ``systemd-analyze`` [GH-1135]
 
+- Improvements:
+
+  - Use option ``flycheck-go-build-tags`` to for ``go-test``,
+    ``go-vet`` and ``go-errcheck`` as well.
+
 30 (Oct 12, 2016)
 =================
 

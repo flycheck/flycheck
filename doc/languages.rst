@@ -387,6 +387,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          Whether to check for shadowed variables, in Go 1.6 or newer.
 
+      .. defcustom:: flycheck-go-build-tags
+
+         A list of build tags.
+
       .. _vet: https://golang.org/cmd/vet/
 
    .. syntax-checker:: go-build
@@ -405,8 +409,9 @@ to view the docstring of the syntax checker.  Likewise, you may use
          `go-test`
 
       .. defcustom:: flycheck-go-build-tags
+         :noindex:
 
-         A list of build tags.
+         See `flycheck-go-build-tags`
 
    .. syntax-checker:: go-test
 
@@ -421,6 +426,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          See `flycheck-go-build-install-deps`.
 
+      .. defcustom:: flycheck-go-build-tags
+         :noindex:
+
+         See `flycheck-go-build-tags`
+
    .. syntax-checker:: go-errcheck
 
       Check for unhandled error returns in Go with errcheck_.
@@ -431,6 +441,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
          28th, 2015) or newer.
 
       .. _errcheck: https://github.com/kisielk/errcheck
+
+      .. defcustom:: flycheck-go-build-tags
+         :noindex:
+
+         See `flycheck-go-build-tags`
 
    .. syntax-checker:: go-unconvert
 
