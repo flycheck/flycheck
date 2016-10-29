@@ -8797,7 +8797,6 @@ See URL `https://github.com/sasstools/sass-lint'."
             "--format" "Checkstyle"
             (config-file "--config" flycheck-sass-lintrc)
             source)
-  :standard-input nil
   :error-parser flycheck-parse-checkstyle
   :modes (sass-mode scss-mode))
 
