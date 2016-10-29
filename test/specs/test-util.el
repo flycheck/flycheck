@@ -46,6 +46,35 @@
         (goto-char (point-min))
         (narrow-to-region (point-min) (point-min))
         (expect (buffer-string) :to-equal "")
-        (expect (flycheck-buffer-empty-p) :not :to-be-truthy)))))
+        (expect (flycheck-buffer-empty-p) :not :to-be-truthy))))
+
+  (describe "flycheck-buffer-saved-p"
+
+    (it "considers an unmodified buffer without backing file unsaved"
+      (with-temp-buffer
+        (expect (flycheck-buffer-saved-p) :not :to-be-truthy)))
+
+    (it "considers a modified buffer without backing file unsaved"
+      (with-temp-buffer
+        (set-buffer-modified-p t)
+        (expect (flycheck-buffer-saved-p) :not :to-be-truthy)))
+
+    (it "considers an unmodified buffer with backing file saved"
+      (spy-on 'file-exists-p :and-return-value t)
+      (spy-on 'buffer-file-name :and-return-value "test-buffer-name")
+      (with-temp-buffer
+        (expect (flycheck-buffer-saved-p) :to-be-truthy))
+      (expect (spy-calls-count 'file-exists-p) :to-equal 1)
+      (expect (spy-calls-count 'buffer-file-name) :to-equal 1))
+
+    (it "considers a modified buffer with backing file unsaved"
+      (spy-on 'file-exists-p :and-return-value t)
+      (spy-on 'buffer-file-name :and-return-value "test-buffer-name")
+      (with-temp-buffer
+        (set-buffer-modified-p t)
+        (expect (flycheck-buffer-saved-p) :not :to-be-truthy))
+      (expect (spy-calls-count 'file-exists-p) :to-equal 1)
+      (expect (spy-calls-count 'buffer-file-name) :to-equal 1))))
+
 
 ;;; test-util.el ends here
