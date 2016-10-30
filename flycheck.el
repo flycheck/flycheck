@@ -2191,7 +2191,8 @@ current buffer as BUFFER.
 
 Return non-nil if the BUFFER is backed by a file, and not
 modified, or nil otherwise."
-  (and (buffer-file-name buffer) (not (buffer-modified-p buffer))))
+  (let ((file-name (buffer-file-name buffer)))
+    (and file-name (file-exists-p file-name) (not (buffer-modified-p buffer)))))
 
 
 ;;; Extending generic checkers
