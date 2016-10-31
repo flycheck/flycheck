@@ -64,8 +64,6 @@ C/C++/Objective C
 
 * :gh:`Wilfred/flycheck-pkg-config` configures Flycheck to use settings from
   `pkg-config`_ when checking C/C++.
-* :flyc:`flycheck-google-cpplint` (*official*) adds a syntax checker for
-  Google's C++ style checker.
 * :gh:`Sarcasm/flycheck-irony` adds a Flycheck syntax checker for C, C++ and
   Objective C using :gh:`Irony Mode <Sarcasm/irony-mode>`.
 
