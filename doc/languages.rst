@@ -949,6 +949,18 @@ to view the docstring of the syntax checker.  Likewise, you may use
          A list of additional library directories. Relative paths are relative
          to the buffer being checked.
 
+   .. syntax-checker:: rust-cargo-clippy
+
+      Check syntax and lint with `cargo clippy <https://github.com/Manishearth/rust-clippy>`_.
+
+      .. note::
+
+         This syntax checker requires ``cargo clippy``, and therefore a nighlty version of rustc.
+
+      .. defcustom:: flycheck-cargo-clippy-args
+
+         A list of additional arguments passed to the cargo clippy subcommand.
+
 .. supported-language:: Sass/SCSS
 
    Flycheck checks SASS with `sass/scss-sass-lint`, falling back to `sass`, and

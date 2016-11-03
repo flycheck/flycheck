@@ -231,6 +231,7 @@ attention to case differences."
     ruby
     ruby-jruby
     rust-cargo
+    rust-cargo-clippy
     rust
     scala
     scala-scalastyle
@@ -8608,10 +8609,13 @@ See URL `http://jruby.org/'."
   :modes (enh-ruby-mode ruby-mode)
   :next-checkers ((warning . ruby-rubylint)))
 
+(flycheck-def-args-var flycheck-cargo-clippy-args (rust-cargo-clippy)
+  :package-version '(flycheck . "31"))
+
 (flycheck-def-args-var flycheck-cargo-rustc-args (rust-cargo)
   :package-version '(flycheck . "30"))
 
-(flycheck-def-args-var flycheck-rust-args (rust-cargo rust)
+(flycheck-def-args-var flycheck-rust-args (rust-cargo rust-cargo-clippy rust)
   :package-version '(flycheck . "0.24"))
 
 (flycheck-def-option-var flycheck-rust-check-tests t (rust-cargo rust)
@@ -8665,7 +8669,7 @@ This variable is used only when `flycheck-rust-crate-type' is
   :package-version '(flycheck . "28"))
 (make-variable-buffer-local 'flycheck-rust-binary-name)
 
-(flycheck-def-option-var flycheck-rust-library-path nil (rust-cargo rust)
+(flycheck-def-option-var flycheck-rust-library-path nil (rust-cargo rust-cargo-clippy rust)
   "A list of library directories for Rust.
 
 The value of this variable is a list of strings, where each
@@ -8706,6 +8710,25 @@ rustc command.  See URL `https://www.rust-lang.org'."
   :modes rust-mode
   :predicate (lambda ()
                ;; Since we build the entire project with cargo rustc we require
+               ;; that the buffer is saved.  And of course, we also need a Cargo
+               ;; file :)
+               (and (flycheck-buffer-saved-p)
+                    (locate-dominating-file (buffer-file-name) "Cargo.toml"))))
+
+(flycheck-define-checker rust-cargo-clippy
+  "A Rust syntax checker and linter using clippy.
+
+This syntax checker needs the cargo clippy subcommand. See URL `https://github.com/Manishearth/rust-clippy'"
+  :command ("cargo" "clippy"
+            (eval flycheck-cargo-clippy-args)
+            "--"  "--error-format=json"
+            (option-list "-L" flycheck-rust-library-path concat)
+            (eval flycheck-rust-args))
+  :error-parser flycheck-parse-rust
+  :error-explainer flycheck-rust-error-explainer
+  :modes rust-mode
+  :predicate (lambda ()
+               ;; Since we build the entire project with cargo clippy we require
                ;; that the buffer is saved.  And of course, we also need a Cargo
                ;; file :)
                (and (flycheck-buffer-saved-p)
