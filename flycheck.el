@@ -8204,6 +8204,7 @@ This syntax checker requires Pylint 1.0 or newer.
 See URL `https://www.pylint.org/'."
   ;; -r n disables the scoring report
   :command ("pylint" "-r" "n"
+            "--output-format" "text"
             "--msg-template"
             (eval (if flycheck-pylint-use-symbolic-id
                       "{path}:{line}:{column}:{C}:{symbol}:{msg}"
