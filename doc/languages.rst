@@ -890,9 +890,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 .. supported-language:: Rust
 
    Flycheck checks Rust_ with `rust-cargo` in Cargo projects, or `rust`
-   otherwise.
+   otherwise. For Cargo projects, you can also use `rust-cargo-clippy` and get
+   the additional lints of clippy_.
 
    .. _Rust: https://www.rust-lang.org/
+   .. _clippy: https://github.com/Manishearth/rust-clippy
 
    .. syntax-checker:: rust-cargo
                        rust
