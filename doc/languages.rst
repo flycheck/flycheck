@@ -955,7 +955,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. note::
 
-         This syntax checker requires ``cargo clippy``, and therefore a nighlty version of rustc.
+         This syntax checker requires ``cargo clippy``, and therefore a nightly version of rustc.
 
       .. defcustom:: flycheck-cargo-clippy-args
 
