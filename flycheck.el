@@ -8727,6 +8727,8 @@ This syntax checker needs the cargo clippy subcommand. See URL `https://github.c
   :error-parser flycheck-parse-rust
   :error-explainer flycheck-rust-error-explainer
   :modes rust-mode
+  ;; cargo clippy must be run from the directory containing Cargo.toml
+  :working-directory (lambda (_) (locate-dominating-file (buffer-file-name) "Cargo.toml"))
   ;; Since we build the entire project with cargo clippy we require
   ;; that the buffer is saved.
   :predicate flycheck-buffer-saved-p
