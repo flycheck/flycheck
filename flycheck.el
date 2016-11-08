@@ -8685,6 +8685,17 @@ Relative paths are relative to the file being checked."
     (with-output-to-string
       (call-process "rustc" nil standard-output nil "--explain" error-code))))
 
+(defun flycheck-rust--verify-cargo-toml ()
+  "Return a flycheck-verification-result indicating whether Cargo.toml was found."
+  (let ((have-cargo-toml (locate-dominating-file (buffer-file-name) "Cargo.toml")))
+    (flycheck-verification-result-new
+     :label "Cargo.toml"
+     :message (if have-cargo-toml "found" "missing")
+     :face (if have-cargo-toml 'success '(bold error))
+     )
+    )
+  )
+
 (flycheck-define-checker rust-cargo
   "A Rust syntax checker using Cargo.
 
@@ -8708,12 +8719,11 @@ rustc command.  See URL `https://www.rust-lang.org'."
   :error-parser flycheck-parse-rust
   :error-explainer flycheck-rust-error-explainer
   :modes rust-mode
-  :predicate (lambda ()
-               ;; Since we build the entire project with cargo rustc we require
-               ;; that the buffer is saved.  And of course, we also need a Cargo
-               ;; file :)
-               (and (flycheck-buffer-saved-p)
-                    (locate-dominating-file (buffer-file-name) "Cargo.toml"))))
+  ;; Since we build the entire project with cargo rustc we require
+  ;; that the buffer is saved.
+  :predicate flycheck-buffer-saved-p
+  :enabled (lambda () (locate-dominating-file (buffer-file-name) "Cargo.toml"))
+  :verify (lambda(_) (list (flycheck-rust--verify-cargo-toml))))
 
 (flycheck-define-checker rust-cargo-clippy
   "A Rust syntax checker and linter using clippy.
@@ -8736,14 +8746,9 @@ This syntax checker needs the cargo clippy subcommand. See URL `https://github.c
              (and (funcall flycheck-executable-find "cargo-clippy")
                   (locate-dominating-file (buffer-file-name) "Cargo.toml")))
   :verify (lambda (_)
-            (let ((have-cargo-toml (locate-dominating-file (buffer-file-name) "Cargo.toml"))
-                  (have-clippy (funcall flycheck-executable-find "cargo-clippy")))
+            (let ((have-clippy (funcall flycheck-executable-find "cargo-clippy")))
               (list
-               (flycheck-verification-result-new
-                :label "Cargo.toml"
-                :message (if have-cargo-toml "found" "missing")
-                :face (if have-cargo-toml 'success '(bold error))
-                )
+               (flycheck-rust--verify-cargo-toml)
                (flycheck-verification-result-new
                 :label "cargo clippy subcommand"
                 :message (if have-clippy "found" "missing")
