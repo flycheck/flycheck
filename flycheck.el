@@ -8727,12 +8727,26 @@ This syntax checker needs the cargo clippy subcommand. See URL `https://github.c
   :error-parser flycheck-parse-rust
   :error-explainer flycheck-rust-error-explainer
   :modes rust-mode
-  :predicate (lambda ()
-               ;; Since we build the entire project with cargo clippy we require
-               ;; that the buffer is saved.  And of course, we also need a Cargo
-               ;; file :)
-               (and (flycheck-buffer-saved-p)
-                    (locate-dominating-file (buffer-file-name) "Cargo.toml"))))
+  ;; Since we build the entire project with cargo clippy we require
+  ;; that the buffer is saved.
+  :predicate flycheck-buffer-saved-p
+  :enabled (lambda ()
+             (and (funcall flycheck-executable-find "cargo-clippy")
+                  (locate-dominating-file (buffer-file-name) "Cargo.toml")))
+  :verify (lambda (_)
+            (let ((have-cargo-toml (locate-dominating-file (buffer-file-name) "Cargo.toml"))
+                  (have-clippy (funcall flycheck-executable-find "cargo-clippy")))
+              (list
+               (flycheck-verification-result-new
+                :label "Cargo.toml"
+                :message (if have-cargo-toml "found" "missing")
+                :face (if have-cargo-toml 'success '(bold error))
+                )
+               (flycheck-verification-result-new
+                :label "cargo clippy subcommand"
+                :message (if have-clippy "found" "missing")
+                :face (if have-clippy 'success '(bold error))
+                )))))
 
 (flycheck-define-checker rust
   "A Rust syntax checker using Rust compiler.
