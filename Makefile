@@ -86,6 +86,8 @@ endif
 	$(OPTIPNG) $@
 
 # Public targets
+.PHONY: travis
+travis: init compile unit specs
 .PHONY: init
 init:
 	$(CASK) install
