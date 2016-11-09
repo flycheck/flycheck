@@ -1,26 +1,26 @@
-# Use Python 3.5 for our tooling
-language: python
-python:
-  - "3.5"
 sudo: required
 services:
   - docker
 matrix:
   # Don’t wait for jobs that are allowed to fail
   fast_finish: true
+cache:
+  - directories:
+    - ~/docker/
 env:
   matrix:
-    - EMACS_VERSION=24.4
+    - EMACS_VERSION=24.3
     - EMACS_VERSION=24.5
     - EMACS_VERSION=25.1
 before_install:
-  - docker pull larsbrinkhoff/emacsen
   - sudo rm /usr/local/bin/docker-compose
   - curl -L https://github.com/docker/compose/releases/download/1.8.1/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
-  - if [[ -n $EMACS_VERSION ]]; then docker-compose run app emacs --version; fi
+  - mkdir -p ~/docker
+  - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; else docker pull larsbrinkhoff/emacsen:latest && docker save larsbrinkhoff/emacsen:latest > ~/docker/image.tar; fi
 script:
+  - if [[ -n $EMACS_VERSION ]]; then docker-compose run app emacs --version; fi
   # Compile and test
   - if [[ -n $EMACS_VERSION ]]; then docker-compose run app make travis; fi
 notifications:
