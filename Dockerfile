@@ -3,7 +3,7 @@ FROM larsbrinkhoff/emacsen:latest
 ENV HOME /root
 
 RUN mkdir -p $HOME/bin \
-  && echo "#!/bin/bash\n\"/usr/local/emacs-\$EMACS_VERSION/bin/emacs\" \"\$@\"" > $HOME/bin/emacs
+  && echo "#!/bin/bash\n\"/usr/local/emacs-\$EMACS_VERSION/bin/emacs\" \"\$@\"" > $HOME/bin/emacs \
   && chmod a+x $HOME/bin/emacs
 
 RUN apt-get update \
