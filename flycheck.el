@@ -4639,7 +4639,7 @@ the syntax checker definition, if the variable is nil."
         (flycheck-checker-default-executable checker))))
 
 (defun flycheck-find-checker-executable (checker)
-  "Get the full path of the executbale of CHECKER.
+  "Get the full path of the executable of CHECKER.
 
 Return the full absolute path to the executable of CHECKER, or
 nil if the executable does not exist."
