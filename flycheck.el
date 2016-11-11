@@ -7937,6 +7937,10 @@ Needs PHP Code Sniffer 2.6 or newer.
 
 See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
   :command ("phpcs" "--report=checkstyle"
+            ;; Use -q flag to force quiet mode
+            ;; Quiet mode prevents errors from extra output when phpcs has
+            ;; been configured with show_progress enabled
+            "-q"
             (option "--standard=" flycheck-phpcs-standard concat)
             ;; Pass original file name to phpcs.  We need to concat explicitly
             ;; here, because phpcs really insists to get option and argument as
