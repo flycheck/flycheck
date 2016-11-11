@@ -8685,9 +8685,16 @@ Relative paths are relative to the file being checked."
     (with-output-to-string
       (call-process "rustc" nil standard-output nil "--explain" error-code))))
 
+(defun flycheck-rust-find-cargo-root ()
+  "Get the root of the cargo project for the current buffer.
+
+Return the root of the cargo project of the current buffer, or nil
+if we are not in a cargo project."
+  (locate-dominating-file (buffer-file-name) "Cargo.toml"))
+
 (defun flycheck-rust--verify-cargo-toml ()
   "Return a flycheck-verification-result indicating whether Cargo.toml was found."
-  (let ((have-cargo-toml (locate-dominating-file (buffer-file-name) "Cargo.toml")))
+  (let ((have-cargo-toml (flycheck-rust-find-cargo-root)))
     (flycheck-verification-result-new
      :label "Cargo.toml"
      :message (if have-cargo-toml "found" "missing")
@@ -8719,7 +8726,7 @@ rustc command.  See URL `https://www.rust-lang.org'."
   ;; Since we build the entire project with cargo rustc we require
   ;; that the buffer is saved.
   :predicate flycheck-buffer-saved-p
-  :enabled (lambda () (locate-dominating-file (buffer-file-name) "Cargo.toml"))
+  :enabled flycheck-rust-find-cargo-root
   :verify (lambda(_) (list (flycheck-rust--verify-cargo-toml))))
 
 (flycheck-define-checker rust-cargo-clippy
@@ -8735,13 +8742,13 @@ This syntax checker needs the cargo clippy subcommand. See URL `https://github.c
   :error-explainer flycheck-rust-error-explainer
   :modes rust-mode
   ;; cargo clippy must be run from the directory containing Cargo.toml
-  :working-directory (lambda (_) (locate-dominating-file (buffer-file-name) "Cargo.toml"))
+  :working-directory (lambda(_) (flycheck-rust-find-cargo-root))
   ;; Since we build the entire project with cargo clippy we require
   ;; that the buffer is saved.
   :predicate flycheck-buffer-saved-p
   :enabled (lambda ()
              (and (funcall flycheck-executable-find "cargo-clippy")
-                  (locate-dominating-file (buffer-file-name) "Cargo.toml")))
+                  (flycheck-rust-find-cargo-root)))
   :verify (lambda (_)
             (let ((have-clippy (funcall flycheck-executable-find "cargo-clippy")))
               (list
