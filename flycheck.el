@@ -8691,10 +8691,7 @@ Relative paths are relative to the file being checked."
     (flycheck-verification-result-new
      :label "Cargo.toml"
      :message (if have-cargo-toml "found" "missing")
-     :face (if have-cargo-toml 'success '(bold error))
-     )
-    )
-  )
+     :face (if have-cargo-toml 'success '(bold error)))))
 
 (flycheck-define-checker rust-cargo
   "A Rust syntax checker using Cargo.
@@ -8752,8 +8749,7 @@ This syntax checker needs the cargo clippy subcommand. See URL `https://github.c
                (flycheck-verification-result-new
                 :label "cargo clippy subcommand"
                 :message (if have-clippy "found" "missing")
-                :face (if have-clippy 'success '(bold error))
-                )))))
+                :face (if have-clippy 'success '(bold error)))))))
 
 (flycheck-define-checker rust
   "A Rust syntax checker using Rust compiler.
