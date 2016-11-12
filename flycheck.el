@@ -8700,6 +8700,11 @@ if we are not in a cargo project."
      :message (if have-cargo-toml "found" "missing")
      :face (if have-cargo-toml 'success '(bold error)))))
 
+(defun flycheck-rust-cargo-has-subcommand-p(checker subcommand)
+  "Whether the executable of CHECKER has the SUBCOMMAND subcommand."
+  (let ((cargo (flycheck-checker-executable checker)))
+    (member subcommand (mapcar #'string-trim-left (ignore-errors (process-lines cargo "--list"))))))
+
 (flycheck-define-checker rust-cargo
   "A Rust syntax checker using Cargo.
 
@@ -8747,10 +8752,10 @@ This syntax checker needs the cargo clippy subcommand. See URL `https://github.c
   ;; that the buffer is saved.
   :predicate flycheck-buffer-saved-p
   :enabled (lambda ()
-             (and (funcall flycheck-executable-find "cargo-clippy")
+             (and (flycheck-rust-cargo-has-subcommand-p 'rust-cargo-clippy "clippy")
                   (flycheck-rust-find-cargo-root)))
-  :verify (lambda (_)
-            (let ((have-clippy (funcall flycheck-executable-find "cargo-clippy")))
+  :verify (lambda (checker)
+            (let ((have-clippy (flycheck-rust-cargo-has-subcommand-p checker "clippy")))
               (list
                (flycheck-rust--verify-cargo-toml)
                (flycheck-verification-result-new
