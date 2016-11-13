@@ -262,6 +262,7 @@ attention to case differences."
     texinfo
     typescript-tslint
     verilog-verilator
+    vhdl-ghdl
     xml-xmlstarlet
     xml-xmllint
     yaml-jsyaml
@@ -10094,6 +10095,43 @@ See URL `https://www.veripool.org/wiki/verilator'."
    (error line-start "%Error: " (file-name) ":"
           line ": " (message) line-end))
   :modes verilog-mode)
+
+(flycheck-def-option-var flycheck-ghdl-language-standard nil vhdl-ghdl
+  "The language standard to use in GHDL.
+
+The value of this variable is either a string denoting a language
+standard, or nil, to use the default standard.  When non-nil,
+pass the language standard via the `--std' option."
+  :type '(choice (const :tag "Default standard" nil)
+                 (string :tag "Language standard"))
+  :safe #'stringp
+  :package-version '(flycheck . "32"))
+(make-variable-buffer-local 'flycheck-ghdl-language-standard)
+
+(flycheck-def-option-var flycheck-ghdl-workdir nil vhdl-ghdl
+  "The directory to use for the file library
+
+The value of this variable is either a string with the directory
+to use for the file library, or nil, to use the default value.
+When non-nil, pass the directory via the `--workdir' option."
+  :type '(choice (const :tag "Default directory" nil)
+                 (string :tag "Directory for the file library"))
+  :safe #'stringp
+  :package-version '(flycheck . "32"))
+(make-variable-buffer-local 'flycheck-ghdl-workdir)
+
+(flycheck-define-checker vhdl-ghdl
+  "A VHDL syntax checker using GHDL.
+
+See URL `http://ghdl.free.fr/'."
+  :command ("ghdl"
+            "-s" ; only do the syntax checking
+            (option "--std=" flycheck-ghdl-language-standard concat)
+            (option "--workdir=" flycheck-ghdl-workdir concat)
+            source)
+  :error-patterns
+  ((error line-start (file-name) ":" line ":" column ": " (message) line-end))
+  :modes vhdl-mode)
 
 (flycheck-def-option-var flycheck-xml-xmlstarlet-xsd-path nil xml-xmlstarlet
   "An XSD schema to validate against."
