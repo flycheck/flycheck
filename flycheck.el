@@ -253,6 +253,7 @@ attention to case differences."
     texinfo
     typescript-tslint
     verilog-verilator
+    vhdl-ghdl
     xml-xmlstarlet
     xml-xmllint
     yaml-jsyaml
@@ -9275,6 +9276,28 @@ See URL `http://www.veripool.org/wiki/verilator'."
    (error line-start "%Error: " (file-name) ":"
           line ": " (message) line-end))
   :modes verilog-mode)
+
+(flycheck-def-option-var flycheck-ghdl-language-standard nil vhdl-ghdl
+  "The language standard to use in GHDL.
+
+The value of this variable is either a string denoting a language
+standard, or nil, to use the default standard.  When non-nil,
+pass the language standard via the `--std' option."
+  :type '(choice (const :tag "Default standard" nil)
+                 (string :tag "Language standard"))
+  :safe #'stringp
+  :package-version '(flycheck . "31"))
+(make-variable-buffer-local 'flycheck-ghdl-language-standard)
+
+(flycheck-define-checker vhdl-ghdl
+  "A VHDL syntax checker using GHDL."
+  :command ("ghdl"
+            "-s" ; only do the syntax checking
+            (option "--std=" flycheck-ghdl-language-standard concat)
+            source)
+  :error-patterns
+  ((error line-start (file-name) ":" line ":" column ": " (message) line-end))
+  :modes vhdl-mode)
 
 (flycheck-define-checker xml-xmlstarlet
   "A XML syntax checker and validator using the xmlstarlet utility.

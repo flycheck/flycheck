@@ -5,6 +5,7 @@
 
   - Protobuf with ``protoc`` [GH-1125]
   - systemd-analyze with ``systemd-analyze`` [GH-1135]
+  - VHDL with ``ghdl`` [GH-1160]
 
 - Improvements:
 
