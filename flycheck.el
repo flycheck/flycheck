@@ -8609,10 +8609,7 @@ See URL `http://jruby.org/'."
   :modes (enh-ruby-mode ruby-mode)
   :next-checkers ((warning . ruby-rubylint)))
 
-(flycheck-def-args-var flycheck-cargo-clippy-args (rust-cargo-clippy)
-  :package-version '(flycheck . "31"))
-
-(flycheck-def-args-var flycheck-cargo-rustc-args (rust-cargo)
+(flycheck-def-args-var flycheck-cargo-rustc-args (rust-cargo rust-cargo-clippy)
   :package-version '(flycheck . "30"))
 
 (flycheck-def-args-var flycheck-rust-args (rust-cargo rust-cargo-clippy rust)
@@ -8739,7 +8736,7 @@ rustc command.  See URL `https://www.rust-lang.org'."
 
 This syntax checker needs the cargo clippy subcommand. See URL `https://github.com/Manishearth/rust-clippy'"
   :command ("cargo" "clippy"
-            (eval flycheck-cargo-clippy-args)
+            (eval flycheck-cargo-rustc-args)
             "--"  "--error-format=json"
             (option-list "-L" flycheck-rust-library-path concat)
             (eval flycheck-rust-args))
