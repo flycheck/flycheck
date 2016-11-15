@@ -3286,7 +3286,8 @@ Why not:
 (defconst flycheck-test-javascript-modes '(js-mode
                                            js2-mode
                                            js3-mode
-                                           js2-jsx-mode))
+                                           js2-jsx-mode
+                                           rjsx-mode))
 
 (when (version<= "25" emacs-version)
   (add-to-list 'flycheck-test-javascript-modes 'js-jsx-mode))
@@ -3298,7 +3299,7 @@ Why not:
         (js2-mode-show-strict-warnings nil)
         (js3-mode-show-parse-errors nil))
     (flycheck-ert-should-syntax-check
-     "language/javascript/syntax-error.js" '(js-mode js2-mode js3-mode)
+     "language/javascript/syntax-error.js" '(js-mode js2-mode js3-mode rjsx-mode)
      '(3 4 error "Unmatched '('." :checker javascript-jshint :id "E019")
      '(3 25 error "Expected an identifier and instead saw ')'."
          :checker javascript-jshint :id "E030")
@@ -3310,7 +3311,7 @@ Why not:
   (let ((flycheck-jshintrc "jshintrc")
         (flycheck-disabled-checkers '(javascript-jscs)))
     (flycheck-ert-should-syntax-check
-     "language/javascript/warnings.js" '(js-mode js2-mode js3-mode)
+     "language/javascript/warnings.js" '(js-mode js2-mode js3-mode rjsx-mode)
      '(4 9 warning "'foo' is defined but never used." :id "W098"
          :checker javascript-jshint))))
 
@@ -3335,7 +3336,7 @@ Why not:
   (let ((flycheck-disabled-checkers
          '(javascript-jshint javascript-eslint javascript-jscs)))
     (flycheck-ert-should-syntax-check
-     "language/javascript/warnings.js" '(js-mode js2-mode js3-mode)
+     "language/javascript/warnings.js" '(js-mode js2-mode js3-mode rjsx-mode)
      '(4 nil warning "Single-quoted string preferred over double-quoted string."
          :id "0131" :checker javascript-gjslint)
      '(4 nil warning "Extra space before \"]\""
@@ -3366,7 +3367,7 @@ Why not:
   (let ((flycheck-jshintrc "jshintrc")
         (flycheck-jscsrc "jscsrc"))
     (flycheck-ert-should-syntax-check
-     "language/javascript/warnings.js" '(js-mode js2-mode js3-mode)
+     "language/javascript/warnings.js" '(js-mode js2-mode js3-mode rjsx-mode)
      '(4 3 error "Expected indentation of 2 characters"
          :checker javascript-jscs)
      '(4 9 warning "'foo' is defined but never used." :id "W098"
@@ -3392,7 +3393,7 @@ Why not:
   (let ((flycheck-jscsrc "jscsrc")
         (flycheck-disabled-checkers '(javascript-jshint javascript-eslint)))
     (flycheck-ert-should-syntax-check
-     "language/javascript/warnings.js" '(js-mode js2-mode js3-mode)
+     "language/javascript/warnings.js" '(js-mode js2-mode js3-mode rjsx-mode)
      '(4 nil warning "Single-quoted string preferred over double-quoted string."
          :id "0131" :checker javascript-gjslint)
      '(4 nil warning "Extra space before \"]\""
