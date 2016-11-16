@@ -959,9 +959,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          This syntax checker requires ``cargo clippy``, and therefore a nightly version of rustc.
 
-      .. defcustom:: flycheck-cargo-clippy-args
+      .. defcustom:: flycheck-cargo-rustc-args
 
-         A list of additional arguments passed to the cargo clippy subcommand.
+         A list of additional arguments passed to the cargo clippy subcommand. This checker reuses
+         the variable from `rust-cargo`.
 
 .. supported-language:: Sass/SCSS
 
