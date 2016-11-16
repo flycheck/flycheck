@@ -3140,7 +3140,8 @@ otherwise."
        ;; and the current buffer has no file name, too, or if it refers to the
        ;; same file as the current buffer.
        (or (and (not file-name) (not buffer-file-name))
-           (flycheck-same-files-p file-name (buffer-file-name)))
+           (and buffer-file-name file-name
+                (flycheck-same-files-p file-name buffer-file-name)))
        message
        (not (string-empty-p message))
        (flycheck-error-line err)))))
