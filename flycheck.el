@@ -3134,7 +3134,11 @@ otherwise."
     (let ((file-name (flycheck-error-filename err))
           (message (flycheck-error-message err)))
       (and
-       (or (not file-name) (flycheck-same-files-p file-name (buffer-file-name)))
+       ;; The error is relevant for the current buffer if it's got no file-name
+       ;; and the current buffer has no file name, too, or if it refers to the
+       ;; same file as the current buffer.
+       (or (and (not file-name) (not buffer-file-name))
+           (flycheck-same-files-p file-name (buffer-file-name)))
        message
        (not (string-empty-p message))
        (flycheck-error-line err)))))
