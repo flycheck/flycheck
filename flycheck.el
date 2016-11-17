@@ -205,6 +205,7 @@ attention to case differences."
     json-python-json
     less
     less-stylelint
+    llvm-llc
     lua-luacheck
     lua
     perl
@@ -8215,6 +8216,24 @@ See URL `http://stylelint.io/'."
   :standard-input t
   :error-parser flycheck-parse-stylelint
   :modes (less-css-mode))
+
+(flycheck-define-checker llvm-llc
+  "Flycheck LLVM IR checker using llc.
+
+See URL `http://llvm.org/docs/CommandGuide/llc.html'."
+  :command ("llc" "-o" null-device source)
+  :error-patterns
+  ((error line-start
+          ;; llc prints the executable path
+          (zero-or-one (minimal-match (one-or-more not-newline)) ": ")
+          (file-name) ":" line ":" column ": error: " (message)
+          line-end))
+  :error-filter
+  (lambda (errors)
+    ;; sanitize errors occurring in inline assembly
+    (flycheck-sanitize-errors
+     (flycheck-remove-error-file-names "<inline asm>" errors)))
+  :modes llvm-mode)
 
 (flycheck-def-config-file-var flycheck-luacheckrc lua-luacheck ".luacheckrc"
   :safe #'stringp)

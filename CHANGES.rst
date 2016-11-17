@@ -16,6 +16,7 @@
   - CSS/SCSS/LESS with ``stylelint`` [GH-903]
   - Ruby with ``reek`` [GH-1244]
   - Go with ``megacheck`` [GH-1290]
+  - LLVM IR with ``llc`` [GH-1302]
 
 - New features:
 
