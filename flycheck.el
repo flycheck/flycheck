@@ -8734,7 +8734,8 @@ rustc command.  See URL `https://www.rust-lang.org'."
 (flycheck-define-checker rust-cargo-clippy
   "A Rust syntax checker and linter using clippy.
 
-This syntax checker needs the cargo clippy subcommand. See URL `https://github.com/Manishearth/rust-clippy'"
+This syntax checker needs the cargo clippy subcommand. See URL
+`https://github.com/Manishearth/rust-clippy'"
   :command ("cargo" "clippy"
             (eval flycheck-cargo-rustc-args)
             "--"  "--error-format=json"
