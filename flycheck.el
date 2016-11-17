@@ -221,6 +221,7 @@ attention to case differences."
     racket
     rpm-rpmlint
     markdown-mdl
+    nix
     rst-sphinx
     rst
     ruby-rubocop
@@ -8708,6 +8709,17 @@ See URL `https://github.com/mivok/markdownlint'."
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "(stdin)" errors)))
   :modes (markdown-mode gfm-mode))
+
+(flycheck-define-checker nix
+  "Nix checker using nix-instantiate.
+
+See URL `https://nixos.org/nix/manual/#sec-nix-instantiate'."
+  :command ("nix-instantiate" "--parse" source-inplace)
+  :error-patterns
+  ((error line-start
+          "error: " (message) " at " (file-name) ":" line ":" column
+          line-end))
+  :modes nix-mode)
 
 (defun flycheck-locate-sphinx-source-directory ()
   "Locate the Sphinx source directory for the current buffer.
