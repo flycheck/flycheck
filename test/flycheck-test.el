@@ -2712,6 +2712,12 @@ evaluating BODY."
    '(3 nil info "old tables syntax" :checker asciidoc)
    '(11 nil error "[tabledef-default] illegal width=%60%" :checker asciidoc)))
 
+(flycheck-ert-def-checker-test asciidoctor asciidoc nil
+  (flycheck-ert-should-syntax-check
+   "language/asciidoctor.adoc" 'adoc-mode
+   '(4 nil warning "section title out of sequence: expected level 1, got level 2" :checker asciidoctor)
+   '(6 nil error "unmatched macro: endif::[]" :checker asciidoctor)))
+
 (flycheck-ert-def-checker-test c/c++-clang (c c++) error
   (let ((flycheck-disabled-checkers '(c/c++-gcc)))
     (flycheck-ert-should-syntax-check

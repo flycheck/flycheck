@@ -50,6 +50,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: AsciiDoc
 
+   .. syntax-checker:: asciidoctor
+
+      Check AsciiDoc with the default Asciidoctor_ backend.
+
+      .. _Asciidoctor: http://asciidoctor.org
+
    .. syntax-checker:: asciidoc
 
       Check AsciiDoc_ with the standard AsciiDoc processor.

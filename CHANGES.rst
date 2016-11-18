@@ -6,6 +6,7 @@
   - Protobuf with ``protoc`` [GH-1125]
   - systemd-analyze with ``systemd-analyze`` [GH-1135]
   - Dockerfile with ``hadolint`` [GH-1194]
+  - AsciiDoc with ``asciidoctor`` [GH-1167]
 
 - New features:
 

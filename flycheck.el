@@ -160,6 +160,7 @@ attention to case differences."
 
 (defcustom flycheck-checkers
   '(ada-gnat
+    asciidoctor
     asciidoc
     c/c++-clang
     c/c++-gcc
@@ -5964,6 +5965,21 @@ See URL `http://www.methods.co.nz/asciidoc'."
    (info line-start
          "asciidoc: DEPRECATED: <stdin>: Line " line ": " (message)
          line-end))
+  :modes adoc-mode)
+
+(flycheck-define-checker asciidoctor
+  "An AsciiDoc syntax checker using the Asciidoctor compiler.
+
+See URL `http://asciidoctor.org'."
+  :command ("asciidoctor" "-o" null-device "-")
+  :standard-input t
+  :error-patterns
+  ((error line-start
+          "asciidoctor: ERROR: <stdin>: Line " line ": " (message)
+          line-end)
+   (warning line-start
+            "asciidoctor: WARNING: <stdin>: Line " line ": " (message)
+            line-end))
   :modes adoc-mode)
 
 (flycheck-def-args-var flycheck-clang-args c/c++-clang
