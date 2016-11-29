@@ -1161,6 +1161,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          The language standard to use as string.
 
+      .. defcustom:: flycheck-ghdl-workdir
+
+         The directory to use for the file library.
+
 .. supported-language:: XML
 
    Flycheck checks XML with `xml-xmlstarlet` or `xml-xmllint`.

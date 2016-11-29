@@ -9289,11 +9289,24 @@ pass the language standard via the `--std' option."
   :package-version '(flycheck . "31"))
 (make-variable-buffer-local 'flycheck-ghdl-language-standard)
 
+(flycheck-def-option-var flycheck-ghdl-workdir nil vhdl-ghdl
+  "The directory to use for the file library
+
+The value of this variable is either a string with the directory
+to use for the file library, or nil, to use the default value.
+When non-nil, pass the directory via the `--workdir' option."
+  :type '(choice (const :tag "Default directory" nil)
+                 (string :tag "Directory for the file library"))
+  :safe #'stringp
+  :package-version '(flycheck . "31"))
+(make-variable-buffer-local 'flycheck-ghdl-workdir)
+
 (flycheck-define-checker vhdl-ghdl
   "A VHDL syntax checker using GHDL."
   :command ("ghdl"
             "-s" ; only do the syntax checking
             (option "--std=" flycheck-ghdl-language-standard concat)
+            (option "--workdir=" flycheck-ghdl-workdir concat)
             source)
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ": " (message) line-end))
