@@ -8741,7 +8741,7 @@ This syntax checker needs Rust 1.7 or newer.  See URL
             (option-list "-L" flycheck-rust-library-path concat)
             (eval flycheck-rust-args)
             (eval (or flycheck-rust-crate-root
-                      (flycheck-substitute-argument 'source-inplace 'rust))))
+                      (flycheck-substitute-argument 'source-original 'rust))))
   :error-parser flycheck-parse-rust
   :error-explainer flycheck-rust-error-explainer
   :modes rust-mode
