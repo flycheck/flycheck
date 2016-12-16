@@ -24,6 +24,10 @@
     ``g`` reloads the buffer.
   - Make sure the erlang compiler is only run on compilable files.
   - ``flycheck-tslint`` does not crash any more on deprecation notices [GH-1174]
+  - ``rust-cargo`` now checks integration tests, examples and benchmarks
+    [GH-1206]
+  - ``rust-cargo`` does not use ``flycheck-rust-library-path`` anymore, as
+    dependencies are taken care of by Cargo [GH-1206]
 
 30 (Oct 12, 2016)
 =================

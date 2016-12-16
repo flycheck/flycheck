@@ -700,7 +700,7 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
   "Functions to run if the Flycheck status changed.
 
 This hook is run whenever the status of Flycheck changes.  Each
-hook function takes the status symbol as sinlge argument, as
+hook function takes the status symbol as single argument, as
 given to `flycheck-report-status', which see.
 
 This variable is a abnormal hook.  See Info
@@ -2468,7 +2468,7 @@ buffer-local value of `flycheck-disabled-checkers'."
 
 Set `flycheck-current-syntax-check' accordingly."
   ;; Allocate the current syntax check *before* starting it.  This allows for
-  ;; synchronous checks, which call the status callback immediately in there
+  ;; synchronous checks, which call the status callback immediately in their
   ;; start function.
   (let* ((check (flycheck-syntax-check-new
                  :buffer (current-buffer)
@@ -8785,28 +8785,45 @@ if it is not modified, i.e. after it has been saved."
 (flycheck-def-option-var flycheck-rust-crate-type "lib" (rust-cargo rust)
   "The type of the Rust Crate to check.
 
-The value of this variable is a string denoting the crate type,
-for the `--crate-type' flag."
-  :type 'string
+For `rust-cargo', the value should be a string denoting the
+target type passed to Cargo.  See
+`flycheck-rust-valid-crate-type-p' for the list of allowed
+values.
+
+For `rust', the value should be a string denoting the crate type
+for the `--crate-type' flag of rustc."
+  :type '(choice (const :tag "nil (rust/rust-cargo)" nil)
+                 (const :tag "lib (rust/rust-cargo)" "lib")
+                 (const :tag "bin (rust/rust-cargo)" "bin")
+                 (const :tag "example (rust-cargo)" "example")
+                 (const :tag "test (rust-cargo)" "test")
+                 (const :tag "bench (rust-cargo)" "bench")
+                 (const :tag "rlib (rust)" "rlib")
+                 (const :tag "dylib (rust)" "dylib")
+                 (const :tag "cdylib (rust)" "cdylib")
+                 (const :tag "staticlib (rust)" "staticlib")
+                 (const :tag "metadata (rust)" "metadata"))
   :safe #'stringp
   :package-version '(flycheck . "0.20"))
 (make-variable-buffer-local 'flycheck-rust-crate-type)
 
 (flycheck-def-option-var flycheck-rust-binary-name nil rust-cargo
-  "The name of the binary to pass to `cargo rustc --bin'.
+  "The name of the binary to pass to `cargo rustc --CRATE-TYPE'.
 
 The value of this variable is a string denoting the name of the
-binary to build: Either the name of the crate, or the name of one
-of the files under `src/bin'.
+target to check: usually the name of the crate, or the name of
+one of the files under `src/bin', `tests', `examples' or
+`benches'.
 
-This variable is used only when `flycheck-rust-crate-type' is
-`bin', and is only useful for crates with multiple targets."
+This always requires a non-nil value, unless
+`flycheck-rust-crate-type' is `lib' or nil, in which case it is
+ignored."
   :type 'string
   :safe #'stringp
   :package-version '(flycheck . "28"))
 (make-variable-buffer-local 'flycheck-rust-binary-name)
 
-(flycheck-def-option-var flycheck-rust-library-path nil (rust-cargo rust)
+(flycheck-def-option-var flycheck-rust-library-path nil rust
   "A list of library directories for Rust.
 
 The value of this variable is a list of strings, where each
@@ -8831,32 +8848,72 @@ Relative paths are relative to the file being checked."
                  (flycheck-error-message err)))
               errors))
 
+(defun flycheck-rust-valid-crate-type-p (crate-type)
+  "Whether CRATE-TYPE is a valid target type for Cargo.
+
+A valid Cargo target type is one of `lib', `bin', `example',
+`test' or `bench'."
+  (member crate-type '(nil "lib" "bin" "example" "test" "bench")))
+
 (flycheck-define-checker rust-cargo
   "A Rust syntax checker using Cargo.
 
 This syntax checker requires Rust 1.15 or newer.  See URL
 `https://www.rust-lang.org'."
   :command ("cargo" "rustc"
-            (eval (cond
-                   ((string= flycheck-rust-crate-type "lib") "--lib")
-                   (flycheck-rust-binary-name
-                    (list "--bin" flycheck-rust-binary-name))))
+            (eval (when flycheck-rust-crate-type
+                    (concat "--" flycheck-rust-crate-type)))
+            ;; All crate targets except "lib" need a binary name
+            (eval (when (and flycheck-rust-crate-type
+                             (not (string= flycheck-rust-crate-type "lib")))
+                    flycheck-rust-binary-name))
             "--message-format=json"
             (eval flycheck-cargo-rustc-args)
             "--" "-Z" "no-trans"
-            (option-flag "--test" flycheck-rust-check-tests)
-            (option-list "-L" flycheck-rust-library-path concat)
+            ;; Passing the "--test" flag when the target is a test binary or
+            ;; bench is unnecessary and triggers an error.
+            (eval (when flycheck-rust-check-tests
+                    (unless (member flycheck-rust-crate-type '("test" "bench"))
+                      "--test")))
             (eval flycheck-rust-args))
   :error-parser flycheck-parse-cargo-rustc
   :error-filter flycheck-rust-error-filter
   :error-explainer flycheck-rust-error-explainer
   :modes rust-mode
-  :predicate (lambda ()
-               ;; Since we build the entire project with cargo rustc we require
-               ;; that the buffer is saved.  And of course, we also need a Cargo
-               ;; file :)
-               (and (flycheck-buffer-saved-p)
-                    (locate-dominating-file (buffer-file-name) "Cargo.toml"))))
+  :predicate flycheck-buffer-saved-p
+  :enabled (lambda ()
+             (-when-let (file (buffer-file-name))
+               (locate-dominating-file file "Cargo.toml")))
+  :verify (lambda (_)
+            (-when-let (file (buffer-file-name))
+              (let* ((has-toml (locate-dominating-file file "Cargo.toml"))
+                     (valid-crate-type (flycheck-rust-valid-crate-type-p
+                                        flycheck-rust-crate-type))
+                     (need-binary-name
+                      (and flycheck-rust-crate-type
+                           (not (string= flycheck-rust-crate-type "lib")))))
+                (list
+                 (flycheck-verification-result-new
+                  :label "Cargo.toml"
+                  :message (if has-toml "Found" "Missing")
+                  :face (if has-toml 'success '(bold warning)))
+                 (flycheck-verification-result-new
+                  :label "Crate type"
+                  :message (if valid-crate-type
+                               (format "%s" flycheck-rust-crate-type)
+                             (format "%s (invalid, should be one of 'lib', 'bin', 'test', 'example' or 'bench')"
+                                     flycheck-rust-crate-type))
+                  :face (if valid-crate-type 'success '(bold error)))
+                 (flycheck-verification-result-new
+                  :label "Binary name"
+                  :message (cond
+                            ((not need-binary-name) "Not required")
+                            ((not flycheck-rust-binary-name) "Required")
+                            (t (format "%s" flycheck-rust-binary-name)))
+                  :face (cond
+                         ((not need-binary-name) 'success)
+                         ((not flycheck-rust-binary-name) '(bold error))
+                         (t 'success))))))))
 
 (flycheck-define-checker rust
   "A Rust syntax checker using Rust compiler.
