@@ -5733,7 +5733,22 @@ https://github.com/rust-lang/rust/blob/master/src/libsyntax/json.rs#L67-L139"
               :checker checker
               :buffer buffer
               :filename primary-filename)
-             errors)))))
+             errors)))
+
+        ;; If there are no spans, the error is not associated with a specific
+        ;; file but with the project as a whole.  We still need to report it to
+        ;; the user by emitting a corresponding flycheck-error object.
+        (unless spans
+          (push (flycheck-error-new-at
+                 ;; We have no specific position to attach the error to, so
+                 ;; let's use the top of the file.
+                 1 1
+                 error-level
+                 error-message
+                 :id error-code
+                 :checker checker
+                 :buffer buffer)
+                errors))))
     (nreverse errors)))
 
 
