@@ -9,8 +9,6 @@ int f(int x)
     return x * 2 / null;
 }
 
-bool foo(bool a, bool b) { return a & b; }
-
 std::string foobar(const std::string foo) {
     return foo + "bar";
 }
