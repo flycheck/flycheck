@@ -3847,7 +3847,7 @@ Why not:
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/src/syntax-error.rs" 'rust-mode
-     '(4 5 error "unresolved name `bla`" :checker rust :id "E0425"))))
+     '(4 5 error "unresolved name `bla` (unresolved name)" :checker rust :id "E0425"))))
 
 (flycheck-ert-def-checker-test rust rust type-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
@@ -3874,7 +3874,7 @@ Why not:
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/src/importing.rs" 'rust-mode
-     '(1 5 error "unresolved import `super::imported`. There are too many initial `super`s." :checker rust :id "E0432"))))
+     '(1 5 error "unresolved import `super::imported` (There are too many initial `super`s.)" :checker rust :id "E0432"))))
 
 (flycheck-ert-def-checker-test rust rust macro-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
