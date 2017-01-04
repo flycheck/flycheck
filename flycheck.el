@@ -9255,6 +9255,9 @@ for more information about the custom directory."
   :safe #'stringp
   :package-version '(flycheck . "27"))
 
+(flycheck-def-args-var flycheck-tslint-args (typescript-tslint)
+  :package-version '(flycheck . "31"))
+
 (flycheck-define-checker typescript-tslint
   "TypeScript style checker using TSLint.
 
@@ -9266,6 +9269,7 @@ See URL `https://github.com/palantir/tslint'."
   :command ("tslint" "--format" "json"
             (config-file "--config" flycheck-typescript-tslint-config)
             (option "--rules-dir" flycheck-typescript-tslint-rulesdir)
+            (eval flycheck-tslint-args)
             source)
   :error-parser flycheck-parse-tslint
   :modes (typescript-mode))

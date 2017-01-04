@@ -1140,6 +1140,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          Additional rules directory, for user created rules.
 
+      .. defcustom:: flycheck-tslint-args
+
+         A list of additional arguments that are passed to tslint.
+
 .. supported-language:: Verilog
 
    .. syntax-checker:: verilog-verilator
