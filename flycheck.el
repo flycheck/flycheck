@@ -8710,6 +8710,15 @@ Relative paths are relative to the file being checked."
     (with-output-to-string
       (call-process "rustc" nil standard-output nil "--explain" error-code))))
 
+(defun flycheck-rust-error-filter (errors)
+  "Filter ERRORS from rustc output that have no explanatory value."
+  (seq-remove (lambda (err)
+                (string-match-p
+                 (rx "aborting due to " (optional (one-or-more num) " ")
+                     "previous error")
+                 (flycheck-error-message err)))
+              errors))
+
 (flycheck-define-checker rust-cargo
   "A Rust syntax checker using Cargo.
 
@@ -8731,6 +8740,7 @@ rustc command.  See URL `https://www.rust-lang.org'."
             (option-list "-L" flycheck-rust-library-path concat)
             (eval flycheck-rust-args))
   :error-parser flycheck-parse-rust
+  :error-filter flycheck-rust-error-filter
   :error-explainer flycheck-rust-error-explainer
   :modes rust-mode
   :predicate (lambda ()
@@ -8758,6 +8768,7 @@ This syntax checker needs Rust 1.7 or newer.  See URL
             (eval (or flycheck-rust-crate-root
                       (flycheck-substitute-argument 'source-original 'rust))))
   :error-parser flycheck-parse-rust
+  :error-filter flycheck-rust-error-filter
   :error-explainer flycheck-rust-error-explainer
   :modes rust-mode
   :predicate flycheck-buffer-saved-p)
