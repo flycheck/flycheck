@@ -7425,7 +7425,9 @@ See URL `https://github.com/commercialhaskell/stack'."
             source)
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ":"
-            (or " " "\n    ") "Warning:" (optional "\n")
+            (or " " "\n    ") "Warning:"
+            (optional " " "[" (id (one-or-more not-newline)) "]")
+            (optional "\n")
             (message
              (one-or-more " ") (one-or-more not-newline)
              (zero-or-more "\n"
@@ -7473,7 +7475,9 @@ See URL `https://www.haskell.org/ghc/'."
             source)
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ":"
-            (or " " "\n    ") "Warning:" (optional "\n")
+            (or " " "\n    ") "Warning:"
+            (optional " " "[" (id (one-or-more not-newline)) "]")
+            (optional "\n")
             (message
              (one-or-more " ") (one-or-more not-newline)
              (zero-or-more "\n"
