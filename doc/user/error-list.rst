@@ -79,7 +79,7 @@ VisualStudio, Eclipse, etc. with the following code in your :term:`init file`:
 .. code-block:: elisp
 
    (add-to-list 'display-buffer-alist
-                (,(rx bos "*Flycheck errors*" eos)
+                `(,(rx bos "*Flycheck errors*" eos)
                  (display-buffer-reuse-window
                   display-buffer-in-side-window)
                  (side            . bottom)
