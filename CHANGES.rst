@@ -5,6 +5,7 @@
 
   - Protobuf with ``protoc`` [GH-1125]
   - systemd-analyze with ``systemd-analyze`` [GH-1135]
+  - Rust with ``cargo clippy`` [GH-1156]
 
 - New features:
 

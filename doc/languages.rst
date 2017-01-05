@@ -905,9 +905,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 .. supported-language:: Rust
 
    Flycheck checks Rust_ with `rust-cargo` in Cargo projects, or `rust`
-   otherwise.
+   otherwise. For Cargo projects, you can also use `rust-cargo-clippy` and get
+   the additional lints of clippy_.
 
    .. _Rust: https://www.rust-lang.org/
+   .. _clippy: https://github.com/Manishearth/rust-clippy
 
    .. syntax-checker:: rust-cargo
                        rust
@@ -963,6 +965,19 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          A list of additional library directories. Relative paths are relative
          to the buffer being checked.
+
+   .. syntax-checker:: rust-cargo-clippy
+
+      Check syntax and lint with `cargo clippy <https://github.com/Manishearth/rust-clippy>`_.
+
+      .. note::
+
+         This syntax checker requires ``cargo clippy``, and therefore a nightly version of rustc.
+
+      .. defcustom:: flycheck-cargo-rustc-args
+
+         A list of additional arguments passed to the cargo clippy subcommand. This checker reuses
+         the variable from `rust-cargo`.
 
 .. supported-language:: Sass/SCSS
 

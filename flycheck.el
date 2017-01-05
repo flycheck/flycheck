@@ -231,6 +231,7 @@ attention to case differences."
     ruby
     ruby-jruby
     rust-cargo
+    rust-cargo-clippy
     rust
     scala
     scala-scalastyle
@@ -4644,7 +4645,7 @@ the syntax checker definition, if the variable is nil."
         (flycheck-checker-default-executable checker))))
 
 (defun flycheck-find-checker-executable (checker)
-  "Get the full path of the executbale of CHECKER.
+  "Get the full path of the executable of CHECKER.
 
 Return the full absolute path to the executable of CHECKER, or
 nil if the executable does not exist."
@@ -8637,10 +8638,10 @@ See URL `http://jruby.org/'."
   :modes (enh-ruby-mode ruby-mode)
   :next-checkers ((warning . ruby-rubylint)))
 
-(flycheck-def-args-var flycheck-cargo-rustc-args (rust-cargo)
+(flycheck-def-args-var flycheck-cargo-rustc-args (rust-cargo rust-cargo-clippy)
   :package-version '(flycheck . "30"))
 
-(flycheck-def-args-var flycheck-rust-args (rust-cargo rust)
+(flycheck-def-args-var flycheck-rust-args (rust-cargo rust-cargo-clippy rust)
   :package-version '(flycheck . "0.24"))
 
 (flycheck-def-option-var flycheck-rust-check-tests t (rust-cargo rust)
@@ -8694,7 +8695,7 @@ This variable is used only when `flycheck-rust-crate-type' is
   :package-version '(flycheck . "28"))
 (make-variable-buffer-local 'flycheck-rust-binary-name)
 
-(flycheck-def-option-var flycheck-rust-library-path nil (rust-cargo rust)
+(flycheck-def-option-var flycheck-rust-library-path nil (rust-cargo rust-cargo-clippy rust)
   "A list of library directories for Rust.
 
 The value of this variable is a list of strings, where each
@@ -8709,6 +8710,26 @@ Relative paths are relative to the file being checked."
   (-when-let (error-code (flycheck-error-id error))
     (with-output-to-string
       (call-process "rustc" nil standard-output nil "--explain" error-code))))
+
+(defun flycheck-rust-find-cargo-root ()
+  "Get the root of the cargo project for the current buffer.
+
+Return the root of the cargo project of the current buffer, or nil
+if we are not in a cargo project."
+  (locate-dominating-file (buffer-file-name) "Cargo.toml"))
+
+(defun flycheck-rust--verify-cargo-toml ()
+  "Return a flycheck-verification-result indicating whether Cargo.toml was found."
+  (let ((have-cargo-toml (flycheck-rust-find-cargo-root)))
+    (flycheck-verification-result-new
+     :label "Cargo.toml"
+     :message (if have-cargo-toml "found" "missing")
+     :face (if have-cargo-toml 'success '(bold error)))))
+
+(defun flycheck-rust-cargo-has-subcommand-p(checker subcommand)
+  "Whether the executable of CHECKER has the SUBCOMMAND subcommand."
+  (let ((cargo (flycheck-checker-executable checker)))
+    (member subcommand (mapcar #'string-trim-left (ignore-errors (process-lines cargo "--list"))))))
 
 (flycheck-define-checker rust-cargo
   "A Rust syntax checker using Cargo.
@@ -8733,12 +8754,41 @@ rustc command.  See URL `https://www.rust-lang.org'."
   :error-parser flycheck-parse-rust
   :error-explainer flycheck-rust-error-explainer
   :modes rust-mode
-  :predicate (lambda ()
-               ;; Since we build the entire project with cargo rustc we require
-               ;; that the buffer is saved.  And of course, we also need a Cargo
-               ;; file :)
-               (and (flycheck-buffer-saved-p)
-                    (locate-dominating-file (buffer-file-name) "Cargo.toml"))))
+  ;; Since we build the entire project with cargo rustc we require
+  ;; that the buffer is saved.
+  :predicate flycheck-buffer-saved-p
+  :enabled flycheck-rust-find-cargo-root
+  :verify (lambda(_) (list (flycheck-rust--verify-cargo-toml))))
+
+(flycheck-define-checker rust-cargo-clippy
+  "A Rust syntax checker and linter using clippy.
+
+This syntax checker needs the cargo clippy subcommand. See URL
+`https://github.com/Manishearth/rust-clippy'"
+  :command ("cargo" "clippy"
+            (eval flycheck-cargo-rustc-args)
+            "--"  "--error-format=json"
+            (option-list "-L" flycheck-rust-library-path concat)
+            (eval flycheck-rust-args))
+  :error-parser flycheck-parse-rust
+  :error-explainer flycheck-rust-error-explainer
+  :modes rust-mode
+  ;; cargo clippy must be run from the directory containing Cargo.toml
+  :working-directory (lambda(_) (flycheck-rust-find-cargo-root))
+  ;; Since we build the entire project with cargo clippy we require
+  ;; that the buffer is saved.
+  :predicate flycheck-buffer-saved-p
+  :enabled (lambda ()
+             (and (flycheck-rust-cargo-has-subcommand-p 'rust-cargo-clippy "clippy")
+                  (flycheck-rust-find-cargo-root)))
+  :verify (lambda (checker)
+            (let ((have-clippy (flycheck-rust-cargo-has-subcommand-p checker "clippy")))
+              (list
+               (flycheck-rust--verify-cargo-toml)
+               (flycheck-verification-result-new
+                :label "cargo clippy subcommand"
+                :message (if have-clippy "found" "missing")
+                :face (if have-clippy 'success '(bold error)))))))
 
 (flycheck-define-checker rust
   "A Rust syntax checker using Rust compiler.
