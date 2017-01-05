@@ -6,6 +6,10 @@
   - Protobuf with ``protoc`` [GH-1125]
   - systemd-analyze with ``systemd-analyze`` [GH-1135]
 
+- New features:
+
+  - Add ``flycheck-tslint-args`` to pass additional arguments to tslint [GH-1186]
+
 - Improvements:
 
   - Use option ``flycheck-go-build-tags`` to for ``go-test``,
