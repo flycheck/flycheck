@@ -3790,7 +3790,7 @@ Intended for use with `next-error-function'."
   (let ((pos (flycheck-next-error-pos n reset)))
     (if pos
         (goto-char pos)
-      (let ((result (cl-remove-if
+      (let ((result (seq-remove
                      (lambda (err)
                        (eq (current-buffer)
                            (flycheck-error-buffer err)))
