@@ -801,7 +801,7 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
   '((t :inherit buffer-menu-buffer))
   "Face for filenames in the error list."
   :group 'flycheck-faces
-  :package-version '(flycheck . "0.25"))
+  :package-version '(flycheck . "0.31"))
 
 (defface flycheck-error-list-column-number
   '((t :inherit font-lock-constant-face))
