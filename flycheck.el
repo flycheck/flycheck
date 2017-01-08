@@ -3627,7 +3627,8 @@ Return the created overlay."
   ;; We must have a proper error region for the sake of fringe indication,
   ;; error display and error navigation, even if the highlighting is disabled.
   ;; We erase the highlighting later on in this case
-  (when (eq (flycheck-error-buffer err) (current-buffer))
+  (when (equal (flycheck-error-filename err)
+               (buffer-file-name (current-buffer)))
     (pcase-let* ((`(,beg . ,end) (flycheck-error-region-for-mode
                                   err (or flycheck-highlighting-mode 'lines)))
                  (overlay (make-overlay beg end))
