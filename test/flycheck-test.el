@@ -3197,18 +3197,20 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (let ((flycheck-disabled-checkers '(haskell-ghc)))
     (flycheck-ert-should-syntax-check
      "language/haskell/Error.hs" 'haskell-mode
-     '(4 16 error "Couldn't match type `Bool' with `[Char]'
-Expected type: String
-  Actual type: Bool
-In the first argument of `putStrLn', namely `True'
-In the expression: putStrLn True" :checker haskell-stack-ghc))))
+     '(4 16 error "* Couldn't match type `Bool' with `[Char]'
+  Expected type: String
+    Actual type: Bool
+* In the first argument of `putStrLn', namely `True'
+  In the expression: putStrLn True
+  In an equation for `foo': foo = putStrLn True" :checker haskell-stack-ghc))))
 
 (flycheck-ert-def-checker-test (haskell-stack-ghc haskell-hlint) haskell literate
   (skip-unless (file-exists-p (getenv "HOME")))
   (let ((flycheck-disabled-checkers '(haskell-ghc)))
     (flycheck-ert-should-syntax-check
      "language/haskell/Literate.lhs" 'literate-haskell-mode
-     '(6 1 warning "Top-level binding with no type signature: foo :: forall t. t"
+     '(6 1 warning "Top-level binding with no type signature: foo :: forall a. a"
+         :id "-Wmissing-signatures"
          :checker haskell-stack-ghc))))
 
 (flycheck-ert-def-checker-test (haskell-stack-ghc haskell-hlint) haskell
@@ -3223,7 +3225,9 @@ Found:
 Why not:
   spam = map lines" :checker haskell-hlint)
      '(4 1 warning "Top-level binding with no type signature:
-  spam :: [String] -> [[String]]" :checker haskell-stack-ghc)
+  spam :: [String] -> [[String]]"
+         :id "-Wmissing-signatures"
+         :checker haskell-stack-ghc)
      '(7 8 info "Redundant bracket
 Found:
   (putStrLn \"hello world\")
@@ -3240,17 +3244,19 @@ Why not:
   (let ((flycheck-disabled-checkers '(haskell-stack-ghc)))
     (flycheck-ert-should-syntax-check
      "language/haskell/Error.hs" 'haskell-mode
-     '(4 16 error "Couldn't match type `Bool' with `[Char]'
-Expected type: String
-  Actual type: Bool
-In the first argument of `putStrLn', namely `True'
-In the expression: putStrLn True" :checker haskell-ghc))))
+     '(4 16 error "* Couldn't match type `Bool' with `[Char]'
+  Expected type: String
+    Actual type: Bool
+* In the first argument of `putStrLn', namely `True'
+  In the expression: putStrLn True
+  In an equation for `foo': foo = putStrLn True" :checker haskell-ghc))))
 
 (flycheck-ert-def-checker-test (haskell-ghc haskell-hlint) haskell literate
   (let ((flycheck-disabled-checkers '(haskell-stack-ghc)))
     (flycheck-ert-should-syntax-check
      "language/haskell/Literate.lhs" 'literate-haskell-mode
-     '(6 1 warning "Top-level binding with no type signature: foo :: forall t. t"
+     '(6 1 warning "Top-level binding with no type signature: foo :: forall a. a"
+         :id "-Wmissing-signatures"
          :checker haskell-ghc))))
 
 (flycheck-ert-def-checker-test (haskell-ghc haskell-hlint) haskell
@@ -3265,6 +3271,7 @@ Why not:
   spam = map lines" :checker haskell-hlint)
      '(4 1 warning "Top-level binding with no type signature:
   spam :: [String] -> [[String]]"
+         :id "-Wmissing-signatures"
          :checker haskell-ghc)
      '(7 8 info "Redundant bracket
 Found:
@@ -3847,7 +3854,7 @@ Why not:
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/src/syntax-error.rs" 'rust-mode
-     '(4 5 error "unresolved name `bla`" :checker rust :id "E0425"))))
+     '(4 5 error "unresolved name `bla` (unresolved name)" :checker rust :id "E0425"))))
 
 (flycheck-ert-def-checker-test rust rust type-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
@@ -3874,7 +3881,7 @@ Why not:
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/src/importing.rs" 'rust-mode
-     '(1 5 error "unresolved import `super::imported`. There are too many initial `super`s." :checker rust :id "E0432"))))
+     '(1 5 error "unresolved import `super::imported` (There are too many initial `super`s.)" :checker rust :id "E0432"))))
 
 (flycheck-ert-def-checker-test rust rust macro-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
@@ -4052,11 +4059,9 @@ Why not:
 (flycheck-ert-def-checker-test typescript-tslint typescript nil
   (flycheck-ert-should-syntax-check
    "language/typescript/sample.ts" 'typescript-mode
-   '(1 10 warning "unused variable: 'invalidAlignment'"
-       :checker typescript-tslint :id "no-unused-variable")
-   '(2 7 warning "unused variable: 'a'"
-       :checker typescript-tslint :id "no-unused-variable")
-   '(3 15 warning "missing semicolon"
+   '(2 3 warning "Forbidden 'var' keyword, use 'let' or 'const' instead"
+       :checker typescript-tslint :id "no-var-keyword")
+   '(3 15 warning "Missing semicolon"
        :checker typescript-tslint :id "semicolon")))
 
 (flycheck-ert-def-checker-test verilog-verilator verilog error
