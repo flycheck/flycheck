@@ -2783,21 +2783,22 @@ evaluating BODY."
         (flycheck-cppcheck-inconclusive nil)
         (flycheck-cppcheck-checks '("style")))
     (flycheck-ert-should-syntax-check
+     "language/c_c++/style2.cpp" 'c++-mode
+     '(3 nil info "The scope of the variable 'i' can be reduced. Warning: Be careful when fixing this message, especially when there are inner loops. Here is an example where cppcheck will write that the scope for 'i' can be reduced:\nvoid f(int x)\n{\n    int i = 0;\n    if (x) {\n        // it's safe to move 'int i = 0;' here\n        for (int n = 0; n < 10; ++n) {\n            // it is possible but not safe to move 'int i = 0;' here\n            do_something(&i);\n        }\n    }\n}\nWhen you see this message it is always safe to reduce the variable scope 1 level."
+         :id "variableScope" :checker c/c++-cppcheck))
+
+    (flycheck-ert-should-syntax-check
      "language/c_c++/style.cpp" 'c-mode
      '(5 nil info "Unused variable: unused" :id "unusedVariable"
          :checker c/c++-cppcheck)
-     '(9 nil error "Division by zero." :id "zerodiv" :checker c/c++-cppcheck)
-     '(12 nil info "Suspicious expression. Boolean result is used in bitwise operation. The operator '!' and the comparison operators have higher precedence than bitwise operators. It is recommended that the expression is clarified with parentheses."
-          :id "clarifyCondition" :checker c/c++-cppcheck))
+     '(9 nil error "Division by zero." :id "zerodiv" :checker c/c++-cppcheck))
 
     (flycheck-ert-should-syntax-check
      "language/c_c++/style.cpp" 'c++-mode
      '(5 nil info "Unused variable: unused" :id "unusedVariable"
          :checker c/c++-cppcheck)
      '(9 nil error "Division by zero." :id "zerodiv" :checker c/c++-cppcheck)
-     '(12 nil info "Suspicious expression. Boolean result is used in bitwise operation. The operator '!' and the comparison operators have higher precedence than bitwise operators. It is recommended that the expression is clarified with parentheses."
-          :id "clarifyCondition" :checker c/c++-cppcheck)
-     '(14 nil warning "Parameter 'foo' is passed by value. It could be passed as a (const) reference which is usually faster and recommended in C++."
+     '(12 nil warning "Parameter 'foo' is passed by value. It could be passed as a (const) reference which is usually faster and recommended in C++."
           :id "passedByValue" :checker c/c++-cppcheck))))
 
 (flycheck-ert-def-checker-test cfengine cfengine error

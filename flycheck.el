@@ -5550,7 +5550,9 @@ about Cppcheck."
                           (push (flycheck-error-new-at
                                  (flycheck-string-to-number-safe .line)
                                  nil
-                                 level message
+                                 level
+                                 ;; cppcheck return newline characters as "\012"
+                                 (replace-regexp-in-string "\\\\012" "\n" message)
                                  :id id
                                  :checker checker
                                  :buffer buffer
