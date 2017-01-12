@@ -256,6 +256,14 @@ to view the docstring of the syntax checker.  Likewise, you may use
          Flycheck extension which provides a syntax checker to run D unittests
          on the fly and report the results with Flycheck.
 
+.. supported-language:: Dockerfile
+
+   .. syntax-checker:: dockerfile-hadolint
+
+      Check syntax and code style with hadolint_
+
+      .. _hadolint: http://hadolint.lukasmartinelli.ch/
+
 .. supported-language:: Elixir
 
    .. syntax-checker:: elixir-dogma

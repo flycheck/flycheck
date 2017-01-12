@@ -177,6 +177,7 @@ attention to case differences."
     coq
     css-csslint
     d-dmd
+    dockerfile-hadolint
     elixir-dogma
     emacs-lisp
     emacs-lisp-checkdoc
@@ -6580,6 +6581,25 @@ Requires DMD 2.066 or newer.  See URL `http://dlang.org/'."
    (info line-start (file-name) "(" line "," column "): "
          (one-or-more " ") (message) line-end))
   :modes d-mode)
+
+(flycheck-define-checker dockerfile-hadolint
+  "A Dockerfile syntax checker using the hadolint.
+
+See URL `http://hadolint.lukasmartinelli.ch/'."
+  :command ("hadolint" "-")
+  :standard-input t
+  :error-patterns
+  ((error line-start
+          (file-name) ":" line ":" column " " (message)
+          line-end)
+   (warning line-start
+            (file-name) ":" line " " (id (one-or-more alnum)) " " (message)
+            line-end))
+  :error-filter
+  (lambda (errors)
+    (flycheck-sanitize-errors
+     (flycheck-remove-error-file-names "/dev/stdin" errors)))
+  :modes dockerfile-mode)
 
 (defun flycheck-elixir--find-default-directory (_checker)
   "Come up with a suitable default directory to run CHECKER in.
