@@ -2955,6 +2955,24 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
    '(13 1 info "instantiated from here: U!()"
         :checker d-dmd)))
 
+(flycheck-ert-def-checker-test dockerfile-hadolint dockerfile error
+  (flycheck-ert-should-syntax-check
+   "language/dockerfile/Dockerfile.error" 'dockerfile-mode
+   '(2 1 error "unexpected 'I' expecting space, \"\\t\", \"ONBUILD\", \"FROM\", \"COPY\", \"RUN\", \"WORKDIR\", \"ENTRYPOINT\", \"VOLUME\", \"EXPOSE\", \"ENV\", \"ARG\", \"USER\", \"LABEL\", \"STOPSIGNAL\", \"CMD\", \"SHELL\", \"MAINTAINER\", \"ADD\", \"#\", \"HEALTHCHECK\" or end of input"
+       :id nil :checker dockerfile-hadolint)))
+
+(flycheck-ert-def-checker-test dockerfile-hadolint dockerfile warnings
+  (flycheck-ert-should-syntax-check
+   "language/dockerfile/Dockerfile.warning" 'dockerfile-mode
+   '(1 nil warning "Always tag the version of an image explicitly."
+       :id "DL3006" :checker dockerfile-hadolint)
+   '(2 nil warning "Do not use apt-get upgrade or dist-upgrade."
+       :id "DL3005" :checker dockerfile-hadolint)
+   '(2 nil warning "Delete the apt-get lists after installing something"
+       :id "DL3009" :checker dockerfile-hadolint)
+   '(3 nil warning "Use absolute WORKDIR"
+       :id "DL3000" :checker dockerfile-hadolint)))
+
 (flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp nil
   (flycheck-ert-should-syntax-check
    "language/emacs-lisp/warnings.el" 'emacs-lisp-mode
