@@ -136,33 +136,27 @@ attention to case differences."
   :prefix "flycheck-"
   :group 'tools
   :link '(url-link :tag "Website" "http://www.flycheck.org")
-  :link '(url-link :tag "Github" "https://github.com/flycheck/flycheck")
-  :link '(custom-manual "(flycheck)Top")
-  :link '(info-link "(flycheck)Usage"))
+  :link '(url-link :tag "Github" "https://github.com/flycheck/flycheck"))
 
 (defgroup flycheck-config-files nil
   "Configuration files for on-the-fly syntax checkers."
   :prefix "flycheck-"
-  :group 'flycheck
-  :link '(custom-manual "(flycheck)Syntax checker configuration files"))
+  :group 'flycheck)
 
 (defgroup flycheck-options nil
   "Options for on-the-fly syntax checkers."
   :prefix "flycheck-"
-  :group 'flycheck
-  :link '(custom-manual "(flycheck)Syntax checker options"))
+  :group 'flycheck)
 
 (defgroup flycheck-executables nil
   "Executables of syntax checkers."
   :prefix "flycheck-"
-  :group 'flycheck
-  :link '(custom-manual "(flycheck)Syntax checker executables"))
+  :group 'flycheck)
 
 (defgroup flycheck-faces nil
   "Faces used by on-the-fly syntax checking."
   :prefix "flycheck-"
-  :group 'flycheck
-  :link '(info-link "(flycheck)Error reporting"))
+  :group 'flycheck)
 
 (defcustom flycheck-checkers
   '(ada-gnat
