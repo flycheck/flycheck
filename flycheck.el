@@ -9219,7 +9219,7 @@ See URL `https://github.com/purcell/sqlint'."
   "A systemd unit checker using systemd-analyze(1).
 
 See URL `https://www.freedesktop.org/software/systemd/man/systemd-analyze.html'."
-  :command ("systemd-analyze" "verify" source-original)
+  :command ("systemd-analyze" "verify" source)
   :error-patterns
   ((error line-start "[" (file-name) ":" line "] " (message) line-end))
   :modes (systemd-mode))
