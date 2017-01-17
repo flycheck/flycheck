@@ -4165,15 +4165,10 @@ POS defaults to `point'."
 
 (defun flycheck-jump-to-error (error)
   "Go to the location of ERROR."
-  (let ((buffer (flycheck-error-buffer error))
-        (filename (flycheck-error-filename error)))
-    (cond
-     ((buffer-live-p buffer)
-      (flycheck-jump-in-buffer buffer error))
-     ((file-exists-p filename)
-      (let ((buffer (find-file filename)))
-        (setf (flycheck-error-buffer error) buffer)
-        (flycheck-jump-in-buffer buffer error))))))
+  (let ((error-copy (copy-flycheck-error error))
+        (buffer (find-file-noselect (flycheck-error-filename error))))
+    (setf (flycheck-error-buffer error-copy) buffer)
+    (flycheck-jump-in-buffer buffer error-copy)))
 
 (defun flycheck-jump-in-buffer (buffer error)
   "In BUFFER, jump to ERROR."
