@@ -1,4 +1,4 @@
-;;; test-emacs-lisp.el --- Flycheck Specs: Haskell      -*- lexical-binding: t; -*-
+;;; test-emacs-lisp.el --- Flycheck Specs: Emacs Lisp      -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013-2016 Sebastian Wiesner and Flycheck contributors
 
