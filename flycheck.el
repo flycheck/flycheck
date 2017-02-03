@@ -2146,10 +2146,11 @@ possible problems are shown."
   (let ((buffer (current-buffer))
         ;; Get all checkers that support the current major mode
         (checkers (seq-filter #'flycheck-checker-supports-major-mode-p
-                              flycheck-checkers)))
+                              flycheck-checkers))
+        (help-buffer (get-buffer-create " *Flycheck checkers*")))
 
     ;; Now print all applicable checkers
-    (with-help-window (get-buffer-create " *Flycheck checkers*")
+    (with-help-window help-buffer
       (with-current-buffer standard-output
         (flycheck--verify-print-header "Syntax checkers for buffer " buffer)
         (unless checkers
@@ -2174,7 +2175,12 @@ possible problems are shown."
               (princ "\n"))
             (princ "\nTry adding these syntax checkers to `flycheck-checkers'.\n")))
 
-        (flycheck--verify-print-footer buffer)))))
+        (flycheck--verify-print-footer buffer)))
+
+    (with-current-buffer help-buffer
+      (setq-local revert-buffer-function
+                  (lambda (_ignore-auto _noconfirm)
+                    (with-current-buffer buffer (flycheck-verify-setup)))))))
 
 
 ;;; Predicates for generic syntax checkers
