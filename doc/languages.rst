@@ -926,7 +926,8 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. note::
 
-         These syntax checkers require Rust 1.7 or newer.
+         `rust-cargo` requires Rust 1.15 or newer.
+         `rust` requires Rust 1.7 or newer.
 
       .. _Cargo: http://doc.crates.io/index.html
 

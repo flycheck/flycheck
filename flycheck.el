@@ -5625,8 +5625,139 @@ about TSLint."
                   spans)
         spans))))
 
-(defun flycheck-parse-rust (output checker buffer)
-  "Parse rust errors from OUTPUT and return a list of `flycheck-error'.
+(defun flycheck-parse-rustc-diagnostic (diagnostic checker buffer)
+  "Turn a rustc DIAGNOSTIC into a `flycheck-error'.
+
+CHECKER and BUFFER denote the CHECKER that returned DIAGNOSTIC
+and the BUFFER that was checked respectively.
+
+DIAGNOSTIC should be a parsed JSON object describing a rustc
+diagnostic, following the format described there:
+
+https://github.com/rust-lang/rust/blob/master/src/libsyntax/json.rs#L67-L139"
+  (let ((error-message)
+        (error-level)
+        (error-code)
+        (primary-filename)
+        (primary-line)
+        (primary-column)
+        (spans)
+        (children)
+        (errors))
+    ;; The diagnostic format is described in the link above.  The gist of it is
+    ;; that a diagnostic can have several causes in the source text; these
+    ;; causes are represented by spans.  The diagnostic has a message and a
+    ;; level (error, warning), while the spans have a filename, line, column,
+    ;; and an optional label.  The primary span points to the root cause of the
+    ;; error in the source text, while non-primary spans point to related
+    ;; causes.  Spans may have an 'expansion' field for macro expansion errors;
+    ;; these expansion fields will contain another span (and so on).  In
+    ;; addition, a diagnostic can also have children diagnostics that are used
+    ;; to provide additional information through their message field, but do not
+    ;; seem to contain any spans (yet).
+    ;;
+    ;; We first gather spans in order to turn every span into a flycheck error
+    ;; object, that we collect into the `errors' list.
+
+    ;; Nested `let-alist' cause compilation warnings, hence we `setq' all
+    ;; these values here first to avoid nesting.
+    (let-alist diagnostic
+      (setq error-message .message
+            error-level (pcase .level
+                          (`"error" 'error)
+                          (`"warning" 'warning)
+                          (_ 'error))
+            ;; The 'code' field of the diagnostic contains the actual error
+            ;; code and an optional explanation that we ignore
+            error-code .code.code
+            ;; Collect all spans recursively
+            spans (seq-mapcat #'flycheck-parse-rust-collect-spans .spans)
+            children .children))
+
+    ;; Turn each span into a flycheck error
+    (dolist (span spans)
+      (let-alist span
+        ;; Children lack any filename/line/column information, so we use
+        ;; those from the primary span
+        (when .is_primary
+          (setq primary-filename .file_name
+                primary-line .line_start
+                primary-column .column_start))
+        (push
+         (flycheck-error-new-at
+          .line_start
+          .column_start
+          ;; Non-primary spans are used for notes
+          (if .is_primary error-level 'info)
+          (if .is_primary
+              ;; Primary spans may have labels with additional information
+              (concat error-message (when .label
+                                      (format " (%s)" .label)))
+            ;; If the label is empty, fallback on the error message,
+            ;; otherwise we won't be able to display anything
+            (or .label error-message))
+          :id error-code
+          :checker checker
+          :buffer buffer
+          :filename .file_name)
+         errors)))
+
+    ;; Then we turn children messages into flycheck errors pointing to the
+    ;; location of the primary span.  According to the format, children
+    ;; may contain spans, but they do not seem to use them in practice.
+    (dolist (child children)
+      (let-alist child
+        (push
+         (flycheck-error-new-at
+          primary-line
+          primary-column
+          'info
+          .message
+          :id error-code
+          :checker checker
+          :buffer buffer
+          :filename primary-filename)
+         errors)))
+
+    ;; If there are no spans, the error is not associated with a specific
+    ;; file but with the project as a whole.  We still need to report it to
+    ;; the user by emitting a corresponding flycheck-error object.
+    (unless spans
+      (push (flycheck-error-new-at
+             ;; We have no specific position to attach the error to, so
+             ;; let's use the top of the file.
+             1 1
+             error-level
+             error-message
+             :id error-code
+             :checker checker
+             :buffer buffer)
+            errors))
+    (nreverse errors)))
+
+(defun flycheck-parse-json (output)
+  "Return parsed JSON data from OUTPUT.
+
+OUTPUT is a string that contains JSON data.  Each line of OUTPUT
+may be either plain text, a JSON array (starting with `['), or a
+JSON object (starting with `{').
+
+This function ignores the plain text lines, parses the JSON
+lines, and returns the parsed JSON lines in a list."
+  (let ((objects nil)
+        (json-array-type 'list)
+        (json-false nil))
+    (with-temp-buffer
+      (insert output)
+      (goto-char (point-min))
+      (while (not (eobp))
+        (when (memq (char-after) '(?\{ ?\[))
+          (push (json-read) objects))
+        (forward-line)))
+    (nreverse objects)))
+
+(defun flycheck-parse-rustc (output checker buffer)
+  "Parse rustc errors from OUTPUT and return a list of `flycheck-error'.
 
 CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
 the BUFFER that was checked respectively.
@@ -5638,115 +5769,33 @@ object that corresponds to a diagnostic from the compiler.  The
 expected diagnostic format is described there:
 
 https://github.com/rust-lang/rust/blob/master/src/libsyntax/json.rs#L67-L139"
-  (let* ((json-array-type 'list)
-         (json-false nil)
-         ;; Skip the plain text lines in OUTPUT, keep the JSON lines.
-         (json-lines (seq-filter (lambda (line)
-                                   (string-match-p "^{" line))
-                                 (split-string output "\n")))
-         ;; Each JSON line is a JSON object.
-         (diagnostics (seq-map #'json-read-from-string json-lines))
-         (errors))
-    ;; The diagnostic format is described in the link above.  The gist of it is
-    ;; that each diagnostic can have several causes in the source text; these
-    ;; causes are represented by spans.  The diagnostic has a message and a
-    ;; level (error, warning), while the spans have a filename, line, column,
-    ;; and an optional label.  The primary span points to the root cause of the
-    ;; error in the source text, while non-primary spans point to related
-    ;; causes.  Spans may have an 'expansion' field for macro expansion errors;
-    ;; these expansion fields will contain another span (and so on).  In
-    ;; addition, each diagnostic can also have children diagnostics that are
-    ;; used to provide additional information through their message field, but
-    ;; do not seem to contain any spans (yet).
-    ;;
-    ;; We first iterate over diagnostics, get all their spans and turn every
-    ;; span into a flycheck error object, that we collect into the `errors'
-    ;; list.
-    (dolist (diagnostic diagnostics)
-      (let ((error-message)
-            (error-level)
-            (error-code)
-            (primary-filename)
-            (primary-line)
-            (primary-column)
-            (spans)
-            (children))
+  (seq-mapcat (lambda (msg)
+                (flycheck-parse-rustc-diagnostic msg checker buffer))
+              (flycheck-parse-json output)))
 
-        ;; Nested `let-alist' cause compilation warnings, hence we `setq' all
-        ;; these values here first to avoid nesting.
-        (let-alist diagnostic
-          (setq error-message .message
-                error-level (pcase .level
-                              (`"error" 'error)
-                              (`"warning" 'warning)
-                              (_ 'error))
-                ;; The 'code' field of the diagnostic contains the actual error
-                ;; code and an optional explanation that we ignore
-                error-code .code.code
-                ;; Collect all spans recursively
-                spans (seq-mapcat #'flycheck-parse-rust-collect-spans .spans)
-                children .children))
+(defun flycheck-parse-cargo-rustc (output checker buffer)
+  "Parse Cargo errors from OUTPUT and return a list of `flycheck-error'.
 
-        ;; Turn each span into a flycheck error
-        (dolist (span spans)
-          (let-alist span
-            ;; Children lack any filename/line/column information, so we use
-            ;; those from the primary span
-            (when .is_primary
-              (setq primary-filename .file_name
-                    primary-line .line_start
-                    primary-column .column_start))
-            (push
-             (flycheck-error-new-at
-              .line_start
-              .column_start
-              ;; Non-primary spans are used for notes
-              (if .is_primary error-level 'info)
-              (if .is_primary
-                  ;; Primary spans may have labels with additional information
-                  (concat error-message (when .label
-                                          (format " (%s)" .label)))
-                ;; If the label is empty, fallback on the error message,
-                ;; otherwise we won't be able to display anything
-                (or .label error-message))
-              :id error-code
-              :checker checker
-              :buffer buffer
-              :filename .file_name)
-             errors)))
+CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
+the BUFFER that was checked respectively.
 
-        ;; Then we turn children messages into flycheck errors pointing to the
-        ;; location of the primary span.  According to the format, children
-        ;; may contain spans, but they do not seem to use them in practice.
-        (dolist (child children)
-          (let-alist child
-            (push
-             (flycheck-error-new-at
-              primary-line
-              primary-column
-              'info
-              .message
-              :id error-code
-              :checker checker
-              :buffer buffer
-              :filename primary-filename)
-             errors)))
+The expected format for OUTPUT is a mix of plain text lines and
+JSON lines.  This function ignores the plain text lines and
+parses only JSON lines.  Each JSON line is expected to be a JSON
+object that represents a message from Cargo.  The format of
+messages emitted by Cargo is described there:
 
-        ;; If there are no spans, the error is not associated with a specific
-        ;; file but with the project as a whole.  We still need to report it to
-        ;; the user by emitting a corresponding flycheck-error object.
-        (unless spans
-          (push (flycheck-error-new-at
-                 ;; We have no specific position to attach the error to, so
-                 ;; let's use the top of the file.
-                 1 1
-                 error-level
-                 error-message
-                 :id error-code
-                 :checker checker
-                 :buffer buffer)
+https://github.com/rust-lang/cargo/blob/master/src/cargo/util/machine_message.rs#L20-L31"
+  (let ((errors))
+    (dolist (msg (flycheck-parse-json output))
+      (let-alist msg
+        ;; Errors and warnings from rustc are wrapped by cargo, so we filter and
+        ;; unwrap them, and delegate the actual construction of `flycheck-error'
+        ;; objects to `flycheck-parse-rustc-diagnostic'.
+        (when (string= .reason "compiler-message")
+          (push (flycheck-parse-rustc-diagnostic .message checker buffer)
                 errors))))
-    (nreverse errors)))
+    (apply #'nconc errors)))
 
 
 ;;; Error parsing with regular expressions
@@ -8742,24 +8791,20 @@ Relative paths are relative to the file being checked."
 (flycheck-define-checker rust-cargo
   "A Rust syntax checker using Cargo.
 
-This syntax checker needs Rust 1.7 or newer, and Cargo with the
-rustc command.  See URL `https://www.rust-lang.org'."
+This syntax checker requires Rust 1.15 or newer.  See URL
+`https://www.rust-lang.org'."
   :command ("cargo" "rustc"
             (eval (cond
                    ((string= flycheck-rust-crate-type "lib") "--lib")
                    (flycheck-rust-binary-name
                     (list "--bin" flycheck-rust-binary-name))))
+            "--message-format=json"
             (eval flycheck-cargo-rustc-args)
             "--" "-Z" "no-trans"
-            ;; Passing the "unstable-options" flag may raise an error in the
-            ;; future.  For the moment, we need it to access JSON output in all
-            ;; rust versions >= 1.7.
-            "-Z" "unstable-options"
-            "--error-format=json"
             (option-flag "--test" flycheck-rust-check-tests)
             (option-list "-L" flycheck-rust-library-path concat)
             (eval flycheck-rust-args))
-  :error-parser flycheck-parse-rust
+  :error-parser flycheck-parse-cargo-rustc
   :error-filter flycheck-rust-error-filter
   :error-explainer flycheck-rust-error-explainer
   :modes rust-mode
@@ -8787,7 +8832,7 @@ This syntax checker needs Rust 1.7 or newer.  See URL
             (eval flycheck-rust-args)
             (eval (or flycheck-rust-crate-root
                       (flycheck-substitute-argument 'source-original 'rust))))
-  :error-parser flycheck-parse-rust
+  :error-parser flycheck-parse-rustc
   :error-filter flycheck-rust-error-filter
   :error-explainer flycheck-rust-error-explainer
   :modes rust-mode

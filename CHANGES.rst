@@ -1,6 +1,10 @@
 31-cvs (in development)
 =======================
 
+- **Breaking changes**
+
+  - ``rust-cargo`` now requires Rust 1.15 or newer [GH-1201]
+
 - New syntax checkers:
 
   - Protobuf with ``protoc`` [GH-1125]

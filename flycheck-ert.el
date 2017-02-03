@@ -46,8 +46,7 @@
   (unless flycheck-ert-ert-can-skip
     ;; Fake skipping
 
-    (setf (get 'flycheck-ert-skipped 'error-message) "Test skipped")
-    (setf (get 'flycheck-ert-skipped 'error-conditions) '(error))
+    (define-error 'flycheck-ert-skipped "Test skipped")
 
     (defun ert-skip (data)
       (signal 'flycheck-ert-skipped data))
@@ -270,9 +269,7 @@ RESULT is an ERT test result object."
 After this time has elapsed, the checker is considered to have
 failed, and the test aborted with failure.")
 
-(put 'flycheck-ert-syntax-check-timed-out 'error-message
-     "Syntax check timed out.")
-(put 'flycheck-ert-syntax-check-timed-out 'error-conditions '(error))
+(define-error 'flycheck-ert-syntax-check-timed-out "Syntax check timed out.")
 
 (defun flycheck-ert-wait-for-syntax-checker ()
   "Wait until the syntax check in the current buffer is finished."
@@ -357,6 +354,8 @@ check that the buffer has all ERRORS, and no other errors."
   (should (= (length errors)
              (length (flycheck-overlays-in (point-min) (point-max))))))
 
+(define-error 'flycheck-ert-suspicious-checker "Suspicious state from checker")
+
 (defun flycheck-ert-should-syntax-check (resource-file modes &rest errors)
   "Test a syntax check in RESOURCE-FILE with MODES.
 
@@ -398,6 +397,10 @@ resource directory."
                     (setq process-hook-called (1+ process-hook-called))
                     nil)
                   nil :local)
+        (add-hook 'flycheck-status-changed-functions
+                  (lambda (status)
+                    (when (eq status 'suspicious)
+                      (signal 'flycheck-ert-suspicious-checker nil))))
         (flycheck-ert-buffer-sync)
         (apply #'flycheck-ert-should-errors errors)
         (should (= process-hook-called (length errors))))

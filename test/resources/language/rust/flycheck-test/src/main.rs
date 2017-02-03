@@ -1,6 +1,3 @@
-#![crate_type="bin"]
-#![crate_id="flycheck"]
-
 mod imported;
 mod importing;
 mod warnings;
