@@ -15,6 +15,8 @@
 
   - Use option ``flycheck-go-build-tags`` to for ``go-test``,
     ``go-vet`` and ``go-errcheck`` as well.
+  - Add a revert function to ``flycheck-verify-setup``, so hitting
+    ``g`` reloads the buffer.
 
 30 (Oct 12, 2016)
 =================
