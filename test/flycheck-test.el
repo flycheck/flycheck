@@ -3869,35 +3869,41 @@ Why not:
 (flycheck-ert-def-checker-test rust-cargo rust warning
   (let ((flycheck-rust-crate-type "bin"))
     (flycheck-ert-should-syntax-check
-     "language/rust/src/warnings.rs" 'rust-mode
+     "language/rust/flycheck-test/src/warnings.rs" 'rust-mode
      '(3 1 warning "function is never used: `main`, #[warn(dead_code)] on by default"
          :checker rust-cargo)
      '(4 9 warning "unused variable: `x`, #[warn(unused_variables)] on by default"
          :checker rust-cargo))))
 
+(flycheck-ert-def-checker-test rust-cargo rust lib-main
+  (let ((flycheck-rust-crate-type "bin")
+        (flycheck-rust-binary-name "lib-main"))
+    (flycheck-ert-should-syntax-check
+     "language/rust/lib-main/src/main.rs" 'rust-mode)))
+
 (flycheck-ert-def-checker-test rust rust syntax-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
-     "language/rust/src/syntax-error.rs" 'rust-mode
+     "language/rust/flycheck-test/src/syntax-error.rs" 'rust-mode
      '(4 5 error "unresolved name `bla` (unresolved name)" :checker rust :id "E0425"))))
 
 (flycheck-ert-def-checker-test rust rust type-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
-     "language/rust/src/multiline-error.rs" 'rust-mode
+     "language/rust/flycheck-test/src/multiline-error.rs" 'rust-mode
      '(7 9 error "mismatched types (expected u8, found i8)" :checker rust :id "E0308"))))
 
 (flycheck-ert-def-checker-test rust rust warning
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
-     "language/rust/src/warnings.rs" 'rust-mode
+     "language/rust/flycheck-test/src/warnings.rs" 'rust-mode
      '(4 9 warning "unused variable: `x`, #[warn(unused_variables)] on by default"
          :checker rust))))
 
 (flycheck-ert-def-checker-test rust rust note-and-help
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
-     "language/rust/src/note-and-help.rs" 'rust-mode
+     "language/rust/flycheck-test/src/note-and-help.rs" 'rust-mode
      '(11 9 info "value moved here" :checker rust :id "E0382")
      '(12 9 error "use of moved value: `x` (value used here after move)" :checker rust :id "E0382")
      '(12 9 info "move occurs because `x` has type `NonPOD`, which does not implement the `Copy` trait" :checker rust :id "E0382"))))
@@ -3905,13 +3911,13 @@ Why not:
 (flycheck-ert-def-checker-test rust rust crate-root-not-set
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
-     "language/rust/src/importing.rs" 'rust-mode
+     "language/rust/flycheck-test/src/importing.rs" 'rust-mode
      '(1 5 error "unresolved import `super::imported` (There are too many initial `super`s.)" :checker rust :id "E0432"))))
 
 (flycheck-ert-def-checker-test rust rust macro-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
-     "language/rust/src/macro-error.rs" 'rust-mode
+     "language/rust/flycheck-test/src/macro-error.rs" 'rust-mode
      '(2 3 info "invalid reference to argument `0` (no arguments given)" :checker rust))))
 
 (flycheck-ert-def-checker-test sass sass nil
