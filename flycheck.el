@@ -6775,7 +6775,7 @@ See Info Node `(elisp)Byte Compilation'."
                     flycheck-option-emacs-lisp-package-user-dir)
             (option "--eval" flycheck-emacs-lisp-initialize-packages nil
                     flycheck-option-emacs-lisp-package-initialize)
-            (option "--eval" flycheck-emacs-lisp-other-initialization
+            (option "--eval" flycheck-emacs-lisp-other-initialization nil
                     flycheck-sexp-to-string)
             "--eval" (eval flycheck-emacs-lisp-check-form)
             "--"
