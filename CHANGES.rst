@@ -22,6 +22,7 @@
     ``go-vet`` and ``go-errcheck`` as well.
   - Add a revert function to ``flycheck-verify-setup``, so hitting
     ``g`` reloads the buffer.
+  - Make sure the erlang compiler is only run on compilable files.
 
 30 (Oct 12, 2016)
 =================

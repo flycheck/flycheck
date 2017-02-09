@@ -7016,7 +7016,8 @@ See URL `http://www.erlang.org/'."
   :error-patterns
   ((warning line-start (file-name) ":" line ": Warning:" (message) line-end)
    (error line-start (file-name) ":" line ": " (message) line-end))
-  :modes erlang-mode)
+  :modes erlang-mode
+  :enabled (lambda () (string-suffix-p ".erl" (buffer-file-name))))
 
 (flycheck-define-checker eruby-erubis
   "A eRuby syntax checker using the `erubis' command.
