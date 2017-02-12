@@ -6947,7 +6947,8 @@ See Info Node `(elisp)Byte Compilation'."
     checkdoc-package-keywords-flag
     checkdoc-spellcheck-documentation-flag
     checkdoc-verb-check-experimental-flag
-    checkdoc-max-keyref-before-warn)
+    checkdoc-max-keyref-before-warn
+    sentence-end-double-space)
   "Variables inherited by the checkdoc subprocess.")
 
 (defun flycheck-emacs-lisp-checkdoc-variables-form ()

@@ -3,7 +3,8 @@
 ;;; Commentary:
 
 ;; Make sure that file-local checkdoc settings are properly propagated to
-;; checkdoc process.
+;; checkdoc process. There's only a single space between these sentences, but we
+;; allow that in this file.
 
 ;;; Code:
 
@@ -17,6 +18,7 @@
 ;; Local Variables:
 ;; checkdoc-arguments-in-order-flag: nil
 ;; checkdoc-verb-check-experimental-flag: nil
+;; sentence-end-double-space: nil
 ;; End:
 
 (provide 'local-checkdoc-variables)
