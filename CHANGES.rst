@@ -23,6 +23,7 @@
   - Add a revert function to ``flycheck-verify-setup``, so hitting
     ``g`` reloads the buffer.
   - Make sure the erlang compiler is only run on compilable files.
+  - ``flycheck-tslint`` does not crash any more on deprecation notices [GH-1174]
 
 30 (Oct 12, 2016)
 =================
