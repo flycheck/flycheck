@@ -5613,7 +5613,7 @@ about TSLint."
                   :filename .name)))
              ;; Don't try to parse empty output as JSON
              (and (not (string-empty-p output))
-                  (json-read-from-string output)))))
+                  (car (flycheck-parse-json output))))))
 
 (defun flycheck-parse-rust-collect-spans (span)
   "Return a list of spans contained in a SPAN object."

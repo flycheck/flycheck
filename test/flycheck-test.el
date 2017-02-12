@@ -4090,8 +4090,12 @@ Why not:
 (flycheck-ert-def-checker-test typescript-tslint typescript nil
   (flycheck-ert-should-syntax-check
    "language/typescript/sample.ts" 'typescript-mode
+   '(1 10 warning "Unused function: 'invalidAlignment'"
+       :checker typescript-tslint :id "no-unused-variable")
    '(2 3 warning "Forbidden 'var' keyword, use 'let' or 'const' instead"
        :checker typescript-tslint :id "no-var-keyword")
+   '(2 7 warning "Unused variable: 'a'"
+       :checker typescript-tslint :id "no-unused-variable")
    '(3 15 warning "Missing semicolon"
        :checker typescript-tslint :id "semicolon")))
 
