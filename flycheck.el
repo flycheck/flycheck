@@ -2354,6 +2354,7 @@ buffer manually.
 
     (pcase-dolist (`(,hook . ,fn) flycheck-hooks-alist)
       (add-hook hook fn nil 'local))
+    (add-hook 'post-command-hook #'flycheck-clear-display-error-caused-by-next-error t 'local)
 
     (setq flycheck-old-next-error-function (if flycheck-standard-error-navigation
                                                next-error-function
@@ -2366,6 +2367,7 @@ buffer manually.
 
     (pcase-dolist (`(,hook . ,fn) flycheck-hooks-alist)
       (remove-hook hook fn 'local))
+    (remove-hook 'post-command-hook #'flycheck-clear-display-error-caused-by-next-error 'local)
 
     (flycheck-teardown))))
 
@@ -3794,6 +3796,11 @@ Intended for use with `next-error-function'."
         (goto-char pos)
       (user-error "No more Flycheck errors"))))
 
+(defvar-local flycheck-display-error-caused-by-next-error nil)
+
+(defun flycheck-clear-display-error-caused-by-next-error ()
+  (setq flycheck-display-error-caused-by-next-error nil))
+
 (defun flycheck-next-error (&optional n reset)
   "Visit the N-th error from the current point.
 
@@ -3806,7 +3813,8 @@ position."
     ;; Universal prefix argument means reset
     (setq reset t n nil))
   (flycheck-next-error-function n reset)
-  (flycheck-display-error-at-point))
+  (flycheck-display-error-at-point)
+  (setq flycheck-display-error-caused-by-next-error t))
 
 (defun flycheck-previous-error (&optional n)
   "Visit the N-th previous error.
@@ -4312,7 +4320,8 @@ non-nil."
 (defun flycheck-display-error-at-point-soon ()
   "Display the first error message at point in minibuffer delayed."
   (flycheck-cancel-error-display-error-at-point-timer)
-  (when (flycheck-overlays-at (point))
+  (when (and (flycheck-overlays-at (point))
+             (not flycheck-display-error-caused-by-next-error))
     (setq flycheck-display-error-at-point-timer
           (run-at-time flycheck-display-errors-delay nil 'flycheck-display-error-at-point))))
 
