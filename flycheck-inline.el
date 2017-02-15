@@ -103,11 +103,13 @@ Return the displayed phantom."
     (push (phantom-display msg pos) flycheck-inline--phantoms)))
 
 (defun flycheck-inline-display-messages (errors)
-  "Display ERRORS inline.
+  "Display ERRORS, and all errors from their groups, inline.
 
 ERRORS is a list of `flycheck-error' objects."
   (flycheck-inline-hide-messages)
-  (mapc #'flycheck-inline--display-phantom errors))
+  (mapc #'flycheck-inline--display-phantom
+        (seq-uniq
+         (seq-mapcat #'flycheck-errors-from-group errors))))
 
 (defun flycheck-inline-hide-messages ()
   "Hide all inline messages currently being shown."
