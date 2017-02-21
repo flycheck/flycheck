@@ -2706,11 +2706,12 @@ evaluating BODY."
    '(8  11 warning "unrecognized pragma \"Foo\"" :checker ada-gnat)))
 
 (flycheck-ert-def-checker-test asciidoc asciidoc nil
-  (flycheck-ert-should-syntax-check
-   "language/asciidoc.adoc" 'adoc-mode
-   '(1 nil warning "missing style: [paradef-default]: paragraph" :checker asciidoc)
-   '(3 nil info "old tables syntax" :checker asciidoc)
-   '(11 nil error "[tabledef-default] illegal width=%60%" :checker asciidoc)))
+  (let ((flycheck-disabled-checkers '(asciidoctor)))
+    (flycheck-ert-should-syntax-check
+     "language/asciidoc.adoc" 'adoc-mode
+     '(1 nil warning "missing style: [paradef-default]: paragraph" :checker asciidoc)
+     '(3 nil info "old tables syntax" :checker asciidoc)
+     '(11 nil error "[tabledef-default] illegal width=%60%" :checker asciidoc))))
 
 (flycheck-ert-def-checker-test asciidoctor asciidoc nil
   (flycheck-ert-should-syntax-check
