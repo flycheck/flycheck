@@ -4163,10 +4163,10 @@ Why not:
    "language/slim.slim" 'slim-mode
    `(2 1 error "Unexpected indentation" :checker slim)))
 
-(flycheck-ert-def-checker-test sqllint sql nil
+(flycheck-ert-def-checker-test sqlint sql nil
   (flycheck-ert-should-syntax-check
    "language/sql.sql" 'sql-mode
-   `(1 15 error "unterminated quoted string at or near \"';\n  \" (scan.l:1087)"
+   `(1 15 error "unterminated quoted string at or near \"';\n  \""
        :checker sql-sqlint)))
 
 (flycheck-ert-def-checker-test systemd-analyze systemd nil

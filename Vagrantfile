@@ -152,7 +152,8 @@ Vagrant.configure("2") do |config|
                               sass \
                               scss_lint \
                               scss_lint_reporter_checkstyle \
-                              slim
+                              slim \
+                              sqlint
 
     echo "Installing packages from npm..."
     npm install --global --prefix ~/.node_modules coffeelint \
