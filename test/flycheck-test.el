@@ -3801,8 +3801,10 @@ Why not:
 (flycheck-ert-def-checker-test ruby-rubocop ruby syntax-error
   (flycheck-ert-should-syntax-check
    "language/ruby/syntax-error.rb" 'ruby-mode
-   '(5 7 error "unexpected token tCONSTANT (Using Ruby 2.1 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)" :checker ruby-rubocop)
-   '(5 24 error "unterminated string meets end of file (Using Ruby 2.1 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)" :checker ruby-rubocop)))
+   '(5 7 error "unexpected token tCONSTANT (Using Ruby 2.1 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+       :checker ruby-rubocop)
+   '(5 24 error "unterminated string meets end of file (Using Ruby 2.1 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+       :checker ruby-rubocop)))
 
 (flycheck-ert-def-checker-test ruby-rubylint ruby syntax-error
   (ert-skip "Pending: https://github.com/YorickPeterse/ruby-lint/issues/202")
