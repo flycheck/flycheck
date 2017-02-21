@@ -3791,7 +3791,7 @@ Why not:
    "language/rst/sphinx/index.rst" 'rst-mode
    '(2 nil warning "Title underline too short." :checker rst-sphinx)
    '(9 nil error "Unknown target name: \"cool\"." :checker rst-sphinx)
-   '(9 nil warning "u'envvar' reference target not found: FOO"
+   '(9 nil warning "'envvar' reference target not found: FOO"
        :checker rst-sphinx)))
 
 (flycheck-ert-def-checker-test rst-sphinx rst not-outside-of-a-sphinx-project
