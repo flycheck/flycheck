@@ -3226,7 +3226,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (let ((flycheck-disabled-checkers '(haskell-ghc)))
     (flycheck-ert-should-syntax-check
      "language/haskell/Literate.lhs" 'literate-haskell-mode
-     '(6 1 warning "Top-level binding with no type signature: foo :: forall a. a"
+     '(6 1 warning "Top-level binding with no type signature: foo :: a"
          :id "-Wmissing-signatures"
          :checker haskell-stack-ghc))))
 
