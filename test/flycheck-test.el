@@ -2746,13 +2746,10 @@ evaluating BODY."
 
 (flycheck-ert-def-checker-test c/c++-clang (c c++) included-file-error
   (let ((flycheck-clang-include-path '("./include"))
-        (flycheck-disabled-checkers '(c/c++-gcc))
-        (include-file (flycheck-ert-resource-filename
-                       "language/c_c++/warning.c")))
+        (flycheck-disabled-checkers '(c/c++-gcc)))
     (flycheck-ert-should-syntax-check
      "language/c_c++/in-included-file.cpp" 'c++-mode
-     `(3 nil warning ,(format "In include %s" include-file)
-         :checker c/c++-clang))))
+     `(3 nil warning "In include ./warning.c" :checker c/c++-clang))))
 
 (flycheck-ert-def-checker-test c/c++-gcc (c c++) error
   (let ((flycheck-disabled-checkers '(c/c++-clang)))
