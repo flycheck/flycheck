@@ -3734,6 +3734,7 @@ Why not:
      "language/r.R" 'R-mode
      '(1 28 info "Opening curly braces should never go on their own line and should always be followed by a new line."
          :checker r-lintr)
+     '(1 56 info "Put spaces around all infix operators." :checker r-lintr)
      '(4 6 warning "Do not use absolute paths." :checker r-lintr)
      '(7 5 error "unexpected end of input" :checker r-lintr))))
 
