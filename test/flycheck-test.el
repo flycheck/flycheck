@@ -3756,7 +3756,8 @@ Why not:
 (flycheck-ert-def-checker-test markdown-mdl markdown nil
   (flycheck-ert-should-syntax-check
    "language/markdown.md" 'markdown-mode
-   '(1 nil error "First header should be a h1 header" :id "MD002" :checker markdown-mdl)))
+   '(1 nil error "First header should be a top level header"
+       :id "MD002" :checker markdown-mdl)))
 
 (flycheck-ert-def-checker-test nix nix nil
   (flycheck-ert-should-syntax-check
