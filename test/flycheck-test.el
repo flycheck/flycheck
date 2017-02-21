@@ -2878,14 +2878,8 @@ The term \"1\" has type \"nat\" while it is expected to have type
   :tags '(checkstyle-xml)
   (flycheck-ert-should-syntax-check
    "language/css/syntax-error.css" 'css-mode
-   '(4 16 error "Expected LBRACE at line 4, col 16." :id "ParsingErrors"
-       :checker css-csslint)
-   '(4 16 error "Unexpected token '100%' at line 4, col 16." :id "ParsingErrors"
-       :checker css-csslint)
-   '(4 20 error "Unexpected token ';' at line 4, col 20." :id "ParsingErrors"
-       :checker css-csslint)
-   '(5 1 error "Unexpected token '}' at line 5, col 1." :id "ParsingErrors"
-       :checker css-csslint)))
+   '(4 14 error "Expected a `FUNCTION` or `IDENT` after colon at line 4, col 14."
+       :id "ParsingErrors" :checker css-csslint)))
 
 (ert-deftest flycheck-d-module-re/matches-module-name ()
   :tags '(language-d)
