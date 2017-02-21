@@ -3321,7 +3321,9 @@ Why not:
   ;; Silence JS2 and JS3 parsers
   (let ((js2-mode-show-parse-errors nil)
         (js2-mode-show-strict-warnings nil)
-        (js3-mode-show-parse-errors nil))
+        (js3-mode-show-parse-errors nil)
+        (flycheck-disabled-checkers
+         '(javascript-jscs javascript-eslint javascript-gjslint)))
     (flycheck-ert-should-syntax-check
      "language/javascript/syntax-error.js" '(js-mode js2-mode js3-mode rjsx-mode)
      '(3 4 error "Unmatched '('." :checker javascript-jshint :id "E019")
@@ -3333,7 +3335,8 @@ Why not:
 (flycheck-ert-def-checker-test javascript-jshint javascript nil
   :tags '(checkstyle-xml)
   (let ((flycheck-jshintrc "jshintrc")
-        (flycheck-disabled-checkers '(javascript-jscs)))
+        (flycheck-disabled-checkers
+         '(javascript-jscs javascript-eslint javascript-gjslint)))
     (flycheck-ert-should-syntax-check
      "language/javascript/warnings.js" '(js-mode js2-mode js3-mode rjsx-mode)
      '(4 9 warning "'foo' is defined but never used." :id "W098"
@@ -3353,8 +3356,8 @@ Why not:
      "language/javascript/warnings.js" flycheck-test-javascript-modes
      '(3 2 warning "Use the function form of 'use strict'." :id "strict"
          :checker javascript-eslint)
-     '(4 9 warning "'foo' is defined but never used." :id "no-unused-vars"
-         :checker javascript-eslint))))
+     '(4 9 warning "'foo' is assigned a value but never used."
+         :id "no-unused-vars" :checker javascript-eslint))))
 
 (flycheck-ert-def-checker-test javascript-jscs javascript nil
   :tags '(checkstyle-xml)
@@ -3363,7 +3366,9 @@ Why not:
          '(javascript-jshint javascript-eslint)))
     (flycheck-ert-should-syntax-check
      "language/javascript/style.js" flycheck-test-javascript-modes
-     '(4 3 error "Expected indentation of 2 characters"
+     '(4 1 error "validateIndentation: Invalid indentation character:"
+         :checker javascript-jscs)
+     '(4 1 error "validateIndentation: Expected indentation of 0 characters"
          :checker javascript-jscs))))
 
 (flycheck-ert-def-checker-test javascript-jscs javascript no-config
@@ -3379,10 +3384,11 @@ Why not:
     javascript complete-chain
   :tags '(checkstyle-xml)
   (let ((flycheck-jshintrc "jshintrc")
-        (flycheck-jscsrc "jscsrc"))
+        (flycheck-jscsrc "jscsrc")
+        (flycheck-disabled-checkers '(javascript-eslint javascript-gjslint)))
     (flycheck-ert-should-syntax-check
      "language/javascript/warnings.js" '(js-mode js2-mode js3-mode rjsx-mode)
-     '(4 3 error "Expected indentation of 2 characters"
+     '(4 1 error "validateIndentation: Expected indentation of 0 characters"
          :checker javascript-jscs)
      '(4 9 warning "'foo' is defined but never used." :id "W098"
          :checker javascript-jshint))))
@@ -3394,11 +3400,11 @@ Why not:
         (flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-ert-should-syntax-check
      "language/javascript/warnings.js" flycheck-test-javascript-modes
-     '(3 2 warning "Use the function form of \"use strict\"." :id "strict"
+     '(3 2 warning "Use the function form of 'use strict'." :id "strict"
          :checker javascript-eslint)
-     '(4 3 error "Expected indentation of 2 characters"
+     '(4 1 error "validateIndentation: Expected indentation of 0 characters"
          :checker javascript-jscs)
-     '(4 9 warning "\"foo\" is defined but never used" :id "no-unused-vars"
+     '(4 9 warning "'foo' is assigned a value but never used." :id "no-unused-vars"
          :checker javascript-eslint))))
 
 (flycheck-ert-def-checker-test javascript-standard javascript error
@@ -3407,9 +3413,11 @@ Why not:
      "language/javascript/style.js" flycheck-test-javascript-modes
      '(3 10 error "Missing space before function parentheses."
          :checker javascript-standard)
-     '(4 2 error "Expected indentation of 2 space characters but found 0."
+     '(4 2 error "Unexpected tab character."
          :checker javascript-standard)
-     '(4 6 error "\"foo\" is defined but never used"
+     '(4 2 error "Expected indentation of 2 spaces but found 1 tab."
+         :checker javascript-standard)
+     '(4 6 error "'foo' is assigned a value but never used."
          :checker javascript-standard)
      '(4 13 error "Strings must use singlequote."
          :checker javascript-standard)
@@ -3425,9 +3433,11 @@ Why not:
      "language/javascript/style.js" flycheck-test-javascript-modes
      '(3 10 error "Missing space before function parentheses."
          :checker javascript-standard)
-     '(4 2 error "Expected indentation of 2 space characters but found 0."
+     '(4 2 error "Unexpected tab character."
          :checker javascript-standard)
-     '(4 6 error "\"foo\" is defined but never used"
+     '(4 2 error "Expected indentation of 2 spaces but found 1 tab."
+         :checker javascript-standard)
+     '(4 6 error "'foo' is assigned a value but never used."
          :checker javascript-standard)
      '(4 13 error "Strings must use singlequote."
          :checker javascript-standard))))
