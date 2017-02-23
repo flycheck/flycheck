@@ -15,8 +15,8 @@ warnings and errors directly in the buffer, or in an optional :ref:`error list
 
 Out of the box Flycheck supports over :ref:`40 different programming languages
 <flycheck-languages>` with more than 80 different syntax checking tools, and
-comes with a :ref:`simple interface <flycheck-definitions>` to define new syntax
-checkers.
+comes with a :ref:`simple interface <flycheck-developers-guide>` to define new
+syntax checkers.
 
 Many :ref:`3rd party extensions <flycheck-extensions>` provide new syntax
 checkers and other features like alternative error displays or mode line
@@ -88,14 +88,6 @@ in-depth references of all parts of Flycheck.
    user/error-interaction
    user/flycheck-versus-flymake
 
-The Developer Guide
-===================
-
-The Developer Guide shows how extend Flycheck and how to write syntax checkers
-for Flycheck.
-
-.. todo:: To be written
-
 .. _flycheck-community-guide:
 
 The Community Guide
@@ -110,6 +102,18 @@ community.
    community/extensions
    community/get-help
    community/people
+
+.. _flycheck-developer-guide:
+
+The Developer Guide
+===================
+
+The Developer Guide shows how extend Flycheck and how to write syntax checkers
+for Flycheck.
+
+.. toctree::
+
+   developer/developing
 
 .. _flycheck-contributor-guide:
 
