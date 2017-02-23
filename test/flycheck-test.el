@@ -3507,6 +3507,28 @@ Why not:
    '(4 11 warning "variable 'var2' is never set"
        :id "W221" :checker lua-luacheck)))
 
+(flycheck-ert-def-checker-test lua-luacheck lua custom-luacheckrc
+  (let ((flycheck-luacheckrc "custom.luacheckrc"))
+    (flycheck-ert-should-syntax-check
+     "language/lua/warnings.lua" 'lua-mode
+     '(1 1 warning "setting non-standard global variable 'global_var'"
+         :id "W111" :checker lua-luacheck)
+     '(3 16 warning "unused function 'test'"
+         :id "W211" :checker lua-luacheck)
+     '(4 11 warning "variable 'var2' is never set"
+         :id "W221" :checker lua-luacheck))))
+
+(flycheck-ert-def-checker-test lua-luacheck lua custom-standards
+  (let ((flycheck-luacheck-standards '("ngx_lua")))
+    (flycheck-ert-should-syntax-check
+     "language/lua/ngx_lua.warnings.lua" 'lua-mode
+     '(3 16 warning "unused function 'test'"
+         :id "W211" :checker lua-luacheck)
+     '(3 21 warning "unused argument 'arg'"
+         :id "W212" :checker lua-luacheck)
+     '(4 11 warning "variable 'var2' is never set"
+         :id "W221" :checker lua-luacheck))))
+
 (flycheck-ert-def-checker-test lua lua nil
   (let ((flycheck-disabled-checkers '(lua-luacheck)))
     (flycheck-ert-should-syntax-check

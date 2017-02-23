@@ -7893,6 +7893,21 @@ See URL `http://lesscss.org'."
           line-end))
   :modes less-css-mode)
 
+(flycheck-def-config-file-var flycheck-luacheckrc lua-luacheck ".luacheckrc"
+  :safe #'stringp)
+
+(flycheck-def-option-var flycheck-luacheck-standards nil lua-luacheck
+  "The standards to use in luacheck.
+
+The value of this variable is either a list of strings denoting
+the standards to use, or nil to pass nothing to luacheck.  When
+non-nil, pass the standards via one or more `--std' options."
+  :type '(choice (const :tag "Default" nil)
+                 (repeat :tag "Custom standards"
+                         (string :tag "Standard name")))
+  :safe #'flycheck-string-list-p)
+(make-variable-buffer-local 'flycheck-luacheck-standards)
+
 (flycheck-define-checker lua-luacheck
   "A Lua syntax checker using luacheck.
 
@@ -7901,6 +7916,8 @@ See URL `https://github.com/mpeterv/luacheck'."
             "--formatter" "plain"
             "--codes"                   ; Show warning codes
             "--no-color"
+            (option-list "--std" flycheck-luacheck-standards)
+            (config-file "--config" flycheck-luacheckrc)
             "--filename" source-original
             ;; Read from standard input
             "-")
