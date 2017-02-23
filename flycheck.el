@@ -5673,6 +5673,7 @@ https://github.com/rust-lang/rust/blob/master/src/libsyntax/json.rs#L67-L139"
             error-level (pcase .level
                           (`"error" 'error)
                           (`"warning" 'warning)
+                          (`"note" 'info)
                           (_ 'error))
             ;; The 'code' field of the diagnostic contains the actual error
             ;; code and an optional explanation that we ignore

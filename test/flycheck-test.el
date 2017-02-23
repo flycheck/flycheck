@@ -3881,6 +3881,32 @@ Why not:
     (flycheck-ert-should-syntax-check
      "language/rust/lib-main/src/main.rs" 'rust-mode)))
 
+(flycheck-ert-def-checker-test rust-cargo rust notes
+  ;; We only get notes on the first build. Ensure we start from a
+  ;; clean directory each time.
+  (call-process "cargo" nil nil nil "clean" "--manifest-path"
+                (expand-file-name
+                 "language/rust/note-test/Cargo.toml"
+                 flycheck-test-resources-directory))
+
+  (let* (flycheck-rust-check-tests)
+    (flycheck-ert-should-syntax-check
+     "language/rust/note-test/src/lib.rs" 'rust-mode
+     '(1 1 info "library: util" :checker rust-cargo)
+     '(1 1 info "library: rt" :checker rust-cargo)
+     '(1 1 info "library: m" :checker rust-cargo)
+     '(1 1 info "library: c" :checker rust-cargo)
+     '(1 1 info "library: gcc_s" :checker rust-cargo)
+     '(1 1 info "library: pthread" :checker rust-cargo)
+     '(1 1 info "library: rt" :checker rust-cargo)
+     '(1 1 info "library: dl" :checker rust-cargo)
+     '(1 1 info
+         "the order and any duplication can be significant on some platforms, and so may need to be preserved"
+         :checker rust-cargo)
+     '(1 1 info
+         "link against the following native artifacts when linking against this static library"
+         :checker rust-cargo))))
+
 (flycheck-ert-def-checker-test rust rust syntax-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
