@@ -136,8 +136,8 @@ We would also like to thank the following people and projects:
   Flycheck internals, and greatly helped to overcome Sebastian’s initial
   aversion to Emacs Lisp.
 * Martin Grenfell (:gh:`scrooloose`) for the Vim syntax checking extension
-  :gh:`Syntastic <scrooloose/syntastic>` which saved Sebastian’s life back when
-  he was using Vim, and served as inspiration for Flycheck and many of its
+  :gh:`Syntastic <vim-syntastic/syntastic>` which saved Sebastian’s life back
+  when he was using Vim, and served as inspiration for Flycheck and many of its
   syntax checkers.
 * Matthias Güdemann (:gh:`mgudemann`), for his invaluable work on
   Flycheck’s logo.

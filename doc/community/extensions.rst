@@ -53,7 +53,7 @@ Cadence
 * :gh:`cmarqu/flycheck-hdl-irun` adds a syntax checker for hardware description
   languages supported by `Cadence IES/irun`_.
 
-.. _Cadence IES/irun: http://www.cadence.com/products/fv/enterprise_simulator/pages/default.aspx
+.. _Cadence IES/irun: https://www.cadence.com/content/cadence-www/global/en_US/home/tools/system-design-and-verification/simulation-and-testbench-verification/incisive-enterprise-simulator.html
 
 Clojure
 -------
@@ -118,14 +118,14 @@ OCaml
 -----
 
 * :flyc:`flycheck-ocaml` (*official*) adds a syntax checker for OCaml using the
-  :gh:`Merlin <the-lambda-church/merlin>` backend.
+  :gh:`Merlin <ocaml/merlin>` backend.
 
 Python
 ------
 
 * :gh:`Wilfred/flycheck-pyflakes` adds a Python syntax checker using Pyflakes.
 
-.. _Pyflakes: https://github.com/pyflakes/pyflakes
+.. _Pyflakes: https://github.com/PyCQA/pyflakes
 
 Rust
 ----

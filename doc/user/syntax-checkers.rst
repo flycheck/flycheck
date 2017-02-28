@@ -42,10 +42,10 @@ buffer from `flycheck-checkers` whenever it needs to check the buffer:
 
 Flycheck picks the first syntax checker from this list which exists and supports
 the current major mode, and runs it over the current buffer.  When the checker
-has finished Flycheck whether it asks for a next syntax checker to run, and if
-so, runs the next syntax checker, and so on, until there is no more syntax
-checker for the current buffer.  This process repeats whenever Flycheck needs to
-check the buffer according to `flycheck-check-syntax-automatically`.
+has finished, Flycheck looks for the next syntax checker to run, and if there is
+one, Flycheck runs the next syntax checker, and so on, until there is no more
+syntax checker for the current buffer.  This process repeats whenever Flycheck
+needs to check the buffer according to `flycheck-check-syntax-automatically`.
 
 .. important::
 

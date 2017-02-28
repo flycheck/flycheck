@@ -45,7 +45,7 @@ package managers such as Rubygems, NPM, Cabal, etc.
    exec-path-from-shell_ to make Emacs use the proper ``$PATH`` and avoid a
    :ref:`common setup issue on MacOS <flycheck-macos-exec-path-from-shell>`.
 
-.. _Homebrew: http://brew.sh
+.. _Homebrew: https://brew.sh
 .. _exec-path-from-shell: https://github.com/purcell/exec-path-from-shell
 
 .. _flycheck-package-installation:

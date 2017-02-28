@@ -9387,7 +9387,7 @@ Relative paths are relative to the file being checked."
 (flycheck-define-checker verilog-verilator
   "A Verilog syntax checker using the Verilator Verilog HDL simulator.
 
-See URL `http://www.veripool.org/wiki/verilator'."
+See URL `https://www.veripool.org/wiki/verilator'."
   :command ("verilator" "--lint-only" "-Wall"
             (option-list "-I" flycheck-verilator-include-path concat)
             source)

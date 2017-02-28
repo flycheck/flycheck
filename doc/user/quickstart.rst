@@ -42,10 +42,10 @@ Now you are ready to use Flycheck in a Python or Javascript buffer.  Visit a
 Python or Javascript file and check whether your Flycheck setup is complete with
 `C-c ! v`.
 
-If everything is green Flycheck will now start to check the buffer on the fly
-while you are editing.  Whenever you make a mistake that the eslint or Pylint
-catch Flycheck will highlight the corresponding place in the buffer with an
-error underline whose color reflects the severity of the issue.  Additionally
+If everything is green, Flycheck will now start to check the buffer on the fly
+while you are editing.  Whenever you make a mistake that eslint or Pylint can
+catch, Flycheck will highlight the corresponding place in the buffer with an
+error underline whose color reflects the severity of the issue.  Additionally,
 Flycheck will put a symbol into the fringe for affected lines and show the total
 number of errors and warnings in the buffer in the mode line.
 

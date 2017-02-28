@@ -110,13 +110,13 @@ As a contributor
 * Consider whether there might be a simpler approach or a better solution to the
   problem that the PR solves.
 
-If you find any issues please leave a :ref:`pull request review` that requests
+If you find any issues please leave a `pull request review`_ that requests
 for changes.  Please try to leave an inline comment wherever possible and try to
 suggest a better solution, to make it easy for the PR author to discover and fix
 the issues.
 
-If you didn't find any issues leave a :ref:`pull request review` that approves
-the changes.
+If you didn't find any issues leave a `pull request review`_ that approves the
+changes.
 
 In doubt request changes first and let the PR author explain their intention and
 implementation.  You can still approve the review afterwards if you are
@@ -213,7 +213,7 @@ To install all required libraries run ``make -C maint init``.  We recommend that
 you use virtualenv_ to avoid a global installation of Python modules.  ``make
 init`` will warn you if you do not.
 
-.. _Homebrew: http://brew.sh
+.. _Homebrew: https://brew.sh
 .. _virtualenv: https://virtualenv.pypa.io/en/latest/
 
 Versioning and releases
