@@ -153,9 +153,9 @@ All pull requests go through a two-stage review process:
 Additionally all pull requests go through automated tests on `Travis CI`_ which
 check code style, run unit tests, etc
 
-Feel free to mention individual contributors (e.g. ``@lunaryorn``) or entire
-teams (e.g. ``@flycheck/maintainers`` or ``@flycheck/javascript``) to ask for
-help or feedback or request a review.  Please mention the maintainers
+Feel free to mention individual contributors or entire teams
+(e.g. ``@flycheck/maintainers`` or ``@flycheck/javascript``) to ask for help or
+feedback or request a review.  Please mention the maintainers
 (``@flycheck/maintainers``) if you think that your pull request has been waiting
 for review too long.  You can expect a first response to any pull request in a
 couple of days.
