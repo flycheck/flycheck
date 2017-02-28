@@ -123,21 +123,34 @@ Merge guidelines
 ~~~~~~~~~~~~~~~~
 
 Any contributor may merge approved pull requests.  Our protection rules for the
-``master`` branch ensure that only approved pull requests can be merged, so if
-the "Merge" button is green go ahead and press it :)
+``master`` branch ensure that only approved pull requests can be merged, but you
+still have to check a few things before merging:
 
-We require proper merges for pull requests, to preserve the fact that a change
-came from a pull request in the git history and to retain any commit signatures
-that may exist.  As such you can't squash-merge or rebase-merge through GitHub's
-UI.
+* Are commits squashed?  Before merging please take an extra look at the commits
+  to make sure that the commits were properly squashed and have good commit
+  messages.  If needed, ask the contributor to improve the commit messages and
+  squash the commits first, by requesting changes with a pull request review.
+* Does the PR pass the integration tests?  We don't run integration tests
+  automatically, so contributors should make sure to run them on their side.
+* Should the PR warrant a line in the changelog?  User-facing changes should be
+  documented in ``CHANGES.rst``.
 
-.. important::
+For new features:
 
-   Before merging please take an extra look at the commits to make sure that the
-   commits were properly squashed and have good commit messages.
+* Does the PR include tests?  A new syntax checker should have at least one
+  accompanying integration test.
+* Does the PR include documentation?  New syntax checkers or options should be
+  documented in :ref:`flycheck-languages`.
 
-   Ask the contributor to improve the commit messages and squash the commits
-   first, by requesting changes with a pull request review.
+If all the points above have been addressed, then go ahead and click that green
+button :)
+
+.. note::
+
+   We require proper merges for pull requests, to preserve the fact that a
+   change came from a pull request in the git history and to retain any commit
+   signatures that may exist.  As such you can't squash-merge or rebase-merge
+   through GitHub's UI.
 
 .. _flycheck-git-signatures:
 
