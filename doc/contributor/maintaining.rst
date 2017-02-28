@@ -93,9 +93,6 @@ As a maintainer
 * Don't review for technical details.  It's the idea and direction that counts.
 
 If you would like to see the pull request in Flycheck leave a ``LGTM`` comment.
-The LGTM.co service will look for these comments and unlock the pull request
-once enough maintainers approved it.  The exact rules are in the :file:`.lgtm`
-file, the list of maintainers is in the :file:`MAINTAINERS` file.
 
 As a contributor
 ~~~~~~~~~~~~~~~~
@@ -178,9 +175,6 @@ extra tooling and some 3rd party services for Flycheck:
   configuration.
 * `Travis CI`_ runs our tests after every push and for every pull request.
   It's configured through ``.travis.yml``.
-* LGTM_ handles the pull request approval process through ``LGTM`` comments.
-  It's configured through ``.lgtm``, the list of maintainers that may approve
-  pull requests is in the ``MAINTAINERS`` file.
 * `CLA assistant`_ checks signatures to our CLA_ and allows contributors to sign
   the CLA through their Github account.
 
@@ -190,7 +184,6 @@ these services so in case of an issue just contact them.
 .. _Github: https://github.com/flycheck
 .. _ReadTheDocs: https://readthedocs.org/projects/flycheck/
 .. _Travis CI: https://travis-ci.org/flycheck/flycheck
-.. _LGTM: https://lgtm.co/
 .. _CLA assistant: https://cla-assistant.io
 .. _CLA: https://gist.github.com/lunaryorn/c9c0d656fe7e704da2f734779242ec99
 
