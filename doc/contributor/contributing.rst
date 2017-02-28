@@ -45,9 +45,6 @@ than too little. Here’s a list of facts that are important:
 * What you did, and what you expected to happen instead
 * Whether and how you were able to `reproduce the issue in emacs -Q`_
 * Your Flycheck setup from ``M-x flycheck-verify-setup``
-* Your operating system
-* Your Emacs version from ``M-x emacs-version``
-* Your Flycheck version from ``M-x flycheck-version``
 
 .. _search existing issues: https://github.com/flycheck/flycheck/issues?q=is%3Aissue
 .. _issue form: https://github.com/flycheck/flycheck/issues/new
