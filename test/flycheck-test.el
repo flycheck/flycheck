@@ -2771,10 +2771,11 @@ evaluating BODY."
   (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck)))
     (flycheck-ert-should-syntax-check
      "language/c_c++/warning.c" 'c-mode
-     '(5 10 warning "unused variable 'unused'" :checker c/c++-gcc)
+     '(5 10 warning "unused variable 'unused'"
+         :id "-Wunused-variable" :checker c/c++-gcc)
      '(7 15 warning "comparison between signed and unsigned integer expressions"
-         :checker c/c++-gcc)
-     '(8 7 warning "#warning" :checker c/c++-gcc))))
+         :id "-Wsign-compare" :checker c/c++-gcc)
+     '(8 7 warning "#warning" :id "-Wcpp" :checker c/c++-gcc))))
 
 (flycheck-ert-def-checker-test c/c++-gcc (c c++) included-file-error
   (let ((flycheck-gcc-include-path '("./include"))
