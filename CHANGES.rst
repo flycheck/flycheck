@@ -24,7 +24,7 @@
 
 - Improvements:
 
-  - Use option ``flycheck-go-build-tags`` to for ``go-test``,
+  - Use option ``flycheck-go-build-tags`` for ``go-test``,
     ``go-vet`` and ``go-errcheck`` as well.
   - Add a revert function to ``flycheck-verify-setup``, so hitting
     ``g`` reloads the buffer.
@@ -34,6 +34,7 @@
     [GH-1206]
   - ``rust-cargo`` does not use ``flycheck-rust-library-path`` anymore, as
     dependencies are taken care of by Cargo [GH-1206]
+  - ``c/c++-gcc`` checker now works from GCC 4.4 and up [GH-1226]
 
 30 (Oct 12, 2016)
 =================
