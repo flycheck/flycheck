@@ -649,6 +649,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax and lint with Luacheck_.
 
+      .. syntax-checker-config-file:: flycheck-luacheckrc
+
+      .. defcustom:: flycheck-luacheck-standards
+
+         The luacheck standards to use via one or more ``--std`` arguments.
+
       .. _Luacheck: https://github.com/mpeterv/luacheck
 
    .. syntax-checker:: lua
