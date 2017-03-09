@@ -197,7 +197,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: cfengine
 
-      Check syntax with `CFEngine <http://cfengine.com/>`_.
+      Check syntax with `CFEngine <https://cfengine.com/>`_.
 
 .. supported-language:: Chef
 
@@ -753,7 +753,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: pug
 
-      Check syntax using the `Pug <http://www.pugjs.org>`_ compiler.
+      Check syntax using the `Pug <https://www.pugjs.org>`_ compiler.
 
 .. supported-language:: Puppet
 
@@ -782,7 +782,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       :gh:`flycheck-pyflakes <Wilfred/flycheck-pyflakes>`
          Flycheck extension which adds a syntax checker using `Pyflakes
-         <https://github.com/pyflakes/pyflakes>`_.
+         <https://github.com/PyCQA/pyflakes>`_.
 
    .. syntax-checker:: python-flake8
 
@@ -1036,7 +1036,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
          This syntax checker is fairly primitive.  For a better Scala experience
          we recommend Ensime_.
 
-         .. _Ensime: http://ensime.github.io
+         .. _Ensime: http://ensime.org/
 
    .. syntax-checker:: scala-scalastyle
 
@@ -1169,7 +1169,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: verilog-verilator
 
-      Check syntax with `Verilator <http://www.veripool.org/wiki/verilator>`_.
+      Check syntax with `Verilator <https://www.veripool.org/wiki/verilator>`_.
 
       .. defcustom:: flycheck-verilator-include-path
 

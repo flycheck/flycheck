@@ -93,9 +93,6 @@ As a maintainer
 * Don't review for technical details.  It's the idea and direction that counts.
 
 If you would like to see the pull request in Flycheck leave a ``LGTM`` comment.
-The LGTM.co service will look for these comments and unlock the pull request
-once enough maintainers approved it.  The exact rules are in the :file:`.lgtm`
-file, the list of maintainers is in the :file:`MAINTAINERS` file.
 
 As a contributor
 ~~~~~~~~~~~~~~~~
@@ -110,13 +107,13 @@ As a contributor
 * Consider whether there might be a simpler approach or a better solution to the
   problem that the PR solves.
 
-If you find any issues please leave a :ref:`pull request review` that requests
+If you find any issues please leave a `pull request review`_ that requests
 for changes.  Please try to leave an inline comment wherever possible and try to
 suggest a better solution, to make it easy for the PR author to discover and fix
 the issues.
 
-If you didn't find any issues leave a :ref:`pull request review` that approves
-the changes.
+If you didn't find any issues leave a `pull request review`_ that approves the
+changes.
 
 In doubt request changes first and let the PR author explain their intention and
 implementation.  You can still approve the review afterwards if you are
@@ -126,21 +123,34 @@ Merge guidelines
 ~~~~~~~~~~~~~~~~
 
 Any contributor may merge approved pull requests.  Our protection rules for the
-``master`` branch ensure that only approved pull requests can be merged, so if
-the "Merge" button is green go ahead and press it :)
+``master`` branch ensure that only approved pull requests can be merged, but you
+still have to check a few things before merging:
 
-We require proper merges for pull requests, to preserve the fact that a change
-came from a pull request in the git history and to retain any commit signatures
-that may exist.  As such you can't squash-merge or rebase-merge through GitHub's
-UI.
+* Are commits squashed?  Before merging please take an extra look at the commits
+  to make sure that the commits were properly squashed and have good commit
+  messages.  If needed, ask the contributor to improve the commit messages and
+  squash the commits first, by requesting changes with a pull request review.
+* Does the PR pass the integration tests?  We don't run integration tests
+  automatically, so contributors should make sure to run them on their side.
+* Should the PR warrant a line in the changelog?  User-facing changes should be
+  documented in ``CHANGES.rst``.
 
-.. important::
+For new features:
 
-   Before merging please take an extra look at the commits to make sure that the
-   commits were properly squashed and have good commit messages.
+* Does the PR include tests?  A new syntax checker should have at least one
+  accompanying integration test.
+* Does the PR include documentation?  New syntax checkers or options should be
+  documented in :ref:`flycheck-languages`.
 
-   Ask the contributor to improve the commit messages and squash the commits
-   first, by requesting changes with a pull request review.
+If all the points above have been addressed, then go ahead and click that green
+button :)
+
+.. note::
+
+   We require proper merges for pull requests, to preserve the fact that a
+   change came from a pull request in the git history and to retain any commit
+   signatures that may exist.  As such you can't squash-merge or rebase-merge
+   through GitHub's UI.
 
 .. _flycheck-git-signatures:
 
@@ -178,9 +188,6 @@ extra tooling and some 3rd party services for Flycheck:
   configuration.
 * `Travis CI`_ runs our tests after every push and for every pull request.
   It's configured through ``.travis.yml``.
-* LGTM_ handles the pull request approval process through ``LGTM`` comments.
-  It's configured through ``.lgtm``, the list of maintainers that may approve
-  pull requests is in the ``MAINTAINERS`` file.
 * `CLA assistant`_ checks signatures to our CLA_ and allows contributors to sign
   the CLA through their Github account.
 
@@ -190,7 +197,6 @@ these services so in case of an issue just contact them.
 .. _Github: https://github.com/flycheck
 .. _ReadTheDocs: https://readthedocs.org/projects/flycheck/
 .. _Travis CI: https://travis-ci.org/flycheck/flycheck
-.. _LGTM: https://lgtm.co/
 .. _CLA assistant: https://cla-assistant.io
 .. _CLA: https://gist.github.com/lunaryorn/c9c0d656fe7e704da2f734779242ec99
 
@@ -213,7 +219,7 @@ To install all required libraries run ``make -C maint init``.  We recommend that
 you use virtualenv_ to avoid a global installation of Python modules.  ``make
 init`` will warn you if you do not.
 
-.. _Homebrew: http://brew.sh
+.. _Homebrew: https://brew.sh
 .. _virtualenv: https://virtualenv.pypa.io/en/latest/
 
 Versioning and releases

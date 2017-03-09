@@ -243,7 +243,7 @@ instance, flycheck-ocaml_ uses a running Merlin_ process to check OCaml buffers.
 This is much easier and faster than invoking the OCaml compiler.
 
 .. _flycheck-ocaml: https://github.com/flycheck/flycheck-ocaml
-.. _Merlin: https://github.com/the-lambda-church/merlin
+.. _Merlin: https://github.com/ocaml/merlin
 
 Customization of syntax checkers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
