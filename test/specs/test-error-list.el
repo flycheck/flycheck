@@ -67,34 +67,40 @@
     (it "has a local header line"
       (flycheck/with-error-list-buffer
         (expect header-line-format
-                :to-equal "  Line Col Level ID Message (Checker) ")
+                :to-equal " File  Line Col Level ID Message (Checker) ")
         (expect 'header-line-format :to-be-local))))
 
   (describe "Columns"
-    (it "has the line number in the 1st column"
+    (it "has the file name in the 1st column"
       (flycheck/with-error-list-buffer
         (expect (aref tabulated-list-format 0)
                 :to-equal
-                '("Line" 5 flycheck-error-list-entry-< :right-align t))))
+                '("File" 6))))
 
-    (it "has the column number in the 2nd column"
+    (it "has the line number in the 2nd column"
       (flycheck/with-error-list-buffer
         (expect (aref tabulated-list-format 1)
-                :to-equal '("Col" 3 nil :right-align t))))
+                :to-equal
+                '("Line" 5 flycheck-error-list-entry-< :right-align t))))
 
-    (it "has the error level in the 3rd column"
+    (it "has the column number in the 3rd column"
       (flycheck/with-error-list-buffer
         (expect (aref tabulated-list-format 2)
-                :to-equal '("Level" 8 flycheck-error-list-entry-level-<))))
+                :to-equal '("Col" 3 nil :right-align t))))
 
-    (it "has the error ID in the 4th column"
+    (it "has the error level in the 4th column"
       (flycheck/with-error-list-buffer
         (expect (aref tabulated-list-format 3)
-                :to-equal '("ID" 6 t))))
+                :to-equal '("Level" 8 flycheck-error-list-entry-level-<))))
 
-    (it "has the error message in the 5th column"
+    (it "has the error ID in the 5th column"
       (flycheck/with-error-list-buffer
         (expect (aref tabulated-list-format 4)
+                :to-equal '("ID" 6 t))))
+
+    (it "has the error message in the 6th column"
+      (flycheck/with-error-list-buffer
+        (expect (aref tabulated-list-format 5)
                 :to-equal '("Message (Checker)" 0 t)))))
 
   (describe "Entry"
@@ -107,35 +113,35 @@
       (it "has the error object as ID"
         (expect (car entry) :to-be warning))
 
-      (it "has the line number in the 1st cell"
-        (expect (aref cells 0) :to-equal
+      (it "has the line number in the 2nd cell"
+        (expect (aref cells 1) :to-equal
                 (list "10"
                       'type 'flycheck-error-list
                       'face 'flycheck-error-list-line-number)))
 
-      (it "has the column number in the 2nd cell"
-        (expect (aref cells 1) :to-equal
+      (it "has the column number in the 3rd cell"
+        (expect (aref cells 2) :to-equal
                 (list "12"
                       'type 'flycheck-error-list
                       'face 'flycheck-error-list-column-number)))
 
-      (it "has an empty 2nd cell if there is no column number"
+      (it "has an empty 3rd cell if there is no column number"
         (cl-letf* (((flycheck-error-column warning) nil)
                    (entry (flycheck-error-list-make-entry warning))
                    (cells (cadr entry)))
-          (expect (aref cells 1) :to-equal
+          (expect (aref cells 2) :to-equal
                   (list ""
                         'type 'flycheck-error-list
                         'face 'flycheck-error-list-column-number))))
 
-      (it "has the error level in the 3rd cell"
-        (expect (aref cells 2) :to-equal
+      (it "has the error level in the 4th cell"
+        (expect (aref cells 3) :to-equal
                 (list "warning"
                       'type 'flycheck-error-list
                       'face (flycheck-error-level-error-list-face 'warning))))
 
-      (it "has the error ID in the 4th cell"
-        (expect (aref cells 3) :to-equal
+      (it "has the error ID in the 5th cell"
+        (expect (aref cells 4) :to-equal
                 (list "W1"
                       'type 'flycheck-error-list-explain-error
                       'face 'flycheck-error-list-id
@@ -143,22 +149,22 @@
 
       (let ((checker-name (propertize "emacs-lisp-checkdoc"
                                       'face 'flycheck-error-list-checker-name)))
-        (it "has the error message in the 5th cell"
+        (it "has the error message in the 6th cell"
           (let* ((message (format (propertize "A foo warning (%s)"
                                               'face 'default)
                                   checker-name)))
-            (expect (aref cells 4) :to-equal
+            (expect (aref cells 5) :to-equal
                     (list message 'type 'flycheck-error-list
                           'help-echo message))))
 
-        (it "has a default message in the 5th cell if there is no message"
+        (it "has a default message in the 6th cell if there is no message"
           (cl-letf* (((flycheck-error-message warning) nil)
                      (entry (flycheck-error-list-make-entry warning))
                      (cells (cadr entry))
                      (message (format (propertize "Unknown warning (%s)"
                                                   'face 'default)
                                       checker-name)))
-            (expect (aref cells 4) :to-equal
+            (expect (aref cells 5) :to-equal
                     (list message 'type 'flycheck-error-list
                           'help-echo message)))))))
 
