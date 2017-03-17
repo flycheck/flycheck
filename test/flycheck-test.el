@@ -4011,7 +4011,7 @@ Why not:
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/syntax-error.rs" 'rust-mode
-     '(4 5 error "unresolved name `bla` (unresolved name)" :checker rust :id "E0425"))))
+     '(4 5 error "cannot find value `bla` in this scope (not found in this scope)" :checker rust :id "E0425"))))
 
 (flycheck-ert-def-checker-test rust rust type-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
