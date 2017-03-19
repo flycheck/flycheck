@@ -126,4 +126,4 @@ If all else fails…
 
 …please do :ref:`ask for help <flycheck-get-help>`.  We have many different
 channels, from Twitter to a chat room to StackOverflow, whatever suits you best,
-and we try to help you as fast and as good as possible.
+and we try to help you as fast and as well as possible.
