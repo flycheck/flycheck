@@ -970,15 +970,22 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. defcustom:: flycheck-rust-crate-type
 
-         The type of the crate to check, as string for the ``--crate-type``
-         option.
+         For `rust-cargo`, the target type as a string, one of ``lib``, ``bin``,
+         ``example``, ``test`` or ``bench``.  Can also be nil for projects with
+         a single target.
+
+         For `rust`, the type of the crate to check, as a string for the
+         ``--crate-type`` option.
 
       .. defcustom:: flycheck-rust-binary-name
 
-         The name of the binary to pass to ``cargo rustc --bin``, as a string.
+         The name of the binary to pass to ``cargo rustc --TARGET-TYPE``, as a
+         string.
 
-         Only required when `flycheck-rust-crate-type` is ``bin`` and the crate
-         has multiple targets.
+         For `rust-cargo`, always required unless `flycheck-rust-crate-type` is
+         ``lib`` or nil, in which case it is ignored.
+
+         Ignored by `rust`.
 
       .. defcustom:: flycheck-rust-library-path
 
