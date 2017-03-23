@@ -10,13 +10,7 @@
 
 (defun foobar ()
   "Does nothing really useful"
-  (dummy-package-foo))
+  (message))
 
-(require 'dummy-package)
-
-(if t
-    (message)
-  (message "Hello foo"))
-
-(provide 'errors-and-warnings)
+(provide 'errors-and-warnings
 ;;; errors-and-warnings.el ends here

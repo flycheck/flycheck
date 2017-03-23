@@ -2566,7 +2566,9 @@ WORKING-DIR."
                    working-dir))))
     (unless (flycheck-disable-excessive-checker checker errors)
       (flycheck-report-current-errors errors))
-    (if next-checkers
+    ;; Run the next checker only if the current one has not reported any error
+    (if (and next-checkers
+             (flycheck-has-max-current-errors-p 'warning))
         (flycheck-start-current-syntax-check next-checkers)
       (setq flycheck-current-syntax-check nil)
       (flycheck-report-status 'finished)

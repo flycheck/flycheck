@@ -2318,8 +2318,6 @@ evaluating BODY."
                                          "bin/dummy-emacs")))
     (flycheck-ert-should-syntax-check
      "language/emacs-lisp/warnings.el" 'emacs-lisp-mode
-     '(12 nil warning "First sentence should end with punctuation"
-          :checker emacs-lisp-checkdoc)
      '(17 4 error "t is not true!" :checker emacs-lisp)
      '(19 11 warning "This is a stupid message" :checker emacs-lisp))))
 
