@@ -569,8 +569,8 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Javascript
 
-   Flycheck checks Javascript with one of `javascript-eslint`,
-   `javascript-jshint` or `javascript-gjslint`, and then with `javascript-jscs`.
+   Flycheck checks Javascript with one of `javascript-eslint` or
+   `javascript-jshint`, and then with `javascript-jscs`.
 
    Alternatively `javascript-standard` is used instead all of the former ones.
 
@@ -597,14 +597,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
          Whether to extract Javascript from HTML before linting.
 
       .. syntax-checker-config-file:: flycheck-jshintrc
-
-   .. syntax-checker:: javascript-gjslint
-
-      Lint with `Closure Linter`_.
-
-      .. _Closure Linter: https://developers.google.com/closure/utilities
-
-      .. syntax-checker-config-file:: flycheck-gjslintrc
 
    .. syntax-checker:: javascript-jscs
 
