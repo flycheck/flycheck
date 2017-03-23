@@ -1818,17 +1818,6 @@ nil otherwise."
          (flycheck-may-enable-checker checker)
          (or (null predicate) (funcall predicate)))))
 
-(defun flycheck-may-use-next-checker (next-checker)
-  "Determine whether NEXT-CHECKER may be used."
-  (when (symbolp next-checker)
-    (push t next-checker))
-  (let ((level (car next-checker))
-        (next-checker (cdr next-checker)))
-    (and (or (eq level t)
-             (flycheck-has-max-current-errors-p level))
-         (flycheck-registered-checker-p next-checker)
-         (flycheck-may-use-checker next-checker))))
-
 
 ;;; Help for generic syntax checkers
 (define-button-type 'help-flycheck-checker-def
@@ -2134,11 +2123,6 @@ possible problems are shown."
                               'face '(bold error))))
         (dolist (checker checkers)
           (flycheck--verify-princ-checker checker buffer))
-
-        (-when-let (selected-checker (buffer-local-value 'flycheck-checker buffer))
-          (insert (propertize "The following checker is explicitly selected for this buffer:\n\n"
-                              'face 'bold))
-          (flycheck--verify-princ-checker selected-checker buffer 'with-mm))
 
         (let ((unregistered-checkers (seq-difference (flycheck-defined-checkers)
                                                      flycheck-checkers)))
