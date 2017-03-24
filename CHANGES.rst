@@ -4,6 +4,7 @@
 - **Breaking changes**
 
   - ``rust-cargo`` now requires Rust 1.15 or newer [GH-1201]
+  - Remove javascript-gjslint checker
 
 - New syntax checkers:
 

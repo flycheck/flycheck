@@ -3364,21 +3364,11 @@ Why not:
      '(4 9 warning "'foo' is defined but never used." :id "no-unused-vars"
          :checker javascript-eslint))))
 
-(flycheck-ert-def-checker-test javascript-gjslint javascript nil
-  (let ((flycheck-disabled-checkers
-         '(javascript-jshint javascript-eslint javascript-jscs)))
-    (flycheck-ert-should-syntax-check
-     "language/javascript/warnings.js" '(js-mode js2-mode js3-mode rjsx-mode)
-     '(4 nil warning "Single-quoted string preferred over double-quoted string."
-         :id "0131" :checker javascript-gjslint)
-     '(4 nil warning "Extra space before \"]\""
-         :id "0001" :checker javascript-gjslint))))
-
 (flycheck-ert-def-checker-test javascript-jscs javascript nil
   :tags '(checkstyle-xml)
   (let ((flycheck-jscsrc "jscsrc")
         (flycheck-disabled-checkers
-         '(javascript-jshint javascript-eslint javascript-gjslint)))
+         '(javascript-jshint javascript-eslint)))
     (flycheck-ert-should-syntax-check
      "language/javascript/style.js" flycheck-test-javascript-modes
      '(4 3 error "Expected indentation of 2 characters"
@@ -3387,7 +3377,7 @@ Why not:
 (flycheck-ert-def-checker-test javascript-jscs javascript no-config
   :tags '(checkstyle-xml)
   (let ((flycheck-disabled-checkers
-         '(javascript-jshint javascript-eslint javascript-gjslint)))
+         '(javascript-jshint javascript-eslint)))
     (flycheck-ert-should-syntax-check
      "language/javascript/style.js" flycheck-test-javascript-modes
      '(1 nil warning "No JSCS configuration found.  Set `flycheck-jscsrc' for JSCS"
@@ -3418,20 +3408,6 @@ Why not:
          :checker javascript-jscs)
      '(4 9 warning "\"foo\" is defined but never used" :id "no-unused-vars"
          :checker javascript-eslint))))
-
-(flycheck-ert-def-checker-test (javascript-gjslint javascript-jscs)
-    javascript complete-chain
-  :tags '(checkstyle-xml)
-  (let ((flycheck-jscsrc "jscsrc")
-        (flycheck-disabled-checkers '(javascript-jshint javascript-eslint)))
-    (flycheck-ert-should-syntax-check
-     "language/javascript/warnings.js" '(js-mode js2-mode js3-mode rjsx-mode)
-     '(4 nil warning "Single-quoted string preferred over double-quoted string."
-         :id "0131" :checker javascript-gjslint)
-     '(4 nil warning "Extra space before \"]\""
-         :id "0001" :checker javascript-gjslint)
-     '(4 3 error "Expected indentation of 2 characters"
-         :checker javascript-jscs))))
 
 (flycheck-ert-def-checker-test javascript-standard javascript error
   (let ((flycheck-checker 'javascript-standard))

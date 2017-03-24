@@ -196,7 +196,6 @@ attention to case differences."
     html-tidy
     javascript-eslint
     javascript-jshint
-    javascript-gjslint
     javascript-jscs
     javascript-standard
     json-jsonlint
@@ -7897,22 +7896,6 @@ See URL `https://github.com/eslint/eslint'."
         :label "config file"
         :message (if have-config "found" "missing")
         :face (if have-config 'success '(bold error)))))))
-
-(flycheck-def-config-file-var flycheck-gjslintrc javascript-gjslint ".gjslintrc"
-  :safe #'stringp)
-
-(flycheck-define-checker javascript-gjslint
-  "A Javascript syntax and style checker using Closure Linter.
-
-See URL `https://developers.google.com/closure/utilities'."
-  :command ("gjslint" "--unix_mode"
-            (config-file "--flagfile" flycheck-gjslintrc)
-            source)
-  :error-patterns ((warning
-                    line-start (file-name) ":" line ":("
-                    (id (one-or-more digit)) ") " (message) line-end))
-  :modes (js-mode js2-mode js3-mode rjsx-mode)
-  :next-checkers ((warning . javascript-jscs)))
 
 (defun flycheck-parse-jscs (output checker buffer)
   "Parse JSCS OUTPUT from CHECKER and BUFFER.
