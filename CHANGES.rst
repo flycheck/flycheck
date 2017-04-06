@@ -4,6 +4,11 @@
 - **Breaking changes**
 
   - Remove javascript-jscs checker
+  - ``rust-cargo`` now requires Rust 1.17 or newer [GH-1289]
+  - Rename ``flycheck-cargo-rustc-args`` to ``flycheck-cargo-check-args``
+    [GH-1289]
+  - ``rust-cargo`` does not use the variable ``flycheck-rust-args`` anymore
+    [GH-1289]
 
 - New syntax checkers:
 
@@ -25,6 +30,7 @@
   - Flycheck will execute ``rubocop`` from directory where ``Gemfile`` is
     located. If ``Gemfile`` does not exist, old behaviour of running command
     from directory where ``.rubocop.yml`` is found will be used [GH-1368]
+  - ``rust-cargo`` now uses ``cargo check`` and ``cargo test`` [GH-1289]
 
 31 (Oct 07, 2017)
 =================
