@@ -1,0 +1,10 @@
+---
+version: "2"
+services:
+  app:
+    build: "."
+    environment:
+      EMACS_VERSION: ${EMACS_VERSION}
+    working_dir: "/src"
+    volumes:
+      - ".:/src"

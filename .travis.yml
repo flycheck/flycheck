@@ -1,53 +1,28 @@
-# Use Python 3.5 for our tooling
-language: python
-python:
-  - "3.5"
-sudo: false
+sudo: required
+services:
+  - docker
 matrix:
   # Don’t wait for jobs that are allowed to fail
   fast_finish: true
-  # Allow snapshot to fail
-  allow_failures:
-    - env: EMACS_VERSION=snapshot
 cache:
-  - pip
   - directories:
-      - .cask/
+    - ~/docker/
 env:
   matrix:
-    - EMACS_VERSION=24.4
+    - EMACS_VERSION=24.3
     - EMACS_VERSION=24.5
     - EMACS_VERSION=25.1
-    - EMACS_VERSION=snapshot
-    # A special job to build the manual
-    - BUILD_MANUAL=yes
-    # And another special job to lint our Python code
-    - LINT_PYTHON=yes
 before_install:
-  - export PATH="$HOME/bin:$PATH"
-  - wget 'https://raw.githubusercontent.com/flycheck/emacs-travis/master/emacs-travis.mk'
-  - if [[ -n $EMACS_VERSION ]]; then make -f emacs-travis.mk install_emacs; fi
-  - if [[ -n $EMACS_VERSION ]]; then make -f emacs-travis.mk install_cask; fi
-  - if [[ -n $EMACS_VERSION ]]; then emacs --version; fi
-install:
-  - if [[ -n $EMACS_VERSION ]]; then make init; fi
-  # Install requirements of documentation
-  - if [[ $BUILD_MANUAL == yes ]]; then pip install -r doc/requirements.txt; fi
-  # Install requirements for linting
-  - if [[ $LINT_PYTHON == yes ]]; then pip install -r maint/requirements.txt; fi
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/1.8.1/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  - mkdir -p ~/docker
+  - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; else docker pull larsbrinkhoff/emacsen:latest && docker save larsbrinkhoff/emacsen:latest > ~/docker/image.tar; fi
 script:
-  # Check formatting on Emacs 25 (our formatting rules dont’ work on Emacs 24).
-  - if [[ $EMACS_VERSION == 25.* ]]; then make check; fi
+  - if [[ -n $EMACS_VERSION ]]; then docker-compose run app emacs --version; fi
   # Compile and test
-  - if [[ -n $EMACS_VERSION ]]; then make compile; fi
-  - if [[ -n $EMACS_VERSION ]]; then make unit; fi
-  - if [[ -n $EMACS_VERSION ]]; then make specs; fi
-  # Run those integration tests that we can safely run on Travis CI
-  - if [[ -n $EMACS_VERSION ]]; then make LANGUAGE=emacs-lisp integ; fi
-  # Build and deploy the manual
-  - if [[ $BUILD_MANUAL == yes ]]; then make -C doc SPHINXOPTS=-n html; fi
-  # Lint our Python code
-  - if [[ $LINT_PYTHON == yes ]]; then make -C maint check; fi
+  - if [[ -n $EMACS_VERSION ]]; then docker-compose run app make travis; fi
 notifications:
   webhooks:
     urls:
