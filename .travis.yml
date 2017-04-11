@@ -12,7 +12,12 @@ matrix:
 cache:
   - pip
   - directories:
-      - .cask/
+      # Cache stable Emacs binaries
+      - "$HOME/emacs/"
+      # Cache Flycheck dependencies
+      - ".cask/"
+      # Cache Cask bootstrap dependencies
+      - "$HOME/.emacs.d/.cask"
 env:
   matrix:
     - EMACS_VERSION=24.4
