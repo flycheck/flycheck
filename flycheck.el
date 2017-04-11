@@ -8642,6 +8642,13 @@ See URL `https://sourceforge.net/projects/rpmlint/'."
       (unless (flycheck-error-line err)
         (setf (flycheck-error-line err) 1)))
     errors)
+  :error-explainer
+  (lambda (error)
+    (-when-let* ((error-message (flycheck-error-message error))
+                 (message-id (save-match-data (string-match "\\([^ ]+\\)" error-message)
+                                              (match-string 1 error-message))))
+      (with-output-to-string
+        (call-process "rpmlint" nil standard-output nil "-I" message-id))))
   :modes (sh-mode rpm-spec-mode)
   :predicate (lambda () (or (not (eq major-mode 'sh-mode))
                             ;; In `sh-mode', we need the proper shell
