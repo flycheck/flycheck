@@ -204,6 +204,7 @@ attention to case differences."
     less-stylelint
     lua-luacheck
     lua
+    nix
     perl
     perl-perlcritic
     php
@@ -8053,6 +8054,16 @@ See URL `https://github.com/mpeterv/luacheck'."
           (optional " (" (id "E" (one-or-more digit)) ") ")
           (message) line-end))
   :modes lua-mode)
+
+(flycheck-define-checker nix
+  "A nix syntax checker using nix-instantiate."
+
+  :command ("nix-instantiate" "--parse-only")
+  :standard-input t
+  :error-patterns
+  ((error line-start
+          "error: " (message) "at " (file-name) ":" line ":" column line-end))
+  :modes nix-mode)
 
 (flycheck-define-checker lua
   "A Lua syntax checker using the Lua compiler.
