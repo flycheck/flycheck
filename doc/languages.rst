@@ -693,6 +693,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-markdown-mdl-style
 
+.. supported-language:: Nix
+
+   .. syntax-checker:: nix
+
+      Check Nix with `nix-instantiate <http://nixos.org/nix/>`_.
+
 .. supported-language:: Perl
 
    Flycheck checks Perl with `perl` and `perl-perlcritic`.
