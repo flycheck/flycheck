@@ -32,6 +32,7 @@
  (depends-on "lua-mode")
  (depends-on "markdown-mode")
  (depends-on "mmm-mode")
+ (depends-on "nix-mode")
  (depends-on "php-mode")
  (depends-on "processing-mode")
  (depends-on "protobuf-mode")

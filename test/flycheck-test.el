@@ -3766,6 +3766,11 @@ Why not:
    "language/markdown.md" 'markdown-mode
    '(1 nil error "First header should be a h1 header" :id "MD002" :checker markdown-mdl)))
 
+(flycheck-ert-def-checker-test nix nix nil
+  (flycheck-ert-should-syntax-check
+   "language/nix.nix" 'nix-mode
+   '(3 1 error "syntax error, unexpected IN, expecting ';'," :checker nix)))
+
 (ert-deftest flycheck-locate-sphinx-source-directory/not-in-a-sphinx-project ()
   :tags '(language-rst)
   (flycheck-ert-with-resource-buffer "language/rst/errors.rst"

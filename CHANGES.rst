@@ -10,6 +10,7 @@
 
   - Protobuf with ``protoc`` [GH-1125]
   - systemd-analyze with ``systemd-analyze`` [GH-1135]
+  - Nix with ``nix-instantiate`` [GH-1164]
   - Dockerfile with ``hadolint`` [GH-1194]
   - AsciiDoc with ``asciidoctor`` [GH-1167]
   - CSS/SCSS/LESS with ``stylelint`` [GH-903]
