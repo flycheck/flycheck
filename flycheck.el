@@ -4309,7 +4309,9 @@ non-nil."
   ;; errors
   (with-demoted-errors "Flycheck error display error: %s"
     (flycheck-cancel-error-display-error-at-point-timer)
-    (when flycheck-mode
+    (when (and flycheck-mode
+               (not this-command)
+               (flycheck--message-command-p last-command))
       (-when-let (errors (flycheck-overlay-errors-at (point)))
         (flycheck-display-errors errors)))))
 
@@ -9675,6 +9677,60 @@ See URL `http://www.ruby-doc.org/stdlib-2.0.0/libdoc/yaml/rdoc/YAML.html'."
   ((error line-start "stdin:" (zero-or-more not-newline) ":" (message)
           "at line " line " column " column line-end))
   :modes yaml-mode)
+
+
+(defvar flycheck-message-commands-table-size 31
+  "Used by `flycheck-add-command' to initialize `flycheck-message-commands' obarray.
+It should probably never be necessary to do so, but if you
+choose to increase the number of buckets, you must do so before loading
+this file since the obarray is initialized at load time.
+Remember to keep it a prime number to improve hash performance.")
+
+(defvar flycheck-message-commands
+  ;; Don't define as `defconst' since it would then go to (read-only) purespace.
+  (make-vector flycheck-message-commands-table-size 0)
+  "Commands after which it is appropriate to print in the echo area.
+Flycheck does not try to print function arglists, etc., after just any command,
+because some commands print their own messages in the echo area and these
+functions would instantly overwrite them.  But `self-insert-command' as well
+as most motion commands are good candidates.
+This variable contains an obarray of symbols; do not manipulate it
+directly.  Instead, use `flycheck-add-command' and `flycheck-remove-command'.")
+
+(defun flycheck--message-command-p (command)
+  (and (symbolp command)
+       (intern-soft (symbol-name command) flycheck-message-commands)))
+
+(defun flycheck-add-command (&rest cmds)
+  (dolist (name cmds)
+    (and (symbolp name)
+         (setq name (symbol-name name)))
+    (set (intern name flycheck-message-commands) t)))
+
+(defun flycheck-add-command-completions (&rest names)
+  (dolist (name names)
+    (apply #'flycheck-add-command (all-completions name obarray 'commandp))))
+
+(defun flycheck-remove-command (&rest cmds)
+  (dolist (name cmds)
+    (and (symbolp name)
+         (setq name (symbol-name name)))
+    (unintern name flycheck-message-commands)))
+
+(defun flycheck-remove-command-completions (&rest names)
+  (dolist (name names)
+    (apply #'flycheck-remove-command
+           (all-completions name flycheck-message-commands))))
+
+;; Prime the command list.
+(flycheck-add-command-completions
+ "backward-" "beginning-of-" "delete-other-windows" "delete-window"
+ "down-list" "end-of-" "exchange-point-and-mark" "forward-" "goto-"
+ "handle-select-window" "indent-for-tab-command" "left-" "mark-page"
+ "mark-paragraph" "mouse-set-point" "move-" "move-beginning-of-"
+ "move-end-of-" "next-" "other-window" "pop-global-mark" "previous-"
+ "recenter" "right-" "scroll-" "self-insert-command" "split-window-"
+ "up-list")
 
 (provide 'flycheck)
 
