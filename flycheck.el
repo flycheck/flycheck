@@ -6069,6 +6069,17 @@ Relative paths are relative to the file being checked."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.14"))
 
+(flycheck-def-option-var flycheck-clang-system-include-path nil c/c++-clang
+  "A list of system include directories for Clang.
+
+The value of this variable is a list of strings, where each
+string is a directory to add to the include path of Clang.
+For files in this directory, most warnings will be suppressed.
+Relative paths are relative to the file being checked."
+  :type '(repeat (directory :tag "System include directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.22"))
+
 (flycheck-def-option-var flycheck-clang-includes nil c/c++-clang
   "A list of additional include files for Clang.
 
@@ -6205,6 +6216,7 @@ See URL `http://clang.llvm.org/'."
             (option-flag "-fno-rtti" flycheck-clang-no-rtti)
             (option-flag "-fblocks" flycheck-clang-blocks)
             (option-list "-include" flycheck-clang-includes)
+            (option-list "-isystem" flycheck-clang-system-include-path)
             (option-list "-W" flycheck-clang-warnings concat)
             (option-list "-D" flycheck-clang-definitions concat)
             (option-list "-I" flycheck-clang-include-path)
@@ -6261,6 +6273,17 @@ Relative paths are relative to the file being checked."
   :type '(repeat (directory :tag "Include directory"))
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.20"))
+
+(flycheck-def-option-var flycheck-gcc-system-include-path nil c/c++-gcc
+  "A list of system include directories for GCC.
+
+The value of this variable is a list of strings, where each
+string is a directory to add to the include path of gcc.
+For files in this directory, most warnings will be suppressed.
+Relative paths are relative to the file being checked."
+  :type '(repeat (directory :tag "System include directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.22"))
 
 (flycheck-def-option-var flycheck-gcc-includes nil c/c++-gcc
   "A list of additional include files for GCC.
@@ -6364,6 +6387,7 @@ Requires GCC 4.8 or newer.  See URL `https://gcc.gnu.org/'."
             (option-flag "-fno-rtti" flycheck-gcc-no-rtti)
             (option-flag "-fopenmp" flycheck-gcc-openmp)
             (option-list "-include" flycheck-gcc-includes)
+            (option-list "-isystem" flycheck-gcc-system-include-path)
             (option-list "-W" flycheck-gcc-warnings concat)
             (option-list "-D" flycheck-gcc-definitions concat)
             (option-list "-I" flycheck-gcc-include-path)
