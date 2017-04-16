@@ -6037,6 +6037,7 @@ See URL `http://asciidoctor.org'."
   :modes adoc-mode)
 
 (flycheck-def-args-var flycheck-clang-args c/c++-clang
+  :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.22"))
 
 (flycheck-def-option-var flycheck-clang-blocks nil c/c++-clang
@@ -6240,6 +6241,7 @@ See URL `http://clang.llvm.org/'."
   :next-checkers ((warning . c/c++-cppcheck)))
 
 (flycheck-def-args-var flycheck-gcc-args c/c++-gcc
+  :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.22"))
 
 (flycheck-def-option-var flycheck-gcc-definitions nil c/c++-gcc
