@@ -827,6 +827,18 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
   :package-version '(flycheck . "0.15")
   :group 'flycheck-faces)
 
+(defface flycheck-mode-line-errors
+  '((t :inherit mode-line))
+  "Flycheck face to highlight a non-zero error count in the mode line."
+  :package-version '(flycheck . "0.25")
+  :group 'flycheck-faces)
+
+(defface flycheck-mode-line-warnings
+  '((t :inherit mode-line))
+  "Flycheck face to highlight a non-zero warning count in the mode line."
+  :package-version '(flycheck . "0.25")
+  :group 'flycheck-faces)
+
 (defvar flycheck-command-map
   (let ((map (make-sparse-keymap)))
     (define-key map "c"         #'flycheck-buffer)
@@ -3221,7 +3233,12 @@ nil."
                 (`finished
                  (let-alist (flycheck-count-errors flycheck-current-errors)
                    (if (or .error .warning)
-                       (format ":%s/%s" (or .error 0) (or .warning 0))
+                       (concat ":"
+                               (apply 'propertize (number-to-string (or .error 0))
+                                      (if .error '(face flycheck-mode-line-errors)))
+                               "/"
+                               (apply 'propertize (number-to-string (or .warning 0))
+                                      (if .warning '(face flycheck-mode-line-warnings))))
                      "")))
                 (`interrupted "-")
                 (`suspicious "?"))))
