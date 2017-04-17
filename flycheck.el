@@ -4436,6 +4436,7 @@ this error to produce the explanation to display."
     ((pred stringp) t)
     ((or `source `source-inplace `source-original) t)
     ((or `temporary-directory `temporary-file-name) t)
+    (`source-directory t)
     (`null-device t)
     (`(config-file ,option-name ,config-file-var)
      (and (stringp option-name)
@@ -4697,6 +4698,9 @@ STRING
      When using this symbol as primary input to the syntax
      checker, add `flycheck-buffer-saved-p' to the `:predicate'.
 
+`source-directory'
+     Return path to source directory.
+
 `temporary-directory'
      Create a unique temporary directory and return its path.
 
@@ -4783,6 +4787,7 @@ are substituted within the body of cells!"
     (`source-inplace
      (list (flycheck-save-buffer-to-temp #'flycheck-temp-file-inplace)))
     (`source-original (list (or (buffer-file-name) "")))
+    (`source-directory (list (file-name-directory (or (buffer-file-name) ""))))
     (`temporary-directory (list (flycheck-temp-dir-system)))
     (`temporary-file-name
      (let ((directory (flycheck-temp-dir-system)))
