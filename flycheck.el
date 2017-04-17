@@ -162,6 +162,7 @@ attention to case differences."
   '(ada-gnat
     asciidoctor
     asciidoc
+    c/c++-clang-check
     c/c++-clang
     c/c++-gcc
     c/c++-cppcheck
@@ -6183,6 +6184,41 @@ This function determines the directory by looking at function
       (file-name-directory fn)
     ;; If the buffer has no file name, fall back to its default directory
     default-directory))
+
+(flycheck-define-checker c/c++-clang-check
+  "A C/C++ syntax checker using Clang libtooling checker.
+
+See URL `http://clang.llvm.org/'."
+  :command ("clang-check"
+            "--extra-arg=-Wno-unknown-warning-option" ; silence GCC options
+            "--extra-arg=-Wno-null-character"         ; silence null
+            "--extra-arg=-fno-color-diagnostics"      ; Do not include color codes in output
+            "--extra-arg=-fno-caret-diagnostics"      ; Do not visually indicate the source
+            "--extra-arg=-fno-diagnostics-show-option" ; Do not show the corresponding
+            source-original)
+  :error-patterns
+  ((error line-start
+          (message "In file included from") " " (file-name) ":" line ":"
+          line-end)
+   (info line-start (file-name) ":" line ":" column
+         ": note: " (optional (message)) line-end)
+   (warning line-start (file-name) ":" line ":" column
+            ": warning: " (optional (message)) line-end)
+   (error line-start (file-name) ":" line ":" column
+          ": " (or "fatal error" "error") ": " (optional (message)) line-end))
+  :error-filter
+  (lambda (errors)
+    (let ((errors (flycheck-sanitize-errors errors)))
+      (dolist (err errors)
+        ;; Clang will output empty messages for #error/#warning pragmas without
+        ;; messages.  We fill these empty errors with a dummy message to get
+        ;; them past our error filtering
+        (setf (flycheck-error-message err)
+              (or (flycheck-error-message err) "no message")))
+      (flycheck-fold-include-levels errors "In file included from")))
+  :modes (c-mode c++-mode)
+  :next-checkers ((warning . c/c++-clang))
+  :predicate flycheck-buffer-saved-p)
 
 (flycheck-define-checker c/c++-clang
   "A C/C++ syntax checker using Clang.
