@@ -7775,7 +7775,12 @@ See URL `https://github.com/ndmitchell/hlint'."
           (file-name) ":" line ":" column
           ": Error: "
           (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
-          line-end))
+          line-end)
+  (info line-start
+         (file-name) ":" line ":" column
+         ": Suggestion: "
+         (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
+         line-end))
   :modes (haskell-mode literate-haskell-mode))
 
 (flycheck-def-config-file-var flycheck-tidyrc html-tidy ".tidyrc"
