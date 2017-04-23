@@ -8817,7 +8817,7 @@ See URL `http://batsov.com/rubocop/'."
    (error line-start (file-name) ":" line ":" column ": " (or "E" "F") ": "
           (optional (id (one-or-more (not (any ":")))) ": ") (message)
           line-end))
-  :modes (enh-ruby-mode ruby-mode)
+  :modes (enh-ruby-mode ruby-mode motion-mode)
   :next-checkers ((warning . ruby-rubylint)))
 
 ;; Default to `nil' to let Rubylint find its configuration file by itself, and
@@ -8841,7 +8841,7 @@ Requires ruby-lint 2.0.2 or newer.  See URL
             (file-name) ":W:" line ":" column ": " (message) line-end)
    (error line-start
           (file-name) ":E:" line ":" column ": " (message) line-end))
-  :modes (enh-ruby-mode ruby-mode))
+  :modes (enh-ruby-mode ruby-mode motion-mode))
 
 (flycheck-define-checker ruby
   "A Ruby syntax checker using the standard Ruby interpreter.
