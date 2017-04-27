@@ -3808,17 +3808,18 @@ Why not:
 (flycheck-ert-def-checker-test ruby-rubocop ruby syntax-error
   (flycheck-ert-should-syntax-check
    "language/ruby/syntax-error.rb" 'ruby-mode
-   '(5 7 error "unexpected token tCONSTANT" :checker ruby-rubocop)
-   '(5 24 error "unterminated string meets end of file" :checker ruby-rubocop)))
+   '(5 7 error "unexpected token tCONSTANT (Using Ruby 2.1 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)" :checker ruby-rubocop)
+   '(5 24 error "unterminated string meets end of file (Using Ruby 2.1 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)" :checker ruby-rubocop)))
 
 (flycheck-ert-def-checker-test ruby-rubylint ruby syntax-error
-  (let ((flycheck-disabled-checkers '(ruby-rubocop)))
+  (ert-skip "Pending: https://github.com/YorickPeterse/ruby-lint/issues/202")
+  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek)))
     (flycheck-ert-should-syntax-check
      "language/ruby/syntax-error.rb" 'ruby-mode
      '(5 7 error "unexpected token tCONSTANT" :checker ruby-rubylint))))
 
 (flycheck-ert-def-checker-test ruby ruby syntax-error
-  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-rubylint)))
+  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek ruby-rubylint)))
     (flycheck-ert-should-syntax-check
      "language/ruby/syntax-error.rb" 'ruby-mode
      '(4 nil warning "assigned but unused variable - days" :checker ruby)
@@ -3826,19 +3827,23 @@ Why not:
          :checker ruby))))
 
 (flycheck-ert-def-checker-test ruby-jruby ruby syntax-error
-  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-rubylint ruby)))
+  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek ruby-rubylint ruby)))
     (flycheck-ert-should-syntax-check
      "language/ruby/syntax-error.rb" 'ruby-mode
      '(5 nil error "syntax error, unexpected tCONSTANT" :checker ruby-jruby))))
 
-(flycheck-ert-def-checker-test (ruby-rubocop ruby-rubylint) ruby with-rubylint
+(flycheck-ert-def-checker-test (ruby-rubocop ruby-reek ruby-rubylint) ruby with-rubylint
   (flycheck-ert-should-syntax-check
    "language/ruby/warnings.rb" 'ruby-mode
+   '(3 nil warning "Person assumes too much for instance variable '@name'"
+       :id "InstanceVariableAssumption" :checker ruby-reek)
    '(3 1 info "Missing top-level class documentation comment."
        :id "Style/Documentation" :checker ruby-rubocop)
    '(5 5 warning "unused local variable arr" :checker ruby-rubylint)
    '(5 5 warning "Useless assignment to variable - `arr`."
        :id "Lint/UselessAssignment" :checker ruby-rubocop)
+   '(5 11 info "Use `%i` or `%I` for an array of symbols."
+       :id "Style/SymbolArray" :checker ruby-rubocop)
    '(6 10 info "Prefer single-quoted strings when you don't need string interpolation or special symbols."
        :id "Style/StringLiterals" :checker ruby-rubocop)
    '(10 5 info "the use of then/do is not needed here" :checker ruby-rubylint)
@@ -3850,12 +3855,21 @@ Why not:
         :id "Lint/LiteralInCondition" :checker ruby-rubocop)
    '(10 13 info "Do not use `then` for multi-line `if`."
         :id "Style/MultilineIfThen" :checker ruby-rubocop)
+   '(11 7 info "Redundant `return` detected."
+        :id "Style/RedundantReturn" :checker ruby-rubocop)
    '(11 24 error "undefined instance variable @name" :checker ruby-rubylint)
-   '(16 1 error "wrong number of arguments (expected 2..3 but got 0)"
+   '(16 1 error "wrong number of arguments for 'test' (expected 2..3 but got 0)"
         :checker ruby-rubylint)))
 
-(flycheck-ert-def-checker-test ruby ruby warnings
+(flycheck-ert-def-checker-test ruby-reek ruby warnings
   (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-rubylint)))
+    (flycheck-ert-should-syntax-check
+     "language/ruby/warnings.rb" 'ruby-mode
+     '(3 nil warning "Person assumes too much for instance variable '@name'"
+         :id "InstanceVariableAssumption" :checker ruby-reek))))
+
+(flycheck-ert-def-checker-test ruby ruby warnings
+  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek ruby-rubylint)))
     (flycheck-ert-should-syntax-check
      "language/ruby/warnings.rb" 'ruby-mode
      '(5 nil warning "assigned but unused variable - arr" :checker ruby)
@@ -3863,7 +3877,7 @@ Why not:
           :checker ruby))))
 
 (flycheck-ert-def-checker-test ruby-jruby ruby ()
-  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-rubylint ruby)))
+  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek ruby-rubylint ruby)))
     (flycheck-ert-should-syntax-check
      "language/ruby/warnings.rb" 'ruby-mode
      '(16 nil warning "Useless use of == in void context."

@@ -908,8 +908,9 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Ruby
 
-   Flycheck checks Ruby with `ruby-rubocop` and `ruby-rubylint`, falling back to
-   `ruby` or `ruby-jruby` for basic syntax checking if those are not available.
+   Flycheck checks Ruby with `ruby-rubocop`, `ruby-reek` and `ruby-rubylint`,
+   falling back to `ruby` or `ruby-jruby` for basic syntax checking if those
+   are not available.
 
    .. syntax-checker:: ruby-rubocop
 
@@ -925,6 +926,19 @@ to view the docstring of the syntax checker.  Likewise, you may use
          option.
 
       .. syntax-checker-config-file:: flycheck-rubocoprc
+
+   .. syntax-checker:: ruby-reek
+
+      Check syntax and lint with reek_.
+
+      .. _Reek: https://github.com/troessner/reek
+
+      .. syntax-checker-config-file:: flycheck-reekrc
+
+      .. note::
+
+         ``flycheck-reekrc`` defaults to ``nil``, because Reek can find its own
+         configuration.
 
    .. syntax-checker:: ruby-rubylint
 
