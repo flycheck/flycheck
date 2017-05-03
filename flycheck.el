@@ -8739,11 +8739,16 @@ See URL `https://github.com/mivok/markdownlint'."
   "Nix checker using nix-instantiate.
 
 See URL `https://nixos.org/nix/manual/#sec-nix-instantiate'."
-  :command ("nix-instantiate" "--parse" source-inplace)
+  :command ("nix-instantiate" "--parse" "-")
+  :standard-input t
   :error-patterns
   ((error line-start
           "error: " (message) " at " (file-name) ":" line ":" column
           line-end))
+  :error-filter
+  (lambda (errors)
+    (flycheck-sanitize-errors
+     (flycheck-remove-error-file-names "(string)" errors)))
   :modes nix-mode)
 
 (defun flycheck-locate-sphinx-source-directory ()
