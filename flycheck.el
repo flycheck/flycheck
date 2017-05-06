@@ -5702,6 +5702,7 @@ https://github.com/rust-lang/rust/blob/master/src/libsyntax/json.rs#L67-L139"
         (primary-filename)
         (primary-line)
         (primary-column)
+        (group (make-symbol "group"))
         (spans)
         (children)
         (errors))
@@ -5761,7 +5762,8 @@ https://github.com/rust-lang/rust/blob/master/src/libsyntax/json.rs#L67-L139"
           :id error-code
           :checker checker
           :buffer buffer
-          :filename .file_name)
+          :filename .file_name
+          :group group)
          errors)))
 
     ;; Then we turn children messages into flycheck errors pointing to the
@@ -5778,7 +5780,8 @@ https://github.com/rust-lang/rust/blob/master/src/libsyntax/json.rs#L67-L139"
           :id error-code
           :checker checker
           :buffer buffer
-          :filename primary-filename)
+          :filename primary-filename
+          :group group)
          errors)))
 
     ;; If there are no spans, the error is not associated with a specific
@@ -5793,7 +5796,8 @@ https://github.com/rust-lang/rust/blob/master/src/libsyntax/json.rs#L67-L139"
              error-message
              :id error-code
              :checker checker
-             :buffer buffer)
+             :buffer buffer
+             :group group)
             errors))
     (nreverse errors)))
 
