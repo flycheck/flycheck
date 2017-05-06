@@ -2864,7 +2864,7 @@ variables of Flycheck."
                (:constructor flycheck-error-new)
                (:constructor flycheck-error-new-at (line column
                                                          &optional level message
-                                                         &key checker id
+                                                         &key checker id group
                                                          (filename (buffer-file-name))
                                                          (buffer (current-buffer)))))
   "Structure representing an error reported by a syntax checker.
@@ -2901,8 +2901,18 @@ Slots:
      The error level, as either `info', `warning' or `error'.
 
 `id' (optional)
-     An ID identifying the kind of error."
-  buffer checker filename line column message level id)
+     An ID identifying the kind of error.
+
+`group` (optional)
+     A symbol identifying the group the error belongs to.
+
+     Some tools will emit multiple errors that relate to the same
+     issue (e.g., lifetime errors in Rust).  All related errors
+     collected by a checker should have the same `group` value,
+     in order to be able to present them to the user.
+
+     See `flycheck-errors-from-group`."
+  buffer checker filename line column message level id group)
 
 (defmacro flycheck-error-with-buffer (err &rest forms)
   "Switch to the buffer of ERR and evaluate FORMS.
@@ -3159,6 +3169,18 @@ otherwise."
 Return a list of all errors that are relevant for their
 corresponding buffer."
   (seq-filter #'flycheck-relevant-error-p errors))
+
+(defun flycheck-related-errors (err)
+  "Get all the errors that are in the same group as ERR.
+
+Return a list of all errors (in `flycheck-current-errors') that
+have the same `flycheck-error-group' as ERR, including ERR
+itself."
+  (-if-let (group (flycheck-error-group err))
+      (seq-filter (lambda (e)
+                    (eq (flycheck-error-group e) group))
+                  flycheck-current-errors)
+    (list err)))
 
 
 ;;; Status reporting for the current buffer
