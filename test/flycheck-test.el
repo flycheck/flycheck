@@ -2824,8 +2824,6 @@ evaluating BODY."
    "language/chef/recipes/error.rb" 'ruby-mode
    '(3 nil error "FC002: Avoid string interpolation where not required"
        :checker chef-foodcritic)
-   '(8 nil error "FC003: Check whether you are running with chef server before using server-specific features"
-       :checker chef-foodcritic)
    '(11 nil error "FC004: Use a service resource to start and stop services"
         :checker chef-foodcritic)))
 
