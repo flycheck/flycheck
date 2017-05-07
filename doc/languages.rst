@@ -76,7 +76,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. note::
 
-         `c/c++-gcc` requires GCC 4.8 or newer.
+         `c/c++-gcc` requires GCC 4.4 or newer.
 
       .. _Clang: http://clang.llvm.org/
       .. _GCC: https://gcc.gnu.org/
