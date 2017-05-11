@@ -3629,7 +3629,7 @@ Why not:
   (let ((python-indent-guess-indent-offset nil))       ; Silence Python Mode!
     (flycheck-ert-should-syntax-check
      "language/python/syntax-error.py" 'python-mode
-     '(3 13 error "SyntaxError: invalid syntax" :id "E999"
+     '(3 12 error "SyntaxError: invalid syntax" :id "E999"
          :checker python-flake8))))
 
 (flycheck-ert-def-checker-test python-flake8 python nil
@@ -3645,6 +3645,8 @@ Why not:
         :id "E251" :checker python-flake8)
    '(12 31 warning "unexpected spaces around keyword / parameter equals"
         :id "E251" :checker python-flake8)
+   '(21 1 warning "expected 2 blank lines after class or function definition, found 1"
+        :id "E305" :checker python-flake8)
    '(22 1 error "undefined name 'antigravity'" :id "F821"
         :checker python-flake8)))
 
