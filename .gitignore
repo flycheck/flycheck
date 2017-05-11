@@ -12,3 +12,4 @@
 
 # Directory local variables
 .dir-locals.el
+.vagrant

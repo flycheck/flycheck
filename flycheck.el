@@ -8928,7 +8928,7 @@ See URL `http://jruby.org/'."
   :standard-input t
   :error-patterns
   ((error line-start "SyntaxError in -:" line ": " (message) line-end)
-   (warning line-start "-:" line " warning: " (message) line-end)
+   (warning line-start "-:" line ":" " warning: " (message) line-end)
    (error line-start  "-:" line ": " (message) line-end))
   :modes (enh-ruby-mode ruby-mode)
   :next-checkers ((warning . ruby-rubylint)))
