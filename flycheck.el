@@ -8196,6 +8196,15 @@ See URL `https://phpmd.org/'."
   :modes (php-mode php+-mode)
   :next-checkers (php-phpcs))
 
+(defvar flycheck-phpcs-standards-list
+      (s-split ", "
+	       (s-chop-prefix
+		"The installed coding standards are "
+		(s-replace-all '((" and " . ", ")(" PEAR," . ""))
+			   (substring
+			    (shell-command-to-string "phpcs -i")  0 -1))))
+      "List of currently installed coding standards for PHP CodeSniffer.")
+
 (flycheck-def-option-var flycheck-phpcs-standard nil php-phpcs
   "The coding standard for PHP CodeSniffer.
 
@@ -8203,8 +8212,11 @@ When nil, use the default standard from the global PHP
 CodeSniffer configuration.  When set to a string, pass the string
 to PHP CodeSniffer which will interpret it as name as a standard,
 or as path to a standard specification."
-  :type '(choice (const :tag "Default standard" nil)
-                 (string :tag "Standard name or file"))
+  :type `(choice (const :tag "Default standard (PEAR)" nil)
+		 ,@(mapcar (lambda (c)
+                           (list 'const :tag c c))
+		    flycheck-phpcs-standards-list)
+		 (string :tag "Custom standard name or config file"))
   :safe #'stringp)
 
 (flycheck-define-checker php-phpcs
