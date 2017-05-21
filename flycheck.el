@@ -6923,8 +6923,8 @@ See URL `http://www.erlang.org/'."
 
 (defun contains-rebar-config (dir-name)
   "Return DIR-NAME if DIR-NAME/rebar.config exists, nil otherwise."
-  (if (file-exists-p (expand-file-name "rebar.config" dir-name))
-      dir-name nil))
+  (when (file-exists-p (expand-file-name "rebar.config" dir-name))
+    dir-name))
 
 (defun locate-rebar3-project-root (file-name &optional prev-file-name acc)
   "Find the top-most rebar project root for source FILE-NAME.
@@ -6942,7 +6942,7 @@ non-nil of which will be our project root.
 
 Return the absolute path to the directory"
   (if (string= file-name prev-file-name)
-      (car (seq-drop-while (lambda (x) (not x)) acc))
+      (car (remove nil acc))
     (let ((current-dir (file-name-directory file-name)))
       (locate-rebar3-project-root
        (directory-file-name current-dir)
@@ -6961,7 +6961,7 @@ Return the absolute path to the directory"
     ;; rebar3 outputs ANSI terminal colors, which don't match up with
     ;; :error-patterns, so we strip those color codes from the output
     ;; here before passing it along to the default behavior. The
-    ;; relevant disucssion can be found
+    ;; relevant disucssion can be found at
     ;; https://github.com/flycheck/flycheck/pull/1144
     (require 'ansi-color)
     (flycheck-parse-with-patterns
@@ -6973,8 +6973,8 @@ Return the absolute path to the directory"
    (error line-start
           (file-name) ":" line ": " (message) line-end))
   :modes erlang-mode
-  :enabled (lambda () (flycheck-rebar3-project-root))
-  :predicate (lambda () (flycheck-buffer-saved-p))
+  :enabled flycheck-rebar3-project-root
+  :predicate flycheck-buffer-saved-p
   :working-directory flycheck-rebar3-project-root)
 
 (flycheck-define-checker eruby-erubis

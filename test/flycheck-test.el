@@ -3056,7 +3056,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 (flycheck-ert-def-checker-test erlang-rebar3 erlang build
   (flycheck-ert-should-syntax-check
    "language/erlang/rebar3/_checkouts/dependency/src/dependency.erl" 'erlang-mode)
-  ;; Ensure that the dependency file wasn't build as standalone
+  ;; Ensure that the dependency file wasn't built as standalone
   ;; project which would create a separate _build directory
   (should (not (file-exists-p
                 (flycheck-ert-resource-filename
