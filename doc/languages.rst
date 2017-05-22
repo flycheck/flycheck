@@ -332,6 +332,9 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Erlang
 
+   Flycheck checks Erlang with `erlang-rebar3` in rebar projects and
+   `erlang` otherwise.
+
    .. syntax-checker:: erlang
 
       Check Erlang with the standard `Erlang <http://www.erlang.org/>`_
@@ -344,6 +347,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
       .. defcustom:: flycheck-erlang-library-path
 
          A list of library directories.
+
+   .. syntax-checker:: erlang-rebar3
+
+      Check Erlang with the `rebar3 <https://www.rebar3.org/>`_ build tool.
 
 .. supported-language:: ERuby
 

@@ -96,15 +96,6 @@
       (should (memq checker flycheck-checkers))
       (should (flycheck-registered-checker-p checker)))))
 
-(ert-deftest flycheck-checkers/should-have-either-patterns-or-parser ()
-  :tags '(customization)
-  (dolist (checker flycheck-checkers)
-    (let ((patterns (flycheck-checker-get checker 'error-patterns))
-          (parser (flycheck-checker-get checker 'error-parser)))
-      (should checker)
-      (should (or (and (eq parser 'flycheck-parse-with-patterns) patterns)
-                  (null patterns))))))
-
 (ert-deftest flycheck-checkers/no-registered-checker-is-disabled ()
   :tags '(customization)
   (dolist (checker flycheck-checkers)
@@ -3058,13 +3049,32 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 
 (flycheck-ert-def-checker-test erlang erlang error
   (flycheck-ert-should-syntax-check
-   "language/erlang/error.erl" 'erlang-mode
+   "language/erlang/erlang/error.erl" 'erlang-mode
    '(7 nil error "head mismatch" :checker erlang)))
 
 (flycheck-ert-def-checker-test erlang erlang warning
   (flycheck-ert-should-syntax-check
-   "language/erlang/warning.erl" 'erlang-mode
+   "language/erlang/erlang/warning.erl" 'erlang-mode
    '(6 nil warning "wrong number of arguments in format call" :checker erlang)))
+
+(flycheck-ert-def-checker-test erlang-rebar3 erlang error
+  (flycheck-ert-should-syntax-check
+   "language/erlang/rebar3/src/erlang-error.erl" 'erlang-mode
+   '(7 nil error "head mismatch" :checker erlang-rebar3)))
+
+(flycheck-ert-def-checker-test erlang-rebar3 erlang warning
+  (flycheck-ert-should-syntax-check
+   "language/erlang/rebar3/src/erlang-warning.erl" 'erlang-mode
+   '(6 nil warning "wrong number of arguments in format call" :checker erlang-rebar3)))
+
+(flycheck-ert-def-checker-test erlang-rebar3 erlang build
+  (flycheck-ert-should-syntax-check
+   "language/erlang/rebar3/_checkouts/dependency/src/dependency.erl" 'erlang-mode)
+  ;; Ensure that the dependency file wasn't built as standalone
+  ;; project which would create a separate _build directory
+  (should (not (file-exists-p
+                (flycheck-ert-resource-filename
+                 "language/erlang/rebar3/_build/default/lib/dependency/_build")))))
 
 (flycheck-ert-def-checker-test eruby-erubis eruby nil
   (flycheck-ert-should-syntax-check
