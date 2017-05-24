@@ -1165,6 +1165,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
       .. defcustom:: flycheck-shellcheck-excluded-warnings
 
          A list of excluded warnings.
+         
+       .. defcustom:: flycheck-shellcheck-follow-sources
+       
+         Allow shellcheck to read sourced files.
 
 .. supported-language:: Slim
 
