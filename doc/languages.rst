@@ -1166,6 +1166,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          A list of excluded warnings.
 
+      .. defcustom:: flycheck-shellcheck-external-sources
+
+         Whether to follow 'source' statements in shell scripts.
+
 .. supported-language:: Slim
 
    .. syntax-checker:: slim
