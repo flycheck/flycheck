@@ -9543,6 +9543,7 @@ By default, no warnings are excluded."
 
 See URL `https://github.com/koalaman/shellcheck/'."
   :command ("shellcheck"
+            "--external-sources"
             "--format" "checkstyle"
             "--shell" (eval (symbol-name sh-shell))
             (option "--exclude" flycheck-shellcheck-excluded-warnings list
