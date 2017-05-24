@@ -9549,7 +9549,7 @@ or added as a shellcheck directive before the source command
 (e.g. # shellcheck source=/full/path/to/file.txt)."
   :type 'boolean
   :safe #'booleanp
-  :package-version '(flycheck . "0.31"))
+  :package-version '(flycheck . "0.21"))
 
 (flycheck-define-checker sh-shellcheck
   "A shell script syntax and style checker using Shellcheck.
