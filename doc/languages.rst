@@ -1166,7 +1166,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          A list of excluded warnings.
          
-       .. defcustom:: flycheck-shellcheck-follow-sources
+      .. defcustom:: flycheck-shellcheck-follow-sources
        
          Allow shellcheck to read sourced files.
 
