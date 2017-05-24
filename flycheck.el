@@ -9538,12 +9538,21 @@ By default, no warnings are excluded."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.21"))
 
+(flycheck-def-option-var flycheck-shellcheck-external-sources t sh-shellcheck
+  "Whether to follow 'source' statements or not.
+
+When non-nil, `shellcheck' is passed the `--external-sources' flag,
+which will follow any 'source' statements in the file."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "31"))
+
 (flycheck-define-checker sh-shellcheck
   "A shell script syntax and style checker using Shellcheck.
 
 See URL `https://github.com/koalaman/shellcheck/'."
   :command ("shellcheck"
-            "--external-sources"
+            (option-flag "--external-sources" flycheck-shellcheck-external-sources)
             "--format" "checkstyle"
             "--shell" (eval (symbol-name sh-shell))
             (option "--exclude" flycheck-shellcheck-excluded-warnings list
