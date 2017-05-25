@@ -9538,6 +9538,19 @@ By default, no warnings are excluded."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.21"))
 
+(flycheck-def-option-var flycheck-shellcheck-follow-sources t sh-shellcheck
+  "Whether to follow external sourced files in scripts.
+
+Shellcheck will follow and parse sourced files so long as
+a pre-runtime resolvable path to the file is present. This
+can either be part of the source command itself
+(e.g. source /full/path/to/file.txt)
+or added as a shellcheck directive before the source command
+(e.g. # shellcheck source=/full/path/to/file.txt)."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.31"))
+
 (flycheck-define-checker sh-shellcheck
   "A shell script syntax and style checker using Shellcheck.
 
@@ -9545,6 +9558,7 @@ See URL `https://github.com/koalaman/shellcheck/'."
   :command ("shellcheck"
             "--format" "checkstyle"
             "--shell" (eval (symbol-name sh-shell))
+            (option-flag "--external-sources" flycheck-shellcheck-follow-sources)
             (option "--exclude" flycheck-shellcheck-excluded-warnings list
                     flycheck-option-comma-separated-list)
             "-")
