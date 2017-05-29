@@ -1076,16 +1076,19 @@ to a number and return it.  Otherwise return nil."
 
 (defun flycheck-same-files-p (file-a file-b)
   "Determine whether FILE-A and FILE-B refer to the same file."
-  (let ((file-a (expand-file-name file-a))
-        (file-b (expand-file-name file-b)))
-    ;; We must resolve symbolic links here, since some syntax checker always
-    ;; output canonical file names with all symbolic links resolved.  However,
-    ;; we still do a simple path compassion first, to avoid the comparatively
-    ;; expensive file system call if possible.  See
-    ;; https://github.com/flycheck/flycheck/issues/561
-    (or (string= (directory-file-name file-a) (directory-file-name file-b))
-        (string= (directory-file-name (file-truename file-a))
-                 (directory-file-name (file-truename file-b))))))
+  (if (or (null file-a)
+          (null file-b))
+      nil
+    (let ((file-a (expand-file-name file-a))
+          (file-b (expand-file-name file-b)))
+      ;; We must resolve symbolic links here, since some syntax checker always
+      ;; output canonical file names with all symbolic links resolved.  However,
+      ;; we still do a simple path compassion first, to avoid the comparatively
+      ;; expensive file system call if possible.  See
+      ;; https://github.com/flycheck/flycheck/issues/561
+      (or (string= (directory-file-name file-a) (directory-file-name file-b))
+          (string= (directory-file-name (file-truename file-a))
+                   (directory-file-name (file-truename file-b)))))))
 
 (defvar-local flycheck-temporaries nil
   "Temporary files and directories created by Flycheck.")
