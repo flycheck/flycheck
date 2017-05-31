@@ -7734,21 +7734,23 @@ contains a cabal file."
   (pcase checker
     (`haskell-stack-ghc
      (or
-      (locate-dominating-file (buffer-file-name) "stack.yaml")
+      (when (buffer-file-name)
+        (locate-dominating-file (buffer-file-name) "stack.yaml"))
       (-when-let* ((stack (funcall flycheck-executable-find "stack"))
                    (output (ignore-errors
                              (process-lines stack "path" "--project-root")))
                    (stack-dir (car output)))
         (and (file-directory-p stack-dir) stack-dir))))
     (_
-     (locate-dominating-file
-      (file-name-directory (buffer-file-name))
-      (lambda (dir)
-        (directory-files dir
-                         nil ;; use full paths
-                         ".+\\.cabal\\'"
-                         t ;; do not sort result
-                         ))))))
+     (when (buffer-file-name)
+       (locate-dominating-file
+        (file-name-directory (buffer-file-name))
+        (lambda (dir)
+          (directory-files dir
+                           nil ;; use full paths
+                           ".+\\.cabal\\'"
+                           t ;; do not sort result
+                           )))))))
 
 (flycheck-define-checker haskell-stack-ghc
   "A Haskell syntax and type checker using `stack ghc'.
