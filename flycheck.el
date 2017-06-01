@@ -7722,7 +7722,7 @@ See URL `https://github.com/commercialhaskell/stack'."
             source)
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ":"
-            (or " " "\n    ") "Warning:"
+            (or " " "\n    ") (in "Ww") "arning:"
             (optional " " "[" (id (one-or-more not-newline)) "]")
             (optional "\n")
             (message
@@ -7772,7 +7772,7 @@ See URL `https://www.haskell.org/ghc/'."
             source)
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ":"
-            (or " " "\n    ") "Warning:"
+            (or " " "\n    ") (in "Ww") "arning:"
             (optional " " "[" (id (one-or-more not-newline)) "]")
             (optional "\n")
             (message
