@@ -9556,6 +9556,7 @@ or added as a shellcheck directive before the source command:
 
 See URL `https://github.com/koalaman/shellcheck/'."
   :command ("shellcheck"
+            "-x"
             "--format" "checkstyle"
             "--shell" (eval (symbol-name sh-shell))
             (option-flag "--external-sources" flycheck-shellcheck-follow-sources)
