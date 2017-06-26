@@ -18,6 +18,8 @@
 
 - New features:
 
+  - Add ``flycheck-xml-xmlstarlet-xsd-path`` and ``flycheck-xml-xmllint-xsd-path`` to
+    specify an XSD schema to validate XML documents against [GH-1272]
   - Add ``flycheck-tslint-args`` to pass additional arguments to tslint [GH-1186]
   - Add an error explainer to the ``rpm-rpmlint`` checker using
     ``rpmlint -I`` [GH-1235]
