@@ -95,7 +95,7 @@ Emacs Lisp
 Julia
 -----
 
-* :jl:`gdkrmr/flycheck-julia` makes linting for Julia_ available via Lint.jl_.
+* :gh:`gdkrmr/flycheck-julia` makes linting for Julia_ available via Lint.jl_.
 
 .. _Julia: https://julialang.org
 .. _Lint.jl: https://lintjl.readthedocs.io/en/stable/
