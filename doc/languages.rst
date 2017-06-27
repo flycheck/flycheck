@@ -1252,6 +1252,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with `XMLStarlet <http://xmlstar.sourceforge.net>`_.
 
+      .. defcustom:: flycheck-xml-xmlstarlet-xsd-path
+                     flycheck-xml-xmllint-xsd-path
+
+         Location of XSD schema to validate against for `xml-xmlstarlet` and
+         `xml-xmllint` respectively.
+
    .. syntax-checker:: xml-xmllint
 
       Check syntax with :program:`xmllint` from Libxml2_.
