@@ -12,8 +12,6 @@ Teams
 Maintainers
 -----------
 
-* **Sebastian Wiesner** (:gh:`lunaryorn`, owner, GPG key ``C4EC41E35C42FE98``,
-  `keybase <https://keybase.io/lunaryorn>`_)
 * **Clément Pit--Claudel** (:gh:`cpitclaudel`, owner)
 
 We maintain Flycheck and all official extensions within the `Flycheck
@@ -127,6 +125,11 @@ Acknowledgements
 
 We would also like to thank the following people and projects:
 
+* Sebastian Wiesner (:gh:`lunaryorn`) for creating Flycheck in the first place,
+  for taking the time and dedication to maintain it for over 4 years, while
+  maintaining high standards of code quality and nurturing an healthy, active
+  community around it, giving Flycheck the best chances to thrive after his
+  departure.
 * Bozhidar Batsov (:gh:`bbatsov`) for his valuable feedback and his constant
   support and endorsement of Flycheck from the very beginning. Notably he added
   Flycheck to his popular :gh:`Prelude <bbatsov/prelude>` project at a very
@@ -217,7 +220,7 @@ to Flycheck:
 * Sean Gillespie (:gh:`swgillespie`)
 * Sean Salmon (:gh:`phatcabbage`)
 * Sebastian Beyer (:gh:`sebastianbeyer`)
-* Sebastian Wiesner (:gh:`lunaryorn`, founder, maintainer, owner)
+* Sebastian Wiesner (:gh:`lunaryorn`, founder, former maintainer, former owner)
 * Sergey Vinokurov (:gh:`sergv`)
 * Stephen Lewis (:gh:`stephenjlewis`)
 * Steve Purcell (:gh:`purcell`)
