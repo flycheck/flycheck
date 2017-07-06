@@ -92,6 +92,14 @@ Emacs Lisp
 
 .. _Cask: https://github.com/cask/cask
 
+Julia
+-----
+
+* :gh:`gdkrmr/flycheck-julia` makes linting for Julia_ available via Lint.jl_.
+
+.. _Julia: https://julialang.org
+.. _Lint.jl: https://lintjl.readthedocs.io/en/stable/
+
 Haskell
 -------
 
