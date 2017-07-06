@@ -9628,7 +9628,7 @@ See URL `https://github.com/purcell/sqlint'."
 See URL `https://www.freedesktop.org/software/systemd/man/systemd-analyze.html'."
   :command ("systemd-analyze" "verify" source)
   :error-patterns
-  ((error line-start "[" (file-name) ":" line "] " (message) line-end))
+  ((error line-start (file-name) ":" (optional line ":") (message) line-end))
   :modes (systemd-mode))
 
 (flycheck-def-config-file-var flycheck-chktexrc tex-chktex ".chktexrc"
