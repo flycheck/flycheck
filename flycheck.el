@@ -2865,7 +2865,7 @@ variables of Flycheck."
                (:constructor flycheck-error-new)
                (:constructor flycheck-error-new-at (line column
                                                          &optional level message
-                                                         &key checker id
+                                                         &key checker id group
                                                          (filename (buffer-file-name))
                                                          (buffer (current-buffer)))))
   "Structure representing an error reported by a syntax checker.
@@ -2895,12 +2895,25 @@ Slots:
      columns must be adjusted for Flycheck, see
      `flycheck-increment-error-columns'.
 
+`message' (optional)
+     The error message as a string, if any.
+
 `level'
-     The error level, as either `warning' or `error'.
+     The error level, as either `info', `warning' or `error'.
 
 `id' (optional)
-     An ID identifying the kind of error."
-  buffer checker filename line column message level id)
+     An ID identifying the kind of error.
+
+`group` (optional)
+     A symbol identifying the group the error belongs to.
+
+     Some tools will emit multiple errors that relate to the same
+     issue (e.g., lifetime errors in Rust).  All related errors
+     collected by a checker should have the same `group` value,
+     in order to be able to present them to the user.
+
+     See `flycheck-errors-from-group`."
+  buffer checker filename line column message level id group)
 
 (defmacro flycheck-error-with-buffer (err &rest forms)
   "Switch to the buffer of ERR and evaluate FORMS.
@@ -3161,6 +3174,18 @@ otherwise."
 Return a list of all errors that are relevant for their
 corresponding buffer."
   (seq-filter #'flycheck-relevant-error-p errors))
+
+(defun flycheck-related-errors (err)
+  "Get all the errors that are in the same group as ERR.
+
+Return a list of all errors (in `flycheck-current-errors') that
+have the same `flycheck-error-group' as ERR, including ERR
+itself."
+  (-if-let (group (flycheck-error-group err))
+      (seq-filter (lambda (e)
+                    (eq (flycheck-error-group e) group))
+                  flycheck-current-errors)
+    (list err)))
 
 
 ;;; Status reporting for the current buffer
@@ -5684,6 +5709,7 @@ https://github.com/rust-lang/rust/blob/master/src/libsyntax/json.rs#L67-L139"
         (primary-filename)
         (primary-line)
         (primary-column)
+        (group (make-symbol "group"))
         (spans)
         (children)
         (errors))
@@ -5743,7 +5769,8 @@ https://github.com/rust-lang/rust/blob/master/src/libsyntax/json.rs#L67-L139"
           :id error-code
           :checker checker
           :buffer buffer
-          :filename .file_name)
+          :filename .file_name
+          :group group)
          errors)))
 
     ;; Then we turn children messages into flycheck errors pointing to the
@@ -5760,7 +5787,8 @@ https://github.com/rust-lang/rust/blob/master/src/libsyntax/json.rs#L67-L139"
           :id error-code
           :checker checker
           :buffer buffer
-          :filename primary-filename)
+          :filename primary-filename
+          :group group)
          errors)))
 
     ;; If there are no spans, the error is not associated with a specific
@@ -5775,7 +5803,8 @@ https://github.com/rust-lang/rust/blob/master/src/libsyntax/json.rs#L67-L139"
              error-message
              :id error-code
              :checker checker
-             :buffer buffer)
+             :buffer buffer
+             :group group)
             errors))
     (nreverse errors)))
 
