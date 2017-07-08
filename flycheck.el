@@ -8198,11 +8198,13 @@ Relative paths are relative to the file being checked."
 
 See URL `https://www.perl.org'."
   :command ("perl" "-w" "-c"
-            (option-list "-I" flycheck-perl-include-path))
-  :standard-input t
+            (option-list "-I" flycheck-perl-include-path)
+            ;; Cannot use standard input because perl might exit early
+            ;; (see GH-1278)
+            source)
   :error-patterns
   ((error line-start (minimal-match (message))
-          " at - line " line
+          " at " (file-name) " line " line
           (or "." (and ", " (zero-or-more not-newline))) line-end))
   :modes (perl-mode cperl-mode)
   :next-checkers (perl-perlcritic))
