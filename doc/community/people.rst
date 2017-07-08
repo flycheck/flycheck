@@ -13,6 +13,7 @@ Maintainers
 -----------
 
 * **Clément Pit--Claudel** (:gh:`cpitclaudel`, owner)
+* **fmdkdd** (:gh:`fmdkdd`, owner)
 
 We maintain Flycheck and all official extensions within the `Flycheck
 organisation`_, and set the direction and scope of Flycheck.  We review and
@@ -178,7 +179,7 @@ to Flycheck:
 * Drew Wells (:gh:`drewwells`)
 * Erik Hetzner (:gh:`egh`)
 * Fanael Linithien (:gh:`Fanael`)
-* :gh:`fmdkdd`
+* :gh:`fmdkdd` (maintainer, owner)
 * Fred Morcos (:gh:`fredmorcos`)
 * Gereon Frey (:gh:`gfrey`)
 * Gordon Gao (:gh:`ghprince`)
