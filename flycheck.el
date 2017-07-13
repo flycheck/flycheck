@@ -551,7 +551,7 @@ If nil, never check syntax automatically.  In this case, use
               (const :tag "After a new line was inserted" new-line)
               (const :tag "After `flycheck-mode' was enabled" mode-enabled))
   :package-version '(flycheck . "0.12")
-  :safe #'symbolp)
+  :safe #'flycheck-symbol-list-p)
 
 (defcustom flycheck-idle-change-delay 0.5
   "How many seconds to wait before checking syntax automatically.
