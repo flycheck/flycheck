@@ -7587,7 +7587,9 @@ See URL `https://github.com/mdempsky/unconvert'."
 Requires Go 1.6 or newer. See URL `https://github.com/dominikh/go-tools'."
   :command ("gosimple"
             (option-list "-tags=" flycheck-go-build-tags concat)
-            source)
+            ;; Run in current directory to make gosimple aware of symbols
+            ;; declared in other files.
+            ".")
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ": " (message) line-end))
   :modes go-mode)

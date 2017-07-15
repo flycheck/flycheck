@@ -3197,7 +3197,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (flycheck-ert-with-env
       `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
     (flycheck-ert-should-syntax-check
-     "language/go/src/gosimple/gosimple.go" 'go-mode
+     "language/go/src/gosimple/gosimple1.go" 'go-mode
      '(5 6 warning "should omit values from range; this loop is equivalent to `for range ...` (S1005)"
          :checker go-gosimple))))
 
