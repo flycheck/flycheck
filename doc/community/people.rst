@@ -12,7 +12,7 @@ Teams
 Maintainers
 -----------
 
-* **Clément Pit--Claudel** (:gh:`cpitclaudel`, owner)
+* **Clément Pit-Claudel** (:gh:`cpitclaudel`, owner)
 * **fmdkdd** (:gh:`fmdkdd`, owner)
 
 We maintain Flycheck and all official extensions within the `Flycheck
@@ -165,7 +165,7 @@ to Flycheck:
 * Alex Reed (:gh:`acr4`)
 * Atila Neves (:gh:`atilaneves`)
 * Bozhidar Batsov (:gh:`bbatsov`)
-* Clément Pit--Claudel (:gh:`cpitclaudel`, maintainer, owner)
+* Clément Pit-Claudel (:gh:`cpitclaudel`, maintainer, owner)
 * Cristian Capdevila (:gh:`capdevc`)
 * Damon Haley (:gh:`dhaley`)
 * David Caldwell (:gh:`caldwell`)
