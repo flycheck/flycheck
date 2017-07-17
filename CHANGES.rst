@@ -14,7 +14,8 @@
   - Dockerfile with ``hadolint`` [GH-1194]
   - AsciiDoc with ``asciidoctor`` [GH-1167]
   - CSS/SCSS/LESS with ``stylelint`` [GH-903]
-  - Ruby with ``reek`` [PR-1244]
+  - Ruby with ``reek`` [GH-1244]
+  - Go with ``gosimple`` [GH-1281]
 
 - New features:
 
