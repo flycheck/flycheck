@@ -280,13 +280,12 @@ Once the script is completed please
    release.  Don’t forget to add a link to the complete changelog and upload the
    package TAR file.
 2. Enable the new release on the ReadTheDocs `versions dashboard`_.
-3. Announce the new release in our Gitter_ channel, on `emacs_flycheck`_ Twitter
-   and wherever else you see fit.
+3. Announce the new release in our Gitter_ channel, and wherever else you see
+   fit.
 
 .. _release information: https://github.com/flycheck/flycheck/releases
 .. _versions dashboard: https://readthedocs.org/dashboard/flycheck/versions/
 .. _Gitter: https://gitter.im/flycheck/flycheck
-.. _emacs_flycheck: https://twitter.com/emacs_flycheck
 
 New maintainers
 ===============
@@ -302,6 +301,5 @@ Once merged please also
   organisation.  This does not award additional privileges, it's just to support
   ``@flycheck/maintainers`` mentions for the sake of convenience,
 - invite the new maintainer to the internal `Maintainers channel`_ on Gitter,
-- and announce the new maintainer on Flycheck's Twitter account.
 
 .. _Maintainers channel: https://gitter.im/flycheck/maintainers
