@@ -1,5 +1,6 @@
 ;;; test-typescript.el --- Flycheck Specs: Ruby      -*- lexical-binding: t; -*-
 
+;; Copyright (C) 2017 Flycheck contributors
 ;; Copyright (C) 2016 Sebastian Wiesner and Flycheck contributors
 
 ;; Author: Saša Jovanić <sasa@simplify.ba>

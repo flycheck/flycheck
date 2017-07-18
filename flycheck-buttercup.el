@@ -1,8 +1,11 @@
 ;;; flycheck-buttercup.el --- Flycheck: Extensions to Buttercup -*- lexical-binding: t; -*-
 
+;; Copyright (C) 2017 Flycheck contributors
 ;; Copyright (C) 2016 Sebastian Wiesner and Flycheck contributors
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
+;; Maintainer: Clément Pit-Claudel <clement.pitclaudel@live.com>
+;;             fmdkdd <fmdkdd@gmail.com>
 ;; Keywords: lisp, tools
 
 ;; This file is not part of GNU Emacs.

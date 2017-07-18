@@ -1,5 +1,6 @@
 ;;; test-emacs-lisp.el --- Flycheck Specs: Emacs Lisp      -*- lexical-binding: t; -*-
 
+;; Copyright (C) 2017 Flycheck contributors
 ;; Copyright (C) 2013-2016 Sebastian Wiesner and Flycheck contributors
 
 ;; Author: Clément Pit-Claudel <clement.pitclaudel@live.com>

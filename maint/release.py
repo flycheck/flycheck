@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (C) 2017 Flycheck contributors
 # Copyright (C) 2016 Sebastian Wiesner and Flycheck contributors
 
 # This file is not part of GNU Emacs.
