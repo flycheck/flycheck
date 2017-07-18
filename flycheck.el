@@ -6761,7 +6761,8 @@ This variable has no effect, if
 
 (defun flycheck-emacs-lisp-feature-requires (value)
   "Option VALUE filter for `flycheck-def-option-var'."
-  (mapconcat (lambda (feature) (format "(require '%s)" feature)) value " "))
+  (when value
+    (mapconcat (lambda (feature) (format "(require '%s)" feature)) value " ")))
 
 (flycheck-define-checker emacs-lisp
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler.
