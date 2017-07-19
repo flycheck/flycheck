@@ -314,6 +314,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
          The package directory as string.  Has no effect if
          `flycheck-emacs-lisp-initialize-packages` is nil.
 
+      .. defcustom:: flycheck-emacs-lisp-check-declare
+
+         If non-nil, also check `declare-function` forms using
+         `check-declare-file`.
+
    .. syntax-checker:: emacs-lisp-checkdoc
 
       Check Emacs Lisp documentation conventions with ``checkdoc``.

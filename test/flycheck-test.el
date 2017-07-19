@@ -3049,6 +3049,21 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
               :checker emacs-lisp-checkdoc))
       (remove-hook 'emacs-lisp-mode-hook disable-byte-comp))))
 
+(flycheck-ert-def-checker-test emacs-lisp emacs-lisp check-declare-warnings
+  (let ((flycheck-emacs-lisp-check-declare t))
+    (flycheck-ert-should-syntax-check
+     "language/emacs-lisp/check-declare-warnings.el" 'emacs-lisp-mode
+     (if (version< emacs-version "25")
+         '(0 nil warning "`this-function-is-not-declared' was defined in this-file-does-not-exist.el: file not found"
+             :checker emacs-lisp)
+       '(9 1 warning "`this-function-is-not-declared' was defined in this-file-does-not-exist.el: file not found"
+           :checker emacs-lisp)))))
+
+(flycheck-ert-def-checker-test emacs-lisp emacs-lisp disable-check-declare
+  (let ((flycheck-emacs-lisp-check-declare nil))
+    (flycheck-ert-should-syntax-check
+     "language/emacs-lisp/check-declare-warnings.el" 'emacs-lisp-mode)))
+
 (flycheck-ert-def-checker-test erlang erlang error
   (flycheck-ert-should-syntax-check
    "language/erlang/erlang/error.erl" 'erlang-mode

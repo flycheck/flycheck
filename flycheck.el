@@ -3617,6 +3617,19 @@ IDs, that include the name of the tool."
   (seq-do (lambda (err) (setf (flycheck-error-id err) nil)) errors)
   errors)
 
+(defun flycheck-fill-empty-line-numbers (errors)
+  "Set ERRORS without lines to line 0.
+
+Use as `:error-filter' for syntax checkers that output errors
+without line numbers.
+
+Return ERRORS."
+  (seq-do (lambda (err)
+            (unless (flycheck-error-line err)
+              (setf (flycheck-error-line err) 0)))
+          errors)
+  errors)
+
 
 ;;; Error analysis
 (defun flycheck-count-errors (errors)
@@ -6946,7 +6959,9 @@ See URL `https://github.com/lpil/dogma/'."
       (unwind-protect
           (byte-compile-file (car command-line-args-left))
         (mapc (lambda (f) (ignore-errors (delete-file f)))
-              flycheck-byte-compiled-files)))))
+              flycheck-byte-compiled-files))
+      (when (bound-and-true-p flycheck-emacs-lisp-check-declare)
+        (check-declare-file (car command-line-args-left))))))
 
 (flycheck-def-option-var flycheck-emacs-lisp-load-path nil emacs-lisp
   "Load path to use in the Emacs Lisp syntax checker.
@@ -7035,6 +7050,21 @@ This variable has no effect, if
     (when value
       (flycheck-sexp-to-string `(setq package-user-dir ,value)))))
 
+(flycheck-def-option-var flycheck-emacs-lisp-check-declare nil emacs-lisp
+  "If non-nil, check ‘declare-function’ forms using ‘check-declare-file’."
+  :type '(choice (const :tag "Do not check declare forms" nil)
+                 (const :tag "Check declare forms" t))
+  :risky t
+  :package-version '(flycheck . "31"))
+
+(defun flycheck-option-emacs-lisp-check-declare (value)
+  "Option VALUE filter for `flycheck-emacs-lisp-check-declare'."
+  (when value
+    (flycheck-sexp-to-string
+     `(progn
+        (defvar flycheck-emacs-lisp-check-declare)
+        (setq flycheck-emacs-lisp-check-declare ,value)))))
+
 (flycheck-define-checker emacs-lisp
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler.
 
@@ -7049,6 +7079,8 @@ See Info Node `(elisp)Byte Compilation'."
                     flycheck-option-emacs-lisp-package-user-dir)
             (option "--eval" flycheck-emacs-lisp-initialize-packages nil
                     flycheck-option-emacs-lisp-package-initialize)
+            (option "--eval" flycheck-emacs-lisp-check-declare nil
+                    flycheck-option-emacs-lisp-check-declare)
             "--eval" (eval flycheck-emacs-lisp-check-form)
             "--"
             source-inplace)
@@ -7060,11 +7092,22 @@ See Info Node `(elisp)Byte Compilation'."
    (warning line-start (file-name) ":" line ":" column ":Warning:"
             (message (zero-or-more not-newline)
                      (zero-or-more "\n    " (zero-or-more not-newline)))
+            line-end)
+   (warning line-start (file-name) ":" line ":" column
+            ":Warning (check-declare): said\n"
+            (message (zero-or-more "    " (zero-or-more not-newline))
+                     (zero-or-more "\n    " (zero-or-more not-newline)))
+            line-end)
+   ;; The following is for Emacs 24 ‘check-declare-file’, which uses a
+   ;; less informative format.
+   (warning line-start "Warning (check-declare): " (file-name) " said "
+            (message (zero-or-more not-newline))
             line-end))
   :error-filter
   (lambda (errors)
-    (flycheck-collapse-error-message-whitespace
-     (flycheck-sanitize-errors errors)))
+    (flycheck-fill-empty-line-numbers
+     (flycheck-collapse-error-message-whitespace
+      (flycheck-sanitize-errors errors))))
   :modes (emacs-lisp-mode lisp-interaction-mode)
   :predicate
   (lambda ()
