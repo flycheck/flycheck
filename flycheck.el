@@ -7984,7 +7984,7 @@ The value of this variable is a list of strings, where each
 string is a directory with custom rules for ESLint.
 
 Refer to the ESLint manual at URL
-`https://github.com/eslint/eslint/tree/master/docs/command-line-interface#--rulesdir'
+`http://eslint.org/docs/user-guide/command-line-interface#--rulesdir'
 for more information about the custom directories."
   :type '(repeat (directory :tag "Custom rules directory"))
   :safe #'flycheck-string-list-p
@@ -8000,7 +8000,7 @@ for more information about the custom directories."
 (flycheck-define-checker javascript-eslint
   "A Javascript syntax and style checker using eslint.
 
-See URL `https://github.com/eslint/eslint'."
+See URL `http://eslint.org/'."
   :command ("eslint" "--format=checkstyle"
             (option-list "--rulesdir" flycheck-eslint-rules-directories)
             "--stdin" "--stdin-filename" source-original)
