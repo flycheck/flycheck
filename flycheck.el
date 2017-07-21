@@ -9162,7 +9162,7 @@ This syntax checker requires Rust 1.15 or newer.  See URL
                     flycheck-rust-binary-name))
             "--message-format=json"
             (eval flycheck-cargo-rustc-args)
-            "--" "-Z" "no-trans"
+            "--"
             ;; Passing the "--test" flag when the target is a test binary or
             ;; bench is unnecessary and triggers an error.
             (eval (when flycheck-rust-check-tests
