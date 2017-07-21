@@ -7724,8 +7724,8 @@ Otherwise return the previously used cache directory."
 (defun flycheck--locate-dominating-file-matching (file regexp)
   "Search for a file in directory hierarchy starting at FILE.
 
-Look up the directory hierarchy from START-DIR for a directory
-containing file that matches REGEXP."
+Look up the directory hierarchy from FILE for a directory
+containing a file that matches REGEXP."
   (locate-dominating-file
    file
    (lambda (dir)
