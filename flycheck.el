@@ -9220,12 +9220,8 @@ This syntax checker requires Rust 1.15 or newer.  See URL
 
 This syntax checker needs Rust 1.7 or newer.  See URL
 `https://www.rust-lang.org'."
-  :command ("rustc" "-Z" "no-trans"
+  :command ("rustc"
             (option "--crate-type" flycheck-rust-crate-type)
-            ;; Passing the "unstable-options" flag may raise an error in the
-            ;; future.  For the moment, we need it to access JSON output in all
-            ;; rust versions >= 1.7.
-            "-Z" "unstable-options"
             "--error-format=json"
             (option-flag "--test" flycheck-rust-check-tests)
             (option-list "-L" flycheck-rust-library-path concat)
