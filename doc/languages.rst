@@ -399,7 +399,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
    4. `go-build` or `go-test`
    5. `go-errcheck`
    6. `go-unconvert`
-   7. `go-gosimple`
+   7. `go-megacheck`
 
    .. syntax-checker:: go-gofmt
 
@@ -487,11 +487,15 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _unconvert: https://github.com/mdempsky/unconvert
 
-   .. syntax-checker:: go-gosimple
+   .. syntax-checker:: go-megacheck
 
-      Simplify code with gosimple_.
+      Lint code with megacheck_.
 
-      .. _gosimple: https://github.com/dominikh/go-tools
+      .. defcustom:: flycheck-go-megacheck-disabled-checkers
+
+         A list of checkers to disable when running megacheck_.
+
+      .. _megacheck: https://github.com/dominikh/go-tools
 
 .. supported-language:: Groovy
 
