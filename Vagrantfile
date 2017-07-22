@@ -175,7 +175,7 @@ Vagrant.configure("2") do |config|
     go get -u github.com/kisielk/errcheck \
               github.com/mdempsky/unconvert \
               github.com/golang/lint/golint \
-              honnef.co/go/tools/cmd/gosimple
+              honnef.co/go/tools/cmd/megacheck
 
     echo "Installing packages with raco pkg..."
     raco pkg install --auto --skip-installed compiler-lib

@@ -189,7 +189,7 @@ attention to case differences."
     go-test
     go-errcheck
     go-unconvert
-    go-gosimple
+    go-megacheck
     groovy
     haml
     handlebars
@@ -7386,7 +7386,7 @@ See URL `https://golang.org/cmd/gofmt/'."
                   (warning . go-build) (warning . go-test)
                   (warning . go-errcheck)
                   (warning . go-unconvert)
-                  (warning . go-gosimple)))
+                  (warning . go-megacheck)))
 
 (flycheck-define-checker go-golint
   "A Go style checker using Golint.
@@ -7398,7 +7398,7 @@ See URL `https://github.com/golang/lint'."
   :modes go-mode
   :next-checkers (go-vet
                   ;; Fall back, if go-vet doesn't exist
-                  go-build go-test go-errcheck go-unconvert go-gosimple))
+                  go-build go-test go-errcheck go-unconvert go-megacheck))
 
 (flycheck-def-option-var flycheck-go-vet-print-functions nil go-vet
   "A list of print-like functions for `go tool vet'.
@@ -7429,6 +7429,18 @@ This option requires Go 1.6 or newer."
                  (const :tag "Check for shadowed variables" t)
                  (const :tag "Strictly check for shadowed variables" strict)))
 
+(flycheck-def-option-var flycheck-go-megacheck-disabled-checkers nil go-megacheck
+  "A list of checkers to disable when running `megacheck'.
+
+The value of this variable is a list of strings, where each
+string is a checker to be disabled. Valid checkers are `simple',
+`staticcheck' and `unused'. When nil, all checkers will be
+enabled. "
+  :type '(set (const :tag "Disable simple" "simple")
+              (const :tag "Disable staticcheck" "staticcheck")
+              (const :tag "Disable unused" "unused"))
+  :safe #'flycheck-string-list-p)
+
 (flycheck-define-checker go-vet
   "A Go syntax checker using the `go tool vet' command.
 
@@ -7453,7 +7465,7 @@ See URL `https://golang.org/cmd/go/' and URL
                   ;; Fall back if `go build' or `go test' can be used
                   go-errcheck
                   go-unconvert
-                  go-gosimple)
+                  go-megacheck)
   :verify (lambda (_)
             (let* ((go (flycheck-checker-executable 'go-vet))
                    (have-vet (member "vet" (ignore-errors
@@ -7519,7 +7531,7 @@ Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
                     (not (string-suffix-p "_test.go" (buffer-file-name)))))
   :next-checkers ((warning . go-errcheck)
                   (warning . go-unconvert)
-                  (warning . go-gosimple)))
+                  (warning . go-megacheck)))
 
 (flycheck-define-checker go-test
   "A Go syntax and type checker using the `go test' command.
@@ -7540,7 +7552,7 @@ Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
                   (string-suffix-p "_test.go" (buffer-file-name))))
   :next-checkers ((warning . go-errcheck)
                   (warning . go-unconvert)
-                  (warning . go-gosimple)))
+                  (warning . go-megacheck)))
 
 (flycheck-define-checker go-errcheck
   "A Go checker for unchecked errors.
@@ -7569,7 +7581,7 @@ See URL `https://github.com/kisielk/errcheck'."
   :modes go-mode
   :predicate (lambda () (flycheck-buffer-saved-p))
   :next-checkers ((warning . go-unconvert)
-                  (warning . go-gosimple)))
+                  (warning . go-megacheck)))
 
 (flycheck-define-checker go-unconvert
   "A Go checker looking for unnecessary type conversions.
@@ -7580,15 +7592,20 @@ See URL `https://github.com/mdempsky/unconvert'."
   ((warning line-start (file-name) ":" line ":" column ": " (message) line-end))
   :modes go-mode
   :predicate (lambda () (flycheck-buffer-saved-p))
-  :next-checkers ((warning . go-gosimple)))
+  :next-checkers ((warning . go-megacheck)))
 
-(flycheck-define-checker go-gosimple
-  "A Go linter that simplifies code using the `gosimple' command.
+(flycheck-define-checker go-megacheck
+  "A Go checker that performs static analysis and linting using the `megacheck'
+command.
 
-Requires Go 1.6 or newer. See URL `https://github.com/dominikh/go-tools'."
-  :command ("gosimple"
+Requires Go 1.6 or newer. See URL
+`https://github.com/dominikh/go-tools'."
+  :command ("megacheck"
             (option-list "-tags=" flycheck-go-build-tags concat)
-            ;; Run in current directory to make gosimple aware of symbols
+            (eval (mapcar (lambda (checker) (concat "-" checker
+                                                    ".enabled=false"))
+                          flycheck-go-megacheck-disabled-checkers))
+            ;; Run in current directory to make megacheck aware of symbols
             ;; declared in other files.
             ".")
   :error-patterns

@@ -3156,7 +3156,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
            :checker go-build)))))
 
 (flycheck-ert-def-checker-test go-build go directory-with-two-packages
-  (let ((flycheck-disabled-checkers '(go-errcheck go-unconvert)))
+  (let ((flycheck-disabled-checkers '(go-errcheck go-unconvert go-megacheck)))
     (flycheck-ert-with-env
         `(("GOPATH" . ,(flycheck-ert-resource-filename "checkers/go")))
       (flycheck-ert-should-syntax-check
@@ -3194,14 +3194,29 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
      '(7 17 warning "unnecessary conversion"
          :checker go-unconvert))))
 
-(flycheck-ert-def-checker-test go-gosimple go nil
+(flycheck-ert-def-checker-test go-megacheck go nil
   :tags '(language-go external-tool)
   (flycheck-ert-with-env
       `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
     (flycheck-ert-should-syntax-check
-     "language/go/src/gosimple/gosimple1.go" 'go-mode
-     '(5 6 warning "should omit values from range; this loop is equivalent to `for range ...` (S1005)"
-         :checker go-gosimple))))
+     "language/go/src/megacheck/megacheck1.go" 'go-mode
+     '(8 6 warning "should omit values from range; this loop is equivalent to `for range ...` (S1005)"
+         :checker go-megacheck)
+     '(12 21 warning "calling strings.Replace with n == 0 will return no results, did you mean -1? (SA1018)"
+          :checker go-megacheck)
+     '(16 6 warning "func unused is unused (U1000)"
+          :checker go-megacheck))))
+
+(flycheck-ert-def-checker-test go-megacheck-disabled-checkers go nil
+  :tags '(language-go external-tool)
+  (flycheck-ert-with-env
+      `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
+    ;; Run with simple and unused checkers disabled
+    (let ((flycheck-go-megacheck-disabled-checkers '("simple" "unused")))
+      (flycheck-ert-should-syntax-check
+       "language/go/src/megacheck/megacheck1.go" 'go-mode
+       '(12 21 warning "calling strings.Replace with n == 0 will return no results, did you mean -1? (SA1018)"
+            :checker go-megacheck)))))
 
 (flycheck-ert-def-checker-test groovy groovy syntax-error
   ;; Work around

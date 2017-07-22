@@ -15,7 +15,7 @@
   - AsciiDoc with ``asciidoctor`` [GH-1167]
   - CSS/SCSS/LESS with ``stylelint`` [GH-903]
   - Ruby with ``reek`` [GH-1244]
-  - Go with ``gosimple`` [GH-1281]
+  - Go with ``megacheck`` [GH-1290]
 
 - New features:
 
