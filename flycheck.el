@@ -7738,13 +7738,13 @@ Otherwise return the previously used cache directory."
         (or flycheck-haskell-ghc-cache-directory
             (make-temp-file "flycheck-haskell-ghc-cache" 'directory))))
 
-(defun flycheck--locate-dominating-file-matching (file regexp)
-  "Search for a file in directory hierarchy starting at FILE.
+(defun flycheck--locate-dominating-file-matching (directory regexp)
+  "Search for a file in directory hierarchy starting at DIRECTORY.
 
-Look up the directory hierarchy from FILE for a directory
+Look up the directory hierarchy from DIRECTORY for a directory
 containing a file that matches REGEXP."
   (locate-dominating-file
-   file
+   directory
    (lambda (dir)
      (directory-files dir t regexp t))))
 
@@ -7763,7 +7763,7 @@ contains a cabal file."
      (or
       (when (buffer-file-name)
         (flycheck--locate-dominating-file-matching
-         (buffer-file-name)
+         (file-name-directory (buffer-file-name))
          "stack.*\\.yaml\\'"))
       (-when-let* ((stack (funcall flycheck-executable-find "stack"))
                    (output (ignore-errors
@@ -7773,7 +7773,7 @@ contains a cabal file."
     (_
      (when (buffer-file-name)
        (flycheck--locate-dominating-file-matching
-        (buffer-file-name)
+        (file-name-directory (buffer-file-name))
         ".+\\.cabal\\'")))))
 
 (flycheck-define-checker haskell-stack-ghc
