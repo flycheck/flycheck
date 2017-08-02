@@ -147,6 +147,18 @@
       (let ((errors (list (flycheck-error-new-at 1 2 nil nil :id "Foo.Bar"))))
         (expect (flycheck-remove-error-ids errors)
                 :to-be-equal-flycheck-errors
-                (list (flycheck-error-new-at 1 2)))))))
+                (list (flycheck-error-new-at 1 2))))))
+
+  (describe "flycheck-fill-empty-line-numbers"
+    (it "ignores errors with line numbers"
+      (let ((errors (list (flycheck-error-new-at 1 2))))
+        (expect (flycheck-fill-empty-line-numbers errors)
+                :to-be-equal-flycheck-errors errors)))
+
+    (it "sets errors missing line numbers to line 0"
+      (let ((errors (list (flycheck-error-new-at nil nil))))
+        (expect (flycheck-fill-empty-line-numbers errors)
+                :to-be-equal-flycheck-errors
+                (list (flycheck-error-new-at 0 nil)))))))
 
 ;;; test-error-filters.el ends here
