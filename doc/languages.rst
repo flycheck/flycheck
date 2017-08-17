@@ -680,6 +680,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          Whether to run stylelint in quiet mode via ``--quiet``.
 
+.. supported-language:: LLVM
+
+   .. syntax-checker:: llvm-llc
+
+      Check syntax with `llc <http://llvm.org/docs/CommandGuide/llc.html>`_.
+
 .. supported-language:: Lua
 
    Flycheck checks Lua with `lua-luacheck`, falling back to `lua`.

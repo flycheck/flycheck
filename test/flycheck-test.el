@@ -3519,6 +3519,11 @@ Why not:
    "language/less/syntax-error.less" 'less-css-mode
    '(1 1 error "Unrecognised input" :checker less)))
 
+(flycheck-ert-def-checker-test llvm-llc llvm nil
+  (flycheck-ert-should-syntax-check
+   "language/llvm.ll" 'llvm-mode
+   '(4 19 error "'%tmp' defined with type 'i32'" :checker llvm-llc)))
+
 (flycheck-ert-def-checker-test lua-luacheck lua syntax-error
   (flycheck-ert-should-syntax-check
    "language/lua/syntax-error.lua" 'lua-mode
