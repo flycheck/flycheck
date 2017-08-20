@@ -3626,17 +3626,22 @@ Why not:
         :id "Generic.PHP.LowerCaseConstant.Found" :checker php-phpcs)))
 
 (flycheck-ert-def-checker-test proselint (text markdown) nil
-  (flycheck-ert-should-syntax-check
-   "language/text.txt" 'text-mode
-   '(1 7 warning "Substitute 'damn' every time you're inclined to write 'very;' your editor will delete it and the writing will be just as it should be."
-       :id "weasel_words.very"
-       :checker proselint)
-   '(2 4 warning "Redundancy. Use 'associate' instead of 'associate together'."
-       :id "redundancy.garner"
-       :checker proselint)
-   '(3 5 warning "Gender bias. Use 'lawyer' instead of 'lady lawyer'."
-       :id "sexism.misc"
-       :checker proselint)))
+  ;; Unset LC_ALL which is set to LC_ALL=C for other checkers in ./run.el,
+  ;; because Click, used by ProseLint, when running with python 3 will refuse to
+  ;; work unless an Unicode locale is exported. See:
+  ;; http://click.pocoo.org/5/python3/#python-3-surrogate-handling
+  (flycheck-ert-with-env '(("LC_ALL" . nil))
+    (flycheck-ert-should-syntax-check
+     "language/text.txt" 'text-mode
+     '(1 7 warning "Substitute 'damn' every time you're inclined to write 'very;' your editor will delete it and the writing will be just as it should be."
+         :id "weasel_words.very"
+         :checker proselint)
+     '(2 4 warning "Redundancy. Use 'associate' instead of 'associate together'."
+         :id "redundancy.garner"
+         :checker proselint)
+     '(3 5 warning "Gender bias. Use 'lawyer' instead of 'lady lawyer'."
+         :id "sexism.misc"
+         :checker proselint))))
 
 (flycheck-ert-def-checker-test processing processing syntax-error
   (flycheck-ert-should-syntax-check
