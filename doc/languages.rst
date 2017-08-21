@@ -1221,7 +1221,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: proselint
 
-      Check text prose with `Proselint <http://proselint.com/>`_.
+      Check English prose with `Proselint <http://proselint.com/>`_.
 
 .. supported-language:: TeX/LaTeX
 
