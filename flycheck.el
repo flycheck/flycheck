@@ -8480,7 +8480,7 @@ See URL `http://proselint.com/'."
   :command ("proselint" "--json" "-")
   :standard-input t
   :error-parser flycheck-proselint-parse-errors
-  :modes (text-mode markdown-mode gfm-mode))
+  :modes (text-mode markdown-mode gfm-mode message-mode))
 
 (flycheck-define-checker protobuf-protoc
   "A protobuf syntax checker using the protoc compiler.
