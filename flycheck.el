@@ -7793,6 +7793,17 @@ When non-nil, stack will append '--nix' flag to any call."
   :safe #'booleanp
   :package-version '(flycheck . "26"))
 
+(flycheck-def-option-var flycheck-ghc-stack-project-file nil haskell-stack-ghc
+  "Override project stack.yaml file.
+
+The value of this variable is a file path that refers to a yaml
+file for the current stack project. Relative file paths are
+resolved against the checker's working directory. When non-nil,
+stack will get overridden value via `--stack-yaml'."
+  :type 'string
+  :safe #'stringp
+  :package-version '(flycheck . "32"))
+
 (flycheck-def-option-var flycheck-ghc-no-user-package-database nil haskell-ghc
   "Whether to disable the user package database in GHC.
 
@@ -7889,6 +7900,7 @@ contains a cabal file."
 
 See URL `https://github.com/commercialhaskell/stack'."
   :command ("stack"
+            (option "--stack-yaml" flycheck-ghc-stack-project-file)
             (option-flag "--nix" flycheck-ghc-stack-use-nix)
             "ghc" "--" "-Wall" "-no-link"
             "-outputdir" (eval (flycheck-haskell-ghc-cache-directory))

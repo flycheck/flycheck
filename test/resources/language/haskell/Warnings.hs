@@ -1,4 +1,4 @@
-module Haskell.Warnings
+module Haskell.Warnings (spam, main)
 where
 
 spam eggs = map lines eggs

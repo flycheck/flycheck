@@ -16,6 +16,8 @@
   - Add ``flycheck-cppcheck-suppressions-file`` to pass a suppressions
     file to cppcheck [GH-1329]
   - Add ``--force-exclusion`` flag to ``rubocop`` command [GH-1348]
+  - Add ``flycheck-ghc-stack-project-file`` for the
+    ``haskell-stack-ghc`` checker. [GH-1316]
 
 - Improvements
 
