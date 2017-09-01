@@ -7588,7 +7588,8 @@ Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
             (option-list "-tags=" flycheck-go-build-tags concat)
             "-c" "-o" null-device)
   :error-patterns
-  ((error line-start (file-name) ":" line ": "
+  ((error line-start (file-name) ":" line ":"
+          (optional column ":") " "
           (message (one-or-more not-newline)
                    (zero-or-more "\n\t" (one-or-more not-newline)))
           line-end))
