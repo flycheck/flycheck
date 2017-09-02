@@ -214,6 +214,7 @@ attention to case differences."
     php-phpmd
     php-phpcs
     processing
+    proselint
     protobuf-protoc
     pug
     puppet-parser
@@ -8448,6 +8449,40 @@ See https://github.com/processing/processing/wiki/Command-Line"
   :modes processing-mode
   ;; This syntax checker needs a file name
   :predicate (lambda () (buffer-file-name)))
+
+(defun flycheck-proselint-parse-errors (output checker buffer)
+  "Parse proselint json output errors from OUTPUT.
+
+CHECKER and BUFFER denoted the CHECKER that returned OUTPUT and
+the BUFFER that was checked respectively.
+
+See URL `http://proselint.com/' for more information about proselint."
+  (mapcar (lambda (err)
+            (let-alist err
+              (flycheck-error-new-at
+               .line
+               .column
+               (pcase .severity
+                 (`"suggestion" 'info)
+                 (`"warning"    'warning)
+                 (`"error"      'error)
+                 ;; Default to error
+                 (_             'error))
+               .message
+               :id .check
+               :buffer buffer
+               :checker checker)))
+          (let-alist (car (flycheck-parse-json output))
+            .data.errors)))
+
+(flycheck-define-checker proselint
+  "Flycheck checker using Proselint.
+
+See URL `http://proselint.com/'."
+  :command ("proselint" "--json" "-")
+  :standard-input t
+  :error-parser flycheck-proselint-parse-errors
+  :modes (text-mode markdown-mode gfm-mode))
 
 (flycheck-define-checker protobuf-protoc
   "A protobuf syntax checker using the protoc compiler.

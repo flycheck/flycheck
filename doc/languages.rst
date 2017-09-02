@@ -1217,6 +1217,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _systemd-analyze: https://www.freedesktop.org/software/systemd/man/systemd-analyze.html
 
+.. supported-language:: Text
+
+   .. syntax-checker:: proselint
+
+      Check text prose with `Proselint <http://proselint.com/>`_.
+
 .. supported-language:: TeX/LaTeX
 
    Flycheck checks TeX and LaTeX with either `tex-chktex` or `tex-lacheck`.
