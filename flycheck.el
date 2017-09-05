@@ -8062,7 +8062,7 @@ for more information about the custom directories."
   :package-version '(flycheck . "29"))
 
 (defun flycheck-eslint-config-exists-p ()
-  "Whether there is an eslint config for the current buffer."
+  "Whether there is a valid eslint config for the current buffer."
   (let* ((executable (flycheck-find-checker-executable 'javascript-eslint))
          (exitcode (and executable (call-process executable nil nil nil
                                                  "--print-config" "."))))
@@ -8104,7 +8104,7 @@ See URL `http://eslint.org/'."
       (list
        (flycheck-verification-result-new
         :label "config file"
-        :message (if have-config "found" "missing")
+        :message (if have-config "found" "missing or incorrect")
         :face (if have-config 'success '(bold error)))))))
 
 (defun flycheck-parse-jscs (output checker buffer)
