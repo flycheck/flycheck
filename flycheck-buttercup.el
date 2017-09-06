@@ -55,12 +55,17 @@
 ;;; Data matchers
 
 (buttercup-define-matcher :to-be-empty-string (s)
-  (if (equal s "")
-      (cons t (format "Expected %S not be an empty string" s))
-    (cons nil (format "Expected %S to be an empty string" s))))
+  (let ((s (funcall s)))
+    (if (equal s "")
+        (cons t (format "Expected %S not be an empty string" s))
+      (cons nil (format "Expected %S to be an empty string" s)))))
 
 (buttercup-define-matcher :to-match-with-group (re s index match)
-  (let* ((matches? (string-match re s))
+  (let* ((re (funcall re))
+         (s (funcall s))
+         (index (funcall index))
+         (match (funcall match))
+         (matches? (string-match re s))
          (result (and matches? (match-string index s))))
     (if (and matches? (equal result match))
         (cons t (format "Expected %S not to match %S with %S in group %s"
@@ -76,7 +81,7 @@
 ;;; Emacs feature matchers
 
 (buttercup-define-matcher :to-be-live (buffer)
-  (let ((buffer (get-buffer buffer)))
+  (let ((buffer (get-buffer (funcall buffer))))
     (if (buffer-live-p buffer)
         (cons t (format "Expected %S not to be a live buffer, but it is"
                         buffer))
@@ -84,7 +89,7 @@
                         buffer)))))
 
 (buttercup-define-matcher :to-be-visible (buffer)
-  (let ((buffer (get-buffer buffer)))
+  (let ((buffer (get-buffer (funcall buffer))))
     (cond
      ((and buffer (get-buffer-window buffer))
       (cons t (format "Expected %S not to be a visible buffer, but it is"
@@ -99,31 +104,36 @@
                  buffer))))))
 
 (buttercup-define-matcher :to-be-local (symbol)
-  (if (local-variable-p symbol)
-      (cons t (format "Expected %S not to be a local variable, but it is"
-                      symbol))
-    (cons nil (format "Expected %S to be a local variable, but it is not"
-                      symbol))))
+  (let ((symbol (funcall symbol)))
+    (if (local-variable-p symbol)
+        (cons t (format "Expected %S not to be a local variable, but it is"
+                        symbol))
+      (cons nil (format "Expected %S to be a local variable, but it is not"
+                        symbol)))))
 
 (buttercup-define-matcher :to-contain-match (buffer re)
-  (if (not (get-buffer buffer))
-      (cons nil (format "Expected %S to contain a match of %s, \
+  (let ((buffer (funcall buffer))
+        (re (funcall re)))
+    (if (not (get-buffer buffer))
+        (cons nil (format "Expected %S to contain a match of %s, \
 but is not a buffer" buffer re))
-    (with-current-buffer buffer
-      (save-excursion
-        (goto-char (point-min))
-        (if (re-search-forward re nil 'noerror)
-            (cons t (format "Expected %S to contain a match \
+      (with-current-buffer buffer
+        (save-excursion
+          (goto-char (point-min))
+          (if (re-search-forward re nil 'noerror)
+              (cons t (format "Expected %S to contain a match \
 for %s, but it did not" buffer re))
-          (cons nil (format "Expected %S not to contain a match for \
-%s but it did not." buffer re)))))))
+            (cons nil (format "Expected %S not to contain a match for \
+%s but it did not." buffer re))))))))
 
 
 ;;; Flycheck matchers
 
 (buttercup-define-matcher :to-be-equal-flycheck-errors (a b)
-  (let ((a-formatted (flycheck-buttercup-format-error-list a))
-        (b-formatted (flycheck-buttercup-format-error-list b)))
+  (let* ((a (funcall a))
+         (b (funcall b))
+         (a-formatted (flycheck-buttercup-format-error-list a))
+         (b-formatted (flycheck-buttercup-format-error-list b)))
     (if (equal a b)
         (cons t (format "Expected
 %s

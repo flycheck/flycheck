@@ -1,5 +1,6 @@
 ;;; test-help.el --- Flycheck Specs: Syntax checker help  -*- lexical-binding: t; -*-
 
+;; Copyright (C) 2017  Flycheck contributors
 ;; Copyright (C) 2016  Sebastian Wiesner
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
@@ -62,16 +63,20 @@
           (unwind-protect
               (progn
                 (expect (buffer-name) :to-equal "flycheck.el")
-                (expect (looking-at (rx bol
+                ;; Default matchers modify `match-data', so we save search and
+                ;; save the results first.
+                (let* ((in-checker-definition
+                        (looking-at (rx bol
                                         "(flycheck-define-checker"
                                         symbol-end
                                         " "
                                         symbol-start
                                         (group (1+ (or (syntax word)
                                                        (syntax symbol))))
-                                        symbol-end))
-                        :to-be-truthy)
-                (expect (match-string 1) :to-equal (symbol-name checker)))
+                                        symbol-end)))
+                       (checker-name (and in-checker-definition (match-string 1))))
+                  (expect in-checker-definition :to-be-truthy)
+                  (expect checker-name :to-equal (symbol-name checker))))
             ;; Kill the Flycheck buffer again
             (kill-buffer))))
 
