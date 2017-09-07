@@ -1,3 +1,4 @@
+# Copyright (C) 2017 Flycheck contributors
 # Copyright (C) 2016 Sebastian Wiesner and Flycheck contributors
 
 # This file is not part of GNU Emacs.
@@ -120,9 +121,6 @@ html_theme_options = {
     'github_type': 'star',
     'github_banner': True,
     'travis_button': False,
-    # Google Analytics ID for our documentation.  On ReadTheDocs it's set via
-    # the Admin interface so we'll skip it here.
-    'analytics_id': 'UA-71100672-2' if not ON_RTD else None,
 }
 html_sidebars = {
     '**': [
@@ -274,7 +272,6 @@ def build_offline_html(app):
         app.info('Building offline documentation without external resources!')
         app.builder.theme_options['github_banner'] = 'false'
         app.builder.theme_options['github_button'] = 'false'
-        app.builder.theme_options['analytics_id'] = None
 
 
 def add_offline_to_context(app, _pagename, _templatename, context, _doctree):
