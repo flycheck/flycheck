@@ -2745,14 +2745,22 @@ buffer."
           (flycheck-buffer-automatically 'new-line 'force-deferred)
         (setq flycheck-idle-change-timer
               (run-at-time flycheck-idle-change-delay nil
-                           #'flycheck-handle-idle-change (current-buffer)))))))
+                           #'flycheck--handle-idle-change-in-buffer
+                           (current-buffer)))))))
 
-(defun flycheck-handle-idle-change (buffer)
-  "Handle an expired idle timer in BUFFER since the last change."
+(defun flycheck--handle-idle-change-in-buffer (buffer)
+  "Handle an expired idle timer in BUFFER since the last change.
+This thin wrapper around `flycheck-handle-idle-change' is needed
+because some users override that function, as described in URL
+`https://github.com/flycheck/flycheck/pull/1305'."
   (when (buffer-live-p buffer)
     (with-current-buffer buffer
-      (flycheck-clear-idle-change-timer)
-      (flycheck-buffer-automatically 'idle-change))))
+      (flycheck-handle-idle-change))))
+
+(defun flycheck-handle-idle-change ()
+  "Handle an expired idle timer since the last change."
+  (flycheck-clear-idle-change-timer)
+  (flycheck-buffer-automatically 'idle-change))
 
 (defun flycheck-handle-save ()
   "Handle a save of the buffer."
