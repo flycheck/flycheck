@@ -833,6 +833,71 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
   :package-version '(flycheck . "0.15")
   :group 'flycheck-faces)
 
+(defvar flycheck-current-syntax-check-start-time nil
+  "Start time of currently active syntax check")
+(make-variable-buffer-local 'flycheck-current-syntax-check-start-time)
+
+(defvar flycheck-current-syntax-check-end-time nil
+  "End time of currently active syntax check")
+(make-variable-buffer-local 'flycheck-current-syntax-check-end-time)
+
+(defvar flycheck-last-syntax-check-duration nil
+  "Last duration of syntax check.")
+(make-variable-buffer-local 'flycheck-last-syntax-check-duration)
+
+(defun flycheck-log-current-syntax-check-start-time ()
+  (setq flycheck-current-syntax-check-start-time (current-time)))
+
+(defun flycheck-log-current-syntax-check-end-time ()
+  (setq flycheck-current-syntax-check-end-time (current-time))
+  (setq flycheck-last-syntax-check-duration
+        (time-subtract
+         flycheck-current-syntax-check-end-time
+         flycheck-current-syntax-check-start-time))
+  )
+
+(setq flycheck-mode-line
+      '(:eval
+        (pcase flycheck-last-status-change
+          (`not-checked nil)
+          (`no-checker
+           (propertize " -" 'face 'warning))
+          (`running
+           (propertize " ✷" 'face 'success))
+          (`errored
+           (propertize " !" 'face 'error))
+          (`finished
+           (let*
+               ((error-counts
+                 (flycheck-count-errors flycheck-current-errors))
+                (no-errors
+                 (cdr
+                  (assq 'error error-counts)))
+                (no-warnings
+                 (cdr
+                  (assq 'warning error-counts)))
+                (face
+                 (cond
+                  (no-errors 'error)
+                  (no-warnings 'warning)
+                  (t 'success))))
+             (concat (propertize
+                      (format " %s/%s"
+                              (or no-errors 0)
+                              (or no-warnings 0)
+                              )
+                      'face face)
+                     (format-time-string " (%s.%3N)" flycheck-last-syntax-check-duration))))
+          (`interrupted " -")
+          (`suspicious
+           '(propertize " ?" 'face 'warning)))))
+
+(add-hook 'flycheck-before-syntax-check-hook
+          'flycheck-log-current-syntax-check-start-time)
+
+(add-hook 'flycheck-after-syntax-check-hook
+          'flycheck-log-current-syntax-check-end-time)
+
 (defvar flycheck-command-map
   (let ((map (make-sparse-keymap)))
     (define-key map "c"         #'flycheck-buffer)
