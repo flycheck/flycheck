@@ -6512,6 +6512,18 @@ non-nil, pass the standards via one or more `--std=' options."
   :package-version '(flycheck . "28"))
 (make-variable-buffer-local 'flycheck-cppcheck-standards)
 
+(flycheck-def-option-var flycheck-cppcheck-suppressions-file nil c/c++-cppcheck
+  "The suppressions file to use in cppcheck.
+
+The value of this variable is a file with the suppressions to
+use, or nil to pass nothing to cppcheck.  When non-nil, pass the
+suppressions file via the `--suppressions-list=' option."
+  :type '(choice (const :tag "Default" nil)
+                 (file :tag "Suppressions file"))
+  :safe #'stringp
+  :package-version '(flycheck . "32"))
+(make-variable-buffer-local 'flycheck-cppcheck-suppressions-file)
+
 (flycheck-def-option-var flycheck-cppcheck-suppressions nil c/c++-cppcheck
   "The suppressions to use in cppcheck.
 
@@ -6557,6 +6569,7 @@ See URL `http://cppcheck.sourceforge.net/'."
             (option-list "-I" flycheck-cppcheck-include-path)
             (option-list "--std=" flycheck-cppcheck-standards concat)
             (option-list "--suppress=" flycheck-cppcheck-suppressions concat)
+            (option "--suppressions-list=" flycheck-cppcheck-suppressions-file concat)
             "-x" (eval
                   (pcase major-mode
                     (`c++-mode "c++")

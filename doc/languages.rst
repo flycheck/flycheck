@@ -193,6 +193,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
          The cppcheck suppressions list to use via one or more ``--suppress=``
          arguments.
 
+      .. defcustom:: flycheck-cppcheck-suppressions-file
+
+         The cppcheck suppressions file to use via the
+         ``--suppressions-list=`` argument.
+
 .. supported-language:: CFEngine
 
    .. syntax-checker:: cfengine
