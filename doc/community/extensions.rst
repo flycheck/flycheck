@@ -132,6 +132,7 @@ Python
 ------
 
 * :gh:`Wilfred/flycheck-pyflakes` adds a Python syntax checker using Pyflakes.
+* :gh:`msherry/flycheck-pycheckers` adds a checker for Python that can run multiple syntax checkers simultaneously (Pyflakes, PEP8, mypy2/3, etc.).
 
 .. _Pyflakes: https://github.com/PyCQA/pyflakes
 
