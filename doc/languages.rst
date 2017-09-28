@@ -837,6 +837,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
          Flycheck extension which adds a syntax checker using `Pyflakes
          <https://github.com/PyCQA/pyflakes>`_.
 
+      :gh:`msherry/flycheck-pycheckers`
+         Flycheck extension which can use multiple checkers simultaneously --
+         including pyflakes, pep8, flake8, pylint, and mypy 2/3.
+
    .. syntax-checker:: python-flake8
 
       Check syntax and lint with `flake8 <https://flake8.readthedocs.io/>`_.
@@ -1187,9 +1191,9 @@ to view the docstring of the syntax checker.  Likewise, you may use
       .. defcustom:: flycheck-shellcheck-excluded-warnings
 
          A list of excluded warnings.
-         
+
       .. defcustom:: flycheck-shellcheck-follow-sources
-       
+
          Allow shellcheck to read sourced files.
 
 .. supported-language:: Slim
