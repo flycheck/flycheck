@@ -26,6 +26,10 @@
   - Add ``flycheck-tslint-args`` to pass additional arguments to tslint [GH-1186]
   - Add an error explainer to the ``rpm-rpmlint`` checker using
     ``rpmlint -I`` [GH-1235]
+  - Add ``flycheck-emacs-lisp-check-declare`` to check function declaration in
+    the ``emacs-lisp`` checker [GH-1286]
+  - Add ``flycheck-shellcheck-follow-sources`` to check included files when
+    using the ``sh-shellcheck`` checker [GH-1256]
 
 - Improvements:
 
