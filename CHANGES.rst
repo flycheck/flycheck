@@ -1,5 +1,5 @@
-31-cvs (in development)
-=======================
+31 (Oct 07, 2017)
+=================
 
 - **Breaking changes**
 
