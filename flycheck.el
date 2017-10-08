@@ -203,6 +203,7 @@ attention to case differences."
     javascript-standard
     json-jsonlint
     json-python-json
+    jsonnet
     less
     less-stylelint
     llvm-llc
@@ -9991,6 +9992,16 @@ See URL `http://www.ruby-doc.org/stdlib-2.0.0/libdoc/yaml/rdoc/YAML.html'."
   ((error line-start "stdin:" (zero-or-more not-newline) ":" (message)
           "at line " line " column " column line-end))
   :modes yaml-mode)
+
+(flycheck-define-checker jsonnet
+  "A Jsonnet syntax checker using the jsonnet binary.
+
+See URL `https://jsonnet.org'."
+  :command ("jsonnet" source-inplace)
+  :error-patterns
+  ((error line-start "STATIC ERROR: " (file-name) ":" line ":" column (zero-or-one (group "-" (one-or-more digit))) ": " (message) line-end)
+   (error line-start "RUNTIME ERROR: " (message) "\n" (one-or-more space) (file-name) ":" (zero-or-one "(") line ":" column (zero-or-more not-newline) line-end))
+  :modes jsonnet-mode)
 
 (provide 'flycheck)
 
