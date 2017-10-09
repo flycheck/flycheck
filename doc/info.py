@@ -118,6 +118,7 @@ class HTMLXRefDB(object):
         return cls(manuals)
 
     def __init__(self, entries):
+        """Initialize the HTMLXrefDB object with the provided entries."""
         self.entries = entries
 
     def resolve(self, manual, node):

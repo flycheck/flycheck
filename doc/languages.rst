@@ -658,6 +658,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check JSON with Python's built-in :py:mod:`json` module.
 
+.. supported-language:: Jsonnet
+
+   .. syntax-checker:: jsonnet
+
+      Checks `Jsonnet <http://jsonnet.org>`_ with `jsonnet`.
+
 .. supported-language:: Less
 
    .. syntax-checker:: less

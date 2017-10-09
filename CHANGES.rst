@@ -1,6 +1,10 @@
 32-cvs (in development)
 =======================
 
+- New syntax checkers:
+
+  - Jsonnet with ``jsonnet`` [GH-1345]
+
 31 (Oct 07, 2017)
 =================
 

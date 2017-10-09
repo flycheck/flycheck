@@ -4329,6 +4329,16 @@ Why not:
      '(4 5 error "mapping values are not allowed in this context"
          :checker yaml-ruby))))
 
+(flycheck-ert-def-checker-test jsonnet jsonnet nil
+  (flycheck-ert-should-syntax-check
+   "language/jsonnet/static_error.jsonnet" 'jsonnet-mode
+   '(22 1 "Not a unary operator: =" :checker jsonnet)))
+
+(flycheck-ert-def-checker-test jsonnet jsonnet nil
+  (flycheck-ert-should-syntax-check
+   "language/jsonnet/runtime_error.jsonnet" 'jsonnet-mode
+   '(8 3 "Field does not exist: flat" :checker jsonnet)))
+
 (flycheck-ert-initialize flycheck-test-resources-directory)
 
 (provide 'flycheck-test)
