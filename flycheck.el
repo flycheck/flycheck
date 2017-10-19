@@ -2390,10 +2390,8 @@ otherwise search for the best checker from `flycheck-checkers'.
 Return checker if there is a checker for the current buffer, or
 nil otherwise."
   (if flycheck-checker
-      (if (flycheck-may-use-checker flycheck-checker)
-          flycheck-checker
-        (error "Flycheck cannot use %s in this buffer, type M-x flycheck-verify-setup for more details"
-               flycheck-checker))
+      (when (flycheck-may-use-checker flycheck-checker)
+        flycheck-checker)
     (seq-find #'flycheck-may-use-checker flycheck-checkers)))
 
 (defun flycheck-get-next-checker-for-buffer (checker)
