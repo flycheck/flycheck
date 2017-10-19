@@ -63,20 +63,16 @@
           (unwind-protect
               (progn
                 (expect (buffer-name) :to-equal "flycheck.el")
-                ;; Default matchers modify `match-data', so we save search and
-                ;; save the results first.
-                (let* ((in-checker-definition
-                        (looking-at (rx bol
+                (expect (looking-at (rx bol
                                         "(flycheck-define-checker"
                                         symbol-end
                                         " "
                                         symbol-start
                                         (group (1+ (or (syntax word)
                                                        (syntax symbol))))
-                                        symbol-end)))
-                       (checker-name (and in-checker-definition (match-string 1))))
-                  (expect in-checker-definition :to-be-truthy)
-                  (expect checker-name :to-equal (symbol-name checker))))
+                                        symbol-end))
+                        :to-be-truthy)
+                (expect (match-string 1) :to-equal (symbol-name checker)))
             ;; Kill the Flycheck buffer again
             (kill-buffer))))
 
