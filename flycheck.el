@@ -7195,7 +7195,7 @@ See Info Node `(elisp)Byte Compilation'."
 
 Variables are taken from `flycheck-emacs-lisp-checkdoc-variables'."
   `(progn
-     ,@(seq-map (lambda (opt) `(setq-default ,opt ,(symbol-value opt)))
+     ,@(seq-map (lambda (opt) `(setq-default ,opt ',(symbol-value opt)))
                 (seq-filter #'boundp flycheck-emacs-lisp-checkdoc-variables))))
 
 (flycheck-define-checker emacs-lisp-checkdoc
