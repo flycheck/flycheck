@@ -5,6 +5,11 @@
 
   - Jsonnet with ``jsonnet`` [GH-1345]
 
+- New features:
+
+  - Add ``flycheck-cppcheck-suppressions-file`` to pass a suppressions
+    file to cppcheck [GH-1329]
+
 31 (Oct 07, 2017)
 =================
 
