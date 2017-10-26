@@ -9082,7 +9082,10 @@ Otherwise report style issues as well."
 You need at least RuboCop 0.34 for this syntax checker.
 
 See URL `http://batsov.com/rubocop/'."
-  :command ("rubocop" "--display-cop-names" "--format" "emacs"
+  :command ("rubocop"
+            "--display-cop-names"
+            "--force-exclusion"
+            "--format" "emacs"
             ;; Explicitly disable caching to prevent Rubocop 0.35.1 and earlier
             ;; from caching standard input.  Later versions of Rubocop
             ;; automatically disable caching with --stdin, see
