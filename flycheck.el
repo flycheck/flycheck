@@ -5525,15 +5525,26 @@ Wrapper around `xml-parse-region' which transforms the return
 value of this function into one compatible to
 `libxml-parse-xml-region' by simply returning the first element
 from the node list."
-  (car (xml-parse-region beg end)))
+  (ignore-errors (car (xml-parse-region beg end))))
 
-(defvar flycheck-xml-parser
-  (if (fboundp 'libxml-parse-xml-region)
-      'libxml-parse-xml-region 'flycheck-parse-xml-region)
-  "Parse an xml string from a region.
+(defun flycheck-parse-xml-region-with-fallback (beg end)
+  "Parse the xml region between BEG and END.
 
-Use libxml if Emacs is built with libxml support.  Otherwise fall
-back to `xml-parse-region', via `flycheck-parse-xml-region'.")
+Try parsing with libxml first; if that fails, revert to
+`flycheck-parse-xml-region'.  Failures can be caused by incorrect
+XML (see URL `https://github.com/flycheck/flycheck/issues/1298'),
+or on Windows by a missing libxml DLL with a libxml-enabled Emacs
+\(see URL `https://github.com/flycheck/flycheck/issues/1330')."
+  ;; FIXME use `libxml-available-p' when it gets implemented.
+  (or (and (fboundp 'libxml-parse-xml-region)
+           (libxml-parse-xml-region beg end))
+      (flycheck-parse-xml-region beg end)))
+
+(defvar flycheck-xml-parser 'flycheck-parse-xml-region-with-fallback
+  "Function used to parse an xml string from a region.
+
+The default uses libxml if available, and falls back to
+`flycheck-parse-xml-region' otherwise.")
 
 (defun flycheck-parse-xml-string (xml)
   "Parse an XML string.

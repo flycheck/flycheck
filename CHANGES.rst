@@ -11,6 +11,11 @@
     file to cppcheck [GH-1329]
   - Add ``--force-exclusion`` flag to ``rubocop`` command [GH-1348]
 
+- Improvements
+
+  - Use Emacs' native XML parsing when libXML fails.  This behavior can be
+    changed by customizing ``flycheck-xml-parser`` [GH-1349]
+
 31 (Oct 07, 2017)
 =================
 
