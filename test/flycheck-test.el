@@ -3764,6 +3764,15 @@ Why not:
    '(22 1 error "undefined name 'antigravity'" :id "F821"
         :checker python-flake8)))
 
+(flycheck-ert-def-checker-test python-mypy python nil
+  (let ((flycheck-disabled-checkers '(python-flake8))
+        (flycheck-checkers '(python-mypy))
+        (flycheck-python-mypy-cache-dir null-device))
+    (flycheck-ert-should-syntax-check
+     "language/python/invalid_type.py" 'python-mode
+     '(2 nil error "Incompatible return value type (got \"str\", expected \"int\")"
+         :checker python-mypy))))
+
 (flycheck-ert-def-checker-test python-pylint python syntax-error
   (let ((flycheck-disabled-checkers '(python-flake8))
         (python-indent-guess-indent-offset nil)) ; Silence Python Mode

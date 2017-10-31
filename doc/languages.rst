@@ -900,6 +900,23 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-flake8rc
 
+   .. syntax-checker:: python-mypy
+
+      Type check python with  `mypy <http://www.mypy-lang.org/>`_.
+
+      .. note::
+
+         This syntax checker requires mypy 0.580 or newer.
+
+      .. syntax-checker-config-file:: flycheck-python-mypy-ini
+
+      .. defcustom:: flycheck-python-mypy-cache-dir
+
+         Directory used to write ``.mypy_cache`` directories.
+
+         Set to ``null-device`` to disable writing cache directories
+         entirely.
+
    .. syntax-checker:: python-pylint
 
       Check syntax and lint with `Pylint <https://pylint.org/>`_.

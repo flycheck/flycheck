@@ -225,6 +225,7 @@ attention to case differences."
     python-flake8
     python-pylint
     python-pycompile
+    python-mypy
     r-lintr
     racket
     rpm-rpmlint
@@ -8949,6 +8950,35 @@ See URL `https://docs.python.org/3.4/library/py_compile.html'."
           "', ('" (file-name (one-or-more (not (any "'")))) "', "
           line ", " column ", " (one-or-more not-newline) line-end))
   :modes python-mode)
+
+(flycheck-def-config-file-var flycheck-python-mypy-ini python-mypy
+                              "mypy.ini"
+  :safe #'stringp)
+
+(flycheck-def-option-var flycheck-python-mypy-cache-dir nil python-mypy
+  "Directory used to write .mypy_cache directories."
+  :safe #'stringp
+  :type '(choice
+          (const :tag "Write to the working directory" nil)
+          (const :tag "Never write .mypy_cache directories" null-device)
+          (string :tag "Path"))
+  :package-version '(flycheck . "32"))
+
+(flycheck-define-checker python-mypy
+  "Mypy syntax and type checker.  Requires mypy>=0.580.
+
+See URL `http://mypy-lang.org/'."
+  :command ("mypy"
+            (config-file "--config-file" flycheck-python-mypy-ini)
+            (option "--cache-dir" flycheck-python-mypy-cache-dir)
+            source-original)
+  :error-patterns
+  ((error line-start (file-name) ":" line ": error:" (message) line-end)
+   (warning line-start (file-name) ":" line ": warning:" (message) line-end))
+  :modes python-mode
+  ;; Ensure the file is saved, to work around https://github.com/python/mypy/issues/4746.
+  :predicate flycheck-buffer-saved-p
+  :next-checkers '(t . python-flake8))
 
 (flycheck-def-option-var flycheck-lintr-caching t r-lintr
   "Whether to enable caching in lintr.

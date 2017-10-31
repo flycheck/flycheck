@@ -21,6 +21,7 @@
   - MarkdownLint CLI with ``markdownlint`` [GH-1366]
   - Rust with ``rust-clippy`` [GH-1385]
   - VHDL with ``ghdl`` [GH-1160]
+  - mypy with ``python-mypy`` [GH-1354]
 
 - New features:
 
