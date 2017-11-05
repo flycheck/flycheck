@@ -2402,9 +2402,9 @@ buffer manually.
     (pcase-dolist
         (`(,hook . ,fn)
          (if flycheck-automatically-display-error-at-point
-             flycheck-hooks-alist
-           (append flycheck-hooks-alist
-                   flycheck-automatically-display-error-at-point-alist)))
+             (append flycheck-hooks-alist
+                     flycheck-automatically-display-error-at-point-alist)
+           flycheck-hooks-alist))
       (add-hook hook fn nil 'local))
 
     (setq flycheck-old-next-error-function (if flycheck-standard-error-navigation
