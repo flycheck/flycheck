@@ -168,6 +168,7 @@ attention to case differences."
     c/c++-cppcheck
     cfengine
     chef-foodcritic
+    coala
     coffee
     coffee-coffeelint
     coq
@@ -10018,6 +10019,61 @@ See URL `https://jsonnet.org'."
   ((error line-start "STATIC ERROR: " (file-name) ":" line ":" column (zero-or-one (group "-" (one-or-more digit))) ": " (message) line-end)
    (error line-start "RUNTIME ERROR: " (message) "\n" (one-or-more space) (file-name) ":" (zero-or-one "(") line ":" column (zero-or-more not-newline) line-end))
   :modes jsonnet-mode)
+
+(flycheck-define-checker coala
+  "A checker using coala.
+See URL `https://coala.io'."
+  :command ("coala" "--format" "{line}:{column}:{severity_str}:{message}" "--find-config" "--limit-files" source)
+  :error-patterns  ((error line-start (or "None" line) ":" (or "None" column) ":MAJOR:" (message) line-end)
+                    (warning line-start (or "None" line) ":" (or "None" column) ":NORMAL:" (message) line-end)
+                    (info line-start (or "None" line) ":" (or "None" column) ":INFO:" (message) line-end))
+  :modes (c-mode
+          csharp-mode
+          c++-mode
+          cmake-mode
+          css-mode
+          csv-mode
+          cuda-mode
+          coffee-mode
+          dart-mode
+          dockerfile-mode
+          fortran-mode
+          go-mode
+          html-mode
+          haskell-mode
+          json-mode
+          js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode rjsx-mode
+          java-mode
+          jinja2-mode
+          julia-mode
+          lua-mode
+          markdown-mode
+          matlab-mode
+          objc-mode
+          octave-mode
+          opencl-mode
+          org-mode
+          php-mode php+-mode
+          plsql-mode
+          perl-mode cperl-mode
+          po-mode
+          puppet-mode
+          python-mode pip-requirements-mode
+          R-mode
+          rst-mode
+          ruby-mode enh-ruby-mode
+          scss-mode
+          sh-mode
+          sql-mode
+          scala-mode
+          swift-mode swift3-mode
+          latex-mode plain-tex-mode
+          text-mode
+          typescript-mode
+          vhdl-mode
+          verilog-mode
+          xml-mode nxml-mode
+          yaml-mode))
 
 (provide 'flycheck)
 

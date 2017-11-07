@@ -1,0 +1,5 @@
+[all]
+files = pep8.py
+
+[all.python]
+bears = PEP8Bear

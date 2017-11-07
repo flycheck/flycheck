@@ -4339,6 +4339,11 @@ Why not:
    "language/jsonnet/runtime_error.jsonnet" 'jsonnet-mode
    '(8 3 "Field does not exist: flat" :checker jsonnet)))
 
+(flycheck-ert-def-checker-test coala python coala-python
+  (flycheck-ert-should-syntax-check
+   "language/python/pep8.py" 'python-mode
+   '(1 nil warning "The code does not comply to PEP8." :checker coala)))
+
 (flycheck-ert-initialize flycheck-test-resources-directory)
 
 (provide 'flycheck-test)
