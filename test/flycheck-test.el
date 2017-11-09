@@ -3241,10 +3241,16 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
    "language/groovy.groovy" 'groovy-mode
    '(2 14 error "unexpected token: {" :checker groovy)))
 
-(flycheck-ert-def-checker-test haml haml nil
+(flycheck-ert-def-checker-test haml haml "haml-error"
   (flycheck-ert-should-syntax-check
-   "language/haml.haml" 'haml-mode
+   "language/haml/haml-error.haml" 'haml-mode
    '(5 nil error "Inconsistent indentation: 3 spaces used for indentation, but the rest of the document was indented using 2 spaces."
+       :checker haml)))
+
+(flycheck-ert-def-checker-test haml haml "ruby-error"
+  (flycheck-ert-should-syntax-check
+   "language/haml/ruby-error.haml" 'haml-mode
+   '(1 nil error "unexpected end-of-input"
        :checker haml)))
 
 (flycheck-ert-def-checker-test handlebars handlebars nil
