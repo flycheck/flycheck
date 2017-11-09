@@ -893,6 +893,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with Python's byte compiler (see :py:mod:`py_compile`).
 
+   .. syntax-checker:: coala
+
+      Check python with customized bears with `coala <https://coala.io>`_.
+
 .. supported-language:: R
 
    .. syntax-checker:: r-lintr

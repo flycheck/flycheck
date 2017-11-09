@@ -4,6 +4,7 @@
 - New syntax checkers:
 
   - Jsonnet with ``jsonnet`` [GH-1345]
+  - Coala with ``coala`` [GH-1357]
 
 - New features:
 
