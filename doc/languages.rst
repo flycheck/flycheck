@@ -624,6 +624,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
          this syntax checker if eslint cannot find a valid configuration file
          for the current buffer.
 
+      .. defcustom:: flycheck-eslint-args
+
+         A list of additional arguments that are passed to eslint.
+
       .. defcustom:: flycheck-eslint-rules-directories
 
          A list of directories with custom rules.

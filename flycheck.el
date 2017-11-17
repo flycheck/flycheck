@@ -8083,6 +8083,9 @@ See URL `http://www.jshint.com'."
   :modes (js-mode js2-mode js3-mode rjsx-mode)
   :next-checkers ((warning . javascript-jscs)))
 
+(flycheck-def-args-var flycheck-eslint-args javascript-eslint
+  :package-version '(flycheck . "32"))
+
 (flycheck-def-option-var flycheck-eslint-rules-directories nil javascript-eslint
   "A list of directories with custom rules for ESLint.
 
@@ -8109,6 +8112,7 @@ for more information about the custom directories."
 See URL `http://eslint.org/'."
   :command ("eslint" "--format=checkstyle"
             (option-list "--rulesdir" flycheck-eslint-rules-directories)
+            (eval flycheck-eslint-args)
             "--stdin" "--stdin-filename" source-original)
   :standard-input t
   :error-parser flycheck-parse-checkstyle
