@@ -5,6 +5,7 @@
 
   - Jsonnet with ``jsonnet`` [GH-1345]
   - Tcl with ``nagelfar`` [GH-1365]
+  - CWL with ``schema-salad-tool`` [GH-1361]
 
 - New features:
 

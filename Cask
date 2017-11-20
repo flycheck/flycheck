@@ -14,6 +14,7 @@
  (depends-on "adoc-mode")
  (depends-on "coffee-mode")
  (depends-on "cperl-mode")
+ (depends-on "cwl-mode")
  (depends-on "d-mode")
  (depends-on "dockerfile-mode")
  (depends-on "erlang")

@@ -120,6 +120,7 @@ Vagrant.configure("2") do |config|
                                         protobuf \
                                         puppet \
                                         flake8 \
+                                        python-pip \
                                         python-pylint \
                                         racket-minimal \
                                         python-docutils \
@@ -170,6 +171,9 @@ Vagrant.configure("2") do |config|
                                                   tslint \
                                                   typescript \
                                                   js-yaml
+
+    echo "Installing packages with pip..."
+    pip install --user schema-salad
 
     echo "Installing packages with go get..."
     go get -u github.com/kisielk/errcheck \
