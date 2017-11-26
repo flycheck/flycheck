@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-PIP = ${HOME}/anaconda/bin/pip
+PIP = pip3
 SPHINXOPTS = -j4
 SPHINXBUILD = sphinx-build
 SPHINXAUTOBUILD = sphinx-autobuild
