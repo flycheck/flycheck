@@ -163,6 +163,7 @@ Vagrant.configure("2") do |config|
                                                   jshint \
                                                   eslint \
                                                   jscs \
+                                                  markdownlint-cli \
                                                   standard \
                                                   semistandard \
                                                   jsonlint \

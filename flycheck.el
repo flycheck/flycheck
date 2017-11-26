@@ -226,6 +226,7 @@ attention to case differences."
     r-lintr
     racket
     rpm-rpmlint
+    markdown-markdownlint-cli
     markdown-mdl
     nix
     rst-sphinx
@@ -8939,6 +8940,28 @@ See URL `https://sourceforge.net/projects/rpmlint/'."
   :predicate (lambda () (or (not (eq major-mode 'sh-mode))
                             ;; In `sh-mode', we need the proper shell
                             (eq sh-shell 'rpm))))
+
+(flycheck-def-config-file-var flycheck-markdown-markdownlint-cli-config
+    markdown-markdownlint-cli nil
+  :safe #'stringp
+  :package-version '(flycheck . "32"))
+
+(flycheck-define-checker markdown-markdownlint-cli
+  "Markdown checker using markdownlint-cli.
+
+See URL `https://github.com/igorshubovych/markdownlint-cli'."
+  :command ("markdownlint"
+            (config-file "--config" flycheck-markdown-markdownlint-cli-config)
+            source)
+  :error-patterns
+  ((error line-start
+          (file-name) ": " line ": " (id (one-or-more (not (any space))))
+          " " (message) line-end))
+  :error-filter
+  (lambda (errors)
+    (flycheck-sanitize-errors
+     (flycheck-remove-error-file-names "(string)" errors)))
+  :modes (markdown-mode gfm-mode))
 
 (flycheck-def-option-var flycheck-markdown-mdl-rules nil markdown-mdl
   "Rules to enable for mdl.

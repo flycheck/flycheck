@@ -3806,6 +3806,14 @@ Why not:
    )
   )
 
+(flycheck-ert-def-checker-test markdown-markdownlint-cli markdown nil
+  (flycheck-ert-should-syntax-check
+   "language/markdown.md" 'markdown-mode
+   '(1 nil error "First header should be a top level header [Expected: h1; Actual: h2]"
+       :id "MD002/first-header-h1" :checker markdown-markdownlint-cli)
+   '(1 nil error "First line in file should be a top level header [Context: "## Second Header First"]"
+       :id "MD041/first-line-h1" :checker markdown-markdownlint-cli)))
+
 (flycheck-ert-def-checker-test markdown-mdl markdown nil
   (flycheck-ert-should-syntax-check
    "language/markdown.md" 'markdown-mode
