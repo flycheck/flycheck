@@ -1232,6 +1232,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _systemd-analyze: https://www.freedesktop.org/software/systemd/man/systemd-analyze.html
 
+.. supported-language:: Tcl
+
+   .. syntax-checker:: tcl-nagelfar
+
+      Check Tcl syntax with `Nagelfar <http://nagelfar.sourceforge.net/>`_.
+
 .. supported-language:: Text
 
    .. syntax-checker:: proselint
