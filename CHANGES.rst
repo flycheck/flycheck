@@ -4,6 +4,7 @@
 - New syntax checkers:
 
   - Jsonnet with ``jsonnet`` [GH-1345]
+  - Tcl with ``nagelfar`` [GH-1365]
 
 - New features:
 
