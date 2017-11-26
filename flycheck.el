@@ -254,6 +254,7 @@ attention to case differences."
     slim-lint
     sql-sqlint
     systemd-analyze
+    tcl-nagelfar
     tex-chktex
     tex-lacheck
     texinfo
@@ -9842,6 +9843,19 @@ See URL `https://www.freedesktop.org/software/systemd/man/systemd-analyze.html'.
 
 (flycheck-def-config-file-var flycheck-chktexrc tex-chktex ".chktexrc"
   :safe #'stringp)
+
+(flycheck-define-checker tcl-nagelfar
+  "An extensible tcl syntax checker
+
+See URL `http://nagelfar.sourceforge.net/'."
+  :command ("nagelfar" "-H" source)
+  :error-patterns
+  ;; foo.tcl: 29: E Wrong number of arguments (4) to "set"
+  ;; foo.tcl: 29: W Expr without braces
+  ((info    line-start (file-name) ": " line ": N " (message) line-end)
+   (warning line-start (file-name) ": " line ": W " (message) line-end)
+   (error   line-start (file-name) ": " line ": E " (message) line-end))
+  :modes tcl-mode)
 
 (flycheck-define-checker tex-chktex
   "A TeX and LaTeX syntax and style checker using chktex.

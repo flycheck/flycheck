@@ -32,7 +32,7 @@
 
 ;;; Tags
 
-;; For new tests, please add the the section tag.  Additionally, add any of the
+;; For new tests, please add the section tag.  Additionally, add any of the
 ;; following tags, if appropriate:
 ;;
 ;; - `external-tool' for tests which need external tools
@@ -3832,6 +3832,22 @@ Why not:
    '(7 nil error "buildarch-instead-of-exclusivearch-tag x86_64"
        :checker rpm-rpmlint)
    '(22 nil warning "macro-in-%changelog %{_bindir}" :checker rpm-rpmlint)))
+
+(flycheck-ert-def-checker-test
+    tcl-nagelfar tcl nil
+  :tags '(language-tcl external-tool)
+  (flycheck-ert-should-syntax-check
+   "language/tcl/test.tcl" 'tcl-mode
+   '(7 nil warning "Expr without braces"
+       :checker tcl-nagelfar)
+   '(8 nil info "Suspicious variable name \"val_${val}\""
+       :checker tcl-nagelfar)
+   '(9 nil info "Suspicious variable name \"val_${val}\""
+       :checker tcl-nagelfar)
+   '(12 nil error "Wrong number of arguments \(4\) to \"set\""
+        :checker tcl-nagelfar)
+   )
+  )
 
 (flycheck-ert-def-checker-test markdown-mdl markdown nil
   (flycheck-ert-should-syntax-check
