@@ -2873,6 +2873,13 @@ The term \"1\" has type \"nat\" while it is expected to have type \"bool\"." :ch
    '(4 14 error "Expected a `FUNCTION` or `IDENT` after colon at line 4, col 14."
        :id "ParsingErrors" :checker css-csslint)))
 
+(flycheck-ert-def-checker-test cwl cwl syntax-error
+  (let ((flycheck-cwl-schema-path "schema/CommonWorkflowLanguage.yml"))
+    (flycheck-ert-should-syntax-check
+     "language/cwl/cwl.cwl" 'cwl-mode
+     '(6 5 error "the `inputBinding` field is not valid because value is a str, expected null or CommandLineBinding"
+         :checker cwl))))
+
 (ert-deftest flycheck-d-module-re/matches-module-name ()
   :tags '(language-d)
   (unless (version<= "24.4" emacs-version)

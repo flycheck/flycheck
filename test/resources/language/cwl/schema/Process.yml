@@ -1,0 +1,743 @@
+$base: "https://w3id.org/cwl/cwl#"
+
+$namespaces:
+  cwl: "https://w3id.org/cwl/cwl#"
+  sld: "https://w3id.org/cwl/salad#"
+
+$graph:
+
+- name: "Common Workflow Language, v1.0"
+  type: documentation
+  doc: {$include: concepts.md}
+
+- $import: "metaschema_base.yml"
+
+- name: BaseTypesDoc
+  type: documentation
+  doc: |
+    ## Base types
+  docChild:
+    - "#CWLType"
+    - "#Process"
+
+- type: enum
+  name: CWLVersion
+  doc: "Version symbols for published CWL document versions."
+  symbols:
+    - cwl:draft-2
+    - cwl:draft-3.dev1
+    - cwl:draft-3.dev2
+    - cwl:draft-3.dev3
+    - cwl:draft-3.dev4
+    - cwl:draft-3.dev5
+    - cwl:draft-3
+    - cwl:draft-4.dev1
+    - cwl:draft-4.dev2
+    - cwl:draft-4.dev3
+    - cwl:v1.0.dev4
+    - cwl:v1.0
+
+- name: CWLType
+  type: enum
+  extends: "sld:PrimitiveType"
+  symbols:
+    - cwl:File
+    - cwl:Directory
+  doc:
+    - "Extends primitive types with the concept of a file and directory as a builtin type."
+    - "File: A File object"
+    - "Directory: A Directory object"
+
+- name: File
+  type: record
+  docParent: "#CWLType"
+  doc: |
+    Represents a file (or group of files if `secondaryFiles` is specified) that
+    must be accessible by tools using standard POSIX file system call API such as
+    open(2) and read(2).
+  fields:
+    - name: class
+      type:
+        type: enum
+        name: File_class
+        symbols:
+          - cwl:File
+      jsonldPredicate:
+        _id: "@type"
+        _type: "@vocab"
+      doc: Must be `File` to indicate this object describes a file.
+    - name: location
+      type: string?
+      doc: |
+        An IRI that identifies the file resource.  This may be a relative
+        reference, in which case it must be resolved using the base IRI of the
+        document.  The location may refer to a local or remote resource; the
+        implementation must use the IRI to retrieve file content.  If an
+        implementation is unable to retrieve the file content stored at a
+        remote resource (due to unsupported protocol, access denied, or other
+        issue) it must signal an error.
+
+        If the `location` field is not provided, the `contents` field must be
+        provided.  The implementation must assign a unique identifier for
+        the `location` field.
+
+        If the `path` field is provided but the `location` field is not, an
+        implementation may assign the value of the `path` field to `location`,
+        then follow the rules above.
+      jsonldPredicate:
+        _id: "@id"
+        _type: "@id"
+    - name: path
+      type: string?
+      doc: |
+        The local host path where the File is available when a CommandLineTool is
+        executed.  This field must be set by the implementation.  The final
+        path component must match the value of `basename`.  This field
+        must not be used in any other context.  The command line tool being
+        executed must be able to to access the file at `path` using the POSIX
+        `open(2)` syscall.
+
+        As a special case, if the `path` field is provided but the `location`
+        field is not, an implementation may assign the value of the `path`
+        field to `location`, and remove the `path` field.
+
+        If the `path` contains [POSIX shell metacharacters](http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_02)
+        (`|`,`&`, `;`, `<`, `>`, `(`,`)`, `$`,`` ` ``, `\`, `"`, `'`,
+        `<space>`, `<tab>`, and `<newline>`) or characters
+        [not allowed](http://www.iana.org/assignments/idna-tables-6.3.0/idna-tables-6.3.0.xhtml)
+        for [Internationalized Domain Names for Applications](https://tools.ietf.org/html/rfc6452)
+        then implementations may terminate the process with a
+        `permanentFailure`.
+      jsonldPredicate:
+        "_id": "cwl:path"
+        "_type": "@id"
+    - name: basename
+      type: string?
+      doc: |
+        The base name of the file, that is, the name of the file without any
+        leading directory path.  The base name must not contain a slash `/`.
+
+        If not provided, the implementation must set this field based on the
+        `location` field by taking the final path component after parsing
+        `location` as an IRI.  If `basename` is provided, it is not required to
+        match the value from `location`.
+
+        When this file is made available to a CommandLineTool, it must be named
+        with `basename`, i.e. the final component of the `path` field must match
+        `basename`.
+      jsonldPredicate: "cwl:basename"
+    - name: dirname
+      type: string?
+      doc: |
+        The name of the directory containing file, that is, the path leading up
+        to the final slash in the path such that `dirname + '/' + basename ==
+        path`.
+
+        The implementation must set this field based on the value of `path`
+        prior to evaluating parameter references or expressions in a
+        CommandLineTool document.  This field must not be used in any other
+        context.
+    - name: nameroot
+      type: string?
+      doc: |
+        The basename root such that `nameroot + nameext == basename`, and
+        `nameext` is empty or begins with a period and contains at most one
+        period.  For the purposess of path splitting leading periods on the
+        basename are ignored; a basename of `.cshrc` will have a nameroot of
+        `.cshrc`.
+
+        The implementation must set this field automatically based on the value
+        of `basename` prior to evaluating parameter references or expressions.
+    - name: nameext
+      type: string?
+      doc: |
+        The basename extension such that `nameroot + nameext == basename`, and
+        `nameext` is empty or begins with a period and contains at most one
+        period.  Leading periods on the basename are ignored; a basename of
+        `.cshrc` will have an empty `nameext`.
+
+        The implementation must set this field automatically based on the value
+        of `basename` prior to evaluating parameter references or expressions.
+    - name: checksum
+      type: string?
+      doc: |
+        Optional hash code for validating file integrity.  Currently must be in the form
+        "sha1$ + hexadecimal string" using the SHA-1 algorithm.
+    - name: size
+      type: long?
+      doc: Optional file size
+    - name: "secondaryFiles"
+      type:
+        - "null"
+        - type: array
+          items: [File, Directory]
+      jsonldPredicate: "cwl:secondaryFiles"
+      doc: |
+        A list of additional files that are associated with the primary file
+        and must be transferred alongside the primary file.  Examples include
+        indexes of the primary file, or external references which must be
+        included when loading primary document.  A file object listed in
+        `secondaryFiles` may itself include `secondaryFiles` for which the same
+        rules apply.
+    - name: format
+      type: string?
+      jsonldPredicate:
+        _id: cwl:format
+        _type: "@id"
+        identity: true
+      doc: |
+        The format of the file: this must be an IRI of a concept node that
+        represents the file format, preferrably defined within an ontology.
+        If no ontology is available, file formats may be tested by exact match.
+
+        Reasoning about format compatability must be done by checking that an
+        input file format is the same, `owl:equivalentClass` or
+        `rdfs:subClassOf` the format required by the input parameter.
+        `owl:equivalentClass` is transitive with `rdfs:subClassOf`, e.g. if
+        `<B> owl:equivalentClass <C>` and `<B> owl:subclassOf <A>` then infer
+        `<C> owl:subclassOf <A>`.
+
+        File format ontologies may be provided in the "$schema" metadata at the
+        root of the document.  If no ontologies are specified in `$schema`, the
+        runtime may perform exact file format matches.
+    - name: contents
+      type: string?
+      doc: |
+        File contents literal.  Maximum of 64 KiB.
+
+        If neither `location` nor `path` is provided, `contents` must be
+        non-null.  The implementation must assign a unique identifier for the
+        `location` field.  When the file is staged as input to CommandLineTool,
+        the value of `contents` must be written to a file.
+
+        If `loadContents` of `inputBinding` or `outputBinding` is true and
+        `location` is valid, the implementation must read up to the first 64
+        KiB of text from the file and place it in the "contents" field.
+
+
+- name: Directory
+  type: record
+  docAfter: "#File"
+  doc: |
+    Represents a directory to present to a command line tool.
+  fields:
+    - name: class
+      type:
+        type: enum
+        name: Directory_class
+        symbols:
+          - cwl:Directory
+      jsonldPredicate:
+        _id: "@type"
+        _type: "@vocab"
+      doc: Must be `Directory` to indicate this object describes a Directory.
+    - name: location
+      type: string?
+      doc: |
+        An IRI that identifies the directory resource.  This may be a relative
+        reference, in which case it must be resolved using the base IRI of the
+        document.  The location may refer to a local or remote resource.  If
+        the `listing` field is not set, the implementation must use the
+        location IRI to retrieve directory listing.  If an implementation is
+        unable to retrieve the directory listing stored at a remote resource (due to
+        unsupported protocol, access denied, or other issue) it must signal an
+        error.
+
+        If the `location` field is not provided, the `listing` field must be
+        provided.  The implementation must assign a unique identifier for
+        the `location` field.
+
+        If the `path` field is provided but the `location` field is not, an
+        implementation may assign the value of the `path` field to `location`,
+        then follow the rules above.
+      jsonldPredicate:
+        _id: "@id"
+        _type: "@id"
+    - name: path
+      type: string?
+      doc: |
+        The local path where the Directory is made available prior to executing a
+        CommandLineTool.  This must be set by the implementation.  This field
+        must not be used in any other context.  The command line tool being
+        executed must be able to to access the directory at `path` using the POSIX
+        `opendir(2)` syscall.
+
+        If the `path` contains [POSIX shell metacharacters](http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_02)
+        (`|`,`&`, `;`, `<`, `>`, `(`,`)`, `$`,`` ` ``, `\`, `"`, `'`,
+        `<space>`, `<tab>`, and `<newline>`) or characters
+        [not allowed](http://www.iana.org/assignments/idna-tables-6.3.0/idna-tables-6.3.0.xhtml)
+        for [Internationalized Domain Names for Applications](https://tools.ietf.org/html/rfc6452)
+        then implementations may terminate the process with a
+        `permanentFailure`.
+      jsonldPredicate:
+        _id: "cwl:path"
+        _type: "@id"
+    - name: basename
+      type: string?
+      doc: |
+        The base name of the directory, that is, the name of the file without any
+        leading directory path.  The base name must not contain a slash `/`.
+
+        If not provided, the implementation must set this field based on the
+        `location` field by taking the final path component after parsing
+        `location` as an IRI.  If `basename` is provided, it is not required to
+        match the value from `location`.
+
+        When this file is made available to a CommandLineTool, it must be named
+        with `basename`, i.e. the final component of the `path` field must match
+        `basename`.
+      jsonldPredicate: "cwl:basename"
+    - name: listing
+      type:
+        - "null"
+        - type: array
+          items: [File, Directory]
+      doc: |
+        List of files or subdirectories contained in this directory.  The name
+        of each file or subdirectory is determined by the `basename` field of
+        each `File` or `Directory` object.  It is an error if a `File` shares a
+        `basename` with any other entry in `listing`.  If two or more
+        `Directory` object share the same `basename`, this must be treated as
+        equivalent to a single subdirectory with the listings recursively
+        merged.
+      jsonldPredicate:
+        _id: "cwl:listing"
+
+- name: SchemaBase
+  type: record
+  abstract: true
+  fields:
+    - name: label
+      type:
+        - "null"
+        - string
+      jsonldPredicate: "rdfs:label"
+      doc: "A short, human-readable label of this object."
+
+
+- name: Parameter
+  type: record
+  extends: SchemaBase
+  abstract: true
+  doc: |
+    Define an input or output parameter to a process.
+
+  fields:
+    - name: secondaryFiles
+      type:
+        - "null"
+        - string
+        - Expression
+        - type: array
+          items: [string, Expression]
+      jsonldPredicate: "cwl:secondaryFiles"
+      doc: |
+        Only valid when `type: File` or is an array of `items: File`.
+
+        Describes files that must be included alongside the primary file(s).
+
+        If the value is an expression, the value of `self` in the expression
+        must be the primary input or output File to which this binding applies.
+
+        If the value is a string, it specifies that the following pattern
+        should be applied to the primary file:
+
+          1. If string begins with one or more caret `^` characters, for each
+            caret, remove the last file extension from the path (the last
+            period `.` and all following characters).  If there are no file
+            extensions, the path is unchanged.
+          2. Append the remainder of the string to the end of the file path.
+
+    - name: format
+      type:
+        - "null"
+        - string
+        - type: array
+          items: string
+        - Expression
+      jsonldPredicate:
+        _id: cwl:format
+        _type: "@id"
+        identity: true
+      doc: |
+        Only valid when `type: File` or is an array of `items: File`.
+
+        For input parameters, this must be one or more IRIs of concept nodes
+        that represents file formats which are allowed as input to this
+        parameter, preferrably defined within an ontology.  If no ontology is
+        available, file formats may be tested by exact match.
+
+        For output parameters, this is the file format that will be assigned to
+        the output parameter.
+
+    - name: streamable
+      type: boolean?
+      doc: |
+        Only valid when `type: File` or is an array of `items: File`.
+
+        A value of `true` indicates that the file is read or written
+        sequentially without seeking.  An implementation may use this flag to
+        indicate whether it is valid to stream file contents using a named
+        pipe.  Default: `false`.
+
+    - name: doc
+      type:
+        - string?
+        - string[]?
+      doc: "A documentation string for this type, or an array of strings which should be concatenated."
+      jsonldPredicate: "rdfs:comment"
+
+
+- type: enum
+  name: Expression
+  doc: |
+    'Expression' is not a real type.  It indicates that a field must allow
+    runtime parameter references.  If [InlineJavascriptRequirement](#InlineJavascriptRequirement)
+    is declared and supported by the platform, the field must also allow
+    Javascript expressions.
+  symbols:
+    - cwl:ExpressionPlaceholder
+
+
+- name: InputBinding
+  type: record
+  abstract: true
+  fields:
+    - name: loadContents
+      type:
+        - "null"
+        - boolean
+      jsonldPredicate: "cwl:loadContents"
+      doc: |
+        Only valid when `type: File` or is an array of `items: File`.
+
+        Read up to the first 64 KiB of text from the file and place it in the
+        "contents" field of the file object for use by expressions.
+
+
+- name: OutputBinding
+  type: record
+  abstract: true
+
+
+- name: InputSchema
+  extends: SchemaBase
+  type: record
+  abstract: true
+
+
+- name: OutputSchema
+  extends: SchemaBase
+  type: record
+  abstract: true
+
+
+- name: InputRecordField
+  type: record
+  extends: "sld:RecordField"
+  specialize:
+    - specializeFrom: "sld:RecordSchema"
+      specializeTo: InputRecordSchema
+    - specializeFrom: "sld:EnumSchema"
+      specializeTo: InputEnumSchema
+    - specializeFrom: "sld:ArraySchema"
+      specializeTo: InputArraySchema
+    - specializeFrom: "sld:PrimitiveType"
+      specializeTo: CWLType
+  fields:
+    - name: inputBinding
+      type: InputBinding?
+      jsonldPredicate: "cwl:inputBinding"
+    - name: label
+      type: string?
+      jsonldPredicate: "rdfs:label"
+      doc: "A short, human-readable label of this process object."
+
+
+- name: InputRecordSchema
+  type: record
+  extends: ["sld:RecordSchema", InputSchema]
+  specialize:
+    - specializeFrom: "sld:RecordField"
+      specializeTo: InputRecordField
+
+
+- name: InputEnumSchema
+  type: record
+  extends: ["sld:EnumSchema", InputSchema]
+  fields:
+    - name: inputBinding
+      type: InputBinding?
+      jsonldPredicate: "cwl:inputBinding"
+
+
+- name: InputArraySchema
+  type: record
+  extends: ["sld:ArraySchema", InputSchema]
+  specialize:
+    - specializeFrom: "sld:RecordSchema"
+      specializeTo: InputRecordSchema
+    - specializeFrom: "sld:EnumSchema"
+      specializeTo: InputEnumSchema
+    - specializeFrom: "sld:ArraySchema"
+      specializeTo: InputArraySchema
+    - specializeFrom: "sld:PrimitiveType"
+      specializeTo: CWLType
+  fields:
+    - name: inputBinding
+      type: InputBinding?
+      jsonldPredicate: "cwl:inputBinding"
+
+
+- name: OutputRecordField
+  type: record
+  extends: "sld:RecordField"
+  specialize:
+    - specializeFrom: "sld:RecordSchema"
+      specializeTo: OutputRecordSchema
+    - specializeFrom: "sld:EnumSchema"
+      specializeTo: OutputEnumSchema
+    - specializeFrom: "sld:ArraySchema"
+      specializeTo: OutputArraySchema
+    - specializeFrom: "sld:PrimitiveType"
+      specializeTo: CWLType
+  fields:
+    - name: outputBinding
+      type: OutputBinding?
+      jsonldPredicate: "cwl:outputBinding"
+
+
+- name: OutputRecordSchema
+  type: record
+  extends: ["sld:RecordSchema", "#OutputSchema"]
+  docParent: "#OutputParameter"
+  specialize:
+    - specializeFrom: "sld:RecordField"
+      specializeTo: OutputRecordField
+
+
+- name: OutputEnumSchema
+  type: record
+  extends: ["sld:EnumSchema", OutputSchema]
+  docParent: "#OutputParameter"
+  fields:
+    - name: outputBinding
+      type: OutputBinding?
+      jsonldPredicate: "cwl:outputBinding"
+
+- name: OutputArraySchema
+  type: record
+  extends: ["sld:ArraySchema", OutputSchema]
+  docParent: "#OutputParameter"
+  specialize:
+    - specializeFrom: "sld:RecordSchema"
+      specializeTo: OutputRecordSchema
+    - specializeFrom: "sld:EnumSchema"
+      specializeTo: OutputEnumSchema
+    - specializeFrom: "sld:ArraySchema"
+      specializeTo: OutputArraySchema
+    - specializeFrom: "sld:PrimitiveType"
+      specializeTo: CWLType
+  fields:
+    - name: outputBinding
+      type: OutputBinding?
+      jsonldPredicate: "cwl:outputBinding"
+
+
+- name: InputParameter
+  type: record
+  extends: Parameter
+  fields:
+    - name: id
+      type: string
+      jsonldPredicate: "@id"
+      doc: "The unique identifier for this parameter object."
+
+    - name: inputBinding
+      type: InputBinding?
+      jsonldPredicate: "cwl:inputBinding"
+      doc: |
+        Describes how to handle the inputs of a process and convert them
+        into a concrete form for execution, such as command line parameters.
+
+    - name: default
+      type: Any?
+      jsonldPredicate: "cwl:default"
+      doc: |
+        The default value for this parameter if not provided in the input
+        object.
+
+    - name: type
+      type:
+        - "null"
+        - CWLType
+        - InputRecordSchema
+        - InputEnumSchema
+        - InputArraySchema
+        - string
+        - type: array
+          items:
+            - CWLType
+            - InputRecordSchema
+            - InputEnumSchema
+            - InputArraySchema
+            - string
+      jsonldPredicate:
+        "_id": "sld:type"
+        "_type": "@vocab"
+        refScope: 2
+        typeDSL: True
+      doc: |
+        Specify valid types of data that may be assigned to this parameter.
+
+- name: OutputParameter
+  type: record
+  extends: Parameter
+  fields:
+    - name: id
+      type: string
+      jsonldPredicate: "@id"
+      doc: "The unique identifier for this parameter object."
+    - name: outputBinding
+      type: OutputBinding?
+      jsonldPredicate: "cwl:outputBinding"
+      doc: |
+        Describes how to handle the outputs of a process.
+
+
+- type: record
+  name: ProcessRequirement
+  abstract: true
+  doc: |
+    A process requirement declares a prerequisite that may or must be fulfilled
+    before executing a process.  See [`Process.hints`](#process) and
+    [`Process.requirements`](#process).
+
+    Process requirements are the primary mechanism for specifying extensions to
+    the CWL core specification.
+
+
+- type: record
+  name: Process
+  abstract: true
+  doc: |
+
+    The base executable type in CWL is the `Process` object defined by the
+    document.  Note that the `Process` object is abstract and cannot be
+    directly executed.
+
+  fields:
+    - name: id
+      type: string?
+      jsonldPredicate: "@id"
+      doc: "The unique identifier for this process object."
+    - name: inputs
+      type:
+        type: array
+        items: InputParameter
+      jsonldPredicate:
+        _id: "cwl:inputs"
+        mapSubject: id
+        mapPredicate: type
+      doc: |
+        Defines the input parameters of the process.  The process is ready to
+        run when all required input parameters are associated with concrete
+        values.  Input parameters include a schema for each parameter which is
+        used to validate the input object.  It may also be used to build a user
+        interface for constructing the input object.
+    - name: outputs
+      type:
+        type: array
+        items: OutputParameter
+      jsonldPredicate:
+        _id: "cwl:outputs"
+        mapSubject: id
+        mapPredicate: type
+      doc: |
+        Defines the parameters representing the output of the process.  May be
+        used to generate and/or validate the output object.
+    - name: requirements
+      type: ProcessRequirement[]?
+      jsonldPredicate:
+        _id: "cwl:requirements"
+        mapSubject: class
+      doc: |
+        Declares requirements that apply to either the runtime environment or the
+        workflow engine that must be met in order to execute this process.  If
+        an implementation cannot satisfy all requirements, or a requirement is
+        listed which is not recognized by the implementation, it is a fatal
+        error and the implementation must not attempt to run the process,
+        unless overridden at user option.
+    - name: hints
+      type: Any[]?
+      doc: |
+        Declares hints applying to either the runtime environment or the
+        workflow engine that may be helpful in executing this process.  It is
+        not an error if an implementation cannot satisfy all hints, however
+        the implementation may report a warning.
+      jsonldPredicate:
+        _id: cwl:hints
+        noLinkCheck: true
+        mapSubject: class
+    - name: label
+      type: string?
+      jsonldPredicate: "rdfs:label"
+      doc: "A short, human-readable label of this process object."
+    - name: doc
+      type: string?
+      jsonldPredicate: "rdfs:comment"
+      doc: "A long, human-readable description of this process object."
+    - name: cwlVersion
+      type: CWLVersion?
+      doc: |
+        CWL document version. Always required at the document root. Not
+        required for a Process embedded inside another Process.
+      jsonldPredicate:
+        "_id": "cwl:cwlVersion"
+        "_type": "@vocab"
+
+- name: InlineJavascriptRequirement
+  type: record
+  extends: ProcessRequirement
+  doc: |
+    Indicates that the workflow platform must support inline Javascript expressions.
+    If this requirement is not present, the workflow platform must not perform expression
+    interpolatation.
+  fields:
+    - name: class
+      type: string
+      doc: "Always 'InlineJavascriptRequirement'"
+      jsonldPredicate:
+        "_id": "@type"
+        "_type": "@vocab"
+    - name: expressionLib
+      type: string[]?
+      doc: |
+        Additional code fragments that will also be inserted
+        before executing the expression code.  Allows for function definitions that may
+        be called from CWL expressions.
+
+
+- name: SchemaDefRequirement
+  type: record
+  extends: ProcessRequirement
+  doc: |
+    This field consists of an array of type definitions which must be used when
+    interpreting the `inputs` and `outputs` fields.  When a `type` field
+    contain a IRI, the implementation must check if the type is defined in
+    `schemaDefs` and use that definition.  If the type is not found in
+    `schemaDefs`, it is an error.  The entries in `schemaDefs` must be
+    processed in the order listed such that later schema definitions may refer
+    to earlier schema definitions.
+  fields:
+    - name: class
+      type: string
+      doc: "Always 'SchemaDefRequirement'"
+      jsonldPredicate:
+        "_id": "@type"
+        "_type": "@vocab"
+    - name: types
+      type:
+        type: array
+        items: InputSchema
+      doc: The list of type definitions.

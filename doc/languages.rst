@@ -255,6 +255,16 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          Whether to run stylelint in quiet mode via ``--quiet``.
 
+.. supported-language:: CWL
+
+   .. syntax-checker:: cwl
+
+      Syntax check with (`Schema Salad <http://www.commonwl.org/v1.0/SchemaSalad.html>`_).
+
+      .. defcustom:: flycheck-cwl-schema-path
+
+         A path for the schema file for Common Workflow Language.
+
 .. supported-language:: D
 
    .. syntax-checker:: d-dmd

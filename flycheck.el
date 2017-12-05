@@ -173,6 +173,7 @@ attention to case differences."
     coq
     css-csslint
     css-stylelint
+    cwl
     d-dmd
     dockerfile-hadolint
     elixir-dogma
@@ -6827,6 +6828,31 @@ See URL `http://stylelint.io/'."
   :error-parser flycheck-parse-stylelint
   :modes (css-mode))
 
+(flycheck-def-option-var flycheck-cwl-schema-path nil cwl
+  "A path for the schema file for Common Workflow Language.
+
+The value of this variable is a string that denotes a path for the schema file of
+Common Workflow Language."
+  :type 'string
+  :safe #'stringp)
+
+(flycheck-define-checker cwl
+  "A CWL syntax checker using Schema Salad validator.
+
+Requires Schema Salad 2.6.20171101113912 or newer.
+See URL `http://www.commonwl.org/v1.0/SchemaSalad.html'."
+  :command ("schema-salad-tool"
+            "--quiet"
+            "--print-oneline"
+            (eval flycheck-cwl-schema-path)
+            source-inplace)
+  :error-patterns
+  ((error line-start
+          (file-name) ":" line ":" column ":" (zero-or-more blank)
+          (message (one-or-more not-newline))
+          line-end))
+  :modes cwl-mode)
+
 (defconst flycheck-d-module-re
   (rx "module" (one-or-more (syntax whitespace))
       (group (one-or-more (not (syntax whitespace))))
@@ -10015,7 +10041,8 @@ See URL `https://github.com/nodeca/js-yaml'."
           (or "JS-YAML" "YAMLException") ": "
           (message) " at line " line ", column " column ":"
           line-end))
-  :modes yaml-mode)
+  :modes yaml-mode
+  :next-checkers ((warning . cwl)))
 
 (flycheck-define-checker yaml-ruby
   "A YAML syntax checker using Ruby's YAML parser.
@@ -10033,7 +10060,8 @@ See URL `http://www.ruby-doc.org/stdlib-2.0.0/libdoc/yaml/rdoc/YAML.html'."
   :error-patterns
   ((error line-start "stdin:" (zero-or-more not-newline) ":" (message)
           "at line " line " column " column line-end))
-  :modes yaml-mode)
+  :modes yaml-mode
+  :next-checkers ((warning . cwl)))
 
 (flycheck-define-checker jsonnet
   "A Jsonnet syntax checker using the jsonnet binary.

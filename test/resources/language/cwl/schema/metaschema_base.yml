@@ -1,0 +1,164 @@
+$base: "https://w3id.org/cwl/salad#"
+
+$namespaces:
+  sld:  "https://w3id.org/cwl/salad#"
+  dct:  "http://purl.org/dc/terms/"
+  rdf:  "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  rdfs: "http://www.w3.org/2000/01/rdf-schema#"
+  xsd:  "http://www.w3.org/2001/XMLSchema#"
+
+$graph:
+- name: PrimitiveType
+  type: enum
+  symbols:
+    - "sld:null"
+    - "xsd:boolean"
+    - "xsd:int"
+    - "xsd:long"
+    - "xsd:float"
+    - "xsd:double"
+    - "xsd:string"
+  doc:
+    - |
+      Salad data types are based on Avro schema declarations.  Refer to the
+      [Avro schema declaration documentation](https://avro.apache.org/docs/current/spec.html#schemas) for
+      detailed information.
+    - "null: no value"
+    - "boolean: a binary value"
+    - "int: 32-bit signed integer"
+    - "long: 64-bit signed integer"
+    - "float: single precision (32-bit) IEEE 754 floating-point number"
+    - "double: double precision (64-bit) IEEE 754 floating-point number"
+    - "string: Unicode character sequence"
+
+
+- name: Any
+  type: enum
+  symbols: ["#Any"]
+  doc: |
+    The **Any** type validates for any non-null value.
+
+
+- name: RecordField
+  type: record
+  doc: A field of a record.
+  fields:
+    - name: name
+      type: string
+      jsonldPredicate: "@id"
+      doc: |
+        The name of the field
+
+    - name: doc
+      type: string?
+      doc: |
+        A documentation string for this field
+      jsonldPredicate: "rdfs:comment"
+
+    - name: type
+      type:
+        - PrimitiveType
+        - RecordSchema
+        - EnumSchema
+        - ArraySchema
+        - string
+        - type: array
+          items:
+            - PrimitiveType
+            - RecordSchema
+            - EnumSchema
+            - ArraySchema
+            - string
+      jsonldPredicate:
+        _id: sld:type
+        _type: "@vocab"
+        typeDSL: true
+        refScope: 2
+      doc: |
+        The field type
+
+
+- name: RecordSchema
+  type: record
+  fields:
+    type:
+      doc: "Must be `record`"
+      type:
+        name: Record_symbol
+        type: enum
+        symbols:
+          - "sld:record"
+      jsonldPredicate:
+        _id: "sld:type"
+        _type: "@vocab"
+        typeDSL: true
+        refScope: 2
+    fields:
+      type: RecordField[]?
+      jsonldPredicate:
+        _id: sld:fields
+        mapSubject: name
+        mapPredicate: type
+      doc: "Defines the fields of the record."
+
+
+- name: EnumSchema
+  type: record
+  doc: |
+    Define an enumerated type.
+  fields:
+    type:
+      doc: "Must be `enum`"
+      type:
+        name: Enum_symbol
+        type: enum
+        symbols:
+          - "sld:enum"
+      jsonldPredicate:
+        _id: "sld:type"
+        _type: "@vocab"
+        typeDSL: true
+        refScope: 2
+    symbols:
+      type: string[]
+      jsonldPredicate:
+        _id: "sld:symbols"
+        _type: "@id"
+        identity: true
+      doc: "Defines the set of valid symbols."
+
+
+- name: ArraySchema
+  type: record
+  fields:
+    type:
+      doc: "Must be `array`"
+      type:
+        name: Array_symbol
+        type: enum
+        symbols:
+          - "sld:array"
+      jsonldPredicate:
+        _id: "sld:type"
+        _type: "@vocab"
+        typeDSL: true
+        refScope: 2
+    items:
+      type:
+        - PrimitiveType
+        - RecordSchema
+        - EnumSchema
+        - ArraySchema
+        - string
+        - type: array
+          items:
+            - PrimitiveType
+            - RecordSchema
+            - EnumSchema
+            - ArraySchema
+            - string
+      jsonldPredicate:
+        _id: "sld:items"
+        _type: "@vocab"
+        refScope: 2
+      doc: "Defines the type of the array elements."
