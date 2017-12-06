@@ -3387,20 +3387,18 @@ Why not:
         (js2-mode-show-strict-warnings nil)
         (js3-mode-show-parse-errors nil)
         (flycheck-disabled-checkers
-         '(javascript-jscs javascript-eslint javascript-gjslint)))
+         '(javascript-eslint javascript-gjslint)))
     (flycheck-ert-should-syntax-check
      "language/javascript/syntax-error.js" '(js-mode js2-mode js3-mode rjsx-mode)
-     '(3 4 error "Unmatched '('." :checker javascript-jshint :id "E019")
+     '(3 1 error "Unrecoverable syntax error. (75% scanned)." :checker javascript-jshint :id "E041")
      '(3 25 error "Expected an identifier and instead saw ')'."
-         :checker javascript-jshint :id "E030")
-     '(4 1 error "Unrecoverable syntax error. (100% scanned)."
-         :checker javascript-jshint :id "E041"))))
+         :checker javascript-jshint :id "E030"))))
 
 (flycheck-ert-def-checker-test javascript-jshint javascript nil
   :tags '(checkstyle-xml)
   (let ((flycheck-jshintrc "jshintrc")
         (flycheck-disabled-checkers
-         '(javascript-jscs javascript-eslint javascript-gjslint)))
+         '(javascript-eslint javascript-gjslint)))
     (flycheck-ert-should-syntax-check
      "language/javascript/warnings.js" '(js-mode js2-mode js3-mode rjsx-mode)
      '(4 9 warning "'foo' is defined but never used." :id "W098"
@@ -3415,61 +3413,13 @@ Why not:
 
 (flycheck-ert-def-checker-test javascript-eslint javascript warning
   :tags '(checkstyle-xml)
-  (let ((flycheck-disabled-checkers '(javascript-jshint javascript-jscs)))
+  (let ((flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-ert-should-syntax-check
      "language/javascript/warnings.js" flycheck-test-javascript-modes
      '(3 2 warning "Use the function form of 'use strict'." :id "strict"
          :checker javascript-eslint)
      '(4 9 warning "'foo' is assigned a value but never used."
          :id "no-unused-vars" :checker javascript-eslint))))
-
-(flycheck-ert-def-checker-test javascript-jscs javascript nil
-  :tags '(checkstyle-xml)
-  (let ((flycheck-jscsrc "jscsrc")
-        (flycheck-disabled-checkers
-         '(javascript-jshint javascript-eslint)))
-    (flycheck-ert-should-syntax-check
-     "language/javascript/style.js" flycheck-test-javascript-modes
-     '(4 1 error "validateIndentation: Invalid indentation character:"
-         :checker javascript-jscs)
-     '(4 1 error "validateIndentation: Expected indentation of 0 characters"
-         :checker javascript-jscs))))
-
-(flycheck-ert-def-checker-test javascript-jscs javascript no-config
-  :tags '(checkstyle-xml)
-  (let ((flycheck-disabled-checkers
-         '(javascript-jshint javascript-eslint)))
-    (flycheck-ert-should-syntax-check
-     "language/javascript/style.js" flycheck-test-javascript-modes
-     '(1 nil warning "No JSCS configuration found.  Set `flycheck-jscsrc' for JSCS"
-         :checker javascript-jscs))))
-
-(flycheck-ert-def-checker-test (javascript-jshint javascript-jscs)
-    javascript complete-chain
-  :tags '(checkstyle-xml)
-  (let ((flycheck-jshintrc "jshintrc")
-        (flycheck-jscsrc "jscsrc")
-        (flycheck-disabled-checkers '(javascript-eslint javascript-gjslint)))
-    (flycheck-ert-should-syntax-check
-     "language/javascript/warnings.js" '(js-mode js2-mode js3-mode rjsx-mode)
-     '(4 1 error "validateIndentation: Expected indentation of 0 characters"
-         :checker javascript-jscs)
-     '(4 9 warning "'foo' is defined but never used." :id "W098"
-         :checker javascript-jshint))))
-
-(flycheck-ert-def-checker-test (javascript-eslint javascript-jscs)
-    javascript complete-chain
-  :tags '(checkstyle-xml)
-  (let ((flycheck-jscsrc "jscsrc")
-        (flycheck-disabled-checkers '(javascript-jshint)))
-    (flycheck-ert-should-syntax-check
-     "language/javascript/warnings.js" flycheck-test-javascript-modes
-     '(3 2 warning "Use the function form of 'use strict'." :id "strict"
-         :checker javascript-eslint)
-     '(4 1 error "validateIndentation: Expected indentation of 0 characters"
-         :checker javascript-jscs)
-     '(4 9 warning "'foo' is assigned a value but never used." :id "no-unused-vars"
-         :checker javascript-eslint))))
 
 (flycheck-ert-def-checker-test javascript-standard javascript error
   (let ((flycheck-checker 'javascript-standard))
