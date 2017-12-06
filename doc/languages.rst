@@ -620,7 +620,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 .. supported-language:: Javascript
 
    Flycheck checks Javascript with one of `javascript-eslint` or
-   `javascript-jshint`, and then with `javascript-jscs`.
+   `javascript-jshint`.
 
    Alternatively `javascript-standard` is used instead all of the former ones.
 
@@ -647,12 +647,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
          Whether to extract Javascript from HTML before linting.
 
       .. syntax-checker-config-file:: flycheck-jshintrc
-
-   .. syntax-checker:: javascript-jscs
-
-      Check code style with `JSCS <http://jscs.info/>`_.
-
-      .. syntax-checker-config-file:: flycheck-jscsrc
 
    .. syntax-checker:: javascript-standard
 

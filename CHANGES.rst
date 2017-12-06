@@ -1,6 +1,10 @@
 32-cvs (in development)
 =======================
 
+- **Breaking changes**
+
+  - Remove javascript-jscs checker
+
 - New syntax checkers:
 
   - Jsonnet with ``jsonnet`` [GH-1345]

@@ -200,7 +200,6 @@ attention to case differences."
     html-tidy
     javascript-eslint
     javascript-jshint
-    javascript-jscs
     javascript-standard
     json-jsonlint
     json-python-json
@@ -8107,8 +8106,7 @@ See URL `http://www.jshint.com'."
   (lambda (errors)
     (flycheck-remove-error-file-names
      "stdin" (flycheck-dequalify-error-ids errors)))
-  :modes (js-mode js2-mode js3-mode rjsx-mode)
-  :next-checkers ((warning . javascript-jscs)))
+  :modes (js-mode js2-mode js3-mode rjsx-mode))
 
 (flycheck-def-option-var flycheck-eslint-rules-directories nil javascript-eslint
   "A list of directories with custom rules for ESLint.
@@ -8157,7 +8155,6 @@ See URL `http://eslint.org/'."
     errors)
   :enabled (lambda () (flycheck-eslint-config-exists-p))
   :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode rjsx-mode)
-  :next-checkers ((warning . javascript-jscs))
   :verify
   (lambda (_)
     (let* ((default-directory
@@ -8168,39 +8165,6 @@ See URL `http://eslint.org/'."
         :label "config file"
         :message (if have-config "found" "missing or incorrect")
         :face (if have-config 'success '(bold error)))))))
-
-(defun flycheck-parse-jscs (output checker buffer)
-  "Parse JSCS OUTPUT from CHECKER and BUFFER.
-
-Like `flycheck-parse-checkstyle', but catches errors about no
-configuration found and prevents to be reported as a suspicious
-error."
-  (if (string-match-p (rx string-start "No configuration found") output)
-      (let ((message "No JSCS configuration found.  Set `flycheck-jscsrc' for JSCS"))
-        (list (flycheck-error-new-at 1 nil 'warning message
-                                     :checker checker
-                                     :buffer buffer
-                                     :filename (buffer-file-name buffer))))
-    (flycheck-parse-checkstyle output checker buffer)))
-
-(flycheck-def-config-file-var flycheck-jscsrc javascript-jscs ".jscsrc"
-  :safe #'stringp
-  :package-version '(flycheck . "0.24"))
-
-(flycheck-define-checker javascript-jscs
-  "A Javascript style checker using JSCS.
-
-See URL `http://www.jscs.info'."
-  :command ("jscs" "--reporter=checkstyle"
-            (config-file "--config" flycheck-jscsrc)
-            "-")
-  :standard-input t
-  :error-parser flycheck-parse-jscs
-  :error-filter (lambda (errors)
-                  (flycheck-remove-error-ids
-                   (flycheck-sanitize-errors
-                    (flycheck-remove-error-file-names "input" errors))))
-  :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode rjsx-mode))
 
 (flycheck-define-checker javascript-standard
   "A Javascript code and style checker for the (Semi-)Standard Style.
