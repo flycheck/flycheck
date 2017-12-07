@@ -22,6 +22,9 @@
   - Use Emacs' native XML parsing when libXML fails.  This behavior can be
     changed by customizing ``flycheck-xml-parser`` [GH-1349]
   - Changed parsing of ESLint output from checkstyle XML to JSON [GH-1350]
+  - Flycheck will execute ``rubocop`` from directory where ``Gemfile`` is
+    located. If ``Gemfile`` does not exist, old behaviour of running command
+    from directory where ``.rubocop.yml`` is found will be used [GH-1368]
 
 31 (Oct 07, 2017)
 =================
