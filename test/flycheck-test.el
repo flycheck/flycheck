@@ -1885,11 +1885,10 @@ evaluating BODY."
   `(flycheck-ert-with-resource-buffer "language/emacs-lisp/errors-and-warnings.el"
      (emacs-lisp-mode)
      (flycheck-mode)
-     (when ,minimum-level
-       (let ((flycheck-navigation-minimum-level ,minimum-level))
-         (flycheck-ert-buffer-sync)
-         (goto-char (point-min))
-         ,@body))))
+     (let ((flycheck-navigation-minimum-level ,minimum-level))
+       (flycheck-ert-buffer-sync)
+       (goto-char (point-min))
+       ,@body)))
 
 (ert-deftest flycheck-next-error/goes-to-first-error ()
   :tags '(navigation)
