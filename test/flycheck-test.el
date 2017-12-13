@@ -3405,14 +3405,12 @@ Why not:
          :checker javascript-jshint))))
 
 (flycheck-ert-def-checker-test javascript-eslint javascript error
-  :tags '(checkstyle-xml)
   (let ((flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-ert-should-syntax-check
      "language/javascript/syntax-error.js" flycheck-test-javascript-modes
      '(3 25 error "Parsing error: Unexpected token )" :checker javascript-eslint))))
 
 (flycheck-ert-def-checker-test javascript-eslint javascript warning
-  :tags '(checkstyle-xml)
   (let ((flycheck-disabled-checkers '(javascript-jshint)))
     (flycheck-ert-should-syntax-check
      "language/javascript/warnings.js" flycheck-test-javascript-modes

@@ -21,6 +21,7 @@
 
   - Use Emacs' native XML parsing when libXML fails.  This behavior can be
     changed by customizing ``flycheck-xml-parser`` [GH-1349]
+  - Changed parsing of ESLint output from checkstyle XML to JSON [GH-1350]
 
 31 (Oct 07, 2017)
 =================

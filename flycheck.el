@@ -8128,31 +8128,39 @@ for more information about the custom directories."
                                                  "--print-config" "."))))
     (eq exitcode 0)))
 
+(defun flycheck-parse-eslint (output checker buffer)
+  "Parse ESLint errors/warnings from JSON OUTPUT.
+
+CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
+the BUFFER that was checked respectively.
+
+See URL `https://eslint.org' for more information about ESLint."
+  (mapcar (lambda (err)
+            (let-alist err
+              (flycheck-error-new-at
+               .line
+               .column
+               (pcase .severity
+                 (2 'error)
+                 (1 'warning)
+                 (_ 'warning))
+               .message
+               :id .ruleId
+               :checker checker
+               :buffer buffer
+               :filename (buffer-file-name buffer))))
+          (let-alist (caar (flycheck-parse-json output))
+            .messages)))
+
 (flycheck-define-checker javascript-eslint
   "A Javascript syntax and style checker using eslint.
 
 See URL `http://eslint.org/'."
-  :command ("eslint" "--format=checkstyle"
+  :command ("eslint" "--format=json"
             (option-list "--rulesdir" flycheck-eslint-rules-directories)
             "--stdin" "--stdin-filename" source-original)
   :standard-input t
-  :error-parser flycheck-parse-checkstyle
-  :error-filter
-  (lambda (errors)
-    (seq-do (lambda (err)
-              ;; Parse error ID from the error message
-              (setf (flycheck-error-message err)
-                    (replace-regexp-in-string
-                     (rx " ("
-                         (group (one-or-more (not (any ")"))))
-                         ")" string-end)
-                     (lambda (s)
-                       (setf (flycheck-error-id err)
-                             (match-string 1 s))
-                       "")
-                     (flycheck-error-message err))))
-            (flycheck-sanitize-errors errors))
-    errors)
+  :error-parser flycheck-parse-eslint
   :enabled (lambda () (flycheck-eslint-config-exists-p))
   :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode rjsx-mode)
   :verify
