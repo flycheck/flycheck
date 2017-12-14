@@ -9075,6 +9075,14 @@ Requires Sphinx 1.2 or newer.  See URL `http://sphinx-doc.org'."
   :predicate (lambda () (and (flycheck-buffer-saved-p)
                              (flycheck-locate-sphinx-source-directory))))
 
+(defun flycheck-ruby--find-project-root (_checker)
+  "Compute an appropriate working-directory for flycheck-ruby.
+
+This is either a parent directory containing a Gemfile, or nil."
+  (and
+   buffer-file-name
+   (locate-dominating-file buffer-file-name "Gemfile")))
+
 (flycheck-def-config-file-var flycheck-rubocoprc ruby-rubocop ".rubocop.yml"
   :safe #'stringp)
 
@@ -9109,6 +9117,7 @@ See URL `http://batsov.com/rubocop/'."
             ;; from standard input
             "--stdin" source-original)
   :standard-input t
+  :working-directory flycheck-ruby--find-project-root
   :error-patterns
   ((info line-start (file-name) ":" line ":" column ": C: "
          (optional (id (one-or-more (not (any ":")))) ": ") (message) line-end)
