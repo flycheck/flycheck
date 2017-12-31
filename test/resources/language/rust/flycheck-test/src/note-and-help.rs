@@ -7,7 +7,7 @@ impl Drop for NonPOD {
 }
 
 fn main() {
-    let x = NonPOD;
-    let y = x;          // note: x's lifetime ends here
-    let z = x;          // error: can no longer move x
+    let _x = NonPOD;
+    let _y = _x;          // note: x's lifetime ends here
+    let _z = _x;          // error: can no longer move x
 }

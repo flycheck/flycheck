@@ -2928,7 +2928,7 @@ Slots:
      collected by a checker should have the same `group` value,
      in order to be able to present them to the user.
 
-     See `flycheck-errors-from-group`."
+     See `flycheck-related-errors`."
   buffer checker filename line column message level id group)
 
 (defmacro flycheck-error-with-buffer (err &rest forms)
