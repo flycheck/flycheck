@@ -2,7 +2,11 @@
 language: python
 python:
   - "3.5"
-sudo: false
+# Emacs fails to build using the latest Trusty image on Travis
+# See https://github.com/travis-ci/travis-ci/issues/9073
+sudo: required
+dist: trusty
+group: deprecated-2017Q4
 matrix:
   # Don’t wait for jobs that are allowed to fail
   fast_finish: true
@@ -24,6 +28,7 @@ env:
     - EMACS_VERSION=24.5
     - EMACS_VERSION=25.1
     - EMACS_VERSION=25.2
+    - EMACS_VERSION=25.3
     - EMACS_VERSION=snapshot
     # A special job to build the manual
     - BUILD_MANUAL=yes
