@@ -1,5 +1,6 @@
 ;;; test-documentation.el --- Flycheck Specs: Documentation -*- lexical-binding: t; -*-
 
+;; Copyright (C) 2018 Flycheck contributors
 ;; Copyright (C) 2013-2016 Sebastian Wiesner and Flycheck contributors
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
@@ -40,12 +41,15 @@
         (let ((match (intern (match-string 1))))
           (cl-pushnew match matches))
         (-when-let (match (match-string 2))
+          (cl-pushnew (intern match) matches))
+        (-when-let (match (match-string 3))
           (cl-pushnew (intern match) matches))))
     matches))
 
 (defconst flycheck/checker-re
   (rx bol "   .. syntax-checker:: " (group (1+ nonl)) "\n"
-      (? "                       " (group (1+ nonl)) eol)))
+      (? "                       " (group (1+ nonl)) "\n")
+      (? "                       " (group (1+ nonl))) eol))
 
 (defconst flycheck/defcustom-re
   (rx bol "      .. defcustom:: " (group (1+ nonl)) "\n"

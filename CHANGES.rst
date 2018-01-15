@@ -16,6 +16,7 @@
   - Tcl with ``nagelfar`` [GH-1365]
   - CWL with ``schema-salad-tool`` [GH-1361]
   - MarkdownLint CLI with ``markdownlint`` [GH-1366]
+  - Rust with ``rust-clippy`` [GH-1385]
 
 - New features:
 
