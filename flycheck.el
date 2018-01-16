@@ -1,6 +1,6 @@
 ;;; flycheck.el --- On-the-fly syntax checking -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017 Flycheck contributors
+;; Copyright (C) 2017-2018 Flycheck contributors
 ;; Copyright (C) 2012-2016 Sebastian Wiesner and Flycheck contributors
 ;; Copyright (C) 2013, 2014 Free Software Foundation, Inc.
 ;;
@@ -1709,7 +1709,7 @@ are mandatory.
      nil to fall back to the `default-directory' of the current
      buffer.
 
-     This property is optional.  If omitted invoke `:start'
+     This property is optional.  If omitted, invoke `:start'
      from the `default-directory' of the buffer being checked.
 
 Signal an error, if any property has an invalid value."
@@ -2928,7 +2928,7 @@ Slots:
      collected by a checker should have the same `group` value,
      in order to be able to present them to the user.
 
-     See `flycheck-errors-from-group`."
+     See `flycheck-related-errors`."
   buffer checker filename line column message level id group)
 
 (defmacro flycheck-error-with-buffer (err &rest forms)
@@ -9343,39 +9343,46 @@ This syntax checker requires Rust 1.15 or newer.  See URL
   :error-explainer flycheck-rust-error-explainer
   :modes rust-mode
   :predicate flycheck-buffer-saved-p
-  :enabled (lambda ()
-             (-when-let (file (buffer-file-name))
-               (locate-dominating-file file "Cargo.toml")))
-  :verify (lambda (_)
-            (-when-let (file (buffer-file-name))
-              (let* ((has-toml (locate-dominating-file file "Cargo.toml"))
-                     (valid-crate-type (flycheck-rust-valid-crate-type-p
-                                        flycheck-rust-crate-type))
-                     (need-binary-name
-                      (and flycheck-rust-crate-type
-                           (not (string= flycheck-rust-crate-type "lib")))))
-                (list
-                 (flycheck-verification-result-new
-                  :label "Cargo.toml"
-                  :message (if has-toml "Found" "Missing")
-                  :face (if has-toml 'success '(bold warning)))
-                 (flycheck-verification-result-new
-                  :label "Crate type"
-                  :message (if valid-crate-type
-                               (format "%s" flycheck-rust-crate-type)
-                             (format "%s (invalid, should be one of 'lib', 'bin', 'test', 'example' or 'bench')"
-                                     flycheck-rust-crate-type))
-                  :face (if valid-crate-type 'success '(bold error)))
-                 (flycheck-verification-result-new
-                  :label "Binary name"
-                  :message (cond
-                            ((not need-binary-name) "Not required")
-                            ((not flycheck-rust-binary-name) "Required")
-                            (t (format "%s" flycheck-rust-binary-name)))
-                  :face (cond
-                         ((not need-binary-name) 'success)
-                         ((not flycheck-rust-binary-name) '(bold error))
-                         (t 'success))))))))
+  :enabled
+  (lambda ()
+    (and buffer-file-name
+         (locate-dominating-file buffer-file-name "Cargo.toml")))
+  :working-directory
+  (lambda (_)
+    (and buffer-file-name
+         (locate-dominating-file buffer-file-name "Cargo.toml")))
+  :verify
+  (lambda (_)
+    (and buffer-file-name
+         (let* ((has-toml (locate-dominating-file
+                           buffer-file-name "Cargo.toml"))
+                (valid-crate-type (flycheck-rust-valid-crate-type-p
+                                   flycheck-rust-crate-type))
+                (need-binary-name
+                 (and flycheck-rust-crate-type
+                      (not (string= flycheck-rust-crate-type "lib")))))
+           (list
+            (flycheck-verification-result-new
+             :label "Cargo.toml"
+             :message (if has-toml "Found" "Missing")
+             :face (if has-toml 'success '(bold warning)))
+            (flycheck-verification-result-new
+             :label "Crate type"
+             :message (if valid-crate-type
+                          (format "%s" flycheck-rust-crate-type)
+                        (format "%s (invalid, should be one of 'lib', 'bin', 'test', 'example' or 'bench')"
+                                flycheck-rust-crate-type))
+             :face (if valid-crate-type 'success '(bold error)))
+            (flycheck-verification-result-new
+             :label "Binary name"
+             :message (cond
+                       ((not need-binary-name) "Not required")
+                       ((not flycheck-rust-binary-name) "Required")
+                       (t (format "%s" flycheck-rust-binary-name)))
+             :face (cond
+                    ((not need-binary-name) 'success)
+                    ((not flycheck-rust-binary-name) '(bold error))
+                    (t 'success))))))))
 
 (flycheck-define-checker rust
   "A Rust syntax checker using Rust compiler.
