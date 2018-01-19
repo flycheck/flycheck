@@ -3,10 +3,10 @@ language: python
 python:
   - "3.5"
 # Emacs fails to build using the latest Trusty image on Travis
-# See https://github.com/travis-ci/travis-ci/issues/9073
+# See https://github.com/travis-ci/travis-ci/issues/9061
+# and https://github.com/moby/moby/issues/22801
 sudo: required
 dist: trusty
-group: deprecated-2017Q4
 matrix:
   # Don’t wait for jobs that are allowed to fail
   fast_finish: true
