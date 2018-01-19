@@ -1,3 +1,4 @@
+# Copyright (c) 2018 Flycheck contributors
 # Copyright (c) 2012-2016 Sebastian Wiesner and Flycheck contributors
 
 # This program is free software: you can redistribute it and/or modify it under
@@ -88,7 +89,9 @@ endif
 # Public targets
 .PHONY: init
 init:
-	$(CASK) install
+# The `--verbose` flag is a workaround for a Cask bug with Emacs 26.
+# See https://github.com/cask/cask/issues/367
+	$(CASK) --verbose install
 	$(CASK) update
 
 .PHONY: clean

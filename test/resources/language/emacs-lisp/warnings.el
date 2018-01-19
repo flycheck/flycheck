@@ -13,7 +13,7 @@
   (dummy-package-foo))
 
 (if t
-    (message)
+    (foobar 1)
   (message "Hello foo"))
 
 (provide 'warnings)
