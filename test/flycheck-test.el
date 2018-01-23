@@ -3315,6 +3315,20 @@ Found:
 Why not:
   putStrLn \"hello world\"" :checker haskell-hlint))))
 
+(flycheck-ert-def-checker-test
+    haskell-stack-ghc haskell nonstandard-stack-yaml-file
+  (skip-unless (file-exists-p (getenv "HOME")))
+
+  (let* ((flycheck-disabled-checkers '(haskell-ghc))
+         (proj-dir "language/haskell/stack-project-with-renamed-stack-yaml")
+         (flycheck-ghc-stack-project-file
+          (expand-file-name "stack-nonstandard.yaml"
+                            (flycheck-ert-resource-filename proj-dir))))
+
+    (flycheck-ert-should-syntax-check
+     (concat proj-dir "/src/Foo.hs")
+     'haskell-mode)))
+
 (flycheck-ert-def-checker-test haskell-ghc haskell syntax-error
   (let ((flycheck-disabled-checkers '(haskell-stack-ghc)))
     (flycheck-ert-should-syntax-check
@@ -3336,7 +3350,7 @@ Why not:
   (let ((flycheck-disabled-checkers '(haskell-stack-ghc)))
     (flycheck-ert-should-syntax-check
      "language/haskell/Literate.lhs" 'literate-haskell-mode
-     '(6 1 warning "Top-level binding with no type signature: foo :: forall a. a"
+     '(6 1 warning "Top-level binding with no type signature: foo :: a"
          :id "-Wmissing-signatures"
          :checker haskell-ghc))))
 

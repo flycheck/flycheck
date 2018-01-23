@@ -170,7 +170,7 @@ with VALUE."
   "Determine the absolute file name of a RESOURCE-FILE.
 
 Relative file names are expanded against
-`flycheck-ert-resources-directory'."
+`flycheck-ert--resource-directory'."
   (expand-file-name resource-file flycheck-ert--resource-directory))
 
 (defmacro flycheck-ert-with-resource-buffer (resource-file &rest body)

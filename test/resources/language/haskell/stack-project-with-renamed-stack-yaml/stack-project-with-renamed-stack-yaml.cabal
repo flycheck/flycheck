@@ -1,0 +1,34 @@
+-- Created     :  24 October 2017
+
+name:
+  stack-project-with-renamed-stack-yaml
+version:
+  0.1.0.0
+license:
+  BSD3
+
+cabal-version:
+  >= 1.16
+build-type:
+  Simple
+
+library
+  exposed-modules:
+    Foo
+  hs-source-dirs:
+    src
+  build-depends:
+    base >= 4.4
+  default-language:
+    Haskell2010
+  ghc-options:
+    -Wall
+    -fwarn-name-shadowing
+    -Wincomplete-uni-patterns
+    -Wincomplete-record-updates
+    -fno-warn-type-defaults
+  if impl(ghc >= 8.0)
+    ghc-options:
+      -Wcompat
+  ghc-prof-options:
+    -fprof-auto

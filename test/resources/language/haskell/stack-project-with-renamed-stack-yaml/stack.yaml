@@ -1,0 +1,4 @@
+resolver: invalid-resolver
+
+packages:
+- "."

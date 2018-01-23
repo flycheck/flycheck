@@ -571,6 +571,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          Whether to enable Nix support for Stack (only for `haskell-stack-ghc`).
 
+      .. defcustom:: flycheck-ghc-stack-project-file
+
+         Allows to override the default ``stack.yaml`` file for Stack,
+         via ``--stack-yaml`` (only for `haskell-stack-ghc`).
+
       .. defcustom:: flycheck-ghc-package-databases
 
          A list of additional package databases for GHC (only for
