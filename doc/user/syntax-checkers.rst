@@ -173,7 +173,7 @@ Internally this command changes the buffer-local `flycheck-disabled-checkers`:
 
 You can also disable syntax checkers per project with directory local variables.
 For instance type :kbd:`M-x add-dir-local-variable RET emacs-lisp-mode RET
-flycheck-disabled-checkers RET emacs-lisp-checkdoc` in your :term:`user emacs
+flycheck-disabled-checkers RET (emacs-lisp-checkdoc)` in your :term:`user emacs
 directory` to disable `emacs-lisp-checkdoc` for all Emacs Lisp files in your
 personal configuration.
 
