@@ -770,6 +770,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          A list of include directories, relative to the file being checked.
 
+      .. defcustom:: flycheck-perl-module-list
+
+         A list of module names to implicitly use.
+
    .. syntax-checker:: perl-perlcritic
 
       Lint and check style with `Perl::Critic`_.

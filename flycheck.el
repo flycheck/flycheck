@@ -8370,12 +8370,22 @@ Relative paths are relative to the file being checked."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.24"))
 
+(flycheck-def-option-var flycheck-perl-module-list nil perl
+  "A list of modules to use for Perl.
+
+The value of this variable is a list of strings, where each
+string is a module to 'use' in Perl."
+  :type '(repeat :tag "Module")
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "32"))
+
 (flycheck-define-checker perl
   "A Perl syntax checker using the Perl interpreter.
 
 See URL `https://www.perl.org'."
   :command ("perl" "-w" "-c"
-            (option-list "-I" flycheck-perl-include-path))
+            (option-list "-I" flycheck-perl-include-path)
+            (option-list "-M" flycheck-perl-module-list concat))
   :standard-input t
   :error-patterns
   ((error line-start (minimal-match (message))

@@ -19,6 +19,8 @@
   - Add ``--force-exclusion`` flag to ``rubocop`` command [GH-1348]
   - Add ``flycheck-ghc-stack-project-file`` for the
     ``haskell-stack-ghc`` checker. [GH-1316]
+  - Add ``flycheck-perl-module-list`` to use specified modules when
+    syntax checking code with the ``perl`` checker.
 
 - Improvements
 

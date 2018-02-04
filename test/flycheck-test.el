@@ -3555,6 +3555,27 @@ Why not:
    '(6 6 error "Glob written as <...> (See page 167 of PBP)"
        :id "BuiltinFunctions::RequireGlobFunction" :checker perl-perlcritic)))
 
+(flycheck-ert-def-checker-test perl perl modules
+  ;; Files that require unlisted modules should fail to check
+  (flycheck-ert-should-syntax-check
+   "language/perl/Script.pl" '(perl-mode cperl-mode)
+   '(3 nil error "Global symbol \"$dependency_a\" requires explicit package name (did you forget to declare \"my $dependency_a\"?)"
+       :checker perl)
+   '(4 nil error "Global symbol \"$dependency_b\" requires explicit package name (did you forget to declare \"my $dependency_b\"?)"
+       :checker perl))
+  ;; Including those modules should allow them to check
+  (let
+      ((flycheck-perl-module-list '("DependencyA")))
+    (flycheck-ert-should-syntax-check
+     "language/perl/Script.pl" '(perl-mode cperl-mode)
+     '(4 nil error "Global symbol \"$dependency_b\" requires explicit package name (did you forget to declare \"my $dependency_b\"?)"
+         :checker perl)))
+  ;; Multiple modules should be allowed
+  (let
+      ((flycheck-perl-module-list '("DependencyA" "DependencyB")))
+    (flycheck-ert-should-syntax-check
+     "language/perl/Script.pl" '(perl-mode cperl-mode))))
+
 (flycheck-ert-def-checker-test php php syntax-error
   (flycheck-ert-should-syntax-check
    "language/php/syntax-error.php" 'php-mode
