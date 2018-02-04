@@ -977,9 +977,9 @@
     (emacs-lisp-mode)
     (flycheck-mode)
     (let* ((flycheck-checker 'sh-bash))
-      (should-error (flycheck-buffer))
+      (flycheck-buffer)
       (should (eq flycheck-checker 'sh-bash))
-      (should (string= flycheck-last-status-change 'errored)))))
+      (should (string= flycheck-last-status-change 'no-checker)))))
 
 (ert-deftest flycheck-checker/usable-checker-is-used ()
   :tags '(selection language-emacs-lisp checker-emacs-lisp-checkdoc)
@@ -1002,9 +1002,9 @@
     (let ((flycheck-disabled-checkers '(emacs-lisp emacs-lisp-checkdoc)))
       (should-not (flycheck-get-checker-for-buffer))
       (let* ((flycheck-checker 'emacs-lisp))
-        (should-error (flycheck-buffer))
+        (flycheck-buffer)
         (should (eq flycheck-checker 'emacs-lisp))
-        (should (string= flycheck-last-status-change 'errored))))))
+        (should (string= flycheck-last-status-change 'no-checker))))))
 
 (ert-deftest flycheck-checker/unregistered-checker-is-used ()
   :tags '(selection language-emacs-lisp checker-emacs-lisp-checkdoc)
