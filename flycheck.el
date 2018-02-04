@@ -9274,21 +9274,25 @@ See URL `http://jruby.org/'."
   :modes (enh-ruby-mode ruby-mode)
   :next-checkers ((warning . ruby-rubylint)))
 
-(flycheck-def-args-var flycheck-cargo-rustc-args (rust-cargo)
-  :package-version '(flycheck . "30"))
+(flycheck-def-args-var flycheck-cargo-check-args (rust-cargo)
+  :package-version '(flycheck . "32"))
 
-(flycheck-def-args-var flycheck-rust-args (rust-cargo rust)
+(flycheck-def-args-var flycheck-rust-args (rust)
   :package-version '(flycheck . "0.24"))
 
 (flycheck-def-option-var flycheck-rust-check-tests t (rust-cargo rust)
   "Whether to check test code in Rust.
 
-When non-nil, `rustc' is passed the `--test' flag, which will
-check any code marked with the `#[cfg(test)]' attribute and any
-functions marked with `#[test]'. Otherwise, `rustc' is not passed
-`--test' and test code will not be checked.  Skipping `--test' is
-necessary when using `#![no_std]', because compiling the test
-runner requires `std'."
+For the `rust' checker: When non-nil, `rustc' is passed the
+`--test' flag, which will check any code marked with the
+`#[cfg(test)]' attribute and any functions marked with
+`#[test]'. Otherwise, `rustc' is not passed `--test' and test
+code will not be checked.  Skipping `--test' is necessary when
+using `#![no_std]', because compiling the test runner requires
+`std'.
+
+For the `rust-cargo' checker: When non-nil, calls `cargo test
+--no-run' instead of `cargo check'."
   :type 'boolean
   :safe #'booleanp
   :package-version '("flycheck" . "0.19"))
@@ -9333,7 +9337,7 @@ for the `--crate-type' flag of rustc."
 (make-variable-buffer-local 'flycheck-rust-crate-type)
 
 (flycheck-def-option-var flycheck-rust-binary-name nil rust-cargo
-  "The name of the binary to pass to `cargo rustc --CRATE-TYPE'.
+  "The name of the binary to pass to `cargo check --CRATE-TYPE'.
 
 The value of this variable is a string denoting the name of the
 target to check: usually the name of the crate, or the name of
@@ -9383,24 +9387,22 @@ A valid Cargo target type is one of `lib', `bin', `example',
 (flycheck-define-checker rust-cargo
   "A Rust syntax checker using Cargo.
 
-This syntax checker requires Rust 1.15 or newer.  See URL
+This syntax checker requires Rust 1.17 or newer.  See URL
 `https://www.rust-lang.org'."
-  :command ("cargo" "rustc"
+  :command ("cargo"
+            (eval (if flycheck-rust-check-tests
+                      "test"
+                    "check"))
+            (eval (when flycheck-rust-check-tests
+                    "--no-run"))
             (eval (when flycheck-rust-crate-type
                     (concat "--" flycheck-rust-crate-type)))
             ;; All crate targets except "lib" need a binary name
             (eval (when (and flycheck-rust-crate-type
                              (not (string= flycheck-rust-crate-type "lib")))
                     flycheck-rust-binary-name))
-            "--message-format=json"
-            (eval flycheck-cargo-rustc-args)
-            "--"
-            ;; Passing the "--test" flag when the target is a test binary or
-            ;; bench is unnecessary and triggers an error.
-            (eval (when flycheck-rust-check-tests
-                    (unless (member flycheck-rust-crate-type '("test" "bench"))
-                      "--test")))
-            (eval flycheck-rust-args))
+            (eval flycheck-cargo-check-args)
+            "--message-format=json")
   :error-parser flycheck-parse-cargo-rustc
   :error-filter flycheck-rust-error-filter
   :error-explainer flycheck-rust-error-explainer

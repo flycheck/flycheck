@@ -4099,6 +4099,19 @@ The manifest path is relative to
        '(4 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
        '(4 17 info "to avoid this warning, consider using `_foo_ex_a_test` instead" :checker rust-cargo :id "unused_variables")))))
 
+(flycheck-ert-def-checker-test rust-cargo rust dev-dependencies
+  (let ((flycheck-disabled-checkers '(rust)))
+    (let ((flycheck-rust-crate-type "lib")
+          (flycheck-rust-check-tests t))
+      (flycheck-ert-cargo-clean "language/rust/dev-deps/Cargo.toml")
+      (flycheck-ert-should-syntax-check
+       "language/rust/dev-deps/src/lib.rs" 'rust-mode
+       '(2 1 warning "unused `#[macro_use]` import" :checker rust-cargo :id "unused_imports")
+       '(2 1 info "#[warn(unused_imports)] on by default" :checker rust-cargo :id "unused_imports")
+       '(8 9 warning "unused variable: `foo`" :checker rust-cargo :id "unused_variables")
+       '(8 9 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
+       '(8 9 info "to avoid this warning, consider using `_foo` instead" :checker rust-cargo :id "unused_variables")))))
+
 (flycheck-ert-def-checker-test rust rust syntax-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check

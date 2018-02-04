@@ -1,0 +1,8 @@
+[package]
+name = "dev-deps"
+version = "0.1.0"
+
+[dependencies]
+
+[dev-dependencies]
+lazy_static = "0.2.2"
