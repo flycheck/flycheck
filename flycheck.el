@@ -9884,7 +9884,7 @@ See URL `http://slim-lang.com'."
   "A Slim linter.
 
 See URL `https://github.com/sds/slim-lint'."
-  :command ("slim-lint" "--reporter=checkstyle" source)
+  :command ("slim-lint" "--reporter=checkstyle" source-inplace)
   :error-parser flycheck-parse-checkstyle
   :modes slim-mode)
 
