@@ -1284,6 +1284,29 @@
 
 
 ;;; Errors from syntax checks
+(defun flycheck-error-line-region (err)
+  "Wrap `flycheck--line-region' on ERR to facilitate testing."
+  (flycheck--line-region
+   (flycheck-error-start-line err)
+   (flycheck-error-end-line err)
+   (flycheck-error-buffer err)))
+
+(defun flycheck-error-column-region (err)
+  "Wrap `flycheck--column-region' on ERR to facilitate testing."
+  (-when-let* ((line (flycheck-error-start-line err))
+               (col (flycheck-error-start-column err))
+               (buf (flycheck-error-buffer err)))
+    (flycheck--column-region
+     (flycheck-line-column-to-position line col buf) buf)))
+
+(defun flycheck-error-thing-region (thing err)
+  "Wrap `flycheck--thing-region' on THING and ERR to facilitate testing."
+  (-when-let* ((line (flycheck-error-start-line err))
+               (col (flycheck-error-start-column err))
+               (buf (flycheck-error-buffer err)))
+    (flycheck-bounds-of-thing-at-pos
+     thing (flycheck-line-column-to-position line col buf) buf)))
+
 (ert-deftest flycheck-error-line-region ()
   :tags '(error-api)
   (flycheck-ert-with-temp-buffer
@@ -1337,6 +1360,11 @@
     ;; An incomplete expression
     (should-not (flycheck-error-thing-region 'sexp (flycheck-error-new-at 2 5)))))
 
+(defun flycheck-error-region-for-mode (err mode)
+  "Call `flycheck-error-region' on ERR with the given highlighting MODE."
+  (let ((flycheck-highlighting-mode mode))
+    (flycheck-error-region err)))
+
 (ert-deftest flycheck-error-region-for-mode ()
   :tags '(error-api)
   (flycheck-ert-with-temp-buffer
@@ -1369,6 +1397,26 @@
     (should (= (flycheck-error-pos (flycheck-error-new-at 3 1)) 19))
     (should (= (flycheck-error-pos (flycheck-error-new-at 4 1)) 19))
     (should (= (flycheck-error-pos (flycheck-error-new-at 4 nil)) 19))))
+
+(ert-deftest flycheck-error-region ()
+  :tags '(error-api)
+  ;; All these tests should be independent of the ambient `flycheck-highlighting-mode'
+  (flycheck-ert-with-temp-buffer
+    (insert "    Hello\n   World\n")
+    (should (equal (flycheck-error-region (flycheck-error-new-with-coords 1 1 1 3))
+                   '(1 . 3)))
+    (should (equal (flycheck-error-region (flycheck-error-new-with-coords 1 4 1 6))
+                   '(4 . 6)))
+    (should (equal (flycheck-error-region (flycheck-error-new-with-coords 1 nil 2 nil))
+                   '(5 . 19)))
+    (should (equal (flycheck-error-region (flycheck-error-new-with-coords 2 4 nil 8))
+                   '(14 . 18)))
+    (should (equal (flycheck-error-region (flycheck-error-new-with-coords 3 1 nil nil))
+                   '(19 . 20)))
+    (should (equal (flycheck-error-region (flycheck-error-new-with-coords 4 1 12 15))
+                   '(19 . 20)))
+    (should (equal (flycheck-error-region (flycheck-error-new-with-coords 4 nil 5 nil))
+                   '(19 . 20)))))
 
 (ert-deftest flycheck-error-format-message-and-id/no-id ()
   :tags '(error-api)

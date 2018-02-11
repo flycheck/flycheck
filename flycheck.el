@@ -1224,17 +1224,43 @@ spliced into the resulting list."
               (t (error "Invalid result type for option: %S" result)))))))
     (apply #'append (seq-map prepend items))))
 
+(defun flycheck-line-column-at (pos)
+  "Move to POS and return the current line and column numbers."
+  (goto-char pos)
+  (cons (line-number-at-pos)
+        ;; `current-column' measures character widths, not just offsets
+        (- (point) (point-at-bol))))
+
+(defmacro flycheck-with-buffer (buf &rest forms)
+  "Switch to buffer BUF and evaluate FORMS.
+
+If BUF is not live, FORMS are not evaluated."
+  (declare (indent 1) (debug t))
+  `(when (buffer-live-p ,buf)
+     (with-current-buffer ,buf
+       ,@forms)))
+
+(defmacro flycheck-with-widened-buffer (buf &rest forms)
+  "Switch to buffer BUF, widen, and evaluate FORMS.
+
+If BUF is not live, FORMS are not evaluated.  Position and
+restrictions are restored after running FORMS."
+  (declare (indent 1) (debug t))
+  `(flycheck-with-buffer ,buf
+     (save-excursion
+       (save-restriction
+         (widen)
+         ,@forms))))
+
 (defun flycheck-find-in-buffer (pattern)
   "Find PATTERN in the current buffer.
 
 Return the result of the first matching group of PATTERN, or nil,
 if PATTERN did not match."
-  (save-restriction
-    (widen)
-    (save-excursion
-      (goto-char (point-min))
-      (when (re-search-forward pattern nil 'no-error)
-        (match-string-no-properties 1)))))
+  (flycheck-with-widened-buffer (current-buffer)
+    (goto-char (point-min))
+    (when (re-search-forward pattern nil 'no-error)
+      (match-string-no-properties 1))))
 
 (defun flycheck-buffer-empty-p (&optional buffer)
   "Whether a BUFFER is empty.
@@ -2921,15 +2947,79 @@ variables of Flycheck."
 
 
 ;;; Errors from syntax checks
-(cl-defstruct (flycheck-error
-               (:constructor flycheck-error-new)
-               (:constructor flycheck-error-new-at
-                             (line column
-                                   &optional level message
-                                   &key checker id group
-                                   (filename (buffer-file-name))
-                                   (buffer (current-buffer)))))
+(cl-defstruct (flycheck-coords
+               (:constructor flycheck-coords-new
+                             (start-line start-column end-line end-column)))
+  "Structure representing error locations using line and column numbers.
+
+For compatibility with external tools and unlike Emacs
+itself (e.g. in Compile Mode) Flycheck uses _1-based_
+columns: The first character on a line is column 1.
+
+Occasionally some tools try to proactively adapt to Emacs
+and emit 0-based columns automatically.  In these cases, the
+columns must be adjusted for Flycheck, see
+`flycheck-increment-error-columns'.
+
+Slots:
+
+`start-line'
+    The line on which the error begins.  Nil is the same as 0.
+
+`start-column'
+    The column at which the error begins.  If nil, the error is assumed
+    to cover the entire line.
+
+`end-line'
+    The line on which the error ends.  If nil, this is assumed to be
+    equal to `start-line'.
+
+`end-column'
+    The column at which the error ends.  If nil, this is inferred by
+    later code according to `flycheck-highlighting-mode'."
+  start-line start-column end-line end-column)
+
+(cl-defstruct
+    (flycheck-error
+     (:constructor nil)
+     (:constructor
+      flycheck-error-new
+      (&key
+       line column ;; Backwards compatibility
+       end-line end-column buffer checker filename message level id group
+       &aux
+       (-region nil)
+       (-coordinates (flycheck-coords-new line column end-line end-column))))
+     (:constructor ;; Legacy constructor
+      flycheck-error-new-at
+      (line
+       column
+       &optional level message
+       &key checker id group end-line end-column
+       (filename (buffer-file-name)) (buffer (current-buffer))
+       &aux (-region nil)
+       (-coordinates (flycheck-coords-new line column end-line end-column))))
+     (:constructor
+      flycheck-error-new-with-coords
+      (line
+       column
+       end-line
+       end-column
+       &optional level message
+       &key checker id group
+       (filename (buffer-file-name)) (buffer (current-buffer))
+       &aux (-region nil)
+       (-coordinates (flycheck-coords-new line column end-line end-column))))
+     (:constructor
+      flycheck-error-new-with-region
+      (start-pos
+       end-pos
+       &optional level message
+       &key checker id group
+       (filename (buffer-file-name)) (buffer (current-buffer))
+       &aux (-region (cons start-pos end-pos)) (-coordinates nil))))
   "Structure representing an error reported by a syntax checker.
+
 Slots:
 
 `buffer'
@@ -2941,20 +3031,20 @@ Slots:
 `filename'
      The file name the error refers to, as string.
 
-`line'
-     The line number the error refers to, as number.
+`-coordinates'
+     The boundaries of this error as a `flycheck-coords' record.
+     This field may be nil or partially populated; use the
+     `flycheck-error-coordinates' wrapper function to access a
+     consistent version of it, or use the individual accessor functions
+     `flycheck-error-start-line', `flycheck-error-start-column',
+     `flycheck-error-end-line', `flycheck-error-end-column' (all of these are
+     `setf'-able, as long as `-region' is unset).
 
-`column' (optional)
-     The column number the error refers to, as number.
-
-     For compatibility with external tools and unlike Emacs
-     itself (e.g. in Compile Mode) Flycheck uses _1-based_
-     columns: The first character on a line is column 1.
-
-     Occasionally some tools try to proactively adapt to Emacs
-     and emit 0-based columns automatically.  In these cases, the
-     columns must be adjusted for Flycheck, see
-     `flycheck-increment-error-columns'.
+`-region'
+     The boundaries of this error as a cons of two points (beginning and
+     end of this error).  This field may be nil; use the
+     `flycheck-error-region' wrapper function to access a consistent
+     version of it.  If set, this takes precedence over `-coordinates'.
 
 `message' (optional)
      The error message as a string, if any.
@@ -2965,7 +3055,7 @@ Slots:
 `id' (optional)
      An ID identifying the kind of error.
 
-`group` (optional)
+`group' (optional)
      A symbol identifying the group the error belongs to.
 
      Some tools will emit multiple errors that relate to the same
@@ -2973,125 +3063,59 @@ Slots:
      collected by a checker should have the same `group` value,
      in order to be able to present them to the user.
 
-     See `flycheck-related-errors`."
-  buffer checker filename line column message level id group)
+     See `flycheck-related-errors`.
 
-(defmacro flycheck-error-with-buffer (err &rest forms)
-  "Switch to the buffer of ERR and evaluate FORMS.
+Constructors:
 
-If the buffer of ERR is not live, FORMS are not evaluated."
-  (declare (indent 1) (debug t))
-  `(when (buffer-live-p (flycheck-error-buffer ,err))
-     (with-current-buffer (flycheck-error-buffer ,err)
-       ,@forms)))
+- `flycheck-error-new': Construct an arbitrary error (no default values).
+- `flycheck-error-new-at': Construct an error at a given line and column.
+- `flycheck-error-new-with-coords': Construct an error from two pairs of lines
+  and columns.
+- `flycheck-error-new-with-region': Construct an error from a pair of buffer
+  offsets."
+  buffer checker filename -coordinates -region message level id group)
 
-(defun flycheck-error-line-region (err)
-  "Get the line region of ERR.
+;; Getters and setters for error objects
 
-ERR is a Flycheck error whose region to get.
+(defun flycheck-region-to-coordinates (region buf)
+  "Convert REGION to a set of coordinates using BUF."
+  (flycheck-with-widened-buffer buf
+    (let ((start (flycheck-line-column-at (car region)))
+          (end (flycheck-line-column-at (cdr region))))
+      (flycheck-coords-new
+       (car start) (cdr start) (car end) (cdr end)))))
 
-Return a cons cell `(BEG . END)' where BEG is the first
-non-whitespace character on the line ERR refers to, and END the
-end of the line."
-  (flycheck-error-with-buffer err
-    (save-restriction
-      (save-excursion
-        (widen)
-        (goto-char (point-min))
-        (forward-line (- (flycheck-error-line err) 1))
-        ;; We are at the beginning of the line now, so move to the beginning of
-        ;; its indentation, similar to `back-to-indentation'
-        (let ((end (line-end-position)))
-          (skip-syntax-forward " " end)
-          (backward-prefix-chars)
-          ;; If the current line is empty, include the previous line break
-          ;; character(s) to have any region at all.  When called with 0,
-          ;; `line-end-position' gives us the end of the previous line
-          (cons (if (eolp) (line-end-position 0) (point)) end))))))
+(defun flycheck-error-coordinates (err)
+  "Read or compute the line-column coordinates of error ERR.
 
-(defun flycheck-error-column-region (err)
-  "Get the error column region of ERR.
+Do not modify the value returned by this function; instead, use
+the function `flycheck-error-set-coordinates'."
+  (setf (flycheck-error--coordinates err)
+        (or (flycheck-error--coordinates err)
+            (flycheck-region-to-coordinates
+             (flycheck-error--region err) (flycheck-error-buffer err)))))
 
-ERR is a Flycheck error whose region to get.
+(defun flycheck-error-start-line (err)
+  "Return the start line of a Flycheck error ERR."
+  (flycheck-coords-start-line (flycheck-error-coordinates err)))
 
-Return a cons cell `(BEG . END)' where BEG is the character
-before the error column, and END the actual error column, or nil
-if ERR has no column."
-  (flycheck-error-with-buffer err
-    (save-restriction
-      (save-excursion
-        (-when-let (column (flycheck-error-column err))
-          (widen)
-          (goto-char (point-min))
-          (forward-line (- (flycheck-error-line err) 1))
-          (cond
-           ((eobp)                    ; Line beyond EOF
-            ;; If we are at the end of the file (i.e. the line was beyond the
-            ;; end of the file), use the very last column in the file.
-            (cons (- (point-max) 1) (point-max)))
-           ((eolp)                    ; Empty line
-            ;; If the target line is empty, there's no column to highlight on
-            ;; this line, so return the last column of the previous line.
-            (cons (line-end-position 0) (point)))
-           (t
-            ;; The end is either the column offset of the line, or the end of
-            ;; the line, if the column offset points beyond the end of the
-            ;; line.
-            (let ((end (min (+ (point) column)
-                            (+ (line-end-position) 1))))
-              (cons (- end 1) end)))))))))
+(defun flycheck-error-start-column (err)
+  "Return the start column of a Flycheck error ERR."
+  (flycheck-coords-start-column (flycheck-error-coordinates err)))
 
-(defun flycheck-error-thing-region (thing err)
-  "Get the region of THING at the column of ERR.
+(defun flycheck-error-end-line (err)
+  "Return the end line of a Flycheck error ERR."
+  (flycheck-coords-end-line (flycheck-error-coordinates err)))
 
-ERR is a Flycheck error whose region to get.  THING is a
-understood by `thing-at-point'.
+(defun flycheck-error-end-column (err)
+  "Return the end column of a Flycheck error ERR."
+  (flycheck-coords-end-column (flycheck-error-coordinates err)))
 
-Return a cons cell `(BEG . END)' where BEG is the beginning of
-the THING at the error column, and END the end of the symbol.  If
-ERR has no error column, or if there is no THING at this column,
-return nil."
-  (-when-let (column (car (flycheck-error-column-region err)))
-    (flycheck-error-with-buffer err
-      (save-excursion
-        (save-restriction
-          (widen)
-          (goto-char column)
-          (bounds-of-thing-at-point thing))))))
+(define-obsolete-function-alias 'flycheck-error-line
+  'flycheck-error-start-line "Flycheck 32")
 
-(defun flycheck-error-region-for-mode (err mode)
-  "Get the region of ERR for the highlighting MODE.
-
-ERR is a Flycheck error.  MODE may be one of the following symbols:
-
-`columns'
-     Get the column region of ERR, or the line region if ERR
-     has no column.
-
-`symbols'
-     Get the symbol region of ERR, or the result of `columns', if
-     there is no sexp at the error column.
-
-`sexps'
-     Get the sexp region of ERR, or the result of `columns', if
-     there is no sexp at the error column.
-
-`lines'
-     Return the line region.
-
-Otherwise signal an error."
-  ;; Ignoring fields speeds up calls to `line-end-position' in
-  ;; `flycheck-error-column-region' and `flycheck-error-line-region'.
-  (let ((inhibit-field-text-motion t))
-    (pcase mode
-      (`columns (or (flycheck-error-column-region err)
-                    (flycheck-error-line-region err)))
-      (`symbols (or (flycheck-error-thing-region 'symbol err)
-                    (flycheck-error-region-for-mode err 'columns)))
-      (`sexps (or (flycheck-error-thing-region 'sexp err)
-                  (flycheck-error-region-for-mode err 'columns)))
-      (`lines (flycheck-error-line-region err))
-      (_ (error "Invalid mode %S" mode)))))
+(define-obsolete-function-alias 'flycheck-error-column
+  'flycheck-error-start-column "Flycheck 32")
 
 (defun flycheck-error-pos (err)
   "Get the buffer position of ERR.
@@ -3100,8 +3124,160 @@ ERR is a Flycheck error whose position to get.
 
 The error position is the error column, or the first
 non-whitespace character of the error line, if ERR has no error column."
-  (car (or (flycheck-error-column-region err)
-           (flycheck-error-line-region err))))
+  (let ((flycheck-highlighting-mode 'columns))
+    (car (flycheck-error-region err))))
+
+(defun flycheck-error--ensure-coordinates-writable (err)
+  "Complain loudly if the `-region' field of ERR is set."
+  (when (flycheck-error--region err)
+    (error "Cannot change the coordinates of an error built \
+using `flycheck-error-new-with-region'")))
+
+(defun flycheck-error--set-start-line (err line)
+  "Set the start line of a Flycheck error ERR to LINE."
+  (flycheck-error--ensure-coordinates-writable err)
+  (setf (flycheck-coords-start-line
+         (flycheck-error--coordinates err))
+        line))
+
+(defun flycheck-error--set-start-column (err column)
+  "Set the start column of a Flycheck error ERR to COLUMN."
+  (flycheck-error--ensure-coordinates-writable err)
+  (setf (flycheck-coords-start-column
+         (flycheck-error--coordinates err))
+        column))
+
+(defun flycheck-error--set-end-line (err line)
+  "Set the end line of a Flycheck error ERR to LINE."
+  (flycheck-error--ensure-coordinates-writable err)
+  (setf (flycheck-coords-end-line (flycheck-error--coordinates err)) line))
+
+(defun flycheck-error--set-end-column (err column)
+  "Set the end column of a Flycheck error ERR to COLUMN."
+  (flycheck-error--ensure-coordinates-writable err)
+  (setf (flycheck-coords-end-column (flycheck-error--coordinates err)) column))
+
+(gv-define-simple-setter flycheck-error-start-line
+                         flycheck-error--set-start-line)
+(gv-define-simple-setter flycheck-error-start-column
+                         flycheck-error--set-start-column)
+(gv-define-simple-setter flycheck-error-end-line
+                         flycheck-error--set-end-line)
+(gv-define-simple-setter flycheck-error-end-column
+                         flycheck-error--set-end-column)
+
+(defun flycheck-error--set-line (err line)
+  "Set the start line of error ERR to LINE and its end line to nil."
+  (declare (obsolete "use `flycheck-error-start-line' \
+and `flycheck-error-end-line' instead." "Flycheck 32"))
+  (setf (flycheck-error-start-line err) line (flycheck-error-end-line err) nil))
+
+(defun flycheck-error--set-column (err column)
+  "Set the start column of error ERR to COLUMN and its end column to nil."
+  (declare (obsolete "use `flycheck-error-start-column' \
+and `flycheck-error-end-column' instead." "Flycheck 32"))
+  (setf (flycheck-error-start-column err) column
+        (flycheck-error-end-column err) nil))
+
+(gv-define-simple-setter flycheck-error-line flycheck-error--set-line)
+(gv-define-simple-setter flycheck-error-column flycheck-error--set-column)
+
+(defmacro flycheck-error-with-buffer (err &rest forms)
+  "Switch to the buffer of ERR and evaluate FORMS.
+
+If the buffer of ERR is not live, FORMS are not evaluated."
+  (declare (indent 1) (debug t))
+  `(flycheck-with-buffer (flycheck-error-buffer ,err)
+     ,@forms))
+
+(defun flycheck-line-column-to-position (line col buf)
+  "Return the point closest to LINE, COL in BUF."
+  (flycheck-with-widened-buffer buf
+    (goto-char (point-min))
+    (forward-line (- line 1))
+    (min (+ (point) (1- col))
+         (line-end-position))))
+
+(defun flycheck--line-region (start-line end-line buf)
+  "Get the line region of lines START-LINE..END-LINE in BUF.
+
+Return a cons cell `(BEG . END)' where BEG is the first
+non-whitespace character on START-LINE line in BUF, and END the end of
+line END-LINE (defaulting to START-LINE)."
+  (flycheck-with-widened-buffer buf
+    (goto-char (point-min))
+    (forward-line (- start-line 1))
+    ;; We are at the beginning of the line now, so move to the beginning of
+    ;; its indentation, similar to `back-to-indentation'
+    (skip-syntax-forward " " (line-end-position))
+    (backward-prefix-chars)
+    ;; If the current line is empty, include the previous line break
+    ;; character(s) to have any region at all.  When called with 0,
+    ;; `line-end-position' gives us the end of the previous line
+    (let ((start (if (eolp) (line-end-position 0) (point))))
+      (unless (or (null end-line) (= start-line end-line))
+        (forward-line (- end-line start-line)))
+      (cons start (line-end-position)))))
+
+(defun flycheck--column-region (pos buf)
+  "Get the column region of position POS in BUF.
+
+Return a cons cell `(BEG . END)' where BEG is the character
+before the column, and END the actual column."
+  (flycheck-with-widened-buffer buf
+    (goto-char pos)
+    ;; (eobp): No enough lines in the buffer
+    (if (eobp) (cons (1- (point-max)) (point-max))
+      (cons pos (1+ pos)))))
+
+(defun flycheck-bounds-of-thing-at-pos (thing pos buf)
+  "Get the region of THING at position POS in BUF.
+
+THING is a understood by `thing-at-point'.
+
+Return a cons cell `(BEG . END)' where BEG is the beginning of
+the THING at the column, and END the end of the THING."
+  (flycheck-with-widened-buffer buf
+    (goto-char pos)
+    (bounds-of-thing-at-point thing)))
+
+(defun flycheck-coords-to-region (coordinates buf)
+  "Convert COORDINATES to a cons of positions in buffer BUF."
+  (let* ((start-line (flycheck-coords-start-line coordinates))
+         (end-line (or (flycheck-coords-end-line coordinates) start-line))
+         (start-column (flycheck-coords-start-column coordinates))
+         (end-column (flycheck-coords-end-column coordinates)))
+    (if (and start-column end-column)
+        ;; We have exact coordinates
+        (let ((beg (flycheck-line-column-to-position
+                    start-line start-column buf))
+              (end (flycheck-line-column-to-position
+                    end-line end-column buf)))
+          (if (= beg end)
+              (flycheck-with-widened-buffer buf
+                (if (= end (point-max))
+                    (cons (1- end) end)
+                  (cons end (1+ end))))
+            (cons beg end)))
+      ;; We have partial coordinates, so highlight according
+      ;; to `flycheck-highlighting-mode'
+      (let ((inhibit-field-text-motion t))
+        (if (or (null start-column)
+                (eq flycheck-highlighting-mode 'lines))
+            (flycheck--line-region start-line end-line buf)
+          (let* ((beg (flycheck-line-column-to-position
+                       start-line start-column buf)))
+            (or (pcase flycheck-highlighting-mode
+                  (`symbols (flycheck-bounds-of-thing-at-pos 'symbol beg buf))
+                  (`sexps (flycheck-bounds-of-thing-at-pos 'sexp beg buf)))
+                (flycheck--column-region beg buf))))))))
+
+(defun flycheck-error-region (err)
+  "Read or compute the region covered by ERR."
+  ;; No caching: this is called just once, when placing overlays.
+  (or (flycheck-error--region err)
+      (flycheck-coords-to-region
+       (flycheck-error--coordinates err) (flycheck-error-buffer err))))
 
 (defun flycheck-error-format-message-and-id (err)
   "Format the message and id of ERR as human-readable string."
@@ -3120,8 +3296,8 @@ non-whitespace character of the error line, if ERR has no error column."
 Return a string that represents the given ERR.  If WITH-FILE-NAME
 is given and non-nil, include the file-name as well, otherwise
 omit it."
-  (let* ((line (flycheck-error-line err))
-         (column (flycheck-error-column err))
+  (let* ((line (flycheck-error-start-line err))
+         (column (flycheck-error-start-column err))
          (level (symbol-name (flycheck-error-level err)))
          (checker (symbol-name (flycheck-error-checker err)))
          (format `(,@(when with-file-name
@@ -3134,18 +3310,19 @@ omit it."
     (apply #'concat format)))
 
 (defun flycheck-error-< (err1 err2)
-  "Determine whether ERR1 is less than ERR2 by location.
-
-Compare by line numbers and then by column numbers."
-  (let ((line1 (flycheck-error-line err1))
-        (line2 (flycheck-error-line err2)))
-    (if (= line1 line2)
-        (let ((col1 (flycheck-error-column err1))
-              (col2 (flycheck-error-column err2)))
-          (and col2
-               ;; Sort errors for the whole line first
-               (or (not col1) (< col1 col2))))
-      (< line1 line2))))
+  "Determine whether ERR1 is less than ERR2 by location."
+  (-if-let* ((r1 (flycheck-error--region err1))
+             (r2 (flycheck-error--region err2)))
+      (< (car r1) (car r2))
+    (let ((line1 (flycheck-error-start-line err1))
+          (line2 (flycheck-error-start-line err2)))
+      (if (= line1 line2)
+          (let ((col1 (flycheck-error-start-column err1))
+                (col2 (flycheck-error-start-column err2)))
+            (and col2
+                 ;; Sort errors for the whole line first
+                 (or (not col1) (< col1 col2))))
+        (< line1 line2)))))
 
 (defun flycheck-error-level-< (err1 err2)
   "Determine whether ERR1 is less than ERR2 by error level.
@@ -3242,7 +3419,7 @@ otherwise."
         (flycheck-relevant-error-other-file-p err))
        message
        (not (string-empty-p message))
-       (flycheck-error-line err)))))
+       (flycheck-error-start-line err)))))
 
 (defun flycheck-relevant-errors (errors)
   "Filter the relevant errors from ERRORS.
@@ -3529,7 +3706,6 @@ Returns sanitized ERRORS."
   (dolist (err errors)
     (flycheck-error-with-buffer err
       (let ((message (flycheck-error-message err))
-            (column (flycheck-error-column err))
             (id (flycheck-error-id err)))
         (when message
           (setq message (string-trim message))
@@ -3537,8 +3713,10 @@ Returns sanitized ERRORS."
                 (if (string-empty-p message) nil message)))
         (when (and id (string-empty-p id))
           (setf (flycheck-error-id err) nil))
-        (when (eq column 0)
-          (setf (flycheck-error-column err) nil)))))
+        (when (eq (flycheck-error-start-column err) 0)
+          (setf (flycheck-error-start-column err) nil))
+        (when (eq (flycheck-error-end-column err) 0)
+          (setf (flycheck-error-end-column err) nil)))))
   errors)
 
 (defun flycheck-remove-error-file-names (file-name errors)
@@ -3556,15 +3734,16 @@ Return ERRORS."
   errors)
 
 (defun flycheck-increment-error-columns (errors &optional offset)
-  "Increment all columns of ERRORS by OFFSET.
+  "Increment all columns of ERRORS by OFFSET (default: 1) .
 
 Use this as `:error-filter' if a syntax checker outputs 0-based
 columns."
+  (setq offset (or offset 1)) ;; Emacs bug #31715
   (seq-do (lambda (err)
-            (let ((column (flycheck-error-column err)))
-              (when column
-                (setf (flycheck-error-column err)
-                      (+ column (or offset 1))))))
+            (when (flycheck-error-start-column err)
+              (cl-incf (flycheck-error-start-column err) offset))
+            (when (flycheck-error-end-column err)
+              (cl-incf (flycheck-error-end-column err) offset)))
           errors)
   errors)
 
@@ -3615,7 +3794,7 @@ Return ERRORS, with in-place modifications."
 
 ERRORS is a list of `flycheck-error' objects.  SENTINEL-MESSAGE
 is a regular expression matched against the error message to
-determine whether the errror denotes errors from an included
+determine whether the error denotes errors from an included
 file.  Alternatively, it is a function that is given an error and
 shall return non-nil, if the error denotes errors from an
 included file."
@@ -3703,8 +3882,8 @@ without line numbers.
 
 Return ERRORS."
   (seq-do (lambda (err)
-            (unless (flycheck-error-line err)
-              (setf (flycheck-error-line err) 0)))
+            (unless (flycheck-error-start-line err)
+              (setf (flycheck-error-start-line err) 0)))
           errors)
   errors)
 
@@ -3764,8 +3943,7 @@ Return the created overlay."
                     (cons (point-min)
                           (save-excursion (goto-char (point-min))
                                           (point-at-eol)))
-                  (flycheck-error-region-for-mode
-                   err (or flycheck-highlighting-mode 'lines))))
+                  (flycheck-error-region err)))
                (overlay (make-overlay beg end))
                (level (flycheck-error-level err))
                (category (flycheck-error-level-overlay-category level)))
@@ -4111,8 +4289,8 @@ Return a list with the contents of the table cell."
   (let* ((level (flycheck-error-level error))
          (level-face (flycheck-error-level-error-list-face level))
          (filename (flycheck-error-filename error))
-         (line (flycheck-error-line error))
-         (column (flycheck-error-column error))
+         (line (flycheck-error-start-line error))
+         (column (flycheck-error-start-column error))
          (message (or (flycheck-error-message error)
                       (format "Unknown %s" (symbol-name level))))
          (flushed-msg (flycheck-flush-multiline-message message))
@@ -7692,11 +7870,11 @@ Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
   :error-filter
   (lambda (errors)
     (dolist (error errors)
-      (unless (flycheck-error-line error)
+      (unless (flycheck-error-start-line error)
         ;; Flycheck ignores errors without line numbers, but the error
         ;; message about multiple packages in a directory doesn't come with a
         ;; line number, so inject a fake one.
-        (setf (flycheck-error-line error) 1)))
+        (setf (flycheck-error-start-line error) 1)))
     errors)
   :modes go-mode
   :predicate (lambda ()
@@ -9161,8 +9339,8 @@ See URL `https://sourceforge.net/projects/rpmlint/'."
   ;; Add fake line numbers if they are missing in the lint output
   (lambda (errors)
     (dolist (err errors)
-      (unless (flycheck-error-line err)
-        (setf (flycheck-error-line err) 1)))
+      (unless (flycheck-error-start-line err)
+        (setf (flycheck-error-start-line err) 1)))
     errors)
   :error-explainer
   (lambda (error)
