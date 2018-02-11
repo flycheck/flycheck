@@ -17,6 +17,7 @@
   - CWL with ``schema-salad-tool`` [GH-1361]
   - MarkdownLint CLI with ``markdownlint`` [GH-1366]
   - Rust with ``rust-clippy`` [GH-1385]
+  - VHDL with ``ghdl`` [GH-1160]
 
 - New features:
 

@@ -1322,6 +1322,20 @@ to view the docstring of the syntax checker.  Likewise, you may use
          A list of include directories.  Relative paths are relative to the file
          being checked.
 
+.. supported-language:: VHDL
+
+   .. syntax-checker:: vhdl-ghdl
+
+      Check syntax with `GHDL <http://ghdl.free.fr/>`_.
+
+      .. defcustom:: flycheck-ghdl-language-standard
+
+         The language standard to use as string.
+
+      .. defcustom:: flycheck-ghdl-workdir
+
+         The directory to use for the file library.
+
 .. supported-language:: XML
 
    Flycheck checks XML with `xml-xmlstarlet` or `xml-xmllint`.

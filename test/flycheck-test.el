@@ -4342,6 +4342,12 @@ The manifest path is relative to
    '(2 nil warning "Signal is not driven, nor used: val"
        :checker verilog-verilator)))
 
+(flycheck-ert-def-checker-test vhdl-ghdl vhdl error
+  (flycheck-ert-should-syntax-check
+   "language/vhdl.vhd" 'vhdl-mode
+   '(4 1 error "';' is expected instead of '<EOF>'"
+       :checker vhdl-ghdl)))
+
 (flycheck-ert-def-checker-test xml-xmlstarlet xml nil
   (flycheck-ert-should-syntax-check
    "language/xml.xml" 'nxml-mode
