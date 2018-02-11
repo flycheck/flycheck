@@ -48,7 +48,7 @@
   - Add ``flycheck-perl-module-list`` to use specified modules when
     syntax checking code with the ``perl`` checker. [GH-1207]
   - Add ``flycheck-sh-bash-args`` to pass arguments to ``sh-bash`` [GH-1439].
-  - Add ``flychjeck-eslint-args`` to pass arguments to ``javascript-eslint``
+  - Add ``flychjeck-eslint-args`` to pass arguments to ``javascript-eslint``.
     [GH-1360]
   - Add ``flycheck-default-executable-find``, the new default value for
     ``flycheck-executable-find``, to allow using relative paths to checkers
@@ -66,6 +66,8 @@
   - Add ``flycheck-relevant-error-other-file-show`` to avoid showing errors
     from other files. [GH-1579]
   - Add an error explainer for the ``nix-linter`` checker. [GH-1586]
+  - Checkers can now specify the exact region covered by an error, using
+    the :end-line and :end-column properties. [GH-1400]
 
 - Improvements
 
