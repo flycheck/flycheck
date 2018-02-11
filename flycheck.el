@@ -238,6 +238,7 @@ attention to case differences."
     ruby-jruby
     rust-cargo
     rust
+    rust-clippy
     scala
     scala-scalastyle
     scheme-chicken
@@ -4711,7 +4712,7 @@ the syntax checker definition, if the variable is nil."
         (flycheck-checker-default-executable checker))))
 
 (defun flycheck-find-checker-executable (checker)
-  "Get the full path of the executbale of CHECKER.
+  "Get the full path of the executable of CHECKER.
 
 Return the full absolute path to the executable of CHECKER, or
 nil if the executable does not exist."
@@ -5786,7 +5787,7 @@ https://github.com/rust-lang/rust/blob/master/src/libsyntax/json.rs#L67-L139"
     ;; Turn each span into a flycheck error
     (dolist (span spans)
       (let-alist span
-        ;; Children lack any filename/line/column information, so we use
+        ;; Children may not have filename/line/column information, so we use
         ;; those from the primary span
         (when .is_primary
           (setq primary-filename .file_name
@@ -5813,16 +5814,27 @@ https://github.com/rust-lang/rust/blob/master/src/libsyntax/json.rs#L67-L139"
          errors)))
 
     ;; Then we turn children messages into flycheck errors pointing to the
-    ;; location of the primary span.  According to the format, children
-    ;; may contain spans, but they do not seem to use them in practice.
+    ;; location of the primary span.
     (dolist (child children)
       (let-alist child
         (push
          (flycheck-error-new-at
-          primary-line
-          primary-column
+          ;; Use the line/column from the first span if there is one, or
+          ;; fallback to the line/column information from the primary span of
+          ;; the diagnostic.
+          (or (cdr (assq 'line_start (car .spans)))
+              primary-line)
+          (or (cdr (assq 'column_start (car .spans)))
+              primary-column)
           'info
-          .message
+          ;; Messages from `cargo clippy' may suggest replacement code.  In
+          ;; these cases, the `message' field itself is an unhelpful `try' or
+          ;; `change this to'.  We add the `suggested_replacement' field in
+          ;; these cases.
+          (-if-let (replacement
+                    (cdr (assq 'suggested_replacement (car .spans))))
+              (format "%s: `%s`" .message replacement)
+            .message)
           :id error-code
           :checker checker
           :buffer buffer
@@ -9375,6 +9387,24 @@ Relative paths are relative to the file being checked."
                  (flycheck-error-message err)))
               errors))
 
+(defun flycheck-rust-manifest-directory ()
+  "Return the nearest directory holding the Cargo manifest.
+
+Return the nearest directory containing the `Cargo.toml' manifest
+file, starting from the current buffer and using
+`locate-dominating-file'.  Return nil if there is no such file,
+or if the current buffer has no file name."
+  (and buffer-file-name
+       (locate-dominating-file buffer-file-name "Cargo.toml")))
+
+(defun flycheck-rust-cargo-has-command-p (command)
+  "Whether Cargo has COMMAND in its list of commands.
+
+Execute `cargo --list' to find out whether COMMAND is present."
+  (let ((cargo (funcall flycheck-executable-find "cargo")))
+    (member command (mapcar #'string-trim-left
+                            (ignore-errors (process-lines cargo "--list"))))))
+
 (defun flycheck-rust-valid-crate-type-p (crate-type)
   "Whether CRATE-TYPE is a valid target type for Cargo.
 
@@ -9406,19 +9436,12 @@ This syntax checker requires Rust 1.17 or newer.  See URL
   :error-explainer flycheck-rust-error-explainer
   :modes rust-mode
   :predicate flycheck-buffer-saved-p
-  :enabled
-  (lambda ()
-    (and buffer-file-name
-         (locate-dominating-file buffer-file-name "Cargo.toml")))
-  :working-directory
-  (lambda (_)
-    (and buffer-file-name
-         (locate-dominating-file buffer-file-name "Cargo.toml")))
+  :enabled flycheck-rust-manifest-directory
+  :working-directory (lambda (_) (flycheck-rust-manifest-directory))
   :verify
   (lambda (_)
     (and buffer-file-name
-         (let* ((has-toml (locate-dominating-file
-                           buffer-file-name "Cargo.toml"))
+         (let* ((has-toml (flycheck-rust-manifest-directory))
                 (valid-crate-type (flycheck-rust-valid-crate-type-p
                                    flycheck-rust-crate-type))
                 (need-binary-name
@@ -9465,6 +9488,36 @@ This syntax checker needs Rust 1.7 or newer.  See URL
   :error-explainer flycheck-rust-error-explainer
   :modes rust-mode
   :predicate flycheck-buffer-saved-p)
+
+(flycheck-define-checker rust-clippy
+  "A Rust syntax checker using clippy.
+
+See URL `https://github.com/rust-lang-nursery/rust-clippy'."
+  :command ("cargo" "+nightly" "clippy" "--message-format=json")
+  :error-parser flycheck-parse-cargo-rustc
+  :error-filter flycheck-rust-error-filter
+  :error-explainer flycheck-rust-error-explainer
+  :modes rust-mode
+  :predicate flycheck-buffer-saved-p
+  :enabled (lambda ()
+             (and (flycheck-rust-cargo-has-command-p "clippy")
+                  (flycheck-rust-manifest-directory)))
+  :working-directory (lambda (_) (flycheck-rust-manifest-directory))
+  :verify
+  (lambda (_)
+    (and buffer-file-name
+         (let ((has-toml (flycheck-rust-manifest-directory))
+               (has-clippy (flycheck-rust-cargo-has-command-p "clippy")))
+           (list
+            (flycheck-verification-result-new
+             :label "Clippy"
+             :message (if has-clippy "Found"
+                        "Cannot find the `cargo clippy' command")
+             :face (if has-clippy 'success '(bold warning)))
+            (flycheck-verification-result-new
+             :label "Cargo.toml"
+             :message (if has-toml "Found" "Missing")
+             :face (if has-toml 'success '(bold warning))))))))
 
 (defvar flycheck-sass-scss-cache-directory nil
   "The cache directory for `sass' and `scss'.")

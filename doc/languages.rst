@@ -1028,21 +1028,27 @@ to view the docstring of the syntax checker.  Likewise, you may use
 .. supported-language:: Rust
 
    Flycheck checks Rust_ with `rust-cargo` in Cargo projects, or `rust`
-   otherwise.
+   otherwise.  For Cargo projects, you can also use the clippy_ linter with
+   `rust-clippy`.
 
    .. _Rust: https://www.rust-lang.org/
+   .. _clippy: https://github.com/rust-lang-nursery/rust-clippy
 
    .. syntax-checker:: rust-cargo
                        rust
+                       rust-clippy
 
       Check syntax and types with the Rust_ compiler.  In a Cargo_ project the
       compiler is invoked through ``cargo check`` to take Cargo dependencies
       into account.
 
+      `rust-clippy` has no configurable options.
+
       .. note::
 
          `rust-cargo` requires Rust 1.17 or newer.
          `rust` requires Rust 1.7 or newer.
+         `rust-clippy` requires the nightly version of Rust.
 
       .. _Cargo: http://doc.crates.io/index.html
 
