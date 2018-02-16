@@ -8507,7 +8507,9 @@ See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
             ;; here, because phpcs really insists to get option and argument as
             ;; a single command line argument :|
             (eval (when (buffer-file-name)
-                    (concat "--stdin-path=" (buffer-file-name)))))
+                    (concat "--stdin-path=" (buffer-file-name))))
+            ;; Read from standard input
+            "-")
   :standard-input t
   :error-parser flycheck-parse-checkstyle
   :error-filter
