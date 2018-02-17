@@ -7738,19 +7738,17 @@ See URL `http://www.groovy-lang.org'."
   :command ("groovy" "-e"
             "import org.codehaus.groovy.control.*
 
-file = new File(args[0])
 unit = new CompilationUnit()
-unit.addSource(file)
+unit.addSource(\"input\", System.in)
 
 try {
     unit.compile(Phases.CONVERSION)
 } catch (MultipleCompilationErrorsException e) {
     e.errorCollector.write(new PrintWriter(System.out, true), null)
-}
-"
-            source)
+}")
+  :standard-input t
   :error-patterns
-  ((error line-start (file-name) ": " line ":" (message)
+  ((error line-start "input: " line ":" (message)
           " @ line " line ", column " column "." line-end))
   :modes groovy-mode)
 
