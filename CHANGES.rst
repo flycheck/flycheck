@@ -38,6 +38,8 @@
     located. If ``Gemfile`` does not exist, old behaviour of running command
     from directory where ``.rubocop.yml`` is found will be used [GH-1368]
   - ``rust-cargo`` now uses ``cargo check`` and ``cargo test`` [GH-1289]
+  - ``python-pylint`` and ``python-flake8`` are now invoked with ``python -c``,
+    to make it easier to change between Python 2 and Python 3 [GH-1113]
 
 31 (Oct 07, 2017)
 =================
