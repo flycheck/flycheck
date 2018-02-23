@@ -3,10 +3,10 @@ language: python
 python:
   - "3.5"
 # Emacs fails to build using the latest Trusty image on Travis
-# See https://github.com/travis-ci/travis-ci/issues/9073
+# See https://github.com/travis-ci/travis-ci/issues/9061
+# and https://github.com/moby/moby/issues/22801
 sudo: required
 dist: trusty
-group: deprecated-2017Q4
 matrix:
   # Don’t wait for jobs that are allowed to fail
   fast_finish: true
@@ -27,6 +27,7 @@ env:
     - EMACS_VERSION=24.5
     - EMACS_VERSION=25.2
     - EMACS_VERSION=25.3
+    - EMACS_VERSION=26.0.91 PRETEST=yes
     - EMACS_VERSION=snapshot
     # A special job to build the manual
     - BUILD_MANUAL=yes
@@ -34,7 +35,7 @@ env:
     - LINT_PYTHON=yes
 before_install:
   - export PATH="$HOME/bin:$PATH"
-  - wget 'https://raw.githubusercontent.com/flycheck/emacs-travis/master/emacs-travis.mk'
+  - travis_retry wget 'https://raw.githubusercontent.com/flycheck/emacs-travis/master/emacs-travis.mk'
   - if [[ -n $EMACS_VERSION ]]; then make -f emacs-travis.mk install_emacs; fi
   - if [[ -n $EMACS_VERSION ]]; then make -f emacs-travis.mk install_cask; fi
   - if [[ -n $EMACS_VERSION ]]; then emacs --version; fi
@@ -45,7 +46,7 @@ install:
   # Install requirements for linting
   - if [[ $LINT_PYTHON == yes ]]; then pip install -r maint/requirements.txt; fi
 script:
-  # Check formatting on Emacs 25 (our formatting rules dont’ work on Emacs 24).
+  # Check formatting on Emacs 25 (our formatting rules don’t work on Emacs 24).
   - if [[ $EMACS_VERSION == 25.* ]]; then make check; fi
   # Compile and test
   - if [[ -n $EMACS_VERSION ]]; then make compile; fi

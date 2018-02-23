@@ -1,6 +1,6 @@
 ;;; test-javascript.el --- Flycheck Specs: JavaScript      -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017 Flycheck contributors
+;; Copyright (C) 2017-2018 Flycheck contributors
 
 ;; Author: Saša Jovanić <info@simplify.ba>
 
@@ -35,7 +35,7 @@
   \"message\":\"Parsing error: Unexpected token )\",
   \"line\":3,\"column\":25}],
   \"errorCount\":1,\"warningCount\":0,\"fixableErrorCount\":0,\"fixableWarningCount\":0,
-  \"source\":\"/** A bad if */\n\nif ( /* nothing here */ ) // comment\n\"}]")
+  \"source\":\"/** A bad if */if ( /* nothing here */ ) // comment\"}]")
           (json-without-errors "[{\"filePath\":\"/Users/username/Projects/elisp/flycheck/test/resources/language/javascript/jquery-3.2.1.js\",
   \"messages\":[],\"errorCount\":0,\"warningCount\":0,\"fixableErrorCount\":0,
   \"fixableWarningCount\":0}]")
@@ -45,7 +45,7 @@
   \"line\":3,\"column\":2,\"nodeType\":\"FunctionExpression\",
   \"source\":\"(function() {\",\"endLine\":5,\"endColumn\":2}],
   \"errorCount\":0,\"warningCount\":1,\"fixableErrorCount\":0,\"fixableWarningCount\":0,
-  \"source\":\"/** Tab indentation */\n\n(function() {\n\tvar foo = ['Hello world'];\n}());\n\"}]"))
+  \"source\":\"/** Tab indentation */(function() {var foo = ['Hello world'];}());\"}]"))
       (it "parses ESLint JSON output with errors"
         (expect (flycheck-parse-eslint json 'checker nil)
                 :to-be-equal-flycheck-errors

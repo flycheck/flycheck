@@ -30,7 +30,6 @@
  (depends-on "rjsx-mode")
  (depends-on "json-mode")
  (depends-on "less-css-mode")
- (depends-on "llvm-mode")
  (depends-on "lua-mode")
  (depends-on "markdown-mode")
  (depends-on "mmm-mode")

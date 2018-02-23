@@ -2974,7 +2974,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
    "language/emacs-lisp/warnings.el" 'emacs-lisp-mode
    '(12 nil warning "First sentence should end with punctuation"
         :checker emacs-lisp-checkdoc)
-   '(16 6 warning "message called with 0 arguments, but requires 1+"
+   '(16 6 warning "foobar called with 1 argument, but accepts only 0"
         :checker emacs-lisp)
    '(21 1 warning "the function `dummy-package-foo' is not known to be defined."
         :checker emacs-lisp )))
@@ -2997,10 +2997,10 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 (flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
                                checks-compressed-file
   (flycheck-ert-should-syntax-check
-   "language/emacs-lisp/compressed.el.gz" 'emacs-lisp-mode
+   "language/emacs-lisp/warnings.el.gz" 'emacs-lisp-mode
    '(12 nil warning "First sentence should end with punctuation"
         :checker emacs-lisp-checkdoc)
-   '(16 6 warning "message called with 0 arguments, but requires 1+"
+   '(16 6 warning "foobar called with 1 argument, but accepts only 0"
         :checker emacs-lisp)
    '(21 1 warning "the function `dummy-package-foo' is not known to be defined."
         :checker emacs-lisp)))
@@ -3059,11 +3059,16 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (let ((flycheck-emacs-lisp-check-declare t))
     (flycheck-ert-should-syntax-check
      "language/emacs-lisp/check-declare-warnings.el" 'emacs-lisp-mode
-     (if (version< emacs-version "25")
-         '(0 nil warning "`this-function-is-not-declared' was defined in this-file-does-not-exist.el: file not found"
-             :checker emacs-lisp)
+     (cond
+      ((version< emacs-version "25")
+       '(0 nil warning "`this-function-is-not-declared' was defined in this-file-does-not-exist.el: file not found"
+           :checker emacs-lisp))
+      ((version< emacs-version "26")
        '(9 1 warning "`this-function-is-not-declared' was defined in this-file-does-not-exist.el: file not found"
-           :checker emacs-lisp)))))
+           :checker emacs-lisp))
+      (t
+       '(9 nil warning "`this-function-is-not-declared' was defined in this-file-does-not-exist.el: file not found"
+           :checker emacs-lisp))))))
 
 (flycheck-ert-def-checker-test emacs-lisp emacs-lisp disable-check-declare
   (let ((flycheck-emacs-lisp-check-declare nil))
