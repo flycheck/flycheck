@@ -54,6 +54,8 @@ Flycheck follows this process for all the :ref:`many different syntax checkers
    :infonode:`(elisp)Overlays`
       How to add temporary annotations to a buffer.
 
+.. _adding-a-checker:
+
 Adding a syntax checker to Flycheck
 ===================================
 
