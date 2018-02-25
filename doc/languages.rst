@@ -730,11 +730,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: markdown-markdownlint-cli
 
-      Check Markdown with `markdownlint <https://github.com/igorshubovych/markdownlint-cli>`_.
+      Check Markdown with `markdownlint-cli
+      <https://github.com/igorshubovych/markdownlint-cli>`_.
 
       .. syntax-checker-config-file:: flycheck-markdown-markdownlint-cli-config
-
-         Path to configuration file.
 
    .. syntax-checker:: markdown-mdl
 
