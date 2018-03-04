@@ -1364,7 +1364,7 @@ a default on its own."
                                   (flycheck-defined-checkers property))))
          (default (and default (symbol-name default)))
          (input (flycheck-completing-read
-                 prompt candidates default
+                 prompt candidates (or default (car candidates))
                  'read-flycheck-checker-history)))
     (when (string-empty-p input)
       (unless default
@@ -1384,7 +1384,8 @@ to the default levels."
                           (flycheck-error-list-current-errors)))
          (levels-with-defaults (append '(info warning error) levels))
          (uniq-levels (seq-uniq levels-with-defaults))
-         (level (flycheck-completing-read prompt uniq-levels nil)))
+         (level (flycheck-completing-read prompt uniq-levels
+                                          (car uniq-levels))))
     (and (stringp level) (intern level))))
 
 
