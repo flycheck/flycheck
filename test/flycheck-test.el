@@ -3999,7 +3999,6 @@ The manifest path is relative to
      '(3 1 warning "function is never used: `main`" :checker rust-cargo :id "dead_code")
      '(3 1 info "#[warn(dead_code)] on by default" :checker rust-cargo :id "dead_code")
      '(4 9 warning "unused variable: `x`" :checker rust-cargo :id "unused_variables")
-     '(4 9 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
      '(4 9 info "to avoid this warning, consider using `_x` instead" :checker rust-cargo :id "unused_variables"))))
 
 (flycheck-ert-def-checker-test rust-cargo rust default-target
@@ -4012,7 +4011,6 @@ The manifest path is relative to
      '(3 1 warning "function is never used: `main`" :checker rust-cargo :id "dead_code")
      '(3 1 info "#[warn(dead_code)] on by default" :checker rust-cargo :id "dead_code")
      '(4 9 warning "unused variable: `x`" :checker rust-cargo :id "unused_variables")
-     '(4 9 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
      '(4 9 info "to avoid this warning, consider using `_x` instead" :checker rust-cargo :id "unused_variables"))))
 
 (flycheck-ert-def-checker-test rust-cargo rust lib-main
@@ -4029,9 +4027,7 @@ The manifest path is relative to
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/src/lib.rs" 'rust-mode
        '(3 1 warning "function is never used: `foo_lib`" :checker rust-cargo :id "dead_code")
-       '(3 1 info "#[warn(dead_code)] on by default" :checker rust-cargo :id "dead_code")
        '(6 17 warning "unused variable: `foo_lib_test`" :checker rust-cargo  :id "unused_variables")
-       '(6 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
        '(6 17 info "to avoid this warning, consider using `_foo_lib_test` instead" :checker rust-cargo :id "unused_variables")))
 
     (let ((flycheck-rust-crate-type "lib"))
@@ -4053,7 +4049,6 @@ The manifest path is relative to
        '(1 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
        '(1 17 info "to avoid this warning, consider using `_foo_main` instead" :checker rust-cargo :id "unused_variables")
        '(4 17 warning "unused variable: `foo_main_test`" :checker rust-cargo :id "unused_variables")
-       '(4 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
        '(4 17 info "to avoid this warning, consider using `_foo_main_test` instead" :checker rust-cargo :id "unused_variables")))
 
     (let ((flycheck-rust-crate-type "bin")
@@ -4065,7 +4060,6 @@ The manifest path is relative to
        '(1 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
        '(1 17 info "to avoid this warning, consider using `_foo_bin_a` instead" :checker rust-cargo :id "unused_variables")
        '(4 17 warning "unused variable: `foo_bin_a_test`" :checker rust-cargo :id "unused_variables")
-       '(4 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
        '(4 17 info "to avoid this warning, consider using `_foo_bin_a_test` instead" :checker rust-cargo :id "unused_variables")))
 
     (let ((flycheck-rust-crate-type "bench")
@@ -4077,7 +4071,6 @@ The manifest path is relative to
        '(1 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
        '(1 17 info "to avoid this warning, consider using `_foo_bench_a` instead" :checker rust-cargo :id "unused_variables")
        '(4 17 warning "unused variable: `foo_bench_a_test`" :checker rust-cargo :id "unused_variables")
-       '(4 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
        '(4 17 info "to avoid this warning, consider using `_foo_bench_a_test` instead" :checker rust-cargo :id "unused_variables")))
 
     (let ((flycheck-rust-crate-type "test")
@@ -4100,8 +4093,18 @@ The manifest path is relative to
        '(1 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
        '(1 17 info "to avoid this warning, consider using `_foo_ex_a` instead" :checker rust-cargo :id "unused_variables")
        '(4 17 warning "unused variable: `foo_ex_a_test`" :checker rust-cargo :id "unused_variables")
-       '(4 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
        '(4 17 info "to avoid this warning, consider using `_foo_ex_a_test` instead" :checker rust-cargo :id "unused_variables")))))
+
+(flycheck-ert-def-checker-test rust-cargo rust workspace-subcrate
+  (let ((flycheck-disabled-checkers '(rust)))
+    (let ((flycheck-rust-crate-type "lib")
+          (flycheck-rust-check-tests t))
+      (flycheck-ert-cargo-clean "language/rust/workspace/crate1/Cargo.toml")
+      (flycheck-ert-should-syntax-check
+       "language/rust/workspace/crate1/src/lib.rs" 'rust-mode
+       '(2 7 warning "unused variable: `a`" :checker rust-cargo :id "unused_variables")
+       '(2 7 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
+       '(2 7 info "to avoid this warning, consider using `_a` instead" :checker rust-cargo :id "unused_variables")))))
 
 (flycheck-ert-def-checker-test rust-cargo rust dev-dependencies
   (let ((flycheck-disabled-checkers '(rust)))
@@ -4148,7 +4151,11 @@ The manifest path is relative to
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/importing.rs" 'rust-mode
-     '(1 5 error "unresolved import `super` (There are too many initial `super`s.)" :checker rust :id "E0432"))))
+     '(1 5 error "failed to resolve. There are too many initial `super`s. (There are too many initial `super`s.)" :checker rust :id "E0433")
+     '(1 5 warning "unused import: `super::imported`" :checker rust :id "unused_imports")
+     '(1 5 info "#[warn(unused_imports)] on by default" :checker rust :id "unused_imports")
+     '(4 24 error "failed to resolve. Use of undeclared type or module `imported` (Use of undeclared type or module `imported`)" :checker rust :id "E0433")
+     )))
 
 (flycheck-ert-def-checker-test rust rust macro-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
