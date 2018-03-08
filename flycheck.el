@@ -10150,7 +10150,7 @@ See URL `https://github.com/palantir/tslint'."
             (config-file "--config" flycheck-typescript-tslint-config)
             (option "--rules-dir" flycheck-typescript-tslint-rulesdir)
             (eval flycheck-tslint-args)
-            source)
+            source-inplace)
   :error-parser flycheck-parse-tslint
   :modes (typescript-mode))
 

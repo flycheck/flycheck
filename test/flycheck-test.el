@@ -4327,13 +4327,11 @@ The manifest path is relative to
 (flycheck-ert-def-checker-test typescript-tslint typescript nil
   (flycheck-ert-should-syntax-check
    "language/typescript/sample.ts" 'typescript-mode
-   '(1 10 warning "Unused function: 'invalidAlignment'"
-       :checker typescript-tslint :id "no-unused-variable")
-   '(2 3 warning "Forbidden 'var' keyword, use 'let' or 'const' instead"
+   '(2 23 warning "Module 'chai' is not listed as dependency in package.json"
+       :checker typescript-tslint :id "no-implicit-dependencies")
+   '(5 3 warning "Forbidden 'var' keyword, use 'let' or 'const' instead"
        :checker typescript-tslint :id "no-var-keyword")
-   '(2 7 warning "Unused variable: 'a'"
-       :checker typescript-tslint :id "no-unused-variable")
-   '(3 15 warning "Missing semicolon"
+   '(6 15 warning "Missing semicolon"
        :checker typescript-tslint :id "semicolon")))
 
 (flycheck-ert-def-checker-test verilog-verilator verilog error
