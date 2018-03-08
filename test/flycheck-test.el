@@ -482,9 +482,10 @@
 
 (ert-deftest flycheck-in-user-emacs-directory-p/no-child-of-user-emacs-directory ()
   :tags '(utility)
-  (should-not (flycheck-in-user-emacs-directory-p
-               (flycheck-ert-resource-filename
-                "language/emacs-lisp/warnings.el"))))
+  (let ((user-emacs-directory "/flycheck-nonexisting"))
+    (should-not (flycheck-in-user-emacs-directory-p
+                 (flycheck-ert-resource-filename
+                  "language/emacs-lisp/warnings.el")))))
 
 (ert-deftest flycheck-in-user-emacs-directory-p/direct-child-of-user-emacs-directory ()
   :tags '(utility)
