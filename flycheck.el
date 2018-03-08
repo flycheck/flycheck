@@ -8203,12 +8203,12 @@ See URL `https://eslint.org' for more information about ESLint."
             .messages)))
 
 (defun flycheck-eslint--find-working-directory (_checker)
-  "Look for a working directory to run CHECKER in.
+  "Look for a working directory to run ESLint CHECKER in.
 
-This will either be the directory that contains `.eslintrc' by
-supports configuration files formats or `.eslintignore', if no
-such file is found in the directory hierarchy, searches
-`node_modules' directory to detect root of project."
+This will be the directory that contains the `node_modules'
+directory.  If no such directory is found in the directory
+hierarchy, it looks first for `.eslintignore' and then for
+`.eslintrc' files to detect the project root."
   (let* ((regex-config (concat "\\`\\.eslintrc"
                                "\\(\\.\\(js\\|ya?ml\\|json\\)\\)?\\'")))
     (when buffer-file-name
