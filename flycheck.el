@@ -7553,7 +7553,7 @@ Requires DMD 2.066 or newer.  See URL `https://dlang.org/'."
             (eval (concat "-I" (flycheck-d-base-directory)))
             (option-list "-I" flycheck-dmd-include-path concat)
             (eval flycheck-dmd-args)
-            source)
+            (source ".d"))
   :error-patterns
   ((error line-start
           (file-name) "(" line "," column "): Error: " (message)

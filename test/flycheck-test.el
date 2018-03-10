@@ -3224,6 +3224,19 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
    '(13 1 info "instantiated from here: `U!()`"
         :checker d-dmd)))
 
+(flycheck-ert-def-checker-test d-dmd d non-d-extension
+  (skip-unless (fboundp 'd-mode))
+  (unless (version<= "24.4" emacs-version)
+    (ert-skip "Skipped because CC Mode is broken on 24.3.
+See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
+  (flycheck-ert-with-temp-buffer
+    (insert "!invalid")
+    (d-mode)
+    (flycheck-ert-buffer-sync)
+    (flycheck-ert-should-errors
+     '(1 1 error "declaration expected, not `!`"
+         :checker d-dmd))))
+
 (flycheck-ert-def-checker-test dockerfile-hadolint dockerfile error
   (flycheck-ert-should-syntax-check
    "language/dockerfile/Dockerfile.error" 'dockerfile-mode
