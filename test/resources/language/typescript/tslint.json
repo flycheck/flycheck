@@ -1,8 +1,7 @@
 {
   "rules": {
-    "no-unused-variable": true,
-    "use-strict": true,
     "no-var-keyword": true,
-    "semicolon": true
+    "semicolon": true,
+    "no-implicit-dependencies": [true, "dev"]
   }
 }
