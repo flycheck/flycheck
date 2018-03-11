@@ -9726,11 +9726,16 @@ See URL `http://www.scalastyle.org'."
                        ((not config-file) '(bold error))
                        (t 'success)))))))
 
+(flycheck-def-args-var flycheck-scheme-chicken-args scheme-chicken
+  :package-version '(scheme-chicken . "0.31"))
+
 (flycheck-define-checker scheme-chicken
   "A CHICKEN Scheme syntax checker using the CHICKEN compiler `csc'.
 
 See URL `http://call-cc.org/'."
-  :command ("csc" "-analyze-only" "-local" source)
+  :command ("csc" "-analyze-only" "-local"
+            (eval flycheck-scheme-chicken-args)
+            source)
   :error-patterns
   ((info line-start
          "Note: " (zero-or-more not-newline) ":\n"
