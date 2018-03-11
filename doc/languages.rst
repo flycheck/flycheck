@@ -1189,6 +1189,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
       Check syntax with ``csc``, the `CHICKEN Scheme <http://call-cc.org/>`_
       compiler.
 
+      .. defcustom:: flycheck-scheme-chicken-args
+
+	 A list of additional options.
+
    .. important::
 
       `Geiser <http://www.nongnu.org/geiser/>`_ must be installed and active for
