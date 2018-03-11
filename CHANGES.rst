@@ -40,6 +40,10 @@
   - ``rust-cargo`` now uses ``cargo check`` and ``cargo test`` [GH-1289]
   - ``python-pylint`` and ``python-flake8`` are now invoked with ``python -c``,
     to make it easier to change between Python 2 and Python 3 [GH-1113]
+  - When a checker returns errors for another file, they will be displayed
+    instead of ignored.  They can be navigated to from the error list.
+    This change helps with compiled languages, where an error in another file
+    may cause the current file to be considered invalid. [GH-1427]
 
 31 (Oct 07, 2017)
 =================
