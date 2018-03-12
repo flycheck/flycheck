@@ -813,6 +813,12 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
   :group 'flycheck-faces
   :package-version '(flycheck . "0.16"))
 
+(defface flycheck-error-list-filename
+  '((t :inherit font-lock-variable-name-face))
+  "Face for filenames in the error list."
+  :group 'flycheck-faces
+  :package-version '(flycheck . "32"))
+
 (defface flycheck-error-list-id
   '((t :inherit font-lock-type-face))
   "Face for the error ID in the error list."
@@ -3083,8 +3089,12 @@ non-whitespace character of the error line, if ERR has no error column."
 (defun flycheck-error-format-message-and-id (err)
   "Format the message and id of ERR as human-readable string."
   (let ((id (flycheck-error-id err))
-        (message (flycheck-error-message err)))
-    (if id (format "%s [%s]" message id) message)))
+        (filename (flycheck-error-filename err)))
+    (concat (when (and filename (not (equal filename (buffer-file-name))))
+              (format "In \"%s\":\n" (file-relative-name filename default-directory)))
+            (flycheck-error-message err)
+            (when id
+              (format " [%s]" id)))))
 
 (defun flycheck-error-format (err &optional with-file-name)
   "Format ERR as human-readable string, optionally WITH-FILE-NAME.
@@ -3187,6 +3197,14 @@ Return ERRORS, modified in-place."
           errors)
   errors)
 
+(defun flycheck-relevant-error-other-file-p (err)
+  "Determine whether ERR is a relevant error for another file."
+  (let ((file-name (flycheck-error-filename err)))
+    (and file-name
+         (or (null buffer-file-name)
+             (not (flycheck-same-files-p buffer-file-name file-name)))
+         (eq 'error (flycheck-error-level err)))))
+
 (defun flycheck-relevant-error-p (err)
   "Determine whether ERR is relevant for the current buffer.
 
@@ -3196,12 +3214,14 @@ otherwise."
     (let ((file-name (flycheck-error-filename err))
           (message (flycheck-error-message err)))
       (and
-       ;; The error is relevant for the current buffer if it's got no file-name
-       ;; and the current buffer has no file name, too, or if it refers to the
-       ;; same file as the current buffer.
-       (or (and (not file-name) (not buffer-file-name))
-           (and buffer-file-name file-name
-                (flycheck-same-files-p file-name buffer-file-name)))
+       (or
+        ;; Neither the error nor buffer have a file name
+        (and (not file-name) (not buffer-file-name))
+        ;; Both have files, and they match
+        (and buffer-file-name file-name
+             (flycheck-same-files-p file-name buffer-file-name))
+        ;; This is a significant error from another file
+        (flycheck-relevant-error-other-file-p err))
        message
        (not (string-empty-p message))
        (flycheck-error-line err)))))
@@ -3716,8 +3736,13 @@ Return the created overlay."
   ;; We must have a proper error region for the sake of fringe indication,
   ;; error display and error navigation, even if the highlighting is disabled.
   ;; We erase the highlighting later on in this case
-  (pcase-let* ((`(,beg . ,end) (flycheck-error-region-for-mode
-                                err (or flycheck-highlighting-mode 'lines)))
+  (pcase-let* ((`(,beg . ,end)
+                (if (flycheck-relevant-error-other-file-p err)
+                    ;; Display overlays for other-file errors on the first line
+                    (cons (point-min)
+                          (save-excursion (goto-char (point-min)) (point-at-eol)))
+                  (flycheck-error-region-for-mode
+                   err (or flycheck-highlighting-mode 'lines))))
                (overlay (make-overlay beg end))
                (level (flycheck-error-level err))
                (category (flycheck-error-level-overlay-category level)))
@@ -3877,10 +3902,10 @@ beginning of the buffer, otherwise advance from the current
 position.
 
 Intended for use with `next-error-function'."
-  (let ((pos (flycheck-next-error-pos n reset)))
-    (if pos
-        (goto-char pos)
-      (user-error "No more Flycheck errors"))))
+  (-if-let* ((pos (flycheck-next-error-pos n reset)))
+      (let ((err (get-char-property pos 'flycheck-error)))
+        (flycheck-jump-to-error err))
+    (user-error "No more Flycheck errors")))
 
 (defun flycheck-next-error (&optional n reset)
   "Visit the N-th error from the current point.
@@ -3940,7 +3965,8 @@ message to stretch arbitrarily far."
             message checker-name)))
 
 (defconst flycheck-error-list-format
-  `[("Line" 5 flycheck-error-list-entry-< :right-align t)
+  `[("File" 6)
+    ("Line" 5 flycheck-error-list-entry-< :right-align t)
     ("Col" 3 nil :right-align t)
     ("Level" 8 flycheck-error-list-entry-level-<)
     ("ID" 6 t)
@@ -4060,6 +4086,7 @@ string with attached text properties."
 Return a list with the contents of the table cell."
   (let* ((level (flycheck-error-level error))
          (level-face (flycheck-error-level-error-list-face level))
+         (filename (flycheck-error-filename error))
          (line (flycheck-error-line error))
          (column (flycheck-error-column error))
          (message (or (flycheck-error-message error)
@@ -4071,7 +4098,12 @@ Return a list with the contents of the table cell."
          (msg-and-checker (flycheck-error-list-make-last-column flushed-msg checker))
          (explainer (flycheck-checker-get checker 'error-explainer)))
     (list error
-          (vector (flycheck-error-list-make-number-cell
+          (vector (flycheck-error-list-make-cell
+                   (if filename
+                       (file-name-nondirectory filename)
+                     "")
+                   'flycheck-error-list-filename)
+                  (flycheck-error-list-make-number-cell
                    line 'flycheck-error-list-line-number)
                   (flycheck-error-list-make-number-cell
                    column 'flycheck-error-list-column-number)
@@ -4233,22 +4265,38 @@ LEVEL is either an error level symbol, or nil, to remove the filter."
 
 POS defaults to `point'."
   (interactive)
-  (-when-let* ((error (tabulated-list-get-id pos))
-               (buffer (flycheck-error-buffer error)))
-    (when (buffer-live-p buffer)
-      (if (eq (window-buffer) (get-buffer flycheck-error-list-buffer))
-          ;; When called from within the error list, keep the error list,
-          ;; otherwise replace the current buffer.
-          (pop-to-buffer buffer 'other-window)
-        (switch-to-buffer buffer))
-      (let ((pos (flycheck-error-pos error)))
-        (unless (eq (goto-char pos) (point))
-          ;; If widening gets in the way of moving to the right place, remove it
-          ;; and try again
-          (widen)
-          (goto-char pos)))
-      ;; Re-highlight the errors
-      (flycheck-error-list-highlight-errors 'preserve-pos))))
+  (-when-let* ((error (tabulated-list-get-id pos)))
+    (flycheck-jump-to-error error)))
+
+(defun flycheck-jump-to-error (error)
+  "Go to the location of ERROR."
+  (let ((error-copy (copy-flycheck-error error))
+        (buffer (find-file-noselect (flycheck-error-filename error))))
+    (setf (flycheck-error-buffer error-copy) buffer)
+    (flycheck-jump-in-buffer buffer error-copy)
+    ;; When jumping to an error in another file, it may not have
+    ;; this error available for highlighting yet, so we trigger a check
+    ;; if necessary.
+    (with-current-buffer buffer
+      (unless (seq-contains flycheck-current-errors error-copy 'equal)
+        (when flycheck-mode
+          (flycheck-buffer))))))
+
+(defun flycheck-jump-in-buffer (buffer error)
+  "In BUFFER, jump to ERROR."
+  (if (eq (window-buffer) (get-buffer flycheck-error-list-buffer))
+      ;; When called from within the error list, keep the error list,
+      ;; otherwise replace the current buffer.
+      (pop-to-buffer buffer 'other-window)
+    (switch-to-buffer buffer))
+  (let ((pos (flycheck-error-pos error)))
+    (unless (eq (goto-char pos) (point))
+      ;; If widening gets in the way of moving to the right place, remove it
+      ;; and try again
+      (widen)
+      (goto-char pos)))
+  ;; Re-highlight the errors
+  (flycheck-error-list-highlight-errors 'preserve-pos))
 
 (defun flycheck-error-list-explain-error (&optional pos)
   "Explain the error at POS in the error list.
