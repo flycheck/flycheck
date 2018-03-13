@@ -9528,6 +9528,22 @@ or if the current buffer has no file name."
   (and buffer-file-name
        (locate-dominating-file buffer-file-name "Cargo.toml")))
 
+(defun flycheck-rust-cargo-metadata ()
+  "Run 'cargo metadata' and return the result as parsed JSON object."
+  (with-temp-buffer
+    (call-process "cargo" nil t nil
+                  "metadata" "--no-deps" "--format-version" "1")
+    (goto-char (point-min))
+    (json-read)))
+
+(defun flycheck-rust-cargo-workspace-root ()
+  "Return the path to the workspace root of a Rust Cargo project.
+
+Return nil if the workspace root does not exist (for Rust
+versions inferior to 1.25)."
+  (let-alist (flycheck-rust-cargo-metadata)
+    .workspace_root))
+
 (defun flycheck-rust-cargo-has-command-p (command)
   "Whether Cargo has COMMAND in its list of commands.
 
@@ -9563,7 +9579,15 @@ This syntax checker requires Rust 1.17 or newer.  See URL
             (eval flycheck-cargo-check-args)
             "--message-format=json")
   :error-parser flycheck-parse-cargo-rustc
-  :error-filter flycheck-rust-error-filter
+  :error-filter (lambda (errors)
+                  ;; In Rust 1.25+, filenames are relative to the workspace
+                  ;; root.
+                  (let ((root (flycheck-rust-cargo-workspace-root)))
+                    (seq-do (lambda (err)
+                              (setf (flycheck-error-filename err)
+                                    (expand-file-name
+                                     (flycheck-error-filename err) root)))
+                            (flycheck-rust-error-filter errors))))
   :error-explainer flycheck-rust-error-explainer
   :modes rust-mode
   :predicate flycheck-buffer-saved-p
