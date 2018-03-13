@@ -3902,9 +3902,9 @@ beginning of the buffer, otherwise advance from the current
 position.
 
 Intended for use with `next-error-function'."
-  (-if-let* ((pos (flycheck-next-error-pos n reset)))
-      (let ((err (get-char-property pos 'flycheck-error)))
-        (flycheck-jump-to-error err))
+  (-if-let* ((pos (flycheck-next-error-pos n reset))
+             (err (get-char-property pos 'flycheck-error)))
+      (flycheck-jump-to-error err)
     (user-error "No more Flycheck errors")))
 
 (defun flycheck-next-error (&optional n reset)
