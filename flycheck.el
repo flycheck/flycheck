@@ -3233,16 +3233,17 @@ Return a list of all errors that are relevant for their
 corresponding buffer."
   (seq-filter #'flycheck-relevant-error-p errors))
 
-(defun flycheck-related-errors (err)
+(defun flycheck-related-errors (err &optional error-set)
   "Get all the errors that are in the same group as ERR.
 
-Return a list of all errors (in `flycheck-current-errors') that
-have the same `flycheck-error-group' as ERR, including ERR
-itself."
+Return a list of all errors (from ERROR-SET) that have the same
+`flycheck-error-group' as ERR, including ERR itself.
+
+If ERROR-SET is nil, `flycheck-current-errors' is used instead."
   (-if-let (group (flycheck-error-group err))
       (seq-filter (lambda (e)
                     (eq (flycheck-error-group e) group))
-                  flycheck-current-errors)
+                  (or error-set flycheck-current-errors))
     (list err)))
 
 
