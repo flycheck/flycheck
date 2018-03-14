@@ -4019,7 +4019,12 @@ The manifest path is relative to
         (flycheck-rust-crate-type "bin")
         (flycheck-rust-binary-name "lib-main"))
     (flycheck-ert-should-syntax-check
-     "language/rust/lib-main/src/main.rs" 'rust-mode)))
+     "language/rust/lib-main/src/main.rs" 'rust-mode
+     `(3 12 error "cannot find value `zorglub` in this scope (not found in this scope)"
+         :checker rust-cargo :id "E0425"
+         :filename ,(flycheck-ert-resource-filename "language/rust/lib-main/src/lib.rs")
+         :group 1)
+     )))
 
 (flycheck-ert-def-checker-test rust-cargo rust conventional-layout
   (let ((flycheck-disabled-checkers '(rust)))

@@ -9513,10 +9513,17 @@ Relative paths are relative to the file being checked."
 (defun flycheck-rust-error-filter (errors)
   "Filter ERRORS from rustc output that have no explanatory value."
   (seq-remove (lambda (err)
-                (string-match-p
-                 (rx "aborting due to " (optional (one-or-more num) " ")
-                     "previous error")
-                 (flycheck-error-message err)))
+                (or
+                 ;; Macro errors emit a diagnostic in a phony file,
+                 ;; e.g. "<println macros>".
+                 (string-match-p
+                  (rx "macros>" line-end)
+                  (flycheck-error-filename err))
+                 ;; Redundant message giving the number of failed errors
+                 (string-match-p
+                  (rx "aborting due to " (optional (one-or-more num) " ")
+                      "previous error")
+                  (flycheck-error-message err))))
               errors))
 
 (defun flycheck-rust-manifest-directory ()
