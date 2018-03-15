@@ -3240,11 +3240,14 @@ Return a list of all errors (from ERROR-SET) that have the same
 `flycheck-error-group' as ERR, including ERR itself.
 
 If ERROR-SET is nil, `flycheck-current-errors' is used instead."
-  (-if-let (group (flycheck-error-group err))
-      (seq-filter (lambda (e)
-                    (eq (flycheck-error-group e) group))
-                  (or error-set flycheck-current-errors))
-    (list err)))
+  (let ((group (flycheck-error-group err))
+        (checker (flycheck-error-checker err)))
+    (if group
+        (seq-filter (lambda (e)
+                      (and (eq (flycheck-error-checker e) checker)
+                           (eq (flycheck-error-group e) group)))
+                    (or error-set flycheck-current-errors))
+      (list err))))
 
 
 ;;; Status reporting for the current buffer

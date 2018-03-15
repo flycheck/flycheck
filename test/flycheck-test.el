@@ -1497,6 +1497,19 @@
     (should (equal (error-message-string data)
                    "Wrong type argument: flycheck-error-p, \"foo\""))))
 
+(ert-deftest flycheck-related-errors ()
+  :tags '(error-api)
+  (let ((flycheck-current-errors
+         (list (flycheck-error-new-at 5 7 'error "foo" :checker 'a :group 1)
+               (flycheck-error-new-at 8 9 'error "bar" :checker 'a :group 2)
+               (flycheck-error-new-at 1 4 'error "gul" :checker 'a :group 1)
+               (flycheck-error-new-at 4 5 'error "lag" :checker 'b :group 1))))
+    (should (equal (flycheck-related-errors (nth 0 flycheck-current-errors))
+                   (list (nth 0 flycheck-current-errors)
+                         (nth 2 flycheck-current-errors))))
+    (should (equal (flycheck-related-errors (nth 1 flycheck-current-errors))
+                   (list (nth 1 flycheck-current-errors))))))
+
 
 ;;; Errors in the current buffer
 
