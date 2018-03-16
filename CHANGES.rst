@@ -39,6 +39,11 @@
   - Add ``flycheck-default-executable-find``, the new default value for
     ``flycheck-executable-find``, to allow using relative paths to checkers
     (set e.g. in file or dir-local variables). [GH-1485]
+  - Add ``idle-buffer-switch`` option for use in
+    ``flycheck-check-syntax-automatically``.  Variables
+    ``flycheck-idle-buffer-switch-delay`` and
+    ``flycheck-buffer-switch-check-intermediate-buffers`` control the
+    functionality [GH-1297]
 
 - Improvements
 
