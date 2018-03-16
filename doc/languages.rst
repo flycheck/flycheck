@@ -730,11 +730,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: markdown-markdownlint-cli
 
-      Check Markdown with `markdownlint <https://github.com/igorshubovych/markdownlint-cli>`_.
+      Check Markdown with `markdownlint-cli
+      <https://github.com/igorshubovych/markdownlint-cli>`_.
 
       .. syntax-checker-config-file:: flycheck-markdown-markdownlint-cli-config
-
-         Path to configuration file.
 
    .. syntax-checker:: markdown-mdl
 
@@ -862,6 +861,14 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    Flycheck checks Python with `python-flake8` or `python-pylint`, and falls
    back to `python-pycompile` if neither of those is available.
+
+   All Python checkers are invoked indirectly using ``python -c ...`` (rather
+   than a direct call to ``flake8`` or ``pylint``) to make it easier to switch
+   between Python 2 and 3.  For example, you can use ``(setq-local
+   flycheck-python-pylint-executable "python3")`` to run ``pylint`` using Python
+   3, or ``(defvaralias 'flycheck-python-flake8-executable
+   'python-shell-interpreter)`` to run ``flake8`` through the executable pointed
+   to by ``python-shell-interpreter``.
 
    .. seealso::
 
