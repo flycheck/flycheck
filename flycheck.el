@@ -7951,7 +7951,7 @@ containing a file that matches REGEXP."
   (locate-dominating-file
    directory
    (lambda (dir)
-     (directory-files dir t regexp t))))
+     (directory-files dir nil regexp t))))
 
 (defun flycheck-haskell--find-default-directory (checker)
   "Come up with a suitable default directory for Haskell to run CHECKER in.
