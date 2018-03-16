@@ -7979,7 +7979,7 @@ contains a cabal file."
      (when (buffer-file-name)
        (flycheck--locate-dominating-file-matching
         (file-name-directory (buffer-file-name))
-        ".+\\.cabal\\'")))))
+        "\\.cabal\\'\\|\\`package\\.yaml\\'")))))
 
 (flycheck-define-checker haskell-stack-ghc
   "A Haskell syntax and type checker using `stack ghc'.
