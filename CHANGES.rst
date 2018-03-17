@@ -9,6 +9,8 @@
     [GH-1289]
   - ``rust-cargo`` does not use the variable ``flycheck-rust-args`` anymore
     [GH-1289]
+  - Improve detection of default directory for ``haskell-ghc`` to consider
+    ``hpack`` project files [GH-1435]
 
 - New syntax checkers:
 

@@ -7951,7 +7951,7 @@ containing a file that matches REGEXP."
   (locate-dominating-file
    directory
    (lambda (dir)
-     (directory-files dir t regexp t))))
+     (directory-files dir nil regexp t))))
 
 (defun flycheck-haskell--find-default-directory (checker)
   "Come up with a suitable default directory for Haskell to run CHECKER in.
@@ -7979,7 +7979,7 @@ contains a cabal file."
      (when (buffer-file-name)
        (flycheck--locate-dominating-file-matching
         (file-name-directory (buffer-file-name))
-        ".+\\.cabal\\'")))))
+        "\\.cabal\\'\\|\\`package\\.yaml\\'")))))
 
 (flycheck-define-checker haskell-stack-ghc
   "A Haskell syntax and type checker using `stack ghc'.
