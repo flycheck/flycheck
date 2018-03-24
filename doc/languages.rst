@@ -1219,6 +1219,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _Bash: http://www.gnu.org/software/bash/
 
+      .. defcustom:: flycheck-sh-bash-args
+
+         A list of additional arguments that are passed to bash.
+
    .. syntax-checker:: sh-posix-dash
 
       Check POSIX shell syntax with Dash_.
