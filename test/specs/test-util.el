@@ -35,7 +35,7 @@
       (with-temp-buffer
         (expect (flycheck-buffer-empty-p) :to-be-truthy)))
 
-    (it "does not consider an buffer with content as empty"
+    (it "does not consider a buffer with content as empty"
       (with-temp-buffer
         (insert "foo bar")
         (expect (flycheck-buffer-empty-p) :not :to-be-truthy)))

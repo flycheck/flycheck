@@ -1,4 +1,4 @@
-;;; flycheck-maint.el --- Flycheck: Maintenace library  -*- lexical-binding: t; -*-
+;;; flycheck-maint.el --- Flycheck: Maintenance library  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2016  Sebastian Wiesner and Flycheck contributors
 

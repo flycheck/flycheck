@@ -36,7 +36,7 @@ endif
 .PHONY: help
 help:
 	@echo 'Available targets:'
-	@echo '  init:    Install dependencies of maintenace scripts'
+	@echo '  init:    Install dependencies of maintenance scripts'
 	@echo '  check:   Check maintenance scripts'
 	@echo '  release: Make a Flycheck release'
 	@echo ''
