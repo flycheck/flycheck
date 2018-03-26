@@ -9965,11 +9965,16 @@ See URL `http://sass-lang.com'."
             line-end))
   :modes scss-mode)
 
+(flycheck-def-args-var flycheck-sh-bash-args (sh-bash)
+  :package-version '(flycheck . "32"))
+
 (flycheck-define-checker sh-bash
   "A Bash syntax checker using the Bash shell.
 
 See URL `http://www.gnu.org/software/bash/'."
-  :command ("bash" "--norc" "-n" "--")
+  :command ("bash" "--norc" "-n"
+            (eval flycheck-sh-bash-args)
+            "--")
   :standard-input t
   :error-patterns
   ((error line-start
