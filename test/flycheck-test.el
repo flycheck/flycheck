@@ -1497,6 +1497,19 @@
     (should (equal (error-message-string data)
                    "Wrong type argument: flycheck-error-p, \"foo\""))))
 
+(ert-deftest flycheck-related-errors ()
+  :tags '(error-api)
+  (let ((flycheck-current-errors
+         (list (flycheck-error-new-at 5 7 'error "foo" :checker 'a :group 1)
+               (flycheck-error-new-at 8 9 'error "bar" :checker 'a :group 2)
+               (flycheck-error-new-at 1 4 'error "gul" :checker 'a :group 1)
+               (flycheck-error-new-at 4 5 'error "lag" :checker 'b :group 1))))
+    (should (equal (flycheck-related-errors (nth 0 flycheck-current-errors))
+                   (list (nth 0 flycheck-current-errors)
+                         (nth 2 flycheck-current-errors))))
+    (should (equal (flycheck-related-errors (nth 1 flycheck-current-errors))
+                   (list (nth 1 flycheck-current-errors))))))
+
 
 ;;; Errors in the current buffer
 
@@ -3997,10 +4010,10 @@ The manifest path is relative to
     (flycheck-ert-cargo-clean "language/rust/flycheck-test/Cargo.toml")
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/warnings.rs" 'rust-mode
-     '(3 1 warning "function is never used: `main`" :checker rust-cargo :id "dead_code")
-     '(3 1 info "#[warn(dead_code)] on by default" :checker rust-cargo :id "dead_code")
-     '(4 9 warning "unused variable: `x`" :checker rust-cargo :id "unused_variables")
-     '(4 9 info "to avoid this warning, consider using `_x` instead" :checker rust-cargo :id "unused_variables"))))
+     '(3 1 warning "function is never used: `main`" :checker rust-cargo :id "dead_code" :group 1)
+     '(3 1 info "#[warn(dead_code)] on by default" :checker rust-cargo :id "dead_code" :group 1)
+     '(4 9 warning "unused variable: `x`" :checker rust-cargo :id "unused_variables" :group 2)
+     '(4 9 info "to avoid this warning, consider using `_x` instead" :checker rust-cargo :id "unused_variables" :group 2))))
 
 (flycheck-ert-def-checker-test rust-cargo rust default-target
   (let ((flycheck-disabled-checkers '(rust))
@@ -4009,17 +4022,22 @@ The manifest path is relative to
     (flycheck-ert-cargo-clean "language/rust/flycheck-test/Cargo.toml")
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/warnings.rs" 'rust-mode
-     '(3 1 warning "function is never used: `main`" :checker rust-cargo :id "dead_code")
-     '(3 1 info "#[warn(dead_code)] on by default" :checker rust-cargo :id "dead_code")
-     '(4 9 warning "unused variable: `x`" :checker rust-cargo :id "unused_variables")
-     '(4 9 info "to avoid this warning, consider using `_x` instead" :checker rust-cargo :id "unused_variables"))))
+     '(3 1 warning "function is never used: `main`" :checker rust-cargo :id "dead_code" :group 1)
+     '(3 1 info "#[warn(dead_code)] on by default" :checker rust-cargo :id "dead_code" :group 1)
+     '(4 9 warning "unused variable: `x`" :checker rust-cargo :id "unused_variables" :group 2)
+     '(4 9 info "to avoid this warning, consider using `_x` instead" :checker rust-cargo :id "unused_variables" :group 2))))
 
 (flycheck-ert-def-checker-test rust-cargo rust lib-main
   (let ((flycheck-disabled-checkers '(rust))
         (flycheck-rust-crate-type "bin")
         (flycheck-rust-binary-name "lib-main"))
     (flycheck-ert-should-syntax-check
-     "language/rust/lib-main/src/main.rs" 'rust-mode)))
+     "language/rust/lib-main/src/main.rs" 'rust-mode
+     `(3 12 error "cannot find value `zorglub` in this scope (not found in this scope)"
+         :checker rust-cargo :id "E0425"
+         :filename ,(flycheck-ert-resource-filename "language/rust/lib-main/src/lib.rs")
+         :group 1)
+     )))
 
 (flycheck-ert-def-checker-test rust-cargo rust conventional-layout
   (let ((flycheck-disabled-checkers '(rust)))
@@ -4027,74 +4045,74 @@ The manifest path is relative to
       (flycheck-ert-cargo-clean "language/rust/cargo-targets/Cargo.toml")
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/src/lib.rs" 'rust-mode
-       '(3 1 warning "function is never used: `foo_lib`" :checker rust-cargo :id "dead_code")
-       '(6 17 warning "unused variable: `foo_lib_test`" :checker rust-cargo  :id "unused_variables")
-       '(6 17 info "to avoid this warning, consider using `_foo_lib_test` instead" :checker rust-cargo :id "unused_variables")))
+       '(3 1 warning "function is never used: `foo_lib`" :checker rust-cargo :id "dead_code" :group 1)
+       '(6 17 warning "unused variable: `foo_lib_test`" :checker rust-cargo  :id "unused_variables" :group 2)
+       '(6 17 info "to avoid this warning, consider using `_foo_lib_test` instead" :checker rust-cargo :id "unused_variables" :group 2)))
 
     (let ((flycheck-rust-crate-type "lib"))
       (flycheck-ert-cargo-clean "language/rust/cargo-targets/Cargo.toml")
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/src/a.rs" 'rust-mode
-       '(1 1 warning "function is never used: `foo_a`" :checker rust-cargo :id "dead_code")
-       '(1 1 info "#[warn(dead_code)] on by default" :checker rust-cargo :id "dead_code")
-       '(4 17 warning "unused variable: `foo_a_test`" :checker rust-cargo :id "unused_variables")
-       '(4 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
-       '(4 17 info "to avoid this warning, consider using `_foo_a_test` instead" :checker rust-cargo :id "unused_variables")))
+       '(1 1 warning "function is never used: `foo_a`" :checker rust-cargo :id "dead_code" :group 1)
+       '(1 1 info "#[warn(dead_code)] on by default" :checker rust-cargo :id "dead_code" :group 1)
+       '(4 17 warning "unused variable: `foo_a_test`" :checker rust-cargo :id "unused_variables" :group 2)
+       '(4 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 2)
+       '(4 17 info "to avoid this warning, consider using `_foo_a_test` instead" :checker rust-cargo :id "unused_variables" :group 2)))
 
     (let ((flycheck-rust-crate-type "bin")
           (flycheck-rust-binary-name "cargo-targets"))
       (flycheck-ert-cargo-clean "language/rust/cargo-targets/Cargo.toml")
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/src/main.rs" 'rust-mode
-       '(1 17 warning "unused variable: `foo_main`" :checker rust-cargo :id "unused_variables")
-       '(1 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
-       '(1 17 info "to avoid this warning, consider using `_foo_main` instead" :checker rust-cargo :id "unused_variables")
-       '(4 17 warning "unused variable: `foo_main_test`" :checker rust-cargo :id "unused_variables")
-       '(4 17 info "to avoid this warning, consider using `_foo_main_test` instead" :checker rust-cargo :id "unused_variables")))
+       '(1 17 warning "unused variable: `foo_main`" :checker rust-cargo :id "unused_variables" :group 1)
+       '(1 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 1)
+       '(1 17 info "to avoid this warning, consider using `_foo_main` instead" :checker rust-cargo :id "unused_variables" :group 1)
+       '(4 17 warning "unused variable: `foo_main_test`" :checker rust-cargo :id "unused_variables" :group 2)
+       '(4 17 info "to avoid this warning, consider using `_foo_main_test` instead" :checker rust-cargo :id "unused_variables" :group 2)))
 
     (let ((flycheck-rust-crate-type "bin")
           (flycheck-rust-binary-name "a"))
       (flycheck-ert-cargo-clean "language/rust/cargo-targets/Cargo.toml")
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/src/bin/a.rs" 'rust-mode
-       '(1 17 warning "unused variable: `foo_bin_a`" :checker rust-cargo :id "unused_variables")
-       '(1 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
-       '(1 17 info "to avoid this warning, consider using `_foo_bin_a` instead" :checker rust-cargo :id "unused_variables")
-       '(4 17 warning "unused variable: `foo_bin_a_test`" :checker rust-cargo :id "unused_variables")
-       '(4 17 info "to avoid this warning, consider using `_foo_bin_a_test` instead" :checker rust-cargo :id "unused_variables")))
+       '(1 17 warning "unused variable: `foo_bin_a`" :checker rust-cargo :id "unused_variables" :group 1)
+       '(1 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 1)
+       '(1 17 info "to avoid this warning, consider using `_foo_bin_a` instead" :checker rust-cargo :id "unused_variables" :group 1)
+       '(4 17 warning "unused variable: `foo_bin_a_test`" :checker rust-cargo :id "unused_variables" :group 2)
+       '(4 17 info "to avoid this warning, consider using `_foo_bin_a_test` instead" :checker rust-cargo :id "unused_variables" :group 2)))
 
     (let ((flycheck-rust-crate-type "bench")
           (flycheck-rust-binary-name "a"))
       (flycheck-ert-cargo-clean "language/rust/cargo-targets/Cargo.toml")
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/benches/a.rs" 'rust-mode
-       '(1 17 warning "unused variable: `foo_bench_a`" :checker rust-cargo :id "unused_variables")
-       '(1 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
-       '(1 17 info "to avoid this warning, consider using `_foo_bench_a` instead" :checker rust-cargo :id "unused_variables")
-       '(4 17 warning "unused variable: `foo_bench_a_test`" :checker rust-cargo :id "unused_variables")
-       '(4 17 info "to avoid this warning, consider using `_foo_bench_a_test` instead" :checker rust-cargo :id "unused_variables")))
+       '(1 17 warning "unused variable: `foo_bench_a`" :checker rust-cargo :id "unused_variables" :group 1)
+       '(1 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 1)
+       '(1 17 info "to avoid this warning, consider using `_foo_bench_a` instead" :checker rust-cargo :id "unused_variables" :group 1)
+       '(4 17 warning "unused variable: `foo_bench_a_test`" :checker rust-cargo :id "unused_variables" :group 2)
+       '(4 17 info "to avoid this warning, consider using `_foo_bench_a_test` instead" :checker rust-cargo :id "unused_variables" :group 2)))
 
     (let ((flycheck-rust-crate-type "test")
           (flycheck-rust-binary-name "a"))
       (flycheck-ert-cargo-clean "language/rust/cargo-targets/Cargo.toml")
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/tests/a.rs" 'rust-mode
-       '(2 16 warning "unused variable: `foo_test_a_test`" :checker rust-cargo :id "unused_variables")
-       '(2 16 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
-       '(2 16 info "to avoid this warning, consider using `_foo_test_a_test` instead" :checker rust-cargo :id "unused_variables")
-       '(4 1 warning "function is never used: `foo_test_a`" :checker rust-cargo :id "dead_code")
-       '(4 1 info "#[warn(dead_code)] on by default" :checker rust-cargo :id "dead_code")))
+       '(2 16 warning "unused variable: `foo_test_a_test`" :checker rust-cargo :id "unused_variables" :group 1)
+       '(2 16 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 1)
+       '(2 16 info "to avoid this warning, consider using `_foo_test_a_test` instead" :checker rust-cargo :id "unused_variables" :group 1)
+       '(4 1 warning "function is never used: `foo_test_a`" :checker rust-cargo :id "dead_code" :group 2)
+       '(4 1 info "#[warn(dead_code)] on by default" :checker rust-cargo :id "dead_code" :group 2)))
 
     (let ((flycheck-rust-crate-type "example")
           (flycheck-rust-binary-name "a"))
       (flycheck-ert-cargo-clean "language/rust/cargo-targets/Cargo.toml")
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/examples/a.rs" 'rust-mode
-       '(1 17 warning "unused variable: `foo_ex_a`" :checker rust-cargo :id "unused_variables")
-       '(1 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
-       '(1 17 info "to avoid this warning, consider using `_foo_ex_a` instead" :checker rust-cargo :id "unused_variables")
-       '(4 17 warning "unused variable: `foo_ex_a_test`" :checker rust-cargo :id "unused_variables")
-       '(4 17 info "to avoid this warning, consider using `_foo_ex_a_test` instead" :checker rust-cargo :id "unused_variables")))))
+       '(1 17 warning "unused variable: `foo_ex_a`" :checker rust-cargo :id "unused_variables" :group 1)
+       '(1 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 1)
+       '(1 17 info "to avoid this warning, consider using `_foo_ex_a` instead" :checker rust-cargo :id "unused_variables" :group 1)
+       '(4 17 warning "unused variable: `foo_ex_a_test`" :checker rust-cargo :id "unused_variables" :group 2)
+       '(4 17 info "to avoid this warning, consider using `_foo_ex_a_test` instead" :checker rust-cargo :id "unused_variables" :group 2)))))
 
 (flycheck-ert-def-checker-test rust-cargo rust workspace-subcrate
   (let ((flycheck-disabled-checkers '(rust)))
@@ -4103,9 +4121,9 @@ The manifest path is relative to
       (flycheck-ert-cargo-clean "language/rust/workspace/crate1/Cargo.toml")
       (flycheck-ert-should-syntax-check
        "language/rust/workspace/crate1/src/lib.rs" 'rust-mode
-       '(2 7 warning "unused variable: `a`" :checker rust-cargo :id "unused_variables")
-       '(2 7 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
-       '(2 7 info "to avoid this warning, consider using `_a` instead" :checker rust-cargo :id "unused_variables")))))
+       '(2 7 warning "unused variable: `a`" :checker rust-cargo :id "unused_variables" :group 1)
+       '(2 7 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 1)
+       '(2 7 info "to avoid this warning, consider using `_a` instead" :checker rust-cargo :id "unused_variables" :group 1)))))
 
 (flycheck-ert-def-checker-test rust-cargo rust dev-dependencies
   (let ((flycheck-disabled-checkers '(rust)))
@@ -4114,55 +4132,55 @@ The manifest path is relative to
       (flycheck-ert-cargo-clean "language/rust/dev-deps/Cargo.toml")
       (flycheck-ert-should-syntax-check
        "language/rust/dev-deps/src/lib.rs" 'rust-mode
-       '(2 1 warning "unused `#[macro_use]` import" :checker rust-cargo :id "unused_imports")
-       '(2 1 info "#[warn(unused_imports)] on by default" :checker rust-cargo :id "unused_imports")
-       '(8 9 warning "unused variable: `foo`" :checker rust-cargo :id "unused_variables")
-       '(8 9 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables")
-       '(8 9 info "to avoid this warning, consider using `_foo` instead" :checker rust-cargo :id "unused_variables")))))
+       '(2 1 warning "unused `#[macro_use]` import" :checker rust-cargo :id "unused_imports" :group 1)
+       '(2 1 info "#[warn(unused_imports)] on by default" :checker rust-cargo :id "unused_imports" :group 1)
+       '(8 9 warning "unused variable: `foo`" :checker rust-cargo :id "unused_variables" :group 2)
+       '(8 9 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 2)
+       '(8 9 info "to avoid this warning, consider using `_foo` instead" :checker rust-cargo :id "unused_variables" :group 2)))))
 
 (flycheck-ert-def-checker-test rust rust syntax-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/syntax-error.rs" 'rust-mode
-     '(4 5 error "cannot find value `bla` in this scope (not found in this scope)" :checker rust :id "E0425"))))
+     '(4 5 error "cannot find value `bla` in this scope (not found in this scope)" :checker rust :id "E0425" :group 1))))
 
 (flycheck-ert-def-checker-test rust rust type-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/multiline-error.rs" 'rust-mode
-     '(7 9 error "mismatched types (expected u8, found i8)" :checker rust :id "E0308"))))
+     '(7 9 error "mismatched types (expected u8, found i8)" :checker rust :id "E0308" :group 1))))
 
 (flycheck-ert-def-checker-test rust rust warning
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/warnings.rs" 'rust-mode
-     '(4 9 warning "unused variable: `x`" :checker rust :id "unused_variables")
-     '(4 9 info "#[warn(unused_variables)] on by default" :checker rust :id "unused_variables")
-     '(4 9 info "to avoid this warning, consider using `_x` instead" :checker rust :id "unused_variables"))))
+     '(4 9 warning "unused variable: `x`" :checker rust :id "unused_variables" :group 1)
+     '(4 9 info "#[warn(unused_variables)] on by default" :checker rust :id "unused_variables" :group 1)
+     '(4 9 info "to avoid this warning, consider using `_x` instead" :checker rust :id "unused_variables" :group 1))))
 
 (flycheck-ert-def-checker-test rust rust note-and-help
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/note-and-help.rs" 'rust-mode
-     '(11 9 info "value moved here" :checker rust :id "E0382")
-     '(12 9 error "use of moved value: `_x` (value used here after move)" :checker rust :id "E0382")
-     '(12 9 info "move occurs because `_x` has type `NonPOD`, which does not implement the `Copy` trait" :checker rust :id "E0382"))))
+     '(11 9 info "value moved here" :checker rust :id "E0382" :group 1)
+     '(12 9 error "use of moved value: `_x` (value used here after move)" :checker rust :id "E0382" :group 1)
+     '(12 9 info "move occurs because `_x` has type `NonPOD`, which does not implement the `Copy` trait" :checker rust :id "E0382" :group 1))))
 
 (flycheck-ert-def-checker-test rust rust crate-root-not-set
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/importing.rs" 'rust-mode
-     '(1 5 error "failed to resolve. There are too many initial `super`s. (There are too many initial `super`s.)" :checker rust :id "E0433")
-     '(1 5 warning "unused import: `super::imported`" :checker rust :id "unused_imports")
-     '(1 5 info "#[warn(unused_imports)] on by default" :checker rust :id "unused_imports")
-     '(4 24 error "failed to resolve. Use of undeclared type or module `imported` (Use of undeclared type or module `imported`)" :checker rust :id "E0433")
+     '(1 5 error "failed to resolve. There are too many initial `super`s. (There are too many initial `super`s.)" :checker rust :id "E0433" :group 2)
+     '(1 5 warning "unused import: `super::imported`" :checker rust :id "unused_imports" :group 1)
+     '(1 5 info "#[warn(unused_imports)] on by default" :checker rust :id "unused_imports" :group 1)
+     '(4 24 error "failed to resolve. Use of undeclared type or module `imported` (Use of undeclared type or module `imported`)" :checker rust :id "E0433" :group 3)
      )))
 
 (flycheck-ert-def-checker-test rust rust macro-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/macro-error.rs" 'rust-mode
-     '(2 3 info "1 positional argument in format string, but no arguments were given" :checker rust))))
+     '(2 3 info "1 positional argument in format string, but no arguments were given" :checker rust :group 1))))
 
 (flycheck-ert-def-checker-test sass sass nil
   (flycheck-ert-should-syntax-check

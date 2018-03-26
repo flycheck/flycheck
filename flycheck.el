@@ -3233,17 +3233,21 @@ Return a list of all errors that are relevant for their
 corresponding buffer."
   (seq-filter #'flycheck-relevant-error-p errors))
 
-(defun flycheck-related-errors (err)
+(defun flycheck-related-errors (err &optional error-set)
   "Get all the errors that are in the same group as ERR.
 
-Return a list of all errors (in `flycheck-current-errors') that
-have the same `flycheck-error-group' as ERR, including ERR
-itself."
-  (-if-let (group (flycheck-error-group err))
-      (seq-filter (lambda (e)
-                    (eq (flycheck-error-group e) group))
-                  flycheck-current-errors)
-    (list err)))
+Return a list of all errors (from ERROR-SET) that have the same
+`flycheck-error-group' as ERR, including ERR itself.
+
+If ERROR-SET is nil, `flycheck-current-errors' is used instead."
+  (let ((group (flycheck-error-group err))
+        (checker (flycheck-error-checker err)))
+    (if group
+        (seq-filter (lambda (e)
+                      (and (eq (flycheck-error-checker e) checker)
+                           (eq (flycheck-error-group e) group)))
+                    (or error-set flycheck-current-errors))
+      (list err))))
 
 
 ;;; Status reporting for the current buffer
@@ -9512,10 +9516,17 @@ Relative paths are relative to the file being checked."
 (defun flycheck-rust-error-filter (errors)
   "Filter ERRORS from rustc output that have no explanatory value."
   (seq-remove (lambda (err)
-                (string-match-p
-                 (rx "aborting due to " (optional (one-or-more num) " ")
-                     "previous error")
-                 (flycheck-error-message err)))
+                (or
+                 ;; Macro errors emit a diagnostic in a phony file,
+                 ;; e.g. "<println macros>".
+                 (string-match-p
+                  (rx "macros>" line-end)
+                  (flycheck-error-filename err))
+                 ;; Redundant message giving the number of failed errors
+                 (string-match-p
+                  (rx "aborting due to " (optional (one-or-more num) " ")
+                      "previous error")
+                  (flycheck-error-message err))))
               errors))
 
 (defun flycheck-rust-manifest-directory ()
