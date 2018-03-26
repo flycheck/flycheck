@@ -30,6 +30,7 @@
     ``haskell-stack-ghc`` checker. [GH-1316]
   - Add ``flycheck-perl-module-list`` to use specified modules when
     syntax checking code with the ``perl`` checker.
+  - Add ``flycheck-sh-bash-args`` to pass arguments to ``sh-bash`` [GH-1439].
 
 - Improvements
 
