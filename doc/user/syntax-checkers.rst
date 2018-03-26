@@ -237,7 +237,7 @@ syntax checker program:
 Flycheck takes the names of configuration files from user options defined for
 syntax checkers that support configuration files.  Like above the :ref:`list of
 languages <flycheck-languages>` also lists all supported configuration file
-options.  You can alse change these in Customize, under
+options.  You can also change these in Customize, under
 :menuselection:`programming --> tools --> flycheck --> flycheck-config-files`,
 but again we recommend to use Directory Variables.
 

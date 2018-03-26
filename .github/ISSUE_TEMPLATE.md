@@ -7,7 +7,7 @@ If this is your first issue that you report to Flycheck, you may want to take a
 look at our [Contributor’s Guide][], specially the [Bug Reports][] section,
 which helps you through the process.  Please tell us if you had difficulties
 with the information there, if you think that anything is missing, or if you had
-an problems with reporting an issue to Flycheck.
+a problem with reporting an issue to Flycheck.
 
 We’d also like to refer you to our [Troubleshooting Guide][] guide for a list of
 common issues with Flycheck that you can to fix yourself right now and more

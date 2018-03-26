@@ -128,7 +128,7 @@ We would also like to thank the following people and projects:
 
 * Sebastian Wiesner (:gh:`lunaryorn`) for creating Flycheck in the first place,
   for taking the time and dedication to maintain it for over 4 years, while
-  maintaining high standards of code quality and nurturing an healthy, active
+  maintaining high standards of code quality and nurturing a healthy, active
   community around it, giving Flycheck the best chances to thrive after his
   departure.
 * Bozhidar Batsov (:gh:`bbatsov`) for his valuable feedback and his constant
@@ -151,7 +151,7 @@ We would also like to thank the following people and projects:
   syntax checking, and his very constructive feedback.
 * Steve Purcell (:gh:`purcell`) for his valuable feedback, the fruitful
   discussions and his important ideas about the shape and design of Flycheck,
-  and his indispensible and dedicated work on MELPA, which drives the continuous
+  and his indispensable and dedicated work on MELPA, which drives the continuous
   distribution of Flycheck to its users.
 
 Contributors

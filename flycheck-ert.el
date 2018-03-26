@@ -411,7 +411,7 @@ resource directory."
       ;; Load safe file-local variables because some tests depend on them
       (let ((enable-local-variables :safe)
             ;; Disable all hooks at this place, to prevent 3rd party packages
-            ;; from interferring
+            ;; from interfering
             (hack-local-variables-hook))
         (hack-local-variables))
       ;; Configure config file locating for unit tests
