@@ -6085,6 +6085,25 @@ objects)."
 
 
 ;;; Convenience definition of command-syntax checkers
+
+;; We need the byte-compiler to be aware of this function when macroexpanding
+;; `flycheck-define-checker'.
+(eval-and-compile
+  ;; We allow unquoted function symbols and lambdas as arguments to
+  ;; `flycheck-define-checker'.  When that macro is defined, like in this file,
+  ;; it works fine.  However, when wrapping `flycheck-define-checker' in a
+  ;; `with-eval-after-load flycheck', the body of the latter is macroexpanded
+  ;; *before* flycheck.el has been loaded, and thus before the macro is defined.
+  ;; Unquoted function symbols are still unquoted, but (lambda ...) forms are
+  ;; macroexpanded into (function (lambda ...)), and thus should *not* be
+  ;; quoted.  We use `flycheck-maybe-quote' to avoid double-quoting.  In the
+  ;; future, `flycheck-define-checker' should not accept unquoted symbols, and
+  ;; thus `flycheck-maybe-quote' will be unnecessary.
+  ;; See https://github.com/flycheck/flycheck/issues/1398
+  (defun flycheck-maybe-quote (arg)
+    "Function quote ARG if it is a symbol, return ARG otherwise."
+    (if (and (symbolp arg) arg) `(function ,arg) arg)))
+
 (defmacro flycheck-define-checker (symbol docstring &rest properties)
   "Define SYMBOL as command syntax checker with DOCSTRING and PROPERTIES.
 
@@ -6093,13 +6112,14 @@ be quoted.  Also, implicitly define the executable variable for
 SYMBOL with `flycheck-def-executable-var'."
   (declare (indent 1)
            (doc-string 2))
-  (let ((command (plist-get properties :command))
-        (parser (plist-get properties :error-parser))
-        (filter (plist-get properties :error-filter))
-        (explainer (plist-get properties :error-explainer))
-        (predicate (plist-get properties :predicate))
-        (enabled-fn (plist-get properties :enabled))
-        (verify-fn (plist-get properties :verify)))
+  (let ((command                           (plist-get properties :command))
+        (parser      (flycheck-maybe-quote (plist-get properties :error-parser)))
+        (filter      (flycheck-maybe-quote (plist-get properties :error-filter)))
+        (explainer   (flycheck-maybe-quote (plist-get properties :error-explainer)))
+        (predicate   (flycheck-maybe-quote (plist-get properties :predicate)))
+        (enabled-fn  (flycheck-maybe-quote (plist-get properties :enabled)))
+        (verify-fn   (flycheck-maybe-quote (plist-get properties :verify)))
+        (work-dir-fn (flycheck-maybe-quote (plist-get properties :working-directory))))
 
     `(progn
        (flycheck-def-executable-var ,symbol ,(car command))
@@ -6108,22 +6128,23 @@ SYMBOL with `flycheck-def-executable-var'."
          ,docstring
          :command ',command
          ,@(when parser
-             `(:error-parser #',parser))
+             `(:error-parser ,parser))
          :error-patterns ',(plist-get properties :error-patterns)
          ,@(when filter
-             `(:error-filter #',filter))
+             `(:error-filter ,filter))
          ,@(when explainer
-             `(:error-explainer #',explainer))
+             `(:error-explainer ,explainer))
          :modes ',(plist-get properties :modes)
          ,@(when predicate
-             `(:predicate #',predicate))
+             `(:predicate ,predicate))
          :next-checkers ',(plist-get properties :next-checkers)
          ,@(when enabled-fn
-             `(:enabled #',enabled-fn))
+             `(:enabled ,enabled-fn))
          ,@(when verify-fn
-             `(:verify #',verify-fn))
+             `(:verify ,verify-fn))
          :standard-input ',(plist-get properties :standard-input)
-         :working-directory ',(plist-get properties :working-directory)))))
+         ,@(when work-dir-fn
+             `(:working-directory ,work-dir-fn))))))
 
 
 ;;; Built-in checkers
@@ -6678,7 +6699,7 @@ See URL `http://cppcheck.sourceforge.net/'."
                     (`c++-mode "c++")
                     (`c-mode "c")))
             source)
-  :error-parser flycheck-parse-cppcheck
+  :error-parser #'flycheck-parse-cppcheck
   :modes (c-mode c++-mode))
 
 (flycheck-define-checker cfengine
@@ -6759,7 +6780,7 @@ See URL `http://www.coffeelint.org/'."
    (config-file "--file" flycheck-coffeelintrc)
    "--stdin" "--reporter" "checkstyle")
   :standard-input t
-  :error-parser flycheck-parse-checkstyle
+  :error-parser #'flycheck-parse-checkstyle
   :error-filter (lambda (errors)
                   (flycheck-remove-error-file-names
                    "stdin" (flycheck-remove-error-ids
@@ -6797,8 +6818,8 @@ See URL `https://coq.inria.fr/'."
 
 See URL `https://github.com/CSSLint/csslint'."
   :command ("csslint" "--format=checkstyle-xml" source)
-  :error-parser flycheck-parse-checkstyle
-  :error-filter flycheck-dequalify-error-ids
+  :error-parser #'flycheck-parse-checkstyle
+  :error-filter #'flycheck-dequalify-error-ids
   :modes css-mode)
 
 (defconst flycheck-stylelint-args '("--formatter" "json")
@@ -6915,7 +6936,7 @@ See URL `http://stylelint.io/'."
             (option-flag "--quiet" flycheck-stylelint-quiet)
             (config-file "--config" flycheck-stylelintrc))
   :standard-input t
-  :error-parser flycheck-parse-stylelint
+  :error-parser #'flycheck-parse-stylelint
   :modes (css-mode))
 
 (flycheck-def-option-var flycheck-cwl-schema-path nil cwl
@@ -7393,9 +7414,9 @@ Return the absolute path to the directory"
    (error line-start
           (file-name) ":" line ": " (message) line-end))
   :modes erlang-mode
-  :enabled flycheck-rebar3-project-root
-  :predicate flycheck-buffer-saved-p
-  :working-directory flycheck-rebar3-project-root)
+  :enabled #'flycheck-rebar3-project-root
+  :predicate #'flycheck-buffer-saved-p
+  :working-directory #'flycheck-rebar3-project-root)
 
 (flycheck-define-checker eruby-erubis
   "An eRuby syntax checker using the `erubis' command.
@@ -7971,7 +7992,7 @@ See URL `https://github.com/commercialhaskell/stack'."
     (flycheck-sanitize-errors (flycheck-dedent-error-messages errors)))
   :modes (haskell-mode literate-haskell-mode)
   :next-checkers ((warning . haskell-hlint))
-  :working-directory flycheck-haskell--find-default-directory)
+  :working-directory #'flycheck-haskell--find-default-directory)
 
 (flycheck-define-checker haskell-ghc
   "A Haskell syntax and type checker using ghc.
@@ -8021,7 +8042,7 @@ See URL `https://www.haskell.org/ghc/'."
     (flycheck-sanitize-errors (flycheck-dedent-error-messages errors)))
   :modes (haskell-mode literate-haskell-mode)
   :next-checkers ((warning . haskell-hlint))
-  :working-directory flycheck-haskell--find-default-directory)
+  :working-directory #'flycheck-haskell--find-default-directory)
 
 (flycheck-def-config-file-var flycheck-hlintrc haskell-hlint "HLint.hs"
   :safe #'stringp)
@@ -8145,7 +8166,7 @@ See URL `http://www.jshint.com'."
                     concat flycheck-option-symbol)
             "-")
   :standard-input t
-  :error-parser flycheck-parse-checkstyle
+  :error-parser #'flycheck-parse-checkstyle
   :error-filter
   (lambda (errors)
     (flycheck-remove-error-file-names
@@ -8225,10 +8246,10 @@ See URL `http://eslint.org/'."
             (eval flycheck-eslint-args)
             "--stdin" "--stdin-filename" source-original)
   :standard-input t
-  :error-parser flycheck-parse-eslint
+  :error-parser #'flycheck-parse-eslint
   :enabled (lambda () (flycheck-eslint-config-exists-p))
   :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode rjsx-mode)
-  :working-directory flycheck-eslint--find-working-directory
+  :working-directory #'flycheck-eslint--find-working-directory
   :verify
   (lambda (_)
     (let* ((default-directory
@@ -8317,7 +8338,7 @@ See URL `http://stylelint.io/'."
             (option-flag "--quiet" flycheck-stylelint-quiet)
             (config-file "--config" flycheck-stylelintrc))
   :standard-input t
-  :error-parser flycheck-parse-stylelint
+  :error-parser #'flycheck-parse-stylelint
   :modes (less-css-mode))
 
 (flycheck-define-checker llvm-llc
@@ -8500,7 +8521,7 @@ See URL `https://phpmd.org/'."
   :command ("phpmd" source "xml"
             (eval (flycheck-option-comma-separated-list
                    flycheck-phpmd-rulesets)))
-  :error-parser flycheck-parse-phpmd
+  :error-parser #'flycheck-parse-phpmd
   :modes (php-mode php+-mode)
   :next-checkers (php-phpcs))
 
@@ -8535,7 +8556,7 @@ See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
             ;; Read from standard input
             "-")
   :standard-input t
-  :error-parser flycheck-parse-checkstyle
+  :error-parser #'flycheck-parse-checkstyle
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors
@@ -8593,7 +8614,7 @@ See URL `http://proselint.com/' for more information about proselint."
 See URL `http://proselint.com/'."
   :command ("proselint" "--json" "-")
   :standard-input t
-  :error-parser flycheck-proselint-parse-errors
+  :error-parser #'flycheck-proselint-parse-errors
   :modes (text-mode markdown-mode gfm-mode message-mode))
 
 (flycheck-define-checker protobuf-protoc
@@ -8711,7 +8732,7 @@ See URL `http://puppet-lint.com/'."
   :modes puppet-mode
   ;; Since we check the original file, we can only use this syntax checker if
   ;; the buffer is actually linked to a file, and if it is not modified.
-  :predicate flycheck-buffer-saved-p)
+  :predicate #'flycheck-buffer-saved-p)
 
 (defun flycheck-python-find-module (checker module)
   "Check if a Python MODULE is available.
@@ -9271,7 +9292,7 @@ See URL `http://batsov.com/rubocop/'."
             ;; from standard input
             "--stdin" source-original)
   :standard-input t
-  :working-directory flycheck-ruby--find-project-root
+  :working-directory #'flycheck-ruby--find-project-root
   :error-patterns
   ((info line-start (file-name) ":" line ":" column ": C: "
          (optional (id (one-or-more (not (any ":")))) ": ") (message) line-end)
@@ -9297,7 +9318,7 @@ See URL `https://github.com/troessner/reek'."
   :command ("reek" "--format" "json"
             (config-file "--config" flycheck-reekrc)
             source)
-  :error-parser flycheck-parse-reek
+  :error-parser #'flycheck-parse-reek
   :modes (enh-ruby-mode ruby-mode)
   :next-checkers ((warning . ruby-rubylint)))
 
@@ -9535,7 +9556,7 @@ This syntax checker requires Rust 1.17 or newer.  See URL
                     flycheck-rust-binary-name))
             (eval flycheck-cargo-check-args)
             "--message-format=json")
-  :error-parser flycheck-parse-cargo-rustc
+  :error-parser #'flycheck-parse-cargo-rustc
   :error-filter (lambda (errors)
                   ;; In Rust 1.25+, filenames are relative to the workspace
                   ;; root.
@@ -9545,10 +9566,10 @@ This syntax checker requires Rust 1.17 or newer.  See URL
                                     (expand-file-name
                                      (flycheck-error-filename err) root)))
                             (flycheck-rust-error-filter errors))))
-  :error-explainer flycheck-rust-error-explainer
+  :error-explainer #'flycheck-rust-error-explainer
   :modes rust-mode
-  :predicate flycheck-buffer-saved-p
-  :enabled flycheck-rust-manifest-directory
+  :predicate #'flycheck-buffer-saved-p
+  :enabled #'flycheck-rust-manifest-directory
   :working-directory (lambda (_) (flycheck-rust-manifest-directory))
   :verify
   (lambda (_)
@@ -9595,22 +9616,22 @@ This syntax checker needs Rust 1.7 or newer.  See URL
             (eval flycheck-rust-args)
             (eval (or flycheck-rust-crate-root
                       (flycheck-substitute-argument 'source-original 'rust))))
-  :error-parser flycheck-parse-rustc
-  :error-filter flycheck-rust-error-filter
-  :error-explainer flycheck-rust-error-explainer
+  :error-parser #'flycheck-parse-rustc
+  :error-filter #'flycheck-rust-error-filter
+  :error-explainer #'flycheck-rust-error-explainer
   :modes rust-mode
-  :predicate flycheck-buffer-saved-p)
+  :predicate #'flycheck-buffer-saved-p)
 
 (flycheck-define-checker rust-clippy
   "A Rust syntax checker using clippy.
 
 See URL `https://github.com/rust-lang-nursery/rust-clippy'."
   :command ("cargo" "+nightly" "clippy" "--message-format=json")
-  :error-parser flycheck-parse-cargo-rustc
-  :error-filter flycheck-rust-error-filter
-  :error-explainer flycheck-rust-error-explainer
+  :error-parser #'flycheck-parse-cargo-rustc
+  :error-filter #'flycheck-rust-error-filter
+  :error-explainer #'flycheck-rust-error-explainer
   :modes rust-mode
-  :predicate flycheck-buffer-saved-p
+  :predicate #'flycheck-buffer-saved-p
   :enabled (lambda ()
              (and (flycheck-rust-cargo-has-command-p "clippy")
                   (flycheck-rust-manifest-directory)))
@@ -9695,7 +9716,7 @@ See URL `https://github.com/sasstools/sass-lint'."
             "--format" "Checkstyle"
             (config-file "--config" flycheck-sass-lintrc)
             source)
-  :error-parser flycheck-parse-checkstyle
+  :error-parser #'flycheck-parse-checkstyle
   :modes (sass-mode scss-mode))
 
 (flycheck-define-checker scala
@@ -9847,7 +9868,7 @@ See URL `https://github.com/brigade/scss-lint'."
   ;; as an addon which might not be installed.  We use a custom error parser to
   ;; check whether the addon is missing and turn that into a special kind of
   ;; Flycheck error.
-  :error-parser flycheck-parse-scss-lint
+  :error-parser #'flycheck-parse-scss-lint
   :modes scss-mode
   :verify (lambda (checker)
             (let* ((executable (flycheck-find-checker-executable checker))
@@ -9881,7 +9902,7 @@ See URL `http://stylelint.io/'."
             (option-flag "--quiet" flycheck-stylelint-quiet)
             (config-file "--config" flycheck-stylelintrc))
   :standard-input t
-  :error-parser flycheck-parse-stylelint
+  :error-parser #'flycheck-parse-stylelint
   :modes (scss-mode))
 
 (flycheck-def-option-var flycheck-scss-compass nil scss
@@ -10025,7 +10046,7 @@ See URL `https://github.com/koalaman/shellcheck/'."
                     flycheck-option-comma-separated-list)
             "-")
   :standard-input t
-  :error-parser flycheck-parse-checkstyle
+  :error-parser #'flycheck-parse-checkstyle
   :error-filter
   (lambda (errors)
     (flycheck-remove-error-file-names
@@ -10060,7 +10081,7 @@ See URL `http://slim-lang.com'."
 
 See URL `https://github.com/sds/slim-lint'."
   :command ("slim-lint" "--reporter=checkstyle" source)
-  :error-parser flycheck-parse-checkstyle
+  :error-parser #'flycheck-parse-checkstyle
   :modes slim-mode)
 
 (flycheck-define-checker sql-sqlint
@@ -10190,7 +10211,7 @@ See URL `https://github.com/palantir/tslint'."
             (option "--rules-dir" flycheck-typescript-tslint-rulesdir)
             (eval flycheck-tslint-args)
             source-inplace)
-  :error-parser flycheck-parse-tslint
+  :error-parser #'flycheck-parse-tslint
   :modes (typescript-mode))
 
 (flycheck-def-option-var flycheck-verilator-include-path nil verilog-verilator
