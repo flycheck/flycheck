@@ -89,6 +89,7 @@
 ;; Tell the byte compiler about autoloaded functions from packages
 (declare-function pkg-info-version-info "pkg-info" (package))
 
+(autoload 'ansi-color-filter-apply "ansi-color")
 
 ;;; Compatibility
 (eval-and-compile
@@ -9217,6 +9218,9 @@ See URL `https://github.com/mivok/markdownlint'."
 See URL `https://nixos.org/nix/manual/#sec-nix-instantiate'."
   :command ("nix-instantiate" "--parse" "-")
   :standard-input t
+  :error-parser
+  (lambda (output checker buffer)
+    (flycheck-parse-with-patterns (ansi-color-filter-apply output) checker buffer))
   :error-patterns
   ((error line-start
           "error: " (message) " at " (file-name) ":" line ":" column
