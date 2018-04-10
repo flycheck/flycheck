@@ -9344,6 +9344,27 @@ See URL `http://batsov.com/rubocop/'."
   :safe #'string-or-null-p
   :package-version '(flycheck . "30"))
 
+(defun flycheck-ruby-rbenv-shim-p (program)
+  "Whether PROGRAM is an rbenv shim.
+
+See URL `https://github.com/rbenv/rbenv'."
+  (-when-let (rbenv-root (getenv "RBENV_ROOT"))
+    (string-prefix-p (expand-file-name "shims" rbenv-root)
+                     (funcall flycheck-executable-find program))))
+
+(defun flycheck-ruby-rbenv-shim-path (program)
+  "Return the full path to a Ruby SHIM.
+
+If PROGRAM is an rbenv shim, return the value of `rbenv which
+PROGRAM'.  If the shim is not available for the current version,
+or if the program is not a shim, return nil."
+  (when (flycheck-ruby-rbenv-shim-p program)
+    (let* ((ret)
+           (path (with-output-to-string
+                   (setq ret (call-process "rbenv" nil standard-output nil
+                                           "which" program)))))
+      (and (= ret 0) path))))
+
 (flycheck-define-checker ruby-reek
   "A Ruby smell checker using reek.
 
@@ -9353,6 +9374,19 @@ See URL `https://github.com/troessner/reek'."
             source)
   :error-parser flycheck-parse-reek
   :modes (enh-ruby-mode ruby-mode)
+  :enabled (lambda ()
+             (or (not (flycheck-ruby-rbenv-shim-p "reek"))
+                 (flycheck-ruby-rbenv-shim-path "reek")))
+  :verify (lambda (_)
+            (let ((is-shim (flycheck-ruby-rbenv-shim-p "reek"))
+                  (true-path (flycheck-ruby-rbenv-shim-path "reek")))
+              (if is-shim
+                  (list
+                   (flycheck-verification-result-new
+                    :label "rbenv"
+                    :message (if true-path (format "Real binary found at %s" true-path)
+                               "'reek' is not installed for the currently active Ruby version")
+                    :face (if true-path 'success '(bold error)))))))
   :next-checkers ((warning . ruby-rubylint)))
 
 ;; Default to `nil' to let Rubylint find its configuration file by itself, and
