@@ -3242,6 +3242,29 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
    '(3 nil warning "Use absolute WORKDIR"
        :id "DL3000" :checker dockerfile-hadolint)))
 
+(flycheck-ert-def-checker-test elixir-credo elixir infos-without-strict-mode
+  (flycheck-ert-should-syntax-check
+   "language/elixir/lib/infos.ex" 'elixir-mode
+   '(1 11 info "Modules should have a @moduledoc tag."
+       :checker elixir-credo)))
+
+(flycheck-ert-def-checker-test elixir-credo elixir infos-with-strict-mode
+  (let ((flycheck-elixir-credo-strict t))
+    (flycheck-ert-should-syntax-check
+     "language/elixir/lib/infos.ex" 'elixir-mode
+     '(1 11 info "Modules should have a @moduledoc tag."
+         :checker elixir-credo)
+     '(2 nil info "Do not use parentheses when defining a function which has no arguments."
+         :checker elixir-credo))))
+
+(flycheck-ert-def-checker-test elixir-credo elixir warnings
+  (flycheck-ert-should-syntax-check
+   "language/elixir/lib/warnings.ex" 'elixir-mode
+   '(5 nil warning "There are identical sub-expressions to the left and to the right of the '&&' operator."
+       :checker elixir-credo)
+   '(8 8 warning "length(list) == 0 is expensive. Prefer Enum.empty?/1 or list == []"
+       :checker elixir-credo)))
+
 (flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp nil
   (flycheck-ert-should-syntax-check
    "language/emacs-lisp/warnings.el" 'emacs-lisp-mode

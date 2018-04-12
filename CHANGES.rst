@@ -37,6 +37,7 @@
   - protobuf-prototool with ``prototool`` [GH-1591]
   - Bazel with ``bazel-buildifier`` [GH-1613]
   - Ruumba with ``eruby-ruumba`` [GH-1616]
+  - Elixir with ``credo`` [GH-1062]
 
 - New features:
 
