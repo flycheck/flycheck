@@ -27,7 +27,7 @@ env:
     - EMACS_VERSION=24.5
     - EMACS_VERSION=25.2
     - EMACS_VERSION=25.3
-    - EMACS_VERSION=26.0.91 PRETEST=yes
+    - EMACS_VERSION=26.1-rc1
     - EMACS_VERSION=snapshot
     # A special job to build the manual
     - BUILD_MANUAL=yes
