@@ -8152,6 +8152,9 @@ See URL `http://www.jshint.com'."
      "stdin" (flycheck-dequalify-error-ids errors)))
   :modes (js-mode js2-mode js3-mode rjsx-mode))
 
+(flycheck-def-args-var flycheck-eslint-args javascript-eslint
+  :package-version '(flycheck . "32"))
+
 (flycheck-def-option-var flycheck-eslint-rules-directories nil javascript-eslint
   "A list of directories with custom rules for ESLint.
 
@@ -8219,6 +8222,7 @@ hierarchy, it looks first for `.eslintignore' and then for
 See URL `http://eslint.org/'."
   :command ("eslint" "--format=json"
             (option-list "--rulesdir" flycheck-eslint-rules-directories)
+            (eval flycheck-eslint-args)
             "--stdin" "--stdin-filename" source-original)
   :standard-input t
   :error-parser flycheck-parse-eslint
