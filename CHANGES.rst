@@ -32,6 +32,8 @@
   - Add ``flycheck-perl-module-list`` to use specified modules when
     syntax checking code with the ``perl`` checker.
   - Add ``flycheck-sh-bash-args`` to pass arguments to ``sh-bash`` [GH-1439].
+  - Add ``flychjeck-eslint-args`` to pass arguments to ``javascript-eslint``
+    [GH-1360]
 
 - Improvements
 
