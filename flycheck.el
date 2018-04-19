@@ -6100,9 +6100,17 @@ objects)."
   ;; future, `flycheck-define-checker' should not accept unquoted symbols, and
   ;; thus `flycheck-maybe-quote' will be unnecessary.
   ;; See https://github.com/flycheck/flycheck/issues/1398
-  (defun flycheck-maybe-quote (arg)
+  (defun flycheck-maybe-quote-function (arg)
     "Function quote ARG if it is a symbol, return ARG otherwise."
-    (if (and (symbolp arg) arg) `(function ,arg) arg)))
+    (if (and (symbolp arg) arg) `(function ,arg) arg))
+
+  ;; We also quote non-function properties for backward-compatibility.  In the
+  ;; future, unquoted arguments should be invalid.
+  (defun flycheck-maybe-quote (arg)
+    "Quote ARG unless it is already quoted, or is a boolean."
+    (if (or (booleanp arg) (and (listp arg) (eq 'quote (car arg))))
+        arg
+      `(quote ,arg))))
 
 (defmacro flycheck-define-checker (symbol docstring &rest properties)
   "Define SYMBOL as command syntax checker with DOCSTRING and PROPERTIES.
@@ -6112,37 +6120,42 @@ be quoted.  Also, implicitly define the executable variable for
 SYMBOL with `flycheck-def-executable-var'."
   (declare (indent 1)
            (doc-string 2))
-  (let ((command                           (plist-get properties :command))
-        (parser      (flycheck-maybe-quote (plist-get properties :error-parser)))
-        (filter      (flycheck-maybe-quote (plist-get properties :error-filter)))
-        (explainer   (flycheck-maybe-quote (plist-get properties :error-explainer)))
-        (predicate   (flycheck-maybe-quote (plist-get properties :predicate)))
-        (enabled-fn  (flycheck-maybe-quote (plist-get properties :enabled)))
-        (verify-fn   (flycheck-maybe-quote (plist-get properties :verify)))
-        (work-dir-fn (flycheck-maybe-quote (plist-get properties :working-directory))))
+  (let ((command        (flycheck-maybe-quote (plist-get properties :command)))
+        (patterns       (flycheck-maybe-quote (plist-get properties :error-patterns)))
+        (modes          (flycheck-maybe-quote (plist-get properties :modes)))
+        (next-checkers  (flycheck-maybe-quote (plist-get properties :next-checkers)))
+        (standard-input (flycheck-maybe-quote (plist-get properties :standard-input)))
+        (parser      (flycheck-maybe-quote-function (plist-get properties :error-parser)))
+        (filter      (flycheck-maybe-quote-function (plist-get properties :error-filter)))
+        (explainer   (flycheck-maybe-quote-function (plist-get properties :error-explainer)))
+        (predicate   (flycheck-maybe-quote-function (plist-get properties :predicate)))
+        (enabled-fn  (flycheck-maybe-quote-function (plist-get properties :enabled)))
+        (verify-fn   (flycheck-maybe-quote-function (plist-get properties :verify)))
+        (work-dir-fn (flycheck-maybe-quote-function (plist-get properties :working-directory))))
 
     `(progn
        (flycheck-def-executable-var ,symbol ,(car command))
 
        (flycheck-define-command-checker ',symbol
          ,docstring
-         :command ',command
+         :command ,command
          ,@(when parser
              `(:error-parser ,parser))
-         :error-patterns ',(plist-get properties :error-patterns)
+         :error-patterns ,patterns
          ,@(when filter
              `(:error-filter ,filter))
          ,@(when explainer
              `(:error-explainer ,explainer))
-         :modes ',(plist-get properties :modes)
+         :modes ,modes
          ,@(when predicate
              `(:predicate ,predicate))
-         :next-checkers ',(plist-get properties :next-checkers)
+         ,@(when next-checkers
+             `(:next-checkers ,next-checkers))
          ,@(when enabled-fn
              `(:enabled ,enabled-fn))
          ,@(when verify-fn
              `(:verify ,verify-fn))
-         :standard-input ',(plist-get properties :standard-input)
+         :standard-input ,standard-input
          ,@(when work-dir-fn
              `(:working-directory ,work-dir-fn))))))
 
@@ -6191,63 +6204,63 @@ more information about GNAT warnings."
 
 Uses the GNAT compiler from GCC.  See URL
 `http://libre.adacore.com/tools/gnat-gpl-edition/'."
-  :command ("gnatmake"
-            "-c"                        ; Just compile, don't bind
-            "-f"                        ; Force re-compilation
-            "-u"                        ; Compile the main file only
-            "-gnatf"                    ; Full error information
-            "-gnatef"                   ; Full source file name
-            "-D" temporary-directory
-            (option-list "-gnat" flycheck-gnat-warnings concat)
-            (option-list "-I" flycheck-gnat-include-path concat)
-            (option "-gnat" flycheck-gnat-language-standard concat)
-            (eval flycheck-gnat-args)
-            source)
+  :command '("gnatmake"
+             "-c"                        ; Just compile, don't bind
+             "-f"                        ; Force re-compilation
+             "-u"                        ; Compile the main file only
+             "-gnatf"                    ; Full error information
+             "-gnatef"                   ; Full source file name
+             "-D" temporary-directory
+             (option-list "-gnat" flycheck-gnat-warnings concat)
+             (option-list "-I" flycheck-gnat-include-path concat)
+             (option "-gnat" flycheck-gnat-language-standard concat)
+             (eval flycheck-gnat-args)
+             source)
   :error-patterns
-  ((error line-start
-          (message "In file included from") " " (file-name) ":" line ":"
-          column ":"
-          line-end)
-   (info line-start (file-name) ":" line ":" column
-         ": note: " (message) line-end)
-   (warning line-start (file-name) ":" line ":" column
-            ": warning: " (message) line-end)
-   (error line-start (file-name) ":" line ":" column ;no specific error prefix in Ada
-          ": " (message) line-end))
-  :modes ada-mode)
+  '((error line-start
+           (message "In file included from") " " (file-name) ":" line ":"
+           column ":"
+           line-end)
+    (info line-start (file-name) ":" line ":" column
+          ": note: " (message) line-end)
+    (warning line-start (file-name) ":" line ":" column
+             ": warning: " (message) line-end)
+    (error line-start (file-name) ":" line ":" column ;no specific error prefix in Ada
+           ": " (message) line-end))
+  :modes 'ada-mode)
 
 (flycheck-define-checker asciidoc
   "A AsciiDoc syntax checker using the AsciiDoc compiler.
 
 See URL `http://www.methods.co.nz/asciidoc'."
-  :command ("asciidoc" "-o" null-device "-")
+  :command '("asciidoc" "-o" null-device "-")
   :standard-input t
   :error-patterns
-  ((error line-start
-          "asciidoc: ERROR: <stdin>: Line " line ": " (message)
-          line-end)
-   (warning line-start
-            "asciidoc: WARNING: <stdin>: Line " line ": " (message)
-            line-end)
-   (info line-start
-         "asciidoc: DEPRECATED: <stdin>: Line " line ": " (message)
-         line-end))
-  :modes adoc-mode)
+  '((error line-start
+           "asciidoc: ERROR: <stdin>: Line " line ": " (message)
+           line-end)
+    (warning line-start
+             "asciidoc: WARNING: <stdin>: Line " line ": " (message)
+             line-end)
+    (info line-start
+          "asciidoc: DEPRECATED: <stdin>: Line " line ": " (message)
+          line-end))
+  :modes 'adoc-mode)
 
 (flycheck-define-checker asciidoctor
   "An AsciiDoc syntax checker using the Asciidoctor compiler.
 
 See URL `http://asciidoctor.org'."
-  :command ("asciidoctor" "-o" null-device "-")
+  :command '("asciidoctor" "-o" null-device "-")
   :standard-input t
   :error-patterns
-  ((error line-start
-          "asciidoctor: ERROR: <stdin>: Line " line ": " (message)
-          line-end)
-   (warning line-start
-            "asciidoctor: WARNING: <stdin>: Line " line ": " (message)
-            line-end))
-  :modes adoc-mode)
+  '((error line-start
+           "asciidoctor: ERROR: <stdin>: Line " line ": " (message)
+           line-end)
+    (warning line-start
+             "asciidoctor: WARNING: <stdin>: Line " line ": " (message)
+             line-end))
+  :modes 'adoc-mode)
 
 (flycheck-def-args-var flycheck-clang-args c/c++-clang
   :package-version '(flycheck . "0.22"))
@@ -6401,44 +6414,44 @@ This function determines the directory by looking at function
   "A C/C++ syntax checker using Clang.
 
 See URL `http://clang.llvm.org/'."
-  :command ("clang"
-            "-fsyntax-only"
-            "-fno-color-diagnostics"    ; Do not include color codes in output
-            "-fno-caret-diagnostics"    ; Do not visually indicate the source
+  :command '("clang"
+             "-fsyntax-only"
+             "-fno-color-diagnostics"    ; Do not include color codes in output
+             "-fno-caret-diagnostics"    ; Do not visually indicate the source
                                         ; location
-            "-fno-diagnostics-show-option" ; Do not show the corresponding
+             "-fno-diagnostics-show-option" ; Do not show the corresponding
                                         ; warning group
-            "-iquote" (eval (flycheck-c/c++-quoted-include-directory))
-            (option "-std=" flycheck-clang-language-standard concat)
-            (option-flag "-pedantic" flycheck-clang-pedantic)
-            (option-flag "-pedantic-errors" flycheck-clang-pedantic-errors)
-            (option "-stdlib=" flycheck-clang-standard-library concat)
-            (option-flag "-fms-extensions" flycheck-clang-ms-extensions)
-            (option-flag "-fno-exceptions" flycheck-clang-no-exceptions)
-            (option-flag "-fno-rtti" flycheck-clang-no-rtti)
-            (option-flag "-fblocks" flycheck-clang-blocks)
-            (option-list "-include" flycheck-clang-includes)
-            (option-list "-W" flycheck-clang-warnings concat)
-            (option-list "-D" flycheck-clang-definitions concat)
-            (option-list "-I" flycheck-clang-include-path)
-            (eval flycheck-clang-args)
-            "-x" (eval
-                  (pcase major-mode
-                    (`c++-mode "c++")
-                    (`c-mode "c")))
-            ;; Read from standard input
-            "-")
+             "-iquote" (eval (flycheck-c/c++-quoted-include-directory))
+             (option "-std=" flycheck-clang-language-standard concat)
+             (option-flag "-pedantic" flycheck-clang-pedantic)
+             (option-flag "-pedantic-errors" flycheck-clang-pedantic-errors)
+             (option "-stdlib=" flycheck-clang-standard-library concat)
+             (option-flag "-fms-extensions" flycheck-clang-ms-extensions)
+             (option-flag "-fno-exceptions" flycheck-clang-no-exceptions)
+             (option-flag "-fno-rtti" flycheck-clang-no-rtti)
+             (option-flag "-fblocks" flycheck-clang-blocks)
+             (option-list "-include" flycheck-clang-includes)
+             (option-list "-W" flycheck-clang-warnings concat)
+             (option-list "-D" flycheck-clang-definitions concat)
+             (option-list "-I" flycheck-clang-include-path)
+             (eval flycheck-clang-args)
+             "-x" (eval
+                   (pcase major-mode
+                     (`c++-mode "c++")
+                     (`c-mode "c")))
+             ;; Read from standard input
+             "-")
   :standard-input t
   :error-patterns
-  ((error line-start
-          (message "In file included from") " " (or "<stdin>" (file-name))
-          ":" line ":" line-end)
-   (info line-start (or "<stdin>" (file-name)) ":" line ":" column
-         ": note: " (optional (message)) line-end)
-   (warning line-start (or "<stdin>" (file-name)) ":" line ":" column
-            ": warning: " (optional (message)) line-end)
-   (error line-start (or "<stdin>" (file-name)) ":" line ":" column
-          ": " (or "fatal error" "error") ": " (optional (message)) line-end))
+  '((error line-start
+           (message "In file included from") " " (or "<stdin>" (file-name))
+           ":" line ":" line-end)
+    (info line-start (or "<stdin>" (file-name)) ":" line ":" column
+          ": note: " (optional (message)) line-end)
+    (warning line-start (or "<stdin>" (file-name)) ":" line ":" column
+             ": warning: " (optional (message)) line-end)
+    (error line-start (or "<stdin>" (file-name)) ":" line ":" column
+           ": " (or "fatal error" "error") ": " (optional (message)) line-end))
   :error-filter
   (lambda (errors)
     (let ((errors (flycheck-sanitize-errors errors)))
@@ -6449,8 +6462,8 @@ See URL `http://clang.llvm.org/'."
         (setf (flycheck-error-message err)
               (or (flycheck-error-message err) "no message")))
       (flycheck-fold-include-levels errors "In file included from")))
-  :modes (c-mode c++-mode)
-  :next-checkers ((warning . c/c++-cppcheck)))
+  :modes '(c-mode c++-mode)
+  :next-checkers '((warning . c/c++-cppcheck)))
 
 (flycheck-def-args-var flycheck-gcc-args c/c++-gcc
   :package-version '(flycheck . "0.22"))
@@ -6564,48 +6577,48 @@ warnings."
   "A C/C++ syntax checker using GCC.
 
 Requires GCC 4.4 or newer.  See URL `https://gcc.gnu.org/'."
-  :command ("gcc"
-            "-fshow-column"
-            "-iquote" (eval (flycheck-c/c++-quoted-include-directory))
-            (option "-std=" flycheck-gcc-language-standard concat)
-            (option-flag "-pedantic" flycheck-gcc-pedantic)
-            (option-flag "-pedantic-errors" flycheck-gcc-pedantic-errors)
-            (option-flag "-fno-exceptions" flycheck-gcc-no-exceptions)
-            (option-flag "-fno-rtti" flycheck-gcc-no-rtti)
-            (option-flag "-fopenmp" flycheck-gcc-openmp)
-            (option-list "-include" flycheck-gcc-includes)
-            (option-list "-W" flycheck-gcc-warnings concat)
-            (option-list "-D" flycheck-gcc-definitions concat)
-            (option-list "-I" flycheck-gcc-include-path)
-            (eval flycheck-gcc-args)
-            "-x" (eval
-                  (pcase major-mode
-                    (`c++-mode "c++")
-                    (`c-mode "c")))
-            ;; GCC performs full checking only when actually compiling, so
-            ;; `-fsyntax-only' is not enough. Just let it generate assembly
-            ;; code.
-            "-S" "-o" null-device
-            ;; Read from standard input
-            "-")
+  :command '("gcc"
+             "-fshow-column"
+             "-iquote" (eval (flycheck-c/c++-quoted-include-directory))
+             (option "-std=" flycheck-gcc-language-standard concat)
+             (option-flag "-pedantic" flycheck-gcc-pedantic)
+             (option-flag "-pedantic-errors" flycheck-gcc-pedantic-errors)
+             (option-flag "-fno-exceptions" flycheck-gcc-no-exceptions)
+             (option-flag "-fno-rtti" flycheck-gcc-no-rtti)
+             (option-flag "-fopenmp" flycheck-gcc-openmp)
+             (option-list "-include" flycheck-gcc-includes)
+             (option-list "-W" flycheck-gcc-warnings concat)
+             (option-list "-D" flycheck-gcc-definitions concat)
+             (option-list "-I" flycheck-gcc-include-path)
+             (eval flycheck-gcc-args)
+             "-x" (eval
+                   (pcase major-mode
+                     (`c++-mode "c++")
+                     (`c-mode "c")))
+             ;; GCC performs full checking only when actually compiling, so
+             ;; `-fsyntax-only' is not enough. Just let it generate assembly
+             ;; code.
+             "-S" "-o" null-device
+             ;; Read from standard input
+             "-")
   :standard-input t
   :error-patterns
-  ((error line-start
-          (message "In file included from") " " (or "<stdin>" (file-name))
-          ":" line ":" column ":" line-end)
-   (info line-start (or "<stdin>" (file-name)) ":" line ":" column
-         ": note: " (message) line-end)
-   (warning line-start (or "<stdin>" (file-name)) ":" line ":" column
-            ": warning: " (message (one-or-more (not (any "\n["))))
-            (optional "[" (id (one-or-more not-newline)) "]") line-end)
-   (error line-start (or "<stdin>" (file-name)) ":" line ":" column
-          ": " (or "fatal error" "error") ": " (message) line-end))
+  '((error line-start
+           (message "In file included from") " " (or "<stdin>" (file-name))
+           ":" line ":" column ":" line-end)
+    (info line-start (or "<stdin>" (file-name)) ":" line ":" column
+          ": note: " (message) line-end)
+    (warning line-start (or "<stdin>" (file-name)) ":" line ":" column
+             ": warning: " (message (one-or-more (not (any "\n["))))
+             (optional "[" (id (one-or-more not-newline)) "]") line-end)
+    (error line-start (or "<stdin>" (file-name)) ":" line ":" column
+           ": " (or "fatal error" "error") ": " (message) line-end))
   :error-filter
   (lambda (errors)
     (flycheck-fold-include-levels (flycheck-sanitize-errors errors)
                                   "In file included from"))
-  :modes (c-mode c++-mode)
-  :next-checkers ((warning . c/c++-cppcheck)))
+  :modes '(c-mode c++-mode)
+  :next-checkers '((warning . c/c++-cppcheck)))
 
 (flycheck-def-option-var flycheck-cppcheck-checks '("style") c/c++-cppcheck
   "Enabled checks for Cppcheck.
@@ -6686,35 +6699,35 @@ Relative paths are relative to the file being checked."
   "A C/C++ checker using cppcheck.
 
 See URL `http://cppcheck.sourceforge.net/'."
-  :command ("cppcheck" "--quiet" "--xml-version=2" "--inline-suppr"
-            (option "--enable=" flycheck-cppcheck-checks concat
-                    flycheck-option-comma-separated-list)
-            (option-flag "--inconclusive" flycheck-cppcheck-inconclusive)
-            (option-list "-I" flycheck-cppcheck-include-path)
-            (option-list "--std=" flycheck-cppcheck-standards concat)
-            (option-list "--suppress=" flycheck-cppcheck-suppressions concat)
-            (option "--suppressions-list=" flycheck-cppcheck-suppressions-file concat)
-            "-x" (eval
-                  (pcase major-mode
-                    (`c++-mode "c++")
-                    (`c-mode "c")))
-            source)
+  :command '("cppcheck" "--quiet" "--xml-version=2" "--inline-suppr"
+             (option "--enable=" flycheck-cppcheck-checks concat
+                     flycheck-option-comma-separated-list)
+             (option-flag "--inconclusive" flycheck-cppcheck-inconclusive)
+             (option-list "-I" flycheck-cppcheck-include-path)
+             (option-list "--std=" flycheck-cppcheck-standards concat)
+             (option-list "--suppress=" flycheck-cppcheck-suppressions concat)
+             (option "--suppressions-list=" flycheck-cppcheck-suppressions-file concat)
+             "-x" (eval
+                   (pcase major-mode
+                     (`c++-mode "c++")
+                     (`c-mode "c")))
+             source)
   :error-parser #'flycheck-parse-cppcheck
-  :modes (c-mode c++-mode))
+  :modes '(c-mode c++-mode))
 
 (flycheck-define-checker cfengine
   "A CFEngine syntax checker using cf-promises.
 
 See URL `https://cfengine.com/'."
-  :command ("cf-promises" "-Wall" "-f"
-            ;; We must stay in the same directory to resolve @include
-            source-inplace)
+  :command '("cf-promises" "-Wall" "-f"
+             ;; We must stay in the same directory to resolve @include
+             source-inplace)
   :error-patterns
-  ((warning line-start (file-name) ":" line ":" column
-            ": warning: " (message) line-end)
-   (error line-start (file-name) ":" line ":" column
-          ": error: " (message) line-end))
-  :modes (cfengine-mode cfengine3-mode))
+  '((warning line-start (file-name) ":" line ":" column
+             ": warning: " (message) line-end)
+    (error line-start (file-name) ":" line ":" column
+           ": error: " (message) line-end))
+  :modes '(cfengine-mode cfengine3-mode))
 
 (flycheck-def-option-var flycheck-foodcritic-tags nil chef-foodcritic
   "A list of tags to select for Foodcritic.
@@ -6735,12 +6748,12 @@ See URL `http://www.foodcritic.io'."
   ;; foodcritic interprets these as relative to the source file, so we need to
   ;; stay within the source tree.  See
   ;; https://github.com/flycheck/flycheck/pull/556
-  :command ("foodcritic"
-            (option-list "--tags" flycheck-foodcritic-tags)
-            source-inplace)
+  :command '("foodcritic"
+             (option-list "--tags" flycheck-foodcritic-tags)
+             source-inplace)
   :error-patterns
-  ((error line-start (message) ": " (file-name) ":" line line-end))
-  :modes (enh-ruby-mode ruby-mode)
+  '((error line-start (message) ": " (file-name) ":" line line-end))
+  :modes '(enh-ruby-mode ruby-mode)
   :predicate
   (lambda ()
     (let ((parent-dir (file-name-directory
@@ -6759,13 +6772,13 @@ See URL `http://www.foodcritic.io'."
 
 See URL `http://coffeescript.org/'."
   ;; --print suppresses generation of compiled .js files
-  :command ("coffee" "--compile" "--print" "--stdio")
+  :command '("coffee" "--compile" "--print" "--stdio")
   :standard-input t
   :error-patterns
-  ((error line-start "[stdin]:" line ":" column
-          ": error: " (message) line-end))
-  :modes coffee-mode
-  :next-checkers ((warning . coffee-coffeelint)))
+  '((error line-start "[stdin]:" line ":" column
+           ": error: " (message) line-end))
+  :modes 'coffee-mode
+  :next-checkers '((warning . coffee-coffeelint)))
 
 (flycheck-def-config-file-var flycheck-coffeelintrc coffee-coffeelint
                               ".coffeelint.json"
@@ -6776,33 +6789,33 @@ See URL `http://coffeescript.org/'."
 
 See URL `http://www.coffeelint.org/'."
   :command
-  ("coffeelint"
-   (config-file "--file" flycheck-coffeelintrc)
-   "--stdin" "--reporter" "checkstyle")
+  '("coffeelint"
+    (config-file "--file" flycheck-coffeelintrc)
+    "--stdin" "--reporter" "checkstyle")
   :standard-input t
   :error-parser #'flycheck-parse-checkstyle
   :error-filter (lambda (errors)
                   (flycheck-remove-error-file-names
                    "stdin" (flycheck-remove-error-ids
                             (flycheck-sanitize-errors errors))))
-  :modes coffee-mode)
+  :modes 'coffee-mode)
 
 (flycheck-define-checker coq
   "A Coq syntax checker using the Coq compiler.
 
 See URL `https://coq.inria.fr/'."
   ;; We use coqtop in batch mode, because coqc is picky about file names.
-  :command ("coqtop" "-batch" "-load-vernac-source" source)
+  :command '("coqtop" "-batch" "-load-vernac-source" source)
   :error-patterns
-  ((error line-start "File \"" (file-name) "\", line " line
-          ;; TODO: Parse the end column, once Flycheck supports that
-          ", characters " column "-" (one-or-more digit) ":\n"
-          (or "Syntax error:" "Error:")
-          ;; Most Coq error messages span multiple lines, and end with a dot.
-          ;; There are simple one-line messages, too, though.
-          (message (or (and (one-or-more (or not-newline "\n")) ".")
-                       (one-or-more not-newline)))
-          line-end))
+  '((error line-start "File \"" (file-name) "\", line " line
+           ;; TODO: Parse the end column, once Flycheck supports that
+           ", characters " column "-" (one-or-more digit) ":\n"
+           (or "Syntax error:" "Error:")
+           ;; Most Coq error messages span multiple lines, and end with a dot.
+           ;; There are simple one-line messages, too, though.
+           (message (or (and (one-or-more (or not-newline "\n")) ".")
+                        (one-or-more not-newline)))
+           line-end))
   :error-filter
   (lambda (errors)
     (dolist (err (flycheck-sanitize-errors errors))
@@ -6811,16 +6824,16 @@ See URL `https://coq.inria.fr/'."
                                       "" (flycheck-error-message err)
                                       'fixedcase 'literal)))
     (flycheck-increment-error-columns errors))
-  :modes coq-mode)
+  :modes 'coq-mode)
 
 (flycheck-define-checker css-csslint
   "A CSS syntax and style checker using csslint.
 
 See URL `https://github.com/CSSLint/csslint'."
-  :command ("csslint" "--format=checkstyle-xml" source)
+  :command '("csslint" "--format=checkstyle-xml" source)
   :error-parser #'flycheck-parse-checkstyle
   :error-filter #'flycheck-dequalify-error-ids
-  :modes css-mode)
+  :modes 'css-mode)
 
 (defconst flycheck-stylelint-args '("--formatter" "json")
   "Common arguments to stylelint invocations.")
@@ -6931,13 +6944,13 @@ about the JSON format of stylelint."
   "A CSS syntax and style checker using stylelint.
 
 See URL `http://stylelint.io/'."
-  :command ("stylelint"
-            (eval flycheck-stylelint-args)
-            (option-flag "--quiet" flycheck-stylelint-quiet)
-            (config-file "--config" flycheck-stylelintrc))
+  :command '("stylelint"
+             (eval flycheck-stylelint-args)
+             (option-flag "--quiet" flycheck-stylelint-quiet)
+             (config-file "--config" flycheck-stylelintrc))
   :standard-input t
   :error-parser #'flycheck-parse-stylelint
-  :modes (css-mode))
+  :modes 'css-mode)
 
 (flycheck-def-option-var flycheck-cwl-schema-path nil cwl
   "A path for the schema file for Common Workflow Language.
@@ -6952,17 +6965,17 @@ Common Workflow Language."
 
 Requires Schema Salad 2.6.20171101113912 or newer.
 See URL `http://www.commonwl.org/v1.0/SchemaSalad.html'."
-  :command ("schema-salad-tool"
-            "--quiet"
-            "--print-oneline"
-            (eval flycheck-cwl-schema-path)
-            source-inplace)
+  :command '("schema-salad-tool"
+             "--quiet"
+             "--print-oneline"
+             (eval flycheck-cwl-schema-path)
+             source-inplace)
   :error-patterns
-  ((error line-start
-          (file-name) ":" line ":" column ":" (zero-or-more blank)
-          (message (one-or-more not-newline))
-          line-end))
-  :modes cwl-mode)
+  '((error line-start
+           (file-name) ":" line ":" column ":" (zero-or-more blank)
+           (message (one-or-more not-newline))
+           line-end))
+  :modes 'cwl-mode)
 
 (defconst flycheck-d-module-re
   (rx "module" (one-or-more (syntax whitespace))
@@ -6999,43 +7012,43 @@ Relative paths are relative to the file being checked."
   "A D syntax checker using the DMD compiler.
 
 Requires DMD 2.066 or newer.  See URL `http://dlang.org/'."
-  :command ("dmd"
-            "-debug"                    ; Compile in debug mode
-            "-o-"                       ; Don't generate an object file
-            "-vcolumns"                 ; Add columns in output
-            "-wi" ; Compilation will continue even if there are warnings
-            (eval (concat "-I" (flycheck-d-base-directory)))
-            (option-list "-I" flycheck-dmd-include-path concat)
-            (eval flycheck-dmd-args)
-            source)
+  :command '("dmd"
+             "-debug"                    ; Compile in debug mode
+             "-o-"                       ; Don't generate an object file
+             "-vcolumns"                 ; Add columns in output
+             "-wi" ; Compilation will continue even if there are warnings
+             (eval (concat "-I" (flycheck-d-base-directory)))
+             (option-list "-I" flycheck-dmd-include-path concat)
+             (eval flycheck-dmd-args)
+             source)
   :error-patterns
-  ((error line-start
-          (file-name) "(" line "," column "): Error: " (message)
-          line-end)
-   (warning line-start (file-name) "(" line "," column "): "
-            (or "Warning" "Deprecation") ": " (message) line-end)
-   (info line-start (file-name) "(" line "," column "): "
-         (one-or-more " ") (message) line-end))
-  :modes d-mode)
+  '((error line-start
+           (file-name) "(" line "," column "): Error: " (message)
+           line-end)
+    (warning line-start (file-name) "(" line "," column "): "
+             (or "Warning" "Deprecation") ": " (message) line-end)
+    (info line-start (file-name) "(" line "," column "): "
+          (one-or-more " ") (message) line-end))
+  :modes 'd-mode)
 
 (flycheck-define-checker dockerfile-hadolint
   "A Dockerfile syntax checker using the hadolint.
 
 See URL `http://hadolint.lukasmartinelli.ch/'."
-  :command ("hadolint" "-")
+  :command '("hadolint" "-")
   :standard-input t
   :error-patterns
-  ((error line-start
-          (file-name) ":" line ":" column " " (message)
-          line-end)
-   (warning line-start
-            (file-name) ":" line " " (id (one-or-more alnum)) " " (message)
-            line-end))
+  '((error line-start
+           (file-name) ":" line ":" column " " (message)
+           line-end)
+    (warning line-start
+             (file-name) ":" line " " (id (one-or-more alnum)) " " (message)
+             line-end))
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "/dev/stdin" errors)))
-  :modes dockerfile-mode)
+  :modes 'dockerfile-mode)
 
 (defconst flycheck-this-emacs-executable
   (concat invocation-directory invocation-name)
@@ -7185,46 +7198,46 @@ This variable has no effect, if
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler.
 
 See Info Node `(elisp)Byte Compilation'."
-  :command ("emacs" (eval flycheck-emacs-args)
-            (eval
-             (let ((path (pcase flycheck-emacs-lisp-load-path
-                           (`inherit load-path)
-                           (p (seq-map #'expand-file-name p)))))
-               (flycheck-prepend-with-option "--directory" path)))
-            (option "--eval" flycheck-emacs-lisp-package-user-dir nil
-                    flycheck-option-emacs-lisp-package-user-dir)
-            (option "--eval" flycheck-emacs-lisp-initialize-packages nil
-                    flycheck-option-emacs-lisp-package-initialize)
-            (option "--eval" flycheck-emacs-lisp-check-declare nil
-                    flycheck-option-emacs-lisp-check-declare)
-            "--eval" (eval flycheck-emacs-lisp-check-form)
-            "--"
-            source-inplace)
+  :command '("emacs" (eval flycheck-emacs-args)
+             (eval
+              (let ((path (pcase flycheck-emacs-lisp-load-path
+                            (`inherit load-path)
+                            (p (seq-map #'expand-file-name p)))))
+                (flycheck-prepend-with-option "--directory" path)))
+             (option "--eval" flycheck-emacs-lisp-package-user-dir nil
+                     flycheck-option-emacs-lisp-package-user-dir)
+             (option "--eval" flycheck-emacs-lisp-initialize-packages nil
+                     flycheck-option-emacs-lisp-package-initialize)
+             (option "--eval" flycheck-emacs-lisp-check-declare nil
+                     flycheck-option-emacs-lisp-check-declare)
+             "--eval" (eval flycheck-emacs-lisp-check-form)
+             "--"
+             source-inplace)
   :error-patterns
-  ((error line-start (file-name) ":" line ":" column ":Error:"
-          (message (zero-or-more not-newline)
-                   (zero-or-more "\n    " (zero-or-more not-newline)))
-          line-end)
-   (warning line-start (file-name) ":" line ":" column ":Warning:"
-            (message (zero-or-more not-newline)
-                     (zero-or-more "\n    " (zero-or-more not-newline)))
-            line-end)
-   (warning line-start (file-name) ":" line (optional ":" column)
-            ":Warning (check-declare): said\n"
-            (message (zero-or-more "    " (zero-or-more not-newline))
-                     (zero-or-more "\n    " (zero-or-more not-newline)))
-            line-end)
-   ;; The following is for Emacs 24 ‘check-declare-file’, which uses a
-   ;; less informative format.
-   (warning line-start "Warning (check-declare): " (file-name) " said "
-            (message (zero-or-more not-newline))
-            line-end))
+  '((error line-start (file-name) ":" line ":" column ":Error:"
+           (message (zero-or-more not-newline)
+                    (zero-or-more "\n    " (zero-or-more not-newline)))
+           line-end)
+    (warning line-start (file-name) ":" line ":" column ":Warning:"
+             (message (zero-or-more not-newline)
+                      (zero-or-more "\n    " (zero-or-more not-newline)))
+             line-end)
+    (warning line-start (file-name) ":" line (optional ":" column)
+             ":Warning (check-declare): said\n"
+             (message (zero-or-more "    " (zero-or-more not-newline))
+                      (zero-or-more "\n    " (zero-or-more not-newline)))
+             line-end)
+    ;; The following is for Emacs 24 ‘check-declare-file’, which uses a
+    ;; less informative format.
+    (warning line-start "Warning (check-declare): " (file-name) " said "
+             (message (zero-or-more not-newline))
+             line-end))
   :error-filter
   (lambda (errors)
     (flycheck-fill-empty-line-numbers
      (flycheck-collapse-error-message-whitespace
       (flycheck-sanitize-errors errors))))
-  :modes (emacs-lisp-mode lisp-interaction-mode)
+  :modes '(emacs-lisp-mode lisp-interaction-mode)
   :predicate
   (lambda ()
     (and
@@ -7247,7 +7260,7 @@ See Info Node `(elisp)Byte Compilation'."
      ;; compilation buffers, but as these are ephemeral, Flycheck won't check
      ;; them anyway.
      (not (flycheck-autoloads-file-p))))
-  :next-checkers (emacs-lisp-checkdoc))
+  :next-checkers '(emacs-lisp-checkdoc))
 
 (defconst flycheck-emacs-lisp-checkdoc-form
   (flycheck-prepare-emacs-lisp-form
@@ -7305,14 +7318,14 @@ Variables are taken from `flycheck-emacs-lisp-checkdoc-variables'."
   "An Emacs Lisp style checker using CheckDoc.
 
 The checker runs `checkdoc-current-buffer'."
-  :command ("emacs" (eval flycheck-emacs-args)
-            "--eval" (eval (flycheck-sexp-to-string
-                            (flycheck-emacs-lisp-checkdoc-variables-form)))
-            "--eval" (eval flycheck-emacs-lisp-checkdoc-form)
-            "--" source)
+  :command '("emacs" (eval flycheck-emacs-args)
+             "--eval" (eval (flycheck-sexp-to-string
+                             (flycheck-emacs-lisp-checkdoc-variables-form)))
+             "--eval" (eval flycheck-emacs-lisp-checkdoc-form)
+             "--" source)
   :error-patterns
-  ((warning line-start (file-name) ":" line ": " (message) line-end))
-  :modes (emacs-lisp-mode)
+  '((warning line-start (file-name) ":" line ": " (message) line-end))
+  :modes 'emacs-lisp-mode
   :predicate
   (lambda ()
     ;; Do not check Autoloads, Cask/Carton and dir-locals files.  These files
@@ -7350,16 +7363,16 @@ Relative paths are relative to the file being checked."
   "An Erlang syntax checker using the Erlang interpreter.
 
 See URL `http://www.erlang.org/'."
-  :command ("erlc"
-            "-o" temporary-directory
-            (option-list "-I" flycheck-erlang-include-path)
-            (option-list "-pa" flycheck-erlang-library-path)
-            "-Wall"
-            source)
+  :command '("erlc"
+             "-o" temporary-directory
+             (option-list "-I" flycheck-erlang-include-path)
+             (option-list "-pa" flycheck-erlang-library-path)
+             "-Wall"
+             source)
   :error-patterns
-  ((warning line-start (file-name) ":" line ": Warning:" (message) line-end)
-   (error line-start (file-name) ":" line ": " (message) line-end))
-  :modes erlang-mode
+  '((warning line-start (file-name) ":" line ": Warning:" (message) line-end)
+    (error line-start (file-name) ":" line ": " (message) line-end))
+  :modes 'erlang-mode
   :enabled (lambda () (string-suffix-p ".erl" (buffer-file-name))))
 
 (defun contains-rebar-config (dir-name)
@@ -7396,7 +7409,7 @@ Return the absolute path to the directory"
 
 (flycheck-define-checker erlang-rebar3
   "An Erlang syntax checker using the rebar3 build tool."
-  :command ("rebar3" "compile")
+  :command '("rebar3" "compile")
   :error-parser
   (lambda (output checker buffer)
     ;; rebar3 outputs ANSI terminal colors, which don't match up with
@@ -7409,11 +7422,11 @@ Return the absolute path to the directory"
      (and (fboundp 'ansi-color-filter-apply) (ansi-color-filter-apply output))
      checker buffer))
   :error-patterns
-  ((warning line-start
-            (file-name) ":" line ": Warning:" (message) line-end)
-   (error line-start
-          (file-name) ":" line ": " (message) line-end))
-  :modes erlang-mode
+  '((warning line-start
+             (file-name) ":" line ": Warning:" (message) line-end)
+    (error line-start
+           (file-name) ":" line ": " (message) line-end))
+  :modes 'erlang-mode
   :enabled #'flycheck-rebar3-project-root
   :predicate #'flycheck-buffer-saved-p
   :working-directory #'flycheck-rebar3-project-root)
@@ -7422,10 +7435,10 @@ Return the absolute path to the directory"
   "An eRuby syntax checker using the `erubis' command.
 
 See URL `http://www.kuwata-lab.com/erubis/'."
-  :command ("erubis" "-z" source)
+  :command '("erubis" "-z" source)
   :error-patterns
-  ((error line-start (file-name) ":" line ": " (message) line-end))
-  :modes (html-erb-mode rhtml-mode))
+  '((error line-start (file-name) ":" line ": " (message) line-end))
+  :modes '(html-erb-mode rhtml-mode))
 
 (flycheck-def-args-var flycheck-gfortran-args fortran-gfortran
   :package-version '(flycheck . "0.22"))
@@ -7504,60 +7517,60 @@ about warnings"
 
 Uses GCC's Fortran compiler gfortran.  See URL
 `https://gcc.gnu.org/onlinedocs/gfortran/'."
-  :command ("gfortran"
-            "-fsyntax-only"
-            "-fshow-column"
-            "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
-            "-fno-diagnostics-show-option" ; Do not show the corresponding
+  :command '("gfortran"
+             "-fsyntax-only"
+             "-fshow-column"
+             "-fno-diagnostics-show-caret" ; Do not visually indicate the source location
+             "-fno-diagnostics-show-option" ; Do not show the corresponding
                                         ; warning group
-            ;; Fortran has similar include processing as C/C++
-            "-iquote" (eval (flycheck-c/c++-quoted-include-directory))
-            (option "-std=" flycheck-gfortran-language-standard concat)
-            (option "-f" flycheck-gfortran-layout concat
-                    flycheck-option-gfortran-layout)
-            (option-list "-W" flycheck-gfortran-warnings concat)
-            (option-list "-I" flycheck-gfortran-include-path concat)
-            (eval flycheck-gfortran-args)
-            source)
+             ;; Fortran has similar include processing as C/C++
+             "-iquote" (eval (flycheck-c/c++-quoted-include-directory))
+             (option "-std=" flycheck-gfortran-language-standard concat)
+             (option "-f" flycheck-gfortran-layout concat
+                     flycheck-option-gfortran-layout)
+             (option-list "-W" flycheck-gfortran-warnings concat)
+             (option-list "-I" flycheck-gfortran-include-path concat)
+             (eval flycheck-gfortran-args)
+             source)
   :error-patterns
-  ((error line-start (file-name) ":" line (or ":" ".") column (or ": " ":\n")
-          (or (= 3 (zero-or-more not-newline) "\n") "")
-          (or "Error" "Fatal Error") ": "
-          (message) line-end)
-   (warning line-start (file-name) ":" line (or ":" ".") column (or ": " ":\n")
-            (or (= 3 (zero-or-more not-newline) "\n") "")
-            "Warning: " (message) line-end))
-  :modes (fortran-mode f90-mode))
+  '((error line-start (file-name) ":" line (or ":" ".") column (or ": " ":\n")
+           (or (= 3 (zero-or-more not-newline) "\n") "")
+           (or "Error" "Fatal Error") ": "
+           (message) line-end)
+    (warning line-start (file-name) ":" line (or ":" ".") column (or ": " ":\n")
+             (or (= 3 (zero-or-more not-newline) "\n") "")
+             "Warning: " (message) line-end))
+  :modes '(fortran-mode f90-mode))
 
 (flycheck-define-checker go-gofmt
   "A Go syntax and style checker using the gofmt utility.
 
 See URL `https://golang.org/cmd/gofmt/'."
-  :command ("gofmt")
+  :command '("gofmt")
   :standard-input t
   :error-patterns
-  ((error line-start "<standard input>:" line ":" column ": " (message) line-end))
-  :modes go-mode
-  :next-checkers ((warning . go-golint)
-                  ;; Fall back, if go-golint doesn't exist
-                  (warning . go-vet)
-                  ;; Fall back, if go-vet doesn't exist
-                  (warning . go-build) (warning . go-test)
-                  (warning . go-errcheck)
-                  (warning . go-unconvert)
-                  (warning . go-megacheck)))
+  '((error line-start "<standard input>:" line ":" column ": " (message) line-end))
+  :modes 'go-mode
+  :next-checkers '((warning . go-golint)
+                   ;; Fall back, if go-golint doesn't exist
+                   (warning . go-vet)
+                   ;; Fall back, if go-vet doesn't exist
+                   (warning . go-build) (warning . go-test)
+                   (warning . go-errcheck)
+                   (warning . go-unconvert)
+                   (warning . go-megacheck)))
 
 (flycheck-define-checker go-golint
   "A Go style checker using Golint.
 
 See URL `https://github.com/golang/lint'."
-  :command ("golint" source)
+  :command '("golint" source)
   :error-patterns
-  ((warning line-start (file-name) ":" line ":" column ": " (message) line-end))
-  :modes go-mode
-  :next-checkers (go-vet
-                  ;; Fall back, if go-vet doesn't exist
-                  go-build go-test go-errcheck go-unconvert go-megacheck))
+  '((warning line-start (file-name) ":" line ":" column ": " (message) line-end))
+  :modes 'go-mode
+  :next-checkers '(go-vet
+                   ;; Fall back, if go-vet doesn't exist
+                   go-build go-test go-errcheck go-unconvert go-megacheck))
 
 (flycheck-def-option-var flycheck-go-vet-print-functions nil go-vet
   "A list of print-like functions for `go tool vet'.
@@ -7605,26 +7618,26 @@ enabled. "
 
 See URL `https://golang.org/cmd/go/' and URL
 `https://golang.org/cmd/vet/'."
-  :command ("go" "tool" "vet" "-all"
-            (option "-printfuncs=" flycheck-go-vet-print-functions concat
-                    flycheck-option-comma-separated-list)
-            (option-flag "-shadow" flycheck-go-vet-shadow)
-            (option-list "-tags=" flycheck-go-build-tags concat)
-            (eval (when (eq flycheck-go-vet-shadow 'strict) "-shadowstrict"))
-            source)
+  :command '("go" "tool" "vet" "-all"
+             (option "-printfuncs=" flycheck-go-vet-print-functions concat
+                     flycheck-option-comma-separated-list)
+             (option-flag "-shadow" flycheck-go-vet-shadow)
+             (option-list "-tags=" flycheck-go-build-tags concat)
+             (eval (when (eq flycheck-go-vet-shadow 'strict) "-shadowstrict"))
+             source)
   :error-patterns
-  ((warning line-start (file-name) ":" line ": " (message) line-end))
-  :modes go-mode
+  '((warning line-start (file-name) ":" line ": " (message) line-end))
+  :modes 'go-mode
   ;; We must explicitly check whether the "vet" tool is available
   :predicate (lambda ()
                (let ((go (flycheck-checker-executable 'go-vet)))
                  (member "vet" (ignore-errors (process-lines go "tool")))))
-  :next-checkers (go-build
-                  go-test
-                  ;; Fall back if `go build' or `go test' can be used
-                  go-errcheck
-                  go-unconvert
-                  go-megacheck)
+  :next-checkers '(go-build
+                   go-test
+                   ;; Fall back if `go build' or `go test' can be used
+                   go-errcheck
+                   go-unconvert
+                   go-megacheck)
   :verify (lambda (_)
             (let* ((go (flycheck-checker-executable 'go-vet))
                    (have-vet (member "vet" (ignore-errors
@@ -7656,25 +7669,25 @@ Each item is a string with a tag to be given to `go build'."
   "A Go syntax and type checker using the `go build' command.
 
 Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
-  :command ("go" "build"
-            (option-flag "-i" flycheck-go-build-install-deps)
-            ;; multiple tags are listed as "dev debug ..."
-            (option-list "-tags=" flycheck-go-build-tags concat)
-            "-o" null-device)
+  :command '("go" "build"
+             (option-flag "-i" flycheck-go-build-install-deps)
+             ;; multiple tags are listed as "dev debug ..."
+             (option-list "-tags=" flycheck-go-build-tags concat)
+             "-o" null-device)
   :error-patterns
-  ((error line-start (file-name) ":" line ":"
-          (optional column ":") " "
-          (message (one-or-more not-newline)
-                   (zero-or-more "\n\t" (one-or-more not-newline)))
-          line-end)
-   ;; Catch error message about multiple packages in a directory, which doesn't
-   ;; follow the standard error message format.
-   (info line-start
-         (message "can't load package: package "
-                  (one-or-more (not (any ?: ?\n)))
-                  ": found packages "
-                  (one-or-more not-newline))
-         line-end))
+  '((error line-start (file-name) ":" line ":"
+           (optional column ":") " "
+           (message (one-or-more not-newline)
+                    (zero-or-more "\n\t" (one-or-more not-newline)))
+           line-end)
+    ;; Catch error message about multiple packages in a directory, which doesn't
+    ;; follow the standard error message format.
+    (info line-start
+          (message "can't load package: package "
+                   (one-or-more (not (any ?: ?\n)))
+                   ": found packages "
+                   (one-or-more not-newline))
+          line-end))
   :error-filter
   (lambda (errors)
     (dolist (error errors)
@@ -7684,35 +7697,35 @@ Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
         ;; line number, so inject a fake one.
         (setf (flycheck-error-line error) 1)))
     errors)
-  :modes go-mode
+  :modes 'go-mode
   :predicate (lambda ()
                (and (flycheck-buffer-saved-p)
                     (not (string-suffix-p "_test.go" (buffer-file-name)))))
-  :next-checkers ((warning . go-errcheck)
-                  (warning . go-unconvert)
-                  (warning . go-megacheck)))
+  :next-checkers '((warning . go-errcheck)
+                   (warning . go-unconvert)
+                   (warning . go-megacheck)))
 
 (flycheck-define-checker go-test
   "A Go syntax and type checker using the `go test' command.
 
 Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
-  :command ("go" "test"
-            (option-flag "-i" flycheck-go-build-install-deps)
-            (option-list "-tags=" flycheck-go-build-tags concat)
-            "-c" "-o" null-device)
+  :command '("go" "test"
+             (option-flag "-i" flycheck-go-build-install-deps)
+             (option-list "-tags=" flycheck-go-build-tags concat)
+             "-c" "-o" null-device)
   :error-patterns
-  ((error line-start (file-name) ":" line ":"
-          (optional column ":") " "
-          (message (one-or-more not-newline)
-                   (zero-or-more "\n\t" (one-or-more not-newline)))
-          line-end))
-  :modes go-mode
+  '((error line-start (file-name) ":" line ":"
+           (optional column ":") " "
+           (message (one-or-more not-newline)
+                    (zero-or-more "\n\t" (one-or-more not-newline)))
+           line-end))
+  :modes 'go-mode
   :predicate
   (lambda () (and (flycheck-buffer-saved-p)
                   (string-suffix-p "_test.go" (buffer-file-name))))
-  :next-checkers ((warning . go-errcheck)
-                  (warning . go-unconvert)
-                  (warning . go-megacheck)))
+  :next-checkers '((warning . go-errcheck)
+                   (warning . go-unconvert)
+                   (warning . go-megacheck)))
 
 (flycheck-define-checker go-errcheck
   "A Go checker for unchecked errors.
@@ -7720,15 +7733,15 @@ Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
 Requires errcheck newer than commit 8515d34 (Aug 28th, 2015).
 
 See URL `https://github.com/kisielk/errcheck'."
-  :command ("errcheck"
-            "-abspath"
-            (option-list "-tags=" flycheck-go-build-tags concat)
-            ".")
+  :command '("errcheck"
+             "-abspath"
+             (option-list "-tags=" flycheck-go-build-tags concat)
+             ".")
   :error-patterns
-  ((warning line-start
-            (file-name) ":" line ":" column (or (one-or-more "\t") ": " ":\t")
-            (message)
-            line-end))
+  '((warning line-start
+             (file-name) ":" line ":" column (or (one-or-more "\t") ": " ":\t")
+             (message)
+             line-end))
   :error-filter
   (lambda (errors)
     (let ((errors (flycheck-sanitize-errors errors)))
@@ -7738,21 +7751,21 @@ See URL `https://github.com/kisielk/errcheck'."
           (setf (flycheck-error-message err)
                 (format "Ignored `error` returned from `%s`" message)))))
     errors)
-  :modes go-mode
+  :modes 'go-mode
   :predicate (lambda () (flycheck-buffer-saved-p))
-  :next-checkers ((warning . go-unconvert)
-                  (warning . go-megacheck)))
+  :next-checkers '((warning . go-unconvert)
+                   (warning . go-megacheck)))
 
 (flycheck-define-checker go-unconvert
   "A Go checker looking for unnecessary type conversions.
 
 See URL `https://github.com/mdempsky/unconvert'."
-  :command ("unconvert" ".")
+  :command '("unconvert" ".")
   :error-patterns
-  ((warning line-start (file-name) ":" line ":" column ": " (message) line-end))
-  :modes go-mode
+  '((warning line-start (file-name) ":" line ":" column ": " (message) line-end))
+  :modes 'go-mode
   :predicate (lambda () (flycheck-buffer-saved-p))
-  :next-checkers ((warning . go-megacheck)))
+  :next-checkers '((warning . go-megacheck)))
 
 (flycheck-define-checker go-megacheck
   "A Go checker that performs static analysis and linting using the `megacheck'
@@ -7760,24 +7773,24 @@ command.
 
 Requires Go 1.6 or newer. See URL
 `https://github.com/dominikh/go-tools'."
-  :command ("megacheck"
-            (option-list "-tags=" flycheck-go-build-tags concat)
-            (eval (mapcar (lambda (checker) (concat "-" checker
-                                                    ".enabled=false"))
-                          flycheck-go-megacheck-disabled-checkers))
-            ;; Run in current directory to make megacheck aware of symbols
-            ;; declared in other files.
-            ".")
+  :command '("megacheck"
+             (option-list "-tags=" flycheck-go-build-tags concat)
+             (eval (mapcar (lambda (checker) (concat "-" checker
+                                                     ".enabled=false"))
+                           flycheck-go-megacheck-disabled-checkers))
+             ;; Run in current directory to make megacheck aware of symbols
+             ;; declared in other files.
+             ".")
   :error-patterns
-  ((warning line-start (file-name) ":" line ":" column ": " (message) line-end))
-  :modes go-mode)
+  '((warning line-start (file-name) ":" line ":" column ": " (message) line-end))
+  :modes 'go-mode)
 
 (flycheck-define-checker groovy
   "A groovy syntax checker using groovy compiler API.
 
 See URL `http://www.groovy-lang.org'."
-  :command ("groovy" "-e"
-            "import org.codehaus.groovy.control.*
+  :command '("groovy" "-e"
+             "import org.codehaus.groovy.control.*
 
 unit = new CompilationUnit()
 unit.addSource(\"input\", System.in)
@@ -7789,33 +7802,33 @@ try {
 }")
   :standard-input t
   :error-patterns
-  ((error line-start "input: " line ":" (message)
-          " @ line " line ", column " column "." line-end))
-  :modes groovy-mode)
+  '((error line-start "input: " line ":" (message)
+           " @ line " line ", column " column "." line-end))
+  :modes 'groovy-mode)
 
 (flycheck-define-checker haml
   "A Haml syntax checker using the Haml compiler.
 
 See URL `http://haml.info'."
-  :command ("haml" "-c" "--stdin")
+  :command '("haml" "-c" "--stdin")
   :standard-input t
   :error-patterns
-  ((error line-start "Syntax error on line " line ": " (message) line-end)
-   (error line-start ":" line ": syntax error, " (message) line-end))
-  :modes haml-mode)
+  '((error line-start "Syntax error on line " line ": " (message) line-end)
+    (error line-start ":" line ": syntax error, " (message) line-end))
+  :modes 'haml-mode)
 
 (flycheck-define-checker handlebars
   "A Handlebars syntax checker using the Handlebars compiler.
 
 See URL `http://handlebarsjs.com/'."
-  :command ("handlebars" "-i-")
+  :command '("handlebars" "-i-")
   :standard-input t
   :error-patterns
-  ((error line-start
-          "Error: Parse error on line " line ":" (optional "\r") "\n"
-          (zero-or-more not-newline) "\n" (zero-or-more not-newline) "\n"
-          (message) line-end))
-  :modes (handlebars-mode handlebars-sgml-mode web-mode)
+  '((error line-start
+           "Error: Parse error on line " line ":" (optional "\r") "\n"
+           (zero-or-more not-newline) "\n" (zero-or-more not-newline) "\n"
+           (message) line-end))
+  :modes '(handlebars-mode handlebars-sgml-mode web-mode)
   :predicate
   (lambda ()
     (if (eq major-mode 'web-mode)
@@ -7950,98 +7963,98 @@ contains a cabal file."
   "A Haskell syntax and type checker using `stack ghc'.
 
 See URL `https://github.com/commercialhaskell/stack'."
-  :command ("stack"
-            (option "--stack-yaml" flycheck-ghc-stack-project-file)
-            (option-flag "--nix" flycheck-ghc-stack-use-nix)
-            "ghc" "--" "-Wall" "-no-link"
-            "-outputdir" (eval (flycheck-haskell-ghc-cache-directory))
-            (option-list "-X" flycheck-ghc-language-extensions concat)
-            (option-list "-i" flycheck-ghc-search-path concat)
-            (eval (concat
-                   "-i"
-                   (flycheck-module-root-directory
-                    (flycheck-find-in-buffer flycheck-haskell-module-re))))
-            (eval flycheck-ghc-args)
-            "-x" (eval
-                  (pcase major-mode
-                    (`haskell-mode "hs")
-                    (`literate-haskell-mode "lhs")))
-            source)
+  :command '("stack"
+             (option "--stack-yaml" flycheck-ghc-stack-project-file)
+             (option-flag "--nix" flycheck-ghc-stack-use-nix)
+             "ghc" "--" "-Wall" "-no-link"
+             "-outputdir" (eval (flycheck-haskell-ghc-cache-directory))
+             (option-list "-X" flycheck-ghc-language-extensions concat)
+             (option-list "-i" flycheck-ghc-search-path concat)
+             (eval (concat
+                    "-i"
+                    (flycheck-module-root-directory
+                     (flycheck-find-in-buffer flycheck-haskell-module-re))))
+             (eval flycheck-ghc-args)
+             "-x" (eval
+                   (pcase major-mode
+                     (`haskell-mode "hs")
+                     (`literate-haskell-mode "lhs")))
+             source)
   :error-patterns
-  ((warning line-start (file-name) ":" line ":" column ":"
-            (or " " "\n    ") (in "Ww") "arning:"
-            (optional " " "[" (id (one-or-more not-newline)) "]")
-            (optional "\n")
-            (message
-             (one-or-more " ") (one-or-more not-newline)
-             (zero-or-more "\n"
-                           (one-or-more " ")
-                           (one-or-more not-newline)))
-            line-end)
-   (error line-start (file-name) ":" line ":" column ":" (optional " error:")
-          (or (message (one-or-more not-newline))
-              (and "\n"
-                   (message
-                    (one-or-more " ") (one-or-more not-newline)
-                    (zero-or-more "\n"
-                                  (one-or-more " ")
-                                  (one-or-more not-newline)))))
-          line-end))
+  '((warning line-start (file-name) ":" line ":" column ":"
+             (or " " "\n    ") (in "Ww") "arning:"
+             (optional " " "[" (id (one-or-more not-newline)) "]")
+             (optional "\n")
+             (message
+              (one-or-more " ") (one-or-more not-newline)
+              (zero-or-more "\n"
+                            (one-or-more " ")
+                            (one-or-more not-newline)))
+             line-end)
+    (error line-start (file-name) ":" line ":" column ":" (optional " error:")
+           (or (message (one-or-more not-newline))
+               (and "\n"
+                    (message
+                     (one-or-more " ") (one-or-more not-newline)
+                     (zero-or-more "\n"
+                                   (one-or-more " ")
+                                   (one-or-more not-newline)))))
+           line-end))
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-dedent-error-messages errors)))
-  :modes (haskell-mode literate-haskell-mode)
-  :next-checkers ((warning . haskell-hlint))
+  :modes '(haskell-mode literate-haskell-mode)
+  :next-checkers '((warning . haskell-hlint))
   :working-directory #'flycheck-haskell--find-default-directory)
 
 (flycheck-define-checker haskell-ghc
   "A Haskell syntax and type checker using ghc.
 
 See URL `https://www.haskell.org/ghc/'."
-  :command ("ghc" "-Wall" "-no-link"
-            "-outputdir" (eval (flycheck-haskell-ghc-cache-directory))
-            (option-flag "-no-user-package-db"
-                         flycheck-ghc-no-user-package-database)
-            (option-list "-package-db" flycheck-ghc-package-databases)
-            (option-list "-i" flycheck-ghc-search-path concat)
-            ;; Include the parent directory of the current module tree, to
-            ;; properly resolve local imports
-            (eval (concat
-                   "-i"
-                   (flycheck-module-root-directory
-                    (flycheck-find-in-buffer flycheck-haskell-module-re))))
-            (option-list "-X" flycheck-ghc-language-extensions concat)
-            (eval flycheck-ghc-args)
-            "-x" (eval
-                  (pcase major-mode
-                    (`haskell-mode "hs")
-                    (`literate-haskell-mode "lhs")))
-            source)
+  :command '("ghc" "-Wall" "-no-link"
+             "-outputdir" (eval (flycheck-haskell-ghc-cache-directory))
+             (option-flag "-no-user-package-db"
+                          flycheck-ghc-no-user-package-database)
+             (option-list "-package-db" flycheck-ghc-package-databases)
+             (option-list "-i" flycheck-ghc-search-path concat)
+             ;; Include the parent directory of the current module tree, to
+             ;; properly resolve local imports
+             (eval (concat
+                    "-i"
+                    (flycheck-module-root-directory
+                     (flycheck-find-in-buffer flycheck-haskell-module-re))))
+             (option-list "-X" flycheck-ghc-language-extensions concat)
+             (eval flycheck-ghc-args)
+             "-x" (eval
+                   (pcase major-mode
+                     (`haskell-mode "hs")
+                     (`literate-haskell-mode "lhs")))
+             source)
   :error-patterns
-  ((warning line-start (file-name) ":" line ":" column ":"
-            (or " " "\n    ") (in "Ww") "arning:"
-            (optional " " "[" (id (one-or-more not-newline)) "]")
-            (optional "\n")
-            (message
-             (one-or-more " ") (one-or-more not-newline)
-             (zero-or-more "\n"
-                           (one-or-more " ")
-                           (one-or-more not-newline)))
-            line-end)
-   (error line-start (file-name) ":" line ":" column ":" (optional " error:")
-          (or (message (one-or-more not-newline))
-              (and "\n"
-                   (message
-                    (one-or-more " ") (one-or-more not-newline)
-                    (zero-or-more "\n"
-                                  (one-or-more " ")
-                                  (one-or-more not-newline)))))
-          line-end))
+  '((warning line-start (file-name) ":" line ":" column ":"
+             (or " " "\n    ") (in "Ww") "arning:"
+             (optional " " "[" (id (one-or-more not-newline)) "]")
+             (optional "\n")
+             (message
+              (one-or-more " ") (one-or-more not-newline)
+              (zero-or-more "\n"
+                            (one-or-more " ")
+                            (one-or-more not-newline)))
+             line-end)
+    (error line-start (file-name) ":" line ":" column ":" (optional " error:")
+           (or (message (one-or-more not-newline))
+               (and "\n"
+                    (message
+                     (one-or-more " ") (one-or-more not-newline)
+                     (zero-or-more "\n"
+                                   (one-or-more " ")
+                                   (one-or-more not-newline)))))
+           line-end))
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-dedent-error-messages errors)))
-  :modes (haskell-mode literate-haskell-mode)
-  :next-checkers ((warning . haskell-hlint))
+  :modes '(haskell-mode literate-haskell-mode)
+  :next-checkers '((warning . haskell-hlint))
   :working-directory #'flycheck-haskell--find-default-directory)
 
 (flycheck-def-config-file-var flycheck-hlintrc haskell-hlint "HLint.hs"
@@ -8086,30 +8099,30 @@ string is a default hint package (e.g. (\"Generalise\"
   "A Haskell style checker using hlint.
 
 See URL `https://github.com/ndmitchell/hlint'."
-  :command ("hlint"
-            (option-list "-X" flycheck-hlint-language-extensions concat)
-            (option-list "-i=" flycheck-hlint-ignore-rules concat)
-            (option-list "-h" flycheck-hlint-hint-packages concat)
-            (config-file "-h" flycheck-hlintrc)
-            (eval flycheck-hlint-args)
-            source-inplace)
+  :command '("hlint"
+             (option-list "-X" flycheck-hlint-language-extensions concat)
+             (option-list "-i=" flycheck-hlint-ignore-rules concat)
+             (option-list "-h" flycheck-hlint-hint-packages concat)
+             (config-file "-h" flycheck-hlintrc)
+             (eval flycheck-hlint-args)
+             source-inplace)
   :error-patterns
-  ((info line-start
-         (file-name) ":" line ":" column
-         ": Suggestion: "
-         (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
-         line-end)
-   (warning line-start
-            (file-name) ":" line ":" column
-            ": Warning: "
-            (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
-            line-end)
-   (error line-start
+  '((info line-start
           (file-name) ":" line ":" column
-          ": Error: "
+          ": Suggestion: "
           (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
-          line-end))
-  :modes (haskell-mode literate-haskell-mode))
+          line-end)
+    (warning line-start
+             (file-name) ":" line ":" column
+             ": Warning: "
+             (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
+             line-end)
+    (error line-start
+           (file-name) ":" line ":" column
+           ": Error: "
+           (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
+           line-end))
+  :modes '(haskell-mode literate-haskell-mode))
 
 (flycheck-def-config-file-var flycheck-tidyrc html-tidy ".tidyrc"
   :safe #'stringp)
@@ -8118,20 +8131,20 @@ See URL `https://github.com/ndmitchell/hlint'."
   "A HTML syntax and style checker using Tidy.
 
 See URL `https://github.com/htacg/tidy-html5'."
-  :command ("tidy" (config-file "-config" flycheck-tidyrc)
-            "-lang" "en"
-            "-e" "-q")
+  :command '("tidy" (config-file "-config" flycheck-tidyrc)
+             "-lang" "en"
+             "-e" "-q")
   :standard-input t
   :error-patterns
-  ((error line-start
-          "line " line
-          " column " column
-          " - Error: " (message) line-end)
-   (warning line-start
-            "line " line
-            " column " column
-            " - Warning: " (message) line-end))
-  :modes (html-mode nxhtml-mode))
+  '((error line-start
+           "line " line
+           " column " column
+           " - Error: " (message) line-end)
+    (warning line-start
+             "line " line
+             " column " column
+             " - Warning: " (message) line-end))
+  :modes '(html-mode nxhtml-mode))
 
 (flycheck-def-config-file-var flycheck-jshintrc javascript-jshint ".jshintrc"
   :safe #'stringp)
@@ -8159,19 +8172,19 @@ Refer to the jshint manual at the URL
   "A Javascript syntax and style checker using jshint.
 
 See URL `http://www.jshint.com'."
-  :command ("jshint" "--reporter=checkstyle"
-            "--filename" source-original
-            (config-file "--config" flycheck-jshintrc)
-            (option "--extract=" flycheck-jshint-extract-javascript
-                    concat flycheck-option-symbol)
-            "-")
+  :command '("jshint" "--reporter=checkstyle"
+             "--filename" source-original
+             (config-file "--config" flycheck-jshintrc)
+             (option "--extract=" flycheck-jshint-extract-javascript
+                     concat flycheck-option-symbol)
+             "-")
   :standard-input t
   :error-parser #'flycheck-parse-checkstyle
   :error-filter
   (lambda (errors)
     (flycheck-remove-error-file-names
      "stdin" (flycheck-dequalify-error-ids errors)))
-  :modes (js-mode js2-mode js3-mode rjsx-mode))
+  :modes '(js-mode js2-mode js3-mode rjsx-mode))
 
 (flycheck-def-args-var flycheck-eslint-args javascript-eslint
   :package-version '(flycheck . "32"))
@@ -8241,14 +8254,14 @@ hierarchy, it looks first for `.eslintignore' and then for
   "A Javascript syntax and style checker using eslint.
 
 See URL `http://eslint.org/'."
-  :command ("eslint" "--format=json"
-            (option-list "--rulesdir" flycheck-eslint-rules-directories)
-            (eval flycheck-eslint-args)
-            "--stdin" "--stdin-filename" source-original)
+  :command '("eslint" "--format=json"
+             (option-list "--rulesdir" flycheck-eslint-rules-directories)
+             (eval flycheck-eslint-args)
+             "--stdin" "--stdin-filename" source-original)
   :standard-input t
   :error-parser #'flycheck-parse-eslint
   :enabled (lambda () (flycheck-eslint-config-exists-p))
-  :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode rjsx-mode)
+  :modes '(js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode rjsx-mode)
   :working-directory #'flycheck-eslint--find-working-directory
   :verify
   (lambda (_)
@@ -8270,11 +8283,11 @@ to the former.  To use it with the latter, set
 
 See URL `https://github.com/feross/standard' and URL
 `https://github.com/Flet/semistandard'."
-  :command ("standard" "--stdin")
+  :command '("standard" "--stdin")
   :standard-input t
   :error-patterns
-  ((error line-start "  <text>:" line ":" column ":" (message) line-end))
-  :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode rjsx-mode))
+  '((error line-start "  <text>:" line ":" column ":" (message) line-end))
+  :modes '(js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode rjsx-mode))
 
 (flycheck-define-checker json-jsonlint
   "A JSON syntax and style checker using jsonlint.
@@ -8282,34 +8295,44 @@ See URL `https://github.com/feross/standard' and URL
 See URL `https://github.com/zaach/jsonlint'."
   ;; We can't use standard input for jsonlint, because it doesn't output errors
   ;; anymore when using -c -q with standard input :/
-  :command ("jsonlint" "-c" "-q" source)
+  :command '("jsonlint" "-c" "-q" source)
   :error-patterns
-  ((error line-start
-          (file-name)
-          ": line " line
-          ", col " column ", "
-          (message) line-end))
+  '((error line-start
+           (file-name)
+           ": line " line
+           ", col " column ", "
+           (message) line-end))
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
-  :modes json-mode)
+  :modes 'json-mode)
 
 (flycheck-define-checker json-python-json
   "A JSON syntax checker using Python json.tool module.
 
 See URL `https://docs.python.org/3.5/library/json.html#command-line-interface'."
-  :command ("python" "-m" "json.tool" source
-            ;; Send the pretty-printed output to the null device
-            null-device)
+  :command '("python" "-m" "json.tool" source
+             ;; Send the pretty-printed output to the null device
+             null-device)
   :error-patterns
-  ((error line-start
-          (message) ": line " line " column " column
-          ;; Ignore the rest of the line which shows the char position.
-          (one-or-more not-newline)
-          line-end))
-  :modes json-mode
+  '((error line-start
+           (message) ": line " line " column " column
+           ;; Ignore the rest of the line which shows the char position.
+           (one-or-more not-newline)
+           line-end))
+  :modes 'json-mode
   ;; The JSON parser chokes if the buffer is empty and has no JSON inside
   :predicate (lambda () (not (flycheck-buffer-empty-p))))
+
+(flycheck-define-checker jsonnet
+  "A Jsonnet syntax checker using the jsonnet binary.
+
+See URL `https://jsonnet.org'."
+  :command '("jsonnet" source-inplace)
+  :error-patterns
+  '((error line-start "STATIC ERROR: " (file-name) ":" line ":" column (zero-or-one (group "-" (one-or-more digit))) ": " (message) line-end)
+    (error line-start "RUNTIME ERROR: " (message) "\n" (one-or-more space) (file-name) ":" (zero-or-one "(") line ":" column (zero-or-more not-newline) line-end))
+  :modes 'jsonnet-mode)
 
 (flycheck-define-checker less
   "A LESS syntax checker using lessc.
@@ -8317,47 +8340,47 @@ See URL `https://docs.python.org/3.5/library/json.html#command-line-interface'."
 Requires lessc 1.4 or newer.
 
 See URL `http://lesscss.org'."
-  :command ("lessc" "--lint" "--no-color"
-            "-")
+  :command '("lessc" "--lint" "--no-color"
+             "-")
   :standard-input t
   :error-patterns
-  ((error line-start (one-or-more word) ":"
-          (message)
-          " in - on line " line
-          ", column " column ":"
-          line-end))
-  :modes less-css-mode)
+  '((error line-start (one-or-more word) ":"
+           (message)
+           " in - on line " line
+           ", column " column ":"
+           line-end))
+  :modes 'less-css-mode)
 
 (flycheck-define-checker less-stylelint
   "A LESS syntax and style checker using stylelint.
 
 See URL `http://stylelint.io/'."
-  :command ("stylelint"
-            (eval flycheck-stylelint-args)
-            "--syntax" "less"
-            (option-flag "--quiet" flycheck-stylelint-quiet)
-            (config-file "--config" flycheck-stylelintrc))
+  :command '("stylelint"
+             (eval flycheck-stylelint-args)
+             "--syntax" "less"
+             (option-flag "--quiet" flycheck-stylelint-quiet)
+             (config-file "--config" flycheck-stylelintrc))
   :standard-input t
   :error-parser #'flycheck-parse-stylelint
-  :modes (less-css-mode))
+  :modes 'less-css-mode)
 
 (flycheck-define-checker llvm-llc
   "Flycheck LLVM IR checker using llc.
 
 See URL `http://llvm.org/docs/CommandGuide/llc.html'."
-  :command ("llc" "-o" null-device source)
+  :command '("llc" "-o" null-device source)
   :error-patterns
-  ((error line-start
-          ;; llc prints the executable path
-          (zero-or-one (minimal-match (one-or-more not-newline)) ": ")
-          (file-name) ":" line ":" column ": error: " (message)
-          line-end))
+  '((error line-start
+           ;; llc prints the executable path
+           (zero-or-one (minimal-match (one-or-more not-newline)) ": ")
+           (file-name) ":" line ":" column ": error: " (message)
+           line-end))
   :error-filter
   (lambda (errors)
     ;; sanitize errors occurring in inline assembly
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "<inline asm>" errors)))
-  :modes llvm-mode)
+  :modes 'llvm-mode)
 
 (flycheck-def-config-file-var flycheck-luacheckrc lua-luacheck ".luacheckrc"
   :safe #'stringp)
@@ -8378,43 +8401,43 @@ non-nil, pass the standards via one or more `--std' options."
   "A Lua syntax checker using luacheck.
 
 See URL `https://github.com/mpeterv/luacheck'."
-  :command ("luacheck"
-            "--formatter" "plain"
-            "--codes"                   ; Show warning codes
-            "--no-color"
-            (option-list "--std" flycheck-luacheck-standards)
-            (config-file "--config" flycheck-luacheckrc)
-            "--filename" source-original
-            ;; Read from standard input
-            "-")
+  :command '("luacheck"
+             "--formatter" "plain"
+             "--codes"                   ; Show warning codes
+             "--no-color"
+             (option-list "--std" flycheck-luacheck-standards)
+             (config-file "--config" flycheck-luacheckrc)
+             "--filename" source-original
+             ;; Read from standard input
+             "-")
   :standard-input t
   :error-patterns
-  ((warning line-start
-            (optional (file-name))
-            ":" line ":" column
-            ": (" (id "W" (one-or-more digit)) ") "
-            (message) line-end)
-   (error line-start
-          (optional (file-name))
-          ":" line ":" column ":"
-          ;; `luacheck' before 0.11.0 did not output codes for errors, hence
-          ;; the ID is optional here
-          (optional " (" (id "E" (one-or-more digit)) ") ")
-          (message) line-end))
-  :modes lua-mode)
+  '((warning line-start
+             (optional (file-name))
+             ":" line ":" column
+             ": (" (id "W" (one-or-more digit)) ") "
+             (message) line-end)
+    (error line-start
+           (optional (file-name))
+           ":" line ":" column ":"
+           ;; `luacheck' before 0.11.0 did not output codes for errors, hence
+           ;; the ID is optional here
+           (optional " (" (id "E" (one-or-more digit)) ") ")
+           (message) line-end))
+  :modes 'lua-mode)
 
 (flycheck-define-checker lua
   "A Lua syntax checker using the Lua compiler.
 
 See URL `http://www.lua.org/'."
-  :command ("luac" "-p" "-")
+  :command '("luac" "-p" "-")
   :standard-input t
   :error-patterns
-  ((error line-start
-          ;; Skip the name of the luac executable.
-          (minimal-match (zero-or-more not-newline))
-          ": stdin:" line ": " (message) line-end))
-  :modes lua-mode)
+  '((error line-start
+           ;; Skip the name of the luac executable.
+           (minimal-match (zero-or-more not-newline))
+           ": stdin:" line ": " (message) line-end))
+  :modes 'lua-mode)
 
 (flycheck-def-option-var flycheck-perl-include-path nil perl
   "A list of include directories for Perl.
@@ -8439,16 +8462,16 @@ string is a module to 'use' in Perl."
   "A Perl syntax checker using the Perl interpreter.
 
 See URL `https://www.perl.org'."
-  :command ("perl" "-w" "-c"
-            (option-list "-I" flycheck-perl-include-path)
-            (option-list "-M" flycheck-perl-module-list concat))
+  :command '("perl" "-w" "-c"
+             (option-list "-I" flycheck-perl-include-path)
+             (option-list "-M" flycheck-perl-module-list concat))
   :standard-input t
   :error-patterns
-  ((error line-start (minimal-match (message))
-          " at - line " line
-          (or "." (and ", " (zero-or-more not-newline))) line-end))
-  :modes (perl-mode cperl-mode)
-  :next-checkers (perl-perlcritic))
+  '((error line-start (minimal-match (message))
+           " at - line " line
+           (or "." (and ", " (zero-or-more not-newline))) line-end))
+  :modes '(perl-mode cperl-mode)
+  :next-checkers '(perl-perlcritic))
 
 (flycheck-def-option-var flycheck-perlcritic-severity nil perl-perlcritic
   "The message severity for Perl Critic.
@@ -8468,38 +8491,38 @@ the `--severity' option to Perl Critic."
   "A Perl syntax checker using Perl::Critic.
 
 See URL `https://metacpan.org/pod/Perl::Critic'."
-  :command ("perlcritic" "--no-color" "--verbose" "%f/%l/%c/%s/%p/%m (%e)\n"
-            (config-file "--profile" flycheck-perlcriticrc)
-            (option "--severity" flycheck-perlcritic-severity nil
-                    flycheck-option-int))
+  :command '("perlcritic" "--no-color" "--verbose" "%f/%l/%c/%s/%p/%m (%e)\n"
+             (config-file "--profile" flycheck-perlcriticrc)
+             (option "--severity" flycheck-perlcritic-severity nil
+                     flycheck-option-int))
   :standard-input t
   :error-patterns
-  ((info line-start
-         "STDIN/" line "/" column "/" (any "1") "/"
-         (id (one-or-more (not (any "/")))) "/" (message)
-         line-end)
-   (warning line-start
-            "STDIN/" line "/" column "/" (any "234") "/"
-            (id (one-or-more (not (any "/")))) "/" (message)
-            line-end)
-   (error line-start
-          "STDIN/" line "/" column "/" (any "5") "/"
+  '((info line-start
+          "STDIN/" line "/" column "/" (any "1") "/"
           (id (one-or-more (not (any "/")))) "/" (message)
-          line-end))
-  :modes (cperl-mode perl-mode))
+          line-end)
+    (warning line-start
+             "STDIN/" line "/" column "/" (any "234") "/"
+             (id (one-or-more (not (any "/")))) "/" (message)
+             line-end)
+    (error line-start
+           "STDIN/" line "/" column "/" (any "5") "/"
+           (id (one-or-more (not (any "/")))) "/" (message)
+           line-end))
+  :modes '(cperl-mode perl-mode))
 
 (flycheck-define-checker php
   "A PHP syntax checker using the PHP command line interpreter.
 
 See URL `http://php.net/manual/en/features.commandline.php'."
-  :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
-            "-d" "log_errors=0" source)
+  :command '("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
+             "-d" "log_errors=0" source)
   :error-patterns
-  ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
-          (message) " in " (file-name) " on line " line line-end))
-  :modes (php-mode php+-mode)
-  :next-checkers ((warning . php-phpmd)
-                  (warning . php-phpcs)))
+  '((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
+           (message) " in " (file-name) " on line " line line-end))
+  :modes '(php-mode php+-mode)
+  :next-checkers '((warning . php-phpmd)
+                   (warning . php-phpcs)))
 
 (flycheck-def-option-var flycheck-phpmd-rulesets
     '("cleancode" "codesize" "controversial" "design" "naming" "unusedcode")
@@ -8518,12 +8541,12 @@ manual at URL `https://phpmd.org/documentation/index.html'."
   "A PHP style checker using PHP Mess Detector.
 
 See URL `https://phpmd.org/'."
-  :command ("phpmd" source "xml"
-            (eval (flycheck-option-comma-separated-list
-                   flycheck-phpmd-rulesets)))
+  :command '("phpmd" source "xml"
+             (eval (flycheck-option-comma-separated-list
+                    flycheck-phpmd-rulesets)))
   :error-parser #'flycheck-parse-phpmd
-  :modes (php-mode php+-mode)
-  :next-checkers (php-phpcs))
+  :modes '(php-mode php+-mode)
+  :next-checkers '(php-phpcs))
 
 (flycheck-def-option-var flycheck-phpcs-standard nil php-phpcs
   "The coding standard for PHP CodeSniffer.
@@ -8542,26 +8565,26 @@ or as path to a standard specification."
 Needs PHP Code Sniffer 2.6 or newer.
 
 See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
-  :command ("phpcs" "--report=checkstyle"
-            ;; Use -q flag to force quiet mode
-            ;; Quiet mode prevents errors from extra output when phpcs has
-            ;; been configured with show_progress enabled
-            "-q"
-            (option "--standard=" flycheck-phpcs-standard concat)
-            ;; Pass original file name to phpcs.  We need to concat explicitly
-            ;; here, because phpcs really insists to get option and argument as
-            ;; a single command line argument :|
-            (eval (when (buffer-file-name)
-                    (concat "--stdin-path=" (buffer-file-name))))
-            ;; Read from standard input
-            "-")
+  :command '("phpcs" "--report=checkstyle"
+             ;; Use -q flag to force quiet mode
+             ;; Quiet mode prevents errors from extra output when phpcs has
+             ;; been configured with show_progress enabled
+             "-q"
+             (option "--standard=" flycheck-phpcs-standard concat)
+             ;; Pass original file name to phpcs.  We need to concat explicitly
+             ;; here, because phpcs really insists to get option and argument as
+             ;; a single command line argument :|
+             (eval (when (buffer-file-name)
+                     (concat "--stdin-path=" (buffer-file-name))))
+             ;; Read from standard input
+             "-")
   :standard-input t
   :error-parser #'flycheck-parse-checkstyle
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "STDIN" errors)))
-  :modes (php-mode php+-mode)
+  :modes '(php-mode php+-mode)
   ;; phpcs seems to choke on empty standard input, hence skip phpcs if the
   ;; buffer is empty, see https://github.com/flycheck/flycheck/issues/907
   :predicate (lambda () (not (flycheck-buffer-empty-p))))
@@ -8570,16 +8593,16 @@ See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
   "Processing command line tool.
 
 See https://github.com/processing/processing/wiki/Command-Line"
-  :command ("processing-java" "--force"
-            ;; Don't change the order of these arguments, processing is pretty
-            ;; picky
-            (eval (concat "--sketch=" (file-name-directory (buffer-file-name))))
-            (eval (concat "--output=" (flycheck-temp-dir-system)))
-            "--build")
+  :command '("processing-java" "--force"
+             ;; Don't change the order of these arguments, processing is pretty
+             ;; picky
+             (eval (concat "--sketch=" (file-name-directory (buffer-file-name))))
+             (eval (concat "--output=" (flycheck-temp-dir-system)))
+             "--build")
   :error-patterns
-  ((error line-start (file-name) ":" line ":" column
-          (zero-or-more (or digit ":")) (message) line-end))
-  :modes processing-mode
+  '((error line-start (file-name) ":" line ":" column
+           (zero-or-more (or digit ":")) (message) line-end))
+  :modes 'processing-mode
   ;; This syntax checker needs a file name
   :predicate (lambda () (buffer-file-name)))
 
@@ -8612,82 +8635,82 @@ See URL `http://proselint.com/' for more information about proselint."
   "Flycheck checker using Proselint.
 
 See URL `http://proselint.com/'."
-  :command ("proselint" "--json" "-")
+  :command '("proselint" "--json" "-")
   :standard-input t
   :error-parser #'flycheck-proselint-parse-errors
-  :modes (text-mode markdown-mode gfm-mode message-mode))
+  :modes '(text-mode markdown-mode gfm-mode message-mode))
 
 (flycheck-define-checker protobuf-protoc
   "A protobuf syntax checker using the protoc compiler.
 
 See URL `https://developers.google.com/protocol-buffers/'."
-  :command ("protoc" "--error_format" "gcc"
-            (eval (concat "--java_out=" (flycheck-temp-dir-system)))
-            ;; Add the file directory of protobuf path to resolve import directives
-            (eval (concat "--proto_path=" (file-name-directory (buffer-file-name))))
-            source-inplace)
+  :command '("protoc" "--error_format" "gcc"
+             (eval (concat "--java_out=" (flycheck-temp-dir-system)))
+             ;; Add the file directory of protobuf path to resolve import directives
+             (eval (concat "--proto_path=" (file-name-directory (buffer-file-name))))
+             source-inplace)
   :error-patterns
-  ((info line-start (file-name) ":" line ":" column
-         ": note: " (message) line-end)
-   (error line-start (file-name) ":" line ":" column
-          ": " (message) line-end)
-   (error line-start
-          (message "In file included from") " " (file-name) ":" line ":"
-          column ":" line-end))
-  :modes protobuf-mode
+  '((info line-start (file-name) ":" line ":" column
+          ": note: " (message) line-end)
+    (error line-start (file-name) ":" line ":" column
+           ": " (message) line-end)
+    (error line-start
+           (message "In file included from") " " (file-name) ":" line ":"
+           column ":" line-end))
+  :modes 'protobuf-mode
   :predicate (lambda () (buffer-file-name)))
 
 (flycheck-define-checker pug
   "A Pug syntax checker using the pug compiler.
 
 See URL `https://pugjs.org/'."
-  :command ("pug" "-p" (eval (expand-file-name (buffer-file-name))))
+  :command '("pug" "-p" (eval (expand-file-name (buffer-file-name))))
   :standard-input t
   :error-patterns
   ;; errors with includes/extends (e.g. missing files)
-  ((error "Error: " (message) (zero-or-more not-newline) "\n"
-          (zero-or-more not-newline) "at "
-          (zero-or-more not-newline) " line " line)
-   ;; syntax/runtime errors (e.g. type errors, bad indentation, etc.)
-   (error line-start
-          (optional "Type") "Error: "  (file-name) ":" line (optional ":" column)
-          (zero-or-more not-newline) "\n"
-          (one-or-more (or (zero-or-more not-newline) "|"
-                           (zero-or-more not-newline) "\n")
-                       (zero-or-more "-")  (zero-or-more not-newline) "|"
-                       (zero-or-more not-newline) "\n")
-          (zero-or-more not-newline) "\n"
-          (one-or-more
-           (zero-or-more not-newline) "|"
-           (zero-or-more not-newline) "\n") (zero-or-more not-newline) "\n"
-           (message) line-end))
-  :modes pug-mode)
+  '((error "Error: " (message) (zero-or-more not-newline) "\n"
+           (zero-or-more not-newline) "at "
+           (zero-or-more not-newline) " line " line)
+    ;; syntax/runtime errors (e.g. type errors, bad indentation, etc.)
+    (error line-start
+           (optional "Type") "Error: "  (file-name) ":" line (optional ":" column)
+           (zero-or-more not-newline) "\n"
+           (one-or-more (or (zero-or-more not-newline) "|"
+                            (zero-or-more not-newline) "\n")
+                        (zero-or-more "-")  (zero-or-more not-newline) "|"
+                        (zero-or-more not-newline) "\n")
+           (zero-or-more not-newline) "\n"
+           (one-or-more
+            (zero-or-more not-newline) "|"
+            (zero-or-more not-newline) "\n") (zero-or-more not-newline) "\n"
+            (message) line-end))
+  :modes 'pug-mode)
 
 (flycheck-define-checker puppet-parser
   "A Puppet DSL syntax checker using puppet's own parser.
 
 See URL `https://puppet.com/'."
-  :command ("puppet" "parser" "validate" "--color=false")
+  :command '("puppet" "parser" "validate" "--color=false")
   :standard-input t
   :error-patterns
-  (
-   ;; Patterns for Puppet 4
-   (error line-start "Error: Could not parse for environment "
-          (one-or-more (in "a-z" "0-9" "_")) ":"
-          (message) " at line " line ":" column line-end)
-   ;; Errors from Puppet < 4
-   (error line-start "Error: Could not parse for environment "
-          (one-or-more (in "a-z" "0-9" "_")) ":"
-          (message (minimal-match (one-or-more anything)))
-          " at line " line line-end)
-   (error line-start
-          ;; Skip over the path of the Puppet executable
-          (minimal-match (zero-or-more not-newline))
-          ": Could not parse for environment " (one-or-more word)
-          ": " (message (minimal-match (zero-or-more anything)))
-          " at " (file-name "/" (zero-or-more not-newline)) ":" line line-end))
-  :modes puppet-mode
-  :next-checkers ((warning . puppet-lint)))
+  '(
+    ;; Patterns for Puppet 4
+    (error line-start "Error: Could not parse for environment "
+           (one-or-more (in "a-z" "0-9" "_")) ":"
+           (message) " at line " line ":" column line-end)
+    ;; Errors from Puppet < 4
+    (error line-start "Error: Could not parse for environment "
+           (one-or-more (in "a-z" "0-9" "_")) ":"
+           (message (minimal-match (one-or-more anything)))
+           " at line " line line-end)
+    (error line-start
+           ;; Skip over the path of the Puppet executable
+           (minimal-match (zero-or-more not-newline))
+           ": Could not parse for environment " (one-or-more word)
+           ": " (message (minimal-match (zero-or-more anything)))
+           " at " (file-name "/" (zero-or-more not-newline)) ":" line line-end))
+  :modes 'puppet-mode
+  :next-checkers '((warning . puppet-lint)))
 
 (flycheck-def-config-file-var flycheck-puppet-lint-rc puppet-lint
                               ".puppet-lint.rc"
@@ -8719,17 +8742,17 @@ See URL `http://puppet-lint.com/'."
   ;; Puppet's autoload directory layout.  For instance, a class foo::bar is
   ;; required to be in a file foo/bar.pp.  Any other place, such as a Flycheck
   ;; temporary file will cause an error.
-  :command ("puppet-lint"
-            (config-file "--config" flycheck-puppet-lint-rc)
-            "--log-format"
-            "%{path}:%{line}:%{kind}: %{message} (%{check})"
-            (option-list "" flycheck-puppet-lint-disabled-checks concat
-                         flycheck-puppet-lint-disabled-arg-name)
-            source-original)
+  :command '("puppet-lint"
+             (config-file "--config" flycheck-puppet-lint-rc)
+             "--log-format"
+             "%{path}:%{line}:%{kind}: %{message} (%{check})"
+             (option-list "" flycheck-puppet-lint-disabled-checks concat
+                          flycheck-puppet-lint-disabled-arg-name)
+             source-original)
   :error-patterns
-  ((warning line-start (file-name) ":" line ":warning: " (message) line-end)
-   (error line-start (file-name) ":" line ":error: " (message) line-end))
-  :modes puppet-mode
+  '((warning line-start (file-name) ":" line ":warning: " (message) line-end)
+    (error line-start (file-name) ":" line ":error: " (message) line-end))
+  :modes 'puppet-mode
   ;; Since we check the original file, we can only use this syntax checker if
   ;; the buffer is actually linked to a file, and if it is not modified.
   :predicate #'flycheck-buffer-saved-p)
@@ -8853,30 +8876,30 @@ Requires Flake8 3.0 or newer. See URL
 `https://flake8.readthedocs.io/'."
   ;; Not calling flake8 directly makes it easier to switch between different
   ;; Python versions; see https://github.com/flycheck/flycheck/issues/1055.
-  :command ("python"
-            (eval (flycheck-python-module-args 'python-flake8 "flake8"))
-            "--format=default"
-            (config-file "--config" flycheck-flake8rc)
-            (option "--max-complexity" flycheck-flake8-maximum-complexity nil
-                    flycheck-option-int)
-            (option "--max-line-length" flycheck-flake8-maximum-line-length nil
-                    flycheck-option-int)
-            "-")
+  :command '("python"
+             (eval (flycheck-python-module-args 'python-flake8 "flake8"))
+             "--format=default"
+             (config-file "--config" flycheck-flake8rc)
+             (option "--max-complexity" flycheck-flake8-maximum-complexity nil
+                     flycheck-option-int)
+             (option "--max-line-length" flycheck-flake8-maximum-line-length nil
+                     flycheck-option-int)
+             "-")
   :standard-input t
   :error-filter (lambda (errors)
                   (let ((errors (flycheck-sanitize-errors errors)))
                     (seq-map #'flycheck-flake8-fix-error-level errors)))
   :error-patterns
-  ((warning line-start
-            "stdin:" line ":" (optional column ":") " "
-            (id (one-or-more (any alpha)) (one-or-more digit)) " "
-            (message (one-or-more not-newline))
-            line-end))
+  '((warning line-start
+             "stdin:" line ":" (optional column ":") " "
+             (id (one-or-more (any alpha)) (one-or-more digit)) " "
+             (message (one-or-more not-newline))
+             line-end))
   :enabled (lambda ()
              (or (not (flycheck-python-needs-module-p 'python-flake8))
                  (flycheck-python-find-module 'python-flake8 "flake8")))
   :verify (lambda (_) (flycheck-python-verify-module 'python-flake8 "flake8"))
-  :modes python-mode)
+  :modes 'python-mode)
 
 (flycheck-def-config-file-var flycheck-pylintrc python-pylint ".pylintrc"
   :safe #'stringp)
@@ -8900,57 +8923,57 @@ See URL `https://www.pylint.org/'."
   ;; -r n disables the scoring report
   ;; Not calling pylint directly makes it easier to switch between different
   ;; Python versions; see https://github.com/flycheck/flycheck/issues/1055.
-  :command ("python"
-            (eval (flycheck-python-module-args 'python-pylint "pylint"))
-            "-r" "n"
-            "--output-format" "text"
-            "--msg-template"
-            (eval (if flycheck-pylint-use-symbolic-id
-                      "{path}:{line}:{column}:{C}:{symbol}:{msg}"
-                    "{path}:{line}:{column}:{C}:{msg_id}:{msg}"))
-            (config-file "--rcfile" flycheck-pylintrc)
-            ;; Need `source-inplace' for relative imports (e.g. `from .foo
-            ;; import bar'), see https://github.com/flycheck/flycheck/issues/280
-            source-inplace)
+  :command '("python"
+             (eval (flycheck-python-module-args 'python-pylint "pylint"))
+             "-r" "n"
+             "--output-format" "text"
+             "--msg-template"
+             (eval (if flycheck-pylint-use-symbolic-id
+                       "{path}:{line}:{column}:{C}:{symbol}:{msg}"
+                     "{path}:{line}:{column}:{C}:{msg_id}:{msg}"))
+             (config-file "--rcfile" flycheck-pylintrc)
+             ;; Need `source-inplace' for relative imports (e.g. `from .foo
+             ;; import bar'), see https://github.com/flycheck/flycheck/issues/280
+             source-inplace)
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
   :error-patterns
-  ((error line-start (file-name) ":" line ":" column ":"
-          (or "E" "F") ":"
-          (id (one-or-more (not (any ":")))) ":"
-          (message) line-end)
-   (warning line-start (file-name) ":" line ":" column ":"
-            (or "W" "R") ":"
-            (id (one-or-more (not (any ":")))) ":"
-            (message) line-end)
-   (info line-start (file-name) ":" line ":" column ":"
-         "C:" (id (one-or-more (not (any ":")))) ":"
-         (message) line-end))
+  '((error line-start (file-name) ":" line ":" column ":"
+           (or "E" "F") ":"
+           (id (one-or-more (not (any ":")))) ":"
+           (message) line-end)
+    (warning line-start (file-name) ":" line ":" column ":"
+             (or "W" "R") ":"
+             (id (one-or-more (not (any ":")))) ":"
+             (message) line-end)
+    (info line-start (file-name) ":" line ":" column ":"
+          "C:" (id (one-or-more (not (any ":")))) ":"
+          (message) line-end))
   :enabled (lambda ()
              (or (not (flycheck-python-needs-module-p 'python-pylint))
                  (flycheck-python-find-module 'python-pylint "pylint")))
   :verify (lambda (_) (flycheck-python-verify-module 'python-pylint "pylint"))
-  :modes python-mode)
+  :modes 'python-mode)
 
 (flycheck-define-checker python-pycompile
   "A Python syntax checker using Python's builtin compiler.
 
 See URL `https://docs.python.org/3.4/library/py_compile.html'."
-  :command ("python" "-m" "py_compile" source)
+  :command '("python" "-m" "py_compile" source)
   :error-patterns
   ;; Python 2.7
-  ((error line-start "  File \"" (file-name) "\", line " line "\n"
-          (>= 2 (zero-or-more not-newline) "\n")
-          "SyntaxError: " (message) line-end)
-   (error line-start "Sorry: IndentationError: "
-          (message) "(" (file-name) ", line " line ")"
-          line-end)
-   ;; 2.6
-   (error line-start "SyntaxError: ('" (message (one-or-more (not (any "'"))))
-          "', ('" (file-name (one-or-more (not (any "'")))) "', "
-          line ", " column ", " (one-or-more not-newline) line-end))
-  :modes python-mode)
+  '((error line-start "  File \"" (file-name) "\", line " line "\n"
+           (>= 2 (zero-or-more not-newline) "\n")
+           "SyntaxError: " (message) line-end)
+    (error line-start "Sorry: IndentationError: "
+           (message) "(" (file-name) ", line " line ")"
+           line-end)
+    ;; 2.6
+    (error line-start "SyntaxError: ('" (message (one-or-more (not (any "'"))))
+           "', ('" (file-name (one-or-more (not (any "'")))) "', "
+           line ", " column ", " (one-or-more not-newline) line-end))
+  :modes 'python-mode)
 
 (flycheck-def-option-var flycheck-lintr-caching t r-lintr
   "Whether to enable caching in lintr.
@@ -8985,22 +9008,22 @@ expression, which selects linters for lintr."
   "An R style and syntax checker using the lintr package.
 
 See URL `https://github.com/jimhester/lintr'."
-  :command ("R" "--slave" "--restore" "--no-save" "-e"
-            (eval (concat
-                   "library(lintr);"
-                   "try(lint(commandArgs(TRUE)"
-                   ", cache=" (if flycheck-lintr-caching "TRUE" "FALSE")
-                   ", " flycheck-lintr-linters
-                   "))"))
-            "--args" source)
+  :command '("R" "--slave" "--restore" "--no-save" "-e"
+             (eval (concat
+                    "library(lintr);"
+                    "try(lint(commandArgs(TRUE)"
+                    ", cache=" (if flycheck-lintr-caching "TRUE" "FALSE")
+                    ", " flycheck-lintr-linters
+                    "))"))
+             "--args" source)
   :error-patterns
-  ((info line-start (file-name) ":" line ":" column ": style: " (message)
-         line-end)
-   (warning line-start (file-name) ":" line ":" column ": warning: " (message)
-            line-end)
-   (error line-start (file-name) ":" line ":" column ": error: " (message)
-          line-end))
-  :modes ess-mode
+  '((info line-start (file-name) ":" line ":" column ": style: " (message)
+          line-end)
+    (warning line-start (file-name) ":" line ":" column ": warning: " (message)
+             line-end)
+    (error line-start (file-name) ":" line ":" column ": error: " (message)
+           line-end))
+  :modes 'ess-mode
   :predicate
   ;; Don't check ESS files which do not contain R, and make sure that lintr is
   ;; actually available
@@ -9034,7 +9057,7 @@ The `compiler-lib' racket package is required for this syntax
 checker.
 
 See URL `https://racket-lang.org/'."
-  :command ("raco" "expand" source-inplace)
+  :command '("raco" "expand" source-inplace)
   :predicate
   (lambda ()
     (and (or (not (eq major-mode 'scheme-mode))
@@ -9067,21 +9090,21 @@ See URL `https://racket-lang.org/'."
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
   :error-patterns
-  ((error line-start (file-name) ":" line ":" column ":" (message) line-end))
-  :modes (racket-mode scheme-mode))
+  '((error line-start (file-name) ":" line ":" column ":" (message) line-end))
+  :modes '(racket-mode scheme-mode))
 
 (flycheck-define-checker rpm-rpmlint
   "A RPM SPEC file syntax checker using rpmlint.
 
 See URL `https://sourceforge.net/projects/rpmlint/'."
-  :command ("rpmlint" source)
+  :command '("rpmlint" source)
   :error-patterns
-  ((error line-start
-          (file-name) ":" (optional line ":") " E: " (message)
-          line-end)
-   (warning line-start
-            (file-name) ":" (optional line ":") " W: " (message)
-            line-end))
+  '((error line-start
+           (file-name) ":" (optional line ":") " E: " (message)
+           line-end)
+    (warning line-start
+             (file-name) ":" (optional line ":") " W: " (message)
+             line-end))
   :error-filter
   ;; Add fake line numbers if they are missing in the lint output
   (lambda (errors)
@@ -9096,7 +9119,7 @@ See URL `https://sourceforge.net/projects/rpmlint/'."
                                               (match-string 1 error-message))))
       (with-output-to-string
         (call-process "rpmlint" nil standard-output nil "-I" message-id))))
-  :modes (sh-mode rpm-spec-mode)
+  :modes '(sh-mode rpm-spec-mode)
   :predicate (lambda () (or (not (eq major-mode 'sh-mode))
                             ;; In `sh-mode', we need the proper shell
                             (eq sh-shell 'rpm))))
@@ -9110,18 +9133,18 @@ See URL `https://sourceforge.net/projects/rpmlint/'."
   "Markdown checker using markdownlint-cli.
 
 See URL `https://github.com/igorshubovych/markdownlint-cli'."
-  :command ("markdownlint"
-            (config-file "--config" flycheck-markdown-markdownlint-cli-config)
-            source)
+  :command '("markdownlint"
+             (config-file "--config" flycheck-markdown-markdownlint-cli-config)
+             source)
   :error-patterns
-  ((error line-start
-          (file-name) ": " line ": " (id (one-or-more (not (any space))))
-          " " (message) line-end))
+  '((error line-start
+           (file-name) ": " line ": " (id (one-or-more (not (any space))))
+           " " (message) line-end))
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "(string)" errors)))
-  :modes (markdown-mode gfm-mode))
+  :modes '(markdown-mode gfm-mode))
 
 (flycheck-def-option-var flycheck-markdown-mdl-rules nil markdown-mdl
   "Rules to enable for mdl.
@@ -9161,38 +9184,38 @@ See URL
   "Markdown checker using mdl.
 
 See URL `https://github.com/mivok/markdownlint'."
-  :command ("mdl"
-            (config-file "--style" flycheck-markdown-mdl-style)
-            (option "--tags=" flycheck-markdown-mdl-rules concat
-                    flycheck-option-comma-separated-list)
-            (option "--rules=" flycheck-markdown-mdl-rules concat
-                    flycheck-option-comma-separated-list))
+  :command '("mdl"
+             (config-file "--style" flycheck-markdown-mdl-style)
+             (option "--tags=" flycheck-markdown-mdl-rules concat
+                     flycheck-option-comma-separated-list)
+             (option "--rules=" flycheck-markdown-mdl-rules concat
+                     flycheck-option-comma-separated-list))
   :standard-input t
   :error-patterns
-  ((error line-start
-          (file-name) ":" line ": " (id (one-or-more alnum)) " " (message)
-          line-end))
+  '((error line-start
+           (file-name) ":" line ": " (id (one-or-more alnum)) " " (message)
+           line-end))
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "(stdin)" errors)))
-  :modes (markdown-mode gfm-mode))
+  :modes '(markdown-mode gfm-mode))
 
 (flycheck-define-checker nix
   "Nix checker using nix-instantiate.
 
 See URL `https://nixos.org/nix/manual/#sec-nix-instantiate'."
-  :command ("nix-instantiate" "--parse" "-")
+  :command '("nix-instantiate" "--parse" "-")
   :standard-input t
   :error-patterns
-  ((error line-start
-          "error: " (message) " at " (file-name) ":" line ":" column
-          line-end))
+  '((error line-start
+           "error: " (message) " at " (file-name) ":" line ":" column
+           line-end))
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "(string)" errors)))
-  :modes nix-mode)
+  :modes 'nix-mode)
 
 (defun flycheck-locate-sphinx-source-directory ()
   "Locate the Sphinx source directory for the current buffer.
@@ -9209,16 +9232,16 @@ part of a Sphinx project."
 See URL `http://docutils.sourceforge.net/'."
   ;; We need to use source-inplace to properly resolve relative paths in
   ;; include:: directives
-  :command ("rst2pseudoxml.py" "--report=2" "--halt=5"
-            ;; Read from standard input and throw output away
-            "-" null-device)
+  :command '("rst2pseudoxml.py" "--report=2" "--halt=5"
+             ;; Read from standard input and throw output away
+             "-" null-device)
   :standard-input t
   :error-patterns
-  ((warning line-start "<stdin>:" line ": (WARNING/2) " (message) line-end)
-   (error line-start "<stdin>:" line
-          ": (" (or "ERROR/3" "SEVERE/4") ") "
-          (message) line-end))
-  :modes rst-mode)
+  '((warning line-start "<stdin>:" line ": (WARNING/2) " (message) line-end)
+    (error line-start "<stdin>:" line
+           ": (" (or "ERROR/3" "SEVERE/4") ") "
+           (message) line-end))
+  :modes 'rst-mode)
 
 (flycheck-def-option-var flycheck-sphinx-warn-on-missing-references t rst-sphinx
   "Whether to warn about missing references in Sphinx.
@@ -9233,20 +9256,20 @@ Sphinx via `-n'."
   "A ReStructuredText (RST) syntax checker using Sphinx.
 
 Requires Sphinx 1.2 or newer.  See URL `http://sphinx-doc.org'."
-  :command ("sphinx-build" "-b" "pseudoxml"
-            "-q" "-N"                   ; Reduced output and no colors
-            (option-flag "-n" flycheck-sphinx-warn-on-missing-references)
-            (eval (flycheck-locate-sphinx-source-directory))
-            temporary-directory         ; Redirect the output to a temporary
+  :command '("sphinx-build" "-b" "pseudoxml"
+             "-q" "-N"                   ; Reduced output and no colors
+             (option-flag "-n" flycheck-sphinx-warn-on-missing-references)
+             (eval (flycheck-locate-sphinx-source-directory))
+             temporary-directory         ; Redirect the output to a temporary
                                         ; directory
-            source-original)            ; Sphinx needs the original document
+             source-original)            ; Sphinx needs the original document
   :error-patterns
-  ((warning line-start (file-name) ":" line ": WARNING: " (message) line-end)
-   (error line-start
-          (file-name) ":" line
-          ": " (or "ERROR" "SEVERE") ": "
-          (message) line-end))
-  :modes rst-mode
+  '((warning line-start (file-name) ":" line ": WARNING: " (message) line-end)
+    (error line-start
+           (file-name) ":" line
+           ": " (or "ERROR" "SEVERE") ": "
+           (message) line-end))
+  :modes 'rst-mode
   :predicate (lambda () (and (flycheck-buffer-saved-p)
                              (flycheck-locate-sphinx-source-directory))))
 
@@ -9276,35 +9299,35 @@ Otherwise report style issues as well."
 You need at least RuboCop 0.34 for this syntax checker.
 
 See URL `http://batsov.com/rubocop/'."
-  :command ("rubocop"
-            "--display-cop-names"
-            "--force-exclusion"
-            "--format" "emacs"
-            ;; Explicitly disable caching to prevent Rubocop 0.35.1 and earlier
-            ;; from caching standard input.  Later versions of Rubocop
-            ;; automatically disable caching with --stdin, see
-            ;; https://github.com/flycheck/flycheck/issues/844 and
-            ;; https://github.com/bbatsov/rubocop/issues/2576
-            "--cache" "false"
-            (config-file "--config" flycheck-rubocoprc)
-            (option-flag "--lint" flycheck-rubocop-lint-only)
-            ;; Rubocop takes the original file name as argument when reading
-            ;; from standard input
-            "--stdin" source-original)
+  :command '("rubocop"
+             "--display-cop-names"
+             "--force-exclusion"
+             "--format" "emacs"
+             ;; Explicitly disable caching to prevent Rubocop 0.35.1 and earlier
+             ;; from caching standard input.  Later versions of Rubocop
+             ;; automatically disable caching with --stdin, see
+             ;; https://github.com/flycheck/flycheck/issues/844 and
+             ;; https://github.com/bbatsov/rubocop/issues/2576
+             "--cache" "false"
+             (config-file "--config" flycheck-rubocoprc)
+             (option-flag "--lint" flycheck-rubocop-lint-only)
+             ;; Rubocop takes the original file name as argument when reading
+             ;; from standard input
+             "--stdin" source-original)
   :standard-input t
   :working-directory #'flycheck-ruby--find-project-root
   :error-patterns
-  ((info line-start (file-name) ":" line ":" column ": C: "
-         (optional (id (one-or-more (not (any ":")))) ": ") (message) line-end)
-   (warning line-start (file-name) ":" line ":" column ": W: "
-            (optional (id (one-or-more (not (any ":")))) ": ") (message)
-            line-end)
-   (error line-start (file-name) ":" line ":" column ": " (or "E" "F") ": "
-          (optional (id (one-or-more (not (any ":")))) ": ") (message)
-          line-end))
-  :modes (enh-ruby-mode ruby-mode)
-  :next-checkers ((warning . ruby-reek)
-                  (warning . ruby-rubylint)))
+  '((info line-start (file-name) ":" line ":" column ": C: "
+          (optional (id (one-or-more (not (any ":")))) ": ") (message) line-end)
+    (warning line-start (file-name) ":" line ":" column ": W: "
+             (optional (id (one-or-more (not (any ":")))) ": ") (message)
+             line-end)
+    (error line-start (file-name) ":" line ":" column ": " (or "E" "F") ": "
+           (optional (id (one-or-more (not (any ":")))) ": ") (message)
+           line-end))
+  :modes '(enh-ruby-mode ruby-mode)
+  :next-checkers '((warning . ruby-reek)
+                   (warning . ruby-rubylint)))
 
 ;; Default to `nil' to let Reek find its configuration file by itself
 (flycheck-def-config-file-var flycheck-reekrc ruby-reek nil
@@ -9315,12 +9338,12 @@ See URL `http://batsov.com/rubocop/'."
   "A Ruby smell checker using reek.
 
 See URL `https://github.com/troessner/reek'."
-  :command ("reek" "--format" "json"
-            (config-file "--config" flycheck-reekrc)
-            source)
+  :command '("reek" "--format" "json"
+             (config-file "--config" flycheck-reekrc)
+             source)
   :error-parser #'flycheck-parse-reek
-  :modes (enh-ruby-mode ruby-mode)
-  :next-checkers ((warning . ruby-rubylint)))
+  :modes '(enh-ruby-mode ruby-mode)
+  :next-checkers '((warning . ruby-rubylint)))
 
 ;; Default to `nil' to let Rubylint find its configuration file by itself, and
 ;; to maintain backwards compatibility with older Rubylint and Flycheck releases
@@ -9332,18 +9355,18 @@ See URL `https://github.com/troessner/reek'."
 
 Requires ruby-lint 2.0.2 or newer.  See URL
 `https://github.com/YorickPeterse/ruby-lint'."
-  :command ("ruby-lint" "--presenter=syntastic"
-            (config-file "--config" flycheck-rubylintrc)
-            source)
+  :command '("ruby-lint" "--presenter=syntastic"
+             (config-file "--config" flycheck-rubylintrc)
+             source)
   ;; Ruby Lint can't read from standard input
   :error-patterns
-  ((info line-start
-         (file-name) ":I:" line ":" column ": " (message) line-end)
-   (warning line-start
-            (file-name) ":W:" line ":" column ": " (message) line-end)
-   (error line-start
-          (file-name) ":E:" line ":" column ": " (message) line-end))
-  :modes (enh-ruby-mode ruby-mode))
+  '((info line-start
+          (file-name) ":I:" line ":" column ": " (message) line-end)
+    (warning line-start
+             (file-name) ":W:" line ":" column ": " (message) line-end)
+    (error line-start
+           (file-name) ":E:" line ":" column ": " (message) line-end))
+  :modes '(enh-ruby-mode ruby-mode))
 
 (flycheck-define-checker ruby
   "A Ruby syntax checker using the standard Ruby interpreter.
@@ -9357,16 +9380,16 @@ implementations.
 Please consider using `ruby-rubocop' or `ruby-reek' instead.
 
 See URL `https://www.ruby-lang.org/'."
-  :command ("ruby" "-w" "-c")
+  :command '("ruby" "-w" "-c")
   :standard-input t
   :error-patterns
   ;; These patterns support output from JRuby, too, to deal with RVM or Rbenv
-  ((error line-start "SyntaxError in -:" line ": " (message) line-end)
-   (warning line-start "-:" line ":" (optional column ":")
-            " warning: " (message) line-end)
-   (error line-start "-:" line ": " (message) line-end))
-  :modes (enh-ruby-mode ruby-mode)
-  :next-checkers ((warning . ruby-rubylint)))
+  '((error line-start "SyntaxError in -:" line ": " (message) line-end)
+    (warning line-start "-:" line ":" (optional column ":")
+             " warning: " (message) line-end)
+    (error line-start "-:" line ": " (message) line-end))
+  :modes '(enh-ruby-mode ruby-mode)
+  :next-checkers '((warning . ruby-rubylint)))
 
 (flycheck-define-checker ruby-jruby
   "A Ruby syntax checker using the JRuby interpreter.
@@ -9377,14 +9400,14 @@ versions of JRuby.
 Please consider using `ruby-rubocop' or `ruby-rubylint' instead.
 
 See URL `http://jruby.org/'."
-  :command ("jruby" "-w" "-c")
+  :command '("jruby" "-w" "-c")
   :standard-input t
   :error-patterns
-  ((error line-start "SyntaxError in -:" line ": " (message) line-end)
-   (warning line-start "-:" line ":" " warning: " (message) line-end)
-   (error line-start  "-:" line ": " (message) line-end))
-  :modes (enh-ruby-mode ruby-mode)
-  :next-checkers ((warning . ruby-rubylint)))
+  '((error line-start "SyntaxError in -:" line ": " (message) line-end)
+    (warning line-start "-:" line ":" " warning: " (message) line-end)
+    (error line-start  "-:" line ": " (message) line-end))
+  :modes '(enh-ruby-mode ruby-mode)
+  :next-checkers '((warning . ruby-rubylint)))
 
 (flycheck-def-args-var flycheck-cargo-check-args (rust-cargo)
   :package-version '(flycheck . "32"))
@@ -9542,20 +9565,20 @@ A valid Cargo target type is one of `lib', `bin', `example',
 
 This syntax checker requires Rust 1.17 or newer.  See URL
 `https://www.rust-lang.org'."
-  :command ("cargo"
-            (eval (if flycheck-rust-check-tests
-                      "test"
-                    "check"))
-            (eval (when flycheck-rust-check-tests
-                    "--no-run"))
-            (eval (when flycheck-rust-crate-type
-                    (concat "--" flycheck-rust-crate-type)))
-            ;; All crate targets except "lib" need a binary name
-            (eval (when (and flycheck-rust-crate-type
-                             (not (string= flycheck-rust-crate-type "lib")))
-                    flycheck-rust-binary-name))
-            (eval flycheck-cargo-check-args)
-            "--message-format=json")
+  :command '("cargo"
+             (eval (if flycheck-rust-check-tests
+                       "test"
+                     "check"))
+             (eval (when flycheck-rust-check-tests
+                     "--no-run"))
+             (eval (when flycheck-rust-crate-type
+                     (concat "--" flycheck-rust-crate-type)))
+             ;; All crate targets except "lib" need a binary name
+             (eval (when (and flycheck-rust-crate-type
+                              (not (string= flycheck-rust-crate-type "lib")))
+                     flycheck-rust-binary-name))
+             (eval flycheck-cargo-check-args)
+             "--message-format=json")
   :error-parser #'flycheck-parse-cargo-rustc
   :error-filter (lambda (errors)
                   ;; In Rust 1.25+, filenames are relative to the workspace
@@ -9567,7 +9590,7 @@ This syntax checker requires Rust 1.17 or newer.  See URL
                                      (flycheck-error-filename err) root)))
                             (flycheck-rust-error-filter errors))))
   :error-explainer #'flycheck-rust-error-explainer
-  :modes rust-mode
+  :modes 'rust-mode
   :predicate #'flycheck-buffer-saved-p
   :enabled #'flycheck-rust-manifest-directory
   :working-directory (lambda (_) (flycheck-rust-manifest-directory))
@@ -9608,29 +9631,29 @@ This syntax checker requires Rust 1.17 or newer.  See URL
 
 This syntax checker needs Rust 1.7 or newer.  See URL
 `https://www.rust-lang.org'."
-  :command ("rustc"
-            (option "--crate-type" flycheck-rust-crate-type)
-            "--error-format=json"
-            (option-flag "--test" flycheck-rust-check-tests)
-            (option-list "-L" flycheck-rust-library-path concat)
-            (eval flycheck-rust-args)
-            (eval (or flycheck-rust-crate-root
-                      (flycheck-substitute-argument 'source-original 'rust))))
+  :command '("rustc"
+             (option "--crate-type" flycheck-rust-crate-type)
+             "--error-format=json"
+             (option-flag "--test" flycheck-rust-check-tests)
+             (option-list "-L" flycheck-rust-library-path concat)
+             (eval flycheck-rust-args)
+             (eval (or flycheck-rust-crate-root
+                       (flycheck-substitute-argument 'source-original 'rust))))
   :error-parser #'flycheck-parse-rustc
   :error-filter #'flycheck-rust-error-filter
   :error-explainer #'flycheck-rust-error-explainer
-  :modes rust-mode
+  :modes 'rust-mode
   :predicate #'flycheck-buffer-saved-p)
 
 (flycheck-define-checker rust-clippy
   "A Rust syntax checker using clippy.
 
 See URL `https://github.com/rust-lang-nursery/rust-clippy'."
-  :command ("cargo" "+nightly" "clippy" "--message-format=json")
+  :command '("cargo" "+nightly" "clippy" "--message-format=json")
   :error-parser #'flycheck-parse-cargo-rustc
   :error-filter #'flycheck-rust-error-filter
   :error-explainer #'flycheck-rust-error-explainer
-  :modes rust-mode
+  :modes 'rust-mode
   :predicate #'flycheck-buffer-saved-p
   :enabled (lambda ()
              (and (flycheck-rust-cargo-has-command-p "clippy")
@@ -9676,31 +9699,31 @@ When non-nil, enable the Compass CSS framework, via `--compass'."
   "A Sass syntax checker using the Sass compiler.
 
 See URL `http://sass-lang.com'."
-  :command ("sass"
-            "--cache-location" (eval (flycheck-sass-scss-cache-location))
-            (option-flag "--compass" flycheck-sass-compass)
-            "--check" "--stdin")
+  :command '("sass"
+             "--cache-location" (eval (flycheck-sass-scss-cache-location))
+             (option-flag "--compass" flycheck-sass-compass)
+             "--check" "--stdin")
   :standard-input t
   :error-patterns
-  ((error line-start
-          (or "Syntax error: " "Error: ")
-          (message (one-or-more not-newline)
-                   (zero-or-more "\n"
-                                 (one-or-more " ")
-                                 (one-or-more not-newline)))
-          (optional "\r") "\n" (one-or-more " ") "on line " line
-          " of standard input"
-          line-end)
-   (warning line-start
-            "WARNING: "
-            (message (one-or-more not-newline)
-                     (zero-or-more "\n"
-                                   (one-or-more " ")
-                                   (one-or-more not-newline)))
-            (optional "\r") "\n" (one-or-more " ") "on line " line
-            " of " (one-or-more not-newline)
-            line-end))
-  :modes sass-mode)
+  '((error line-start
+           (or "Syntax error: " "Error: ")
+           (message (one-or-more not-newline)
+                    (zero-or-more "\n"
+                                  (one-or-more " ")
+                                  (one-or-more not-newline)))
+           (optional "\r") "\n" (one-or-more " ") "on line " line
+           " of standard input"
+           line-end)
+    (warning line-start
+             "WARNING: "
+             (message (one-or-more not-newline)
+                      (zero-or-more "\n"
+                                    (one-or-more " ")
+                                    (one-or-more not-newline)))
+             (optional "\r") "\n" (one-or-more " ") "on line " line
+             " of " (one-or-more not-newline)
+             line-end))
+  :modes 'sass-mode)
 
 (flycheck-def-config-file-var flycheck-sass-lintrc sass/scss-sass-lint ".sass-lint.yml"
   :safe #'stringp
@@ -9710,24 +9733,24 @@ See URL `http://sass-lang.com'."
   "A SASS/SCSS syntax checker using sass-Lint.
 
 See URL `https://github.com/sasstools/sass-lint'."
-  :command ("sass-lint"
-            "--verbose"
-            "--no-exit"
-            "--format" "Checkstyle"
-            (config-file "--config" flycheck-sass-lintrc)
-            source)
+  :command '("sass-lint"
+             "--verbose"
+             "--no-exit"
+             "--format" "Checkstyle"
+             (config-file "--config" flycheck-sass-lintrc)
+             source)
   :error-parser #'flycheck-parse-checkstyle
-  :modes (sass-mode scss-mode))
+  :modes '(sass-mode scss-mode))
 
 (flycheck-define-checker scala
   "A Scala syntax checker using the Scala compiler.
 
 See URL `http://www.scala-lang.org/'."
-  :command ("scalac" "-Ystop-after:parser" source)
+  :command '("scalac" "-Ystop-after:parser" source)
   :error-patterns
-  ((error line-start (file-name) ":" line ": error: " (message) line-end))
-  :modes scala-mode
-  :next-checkers ((warning . scala-scalastyle)))
+  '((error line-start (file-name) ":" line ": error: " (message) line-end))
+  :modes 'scala-mode
+  :next-checkers '((warning . scala-scalastyle)))
 
 (flycheck-def-config-file-var flycheck-scalastylerc scala-scalastyle nil
   :safe #'stringp
@@ -9740,18 +9763,18 @@ Note that this syntax checker is not used if
 `flycheck-scalastylerc' is nil or refers to a non-existing file.
 
 See URL `http://www.scalastyle.org'."
-  :command ("scalastyle"
-            (config-file "-c" flycheck-scalastylerc)
-            source)
+  :command '("scalastyle"
+             (config-file "-c" flycheck-scalastylerc)
+             source)
   :error-patterns
-  ((error line-start "error file=" (file-name) " message="
-          (message) " line=" line (optional " column=" column) line-end)
-   (warning line-start "warning file=" (file-name) " message="
-            (message) " line=" line (optional " column=" column) line-end))
+  '((error line-start "error file=" (file-name) " message="
+           (message) " line=" line (optional " column=" column) line-end)
+    (warning line-start "warning file=" (file-name) " message="
+             (message) " line=" line (optional " column=" column) line-end))
   :error-filter (lambda (errors)
                   (flycheck-sanitize-errors
                    (flycheck-increment-error-columns errors)))
-  :modes scala-mode
+  :modes 'scala-mode
   :predicate
   ;; Inhibit this syntax checker if the JAR or the configuration are unset or
   ;; missing
@@ -9783,31 +9806,31 @@ See URL `http://www.scalastyle.org'."
   "A CHICKEN Scheme syntax checker using the CHICKEN compiler `csc'.
 
 See URL `http://call-cc.org/'."
-  :command ("csc" "-analyze-only" "-local"
-            (eval flycheck-scheme-chicken-args)
-            source)
+  :command '("csc" "-analyze-only" "-local"
+             (eval flycheck-scheme-chicken-args)
+             source)
   :error-patterns
-  ((info line-start
-         "Note: " (zero-or-more not-newline) ":\n"
-         (one-or-more (any space)) "(" (file-name) ":" line ") " (message)
-         line-end)
-   (warning line-start
-            "Warning: " (zero-or-more not-newline) ":\n"
-            (one-or-more (any space)) "(" (file-name) ":" line ") " (message)
-            line-end)
-   (error line-start "Error: (line " line ") " (message) line-end)
-   (error line-start "Syntax error: (" (file-name) ":" line ")"
-          (zero-or-more not-newline) " - "
-          (message (one-or-more not-newline)
-                   (zero-or-more "\n"
-                                 (zero-or-more space)
-                                 (zero-or-more not-newline))
-                   (one-or-more space) "<--")
-          line-end)
-   (error line-start
-          "Error: " (zero-or-more not-newline) ":\n"
+  '((info line-start
+          "Note: " (zero-or-more not-newline) ":\n"
           (one-or-more (any space)) "(" (file-name) ":" line ") " (message)
-          line-end))
+          line-end)
+    (warning line-start
+             "Warning: " (zero-or-more not-newline) ":\n"
+             (one-or-more (any space)) "(" (file-name) ":" line ") " (message)
+             line-end)
+    (error line-start "Error: (line " line ") " (message) line-end)
+    (error line-start "Syntax error: (" (file-name) ":" line ")"
+           (zero-or-more not-newline) " - "
+           (message (one-or-more not-newline)
+                    (zero-or-more "\n"
+                                  (zero-or-more space)
+                                  (zero-or-more not-newline))
+                    (one-or-more space) "<--")
+           line-end)
+    (error line-start
+           "Error: " (zero-or-more not-newline) ":\n"
+           (one-or-more (any space)) "(" (file-name) ":" line ") " (message)
+           line-end))
   :predicate
   (lambda ()
     ;; In `scheme-mode' we must check the current Scheme implementation
@@ -9827,7 +9850,7 @@ See URL `http://call-cc.org/'."
         :face (cond
                ((eq geiser-impl 'chicken) 'success)
                (t '(bold error)))))))
-  :modes scheme-mode)
+  :modes 'scheme-mode)
 
 (defconst flycheck-scss-lint-checkstyle-re
   (rx "cannot load such file" (1+ not-newline) "scss_lint_reporter_checkstyle")
@@ -9857,11 +9880,11 @@ Please run gem install scss_lint_reporter_checkstyle"
 Needs SCSS-Lint 0.43.2 or newer.
 
 See URL `https://github.com/brigade/scss-lint'."
-  :command ("scss-lint"
-            "--require=scss_lint_reporter_checkstyle"
-            "--format=Checkstyle"
-            (config-file "--config" flycheck-scss-lintrc)
-            "--stdin-file-path" source-original "-")
+  :command '("scss-lint"
+             "--require=scss_lint_reporter_checkstyle"
+             "--format=Checkstyle"
+             (config-file "--config" flycheck-scss-lintrc)
+             "--stdin-file-path" source-original "-")
   :standard-input t
   ;; We cannot directly parse Checkstyle XML, since for some mysterious reason
   ;; SCSS-Lint doesn't have a built-in Checkstyle reporter, and instead ships it
@@ -9869,7 +9892,7 @@ See URL `https://github.com/brigade/scss-lint'."
   ;; check whether the addon is missing and turn that into a special kind of
   ;; Flycheck error.
   :error-parser #'flycheck-parse-scss-lint
-  :modes scss-mode
+  :modes 'scss-mode
   :verify (lambda (checker)
             (let* ((executable (flycheck-find-checker-executable checker))
                    (reporter-missing
@@ -9896,14 +9919,14 @@ See URL `https://github.com/brigade/scss-lint'."
   "A SCSS syntax and style checker using stylelint.
 
 See URL `http://stylelint.io/'."
-  :command ("stylelint"
-            (eval flycheck-stylelint-args)
-            "--syntax" "scss"
-            (option-flag "--quiet" flycheck-stylelint-quiet)
-            (config-file "--config" flycheck-stylelintrc))
+  :command '("stylelint"
+             (eval flycheck-stylelint-args)
+             "--syntax" "scss"
+             (option-flag "--quiet" flycheck-stylelint-quiet)
+             (config-file "--config" flycheck-stylelintrc))
   :standard-input t
   :error-parser #'flycheck-parse-stylelint
-  :modes (scss-mode))
+  :modes 'scss-mode)
 
 (flycheck-def-option-var flycheck-scss-compass nil scss
   "Whether to enable the Compass CSS framework.
@@ -9917,31 +9940,31 @@ When non-nil, enable the Compass CSS framework, via `--compass'."
   "A SCSS syntax checker using the SCSS compiler.
 
 See URL `http://sass-lang.com'."
-  :command ("scss"
-            "--cache-location" (eval (flycheck-sass-scss-cache-location))
-            (option-flag "--compass" flycheck-scss-compass)
-            "--check" "--stdin")
+  :command '("scss"
+             "--cache-location" (eval (flycheck-sass-scss-cache-location))
+             (option-flag "--compass" flycheck-scss-compass)
+             "--check" "--stdin")
   :standard-input t
   :error-patterns
-  ((error line-start
-          (or "Syntax error: " "Error: ")
-          (message (one-or-more not-newline)
-                   (zero-or-more "\n"
-                                 (one-or-more " ")
-                                 (one-or-more not-newline)))
-          (optional "\r") "\n" (one-or-more " ") "on line " line
-          " of standard input"
-          line-end)
-   (warning line-start
-            "WARNING: "
-            (message (one-or-more not-newline)
-                     (zero-or-more "\n"
-                                   (one-or-more " ")
-                                   (one-or-more not-newline)))
-            (optional "\r") "\n" (one-or-more " ") "on line " line
-            " of an unknown file"
-            line-end))
-  :modes scss-mode)
+  '((error line-start
+           (or "Syntax error: " "Error: ")
+           (message (one-or-more not-newline)
+                    (zero-or-more "\n"
+                                  (one-or-more " ")
+                                  (one-or-more not-newline)))
+           (optional "\r") "\n" (one-or-more " ") "on line " line
+           " of standard input"
+           line-end)
+    (warning line-start
+             "WARNING: "
+             (message (one-or-more not-newline)
+                      (zero-or-more "\n"
+                                    (one-or-more " ")
+                                    (one-or-more not-newline)))
+             (optional "\r") "\n" (one-or-more " ") "on line " line
+             " of an unknown file"
+             line-end))
+  :modes 'scss-mode)
 
 (flycheck-def-args-var flycheck-sh-bash-args (sh-bash)
   :package-version '(flycheck . "32"))
@@ -9950,62 +9973,62 @@ See URL `http://sass-lang.com'."
   "A Bash syntax checker using the Bash shell.
 
 See URL `http://www.gnu.org/software/bash/'."
-  :command ("bash" "--norc" "-n"
-            (eval flycheck-sh-bash-args)
-            "--")
+  :command '("bash" "--norc" "-n"
+             (eval flycheck-sh-bash-args)
+             "--")
   :standard-input t
   :error-patterns
-  ((error line-start
-          ;; The name/path of the bash executable
-          (one-or-more (not (any ":"))) ":"
-          ;; A label "line", possibly localized
-          (one-or-more (not (any digit)))
-          line (zero-or-more " ") ":" (zero-or-more " ")
-          (message) line-end))
-  :modes sh-mode
+  '((error line-start
+           ;; The name/path of the bash executable
+           (one-or-more (not (any ":"))) ":"
+           ;; A label "line", possibly localized
+           (one-or-more (not (any digit)))
+           line (zero-or-more " ") ":" (zero-or-more " ")
+           (message) line-end))
+  :modes 'sh-mode
   :predicate (lambda () (eq sh-shell 'bash))
-  :next-checkers ((warning . sh-shellcheck)))
+  :next-checkers '((warning . sh-shellcheck)))
 
 (flycheck-define-checker sh-posix-dash
   "A POSIX Shell syntax checker using the Dash shell.
 
 See URL `http://gondor.apana.org.au/~herbert/dash/'."
-  :command ("dash" "-n")
+  :command '("dash" "-n")
   :standard-input t
   :error-patterns
-  ((error line-start (one-or-more (not (any ":"))) ": " line ": " (message)))
-  :modes sh-mode
+  '((error line-start (one-or-more (not (any ":"))) ": " line ": " (message)))
+  :modes 'sh-mode
   :predicate (lambda () (eq sh-shell 'sh))
-  :next-checkers ((warning . sh-shellcheck)))
+  :next-checkers '((warning . sh-shellcheck)))
 
 (flycheck-define-checker sh-posix-bash
   "A POSIX Shell syntax checker using the Bash shell.
 
 See URL `http://www.gnu.org/software/bash/'."
-  :command ("bash" "--posix" "--norc" "-n" "--")
+  :command '("bash" "--posix" "--norc" "-n" "--")
   :standard-input t
   :error-patterns
-  ((error line-start
-          ;; The name/path of the bash executable
-          (one-or-more (not (any ":"))) ":"
-          ;; A label "line", possibly localized
-          (one-or-more (not (any digit)))
-          line (zero-or-more " ") ":" (zero-or-more " ")
-          (message) line-end))
-  :modes sh-mode
+  '((error line-start
+           ;; The name/path of the bash executable
+           (one-or-more (not (any ":"))) ":"
+           ;; A label "line", possibly localized
+           (one-or-more (not (any digit)))
+           line (zero-or-more " ") ":" (zero-or-more " ")
+           (message) line-end))
+  :modes 'sh-mode
   :predicate (lambda () (eq sh-shell 'sh))
-  :next-checkers ((warning . sh-shellcheck)))
+  :next-checkers '((warning . sh-shellcheck)))
 
 (flycheck-define-checker sh-zsh
   "A Zsh syntax checker using the Zsh shell.
 
 See URL `http://www.zsh.org/'."
-  :command ("zsh" "--no-exec" "--no-globalrcs" "--no-rcs" source)
+  :command '("zsh" "--no-exec" "--no-globalrcs" "--no-rcs" source)
   :error-patterns
-  ((error line-start (file-name) ":" line ": " (message) line-end))
-  :modes sh-mode
+  '((error line-start (file-name) ":" line ": " (message) line-end))
+  :modes 'sh-mode
   :predicate (lambda () (eq sh-shell 'zsh))
-  :next-checkers ((warning . sh-shellcheck)))
+  :next-checkers '((warning . sh-shellcheck)))
 
 (defconst flycheck-shellcheck-supported-shells '(bash ksh88 sh)
   "Shells supported by ShellCheck.")
@@ -10038,20 +10061,20 @@ or added as a shellcheck directive before the source command:
   "A shell script syntax and style checker using Shellcheck.
 
 See URL `https://github.com/koalaman/shellcheck/'."
-  :command ("shellcheck"
-            "--format" "checkstyle"
-            "--shell" (eval (symbol-name sh-shell))
-            (option-flag "--external-sources" flycheck-shellcheck-follow-sources)
-            (option "--exclude" flycheck-shellcheck-excluded-warnings list
-                    flycheck-option-comma-separated-list)
-            "-")
+  :command '("shellcheck"
+             "--format" "checkstyle"
+             "--shell" (eval (symbol-name sh-shell))
+             (option-flag "--external-sources" flycheck-shellcheck-follow-sources)
+             (option "--exclude" flycheck-shellcheck-excluded-warnings list
+                     flycheck-option-comma-separated-list)
+             "-")
   :standard-input t
   :error-parser #'flycheck-parse-checkstyle
   :error-filter
   (lambda (errors)
     (flycheck-remove-error-file-names
      "-" (flycheck-dequalify-error-ids errors)))
-  :modes sh-mode
+  :modes 'sh-mode
   :predicate (lambda () (memq sh-shell flycheck-shellcheck-supported-shells))
   :verify (lambda (_)
             (let ((supports-shell (memq sh-shell
@@ -10066,53 +10089,53 @@ See URL `https://github.com/koalaman/shellcheck/'."
   "A Slim syntax checker using the Slim compiler.
 
 See URL `http://slim-lang.com'."
-  :command ("slimrb" "--compile")
+  :command '("slimrb" "--compile")
   :standard-input t
   :error-patterns
-  ((error line-start
-          "Slim::Parser::SyntaxError:" (message) (optional "\r") "\n  "
-          "STDIN, Line " line (optional ", Column " column)
-          line-end))
-  :modes slim-mode
-  :next-checkers ((warning . slim-lint)))
+  '((error line-start
+           "Slim::Parser::SyntaxError:" (message) (optional "\r") "\n  "
+           "STDIN, Line " line (optional ", Column " column)
+           line-end))
+  :modes 'slim-mode
+  :next-checkers '((warning . slim-lint)))
 
 (flycheck-define-checker slim-lint
   "A Slim linter.
 
 See URL `https://github.com/sds/slim-lint'."
-  :command ("slim-lint" "--reporter=checkstyle" source)
+  :command '("slim-lint" "--reporter=checkstyle" source)
   :error-parser #'flycheck-parse-checkstyle
-  :modes slim-mode)
+  :modes 'slim-mode)
 
 (flycheck-define-checker sql-sqlint
   "A SQL syntax checker using the sqlint tool.
 
 See URL `https://github.com/purcell/sqlint'."
-  :command ("sqlint")
+  :command '("sqlint")
   :standard-input t
   :error-patterns
-  ((warning line-start "stdin:" line ":" column ":WARNING "
-            (message (one-or-more not-newline)
-                     (zero-or-more "\n"
-                                   (one-or-more "  ")
-                                   (one-or-more not-newline)))
-            line-end)
-   (error line-start "stdin:" line ":" column ":ERROR "
-          (message (one-or-more not-newline)
-                   (zero-or-more "\n"
-                                 (one-or-more "  ")
-                                 (one-or-more not-newline)))
-          line-end))
-  :modes (sql-mode))
+  '((warning line-start "stdin:" line ":" column ":WARNING "
+             (message (one-or-more not-newline)
+                      (zero-or-more "\n"
+                                    (one-or-more "  ")
+                                    (one-or-more not-newline)))
+             line-end)
+    (error line-start "stdin:" line ":" column ":ERROR "
+           (message (one-or-more not-newline)
+                    (zero-or-more "\n"
+                                  (one-or-more "  ")
+                                  (one-or-more not-newline)))
+           line-end))
+  :modes 'sql-mode)
 
 (flycheck-define-checker systemd-analyze
   "A systemd unit checker using systemd-analyze(1).
 
 See URL `https://www.freedesktop.org/software/systemd/man/systemd-analyze.html'."
-  :command ("systemd-analyze" "verify" source)
+  :command '("systemd-analyze" "verify" source)
   :error-patterns
-  ((error line-start "[" (file-name) ":" line "] " (message) line-end))
-  :modes (systemd-mode))
+  '((error line-start "[" (file-name) ":" line "] " (message) line-end))
+  :modes 'systemd-mode)
 
 (flycheck-def-config-file-var flycheck-chktexrc tex-chktex ".chktexrc"
   :safe #'stringp)
@@ -10121,58 +10144,58 @@ See URL `https://www.freedesktop.org/software/systemd/man/systemd-analyze.html'.
   "An extensible tcl syntax checker
 
 See URL `http://nagelfar.sourceforge.net/'."
-  :command ("nagelfar" "-H" source)
+  :command '("nagelfar" "-H" source)
   :error-patterns
   ;; foo.tcl: 29: E Wrong number of arguments (4) to "set"
   ;; foo.tcl: 29: W Expr without braces
-  ((info    line-start (file-name) ": " line ": N " (message) line-end)
-   (warning line-start (file-name) ": " line ": W " (message) line-end)
-   (error   line-start (file-name) ": " line ": E " (message) line-end))
-  :modes tcl-mode)
+  '((info    line-start (file-name) ": " line ": N " (message) line-end)
+    (warning line-start (file-name) ": " line ": W " (message) line-end)
+    (error   line-start (file-name) ": " line ": E " (message) line-end))
+  :modes 'tcl-mode)
 
 (flycheck-define-checker tex-chktex
   "A TeX and LaTeX syntax and style checker using chktex.
 
 See URL `http://www.nongnu.org/chktex/'."
-  :command ("chktex"
-            (config-file "--localrc" flycheck-chktexrc)
-            ;; Compact error messages, and no version information, and execute
-            ;; \input statements
-            "--verbosity=0" "--quiet" "--inputfiles")
+  :command '("chktex"
+             (config-file "--localrc" flycheck-chktexrc)
+             ;; Compact error messages, and no version information, and execute
+             ;; \input statements
+             "--verbosity=0" "--quiet" "--inputfiles")
   :standard-input t
   :error-patterns
-  ((warning line-start "stdin:" line ":" column ":"
-            (id (one-or-more digit)) ":" (message) line-end))
+  '((warning line-start "stdin:" line ":" column ":"
+             (id (one-or-more digit)) ":" (message) line-end))
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
-  :modes (latex-mode plain-tex-mode))
+  :modes '(latex-mode plain-tex-mode))
 
 (flycheck-define-checker tex-lacheck
   "A LaTeX syntax and style checker using lacheck.
 
 See URL `http://www.ctan.org/pkg/lacheck'."
-  :command ("lacheck" source-inplace)
+  :command '("lacheck" source-inplace)
   :error-patterns
-  ((warning line-start
-            "\"" (file-name) "\", line " line ": " (message)
-            line-end))
-  :modes latex-mode)
+  '((warning line-start
+             "\"" (file-name) "\", line " line ": " (message)
+             line-end))
+  :modes 'latex-mode)
 
 (flycheck-define-checker texinfo
   "A Texinfo syntax checker using makeinfo.
 
 See URL `http://www.gnu.org/software/texinfo/'."
-  :command ("makeinfo" "-o" null-device "-")
+  :command '("makeinfo" "-o" null-device "-")
   :standard-input t
   :error-patterns
-  ((warning line-start
-            "-:" line (optional ":" column) ": " "warning: " (message)
-            line-end)
-   (error line-start
-          "-:" line (optional ":" column) ": " (message)
-          line-end))
-  :modes texinfo-mode)
+  '((warning line-start
+             "-:" line (optional ":" column) ": " "warning: " (message)
+             line-end)
+    (error line-start
+           "-:" line (optional ":" column) ": " (message)
+           line-end))
+  :modes 'texinfo-mode)
 
 (flycheck-def-config-file-var flycheck-typescript-tslint-config
     typescript-tslint "tslint.json"
@@ -10206,13 +10229,13 @@ Note that this syntax checker is not used if
 non-existing file.
 
 See URL `https://github.com/palantir/tslint'."
-  :command ("tslint" "--format" "json"
-            (config-file "--config" flycheck-typescript-tslint-config)
-            (option "--rules-dir" flycheck-typescript-tslint-rulesdir)
-            (eval flycheck-tslint-args)
-            source-inplace)
+  :command '("tslint" "--format" "json"
+             (config-file "--config" flycheck-typescript-tslint-config)
+             (option "--rules-dir" flycheck-typescript-tslint-rulesdir)
+             (eval flycheck-tslint-args)
+             source-inplace)
   :error-parser #'flycheck-parse-tslint
-  :modes (typescript-mode))
+  :modes 'typescript-mode)
 
 (flycheck-def-option-var flycheck-verilator-include-path nil verilog-verilator
   "A list of include directories for Verilator.
@@ -10228,15 +10251,15 @@ Relative paths are relative to the file being checked."
   "A Verilog syntax checker using the Verilator Verilog HDL simulator.
 
 See URL `https://www.veripool.org/wiki/verilator'."
-  :command ("verilator" "--lint-only" "-Wall"
-            (option-list "-I" flycheck-verilator-include-path concat)
-            source)
+  :command '("verilator" "--lint-only" "-Wall"
+             (option-list "-I" flycheck-verilator-include-path concat)
+             source)
   :error-patterns
-  ((warning line-start "%Warning-" (zero-or-more not-newline) ": "
-            (file-name) ":" line ": " (message) line-end)
-   (error line-start "%Error: " (file-name) ":"
-          line ": " (message) line-end))
-  :modes verilog-mode)
+  '((warning line-start "%Warning-" (zero-or-more not-newline) ": "
+             (file-name) ":" line ": " (message) line-end)
+    (error line-start "%Error: " (file-name) ":"
+           line ": " (message) line-end))
+  :modes 'verilog-mode)
 
 (flycheck-def-option-var flycheck-ghdl-language-standard nil vhdl-ghdl
   "The language standard to use in GHDL.
@@ -10266,14 +10289,14 @@ When non-nil, pass the directory via the `--workdir' option."
   "A VHDL syntax checker using GHDL.
 
 See URL `http://ghdl.free.fr/'."
-  :command ("ghdl"
-            "-s" ; only do the syntax checking
-            (option "--std=" flycheck-ghdl-language-standard concat)
-            (option "--workdir=" flycheck-ghdl-workdir concat)
-            source)
+  :command '("ghdl"
+             "-s" ; only do the syntax checking
+             (option "--std=" flycheck-ghdl-language-standard concat)
+             (option "--workdir=" flycheck-ghdl-workdir concat)
+             source)
   :error-patterns
-  ((error line-start (file-name) ":" line ":" column ": " (message) line-end))
-  :modes vhdl-mode)
+  '((error line-start (file-name) ":" line ":" column ": " (message) line-end))
+  :modes 'vhdl-mode)
 
 (flycheck-def-option-var flycheck-xml-xmlstarlet-xsd-path nil xml-xmlstarlet
   "An XSD schema to validate against."
@@ -10287,13 +10310,13 @@ See URL `http://ghdl.free.fr/'."
 See URL `http://xmlstar.sourceforge.net/'."
   ;; Validate standard input with verbose error messages, and do not dump
   ;; contents to standard output
-  :command ("xmlstarlet" "val" "--err" "--quiet"
-            (option "--xsd" flycheck-xml-xmlstarlet-xsd-path)
-            "-")
+  :command '("xmlstarlet" "val" "--err" "--quiet"
+             (option "--xsd" flycheck-xml-xmlstarlet-xsd-path)
+             "-")
   :standard-input t
   :error-patterns
-  ((error line-start "-:" line "." column ": " (message) line-end))
-  :modes (xml-mode nxml-mode))
+  '((error line-start "-:" line "." column ": " (message) line-end))
+  :modes '(xml-mode nxml-mode))
 
 (flycheck-def-option-var flycheck-xml-xmllint-xsd-path nil xml-xmllint
   "An XSD schema to validate against."
@@ -10306,27 +10329,27 @@ See URL `http://xmlstar.sourceforge.net/'."
 
 The xmllint is part of libxml2, see URL
 `http://www.xmlsoft.org/'."
-  :command ("xmllint" "--noout"
-            (option "--schema" flycheck-xml-xmllint-xsd-path)
-            "-")
+  :command '("xmllint" "--noout"
+             (option "--schema" flycheck-xml-xmllint-xsd-path)
+             "-")
   :standard-input t
   :error-patterns
-  ((error line-start "-:" line ": " (message) line-end))
-  :modes (xml-mode nxml-mode))
+  '((error line-start "-:" line ": " (message) line-end))
+  :modes '(xml-mode nxml-mode))
 
 (flycheck-define-checker yaml-jsyaml
   "A YAML syntax checker using JS-YAML.
 
 See URL `https://github.com/nodeca/js-yaml'."
-  :command ("js-yaml")
+  :command '("js-yaml")
   :standard-input t
   :error-patterns
-  ((error line-start
-          (or "JS-YAML" "YAMLException") ": "
-          (message) " at line " line ", column " column ":"
-          line-end))
-  :modes yaml-mode
-  :next-checkers ((warning . cwl)))
+  '((error line-start
+           (or "JS-YAML" "YAMLException") ": "
+           (message) " at line " line ", column " column ":"
+           line-end))
+  :modes 'yaml-mode
+  :next-checkers '((warning . cwl)))
 
 (flycheck-define-checker yaml-ruby
   "A YAML syntax checker using Ruby's YAML parser.
@@ -10335,27 +10358,17 @@ This syntax checker uses the YAML parser from Ruby's standard
 library.
 
 See URL `http://www.ruby-doc.org/stdlib-2.0.0/libdoc/yaml/rdoc/YAML.html'."
-  :command ("ruby" "-ryaml" "-e" "begin;
+  :command '("ruby" "-ryaml" "-e" "begin;
    YAML.load(STDIN); \
  rescue Exception => e; \
    STDERR.puts \"stdin:#{e}\"; \
  end")
   :standard-input t
   :error-patterns
-  ((error line-start "stdin:" (zero-or-more not-newline) ":" (message)
-          "at line " line " column " column line-end))
-  :modes yaml-mode
-  :next-checkers ((warning . cwl)))
-
-(flycheck-define-checker jsonnet
-  "A Jsonnet syntax checker using the jsonnet binary.
-
-See URL `https://jsonnet.org'."
-  :command ("jsonnet" source-inplace)
-  :error-patterns
-  ((error line-start "STATIC ERROR: " (file-name) ":" line ":" column (zero-or-one (group "-" (one-or-more digit))) ": " (message) line-end)
-   (error line-start "RUNTIME ERROR: " (message) "\n" (one-or-more space) (file-name) ":" (zero-or-one "(") line ":" column (zero-or-more not-newline) line-end))
-  :modes jsonnet-mode)
+  '((error line-start "stdin:" (zero-or-more not-newline) ":" (message)
+           "at line " line " column " column line-end))
+  :modes 'yaml-mode
+  :next-checkers '((warning . cwl)))
 
 (provide 'flycheck)
 
