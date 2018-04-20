@@ -7916,7 +7916,9 @@ contains a cabal file."
          "stack.*\\.yaml\\'"))
       (-when-let* ((stack (funcall flycheck-executable-find "stack"))
                    (output (ignore-errors
-                             (process-lines stack "path" "--project-root")))
+                             (process-lines stack
+                                            "--no-install-ghc"
+                                            "path" "--project-root")))
                    (stack-dir (car output)))
         (and (file-directory-p stack-dir) stack-dir))))
     (_
@@ -7930,6 +7932,7 @@ contains a cabal file."
 
 See URL `https://github.com/commercialhaskell/stack'."
   :command ("stack"
+            "--no-install-ghc"
             (option "--stack-yaml" flycheck-ghc-stack-project-file)
             (option-flag "--nix" flycheck-ghc-stack-use-nix)
             "ghc" "--" "-Wall" "-no-link"
