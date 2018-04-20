@@ -50,6 +50,8 @@
   - ``rust-cargo`` now uses ``cargo check`` and ``cargo test`` [GH-1289]
   - ``python-pylint`` and ``python-flake8`` are now invoked with ``python -c``,
     to make it easier to change between Python 2 and Python 3 [GH-1113]
+  - ``haskell-stack-ghc`` will not try to install GHC thereby freezing Emacs
+    [GH-1443]
 
 31 (Oct 07, 2017)
 =================
