@@ -8907,7 +8907,8 @@ See URL `https://www.pylint.org/'."
             (id (one-or-more (not (any ":")))) ":"
             (message) line-end)
    (info line-start (file-name) ":" line ":" column ":"
-         "C:" (id (one-or-more (not (any ":")))) ":"
+         (or "C" "I") ":"
+         (id (one-or-more (not (any ":")))) ":"
          (message) line-end))
   :enabled (lambda ()
              (or (not (flycheck-python-needs-module-p 'python-pylint))
