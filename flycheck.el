@@ -284,7 +284,7 @@ Syntax checkers in this list must be defined with
   :type '(repeat (symbol :tag "Checker"))
   :risky t)
 
-(defcustom flycheck-disabled-checkers nil
+(defcustom flycheck-disabled-checkers '(html-tidy)
   "Syntax checkers excluded from automatic selection.
 
 A list of Flycheck syntax checkers to exclude from automatic
@@ -6799,7 +6799,10 @@ See URL `https://github.com/CSSLint/csslint'."
   :command ("csslint" "--format=checkstyle-xml" source)
   :error-parser flycheck-parse-checkstyle
   :error-filter flycheck-dequalify-error-ids
-  :modes css-mode)
+  :enabled
+  (lambda () (and (eq major-mode 'web-mode)
+                  (string= "css" (file-name-extension (buffer-file-name)))))
+  :modes (css-mode web-mode))
 
 (defconst flycheck-stylelint-args '("--formatter" "json")
   "Common arguments to stylelint invocations.")
@@ -6916,7 +6919,10 @@ See URL `http://stylelint.io/'."
             (config-file "--config" flycheck-stylelintrc))
   :standard-input t
   :error-parser flycheck-parse-stylelint
-  :modes (css-mode))
+  :enabled
+  (lambda () (and (eq major-mode 'web-mode)
+                  (string= "css" (file-name-extension (buffer-file-name)))))
+  :modes (css-mode web-mode))
 
 (flycheck-def-option-var flycheck-cwl-schema-path nil cwl
   "A path for the schema file for Common Workflow Language.
@@ -7404,7 +7410,15 @@ See URL `http://www.kuwata-lab.com/erubis/'."
   :command ("erubis" "-z" source)
   :error-patterns
   ((error line-start (file-name) ":" line ": " (message) line-end))
-  :modes (html-erb-mode rhtml-mode))
+  :predicate
+  (lambda ()
+    (if (eq major-mode 'web-mode)
+        (let* ((regexp-alist (bound-and-true-p web-mode-engine-file-regexps))
+               (pattern (cdr (assoc "erb" regexp-alist))))
+          (and pattern (buffer-file-name)
+               (string-match-p pattern (buffer-file-name))))
+      t))
+  :modes (html-erb-mode rhtml-mode web-mode))
 
 (flycheck-def-args-var flycheck-gfortran-args fortran-gfortran
   :package-version '(flycheck . "0.22"))
@@ -8113,7 +8127,7 @@ See URL `https://github.com/htacg/tidy-html5'."
             "line " line
             " column " column
             " - Warning: " (message) line-end))
-  :modes (html-mode nxhtml-mode))
+  :modes (html-mode nxhtml-mode web-mode))
 
 (flycheck-def-config-file-var flycheck-jshintrc javascript-jshint ".jshintrc"
   :safe #'stringp)
@@ -8321,7 +8335,7 @@ See URL `http://stylelint.io/'."
             (config-file "--config" flycheck-stylelintrc))
   :standard-input t
   :error-parser flycheck-parse-stylelint
-  :modes (less-css-mode))
+  :modes less-css-mode)
 
 (flycheck-define-checker llvm-llc
   "Flycheck LLVM IR checker using llc.
@@ -9700,7 +9714,10 @@ See URL `https://github.com/sasstools/sass-lint'."
             (config-file "--config" flycheck-sass-lintrc)
             source)
   :error-parser flycheck-parse-checkstyle
-  :modes (sass-mode scss-mode))
+  :enabled
+  (lambda () (and (eq major-mode 'web-mode)
+                  (string-match "s[ac]ss" (file-name-extension (buffer-file-name)))))
+  :modes (sass-mode scss-mode web-mode))
 
 (flycheck-define-checker scala
   "A Scala syntax checker using the Scala compiler.
@@ -9852,7 +9869,10 @@ See URL `https://github.com/brigade/scss-lint'."
   ;; check whether the addon is missing and turn that into a special kind of
   ;; Flycheck error.
   :error-parser flycheck-parse-scss-lint
-  :modes scss-mode
+  :modes (scss-mode web-mode)
+  :enabled
+  (lambda () (and (eq major-mode 'web-mode)
+                  (string="scss" (file-name-extension (buffer-file-name)))))
   :verify (lambda (checker)
             (let* ((executable (flycheck-find-checker-executable checker))
                    (reporter-missing
@@ -9886,7 +9906,10 @@ See URL `http://stylelint.io/'."
             (config-file "--config" flycheck-stylelintrc))
   :standard-input t
   :error-parser flycheck-parse-stylelint
-  :modes (scss-mode))
+  :enabled
+  (lambda () (and (eq major-mode 'web-mode)
+                  (string= "scss" (file-name-extension (buffer-file-name)))))
+  :modes (scss-mode web-mode))
 
 (flycheck-def-option-var flycheck-scss-compass nil scss
   "Whether to enable the Compass CSS framework.
@@ -9924,7 +9947,10 @@ See URL `http://sass-lang.com'."
             (optional "\r") "\n" (one-or-more " ") "on line " line
             " of an unknown file"
             line-end))
-  :modes scss-mode)
+  :enabled
+  (lambda () (and (eq major-mode 'web-mode)
+                  (string= "scss" (file-name-extension (buffer-file-name)))))
+  :modes (scss-mode web-mode))
 
 (flycheck-def-args-var flycheck-sh-bash-args (sh-bash)
   :package-version '(flycheck . "32"))

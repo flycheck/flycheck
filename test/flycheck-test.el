@@ -98,14 +98,16 @@
       (should (memq checker flycheck-checkers))
       (should (flycheck-registered-checker-p checker)))))
 
-(ert-deftest flycheck-checkers/no-registered-checker-is-disabled ()
+(ert-deftest flycheck-checkers/no-registered-checker-other-than-html-tidy-is-disabled ()
   :tags '(customization)
   (dolist (checker flycheck-checkers)
-    (should-not (flycheck-disabled-checker-p checker))))
+    (unless (memq checker (default-value 'flycheck-disabled-checkers))
+      (should-not (flycheck-disabled-checker-p checker)))))
 
-(ert-deftest flycheck-disabled-checkers/is-empty ()
+(ert-deftest flycheck-disabled-checkers/has-html-tidy ()
   :tags '(customization)
-  (should-not (default-value 'flycheck-disabled-checkers)))
+  (should (equal (default-value 'flycheck-disabled-checkers)
+                 '(html-tidy))))
 
 (ert-deftest flycheck-locate-config-file-functions/default ()
   :tags '(customization)
@@ -1088,12 +1090,12 @@
     (flycheck-mode)
     (with-no-warnings
       (flycheck-disable-checker 'emacs-lisp))
-    (should (equal '(emacs-lisp) flycheck-disabled-checkers))
-    (should-not (default-value 'flycheck-disabled-checkers))
+    (should (memq 'emacs-lisp flycheck-disabled-checkers))
+    (should-not (equal flycheck-disabled-checkers (default-value 'flycheck-disabled-checkers)))
     ;; Disabling a disabled checker should be a no-op
     (with-no-warnings
       (flycheck-disable-checker 'emacs-lisp))
-    (should (equal '(emacs-lisp) flycheck-disabled-checkers))))
+    (should (memq 'emacs-lisp flycheck-disabled-checkers))))
 
 (ert-deftest flycheck-disable-checker/enables-checker ()
   :tags '(selection)
