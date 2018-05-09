@@ -8113,7 +8113,7 @@ See URL `https://github.com/htacg/tidy-html5'."
             "line " line
             " column " column
             " - Warning: " (message) line-end))
-  :modes (html-mode nxhtml-mode))
+  :modes (html-mode mhtml-mode nxhtml-mode))
 
 (flycheck-def-config-file-var flycheck-jshintrc javascript-jshint ".jshintrc"
   :safe #'stringp)
