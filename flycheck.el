@@ -8295,6 +8295,20 @@ See URL `https://docs.python.org/3.5/library/json.html#command-line-interface'."
   ;; The JSON parser chokes if the buffer is empty and has no JSON inside
   :predicate (lambda () (not (flycheck-buffer-empty-p))))
 
+(flycheck-define-checker jsonnet
+  "A Jsonnet syntax checker using the jsonnet binary.
+
+See URL `https://jsonnet.org'."
+  :command ("jsonnet" source-inplace)
+  :error-patterns
+  ((error line-start "STATIC ERROR: " (file-name) ":" line ":" column
+          (zero-or-one (group "-" (one-or-more digit))) ": "
+          (message) line-end)
+   (error line-start "RUNTIME ERROR: " (message) "\n"
+          (one-or-more space) (file-name) ":" (zero-or-one "(")
+          line ":" column (zero-or-more not-newline) line-end))
+  :modes jsonnet-mode)
+
 (flycheck-define-checker less
   "A LESS syntax checker using lessc.
 
@@ -10340,16 +10354,6 @@ See URL `http://www.ruby-doc.org/stdlib-2.0.0/libdoc/yaml/rdoc/YAML.html'."
           "at line " line " column " column line-end))
   :modes yaml-mode
   :next-checkers ((warning . cwl)))
-
-(flycheck-define-checker jsonnet
-  "A Jsonnet syntax checker using the jsonnet binary.
-
-See URL `https://jsonnet.org'."
-  :command ("jsonnet" source-inplace)
-  :error-patterns
-  ((error line-start "STATIC ERROR: " (file-name) ":" line ":" column (zero-or-one (group "-" (one-or-more digit))) ": " (message) line-end)
-   (error line-start "RUNTIME ERROR: " (message) "\n" (one-or-more space) (file-name) ":" (zero-or-one "(") line ":" column (zero-or-more not-newline) line-end))
-  :modes jsonnet-mode)
 
 (provide 'flycheck)
 
