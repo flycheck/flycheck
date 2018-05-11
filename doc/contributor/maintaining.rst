@@ -130,8 +130,9 @@ still have to check a few things before merging:
   to make sure that the commits were properly squashed and have good commit
   messages.  If needed, ask the contributor to improve the commit messages and
   squash the commits first, by requesting changes with a pull request review.
-* Does the PR pass the integration tests?  We don't run integration tests
-  automatically, so contributors should make sure to run them on their side.
+* Does the PR pass the integration tests?  Not all checkers have integration
+  tests, and not all tests are run on CI, so contributors should make sure to
+  run them on their side.
 * Should the PR warrant a line in the changelog?  User-facing changes should be
   documented in ``CHANGES.rst``.
 
