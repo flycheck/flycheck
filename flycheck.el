@@ -10259,7 +10259,7 @@ When non-nil, pass the directory via the `--workdir' option."
 (flycheck-define-checker vhdl-ghdl
   "A VHDL syntax checker using GHDL.
 
-See URL `http://ghdl.free.fr/'."
+See URL `https://github.com/ghdl/ghdl'."
   :command ("ghdl"
             "-s" ; only do the syntax checking
             (option "--std=" flycheck-ghdl-language-standard concat)

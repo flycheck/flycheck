@@ -1339,7 +1339,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: vhdl-ghdl
 
-      Check syntax with `GHDL <http://ghdl.free.fr/>`_.
+      Check syntax with `GHDL <https://github.com/ghdl/ghdl>`_.
 
       .. defcustom:: flycheck-ghdl-language-standard
 
