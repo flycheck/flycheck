@@ -4205,7 +4205,8 @@ ALL-FRAMES specifies the frames to consider, as in
   (dolist (window (flycheck-get-error-list-window-list t))
     (with-selected-window window
       (goto-char pos)
-      (recenter))))
+      (let ((recenter-redisplay nil))
+        (recenter)))))
 
 (defun flycheck-error-list-refresh ()
   "Refresh the current error list.
