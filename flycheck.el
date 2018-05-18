@@ -3984,8 +3984,7 @@ MESSAGE and CHECKER are displayed in a single column to allow the
 message to stretch arbitrarily far."
   (let ((checker-name (propertize (symbol-name checker)
                                   'face 'flycheck-error-list-checker-name)))
-    (format (propertize "%s (%s)" 'face 'default)
-            message checker-name)))
+    (format "%s (%s)" message checker-name)))
 
 (defconst flycheck-error-list-format
   `[("File" 6)
@@ -4061,7 +4060,8 @@ message to stretch arbitrarily far."
 
 (define-button-type 'flycheck-error-list
   'action #'flycheck-error-list-button-goto-error
-  'help-echo "mouse-2, RET: goto error")
+  'help-echo "mouse-2, RET: goto error"
+  'face nil)
 
 (defun flycheck-error-list-button-goto-error (button)
   "Go to the error at BUTTON."
