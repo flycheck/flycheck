@@ -212,7 +212,7 @@ EOF
 
     echo "Installing hadolint..."
     if [ ! -d hadolint ]; then
-      git clone --depth=1 https://github.com/lukasmartinelli/hadolint
+      git clone --depth=1 https://github.com/hadolint/hadolint
     else
       pushd hadolint
       git pull
