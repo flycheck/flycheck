@@ -51,7 +51,12 @@
 (require 'flycheck)
 (require 'flycheck-ert)
 
-;; Make a best effort to make Coq Mode available
+;; Make a best effort to make Coq Mode available.
+;; If we run Emacs with the `-Q` flag (which we do in the CI), this prevents
+;; site-lisp directories to be added to `load-path'.  In addition, in the Docker
+;; images we use in the CI Emacs is installed under /opt/emacs and cannot pick
+;; up site-lisp directories under /usr/share/emacs.  This is why we add the
+;; site-lisp directories manually for coq.
 (mapc (lambda (dir)
         (add-to-list 'load-path (expand-file-name "coq/" dir)))
       '("/usr/share/emacs/site-lisp/"
