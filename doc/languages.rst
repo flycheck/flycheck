@@ -295,7 +295,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax and code style with hadolint_
 
-      .. _hadolint: http://hadolint.lukasmartinelli.ch/
+      .. _hadolint: https://github.com/hadolint/hadolint
 
 .. supported-language:: Emacs Lisp
 

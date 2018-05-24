@@ -7000,7 +7000,7 @@ Requires DMD 2.066 or newer.  See URL `http://dlang.org/'."
 (flycheck-define-checker dockerfile-hadolint
   "A Dockerfile syntax checker using the hadolint.
 
-See URL `http://hadolint.lukasmartinelli.ch/'."
+See URL `http://github.com/hadolint/hadolint/'."
   :command ("hadolint" "-")
   :standard-input t
   :error-patterns
