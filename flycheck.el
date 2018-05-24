@@ -8880,18 +8880,17 @@ which should be used and reported to the user."
 This syntax checker requires Pylint 1.0 or newer.
 
 See URL `https://www.pylint.org/'."
-  ;; -r n disables the scoring report
+  ;; --reports=n disables the scoring report.
   ;; Not calling pylint directly makes it easier to switch between different
   ;; Python versions; see https://github.com/flycheck/flycheck/issues/1055.
   :command ("python"
             (eval (flycheck-python-module-args 'python-pylint "pylint"))
-            "-r" "n"
-            "--output-format" "text"
-            "--msg-template"
+            "--reports=n"
+            "--output-format=text"
             (eval (if flycheck-pylint-use-symbolic-id
-                      "{path}:{line}:{column}:{C}:{symbol}:{msg}"
-                    "{path}:{line}:{column}:{C}:{msg_id}:{msg}"))
-            (config-file "--rcfile" flycheck-pylintrc)
+                      "--msg-template={path}:{line}:{column}:{C}:{symbol}:{msg}"
+                    "--msg-template={path}:{line}:{column}:{C}:{msg_id}:{msg}"))
+            (config-file "--rcfile=" flycheck-pylintrc concat)
             ;; Need `source-inplace' for relative imports (e.g. `from .foo
             ;; import bar'), see https://github.com/flycheck/flycheck/issues/280
             source-inplace)
