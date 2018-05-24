@@ -131,10 +131,13 @@ OCaml
 Python
 ------
 
-* :gh:`Wilfred/flycheck-pyflakes` adds a Python syntax checker using Pyflakes.
-* :gh:`msherry/flycheck-pycheckers` adds a checker for Python that can run multiple syntax checkers simultaneously (Pyflakes, PEP8, mypy2/3, etc.).
+* :gh:`Wilfred/flycheck-pyflakes` adds a Python syntax checker using Pyflakes_.
+* :gh:`msherry/flycheck-pycheckers` adds a checker for Python that can run multiple syntax checkers simultaneously (Pyflakes_, PEP8, Mypy_ 2/3, etc.).
+* :gh:`chocoelho/flycheck-prospector` adds Prospector_ checker for Python syntax.
 
 .. _Pyflakes: https://github.com/PyCQA/pyflakes
+.. _Prospector: https://github.com/PyCQA/prospector
+.. _Mypy: http://mypy-lang.org/
 
 Rust
 ----
