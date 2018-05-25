@@ -208,6 +208,9 @@ attention to case differences."
     llvm-llc
     lua-luacheck
     lua
+    markdown-markdownlint-cli
+    markdown-mdl
+    nix
     perl
     perl-perlcritic
     php
@@ -225,9 +228,6 @@ attention to case differences."
     r-lintr
     racket
     rpm-rpmlint
-    markdown-markdownlint-cli
-    markdown-mdl
-    nix
     rst-sphinx
     rst
     ruby-rubocop
@@ -6719,7 +6719,8 @@ See URL `http://www.foodcritic.io'."
             (option-list "--tags" flycheck-foodcritic-tags)
             source-inplace)
   :error-patterns
-  ((error line-start (message) ": " (file-name) ":" line line-end))
+  ((error line-start (id (one-or-more alnum)) ": "
+          (message) ": " (file-name) ":" line line-end))
   :modes (enh-ruby-mode ruby-mode)
   :predicate
   (lambda ()
@@ -7959,7 +7960,7 @@ See URL `https://github.com/commercialhaskell/stack'."
              (one-or-more " ") (one-or-more not-newline)
              (zero-or-more "\n"
                            (one-or-more " ")
-                           (one-or-more not-newline)))
+                           (one-or-more (not (any ?\n ?|)))))
             line-end)
    (error line-start (file-name) ":" line ":" column ":" (optional " error:")
           (or (message (one-or-more not-newline))
@@ -7968,7 +7969,7 @@ See URL `https://github.com/commercialhaskell/stack'."
                     (one-or-more " ") (one-or-more not-newline)
                     (zero-or-more "\n"
                                   (one-or-more " ")
-                                  (one-or-more not-newline)))))
+                                  (one-or-more (not (any ?\n ?|)))))))
           line-end))
   :error-filter
   (lambda (errors)
@@ -8009,7 +8010,7 @@ See URL `https://www.haskell.org/ghc/'."
              (one-or-more " ") (one-or-more not-newline)
              (zero-or-more "\n"
                            (one-or-more " ")
-                           (one-or-more not-newline)))
+                           (one-or-more (not (any ?\n ?|)))))
             line-end)
    (error line-start (file-name) ":" line ":" column ":" (optional " error:")
           (or (message (one-or-more not-newline))
@@ -8018,7 +8019,7 @@ See URL `https://www.haskell.org/ghc/'."
                     (one-or-more " ") (one-or-more not-newline)
                     (zero-or-more "\n"
                                   (one-or-more " ")
-                                  (one-or-more not-newline)))))
+                                  (one-or-more (not (any ?\n ?|)))))))
           line-end))
   :error-filter
   (lambda (errors)
@@ -8293,6 +8294,20 @@ See URL `https://docs.python.org/3.5/library/json.html#command-line-interface'."
   :modes json-mode
   ;; The JSON parser chokes if the buffer is empty and has no JSON inside
   :predicate (lambda () (not (flycheck-buffer-empty-p))))
+
+(flycheck-define-checker jsonnet
+  "A Jsonnet syntax checker using the jsonnet binary.
+
+See URL `https://jsonnet.org'."
+  :command ("jsonnet" source-inplace)
+  :error-patterns
+  ((error line-start "STATIC ERROR: " (file-name) ":" line ":" column
+          (zero-or-one (group "-" (one-or-more digit))) ": "
+          (message) line-end)
+   (error line-start "RUNTIME ERROR: " (message) "\n"
+          (one-or-more space) (file-name) ":" (zero-or-one "(")
+          line ":" column (zero-or-more not-newline) line-end))
+  :modes jsonnet-mode)
 
 (flycheck-define-checker less
   "A LESS syntax checker using lessc.
@@ -8657,7 +8672,7 @@ See URL `https://puppet.com/'."
    ;; Patterns for Puppet 4
    (error line-start "Error: Could not parse for environment "
           (one-or-more (in "a-z" "0-9" "_")) ":"
-          (message) " at line " line ":" column line-end)
+          (message) "(line: " line ", column: " column ")" line-end)
    ;; Errors from Puppet < 4
    (error line-start "Error: Could not parse for environment "
           (one-or-more (in "a-z" "0-9" "_")) ":"
@@ -9048,9 +9063,17 @@ See URL `https://racket-lang.org/'."
                (t '(bold error)))))))
   :error-filter
   (lambda (errors)
-    (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
+    (flycheck-sanitize-errors
+     (flycheck-increment-error-columns
+      (seq-remove
+       (lambda (err)
+         (string=
+          "/usr/share/racket/pkgs/compiler-lib/compiler/commands/expand.rkt"
+          (flycheck-error-filename err)))
+       errors))))
   :error-patterns
-  ((error line-start (file-name) ":" line ":" column ":" (message) line-end))
+  ((error line-start (zero-or-more space)
+          (file-name) ":" line ":" column ":" (message) line-end))
   :modes (racket-mode scheme-mode))
 
 (flycheck-define-checker rpm-rpmlint
@@ -9363,9 +9386,9 @@ See URL `http://jruby.org/'."
   :command ("jruby" "-w" "-c")
   :standard-input t
   :error-patterns
-  ((error line-start "SyntaxError in -:" line ": " (message) line-end)
-   (warning line-start "-:" line ":" " warning: " (message) line-end)
-   (error line-start  "-:" line ": " (message) line-end))
+  ((error   line-start "SyntaxError in -:" line ": " (message) line-end)
+   (warning line-start "-:" line ": warning: " (message) line-end)
+   (error   line-start "-:" line ": "          (message) line-end))
   :modes (enh-ruby-mode ruby-mode)
   :next-checkers ((warning . ruby-rubylint)))
 
@@ -9474,8 +9497,10 @@ Relative paths are relative to the file being checked."
                   (flycheck-error-filename err))
                  ;; Redundant message giving the number of failed errors
                  (string-match-p
-                  (rx "aborting due to " (optional (one-or-more num) " ")
-                      "previous error")
+                  (rx (or (: "aborting due to " (optional (one-or-more num) " ")
+                             "previous error")
+                          (: "For more information about this error, try `rustc --explain "
+                             (one-or-more alnum) "`.")))
                   (flycheck-error-message err))))
               errors))
 
@@ -10248,7 +10273,7 @@ When non-nil, pass the directory via the `--workdir' option."
 (flycheck-define-checker vhdl-ghdl
   "A VHDL syntax checker using GHDL.
 
-See URL `http://ghdl.free.fr/'."
+See URL `https://github.com/ghdl/ghdl'."
   :command ("ghdl"
             "-s" ; only do the syntax checking
             (option "--std=" flycheck-ghdl-language-standard concat)
@@ -10329,16 +10354,6 @@ See URL `http://www.ruby-doc.org/stdlib-2.0.0/libdoc/yaml/rdoc/YAML.html'."
           "at line " line " column " column line-end))
   :modes yaml-mode
   :next-checkers ((warning . cwl)))
-
-(flycheck-define-checker jsonnet
-  "A Jsonnet syntax checker using the jsonnet binary.
-
-See URL `https://jsonnet.org'."
-  :command ("jsonnet" source-inplace)
-  :error-patterns
-  ((error line-start "STATIC ERROR: " (file-name) ":" line ":" column (zero-or-one (group "-" (one-or-more digit))) ": " (message) line-end)
-   (error line-start "RUNTIME ERROR: " (message) "\n" (one-or-more space) (file-name) ":" (zero-or-one "(") line ":" column (zero-or-more not-newline) line-end))
-  :modes jsonnet-mode)
 
 (provide 'flycheck)
 

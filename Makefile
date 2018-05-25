@@ -59,7 +59,7 @@ export CASK_EMACS
 .DEFAULT_GOAL = help
 
 # File lists
-SRCS = flycheck.el flycheck-buttercup.el flycheck-ert.el
+SRCS = flycheck.el flycheck-ert.el
 OBJS = $(SRCS:.el=.elc)
 IMGS = doc/_static/logo.png
 TEST_SRCS = flycheck.el flycheck-ert.el test/flycheck-test.el

@@ -152,7 +152,7 @@ After BODY, restore the old state of Global Flycheck Mode."
 (defmacro flycheck-ert-with-env (env &rest body)
   "Add ENV to `process-environment' in BODY.
 
-Execute BODY with a `process-environment' with contains all
+Execute BODY with a `process-environment' which contains all
 variables from ENV added.
 
 ENV is an alist, where each cons cell `(VAR . VALUE)' is a
@@ -254,10 +254,7 @@ case, including assertions and setup code."
          (keys (car keys-and-body))
          (default-tags '(syntax-checker external-tool)))
     `(ert-deftest ,full-name ()
-       :expected-result
-       (list 'or
-             '(satisfies flycheck-ert-syntax-check-timed-out-p)
-             ,(or (plist-get keys :expected-result) :passed))
+       :expected-result ,(or (plist-get keys :expected-result) :passed)
        :tags (append ',(append default-tags language-tags checker-tags)
                      ,(plist-get keys :tags))
        ,@(mapcar (lambda (c) `(skip-unless

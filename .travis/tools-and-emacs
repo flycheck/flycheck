@@ -1,0 +1,22 @@
+# Adding this stage is a workaround because `COPY --from` does not support
+# variable substitution.
+# See https://github.com/moby/moby/issues/34482
+ARG EMACS_VERSION=25.3
+FROM flycheck/emacs-cask:${EMACS_VERSION} AS emacs-cask
+
+FROM flycheck/all-tools
+
+# We need gnutls for downloading packages from ELPA
+RUN apt-get -qq update && \
+    apt-get install -qq --no-install-recommends -y \
+            gnutls-bin \
+            make \
+    && rm -rf /var/lib/apt/lists/*
+
+# We need Emacs and Cask
+ENV PATH /opt/emacs/bin:$PATH
+COPY --from=emacs-cask /opt/emacs /opt/emacs
+
+ENV PATH /root/.cask/bin:$PATH
+COPY --from=emacs-cask /root/.cask /root/.cask
+COPY --from=emacs-cask /root/.emacs.d /root/.emacs.d

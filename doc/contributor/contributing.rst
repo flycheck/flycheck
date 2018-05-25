@@ -93,11 +93,11 @@ Run ``make help`` to see a list of all available targets.  Some common ones are:
   favour of Buttercup; no new ERT unit tests will be added and this target will
   eventually be removed.
 - ``make integ`` runs all integration tests for Flycheck syntax checkers.  These
-  tests are very dependent on the checker programs and their versions; expect
-  failures when running this target.  Set :makevar:`SELECTOR` to run only tests
-  matching a specific ERT selector, e.g. ``make SELECTOR='(language haskell)'
-  integ`` to run only integration tests for Haskell.  ``make LANGUAGE=haskell
-  integ`` is a shortcut for this.
+  tests are dependent on the checker programs and their versions; expect
+  failures when running this target with bleeding-edge checkers.  Set
+  :makevar:`SELECTOR` to run only tests matching a specific ERT selector,
+  e.g. ``make SELECTOR='(language haskell)' integ`` to run only integration
+  tests for Haskell.  ``make LANGUAGE=haskell integ`` is a shortcut for this.
 
 .. _Cask: http://cask.readthedocs.io/
 .. _Buttercup: https://github.com/jorgenschaefer/emacs-buttercup
@@ -116,7 +116,8 @@ Use ``make check specs unit`` to test your pull request locally. When making
 changes to syntax checkers of a specific language, it’s also a good idea to run
 :samp:`make LANGUAGE={language} integ` and check whether the tests for the
 particular language still work.  A successful ``make integ`` is by no means
-mandatory for pull requests, though, we will test your changes, too.
+mandatory for pull requests, though, the continuous integration will test your
+changes, too.
 
 .. important::
 
