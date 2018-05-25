@@ -36,6 +36,8 @@ These extensions change Flycheck’s user interface:
 * :gh:`liblit/flycheck-status-emoji` adds cute emoji (e.g. 😱 for errors) to
   Flycheck’s mode line status.
 * :gh:`Wilfred/flycheck-title` shows Flycheck error messages in the frame title.
+* :flyc:`flycheck-inline` shows Flycheck error messages in the buffer, directly
+  below their origin.
 
 Language support
 ================
