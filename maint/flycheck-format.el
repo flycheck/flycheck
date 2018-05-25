@@ -1,6 +1,6 @@
 ;;; flycheck-format.el --- Flycheck: Source code formatter  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2016  Sebastian Wiesner and Flycheck contributors
+;; Copyright (C) 2016, 2018  Sebastian Wiesner and Flycheck contributors
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
 ;; This file is not part of GNU Emacs.
@@ -64,10 +64,45 @@ Switch the buffer to Emacs Lisp mode."
            space-before-tab::space      ; Replace tabs with spaces
            trailing                     ; Remove trailing spaces
            )))
-    (cl-letf (((symbol-function 'message) #'ignore))
+    (let ((inhibit-message t))
       ;; Silence "Indenting region..." progress reporter
       (indent-region (point-min) (point-max)))
     (whitespace-cleanup-region (point-min) (point-max))))
+
+(defun flycheck/check-long-lines (filename &optional length)
+  "Check FILENAME for lines longer than LENGTH.
+
+Display a message for any line longer than LENGTH.  If LENGTH is
+nil, default to `fill-column'.  Return t if FILENAME has no long
+lines, otherwise return nil.
+
+If FILENAME is a package file, return t regardless if there are
+long lines or not."
+  (let ((long-lines 0)
+        (max-length (or length fill-column)))
+    (save-excursion
+      (goto-char (point-min))
+      ;; If the file has a Commentary line, then it's a package and we start
+      ;; checking for long lines after the Commentary section.  Lines before it
+      ;; may be too long but some are unsplittable.
+      (when (search-forward ";;; Commentary:" nil t)
+        (while (not (eobp))
+          (end-of-line)
+          (when (> (current-column) max-length)
+            (message "%s:%d: line is over %d characters"
+                     filename
+                     (line-number-at-pos (point))
+                     max-length)
+            (setq long-lines (1+ long-lines)))
+          (forward-line 1))))
+    (= long-lines 0)))
+
+(defun flycheck/can-have-long-lines (filename)
+  "Whether FILENAME can have arbitrarly long lines.
+
+Test files which contain error messages from checkers are allowed
+to have long lines."
+  (string-match-p (rx (or "languages/test-" "flycheck-test.el")) filename))
 
 (defun flycheck/file-formatted-p (filename)
   "Check whether FILENAME is properly formatted.
@@ -77,7 +112,9 @@ Return a non-nil value in this case, otherwise return nil."
     (insert-file-contents filename)
     (set-buffer-modified-p nil)
     (flycheck/eval-and-format-buffer filename)
-    (not (buffer-modified-p))))
+    (and (not (buffer-modified-p))
+         (or (flycheck/can-have-long-lines filename)
+             (flycheck/check-long-lines filename 80)))))
 
 (defun flycheck/batch-check-format ()
   "Check formatting of all sources."
