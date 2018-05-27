@@ -9516,11 +9516,10 @@ or if the current buffer has no file name."
 
 (defun flycheck-rust-cargo-metadata ()
   "Run 'cargo metadata' and return the result as parsed JSON object."
-  (with-temp-buffer
-    (call-process "cargo" nil t nil
-                  "metadata" "--no-deps" "--format-version" "1")
-    (goto-char (point-min))
-    (json-read)))
+  (car (flycheck-parse-json
+        (with-output-to-string
+          (call-process "cargo" nil standard-output nil
+                        "metadata" "--no-deps" "--format-version" "1")))))
 
 (defun flycheck-rust-cargo-workspace-root ()
   "Return the path to the workspace root of a Rust Cargo project.
