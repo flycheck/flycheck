@@ -3885,6 +3885,15 @@ Return the position of the next or previous error overlay, or nil
 if there is none."
   (let ((n (or n 1))
         (pos (if reset (point-min) (point))))
+    ;; When resetting, we may start on an error at `point-min'. In
+    ;; this case, we count it as the first error here; the loops below
+    ;; proceed by skipping the current error, and so don't handle this
+    ;; case. This code applies for example when using
+    ;; `flycheck-first-error' to jump to the first-line overlay in a
+    ;; file that doesn't check due to errors in other files.
+    (when (and reset
+               (get-char-property (point-min) 'flycheck-error))
+      (setq n (1- n)))
     (if (>= n 0)
         ;; Search forwards
         (while (and pos (> n 0))
