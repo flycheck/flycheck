@@ -600,7 +600,7 @@ where variable `flycheck-mode' is already non-nil."
 
 When an error in another file prevents checking the current file,
 Flycheck puts on error overlay on the first line of the current
-file that references the errors in the other file. This option
+file that references the errors in the other file.  This option
 determines how error navigation treats that first-line overlay
 when the cursor is not already on the first line.
 
