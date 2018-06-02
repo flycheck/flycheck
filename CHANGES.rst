@@ -42,7 +42,7 @@
     This change helps with compiled languages, where an error in another file
     may cause the current file to be considered invalid. [GH-1427]
 
-    The new option ``flycheck-jump-to-other-file-immediately``
+    The new option ``flycheck-jump-to-other-files-immediately``
     controls how eagerly error navigation in the current file jumps to
     the other file containing the error. [GH-1473]
   - Use Emacs' native XML parsing when libXML fails.  This behavior can be
