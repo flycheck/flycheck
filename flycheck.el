@@ -3881,19 +3881,37 @@ With negative N, get the position of the (-N)-th previous error
 overlay instead.  With non-nil RESET, search from `point-min',
 otherwise search from the current point.
 
+If the cursor is already on an error overlay for an error in
+another file (`flycheck-relevant-error-other-file-p'), then that
+error is considered to be the 1-th and (-1)-th next error.
+
 Return the position of the next or previous error overlay, or nil
 if there is none."
-  (let ((n (or n 1))
-        (pos (if reset (point-min) (point))))
-    ;; When resetting, we may start on an error at `point-min'. In
-    ;; this case, we count it as the first error here; the loops below
-    ;; proceed by skipping the current error, and so don't handle this
-    ;; case. This code applies for example when using
-    ;; `flycheck-first-error' to jump to the first-line overlay in a
-    ;; file that doesn't check due to errors in other files.
-    (when (and reset
-               (get-char-property (point-min) 'flycheck-error))
-      (setq n (1- n)))
+  (let* ((n (or n 1))
+         (pos (if reset (point-min) (point)))
+         ;; When resetting, we may start on an error at `point-min'. In
+         ;; this case, we count it as the first error here; the loops
+         ;; below proceed by skipping the current error, and so don't
+         ;; handle this case. This code applies for example when using
+         ;; `flycheck-first-error' to jump to the first-line overlay in
+         ;; a file that doesn't check due to errors in other files.
+         (reset-when-first-overlay-is-point-min
+          (and reset
+               (get-char-property (point-min) 'flycheck-error)))
+         ;; When we're already on an overlay for an error in another
+         ;; file, we treat it as the next error so that jumping will
+         ;; take us to the actual source of the error in the other
+         ;; file.
+         (current-error (get-char-property pos 'flycheck-error))
+         (currently-on-overlay-for-error-in-other-file
+          (and current-error
+               (flycheck-relevant-error-other-file-p current-error))))
+    (when (or reset-when-first-overlay-is-point-min
+              currently-on-overlay-for-error-in-other-file)
+      ;; It's possible for `n' to be zero here, and we shouldn't do
+      ;; anything in that case.
+      (when (> n 0) (setq n (1- n)))
+      (when (< n 0) (setq n (1+ n))))
     (if (>= n 0)
         ;; Search forwards
         (while (and pos (> n 0))
