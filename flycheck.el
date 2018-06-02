@@ -948,6 +948,25 @@ currently listed."
   :risky t
   :package-version '(flycheck . "0.20"))
 
+(defcustom flycheck-automatically-display-error-at-point t
+  "Automatically display display error at point when available.
+
+If t, use `flycheck-display-error-at-point-timer' to show error under point
+after commands, and `flycheck-idle-change-timer' after changes.
+
+Otherwise disable all unnecessary timers to suppress messages."
+  :group 'flycheck
+  :type 'boolean
+  :risky t
+  :package-version '(flycheck . "0.31")
+  :set
+  (lambda (symbol value)
+    (when (bound-and-true-p flycheck-mode)
+      (if value
+          (flycheck-automatically-display-error-at-point-enable)
+        (flycheck-automatically-display-error-at-point-disable)))
+    (set-default symbol value)))
+
 (defcustom flycheck-global-modes t
   "Modes for which option `flycheck-mode' is turned on.
 
@@ -1388,6 +1407,21 @@ FILE-NAME is nil, return `default-directory'."
       (if file-name
           (file-name-directory file-name)
         (expand-file-name default-directory)))))
+
+(defun flycheck-automatically-display-error-at-point-enable ()
+  "Setup necessary hooks for `flycheck-automatically-display-error-at-point'."
+  (pcase-dolist
+      (`(,hook . ,fn) flycheck-automatically-display-error-at-point-alist)
+    (add-hook hook fn nil 'local))
+  (flycheck-display-error-at-point))
+
+(defun flycheck-automatically-display-error-at-point-disable ()
+  "Remove unnecessary hooks for `flycheck-automatically-display-error-at-point'."
+  (pcase-dolist
+      (`(,hook . ,fn) flycheck-automatically-display-error-at-point-alist)
+    (remove-hook hook fn 'local))
+  (flycheck-clear-idle-change-timer)
+  (flycheck-cancel-error-display-error-at-point-timer))
 
 
 ;;; Minibuffer tools
@@ -2335,7 +2369,6 @@ Slots:
   '(
     ;; Handle events that may start automatic syntax checks
     (after-save-hook        . flycheck-handle-save)
-    (after-change-functions . flycheck-handle-change)
     ;; Handle events that may triggered pending deferred checks
     (window-configuration-change-hook . flycheck-perform-deferred-syntax-check)
     (post-command-hook                . flycheck-perform-deferred-syntax-check)
@@ -2347,15 +2380,6 @@ Slots:
     ;; Update the error list if necessary
     (post-command-hook . flycheck-error-list-update-source)
     (post-command-hook . flycheck-error-list-highlight-errors)
-    ;; Display errors.  Show errors at point after commands (like movements) and
-    ;; when Emacs gets focus.  Cancel the display timer when Emacs looses focus
-    ;; (as there's no need to display errors if the user can't see them), and
-    ;; hide the error buffer (for large error messages) if necessary.  Note that
-    ;; the focus hooks only work on Emacs 24.4 and upwards, but since undefined
-    ;; hooks are perfectly ok we don't need a version guard here.  They'll just
-    ;; not work silently.
-    (post-command-hook . flycheck-display-error-at-point-soon)
-    (focus-in-hook     . flycheck-display-error-at-point-soon)
     (focus-out-hook    . flycheck-cancel-error-display-error-at-point-timer)
     (post-command-hook . flycheck-hide-error-buffer)
     ;; Immediately show error popups when navigating to an error
@@ -2365,6 +2389,24 @@ Slots:
 The `car' of each pair is a hook variable, the `cdr' a function
 to be added or removed from the hook variable if Flycheck mode is
 enabled and disabled respectively.")
+
+(defconst flycheck-automatically-display-error-at-point-alist
+  '(
+    ;; Handle events that may start automatic syntax checks
+    (after-change-functions . flycheck-handle-change)
+    ;; Display errors.  Show errors at point after commands (like movements) and
+    ;; when Emacs gets focus.  Cancel the display timer when Emacs looses focus
+    ;; (as there's no need to display errors if the user can't see them), and
+    ;; hide the error buffer (for large error messages) if necessary.  Note that
+    ;; the focus hooks only work on Emacs 24.4 and upwards, but since undefined
+    ;; hooks are perfectly ok we don't need a version guard here.  They'll just
+    ;; not work silently.
+    (post-command-hook . flycheck-display-error-at-point-soon)
+    (focus-in-hook     . flycheck-display-error-at-point-soon))
+  "Hooks which Flycheck needs to hook in.
+
+Depend on `flycheck-automatically-display-error-at-point',
+see `flycheck-hooks-alist' for details.'")
 
 ;;;###autoload
 (define-minor-mode flycheck-mode
@@ -2392,7 +2434,12 @@ buffer manually.
    (flycheck-mode
     (flycheck-clear)
 
-    (pcase-dolist (`(,hook . ,fn) flycheck-hooks-alist)
+    (pcase-dolist
+        (`(,hook . ,fn)
+         (if flycheck-automatically-display-error-at-point
+             (append flycheck-hooks-alist
+                     flycheck-automatically-display-error-at-point-alist)
+           flycheck-hooks-alist))
       (add-hook hook fn nil 'local))
 
     (setq flycheck-old-next-error-function (if flycheck-standard-error-navigation
@@ -2404,7 +2451,10 @@ buffer manually.
     (unless (eq flycheck-old-next-error-function :unset)
       (setq next-error-function flycheck-old-next-error-function))
 
-    (pcase-dolist (`(,hook . ,fn) flycheck-hooks-alist)
+    (pcase-dolist
+        (`(,hook . ,fn)
+         (append flycheck-hooks-alist
+                 flycheck-automatically-display-error-at-point-alist))
       (remove-hook hook fn 'local))
 
     (flycheck-teardown))))
@@ -2672,7 +2722,7 @@ WORKING-DIR."
         (flycheck-error-list-refresh)
         (run-hooks 'flycheck-after-syntax-check-hook)
         (when (eq (current-buffer) (window-buffer))
-          (flycheck-display-error-at-point))
+          (flycheck-automatically-display-error-at-point))
         ;; Immediately try to run any pending deferred syntax check, which
         ;; were triggered by intermediate automatic check event, to make sure
         ;; that we quickly refine outdated error information
@@ -4438,6 +4488,11 @@ non-nil."
     (cancel-timer flycheck-display-error-at-point-timer)
     (setq flycheck-display-error-at-point-timer nil)))
 
+(defun flycheck-automatically-display-error-at-point ()
+  "Do `flycheck-display-error-at-point' if `flycheck-automatically-display-error-at-point'."
+  (when flycheck-automatically-display-error-at-point
+    (flycheck-display-error-at-point)))
+
 (defun flycheck-display-error-at-point ()
   "Display the all error messages at point in minibuffer."
   (interactive)
@@ -4454,7 +4509,8 @@ non-nil."
   (flycheck-cancel-error-display-error-at-point-timer)
   (when (flycheck-overlays-at (point))
     (setq flycheck-display-error-at-point-timer
-          (run-at-time flycheck-display-errors-delay nil 'flycheck-display-error-at-point))))
+          (run-at-time flycheck-display-errors-delay nil
+                       'flycheck-automatically-display-error-at-point))))
 
 
 ;;; Functions to display errors
