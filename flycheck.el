@@ -595,6 +595,30 @@ where variable `flycheck-mode' is already non-nil."
   :package-version '(flycheck . "0.15")
   :safe #'booleanp)
 
+(defcustom flycheck-jump-to-other-files-immediately t
+  "Whether to jump to other files immediately in `flycheck-next-error'.
+
+When an error in another file prevents checking the current file,
+Flycheck puts on error overlay on the first line of the current
+file that references the errors in the other file. This option
+determines how error navigation treats that first-line overlay
+when the cursor is not already on the first line.
+
+If non-nil, Flycheck error navigation jumps to the other file
+immediately, regardless of the position of the cursor in the
+current file.
+
+If nil, Flycheck error navigation jumps to that first-line
+overlay when the cursor is not already on the first line.
+
+If the cursor is already on the first-line error overlay, then
+this option has no effect: Flycheck error navigation will always
+jump to the other file containing the error in that case."
+  :group 'flycheck
+  :type 'boolean
+  :package-version '(flycheck . "0.32")
+  :safe #'booleanp)
+
 (define-widget 'flycheck-minimum-level 'lazy
   "A radio-type choice of minimum error levels.
 
@@ -3850,15 +3874,15 @@ overlays."
             (flycheck-error-level-severity (flycheck-error-level err)))
       t)))
 
-(defun flycheck-next-error-pos (n &optional reset)
-  "Get the position of the N-th next error.
+(defun flycheck-next-error-overlay-pos (n &optional reset)
+  "Get the position of the N-th next error overlay in buffer.
 
 With negative N, get the position of the (-N)-th previous error
-instead.  With non-nil RESET, search from `point-min', otherwise
-search from the current point.
+overlay instead.  With non-nil RESET, search from `point-min',
+otherwise search from the current point.
 
-Return the position of the next or previous error, or nil if
-there is none."
+Return the position of the next or previous error overlay, or nil
+if there is none."
   (let ((n (or n 1))
         (pos (if reset (point-min) (point))))
     (if (>= n 0)
@@ -3904,10 +3928,33 @@ advances backwards.  With non-nil RESET, advance from the
 beginning of the buffer, otherwise advance from the current
 position.
 
+The user option `flycheck-jump-to-other-files-immediately'
+controls how eagerly this function changes files when the error
+selected here is in a different file but has an overlay on first
+line of the current file.
+
 Intended for use with `next-error-function'."
-  (-if-let* ((pos (flycheck-next-error-pos n reset))
-             (err (get-char-property pos 'flycheck-error)))
-      (flycheck-jump-to-error err)
+  (-if-let* ((new-pos (flycheck-next-error-overlay-pos n reset))
+             (new-err (get-char-property new-pos 'flycheck-error)))
+      ;; The position `new-pos' of the next error overlay will not be
+      ;; the position of the next error `new-err' it references, if
+      ;; `new-err' is in another file and `new-pos' is the overlay on
+      ;; first line of this file. If the `new-err' is in another file,
+      ;; then only jump to that other file if
+      ;; `flycheck-jump-to-other-files-immediately' is non-nil, or if
+      ;; the cursor is already on the other-file error overlay on the
+      ;; first line of this file.
+      (let ((cur-err (get-char-property (point) 'flycheck-error)))
+        (if (or flycheck-jump-to-other-files-immediately
+                (equal cur-err new-err))
+            ;; Jump to error regardless of where it is. This will
+            ;; change files if the overlay points to an error in a
+            ;; different file.
+            (flycheck-jump-to-error new-err)
+          ;; Stay in current file and jump to position of
+          ;; overlay. This will also be the position of the error, if
+          ;; the error is not in another file.
+          (goto-char new-pos)))
     (user-error "No more Flycheck errors")))
 
 (defun flycheck-next-error (&optional n reset)
