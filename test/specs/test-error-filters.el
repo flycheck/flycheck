@@ -52,10 +52,11 @@
   (describe "flycheck-remove-error-file-names"
 
     (it "removes the given filename from errors"
-      (let ((errors (list
-                     (flycheck-error-new-at 1 1 'error "foo" :filename "hello")
-                     (flycheck-error-new-at 2 2 'warning "bar" :filename "world")
-                     (flycheck-error-new-at 3 3 'info "spam"))))
+      (let ((errors
+             (list
+              (flycheck-error-new-at 1 1 'error "foo" :filename "hello")
+              (flycheck-error-new-at 2 2 'warning "bar" :filename "world")
+              (flycheck-error-new-at 3 3 'info "spam"))))
         (expect (flycheck-remove-error-file-names "world" errors)
                 :to-be-equal-flycheck-errors
                 (list
@@ -89,14 +90,17 @@
   (describe "flycheck-fold-include-levels"
     (it "skips over intermittent errors"
       ;; See https://github.com/flycheck/flycheck/pull/783
-      (let ((errors (list (flycheck-error-new-at 1 0 'error "In file included from"
-                                                 :filename "foo.cpp")
-                          (flycheck-error-new-at 6 11 'error "b is not a member of hi"
-                                                 :filename "foo.cpp")
-                          (flycheck-error-new-at 5 20 'note "in definition of macro CHECK"
-                                                 :filename "foo.h")
-                          (flycheck-error-new-at 8 5 'error "xx was not declared in this scope"
-                                                 :filename "foo.cpp"))))
+      (let ((errors
+             (list (flycheck-error-new-at 1 0 'error "In file included from"
+                                          :filename "foo.cpp")
+                   (flycheck-error-new-at 6 11 'error "b is not a member of hi"
+                                          :filename "foo.cpp")
+                   (flycheck-error-new-at 5 20 'note
+                                          "in definition of macro CHECK"
+                                          :filename "foo.h")
+                   (flycheck-error-new-at 8 5 'error
+                                          "xx was not declared in this scope"
+                                          :filename "foo.cpp"))))
         (expect
          (flycheck-fold-include-levels errors "In file included from")
          :to-be-equal-flycheck-errors
@@ -106,7 +110,8 @@
                                       :filename "foo.cpp")
                (flycheck-error-new-at 5 20 'note "in definition of macro CHECK"
                                       :filename "foo.h")
-               (flycheck-error-new-at 8 5 'error "xx was not declared in this scope"
+               (flycheck-error-new-at 8 5 'error
+                                      "xx was not declared in this scope"
                                       :filename "foo.cpp"))))))
 
   (describe "flycheck-collapse-error-message-whitespace"
@@ -120,8 +125,9 @@
 
   (describe "flycheck-dequalify-error-ids"
     (it "removes all nested qualifiers"
-      (let ((errors (list (flycheck-error-new-at 1 2 nil nil :id "foo.bar")
-                          (flycheck-error-new-at 1 2 nil nil :id "Spam.With.Eggs"))))
+      (let ((errors
+             (list (flycheck-error-new-at 1 2 nil nil :id "foo.bar")
+                   (flycheck-error-new-at 1 2 nil nil :id "Spam.With.Eggs"))))
         (expect (flycheck-dequalify-error-ids errors)
                 :to-be-equal-flycheck-errors
                 (list (flycheck-error-new-at 1 2 nil nil :id "bar")

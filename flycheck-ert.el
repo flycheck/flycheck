@@ -57,11 +57,12 @@ Defaults to `error'."
       (let ((conditions
              (if (consp parent)
                  (apply #'append
-                        (mapcar (lambda (parent)
-                                  (cons parent
-                                        (or (get parent 'error-conditions)
-                                            (error "Unknown signal `%s'" parent))))
-                                parent))
+                        (mapcar
+                         (lambda (parent)
+                           (cons parent
+                                 (or (get parent 'error-conditions)
+                                     (error "Unknown signal `%s'" parent))))
+                         parent))
                (cons parent (get parent 'error-conditions)))))
         (put name 'error-conditions
              (delete-dups (copy-sequence (cons name conditions))))
@@ -196,7 +197,8 @@ should use to lookup resource files."
   (let ((tests (ert-select-tests t t)))
     ;; Select all tests
     (unless tests
-      (error "No tests defined.  Call `flycheck-ert-initialize' after defining all tests!"))
+      (error "No tests defined.  \
+Call `flycheck-ert-initialize' after defining all tests!"))
 
     (setq flycheck-ert--resource-directory resource-dir)
 
@@ -257,10 +259,11 @@ case, including assertions and setup code."
        :expected-result ,(or (plist-get keys :expected-result) :passed)
        :tags (append ',(append default-tags language-tags checker-tags)
                      ,(plist-get keys :tags))
-       ,@(mapcar (lambda (c) `(skip-unless
-                               ;; Ignore non-command checkers
-                               (or (not (flycheck-checker-get ',c 'command))
-                                   (executable-find (flycheck-checker-executable ',c)))))
+       ,@(mapcar (lambda (c)
+                   `(skip-unless
+                     ;; Ignore non-command checkers
+                     (or (not (flycheck-checker-get ',c 'command))
+                         (executable-find (flycheck-checker-executable ',c)))))
                  checkers)
        ,@body)))
 

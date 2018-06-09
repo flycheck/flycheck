@@ -58,7 +58,8 @@ in this file."
   (setq package-user-dir (expand-file-name "init-elpa" (file-name-directory
                                                         flycheck/init-file))
         package-check-signature nil)
-  (add-to-list 'package-archives '("MELPA" . "https://stable.melpa.org/packages/"))
+  (add-to-list 'package-archives
+               '("MELPA" . "https://stable.melpa.org/packages/"))
 
   (package-initialize)
 
@@ -84,8 +85,8 @@ in this file."
   (ido-mode t)
   (setq ido-enable-flex-matching t)
 
-  ;; Get rid of all the silly UI clutter of a default Emacs session and opt out of
-  ;; all the stupid startup and license messages
+  ;; Get rid of all the silly UI clutter of a default Emacs session and opt out
+  ;; of all the stupid startup and license messages
   (tool-bar-mode -1)
   (blink-cursor-mode -1)
   (setq ring-bell-function #'ignore
@@ -109,15 +110,15 @@ in this file."
                       (save-excursion
                         (goto-char (point-min))
                         (search-forward "an-info-here")
-                        (list (flycheck-error-new-at (line-number-at-pos)
-                                                     10 'info "An info here"
-                                                     :checker checker)
-                              (flycheck-error-new-at (+ 1 (line-number-at-pos))
-                                                     10 'warning "A warning here"
-                                                     :checker checker)
-                              (flycheck-error-new-at (+ 2 (line-number-at-pos))
-                                                     10 'error "A error here"
-                                                     :checker checker)))))
+                        (list (flycheck-error-new-at
+                               (line-number-at-pos) 10 'info
+                               "An info here" :checker checker)
+                              (flycheck-error-new-at
+                               (+ 1 (line-number-at-pos)) 10 'warning
+                               "A warning here" :checker checker)
+                              (flycheck-error-new-at
+                               (+ 2 (line-number-at-pos)) 10 'error
+                               "A error here" :checker checker)))))
     :modes 'emacs-lisp-mode))
 
 (defun flycheck-prepare-screenshot (&optional hide-cursor)
