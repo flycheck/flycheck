@@ -3742,27 +3742,29 @@ Why not:
        :checker puppet-lint)))
 
 (flycheck-ert-def-checker-test python-flake8 python syntax-error
-  (let ((python-indent-guess-indent-offset nil))       ; Silence Python Mode!
+  (let ((python-indent-guess-indent-offset nil) ; Silence Python Mode!
+        (flycheck-python-flake8-executable "python3"))
     (flycheck-ert-should-syntax-check
      "language/python/syntax-error.py" 'python-mode
      '(3 12 error "SyntaxError: invalid syntax" :id "E999"
          :checker python-flake8))))
 
 (flycheck-ert-def-checker-test python-flake8 python nil
-  (flycheck-ert-should-syntax-check
-   "language/python/test.py" 'python-mode
-   '(5 1 warning "'.antigravit' imported but unused" :id "F401"
-       :checker python-flake8)
-   '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
-       :checker python-flake8)
-   '(12 29 warning "unexpected spaces around keyword / parameter equals"
-        :id "E251" :checker python-flake8)
-   '(12 31 warning "unexpected spaces around keyword / parameter equals"
-        :id "E251" :checker python-flake8)
-   '(21 1 warning "expected 2 blank lines after class or function definition, found 1"
-        :id "E305" :checker python-flake8)
-   '(22 1 error "undefined name 'antigravity'" :id "F821"
-        :checker python-flake8)))
+  (let ((flycheck-python-flake8-executable "python3"))
+    (flycheck-ert-should-syntax-check
+     "language/python/test.py" 'python-mode
+     '(5 1 warning "'.antigravit' imported but unused" :id "F401"
+         :checker python-flake8)
+     '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
+         :checker python-flake8)
+     '(12 29 warning "unexpected spaces around keyword / parameter equals"
+          :id "E251" :checker python-flake8)
+     '(12 31 warning "unexpected spaces around keyword / parameter equals"
+          :id "E251" :checker python-flake8)
+     '(21 1 warning "expected 2 blank lines after class or function definition, found 1"
+          :id "E305" :checker python-flake8)
+     '(22 1 error "undefined name 'antigravity'" :id "F821"
+          :checker python-flake8))))
 
 (flycheck-ert-def-checker-test python-mypy python nil
   (let ((flycheck-disabled-checkers '(python-flake8))
@@ -3775,14 +3777,16 @@ Why not:
 
 (flycheck-ert-def-checker-test python-pylint python syntax-error
   (let ((flycheck-disabled-checkers '(python-flake8))
-        (python-indent-guess-indent-offset nil)) ; Silence Python Mode
+        (python-indent-guess-indent-offset nil) ; Silence Python Mode
+        (flycheck-python-pylint-executable "python3"))
     (flycheck-ert-should-syntax-check
      "language/python/syntax-error.py" 'python-mode
      '(3 1 error "invalid syntax (<string>, line 3)"
          :id "syntax-error" :checker python-pylint))))
 
 (flycheck-ert-def-checker-test python-pylint python nil
-  (let ((flycheck-disabled-checkers '(python-flake8)))
+  (let ((flycheck-disabled-checkers '(python-flake8))
+        (flycheck-python-pylint-executable "python3"))
     (flycheck-ert-should-syntax-check
      "language/python/test.py" 'python-mode
      '(1 1 info "Missing module docstring" :id "missing-docstring" :checker python-pylint)
@@ -3806,16 +3810,13 @@ Why not:
           :id "no-self-use" :checker python-pylint)
      '(14 16 error "Module 'sys' has no 'python_version' member" :id "no-member"
           :checker python-pylint)
-     '(15 1 info "Unnecessary parens after 'print' keyword" :id "superfluous-parens"
-          :checker python-pylint)
-     '(17 1 info "Unnecessary parens after 'print' keyword" :id "superfluous-parens"
-          :checker python-pylint)
      '(22 1 error "Undefined variable 'antigravity'" :id "undefined-variable"
           :checker python-pylint))))
 
 (flycheck-ert-def-checker-test python-pylint python no-symbolic-id
   (let ((flycheck-disabled-checkers '(python-flake8))
-        (flycheck-pylint-use-symbolic-id nil))
+        (flycheck-pylint-use-symbolic-id nil)
+        (flycheck-python-pylint-executable "python3"))
     (flycheck-ert-should-syntax-check
      "language/python/test.py" 'python-mode
      '(1 1 info "Missing module docstring" :id "C0111" :checker python-pylint)
@@ -3838,10 +3839,6 @@ Why not:
      '(12 5 warning "Method could be a function"
           :id "R0201" :checker python-pylint)
      '(14 16 error "Module 'sys' has no 'python_version' member" :id "E1101"
-          :checker python-pylint)
-     '(15 1 info "Unnecessary parens after 'print' keyword" :id "C0325"
-          :checker python-pylint)
-     '(17 1 info "Unnecessary parens after 'print' keyword" :id "C0325"
           :checker python-pylint)
      '(22 1 error "Undefined variable 'antigravity'" :id "E0602"
           :checker python-pylint))))
@@ -3875,9 +3872,10 @@ Why not:
 
 (flycheck-ert-def-checker-test racket racket nil
   (skip-unless (funcall (flycheck-checker-get 'racket 'predicate)))
-  (flycheck-ert-should-syntax-check
-   "language/racket.rkt" 'racket-mode
-   '(4 3 error "read: expected a `)' to close `('" :checker racket)))
+  (let ((inhibit-message t))
+    (flycheck-ert-should-syntax-check
+     "language/racket.rkt" 'racket-mode
+     '(4 3 error "read: expected a `)' to close `('" :checker racket))))
 
 (flycheck-ert-def-checker-test rpm-rpmlint rpm nil
   (let ((inhibit-message t))
@@ -3905,9 +3903,9 @@ Why not:
 (flycheck-ert-def-checker-test markdown-markdownlint-cli markdown nil
   (flycheck-ert-should-syntax-check
    "language/markdown.md" 'markdown-mode
-   '(1 nil error "First header should be a top level header [Expected: h1; Actual: h2]"
-       :id "MD002/first-header-h1" :checker markdown-markdownlint-cli)
-   '(1 nil error "First line in file should be a top level header [Context: \"## Second Header First\"]"
+   '(1 nil error "First heading should be a top level heading [Expected: h1; Actual: h2]"
+       :id "MD002/first-heading-h1/first-header-h1" :checker markdown-markdownlint-cli)
+   '(1 nil error "First line in file should be a top level heading [Context: \"## Second Header First\"]"
        :id "MD041/first-line-h1" :checker markdown-markdownlint-cli)))
 
 (flycheck-ert-def-checker-test markdown-mdl markdown nil
@@ -3948,7 +3946,7 @@ Why not:
    "language/rst/sphinx/index.rst" 'rst-mode
    '(2 nil warning "Title underline too short." :checker rst-sphinx)
    '(9 nil warning "Unknown target name: \"cool\"." :checker rst-sphinx)
-   '(9 nil warning "u'envvar' reference target not found: FOO"
+   '(9 nil warning "'envvar' reference target not found: FOO"
        :checker rst-sphinx)))
 
 (flycheck-ert-def-checker-test rst-sphinx rst not-outside-of-a-sphinx-project
