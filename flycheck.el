@@ -8693,8 +8693,10 @@ See URL `https://pugjs.org/'."
           (zero-or-more not-newline) "\n"
           (one-or-more
            (zero-or-more not-newline) "|"
-           (zero-or-more not-newline) "\n") (zero-or-more not-newline) "\n"
-           (message) line-end))
+           (zero-or-more not-newline) "\n")
+          (zero-or-more not-newline) "\n"
+          (message)
+          line-end))
   :modes pug-mode)
 
 (flycheck-define-checker puppet-parser
