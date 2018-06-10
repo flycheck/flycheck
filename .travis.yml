@@ -56,8 +56,7 @@ script:
   case $JOB in
     emacs)
       # Check formatting (our formatting rules don’t work on Emacs 24).
-      # FIXME: this should run on Emacs 26 as well
-      if [[ $EMACS_VERSION == 25.* ]]; then
+      if [[ $EMACS_VERSION != 24.* ]]; then
         docker run --volume "$TRAVIS_BUILD_DIR":/flycheck \
                    --workdir /flycheck \
                    flycheck/emacs-cask:$EMACS_VERSION \

@@ -72,8 +72,8 @@
                   :to-equal nil)))
 
       (describe "Options"
-        (let ((documented-options (flycheck/collect-matches flycheck/defcustom-re
-                                                            languages))
+        (let ((documented-options
+               (flycheck/collect-matches flycheck/defcustom-re languages))
               (all-options (seq-mapcat (lambda (c)
                                          (flycheck-checker-get c 'option-vars))
                                        flycheck-checkers)))
