@@ -2981,7 +2981,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 (flycheck-ert-def-checker-test dockerfile-hadolint dockerfile error
   (flycheck-ert-should-syntax-check
    "language/dockerfile/Dockerfile.error" 'dockerfile-mode
-   '(2 1 error "unexpected 'I' expecting ONBUILD, FROM, COPY, RUN, WORKDIR, ENTRYPOINT, VOLUME, EXPOSE, ENV, ARG, USER, LABEL, STOPSIGNAL, CMD, SHELL, MAINTAINER, ADD, \"#\", HEALTHCHECK or end of input"
+   '(2 1 error "unexpected 'I' expecting '#', ADD, ARG, CMD, COPY, ENTRYPOINT, ENV, EXPOSE, FROM, HEALTHCHECK, LABEL, MAINTAINER, ONBUILD, RUN, SHELL, STOPSIGNAL, USER, VOLUME, WORKDIR, end of input, or the rest of a new line followed by the next instruction"
        :checker dockerfile-hadolint)))
 
 (flycheck-ert-def-checker-test dockerfile-hadolint dockerfile warnings
