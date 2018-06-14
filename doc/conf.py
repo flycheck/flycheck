@@ -1,4 +1,4 @@
-# Copyright (C) 2017 Flycheck contributors
+# Copyright (C) 2017, 2018 Flycheck contributors
 # Copyright (C) 2016 Sebastian Wiesner and Flycheck contributors
 
 # This file is not part of GNU Emacs.
@@ -86,7 +86,7 @@ rst_prolog = """\
 .. role:: elisp(code)
    :language: elisp
 
-.. |min-emacs| replace:: {emacs_version}
+.. |min-emacs| replace:: {emacs_version}+
 """.format(emacs_version=read_minimum_emacs_version())
 
 # Build settings
@@ -110,6 +110,9 @@ nitpick_ignore = [
     ('any', 'user-emacs-directory'),
     ('any', 'check-declare-file'),
     ('any', 'declare-function'),
+    ('any', 'exec-path'),
+    ('any', 'sh-shell'),
+    ('any', 'rx'),
 ]
 
 # HTML settings

@@ -168,4 +168,4 @@ you to comply to these guidelines.
 
 .. _Git Commit: https://github.com/magit/magit/
 .. _Magit: https://github.com/magit/magit/
-.. _A Note About Git Commit Messages: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
+.. _A Note About Git Commit Messages: https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
