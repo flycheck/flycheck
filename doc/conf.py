@@ -111,6 +111,8 @@ nitpick_ignore = [
     ('any', 'check-declare-file'),
     ('any', 'declare-function'),
     ('any', 'exec-path'),
+    ('any', 'sh-shell'),
+    ('any', 'rx'),
 ]
 
 # HTML settings

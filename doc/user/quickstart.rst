@@ -33,7 +33,7 @@ For instance, you can install Pylint_ for Python and ESLint_ for Javascript:
    $ npm install eslint
 
 .. _Pylint: https://pylint.org
-.. _ESLint: http://eslint.org
+.. _ESLint: https://eslint.org
 
 Check syntax in a buffer
 ========================

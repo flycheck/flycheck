@@ -107,7 +107,7 @@ find in ``flycheck.el``:
    (flycheck-define-checker scala
      "A Scala syntax checker using the Scala compiler.
 
-   See URL `http://www.scala-lang.org/'."
+   See URL `https://www.scala-lang.org/'."
      :command ("scalac" "-Ystop-after:parser" source)
      :error-patterns
        ((error line-start (file-name) ":" line ": error: " (message) line-end))

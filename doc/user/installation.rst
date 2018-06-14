@@ -144,4 +144,4 @@ Flycheck.
 .. _MELPA Stable: https://stable.melpa.org
 .. _Getting Started: https://melpa.org/#/getting-started
 .. _use-package: https://github.com/jwiegley/use-package
-.. _My Emacs configuration with use-package: http://www.lunaryorn.com/posts/my-emacs-configuration-with-use-package.html
+.. _My Emacs configuration with use-package: http://swsnr.de/posts/my-emacs-configuration-with-use-package.html

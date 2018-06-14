@@ -114,7 +114,7 @@ Ledger
 * :gh:`purcell/flycheck-ledger` adds a syntax checker for the Ledger_ accounting
   tool.
 
-.. _Ledger: http://ledger-cli.org/
+.. _Ledger: https://ledger-cli.org/
 
 Mercury
 -------
@@ -154,4 +154,4 @@ Shell scripts
   ``checkbashisms`` which is part of `Debian devscripts`_ and checks for common
   Bash constructs in POSIX shell scripts.
 
-.. _Debian devscripts: https://anonscm.debian.org/cgit/collab-maint/devscripts.git
+.. _Debian devscripts: https://salsa.debian.org/debian/devscripts
