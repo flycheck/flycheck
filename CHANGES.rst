@@ -33,8 +33,10 @@
   - Add ``flycheck-perl-module-list`` to use specified modules when
     syntax checking code with the ``perl`` checker.
   - Add ``flycheck-sh-bash-args`` to pass arguments to ``sh-bash`` [GH-1439].
-  - Add ``flychjeck-eslint-args`` to pass arguments to ``javascript-eslint``
+  - Add ``flychjeck-eslint-args`` to pass arguments to ``javascript-eslint``.
     [GH-1360]
+  - Checkers can now specify the exact region covered by an error, either using
+    an end line and an end column, or using two buffer positions. [GH-1400]
 
 - Improvements
 
