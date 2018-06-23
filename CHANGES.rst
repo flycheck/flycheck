@@ -60,6 +60,8 @@
     instead of ignored.  They can be navigated to from the error list.
     This change helps with compiled languages, where an error in another file
     may cause the current file to be considered invalid. [GH-1427]
+  - Enhanced the ``flycheck-verify-setup`` to show more clearly which checkers
+    will run in the buffer, and which are misconfigured. [GH-1478]
   - Use Emacs' native XML parsing when libXML fails.  This behavior can be
     changed by customizing ``flycheck-xml-parser`` [GH-1349]
   - Changed parsing of ESLint output from checkstyle XML to JSON [GH-1350]
