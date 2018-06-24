@@ -226,8 +226,8 @@ files with PHP CLI first to find syntax errors, then with PHP MessDetector to
 additionally find idiomatic and semantic errors, and eventually with PHP
 CheckStyle to find stylistic errors.  The user will see all errors reported by
 all of these tools in the buffer.  However, if the first checker reported at
-least one error, then the subsequent checkers would not be run (by default; this
-behavior is configurable).
+least one error, then the subsequent checkers would not be run.  This behavior
+is fully configurable; see :ref:`flycheck-checker-chains`.
 
 Errors
 ------

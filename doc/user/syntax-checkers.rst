@@ -274,3 +274,57 @@ installed into a local ``node_modules`` directory:
 
       :infonode:`(emacs)Directory Variables`
          Information about directory variables.
+
+.. _flycheck-checker-chains:
+
+Configuring checker chains
+==========================
+
+In any given buffer where Flycheck is enabled, only one checker may be run at a
+time.  However, any number of checkers can be run in sequence.  In such a
+sequence, after the first checker has finished running and its errors have been
+reported, the next checker of the sequence runs and its errors are reported,
+etc. until there are no more checkers in the sequence.  This sequence is called
+a *checker chain*.
+
+Some checkers chains are already setup by default in Flycheck: e.g.,
+`emacs-lisp` will be followed by `emacs-lisp-checkdoc`, and `python-mypy` will
+be followed by `python-flake8`.
+
+When defining a checker, you can specify which checkers may run after it by
+setting the ``:next-checkers`` property (see the docstring of
+`flycheck-define-generic-checker`).
+
+For a given checker, several next checkers may be specified.  Flycheck will run
+the first (in order of declaration) whose error level matches (see below) and
+which can be used in the current buffer.
+
+You can also customize the next checker property by calling
+`flycheck-add-next-checker` in your Emacs configuration file.
+
+.. defun:: flycheck-add-next-checker checker next &optional append
+
+   Set *next* to run after *checker*.  Both arguments are syntax checker
+   symbols.
+
+   For example, the following will make `python-pylint` run after
+   `python-flake8`:
+
+   .. code-block:: elisp
+
+      (flycheck-add-next-checker 'python-flake8 'python-pylint)
+
+   *Next* may also be a cons cell ``(level . next-checker)``, where
+   *next-checker* is a symbol denoting the syntax checker to run after
+   *checker*, and *level* is an error level.  The *next-checker* will then only
+   be run if there is no current error whose level is more severe than *level*.
+   If *level* is ``t``, then *next-checker* is run regardless of the current
+   errors.
+
+   For instance, if you wanted to run `python-pylint` only if `python-flake8`
+   produced no errors (only warnings and info diagnostics), then you would
+   rather use:
+
+   .. code-block:: elisp
+
+      (flycheck-add-next-checker 'python-flake8 '(warning . python-pylint))
