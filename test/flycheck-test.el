@@ -2705,12 +2705,14 @@ evaluating BODY."
   (defvar python-indent-guess-indent-offset))
 
 (flycheck-ert-def-checker-test ada-gnat ada syntax-error
+  (require 'speedbar)
   (flycheck-ert-should-syntax-check
    "language/ada/syntaxerror.adb" 'ada-mode
    '(7  32 error "missing \";\"" :checker ada-gnat)
    '(8 5 error "misspelling of \"SYNTAXERROR\"" :checker ada-gnat)))
 
 (flycheck-ert-def-checker-test ada-gnat ada warnings
+  (require 'speedbar)
   (flycheck-ert-should-syntax-check
    "language/ada/hello.adb" 'ada-mode
    '(   6 4 warning "variable \"Name\" is not referenced" :checker ada-gnat)
@@ -3957,10 +3959,10 @@ Why not:
 (flycheck-ert-def-checker-test ruby-rubocop ruby syntax-error
   (flycheck-ert-should-syntax-check
    "language/ruby/syntax-error.rb" 'ruby-mode
-   '(5 7 error "unexpected token tCONSTANT (Using Ruby 2.1 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+   '(5 7 error "unexpected token tCONSTANT (Using Ruby 2.2 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
        :id "Lint/Syntax"
        :checker ruby-rubocop)
-   '(5 24 error "unterminated string meets end of file (Using Ruby 2.1 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+   '(5 24 error "unterminated string meets end of file (Using Ruby 2.2 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
        :id "Lint/Syntax"
        :checker ruby-rubocop)))
 
