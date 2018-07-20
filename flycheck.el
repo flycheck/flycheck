@@ -4297,20 +4297,28 @@ POS defaults to `point'."
 
 (defun flycheck-jump-to-error (error)
   "Go to the location of ERROR."
-  (let ((error-copy (copy-flycheck-error error))
-        (buffer (find-file-noselect (flycheck-error-filename error))))
-    (setf (flycheck-error-buffer error-copy) buffer)
-    (flycheck-jump-in-buffer buffer error-copy)
-    ;; When jumping to an error in another file, it may not have
-    ;; this error available for highlighting yet, so we trigger a check
-    ;; if necessary.
-    (with-current-buffer buffer
-      (unless (seq-contains flycheck-current-errors error-copy 'equal)
-        (when flycheck-mode
-          (flycheck-buffer))))))
+  (let* ((error-copy (copy-flycheck-error error))
+         (filename (flycheck-error-filename error))
+         (other-file-error (flycheck-relevant-error-other-file-p error))
+         (buffer (if filename
+                     (find-file-noselect filename)
+                   (flycheck-error-buffer error))))
+    (when (buffer-live-p buffer)
+      (setf (flycheck-error-buffer error-copy) buffer)
+      (flycheck-jump-in-buffer buffer error-copy)
+      ;; When jumping to an error in another file, it may not have
+      ;; this error available for highlighting yet, so we trigger a check
+      ;; if necessary.
+      (when other-file-error
+        (with-current-buffer buffer
+          (unless (seq-contains flycheck-current-errors error-copy 'equal)
+            (when flycheck-mode
+              (flycheck-buffer))))))))
 
 (defun flycheck-jump-in-buffer (buffer error)
   "In BUFFER, jump to ERROR."
+  ;; FIXME: we assume BUFFER and the buffer of ERROR are the same.  We don't
+  ;; need the first argument then.
   (if (eq (window-buffer) (get-buffer flycheck-error-list-buffer))
       ;; When called from within the error list, keep the error list,
       ;; otherwise replace the current buffer.
