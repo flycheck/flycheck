@@ -8920,7 +8920,9 @@ Requires Flake8 3.0 or newer. See URL
              (or (not (flycheck-python-needs-module-p 'python-flake8))
                  (flycheck-python-find-module 'python-flake8 "flake8")))
   :verify (lambda (_) (flycheck-python-verify-module 'python-flake8 "flake8"))
-  :modes python-mode)
+  :modes python-mode
+  :next-checkers ((error . python-pylint)
+                  (error . python-mypy)))
 
 (flycheck-def-config-file-var flycheck-pylintrc python-pylint ".pylintrc"
   :safe #'stringp)
@@ -8975,7 +8977,8 @@ See URL `https://www.pylint.org/'."
              (or (not (flycheck-python-needs-module-p 'python-pylint))
                  (flycheck-python-find-module 'python-pylint "pylint")))
   :verify (lambda (_) (flycheck-python-verify-module 'python-pylint "pylint"))
-  :modes python-mode)
+  :modes python-mode
+  :next-checkers ((error . python-mypy)))
 
 (flycheck-define-checker python-pycompile
   "A Python syntax checker using Python's builtin compiler.
@@ -8994,7 +8997,8 @@ See URL `https://docs.python.org/3.4/library/py_compile.html'."
    (error line-start "SyntaxError: ('" (message (one-or-more (not (any "'"))))
           "', ('" (file-name (one-or-more (not (any "'")))) "', "
           line ", " column ", " (one-or-more not-newline) line-end))
-  :modes python-mode)
+  :modes python-mode
+  :next-checkers ((error . python-mypy)))
 
 (flycheck-def-config-file-var flycheck-python-mypy-ini python-mypy
                               "mypy.ini"
@@ -9023,8 +9027,7 @@ See URL `http://mypy-lang.org/'."
   :modes python-mode
   ;; Ensure the file is saved, to work around
   ;; https://github.com/python/mypy/issues/4746.
-  :predicate flycheck-buffer-saved-p
-  :next-checkers '(t . python-flake8))
+  :predicate flycheck-buffer-saved-p)
 
 (flycheck-def-option-var flycheck-lintr-caching t r-lintr
   "Whether to enable caching in lintr.
