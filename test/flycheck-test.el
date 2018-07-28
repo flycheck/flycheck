@@ -4007,7 +4007,7 @@ Why not:
          :checker python-mypy))))
 
 (flycheck-ert-def-checker-test python-pylint python syntax-error
-  (let ((flycheck-disabled-checkers '(python-flake8))
+  (let ((flycheck-disabled-checkers '(python-flake8 python-mypy))
         (python-indent-guess-indent-offset nil) ; Silence Python Mode
         (flycheck-python-pylint-executable "python3"))
     (flycheck-ert-should-syntax-check
@@ -4016,7 +4016,7 @@ Why not:
          :id "syntax-error" :checker python-pylint))))
 
 (flycheck-ert-def-checker-test python-pylint python nil
-  (let ((flycheck-disabled-checkers '(python-flake8))
+  (let ((flycheck-disabled-checkers '(python-flake8 python-mypy))
         (flycheck-python-pylint-executable "python3"))
     (flycheck-ert-should-syntax-check
      "language/python/test.py" 'python-mode
@@ -4047,7 +4047,7 @@ Why not:
           :checker python-pylint))))
 
 (flycheck-ert-def-checker-test python-pylint python no-symbolic-id
-  (let ((flycheck-disabled-checkers '(python-flake8))
+  (let ((flycheck-disabled-checkers '(python-flake8 python-mypy))
         (flycheck-pylint-use-symbolic-id nil)
         (flycheck-python-pylint-executable "python3"))
     (flycheck-ert-should-syntax-check
@@ -4080,7 +4080,7 @@ Why not:
 
 (flycheck-ert-def-checker-test python-pycompile python python27
   (skip-unless (executable-find "python2"))
-  (let ((flycheck-disabled-checkers '(python-flake8 python-pylint))
+  (let ((flycheck-disabled-checkers '(python-flake8 python-pylint python-mypy))
         (flycheck-python-pycompile-executable "python2")
         (python-indent-guess-indent-offset nil))
     (flycheck-ert-should-syntax-check
@@ -4088,7 +4088,7 @@ Why not:
      `(3 nil error "invalid syntax" :checker python-pycompile))))
 
 (flycheck-ert-def-checker-test python-pycompile python has-no-warnings
-  (let ((flycheck-disabled-checkers '(python-flake8 python-pylint)))
+  (let ((flycheck-disabled-checkers '(python-flake8 python-pylint python-mypy)))
     (flycheck-ert-should-syntax-check
      "language/python/test.py" 'python-mode)))
 
