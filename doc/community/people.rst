@@ -70,13 +70,14 @@ Haskell
 ~~~~~~~
 
 * Sergey Vinokurov (:gh:`sergv`)
+* Steve Purcell (:gh:`purcell`)
 
 Mention with ``@flycheck/haskell``.
 
 Javascript
 ~~~~~~~~~~
 
-* Saša Jovanić (:gh:`Simplify`)
+* Saša Jovanić (:gh:`Simplify`)
 
 Mention with ``@flycheck/javascript``.
 
@@ -87,12 +88,33 @@ Lua
 
 Mention with ``@flycheck/lua``.
 
+Mercury
+~~~~~~~
+
+* Matthias Güdemann (:gh:`mgudemann`)
+
+Mention with ``@flycheck/mercury``.
+
+PHP
+~~~
+
+* USAMI Kenta (:gh:`zonuexe`)
+
+Mention with ``@flycheck/php``.
+
 Puppet
 ~~~~~~
 
 * Romanos Skiadas (:gh:`rski`)
 
 Mention with ``@flycheck/puppet``.
+
+Ruby
+~~~~
+
+* Saša Jovanić (:gh:`Simplify`)
+
+Mention with ``@flycheck/javascript``.
 
 Rust
 ~~~~
@@ -105,7 +127,7 @@ Mention with ``@flycheck/rust``.
 TypeScript
 ~~~~~~~~~~
 
-* Saša Jovanić (:gh:`Simplify`)
+* Saša Jovanić (:gh:`Simplify`)
 
 Mention with ``@flycheck/typescript``.
 
