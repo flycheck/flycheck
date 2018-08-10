@@ -6076,7 +6076,7 @@ otherwise."
             (message (match-string 4 err))
             (id (match-string 5 err)))
         (flycheck-error-new-at
-         (flycheck-string-to-number-safe line)
+         (or (flycheck-string-to-number-safe line) 1)
          (flycheck-string-to-number-safe column)
          level
          (unless (string-empty-p message) message)
