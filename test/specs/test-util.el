@@ -74,7 +74,16 @@
         (set-buffer-modified-p t)
         (expect (flycheck-buffer-saved-p) :not :to-be-truthy))
       (expect (spy-calls-count 'file-exists-p) :to-equal 1)
-      (expect (spy-calls-count 'buffer-file-name) :to-equal 1))))
+      (expect (spy-calls-count 'buffer-file-name) :to-equal 1)))
+
+  (describe "flycheck-try-parse-error-with-pattern"
+
+    (it "generates relevant errors even when not matching any line number"
+      (let ((err (flycheck-try-parse-error-with-pattern
+                  "Some error\n"
+                  (cons "^\\(?4:.+\\)\n" 'error)
+                  nil)))
+        (expect (flycheck-relevant-error-p err) :to-be-truthy)))))
 
 
 ;;; test-util.el ends here
