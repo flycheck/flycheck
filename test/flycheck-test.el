@@ -3676,7 +3676,7 @@ Why not:
     (flycheck-ert-with-env '(("LC_ALL" . nil))
       (flycheck-ert-should-syntax-check
        "language/text.txt" '(text-mode markdown-mode)
-       '(1 7 warning "Substitute 'damn' every time you're inclined to write 'very;' your editor will delete it and the writing will be just as it should be."
+       '(1 7 warning "Substitute 'damn' every time you're inclined to write 'very'; your editor will delete it and the writing will be just as it should be."
            :id "weasel_words.very"
            :checker proselint)
        '(2 4 warning "Redundancy. Use 'associate' instead of 'associate together'."
@@ -3783,7 +3783,7 @@ Why not:
         (flycheck-python-pylint-executable "python3"))
     (flycheck-ert-should-syntax-check
      "language/python/syntax-error.py" 'python-mode
-     '(3 1 error "invalid syntax (<string>, line 3)"
+     '(3 1 error "invalid syntax (<unknown>, line 3)"
          :id "syntax-error" :checker python-pylint))))
 
 (flycheck-ert-def-checker-test python-pylint python nil
@@ -3798,18 +3798,20 @@ Why not:
      '(5 1 warning "Unused import antigravit" :id "unused-import"
          :checker python-pylint)
      '(7 1 info "Missing class docstring" :id "missing-docstring" :checker python-pylint)
+     '(7 1 warning "Class 'Spam' inherits from object, can be safely removed from bases in python3"
+         :id "useless-object-inheritance" :checker python-pylint)
      '(9 5 info "Method name \"withEggs\" doesn't conform to snake_case naming style"
          :id "invalid-name" :checker python-pylint)
      '(9 5 info "Missing method docstring" :id "missing-docstring" :checker python-pylint)
      '(9 5 warning "Method could be a function" :id "no-self-use"
          :checker python-pylint)
-     '(12 1 info "No space allowed around keyword argument assignment"
-          :id "bad-whitespace" :checker python-pylint)
      '(12 5 info "Missing method docstring" :id "missing-docstring" :checker python-pylint)
      '(12 5 warning "Either all return statements in a function should return an expression, or none of them should."
           :id "inconsistent-return-statements" :checker python-pylint)
      '(12 5 warning "Method could be a function"
           :id "no-self-use" :checker python-pylint)
+     '(12 30 info "No space allowed around keyword argument assignment"
+          :id "bad-whitespace" :checker python-pylint)
      '(14 16 error "Module 'sys' has no 'python_version' member" :id "no-member"
           :checker python-pylint)
      '(22 1 error "Undefined variable 'antigravity'" :id "undefined-variable"
@@ -3828,18 +3830,20 @@ Why not:
      '(5 1 warning "Unused import antigravit" :id "W0611"
          :checker python-pylint)
      '(7 1 info "Missing class docstring" :id "C0111" :checker python-pylint)
+     '(7 1 warning "Class 'Spam' inherits from object, can be safely removed from bases in python3"
+         :id "R0205" :checker python-pylint)
      '(9 5 info "Method name \"withEggs\" doesn't conform to snake_case naming style"
          :id "C0103" :checker python-pylint)
      '(9 5 info "Missing method docstring" :id "C0111" :checker python-pylint)
      '(9 5 warning "Method could be a function" :id "R0201"
          :checker python-pylint)
-     '(12 1 info "No space allowed around keyword argument assignment"
-          :id "C0326" :checker python-pylint)
      '(12 5 info "Missing method docstring" :id "C0111" :checker python-pylint)
      '(12 5 warning "Either all return statements in a function should return an expression, or none of them should."
           :id "R1710" :checker python-pylint)
      '(12 5 warning "Method could be a function"
           :id "R0201" :checker python-pylint)
+     '(12 30 info "No space allowed around keyword argument assignment"
+          :id "C0326" :checker python-pylint)
      '(14 16 error "Module 'sys' has no 'python_version' member" :id "E1101"
           :checker python-pylint)
      '(22 1 error "Undefined variable 'antigravity'" :id "E0602"
