@@ -3774,7 +3774,7 @@ Why not:
         (flycheck-python-mypy-cache-dir null-device))
     (flycheck-ert-should-syntax-check
      "language/python/invalid_type.py" 'python-mode
-     '(2 nil error "Incompatible return value type (got \"str\", expected \"int\")"
+     '(2 5 error "Incompatible return value type (got \"str\", expected \"int\")"
          :checker python-mypy))))
 
 (flycheck-ert-def-checker-test python-pylint python syntax-error
