@@ -9549,6 +9549,18 @@ ignored."
   :package-version '(flycheck . "28"))
 (make-variable-buffer-local 'flycheck-rust-binary-name)
 
+(flycheck-def-option-var flycheck-rust-features nil rust-cargo
+  "List of features to activate during build or check.
+
+The value of this variable is a list of strings denoting features
+that will be activated to build the target to check. Features will
+be passed to `cargo check --features=FEATURES'."
+  :type '(repeat :tag "Features to activate"
+                 (string :tag "Feature"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "32"))
+(make-variable-buffer-local 'flycheck-rust-features)
+
 (flycheck-def-option-var flycheck-rust-library-path nil rust
   "A list of library directories for Rust.
 
@@ -9641,6 +9653,8 @@ This syntax checker requires Rust 1.17 or newer.  See URL
             (eval (when (and flycheck-rust-crate-type
                              (not (string= flycheck-rust-crate-type "lib")))
                     flycheck-rust-binary-name))
+            (option "--features=" flycheck-rust-features concat
+                    flycheck-option-comma-separated-list)
             (eval flycheck-cargo-check-args)
             "--message-format=json")
   :error-parser flycheck-parse-cargo-rustc

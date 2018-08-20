@@ -1120,6 +1120,18 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          Ignored by `rust`.
 
+      .. defcustom:: flycheck-rust-features
+
+         List of features to activate during build or check.
+
+         The value of this variable is a list of strings denoting features
+         that will be activated to build the target to check. Features will
+         be passed to `cargo check --features=FEATURES'.
+
+         Empty by default.
+
+         Ignored by `rust`.
+
       .. defcustom:: flycheck-rust-library-path
 
          A list of additional library directories. Relative paths are relative
