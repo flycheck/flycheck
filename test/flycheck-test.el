@@ -4277,10 +4277,28 @@ The manifest path is relative to
    '(2 nil warning "in procedure call to `g1', expected a value of type `(procedure (* *) *)' but was given a value of type `number'"
        :checker scheme-chicken)))
 
+(flycheck-ert-def-checker-test scheme-chicken scheme error-no-line-number
+  (flycheck-ert-should-syntax-check
+   "language/chicken/error-no-line-number.scm" 'flycheck/chicken-mode
+   '(0 nil error "(cddr) during expansion of (for-each ...) - bad argument type: ()\n\n\tCall history:\n\n\tlibrary.scm:3448: print-exit54375438\t  \n\tlibrary.scm:2290: body3981\t  \n\tlibrary.scm:2292: assign\t  \n\tlibrary.scm:3448: current-print-length54395440\t  \n\tlibrary.scm:2290: body3981\t  \n\tlibrary.scm:2292: assign\t  \n\tlibrary.scm:3926: ##sys#print\t  \n\tlibrary.scm:3188: case-sensitive\t  \n\tlibrary.scm:3189: keyword-style\t  \n\tlibrary.scm:3190: ##sys#print-length-limit\t  \n\tlibrary.scm:3297: outchr\t  \n\tlibrary.scm:3188: g5148\t  \n\tlibrary.scm:3927: print-call-chain\t  \n\tlibrary.scm:3882: ##sys#get-call-chain\t  \n\tlibrary.scm:3834: ##sys#make-vector\t  \n\tlibrary.scm:1371: ##sys#allocate-vector\t  \t<--"
+       :checker scheme-chicken)))
+
+(flycheck-ert-def-checker-test scheme-chicken scheme io-type-error
+  (flycheck-ert-should-syntax-check
+   "language/chicken/io-type-warning.scm" 'flycheck/chicken-mode
+   '(4 nil warning "in procedure call to `read-all', expected argument #1 of type `(or input-port string)' but was given an argument of type `output-port'"
+       :checker scheme-chicken)))
+
 (flycheck-ert-def-checker-test scheme-chicken scheme syntax-error
   (flycheck-ert-should-syntax-check
    "language/chicken/syntax-error.scm" 'flycheck/chicken-mode
    '(1 nil error "not enough arguments\n\n\t(define)\n\n\tExpansion history:\n\n\textras.scm:630: loop\t  \n\textras.scm:633: get-output-string\t  \n\tlibrary.scm:3655: ##sys#substring\t  \n\tlibrary.scm:603: ##sys#make-string\t  \n\tlibrary.scm:511: ##sys#allocate-vector\t  \n\textras.scm:633: ##sys#print\t  \n\tlibrary.scm:3188: case-sensitive\t  \n\tlibrary.scm:3189: keyword-style\t  \n\tlibrary.scm:3190: ##sys#print-length-limit\t  \n\tlibrary.scm:3319: ##sys#number?\t  \n\tlibrary.scm:3349: outstr\t  \n\tlibrary.scm:3188: g5138\t  \n\tsupport.scm:122: print-call-chain\t  \n\tlibrary.scm:3882: ##sys#get-call-chain\t  \n\tlibrary.scm:3834: ##sys#make-vector\t  \n\tlibrary.scm:1371: ##sys#allocate-vector\t  \t<--"
+       :checker scheme-chicken)))
+
+(flycheck-ert-def-checker-test scheme-chicken scheme syntax-error-no-line-number
+  (flycheck-ert-should-syntax-check
+   "language/chicken/syntax-error-no-line-number.scm" 'flycheck/chicken-mode
+   '(0 nil error "illegal atomic form\n\n\t()\n\n\tExpansion history:\n\n\textras.scm:630: loop\t  \n\textras.scm:633: get-output-string\t  \n\tlibrary.scm:3655: ##sys#substring\t  \n\tlibrary.scm:603: ##sys#make-string\t  \n\tlibrary.scm:511: ##sys#allocate-vector\t  \n\textras.scm:633: ##sys#print\t  \n\tlibrary.scm:3188: case-sensitive\t  \n\tlibrary.scm:3189: keyword-style\t  \n\tlibrary.scm:3190: ##sys#print-length-limit\t  \n\tlibrary.scm:3319: ##sys#number?\t  \n\tlibrary.scm:3349: outstr\t  \n\tlibrary.scm:3188: g5138\t  \n\tsupport.scm:122: print-call-chain\t  \n\tlibrary.scm:3882: ##sys#get-call-chain\t  \n\tlibrary.scm:3834: ##sys#make-vector\t  \n\tlibrary.scm:1371: ##sys#allocate-vector\t  \t<--"
        :checker scheme-chicken)))
 
 (flycheck-ert-def-checker-test scheme-chicken scheme syntax-read-error

@@ -9881,6 +9881,11 @@ See URL `http://call-cc.org/'."
          (one-or-more (any space)) "(" (file-name) ":" line ") " (message)
          line-end)
    (warning line-start
+            "Warning: " (zero-or-more not-newline) ",\n"
+            (one-or-more (any space)) (zero-or-more not-newline) ":\n"
+            (one-or-more (any space)) "(" (file-name) ":" line ") " (message)
+            line-end)
+   (warning line-start
             "Warning: " (zero-or-more not-newline) ":\n"
             (one-or-more (any space)) "(" (file-name) ":" line ") " (message)
             line-end)
@@ -9893,10 +9898,28 @@ See URL `http://call-cc.org/'."
                                  (zero-or-more not-newline))
                    (one-or-more space) "<--")
           line-end)
+   ;; A of version 4.12.0, the chicken compiler doesn't provide a
+   ;; line number for this error.
+   (error line-start "Syntax error: "
+          (message (one-or-more not-newline)
+                   (zero-or-more "\n"
+                                 (zero-or-more space)
+                                 (zero-or-more not-newline))
+                   (one-or-more space) "<--")
+          line-end)
    (error line-start
           "Error: " (zero-or-more not-newline) ":\n"
           (one-or-more (any space)) "(" (file-name) ":" line ") " (message)
-          line-end))
+          line-end)
+   ;; A of version 4.12.0, the chicken compiler doesn't provide a
+   ;; line number for this error.
+   (error line-start "Error: "
+          (message (one-or-more not-newline)
+                   (zero-or-more "\n"
+                                 (zero-or-more space)
+                                 (zero-or-more not-newline))
+                   (one-or-more space) "<--")))
+  :error-filter flycheck-fill-empty-line-numbers
   :predicate
   (lambda ()
     ;; In `scheme-mode' we must check the current Scheme implementation
