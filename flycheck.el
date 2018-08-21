@@ -9014,12 +9014,15 @@ See URL `https://docs.python.org/3.4/library/py_compile.html'."
 
 See URL `http://mypy-lang.org/'."
   :command ("mypy"
+            "--show-column-numbers"
             (config-file "--config-file" flycheck-python-mypy-ini)
             (option "--cache-dir" flycheck-python-mypy-cache-dir)
             source-original)
   :error-patterns
-  ((error line-start (file-name) ":" line ": error:" (message) line-end)
-   (warning line-start (file-name) ":" line ": warning:" (message) line-end))
+  ((error line-start (file-name) ":" line ":" column ": error:" (message)
+          line-end)
+   (warning line-start (file-name) ":" line ":" column  ": warning:" (message)
+            line-end))
   :modes python-mode
   ;; Ensure the file is saved, to work around
   ;; https://github.com/python/mypy/issues/4746.
