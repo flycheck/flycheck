@@ -29,6 +29,7 @@
  (depends-on "js3-mode")
  (depends-on "rjsx-mode")
  (depends-on "json-mode")
+ (depends-on "julia-mode")
  (depends-on "less-css-mode")
  (depends-on "lua-mode")
  (depends-on "markdown-mode")
