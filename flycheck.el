@@ -9599,16 +9599,17 @@ Relative paths are relative to the file being checked."
      (or
       ;; Macro errors emit a diagnostic in a phony file,
       ;; e.g. "<println macros>".
-      (string-match-p
-       (rx "macros>" line-end)
-       (flycheck-error-filename err))
+      (-when-let (filename (flycheck-error-filename err))
+        (string-match-p (rx "macros>" line-end) filename))
       ;; Redundant message giving the number of failed errors
-      (string-match-p
-       (rx (or (: "aborting due to " (optional (one-or-more num) " ")
-                  "previous error")
-               (: "For more information about this error, try `rustc --explain "
-                  (one-or-more alnum) "`.")))
-       (flycheck-error-message err))))
+      (-when-let (msg (flycheck-error-message err))
+        (string-match-p
+         (rx
+          (or (: "aborting due to " (optional (one-or-more num) " ")
+                 "previous error")
+              (: "For more information about this error, try `rustc --explain "
+                 (one-or-more alnum) "`.")))
+         msg))))
    errors))
 
 (defun flycheck-rust-manifest-directory ()
