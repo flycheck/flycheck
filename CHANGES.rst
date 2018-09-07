@@ -6,6 +6,7 @@
   - Remove ``javascript-jscs`` checker
   - Remove ``elixir-dogma`` checker [GH-1450]
   - ``rust-cargo`` now requires Rust 1.17 or newer [GH-1289]
+  - ``rust`` now requires 1.18 or newer [GH-1501]
   - Rename ``flycheck-cargo-rustc-args`` to ``flycheck-cargo-check-args``
     [GH-1289]
   - ``rust-cargo`` does not use the variable ``flycheck-rust-args`` anymore
