@@ -173,6 +173,7 @@ attention to case differences."
     coq
     css-csslint
     css-stylelint
+    cuda-nvcc
     cwl
     d-dmd
     dockerfile-hadolint
@@ -6971,6 +6972,59 @@ See URL `http://stylelint.io/'."
   :standard-input t
   :error-parser flycheck-parse-stylelint
   :modes (css-mode))
+
+(flycheck-def-option-var flycheck-cuda-language-standard nil cuda-nvcc
+  "Our CUDA Language Standard."
+  :type '(choice (const :tag "Default standard" nil)
+                 (string :tag "Language standard"))
+  :safe #'stringp
+  :package-version '(flycheck . "32"))
+(make-variable-buffer-local 'flycheck-cuda-language-standard)
+
+(flycheck-def-option-var flycheck-cuda-includes nil cuda-nvcc
+  "Our include directories to pass to nvcc."
+  :type '(repeat (file :tag "Include file"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "32"))
+
+(flycheck-def-option-var flycheck-cuda-definitions nil cuda-nvcc
+  "Additional preprocessor definitions for nvcc.
+A list of strings to pass to cuda, a la flycheck-clang"
+  :type '(repeat (string :tag "Definitions"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "32"))
+
+(flycheck-def-option-var flycheck-cuda-include-path nil cuda-nvcc
+  "A list of include directories for nvcc."
+  :type '(repeat (directory :tag "Include directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "32"))
+
+(flycheck-define-checker cuda-nvcc
+  "A CUDA C/C++ syntax checker using nvcc.
+
+See URL `https://developer.nvidia.com/cuda-llvm-compiler'."
+  :command ("nvcc"
+            "-c" ;; Compile Only
+            (option "-std=" flycheck-cuda-language-standard concat)
+            (option-list "-include" flycheck-cuda-includes)
+            (option-list "-D" flycheck-cuda-definitions concat)
+            (option-list "-I" flycheck-cuda-include-path)
+            source)
+  :error-patterns
+  ((error line-start
+          (message "In file included from")
+          " " (or "<stdin>" (file-name))
+          ":" line ":" line-end)
+   (error line-start (or "<stdin>" (file-name))
+          "(" line "): error: " (message) line-end)
+   (error line-start (or "<stdin>" (file-name))
+          ":" line ":" column
+          ": fatal error: " (optional (message)) line-end)
+   (warning line-start (or "<stdin>" (file-name))
+            "(" line "): warning: " (message) line-end))
+  :modes cuda-mode)
+
 
 (flycheck-def-option-var flycheck-cwl-schema-path nil cwl
   "A path for the schema file for Common Workflow Language.

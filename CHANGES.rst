@@ -23,6 +23,7 @@
   - Rust with ``rust-clippy`` [GH-1385]
   - VHDL with ``ghdl`` [GH-1160]
   - mypy with ``python-mypy`` [GH-1354]
+  - CUDA with ``cuda-nvcc`` [GH-1508]
 
 - New features:
 
