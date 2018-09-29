@@ -3058,6 +3058,18 @@ The term \"1\" has type \"nat\" while it is expected to have type \"bool\"." :ch
    '(4 14 error "Expected a `FUNCTION` or `IDENT` after colon at line 4, col 14."
        :id "ParsingErrors" :checker css-csslint)))
 
+(flycheck-ert-def-checker-test cuda cuda syntax-error
+  (flycheck-ert-should-syntax-check
+   "language/cuda/syntax-error.cu" 'cuda-mode
+   '(5 0 error "error: identifier \"ac\" is undefined"
+       :checker cuda)))
+
+(flycheck-ert-def-checker-test cuda cuda syntax-warning
+  (flycheck-ert-should-syntax-check
+   "language/cuda/syntax-warning.cu" 'cuda-mode
+   '(3 0 warning "variable \"b\" was set but never used"
+       :checker cuda)))
+
 (flycheck-ert-def-checker-test cwl cwl syntax-error
   (let ((flycheck-cwl-schema-path "schema/CommonWorkflowLanguage.yml"))
     (flycheck-ert-should-syntax-check
