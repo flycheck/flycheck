@@ -476,15 +476,17 @@ sandboxes."
 (defun flycheck-default-executable-find (executable)
   "Resolve EXECUTABLE to a full path.
 
-If given just a command name (no directory component), search
-`exec-path' using the standard `executable-find' function;
-otherwise, resolve any relative paths to absolute ones."
+Like `executable-find', but supports relative paths.
+
+Attempts invoking `executable-find' first; if that returns nil,
+and EXECUTABLE contains a directory component, expands to a full
+path and tries invoking `executable-find' again."
   ;; file-name-directory returns non-nil iff the given path has a
   ;; directory component.
-  (if (file-name-directory executable)
-      (when (file-executable-p executable)
-        (expand-file-name executable))
-    (executable-find executable)))
+  (or
+   (executable-find executable)
+   (when (file-name-directory executable)
+     (executable-find (expand-file-name executable)))))
 
 (defcustom flycheck-indication-mode 'left-fringe
   "The indication mode for Flycheck errors and warnings.
