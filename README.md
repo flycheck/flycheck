@@ -1,11 +1,11 @@
-# [![Flycheck][logo]](http://www.flycheck.org) #
+# [![Flycheck][logo]](https://www.flycheck.org) #
 
 [![License GPL 3](https://img.shields.io/github/license/flycheck/flycheck.svg)][COPYING]
 [![Join the chat](https://img.shields.io/gitter/room/flycheck/flycheck.svg)](https://gitter.im/flycheck/flycheck)
-[![MELPA stable version](http://stable.melpa.org/packages/flycheck-badge.svg)](http://stable.melpa.org/#/flycheck)
+[![MELPA stable version](http://stable.melpa.org/packages/flycheck-badge.svg)](https://stable.melpa.org/#/flycheck)
 [![Build Status](https://img.shields.io/travis/flycheck/flycheck/master.svg)](https://travis-ci.org/flycheck/flycheck)
 
-<http://www.flycheck.org>
+<https://www.flycheck.org>
 
 Modern on-the-fly syntax checking extension for GNU Emacs.  [Try it][]!
 
@@ -40,13 +40,13 @@ PARTICULAR PURPOSE.  See the [GNU General Public License][copying] for more
 details.
 
 [COPYING]: https://github.com/flycheck/flycheck/blob/master/COPYING
-[manual]: http://www.flycheck.org/en/latest/index.html#the-user-guide
+[manual]: https://www.flycheck.org/en/latest/index.html#the-user-guide
 [logo]: https://raw.githubusercontent.com/flycheck/flycheck/master/doc/_static/logo.png
-[try it]: http://www.flycheck.org/en/latest/#try-out
-[Installation]: http://www.flycheck.org/en/latest/user/installation.html
-[Quickstart]: http://www.flycheck.org/en/latest/user/quickstart.html
+[try it]: https://www.flycheck.org/en/latest/#try-out
+[Installation]: https://www.flycheck.org/en/latest/user/installation.html
+[Quickstart]: https://www.flycheck.org/en/latest/user/quickstart.html
 [sx]: https://emacs.stackexchange.com/questions/tagged/flycheck
 [gitter]: https://gitter.im/flycheck/flycheck
 [Issue Tracker]: https://github.com/flycheck/flycheck/issues
-[contrib]: http://www.flycheck.org/en/latest/contributor/contributing.html
-[coc]: http://www.flycheck.org/en/latest/community/conduct.html
+[contrib]: https://www.flycheck.org/en/latest/contributor/contributing.html
+[coc]: https://www.flycheck.org/en/latest/community/conduct.html
