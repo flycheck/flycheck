@@ -693,6 +693,17 @@ using \\[flycheck-error-list-reset-filter]."
   :safe #'flycheck-error-level-p
   :package-version '(flycheck . "0.24"))
 
+(defcustom flycheck-relevant-error-other-file-minimum-level 'error
+  "The minimum level of errors from other files to display in this buffer.
+
+If set to an error level, only display errors from other files
+whose error level is at least as severe as this one.  If nil,
+display all errors from other files."
+  :group 'flycheck
+  :type 'flycheck-minimum-level
+  :safe #'flycheck-error-level-p
+  :package-version '(flycheck . "32"))
+
 (defcustom flycheck-completing-read-function #'completing-read
   "Function to read from minibuffer with completion.
 
@@ -3368,7 +3379,9 @@ Return ERRORS, modified in-place."
     (and file-name
          (or (null buffer-file-name)
              (not (flycheck-same-files-p buffer-file-name file-name)))
-         (eq 'error (flycheck-error-level err)))))
+         (<= (flycheck-error-level-severity
+              flycheck-relevant-error-other-file-minimum-level)
+             (flycheck-error-level-severity (flycheck-error-level err))))))
 
 (defun flycheck-relevant-error-p (err)
   "Determine whether ERR is relevant for the current buffer.
