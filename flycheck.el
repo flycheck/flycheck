@@ -6764,20 +6764,13 @@ Requires GCC 4.4 or newer.  See URL `https://gcc.gnu.org/'."
             "-")
   :standard-input t
   :error-patterns
-  ((error line-start
-          (message "In file included from") " " (or "<stdin>" (file-name))
-          ":" line ":" column ":" line-end)
-   (info line-start (or "<stdin>" (file-name)) ":" line ":" column
+  ((info line-start (or "<stdin>" (file-name)) ":" line ":" column
          ": note: " (message) line-end)
    (warning line-start (or "<stdin>" (file-name)) ":" line ":" column
             ": warning: " (message (one-or-more (not (any "\n["))))
             (optional "[" (id (one-or-more not-newline)) "]") line-end)
    (error line-start (or "<stdin>" (file-name)) ":" line ":" column
           ": " (or "fatal error" "error") ": " (message) line-end))
-  :error-filter
-  (lambda (errors)
-    (flycheck-fold-include-levels (flycheck-sanitize-errors errors)
-                                  "In file included from"))
   :modes (c-mode c++-mode)
   :next-checkers ((warning . c/c++-cppcheck)))
 
