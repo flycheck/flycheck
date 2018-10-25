@@ -153,9 +153,9 @@ class EmacsLispSymbol(ObjectDescription):
             symbol = obarray.setdefault(name, {})
             if self.cell in symbol:
                 self.state_machine.reporter.warning(
-                    'duplicate description of %s %s, ' % (self.objtype, name) +
-                    'other instance in ' +
-                    self.env.doc2path(symbol[self.cell].docname),
+                    'duplicate description of %s %s, ' % (self.objtype, name)
+                    + 'other instance in '
+                    + self.env.doc2path(symbol[self.cell].docname),
                     line=self.lineno)
             symbol[self.cell] = Cell(self.objtype, self.env.docname)
 
@@ -238,9 +238,9 @@ class EmacsLispKey(ObjectDescription):
             symbol = obarray.setdefault(name, {})
             if 'function' in symbol:
                 self.state_machine.reporter.warning(
-                    'duplicate description of %s %s, ' % (self.objtype, name) +
-                    'other instance in ' +
-                    self.env.doc2path(symbol['function'].docname),
+                    'duplicate description of %s %s, ' % (self.objtype, name)
+                    + 'other instance in '
+                    + self.env.doc2path(symbol['function'].docname),
                     line=self.lineno)
             symbol['function'] = Cell(self.objtype, self.env.docname)
 
@@ -260,9 +260,9 @@ class EmacsLispKey(ObjectDescription):
             keymap = self.env.domaindata['el']['keymap']
             if binding in keymap:
                 self.state_machine.reporter.warning(
-                    'duplicate description of binding %s, ' % binding +
-                    'other instance in ' +
-                    self.env.doc2path(keymap[binding]),
+                    'duplicate description of binding %s, ' % binding
+                    + 'other instance in '
+                    + self.env.doc2path(keymap[binding]),
                     line=self.lineno)
             keymap[binding] = self.env.docname
 
