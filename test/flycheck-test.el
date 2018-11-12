@@ -2983,7 +2983,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 (flycheck-ert-def-checker-test dockerfile-hadolint dockerfile error
   (flycheck-ert-should-syntax-check
    "language/dockerfile/Dockerfile.error" 'dockerfile-mode
-   '(2 1 error "unexpected 'I' expecting '#', ADD, ARG, CMD, COPY, ENTRYPOINT, ENV, EXPOSE, FROM, HEALTHCHECK, LABEL, MAINTAINER, ONBUILD, RUN, SHELL, STOPSIGNAL, USER, VOLUME, WORKDIR, end of input, or the rest of a new line followed by the next instruction"
+   '(2 1 error "unexpected 'I' expecting '#', ADD, ARG, CMD, COPY, ENTRYPOINT, ENV, EXPOSE, FROM, HEALTHCHECK, LABEL, MAINTAINER, ONBUILD, RUN, SHELL, STOPSIGNAL, USER, VOLUME, WORKDIR, end of input, or whitespace"
        :checker dockerfile-hadolint)))
 
 (flycheck-ert-def-checker-test dockerfile-hadolint dockerfile warnings
@@ -4229,7 +4229,8 @@ The manifest path is relative to
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/macro-error.rs" 'rust-mode
-     '(2 3 info "1 positional argument in format string, but no arguments were given" :checker rust :group 1))))
+     '(2 3 info "1 positional argument in format string, but no arguments were given" :checker rust :group 1)
+     '(2 13 error "1 positional argument in format string, but no arguments were given" :checker rust :group 1))))
 
 (flycheck-ert-def-checker-test sass sass nil
   (let ((flycheck-disabled-checkers '(sass/scss-sass-lint)))
