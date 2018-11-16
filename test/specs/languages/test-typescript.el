@@ -34,11 +34,13 @@
   \"failure\":\"unused variable: 'invalidAlignment'\",
   \"name\":\"sample.ts\",
   \"ruleName\":\"no-unused-variable\",
+  \"ruleSeverity\":\"ERROR\",
   \"startPosition\":{\"character\":9,\"line\":0,\"position\":9}},
  {\"endPosition\":{\"character\":14,\"line\":2,\"position\":76},
   \"failure\":\"missing semicolon\",
   \"name\":\"sample.ts\",
   \"ruleName\":\"semicolon\",
+  \"ruleSeverity\":\"WARNING\",
   \"startPosition\":{\"character\":14,\"line\":2,\"position\":76}}]")
           (json-with-deprecations "no-unused-variable is deprecated. Use the tsc compiler options --noUnusedParameters and --noUnusedLocals instead.
 
@@ -55,12 +57,13 @@
  \"failure\":\"unused variable: 'invalidAlignment'\",
  \"name\":\"sample.ts\",
  \"ruleName\":\"no-unused-variable\",
+ \"ruleSeverity\":\"XXX\",
  \"startPosition\":{\"character\":9,\"line\":0,\"position\":9}}]"))
       (it "parses TSLint JSON output"
         (expect (flycheck-parse-tslint json 'checker 'buffer)
                 :to-be-equal-flycheck-errors
                 (list
-                 (flycheck-error-new-at 1 10 'warning
+                 (flycheck-error-new-at 1 10 'error
                                         "unused variable: 'invalidAlignment'"
                                         :id "no-unused-variable"
                                         :checker 'checker
@@ -76,7 +79,7 @@
         (expect (flycheck-parse-tslint json-with-deprecations 'checker 'buffer)
                 :to-be-equal-flycheck-errors
                 (list
-                 (flycheck-error-new-at 1 10 'warning
+                 (flycheck-error-new-at 1 10 'error
                                         "unused variable: 'invalidAlignment'"
                                         :id "no-unused-variable"
                                         :checker 'checker
