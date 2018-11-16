@@ -36,6 +36,9 @@
   - Add ``flycheck-sh-bash-args`` to pass arguments to ``sh-bash`` [GH-1439].
   - Add ``flychjeck-eslint-args`` to pass arguments to ``javascript-eslint``
     [GH-1360]
+  - Add ``flycheck-default-executable-find``, the new default value for
+    ``flycheck-executable-find``, to allow using relative paths to checkers
+    (set e.g. in file or dir-local variables). [GH-1485]
 
 - Improvements
 

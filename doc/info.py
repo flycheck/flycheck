@@ -110,8 +110,8 @@ class HTMLXRefDB(object):
                     url = Template(match.group('substurl')).substitute(
                         substitutions)
                     substitutions[match.group('substname')] = url
-                elif (match.group('manname') and
-                      match.group('mantype') == 'node'):
+                elif (match.group('manname')
+                      and match.group('mantype') == 'node'):
                     url = Template(match.group('manurl')).substitute(
                         substitutions)
                     manuals[match.group('manname')] = url
@@ -137,7 +137,7 @@ def update_htmlxref(app):
         try:
             app.env.info_htmlxref = HTMLXRefDB.parse(
                 requests.get(HTMLXRefDB.XREF_URL).text)
-        except requests.exceptions.ConnectionError as error:
+        except requests.exceptions.ConnectionError:
             app.warn('Failed to load xref DB.  '
                      'Info references will not be resolved')
             app.env.info_htmlxref = None

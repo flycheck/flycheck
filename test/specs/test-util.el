@@ -74,7 +74,61 @@
         (set-buffer-modified-p t)
         (expect (flycheck-buffer-saved-p) :not :to-be-truthy))
       (expect (spy-calls-count 'file-exists-p) :to-equal 1)
-      (expect (spy-calls-count 'buffer-file-name) :to-equal 1))))
+      (expect (spy-calls-count 'buffer-file-name) :to-equal 1)))
+
+
+  (describe "flycheck-default-executable-find"
+
+    (describe "non-existing programs"
+      (it "returns nil when given a non-existing program name"
+        (let ((result (flycheck-default-executable-find
+                       "flycheck-nonexisting")))
+          (expect result :to-be nil)))
+
+      (it "returns nil when given a non-existing relative program path"
+        (let ((result (flycheck-default-executable-find
+                       "dir/flycheck-nonexisting")))
+          (expect result :to-be nil)))
+
+      (it "returns nil when given a non-existing absolute program path"
+        (let ((result (flycheck-default-executable-find
+                       "/usr/bin/flycheck-nonexisting")))
+          (expect result :to-be nil))))
+
+    (describe "existing programs with implied suffix"
+      (let (temp-dir program-path)
+        (before-each
+          (setq temp-dir (make-temp-file "flycheck-exec-find-root" 'dir-flag)
+                program-path (expand-file-name
+                              "dir/flycheck-testprog.program" temp-dir))
+          (make-directory (expand-file-name "dir" temp-dir))
+          (write-region "" nil program-path)
+          (set-file-modes program-path
+                          (logior 73 (file-modes program-path))))
+        (after-each
+          (ignore-errors (delete-directory temp-dir 'recursive)))
+
+        (it "resolves the path when given an existing program name"
+          (let* ((default-directory temp-dir)
+                 (exec-path (list (expand-file-name "dir" temp-dir)))
+                 (exec-suffixes '(".program"))
+                 (result (flycheck-default-executable-find
+                          "flycheck-testprog")))
+            (expect result :to-equal program-path)))
+
+        (it "resolves the path when given an existing relative program path"
+          (let* ((default-directory temp-dir)
+                 (exec-suffixes '(".program"))
+                 (result (flycheck-default-executable-find
+                          "dir/flycheck-testprog")))
+            (expect result :to-equal program-path)))
+
+        (it "resolves the path when given an existing absolute program path"
+          (let* ((default-directory temp-dir)
+                 (exec-suffixes '(".program"))
+                 (result (flycheck-default-executable-find
+                          (expand-file-name "dir/flycheck-testprog" temp-dir))))
+            (expect result :to-equal program-path)))))))
 
 
 ;;; test-util.el ends here
