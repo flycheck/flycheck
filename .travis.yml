@@ -61,14 +61,17 @@ script:
                    --workdir /flycheck \
                    flycheck/emacs-cask:$EMACS_VERSION \
                    /bin/bash -c "make check"
+      # We use another Cask file for Emacs 24
+      else
+        cp Cask.24 Cask
       fi
       # Compile and run unit tests.
-      # If the unit tests succeed, fetch the all-tools container
-      # and run the integration tests
       docker run --volume "$TRAVIS_BUILD_DIR":/flycheck \
                  --workdir /flycheck \
                  flycheck/emacs-cask:$EMACS_VERSION \
                  /bin/bash -c "make compile && make unit && make specs"
+      # If the unit tests succeed, fetch the all-tools container
+      # and run the integration tests
       docker build --build-arg EMACS_VERSION=$EMACS_VERSION \
                       --tag tools-and-emacs:$EMACS_VERSION \
                       --file=.travis/tools-and-emacs .
