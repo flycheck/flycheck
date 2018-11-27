@@ -9095,7 +9095,7 @@ See URL `https://github.com/jimhester/lintr'."
             line-end)
    (error line-start (file-name) ":" line ":" column ": error: " (message)
           line-end))
-  :modes ess-mode
+  :modes (ess-mode ess-r-mode)
   :predicate
   ;; Don't check ESS files which do not contain R, and make sure that lintr is
   ;; actually available
