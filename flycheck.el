@@ -184,6 +184,7 @@ attention to case differences."
     fortran-gfortran
     go-gofmt
     go-golint
+    go-revive
     go-vet
     go-build
     go-test
@@ -7596,6 +7597,19 @@ See URL `https://github.com/golang/lint'."
   :next-checkers (go-vet
                   ;; Fall back, if go-vet doesn't exist
                   go-build go-test go-errcheck go-unconvert go-megacheck))
+
+(flycheck-define-checker go-revive
+  "A Go style checker using revive.
+
+See URL `https://github.com/mgechev/revive'."
+  :command ("revive" source)
+  :error-patterns
+  ((warning line-start (file-name) ":" line ":" column ": " (message) line-end))
+  :modes go-mode
+  :next-checkers (go-vet
+                  ;; Fall back, if go-vet doesn't exist
+                  go-build go-test go-errcheck go-unconvert))
+
 
 (flycheck-def-option-var flycheck-go-vet-print-functions nil go-vet
   "A list of print-like functions for `go tool vet'.
