@@ -4062,8 +4062,15 @@ Why not:
 
 (flycheck-ert-def-checker-test nix nix nil
   (flycheck-ert-should-syntax-check
-   "language/nix.nix" 'nix-mode
+   "language/nix/syntax-error.nix" 'nix-mode
    '(3 1 error "syntax error, unexpected IN, expecting ';'," :checker nix)))
+
+(flycheck-ert-def-checker-test nix-linter nix nil
+  (flycheck-ert-should-syntax-check
+   "language/nix/warnings.nix" 'nix-mode
+   '(1 1 warning "LetInInheritRecset" :id "LetInInheritRecset" :checker nix-linter)
+   '(2 3 warning "Unused `let` bind `x`" :id "UnusedLetBind" :checker nix-linter)
+   '(3 4 warning "Unneeded `rec` on set" :id "UnneededRec" :checker nix-linter)))
 
 (ert-deftest flycheck-locate-sphinx-source-directory/not-in-a-sphinx-project ()
   :tags '(language-rst)
