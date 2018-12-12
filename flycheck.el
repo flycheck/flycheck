@@ -5842,10 +5842,9 @@ about TSLint."
                   (+ 1 .startPosition.line)
                   (+ 1 .startPosition.character)
                   (pcase .ruleSeverity
-                    (`"ERROR"   'error)
-                    (`"WARNING" 'warning)
-                    ;; Default to error
-                    (_          'error))
+                    ("ERROR"   'error)
+                    ("WARNING" 'warning)
+                    (_          'warning))
                   .failure
                   :id .ruleName
                   :checker checker

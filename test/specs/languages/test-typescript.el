@@ -42,7 +42,7 @@
   \"ruleName\":\"semicolon\",
   \"ruleSeverity\":\"WARNING\",
   \"startPosition\":{\"character\":14,\"line\":2,\"position\":76}}]")
-          (json-with-deprecations "no-unused-variable is deprecated. Use the tsc compiler options --noUnusedParameters and --noUnusedLocals instead.
+          (json-with-unknown-severity "no-unused-variable is deprecated. Use the tsc compiler options --noUnusedParameters and --noUnusedLocals instead.
 
   Could not find implementations for the following rules specified in the configuration:
       label-undefined
@@ -75,11 +75,11 @@
                                         :checker 'checker
                                         :buffer 'buffer
                                         :filename "sample.ts"))))
-      (it "parses TSLint JSON output with deprecation output"
-        (expect (flycheck-parse-tslint json-with-deprecations 'checker 'buffer)
+      (it "parses TSLint JSON output with unknown severity"
+          (expect (flycheck-parse-tslint json-with-unknown-severity 'checker 'buffer)
                 :to-be-equal-flycheck-errors
                 (list
-                 (flycheck-error-new-at 1 10 'error
+                 (flycheck-error-new-at 1 10 'warning
                                         "unused variable: 'invalidAlignment'"
                                         :id "no-unused-variable"
                                         :checker 'checker
