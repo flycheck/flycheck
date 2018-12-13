@@ -178,6 +178,7 @@ attention to case differences."
     dockerfile-hadolint
     emacs-lisp
     emacs-lisp-checkdoc
+    ember-template-lint
     erlang-rebar3
     erlang
     eruby-erubis
@@ -7360,6 +7361,40 @@ The checker runs `checkdoc-current-buffer'."
 (dolist (checker '(emacs-lisp emacs-lisp-checkdoc))
   (setf (car (flycheck-checker-get checker 'command))
         flycheck-this-emacs-executable))
+
+(defun flycheck-ember-template-lint--check-for-config (&rest _ignored)
+  "Check the required config file is available up the file system."
+  (and buffer-file-name
+       (locate-dominating-file buffer-file-name ".template-lintrc.js")))
+
+(defun flycheck-ember-template-lint--parse-error (output checker buffer)
+  "Parse Ember-template-lint errors/warnings from JSON OUTPUT.
+CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
+the BUFFER that was checked respectively."
+  (mapcar (lambda (err)
+            (let-alist err
+              (flycheck-error-new-at
+               .line
+               .column
+               (pcase .severity
+                 (2 'error)
+                 (1 'warning)
+                 (_ 'warning))
+               .message
+               :id .rule
+               :checker checker
+               :buffer buffer
+               :filename (buffer-file-name buffer))))
+          (cdr (car (car (flycheck-parse-json output))))))
+
+(flycheck-define-checker ember-template-lint
+  "An Ember template checker using ember-template-lint."
+  :command ("ember-template-lint" source "--json")
+  :standard-input t
+  :error-parser flycheck-ember-template-lint--parse-error
+  :modes web-mode
+  :enabled flycheck-ember-template-lint--check-for-config
+  :working-directory flycheck-ember-template-lint--check-for-config)
 
 (flycheck-def-option-var flycheck-erlang-include-path nil erlang
   "A list of include directories for Erlang.

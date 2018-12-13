@@ -344,6 +344,13 @@ to view the docstring of the syntax checker.  Likewise, you may use
       :infonode:`(elisp)Library Headers`
          Information about library headers for Emacs Lisp files.
 
+.. supported-language:: Ember Templates
+
+   .. syntax-checker:: ember-template-lint
+
+      Check your Ember templates with
+      `ember-template-lint <https://github.com/ember-template-lint/ember-template-lint>`_ 
+
 .. supported-language:: Erlang
 
    Flycheck checks Erlang with `erlang-rebar3` in rebar projects and
