@@ -4219,10 +4219,10 @@ The manifest path is relative to
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/importing.rs" 'rust-mode
-     '(1 5 error "failed to resolve. There are too many initial `super`s. (There are too many initial `super`s.)" :checker rust :id "E0433" :group 2)
+     '(1 5 error "failed to resolve: there are too many initial `super`s. (there are too many initial `super`s.)" :checker rust :id "E0433" :group 2)
      '(1 5 warning "unused import: `super::imported`" :checker rust :id "unused_imports" :group 1)
      '(1 5 info "#[warn(unused_imports)] on by default" :checker rust :id "unused_imports" :group 1)
-     '(4 24 error "failed to resolve. Use of undeclared type or module `imported` (Use of undeclared type or module `imported`)" :checker rust :id "E0433" :group 3)
+     '(4 24 error "failed to resolve: use of undeclared type or module `imported` (use of undeclared type or module `imported`)" :checker rust :id "E0433" :group 3)
      )))
 
 (flycheck-ert-def-checker-test rust rust macro-error
