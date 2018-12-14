@@ -9681,9 +9681,12 @@ This syntax checker requires Rust 1.17 or newer.  See URL
                   ;; root.
                   (let ((root (flycheck-rust-cargo-workspace-root)))
                     (seq-do (lambda (err)
-                              (setf (flycheck-error-filename err)
-                                    (expand-file-name
-                                     (flycheck-error-filename err) root)))
+                              ;; Some errors are crate level and do not have a
+                              ;; filename
+                              (when (flycheck-error-filename err)
+                                (setf (flycheck-error-filename err)
+                                      (expand-file-name
+                                       (flycheck-error-filename err) root))))
                             (flycheck-rust-error-filter errors))))
   :error-explainer flycheck-rust-error-explainer
   :modes rust-mode
