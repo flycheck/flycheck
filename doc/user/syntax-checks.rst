@@ -100,6 +100,28 @@ You can customise this behaviour with `flycheck-check-syntax-automatically`:
          Seconds to wait after the last change to the buffer before starting a
          syntax check.
 
+   ``idle-buffer-switch``
+     Check the buffer a short time after switching to it from another
+     buffer.  The delay is customisable with
+     `flycheck-idle-buffer-switch-delay`:
+
+     .. defcustom:: flycheck-idle-buffer-switch-delay
+
+        Seconds to wait after switching to a buffer before starting a
+        syntax check.
+
+      If you switch to several buffers in rapid succession, the
+      behavior depends on
+      `flycheck-buffer-switch-check-intermediate-buffers`:
+
+      .. defcustom:: flycheck-buffer-switch-check-intermediate-buffers
+
+         If non-nil, then a buffer you switch to will have a syntax
+         check run even if you switch to another buffer before it
+         starts.  If nil, then only the current buffer can have a
+         syntax check run.  Note that syntax checks can still be run
+         in other buffers due to changes to their contents.
+
    ``mode-enabled``
       Check the buffer immediately after :mode:`flycheck` was enabled.
 
