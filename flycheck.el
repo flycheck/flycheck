@@ -178,7 +178,7 @@ attention to case differences."
     dockerfile-hadolint
     emacs-lisp
     emacs-lisp-checkdoc
-    ember-template-lint
+    ember-template
     erlang-rebar3
     erlang
     eruby-erubis
@@ -7362,12 +7362,12 @@ The checker runs `checkdoc-current-buffer'."
   (setf (car (flycheck-checker-get checker 'command))
         flycheck-this-emacs-executable))
 
-(defun flycheck-ember-template-lint--check-for-config (&rest _ignored)
+(defun flycheck-ember-template--check-for-config (&rest _ignored)
   "Check the required config file is available up the file system."
   (and buffer-file-name
        (locate-dominating-file buffer-file-name ".template-lintrc.js")))
 
-(defun flycheck-ember-template-lint--parse-error (output checker buffer)
+(defun flycheck-ember-template--parse-error (output checker buffer)
   "Parse Ember-template-lint errors/warnings from JSON OUTPUT.
 CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
 the BUFFER that was checked respectively."
@@ -7387,14 +7387,23 @@ the BUFFER that was checked respectively."
                :filename (buffer-file-name buffer))))
           (cdr (car (car (flycheck-parse-json output))))))
 
-(flycheck-define-checker ember-template-lint
+(flycheck-def-config-file-var flycheck-ember-template-lintrc
+    ember-template
+    ".template-lintrc.js"
+  :type 'string
+  :safe #'stringp)
+
+(flycheck-define-checker ember-template
   "An Ember template checker using ember-template-lint."
-  :command ("ember-template-lint" source "--json")
+  :command ("ember-template-lint"
+            (config-file "--config-path" flycheck-ember-template-lintrc)
+            "--stdin-filename" source-original
+            "--json")
   :standard-input t
-  :error-parser flycheck-ember-template-lint--parse-error
+  :error-parser flycheck-ember-template--parse-error
   :modes web-mode
-  :enabled flycheck-ember-template-lint--check-for-config
-  :working-directory flycheck-ember-template-lint--check-for-config)
+  :enabled flycheck-ember-template--check-for-config
+  :working-directory flycheck-ember-template--check-for-config)
 
 (flycheck-def-option-var flycheck-erlang-include-path nil erlang
   "A list of include directories for Erlang.

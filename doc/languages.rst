@@ -346,10 +346,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Ember Templates
 
-   .. syntax-checker:: ember-template-lint
+   .. syntax-checker:: ember-template
 
       Check your Ember templates with
       `ember-template-lint <https://github.com/ember-template-lint/ember-template-lint>`_ 
+
+      .. syntax-checker-config-file:: flycheck-ember-template-lintrc
 
 .. supported-language:: Erlang
 
