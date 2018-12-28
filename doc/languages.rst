@@ -761,6 +761,14 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _nix-linter: https://github.com/Synthetica9/nix-linter
 
+.. supported-language:: Opam
+
+   .. syntax-checker:: opam
+
+      Check Opam configuration files with `opam lint`_.
+
+      .. _opam lint: https://opam.ocaml.org/doc/man/opam-lint.html
+
 .. supported-language:: Perl
 
    Flycheck checks Perl with `perl` and `perl-perlcritic`.

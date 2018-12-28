@@ -49,6 +49,7 @@
  (depends-on "scss-mode")
  (depends-on "slim-mode")
  (depends-on "systemd")
+ (depends-on "tuareg")
  (depends-on "typescript-mode")
  (depends-on "web-mode")
  (depends-on "yaml-mode")
