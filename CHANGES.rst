@@ -23,6 +23,7 @@
   - Rust with ``rust-clippy`` [GH-1385]
   - VHDL with ``ghdl`` [GH-1160]
   - mypy with ``python-mypy`` [GH-1354]
+  - Nix with ``nix-linter`` [GH-1530]
 
 - New features:
 

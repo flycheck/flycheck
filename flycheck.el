@@ -211,6 +211,7 @@ attention to case differences."
     markdown-markdownlint-cli
     markdown-mdl
     nix
+    nix-linter
     perl
     perl-perlcritic
     php
@@ -9421,6 +9422,36 @@ See URL `https://nixos.org/nix/manual/#sec-nix-instantiate'."
   (lambda (errors)
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "(string)" errors)))
+  :next-checkers ((warning . nix-linter))
+  :modes nix-mode)
+
+(defun flycheck-parse-nix-linter (output checker buffer)
+  "Parse nix-linter warnings from JSON OUTPUT.
+
+CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
+the BUFFER that was checked respectively.
+
+See URL `https://github.com/Synthetica9/nix-linter' for more
+information about nix-linter."
+  (mapcar (lambda (err)
+            (let-alist err
+              (flycheck-error-new-at
+               .pos.spanBegin.sourceLine
+               .pos.spanBegin.sourceColumn
+               'warning
+               .description
+               :id .offense
+               :checker checker
+               :buffer buffer
+               :filename (buffer-file-name buffer))))
+          (flycheck-parse-json output)))
+
+(flycheck-define-checker nix-linter
+  "Nix checker using nix-linter.
+
+See URL `https://github.com/Synthetica9/nix-linter'."
+  :command ("nix-linter" "--json-stream" source)
+  :error-parser flycheck-parse-nix-linter
   :modes nix-mode)
 
 (defun flycheck-locate-sphinx-source-directory ()
