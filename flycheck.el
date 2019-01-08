@@ -212,6 +212,7 @@ attention to case differences."
     markdown-mdl
     nix
     nix-linter
+    opam
     perl
     perl-perlcritic
     php
@@ -8599,6 +8600,38 @@ See URL `http://www.lua.org/'."
           (minimal-match (zero-or-more not-newline))
           ": stdin:" line ": " (message) line-end))
   :modes lua-mode)
+
+(flycheck-define-checker opam
+  "A Opam syntax and style checker using opam lint.
+
+See URL `https://opam.ocaml.org/doc/man/opam-lint.html'."
+  :command ("opam" "lint" "-")
+  :standard-input t
+  :error-patterns
+  ((error line-start                    ; syntax error
+          (one-or-more space) "error  " (id ?2)
+          ": File format error"
+          (or (and " at line " line ", column " column ": " (message))
+              (and ": " (message)))
+          line-end)
+   (error line-start
+          (one-or-more space) "error  " (id ?3)
+          (minimal-match (zero-or-more not-newline))
+          "at line " line ", column " column ": " (message)
+          line-end)
+   (error line-start
+          (one-or-more space) "error " (id (one-or-more num))
+          ": " (message (one-or-more not-newline))
+          line-end)
+   (warning line-start
+            (one-or-more space) "warning " (id (one-or-more num))
+            ": " (message)
+            line-end))
+  :error-filter
+  (lambda (errors)
+    (flycheck-increment-error-columns
+     (flycheck-fill-empty-line-numbers errors)))
+  :modes tuareg-opam-mode)
 
 (flycheck-def-option-var flycheck-perl-include-path nil perl
   "A list of include directories for Perl.
