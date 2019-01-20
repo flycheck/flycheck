@@ -9197,10 +9197,10 @@ See URL `http://mypy-lang.org/'."
             (option "--cache-dir" flycheck-python-mypy-cache-dir)
             source-original)
   :error-patterns
-  ((error line-start (file-name) ":" line ":" column ": error:" (message)
-          line-end)
-   (warning line-start (file-name) ":" line ":" column  ": warning:" (message)
-            line-end))
+  ((error line-start (file-name) ":" line (optional ":" column)
+          ": error:" (message) line-end)
+   (warning line-start (file-name) ":" line (optional ":" column)
+            ": warning:" (message) line-end))
   :modes python-mode
   ;; Ensure the file is saved, to work around
   ;; https://github.com/python/mypy/issues/4746.
