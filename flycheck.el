@@ -9483,7 +9483,8 @@ information about nix-linter."
   "Nix checker using nix-linter.
 
 See URL `https://github.com/Synthetica9/nix-linter'."
-  :command ("nix-linter" "--json-stream" source)
+  :command ("nix-linter" "--json-stream" "-")
+  :standard-input t
   :error-parser flycheck-parse-nix-linter
   :modes nix-mode)
 

@@ -4083,7 +4083,6 @@ Why not:
   (flycheck-ert-should-syntax-check
    "language/nix/warnings.nix" 'nix-mode
    '(1 1 warning "LetInInheritRecset" :id "LetInInheritRecset" :checker nix-linter)
-   '(2 3 warning "Unused `let` bind `x`" :id "UnusedLetBind" :checker nix-linter)
    '(3 4 warning "Unneeded `rec` on set" :id "UnneededRec" :checker nix-linter)))
 
 (ert-deftest flycheck-locate-sphinx-source-directory/not-in-a-sphinx-project ()
