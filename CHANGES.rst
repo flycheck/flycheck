@@ -25,6 +25,7 @@
   - mypy with ``python-mypy`` [GH-1354]
   - Nix with ``nix-linter`` [GH-1530]
   - Opam with ``opam lint`` [GH-1532]
+  - Text prose with ``textlint`` [GH-1534]
 
 - New features:
 

@@ -3828,7 +3828,7 @@ Why not:
   (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli markdown-mdl)))
     (flycheck-ert-with-env '(("LC_ALL" . nil))
       (flycheck-ert-should-syntax-check
-       "language/text.txt" '(text-mode markdown-mode)
+       "language/text/text.txt" '(text-mode markdown-mode)
        '(1 7 warning "Substitute 'damn' every time you're inclined to write 'very'; your editor will delete it and the writing will be just as it should be."
            :id "weasel_words.very"
            :checker proselint)
@@ -4582,6 +4582,13 @@ The manifest path is relative to
    '(7 nil error "misplaced }" :checker texinfo)
    '(9 nil warning "printindex before document beginning: @printindex cp"
        :checker texinfo)))
+
+(flycheck-ert-def-checker-test textlint (text markdown) nil
+  (let ((flycheck-textlint-config "language/text/textlintrc.json"))
+    (flycheck-ert-should-syntax-check
+     "language/text/text.txt" '(text-mode markdown-mode)
+     '(1 7 warning "\"very\" is a weasel word and can weaken meaning [Error/write-good]"
+         :checker textlint))))
 
 (flycheck-ert-def-checker-test typescript-tslint typescript nil
   (flycheck-ert-should-syntax-check
