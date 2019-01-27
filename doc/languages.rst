@@ -414,6 +414,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
    5. `go-errcheck`
    6. `go-unconvert`
    7. `go-megacheck`
+   8. `go-staticcheck`
 
    .. syntax-checker:: go-gofmt
 
@@ -501,11 +502,27 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Lint code with megacheck_.
 
+      .. note::
+
+         megacheck_ is officially deprecated; it's recommended to switch to staticcheck_.
+
       .. defcustom:: flycheck-go-megacheck-disabled-checkers
 
          A list of checkers to disable when running megacheck_.
 
       .. _megacheck: https://github.com/dominikh/go-tools
+
+   .. syntax-checker:: go-staticcheck
+
+      Perform static analysis and code linting with staticcheck_, the successor to megacheck_.
+
+      .. defcustom:: flycheck-go-version
+
+         staticcheck_ explicitly supports the last two releases of Go, but
+         supports targeting older versions. Go versions should be specified
+         like, "1.6", or, "1.11.4".
+
+      .. _staticcheck: https://staticcheck.io/
 
 .. supported-language:: Groovy
 
@@ -1239,7 +1256,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. defcustom:: flycheck-scheme-chicken-args
 
-	 A list of additional options.
+     A list of additional options.
 
    .. important::
 
