@@ -2896,12 +2896,21 @@ evaluating BODY."
          :checker c/c++-clang)
      '(8 7 warning "no message" :checker c/c++-clang))))
 
-(flycheck-ert-def-checker-test c/c++-clang (c c++) included-file-error
+(flycheck-ert-def-checker-test c/c++-clang (c c++) included-file-warning
   (let ((flycheck-clang-include-path '("./include"))
-        (flycheck-disabled-checkers '(c/c++-gcc)))
+        (flycheck-disabled-checkers '(c/c++-gcc))
+        (flycheck-relevant-error-other-file-minimum-level 'warning))
     (flycheck-ert-should-syntax-check
      "language/c_c++/in-included-file.cpp" 'c++-mode
-     `(3 nil warning "In include ./warning.c" :checker c/c++-clang))))
+     `(5 10 warning "unused variable 'unused'"
+         :filename ,(flycheck-ert-resource-filename "language/c_c++/warning.c")
+         :checker c/c++-clang)
+     `(7 15 warning "comparison of integers of different signs: 'int' and 'unsigned int'"
+         :filename ,(flycheck-ert-resource-filename "language/c_c++/warning.c")
+         :checker c/c++-clang)
+     `(8 7 warning "no message"
+         :filename ,(flycheck-ert-resource-filename "language/c_c++/warning.c")
+         :checker c/c++-clang))))
 
 (flycheck-ert-def-checker-test c/c++-gcc (c c++) error
   (let ((flycheck-disabled-checkers '(c/c++-clang)))
@@ -2927,12 +2936,21 @@ evaluating BODY."
          :id "-Wsign-compare" :checker c/c++-gcc)
      '(8 7 warning "#warning" :id "-Wcpp" :checker c/c++-gcc))))
 
-(flycheck-ert-def-checker-test c/c++-gcc (c c++) included-file-error
+(flycheck-ert-def-checker-test c/c++-gcc (c c++) included-file-warning
   (let ((flycheck-gcc-include-path '("./include"))
-        (flycheck-disabled-checkers '(c/c++-clang)))
+        (flycheck-disabled-checkers '(c/c++-clang))
+        (flycheck-relevant-error-other-file-minimum-level 'warning))
     (flycheck-ert-should-syntax-check
      "language/c_c++/in-included-file.cpp" 'c++-mode
-     `(3 nil warning "In include warning.c" :checker c/c++-gcc))))
+     `(5 10 warning "unused variable 'unused'"
+         :filename ,(flycheck-ert-resource-filename "language/c_c++/warning.c")
+         :id "-Wunused-variable" :checker c/c++-gcc)
+     `(7 15 warning "comparison between signed and unsigned integer expressions"
+         :filename ,(flycheck-ert-resource-filename "language/c_c++/warning.c")
+         :id "-Wsign-compare" :checker c/c++-gcc)
+     `(8 7 warning "#warning"
+         :filename ,(flycheck-ert-resource-filename "language/c_c++/warning.c")
+         :id "-Wcpp" :checker c/c++-gcc))))
 
 (flycheck-ert-def-checker-test c/c++-cppcheck (c c++) nil
   :tags '(cppcheck-xml)

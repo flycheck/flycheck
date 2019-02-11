@@ -693,6 +693,17 @@ using \\[flycheck-error-list-reset-filter]."
   :safe #'flycheck-error-level-p
   :package-version '(flycheck . "0.24"))
 
+(defcustom flycheck-relevant-error-other-file-minimum-level 'error
+  "The minimum level of errors from other files to display in this buffer.
+
+If set to an error level, only display errors from other files
+whose error level is at least as severe as this one.  If nil,
+display all errors from other files."
+  :group 'flycheck
+  :type 'flycheck-minimum-level
+  :safe #'flycheck-error-level-p
+  :package-version '(flycheck . "32"))
+
 (defcustom flycheck-completing-read-function #'completing-read
   "Function to read from minibuffer with completion.
 
@@ -3368,7 +3379,9 @@ Return ERRORS, modified in-place."
     (and file-name
          (or (null buffer-file-name)
              (not (flycheck-same-files-p buffer-file-name file-name)))
-         (eq 'error (flycheck-error-level err)))))
+         (<= (flycheck-error-level-severity
+              flycheck-relevant-error-other-file-minimum-level)
+             (flycheck-error-level-severity (flycheck-error-level err))))))
 
 (defun flycheck-relevant-error-p (err)
   "Determine whether ERR is relevant for the current buffer.
@@ -6594,10 +6607,7 @@ See URL `http://clang.llvm.org/'."
             "-")
   :standard-input t
   :error-patterns
-  ((error line-start
-          (message "In file included from") " " (or "<stdin>" (file-name))
-          ":" line ":" line-end)
-   (info line-start (or "<stdin>" (file-name)) ":" line ":" column
+  ((info line-start (or "<stdin>" (file-name)) ":" line ":" column
          ": note: " (optional (message)) line-end)
    (warning line-start (or "<stdin>" (file-name)) ":" line ":" column
             ": warning: " (optional (message)) line-end)
@@ -6612,7 +6622,7 @@ See URL `http://clang.llvm.org/'."
         ;; them past our error filtering
         (setf (flycheck-error-message err)
               (or (flycheck-error-message err) "no message")))
-      (flycheck-fold-include-levels errors "In file included from")))
+      errors))
   :modes (c-mode c++-mode)
   :next-checkers ((warning . c/c++-cppcheck)))
 
@@ -6754,20 +6764,13 @@ Requires GCC 4.4 or newer.  See URL `https://gcc.gnu.org/'."
             "-")
   :standard-input t
   :error-patterns
-  ((error line-start
-          (message "In file included from") " " (or "<stdin>" (file-name))
-          ":" line ":" column ":" line-end)
-   (info line-start (or "<stdin>" (file-name)) ":" line ":" column
+  ((info line-start (or "<stdin>" (file-name)) ":" line ":" column
          ": note: " (message) line-end)
    (warning line-start (or "<stdin>" (file-name)) ":" line ":" column
             ": warning: " (message (one-or-more (not (any "\n["))))
             (optional "[" (id (one-or-more not-newline)) "]") line-end)
    (error line-start (or "<stdin>" (file-name)) ":" line ":" column
           ": " (or "fatal error" "error") ": " (message) line-end))
-  :error-filter
-  (lambda (errors)
-    (flycheck-fold-include-levels (flycheck-sanitize-errors errors)
-                                  "In file included from"))
   :modes (c-mode c++-mode)
   :next-checkers ((warning . c/c++-cppcheck)))
 
