@@ -3440,12 +3440,12 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
         `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
       (flycheck-ert-should-syntax-check
        "language/go/src/staticcheck/staticcheck1.go" 'go-mode
-       '(8 6 warning "should omit values from range; this loop is equivalent to `for range ...` (S1005)"
-           :checker go-staticcheck)
-       '(12 21 warning "calling strings.Replace with n == 0 will return no results, did you mean -1? (SA1018)"
-            :checker go-staticcheck)
-       '(16 6 warning "func unused is unused (U1000)"
-            :checker go-staticcheck)))))
+       '(8 6 error "should omit values from range; this loop is equivalent to `for range ...`"
+           :checker go-staticcheck :id "S1005")
+       '(12 21 error "calling strings.Replace with n == 0 will return no results, did you mean -1?"
+            :checker go-staticcheck :id "SA1018")
+       '(16 6 error "func unused is unused"
+            :checker go-staticcheck :id "U1000")))))
 
 (flycheck-ert-def-checker-test groovy groovy syntax-error
   ;; Work around

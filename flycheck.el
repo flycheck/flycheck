@@ -5972,6 +5972,35 @@ about Reek."
            errors))))
     (nreverse errors)))
 
+(defun flycheck-parse-go-staticcheck (output checker buffer)
+  "Parse staticheck warnings from JSON OUTPUT.
+
+CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
+the BUFFER that was checked respectively.
+
+See URL `https://staticcheck.io/docs/formatters' for more
+information about staticheck."
+  (let ((errors nil))
+    (dolist (msg (flycheck-parse-json output))
+      (let-alist msg
+        (push
+         (flycheck-error-new-at
+          .location.line
+          .location.column
+          (pcase .severity
+            (`"error"   'error)
+            (`"warning" 'warning)
+            (`"ignored" 'info)
+            ;; Default to warning for unknown .severity
+            (_          'warning))
+          .message
+          :id .code
+          :checker checker
+          :buffer buffer
+          :filename .location.file)
+         errors)))
+    (nreverse errors)))
+
 (defun flycheck-parse-tslint (output checker buffer)
   "Parse TSLint errors from JSON OUTPUT.
 
@@ -7955,14 +7984,11 @@ recommended to migrate to `staticcheck'.
 versions of go\". `staticheck' can target earlier versions (with
 limited features) if `flycheck-go-version' is set. See URL
 `https://staticcheck.io/'."
-  :command ("staticcheck"
+  :command ("staticcheck" "-f" "json"
             (option-list "-tags" flycheck-go-build-tags concat)
-            (option "-go" flycheck-go-version)
-            ;; Run in current directory to make staticcheck aware of symbols
-            ;; declared in other files.
-            ".")
-  :error-patterns
-  ((warning line-start (file-name) ":" line ":" column ": " (message) line-end))
+            (option "-go" flycheck-go-version))
+
+  :error-parser flycheck-parse-go-staticcheck
   :modes go-mode)
 
 (flycheck-define-checker groovy
