@@ -10076,9 +10076,10 @@ See URL `https://www.pylint.org/'."
             "--reports=n"
             "--output-format=json"
             (config-file "--rcfile=" flycheck-pylintrc concat)
-            ;; Need `source-inplace' for relative imports (e.g. `from .foo
-            ;; import bar'), see https://github.com/flycheck/flycheck/issues/280
-            source-inplace)
+            ;; pylint takes the original file name as argument when reading
+            ;; from standard input
+            "--from-stdin" source-original)
+  :standard-input t
   :error-parser flycheck-parse-pylint
   :enabled (lambda ()
              (or (not (flycheck-python-needs-module-p 'python-pylint))

@@ -16,6 +16,7 @@
   - Replace ``go tool vet`` with ``go vet``. [GH-1548]
   - Remove the deprecated ``go-megacheck`` checker, which is replaced by
     ``go-staticcheck``. [GH-1583]
+  - ``pylint`` now requires 2.5 or newer. [GH-1546]
 
 - New syntax checkers:
 
