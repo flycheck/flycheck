@@ -1430,6 +1430,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          The directory to use for the file library.
 
+      .. defcustom:: flycheck-ghdl-ieee-library
+
+         The standard to use for the IEEE library.
+
 .. supported-language:: XML
 
    Flycheck checks XML with `xml-xmlstarlet` or `xml-xmllint`.

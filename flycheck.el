@@ -10714,7 +10714,7 @@ pass the language standard via the `--std' option."
 (make-variable-buffer-local 'flycheck-ghdl-language-standard)
 
 (flycheck-def-option-var flycheck-ghdl-workdir nil vhdl-ghdl
-  "The directory to use for the file library
+  "The directory to use for the file library.
 
 The value of this variable is either a string with the directory
 to use for the file library, or nil, to use the default value.
@@ -10725,6 +10725,21 @@ When non-nil, pass the directory via the `--workdir' option."
   :package-version '(flycheck . "32"))
 (make-variable-buffer-local 'flycheck-ghdl-workdir)
 
+(flycheck-def-option-var flycheck-ghdl-ieee-library nil vhdl-ghdl
+  "The standard to use for the IEEE library.
+
+The value of this variable is either a string denoting an ieee library
+standard, or nil, to use the default standard.  When non-nil,
+pass the ieee library standard via the `--ieee' option."
+  :type '(choice (const :tag "Default standard" nil)
+                 (const :tag "No IEEE Library" "none")
+                 (const :tag "IEEE standard" "standard")
+                 (const :tag "Synopsys standard" "synopsys")
+                 (const :tag "Mentor standard" "mentor"))
+  :safe #'stringp
+  :package-version '(flycheck . "32"))
+(make-variable-buffer-local 'flycheck-ghdl-ieee-library)
+
 (flycheck-define-checker vhdl-ghdl
   "A VHDL syntax checker using GHDL.
 
@@ -10733,6 +10748,7 @@ See URL `https://github.com/ghdl/ghdl'."
             "-s" ; only do the syntax checking
             (option "--std=" flycheck-ghdl-language-standard concat)
             (option "--workdir=" flycheck-ghdl-workdir concat)
+            (option "--ieee=" flycheck-ghdl-ieee-library concat)
             source)
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ": " (message) line-end))
