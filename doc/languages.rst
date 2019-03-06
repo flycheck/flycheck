@@ -431,10 +431,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          A list of print-like functions to check calls for format string problems.
 
-      .. defcustom:: flycheck-go-vet-shadow
-
-         Whether to check for shadowed variables, in Go 1.6 or newer.
-
       .. defcustom:: flycheck-go-build-tags
 
          A list of build tags.

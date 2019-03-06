@@ -7769,31 +7769,16 @@ See URL `https://golang.org/cmd/go/' and URL
   :command ("go" "vet"
             (option "-printf.funcs=" flycheck-go-vet-print-functions concat
                     flycheck-option-comma-separated-list)
-            ;; (option-flag "-shadow" flycheck-go-vet-shadow) ;; DEPRECATED
-            ;; (option-list "-tags=" flycheck-go-build-tags concat) ;; DEPRECATED
-            ;; (eval (when (eq flycheck-go-vet-shadow 'strict) "-shadowstrict")) ;; DEPRECATED
             source)
   :error-patterns
   ((warning line-start (file-name) ":" line ": " (message) line-end))
   :modes go-mode
-  ;; We must explicitly check whether the "vet" command is available
-  :predicate (lambda ()
-               (let ((go (flycheck-checker-executable 'go-vet)))
-                 (ignore-errors (process-lines go "help" "vet"))))
   :next-checkers (go-build
                   go-test
                   ;; Fall back if `go build' or `go test' can be used
                   go-errcheck
                   go-unconvert
-                  go-megacheck)
-  :verify (lambda (_)
-            (let* ((go (flycheck-checker-executable 'go-vet))
-                    (have-vet (ignore-errors (process-lines go "help" "vet"))))
-              (list
-               (flycheck-verification-result-new
-                :label "go vet"
-                :message (if have-vet "present" "missing")
-                :face (if have-vet 'success '(bold error)))))))
+                  go-megacheck))
 
 (flycheck-def-option-var flycheck-go-build-install-deps nil (go-build go-test)
   "Whether to install dependencies in `go build' and `go test'.
