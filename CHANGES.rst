@@ -13,6 +13,7 @@
     [GH-1289]
   - Improve detection of default directory for ``haskell-ghc`` to consider
     ``hpack`` project files [GH-1435]
+  - Replace ``go tool vet`` with ``go vet`` [GH-1548]
 
 - New syntax checkers:
 
