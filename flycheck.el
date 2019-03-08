@@ -7732,7 +7732,7 @@ See URL `https://github.com/golang/lint'."
                   go-build go-test go-errcheck go-unconvert go-megacheck))
 
 (flycheck-def-option-var flycheck-go-vet-print-functions nil go-vet
-  "A list of print-like functions for `go tool vet'.
+  "A list of print-like functions for `go vet'.
 
 Go vet will check these functions for format string problems and
 issues, such as a mismatch between the number of formats used,
@@ -7748,18 +7748,6 @@ take an io.Writer as their first argument, like Fprintf,
                  (string :tag "function"))
   :safe #'flycheck-string-list-p)
 
-(flycheck-def-option-var flycheck-go-vet-shadow nil go-vet
-  "Whether to check for shadowed variables with `go tool vet'.
-
-When non-nil check for shadowed variables.  When `strict' check
-more strictly, which can very noisy.  When nil do not check for
-shadowed variables.
-
-This option requires Go 1.6 or newer."
-  :type '(choice (const :tag "Do not check for shadowed variables" nil)
-                 (const :tag "Check for shadowed variables" t)
-                 (const :tag "Strictly check for shadowed variables" strict)))
-
 (flycheck-def-option-var flycheck-go-megacheck-disabled-checkers nil
                          go-megacheck
   "A list of checkers to disable when running `megacheck'.
@@ -7774,39 +7762,23 @@ enabled. "
   :safe #'flycheck-string-list-p)
 
 (flycheck-define-checker go-vet
-  "A Go syntax checker using the `go tool vet' command.
+  "A Go syntax checker using the `go vet' command.
 
 See URL `https://golang.org/cmd/go/' and URL
 `https://golang.org/cmd/vet/'."
-  :command ("go" "tool" "vet" "-all"
-            (option "-printfuncs=" flycheck-go-vet-print-functions concat
+  :command ("go" "vet"
+            (option "-printf.funcs=" flycheck-go-vet-print-functions concat
                     flycheck-option-comma-separated-list)
-            (option-flag "-shadow" flycheck-go-vet-shadow)
-            (option-list "-tags=" flycheck-go-build-tags concat)
-            (eval (when (eq flycheck-go-vet-shadow 'strict) "-shadowstrict"))
             source)
   :error-patterns
   ((warning line-start (file-name) ":" line ": " (message) line-end))
   :modes go-mode
-  ;; We must explicitly check whether the "vet" tool is available
-  :predicate (lambda ()
-               (let ((go (flycheck-checker-executable 'go-vet)))
-                 (member "vet" (ignore-errors (process-lines go "tool")))))
   :next-checkers (go-build
                   go-test
                   ;; Fall back if `go build' or `go test' can be used
                   go-errcheck
                   go-unconvert
-                  go-megacheck)
-  :verify (lambda (_)
-            (let* ((go (flycheck-checker-executable 'go-vet))
-                   (have-vet (member "vet" (ignore-errors
-                                             (process-lines go "tool")))))
-              (list
-               (flycheck-verification-result-new
-                :label "go tool vet"
-                :message (if have-vet "present" "missing")
-                :face (if have-vet 'success '(bold error)))))))
+                  go-megacheck))
 
 (flycheck-def-option-var flycheck-go-build-install-deps nil (go-build go-test)
   "Whether to install dependencies in `go build' and `go test'.

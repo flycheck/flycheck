@@ -3329,8 +3329,8 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 (flycheck-ert-def-checker-test go-gofmt go syntax-error
   (flycheck-ert-should-syntax-check
    "language/go/src/syntax/syntax-error.go" 'go-mode
-   '(5 9 error "expected '(', found 'IDENT' ta" :checker go-gofmt)
-   '(6 1 error "expected ')', found '}'" :checker go-gofmt)))
+   '(5 9 error "expected '(', found ta" :checker go-gofmt)
+   '(6 1 error "expected declaration, found '}'" :checker go-gofmt)))
 
 (flycheck-ert-def-checker-test (go-build go-golint go-vet) go complete-chain
   (skip-unless (funcall (flycheck-checker-get 'go-vet 'predicate)))
