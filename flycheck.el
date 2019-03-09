@@ -8653,6 +8653,16 @@ the `--severity' option to Perl Critic."
   :safe #'integerp
   :package-version '(flycheck . "0.18"))
 
+(flycheck-def-option-var flycheck-perlcritic-theme nil perl-perlcritic
+  "The theme expression for Perl Critic.
+
+The value of this variable is passed as the `--theme' option to
+`Perl::Critic'.  See the documentation of `Perl::Critic' for
+details."
+  :type '(string :tag "Theme expression")
+  :safe #'stringp
+  :package-version '(flycheck . "32-csv"))
+
 (flycheck-def-config-file-var flycheck-perlcriticrc perl-perlcritic
                               ".perlcriticrc"
   :safe #'stringp
@@ -8665,7 +8675,8 @@ See URL `https://metacpan.org/pod/Perl::Critic'."
   :command ("perlcritic" "--no-color" "--verbose" "%f/%l/%c/%s/%p/%m (%e)\n"
             (config-file "--profile" flycheck-perlcriticrc)
             (option "--severity" flycheck-perlcritic-severity nil
-                    flycheck-option-int))
+                    flycheck-option-int)
+            (option "--theme" flycheck-perlcritic-theme))
   :standard-input t
   :error-patterns
   ((info line-start
