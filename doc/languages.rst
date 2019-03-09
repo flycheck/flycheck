@@ -791,6 +791,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          The severity level as integer for the ``--severity``.
 
+      .. defcustom:: flycheck-perlcritic-theme
+
+		 The theme expression, passed as the ``--theme`` to ``perlcritic``.
+
       .. syntax-checker-config-file:: flycheck-perlcriticrc
 
 .. supported-language:: PHP
