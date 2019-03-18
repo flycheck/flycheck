@@ -3613,25 +3613,77 @@ show the icon."
 
 
 ;;; Built-in error levels
+(defun flycheck-high-dpi-screen ()
+  "Return t if the user has a HiDPI screen"
+  (let* ((attrs (car (display-monitor-attributes-list)))
+         (size (assoc 'mm-size attrs))
+         (sizex (cadr size))
+         (res (cdr (assoc 'geometry attrs)))
+         (resx (- (caddr res) (car res)))
+         dpi)
+    (catch 'exit
+      ;; in terminal
+      (unless sizex
+        (throw 'exit 10))
+      ;; on big screen
+      (when (> sizex 1000)
+        (throw 'exit 10))
+      ;; if dpi > 150 (standard dpi: 96; hdpi: 192)
+      (if (> (* (/ (float resx) sizex) 25.4) 150) t nil))))
+
 (when (fboundp 'define-fringe-bitmap)
-  (define-fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
-    (vector #b00000000
-            #b00000000
-            #b00000000
-            #b00000000
-            #b00000000
-            #b10011000
-            #b01101100
-            #b00110110
-            #b00011011
-            #b00110110
-            #b01101100
-            #b10011000
-            #b00000000
-            #b00000000
-            #b00000000
-            #b00000000
-            #b00000000)))
+  (if (flycheck-high-dpi-screen)
+    (define-fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
+        (vector #b0000000000000000
+                #b0000000000000000
+                #b0000000000000000
+                #b0000000000000000
+                #b0000000000000000
+                #b0000000000000000
+                #b0000000000000000
+                #b0000000000000000
+                #b0000000000000000
+                #b0000000000000000
+                #b1100001111000000
+                #b1100001111000000
+                #b0011110011110000
+                #b0011110011110000
+                #b0000111100111100
+                #b0000111100111100
+                #b0000001111001111
+                #b0000001111001111
+                #b0000111100111100
+                #b0000111100111100
+                #b0011110011110000
+                #b0011110011110000
+                #b1100001111000000
+                #b1100001111000000
+                #b0000000000000000
+                #b0000000000000000
+                #b0000000000000000
+                #b0000000000000000
+                #b0000000000000000
+                #b0000000000000000
+                #b0000000000000000
+                #b0000000000000000) 32 16)
+        (define-fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
+            (vector #b00000000
+                #b00000000
+                #b00000000
+                #b00000000
+                #b00000000
+                #b10011000
+                #b01101100
+                #b00110110
+                #b00011011
+                #b00110110
+                #b01101100
+                #b10011000
+                #b00000000
+                #b00000000
+                #b00000000
+                #b00000000
+                #b00000000)))
 
 (setf (get 'flycheck-error-overlay 'face) 'flycheck-error)
 (setf (get 'flycheck-error-overlay 'priority) 110)
