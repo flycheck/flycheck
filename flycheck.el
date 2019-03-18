@@ -3677,7 +3677,7 @@ show the icon."
                 #b00000000
                 #b00000000
                 #b00000000
-                #b00000000)))
+                #b00000000))))
 
 (setf (get 'flycheck-error-overlay 'face) 'flycheck-error)
 (setf (get 'flycheck-error-overlay 'priority) 110)
