@@ -3621,13 +3621,7 @@ show the icon."
          (res (cdr (assoc 'geometry attrs)))
          (resx (- (caddr res) (car res)))
          dpi)
-    (catch 'exit
-      ;; in terminal
-      (unless sizex
-        (throw 'exit 10))
-      ;; on big screen
-      (when (> sizex 1000)
-        (throw 'exit 10))
+    (catch nil
       ;; if dpi > 150 (standard dpi: 96; hdpi: 192)
       (if (> (* (/ (float resx) sizex) 25.4) 150) t nil))))
 
