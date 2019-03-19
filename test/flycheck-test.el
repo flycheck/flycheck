@@ -3435,7 +3435,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 
 (flycheck-ert-def-checker-test go-staticcheck go nil
   :tags '(language-go external-tool)
-  (let ((flycheck-disabled-checkers '(go-golint go-megacheck)))
+  (let ((flycheck-disabled-checkers '(go-golint go-unconvert)))
     (flycheck-ert-with-env
         `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
       (flycheck-ert-should-syntax-check
