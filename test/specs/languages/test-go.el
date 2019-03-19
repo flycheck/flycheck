@@ -1,4 +1,10 @@
 ;;; test-go.el --- Flycheck Specs: Go -*- lexical-binding: t; -*-
+;;
+;;; Commentary:
+;;
+;; This file implements buttercup tests for the `go-staticheck' syntax checker.
+;;
+;;; Code:
 
 (require 'flycheck-buttercup)
 
