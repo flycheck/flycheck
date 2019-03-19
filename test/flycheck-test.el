@@ -3369,7 +3369,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
            :checker go-build)))))
 
 (flycheck-ert-def-checker-test go-build go directory-with-two-packages
-  (let ((flycheck-disabled-checkers '(go-errcheck go-unconvert go-megacheck)))
+  (let ((flycheck-disabled-checkers '(go-errcheck go-unconvert go-megacheck go-staticcheck)))
     (flycheck-ert-with-env
         `(("GOPATH" . ,(flycheck-ert-resource-filename "checkers/go")))
       (flycheck-ert-should-syntax-check
@@ -3409,7 +3409,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 
 (flycheck-ert-def-checker-test go-megacheck go nil
   :tags '(language-go external-tool)
-  (let ((flycheck-disabled-checkers '(go-golint)))
+  (let ((flycheck-disabled-checkers '(go-golint go-staticcheck)))
     (flycheck-ert-with-env
         `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
       (flycheck-ert-should-syntax-check
@@ -3435,7 +3435,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 
 (flycheck-ert-def-checker-test go-staticcheck go nil
   :tags '(language-go external-tool)
-  (let ((flycheck-disabled-checkers '(go-golint)))
+  (let ((flycheck-disabled-checkers '(go-golint go-megacheck)))
     (flycheck-ert-with-env
         `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
       (flycheck-ert-should-syntax-check
