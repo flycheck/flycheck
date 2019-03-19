@@ -3,8 +3,8 @@
 (require 'flycheck-buttercup)
 
 (describe "Language Go"
-          (describe "The staticcheck error parser"
-                    (let ((json "
+  (describe "The staticcheck error parser"
+    (let ((json "
 {
   \"code\":\"compile\",
   \"severity\":\"error\",
@@ -24,26 +24,26 @@
   },
   \"message\":\"undeclared name: Number\"
 }"
-                                ))
+                ))
 
-                      (it "parses staticcheck JSON output"
-                          (expect (flycheck-parse-go-staticcheck json 'checker 'buffer)
-                                  :to-be-equal-flycheck-errors
-                                  (list
-                                   (flycheck-error-new-at
-                                    4 8 'error
-                                    "expected ';', found ':'"
-                                    :id "compile"
-                                    :checker 'checker
-                                    :buffer 'buffer
-                                    :filename "/home/gastove/golang/src/github.com/Gastove/test/pkg/lib/lib.go")
-                                   (flycheck-error-new-at
-                                    4 2 'warning
-                                    "undeclared name: Number"
-                                    :id "compile"
-                                    :checker 'checker
-                                    :buffer 'buffer
-                                    :filename "/home/gastove/golang/src/github.com/Gastove/test/pkg/lib/lib.go")
-                                   ))))))
+      (it "parses staticcheck JSON output"
+        (expect (flycheck-parse-go-staticcheck json 'checker 'buffer)
+                :to-be-equal-flycheck-errors
+                (list
+                 (flycheck-error-new-at
+                  4 8 'error
+                  "expected ';', found ':'"
+                  :id "compile"
+                  :checker 'checker
+                  :buffer 'buffer
+                  :filename "/home/gastove/golang/src/github.com/Gastove/test/pkg/lib/lib.go")
+                 (flycheck-error-new-at
+                  4 2 'warning
+                  "undeclared name: Number"
+                  :id "compile"
+                  :checker 'checker
+                  :buffer 'buffer
+                  :filename "/home/gastove/golang/src/github.com/Gastove/test/pkg/lib/lib.go")
+                 ))))))
 
 ;;; test-go.el ends here
