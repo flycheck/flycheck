@@ -28,6 +28,7 @@
   - Opam with ``opam lint`` [GH-1532]
   - Text prose with ``textlint`` [GH-1534]
   - CUDA with ``cuda-nvcc`` [GH-1508]
+  - Staticcheck with ``go-staticheck`` [GH-1541]
 
 - New features:
 
@@ -50,7 +51,7 @@
     ``flycheck-buffer-switch-check-intermediate-buffers`` control the
     functionality [GH-1297]
   - Add ``flycheck-ghdl-ieee-library`` to select which standard IEEE
-    library to use for ghdl.
+    library to use for ghdl. [GH-1547]
 
 - Improvements
 
