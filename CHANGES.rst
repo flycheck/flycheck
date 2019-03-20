@@ -48,6 +48,8 @@
     ``flycheck-idle-buffer-switch-delay`` and
     ``flycheck-buffer-switch-check-intermediate-buffers`` control the
     functionality [GH-1297]
+  - Add ``flycheck-ghdl-ieee-library`` to select which standard IEEE
+    library to use for ghdl.
 
 - Improvements
 
