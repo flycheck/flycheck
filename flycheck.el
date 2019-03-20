@@ -3614,7 +3614,11 @@ show the icon."
 
 ;;; Built-in error levels
 (defun flycheck-high-dpi-screen ()
-  "Return t if the user has a HiDPI screen"
+  "Return t if the user has a HiDPI screen."
+  ;; This is slightly more complicated than using (x-display-mm-width)
+  ;; and (x-display-pixel-width), but it gets the width of the current
+  ;; physical screen (rather than of all monitors) for users with
+  ;; multiple monitors.
   (let* ((attrs (car (display-monitor-attributes-list)))
          (size (assoc 'mm-size attrs))
          (sizex (cadr size))
