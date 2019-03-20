@@ -27,6 +27,7 @@
   - Nix with ``nix-linter`` [GH-1530]
   - Opam with ``opam lint`` [GH-1532]
   - Text prose with ``textlint`` [GH-1534]
+  - CUDA with ``cuda-nvcc`` [GH-1508]
 
 - New features:
 

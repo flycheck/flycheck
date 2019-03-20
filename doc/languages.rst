@@ -255,6 +255,36 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          Whether to run stylelint in quiet mode via ``--quiet``.
 
+.. supported-language:: CUDA C/C++
+   :index_as: CUDA
+
+   .. syntax-checker:: cuda-nvcc
+
+      Checks syntax for CUDA C/C++ using the nvcc
+      `nvcc <https://developer.nvidia.com/cuda-llvm-compiler>`_ compiler
+      bundled in the NVIDIA Toolkit.
+
+      CUDA C/C++ uses whichever system compiler you have configured, gcc/clang
+      etc, but will sanitise error messages into a standardised format that
+      can be picked up via flycheck. Corner cases may cause some odd behavior.
+
+      .. defcustom:: flycheck-cuda-language-standard
+
+         The C or C++ Language standard that you want the CUDA compiler to enforce.
+
+      .. defcustom:: flycheck-cuda-includes
+
+         A list of cuda includes.
+
+      .. defcustom:: flycheck-cuda-include-path
+
+         A list of include directories for nvcc.
+
+      .. defcustom:: flycheck-cuda-definitions
+
+         Additional preprocessor definitions for nvcc. Is passed unaltered to both
+         GPU compiler and underlying C/C++ compiler.
+
 .. supported-language:: CWL
 
    .. syntax-checker:: cwl
