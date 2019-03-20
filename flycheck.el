@@ -3556,7 +3556,10 @@ The following PROPERTIES constitute an error level:
         (plist-get properties :compilation-level))
   (setf (get level 'flycheck-overlay-category)
         (plist-get properties :overlay-category))
-  (setf (get level 'flycheck-fringe-bitmap-double-arrow)
+  (setf (get level
+        (if (flycheck-high-dpi-screen)
+             'flycheck-fringe-bitmap-double-arrow-hdpi
+             'flycheck-fringe-bitmap-double-arrow))
         (plist-get properties :fringe-bitmap))
   (setf (get level 'flycheck-fringe-face)
         (plist-get properties :fringe-face))
@@ -3630,8 +3633,7 @@ show the icon."
       (if (> (* (/ (float resx) sizex) 25.4) 150) t nil))))
 
 (when (fboundp 'define-fringe-bitmap)
-  (if (flycheck-high-dpi-screen)
-    (define-fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
+    (define-fringe-bitmap 'flycheck-fringe-bitmap-double-arrow-hdpi
         (vector #b0000000000000000
                 #b0000000000000000
                 #b0000000000000000
@@ -3681,7 +3683,7 @@ show the icon."
                 #b00000000
                 #b00000000
                 #b00000000
-                #b00000000))))
+                #b00000000)))
 
 (setf (get 'flycheck-error-overlay 'face) 'flycheck-error)
 (setf (get 'flycheck-error-overlay 'priority) 110)
