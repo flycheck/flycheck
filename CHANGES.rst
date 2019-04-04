@@ -54,6 +54,8 @@
   - Add ``flycheck-ghdl-ieee-library`` to select which standard IEEE
     library to use for ghdl. [GH-1547]
   - ``javascript-eslint`` checker now supports ``typescript-mode`` by default.
+  - Add ``flycheck-erlang-rebar3-profile`` to select which profile to
+    use when compiling erlang with rebar3.
 
 - Improvements
 
