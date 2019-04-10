@@ -21,8 +21,9 @@ from string import Template
 import requests
 from docutils import nodes
 from sphinx.roles import XRefRole
-from sphinx.util import ws_re
+from sphinx.util import ws_re, logging
 
+logger = logging.getLogger(__name__)
 
 # Regular expression object to parse the contents of an Info reference
 # role.
@@ -132,7 +133,7 @@ class HTMLXRefDB(object):
 
 def update_htmlxref(app):
     if not isinstance(getattr(app.env, 'info_htmlxref', None), HTMLXRefDB):
-        app.info('fetching Texinfo htmlxref database from {0}... '.format(
+        logger.info('fetching Texinfo htmlxref database from {0}... '.format(
             HTMLXRefDB.XREF_URL))
         try:
             app.env.info_htmlxref = HTMLXRefDB.parse(

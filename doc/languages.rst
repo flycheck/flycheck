@@ -1187,7 +1187,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          The value of this variable is a list of strings denoting features
          that will be activated to build the target to check. Features will
-         be passed to `cargo check --features=FEATURES'.
+         be passed to ``cargo check --features=FEATURES``.
 
          Empty by default.
 
