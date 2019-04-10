@@ -277,7 +277,8 @@ def build_offline_html(app):
     from sphinx.builders.html import StandaloneHTMLBuilder
     build_standalone = isinstance(app.builder, StandaloneHTMLBuilder)
     if app.config.flycheck_offline_html and build_standalone:
-        logger.info('Building offline documentation without external resources!')
+        logger.info(
+            'Building offline documentation without external resources!')
         app.builder.theme_options['github_banner'] = 'false'
         app.builder.theme_options['github_button'] = 'false'
 
