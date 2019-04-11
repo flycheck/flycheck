@@ -176,17 +176,17 @@ Kill errors
 
 You can put errors into the kill ring with `C-c ! w`:
 
-.. define-key:: C-c ! w
+.. define-key:: C-c ! C-w
                 M-x flycheck-copy-errors-as-kill
 
    Copy all messages of the errors at point into the kill ring.
 
-.. define-key:: C-u C-c ! w
+.. define-key:: C-u C-c ! C-w
                 C-u M-x flycheck-copy-errors-as-kill
 
    Like `C-c ! w` but with error IDs.
 
-.. define-key:: M-0 C-c ! w
+.. define-key:: M-0 C-c ! C-w
                 M-0 M-x flycheck-copy-errors-as-kill
 
    Like `C-c ! w` but do not copy the error messages but only the error IDs.
