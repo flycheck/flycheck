@@ -8524,7 +8524,7 @@ See URL `https://eslint.org/'."
   :standard-input t
   :error-parser flycheck-parse-eslint
   :enabled (lambda () (flycheck-eslint-config-exists-p))
-  :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode rjsx-mode)
+  :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode rjsx-mode typescript-mode)
   :working-directory flycheck-eslint--find-working-directory
   :verify
   (lambda (_)

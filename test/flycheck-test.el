@@ -4635,14 +4635,15 @@ The manifest path is relative to
          :checker textlint))))
 
 (flycheck-ert-def-checker-test typescript-tslint typescript nil
-  (flycheck-ert-should-syntax-check
-   "language/typescript/sample.ts" 'typescript-mode
-   '(2 23 warning "Module 'chai' is not listed as dependency in package.json"
-       :checker typescript-tslint :id "no-implicit-dependencies")
-   '(5 3 warning "Forbidden 'var' keyword, use 'let' or 'const' instead"
-       :checker typescript-tslint :id "no-var-keyword")
-   '(6 15 warning "Missing semicolon"
-       :checker typescript-tslint :id "semicolon")))
+  (let ((flycheck-disabled-checkers '(javascript-eslint)))
+    (flycheck-ert-should-syntax-check
+     "language/typescript/sample.ts" 'typescript-mode
+     '(2 23 warning "Module 'chai' is not listed as dependency in package.json"
+         :checker typescript-tslint :id "no-implicit-dependencies")
+     '(5 3 warning "Forbidden 'var' keyword, use 'let' or 'const' instead"
+         :checker typescript-tslint :id "no-var-keyword")
+     '(6 15 warning "Missing semicolon"
+         :checker typescript-tslint :id "semicolon"))))
 
 (flycheck-ert-def-checker-test verilog-verilator verilog error
   (flycheck-ert-should-syntax-check

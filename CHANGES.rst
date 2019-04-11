@@ -52,6 +52,7 @@
     functionality [GH-1297]
   - Add ``flycheck-ghdl-ieee-library`` to select which standard IEEE
     library to use for ghdl. [GH-1547]
+  - ``javascript-eslint`` checker now supports ``typescript-mode`` by default.
 
 - Improvements
 
