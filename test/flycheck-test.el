@@ -1,6 +1,6 @@
 ;;; flycheck-test.el --- Flycheck: Unit test suite   -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017-2018 Flycheck contributors
+;; Copyright (C) 2017-2019 Flycheck contributors
 ;; Copyright (C) 2013-2016 Sebastian Wiesner and Flycheck contributors
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
@@ -4106,10 +4106,8 @@ Why not:
 (flycheck-ert-def-checker-test markdown-markdownlint-cli markdown nil
   (flycheck-ert-should-syntax-check
    "language/markdown.md" 'markdown-mode
-   '(1 nil error "First heading should be a top level heading [Expected: h1; Actual: h2]"
-       :id "MD002/first-heading-h1/first-header-h1" :checker markdown-markdownlint-cli)
    '(1 nil error "First line in file should be a top level heading [Context: \"## Second Header First\"]"
-       :id "MD041/first-line-h1" :checker markdown-markdownlint-cli)))
+       :id "MD041/first-line-heading/first-line-h1" :checker markdown-markdownlint-cli)))
 
 (flycheck-ert-def-checker-test markdown-mdl markdown nil
   (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli)))
@@ -4266,7 +4264,7 @@ The manifest path is relative to
      '(3 1 warning "function is never used: `main`" :checker rust-cargo :id "dead_code" :group 1)
      '(3 1 info "#[warn(dead_code)] on by default" :checker rust-cargo :id "dead_code" :group 1)
      '(4 9 warning "unused variable: `x`" :checker rust-cargo :id "unused_variables" :group 2)
-     '(4 9 info "consider using `_x` instead: `_x`" :checker rust-cargo :id "unused_variables" :group 2))))
+     '(4 9 info "consider prefixing with an underscore: `_x`" :checker rust-cargo :id "unused_variables" :group 2))))
 
 (flycheck-ert-def-checker-test rust-cargo rust default-target
   (let ((flycheck-disabled-checkers '(rust))
@@ -4278,7 +4276,7 @@ The manifest path is relative to
      '(3 1 warning "function is never used: `main`" :checker rust-cargo :id "dead_code" :group 1)
      '(3 1 info "#[warn(dead_code)] on by default" :checker rust-cargo :id "dead_code" :group 1)
      '(4 9 warning "unused variable: `x`" :checker rust-cargo :id "unused_variables" :group 2)
-     '(4 9 info "consider using `_x` instead: `_x`" :checker rust-cargo :id "unused_variables" :group 2))))
+     '(4 9 info "consider prefixing with an underscore: `_x`" :checker rust-cargo :id "unused_variables" :group 2))))
 
 (flycheck-ert-def-checker-test rust-cargo rust lib-main
   (let ((flycheck-disabled-checkers '(rust))
@@ -4299,7 +4297,8 @@ The manifest path is relative to
        "language/rust/cargo-targets/src/lib.rs" 'rust-mode
        '(3 1 warning "function is never used: `foo_lib`" :checker rust-cargo :id "dead_code" :group 1)
        '(6 17 warning "unused variable: `foo_lib_test`" :checker rust-cargo  :id "unused_variables" :group 2)
-       '(6 17 info "consider using `_foo_lib_test` instead: `_foo_lib_test`" :checker rust-cargo :id "unused_variables" :group 2)))
+       '(6 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 2)
+       '(6 17 info "consider prefixing with an underscore: `_foo_lib_test`" :checker rust-cargo :id "unused_variables" :group 2)))
 
     (let ((flycheck-rust-crate-type "lib"))
       (flycheck-ert-cargo-clean "language/rust/cargo-targets/Cargo.toml")
@@ -4308,8 +4307,7 @@ The manifest path is relative to
        '(1 1 warning "function is never used: `foo_a`" :checker rust-cargo :id "dead_code" :group 1)
        '(1 1 info "#[warn(dead_code)] on by default" :checker rust-cargo :id "dead_code" :group 1)
        '(4 17 warning "unused variable: `foo_a_test`" :checker rust-cargo :id "unused_variables" :group 2)
-       '(4 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 2)
-       '(4 17 info "consider using `_foo_a_test` instead: `_foo_a_test`" :checker rust-cargo :id "unused_variables" :group 2)))
+       '(4 17 info "consider prefixing with an underscore: `_foo_a_test`" :checker rust-cargo :id "unused_variables" :group 2)))
 
     (let ((flycheck-rust-crate-type "bin")
           (flycheck-rust-binary-name "cargo-targets"))
@@ -4318,9 +4316,9 @@ The manifest path is relative to
        "language/rust/cargo-targets/src/main.rs" 'rust-mode
        '(1 17 warning "unused variable: `foo_main`" :checker rust-cargo :id "unused_variables" :group 1)
        '(1 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 1)
-       '(1 17 info "consider using `_foo_main` instead: `_foo_main`" :checker rust-cargo :id "unused_variables" :group 1)
+       '(1 17 info "consider prefixing with an underscore: `_foo_main`" :checker rust-cargo :id "unused_variables" :group 1)
        '(4 17 warning "unused variable: `foo_main_test`" :checker rust-cargo :id "unused_variables" :group 2)
-       '(4 17 info "consider using `_foo_main_test` instead: `_foo_main_test`" :checker rust-cargo :id "unused_variables" :group 2)))
+       '(4 17 info "consider prefixing with an underscore: `_foo_main_test`" :checker rust-cargo :id "unused_variables" :group 2)))
 
     (let ((flycheck-rust-crate-type "bin")
           (flycheck-rust-binary-name "a"))
@@ -4329,9 +4327,9 @@ The manifest path is relative to
        "language/rust/cargo-targets/src/bin/a.rs" 'rust-mode
        '(1 17 warning "unused variable: `foo_bin_a`" :checker rust-cargo :id "unused_variables" :group 1)
        '(1 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 1)
-       '(1 17 info "consider using `_foo_bin_a` instead: `_foo_bin_a`" :checker rust-cargo :id "unused_variables" :group 1)
+       '(1 17 info "consider prefixing with an underscore: `_foo_bin_a`" :checker rust-cargo :id "unused_variables" :group 1)
        '(4 17 warning "unused variable: `foo_bin_a_test`" :checker rust-cargo :id "unused_variables" :group 2)
-       '(4 17 info "consider using `_foo_bin_a_test` instead: `_foo_bin_a_test`" :checker rust-cargo :id "unused_variables" :group 2)))
+       '(4 17 info "consider prefixing with an underscore: `_foo_bin_a_test`" :checker rust-cargo :id "unused_variables" :group 2)))
 
     (let ((flycheck-rust-crate-type "bench")
           (flycheck-rust-binary-name "a"))
@@ -4340,9 +4338,9 @@ The manifest path is relative to
        "language/rust/cargo-targets/benches/a.rs" 'rust-mode
        '(1 17 warning "unused variable: `foo_bench_a`" :checker rust-cargo :id "unused_variables" :group 1)
        '(1 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 1)
-       '(1 17 info "consider using `_foo_bench_a` instead: `_foo_bench_a`" :checker rust-cargo :id "unused_variables" :group 1)
+       '(1 17 info "consider prefixing with an underscore: `_foo_bench_a`" :checker rust-cargo :id "unused_variables" :group 1)
        '(4 17 warning "unused variable: `foo_bench_a_test`" :checker rust-cargo :id "unused_variables" :group 2)
-       '(4 17 info "consider using `_foo_bench_a_test` instead: `_foo_bench_a_test`" :checker rust-cargo :id "unused_variables" :group 2)))
+       '(4 17 info "consider prefixing with an underscore: `_foo_bench_a_test`" :checker rust-cargo :id "unused_variables" :group 2)))
 
     (let ((flycheck-rust-crate-type "test")
           (flycheck-rust-binary-name "a"))
@@ -4351,7 +4349,7 @@ The manifest path is relative to
        "language/rust/cargo-targets/tests/a.rs" 'rust-mode
        '(2 16 warning "unused variable: `foo_test_a_test`" :checker rust-cargo :id "unused_variables" :group 1)
        '(2 16 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 1)
-       '(2 16 info "consider using `_foo_test_a_test` instead: `_foo_test_a_test`" :checker rust-cargo :id "unused_variables" :group 1)
+       '(2 16 info "consider prefixing with an underscore: `_foo_test_a_test`" :checker rust-cargo :id "unused_variables" :group 1)
        '(4 1 warning "function is never used: `foo_test_a`" :checker rust-cargo :id "dead_code" :group 2)
        '(4 1 info "#[warn(dead_code)] on by default" :checker rust-cargo :id "dead_code" :group 2)))
 
@@ -4362,9 +4360,9 @@ The manifest path is relative to
        "language/rust/cargo-targets/examples/a.rs" 'rust-mode
        '(1 17 warning "unused variable: `foo_ex_a`" :checker rust-cargo :id "unused_variables" :group 1)
        '(1 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 1)
-       '(1 17 info "consider using `_foo_ex_a` instead: `_foo_ex_a`" :checker rust-cargo :id "unused_variables" :group 1)
+       '(1 17 info "consider prefixing with an underscore: `_foo_ex_a`" :checker rust-cargo :id "unused_variables" :group 1)
        '(4 17 warning "unused variable: `foo_ex_a_test`" :checker rust-cargo :id "unused_variables" :group 2)
-       '(4 17 info "consider using `_foo_ex_a_test` instead: `_foo_ex_a_test`" :checker rust-cargo :id "unused_variables" :group 2)))))
+       '(4 17 info "consider prefixing with an underscore: `_foo_ex_a_test`" :checker rust-cargo :id "unused_variables" :group 2)))))
 
 (flycheck-ert-def-checker-test rust-cargo rust workspace-subcrate
   (let ((flycheck-disabled-checkers '(rust))
@@ -4375,7 +4373,7 @@ The manifest path is relative to
      "language/rust/workspace/crate1/src/lib.rs" 'rust-mode
      '(2 7 warning "unused variable: `a`" :checker rust-cargo :id "unused_variables" :group 1)
      '(2 7 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 1)
-     '(2 7 info "consider using `_a` instead: `_a`" :checker rust-cargo :id "unused_variables" :group 1))))
+     '(2 7 info "consider prefixing with an underscore: `_a`" :checker rust-cargo :id "unused_variables" :group 1))))
 
 (flycheck-ert-def-checker-test rust-cargo rust dev-dependencies
   (let ((flycheck-disabled-checkers '(rust))
@@ -4388,7 +4386,7 @@ The manifest path is relative to
      '(2 1 info "#[warn(unused_imports)] on by default" :checker rust-cargo :id "unused_imports" :group 1)
      '(8 9 warning "unused variable: `foo`" :checker rust-cargo :id "unused_variables" :group 2)
      '(8 9 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 2)
-     '(8 9 info "consider using `_foo` instead: `_foo`" :checker rust-cargo :id "unused_variables" :group 2))))
+     '(8 9 info "consider prefixing with an underscore: `_foo`" :checker rust-cargo :id "unused_variables" :group 2))))
 
 (flycheck-ert-def-checker-test rust rust syntax-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
@@ -4408,7 +4406,7 @@ The manifest path is relative to
      "language/rust/flycheck-test/src/warnings.rs" 'rust-mode
      '(4 9 warning "unused variable: `x`" :checker rust :id "unused_variables" :group 1)
      '(4 9 info "#[warn(unused_variables)] on by default" :checker rust :id "unused_variables" :group 1)
-     '(4 9 info "consider using `_x` instead: `_x`" :checker rust :id "unused_variables" :group 1))))
+     '(4 9 info "consider prefixing with an underscore: `_x`" :checker rust :id "unused_variables" :group 1))))
 
 (flycheck-ert-def-checker-test rust rust note-and-help
   (let ((flycheck-disabled-checkers '(rust-cargo)))
@@ -4422,6 +4420,7 @@ The manifest path is relative to
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/importing.rs" 'rust-mode
+     '(1 1 info "remove the whole `use` item: ``" :checker rust :id "unused_imports" :group 1)
      '(1 5 error "failed to resolve: there are too many initial `super`s. (there are too many initial `super`s.)" :checker rust :id "E0433" :group 2)
      '(1 5 warning "unused import: `super::imported`" :checker rust :id "unused_imports" :group 1)
      '(1 5 info "#[warn(unused_imports)] on by default" :checker rust :id "unused_imports" :group 1)
