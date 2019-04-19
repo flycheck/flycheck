@@ -10658,6 +10658,14 @@ published on NPM."
   :type '(repeat (choice (cons symbol string)
                          (cons (const t) string))))
 
+(defun flycheck--textlint-get-plugin ()
+  "Return the textlint plugin for the current mode."
+  (cdr (-first
+        (pcase-lambda (`(,mode . _))
+          (or (and (booleanp mode) mode) ; mode is t
+              (derived-mode-p mode)))
+        flycheck-textlint-plugin-alist)))
+
 (flycheck-define-checker textlint
   "A text prose linter using textlint.
 
@@ -10667,13 +10675,7 @@ See URL `https://textlint.github.io/'."
             "--format" "json"
             ;; get the first matching plugin from plugin-alist
             "--plugin"
-            (eval (cdr
-                   (-first
-                    (lambda (pair)
-                      (let ((mode (car pair)))
-                        (or (and (booleanp mode) mode) ; mode is t
-                            (derived-mode-p mode))))
-                    flycheck-textlint-plugin-alist)))
+            (eval flycheck--textlint-get-plugin)
             source)
   ;; textlint seems to say that its json output is compatible with ESLint.
   ;; https://textlint.github.io/docs/formatter.html
@@ -10686,11 +10688,15 @@ See URL `https://textlint.github.io/'."
   (text-mode markdown-mode gfm-mode message-mode adoc-mode
              mhtml-mode latex-mode org-mode rst-mode)
   :enabled
-  (lambda () (or (eq major-mode 'markdown-mode)
-                 (eq major-mode 'gfm-mode)
-                 (eq major-mode 'text-mode)
-                 (memq major-mode
-                       (mapcar #'car flycheck-textlint-plugin-alist)))))
+  (lambda () (flycheck--textlint-get-plugin))
+  :verify
+  (lambda (_)
+    (let ((plugin (flycheck--textlint-get-plugin)))
+      (list
+       (flycheck-verification-result-new
+        :label "textlint plugin"
+        :message plugin
+        :face 'success)))))
 
 (flycheck-def-config-file-var flycheck-typescript-tslint-config
     typescript-tslint "tslint.json"
