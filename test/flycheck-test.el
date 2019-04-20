@@ -3360,7 +3360,6 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
      '(17 2 error "undefined: fmt" :checker go-build)
      '(19 13 error "cannot use 1 (type int) as type string in argument to Warnf"
           :checker go-build)
-     '(23 nil warning "unreachable code" :checker go-vet)
      '(25 9 warning "if block ends with a return statement, so drop this else and outdent its block"
           :checker go-golint))))
 
