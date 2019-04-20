@@ -4629,8 +4629,8 @@ The manifest path is relative to
         (flycheck-textlint-config "language/text/textlintrc.json"))
     (flycheck-ert-should-syntax-check
      "language/text/text.txt" '(text-mode markdown-mode)
-     '(1 7 warning "\"very\" is a weasel word and can weaken meaning [Error/write-good]"
-         :checker textlint))))
+     '(1 7 error "\"very\" is a weasel word and can weaken meaning"
+         :id "write-good" :checker textlint))))
 
 (flycheck-ert-def-checker-test typescript-tslint typescript nil
   (let ((flycheck-disabled-checkers '(javascript-eslint)))
