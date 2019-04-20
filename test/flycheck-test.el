@@ -4625,7 +4625,8 @@ The manifest path is relative to
        :checker texinfo)))
 
 (flycheck-ert-def-checker-test textlint (text markdown) nil
-  (let ((flycheck-textlint-config "language/text/textlintrc.json"))
+  (let ((flycheck-disabled-checkers '(proselint))
+        (flycheck-textlint-config "language/text/textlintrc.json"))
     (flycheck-ert-should-syntax-check
      "language/text/text.txt" '(text-mode markdown-mode)
      '(1 7 warning "\"very\" is a weasel word and can weaken meaning [Error/write-good]"
