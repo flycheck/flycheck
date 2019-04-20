@@ -4625,7 +4625,7 @@ The manifest path is relative to
        :checker texinfo)))
 
 (flycheck-ert-def-checker-test textlint (text markdown) nil
-  (let ((flycheck-disabled-checkers '(proselint))
+  (let ((flycheck-disabled-checkers '(proselint markdown-markdownlint-cli markdown-mdl))
         (flycheck-textlint-config "language/text/textlintrc.json"))
     (flycheck-ert-should-syntax-check
      "language/text/text.txt" '(text-mode markdown-mode)
