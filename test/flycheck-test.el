@@ -3345,7 +3345,6 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
    '(6 1 error "expected declaration, found '}'" :checker go-gofmt)))
 
 (flycheck-ert-def-checker-test (go-build go-golint go-vet) go complete-chain
-  (skip-unless (funcall (flycheck-checker-get 'go-vet 'predicate)))
   (flycheck-ert-with-env
       `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
     (flycheck-ert-should-syntax-check
