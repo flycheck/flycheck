@@ -10675,7 +10675,7 @@ See URL `https://textlint.github.io/'."
             "--format" "json"
             ;; get the first matching plugin from plugin-alist
             "--plugin"
-            (eval flycheck--textlint-get-plugin)
+            (eval (flycheck--textlint-get-plugin))
             source)
   ;; textlint seems to say that its json output is compatible with ESLint.
   ;; https://textlint.github.io/docs/formatter.html
