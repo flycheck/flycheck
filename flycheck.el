@@ -10661,9 +10661,10 @@ published on NPM."
 (defun flycheck--textlint-get-plugin ()
   "Return the textlint plugin for the current mode."
   (cdr (-first
-        (pcase-lambda (`(,mode . _))
-          (or (and (booleanp mode) mode) ; mode is t
-              (derived-mode-p mode)))
+        (lambda (arg)
+          (pcase-let ((`(,mode . _) arg))
+            (or (and (booleanp mode) mode) ; mode is t
+                (derived-mode-p mode))))
         flycheck-textlint-plugin-alist)))
 
 (flycheck-define-checker textlint
