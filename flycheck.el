@@ -1,6 +1,6 @@
 ;;; flycheck.el --- On-the-fly syntax checking -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017-2018 Flycheck contributors
+;; Copyright (C) 2017-2019 Flycheck contributors
 ;; Copyright (C) 2012-2016 Sebastian Wiesner and Flycheck contributors
 ;; Copyright (C) 2013, 2014 Free Software Foundation, Inc.
 ;;
@@ -915,6 +915,12 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
   '((t :inherit highlight))
   "Flycheck face to highlight errors in the error list."
   :package-version '(flycheck . "0.15")
+  :group 'flycheck-faces)
+
+(defface flycheck-verify-select-checker
+  '((t :box (:style released-button)))
+  "Flycheck face for the 'select' button in the verify setup buffer."
+  :package-version '(flycheck . "32")
   :group 'flycheck-faces)
 
 (defvar flycheck-command-map
@@ -1975,7 +1981,7 @@ nil otherwise."
 (define-button-type 'help-flycheck-checker-def
   :supertype 'help-xref
   'help-function #'flycheck-goto-checker-definition
-  'help-echo "mouse-2, RET: find Flycheck checker definition")
+  'help-echo "mouse-1, RET: find Flycheck checker definition")
 
 (defconst flycheck-find-checker-regexp
   (rx line-start (zero-or-more (syntax whitespace))
@@ -2133,22 +2139,43 @@ Return a list of `flycheck-verification-result' objects."
 (define-button-type 'help-flycheck-checker-doc
   :supertype 'help-xref
   'help-function #'flycheck-describe-checker
-  'help-echo "mouse-2, RET: describe Flycheck checker")
+  'help-echo "mouse-1, RET: describe Flycheck checker")
 
-(defun flycheck--verify-princ-checker (checker buffer &optional with-mm)
+(define-button-type 'flycheck-checker-select
+  :supertype 'help-xref
+  'help-function (lambda (buffer checker)
+                   (with-current-buffer buffer
+                     (flycheck-select-checker checker))
+                   ;; Revert the verify-setup buffer since it is now stale
+                   (revert-buffer))
+  'help-echo "mouse-1, RET: select Flycheck checker"
+  'face 'flycheck-verify-select-checker)
+
+(defun flycheck--verify-princ-checker (checker buffer
+                                               &optional with-mm with-select)
   "Print verification result of CHECKER for BUFFER.
 
 When WITH-MM is given and non-nil, also include the major mode
-into the verification results."
+into the verification results.
+
+When WITH-SELECT is non-nil, add a button to select this checker."
   (princ "  ")
   (insert-button (symbol-name checker)
                  'type 'help-flycheck-checker-doc
                  'help-args (list checker))
   (when (with-current-buffer buffer (flycheck-disabled-checker-p checker))
     (insert (propertize " (disabled)" 'face '(bold error))))
+  (when (eq checker (buffer-local-value 'flycheck-checker buffer))
+    (insert (propertize " (explicitly selected)" 'face 'bold)))
+  (when with-select
+    (princ "  ")
+    (insert-text-button "select"
+                        'type 'flycheck-checker-select
+                        'help-args (list buffer checker)))
   (princ "\n")
   (let ((results (with-current-buffer buffer
-                   (flycheck-verify-generic-checker checker))))
+                   (append (flycheck-verify-generic-checker checker)
+                           (flycheck--verify-next-checkers checker)))))
     (when with-mm
       (with-current-buffer buffer
         (let ((message-and-face
@@ -2173,9 +2200,53 @@ into the verification results."
         (princ (make-string (- message-column (current-column)) ?\ ))
         (let ((message (flycheck-verification-result-message result))
               (face (flycheck-verification-result-face result)))
-          (insert (propertize message 'face face)))
+          ;; If face is nil, using propertize erases the face already contained
+          ;; by the message.  We don't want that, since this would remove the
+          ;; button face from the checker chain result.
+          (insert (if face (propertize message 'face face) message)))
         (princ "\n"))))
   (princ "\n"))
+
+(defun flycheck-get-next-checkers (checker)
+  "Return the immediate next checkers of CHECKER.
+
+This is a list of checker symbols.  The error levels of the
+`:next-checker' property are ignored."
+  (mapcar (lambda (c) (if (consp c) (cdr c) c))
+          (flycheck-checker-get checker 'next-checkers)))
+
+(defun flycheck-all-next-checkers (checker)
+  "Return all checkers that may follow CHECKER.
+
+Return the transitive closure of the next-checker relation.  The
+return value is a list of checkers, not including CHECKER."
+  (let ((next-checkers)
+        (visited)
+        (queue (list checker)))
+    (while queue
+      (let ((c (pop queue)))
+        (push c visited)
+        (dolist (n (flycheck-get-next-checkers c))
+          (push n next-checkers)
+          (unless (memq n visited)
+            (cl-pushnew n queue)))))
+    (seq-uniq next-checkers)))
+
+(defun flycheck--verify-next-checkers (checker)
+  "Return a verification result for the next checkers of CHECKER."
+  (-when-let (next (flycheck-get-next-checkers checker))
+    (list
+     (flycheck-verification-result-new
+      :label "next checkers"
+      ;; We use `make-text-button' to preserve the button properties in the
+      ;; string
+      :message (mapconcat
+                (lambda (checker)
+                  (make-text-button (symbol-name checker) nil
+                                    'type 'help-flycheck-checker-doc
+                                    'help-args (list checker)))
+                next
+                ", ")))))
 
 (defun flycheck--verify-print-header (desc buffer)
   "Print a title with DESC for BUFFER in the current buffer.
@@ -2234,6 +2305,7 @@ is applicable from Emacs Lisp code.  Use
     (user-error "%s is not a syntax checker" checker))
 
   ;; Save the buffer to make sure that all predicates are good
+  ;; FIXME: this may be surprising to users, with unintended side-effects.
   (when (and (buffer-file-name) (buffer-modified-p))
     (save-buffer))
 
@@ -2259,34 +2331,63 @@ Display a new buffer listing all syntax checkers that could be
 applicable in the current buffer.  For each syntax checkers,
 possible problems are shown."
   (interactive)
+  ;; Save to make sure checkers that only work on saved buffers will pass the
+  ;; verification
   (when (and (buffer-file-name) (buffer-modified-p))
-    ;; Save the buffer
     (save-buffer))
 
-  (let ((buffer (current-buffer))
-        ;; Get all checkers that support the current major mode
-        (checkers (seq-filter #'flycheck-checker-supports-major-mode-p
-                              flycheck-checkers))
-        (help-buffer (get-buffer-create " *Flycheck checkers*")))
+  (let* ((buffer (current-buffer))
+         (first-checker (flycheck-get-checker-for-buffer))
+         (valid-checkers
+          (remq first-checker
+                (seq-filter #'flycheck-may-use-checker flycheck-checkers)))
+         (valid-next-checkers
+          (when first-checker
+            (seq-intersection valid-checkers
+                              (flycheck-all-next-checkers first-checker))))
+         (valid-remaining (seq-difference valid-checkers valid-next-checkers))
+         (other-checkers
+          (seq-difference (seq-filter #'flycheck-checker-supports-major-mode-p
+                                      flycheck-checkers)
+                          (cons first-checker valid-checkers)))
+         (help-buffer (get-buffer-create " *Flycheck checkers*")))
 
-    ;; Now print all applicable checkers
+    ;; Print all applicable checkers for this buffer
     (with-help-window help-buffer
       (with-current-buffer standard-output
         (flycheck--verify-print-header "Syntax checkers for buffer " buffer)
-        (unless checkers
-          (insert (propertize
-                   "There are no syntax checkers for this buffer!\n\n"
-                   'face '(bold error))))
-        (dolist (checker checkers)
-          (flycheck--verify-princ-checker checker buffer))
 
-        (-when-let (selected-checker
-                    (buffer-local-value 'flycheck-checker buffer))
-          (insert
-           (propertize
-            "The following checker is explicitly selected for this buffer:\n\n"
-            'face 'bold))
-          (flycheck--verify-princ-checker selected-checker buffer 'with-mm))
+        (if first-checker
+            (progn
+              (princ "First checker to run:\n\n")
+              (flycheck--verify-princ-checker first-checker buffer))
+          (insert (propertize
+                   "No checker to run in this buffer.\n\n"
+                   'face '(bold error))))
+
+        (when valid-next-checkers
+          (princ
+           "Checkers that may run as part of the first checker's chain:\n\n")
+          (dolist (checker valid-next-checkers)
+            (flycheck--verify-princ-checker checker buffer)))
+
+        (when valid-remaining
+          (princ "Checkers that could run if selected:\n\n")
+          (dolist (checker valid-remaining)
+            (flycheck--verify-princ-checker checker buffer nil 'with-select)))
+
+        (when other-checkers
+          (princ
+           "Checkers that are compatible with this mode, \
+but will not run until properly configured:\n\n")
+          (dolist (checker other-checkers)
+            (flycheck--verify-princ-checker checker buffer)))
+
+        ;; If we have no checkers at all, that's worth mentioning
+        (unless (or first-checker valid-checkers other-checkers)
+          (insert (propertize
+                   "No checkers are available for this buffer.\n\n"
+                   'face '(bold error))))
 
         (let ((unregistered-checkers
                (seq-difference (flycheck-defined-checkers) flycheck-checkers)))
@@ -4223,7 +4324,7 @@ message to stretch arbitrarily far."
 
 (define-button-type 'flycheck-error-list
   'action #'flycheck-error-list-button-goto-error
-  'help-echo "mouse-2, RET: goto error"
+  'help-echo "mouse-1, RET: goto error"
   'face nil)
 
 (defun flycheck-error-list-button-goto-error (button)
@@ -4232,7 +4333,7 @@ message to stretch arbitrarily far."
 
 (define-button-type 'flycheck-error-list-explain-error
   'action #'flycheck-error-list-button-explain-error
-  'help-echo "mouse-2, RET: explain error")
+  'help-echo "mouse-1, RET: explain error")
 
 (defun flycheck-error-list-button-explain-error (button)
   "Explain the error at BUTTON."
@@ -9322,7 +9423,7 @@ See URL `http://mypy-lang.org/'."
   ;; Ensure the file is saved, to work around
   ;; https://github.com/python/mypy/issues/4746.
   :predicate flycheck-buffer-saved-p
-  :next-checkers '(t . python-flake8))
+  :next-checkers (python-flake8))
 
 (flycheck-def-option-var flycheck-lintr-caching t r-lintr
   "Whether to enable caching in lintr.
