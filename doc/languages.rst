@@ -703,7 +703,8 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: JSON
 
-   Flycheck checks JSON with `json-jsonlint` or `json-python-json`.
+   Flycheck checks JSON with `json-jsonlint`, `json-python-json`, or
+   `json-jq`.
 
    .. syntax-checker:: json-jsonlint
 
@@ -712,6 +713,14 @@ to view the docstring of the syntax checker.  Likewise, you may use
    .. syntax-checker:: json-python-json
 
       Check JSON with Python's built-in :py:mod:`json` module.
+
+   .. syntax-checker:: json-jq
+
+      Check JSON with jq_.
+
+      This checker accepts multiple consecutive JSON values in a single input, which is useful for jsonlines data.
+
+      .. _jq: https://stedolan.github.io/jq/
 
 .. supported-language:: Jsonnet
 
