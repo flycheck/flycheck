@@ -3703,6 +3703,12 @@ Why not:
      "language/json.json" 'json-mode
      '(1 44 error "Extra data" :checker json-python-json))))
 
+(flycheck-ert-def-checker-test json-jq json nil
+  (let ((flycheck-disabled-checkers '(json-jsonlint json-python-json)))
+    (flycheck-ert-should-syntax-check
+     "language/json.json" 'json-mode
+     '(1 44 error "Expected value before ','" :checker json-jq))))
+
 (flycheck-ert-def-checker-test less less file-error
   (let* ((candidates (list "no-such-file.less"
                            "npm://no-such-file.less"
