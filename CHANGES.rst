@@ -19,6 +19,7 @@
 
   - CUDA with ``cuda-nvcc`` [GH-1508]
   - CWL with ``schema-salad-tool`` [GH-1361]
+  - JSON with ``json-jq`` [GH-1568]
   - Jsonnet with ``jsonnet`` [GH-1345]
   - MarkdownLint CLI with ``markdownlint`` [GH-1366]
   - Nix with ``nix-linter`` [GH-1530]
