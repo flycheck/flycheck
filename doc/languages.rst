@@ -396,6 +396,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check Erlang with the `rebar3 <https://www.rebar3.org/>`_ build tool.
 
+      .. defcustom:: flycheck-erlang-rebar3-profile
+
+         The profile to use when compiling, e.g. "default" or "test".
+         The default value is nil which will use test profile
+         in test directories and default profile otherwise.
+
 .. supported-language:: ERuby
 
    .. syntax-checker:: eruby-erubis

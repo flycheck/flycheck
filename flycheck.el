@@ -7749,9 +7749,34 @@ Return the absolute path to the directory"
   "Return directory where rebar.config is located."
   (locate-rebar3-project-root buffer-file-name))
 
+(flycheck-def-option-var flycheck-erlang-rebar3-profile nil erlang-rebar3
+  "The rebar3 profile to use.
+
+The profile used when compiling, if VALUE is nil \"test\" will be used
+when the file is located in test directory, otherwise \"default\" will be
+used as profile."
+  :type 'string
+  :safe #'stringp
+  :package-version '(flycheck . "32"))
+
+(defun flycheck-erlang-rebar3-get-profile ()
+  "Return rebar3 profile.
+
+Use flycheck-erlang-rebar3-profile if set, otherwise use test profile if
+dirname is test or else default."
+  (cond
+   (flycheck-erlang-rebar3-profile flycheck-erlang-rebar3-profile)
+   ((and buffer-file-name
+         (string= "test"
+                  (file-name-base
+                   (directory-file-name
+                    (file-name-directory buffer-file-name)))))
+    "test")
+   (t "default")))
+
 (flycheck-define-checker erlang-rebar3
   "An Erlang syntax checker using the rebar3 build tool."
-  :command ("rebar3" "compile")
+  :command ("rebar3" "as" (eval (flycheck-erlang-rebar3-get-profile)) "compile")
   :error-parser
   (lambda (output checker buffer)
     ;; rebar3 outputs ANSI terminal colors, which don't match up with
