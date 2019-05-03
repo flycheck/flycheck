@@ -17,18 +17,19 @@
 
 - New syntax checkers:
 
-  - Jsonnet with ``jsonnet`` [GH-1345]
-  - Tcl with ``nagelfar`` [GH-1365]
+  - CUDA with ``cuda-nvcc`` [GH-1508]
   - CWL with ``schema-salad-tool`` [GH-1361]
+  - JSON with ``json-jq`` [GH-1568]
+  - Jsonnet with ``jsonnet`` [GH-1345]
   - MarkdownLint CLI with ``markdownlint`` [GH-1366]
-  - Rust with ``rust-clippy`` [GH-1385]
-  - VHDL with ``ghdl`` [GH-1160]
-  - mypy with ``python-mypy`` [GH-1354]
   - Nix with ``nix-linter`` [GH-1530]
   - Opam with ``opam lint`` [GH-1532]
-  - Text prose with ``textlint`` [GH-1534]
-  - CUDA with ``cuda-nvcc`` [GH-1508]
+  - Rust with ``rust-clippy`` [GH-1385]
   - Staticcheck with ``go-staticheck`` [GH-1541]
+  - Tcl with ``nagelfar`` [GH-1365]
+  - Text prose with ``textlint`` [GH-1534]
+  - VHDL with ``ghdl`` [GH-1160]
+  - mypy with ``python-mypy`` [GH-1354]
 
 - New features:
 

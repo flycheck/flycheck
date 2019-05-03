@@ -204,6 +204,7 @@ attention to case differences."
     javascript-standard
     json-jsonlint
     json-python-json
+    json-jq
     jsonnet
     less
     less-stylelint
@@ -8688,6 +8689,23 @@ See URL `https://docs.python.org/3.5/library/json.html#command-line-interface'."
   :modes json-mode
   ;; The JSON parser chokes if the buffer is empty and has no JSON inside
   :predicate (lambda () (not (flycheck-buffer-empty-p))))
+
+(flycheck-define-checker json-jq
+  "JSON checker using the jq tool.
+
+This checker accepts multiple consecutive JSON values in a
+single input, which is useful for jsonlines data.
+
+See URL `https://stedolan.github.io/jq/'."
+  :command ("jq" "." source null-device)
+  ;; Example error message:
+  ;;   parse error: Expected another key-value pair at line 3, column 1
+  :error-patterns
+  ((error line-start
+          (optional "parse error: ")
+          (message) "at line " line ", column " column
+          (zero-or-more not-newline) line-end))
+  :modes json-mode)
 
 (flycheck-define-checker jsonnet
   "A Jsonnet syntax checker using the jsonnet binary.
