@@ -60,7 +60,7 @@ def node_encode(char):
     elif char == ' ':
         return '-'
     else:
-        return '_00' + char.encode('hex')
+        return '_00' + char.encode().hex()
 
 
 def expand_node_name(node):
