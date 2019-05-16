@@ -49,6 +49,10 @@ directly to the languages that interest you:
 .. contents:: Languages
    :local:
 
+Bazel
+-----
+* :gh:`michaelschiff/flycheck-bazel` adds a syntax checker for files build with bazel (https://bazel.build/)
+
 Cadence
 -------
 
