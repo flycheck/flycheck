@@ -51,7 +51,7 @@ directly to the languages that interest you:
 
 Bazel
 -----
-* :gh:`michaelschiff/flycheck-bazel` adds a syntax checker for files build with bazel (https://bazel.build/)
+* :gh:`michaelschiff/flycheck-bazel` adds a syntax checker for files built with bazel (https://bazel.build/)
 
 Cadence
 -------
