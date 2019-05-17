@@ -7838,6 +7838,12 @@ dirname is test or else default."
                    (directory-file-name
                     (file-name-directory buffer-file-name)))))
     "test")
+   ((and buffer-file-name
+         (string= "eqc"
+                  (file-name-base
+                   (directory-file-name
+                    (file-name-directory buffer-file-name)))))
+    "eqc")
    (t "default")))
 
 (flycheck-define-checker erlang-rebar3
