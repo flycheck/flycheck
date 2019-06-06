@@ -707,6 +707,13 @@ display all errors from other files."
   :safe #'flycheck-error-level-p
   :package-version '(flycheck . "32"))
 
+(defcustom flycheck-relevant-error-other-file-show t
+  "Whether to show errors from other files."
+  :group 'flycheck
+  :type 'boolean
+  :package-version '(flycheck . "32")
+  :safe #'booleanp)
+
 (defcustom flycheck-completing-read-function #'completing-read
   "Function to read from minibuffer with completion.
 
@@ -3481,6 +3488,7 @@ Return ERRORS, modified in-place."
   "Determine whether ERR is a relevant error for another file."
   (let ((file-name (flycheck-error-filename err)))
     (and file-name
+         flycheck-relevant-error-other-file-show
          (or (null buffer-file-name)
              (not (flycheck-same-files-p buffer-file-name file-name)))
          (<= (flycheck-error-level-severity
