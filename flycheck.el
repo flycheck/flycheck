@@ -467,9 +467,9 @@ path of an executable and shall return the full path to the
 executable, or nil if the executable does not exit.
 
 The default is `flycheck-default-executable-find', which searches
-`exec-path' when given a command name, and resolves paths to
-absolute ones.  You can customize this option to search for
-checkers in other environments such as bundle or NixOS
+variable `exec-path' when given a command name, and resolves
+paths to absolute ones.  You can customize this option to search
+for checkers in other environments such as bundle or NixOS
 sandboxes."
   :group 'flycheck
   :type '(choice
@@ -4576,7 +4576,9 @@ POS defaults to `point'."
       ;; if necessary.
       (when other-file-error
         (with-current-buffer buffer
-          (unless (seq-contains flycheck-current-errors error-copy 'equal)
+          ;; `seq-contains-p' is only in seq >= 2.21, which isn't in ELPA
+          (unless (with-no-warnings
+                    (seq-contains flycheck-current-errors error-copy 'equal))
             (when flycheck-mode
               (flycheck-buffer))))))))
 
