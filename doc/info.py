@@ -139,8 +139,8 @@ def update_htmlxref(app):
             app.env.info_htmlxref = HTMLXRefDB.parse(
                 requests.get(HTMLXRefDB.XREF_URL).text)
         except requests.exceptions.ConnectionError:
-            app.warn('Failed to load xref DB.  '
-                     'Info references will not be resolved')
+            logger.warning('Failed to load xref DB.  '
+                           'Info references will not be resolved')
             app.env.info_htmlxref = None
 
 
@@ -161,8 +161,8 @@ def resolve_info_references(app, _env, refnode, contnode):
     target = ws_re.sub(' ', refnode['reftarget'])
     match = INFO_RE.match(target)
     if not match:
-        app.env.warn(refnode.source, 'Invalid info target: {0}'.format(target),
-                     refnode.line)
+        logger.warning('Invalid info target: {0}'.format(target),
+                       location=(refnode.source, refnode.line))
         return contnode
 
     manual = match.group('manual')
@@ -173,7 +173,7 @@ def resolve_info_references(app, _env, refnode, contnode):
         uri = xrefdb.resolve(manual, node)
         if not uri:
             message = 'Cannot resolve info manual {0}'.format(manual)
-            app.env.warn(refnode.source, message, refnode.line)
+            logger.warning(message, location=(refnode.source, refnode.line))
             return contnode
         else:
             reference = nodes.reference('', '', internal=False,
