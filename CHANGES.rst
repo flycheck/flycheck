@@ -56,8 +56,8 @@
   - ``javascript-eslint`` checker now supports ``typescript-mode`` by default.
   - Add ``flycheck-erlang-rebar3-profile`` to select which profile to
     use when compiling erlang with rebar3.
-  - Add ``flycheck-relevant-error-other-file-show`` to avoid showing other
-    file's error.
+  - Add ``flycheck-relevant-error-other-file-show`` to avoid showing errors
+    from other files.
 
 - Improvements
 
