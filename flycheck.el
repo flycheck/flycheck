@@ -2945,7 +2945,11 @@ Return t when CHECKER was disabled, or nil otherwise."
     ;; Disable CHECKER for this buffer
     ;; (`flycheck--automatically-disabled-checkers' is a local variable).
     (lwarn '(flycheck syntax-checker) :warning
-           "Syntax checker %s reported too many errors (%s) and is disabled."
+           (substitute-command-keys
+            "Syntax checker %s reported too many errors (%s) and is disabled.
+Use `\\[customize-variable] RET flycheck-checker-error-threshold' to
+change the threshold or `\\[universal-argument] \
+\\[flycheck-disable-checker]' to re-enable the checker.")
            checker (length errors))
     (push checker flycheck--automatically-disabled-checkers)
     t))
