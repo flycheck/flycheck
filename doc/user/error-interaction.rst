@@ -158,6 +158,13 @@ customize the minimum level:
    level is at least as severe as this one.  If ``nil``, display all errors from
    other files.
 
+To never show any errors from other files, set
+`flycheck-relevant-error-other-file-show` to ``nil``.
+
+.. defcustom:: flycheck-relevant-error-other-file-show
+
+   Whether to show errors from other files.
+
 Explain errors
 ==============
 
