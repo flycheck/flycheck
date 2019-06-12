@@ -4142,10 +4142,10 @@ Why not:
 (flycheck-ert-def-checker-test ruby-rubocop ruby syntax-error
   (flycheck-ert-should-syntax-check
    "language/ruby/syntax-error.rb" 'ruby-mode
-   '(5 7 error "unexpected token tCONSTANT (Using Ruby 2.2 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+   '(5 7 error "unexpected token tCONSTANT (Using Ruby 2.3 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
        :id "Lint/Syntax"
        :checker ruby-rubocop)
-   '(5 24 error "unterminated string meets end of file (Using Ruby 2.2 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+   '(5 24 error "unterminated string meets end of file (Using Ruby 2.3 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
        :id "Lint/Syntax"
        :checker ruby-rubocop)))
 
@@ -4173,6 +4173,8 @@ Why not:
 (flycheck-ert-def-checker-test (ruby-rubocop ruby-reek ruby-rubylint) ruby with-rubylint
   (flycheck-ert-should-syntax-check
    "language/ruby/warnings.rb" 'ruby-mode
+   '(1 1 info "Missing magic comment `# frozen_string_literal: true`."
+       :id "Style/FrozenStringLiteralComment" :checker ruby-rubocop)
    '(3 nil warning "Person assumes too much for instance variable '@name'"
        :id "InstanceVariableAssumption" :checker ruby-reek)
    '(3 1 info "Missing top-level class documentation comment."
