@@ -14,6 +14,8 @@
   - Improve detection of default directory for ``haskell-ghc`` to consider
     ``hpack`` project files [GH-1435]
   - Replace ``go tool vet`` with ``go vet`` [GH-1548]
+  - Remove the deprecated ``go-megacheck`` checker, which is replaced by
+    ``go-staticcheck``.
 
 - New syntax checkers:
 

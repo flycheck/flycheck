@@ -449,8 +449,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
    4. `go-build` or `go-test`
    5. `go-errcheck`
    6. `go-unconvert`
-   7. `go-megacheck`
-   8. `go-staticcheck`
+   7. `go-staticcheck`
 
    .. syntax-checker:: go-gofmt
 
@@ -533,20 +532,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
       Check for unnecessary type conversions with unconvert_.
 
       .. _unconvert: https://github.com/mdempsky/unconvert
-
-   .. syntax-checker:: go-megacheck
-
-      Lint code with megacheck_.
-
-      .. note::
-
-         megacheck_ is officially deprecated; it's recommended to switch to staticcheck_.
-
-      .. defcustom:: flycheck-go-megacheck-disabled-checkers
-
-         A list of checkers to disable when running megacheck_.
-
-      .. _megacheck: https://github.com/dominikh/go-tools
 
    .. syntax-checker:: go-staticcheck
 

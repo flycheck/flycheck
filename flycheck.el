@@ -190,7 +190,6 @@ attention to case differences."
     go-test
     go-errcheck
     go-unconvert
-    go-megacheck
     go-staticcheck
     groovy
     haml
@@ -7928,8 +7927,7 @@ See URL `https://golang.org/cmd/gofmt/'."
                   (warning . go-build) (warning . go-test)
                   (warning . go-errcheck)
                   (warning . go-unconvert)
-                  (warning . go-staticcheck)
-                  (warning . go-megacheck)))
+                  (warning . go-staticcheck)))
 
 (flycheck-define-checker go-golint
   "A Go style checker using Golint.
@@ -7941,7 +7939,7 @@ See URL `https://github.com/golang/lint'."
   :modes go-mode
   :next-checkers (go-vet
                   ;; Fall back, if go-vet doesn't exist
-                  go-build go-test go-errcheck go-unconvert go-megacheck))
+                  go-build go-test go-errcheck go-unconvert))
 
 (flycheck-def-option-var flycheck-go-vet-print-functions nil go-vet
   "A list of print-like functions for `go vet'.
@@ -7958,19 +7956,6 @@ take an io.Writer as their first argument, like Fprintf,
 -printfuncs=Warn:1,Warnf:1 "
   :type '(repeat :tag "print-like functions"
                  (string :tag "function"))
-  :safe #'flycheck-string-list-p)
-
-(flycheck-def-option-var flycheck-go-megacheck-disabled-checkers nil
-                         go-megacheck
-  "A list of checkers to disable when running `megacheck'.
-
-The value of this variable is a list of strings, where each
-string is a checker to be disabled. Valid checkers are `simple',
-`staticcheck' and `unused'. When nil, all checkers will be
-enabled. "
-  :type '(set (const :tag "Disable simple" "simple")
-              (const :tag "Disable staticcheck" "staticcheck")
-              (const :tag "Disable unused" "unused"))
   :safe #'flycheck-string-list-p)
 
 (flycheck-define-checker go-vet
@@ -7990,8 +7975,7 @@ See URL `https://golang.org/cmd/go/' and URL
                   ;; Fall back if `go build' or `go test' can be used
                   go-errcheck
                   go-unconvert
-                  go-staticcheck
-                  go-megacheck)
+                  go-staticcheck)
   :verify (lambda (_)
             (let* ((go (flycheck-checker-executable 'go-vet))
                    (have-vet (member "vet" (ignore-errors
@@ -8012,8 +7996,7 @@ while syntax checking."
   :package-version '(flycheck . "0.25"))
 
 (flycheck-def-option-var flycheck-go-build-tags nil
-                         (go-build go-test go-errcheck
-                                   go-megacheck go-staticcheck)
+                         (go-build go-test go-errcheck go-staticcheck)
   "A list of tags for `go build'.
 
 Each item is a string with a tag to be given to `go build'."
@@ -8070,8 +8053,7 @@ Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
                     (not (string-suffix-p "_test.go" (buffer-file-name)))))
   :next-checkers ((warning . go-errcheck)
                   (warning . go-unconvert)
-                  (warning . go-staticcheck)
-                  (warning . go-megacheck)))
+                  (warning . go-staticcheck)))
 
 (flycheck-define-checker go-test
   "A Go syntax and type checker using the `go test' command.
@@ -8093,8 +8075,7 @@ Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
                   (string-suffix-p "_test.go" (buffer-file-name))))
   :next-checkers ((warning . go-errcheck)
                   (warning . go-unconvert)
-                  (warning . go-staticcheck)
-                  (warning . go-megacheck)))
+                  (warning . go-staticcheck)))
 
 (flycheck-define-checker go-errcheck
   "A Go checker for unchecked errors.
@@ -8123,8 +8104,7 @@ See URL `https://github.com/kisielk/errcheck'."
   :modes go-mode
   :predicate (lambda () (flycheck-buffer-saved-p))
   :next-checkers ((warning . go-unconvert)
-                  (warning . go-staticcheck)
-                  (warning . go-megacheck)))
+                  (warning . go-staticcheck)))
 
 (flycheck-define-checker go-unconvert
   "A Go checker looking for unnecessary type conversions.
@@ -8134,32 +8114,11 @@ See URL `https://github.com/mdempsky/unconvert'."
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ": " (message) line-end))
   :modes go-mode
-  :predicate (lambda () (flycheck-buffer-saved-p))
-  :next-checkers ((warning . go-megacheck)))
-
-(flycheck-define-checker go-megacheck
-  "A Go checker that performs static analysis and linting using the `megacheck'
-command.
-
-Requires Go 1.6 or newer. See URL
-`https://github.com/dominikh/go-tools'."
-  :command ("megacheck"
-            (option-list "-tags=" flycheck-go-build-tags concat)
-            (eval (mapcar (lambda (checker) (concat "-" checker
-                                                    ".enabled=false"))
-                          flycheck-go-megacheck-disabled-checkers))
-            ;; Run in current directory to make megacheck aware of symbols
-            ;; declared in other files.
-            ".")
-  :error-patterns
-  ((warning line-start (file-name) ":" line ":" column ": " (message) line-end))
-  :modes go-mode)
+  :predicate (lambda () (flycheck-buffer-saved-p)))
 
 (flycheck-define-checker go-staticcheck
   "A Go checker that performs static analysis and linting using
-the `staticcheck' command. `staticcheck' is the successor to
-`megacheck'; while the latter isn't fully deprecated yet, it's
-recommended to migrate to `staticcheck'.
+the `staticcheck' command.
 
 `staticcheck' is explicitly fully compatible with \"the last two
 versions of go\". `staticheck' can target earlier versions (with
