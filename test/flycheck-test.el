@@ -3379,7 +3379,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
            :checker go-build)))))
 
 (flycheck-ert-def-checker-test go-build go directory-with-two-packages
-  (let ((flycheck-disabled-checkers '(go-errcheck go-unconvert go-megacheck go-staticcheck)))
+  (let ((flycheck-disabled-checkers '(go-errcheck go-unconvert go-staticcheck)))
     (flycheck-ert-with-env
         `(("GOPATH" . ,(flycheck-ert-resource-filename "checkers/go")))
       (flycheck-ert-should-syntax-check
@@ -3416,32 +3416,6 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
      "language/go/src/unconvert/unconvert.go" 'go-mode
      '(7 17 warning "unnecessary conversion"
          :checker go-unconvert))))
-
-(flycheck-ert-def-checker-test go-megacheck go nil
-  :tags '(language-go external-tool)
-  (let ((flycheck-disabled-checkers '(go-golint go-staticcheck)))
-    (flycheck-ert-with-env
-        `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
-      (flycheck-ert-should-syntax-check
-       "language/go/src/megacheck/megacheck1.go" 'go-mode
-       '(8 6 warning "should omit values from range; this loop is equivalent to `for range ...` (S1005)"
-           :checker go-megacheck)
-       '(12 21 warning "calling strings.Replace with n == 0 will return no results, did you mean -1? (SA1018)"
-            :checker go-megacheck)
-       '(16 6 warning "func unused is unused (U1000)"
-            :checker go-megacheck)))))
-
-(flycheck-ert-def-checker-test go-megacheck-disabled-checkers go nil
-  :tags '(language-go external-tool)
-  (let ((flycheck-disabled-checkers '(go-golint)))
-    (flycheck-ert-with-env
-        `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
-      ;; Run with simple and unused checkers disabled
-      (let ((flycheck-go-megacheck-disabled-checkers '("simple" "unused")))
-        (flycheck-ert-should-syntax-check
-         "language/go/src/megacheck/megacheck1.go" 'go-mode
-         '(12 21 warning "calling strings.Replace with n == 0 will return no results, did you mean -1? (SA1018)"
-              :checker go-megacheck))))))
 
 (flycheck-ert-def-checker-test go-staticcheck go nil
   :tags '(language-go external-tool)
@@ -4168,10 +4142,10 @@ Why not:
 (flycheck-ert-def-checker-test ruby-rubocop ruby syntax-error
   (flycheck-ert-should-syntax-check
    "language/ruby/syntax-error.rb" 'ruby-mode
-   '(5 7 error "unexpected token tCONSTANT (Using Ruby 2.2 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+   '(5 7 error "unexpected token tCONSTANT (Using Ruby 2.3 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
        :id "Lint/Syntax"
        :checker ruby-rubocop)
-   '(5 24 error "unterminated string meets end of file (Using Ruby 2.2 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+   '(5 24 error "unterminated string meets end of file (Using Ruby 2.3 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
        :id "Lint/Syntax"
        :checker ruby-rubocop)))
 
@@ -4199,6 +4173,8 @@ Why not:
 (flycheck-ert-def-checker-test (ruby-rubocop ruby-reek ruby-rubylint) ruby with-rubylint
   (flycheck-ert-should-syntax-check
    "language/ruby/warnings.rb" 'ruby-mode
+   '(1 1 info "Missing magic comment `# frozen_string_literal: true`."
+       :id "Style/FrozenStringLiteralComment" :checker ruby-rubocop)
    '(3 nil warning "Person assumes too much for instance variable '@name'"
        :id "InstanceVariableAssumption" :checker ruby-reek)
    '(3 1 info "Missing top-level class documentation comment."
