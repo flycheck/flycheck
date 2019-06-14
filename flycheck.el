@@ -5501,14 +5501,26 @@ CHECKER."
     `(
       ,(flycheck-verification-result-new
         :label "executable"
-        :message (if executable (format "Found at %s" executable) "Not found")
+        :message
+        (if executable (format "Found at %s" executable)
+          (format
+           "Not found. %s"
+           (let ((candidate (flycheck-checker-executable checker)))
+             (if candidate (format "(Tried %s)" candidate)
+               "(No executable file was specified for this checker.)"))))
         :face (if executable 'success '(bold error)))
       ,@(when config-file-var
           (let* ((value (symbol-value config-file-var))
                  (path (and value (flycheck-locate-config-file value checker))))
             (list (flycheck-verification-result-new
                    :label "configuration file"
-                   :message (if path (format "Found at %S" path) "Not found")
+                   :message
+                   (if path (format "Found at %S" path)
+                     (format
+                      "Not found. %s"
+                      (if value (format "(Tried %s)" value)
+                        (concat "(No configuration file was specified "
+                                "for this checker.)"))))
                    :face (if path 'success 'warning)))))
       ,@(when (not (flycheck-temp-files-writable-p checker))
           (list (flycheck-verification-result-new
