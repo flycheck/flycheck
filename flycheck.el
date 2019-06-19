@@ -9771,6 +9771,12 @@ See URL `https://github.com/Synthetica9/nix-linter'."
   :command ("nix-linter" "--json-stream" "-")
   :standard-input t
   :error-parser flycheck-parse-nix-linter
+  :error-explainer
+  (lambda (error)
+    (-when-let (error-code (flycheck-error-id error))
+      (with-output-to-string
+        (call-process "nix-linter" nil standard-output nil "--help-for"
+                      error-code))))
   :modes nix-mode)
 
 (defun flycheck-locate-sphinx-source-directory ()
