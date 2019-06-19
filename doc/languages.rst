@@ -1378,6 +1378,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _terraform fmt: https://www.terraform.io/docs/commands/fmt.html
 
+   .. syntax-checker:: terraform-tflint
+
+      Check Terraform with `tflint <https://github.com/wata727/tflint>`_
+
 .. supported-language:: Text
 
    .. syntax-checker:: proselint

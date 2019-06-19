@@ -262,6 +262,7 @@ attention to case differences."
     systemd-analyze
     tcl-nagelfar
     terraform
+    terraform-tflint
     tex-chktex
     tex-lacheck
     texinfo
@@ -10770,6 +10771,40 @@ See URL `https://www.terraform.io/docs/commands/fmt.html'."
           "\n\n  on <stdin> line " line ":\n  (source code not available)\n\n"
           (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
           line-end))
+  :next-checkers ((warning . terraform-tflint))
+  :modes terraform-mode)
+
+(defun flycheck-parse-tflint-linter (output checker buffer)
+  "Parse tflint warnings from JSON OUTPUT.
+
+CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
+the BUFFER that was checked respectively.
+
+See URL `https://github.com/wata727/tflint' for more
+information about tflint."
+  (mapcar (lambda (err)
+            (let-alist err
+              (flycheck-error-new-at
+               .line
+               nil
+               (pcase .type
+                 (`"ERROR"   'error)
+                 (`"WARNING" 'warning)
+                 ;; Default to error
+                 (_          'error))
+               .message
+               :id .detector
+               :checker checker
+               :buffer buffer
+               :filename (buffer-file-name buffer))))
+          (car (flycheck-parse-json output))))
+
+(flycheck-define-checker terraform-tflint
+  "A Terraform checker using tflint.
+
+See URL `https://github.com/wata727/tflint'."
+  :command ("tflint" "--error-with-issues" "--format=json" source)
+  :error-parser flycheck-parse-tflint-linter
   :modes terraform-mode)
 
 (flycheck-define-checker tex-chktex

@@ -33,6 +33,7 @@
   - VHDL with ``ghdl`` [GH-1160]
   - mypy with ``python-mypy`` [GH-1354]
   - terraform with ``terraform fmt`` [GH-1586]
+  - terraform-tflint with ``tflint`` [GH-1586]
 
 - New features:
 
