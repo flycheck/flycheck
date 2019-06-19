@@ -3,7 +3,7 @@
 
 - **Breaking changes**
 
-  - Remove ``javascript-jscs`` checker
+  - Remove ``javascript-jscs`` checker [GH-1024]
   - Remove ``elixir-dogma`` checker [GH-1450]
   - ``rust-cargo`` now requires Rust 1.17 or newer [GH-1289]
   - ``rust`` now requires 1.18 or newer [GH-1501]
@@ -15,7 +15,7 @@
     ``hpack`` project files [GH-1435]
   - Replace ``go tool vet`` with ``go vet`` [GH-1548]
   - Remove the deprecated ``go-megacheck`` checker, which is replaced by
-    ``go-staticcheck``.
+    ``go-staticcheck``. [GH-1583]
 
 - New syntax checkers:
 
@@ -41,7 +41,7 @@
   - Add ``flycheck-ghc-stack-project-file`` for the
     ``haskell-stack-ghc`` checker. [GH-1316]
   - Add ``flycheck-perl-module-list`` to use specified modules when
-    syntax checking code with the ``perl`` checker.
+    syntax checking code with the ``perl`` checker. [GH-1207]
   - Add ``flycheck-sh-bash-args`` to pass arguments to ``sh-bash`` [GH-1439].
   - Add ``flychjeck-eslint-args`` to pass arguments to ``javascript-eslint``
     [GH-1360]
@@ -59,7 +59,8 @@
   - Add ``flycheck-erlang-rebar3-profile`` to select which profile to
     use when compiling erlang with rebar3.
   - Add ``flycheck-relevant-error-other-file-show`` to avoid showing errors
-    from other files.
+    from other files. [GH-1579]
+  - Add an error explainer for the ``nix-linter`` checker. [GH-1586]
 
 - Improvements
 
