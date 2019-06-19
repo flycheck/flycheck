@@ -1370,6 +1370,14 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check Tcl syntax with `Nagelfar <http://nagelfar.sourceforge.net/>`_.
 
+.. supported-language:: Terraform
+
+   .. syntax-checker:: terraform
+
+      Check Terraform syntax with `terraform fmt`_
+
+      .. _terraform fmt: https://www.terraform.io/docs/commands/fmt.html
+
 .. supported-language:: Text
 
    .. syntax-checker:: proselint

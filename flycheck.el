@@ -261,6 +261,7 @@ attention to case differences."
     sql-sqlint
     systemd-analyze
     tcl-nagelfar
+    terraform
     tex-chktex
     tex-lacheck
     texinfo
@@ -10757,6 +10758,19 @@ See URL `http://nagelfar.sourceforge.net/'."
    (warning line-start (file-name) ": " line ": W " (message) line-end)
    (error   line-start (file-name) ": " line ": E " (message) line-end))
   :modes tcl-mode)
+
+(flycheck-define-checker terraform
+  "A Terraform syntax checker with `terraform fmt'.
+
+See URL `https://www.terraform.io/docs/commands/fmt.html'."
+  :command ("terraform" "fmt" "-no-color" "-")
+  :standard-input t
+  :error-patterns
+  ((error line-start "Error: " (one-or-more not-newline)
+          "\n\n  on <stdin> line " line ":\n  (source code not available)\n\n"
+          (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
+          line-end))
+  :modes terraform-mode)
 
 (flycheck-define-checker tex-chktex
   "A TeX and LaTeX syntax and style checker using chktex.
