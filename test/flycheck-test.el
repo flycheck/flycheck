@@ -3869,9 +3869,17 @@ Why not:
 
 (flycheck-ert-def-checker-test protobuf-protoc protobuf syntax-error
   (flycheck-ert-should-syntax-check
-   "language/protobuf.proto" 'protobuf-mode
+   "language/protobuf/protobuf/syntax-error.proto" 'protobuf-mode
    '(2 23 error "Missing field number."
        :checker protobuf-protoc)))
+
+(flycheck-ert-def-checker-test protobuf-prototool protobuf warnings
+  (flycheck-ert-should-syntax-check
+   "language/protobuf/prototool/missing_syntax.proto" 'protobuf-mode
+   '(1 1 warning "No syntax specified. Please use 'syntax = \"proto2\";' or 'syntax = \"proto3\";' to specify a syntax version."
+       :checker protobuf-prototool)
+   '(4 3 warning "Expected \"required\", \"optional\", or \"repeated\"."
+       :checker protobuf-prototool)))
 
 (flycheck-ert-def-checker-test pug pug syntax-error
   (flycheck-ert-should-syntax-check

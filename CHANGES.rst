@@ -34,6 +34,7 @@
   - mypy with ``python-mypy`` [GH-1354]
   - terraform with ``terraform fmt`` [GH-1586]
   - terraform-tflint with ``tflint`` [GH-1586]
+  - protobuf-prototool with ``prototool`` [GH-1591]
 
 - New features:
 
