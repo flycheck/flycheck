@@ -892,6 +892,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _protoc: https://developers.google.com/protocol-buffers/
 
+      .. defcustom:: flycheck-protoc-import-path
+
+         A list of directories to resolve import directives.  Relative paths are
+         relative to the path of the buffer being checked.
+
    .. syntax-checker:: protobuf-prototool
 
       Lint with `prototool <https://github.com/uber/prototool>`_.
