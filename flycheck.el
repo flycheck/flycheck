@@ -7831,19 +7831,12 @@ used as profile."
 Use flycheck-erlang-rebar3-profile if set, otherwise use test profile if
 dirname is test or else default."
   (cond
-   (flycheck-erlang-rebar3-profile flycheck-erlang-rebar3-profile)
-   ((and buffer-file-name
-         (string= "test"
-                  (file-name-base
-                   (directory-file-name
-                    (file-name-directory buffer-file-name)))))
-    "test")
-   ((and buffer-file-name
-         (string= "eqc"
-                  (file-name-base
-                   (directory-file-name
-                    (file-name-directory buffer-file-name)))))
-    "eqc")
+   (flycheck-erlang-rebar3-profile)
+   ((seq-contains '("test" "eqc")
+                  (and buffer-file-name
+                       (file-name-base
+                        (directory-file-name
+                         (file-name-directory buffer-file-name))))))
    (t "default")))
 
 (flycheck-define-checker erlang-rebar3
