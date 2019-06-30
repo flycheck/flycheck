@@ -1382,6 +1382,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check Terraform with `tflint <https://github.com/wata727/tflint>`_
 
+      .. defcustom:: flycheck-tflint-variable-files
+
+         A list of files to resolve terraform variables.  Relative paths are
+         relative to the path of the buffer being checked.
+
 .. supported-language:: Text
 
    .. syntax-checker:: proselint
