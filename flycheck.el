@@ -10809,7 +10809,7 @@ information about tflint."
   "A Terraform checker using tflint.
 
 See URL `https://github.com/wata727/tflint'."
-  :command ("tflint" "--error-with-issues" "--format=json" source)
+  :command ("tflint" "--format=json" source)
   :error-parser flycheck-parse-tflint-linter
   :modes terraform-mode)
 
