@@ -400,7 +400,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          The profile to use when compiling, e.g. "default" or "test".
          The default value is nil which will use the test profile in test
-         directories, eqc if the eqc directories and default profile
+         directories, the eqc profile in eqc directories and the default profile
          otherwise.
 
 .. supported-language:: ERuby
