@@ -399,7 +399,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
       .. defcustom:: flycheck-erlang-rebar3-profile
 
          The profile to use when compiling, e.g. "default" or "test".
-         The default value is nil which will use test profile in test
+         The default value is nil which will use the test profile in test
          directories, eqc if the eqc directories and default profile
          otherwise.
 
