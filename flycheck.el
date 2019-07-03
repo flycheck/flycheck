@@ -223,6 +223,7 @@ attention to case differences."
     processing
     proselint
     protobuf-protoc
+    protobuf-prototool
     pug
     puppet-parser
     puppet-lint
@@ -9142,6 +9143,22 @@ See URL `https://developers.google.com/protocol-buffers/'."
           column ":" line-end))
   :modes protobuf-mode
   :predicate (lambda () (buffer-file-name)))
+
+(defun flycheck-prototool-project-root (&optional _checker)
+  "Return the nearest directory holding the prototool.yaml configuration."
+  (and buffer-file-name
+       (locate-dominating-file buffer-file-name "prototool.yaml")))
+
+(flycheck-define-checker protobuf-prototool
+  "A protobuf syntax checker using prototool.
+
+See URL `https://github.com/uber/prototool'."
+  :command ("prototool" "lint" source-original)
+  :error-patterns
+  ((warning line-start (file-name) ":" line ":" column ":" (message) line-end))
+  :modes protobuf-mode
+  :enabled flycheck-prototool-project-root
+  :predicate flycheck-buffer-saved-p)
 
 (flycheck-define-checker pug
   "A Pug syntax checker using the pug compiler.

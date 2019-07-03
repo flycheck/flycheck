@@ -892,6 +892,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _protoc: https://developers.google.com/protocol-buffers/
 
+   .. syntax-checker:: protobuf-prototool
+
+      Lint with `prototool <https://github.com/uber/prototool>`_.
+
 .. supported-language:: Pug
 
    .. syntax-checker:: pug
