@@ -4083,7 +4083,7 @@ Why not:
 
 (flycheck-ert-def-checker-test terraform terraform nil
   (flycheck-ert-should-syntax-check
-   "language/terraform/syntax-error.tf" 'terraform-mode
+   "language/terraform/terraform/syntax-error.tf" 'terraform-mode
    '(2 nil error "The \";\" character is not valid. Use newlines to separate arguments and blocks,\nand commas to separate items in collection values."
        :checker terraform)
    '(2 nil error "An argument definition must end with a newline."
@@ -4091,8 +4091,8 @@ Why not:
 
 (flycheck-ert-def-checker-test terraform-tflint terraform nil
   (flycheck-ert-should-syntax-check
-   "language/terraform/error.tf" 'terraform-mode
-   '(3 nil error "\"t1.2xlarge\" is invalid instance type."
+   "language/terraform/tflint/error.tf" 'terraform-mode
+   '(3 nil error "instance_type is not a valid value"
        :id "aws_instance_invalid_type" :checker terraform-tflint)))
 
 (flycheck-ert-def-checker-test markdown-markdownlint-cli markdown nil

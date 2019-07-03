@@ -10780,6 +10780,16 @@ See URL `https://www.terraform.io/docs/commands/fmt.html'."
   :next-checkers ((warning . terraform-tflint))
   :modes terraform-mode)
 
+(flycheck-def-option-var flycheck-tflint-variable-files nil terraform-tflint
+  "A list of files to resolve terraform variables.
+
+The value of this variable is a list of strings, where each
+string is a file to add to the terraform variables files.
+Relative files are relative to the file being checked."
+  :type '(repeat (directory :tag "Variable file"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "32"))
+
 (defun flycheck-parse-tflint-linter (output checker buffer)
   "Parse tflint warnings from JSON OUTPUT.
 
@@ -10809,8 +10819,11 @@ information about tflint."
   "A Terraform checker using tflint.
 
 See URL `https://github.com/wata727/tflint'."
-  :command ("tflint" "--error-with-issues" "--format=json" source)
+  :command ("tflint" "--format=json"
+            (option-list "--var-file=" flycheck-tflint-variable-files concat)
+            source-original)
   :error-parser flycheck-parse-tflint-linter
+  :predicate flycheck-buffer-saved-p
   :modes terraform-mode)
 
 (flycheck-define-checker tex-chktex
