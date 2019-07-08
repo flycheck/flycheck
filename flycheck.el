@@ -8623,7 +8623,7 @@ for more information about the custom directories."
   "Whether there is a valid eslint config for the current buffer."
   (let* ((executable (flycheck-find-checker-executable 'javascript-eslint))
          (exitcode (and executable (call-process executable nil nil nil
-                                                 "--print-config" "."))))
+                                                 "--print-config" (buffer-file-name)))))
     (eq exitcode 0)))
 
 (defun flycheck-parse-eslint (output checker buffer)
