@@ -38,54 +38,6 @@
 (require 'macroexp)                     ; For macro utilities
 
 
-;;; Compatibility
-
-(eval-and-compile
-  ;; Provide `ert-skip' and friends for Emacs 24.3
-  (defconst flycheck-ert-ert-can-skip (fboundp 'ert-skip)
-    "Whether ERT supports test skipping.")
-
-  (unless (fboundp 'define-error)
-    ;; from Emacs `subr.el'
-    (defun define-error (name message &optional parent)
-      "Define NAME as a new error signal.
-MESSAGE is a string that will be output to the echo area if such an error
-is signaled without being caught by a `condition-case'.
-PARENT is either a signal or a list of signals from which it inherits.
-Defaults to `error'."
-      (unless parent (setq parent 'error))
-      (let ((conditions
-             (if (consp parent)
-                 (apply #'append
-                        (mapcar
-                         (lambda (parent)
-                           (cons parent
-                                 (or (get parent 'error-conditions)
-                                     (error "Unknown signal `%s'" parent))))
-                         parent))
-               (cons parent (get parent 'error-conditions)))))
-        (put name 'error-conditions
-             (delete-dups (copy-sequence (cons name conditions))))
-        (when message (put name 'error-message message)))))
-
-  (unless flycheck-ert-ert-can-skip
-    ;; Fake skipping
-
-    (define-error 'flycheck-ert-skipped "Test skipped")
-
-    (defun ert-skip (data)
-      (signal 'flycheck-ert-skipped data))
-
-    (defmacro skip-unless (form)
-      `(unless (ignore-errors ,form)
-         (signal 'flycheck-ert-skipped ',form)))
-
-    (defun ert-test-skipped-p (result)
-      (and (ert-test-failed-p result)
-           (eq (car (ert-test-failed-condition result))
-               'flycheck-ert-skipped)))))
-
-
 ;;; Internal variables
 
 (defvar flycheck-ert--resource-directory nil
@@ -200,16 +152,7 @@ should use to lookup resource files."
       (error "No tests defined.  \
 Call `flycheck-ert-initialize' after defining all tests!"))
 
-    (setq flycheck-ert--resource-directory resource-dir)
-
-    ;; Emacs 24.3 don't support skipped tests, so we add poor man's test
-    ;; skipping: We mark skipped tests as expected failures by adjusting the
-    ;; expected result of all test cases. Not particularly pretty, but works :)
-    (unless flycheck-ert-ert-can-skip
-      (dolist (test tests)
-        (let ((result (ert-test-expected-result-type test)))
-          (setf (ert-test-expected-result-type test)
-                `(or ,result (satisfies ert-test-skipped-p))))))))
+    (setq flycheck-ert--resource-directory resource-dir)))
 
 
 ;;; Test case definitions

@@ -3,6 +3,7 @@
 
 - **Breaking changes**
 
+  - Flycheck now requires GNU Emacs 24.5 or newer
   - Remove ``javascript-jscs`` checker [GH-1024]
   - Remove ``elixir-dogma`` checker [GH-1450]
   - ``rust-cargo`` now requires Rust 1.17 or newer [GH-1289]
