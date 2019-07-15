@@ -3612,9 +3612,9 @@ Why not:
      "language/javascript/style.js" flycheck-test-javascript-modes
      '(3 10 error "Missing space before function parentheses."
          :checker javascript-standard)
-     '(4 1 error "Expected indentation of 2 spaces but found 1 tab."
+     '(4 1 error "Unexpected tab character."
          :checker javascript-standard)
-     '(4 2 error "Unexpected tab character."
+     '(4 1 error "Expected indentation of 2 spaces but found 1 tab."
          :checker javascript-standard)
      '(4 6 error "'foo' is assigned a value but never used."
          :checker javascript-standard)
@@ -4376,7 +4376,8 @@ The manifest path is relative to
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/multiline-error.rs" 'rust-mode
-     '(7 9 error "mismatched types (expected u8, found i8)" :checker rust :id "E0308" :group 1))))
+     '(7 9 error "mismatched types (expected u8, found i8)" :checker rust :id "E0308" :group 1)
+     '(7 9 info "you can convert an `i8` to `u8` and panic if the converted value wouldn't fit: `i.try_into().unwrap()`" :checker rust :id "E0308" :group 1))))
 
 (flycheck-ert-def-checker-test rust rust warning
   (let ((flycheck-disabled-checkers '(rust-cargo)))
@@ -4390,9 +4391,9 @@ The manifest path is relative to
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/note-and-help.rs" 'rust-mode
-     '(11 9 info "value moved here" :checker rust :id "E0382" :group 1)
-     '(12 9 error "use of moved value: `_x` (value used here after move)" :checker rust :id "E0382" :group 1)
-     '(12 9 info "move occurs because `_x` has type `NonPOD`, which does not implement the `Copy` trait" :checker rust :id "E0382" :group 1))))
+     '(10 9 info "move occurs because `_x` has type `NonPOD`, which does not implement the `Copy` trait" :checker rust :id "E0382" :group 1)
+     '(11 14 info "value moved here" :checker rust :id "E0382" :group 1)
+     '(12 14 error "use of moved value: `_x` (value used here after move)" :checker rust :id "E0382" :group 1))))
 
 (flycheck-ert-def-checker-test rust rust crate-root-not-set
   (let ((flycheck-disabled-checkers '(rust-cargo)))
