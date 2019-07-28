@@ -1191,17 +1191,23 @@ to a number and return it.  Otherwise return nil."
   (and (listp obj) (seq-every-p #'symbolp obj)))
 
 (defun flycheck-same-files-p (file-a file-b)
-  "Determine whether FILE-A and FILE-B refer to the same file."
-  (let ((file-a (expand-file-name file-a))
-        (file-b (expand-file-name file-b)))
-    ;; We must resolve symbolic links here, since some syntax checker always
-    ;; output canonical file names with all symbolic links resolved.  However,
-    ;; we still do a simple path compassion first, to avoid the comparatively
-    ;; expensive file system call if possible.  See
-    ;; https://github.com/flycheck/flycheck/issues/561
-    (or (string= (directory-file-name file-a) (directory-file-name file-b))
-        (string= (directory-file-name (file-truename file-a))
-                 (directory-file-name (file-truename file-b))))))
+  "Determine whether FILE-A and FILE-B refer to the same file.
+
+Files are the same if (in the order checked):
+
+- They have the same path.  Or,
+- They have the same inode and filesystem numbers, not following symlink.  Or,
+- After chasing symlinks, they result in the same path.
+
+This should work even on w32, where Emacs uses file index to
+emulate inode (see fstat() in emacs/src/w32.c)."
+  (or (string= file-a file-b)
+      (let ((attrs-a (file-attributes file-a))
+            (attrs-b (file-attributes file-b)))
+        (and attrs-a attrs-b  ;; Make sure both file-a and file-b exist.
+             (equal (nth 10 attrs-a) (nth 10 attrs-b))    ;; inode
+             (equal (nth 11 attrs-a) (nth 11 attrs-b))))  ;; filesystem
+      (string= (file-chase-links file-a) (file-chase-links file-b))))
 
 (defvar-local flycheck-temporaries nil
   "Temporary files and directories created by Flycheck.")
