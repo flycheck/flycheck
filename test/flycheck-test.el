@@ -4209,7 +4209,7 @@ Why not:
    '(6 10 info "Prefer single-quoted strings when you don't need string interpolation or special symbols."
        :id "Style/StringLiterals" :checker ruby-rubocop)
    '(10 5 info "the use of then/do is not needed here" :checker ruby-rubylint)
-   '(10 5 info "Use a guard clause instead of wrapping the code inside a conditional expression."
+   '(10 5 info "Use a guard clause (`return unless true`) instead of wrapping the code inside a conditional expression."
         :id "Style/GuardClause":checker ruby-rubocop)
    '(10 5 info "Favor modifier `if` usage when having a single-line body. Another good alternative is the usage of control flow `&&`/`||`."
         :id "Style/IfUnlessModifier" :checker ruby-rubocop)
