@@ -35,6 +35,7 @@
   - terraform with ``terraform fmt`` [GH-1586]
   - terraform-tflint with ``tflint`` [GH-1586]
   - protobuf-prototool with ``prototool`` [GH-1591]
+  - Bazel with ``bazel-buildifier`` [GH-1613]
 
 - New features:
 
