@@ -163,6 +163,7 @@ attention to case differences."
   '(ada-gnat
     asciidoctor
     asciidoc
+    bazel-buildifier
     c/c++-clang
     c/c++-gcc
     c/c++-cppcheck
@@ -6631,6 +6632,21 @@ See URL `http://asciidoctor.org'."
             "asciidoctor: WARNING: <stdin>: Line " line ": " (message)
             line-end))
   :modes adoc-mode)
+
+(flycheck-define-checker bazel-buildifier
+  "An Bazel checker using the buildifier.
+
+See URL `https://github.com/bazelbuild/buildtools/blob/master/buildifier'."
+  :command ("buildifier" "-lint=warn")
+  :standard-input t
+  :error-patterns
+  ((error line-start
+          "<stdin>:" line ":" column ": " (message)
+          line-end)
+   (warning line-start
+            "<stdin>:" line ": " (id (one-or-more (in word "-"))) ": " (message)
+            line-end))
+  :modes bazel-mode)
 
 (flycheck-def-args-var flycheck-clang-args c/c++-clang
   :package-version '(flycheck . "0.22"))

@@ -62,6 +62,14 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _AsciiDoc: http://www.methods.co.nz/asciidoc
 
+.. supported-language:: Bazel
+
+   .. syntax-checker:: bazel-buildifier
+
+      Check Bazel with buildifier_.
+
+      .. _buildifier: https://github.com/bazelbuild/buildtools
+
 .. supported-language:: C/C++
    :index_as: C
               C++

@@ -2871,6 +2871,16 @@ evaluating BODY."
    '(4 nil warning "section title out of sequence: expected level 1, got level 2" :checker asciidoctor)
    '(6 nil error "unmatched macro: endif::[]" :checker asciidoctor)))
 
+(flycheck-ert-def-checker-test bazel-buildifier bazel error
+  (flycheck-ert-should-syntax-check
+   "language/bazel/syntax-error.bazel" 'bazel-mode
+   '(1 11 error "syntax error near !" :checker bazel-buildifier)))
+
+(flycheck-ert-def-checker-test bazel-buildifier bazel nil
+  (flycheck-ert-should-syntax-check
+   "language/bazel/warnings.bazel" 'bazel-mode
+   '(1 nil warning "The file has no module docstring. (https://github.com/bazelbuild/buildtools/blob/master/WARNINGS.md#module-docstring)" :id "module-docstring" :checker bazel-buildifier)))
+
 (flycheck-ert-def-checker-test c/c++-clang (c c++) error
   (let ((flycheck-disabled-checkers '(c/c++-gcc)))
     (flycheck-ert-should-syntax-check
