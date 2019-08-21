@@ -9539,7 +9539,9 @@ See URL `http://mypy-lang.org/'."
   ((error line-start (file-name) ":" line (optional ":" column)
           ": error:" (message) line-end)
    (warning line-start (file-name) ":" line (optional ":" column)
-            ": warning:" (message) line-end))
+            ": warning:" (message) line-end)
+   (info line-start (file-name) ":" line (optional ":" column)
+         ": note:" (message) line-end))
   :modes python-mode
   ;; Ensure the file is saved, to work around
   ;; https://github.com/python/mypy/issues/4746.
