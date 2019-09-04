@@ -3436,7 +3436,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
        "language/go/src/staticcheck/staticcheck1.go" 'go-mode
        '(8 6 error "should omit values from range; this loop is equivalent to `for range ...`"
            :checker go-staticcheck :id "S1005")
-       '(12 21 error "calling strings.Replace with n == 0 will return no results, did you mean -1?"
+       '(12 39 error "calling strings.Replace with n == 0 will return no results, did you mean -1?"
             :checker go-staticcheck :id "SA1018")
        '(16 6 error "func unused is unused"
             :checker go-staticcheck :id "U1000")))))
@@ -3667,9 +3667,9 @@ Why not:
      "language/javascript/style.js" flycheck-test-javascript-modes
      '(3 10 error "Missing space before function parentheses."
          :checker javascript-standard)
-     '(4 1 error "Expected indentation of 2 spaces but found 1 tab."
+     '(4 1 error "Unexpected tab character."
          :checker javascript-standard)
-     '(4 2 error "Unexpected tab character."
+     '(4 1 error "Expected indentation of 2 spaces but found 1 tab."
          :checker javascript-standard)
      '(4 6 error "'foo' is assigned a value but never used."
          :checker javascript-standard)
