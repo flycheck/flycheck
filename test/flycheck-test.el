@@ -3316,9 +3316,17 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
                  "language/erlang/rebar3/_build/default/lib/dependency/_build")))))
 
 (flycheck-ert-def-checker-test eruby-erubis eruby nil
-  (flycheck-ert-should-syntax-check
-   "language/eruby.erb" '(html-erb-mode rhtml-mode)
-   '(9 nil error "syntax error, unexpected end-of-input, expecting keyword_end" :checker eruby-erubis)))
+  (let ((flycheck-disabled-checkers '(eruby-ruumba)))
+    (flycheck-ert-should-syntax-check
+     "language/eruby.erb" '(html-erb-mode rhtml-mode)
+     '(9 nil error "syntax error, unexpected end-of-input, expecting keyword_end" :checker eruby-erubis))))
+
+(flycheck-ert-def-checker-test eruby-ruumba eruby syntax-error
+  (let ((flycheck-disabled-checkers '(eruby-erubis)))
+    (flycheck-ert-should-syntax-check
+     "language/eruby.erb" '(html-erb-mode rhtml-mode)
+     '(8 1 error "unexpected token $end (Using Ruby 2.3 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+         :id "Lint/Syntax"  :checker eruby-ruumba))))
 
 (flycheck-ert-def-checker-test fortran-gfortran fortran error
   (flycheck-ert-should-syntax-check
