@@ -9711,8 +9711,8 @@ See URL `https://racket-lang.org/'."
      (flycheck-increment-error-columns
       (seq-remove
        (lambda (err)
-         (string=
-          "/usr/share/racket/pkgs/compiler-lib/compiler/commands/expand.rkt"
+         (string-suffix-p
+          "/share/racket/pkgs/compiler-lib/compiler/commands/expand.rkt"
           (flycheck-error-filename err)))
        errors))))
   :error-patterns
