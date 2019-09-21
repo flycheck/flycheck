@@ -80,6 +80,7 @@
 (require 'help-mode)             ; `define-button-type'
 (require 'find-func)             ; `find-function-regexp-alist'
 (require 'json)                  ; `flycheck-parse-tslint'
+(require 'ansi-color)            ; `flycheck-parse-with-patterns-without-color'
 
 
 ;; Declare a bunch of dynamic variables that we need from other modes
@@ -6407,6 +6408,22 @@ machine_message.rs at URL `https://git.io/vh24R'."
                 errors))))
     (apply #'nconc errors)))
 
+;; Some checkers output ANSI terminal colors, which don't match up
+;; with :error-patterns, so we strip those color codes from the output
+;; here before passing it along to the default behavior. This is
+;; originally only used in the rebar3 checker, but the systemd checker
+;; now also makes use of it.
+;;
+;; The relevant discussion can be found at
+;; https://github.com/flycheck/flycheck/pull/1144
+(defun flycheck-parse-with-patterns-without-color (output checker buffer)
+  "Strip color codes from OUTPUT before passing it to the default behavior.
+
+CHECKER and BUFFER are passed along as well."
+  (flycheck-parse-with-patterns
+   (and (fboundp 'ansi-color-filter-apply) (ansi-color-filter-apply output))
+   checker buffer))
+
 
 ;;; Error parsing with regular expressions
 (defun flycheck-get-regexp (patterns)
@@ -7869,17 +7886,7 @@ dirname is test or else default."
 (flycheck-define-checker erlang-rebar3
   "An Erlang syntax checker using the rebar3 build tool."
   :command ("rebar3" "as" (eval (flycheck-erlang-rebar3-get-profile)) "compile")
-  :error-parser
-  (lambda (output checker buffer)
-    ;; rebar3 outputs ANSI terminal colors, which don't match up with
-    ;; :error-patterns, so we strip those color codes from the output
-    ;; here before passing it along to the default behavior. The
-    ;; relevant discussion can be found at
-    ;; https://github.com/flycheck/flycheck/pull/1144
-    (require 'ansi-color)
-    (flycheck-parse-with-patterns
-     (and (fboundp 'ansi-color-filter-apply) (ansi-color-filter-apply output))
-     checker buffer))
+  :error-parser flycheck-parse-with-patterns-without-color
   :error-patterns
   ((warning line-start
             (file-name) ":" line ": Warning:" (message) line-end)
@@ -10845,6 +10852,7 @@ See URL `https://github.com/purcell/sqlint'."
 See URL
 `https://www.freedesktop.org/software/systemd/man/systemd-analyze.html'."
   :command ("systemd-analyze" "verify" source)
+  :error-parser flycheck-parse-with-patterns-without-color
   :error-patterns
   ((error line-start "[" (file-name) ":" line "] " (message) line-end))
   :modes (systemd-mode))
