@@ -4613,14 +4613,28 @@ The manifest path is relative to
        :checker sql-sqlint)))
 
 (flycheck-ert-def-checker-test systemd-analyze systemd nil
-  (flycheck-ert-should-syntax-check
-   "language/systemd-analyze-test.service" 'systemd-mode
-   '(3 nil error "Invalid URL, ignoring: foo://bar"
-       :checker systemd-analyze)
-   '(6 nil error "Unknown lvalue 'ExecSmart' in section 'Service'"
-       :checker systemd-analyze)
-   '(8 nil error "Unknown section 'Dog'. Ignoring."
-       :checker systemd-analyze)))
+  (let* ((systemd-version
+          (--> (shell-command-to-string
+                (format "%s --version"
+                        (flycheck-find-checker-executable 'systemd-analyze)))
+               split-string
+               cl-second))
+         (key-unknown-message
+          (cond
+           ((ignore-errors (version< systemd-version "241"))
+            "Unknown lvalue 'ExecSmart' in section 'Service'")
+           ((ignore-errors (version< systemd-version "243"))
+            "Unknown lvalue 'ExecSmart' in section 'Service', ignoring")
+           (t
+            "Unknown key name 'ExecSmart' in section 'Service', ignoring."))))
+    (flycheck-ert-should-syntax-check
+     "language/systemd-analyze-test.service" 'systemd-mode
+     '(3 nil error "Invalid URL, ignoring: foo://bar"
+         :checker systemd-analyze)
+     `(6 nil error ,key-unknown-message
+         :checker systemd-analyze)
+     '(8 nil error "Unknown section 'Dog'. Ignoring."
+         :checker systemd-analyze))))
 
 (flycheck-ert-def-checker-test tex-chktex (tex latex) nil
   (flycheck-ert-should-syntax-check
