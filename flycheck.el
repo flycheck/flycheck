@@ -7810,8 +7810,9 @@ See URL `http://www.erlang.org/'."
   :enabled (lambda () (string-suffix-p ".erl" (buffer-file-name))))
 
 (defun contains-rebar-config (dir-name)
-  "Return DIR-NAME if DIR-NAME/rebar.config exists, nil otherwise."
-  (when (file-exists-p (expand-file-name "rebar.config" dir-name))
+  "Return DIR-NAME if rebar config file exists in DIR-NAME, nil otherwise."
+  (when (or (file-exists-p (expand-file-name "rebar.config" dir-name))
+            (file-exists-p (expand-file-name "rebar.config.script" dir-name)))
     dir-name))
 
 (defun locate-rebar3-project-root (file-name &optional prev-file-name acc)
