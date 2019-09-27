@@ -7809,12 +7809,13 @@ See URL `http://www.erlang.org/'."
   :modes erlang-mode
   :enabled (lambda () (string-suffix-p ".erl" (buffer-file-name))))
 
-(defun contains-rebar-config (dir-name)
+(defun flycheck-contains-rebar-config (dir-name)
   "Return DIR-NAME if DIR-NAME/rebar.config exists, nil otherwise."
   (when (file-exists-p (expand-file-name "rebar.config" dir-name))
     dir-name))
 
-(defun locate-rebar3-project-root (file-name &optional prev-file-name acc)
+(defun flycheck-locate-rebar3-project-root (file-name &optional
+                                                      prev-file-name acc)
   "Find the top-most rebar project root for source FILE-NAME.
 
 A project root directory is any directory containing a
@@ -7832,14 +7833,14 @@ Return the absolute path to the directory"
   (if (string= file-name prev-file-name)
       (car (remove nil acc))
     (let ((current-dir (file-name-directory file-name)))
-      (locate-rebar3-project-root
+      (flycheck-locate-rebar3-project-root
        (directory-file-name current-dir)
        file-name
-       (cons (contains-rebar-config current-dir) acc)))))
+       (cons (flycheck-contains-rebar-config current-dir) acc)))))
 
 (defun flycheck-rebar3-project-root (&optional _checker)
   "Return directory where rebar.config is located."
-  (locate-rebar3-project-root buffer-file-name))
+  (flycheck-locate-rebar3-project-root buffer-file-name))
 
 (flycheck-def-option-var flycheck-erlang-rebar3-profile nil erlang-rebar3
   "The rebar3 profile to use.
