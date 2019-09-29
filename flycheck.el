@@ -1501,8 +1501,8 @@ FILE-NAME is nil, return `default-directory'."
 
 
 ;;; Minibuffer tools
-(defvar read-flycheck-checker-history nil
-  "`completing-read' history of `read-flycheck-checker'.")
+(defvar flycheck-read-checker-history nil
+  "`completing-read' history of `flycheck-read-checker'.")
 
 (defun flycheck-completing-read (prompt candidates default &optional history)
   "Read a value from the minibuffer.
@@ -1515,7 +1515,7 @@ HISTORY is passed to `flycheck-completing-read-function'."
   (funcall flycheck-completing-read-function
            prompt candidates nil 'require-match nil history default))
 
-(defun read-flycheck-checker (prompt &optional default property candidates)
+(defun flycheck-read-checker (prompt &optional default property candidates)
   "Read a flycheck checker from minibuffer with PROMPT and DEFAULT.
 
 PROMPT is a string to show in the minibuffer as prompt.  It
@@ -1539,7 +1539,7 @@ a default on its own."
          (default (and default (symbol-name default)))
          (input (flycheck-completing-read
                  prompt candidates default
-                 'read-flycheck-checker-history)))
+                 'flycheck-read-checker-history)))
     (when (string-empty-p input)
       (unless default
         (user-error "No syntax checker selected"))
@@ -1549,7 +1549,7 @@ a default on its own."
         (error "%S is not a valid Flycheck syntax checker" checker))
       checker)))
 
-(defun read-flycheck-error-level (prompt)
+(defun flycheck-read-error-level (prompt)
   "Read an error level from the user with PROMPT.
 
 Only offers level for which errors currently exist, in addition
@@ -2087,7 +2087,7 @@ Pop up a help buffer with the documentation of CHECKER."
           (prompt (if default
                       (format "Describe syntax checker (default %s): " default)
                     "Describe syntax checker: ")))
-     (list (read-flycheck-checker prompt default))))
+     (list (flycheck-read-checker prompt default))))
   (unless (flycheck-valid-checker-p checker)
     (user-error "You didn't specify a Flycheck syntax checker"))
   (help-setup-xref (list #'flycheck-describe-checker checker)
@@ -2361,7 +2361,7 @@ being used for the current buffer.
 Note: Do not use this function to check whether a syntax checker
 is applicable from Emacs Lisp code.  Use
 `flycheck-may-use-checker' instead."
-  (interactive (list (read-flycheck-checker "Checker to verify: ")))
+  (interactive (list (flycheck-read-checker "Checker to verify: ")))
   (unless (flycheck-valid-checker-p checker)
     (user-error "%s is not a syntax checker" checker))
 
@@ -2708,7 +2708,7 @@ CHECKER will be used, even if it is not contained in
   (interactive
    (if current-prefix-arg
        (list nil)
-     (list (read-flycheck-checker "Select checker: "
+     (list (flycheck-read-checker "Select checker: "
                                   (flycheck-get-checker-for-buffer)))))
   (when (not (eq checker flycheck-checker))
     (unless (or (not checker) (flycheck-may-use-checker checker))
@@ -2740,7 +2740,7 @@ buffer-local value of `flycheck-disabled-checkers'."
                     "Disable syntax checker: ")))
      (when (and enable (not candidates))
        (user-error "No syntax checkers disabled in this buffer"))
-     (list (read-flycheck-checker prompt nil nil candidates) enable)))
+     (list (flycheck-read-checker prompt nil nil candidates) enable)))
   (unless checker
     (user-error "No syntax checker given"))
   (if enable
@@ -4601,7 +4601,7 @@ list."
 
 LEVEL is either an error level symbol, or nil, to remove the filter."
   (interactive
-   (list (read-flycheck-error-level
+   (list (flycheck-read-error-level
           "Minimum error level (errors at lower levels will be hidden): ")))
   (when (and level (not (flycheck-error-level-p level)))
     (user-error "Invalid level: %s" level))
@@ -5647,7 +5647,7 @@ This command is intended for interactive use only.  In Lisp, just
 variable symbol for a syntax checker."
   (declare (interactive-only "Set the executable variable directly instead"))
   (interactive
-   (let* ((checker (read-flycheck-checker "Syntax checker: "))
+   (let* ((checker (flycheck-read-checker "Syntax checker: "))
           (default-executable (flycheck-checker-default-executable checker))
           (executable (if current-prefix-arg
                           nil
@@ -5923,7 +5923,7 @@ up a separate buffer with the entire output of the syntax checker
 tool, just like `compile' (\\[compile])."
   (interactive
    (let ((default (flycheck-get-checker-for-buffer)))
-     (list (read-flycheck-checker "Run syntax checker as compile command: "
+     (list (flycheck-read-checker "Run syntax checker as compile command: "
                                   (when (flycheck-checker-get default 'command)
                                     default)
                                   'command))))
@@ -7809,13 +7809,14 @@ See URL `http://www.erlang.org/'."
   :modes erlang-mode
   :enabled (lambda () (string-suffix-p ".erl" (buffer-file-name))))
 
-(defun contains-rebar-config (dir-name)
+(defun flycheck--contains-rebar-config (dir-name)
   "Return DIR-NAME if rebar config file exists in DIR-NAME, nil otherwise."
   (when (or (file-exists-p (expand-file-name "rebar.config" dir-name))
             (file-exists-p (expand-file-name "rebar.config.script" dir-name)))
     dir-name))
 
-(defun locate-rebar3-project-root (file-name &optional prev-file-name acc)
+(defun flycheck--locate-rebar3-project-root
+    (file-name &optional prev-file-name acc)
   "Find the top-most rebar project root for source FILE-NAME.
 
 A project root directory is any directory containing a
@@ -7833,14 +7834,14 @@ Return the absolute path to the directory"
   (if (string= file-name prev-file-name)
       (car (remove nil acc))
     (let ((current-dir (file-name-directory file-name)))
-      (locate-rebar3-project-root
+      (flycheck--locate-rebar3-project-root
        (directory-file-name current-dir)
        file-name
-       (cons (contains-rebar-config current-dir) acc)))))
+       (cons (flycheck--contains-rebar-config current-dir) acc)))))
 
 (defun flycheck-rebar3-project-root (&optional _checker)
   "Return directory where rebar.config is located."
-  (locate-rebar3-project-root buffer-file-name))
+  (flycheck--locate-rebar3-project-root buffer-file-name))
 
 (flycheck-def-option-var flycheck-erlang-rebar3-profile nil erlang-rebar3
   "The rebar3 profile to use.
