@@ -4617,7 +4617,7 @@ The manifest path is relative to
    "language/systemd-analyze-test.service" 'systemd-mode
    '(3 nil error "Invalid URL, ignoring: foo://bar"
        :checker systemd-analyze)
-   '(6 nil error "Unknown lvalue 'ExecSmart' in section 'Service'"
+   '(6 nil error "Unknown key name 'ExecSmart' in section 'Service', ignoring."
        :checker systemd-analyze)
    '(8 nil error "Unknown section 'Dog'. Ignoring."
        :checker systemd-analyze)))
