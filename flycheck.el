@@ -9471,6 +9471,7 @@ Requires Flake8 3.0 or newer. See URL
   :command ("python"
             (eval (flycheck-python-module-args 'python-flake8 "flake8"))
             "--format=default"
+            "--stdin-display-name" source-original
             (config-file "--config" flycheck-flake8rc)
             (option "--max-complexity" flycheck-flake8-maximum-complexity nil
                     flycheck-option-int)
@@ -9483,7 +9484,7 @@ Requires Flake8 3.0 or newer. See URL
                     (seq-map #'flycheck-flake8-fix-error-level errors)))
   :error-patterns
   ((warning line-start
-            "stdin:" line ":" (optional column ":") " "
+            (file-name) ":" line ":" (optional column ":") " "
             (id (one-or-more (any alpha)) (one-or-more digit)) " "
             (message (one-or-more not-newline))
             line-end))
