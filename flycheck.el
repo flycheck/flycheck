@@ -4137,7 +4137,7 @@ overlays."
     (with-current-buffer buf
       (-when-let* ((fn flycheck-help-echo-function)
                    (errs (flycheck-overlay-errors-at pos)))
-        (funcall fn errs)))))
+        (propertize (funcall fn errs) 'help-echo-inhibit-substitution t)))))
 
 (defun flycheck-help-echo-all-error-messages (errs)
   "Concatenate error messages and ids from ERRS."
