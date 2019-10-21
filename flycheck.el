@@ -7645,6 +7645,24 @@ This variable has no effect, if
         (defvar flycheck-emacs-lisp-check-declare)
         (setq flycheck-emacs-lisp-check-declare ,value)))))
 
+(defun flycheck--emacs-lisp-enabled-p ()
+  "Check whether to enable Emacs Lisp checkers in the current buffer."
+  (not
+   (or
+    ;; Do not check buffers used for autoloads generation during package
+    ;; installation.  These buffers are too short-lived for being checked, and
+    ;; doing so causes spurious errors.  See
+    ;; https://github.com/flycheck/flycheck/issues/45 and
+    ;; https://github.com/bbatsov/prelude/issues/248.  We must also not check
+    ;; compilation buffers, but as these are ephemeral, Flycheck won't check
+    ;; them anyway.
+    (flycheck-autoloads-file-p)
+    ;; Cask/Carton and dir-locals files contain data, not code, and don't need
+    ;; to follow Checkdoc conventions either.
+    (and (buffer-file-name)
+         (member (file-name-nondirectory (buffer-file-name))
+                 '("Cask" "Carton" ".dir-locals.el" ".dir-locals-2.el"))))))
+
 (flycheck-define-checker emacs-lisp
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler.
 
@@ -7689,6 +7707,7 @@ See Info Node `(elisp)Byte Compilation'."
      (flycheck-collapse-error-message-whitespace
       (flycheck-sanitize-errors errors))))
   :modes (emacs-lisp-mode lisp-interaction-mode)
+  :enabled flycheck--emacs-lisp-enabled-p
   :predicate
   (lambda ()
     (and
@@ -7702,15 +7721,7 @@ See Info Node `(elisp)Byte Compilation'."
      (buffer-file-name)
      ;; Do not check buffers which should not be byte-compiled.  The checker
      ;; process will refuse to compile these, which would confuse Flycheck
-     (not (bound-and-true-p no-byte-compile))
-     ;; Do not check buffers used for autoloads generation during package
-     ;; installation.  These buffers are too short-lived for being checked, and
-     ;; doing so causes spurious errors.  See
-     ;; https://github.com/flycheck/flycheck/issues/45 and
-     ;; https://github.com/bbatsov/prelude/issues/248.  We must also not check
-     ;; compilation buffers, but as these are ephemeral, Flycheck won't check
-     ;; them anyway.
-     (not (flycheck-autoloads-file-p))))
+     (not (bound-and-true-p no-byte-compile))))
   :next-checkers (emacs-lisp-checkdoc))
 
 (defconst flycheck-emacs-lisp-checkdoc-form
@@ -7777,14 +7788,7 @@ The checker runs `checkdoc-current-buffer'."
   :error-patterns
   ((warning line-start (file-name) ":" line ": " (message) line-end))
   :modes (emacs-lisp-mode)
-  :predicate
-  (lambda ()
-    ;; Do not check Autoloads, Cask/Carton and dir-locals files.  These files
-    ;; really don't need to follow Checkdoc conventions.
-    (not (or (flycheck-autoloads-file-p)
-             (and (buffer-file-name)
-                  (member (file-name-nondirectory (buffer-file-name))
-                          '("Cask" "Carton" ".dir-locals.el")))))))
+  :enabled flycheck--emacs-lisp-enabled-p)
 
 (dolist (checker '(emacs-lisp emacs-lisp-checkdoc))
   (setf (car (flycheck-checker-get checker 'command))
