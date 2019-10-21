@@ -3442,7 +3442,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
         `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
       (flycheck-ert-should-syntax-check
        "language/go/src/staticcheck/staticcheck1.go" 'go-mode
-       '(8 6 error "should omit values from range; this loop is equivalent to `for range ...`"
+       '(8 6 error "unnecessary assignment to the blank identifier"
            :checker go-staticcheck :id "S1005")
        '(12 39 error "calling strings.Replace with n == 0 will return no results, did you mean -1?"
             :checker go-staticcheck :id "SA1018")
