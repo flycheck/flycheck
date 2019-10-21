@@ -36,9 +36,12 @@ install:
 - |
   case $JOB in
     emacs)
-      # We use another Cask file for Emacs 24
+      # We use separate Cask files for Emacs 24 and 25
       if [[ $EMACS_VERSION == 24.* ]]; then
         cp Cask.24 Cask
+      fi
+      if [[ $EMACS_VERSION == 25.* ]]; then
+        cp Cask.25 Cask
       fi
       # Install Emacs modes for our tests
       docker run --volume "$TRAVIS_BUILD_DIR":/flycheck \
