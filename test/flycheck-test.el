@@ -4713,6 +4713,17 @@ The manifest path is relative to
      '(4 5 error "mapping values are not allowed in this context"
          :checker yaml-ruby))))
 
+(flycheck-ert-def-checker-test yaml-yamllint yaml nil
+  (let ((flycheck-disabled-checkers '(yaml-yamlyaml)))
+    (flycheck-ert-should-syntax-check
+     "language/yaml.yaml" 'yaml-mode
+     '(3 1 warning "missing document start "---" (document-start)"
+         :checker yaml-yamllint))
+    (flycheck-ert-should-syntax-check
+     "language/yaml.yaml" 'yaml-mode
+     '(4 5 error "syntax error: mapping values are not allowed here"
+         :checker yaml-yamllint))))
+
 (flycheck-ert-def-checker-test jsonnet jsonnet nil
   (flycheck-ert-should-syntax-check
    "language/jsonnet/static_error.jsonnet" 'jsonnet-mode
