@@ -4385,7 +4385,7 @@ message to stretch arbitrarily far."
 
 (defun flycheck-error-list-update-source ()
   "Update the source buffer of the error list."
-  (when (not (eq (current-buffer) (get-buffer flycheck-error-list-buffer)))
+  (unless (eq (current-buffer) (get-buffer flycheck-error-list-buffer))
     ;; We must not update the source buffer, if the current buffer is the error
     ;; list itself.
     (flycheck-error-list-set-source (current-buffer))))
@@ -4849,6 +4849,10 @@ The echo area may be used if the cursor is not in the echo area,
 and if the echo area is not occupied by minibuffer input."
   (not (or cursor-in-echo-area (active-minibuffer-window))))
 
+(define-derived-mode flycheck-error-message-mode text-mode
+  "Flycheck error messages"
+  "Major mode for extended error messages.")
+
 (defun flycheck-display-error-messages (errors)
   "Display the messages of ERRORS.
 
@@ -4862,9 +4866,13 @@ In the latter case, show messages in the buffer denoted by
 variable `flycheck-error-message-buffer'."
   (when (and errors (flycheck-may-use-echo-area-p))
     (let ((messages (seq-map #'flycheck-error-format-message-and-id errors)))
-      (display-message-or-buffer (string-join messages "\n\n")
-                                 flycheck-error-message-buffer
-                                 'not-this-window))))
+      (let ((result (display-message-or-buffer (string-join messages "\n\n")
+                                               flycheck-error-message-buffer
+                                               'not-this-window)))
+        (when (window-live-p result)
+          (with-current-buffer (window-buffer result)
+            (unless (derived-mode-p 'flycheck-error-message-mode)
+              (flycheck-error-message-mode))))))))
 
 (defun flycheck-display-error-messages-unless-error-list (errors)
   "Show messages of ERRORS unless the error list is visible.
