@@ -277,7 +277,8 @@ attention to case differences."
     xml-xmlstarlet
     xml-xmllint
     yaml-jsyaml
-    yaml-ruby)
+    yaml-ruby
+    yaml-yamllint)
   "Syntax checkers available for automatic selection.
 
 A list of Flycheck syntax checkers to choose from when syntax
@@ -11245,6 +11246,22 @@ See URL `http://www.ruby-doc.org/stdlib-2.0.0/libdoc/yaml/rdoc/YAML.html'."
           "at line " line " column " column line-end))
   :modes yaml-mode
   :next-checkers ((warning . cwl)))
+
+(flycheck-def-config-file-var flycheck-yamllintrc yaml-yamllint ".yamllint"
+  :safe #'stringp)
+
+(flycheck-define-checker yaml-yamllint
+  "A YAML syntax checker using YAMLLint.
+See URL `https://github.com/adrienverge/yamllint'."
+  :standard-input t
+  :command ("yamllint" "-f" "parsable" "-"
+            (config-file "-c" flycheck-yamllintrc))
+  :error-patterns
+  ((error line-start
+          (file-name) ":" line ":" column ": [error] " (message) line-end)
+   (warning line-start
+            (file-name) ":" line ":" column ": [warning] " (message) line-end))
+  :modes yaml-mode)
 
 (provide 'flycheck)
 
