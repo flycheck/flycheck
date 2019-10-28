@@ -1199,6 +1199,23 @@
       (sleep-for 1.1)
       (should (flycheck-deferred-check-p)))))
 
+(ert-deftest flycheck-check-syntax-automatically/idle-change-checks-changed-buffer ()
+  :tags '(automatic)
+  (let ((flycheck-check-syntax-automatically '(idle-change))
+        (flycheck-idle-change-delay 0.1))
+    (flycheck-ert-with-resource-buffer "automatic-check-dummy.el"
+      (let ((changed-buffer (current-buffer)))
+        (emacs-lisp-mode)
+        (flycheck-mode)
+        (insert "Hello world")
+        (switch-to-buffer "other-dummy2.el")
+        (emacs-lisp-mode)
+        (flycheck-mode)
+        (sleep-for 0.2)
+        (should-not (flycheck-deferred-check-p))
+        (set-buffer changed-buffer)
+        (should (flycheck-deferred-check-p))))))
+
 (ert-deftest flycheck-check-syntax-automatically/does-not-check-after-buffer-switch-by-default ()
   :tags '(automatic)
   (let ((flycheck-check-syntax-automatically '())
