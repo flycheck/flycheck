@@ -2230,6 +2230,17 @@ evaluating BODY."
     (let ((err (should-error (flycheck-next-error) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
+(ert-deftest flycheck-next-error/minimum-level/ignores-minimum-level-if-no-error-beyond-it ()
+  :tags '(navigation)
+  (flycheck-ert-with-resource-buffer "language/emacs-lisp/warnings.el"
+    (emacs-lisp-mode)
+    (flycheck-mode)
+    (let ((flycheck-navigation-minimum-level 'error))
+      (flycheck-ert-buffer-sync)
+      (goto-char (point-min))
+      (flycheck-next-error 1)
+      (should (flycheck-ert-at-nth-error 1)))))
+
 (ert-deftest flycheck-previous-error/over-errors/errors-before-first-error ()
   :tags '(navigation)
   (flycheck-test-with-nav-buffer 'error
