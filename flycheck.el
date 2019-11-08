@@ -11262,9 +11262,9 @@ See URL `https://github.com/adrienverge/yamllint'."
             (config-file "-c" flycheck-yamllintrc))
   :error-patterns
   ((error line-start
-          (file-name) ":" line ":" column ": [error] " (message) line-end)
+          "stdin:" line ":" column ": [error] " (message) line-end)
    (warning line-start
-            (file-name) ":" line ":" column ": [warning] " (message) line-end))
+            "stdin:" line ":" column ": [warning] " (message) line-end))
   :modes yaml-mode)
 
 (provide 'flycheck)
