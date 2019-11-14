@@ -4003,7 +4003,7 @@ Why not:
         (flycheck-python-mypy-cache-dir null-device))
     (flycheck-ert-should-syntax-check
      "language/python/invalid_type.py" 'python-mode
-     '(2 5 error "Incompatible return value type (got \"str\", expected \"int\")"
+     '(2 12 error "Incompatible return value type (got \"str\", expected \"int\")"
          :checker python-mypy))))
 
 (flycheck-ert-def-checker-test python-pylint python syntax-error
@@ -4469,10 +4469,7 @@ The manifest path is relative to
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/importing.rs" 'rust-mode
-     '(1 1 info "remove the whole `use` item: ``" :checker rust :id "unused_imports" :group 1)
      '(1 5 error "failed to resolve: there are too many initial `super`s. (there are too many initial `super`s.)" :checker rust :id "E0433" :group 2)
-     '(1 5 warning "unused import: `super::imported`" :checker rust :id "unused_imports" :group 1)
-     '(1 5 info "`#[warn(unused_imports)]` on by default" :checker rust :id "unused_imports" :group 1)
      '(4 24 error "failed to resolve: use of undeclared type or module `imported` (use of undeclared type or module `imported`)" :checker rust :id "E0433" :group 3)
      )))
 
