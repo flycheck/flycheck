@@ -9794,7 +9794,7 @@ See URL `https://github.com/igorshubovych/markdownlint-cli'."
             source)
   :error-patterns
   ((error line-start
-          (file-name) ": " line ": " (id (one-or-more (not (any space))))
+          (file-name) ":" line " " (id (one-or-more (not (any space))))
           " " (message) line-end))
   :error-filter
   (lambda (errors)
