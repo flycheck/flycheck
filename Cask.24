@@ -26,7 +26,7 @@
  (depends-on "groovy-mode")
  (depends-on "haml-mode")
  (depends-on "handlebars-mode")
- (depends-on "haskell-mode")
+ ;; (depends-on "haskell-mode")    ; requires Emacs 25.1+
  (depends-on "js2-mode")
  (depends-on "js3-mode")
  (depends-on "rjsx-mode")
