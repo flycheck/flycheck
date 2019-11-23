@@ -4871,16 +4871,15 @@ In the latter case, show messages in the buffer denoted by
 variable `flycheck-error-message-buffer'."
   (when (and errors (flycheck-may-use-echo-area-p))
     (let ((messages (seq-map #'flycheck-error-format-message-and-id errors)))
-      (let ((result (display-message-or-buffer (string-join messages "\n\n")
-                                               flycheck-error-message-buffer
-                                               'not-this-window)))
-        ;; We cannot rely on `display-message-or-buffer' returning the right
-        ;; window. See URL `https://github.com/flycheck/flycheck/issues/1643'.
-        (when (window-live-p result)
-          (-when-let ((buffer (get-buffer flycheck-error-message-buffer)))
-            (with-current-buffer buffer
-              (unless (derived-mode-p 'flycheck-error-message-mode)
-                (flycheck-error-message-mode)))))))))
+      (display-message-or-buffer (string-join messages "\n\n")
+                                 flycheck-error-message-buffer
+                                 'not-this-window)
+      ;; We cannot rely on `display-message-or-buffer' returning the right
+      ;; window. See URL `https://github.com/flycheck/flycheck/issues/1643'.
+      (-when-let ((buf (get-buffer flycheck-error-message-buffer)))
+        (with-current-buffer buf
+          (unless (derived-mode-p 'flycheck-error-message-mode)
+            (flycheck-error-message-mode)))))))
 
 (defun flycheck-display-error-messages-unless-error-list (errors)
   "Show messages of ERRORS unless the error list is visible.
