@@ -8824,7 +8824,7 @@ See URL `https://github.com/zaach/jsonlint'."
   "A JSON syntax checker using Python json.tool module.
 
 See URL `https://docs.python.org/3.5/library/json.html#command-line-interface'."
-  :command ("python" "-m" "json.tool" source
+  :command ("python3" "-m" "json.tool" source
             ;; Send the pretty-printed output to the null device
             null-device)
   :error-patterns
@@ -9485,7 +9485,7 @@ Requires Flake8 3.0 or newer. See URL
 `https://flake8.readthedocs.io/'."
   ;; Not calling flake8 directly makes it easier to switch between different
   ;; Python versions; see https://github.com/flycheck/flycheck/issues/1055.
-  :command ("python"
+  :command ("python3"
             (eval (flycheck-python-module-args 'python-flake8 "flake8"))
             "--format=default"
             (config-file "--config" flycheck-flake8rc)
@@ -9534,7 +9534,7 @@ See URL `https://www.pylint.org/'."
   ;; --reports=n disables the scoring report.
   ;; Not calling pylint directly makes it easier to switch between different
   ;; Python versions; see https://github.com/flycheck/flycheck/issues/1055.
-  :command ("python"
+  :command ("python3"
             (eval (flycheck-python-module-args 'python-pylint "pylint"))
             "--reports=n"
             "--output-format=text"
@@ -9571,7 +9571,7 @@ See URL `https://www.pylint.org/'."
   "A Python syntax checker using Python's builtin compiler.
 
 See URL `https://docs.python.org/3.4/library/py_compile.html'."
-  :command ("python" "-m" "py_compile" source)
+  :command ("python3" "-m" "py_compile" source)
   :error-patterns
   ;; Python 2.7
   ((error line-start "  File \"" (file-name) "\", line " line "\n"
