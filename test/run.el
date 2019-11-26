@@ -107,7 +107,7 @@ Node `(ert)Test Selectors' for information about test selectors."
 ;; as it's easier to fix failures with the full output, since we cannot always
 ;; easily reproduce locally (for integration tests running on CI).
 (defun flycheck-run-unlimit-ert-pretty-printer ()
-  "Instal advice to unlimit the ERT output."
+  "Install advice to unlimit the ERT output."
   (advice-add 'ert--pp-with-indentation-and-newline :around
               (lambda (orig &rest args)
                 (let ((print-length nil)

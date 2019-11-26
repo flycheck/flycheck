@@ -1444,7 +1444,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. note::
 
-         textlint plugins need to be installed seperately.
+         textlint plugins need to be installed separately.
 
 .. supported-language:: TeX/LaTeX
 

@@ -253,7 +253,7 @@ class IssueReferences(Transform):
                 # Adjust the position of the last issue reference in the
                 # text
                 last_issue_ref_end = match.end()
-                # Extract the issue text and the issue numer
+                # Extract the issue text and the issue number
                 issuetext = match.group(0)
                 issue_id = match.group(1)
                 # Turn the issue into a proper reference
