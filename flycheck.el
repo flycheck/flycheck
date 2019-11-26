@@ -3940,7 +3940,7 @@ Return ERRORS, with in-place modifications."
           (while (not (eobp))
             (back-to-indentation)
             ;; If the current line starts with sufficient whitespace, delete the
-            ;; indendation offset.  Otherwise keep the line intact, as we might
+            ;; indentation offset.  Otherwise keep the line intact, as we might
             ;; loose valuable information
             (when (>= (- (point) (line-beginning-position)) indent-offset)
               (delete-char (- indent-offset)))
@@ -3955,7 +3955,7 @@ Return ERRORS, with in-place modifications."
 
 ERRORS is a list of `flycheck-error' objects.  SENTINEL-MESSAGE
 is a regular expression matched against the error message to
-determine whether the errror denotes errors from an included
+determine whether the error denotes errors from an included
 file.  Alternatively, it is a function that is given an error and
 shall return non-nil, if the error denotes errors from an
 included file."
@@ -4163,12 +4163,12 @@ overlays."
   (flycheck-filter-overlays (overlays-in beg end)))
 
 (defun flycheck-overlay-errors-at (pos)
-  "Return a list of all flycheck errors overlayed at POS."
+  "Return a list of all flycheck errors overlaid at POS."
   (seq-map (lambda (o) (overlay-get o 'flycheck-error))
            (flycheck-overlays-at pos)))
 
 (defun flycheck-overlay-errors-in (beg end)
-  "Return a list of all flycheck errors overlayed between BEG and END."
+  "Return a list of all flycheck errors overlaid between BEG and END."
   (seq-map (lambda (o) (overlay-get o 'flycheck-error))
            (flycheck-overlays-in beg end)))
 
@@ -11007,7 +11007,7 @@ See URL `http://www.gnu.org/software/texinfo/'."
     textlint "textlintrc.json"
   :safe #'stringp)
 
-;; This needs to be set because textlint plugins are installed seperately,
+;; This needs to be set because textlint plugins are installed separately,
 ;; and there is no way to check their installation status -- textlint simply
 ;; prints a backtrace.
 (flycheck-def-option-var flycheck-textlint-plugin-alist

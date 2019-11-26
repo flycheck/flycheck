@@ -27,7 +27,7 @@
 
 (require 'flycheck-buttercup)
 
-(describe "Utilties"
+(describe "Utilities"
 
   (describe "flycheck-buffer-empty-p"
 
