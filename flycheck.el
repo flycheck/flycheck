@@ -7397,7 +7397,7 @@ the BUFFER that was checked respectively."
   "An Ember template checker using ember-template-lint."
   :command ("ember-template-lint"
             (config-file "--config-path" flycheck-ember-template-lintrc)
-            "--stdin-filename" source-original
+            "--filename" source-original
             "--json")
   :standard-input t
   :error-parser flycheck-ember-template--parse-error
