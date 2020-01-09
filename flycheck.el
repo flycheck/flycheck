@@ -9138,6 +9138,12 @@ or as path to a standard specification."
                  (string :tag "Standard name or file"))
   :safe #'stringp)
 
+(flycheck-def-option-var flycheck-phpcs-file-extension nil php-phpcs
+  "Define file extensions to use with PHP CodeSniffer"
+  :type '(choice (const :tag "Default extension" "php")
+                 (string :tag "Extenion list"))
+  :safe #'stringp)
+
 (flycheck-define-checker php-phpcs
   "A PHP style checker using PHP Code Sniffer.
 
@@ -9150,6 +9156,7 @@ See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
             ;; been configured with show_progress enabled
             "-q"
             (option "--standard=" flycheck-phpcs-standard concat)
+            (option "--extensions=" flycheck-phpcs-file-extension concat)
             ;; Pass original file name to phpcs.  We need to concat explicitly
             ;; here, because phpcs really insists to get option and argument as
             ;; a single command line argument :|
