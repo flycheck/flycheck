@@ -9150,6 +9150,7 @@ See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
             ;; been configured with show_progress enabled
             "-q"
             (option "--standard=" flycheck-phpcs-standard concat)
+            (eval (concat "--extensions=" (file-name-extension (buffer-file-name))))
             ;; Pass original file name to phpcs.  We need to concat explicitly
             ;; here, because phpcs really insists to get option and argument as
             ;; a single command line argument :|
