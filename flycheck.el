@@ -8730,6 +8730,14 @@ CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
 the BUFFER that was checked respectively.
 
 See URL `https://eslint.org' for more information about ESLint."
+  (with-temp-buffer
+    (let ((output (let-alist (caar (flycheck-parse-json output)) .output)))
+      (if output
+          (progn
+            (insert output)
+            (let ((output-buffer (current-buffer)))
+              (with-current-buffer buffer
+                (replace-buffer-contents output-buffer)))))))
   (mapcar (lambda (err)
             (let-alist err
               (flycheck-error-new-at
