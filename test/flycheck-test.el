@@ -1499,11 +1499,12 @@
     (insert "    (message) ;; Hello world\n    (message")
     (emacs-lisp-mode)
     ;; Test an expression at the error column for all modes
-    (let ((err (flycheck-error-new-at 1 7)))
+    (let ((err (flycheck-error-new-at 1 7 nil nil :end-column 8 :end-line 1)))
       (should (equal (flycheck-error-region-for-mode err 'lines) '(5 . 29)))
       (should (equal (flycheck-error-region-for-mode err 'columns) '(7 . 8)))
       (should (equal (flycheck-error-region-for-mode err 'symbols) '(6 . 13)))
-      (should (equal (flycheck-error-region-for-mode err 'sexps) '(6 . 13))))
+      (should (equal (flycheck-error-region-for-mode err 'sexps) '(6 . 13)))
+      (should (equal (flycheck-error-region err) '(8 . 9))))
     ;; Test an error column which does not point to an expression
     (let ((err (flycheck-error-new-at 2 5)))
       (should (equal (flycheck-error-region-for-mode err 'lines) '(34 . 42)))

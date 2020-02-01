@@ -3263,7 +3263,7 @@ non-nil, then only do this and skip per-buffer teardown.)"
                (:constructor flycheck-error-new-at
                              (line column
                                    &optional level message
-                                   &key checker id group
+                                   &key checker id group end-column end-line
                                    (filename (buffer-file-name))
                                    (buffer (current-buffer)))))
   "Structure representing an error reported by a syntax checker.
@@ -3310,8 +3310,14 @@ Slots:
      collected by a checker should have the same `group` value,
      in order to be able to present them to the user.
 
-     See `flycheck-related-errors`."
-  buffer checker filename line column message level id group)
+     See `flycheck-related-errors`.
+`end-line' (optional)
+     The line marking the end of the error.
+
+`end-column' (optional)
+     The column marking the end of the error."
+  buffer checker filename line column message level id group end-line
+  end-column)
 
 (defmacro flycheck-error-with-buffer (err &rest forms)
   "Switch to the buffer of ERR and evaluate FORMS.
@@ -3395,6 +3401,29 @@ return nil."
           (widen)
           (goto-char column)
           (bounds-of-thing-at-point thing))))))
+
+(defun flycheck-error-region (err)
+  "Get the region of ERR.
+Returns the region only if all `column', `line', `end-line' and
+`end-column' are specified."
+  (flycheck-error-with-buffer err
+    (-when-let* ((end-column (flycheck-error-end-column err))
+                 (end-line (flycheck-error-end-line err))
+                 (column (flycheck-error-column err))
+                 (line (flycheck-error-line err)))
+      (save-excursion
+        (save-restriction
+          (widen)
+          (cons (progn
+                  (goto-char (point-min))
+                  (forward-line (1- line))
+                  (min (+ (point) column)
+                       (+ (line-end-position) 1)))
+                (progn
+                  (goto-char (point-min))
+                  (forward-line (1- end-line))
+                  (min (+ (point) end-column)
+                       (+ (line-end-position) 1)))))))))
 
 (defun flycheck-error-region-for-mode (err mode)
   "Get the region of ERR for the highlighting MODE.
@@ -4104,8 +4133,9 @@ Return the created overlay."
                     (cons (point-min)
                           (save-excursion (goto-char (point-min))
                                           (point-at-eol)))
-                  (flycheck-error-region-for-mode
-                   err (or flycheck-highlighting-mode 'lines))))
+                  (or (flycheck-error-region err)
+                      (flycheck-error-region-for-mode
+                       err (or flycheck-highlighting-mode 'lines)))))
                (overlay (make-overlay beg end))
                (level (flycheck-error-level err))
                (category (flycheck-error-level-overlay-category level)))
