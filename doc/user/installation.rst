@@ -54,16 +54,18 @@ Package installation
 ====================
 
 We recommend to install Flycheck with Emacs' built-in package manager.  Flycheck
-is available in the popular `MELPA Stable`_ archive which provides packages for
-Flycheck releases.  We recommend to read through the :doc:`changelog </changes>`
-before every upgrade to check for any breaking changes that might affect you.
+is available in the popular `MELPA`_ archive which serves up to date snapshots
+of Flycheck's development state.  We recommend to read through the
+:doc:`changelog </changes>` before every upgrade to check for any breaking
+changes that might affect you.
 
 .. note::
 
-   The sibling repository `MELPA Stable`_ serves up to date snapshots of
-   Flycheck's development state.  If you prefer to follow the most recent
-   changes use MELPA instead, but be aware that we make breaking changes anytime
-   without prior announcement.
+   The sibling repository `MELPA Stable`_ provides packages for Flycheck
+   releases.  If you prefer to follow the most recent changes use MELPA instead,
+   but be aware that, while we try to be careful about the stability of the
+   development snapshots, we may make breaking changes anytime without prior
+   announcement.
 
 Unfortunately the MELPA repositories are not available in Emacs by default.  You
 must explicitly add them to `package-archives` with the following code in your

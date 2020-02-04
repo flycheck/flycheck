@@ -1,6 +1,6 @@
 # -*- mode: conf; -*-
 [flake8]
 # Ignore all missing docstrings for now, until we have docstrings everywhere
-ignore = D100,D101,D102,D103,D105,D401
+ignore = D100,D101,D102,D103,D105,D401,W503
 exclude = test/resources
 inline-quotes = '

@@ -89,9 +89,7 @@ endif
 # Public targets
 .PHONY: init
 init:
-# The `--verbose` flag is a workaround for a Cask bug with Emacs 26.
-# See https://github.com/cask/cask/issues/367
-	$(CASK) --verbose install
+	$(CASK) install
 	$(CASK) update
 
 .PHONY: clean

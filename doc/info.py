@@ -21,8 +21,9 @@ from string import Template
 import requests
 from docutils import nodes
 from sphinx.roles import XRefRole
-from sphinx.util import ws_re
+from sphinx.util import ws_re, logging
 
+logger = logging.getLogger(__name__)
 
 # Regular expression object to parse the contents of an Info reference
 # role.
@@ -59,7 +60,7 @@ def node_encode(char):
     elif char == ' ':
         return '-'
     else:
-        return '_00' + char.encode('hex')
+        return '_00{:02x}'.format(ord(char))
 
 
 def expand_node_name(node):
@@ -110,8 +111,8 @@ class HTMLXRefDB(object):
                     url = Template(match.group('substurl')).substitute(
                         substitutions)
                     substitutions[match.group('substname')] = url
-                elif (match.group('manname') and
-                      match.group('mantype') == 'node'):
+                elif (match.group('manname')
+                      and match.group('mantype') == 'node'):
                     url = Template(match.group('manurl')).substitute(
                         substitutions)
                     manuals[match.group('manname')] = url
@@ -132,14 +133,14 @@ class HTMLXRefDB(object):
 
 def update_htmlxref(app):
     if not isinstance(getattr(app.env, 'info_htmlxref', None), HTMLXRefDB):
-        app.info('fetching Texinfo htmlxref database from {0}... '.format(
+        logger.info('fetching Texinfo htmlxref database from {0}... '.format(
             HTMLXRefDB.XREF_URL))
         try:
             app.env.info_htmlxref = HTMLXRefDB.parse(
                 requests.get(HTMLXRefDB.XREF_URL).text)
-        except requests.exceptions.ConnectionError as error:
-            app.warn('Failed to load xref DB.  '
-                     'Info references will not be resolved')
+        except requests.exceptions.ConnectionError:
+            logger.warning('Failed to load xref DB.  '
+                           'Info references will not be resolved')
             app.env.info_htmlxref = None
 
 
@@ -160,8 +161,8 @@ def resolve_info_references(app, _env, refnode, contnode):
     target = ws_re.sub(' ', refnode['reftarget'])
     match = INFO_RE.match(target)
     if not match:
-        app.env.warn(refnode.source, 'Invalid info target: {0}'.format(target),
-                     refnode.line)
+        logger.warning('Invalid info target: {0}'.format(target),
+                       location=(refnode.source, refnode.line))
         return contnode
 
     manual = match.group('manual')
@@ -172,7 +173,7 @@ def resolve_info_references(app, _env, refnode, contnode):
         uri = xrefdb.resolve(manual, node)
         if not uri:
             message = 'Cannot resolve info manual {0}'.format(manual)
-            app.env.warn(refnode.source, message, refnode.line)
+            logger.warning(message, location=(refnode.source, refnode.line))
             return contnode
         else:
             reference = nodes.reference('', '', internal=False,

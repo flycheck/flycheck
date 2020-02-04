@@ -26,6 +26,9 @@ from docutils.transforms import Transform
 from docutils.parsers.rst import Directive, directives
 from sphinx import addnodes
 from sphinx.util.nodes import set_source_info, process_index_entry
+from sphinx.util import logging
+
+logger = logging.getLogger(__name__)
 
 sys.path.append(str(Path(__file__).parent))
 
@@ -250,7 +253,7 @@ class IssueReferences(Transform):
                 # Adjust the position of the last issue reference in the
                 # text
                 last_issue_ref_end = match.end()
-                # Extract the issue text and the issue numer
+                # Extract the issue text and the issue number
                 issuetext = match.group(0)
                 issue_id = match.group(1)
                 # Turn the issue into a proper reference
@@ -274,7 +277,8 @@ def build_offline_html(app):
     from sphinx.builders.html import StandaloneHTMLBuilder
     build_standalone = isinstance(app.builder, StandaloneHTMLBuilder)
     if app.config.flycheck_offline_html and build_standalone:
-        app.info('Building offline documentation without external resources!')
+        logger.info(
+            'Building offline documentation without external resources!')
         app.builder.theme_options['github_banner'] = 'false'
         app.builder.theme_options['github_button'] = 'false'
 

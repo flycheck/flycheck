@@ -12,6 +12,7 @@
 
  ;; Various modes for use in the unit tests
  (depends-on "adoc-mode")
+ (depends-on "bazel-mode")
  (depends-on "coffee-mode")
  (depends-on "cperl-mode")
  (depends-on "cwl-mode")
@@ -29,6 +30,7 @@
  (depends-on "js3-mode")
  (depends-on "rjsx-mode")
  (depends-on "json-mode")
+ (depends-on "julia-mode")
  (depends-on "less-css-mode")
  (depends-on "lua-mode")
  (depends-on "markdown-mode")
@@ -48,6 +50,8 @@
  (depends-on "scss-mode")
  (depends-on "slim-mode")
  (depends-on "systemd")
+ (depends-on "terraform-mode")
+ (depends-on "tuareg")
  (depends-on "typescript-mode")
  (depends-on "web-mode")
  (depends-on "yaml-mode")

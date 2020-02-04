@@ -21,7 +21,7 @@ env:
   matrix:
   # Run our tests on all these Emacs versions
   - JOB="emacs" EMACS_VERSION="master"
-  - JOB="emacs" EMACS_VERSION="26.1"
+  - JOB="emacs" EMACS_VERSION="26.3"
   - JOB="emacs" EMACS_VERSION="25.3"
   - JOB="emacs" EMACS_VERSION="24.5"
   # A special job to build the manual
@@ -36,6 +36,13 @@ install:
 - |
   case $JOB in
     emacs)
+      # We use separate Cask files for Emacs 24 and 25
+      if [[ $EMACS_VERSION == 24.* ]]; then
+        cp Cask.24 Cask
+      fi
+      if [[ $EMACS_VERSION == 25.* ]]; then
+        cp Cask.25 Cask
+      fi
       # Install Emacs modes for our tests
       docker run --volume "$TRAVIS_BUILD_DIR":/flycheck \
                  --workdir /flycheck \
@@ -63,12 +70,12 @@ script:
                    /bin/bash -c "make check"
       fi
       # Compile and run unit tests.
-      # If the unit tests succeed, fetch the all-tools container
-      # and run the integration tests
       docker run --volume "$TRAVIS_BUILD_DIR":/flycheck \
                  --workdir /flycheck \
                  flycheck/emacs-cask:$EMACS_VERSION \
                  /bin/bash -c "make compile && make unit && make specs"
+      # If the unit tests succeed, fetch the all-tools container
+      # and run the integration tests
       docker build --build-arg EMACS_VERSION=$EMACS_VERSION \
                       --tag tools-and-emacs:$EMACS_VERSION \
                       --file=.travis/tools-and-emacs .

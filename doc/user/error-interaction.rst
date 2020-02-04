@@ -138,6 +138,33 @@ and IDs of all errors under the pointer, but the contents are customisable:
    The function is given a list of Flycheck errors to display as sole argument
    and shall return a single string to use as the contents of the tooltip.
 
+Errors from other files
+=======================
+
+Some checkers may return errors from files other than the current buffer (e.g.,
+`gcc` may complain about errors in included files).  These errors appear in the
+error list, and are also added on the first line of the current buffer.  You can
+jump to the incriminating files with `flycheck-previous-error`.
+
+By default, warnings and info messages from other files are ignored, but you can
+customize the minimum level:
+
+.. defcustom:: flycheck-relevant-error-other-file-minimum-level
+
+   The minimum level errors from other files to consider for inclusion in the
+   current buffer.
+
+   If set to an error level, only display errors from other files whose error
+   level is at least as severe as this one.  If ``nil``, display all errors from
+   other files.
+
+To never show any errors from other files, set
+`flycheck-relevant-error-other-file-show` to ``nil``.
+
+.. defcustom:: flycheck-relevant-error-other-file-show
+
+   Whether to show errors from other files.
+
 Explain errors
 ==============
 
@@ -156,17 +183,17 @@ Kill errors
 
 You can put errors into the kill ring with `C-c ! w`:
 
-.. define-key:: C-c ! w
+.. define-key:: C-c ! C-w
                 M-x flycheck-copy-errors-as-kill
 
    Copy all messages of the errors at point into the kill ring.
 
-.. define-key:: C-u C-c ! w
+.. define-key:: C-u C-c ! C-w
                 C-u M-x flycheck-copy-errors-as-kill
 
    Like `C-c ! w` but with error IDs.
 
-.. define-key:: M-0 C-c ! w
+.. define-key:: M-0 C-c ! C-w
                 M-0 M-x flycheck-copy-errors-as-kill
 
    Like `C-c ! w` but do not copy the error messages but only the error IDs.

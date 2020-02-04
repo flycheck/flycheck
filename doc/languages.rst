@@ -62,6 +62,14 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _AsciiDoc: http://www.methods.co.nz/asciidoc
 
+.. supported-language:: Bazel
+
+   .. syntax-checker:: bazel-buildifier
+
+      Check Bazel with buildifier_.
+
+      .. _buildifier: https://github.com/bazelbuild/buildtools
+
 .. supported-language:: C/C++
    :index_as: C
               C++
@@ -255,6 +263,36 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          Whether to run stylelint in quiet mode via ``--quiet``.
 
+.. supported-language:: CUDA C/C++
+   :index_as: CUDA
+
+   .. syntax-checker:: cuda-nvcc
+
+      Checks syntax for CUDA C/C++ using the nvcc
+      `nvcc <https://developer.nvidia.com/cuda-llvm-compiler>`_ compiler
+      bundled in the NVIDIA Toolkit.
+
+      CUDA C/C++ uses whichever system compiler you have configured, gcc/clang
+      etc, but will sanitise error messages into a standardised format that
+      can be picked up via flycheck. Corner cases may cause some odd behavior.
+
+      .. defcustom:: flycheck-cuda-language-standard
+
+         The C or C++ Language standard that you want the CUDA compiler to enforce.
+
+      .. defcustom:: flycheck-cuda-includes
+
+         A list of cuda includes.
+
+      .. defcustom:: flycheck-cuda-include-path
+
+         A list of include directories for nvcc.
+
+      .. defcustom:: flycheck-cuda-definitions
+
+         Additional preprocessor definitions for nvcc. Is passed unaltered to both
+         GPU compiler and underlying C/C++ compiler.
+
 .. supported-language:: CWL
 
    .. syntax-checker:: cwl
@@ -366,11 +404,32 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check Erlang with the `rebar3 <https://www.rebar3.org/>`_ build tool.
 
+      .. defcustom:: flycheck-erlang-rebar3-profile
+
+         The profile to use when compiling, e.g. "default" or "test".
+         The default value is nil which will use test profile
+         in test directories and default profile otherwise.
+
 .. supported-language:: ERuby
 
    .. syntax-checker:: eruby-erubis
 
       Check ERuby with `erubis <http://www.kuwata-lab.com/erubis/>`_.
+
+   .. syntax-checker:: eruby-ruumba
+
+      Check syntax and lint with `Ruumba <https://github.com/ericqweinstein/ruumba>`_.
+
+      .. note::
+
+         This syntax checker requires Ruumba 0.1.7 or newer.
+
+      .. defcustom:: flycheck-ruumba-lint-only
+
+         Whether to suppress warnings about style issues, via the ``--lint``
+         option.
+
+      .. syntax-checker-config-file:: flycheck-ruumbarc
 
 .. supported-language:: Fortran
 
@@ -413,7 +472,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
    4. `go-build` or `go-test`
    5. `go-errcheck`
    6. `go-unconvert`
-   7. `go-megacheck`
+   7. `go-staticcheck`
 
    .. syntax-checker:: go-gofmt
 
@@ -430,10 +489,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
       .. defcustom:: flycheck-go-vet-print-functions
 
          A list of print-like functions to check calls for format string problems.
-
-      .. defcustom:: flycheck-go-vet-shadow
-
-         Whether to check for shadowed variables, in Go 1.6 or newer.
 
       .. defcustom:: flycheck-go-build-tags
 
@@ -501,15 +556,17 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _unconvert: https://github.com/mdempsky/unconvert
 
-   .. syntax-checker:: go-megacheck
+   .. syntax-checker:: go-staticcheck
 
-      Lint code with megacheck_.
+      Perform static analysis and code linting with staticcheck_, the successor to megacheck_.
 
-      .. defcustom:: flycheck-go-megacheck-disabled-checkers
+      .. defcustom:: flycheck-go-version
 
-         A list of checkers to disable when running megacheck_.
+         staticcheck_ explicitly supports the last two releases of Go, but
+         supports targeting older versions. Go versions should be specified
+         like, "1.6", or, "1.11.4".
 
-      .. _megacheck: https://github.com/dominikh/go-tools
+      .. _staticcheck: https://staticcheck.io/
 
 .. supported-language:: Groovy
 
@@ -660,7 +717,8 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: JSON
 
-   Flycheck checks JSON with `json-jsonlint` or `json-python-json`.
+   Flycheck checks JSON with `json-jsonlint`, `json-python-json`, or
+   `json-jq`.
 
    .. syntax-checker:: json-jsonlint
 
@@ -669,6 +727,14 @@ to view the docstring of the syntax checker.  Likewise, you may use
    .. syntax-checker:: json-python-json
 
       Check JSON with Python's built-in :py:mod:`json` module.
+
+   .. syntax-checker:: json-jq
+
+      Check JSON with jq_.
+
+      This checker accepts multiple consecutive JSON values in a single input, which is useful for jsonlines data.
+
+      .. _jq: https://stedolan.github.io/jq/
 
 .. supported-language:: Jsonnet
 
@@ -755,6 +821,20 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _nix-instantiate: https://nixos.org/nix/manual/#sec-nix-instantiate
 
+   .. syntax-checker:: nix-linter
+
+      Check Nix with nix-linter_.
+
+      .. _nix-linter: https://github.com/Synthetica9/nix-linter
+
+.. supported-language:: Opam
+
+   .. syntax-checker:: opam
+
+      Check Opam configuration files with `opam lint`_.
+
+      .. _opam lint: https://opam.ocaml.org/doc/man/opam-lint.html
+
 .. supported-language:: Perl
 
    Flycheck checks Perl with `perl` and `perl-perlcritic`.
@@ -780,6 +860,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
       .. defcustom:: flycheck-perlcritic-severity
 
          The severity level as integer for the ``--severity``.
+
+      .. defcustom:: flycheck-perlcritic-theme
+
+		 The theme expression, passed as the ``--theme`` to ``perlcritic``.
 
       .. syntax-checker-config-file:: flycheck-perlcriticrc
 
@@ -830,6 +914,15 @@ to view the docstring of the syntax checker.  Likewise, you may use
       Check syntax using the protoc_ compiler.
 
       .. _protoc: https://developers.google.com/protocol-buffers/
+
+      .. defcustom:: flycheck-protoc-import-path
+
+         A list of directories to resolve import directives.  Relative paths are
+         relative to the path of the buffer being checked.
+
+   .. syntax-checker:: protobuf-prototool
+
+      Lint with `prototool <https://github.com/uber/prototool>`_.
 
 .. supported-language:: Pug
 
@@ -1069,7 +1162,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
       .. note::
 
          `rust-cargo` requires Rust 1.17 or newer.
-         `rust` requires Rust 1.7 or newer.
+         `rust` requires Rust 1.18 or newer.
          `rust-clippy` requires the nightly version of Rust.
 
       .. _Cargo: http://doc.crates.io/index.html
@@ -1117,6 +1210,18 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          For `rust-cargo`, always required unless `flycheck-rust-crate-type` is
          ``lib`` or nil, in which case it is ignored.
+
+         Ignored by `rust`.
+
+      .. defcustom:: flycheck-rust-features
+
+         List of features to activate during build or check.
+
+         The value of this variable is a list of strings denoting features
+         that will be activated to build the target to check. Features will
+         be passed to ``cargo check --features=FEATURES``.
+
+         Empty by default.
 
          Ignored by `rust`.
 
@@ -1213,7 +1318,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. defcustom:: flycheck-scheme-chicken-args
 
-	 A list of additional options.
+     A list of additional options.
 
    .. important::
 
@@ -1297,11 +1402,49 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check Tcl syntax with `Nagelfar <http://nagelfar.sourceforge.net/>`_.
 
+.. supported-language:: Terraform
+
+   .. syntax-checker:: terraform
+
+      Check Terraform syntax with `terraform fmt`_
+
+      .. _terraform fmt: https://www.terraform.io/docs/commands/fmt.html
+
+   .. syntax-checker:: terraform-tflint
+
+      Check Terraform with `tflint <https://github.com/wata727/tflint>`_
+
+      .. defcustom:: flycheck-tflint-variable-files
+
+         A list of files to resolve terraform variables.  Relative paths are
+         relative to the path of the buffer being checked.
+
 .. supported-language:: Text
 
    .. syntax-checker:: proselint
 
       Check English prose with `Proselint <http://proselint.com/>`_.
+
+   .. syntax-checker:: textlint
+
+      Check prose with `textlint <https://textlint.github.io/>`_.
+
+      .. syntax-checker-config-file:: flycheck-textlint-config
+
+      .. defcustom:: flycheck-textlint-plugin-alist
+
+         An alist mapping major modes to textlint plugins.
+
+         Flycheck currently supports the following textlint plugins on NPM:
+
+         * textlint-plugin-rst
+         * textlint-plugin-html
+         * textlint-plugin-latex
+         * textlint-plugin-asciidoctor (as well as other AsciiDoc plugins)
+
+      .. note::
+
+         textlint plugins need to be installed separately.
 
 .. supported-language:: TeX/LaTeX
 
@@ -1366,6 +1509,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          The directory to use for the file library.
 
+      .. defcustom:: flycheck-ghdl-ieee-library
+
+         The standard to use for the IEEE library.
+
 .. supported-language:: XML
 
    Flycheck checks XML with `xml-xmlstarlet` or `xml-xmllint`.
@@ -1388,7 +1535,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: YAML
 
-   Flycheck checks YAML with `yaml-jsyaml` or `yaml-ruby`.
+   Flycheck checks YAML with `yaml-jsyaml`, `yaml-ruby` or 'yaml-yamllint'.
 
    .. syntax-checker:: yaml-jsyaml
 
@@ -1397,3 +1544,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
    .. syntax-checker:: yaml-ruby
 
       Check syntax with Ruby's YAML parser.
+
+   .. syntax-checker:: yaml-yamllint
+
+      Check syntax with yamllint.
+
+      .. syntax-checker-config-file:: flycheck-yamllintrc
+
+         Location of yamllint configuration file.

@@ -1,6 +1,6 @@
 ;;; flycheck-test.el --- Flycheck: Unit test suite   -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017-2018 Flycheck contributors
+;; Copyright (C) 2017-2019 Flycheck contributors
 ;; Copyright (C) 2013-2016 Sebastian Wiesner and Flycheck contributors
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
@@ -1199,6 +1199,162 @@
       (sleep-for 1.1)
       (should (flycheck-deferred-check-p)))))
 
+(ert-deftest flycheck-check-syntax-automatically/idle-change-checks-changed-buffer ()
+  :tags '(automatic)
+  (let ((flycheck-check-syntax-automatically '(idle-change))
+        (flycheck-idle-change-delay 0.1))
+    (flycheck-ert-with-resource-buffer "automatic-check-dummy.el"
+      (let ((changed-buffer (current-buffer)))
+        (emacs-lisp-mode)
+        (flycheck-mode)
+        (insert "Hello world")
+        (switch-to-buffer "other-dummy2.el")
+        (emacs-lisp-mode)
+        (flycheck-mode)
+        (sleep-for 0.2)
+        (should-not (flycheck-deferred-check-p))
+        (set-buffer changed-buffer)
+        (should (flycheck-deferred-check-p))))))
+
+(ert-deftest flycheck-check-syntax-automatically/does-not-check-after-buffer-switch-by-default ()
+  :tags '(automatic)
+  (let ((flycheck-check-syntax-automatically '())
+        (flycheck-idle-buffer-switch-delay 0)
+        (checks 0))
+    (find-file (flycheck-ert-resource-filename "automatic-check-dummy.el"))
+    (emacs-lisp-mode)
+    (flycheck-mode)
+    (add-hook 'flycheck-before-syntax-check-hook (lambda () (cl-incf checks)) nil 'local)
+
+    (switch-to-buffer "*scratch*")
+    (switch-to-buffer "automatic-check-dummy.el")
+    (sleep-for 0.1)
+    (should (= checks 0))
+    (kill-buffer "automatic-check-dummy.el")))
+
+(ert-deftest flycheck-check-syntax-automatically/idle-buffer-switch-checks-after-buffer-switch ()
+  :tags '(automatic)
+  (let ((flycheck-check-syntax-automatically '(idle-buffer-switch))
+        (flycheck-idle-buffer-switch-delay 0)
+        (checks 0))
+    (find-file (flycheck-ert-resource-filename "automatic-check-dummy.el"))
+    (emacs-lisp-mode)
+    (flycheck-mode)
+    (add-hook 'flycheck-before-syntax-check-hook (lambda () (cl-incf checks)) nil 'local)
+
+    (switch-to-buffer "*scratch*")
+    (switch-to-buffer "automatic-check-dummy.el")
+    (sleep-for 0.1)
+    (should (= checks 1))
+    (kill-buffer "automatic-check-dummy.el")))
+
+(ert-deftest flycheck-check-syntax-automatically/idle-change-cancels-idle-buffer-switch ()
+  :tags '(automatic)
+  (let ((flycheck-check-syntax-automatically '(idle-change idle-buffer-switch))
+        (flycheck-idle-change-delay 0.02)
+        (flycheck-idle-buffer-switch-delay 0.01)
+        (checks 0))
+    (find-file (flycheck-ert-resource-filename "automatic-check-dummy.el"))
+    (emacs-lisp-mode)
+    (flycheck-mode)
+    (add-hook 'flycheck-before-syntax-check-hook (lambda () (cl-incf checks)) nil 'local)
+
+    (switch-to-buffer "*scratch*")
+    (switch-to-buffer "automatic-check-dummy.el")
+    (insert "Hello")
+    (sleep-for 0.015)
+    (should (= checks 0))
+    (sleep-for 0.01)
+    (should (= checks 1))
+    (kill-buffer "automatic-check-dummy.el")))
+
+(ert-deftest flycheck-check-syntax-automatically/idle-buffer-switch-cancels-idle-change ()
+  :tags '(automatic)
+  (let ((flycheck-check-syntax-automatically '(idle-change idle-buffer-switch))
+        (flycheck-idle-change-delay 0.01)
+        (flycheck-idle-buffer-switch-delay 0.05)
+        (checks 0))
+    (find-file (flycheck-ert-resource-filename "automatic-check-dummy.el"))
+    (emacs-lisp-mode)
+    (flycheck-mode)
+    (add-hook 'flycheck-before-syntax-check-hook (lambda () (cl-incf checks)) nil 'local)
+
+    (insert "Hello")
+    (switch-to-buffer "*scratch*")
+    (switch-to-buffer "automatic-check-dummy.el")
+    (sleep-for 0.02)
+    (should (= checks 0))
+    (sleep-for 0.06)
+    (should (= checks 1))
+    (kill-buffer "automatic-check-dummy.el")))
+
+(ert-deftest flycheck-check-syntax-automatically/idle-buffer-switch-does-not-check-intermediate-buffers-by-default ()
+  :tags '(automatic)
+  (let ((flycheck-check-syntax-automatically '(idle-buffer-switch))
+        (flycheck-idle-buffer-switch-delay 0.01)
+        (checks 0))
+    (find-file (flycheck-ert-resource-filename "automatic-check-dummy.el"))
+    (emacs-lisp-mode)
+    (flycheck-mode)
+    (find-file (flycheck-ert-resource-filename "global-mode-dummy.el"))
+    (emacs-lisp-mode)
+    (flycheck-mode)
+    (add-hook 'flycheck-before-syntax-check-hook (lambda () (cl-incf checks)) nil 'local)
+
+    (switch-to-buffer "*scratch*")
+    (switch-to-buffer "automatic-check-dummy.el")
+    (switch-to-buffer "global-mode-dummy.el")
+    (sleep-for 0.015)
+    (should (= checks 1))
+    ;; Since the buffer is not visible, the check would be automatically deferred
+    (set-buffer "automatic-check-dummy.el")
+    (should-not (flycheck-deferred-check-p))
+    (kill-buffer "automatic-check-dummy.el")
+    (kill-buffer "global-mode-dummy.el")))
+
+(ert-deftest flycheck-check-syntax-automatically/idle-buffer-switch-checks-intermediate-buffers-with-option ()
+  :tags '(automatic)
+  (let ((flycheck-check-syntax-automatically '(idle-buffer-switch))
+        (flycheck-idle-buffer-switch-delay 0.01)
+        (flycheck-buffer-switch-check-intermediate-buffers t)
+        (checks 0))
+    (find-file (flycheck-ert-resource-filename "automatic-check-dummy.el"))
+    (emacs-lisp-mode)
+    (flycheck-mode)
+    (find-file (flycheck-ert-resource-filename "global-mode-dummy.el"))
+    (emacs-lisp-mode)
+    (flycheck-mode)
+    (add-hook 'flycheck-before-syntax-check-hook (lambda () (cl-incf checks)) nil 'local)
+
+    (switch-to-buffer "*scratch*")
+    (switch-to-buffer "automatic-check-dummy.el")
+    (switch-to-buffer "global-mode-dummy.el")
+    (sleep-for 0.015)
+    (should (= checks 1))
+    ;; Since the buffer is not visible, the check will be automatically deferred
+    (set-buffer "automatic-check-dummy.el")
+    (should (flycheck-deferred-check-p))
+    (kill-buffer "automatic-check-dummy.el")
+    (kill-buffer "global-mode-dummy.el")))
+
+(ert-deftest flycheck-check-syntax-automatically/buffer-switch-check-intermediate-buffers-does-not-cancel-idle-change ()
+  :tags '(automatic)
+  (let ((flycheck-check-syntax-automatically '(idle-change idle-buffer-switch))
+        (flycheck-buffer-switch-check-intermediate-buffers t)
+        (flycheck-idle-change-delay 0.01)
+        (flycheck-idle-buffer-switch-delay 0))
+    (find-file (flycheck-ert-resource-filename "automatic-check-dummy.el"))
+    (emacs-lisp-mode)
+    (flycheck-mode)
+
+    (insert "Hello")
+    (switch-to-buffer "*scratch*")
+    (sleep-for 0.015)
+    ;; Since the buffer is not visible, the check will be automatically deferred
+    (set-buffer "automatic-check-dummy.el")
+    (should (flycheck-deferred-check-p))
+    (kill-buffer "automatic-check-dummy.el")))
+
 (ert-deftest flycheck-check-syntax-automatically/new-line-is-disabled ()
   :tags '(automatic)
   (flycheck-ert-with-resource-buffer "automatic-check-dummy.el"
@@ -2074,6 +2230,17 @@ evaluating BODY."
     (let ((err (should-error (flycheck-next-error) :type 'user-error)))
       (should (string= (cadr err) "No more Flycheck errors")))))
 
+(ert-deftest flycheck-next-error/minimum-level/ignores-minimum-level-if-no-error-beyond-it ()
+  :tags '(navigation)
+  (flycheck-ert-with-resource-buffer "language/emacs-lisp/warnings.el"
+    (emacs-lisp-mode)
+    (flycheck-mode)
+    (let ((flycheck-navigation-minimum-level 'error))
+      (flycheck-ert-buffer-sync)
+      (goto-char (point-min))
+      (flycheck-next-error 1)
+      (should (flycheck-ert-at-nth-error 1)))))
+
 (ert-deftest flycheck-previous-error/over-errors/errors-before-first-error ()
   :tags '(navigation)
   (flycheck-test-with-nav-buffer 'error
@@ -2732,6 +2899,16 @@ evaluating BODY."
    '(4 nil warning "section title out of sequence: expected level 1, got level 2" :checker asciidoctor)
    '(6 nil error "unmatched macro: endif::[]" :checker asciidoctor)))
 
+(flycheck-ert-def-checker-test bazel-buildifier bazel error
+  (flycheck-ert-should-syntax-check
+   "language/bazel/syntax-error.bazel" 'bazel-mode
+   '(1 11 error "syntax error near !" :checker bazel-buildifier)))
+
+(flycheck-ert-def-checker-test bazel-buildifier bazel nil
+  (flycheck-ert-should-syntax-check
+   "language/bazel/warnings.bazel" 'bazel-mode
+   '(1 nil warning "The file has no module docstring. (https://github.com/bazelbuild/buildtools/blob/master/WARNINGS.md#module-docstring)" :id "module-docstring" :checker bazel-buildifier)))
+
 (flycheck-ert-def-checker-test c/c++-clang (c c++) error
   (let ((flycheck-disabled-checkers '(c/c++-gcc)))
     (flycheck-ert-should-syntax-check
@@ -2757,12 +2934,21 @@ evaluating BODY."
          :checker c/c++-clang)
      '(8 7 warning "no message" :checker c/c++-clang))))
 
-(flycheck-ert-def-checker-test c/c++-clang (c c++) included-file-error
+(flycheck-ert-def-checker-test c/c++-clang (c c++) included-file-warning
   (let ((flycheck-clang-include-path '("./include"))
-        (flycheck-disabled-checkers '(c/c++-gcc)))
+        (flycheck-disabled-checkers '(c/c++-gcc))
+        (flycheck-relevant-error-other-file-minimum-level 'warning))
     (flycheck-ert-should-syntax-check
      "language/c_c++/in-included-file.cpp" 'c++-mode
-     `(3 nil warning "In include ./warning.c" :checker c/c++-clang))))
+     `(5 10 warning "unused variable 'unused'"
+         :filename ,(flycheck-ert-resource-filename "language/c_c++/warning.c")
+         :checker c/c++-clang)
+     `(7 15 warning "comparison of integers of different signs: 'int' and 'unsigned int'"
+         :filename ,(flycheck-ert-resource-filename "language/c_c++/warning.c")
+         :checker c/c++-clang)
+     `(8 7 warning "no message"
+         :filename ,(flycheck-ert-resource-filename "language/c_c++/warning.c")
+         :checker c/c++-clang))))
 
 (flycheck-ert-def-checker-test c/c++-gcc (c c++) error
   (let ((flycheck-disabled-checkers '(c/c++-clang)))
@@ -2788,12 +2974,21 @@ evaluating BODY."
          :id "-Wsign-compare" :checker c/c++-gcc)
      '(8 7 warning "#warning" :id "-Wcpp" :checker c/c++-gcc))))
 
-(flycheck-ert-def-checker-test c/c++-gcc (c c++) included-file-error
+(flycheck-ert-def-checker-test c/c++-gcc (c c++) included-file-warning
   (let ((flycheck-gcc-include-path '("./include"))
-        (flycheck-disabled-checkers '(c/c++-clang)))
+        (flycheck-disabled-checkers '(c/c++-clang))
+        (flycheck-relevant-error-other-file-minimum-level 'warning))
     (flycheck-ert-should-syntax-check
      "language/c_c++/in-included-file.cpp" 'c++-mode
-     `(3 nil warning "In include warning.c" :checker c/c++-gcc))))
+     `(5 10 warning "unused variable 'unused'"
+         :filename ,(flycheck-ert-resource-filename "language/c_c++/warning.c")
+         :id "-Wunused-variable" :checker c/c++-gcc)
+     `(7 15 warning "comparison between signed and unsigned integer expressions"
+         :filename ,(flycheck-ert-resource-filename "language/c_c++/warning.c")
+         :id "-Wsign-compare" :checker c/c++-gcc)
+     `(8 7 warning "#warning"
+         :filename ,(flycheck-ert-resource-filename "language/c_c++/warning.c")
+         :id "-Wcpp" :checker c/c++-gcc))))
 
 (flycheck-ert-def-checker-test c/c++-cppcheck (c c++) nil
   :tags '(cppcheck-xml)
@@ -2901,6 +3096,18 @@ The term \"1\" has type \"nat\" while it is expected to have type \"bool\"." :ch
    '(4 14 error "Expected a `FUNCTION` or `IDENT` after colon at line 4, col 14."
        :id "ParsingErrors" :checker css-csslint)))
 
+(flycheck-ert-def-checker-test cuda cuda syntax-error
+  (flycheck-ert-should-syntax-check
+   "language/cuda/syntax-error.cu" 'cuda-mode
+   '(5 0 error "error: identifier \"ac\" is undefined"
+       :checker cuda)))
+
+(flycheck-ert-def-checker-test cuda cuda syntax-warning
+  (flycheck-ert-should-syntax-check
+   "language/cuda/syntax-warning.cu" 'cuda-mode
+   '(3 0 warning "variable \"b\" was set but never used"
+       :checker cuda)))
+
 (flycheck-ert-def-checker-test cwl cwl syntax-error
   (let ((flycheck-cwl-schema-path "schema/CommonWorkflowLanguage.yml"))
     (flycheck-ert-should-syntax-check
@@ -2983,7 +3190,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 (flycheck-ert-def-checker-test dockerfile-hadolint dockerfile error
   (flycheck-ert-should-syntax-check
    "language/dockerfile/Dockerfile.error" 'dockerfile-mode
-   '(2 1 error "unexpected 'I' expecting '#', ADD, ARG, CMD, COPY, ENTRYPOINT, ENV, EXPOSE, FROM, HEALTHCHECK, LABEL, MAINTAINER, ONBUILD, RUN, SHELL, STOPSIGNAL, USER, VOLUME, WORKDIR, end of input, or the rest of a new line followed by the next instruction"
+   '(2 1 error "unexpected 'I' expecting '#', ADD, ARG, CMD, COPY, ENTRYPOINT, ENV, EXPOSE, FROM, HEALTHCHECK, LABEL, MAINTAINER, ONBUILD, RUN, SHELL, STOPSIGNAL, USER, VOLUME, WORKDIR, end of input, or whitespace"
        :checker dockerfile-hadolint)))
 
 (flycheck-ert-def-checker-test dockerfile-hadolint dockerfile warnings
@@ -3137,9 +3344,17 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
                  "language/erlang/rebar3/_build/default/lib/dependency/_build")))))
 
 (flycheck-ert-def-checker-test eruby-erubis eruby nil
-  (flycheck-ert-should-syntax-check
-   "language/eruby.erb" '(html-erb-mode rhtml-mode)
-   '(9 nil error "syntax error, unexpected end-of-input, expecting keyword_end" :checker eruby-erubis)))
+  (let ((flycheck-disabled-checkers '(eruby-ruumba)))
+    (flycheck-ert-should-syntax-check
+     "language/eruby.erb" '(html-erb-mode rhtml-mode)
+     '(9 nil error "syntax error, unexpected end-of-input, expecting keyword_end" :checker eruby-erubis))))
+
+(flycheck-ert-def-checker-test eruby-ruumba eruby syntax-error
+  (let ((flycheck-disabled-checkers '(eruby-erubis)))
+    (flycheck-ert-should-syntax-check
+     "language/eruby.erb" '(html-erb-mode rhtml-mode)
+     '(8 1 error "unexpected token $end (Using Ruby 2.3 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+         :id "Lint/Syntax"  :checker eruby-ruumba))))
 
 (flycheck-ert-def-checker-test fortran-gfortran fortran error
   (flycheck-ert-should-syntax-check
@@ -3172,11 +3387,10 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 (flycheck-ert-def-checker-test go-gofmt go syntax-error
   (flycheck-ert-should-syntax-check
    "language/go/src/syntax/syntax-error.go" 'go-mode
-   '(5 9 error "expected '(', found 'IDENT' ta" :checker go-gofmt)
-   '(6 1 error "expected ')', found '}'" :checker go-gofmt)))
+   '(5 9 error "expected '(', found ta" :checker go-gofmt)
+   '(6 1 error "expected declaration, found '}'" :checker go-gofmt)))
 
 (flycheck-ert-def-checker-test (go-build go-golint go-vet) go complete-chain
-  (skip-unless (funcall (flycheck-checker-get 'go-vet 'predicate)))
   (flycheck-ert-with-env
       `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
     (flycheck-ert-should-syntax-check
@@ -3192,7 +3406,6 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
      '(17 2 error "undefined: fmt" :checker go-build)
      '(19 13 error "cannot use 1 (type int) as type string in argument to Warnf"
           :checker go-build)
-     '(23 nil warning "unreachable code" :checker go-vet)
      '(25 9 warning "if block ends with a return statement, so drop this else and outdent its block"
           :checker go-golint))))
 
@@ -3212,7 +3425,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
            :checker go-build)))))
 
 (flycheck-ert-def-checker-test go-build go directory-with-two-packages
-  (let ((flycheck-disabled-checkers '(go-errcheck go-unconvert go-megacheck)))
+  (let ((flycheck-disabled-checkers '(go-errcheck go-unconvert go-staticcheck)))
     (flycheck-ert-with-env
         `(("GOPATH" . ,(flycheck-ert-resource-filename "checkers/go")))
       (flycheck-ert-should-syntax-check
@@ -3250,31 +3463,19 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
      '(7 17 warning "unnecessary conversion"
          :checker go-unconvert))))
 
-(flycheck-ert-def-checker-test go-megacheck go nil
+(flycheck-ert-def-checker-test go-staticcheck go nil
   :tags '(language-go external-tool)
-  (let ((flycheck-disabled-checkers '(go-golint)))
+  (let ((flycheck-disabled-checkers '(go-golint go-unconvert)))
     (flycheck-ert-with-env
         `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
       (flycheck-ert-should-syntax-check
-       "language/go/src/megacheck/megacheck1.go" 'go-mode
-       '(8 6 warning "should omit values from range; this loop is equivalent to `for range ...` (S1005)"
-           :checker go-megacheck)
-       '(12 21 warning "calling strings.Replace with n == 0 will return no results, did you mean -1? (SA1018)"
-            :checker go-megacheck)
-       '(16 6 warning "func unused is unused (U1000)"
-            :checker go-megacheck)))))
-
-(flycheck-ert-def-checker-test go-megacheck-disabled-checkers go nil
-  :tags '(language-go external-tool)
-  (let ((flycheck-disabled-checkers '(go-golint)))
-    (flycheck-ert-with-env
-        `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
-      ;; Run with simple and unused checkers disabled
-      (let ((flycheck-go-megacheck-disabled-checkers '("simple" "unused")))
-        (flycheck-ert-should-syntax-check
-         "language/go/src/megacheck/megacheck1.go" 'go-mode
-         '(12 21 warning "calling strings.Replace with n == 0 will return no results, did you mean -1? (SA1018)"
-              :checker go-megacheck))))))
+       "language/go/src/staticcheck/staticcheck1.go" 'go-mode
+       '(8 6 error "unnecessary assignment to the blank identifier"
+           :checker go-staticcheck :id "S1005")
+       '(12 39 error "calling strings.Replace with n == 0 will return no results, did you mean -1?"
+            :checker go-staticcheck :id "SA1018")
+       '(16 6 error "func unused is unused"
+            :checker go-staticcheck :id "U1000")))))
 
 (flycheck-ert-def-checker-test groovy groovy syntax-error
   ;; Work around
@@ -3481,9 +3682,9 @@ Why not:
      "language/javascript/style.js" flycheck-test-javascript-modes
      '(3 10 error "Missing space before function parentheses."
          :checker javascript-standard)
-     '(4 1 error "Expected indentation of 2 spaces but found 1 tab."
+     '(4 1 error "Unexpected tab character."
          :checker javascript-standard)
-     '(4 2 error "Unexpected tab character."
+     '(4 1 error "Expected indentation of 2 spaces but found 1 tab."
          :checker javascript-standard)
      '(4 6 error "'foo' is assigned a value but never used."
          :checker javascript-standard)
@@ -3502,9 +3703,9 @@ Why not:
      "language/javascript/style.js" flycheck-test-javascript-modes
      '(3 10 error "Missing space before function parentheses."
          :checker javascript-standard)
-     '(4 1 error "Expected indentation of 2 spaces but found 1 tab."
+     '(4 1 error "Unexpected tab character."
          :checker javascript-standard)
-     '(4 2 error "Unexpected tab character."
+     '(4 1 error "Expected indentation of 2 spaces but found 1 tab."
          :checker javascript-standard)
      '(4 6 error "'foo' is assigned a value but never used."
          :checker javascript-standard)
@@ -3521,6 +3722,12 @@ Why not:
     (flycheck-ert-should-syntax-check
      "language/json.json" 'json-mode
      '(1 44 error "Extra data" :checker json-python-json))))
+
+(flycheck-ert-def-checker-test json-jq json nil
+  (let ((flycheck-disabled-checkers '(json-jsonlint json-python-json)))
+    (flycheck-ert-should-syntax-check
+     "language/json.json" 'json-mode
+     '(1 44 error "Expected value before ','" :checker json-jq))))
 
 (flycheck-ert-def-checker-test less less file-error
   (let* ((candidates (list "no-such-file.less"
@@ -3588,6 +3795,20 @@ Why not:
      "language/lua/syntax-error.lua" 'lua-mode
      '(5 nil error "unfinished string near '\"oh no'"
          :checker lua))))
+
+(flycheck-ert-def-checker-test opam opam nil
+  (flycheck-ert-should-syntax-check
+   "language/opam.opam" 'tuareg-opam-mode
+   '(0 nil error "Missing field 'maintainer'"
+       :id "23" :checker opam)
+   '(0 nil warning "Missing field 'authors'"
+       :id "25" :checker opam)
+   '(0 nil warning "Missing field 'homepage'"
+       :id "35" :checker opam)
+   '(0 nil warning "Missing field 'bug-reports'"
+       :id "36" :checker opam)
+   '(2 1 error "Invalid field maintainers"
+       :id "3" :checker opam)))
 
 (flycheck-ert-def-checker-test (perl perl-perlcritic) perl nil
   (flycheck-ert-should-syntax-check
@@ -3675,8 +3896,8 @@ Why not:
   (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli markdown-mdl)))
     (flycheck-ert-with-env '(("LC_ALL" . nil))
       (flycheck-ert-should-syntax-check
-       "language/text.txt" '(text-mode markdown-mode)
-       '(1 7 warning "Substitute 'damn' every time you're inclined to write 'very;' your editor will delete it and the writing will be just as it should be."
+       "language/text/text.txt" '(text-mode markdown-mode)
+       '(1 7 warning "Substitute 'damn' every time you're inclined to write 'very'; your editor will delete it and the writing will be just as it should be."
            :id "weasel_words.very"
            :checker proselint)
        '(2 4 warning "Redundancy. Use 'associate' instead of 'associate together'."
@@ -3694,9 +3915,17 @@ Why not:
 
 (flycheck-ert-def-checker-test protobuf-protoc protobuf syntax-error
   (flycheck-ert-should-syntax-check
-   "language/protobuf.proto" 'protobuf-mode
+   "language/protobuf/protobuf/syntax-error.proto" 'protobuf-mode
    '(2 23 error "Missing field number."
        :checker protobuf-protoc)))
+
+(flycheck-ert-def-checker-test protobuf-prototool protobuf warnings
+  (flycheck-ert-should-syntax-check
+   "language/protobuf/prototool/missing_syntax.proto" 'protobuf-mode
+   '(1 1 warning "No syntax specified. Please use 'syntax = \"proto2\";' or 'syntax = \"proto3\";' to specify a syntax version."
+       :checker protobuf-prototool)
+   '(4 3 warning "Expected \"required\", \"optional\", or \"repeated\"."
+       :checker protobuf-prototool)))
 
 (flycheck-ert-def-checker-test pug pug syntax-error
   (flycheck-ert-should-syntax-check
@@ -3776,7 +4005,7 @@ Why not:
         (flycheck-python-mypy-cache-dir null-device))
     (flycheck-ert-should-syntax-check
      "language/python/invalid_type.py" 'python-mode
-     '(2 nil error "Incompatible return value type (got \"str\", expected \"int\")"
+     '(2 12 error "Incompatible return value type (got \"str\", expected \"int\")"
          :checker python-mypy))))
 
 (flycheck-ert-def-checker-test python-pylint python syntax-error
@@ -3785,7 +4014,7 @@ Why not:
         (flycheck-python-pylint-executable "python3"))
     (flycheck-ert-should-syntax-check
      "language/python/syntax-error.py" 'python-mode
-     '(3 1 error "invalid syntax (<string>, line 3)"
+     '(3 13 error "invalid syntax (<unknown>, line 3)"
          :id "syntax-error" :checker python-pylint))))
 
 (flycheck-ert-def-checker-test python-pylint python nil
@@ -3793,25 +4022,27 @@ Why not:
         (flycheck-python-pylint-executable "python3"))
     (flycheck-ert-should-syntax-check
      "language/python/test.py" 'python-mode
-     '(1 1 info "Missing module docstring" :id "missing-docstring" :checker python-pylint)
+     '(1 1 info "Missing module docstring" :id "missing-module-docstring" :checker python-pylint)
      '(4 1 error "Unable to import 'spam'" :id "import-error" :checker python-pylint)
      '(5 1 error "No name 'antigravit' in module 'python'" :id "no-name-in-module"
          :checker python-pylint)
      '(5 1 warning "Unused import antigravit" :id "unused-import"
          :checker python-pylint)
-     '(7 1 info "Missing class docstring" :id "missing-docstring" :checker python-pylint)
+     '(7 1 info "Missing class docstring" :id "missing-class-docstring" :checker python-pylint)
+     '(7 1 warning "Class 'Spam' inherits from object, can be safely removed from bases in python3"
+         :id "useless-object-inheritance" :checker python-pylint)
      '(9 5 info "Method name \"withEggs\" doesn't conform to snake_case naming style"
          :id "invalid-name" :checker python-pylint)
-     '(9 5 info "Missing method docstring" :id "missing-docstring" :checker python-pylint)
+     '(9 5 info "Missing function or method docstring" :id "missing-function-docstring" :checker python-pylint)
      '(9 5 warning "Method could be a function" :id "no-self-use"
          :checker python-pylint)
-     '(12 1 info "No space allowed around keyword argument assignment"
-          :id "bad-whitespace" :checker python-pylint)
-     '(12 5 info "Missing method docstring" :id "missing-docstring" :checker python-pylint)
+     '(12 5 info "Missing function or method docstring" :id "missing-function-docstring" :checker python-pylint)
      '(12 5 warning "Either all return statements in a function should return an expression, or none of them should."
           :id "inconsistent-return-statements" :checker python-pylint)
      '(12 5 warning "Method could be a function"
           :id "no-self-use" :checker python-pylint)
+     '(12 30 info "No space allowed around keyword argument assignment"
+          :id "bad-whitespace" :checker python-pylint)
      '(14 16 error "Module 'sys' has no 'python_version' member" :id "no-member"
           :checker python-pylint)
      '(22 1 error "Undefined variable 'antigravity'" :id "undefined-variable"
@@ -3823,25 +4054,27 @@ Why not:
         (flycheck-python-pylint-executable "python3"))
     (flycheck-ert-should-syntax-check
      "language/python/test.py" 'python-mode
-     '(1 1 info "Missing module docstring" :id "C0111" :checker python-pylint)
+     '(1 1 info "Missing module docstring" :id "C0114" :checker python-pylint)
      '(4 1 error "Unable to import 'spam'" :id "E0401" :checker python-pylint)
      '(5 1 error "No name 'antigravit' in module 'python'" :id "E0611"
          :checker python-pylint)
      '(5 1 warning "Unused import antigravit" :id "W0611"
          :checker python-pylint)
-     '(7 1 info "Missing class docstring" :id "C0111" :checker python-pylint)
+     '(7 1 info "Missing class docstring" :id "C0115" :checker python-pylint)
+     '(7 1 warning "Class 'Spam' inherits from object, can be safely removed from bases in python3"
+         :id "R0205" :checker python-pylint)
      '(9 5 info "Method name \"withEggs\" doesn't conform to snake_case naming style"
          :id "C0103" :checker python-pylint)
-     '(9 5 info "Missing method docstring" :id "C0111" :checker python-pylint)
+     '(9 5 info "Missing function or method docstring" :id "C0116" :checker python-pylint)
      '(9 5 warning "Method could be a function" :id "R0201"
          :checker python-pylint)
-     '(12 1 info "No space allowed around keyword argument assignment"
-          :id "C0326" :checker python-pylint)
-     '(12 5 info "Missing method docstring" :id "C0111" :checker python-pylint)
+     '(12 5 info "Missing function or method docstring" :id "C0116" :checker python-pylint)
      '(12 5 warning "Either all return statements in a function should return an expression, or none of them should."
           :id "R1710" :checker python-pylint)
      '(12 5 warning "Method could be a function"
           :id "R0201" :checker python-pylint)
+     '(12 30 info "No space allowed around keyword argument assignment"
+          :id "C0326" :checker python-pylint)
      '(14 16 error "Module 'sys' has no 'python_version' member" :id "E1101"
           :checker python-pylint)
      '(22 1 error "Undefined variable 'antigravity'" :id "E0602"
@@ -3904,13 +4137,25 @@ Why not:
    '(12 nil error "Wrong number of arguments \(4\) to \"set\""
         :checker tcl-nagelfar)))
 
+(flycheck-ert-def-checker-test terraform terraform nil
+  (flycheck-ert-should-syntax-check
+   "language/terraform/terraform/syntax-error.tf" 'terraform-mode
+   '(2 nil error "The \";\" character is not valid. Use newlines to separate arguments and blocks,\nand commas to separate items in collection values."
+       :checker terraform)
+   '(2 nil error "An argument definition must end with a newline."
+       :checker terraform)))
+
+(flycheck-ert-def-checker-test terraform-tflint terraform nil
+  (flycheck-ert-should-syntax-check
+   "language/terraform/tflint/error.tf" 'terraform-mode
+   '(3 nil error "instance_type is not a valid value"
+       :id "aws_instance_invalid_type" :checker terraform-tflint)))
+
 (flycheck-ert-def-checker-test markdown-markdownlint-cli markdown nil
   (flycheck-ert-should-syntax-check
    "language/markdown.md" 'markdown-mode
-   '(1 nil error "First heading should be a top level heading [Expected: h1; Actual: h2]"
-       :id "MD002/first-heading-h1/first-header-h1" :checker markdown-markdownlint-cli)
    '(1 nil error "First line in file should be a top level heading [Context: \"## Second Header First\"]"
-       :id "MD041/first-line-h1" :checker markdown-markdownlint-cli)))
+       :id "MD041/first-line-heading/first-line-h1" :checker markdown-markdownlint-cli)))
 
 (flycheck-ert-def-checker-test markdown-mdl markdown nil
   (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli)))
@@ -3921,8 +4166,14 @@ Why not:
 
 (flycheck-ert-def-checker-test nix nix nil
   (flycheck-ert-should-syntax-check
-   "language/nix.nix" 'nix-mode
+   "language/nix/syntax-error.nix" 'nix-mode
    '(3 1 error "syntax error, unexpected IN, expecting ';'," :checker nix)))
+
+(flycheck-ert-def-checker-test nix-linter nix nil
+  (flycheck-ert-should-syntax-check
+   "language/nix/warnings.nix" 'nix-mode
+   '(1 1 warning "LetInInheritRecset" :id "LetInInheritRecset" :checker nix-linter)
+   '(3 4 warning "Unneeded `rec` on set" :id "UnneededRec" :checker nix-linter)))
 
 (ert-deftest flycheck-locate-sphinx-source-directory/not-in-a-sphinx-project ()
   :tags '(language-rst)
@@ -3961,10 +4212,10 @@ Why not:
 (flycheck-ert-def-checker-test ruby-rubocop ruby syntax-error
   (flycheck-ert-should-syntax-check
    "language/ruby/syntax-error.rb" 'ruby-mode
-   '(5 7 error "unexpected token tCONSTANT (Using Ruby 2.2 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+   '(5 7 error "unexpected token tCONSTANT (Using Ruby 2.3 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
        :id "Lint/Syntax"
        :checker ruby-rubocop)
-   '(5 24 error "unterminated string meets end of file (Using Ruby 2.2 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+   '(5 24 error "unterminated string meets end of file (Using Ruby 2.3 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
        :id "Lint/Syntax"
        :checker ruby-rubocop)))
 
@@ -3992,6 +4243,8 @@ Why not:
 (flycheck-ert-def-checker-test (ruby-rubocop ruby-reek ruby-rubylint) ruby with-rubylint
   (flycheck-ert-should-syntax-check
    "language/ruby/warnings.rb" 'ruby-mode
+   '(1 1 info "Missing magic comment `# frozen_string_literal: true`."
+       :id "Style/FrozenStringLiteralComment" :checker ruby-rubocop)
    '(3 nil warning "Person assumes too much for instance variable '@name'"
        :id "InstanceVariableAssumption" :checker ruby-reek)
    '(3 1 info "Missing top-level class documentation comment."
@@ -4004,7 +4257,7 @@ Why not:
    '(6 10 info "Prefer single-quoted strings when you don't need string interpolation or special symbols."
        :id "Style/StringLiterals" :checker ruby-rubocop)
    '(10 5 info "the use of then/do is not needed here" :checker ruby-rubylint)
-   '(10 5 info "Use a guard clause instead of wrapping the code inside a conditional expression."
+   '(10 5 info "Use a guard clause (`return unless true`) instead of wrapping the code inside a conditional expression."
         :id "Style/GuardClause":checker ruby-rubocop)
    '(10 5 info "Favor modifier `if` usage when having a single-line body. Another good alternative is the usage of control flow `&&`/`||`."
         :id "Style/IfUnlessModifier" :checker ruby-rubocop)
@@ -4059,9 +4312,9 @@ The manifest path is relative to
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/warnings.rs" 'rust-mode
      '(3 1 warning "function is never used: `main`" :checker rust-cargo :id "dead_code" :group 1)
-     '(3 1 info "#[warn(dead_code)] on by default" :checker rust-cargo :id "dead_code" :group 1)
+     '(3 1 info "`#[warn(dead_code)]` on by default" :checker rust-cargo :id "dead_code" :group 1)
      '(4 9 warning "unused variable: `x`" :checker rust-cargo :id "unused_variables" :group 2)
-     '(4 9 info "consider using `_x` instead: `_x`" :checker rust-cargo :id "unused_variables" :group 2))))
+     '(4 9 info "consider prefixing with an underscore: `_x`" :checker rust-cargo :id "unused_variables" :group 2))))
 
 (flycheck-ert-def-checker-test rust-cargo rust default-target
   (let ((flycheck-disabled-checkers '(rust))
@@ -4071,9 +4324,9 @@ The manifest path is relative to
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/warnings.rs" 'rust-mode
      '(3 1 warning "function is never used: `main`" :checker rust-cargo :id "dead_code" :group 1)
-     '(3 1 info "#[warn(dead_code)] on by default" :checker rust-cargo :id "dead_code" :group 1)
+     '(3 1 info "`#[warn(dead_code)]` on by default" :checker rust-cargo :id "dead_code" :group 1)
      '(4 9 warning "unused variable: `x`" :checker rust-cargo :id "unused_variables" :group 2)
-     '(4 9 info "consider using `_x` instead: `_x`" :checker rust-cargo :id "unused_variables" :group 2))))
+     '(4 9 info "consider prefixing with an underscore: `_x`" :checker rust-cargo :id "unused_variables" :group 2))))
 
 (flycheck-ert-def-checker-test rust-cargo rust lib-main
   (let ((flycheck-disabled-checkers '(rust))
@@ -4094,17 +4347,17 @@ The manifest path is relative to
        "language/rust/cargo-targets/src/lib.rs" 'rust-mode
        '(3 1 warning "function is never used: `foo_lib`" :checker rust-cargo :id "dead_code" :group 1)
        '(6 17 warning "unused variable: `foo_lib_test`" :checker rust-cargo  :id "unused_variables" :group 2)
-       '(6 17 info "consider using `_foo_lib_test` instead: `_foo_lib_test`" :checker rust-cargo :id "unused_variables" :group 2)))
+       '(6 17 info "`#[warn(unused_variables)]` on by default" :checker rust-cargo :id "unused_variables" :group 2)
+       '(6 17 info "consider prefixing with an underscore: `_foo_lib_test`" :checker rust-cargo :id "unused_variables" :group 2)))
 
     (let ((flycheck-rust-crate-type "lib"))
       (flycheck-ert-cargo-clean "language/rust/cargo-targets/Cargo.toml")
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/src/a.rs" 'rust-mode
        '(1 1 warning "function is never used: `foo_a`" :checker rust-cargo :id "dead_code" :group 1)
-       '(1 1 info "#[warn(dead_code)] on by default" :checker rust-cargo :id "dead_code" :group 1)
+       '(1 1 info "`#[warn(dead_code)]` on by default" :checker rust-cargo :id "dead_code" :group 1)
        '(4 17 warning "unused variable: `foo_a_test`" :checker rust-cargo :id "unused_variables" :group 2)
-       '(4 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 2)
-       '(4 17 info "consider using `_foo_a_test` instead: `_foo_a_test`" :checker rust-cargo :id "unused_variables" :group 2)))
+       '(4 17 info "consider prefixing with an underscore: `_foo_a_test`" :checker rust-cargo :id "unused_variables" :group 2)))
 
     (let ((flycheck-rust-crate-type "bin")
           (flycheck-rust-binary-name "cargo-targets"))
@@ -4112,10 +4365,10 @@ The manifest path is relative to
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/src/main.rs" 'rust-mode
        '(1 17 warning "unused variable: `foo_main`" :checker rust-cargo :id "unused_variables" :group 1)
-       '(1 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 1)
-       '(1 17 info "consider using `_foo_main` instead: `_foo_main`" :checker rust-cargo :id "unused_variables" :group 1)
+       '(1 17 info "`#[warn(unused_variables)]` on by default" :checker rust-cargo :id "unused_variables" :group 1)
+       '(1 17 info "consider prefixing with an underscore: `_foo_main`" :checker rust-cargo :id "unused_variables" :group 1)
        '(4 17 warning "unused variable: `foo_main_test`" :checker rust-cargo :id "unused_variables" :group 2)
-       '(4 17 info "consider using `_foo_main_test` instead: `_foo_main_test`" :checker rust-cargo :id "unused_variables" :group 2)))
+       '(4 17 info "consider prefixing with an underscore: `_foo_main_test`" :checker rust-cargo :id "unused_variables" :group 2)))
 
     (let ((flycheck-rust-crate-type "bin")
           (flycheck-rust-binary-name "a"))
@@ -4123,10 +4376,10 @@ The manifest path is relative to
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/src/bin/a.rs" 'rust-mode
        '(1 17 warning "unused variable: `foo_bin_a`" :checker rust-cargo :id "unused_variables" :group 1)
-       '(1 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 1)
-       '(1 17 info "consider using `_foo_bin_a` instead: `_foo_bin_a`" :checker rust-cargo :id "unused_variables" :group 1)
+       '(1 17 info "`#[warn(unused_variables)]` on by default" :checker rust-cargo :id "unused_variables" :group 1)
+       '(1 17 info "consider prefixing with an underscore: `_foo_bin_a`" :checker rust-cargo :id "unused_variables" :group 1)
        '(4 17 warning "unused variable: `foo_bin_a_test`" :checker rust-cargo :id "unused_variables" :group 2)
-       '(4 17 info "consider using `_foo_bin_a_test` instead: `_foo_bin_a_test`" :checker rust-cargo :id "unused_variables" :group 2)))
+       '(4 17 info "consider prefixing with an underscore: `_foo_bin_a_test`" :checker rust-cargo :id "unused_variables" :group 2)))
 
     (let ((flycheck-rust-crate-type "bench")
           (flycheck-rust-binary-name "a"))
@@ -4134,10 +4387,10 @@ The manifest path is relative to
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/benches/a.rs" 'rust-mode
        '(1 17 warning "unused variable: `foo_bench_a`" :checker rust-cargo :id "unused_variables" :group 1)
-       '(1 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 1)
-       '(1 17 info "consider using `_foo_bench_a` instead: `_foo_bench_a`" :checker rust-cargo :id "unused_variables" :group 1)
+       '(1 17 info "`#[warn(unused_variables)]` on by default" :checker rust-cargo :id "unused_variables" :group 1)
+       '(1 17 info "consider prefixing with an underscore: `_foo_bench_a`" :checker rust-cargo :id "unused_variables" :group 1)
        '(4 17 warning "unused variable: `foo_bench_a_test`" :checker rust-cargo :id "unused_variables" :group 2)
-       '(4 17 info "consider using `_foo_bench_a_test` instead: `_foo_bench_a_test`" :checker rust-cargo :id "unused_variables" :group 2)))
+       '(4 17 info "consider prefixing with an underscore: `_foo_bench_a_test`" :checker rust-cargo :id "unused_variables" :group 2)))
 
     (let ((flycheck-rust-crate-type "test")
           (flycheck-rust-binary-name "a"))
@@ -4145,10 +4398,10 @@ The manifest path is relative to
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/tests/a.rs" 'rust-mode
        '(2 16 warning "unused variable: `foo_test_a_test`" :checker rust-cargo :id "unused_variables" :group 1)
-       '(2 16 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 1)
-       '(2 16 info "consider using `_foo_test_a_test` instead: `_foo_test_a_test`" :checker rust-cargo :id "unused_variables" :group 1)
+       '(2 16 info "`#[warn(unused_variables)]` on by default" :checker rust-cargo :id "unused_variables" :group 1)
+       '(2 16 info "consider prefixing with an underscore: `_foo_test_a_test`" :checker rust-cargo :id "unused_variables" :group 1)
        '(4 1 warning "function is never used: `foo_test_a`" :checker rust-cargo :id "dead_code" :group 2)
-       '(4 1 info "#[warn(dead_code)] on by default" :checker rust-cargo :id "dead_code" :group 2)))
+       '(4 1 info "`#[warn(dead_code)]` on by default" :checker rust-cargo :id "dead_code" :group 2)))
 
     (let ((flycheck-rust-crate-type "example")
           (flycheck-rust-binary-name "a"))
@@ -4156,10 +4409,10 @@ The manifest path is relative to
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/examples/a.rs" 'rust-mode
        '(1 17 warning "unused variable: `foo_ex_a`" :checker rust-cargo :id "unused_variables" :group 1)
-       '(1 17 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 1)
-       '(1 17 info "consider using `_foo_ex_a` instead: `_foo_ex_a`" :checker rust-cargo :id "unused_variables" :group 1)
+       '(1 17 info "`#[warn(unused_variables)]` on by default" :checker rust-cargo :id "unused_variables" :group 1)
+       '(1 17 info "consider prefixing with an underscore: `_foo_ex_a`" :checker rust-cargo :id "unused_variables" :group 1)
        '(4 17 warning "unused variable: `foo_ex_a_test`" :checker rust-cargo :id "unused_variables" :group 2)
-       '(4 17 info "consider using `_foo_ex_a_test` instead: `_foo_ex_a_test`" :checker rust-cargo :id "unused_variables" :group 2)))))
+       '(4 17 info "consider prefixing with an underscore: `_foo_ex_a_test`" :checker rust-cargo :id "unused_variables" :group 2)))))
 
 (flycheck-ert-def-checker-test rust-cargo rust workspace-subcrate
   (let ((flycheck-disabled-checkers '(rust))
@@ -4169,8 +4422,8 @@ The manifest path is relative to
     (flycheck-ert-should-syntax-check
      "language/rust/workspace/crate1/src/lib.rs" 'rust-mode
      '(2 7 warning "unused variable: `a`" :checker rust-cargo :id "unused_variables" :group 1)
-     '(2 7 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 1)
-     '(2 7 info "consider using `_a` instead: `_a`" :checker rust-cargo :id "unused_variables" :group 1))))
+     '(2 7 info "`#[warn(unused_variables)]` on by default" :checker rust-cargo :id "unused_variables" :group 1)
+     '(2 7 info "consider prefixing with an underscore: `_a`" :checker rust-cargo :id "unused_variables" :group 1))))
 
 (flycheck-ert-def-checker-test rust-cargo rust dev-dependencies
   (let ((flycheck-disabled-checkers '(rust))
@@ -4180,10 +4433,10 @@ The manifest path is relative to
     (flycheck-ert-should-syntax-check
      "language/rust/dev-deps/src/lib.rs" 'rust-mode
      '(2 1 warning "unused `#[macro_use]` import" :checker rust-cargo :id "unused_imports" :group 1)
-     '(2 1 info "#[warn(unused_imports)] on by default" :checker rust-cargo :id "unused_imports" :group 1)
+     '(2 1 info "`#[warn(unused_imports)]` on by default" :checker rust-cargo :id "unused_imports" :group 1)
      '(8 9 warning "unused variable: `foo`" :checker rust-cargo :id "unused_variables" :group 2)
-     '(8 9 info "#[warn(unused_variables)] on by default" :checker rust-cargo :id "unused_variables" :group 2)
-     '(8 9 info "consider using `_foo` instead: `_foo`" :checker rust-cargo :id "unused_variables" :group 2))))
+     '(8 9 info "`#[warn(unused_variables)]` on by default" :checker rust-cargo :id "unused_variables" :group 2)
+     '(8 9 info "consider prefixing with an underscore: `_foo`" :checker rust-cargo :id "unused_variables" :group 2))))
 
 (flycheck-ert-def-checker-test rust rust syntax-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
@@ -4195,39 +4448,38 @@ The manifest path is relative to
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/multiline-error.rs" 'rust-mode
-     '(7 9 error "mismatched types (expected u8, found i8)" :checker rust :id "E0308" :group 1))))
+     '(7 9 error "mismatched types (expected u8, found i8)" :checker rust :id "E0308" :group 1)
+     '(7 9 info "you can convert an `i8` to `u8` and panic if the converted value wouldn't fit: `i.try_into().unwrap()`" :checker rust :id "E0308" :group 1))))
 
 (flycheck-ert-def-checker-test rust rust warning
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/warnings.rs" 'rust-mode
      '(4 9 warning "unused variable: `x`" :checker rust :id "unused_variables" :group 1)
-     '(4 9 info "#[warn(unused_variables)] on by default" :checker rust :id "unused_variables" :group 1)
-     '(4 9 info "consider using `_x` instead: `_x`" :checker rust :id "unused_variables" :group 1))))
+     '(4 9 info "`#[warn(unused_variables)]` on by default" :checker rust :id "unused_variables" :group 1)
+     '(4 9 info "consider prefixing with an underscore: `_x`" :checker rust :id "unused_variables" :group 1))))
 
 (flycheck-ert-def-checker-test rust rust note-and-help
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/note-and-help.rs" 'rust-mode
-     '(11 9 info "value moved here" :checker rust :id "E0382" :group 1)
-     '(12 9 error "use of moved value: `_x` (value used here after move)" :checker rust :id "E0382" :group 1)
-     '(12 9 info "move occurs because `_x` has type `NonPOD`, which does not implement the `Copy` trait" :checker rust :id "E0382" :group 1))))
+     '(10 9 info "move occurs because `_x` has type `NonPOD`, which does not implement the `Copy` trait" :checker rust :id "E0382" :group 1)
+     '(11 14 info "value moved here" :checker rust :id "E0382" :group 1)
+     '(12 14 error "use of moved value: `_x` (value used here after move)" :checker rust :id "E0382" :group 1))))
 
 (flycheck-ert-def-checker-test rust rust crate-root-not-set
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/importing.rs" 'rust-mode
-     '(1 5 error "failed to resolve. There are too many initial `super`s. (There are too many initial `super`s.)" :checker rust :id "E0433" :group 2)
-     '(1 5 warning "unused import: `super::imported`" :checker rust :id "unused_imports" :group 1)
-     '(1 5 info "#[warn(unused_imports)] on by default" :checker rust :id "unused_imports" :group 1)
-     '(4 24 error "failed to resolve. Use of undeclared type or module `imported` (Use of undeclared type or module `imported`)" :checker rust :id "E0433" :group 3)
+     '(1 5 error "failed to resolve: there are too many initial `super`s. (there are too many initial `super`s.)" :checker rust :id "E0433" :group 2)
+     '(4 24 error "failed to resolve: use of undeclared type or module `imported` (use of undeclared type or module `imported`)" :checker rust :id "E0433" :group 3)
      )))
 
 (flycheck-ert-def-checker-test rust rust macro-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/macro-error.rs" 'rust-mode
-     '(2 3 info "1 positional argument in format string, but no arguments were given" :checker rust :group 1))))
+     '(2 13 error "1 positional argument in format string, but no arguments were given" :checker rust :group 1))))
 
 (flycheck-ert-def-checker-test sass sass nil
   (let ((flycheck-disabled-checkers '(sass/scss-sass-lint)))
@@ -4275,10 +4527,28 @@ The manifest path is relative to
    '(2 nil warning "in procedure call to `g1', expected a value of type `(procedure (* *) *)' but was given a value of type `number'"
        :checker scheme-chicken)))
 
+(flycheck-ert-def-checker-test scheme-chicken scheme error-no-line-number
+  (flycheck-ert-should-syntax-check
+   "language/chicken/error-no-line-number.scm" 'flycheck/chicken-mode
+   '(0 nil error "(cddr) during expansion of (for-each ...) - bad argument type: ()\n\n\tCall history:\n\n\tlibrary.scm:3448: print-exit54375438\t  \n\tlibrary.scm:2290: body3981\t  \n\tlibrary.scm:2292: assign\t  \n\tlibrary.scm:3448: current-print-length54395440\t  \n\tlibrary.scm:2290: body3981\t  \n\tlibrary.scm:2292: assign\t  \n\tlibrary.scm:3926: ##sys#print\t  \n\tlibrary.scm:3188: case-sensitive\t  \n\tlibrary.scm:3189: keyword-style\t  \n\tlibrary.scm:3190: ##sys#print-length-limit\t  \n\tlibrary.scm:3297: outchr\t  \n\tlibrary.scm:3188: g5148\t  \n\tlibrary.scm:3927: print-call-chain\t  \n\tlibrary.scm:3882: ##sys#get-call-chain\t  \n\tlibrary.scm:3834: ##sys#make-vector\t  \n\tlibrary.scm:1371: ##sys#allocate-vector\t  \t<--"
+       :checker scheme-chicken)))
+
+(flycheck-ert-def-checker-test scheme-chicken scheme io-type-error
+  (flycheck-ert-should-syntax-check
+   "language/chicken/io-type-warning.scm" 'flycheck/chicken-mode
+   '(4 nil warning "in procedure call to `read-all', expected argument #1 of type `(or input-port string)' but was given an argument of type `output-port'"
+       :checker scheme-chicken)))
+
 (flycheck-ert-def-checker-test scheme-chicken scheme syntax-error
   (flycheck-ert-should-syntax-check
    "language/chicken/syntax-error.scm" 'flycheck/chicken-mode
    '(1 nil error "not enough arguments\n\n\t(define)\n\n\tExpansion history:\n\n\textras.scm:630: loop\t  \n\textras.scm:633: get-output-string\t  \n\tlibrary.scm:3655: ##sys#substring\t  \n\tlibrary.scm:603: ##sys#make-string\t  \n\tlibrary.scm:511: ##sys#allocate-vector\t  \n\textras.scm:633: ##sys#print\t  \n\tlibrary.scm:3188: case-sensitive\t  \n\tlibrary.scm:3189: keyword-style\t  \n\tlibrary.scm:3190: ##sys#print-length-limit\t  \n\tlibrary.scm:3319: ##sys#number?\t  \n\tlibrary.scm:3349: outstr\t  \n\tlibrary.scm:3188: g5138\t  \n\tsupport.scm:122: print-call-chain\t  \n\tlibrary.scm:3882: ##sys#get-call-chain\t  \n\tlibrary.scm:3834: ##sys#make-vector\t  \n\tlibrary.scm:1371: ##sys#allocate-vector\t  \t<--"
+       :checker scheme-chicken)))
+
+(flycheck-ert-def-checker-test scheme-chicken scheme syntax-error-no-line-number
+  (flycheck-ert-should-syntax-check
+   "language/chicken/syntax-error-no-line-number.scm" 'flycheck/chicken-mode
+   '(0 nil error "illegal atomic form\n\n\t()\n\n\tExpansion history:\n\n\textras.scm:630: loop\t  \n\textras.scm:633: get-output-string\t  \n\tlibrary.scm:3655: ##sys#substring\t  \n\tlibrary.scm:603: ##sys#make-string\t  \n\tlibrary.scm:511: ##sys#allocate-vector\t  \n\textras.scm:633: ##sys#print\t  \n\tlibrary.scm:3188: case-sensitive\t  \n\tlibrary.scm:3189: keyword-style\t  \n\tlibrary.scm:3190: ##sys#print-length-limit\t  \n\tlibrary.scm:3319: ##sys#number?\t  \n\tlibrary.scm:3349: outstr\t  \n\tlibrary.scm:3188: g5138\t  \n\tsupport.scm:122: print-call-chain\t  \n\tlibrary.scm:3882: ##sys#get-call-chain\t  \n\tlibrary.scm:3834: ##sys#make-vector\t  \n\tlibrary.scm:1371: ##sys#allocate-vector\t  \t<--"
        :checker scheme-chicken)))
 
 (flycheck-ert-def-checker-test scheme-chicken scheme syntax-read-error
@@ -4373,7 +4643,7 @@ The manifest path is relative to
    "language/systemd-analyze-test.service" 'systemd-mode
    '(3 nil error "Invalid URL, ignoring: foo://bar"
        :checker systemd-analyze)
-   '(6 nil error "Unknown lvalue 'ExecSmart' in section 'Service'"
+   '(6 nil error "Unknown key name 'ExecSmart' in section 'Service', ignoring."
        :checker systemd-analyze)
    '(8 nil error "Unknown section 'Dog'. Ignoring."
        :checker systemd-analyze)))
@@ -4403,15 +4673,24 @@ The manifest path is relative to
    '(9 nil warning "printindex before document beginning: @printindex cp"
        :checker texinfo)))
 
+(flycheck-ert-def-checker-test textlint (text markdown) nil
+  (let ((flycheck-disabled-checkers '(proselint markdown-markdownlint-cli markdown-mdl))
+        (flycheck-textlint-config "language/text/textlintrc.json"))
+    (flycheck-ert-should-syntax-check
+     "language/text/text.txt" '(text-mode markdown-mode)
+     '(1 7 error "\"very\" is a weasel word and can weaken meaning"
+         :id "write-good" :checker textlint))))
+
 (flycheck-ert-def-checker-test typescript-tslint typescript nil
-  (flycheck-ert-should-syntax-check
-   "language/typescript/sample.ts" 'typescript-mode
-   '(2 23 warning "Module 'chai' is not listed as dependency in package.json"
-       :checker typescript-tslint :id "no-implicit-dependencies")
-   '(5 3 warning "Forbidden 'var' keyword, use 'let' or 'const' instead"
-       :checker typescript-tslint :id "no-var-keyword")
-   '(6 15 warning "Missing semicolon"
-       :checker typescript-tslint :id "semicolon")))
+  (let ((flycheck-disabled-checkers '(javascript-eslint)))
+    (flycheck-ert-should-syntax-check
+     "language/typescript/sample.ts" 'typescript-mode
+     '(2 23 warning "Module 'chai' is not listed as dependency in package.json"
+         :checker typescript-tslint :id "no-implicit-dependencies")
+     '(5 3 warning "Forbidden 'var' keyword, use 'let' or 'const' instead"
+         :checker typescript-tslint :id "no-var-keyword")
+     '(6 15 warning "Missing semicolon"
+         :checker typescript-tslint :id "semicolon"))))
 
 (flycheck-ert-def-checker-test verilog-verilator verilog error
   (flycheck-ert-should-syntax-check
@@ -4460,6 +4739,17 @@ The manifest path is relative to
      "language/yaml.yaml" 'yaml-mode
      '(4 5 error "mapping values are not allowed in this context"
          :checker yaml-ruby))))
+
+(flycheck-ert-def-checker-test yaml-yamllint yaml nil
+  (let ((flycheck-disabled-checkers '(yaml-yamlyaml)))
+    (flycheck-ert-should-syntax-check
+     "language/yaml.yaml" 'yaml-mode
+     '(3 1 warning "missing document start "---" (document-start)"
+         :checker yaml-yamllint))
+    (flycheck-ert-should-syntax-check
+     "language/yaml.yaml" 'yaml-mode
+     '(4 5 error "syntax error: mapping values are not allowed here"
+         :checker yaml-yamllint))))
 
 (flycheck-ert-def-checker-test jsonnet jsonnet nil
   (flycheck-ert-should-syntax-check

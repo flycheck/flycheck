@@ -3,25 +3,40 @@
 
 - **Breaking changes**
 
-  - Remove ``javascript-jscs`` checker
+  - Remove ``javascript-jscs`` checker [GH-1024]
   - Remove ``elixir-dogma`` checker [GH-1450]
   - ``rust-cargo`` now requires Rust 1.17 or newer [GH-1289]
+  - ``rust`` now requires 1.18 or newer [GH-1501]
   - Rename ``flycheck-cargo-rustc-args`` to ``flycheck-cargo-check-args``
     [GH-1289]
   - ``rust-cargo`` does not use the variable ``flycheck-rust-args`` anymore
     [GH-1289]
   - Improve detection of default directory for ``haskell-ghc`` to consider
     ``hpack`` project files [GH-1435]
+  - Replace ``go tool vet`` with ``go vet`` [GH-1548]
+  - Remove the deprecated ``go-megacheck`` checker, which is replaced by
+    ``go-staticcheck``. [GH-1583]
 
 - New syntax checkers:
 
-  - Jsonnet with ``jsonnet`` [GH-1345]
-  - Tcl with ``nagelfar`` [GH-1365]
+  - CUDA with ``cuda-nvcc`` [GH-1508]
   - CWL with ``schema-salad-tool`` [GH-1361]
+  - JSON with ``json-jq`` [GH-1568]
+  - Jsonnet with ``jsonnet`` [GH-1345]
   - MarkdownLint CLI with ``markdownlint`` [GH-1366]
+  - Nix with ``nix-linter`` [GH-1530]
+  - Opam with ``opam lint`` [GH-1532]
   - Rust with ``rust-clippy`` [GH-1385]
+  - Staticcheck with ``go-staticheck`` [GH-1541]
+  - Tcl with ``nagelfar`` [GH-1365]
+  - Text prose with ``textlint`` [GH-1534]
   - VHDL with ``ghdl`` [GH-1160]
   - mypy with ``python-mypy`` [GH-1354]
+  - terraform with ``terraform fmt`` [GH-1586]
+  - terraform-tflint with ``tflint`` [GH-1586]
+  - protobuf-prototool with ``prototool`` [GH-1591]
+  - Bazel with ``bazel-buildifier`` [GH-1613]
+  - Ruumba with ``eruby-ruumba`` [GH-1616]
 
 - New features:
 
@@ -31,10 +46,26 @@
   - Add ``flycheck-ghc-stack-project-file`` for the
     ``haskell-stack-ghc`` checker. [GH-1316]
   - Add ``flycheck-perl-module-list`` to use specified modules when
-    syntax checking code with the ``perl`` checker.
+    syntax checking code with the ``perl`` checker. [GH-1207]
   - Add ``flycheck-sh-bash-args`` to pass arguments to ``sh-bash`` [GH-1439].
   - Add ``flychjeck-eslint-args`` to pass arguments to ``javascript-eslint``
     [GH-1360]
+  - Add ``flycheck-default-executable-find``, the new default value for
+    ``flycheck-executable-find``, to allow using relative paths to checkers
+    (set e.g. in file or dir-local variables). [GH-1485]
+  - Add ``idle-buffer-switch`` option for use in
+    ``flycheck-check-syntax-automatically``.  Variables
+    ``flycheck-idle-buffer-switch-delay`` and
+    ``flycheck-buffer-switch-check-intermediate-buffers`` control the
+    functionality [GH-1297]
+  - Add ``flycheck-ghdl-ieee-library`` to select which standard IEEE
+    library to use for ghdl. [GH-1547]
+  - ``javascript-eslint`` checker now supports ``typescript-mode`` by default.
+  - Add ``flycheck-erlang-rebar3-profile`` to select which profile to
+    use when compiling erlang with rebar3.
+  - Add ``flycheck-relevant-error-other-file-show`` to avoid showing errors
+    from other files. [GH-1579]
+  - Add an error explainer for the ``nix-linter`` checker. [GH-1586]
 
 - Improvements
 
@@ -42,6 +73,8 @@
     instead of ignored.  They can be navigated to from the error list.
     This change helps with compiled languages, where an error in another file
     may cause the current file to be considered invalid. [GH-1427]
+  - Enhanced the ``flycheck-verify-setup`` to show more clearly which checkers
+    will run in the buffer, and which are misconfigured. [GH-1478]
   - Use Emacs' native XML parsing when libXML fails.  This behavior can be
     changed by customizing ``flycheck-xml-parser`` [GH-1349]
   - Changed parsing of ESLint output from checkstyle XML to JSON [GH-1350]

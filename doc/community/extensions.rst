@@ -130,6 +130,13 @@ OCaml
 * :flyc:`flycheck-ocaml` (*official*) adds a syntax checker for OCaml using the
   :gh:`Merlin <ocaml/merlin>` backend.
 
+PHP
+---
+
+* :gh:`emacs-php/phpstan.el` adds a PHP static analyzer using PHPStan_.
+
+.. _PHPStan: https://github.com/phpstan/phpstan
+
 Python
 ------
 

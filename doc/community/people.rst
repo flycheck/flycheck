@@ -70,13 +70,14 @@ Haskell
 ~~~~~~~
 
 * Sergey Vinokurov (:gh:`sergv`)
+* Steve Purcell (:gh:`purcell`)
 
 Mention with ``@flycheck/haskell``.
 
 Javascript
 ~~~~~~~~~~
 
-* Saša Jovanić (:gh:`Simplify`)
+* Saša Jovanić (:gh:`Simplify`)
 
 Mention with ``@flycheck/javascript``.
 
@@ -87,12 +88,33 @@ Lua
 
 Mention with ``@flycheck/lua``.
 
+Mercury
+~~~~~~~
+
+* Matthias Güdemann (:gh:`mgudemann`)
+
+Mention with ``@flycheck/mercury``.
+
+PHP
+~~~
+
+* USAMI Kenta (:gh:`zonuexe`)
+
+Mention with ``@flycheck/php``.
+
 Puppet
 ~~~~~~
 
 * Romanos Skiadas (:gh:`rski`)
 
 Mention with ``@flycheck/puppet``.
+
+Ruby
+~~~~
+
+* Saša Jovanić (:gh:`Simplify`)
+
+Mention with ``@flycheck/javascript``.
 
 Rust
 ~~~~
@@ -105,7 +127,7 @@ Mention with ``@flycheck/rust``.
 TypeScript
 ~~~~~~~~~~
 
-* Saša Jovanić (:gh:`Simplify`)
+* Saša Jovanić (:gh:`Simplify`)
 
 Mention with ``@flycheck/typescript``.
 
@@ -164,8 +186,10 @@ to Flycheck:
 * Alain Kalker (:gh:`ackalker`)
 * Alex Reed (:gh:`acr4`)
 * Atila Neves (:gh:`atilaneves`)
+* Ben Sless (:gh:`bsless`)
 * Bozhidar Batsov (:gh:`bbatsov`)
 * Clément Pit-Claudel (:gh:`cpitclaudel`, maintainer, owner)
+* Colin Marquardt (:gh:`cmarqu`)
 * Cristian Capdevila (:gh:`capdevc`)
 * Damon Haley (:gh:`dhaley`)
 * David Caldwell (:gh:`caldwell`)
@@ -183,45 +207,62 @@ to Flycheck:
 * Fred Morcos (:gh:`fredmorcos`)
 * Gereon Frey (:gh:`gfrey`)
 * Gordon Gao (:gh:`ghprince`)
+* Guido Kraemer (:gh:`gdkrmr`)
 * Gulshan Singh (:gh:`gsingh93`)
 * Iain Beeston (:gh:`iainbeeston`)
 * Ibrahim Awwal (:gh:`ibrahima`)
 * Jackson Ray Hamilton (:gh:`jacksonrayhamilton`)
 * Jim Hester (:gh:`jimhester`)
 * Jimmy Yuen Ho Wong (:gh:`wyuenho`)
+* Joe DeVivo (:gh:`joedevivo`)
+* John Shahid (:gh:`jvshahid`)
+* Juergen Hoetzel (:gh:`juergenhoetzel`)
 * Kári Tristan Helgason (:gh:`kthelgason`)
 * Krzysztof Witkowski (:gh:`kwitek`)
 * Lee Adams (:gh:`leeaustinadams`)
+* Loïc Damien (:gh:`dzamlo`)
 * Lorenzo Villani (:gh:`lvillani`)
+* Łukasz Jędrzejewski (:gh:`jedrz`)
 * Magnar Sveen (:gh:`magnars`)
 * Malyshev Artem (:gh:`proofit404`)
 * Manuel Uberti (:gh:`manuel-uberti`)
+* Marc Sherry (:gh:`msherry`)
 * Marcin Antczak (:gh:`marcinant`)
 * Marcus Majewski (:gh:`hekto`)
 * Marian Schubert (:gh:`maio`)
 * Mario Rodas (:gh:`marsam`)
+* Mark Laws (:gh:`drvink`)
 * Mark Hellewell (:gh:`markhellewell`)
 * Mark Karpov (:gh:`mrkkrp`)
+* Martin Polden (:gh:`mpolden`)
+* mats cronqvist (:gh:`massemanet`)
 * Matthew Curry (:gh:`strawhatguy`)
 * Matthias Dahl (:gh:`BinaryKhaos`)
 * Michael Pankov (:gh:`mkpankov`)
 * Michael Alan Dorman (:gh:`mdorman`)
+* Miles Yucht (:gh:`mgyucht`)
 * Miro Bezjak (:gh:`mbezjak`)
 * Mitch Tishmack (:gh:`mitchty`)
 * Moritz Bunkus (:gh:`mbunkus`)
 * Omair Majid (:gh:`omajid`)
+* :gh:`papaeye`
 * Per Nordlöw (:gh:`nordlow`)
 * Peter Eisentraut (:gh:`petere`)
-* Philipp Stephani (:gh:`phst`)
+* Peter Hoeg (:gh:`peterhoeg`)
+* Peter Oliver (:gh:`mavit`)
 * Peter Vasil (:gh:`ptrv`)
+* Philipp Stephani (:gh:`phst`)
 * Robert Dallas Gray (:gh:`rdallasgray`)
 * Robert O'Connor (:gh:`robbyoconnor`)
 * Robert Zaremba (:gh:`robert-zaremba`)
-* Saša Jovanić (:gh:`Simplify`)
+* Romano Skiadas (:gh:`rski`)
+* Saša Jovanić (:gh:`Simplify`)
 * Sean Gillespie (:gh:`swgillespie`)
 * Sean Salmon (:gh:`phatcabbage`)
+* Sean Whitton (:gh:`spwhitton`)
 * Sebastian Beyer (:gh:`sebastianbeyer`)
 * Sebastian Wiesner (:gh:`lunaryorn`, founder, former maintainer, former owner)
+* Sebastian Schlueppel (:gh:`s3bs`)
 * Sergey Vinokurov (:gh:`sergv`)
 * Stephen Lewis (:gh:`stephenjlewis`)
 * Steve Purcell (:gh:`purcell`)
@@ -231,15 +272,20 @@ to Flycheck:
 * Syohei Yoshida (:gh:`syohex`)
 * Ted Zlatanov (:gh:`tzz`)
 * Tom Jakubowski (:gh:`tomjakubowski`)
+* Tom Willemse (:gh:`ryuslash`)
 * Tomoya Tanjo (:gh:`tom-tan`)
+* Troy Hinckley (:gh:`CeleritasCelery`)
+* Usami Kenta (:gh:`zonuexe`)
 * Victor Deryagin (:gh:`vderyagin`)
+* Ville Skyttä (:gh:`scop`)
 * Vlatko Basic (:gh:`vlatkoB`)
+* Wieland Hoffmann (:gh:`mineo`)
+* Wilfred Hughes (:gh:`Wilfred`)
 * William Cummings (:gh:`wcummings`)
 * William Xu (:gh:`xwl`)
 * Yannick Roehlly (:gh:`yannick1974`)
 * Yasuyuki Oka (:gh:`yasuyk`)
 * Zhuo Yuan (:gh:`yzprofile`)
-* Łukasz Jędrzejewski (:gh:`jedrz`)
 
 For a complete list of all code contributors see the `Contributor Graph`_ or
 ``git shortlog --summary``.
