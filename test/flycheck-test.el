@@ -3112,7 +3112,7 @@ The term \"1\" has type \"nat\" while it is expected to have type \"bool\"." :ch
   (let ((flycheck-cwl-schema-path "schema/CommonWorkflowLanguage.yml"))
     (flycheck-ert-should-syntax-check
      "language/cwl/cwl.cwl" 'cwl-mode
-     '(6 5 error "the `inputBinding` field is not valid because value is a str, expected null or CommandLineBinding"
+     '(6 5 error "value is a str, expected null or CommandLineBinding"
          :checker cwl))))
 
 (ert-deftest flycheck-d-module-re/matches-module-name ()
