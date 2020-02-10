@@ -1339,9 +1339,9 @@ spliced into the resulting list."
 
 Return the result of the first matching group of PATTERN, or nil,
 if PATTERN did not match."
-  (save-restriction
-    (widen)
-    (save-excursion
+  (save-excursion
+    (save-restriction
+      (widen)
       (goto-char (point-min))
       (when (re-search-forward pattern nil 'no-error)
         (match-string-no-properties 1)))))
