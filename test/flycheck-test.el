@@ -1444,54 +1444,55 @@
   :tags '(error-api)
   (flycheck-ert-with-temp-buffer
     (insert "Hello\n    World\n")
-    (should (equal (flycheck-error-line-region (flycheck-error-new-at 1 1))
-                   '(1 . 6)))
-    (should (equal (flycheck-error-line-region (flycheck-error-new-at 2 4))
-                   '(11 . 16)))
+    (should (equal (flycheck--line-region (flycheck-line-column-to-position 1 1)) '(1 . 6)))
+    (should (equal (flycheck--line-region (flycheck-line-column-to-position 2 4)) '(11 . 16)))
     ;; An error column beyond the end of the line is simply ignored just like
     ;; all other error columns
-    (should (equal (flycheck-error-line-region (flycheck-error-new-at 2 10))
-                   '(11 . 16)))
+    (should (equal (flycheck--line-region (flycheck-line-column-to-position 2 10)) '(11 . 16)))
     ;; An error line beyond the end of file should highlight the last line
-    (should (equal (flycheck-error-line-region (flycheck-error-new-at 4 3))
-                   '(16 . 17)))))
+    (should (equal (flycheck--line-region (flycheck-line-column-to-position 4 3)) '(16 . 17)))))
 
 (ert-deftest flycheck-error-column-region ()
   :tags '(error-api)
   (flycheck-ert-with-temp-buffer
     (insert "Hello\n    World\n")
-    (should-not (flycheck-error-column-region (flycheck-error-new-at 1 nil)))
-    (should (equal (flycheck-error-column-region (flycheck-error-new-at 1 4))
+    (should (equal (flycheck--column-region (flycheck-line-column-to-position 1 4))
                    '(4 . 5)))
-    (should (equal (flycheck-error-column-region (flycheck-error-new-at 2 6))
+    (should (equal (flycheck--column-region (flycheck-line-column-to-position 2 6))
                    '(12 . 13)))
     ;; A column beyond the end of a line
-    (should (equal (flycheck-error-column-region (flycheck-error-new-at 1 7))
+    (should (equal (flycheck--column-region (flycheck-line-column-to-position 1 7))
                    '(6 . 7)))
     ;; A column right at the end of the last empty line of a file (an important
     ;; special case, because the Emacs Lisp checker reports undefined functions
     ;; at this place!)
-    (should (equal (flycheck-error-column-region (flycheck-error-new-at 3 1))
+    (should (equal (flycheck--column-region (flycheck-line-column-to-position 3 1))
                    '(16 . 17)))
     ;; A column beyond the end of file
-    (should (equal (flycheck-error-column-region (flycheck-error-new-at 4 2))
+    (should (equal (flycheck--column-region (flycheck-line-column-to-position 4 2))
                    '(16 . 17)))))
 
-(ert-deftest flycheck-error-thing-region ()
+(ert-deftest flycheck-bounds-of-things-at-point ()
   :tags '(error-api)
   (flycheck-ert-with-temp-buffer
     (insert "    (message)\n    (message")
     (emacs-lisp-mode)
-    (should-not (flycheck-error-thing-region 'sexp (flycheck-error-new-at 1 2)))
-    (should (equal (flycheck-error-thing-region 'sexp (flycheck-error-new-at 1 5))
+    (should-not (flycheck-bounds-of-thing-at-point
+                 'sexp (flycheck-line-column-to-position 1 2)))
+    (should (equal (flycheck-bounds-of-thing-at-point
+                    'sexp (flycheck-line-column-to-position 1 5))
                    '(5 . 14)))
-    (should-not (flycheck-error-thing-region 'symbol (flycheck-error-new-at 1 5)))
-    (should (equal (flycheck-error-thing-region 'sexp (flycheck-error-new-at 1 8))
+    (should-not (flycheck-bounds-of-thing-at-point
+                 'symbol (flycheck-line-column-to-position 1 5)))
+    (should (equal (flycheck-bounds-of-thing-at-point
+                    'sexp (flycheck-line-column-to-position 1 8))
                    '(6 . 13)))
-    (should (equal (flycheck-error-thing-region 'symbol (flycheck-error-new-at 1 8))
+    (should (equal (flycheck-bounds-of-thing-at-point
+                    'symbol (flycheck-line-column-to-position 1 8))
                    '(6 . 13)))
     ;; An incomplete expression
-    (should-not (flycheck-error-thing-region 'sexp (flycheck-error-new-at 2 5)))))
+    (should-not (flycheck-bounds-of-thing-at-point
+                 'sexp (flycheck-line-column-to-position 2 5)))))
 
 (ert-deftest flycheck-error-region-for-mode ()
   :tags '(error-api)
@@ -1512,7 +1513,43 @@
     ;; Test an error without column for all modes
     (let ((err (flycheck-error-new-at 1 nil)))
       (dolist (mode '(lines columns symbols sexps))
-        (should (equal (flycheck-error-region-for-mode err mode) '(5 . 29)))))))
+        (should (equal (flycheck-error-region-for-mode err mode) '(5 . 29)))))
+    ;; With end-line and end-col set, MODE shouldn't make a difference
+    (should (equal (flycheck-error-region-for-mode
+                    (flycheck-error-new-at
+                     1 18 nil nil :end-line 1 :end-column 29)
+                    nil)
+                   '(18 . 29)))
+    (should (equal (flycheck-error-region-for-mode
+                    (flycheck-error-new-at
+                     1 14 nil nil :end-line 1 :end-column 18)
+                    nil)
+                   '(14 . 18)))
+    (should (equal (flycheck-error-region-for-mode
+                    (flycheck-error-new-at ;;
+                     1 5 nil nil :end-line 2 :end-column 13)
+                    nil)
+                   '(5 . 42)))
+    (should (equal (flycheck-error-region-for-mode
+                    (flycheck-error-new-at ;; Missing end column
+                     1 nil nil nil :end-line 2)
+                    'lines)
+                   '(5 . 29)))
+    (should (equal (flycheck-error-region-for-mode
+                    (flycheck-error-new-at ;; Implicit end line
+                     2 5 nil nil :end-column 13)
+                    nil)
+                   '(34 . 42)))
+    (should (equal (flycheck-error-region-for-mode
+                    (flycheck-error-new-at ;; Out of bounds start
+                     10 1 nil nil :end-line 10 :end-column 3)
+                    nil)
+                   '(41 . 42)))
+    (should (equal (flycheck-error-region-for-mode
+                    (flycheck-error-new-at ;; Out of bounds end
+                     1 1 nil nil :end-line 10 :end-column 1)
+                    nil)
+                   '(1 . 42)))))
 
 (ert-deftest flycheck-error-pos ()
   :tags '(error-api)
