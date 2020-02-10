@@ -532,20 +532,20 @@ highlight them according to `flycheck-highlighting-mode'."
   "The highlighting mode for Flycheck errors and warnings.
 
 The highlighting mode controls how Flycheck highlights errors in
-buffers.  The following modes are known:
+buffers when a checker only reports the starting position of an
+error.  The following modes are known:
 
 `columns'
-     Highlight the error column.  If the error does not have a column,
+     Highlight a single character.  If the error does not have a column,
      highlight the whole line.
 
 `symbols'
-     Highlight the symbol at the error column, if there is any,
-     otherwise behave like `columns'.  This is the default.
+     Highlight a full symbol if there is any, otherwise behave like `columns'.
+     This is the default.
 
 `sexps'
-     Highlight the expression at the error column, if there is
-     any, otherwise behave like `columns'.  Note that this mode
-     can be *very* slow in some major modes.
+     Highlight a full expression, if there is any, otherwise behave like
+     `columns'.  Note that this mode can be *very* slow in some major modes.
 
 `lines'
      Highlight the whole line.
