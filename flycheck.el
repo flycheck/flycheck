@@ -7698,16 +7698,18 @@ See Info Node `(elisp)Byte Compilation'."
             "--"
             source-inplace)
   :error-patterns
-  ((error line-start (file-name) ":" line ":" column ":Error:"
+  ((error line-start (file-name) ":" line ":" column ":"
+          (zero-or-more whitespace) "Error:" (zero-or-more whitespace)
           (message (zero-or-more not-newline)
                    (zero-or-more "\n    " (zero-or-more not-newline)))
           line-end)
-   (warning line-start (file-name) ":" line ":" column ":Warning:"
+   (warning line-start (file-name) ":" line ":" column ":"
+            (zero-or-more whitespace) "Warning:" (zero-or-more whitespace)
             (message (zero-or-more not-newline)
                      (zero-or-more "\n    " (zero-or-more not-newline)))
             line-end)
-   (warning line-start (file-name) ":" line (optional ":" column)
-            ":Warning (check-declare): said\n"
+   (warning line-start (file-name) ":" line (optional ":" column) ":"
+            (zero-or-more whitespace) "Warning (check-declare): said\n"
             (message (zero-or-more "    " (zero-or-more not-newline))
                      (zero-or-more "\n    " (zero-or-more not-newline)))
             line-end)
