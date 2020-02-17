@@ -3974,6 +3974,7 @@ Why not:
 
 (flycheck-ert-def-checker-test python-flake8 python syntax-error
   (let ((python-indent-guess-indent-offset nil) ; Silence Python Mode!
+
         (flycheck-python-flake8-executable "python3"))
     (flycheck-ert-should-syntax-check
      "language/python/syntax-error.py" 'python-mode
@@ -4309,8 +4310,8 @@ The manifest path is relative to
     (flycheck-ert-cargo-clean "language/rust/flycheck-test/Cargo.toml")
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/warnings.rs" 'rust-mode
-     '(3 1 warning "function is never used: `main`" :checker rust-cargo :id "dead_code" :group 1)
-     '(3 1 info "`#[warn(dead_code)]` on by default" :checker rust-cargo :id "dead_code" :group 1)
+     '(3 4 warning "function is never used: `main`" :checker rust-cargo :id "dead_code" :group 1)
+     '(3 4 info "`#[warn(dead_code)]` on by default" :checker rust-cargo :id "dead_code" :group 1)
      '(4 9 warning "unused variable: `x`" :checker rust-cargo :id "unused_variables" :group 2)
      '(4 9 info "consider prefixing with an underscore: `_x`" :checker rust-cargo :id "unused_variables" :group 2))))
 
@@ -4321,8 +4322,8 @@ The manifest path is relative to
     (flycheck-ert-cargo-clean "language/rust/flycheck-test/Cargo.toml")
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/warnings.rs" 'rust-mode
-     '(3 1 warning "function is never used: `main`" :checker rust-cargo :id "dead_code" :group 1)
-     '(3 1 info "`#[warn(dead_code)]` on by default" :checker rust-cargo :id "dead_code" :group 1)
+     '(3 4 warning "function is never used: `main`" :checker rust-cargo :id "dead_code" :group 1)
+     '(3 4 info "`#[warn(dead_code)]` on by default" :checker rust-cargo :id "dead_code" :group 1)
      '(4 9 warning "unused variable: `x`" :checker rust-cargo :id "unused_variables" :group 2)
      '(4 9 info "consider prefixing with an underscore: `_x`" :checker rust-cargo :id "unused_variables" :group 2))))
 
@@ -4343,7 +4344,7 @@ The manifest path is relative to
       (flycheck-ert-cargo-clean "language/rust/cargo-targets/Cargo.toml")
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/src/lib.rs" 'rust-mode
-       '(3 1 warning "function is never used: `foo_lib`" :checker rust-cargo :id "dead_code" :group 1)
+       '(3 4 warning "function is never used: `foo_lib`" :checker rust-cargo :id "dead_code" :group 1)
        '(6 17 warning "unused variable: `foo_lib_test`" :checker rust-cargo  :id "unused_variables" :group 2)
        '(6 17 info "`#[warn(unused_variables)]` on by default" :checker rust-cargo :id "unused_variables" :group 2)
        '(6 17 info "consider prefixing with an underscore: `_foo_lib_test`" :checker rust-cargo :id "unused_variables" :group 2)))
@@ -4352,8 +4353,8 @@ The manifest path is relative to
       (flycheck-ert-cargo-clean "language/rust/cargo-targets/Cargo.toml")
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/src/a.rs" 'rust-mode
-       '(1 1 warning "function is never used: `foo_a`" :checker rust-cargo :id "dead_code" :group 1)
-       '(1 1 info "`#[warn(dead_code)]` on by default" :checker rust-cargo :id "dead_code" :group 1)
+       '(1 4 warning "function is never used: `foo_a`" :checker rust-cargo :id "dead_code" :group 1)
+       '(1 4 info "`#[warn(dead_code)]` on by default" :checker rust-cargo :id "dead_code" :group 1)
        '(4 17 warning "unused variable: `foo_a_test`" :checker rust-cargo :id "unused_variables" :group 2)
        '(4 17 info "consider prefixing with an underscore: `_foo_a_test`" :checker rust-cargo :id "unused_variables" :group 2)))
 
@@ -4398,8 +4399,8 @@ The manifest path is relative to
        '(2 16 warning "unused variable: `foo_test_a_test`" :checker rust-cargo :id "unused_variables" :group 1)
        '(2 16 info "`#[warn(unused_variables)]` on by default" :checker rust-cargo :id "unused_variables" :group 1)
        '(2 16 info "consider prefixing with an underscore: `_foo_test_a_test`" :checker rust-cargo :id "unused_variables" :group 1)
-       '(4 1 warning "function is never used: `foo_test_a`" :checker rust-cargo :id "dead_code" :group 2)
-       '(4 1 info "`#[warn(dead_code)]` on by default" :checker rust-cargo :id "dead_code" :group 2)))
+       '(4 4 warning "function is never used: `foo_test_a`" :checker rust-cargo :id "dead_code" :group 2)
+       '(4 4 info "`#[warn(dead_code)]` on by default" :checker rust-cargo :id "dead_code" :group 2)))
 
     (let ((flycheck-rust-crate-type "example")
           (flycheck-rust-binary-name "a"))
@@ -4446,7 +4447,7 @@ The manifest path is relative to
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/multiline-error.rs" 'rust-mode
-     '(7 9 error "mismatched types (expected u8, found i8)" :checker rust :id "E0308" :group 1)
+     '(7 9 error "mismatched types (expected `u8`, found `i8`)" :checker rust :id "E0308" :group 1)
      '(7 9 info "you can convert an `i8` to `u8` and panic if the converted value wouldn't fit: `i.try_into().unwrap()`" :checker rust :id "E0308" :group 1))))
 
 (flycheck-ert-def-checker-test rust rust warning
