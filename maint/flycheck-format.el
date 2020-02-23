@@ -34,6 +34,9 @@
 (require 'whitespace)
 (require 'elisp-mode)
 
+;; Work around Emacs bug #39761
+(require 'cl-lib)
+
 (require 'flycheck-maint
          (expand-file-name "flycheck-maint"
                            (file-name-directory (f-this-file))))
