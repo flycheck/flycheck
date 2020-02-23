@@ -1520,6 +1520,19 @@ FILE-NAME is nil, return `default-directory'."
     (forward-line (- line 1))
     (min (+ (point) (1- column)) (line-end-position))))
 
+(defun flycheck-line-column-at-point ()
+  "Return the line and column number at point."
+  (cons (line-number-at-pos) (1+ (- (point) (line-beginning-position)))))
+
+(defun flycheck-line-column-at-pos (pos)
+  "Return the line and column number at position POS.
+
+COLUMN is one-based."
+  (let ((inhibit-field-text-motion t))
+    (save-excursion
+      (goto-char pos)
+      (flycheck-line-column-at-point))))
+
 
 ;;; Minibuffer tools
 (defvar flycheck-read-checker-history nil
@@ -3293,7 +3306,20 @@ non-nil, then only do this and skip per-buffer teardown.)"
                  &optional level message
                  &key end-line end-column checker id group
                  (filename (buffer-file-name)) (buffer (current-buffer))
-                 &aux (-end-line end-line) (-end-column end-column))))
+                 &aux (-end-line end-line) (-end-column end-column)))
+               (:constructor
+                flycheck-error-new-at-pos
+                (pos
+                 &optional level message
+                 &key end-pos checker id group
+                 (filename (buffer-file-name)) (buffer (current-buffer))
+                 &aux
+                 ((line . column)
+                  (if pos (flycheck-line-column-at-pos pos)
+                    '(nil . nil)))
+                 ((-end-line . -end-column)
+                  (if end-pos (flycheck-line-column-at-pos end-pos)
+                    '(nil . nil))))))
   "Structure representing an error reported by a syntax checker.
 Slots:
 

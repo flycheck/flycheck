@@ -68,7 +68,7 @@
     from other files. [GH-1579]
   - Add an error explainer for the ``nix-linter`` checker. [GH-1586]
   - Checkers can now specify the exact region covered by an error, using
-    the :end-line and :end-column properties. [GH-1400]
+    the ``:end-line`` and ``:end-column`` properties. [GH-1400]
   - Error patterns can now mention ``end-line`` and ``end-column`` in addition
     to ``line`` and ``column``.
 
@@ -91,6 +91,9 @@
     to make it easier to change between Python 2 and Python 3 [GH-1113]
   - ``haskell-stack-ghc`` will not try to install GHC thereby freezing Emacs
     [GH-1443]
+  - Checkers that report error positions as a single offset from the start of
+    the file can use the new ``flycheck-error-new-at-pos`` constructor instead
+    of converting that position to a line and a column.
 
 31 (Oct 07, 2017)
 =================
