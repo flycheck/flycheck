@@ -1420,10 +1420,17 @@ Safely delete all files and directories listed in
   "Like `rx-to-string' for FORM, but with special keywords:
 
 `line'
-     matches the line number.
+     matches the initial line number.
 
 `column'
-     matches the column number.
+     matches the initial column number.
+
+`end-line'
+     matches the final line number.
+
+`end-column'
+     matches the final column number (exclusive).
+
 
 `(file-name SEXP ...)'
      matches the file name.  SEXP describes the file name.  If no
@@ -1443,11 +1450,13 @@ NO-GROUP is passed to `rx-to-string'.
 See `rx' for a complete list of all built-in `rx' forms."
   (let ((rx-constituents
          (append
-          `((line . ,(rx (group-n 2 (one-or-more digit))))
+          `((file-name flycheck-rx-file-name 0 nil) ;; group 1
+            (line . ,(rx (group-n 2 (one-or-more digit))))
             (column . ,(rx (group-n 3 (one-or-more digit))))
-            (file-name flycheck-rx-file-name 0 nil)
-            (message flycheck-rx-message 0 nil)
-            (id flycheck-rx-id 0 nil))
+            (message flycheck-rx-message 0 nil) ;; group 4
+            (id flycheck-rx-id 0 nil) ;; group 5
+            (end-line . ,(rx (group-n 6 (one-or-more digit))))
+            (end-column . ,(rx (group-n 7 (one-or-more digit)))))
           rx-constituents nil)))
     (rx-to-string form no-group)))
 
@@ -3298,10 +3307,10 @@ Slots:
      The file name the error refers to, as string.
 
 `line'
-     The line number the error refers to, as number.
+     The line on which the error starts, as number.
 
 `column' (optional)
-     The column number the error refers to, as number.
+     The column at which the error starts, as number.
 
      For compatibility with external tools and unlike Emacs
      itself (e.g. in Compile Mode) Flycheck uses _1-based_
@@ -3320,7 +3329,10 @@ Slots:
 
 `end-column'
     The column at which the error ends.  If nil, this is computed according to
-    `flycheck-highlighting-mode'.
+    `flycheck-highlighting-mode'.  Error intervals are right-open: the
+    end-column points to the first character not included in the error.  For
+    example, 1:1 is an empty range. and in \"line-number-at-pos\", the range
+    6:12 covers the word \"number\".
 
 `message' (optional)
      The error message as a string, if any.
@@ -6518,25 +6530,33 @@ Return a list of error tokens."
   "Try to parse a single ERR with a PATTERN for CHECKER.
 
 Return the parsed error if PATTERN matched ERR, or nil
-otherwise."
+otherwise.
+
+`end-line' defaults to the value of `line' when `end-column' is
+set, since checkers often omit redundant end lines (as in
+<file>:<line>:<column>-<end-column>)."
   (let ((regexp (car pattern))
         (level (cdr pattern)))
     (when (string-match regexp err)
       (let ((filename (match-string 1 err))
-            (line (match-string 2 err))
-            (column (match-string 3 err))
+            (line (flycheck-string-to-number-safe (match-string 2 err)))
+            (column (flycheck-string-to-number-safe (match-string 3 err)))
             (message (match-string 4 err))
-            (id (match-string 5 err)))
+            (id (match-string 5 err))
+            (end-line (flycheck-string-to-number-safe (match-string 6 err)))
+            (end-column (flycheck-string-to-number-safe (match-string 7 err))))
         (flycheck-error-new-at
-         (flycheck-string-to-number-safe line)
-         (flycheck-string-to-number-safe column)
+         line
+         column
          level
          (unless (string-empty-p message) message)
          :id (unless (string-empty-p id) id)
          :checker checker
          :filename (if (or (null filename) (string-empty-p filename))
                        (buffer-file-name)
-                     filename))))))
+                     filename)
+         :end-line (or end-line (and end-column line))
+         :end-column end-column)))))
 
 (defun flycheck-parse-error-with-patterns (err patterns checker)
   "Parse a single ERR with error PATTERNS for CHECKER.

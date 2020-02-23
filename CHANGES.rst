@@ -69,6 +69,8 @@
   - Add an error explainer for the ``nix-linter`` checker. [GH-1586]
   - Checkers can now specify the exact region covered by an error, using
     the :end-line and :end-column properties. [GH-1400]
+  - Error patterns can now mention ``end-line`` and ``end-column`` in addition
+    to ``line`` and ``column``.
 
 - Improvements
 
