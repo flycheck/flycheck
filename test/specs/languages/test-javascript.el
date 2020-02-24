@@ -68,6 +68,8 @@
                                         :id "strict"
                                         :checker 'checker
                                         :buffer nil
-                                        :filename nil)))))))
+                                        :filename nil
+                                        :end-line 5
+                                        :end-column 2)))))))
 
 ;;; test-javascript.el ends here

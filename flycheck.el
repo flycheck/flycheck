@@ -1513,11 +1513,17 @@ FILE-NAME is nil, return `default-directory'."
           (file-name-directory file-name)
         (expand-file-name default-directory)))))
 
+(defun flycheck-goto-line (line)
+  "Move point to beginning of line number LINE."
+  (goto-char (point-min))
+  (forward-line (- line 1)))
+
 (defun flycheck-line-column-to-position (line column)
-  "Return the point closest to LINE, COLUMN."
+  "Return the point closest to LINE, COLUMN on line LINE.
+
+COLUMN is one-based."
   (save-excursion
-    (goto-char (point-min))
-    (forward-line (- line 1))
+    (flycheck-goto-line line)
     (min (+ (point) (1- column)) (line-end-position))))
 
 (defun flycheck-line-column-at-point ()
@@ -6233,6 +6239,8 @@ See URL `http://phpmd.org/' for more information about phpmd."
                        (flycheck-string-to-number-safe .beginline)
                        nil
                        'warning (string-trim message)
+                       ;; Ignore .endline (phpmd marks giant spans as errors)
+                       ;; :end-line (flycheck-string-to-number-safe .endline)
                        :id .rule
                        :checker checker
                        :buffer buffer
@@ -6315,7 +6323,9 @@ about TSLint."
                   :id .ruleName
                   :checker checker
                   :buffer buffer
-                  :filename .name)))
+                  :filename .name
+                  :end-line (+ 1 .endPosition.line)
+                  :end-column (+ 1 .endPosition.character))))
              ;; Don't try to parse empty output as JSON
              (and (not (string-empty-p output))
                   (car (flycheck-parse-json output))))))
@@ -6346,13 +6356,15 @@ and the BUFFER that was checked respectively.
 DIAGNOSTIC should be a parsed JSON object describing a rustc
 diagnostic, following the format described there:
 
-https://github.com/rust-lang/rust/blob/master/src/libsyntax/json.rs#L67-L139"
+https://github.com/rust-lang/rust/blob/master/src/librustc_errors/json.rs#L154"
   (let ((error-message)
         (error-level)
         (error-code)
         (primary-filename)
         (primary-line)
         (primary-column)
+        (primary-end-line)
+        (primary-end-column)
         (group (make-symbol "group"))
         (spans)
         (children)
@@ -6396,7 +6408,9 @@ https://github.com/rust-lang/rust/blob/master/src/libsyntax/json.rs#L67-L139"
         (when .is_primary
           (setq primary-filename .file_name
                 primary-line .line_start
-                primary-column .column_start))
+                primary-column .column_start
+                primary-end-line .line_end
+                primary-end-column .column_end))
         (push
          (flycheck-error-new-at
           .line_start
@@ -6414,37 +6428,39 @@ https://github.com/rust-lang/rust/blob/master/src/libsyntax/json.rs#L67-L139"
           :checker checker
           :buffer buffer
           :filename .file_name
-          :group group)
+          :group group
+          :end-line .line_end
+          :end-column .column_end)
          errors)))
 
     ;; Then we turn children messages into flycheck errors pointing to the
     ;; location of the primary span.
     (dolist (child children)
-      (let-alist child
-        (push
-         (flycheck-error-new-at
-          ;; Use the line/column from the first span if there is one, or
-          ;; fallback to the line/column information from the primary span of
-          ;; the diagnostic.
-          (or (cdr (assq 'line_start (car .spans)))
-              primary-line)
-          (or (cdr (assq 'column_start (car .spans)))
-              primary-column)
-          'info
-          ;; Messages from `cargo clippy' may suggest replacement code.  In
-          ;; these cases, the `message' field itself is an unhelpful `try' or
-          ;; `change this to'.  We add the `suggested_replacement' field in
-          ;; these cases.
-          (-if-let (replacement
-                    (cdr (assq 'suggested_replacement (car .spans))))
-              (format "%s: `%s`" .message replacement)
-            .message)
-          :id error-code
-          :checker checker
-          :buffer buffer
-          :filename primary-filename
-          :group group)
-         errors)))
+      (let ((message (let-alist child .message)))
+        (let-alist (car (let-alist child .spans))
+          (push
+           (flycheck-error-new-at
+            ;; Use the line/column from the first span if there is one, or
+            ;; fallback to the line/column information from the primary span of
+            ;; the diagnostic.
+            (or .line_start primary-line)
+            (or .column_start primary-column)
+            'info
+            ;; Messages from `cargo clippy' may suggest replacement code.  In
+            ;; these cases, the `message' field itself is an unhelpful `try' or
+            ;; `change this to'.  We add the `suggested_replacement' field in
+            ;; these cases.
+            (if .suggested_replacement
+                (format "%s: `%s`" message .suggested_replacement)
+              message)
+            :id error-code
+            :checker checker
+            :buffer buffer
+            :filename primary-filename
+            :group group
+            :end-line (or .line_end primary-end-line)
+            :end-column (or .column_end primary-end-column))
+           errors))))
 
     ;; If there are no spans, the error is not associated with a specific
     ;; file but with the project as a whole.  We still need to report it to
@@ -7321,6 +7337,25 @@ See URL `http://www.coffeelint.org/'."
                             (flycheck-sanitize-errors errors))))
   :modes coffee-mode)
 
+(defun flycheck-coq-error-filter (errors)
+  "Sanitize Coq ERRORS and compute end-lines and end-columns."
+  (flycheck-increment-error-columns errors)
+  (dolist (err errors)
+    (setf (flycheck-error-message err)
+          (replace-regexp-in-string (rx (1+ (syntax whitespace)) line-end)
+                                    "" (flycheck-error-message err)
+                                    'fixedcase 'literal))
+    (-when-let* ((end-col (flycheck-error-end-column err)))
+      ;; Coq reports an offset (potentially past eol), not an end column
+      (let* ((line (flycheck-error-line err))
+             (end-lc (save-excursion
+                       (flycheck-goto-line line)
+                       (goto-char (+ (point) (1- end-col)))
+                       (flycheck-line-column-at-point))))
+        (setf (flycheck-error-end-line err) (car end-lc))
+        (setf (flycheck-error-end-column err) (cdr end-lc)))))
+  (flycheck-sanitize-errors errors))
+
 (flycheck-define-checker coq
   "A Coq syntax checker using the Coq compiler.
 
@@ -7329,22 +7364,14 @@ See URL `https://coq.inria.fr/'."
   :command ("coqtop" "-batch" "-load-vernac-source" source)
   :error-patterns
   ((error line-start "File \"" (file-name) "\", line " line
-          ;; TODO: Parse the end column, once Flycheck supports that
-          ", characters " column "-" (one-or-more digit) ":\n"
+          ", characters " column "-" end-column ":\n"
           (or "Syntax error:" "Error:")
           ;; Most Coq error messages span multiple lines, and end with a dot.
           ;; There are simple one-line messages, too, though.
           (message (or (and (one-or-more (or not-newline "\n")) ".")
                        (one-or-more not-newline)))
           line-end))
-  :error-filter
-  (lambda (errors)
-    (dolist (err (flycheck-sanitize-errors errors))
-      (setf (flycheck-error-message err)
-            (replace-regexp-in-string (rx (1+ (syntax whitespace)) line-end)
-                                      "" (flycheck-error-message err)
-                                      'fixedcase 'literal)))
-    (flycheck-increment-error-columns errors))
+  :error-filter flycheck-coq-error-filter
   :modes coq-mode)
 
 (flycheck-define-checker css-csslint
@@ -8931,7 +8958,9 @@ See URL `https://eslint.org' for more information about ESLint."
                :id .ruleId
                :checker checker
                :buffer buffer
-               :filename (buffer-file-name buffer))))
+               :filename (buffer-file-name buffer)
+               :end-line .endLine
+               :end-column .endColumn)))
           (let-alist (caar (flycheck-parse-json output))
             .messages)))
 
@@ -9050,12 +9079,24 @@ See URL `https://stedolan.github.io/jq/'."
 See URL `https://jsonnet.org'."
   :command ("jsonnet" source-inplace)
   :error-patterns
-  ((error line-start "STATIC ERROR: " (file-name) ":" line ":" column
-          (zero-or-one (group "-" (one-or-more digit))) ": "
-          (message) line-end)
+  ((error line-start "STATIC ERROR: " (file-name) ":"
+          (or (seq line ":" column (zero-or-one (seq "-" end-column)))
+              (seq "(" line ":" column ")" "-"
+                   "(" end-line ":" end-column ")"))
+          ": " (message) line-end)
    (error line-start "RUNTIME ERROR: " (message) "\n"
-          (one-or-more space) (file-name) ":" (zero-or-one "(")
-          line ":" column (zero-or-more not-newline) line-end))
+          (? "\t" (file-name) ":" ;; first line of the backtrace
+             (or (seq line ":" column (zero-or-one (seq "-" end-column)))
+                 (seq "(" line ":" column ")" "-"
+                      "(" end-line ":" end-column ")")))))
+  :error-filter
+  (lambda (errs)
+    ;; Some errors are missing line numbers. See URL
+    ;; `https://github.com/google/jsonnet/issues/786'.
+    (dolist (err errs)
+      (unless (flycheck-error-line err)
+        (setf (flycheck-error-line err) 1)))
+    (flycheck-sanitize-errors errs))
   :modes jsonnet-mode)
 
 (flycheck-define-checker less
@@ -9382,9 +9423,8 @@ the BUFFER that was checked respectively.
 See URL `http://proselint.com/' for more information about proselint."
   (mapcar (lambda (err)
             (let-alist err
-              (flycheck-error-new-at
-               .line
-               .column
+              (flycheck-error-new-at-pos
+               .start
                (pcase .severity
                  (`"suggestion" 'info)
                  (`"warning"    'warning)
@@ -9394,7 +9434,9 @@ See URL `http://proselint.com/' for more information about proselint."
                .message
                :id .check
                :buffer buffer
-               :checker checker)))
+               :checker checker
+               ;; See https://github.com/amperser/proselint/issues/1048
+               :end-pos .end)))
           (let-alist (car (flycheck-parse-json output))
             .data.errors)))
 
@@ -10090,7 +10132,9 @@ information about nix-linter."
                :id .offense
                :checker checker
                :buffer buffer
-               :filename (buffer-file-name buffer))))
+               :filename (buffer-file-name buffer)
+               :end-line .pos.spanEnd.sourceLine
+               :end-column .pos.spanEnd.sourceColumn)))
           (flycheck-parse-json output)))
 
 (flycheck-define-checker nix-linter
