@@ -1508,6 +1508,16 @@ FILE-NAME is nil, return `default-directory'."
     (forward-line (- line 1))
     (min (+ (point) (1- column)) (line-end-position))))
 
+(defun flycheck-position-to-line-column (pos)
+  "Return the line and column of the position POS.
+
+The first line is 1 and the first column is 1."
+  (save-excursion
+    (goto-char pos)
+    ;; Add 1 because flycheck assumes that columns start at 1.  Don't use
+    ;; (current-column) because it is wrong for wide characters like tabs.
+    (cons (line-number-at-pos) (1+ (- (point) (line-beginning-position))))))
+
 
 ;;; Minibuffer tools
 (defvar flycheck-read-checker-history nil
