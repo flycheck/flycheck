@@ -2057,11 +2057,12 @@ nil otherwise."
 
 (defconst flycheck-find-checker-regexp
   (rx line-start (zero-or-more (syntax whitespace))
-      "(" symbol-start "flycheck-define-checker" symbol-end
-      (eval (list 'regexp find-function-space-re))
-      symbol-start
-      "%s"
+      "(" symbol-start
+      (or "flycheck-define-checker" "flycheck-define-command-checker")
       symbol-end
+      (eval (list 'regexp find-function-space-re))
+      (? "'")
+      symbol-start "%s" symbol-end
       (or (syntax whitespace) line-end))
   "Regular expression to find a checker definition.")
 
