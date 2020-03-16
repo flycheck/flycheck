@@ -241,6 +241,7 @@ attention to case differences."
     rst-sphinx
     rst
     ruby-rubocop
+    ruby-standard
     ruby-reek
     ruby-rubylint
     ruby
@@ -2056,11 +2057,12 @@ nil otherwise."
 
 (defconst flycheck-find-checker-regexp
   (rx line-start (zero-or-more (syntax whitespace))
-      "(" symbol-start "flycheck-define-checker" symbol-end
-      (eval (list 'regexp find-function-space-re))
-      symbol-start
-      "%s"
+      "(" symbol-start
+      (or "flycheck-define-checker" "flycheck-define-command-checker")
       symbol-end
+      (eval (list 'regexp find-function-space-re))
+      (? "'")
+      symbol-start "%s" symbol-end
       (or (syntax whitespace) line-end))
   "Regular expression to find a checker definition.")
 
@@ -10070,50 +10072,80 @@ This is either a parent directory containing a Gemfile, or nil."
 (flycheck-def-config-file-var flycheck-rubocoprc ruby-rubocop ".rubocop.yml"
   :safe #'stringp)
 
-(flycheck-def-option-var flycheck-rubocop-lint-only nil ruby-rubocop
-  "Whether to only report code issues in Rubocop.
+(flycheck-def-option-var flycheck-rubocop-lint-only nil
+                         (ruby-rubocop ruby-standard)
+  "Whether to only report code issues in Rubocop and Standard.
 
-When non-nil, only report code issues in Rubocop, via `--lint'.
-Otherwise report style issues as well."
+When non-nil, only report code issues, via `--lint'.  Otherwise
+report style issues as well."
   :safe #'booleanp
   :type 'boolean
   :package-version '(flycheck . "0.16"))
 
-(flycheck-define-checker ruby-rubocop
+(defconst flycheck-ruby-rubocop-error-patterns
+  '((info line-start (file-name) ":" line ":" column ": C: "
+          (optional (id (one-or-more (not (any ":")))) ": ") (message) line-end)
+    (warning line-start (file-name) ":" line ":" column ": W: "
+             (optional (id (one-or-more (not (any ":")))) ": ") (message)
+             line-end)
+    (error line-start (file-name) ":" line ":" column ": " (or "E" "F") ": "
+           (optional (id (one-or-more (not (any ":")))) ": ") (message)
+           line-end)))
+
+(flycheck-def-executable-var ruby-rubocop "rubocop")
+(flycheck-define-command-checker 'ruby-rubocop
   "A Ruby syntax and style checker using the RuboCop tool.
 
 You need at least RuboCop 0.34 for this syntax checker.
 
 See URL `http://batsov.com/rubocop/'."
-  :command ("rubocop"
-            "--display-cop-names"
-            "--force-exclusion"
-            "--format" "emacs"
-            ;; Explicitly disable caching to prevent Rubocop 0.35.1 and earlier
-            ;; from caching standard input.  Later versions of Rubocop
-            ;; automatically disable caching with --stdin, see
-            ;; https://github.com/flycheck/flycheck/issues/844 and
-            ;; https://github.com/bbatsov/rubocop/issues/2576
-            "--cache" "false"
-            (config-file "--config" flycheck-rubocoprc)
-            (option-flag "--lint" flycheck-rubocop-lint-only)
-            ;; Rubocop takes the original file name as argument when reading
-            ;; from standard input
-            "--stdin" source-original)
+  ;; ruby-standard is defined based on this checker
+  :command '("rubocop"
+             "--display-cop-names"
+             "--force-exclusion"
+             "--format" "emacs"
+             ;; Explicitly disable caching to prevent Rubocop 0.35.1 and earlier
+             ;; from caching standard input.  Later versions of Rubocop
+             ;; automatically disable caching with --stdin, see
+             ;; https://github.com/flycheck/flycheck/issues/844 and
+             ;; https://github.com/bbatsov/rubocop/issues/2576
+             "--cache" "false"
+             (config-file "--config" flycheck-rubocoprc)
+             (option-flag "--lint" flycheck-rubocop-lint-only)
+             ;; Rubocop takes the original file name as argument when reading
+             ;; from standard input
+             "--stdin" source-original)
   :standard-input t
-  :working-directory flycheck-ruby--find-project-root
-  :error-patterns
-  ((info line-start (file-name) ":" line ":" column ": C: "
-         (optional (id (one-or-more (not (any ":")))) ": ") (message) line-end)
-   (warning line-start (file-name) ":" line ":" column ": W: "
-            (optional (id (one-or-more (not (any ":")))) ": ") (message)
-            line-end)
-   (error line-start (file-name) ":" line ":" column ": " (or "E" "F") ": "
-          (optional (id (one-or-more (not (any ":")))) ": ") (message)
-          line-end))
-  :modes (enh-ruby-mode ruby-mode)
-  :next-checkers ((warning . ruby-reek)
-                  (warning . ruby-rubylint)))
+  :working-directory #'flycheck-ruby--find-project-root
+  :error-patterns flycheck-ruby-rubocop-error-patterns
+  :modes '(enh-ruby-mode ruby-mode)
+  :next-checkers '((warning . ruby-reek)
+                   (warning . ruby-rubylint)))
+
+(flycheck-def-config-file-var flycheck-ruby-standardrc ruby-standard
+                              ".standard.yml"
+  :safe #'stringp)
+
+(flycheck-def-executable-var ruby-standard "standardrb")
+(flycheck-define-command-checker 'ruby-standard
+  "A Ruby syntax and style checker using the StandardRB gem.
+
+See URL `https://github.com/testdouble/standard' for more information."
+  ;; This checker is derived from ruby-rubocop; see above
+  :command '("standardrb"
+             "--display-cop-names"
+             "--force-exclusion"
+             "--format" "emacs"
+             "--cache" "false"
+             (config-file "--config" flycheck-ruby-standardrc)
+             (option-flag "--lint" flycheck-ruby-rubocop-lint-only)
+             "--stdin" source-original)
+  :standard-input t
+  :working-directory #'flycheck-ruby--find-project-root
+  :error-patterns flycheck-ruby-rubocop-error-patterns
+  :modes '(enh-ruby-mode ruby-mode)
+  :next-checkers '((warning . ruby-reek)
+                   (warning . ruby-rubylint)))
 
 ;; Default to `nil' to let Reek find its configuration file by itself
 (flycheck-def-config-file-var flycheck-reekrc ruby-reek nil

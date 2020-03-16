@@ -387,7 +387,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
    .. syntax-checker:: ember-template
 
       Check your Ember templates with
-      `ember-template-lint <https://github.com/ember-template-lint/ember-template-lint>`_ 
+      `ember-template-lint <https://github.com/ember-template-lint/ember-template-lint>`_
 
       .. syntax-checker-config-file:: flycheck-ember-template-lintrc
 
@@ -872,7 +872,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. defcustom:: flycheck-perlcritic-theme
 
-		 The theme expression, passed as the ``--theme`` to ``perlcritic``.
+         The theme expression, passed as the ``--theme`` to ``perlcritic``.
 
       .. syntax-checker-config-file:: flycheck-perlcriticrc
 
@@ -1115,6 +1115,21 @@ to view the docstring of the syntax checker.  Likewise, you may use
          option.
 
       .. syntax-checker-config-file:: flycheck-rubocoprc
+
+   .. syntax-checker:: ruby-standard
+
+      Check syntax and lint with `Standard <https://github.com/testdouble/standard/>`_.
+
+      .. note::
+
+         This syntax checker and ruby-rubocop are mutually exclusive, since Standard employs an opinionated rubocop config.
+
+      .. defcustom:: flycheck-rubocop-lint-only
+         :noindex:
+
+         See `flycheck-rubocop-lint-only`.
+
+      .. syntax-checker-config-file:: flycheck-ruby-standardrc
 
    .. syntax-checker:: ruby-reek
 

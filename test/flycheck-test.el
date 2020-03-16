@@ -4265,6 +4265,17 @@ Why not:
        :id "Lint/Syntax"
        :checker ruby-rubocop)))
 
+(flycheck-ert-def-checker-test ruby-standard ruby syntax-error
+  (let ((flycheck-disabled-checkers '(ruby-rubocop)))
+    (flycheck-ert-should-syntax-check
+     "language/ruby/syntax-error.rb" 'ruby-mode
+     '(5 7 error "unexpected token tCONSTANT (Using Ruby 2.3 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+         :id "Lint/Syntax"
+         :checker ruby-standard)
+     '(5 24 error "unterminated string meets end of file (Using Ruby 2.3 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+         :id "Lint/Syntax"
+         :checker ruby-standard))))
+
 (flycheck-ert-def-checker-test ruby-rubylint ruby syntax-error
   (ert-skip "Pending: https://github.com/YorickPeterse/ruby-lint/issues/202")
   (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek)))
@@ -4289,7 +4300,7 @@ Why not:
 (flycheck-ert-def-checker-test (ruby-rubocop ruby-reek ruby-rubylint) ruby with-rubylint
   (flycheck-ert-should-syntax-check
    "language/ruby/warnings.rb" 'ruby-mode
-   '(1 1 info "Missing magic comment `# frozen_string_literal: true`."
+   '(1 1 info "Missing frozen string literal comment."
        :id "Style/FrozenStringLiteralComment" :checker ruby-rubocop)
    '(3 nil warning "Person assumes too much for instance variable '@name'"
        :id "InstanceVariableAssumption" :checker ruby-reek)
