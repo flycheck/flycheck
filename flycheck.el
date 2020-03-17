@@ -12296,14 +12296,18 @@ Relative paths are relative to the file being checked."
   "A Verilog syntax checker using the Verilator Verilog HDL simulator.
 
 See URL `https://www.veripool.org/wiki/verilator'."
-  :command ("verilator" "--lint-only" "-Wall"
+  :command ("verilator" "--lint-only" "-Wall" "--quiet-exit"
             (option-list "-I" flycheck-verilator-include-path concat)
             source)
   :error-patterns
-  ((warning line-start "%Warning-" (zero-or-more not-newline) ": "
-            (file-name) ":" line ": " (message) line-end)
-   (error line-start "%Error: " (file-name) ":"
-          line ": " (message) line-end))
+  ((warning line-start "%Warning"
+            (? "-" (id (+ (any "0-9A-Z_")))) ": "
+            (? (file-name) ":" line ":" (? column ":") " ")
+            (message) line-end)
+   (error line-start "%Error"
+          (? "-" (id (+ (any "0-9A-Z_")))) ": "
+          (? (file-name) ":" line ":" (? column ":") " ")
+          (message) line-end))
   :modes verilog-mode)
 
 (flycheck-def-option-var flycheck-ghdl-language-standard nil vhdl-ghdl
