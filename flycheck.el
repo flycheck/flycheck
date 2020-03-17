@@ -7282,7 +7282,7 @@ Split the output into error tokens, using all regular expressions
 from the error PATTERNS.  An error token is simply a string
 containing a single error from OUTPUT.  Such a token can then be
 parsed into a structured error by applying the PATTERNS again,
-see `flycheck-parse-errors-with-patterns'.
+see `flycheck-parse-error-with-patterns'.
 
 Return a list of error tokens."
   (let ((regexp (flycheck-get-regexp patterns))
