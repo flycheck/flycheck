@@ -10138,7 +10138,7 @@ See URL `https://github.com/testdouble/standard' for more information."
              "--format" "emacs"
              "--cache" "false"
              (config-file "--config" flycheck-ruby-standardrc)
-             (option-flag "--lint" flycheck-ruby-rubocop-lint-only)
+             (option-flag "--lint" flycheck-rubocop-lint-only)
              "--stdin" source-original)
   :standard-input t
   :working-directory #'flycheck-ruby--find-project-root
