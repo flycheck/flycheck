@@ -335,6 +335,16 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _hadolint: https://github.com/hadolint/hadolint
 
+.. supported-language:: Elixir
+
+   .. syntax-checker:: elixir-credo
+
+      Check code style with `credo <https://github.com/rrrene/credo>`_
+
+      .. defcustom:: flycheck-elixir-credo-strict
+
+         When non-nil, run credo in strict mode, via ``--strict``.
+
 .. supported-language:: Emacs Lisp
 
    Flycheck checks Emacs Lisp with `emacs-lisp` and then with

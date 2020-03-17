@@ -179,6 +179,7 @@ attention to case differences."
     cwl
     d-dmd
     dockerfile-hadolint
+    elixir-credo
     emacs-lisp
     emacs-lisp-checkdoc
     ember-template
@@ -7560,6 +7561,39 @@ See URL `http://github.com/hadolint/hadolint/'."
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "/dev/stdin" errors)))
   :modes dockerfile-mode)
+
+(defun flycheck-credo--working-directory (&rest _ignored)
+  "Check if `credo' is installed as dependency in the application."
+  (and buffer-file-name
+       (locate-dominating-file buffer-file-name "deps/credo")))
+
+(flycheck-def-option-var flycheck-elixir-credo-strict nil elixir-credo
+  "Enable strict mode in `credo'.
+
+When non-nil, pass the `--strict' flag to credo."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "32"))
+
+(flycheck-define-checker elixir-credo
+  "An Elixir checker for static code analysis using Credo.
+
+See `http://credo-ci.org/'."
+  :command ("mix" "credo"
+            (option-flag "--strict" flycheck-elixir-credo-strict)
+            "--format" "flycheck"
+            "--read-from-stdin" source-original)
+  :standard-input t
+  :working-directory flycheck-credo--working-directory
+  :enabled flycheck-credo--working-directory
+  :error-patterns
+  ((info line-start
+         (file-name) ":" line (optional ":" column) ": "
+         (or "F" "R" "C")  ": " (message) line-end)
+   (warning line-start
+            (file-name) ":" line (optional ":" column) ": "
+            (or "D" "W")  ": " (message) line-end))
+  :modes elixir-mode)
 
 (defconst flycheck-this-emacs-executable
   (concat invocation-directory invocation-name)

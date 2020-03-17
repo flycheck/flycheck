@@ -18,6 +18,7 @@
  (depends-on "cwl-mode")
  (depends-on "d-mode")
  (depends-on "dockerfile-mode")
+ (depends-on "elixir-mode")
  (depends-on "erlang")
  (depends-on "ess")
  (depends-on "geiser")
