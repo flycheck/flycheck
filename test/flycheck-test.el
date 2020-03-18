@@ -4002,6 +4002,19 @@ Why not:
    "language/pug/pug.pug" 'pug-mode
    '(2 1 error "unexpected token \"indent\"" :checker pug)))
 
+(flycheck-ert-def-checker-test pug pug non-block-or-mixin-at-top-level-of-extended-template-error
+  (flycheck-ert-should-syntax-check
+   "language/pug/foo.pug" 'pug-mode
+   '(9 1
+       error "Only named blocks and mixins can appear at the top level of an extending template"
+       :checker pug)))
+(flycheck-ert-def-checker-test pug pug unknown-filter
+  (flycheck-ert-should-syntax-check
+   "language/pug/foo-unknown-filter.pug" 'pug-mode
+   '(1 1
+       error "unknown filter \":myfilter\""
+       :checker pug)))
+
 (flycheck-ert-def-checker-test pug pug include-extends-error
   (flycheck-ert-should-syntax-check
    "language/pug/pug-extends.pug" 'pug-mode

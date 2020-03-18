@@ -9410,6 +9410,11 @@ See URL `https://pugjs.org/'."
   ((error "Error: " (message) (zero-or-more not-newline) "\n"
           (zero-or-more not-newline) "at "
           (zero-or-more not-newline) " line " line)
+   ;; error when placing anything other than a mixin or
+   ;; block at the top-level of an extended template
+   ;; also unknown filters
+   (error line-start "Error: " (file-name) ":"
+          line ":" column "\n\n" (message) line-end)
    ;; syntax/runtime errors (e.g. type errors, bad indentation, etc.)
    (error line-start
           (optional "Type") "Error: "  (file-name) ":"
