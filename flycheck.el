@@ -6256,7 +6256,11 @@ about TSLint."
                  (flycheck-error-new-at
                   (+ 1 .startPosition.line)
                   (+ 1 .startPosition.character)
-                  'warning .failure
+                  (pcase .ruleSeverity
+                    ("ERROR"   'error)
+                    ("WARNING" 'warning)
+                    (_         'warning))
+                  .failure
                   :id .ruleName
                   :checker checker
                   :buffer buffer
@@ -11095,10 +11099,9 @@ information about tflint."
                .line
                nil
                (pcase .type
-                 (`"ERROR"   'error)
-                 (`"WARNING" 'warning)
-                 ;; Default to error
-                 (_          'error))
+                 ("ERROR"   'error)
+                 ("WARNING" 'warning)
+                 (_         'error))
                .message
                :id .detector
                :checker checker
