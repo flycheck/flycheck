@@ -4702,7 +4702,7 @@ POS defaults to `point'."
       ;; if necessary.
       (when other-file-error
         (with-current-buffer buffer
-          ;; `seq-contains-p' is only in seq >= 2.21, which isn't in ELPA
+          ;; `seq-contains-p' is only in seq >= 2.21
           (unless (with-no-warnings
                     (seq-contains flycheck-current-errors error-copy 'equal))
             (when flycheck-mode
@@ -8016,17 +8016,18 @@ used as profile."
 (defun flycheck-erlang-rebar3-get-profile ()
   "Return rebar3 profile.
 
-Use flycheck-erlang-rebar3-profile if set, otherwise use test profile if
-dirname is test or else default."
-  (cond
-   (flycheck-erlang-rebar3-profile flycheck-erlang-rebar3-profile)
-   ((and buffer-file-name
-         (string= "test"
-                  (file-name-base
-                   (directory-file-name
-                    (file-name-directory buffer-file-name)))))
-    "test")
-   (t "default")))
+Use flycheck-erlang-rebar3-profile if set, otherwise use test or eqc profile if
+directory name is \"test\" or \"eqc\", or else \"default\"."
+  (or
+   flycheck-erlang-rebar3-profile
+   (with-no-warnings
+     ;; `seq-contains-p' is only in seq >= 2.21
+     (seq-contains '("test" "eqc")
+                   (and buffer-file-name
+                        (file-name-base
+                         (directory-file-name
+                          (file-name-directory buffer-file-name))))))
+   "default"))
 
 (flycheck-define-checker erlang-rebar3
   "An Erlang syntax checker using the rebar3 build tool."
