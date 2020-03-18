@@ -97,6 +97,7 @@
     of converting that position to a line and a column.
   - ``flycheck-compile`` now locates the checker executable relative to
     ``exec-path`` instead of the shell's ``PATH``.
+  - The Emacs Lisp checker can now run in buffers not backed by files. [GH-1695]
 
 31 (Oct 07, 2017)
 =================
