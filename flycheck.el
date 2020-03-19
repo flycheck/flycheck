@@ -7503,8 +7503,9 @@ See URL `https://www.commonwl.org/v1.0/SchemaSalad.html'."
 (defun flycheck-d-base-directory ()
   "Get the relative base directory path for this module."
   (let* ((file-name (buffer-file-name))
-         (module-file (if (string= (file-name-nondirectory file-name)
-                                   "package.d")
+         (module-file (if (and file-name
+                               (string= (file-name-nondirectory file-name)
+                                        "package.d"))
                           (directory-file-name (file-name-directory file-name))
                         file-name)))
     (flycheck-module-root-directory
