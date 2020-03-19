@@ -1214,7 +1214,7 @@ emulate inode (see fstat() in emacs/src/w32.c)."
         (and attrs-a attrs-b  ;; Make sure both file-a and file-b exist.
              (equal (nth 10 attrs-a) (nth 10 attrs-b))    ;; inode
              (equal (nth 11 attrs-a) (nth 11 attrs-b))))  ;; filesystem
-      (string= (file-chase-links file-a) (file-chase-links file-b))))
+      (string= (file-truename file-a) (file-truename file-b))))
 
 (defvar-local flycheck-temporaries nil
   "Temporary files and directories created by Flycheck.")
