@@ -335,6 +335,16 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _hadolint: https://github.com/hadolint/hadolint
 
+.. supported-language:: Elixir
+
+   .. syntax-checker:: elixir-credo
+
+      Check code style with `credo <https://github.com/rrrene/credo>`_
+
+      .. defcustom:: flycheck-elixir-credo-strict
+
+         When non-nil, run credo in strict mode, via ``--strict``.
+
 .. supported-language:: Emacs Lisp
 
    Flycheck checks Emacs Lisp with `emacs-lisp` and then with
@@ -382,6 +392,15 @@ to view the docstring of the syntax checker.  Likewise, you may use
       :infonode:`(elisp)Library Headers`
          Information about library headers for Emacs Lisp files.
 
+.. supported-language:: Ember Templates
+
+   .. syntax-checker:: ember-template
+
+      Check your Ember templates with
+      `ember-template-lint <https://github.com/ember-template-lint/ember-template-lint>`_
+
+      .. syntax-checker-config-file:: flycheck-ember-template-lintrc
+
 .. supported-language:: Erlang
 
    Flycheck checks Erlang with `erlang-rebar3` in rebar projects and
@@ -407,8 +426,9 @@ to view the docstring of the syntax checker.  Likewise, you may use
       .. defcustom:: flycheck-erlang-rebar3-profile
 
          The profile to use when compiling, e.g. "default" or "test".
-         The default value is nil which will use test profile
-         in test directories and default profile otherwise.
+         The default value is nil which will use the test profile in test
+         directories, the eqc profile in eqc directories and the default profile
+         otherwise.
 
 .. supported-language:: ERuby
 
@@ -863,7 +883,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. defcustom:: flycheck-perlcritic-theme
 
-		 The theme expression, passed as the ``--theme`` to ``perlcritic``.
+         The theme expression, passed as the ``--theme`` to ``perlcritic``.
 
       .. syntax-checker-config-file:: flycheck-perlcriticrc
 
@@ -1106,6 +1126,21 @@ to view the docstring of the syntax checker.  Likewise, you may use
          option.
 
       .. syntax-checker-config-file:: flycheck-rubocoprc
+
+   .. syntax-checker:: ruby-standard
+
+      Check syntax and lint with `Standard <https://github.com/testdouble/standard/>`_.
+
+      .. note::
+
+         This syntax checker and ruby-rubocop are mutually exclusive, since Standard employs an opinionated rubocop config.
+
+      .. defcustom:: flycheck-rubocop-lint-only
+         :noindex:
+
+         See `flycheck-rubocop-lint-only`.
+
+      .. syntax-checker-config-file:: flycheck-ruby-standardrc
 
    .. syntax-checker:: ruby-reek
 
@@ -1444,7 +1479,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. note::
 
-         textlint plugins need to be installed seperately.
+         textlint plugins need to be installed separately.
 
 .. supported-language:: TeX/LaTeX
 

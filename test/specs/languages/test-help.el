@@ -64,9 +64,10 @@
               (progn
                 (expect (buffer-name) :to-equal "flycheck.el")
                 (expect (looking-at (rx bol
-                                        "(flycheck-define-checker"
+                                        (or "(flycheck-define-checker"
+                                            "(flycheck-define-command-checker")
                                         symbol-end
-                                        " "
+                                        " " (? "'")
                                         symbol-start
                                         (group (1+ (or (syntax word)
                                                        (syntax symbol))))
