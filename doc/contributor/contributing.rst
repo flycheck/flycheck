@@ -48,7 +48,8 @@ than too little. Here’s a list of facts that are important:
 
 .. _search existing issues: https://github.com/flycheck/flycheck/issues?q=is%3Aissue
 .. _issue form: https://github.com/flycheck/flycheck/issues/new
-.. _reproduce the issue in emacs -Q: https://swsnr.de/posts/reproduce-bugs-in-emacs-q/
+.. _reproduce the issue in emacs -Q: https://emacs.stackexchange.com/questions/28429/how-do-i-troubleshoot-emacs-problems
+
 
 .. _flycheck-windows-issues:
 
