@@ -3199,7 +3199,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
     (flycheck-ert-should-syntax-check
      "language/d/src/dmd/warning.d" 'd-mode
      '(9 5 warning "statement is not reachable" :checker d-dmd)
-     '(20 17 warning "function dmd.warning.bar is deprecated"
+     '(20 17 warning "function `dmd.warning.bar` is deprecated"
           :checker d-dmd))))
 
 (flycheck-ert-def-checker-test d-dmd d missing-import
@@ -3208,7 +3208,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (flycheck-ert-should-syntax-check
    "language/d/src/dmd/warning.d" 'd-mode
-   '(4 8 error "module external_library is in file 'external_library.d' which cannot be read"
+   '(4 8 error "module `external_library` is in file 'external_library.d' which cannot be read"
        :checker d-dmd)))
 
 (flycheck-ert-def-checker-test d-dmd d continuation-line
@@ -3217,12 +3217,25 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (flycheck-ert-should-syntax-check
    "language/d/src/dmd/continuation.d" 'd-mode
-   '(5 12 error "undefined identifier 'invalid'"
+   '(5 12 error "undefined identifier `invalid`"
        :checker d-dmd)
-   '(10 12 error "template instance continuation.T!() error instantiating"
+   '(10 12 error "template instance `continuation.T!()` error instantiating"
         :checker d-dmd)
-   '(13 1 info "instantiated from here: U!()"
+   '(13 1 info "instantiated from here: `U!()`"
         :checker d-dmd)))
+
+(flycheck-ert-def-checker-test d-dmd d non-d-extension
+  (skip-unless (fboundp 'd-mode))
+  (unless (version<= "24.4" emacs-version)
+    (ert-skip "Skipped because CC Mode is broken on 24.3.
+See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
+  (flycheck-ert-with-temp-buffer
+    (insert "!invalid")
+    (d-mode)
+    (flycheck-ert-buffer-sync)
+    (flycheck-ert-should-errors
+     '(1 1 error "declaration expected, not `!`"
+         :checker d-dmd))))
 
 (flycheck-ert-def-checker-test dockerfile-hadolint dockerfile error
   (flycheck-ert-should-syntax-check

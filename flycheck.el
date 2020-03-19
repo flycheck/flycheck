@@ -1230,33 +1230,35 @@ Return the path of the directory"
     (push tempdir flycheck-temporaries)
     tempdir))
 
-(defun flycheck-temp-file-system (filename)
+(defun flycheck-temp-file-system (filename &optional suffix)
   "Create a temporary file named after FILENAME.
 
 If FILENAME is non-nil, this function creates a temporary
 directory with `flycheck-temp-dir-system', and creates a file
 with the same name as FILENAME in this directory.
 
-Otherwise this function creates a temporary file with
-`flycheck-temp-prefix' and a random suffix.  The path of the file
-is added to `flycheck-temporaries'.
+Otherwise this function creates a temporary file starting with
+`flycheck-temp-prefix'.  If present, SUFFIX is appended;
+otherwise, a random suffix is used.  The path of the file is
+added to `flycheck-temporaries'.
 
 Return the path of the file."
   (let ((tempfile (convert-standard-filename
                    (if filename
                        (expand-file-name (file-name-nondirectory filename)
                                          (flycheck-temp-dir-system))
-                     (make-temp-file flycheck-temp-prefix)))))
+                     (make-temp-file flycheck-temp-prefix nil suffix)))))
     (push tempfile flycheck-temporaries)
     tempfile))
 
-(defun flycheck-temp-file-inplace (filename)
+(defun flycheck-temp-file-inplace (filename &optional suffix)
   "Create an in-place copy of FILENAME.
 
 Prefix the file with `flycheck-temp-prefix' and add the path of
 the file to `flycheck-temporaries'.
 
-If FILENAME is nil, fall back to `flycheck-temp-file-system'.
+If FILENAME is nil, fall back to `flycheck-temp-file-system' with
+the specified SUFFIX.
 
 Return the path of the file."
   (if filename
@@ -1268,7 +1270,7 @@ Return the path of the file."
                                           (file-name-directory filename)))))
         (push tempfile flycheck-temporaries)
         tempfile)
-    (flycheck-temp-file-system filename)))
+    (flycheck-temp-file-system filename suffix)))
 
 (defun flycheck-temp-directory (checker)
   "Return the directory where CHECKER writes temporary files.
@@ -5006,6 +5008,8 @@ this error to produce the explanation to display."
   (pcase arg
     ((pred stringp) t)
     ((or `source `source-inplace `source-original) t)
+    (`(,(or `source `source-inplace) ,suffix)
+     (stringp suffix))
     ((or `temporary-directory `temporary-file-name) t)
     (`null-device t)
     (`(config-file ,option-name ,config-file-var)
@@ -5258,6 +5262,12 @@ STRING
      syntax checker needs other files from the source directory,
      such as include files in C.
 
+`(source SUFFIX)', `(source-inplace SUFFIX)'
+     Like `source' and `source-inplace', but ensure generated
+     file names end with the given suffix.  Use this when the
+     checker requires that file names on its command line have a
+     certain suffix (file extension).
+
 `source-original'
      Return the path of the actual file to check, or an empty
      string if the buffer has no file name.
@@ -5354,6 +5364,12 @@ are substituted within the body of cells!"
      (list (flycheck-save-buffer-to-temp #'flycheck-temp-file-system)))
     (`source-inplace
      (list (flycheck-save-buffer-to-temp #'flycheck-temp-file-inplace)))
+    (`(source ,suffix)
+     (list (flycheck-save-buffer-to-temp
+            (lambda (filename) (flycheck-temp-file-system filename suffix)))))
+    (`(source-inplace ,suffix)
+     (list (flycheck-save-buffer-to-temp
+            (lambda (filename) (flycheck-temp-file-inplace filename suffix)))))
     (`source-original (list (or (buffer-file-name) "")))
     (`temporary-directory (list (flycheck-temp-dir-system)))
     (`temporary-file-name
@@ -7503,8 +7519,9 @@ See URL `https://www.commonwl.org/v1.0/SchemaSalad.html'."
 (defun flycheck-d-base-directory ()
   "Get the relative base directory path for this module."
   (let* ((file-name (buffer-file-name))
-         (module-file (if (string= (file-name-nondirectory file-name)
-                                   "package.d")
+         (module-file (if (and file-name
+                               (string= (file-name-nondirectory file-name)
+                                        "package.d"))
                           (directory-file-name (file-name-directory file-name))
                         file-name)))
     (flycheck-module-root-directory
@@ -7536,7 +7553,7 @@ Requires DMD 2.066 or newer.  See URL `https://dlang.org/'."
             (eval (concat "-I" (flycheck-d-base-directory)))
             (option-list "-I" flycheck-dmd-include-path concat)
             (eval flycheck-dmd-args)
-            source)
+            (source ".d"))
   :error-patterns
   ((error line-start
           (file-name) "(" line "," column "): Error: " (message)
