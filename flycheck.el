@@ -7464,6 +7464,8 @@ A list of strings to pass to cuda, a la flycheck-clang"
 See URL `https://developer.nvidia.com/cuda-llvm-compiler'."
   :command ("nvcc"
             "-c" ;; Compile Only
+            "--output-file" "/dev/null" ;; avoid creating output .o
+            "--x=cu" ;; explicitly specify it's a CUDA language file
             (option "-std=" flycheck-cuda-language-standard concat)
             (option-list "-include" flycheck-cuda-includes)
             (option-list "-D" flycheck-cuda-definitions concat)
