@@ -6,6 +6,7 @@
   - The variable ``flycheck-current-errors`` now contains errors in the order in
     which they were returned by checkers.  In previous versions of Flycheck,
     this list was sorted by error position and severity. [GH-1749]
+  - Remove the ``coq`` checker. [GH-1697]
 
 32-cvs (frozen on May 3rd, 2020)
 ================================

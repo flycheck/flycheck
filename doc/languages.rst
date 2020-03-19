@@ -245,12 +245,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-coffeelintrc
 
-.. supported-language:: Coq
-
-   .. syntax-checker:: coq
-
-      Check and proof with the standard `Coq <https://coq.inria.fr/>`_ compiler.
-
 .. supported-language:: CSS
 
    .. syntax-checker:: css-csslint

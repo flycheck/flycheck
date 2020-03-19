@@ -51,18 +51,6 @@
 (require 'flycheck)
 (require 'flycheck-ert)
 
-;; Make a best effort to make Coq Mode available.
-;; If we run Emacs with the `-Q` flag (which we do in the CI), this prevents
-;; site-lisp directories to be added to `load-path'.  In addition, in the Docker
-;; images we use in the CI Emacs is installed under /opt/emacs and cannot pick
-;; up site-lisp directories under /usr/share/emacs.  This is why we add the
-;; site-lisp directories manually for coq.
-(mapc (lambda (dir)
-        (add-to-list 'load-path (expand-file-name "coq/" dir)))
-      '("/usr/share/emacs/site-lisp/"
-        "/usr/local/share/emacs/site-lisp/"))
-(autoload 'coq-mode "gallina")
-
 ;; Load ESS for R-mode (its autoloads are broken)
 (require 'ess-site nil 'noerror)
 
@@ -3257,29 +3245,6 @@ evaluating BODY."
      "language/coffee/error.coffee" 'coffee-mode
      '(4 nil warning "Throwing strings is forbidden; context:"
          :checker coffee-coffeelint))))
-
-(flycheck-ert-def-checker-test coq coq syntax-error
-  (skip-unless (shut-up (load "gallina" 'noerror 'nomessage)))
-  (flycheck-ert-should-syntax-check
-   "language/coq/syntax-error.v" 'coq-mode
-   '(6 12 error "\'end\' expected after [branches] (in [match_constr])."
-       :checker coq
-       :end-line 6
-       :end-column 14)))
-
-(flycheck-ert-def-checker-test coq coq error
-  (skip-unless (shut-up (load "gallina" 'noerror 'nomessage)))
-  (flycheck-ert-should-syntax-check
-   "language/coq/error.v" 'coq-mode
-   '(7 21 error "In environment
-evenb : nat -> bool
-n : nat
-n0 : nat
-n' : nat
-The term \"1\" has type \"nat\" while it is expected to have type \"bool\"."
-       :checker coq
-       :end-line 7
-       :end-column 22)))
 
 (flycheck-ert-def-checker-test css-csslint css nil
   :tags '(checkstyle-xml)
