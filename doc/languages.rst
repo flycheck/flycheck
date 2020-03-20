@@ -1521,9 +1521,15 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: TypeScript
 
+   .. syntax-checker:: javascript-eslint
+      :noindex:
+
+      See `javascript-eslint`.
+
    .. syntax-checker:: typescript-tslint
 
       Check syntax and style with `TSLint <https://github.com/palantir/tslint>`_.
+      This checker is deprecated.
 
       .. syntax-checker-config-file:: flycheck-typescript-tslint-config
 

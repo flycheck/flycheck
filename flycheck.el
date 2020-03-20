@@ -79,7 +79,7 @@
 (require 'rx)                    ; Regexp fanciness in `flycheck-define-checker'
 (require 'help-mode)             ; `define-button-type'
 (require 'find-func)             ; `find-function-regexp-alist'
-(require 'json)                  ; `flycheck-parse-tslint'
+(require 'json)                  ; `flycheck-parse-json'
 (require 'ansi-color)            ; `flycheck-parse-with-patterns-without-color'
 
 
