@@ -28,7 +28,8 @@ started (see :ref:`flycheck-syntax-checks`), the following happens:
    the error.
 3. Flycheck then filters the collected errors to keep only the relevant ones.
    For instance, errors directed at other files than the one you are editing are
-   discarded.
+   discarded.  The exact sementics of which errors are relevant is defined in
+   ``flycheck-relevant-error-p``.
 4. Relevant errors are highlighted by Flycheck in the buffer, according to user
    preference.  By default, each error adds a mark in the fringe at the line it
    occurs, and underlines the symbol at the position of the error using
