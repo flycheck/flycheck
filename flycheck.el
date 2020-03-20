@@ -6078,24 +6078,37 @@ use with `compilation-error-regexp-alist'."
   (seq-map #'flycheck-checker-pattern-to-error-regexp
            (flycheck-checker-get checker 'error-patterns)))
 
+(defun flycheck--substitute-shell-command-argument (arg checker)
+  "Substitute ARG for CHECKER.
+
+Like `flycheck-substitute-argument', except for source,
+source-inplace, and source-original."
+  (if (memq arg '(source source-inplace source-original))
+      (list buffer-file-name)
+    (flycheck-substitute-argument arg checker)))
+
+(defun flycheck--checker-substituted-shell-command-arguments (checker)
+  "Get the substituted arguments of a CHECKER to run as a shell command.
+
+Substitute each argument of CHECKER using
+`flycheck-substitute-shell-command-argument'."
+  (apply #'append
+         (seq-map (lambda (arg)
+                    (flycheck--substitute-shell-command-argument arg checker))
+                  (flycheck-checker-arguments checker))))
+
 (defun flycheck-checker-shell-command (checker)
   "Get a shell command for CHECKER.
 
 Perform substitution in the arguments of CHECKER, but with
-`flycheck-substitute-shell-argument'.
+`flycheck--substitute-shell-command-argument'.
 
 Return the command of CHECKER as single string, suitable for
 shell execution."
   ;; Note: Do NOT use `combine-and-quote-strings' here.  Despite it's name it
   ;; does not properly quote shell arguments, and actually breaks for special
   ;; characters.  See https://github.com/flycheck/flycheck/pull/522
-  (let* ((args (apply #'append
-                      (seq-map
-                       (lambda (arg)
-                         (if (memq arg '(source source-inplace source-original))
-                             (list (buffer-file-name))
-                           (flycheck-substitute-argument arg checker)))
-                       (flycheck-checker-arguments checker))))
+  (let* ((args (flycheck--checker-substituted-shell-command-arguments checker))
          (program
           (or (flycheck-find-checker-executable checker)
               (user-error "Cannot find `%s' using `flycheck-executable-find'"
