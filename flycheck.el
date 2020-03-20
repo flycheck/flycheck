@@ -3628,6 +3628,10 @@ otherwise."
         (flycheck-relevant-error-other-file-p err))
        message
        (not (string-empty-p message))
+       ;; Errors without line numbers are discarded.  If a linter
+       ;; reports relevant errors without line numbers, use
+       ;; `flycheck-fill-empty-line-numbers' as the checker's
+       ;; `:error-filter' to set them to line 0.
        (flycheck-error-line err)))))
 
 (defun flycheck-relevant-errors (errors)
