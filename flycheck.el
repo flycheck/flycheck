@@ -5606,14 +5606,21 @@ and rely on Emacs' own buffering and chunking."
       (process-send-region process (point-min) (point-max))))
   (process-send-eof process))
 
+(defun flycheck--wrap-command (prog args)
+  "Wrap PROG and ARGS using `flycheck-command-wrapper-function'."
+  ;; We don't call `flycheck-executable-find' on the output of the wrapper
+  ;; function, since it might not expect it (an executable-find function
+  ;; designed to find binaries in a sandbox could get confused if we asked it
+  ;; about the sandboxing program itself).
+  (funcall flycheck-command-wrapper-function (cons prog args)))
+
 (defun flycheck-start-command-checker (checker callback)
   "Start a command CHECKER with CALLBACK."
   (let (process)
     (condition-case err
         (let* ((program (flycheck-find-checker-executable checker))
                (args (flycheck-checker-substituted-arguments checker))
-               (command (funcall flycheck-command-wrapper-function
-                                 (cons program args)))
+               (command (flycheck--wrap-command program args))
                ;; Use pipes to receive output from the syntax checker.  They are
                ;; more efficient and more robust than PTYs, which Emacs uses by
                ;; default, and since we don't need any job control features, we
@@ -6089,11 +6096,20 @@ shell execution."
                              (list (buffer-file-name))
                            (flycheck-substitute-argument arg checker)))
                        (flycheck-checker-arguments checker))))
-         (command (mapconcat
-                   #'shell-quote-argument
-                   (funcall flycheck-command-wrapper-function
-                            (cons (flycheck-checker-executable checker) args))
-                   " ")))
+         (program
+          (or (flycheck-find-checker-executable checker)
+              (user-error "Cannot find `%s' using `flycheck-executable-find'"
+                          (flycheck-checker-executable checker))))
+         (wrapped (flycheck--wrap-command program args))
+         (abs-prog
+          ;; The executable path returned by `flycheck-command-wrapper-function'
+          ;; may not be absolute, so expand it here.  See URL
+          ;; `https://github.com/flycheck/flycheck/issues/1461'.
+          (or (executable-find (car wrapped))
+              (user-error "Cannot find `%s' using `executable-find'"
+                          (car wrapped))))
+         (command (mapconcat #'shell-quote-argument
+                             (cons abs-prog (cdr wrapped)) " ")))
     (if (flycheck-checker-get checker 'standard-input)
         ;; If the syntax checker expects the source from standard input add an
         ;; appropriate shell redirection
