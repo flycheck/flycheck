@@ -1557,7 +1557,11 @@ Use `flycheck-completing-read-function' to read input from the
 minibuffer with completion.
 
 Show PROMPT and read one of CANDIDATES, defaulting to DEFAULT.
-HISTORY is passed to `flycheck-completing-read-function'."
+HISTORY is passed to `flycheck-completing-read-function'.
+
+Note that `flycheck-completing-read-function' may return an empty
+string instead of nil, even when \"\" isn't among the candidates.
+See `completing-read' for more details."
   (funcall flycheck-completing-read-function
            prompt candidates nil 'require-match nil history default))
 
@@ -1605,7 +1609,8 @@ to the default levels."
          (levels-with-defaults (append '(info warning error) levels))
          (uniq-levels (seq-uniq levels-with-defaults))
          (level (flycheck-completing-read prompt uniq-levels nil)))
-    (and (stringp level) (intern level))))
+    (when (string-empty-p level) (setq level nil))
+    (and level (intern level))))
 
 
 ;;; Checker API
