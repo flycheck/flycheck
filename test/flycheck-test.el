@@ -2936,6 +2936,11 @@ evaluating BODY."
    '(4 nil warning "section title out of sequence: expected level 1, got level 2" :checker asciidoctor)
    '(6 nil error "unmatched macro: endif::[]" :checker asciidoctor)))
 
+(flycheck-ert-def-checker-test awk-gawk awk syntax-error
+  (flycheck-ert-should-syntax-check
+   "language/awk/syntax-error.awk" 'awk-mode
+   '(2 nil warning "x=|\n  ^ syntax error" :checker awk-gawk)))
+
 (flycheck-ert-def-checker-test bazel-buildifier bazel error
   (flycheck-ert-should-syntax-check
    "language/bazel/syntax-error.bazel" 'bazel-mode
