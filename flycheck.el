@@ -6589,6 +6589,10 @@ objects)."
 
 
 ;;; Convenience definition of command-syntax checkers
+
+;; This macro is autoloaded to prevent `with-eval-after-load' from expanding its
+;; arguments.  See https://github.com/flycheck/flycheck/issues/1398.
+;;;###autoload
 (defmacro flycheck-define-checker (symbol docstring &rest properties)
   "Define SYMBOL as command syntax checker with DOCSTRING and PROPERTIES.
 
