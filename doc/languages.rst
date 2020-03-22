@@ -62,6 +62,14 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _AsciiDoc: http://www.methods.co.nz/asciidoc
 
+.. supported-language:: Awk
+
+   .. syntax-checker:: awk-gawk
+
+      Check Awk with gawk_.
+
+      .. _gawk: https://www.gnu.org/software/gawk/manual
+
 .. supported-language:: Bazel
 
    .. syntax-checker:: bazel-buildifier
