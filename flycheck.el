@@ -1088,7 +1088,7 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
 ;; http://lists.gnu.org/archive/html/emacs-devel/2015-02/msg01271.html for why
 ;; we don't initialize the hook variables right away.  We append our own
 ;; functions, because a user likely expects that their functions come first,
-;; even if the added them before Flycheck was loaded.
+;; even if they added them before Flycheck was loaded.
 (dolist (hook (list #'flycheck-locate-config-file-by-path
                     #'flycheck-locate-config-file-ancestor-directories
                     #'flycheck-locate-config-file-home))
@@ -1197,6 +1197,10 @@ to a number and return it.  Otherwise return nil."
 (defun flycheck-string-list-p (obj)
   "Determine if OBJ is a list of strings."
   (and (listp obj) (seq-every-p #'stringp obj)))
+
+(defun flycheck-string-or-string-list-p (obj)
+  "Determine if OBJ is a string or a list of strings."
+  (or (stringp obj) (flycheck-string-list-p obj)))
 
 (defun flycheck-symbol-list-p (obj)
   "Determine if OBJ is a list of symbols."
@@ -5903,16 +5907,15 @@ CHECKERS is a single syntax checker or a list thereof."
   "Define SYMBOL as config file variable for CHECKER, with default FILE-NAME.
 
 SYMBOL is declared as customizable variable using `defcustom', to
-provide a configuration file for the given syntax CHECKER.
+provide configuration files for the given syntax CHECKER.
 CUSTOM-ARGS are forwarded to `defcustom'.
 
 FILE-NAME is the initial value of the new variable.  If omitted,
-the default value is nil.
+the default value is nil.  It can be either a string or a list of
+strings.
 
 Use this together with the `config-file' form in the `:command'
 argument to `flycheck-define-checker'."
-  ;; FIXME: We should allow multiple config files per checker as well as
-  ;; multiple checkers per config file
   (declare (indent 3))
   `(progn
      (defcustom ,symbol ,file-name
@@ -5927,27 +5930,33 @@ If no configuration file is found, or if this variable is set to
 nil, invoke the syntax checker without a configuration file.
 
 Use this variable as file-local variable if you need a specific
-configuration file a buffer." checker)
+configuration file for a buffer." checker)
        :type '(choice (const :tag "No configuration file" nil)
-                      (string :tag "File name or path"))
-       :safe #'flycheck-string-or-nil-p
+                      (string :tag "File name or path")
+                      (repeat :tag "File names or paths" string))
+       :safe #'flycheck-string-or-string-list-p
        :group 'flycheck-config-files
        ,@custom-args)
      (flycheck-register-config-file-var ',symbol ',checker)))
 
-(defun flycheck-locate-config-file (filename checker)
-  "Locate the configuration file FILENAME for CHECKER.
+(defun flycheck-locate-config-file (filenames checker)
+  "Locate the configuration file for CHECKER, based on FILENAMES.
 
-Locate the configuration file using
-`flycheck-locate-config-file-functions'.
+FILENAMES can be either a single file, or a list.  Each filename
+is passed to all `flycheck-locate-config-file-functions', until
+one returns non-nil.
 
 Return the absolute path of the configuration file, or nil if no
 configuration file was found."
-  (-when-let (filepath (run-hook-with-args-until-success
-                        'flycheck-locate-config-file-functions
-                        filename checker))
-    (when (file-exists-p filepath)
-      filepath)))
+  (when (stringp filenames)
+    (setq filenames (list filenames)))
+  (let ((config-file nil))
+    (while (and filenames (null config-file))
+      (setq config-file (run-hook-with-args-until-success
+                         'flycheck-locate-config-file-functions
+                         (pop filenames) checker)))
+    (when (and config-file (file-exists-p config-file))
+      config-file)))
 
 (defun flycheck-locate-config-file-by-path (filepath _checker)
   "Locate a configuration file by a FILEPATH.
@@ -10014,8 +10023,11 @@ See URL `https://docs.python.org/3.4/library/py_compile.html'."
   :modes python-mode
   :next-checkers ((warning . python-mypy)))
 
-(flycheck-def-config-file-var flycheck-python-mypy-ini python-mypy
-                              "mypy.ini")
+(define-obsolete-variable-alias 'flycheck-python-mypy-ini
+  'flycheck-python-mypy-config "32")
+
+(flycheck-def-config-file-var flycheck-python-mypy-config python-mypy
+                              '("mypy.ini" "setup.cfg"))
 
 (flycheck-def-option-var flycheck-python-mypy-cache-dir nil python-mypy
   "Directory used to write .mypy_cache directories."
@@ -10032,7 +10044,7 @@ See URL `https://docs.python.org/3.4/library/py_compile.html'."
 See URL `http://mypy-lang.org/'."
   :command ("mypy"
             "--show-column-numbers"
-            (config-file "--config-file" flycheck-python-mypy-ini)
+            (config-file "--config-file" flycheck-python-mypy-config)
             (option "--cache-dir" flycheck-python-mypy-cache-dir)
             source-original)
   :error-patterns

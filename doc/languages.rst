@@ -1029,7 +1029,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          This syntax checker requires mypy 0.580 or newer.
 
-      .. syntax-checker-config-file:: flycheck-python-mypy-ini
+      .. syntax-checker-config-file:: flycheck-python-mypy-config
 
       .. defcustom:: flycheck-python-mypy-cache-dir
 
