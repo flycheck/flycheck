@@ -1590,12 +1590,27 @@
                                            :checker 'ruby))
                    "20:7:error: Spam with eggs (ruby)")))
 
-(ert-deftest flycheck-error-format/no-column ()
+(ert-deftest flycheck-error-format-position ()
   :tags '(error-api)
-  (should (string= (flycheck-error-format
-                    (flycheck-error-new-at 14 nil 'warning "Oh no"
-                                           :checker 'python-flake8))
-                   "14:warning: Oh no (python-flake8)")))
+  (cl-flet ((fmt
+             (l c el ec)
+             (flycheck-error-format-position
+              (flycheck-error-new-at
+               l c 'error "err" :end-line el :end-column ec
+               :checker 'emacs-lisp))))
+    (should (string= (fmt 14 nil nil nil) "14"))
+    (should (string= (fmt 14 nil nil 1)   "14"))
+    (should (string= (fmt 14 nil 14  nil) "14"))
+    (should (string= (fmt 14 nil 15  nil) "14-15"))
+    (should (string= (fmt 14 nil 15  1)   "14-15"))
+    (should (string= (fmt 14 1   nil nil) "14:1"))
+    (should (string= (fmt 14 1   nil 2)   "14:1"))
+    (should (string= (fmt 14 1   nil 1)   "14:1-1"))
+    (should (string= (fmt 14 1   14  nil) "14:1"))
+    (should (string= (fmt 14 1   14  2)   "14:1"))
+    (should (string= (fmt 14 1   14  1)   "14:1-1"))
+    (should (string= (fmt 14 1   14  5)   "14:1-5"))
+    (should (string= (fmt 14 1   15  5)   "(14:1)-(15:5)"))))
 
 (ert-deftest flycheck-error-format/handles-line-breaks ()
   :tags '(error-api)
@@ -3111,7 +3126,9 @@ evaluating BODY."
   (flycheck-ert-should-syntax-check
    "language/coq/syntax-error.v" 'coq-mode
    '(6 12 error "\'end\' expected after [branches] (in [match_constr])."
-       :checker coq)))
+       :checker coq
+       :end-line 6
+       :end-column 14)))
 
 (flycheck-ert-def-checker-test coq coq error
   (skip-unless (shut-up (load "gallina" 'noerror 'nomessage)))
@@ -3122,7 +3139,10 @@ evenb : nat -> bool
 n : nat
 n0 : nat
 n' : nat
-The term \"1\" has type \"nat\" while it is expected to have type \"bool\"." :checker coq)))
+The term \"1\" has type \"nat\" while it is expected to have type \"bool\"."
+       :checker coq
+       :end-line 7
+       :end-column 22)))
 
 (flycheck-ert-def-checker-test css-csslint css nil
   :tags '(checkstyle-xml)
@@ -3759,9 +3779,11 @@ Why not:
     (flycheck-ert-should-syntax-check
      "language/javascript/warnings.js" flycheck-test-javascript-modes
      '(3 2 warning "Use the function form of 'use strict'." :id "strict"
-         :checker javascript-eslint)
+         :checker javascript-eslint
+         :end-line 5 :end-column 2)
      '(4 9 warning "'foo' is assigned a value but never used."
-         :id "no-unused-vars" :checker javascript-eslint))))
+         :id "no-unused-vars" :checker javascript-eslint
+         :end-line 4 :end-column 12))))
 
 (flycheck-ert-def-checker-test javascript-standard javascript error
   (let ((flycheck-checker 'javascript-standard)
@@ -3987,13 +4009,19 @@ Why not:
        "language/text/text.txt" '(text-mode markdown-mode)
        '(1 7 warning "Substitute 'damn' every time you're inclined to write 'very'; your editor will delete it and the writing will be just as it should be."
            :id "weasel_words.very"
-           :checker proselint)
+           :checker proselint
+           :end-line 1
+           :end-column 12)
        '(2 4 warning "Redundancy. Use 'associate' instead of 'associate together'."
            :id "redundancy.garner"
-           :checker proselint)
+           :checker proselint
+           :end-line 3
+           :end-column 1)
        '(3 5 warning "Gender bias. Use 'lawyer' instead of 'lady lawyer'."
            :id "sexism.misc"
-           :checker proselint)))))
+           :checker proselint
+           :end-line 3
+           :end-column 17)))))
 
 (flycheck-ert-def-checker-test processing processing syntax-error
   (flycheck-ert-should-syntax-check
@@ -4422,10 +4450,18 @@ The manifest path is relative to
     (flycheck-ert-cargo-clean "language/rust/flycheck-test/Cargo.toml")
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/warnings.rs" 'rust-mode
-     '(3 4 warning "function is never used: `main`" :checker rust-cargo :id "dead_code" :group 1)
-     '(3 4 info "`#[warn(dead_code)]` on by default" :checker rust-cargo :id "dead_code" :group 1)
-     '(4 9 warning "unused variable: `x`" :checker rust-cargo :id "unused_variables" :group 2)
-     '(4 9 info "consider prefixing with an underscore: `_x`" :checker rust-cargo :id "unused_variables" :group 2))))
+     '(3 4 warning "function is never used: `main`"
+         :checker rust-cargo :id "dead_code" :group 1
+         :end-line 3 :end-column 8)
+     '(3 4 info "`#[warn(dead_code)]` on by default"
+         :checker rust-cargo :id "dead_code" :group 1
+         :end-line 3 :end-column 8)
+     '(4 9 warning "unused variable: `x`"
+         :checker rust-cargo :id "unused_variables" :group 2
+         :end-line 4 :end-column 10)
+     '(4 9 info "consider prefixing with an underscore: `_x`"
+         :checker rust-cargo :id "unused_variables" :group 2
+         :end-line 4 :end-column 10))))
 
 (flycheck-ert-def-checker-test rust-cargo rust default-target
   (let ((flycheck-disabled-checkers '(rust))
@@ -4434,10 +4470,18 @@ The manifest path is relative to
     (flycheck-ert-cargo-clean "language/rust/flycheck-test/Cargo.toml")
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/warnings.rs" 'rust-mode
-     '(3 4 warning "function is never used: `main`" :checker rust-cargo :id "dead_code" :group 1)
-     '(3 4 info "`#[warn(dead_code)]` on by default" :checker rust-cargo :id "dead_code" :group 1)
-     '(4 9 warning "unused variable: `x`" :checker rust-cargo :id "unused_variables" :group 2)
-     '(4 9 info "consider prefixing with an underscore: `_x`" :checker rust-cargo :id "unused_variables" :group 2))))
+     '(3 4 warning "function is never used: `main`"
+         :checker rust-cargo :id "dead_code" :group 1
+         :end-line 3 :end-column 8)
+     '(3 4 info "`#[warn(dead_code)]` on by default"
+         :checker rust-cargo :id "dead_code" :group 1
+         :end-line 3 :end-column 8)
+     '(4 9 warning "unused variable: `x`"
+         :checker rust-cargo :id "unused_variables" :group 2
+         :end-line 4 :end-column 10)
+     '(4 9 info "consider prefixing with an underscore: `_x`"
+         :checker rust-cargo :id "unused_variables" :group 2
+         :end-line 4 :end-column 10))))
 
 (flycheck-ert-def-checker-test rust-cargo rust lib-main
   (let ((flycheck-disabled-checkers '(rust))
@@ -4448,7 +4492,8 @@ The manifest path is relative to
      `(3 12 error "cannot find value `zorglub` in this scope (not found in this scope)"
          :checker rust-cargo :id "E0425"
          :filename ,(flycheck-ert-resource-filename "language/rust/lib-main/src/lib.rs")
-         :group 1))))
+         :group 1
+         :end-line 3 :end-column 19))))
 
 (flycheck-ert-def-checker-test rust-cargo rust conventional-layout
   (let ((flycheck-disabled-checkers '(rust)))
@@ -4456,74 +4501,140 @@ The manifest path is relative to
       (flycheck-ert-cargo-clean "language/rust/cargo-targets/Cargo.toml")
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/src/lib.rs" 'rust-mode
-       '(3 4 warning "function is never used: `foo_lib`" :checker rust-cargo :id "dead_code" :group 1)
-       '(6 17 warning "unused variable: `foo_lib_test`" :checker rust-cargo  :id "unused_variables" :group 2)
-       '(6 17 info "`#[warn(unused_variables)]` on by default" :checker rust-cargo :id "unused_variables" :group 2)
-       '(6 17 info "consider prefixing with an underscore: `_foo_lib_test`" :checker rust-cargo :id "unused_variables" :group 2)))
+       '(3 4 warning "function is never used: `foo_lib`"
+           :checker rust-cargo :id "dead_code" :group 1
+           :end-line 3 :end-column 11)
+       '(6 17 warning "unused variable: `foo_lib_test`"
+           :checker rust-cargo  :id "unused_variables" :group 2
+           :end-line 6 :end-column 29)
+       '(6 17 info "`#[warn(unused_variables)]` on by default"
+           :checker rust-cargo :id "unused_variables" :group 2
+           :end-line 6 :end-column 29)
+       '(6 17 info "consider prefixing with an underscore: `_foo_lib_test`"
+           :checker rust-cargo :id "unused_variables" :group 2
+           :end-line 6 :end-column 29)))
 
     (let ((flycheck-rust-crate-type "lib"))
       (flycheck-ert-cargo-clean "language/rust/cargo-targets/Cargo.toml")
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/src/a.rs" 'rust-mode
-       '(1 4 warning "function is never used: `foo_a`" :checker rust-cargo :id "dead_code" :group 1)
-       '(1 4 info "`#[warn(dead_code)]` on by default" :checker rust-cargo :id "dead_code" :group 1)
-       '(4 17 warning "unused variable: `foo_a_test`" :checker rust-cargo :id "unused_variables" :group 2)
-       '(4 17 info "consider prefixing with an underscore: `_foo_a_test`" :checker rust-cargo :id "unused_variables" :group 2)))
+       '(1 4 warning "function is never used: `foo_a`"
+           :checker rust-cargo :id "dead_code" :group 1
+           :end-line 1 :end-column 9)
+       '(1 4 info "`#[warn(dead_code)]` on by default"
+           :checker rust-cargo :id "dead_code" :group 1
+           :end-line 1 :end-column 9)
+       '(4 17 warning "unused variable: `foo_a_test`"
+           :checker rust-cargo :id "unused_variables" :group 2
+           :end-line 4 :end-column 27)
+       '(4 17 info "consider prefixing with an underscore: `_foo_a_test`"
+           :checker rust-cargo :id "unused_variables" :group 2
+           :end-line 4 :end-column 27)))
 
     (let ((flycheck-rust-crate-type "bin")
           (flycheck-rust-binary-name "cargo-targets"))
       (flycheck-ert-cargo-clean "language/rust/cargo-targets/Cargo.toml")
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/src/main.rs" 'rust-mode
-       '(1 17 warning "unused variable: `foo_main`" :checker rust-cargo :id "unused_variables" :group 1)
-       '(1 17 info "`#[warn(unused_variables)]` on by default" :checker rust-cargo :id "unused_variables" :group 1)
-       '(1 17 info "consider prefixing with an underscore: `_foo_main`" :checker rust-cargo :id "unused_variables" :group 1)
-       '(4 17 warning "unused variable: `foo_main_test`" :checker rust-cargo :id "unused_variables" :group 2)
-       '(4 17 info "consider prefixing with an underscore: `_foo_main_test`" :checker rust-cargo :id "unused_variables" :group 2)))
+       '(1 17 warning "unused variable: `foo_main`"
+           :checker rust-cargo :id "unused_variables" :group 1
+           :end-line 1 :end-column 25)
+       '(1 17 info "`#[warn(unused_variables)]` on by default"
+           :checker rust-cargo :id "unused_variables" :group 1
+           :end-line 1 :end-column 25)
+       '(1 17 info "consider prefixing with an underscore: `_foo_main`"
+           :checker rust-cargo :id "unused_variables" :group 1
+           :end-line 1 :end-column 25)
+       '(4 17 warning "unused variable: `foo_main_test`"
+           :checker rust-cargo :id "unused_variables" :group 2
+           :end-line 4 :end-column 30)
+       '(4 17 info "consider prefixing with an underscore: `_foo_main_test`"
+           :checker rust-cargo :id "unused_variables" :group 2
+           :end-line 4 :end-column 30)))
 
     (let ((flycheck-rust-crate-type "bin")
           (flycheck-rust-binary-name "a"))
       (flycheck-ert-cargo-clean "language/rust/cargo-targets/Cargo.toml")
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/src/bin/a.rs" 'rust-mode
-       '(1 17 warning "unused variable: `foo_bin_a`" :checker rust-cargo :id "unused_variables" :group 1)
-       '(1 17 info "`#[warn(unused_variables)]` on by default" :checker rust-cargo :id "unused_variables" :group 1)
-       '(1 17 info "consider prefixing with an underscore: `_foo_bin_a`" :checker rust-cargo :id "unused_variables" :group 1)
-       '(4 17 warning "unused variable: `foo_bin_a_test`" :checker rust-cargo :id "unused_variables" :group 2)
-       '(4 17 info "consider prefixing with an underscore: `_foo_bin_a_test`" :checker rust-cargo :id "unused_variables" :group 2)))
+       '(1 17 warning "unused variable: `foo_bin_a`"
+           :checker rust-cargo :id "unused_variables" :group 1
+           :end-line 1 :end-column 26)
+       '(1 17 info "`#[warn(unused_variables)]` on by default"
+           :checker rust-cargo :id "unused_variables" :group 1
+           :end-line 1 :end-column 26)
+       '(1 17 info "consider prefixing with an underscore: `_foo_bin_a`"
+           :checker rust-cargo :id "unused_variables" :group 1
+           :end-line 1 :end-column 26)
+       '(4 17 warning "unused variable: `foo_bin_a_test`"
+           :checker rust-cargo :id "unused_variables" :group 2
+           :end-line 4 :end-column 31)
+       '(4 17 info "consider prefixing with an underscore: `_foo_bin_a_test`"
+           :checker rust-cargo :id "unused_variables" :group 2
+           :end-line 4 :end-column 31)))
 
     (let ((flycheck-rust-crate-type "bench")
           (flycheck-rust-binary-name "a"))
       (flycheck-ert-cargo-clean "language/rust/cargo-targets/Cargo.toml")
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/benches/a.rs" 'rust-mode
-       '(1 17 warning "unused variable: `foo_bench_a`" :checker rust-cargo :id "unused_variables" :group 1)
-       '(1 17 info "`#[warn(unused_variables)]` on by default" :checker rust-cargo :id "unused_variables" :group 1)
-       '(1 17 info "consider prefixing with an underscore: `_foo_bench_a`" :checker rust-cargo :id "unused_variables" :group 1)
-       '(4 17 warning "unused variable: `foo_bench_a_test`" :checker rust-cargo :id "unused_variables" :group 2)
-       '(4 17 info "consider prefixing with an underscore: `_foo_bench_a_test`" :checker rust-cargo :id "unused_variables" :group 2)))
+       '(1 17 warning "unused variable: `foo_bench_a`"
+           :checker rust-cargo :id "unused_variables" :group 1
+           :end-line 1 :end-column 28)
+       '(1 17 info "`#[warn(unused_variables)]` on by default"
+           :checker rust-cargo :id "unused_variables" :group 1
+           :end-line 1 :end-column 28)
+       '(1 17 info "consider prefixing with an underscore: `_foo_bench_a`"
+           :checker rust-cargo :id "unused_variables" :group 1
+           :end-line 1 :end-column 28)
+       '(4 17 warning "unused variable: `foo_bench_a_test`"
+           :checker rust-cargo :id "unused_variables" :group 2
+           :end-line 4 :end-column 33)
+       '(4 17 info "consider prefixing with an underscore: `_foo_bench_a_test`"
+           :checker rust-cargo :id "unused_variables" :group 2
+           :end-line 4 :end-column 33)))
 
     (let ((flycheck-rust-crate-type "test")
           (flycheck-rust-binary-name "a"))
       (flycheck-ert-cargo-clean "language/rust/cargo-targets/Cargo.toml")
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/tests/a.rs" 'rust-mode
-       '(2 16 warning "unused variable: `foo_test_a_test`" :checker rust-cargo :id "unused_variables" :group 1)
-       '(2 16 info "`#[warn(unused_variables)]` on by default" :checker rust-cargo :id "unused_variables" :group 1)
-       '(2 16 info "consider prefixing with an underscore: `_foo_test_a_test`" :checker rust-cargo :id "unused_variables" :group 1)
-       '(4 4 warning "function is never used: `foo_test_a`" :checker rust-cargo :id "dead_code" :group 2)
-       '(4 4 info "`#[warn(dead_code)]` on by default" :checker rust-cargo :id "dead_code" :group 2)))
+       '(2 16 warning "unused variable: `foo_test_a_test`"
+           :checker rust-cargo :id "unused_variables" :group 1
+           :end-line 2 :end-column 31)
+       '(2 16 info "`#[warn(unused_variables)]` on by default"
+           :checker rust-cargo :id "unused_variables" :group 1
+           :end-line 2 :end-column 31)
+       '(2 16 info "consider prefixing with an underscore: `_foo_test_a_test`"
+           :checker rust-cargo :id "unused_variables" :group 1
+           :end-line 2 :end-column 31)
+       '(4 4 warning "function is never used: `foo_test_a`"
+           :checker rust-cargo :id "dead_code" :group 2
+           :end-line 4 :end-column 14)
+       '(4 4 info "`#[warn(dead_code)]` on by default"
+           :checker rust-cargo :id "dead_code" :group 2
+           :end-line 4 :end-column 14)))
 
     (let ((flycheck-rust-crate-type "example")
           (flycheck-rust-binary-name "a"))
       (flycheck-ert-cargo-clean "language/rust/cargo-targets/Cargo.toml")
       (flycheck-ert-should-syntax-check
        "language/rust/cargo-targets/examples/a.rs" 'rust-mode
-       '(1 17 warning "unused variable: `foo_ex_a`" :checker rust-cargo :id "unused_variables" :group 1)
-       '(1 17 info "`#[warn(unused_variables)]` on by default" :checker rust-cargo :id "unused_variables" :group 1)
-       '(1 17 info "consider prefixing with an underscore: `_foo_ex_a`" :checker rust-cargo :id "unused_variables" :group 1)
-       '(4 17 warning "unused variable: `foo_ex_a_test`" :checker rust-cargo :id "unused_variables" :group 2)
-       '(4 17 info "consider prefixing with an underscore: `_foo_ex_a_test`" :checker rust-cargo :id "unused_variables" :group 2)))))
+       '(1 17 warning "unused variable: `foo_ex_a`"
+           :checker rust-cargo :id "unused_variables" :group 1
+           :end-line 1 :end-column 25)
+       '(1 17 info "`#[warn(unused_variables)]` on by default"
+           :checker rust-cargo :id "unused_variables" :group 1
+           :end-line 1 :end-column 25)
+       '(1 17 info "consider prefixing with an underscore: `_foo_ex_a`"
+           :checker rust-cargo :id "unused_variables" :group 1
+           :end-line 1 :end-column 25)
+       '(4 17 warning "unused variable: `foo_ex_a_test`"
+           :checker rust-cargo :id "unused_variables" :group 2
+           :end-line 4 :end-column 30)
+       '(4 17 info "consider prefixing with an underscore: `_foo_ex_a_test`"
+           :checker rust-cargo :id "unused_variables" :group 2
+           :end-line 4 :end-column 30)))))
 
 (flycheck-ert-def-checker-test rust-cargo rust workspace-subcrate
   (let ((flycheck-disabled-checkers '(rust))
@@ -4532,9 +4643,15 @@ The manifest path is relative to
     (flycheck-ert-cargo-clean "language/rust/workspace/crate1/Cargo.toml")
     (flycheck-ert-should-syntax-check
      "language/rust/workspace/crate1/src/lib.rs" 'rust-mode
-     '(2 7 warning "unused variable: `a`" :checker rust-cargo :id "unused_variables" :group 1)
-     '(2 7 info "`#[warn(unused_variables)]` on by default" :checker rust-cargo :id "unused_variables" :group 1)
-     '(2 7 info "consider prefixing with an underscore: `_a`" :checker rust-cargo :id "unused_variables" :group 1))))
+     '(2 7 warning "unused variable: `a`"
+         :checker rust-cargo :id "unused_variables" :group 1
+         :end-line 2 :end-column 8)
+     '(2 7 info "`#[warn(unused_variables)]` on by default"
+         :checker rust-cargo :id "unused_variables" :group 1
+         :end-line 2 :end-column 8)
+     '(2 7 info "consider prefixing with an underscore: `_a`"
+         :checker rust-cargo :id "unused_variables" :group 1
+         :end-line 2 :end-column 8))))
 
 (flycheck-ert-def-checker-test rust-cargo rust dev-dependencies
   (let ((flycheck-disabled-checkers '(rust))
@@ -4543,54 +4660,86 @@ The manifest path is relative to
     (flycheck-ert-cargo-clean "language/rust/dev-deps/Cargo.toml")
     (flycheck-ert-should-syntax-check
      "language/rust/dev-deps/src/lib.rs" 'rust-mode
-     '(2 1 warning "unused `#[macro_use]` import" :checker rust-cargo :id "unused_imports" :group 1)
-     '(2 1 info "`#[warn(unused_imports)]` on by default" :checker rust-cargo :id "unused_imports" :group 1)
-     '(8 9 warning "unused variable: `foo`" :checker rust-cargo :id "unused_variables" :group 2)
-     '(8 9 info "`#[warn(unused_variables)]` on by default" :checker rust-cargo :id "unused_variables" :group 2)
-     '(8 9 info "consider prefixing with an underscore: `_foo`" :checker rust-cargo :id "unused_variables" :group 2))))
+     '(2 1 warning "unused `#[macro_use]` import"
+         :checker rust-cargo :id "unused_imports" :group 1
+         :end-line 2 :end-column 13)
+     '(2 1 info "`#[warn(unused_imports)]` on by default"
+         :checker rust-cargo :id "unused_imports" :group 1
+         :end-line 2 :end-column 13)
+     '(8 9 warning "unused variable: `foo`"
+         :checker rust-cargo :id "unused_variables" :group 2
+         :end-line 8 :end-column 12)
+     '(8 9 info "`#[warn(unused_variables)]` on by default"
+         :checker rust-cargo :id "unused_variables" :group 2
+         :end-line 8 :end-column 12)
+     '(8 9 info "consider prefixing with an underscore: `_foo`"
+         :checker rust-cargo :id "unused_variables" :group 2
+         :end-line 8 :end-column 12))))
 
 (flycheck-ert-def-checker-test rust rust syntax-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/syntax-error.rs" 'rust-mode
-     '(4 5 error "cannot find value `bla` in this scope (not found in this scope)" :checker rust :id "E0425" :group 1))))
+     '(4 5 error "cannot find value `bla` in this scope (not found in this scope)"
+         :checker rust :id "E0425" :group 1 :end-line 4 :end-column 8))))
 
 (flycheck-ert-def-checker-test rust rust type-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/multiline-error.rs" 'rust-mode
-     '(7 9 error "mismatched types (expected `u8`, found `i8`)" :checker rust :id "E0308" :group 1)
-     '(7 9 info "you can convert an `i8` to `u8` and panic if the converted value wouldn't fit: `i.try_into().unwrap()`" :checker rust :id "E0308" :group 1))))
+     '(7 9 error "mismatched types (expected `u8`, found `i8`)"
+         :checker rust :id "E0308" :group 1
+         :end-line 7 :end-column 10)
+     '(7 9 info "you can convert an `i8` to `u8` and panic if the converted value wouldn't fit: `i.try_into().unwrap()`"
+         :checker rust :id "E0308" :group 1
+         :end-line 7 :end-column 10))))
 
 (flycheck-ert-def-checker-test rust rust warning
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/warnings.rs" 'rust-mode
-     '(4 9 warning "unused variable: `x`" :checker rust :id "unused_variables" :group 1)
-     '(4 9 info "`#[warn(unused_variables)]` on by default" :checker rust :id "unused_variables" :group 1)
-     '(4 9 info "consider prefixing with an underscore: `_x`" :checker rust :id "unused_variables" :group 1))))
+     '(4 9 warning "unused variable: `x`"
+         :checker rust :id "unused_variables" :group 1
+         :end-line 4 :end-column 10)
+     '(4 9 info "`#[warn(unused_variables)]` on by default"
+         :checker rust :id "unused_variables" :group 1
+         :end-line 4 :end-column 10)
+     '(4 9 info "consider prefixing with an underscore: `_x`"
+         :checker rust :id "unused_variables" :group 1
+         :end-line 4 :end-column 10))))
 
 (flycheck-ert-def-checker-test rust rust note-and-help
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/note-and-help.rs" 'rust-mode
-     '(10 9 info "move occurs because `_x` has type `NonPOD`, which does not implement the `Copy` trait" :checker rust :id "E0382" :group 1)
-     '(11 14 info "value moved here" :checker rust :id "E0382" :group 1)
-     '(12 14 error "use of moved value: `_x` (value used here after move)" :checker rust :id "E0382" :group 1))))
+     '(10 9 info "move occurs because `_x` has type `NonPOD`, which does not implement the `Copy` trait"
+          :checker rust :id "E0382" :group 1
+          :end-line 10 :end-column 11)
+     '(11 14 info "value moved here"
+          :checker rust :id "E0382" :group 1
+          :end-line 11 :end-column 16)
+     '(12 14 error "use of moved value: `_x` (value used here after move)"
+          :checker rust :id "E0382" :group 1
+          :end-line 12 :end-column 16))))
 
 (flycheck-ert-def-checker-test rust rust crate-root-not-set
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/importing.rs" 'rust-mode
-     '(1 5 error "failed to resolve: there are too many initial `super`s. (there are too many initial `super`s.)" :checker rust :id "E0433" :group 2)
-     '(4 24 error "failed to resolve: use of undeclared type or module `imported` (use of undeclared type or module `imported`)" :checker rust :id "E0433" :group 3)
-     )))
+     '(1 5 error "failed to resolve: there are too many initial `super`s. (there are too many initial `super`s.)"
+         :checker rust :id "E0433" :group 2
+         :end-line 1 :end-column 10)
+     '(4 24 error "failed to resolve: use of undeclared type or module `imported` (use of undeclared type or module `imported`)"
+         :checker rust :id "E0433" :group 3
+         :end-line 4 :end-column 32))))
 
 (flycheck-ert-def-checker-test rust rust macro-error
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/macro-error.rs" 'rust-mode
-     '(2 13 error "1 positional argument in format string, but no arguments were given" :checker rust :group 1))))
+     '(2 13 error "1 positional argument in format string, but no arguments were given"
+         :checker rust :group 1
+         :end-line 2 :end-column 15))))
 
 (flycheck-ert-def-checker-test sass sass nil
   (let ((flycheck-disabled-checkers '(sass/scss-sass-lint)))
@@ -4803,11 +4952,14 @@ The manifest path is relative to
     (flycheck-ert-should-syntax-check
      "language/typescript/sample.ts" 'typescript-mode
      '(2 23 warning "Module 'chai' is not listed as dependency in package.json"
-         :checker typescript-tslint :id "no-implicit-dependencies")
+         :checker typescript-tslint :id "no-implicit-dependencies"
+         :end-line 2 :end-column 29)
      '(5 3 warning "Forbidden 'var' keyword, use 'let' or 'const' instead"
-         :checker typescript-tslint :id "no-var-keyword")
+         :checker typescript-tslint :id "no-var-keyword"
+         :end-line 5 :end-column 6)
      '(6 15 warning "Missing semicolon"
-         :checker typescript-tslint :id "semicolon"))))
+         :checker typescript-tslint :id "semicolon"
+         :end-line 6 :end-column 15))))
 
 (flycheck-ert-def-checker-test verilog-verilator verilog error
   (flycheck-ert-should-syntax-check
@@ -4871,12 +5023,13 @@ The manifest path is relative to
 (flycheck-ert-def-checker-test jsonnet jsonnet nil
   (flycheck-ert-should-syntax-check
    "language/jsonnet/static_error.jsonnet" 'jsonnet-mode
-   '(22 1 "Not a unary operator: =" :checker jsonnet)))
+   '(1 23 "Not a unary operator: =" :checker jsonnet)))
 
 (flycheck-ert-def-checker-test jsonnet jsonnet nil
   (flycheck-ert-should-syntax-check
    "language/jsonnet/runtime_error.jsonnet" 'jsonnet-mode
-   '(8 3 "Field does not exist: flat" :checker jsonnet)))
+   '(2 6 "Field does not exist: flat" :checker jsonnet
+       :end-line 2 :end-column 14)))
 
 (flycheck-ert-initialize flycheck-test-resources-directory)
 
