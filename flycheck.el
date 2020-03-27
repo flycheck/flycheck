@@ -5986,7 +5986,7 @@ Return a list representing PATTERN, suitable as element in
   (let* ((regexp (car pattern))
          (level (cdr pattern))
          (level-no (flycheck-error-level-compilation-level level)))
-    (list regexp 1 2 3 level-no)))
+    `(,regexp 1 (2 . 6) (3 . 7) ,level-no)))
 
 (defun flycheck-checker-compilation-error-regexp-alist (checker)
   "Convert error patterns of CHECKER for use with compile.el.
