@@ -3529,20 +3529,33 @@ non-whitespace character of the error line, if ERR has no error column."
             (when id
               (format " [%s]" id)))))
 
+(defun flycheck-error-format-position (err)
+  "Format the position of ERR as a human-readable string."
+  (let ((line (flycheck-error-line err))
+        (column (flycheck-error-column err))
+        (end-line (flycheck-error-end-line err))
+        (end-column (flycheck-error-end-column err)))
+    (if (and line column)
+        (if (or (null end-line) (equal line end-line))
+            (if (or (null end-column) (equal column (1- end-column)))
+                (format "%d:%d" line column)
+              (format "%d:%d-%d" line column end-column))
+          (format "(%d:%d)-(%d:%d)" line column end-line end-column))
+      (if (or (null end-line) (equal line end-line))
+          (format "%d" line)
+        (format "%d-%d" line end-line)))))
+
 (defun flycheck-error-format (err &optional with-file-name)
   "Format ERR as human-readable string, optionally WITH-FILE-NAME.
 
 Return a string that represents the given ERR.  If WITH-FILE-NAME
 is given and non-nil, include the file-name as well, otherwise
 omit it."
-  (let* ((line (flycheck-error-line err))
-         (column (flycheck-error-column err))
-         (level (symbol-name (flycheck-error-level err)))
+  (let* ((level (symbol-name (flycheck-error-level err)))
          (checker (symbol-name (flycheck-error-checker err)))
          (format `(,@(when with-file-name
                        (list (flycheck-error-filename err) ":"))
-                   ,(number-to-string line) ":"
-                   ,@(when column (list (number-to-string column) ":"))
+                   ,(flycheck-error-format-position err) ":"
                    ,level ": "
                    ,(flycheck-error-format-message-and-id err)
                    " (" ,checker ")")))

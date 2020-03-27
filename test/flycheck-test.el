@@ -1590,12 +1590,27 @@
                                            :checker 'ruby))
                    "20:7:error: Spam with eggs (ruby)")))
 
-(ert-deftest flycheck-error-format/no-column ()
+(ert-deftest flycheck-error-format-position ()
   :tags '(error-api)
-  (should (string= (flycheck-error-format
-                    (flycheck-error-new-at 14 nil 'warning "Oh no"
-                                           :checker 'python-flake8))
-                   "14:warning: Oh no (python-flake8)")))
+  (cl-flet ((fmt
+             (l c el ec)
+             (flycheck-error-format-position
+              (flycheck-error-new-at
+               l c 'error "err" :end-line el :end-column ec
+               :checker 'emacs-lisp))))
+    (should (string= (fmt 14 nil nil nil) "14"))
+    (should (string= (fmt 14 nil nil 1)   "14"))
+    (should (string= (fmt 14 nil 14  nil) "14"))
+    (should (string= (fmt 14 nil 15  nil) "14-15"))
+    (should (string= (fmt 14 nil 15  1)   "14-15"))
+    (should (string= (fmt 14 1   nil nil) "14:1"))
+    (should (string= (fmt 14 1   nil 2)   "14:1"))
+    (should (string= (fmt 14 1   nil 1)   "14:1-1"))
+    (should (string= (fmt 14 1   14  nil) "14:1"))
+    (should (string= (fmt 14 1   14  2)   "14:1"))
+    (should (string= (fmt 14 1   14  1)   "14:1-1"))
+    (should (string= (fmt 14 1   14  5)   "14:1-5"))
+    (should (string= (fmt 14 1   15  5)   "(14:1)-(15:5)"))))
 
 (ert-deftest flycheck-error-format/handles-line-breaks ()
   :tags '(error-api)
