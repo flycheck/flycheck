@@ -2312,12 +2312,19 @@ When WITH-SELECT is non-nil, add a button to select this checker."
         (princ "\n"))))
   (princ "\n"))
 
+(defun flycheck--get-next-checker-symbol (next)
+  "Get the checker symmbol of NEXT checker.
+
+NEXT should be either a cons (NEXT-CHECKER . LEVEL) or a
+symbol."
+  (if (consp next) (cdr next) next))
+
 (defun flycheck-get-next-checkers (checker)
   "Return the immediate next checkers of CHECKER.
 
 This is a list of checker symbols.  The error levels of the
 `:next-checker' property are ignored."
-  (mapcar (lambda (c) (if (consp c) (cdr c) c))
+  (mapcar #'flycheck--get-next-checker-symbol
           (flycheck-checker-get checker 'next-checkers)))
 
 (defun flycheck-all-next-checkers (checker)
@@ -2529,6 +2536,23 @@ modified, or nil otherwise."
 
 
 ;;; Extending generic checkers
+(defun flycheck-remove-next-checker (checker next)
+  "After CHECKER remove a NEXT checker.
+
+CHECKER is a syntax checker symbol, from which to remove NEXT
+checker.
+
+NEXT is a cons or a symbol, as documented in
+`flycheck-add-next-checker'."
+  (unless (flycheck-valid-checker-p checker)
+    (error "%s is not a valid syntax checker" checker))
+  (let* ((next-symbol (flycheck--get-next-checker-symbol next)))
+    (setf
+     (flycheck-checker-get checker 'next-checkers)
+     (seq-remove
+      (lambda (next) (eq (flycheck--get-next-checker-symbol next) next-symbol))
+      (flycheck-checker-get checker 'next-checkers)))))
+
 (defun flycheck-add-next-checker (checker next &optional append)
   "After CHECKER add a NEXT checker.
 
@@ -2549,10 +2573,11 @@ APPEND is non-nil."
   (unless (flycheck-valid-checker-p checker)
     (error "%s is not a valid syntax checker" checker))
   (flycheck-validate-next-checker next 'strict)
-  (if append
-      (setf (flycheck-checker-get checker 'next-checkers)
-            (append (flycheck-checker-get checker 'next-checkers) (list next)))
-    (push next (flycheck-checker-get checker 'next-checkers))))
+  (flycheck-remove-next-checker checker next)
+  (let ((next-checkers (flycheck-checker-get checker 'next-checkers)))
+    (setf (flycheck-checker-get checker 'next-checkers)
+          (if append (append next-checkers (list next))
+            (cons next next-checkers)))))
 
 (defun flycheck-add-mode (checker mode)
   "To CHECKER add a new major MODE.

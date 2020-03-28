@@ -875,6 +875,27 @@
 
 
 ;;; Checker extensions
+(ert-deftest flycheck-remove-next-checker/no-valid-checker ()
+  :tags '(extending)
+  (let ((err-data (should-error (flycheck-remove-next-checker 'foo 'emacs-lisp))))
+    (should (string= (cadr err-data) "foo is not a valid syntax checker"))))
+
+(ert-deftest flycheck-remove-next-checker/plain ()
+  :tags '(extending)
+  (let ((next-checkers (flycheck-checker-get 'emacs-lisp 'next-checkers)))
+    (flycheck-remove-next-checker 'emacs-lisp 'emacs-lisp-checkdoc)
+    (unwind-protect
+        (should (equal (flycheck-checker-get 'emacs-lisp 'next-checkers) nil))
+      (put 'emacs-lisp 'flycheck-next-checkers next-checkers))))
+
+(ert-deftest flycheck-remove-next-checker/level ()
+  :tags '(extending)
+  (let ((next-checkers (flycheck-checker-get 'sh-zsh 'next-checkers)))
+    (flycheck-remove-next-checker 'sh-zsh 'sh-shellcheck)
+    (unwind-protect
+        (should (equal (flycheck-checker-get 'sh-zsh 'next-checkers) nil))
+      (put 'sh-zsh 'flycheck-next-checkers next-checkers))))
+
 (ert-deftest flycheck-add-next-checker/no-valid-checker ()
   :tags '(extending)
   (let ((err-data (should-error (flycheck-add-next-checker 'foo 'emacs-lisp))))
@@ -888,6 +909,18 @@
   (should-error (flycheck-add-next-checker 'emacs-lisp '(warnings-only . bar)))
   (should-error (flycheck-add-next-checker 'emacs-lisp '(foo . emacs-lisp))))
 
+(ert-deftest flycheck-add-next-checker/redundant ()
+  :tags '(extending)
+  (let ((next-checkers (flycheck-checker-get 'emacs-lisp 'next-checkers)))
+    (flycheck-add-next-checker 'emacs-lisp 'texinfo)
+    (flycheck-add-next-checker 'emacs-lisp 'texinfo)
+    (flycheck-add-next-checker 'emacs-lisp '(t . texinfo))
+    (flycheck-add-next-checker 'emacs-lisp '(warning . texinfo))
+    (unwind-protect
+        (should (equal (flycheck-checker-get 'emacs-lisp 'next-checkers)
+                       (cons '(warning . texinfo) next-checkers)))
+      (put 'emacs-lisp 'flycheck-next-checkers next-checkers))))
+
 (ert-deftest flycheck-add-next-checker/prepend ()
   :tags '(extending)
   (let ((next-checkers (flycheck-checker-get 'emacs-lisp 'next-checkers)))
@@ -895,9 +928,7 @@
     (unwind-protect
         (should (equal (flycheck-checker-get 'emacs-lisp 'next-checkers)
                        (cons 'texinfo next-checkers)))
-      (put 'emacs-lisp 'flycheck-next-checkers next-checkers)
-      (should (equal (flycheck-checker-get 'emacs-lisp 'next-checkers)
-                     next-checkers)))))
+      (put 'emacs-lisp 'flycheck-next-checkers next-checkers))))
 
 (ert-deftest flycheck-add-next-checker/append ()
   :tags '(extending)
@@ -906,9 +937,7 @@
     (unwind-protect
         (should (equal (flycheck-checker-get 'emacs-lisp 'next-checkers)
                        (append next-checkers '(texinfo))))
-      (put 'emacs-lisp 'flycheck-next-checkers next-checkers)
-      (should (equal (flycheck-checker-get 'emacs-lisp 'next-checkers)
-                     next-checkers)))))
+      (put 'emacs-lisp 'flycheck-next-checkers next-checkers))))
 
 (ert-deftest flycheck-add-mode/no-valid-checker ()
   :tags '(extending)
