@@ -29,6 +29,28 @@ reject any pull request for being out of scope.
 * Likewise do not deviate from Emacs’ default behaviour too much.  Stick to
   Emacs’ standard for key bindings, interactive functions, etc.
 
+Backward compatibility
+======================
+
+Checkers and languages evolve over time, and their error format often change as
+a consequence.  It is not a goal of Flycheck to work with every version of every
+checker ever supported.  However, the latest Flycheck version *should always
+work* with the contemporary version of a checker.
+
+As a rule of thumb, if maintaining backward compatibility is trivial (i.e., does
+not incur code maintenance costs), then we should do it.  For example, a
+slightly more complex parsing regexp is OK, but doing version detection to add a
+flag would most likely be too much.
+
+Keep in mind that users may not have the choice of updating to the latest
+version of a checker (e.g., ``gcc`` on Debian-based distributions).  On the
+other hand, npm or Python packages are usually trivial to update.  Making an
+extra effort to maintain backward compatibility for these hard-to-update
+checkers is reasonable.
+
+The integration tests that are run on our CI should always reflect the latest
+supported version.
+
 Style
 =====
 
