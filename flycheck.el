@@ -4207,6 +4207,16 @@ If LEVEL is omitted if the current buffer has any errors at all."
 
 
 ;;; Error overlays in the current buffer
+(defvar-local flycheck--last-overlay-index 0
+  "Last index given to a Flycheck overlay.
+
+These indices are used to preserve error order (Emacs doesn't
+preserve overlay order when calling `overlays-at').")
+
+(defun flycheck--next-overlay-index ()
+  "Compute the index to assign to a new Flycheck overlay."
+  (cl-incf flycheck--last-overlay-index))
+
 (defun flycheck-add-overlay (err)
   "Add overlay for ERR.
 
@@ -4224,9 +4234,11 @@ Return the created overlay."
                    err (or flycheck-highlighting-mode 'lines))))
                (overlay (make-overlay beg end))
                (level (flycheck-error-level err))
-               (category (flycheck-error-level-overlay-category level)))
+               (category (flycheck-error-level-overlay-category level))
+               (index (flycheck--next-overlay-index)))
     (unless (flycheck-error-level-p level)
       (error "Undefined error level: %S" level))
+    (setf (overlay-get overlay 'flycheck-error-index) index)
     (setf (overlay-get overlay 'flycheck-overlay) t)
     (setf (overlay-get overlay 'flycheck-error) err)
     (setf (overlay-get overlay 'category) category)
@@ -4264,11 +4276,17 @@ overlays."
        (if (flycheck-error-message err)
            (flycheck-error-format-message-and-id err)
          (format "Unknown %s" (flycheck-error-level err)))))
-   (reverse errs) "\n\n"))
+   errs "\n\n"))
 
 (defun flycheck-filter-overlays (overlays)
-  "Get all Flycheck overlays from OVERLAYS."
-  (seq-filter (lambda (o) (overlay-get o 'flycheck-overlay)) overlays))
+  "Get all Flycheck overlays from OVERLAYS, in original order."
+  ;; The order of errors returned from overlays is not stable, so we sort
+  ;; them again using the internal index to guarantee errors are always
+  ;; displayed in the same order.
+  (seq-sort
+   (lambda (o1 o2) (< (overlay-get o1 'flycheck-error-index)
+                      (overlay-get o2 'flycheck-error-index)))
+   (seq-filter (lambda (o) (overlay-get o 'flycheck-overlay)) overlays)))
 
 (defun flycheck-overlays-at (pos)
   "Get all Flycheck overlays at POS."
@@ -4296,6 +4314,7 @@ overlays."
   "Remove all flycheck overlays in the current buffer."
   (overlay-recenter (point-max))
   (flycheck-delete-marked-overlays)
+  (setq flycheck--last-overlay-index 0)
   (save-restriction
     (widen)
     (seq-do #'delete-overlay (flycheck-overlays-in (point-min) (point-max)))))
