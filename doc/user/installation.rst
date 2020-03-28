@@ -92,10 +92,8 @@ use-package
 -----------
 
 You may want to take a look at `use-package`_ which provides simple syntax to
-declare and configure packages in your init file.  In addition to the Github
-README the article `My Emacs configuration with use-package`_ has more
-information about use-package.  Specifically it allows to automatically install
-missing packages from package archive when Emacs starts.
+declare and configure packages in your init file.  Specifically it allows to
+automatically install missing packages from package archive when Emacs starts.
 
 Add the following form to your init file to setup Flycheck with `use-package`_:
 
@@ -146,4 +144,3 @@ Flycheck.
 .. _MELPA Stable: https://stable.melpa.org
 .. _Getting Started: https://melpa.org/#/getting-started
 .. _use-package: https://github.com/jwiegley/use-package
-.. _My Emacs configuration with use-package: http://swsnr.de/posts/my-emacs-configuration-with-use-package.html

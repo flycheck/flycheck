@@ -24,6 +24,8 @@ Steps to reproduce the behavior:
 2. Do '....'
 3. See error
 
+- [ ] I have read https://emacs.stackexchange.com/questions/28429/how-do-i-troubleshoot-emacs-problems
+
 ## Expected behavior
 A clear and concise description of what you expected to happen.
 
