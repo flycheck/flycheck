@@ -2674,7 +2674,7 @@ Slots:
     ;; the focus hooks only work on Emacs 24.4 and upwards, but since undefined
     ;; hooks are perfectly ok we don't need a version guard here.  They'll just
     ;; not work silently.
-    (post-command-hook . flycheck-display-error-at-point-soon)
+    (post-command-hook . flycheck-maybe-display-error-at-point-soon)
     (focus-in-hook     . flycheck-display-error-at-point-soon)
     (focus-out-hook    . flycheck-cancel-error-display-error-at-point-timer)
     (post-command-hook . flycheck-hide-error-buffer)
@@ -3055,7 +3055,8 @@ current syntax check."
   "Empty variables used by Flycheck."
   (kill-local-variable 'flycheck--file-truename-cache)
   (kill-local-variable 'flycheck--idle-trigger-timer)
-  (kill-local-variable 'flycheck--idle-trigger-conditions))
+  (kill-local-variable 'flycheck--idle-trigger-conditions)
+  (kill-local-variable 'flycheck--last-error-display-tick))
 
 (defun flycheck-teardown (&optional ignore-global)
   "Teardown Flycheck in the current buffer.
@@ -4972,7 +4973,7 @@ non-nil."
     (funcall flycheck-display-errors-function errors)))
 
 (defvar-local flycheck-display-error-at-point-timer nil
-  "Timer to automatically show the error at point in minibuffer.")
+  "Timer to automatically show errors.")
 
 (defun flycheck-cancel-error-display-error-at-point-timer ()
   "Cancel the error display timer for the current buffer."
@@ -4980,21 +4981,37 @@ non-nil."
     (cancel-timer flycheck-display-error-at-point-timer)
     (setq flycheck-display-error-at-point-timer nil)))
 
+(defun flycheck--error-display-tick ()
+  "Return point and tick counter of current buffer."
+  (cons (point) (buffer-modified-tick)))
+
+(defvar-local flycheck--last-error-display-tick nil
+  "Value of `flycheck--error-display-tick' when errors were last displayed.")
+
 (defun flycheck-display-error-at-point ()
-  "Display the all error messages at point in minibuffer."
+  "Display all the error messages at point."
   (interactive)
   ;; This function runs from a timer, so we must take care to not ignore any
   ;; errors
   (with-demoted-errors "Flycheck error display error: %s"
     (flycheck-cancel-error-display-error-at-point-timer)
+    (setq flycheck--last-error-display-tick (flycheck--error-display-tick))
     (when flycheck-mode
       (-when-let (errors (flycheck-overlay-errors-at (point)))
         (flycheck-display-errors errors)))))
 
 (defun flycheck-display-error-at-point-soon ()
-  "Display the first error message at point in minibuffer delayed."
+  "Display error messages at point, with a delay."
+  (setq flycheck--last-error-display-tick nil)
+  (flycheck-maybe-display-error-at-point-soon))
+
+(defun flycheck-maybe-display-error-at-point-soon ()
+  "Display error message at point with a delay, unless already displayed."
   (flycheck-cancel-error-display-error-at-point-timer)
-  (when (flycheck-overlays-at (point))
+  (when (and (not (equal flycheck--last-error-display-tick
+                         (setq flycheck--last-error-display-tick
+                               (flycheck--error-display-tick))))
+             (flycheck-overlays-at (point)))
     (setq flycheck-display-error-at-point-timer
           (run-at-time flycheck-display-errors-delay nil
                        'flycheck-display-error-at-point))))
