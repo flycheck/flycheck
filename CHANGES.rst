@@ -95,6 +95,8 @@
   - Checkers that report error positions as a single offset from the start of
     the file can use the new ``flycheck-error-new-at-pos`` constructor instead
     of converting that position to a line and a column.
+  - ``flycheck-compile`` now locates the checker executable relative to
+    ``exec-path`` instead of the shell's ``PATH``.
 
 31 (Oct 07, 2017)
 =================

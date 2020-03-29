@@ -5606,14 +5606,21 @@ and rely on Emacs' own buffering and chunking."
       (process-send-region process (point-min) (point-max))))
   (process-send-eof process))
 
+(defun flycheck--wrap-command (prog args)
+  "Wrap PROG and ARGS using `flycheck-command-wrapper-function'."
+  ;; We don't call `flycheck-executable-find' on the output of the wrapper
+  ;; function, since it might not expect it (an executable-find function
+  ;; designed to find binaries in a sandbox could get confused if we asked it
+  ;; about the sandboxing program itself).
+  (funcall flycheck-command-wrapper-function (cons prog args)))
+
 (defun flycheck-start-command-checker (checker callback)
   "Start a command CHECKER with CALLBACK."
   (let (process)
     (condition-case err
         (let* ((program (flycheck-find-checker-executable checker))
                (args (flycheck-checker-substituted-arguments checker))
-               (command (funcall flycheck-command-wrapper-function
-                                 (cons program args)))
+               (command (flycheck--wrap-command program args))
                ;; Use pipes to receive output from the syntax checker.  They are
                ;; more efficient and more robust than PTYs, which Emacs uses by
                ;; default, and since we don't need any job control features, we
@@ -6071,29 +6078,51 @@ use with `compilation-error-regexp-alist'."
   (seq-map #'flycheck-checker-pattern-to-error-regexp
            (flycheck-checker-get checker 'error-patterns)))
 
+(defun flycheck--substitute-shell-command-argument (arg checker)
+  "Substitute ARG for CHECKER.
+
+Like `flycheck-substitute-argument', except for source,
+source-inplace, and source-original."
+  (if (memq arg '(source source-inplace source-original))
+      (list buffer-file-name)
+    (flycheck-substitute-argument arg checker)))
+
+(defun flycheck--checker-substituted-shell-command-arguments (checker)
+  "Get the substituted arguments of a CHECKER to run as a shell command.
+
+Substitute each argument of CHECKER using
+`flycheck-substitute-shell-command-argument'."
+  (apply #'append
+         (seq-map (lambda (arg)
+                    (flycheck--substitute-shell-command-argument arg checker))
+                  (flycheck-checker-arguments checker))))
+
 (defun flycheck-checker-shell-command (checker)
   "Get a shell command for CHECKER.
 
 Perform substitution in the arguments of CHECKER, but with
-`flycheck-substitute-shell-argument'.
+`flycheck--substitute-shell-command-argument'.
 
 Return the command of CHECKER as single string, suitable for
 shell execution."
   ;; Note: Do NOT use `combine-and-quote-strings' here.  Despite it's name it
   ;; does not properly quote shell arguments, and actually breaks for special
   ;; characters.  See https://github.com/flycheck/flycheck/pull/522
-  (let* ((args (apply #'append
-                      (seq-map
-                       (lambda (arg)
-                         (if (memq arg '(source source-inplace source-original))
-                             (list (buffer-file-name))
-                           (flycheck-substitute-argument arg checker)))
-                       (flycheck-checker-arguments checker))))
-         (command (mapconcat
-                   #'shell-quote-argument
-                   (funcall flycheck-command-wrapper-function
-                            (cons (flycheck-checker-executable checker) args))
-                   " ")))
+  (let* ((args (flycheck--checker-substituted-shell-command-arguments checker))
+         (program
+          (or (flycheck-find-checker-executable checker)
+              (user-error "Cannot find `%s' using `flycheck-executable-find'"
+                          (flycheck-checker-executable checker))))
+         (wrapped (flycheck--wrap-command program args))
+         (abs-prog
+          ;; The executable path returned by `flycheck-command-wrapper-function'
+          ;; may not be absolute, so expand it here.  See URL
+          ;; `https://github.com/flycheck/flycheck/issues/1461'.
+          (or (executable-find (car wrapped))
+              (user-error "Cannot find `%s' using `executable-find'"
+                          (car wrapped))))
+         (command (mapconcat #'shell-quote-argument
+                             (cons abs-prog (cdr wrapped)) " ")))
     (if (flycheck-checker-get checker 'standard-input)
         ;; If the syntax checker expects the source from standard input add an
         ;; appropriate shell redirection
@@ -6124,11 +6153,12 @@ tool, just like `compile' (\\[compile])."
   (unless (flycheck-valid-checker-p checker)
     (user-error "%S is not a valid syntax checker" checker))
   (unless (buffer-file-name)
-    (user-error "Cannot compile buffers without backing file"))
+    (user-error "Cannot compile a buffer without a backing file"))
   (unless (flycheck-may-use-checker checker)
     (user-error "Cannot use syntax checker %S in this buffer" checker))
   (unless (flycheck-checker-executable checker)
     (user-error "Cannot run checker %S as shell command" checker))
+  (save-some-buffers)
   (let* ((default-directory (flycheck-compute-working-directory checker))
          (command (flycheck-checker-shell-command checker))
          (buffer (compilation-start command nil #'flycheck-compile-name)))
