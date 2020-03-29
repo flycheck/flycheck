@@ -1355,12 +1355,12 @@ if PATTERN did not match."
         (match-string-no-properties 1)))))
 
 (defun flycheck-buffer-empty-p (&optional buffer)
-  "Whether a BUFFER is empty.
+  "Check whether a BUFFER is empty, defaulting to the current one."
+  (= (buffer-size buffer) 0))
 
-If buffer is nil or omitted check the current buffer.
-
-Return non-nil if so, or nil if the buffer has content."
-  (<= (buffer-size buffer) 0))
+(defun flycheck-buffer-nonempty-p (&optional buffer)
+  "Check whether a BUFFER is nonempty, defaulting to the current one."
+  (> (buffer-size buffer) 0))
 
 (defun flycheck-ephemeral-buffer-p ()
   "Determine whether the current buffer is an ephemeral buffer.
@@ -7620,6 +7620,7 @@ See URL `http://stylelint.io/'."
             "--stdin-filename" (eval (or (buffer-file-name) "style.css")))
   :standard-input t
   :error-parser flycheck-parse-stylelint
+  :predicate flycheck-buffer-nonempty-p
   :modes (css-mode))
 
 (flycheck-def-option-var flycheck-cuda-language-standard nil cuda-nvcc
@@ -9179,7 +9180,7 @@ See URL `https://docs.python.org/3.5/library/json.html#command-line-interface'."
           line-end))
   :modes json-mode
   ;; The JSON parser chokes if the buffer is empty and has no JSON inside
-  :predicate (lambda () (not (flycheck-buffer-empty-p))))
+  :predicate flycheck-buffer-nonempty-p)
 
 (flycheck-define-checker json-jq
   "JSON checker using the jq tool.
@@ -9252,6 +9253,7 @@ See URL `http://stylelint.io/'."
             (config-file "--config" flycheck-stylelintrc))
   :standard-input t
   :error-parser flycheck-parse-stylelint
+  :predicate flycheck-buffer-nonempty-p
   :modes (less-css-mode))
 
 (flycheck-define-checker llvm-llc
@@ -9527,7 +9529,7 @@ See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
   :modes (php-mode php+-mode)
   ;; phpcs seems to choke on empty standard input, hence skip phpcs if the
   ;; buffer is empty, see https://github.com/flycheck/flycheck/issues/907
-  :predicate (lambda () (not (flycheck-buffer-empty-p))))
+  :predicate flycheck-buffer-nonempty-p)
 
 (flycheck-define-checker processing
   "Processing command line tool.
@@ -11070,6 +11072,7 @@ See URL `http://stylelint.io/'."
             (config-file "--config" flycheck-stylelintrc))
   :standard-input t
   :error-parser flycheck-parse-stylelint
+  :predicate flycheck-buffer-nonempty-p
   :modes (scss-mode))
 
 (flycheck-def-option-var flycheck-scss-compass nil scss
