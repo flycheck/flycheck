@@ -4184,15 +4184,6 @@ Why not:
      '(2 12 error "Incompatible return value type (got \"str\", expected \"int\")"
          :checker python-mypy))))
 
-(flycheck-ert-def-checker-test python-pylint python syntax-error
-  (let ((flycheck-disabled-checkers '(python-flake8 python-mypy))
-        (python-indent-guess-indent-offset nil) ; Silence Python Mode
-        (flycheck-python-pylint-executable "python3"))
-    (flycheck-ert-should-syntax-check
-     "language/python/syntax-error.py" 'python-mode
-     '(3 13 error "invalid syntax (<unknown>, line 3)"
-         :id "syntax-error" :checker python-pylint))))
-
 (flycheck-ert-def-checker-test python-pylint python nil
   (let ((flycheck-disabled-checkers '(python-flake8 python-mypy))
         (flycheck-python-pylint-executable "python3"))
@@ -4255,6 +4246,17 @@ Why not:
           :checker python-pylint)
      '(22 1 error "Undefined variable 'antigravity'" :id "E0602"
           :checker python-pylint))))
+
+(flycheck-ert-def-checker-test python-pylint python negative-columns
+  (let ((flycheck-disabled-checkers '(python-flake8 python-mypy))
+        (python-indent-guess-indent-offset nil) ; Silence Python Mode
+        (flycheck-python-pylint-executable "python3"))
+    (flycheck-ert-should-syntax-check
+     "language/python/gh_1383.py" 'python-mode
+     '(2 1 warning "Unused import sys"
+         :id "unused-import" :checker python-pylint)
+     '(6 1 warning "String statement has no effect"
+         :id "pointless-string-statement" :checker python-pylint))))
 
 (flycheck-ert-def-checker-test python-pycompile python python27
   (skip-unless (executable-find "python2"))
